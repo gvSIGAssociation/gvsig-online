@@ -1,0 +1,189 @@
+# -*- coding: utf-8 -*-
+
+'''
+    gvSIG Online.
+    Copyright (C) 2007-2015 gvSIG Association.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+'''
+@author: Javier Rodrigo <jrodrigo@scolab.es>
+'''
+
+import os
+import ldap
+from django_auth_ldap.config import LDAPSearch
+from django.utils.translation import ugettext_lazy as _
+
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = '##s#jx5ildpkavpi@tbtl0fvj#(np#hyckdg*q#1mu%ovr8$t_'
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
+
+ALLOWED_HOSTS = []
+
+
+# Application definition
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'gvsigol_auth',
+    'gvsigol_services',
+    'gvsigol_symbology',
+    'gvsigol_core',
+]
+
+MIDDLEWARE_CLASSES = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+ROOT_URLCONF = 'gvsigol.urls'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(BASE_DIR, 'gvsigol_auth/templates'),
+            os.path.join(BASE_DIR, 'gvsigol_core/templates'),
+            
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = 'gvsigol.wsgi.application'
+
+
+# Database
+# https://docs.djangoproject.com/en/1.9/ref/settings/#databases
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        #'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'gvsigonline_v2',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
+POSTGIS_VERSION = (2, 1, 2)
+
+
+# Password validation
+# https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+GVSIGOL_LDAP = {
+    'ENABLED': True,
+    'HOST':'test.scolab.eu',
+    'PORT': '389',
+    'DOMAIN': 'dc=test,dc=scolab,dc=eu',
+    'USERNAME': 'cn=admin,dc=test,dc=scolab,dc=eu',
+    'PASSWORD': 'GE2wa8RE'
+}
+
+AUTHENTICATION_BACKENDS = (
+    'django_auth_ldap.backend.LDAPBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+AUTH_LDAP_SERVER_URI = "ldap://test.scolab.eu:389"
+AUTH_LDAP_ROOT_DN = "dc=test,dc=scolab,dc=eu"
+AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=test,dc=scolab,dc=eu", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
+
+
+# Internationalization
+# https://docs.djangoproject.com/en/1.9/topics/i18n/
+LANGUAGE_CODE = 'es'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
+LANGUAGES = (
+    ('es', _('Spanish')),
+    ('en', _('English')),   
+)
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'gvsigol_core/locale'),
+)
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'devel@scolab.es'
+EMAIL_HOST_PASSWORD = 'ksiopa247'
+EMAIL_PORT = 587
+SITE_ID=1
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/1.9/howto/static-files/
+MEDIA_ROOT = '/var/www/media/'
+MEDIA_URL = 'http://localhost/media/'
+STATIC_URL = '/gvsigonline/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'gvsigol_core/static'),
+    os.path.join(BASE_DIR, 'gvsigol_auth/static'),
+)
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    #'compressor.finders.CompressorFinder',
+)
