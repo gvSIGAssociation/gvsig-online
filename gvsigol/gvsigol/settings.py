@@ -39,7 +39,7 @@ SECRET_KEY = '##s#jx5ildpkavpi@tbtl0fvj#(np#hyckdg*q#1mu%ovr8$t_'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -77,6 +77,8 @@ TEMPLATES = [
         'DIRS': [
             os.path.join(BASE_DIR, 'gvsigol_auth/templates'),
             os.path.join(BASE_DIR, 'gvsigol_core/templates'),
+            os.path.join(BASE_DIR, 'gvsigol_services/templates'),
+            os.path.join(BASE_DIR, 'gvsigol_symbology/templates'),
             
         ],
         'APP_DIRS': True,
@@ -187,3 +189,55 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     #'compressor.finders.CompressorFinder',
 )
+
+CATALOG_MODULE = True
+GVSIGOL_CATALOG = {
+    'URL': 'https://test.scolab.eu/geonetwork/srv/spa/'
+}
+
+GVSIGOL_SERVICES = {
+    'ENGINE':'geoserver',
+    'URL': 'https://localhost/gs-test',
+    'SUPPORTED_TYPES': (
+                        #('v_SHP', _('Shapefile folder')),
+                        ('v_PostGIS', _('PostGIS vector')),
+                        ('c_WorldImage', _('JPG, Tiff and PNG + world file')),
+                        ('c_ArcGrid', _('ArcInfo ASCII Grid')),
+                        ('c_GeoTIFF', _('GeoTiff')),
+                        ('c_ImageMosaic', _('Image Mosaics, Time series or elevation series')),
+    ),
+    # if MOSAIC_DB entry is omitted, mosaic indexes will be stored as SHPs
+    'MOSAIC_DB': {
+                  'host': 'test.scolab.eu',
+                  'port': '6433',
+                  'database': 'carto',
+                  'schema': 'public',
+                  'user': 'postgres',
+                  'passwd': 'postgres82'
+    },
+    # OGR path is only necessary if different from the one defined on gdal_tools.OGR2OGR_PATH
+    'OGR2OGR_PATH': '/usr/bin/ogr2ogr'
+}
+
+# Must be a valid iconv encoding name. Use iconv --list on Linux to see valid names 
+SUPPORTED_ENCODINGS = [ "LATIN1", "UTF-8", "ISO-8859-15", "WINDOWS-1252"]
+SUPPORTED_CRS = {
+    '3857': {
+        'code': 'EPSG:3857',
+        'title': 'WGS 84 / Pseudo-Mercator',
+        'definition': '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs',
+        'units': 'meters'
+    },
+    '900913': {
+        'code': 'EPSG:900913',
+        'title': 'Google Maps Global Mercator -- Spherical Mercator',
+        'definition': '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs',
+        'units': 'meters'
+    },
+    '4326': {
+        'code': 'EPSG:4326',
+        'title': 'WGS84',
+        'definition': '+proj=longlat +datum=WGS84 +no_defs',
+        'units': 'degrees'
+    }
+}

@@ -18,6 +18,8 @@
 	<link rel="stylesheet" href="{% static "js/vendors/ol-3.15.1/ol.css" %}">
 	<link rel="stylesheet" href="{% static "css/gvsigOL.css" %}">
 	<link rel="stylesheet" href="{% static "css/skins/_all-skins.min.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/codemirror/lib/codemirror.css" %}" />
+	<link rel="stylesheet" href="{% static "js/vendors/codemirror/theme/xq-dark.css" %}" />
 
 	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -81,9 +83,13 @@
 					<li class="header"></li>					
 					<li {% block home_active %}{% endblock %}>
 						<a href="/gvsigonline/"><i class="fa fa-home"></i><span>{% trans "Home" %}</span></a>
-					</li>					
-					{% include "dashboard_auth_menu.html" %}	
-					{% include "dashboard_core_menu.html" %}									
+					</li>	
+					{% if user.is_staff %}				
+						{% include "dashboard_auth_menu.html" %}								
+						{% include "dashboard_services_menu.html" %}
+						{% include "dashboard_symbology_menu.html" %}
+						{% include "dashboard_core_menu.html" %}
+					{% endif %}								
 				</ul>				
 			</section>			
 		</aside>
@@ -118,6 +124,8 @@
 	<script src="{% static "js/vendors/datatables/jquery.dataTables.min.js" %}"></script>
 	<script src="{% static "js/vendors/datatables/dataTables.bootstrap.min.js" %}"></script>
 	<script src="{% static "js/vendors/ol-3.15.1/ol.js" %}"></script>
+	<script src="{% static "js/vendors/codemirror/lib/codemirror.js" %}"></script>
+	<script src="{% static "js/vendors/codemirror/mode/javascript/javascript.js" %}"></script>
 	<script src="{% static "js/lib/gvsigOL.js" %}"></script>
 	
 	<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
