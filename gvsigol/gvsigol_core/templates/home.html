@@ -64,6 +64,9 @@
 		<div class="box box-primary">
 			<div class="box-header with-border">
 				<h3 class="box-title">{% trans "Projects list" %}</h3>
+				<div class="box-tools pull-right">
+					<button id="button-add-project" class="btn btn-box-tool"><i class="fa fa-plus margin-r-5"></i> {% trans "Add project" %}</button>
+				</div>
 			</div>
 			<div class="box-body">
 				<ul class="products-list product-list-in-box">
@@ -95,6 +98,10 @@
 		} else if (div.className == 'show') {
 			div.className = div.className.replace('show', 'hide');
 		}
+	});
+	
+	$('#button-add-project').click( function() {
+		location.href = '/gvsigonline/project_add/';
 	});
 	
 	$('#update-password-submit').click( function() {

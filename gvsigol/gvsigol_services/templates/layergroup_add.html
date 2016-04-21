@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="box box-primary">
+
+				<div class="box-header with-border">
+					<h3 class="box-title">{% trans "Add layer group" %}</h3>
+				</div>
+
+				<form role="form" method="post" action="/gvsigonline/services/layergroup_add/">
+					<div class="box-body">
+					{% csrf_token %}					
+						{% if form.errors %}
+						<div id="form-error" style="color:#ff0000;">
+							<ul>
+							{% for field in form %}
+								{% if field.errors %}
+									<li>{{field.label}}. {{ field.errors|striptags }}</li>
+								{% endif %}	
+							{% endfor %}
+							</ul>
+						</div>
+						{% endif %}
+								
+						{% if message %}
+						<div id="form-error" style="color:#ff0000;">
+							<p>* {{ message }}</p>
+						</div>
+						{% endif %}
+										
+						<div class="row">
+							<div class="col-xs-12">
+								<label for="layergroup_name">{% trans "Name" %}</label>
+								<input placeholder="{% trans 'Layer group name' %}" name="layergroup_name" id="layergroup_name" type="text" class="form-control">									
+							</div>
+						</div>
+							
+						<div class="row">
+							<div class="col-xs-12">
+								<label for="layergroup_title">{% trans "Title" %}</label>
+								<input placeholder="{% trans 'Layer group title' %}" name="layergroup_description" id="layergroup_title" type="text" class="form-control">								
+							</div>
+						</div>
+						
+						<br>
+						
+						<div class="row">
+							<div class="checkbox col-xs-6">								
+								<label>
+									<input type="checkbox" name="cached" id="cached" />{% trans "Create cache for the layer group" %}
+								</label>
+							</div>
+						</div>
+
+					</div>	
+					
+					<div class="box-footer">
+                    	<button type="submit" class="btn btn-primary">{% trans "Save layer group" %}</button>
+                  	</div>		
+				</form>		
+			</div>
+		</div>				
+	</div>
+{% endblock %}
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-layergroups').addClass("active");
+</script>
+{% endblock %}

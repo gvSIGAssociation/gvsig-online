@@ -112,7 +112,7 @@ def get_all_layer_groups_checked_by_project(project):
                            
             layer_group['id'] = g.id
             layer_group['name'] = g.name
-            layer_group['description'] = g.description
+            layer_group['title'] = g.title
             layer_groups.append(layer_group)
         
     return layer_groups
