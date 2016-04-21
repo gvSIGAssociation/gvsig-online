@@ -18,7 +18,7 @@ from django.views.i18n import javascript_catalog
 from django.contrib import admin
 import settings
 
-handler404 = 'core.views_common.not_found_view'
+handler404 = 'gvsigol_core.views.not_found_view'
 
 js_info_dict = {
     'packages': ('gvsigol_core',),
