@@ -28,14 +28,19 @@ from gvsigol_auth.models import UserGroup, UserGroupUser
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
+from gvsigol_auth.utils import is_admin_user
 from gvsigol import settings
 import utils as core_utils
 import urllib
 import json
 
+def not_found_view(request):
+    response = render_to_response('404.html', {}, context_instance=RequestContext(request))
+    response.status_code = 404
+    return response
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def home(request):
-    '''
     user = User.objects.get(username=request.user.username)
     groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
     
@@ -67,23 +72,11 @@ def home(request):
             project['description'] = a.description
             project['image'] = urllib.unquote(image)
             projects.append(project)
-    '''
-            
-    projects = [{
-        'id': 1,
-        'name': 'Proyecto 1',
-        'description': 'Proyecto de prueba de desarrollo 1',
-        'image': 'https://localhost/gvsigonline/static/img/no_project.png',
-    },{
-        'id': 2,
-        'name': 'Proyecto 2',
-        'description': 'Proyecto de prueba de desarrollo 2',
-        'image': 'https://localhost/gvsigonline/static/img/no_project.png',
-    }]
-            
+   
     return render_to_response('home.html', {'projects': projects}, RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@is_admin_user
 def project_list(request):
     
     project_list = Project.objects.all()
@@ -102,6 +95,7 @@ def project_list(request):
     return render_to_response('project_list.html', response, context_instance=RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@is_admin_user
 def project_add(request):
     if request.method == 'POST':
         name = request.POST.get('project-name')
@@ -122,7 +116,7 @@ def project_add(request):
                 
         assigned_usergroups = []
         for key in request.POST:
-            if 'usergroup-' in key:
+            if 'group-' in key:
                 assigned_usergroups.append(int(key.split('-')[1]))
                 
         exists = False
@@ -194,17 +188,17 @@ def project_add(request):
         groups = core_utils.get_all_groups()
         return render_to_response('project_add.html', {'layergroups': layergroups, 'groups': groups}, context_instance=RequestContext(request))
     
-'''    
+    
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@is_admin_user
 def project_update(request, pid):
     if request.method == 'POST':
         name = request.POST.get('project-name')
         description = request.POST.get('project-description')
-        map_id = request.POST.get('map-id')
-        
-        is_public = False
-        if 'is_public' in request.POST:
-            is_public = True
+        latitude = request.POST.get('center-lat')
+        longitude = request.POST.get('center-lon')
+        extent = request.POST.get('extent')
+        zoom = request.POST.get('zoom')
                 
         assigned_layergroups = []
         for key in request.POST:
@@ -213,16 +207,10 @@ def project_update(request, pid):
                 
         assigned_usergroups = []
         for key in request.POST:
-            if 'usergroup-' in key:
+            if 'group-' in key:
                 assigned_usergroups.append(int(key.split('-')[1]))
                 
-        assigned_elayers = []
-        for key in request.POST:
-            if 'elayer-' in key:
-                assigned_elayers.append(int(key.split('-')[1]))
-                
         project = Project.objects.get(id=int(pid))
-        map = Map.objects.get(id=int(map_id))
                
         exists = False
         projects = Project.objects.all()
@@ -237,8 +225,10 @@ def project_update(request, pid):
             
         if sameName:
             project.description = description
-            project.map = map
-            project.is_public = is_public
+            project.center_lat = latitude
+            project.center_lon = longitude
+            project.zoom = int(zoom)
+            project.extent = extent
             project.save()
             
             for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
@@ -276,8 +266,10 @@ def project_update(request, pid):
             if not exists:
                 project.name = name
                 project.description = description
-                project.map = map
-                project.is_public = is_public
+                project.center_lat = latitude
+                project.center_lon = longitude
+                project.zoom = int(zoom)
+                project.extent = extent
                 project.save()
                 
                 for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
@@ -313,23 +305,22 @@ def project_update(request, pid):
                     
             else:
                 message = _(u'Project name already exists')
-                maps = Map.objects.all()
                 project = Project.objects.get(id=int(pid))    
                 groups = core_utils.get_all_groups_checked_by_project(project)
                 layer_groups = core_utils.get_all_layer_groups_checked_by_project(project)  
-                return render_to_response('project/project_update.html', {'message': message, 'maps': maps, 'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups}, context_instance=RequestContext(request))
+                return render_to_response('project_update.html', {'message': message, 'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups}, context_instance=RequestContext(request))
                 
         
         
     else:
-        maps = Map.objects.all()
         project = Project.objects.get(id=int(pid))    
         groups = core_utils.get_all_groups_checked_by_project(project)
         layer_groups = core_utils.get_all_layer_groups_checked_by_project(project) 
-        return render_to_response('project/project_update.html', {'maps': maps, 'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups}, context_instance=RequestContext(request))
+        return render_to_response('project_update.html', {'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups}, context_instance=RequestContext(request))
     
-'''    
+    
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@is_admin_user
 def project_delete(request, pid):        
     if request.method == 'POST':
         project = Project.objects.get(id=int(pid))

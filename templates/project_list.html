@@ -10,7 +10,7 @@
 			<div class="box-header with-border">
 				<h3 class="box-title">{% trans "Projects list" %}</h3>
 				<div class="box-tools pull-right">
-					<button id="button-add-project" class="btn btn-block btn-success btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add project" %}</button>
+					<button id="button-add-project" class="btn btn-block btn-primary btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add project" %}</button>
 				</div>
 			</div>
 			
@@ -102,7 +102,7 @@ $(document).ready(function() {
 	    },{
 	        "targets": -2,
 	        "data": null,
-	        "defaultContent": '<button type="button" name="button-update-project" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update project" %}' + '" class="btn btn-info"><i class="fa fa-edit"></i></button>'
+	        "defaultContent": '<button type="button" name="button-update-project" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update project" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
 	    }],
 	    "dom": 'T<"clear">lfrtip',
 		"bLengthChange": false

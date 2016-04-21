@@ -1741,9 +1741,11 @@ a:focus {
 }
 .btn-box-tool {
   padding: 5px;
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: bold;
   background: transparent;
-  color: #97a0b3;
+  /*color: #97a0b3;*/
+  color: #3c8dbc;
 }
 .open .btn-box-tool,
 .btn-box-tool:hover {
@@ -4727,4 +4729,7 @@ table.text-center th {
 }
 .hide {
 	display: none;
+}
+.padding-20 {
+	padding: 20px;
 }
