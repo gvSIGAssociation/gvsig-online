@@ -20,10 +20,22 @@
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
+from django.shortcuts import render_to_response, RequestContext
 from django.core.mail import send_mail
 from django.utils.translation import ugettext as _
 from models import UserGroup, UserGroupUser
 import gvsigol.settings
+
+def is_admin_user(function):
+    def wrap(request, *args, **kwargs):
+        if request.user.is_staff:
+            return function(request, *args, **kwargs)
+        else:
+            return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
+
+    wrap.__doc__=function.__doc__
+    wrap.__name__=function.__name__
+    return wrap
 
 def get_all_groups():
     groups_list = UserGroup.objects.all()

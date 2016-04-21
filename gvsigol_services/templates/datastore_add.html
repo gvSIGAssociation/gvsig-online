@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+	<div class="row">
+		<div class="col-md-12">
+			<div class="box box-primary padding-20">
+				<form role="form" method="post" action="/gvsigonline/services/datastore_add/">
+					{% csrf_token %}
+					<div class="box-header with-border">
+						<h3 class="box-title">{% trans "Add datastore" %}</h3>
+					</div>					
+					<div class="box-body">				
+					{{ form }}				
+					</div>						
+					<div class="box-footer">
+	                    <button type="submit" class="btn btn-primary">{% trans "Save datastore" %}</button>
+	                </div>	
+                </form>	
+			</div>
+		</div>				
+	</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-datastores').addClass("active");
+</script>
+<script type="text/javascript">
+$().ready(function(){ 
+	var connectionParams = document.getElementById('id_connection_params');
+	var codemirror = CodeMirror.fromTextArea(connectionParams, {
+		value: "",
+		mode:  "javascript",
+		theme: "xq-dark",
+		lineNumbers: true
+	});
+	
+	window.GOL = window.GOL || {};
+	window.GOL.DS_ADD = window.GOL.DS_ADD || {};
+	window.GOL.DS_ADD.dstypeChanged = function(type) {
+		codemirror.setValue('');		
+		var code = '';
+		
+		if (type == 'v_SHP') {
+			code += '{ \n';
+			code += '\t "url": "file:data/valencia-osm" \n';
+			code += '}';
+			
+		} else if (type == 'v_PostGIS') {
+			code += '{ \n';
+			code += '\t "host": "localhost", \n';
+			code += '\t "port": "5432", \n';
+			code += '\t "database": "mydatabase", \n';
+			code += '\t "schema": "public", \n';
+			code += '\t "user": "postgres", \n';
+			code += '\t "passwd": "postgres", \n';
+			code += '\t "dbtype": "postgis" \n';
+			code += '}';
+			
+		} else if (type == 'c_WorldImage') {
+			code += '{ \n';
+			code += '\t "url": "file:coverages/img_sample/sample.jpg" \n';
+			code += '}';
+			
+		} else if (type == 'c_ArcGrid') {
+			code += '{ \n';
+			code += '\t "url": "file:coverages/MDT05-0640-H30-LIDAR.asc" \n';
+			code += '}';
+			
+		} else if (type == 'c_GeoTIFF') {
+			code += '{ \n';
+			code += '\t "url": "file:coverages/img_sample/sample.tif" \n';
+			code += '}';
+			
+		}
+		
+		codemirror.setValue(code);
+
+	}
+	
+	$("#id_type").change(function() {
+		var type = $('option:selected', $(this)).val();
+		GOL.DS_ADD.dstypeChanged(type);
+	});
+	
+	GOL.DS_ADD.dstypeChanged($("#id_type").val());
+});
+</script>
+{% endblock %}
