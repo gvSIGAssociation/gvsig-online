@@ -6,4 +6,6 @@ urlpatterns = [
     url(r'^project_add/$', 'gvsigol_core.views.project_add', name='project_add'),
     url(r'^project_delete/(?P<pid>[0-9]+)/$', 'gvsigol_core.views.project_delete', name='project_delete'),
     url(r'^project_update/(?P<pid>[0-9]+)/$', 'gvsigol_core.views.project_update', name='project_update'),
+    url(r'^project_load/(?P<pid>[0-9]+)/$', 'gvsigol_core.views.project_load', name='project_load'),
+    url(r'^project_get_conf/$', 'gvsigol_core.views.project_get_conf', name='project_get_conf'),
 ]
