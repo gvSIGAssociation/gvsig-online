@@ -330,3 +330,152 @@ def project_delete(request, pid):
             'deleted': True
         }     
         return HttpResponse(json.dumps(response, indent=4), content_type='project/json')
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@is_admin_user
+def project_load(request, pid):
+    return render_to_response('viewer.html', {'pid': pid}, context_instance=RequestContext(request))
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@is_admin_user
+def project_get_conf(request):
+    if request.method == 'POST':
+        '''
+        pid = request.POST.get('pid')
+        
+        project = Project.objects.get(id=int(pid))
+        map = Map.objects.get(id=project.map_id)
+            
+        project_layers_groups = ProjectLayerGroup.objects.filter(project_id=project.id)
+        layer_groups = []
+        workspaces = []
+        capabilities = mapservice_backend.getCapabilities(request.session)
+        for project_group in project_layers_groups:            
+            group = LayerGroup.objects.get(id=project_group.layer_group_id)
+            
+            conf_group = {}
+            conf_group['groupTitle'] = group.description
+            conf_group['groupId'] = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
+            conf_group['groupOrder'] = group.order
+            conf_group['groupName'] = group.name
+            conf_group['cached'] = group.cached
+            layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('order')
+            layers = []
+            for l in layers_in_group:
+                read_roles = core_utils.get_read_roles(l)
+                write_roles = core_utils.get_write_roles(l)
+                
+                layer = {}                
+                layer['name'] = l.name
+                layer['title'] = l.title
+                layer['visible'] = l.visible 
+                layer['queryable'] = l.queryable 
+                layer['cached'] = l.cached
+                layer['single_image'] = l.single_image
+                layer['read_roles'] = read_roles
+                layer['write_roles'] = write_roles
+                
+                datastore = Datastore.objects.get(id=l.datastore_id)
+                workspace = Workspace.objects.get(id=datastore.workspace_id)
+                
+                if datastore.type == 'v_SHP' or datastore.type == 'v_PostGIS': 
+                    layer['is_vector'] = True
+                else:
+                    layer['is_vector'] = False
+                
+                properties = capabilities.contents[workspace.name + ':' + l.name]
+                defaultCrs = properties.boundingBox[4]
+                epsg = gvsigonline.settings.SUPPORTED_CRS[defaultCrs.split(':')[1]]
+                layer['crs'] = {
+                    'crs': defaultCrs,
+                    'units': epsg['units']
+                }
+                
+                if properties.timepositions is not None:
+                    layer['is_time_layer'] = True
+                    layer['time_params'] = {
+                        'default': properties.timepositions[0],
+                        'values': ','.join(properties.timepositions)
+                    }
+                
+                else:
+                    layer['is_time_layer'] = False
+                    
+                split_wms_url = workspace.wms_endpoint.split('//')
+                authenticated_wms_url = split_wms_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_wms_url[1]
+                layer['wms_url'] = authenticated_wms_url
+                    
+                split_wfs_url = workspace.wfs_endpoint.split('//')
+                authenticated_wfs_url = split_wfs_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_wfs_url[1]
+                layer['wfs_url'] = authenticated_wfs_url
+                layer['namespace'] = workspace.uri
+                layer['workspace'] = workspace.name                
+                #layer['wfs_url'] = workspace.wfs_endpoint
+                
+                if l.cached:  
+                    split_cache_url = workspace.cache_endpoint.split('//')
+                    authenticated_cache_url = split_cache_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_cache_url[1]
+                    layer['cache_url'] = authenticated_cache_url
+                else:
+                    layer['cache_url'] = authenticated_wms_url
+                    
+                layer['legend'] = authenticated_wms_url + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
+                if 'http' in gvsigonline.settings.GVSIGONLINE_CATALOG['URL']:
+                    if l.metadata_uuid is not None and l.metadata_uuid != '':
+                        split_catalog_url = gvsigonline.settings.GVSIGONLINE_CATALOG['URL'].split('//')
+                        authenticated_catalog_url = split_catalog_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_catalog_url[1]  + 'catalog.search#/metadata/' + l.metadata_uuid
+                        layer['metadata'] = authenticated_catalog_url
+                        
+                    else:
+                        layer['metadata'] = ''
+                    
+                else:
+                    layer['metadata'] = ''
+                                                
+                layers.append(layer)
+                
+                w = {}
+                w['name'] = workspace.name
+                w['wms_url'] = workspace.wms_endpoint
+                workspaces.append(w)
+            
+            if len(layers) > 0:   
+                conf_group['layers'] = layers
+                layer_groups.append(conf_group)
+            
+        ordered_layer_groups = sorted(layer_groups, key=itemgetter('groupOrder'))
+        
+        geoserver_url = gvsigonline.settings.GVSIGONLINE_SERVICES['URL']
+        split_geoserver_url = geoserver_url.split('//')
+        authenticated_geoserver_url = split_geoserver_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_geoserver_url[1]
+            
+        conf = {
+            'pid': pid,
+            'user': {
+                'id': request.user.id,
+                'username': request.user.first_name + ' ' + request.user.last_name,
+                'login': request.user.username,
+                'email': request.user.email,
+                'permissions': {
+                    'is_admin': core_utils.check_admin_user(request.user),
+                    'roles': core_utils.get_groups_by_user(request.user)
+                }
+            },
+            'map': {
+                'center_lat': map.center_lat,
+                'center_lon': map.center_lon,
+                'zoom': map.zoom
+            },
+            'supported_crs': gvsigonline.settings.SUPPORTED_CRS,
+            'workspaces': workspaces,
+            'layerGroups': ordered_layer_groups,
+            'tools': gvsigonline.settings.GVSIGONLINE_TOOLS,
+            'base_layers': gvsigonline.settings.GVSIGONLINE_BASE_LAYERS,
+            'is_public_project': False,
+            'geoserver_base_url': authenticated_geoserver_url
+        } 
+        '''
+        
+        conf = {}
+    
+        return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
