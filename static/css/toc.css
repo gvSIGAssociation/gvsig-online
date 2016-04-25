@@ -71,3 +71,25 @@
   cursor: move;
   margin: 0 5px;
 }
+
+.layer-box {
+	margin-left: 10px;
+	border-top: 0px;
+	font-size: 12px;
+}
+
+.btn-custom-tool {
+	color: #2b2b2b;
+    background-color: #ffffff;
+    border-color: rgba(0, 0, 0, 0.2);
+	font-size: 12px;
+    font-weight: 300;
+}
+
+.btn-custom-tool:hover {
+	color: #2b2b2b;
+    background-color: #eeeeee;
+    border-color: rgba(0, 0, 0, 0.2);
+	font-size: 12px;
+    font-weight: 300;
+}
