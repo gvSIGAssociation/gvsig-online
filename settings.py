@@ -55,7 +55,9 @@ INSTALLED_APPS = [
     'gvsigol_services',
     'gvsigol_symbology',
     'gvsigol_core',
+    'gvsigol_dev',
 ]
+HAS_INDEX = True
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -183,6 +185,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_core/static'),
     os.path.join(BASE_DIR, 'gvsigol_auth/static'),
+    os.path.join(BASE_DIR, 'gvsigol_services/static'),
+    os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
+    os.path.join(BASE_DIR, 'gvsigol_dev/static'),
 )
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -239,5 +244,12 @@ SUPPORTED_CRS = {
         'title': 'WGS84',
         'definition': '+proj=longlat +datum=WGS84 +no_defs',
         'units': 'degrees'
+    }
+}
+
+GVSIGOL_SEARCH = {
+    'nominatim': {
+        'url': 'http://osm.gvsigonline.com/nominatim',
+        'country_codes': 'ES'
     }
 }
