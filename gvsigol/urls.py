@@ -30,9 +30,14 @@ urlpatterns = [
     url(r'^gvsigonline/admin/', include(admin.site.urls)),
 ]
 
+if 'gvsigol_dev' in settings.INSTALLED_APPS:
+    urlpatterns += patterns('',
+        url(r'^gvsigonline/', include('gvsigol_dev.urls')),
+    )
+    
 if 'gvsigol_core' in settings.INSTALLED_APPS:
     urlpatterns += patterns('',
-        url(r'^gvsigonline/', include('gvsigol_core.urls')),
+        url(r'^gvsigonline/core/', include('gvsigol_core.urls')),
     )
   
 if 'gvsigol_auth' in settings.INSTALLED_APPS:

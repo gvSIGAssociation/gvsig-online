@@ -11,7 +11,7 @@
 					<h3 class="box-title">{% trans "Add project" %}</h3>
 				</div>
 
-				<form id="project-form" role="form" method="post" action="/gvsigonline/project_add/">
+				<form id="project-form" role="form" method="post" action="/gvsigonline/core/project_add/">
 					<div class="box-body">
 						{% csrf_token %}													
 						{% if message %}

@@ -29,6 +29,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
 from gvsigol_auth.utils import is_admin_user
+from gvsigol_services.backend_geocoding import geocoder
 from gvsigol import settings
 import utils as core_utils
 import urllib
@@ -476,6 +477,183 @@ def project_get_conf(request):
         } 
         '''
         
-        conf = {}
+        conf = {
+            "pid": "2",
+            "view": {
+                "center_lon": "-3.7078857421875", 
+                "zoom": 7, 
+                "center_lat": "40.04443758460857"
+            }, 
+            "workspaces": [
+                {
+                    "name": "test", 
+                    "wms_url": "https://test.scolab.eu/geoserver/test/wms"
+                }, 
+                {
+                    "name": "test", 
+                    "wms_url": "https://test.scolab.eu/geoserver/test/wms"
+                }, 
+                {
+                    "name": "test", 
+                    "wms_url": "https://test.scolab.eu/geoserver/test/wms"
+                }
+            ], 
+            "base_layers": {
+                "bing": {
+                    "active": False, 
+                    "key": "Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3"
+                }
+            }, 
+            "layerGroups": [
+                {
+                    "layers": [
+                        {
+                            "crs": {
+                                "units": "degrees", 
+                                "crs": "EPSG:4258"
+                            }, 
+                            "cache_url": "https://admin:admin52@test.scolab.eu/geoserver/test/wms", 
+                            "read_roles": [], 
+                            "name": "aeropuertos", 
+                            "title": "Aeropuertos y aerodromos", 
+                            "abstract": "Aeropuertos y aerodromos",
+                            "cached": False, 
+                            "wfs_url": "https://admin:admin52@localhost/gs-test/wfs", 
+                            "namespace": "https://test.scolab.eu/geoserver/test", 
+                            "wms_url": "https://admin:admin52@localhost/gs-test/wms", 
+                            "legend": "https://admin:admin52@localhost/gs-test/wms?SERVICE=WMS&VERSION=1.1.1&layer=aeropuertos&REQUEST=getlegendgraphic&FORMAT=image/png", 
+                            "visible": False, 
+                            "is_time_layer": False, 
+                            "workspace": "test", 
+                            "single_image": False, 
+                            "write_roles": [], 
+                            "metadata": "http://admin:admin52@test.scolab.eu/geonetwork/srv/spa/catalog.search#/metadata/ae937e72-a2bd-4deb-bcf0-25e6afaeb5ea", 
+                            "queryable": True, 
+                            "is_vector": True
+                        },{
+                            "crs": {
+                                "units": "degrees", 
+                                "crs": "EPSG:4258"
+                            }, 
+                            "cache_url": "https://admin:admin52@test.scolab.eu/geoserver/test/wms", 
+                            "read_roles": [], 
+                            "name": "espacios_naturales", 
+                            "title": "Espacios naturales", 
+                            "abstract": "Espacios naturales",
+                            "cached": False, 
+                            "wfs_url": "https://admin:admin52@localhost/gs-test/wfs", 
+                            "namespace": "https://test.scolab.eu/geoserver/test", 
+                            "wms_url": "https://admin:admin52@localhost/gs-test/wms", 
+                            "legend": "https://admin:admin52@localhost/gs-test/wms?SERVICE=WMS&VERSION=1.1.1&layer=espacios_naturales&REQUEST=getlegendgraphic&FORMAT=image/png", 
+                            "visible": False, 
+                            "is_time_layer": False, 
+                            "workspace": "test", 
+                            "single_image": False, 
+                            "write_roles": [], 
+                            "metadata": "http://admin:admin52@test.scolab.eu/geonetwork/srv/spa/catalog.search#/metadata/ae937e72-a2bd-4deb-bcf0-25e6afaeb5ea", 
+                            "queryable": True, 
+                            "is_vector": True
+                        },{
+                            "crs": {
+                                "units": "degrees", 
+                                "crs": "EPSG:4258"
+                            }, 
+                            "cache_url": "https://admin:admin52@test.scolab.eu/geoserver/test/wms", 
+                            "read_roles": [], 
+                            "name": "lugares_interes", 
+                            "title": "Lugares de interes", 
+                            "abstract": "Lugares de interes",
+                            "cached": False, 
+                            "wfs_url": "https://admin:admin52@localhost/gs-test/wfs", 
+                            "namespace": "https://test.scolab.eu/geoserver/test", 
+                            "wms_url": "https://admin:admin52@localhost/gs-test/wms", 
+                            "legend": "https://admin:admin52@localhost/gs-test/wms?SERVICE=WMS&VERSION=1.1.1&layer=lugares_interes&REQUEST=getlegendgraphic&FORMAT=image/png", 
+                            "visible": False, 
+                            "is_time_layer": False, 
+                            "workspace": "test", 
+                            "single_image": False, 
+                            "write_roles": [], 
+                            "metadata": "http://admin:admin52@test.scolab.eu/geonetwork/srv/spa/catalog.search#/metadata/ae937e72-a2bd-4deb-bcf0-25e6afaeb5ea", 
+                            "queryable": True, 
+                            "is_vector": True
+                        }
+                    ], 
+                    "cached": False, 
+                    "groupOrder": 0, 
+                    "groupName": "vectorial", 
+                    "groupTitle": "vectorial", 
+                    "groupId": "MTRKYE"
+                }
+            ], 
+            "user": {
+                "username": " ", 
+                "login": "admin", 
+                "permissions": {
+                    "is_admin": True, 
+                    "roles": [
+                        "admin"
+                    ]
+                }, 
+                "id": 1, 
+                "email": "jrodrigo@scolab.es"
+            }, 
+            "tools": {
+                "get_feature_info_control": {
+                    "private_fields_prefix": "_"
+                }, 
+                "attribute_table": {
+                    "private_fields_prefix": "_"
+                }
+            }, 
+            "supported_crs": {
+                "4258": {
+                    "units": "degrees", 
+                    "definition": "+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs", 
+                    "code": "EPSG:4258", 
+                    "title": "ETRS89"
+                }, 
+                "900913": {
+                    "units": "meters", 
+                    "definition": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs", 
+                    "code": "EPSG:900913", 
+                    "title": "Google Maps Global Mercator -- Spherical Mercator"
+                }, 
+                "4326": {
+                    "units": "degrees", 
+                    "definition": "+proj=longlat +datum=WGS84 +no_defs", 
+                    "code": "EPSG:4326", 
+                    "title": "WGS84"
+                }, 
+                "3857": {
+                    "units": "meters", 
+                    "definition": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs", 
+                    "code": "EPSG:3857", 
+                    "title": "WGS 84 / Pseudo-Mercator"
+                }
+            }, 
+            "geoserver_base_url": "https://admin:admin52@test.scolab.eu/geoserver"          
+        }
     
         return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@is_admin_user 
+def search_candidates(request):
+    if request.method == 'GET':
+        query = request.GET.get('query')           
+        suggestions = geocoder.search_candidates(query)
+            
+        return HttpResponse(json.dumps(suggestions, indent=4), content_type='application/json')
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@is_admin_user 
+def get_location_address(request):
+    if request.method == 'POST':
+        query = request.POST.get('query')
+        location = geocoder.get_location_address(query)
+        
+        return HttpResponse(json.dumps(location, indent=4), content_type='application/json')
+    
+def export(request):   
+    return render_to_response('export_a4h.html', {}, context_instance=RequestContext(request))
