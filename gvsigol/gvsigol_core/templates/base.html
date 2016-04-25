@@ -73,7 +73,7 @@
 				<!-- Sidebar user panel -->
 				<div class="user-panel">
 					<div class="pull-left image">
-						<img src="{% static "img/dashboard2.png" %}" class="img-circle" alt="User Image">
+						<img src="{% static "img/logo_icon.png" %}" class="img-circle" alt="User Image">
 					</div>
 					<div class="pull-left info">
 						<p>{% trans "Dashboard" %}</p>
@@ -82,7 +82,7 @@
 				<ul class="sidebar-menu">				
 					<li class="header"></li>					
 					<li {% block home_active %}{% endblock %}>
-						<a href="/gvsigonline/"><i class="fa fa-home"></i><span>{% trans "Home" %}</span></a>
+						<a href="/gvsigonline/core/"><i class="fa fa-home"></i><span>{% trans "Home" %}</span></a>
 					</li>	
 					{% if user.is_staff %}				
 						{% include "dashboard_auth_menu.html" %}								

@@ -119,11 +119,11 @@ $(document).ready(function() {
 	});
 	
 	$('#button-add-project').click( function() {
-		location.href = '/gvsigonline/project_add/';
+		location.href = '/gvsigonline/core/project_add/';
 	});
 
 	function updateProject(data){			
-		location.href = '/gvsigonline/project_update/' + data[0] + '/';
+		location.href = '/gvsigonline/core/project_update/' + data[0] + '/';
 	}
 
 	function deleteProject(data, row){
@@ -131,7 +131,7 @@ $(document).ready(function() {
 			$.ajax({
 				type: 'POST',
 				async: false,
-				url: '/gvsigonline/project_delete/' + data[0] + '/',
+				url: '/gvsigonline/core/project_delete/' + data[0] + '/',
 				beforeSend:function(xhr){
 				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 				},

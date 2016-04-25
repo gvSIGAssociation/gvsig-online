@@ -16,11 +16,12 @@
 	<link rel="stylesheet" href="{% static "css/ionicons.min.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/datatables/dataTables.bootstrap.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/ol-3.15.1/ol.css" %}">
-	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-treeview/bootstrap-treeview.min.css" %}">	
+	<link rel="stylesheet" href="{% static "js/vendors/ol-3.15.1/ol3-popup.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-slider/slider.css" %}">	
 	<link rel="stylesheet" href="{% static "css/gvsigOL.css" %}">
-	<link rel="stylesheet" href="{% static "css/viewer.css" %}">
-	<link rel="stylesheet" href="{% static "css/toc.css" %}">
+	<link rel="stylesheet" href="{% static "css/viewer.css" %}">	
 	<link rel="stylesheet" href="{% static "css/skins/_all-skins.min.css" %}">
+	<link rel="stylesheet" href="{% static "css/toc.css" %}">
 
 	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -39,46 +40,22 @@
 			
 			<!-- Sidebar toggle button-->
           	<a href="#" class="sidebar-toggle" data-toggle="control-sidebar" role="button"></a>
-          
+
+			<div class="viewer-search-form">
+				<div class="input-group">
+					<input type="text" name="search-widget-input" id="autocomplete" class="form-control" placeholder="{% trans "Search" %}..."> 
+					<span class="input-group-btn">
+						<button type="submit" name="search" id="search-btn" class="btn btn-flat">
+							<i class="fa fa-search"></i>
+						</button>
+					</span>
+				</div>
+			</div>
+
 			<div class="navbar-custom-menu">
 				<ul class="nav navbar-nav">
-					<li class="dropdown messages-menu">
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown"> <i class="fa fa-envelope-o"></i> <span class="label label-success">4</span></a>
-						<ul class="dropdown-menu">
-							<li class="header">You have 4 messages</li>
-							<li>
-								<ul class="menu">
-									<li>
-										<a href="#">
-											<div class="pull-left">
-												<img src="dist/img/user2-160x160.jpg" class="img-circle"
-													alt="User Image">
-											</div>
-											<h4>
-												Support Team <small><i class="fa fa-clock-o"></i> 5 mins</small>
-											</h4>
-											<p>Why not buy a new awesome theme?</p>
-										</a>
-									</li>
-								</ul>
-							</li>
-							<li class="footer"><a href="#">See All Messages</a></li>
-						</ul>
-					</li>
 					
-					<!-- Notifications: style can be found in dropdown.less -->
-					<li class="dropdown notifications-menu"><a href="#" class="dropdown-toggle" data-toggle="dropdown"> <i class="fa fa-bell-o"></i> <span class="label label-warning">10</span></a>
-						<ul class="dropdown-menu">
-							<li class="header">You have 10 notifications</li>
-							<li>
-								<!-- inner menu: contains the actual data -->
-								<ul class="menu">
-									<li><a href="#"> <i class="fa fa-users text-red"></i>5 new members joined</a></li>
-									<li><a href="#"> <i class="fa fa-shopping-cart text-green"></i> 25 sales made</a></li>
-								</ul>
-							</li>
-							<li class="footer"><a href="#">View all</a></li>
-						</ul>
+					<li><a href="#" id="export-to-pdf" class="dropdown-toggle"> <i class="fa fa-print"></i></a>
 					</li>
 					
 					<li class="dropdown user user-menu">
@@ -95,7 +72,7 @@
 							</li>
 							<li class="user-footer">
 								<div class="pull-left">
-									<a href="/gvsigonline/" class="btn btn-default btn-flat">{% trans "Dashboard" %}</a>
+									<a href="/gvsigonline/core/" class="btn btn-default btn-flat">{% trans "Dashboard" %}</a>
 								</div>
 								<div class="pull-right">
 									<a href="/gvsigonline/auth/logout_user/" class="btn btn-default btn-flat">{% trans "Sign out" %}</a>
@@ -115,105 +92,86 @@
 			<ul class="nav nav-tabs nav-justified control-sidebar-tabs">
 				<li class="active"><a href="#layer-tree-tab" data-toggle="tab"><i class="icon-layers"></i></a></li>
 				<li><a href="#legend-tab" data-toggle="tab"><i class="fa fa-tags"></i></a></li>
+				<li><a href="#details-tab" data-toggle="tab"><i class="fa fa-list-alt"></i></a></li>
 			</ul>
 
 			<div class="tab-content">
 			
 				<!-- Layer tree -->
 				<div class="tab-pane active" id="layer-tree-tab">
-					<div class="box box-primary">
-						<div class="box-body">
-							<ul class="layer-tree">
-								<li class="box box-default collapsed-box">
-									<div class="box-header with-border">
-										<span class="handle"> 
-											<i class="fa fa-ellipsis-v"></i>
-											<i class="fa fa-ellipsis-v"></i>
-										</span> 
-										<input type="checkbox" value="" name=""> 
-										<span class="text">Design a nice theme</span>
-										<div class="box-tools pull-right">
-											<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">
-												<i class="fa fa-plus"></i>
-											</button>
-										</div>
-									</div>
-									<div class="box-body" style="display: none;">The body of the box</div>
-								</li>
-								<li class="box box-default collapsed-box">
-									<div class="box-header with-border">
-										<span class="handle"> 
-											<i class="fa fa-ellipsis-v"></i>
-											<i class="fa fa-ellipsis-v"></i>
-										</span> 
-										<input type="checkbox" value="" name=""> 
-										<span class="text">Design a nice theme</span>
-										<div class="box-tools pull-right">
-											<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">
-												<i class="fa fa-plus"></i>
-											</button>
-										</div>
-									</div>
-									<div class="box-body" style="display: none;">The body of the box</div>
-								</li>
-								<li class="box box-default collapsed-box">
-									<div class="box-header with-border">
-										<span class="handle"> 
-											<i class="fa fa-ellipsis-v"></i>
-											<i class="fa fa-ellipsis-v"></i>
-										</span> 
-										<input type="checkbox" value="" name=""> 
-										<span class="text">Design a nice theme</span>
-										<div class="box-tools pull-right">
-											<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">
-												<i class="fa fa-plus"></i>
-											</button>
-										</div>
-									</div>
-									<div class="box-body" style="display: none;">The body of the box</div>
-								</li>
-							</ul>
-						</div>
-					</div>
 				</div>
 				
 				<!-- Legend -->
 				<div class="tab-pane" id="legend-tab">
-					<div class="box box-primary">
-						<div class="box-body">
-							
-						</div>
-					</div>
 				</div>
+				
+				<!-- Details -->
+				<div class="tab-pane" id="details-tab">
+				</div>
+				
 			</div>			
 		</aside>
 
-		<div id="map"></div>
+		<div id="map">
+			<div id="toolbar" class="ol-toolbar ol-unselectable ol-control"></div>
+
+			<div class="modal fade" id="float-modal" tabindex="-1" role="dialog" aria-labelledby="myFloatModal">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+							<h4 class="modal-title" id="myModalLabel"></h4>
+						</div>
+						<div class="modal-body"></div>
+						<div class="modal-footer">
+							<button id="float-modal-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+							<button id="float-modal-accept" type="button" class="btn btn-primary">{% trans "Accept" %}</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+		</div>
 		
 	</div>
 
 	<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
 	
-	<script src="{% static "js/vendors/jQuery/jQuery-2.1.4.min.js" %}"></script>
-	<script src="{% static "js/vendors/jQuery/jquery.cookie.js" %}"></script>
-	<script src="{% static "js/vendors/jQueryUI/jquery-ui.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jQuery-2.1.4.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.cookie.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQueryUI/jquery-ui.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.autocomplete.min.js" %}"></script>
 	<script>
 		$.widget.bridge('uibutton', $.ui.button);
 	</script>
-	<script src="{% static "js/vendors/bootstrap-3.3.6/js/bootstrap.min.js" %}"></script>
-	<script src="{% static "js/vendors/datatables/jquery.dataTables.min.js" %}"></script>
-	<script src="{% static "js/vendors/datatables/dataTables.bootstrap.min.js" %}"></script>
-	<script src="{% static "js/vendors/bootstrap-treeview/bootstrap-treeview.min.js" %}"></script>
-	<script src="{% static "js/vendors/ol-3.15.1/ol.js" %}"></script>
-	<script src="{% static "js/lib/gvsigOL.js" %}"></script>
-	<script src="{% static "js/lib/layerTree.js" %}"></script>
-	<script src="{% static "js/lib/viewer.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/bootstrap-3.3.6/js/bootstrap.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/datatables/jquery.dataTables.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/datatables/dataTables.bootstrap.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/bootstrap-slider/bootstrap-slider.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/proj4js/proj4.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/ol-3.15.1/ol.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/ol-3.15.1/ol3-popup.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/gvsigOL.js" %}"></script>
+	
+	<script type="text/javascript" src="{% static "js/lib/tools/getFeatureInfo.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/tools/measureLength.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/tools/measureArea.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/tools/exportToPDF.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/tools/geolocation.js" %}"></script>
+		
+	<script type="text/javascript" src="{% static "js/lib/widgets/layerTree.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/widgets/legend.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/widgets/search.js" %}"></script>
+	
+	<script type="text/javascript" src="{% static "js/lib/viewer.js" %}"></script>
 	
 	<script type="text/javascript">
 		$.ajax({
 			type : 'POST',
 			async : false,
-			url : '/gvsigonline/project_get_conf/',
+			url : '/gvsigonline/core/project_get_conf/',
 			data : {
 				pid : '{{pid}}'
 			},
@@ -221,9 +179,9 @@
 				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 			},
 			success : function(response) {
-				// 		  		for (var key in response.supported_crs) {
-				// 		  			proj4.defs(response.supported_crs[key].code, response.supported_crs[key].definition);	
-				// 		  		}
+				for (var key in response.supported_crs) {
+					proj4.defs(response.supported_crs[key].code, response.supported_crs[key].definition);	
+				}
 				viewer.core.initialize(response);
 			},
 			error : function() {
