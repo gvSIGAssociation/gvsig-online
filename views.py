@@ -60,7 +60,7 @@ def login_user(request):
 
 def logout_user(request):
     logout(request)
-    return redirect('/gvsigonline/auth/login_user/')
+    return redirect('/gvsigonline/')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def password_update(request):  
