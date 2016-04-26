@@ -550,7 +550,7 @@ def project_get_conf(request):
                             "workspace": "test", 
                             "single_image": False, 
                             "write_roles": [], 
-                            "metadata": "http://admin:admin52@test.scolab.eu/geonetwork/srv/spa/catalog.search#/metadata/ae937e72-a2bd-4deb-bcf0-25e6afaeb5ea", 
+                            "metadata": "", 
                             "queryable": True, 
                             "is_vector": True
                         },{

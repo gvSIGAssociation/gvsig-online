@@ -22,10 +22,13 @@
 '''
 
 from django.shortcuts import render_to_response, RequestContext, redirect
-from gvsigol.settings import HAS_INDEX
+from gvsigol.settings import HAS_INDEX, CATALOG_MODULE, GVSIGOL_CATALOG
 
 def index(request):
     if HAS_INDEX:
-        return render_to_response('index.html', {}, RequestContext(request))
+        resp = {}
+        if CATALOG_MODULE:
+            resp['CATALOG_URL'] = GVSIGOL_CATALOG
+        return render_to_response('index.html', resp, RequestContext(request))
     else:
         return redirect('home')
