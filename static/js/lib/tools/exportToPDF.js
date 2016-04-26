@@ -58,23 +58,28 @@ exportToPDF.prototype.deactivable = true;
 exportToPDF.prototype.handler = function(e) {
 	e.preventDefault();
 	
-	var html = '';
-	html += '<div class="row">';
-	html += 	'<div class="col-xs-12 form-group">';
-	html += 		'<label for="export-map-title">' + gettext('Map title') + '</label>';
-	html += 		'<input placeholder="' + gettext('Map title') + '" name="export-map-title" id="export-map-title" type="text" class="form-control">';					
-	html += 	'</div>';
-	html += '</div>';
-	
-	$('#float-modal .modal-title').val("kk");
+	var body = '';
+	body += '<div class="row">';
+	body += 	'<div class="col-xs-12 form-group">';
+	body += 		'<label for="export-map-title">' + gettext('Map title') + '</label>';
+	body += 		'<input placeholder="' + gettext('Map title') + '" name="export-map-title" id="export-map-title" type="text" class="form-control">';					
+	body += 	'</div>';
+	body += '</div>';
 	
 	$('#float-modal .modal-body').empty();
-	$('#float-modal .modal-body').append(html);
+	$('#float-modal .modal-body').append(body);
+	
+	var buttons = '';
+	buttons += '<button id="float-modal-cancel-print" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
+	buttons += '<button id="float-modal-accept-print" type="button" class="btn btn-primary">' + gettext('Print') + '</button>';
+	
+	$('#float-modal .modal-footer').empty();
+	$('#float-modal .modal-footer').append(buttons);
 	
 	$("#float-modal").modal('show');
 	
 	var self = this;	
-	$('#float-modal-accept').on('click', function () {
+	$('#float-modal-accept-print').on('click', function () {
 		var title = $('#export-map-title').val();
 		
 		window.map = self.map;
