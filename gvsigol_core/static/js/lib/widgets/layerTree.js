@@ -174,6 +174,17 @@ layerTree.prototype.createTree = function() {
 	});
 	
 	$(".show-metadata-link").on('click', function(e) {
+		var layers = self.map.getLayers();
+		var selectedLayer = null;
+		var id = this.id.split("show-metadata-")[1];
+		layers.forEach(function(layer){
+			if (layer.baselayer == false) {
+				if (id===layer.get("id")) {
+					selectedLayer = layer;
+				}
+			}						
+		}, this);
+		self.showMetadata(selectedLayer);
 	});
 	
 };
@@ -320,4 +331,42 @@ layerTree.prototype.userCanWrite = function(layer) {
  */
 layerTree.prototype.getEditionBar = function(layer) {
 	return this.editionBar;
+};
+
+/**
+ * TODO
+ */
+layerTree.prototype.showMetadata = function(layer) {
+	
+	$('#float-modal .modal-title').empty();
+	$('#float-modal .modal-title').append(gettext('Layer metadata'));
+	
+	var body = '';
+	body += '<div class="row">';
+	body += 	'<div class="col-xs-12">';
+	body += 		'<p>' + layer.abstract + '</p>';				
+	body += 	'</div>';
+	body += '</div>';
+	
+	$('#float-modal .modal-body').empty();
+	$('#float-modal .modal-body').append(body);
+	
+	var buttons = '';
+	buttons += '<button id="float-modal-cancel-metadata" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
+	if (layer.metadata != '') {
+		buttons += '<button id="float-modal-show-metadata" type="button" class="btn btn-primary">' + gettext('Show in geonetwork') + '</button>';
+	}
+	
+	$('#float-modal .modal-footer').empty();
+	$('#float-modal .modal-footer').append(buttons);
+	
+	$("#float-modal").modal('show');
+	
+	var self = this;	
+	$('#float-modal-show-metadata').on('click', function () {
+		var win = window.open(layer.metadata, '_blank');
+		  win.focus();
+		
+		$('#float-modal').modal('hide');
+	});
 };

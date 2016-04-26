@@ -4,4 +4,4 @@ from django.apps import AppConfig
 
 
 class GvsigolDevConfig(AppConfig):
-    name = 'gvsigol_dev'
+    name = 'gvsigol_app_dev'
