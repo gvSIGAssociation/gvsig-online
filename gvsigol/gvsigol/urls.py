@@ -30,10 +30,11 @@ urlpatterns = [
     url(r'^gvsigonline/admin/', include(admin.site.urls)),
 ]
 
-if 'gvsigol_dev' in settings.INSTALLED_APPS:
-    urlpatterns += patterns('',
-        url(r'^gvsigonline/', include('gvsigol_dev.urls')),
-    )
+for app in settings.INSTALLED_APPS:
+    if 'gvsigol_app_' in app:
+        urlpatterns += patterns('',
+            url(r'^gvsigonline/', include(app + '.urls')),
+        )
     
 if 'gvsigol_core' in settings.INSTALLED_APPS:
     urlpatterns += patterns('',
