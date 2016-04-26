@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     'gvsigol_services',
     'gvsigol_symbology',
     'gvsigol_core',
-    'gvsigol_dev',
+    'gvsigol_app_dev',
 ]
 HAS_INDEX = True
 
@@ -89,6 +89,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
+                'gvsigol_core.context_processors.global_settings',
                 'django.contrib.messages.context_processors.messages',
             ],
         },
@@ -187,7 +188,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_auth/static'),
     os.path.join(BASE_DIR, 'gvsigol_services/static'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
-    os.path.join(BASE_DIR, 'gvsigol_dev/static'),
+    os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
 )
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
