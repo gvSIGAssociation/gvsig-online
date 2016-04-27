@@ -38,6 +38,7 @@ import rest_geoserver
 from zipfile import ZipFile
 import tempfile, zipfile
 import sys, os, shutil
+import requests
 import gdal_tools
 import logging
 import json
@@ -1267,6 +1268,38 @@ class Geoserver():
         except Exception as e:
             print str(e)
             raise
+        
+    def getFeatureCount(self, request, url, layer_name, f):   
+        if filter != '':
+            values = {
+                'SERVICE': 'WFS',
+                'VERSION': '1.1.0',
+                'REQUEST': 'GetFeature',
+                'TYPENAME': layer_name,
+                'OUTPUTFORMAT': 'text/xml; subtype=gml/3.1.1',
+                'RESULTTYPE': 'hits',
+                'FILTER': f.encode('utf-8')
+            }
+            
+        else:
+            values = {
+                'SERVICE': 'WFS',
+                'VERSION': '1.1.0',
+                'REQUEST': 'GetFeature',
+                'TYPENAME': layer_name,
+                'OUTPUTFORMAT': 'text/xml; subtype=gml/3.1.1',
+                'RESULTTYPE': 'hits'
+            }
+            
+        req = requests.Session()
+        if 'username' in request.session and 'password' in request.session:
+            req.auth = (request.session['username'], request.session['password'])
+    
+        response = req.post(url, data=values, verify=False)
+        root = ET.fromstring(response.text)
+        numberOfFeatures = int(root.attrib['numberOfFeatures'])
+        
+        return numberOfFeatures
         
             
 """

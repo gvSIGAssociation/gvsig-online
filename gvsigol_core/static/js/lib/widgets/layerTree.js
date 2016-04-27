@@ -167,6 +167,17 @@ layerTree.prototype.createTree = function() {
 	});
 	
 	$(".show-attribute-table-link").on('click', function(e) {
+		var selectedLayer = null;
+		var layers = self.map.getLayers();
+		layers.forEach(function(layer){
+			if (layer.baselayer == false) {
+				if (this.dataset.id == layer.get('id')) {
+					selectedLayer = layer;
+				}
+			}						
+		}, this);
+		var dataTable = new attributeTable(selectedLayer, self.map, self.conf.tools.attribute_table.private_fields_prefix);
+		dataTable.show();
 	});
 	
 	

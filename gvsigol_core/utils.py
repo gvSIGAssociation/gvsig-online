@@ -27,9 +27,6 @@ from gvsigol_services.models import LayerGroup
 from gvsigol_auth.models import UserGroup, UserGroupUser
 import gvsigol.settings
 
-def check_admin_user(user):            
-    return user.is_staff
-
 def get_all_groups():
     groups_list = UserGroup.objects.all()
     
