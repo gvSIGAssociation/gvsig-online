@@ -30,7 +30,7 @@ from models import UserGroupUser, UserGroup
 from django.contrib.auth.models import User
 from backend import backend as ldap_backend
 import random, string
-from utils import is_admin_user
+from utils import admin_required
 import utils as auth_utils
 import json
 
@@ -107,7 +107,7 @@ def password_reset_success(request):
     return render_to_response('password_reset_success.html', {}, RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def user_list(request):
     
     users_list = User.objects.all()
@@ -137,7 +137,7 @@ def user_list(request):
     return render_to_response('user_list.html', response, context_instance=RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def user_add(request):        
     if request.method == 'POST':
         form = UserCreateForm(request.POST)
@@ -208,7 +208,7 @@ def user_add(request):
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def user_update(request, uid):        
     if request.method == 'POST':
         user = User.objects.get(id=int(uid))
@@ -269,7 +269,7 @@ def user_update(request, uid):
         
         
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def user_delete(request, uid):        
     if request.method == 'POST':
         user = User.objects.get(id=uid)
@@ -289,7 +289,7 @@ def user_delete(request, uid):
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def group_list(request):
     
     groups_list = UserGroup.objects.all()
@@ -310,7 +310,7 @@ def group_list(request):
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def group_add(request):        
     if request.method == 'POST':
         form = UserGroupForm(request.POST)
@@ -338,7 +338,7 @@ def group_add(request):
          
         
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def group_delete(request, gid):        
     if request.method == 'POST':
         group = UserGroup.objects.get(id=int(gid))

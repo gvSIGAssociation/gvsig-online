@@ -28,7 +28,7 @@ from gvsigol_auth.models import UserGroup, UserGroupUser
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
-from gvsigol_auth.utils import is_admin_user
+from gvsigol_auth.utils import admin_required, is_admin_user
 from gvsigol_services.backend_geocoding import geocoder
 from gvsigol import settings
 import utils as core_utils
@@ -44,6 +44,11 @@ def not_found_view(request):
 def home(request):
     user = User.objects.get(username=request.user.username)
     groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
+    
+    from_login = False
+    if 'HTTP_REFERER' in request.META:
+        if 'auth/login_user' in request.META['HTTP_REFERER']:
+            from_login = True
     
     projects_by_user = []
     for usergroup_user in groups_by_user:
@@ -73,11 +78,14 @@ def home(request):
             project['description'] = a.description
             project['image'] = urllib.unquote(image)
             projects.append(project)
-   
-    return render_to_response('home.html', {'projects': projects}, RequestContext(request))
+            
+    if len (projects_by_user) == 1 and not is_admin_user(user) and from_login:
+        return redirect('project_load', pid=projects_by_user[0].project_id)
+    else:
+        return render_to_response('home.html', {'projects': projects}, RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def project_list(request):
     
     project_list = Project.objects.all()
@@ -96,7 +104,7 @@ def project_list(request):
     return render_to_response('project_list.html', response, context_instance=RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def project_add(request):
     if request.method == 'POST':
         name = request.POST.get('project-name')
@@ -191,7 +199,7 @@ def project_add(request):
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def project_update(request, pid):
     if request.method == 'POST':
         name = request.POST.get('project-name')
@@ -321,7 +329,7 @@ def project_update(request, pid):
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def project_delete(request, pid):        
     if request.method == 'POST':
         project = Project.objects.get(id=int(pid))
@@ -333,12 +341,10 @@ def project_delete(request, pid):
         return HttpResponse(json.dumps(response, indent=4), content_type='project/json')
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
 def project_load(request, pid):
     return render_to_response('viewer.html', {'pid': pid}, context_instance=RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
 def project_get_conf(request):
     if request.method == 'POST':
         '''
@@ -458,7 +464,7 @@ def project_get_conf(request):
                 'login': request.user.username,
                 'email': request.user.email,
                 'permissions': {
-                    'is_admin': core_utils.check_admin_user(request.user),
+                    'is_admin': is_admin_user(request.user),
                     'roles': core_utils.get_groups_by_user(request.user)
                 }
             },
@@ -636,8 +642,6 @@ def project_get_conf(request):
     
         return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user 
 def search_candidates(request):
     if request.method == 'GET':
         query = request.GET.get('query')           
@@ -645,9 +649,6 @@ def search_candidates(request):
             
         return HttpResponse(json.dumps(suggestions, indent=4), content_type='application/json')
 
-
-@login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user 
 def get_location_address(request):
     if request.method == 'POST':
         query = request.POST.get('query')
