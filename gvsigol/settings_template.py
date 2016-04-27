@@ -104,7 +104,7 @@ WSGI_APPLICATION = 'gvsigol.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'gvsigonline_v2',
+        'NAME': 'gvsigonline',
         'USER': '##DATABASE_USER##',
         'PASSWORD': '##DATABASE_PASSWORD##',
         'HOST': '##DATABASE_HOST##',
