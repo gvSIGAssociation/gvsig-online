@@ -26,7 +26,7 @@ from django.utils.translation import ugettext as _
 from models import UserGroup, UserGroupUser
 import gvsigol.settings
 
-def is_admin_user(function):
+def admin_required(function):
     def wrap(request, *args, **kwargs):
         if request.user.is_staff:
             return function(request, *args, **kwargs)
@@ -36,6 +36,9 @@ def is_admin_user(function):
     wrap.__doc__=function.__doc__
     wrap.__name__=function.__name__
     return wrap
+
+def is_admin_user(user):            
+    return user.is_staff
 
 def get_all_groups():
     groups_list = UserGroup.objects.all()
