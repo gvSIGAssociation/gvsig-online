@@ -132,7 +132,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-GVSIGONLINE_LDAP = {
+GVSIGOL_LDAP = {
     'ENABLED': True,
     'HOST':'##LDAP_HOSTNAME##',
     'PORT': '##LDAP_PORT##',
