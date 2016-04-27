@@ -142,7 +142,8 @@ GVSIGOL_LDAP = {
 }
 
 AUTHENTICATION_BACKENDS = (
-    'django_auth_ldap.backend.LDAPBackend'
+    'django_auth_ldap.backend.LDAPBackend',
+    #'django.contrib.auth.backends.ModelBackend',
 )
 AUTH_LDAP_SERVER_URI = "ldap://##LDAP_HOSTNAME##:##LDAP_PORT##"
 AUTH_LDAP_ROOT_DN = "##LDAP_DN##"
