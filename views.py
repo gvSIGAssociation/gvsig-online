@@ -28,13 +28,16 @@ from forms_services import WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateF
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from backend_mapservice import gn_backend, WrongElevationPattern, WrongTimePattern, backend as mapservice_backend
 from gvsigol_core.models import ProjectLayerGroup
+from django.views.decorators.csrf import csrf_exempt
 from django.utils.translation import ugettext as _
-from gvsigol_auth.utils import is_admin_user
+from gvsigol_auth.utils import admin_required
 from django.core.urlresolvers import reverse
 from gvsigol_auth.models import UserGroup
 import gvsigol.settings
 import rest_geoserver
 import logging, sys
+import requests
+import urllib
 import utils
 import json
 import re
@@ -44,7 +47,7 @@ _valid_layer_group_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_safe
-@is_admin_user
+@admin_required
 def workspace_list(request):
     response = {
         'workspaces': Workspace.objects.values()
@@ -52,7 +55,7 @@ def workspace_list(request):
     return render_to_response('workspace_list.html', response, context_instance=RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 @require_http_methods(["GET", "POST", "HEAD"])
 def workspace_add(request):
     if request.method == 'POST':
@@ -82,7 +85,7 @@ def workspace_add(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
-@is_admin_user
+@admin_required
 def workspace_import(request):
     """
     FIXME: Not implemented yet.
@@ -111,7 +114,7 @@ def workspace_import(request):
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_POST
-@is_admin_user
+@admin_required
 def workspace_delete(request, wsid):
     try:
         ws = Workspace.objects.get(id=wsid)
@@ -131,7 +134,7 @@ def workspace_delete(request, wsid):
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_safe
-@is_admin_user
+@admin_required
 def datastore_list(request):
     response = {
         'datastores': Datastore.objects.values()
@@ -140,7 +143,7 @@ def datastore_list(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
-@is_admin_user
+@admin_required
 def datastore_add(request):
     if request.method == 'POST':
         form = DatastoreForm(request.session, request.POST)
@@ -166,7 +169,7 @@ def datastore_add(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
-@is_admin_user
+@admin_required
 def datastore_update(request, datastore_id):
     datastore = Datastore.objects.get(id=datastore_id)
     if datastore==None:
@@ -195,7 +198,7 @@ def datastore_update(request, datastore_id):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_POST
-@is_admin_user
+@admin_required
 def datastore_delete(request, dsid):
     try:
         ds = Datastore.objects.get(id=dsid)
@@ -212,7 +215,7 @@ def datastore_delete(request, dsid):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_safe
-@is_admin_user
+@admin_required
 def layer_list(request):
     response = {
         'layers': Layer.objects.all()
@@ -221,7 +224,7 @@ def layer_list(request):
     
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def layer_delete(request, layer_id):
     try:
         layer = Layer.objects.get(pk=layer_id)
@@ -239,7 +242,7 @@ def layer_delete(request, layer_id):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_safe
-@is_admin_user
+@admin_required
 def backend_resource_list_available(request):
     """
     Lists the resources existing on a data store, retrieving the information
@@ -257,7 +260,7 @@ def backend_resource_list_available(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
-@is_admin_user
+@admin_required
 def layer_add(request):
     if request.method == 'POST':
         form = LayerForm(request.POST)
@@ -327,7 +330,7 @@ def layer_add(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
-@is_admin_user
+@admin_required
 def layer_update(request, layer_id):
     if request.method == 'POST':
         layer = Layer.objects.get(id=int(layer_id))
@@ -382,7 +385,7 @@ def layer_update(request, layer_id):
         return render(request, 'layer_update.html', {'layer': layer, 'workspace': workspace, 'form': form, 'layer_id': layer_id})
 
 @require_POST
-@is_admin_user
+@admin_required
 def layer_boundingbox_from_data(request):
     try:
         #layer = Layer.objects.get(pk=layer_id)
@@ -401,7 +404,7 @@ def layer_boundingbox_from_data(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
-@is_admin_user
+@admin_required
 def cache_clear(request, layer_id):
     if request.method == 'GET':
         layer = Layer.objects.get(id=int(layer_id)) 
@@ -413,7 +416,7 @@ def cache_clear(request, layer_id):
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
-@is_admin_user
+@admin_required
 def layergroup_cache_clear(request, layergroup_id):
     if request.method == 'GET':
         layergroup = LayerGroup.objects.get(id=int(layergroup_id)) 
@@ -423,7 +426,7 @@ def layergroup_cache_clear(request, layergroup_id):
     
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def layer_permissions_update(request, layer_id):
     if request.method == 'POST':
         assigned_read_roups = []
@@ -507,7 +510,7 @@ def resource_published(resource):
     
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def layergroup_list(request):
     
     layergroups_list = LayerGroup.objects.all()
@@ -534,7 +537,7 @@ def layergroup_list(request):
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def layergroup_add(request):
     if request.method == 'POST':
         name = request.POST.get('layergroup_name')
@@ -579,7 +582,7 @@ def layergroup_add(request):
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def layergroup_update(request, lgid):
     if request.method == 'POST':
         name = request.POST.get('layergroup_name')
@@ -633,7 +636,7 @@ def layergroup_update(request, lgid):
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def layergroup_delete(request, lgid):        
     if request.method == 'POST':
         layergroup = LayerGroup.objects.get(id=int(lgid))
@@ -652,7 +655,7 @@ def layergroup_delete(request, lgid):
 
 @require_http_methods(["GET", "POST", "HEAD"])
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def layer_upload(request):
     if request.method == 'POST':
         dstype = request.POST.get('id_dstype')
@@ -746,7 +749,7 @@ def layer_upload(request):
 
 @require_http_methods(["GET", "POST", "HEAD"])
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def layer_create(request):
     if request.method == 'POST':
         layer_type = request.POST.get('id_layer_type')
@@ -811,7 +814,7 @@ def layer_create(request):
 
 @require_GET
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@is_admin_user
+@admin_required
 def get_geom_tables(request, datastore_id):
     if request.method == 'GET':
         try:
@@ -822,3 +825,99 @@ def get_geom_tables(request, datastore_id):
         except:
             pass
     return HttpResponseBadRequest()
+
+
+@csrf_exempt
+def get_datatable_data(request):
+    
+    #if sys.getdefaultencoding() != 'utf-8':
+    #    reload(sys)  # Reload does the trick!
+    #    sys.setdefaultencoding('utf-8')
+    
+    if request.method == 'POST':      
+        layer_name = request.POST.get('layer_name')
+        wfs_url = request.POST.get('wfs_url')
+        property_name = request.POST.get('property_name')
+        properties_with_type = request.POST.get('properties_with_type')
+        start_index = request.POST.get('start')
+        max_features = request.POST.get('length')
+        draw = request.POST.get('draw')
+        search_value = request.POST.get('search[value]')
+        
+        values = None
+        recordsTotal = 0
+        recordsFiltered = 0
+        
+        encoded_property_name = property_name.encode('utf-8')
+        
+        if search_value == '':
+            values = {
+                'SERVICE': 'WFS',
+                'VERSION': '1.1.0',
+                'REQUEST': 'GetFeature',
+                'TYPENAME': layer_name,
+                'OUTPUTFORMAT': 'application/json',
+                'MAXFEATURES': max_features,
+                'STARTINDEX': start_index,
+                'PROPERTYNAME': encoded_property_name
+            }
+            recordsTotal = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, '')
+            recordsFiltered = recordsTotal
+            
+        else:
+            properties = properties_with_type.split(',')
+            aux_property_name = ''
+            encoded_value = search_value.encode('ascii', 'replace')
+            
+            filter = '<Filter>'
+            filter += '<Or>'
+            for p in properties:
+                if p.split('|')[1] == 'xsd:string':
+                    aux_property_name += p.split('|')[0] + ','
+                    filter += '<PropertyIsLike matchCase="false" wildCard="*" singleChar="." escape="!">'
+                    filter += '<PropertyName>' + p.split('|')[0] + '</PropertyName>'
+                    filter += '<Literal>*' + encoded_value.replace('?', '.') + '*' + '</Literal>'
+                    filter += '</PropertyIsLike>'
+            filter += '</Or>'
+            filter += '</Filter>'
+            
+            values = {
+                'SERVICE': 'WFS',
+                'VERSION': '1.1.0',
+                'REQUEST': 'GetFeature',
+                'TYPENAME': layer_name,
+                'OUTPUTFORMAT': 'application/json',
+                'MAXFEATURES': max_features,
+                'STARTINDEX': start_index,
+                'PROPERTYNAME': encoded_property_name,
+                'filter': filter
+            }
+            recordsTotal = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, '')
+            recordsFiltered = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, filter)
+
+        params = urllib.urlencode(values)
+        req = requests.Session()
+        if 'username' in request.session and 'password' in request.session:
+            req.auth = (request.session['username'], request.session['password'])
+        print wfs_url + "?" + params
+        #response = req.get(wfs_url + "?" + params, verify=False)
+        response = req.post(wfs_url, data=values, verify=False)
+        jsonString = response.text
+        geojson = json.loads(jsonString)
+        
+        data = []
+        for f in geojson['features']:
+            row = {}
+            for p in f['properties']:
+                row[p] = f['properties'][p]
+            row['featureid'] = f['id']
+            data.append(row)
+                
+        response = {
+            'draw': int(draw),
+            'recordsTotal': recordsTotal,
+            'recordsFiltered': recordsFiltered,
+            'data': data
+        }
+
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
