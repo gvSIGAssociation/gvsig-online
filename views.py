@@ -582,6 +582,29 @@ def project_get_conf(request):
                             "metadata": "http://admin:admin52@test.scolab.eu/geonetwork/srv/spa/catalog.search#/metadata/ae937e72-a2bd-4deb-bcf0-25e6afaeb5ea", 
                             "queryable": True, 
                             "is_vector": True
+                        },{
+                            "crs": {
+                                "units": "degrees", 
+                                "crs": "EPSG:4258"
+                            }, 
+                            "cache_url": "https://admin:admin52@test.scolab.eu/geoserver/test/wms", 
+                            "read_roles": [], 
+                            "name": "prueba_red_electrica", 
+                            "title": "Red electrica", 
+                            "abstract": "Red electrica",
+                            "cached": False, 
+                            "wfs_url": "https://admin:admin52@localhost/gs-test/wfs", 
+                            "namespace": "https://test.scolab.eu/geoserver/test", 
+                            "wms_url": "https://admin:admin52@localhost/gs-test/wms", 
+                            "legend": "https://admin:admin52@localhost/gs-test/wms?SERVICE=WMS&VERSION=1.1.1&layer=prueba_red_electrica&REQUEST=getlegendgraphic&FORMAT=image/png", 
+                            "visible": False, 
+                            "is_time_layer": False, 
+                            "workspace": "test", 
+                            "single_image": False, 
+                            "write_roles": [], 
+                            "metadata": "http://admin:admin52@test.scolab.eu/geonetwork/srv/spa/catalog.search#/metadata/ae937e72-a2bd-4deb-bcf0-25e6afaeb5ea", 
+                            "queryable": True, 
+                            "is_vector": True
                         }
                     ], 
                     "cached": False, 

@@ -187,20 +187,38 @@ html, body {
 .autocomplete-group { padding: 2px 5px; }
 .autocomplete-group strong { font-weight: bold; font-size: 16px; color: #000; display: block; border-bottom: 1px solid #000; }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button.current, .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
-  color: #333 !important;
-  border: 0px;
-  background-color: white;
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, white), color-stop(100%, #dcdcdc));
-  /* Chrome,Safari4+ */
-  background: -webkit-linear-gradient(top, white 0%, #dcdcdc 100%);
-  /* Chrome10+,Safari5.1+ */
-  background: -moz-linear-gradient(top, white 0%, #dcdcdc 100%);
-  /* FF3.6+ */
-  background: -ms-linear-gradient(top, white 0%, #dcdcdc 100%);
-  /* IE10+ */
-  background: -o-linear-gradient(top, white 0%, #dcdcdc 100%);
-  /* Opera 11.10+ */
-  background: linear-gradient(to bottom, white 0%, #dcdcdc 100%);
-  /* W3C */
+.table-dialog {
+	font-weight: 300;	
+}
+
+.ui-widget-header {
+    border: none;
+    background: none;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.ui-widget-content a {
+    color: #ffffff;
+}
+
+.ui-widget {
+	font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: inherit;
+}
+
+.no-close .ui-dialog-titlebar-close {
+  display: none;
+}
+
+.products-list > .item {
+    padding: 5px 0;
+}
+
+.popup-wrapper {
+	padding: 10px;
+}
+
+.feature-info {
+	margin-left: 0px;
 }

@@ -10,6 +10,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 	
+	<link rel="stylesheet" href="{% static "js/vendors/jQueryUI/jquery-ui.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.6/css/bootstrap.min.css" %}">
 	<link rel="stylesheet" href="{% static "css/font-awesome-4.4.0/css/font-awesome.min.css" %}">
 	<link rel="stylesheet" href="{% static "css/fontcustom/fontcustom.css" %}">
@@ -32,7 +33,11 @@
     
 </head>
 
-<body class="hold-transition skin-blue">
+<body class="skin-blue">
+
+	<div id="table-dialog" class="table-dialog">
+	</div>
+	
 	<header class="main-header map-header">
 
 		<!-- Header Navbar: style can be found in header.less -->
@@ -115,7 +120,7 @@
 		<div id="map">
 			<div id="toolbar" class="ol-toolbar ol-unselectable ol-control"></div>
 
-			<div class="modal fade" id="float-modal" data-backdrop="false" tabindex="-1" role="dialog" aria-labelledby="myFloatModal">
+			<div class="modal" id="float-modal" tabindex="-1" role="dialog" aria-labelledby="myFloatModal">
 				<div class="modal-dialog modal-lg" role="document">
 					<div class="modal-content">
 						<div class="modal-header">
@@ -140,10 +145,12 @@
 	
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jQuery-2.1.4.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.cookie.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.easy-overlay.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQueryUI/jquery-ui.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.autocomplete.min.js" %}"></script>
 	<script>
 		$.widget.bridge('uibutton', $.ui.button);
+		$("body").overlay();
 	</script>
 	<script type="text/javascript" src="{% static "js/vendors/bootstrap-3.3.6/js/bootstrap.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/DataTables-1.10.11/media/js/jquery.dataTables.min.js" %}"></script>
@@ -160,6 +167,7 @@
 	<script type="text/javascript" src="{% static "js/lib/tools/measureArea.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/tools/exportToPDF.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/tools/geolocation.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/tools/searchByCoordinate.js" %}"></script>
 		
 	<script type="text/javascript" src="{% static "js/lib/widgets/layerTree.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/widgets/legend.js" %}"></script>
@@ -168,9 +176,7 @@
 	<script type="text/javascript" src="{% static "js/lib/viewer.js" %}"></script>
 	
 	<script type="text/javascript">
-		$("#myModal").draggable({
-	    	handle: ".modal-header"
-	  	});
+		
 		$.ajax({
 			type : 'POST',
 			async : false,
@@ -192,5 +198,65 @@
 		});
 	</script>
 	
+	<script>
+	$(document).ready(function() {
+		
+		$.overlayout();
+		
+		$("#table-dialog").dialog({
+			dialogClass: "no-close table-dialog",
+			autoOpen: false,
+		    width: 'auto', // overcomes width:'auto' and maxWidth bug
+		    maxWidth: 700,
+		    height: 'auto',
+		    maxHeight: 700,
+		    modal: false,
+		    fluid: true, //new option
+		    resizable: false,
+		    buttons: [{
+		    	text: '{% trans "Close" %}',
+		    	"class": "btn btn-default",
+		        click: function() {
+		        	$( this ).dialog("close");
+		       	}
+		   	}]
+		});
+
+		// on window resize run function
+		$(window).resize(function () {
+		    fluidDialog();
+		});
+
+		// catch dialog if opened within a viewport smaller than the dialog width
+		$(document).on("dialogopen", ".ui-dialog", function (event, ui) {
+		    fluidDialog();
+		});
+
+		function fluidDialog() {
+		    var $visible = $(".ui-dialog:visible");
+		    // each open dialog
+		    $visible.each(function () {
+		        var $this = $(this);
+		        var dialog = $this.find(".ui-dialog-content").data("ui-dialog");
+		        // if fluid option == true
+		        if (dialog.options.fluid) {
+		            var wWidth = $(window).width();
+		            // check window width against dialog width
+		            if (wWidth < (parseInt(dialog.options.maxWidth) + 50))  {
+		                // keep dialog from filling entire screen
+		                $this.css("max-width", "90%");
+		            } else {
+		                // fix maxWidth bug
+		                $this.css("max-width", dialog.options.maxWidth + "px");
+		            }
+		            //reposition dialog
+		            dialog.option("position", dialog.options.position);
+		        }
+		    });
+
+		}
+		
+	});
+	</script>
 </body>
 </html>
