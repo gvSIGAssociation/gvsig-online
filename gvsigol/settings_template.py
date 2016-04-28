@@ -200,7 +200,7 @@ GVSIGOL_CATALOG = {
 
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
-    'URL': 'https://localhost/gs-test',
+    'URL': '##GEOSERVER_BASE_URL##',
     'SUPPORTED_TYPES': (
                         #('v_SHP', _('Shapefile folder')),
                         ('v_PostGIS', _('PostGIS vector')),
@@ -211,12 +211,12 @@ GVSIGOL_SERVICES = {
     ),
     # if MOSAIC_DB entry is omitted, mosaic indexes will be stored as SHPs
     'MOSAIC_DB': {
-                  'host': 'test.scolab.eu',
-                  'port': '6433',
-                  'database': 'carto',
-                  'schema': 'public',
-                  'user': 'postgres',
-                  'passwd': 'postgres82'
+                  'host': '##DATABASE_HOST##',
+                  'port': '##DATABASE_PORT##',
+                  'database': 'gvsigonline',
+                  'schema': 'mosaic',
+                  'user': '##DATABASE_USER##',
+                  'passwd': '##DATABASE_PASSWORD##'
     },
     # OGR path is only necessary if different from the one defined on gdal_tools.OGR2OGR_PATH
     'OGR2OGR_PATH': '/usr/bin/ogr2ogr'
