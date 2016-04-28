@@ -34,7 +34,7 @@ var geolocation = function(map) {
 	button.setAttribute("class", "toolbar-button");
 	button.setAttribute("title", gettext('Get current position'));
 	var icon = document.createElement('i');
-	icon.setAttribute("class", "fa fa-map-marker");
+	icon.setAttribute("class", "fa fa-dot-circle-o");
 	button.appendChild(icon);
 	
 	this.$button = $(button);

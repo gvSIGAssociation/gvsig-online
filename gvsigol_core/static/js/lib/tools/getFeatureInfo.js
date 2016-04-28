@@ -176,6 +176,9 @@ getFeatureInfo.prototype.hasLayers = function() {
  * @param {ol.MapBrowserEvent} evt
  */
 getFeatureInfo.prototype.clickHandler = function(evt) {
+	
+	$("body").overlay();
+	
 	var self = this;
 	this.showFirst = true;
 	
@@ -196,12 +199,12 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 			}
 		}
 		
-		//this.resultPanelContent.empty();	
-		//window.sidebar.open('results');
-		
 		var viewResolution = /** @type {number} */ (this.map.getView().getResolution());
 		var qLayer = null;
 		var url = null;
+		var ajaxRequests = new Array();
+		var features = new Array();
+		
 		for (var i=0; i<queryLayers.length; i++) {
 			qLayer = queryLayers[i];
 			url = qLayer.getSource().getGetFeatureInfoUrl(
@@ -210,96 +213,113 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 				this.map.getView().getProjection().getCode(),
 				{'INFO_FORMAT': 'application/json', 'FEATURE_COUNT': '100'}
 			);
-			
-			$.ajax({
-				type: 'GET',
-				async: false,
-			  	url: url,							
-			  	success	:function(response){
-			  		self.appendFeature(response, qLayer);
-			  	},
-			  	error: function(){}
-			});
-		}								
+				
+			ajaxRequests.push(
+					$.ajax({
+					type: 'GET',
+					async: false,
+				  	url: url,							
+				  	success	:function(response){
+				  		if (response.features) {
+				  			for (var i in response.features) {
+				  				features.push(response.features[i]);
+				  			}
+				  		}
+				  	},
+				  	error: function(){}
+				})
+			);
+		}
+		
+		$.when(undefined, ajaxRequests).then(function(){ 
+		     self.showInfo(features);
+		});
+		
 	}
 };
-
 
 /**
  * TODO
  */
-getFeatureInfo.prototype.appendFeature = function(response, layer){
+getFeatureInfo.prototype.showInfo = function(features){
 	
 	var self = this;
-	
-	if (response.features) {
-		var features = response.features;	
-		for (var i in features) {
-			
-			var fid = features[i].id;
-			
-			var html = '<div class="attachment-text">';
-			var text = '';
-			for (var key in features[i].properties) {
-				if (features[i].properties[key] != null && features[i].properties[key].toString().indexOf('http') > -1) {
-					text += features[i].properties[key] + ', ';
-					
-				} else {
-					if (!key.startsWith(this.prefix)) {
-						text += features[i].properties[key] + ', ';
-					}
-				}
-			}
-			html += text;
-			html += '<a href="#">more</a>';
-			html += '</div>';
-          
-			this.popup.show(self.mapCoordinates, '<div>' + html + '</div>');
-			
-			self.map.getView().setCenter(self.mapCoordinates);
-		}		
+
+	var html = '<ul class="products-list product-list-in-box">';
+	for (var i in features) {
 		
-	} else {
+		var fid = features[i].id;
 		
-		var tempDiv = document.createElement('div');
-		tempDiv.innerHTML = response;
 		
-		if (tempDiv.childNodes[4]) {
-			var html = '';
-			html += '<div class="row" style="margin-bottom: 0px; padding-top: 5px; background-color: #ffffff;">';
-			html += 	'<div class="col s12 m12" style="padding: 0 0.50rem;">';
-			html += 		'<div style="padding: 20px;">';
-			html += 			'<div class="grey-text darken-2">';
-			html += 				'<h5 class="blue-text">' + gettext('Cadastre') + '</h5>';
-			html += 				'<ul class="collection">';
-			html += 					'<li class="collection-item" style="padding-top: 10px; padding-bottom: 30px;">';
-			html += 						'<div class="grey-text left"><span style="color: #383838; font-weight: bold;">' + gettext('Cadastral reference') + ': </span><a target="_blank" href="' + tempDiv.childNodes[4].childNodes[0].href + '">' + tempDiv.childNodes[4].childNodes[0].textContent + '</a></div>';
-			html += 					'</li>';
-			html += 				'</ul>';
-			html += 			'</div>';
-			html += 		'</div>';
-			html += 	'</div>';
-			html += '</div>'
+		html += '<li class="item">';
+		html += 	'<div class="feature-info">';
+		html += 		'<a href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;">' + fid;
+		html += 		'<span class="label label-info pull-right">' + gettext('More info') + '</span></a>';
+		html += 	'</div>';
+		html += '</li>';
+		
+	}	
+	html += '</ul>';
+	this.popup.show(self.mapCoordinates, '<div class="popup-wrapper">' + html + '</div>');	
+	self.map.getView().setCenter(self.mapCoordinates);
+	$('.item-fid').click(function(){
+		self.showMoreInfo(this.dataset.fid, features);
+	});
+
+	$.overlayout();
 			
-			this.showResultTab();
-			this.resultPanelContent.append(html);
-			this.resultHeader.empty();
-			this.resultHeader.append(gettext('Point information'));
-			
-			var hdms = ol.coordinate.toStringHDMS(ol.proj.transform(self.mapCoordinates, 'EPSG:3857', 'EPSG:4326'));
-			var wgs84 = ol.proj.transform(self.mapCoordinates, 'EPSG:3857', 'EPSG:4326');
-			this.popupContent.innerHTML = '' +
-										  '<p>' + gettext('Selected coordinate') + '</p>' +
-										  '<code>' + hdms + '</code></br>' +
-										  '<code>' + gettext('Latitude') + ': ' + wgs84[1].toFixed(4) + ', ' + gettext('Longitude') + ': ' + wgs84[0].toFixed(4) + '</code>';
-										  
-			this.overlay.setPosition(self.mapCoordinates);
-			
-			self.map.getView().setCenter(self.mapCoordinates);
+};
+
+/**
+ * TODO
+ */
+getFeatureInfo.prototype.showMoreInfo = function(fid, features){
+	var selectedFeature = null;
+	for (var i in features) {
+		if (fid == features[i].id) {
+			selectedFeature = features[i]; 
 		}
-		
 	}
+	var detailsTab = $('#details-tab');
+	
+	var ui = '';
+	ui += '<div class="box box-primary">';
+	ui += 	'<div class="box-header with-border" style="font-weight: bold;">';
+	ui += 		'<span class="text">' + selectedFeature.id + '</span>';
+	ui += 	'</div>';
+	ui += 	'<div class="box-body" style="padding: 20px;">';
+	ui += 		'<ul class="products-list product-list-in-box">';
+	for (var key in selectedFeature.properties) {
+		if (selectedFeature.properties[key] != null && selectedFeature.properties[key].toString().indexOf('http') > -1) {
+			ui += '<li class="item">';
+			ui += 	'<div class="feature-info">';
+			ui += 		'<a href="' + selectedFeature.properties[key] + '" class="product-title">' + key;
+			ui += 			'<span class="label label-warning pull-right">' + gettext('Open') + '</span>';
+			ui += 		'</a>';
+			ui += 		'<span class="product-description">' + selectedFeature.properties[key] + '</span>';
+			ui += 	'</div>';
+			ui += '</li>';
 			
+		} else {
+			if (!key.startsWith(this.prefix)) {				
+				ui += '<li class="item">';
+				ui += 	'<div class="feature-info">';
+				ui += 		'<a href="javascript:void(0)" class="product-title">' + key + '</a>';
+				ui += 		'<span class="product-description">' + selectedFeature.properties[key] + '</span>';
+				ui += 	'</div>';
+				ui += '</li>';
+			}
+			
+		}
+	}
+	ui += 		'</ul>';
+	ui += 	'</div>';
+	ui += '</div>';
+	
+	detailsTab.empty();
+	$('.nav-tabs a[href="#details-tab"]').tab('show');
+	detailsTab.append(ui);
+	
 };
 
 

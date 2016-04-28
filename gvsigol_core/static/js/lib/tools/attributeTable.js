@@ -110,7 +110,7 @@ attributeTable.prototype.createTable = function(featureType) {
 	var propertiesWithType = new Array();
 	var columns = new Array();
 	
-	var table = $("<table>", {id: 'table-' + this.layer.get("id")});
+	var table = $("<table>", {id: 'table-' + this.layer.get("id"), class: 'stripe nowrap cell-border hover'});
 	var thead = $("<thead>");
 	var trow = $("<tr>");
 	for (var i=0; i<featureType.length; i++) {
@@ -135,8 +135,8 @@ attributeTable.prototype.createTable = function(featureType) {
 	thead.append(trow);
 	table.append(thead);
 	
-	$('#float-modal .modal-body').empty();
-	$('#float-modal .modal-body').append(table);
+	$('#table-dialog').empty();
+	$('#table-dialog').append(table);
 	
 	$('#table-' + this.layer.get("id")).DataTable({
 		language: {
@@ -266,5 +266,5 @@ attributeTable.prototype.zoomToFeature = function(fid) {
  * TODO
  */
 attributeTable.prototype.show = function() {
-	$("#float-modal").modal('show');          
+	$('#table-dialog').dialog("open");
 };

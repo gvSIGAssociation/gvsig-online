@@ -300,7 +300,7 @@ layerTree.prototype.createOverlayUI = function(layer) {
 	ui += '				<i class="fa fa-external-link"></i> ' + gettext('Layer metadata');
 	ui += '			</a>';
 	if (layer.queryable && layer.is_vector) {	    
-	    ui += '	<a id="show-attribute-table-' + id + '" data-id="' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool show-attribute-table-link">';
+	    ui += '	<a id="show-attribute-table-' + id + '" data-id="' + id + '" class="btn btn-block btn-social btn-custom-tool show-attribute-table-link">';
 		ui += '		<i class="fa fa-table"></i> ' + gettext('Attribute table');
 		ui += '	</a>';
     }	
