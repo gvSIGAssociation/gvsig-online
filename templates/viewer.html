@@ -168,6 +168,7 @@
 	<script type="text/javascript" src="{% static "js/lib/tools/exportToPDF.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/tools/geolocation.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/tools/searchByCoordinate.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/tools/editionBar.js" %}"></script>
 		
 	<script type="text/javascript" src="{% static "js/lib/widgets/layerTree.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/widgets/legend.js" %}"></script>
@@ -214,6 +215,7 @@
 		    fluid: true, //new option
 		    resizable: false,
 		    buttons: [{
+		    	id: 'td-close-button',
 		    	text: '{% trans "Close" %}',
 		    	"class": "btn btn-default",
 		        click: function() {

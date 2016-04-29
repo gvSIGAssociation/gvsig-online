@@ -317,6 +317,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 	ui += '</div>';
 	
 	detailsTab.empty();
+	$.gvsigOL.controlSidebar.open();
 	$('.nav-tabs a[href="#details-tab"]').tab('show');
 	detailsTab.append(ui);
 	
@@ -352,16 +353,13 @@ getFeatureInfo.prototype.deactivate = function() {
 	this.$button.removeClass('button-active');
 	this.active = false;
 	this.hideResultTab();
-	window.sidebar.close();
+	this.popup.hide();
 };
 
 /**
  * TODO
  */
 getFeatureInfo.prototype.hideResultTab = function(p,f) {
-	if (!this.resultsTab.hasClass('hidden')) {
-		this.resultsTab.addClass('hidden');
-	}
 };
 
 /**

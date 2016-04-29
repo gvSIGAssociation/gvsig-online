@@ -23,16 +23,22 @@
 
 from django.shortcuts import render_to_response, RequestContext, HttpResponse, redirect
 from models import Project, ProjectUserGroup, ProjectLayerGroup
-from gvsigol_services.models import LayerGroup
+from gvsigol_services.models import Workspace, Datastore, Layer, LayerGroup
 from gvsigol_auth.models import UserGroup, UserGroupUser
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
 from gvsigol_auth.utils import admin_required, is_admin_user
-from gvsigol_services.backend_geocoding import geocoder
-from gvsigol import settings
 import utils as core_utils
+from gvsigol_services.backend_geocoding import geocoder
+from gvsigol_services.backend_mapservice import backend as mapservice_backend
+from gvsigol import settings
+import gvsigol_services.utils as services_utils
+from operator import itemgetter
+import gvsigol
 import urllib
+import random
+import string
 import json
 
 def not_found_view(request):
@@ -125,7 +131,7 @@ def project_add(request):
                 
         assigned_usergroups = []
         for key in request.POST:
-            if 'group-' in key:
+            if 'usergroup-' in key:
                 assigned_usergroups.append(int(key.split('-')[1]))
                 
         exists = False
@@ -216,7 +222,7 @@ def project_update(request, pid):
                 
         assigned_usergroups = []
         for key in request.POST:
-            if 'group-' in key:
+            if 'usergroup-' in key:
                 assigned_usergroups.append(int(key.split('-')[1]))
                 
         project = Project.objects.get(id=int(pid))
@@ -347,11 +353,9 @@ def project_load(request, pid):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def project_get_conf(request):
     if request.method == 'POST':
-        '''
         pid = request.POST.get('pid')
         
         project = Project.objects.get(id=int(pid))
-        map = Map.objects.get(id=project.map_id)
             
         project_layers_groups = ProjectLayerGroup.objects.filter(project_id=project.id)
         layer_groups = []
@@ -361,7 +365,7 @@ def project_get_conf(request):
             group = LayerGroup.objects.get(id=project_group.layer_group_id)
             
             conf_group = {}
-            conf_group['groupTitle'] = group.description
+            conf_group['groupTitle'] = group.title
             conf_group['groupId'] = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
             conf_group['groupOrder'] = group.order
             conf_group['groupName'] = group.name
@@ -369,8 +373,8 @@ def project_get_conf(request):
             layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('order')
             layers = []
             for l in layers_in_group:
-                read_roles = core_utils.get_read_roles(l)
-                write_roles = core_utils.get_write_roles(l)
+                read_roles = services_utils.get_read_roles(l)
+                write_roles = services_utils.get_write_roles(l)
                 
                 layer = {}                
                 layer['name'] = l.name
@@ -392,7 +396,7 @@ def project_get_conf(request):
                 
                 properties = capabilities.contents[workspace.name + ':' + l.name]
                 defaultCrs = properties.boundingBox[4]
-                epsg = gvsigonline.settings.SUPPORTED_CRS[defaultCrs.split(':')[1]]
+                epsg = gvsigol.settings.SUPPORTED_CRS[defaultCrs.split(':')[1]]
                 layer['crs'] = {
                     'crs': defaultCrs,
                     'units': epsg['units']
@@ -427,9 +431,9 @@ def project_get_conf(request):
                     layer['cache_url'] = authenticated_wms_url
                     
                 layer['legend'] = authenticated_wms_url + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                if 'http' in gvsigonline.settings.GVSIGONLINE_CATALOG['URL']:
+                if 'http' in gvsigol.settings.GVSIGOL_CATALOG['URL']:
                     if l.metadata_uuid is not None and l.metadata_uuid != '':
-                        split_catalog_url = gvsigonline.settings.GVSIGONLINE_CATALOG['URL'].split('//')
+                        split_catalog_url = gvsigol.settings.GVSIGOL_CATALOG['URL'].split('//')
                         authenticated_catalog_url = split_catalog_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_catalog_url[1]  + 'catalog.search#/metadata/' + l.metadata_uuid
                         layer['metadata'] = authenticated_catalog_url
                         
@@ -452,7 +456,7 @@ def project_get_conf(request):
             
         ordered_layer_groups = sorted(layer_groups, key=itemgetter('groupOrder'))
         
-        geoserver_url = gvsigonline.settings.GVSIGONLINE_SERVICES['URL']
+        geoserver_url = gvsigol.settings.GVSIGOL_SERVICES['URL']
         split_geoserver_url = geoserver_url.split('//')
         authenticated_geoserver_url = split_geoserver_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_geoserver_url[1]
             
@@ -468,201 +472,20 @@ def project_get_conf(request):
                     'roles': core_utils.get_groups_by_user(request.user)
                 }
             },
-            'map': {
-                'center_lat': map.center_lat,
-                'center_lon': map.center_lon,
-                'zoom': map.zoom
-            },
-            'supported_crs': gvsigonline.settings.SUPPORTED_CRS,
+            "view": {
+                "center_lat": project.center_lat,
+                "center_lon": project.center_lon, 
+                "zoom": project.zoom 
+            }, 
+            'supported_crs': gvsigol.settings.SUPPORTED_CRS,
             'workspaces': workspaces,
             'layerGroups': ordered_layer_groups,
-            'tools': gvsigonline.settings.GVSIGONLINE_TOOLS,
-            'base_layers': gvsigonline.settings.GVSIGONLINE_BASE_LAYERS,
+            'tools': gvsigol.settings.GVSIGOL_TOOLS,
+            'base_layers': gvsigol.settings.GVSIGOL_BASE_LAYERS,
             'is_public_project': False,
             'geoserver_base_url': authenticated_geoserver_url
         } 
-        '''
         
-        conf = {
-            "pid": "2",
-            "view": {
-                "center_lon": "-3.7078857421875", 
-                "zoom": 7, 
-                "center_lat": "40.04443758460857"
-            }, 
-            "workspaces": [
-                {
-                    "name": "test", 
-                    "wms_url": "https://test.scolab.eu/geoserver/test/wms"
-                }, 
-                {
-                    "name": "test", 
-                    "wms_url": "https://test.scolab.eu/geoserver/test/wms"
-                }, 
-                {
-                    "name": "test", 
-                    "wms_url": "https://test.scolab.eu/geoserver/test/wms"
-                }
-            ], 
-            "base_layers": {
-                "bing": {
-                    "active": False, 
-                    "key": "Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3"
-                }
-            }, 
-            "layerGroups": [
-                {
-                    "layers": [
-                        {
-                            "crs": {
-                                "units": "degrees", 
-                                "crs": "EPSG:4258"
-                            }, 
-                            "cache_url": "https://admin:admin52@test.scolab.eu/geoserver/test/wms", 
-                            "read_roles": [], 
-                            "name": "aeropuertos", 
-                            "title": "Aeropuertos y aerodromos", 
-                            "abstract": "Aeropuertos y aerodromos",
-                            "cached": False, 
-                            "wfs_url": "https://admin:admin52@localhost/gs-test/wfs", 
-                            "namespace": "https://test.scolab.eu/geoserver/test", 
-                            "wms_url": "https://admin:admin52@localhost/gs-test/wms", 
-                            "legend": "https://admin:admin52@localhost/gs-test/wms?SERVICE=WMS&VERSION=1.1.1&layer=aeropuertos&REQUEST=getlegendgraphic&FORMAT=image/png", 
-                            "visible": False, 
-                            "is_time_layer": False, 
-                            "workspace": "test", 
-                            "single_image": False, 
-                            "write_roles": [], 
-                            "metadata": "http://admin:admin52@test.scolab.eu/geonetwork/srv/spa/catalog.search#/metadata/ae937e72-a2bd-4deb-bcf0-25e6afaeb5ea", 
-                            "queryable": True, 
-                            "is_vector": True
-                        },{
-                            "crs": {
-                                "units": "degrees", 
-                                "crs": "EPSG:4258"
-                            }, 
-                            "cache_url": "https://admin:admin52@test.scolab.eu/geoserver/test/wms", 
-                            "read_roles": [], 
-                            "name": "espacios_naturales", 
-                            "title": "Espacios naturales", 
-                            "abstract": "Espacios naturales",
-                            "cached": False, 
-                            "wfs_url": "https://admin:admin52@localhost/gs-test/wfs", 
-                            "namespace": "https://test.scolab.eu/geoserver/test", 
-                            "wms_url": "https://admin:admin52@localhost/gs-test/wms", 
-                            "legend": "https://admin:admin52@localhost/gs-test/wms?SERVICE=WMS&VERSION=1.1.1&layer=espacios_naturales&REQUEST=getlegendgraphic&FORMAT=image/png", 
-                            "visible": False, 
-                            "is_time_layer": False, 
-                            "workspace": "test", 
-                            "single_image": False, 
-                            "write_roles": [], 
-                            "metadata": "", 
-                            "queryable": True, 
-                            "is_vector": True
-                        },{
-                            "crs": {
-                                "units": "degrees", 
-                                "crs": "EPSG:4258"
-                            }, 
-                            "cache_url": "https://admin:admin52@test.scolab.eu/geoserver/test/wms", 
-                            "read_roles": [], 
-                            "name": "lugares_interes", 
-                            "title": "Lugares de interes", 
-                            "abstract": "Lugares de interes",
-                            "cached": False, 
-                            "wfs_url": "https://admin:admin52@localhost/gs-test/wfs", 
-                            "namespace": "https://test.scolab.eu/geoserver/test", 
-                            "wms_url": "https://admin:admin52@localhost/gs-test/wms", 
-                            "legend": "https://admin:admin52@localhost/gs-test/wms?SERVICE=WMS&VERSION=1.1.1&layer=lugares_interes&REQUEST=getlegendgraphic&FORMAT=image/png", 
-                            "visible": False, 
-                            "is_time_layer": False, 
-                            "workspace": "test", 
-                            "single_image": False, 
-                            "write_roles": [], 
-                            "metadata": "http://admin:admin52@test.scolab.eu/geonetwork/srv/spa/catalog.search#/metadata/ae937e72-a2bd-4deb-bcf0-25e6afaeb5ea", 
-                            "queryable": True, 
-                            "is_vector": True
-                        },{
-                            "crs": {
-                                "units": "degrees", 
-                                "crs": "EPSG:4258"
-                            }, 
-                            "cache_url": "https://admin:admin52@test.scolab.eu/geoserver/test/wms", 
-                            "read_roles": [], 
-                            "name": "prueba_red_electrica", 
-                            "title": "Red electrica", 
-                            "abstract": "Red electrica",
-                            "cached": False, 
-                            "wfs_url": "https://admin:admin52@localhost/gs-test/wfs", 
-                            "namespace": "https://test.scolab.eu/geoserver/test", 
-                            "wms_url": "https://admin:admin52@localhost/gs-test/wms", 
-                            "legend": "https://admin:admin52@localhost/gs-test/wms?SERVICE=WMS&VERSION=1.1.1&layer=prueba_red_electrica&REQUEST=getlegendgraphic&FORMAT=image/png", 
-                            "visible": False, 
-                            "is_time_layer": False, 
-                            "workspace": "test", 
-                            "single_image": False, 
-                            "write_roles": [], 
-                            "metadata": "http://admin:admin52@test.scolab.eu/geonetwork/srv/spa/catalog.search#/metadata/ae937e72-a2bd-4deb-bcf0-25e6afaeb5ea", 
-                            "queryable": True, 
-                            "is_vector": True
-                        }
-                    ], 
-                    "cached": False, 
-                    "groupOrder": 0, 
-                    "groupName": "vectorial", 
-                    "groupTitle": "vectorial", 
-                    "groupId": "MTRKYE"
-                }
-            ], 
-            "user": {
-                "username": " ", 
-                "login": "admin", 
-                "permissions": {
-                    "is_admin": True, 
-                    "roles": [
-                        "admin"
-                    ]
-                }, 
-                "id": 1, 
-                "email": "jrodrigo@scolab.es"
-            }, 
-            "tools": {
-                "get_feature_info_control": {
-                    "private_fields_prefix": "_"
-                }, 
-                "attribute_table": {
-                    "private_fields_prefix": "_"
-                }
-            }, 
-            "supported_crs": {
-                "4258": {
-                    "units": "degrees", 
-                    "definition": "+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs", 
-                    "code": "EPSG:4258", 
-                    "title": "ETRS89"
-                }, 
-                "900913": {
-                    "units": "meters", 
-                    "definition": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs", 
-                    "code": "EPSG:900913", 
-                    "title": "Google Maps Global Mercator -- Spherical Mercator"
-                }, 
-                "4326": {
-                    "units": "degrees", 
-                    "definition": "+proj=longlat +datum=WGS84 +no_defs", 
-                    "code": "EPSG:4326", 
-                    "title": "WGS84"
-                }, 
-                "3857": {
-                    "units": "meters", 
-                    "definition": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs", 
-                    "code": "EPSG:3857", 
-                    "title": "WGS 84 / Pseudo-Mercator"
-                }
-            }, 
-            "geoserver_base_url": "https://admin:admin52@test.scolab.eu/geoserver"          
-        }
-    
         return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
     
 def search_candidates(request):

@@ -44,7 +44,7 @@
 						<input type="hidden" name="zoom" id="zoom">	
 						
 						<div class="row">
-							<div class="col-xs-12" style="margin-bottom: 20px;">
+							<div class="col-md-12" style="margin-bottom: 20px;">
 								<label>{% trans "Select image" %}</label>
 								<input id="project-image" name="project-image" type="file" class="file" data-show-preview="false">						
 							</div>
@@ -65,7 +65,7 @@
 											<a href="#" class="product-title">{{group.name}}
 												<div class="checkbox pull-right">													
 													<label>
-														<input type="checkbox" name="group-{{group.id}}" id="group-{{group.id}}"/>{% trans "Assign user group" %}
+														<input type="checkbox" name="usergroup-{{group.id}}" id="usergroup-{{group.id}}"/>{% trans "Assign user group" %}
 													</label>
 												</div>
 											</a> 
@@ -136,6 +136,7 @@
 		});
 		
 		$('#project-form').submit(function() {
+			$("body").overlay();
 			var coordinate = map.getView().getCenter();
 			var transformedCoordinate = ol.proj.transform(coordinate, 'EPSG:3857', 'EPSG:4326');
 			var extent = map.getView().calculateExtent(map.getSize()); 

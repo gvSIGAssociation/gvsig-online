@@ -110,8 +110,8 @@ attributeTable.prototype.createTable = function(featureType) {
 	var propertiesWithType = new Array();
 	var columns = new Array();
 	
-	var table = $("<table>", {id: 'table-' + this.layer.get("id"), class: 'stripe nowrap cell-border hover'});
-	var thead = $("<thead>");
+	var table = $("<table>", {id: 'table-' + this.layer.get("id"), class: 'display', style: "width: 100%;"});
+	var thead = $("<thead>", {style: "width: 100%;"});
 	var trow = $("<tr>");
 	for (var i=0; i<featureType.length; i++) {
 		if (featureType[i].type.indexOf('gml:') == -1) {
@@ -138,7 +138,7 @@ attributeTable.prototype.createTable = function(featureType) {
 	$('#table-dialog').empty();
 	$('#table-dialog').append(table);
 	
-	$('#table-' + this.layer.get("id")).DataTable({
+	var dt = $('#table-' + this.layer.get("id")).DataTable({
 		language: {
     		processing		: gettext("Processing request") + "...",
 	        search			: gettext("Search") + "&nbsp;:",
@@ -161,7 +161,7 @@ attributeTable.prototype.createTable = function(featureType) {
 	            sortDescending: ": " + gettext("Sort Descending")
 	        }
 	    },
-		select: true,
+	    select: 'single',
         "processing": true,
         "serverSide": true,
         "sCharSet": "utf-8",
@@ -181,6 +181,7 @@ attributeTable.prototype.createTable = function(featureType) {
         "bSort" : false,
 	    "bLengthChange": false
     });
+	dt.select.info( false );
 	
 	var htmlButtons = '';
 	htmlButtons += 	'<div>';
@@ -195,7 +196,11 @@ attributeTable.prototype.createTable = function(featureType) {
 	});
 	
 	$("#clear-selection-button").click(function(){
-    	self.source.clear()
+    	self.source.clear();
+	});
+	
+	$("#td-close-button").click(function(){
+    	self.source.clear();
 	});
 
 };
