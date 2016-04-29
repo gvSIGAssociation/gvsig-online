@@ -88,10 +88,10 @@ class LayerForm(forms.ModelForm):
     class Meta:
         model = Layer
         fields = ['datastore', 'name', 'title', 'layer_group', 'visible', 'queryable']
-    datastore = forms.ModelChoiceField(required=True, queryset=Datastore.objects.all(), widget=forms.Select(attrs={'class' : 'validate'}))
-    name = forms.CharField(required=True, widget=forms.Select(attrs={'class' : 'validate'}))
-    title = forms.CharField(required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'validate'}))
-    layer_group = forms.ModelChoiceField(required=True, queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class' : 'validate'}))
+    datastore = forms.ModelChoiceField(required=True, queryset=Datastore.objects.all(), widget=forms.Select(attrs={'class' : 'form-control'}))
+    name = forms.CharField(required=True, widget=forms.Select(attrs={'class' : 'form-control'}))
+    title = forms.CharField(required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    layer_group = forms.ModelChoiceField(required=True, queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class' : 'form-control'}))
     #visible = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
     #queryable = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
 

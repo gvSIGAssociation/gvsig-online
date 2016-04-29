@@ -1,95 +1,118 @@
-{% extends "base_services.html" %}
+{% extends "base.html" %}
 {% load staticfiles %}
 {% load i18n %}
 
-{% block content %}
-<div class="dash-content">		
-	<div class="row">
-		<div class="col s12 m12">
-			<form role="form" class="col s12" method="post" action="/gvsigonline/layer_permissions/{{ layer_id }}/">
-			{% csrf_token %}	
-				<div class="row">
-					<button class="btn waves-effect waves-light blue init-session-button right" style="margin-top: 20px; margin-right: 10px;" type="submit">{% trans "Save" %}</button>
-				</div>
-						
-				{% if form.errors %}
-				<div id="form-error" class="red-text" style="color:#ff0000;">
-					<ul>
-					{% for field in form %}
-						{% if field.errors %}
-							<li>{{field.label}}. {{ field.errors|striptags }}</li>
-						{% endif %}	
-					{% endfor %}
-					{% for field, msg in form.errors.iteritems %}
-						<li>{{ msg|striptags }}</li>
-					{% endfor %}
-					</ul>
-				</div>
-				{% endif %}
-						
-				{% if message %}
-				<div id="form-error" class="red-text" style="color:#ff0000;">
-					<p>* {{ message }}</p>
-				</div>
-				{% endif %}
-				
-				<div class="row">
-					<div class="input-field col s12">
-						<input name="id-name" id="id-name" type="text" readonly value="{{ name }}">
-						<label for="id-name">{% trans "Layer" %}</label>					    
-					</div>
-				</div>
-				
-				<div class="row">
-					<div class="input-field col s12">
-						{% trans "Warning: Layer will be public if no read group is assigned" %}
-					</div>
-				</div>
-				<div class="row" style="padding-top: 20px;">				
-					<ul class="collection with-header col s12">
-					    <li class="collection-header"><h5>{% trans "Make layer readable only for the following groups" %}</h5></li>
-					    	{% for group in groups %}
-							<li class="collection-item avatar">
-								<img src="{% static "core/img/toc-app-users.png" %}" alt="" class="circle">
-								<span class="title">{{group.name}}</span>
-								<p>{{group.description}}</p>
-								<div class="secondary-content">
-									{% if group.read_checked %}
-									<input type="checkbox" name="read-usergroup-{{group.id}}" class="filled-in" id="read-usergroup-{{group.id}}" checked />
-									{% else %}
-									<input type="checkbox" name="read-usergroup-{{group.id}}" class="filled-in" id="read-usergroup-{{group.id}}" />
-									{% endif %}
-									<label for="read-usergroup-{{group.id}}">{% trans "Assign user group" %}</label>
-								</div>
-							</li>
-							{% endfor %}
-					</ul>
-				</div>
-				
-				<div class="row">
-					
-					<ul class="collection with-header col s12">
-					    <li class="collection-header"><h5>{% trans "Make the layer writable only for the following groups" %}</h5></li>
-					    	{% for group in groups %}
-							<li class="collection-item avatar">
-								<img src="{% static "core/img/toc-app-users.png" %}" alt="" class="circle">
-								<span class="title">{{group.name}}</span>
-								<p>{{group.description}}</p>
-								<div class="secondary-content">
-									{% if group.write_checked %}
-									<input type="checkbox" name="write-usergroup-{{group.id}}" class="filled-in" id="write-usergroup-{{group.id}}" checked />
-									{% else %}
-									<input type="checkbox" name="write-usergroup-{{group.id}}" class="filled-in" id="write-usergroup-{{group.id}}" />
-									{% endif %}
-									<label for="write-usergroup-{{group.id}}">{% trans "Assign user group" %}</label>
-								</div>
-							</li>
-							{% endfor %}
-					</ul>
-	
-				</div>
+{% block content %}	
+<div class="row">
+	<div class="col-md-12">
+		<div class="box box-primary">
 
-			</form>		
+			<div class="box-header with-border">
+				<h3 class="box-title">{% trans "Layer permissions" %}</h3>
+			</div>
+			
+			<form role="form" method="post" action="/gvsigonline/services/layer_permissions/{{ layer_id }}/">
+				<div class="box-body">
+				{% csrf_token %}					
+					{% if form.errors %}
+					<div id="form-error" style="color:#ff0000;">
+						<ul>
+						{% for field in form %}
+							{% if field.errors %}
+								<li>{{field.label}}. {{ field.errors|striptags }}</li>
+							{% endif %}	
+						{% endfor %}
+						</ul>
+					</div>
+					{% endif %}
+							
+					{% if message %}
+					<div id="form-error" style="color:#ff0000;">
+						<p>* {{ message }}</p>
+					</div>
+					{% endif %}
+				
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="id-name">{% trans "Layer" %}</label>
+							<input class="form-control" name="id-name" id="id-name" type="text" readonly value="{{ name }}">												    
+						</div>
+					</div>
+				
+					<div class="row">
+						<div class="col-md-12 form-group">
+							{% trans "Warning: Layer will be public if no read group is assigned" %}
+						</div>
+					</div>
+					
+					<div class="box box-primary">
+						<div class="box-header with-border">
+							<h3 class="box-title">{% trans "Make layer readable only for the following groups" %}</h3>
+						</div>
+						<div class="box-body">
+							<ul class="products-list product-list-in-box">
+								{% for group in groups %}
+								<li class="item">
+									<div class="product-img">
+										<img src="{% static "img/users.png" %}" alt="Users Image">
+									</div>
+									<div class="product-info">
+										<a href="#" class="product-title">{{group.name}}
+											<div class="checkbox pull-right">													
+												<label>
+													{% if group.read_checked %}
+														<input type="checkbox" name="read-usergroup-{{group.id}}" id="read-usergroup-{{group.id}}" checked/>{% trans "Assign user group" %}
+													{% else %}
+														<input type="checkbox" name="read-usergroup-{{group.id}}" id="read-usergroup-{{group.id}}"/>{% trans "Assign user group" %}
+													{% endif %}
+												</label>
+											</div>
+										</a> 
+										<span class="product-description">{{group.description}}</span>
+									</div>
+								</li> 
+								{% endfor %}
+							</ul>
+						</div>
+					</div>
+					
+					<div class="box box-primary">
+						<div class="box-header with-border">
+							<h3 class="box-title">{% trans "Make layer writeable only for the following groups" %}</h3>
+						</div>
+						<div class="box-body">
+							<ul class="products-list product-list-in-box">
+								{% for group in groups %}
+								<li class="item">
+									<div class="product-img">
+										<img src="{% static "img/users.png" %}" alt="Users Image">
+									</div>
+									<div class="product-info">
+										<a href="#" class="product-title">{{group.name}}
+											<div class="checkbox pull-right">													
+												<label>
+													{% if group.write_checked %}
+														<input type="checkbox" name="write-usergroup-{{group.id}}" id="write-usergroup-{{group.id}}" checked/>{% trans "Assign user group" %}
+													{% else %}
+														<input type="checkbox" name="write-usergroup-{{group.id}}" id="write-usergroup-{{group.id}}"/>{% trans "Assign user group" %}
+													{% endif %}
+												</label>
+											</div>
+										</a> 
+										<span class="product-description">{{group.description}}</span>
+									</div>
+								</li> 
+								{% endfor %}
+							</ul>
+						</div>
+					</div>
+				</div>
+				
+				<div class="box-footer">
+            		<button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
+           		</div>
+			</form>	
+					
 		</div>
 	</div>
 </div>

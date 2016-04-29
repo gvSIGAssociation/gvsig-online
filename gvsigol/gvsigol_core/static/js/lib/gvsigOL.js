@@ -466,17 +466,24 @@ function _init() {
 			open: function (sidebar, slide) {
 				//Slide over content
 				if (slide) {
-					sidebar.addClass('control-sidebar-open');
+					//if (!sidebar.hasClass('control-sidebar-open')) {
+						sidebar.addClass('control-sidebar-open');
+					//}
 				} else {
 					//Push the content by adding the open class to the body instead
 					//of the sidebar itself
-					$('body').addClass('control-sidebar-open');
+					//if (!$('body').hasClass('control-sidebar-open')) {
+						$('body').addClass('control-sidebar-open');
+					//}					
 				}
 			},
 			//Close the control sidebar
 			close: function (sidebar, slide) {
 				if (slide) {
 					sidebar.removeClass('control-sidebar-open');
+					if ($('body').hasClass('control-sidebar-open')) {
+						$('body').removeClass('control-sidebar-open');
+					}
 				} else {
 					$('body').removeClass('control-sidebar-open');
 				}

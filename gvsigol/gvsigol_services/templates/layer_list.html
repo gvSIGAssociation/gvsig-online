@@ -37,8 +37,7 @@
 							<td>{{ layer.name }}</td>
 							<td>{{ layer.title }}</td>
 							<td>{{ layer.datastore.name }}</td>
-							<td>{{ layer.layer_group.name }} ({{
-								layer.layer_group.description }})</td>
+							<td>{{ layer.layer_group.name }} ({{layer.layer_group.title }})</td>
 							<td></td>
 							<td></td>
 							<td></td>
@@ -81,7 +80,7 @@
 </script>
 <script>
 $(document).ready(function() {
-	var table = $('#groups-table').DataTable({
+	var table = $('#layers-table').DataTable({
 		responsive: true,
 	    language: {
 	    	processing		: '{% trans "Processing request..." %}',

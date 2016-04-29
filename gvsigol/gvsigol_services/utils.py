@@ -49,3 +49,21 @@ def get_all_user_groups_checked_by_layer(layer):
             groups.append(group)
         
     return groups
+
+def get_read_roles(layer):
+    roles = []
+    layer_read_groups = LayerReadGroup.objects.filter(layer_id=layer.id)
+    for layer_read_group in layer_read_groups:
+        group = UserGroup.objects.get(id=layer_read_group.group_id)
+        roles.append(group.name)
+        
+    return roles
+        
+def get_write_roles(layer):
+    roles = []
+    layer_write_groups = LayerWriteGroup.objects.filter(layer_id=layer.id)
+    for layer_write_group in layer_write_groups:
+        group = UserGroup.objects.get(id=layer_write_group.group_id)
+        roles.append(group.name)
+        
+    return roles
