@@ -46,7 +46,7 @@ layerTree.prototype.createTree = function() {
 	this.layerCount = 0;
 	
 	var tree = '';
-	tree += '<div class="box box-primary">';
+	tree += '<div class="box box-success">';
 	tree += '	<div class="box-body">';
 	tree += '		<ul class="layer-tree">';
 	tree += '			<li class="box box-default">';
@@ -61,6 +61,11 @@ layerTree.prototype.createTree = function() {
 	tree += '				<div class="box-body" style="display: block; font-size: 12px;">';
 	tree += 					self.createBaseLayerUI(gettext('Ninguna'), false);
 	tree += 					self.createBaseLayerUI('OpenStreetMap', true);
+	if (this.conf.base_layers.bing.active) {
+		tree += 				self.createBaseLayerUI(gettext("Bing roads"), false);
+		tree += 				self.createBaseLayerUI(gettext("Bing aerial"), false);
+		tree += 				self.createBaseLayerUI(gettext("Bing aerial with labels"), false);
+    }
 	tree += '				</div>';
 	tree += '			</li>';
 	if (this.conf.layerGroups) {
@@ -182,6 +187,25 @@ layerTree.prototype.createTree = function() {
 	
 	
 	$(".start-edition-link").on('click', function(e) {
+		if (self.editionBar == null) {
+			var selectedLayer = null;
+			var id = this.id.split("start-edition-")[1];
+			var layers = self.map.getLayers();
+			layers.forEach(function(layer){
+				if (layer.baselayer == false) {
+					if (id==layer.get('id')) {
+						selectedLayer = layer;
+					}
+				}						
+			}, this);
+			
+			var featureType = self.describeFeatureType(selectedLayer);
+			self.editionBar = new editionBar(self, self.map, featureType, selectedLayer);
+			
+		} else {
+			alert(gettext('You are editing the layer') + ': ' + self.editionBar.getSelectedLayer().title);
+			
+		}
 	});
 	
 	$(".show-metadata-link").on('click', function(e) {
@@ -319,6 +343,46 @@ layerTree.prototype.createOverlayUI = function(layer) {
 	
 	
 	return ui;
+};
+
+/**
+ * TODO
+ */
+layerTree.prototype.describeFeatureType = function(layer) {
+	
+	var featureType = new Array();
+	
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: layer.wfs_url,
+	  	data: {
+	  		'service': 'WFS',
+			'version': '1.1.0',
+			'request': 'describeFeatureType',
+			'typeName': layer.getSource().getParams().LAYERS, 
+			'outputFormat': 'text/xml; subtype=gml/3.1.1'
+		},
+	  	success	:function(response){
+	  		var elements = null;
+			try {
+				elements = response.getElementsByTagName('sequence')[0].children;
+		    } catch (error) {
+		    	elements = response.getElementsByTagName('xsd:sequence')[0].children;
+		    }
+			
+			for (var i=0; i<elements.length; i++) {
+				var element = {
+					'name': elements[i].attributes[2].nodeValue,
+					'type': elements[i].attributes[4].nodeValue
+				};
+				featureType.push(element);
+			}
+		},
+	  	error: function(){}
+	});
+	
+	return featureType;
 };
 
 /**

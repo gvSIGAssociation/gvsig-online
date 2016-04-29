@@ -74,7 +74,7 @@ viewer.core = {
 			]),
       		controls: [
 				new ol.control.Zoom(),
-				//new ol.control.ScaleLine(),					
+				new ol.control.ScaleLine(),					
       			new ol.control.OverviewMap({collapsed: false})
       		],
       		renderer: 'canvas',
@@ -115,7 +115,7 @@ viewer.core = {
     _loadLayers: function(conf) {
     	this._loadBaseLayers(conf);
     	this._loadOverlays(conf);
-    	//this._loadLayerGroups(conf);
+    	this._loadLayerGroups(conf);
     },
     
     _createWidgets: function(conf) {   
@@ -225,8 +225,7 @@ viewer.core = {
 		for (var i=0; i<conf.layerGroups.length; i++) {			
 			var group = conf.layerGroups[i];
 			var url = null;
-			var cached = false;
-			//cached = group.cached;
+			var cached = group.cached;
 			
 			if (cached) {
 				url = conf.geoserver_base_url + '/gwc/service/wms';
