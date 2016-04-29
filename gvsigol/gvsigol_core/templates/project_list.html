@@ -9,9 +9,11 @@
 		
 			<div class="box-header with-border">
 				<h3 class="box-title">{% trans "Projects list" %}</h3>
+				{% if user.is_staff %}
 				<div class="box-tools pull-right">
 					<button id="button-add-project" class="btn btn-block btn-primary btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add project" %}</button>
 				</div>
+				{% endif %}
 			</div>
 			
 			<div class="box-body">

@@ -29,11 +29,15 @@ var layerTree = function(conf, map) {
 	this.editionBar = null;
 	this.$container = $('#layer-tree-tab');
 	this.createTree();
-	$(".layer-tree").sortable({
+	$(".layer-tree-groups").sortable({
 		placeholder: "sort-highlight",
 		handle: ".handle",
 		forcePlaceholderSize: true,
 		zIndex: 999999
+	});
+	var self = this;
+	$(".layer-tree-groups").on("sortupdate", function(event, ui){
+		self.reorder(event, ui);
 	});
 };
 
@@ -44,6 +48,7 @@ layerTree.prototype.createTree = function() {
 	
 	var self = this;
 	this.layerCount = 0;
+	var groupCount = 1;
 	
 	var tree = '';
 	tree += '<div class="box box-success">';
@@ -73,10 +78,6 @@ layerTree.prototype.createTree = function() {
 			var layerGroup = this.conf.layerGroups[i];
 			tree += '			<li class="box box-default collapsed-box" id="' + layerGroup.groupId + '">';
 			tree += '				<div class="box-header with-border">';
-			tree += '					<span class="handle"> ';
-			tree += '						<i class="fa fa-ellipsis-v"></i>';
-			tree += '						<i class="fa fa-ellipsis-v"></i>';
-			tree += '					</span>';
 			tree += '					<input type="checkbox" class="layer-group" id="layergroup-' + layerGroup.groupId + '">';
 			tree += '					<span class="text">' + layerGroup.groupTitle + '</span>';
 			tree += '					<div class="box-tools pull-right">';
@@ -85,7 +86,7 @@ layerTree.prototype.createTree = function() {
 			tree += '						</button>';
 			tree += '					</div>';
 			tree += '				</div>';
-			tree += '				<div class="box-body" style="display: none;">';
+			tree += '				<div data-groupnumber="' + (groupCount++) * 100 + '" class="box-body layer-tree-groups" style="display: none;">';
 			for (var j=0; j<layerGroup.layers.length; j++) {	
 				var layer = layerGroup.layers[j];				
 				tree += self.createOverlayUI(layer);
@@ -299,8 +300,12 @@ layerTree.prototype.createOverlayUI = function(layer) {
 	var id = layer.id;
 	
 	var ui = '';
-	ui += '<div class="box layer-box thin-border box-default collapsed-box">';
+	ui += '<div data-layerid="' + id + '" data-zindex="' + mapLayer.getZIndex() + '" class="box layer-box thin-border box-default collapsed-box">';
 	ui += '		<div class="box-header with-border">';
+	ui += '			<span class="handle"> ';
+	ui += '				<i class="fa fa-ellipsis-v"></i>';
+	ui += '				<i class="fa fa-ellipsis-v"></i>';
+	ui += '			</span>';
 	if (layer.visible) {
 		ui += '		<input type="checkbox" id="' + id + '" checked>';
 	} else {
@@ -444,4 +449,25 @@ layerTree.prototype.showMetadata = function(layer) {
 		
 		$('#float-modal').modal('hide');
 	});
+};
+
+/**
+ * TODO
+ */
+layerTree.prototype.reorder = function(event,ui) {
+	var groupNumber = ui.item[0].parentNode.dataset.groupnumber;
+	var groupLayers = ui.item[0].parentNode.children;
+	var mapLayers = this.map.getLayers();
+	
+	var zindex = parseInt(groupNumber);
+	
+	for (var i=0; i<groupLayers.length; i++) {
+		var layerid = groupLayers[i].dataset.layerid;
+		mapLayers.forEach(function(layer){
+			if (layer.get('id') == layerid) {
+				layer.setZIndex(parseInt(zindex));
+				zindex++;
+			}
+		}, this);
+	}
 };

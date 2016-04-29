@@ -295,6 +295,7 @@ def layer_add(request):
                 newRecord.queryable = is_queryable
                 newRecord.cached = cached
                 newRecord.single_image = single_image
+                newRecord.abstract = abstract
                 newRecord.save()
                 style_name = newRecord.name + '_default'
                 mapservice_backend.createDefaultStyle(newRecord, style_name, session=request.session)

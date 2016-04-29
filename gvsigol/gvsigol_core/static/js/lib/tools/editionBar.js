@@ -507,44 +507,44 @@ editionBar.prototype.createFeatureForm = function(feature) {
 	this.detailsTab.empty();	
 	var self = this;
 	
-	var html = '';
-	html += '<div class="center" style="padding: 20px; background-color: #fff;">';
-	html += 	'<div id="form-error" class="red-text" style="color:#ff0000;">';
-	html += 	'</div>';
-	html += 	'<div class="row">';
+	var ui = '';
+	ui += '<div class="box box-success">';
+	ui += 		'<div class="box-header with-border">';
+	ui += 			'<h3 class="box-title">' + gettext('New feature') + '</h3>';
+	ui += 			'<div class="box-tools pull-right">';
+	//ui += 				'<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>';
+	ui += 			'</div>';
+	ui += 		'</div>';
+	ui += 		'<div class="box-body no-padding">';
+	ui += 			'<div id="col-md-12 form-group form-error" style="color:#ff0000;">';
+	ui += 			'</div>';
 	for (var i=0; i<this.featureType.length; i++) {
 		if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
-			var style = '';
+			ui += '<div class="col-md-12 form-group">';
+			ui += 	'<label style="color: #3c8dbc;">' + this.featureType[i].name + '</label>';
 			if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
-				html += '<div class="input-field col s12">';
-				html += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="validate">';
+				ui += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control">';
 				
 			} else if (this.featureType[i].type == 'xsd:date') {
-				html += '<div class="input-field col s12">';
-				html += '<input id="' + this.featureType[i].name + '" type="text" class="validate" placeholder="yyyy-mm-dd">';
+				ui += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" placeholder="yyyy-mm-dd">';
 				
 			} else if (this.featureType[i].type == 'xsd:string') {
-				html += '<div class="input-field col s12">';
-				html += '<input id="' + this.featureType[i].name + '" type="text" class="validate">';
+				ui += '<input id="' + this.featureType[i].name + '" type="text" class="form-control">';
 				
-			} else if (this.featureType[i].type == 'xsd:boolean') {
-				html += '<div class="input-field col s12" style="text-align: left;">';
-				html += '<input id="' + this.featureType[i].name + '" type="checkbox" class="validate filled-in" unchecked>';
-				style = 'margin-top: 30px;';
+			}  else if (this.featureType[i].type == 'xsd:boolean') {
+				ui += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';			
 			}
-			
-			html += 	'<label for="' + this.featureType[i].name + '" class="active" style="' + style + '">' + this.featureType[i].name + '</label>';
-			html += '</div>';
+			ui += '</div>';
 		}
-	}	
-	html += 	'</div>';
-	html += 	'<div class="row" style="margin-top: 50px;">';
-	html +=			'<button class="btn waves-effect waves-light blue" style="margin-right: 10px;" id="save-feature">' + gettext('Save') + '</button>';
-	html +=			'<button class="btn waves-effect waves-light red" id="save-feature-cancel">' + gettext('Cancel') + '</button>';
-	html += 	'</div>';
-	html += '</div>';
+	}
+	ui += 		'</div>';
+	ui += 		'<div class="box-footer text-right">';
+	ui += 			'<button id="save-feature" class="btn btn-default margin-r-5">' + gettext('Save') + '</button>';
+	ui += 			'<button id="save-feature-cancel" class="btn btn-default">' + gettext('Cancel') + '</button>';
+	ui += 		'</div>';
+	ui += '</div>';
 	
-	this.detailsTab.append(html);
+	this.detailsTab.append(ui);
 	$.gvsigOL.controlSidebar.open();
 	
 	$('#save-feature').on('click', function () {
@@ -584,52 +584,52 @@ editionBar.prototype.editFeatureForm = function(feature) {
 	this.detailsTab.empty();	
 	var self = this;
 	
-	var html = '';	
-	html += '<div class="center" style="padding: 20px; background-color: #fff;">';
-	html += 	'<div id="form-error" class="red-text" style="color:#ff0000;">';
-	html += 	'</div>';
-	html += 	'<div class="row">';
+	var ui = '';
+	ui += '<div class="box box-success">';
+	ui += 		'<div class="box-header with-border">';
+	ui += 			'<h3 class="box-title">' + gettext('Edit feature') + '</h3>';
+	ui += 			'<div class="box-tools pull-right">';
+	//ui += 				'<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>';
+	ui += 			'</div>';
+	ui += 		'</div>';
+	ui += 		'<div class="box-body no-padding">';
+	ui += 			'<div id="col-md-12 form-group form-error" style="color:#ff0000;">';
+	ui += 			'</div>';
 	for (var i=0; i<this.featureType.length; i++) {
 		if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
-			var style = '';
+			ui += '<div class="col-md-12 form-group">';
+			ui += 	'<label style="color: #3c8dbc;">' + this.featureType[i].name + '</label>';
 			if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
-				html += '<div class="input-field col s12">';
-				html += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="validate" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+				ui += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
 				
 			} else if (this.featureType[i].type == 'xsd:date') {
-				html += '<div class="input-field col s12">';
-				html += '<input id="' + this.featureType[i].name + '" type="text" class="validate" placeholder="yyyy-mm-dd" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+				ui += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" placeholder="yyyy-mm-dd" value="' + feature.getProperties()[this.featureType[i].name] + '">';
 				
 			} else if (this.featureType[i].type == 'xsd:string') {
-				html += '<div class="input-field col s12">';
-				html += '<input id="' + this.featureType[i].name + '" type="text" class="validate" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+				ui += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
 				
 			}  else if (this.featureType[i].type == 'xsd:boolean') {
-				html += '<div class="input-field col s12" style="text-align: left;">';
 				var checked = feature.getProperties()[this.featureType[i].name];
 				if (checked) {
-					html += '<input id="' + this.featureType[i].name + '" type="checkbox" class="validate filled-in" checked>';
+					ui += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox" checked>';
 				} else {
-					html += '<input id="' + this.featureType[i].name + '" type="checkbox" class="validate filled-in">';
+					ui += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';
 				}				
-				style = 'margin-top: 30px;';
 			}
-			
-			html += 	'<label for="' + this.featureType[i].name + '" class="active" style="' + style + '">' + this.featureType[i].name + '</label>';
-			html += '</div>';
+			ui += '</div>';
 		}
-	}	
-	html += 	'</div>';
-	html += 	'<div class="row" style="margin-top: 50px;">';
-	html +=			'<button class="btn waves-effect waves-light blue" style="margin-right: 10px;" id="save-feature">' + gettext('Save') + '</button>';
-	html +=			'<button class="btn waves-effect waves-light red" id="save-feature-cancel">' + gettext('Cancel') + '</button>';
-	html += 	'</div>';
-	html += '</div>';
+	}
+	ui += 		'</div>';
+	ui += 		'<div class="box-footer text-right">';
+	ui += 			'<button id="edit-feature" class="btn btn-default margin-r-5">' + gettext('Save') + '</button>';
+	ui += 			'<button id="edit-feature-cancel" class="btn btn-default">' + gettext('Cancel') + '</button>';
+	ui += 		'</div>';
+	ui += '</div>';
 	
-	this.detailsTab.append(html);
+	this.detailsTab.append(ui);
 	$.gvsigOL.controlSidebar.open();
 	
-	$('#save-feature').on('click', function () {
+	$('#edit-feature').on('click', function () {
 		var properties = {};
 		for (var i=0; i<self.featureType.length; i++) {
 			if (self.featureType[i].type.indexOf('gml:') == -1) {
@@ -651,7 +651,7 @@ editionBar.prototype.editFeatureForm = function(feature) {
 		}		
 	});
 	
-	$('#save-feature-cancel').on('click', function () {
+	$('#edit-feature-cancel').on('click', function () {
 		self.selectInteraction.getFeatures().clear();
 		self.showLayersTab();
 	});
@@ -751,7 +751,7 @@ editionBar.prototype.transactWFS = function(p,f) {
 				properties[geometryName] = cloned.getGeometry();
 			}
 			var coordinates = cloned.getGeometry().getCoordinates();
-			if (this.geometryType == 'point') {
+			/*if (this.geometryType == 'point') {
 				coordinates[0].reverse();
 				
 			} else if (this.geometryType == 'line'){
@@ -763,7 +763,7 @@ editionBar.prototype.transactWFS = function(p,f) {
 				for (var j=0; j<coordinates[0][0].length; j++) {
 					coordinates[0][0][j].reverse();
 				}
-			}
+			}*/
 			
 			cloned.getGeometry().setCoordinates(coordinates);
 			cloned.setGeometryName(geometryName);
