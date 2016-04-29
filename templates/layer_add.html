@@ -97,7 +97,7 @@
 					</div>				
 				
 					<div class="box-footer">
-                   		<button type="submit" class="btn btn-primary">{% trans "Next" %}</button>
+                   		<button id="dash-submit-button" type="submit" class="btn btn-primary">{% trans "Next" %}</button>
                  	</div>		
             	</div>
 			</form>		
@@ -108,6 +108,10 @@
 
 {% block extra-scripts %}
 <script type="text/javascript">
+	$('#dash-submit-button').click( function() {
+		$("body").overlay();
+	});
+
 	function rebuildSelect(selectObj, placeholderOptionText, placeholderSelected, extraOptions) {
 		selectObj.empty().html(' ');
 		var attribs = {

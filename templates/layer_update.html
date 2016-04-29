@@ -128,7 +128,7 @@
 				</div>
 				
 				<div class="box-footer">
-                   	<button type="submit" class="btn btn-primary">{% trans "Next" %}</button>
+                   	<button id="dash-submit-button" type="submit" class="btn btn-primary">{% trans "Next" %}</button>
                  </div>
                  
 			</form>		
@@ -155,6 +155,10 @@
 				lgs.val(1);
 			}
 		}
+		
+		$('#dash-submit-button').click( function() {
+			$("body").overlay();
+		});
 	});
 </script>
 {% endblock %}
