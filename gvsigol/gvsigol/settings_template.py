@@ -252,3 +252,19 @@ GVSIGOL_SEARCH = {
         'country_codes': '##NOMINATIM_COUNTRY_CODES##'
     }
 }
+
+GVSIGOL_TOOLS = {
+    'get_feature_info_control': {
+        'private_fields_prefix': '_'
+    },
+    'attribute_table': {
+        'private_fields_prefix': '_'
+    }
+}
+
+GVSIGOL_BASE_LAYERS = {
+    'bing': {
+        'active': ##BING_IS_ACTIVE##,
+        'key': '##BING_API_KEY##'
+    }
+}

@@ -245,6 +245,12 @@ SUPPORTED_CRS = {
         'title': 'WGS84',
         'definition': '+proj=longlat +datum=WGS84 +no_defs',
         'units': 'degrees'
+    },
+    '4258': {
+        'code': 'EPSG:4258',
+        'title': 'ETRS89',
+        'definition': '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs',
+        'units': 'degrees'
     }
 }
 
@@ -252,5 +258,21 @@ GVSIGOL_SEARCH = {
     'nominatim': {
         'url': 'http://osm.gvsigonline.com/nominatim',
         'country_codes': 'ES'
+    }
+}
+
+GVSIGOL_TOOLS = {
+    'get_feature_info_control': {
+        'private_fields_prefix': '_'
+    },
+    'attribute_table': {
+        'private_fields_prefix': '_'
+    }
+}
+
+GVSIGOL_BASE_LAYERS = {
+    'bing': {
+        'active': False,
+        'key': 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3'
     }
 }

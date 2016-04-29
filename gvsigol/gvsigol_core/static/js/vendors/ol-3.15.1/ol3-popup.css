@@ -59,6 +59,8 @@ code {
     font-weight: 300;
     /*max-height: 200px;
     overflow-x: auto;*/
+    max-height: 300px;
+    overflow: auto;
 }
 
 .ol-popup div.infoResult {
