@@ -1,133 +1,136 @@
-{% extends "base_services.html" %}
+{% extends "base.html" %}
 {% load staticfiles %}
 {% load i18n %}
 
-{% block content %}
-<div class="dash-content">		
-	<div class="row">
-		<div class="col s12 m12">
-			<form role="form" class="col s12" method="post" action="/gvsigonline/layer_update/{{layer_id}}/">
-			{% csrf_token %}	
-				<div class="row">
-					<button class="btn waves-effect waves-light blue init-session-button right" style="margin-top: 20px; margin-right: 10px;" type="submit">{% trans "Next" %}</button>
-				</div>
-						
-				{% if form.errors %}
-				<div id="form-error" class="red-text" style="color:#ff0000;">
-					<ul>
-					{% for field in form %}
-						{% if field.errors %}
-							<li>{{field.label}}. {{ field.errors|striptags }}</li>
-						{% endif %}	
-					{% endfor %}
-					{% for field, msg in form.errors.iteritems %}
-						<li>{{ msg|striptags }}</li>
-					{% endfor %}
-					</ul>
-				</div>
-				{% endif %}
-						
-				{% if message %}
-				<div id="form-error" class="red-text" style="color:#ff0000;">
-					<p>* {{ message }}</p>
-				</div>
-				{% endif %}
-				
-				<div class="row">
-					<div class="input-field col s12">
-						<label for="workspace">{% trans "Workspace" %}</label>
-						<input readonly="true" name="workspace" id="workspace" type="text" class="validate" value="{{workspace.name}}">
-					</div>
-				</div>
-				
-				<div class="row">
-					<div class="input-field col s12">
-						<label for="datastore">{% trans "Data Store" %}</label>
-						<input readonly="true" name="datastore" id="datastore" type="text" class="validate" value="{{layer.datastore.name}}">
-					</div>
-				</div>
+{% block content %}	
+<div class="row">
+	<div class="col-md-12">
+		<div class="box box-primary">
 
-				<div class="row">
-					<div class="input-field col s12">
-						<label for="name">{% trans "Resource name" %}</label>
-						<input readonly="true" name="name" id="name" type="text" class="validate" value="{{layer.name}}">
-					</div>
-				</div>
+			<div class="box-header with-border">
+				<h3 class="box-title">{% trans "Update layer" %}</h3>
+			</div>
 
-				{% if not layer.metadata_uuid %}
-				<div class="row">
-					<div class="input-field col s6">
-						<label for="datastore">{% trans "Metadata UUID" %}</label>
-						<input name="metadata_uuid" id="metadata_uuid" type="text" class="validate" value="{{layer.metadata_uuid}}">
+			<form role="form" method="post" action="/gvsigonline/services/layer_update/{{layer_id}}/">
+				{% csrf_token %}
+				<div class="box-body">										
+					{% if form.errors %}
+					<div id="form-error" style="color:#ff0000;">
+						<ul>
+						{% for field in form %}
+							{% if field.errors %}
+								<li>{{field.label}}. {{ field.errors|striptags }}</li>
+							{% endif %}	
+						{% endfor %}
+						</ul>
 					</div>
-					<div class="input-field col s6">
-						<div class="card-panel red accent-1">
-							<span class="black-text">
-							{% blocktrans %}The layer has been correctly created, but
-							metadata creation failed. You can directly create the
-							metadata on the Catalog and copy the metadata UUID
-							to this form.
-							Please contact the system administrator if metadata
-							creation persistently fails{% endblocktrans %}
-							</span>
+					{% endif %}
+							
+					{% if message %}
+					<div id="form-error" style="color:#ff0000;">
+						<p>* {{ message }}</p>
+					</div>
+					{% endif %}
+				
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="workspace">{% trans "Workspace" %}</label>
+							<input readonly="true" name="workspace" id="workspace" type="text" class="form-control" value="{{workspace.name}}">
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="datastore">{% trans "Data Store" %}</label>
+							<input readonly="true" name="datastore" id="datastore" type="text" class="form-control" value="{{layer.datastore.name}}">
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="name">{% trans "Resource name" %}</label>
+							<input readonly="true" name="name" id="name" type="text" class="form-control" value="{{layer.name}}">
+						</div>
+					</div>
+
+					{% if not layer.metadata_uuid %}
+					<div class="row">
+						<div class="col-md-6 form-group">
+							<label for="metadata_uuid">{% trans "Metadata UUID" %}</label>
+							<input name="metadata_uuid" id="metadata_uuid" type="text" class="form-control" value="{{layer.metadata_uuid}}">
+						</div>
+						<div class="col-md-6 form-group">
+							<div class="callout callout-danger">
+								{% blocktrans %}The layer has been correctly created, but
+								metadata creation failed. You can directly create the
+								metadata on the Catalog and copy the metadata UUID
+								to this form.
+								Please contact the system administrator if metadata
+								creation persistently fails{% endblocktrans %}
+							</div>
+						</div>
+					</div>
+					{% endif %}
+				
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="title">{% trans "Title" %}</label>
+							<input name="title" id="title" type="text" class="form-control" value="{{layer.title}}">
+						</div>
+					</div>
+	
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label class="active" for="id_layer_group">{% trans "Layer group" %}</label>
+							{{ form.layer_group }}
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<span>{% trans "Layer properties in the viewer" %}.</span>
+						</div>
+						<div class="col-md-4 form-group">
+							{% if layer.visible %}
+							<input type="checkbox" name="visible"  id="visible" checked/>
+							{% else %}
+							<input type="checkbox" name="visible"  id="visible"/>
+							{% endif %}
+							<label for="visible">{% trans "Visible" %}</label>
+						</div>
+						<div class="col-md-4 form-group">
+							{% if layer.cached %}
+							<input type="checkbox" name="cached"  id="cached" checked/>
+							{% else %}
+							<input type="checkbox" name="cached"  id="cached"/>
+							{% endif %}
+							<label for="cached">{% trans "Cached" %}</label>
+						</div>
+						<div class="col-md-4 form-group">
+							{% if layer.queryable %}
+							<input type="checkbox" name="queryable"  id="queryable" checked/>
+							{% else %}
+							<input type="checkbox" name="queryable"  id="queryable"/>
+							{% endif %}
+							<label for="queryable">{% trans "Queryable" %}</label>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-4 form-group">
+							{% if layer.single_image %}
+							<input type="checkbox" name="single_image"  id="single_image" checked/>
+							{% else %}
+							<input type="checkbox" name="single_image"  id="single_image"/>
+							{% endif %}
+							<label for="visible">{% trans "Single image (No tiles)" %}</label>
 						</div>
 					</div>
 				</div>
-				{% endif %}
 				
-				<div class="row">
-					<div class="input-field col s12">
-						<label for="title">{% trans "Title" %}</label>
-						<input name="title" id="title" type="text" class="validate" value="{{layer.title}}">
-					</div>
-				</div>
-
-				<div class="row">
-					<div class="input-field col s12">
-						<label class="active" for="id_layer_group">{% trans "Layer group" %}</label>
-						{{ form.layer_group }}
-					</div>
-				</div>
-					
-				<div class="row">
-					<div class="input-field col s12">
-						<span>{% trans "Layer properties in the viewer" %}.</span>
-					</div>
-					<div class="input-field col s4">
-						{% if layer.visible %}
-						<input type="checkbox" name="visible" class="filled-in" id="visible" checked/>
-						{% else %}
-						<input type="checkbox" name="visible" class="filled-in" id="visible"/>
-						{% endif %}
-						<label for="visible">{% trans "Visible" %}</label>
-					</div>
-					<div class="input-field col s4">
-						{% if layer.cached %}
-						<input type="checkbox" name="cached" class="filled-in" id="cached" checked/>
-						{% else %}
-						<input type="checkbox" name="cached" class="filled-in" id="cached"/>
-						{% endif %}
-						<label for="cached">{% trans "Cached" %}</label>
-					</div>
-					<div class="input-field col s4">
-						{% if layer.queryable %}
-						<input type="checkbox" name="queryable" class="filled-in" id="queryable" checked/>
-						{% else %}
-						<input type="checkbox" name="queryable" class="filled-in" id="queryable"/>
-						{% endif %}
-						<label for="queryable">{% trans "Queryable" %}</label>
-					</div>
-				</div>
-				<div class="row">
-					<div class="input-field col s4">
-						{% if layer.single_image %}
-						<input type="checkbox" name="single_image" class="filled-in" id="single_image" checked/>
-						{% else %}
-						<input type="checkbox" name="single_image" class="filled-in" id="single_image"/>
-						{% endif %}
-						<label for="visible">{% trans "Single image (No tiles)" %}</label>
-					</div>
-				</div>
+				<div class="box-footer">
+                   	<button type="submit" class="btn btn-primary">{% trans "Next" %}</button>
+                 </div>
+                 
 			</form>		
 		</div>
 	</div>
@@ -139,7 +142,6 @@
 	$(document).ready(function() {
 		
 		$('#select-style option[value="{{layer.style}}"]').attr('selected','selected');
-		$('#select-style').material_select();
 		
 		// translate default layer group
 		var lgs = $("#id_layer_group");
@@ -152,7 +154,6 @@
 			if (lgs.val()=="") {
 				lgs.val(1);
 			}
-			lgs.material_select();
 		}
 	});
 </script>
