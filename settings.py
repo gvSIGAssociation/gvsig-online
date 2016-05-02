@@ -180,7 +180,7 @@ SITE_ID=1
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 MEDIA_ROOT = '/var/www/media/'
-MEDIA_URL = 'http://localhost/media/'
+MEDIA_URL = '/gvsigonline/media/'
 STATIC_URL = '/gvsigonline/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 STATICFILES_DIRS = (
