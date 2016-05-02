@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	  
+<div class="row">
+	<div class="col-md-12">
+		<div class="box">
+		
+			<div class="box-header with-border">
+				<h3 class="box-title">{% trans "Create new style" %}</h3>
+			</div>
+			
+			<div class="box-body">
+	     	
+		     	<form role="form" id="create-symbol-form"  class="col s12 m12 ajax-post" method="post" action="{% url 'create_style' %}">
+					{% csrf_token %}
+					
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="datastore">{% trans "Style name" %}</label>
+							{% if style_id != None %}
+								<input id="symbology-title" name="symbology-title" class="form-control " type="text" value="{{ style_title }}" readonly="true">
+			 				{% else %}
+								<input id="symbology-title" name="symbology-title" class="form-control " type="text" value="{{ layer.name }}" placeholder="{% trans "Insert style name" %}"> 					
+			 				{% endif %}
+						</div>
+					</div>		
+	 				<input id="sym-title" name="sym-title" type="hidden" value="">
+	 				<input id="symbology-name" name="symbology-name" type="hidden" value="{{ style_name }}">
+	 				<input id="layer-id" name="layer-id" type="hidden" value="">
+	 				<input id="legend-type" name="legend-type" type="hidden" value="">
+	 				<input id="sld-code" name="sld-code" type="hidden" value="">
+		     	</form>
+				
+				
+				<div id="select-legend" class="hidden">
+
+					<div id="radio-options" class="box">									
+						<div class="box-body">
+							<ul class="products-list product-list-in-box">
+								<li class="item">
+									<div class="product-icon text-primary">
+					                    <i class="fa fa-plus"></i>
+					                </div>
+									<div class="product-info">
+										<a href="javascript:void(0)" id="option1" class="product-title option-selection">
+											{% trans "New legend" %}									
+										</a> 
+										<span class="product-description">{% trans "New legend" %}</span>
+									</div>
+								</li>
+								<li class="item">
+									<div class="product-icon text-primary">
+					                    <i class="fa fa-copy"></i>
+					                </div>
+									<div class="product-info">
+										<a href="javascript:void(0)" id="option2" class="product-title option-selection">
+											{% trans "Copy from existing" %}									
+										</a> 
+										<span class="product-description">{% trans "Copy from existing" %}</span>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+					
+					<div id="option1-panel" class="option-panel box hidden">									
+						<div class="box-body">
+							<div class="darken-1 back-button">
+								<span class="legend-main-title"> 
+									{% trans "Select legend" %}
+								</span>
+							</div>
+							<ul id="legend-buttons" class="products-list product-list-in-box">
+						</div>
+					</div>
+					
+					<div id="option2-panel" class="option-panel box hidden">									
+						<div class="box-body">
+							<div class="row">
+								<div class="input-field col s12">
+									<select name="style-template" id="style-template" style="max-height: 200px;">
+										<option value="" disabled selected>{% trans "---" %}</option>
+										{% for style in styles %}
+											<option value="{{ style.name }}">{{ style.name }}</option>
+										{% endfor %}
+									</select>
+									<label for="workspace">{% trans "Select style template" %}</label>
+								</div>
+							</div>
+							
+							<div class="row button-upload" style="display:none;">
+								<button class="btn waves-effect waves-light blue init-session-button create-legend-button right" type="submit">{% trans "Create SLD legend" %}</button>
+							</div>
+							
+							
+							<div class="row button-upload" style="display:none;">
+								<div class="input-field col s12">
+									<span>{% trans "SLD body" %}</span>
+								</div>
+								<div class="input-field col s12">
+			          				<textarea name="sld-body" id="sld-body" rows="30"></textarea>
+			        			</div>
+							</div>
+						</div>
+					</div>
+					
+				</div>				
+			</div>
+		</div>
+	</div>
+</div> 		  	
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-symbology').addClass("active");
+	$('#submenu-styles').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	var fields = {{ fields|safe }};
+	var layer = {{ layer|safe }};
+	var layer_id = layer[0]["layer"][0].pk;
+	var layer_name = layer[0]["layer"][0].fields.name;
+	var featureType = "{{ featureType }}";
+	var style_name = "{{ style_name }}";
+	var styles = {{ styles|safe }};
+	var style_id = "{{ style_id }}";
+	
+	$("#layer-id").val(layer_id);
+	if(style_id == "None"){
+		$("#symbology-title").val(layer_name);
+	}
+	
+	{% if is_vectorial %}
+		var uniqueSymbol = new UniqueSymbol(null, layer, null, featureType, "legend-buttons");
+		var uniqueValues = new UniqueValues(null, layer, null, featureType, "legend-buttons");
+		var intervals = new Intervals(null, layer, null, featureType, "legend-buttons");
+		var expressions = new Expressions(null, layer, null, featureType, "legend-buttons");
+		var importedSLD = new ImportedSLD(null, layer, null, featureType, "legend-buttons");
+		{% if GEOSERVER_CHART_MODULE %}
+			var charts = new Charts(null, layer, null, featureType, "legend-buttons");
+		{% endif %}
+	{% else %}
+		{% if is_view %}
+			var uniqueSymbol = new UniqueSymbol(null, layer, null, featureType, "legend-buttons");
+			var expressions = new Expressions(null, layer, null, featureType, "legend-buttons");
+			var importedSLD = new ImportedSLD(null, layer, null, featureType, "legend-buttons");
+		{% else %}
+			var colorTable = new ColorTable(null, layer, null, featureType, "legend-buttons");
+			var importedRMF = new ImportedRMF(null, layer, null, featureType, "legend-buttons");
+			var importedSLD = new ImportedSLD(null, layer, null, featureType, "legend-buttons");
+		{% endif %}
+	{% endif %}
+	
+	
+	var submitForm = function(){
+		if(style_id != "None"){
+			$("#symbology-title").removeAttr("disabled");
+			$("#create-symbol-form").attr("action", "/gvsigonline/style_layer_change/"+layer_id+"/"+style_id+"/");
+		}
+		$("#create-symbol-form").submit();
+	}
+			
+	$(".legend-button").click(function(){
+		var symbologyUtils = new SymbologyUtils();
+		var legend = $(this).attr("id");
+		$("#legend-type").val(legend);
+
+		if(style_id !="None"){
+			symbologyUtils.showModal("change-legend-modal", "¿Cambiar la leyenda?", "Se perderá la información anterior de la leyenda y no se podrá recuperar", submitForm, true)
+		}else{
+			submitForm();
+		}
+	});
+	
+	$(".option-selection").click(function(){
+		var id = $(this).attr("id");
+		$("#radio-options").addClass('hidden');
+		$(".option-panel").addClass('hidden');
+		$("#"+id+"-panel").removeClass('hidden');
+	});
+	
+	$(".back-button").click(function(){
+		//$(".option-panel").hide();
+		//$("#radio-options").show();
+	});
+
+
+	function is_valid(){
+		var input=$('#symbology-title');
+		var is_name=input.val();
+		$('#style_name').val(is_name);
+		if(is_name){
+			input.removeClass("invalid").addClass("valid");
+			$('#select-legend').removeClass('hidden');
+		}else{
+			input.removeClass("valid").addClass("invalid");
+			$('#select-legend').addClass('hidden');
+		}
+	}
+	
+	$('#symbology-title').on('input', function() {
+		is_valid();
+		
+	});
+	
+	is_valid();
+	//$('.modal-trigger').leanModal();
+	
+	var sldBody = document.getElementById('sld-body');
+	var codemirror = CodeMirror.fromTextArea(sldBody, {
+		value: "",
+		mode:  "xml",
+		theme: "xq-dark",
+		autoMatchParens: true,
+		height: "1000px",
+		minHeight: 1000,
+		lineNumbers: true
+	});
+	
+	$('#style-template').change(function(){
+		var name = $(this).val();
+		var sld_code = "";
+		for(var i=0; i<styles.length; i++){
+			if(styles[i].name == name){
+				sld_code = styles[i].sld_code;
+				break;
+			}
+		}
+		$(".button-upload").show();
+		codemirror.setValue(sld_code);
+	});
+	
+	
+	$('.create-legend-button').click(function(){
+		$('#legend-type').val("IM");
+		var code = codemirror.getValue();
+		$('#sld-code').val(code);
+		
+		$('form').submit();
+	});
+
+});
+</script>
+{% endblock %}
