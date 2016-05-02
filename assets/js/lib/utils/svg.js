@@ -3139,7 +3139,7 @@ SVG.Doc = SVG.invent({
       }
 
       // set svg element attributes and ensure defs node
-      this.namespace().size('66px', '66px').defs()
+      this.namespace().size('33px', '33px').defs()
     }
   }
 
