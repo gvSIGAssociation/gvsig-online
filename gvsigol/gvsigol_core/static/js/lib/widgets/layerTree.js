@@ -423,7 +423,7 @@ layerTree.prototype.showMetadata = function(layer) {
 	
 	var body = '';
 	body += '<div class="row">';
-	body += 	'<div class="col-xs-12">';
+	body += 	'<div class="col-md-12">';
 	body += 		'<p>' + layer.abstract + '</p>';				
 	body += 	'</div>';
 	body += '</div>';

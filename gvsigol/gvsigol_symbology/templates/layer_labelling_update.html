@@ -1,0 +1,213 @@
+{% extends "base_symbology.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block layers_active %}class="active"{% endblock %}
+
+{% block content %}	  	
+
+<div class="dash-content">
+<div class="section symbology">
+<div class="dash-content symbology">
+		 <div id="buttons-div" class="step-2">
+			<div class="delete-legend top-operation">
+				<i class="fa fa-times"> </i> Borrar etiquetas
+			</div>
+			
+			<!--
+			<div class="metadata-legend top-operation">
+				<i class="fa fa-file-text-o"></i>Metadatos
+			</div>
+			-->
+			
+			<div class="save-legend top-operation">
+				<i class="fa fa-floppy-o"> </i>Guardar
+			</div>
+			
+			<div class="symbol-legend top-operation">
+				<i class="fa  fa-map-marker"> </i>Símbolos
+			</div>
+			<div class="clearBoth"></div>  
+		 </div>
+		 <div id="legend-panel" style="display:block;">
+		 </div>
+</div>
+</div>
+</div>
+
+<div id="modal-symbology" class="modal modal-fixed-footer">
+    <div class="modal-content">
+      
+    </div>
+    <div class="modal-footer">
+
+    </div>                                        
+  </div>
+ 
+  
+<div id="modal-metadata" class="modal modal-fixed-footer">
+    <div class="modal-content">
+      <h5><i class="icon-layers dash-secondary-icon" style:"color:#26a69a;"></i> <span>Datos de la capa</span></h5>
+      <div class="modal-metadata-form">
+      
+      
+      </div>
+    </div>
+    <div class="modal-footer">
+
+    </div>                                        
+  </div>
+	  	
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+$(document).ready(function() {
+	var sup_crs = {{ supported_crs|safe }};
+	for (var key in sup_crs) {
+		proj4.defs(sup_crs[key].code, sup_crs[key].definition);	
+	}
+	
+	var symbologyUtils = new SymbologyUtils();
+	
+	var styleType = "TX";
+	var data = {{ rules|safe }};
+	var workspace = {{ workspace|safe }};
+	var labels = {{ labels|safe }};
+	var fields = {{ fields|safe }};
+	var layer = {{ layer|safe }};
+	var layer_id = layer[0]["layer"][0].pk;
+	var featureType = "TextSymbolizer";
+	var style_id = {{ style.id }};
+	var sorted_fonts = {{ sorted_fonts|safe }};
+	var sldFilterValues = {{ sldFilterValues|safe }};
+	
+	SLDDefaultValues[featureType]["font-family"].definition.values = JSON.stringify(sorted_fonts);
+	for(keys in sorted_fonts){
+		SLDDefaultValues[featureType]["font-family"].definition.defaultValue = keys;
+		break;
+	}
+	
+	var legendName = "{{ layerStyle.name }}";
+	var legendTitle = "{{ layerStyle.title }}";
+	var legendDescription = "{{ layerStyle.description }}";
+		
+	var formHelper = new SymbologyFormComponents();
+	var labelSymbols = new LabelSymbols(workspace, layer, style_id, featureType, null, "legend-panel", fields, sldFilterValues);
+	
+	$(".top-operation").hover(function(){
+		$(this).addClass("top-operation-hover");	
+	},function(){
+		$(this).removeClass("top-operation-hover");	
+	});
+	
+	$(".metadata-legend").click(function(){
+		$('#modal-metadata .modal-metadata-form').empty();
+		var name = legendName;
+		if(name == null || name == "" || name == "None"){
+			name = "{{ layer.name }}";
+		}
+		
+		var title = ""; 
+		var auxTitle = legendTitle;
+		if(auxTitle != null && auxTitle != "" && auxTitle != "None"){
+			title = auxTitle;
+		}
+		
+		var desc = ""; 
+		var auxDesc = legendDescription;
+		if(auxDesc != null && auxDesc != "" && auxDesc != "None"){
+			desc = auxDesc;
+		}
+		
+		var nameContainer = formHelper.createFormTextInput("Nombre capa", "layer-name", name, true, false);
+		$('#modal-metadata .modal-metadata-form').append(nameContainer);
+		
+		var titleContainer = formHelper.createFormTextInput("Título capa", "layer-title", title, false, false);
+		$('#modal-metadata .modal-metadata-form').append(titleContainer);
+		
+		var descripcionContainer = formHelper.createFormInputArea("Descripción capa", "layer-description", desc, false, 4, false);
+		$('#modal-metadata .modal-metadata-form').append(descripcionContainer);
+		
+		$('#modal-metadata .modal-footer').empty();
+		var acceptButton = $("<a>", {id: "metadataAcceptButton", class: "update-metadata.info modal-action modal-close waves-effect waves-green btn-flat", text: "Guardar cambios"});
+		var cancelButton = $("<a>", {id: "formCancelButton", class: "cancel-new-symbol-button modal-action modal-close waves-effect waves-green btn-flat", text: "Cancelar"});
+		$('#modal-metadata .modal-footer').append(acceptButton);
+		$('#modal-metadata .modal-footer').append(cancelButton);
+	
+		$('#modal-metadata').openModal();
+		
+		$("#metadataAcceptButton").click(function(){
+			legendName = $("#layer-name").val();
+			legendTitle = $("#layer-title").val();
+			legendDescription = $("#layer-description").val();
+			
+			ajaxPost(
+			"/gvsigonline/save_legend/"+layer_id+"/{{ style.id }}/", 
+			{
+				'name': $("#layer-name").val(),
+				'title': $("#layer-title").val(),
+				'description': $("#layer-description").val()
+			}, 
+			function(content){
+	            //onSuccess
+	            //alert("Update done succesfully!!");
+	        })
+			});
+		});
+	
+	function save_data(url){
+		var legend = getCurrentLegend(styleType)
+		var lbs = legend.getData();
+		for(var i=0; i<lbs.length; i++){
+			data.push(lbs[i]);
+		}
+		$.ajax({
+		  type: "POST",
+		  async: false,
+		  url: "/gvsigonline/save_style/"+layer_id+"/{{ style.id }}/",
+		  beforeSend:function(xhr){
+				    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				  	},
+		  data: {
+		  	'datos': JSON.stringify({data})
+		  },
+		  success: function(){
+		  	  location.href = url;
+		  },
+	  	  error: function(){
+	  		  //FIXME: should close this modal and show a error modal
+	  	  }
+		});
+	}
+	
+	$(".symbol-legend").click(function(){
+		save_data("/gvsigonline/style_layer_update/"+layer_id+"/{{ style.id }}/");	
+	});
+	
+	$(".save-legend").click(function(){
+		save_data("/gvsigonline/style_layer_list/");
+	});
+	
+	$(".delete-legend").click(function(){
+		labels = [];
+		labelSymbols.loadData(labels);
+		save_data("/gvsigonline/style_label_update/"+layer_id+"/{{ style.id }}/");
+	});
+	
+	function getCurrentLegend(styleType){
+		return labelSymbols;
+	}
+	
+	symbologyUtils.loadData(getCurrentLegend(styleType), styleType, labels);
+	$( "#{{ style.type }}" ).trigger( "click" );
+	$('.modal-trigger').leanModal();
+	$('select').material_select();
+	
+	labelSymbols.loadPreviewMap(workspace, layer, "{{ username }}", "{{ password }}");
+	
+	symbologyUtils.loadData(getCurrentLegend(styleType), styleType, labels);
+	
+});
+</script>
+{% endblock %}

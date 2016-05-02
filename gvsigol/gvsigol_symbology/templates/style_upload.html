@@ -1,0 +1,54 @@
+{% extends "base_symbology.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block upload_style_active %}class="active"{% endblock %}
+
+{% block content %}
+<div class="dash-content symbology">		
+	<div class="row">
+		<div class="col s12 m12">
+			<form role="form" class="col s12" enctype="multipart/form-data" method="post" action="/gvsigonline/style_upload/">
+			{% csrf_token %}	
+				<div class="row">
+					<button class="btn waves-effect waves-light blue init-session-button right" type="submit">{% trans "Upload SLD" %}</button>
+				</div>
+						
+				{% if message %}
+				<div id="form-error" class="red-text" style="color:#ff0000;">
+					<p>* {{ message }}</p>
+				</div>
+				{% endif %}
+								
+				<div class="row">
+					<div class="input-field col s12">
+						<input placeholder="{% trans 'Style name' %}" name="style_name" id="style_name" type="text" class="validate">
+						<label for="style_name">{% trans "Name" %}</label>					    
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="file-field input-field">
+				      	<div class="btn">
+				        	<span>{% trans "Select SLD" %}</span>
+				        	<input type="file" name="sld">
+				      	</div>
+				      	<div class="file-path-wrapper">
+				        	<input class="file-path validate" type="text">
+				      	</div>
+				    </div>
+				</div>
+					
+			</form>		
+		</div>				
+	</div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script type="text/javascript">
+$().ready(function(){ 	
+	$('select').material_select();	
+});
+</script>
+{% endblock %}

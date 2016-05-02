@@ -22,22 +22,22 @@
 						{% endif %}
 										
 						<div class="row">
-							<div class="col-xs-6">
+							<div class="col-md-6">
 								<label for="first_name">{% trans "First name" %}</label>
 								<input placeholder="{% trans 'First name' %}" class="form-control" name="first_name" id="first_name" type="text" value="{{user.first_name}}">							
 							</div>
-							<div class="col-xs-6">
+							<div class="col-md-6">
 								<label for="last_name">{% trans "Last name" %}</label>
 								<input placeholder="{% trans 'Last name' %}" class="form-control" name="last_name" id="last_name" type="text" value="{{user.last_name}}">								
 							</div>
 						</div>
 										
 						<div class="row">
-							<div class="col-xs-6 form-group">
+							<div class="col-md-6 form-group">
 								<label for="username">{% trans "Username" %}</label>
 								<input disabled placeholder="{% trans 'Username' %}" class="form-control" name="username" id="username" type="text" value="{{user.username}}">								
 							</div>
-							<div class="col-xs-6 form-group">
+							<div class="col-md-6 form-group">
 								<label for="email">{% trans "Email" %}</label>
 								<input placeholder="{% trans 'Email' %}" class="form-control" name="email" id="email" type="text" class="validate" value="{{user.email}}">								
 							</div>
@@ -46,7 +46,7 @@
 						<br>
 						
 						<div class="row">
-							<div class="checkbox col-xs-6">								
+							<div class="checkbox col-md-6">								
 								<label>
 									{% if user.is_staff %}
 									<input type="checkbox" name="is_staff" id="is_staff" checked/>{% trans "Is admin" %}

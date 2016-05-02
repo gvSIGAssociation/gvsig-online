@@ -33,11 +33,11 @@
 						{% endif %}
 										
 						<div class="row">
-							<div class="col-xs-6">
+							<div class="col-md-6">
 								<input placeholder="{% trans 'Layer group name' %}" name="layergroup_name" id="layergroup_name" type="text" class="form-control" value="{{layergroup.name}}">
 								<label for="layergroup_name">{% trans "Name" %}</label>	
 							</div>
-							<div class="col-xs-6">
+							<div class="col-md-6">
 								<input placeholder="{% trans 'Layer group title' %}" name="layergroup_title" id="layergroup_title" type="text" class="form-control" value="{{layergroup.title}}">
 								<label for="layergroup_title">{% trans "Title" %}</label>
 							</div>
@@ -46,7 +46,7 @@
 						<br>
 						
 						<div class="row">
-							<div class="checkbox col-xs-6">								
+							<div class="checkbox col-md-6">								
 								<label>
 									{% if layergroup.cached %}
 										<input type="checkbox" name="cached" id="cached" checked/>{% trans "Create cache for the layer group" %}
