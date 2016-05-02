@@ -33,33 +33,33 @@
 						{% endif %}
 										
 						<div class="row">
-							<div class="col-xs-6">
+							<div class="col-md-6">
 								<label for="id_first_name">{% trans "First Name" %}</label>
 								{{ form.first_name }}
 							</div>
-							<div class="col-xs-6">
+							<div class="col-md-6">
 								<label for="id_last_name">{% trans "Last name" %}</label>
 							    {{ form.last_name }}
 							</div>
 						</div>
 										
 						<div class="row">
-							<div class="col-xs-6 form-group">
+							<div class="col-md-6 form-group">
 								<label for="id_username">{% trans "Username" %}</label>
 							    {{ form.username }}
 							</div>
-							<div class="col-xs-6 form-group">
+							<div class="col-md-6 form-group">
 								<label for="id_email">{% trans "Email" %}</label>
 							    {{ form.email }}
 							</div>
 						</div>
 										
 						<div class="row">
-							<div class="col-xs-6">
+							<div class="col-md-6">
 								<label for="id_password">{% trans "Password" %}</label>
 							    {{ form.password1 }}
 							</div>
-							<div class="col-xs-6">
+							<div class="col-md-6">
 								<label for="id_password2">{% trans "Repeat password" %}</label>
 							    {{ form.password2 }}
 							</div>
@@ -68,7 +68,7 @@
 						<br>
 						
 						<div class="row">
-							<div class="checkbox col-xs-6">								
+							<div class="checkbox col-md-6">								
 								<label>
 									<input type="checkbox" name="is_staff" id="is_staff" />{% trans "Is admin" %}
 								</label>
