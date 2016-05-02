@@ -1,0 +1,77 @@
+/**
+ * gvSIG Online.
+ * Copyright (C) 2007-2015 gvSIG Association.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * @author: Javier Rodrigo <jrodrigo@scolab.es>
+ */
+
+/**
+ * TODO
+ */
+var search = function(conf, map) {
+	this.map = map;	
+	this.conf = conf;
+	this.overlay = null;	
+	this.popup = null;
+	this.popupCloser = null;
+	this.popupContent = null;
+	this.initUI();
+};
+
+/**
+ * TODO.
+ */
+search.prototype.initUI = function() {	
+	var self = this;
+	
+	this.popup = new ol.Overlay.Popup();
+	this.map.addOverlay(this.popup);
+	
+	$('#autocomplete').autocomplete({
+		serviceUrl: '/gvsigonline/core/search_candidates/',
+	    onSelect: function (suggestion) {
+	        $.ajax({
+				type: 'POST',
+				async: false,
+			  	url: '/gvsigonline/core/get_location_address/',
+			  	beforeSend:function(xhr){
+			    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			  	},
+			  	data: {
+			  		'query': suggestion.data
+				},
+			  	success	:function(response){
+			  		self.locate(response);
+				},
+			  	error: function(){}
+			});
+	    }
+	});
+};
+
+
+/**
+ * TODO.
+ */
+search.prototype.locate = function(location) {	
+	var self = this;	
+	var coordinate = ol.proj.transform([parseFloat(location.longitude), parseFloat(location.latitude)], 'EPSG:4326', 'EPSG:3857');	
+	this.popup.show(coordinate, '<div><p>' + location.title + '</p></div>');
+	this.map.getView().setCenter(coordinate);
+	this.map.getView().setZoom(14);
+};
