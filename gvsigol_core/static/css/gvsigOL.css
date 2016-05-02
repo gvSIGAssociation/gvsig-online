@@ -4663,3 +4663,11 @@ table.text-center th {
 .padding-20 {
 	padding: 20px;
 }
+
+.product-icon {
+	font-size: 32px;
+}
+
+.products-list .product-icon {
+    float: left;
+}

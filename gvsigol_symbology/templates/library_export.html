@@ -1,0 +1,123 @@
+{% extends "base_symbology.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<div class="dash-content">		
+	<div class="row">
+		<div class="col s12 m12">
+			<form enctype="multipart/form-data" role="form" class="col s12" method="post" action="/gvsigonline/library_upload/">
+				{% csrf_token %}
+				<div class="row">
+						<button id="upload-button" class="btn waves-effect waves-light blue init-session-button right" style="margin-top: 20px; margin-right: 10px;" type="submit">{% trans "Upload library" %}</button>
+						<input type="hidden" name="library_id" value="">
+				</div>
+				
+				<div class="row">
+					<div class="input-field col s12 file-field">
+						<label class="gol-form-label">{% trans "File" %}</label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="input-field col s12 file-field">
+						<div class="btn">
+							<span>{% trans "File" %}</span>
+							<input id="id_file" type="file" name="file" accept="application/zip">
+						</div>
+						<div id="file_wrapper">
+							<div class="file-path-wrapper">
+								<input class="file-path validate" type="text">
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="input-field col s12">
+					    <select id="library-select">
+					      <option value="" selected>{% trans "Crear nueva biblioteca" %}</option>
+					      </select>
+					      
+						<label for="id_workspace">{% trans "Library" %}</label>
+					</div>
+				</div>
+				
+				<div class="row new-library">
+					<div class="input-field col s12">
+			          <input id="library-name" name="library-name" type="text" class="validate">
+			          <label for="library-name">{% trans "Nombre" %}</label>
+			        </div>
+				</div>
+				
+				<div class="row new-library">
+					<div class="input-field col s12">
+			          <input id="library-title" name="library-title" type="text" class="validate">
+			          <label for="library-title">{% trans "Título" %}</label>
+			        </div>
+				</div>
+				
+				<div class="row new-library">
+					<div class="input-field col s12">
+			          <textarea id="library-description" name="library-description" class="materialize-textarea" rows=4 type="text" class="validate"></textarea>
+			          <label for="library-description">{% trans "Descripción" %}</label>
+			        </div>
+				</div>
+				
+			</form>		
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script type="text/javascript">
+	$(document).ready(function() {
+		var libraries = {{ libraries|safe }};
+		
+		for(var i=0; i<libraries.length; i++){
+			var selectItem = $("<option>", {value: libraries[i].pk, text: libraries[i].fields.title});
+			$('#library-select').append(selectItem);
+		}
+	
+		$('select').material_select();
+		
+		
+		$('#library-select').change(function(){
+			var value = $('#library-select').val();
+			
+			if(value == ""){
+				$(".new-library input").removeAttr("disabled");
+				$(".new-library textarea").removeAttr("disabled");
+				
+				$("#library-title").val("");
+				$("#library-name").val("");
+				$("#library-description").val("");	
+				
+			}else{
+				$(".new-library input").attr("disabled", "disabled");
+				$(".new-library textarea").attr("disabled", "disabled");
+				
+				for(var i=0; i<libraries.length; i++){
+					var lib_id = "" + libraries[i].pk;
+					if(lib_id == value){
+						$("#library-title").val( libraries[i].fields.title );
+						$("#library-name").val( libraries[i].fields.name );
+						$("#library-description").val( libraries[i].fields.description );			
+					}
+				}
+			}
+		})
+		
+	});
+	
+	$('#upload-button').click(function (e) {
+		$('body').isLoading({
+			text: '{% trans "Uploading layer. Please wait..." %}',
+			position: "right",
+			class: "fa fa-refresh fa-spin",
+			tpl: '<span class="isloading-wrapper %wrapper%">%text%<i class="%class% icon-spin"></i></span>',
+			disableSource: true,
+		    disableOthers: []
+		});
+	});
+</script>
+{% endblock %}
