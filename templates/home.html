@@ -2,8 +2,6 @@
 {% load staticfiles %}
 {% load i18n %}
 
-{% block home_active %}class="active treeview"{% endblock %}
-
 {% block content %}
 <div class="row">
 	<div class="col-md-4">
@@ -38,14 +36,14 @@
 					</div>
 
 					<div class="row">
-						<div class="col-xs-12 form-group">
+						<div class="col-md-12 form-group">
 							<label for="password1">{% trans "New password" %}</label>
 							<input placeholder='{% trans "New password" %}' name="password1" id="password1" type="password" class="form-control"> 
 						</div>
 					</div>
 
 					<div class="row">
-						<div class="col-xs-12 form-group">
+						<div class="col-md-12 form-group">
 							<label for="password2">{%trans "Repeat new password" %}</label>
 							<input placeholder='{% trans "Repeat new password" %}' name="password2" id="password2" type="password" class="form-control"> 							
 						</div>

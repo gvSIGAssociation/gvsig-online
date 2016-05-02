@@ -60,7 +60,7 @@ exportToPDF.prototype.handler = function(e) {
 	
 	var body = '';
 	body += '<div class="row">';
-	body += 	'<div class="col-xs-12 form-group">';
+	body += 	'<div class="col-md-12 form-group">';
 	body += 		'<label for="export-map-title">' + gettext('Map title') + '</label>';
 	body += 		'<input placeholder="' + gettext('Map title') + '" name="export-map-title" id="export-map-title" type="text" class="form-control">';					
 	body += 	'</div>';
