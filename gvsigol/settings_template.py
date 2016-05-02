@@ -193,7 +193,7 @@ STATICFILES_FINDERS = (
     #'compressor.finders.CompressorFinder',
 )
 
-CATALOG_MODULE = True
+CATALOG_MODULE = ##CATALOG_IS_ACTIVE##
 GVSIGOL_CATALOG = {
     'URL': '##GEONETWORK_API_URL##'
 }
