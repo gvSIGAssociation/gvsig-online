@@ -10,8 +10,7 @@
 			<div class="box-header with-border step-2">
 				<h3 class="box-title">{% trans "Create new style" %}</h3>
 				<div class="box-tools pull-right">
-					<button id="metadata-legend" class="btn btn-box-tool metadata-legend"><i class="fa fa-cog margin-r-5"></i> {% trans "Advance" %}</button>	
-					<button id="label-legend" class="btn btn-box-tool label-legend"><i class="fa fa-tag margin-r-5"></i> {% trans "Labeling" %}</button>		
+					<button id="metadata-legend" class="btn btn-box-tool metadata-legend"><i class="fa fa-cog margin-r-5"></i> {% trans "Advance" %}</button>			
 					<button id="default-legend" class="btn btn-box-tool default-legend"><i class="fa fa-star margin-r-5"></i> {% trans "Default" %}</button>
 					<button id="save-legend" class="btn btn-box-tool save-legend"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
 				</div>
@@ -33,7 +32,7 @@
 							</div>
 							<div class="box-body">
 								<div class="table-responsive">
-									<table id="table-rules" class="table no-margin">
+									<table id="table-unique-symbol" class="table no-margin">
 										<thead>
 											<tr>
 												<th>{% trans "Rule name" %}</th>
@@ -41,25 +40,23 @@
 												<th></th>
 											</tr>
 										</thead>
-										<tbody id="table-rules-body">
+										<tbody id="table-unique-symbol-body">
 										</tbody>
 									</table>
 								</div>
 							</div>
 
 							<div class="box-footer clearfix">
-								<a id="append-rule-button" href="javascript:void(0)" class="btn btn-sm btn-success btn-flat pull-right"><i class="fa fa-plus margin-r-5"></i>{% trans "Append rule" %}</a>
+								<a id="append-label-button" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-tags margin-r-5"></i>{% trans "Append label" %}</a>
+								<a id="append-image-button" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-star margin-r-5"></i>{% trans "Append graphic" %}</a>
+								<a id="append-rule-button" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-square-o margin-r-5"></i>{% trans "Append rule" %}</a>
 							</div>
 						</div>
 					</div>
 
 					<div class="col-md-8">
 						<div class="nav-tabs-custom">
-				            <ul class="nav nav-tabs">
-				              	<li class="active"><a href="#fill-tab" data-toggle="tab">{% trans "Fill" %}</a></li>	
-				              	<li><a href="#border-tab" data-toggle="tab">{% trans "Border" %}</a></li>
-				              	<li><a href="#rotation-tab" data-toggle="tab">{% trans "Rotation" %}</a></li> 
-				              	<li><a href="#geometry-tab" data-toggle="tab">{% trans "Geometry" %}</a></li>              
+				            <ul id="tab-menu" class="nav nav-tabs">				                        
 				            </ul>
 				            <div id="tab-content" class="tab-content">
 				            </div>
@@ -97,12 +94,20 @@ $(document).ready(function() {
 		var rule = uniqueSymbol.appendRule();
 	});
 	
+	$("#append-image-button").on('click', function(e){
+		var rule = uniqueSymbol.appendGraphic();
+	});
+	
+	$("#append-label-button").on('click', function(e){
+		var rule = uniqueSymbol.appendLabel();
+	});
+	
 	var featureType = "{{featureType}}";
 	var fields = {{fields|safe}};
 	var sldFilterValues = {{sldFilterValues|safe}};
 	
 	var uniqueSymbol = new UniqueSymbol(featureType, fields, sldFilterValues);
-	uniqueSymbol.appendRule();
+	//uniqueSymbol.appendRule();
 
 });
 </script>

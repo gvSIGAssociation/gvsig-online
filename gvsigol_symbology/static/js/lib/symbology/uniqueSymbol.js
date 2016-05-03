@@ -17,7 +17,7 @@
  */
 
 /**
- * @author: José Badía <jbadia@scolab.es>
+ * @author: Javier Rodrigo <jrodrigo@scolab.es>
  */
  
  
@@ -27,19 +27,22 @@ var UniqueSymbol = function(featureType, fields, sldFilterValues) {
 	this.sldFilterValues = sldFilterValues;
 };
 
-UniqueSymbol.prototype.ruleCount = 0;
+UniqueSymbol.prototype.count = 0;
 
 UniqueSymbol.prototype.rules = new Array();
+UniqueSymbol.prototype.graphics = new Array();
+UniqueSymbol.prototype.labels = new Array();
 
-UniqueSymbol.prototype.selectedRule = null;
+UniqueSymbol.prototype.selected = null;
 
 
 UniqueSymbol.prototype.appendRule = function() {
 	var self = this;
 	
 	var rule = {
-		id: this.ruleCount,
-		name: "rule " + this.ruleCount,
+		id: this.count,
+		type: 'rule',
+		name: "rule " + this.count,
 		preview: null,
 		fill_color: "#000000",
 		fill_opacity: 0.5,
@@ -53,16 +56,16 @@ UniqueSymbol.prototype.appendRule = function() {
 	};
 	
 	var ui = '';
-	ui += '<tr data-rulerow="' + rule.id + '">';
+	ui += '<tr data-rowid="' + rule.id + '">';
 	ui += 	'<td><a class="rule-link" data-rid="' + rule.id + '" href="javascript:void(0)">' + rule.name + '</a></td>';
 	ui += 	'<td><svg id="rule-preview-' + rule.id + '" class="preview-svg"></svg></td>';	
 	ui += 	'<td><a class="delete-rule-link" data-rid="' + rule.id + '" href="javascript:void(0)"><i class="fa fa-times" style="color: #ff0000;"></i></a></td>';
 	ui += '</tr>';	
-	$('#table-rules tbody').append(ui);
+	$('#table-unique-symbol tbody').append(ui);
 	
 	$(".rule-link").on('click', function(e){	
 		e.preventDefault();
-		self.selectedRule = self.getRuleById(this.dataset.rid);
+		self.selected = self.getRuleById(this.dataset.rid);
 		self.updateForm();
 	});
 	
@@ -74,45 +77,186 @@ UniqueSymbol.prototype.appendRule = function() {
 	rule.preview = this.renderPreview(rule);
 	
 	this.rules.push(rule);
-	this.ruleCount++;
-	this.selectedRule = rule;
+	this.count++;
+	this.selected = rule;
 	this.updateForm();
 	
 	return rule;
 };
 
-UniqueSymbol.prototype.deleteRule = function(rid) {
+UniqueSymbol.prototype.appendGraphic = function() {
+	var self = this;
+	
+	var graphic = {
+		id: this.count,
+		type: 'graphic',
+		name: "graphic " + this.count,
+		preview: null
+	};
+	
+	var ui = '';
+	ui += '<tr data-rowid="' + graphic.id + '">';
+	ui += 	'<td><a class="graphic-link" data-gid="' + graphic.id + '" href="javascript:void(0)">' + graphic.name + '</a></td>';
+	ui += 	'<td><img id="graphic-preview-' + graphic.id + '" class="" /></td>';	
+	ui += 	'<td><a class="delete-graphic-link" data-gid="' + graphic.id + '" href="javascript:void(0)"><i class="fa fa-times" style="color: #ff0000;"></i></a></td>';
+	ui += '</tr>';	
+	$('#table-unique-symbol tbody').append(ui);
+	
+	$(".graphic-link").on('click', function(e){	
+		e.preventDefault();
+		self.selected = self.getGraphicById(this.dataset.gid);
+		self.updateForm();
+	});
+	
+	$(".delete-graphic-link").one('click', function(e){	
+		e.preventDefault();
+		self.deleteGraphic(this.dataset.gid);
+	});
+	
+	//graphic.preview = this.renderPreview(rule);
+	
+	this.graphics.push(graphic);
+	this.count++;
+	this.selected = graphic;
+	this.updateForm();
+	
+	return graphic;
+};
+
+UniqueSymbol.prototype.appendLabel = function() {
+	var self = this;
+	
+	var label = {
+		id: this.count,
+		type: 'label',
+		name: "label " + this.count,
+		preview: null
+	};
+	
+	var ui = '';
+	ui += '<tr data-rowid="' + label.id + '">';
+	ui += 	'<td><a class="label-link" data-lid="' + label.id + '" href="javascript:void(0)">' + label.name + '</a></td>';
+	ui += 	'<td><img id="label-preview-' + label.id + '" class="" /></td>';	
+	ui += 	'<td><a class="delete-label-link" data-lid="' + label.id + '" href="javascript:void(0)"><i class="fa fa-times" style="color: #ff0000;"></i></a></td>';
+	ui += '</tr>';	
+	$('#table-unique-symbol tbody').append(ui);
+	
+	$(".label-link").on('click', function(e){	
+		e.preventDefault();
+		self.selected = self.getLabelById(this.dataset.lid);
+		self.updateForm();
+	});
+	
+	$(".delete-label-link").one('click', function(e){	
+		e.preventDefault();
+		self.deleteLabel(this.dataset.lid);
+	});
+	
+	//graphic.preview = this.renderPreview(rule);
+	
+	this.labels.push(label);
+	this.count++;
+	this.selected = label;
+	this.updateForm();
+	
+	return label;
+};
+
+UniqueSymbol.prototype.deleteRule = function(id) {
 	for (var i=0; i < this.rules.length; i++) {
-		if (this.rules[i].id == rid) {
+		if (this.rules[i].id == id) {
 			this.rules.splice(i, 1);
 		}
 	}
-	var tbody = document.getElementById('table-rules-body');
+	var tbody = document.getElementById('table-unique-symbol-body');
 	for (var i=0; i<tbody.children.length; i++) {
-		if(tbody.children[i].dataset.rulerow == rid) {
+		if(tbody.children[i].dataset.rowid == id) {
 			tbody.removeChild(tbody.children[i]);
 		}
 	}
 	if (this.rules.length >= 1) {
-		this.selectedRule = this.rules[0];
+		this.selected = this.rules[0];
 		this.updateForm();
 	} else {
-		this.appendRule();
+		$('#tab-content').empty();
+		$('#tab-menu').empty();
 	}
 };
 
-UniqueSymbol.prototype.getSelectedRule = function() {
-	return this.selectedRule;
+UniqueSymbol.prototype.deleteGraphic = function(id) {
+	for (var i=0; i < this.graphics.length; i++) {
+		if (this.graphics[i].id == id) {
+			this.graphics.splice(i, 1);
+		}
+	}
+	var tbody = document.getElementById('table-unique-symbol-body');
+	for (var i=0; i<tbody.children.length; i++) {
+		if(tbody.children[i].dataset.rowid == id) {
+			tbody.removeChild(tbody.children[i]);
+		}
+	}
+	if (this.graphics.length >= 1) {
+		this.selected = this.graphics[0];
+		this.updateForm();
+	} else {
+		$('#tab-content').empty();
+		$('#tab-menu').empty();
+	}
 };
 
-UniqueSymbol.prototype.getRuleById = function(rid) {
+UniqueSymbol.prototype.deleteLabel = function(id) {
+	for (var i=0; i < this.labels.length; i++) {
+		if (this.labels[i].id == id) {
+			this.labels.splice(i, 1);
+		}
+	}
+	var tbody = document.getElementById('table-unique-symbol-body');
+	for (var i=0; i<tbody.children.length; i++) {
+		if(tbody.children[i].dataset.rowid == id) {
+			tbody.removeChild(tbody.children[i]);
+		}
+	}
+	if (this.labels.length >= 1) {
+		this.selected = this.labels[0];
+		this.updateForm();
+	} else {
+		$('#tab-content').empty();
+		$('#tab-menu').empty();
+	}
+};
+
+UniqueSymbol.prototype.getSelected = function() {
+	return this.selected;
+};
+
+UniqueSymbol.prototype.getRuleById = function(id) {
 	var rule = null;
 	for (var i=0; i < this.rules.length; i++) {
-		if (this.rules[i].id == rid) {
+		if (this.rules[i].id == id) {
 			rule = this.rules[i];
 		}
 	}
 	return rule;
+};
+
+UniqueSymbol.prototype.getGraphicById = function(id) {
+	var graphic = null;
+	for (var i=0; i < this.graphics.length; i++) {
+		if (this.graphics[i].id == id) {
+			rule = this.graphics[i];
+		}
+	}
+	return graphic;
+};
+
+UniqueSymbol.prototype.getLabelById = function(id) {
+	var label = null;
+	for (var i=0; i < this.labels.length; i++) {
+		if (this.labels[i].id == id) {
+			label = this.labels[i];
+		}
+	}
+	return label;
 };
 
 UniqueSymbol.prototype.renderPreview = function(rule) {
@@ -143,18 +287,26 @@ UniqueSymbol.prototype.renderPreview = function(rule) {
 };
 
 UniqueSymbol.prototype.updateForm = function() {
-	$('#tab-content').empty();
-	$('#tab-content').append(this.updateFillTab());
-	$('#tab-content').append(this.updateBorderTab());
-	$('#tab-content').append(this.updateRotationTab());
-	$('#tab-content').append(this.updateGeometryTab());
-
-	this.registerEvents();
+	$('#tab-menu').empty();
+	$('#tab-content').empty();	
 	
-	$('.nav-tabs a[href="#fill-tab"]').tab('show');
+	if (this.selected.type == 'rule') {
+		$('#tab-menu').append(this.newRuleTabMenu());
+		$('#tab-content').append(this.newRuleFillTab());
+		$('#tab-content').append(this.newRuleBorderTab());
+		$('#tab-content').append(this.newRuleRotationTab());
+		$('#tab-content').append(this.newRuleGeometryTab());
+		this.registerRuleEvents();
+		$('.nav-tabs a[href="#fill-tab"]').tab('show');
+		
+	} else if (this.selected.type == 'graphic') {
+		
+	} else if (this.selected.type == 'label') {
+	
+	}
 };
 
-UniqueSymbol.prototype.registerEvents = function() {
+UniqueSymbol.prototype.registerRuleEvents = function() {
 	var self = this;
 	
 	$( "#fill-opacity-slider" ).slider({
@@ -163,17 +315,17 @@ UniqueSymbol.prototype.registerEvents = function() {
 	    value: 100,
 	    change: function( event, ui ) {
 	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
-	    	self.selectedRule.fill_opacity = opacity;
-			self.selectedRule.preview = self.renderPreview(self.selectedRule);
+	    	self.selected.fill_opacity = opacity;
+			self.selected.preview = self.renderPreview(self.selected);
 	    }
 	});	
 	$("#fill-color-chooser").on('change', function(e) {
-		self.selectedRule.fill_color = this.value;
-		self.selectedRule.preview = self.renderPreview(self.selectedRule);		
+		self.selected.fill_color = this.value;
+		self.selected.preview = self.renderPreview(self.selected);		
 	});	
 	$("#border-color-chooser").on('change', function(e) {
-		self.selectedRule.border_color = this.value;
-		self.selectedRule.preview = self.renderPreview(self.selectedRule);		
+		self.selected.border_color = this.value;
+		self.selected.preview = self.renderPreview(self.selected);		
 	});
 	$( "#border-opacity-slider" ).slider({
 	    min: 0,
@@ -181,23 +333,33 @@ UniqueSymbol.prototype.registerEvents = function() {
 	    value: 100,
 	    change: function( event, ui ) {
 	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
-	    	self.selectedRule.border_opacity = opacity;
-			self.selectedRule.preview = self.renderPreview(self.selectedRule);
+	    	self.selected.border_opacity = opacity;
+			self.selected.preview = self.renderPreview(self.selected);
 	    }
 	});
 	$("#border-size").on('change', function(e) {
-		self.selectedRule.border_size = this.value;
-		self.selectedRule.preview = self.renderPreview(self.selectedRule);		
+		self.selected.border_size = this.value;
+		self.selected.preview = self.renderPreview(self.selected);		
 	});
 };
 
-UniqueSymbol.prototype.updateFillTab = function() {
+UniqueSymbol.prototype.newRuleTabMenu = function() {
+	var ui = '';
+	ui += '<li class="active"><a href="#fill-tab" data-toggle="tab">' + gettext('Fill') + '</a></li>';
+	ui += '<li><a href="#border-tab" data-toggle="tab">' + gettext('Border') + '</a></li>';
+	ui += '<li><a href="#rotation-tab" data-toggle="tab">' + gettext('Rotation') + '</a></li>'; 
+	ui += '<li><a href="#geometry-tab" data-toggle="tab">' + gettext('Geometry') + '</a></li>';
+	
+	return ui;	
+};
+
+UniqueSymbol.prototype.newRuleFillTab = function() {
 	var ui = '';
 	ui += '<div class="tab-pane active" id="fill-tab">';
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
 	ui += 			'<label>' + gettext('Fill color') + '</label>';
-	ui += 			'<input id="fill-color-chooser" type="color" value="' + this.selectedRule.fill_color + '" class="form-control color-chooser">';					
+	ui += 			'<input id="fill-color-chooser" type="color" value="' + this.selected.fill_color + '" class="form-control color-chooser">';					
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += 	'<div class="row">';
@@ -212,7 +374,7 @@ UniqueSymbol.prototype.updateFillTab = function() {
 	
 };
 
-UniqueSymbol.prototype.updateBorderTab = function() {
+UniqueSymbol.prototype.newRuleBorderTab = function() {
 	var ui = '';
 	ui += '<div class="tab-pane" id="border-tab">';
 	ui += 	'<div class="row">';
@@ -225,13 +387,13 @@ UniqueSymbol.prototype.updateBorderTab = function() {
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
 	ui += 			'<label>' + gettext('Border color') + '</label>';
-	ui += 				'<input type="color" value="' + this.selectedRule.border_color + '" class="form-control color-chooser">';					
+	ui += 				'<input type="color" value="' + this.selected.border_color + '" class="form-control color-chooser">';					
 	ui += 			'</div>';
 	ui += 		'</div>';
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
 	ui += 			'<label>' + gettext('Border size') + '</label>';
-	ui += 			'<input id="border-size" type="number" class="form-control" value="' + parseInt(this.selectedRule.border_size) + '">';					
+	ui += 			'<input id="border-size" type="number" class="form-control" value="' + parseInt(this.selected.border_size) + '">';					
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += 	'<div class="row">';
@@ -245,7 +407,7 @@ UniqueSymbol.prototype.updateBorderTab = function() {
 	return ui;
 };
 
-UniqueSymbol.prototype.updateRotationTab = function() {
+UniqueSymbol.prototype.newRuleRotationTab = function() {
 	var ui = '';
 	ui += '<div class="tab-pane" id="rotation-tab">';
 	ui += 	'<div class="row">';
@@ -259,7 +421,7 @@ UniqueSymbol.prototype.updateRotationTab = function() {
 	return ui;
 };
 
-UniqueSymbol.prototype.updateGeometryTab = function() {
+UniqueSymbol.prototype.newRuleGeometryTab = function() {
 	var ui = '';
 	ui += '<div class="tab-pane" id="geometry-tab">';
 	ui += 	'<div class="row">';
