@@ -86,7 +86,7 @@
 				<ul class="sidebar-menu">				
 					<li class="header"></li>					
 					<li {% block home_active %}{% endblock %}>
-						<a href="/gvsigonline/"><i class="fa fa-home"></i><span>{% trans "Home" %}</span></a>
+						<a href="/gvsigonline/core/"><i class="fa fa-home"></i><span>{% trans "Home" %}</span></a>
 					</li>	
 					{% if user.is_staff %}				
 						{% include "dashboard_auth_menu.html" %}								
