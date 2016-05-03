@@ -11,7 +11,8 @@
 	<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 	
 	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.6/css/bootstrap.min.css" %}">
-	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-slider/bootstrap-slider.min.css" %}">
+<!-- 	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-slider/bootstrap-slider.min.css" %}"> -->
+	<link rel="stylesheet" href="{% static "js/vendors/jQueryUI/jquery-ui.min.css" %}">
 	<link rel="stylesheet" href="{% static "css/font-awesome-4.4.0/css/font-awesome.min.css" %}">
 	<link rel="stylesheet" href="{% static "css/fontcustom/fontcustom.css" %}">
 	<link rel="stylesheet" href="{% static "css/ionicons.min.css" %}">
@@ -127,7 +128,7 @@
 		$.widget.bridge('uibutton', $.ui.button);
 	</script>
 	<script type="text/javascript" src="{% static "js/vendors/bootstrap-3.3.6/js/bootstrap.min.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/vendors/bootstrap-slider/bootstrap-slider.min.js" %}"></script>
+<!-- 	<script type="text/javascript" src="{% static "js/vendors/bootstrap-slider/bootstrap-slider.min.js" %}"></script> -->
 	<script type="text/javascript" src="{% static "js/vendors/slimScroll/jquery.slimscroll.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/fastclick/fastclick.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/DataTables-1.10.11/media/js/jquery.dataTables.min.js" %}"></script>
@@ -141,27 +142,10 @@
 	<script type="text/javascript" src="{% static "js/vendors/snap.svg-min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/gvsigOL.js" %}"></script>
 	
-	<script type="text/javascript" src="{% static "js/lib/utils/jsonPath.js" %}"></script>	
-	<script type="text/javascript" src="{% static "js/lib/utils/svg.js" %}"></script>	
+	<script type="text/javascript" src="{% static "js/lib/symbology/jsonPath.js" %}"></script>	
+	<script type="text/javascript" src="{% static "js/lib/symbology/svg.js" %}"></script>	
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.ajax.min.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/lib/symbology/SLDDefaultValues.js" %}"></script>	
-	<script type="text/javascript" src="{% static "js/lib/symbology/SymbologyUtils.js" %}"></script>	
-	<script type="text/javascript" src="{% static "js/lib/symbology/SymbologyPreview.js" %}"></script>	
-	<script type="text/javascript" src="{% static "js/lib/symbology/SymbologyPreviewMap.js" %}"></script>	
-	<script type="text/javascript" src="{% static "js/lib/symbology/SymbologyFormComponents.js" %}"></script>	
-	<script type="text/javascript" src="{% static "js/lib/symbology/SymbologySymbolForm.js" %}"></script>	
-	<script type="text/javascript" src="{% static "js/lib/symbology/SymbologyLibraryForm.js" %}"></script>	
-	<script type="text/javascript" src="{% static "js/lib/symbology/SLDFilterValues.js" %}"></script>	
-	<script type="text/javascript" src="{% static "js/lib/symbology/SymbologyFilter.js" %}"></script>	
-	<script type="text/javascript" src="{% static "js/lib/symbology2/UniqueSymbol.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/lib/symbology2/UniqueValues.js" %}"></script>	
-	<script type="text/javascript" src="{% static "js/lib/symbology2/Intervals.js" %}"></script>	
-	<script type="text/javascript" src="{% static "js/lib/symbology2/Expressions.js" %}"></script>	
-	<script type="text/javascript" src="{% static "js/lib/symbology2/LabelSymbols.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/lib/symbology2/ImportedSLD.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/lib/symbology2/ImportedRMF.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/lib/symbology2/ColorTable.js" %}"></script>	
-	<script type="text/javascript" src="{% static "js/lib/symbology2/Charts.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/uniqueSymbol.js" %}"></script>
 	
 	<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
 
