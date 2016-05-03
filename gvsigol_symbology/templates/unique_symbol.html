@@ -1,0 +1,187 @@
+{% extends "base_symbology.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	  	  
+<div class="row">
+	<div class="col-md-12">
+		<div class="box box-primary">
+		
+			<div class="box-header with-border step-2">
+				<h3 class="box-title">{% trans "Create new style" %}</h3>
+				<div class="box-tools pull-right">
+					<button id="delete-legend" class="btn btn-box-tool delete-legend"><i class="fa fa-times margin-r-5"></i> {% trans "Delete" %}</button>
+					<button id="change-legend" class="btn btn-box-tool change-legend"><i class="fa fa-exchange margin-r-5"></i> {% trans "Modify legend" %}</button>
+					<button id="metadata-legend" class="btn btn-box-tool metadata-legend"><i class="fa fa-cog margin-r-5"></i> {% trans "Advance" %}</button>			
+					<button id="default-legend" class="btn btn-box-tool default-legend"><i class="fa fa-star margin-r-5"></i> {% trans "Default" %}</button>
+					<button id="save-legend" class="btn btn-box-tool save-legend"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>
+					<button id="label-legend" class="btn btn-box-tool label-legend"><i class="fa fa-tag margin-r-5"></i> {% trans "Labeling" %}</button>
+				</div>
+			</div>
+
+			<div class="box-body">
+			
+				<div class="row">
+					<div class="col-md-12">
+						<div id="map" class="preview-map"></div>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-4">
+						<div class="box box-primary">
+							<div class="box-header with-border">
+								<h3 class="box-title">{% trans "Rules" %}</h3>
+							</div>
+							<div class="box-body">
+								<div class="table-responsive">
+									<table class="table no-margin">
+										<thead>
+											<tr>
+												<th>{% trans "Rule name" %}</th>
+												<th>{% trans "Rule preview" %}</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td><a href="pages/examples/invoice.html">Rule 1</a></td>
+												<td><svg id="rule-preview-1" class="preview-svg"></svg></td>		
+											</tr>
+											<tr>
+												<td><a href="pages/examples/invoice.html">Rule 2</a></td>
+												<td><svg id="rule-preview-2" class="preview-svg"></svg></td>		
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+
+							<div class="box-footer clearfix">
+								<a href="javascript:void(0)"class="btn btn-sm btn-success btn-flat pull-right"><i class="fa fa-plus margin-r-5"></i>{% trans "Append rule" %}</a>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-8">
+						<div class="nav-tabs-custom">
+				            <ul class="nav nav-tabs">
+				              	<li class="active"><a href="#fill-tab" data-toggle="tab">{% trans "Fill" %}</a></li>	
+				              	<li><a href="#border-tab" data-toggle="tab">{% trans "Border" %}</a></li>
+				              	<li><a href="#rotation-tab" data-toggle="tab">{% trans "Rotation" %}</a></li> 
+				              	<li><a href="#geometry-tab" data-toggle="tab">{% trans "Geometry" %}</a></li>              
+				            </ul>
+				            <div class="tab-content">
+				              	<div class="tab-pane active" id="fill-tab">
+				                	<div class="row">
+					                	<div class="col-md-12 form-group">
+											<label>{% trans "Symbol color" %}</label>
+											<input type="color" value="#000000" class="form-control color-chooser">					
+										</div>
+					              	</div>
+					              	<div class="row">
+					              		<div class="col-md-12 form-group">
+					              			<label style="display: block;">{% trans "Fill opacity" %} (%)</label>
+											<input style="width: 100%;" name="opacity-slider" data-provide="slider" type="text" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="100"/>
+					              		</div>					 
+					              	</div>
+				              	</div>
+				              	<div class="tab-pane" id="border-tab">
+				                	<div class="row">
+					                	<div class="col-md-12 checkbox">
+											<label>
+												<input type="checkbox" name="usergroup-{{group.id}}" id="usergroup-{{group.id}}"/>{% trans "With border" %}
+											</label>			
+										</div>
+					              	</div>
+					              	<div class="row">
+					                	<div class="col-md-12 form-group">
+											<label>{% trans "Border color" %}</label>
+											<input type="color" value="#000000" class="form-control color-chooser">					
+										</div>
+					              	</div>
+					              	<div class="row">
+					                	<div class="col-md-12 form-group">
+											<label>{% trans "Border size" %}</label>
+											<input type="number" class="form-control">					
+										</div>
+					              	</div>
+					              	<div class="row">
+					              		<div class="col-md-12 form-group">
+					              			<label style="display: block;">{% trans "Border opacity" %} (%)</label>
+											<input style="width: 100%;" name="border-opacity-slider" data-provide="slider" type="text" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="100"/>
+					              		</div>					 
+					              	</div>
+				              	</div>
+				              	<div class="tab-pane" id="rotation-tab">
+				                	<div class="row">
+					              		<div class="col-md-12 form-group">
+					              			<label style="display: block;">{% trans "Rotation" %} (Degrees)</label>
+											<input style="width: 100%;" name="symbol-rotation-slider" data-provide="slider" type="text" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="100"/>
+					              		</div>					 
+					              	</div>
+				              	</div>
+				              	<div class="tab-pane" id="geometry-tab">
+				                	<div class="row">
+				                		<div class="form-group">
+						                  	<label>{% trans "Function" %}</label>
+						                  	<select class="form-control">
+						                    	<option>option 1</option>
+						                    	<option>option 2</option>
+						                    	<option>option 3</option>
+						                    	<option>option 4</option>
+						                    	<option>option 5</option>
+						                  	</select>
+						                </div>
+				                	</div>
+				                	<div class="row">
+				                		<div class="form-group">
+						                  	<label>{% trans "Geometry field" %}</label>
+						                  	<select class="form-control">
+						                    	<option>option 1</option>
+						                    	<option>option 2</option>
+						                    	<option>option 3</option>
+						                    	<option>option 4</option>
+						                    	<option>option 5</option>
+						                  	</select>
+						                </div>
+				                	</div>
+				              	</div>
+				            </div>
+          				</div>
+          			</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>     	
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-symbology').addClass("active");
+	$('#submenu-styles').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	var map = new ol.Map({
+		layers: [
+		    new ol.layer.Tile({
+            	source: new ol.source.MapQuest({layer: 'osm'})
+          	})
+		],
+		target: "map",
+		view: new ol.View({
+		    center:[0,0],
+		    zoom: '2'
+		})
+	});
+	
+	var r1 = Snap("#rule-preview-1");
+	var r2 = Snap("#rule-preview-2");
+	r1.circle(10, 10, 10);
+	r2.circle(10, 10, 10);
+	
+	var mySlider = $("input.slider").slider();
+});
+</script>
+{% endblock %}
