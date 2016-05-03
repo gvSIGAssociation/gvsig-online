@@ -184,7 +184,7 @@ SITE_ID=1
 MEDIA_ROOT = '/var/www/media/'
 MEDIA_URL = '##BASE_URL##/media/'
 STATIC_URL = '##BASE_URL##/static/'
-STATICFILES_ROOT = (
+STATIC_ROOT = (
     '/opt/gvsigonline/gvsigol/assets',
 )
 STATICFILES_FINDERS = (
