@@ -1,11 +1,48 @@
-{% extends "base_symbology.html" %}
+{% extends "base.html" %}
 {% load staticfiles %}
 {% load i18n %}
 
-{% block layers_active %}class="active"{% endblock %}
+{% block content %}	  	
+<div class="row">
+	<div class="col-md-12">
+		<div class="box">
+		
+			<div class="box-header with-border">
+				<h3 class="box-title">{% trans "Style list" %}</h3>
+			</div>
+			
+			<div class="box-body">
+				<table class="table" id="layers-table">
+					<thead>
+						<tr>
+							<th>ID</th>
+						    <th>{% trans "Biblioteca" %}</th>
+						    <th>{% trans "Descripción" %}</th>
+						    <th>{% trans "¿es pública?" %}</th>
+						    <th></th>
+						    <th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for library in libraries %}
+							<tr>
+								<td>{{ library.id }}</td>
+							    <td>{{ library.title }}</td>
+								<td>{{ library.description }}</td>
+								<td>{{ library.is_public }}</td>
+								<td></td>
+								<td></td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>	
+{% endblock %}
 
 {% block content %}	  	
--
 <div class="row">
 	<a href="/gvsigonline/library_add/" class="waves-effect waves-green btn blue right" style="margin-top: 20px; margin-right: 10px;">{% trans "Add library" %}</a>
 	<a href="/gvsigonline/library_upload/" class="waves-effect waves-green btn blue right" style="margin-top: 20px; margin-right: 10px;">{% trans "Import library" %}</a>
