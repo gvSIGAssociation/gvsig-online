@@ -184,9 +184,7 @@ SITE_ID=1
 MEDIA_ROOT = '/var/www/media/'
 MEDIA_URL = '##BASE_URL##/media/'
 STATIC_URL = '##BASE_URL##/static/'
-STATIC_ROOT = (
-    '/opt/gvsigonline/gvsigol/assets',
-)
+STATIC_ROOT = '/opt/gvsigonline/gvsigol/assets'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
