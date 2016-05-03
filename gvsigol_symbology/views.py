@@ -86,9 +86,33 @@ def new_style_options(request, layer_id):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @admin_required
 def unique_symbol(request, layer_id):
-        
-    response = {}
-        
+    
+    resource = get_layer_field_description(layer_id, request.session)
+    if resource != None:
+        fields = resource.get('featureType').get('attributes').get('attribute')
+    
+    featureType = "PointSymbolizer"
+    for field in fields:
+        if field.get('binding').startswith('com.vividsolutions.jts.geom'):
+            auxType = field.get('binding').replace('com.vividsolutions.jts.geom.', '')
+            if auxType == "Point" or auxType == "MultiPoint":
+                featureType = "PointSymbolizer"
+            if auxType == "Line" or auxType == "MultiLineString":
+                featureType = "LineSymbolizer"
+            if auxType == "Polygon" or auxType == "MultiPolygon":
+                featureType = "PolygonSymbolizer"
+    
+    sldFilterValues = get_sld_filter_operations()
+    for category in sldFilterValues:
+        for oper in sldFilterValues[category]:
+            sldFilterValues[category][oper]["genCodeFunc"] = ""
+                        
+    response = {
+        'featureType': featureType,
+        'fields': json.dumps(fields), 
+        'sldFilterValues': json.dumps(sldFilterValues)
+    }
+   
     return render_to_response('unique_symbol.html', response, context_instance=RequestContext(request))
 
 
