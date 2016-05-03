@@ -10,12 +10,10 @@
 			<div class="box-header with-border step-2">
 				<h3 class="box-title">{% trans "Create new style" %}</h3>
 				<div class="box-tools pull-right">
-					<button id="delete-legend" class="btn btn-box-tool delete-legend"><i class="fa fa-times margin-r-5"></i> {% trans "Delete" %}</button>
-					<button id="change-legend" class="btn btn-box-tool change-legend"><i class="fa fa-exchange margin-r-5"></i> {% trans "Modify legend" %}</button>
-					<button id="metadata-legend" class="btn btn-box-tool metadata-legend"><i class="fa fa-cog margin-r-5"></i> {% trans "Advance" %}</button>			
+					<button id="metadata-legend" class="btn btn-box-tool metadata-legend"><i class="fa fa-cog margin-r-5"></i> {% trans "Advance" %}</button>	
+					<button id="label-legend" class="btn btn-box-tool label-legend"><i class="fa fa-tag margin-r-5"></i> {% trans "Labeling" %}</button>		
 					<button id="default-legend" class="btn btn-box-tool default-legend"><i class="fa fa-star margin-r-5"></i> {% trans "Default" %}</button>
-					<button id="save-legend" class="btn btn-box-tool save-legend"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>
-					<button id="label-legend" class="btn btn-box-tool label-legend"><i class="fa fa-tag margin-r-5"></i> {% trans "Labeling" %}</button>
+					<button id="save-legend" class="btn btn-box-tool save-legend"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
 				</div>
 			</div>
 
@@ -43,7 +41,7 @@
 												<th></th>
 											</tr>
 										</thead>
-										<tbody>
+										<tbody id="table-rules-body">
 										</tbody>
 									</table>
 								</div>
@@ -99,7 +97,11 @@ $(document).ready(function() {
 		var rule = uniqueSymbol.appendRule();
 	});
 	
-	var uniqueSymbol = new UniqueSymbol('point');
+	var featureType = "{{featureType}}";
+	var fields = {{fields|safe}};
+	var sldFilterValues = {{sldFilterValues|safe}};
+	
+	var uniqueSymbol = new UniqueSymbol(featureType, fields, sldFilterValues);
 	uniqueSymbol.appendRule();
 
 });

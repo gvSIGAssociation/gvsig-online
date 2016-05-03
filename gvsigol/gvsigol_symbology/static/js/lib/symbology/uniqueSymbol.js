@@ -21,8 +21,10 @@
  */
  
  
-var UniqueSymbol = function(type) {
-	this.type = type;
+var UniqueSymbol = function(featureType, fields, sldFilterValues) {
+	this.featureType = featureType;
+	this.fields = fields;
+	this.sldFilterValues = sldFilterValues;
 };
 
 UniqueSymbol.prototype.ruleCount = 0;
@@ -85,8 +87,18 @@ UniqueSymbol.prototype.deleteRule = function(rid) {
 			this.rules.splice(i, 1);
 		}
 	}
-	var rule = $('#table-rules tbody').find('[data-rulerow="' + rid + '"]')[0];
-	$('#table-rules tbody').remove(rule);
+	var tbody = document.getElementById('table-rules-body');
+	for (var i=0; i<tbody.children.length; i++) {
+		if(tbody.children[i].dataset.rulerow == rid) {
+			tbody.removeChild(tbody.children[i]);
+		}
+	}
+	if (this.rules.length >= 1) {
+		this.selectedRule = this.rules[0];
+		this.updateForm();
+	} else {
+		this.appendRule();
+	}
 };
 
 UniqueSymbol.prototype.getSelectedRule = function() {
@@ -115,8 +127,16 @@ UniqueSymbol.prototype.renderPreview = function(rule) {
 	
 	var preview = null;
 	var previewElement = Snap("#rule-preview-" + rule.id);
-	if (this.type == 'point') {
+	if (this.featureType == 'PointSymbolizer') {
 		preview = previewElement.circle(10, 10, 10);
+		preview.attr(attributes);
+		
+	} else if (this.featureType == 'LineSymbolizer') {
+		preview = previewElement.line(0, 0, 20, 20);
+		preview.attr(attributes);
+		
+	} else if (this.featureType == 'PolygonSymbolizer') {
+		preview = previewElement.polygon(0, 0, 20, 0, 20, 20, 0, 20);
 		preview.attr(attributes);
 	}
 	return preview;
@@ -246,7 +266,9 @@ UniqueSymbol.prototype.updateGeometryTab = function() {
 	ui += 		'<div class="form-group">';
 	ui += 			'<label>' + gettext('Function') + '</label>';
 	ui += 			'<select class="form-control">';
-	ui += 				'<option>option 1</option>';
+	for (var key in this.sldFilterValues) {
+		ui += 			'<option value"' + this.sldFilterValues[key] + '">' + this.sldFilterValues[key] + '</option>';
+	}
 	ui += 			'</select>';
 	ui += 		'</div>';
 	ui += 	'</div>';
@@ -254,7 +276,9 @@ UniqueSymbol.prototype.updateGeometryTab = function() {
 	ui += 		'<div class="form-group">';
 	ui += 			'<label>' + gettext('Geometry field') + '</label>';
 	ui += 			'<select class="form-control">';
-	ui += 				'<option>option 1</option>';
+	for (var i=0; i < this.fields.length; i++) {
+		ui += 			'<option value"' + this.fields[i].name + '">' + this.fields[i].name + '</option>';
+	}	
 	ui += 			'</select>';
 	ui += 		'</div>';
 	ui += 	'</div>';
