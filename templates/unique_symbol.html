@@ -35,29 +35,22 @@
 							</div>
 							<div class="box-body">
 								<div class="table-responsive">
-									<table class="table no-margin">
+									<table id="table-rules" class="table no-margin">
 										<thead>
 											<tr>
 												<th>{% trans "Rule name" %}</th>
 												<th>{% trans "Rule preview" %}</th>
+												<th></th>
 											</tr>
 										</thead>
 										<tbody>
-											<tr>
-												<td><a href="pages/examples/invoice.html">Rule 1</a></td>
-												<td><svg id="rule-preview-1" class="preview-svg"></svg></td>		
-											</tr>
-											<tr>
-												<td><a href="pages/examples/invoice.html">Rule 2</a></td>
-												<td><svg id="rule-preview-2" class="preview-svg"></svg></td>		
-											</tr>
 										</tbody>
 									</table>
 								</div>
 							</div>
 
 							<div class="box-footer clearfix">
-								<a href="javascript:void(0)"class="btn btn-sm btn-success btn-flat pull-right"><i class="fa fa-plus margin-r-5"></i>{% trans "Append rule" %}</a>
+								<a id="append-rule-button" href="javascript:void(0)" class="btn btn-sm btn-success btn-flat pull-right"><i class="fa fa-plus margin-r-5"></i>{% trans "Append rule" %}</a>
 							</div>
 						</div>
 					</div>
@@ -70,82 +63,7 @@
 				              	<li><a href="#rotation-tab" data-toggle="tab">{% trans "Rotation" %}</a></li> 
 				              	<li><a href="#geometry-tab" data-toggle="tab">{% trans "Geometry" %}</a></li>              
 				            </ul>
-				            <div class="tab-content">
-				              	<div class="tab-pane active" id="fill-tab">
-				                	<div class="row">
-					                	<div class="col-md-12 form-group">
-											<label>{% trans "Symbol color" %}</label>
-											<input type="color" value="#000000" class="form-control color-chooser">					
-										</div>
-					              	</div>
-					              	<div class="row">
-					              		<div class="col-md-12 form-group">
-					              			<label style="display: block;">{% trans "Fill opacity" %} (%)</label>
-											<input style="width: 100%;" name="opacity-slider" data-provide="slider" type="text" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="100"/>
-					              		</div>					 
-					              	</div>
-				              	</div>
-				              	<div class="tab-pane" id="border-tab">
-				                	<div class="row">
-					                	<div class="col-md-12 checkbox">
-											<label>
-												<input type="checkbox" name="usergroup-{{group.id}}" id="usergroup-{{group.id}}"/>{% trans "With border" %}
-											</label>			
-										</div>
-					              	</div>
-					              	<div class="row">
-					                	<div class="col-md-12 form-group">
-											<label>{% trans "Border color" %}</label>
-											<input type="color" value="#000000" class="form-control color-chooser">					
-										</div>
-					              	</div>
-					              	<div class="row">
-					                	<div class="col-md-12 form-group">
-											<label>{% trans "Border size" %}</label>
-											<input type="number" class="form-control">					
-										</div>
-					              	</div>
-					              	<div class="row">
-					              		<div class="col-md-12 form-group">
-					              			<label style="display: block;">{% trans "Border opacity" %} (%)</label>
-											<input style="width: 100%;" name="border-opacity-slider" data-provide="slider" type="text" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="100"/>
-					              		</div>					 
-					              	</div>
-				              	</div>
-				              	<div class="tab-pane" id="rotation-tab">
-				                	<div class="row">
-					              		<div class="col-md-12 form-group">
-					              			<label style="display: block;">{% trans "Rotation" %} (Degrees)</label>
-											<input style="width: 100%;" name="symbol-rotation-slider" data-provide="slider" type="text" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="100"/>
-					              		</div>					 
-					              	</div>
-				              	</div>
-				              	<div class="tab-pane" id="geometry-tab">
-				                	<div class="row">
-				                		<div class="form-group">
-						                  	<label>{% trans "Function" %}</label>
-						                  	<select class="form-control">
-						                    	<option>option 1</option>
-						                    	<option>option 2</option>
-						                    	<option>option 3</option>
-						                    	<option>option 4</option>
-						                    	<option>option 5</option>
-						                  	</select>
-						                </div>
-				                	</div>
-				                	<div class="row">
-				                		<div class="form-group">
-						                  	<label>{% trans "Geometry field" %}</label>
-						                  	<select class="form-control">
-						                    	<option>option 1</option>
-						                    	<option>option 2</option>
-						                    	<option>option 3</option>
-						                    	<option>option 4</option>
-						                    	<option>option 5</option>
-						                  	</select>
-						                </div>
-				                	</div>
-				              	</div>
+				            <div id="tab-content" class="tab-content">
 				            </div>
           				</div>
           			</div>
@@ -163,6 +81,7 @@
 </script>
 <script>
 $(document).ready(function() {
+	//Init DOM components
 	var map = new ol.Map({
 		layers: [
 		    new ol.layer.Tile({
@@ -176,12 +95,13 @@ $(document).ready(function() {
 		})
 	});
 	
-	var r1 = Snap("#rule-preview-1");
-	var r2 = Snap("#rule-preview-2");
-	r1.circle(10, 10, 10);
-	r2.circle(10, 10, 10);
+	$("#append-rule-button").on('click', function(e){
+		var rule = uniqueSymbol.appendRule();
+	});
 	
-	var mySlider = $("input.slider").slider();
+	var uniqueSymbol = new UniqueSymbol('point');
+	uniqueSymbol.appendRule();
+
 });
 </script>
 {% endblock %}
