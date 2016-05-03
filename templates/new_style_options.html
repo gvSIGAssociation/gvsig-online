@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	  
+<div class="row">
+	<div class="col-md-12">
+		<div class="box">
+		
+			<div class="box-header with-border">
+				<h3 class="box-title">{% trans "Create new style" %}</h3>
+			</div>
+			
+			<div class="box-body">
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Style name" %}</label>
+						<input id="symbology-title" name="symbology-title" class="form-control " type="text" placeholder="{% trans "Insert style name" %}"> 					
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12">
+						<ul class="products-list product-list-in-box">
+						
+							{% if is_vectorial %}
+							<li class="item">
+								<div class="product-img">
+									<span class="new-style-options-icon"><i class="fa fa-map-marker"></i></span>
+								</div>
+								<div class="product-info">
+									<a href="/gvsigonline/symbology/unique_symbol/{{layer.id}}/" class="product-title">{% trans "Unique symbol" %}
+									</a> 
+									<span class="product-description"> {% trans "Unique symbol description" %} </span>
+								</div>
+							</li>
+							<li class="item">
+								<div class="product-img">
+									<span class="new-style-options-icon"><i class="fa fa-list"></i></span>
+								</div>
+								<div class="product-info">
+									<a href="javascript:void(0)" class="product-title">{% trans "Unique values" %}
+									</a> 
+									<span class="product-description"> {% trans "Unique values description" %} </span>
+								</div>
+							</li>
+							<li class="item">
+								<div class="product-img">
+									<span class="new-style-options-icon"><i class="fa fa-sort-numeric-asc"></i></span>
+								</div>
+								<div class="product-info">
+									<a href="javascript:void(0)" class="product-title">{% trans "Intervals" %}
+									</a> 
+									<span class="product-description"> {% trans "Intervals description" %} </span>
+								</div>
+							</li>
+							<li class="item">
+								<div class="product-img">
+									<span class="new-style-options-icon"><i class="fa fa-terminal"></i></span>
+								</div>
+								<div class="product-info">
+									<a href="javascript:void(0)" class="product-title">{% trans "Expressions" %}
+									</a> 
+									<span class="product-description"> {% trans "Expressions description" %} </span>
+								</div>
+							</li>
+							<li class="item">
+								<div class="product-img">
+									<span class="new-style-options-icon"><i class="fa fa-file-code-o"></i></span>
+								</div>
+								<div class="product-info">
+									<a href="javascript:void(0)" class="product-title">{% trans "Import from SLD" %}
+									</a> 
+									<span class="product-description"> {% trans "SLD legend description" %} </span>
+								</div>
+							</li>
+							{% if GEOSERVER_CHART_MODULE %}
+							<li class="item">
+								<div class="product-img">
+									<span class="new-style-options-icon"><i class="fa fa-pie-chart"></i></span>
+								</div>
+								<div class="product-info">
+									<a href="javascript:void(0)" class="product-title">{% trans "Charts" %}
+									</a> 
+									<span class="product-description"> {% trans "Charts description" %} </span>
+								</div>
+							</li>
+							{% endif %}
+							
+							{% else %}
+								{% if is_view %}
+								<li class="item">
+									<div class="product-img">
+										<span class="new-style-options-icon"><i class="fa fa-map-marker"></i></span>
+									</div>
+									<div class="product-info">
+										<a href="/gvsigonline/symbology/unique_symbol/" class="product-title">{% trans "Unique symbol" %}
+										</a> 
+										<span class="product-description"> {% trans "Unique symbol description" %} </span>
+									</div>
+								</li>
+								<li class="item">
+									<div class="product-img">
+										<span class="new-style-options-icon"><i class="fa fa-terminal"></i></span>
+									</div>
+									<div class="product-info">
+										<a href="javascript:void(0)" class="product-title">{% trans "Expressions" %}
+										</a> 
+										<span class="product-description"> {% trans "Expressions description" %} </span>
+									</div>
+								</li>
+								<li class="item">
+									<div class="product-img">
+										<span class="new-style-options-icon"><i class="fa fa-file-code-o"></i></span>
+									</div>
+									<div class="product-info">
+										<a href="javascript:void(0)" class="product-title">{% trans "Import from SLD" %}
+										</a> 
+										<span class="product-description"> {% trans "SLD legend description" %} </span>
+									</div>
+								</li>
+								{% else %}
+									<li class="item">
+										<div class="product-img">
+											<span class="new-style-options-icon"><i class="fa fa-map-marker"></i></span>
+										</div>
+										<div class="product-info">
+											<a href="javascript:void(0)" class="product-title">{% trans "Color table" %}
+											</a> 
+											<span class="product-description"> {% trans "Color table description" %} </span>
+										</div>
+									</li>
+									<li class="item">
+										<div class="product-img">
+											<span class="new-style-options-icon"><i class="fa fa-terminal"></i></span>
+										</div>
+										<div class="product-info">
+											<a href="javascript:void(0)" class="product-title">{% trans "Import RMF" %}
+											</a> 
+											<span class="product-description"> {% trans "RMF legend description" %} </span>
+										</div>
+									</li>
+									<li class="item">
+										<div class="product-img">
+											<span class="new-style-options-icon"><i class="fa fa-file-code-o"></i></span>
+										</div>
+										<div class="product-info">
+											<a href="javascript:void(0)" class="product-title">{% trans "Import SLD" %}
+											</a> 
+											<span class="product-description"> {% trans "SLD legend description" %} </span>
+										</div>
+									</li>
+								{% endif %}
+							{% endif %}
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div> 		  	
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-symbology').addClass("active");
+	$('#submenu-styles').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	var fields = {{ fields|safe }};
+	var layer = {{ layer|safe }};
+	var layer_id = layer[0]["layer"][0].pk;
+	var layer_name = layer[0]["layer"][0].fields.name;
+	var featureType = "{{ featureType }}";
+	var style_name = "{{ style_name }}";
+	var styles = {{ styles|safe }};
+	var style_id = "{{ style_id }}";
+	
+	$("#layer-id").val(layer_id);
+	if(style_id == "None"){
+		$("#symbology-title").val(layer_name);
+	}
+	
+	{% if is_vectorial %}
+		var uniqueSymbol = new UniqueSymbol(null, layer, null, featureType, "legend-buttons");
+		var uniqueValues = new UniqueValues(null, layer, null, featureType, "legend-buttons");
+		var intervals = new Intervals(null, layer, null, featureType, "legend-buttons");
+		var expressions = new Expressions(null, layer, null, featureType, "legend-buttons");
+		var importedSLD = new ImportedSLD(null, layer, null, featureType, "legend-buttons");
+		{% if GEOSERVER_CHART_MODULE %}
+			var charts = new Charts(null, layer, null, featureType, "legend-buttons");
+		{% endif %}
+	{% else %}
+		{% if is_view %}
+			var uniqueSymbol = new UniqueSymbol(null, layer, null, featureType, "legend-buttons");
+			var expressions = new Expressions(null, layer, null, featureType, "legend-buttons");
+			var importedSLD = new ImportedSLD(null, layer, null, featureType, "legend-buttons");
+		{% else %}
+			var colorTable = new ColorTable(null, layer, null, featureType, "legend-buttons");
+			var importedRMF = new ImportedRMF(null, layer, null, featureType, "legend-buttons");
+			var importedSLD = new ImportedSLD(null, layer, null, featureType, "legend-buttons");
+		{% endif %}
+	{% endif %}
+	
+	
+	var submitForm = function(){
+		if(style_id != "None"){
+			$("#symbology-title").removeAttr("disabled");
+			$("#create-symbol-form").attr("action", "/gvsigonline/style_layer_change/"+layer_id+"/"+style_id+"/");
+		}
+		$("#create-symbol-form").submit();
+	}
+			
+	$(".legend-button").click(function(){
+		var symbologyUtils = new SymbologyUtils();
+		var legend = $(this).attr("id");
+		$("#legend-type").val(legend);
+
+		if(style_id !="None"){
+			symbologyUtils.showModal("change-legend-modal", "¿Cambiar la leyenda?", "Se perderá la información anterior de la leyenda y no se podrá recuperar", submitForm, true)
+		}else{
+			submitForm();
+		}
+	});
+	
+	$(".option-selection").click(function(){
+		var id = $(this).attr("id");
+		$("#radio-options").addClass('hidden');
+		$(".option-panel").addClass('hidden');
+		$("#"+id+"-panel").removeClass('hidden');
+	});
+	
+	$(".back-button").click(function(){
+		//$(".option-panel").hide();
+		//$("#radio-options").show();
+	});
+
+
+	function is_valid(){
+		var input=$('#symbology-title');
+		var is_name=input.val();
+		$('#style_name').val(is_name);
+		if(is_name){
+			input.removeClass("invalid").addClass("valid");
+			$('#select-legend').removeClass('hidden');
+		}else{
+			input.removeClass("valid").addClass("invalid");
+			$('#select-legend').addClass('hidden');
+		}
+	}
+	
+	$('#symbology-title').on('input', function() {
+		is_valid();
+		
+	});
+	
+	is_valid();
+	//$('.modal-trigger').leanModal();
+	
+	var sldBody = document.getElementById('sld-body');
+	var codemirror = CodeMirror.fromTextArea(sldBody, {
+		value: "",
+		mode:  "xml",
+		theme: "xq-dark",
+		autoMatchParens: true,
+		height: "1000px",
+		minHeight: 1000,
+		lineNumbers: true
+	});
+	
+	$('#style-template').change(function(){
+		var name = $(this).val();
+		var sld_code = "";
+		for(var i=0; i<styles.length; i++){
+			if(styles[i].name == name){
+				sld_code = styles[i].sld_code;
+				break;
+			}
+		}
+		$(".button-upload").show();
+		codemirror.setValue(sld_code);
+	});
+	
+	
+	$('.create-legend-button').click(function(){
+		$('#legend-type').val("IM");
+		var code = codemirror.getValue();
+		$('#sld-code').val(code);
+		
+		$('form').submit();
+	});
+
+});
+</script>
+{% endblock %}
