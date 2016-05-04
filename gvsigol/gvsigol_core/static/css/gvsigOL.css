@@ -4036,6 +4036,27 @@ table.text-center th {
 .margin-r-5 {
   margin-right: 5px;
 }
+.margin-r-10 {
+  margin-right: 10px;
+}
+.margin-r-15 {
+  margin-right: 15px;
+}
+.margin-r-20 {
+  margin-right: 20px;
+}
+.margin-l-5 {
+  margin-left: 5px;
+}
+.margin-l-10 {
+  margin-left: 10px;
+}
+.margin-l-15 {
+  margin-left: 15px;
+}
+.margin-l-20 {
+  margin-left: 20px;
+}
 .inline {
   display: inline;
 }
@@ -4670,4 +4691,8 @@ table.text-center th {
 
 .products-list .product-icon {
     float: left;
+}
+
+.gol-slider-output {
+	font-weight: 400;
 }

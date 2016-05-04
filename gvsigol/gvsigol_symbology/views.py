@@ -64,7 +64,7 @@ def style_layer_list(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @admin_required
-def new_style_options(request, layer_id):
+def select_legend_type(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     
     is_vectorial = False
@@ -81,11 +81,11 @@ def new_style_options(request, layer_id):
         'is_view': is_view
     }
         
-    return render_to_response('new_style_options.html', response, context_instance=RequestContext(request))
+    return render_to_response('select_legend_type.html', response, context_instance=RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @admin_required
-def unique_symbol(request, layer_id):
+def unique_symbol_add(request, layer_id):
     
     resource = get_layer_field_description(layer_id, request.session)
     if resource != None:
@@ -106,13 +106,24 @@ def unique_symbol(request, layer_id):
     for category in sldFilterValues:
         for oper in sldFilterValues[category]:
             sldFilterValues[category][oper]["genCodeFunc"] = ""
+            
+    supportedfontsStr = mapservice_backend.getSupportedFonts(request.session)
+    supportedfonts = json.loads(supportedfontsStr)
+    sorted_fonts = sortFontsArray(supportedfonts.get("fonts"))
+    
+    alphanumeric_fields = []
+    for field in fields:
+        if not field.get('binding').startswith('com.vividsolutions.jts.geom'):
+            alphanumeric_fields.append(field)
                         
     response = {
         'featureType': featureType,
         'fields': json.dumps(fields), 
-        'sldFilterValues': json.dumps(sldFilterValues)
+        'alphanumeric_fields': json.dumps(alphanumeric_fields),
+        'sldFilterValues': json.dumps(sldFilterValues),
+        'fonts': sorted_fonts
     }
    
-    return render_to_response('unique_symbol.html', response, context_instance=RequestContext(request))
+    return render_to_response('unique_symbol_add.html', response, context_instance=RequestContext(request))
 
 
