@@ -2,8 +2,8 @@ from django.conf.urls import url
 
 urlpatterns = [    
     url(r'^style_layer_list/$', 'gvsigol_symbology.views.style_layer_list', name='style_layer_list'),
-    url(r'^new_style_options/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.new_style_options', name='new_style_options'),
-    url(r'^unique_symbol/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.unique_symbol', name='unique_symbol'),
+    url(r'^select_legend_type/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.select_legend_type', name='select_legend_type'),
+    url(r'^unique_symbol_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.unique_symbol_add', name='unique_symbol_add'),
     #url(r'^style_label_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.style_label_update', name='style_label_update'),
     #url(r'^create_style/$', 'gvsigol_symbology.views.create_style', name='create_style'),
     #url(r'^delete_style/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.delete_style', name='delete_style'),
