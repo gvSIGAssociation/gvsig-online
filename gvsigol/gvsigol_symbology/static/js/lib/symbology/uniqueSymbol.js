@@ -45,25 +45,36 @@ var UniqueSymbol = function(featureType, fields, alphanumericFields, sldFilterVa
 		value: 'bold',
 		title: gettext('Bold') 
 	}];
+	
+	this.shapes = [{
+		value: 'circle',
+		title: gettext('Circle') 
+	},{
+		value: 'square',
+		title: gettext('Square') 
+	},{
+		value: 'star',
+		title: gettext('Star') 
+	}];
 };
 
 UniqueSymbol.prototype.count = 0;
 
-UniqueSymbol.prototype.vectors = new Array();
-UniqueSymbol.prototype.graphics = new Array();
+UniqueSymbol.prototype.symbols = new Array();
 UniqueSymbol.prototype.labels = new Array();
 
 UniqueSymbol.prototype.selected = null;
 
 
-UniqueSymbol.prototype.appendVector = function() {
+UniqueSymbol.prototype.appendSymbol = function() {
 	var self = this;
 	
-	var vector = {
+	var symbol = {
 		id: this.count,
-		type: "vector",
-		name: "vector " + this.count,
+		type: "symbol",
+		name: "symbol " + this.count,
 		preview: null,
+		shape: "circle",
 		fill_color: "#000000",
 		fill_opacity: 0.5,
 		with_border: true,
@@ -71,75 +82,39 @@ UniqueSymbol.prototype.appendVector = function() {
 		border_size: 1,
 		border_opacity: 1,
 		border_type: "solid",
+		vectorial: true,
+		online_resource: "",
+		format: "",
 		rotation: 0
 	};
 	
 	var ui = '';
-	ui += '<tr data-rowid="' + vector.id + '">';
-	ui += 	'<td><a class="vector-link" data-vid="' + vector.id + '" href="javascript:void(0)">' + vector.name + '</a></td>';
-	ui += 	'<td><svg id="vector-preview-' + vector.id + '" class="preview-svg"></svg></td>';	
-	ui += 	'<td><a class="delete-vector-link" data-vid="' + vector.id + '" href="javascript:void(0)"><i class="fa fa-times" style="color: #ff0000;"></i></a></td>';
+	ui += '<tr data-rowid="' + symbol.id + '">';
+	ui += 	'<td><a class="symbol-link" data-symid="' + symbol.id + '" href="javascript:void(0)">' + symbol.name + '</a></td>';
+	ui += 	'<td id="symbol-preview"><svg id="symbol-preview-' + symbol.id + '" class="preview-svg"></svg></td>';	
+	ui += 	'<td><a class="delete-symbol-link" data-symid="' + symbol.id + '" href="javascript:void(0)"><i class="fa fa-times" style="color: #ff0000;"></i></a></td>';
 	ui += '</tr>';	
 	$('#table-unique-symbol tbody').append(ui);
 	
-	$(".vector-link").on('click', function(e){	
+	$(".symbol-link").on('click', function(e){	
 		e.preventDefault();
-		self.setSelected(self.getVectorById(this.dataset.vid));
+		self.setSelected(self.getSymbolById(this.dataset.symid));
 		self.updateForm();
 	});
 	
-	$(".delete-vector-link").one('click', function(e){	
+	$(".delete-symbol-link").one('click', function(e){	
 		e.preventDefault();
-		self.deleteVector(this.dataset.vid);
+		self.deleteSymbol(this.dataset.symid);
 	});
 	
-	vector.preview = this.renderVectorPreview(vector);
+	symbol.preview = this.renderSymbolPreview(symbol);
 	
-	this.vectors.push(vector);
+	this.symbols.push(symbol);
 	this.count++;
-	self.setSelected(vector);
+	self.setSelected(symbol);
 	this.updateForm();
 	
-	return vector;
-};
-
-UniqueSymbol.prototype.appendGraphic = function() {
-	var self = this;
-	
-	var graphic = {
-		id: this.count,
-		type: 'graphic',
-		name: "graphic " + this.count,
-		preview: null
-	};
-	
-	var ui = '';
-	ui += '<tr data-rowid="' + graphic.id + '">';
-	ui += 	'<td><a class="graphic-link" data-gid="' + graphic.id + '" href="javascript:void(0)">' + graphic.name + '</a></td>';
-	ui += 	'<td><img id="graphic-preview-' + graphic.id + '" class="" /></td>';	
-	ui += 	'<td><a class="delete-graphic-link" data-gid="' + graphic.id + '" href="javascript:void(0)"><i class="fa fa-times" style="color: #ff0000;"></i></a></td>';
-	ui += '</tr>';	
-	$('#table-unique-symbol tbody').append(ui);
-	
-	$(".graphic-link").on('click', function(e){	
-		e.preventDefault();
-		self.setSelected(self.getGraphicById(this.dataset.gid));
-		self.updateForm();
-	});
-	
-	$(".delete-graphic-link").one('click', function(e){	
-		e.preventDefault();
-		self.deleteGraphic(this.dataset.gid);
-	});
-	
-	//graphic.preview = this.renderVectorPreview(vector);
-	
-	this.graphics.push(graphic);
-	this.count++;
-	self.setSelected(graphic);
-	this.updateForm();
-	
-	return graphic;
+	return symbol;
 };
 
 UniqueSymbol.prototype.appendLabel = function() {
@@ -150,7 +125,7 @@ UniqueSymbol.prototype.appendLabel = function() {
 		type: 'label',
 		name: "label " + this.count,
 		field: "",
-		font_type: "",
+		font_family: "",
 		font_size: 12,
 		font_color: "#000000",
 		font_weight: "normal",
@@ -167,21 +142,21 @@ UniqueSymbol.prototype.appendLabel = function() {
 	
 	var ui = '';
 	ui += '<tr data-rowid="' + label.id + '">';
-	ui += 	'<td><a class="label-link" data-lid="' + label.id + '" href="javascript:void(0)">' + label.name + '</a></td>';
+	ui += 	'<td><a class="label-link" data-lbid="' + label.id + '" href="javascript:void(0)">' + label.name + '</a></td>';
 	ui += 	'<td><svg id="label-preview-' + label.id + '" class="label-preview-svg"></td>';	
-	ui += 	'<td><a class="delete-label-link" data-lid="' + label.id + '" href="javascript:void(0)"><i class="fa fa-times" style="color: #ff0000;"></i></a></td>';
+	ui += 	'<td><a class="delete-label-link" data-lbid="' + label.id + '" href="javascript:void(0)"><i class="fa fa-times" style="color: #ff0000;"></i></a></td>';
 	ui += '</tr>';	
 	$('#table-unique-symbol tbody').append(ui);
 	
 	$(".label-link").on('click', function(e){	
 		e.preventDefault();
-		self.setSelected(self.getLabelById(this.dataset.lid));
+		self.setSelected(self.getLabelById(this.dataset.lbid));
 		self.updateForm();
 	});
 	
 	$(".delete-label-link").one('click', function(e){	
 		e.preventDefault();
-		self.deleteLabel(this.dataset.lid);
+		self.deleteLabel(this.dataset.lbid);
 	});
 	
 	label.preview = this.renderLabelPreview(label);
@@ -197,27 +172,19 @@ UniqueSymbol.prototype.appendLabel = function() {
 UniqueSymbol.prototype.setSelected = function(element) {
 	this.selected = element;
 	
-	$(".vector-link").each(function() {$(this).removeClass('link-selected');});
-	$(".graphic-link").each(function() {$(this).removeClass('link-selected');});
+	$(".symbol-link").each(function() {$(this).removeClass('link-selected');});
 	$(".label-link").each(function() {$(this).removeClass('link-selected');});
 	
-	if (this.selected.type == 'vector') {		
-		$(".vector-link").each(function() {
-			if (this.dataset.vid == element.id) {
-				$(this).addClass('link-selected');
-			}			
-		});
-		
-	} else if (this.selected.type == 'graphic') {
-		$(".graphic-link").each(function() {
-			if (this.dataset.gid == element.id) {
+	if (this.selected.type == 'symbol') {		
+		$(".symbol-link").each(function() {
+			if (this.dataset.symid == element.id) {
 				$(this).addClass('link-selected');
 			}			
 		});
 		
 	} else if (this.selected.type == 'label') {
 		$(".label-link").each(function() {
-			if (this.dataset.lid == element.id) {
+			if (this.dataset.lbid == element.id) {
 				$(this).addClass('link-selected');
 			}			
 		});
@@ -226,10 +193,10 @@ UniqueSymbol.prototype.setSelected = function(element) {
 	
 };
 
-UniqueSymbol.prototype.deleteVector = function(id) {
-	for (var i=0; i < this.vectors.length; i++) {
-		if (this.vectors[i].id == id) {
-			this.vectors.splice(i, 1);
+UniqueSymbol.prototype.deleteSymbol = function(id) {
+	for (var i=0; i < this.symbols.length; i++) {
+		if (this.symbols[i].id == id) {
+			this.symbols.splice(i, 1);
 		}
 	}
 	var tbody = document.getElementById('table-unique-symbol-body');
@@ -238,29 +205,8 @@ UniqueSymbol.prototype.deleteVector = function(id) {
 			tbody.removeChild(tbody.children[i]);
 		}
 	}
-	if (this.vectors.length >= 1) {
-		this.setSelected(this.vectors[0]);
-		this.updateForm();
-	} else {
-		$('#tab-content').empty();
-		$('#tab-menu').empty();
-	}
-};
-
-UniqueSymbol.prototype.deleteGraphic = function(id) {
-	for (var i=0; i < this.graphics.length; i++) {
-		if (this.graphics[i].id == id) {
-			this.graphics.splice(i, 1);
-		}
-	}
-	var tbody = document.getElementById('table-unique-symbol-body');
-	for (var i=0; i<tbody.children.length; i++) {
-		if(tbody.children[i].dataset.rowid == id) {
-			tbody.removeChild(tbody.children[i]);
-		}
-	}
-	if (this.graphics.length >= 1) {
-		this.setSelected(this.graphics[0]);
+	if (this.symbols.length >= 1) {
+		this.setSelected(this.symbols[0]);
 		this.updateForm();
 	} else {
 		$('#tab-content').empty();
@@ -289,24 +235,14 @@ UniqueSymbol.prototype.deleteLabel = function(id) {
 	}
 };
 
-UniqueSymbol.prototype.getVectorById = function(id) {
-	var vector = null;
-	for (var i=0; i < this.vectors.length; i++) {
-		if (this.vectors[i].id == id) {
-			vector = this.vectors[i];
+UniqueSymbol.prototype.getSymbolById = function(id) {
+	var symbol = null;
+	for (var i=0; i < this.symbols.length; i++) {
+		if (this.symbols[i].id == id) {
+			symbol = this.symbols[i];
 		}
 	}
-	return vector;
-};
-
-UniqueSymbol.prototype.getGraphicById = function(id) {
-	var graphic = null;
-	for (var i=0; i < this.graphics.length; i++) {
-		if (this.graphics[i].id == id) {
-			graphic = this.graphics[i];
-		}
-	}
-	return graphic;
+	return symbol;
 };
 
 UniqueSymbol.prototype.getLabelById = function(id) {
@@ -319,27 +255,38 @@ UniqueSymbol.prototype.getLabelById = function(id) {
 	return label;
 };
 
-UniqueSymbol.prototype.renderVectorPreview = function(vector) {
+UniqueSymbol.prototype.renderSymbolPreview = function(symbol) {
 	
 	var attributes = {
-		fill: vector.fill_color,
-		fillOpacity: parseFloat(vector.fill_opacity),
-		stroke: vector.border_color,
-		strokeOpacity: vector.border_opacity,
-		strokeWidth: vector.border_size
+		fill: symbol.fill_color,
+		fillOpacity: parseFloat(symbol.fill_opacity),
+		stroke: symbol.border_color,
+		strokeOpacity: symbol.border_opacity,
+		strokeWidth: symbol.border_size
 	}
-	if (vector.border_type == 'dotted') {
+	if (symbol.border_type == 'dotted') {
 		attributes.strokeDasharray= "1 1";
-	} else if (vector.border_type == 'stripped') {
+	} else if (symbol.border_type == 'stripped') {
 		attributes.strokeDasharray= "4 4";
 	}
 	
 	var preview = null;
-	$("#vector-preview-" + vector.id).empty();
-	var previewElement = Snap("#vector-preview-" + vector.id);
+	$("#symbol-preview-" + symbol.id).empty();
+	var previewElement = Snap("#symbol-preview-" + symbol.id);
 	if (this.featureType == 'PointSymbolizer') {
-		preview = previewElement.circle(10, 10, 10);
-		preview.attr(attributes);
+		if (symbol.shape == 'circle') {
+			preview = previewElement.circle(10, 10, 10);
+			preview.attr(attributes);
+			
+		} else if (symbol.shape == 'square') {
+			preview = previewElement.polygon(0, 0, 20, 0, 20, 20, 0, 20);
+			preview.attr(attributes);
+			
+		} else if (symbol.shape == 'star') {
+			preview = previewElement.path('M 0.000 15.000,L 23.511 32.361,L 14.266 4.635,L 38.042 -12.361,L 8.817 -12.135,L 0.000 -40.000,L -8.817 -12.135,L -38.042 -12.361,L -14.266 4.635,L -23.511 32.361,L 0.000 15.000');
+			preview.attr(attributes);
+		}
+		
 		
 	} else if (this.featureType == 'LineSymbolizer') {
 		preview = previewElement.line(0, 0, 20, 20);
@@ -379,16 +326,32 @@ UniqueSymbol.prototype.updateForm = function() {
 	$('#tab-menu').empty();
 	$('#tab-content').empty();	
 	
-	if (this.selected.type == 'vector') {
-		$('#tab-menu').append(this.newVectorTabMenu());
-		$('#tab-content').append(this.newVectorFillTab());
-		$('#tab-content').append(this.newVectorBorderTab());
-		$('#tab-content').append(this.newVectorRotationTab());
-		this.registerVectorEvents();
-		$('.nav-tabs a[href="#fill-tab"]').tab('show');
+	if (this.selected.type == 'symbol') {
+		$('#tab-menu').append(this.newSymbolTabMenu());
+		if (this.featureType == 'PointSymbolizer' && this.selected.vectorial) {
+			$('#tab-content').append(this.newSymbolGraphicTab("active"));
+			$('#tab-content').append(this.newSymbolFillTab(""));
+			$('#tab-content').append(this.newSymbolBorderTab(""));
+			$('#tab-content').append(this.newSymbolRotationTab(""));			
+			$('.nav-tabs a[href="#graphic-tab"]').tab('show');
+			
+		} else if (this.featureType == 'PointSymbolizer' && !this.selected.vectorial) {
+			$('#tab-content').append(this.newSymbolGraphicTab("active"));			
+			$('.nav-tabs a[href="#graphic-tab"]').tab('show');
+			
+		} else if (this.featureType == 'LineSymbolizer') {
+			$('#tab-content').append(this.newSymbolBorderTab("active"));
+			$('#tab-content').append(this.newSymbolRotationTab(""));
+			$('.nav-tabs a[href="#border-tab"]').tab('show');
+			
+		} else if (this.featureType == 'PolygonSymbolizer') {
+			$('#tab-content').append(this.newSymbolFillTab("active"));
+			$('#tab-content').append(this.newSymbolBorderTab(""));
+			$('#tab-content').append(this.newSymbolRotationTab(""));
+			$('.nav-tabs a[href="#fill-tab"]').tab('show');
+		}
 		
-	} else if (this.selected.type == 'graphic') {
-		
+		this.registerSymbolEvents();
 		
 	} else if (this.selected.type == 'label') {
 		$('#tab-menu').append(this.newLabelTabMenu());
@@ -402,9 +365,27 @@ UniqueSymbol.prototype.updateForm = function() {
 	}
 };
 
-UniqueSymbol.prototype.registerVectorEvents = function() {
+UniqueSymbol.prototype.registerSymbolEvents = function() {
 	var self = this;
 	
+	$('input[type=radio][name=symbol-is-vectorial]').change(function() {
+        if (this.value == 'vectorial') {
+        	self.selected.vectorial = true;
+        	self.updateForm();
+        	$("#symbol-preview").append('<td id="symbol-preview"><svg id="symbol-preview-' + self.selected.id + '" class="preview-svg"></svg></td>');
+    		self.selected.preview = self.renderSymbolPreview(self.selected);
+            
+        } else if (this.value == 'external-graphic') {
+        	self.selected.vectorial = false;
+        	self.updateForm();
+        	$("#symbol-preview").empty();
+    		//self.selected.preview = self.renderExternalGraphicPreview(self.selected);
+        }
+    });
+	$("#shape").on('change', function(e) {
+		self.selected.shape = this.value;
+		self.selected.preview = self.renderSymbolPreview(self.selected);		
+	});
 	$( "#fill-opacity-slider" ).slider({
 	    min: 0,
 	    max: 100,
@@ -412,7 +393,7 @@ UniqueSymbol.prototype.registerVectorEvents = function() {
 	    change: function( event, ui ) {
 	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
 	    	self.selected.fill_opacity = opacity;
-			self.selected.preview = self.renderVectorPreview(self.selected);
+			self.selected.preview = self.renderSymbolPreview(self.selected);
 	    },
 	    slide: function( event, ui ) {
 	    	$("#fill-opacity-output").text(ui.value + '%');
@@ -420,15 +401,15 @@ UniqueSymbol.prototype.registerVectorEvents = function() {
 	});	
 	$("#fill-color-chooser").on('change', function(e) {
 		self.selected.fill_color = this.value;
-		self.selected.preview = self.renderVectorPreview(self.selected);		
+		self.selected.preview = self.renderSymbolPreview(self.selected);		
 	});	
-	$('#vector-with-border').on('change', function() {
+	$('#symbol-with-border').on('change', function() {
 		self.selected.with_border = this.checked;		
-		self.selected.preview = self.renderVectorPreview(self.selected);
+		self.selected.preview = self.renderSymbolPreview(self.selected);
 	});
 	$("#border-color-chooser").on('change', function(e) {
 		self.selected.border_color = this.value;
-		self.selected.preview = self.renderVectorPreview(self.selected);		
+		self.selected.preview = self.renderSymbolPreview(self.selected);		
 	});
 	$( "#border-opacity-slider" ).slider({
 	    min: 0,
@@ -437,7 +418,7 @@ UniqueSymbol.prototype.registerVectorEvents = function() {
 	    change: function( event, ui ) {
 	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
 	    	self.selected.border_opacity = opacity;
-			self.selected.preview = self.renderVectorPreview(self.selected);
+			self.selected.preview = self.renderSymbolPreview(self.selected);
 	    },
 	    slide: function( event, ui ) {
 	    	$("#border-opacity-output").text(ui.value + '%');
@@ -445,11 +426,11 @@ UniqueSymbol.prototype.registerVectorEvents = function() {
 	});
 	$("#border-size").on('change', function(e) {
 		self.selected.border_size = this.value;
-		self.selected.preview = self.renderVectorPreview(self.selected);		
+		self.selected.preview = self.renderSymbolPreview(self.selected);		
 	});
 	$('#border-type').on('change', function() {
 		self.selected.border_type = this.value;
-		self.selected.preview = self.renderVectorPreview(self.selected);
+		self.selected.preview = self.renderSymbolPreview(self.selected);
 	});
 	$( "#rotation-slider" ).slider({
 	    min: 0,
@@ -461,10 +442,6 @@ UniqueSymbol.prototype.registerVectorEvents = function() {
 	    	self.selected.rotation = rotation;
 	    }
 	});
-};
-
-UniqueSymbol.prototype.registerGraphicEvents = function() {
-	var self = this;
 };
 
 UniqueSymbol.prototype.registerLabelEvents = function() {
@@ -545,18 +522,69 @@ UniqueSymbol.prototype.registerLabelEvents = function() {
 	});
 };
 
-UniqueSymbol.prototype.newVectorTabMenu = function() {
+UniqueSymbol.prototype.newSymbolTabMenu = function() {
 	var ui = '';
-	ui += '<li class="active"><a href="#fill-tab" data-toggle="tab">' + gettext('Fill') + '</a></li>';
-	ui += '<li><a href="#border-tab" data-toggle="tab">' + gettext('Border') + '</a></li>';
-	ui += '<li><a href="#rotation-tab" data-toggle="tab">' + gettext('Rotation') + '</a></li>'; 
+	if (this.featureType == 'PointSymbolizer' && this.selected.vectorial) {
+		ui += '<li class="active"><a href="#graphic-tab" data-toggle="tab">' + gettext('Graphic') + '</a></li>';
+		ui += '<li><a href="#fill-tab" data-toggle="tab">' + gettext('Fill') + '</a></li>';
+		ui += '<li><a href="#border-tab" data-toggle="tab">' + gettext('Border') + '</a></li>';
+		ui += '<li><a href="#rotation-tab" data-toggle="tab">' + gettext('Rotation') + '</a></li>';
+		
+	} else if (this.featureType == 'PointSymbolizer' && !this.selected.vectorial) {
+		ui += '<li class="active"><a href="#graphic-tab" data-toggle="tab">' + gettext('Graphic') + '</a></li>';
+		
+	} else if (this.featureType == 'LineSymbolizer') {
+		ui += '<li class="active"><a href="#border-tab" data-toggle="tab">' + gettext('Border') + '</a></li>';
+		ui += '<li><a href="#rotation-tab" data-toggle="tab">' + gettext('Rotation') + '</a></li>';
+		
+	} else if (this.featureType == 'PolygonSymbolizer') {
+		ui += '<li class="active"><a href="#fill-tab" data-toggle="tab">' + gettext('Fill') + '</a></li>';
+		ui += '<li><a href="#border-tab" data-toggle="tab">' + gettext('Border') + '</a></li>';
+		ui += '<li><a href="#rotation-tab" data-toggle="tab">' + gettext('Rotation') + '</a></li>';
+	} 
 	
 	return ui;	
 };
 
-UniqueSymbol.prototype.newVectorFillTab = function() {
+UniqueSymbol.prototype.newSymbolGraphicTab = function(active) {
 	var ui = '';
-	ui += '<div class="tab-pane active" id="fill-tab">';
+	ui += '<div class="tab-pane ' + active + '" id="graphic-tab">';
+	ui += 	'<div class="row">';
+	ui += 		'<div class="col-md-12 form-group">';
+	if (this.selected.vectorial) {
+		ui += 		'<label class="radio-inline"><input type="radio" value="vectorial" name="symbol-is-vectorial" checked>' + gettext('Vectorial') + '</label>';
+		ui += 		'<label class="radio-inline"><input type="radio" value="external-graphic" name="symbol-is-vectorial">' + gettext('External graphic') + '</label>';
+	} else {
+		ui += 		'<label class="radio-inline"><input type="radio" value="vectorial" name="symbol-is-vectorial">' + gettext('Vectorial') + '</label>';
+		ui += 		'<label class="radio-inline"><input type="radio" value="external-graphic" name="symbol-is-vectorial" checked>' + gettext('External graphic') + '</label>';
+	}
+	ui += 		'</div>';
+	ui += 	'</div>';
+	if (this.selected.vectorial) {
+		ui += 	'<div class="row">';
+		ui += 		'<div class="col-md-12 form-group">';
+		ui += 			'<label>' + gettext('Select shape') + '</label>';
+		ui += 			'<select id="shape" class="form-control">';
+		for (var i=0; i < this.shapes.length; i++) {
+			if (this.shapes[i].value == this.selected.shape) {
+				ui += '<option value="' + this.shapes[i].value + '" selected>' + this.shapes[i].title + '</option>';
+			} else {
+				ui += '<option value="' + this.shapes[i].value + '">' + this.shapes[i].title + '</option>';
+			}
+		}
+		ui += 			'</select>';
+		ui += 		'</div>';
+		ui += 	'</div>';
+	}
+	ui += '</div>';
+	
+	return ui;
+	
+};
+
+UniqueSymbol.prototype.newSymbolFillTab = function(active) {
+	var ui = '';
+	ui += '<div class="tab-pane ' + active + '" id="fill-tab">';
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
 	ui += 			'<label>' + gettext('Fill color') + '</label>';
@@ -575,16 +603,16 @@ UniqueSymbol.prototype.newVectorFillTab = function() {
 	
 };
 
-UniqueSymbol.prototype.newVectorBorderTab = function() {
+UniqueSymbol.prototype.newSymbolBorderTab = function(active) {
 	var ui = '';
-	ui += '<div class="tab-pane" id="border-tab">';
+	ui += '<div class="tab-pane ' + active + '" id="border-tab">';
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 checkbox">';
 	ui += 			'<label>';
 	if (this.selected.with_border) {
-		ui += '<input type="checkbox" id="vector-with-border" name="vector-with-border" checked/>' + gettext('With border');
+		ui += '<input type="checkbox" id="symbol-with-border" name="symbol-with-border" checked/>' + gettext('With border');
 	} else {
-		ui += '<input type="checkbox" id="vector-with-border" name="vector-with-border"/>' + gettext('With border');
+		ui += '<input type="checkbox" id="symbol-with-border" name="symbol-with-border"/>' + gettext('With border');
 	}	
 	ui += 			'</label>';
 	ui += 		'</div>';
@@ -622,7 +650,7 @@ UniqueSymbol.prototype.newVectorBorderTab = function() {
 	return ui;
 };
 
-UniqueSymbol.prototype.newVectorRotationTab = function() {
+UniqueSymbol.prototype.newSymbolRotationTab = function() {
 	var ui = '';
 	ui += '<div class="tab-pane" id="rotation-tab">';
 	ui += 	'<div class="row">';
@@ -785,4 +813,59 @@ UniqueSymbol.prototype.newLabelVendorTab = function() {
 	
 	return ui;
 	
+};
+
+UniqueSymbol.prototype.save = function(layerId) {
+	
+	var symbologyUtils = new SymbologyUtils();
+	
+	var elements = new Array();
+	for (var i=0; i < this.symbols.length; i++) {
+		if (this.featureType == 'PointSymbolizer') {
+			elements.push(symbologyUtils.createPointSymbolizer(this.symbols[i]));
+				
+		} else if (this.featureType == 'LineSymbolizer') {
+			elements.push(symbologyUtils.createLineSymbolizer(this.symbols[i]));
+			
+		} else if (this.featureType == 'PolygonSymbolizer') {
+			elements.push(symbologyUtils.createPolygonSymbolizer(this.symbols[i]));
+			
+		} 
+	}
+	
+	for (var i=0; i < this.labels.length; i++) {
+		elements.push(symbologyUtils.createTextSymbolizer(this.labels[i]));
+	}
+	
+	var data = {
+		type: "SU",
+		rule: {
+			name: "",
+			order: 0,
+			minscale: -1,
+			maxscale: -1
+		},
+		symbols: elements
+	}
+	
+	$.ajax({
+		type: "POST",
+		async: false,
+		url: "/gvsigonline/symbology/save_style/" + layerId + "/",
+		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		data: {
+			style_data: JSON.stringify(data)
+		},
+		success: function(response){
+			if (response.success) {
+				location.href = "/gvsigonline/symbology/style_layer_list/";
+			} else {
+				alert('Error');
+			}
+			
+		},
+	    error: function(){}
+	});
 };
