@@ -41,6 +41,7 @@ import os.path
 import gvsigol.settings
 from django.views.decorators.http import require_http_methods
 from gvsigol_auth.utils import admin_required
+import utils
 
   
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -121,9 +122,66 @@ def unique_symbol_add(request, layer_id):
         'fields': json.dumps(fields), 
         'alphanumeric_fields': json.dumps(alphanumeric_fields),
         'sldFilterValues': json.dumps(sldFilterValues),
-        'fonts': sorted_fonts
+        'fonts': sorted_fonts,
+        'layer_id': layer_id
     }
    
     return render_to_response('unique_symbol_add.html', response, context_instance=RequestContext(request))
 
 
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@admin_required
+def save_style(request, layer_id):
+    if request.method == 'POST':
+        style_data = request.POST['style_data']
+        json_data = json.loads(style_data)
+        
+        layer = Layer.objects.get(id=int(layer_id))
+        style = Style(
+            title = utils.create_style_name(layer),
+            name = utils.create_style_name(layer),
+            description = "",
+            type = json_data.get('type')
+        )
+        style.save()
+        layerStyle = LayerStyle(
+            layer = layer,
+            style = style
+        )
+        layerStyle.save()
+            
+        json_rule = json_data.get('rule')
+        rule = Rule(
+            name = json_rule.get('name') if json_rule.get('name') != "" else utils.create_style_name(layer),
+            order = json_rule.get('order'),
+            style = style
+        )
+        rule.save();
+        
+        for symbols in json_data.get('symbols'):
+            symbol = Symbol(
+                name = symbols.get('name'),
+                sld_code = symbols.get('sld_code')
+            )
+            symbol.save()
+            RuleSymbol.objects.create(
+                rule_id = rule.id, 
+                symbol_id = symbol.id
+            )
+                
+        sld_body = get_sld_style(layer_id, style.id, request.session)
+        layer = Layer.objects.get(id=layer_id)
+        datastore = Datastore.objects.get(id=layer.datastore_id) 
+        workspace = Workspace.objects.get(id=datastore.workspace_id)
+
+        if not mapservice_backend.createStyle(style.name, sld_body, request.session): 
+            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+        
+        layerStyles = LayerStyle.objects.filter(layer=layer).order_by('order')
+        if len(layerStyles) > 0 and str(layerStyles[0].style_id) == str(style.id):
+            mapservice_backend.setLayerStyle(workspace.name+":"+layer.name, style.name, request.session)
+            
+        layer.style = style.name
+        layer.save()
+        
+        return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
