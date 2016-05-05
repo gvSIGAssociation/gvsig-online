@@ -11,8 +11,8 @@
 				<h3 class="box-title">{% trans "Create new style" %}</h3>
 				<div class="box-tools pull-right">
 					<button id="refresh-preview" class="btn btn-box-tool refresh-preview"><i class="fa fa-refresh margin-r-5"></i> {% trans "Update preview" %}</button>
-					<button id="metadata-legend" class="btn btn-box-tool metadata-legend"><i class="fa fa-cog margin-r-5"></i> {% trans "Advance" %}</button>			
-					<button id="default-legend" class="btn btn-box-tool default-legend"><i class="fa fa-star margin-r-5"></i> {% trans "Default" %}</button>
+					<button id="metadata-legend" class="btn btn-box-tool metadata-legend"><i class="fa fa-cog margin-r-5"></i> {% trans "Metadata" %}</button>			
+					<button id="default-legend" class="btn btn-box-tool default-legend"><i class="fa fa-star margin-r-5"></i> {% trans "Set default" %}</button>
 					<button id="save-legend" class="btn btn-box-tool save-legend"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
 				</div>
 			</div>
@@ -49,8 +49,7 @@
 
 							<div class="box-footer clearfix">
 								<a id="append-label-button" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-tags margin-r-5"></i>{% trans "Append label" %}</a>
-								<a id="append-image-button" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-star margin-r-5"></i>{% trans "Append graphic" %}</a>
-								<a id="append-vector-button" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-square-o margin-r-5"></i>{% trans "Append vectorial symbol" %}</a>
+								<a id="append-symbol-button" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-star-o margin-r-5"></i>{% trans "Append symbol" %}</a>
 							</div>
 						</div>
 					</div>
@@ -91,18 +90,15 @@ $(document).ready(function() {
 		})
 	});
 	
-	$("#append-vector-button").on('click', function(e){
-		uniqueSymbol.appendVector();
-	});
-	
-	$("#append-image-button").on('click', function(e){
-		uniqueSymbol.appendGraphic();
+	$("#append-symbol-button").on('click', function(e){
+		uniqueSymbol.appendSymbol();
 	});
 	
 	$("#append-label-button").on('click', function(e){
 		uniqueSymbol.appendLabel();
 	});
 	
+	var layerId = "{{layer_id}}";
 	var featureType = "{{featureType}}";
 	var fields = {{fields|safe}};
 	var alphanumericFields = {{alphanumeric_fields|safe}};
@@ -110,6 +106,10 @@ $(document).ready(function() {
 	var fonts = {{ fonts|safe }};
 	
 	var uniqueSymbol = new UniqueSymbol(featureType, fields, alphanumericFields, sldFilterValues, fonts);
+	
+	$("#save-legend").on('click', function(e){
+		uniqueSymbol.save(layerId);
+	});
 
 });
 </script>

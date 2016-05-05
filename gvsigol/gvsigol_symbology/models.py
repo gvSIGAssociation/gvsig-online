@@ -23,6 +23,7 @@ from __future__ import unicode_literals
 '''
 from django.db import models
 from gvsigol_services.models import Layer
+from django.utils.translation import ugettext as _
 
 class Style(models.Model):
     UNIQUE_SYMBOL = 'SU'
@@ -32,12 +33,12 @@ class Style(models.Model):
     COLOR_TABLES = 'TC'
     CHARTS = 'CH'
     LEGEND_TYPES = (
-        (UNIQUE_SYMBOL, 'Simbolo_unico'),
-        (UNIQUE_VALUES, 'Valores_unicos'),
-        (INTERVALS, 'Intervalos'),
-        (EXPRESSIONS, 'Expresiones'),
-        (COLOR_TABLES, 'Tabla de color'),
-        (CHARTS, 'Graficas'),
+        (UNIQUE_SYMBOL, _('Unique symbol')),
+        (UNIQUE_VALUES, _('Unique values')),
+        (INTERVALS, _('Intervals')),
+        (EXPRESSIONS, _('Expressions')),
+        (COLOR_TABLES, _('Color table')),
+        (CHARTS, _('Graphics')),
     )
     title = models.CharField(max_length=100, blank=True, null=True)
     name = models.CharField(max_length=100)
