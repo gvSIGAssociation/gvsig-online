@@ -4,6 +4,9 @@ urlpatterns = [
     url(r'^style_layer_list/$', 'gvsigol_symbology.views.style_layer_list', name='style_layer_list'),
     url(r'^select_legend_type/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.select_legend_type', name='select_legend_type'),
     url(r'^unique_symbol_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.unique_symbol_add', name='unique_symbol_add'),
+    
+    url(r'^save_style/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.save_style', name='save_style'),
+    
     #url(r'^style_label_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.style_label_update', name='style_label_update'),
     #url(r'^create_style/$', 'gvsigol_symbology.views.create_style', name='create_style'),
     #url(r'^delete_style/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.delete_style', name='delete_style'),
@@ -21,8 +24,7 @@ urlpatterns = [
     #url(r'^get_sld_style/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.get_sld_style', name='get_sld_style'),
     #url(r'^get_sld_style2/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.sld_tools.get_sld_style2', name='get_sld_style2'),
     #url(r'^set_default_style/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.set_default_style', name='set_default_style'),
-    #url(r'^save_legend/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.save_legend', name='save_legend'),
-    #url(r'^save_style/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.save_style', name='save_style'),
+    #url(r'^save_legend/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.save_legend', name='save_legend'),   
     #url(r'^get_layer_field_description/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.get_layer_field_description', name='get_layer_field_description'),
     #url(r'^get_unique_values/(?P<layer_id>[0-9]+)/(?P<field>\w+)/$', 'gvsigol_symbology.views.get_unique_values', name='get_unique_values'),
     #url(r'^get_minmax_values/(?P<layer_id>[0-9]+)/(?P<field>\w+)/$', 'gvsigol_symbology.views.get_minmax_values', name='get_minmax_values'),

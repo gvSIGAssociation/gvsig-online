@@ -578,6 +578,7 @@ def get_sld_style(layer_id, style_id, session):
         sld += "<Rule>"
         if rule.name != None and rule.name != "":
             sld += "<Name>"+ escape(rule.name) +"</Name>"
+            sld += "<Title>"+ escape(rule.name) +"</Title>"
         if rule.filter != None and rule.filter != "":
             sld += "<Filter>"+ get_sld_filter(rule.filter, layer_id, session) +"</Filter>"
         if rule.minscale != None and rule.minscale != "":
