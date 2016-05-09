@@ -162,10 +162,10 @@ LANGUAGES = (
     ('en', _('English')),   
 )
 LOCALE_PATHS = (
-    '/opt/gvsigonline/gvsigol/gvsigol_core/locale',
-    '/opt/gvsigonline/gvsigol/gvsigol_services/locale',
-    '/opt/gvsigonline/gvsigol/gvsigol_symbology/locale',
-    '/opt/gvsigonline/gvsigol/gvsigol_auth/locale',
+    '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol_core/locale',
+    '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol_services/locale',
+    '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol_symbology/locale',
+    '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol_auth/locale',
 )
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -184,7 +184,7 @@ SITE_ID=1
 MEDIA_ROOT = '/var/www/media/'
 MEDIA_URL = '##BASE_URL##/media/'
 STATIC_URL = '##BASE_URL##/static/'
-STATIC_ROOT = '/opt/gvsigonline/gvsigol/assets'
+STATIC_ROOT = '##GVSIG_ONLINE_HOME##/gvsigol/assets'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
