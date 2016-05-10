@@ -21,12 +21,11 @@
  */
  
  
-var UniqueSymbol = function(featureType, symbologyUtils) {
-	this.count = 0;
+var UniqueSymbol = function(featureType, symbologyUtils, rule_opts) {
 	this.selected = null;
 	this.featureType = featureType;
 	this.symbologyUtils = symbologyUtils;
-	this.rule = new Rule(this.count, featureType);
+	this.rule = new Rule(0, featureType, rule_opts);
 };
 
 UniqueSymbol.prototype.getRule = function() {
@@ -38,13 +37,13 @@ UniqueSymbol.prototype.appendSymbolizer = function() {
 	
 	var symbolizer = null;
 	if (this.featureType == 'PointSymbolizer') {
-		symbolizer = new PointSymbolizer(this.count, this.rule);
+		symbolizer = new PointSymbolizer(this.rule.getNextSymbolizerId(), this.rule);
 		
 	} else if (this.featureType == 'LineSymbolizer') {
-		symbolizer = new LineSymbolizer(this.count, this.rule);
+		symbolizer = new LineSymbolizer(this.rule.getNextSymbolizerId(), this.rule);
 		
 	} else if (this.featureType == 'PolygonSymbolizer') {
-		symbolizer = new PolygonSymbolizer(this.count, this.rule);
+		symbolizer = new PolygonSymbolizer(this.rule.getNextSymbolizerId(), this.rule);
 	}
 	
 	$('#table-symbolizers tbody').append(symbolizer.getTableUI());
@@ -77,8 +76,7 @@ UniqueSymbol.prototype.appendSymbolizer = function() {
 	
 	this.rule.appendSymbolizer(symbolizer);
 	symbolizer.updatePreview();
-	
-	this.count++;
+
 	self.setSelected(symbolizer);
 	this.updateForm();
 };
@@ -86,7 +84,7 @@ UniqueSymbol.prototype.appendSymbolizer = function() {
 UniqueSymbol.prototype.appendLabel = function() {
 	var self = this;
 	
-	var label = new TextSymbolizer(this.count, this.symbologyUtils, this.rule);
+	var label = new TextSymbolizer(this.rule.getNextLabelId(), this.symbologyUtils, this.rule);
 	$('#table-symbolizers tbody').append(label.getTableUI());
 	$("#table-symbolizers-body").sortable({
 		placeholder: "sort-highlight",
@@ -117,7 +115,6 @@ UniqueSymbol.prototype.appendLabel = function() {
 	this.rule.appendLabel(label);
 	label.updatePreview();
 	
-	this.count++;
 	self.setSelected(label);
 	this.updateForm();
 };
@@ -466,6 +463,16 @@ UniqueSymbol.prototype.save = function(layerId) {
 			sld: this.rule.getSymbolizers()[i].toXML(),
 			json: this.rule.getSymbolizers()[i].toJSON(),
 			order: this.rule.getSymbolizers()[i].order
+		};
+		symbolizers.push(symbolizer);
+	}
+	
+	for (var i=0; i < this.rule.getLabels().length; i++) {
+		var label = {
+			type: this.rule.getLabels()[i].type,
+			sld: this.rule.getLabels()[i].toXML(),
+			json: this.rule.getLabels()[i].toJSON(),
+			order: this.rule.getLabels()[i].order
 		};
 		symbolizers.push(symbolizer);
 	}

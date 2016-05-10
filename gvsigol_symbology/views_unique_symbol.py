@@ -134,7 +134,7 @@ def unique_symbol_update(request, layer_id, style_id):
         'maxscale': r.maxscale,
         'order': r.order,
         'type': r.type,
-        'symbolizers': json.dumps(symbolizers)
+        'symbolizers': symbolizers
     }
                         
     response = {
@@ -146,7 +146,9 @@ def unique_symbol_update(request, layer_id, style_id):
         'layer_id': layer_id,
         'libraries': Library.objects.all(),
         'style': style,
-        'rule': rule
+        'minscale': r.minscale,
+        'maxscale': r.maxscale,
+        'rule': json.dumps(rule)
         
     }
     return render_to_response('unique_symbol_update.html', response, context_instance=RequestContext(request))

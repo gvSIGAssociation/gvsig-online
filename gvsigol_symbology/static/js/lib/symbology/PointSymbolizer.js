@@ -21,7 +21,7 @@
  */
  
  
-var PointSymbolizer = function(id, rule) {
+var PointSymbolizer = function(id, rule, symbolizer_object) {
 	this.id = id;
 	this.type = 'PointSymbolizer';
 	this.name = 'PointSymbolizer ' + id;
@@ -37,6 +37,21 @@ var PointSymbolizer = function(id, rule) {
 	this.order = 0;
 	this.is_vector = true;
 	this.rule = rule;
+	
+	if (symbolizer_object) {
+		this.name = symbolizer_object.name;
+		this.shape = symbolizer_object.shape;
+		this.fill_color = symbolizer_object.fill_color;
+		this.fill_opacity = symbolizer_object.fill_opacity;
+		this.with_border = symbolizer_object.with_border;
+		this.border_color = symbolizer_object.border_color;
+		this.border_size = symbolizer_object.border_size;
+		this.border_opacity = symbolizer_object.border_opacity;
+		this.border_type = symbolizer_object.border_type;
+		this.rotation = symbolizer_object.rotation;
+		this.order = symbolizer_object.order;
+		this.is_vector = symbolizer_object.is_vector;
+	}
 };
 
 PointSymbolizer.prototype.getTableUI = function() {

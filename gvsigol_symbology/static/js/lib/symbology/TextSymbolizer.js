@@ -20,7 +20,7 @@
  * @author: Javier Rodrigo <jrodrigo@scolab.es>
  */
  
-var TextSymbolizer = function(id, symbologyUtils, rule) {
+var TextSymbolizer = function(id, symbologyUtils, rule, symbolizer_object) {
 	this.id = id;
 	this.type = 'TextSymbolizer';
 	this.name = 'TextSymbolizer ' + id;
@@ -40,6 +40,24 @@ var TextSymbolizer = function(id, symbologyUtils, rule) {
 	this.order = 0;
 	this.symbologyUtils = symbologyUtils;
 	this.rule = rule;
+	
+	if (symbolizer_object) {
+		this.name = symbolizer_object.name;
+		this.field = symbolizer_object.field;
+		this.font_family = symbolizer_object.font_family;
+		this.font_size = symbolizer_object.font_size;
+		this.font_color = symbolizer_object.font_color;
+		this.font_weight = symbolizer_object.font_weight;
+		this.font_style = symbolizer_object.font_style;
+		this.halo_color = symbolizer_object.halo_color;
+		this.halo_opacity = symbolizer_object.halo_opacity;
+		this.halo_radius = symbolizer_object.halo_radius;
+		this.max_iterations = symbolizer_object.max_iterations;
+		this.max_length = symbolizer_object.max_length;
+		this.min_wrapper = symbolizer_object.min_wrapper;
+		this.solve_overlaps = symbolizer_object.solve_overlaps;
+		this.order = symbolizer_object.order;
+	}
 };
 
 TextSymbolizer.prototype.getTableUI = function() {
