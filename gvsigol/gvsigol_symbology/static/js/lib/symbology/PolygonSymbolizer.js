@@ -21,11 +21,10 @@
  */
  
  
-var PolygonSymbolizer = function(id, rule) {
+var PolygonSymbolizer = function(id, rule, symbolizer_object) {
 	this.id = id;
 	this.type = 'PolygonSymbolizer';
 	this.name = 'PolygonSymbolizer ' + id;
-	this.shape = 'circle';
 	this.fill_color = "#000000";
 	this.fill_opacity = 0.5;
 	this.with_border = true;
@@ -35,8 +34,21 @@ var PolygonSymbolizer = function(id, rule) {
 	this.border_type = "solid";
 	this.rotation = 0;
 	this.order = 0;
-	this.is_vector = true;
 	this.rule = rule;
+	
+	if (symbolizer_object) {
+		this.name = symbolizer_object.name;
+		this.shape = symbolizer_object.shape;
+		this.fill_color = symbolizer_object.fill_color;
+		this.fill_opacity = symbolizer_object.fill_opacity;
+		this.with_border = symbolizer_object.with_border;
+		this.border_color = symbolizer_object.border_color;
+		this.border_size = symbolizer_object.border_size;
+		this.border_opacity = symbolizer_object.border_opacity;
+		this.border_type = symbolizer_object.border_type;
+		this.rotation = symbolizer_object.rotation;
+		this.order = symbolizer_object.order;
+	}
 };
 
 PolygonSymbolizer.prototype.getTableUI = function() {
@@ -195,7 +207,6 @@ PolygonSymbolizer.prototype.toJSON = function(){
 		id: this.id,
 		type: this.type,
 		name: this.name,
-		shape: this.shape,
 		fill_color: this.fill_color,
 		fill_opacity: this.fill_opacity,
 		with_border: this.with_border,
@@ -204,8 +215,7 @@ PolygonSymbolizer.prototype.toJSON = function(){
 		border_opacity: this.border_opacity,
 		border_type: this.border_type,
 		rotation: this.rotation,
-		order: this.order,
-		is_vector: this.is_vector
+		order: this.order
 	};
 	
 	return JSON.stringify(object);
