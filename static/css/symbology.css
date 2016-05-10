@@ -24,18 +24,13 @@
 
 .label-preview-svg{
 	max-height: 30px;
+	max-width: 100px;
 }
 
-.vector-link {
+.symbolizer-link {
 	color: #777 !important;
 }
-.vector-link:hover {
-	color: #999 !important;
-}
-.graphic-link {
-	color: #777 !important;
-}
-.graphic-link:hover {
+.symbolizer-link:hover {
 	color: #999 !important;
 }
 .label-link {
@@ -48,5 +43,9 @@
 .link-selected {
 	color: #3c8dbc !important;
 	font-weight: bold;
+}
+
+.users-list > li {
+    width: 10% !important;
 }
 

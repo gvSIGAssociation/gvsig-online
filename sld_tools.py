@@ -24,8 +24,8 @@
 '''
 
 from backend_symbology import get_layer_field_description
-from gvsigol_services.models import Datastore, Workspace
-from models import RuleSymbol, Style, Rule, Symbol, Layer
+from gvsigol_services.models import Datastore, Workspace, Layer
+from models import Style, Rule, StyleRule, Symbolizer
 from django_ajax.decorators import ajax
 from xml.sax.saxutils import escape
 import gvsigol.settings
@@ -569,32 +569,34 @@ def get_sld_style(layer_id, style_id, session):
         sld += "<Name>"+ ws.name + ":" + layer.name +"</Name>"
     if style.title != None and style.title != "":
         sld += "<Title>"+ escape(style.title) +"</Title>"
-    if style.description != None and style.description != "":
-        sld += "<Abstract>"+ escape(style.description) +"</Abstract>"
+    if style.title != None and style.title != "":
+        sld += "<Abstract>"+ escape(style.title) +"</Abstract>"
     sld += "<FeatureTypeStyle>"
     
-    rules = Rule.objects.filter(style_id=style_id)
-    for rule in rules:
+    style_rules = StyleRule.objects.filter(style_id=style_id)
+    for st in style_rules:
+        rule = Rule.objects.get(id=st.rule.id)
         sld += "<Rule>"
         if rule.name != None and rule.name != "":
             sld += "<Name>"+ escape(rule.name) +"</Name>"
-            sld += "<Title>"+ escape(rule.name) +"</Title>"
+            sld += "<Title>"+ escape(rule.title) +"</Title>"
         if rule.filter != None and rule.filter != "":
             sld += "<Filter>"+ get_sld_filter(rule.filter, layer_id, session) +"</Filter>"
-        if rule.minscale != None and rule.minscale != "":
+        if rule.minscale != None and rule.minscale != -1:
             sld += "<MinScaleDenominator>"+ str(rule.minscale) +"</MinScaleDenominator>"
-        if rule.maxscale != None and rule.maxscale != "":
+        if rule.maxscale != None and rule.maxscale != -1:
             sld += "<MaxScaleDenominator>"+ str(rule.maxscale) +"</MaxScaleDenominator>"
         
-        rulesymbols = RuleSymbol.objects.filter(rule_id = rule.id)
-        for rulesymbol in rulesymbols:
-            symbol = Symbol.objects.get(id=rulesymbol.symbol_id)
-            clean_sld = get_clean_sld(symbol.sld_code, symbol)
+        symbolizers = Symbolizer.objects.filter(rule = rule)
+        for symbolizer in symbolizers:
+            sld += symbolizer.sld
+            '''
+            clean_sld = get_clean_sld(symbol.sld_code, rule)
             symbs = get_symbolizers(clean_sld)
             for symb in symbs:
                 symbol_sld = get_geometry_sld(layer_id, symb, session)                    
-                sld += get_graphics_sld(symbol_sld)
-            
+                sld += get_graphics_sld(symbol_sld) 
+            '''
         sld += "</Rule>"
     
     sld += "</FeatureTypeStyle>"
