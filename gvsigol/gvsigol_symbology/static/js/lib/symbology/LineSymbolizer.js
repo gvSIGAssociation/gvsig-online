@@ -21,20 +21,29 @@
  */
  
  
-var LineSymbolizer = function(id, rule) {
+var LineSymbolizer = function(id, rule, symbolizer_object) {
 	this.id = id;
 	this.type = 'LineSymbolizer';
 	this.name = 'LineSymbolizer ' + id;
 	this.fill_color = "#000000";
 	this.fill_opacity = 0.5;
-	this.with_border = true;
 	this.border_color = "#000000";
 	this.border_size = 1;
 	this.border_opacity = 1;
 	this.border_type = "solid";
-	this.rotation = 0;
 	this.order = 0;
 	this.rule = rule;
+	
+	if (symbolizer_object) {
+		this.name = symbolizer_object.name;
+		this.fill_color = symbolizer_object.fill_color;
+		this.fill_opacity = symbolizer_object.fill_opacity;
+		this.border_color = symbolizer_object.border_color;
+		this.border_size = symbolizer_object.border_size;
+		this.border_opacity = symbolizer_object.border_opacity;
+		this.border_type = symbolizer_object.border_type;
+		this.order = symbolizer_object.order;
+	}
 };
 
 LineSymbolizer.prototype.getTableUI = function() {

@@ -21,36 +21,12 @@
  */
  
  
-var SymbolLibrary = function() {
+var SymbolLibrary = function(symbologyUtils) {
+	this.selected = null;
 	this.featureType = null;
-	
-	this.shapes = [{
-		value: 'circle',
-		title: gettext('Circle') 
-	},{
-		value: 'square',
-		title: gettext('Square') 
-	},{
-		value: 'triangle',
-		title: gettext('Triangle') 
-	},{
-		value: 'star',
-		title: gettext('Star') 
-	},{
-		value: 'cross',
-		title: gettext('Cross') 
-	},{
-		value: 'x',
-		title: 'X' 
-	}];
+	this.symbologyUtils = symbologyUtils;
+	this.symbolizers = new Array();
 };
-
-SymbolLibrary.prototype.count = 0;
-
-SymbolLibrary.prototype.symbols = new Array();
-
-SymbolLibrary.prototype.selected = null;
-
 
 SymbolLibrary.prototype.appendSymbol = function(featureType) {
 	var self = this;
@@ -129,15 +105,6 @@ SymbolLibrary.prototype.appendSymbol = function(featureType) {
 
 SymbolLibrary.prototype.setSelected = function(element) {
 	this.selected = element;
-	
-	$(".symbol-link").each(function() {$(this).removeClass('link-selected');});
-	
-	$(".symbol-link").each(function() {
-		if (this.dataset.symid == element.id) {
-			$(this).addClass('link-selected');
-		}			
-	});
-	
 };
 
 SymbolLibrary.prototype.deleteSymbol = function(id) {

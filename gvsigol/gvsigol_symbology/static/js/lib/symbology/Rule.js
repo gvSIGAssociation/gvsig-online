@@ -21,7 +21,7 @@
  */
  
  
-var Rule = function(id, featureType) {
+var Rule = function(id, featureType, rule_opts) {
 	this.id = id;
 	this.type = featureType;
 	this.name = $("#style-name").val();
@@ -32,7 +32,17 @@ var Rule = function(id, featureType) {
 	this.order = 0;
 	this.symbolizers = new Array();
 	this.labels = new Array();
-	this.createUI();
+	
+	if (rule_opts) {
+		this.name = rule_opts.name;
+		this.title = rule_opts.title;
+		this.createUI();
+		this.loadSymbolizers(rule_opts.symbolizers);
+		
+	} else {
+		this.createUI();
+	}
+	
 };
 
 Rule.prototype.createUI = function() {
@@ -45,6 +55,45 @@ Rule.prototype.createUI = function() {
 	ui += '</tr>';	
 	
 	$('#table-rules tbody').append(ui);
+};
+
+Rule.prototype.loadSymbolizers = function(json_symbolizers) {
+	for (var i=0; i<json_symbolizers.length; i++) {
+		var symbolizer_object = JSON.parse(json_symbolizers[i].json);
+		var symbolizer = null;
+		if (symbolizer_object.type == 'PointSymbolizer') {
+			symbolizer = new PointSymbolizer(this.getNextSymbolizerId(), this, symbolizer_object);
+			$('#table-symbolizers tbody').append(symbolizer.getTableUI());
+			this.appendSymbolizer(symbolizer);
+			symbolizer.updatePreview();
+			
+		} else if (symbolizer_object.type == 'LineSymbolizer') {
+			symbolizer = new LineSymbolizer(this.getNextSymbolizerId(), this, symbolizer_object);
+			$('#table-symbolizers tbody').append(symbolizer.getTableUI());
+			this.appendSymbolizer(symbolizer);
+			symbolizer.updatePreview();
+			
+		} else if (symbolizer_object.type == 'PolygonSymbolizer') {
+			symbolizer = new PolygonSymbolizer(this.getNextSymbolizerId(), this, symbolizer_object);
+			$('#table-symbolizers tbody').append(symbolizer.getTableUI());
+			this.appendSymbolizer(symbolizer);
+			symbolizer.updatePreview();
+			
+		} else if (symbolizer_object.type == 'TextSymbolizer') {
+			symbolizer = new TextSymbolizer(this.getNextLabelId(), this, symbolizer_object);
+			$('#table-symbolizers tbody').append(symbolizer.getTableUI());
+			this.appendLabel(symbolizer);
+			symbolizer.updatePreview();
+		}
+	}
+};
+
+Rule.prototype.getNextSymbolizerId = function() {
+	return this.symbolizers.length;
+};
+
+Rule.prototype.getNextLabelId = function() {
+	return this.labels.length;
 };
 
 Rule.prototype.getSymbolizers = function() {
