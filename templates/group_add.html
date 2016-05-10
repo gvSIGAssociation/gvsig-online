@@ -7,11 +7,15 @@
 		<div class="col-md-12">
 			<div class="box box-primary">
 
-				<div class="box-header with-border">
-					<h3 class="box-title">{% trans "Add group" %}</h3>
-				</div>
-
 				<form role="form" method="post" action="/gvsigonline/auth/group_add/">
+					<div class="box-header with-border">
+						<h3 class="box-title">{% trans "Add group" %}</h3>
+						<div class="box-tools pull-right">
+							<button type="submit" class="btn btn-success btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+						</div>
+					</div>
+
+				
 					<div class="box-body">
 					{% csrf_token %}					
 						{% if form.errors %}
@@ -44,11 +48,7 @@
 								<label for="id_description">{% trans "Description" %}</label>
 					    		{{ form.description }}
 							</div>
-						</div>										
-					
-						<div class="box-footer">
-	                    	<button type="submit" class="btn btn-primary">{% trans "Save group" %}</button>
-	                  	</div>		
+						</div>											
 	            	</div>
 				</form>		
 			</div>
