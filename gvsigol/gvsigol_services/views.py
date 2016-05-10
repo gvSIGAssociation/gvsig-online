@@ -228,6 +228,7 @@ def layer_list(request):
 def layer_delete(request, layer_id):
     try:
         layer = Layer.objects.get(pk=layer_id)
+        mapservice_backend.deleteGeoserverLayerGroup(layer.layer_group, request.session)
         if mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer, session=request.session):
             mapservice_backend.deleteLayerStyles(layer, session=request.session)
             gn_backend.metadata_delete(request.session, layer)

@@ -20,7 +20,7 @@
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
-from models import  LayerStyle, Style
+from models import  StyleLayer, Style
 import psycopg2
 import json
     
@@ -107,7 +107,7 @@ def sortFontsArray(array):
     return output
 
 def create_style_name(layer):
-    layer_styles = LayerStyle.objects.filter(layer=layer)
+    layer_styles = StyleLayer.objects.filter(layer=layer)
     index = len(layer_styles)
     style_name = layer.name + '_' + str(index)
     

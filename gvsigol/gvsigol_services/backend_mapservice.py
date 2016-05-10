@@ -21,7 +21,8 @@
 
 from __builtin__ import isinstance
 from models import Layer, LayerGroup, Datastore, Workspace, DataRule, LayerReadGroup, LayerWriteGroup
-from gvsigol_symbology.models import LayerStyle, Style, Rule, Symbol, RuleSymbol
+from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer,\
+    StyleRule
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
 from gvsigol.settings import GVSIGOL_SERVICES
@@ -319,14 +320,23 @@ class Geoserver():
         except Exception as e:
             return False
         
-    def createDefaultStyle(self, lyr, name, session):
+    def createDefaultStyle(self, layer, name, session):
         """
         Create new style
         """
         data = ''
         symbolizer = ''
         
-        symbol_type = self.get_geometry_type(lyr, session)
+        geom_type = self.get_geometry_type(layer, session)
+        symbol_type = None
+        if geom_type == 'point':
+            symbol_type = 'PointSymbolizer'           
+        elif geom_type == 'line':
+            symbol_type = 'LineSymbolizer'
+        elif geom_type == 'polygon':
+            symbol_type = 'PolygonSymbolizer'
+        elif geom_type == 'raster':
+            symbol_type = 'RasterSymbolizer'
         
         data += '<?xml version="1.0" encoding="ISO-8859-1"?>' 
         data += '<StyledLayerDescriptor version="1.0.0" xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" '
@@ -337,11 +347,11 @@ class Geoserver():
         data +=         '<Name>Default Styler</Name>' 
         data +=         '<UserStyle>' 
         data +=             '<Name>' + name + '</Name>'
-        data +=             '<Title>Style for: ' + lyr.title + '</Title>' 
+        data +=             '<Title>Style for: ' + layer.title + '</Title>' 
         data +=             '<FeatureTypeStyle>' 
         data +=                 '<Rule>' 
         
-        if symbol_type == 'polygon':
+        if symbol_type == 'PolygonSymbolizer':
             symbolizer +=   '<PolygonSymbolizer>' 
             symbolizer +=       '<Fill>' 
             symbolizer +=           '<CssParameter name="fill">#383838</CssParameter>' 
@@ -353,7 +363,7 @@ class Geoserver():
             symbolizer +=       '</Stroke>' 
             symbolizer +=   '</PolygonSymbolizer>'
             
-        elif symbol_type == 'line':
+        elif symbol_type == 'LineSymbolizer':
             symbolizer +=   '<LineSymbolizer>' 
             symbolizer +=       '<Stroke>' 
             symbolizer +=           '<CssParameter name="stroke">#000000</CssParameter>' 
@@ -361,7 +371,7 @@ class Geoserver():
             symbolizer +=       '</Stroke>' 
             symbolizer +=   '</LineSymbolizer>'
             
-        elif symbol_type == 'point':
+        elif symbol_type == 'PointSymbolizer':
             symbolizer +=   '<PointSymbolizer>' 
             symbolizer +=       '<Graphic>'
             symbolizer +=           '<Mark>'
@@ -380,7 +390,7 @@ class Geoserver():
             symbolizer +=       '</Graphic>'
             symbolizer +=   '</PointSymbolizer>'
             
-        elif symbol_type == 'raster':
+        elif symbol_type == 'RasterSymbolizer':
             symbolizer +=   '<RasterSymbolizer>'
             symbolizer +=       '<Opacity>1.0</Opacity>'
             symbolizer +=   '</RasterSymbolizer>'
@@ -396,27 +406,39 @@ class Geoserver():
             catalog = self.getGsconfig(session)
             if catalog.get_style(name, workspace=None) == None:
                 catalog.create_style(name, data.encode('utf-8'), overwrite=False, workspace=None, style_format="sld10", raw=False)
-            tp = 'SU'
-            if symbol_type == 'raster':
+            tp = 'US'
+            if geom_type == 'raster':
                 tp = 'CT'
-            stl = Style(title='Style for: ' + lyr.title, name=name, description=name, type=tp)
-            stl.save()
+                
+            style = Style(name=name, title=_('Style for: ') + layer.title, is_default=True, type=tp, order=0)
+            style.save()
+
+            style_layer = StyleLayer(style=style, layer=layer)
+            style_layer.save()
             
-            layerStyles = LayerStyle.objects.filter(layer=lyr)
-            max_order = 0
-            if layerStyles:
-                auxmax_order = layerStyles.aggregate(Max('order'))
-                max_order = auxmax_order['order__max']
-            lysStl = LayerStyle(style=stl, layer=lyr, order=max_order+1)
-            lysStl.save()
-            
-            rule = Rule(name=lyr.name, style=stl)
+            rule = Rule(
+                name = _('Default symbol'),
+                title = _('Default symbol'),
+                type = symbol_type,
+                order = 0
+            )
             rule.save()
-            symbol = Symbol(name='default_symbolizer', description='default_symbolizer', sld_code=symbolizer)
-            symbol.save()
-            rule_symbol = RuleSymbol(rule=rule, symbol=symbol)
-            rule_symbol.save()
             
+            style_rule = StyleRule(
+                style=style,
+                rule=rule
+            )
+            style_rule.save()
+            
+            symb = Symbolizer(
+                rule=rule,
+                type=symbol_type,
+                sld=symbolizer,
+                json= "",
+                order=0
+            )   
+            symb.save()
+                    
             return True
         
         except Exception as e:
@@ -462,14 +484,22 @@ class Geoserver():
         
     def deleteLayerStyles(self, lyr, session):
         try:
-            layerStyles = LayerStyle.objects.filter(layer=lyr)
+            layer_styles = StyleLayer.objects.filter(layer=lyr)
     
-            for layerStyle in layerStyles:
-                style = Style.objects.get(id=layerStyle.style_id)
+            for layer_style in layer_styles:
+                style = Style.objects.get(id=layer_style.style_id)
                 catalog = self.getGsconfig(session)
                 gs_style = catalog.get_style(style.name, workspace=None)
                 catalog.delete(gs_style, purge=True, recurse=False)
-                layerStyle.delete()
+                layer_style.delete()
+                style_rules = StyleRule.objects.filter(style=style)
+                for style_rule in style_rules:
+                    rule = Rule.objects.filter(id=style_rule.rule.id)
+                    symbolizers = Symbolizer.objects.filter(rule=rule)
+                    for symbolizer in symbolizers:
+                        symbolizer.delete()
+                    rule.delete()
+                    style_rule.delete()
                 style.delete()
                 
             return True
@@ -532,7 +562,7 @@ class Geoserver():
             if resource is not None:
                 try:
                     catalog.delete(resource, purge, True)
-                except:
+                except Exception as e:
                     # only fail if layer exists but deletion failed
                     return False
         except:

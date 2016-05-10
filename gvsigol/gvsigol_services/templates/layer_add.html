@@ -7,11 +7,14 @@
 	<div class="col-md-12">
 		<div class="box box-primary">
 
-			<div class="box-header with-border">
-				<h3 class="box-title">{% trans "Import layer from database" %}</h3>
-			</div>
-
 			<form role="form" method="post" action="/gvsigonline/services/layer_add/">
+				<div class="box-header with-border">
+					<h3 class="box-title">{% trans "Import layer from database" %}</h3>
+					<div class="box-tools pull-right">
+						<button type="submit" class="btn btn-success btn-sm save-button">{% trans "Next" %} <i class="fa fa-angle-right margin-l-5"></i></button>					
+					</div>
+				</div>
+			
 				<div class="box-body">
 				{% csrf_token %}					
 					{% if form.errors %}
@@ -94,11 +97,7 @@
 							<label for="md-abstract">{% trans "Metadata: Abstract" %}</label>
 				        	<textarea class="form-control" name="md-abstract" id="md-abstract" rows="5">{% trans "Some description of the layer" %}</textarea>	     	
 				        </div>
-					</div>				
-				
-					<div class="box-footer">
-                   		<button id="dash-submit-button" type="submit" class="btn btn-primary">{% trans "Next" %}</button>
-                 	</div>		
+					</div>					
             	</div>
 			</form>		
 		</div>
@@ -108,7 +107,7 @@
 
 {% block extra-scripts %}
 <script type="text/javascript">
-	$('#dash-submit-button').click( function() {
+	$('.save-button').click( function() {
 		$("body").overlay();
 	});
 
