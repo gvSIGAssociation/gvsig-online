@@ -1,0 +1,127 @@
+{% extends "base_symbology.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="box box-primary">
+
+				<div class="box-header with-border">
+					<h3 class="box-title">{% trans "Create new symbol" %}</h3>
+					<div class="box-tools pull-right">
+						<button id="save-symbol" class="btn btn-success btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+					</div>
+				</div>
+
+				<div class="box-body">
+					{% csrf_token %}					
+					<div id="form-error" style="color:#ff0000;">
+					</div>
+									
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label>{% trans "Name" %}</label>
+							<input placeholder="{% trans 'Symbol name' %}" name="symbol-name" id="symbol-name" type="text" class="form-control">	
+						</div>
+					</div>
+									
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label>{% trans "Title" %}</label>
+				    		<input placeholder="{% trans 'Symbol title' %}" name="symbol-title" id="symbol-title" type="text" class="form-control">
+						</div>
+						<div class="col-md-12">
+							<p class="text-muted">* {% trans "Specifies a title for the rule. The title is used in display lists and legends" %}.</p>
+						</div>	
+					</div>
+					<div class="row">
+						<div class="col-md-6 form-group">
+							<label>{% trans "Min. scale" %}</label>
+				    		<input placeholder="{% trans 'Minimum scale denominator' %}" name="symbol-minscale" id="symbol-minscale" type="number" class="form-control">
+						</div>
+						<div class="col-md-6 form-group">
+							<label>{% trans "Max. scale" %}</label>
+				    		<input placeholder="{% trans 'Maximum scale denominator' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" class="form-control">
+						</div>
+						<div class="col-md-12 form-group">
+							<p class="text-muted">* {% trans "Specifies the minimum and maximum scale denominator (inclusive) for the scale range in which this rule applies" %}.</p>
+						</div>							
+					</div>
+					
+					<div class="row">
+						<div class="col-md-4">
+							<div class="box box-primary">
+								<div class="box-header with-border">
+									<h3 class="box-title">{% trans "Symbol elements" %}</h3>
+								</div>
+								<div class="box-body">
+									<div class="table-responsive">
+										<table id="table-unique-symbol" class="table no-margin">
+											<thead>
+												<tr>
+													<th>{% trans "Name" %}</th>
+													<th>{% trans "Preview" %}</th>
+													<th></th>
+												</tr>
+											</thead>
+											<tbody id="table-unique-symbol-body">
+											</tbody>
+										</table>
+									</div>
+								</div>
+	
+								<div class="box-footer clearfix">
+									<a id="append-symbol" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-star-o margin-r-5"></i>{% trans "Append" %}</a>
+								</div>
+							</div>
+						</div>
+	
+						<div class="col-md-8">
+							<div class="nav-tabs-custom">
+					            <ul id="tab-menu" class="nav nav-tabs">				                        
+					            </ul>
+					            <div id="tab-content" class="tab-content">
+					            </div>
+	          				</div>
+	          			</div>
+					</div>								
+            	</div>
+	
+			</div>
+		</div>				
+	</div>
+{% endblock %}
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-symbology').addClass("active");
+	$('#submenu-libraries').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	
+	$("#append-symbol").on('click', function(e){
+		symbolLibrary.appendSymbol("{{symbol_type}}");
+	});
+	
+	var symbolLibrary = new SymbolLibrary();
+	
+	$("#save-symbol").on('click', function(e){
+		$("#form-error").empty();
+		var name = $("#symbol-name").val();
+		var title = $("#symbol-title").val();
+		var filter = "";
+		var minscale = $("#symbol-minscale").val();
+		var maxscale = $("#symbol-maxscale").val();
+		
+		if (name != '') {
+			symbolLibrary.save("{{library_id}}", name, title, filter, minscale, maxscale);
+		} else {
+			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
+		}
+		
+	});
+
+});
+</script>
+{% endblock %}

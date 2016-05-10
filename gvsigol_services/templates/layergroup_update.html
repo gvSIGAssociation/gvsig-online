@@ -6,12 +6,15 @@
 	<div class="row">
 		<div class="col-md-12">
 			<div class="box box-primary">
-
-				<div class="box-header with-border">
-					<h3 class="box-title">{% trans "Update layer group" %}</h3>
-				</div>
-
+			
 				<form role="form" method="post" action="/gvsigonline/services/layergroup_update/{{lgid}}/">
+					<div class="box-header with-border">
+						<h3 class="box-title">{% trans "Update layer group" %}</h3>
+						<div class="box-tools pull-right">
+							<button type="submit" class="btn btn-success btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+						</div>
+					</div>
+
 					<div class="box-body">
 					{% csrf_token %}					
 						{% if form.errors %}
@@ -33,13 +36,15 @@
 						{% endif %}
 										
 						<div class="row">
-							<div class="col-md-6">
-								<input placeholder="{% trans 'Layer group name' %}" name="layergroup_name" id="layergroup_name" type="text" class="form-control" value="{{layergroup.name}}">
-								<label for="layergroup_name">{% trans "Name" %}</label>	
+							<div class="col-md-12">
+								<label>{% trans "Name" %}</label>	
+								<input placeholder="{% trans 'Layer group name' %}" name="layergroup_name" id="layergroup_name" type="text" class="form-control" value="{{layergroup.name}}">							
 							</div>
-							<div class="col-md-6">
-								<input placeholder="{% trans 'Layer group title' %}" name="layergroup_title" id="layergroup_title" type="text" class="form-control" value="{{layergroup.title}}">
-								<label for="layergroup_title">{% trans "Title" %}</label>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<label>{% trans "Title" %}</label>
+								<input placeholder="{% trans 'Layer group title' %}" name="layergroup_title" id="layergroup_title" type="text" class="form-control" value="{{layergroup.title}}">							
 							</div>
 						</div>
 						
@@ -58,10 +63,6 @@
 						</div>
 
 					</div>	
-					
-					<div class="box-footer">
-                    	<button type="submit" class="btn btn-primary">{% trans "Update layer group" %}</button>
-                  	</div>		
 				</form>		
 			</div>
 		</div>				

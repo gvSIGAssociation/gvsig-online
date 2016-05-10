@@ -88,6 +88,9 @@
 {% endblock %}
 {% block extra-scripts %}
 <script>
+	$('#menu-home').addClass("active");
+</script>
+<script>
 	$('#show-hide-pass-update-link').click( function(e) {
 		e.preventDefault();
 		var div = $('#show-hide-pass-update-div')[0];

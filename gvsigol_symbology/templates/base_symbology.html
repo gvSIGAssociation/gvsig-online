@@ -125,6 +125,7 @@
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.xml2json.js" %}"></script>
 	<script>
 		$.widget.bridge('uibutton', $.ui.button);
+		var IMG_PATH = '{% static "img/" %}';
 	</script>
 	<script type="text/javascript" src="{% static "js/vendors/bootstrap-3.3.6/js/bootstrap.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/slimScroll/jquery.slimscroll.min.js" %}"></script>
@@ -140,13 +141,16 @@
 	<script type="text/javascript" src="{% static "js/vendors/snap.svg-min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/gvsigOL.js" %}"></script>
 	
-	<script type="text/javascript" src="{% static "js/lib/symbology/jsonPath.js" %}"></script>	
-	<script type="text/javascript" src="{% static "js/lib/symbology/svg.js" %}"></script>	
-	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.ajax.min.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/lib/symbology/SymbologyUtils.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/lib/symbology/uniqueSymbol.js" %}"></script>
+	<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>	
 	
-	<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/PointSymbolizer.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/LineSymbolizer.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/PolygonSymbolizer.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/TextSymbolizer.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/Rule.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/SymbologyUtils.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/UniqueSymbol.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/SymbolLibrary.js" %}"></script>
 
 	{% block extra-scripts %}{% endblock %}
 	

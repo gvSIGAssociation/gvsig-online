@@ -1,0 +1,124 @@
+{% extends "base_symbology.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="box box-primary">
+			
+				<form role="form" method="post" action="/gvsigonline/symbology/library_update/{{library.id}}/">
+				
+					<div class="box-header with-border">
+						<h3 class="box-title">{% trans "Update library" %}</h3>
+						<div class="box-tools pull-right">
+							<button id="update-library" class="btn btn-success"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+						</div>
+					</div>
+
+					<div class="box-body">					
+						{% csrf_token %}					
+						{% if form.errors %}
+						<div id="form-error" style="color:#ff0000;">
+							<ul>
+							{% for field in form %}
+								{% if field.errors %}
+									<li>{{field.label}}. {{ field.errors|striptags }}</li>
+								{% endif %}	
+							{% endfor %}
+							</ul>
+						</div>
+						{% endif %}
+							
+						{% if message %}
+						<div id="form-error" style="color:#ff0000;">
+							<p>* {{ message }}</p>
+						</div>
+						{% endif %}
+									
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label>{% trans "Name" %}</label>
+								<input placeholder="{% trans 'Name' %}" name="library-name" id="library-name" type="text" class="form-control" disabled value="{{library.name}}">	
+							</div>
+						</div>
+										
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label>{% trans "Description" %}</label>
+					    		<input placeholder="{% trans 'Description' %}" name="library-description" id="library-description" type="text" class="form-control" value="{{library.description}}">
+							</div>
+						</div>
+						
+						<div class="row">
+							<div class="checkbox col-md-6">								
+								<label>
+									{% if library.is_public %}
+									<input type="checkbox" name="library-is-public" id="library-is-public" checked/>{% trans "is public?" %}
+									{% else %}
+									<input type="checkbox" name="library-is-public" id="library-is-public" />{% trans "is public?" %}
+									{% endif %}
+								</label>
+							</div>
+						</div>	
+					</form>
+					
+					<div class="row">
+						<div class="col-md-12">
+							<div class="box box-primary">
+								<div class="box-header with-border">
+									<h3 class="box-title">{% trans "Library symbols" %}</h3>
+									<div class="box-tools pull-right">
+										<button id="add-new-point" class="btn btn-box-tool btn-sm"><i class="fa fa-circle margin-r-5"></i> {% trans "Add point" %}</button>
+										<button id="add-new-line" class="btn btn-box-tool btn-sm"><i class="fa fa-code-fork margin-r-5"></i> {% trans "Add line" %}</button>
+										<button id="add-new-polygon" class="btn btn-box-tool btn-sm"><i class="fa fa-square margin-r-5"></i> {% trans "Add polygon" %}</button>						
+									</div>
+								</div>
+								<div class="box-body no-padding">
+									<ul class="users-list clearfix">
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>								
+            	</div>	
+			</div>
+		</div>				
+	</div>
+{% endblock %}
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-symbology').addClass("active");
+	$('#submenu-libraries').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	
+	var symbolLibrary = new SymbolLibrary();
+	
+	"{% for rule in rules %}"
+		var symbolizers = {{rule.symbolizers|safe}};
+		var symbol = '';
+		symbol += '<li>';
+		symbol += 	'<svg id="symbolizer-preview-{{rule.id}}" class="preview-svg"></svg>';
+		symbol += 	'<a class="users-list-name" href="/gvsigonline/symbology/symbol_update/{{rule.id}}/">{{rule.name}}</a>';
+		symbol += '</li>';
+		$(".users-list").append(symbol);
+		symbolLibrary.createPreview("{{rule.id}}", symbolizers);
+	"{% endfor %}"
+	
+	$("#add-new-point").on('click', function(e){
+		e.preventDefault();
+		location.href = "/gvsigonline/symbology/symbol_add/{{library.id}}/point/";
+	});
+	$("#add-new-line").on('click', function(e){
+		e.preventDefault();
+		location.href = "/gvsigonline/symbology/symbol_add/{{library.id}}/line/";
+	});
+	$("#add-new-polygon").on('click', function(e){
+		e.preventDefault();
+		location.href = "/gvsigonline/symbology/symbol_add/{{library.id}}/polygon/";
+	});
+});
+</script>
+{% endblock %}

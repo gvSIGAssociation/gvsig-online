@@ -26,11 +26,11 @@ from gvsigol_services.models import Layer
 from django.utils.translation import ugettext as _
 
 class Style(models.Model):
-    UNIQUE_SYMBOL = 'SU'
-    UNIQUE_VALUES = 'VU'
+    UNIQUE_SYMBOL = 'US'
+    UNIQUE_VALUES = 'UV'
     INTERVALS = 'IN'
     EXPRESSIONS = 'EX'
-    COLOR_TABLES = 'TC'
+    COLOR_TABLES = 'CT'
     CHARTS = 'CH'
     LEGEND_TYPES = (
         (UNIQUE_SYMBOL, _('Unique symbol')),
@@ -40,71 +40,53 @@ class Style(models.Model):
         (COLOR_TABLES, _('Color table')),
         (CHARTS, _('Graphics')),
     )
-    title = models.CharField(max_length=100, blank=True, null=True)
     name = models.CharField(max_length=100)
-    description = models.CharField(max_length=150) 
+    title = models.CharField(max_length=100, blank=True, null=True)   
+    is_default = models.BooleanField(default=False)
     type = models.CharField(max_length=2, choices=LEGEND_TYPES, default=UNIQUE_SYMBOL)
+    order = models.IntegerField(null=False, default=0)
     
     def __unicode__(self):
         return self.name
 
-
-class LayerStyle(models.Model):
+class StyleLayer(models.Model):
     style = models.ForeignKey(Style)
-    layer = models.ForeignKey(Layer)
-    name = models.CharField(max_length=100, blank=True, null=True)
-    title = models.CharField(max_length=100, blank=True, null=True)
-    description = models.CharField(max_length=500, blank=True, null=True)
-    order = models.IntegerField(null=False, default=0)
+    layer = models.ForeignKey(Layer)  
     
     def __unicode__(self):
         return self.layer.name + ' - ' + self.style.name
-   
-    
+      
 class Rule(models.Model):
-    name = models.CharField(max_length=100, blank=True, null=True)
-    filter = models.CharField(max_length=5000, blank=True, null=True) 
-    order = models.IntegerField(null=False, default=0)
+    name = models.CharField(max_length=100)
+    title = models.CharField(max_length=100, blank=True, null=True)
+    type = models.CharField(max_length=25)
+    filter = models.CharField(max_length=5000, blank=True, null=True)    
     minscale = models.FloatField(null=True, blank=True)
     maxscale = models.FloatField(null=True, blank=True)
+    order = models.IntegerField(null=False, default=0)
+    
+class Symbolizer(models.Model):
+    rule = models.ForeignKey(Rule)
+    type = models.CharField(max_length=25) 
+    sld = models.CharField(max_length=5000, blank=True, null=True)
+    json = models.CharField(max_length=5000, blank=True, null=True)
+    order = models.IntegerField(null=False, default=0)
+    
+class StyleRule(models.Model):
+    rule = models.ForeignKey(Rule)
     style = models.ForeignKey(Style)
-
-
-class Symbol(models.Model):
-    name = models.CharField(max_length=100, blank=True, null=True)
-    description = models.CharField(max_length=150, blank=True, null=True)
-    sld_code = models.CharField(max_length=5000, blank=True, null=True) 
-
-    def __unicode__(self):
-        return self.name
-
    
 class Library(models.Model):
     name = models.CharField(max_length=100, blank=False, null=False)
-    title = models.CharField(max_length=100, blank=True, null=True)
     description = models.CharField(max_length=500, blank=True, null=True)
     is_public = models.BooleanField(default=False)
     
     def __unicode__(self):
         return self.name
-
-  
-class LibrarySymbol(models.Model):
-    name = models.CharField(max_length=100, blank=True, null=True)
-    description = models.CharField(max_length=150, blank=True, null=True)
-    sld_code = models.CharField(max_length=5000, blank=True, null=True) 
+ 
+class LibraryRule(models.Model):
     library = models.ForeignKey(Library)
-    type = models.CharField(max_length=20, blank=False, null=False, default='PointSymbolizer')
-    is_public = models.BooleanField(default=False)
-    
-    def __unicode__(self):
-        return self.name
-
-   
-class RuleSymbol(models.Model):
     rule = models.ForeignKey(Rule)
-    symbol = models.ForeignKey(Symbol)
     
     def __unicode__(self):
-        return self.rule.name + ' - ' + self.symbol.name
-
+        return self.library.name + ' - ' + self.rule.name

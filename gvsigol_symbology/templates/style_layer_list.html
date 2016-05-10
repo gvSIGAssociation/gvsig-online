@@ -32,7 +32,11 @@
 								<td> 
 									<select class="form-control" style="width: 100%;" id="select-{{ layerStyle.layer.id }}">
 									{% for style in layerStyle.styles %}
+										{% if style.is_default %}
+										<option value="{{ style.id }}" selected>{{ style.title }}</option>
+										{% else %}
 										<option value="{{ style.id }}">{{ style.title }}</option>
+										{% endif %}
 									{% endfor %}
 									</select> 		
 								</td>
@@ -96,22 +100,22 @@ $(document).ready(function() {
 		var row = table.row($(this).parents('tr'));
 	    var data = row.data();     
 	    if (this.name == "button-update-layer") {
-	        updateLayer(data);
+	        updateStyle(data);
 	    } 
 	    if (this.name == "button-add-layer") {
-	        addLayer(data);
+	        addStyle(data);
 	    } 
 	});
 		
 
-	function updateLayer(data){
+	function updateStyle(data){
 		var optionElem = $("#select-"+data[0]).val();
 		if(optionElem != null){		
 			location.href = '/gvsigonline/symbology/style_layer_update/' + data[0] + '/' + optionElem + '/';
 		}
 	}
 		
-	function addLayer(data){
+	function addStyle(data){
 		location.href = '/gvsigonline/symbology/select_legend_type/' + data[0] + '/';
 	}
   

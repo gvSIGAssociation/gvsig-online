@@ -10,13 +10,13 @@
 					{% csrf_token %}
 					<div class="box-header with-border">
 						<h3 class="box-title">{% trans "Add datastore" %}</h3>
+						<div class="box-tools pull-right">
+							<button type="submit" class="btn btn-success btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+						</div>
 					</div>					
 					<div class="box-body">				
 					{{ form }}				
 					</div>						
-					<div class="box-footer">
-	                    <button type="submit" class="btn btn-primary">{% trans "Save datastore" %}</button>
-	                </div>	
                 </form>	
 			</div>
 		</div>				
