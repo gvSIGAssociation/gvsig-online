@@ -8,7 +8,7 @@
 		<div class="box box-primary">
 		
 			<div class="box-header with-border step-2">
-				<h3 class="box-title">{% trans "Create new style" %}</h3>
+				<h3 class="box-title">{% trans "Update style" %}</h3>
 				<div class="box-tools pull-right">
 					<button id="refresh-preview" class="btn btn-sm btn-warning refresh-preview"><i class="fa fa-refresh margin-r-5"></i> {% trans "Update preview" %}</button>
 					<button id="save-legend" class="btn btn-sm btn-success save-legend"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
@@ -22,23 +22,23 @@
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<label>{% trans "Name" %}</label>
-								<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" type="text" value="{{style_name}}" class="form-control">	
+								<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" type="text" class="form-control" value="{{style.name}}">	
 							</div>
 						</div>
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<label>{% trans "Title" %}</label>
-								<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" type="text" class="form-control">	
+								<input placeholder="{% trans 'Style name' %}" name="style-title" id="style-title" type="text" class="form-control" value="{{style.title}}">	
 							</div>
 						</div>
 						<div class="row">
 							<div class="col-md-6 form-group">
 								<label>{% trans "Min. scale" %}</label>
-					    		<input placeholder="{% trans 'Minimum scale denominator' %}" name="symbol-minscale" id="symbol-minscale" type="number" class="form-control">
+					    		<input placeholder="{% trans 'Minimum scale denominator' %}" name="symbol-minscale" id="symbol-minscale" type="number" value="{{rule.minscale}}" class="form-control">
 							</div>
 							<div class="col-md-6 form-group">
 								<label>{% trans "Max. scale" %}</label>
-					    		<input placeholder="{% trans 'Maximum scale denominator' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" class="form-control">
+					    		<input placeholder="{% trans 'Maximum scale denominator' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" value="{{rule.minscale}}" class="form-control">
 							</div>
 							<div class="col-md-12 form-group">
 								<p class="text-muted">* {% trans "Specifies the minimum and maximum scale denominator (inclusive) for the scale range in which this rule applies" %}.</p>
@@ -47,7 +47,11 @@
 						<div class="row">
 							<div class="checkbox col-md-12">								
 								<label>
+									{% if style.is_default %}
+									<input type="checkbox" name="style-is-default" id="style-is-default" checked/>{% trans "Set as default style" %}
+									{% else %}
 									<input type="checkbox" name="style-is-default" id="style-is-default" />{% trans "Set as default style" %}
+									{% endif%}
 								</label>
 							</div>
 						</div>
@@ -58,29 +62,7 @@
 				</div>
 				
 				<div class="row">
-					<div class="col-md-6">
-						<div class="box box-primary">
-							<div class="box-header with-border">
-								<h3 class="box-title">{% trans "Symbol" %}</h3>
-							</div>
-							<div class="box-body">
-								<div class="table-responsive">
-									<table id="table-rules" class="table no-margin">
-										<thead>
-											<tr>
-												<th>{% trans "Name" %}</th>
-												<th>{% trans "Title" %}</th>
-												<th>{% trans "Preview" %}</th>
-											</tr>
-										</thead>
-										<tbody id="table-rules-body">
-										</tbody>
-									</table>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-6">
+					<div class="col-md-4">
 						<div class="box box-primary">
 							<div class="box-header with-border">
 								<h3 class="box-title">{% trans "Symbol elements" %}</h3>
@@ -90,7 +72,6 @@
 									<table id="table-symbolizers" class="table no-margin">
 										<thead>
 											<tr>
-												<th></th>
 												<th>{% trans "Name" %}</th>
 												<th>{% trans "Preview" %}</th>
 												<th></th>
@@ -110,14 +91,14 @@
 						</div>
 					</div>
 
-<!-- 					<div class="col-md-6"> -->
-<!-- 						<div class="nav-tabs-custom"> -->
-<!-- 				            <ul id="tab-menu" class="nav nav-tabs">				                         -->
-<!-- 				            </ul> -->
-<!-- 				            <div id="tab-content" class="tab-content"> -->
-<!-- 				            </div> -->
-<!--           				</div> -->
-<!--           			</div> -->
+					<div class="col-md-8">
+						<div class="nav-tabs-custom">
+				            <ul id="tab-menu" class="nav nav-tabs">				                        
+				            </ul>
+				            <div id="tab-content" class="tab-content">
+				            </div>
+          				</div>
+          			</div>
 				</div>
 			</div>
 		</div>
@@ -129,10 +110,11 @@
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
-				<h4 class="modal-title">{% trans "Import symbol" %}</h4>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Import symbol" %}</h4>
 			</div>
 			<div class="modal-body">
 				<div class="row">
@@ -163,28 +145,6 @@
 		</div>
 	</div>
 </div>    	
-
-<!-- Modal -->
-<div class="modal fade" id="modal-symbolizer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-				<h4 class="modal-title">{% trans "Edit symbolizer" %}</h4>
-			</div>
-			<div class="modal-body">
-				<div class="nav-tabs-custom">
-	            	<ul id="tab-menu" class="nav nav-tabs">				                        
-	            	</ul>
-	            	<div id="tab-content" class="tab-content">
-	            	</div>
-       			</div>
-			</div>
-		</div>
-	</div>
-</div> 
 {% endblock %}
 
 {% block extra-scripts %}
@@ -194,17 +154,7 @@
 </script>
 <script>
 $(document).ready(function() {
-	
-	var layerId = "{{layer_id}}";
-	var featureType = "{{featureType}}";
-	var fields = {{fields|safe}};
-	var alphanumericFields = {{alphanumeric_fields|safe}};
-	var sldFilterValues = {{sldFilterValues|safe}};
-	var fonts = {{ fonts|safe }};
-	
-	var symbologyUtils = new SymbologyUtils(fonts, alphanumericFields);
-	var uniqueSymbol = new UniqueSymbol(featureType, symbologyUtils);
-	
+	//Init DOM components
 	var map = new ol.Map({
 		layers: [
 		    new ol.layer.Tile({
@@ -218,30 +168,23 @@ $(document).ready(function() {
 		})
 	});
 	
-	$("#style-title").on('change', function(e){
-		var rule = uniqueSymbol.getRule();
-		rule.title = this.value;
-		$("#rule-title").text(this.value);
-	});
-	
-	$("#symbol-minscale").on('change', function(e){
-		var rule = uniqueSymbol.getRule();
-		rule.minscale = this.value;
-	});
-	
-	$("#style-maxscale").on('change', function(e){
-		var rule = uniqueSymbol.getRule();
-		rule.maxscale = this.value;
-	});
-	
 	$("#append-symbol-button").on('click', function(e){
-		uniqueSymbol.appendSymbolizer();
+		uniqueSymbol.appendSymbol();
 	});
 	
 	$("#append-label-button").on('click', function(e){
 		uniqueSymbol.appendLabel();
 	});
-
+	
+	var layerId = "{{layer_id}}";
+	var featureType = "{{featureType}}";
+	var fields = {{fields|safe}};
+	var alphanumericFields = {{alphanumeric_fields|safe}};
+	var sldFilterValues = {{sldFilterValues|safe}};
+	var fonts = {{ fonts|safe }};
+	
+	var uniqueSymbol = new UniqueSymbol(featureType, fields, alphanumericFields, sldFilterValues, fonts);
+	
 	$("#save-legend").on('click', function(e){
 		uniqueSymbol.save(layerId);
 	});

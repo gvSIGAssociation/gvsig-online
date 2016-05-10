@@ -81,7 +81,7 @@
 				</div>
 				<ul class="sidebar-menu">				
 					<li class="header"></li>					
-					<li {% block home_active %}{% endblock %}>
+					<li id="menu-home">
 						<a href="/gvsigonline/core/"><i class="fa fa-home"></i><span>{% trans "Home" %}</span></a>
 					</li>	
 					{% if user.is_staff %}				
