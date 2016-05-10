@@ -379,6 +379,7 @@ def project_get_conf(request):
                 layer = {}                
                 layer['name'] = l.name
                 layer['title'] = l.title
+                layer['abstract'] = l.abstract
                 layer['visible'] = l.visible 
                 layer['queryable'] = l.queryable 
                 layer['cached'] = l.cached
