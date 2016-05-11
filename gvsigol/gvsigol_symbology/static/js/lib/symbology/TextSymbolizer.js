@@ -251,7 +251,9 @@ TextSymbolizer.prototype.updatePreview = function() {
 	preview = previewElement.text(10,20, "Text");
 	preview.attr(attributes);
 
-	this.rule.updatePreview();
+	if (this.rule != null) {
+		this.rule.updatePreview();
+	}
 };
 
 TextSymbolizer.prototype.createTextSymbolizer = function(){

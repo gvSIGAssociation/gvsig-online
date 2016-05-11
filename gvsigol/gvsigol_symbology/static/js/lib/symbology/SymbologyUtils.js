@@ -39,10 +39,10 @@ SymbologyUtils.prototype.fontWeights = [
 SymbologyUtils.prototype.shapes = [
 	{value: 'circle', title: gettext('Circle')},
 	{value: 'square', title: gettext('Square')},
-	{value: 'triangle', title: gettext('Triangle')},
+	{value: 'triangle', title: gettext('Triangle')}/*,
 	{value: 'star', title: gettext('Star')},
 	{value: 'cross', title: gettext('Cross')},
-	{value: 'x', title: 'X'}
+	{value: 'x', title: 'X'}*/
 ];
 
 SymbologyUtils.prototype.getFonts = function(element){
