@@ -271,6 +271,15 @@ viewer.core = {
     	this.map.tools = this.tools;
     },
     
+    loadTool: function(tool) {
+    	this.tools.push(tool);
+    	this.map.tools.push(tool);
+    },
+    
+    getMap: function(){
+    	return this.map;
+    },
+    
     _nextLayerId: function() {
     	return "gol-layer-" + this.layerCount++;
     }

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 '''
     gvSIG Online.
     Copyright (C) 2007-2015 gvSIG Association.
@@ -19,11 +21,8 @@
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 
-import gvsigol.settings
+from django.shortcuts import render_to_response, RequestContext, redirect
+from gvsigol.settings import HAS_INDEX, CATALOG_MODULE, GVSIGOL_CATALOG
 
-def global_settings(request):
-    # return any necessary values
-    return {
-        'CATALOG_MODULE': gvsigol.settings.CATALOG_MODULE,
-        'INSTALLED_APPS': gvsigol.settings.INSTALLED_APPS
-    }
+def index(request):
+    return redirect('home')
