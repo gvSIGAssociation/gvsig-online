@@ -22,10 +22,40 @@
 '''
 from django.core.mail import send_mail
 from django.utils.translation import ugettext as _
-from gvsigol_core.models import ProjectUserGroup, ProjectLayerGroup
+from gvsigol_core.models import Project, ProjectUserGroup, ProjectLayerGroup
 from gvsigol_services.models import LayerGroup
 from gvsigol_auth.models import UserGroup, UserGroupUser
 import gvsigol.settings
+
+def is_valid_project(user, pid):
+    valid = False
+    try:
+        project = Project.objects.get(id=int(pid))   
+        groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
+        
+        projects_by_user = []
+        for usergroup_user in groups_by_user:
+            user_group = UserGroup.objects.get(id=usergroup_user.user_group_id)
+            projects_by_group = ProjectUserGroup.objects.filter(user_group_id=user_group.id)
+            for project_group in projects_by_group:
+                exists = False
+                for aux in projects_by_user:
+                    if aux.project_id == project_group.project_id:
+                        exists = True
+                if not exists:
+                    projects_by_user.append(project_group)
+            
+        if len (projects_by_user) > 0:
+            for ua in projects_by_user:
+                aux = Project.objects.get(id=ua.project_id)
+                if project.id == aux.id:
+                    valid = True
+                    
+        return valid
+                    
+    except Exception as e:
+        print e
+        return valid
 
 def get_all_groups():
     groups_list = UserGroup.objects.all()
