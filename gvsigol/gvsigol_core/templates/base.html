@@ -89,7 +89,12 @@
 						{% include "dashboard_services_menu.html" %}
 						{% include "dashboard_symbology_menu.html" %}
 						{% include "dashboard_core_menu.html" %}
-					{% endif %}								
+					{% endif %}	
+					{% for app in INSTALLED_APPS %}
+    					{% if 'gvsigol_app_' in app %}	
+    					{% include "dashboard_app_menu.html" %}
+    					{% endif %}	
+    				{% endfor %}							
 				</ul>				
 			</section>			
 		</aside>

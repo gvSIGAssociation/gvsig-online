@@ -30,6 +30,12 @@
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     
+    {% for app in INSTALLED_APPS %}
+    {% if 'gvsigol_app_' in app %}	
+    	{% include "load_app_css.html" %}
+    {% endif %}	
+    {% endfor %}
+    
 </head>
 
 <body class="skin-blue">
@@ -196,6 +202,11 @@
 			}
 		});
 	</script>
+	{% for app in INSTALLED_APPS %}
+    {% if 'gvsigol_app_' in app %}	
+    	{% include "load_tools.html" %}
+    {% endif %}	
+    {% endfor %}
 	
 	<script>
 	$(document).ready(function() {

@@ -1,0 +1,46 @@
+{% load staticfiles %}
+<script type="text/javascript" src="{% static "js/lib/tools/calculateClosedControl.js" %}"></script>
+<script type="text/javascript">
+	var map = viewer.core.getMap();
+	var tool = new CalculateClosedControl(map);
+	viewer.core.loadTool(tool);
+	$('.editionbar').css("top","260");
+	
+	var id = viewer.core._nextLayerId();
+	
+	var aguas = new ol.layer.Tile({
+		id: id,
+		label: 'Mapa base',
+	  	visible: true,
+	  	source: new ol.source.XYZ({
+	  		url: ' https://aguas.gvsigonline.com/MapService.svc/GetImage/100/{x}/{y}/{z}'
+	    })
+	});
+	aguas.baselayer = true;
+	
+	var layers = map.getLayers();
+	layers.insertAt(0, aguas);	    
+	
+	var ui = '';
+	ui += '<div style="margin-left:20px;">';
+	ui += 	'<input type="radio" id="' + id + '" name="baselayers-group" checked>';
+	ui += 	'<span class="text">' + 'Mapa base' + '</span>';
+	ui += '</div>';
+	
+	$('#baselayers-group').append(ui);
+	
+	$("input[name=baselayers-group]:radio").change(function (e) {
+		var baseLayers = map.getLayers();
+		baseLayers.forEach(function(layer){
+			if (layer.baselayer) {
+				if (layer.getVisible() == true) {
+					layer.setVisible(false);
+				}
+				if (layer.get('id') == this.id) {
+					layer.setVisible(true);
+				}
+			}						
+		}, this);
+	});
+	
+</script>
