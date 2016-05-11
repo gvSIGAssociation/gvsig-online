@@ -6,6 +6,13 @@
 	viewer.core.loadTool(tool);
 	$('.editionbar').css("top","260");
 	
+	var bases = map.getLayers();
+	bases.forEach(function(layer){
+		if (layer.baselayer) {
+			layer.setVisible(false);
+		}						
+	}, this);
+	
 	var id = viewer.core._nextLayerId();
 	
 	var aguas = new ol.layer.Tile({
@@ -13,7 +20,7 @@
 		label: 'Mapa base',
 	  	visible: true,
 	  	source: new ol.source.XYZ({
-	  		url: ' https://aguas.gvsigonline.com/MapService.svc/GetImage/100/{x}/{y}/{z}'
+	  		url: 'https://aguas.gvsigonline.com/MapService.svc/GetImage/100/{x}/{y}/{z}'
 	    })
 	});
 	aguas.baselayer = true;
