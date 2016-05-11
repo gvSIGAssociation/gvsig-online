@@ -9,15 +9,14 @@ urlpatterns = [
     url(r'^unique_symbol_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views_unique_symbol.unique_symbol_update', name='unique_symbol_update'),
     url(r'^unique_symbol_save/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views_unique_symbol.unique_symbol_save', name='unique_symbol_save'),
     
-    url(r'^library_list/$', 'gvsigol_symbology.views.library_list', name='library_list'),
-    url(r'^library_add/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views.library_add', name='library_add'),
-    url(r'^library_update/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views.library_update', name='library_update'),
-    url(r'^library_delete/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views.library_delete', name='library_delete'),
-    
-    url(r'^symbol_add/(?P<library_id>[0-9]+)/(?P<symbol_type>\w+)/$', 'gvsigol_symbology.views.symbol_add', name='symbol_add'),
-    url(r'^symbol_update/(?P<symbol_id>[0-9]+)/$', 'gvsigol_symbology.views.symbol_update', name='symbol_update'),
-    url(r'^symbol_delete/$', 'gvsigol_symbology.views.symbol_delete', name='symbol_delete'),
-    url(r'^get_symbols_from_library/$', 'gvsigol_symbology.views.get_symbols_from_library', name='get_symbols_from_library'),
+    url(r'^library_list/$', 'gvsigol_symbology.views_library.library_list', name='library_list'),
+    url(r'^library_add/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views_library.library_add', name='library_add'),
+    url(r'^library_update/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views_library.library_update', name='library_update'),
+    url(r'^library_delete/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views_library.library_delete', name='library_delete'),   
+    url(r'^symbol_add/(?P<library_id>[0-9]+)/(?P<symbol_type>\w+)/$', 'gvsigol_symbology.views_library.symbol_add', name='symbol_add'),
+    url(r'^symbol_update/(?P<symbol_id>[0-9]+)/$', 'gvsigol_symbology.views_library.symbol_update', name='symbol_update'),
+    url(r'^symbol_delete/$', 'gvsigol_symbology.views_library.symbol_delete', name='symbol_delete'),
+    url(r'^get_symbols_from_library/$', 'gvsigol_symbology.views_library.get_symbols_from_library', name='get_symbols_from_library'),
 
     #url(r'^style_label_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.style_label_update', name='style_label_update'),
     #url(r'^create_style/$', 'gvsigol_symbology.views.create_style', name='create_style'),

@@ -12,7 +12,7 @@
 					<div class="box-header with-border">
 						<h3 class="box-title">{% trans "Update library" %}</h3>
 						<div class="box-tools pull-right">
-							<button id="update-library" class="btn btn-success"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+							<button id="update-library" type="submit" class="btn btn-success"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
 						</div>
 					</div>
 
@@ -94,30 +94,30 @@
 <script>
 $(document).ready(function() {
 	
-	var symbolLibrary = new SymbolLibrary();
+	var librarySymbol = new LibrarySymbol();
 	
 	"{% for rule in rules %}"
 		var symbolizers = {{rule.symbolizers|safe}};
 		var symbol = '';
 		symbol += '<li>';
-		symbol += 	'<svg id="symbolizer-preview-{{rule.id}}" class="preview-svg"></svg>';
+		symbol += 	'<svg id="symbolizer-preview-{{rule.id}}" class="preview-svg-{{rule.id}}"></svg>';
 		symbol += 	'<a class="users-list-name" href="/gvsigonline/symbology/symbol_update/{{rule.id}}/">{{rule.name}}</a>';
 		symbol += '</li>';
 		$(".users-list").append(symbol);
-		symbolLibrary.createPreview("{{rule.id}}", symbolizers);
+		librarySymbol.loadSymbols("{{rule.id}}", symbolizers);
 	"{% endfor %}"
 	
 	$("#add-new-point").on('click', function(e){
 		e.preventDefault();
-		location.href = "/gvsigonline/symbology/symbol_add/{{library.id}}/point/";
+		location.href = "/gvsigonline/symbology/symbol_add/{{library.id}}/PointSymbolizer/";
 	});
 	$("#add-new-line").on('click', function(e){
 		e.preventDefault();
-		location.href = "/gvsigonline/symbology/symbol_add/{{library.id}}/line/";
+		location.href = "/gvsigonline/symbology/symbol_add/{{library.id}}/LineSymbolizer/";
 	});
 	$("#add-new-polygon").on('click', function(e){
 		e.preventDefault();
-		location.href = "/gvsigonline/symbology/symbol_add/{{library.id}}/polygon/";
+		location.href = "/gvsigonline/symbology/symbol_add/{{library.id}}/PolygonSymbolizer/";
 	});
 });
 </script>
