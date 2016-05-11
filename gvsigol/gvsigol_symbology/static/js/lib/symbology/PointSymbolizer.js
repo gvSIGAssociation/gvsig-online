@@ -21,7 +21,7 @@
  */
  
  
-var PointSymbolizer = function(id, rule, symbolizer_object) {
+var PointSymbolizer = function(id, rule, symbologyUtils, symbolizer_object) {
 	this.id = id;
 	this.type = 'PointSymbolizer';
 	this.name = 'PointSymbolizer ' + id;
@@ -35,8 +35,9 @@ var PointSymbolizer = function(id, rule, symbolizer_object) {
 	this.border_type = "solid";
 	this.rotation = 0;
 	this.order = 0;
-	this.is_vector = true;
+	this.size = 5;
 	this.rule = rule;
+	this.symbologyUtils = symbologyUtils;
 	
 	if (symbolizer_object) {
 		this.name = symbolizer_object.name;
@@ -50,7 +51,7 @@ var PointSymbolizer = function(id, rule, symbolizer_object) {
 		this.border_type = symbolizer_object.border_type;
 		this.rotation = symbolizer_object.rotation;
 		this.order = symbolizer_object.order;
-		this.is_vector = symbolizer_object.is_vector;
+		this.size = symbolizer_object.size;
 	}
 };
 
@@ -64,7 +65,7 @@ PointSymbolizer.prototype.getTableUI = function() {
 	ui += 		'</span>';
 	ui += 	'</td>';
 	ui += 	'<td><span class="text-muted">' + this.name + '</span></td>';
-	ui += 	'<td id="symbolizer-preview"><svg id="symbolizer-preview-' + this.id + '" class="preview-svg"></svg></td>';	
+	ui += 	'<td id="symbolizer-preview"><svg id="symbolizer-preview-' + this.id + '" class="preview-svg-' + this.id + '"></svg></td>';	
 	ui += 	'<td><a class="edit-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
 	ui += 	'<td><a class="delete-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
 	ui += '</tr>';	
@@ -74,16 +75,45 @@ PointSymbolizer.prototype.getTableUI = function() {
 
 PointSymbolizer.prototype.getTabMenu = function() {
 	var ui = '';
-	ui += '<li class="active"><a href="#fill-tab" data-toggle="tab">' + gettext('Fill') + '</a></li>';
+	ui += '<li class="active"><a href="#graphic-tab" data-toggle="tab">' + gettext('Graphic') + '</a></li>';
+	ui += '<li><a href="#fill-tab" data-toggle="tab">' + gettext('Fill') + '</a></li>';
 	ui += '<li><a href="#border-tab" data-toggle="tab">' + gettext('Border') + '</a></li>';
 	ui += '<li><a href="#rotation-tab" data-toggle="tab">' + gettext('Rotation') + '</a></li>';
 	
 	return ui;	
 };
 
+PointSymbolizer.prototype.getGraphicTabUI = function() {
+	var ui = '';
+	ui += '<div class="tab-pane active" id="graphic-tab">';
+	ui += 	'<div class="row">';
+	ui += 		'<div class="col-md-12 form-group">';
+	ui += 			'<label>' + gettext('Select shape') + '</label>';
+	ui += 			'<select id="shape" class="form-control">';
+	for (var i=0; i < this.symbologyUtils.shapes.length; i++) {
+		if (this.symbologyUtils.shapes[i].value == this.shape) {
+			ui += '<option value="' + this.symbologyUtils.shapes[i].value + '" selected>' + this.symbologyUtils.shapes[i].title + '</option>';
+		} else {
+			ui += '<option value="' + this.symbologyUtils.shapes[i].value + '">' + this.symbologyUtils.shapes[i].title + '</option>';
+		}
+	}
+	ui += 			'</select>';
+	ui += 		'</div>';
+	ui += 	'</div>';
+	ui += 	'<div class="row">';
+	ui += 		'<div class="col-md-12 form-group">';
+	ui += 			'<label>' + gettext('Size') + '</label>';
+	ui += 			'<input id="graphic-size" type="number" class="form-control" value="' + parseInt(this.size) + '">';					
+	ui += 		'</div>';
+	ui += 	'</div>';
+	ui += '</div>';
+	
+	return ui;
+};
+
 PointSymbolizer.prototype.getFillTabUI = function() {
 	var ui = '';
-	ui += '<div class="tab-pane active" id="fill-tab">';
+	ui += '<div class="tab-pane" id="fill-tab">';
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
 	ui += 			'<label>' + gettext('Fill color') + '</label>';
@@ -179,23 +209,27 @@ PointSymbolizer.prototype.updatePreview = function() {
 	var preview = null;
 	$("#symbolizer-preview-" + this.id).empty();
 	var previewElement = Snap("#symbolizer-preview-" + this.id);
-
+	
+	var x = this.size * 2;
+	var y = this.size * 2;
 	if (this.shape == 'circle') {
-		preview = previewElement.circle(10, 10, 10);
+		preview = previewElement.circle(this.size, this.size, this.size);
 		preview.attr(attributes);
 		
 	} else if (this.shape == 'square') {
-		preview = previewElement.polygon(0, 0, 20, 0, 20, 20, 0, 20);
+		preview = previewElement.polygon(0, 0, this.size*2, 0, this.size*2, this.size*2, 0, this.size*2);
 		preview.attr(attributes);
 		
 	} else if (this.shape == 'triangle') {
-		preview = previewElement.path('M 12.462757,7.4046606 -2.6621031,7.3865562 4.9160059,-5.7029049 z');
-		preview.transform( 't7,10');
+		var matrix = new Snap.Matrix();
+		matrix.rotate(180, this.size, this.size);
+		preview = previewElement.polygon(0, 0, this.size*2, 0, this.size, this.size*2);
+		preview.transform(matrix);
 		preview.attr(attributes);
 		
-	}  else if (this.shape == 'star') {
+	}/*  else if (this.shape == 'star') {
 		preview = previewElement.path('M 7.0268739,7.8907968 2.2616542,5.5298295 -2.3847299,8.1168351 -1.6118504,2.8552628 -5.5080506,-0.76428228 -0.2651651,-1.6551455 1.9732348,-6.479153 4.4406368,-1.7681645 9.7202441,-1.13002 6.0022969,2.6723943 z');
-		preview.transform( 't10,10');
+		preview.transform(matrix);
 		preview.attr(attributes);
 		
 	} else if (this.shape == 'cross') {
@@ -208,9 +242,14 @@ PointSymbolizer.prototype.updatePreview = function() {
 		preview.transform( 't0,0');
 		preview.attr(attributes);
 		
-	}
+	}*/
+	
+	$('.preview-svg-' + this.id).css("height", y);
+	$('.preview-svg-' + this.id).css("width", x);
 
-	this.rule.updatePreview();
+	if (this.rule != null) {
+		this.rule.updatePreview();
+	}
 };
 
 PointSymbolizer.prototype.toXML = function(){
@@ -234,4 +273,26 @@ PointSymbolizer.prototype.toXML = function(){
 	xml += '</PointSymbolizer>';
 	
 	return xml;
+};
+
+PointSymbolizer.prototype.toJSON = function(){
+	
+	var object = {
+		id: this.id,
+		type: this.type,
+		name: this.name,
+		shape: this.shape,
+		fill_color: this.fill_color,
+		fill_opacity: this.fill_opacity,
+		with_border: this.with_border,
+		border_color: this.border_color,
+		border_size: this.border_size,
+		border_opacity: this.border_opacity,
+		border_type: this.border_type,
+		rotation: this.rotation,
+		order: this.order,
+		size: this.size,
+	};
+	
+	return JSON.stringify(object);
 };

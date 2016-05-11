@@ -177,10 +177,15 @@ PolygonSymbolizer.prototype.updatePreview = function() {
 	$("#symbolizer-preview-" + this.id).empty();
 	var previewElement = Snap("#symbolizer-preview-" + this.id);
 
-	preview = previewElement.polygon(0, 0, 20, 0, 20, 20, 0, 20);
+	preview = previewElement.polygon(0, 0, 30, 0, 30, 30, 0, 30);
 	preview.attr(attributes);
+	
+	$('.preview-svg').css("height", 30);
+	$('.preview-svg').css("width", 30);
 
-	this.rule.updatePreview();
+	if (this.rule != null) {
+		this.rule.updatePreview();
+	}	
 };
 
 PolygonSymbolizer.prototype.toXML = function(){
