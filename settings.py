@@ -55,9 +55,9 @@ INSTALLED_APPS = [
     'gvsigol_services',
     'gvsigol_symbology',
     'gvsigol_core',
-    'gvsigol_app_dev',
+    'gvsigol_app_aguas',
 ]
-HAS_INDEX = True
+HAS_INDEX = False
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -188,7 +188,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_auth/static'),
     os.path.join(BASE_DIR, 'gvsigol_services/static'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
-    os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
+    os.path.join(BASE_DIR, 'gvsigol_app_aguas/static'),
 )
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -251,6 +251,12 @@ SUPPORTED_CRS = {
         'title': 'ETRS89',
         'definition': '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs',
         'units': 'degrees'
+    },
+    '25830': {
+        'code': 'EPSG:25830',
+        'title': 'ETRS89 / UTM zone 30N',
+        'definition': '+proj=utm +zone=30 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
+        'units': 'meters'
     }
 }
 
