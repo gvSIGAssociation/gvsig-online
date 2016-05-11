@@ -960,6 +960,100 @@ class Geoserver():
                 shutil.rmtree(tmp_dir, ignore_errors=True)
         raise rest_geoserver.RequestError(-1, _("Error uploading the layer. Review the file format."))
     
+    def __do_multi_upload_postgis(self, datastore, application, zip_path, session, table_definition):
+        tmp_dir = None
+        try: 
+            # get & sanitize parameters
+            srs = 'EPSG:25830'
+            encoding = 'LATIN1'
+            creation_mode = 'CR'
+            if not encoding in self.supported_encodings_plain or not srs in self.supported_srs_plain:
+                raise rest_geoserver.RequestError()
+            # FIXME: sanitize connection parameters too!!!
+            # We are going to perform a command line execution with them,
+            # so we must be ABSOLUTELY sure that no code injection can be
+            # performed
+            ds_params = json.loads(datastore.connection_params) 
+            db = ds_params.get('database')
+            host = ds_params.get('host')
+            port = ds_params.get('port')
+            schema = ds_params.get('schema', "public")
+            port = str(int(port))
+            user = ds_params.get('user')
+            password = ds_params.get('passwd')
+        
+            if _valid_sql_name_regex.search(db) == None:
+                raise InvalidValue(-1, _("The connection parameters contain an invalid database name: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db))
+            if _valid_sql_name_regex.search(user) == None:
+                raise InvalidValue(-1, _("The connection parameters contain an invalid user name: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db))
+            if _valid_sql_name_regex.search(schema) == None:
+                raise InvalidValue(-1, _("The connection parameters contain an invalid schema: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db)) 
+
+            # extract SHP
+            tmp_dir = tempfile.mkdtemp()
+            with ZipFile(zip_path, 'r') as z:
+                z.extractall(tmp_dir)
+            files = [f for f in os.listdir(tmp_dir) if f.lower()[-4:]==".shp"]
+            
+            for f in files:
+                if f in table_definition:
+                    table_def = table_definition[f]
+                    layer_name = table_def['name']
+                    layer_title = table_def['title']
+                    layer_group = table_def['group'] + '_' + application.name.lower()
+                    shp_abs = os.path.join(tmp_dir, f)
+                    gdal_tools.shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                    
+                    try:
+                        # layer has been uploaded to postgis, now register the layer on GS
+                        # we don't check the creation mode because the users sometimes choose the wrong one
+                        self.createFeaturetype(datastore.workspace, datastore, layer_name, layer_title, session)
+                    except:
+                        if creation_mode==forms_geoserver.MODE_CREATE:
+                            # assume the layer was created if mode is append or overwrite, so don't raise the exception 
+                            raise
+                        
+                    try:
+                        layer = Layer.objects.get(name=layer_name, datastore=datastore)
+                    except:
+                        # may me missing when creating a layer or when
+                        # appending / overwriting a layer created outside gvsig online
+                        layer = Layer()
+                        
+                    layer.datastore = datastore
+                    layer.name = layer_name
+                    layer.visible = False
+                    layer.queryable = True
+                    layer.cached = True
+                    layer.single_image = False
+                    layer.layer_group = LayerGroup.objects.get(name__exact=layer_group)
+                    layer.title = layer_title
+                    layer.type = datastore.type
+                    layer.metadata_uuid = ''
+                    layer.save()
+                    
+                    self.setDataRules(session=session)
+                    
+                    style_name = layer.name + '_default'
+                    self.createDefaultStyle(layer, style_name, session=session)
+                    self.setLayerStyle(layer.name, style_name, session=session)
+                    
+                    if layer.layer_group.name != "__default__":
+                        self.createOrUpdateGeoserverLayerGroup(layer.layer_group, session)
+                            
+                        
+        except (rest_geoserver.RequestError):
+            raise 
+        except gdal_tools.GdalError as e:
+            raise rest_geoserver.RequestError(e.code, e.message)
+        except Exception as e:
+            logging.exception(e)
+        finally:
+            if tmp_dir:
+                shutil.rmtree(tmp_dir, ignore_errors=True)
+        raise rest_geoserver.RequestError(-1, _("Error uploading the layer. Review the file format."))
+    
+    
     def __check_prj_file(self, folder):
         """
         Ensures there is a .prj file on the folder
@@ -1089,6 +1183,14 @@ class Geoserver():
         finally:
             if file_path:
                 self.__delete_temporaries(file_path)
+                
+    def uploadMultiLayer(self, datastore, application, file_upload, session, table_definition):
+        try:
+            self.__test_zip_structure(file_upload)
+            self.__do_multi_upload_postgis(datastore, application, file_upload, session, table_definition)
+        
+        except Exception as e:
+            print e
     
     
     def __field_def_to_gs(self, field_def_array, geometry_type):

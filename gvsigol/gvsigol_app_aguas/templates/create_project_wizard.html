@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="box box-primary">
+
+				<form id="project-wizard-form" enctype="multipart/form-data" role="form" method="post" action="/gvsigonline/create_project_wizard/">
+					<div class="box-header with-border">
+						<h3 class="box-title">{% trans "Import municipality" %}</h3>
+						<div class="box-tools pull-right">
+							<button type="submit" class="btn btn-success btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Import" %}</button>					
+						</div>
+					</div>
+				
+					<div class="box-body">
+						{% csrf_token %}													
+						{% if message %}
+						<div id="form-error" style="color:#ff0000;">
+							<p>* {{ message }}</p>
+						</div>
+						{% endif %}
+										
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="project-name">{% trans "Name" %}</label>
+								<input placeholder="{% trans 'Municipality name' %}" name="municipality-autocomplete" id="municipality-autocomplete" type="text" class="form-control">
+								<div id="direct-search-div"></div>	
+								<input type="hidden" name="project-name" id="project-name">						
+							</div>
+						</div>
+										
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="project-description">{% trans "Description" %}</label>
+								<input placeholder="{% trans 'Project description' %}" name="project-description" id="project-description" type="text" class="form-control">						
+							</div>
+						</div>		
+						
+						<div class="row">
+							<div id="project-map" class="mini-map"></div>
+						</div>
+						
+						<input type="hidden" name="latitude" id="latitude">
+						<input type="hidden" name="longitude" id="longitude">
+						<input type="hidden" name="extent" id="extent">
+						<input type="hidden" name="zoom" id="zoom">	
+						
+						<div class="row">
+							<div class="col-md-12" style="margin-bottom: 20px;">
+								<label>{% trans "Select image" %}</label>
+								<input id="project-image" name="project-image" type="file" class="file" data-show-preview="false">						
+							</div>
+						</div>	
+						
+						<div class="row">
+							<div class="col-md-12" style="margin-bottom: 20px;">
+								<label>{% trans "Select shapefile" %}</label>
+								<input id="shapefile" name="shapefile" type="file" class="file" data-show-preview="false">						
+							</div>
+						</div>
+													
+					</div>	
+				</form>		
+			</div>
+		</div>				
+	</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script type="text/javascript">
+	$('#menu-app').addClass("active");
+	$().ready(function() {
+		/**
+		  * Create the map.
+		  */
+		var map = new ol.Map({
+			layers : [ new ol.layer.Tile({
+				source : new ol.source.MapQuest({
+					layer : 'osm'
+				})
+			})],
+			target : 'project-map',
+			view : new ol.View({
+				center : [ 0, 0 ],
+				zoom : 2
+			})
+		});
+		
+		$('#municipality-autocomplete').autocomplete({
+   			serviceUrl: '/gvsigonline/core/search_candidates/',
+   		    onSelect: function (suggestion) {
+   		        $.ajax({
+   					type: 'POST',
+   					async: false,
+   				  	url: '/gvsigonline/core/get_location_address/',
+   				  	beforeSend:function(xhr){
+   				    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+   				  	},
+   				  	data: {
+   				  		'query': suggestion.data
+   					},
+   				  	success	:function(response){
+   				  		autoConf(response);
+   					},
+   				  	error: function(){}
+   				});
+   		    }
+   		});
+		
+		function autoConf(location){
+   			var municipality = $("#municipality-autocomplete" ).val();
+   			$("#project-name").val(municipality.split(',')[0]);
+    		$("#project-description").val('Aplicación con la cartografía de ' + municipality.split(',')[0]);
+    		
+   			var coordinate = ol.proj.transform([parseFloat(location.longitude), parseFloat(location.latitude)], 'EPSG:4326', 'EPSG:3857');
+   			map.getView().setCenter(coordinate);
+   			map.getView().setZoom(12);
+   			var extent = map.getView().calculateExtent(map.getSize());
+   			
+   			$("#latitude").val(location.latitude);
+   			$("#longitude").val(location.longitude);
+   			$("#zoom").val(12);
+   			$("#extent").val(extent);
+   		}
+		
+		/*$('#project-form').submit(function() {
+			$("body").overlay();
+			var coordinate = map.getView().getCenter();
+			var transformedCoordinate = ol.proj.transform(coordinate, 'EPSG:3857', 'EPSG:4326');
+			var extent = map.getView().calculateExtent(map.getSize()); 
+			var zoom = map.getView().getZoom();
+
+			$("#center-lat").val(transformedCoordinate[1]);
+			$("#center-lon").val(transformedCoordinate[0]);
+			$("#extent").val(extent);
+			$("#zoom").val(zoom);
+		});*/
+	});
+</script>
+{% endblock %}
