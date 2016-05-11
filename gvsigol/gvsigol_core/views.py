@@ -348,7 +348,10 @@ def project_delete(request, pid):
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def project_load(request, pid):
-    return render_to_response('viewer.html', {'pid': pid}, context_instance=RequestContext(request))
+    if core_utils.is_valid_project(request.user, pid):
+        return render_to_response('viewer.html', {'pid': pid}, context_instance=RequestContext(request))
+    else:
+        return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def project_get_conf(request):
