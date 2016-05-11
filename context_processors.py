@@ -24,5 +24,6 @@ import gvsigol.settings
 def global_settings(request):
     # return any necessary values
     return {
-        'CATALOG_MODULE': gvsigol.settings.CATALOG_MODULE
+        'CATALOG_MODULE': gvsigol.settings.CATALOG_MODULE,
+        'INSTALLED_APPS': gvsigol.settings.INSTALLED_APPS
     }
