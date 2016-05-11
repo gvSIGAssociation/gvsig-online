@@ -1,0 +1,221 @@
+<!doctype html>
+{% load staticfiles %}
+{% load i18n %}
+
+<html>
+<head>
+
+  	<title>{% trans "Application setup" %}</title>
+
+  	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	
+	<link rel="stylesheet" href="{% static "css/font-awesome-4.4.0/css/font-awesome.css" %}" />	
+	<link rel="stylesheet" href="{% static "js/vendors/materialize-v0.97.2/css/materialize.css" %}" />
+	<link rel="stylesheet" href="{% static "js/vendors/ol-3.12.1/ol.css" %}" />	
+	<link rel="stylesheet" href="{% static "css/dashboard.css" %}" />
+	
+	<style>
+    	.map {
+        	height: 400px;
+        	width: 100%;
+      	}
+      	.autocomplete-suggestions { border: 1px solid #999; background: #FFF; cursor: default; overflow: auto; -webkit-box-shadow: 1px 4px 3px rgba(50, 50, 50, 0.64); -moz-box-shadow: 1px 4px 3px rgba(50, 50, 50, 0.64); box-shadow: 1px 4px 3px rgba(50, 50, 50, 0.64); }
+		.autocomplete-suggestion { padding: 2px 5px; white-space: nowrap; overflow: hidden; }
+		.autocomplete-no-suggestion { padding: 2px 5px;}
+		.autocomplete-selected { background: #F0F0F0; }
+		.autocomplete-suggestions strong { font-weight: bold; color: #000; }
+		.autocomplete-group { padding: 2px 5px; }
+		.autocomplete-group strong { font-weight: bold; font-size: 16px; color: #000; display: block; border-bottom: 1px solid #000; }
+    </style>
+	
+</head>
+
+<body>
+	{% csrf_token %}
+	<div class="navbar-fixed">
+		<nav>
+    		<div class="nav-wrapper grey lighten-5">
+    			<ul class="left">
+		        	<li><a href="/gvsigonline/administration_menu/" class="grey-text darken-1"><i class="fa fa-angle-left left"></i>{% trans "Return to administration menu" %}</a></li>
+		      	</ul>
+      			<a href="#!" class="brand-logo banner center" style="color: #555;">{% trans "Importar municipio" %}</a>
+    		</div>
+  		</nav>
+  	</div>
+  
+	<div class="container">		
+		<div class="row">
+			<div class="col s12 m12">
+				<form enctype="multipart/form-data" role="form" class="col s12" method="post" action="/gvsigonline/application_wizard_1/">
+					{% csrf_token %}
+					<div class="row">
+							<button id="next-button" class="btn waves-effect waves-light blue init-session-button right" style="margin-top: 20px; margin-right: 10px;" type="submit">{% trans "Importar municipio" %}</button>
+					</div>
+					
+					<br/><br/><br/>
+					
+					{% if form.errors %}
+					<div id="form-error" class="red-text" style="color:#ff0000;">
+						<ul>
+						{% for field in form %}
+							{% if field.errors %}
+								<li>{{field.label}}. {{ field.errors|striptags }}</li>
+							{% endif %}	
+						{% endfor %}
+						{% for field, msg in form.errors.iteritems %}
+							<li>{{ msg|striptags }}</li>
+						{% endfor %}
+						</ul>
+					</div>
+					{% endif %}{% if message %}
+					<div id="form-error" class="red-text" style="color:#ff0000;">
+						<p>* {{ message }}</p>
+					</div>
+					{% endif %}
+					
+					<div class="row">
+						<div class="input-field col s12">
+							<input placeholder="{% trans 'Nombre del municipio' %}" name="municipality-autocomplete" id="municipality-autocomplete" type="text" class="validate">
+							<label for="municipality-autocomplete">{% trans "Nombre" %}</label>	
+							<div id="direct-search-div"></div>	
+							<input type="hidden" name="application-name" id="application-name">			    
+						</div>
+					</div>
+						
+					<div class="row">
+						<div class="input-field col s12">
+							<input placeholder="{% trans 'Descripción de la aplicación' %}" name="application-description" id="application-description" type="text" class="validate">
+							<label for="application-description">{% trans "Descripción" %}</label>
+						</div>
+					</div>
+					
+					<div id="admin-map" class="map row">
+					</div>
+					<input type="hidden" name="map-name" id="map-name">
+					<input type="hidden" name="map-description" id="map-description">
+					<input type="hidden" name="latitude" id="latitude">
+					<input type="hidden" name="longitude" id="longitude">
+					<input type="hidden" name="zoom" id="zoom">
+					
+					<div class="row">
+						<div class="input-field col s12 file-field">
+							<div class="btn">
+								<span>{% trans "Seleccionar imagen" %}</span>
+								<input id="id_file" type="file" name="app-image">
+							</div>
+							<div id="file_wrapper">
+								<div class="file-path-wrapper">
+									<input class="file-path validate" type="text">
+								</div>
+							</div>
+						</div>
+						<div class="col s12">
+							<label class="gol-form-label">* {% trans "Selecciona una imagen que represente el municipio (por ejemplo: El escudo municipal)" %}</label>
+						</div>
+					</div>
+				
+					<div class="row">
+						<div class="input-field col s12 file-field">
+							<div class="btn">
+								<span>{% trans "Seleccionar archivo" %}</span>
+								<input id="id_file" type="file" name="file" accept="{{ file_accepts }}">
+							</div>
+							<div id="file_wrapper">
+								<div class="file-path-wrapper">
+									<input class="file-path validate" type="text">
+								</div>
+							</div>
+						</div>
+						<div class="col s12">
+							<label class="gol-form-label">* {% trans "Selecciona el archivo comprimido que contiene los shapefiles" %}</label>
+						</div>
+					</div>
+	
+					<br/><br/><br/>
+
+				</form>		
+			</div>
+		</div>
+	</div>
+	
+	<!-- Scripts -->
+	<script type="text/javascript" src="{% static "js/vendors/jquery-2.1.4/jquery-2.1.4.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jquery-2.1.4/jquery.cookie.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jquery-2.1.4/jquery.uploadfile.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jquery-2.1.4/jquery.autocomplete.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/materialize-v0.97.2/js/materialize.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/ol-3.12.1/ol-debug.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jquery-2.1.4/jquery.isloading.min.js" %}"></script>
+	<script type="text/javascript">
+       	$().ready(function(){
+       		
+       		$('select').material_select();
+       		
+       		$('#next-button').click(function (e) {
+       			$('body').isLoading({
+       				text: '{% trans "Publicando capas en el servidor. El proceso puede llevar varios minutos..." %}',
+       				position: "right",
+       				class: "fa fa-refresh fa-spin",
+       				tpl: '<span class="isloading-wrapper %wrapper%">%text%<i class="%class% icon-spin"></i></span>',
+       				disableSource: true,
+       			    disableOthers: []
+       			});
+       		});
+       		
+       		$('#municipality-autocomplete').autocomplete({
+       			serviceUrl: '/gvsigonline/search_candidates/',
+       		    onSelect: function (suggestion) {
+       		        $.ajax({
+       					type: 'POST',
+       					async: false,
+       				  	url: '/gvsigonline/get_location_address/',
+       				  	beforeSend:function(xhr){
+       				    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+       				  	},
+       				  	data: {
+       				  		'query': suggestion.data
+       					},
+       				  	success	:function(response){
+       				  		autoConf(response);
+       					},
+       				  	error: function(){}
+       				});
+       		    }
+       		});
+       		
+       		/**
+       		 * Create the map.
+       		 */
+       		var map = new ol.Map({
+       			layers: [
+       		    	new ol.layer.Tile({
+       	           		source: new ol.source.MapQuest({layer: 'osm'})
+       	         	})
+       			],
+       			target: 'admin-map',
+       			view: new ol.View({
+       				center: [0, 0],
+       			    zoom: 2
+       			})
+       		});
+       		
+       		function autoConf(location){
+       			var municipality = $("#municipality-autocomplete" ).val();
+       			$("#application-name").val(municipality.split(',')[0]);
+	    		$("#application-description").val('Aplicación con la cartografía de ' + municipality.split(',')[0]);
+	    		
+       			var coordinate = ol.proj.transform([parseFloat(location.longitude), parseFloat(location.latitude)], 'EPSG:4326', 'EPSG:3857');
+       			map.getView().setCenter(coordinate);
+       			map.getView().setZoom(12);
+       			$("#map-name").val(municipality.split(',')[0]);
+       			$("#map-description").val('Mapa centrado en ' +  municipality.split(',')[0]);
+       			$("#latitude").val(location.latitude);
+       			$("#longitude").val(location.longitude);
+       			$("#zoom").val(12);
+       		}
+       	});
+    </script>
+</body>
+
+
+</html>
