@@ -17,14 +17,9 @@
 	background: #BABABA;
 }
 
-.preview-svg{
-	height: 20px;
-	width: 20px;
-}
-
 .label-preview-svg{
-	max-height: 30px;
-	max-width: 100px;
+	/*max-height: 30px;
+	max-width: 100px;*/
 }
 
 .symbolizer-link {
@@ -47,5 +42,9 @@
 
 .users-list > li {
     width: 10% !important;
+}
+
+.library-symbol-preview-div {
+	text-align: center;
 }
 

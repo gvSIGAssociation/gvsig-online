@@ -66,7 +66,7 @@ LineSymbolizer.prototype.getTableUI = function() {
 
 LineSymbolizer.prototype.getTabMenu = function() {
 	var ui = '';
-	ui += '<li class="active">><a href="#border-tab" data-toggle="tab">' + gettext('Border') + '</a></li>';
+	ui += '<li class="active"><a href="#border-tab" data-toggle="tab">' + gettext('Border') + '</a></li>';
 	
 	return ui;	
 };
@@ -133,13 +133,17 @@ LineSymbolizer.prototype.updatePreview = function() {
 	}
 	
 	var preview = null;
-	$("#symbol-preview-" + this.id).empty();
-	var previewElement = Snap("#symbol-preview-" + this.id);
+	$("#symbolizer-preview-" + this.id).empty();
+	var previewElement = Snap("#symbolizer-preview-" + this.id);
 
-	preview = previewElement.line(0, 0, 20, 20);
+	preview = previewElement.line(0, 0, 30, 30);
 	preview.attr(attributes);
+	$('.preview-svg').css("height", 30);
+	$('.preview-svg').css("width", 30)
 
-	this.rule.updatePreview();
+	if (this.rule != null) {
+		this.rule.updatePreview();
+	}
 };
 
 LineSymbolizer.prototype.toXML = function(){

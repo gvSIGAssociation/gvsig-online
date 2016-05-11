@@ -37,7 +37,7 @@ UniqueSymbol.prototype.appendSymbolizer = function() {
 	
 	var symbolizer = null;
 	if (this.featureType == 'PointSymbolizer') {
-		symbolizer = new PointSymbolizer(this.rule.getNextSymbolizerId(), this.rule);
+		symbolizer = new PointSymbolizer(this.rule.getNextSymbolizerId(), this.rule, this.symbologyUtils);
 		
 	} else if (this.featureType == 'LineSymbolizer') {
 		symbolizer = new LineSymbolizer(this.rule.getNextSymbolizerId(), this.rule);
@@ -125,33 +125,28 @@ UniqueSymbol.prototype.setSelected = function(element) {
 
 UniqueSymbol.prototype.loadSymbols = function(symbolizers) {
 	$("#table-symbolizers-body").empty();
-	this.symbols.splice(0, this.symbols.length);
+	//this.symbols.splice(0, this.symbols.length);
 	for (var i=0; i<symbolizers.length; i++) {
 		var symbolizer = JSON.parse(symbolizers[i].json);
-		this.loadSymbol(symbolizer, symbolizers[i].type);
+		this.loadSymbolizer(symbolizer);
 	}
 };
 
-UniqueSymbol.prototype.loadSymbol = function(symbolizer, featureType) {
+UniqueSymbol.prototype.loadSymbolizer = function(symbolizer_object) {
 	var self = this;
 	
-	this.featureType = featureType;
+	var symbolizer = null;
+	if (this.featureType == 'PointSymbolizer') {
+		symbolizer = new PointSymbolizer(this.rule.getNextSymbolizerId(), this.rule, this.symbologyUtils, symbolizer_object);
+		
+	} else if (this.featureType == 'LineSymbolizer') {
+		symbolizer = new LineSymbolizer(this.rule.getNextSymbolizerId(), this.rule, symbolizer_object);
+		
+	} else if (this.featureType == 'PolygonSymbolizer') {
+		symbolizer = new PolygonSymbolizer(this.rule.getNextSymbolizerId(), this.rule, symbolizer_object);
+	}
 	
-	var symbol = symbolizer;
-	
-	var ui = '';
-	ui += '<tr data-rowid="' + symbol.id + '">';
-	ui += 	'<td>'
-	ui += 		'<span class="handle"> ';
-	ui += 			'<i class="fa fa-ellipsis-v"></i>';
-	ui += 			'<i class="fa fa-ellipsis-v"></i>';
-	ui += 		'</span>';
-	ui += 	'</td>';
-	ui += 	'<td><a class="symbol-link" data-symid="' + symbol.id + '" href="javascript:void(0)">' + symbol.name + '</a></td>';
-	ui += 	'<td id="symbolizer-preview"><svg id="symbolizer-preview-' + symbol.id + '" class="preview-svg"></svg></td>';	
-	ui += 	'<td><a class="delete-symbol-link" data-symid="' + symbol.id + '" href="javascript:void(0)"><i class="fa fa-times" style="color: #ff0000;"></i></a></td>';
-	ui += '</tr>';	
-	$('#table-symbolizers tbody').append(ui);
+	$('#table-symbolizers tbody').append(symbolizer.getTableUI());
 	
 	$("#table-symbolizers-body").sortable({
 		placeholder: "sort-highlight",
@@ -160,30 +155,29 @@ UniqueSymbol.prototype.loadSymbol = function(symbolizer, featureType) {
 		zIndex: 999999
 	});
 	$("#table-symbolizers-body").on("sortupdate", function(event, ui){
-		var rows = ui.item[0].parentNode.children;
+		/*var rows = ui.item[0].parentNode.children;
 		for(var i=0; i < rows.length; i++) {
-			var symbol = self.getSymbolById(rows[i].dataset.rowid);
+			var symbol = self.rule.getSymbolizerById(rows[i].dataset.rowid);
 			symbol.order = i;
-			console.log(symbol.name + ' -> ' + symbol.order);
-		}		
+		}*/		
 	});
 	
-	$(".symbol-link").on('click', function(e){	
+	$(".edit-symbolizer-link").on('click', function(e){	
 		e.preventDefault();
-		self.setSelected(self.getSymbolById(this.dataset.symid));
+		self.setSelected(self.rule.getSymbolizerById(this.dataset.symbolizerid));
 		self.updateForm();
+		$('#modal-symbolizer').modal('show');
 	});
 	
-	$(".delete-symbol-link").one('click', function(e){	
+	$(".delete-symbolizer-link").one('click', function(e){	
 		e.preventDefault();
-		self.deleteSymbol(this.dataset.symid);
+		self.rule.removeSymbolizer(this.dataset.symbolizerid);
 	});
 	
-	symbol.preview = this.renderSymbolPreview(symbol);
-	
-	this.symbols.push(symbol);
-	this.count++;
-	self.setSelected(symbol);
+	this.rule.appendSymbolizer(symbolizer);
+	symbolizer.updatePreview();
+
+	self.setSelected(symbolizer);
 	this.updateForm();
 };
 
@@ -193,11 +187,15 @@ UniqueSymbol.prototype.createPreview = function(rid,symbolizers) {
 	var previewElement = Snap("#symbolizer-preview-" + rid);
 	var previewGroup = previewElement.g();
 	
+	var max = 20;
 	for (var i=0; i<symbolizers.length; i++) {
 		var symbolizer = JSON.parse(symbolizers[i].json);
 		var preview = this.addSymbolizer(previewElement, symbolizer, symbolizers[i].type);
 		previewGroup.add(preview);
 	}
+	
+	$('.preview-svg').css("height",max+"px");
+	$('.preview-svg').css("width",max+"px");
 };
 
 UniqueSymbol.prototype.addSymbolizer = function(previewElement, symbol, stype) {
@@ -264,16 +262,14 @@ UniqueSymbol.prototype.updateForm = function() {
 	$('#tab-content').empty();	
 	
 	$('#tab-menu').append(this.selected.getTabMenu());
-	if (this.selected.type == 'PointSymbolizer' && this.selected.is_vector) {
+	if (this.selected.type == 'PointSymbolizer') {
 		$('#tab-content').append(this.selected.getFillTabUI());
 		$('#tab-content').append(this.selected.getBorderTabUI());
 		$('#tab-content').append(this.selected.getRotationTabUI());		
 		$('.nav-tabs a[href="#fill-tab"]').tab('show');
 		this.registerSymbolizerEvents();
 		
-	} else if (this.selected.type == 'PointSymbolizer' && !this.selected.is_vector) {
-		$('#tab-content').append(this.newSymbolGraphicTab("active"));			
-		$('.nav-tabs a[href="#graphic-tab"]').tab('show');
+	} else if (this.selected.type == 'ExternalGraphicSymbolizer') {
 		this.registerSymbolizerEvents();
 		
 	} else if (this.selected.type == 'LineSymbolizer') {
@@ -300,6 +296,11 @@ UniqueSymbol.prototype.updateForm = function() {
 UniqueSymbol.prototype.registerSymbolizerEvents = function() {
 	var self = this;
 	
+	$("#graphic-size").on('change', function(e) {
+		self.selected.size = this.value;
+		self.selected.updatePreview();	
+		self.updatePreview();
+	});
 	$('input[type=radio][name=symbol-is-vectorial]').change(function() {
         if (this.value == 'vectorial') {
         	self.selected.vectorial = true;

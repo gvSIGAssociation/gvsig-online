@@ -33,9 +33,9 @@
 									<select class="form-control" style="width: 100%;" id="select-{{ layerStyle.layer.id }}">
 									{% for style in layerStyle.styles %}
 										{% if style.is_default %}
-										<option value="{{ style.id }}" selected>{{ style.title }}</option>
+										<option value="{{ style.id }}" selected>{{ style.name }}</option>
 										{% else %}
-										<option value="{{ style.id }}">{{ style.title }}</option>
+										<option value="{{ style.id }}">{{ style.name }}</option>
 										{% endif %}
 									{% endfor %}
 									</select> 		

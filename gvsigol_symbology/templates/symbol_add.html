@@ -16,13 +16,14 @@
 
 			<div class="box-body">
 				{% csrf_token %}					
-				<div id="form-error" style="color:#ff0000;">
-				</div>
-								
 				<div class="row">
 					<div class="col-md-3">
+						<div class="library-symbol-preview-div">
+							<svg id="library-symbol-preview-svg" class="library-symbol-preview-svg"></svg>
+						</div>
 					</div>
 					<div class="col-md-9">
+						<div id="form-error" style="color:#ff0000;"></div>
 						<div class="form-group">
 							<label>{% trans "Name" %}</label>
 							<input placeholder="{% trans 'Symbol name' %}" name="symbol-name" id="symbol-name" type="text" class="form-control">
@@ -104,11 +105,11 @@
 $(document).ready(function() {
 	
 	$("#append-symbol-button").on('click', function(e){
-		symbolLibrary.appendSymbol("{{symbol_type}}");
+		librarySymbol.appendSymbolizer("{{symbol_type}}");
 	});
 	
 	var symbologyUtils = new SymbologyUtils([],[]);
-	var symbolLibrary = new SymbolLibrary(symbologyUtils);
+	var librarySymbol = new LibrarySymbol(symbologyUtils);
 	
 	$("#save-symbol").on('click', function(e){
 		$("#form-error").empty();
@@ -117,7 +118,7 @@ $(document).ready(function() {
 		var filter = "";
 		
 		if (name != '') {
-			symbolLibrary.save("{{library_id}}", name, title, filter);
+			librarySymbol.save("{{library_id}}", name, title, filter);
 		} else {
 			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
 		}
