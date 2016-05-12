@@ -507,4 +507,4 @@ def get_location_address(request):
         return HttpResponse(json.dumps(location, indent=4), content_type='application/json')
     
 def export(request):   
-    return render_to_response('export_a4h.html', {}, context_instance=RequestContext(request))
+    return render_to_response('app_print_template.html', {}, context_instance=RequestContext(request))
