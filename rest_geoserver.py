@@ -59,6 +59,17 @@ class Geoserver():
 
     def get_service_url(self):
         return self.service_url
+    
+    def reload(self, node_url, user=None, password=None):
+        url = node_url + "/rest/reload"
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+        r = self.session.post(url, auth=auth)
+        if r.status_code==200:
+            return True
+        raise FailedRequestError(r.status_code, r.content)
         
     def create_feature_type(self, name, title, store, workspace, srs=None, fields=None, maxFeatures=0, content_type=None, user=None, password=None, extraParams=None):
         url = self.service_url + "/workspaces/" + workspace + "/datastores/" + store + "/featuretypes"
