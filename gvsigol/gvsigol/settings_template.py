@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     'gvsigol_services',
     'gvsigol_symbology',
     'gvsigol_core',
-    'gvsigol_app_dev',
+    'gvsigol_app_aguas',
 ]
 HAS_INDEX = True
 
@@ -81,6 +81,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'gvsigol_core/templates'),
             os.path.join(BASE_DIR, 'gvsigol_services/templates'),
             os.path.join(BASE_DIR, 'gvsigol_symbology/templates'),
+            os.path.join(BASE_DIR, 'gvsigol_app_aguas/templates'),
             
         ],
         'APP_DIRS': True,
