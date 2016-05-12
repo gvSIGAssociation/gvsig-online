@@ -70,6 +70,9 @@ LibrarySymbol.prototype.appendSymbolizer = function(featureType) {
 	if (this.featureType == 'PointSymbolizer') {
 		symbolizer = new PointSymbolizer(this.count, null, this.symbologyUtils);
 		
+	} else if (this.featureType == 'ExternalGraphicSymbolizer') {
+		symbolizer = new ExternalGraphicSymbolizer(this.count, null, this.symbologyUtils);
+		
 	} else if (this.featureType == 'LineSymbolizer') {
 		symbolizer = new LineSymbolizer(this.count, null);
 		
@@ -203,14 +206,17 @@ LibrarySymbol.prototype.loadSymbol = function(symbolizer, featureType) {
 };
 
 LibrarySymbol.prototype.updatePreview = function() {
-	
-	$("#library-symbol-preview-svg").empty();
-	var previewElement = Snap("#library-symbol-preview-svg");
-	var previewGroup = previewElement.g();
-	
 	for (var i=0; i<this.symbolizers.length; i++) {
-		var preview = this.addSymbolizerToPreview(previewElement, this.symbolizers[i], this.symbolizers[i].type);
-		previewGroup.add(preview);
+		if (this.symbolizers[i].type == 'ExternalGraphicSymbolizer') {
+			
+		} else {
+			$("#library-symbol-preview-svg").empty();
+			var previewElement = Snap("#library-symbol-preview-svg");
+			var previewGroup = previewElement.g();
+			var preview = this.addSymbolizerToPreview(previewElement, this.symbolizers[i], this.symbolizers[i].type);
+			previewGroup.add(preview);
+		}
+		
 	}
 };
 
@@ -307,7 +313,8 @@ LibrarySymbol.prototype.updateForm = function() {
 		this.registerSymbolizerEvents();
 		
 	} else if (this.selected.type == 'ExternalGraphicSymbolizer') {
-		this.registerSymbolizerEvents();
+		$('#tab-content').append(this.selected.getGraphicTabUI());
+		this.selected.registerExternalGraphicEvents();
 		
 	} else if (this.selected.type == 'LineSymbolizer') {
 		$('#tab-content').append(this.selected.getBorderTabUI());

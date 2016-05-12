@@ -69,10 +69,11 @@ _valid_sql_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 class Geoserver():
     CREATE_TYPE_SQL_VIEW = "gs_sql_view"
     CREATE_TYPE_VECTOR_LAYER = "gs_vector_layer"
-    def __init__(self, base_url, supported_types=None):
+    def __init__(self, base_url, cluster_nodes, supported_types=None):
         self.base_url = base_url
         self.rest_url = self.base_url+"/rest"
         self.gwc_url = base_url+"/gwc/rest"
+        self.cluster_nodes = cluster_nodes
         self.rest_catalog = rest_geoserver.Geoserver(self.rest_url, self.gwc_url)
         self.supported_types = supported_types
         if supported_types is not None:
@@ -128,6 +129,16 @@ class Geoserver():
     
     def getSupportedFonts(self, session):
         return self.rest_catalog.get_fonts(user=session['username'], password=session['password'])
+    
+    def reload_nodes(self, session):
+        try:
+            if len(self.cluster_nodes) > 0:
+                for node in self.cluster_nodes:
+                    self.rest_catalog.reload(node, user=session['username'], password=session['password'])
+            return True
+        except Exception as e:
+            print str(e)
+            return False
         
     def createWorkspace(self, session, name, uri, description=None,
                         wms_endpoint=None, wfs_endpoint=None,
@@ -1581,12 +1592,13 @@ def get_default_backend():
     try:
         backend_str = GVSIGOL_SERVICES.get('ENGINE', 'geoserver')
         base_url = GVSIGOL_SERVICES['URL']
+        cluster_nodes = GVSIGOL_SERVICES['CLUSTER_NODES']
         supported_types = GVSIGOL_SERVICES.get('SUPPORTED_TYPES', None)
     except:
         raise ImproperlyConfigured
 
     if backend_str=='geoserver':
-        backend = Geoserver(base_url, supported_types)
+        backend = Geoserver(base_url, cluster_nodes, supported_types)
     else:
         raise ImproperlyConfigured
     return backend
