@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     'gvsigol_services',
     'gvsigol_symbology',
     'gvsigol_core',
-    'gvsigol_app_aguas',
+    '##GVSIG_ONLINE_BASE_APP##',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -80,7 +80,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'gvsigol_core/templates'),
             os.path.join(BASE_DIR, 'gvsigol_services/templates'),
             os.path.join(BASE_DIR, 'gvsigol_symbology/templates'),
-            os.path.join(BASE_DIR, 'gvsigol_app_aguas/templates'),
+            os.path.join(BASE_DIR, '##GVSIG_ONLINE_BASE_APP##/templates'),
             
         ],
         'APP_DIRS': True,
