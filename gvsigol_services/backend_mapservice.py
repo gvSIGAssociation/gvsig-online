@@ -1033,11 +1033,14 @@ class Geoserver():
                     layer.save()
                     
                     self.setDataRules(session=session)
-                    
-                    style_name = layer.name + '_default'
-                    self.createDefaultStyle(layer, style_name, session=session)
-                    self.setLayerStyle(layer.name, style_name, session=session)
-                    
+                         
+                    if self.getStyle(layer.name, session): 
+                        self.setLayerStyle(layer.name, layer.name, session=session)
+                    else:
+                        style_name = layer.name + '_default'
+                        self.createDefaultStyle(layer, style_name, session=session)
+                        self.setLayerStyle(layer.name, style_name, session=session)                        
+                        
                     if layer.layer_group.name != "__default__":
                         self.createOrUpdateGeoserverLayerGroup(layer.layer_group, session)
                             
