@@ -69,6 +69,7 @@
 								<div class="box-header with-border">
 									<h3 class="box-title">{% trans "Library symbols" %}</h3>
 									<div class="box-tools pull-right">
+										<button id="add-new-external-graphic" class="btn btn-box-tool btn-sm"><i class="fa fa-picture-o margin-r-5"></i> {% trans "Add external graphic" %}</button>
 										<button id="add-new-point" class="btn btn-box-tool btn-sm"><i class="fa fa-circle margin-r-5"></i> {% trans "Add point" %}</button>
 										<button id="add-new-line" class="btn btn-box-tool btn-sm"><i class="fa fa-code-fork margin-r-5"></i> {% trans "Add line" %}</button>
 										<button id="add-new-polygon" class="btn btn-box-tool btn-sm"><i class="fa fa-square margin-r-5"></i> {% trans "Add polygon" %}</button>						
@@ -106,6 +107,11 @@ $(document).ready(function() {
 		$(".users-list").append(symbol);
 		librarySymbol.loadSymbols("{{rule.id}}", symbolizers);
 	"{% endfor %}"
+	
+	$("#add-new-external-graphic").on('click', function(e){
+		e.preventDefault();
+		location.href = "/gvsigonline/symbology/symbol_add/{{library.id}}/ExternalGraphicSymbolizer/";
+	});
 	
 	$("#add-new-point").on('click', function(e){
 		e.preventDefault();

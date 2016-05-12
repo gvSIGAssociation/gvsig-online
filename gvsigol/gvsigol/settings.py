@@ -55,8 +55,8 @@ INSTALLED_APPS = [
     'gvsigol_services',
     'gvsigol_symbology',
     'gvsigol_core',
-    #'gvsigol_app_dev',
-    'gvsigol_app_aguas',
+    'gvsigol_app_dev',
+    #'gvsigol_app_aguas',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -193,8 +193,8 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_auth/static'),
     os.path.join(BASE_DIR, 'gvsigol_services/static'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
-    #os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
-    os.path.join(BASE_DIR, 'gvsigol_app_aguas/static'),
+    os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
+    #os.path.join(BASE_DIR, 'gvsigol_app_aguas/static'),
 )
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -210,6 +210,7 @@ GVSIGOL_CATALOG = {
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
     'URL': 'https://localhost/gs-test',
+    'CLUSTER_NODES':[],
     'SUPPORTED_TYPES': (
                         #('v_SHP', _('Shapefile folder')),
                         ('v_PostGIS', _('PostGIS vector')),

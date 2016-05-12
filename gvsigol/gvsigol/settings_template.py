@@ -199,6 +199,10 @@ GVSIGOL_CATALOG = {
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
     'URL': '##GEOSERVER_BASE_URL##',
+    'CLUSTER_NODES':[
+        'http://aguas0.gvsigonline.com:8080/geoserver',
+        'http://aguas1.gvsigonline.com:8080/geoserver'
+    ],
     'SUPPORTED_TYPES': (
                         #('v_SHP', _('Shapefile folder')),
                         ('v_PostGIS', _('PostGIS vector')),

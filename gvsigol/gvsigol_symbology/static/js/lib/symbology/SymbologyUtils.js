@@ -45,6 +45,12 @@ SymbologyUtils.prototype.shapes = [
 	{value: 'x', title: 'X'}*/
 ];
 
+SymbologyUtils.prototype.external_graphic_formats = [
+	{value: 'image/png', title: 'image/png'},
+	{value: 'image/jpeg', title: 'image/jpeg'},
+	{value: 'image/gif', title: 'image/gif'}
+];
+
 SymbologyUtils.prototype.getFonts = function(element){
 	return this.fonts;
 };
