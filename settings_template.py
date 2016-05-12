@@ -57,7 +57,6 @@ INSTALLED_APPS = [
     'gvsigol_core',
     'gvsigol_app_aguas',
 ]
-HAS_INDEX = True
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
