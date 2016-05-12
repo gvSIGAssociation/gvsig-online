@@ -143,18 +143,27 @@ def create_and_assign_layergroups(project):
     }]
     
     for group in predefined_groups:
-        layergroup = LayerGroup(
-            name = group['name'] + project.name.lower(),
-            title = group['title'],
-            cached = True
-        )
-        layergroup.save()
-    
-        project_layergroup = ProjectLayerGroup(
-            project = project,
-            layer_group = layergroup
-        )
-        project_layergroup.save()
+        layergroup_name = group['name'] + project.name.lower()
+        
+        exists = False
+        layergroups = LayerGroup.objects.all()
+        for lg in layergroups:
+            if layergroup_name == lg.name:
+                exists = True
+        
+        if not exists:        
+            layergroup = LayerGroup(
+                name = layergroup_name,
+                title = group['title'],
+                cached = True
+            )
+            layergroup.save()
+        
+            project_layergroup = ProjectLayerGroup(
+                project = project,
+                layer_group = layergroup
+            )
+            project_layergroup.save()
         
 def create_workspace(request, project):
     normalized_name = re.sub('[^A-Za-z0-9]+', '', project.name.lower())    
