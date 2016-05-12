@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 AGUAVAL_MUNI_DB = {
-    'dbhost': 'test.scolab.eu',
-    'dbport': '6433',
+    'dbhost': 'adv.gvsigonline.com',
+    'dbport': '5432',
     'dbname': 'municipios',
-    'dbuser': 'municipios',
-    'dbpassword': 'municipios104'
+    'dbuser': 'gvsigonline',
+    'dbpassword': 'GE2wa8RE'
 }
 
 AGUAVAL_TABLE_DEFINITION = {
