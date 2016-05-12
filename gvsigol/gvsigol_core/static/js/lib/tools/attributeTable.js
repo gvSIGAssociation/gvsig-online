@@ -110,7 +110,7 @@ attributeTable.prototype.createTable = function(featureType) {
 	var propertiesWithType = new Array();
 	var columns = new Array();
 	
-	var table = $("<table>", {id: 'table-' + this.layer.get("id"), class: 'display', style: "width: 100%;"});
+	var table = $("<table>", {id: 'table-' + this.layer.get("id"), class: 'stripe nowrap cell-border hover', style: "width: 100%;"});
 	var thead = $("<thead>", {style: "width: 100%;"});
 	var trow = $("<tr>");
 	for (var i=0; i<featureType.length; i++) {

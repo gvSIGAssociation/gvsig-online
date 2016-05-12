@@ -11,7 +11,7 @@
 					<div class="box-header with-border">
 						<h3 class="box-title">{% trans "Import municipality" %}</h3>
 						<div class="box-tools pull-right">
-							<button type="submit" class="btn btn-success btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Import" %}</button>					
+							<button type="submit" id="import-municipality" class="btn btn-success btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Import" %}</button>					
 						</div>
 					</div>
 				
@@ -88,6 +88,10 @@
 				zoom : 2
 			})
 		});
+		
+		$('#import-municipality').on('click', function(){
+			$("body").overlay();
+		});	
 		
 		$('#municipality-autocomplete').autocomplete({
    			serviceUrl: '/gvsigonline/core/search_candidates/',
