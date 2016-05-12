@@ -3115,12 +3115,16 @@ table.text-center th {
 .register-box {
   width: 360px;
   margin: 7% auto;
+  background-color: #ffffff;
+  padding: 10px;
 }
 @media (max-width: 768px) {
   .login-box,
   .register-box {
     width: 90%;
     margin-top: 20px;
+    background-color: #ffffff;
+    padding: 10px;
   }
 }
 .login-box-body,
