@@ -606,6 +606,48 @@ def get_sld_style(layer_id, style_id, session):
     
     return sld #.encode('utf8')
 
+def get_style_from_library_symbol(style_id, session):
+    sld = "<StyledLayerDescriptor version=\"1.0.0\" xmlns=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" "
+    sld += "xmlns:sld=\"http://www.opengis.net/sld\"  xmlns:gml=\"http://www.opengis.net/gml\" " 
+    sld +=   "xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+    sld +=   "xsi:schemaLocation=\"http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd\">"
+    #sld = "<sld:StyledLayerDescriptor xmlns=\"http://www.opengis.net/sld\" xmlns:sld=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:gml=\"http://www.opengis.net/gml\" version=\"1.0.0\">"
+    sld += "<NamedLayer>"
+    
+    style = Style.objects.get(id=style_id)
+    if style.name != None and style.name != "":
+        sld += "<Name>"+ style.name +"</Name>"
+    
+    sld += "<UserStyle>"
+    if style.name != None and style.name != "":
+        sld += "<Name>"+ style.name +"</Name>"
+    if style.title != None and style.title != "":
+        sld += "<Title>"+ escape(style.title) +"</Title>"
+    if style.title != None and style.title != "":
+        sld += "<Abstract>"+ escape(style.title) +"</Abstract>"
+    sld += "<FeatureTypeStyle>"
+    
+    style_rules = StyleRule.objects.filter(style_id=style_id)
+    for st in style_rules:
+        rule = Rule.objects.get(id=st.rule.id)
+        sld += "<Rule>"
+        if rule.name != None and rule.name != "":
+            sld += "<Name>"+ escape(rule.name) +"</Name>"
+            sld += "<Title>"+ escape(rule.title) +"</Title>"
+        
+        symbolizers = Symbolizer.objects.filter(rule = rule)
+        for symbolizer in symbolizers:
+            sld += symbolizer.sld
+
+        sld += "</Rule>"
+    
+    sld += "</FeatureTypeStyle>"
+    sld += "</UserStyle>"
+    sld += "</NamedLayer>"
+    sld += "</StyledLayerDescriptor>"
+    
+    return sld #.encode('utf8')
+
 
 
 def get_clean_sld(sld_code, symbol):

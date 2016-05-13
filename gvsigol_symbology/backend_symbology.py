@@ -297,6 +297,60 @@ def copy(src, dest):
             shutil.copy(src, dest)
         else:
             print('Directory not copied. Error: %s' % e)
+            
+def check_library_path(library):
+    library_path = settings.MEDIA_ROOT + "symbol_libraries/" + library.name + "/"
+    try:        
+        os.mkdir(library_path)
+        return library_path
+     
+    except OSError as e:
+        print('Info: %s' % e)
+        return library_path
+    
+            
+def save_external_graphic(library_path, file, file_name):    
+    try: 
+        file_path = library_path + file_name
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        with open(file_path, 'wb+') as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+                
+        return True
+     
+    except Exception as e:
+        print('Error: %s' % e)
+        return False
+    
+def delete_external_graphic_img(library, file_name):    
+    try: 
+        library_path = settings.MEDIA_ROOT + "symbol_libraries/" + library.name + "/"
+        file_path = library_path + file_name
+        if os.path.exists(file_path):
+            os.remove(file_path)
+                
+        return True
+     
+    except Exception as e:
+        print('Error: %s' % e)
+        return False
+    
+def delete_library_dir(library):    
+    try: 
+        library_path = settings.MEDIA_ROOT + "symbol_libraries/" + library.name
+        if os.path.exists(library_path):
+            shutil.rmtree(library_path)
+                
+        return True
+     
+    except Exception as e:
+        print('Error: %s' % e)
+        return False
+    
+def get_online_resource(library, file_name):
+    return settings.MEDIA_URL + "symbol_libraries/" + library.name + "/" + file_name
 
 def get_layer_field_description(layer_id, session):
     layer = Layer.objects.get(id=layer_id)

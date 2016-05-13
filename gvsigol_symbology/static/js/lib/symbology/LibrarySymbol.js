@@ -445,11 +445,14 @@ LibrarySymbol.prototype.save = function(libraryid, name, title, filter) {
 	$.ajax({
 		type: "POST",
 		async: false,
+		//contentType: false,
+	    enctype: 'multipart/form-data',
 		url: "/gvsigonline/symbology/symbol_add/" + libraryid + "/" + this.featureType + "/",
 		beforeSend:function(xhr){
 			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},
 		data: {
+			file: $("#eg-file")[0],
 			rule: JSON.stringify(symbol)
 		},
 		success: function(response){
