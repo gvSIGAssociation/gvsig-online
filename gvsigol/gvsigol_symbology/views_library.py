@@ -35,8 +35,8 @@ import json, ast
 from models import Style, StyleLayer, Rule, Symbolizer, StyleRule, Library, LibraryRule
 from utils import get_distinct_query, get_minmax_query, sortFontsArray
 from django_ajax.decorators import ajax
-from sld_tools import get_sld_style, get_sld_filter_operations
-from backend_symbology import get_layer_field_description, get_raster_layer_description, uploadLibrary, exportLibrary
+from sld_tools import get_sld_style, get_style_from_library_symbol
+import backend_symbology
 import os.path
 import gvsigol.settings
 from django.views.decorators.http import require_http_methods
@@ -170,6 +170,7 @@ def library_delete(request, library_id):
         lib_rule.delete()
     
     lib = Library.objects.get(id=library_id)
+    backend_symbology.delete_library_dir(lib)
     lib.delete()
     return redirect('library_list')
 
@@ -184,29 +185,59 @@ def symbol_add(request, library_id, symbol_type):
         try:
             rule = Rule(
                 name = json_rule.get('name'),
-                title = json_rule.get('title')
+                title = json_rule.get('title'),
+                type = symbol_type
             )
             rule.save()
             if json_rule.get('filter') != "":
                 rule.filter = json_rule.get('filter')
             rule.save()
             
+            library = Library.objects.get(id=int(library_id))
+            
             for sym in json_rule.get('symbolizers'):
+                sld = sym.get('sld')
+                json_sym = sym.get('json')
+                if symbol_type == 'ExternalGraphicSymbolizer':
+                    library_path = backend_symbology.check_library_path(library)
+                    file_name = json_rule.get('name') + '.png'
+                    if backend_symbology.save_external_graphic(library_path, request.FILES['eg-file'], file_name):
+                        online_resource = backend_symbology.get_online_resource(library, file_name)
+                        sld = sld.replace("online_resource_replace", online_resource)
+                        json_sym = json_sym.replace("online_resource_replace", online_resource)
+                        
                 symbolizer = Symbolizer(
                     rule = rule,
                     type = symbol_type,
-                    sld = sym.get('sld'),
-                    json = sym.get('json'),
+                    sld = sld,
+                    json = json_sym,
                     order = int(sym.get('order'))
                 )
                 symbolizer.save()
             
-            library = Library.objects.get(id=int(library_id))
             library_rule = LibraryRule(
                 library = library,
                 rule = rule
             )
             library_rule.save()
+            
+            style = Style(
+                name = rule.name,
+                title = rule.name,
+                is_default = False,
+                type = "US"
+            )
+            style.save()
+            
+            style_rule = StyleRule(
+                style = style,
+                rule = rule
+            )
+            style_rule.save()
+            
+            sld_body = get_style_from_library_symbol(style.id, request.session)
+            if not mapservice_backend.createStyle(style.name, sld_body, request.session): 
+                return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
 
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
         
@@ -219,7 +250,11 @@ def symbol_add(request, library_id, symbol_type):
             'library_id': library_id,
             'symbol_type': symbol_type
         }
-        return render_to_response('symbol_add.html', response, context_instance=RequestContext(request))
+        if symbol_type == 'ExternalGraphicSymbolizer':
+            return render_to_response('external_graphic_add.html', response, context_instance=RequestContext(request))
+        
+        else:
+            return render_to_response('symbol_add.html', response, context_instance=RequestContext(request))
     
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -231,7 +266,7 @@ def symbol_update(request, symbol_id):
                 
         try:
             rule = Rule.objects.get(id=int(symbol_id))
-            rule.name = json_rule.get('name')
+            #rule.name = json_rule.get('name')
             rule.title = json_rule.get('title')
             rule.save()
             if json_rule.get('filter') != "":
@@ -240,17 +275,38 @@ def symbol_update(request, symbol_id):
             library_rule = LibraryRule.objects.get(rule=rule)
             
             for s in Symbolizer.objects.filter(rule=rule):
+                if s.type == 'ExternalGraphicSymbolizer':
+                    file_name = rule.name + '.png'
+                    backend_symbology.delete_external_graphic_img(library_rule.library, file_name)
                 s.delete()
                 
             for sym in json_rule.get('symbolizers'):
+                
+                sld = sym.get('sld')
+                json_sym = sym.get('json')
+                if rule.type == 'ExternalGraphicSymbolizer':
+                    library_path = backend_symbology.check_library_path(library_rule.library)
+                    file_name = json_rule.get('name') + '.png'
+                    if backend_symbology.save_external_graphic(library_path, request.FILES['eg-file'], file_name):
+                        online_resource = backend_symbology.get_online_resource(library_rule.library, file_name)
+                        sld = sld.replace('online_resource_replace', online_resource)
+                        sld = json_sym.replace('online_resource_replace', online_resource)
+                        
                 symbolizer = Symbolizer(
                     rule = rule,
                     type = sym.get('type'),
-                    sld = sym.get('sld'),
-                    json = sym.get('json'),
+                    sld = sld,
+                    json = json_sym,
                     order = int(sym.get('order'))
                 )
                 symbolizer.save()
+            
+            style_rule = StyleRule.objects.get(rule=rule)
+            style = Style.objects.get(id=style_rule.style.id)
+            if mapservice_backend.deleteStyle(style.name, request.session): 
+                sld_body = get_style_from_library_symbol(style.id, request.session)
+                if not mapservice_backend.createStyle(style.name, sld_body, request.session): 
+                    return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
 
             return HttpResponse(json.dumps({'library_id': library_rule.library.id, 'success': True}, indent=4), content_type='application/json')
         
@@ -260,26 +316,43 @@ def symbol_update(request, symbol_id):
         
     else:
         r = Rule.objects.get(id=int(symbol_id))
-        symbolizers = []
-        for s in Symbolizer.objects.filter(rule=r).order_by('order'):
-            symbolizers.append({
-                'type': s.type,
-                'json': s.json
-            })
-        rule = {
-            'id': r.id,
-            'name': r.name,
-            'title': r.title,
-            'minscale': r.minscale,
-            'maxscale': r.maxscale,
-            'order': r.order,
-            'type': r.type,
-            'symbolizers': json.dumps(symbolizers)
-        }
-        response = {
-            'rule': rule
-        }
-        return render_to_response('symbol_update.html', response, context_instance=RequestContext(request))
+        if r.type == 'ExternalGraphicSymbolizer':       
+            symbolizer = Symbolizer.objects.filter(rule=r)[0]
+            rule = {
+                'id': r.id,
+                'name': r.name,
+                'title': r.title,
+                'minscale': r.minscale,
+                'maxscale': r.maxscale,
+                'type': r.type,
+                'symbolizer_format': json.loads(symbolizer.json).get('format'),
+                'symbolizer_online_resource': json.loads(symbolizer.json).get('online_resource'),
+            }
+            response = {
+                'rule': rule
+            }
+            return render_to_response('external_graphic_update.html', response, context_instance=RequestContext(request))
+        else:
+            symbolizers = []
+            for s in Symbolizer.objects.filter(rule=r).order_by('order'):
+                symbolizers.append({
+                    'type': s.type,
+                    'json': s.json
+                })
+            rule = {
+                'id': r.id,
+                'name': r.name,
+                'title': r.title,
+                'minscale': r.minscale,
+                'maxscale': r.maxscale,
+                'order': r.order,
+                'type': r.type,
+                'symbolizers': json.dumps(symbolizers)
+            }
+            response = {
+                'rule': rule
+            }
+            return render_to_response('symbol_update.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @admin_required
@@ -293,8 +366,18 @@ def symbol_delete(request):
             library_id = library_rule.library.id
             symbolizers = Symbolizer.objects.filter(rule_id=rule.id)
             for symbolizer in symbolizers:
+                if symbolizer.type == 'ExternalGraphicSymbolizer':
+                    file_name = rule.name + '.png'
+                    backend_symbology.delete_external_graphic_img(library_rule.library, file_name)
                 symbolizer.delete()
             library_rule.delete()
+            
+            style_rule = StyleRule.objects.get(rule=rule)
+            style = Style.objects.get(id=style_rule.style.id)
+            if mapservice_backend.deleteStyle(style.name, request.session):            
+                style.delete()
+                style_rule.delete()
+                
             rule.delete()
 
 

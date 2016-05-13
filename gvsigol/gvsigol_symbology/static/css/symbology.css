@@ -48,3 +48,26 @@
 	text-align: center;
 }
 
+.preview-eg{
+	max-height: 48px;
+	max-width: 48px;
+}
+
+.output-eg{
+	max-height: 48px;
+	max-width: 48px;
+}
+
+.output-eg-div {
+	text-align: center;
+	padding: 20px;
+}
+
+.users-list > li img {
+    border-radius: 0px !important;
+    max-width: 48px !important;
+}
+
+.users-list-name {
+    overflow: visible;
+}

@@ -12,7 +12,7 @@
 					<div class="box-header with-border">
 						<h3 class="box-title">{% trans "Update library" %}</h3>
 						<div class="box-tools pull-right">
-							<button id="update-library" type="submit" class="btn btn-success"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+							<button id="update-library" type="submit" class="btn btn-sm btn-success"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
 						</div>
 					</div>
 
@@ -99,13 +99,22 @@ $(document).ready(function() {
 	
 	"{% for rule in rules %}"
 		var symbolizers = {{rule.symbolizers|safe}};
-		var symbol = '';
-		symbol += '<li>';
-		symbol += 	'<svg id="symbolizer-preview-{{rule.id}}" class="preview-svg-{{rule.id}}"></svg>';
-		symbol += 	'<a class="users-list-name" href="/gvsigonline/symbology/symbol_update/{{rule.id}}/">{{rule.name}}</a>';
-		symbol += '</li>';
-		$(".users-list").append(symbol);
-		librarySymbol.loadSymbols("{{rule.id}}", symbolizers);
+		var symbol = '';		
+		"{% if rule.type == 'ExternalGraphicSymbolizer' %}"
+			var graphic = JSON.parse(symbolizers[0].json);
+			symbol += '<li>';
+			symbol += 	'<img src="' + graphic.online_resource + '" class="preview-eg"></img>';
+			symbol += 	'<a class="users-list-name" href="/gvsigonline/symbology/symbol_update/{{rule.id}}/">{{rule.name}}</a>';
+			symbol += '</li>';
+			$(".users-list").append(symbol);
+		"{% else %}"
+			symbol += '<li>';
+			symbol += 	'<svg id="symbolizer-preview-{{rule.id}}" class="preview-svg-{{rule.id}}"></svg>';
+			symbol += 	'<a class="users-list-name" href="/gvsigonline/symbology/symbol_update/{{rule.id}}/">{{rule.name}}</a>';
+			symbol += '</li>';
+			$(".users-list").append(symbol);
+			librarySymbol.loadSymbols("{{rule.id}}", symbolizers);
+		"{% endif %}"	
 	"{% endfor %}"
 	
 	$("#add-new-external-graphic").on('click', function(e){
