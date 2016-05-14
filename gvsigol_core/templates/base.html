@@ -97,8 +97,7 @@
 						{% include "dashboard_core_menu.html" %}
 						{% for app in INSTALLED_APPS %}												  
 	    					{% if 'gvsigol_app_' in app %}	
-	    						{% with "dashboard_"|add:app|cut:"gvsigol_app_"|add:"_menu.html" as aux %}	
-	    							<script>console.log('Loading ... {{ aux }} ')</script>    	
+	    						{% with "dashboard_"|add:app|cut:"gvsigol_app_"|add:"_menu.html" as aux %}	    	
 									{% include aux %}	
 								{% endwith %}
 	    					{% endif %}		    					
