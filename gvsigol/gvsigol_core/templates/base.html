@@ -95,10 +95,13 @@
 						{% include "dashboard_services_menu.html" %}
 						{% include "dashboard_symbology_menu.html" %}
 						{% include "dashboard_core_menu.html" %}
-						{% for app in INSTALLED_APPS %}
+						{% for app in INSTALLED_APPS %}												  
 	    					{% if 'gvsigol_app_' in app %}	
-	    					{% include "dashboard_app_menu.html" %}
-	    					{% endif %}	
+	    						{% with "dashboard_"|add:app|cut:"gvsigol_app_"|add:"_menu.html" as aux %}	
+	    							<script>console.log('Loading ... {{ aux }} ')</script>    	
+									{% include aux %}	
+								{% endwith %}
+	    					{% endif %}		    					
 	    				{% endfor %}
 					{% endif %}								
 				</ul>				
