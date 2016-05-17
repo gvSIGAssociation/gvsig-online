@@ -20,7 +20,7 @@
 					<div class="row">
 						<div class="col-md-2">
 							<div class="output-eg-div">
-								<img id="output" class="output-eg"/>
+								<img id="output-eg" class="output-eg"/>
 							</div>
 						</div>
 						<div class="col-md-10">
@@ -39,6 +39,10 @@
 							<div class="form-group">
 								<label>{% trans "Select image" %}</label>
 								<input id="eg-file" name="eg-file" type="file" accept=".png" onchange="loadFile(event)" class="file" data-show-preview="true">
+							</div>
+							<div class="form-group">
+								<label>{% trans "Size" %}</label>
+					    		<input placeholder="{% trans 'Symbol size (in pixels)' %}" name="symbol-size" id="symbol-size" type="number" value="24" class="form-control">
 							</div>
 							<div class="form-group">
 								<label>{% trans "Select format" %}</label>
@@ -63,7 +67,7 @@
 	var loadFile = function(event) {
 		$("#form-error").empty();
 		if (event.target.files[0].type == 'image/png') {
-			var output = document.getElementById('output');
+			var output = document.getElementById('output-eg');
 		   	output.src = URL.createObjectURL(event.target.files[0]);
 		   	
 		} else {
@@ -76,18 +80,30 @@
 <script>
 $(document).ready(function() {
 	
+	var size = $("#symbol-size").val();
+	$('#output-eg').css("height",size+"px");
+	$('#output-eg').css("width","auto");
+	
+	$("#symbol-size").on('change', function(){
+		var size = $("#symbol-size").val();
+		$('#output-eg').css("height",size+"px");
+		$('#output-eg').css("width","auto");
+	});
+	
 	$("form").submit(function(evt){	 
 		evt.preventDefault();
 
 		$("#form-error").empty();
 		var name = $("#symbol-name").val();
 		var title = $("#symbol-title").val();
+		var egFile = $("#eg-file").val();
 		var format = $("#eg-format").val();
+		var size = $("#symbol-size").val();
 		
 	   	var formData = new FormData($(this)[0]); 	   	
 	   	
-	   	if (name != '') {
-	   		var externalGraphic = new ExternalGraphicSymbolizer(name, format, 'online_resource_replace');
+	   	if (name != '' && egFile != '') {
+	   		var externalGraphic = new ExternalGraphicSymbolizer(name, format, size, 'online_resource_replace');
 			var symbolizer = {
 				type: externalGraphic.type,
 				sld: externalGraphic.toXML(),
@@ -127,8 +143,15 @@ $(document).ready(function() {
 			    error: function(){}
 			});
 			
-	   	} else {
+	   	} else if (name == '' && egFile == '') {
 			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
+			$("#form-error").append('<p>*{% trans "You must select a file" %}</p>');
+			
+		} else if (name == '' && egFile != '') {
+			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
+			
+		} else if (name != '' && egFile == '') {
+			$("#form-error").append('<p>*{% trans "You must select a file" %}</p>');
 		}
 	   	
 		return false;

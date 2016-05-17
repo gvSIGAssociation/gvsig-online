@@ -36,11 +36,13 @@ var Rule = function(id, featureType, rule_opts) {
 	if (rule_opts) {
 		this.name = rule_opts.name;
 		this.title = rule_opts.title;
-		this.createUI();
-		this.loadSymbolizers(rule_opts.symbolizers);
+		//this.createUI();
+		if (rule_opts.symbolizers != "") {
+			this.loadSymbolizers(rule_opts.symbolizers);
+		}		
 		
 	} else {
-		this.createUI();
+		//this.createUI();
 	}
 	
 };
@@ -140,7 +142,7 @@ Rule.prototype.removeSymbolizer = function(id) {
 			tbody.removeChild(tbody.children[i]);
 		}
 	}
-	this.updatePreview();
+	//this.updatePreview();
 };
 
 Rule.prototype.removeLabel = function(id) {
@@ -155,7 +157,7 @@ Rule.prototype.removeLabel = function(id) {
 			tbody.removeChild(tbody.children[i]);
 		}
 	}
-	this.updatePreview();
+	//this.updatePreview();
 };
 
 Rule.prototype.updatePreview = function() {

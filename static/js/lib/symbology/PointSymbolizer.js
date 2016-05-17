@@ -35,7 +35,7 @@ var PointSymbolizer = function(id, rule, symbologyUtils, symbolizer_object) {
 	this.border_type = "solid";
 	this.rotation = 0;
 	this.order = 0;
-	this.size = 5;
+	this.size = 10;
 	this.rule = rule;
 	this.symbologyUtils = symbologyUtils;
 	
@@ -67,7 +67,7 @@ PointSymbolizer.prototype.getTableUI = function() {
 	ui += 	'<td><span class="text-muted">' + this.name + '</span></td>';
 	ui += 	'<td id="symbolizer-preview"><svg id="symbolizer-preview-' + this.id + '" class="preview-svg-' + this.id + '"></svg></td>';	
 	ui += 	'<td><a class="edit-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
-	ui += 	'<td><a class="delete-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
+	//ui += 	'<td><a class="delete-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
 	ui += '</tr>';	
 	
 	return ui;
@@ -213,17 +213,17 @@ PointSymbolizer.prototype.updatePreview = function() {
 	var x = this.size * 2;
 	var y = this.size * 2;
 	if (this.shape == 'circle') {
-		preview = previewElement.circle(this.size, this.size, this.size);
+		preview = previewElement.circle(this.size, this.size, this.size/2);
 		preview.attr(attributes);
 		
 	} else if (this.shape == 'square') {
-		preview = previewElement.polygon(0, 0, this.size*2, 0, this.size*2, this.size*2, 0, this.size*2);
+		preview = previewElement.polygon(0, 0, this.size, 0, this.size, this.size, 0, this.size);
 		preview.attr(attributes);
 		
 	} else if (this.shape == 'triangle') {
 		var matrix = new Snap.Matrix();
 		matrix.rotate(180, this.size, this.size);
-		preview = previewElement.polygon(0, 0, this.size*2, 0, this.size, this.size*2);
+		preview = previewElement.polygon(0, 0, this.size, 0, this.size/2, this.size);
 		preview.transform(matrix);
 		preview.attr(attributes);
 		
@@ -248,7 +248,7 @@ PointSymbolizer.prototype.updatePreview = function() {
 	$('.preview-svg-' + this.id).css("width", x);
 
 	if (this.rule != null) {
-		this.rule.updatePreview();
+		//this.rule.updatePreview();
 	}
 };
 

@@ -276,8 +276,9 @@ def symbol_update(request, symbol_id):
             
             for s in Symbolizer.objects.filter(rule=rule):
                 if s.type == 'ExternalGraphicSymbolizer':
-                    file_name = rule.name + '.png'
-                    backend_symbology.delete_external_graphic_img(library_rule.library, file_name)
+                    if 'eg-file' in request.FILES:
+                        file_name = rule.name + '.png'
+                        backend_symbology.delete_external_graphic_img(library_rule.library, file_name)
                 s.delete()
                 
             for sym in json_rule.get('symbolizers'):
@@ -285,12 +286,13 @@ def symbol_update(request, symbol_id):
                 sld = sym.get('sld')
                 json_sym = sym.get('json')
                 if rule.type == 'ExternalGraphicSymbolizer':
-                    library_path = backend_symbology.check_library_path(library_rule.library)
-                    file_name = json_rule.get('name') + '.png'
-                    if backend_symbology.save_external_graphic(library_path, request.FILES['eg-file'], file_name):
-                        online_resource = backend_symbology.get_online_resource(library_rule.library, file_name)
-                        sld = sld.replace('online_resource_replace', online_resource)
-                        sld = json_sym.replace('online_resource_replace', online_resource)
+                    if 'eg-file' in request.FILES:
+                        library_path = backend_symbology.check_library_path(library_rule.library)
+                        file_name = json_rule.get('name') + '.png'
+                        if backend_symbology.save_external_graphic(library_path, request.FILES['eg-file'], file_name):
+                            online_resource = backend_symbology.get_online_resource(library_rule.library, file_name)
+                            sld = sld.replace('online_resource_replace', online_resource)
+                            json_sym = json_sym.replace('online_resource_replace', online_resource)
                         
                 symbolizer = Symbolizer(
                     rule = rule,
@@ -326,6 +328,7 @@ def symbol_update(request, symbol_id):
                 'maxscale': r.maxscale,
                 'type': r.type,
                 'symbolizer_format': json.loads(symbolizer.json).get('format'),
+                'symbolizer_size': json.loads(symbolizer.json).get('size'),
                 'symbolizer_online_resource': json.loads(symbolizer.json).get('online_resource'),
             }
             response = {

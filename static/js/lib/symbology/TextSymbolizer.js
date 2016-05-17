@@ -252,7 +252,7 @@ TextSymbolizer.prototype.updatePreview = function() {
 	preview.attr(attributes);
 
 	if (this.rule != null) {
-		this.rule.updatePreview();
+		//this.rule.updatePreview();
 	}
 };
 

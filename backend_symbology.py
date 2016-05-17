@@ -29,6 +29,7 @@ from xml.sax.saxutils import escape
 from gvsigol import settings
 import tempfile, zipfile
 import os, shutil, errno
+import sld_tools
 import StringIO
 import re
 
@@ -358,6 +359,44 @@ def get_layer_field_description(layer_id, session):
     workspace = datastore.workspace
     
     return backend_mapservice.getResourceInfo(workspace.name, datastore.name, layer.name, "json", session)
+
+def get_fields(layer_id, session):
+    resource = get_layer_field_description(layer_id, session)
+    fields = None
+    if resource != None:
+        fields = resource.get('featureType').get('attributes').get('attribute')
+        
+    return fields
+
+def get_alphanumeric_fields(fields):
+    alphanumeric_fields = []
+    for field in fields:
+        if not field.get('binding').startswith('com.vividsolutions.jts.geom'):
+            alphanumeric_fields.append(field)
+            
+    return alphanumeric_fields
+
+def get_feature_type(fields):
+    featureType = None
+    for field in fields:
+        if field.get('binding').startswith('com.vividsolutions.jts.geom'):
+            auxType = field.get('binding').replace('com.vividsolutions.jts.geom.', '')
+            if auxType == "Point" or auxType == "MultiPoint":
+                featureType = "PointSymbolizer"
+            if auxType == "Line" or auxType == "MultiLineString":
+                featureType = "LineSymbolizer"
+            if auxType == "Polygon" or auxType == "MultiPolygon":
+                featureType = "PolygonSymbolizer"
+                
+    return featureType
+
+def get_sld_filter_values():
+    sldFilterValues = sld_tools.get_sld_filter_operations()
+    for category in sldFilterValues:
+        for oper in sldFilterValues[category]:
+            sldFilterValues[category][oper]["genCodeFunc"] = ""
+            
+    return sldFilterValues
 
 def get_raster_layer_description(layer_id, session):
     layer = Layer.objects.get(id=layer_id)
