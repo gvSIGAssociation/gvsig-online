@@ -441,11 +441,57 @@ class Geoserver():
             )
             style_rule.save()
             
+            json = None
+            if symbol_type == 'PointSymbolizer':
+                json = {
+                    "id":0,
+                    "type":"PolygonSymbolizer",
+                    "name":"PolygonSymbolizer 0",
+                    "fill_color":"#383838",
+                    "fill_opacity":0.6,
+                    "border_color":"#000000",
+                    "border_size":1,
+                    "border_opacity":1,
+                    "border_type":"solid",
+                    "rotation":0,
+                    "order":0
+                }
+                
+            elif symbol_type == 'LineSymbolizer':
+                json = {
+                    "id":0,
+                    "type":"PolygonSymbolizer",
+                    "name":"PolygonSymbolizer 0",
+                    "fill_color":"#3b893d",
+                    "fill_opacity":0.5,
+                    "border_color":"#000000",
+                    "border_size":1,
+                    "border_opacity":1,
+                    "border_type":"solid",
+                    "rotation":0,
+                    "order":0
+                }
+                
+            elif symbol_type == 'PolygonSymbolizer':
+                json = {
+                    "id":0,
+                    "type":"PolygonSymbolizer",
+                    "name":"PolygonSymbolizer 0",
+                    "fill_color":"#3b893d",
+                    "fill_opacity":0.5,
+                    "border_color":"#000000",
+                    "border_size":1,
+                    "border_opacity":1,
+                    "border_type":"solid",
+                    "rotation":0,
+                    "order":0
+                }
+            
             symb = Symbolizer(
                 rule=rule,
                 type=symbol_type,
                 sld=symbolizer,
-                json= "",
+                json= str(json).replace("'", '"'),
                 order=0
             )   
             symb.save()

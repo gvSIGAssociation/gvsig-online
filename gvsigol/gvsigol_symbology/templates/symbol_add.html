@@ -104,12 +104,15 @@
 <script>
 $(document).ready(function() {
 	
-	$("#append-symbol-button").on('click', function(e){
+	/*$("#append-symbol-button").on('click', function(e){
 		librarySymbol.appendSymbolizer("{{symbol_type}}");
-	});
+	});*/
 	
 	var symbologyUtils = new SymbologyUtils([],[]);
 	var librarySymbol = new LibrarySymbol(symbologyUtils);
+	
+	$("#append-symbol-button").css("display", "none");
+	librarySymbol.appendSymbolizer("{{symbol_type}}");
 	
 	$("#save-symbol").on('click', function(e){
 		$("#form-error").empty();
