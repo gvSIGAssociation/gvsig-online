@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     'gvsigol_services',
     'gvsigol_symbology',
     'gvsigol_core',
-    '##GVSIG_ONLINE_BASE_APP##',
+    ##GVSIG_ONLINE_APPS##
 ]
 
 MIDDLEWARE_CLASSES = [
