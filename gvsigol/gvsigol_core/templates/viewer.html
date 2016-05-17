@@ -202,12 +202,15 @@
 			}
 		});
 	</script>
-	{% for app in INSTALLED_APPS %}
-    {% if 'gvsigol_app_' in app %}	
-    	{% include "load_tools.html" %}
-    {% endif %}	
-    {% endfor %}
 	
+	
+	{% for app in INSTALLED_APPS %}												  
+		{% if 'gvsigol_app_' in app %}	
+			{% with "load_tools_"|add:app|cut:"gvsigol_app_"|add:".html" as aux %}	   			 	
+				{% include aux %}	
+			{% endwith %}
+		{% endif %}		    					
+	{% endfor %}
 	<script>
 	$(document).ready(function() {
 		
