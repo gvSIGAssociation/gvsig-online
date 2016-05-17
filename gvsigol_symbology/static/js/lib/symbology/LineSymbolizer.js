@@ -58,7 +58,7 @@ LineSymbolizer.prototype.getTableUI = function() {
 	ui += 	'<td><span class="text-muted">' + this.name + '</span></td>';
 	ui += 	'<td id="symbolizer-preview"><svg id="symbolizer-preview-' + this.id + '" class="preview-svg"></svg></td>';	
 	ui += 	'<td><a class="edit-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
-	ui += 	'<td><a class="delete-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
+	//ui += 	'<td><a class="delete-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
 	ui += '</tr>';	
 	
 	return ui;
@@ -142,7 +142,7 @@ LineSymbolizer.prototype.updatePreview = function() {
 	$('.preview-svg').css("width", 30)
 
 	if (this.rule != null) {
-		this.rule.updatePreview();
+		//this.rule.updatePreview();
 	}
 };
 
@@ -158,4 +158,22 @@ LineSymbolizer.prototype.toXML = function(){
 	xml += '</LineSymbolizer>';
 	
 	return xml;
+};
+
+LineSymbolizer.prototype.toJSON = function(){
+	
+	var object = {
+		id: this.id,
+		type: this.type,
+		name: this.name,
+		fill_color: this.fill_color,
+		fill_opacity: this.fill_opacity,
+		border_color: this.border_color,
+		border_size: this.border_size,
+		border_opacity: this.border_opacity,
+		border_type: this.border_type,
+		order: this.order
+	};
+	
+	return JSON.stringify(object);
 };

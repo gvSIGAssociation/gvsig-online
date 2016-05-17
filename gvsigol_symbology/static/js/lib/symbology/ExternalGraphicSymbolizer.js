@@ -21,11 +21,12 @@
  */
  
  
-var ExternalGraphicSymbolizer = function(name, format, online_resource) {
+var ExternalGraphicSymbolizer = function(name, format, size, online_resource) {
 	this.type = 'ExternalGraphicSymbolizer';
 	this.name = name;
 	this.online_resource = online_resource;
 	this.format = format;
+	this.size = size;
 };
 
 ExternalGraphicSymbolizer.prototype.toXML = function(){
@@ -38,6 +39,7 @@ ExternalGraphicSymbolizer.prototype.toXML = function(){
 	xml += 			'<Format>' + this.format + '</Format>';
 	xml += 		'</ExternalGraphic>';
 	xml += 	'</Graphic>';
+	xml += 	'<Size>' + this.size + '</Size>';
 	xml += '</PointSymbolizer>';
 	
 	return xml;
@@ -49,7 +51,8 @@ ExternalGraphicSymbolizer.prototype.toJSON = function(){
 		type: this.type,
 		name: this.name,
 		online_resource: this.online_resource,
-		format: this.format
+		format: this.format,
+		size: this.size
 	};
 	
 	return JSON.stringify(object);
