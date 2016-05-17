@@ -29,7 +29,12 @@ var LibrarySymbol = function(symbologyUtils) {
 	this.symbolizers = new Array();
 };
 
+LibrarySymbol.prototype.getSymbolizers = function() {
+	return this.symbolizers;
+};
+
 LibrarySymbol.prototype.loadSymbolizers = function(json_symbolizers) {
+	var self = this;
 	for (var i=0; i<json_symbolizers.length; i++) {
 		var symbolizer_object = JSON.parse(json_symbolizers[i].json);
 		var symbolizer = null;
@@ -59,6 +64,18 @@ LibrarySymbol.prototype.loadSymbolizers = function(json_symbolizers) {
 		}
 		this.count++;
 	}
+	
+	$(".edit-symbolizer-link").on('click', function(e){	
+		e.preventDefault();
+		self.setSelected(self.getSymbolizerById(this.dataset.symbolizerid));
+		self.updateForm();
+		$('#modal-symbolizer').modal('show');
+	});
+	
+	$(".delete-symbolizer-link").one('click', function(e){	
+		e.preventDefault();
+		self.removeSymbolizer(this.dataset.symbolizerid);
+	});
 };
 
 LibrarySymbol.prototype.appendSymbolizer = function(featureType) {
@@ -255,17 +272,17 @@ LibrarySymbol.prototype.addSymbolizerToPreview = function(previewElement, symbol
 	var preview = null;
 	if (stype == 'PointSymbolizer') {
 		if (symbolizer.shape == 'circle') {
-			preview = previewElement.circle(symbolizer.size, symbolizer.size, symbolizer.size);
+			preview = previewElement.circle(symbolizer.size/2, symbolizer.size/2, symbolizer.size/2);
 			preview.attr(attributes);
 			
 		} else if (symbolizer.shape == 'square') {
-			preview = previewElement.polygon(0, 0, symbolizer.size*2, 0, symbolizer.size*2, symbolizer.size*2, 0, symbolizer.size*2);
+			preview = previewElement.polygon(0, 0, symbolizer.size, 0, symbolizer.size, symbolizer.size, 0, symbolizer.size);
 			preview.attr(attributes);
 			
 		} else if (symbolizer.shape == 'triangle') {
 			var matrix = new Snap.Matrix();
 			matrix.rotate(180, symbolizer.size, symbolizer.size);
-			preview = previewElement.polygon(0, 0, symbolizer.size*2, 0, symbolizer.size, symbolizer.size*2);
+			preview = previewElement.polygon(0, 0, symbolizer.size, 0, symbolizer.size/2, symbolizer.size);
 			preview.transform(matrix);
 			preview.attr(attributes);
 			

@@ -299,7 +299,7 @@ UniqueSymbol.prototype.registerSymbolizerEvents = function() {
 	$("#graphic-size").on('change', function(e) {
 		self.selected.size = this.value;
 		self.selected.updatePreview();	
-		self.updatePreview();
+		//self.updatePreview();
 	});
 	$('input[type=radio][name=symbol-is-vectorial]').change(function() {
         if (this.value == 'vectorial') {

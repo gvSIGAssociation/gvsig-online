@@ -80,8 +80,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'gvsigol_auth/templates'),
             os.path.join(BASE_DIR, 'gvsigol_core/templates'),
             os.path.join(BASE_DIR, 'gvsigol_services/templates'),
-            os.path.join(BASE_DIR, 'gvsigol_symbology/templates'),
-            
+            os.path.join(BASE_DIR, 'gvsigol_symbology/templates')
         ],
         'APP_DIRS': True,
         'OPTIONS': {

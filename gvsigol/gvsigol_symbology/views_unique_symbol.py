@@ -28,7 +28,7 @@ from gvsigol_services.models import Layer, Datastore, Workspace
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
 from models import Style, StyleLayer, Rule, Symbolizer, StyleRule, Library
 from sld_tools import get_sld_style, get_sld_filter_operations
-from backend_symbology import get_layer_field_description
+import backend_symbology
 from django.utils.translation import ugettext as _
 from gvsigol_auth.utils import admin_required
 from utils import sortFontsArray
@@ -39,43 +39,23 @@ import json
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @admin_required
 def unique_symbol_add(request, layer_id):
-    resource = get_layer_field_description(layer_id, request.session)
-    if resource != None:
-        fields = resource.get('featureType').get('attributes').get('attribute')
-    
-    featureType = "PointSymbolizer"
-    for field in fields:
-        if field.get('binding').startswith('com.vividsolutions.jts.geom'):
-            auxType = field.get('binding').replace('com.vividsolutions.jts.geom.', '')
-            if auxType == "Point" or auxType == "MultiPoint":
-                featureType = "PointSymbolizer"
-            if auxType == "Line" or auxType == "MultiLineString":
-                featureType = "LineSymbolizer"
-            if auxType == "Polygon" or auxType == "MultiPolygon":
-                featureType = "PolygonSymbolizer"
-    
-    sldFilterValues = get_sld_filter_operations()
-    for category in sldFilterValues:
-        for oper in sldFilterValues[category]:
-            sldFilterValues[category][oper]["genCodeFunc"] = ""
-            
-    supportedfontsStr = mapservice_backend.getSupportedFonts(request.session)
-    supportedfonts = json.loads(supportedfontsStr)
-    sorted_fonts = sortFontsArray(supportedfonts.get("fonts"))
-    
-    alphanumeric_fields = []
-    for field in fields:
-        if not field.get('binding').startswith('com.vividsolutions.jts.geom'):
-            alphanumeric_fields.append(field)
+    fields = backend_symbology.get_fields(layer_id, request.session)
+    feature_type = backend_symbology.get_feature_type(fields)
+    sld_filter_values = backend_symbology.get_sld_filter_values()
+    alphanumeric_fields = backend_symbology.get_alphanumeric_fields(fields)
+       
+    supported_fonts_str = mapservice_backend.getSupportedFonts(request.session)
+    supported_fonts = json.loads(supported_fonts_str)
+    sorted_fonts = sortFontsArray(supported_fonts.get("fonts"))
     
     layer = Layer.objects.get(id=int(layer_id))
     index = len(StyleLayer.objects.filter(layer=layer))
                       
     response = {
-        'featureType': featureType,
+        'featureType': feature_type,
         'fields': json.dumps(fields), 
         'alphanumeric_fields': json.dumps(alphanumeric_fields),
-        'sldFilterValues': json.dumps(sldFilterValues),
+        'sldFilterValues': json.dumps(sld_filter_values),
         'fonts': sorted_fonts,
         'layer_id': layer_id,
         'style_name': layer.name + '_' + str(index),
@@ -87,71 +67,55 @@ def unique_symbol_add(request, layer_id):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @admin_required
 def unique_symbol_update(request, layer_id, style_id):  
-    style = Style.objects.get(id=int(style_id))
-    
-    resource = get_layer_field_description(layer_id, request.session)
-    if resource != None:
-        fields = resource.get('featureType').get('attributes').get('attribute')
-    
-    featureType = "PointSymbolizer"
-    for field in fields:
-        if field.get('binding').startswith('com.vividsolutions.jts.geom'):
-            auxType = field.get('binding').replace('com.vividsolutions.jts.geom.', '')
-            if auxType == "Point" or auxType == "MultiPoint":
-                featureType = "PointSymbolizer"
-            if auxType == "Line" or auxType == "MultiLineString":
-                featureType = "LineSymbolizer"
-            if auxType == "Polygon" or auxType == "MultiPolygon":
-                featureType = "PolygonSymbolizer"
-    
-    sldFilterValues = get_sld_filter_operations()
-    for category in sldFilterValues:
-        for oper in sldFilterValues[category]:
-            sldFilterValues[category][oper]["genCodeFunc"] = ""
-            
-    supportedfontsStr = mapservice_backend.getSupportedFonts(request.session)
-    supportedfonts = json.loads(supportedfontsStr)
-    sorted_fonts = sortFontsArray(supportedfonts.get("fonts"))
-    
-    alphanumeric_fields = []
-    for field in fields:
-        if not field.get('binding').startswith('com.vividsolutions.jts.geom'):
-            alphanumeric_fields.append(field)
-            
-    style_rule = StyleRule.objects.get(style=style)
-    r = Rule.objects.get(id=int(style_rule.rule.id))
-    symbolizers = []
-    for s in Symbolizer.objects.filter(rule=r).order_by('order'):
-        symbolizers.append({
-            'type': s.type,
-            'json': s.json
-        })
-    rule = {
-        'id': r.id,
-        'name': r.name,
-        'title': r.title,
-        'minscale': r.minscale,
-        'maxscale': r.maxscale,
-        'order': r.order,
-        'type': r.type,
-        'symbolizers': symbolizers
-    }
-                        
-    response = {
-        'featureType': featureType,
-        'fields': json.dumps(fields), 
-        'alphanumeric_fields': json.dumps(alphanumeric_fields),
-        'sldFilterValues': json.dumps(sldFilterValues),
-        'fonts': sorted_fonts,
-        'layer_id': layer_id,
-        'libraries': Library.objects.all(),
-        'style': style,
-        'minscale': r.minscale,
-        'maxscale': r.maxscale,
-        'rule': json.dumps(rule)
+    if request.method == 'POST':
+        style = Style.objects.get(id=int(style_id))
         
-    }
-    return render_to_response('unique_symbol_update.html', response, context_instance=RequestContext(request))
+    else:
+        style = Style.objects.get(id=int(style_id))
+        
+        fields = backend_symbology.get_fields(layer_id, request.session)
+        feature_type = backend_symbology.get_feature_type(fields)
+        sld_filter_values = backend_symbology.get_sld_filter_values()
+        alphanumeric_fields = backend_symbology.get_alphanumeric_fields(fields)
+           
+        supported_fonts_str = mapservice_backend.getSupportedFonts(request.session)
+        supported_fonts = json.loads(supported_fonts_str)
+        sorted_fonts = sortFontsArray(supported_fonts.get("fonts"))
+                
+        style_rule = StyleRule.objects.get(style=style)
+        r = Rule.objects.get(id=int(style_rule.rule.id))
+        symbolizers = []
+        for s in Symbolizer.objects.filter(rule=r).order_by('order'):
+            symbolizers.append({
+                'type': s.type,
+                'json': s.json
+            })
+        rule = {
+            'id': r.id,
+            'name': r.name,
+            'title': r.title,
+            'minscale': r.minscale,
+            'maxscale': r.maxscale,
+            'order': r.order,
+            'type': r.type,
+            'symbolizers': symbolizers
+        }
+                            
+        response = {
+            'featureType': feature_type,
+            'fields': json.dumps(fields), 
+            'alphanumeric_fields': json.dumps(alphanumeric_fields),
+            'sldFilterValues': json.dumps(sld_filter_values),
+            'fonts': sorted_fonts,
+            'layer_id': layer_id,
+            'libraries': Library.objects.all(),
+            'style': style,
+            'minscale': r.minscale,
+            'maxscale': r.maxscale,
+            'rule': json.dumps(rule)
+            
+        }
+        return render_to_response('unique_symbol_update.html', response, context_instance=RequestContext(request))
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
