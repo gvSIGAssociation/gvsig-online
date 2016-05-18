@@ -428,6 +428,19 @@ class Geoserver():
             return True
         raise FailedRequestError(r.status_code, r.content)
     
+    def update_style(self, style_name, sld_body, user=None, password=None):
+        url = self.service_url + "/styles/" + style_name + ".sld"
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+        
+        headers = { "content-type": "application/vnd.ogc.sld+xml" }
+        r = self.session.put(url, data=sld_body, headers=headers, auth=auth)
+        if r.status_code==200:
+            return True
+        raise UploadError(r.status_code, r.content)
+    
     def get_content_type(self, file_type):
         if file_type=="geotiff":
             return "image/tiff"

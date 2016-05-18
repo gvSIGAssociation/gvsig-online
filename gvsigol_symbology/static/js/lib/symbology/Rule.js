@@ -37,9 +37,9 @@ var Rule = function(id, featureType, rule_opts) {
 		this.name = rule_opts.name;
 		this.title = rule_opts.title;
 		//this.createUI();
-		if (rule_opts.symbolizers != "") {
-			this.loadSymbolizers(rule_opts.symbolizers);
-		}		
+//		if (rule_opts.symbolizers != "") {
+//			this.loadSymbolizers(rule_opts.symbolizers);
+//		}		
 		
 	} else {
 		//this.createUI();
@@ -60,6 +60,7 @@ Rule.prototype.createUI = function() {
 };
 
 Rule.prototype.loadSymbolizers = function(json_symbolizers) {
+	var self = this;
 	for (var i=0; i<json_symbolizers.length; i++) {
 		var symbolizer_object = JSON.parse(json_symbolizers[i].json);
 		var symbolizer = null;
@@ -88,6 +89,17 @@ Rule.prototype.loadSymbolizers = function(json_symbolizers) {
 			symbolizer.updatePreview();
 		}
 	}
+	$(".edit-symbolizer-link").on('click', function(e){	
+		e.preventDefault();
+		self.setSelected(self.getSymbolizerById(this.dataset.symbolizerid));
+		self.updateForm();
+		$('#modal-symbolizer').modal('show');
+	});
+	
+	$(".delete-symbolizer-link").one('click', function(e){	
+		e.preventDefault();
+		self.removeSymbolizer(this.dataset.symbolizerid);
+	});
 };
 
 Rule.prototype.getNextSymbolizerId = function() {
@@ -143,6 +155,14 @@ Rule.prototype.removeSymbolizer = function(id) {
 		}
 	}
 	//this.updatePreview();
+};
+
+Rule.prototype.removeAllSymbolizers = function(id) {
+	this.symbolizers.splice(0, this.symbolizers.length);
+};
+
+Rule.prototype.removeAllLabels = function(id) {
+	this.labels.splice(0, this.labels.length);
 };
 
 Rule.prototype.removeLabel = function(id) {
