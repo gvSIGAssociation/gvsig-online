@@ -462,7 +462,7 @@ class Geoserver():
                     "id":0,
                     "type":"PolygonSymbolizer",
                     "name":"PolygonSymbolizer 0",
-                    "fill_color":"#3b893d",
+                    "fill_color":"#383838",
                     "fill_opacity":0.5,
                     "border_color":"#000000",
                     "border_size":1,
@@ -477,7 +477,7 @@ class Geoserver():
                     "id":0,
                     "type":"PolygonSymbolizer",
                     "name":"PolygonSymbolizer 0",
-                    "fill_color":"#3b893d",
+                    "fill_color":"#383838",
                     "fill_opacity":0.5,
                     "border_color":"#000000",
                     "border_size":1,
@@ -512,15 +512,13 @@ class Geoserver():
         except Exception as e:
             return False
         
-    def updateStyle(self, name, data, session):
+    def updateStyle(self, style_name, sld_body, session):
         """
         Update a style
         """
             
         try:
-            style = self.getGsconfig(session).get_style(name, workspace=None)
-            style.update_body(data)
-            style.refresh()
+            self.rest_catalog.update_style(style_name, sld_body, user=session['username'], password=session['password'])
             return True
         
         except Exception as e:
