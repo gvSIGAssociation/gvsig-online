@@ -30,11 +30,14 @@
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     
-    {% for app in INSTALLED_APPS %}
-    {% if 'gvsigol_app_' in app %}	
-    	{% include "load_app_css.html" %}
-    {% endif %}	
-    {% endfor %}
+
+    {% for app in INSTALLED_APPS %}												  
+		{% if 'gvsigol_app_' in app %}	
+			{% with "load_css_"|add:app|cut:"gvsigol_app_"|add:".html" as aux %}	   			 	
+				{% include aux %}	
+			{% endwith %}
+		{% endif %}		    					
+	{% endfor %}
     
 </head>
 
