@@ -648,6 +648,35 @@ def get_style_from_library_symbol(style_id, session):
     
     return sld #.encode('utf8')
 
+def get_sld_body(json_data):
+    sld = "<StyledLayerDescriptor version=\"1.0.0\" xmlns=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" "
+    sld += "xmlns:sld=\"http://www.opengis.net/sld\"  xmlns:gml=\"http://www.opengis.net/gml\" " 
+    sld +=   "xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+    sld +=   "xsi:schemaLocation=\"http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd\">"
+    sld += "<NamedLayer>"  
+    sld +=      "<Name>"+ json_data.get('name') +"</Name>"  
+    sld +=      "<UserStyle>"
+    sld +=          "<Name>"+ json_data.get('name') +"</Name>" 
+    sld +=          "<Title>"+ json_data.get('title') +"</Title>" 
+    sld +=          "<Abstract>"+ json_data.get('title') +"</Abstract>" 
+    sld +=          "<FeatureTypeStyle>"
+    for rule in json_data.get('rules'):
+        sld += "<Rule>"
+        sld +=      "<Name>"+ rule.get('name') +"</Name>"
+        sld +=      "<Title>"+ rule.get('title') +"</Title>"
+        
+        for symbolizer in rule.get('rule_symbolizers'):
+            sld += symbolizer.get('sld')
+
+        sld += "</Rule>"
+    
+    sld += "</FeatureTypeStyle>"
+    sld += "</UserStyle>"
+    sld += "</NamedLayer>"
+    sld += "</StyledLayerDescriptor>"
+    
+    return sld #.encode('utf8')
+
 
 
 def get_clean_sld(sld_code, symbol):

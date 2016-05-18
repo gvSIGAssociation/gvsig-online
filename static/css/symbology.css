@@ -41,7 +41,7 @@
 }
 
 .users-list > li {
-    width: 10% !important;
+    width: auto !important;
 }
 
 .library-symbol-preview-div {

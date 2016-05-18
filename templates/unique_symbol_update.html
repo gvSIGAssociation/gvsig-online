@@ -178,15 +178,15 @@
 $(document).ready(function() {
 	
 	var layerId = "{{layer_id}}";
+	var layerUrl = "{{layer_url}}";
+	var layerName = "{{layer_name}}";
+	var styleId = "{{style.id}}";
 	var featureType = "{{featureType}}";
 	var fields = {{fields|safe}};
 	var alphanumericFields = {{alphanumeric_fields|safe}};
 	var sldFilterValues = {{sldFilterValues|safe}};
 	var fonts = {{ fonts|safe }};
 	var rule_opts = {{ rule|safe }};
-	
-	var symbologyUtils = new SymbologyUtils(fonts, alphanumericFields);
-	var uniqueSymbol = new UniqueSymbol(featureType, symbologyUtils, rule_opts);
 	
 	var map = new ol.Map({
 		layers: [
@@ -200,6 +200,21 @@ $(document).ready(function() {
 		    zoom: '2'
 		})
 	});
+	var wmsSource = new ol.source.TileWMS({
+		url: layerUrl,
+		visible: true,
+		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
+		serverType: 'geoserver'
+	});
+	wmsLayer = new ol.layer.Tile({
+		id: 'preview-layer',
+		source: wmsSource,
+		visible: true
+	});
+	map.addLayer(wmsLayer);
+	
+	var symbologyUtils = new SymbologyUtils(map, wmsLayer, fonts, alphanumericFields);
+	var uniqueSymbol = new UniqueSymbol(featureType, symbologyUtils, rule_opts);
 	
 	$("#style-title").on('change', function(e){
 		var rule = uniqueSymbol.getRule();
@@ -226,7 +241,11 @@ $(document).ready(function() {
 	});
 
 	$("#save-legend").on('click', function(e){
-		uniqueSymbol.save(layerId);
+		uniqueSymbol.update(layerId, styleId);
+	});
+	
+	$("#refresh-preview").on('click', function(e){
+		uniqueSymbol.refreshMap();
 	});
 	
 	var rules = null;
