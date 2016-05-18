@@ -21,11 +21,13 @@
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror/lib/codemirror.css" %}" />
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror/theme/xq-dark.css" %}" />
 	
-	{% for app in INSTALLED_APPS %}
-    {% if 'gvsigol_app_' in app %}	
-    	{% include "load_app_css.html" %}
-    {% endif %}	
-    {% endfor %}
+    {% for app in INSTALLED_APPS %}												  
+		{% if 'gvsigol_app_' in app %}	
+			{% with "load_css_"|add:app|cut:"gvsigol_app_"|add:".html" as aux %}	   			 	
+				{% include aux %}	
+			{% endwith %}
+		{% endif %}		    					
+	{% endfor %}
     
 	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
