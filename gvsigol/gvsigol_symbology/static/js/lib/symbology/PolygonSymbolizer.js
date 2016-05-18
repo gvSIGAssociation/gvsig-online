@@ -22,7 +22,7 @@
  
  
 var PolygonSymbolizer = function(id, rule, symbolizer_object) {
-	this.id = id;
+	this.id = 'polygonsymbolizer' + id;
 	this.type = 'PolygonSymbolizer';
 	this.name = 'PolygonSymbolizer ' + id;
 	this.fill_color = "#000000";
@@ -63,7 +63,7 @@ PolygonSymbolizer.prototype.getTableUI = function() {
 	ui += 	'<td><span class="text-muted">' + this.name + '</span></td>';
 	ui += 	'<td id="symbolizer-preview"><svg id="symbolizer-preview-' + this.id + '" class="preview-svg"></svg></td>';	
 	ui += 	'<td><a class="edit-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
-	//ui += 	'<td><a class="delete-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
+	ui += 	'<td><a class="delete-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
 	ui += '</tr>';	
 	
 	return ui;

@@ -26,6 +26,9 @@ var UniqueSymbol = function(featureType, symbologyUtils, rule_opts) {
 	this.featureType = featureType;
 	this.symbologyUtils = symbologyUtils;
 	this.rule = new Rule(0, featureType, rule_opts);
+	if (rule_opts.symbolizers != "") {
+		this.loadSymbols(rule_opts.symbolizers);
+	}
 };
 
 UniqueSymbol.prototype.getRule = function() {
@@ -125,10 +128,15 @@ UniqueSymbol.prototype.setSelected = function(element) {
 
 UniqueSymbol.prototype.loadSymbols = function(symbolizers) {
 	$("#table-symbolizers-body").empty();
-	//this.symbols.splice(0, this.symbols.length);
+	this.rule.removeAllSymbolizers();
+	this.rule.removeAllLabels();
 	for (var i=0; i<symbolizers.length; i++) {
 		var symbolizer = JSON.parse(symbolizers[i].json);
-		this.loadSymbolizer(symbolizer);
+		if (symbolizer.type == 'TextSymbolizer') {
+			this.loadTextSymbolizer(symbolizer);
+		} else {
+			this.loadSymbolizer(symbolizer);
+		}		
 	}
 };
 
@@ -179,6 +187,48 @@ UniqueSymbol.prototype.loadSymbolizer = function(symbolizer_object) {
 
 	self.setSelected(symbolizer);
 	this.updateForm();
+};
+
+UniqueSymbol.prototype.loadTextSymbolizer = function(symbolizer_object) {
+	var self = this;
+	
+	var label = new TextSymbolizer(this.rule.getNextLabelId(), this.symbologyUtils, this.rule, symbolizer_object);
+	$('#table-symbolizers tbody').append(label.getTableUI());
+	$("#table-symbolizers-body").sortable({
+		placeholder: "sort-highlight",
+		handle: ".handle",
+		forcePlaceholderSize: true,
+		zIndex: 999999
+	});
+	$("#table-symbolizers-body").on("sortupdate", function(event, ui){
+		/*var rows = ui.item[0].parentNode.children;
+		for(var i=0; i < rows.length; i++) {
+			var symbol = self.rule.getSymbolizerById(rows[i].dataset.rowid);
+			symbol.order = i;
+		}*/		
+	});
+	
+	$(".edit-label-link").on('click', function(e){	
+		e.preventDefault();
+		self.setSelected(self.rule.getLabelById(this.dataset.labelid));
+		self.updateForm();
+		$('#modal-symbolizer').modal('show');
+	});
+	
+	$(".delete-label-link").one('click', function(e){	
+		e.preventDefault();
+		self.rule.removeLabel(this.dataset.labelid);
+	});
+	
+	this.rule.appendLabel(label);
+	label.updatePreview();
+
+	self.setSelected(label);
+	this.updateForm();
+};
+
+UniqueSymbol.prototype.refreshMap = function(rid,symbolizers) {
+	this.symbologyUtils.updateMap(this.rule, this.map);
 };
 
 UniqueSymbol.prototype.createPreview = function(rid,symbolizers) {
@@ -490,6 +540,59 @@ UniqueSymbol.prototype.save = function(layerId) {
 		type: "POST",
 		async: false,
 		url: "/gvsigonline/symbology/unique_symbol_save/" + layerId + "/",
+		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		data: {
+			style_data: JSON.stringify(style)
+		},
+		success: function(response){
+			if (response.success) {
+				location.href = "/gvsigonline/symbology/style_layer_list/";
+			} else {
+				alert('Error');
+			}
+			
+		},
+	    error: function(){}
+	});
+};
+
+UniqueSymbol.prototype.update = function(layerId, styleId) {
+	
+	var symbolizers = new Array();
+	for (var i=0; i < this.rule.getSymbolizers().length; i++) {
+		var symbolizer = {
+			type: this.rule.getSymbolizers()[i].type,
+			sld: this.rule.getSymbolizers()[i].toXML(),
+			json: this.rule.getSymbolizers()[i].toJSON(),
+			order: this.rule.getSymbolizers()[i].order
+		};
+		symbolizers.push(symbolizer);
+	}
+	
+	for (var i=0; i < this.rule.getLabels().length; i++) {
+		var label = {
+			type: this.rule.getLabels()[i].type,
+			sld: this.rule.getLabels()[i].toXML(),
+			json: this.rule.getLabels()[i].toJSON(),
+			order: this.rule.getLabels()[i].order
+		};
+		symbolizers.push(label);
+	}
+	
+	var style = {
+		name: $('#style-name').val(),
+		title: $('#style-title').val(),
+		is_default: $('#style-is-default').is(":checked"),
+		rule: this.rule,
+		symbolizers: symbolizers
+	}
+	
+	$.ajax({
+		type: "POST",
+		async: false,
+		url: "/gvsigonline/symbology/unique_symbol_update/" + layerId + "/" + styleId + "/",
 		beforeSend:function(xhr){
 			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},

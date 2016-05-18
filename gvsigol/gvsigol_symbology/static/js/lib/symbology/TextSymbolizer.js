@@ -21,7 +21,7 @@
  */
  
 var TextSymbolizer = function(id, symbologyUtils, rule, symbolizer_object) {
-	this.id = id;
+	this.id = 'textsymbolizer' + id;
 	this.type = 'TextSymbolizer';
 	this.name = 'TextSymbolizer ' + id;
 	this.field = '';
@@ -256,12 +256,12 @@ TextSymbolizer.prototype.updatePreview = function() {
 	}
 };
 
-TextSymbolizer.prototype.createTextSymbolizer = function(){
+TextSymbolizer.prototype.toXML = function(){
 	
 	var xml = '';
 	xml += '<TextSymbolizer>';
 	xml += 	'<Label>';
-	xml += 		'<PropertyName>' + this.field + '</PropertyName>';
+	xml += 		'<ogc:PropertyName>' + this.field + '</ogc:PropertyName>';
 	xml +=  '</Label>';
 	xml += 	'<Font>';
 	xml += 		'<CssParameter name="font-family">' + this.font_family + '</CssParameter>';
@@ -275,4 +275,29 @@ TextSymbolizer.prototype.createTextSymbolizer = function(){
 	xml += '</TextSymbolizer>';
 	
 	return xml;
+};
+
+TextSymbolizer.prototype.toJSON = function(){
+	
+	var object = {
+		id: this.id,
+		type: this.type,
+		name: this.name,
+		field: this.field,
+		font_family: this.font_family,
+		font_size: this.font_size,
+		font_color: this.font_color,
+		font_weight: this.font_weight,
+		font_style: this.font_style,
+		halo_color: this.halo_color,
+		halo_opacity: this.halo_opacity,
+		halo_radius: this.halo_radius,
+		max_iterations: this.max_iterations,
+		max_length: this.max_length,
+		min_wrapper: this.min_wrapper,
+		solve_overlaps: this.solve_overlaps,
+		order: this.order
+	};
+	
+	return JSON.stringify(object);
 };

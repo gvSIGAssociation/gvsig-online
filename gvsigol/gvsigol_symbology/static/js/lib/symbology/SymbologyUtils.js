@@ -20,7 +20,9 @@
  * @author: Javi Rodrigo <jrodrigo@scolab.es>
  */
 
-var SymbologyUtils = function(fonts, alphanumericFields) {
+var SymbologyUtils = function(map, layer, fonts, alphanumericFields) {
+	this.map = map;
+	this.layer = layer;
 	this.fonts = fonts;
 	this.alphanumericFields = alphanumericFields;
 };
@@ -69,4 +71,63 @@ SymbologyUtils.prototype.getShapes = function(element){
 
 SymbologyUtils.prototype.getAlphanumericFields = function(element){
 	return this.alphanumericFields;
+};
+
+SymbologyUtils.prototype.updateMap = function(rule) {
+	var self = this;
+	var symbolizers = new Array();
+	for (var i=0; i < rule.getSymbolizers().length; i++) {
+		var symbolizer = {
+			type: rule.getSymbolizers()[i].type,
+			sld: rule.getSymbolizers()[i].toXML(),
+			json: rule.getSymbolizers()[i].toJSON(),
+			order: rule.getSymbolizers()[i].order
+		};
+		symbolizers.push(symbolizer);
+	}
+	
+	for (var i=0; i < rule.getLabels().length; i++) {
+		var label = {
+			type: rule.getLabels()[i].type,
+			sld: rule.getLabels()[i].toXML(),
+			json: rule.getLabels()[i].toJSON(),
+			order: rule.getLabels()[i].order
+		};
+		symbolizers.push(label);
+	}
+	rule['rule_symbolizers'] = symbolizers
+	var data = {
+		name: $('#style-name').val(),
+		title: $('#style-title').val(),
+		rules: [rule]
+	}
+	
+	$.ajax({
+		type: "POST",
+		async: false,
+		url: "/gvsigonline/symbology/get_sld_body/",
+		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		data: {
+			style_data: JSON.stringify(data)
+		},
+		success: function(response){
+			self.reloadLayerPreview(response.sld_body);		
+		},
+	    error: function(){}
+	});
+};
+
+SymbologyUtils.prototype.reloadLayerPreview = function(sld_body){
+	var layers = this.map.getLayers();
+	var self = this;
+	layers.forEach(function(layer){
+		if (!layer.baselayer) {
+			if (layer.get("id") === 'preview-layer') {
+				layer.getSource().updateParams({'SLD_BODY': sld_body, STYLES: undefined});
+				self.map.render();
+			}
+		};
+	}, this);
 };
