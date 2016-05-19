@@ -1017,7 +1017,7 @@ class Geoserver():
                 shutil.rmtree(tmp_dir, ignore_errors=True)
         raise rest_geoserver.RequestError(-1, _("Error uploading the layer. Review the file format."))
     
-    def __do_shpdir2postgis(self, datastore, application, dir_path, session, table_definition, creation_mode, defaults):
+    def __do_shpdir2postgis(self, datastore, application, dir_path, layergroup, session, table_definition, creation_mode, defaults):
         try: 
             # get & sanitize parameters
             if 'srs' in defaults.keys():    
@@ -1061,20 +1061,22 @@ class Geoserver():
                     table_def = table_definition[f]
                     layer_name = table_def['name']
                     layer_title = table_def['title']
-                    layer_group = table_def['group'] + '_' + application.name.lower()
-                    shp_abs = os.path.join(dir_path, f)
-                    gdal_tools.shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
-                    
+                    layer_style = table_def['style']
+                    #layer_group = table_def['group'] + '_' + application.name.lower()
+                else:
+                    layer_name = os.path.splitext(os.path.basename(f))[0]
+                    layer_title = os.path.splitext(os.path.basename(f))[0]
+                    layer_style = layer_name
+                shp_abs = os.path.join(dir_path, f)
+                gdal_tools.shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                
+                                
+                if creation_mode==forms_geoserver.MODE_CREATE:
                     try:
-                        # layer has been uploaded to postgis, now register the layer on GS
-                        # we don't check the creation mode because the users sometimes choose the wrong one
-                        if creation_mode==forms_geoserver.MODE_CREATE:
-                            self.createFeaturetype(datastore.workspace, datastore, layer_name, layer_title, session)
+                        self.createFeaturetype(datastore.workspace, datastore, layer_name, layer_title, session)
                     except:
-                        if creation_mode==forms_geoserver.MODE_CREATE:
-                            # assume the layer was created if mode is append or overwrite, so don't raise the exception 
-                            raise
-                        
+                        raise
+                    
                     try:
                         layer = Layer.objects.get(name=layer_name, datastore=datastore)
                     except:
@@ -1088,34 +1090,36 @@ class Geoserver():
                     layer.queryable = True
                     layer.cached = True
                     layer.single_image = False
-                    layer.layer_group = LayerGroup.objects.get(name__exact=layer_group)
+                    layer.layer_group = layergroup
                     layer.title = layer_title
                     layer.type = datastore.type
                     layer.metadata_uuid = ''
                     layer.save()
-                    
+    
                     self.setDataRules(session=session)
-                         
-                    if self.getStyle(layer.name, session): 
-                        self.setLayerStyle(layer.name, layer.name, session=session)
+                    
+                    # estilos                            
+                    if self.getStyle(layer_style, session): 
+                        self.setLayerStyle(layer.name, layer_style, session=session)
                     else:
-                        style_name = layer.name + '_default'
+                        style_name = layer_style + '_default'
                         self.createDefaultStyle(layer, style_name, session=session)
                         self.setLayerStyle(layer.name, style_name, session=session)                        
                         
                     if layer.layer_group.name != "__default__":
                         self.createOrUpdateGeoserverLayerGroup(layer.layer_group, session)
+                else:
+                    print "TODO: borrar la cache .."
                             
-                        
         except (rest_geoserver.RequestError):
-            raise 
+            print "Error Request"
+            raise             
         except gdal_tools.GdalError as e:
+            print "Error Gdal"
             raise rest_geoserver.RequestError(e.code, e.message)
         except Exception as e:
             logging.exception(e)
-        raise rest_geoserver.RequestError(-1, _("Error creating the layer. Review the file format."))
-
-        
+            raise rest_geoserver.RequestError(-1, _("Error creating the layer. Review the file format."))
     
     def __do_multi_upload_postgis(self, datastore, application, zip_path, session, table_definition):
         tmp_dir = None
@@ -1352,11 +1356,12 @@ class Geoserver():
         except Exception as e:
             print e
     
-    def shpdir2postgis(self, datastore, application, dir_path, session, table_definition,creation_mode, defaults):
+    def shpdir2postgis(self, datastore, application, dir_path, layergroup, session, table_definition,creation_mode, defaults):
         try:
-            self.__do_shpdir2postgis(datastore, application, dir_path, session, table_definition, creation_mode, defaults)        
+            self.__do_shpdir2postgis(datastore, application, dir_path, layergroup, session, table_definition, creation_mode, defaults)        
         except Exception as e:
             print e
+            raise e
     
     
     def __field_def_to_gs(self, field_def_array, geometry_type):
