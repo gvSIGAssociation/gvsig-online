@@ -12,6 +12,7 @@ urlpatterns = [
     url(r'^library_list/$', 'gvsigol_symbology.views_library.library_list', name='library_list'),
     url(r'^library_add/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views_library.library_add', name='library_add'),
     url(r'^library_update/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views_library.library_update', name='library_update'),
+    url(r'^library_import/$', 'gvsigol_symbology.views_library.library_import', name='library_import'),
     url(r'^library_delete/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views_library.library_delete', name='library_delete'),   
     url(r'^symbol_add/(?P<library_id>[0-9]+)/(?P<symbol_type>\w+)/$', 'gvsigol_symbology.views_library.symbol_add', name='symbol_add'),
     url(r'^symbol_update/(?P<symbol_id>[0-9]+)/$', 'gvsigol_symbology.views_library.symbol_update', name='symbol_update'),

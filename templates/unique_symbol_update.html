@@ -266,28 +266,41 @@ $(document).ready(function() {
 				
 				for (var i=0; i<response.rules.length; i++) {
 					var symbolizers = response.rules[i].symbolizers;
-					var symbol = '';
-					symbol += '<li>';
-					symbol += 	'<svg id="symbolizer-preview-' + response.rules[i].id + '" class="preview-svg"></svg>';
-					symbol += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
-					symbol += '</li>';
-					$(".users-list").append(symbol);
-					uniqueSymbol.createPreview(response.rules[i].id, symbolizers);
-				}
-				
-				$(".users-list-name").on('click', function(e){
-					e.preventDefault();
-					for (var j=0; j<rules.length; j++) {
-						if (rules[j].id == this.dataset.rid) {
-							if (rules[j].type == featureType) {
-								uniqueSymbol.loadSymbols(rules[j].symbolizers);
-							} else {
-								alert('Error');
-							}						
+					var symbol = '';				
+					for (var j=0; j<symbolizers.length; j++) {
+						if (response.rules[i].type == 'ExternalGraphicSymbolizer') {
+							var graphic = JSON.parse(symbolizers[j].json);
+							symbol += '<li>';
+							symbol += 	'<img style="height: ' + graphic.size + 'px; width: auto;" src="' + graphic.online_resource + '" class="preview-eg"></img>';
+							symbol += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
+							symbol += '</li>';
+							$(".users-list").append(symbol);
+							
+						} else {
+							symbol += '<li>';
+							symbol += 	'<svg id="library-preview-' + response.rules[i].id + '" class="library-preview-svg"></svg>';
+							symbol += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
+							symbol += '</li>';
+							$(".users-list").append(symbol);
 						}
-					}	
-					$('#modal-import-symbol').modal('hide');
-				});
+					}
+					$(".users-list-name").on('click', function(e){
+						e.preventDefault();
+						for (var j=0; j<rules.length; j++) {
+							if (rules[j].id == this.dataset.rid) {
+								if (rules[j].type == featureType || (rules[j].type == 'ExternalGraphicSymbolizer' && featureType == 'PointSymbolizer')) {
+									uniqueSymbol.loadSymbols(rules[j].symbolizers);
+								} else {
+									messageBox.show('warning', gettext('Selected symbol is not compatible with the layer'));
+								}						
+							}
+						}	
+						$('#modal-import-symbol').modal('hide');
+					});
+					if (response.rules[i].type != 'ExternalGraphicSymbolizer'){
+						uniqueSymbol.libraryPreview(response.rules[i].id, symbolizers);
+					}
+				}
 			},
 		    error: function(){}
 		});
