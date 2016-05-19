@@ -21,12 +21,32 @@
  */
  
  
-var ExternalGraphicSymbolizer = function(name, format, size, online_resource) {
+var ExternalGraphicSymbolizer = function(id, name, format, size, online_resource) {
+	this.id = 'eg' + id;
 	this.type = 'ExternalGraphicSymbolizer';
 	this.name = name;
 	this.online_resource = online_resource;
 	this.format = format;
+	this.order = 0;
 	this.size = size;
+};
+
+ExternalGraphicSymbolizer.prototype.getTableUI = function() {
+	var ui = '';
+	ui += '<tr data-rowid="' + this.id + '">';
+	ui += 	'<td>'
+	ui += 		'<span class="handle"> ';
+	ui += 			'<i class="fa fa-ellipsis-v"></i>';
+	ui += 			'<i class="fa fa-ellipsis-v"></i>';
+	ui += 		'</span>';
+	ui += 	'</td>';
+	ui += 	'<td><span class="text-muted">' + this.name + '</span></td>';
+	ui += 	'<td id="symbolizer-preview"><img style="height: ' + this.size + 'px; width: auto;" src="' + this.online_resource + '" id="eg-preview-' + this.id + '" class="eg-preview-' + this.id + '"></img></td>';	
+	ui += 	'<td><a disabled class="edit-eg-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-default"></i></a></td>';
+	ui += 	'<td><a class="delete-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
+	ui += '</tr>';	
+	
+	return ui;
 };
 
 ExternalGraphicSymbolizer.prototype.toXML = function(){
@@ -52,6 +72,7 @@ ExternalGraphicSymbolizer.prototype.toJSON = function(){
 		name: this.name,
 		online_resource: this.online_resource,
 		format: this.format,
+		order: this.order,
 		size: this.size
 	};
 	

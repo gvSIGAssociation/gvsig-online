@@ -444,9 +444,10 @@ class Geoserver():
             json = None
             if symbol_type == 'PointSymbolizer':
                 json = {
-                    "id":0,
-                    "type":"PolygonSymbolizer",
-                    "name":"PolygonSymbolizer 0",
+                    "id":"pointsymbolizer0",
+                    "type":"PointSymbolizer",
+                    "name":"PointSymbolizer 0",
+                    "shape": "circle",
                     "fill_color":"#383838",
                     "fill_opacity":0.6,
                     "border_color":"#000000",
@@ -454,14 +455,15 @@ class Geoserver():
                     "border_opacity":1,
                     "border_type":"solid",
                     "rotation":0,
+                    "size":10,
                     "order":0
                 }
                 
             elif symbol_type == 'LineSymbolizer':
                 json = {
-                    "id":0,
-                    "type":"PolygonSymbolizer",
-                    "name":"PolygonSymbolizer 0",
+                    "id":"linesymbolizer0",
+                    "type":"LineSymbolizer",
+                    "name":"LineSymbolizer 0",
                     "fill_color":"#383838",
                     "fill_opacity":0.5,
                     "border_color":"#000000",
@@ -474,7 +476,7 @@ class Geoserver():
                 
             elif symbol_type == 'PolygonSymbolizer':
                 json = {
-                    "id":0,
+                    "id":"polygonsymbolizer0",
                     "type":"PolygonSymbolizer",
                     "name":"PolygonSymbolizer 0",
                     "fill_color":"#383838",

@@ -268,6 +268,14 @@ TextSymbolizer.prototype.toXML = function(){
 	xml += 		'<CssParameter name="font-size">' + this.font_size + '</CssParameter>';
 	xml += 		'<CssParameter name="font-style">' + this.font_style + '</CssParameter>';
 	xml += 	'</Font>';
+	xml += 	'<LabelPlacement>';
+	xml += 		'<PointPlacement>';
+	xml += 			'<AnchorPoint>';
+	xml += 				'<AnchorPointX>0.5</AnchorPointX>';
+	xml += 				'<AnchorPointY>0.0</AnchorPointY>';
+	xml += 			'</AnchorPoint>';
+	xml += 		'</PointPlacement>';
+	xml += 	'</LabelPlacement>';
 	xml += 	'<Fill>';
 	xml += 		'<CssParameter name="fill">' + this.font_color + '</CssParameter>';
 	xml += 		'<CssParameter name="fill-opacity">1</CssParameter>';
