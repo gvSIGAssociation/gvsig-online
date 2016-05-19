@@ -129,7 +129,9 @@
 
 		
 	</div>
-
+	
+	<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
+	
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jQuery-2.1.4.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.cookie.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQueryUI/jquery-ui.min.js" %}"></script>
@@ -153,8 +155,10 @@
 	<script type="text/javascript" src="{% static "js/vendors/image-picker/image-picker.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/snap.svg-min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/gvsigOL.js" %}"></script>
-	
-	<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>	
+	<script type="text/javascript" src="{% static "js/lib/widgets/messageBox.js" %}"></script>
+	<script>
+		var messageBox = new messageBox();
+	</script>	
 	
 	<script type="text/javascript" src="{% static "js/lib/symbology/PointSymbolizer.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/ExternalGraphicSymbolizer.js" %}"></script>

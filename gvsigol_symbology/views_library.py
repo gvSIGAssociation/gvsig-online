@@ -23,25 +23,14 @@
 '''
 
 from django.shortcuts import render_to_response, RequestContext, redirect, HttpResponse
-from django.core import serializers
-from django.db.models import Max, Q
-from django.contrib.auth.decorators import login_required
-from gvsigol_services.models import Layer, Datastore, Workspace
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
-from django.utils.translation import ugettext as _  
-from django.views.decorators.csrf import csrf_exempt
-import xml.etree.ElementTree as ET
-import json, ast
-from models import Style, StyleLayer, Rule, Symbolizer, StyleRule, Library, LibraryRule
-from utils import get_distinct_query, get_minmax_query, sortFontsArray
-from django_ajax.decorators import ajax
-from sld_tools import get_sld_style, get_style_from_library_symbol
-import backend_symbology
-import os.path
-import gvsigol.settings
-from django.views.decorators.http import require_http_methods
+from models import Style, Rule, Symbolizer, StyleRule, Library, LibraryRule
+from django.contrib.auth.decorators import login_required
+from django.utils.translation import ugettext as _
+from sld_tools import get_style_from_library_symbol
 from gvsigol_auth.utils import admin_required
-import utils
+import backend_symbology
+import json
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @admin_required
@@ -58,20 +47,23 @@ def library_list(request):
 def library_add(request, library_id):
     if request.method == 'POST': 
         name = request.POST.get('library-name')
-        description = request.POST.get('library-description')
-        
+        description = request.POST.get('library-description')        
         is_public = False
         if 'library-is-public' in request.POST:
             is_public = True
 
-        library = Library(
-            name = name,
-            description = description,
-            is_public = is_public
-        )
-        library.save()
+        if name != '':
+            library = Library(
+                name = name,
+                description = description,
+                is_public = is_public
+            )
+            library.save()         
+            return redirect('library_list')
         
-        return redirect('library_list')
+        else:
+            message = _('You must enter a name for the library')
+            return render_to_response('library_add.html', {'message': message}, context_instance=RequestContext(request))
     
     else:   
         return render_to_response('library_add.html', {}, context_instance=RequestContext(request))
@@ -122,6 +114,41 @@ def library_update(request, library_id):
             'rules': rules
         }
         return render_to_response('library_update.html', response, context_instance=RequestContext(request))
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@admin_required
+def library_import(request):
+    if request.method == 'POST': 
+        name = request.POST.get('library-name')
+        description = request.POST.get('library-description')
+        is_public = False
+        if 'library-is-public' in request.POST:
+            is_public = True
+        
+        message = ''
+        if name != '' and 'library-file' in request.FILES:
+            library = Library(
+                name = name,
+                description = description,
+                is_public = is_public
+            )
+            library.save()
+            
+            return redirect('library_list')
+        
+        elif name == '' and 'library-file' in request.FILES:
+            message = _('You must enter a name for the library')
+            
+        elif name != '' and not 'library-file' in request.FILES:
+            message = _('You must select a file')
+            
+        elif name == '' and not 'library-file' in request.FILES:
+            message = _('You must enter a name for the library and select a file')
+            
+        return render_to_response('library_import.html', {'message': message}, context_instance=RequestContext(request))
+    
+    else:   
+        return render_to_response('library_import.html', {}, context_instance=RequestContext(request))
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
