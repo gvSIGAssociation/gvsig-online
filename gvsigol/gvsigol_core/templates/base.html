@@ -127,6 +127,8 @@
 		
 	</div>
 
+	<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
+
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jQuery-2.1.4.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.cookie.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQueryUI/jquery-ui.min.js" %}"></script>
@@ -146,9 +148,10 @@
 	<script type="text/javascript" src="{% static "js/vendors/codemirror/mode/javascript/javascript.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/codemirror/mode/xml/xml.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/gvsigOL.js" %}"></script>
-	
-	
-	<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/widgets/messageBox.js" %}"></script>
+	<script>
+		var messageBox = new messageBox();
+	</script>
 
 	{% block extra-scripts %}{% endblock %}
 	
