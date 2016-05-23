@@ -17,7 +17,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-#from twisted.test.test_tcp_internals import resource
+from gvsigol_symbology.models import Rule
 '''
 @author: Jose Badia <jbadia@scolab.es>
 '''
@@ -25,16 +25,18 @@
 from gvsigol_services.backend_mapservice import backend as backend_mapservice
 from gvsigol_services.models import Layer
 from django.http import HttpResponse
-from xml.sax.saxutils import escape
+from models import Rule, Symbolizer
 from gvsigol import settings
 import tempfile, zipfile
-import os, shutil, errno
-import sld_tools
+import os, shutil
+import sld_utils
 import StringIO
+import utils
+import json
 import re
 
 
-def exportLibrary(library, symbols):
+def export_library(library, symbols):
     dir_path = tempfile.mkdtemp(suffix='', prefix='tmp-library-')
     resource_path = dir_path+"/resources/"
     os.makedirs(resource_path)
@@ -42,7 +44,7 @@ def exportLibrary(library, symbols):
     for symbol in symbols:
         try:
             file = open(dir_path+"/symbol-"+symbol.name+"-"+str(i)+".sld",'w+')
-            file.write(create_basic_sld(library, symbol, resource_path))
+            file.write(sld_utils.create_basic_sld(library, symbol, resource_path))
             file.close()
         except:
             print('Something went wrong creating SLD file for symbol nº'+str(i))
@@ -68,105 +70,16 @@ def exportLibrary(library, symbols):
     response['Content-Disposition'] = 'attachment; filename='+library.name+'.zip'
     response.write(buffer.read())
     
-    __delete_temporaries(dir_path)
+    utils.__delete_temporaries(dir_path)
     
     return response
 
 
-def create_basic_sld(library, symbol, resource_folder_path):
-    sld = "<StyledLayerDescriptor version=\"1.0.0\" xmlns=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" "
-    sld += "xmlns:sld=\"http://www.opengis.net/sld\"  xmlns:gml=\"http://www.opengis.net/gml\" " 
-    sld +=   "xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-    sld +=   "xsi:schemaLocation=\"http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd\">"
-    sld += "<NamedLayer>"
-    
-    sld += "<Name>"+ library.name +"</Name>"
-    
-    sld += "<UserStyle>"
-    sld += "<Name>"+ library.name +"</Name>"
-    sld += "<Title>"+ escape(library.title) +"</Title>"
-    sld += "<Abstract>"+ escape(library.description) +"</Abstract>"
-    sld += "<FeatureTypeStyle>"
-    
-    sld += "<Rule>"
-    sld += "<Name>"+ escape(symbol.name) +"</Name>"
-        
-    symbs = get_symbolizers(symbol.sld_code)
-    for symb in symbs:
-        sld += get_graphics_sld(symb, resource_folder_path)
-            
-    sld += "</Rule>"
-    
-    sld += "</FeatureTypeStyle>"
-    sld += "</UserStyle>"
-    sld += "</NamedLayer>"
-    sld += "</StyledLayerDescriptor>"
-    
-    return sld   
-
-def get_symbolizers(sld):
-    regex = re.compile('<\/[\\w]*Symbolizer>')
-    symbs = []
-    
-    if re.search(regex, sld):
-        while re.search(regex, sld):
-            m = re.search(regex, sld)
-            if m:
-                symbs.append(sld[0:m.regs[0][1]])
-                if sld.__len__ > m.regs[0][1]:
-                    sld = sld[m.regs[0][1]:]
-                else:
-                    sld = ""
-    else:
-        symbs = [sld]   
-    
-    return symbs
-
-def get_graphics_sld(filter, resource_folder_path):
-    regex = re.compile(r'<ExternalGraphic>(.*)</ExternalGraphic>')
-    match = re.search(regex, filter)
-    if match:
-        if match.regs.__len__() < 2:
-            return filter;
-        geom_op = filter[match.regs[1][0]:match.regs[1][1]]
-        if len(geom_op) != 0:
-            resource_path = None
-            if not geom_op.startswith("<OnlineResource"):
-                if geom_op.startswith("http://chart"):
-                    type = ""
-                    href = "xlink:href=\"" + geom_op +"\""
-                    format = "application/chart"
-                else:
-                    type = "xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:type=\"simple\" "
-                    href = "xlink:href=\"file:"+"/"+"/" + settings.MEDIA_ROOT + geom_op +"\""
-                    format = "image/png"
-                    resource_path = settings.MEDIA_ROOT + geom_op
-                
-                new_filter = "<OnlineResource "+type+""+ href +" />"
-                new_filter = new_filter + "<Format>"+format+"</Format>"
-                filter = regex.sub("<ExternalGraphic>"+ new_filter+"</ExternalGraphic>", filter)
-                regex2 = re.compile(r'<Mark>(.*)</Mark>')
-                filter = regex2.sub("", filter)
-            else:
-                match2 = re.findall(r'xlink:href="([^"]*)"', geom_op)
-                #match2 = re.search(regex2, geom_op)
-                if match2.__len__>0 and match2[0].startswith("file:"):
-                    resource_path =  match2[0].replace("file:", "")
-                
-            if resource_path:
-                local_path = resource_path.replace(settings.MEDIA_ROOT, "")
-                copy(resource_path, resource_folder_path + local_path)
-            
-        else:
-            filter = regex.sub("", filter)
-    
-    return filter
-
-
-def uploadLibrary(file_upload):
-    file_path = __get_uncompressed_file_upload_path(file_upload)
-    copyrecursively(file_path+"/resources/", settings.MEDIA_ROOT)
-    symbolizers = {}
+def upload_library(file, library):
+    library_path = check_library_path(library)
+    file_path = utils.__get_uncompressed_file_upload_path(file)
+    utils.copyrecursively(file_path+"/resources/", library_path)
+    rules = []
     
     file_list = os.listdir(file_path)
     for file in file_list:
@@ -200,18 +113,29 @@ def uploadLibrary(file_upload):
                                 name = name +"-"+str(i)
                             i = i + 1
                             
-                            if not type in symbolizers:
-                                symbolizers[type] = []
+                            rule = Rule(
+                                name = name,
+                                title = name,
+                                type = ''
+                            )
+                            rule.save()
                             
-                            symbolizers[type].append({
-                                'name' :  name,
-                                'file' : file, 
-                                'sld_code' : sld
-                            })
+                            symbolizers = sld_utils.get_json_from_sld(sld, name, library)
+                            for s in symbolizers:
+                                stype = s['type']
+                                rule.type = stype
+                                rule.save()
+                                s = json.dumps(s).replace("'", '"')
+                                symbolizer = Symbolizer(
+                                    rule = rule,
+                                    type = stype,
+                                    sld = sld,
+                                    json = s.encode('utf-8'),
+                                    order = 0
+                                )
+                                symbolizer.save()
                             
-                            print "     Name: " + name
-                            print "     File: " + file
-                            print "     Code: " + sld
+                            rules.append(rule)
                             
                         else:
                             not_found = False
@@ -224,80 +148,12 @@ def uploadLibrary(file_upload):
                     
                 match = re.search(r'<[sld:]?Rule>(.*)</[sld:]?Rule>', sld_text, re.DOTALL)
     
-    __delete_temporaries(file_path)
+    utils.__delete_temporaries(file_path)
     
-    return symbolizers
+    return rules
+
+
     
-def __get_uncompressed_file_upload_path(f):
-    dir_path = tempfile.mkdtemp(suffix='', prefix='tmp-library-')
-    z = zipfile.ZipFile(f, "r")
-    z.extractall(dir_path)
-    return dir_path
-
-def __delete_temporaries(file_path):
-    try:
-        # delete the whole dir if file_path is a dir
-        # otherwise just delete file_path
-        if os.path.isdir(file_path):
-            shutil.rmtree(file_path)
-        else:
-            os.remove(file_path)
-    except:
-        # ignore any errors deleting temporaries
-        pass
-
-def __compress_folder(file_path):
-        #(fd, zip_path) = tempfile.mkstemp(prefix='tmp-library-', suffix=".zip")
-        #os.close(fd)
-        s = tempfile.TemporaryFile()
-        
-        relroot = file_path
-        with zipfile.ZipFile(s, "w", zipfile.ZIP_DEFLATED) as zip:
-            for root, dirs, files in os.walk(file_path):
-                # add directory (needed for empty dirs)
-                rel_path = os.path.relpath(root, relroot)
-                if rel_path != ".":
-                    zip.write(root, os.path.relpath(root, relroot))
-                for file in files:
-                    filename = os.path.join(root, file)
-                    if os.path.isfile(filename): # regular files only
-                        arcname = os.path.join(os.path.relpath(root, relroot), file)
-                        zip.write(filename, arcname)
-
-        return zip
-    
-def copyrecursively(source_folder, destination_folder):
-    for root, dirs, files in os.walk(source_folder):
-        for item in files:
-            src_path = os.path.join(root, item)
-            dst_path = os.path.join(destination_folder, src_path.replace(source_folder, ""))
-            if os.path.exists(dst_path):
-                if os.stat(src_path).st_mtime > os.stat(dst_path).st_mtime:
-                    shutil.copyfile(src_path, dst_path)
-            else:
-                shutil.copyfile(src_path, dst_path)
-        for item in dirs:
-            src_path = os.path.join(root, item)
-            dst_path = os.path.join(destination_folder, src_path.replace(source_folder, ""))
-            if not os.path.exists(dst_path):
-                os.mkdir(dst_path)
-
-def copy(src, dest):
-    try:
-        if os.path.isdir(src):
-            shutil.copytree(src, dest, False, None)
-        else:
-            if dest.rfind('/') >= 0:
-                local_dir_url = dest[:dest.rfind('/')]
-                if not os.path.exists(local_dir_url):
-                    os.mkdir(local_dir_url)
-            shutil.copy2(src, dest)
-    except OSError as e:
-        # If the error was caused because the source wasn't a directory
-        if e.errno == errno.ENOTDIR:
-            shutil.copy(src, dest)
-        else:
-            print('Directory not copied. Error: %s' % e)
             
 def check_library_path(library):
     library_path = settings.MEDIA_ROOT + "symbol_libraries/" + library.name + "/"
@@ -391,7 +247,7 @@ def get_feature_type(fields):
     return featureType
 
 def get_sld_filter_values():
-    sldFilterValues = sld_tools.get_sld_filter_operations()
+    sldFilterValues = sld_utils.get_sld_filter_operations()
     for category in sldFilterValues:
         for oper in sldFilterValues[category]:
             sldFilterValues[category][oper]["genCodeFunc"] = ""
