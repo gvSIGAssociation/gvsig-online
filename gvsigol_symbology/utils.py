@@ -20,9 +20,82 @@
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
-from models import  StyleLayer, Style
+from models import  StyleLayer
+import tempfile, zipfile
+import os, shutil, errno
 import psycopg2
 import json
+
+def __get_uncompressed_file_upload_path(f):
+    dir_path = tempfile.mkdtemp(suffix='', prefix='tmp-library-')
+    z = zipfile.ZipFile(f, "r")
+    z.extractall(dir_path)
+    return dir_path
+
+def __delete_temporaries(file_path):
+    try:
+        # delete the whole dir if file_path is a dir
+        # otherwise just delete file_path
+        if os.path.isdir(file_path):
+            shutil.rmtree(file_path)
+        else:
+            os.remove(file_path)
+    except:
+        # ignore any errors deleting temporaries
+        pass
+
+def __compress_folder(file_path):
+        #(fd, zip_path) = tempfile.mkstemp(prefix='tmp-library-', suffix=".zip")
+        #os.close(fd)
+        s = tempfile.TemporaryFile()
+        
+        relroot = file_path
+        with zipfile.ZipFile(s, "w", zipfile.ZIP_DEFLATED) as zip:
+            for root, dirs, files in os.walk(file_path):
+                # add directory (needed for empty dirs)
+                rel_path = os.path.relpath(root, relroot)
+                if rel_path != ".":
+                    zip.write(root, os.path.relpath(root, relroot))
+                for file in files:
+                    filename = os.path.join(root, file)
+                    if os.path.isfile(filename): # regular files only
+                        arcname = os.path.join(os.path.relpath(root, relroot), file)
+                        zip.write(filename, arcname)
+
+        return zip
+    
+def copyrecursively(source_folder, destination_folder):
+    for root, dirs, files in os.walk(source_folder):
+        for item in files:
+            src_path = os.path.join(root, item)
+            dst_path = os.path.join(destination_folder, src_path.replace(source_folder, ""))
+            if os.path.exists(dst_path):
+                if os.stat(src_path).st_mtime > os.stat(dst_path).st_mtime:
+                    shutil.copyfile(src_path, dst_path)
+            else:
+                shutil.copyfile(src_path, dst_path)
+        for item in dirs:
+            src_path = os.path.join(root, item)
+            dst_path = os.path.join(destination_folder, src_path.replace(source_folder, ""))
+            if not os.path.exists(dst_path):
+                os.mkdir(dst_path)
+
+def copy(src, dest):
+    try:
+        if os.path.isdir(src):
+            shutil.copytree(src, dest, False, None)
+        else:
+            if dest.rfind('/') >= 0:
+                local_dir_url = dest[:dest.rfind('/')]
+                if not os.path.exists(local_dir_url):
+                    os.mkdir(local_dir_url)
+            shutil.copy2(src, dest)
+    except OSError as e:
+        # If the error was caused because the source wasn't a directory
+        if e.errno == errno.ENOTDIR:
+            shutil.copy(src, dest)
+        else:
+            print('Directory not copied. Error: %s' % e)
     
 def get_connection(connection):
     #Conectamos a la base de datos

@@ -27,9 +27,9 @@ from gvsigol_services.backend_mapservice import backend as mapservice_backend
 from models import Style, Rule, Symbolizer, StyleRule, Library, LibraryRule
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
-from sld_tools import get_style_from_library_symbol
+from gvsigol_symbology.sld_utils import get_style_from_library_symbol
 from gvsigol_auth.utils import admin_required
-import backend_symbology
+from gvsigol_symbology import services
 import json
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -134,6 +134,31 @@ def library_import(request):
             )
             library.save()
             
+            rules = services.upload_library(request.FILES['library-file'], library)
+            for rule in rules:               
+                library_rule = LibraryRule(
+                    library = library,
+                    rule = rule
+                )
+                library_rule.save()
+                
+                style = Style(
+                    name = rule.name,
+                    title = rule.name,
+                    is_default = False,
+                    type = "US"
+                )
+                style.save()
+                
+                style_rule = StyleRule(
+                    style = style,
+                    rule = rule
+                )
+                style_rule.save()
+                
+                sld_body = get_style_from_library_symbol(style.id, request.session)
+                mapservice_backend.createStyle(style.name, sld_body, request.session)                
+            
             return redirect('library_list')
         
         elif name == '' and 'library-file' in request.FILES:
@@ -197,7 +222,7 @@ def library_delete(request, library_id):
         lib_rule.delete()
     
     lib = Library.objects.get(id=library_id)
-    backend_symbology.delete_library_dir(lib)
+    services.delete_library_dir(lib)
     lib.delete()
     return redirect('library_list')
 
@@ -226,10 +251,10 @@ def symbol_add(request, library_id, symbol_type):
                 sld = sym.get('sld')
                 json_sym = sym.get('json')
                 if symbol_type == 'ExternalGraphicSymbolizer':
-                    library_path = backend_symbology.check_library_path(library)
+                    library_path = services.check_library_path(library)
                     file_name = json_rule.get('name') + '.png'
-                    if backend_symbology.save_external_graphic(library_path, request.FILES['eg-file'], file_name):
-                        online_resource = backend_symbology.get_online_resource(library, file_name)
+                    if services.save_external_graphic(library_path, request.FILES['eg-file'], file_name):
+                        online_resource = services.get_online_resource(library, file_name)
                         sld = sld.replace("online_resource_replace", online_resource)
                         json_sym = json_sym.replace("online_resource_replace", online_resource)
                         
@@ -305,7 +330,7 @@ def symbol_update(request, symbol_id):
                 if s.type == 'ExternalGraphicSymbolizer':
                     if 'eg-file' in request.FILES:
                         file_name = rule.name + '.png'
-                        backend_symbology.delete_external_graphic_img(library_rule.library, file_name)
+                        services.delete_external_graphic_img(library_rule.library, file_name)
                 s.delete()
                 
             for sym in json_rule.get('symbolizers'):
@@ -314,10 +339,10 @@ def symbol_update(request, symbol_id):
                 json_sym = sym.get('json')
                 if rule.type == 'ExternalGraphicSymbolizer':
                     if 'eg-file' in request.FILES:
-                        library_path = backend_symbology.check_library_path(library_rule.library)
+                        library_path = services.check_library_path(library_rule.library)
                         file_name = json_rule.get('name') + '.png'
-                        if backend_symbology.save_external_graphic(library_path, request.FILES['eg-file'], file_name):
-                            online_resource = backend_symbology.get_online_resource(library_rule.library, file_name)
+                        if services.save_external_graphic(library_path, request.FILES['eg-file'], file_name):
+                            online_resource = services.get_online_resource(library_rule.library, file_name)
                             sld = sld.replace('online_resource_replace', online_resource)
                             json_sym = json_sym.replace('online_resource_replace', online_resource)
                         
@@ -398,7 +423,7 @@ def symbol_delete(request):
             for symbolizer in symbolizers:
                 if symbolizer.type == 'ExternalGraphicSymbolizer':
                     file_name = rule.name + '.png'
-                    backend_symbology.delete_external_graphic_img(library_rule.library, file_name)
+                    services.delete_external_graphic_img(library_rule.library, file_name)
                 symbolizer.delete()
             library_rule.delete()
             

@@ -27,7 +27,7 @@ from django.contrib.auth.decorators import login_required
 from gvsigol_services.models import Layer
 from gvsigol_auth.utils import admin_required
 from models import Style, StyleLayer
-import sld_tools
+from gvsigol_symbology import sld_utils
 import json
 
   
@@ -85,7 +85,7 @@ def get_sld_body(request):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        sld_body = sld_tools.get_sld_body(json_data)
+        sld_body = sld_utils.get_sld_body(json_data)
         
         response = {
             'sld_body': sld_body
