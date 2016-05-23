@@ -23,12 +23,13 @@
 @author: Jose Badia <jbadia@scolab.es>
 '''
 
-from backend_symbology import get_layer_field_description
+from gvsigol_symbology.services import get_layer_field_description
 from gvsigol_services.models import Datastore, Workspace, Layer
 from models import Style, Rule, StyleRule, Symbolizer
 from django_ajax.decorators import ajax
 from xml.sax.saxutils import escape
 import gvsigol.settings
+import xmltodict
 import json
 import re
 
@@ -702,6 +703,37 @@ def get_clean_sld(sld_code, symbol):
     
     return sld
 
+def create_basic_sld(library, symbol, resource_folder_path):
+    sld = "<StyledLayerDescriptor version=\"1.0.0\" xmlns=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" "
+    sld += "xmlns:sld=\"http://www.opengis.net/sld\"  xmlns:gml=\"http://www.opengis.net/gml\" " 
+    sld +=   "xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+    sld +=   "xsi:schemaLocation=\"http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd\">"
+    sld += "<NamedLayer>"
+    
+    sld += "<Name>"+ library.name +"</Name>"
+    
+    sld += "<UserStyle>"
+    sld += "<Name>"+ library.name +"</Name>"
+    sld += "<Title>"+ escape(library.title) +"</Title>"
+    sld += "<Abstract>"+ escape(library.description) +"</Abstract>"
+    sld += "<FeatureTypeStyle>"
+    
+    sld += "<Rule>"
+    sld += "<Name>"+ escape(symbol.name) +"</Name>"
+        
+    symbs = get_symbolizers(symbol.sld_code)
+    for symb in symbs:
+        sld += get_graphics_sld(symb, resource_folder_path)
+            
+    sld += "</Rule>"
+    
+    sld += "</FeatureTypeStyle>"
+    sld += "</UserStyle>"
+    sld += "</NamedLayer>"
+    sld += "</StyledLayerDescriptor>"
+    
+    return sld   
+
 def get_symbolizers(sld):
     regex = re.compile('<\/[\\w]*Symbolizer>')
     symbs = []
@@ -779,3 +811,117 @@ def get_sld_style2(request, layer_id, style_id):
             sld += "</StyledLayerDescriptor>"
             
             return {"sld_code": sld.encode('utf8')}
+        
+def get_json_from_sld(sld, name, library):
+    
+    symbolizers = []
+    
+    doc = None
+    try:
+        doc = xmltodict.parse(sld)
+    except Exception as e:
+        sld = '<complex>' + sld + '</complex>'
+        doc = xmltodict.parse(sld)
+      
+    json_data = {}
+    if doc is not None:
+        if 'complex' in doc:
+            if 'PointSymbolizer' in doc['complex']:
+                complex_point = doc['complex']['PointSymbolizer']
+                for p in complex_point:
+                    mark = p['Graphic']['Mark']
+                    json_data['name'] = name
+                    json_data['type'] = 'PointSymbolizer'
+                    json_data['order'] = 0
+                    json_data['size'] = int(p['Graphic']['Size'])
+                    json_data['shape'] = mark['WellKnownName']
+                    json_data['fill_color'] = extract_property('fill', mark['Fill']['CssParameter'])
+                    json_data['fill_opacity'] = extract_property('fill-opacity', mark['Fill']['CssParameter'])
+                    if 'Stroke' in mark:
+                        json_data['border_color'] = extract_property('stroke', mark['Stroke']['CssParameter'])
+                        json_data['border_size'] = extract_property('stroke-width', mark['Stroke']['CssParameter'])
+                        json_data['border_opacity'] = extract_property('stroke-opacity', mark['Stroke']['CssParameter'])
+                        json_data['border_type'] = 'solid'
+                    symbolizers.append(json_data)
+                    
+            elif 'LineSymbolizer' in doc['complex']:
+                complex_line = doc['complex']['LineSymbolizer']
+                for l in complex_line:
+                    stroke = l['Stroke']
+                    opacity = l['Graphic']['Opacity']
+                    json_data['name'] = name
+                    json_data['type'] = 'LineSymbolizer'
+                    json_data['order'] = 0
+                    json_data['opacity'] = int(opacity)
+                    json_data['border_color'] = extract_property('stroke', stroke['CssParameter'])
+                    json_data['border_size'] = extract_property('stroke-width', stroke['CssParameter'])
+                    json_data['border_opacity'] = extract_property('stroke-opacity', stroke['CssParameter'])
+                    json_data['border_type'] = 'solid'
+                    symbolizers.append(json_data)
+            
+        elif 'PointSymbolizer' in doc:
+            graphic = doc['PointSymbolizer']['Graphic']
+            if 'ExternalGraphic' in graphic:
+                external_graphic = graphic['ExternalGraphic']
+                json_data['name'] = name
+                json_data['type'] = 'ExternalGraphicSymbolizer'
+                json_data['order'] = 0
+                json_data['size'] = int(graphic['Size'])
+                online_resource = external_graphic['OnlineResource']['@xlink:href']
+                image = online_resource.split('/')[-1]
+                json_data['online_resource'] = gvsigol.settings.MEDIA_URL + 'symbol_libraries/' + library.name + '/' + image
+                json_data['format'] = external_graphic['Format']
+                
+            elif 'Mark' in graphic:
+                mark = graphic['Mark']
+                json_data['name'] = name
+                json_data['type'] = 'PointSymbolizer'
+                json_data['order'] = 0
+                json_data['size'] = int(graphic['Size'])
+                json_data['shape'] = mark['WellKnownName']
+                json_data['fill_color'] = extract_property('fill', mark['Fill']['CssParameter'])
+                json_data['fill_opacity'] = extract_property('fill-opacity', mark['Fill']['CssParameter'])
+                if 'Stroke' in mark:
+                    json_data['border_color'] = extract_property('stroke', mark['Stroke']['CssParameter'])
+                    json_data['border_size'] = extract_property('stroke-width', mark['Stroke']['CssParameter'])
+                    json_data['border_opacity'] = extract_property('stroke-opacity', mark['Stroke']['CssParameter'])
+                    json_data['border_type'] = 'solid'
+            symbolizers.append(json_data)
+               
+        elif 'LineSymbolizer' in doc:
+            graphic = doc['LineSymbolizer']['Graphic']
+            stroke = doc['LineSymbolizer']['Stroke']
+            json_data['name'] = name
+            json_data['type'] = 'LineSymbolizer'
+            json_data['order'] = 0
+            json_data['opacity'] = float(graphic['Opacity'])
+            json_data['border_color'] = extract_property('stroke', stroke['CssParameter'])
+            json_data['border_size'] = extract_property('stroke-width', stroke['CssParameter'])
+            json_data['border_opacity'] = extract_property('stroke-opacity', stroke['CssParameter'])
+            json_data['border_type'] = 'solid'
+            symbolizers.append(json_data)
+            
+        elif 'PolygonSymbolizer' in doc:
+            graphic = doc['PolygonSymbolizer']['Graphic']
+            fill = doc['PolygonSymbolizer']['Fill']
+            stroke = doc['PolygonSymbolizer']['Stroke']
+            json_data['name'] = name
+            json_data['type'] = 'PolygonSymbolizer'
+            json_data['order'] = 0
+            json_data['opacity'] = float(graphic['Opacity'])
+            json_data['fill_color'] = extract_property('fill', fill['CssParameter'])
+            json_data['fill_opacity'] = extract_property('fill-opacity', fill['CssParameter'])
+            json_data['border_color'] = extract_property('stroke', stroke['CssParameter'])
+            json_data['border_size'] = extract_property('stroke-width', stroke['CssParameter'])
+            json_data['border_opacity'] = extract_property('stroke-opacity', stroke['CssParameter'])
+            json_data['border_type'] = 'solid'
+            symbolizers.append(json_data)
+                   
+        return symbolizers
+    
+def extract_property(property_name, element):
+    for node in element:
+        if node is not None:
+            if '@name' in node:
+                if node['@name'] == property_name:
+                    return node['#text']

@@ -27,8 +27,8 @@ from django.contrib.auth.decorators import login_required
 from gvsigol_services.models import Layer, Datastore, Workspace
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
 from models import Style, StyleLayer, Rule, Symbolizer, StyleRule, Library
-from sld_tools import get_sld_style, get_sld_filter_operations
-import backend_symbology
+from gvsigol_symbology.sld_utils import get_sld_style, get_sld_filter_operations
+from gvsigol_symbology import services
 from django.utils.translation import ugettext as _
 from gvsigol_auth.utils import admin_required
 from utils import sortFontsArray
@@ -39,10 +39,10 @@ import json
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @admin_required
 def unique_symbol_add(request, layer_id):
-    fields = backend_symbology.get_fields(layer_id, request.session)
-    feature_type = backend_symbology.get_feature_type(fields)
-    sld_filter_values = backend_symbology.get_sld_filter_values()
-    alphanumeric_fields = backend_symbology.get_alphanumeric_fields(fields)
+    fields = services.get_fields(layer_id, request.session)
+    feature_type = services.get_feature_type(fields)
+    sld_filter_values = services.get_sld_filter_values()
+    alphanumeric_fields = services.get_alphanumeric_fields(fields)
        
     supported_fonts_str = mapservice_backend.getSupportedFonts(request.session)
     supported_fonts = json.loads(supported_fonts_str)
@@ -124,10 +124,10 @@ def unique_symbol_update(request, layer_id, style_id):
         authenticated_wms_url = split_wms_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_wms_url[1]
         layer_url = authenticated_wms_url
         
-        fields = backend_symbology.get_fields(layer_id, request.session)
-        feature_type = backend_symbology.get_feature_type(fields)
-        sld_filter_values = backend_symbology.get_sld_filter_values()
-        alphanumeric_fields = backend_symbology.get_alphanumeric_fields(fields)
+        fields = services.get_fields(layer_id, request.session)
+        feature_type = services.get_feature_type(fields)
+        sld_filter_values = services.get_sld_filter_values()
+        alphanumeric_fields = services.get_alphanumeric_fields(fields)
            
         supported_fonts_str = mapservice_backend.getSupportedFonts(request.session)
         supported_fonts = json.loads(supported_fonts_str)
