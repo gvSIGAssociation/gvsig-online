@@ -524,6 +524,7 @@ class Geoserver():
             return True
         
         except Exception as e:
+            print e
             return False
         
     def deleteStyle(self, name, session):
