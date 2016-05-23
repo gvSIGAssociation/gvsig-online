@@ -79,9 +79,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'gvsigol_auth/templates'),
             os.path.join(BASE_DIR, 'gvsigol_core/templates'),
             os.path.join(BASE_DIR, 'gvsigol_services/templates'),
-            os.path.join(BASE_DIR, 'gvsigol_symbology/templates'),
-            os.path.join(BASE_DIR, '##GVSIG_ONLINE_BASE_APP##/templates'),
-            
+            os.path.join(BASE_DIR, 'gvsigol_symbology/templates'),            
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -199,10 +197,7 @@ GVSIGOL_CATALOG = {
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
     'URL': '##GEOSERVER_BASE_URL##',
-    'CLUSTER_NODES':[
-        'http://aguas0.gvsigonline.com:8080/geoserver',
-        'http://aguas1.gvsigonline.com:8080/geoserver'
-    ],
+    'CLUSTER_NODES':[##GEOSERVER_CLUSTER_NODES##],
     'SUPPORTED_TYPES': (
                         #('v_SHP', _('Shapefile folder')),
                         ('v_PostGIS', _('PostGIS vector')),
