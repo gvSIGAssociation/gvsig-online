@@ -101,7 +101,7 @@ $(document).ready(function() {
 		
 	   	var formData = new FormData($(this)[0]); 	   	
 	   	
-   		var externalGraphic = new ExternalGraphicSymbolizer(name, format, size, '{{rule.symbolizer_online_resource}}');
+   		var externalGraphic = new ExternalGraphicSymbolizer(0, name, format, size, '{{rule.symbolizer_online_resource}}');
 		var symbolizer = {
 			type: externalGraphic.type,
 			sld: externalGraphic.toXML(),
