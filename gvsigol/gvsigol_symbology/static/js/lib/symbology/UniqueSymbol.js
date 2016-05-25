@@ -21,14 +21,19 @@
  */
  
  
-var UniqueSymbol = function(featureType, symbologyUtils, rule_opts) {
+var UniqueSymbol = function(featureType, symbologyUtils, rule_opts, previewPointUrl, previewLineUrl, previewPolygonUrl) {
 	this.selected = null;
 	this.featureType = featureType;
+	this.previewPointUrl = previewPointUrl;
+	this.previewLineUrl = previewLineUrl;
+	this.previewPolygonUrl = previewPolygonUrl;
 	this.symbologyUtils = symbologyUtils;
 	this.rule = new Rule(0, featureType, rule_opts);
-	if (rule_opts.symbolizers != "") {
-		this.loadSymbols(rule_opts.symbolizers);
-	}
+	if (rule_opts != null) {
+		if (rule_opts.symbolizers != "") {
+			this.loadSymbols(rule_opts.symbolizers);
+		}
+	}	
 };
 
 UniqueSymbol.prototype.getRule = function() {
@@ -40,13 +45,13 @@ UniqueSymbol.prototype.appendSymbolizer = function() {
 	
 	var symbolizer = null;
 	if (this.featureType == 'PointSymbolizer') {
-		symbolizer = new PointSymbolizer(this.rule.getNextSymbolizerId(), this.rule, this.symbologyUtils);
+		symbolizer = new PointSymbolizer(this.rule.getNextSymbolizerId(), this.rule, this.symbologyUtils, null, this.previewPointUrl);
 		
 	} else if (this.featureType == 'LineSymbolizer') {
-		symbolizer = new LineSymbolizer(this.rule.getNextSymbolizerId(), this.rule);
+		symbolizer = new LineSymbolizer(this.rule.getNextSymbolizerId(), this.rule, null, this.previewLineUrl);
 		
 	} else if (this.featureType == 'PolygonSymbolizer') {
-		symbolizer = new PolygonSymbolizer(this.rule.getNextSymbolizerId(), this.rule);
+		symbolizer = new PolygonSymbolizer(this.rule.getNextSymbolizerId(), this.rule, null, this.previewPolygonUrl);
 	}
 	
 	$('#table-symbolizers tbody').append(symbolizer.getTableUI());
@@ -87,20 +92,24 @@ UniqueSymbol.prototype.appendSymbolizer = function() {
 UniqueSymbol.prototype.appendLabel = function() {
 	var self = this;
 	
-	var label = new TextSymbolizer(this.rule.getNextLabelId(), this.symbologyUtils, this.rule);
+	var previewUrl = null;
+	if (this.featureType == 'PointSymbolizer') {
+		previewUrl = this.previewPointUrl;
+		
+	} else if (this.featureType == 'LineSymbolizer') {
+		previewUrl = this.previewLineUrl;
+		
+	} else if (this.featureType == 'PolygonSymbolizer') {
+		previewUrl = this.previewPolygonUrl;
+	}
+	
+	var label = new TextSymbolizer(this.rule.getNextLabelId(), this.symbologyUtils, this.rule, null, previewUrl);
 	$('#table-symbolizers tbody').append(label.getTableUI());
-	$("#table-symbolizers-body").sortable({
+	$('#table-symbolizers-body').sortable({
 		placeholder: "sort-highlight",
 		handle: ".handle",
 		forcePlaceholderSize: true,
 		zIndex: 999999
-	});
-	$("#table-symbolizers-body").on("sortupdate", function(event, ui){
-		/*var rows = ui.item[0].parentNode.children;
-		for(var i=0; i < rows.length; i++) {
-			var symbol = self.rule.getSymbolizerById(rows[i].dataset.rowid);
-			symbol.order = i;
-		}*/		
 	});
 	
 	$(".edit-label-link").on('click', function(e){	
@@ -120,6 +129,8 @@ UniqueSymbol.prototype.appendLabel = function() {
 	
 	self.setSelected(label);
 	this.updateForm();
+	
+	$('#append-label-button').css('display', 'none');
 };
 
 UniqueSymbol.prototype.setSelected = function(element) {
@@ -147,13 +158,13 @@ UniqueSymbol.prototype.loadSymbolizer = function(symbolizer_object) {
 	
 	var symbolizer = null;
 	if (this.featureType == 'PointSymbolizer') {
-		symbolizer = new PointSymbolizer(this.rule.getNextSymbolizerId(), this.rule, this.symbologyUtils, symbolizer_object);
+		symbolizer = new PointSymbolizer(this.rule.getNextSymbolizerId(), this.rule, this.symbologyUtils, symbolizer_object, this.previewPointUrl);
 		
 	} else if (this.featureType == 'LineSymbolizer') {
-		symbolizer = new LineSymbolizer(this.rule.getNextSymbolizerId(), this.rule, symbolizer_object);
+		symbolizer = new LineSymbolizer(this.rule.getNextSymbolizerId(), this.rule, symbolizer_object, this.previewLineUrl);
 		
 	} else if (this.featureType == 'PolygonSymbolizer') {
-		symbolizer = new PolygonSymbolizer(this.rule.getNextSymbolizerId(), this.rule, symbolizer_object);
+		symbolizer = new PolygonSymbolizer(this.rule.getNextSymbolizerId(), this.rule, symbolizer_object, this.previewPolygonUrl);
 	}
 	
 	$('#table-symbolizers tbody').append(symbolizer.getTableUI());
@@ -258,80 +269,42 @@ UniqueSymbol.prototype.refreshMap = function(rid,symbolizers) {
 	this.symbologyUtils.updateMap(this.rule, this.map);
 };
 
-UniqueSymbol.prototype.libraryPreview = function(rid,symbolizers) {
-	
-	$("#library-preview-" + rid).empty();
-	var previewElement = Snap("#library-preview-" + rid);
-	var previewGroup = previewElement.g();
-	
-	var max = 20;
-	for (var i=0; i<symbolizers.length; i++) {
-		var symbolizer = JSON.parse(symbolizers[i].json);
-		var preview = this.addSymbolPreview(previewElement, symbolizer, symbolizers[i].type);
-		previewGroup.add(preview);
-	}
-	
-	$('.library-preview-svg').css("height",max+"px");
-	$('.library-preview-svg').css("width",max+"px");
-};
-
-UniqueSymbol.prototype.addSymbolPreview = function(previewElement, symbol, stype) {
-	
-	var attributes = {
-		fill: symbol.fill_color,
-		fillOpacity: parseFloat(symbol.fill_opacity),
-		stroke: symbol.border_color,
-		strokeOpacity: symbol.border_opacity,
-		strokeWidth: symbol.border_size
-	}
-	if (symbol.border_type == 'dotted') {
-		attributes.strokeDasharray= "1 1";
-	} else if (symbol.border_type == 'stripped') {
-		attributes.strokeDasharray= "4 4";
-	}
-	
-	var preview = null;
-	if (stype == 'PointSymbolizer') {
-		if (symbol.shape == 'circle') {
-			preview = previewElement.circle(10, 10, 10);
-			preview.attr(attributes);
+UniqueSymbol.prototype.libraryPreview = function(rid,json_symbolizers) {
+	var symbolizers = new Array();
+	var scount = 0;
+	var previewUrl = null;
+	for (var i=0; i<json_symbolizers.length; i++) {
+		var symbolizer_object = JSON.parse(json_symbolizers[i].json);
+		var symbolizer = null;
+		if (symbolizer_object.type == 'PointSymbolizer') {
+			symbolizer = new PointSymbolizer(this.count, this, this.symbologyUtils, symbolizer_object, this.previewPointUrl);
+			previewUrl = this.previewPointUrl;
 			
-		} else if (symbol.shape == 'square') {
-			preview = previewElement.polygon(0, 0, 20, 0, 20, 20, 0, 20);
-			preview.attr(attributes);
+		} else if (symbolizer_object.type == 'LineSymbolizer') {
+			symbolizer = new LineSymbolizer(this.count, this, symbolizer_object, this.previewLineUrl);
+			previewUrl = this.previewLineUrl;
 			
-		} else if (symbol.shape == 'triangle') {
-			preview = previewElement.path('M 12.462757,7.4046606 -2.6621031,7.3865562 4.9160059,-5.7029049 z');
-			preview.transform( 't5,8');
-			preview.attr(attributes);
+		} else if (symbolizer_object.type == 'PolygonSymbolizer') {
+			symbolizer = new PolygonSymbolizer(this.count, this, symbolizer_object, this.previewPolygonUrl);
+			previewUrl = this.previewPolygonUrl;
 			
-		}  else if (symbol.shape == 'star') {
-			preview = previewElement.path('M 7.0268739,7.8907968 2.2616542,5.5298295 -2.3847299,8.1168351 -1.6118504,2.8552628 -5.5080506,-0.76428228 -0.2651651,-1.6551455 1.9732348,-6.479153 4.4406368,-1.7681645 9.7202441,-1.13002 6.0022969,2.6723943 z');
-			preview.transform( 't8,9');
-			preview.attr(attributes);
-			
-		} else if (symbol.shape == 'cross') {
-			preview = previewElement.path('M 7.875 0.53125 L 7.875 7.40625 L 0.59375 7.40625 L 0.59375 11.3125 L 7.875 11.3125 L 7.875 19.46875 L 11.78125 19.46875 L 11.78125 11.28125 L 19.5625 11.28125 L 19.53125 7.375 L 11.78125 7.375 L 11.78125 0.53125 L 7.875 0.53125 z');
-			preview.transform( 't0,0');
-			preview.attr(attributes);
-			
-		} else if (symbol.shape == 'x') {
-			preview = previewElement.path('M 4.34375 0.90625 L 0.90625 3.5 L 6.90625 9.9375 L 0.78125 15.53125 L 3.34375 19.03125 L 9.84375 13.09375 L 15.53125 19.15625 L 19 16.5625 L 13.03125 10.1875 L 19.1875 4.5625 L 16.625 1.09375 L 10.09375 7.03125 L 4.34375 0.90625 z');
-			preview.transform( 't0,0');
-			preview.attr(attributes);
+		} else if (symbolizer_object.type == 'TextSymbolizer') {
+			symbolizer = new TextSymbolizer(this.count, this, symbolizer_object);
+			previewUrl = this.previewPolygonUrl;
 			
 		}
-		
-		
-	} else if (stype == 'LineSymbolizer') {
-		preview = previewElement.line(0, 0, 20, 20);
-		preview.attr(attributes);
-		
-	} else if (stype == 'PolygonSymbolizer') {
-		preview = previewElement.polygon(0, 0, 20, 0, 20, 20, 0, 20);
-		preview.attr(attributes);
+		symbolizers.push(symbolizer);
+		scount++;
 	}
-	return preview;
+	symbolizers.sort(function(a, b){
+		return parseInt(b.order) - parseInt(a.order);
+	});
+	
+	var sldBody = this.symbologyUtils.getSLDBody(symbolizers);
+	var url = previewUrl + '&SLD_BODY=' + encodeURIComponent(sldBody);
+	var ui = '<img id="rule-preview-img" src="' + url + '" class="rule-preview"></img>';
+	$("#library-symbol-preview-div-" + rid).empty();
+	$("#library-symbol-preview-div-" + rid).append(ui);
 };
 
 UniqueSymbol.prototype.updateForm = function() {
@@ -379,18 +352,15 @@ UniqueSymbol.prototype.registerSymbolizerEvents = function() {
 		self.selected.updatePreview();	
 		//self.updatePreview();
 	});
-	$('input[type=radio][name=symbol-is-vectorial]').change(function() {
-        if (this.value == 'vectorial') {
-        	self.selected.vectorial = true;
-        	self.updateForm();
-        	$("#symbolizer-preview").append('<td id="symbolizer-preview"><svg id="symbolizer-preview-' + self.selected.id + '" class="preview-svg"></svg></td>');
-    		self.selected.updatePreview();
+	$('input[type=checkbox][name=symbol-with-border]').change(function() {
+		var isChecked = $('#symbol-with-border').is(":checked");
+        if (isChecked) {
+        	$("#border-div").css('display', 'block');
+        	self.selected.with_border = true;
             
-        } else if (this.value == 'external-graphic') {
-        	self.selected.vectorial = false;
-        	self.updateForm();
-        	$("#symbolizer-preview").empty();
-    		//self.selected.preview = self.renderExternalGraphicPreview(self.selected);
+        } else {
+        	$("#border-div").css('display', 'none');
+        	self.selected.with_border = false;
         }
     });
 	$("#shape").on('change', function(e) {
@@ -553,8 +523,12 @@ UniqueSymbol.prototype.save = function(layerId) {
 			json: this.rule.getLabels()[i].toJSON(),
 			order: this.rule.getLabels()[i].order
 		};
-		symbolizers.push(symbolizer);
+		symbolizers.push(label);
 	}
+	
+	symbolizers.sort(function(a, b){
+		return parseInt(b.order) - parseInt(a.order);
+	});
 	
 	var style = {
 		name: $('#style-name').val(),
@@ -567,7 +541,7 @@ UniqueSymbol.prototype.save = function(layerId) {
 	$.ajax({
 		type: "POST",
 		async: false,
-		url: "/gvsigonline/symbology/unique_symbol_save/" + layerId + "/",
+		url: "/gvsigonline/symbology/unique_symbol_add/" + layerId + "/",
 		beforeSend:function(xhr){
 			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},

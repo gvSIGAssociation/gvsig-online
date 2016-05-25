@@ -20,7 +20,6 @@
 				<div class="row">
 				<div class="col-md-3">
 					<div class="library-symbol-preview-div">
-						<svg id="library-symbol-preview-svg" class="library-symbol-preview-svg"></svg>
 					</div>
 				</div>
 				<div class="col-md-9">
@@ -105,15 +104,15 @@
 <script>
 $(document).ready(function() {
 
+	var previewPointUrl = 'https://localhost/gs-test/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point';
+	var previewLineUrl = 'https://localhost/gs-test/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line';
+	var previewPolygonUrl = 'https://localhost/gs-test/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon';
+	
 	var symbologyUtils = new SymbologyUtils([],[]);
-	var librarySymbol = new LibrarySymbol(symbologyUtils);
+	var librarySymbol = new LibrarySymbol(previewPointUrl, previewLineUrl, previewPolygonUrl, symbologyUtils);
 	
 	var symbolizers = {{rule.symbolizers|safe}};
 	librarySymbol.loadSymbolizers(symbolizers);
-	
-	if (librarySymbol.getSymbolizers().length >=1) {
-		$("#append-symbol-button").css("display", "none");
-	}
 	
 	$("#append-symbol-button").on('click', function(e){
 		librarySymbol.appendSymbolizer("{{rule.type}}");

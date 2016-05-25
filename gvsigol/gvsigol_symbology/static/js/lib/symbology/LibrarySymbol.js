@@ -21,10 +21,13 @@
  */
  
  
-var LibrarySymbol = function(symbologyUtils) {
+var LibrarySymbol = function(previewPointUrl, previewLineUrl, previewPolygonUrl, symbologyUtils) {
 	this.count = 0;
 	this.selected = null;
 	this.featureType = null;
+	this.previewPointUrl = previewPointUrl;
+	this.previewLineUrl = previewLineUrl;
+	this.previewPolygonUrl = previewPolygonUrl;
 	this.symbologyUtils = symbologyUtils;
 	this.symbolizers = new Array();
 };
@@ -35,26 +38,30 @@ LibrarySymbol.prototype.getSymbolizers = function() {
 
 LibrarySymbol.prototype.loadSymbolizers = function(json_symbolizers) {
 	var self = this;
+	var previewUrl = null;
 	for (var i=0; i<json_symbolizers.length; i++) {
 		var symbolizer_object = JSON.parse(json_symbolizers[i].json);
 		var symbolizer = null;
 		if (symbolizer_object.type == 'PointSymbolizer') {
-			symbolizer = new PointSymbolizer(this.count, this, this.symbologyUtils, symbolizer_object);
+			symbolizer = new PointSymbolizer(this.count, this, this.symbologyUtils, symbolizer_object, this.previewPointUrl);
 			$('#table-symbolizers tbody').append(symbolizer.getTableUI());
 			this.symbolizers.push(symbolizer);
 			symbolizer.updatePreview();
+			previewUrl = this.previewPointUrl;
 			
 		} else if (symbolizer_object.type == 'LineSymbolizer') {
-			symbolizer = new LineSymbolizer(this.count, this, symbolizer_object);
+			symbolizer = new LineSymbolizer(this.count, this, symbolizer_object, this.previewLineUrl);
 			$('#table-symbolizers tbody').append(symbolizer.getTableUI());
 			this.symbolizers.push(symbolizer);
 			symbolizer.updatePreview();
+			previewUrl = this.previewLineUrl;
 			
 		} else if (symbolizer_object.type == 'PolygonSymbolizer') {
-			symbolizer = new PolygonSymbolizer(this.count, this, symbolizer_object);
+			symbolizer = new PolygonSymbolizer(this.count, this, symbolizer_object, this.previewPolygonUrl);
 			$('#table-symbolizers tbody').append(symbolizer.getTableUI());
 			this.symbolizers.push(symbolizer);
 			symbolizer.updatePreview();
+			previewUrl = this.previewPolygonUrl;
 			
 		} else if (symbolizer_object.type == 'TextSymbolizer') {
 			symbolizer = new TextSymbolizer(this.count, this, symbolizer_object);
@@ -64,6 +71,21 @@ LibrarySymbol.prototype.loadSymbolizers = function(json_symbolizers) {
 		}
 		this.count++;
 	}
+	
+	$("#table-symbolizers-body").sortable({
+		placeholder: "sort-highlight",
+		handle: ".handle",
+		forcePlaceholderSize: true,
+		zIndex: 999999
+	});
+	$("#table-symbolizers-body").on("sortupdate", function(event, ui){
+		var rows = ui.item[0].parentNode.children;
+		for(var i=0; i < rows.length; i++) {
+			var symbol = self.getSymbolizerById(rows[i].dataset.rowid);
+			symbol.order = i;
+		}
+		self.updatePreview(previewUrl);
+	});
 	
 	$(".edit-symbolizer-link").on('click', function(e){	
 		e.preventDefault();
@@ -76,25 +98,30 @@ LibrarySymbol.prototype.loadSymbolizers = function(json_symbolizers) {
 		e.preventDefault();
 		self.removeSymbolizer(this.dataset.symbolizerid);
 	});
+	
+	this.updatePreview(previewUrl);
 };
 
 LibrarySymbol.prototype.appendSymbolizer = function(featureType) {
 	var self = this;
 	
 	this.featureType = featureType;
-	
+	var previewUrl = null;
 	var symbolizer = null;
 	if (this.featureType == 'PointSymbolizer') {
-		symbolizer = new PointSymbolizer(this.count, null, this.symbologyUtils);
+		symbolizer = new PointSymbolizer(this.count, null, this.symbologyUtils, null, this.previewPointUrl);
+		previewUrl = this.previewPointUrl;
 		
 	} else if (this.featureType == 'ExternalGraphicSymbolizer') {
 		symbolizer = new ExternalGraphicSymbolizer(this.count, null, this.symbologyUtils);
 		
 	} else if (this.featureType == 'LineSymbolizer') {
-		symbolizer = new LineSymbolizer(this.count, null);
+		symbolizer = new LineSymbolizer(this.count, null, null, this.previewLineUrl);
+		previewUrl = this.previewLineUrl;
 		
 	} else if (this.featureType == 'PolygonSymbolizer') {
-		symbolizer = new PolygonSymbolizer(this.count, null);
+		symbolizer = new PolygonSymbolizer(this.count, null, null, this.previewPolygonUrl);
+		previewUrl = this.previewPolygonUrl;
 	}
 	this.count++;
 	
@@ -106,11 +133,12 @@ LibrarySymbol.prototype.appendSymbolizer = function(featureType) {
 		zIndex: 999999
 	});
 	$("#table-symbolizers-body").on("sortupdate", function(event, ui){
-		/*var rows = ui.item[0].parentNode.children;
+		var rows = ui.item[0].parentNode.children;
 		for(var i=0; i < rows.length; i++) {
-			var symbol = self.rule.getSymbolizerById(rows[i].dataset.rowid);
+			var symbol = self.getSymbolizerById(rows[i].dataset.rowid);
 			symbol.order = i;
-		}*/		
+		}
+		self.updatePreview(previewUrl);
 	});
 	
 	$(".edit-symbolizer-link").on('click', function(e){	
@@ -126,7 +154,7 @@ LibrarySymbol.prototype.appendSymbolizer = function(featureType) {
 	});
 	this.symbolizers.push(symbolizer);
 	symbolizer.updatePreview();
-	self.updatePreview();
+	self.updatePreview(previewUrl);
 	self.setSelected(symbolizer);
 	this.updateForm();
 	
@@ -199,7 +227,6 @@ LibrarySymbol.prototype.loadSymbol = function(symbolizer, featureType) {
 		for(var i=0; i < rows.length; i++) {
 			var symbol = self.getSymbolById(rows[i].dataset.rowid);
 			symbol.order = i;
-			console.log(symbol.name + ' -> ' + symbol.order);
 		}		
 	});
 	
@@ -222,99 +249,62 @@ LibrarySymbol.prototype.loadSymbol = function(symbolizer, featureType) {
 	this.updateForm();
 };
 
-LibrarySymbol.prototype.updatePreview = function() {
+LibrarySymbol.prototype.updatePreview = function(previewUrl) {
 	for (var i=0; i<this.symbolizers.length; i++) {
 		if (this.symbolizers[i].type == 'ExternalGraphicSymbolizer') {
 			
-		} else {
-			$("#library-symbol-preview-svg").empty();
-			var previewElement = Snap("#library-symbol-preview-svg");
-			var previewGroup = previewElement.g();
-			var preview = this.addSymbolizerToPreview(previewElement, this.symbolizers[i], this.symbolizers[i].type);
-			previewGroup.add(preview);
+		} else {			
+			this.symbolizers.sort(function(a, b){
+				return parseInt(b.order) - parseInt(a.order);
+			});
+			
+			var sldBody = this.symbologyUtils.getSLDBody(this.symbolizers);
+			var url = previewUrl + '&SLD_BODY=' + encodeURIComponent(sldBody);
+			var ui = '<img id="rule-preview-img" src="' + url + '" class="rule-preview"></img>';
+			$(".library-symbol-preview-div").empty();
+			$(".library-symbol-preview-div").append(ui);
 		}
 		
 	}
 };
 
-LibrarySymbol.prototype.loadSymbols = function(rid,symbolizers) {
-	
-	$("#symbolizer-preview-" + rid).empty();
-	var previewElement = Snap("#symbolizer-preview-" + rid);
-	var previewGroup = previewElement.g();
-	
-	var max = 20;
-	for (var i=0; i<symbolizers.length; i++) {
-		var symbolizer = JSON.parse(symbolizers[i].json);
-		var preview = this.addSymbolizerToPreview(previewElement, symbolizer, symbolizers[i].type);
-		previewGroup.add(preview);
+LibrarySymbol.prototype.libraryPreview = function(rid, json_symbolizers) {
+	var symbolizers = new Array();
+	var scount = 0;
+	var previewUrl = null;
+	for (var i=0; i<json_symbolizers.length; i++) {
+		var symbolizer_object = JSON.parse(json_symbolizers[i].json);
+		var symbolizer = null;
+		if (symbolizer_object.type == 'PointSymbolizer') {
+			symbolizer = new PointSymbolizer(this.count, this, this.symbologyUtils, symbolizer_object, this.previewPointUrl);
+			previewUrl = this.previewPointUrl;
+			
+		} else if (symbolizer_object.type == 'LineSymbolizer') {
+			symbolizer = new LineSymbolizer(this.count, this, symbolizer_object, this.previewLineUrl);
+			previewUrl = this.previewLineUrl;
+			
+		} else if (symbolizer_object.type == 'PolygonSymbolizer') {
+			symbolizer = new PolygonSymbolizer(this.count, this, symbolizer_object, this.previewPolygonUrl);
+			previewUrl = this.previewPolygonUrl;
+			
+		} else if (symbolizer_object.type == 'TextSymbolizer') {
+			symbolizer = new TextSymbolizer(this.count, this, symbolizer_object);
+			previewUrl = this.previewPolygonUrl;
+			
+		}
+		symbolizers.push(symbolizer);
+		scount++;
 	}
+	symbolizers.sort(function(a, b){
+		return parseInt(b.order) - parseInt(a.order);
+	});
 	
-	$('.preview-svg-' + rid).css("height",max+"px");
-	$('.preview-svg-' + rid).css("width",max+"px");
+	var sldBody = this.symbologyUtils.getSLDBody(symbolizers);
+	var url = previewUrl + '&SLD_BODY=' + encodeURIComponent(sldBody);
+	var ui = '<img id="rule-preview-img" src="' + url + '" class="rule-preview"></img>';
+	$("#library-symbol-preview-div-" + rid).empty();
+	$("#library-symbol-preview-div-" + rid).append(ui);
 };
-
-LibrarySymbol.prototype.addSymbolizerToPreview = function(previewElement, symbolizer, stype) {
-	
-	var attributes = {
-		fill: symbolizer.fill_color,
-		fillOpacity: parseFloat(symbolizer.fill_opacity),
-		stroke: symbolizer.border_color,
-		strokeOpacity: symbolizer.border_opacity,
-		strokeWidth: symbolizer.border_size
-	}
-	if (symbolizer.border_type == 'dotted') {
-		attributes.strokeDasharray= "1 1";
-	} else if (symbolizer.border_type == 'stripped') {
-		attributes.strokeDasharray= "4 4";
-	}
-	
-	var preview = null;
-	if (stype == 'PointSymbolizer') {
-		if (symbolizer.shape == 'circle') {
-			preview = previewElement.circle(symbolizer.size/2, symbolizer.size/2, symbolizer.size/2);
-			preview.attr(attributes);
-			
-		} else if (symbolizer.shape == 'square') {
-			preview = previewElement.polygon(0, 0, symbolizer.size, 0, symbolizer.size, symbolizer.size, 0, symbolizer.size);
-			preview.attr(attributes);
-			
-		} else if (symbolizer.shape == 'triangle') {
-			var matrix = new Snap.Matrix();
-			matrix.rotate(180, symbolizer.size, symbolizer.size);
-			preview = previewElement.polygon(0, 0, symbolizer.size, 0, symbolizer.size/2, symbolizer.size);
-			preview.transform(matrix);
-			preview.attr(attributes);
-			
-		}/*  else if (symbolizer.shape == 'star') {
-			preview = previewElement.path('M 7.0268739,7.8907968 2.2616542,5.5298295 -2.3847299,8.1168351 -1.6118504,2.8552628 -5.5080506,-0.76428228 -0.2651651,-1.6551455 1.9732348,-6.479153 4.4406368,-1.7681645 9.7202441,-1.13002 6.0022969,2.6723943 z');
-			preview.transform( 't8,9');
-			preview.attr(attributes);
-			
-		} else if (symbolizer.shape == 'cross') {
-			preview = previewElement.path('M 7.875 0.53125 L 7.875 7.40625 L 0.59375 7.40625 L 0.59375 11.3125 L 7.875 11.3125 L 7.875 19.46875 L 11.78125 19.46875 L 11.78125 11.28125 L 19.5625 11.28125 L 19.53125 7.375 L 11.78125 7.375 L 11.78125 0.53125 L 7.875 0.53125 z');
-			preview.transform( 't0,0');
-			preview.attr(attributes);
-			
-		} else if (symbolizer.shape == 'x') {
-			preview = previewElement.path('M 4.34375 0.90625 L 0.90625 3.5 L 6.90625 9.9375 L 0.78125 15.53125 L 3.34375 19.03125 L 9.84375 13.09375 L 15.53125 19.15625 L 19 16.5625 L 13.03125 10.1875 L 19.1875 4.5625 L 16.625 1.09375 L 10.09375 7.03125 L 4.34375 0.90625 z');
-			preview.transform( 't0,0');
-			preview.attr(attributes);
-			
-		}*/
-			
-	} else if (stype == 'LineSymbolizer') {
-		preview = previewElement.line(0, 0, 30, 30);
-		preview.attr(attributes);
-		
-	} else if (stype == 'PolygonSymbolizer') {
-		preview = previewElement.polygon(0, 0, 30, 0, 30, 30, 0, 30);
-		preview.attr(attributes);
-	}
-	
-	return preview;
-};
-
 
 LibrarySymbol.prototype.updateForm = function() {
 	$('#tab-menu').empty();
@@ -327,7 +317,7 @@ LibrarySymbol.prototype.updateForm = function() {
 		$('#tab-content').append(this.selected.getBorderTabUI());
 		$('#tab-content').append(this.selected.getRotationTabUI());		
 		$('.nav-tabs a[href="#graphic-tab"]').tab('show');
-		this.registerSymbolizerEvents();
+		this.registerSymbolizerEvents(this.previewPointUrl);
 		
 	} else if (this.selected.type == 'ExternalGraphicSymbolizer') {
 		$('#tab-content').append(this.selected.getGraphicTabUI());
@@ -336,24 +326,24 @@ LibrarySymbol.prototype.updateForm = function() {
 	} else if (this.selected.type == 'LineSymbolizer') {
 		$('#tab-content').append(this.selected.getBorderTabUI());
 		$('.nav-tabs a[href="#border-tab"]').tab('show');
-		this.registerSymbolizerEvents();
+		this.registerSymbolizerEvents(this.previewLineUrl);
 		
 	} else if (this.selected.type == 'PolygonSymbolizer') {
 		$('#tab-content').append(this.selected.getFillTabUI());
 		$('#tab-content').append(this.selected.getBorderTabUI());
 		$('#tab-content').append(this.selected.getRotationTabUI());
 		$('.nav-tabs a[href="#fill-tab"]').tab('show');
-		this.registerSymbolizerEvents();
+		this.registerSymbolizerEvents(this.previewPolygonUrl);
 		
 	}
 };
 
-LibrarySymbol.prototype.registerSymbolizerEvents = function() {
+LibrarySymbol.prototype.registerSymbolizerEvents = function(previewUrl) {
 	var self = this;
 	$("#graphic-size").on('change', function(e) {
 		self.selected.size = this.value;
 		self.selected.updatePreview();	
-		self.updatePreview();
+		self.updatePreview(previewUrl);
 	});
 	$('input[type=radio][name=symbol-is-vectorial]').change(function() {
         if (this.value == 'vectorial') {
@@ -361,7 +351,7 @@ LibrarySymbol.prototype.registerSymbolizerEvents = function() {
         	self.updateForm();
         	$("#symbolizer-preview").append('<td id="symbolizer-preview"><svg id="symbolizer-preview-' + self.selected.id + '" class="preview-svg"></svg></td>');
         	self.selected.updatePreview();
-        	self.updatePreview();
+        	self.updatePreview(previewUrl);
             
         } else if (this.value == 'external-graphic') {
         	self.selected.vectorial = false;
@@ -372,7 +362,7 @@ LibrarySymbol.prototype.registerSymbolizerEvents = function() {
 	$("#shape").on('change', function(e) {
 		self.selected.shape = this.value;
 		self.selected.updatePreview();	
-		self.updatePreview();
+		self.updatePreview(previewUrl);
 	});
 	$( "#fill-opacity-slider" ).slider({
 	    min: 0,
@@ -382,7 +372,7 @@ LibrarySymbol.prototype.registerSymbolizerEvents = function() {
 	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
 	    	self.selected.fill_opacity = opacity;
 	    	self.selected.updatePreview();
-	    	self.updatePreview();
+	    	self.updatePreview(previewUrl);
 	    },
 	    slide: function( event, ui ) {
 	    	$("#fill-opacity-output").text(ui.value + '%');
@@ -391,17 +381,17 @@ LibrarySymbol.prototype.registerSymbolizerEvents = function() {
 	$("#fill-color-chooser").on('change', function(e) {
 		self.selected.fill_color = this.value;
 		self.selected.updatePreview();	
-		self.updatePreview();
+		self.updatePreview(previewUrl);
 	});	
 	$('#symbol-with-border').on('change', function() {
 		self.selected.with_border = this.checked;		
 		self.selected.updatePreview();
-		self.updatePreview();
+		self.updatePreview(previewUrl);
 	});
 	$("#border-color-chooser").on('change', function(e) {
 		self.selected.border_color = this.value;
 		self.selected.updatePreview();	
-		self.updatePreview();
+		self.updatePreview(previewUrl);
 	});
 	$( "#border-opacity-slider" ).slider({
 	    min: 0,
@@ -411,7 +401,7 @@ LibrarySymbol.prototype.registerSymbolizerEvents = function() {
 	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
 	    	self.selected.border_opacity = opacity;
 	    	self.selected.updatePreview();
-	    	self.updatePreview();
+	    	self.updatePreview(previewUrl);
 	    },
 	    slide: function( event, ui ) {
 	    	$("#border-opacity-output").text(ui.value + '%');
@@ -420,12 +410,12 @@ LibrarySymbol.prototype.registerSymbolizerEvents = function() {
 	$("#border-size").on('change', function(e) {
 		self.selected.border_size = this.value;
 		self.selected.updatePreview();	
-		self.updatePreview();
+		self.updatePreview(previewUrl);
 	});
 	$('#border-type').on('change', function() {
 		self.selected.border_type = this.value;
 		self.selected.updatePreview();
-		self.updatePreview();
+		self.updatePreview(previewUrl);
 	});
 	$( "#rotation-slider" ).slider({
 	    min: 0,

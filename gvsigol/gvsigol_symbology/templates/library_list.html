@@ -138,6 +138,7 @@ $(document).ready(function() {
 		
 	function deleteLibrary(data){
 		$('#button-delete-library-accept').click( function() {
+			$("body").overlay();
 			$.ajax({
 				type: 'POST',
 				async: false,
@@ -147,6 +148,7 @@ $(document).ready(function() {
 				},
 				success	:function(response){
 					$('#modal-delete-library').modal('hide');
+					$.overlayout();
 					location.reload();
 				},
 				error: function(){}

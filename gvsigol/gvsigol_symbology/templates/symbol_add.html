@@ -104,15 +104,16 @@
 <script>
 $(document).ready(function() {
 	
-	/*$("#append-symbol-button").on('click', function(e){
+	$("#append-symbol-button").on('click', function(e){
 		librarySymbol.appendSymbolizer("{{symbol_type}}");
-	});*/
+	});
+	
+	var previewPointUrl = 'https://localhost/gs-test/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point';
+	var previewLineUrl = 'https://localhost/gs-test/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line';
+	var previewPolygonUrl = 'https://localhost/gs-test/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon';
 	
 	var symbologyUtils = new SymbologyUtils([],[]);
-	var librarySymbol = new LibrarySymbol(symbologyUtils);
-	
-	$("#append-symbol-button").css("display", "none");
-	librarySymbol.appendSymbolizer("{{symbol_type}}");
+	var librarySymbol = new LibrarySymbol(previewPointUrl, previewLineUrl, previewPolygonUrl, symbologyUtils);
 	
 	$("#save-symbol").on('click', function(e){
 		$("#form-error").empty();
