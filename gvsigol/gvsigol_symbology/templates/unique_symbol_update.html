@@ -178,9 +178,9 @@ $(document).ready(function() {
 	var sldFilterValues = {{sldFilterValues|safe}};
 	var fonts = {{ fonts|safe }};
 	var rule_opts = {{ rule|safe }};
-	var previewPointUrl = 'https://localhost/gs-test/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point';
-	var previewLineUrl = 'https://localhost/gs-test/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line';
-	var previewPolygonUrl = 'https://localhost/gs-test/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon';
+	var previewPointUrl = "{{preview_point_url}}";
+	var previewLineUrl = "{{preview_line_url}}";
+	var previewPolygonUrl = "{{preview_polygon_url}}";
 	
 	var map = new ol.Map({
 		layers: [
@@ -208,7 +208,7 @@ $(document).ready(function() {
 	map.addLayer(wmsLayer);
 	
 	var symbologyUtils = new SymbologyUtils(map, wmsLayer, fonts, alphanumericFields);
-	var uniqueSymbol = new UniqueSymbol(featureType, symbologyUtils, rule_opts, previewPointUrl, previewLineUrl, previewPolygonUrl);
+	var uniqueSymbol = new UniqueSymbol(featureType, layerName, symbologyUtils, rule_opts, previewPointUrl, previewLineUrl, previewPolygonUrl);
 	uniqueSymbol.refreshMap();
 	
 	if (uniqueSymbol.getRule().getNextLabelId() >= 1) {
