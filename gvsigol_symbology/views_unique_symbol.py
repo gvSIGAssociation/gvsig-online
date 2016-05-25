@@ -32,6 +32,7 @@ from gvsigol_symbology import services
 from django.utils.translation import ugettext as _
 from gvsigol_auth.utils import admin_required
 from utils import sortFontsArray
+from gvsigol import settings
 import utils
 import json
 
@@ -130,7 +131,10 @@ def unique_symbol_add(request, layer_id):
             'layer_url': layer_url,
             'layer_name': workspace.name + ':' + layer.name,
             'style_name': workspace.name + '_' + layer.name + '_' + str(index),
-            'libraries': Library.objects.all()
+            'libraries': Library.objects.all(),
+            'preview_point_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
+            'preview_line_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
+            'preview_polygon_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
         }
        
         return render_to_response('unique_symbol_add.html', response, context_instance=RequestContext(request))
@@ -236,7 +240,10 @@ def unique_symbol_update(request, layer_id, style_id):
             'style': style,
             'minscale': int(r.minscale),
             'maxscale': int(r.maxscale),
-            'rule': json.dumps(rule)
+            'rule': json.dumps(rule),
+            'preview_point_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
+            'preview_line_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
+            'preview_polygon_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
             
         }
         return render_to_response('unique_symbol_update.html', response, context_instance=RequestContext(request))

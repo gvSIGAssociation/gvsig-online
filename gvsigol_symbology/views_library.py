@@ -30,6 +30,7 @@ from django.utils.translation import ugettext as _
 from gvsigol_symbology.sld_utils import get_style_from_library_symbol
 from gvsigol_auth.utils import admin_required
 from gvsigol_symbology import services
+from gvsigol import settings
 import json
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -111,7 +112,10 @@ def library_update(request, library_id):
             rules.append(rule)
         response = {
             'library': library,
-            'rules': rules
+            'rules': rules,
+            'preview_point_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
+            'preview_line_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
+            'preview_polygon_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
         }
         return render_to_response('library_update.html', response, context_instance=RequestContext(request))
     
@@ -305,7 +309,10 @@ def symbol_add(request, library_id, symbol_type):
     else:          
         response = {
             'library_id': library_id,
-            'symbol_type': symbol_type
+            'symbol_type': symbol_type,
+            'preview_point_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
+            'preview_line_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
+            'preview_polygon_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
         }
         if symbol_type == 'ExternalGraphicSymbolizer':
             return render_to_response('external_graphic_add.html', response, context_instance=RequestContext(request))
@@ -411,7 +418,10 @@ def symbol_update(request, symbol_id):
                 'symbolizers': json.dumps(symbolizers)
             }
             response = {
-                'rule': rule
+                'rule': rule,
+                'preview_point_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
+                'preview_line_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
+                'preview_polygon_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
             }
             return render_to_response('symbol_update.html', response, context_instance=RequestContext(request))
     
