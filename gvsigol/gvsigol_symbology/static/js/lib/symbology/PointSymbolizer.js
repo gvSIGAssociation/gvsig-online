@@ -218,11 +218,13 @@ PointSymbolizer.prototype.toXML = function(){
 	xml += 				'<CssParameter name="fill">' + this.fill_color + '</CssParameter>';
 	xml += 				'<CssParameter name="fill-opacity">' + this.fill_opacity + '</CssParameter>';
 	xml += 			'</Fill>';
-	xml += 			'<Stroke>';
-	xml += 				'<CssParameter name="stroke">' + this.border_color + '</CssParameter>';
-	xml += 				'<CssParameter name="stroke-width">' + this.border_size + '</CssParameter>';
-	xml += 				'<CssParameter name="stroke-opacity">' + this.border_opacity + '</CssParameter>';
-	xml += 			'</Stroke>';
+	if (this.with_border) {
+		xml += 			'<Stroke>';
+		xml += 				'<CssParameter name="stroke">' + this.border_color + '</CssParameter>';
+		xml += 				'<CssParameter name="stroke-width">' + this.border_size + '</CssParameter>';
+		xml += 				'<CssParameter name="stroke-opacity">' + this.border_opacity + '</CssParameter>';
+		xml += 			'</Stroke>';
+	}
 	xml += 		'</Mark>';
 	xml += 		'<Opacity>1</Opacity>';
 	xml += 		'<Size>' + this.size + '</Size>';
