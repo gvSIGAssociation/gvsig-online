@@ -73,8 +73,13 @@ SymbologyUtils.prototype.getAlphanumericFields = function(element){
 	return this.alphanumericFields;
 };
 
-SymbologyUtils.prototype.updateMap = function(rule) {
-	var sldBody = this.getSLDBody(rule.getSymbolizers(), rule.name, rule.title);
+SymbologyUtils.prototype.updateMap = function(rule, layerName) {
+	var symbolizers = rule.getSymbolizers();
+	var labels = rule.getLabels();
+	if (labels.length >= 1) {
+		symbolizers.push(labels[0]);
+	}
+	var sldBody = this.getSLDBody(rule.getSymbolizers(), layerName, layerName);
 	this.reloadLayerPreview(sldBody);
 };
 

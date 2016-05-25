@@ -21,9 +21,10 @@
  */
  
  
-var UniqueSymbol = function(featureType, symbologyUtils, rule_opts, previewPointUrl, previewLineUrl, previewPolygonUrl) {
+var UniqueSymbol = function(featureType, layerName, symbologyUtils, rule_opts, previewPointUrl, previewLineUrl, previewPolygonUrl) {
 	this.selected = null;
 	this.featureType = featureType;
+	this.layerName = layerName;
 	this.previewPointUrl = previewPointUrl;
 	this.previewLineUrl = previewLineUrl;
 	this.previewPolygonUrl = previewPolygonUrl;
@@ -265,8 +266,8 @@ UniqueSymbol.prototype.loadExternalGraphicSymbolizer = function(symbolizer_objec
 	this.rule.appendSymbolizer(symbolizer);
 };
 
-UniqueSymbol.prototype.refreshMap = function(rid,symbolizers) {
-	this.symbologyUtils.updateMap(this.rule, this.map);
+UniqueSymbol.prototype.refreshMap = function() {
+	this.symbologyUtils.updateMap(this.rule, this.layerName);
 };
 
 UniqueSymbol.prototype.libraryPreview = function(rid,json_symbolizers) {
