@@ -218,8 +218,13 @@ def library_delete(request, library_id):
         symbolizers = Symbolizer.objects.filter(rule_id=rule.id)
         for symbolizer in symbolizers:
             symbolizer.delete()
+        style_rule = StyleRule.objects.filter(rule_id=rule.id)
+        for sr in style_rule:
+            style = Style.objects.get(id=sr.style.id)
+            style.delete()
         rule.delete()
         lib_rule.delete()
+        style_rule.delete()
     
     lib = Library.objects.get(id=library_id)
     services.delete_library_dir(lib)
@@ -314,8 +319,9 @@ def symbol_add(request, library_id, symbol_type):
 def symbol_update(request, symbol_id):
     if request.method == 'POST':
         data = request.POST['rule']
-        json_rule = json.loads(data)     
-                
+        json_rule = json.loads(data)   
+        if 'eg-file' in request.FILES:  
+            file_name = json_rule.get('file_name').split('/')[-1]
         try:
             rule = Rule.objects.get(id=int(symbol_id))
             #rule.name = json_rule.get('name')
@@ -329,7 +335,7 @@ def symbol_update(request, symbol_id):
             for s in Symbolizer.objects.filter(rule=rule):
                 if s.type == 'ExternalGraphicSymbolizer':
                     if 'eg-file' in request.FILES:
-                        file_name = rule.name + '.png'
+                        #file_name = rule.name + '.png'
                         services.delete_external_graphic_img(library_rule.library, file_name)
                 s.delete()
                 
@@ -340,7 +346,7 @@ def symbol_update(request, symbol_id):
                 if rule.type == 'ExternalGraphicSymbolizer':
                     if 'eg-file' in request.FILES:
                         library_path = services.check_library_path(library_rule.library)
-                        file_name = json_rule.get('name') + '.png'
+                        #file_name = json_rule.get('name') + '.png'
                         if services.save_external_graphic(library_path, request.FILES['eg-file'], file_name):
                             online_resource = services.get_online_resource(library_rule.library, file_name)
                             sld = sld.replace('online_resource_replace', online_resource)

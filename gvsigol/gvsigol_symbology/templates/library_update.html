@@ -95,7 +95,12 @@
 <script>
 $(document).ready(function() {
 	
-	var librarySymbol = new LibrarySymbol();
+	var previewPointUrl = 'https://localhost/gs-test/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point';
+	var previewLineUrl = 'https://localhost/gs-test/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line';
+	var previewPolygonUrl = 'https://localhost/gs-test/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon';
+	
+	var symbologyUtils = new SymbologyUtils([],[]);
+	var librarySymbol = new LibrarySymbol(previewPointUrl, previewLineUrl, previewPolygonUrl, symbologyUtils);
 	
 	"{% for rule in rules %}"
 		var symbolizers = {{rule.symbolizers|safe}};
@@ -110,11 +115,11 @@ $(document).ready(function() {
 				$(".users-list").append(symbol);
 			"{% else %}"
 				symbol += '<li>';
-				symbol += 	'<svg id="symbolizer-preview-{{rule.id}}" class="preview-svg-{{rule.id}}"></svg>';
+				symbol += 	'<div id="library-symbol-preview-div-{{rule.id}}"></div>';
 				symbol += 	'<a class="users-list-name" href="/gvsigonline/symbology/symbol_update/{{rule.id}}/">{{rule.name}}</a>';
 				symbol += '</li>';
 				$(".users-list").append(symbol);
-				librarySymbol.loadSymbols("{{rule.id}}", symbolizers);
+				librarySymbol.libraryPreview("{{rule.id}}", symbolizers);
 			"{% endif %}"
 		}			
 	"{% endfor %}"

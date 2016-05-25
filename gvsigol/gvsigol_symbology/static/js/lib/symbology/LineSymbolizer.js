@@ -21,7 +21,7 @@
  */
  
  
-var LineSymbolizer = function(id, rule, symbolizer_object) {
+var LineSymbolizer = function(id, rule, symbolizer_object, previewUrl) {
 	this.id = 'linesymbolizer' + id;
 	this.type = 'LineSymbolizer';
 	this.name = 'LineSymbolizer ' + id;
@@ -33,6 +33,7 @@ var LineSymbolizer = function(id, rule, symbolizer_object) {
 	this.border_type = "solid";
 	this.order = 0;
 	this.rule = rule;
+	this.previewUrl = previewUrl;
 	
 	if (symbolizer_object) {
 		this.name = symbolizer_object.name;
@@ -56,7 +57,7 @@ LineSymbolizer.prototype.getTableUI = function() {
 	ui += 		'</span>';
 	ui += 	'</td>';
 	ui += 	'<td><span class="text-muted">' + this.name + '</span></td>';
-	ui += 	'<td id="symbolizer-preview"><svg id="symbolizer-preview-' + this.id + '" class="preview-svg"></svg></td>';	
+	ui += 	'<td id="symbolizer-preview-div-' + this.id + '"></td>';	
 	ui += 	'<td><a class="edit-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
 	ui += 	'<td><a class="delete-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
 	ui += '</tr>';	
@@ -118,32 +119,12 @@ LineSymbolizer.prototype.getBorderTabUI = function() {
 	return ui;
 };
 
-LineSymbolizer.prototype.updatePreview = function() {
-	var attributes = {
-		fill: this.fill_color,
-		fillOpacity: parseFloat(this.fill_opacity),
-		stroke: this.border_color,
-		strokeOpacity: this.border_opacity,
-		strokeWidth: this.border_size
-	}
-	if (this.border_type == 'dotted') {
-		attributes.strokeDasharray= "1 1";
-	} else if (this.border_type == 'stripped') {
-		attributes.strokeDasharray= "4 4";
-	}
-	
-	var preview = null;
-	$("#symbolizer-preview-" + this.id).empty();
-	var previewElement = Snap("#symbolizer-preview-" + this.id);
-
-	preview = previewElement.line(0, 0, 30, 30);
-	preview.attr(attributes);
-	$('.preview-svg').css("height", 30);
-	$('.preview-svg').css("width", 30)
-
-	if (this.rule != null) {
-		//this.rule.updatePreview();
-	}
+LineSymbolizer.prototype.updatePreview = function() {	
+	var sldBody = this.toSLDBody();
+	var url = this.previewUrl + '&SLD_BODY=' + encodeURIComponent(sldBody);
+	var ui = '<img id="symbolizer-preview-' + this.id + '" src="' + url + '" class="symbolizer-preview-' + this.id + '"></img>';
+	$("#symbolizer-preview-div-" + this.id).empty();
+	$("#symbolizer-preview-div-" + this.id).append(ui);
 };
 
 LineSymbolizer.prototype.toXML = function(){
@@ -158,6 +139,38 @@ LineSymbolizer.prototype.toXML = function(){
 	xml += '</LineSymbolizer>';
 	
 	return xml;
+};
+
+LineSymbolizer.prototype.toSLDBody = function(){
+	
+	var sld = '';
+	sld += '<StyledLayerDescriptor version=\"1.0.0\" xmlns=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" ';
+	sld += 	'xmlns:sld=\"http://www.opengis.net/sld\"  xmlns:gml=\"http://www.opengis.net/gml\" '; 
+	sld +=  'xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ';
+	sld +=  'xsi:schemaLocation=\"http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd\">';
+	sld += 	'<NamedLayer>';  
+	sld +=  	'<Name>' + this.name + '</Name>';  
+	sld +=      '<UserStyle>';
+	sld +=          '<Name>' + this.name + '</Name>';
+	sld +=          '<Title>' + this.name + '</Title>';
+	sld +=          '<FeatureTypeStyle>';
+	sld +=          	'<Rule>';
+	sld +=          		'<Name>' + this.name + '</Name>';
+	sld +=          		'<Title>' + this.name + '</Title>';
+	sld += 					'<LineSymbolizer>';
+	sld += 						'<Stroke>';
+	sld += 							'<CssParameter name="stroke">' + this.border_color + '</CssParameter>';
+	sld += 							'<CssParameter name="stroke-width">' + this.border_size + '</CssParameter>';
+	sld += 							'<CssParameter name="stroke-opacity">' + this.border_opacity + '</CssParameter>';
+	sld += 						'</Stroke>';
+	sld += 					'</LineSymbolizer>';
+	sld +=          	'</Rule>';
+	sld +=          '</FeatureTypeStyle>';
+	sld +=      '</UserStyle>';
+	sld += 	'</NamedLayer>';
+	sld += '</StyledLayerDescriptor>';
+	
+	return sld;
 };
 
 LineSymbolizer.prototype.toJSON = function(){

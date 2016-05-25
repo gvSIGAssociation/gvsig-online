@@ -34,11 +34,11 @@
 						<div class="row">
 							<div class="col-md-6 form-group">
 								<label>{% trans "Min. scale" %}</label>
-					    		<input placeholder="{% trans 'Minimum scale denominator' %}" name="symbol-minscale" id="symbol-minscale" type="number" value="{{minscale}}" class="form-control">
+					    		<input placeholder="{% trans 'Minimum scale denominator' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="{{minscale}}" class="form-control">
 							</div>
 							<div class="col-md-6 form-group">
 								<label>{% trans "Max. scale" %}</label>
-					    		<input placeholder="{% trans 'Maximum scale denominator' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" value="{{maxscale}}" class="form-control">
+					    		<input placeholder="{% trans 'Maximum scale denominator' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="{{maxscale}}" class="form-control">
 							</div>
 							<div class="col-md-12 form-group">
 								<p class="text-muted">* {% trans "Specifies the minimum and maximum scale denominator (inclusive) for the scale range in which this rule applies" %}.</p>
@@ -91,15 +91,6 @@
 							</div>
 						</div>
 					</div>
-
-<!-- 					<div class="col-md-6"> -->
-<!-- 						<div class="nav-tabs-custom"> -->
-<!-- 				            <ul id="tab-menu" class="nav nav-tabs">				                         -->
-<!-- 				            </ul> -->
-<!-- 				            <div id="tab-content" class="tab-content"> -->
-<!-- 				            </div> -->
-<!--           				</div> -->
-<!--           			</div> -->
 				</div>
 			</div>
 		</div>
@@ -131,7 +122,7 @@
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box box-primary">
-							<div class="box-body no-padding">
+							<div class="box-body no-padding" style="max-height: 300px; overflow: auto;">
 								<ul class="users-list clearfix">
 								</ul>
 							</div>
@@ -187,6 +178,9 @@ $(document).ready(function() {
 	var sldFilterValues = {{sldFilterValues|safe}};
 	var fonts = {{ fonts|safe }};
 	var rule_opts = {{ rule|safe }};
+	var previewPointUrl = 'https://localhost/gs-test/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point';
+	var previewLineUrl = 'https://localhost/gs-test/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line';
+	var previewPolygonUrl = 'https://localhost/gs-test/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon';
 	
 	var map = new ol.Map({
 		layers: [
@@ -200,13 +194,13 @@ $(document).ready(function() {
 		    zoom: '2'
 		})
 	});
-	var wmsSource = new ol.source.TileWMS({
+	var wmsSource = new ol.source.ImageWMS({
 		url: layerUrl,
 		visible: true,
 		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
 		serverType: 'geoserver'
 	});
-	wmsLayer = new ol.layer.Tile({
+	wmsLayer = new ol.layer.Image({
 		id: 'preview-layer',
 		source: wmsSource,
 		visible: true
@@ -214,7 +208,12 @@ $(document).ready(function() {
 	map.addLayer(wmsLayer);
 	
 	var symbologyUtils = new SymbologyUtils(map, wmsLayer, fonts, alphanumericFields);
-	var uniqueSymbol = new UniqueSymbol(featureType, symbologyUtils, rule_opts);
+	var uniqueSymbol = new UniqueSymbol(featureType, symbologyUtils, rule_opts, previewPointUrl, previewLineUrl, previewPolygonUrl);
+	uniqueSymbol.refreshMap();
+	
+	if (uniqueSymbol.getRule().getNextLabelId() >= 1) {
+		$('#append-label-button').css('display', 'none');
+	}
 	
 	$("#style-title").on('change', function(e){
 		var rule = uniqueSymbol.getRule();
@@ -267,22 +266,20 @@ $(document).ready(function() {
 				for (var i=0; i<response.rules.length; i++) {
 					var symbolizers = response.rules[i].symbolizers;
 					var symbol = '';				
-					for (var j=0; j<symbolizers.length; j++) {
-						if (response.rules[i].type == 'ExternalGraphicSymbolizer') {
-							var graphic = JSON.parse(symbolizers[j].json);
-							symbol += '<li>';
-							symbol += 	'<img style="height: ' + graphic.size + 'px; width: auto;" src="' + graphic.online_resource + '" class="preview-eg"></img>';
-							symbol += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
-							symbol += '</li>';
-							$(".users-list").append(symbol);
-							
-						} else {
-							symbol += '<li>';
-							symbol += 	'<svg id="library-preview-' + response.rules[i].id + '" class="library-preview-svg"></svg>';
-							symbol += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
-							symbol += '</li>';
-							$(".users-list").append(symbol);
-						}
+					if (response.rules[i].type == 'ExternalGraphicSymbolizer') {
+						var graphic = JSON.parse(symbolizers[0].json);
+						symbol += '<li>';
+						symbol += 	'<img style="height: ' + graphic.size + 'px; width: auto;" src="' + graphic.online_resource + '" class="preview-eg"></img>';
+						symbol += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
+						symbol += '</li>';
+						$(".users-list").append(symbol);
+						
+					} else {
+						symbol += '<li>';
+						symbol += 	'<div id="library-symbol-preview-div-' + response.rules[i].id + '"></div>';
+						symbol += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
+						symbol += '</li>';
+						$(".users-list").append(symbol);
 					}
 					$(".users-list-name").on('click', function(e){
 						e.preventDefault();

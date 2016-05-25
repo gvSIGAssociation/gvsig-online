@@ -25,7 +25,7 @@ var TextSymbolizer = function(id, symbologyUtils, rule, symbolizer_object) {
 	this.type = 'TextSymbolizer';
 	this.name = 'TextSymbolizer ' + id;
 	this.field = '';
-	this.font_family = "";
+	this.font_family = 'Arial';
 	this.font_size= 12;
 	this.font_color = "#000000";
 	this.font_weight = "normal";
@@ -101,11 +101,15 @@ TextSymbolizer.prototype.getFontTabUI = function() {
 	ui += 			'<label>' + gettext('Label field') + '</label>';
 	ui += 			'<select id="label-field" class="form-control">';
 	for (var i=0; i < fields.length; i++) {
-		if (fields[i].name == this.field) {
-			ui += '<option value="' + fields[i].name + '" selected>' + fields[i].name + '</option>';
+		if (this.field == '') {
+			this.field = fields[0].name;
 		} else {
-			ui += '<option value="' + fields[i].name + '">' + fields[i].name + '</option>';
-		}
+			if (fields[i].name == this.field) {
+				ui += '<option value="' + fields[i].name + '" selected>' + fields[i].name + '</option>';
+			} else {
+				ui += '<option value="' + fields[i].name + '">' + fields[i].name + '</option>';
+			}
+		}		
 	}	
 	ui += 			'</select>';
 	ui += 		'</div>';
