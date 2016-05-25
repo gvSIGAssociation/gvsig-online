@@ -671,9 +671,9 @@ def get_sld_body(json_data):
 
         sld += "</Rule>"
     
-    sld += "</FeatureTypeStyle>"
-    sld += "</UserStyle>"
-    sld += "</NamedLayer>"
+    sld +=          "</FeatureTypeStyle>"
+    sld +=      "</UserStyle>"
+    sld +=  "</NamedLayer>"
     sld += "</StyledLayerDescriptor>"
     
     return sld #.encode('utf8')
@@ -823,12 +823,12 @@ def get_json_from_sld(sld, name, library):
         sld = '<complex>' + sld + '</complex>'
         doc = xmltodict.parse(sld)
       
-    json_data = {}
     if doc is not None:
         if 'complex' in doc:
             if 'PointSymbolizer' in doc['complex']:
                 complex_point = doc['complex']['PointSymbolizer']
                 for p in complex_point:
+                    json_data = {}
                     mark = p['Graphic']['Mark']
                     json_data['name'] = name
                     json_data['type'] = 'PointSymbolizer'
@@ -847,6 +847,7 @@ def get_json_from_sld(sld, name, library):
             elif 'LineSymbolizer' in doc['complex']:
                 complex_line = doc['complex']['LineSymbolizer']
                 for l in complex_line:
+                    json_data = {}
                     stroke = l['Stroke']
                     opacity = l['Graphic']['Opacity']
                     json_data['name'] = name
@@ -860,6 +861,7 @@ def get_json_from_sld(sld, name, library):
                     symbolizers.append(json_data)
             
         elif 'PointSymbolizer' in doc:
+            json_data = {}
             graphic = doc['PointSymbolizer']['Graphic']
             if 'ExternalGraphic' in graphic:
                 external_graphic = graphic['ExternalGraphic']
@@ -889,6 +891,7 @@ def get_json_from_sld(sld, name, library):
             symbolizers.append(json_data)
                
         elif 'LineSymbolizer' in doc:
+            json_data = {}
             graphic = doc['LineSymbolizer']['Graphic']
             stroke = doc['LineSymbolizer']['Stroke']
             json_data['name'] = name
@@ -902,6 +905,7 @@ def get_json_from_sld(sld, name, library):
             symbolizers.append(json_data)
             
         elif 'PolygonSymbolizer' in doc:
+            json_data = {}
             graphic = doc['PolygonSymbolizer']['Graphic']
             fill = doc['PolygonSymbolizer']['Fill']
             stroke = doc['PolygonSymbolizer']['Stroke']

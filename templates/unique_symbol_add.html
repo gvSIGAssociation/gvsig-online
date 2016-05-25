@@ -8,7 +8,7 @@
 		<div class="box box-primary">
 		
 			<div class="box-header with-border step-2">
-				<h3 class="box-title">{% trans "Create new style" %}</h3>
+				<h3 class="box-title">{% trans "Update style" %}</h3>
 				<div class="box-tools pull-right">
 					<button id="refresh-preview" class="btn btn-sm btn-warning refresh-preview"><i class="fa fa-refresh margin-r-5"></i> {% trans "Update preview" %}</button>
 					<button id="save-legend" class="btn btn-sm btn-success save-legend"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
@@ -17,12 +17,13 @@
 
 			<div class="box-body">
 			
-				<div class="row">
+				<div class="row">					
 					<div class="col-md-6">
+						<div id="form-error" style="color:#ff0000;"></div>
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<label>{% trans "Name" %}</label>
-								<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" type="text" value="{{style_name}}" class="form-control">	
+								<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" value="{{style_name}}" type="text" class="form-control">	
 							</div>
 						</div>
 						<div class="row">
@@ -34,11 +35,11 @@
 						<div class="row">
 							<div class="col-md-6 form-group">
 								<label>{% trans "Min. scale" %}</label>
-					    		<input placeholder="{% trans 'Minimum scale denominator' %}" name="symbol-minscale" id="symbol-minscale" type="number" class="form-control">
+					    		<input placeholder="{% trans 'Minimum scale denominator' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="-1" class="form-control">
 							</div>
 							<div class="col-md-6 form-group">
 								<label>{% trans "Max. scale" %}</label>
-					    		<input placeholder="{% trans 'Maximum scale denominator' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" class="form-control">
+					    		<input placeholder="{% trans 'Maximum scale denominator' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="-1" class="form-control">
 							</div>
 							<div class="col-md-12 form-group">
 								<p class="text-muted">* {% trans "Specifies the minimum and maximum scale denominator (inclusive) for the scale range in which this rule applies" %}.</p>
@@ -47,7 +48,7 @@
 						<div class="row">
 							<div class="checkbox col-md-12">								
 								<label>
-									<input type="checkbox" name="style-is-default" id="style-is-default" />{% trans "Set as default style" %}
+									<input type="checkbox" name="style-is-default" id="style-is-default"/>{% trans "Set as default style" %}
 								</label>
 							</div>
 						</div>
@@ -58,29 +59,7 @@
 				</div>
 				
 				<div class="row">
-					<div class="col-md-6">
-						<div class="box box-primary">
-							<div class="box-header with-border">
-								<h3 class="box-title">{% trans "Symbol" %}</h3>
-							</div>
-							<div class="box-body">
-								<div class="table-responsive">
-									<table id="table-rules" class="table no-margin">
-										<thead>
-											<tr>
-												<th>{% trans "Name" %}</th>
-												<th>{% trans "Title" %}</th>
-												<th>{% trans "Preview" %}</th>
-											</tr>
-										</thead>
-										<tbody id="table-rules-body">
-										</tbody>
-									</table>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-6">
+					<div class="col-md-12">
 						<div class="box box-primary">
 							<div class="box-header with-border">
 								<h3 class="box-title">{% trans "Symbol elements" %}</h3>
@@ -109,15 +88,6 @@
 							</div>
 						</div>
 					</div>
-
-<!-- 					<div class="col-md-6"> -->
-<!-- 						<div class="nav-tabs-custom"> -->
-<!-- 				            <ul id="tab-menu" class="nav nav-tabs">				                         -->
-<!-- 				            </ul> -->
-<!-- 				            <div id="tab-content" class="tab-content"> -->
-<!-- 				            </div> -->
-<!--           				</div> -->
-<!--           			</div> -->
 				</div>
 			</div>
 		</div>
@@ -149,7 +119,7 @@
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box box-primary">
-							<div class="box-body no-padding">
+							<div class="box-body no-padding" style="max-height: 300px; overflow: auto;">
 								<ul class="users-list clearfix">
 								</ul>
 							</div>
@@ -196,14 +166,18 @@
 $(document).ready(function() {
 	
 	var layerId = "{{layer_id}}";
+	var layerUrl = "{{layer_url}}";
+	var layerName = "{{layer_name}}";
+	var styleId = "{{style.id}}";
 	var featureType = "{{featureType}}";
 	var fields = {{fields|safe}};
 	var alphanumericFields = {{alphanumeric_fields|safe}};
 	var sldFilterValues = {{sldFilterValues|safe}};
 	var fonts = {{ fonts|safe }};
-	
-	var symbologyUtils = new SymbologyUtils(fonts, alphanumericFields);
-	var uniqueSymbol = new UniqueSymbol(featureType, symbologyUtils);
+	var rule_opts = "";
+	var previewPointUrl = 'https://localhost/gs-test/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point';
+	var previewLineUrl = 'https://localhost/gs-test/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line';
+	var previewPolygonUrl = 'https://localhost/gs-test/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon';
 	
 	var map = new ol.Map({
 		layers: [
@@ -217,11 +191,29 @@ $(document).ready(function() {
 		    zoom: '2'
 		})
 	});
+	var wmsSource = new ol.source.TileWMS({
+		url: layerUrl,
+		visible: true,
+		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
+		serverType: 'geoserver'
+	});
+	wmsLayer = new ol.layer.Tile({
+		id: 'preview-layer',
+		source: wmsSource,
+		visible: true
+	});
+	map.addLayer(wmsLayer);
+	
+	var symbologyUtils = new SymbologyUtils(map, wmsLayer, fonts, alphanumericFields);
+	var uniqueSymbol = new UniqueSymbol(featureType, symbologyUtils, null, previewPointUrl, previewLineUrl, previewPolygonUrl);
+	
+	if (uniqueSymbol.getRule().getNextLabelId() >= 1) {
+		$('#append-label-button').css('display', 'none');
+	}
 	
 	$("#style-title").on('change', function(e){
 		var rule = uniqueSymbol.getRule();
 		rule.title = this.value;
-		$("#rule-title").text(this.value);
 	});
 	
 	$("#symbol-minscale").on('change', function(e){
@@ -243,7 +235,18 @@ $(document).ready(function() {
 	});
 
 	$("#save-legend").on('click', function(e){
-		uniqueSymbol.save(layerId);
+		if ($("#style-name").val() != '') {
+			uniqueSymbol.save(layerId);
+			
+		} else {
+			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
+			
+		}
+		
+	});
+	
+	$("#refresh-preview").on('click', function(e){
+		uniqueSymbol.refreshMap();
 	});
 	
 	var rules = null;
@@ -264,28 +267,39 @@ $(document).ready(function() {
 				
 				for (var i=0; i<response.rules.length; i++) {
 					var symbolizers = response.rules[i].symbolizers;
-					var symbol = '';
-					symbol += '<li>';
-					symbol += 	'<svg id="symbolizer-preview-' + response.rules[i].id + '" class="preview-svg"></svg>';
-					symbol += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
-					symbol += '</li>';
-					$(".users-list").append(symbol);
-					uniqueSymbol.createPreview(response.rules[i].id, symbolizers);
+					var symbol = '';				
+					if (response.rules[i].type == 'ExternalGraphicSymbolizer') {
+						var graphic = JSON.parse(symbolizers[0].json);
+						symbol += '<li>';
+						symbol += 	'<img style="height: ' + graphic.size + 'px; width: auto;" src="' + graphic.online_resource + '" class="preview-eg"></img>';
+						symbol += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
+						symbol += '</li>';
+						$(".users-list").append(symbol);
+						
+					} else {
+						symbol += '<li>';
+						symbol += 	'<div id="library-symbol-preview-div-' + response.rules[i].id + '"></div>';
+						symbol += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
+						symbol += '</li>';
+						$(".users-list").append(symbol);
+					}
+					$(".users-list-name").on('click', function(e){
+						e.preventDefault();
+						for (var j=0; j<rules.length; j++) {
+							if (rules[j].id == this.dataset.rid) {
+								if (rules[j].type == featureType || (rules[j].type == 'ExternalGraphicSymbolizer' && featureType == 'PointSymbolizer')) {
+									uniqueSymbol.loadSymbols(rules[j].symbolizers);
+								} else {
+									messageBox.show('warning', gettext('Selected symbol is not compatible with the layer'));
+								}						
+							}
+						}	
+						$('#modal-import-symbol').modal('hide');
+					});
+					if (response.rules[i].type != 'ExternalGraphicSymbolizer'){
+						uniqueSymbol.libraryPreview(response.rules[i].id, symbolizers);
+					}
 				}
-				
-				$(".users-list-name").on('click', function(e){
-					e.preventDefault();
-					for (var j=0; j<rules.length; j++) {
-						if (rules[j].id == this.dataset.rid) {
-							if (rules[j].type == featureType) {
-								uniqueSymbol.loadSymbols(rules[j].symbolizers);
-							} else {
-								alert('Error');
-							}						
-						}
-					}	
-					$('#modal-import-symbol').modal('hide');
-				});
 			},
 		    error: function(){}
 		});

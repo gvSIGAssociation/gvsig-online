@@ -21,14 +21,14 @@
  */
  
  
-var PointSymbolizer = function(id, rule, symbologyUtils, symbolizer_object) {
+var PointSymbolizer = function(id, rule, symbologyUtils, symbolizer_object, previewUrl) {
 	this.id = 'pointsymbolizer' + id;
 	this.type = 'PointSymbolizer';
 	this.name = 'PointSymbolizer ' + id;
 	this.shape = 'circle';
 	this.fill_color = "#000000";
 	this.fill_opacity = 0.5;
-	this.with_border = true;
+	this.with_border = false;
 	this.border_color = "#000000";
 	this.border_size = 1;
 	this.border_opacity = 1;
@@ -37,21 +37,22 @@ var PointSymbolizer = function(id, rule, symbologyUtils, symbolizer_object) {
 	this.order = 0;
 	this.size = 10;
 	this.rule = rule;
+	this.previewUrl = previewUrl;
 	this.symbologyUtils = symbologyUtils;
 	
 	if (symbolizer_object) {
 		this.name = symbolizer_object.name;
 		this.shape = symbolizer_object.shape;
 		this.fill_color = symbolizer_object.fill_color;
-		this.fill_opacity = symbolizer_object.fill_opacity;
+		this.fill_opacity = parseFloat(symbolizer_object.fill_opacity) || 0.5;
 		this.with_border = symbolizer_object.with_border;
 		this.border_color = symbolizer_object.border_color;
-		this.border_size = symbolizer_object.border_size;
-		this.border_opacity = symbolizer_object.border_opacity;
+		this.border_size = parseInt(symbolizer_object.border_size);
+		this.border_opacity = parseFloat(symbolizer_object.border_opacity) || 1.0;
 		this.border_type = symbolizer_object.border_type;
-		this.rotation = symbolizer_object.rotation;
-		this.order = symbolizer_object.order;
-		this.size = symbolizer_object.size;
+		this.rotation = parseInt(symbolizer_object.rotation) || 0;
+		this.order = parseInt(symbolizer_object.order) || 0;
+		this.size = parseInt(symbolizer_object.size);
 	}
 };
 
@@ -65,7 +66,7 @@ PointSymbolizer.prototype.getTableUI = function() {
 	ui += 		'</span>';
 	ui += 	'</td>';
 	ui += 	'<td><span class="text-muted">' + this.name + '</span></td>';
-	ui += 	'<td id="symbolizer-preview"><svg id="symbolizer-preview-' + this.id + '" class="preview-svg-' + this.id + '"></svg></td>';	
+	ui += 	'<td id="symbolizer-preview-div-' + this.id + '"></td>';	
 	ui += 	'<td><a class="edit-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
 	ui += 	'<td><a class="delete-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
 	ui += '</tr>';	
@@ -145,32 +146,38 @@ PointSymbolizer.prototype.getBorderTabUI = function() {
 	ui += 			'</label>';
 	ui += 		'</div>';
 	ui += 	'</div>';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Border color') + '</label>';
-	ui += 			'<input id="border-color-chooser" type="color" value="' + this.border_color + '" class="form-control color-chooser">';					
+	if (this.with_border) {
+		ui += 	'<div id="border-div" style="display: block;">';
+	} else {
+		ui += 	'<div id="border-div" style="display: none;">';
+	}
+	ui += 		'<div class="row">';
+	ui += 			'<div class="col-md-12 form-group">';
+	ui += 				'<label>' + gettext('Border color') + '</label>';
+	ui += 				'<input id="border-color-chooser" type="color" value="' + this.border_color + '" class="form-control color-chooser">';					
+	ui += 			'</div>';
 	ui += 		'</div>';
-	ui += 	'</div>';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Border size') + '</label>';
-	ui += 			'<input id="border-size" type="number" class="form-control" value="' + parseInt(this.border_size) + '">';					
+	ui += 		'<div class="row">';
+	ui += 			'<div class="col-md-12 form-group">';
+	ui += 				'<label>' + gettext('Border size') + '</label>';
+	ui += 				'<input id="border-size" type="number" class="form-control" value="' + parseInt(this.border_size) + '">';					
+	ui += 			'</div>';
 	ui += 		'</div>';
-	ui += 	'</div>';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label style="display: block;">' + gettext('Border opacity') + '<span id="border-opacity-output" class="margin-l-15 gol-slider-output">' + (this.border_opacity * 100) + '%</span>' + '</label>';
-	ui += 			'<div id="border-opacity-slider"></div>';
-	ui += 		'</div>';					 
-	ui += 	'</div>';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Border type') + '</label>';
-	ui += 			'<select id="border-type" class="form-control">';
-	ui += 				'<option value="solid">' + gettext('Solid') + '</option>';
-	ui += 				'<option value="dotted">' + gettext('Dotted') + '</option>';
-	ui += 				'<option value="stripped">' + gettext('Stripped') + '</option>';
-	ui += 			'</select>';
+	ui += 		'<div class="row">';
+	ui += 			'<div class="col-md-12 form-group">';
+	ui += 				'<label style="display: block;">' + gettext('Border opacity') + '<span id="border-opacity-output" class="margin-l-15 gol-slider-output">' + (this.border_opacity * 100) + '%</span>' + '</label>';
+	ui += 				'<div id="border-opacity-slider"></div>';
+	ui += 			'</div>';					 
+	ui += 		'</div>';
+	ui += 		'<div class="row">';
+	ui += 			'<div class="col-md-12 form-group">';
+	ui += 				'<label>' + gettext('Border type') + '</label>';
+	ui += 				'<select id="border-type" class="form-control">';
+	ui += 					'<option value="solid">' + gettext('Solid') + '</option>';
+	ui += 					'<option value="dotted">' + gettext('Dotted') + '</option>';
+	ui += 					'<option value="stripped">' + gettext('Stripped') + '</option>';
+	ui += 				'</select>';
+	ui += 			'</div>';
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += '</div>';
@@ -192,64 +199,12 @@ PointSymbolizer.prototype.getRotationTabUI = function() {
 	return ui;
 };
 
-PointSymbolizer.prototype.updatePreview = function() {
-	var attributes = {
-		fill: this.fill_color,
-		fillOpacity: parseFloat(this.fill_opacity),
-		stroke: this.border_color,
-		strokeOpacity: this.border_opacity,
-		strokeWidth: this.border_size
-	}
-	if (this.border_type == 'dotted') {
-		attributes.strokeDasharray= "1 1";
-	} else if (this.border_type == 'stripped') {
-		attributes.strokeDasharray= "4 4";
-	}
-	
-	var preview = null;
-	$("#symbolizer-preview-" + this.id).empty();
-	var previewElement = Snap("#symbolizer-preview-" + this.id);
-	
-	var x = this.size * 2;
-	var y = this.size * 2;
-	if (this.shape == 'circle') {
-		preview = previewElement.circle(this.size, this.size, this.size/2);
-		preview.attr(attributes);
-		
-	} else if (this.shape == 'square') {
-		preview = previewElement.polygon(0, 0, this.size, 0, this.size, this.size, 0, this.size);
-		preview.attr(attributes);
-		
-	} else if (this.shape == 'triangle') {
-		var matrix = new Snap.Matrix();
-		matrix.rotate(180, this.size, this.size);
-		preview = previewElement.polygon(0, 0, this.size, 0, this.size/2, this.size);
-		preview.transform(matrix);
-		preview.attr(attributes);
-		
-	}/*  else if (this.shape == 'star') {
-		preview = previewElement.path('M 7.0268739,7.8907968 2.2616542,5.5298295 -2.3847299,8.1168351 -1.6118504,2.8552628 -5.5080506,-0.76428228 -0.2651651,-1.6551455 1.9732348,-6.479153 4.4406368,-1.7681645 9.7202441,-1.13002 6.0022969,2.6723943 z');
-		preview.transform(matrix);
-		preview.attr(attributes);
-		
-	} else if (this.shape == 'cross') {
-		preview = previewElement.path('M 7.875 0.53125 L 7.875 7.40625 L 0.59375 7.40625 L 0.59375 11.3125 L 7.875 11.3125 L 7.875 19.46875 L 11.78125 19.46875 L 11.78125 11.28125 L 19.5625 11.28125 L 19.53125 7.375 L 11.78125 7.375 L 11.78125 0.53125 L 7.875 0.53125 z');
-		preview.transform( 't0,0');
-		preview.attr(attributes);
-		
-	} else if (symbol.shape == 'x') {
-		preview = previewElement.path('M 4.34375 0.90625 L 0.90625 3.5 L 6.90625 9.9375 L 0.78125 15.53125 L 3.34375 19.03125 L 9.84375 13.09375 L 15.53125 19.15625 L 19 16.5625 L 13.03125 10.1875 L 19.1875 4.5625 L 16.625 1.09375 L 10.09375 7.03125 L 4.34375 0.90625 z');
-		preview.transform( 't0,0');
-		preview.attr(attributes);
-		
-	}*/
-	
-	$('.preview-svg-' + this.id).css("height", y);
-	$('.preview-svg-' + this.id).css("width", x);
-
-	if (this.rule != null) {
-		//this.rule.updatePreview();
-	}
+PointSymbolizer.prototype.updatePreview = function() {	
+	var sldBody = this.toSLDBody();
+	var url = this.previewUrl + '&SLD_BODY=' + encodeURIComponent(sldBody);
+	var ui = '<img id="symbolizer-preview-' + this.id + '" src="' + url + '" class="symbolizer-preview-' + this.id + '"></img>';
+	$("#symbolizer-preview-div-" + this.id).empty();
+	$("#symbolizer-preview-div-" + this.id).append(ui);
 };
 
 PointSymbolizer.prototype.toXML = function(){
@@ -269,10 +224,59 @@ PointSymbolizer.prototype.toXML = function(){
 	xml += 				'<CssParameter name="stroke-opacity">' + this.border_opacity + '</CssParameter>';
 	xml += 			'</Stroke>';
 	xml += 		'</Mark>';
+	xml += 		'<Opacity>1</Opacity>';
+	xml += 		'<Size>' + this.size + '</Size>';
+	xml += 		'<Rotation>0</Rotation>';
 	xml += 	'</Graphic>';
 	xml += '</PointSymbolizer>';
 	
 	return xml;
+};
+
+PointSymbolizer.prototype.toSLDBody = function(){
+	
+	var sld = '';
+	sld += '<StyledLayerDescriptor version=\"1.0.0\" xmlns=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" ';
+	sld += 	'xmlns:sld=\"http://www.opengis.net/sld\"  xmlns:gml=\"http://www.opengis.net/gml\" '; 
+	sld +=  'xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ';
+	sld +=  'xsi:schemaLocation=\"http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd\">';
+	sld += 	'<NamedLayer>';  
+	sld +=  	'<Name>' + this.name + '</Name>';  
+	sld +=      '<UserStyle>';
+	sld +=          '<Name>' + this.name + '</Name>';
+	sld +=          '<Title>' + this.name + '</Title>';
+	sld +=          '<FeatureTypeStyle>';
+	sld +=          	'<Rule>';
+	sld +=          		'<Name>' + this.name + '</Name>';
+	sld +=          		'<Title>' + this.name + '</Title>';
+	sld += 					'<PointSymbolizer>';
+	sld += 						'<Graphic>';
+	sld += 							'<Mark>';
+	sld += 								'<WellKnownName>' + this.shape + '</WellKnownName>';
+	sld += 								'<Fill>';
+	sld += 									'<CssParameter name="fill">' + this.fill_color + '</CssParameter>';
+	sld += 									'<CssParameter name="fill-opacity">' + this.fill_opacity + '</CssParameter>';
+	sld += 								'</Fill>';
+	if (this.with_border) {
+		sld += 							'<Stroke>';
+		sld += 								'<CssParameter name="stroke">' + this.border_color + '</CssParameter>';
+		sld += 								'<CssParameter name="stroke-width">' + this.border_size + '</CssParameter>';
+		sld += 								'<CssParameter name="stroke-opacity">' + this.border_opacity + '</CssParameter>';
+		sld += 							'</Stroke>';
+	}
+	sld += 							'</Mark>';
+	sld += 							'<Opacity>1</Opacity>';
+	sld += 							'<Size>' + this.size + '</Size>';
+	sld += 							'<Rotation>0</Rotation>';
+	sld += 						'</Graphic>';
+	sld += 					'</PointSymbolizer>';
+	sld +=          	'</Rule>';
+	sld +=          '</FeatureTypeStyle>';
+	sld +=      '</UserStyle>';
+	sld += 	'</NamedLayer>';
+	sld += '</StyledLayerDescriptor>';
+	
+	return sld;
 };
 
 PointSymbolizer.prototype.toJSON = function(){
