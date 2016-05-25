@@ -80,6 +80,9 @@
 <script>
 $(document).ready(function() {
 	
+	var output = document.getElementById('output-eg');
+	var old = output.src;
+	
 	var size = $("#symbol-size").val();
 	$('#output-eg').css("height",size+"px");
 	$('#output-eg').css("width","auto");
@@ -110,6 +113,7 @@ $(document).ready(function() {
 		};
 		
 		var symbol = {
+			file_name: old,
 			name: name,
 			title: title,
 			filter: "",

@@ -155,6 +155,7 @@ $(document).ready(function() {
 	
 	function deleteLayer(data, row){
 		$('#button-delete-layer-accept').click( function() {
+			$("body").overlay();
 			$.ajax({
 				type: 'POST',
 				async: false,
@@ -164,6 +165,7 @@ $(document).ready(function() {
 				},
 				success	:function(response){
 					$('#modal-delete-layer').modal('hide');
+					$.overlayout();
 					location.reload();
 				},
 				error: function(){}

@@ -116,12 +116,15 @@ def upload_library(file, library):
                             rule = Rule(
                                 name = name,
                                 title = name,
-                                type = ''
+                                type = '',
+                                minscale = -1,
+                                maxscale = -1
                             )
                             rule.save()
                             
                             symbolizers = sld_utils.get_json_from_sld(sld, name, library)
                             for s in symbolizers:
+                                scount = 0
                                 stype = s['type']
                                 rule.type = stype
                                 rule.save()
@@ -131,10 +134,11 @@ def upload_library(file, library):
                                     type = stype,
                                     sld = sld,
                                     json = s.encode('utf-8'),
-                                    order = 0
+                                    order = scount
                                 )
                                 symbolizer.save()
-                            
+                                scount += 1
+                                
                             rules.append(rule)
                             
                         else:
@@ -178,7 +182,6 @@ def save_external_graphic(library_path, file, file_name):
         return True
      
     except Exception as e:
-        print('Error: %s' % e)
         return False
     
 def delete_external_graphic_img(library, file_name):    

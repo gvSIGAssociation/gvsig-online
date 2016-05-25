@@ -431,7 +431,9 @@ class Geoserver():
                 name = _('Default symbol'),
                 title = _('Default symbol'),
                 type = symbol_type,
-                order = 0
+                order = 0,
+                minscale = -1,
+                maxscale = -1
             )
             rule.save()
             

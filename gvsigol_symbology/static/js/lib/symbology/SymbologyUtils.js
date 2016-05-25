@@ -74,49 +74,36 @@ SymbologyUtils.prototype.getAlphanumericFields = function(element){
 };
 
 SymbologyUtils.prototype.updateMap = function(rule) {
-	var self = this;
-	var symbolizers = new Array();
-	for (var i=0; i < rule.getSymbolizers().length; i++) {
-		var symbolizer = {
-			type: rule.getSymbolizers()[i].type,
-			sld: rule.getSymbolizers()[i].toXML(),
-			json: rule.getSymbolizers()[i].toJSON(),
-			order: rule.getSymbolizers()[i].order
-		};
-		symbolizers.push(symbolizer);
-	}
+	var sldBody = this.getSLDBody(rule.getSymbolizers(), rule.name, rule.title);
+	this.reloadLayerPreview(sldBody);
+};
+
+SymbologyUtils.prototype.getSLDBody = function(symbolizers, name, title) {
 	
-	for (var i=0; i < rule.getLabels().length; i++) {
-		var label = {
-			type: rule.getLabels()[i].type,
-			sld: rule.getLabels()[i].toXML(),
-			json: rule.getLabels()[i].toJSON(),
-			order: rule.getLabels()[i].order
-		};
-		symbolizers.push(label);
+	var sld = '';
+	sld += '<StyledLayerDescriptor version=\"1.0.0\" xmlns=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" ';
+	sld += 	'xmlns:sld=\"http://www.opengis.net/sld\"  xmlns:gml=\"http://www.opengis.net/gml\" '; 
+	sld +=  'xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ';
+	sld +=  'xsi:schemaLocation=\"http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd\">';
+	sld += 	'<NamedLayer>';  
+	sld +=  	'<Name>' + name + '</Name>';  
+	sld +=      '<UserStyle>';
+	sld +=          '<Name>' + name + '</Name>';
+	sld +=          '<Title>' + title + '</Title>';
+	sld +=          '<FeatureTypeStyle>';
+	sld +=          	'<Rule>';
+	sld +=          		'<Name>' + name + '</Name>';
+	sld +=          		'<Title>' + title + '</Title>';
+	for (var i=0; i < symbolizers.length; i++) {
+		sld += symbolizers[i].toXML()
 	}
-	rule['rule_symbolizers'] = symbolizers
-	var data = {
-		name: $('#style-name').val(),
-		title: $('#style-title').val(),
-		rules: [rule]
-	}
+	sld +=          	'</Rule>';
+	sld +=          '</FeatureTypeStyle>';
+	sld +=      '</UserStyle>';
+	sld += 	'</NamedLayer>';
+	sld += '</StyledLayerDescriptor>';
 	
-	$.ajax({
-		type: "POST",
-		async: false,
-		url: "/gvsigonline/symbology/get_sld_body/",
-		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-		},
-		data: {
-			style_data: JSON.stringify(data)
-		},
-		success: function(response){
-			self.reloadLayerPreview(response.sld_body);		
-		},
-	    error: function(){}
-	});
+	return sld;
 };
 
 SymbologyUtils.prototype.reloadLayerPreview = function(sld_body){
@@ -125,7 +112,7 @@ SymbologyUtils.prototype.reloadLayerPreview = function(sld_body){
 	layers.forEach(function(layer){
 		if (!layer.baselayer) {
 			if (layer.get("id") === 'preview-layer') {
-				layer.getSource().updateParams({'SLD_BODY': sld_body, STYLES: undefined});
+				layer.getSource().updateParams({'SLD_BODY': sld_body, time_: (new Date()).getTime()});
 				self.map.render();
 			}
 		};
