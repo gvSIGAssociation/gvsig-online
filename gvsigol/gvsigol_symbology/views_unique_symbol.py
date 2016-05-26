@@ -120,6 +120,10 @@ def unique_symbol_add(request, layer_id):
         split_wms_url = workspace.wms_endpoint.split('//')
         authenticated_wms_url = split_wms_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_wms_url[1]
         layer_url = authenticated_wms_url
+        
+        split_wfs_url = workspace.wfs_endpoint.split('//')
+        authenticated_wfs_url = split_wfs_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_wfs_url[1]
+        layer_wfs_url = authenticated_wfs_url
                           
         response = {
             'featureType': feature_type,
@@ -129,9 +133,11 @@ def unique_symbol_add(request, layer_id):
             'fonts': sorted_fonts,
             'layer_id': layer_id,
             'layer_url': layer_url,
+            'layer_wfs_url': layer_wfs_url,
             'layer_name': workspace.name + ':' + layer.name,
             'style_name': workspace.name + '_' + layer.name + '_' + str(index),
             'libraries': Library.objects.all(),
+            'supported_crs': settings.SUPPORTED_CRS,
             'preview_point_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
             'preview_line_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
             'preview_polygon_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
@@ -199,6 +205,10 @@ def unique_symbol_update(request, layer_id, style_id):
         authenticated_wms_url = split_wms_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_wms_url[1]
         layer_url = authenticated_wms_url
         
+        split_wfs_url = workspace.wfs_endpoint.split('//')
+        authenticated_wfs_url = split_wfs_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_wfs_url[1]
+        layer_wfs_url = authenticated_wfs_url
+        
         fields = services.get_fields(layer_id, request.session)
         feature_type = services.get_feature_type(fields)
         sld_filter_values = services.get_sld_filter_values()
@@ -235,12 +245,14 @@ def unique_symbol_update(request, layer_id, style_id):
             'fonts': sorted_fonts,
             'layer_id': layer_id,
             'layer_url': layer_url,
+            'layer_wfs_url': layer_wfs_url,
             'layer_name': workspace.name + ':' + layer.name,
             'libraries': Library.objects.all(),
             'style': style,
             'minscale': int(r.minscale),
             'maxscale': int(r.maxscale),
             'rule': json.dumps(rule),
+            'supported_crs': settings.SUPPORTED_CRS,
             'preview_point_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
             'preview_line_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
             'preview_polygon_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
