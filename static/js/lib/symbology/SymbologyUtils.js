@@ -73,6 +73,61 @@ SymbologyUtils.prototype.getAlphanumericFields = function(element){
 	return this.alphanumericFields;
 };
 
+SymbologyUtils.prototype.centerMap = function(layerName, wfsUrl) {
+	var self = this;
+	$.ajax({
+		type: 'GET',
+		async: true,
+	  	url: wfsUrl,							
+	  	data: {
+	  		'service': 'WFS',
+			'version': '1.1.0',
+			'request': 'GetFeature',
+			'typename': layerName, 
+			'outputFormat': 'application/json',
+			'maxFeatures': 1
+	  	},
+	  	success	:function(response){
+	  		if(response.features && response.features.length > 0){
+		  		var newFeature = new ol.Feature();
+		  		var sourceCRS = 'EPSG:' + response.crs.properties.name.split('::')[1];
+		  		var projection = new ol.proj.Projection({
+		    		code: sourceCRS,
+		    	});
+		    		
+		    	if (response.features[0].geometry.type == 'Point') {
+		    		newFeature.setGeometry(new ol.geom.Point(response.features[0].geometry.coordinates));				
+		    	} else if (response.features[0].geometry.type == 'MultiPoint') {
+		    		newFeature.setGeometry(new ol.geom.Point(response.features[0].geometry.coordinates[0]));				
+		    	} else if (response.features[0].geometry.type == 'LineString' || response.features[0].geometry.type == 'MultiLineString') {
+		    		newFeature.setGeometry(new ol.geom.MultiLineString([response.features[0].geometry.coordinates[0]]));
+		    	} else if (response.features[0].geometry.type == 'Polygon' || response.features[0].geometry.type == 'MultiPolygon') {
+		    		newFeature.setGeometry(new ol.geom.MultiPolygon(response.features[0].geometry.coordinates));
+		    	}
+		    	newFeature.setProperties(response.features[0].properties);
+				newFeature.setId(response.features[0].id);
+		    	var geom1 = newFeature.getGeometry().getFirstCoordinate();
+		    	var geom2 = ol.proj.transform(geom1, sourceCRS, 'EPSG:3857');
+							
+		  		var view = self.map.getView();			
+				if (response.features[0].geometry.type == 'Point' || response.features[0].geometry.type == 'MultiPoint') {
+					view.setCenter(geom2);
+					view.setZoom(7);
+				} else {
+					view.setCenter(geom2);
+					view.setZoom(7);
+				}
+				
+			} else {
+				console.log("ERROR no features to center map preview");
+			}
+	  	},
+	  	error: function(e){
+	  		console.log("ERROR centering map preview");
+	  	}
+	});
+};
+
 SymbologyUtils.prototype.updateMap = function(rule, layerName) {
 	var symbolizers = rule.getSymbolizers();
 	var labels = rule.getLabels();

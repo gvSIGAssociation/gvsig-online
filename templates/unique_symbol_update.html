@@ -170,6 +170,7 @@ $(document).ready(function() {
 	
 	var layerId = "{{layer_id}}";
 	var layerUrl = "{{layer_url}}";
+	var wfsUrl = "{{layer_wfs_url}}";
 	var layerName = "{{layer_name}}";
 	var styleId = "{{style.id}}";
 	var featureType = "{{featureType}}";
@@ -181,6 +182,11 @@ $(document).ready(function() {
 	var previewPointUrl = "{{preview_point_url}}";
 	var previewLineUrl = "{{preview_line_url}}";
 	var previewPolygonUrl = "{{preview_polygon_url}}";
+	var supported_crs = {{supported_crs|safe}};
+	
+	for (var crs in supported_crs) {
+		proj4.defs(supported_crs[crs].code, supported_crs[crs].definition);	
+	}
 	
 	var map = new ol.Map({
 		layers: [
@@ -209,6 +215,8 @@ $(document).ready(function() {
 	
 	var symbologyUtils = new SymbologyUtils(map, wmsLayer, fonts, alphanumericFields);
 	var uniqueSymbol = new UniqueSymbol(featureType, layerName, symbologyUtils, rule_opts, previewPointUrl, previewLineUrl, previewPolygonUrl);
+	
+	symbologyUtils.centerMap(layerName, wfsUrl);
 	uniqueSymbol.refreshMap();
 	
 	if (uniqueSymbol.getRule().getNextLabelId() >= 1) {
