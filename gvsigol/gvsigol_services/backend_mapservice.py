@@ -1064,7 +1064,11 @@ class Geoserver():
                     table_def = table_definition[f]
                     layer_name = table_def['name']
                     layer_title = table_def['title']
-                    layer_style = table_def['style']
+                    try:
+                        layer_style = table_def['style']
+                    except Exception as e:
+                        layer_style = "Desconocido"
+                        print e
                     #layer_group = table_def['group'] + '_' + application.name.lower()
                 else:
                     layer_name = os.path.splitext(os.path.basename(f))[0]
