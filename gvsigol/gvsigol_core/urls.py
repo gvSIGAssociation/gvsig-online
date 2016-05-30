@@ -10,5 +10,5 @@ urlpatterns = [
     url(r'^project_get_conf/$', 'gvsigol_core.views.project_get_conf', name='project_get_conf'),
     url(r'^search_candidates/$', 'gvsigol_core.views.search_candidates', name='search_candidates'),
     url(r'^get_location_address/$', 'gvsigol_core.views.get_location_address', name='get_location_address'),
-    url(r'^export/$', 'gvsigol_core.views.export', name='export'),
+    url(r'^export/(?P<pid>[0-9]+)/$', 'gvsigol_core.views.export', name='export'),
 ]
