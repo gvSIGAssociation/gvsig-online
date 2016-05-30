@@ -139,7 +139,7 @@ getFeatureInfo.prototype.handler = function(e) {
 			this.map.addLayer(this.resultLayer);
 			
 		} else {
-			alert(gettext("No layers available"));
+			messageBox.show('warning', gettext('No layers available.'));
 		}
 		
 	}

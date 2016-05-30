@@ -100,6 +100,24 @@ layerTree.prototype.createTree = function() {
 	tree += '</div>';
 	
 	this.$container.append(tree);
+	
+	$( ".layer-opacity-slider" ).slider({
+	    min: 0,
+	    max: 100,
+	    value: 100,
+	    slide: function( event, ui ) {
+	    	var layers = self.map.getLayers();
+			var id = this.dataset.layerid;
+			layers.forEach(function(layer){
+				if (layer.baselayer == false) {
+					if (id===layer.get("id")) {
+						layer.setOpacity(parseFloat(ui.value)/100);
+						$("#layer-opacity-output-" + id).text(ui.value + '%');
+					}
+				}						
+			}, this);
+	    }
+	});
 
 	$("input[name=baselayers-group]:radio").change(function (e) {
 		var baseLayers = self.map.getLayers();
@@ -204,7 +222,7 @@ layerTree.prototype.createTree = function() {
 			self.editionBar = new editionBar(self, self.map, featureType, selectedLayer);
 			
 		} else {
-			alert(gettext('You are editing the layer') + ': ' + self.editionBar.getSelectedLayer().title);
+			messageBox.show('warning', gettext('You are editing the layer') + ': ' + self.editionBar.getSelectedLayer().title);
 			
 		}
 	});
@@ -313,12 +331,12 @@ layerTree.prototype.createOverlayUI = function(layer) {
 	}
 	ui += '			<span class="text">' + layer.title + '</span>';
 	ui += '			<div class="box-tools pull-right">';
-	ui += '				<button class="btn btn-box-tool btn-box-tool-custom">';
-	ui += '					<i class="fa fa-angle-up"></i>';
-	ui += '				</button>';
-	ui += '				<button class="btn btn-box-tool btn-box-tool-custom">';
-	ui += '					<i class="fa fa-angle-down"></i>';
-	ui += '				</button>';
+//	ui += '				<button class="btn btn-box-tool btn-box-tool-custom">';
+//	ui += '					<i class="fa fa-angle-up"></i>';
+//	ui += '				</button>';
+//	ui += '				<button class="btn btn-box-tool btn-box-tool-custom">';
+//	ui += '					<i class="fa fa-angle-down"></i>';
+//	ui += '				</button>';
 	ui += '				<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
 	ui += '					<i class="fa fa-plus"></i>';
 	ui += '				</button>';
@@ -342,6 +360,8 @@ layerTree.prototype.createOverlayUI = function(layer) {
     		}
     	}
     }
+	ui += '			<label style="display: block; margin-top: 8px;">' + gettext('Opacity') + '<span id="layer-opacity-output-' + layer.id + '" class="margin-l-15 gol-slider-output">%</span></label>';
+	ui += '			<div id="layer-opacity-slider" data-layerid="' + layer.id + '" class="layer-opacity-slider"><div/>';
 	ui += '		</div>';
 	ui += '</div>';
 	
