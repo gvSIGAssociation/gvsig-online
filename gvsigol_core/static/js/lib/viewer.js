@@ -68,6 +68,14 @@ viewer.core = {
         });
 		osm.baselayer = true;
 		
+		var mousePositionControl = new ol.control.MousePosition({
+	        coordinateFormat: ol.coordinate.createStringXY(4),
+	        projection: 'EPSG:4326',
+	        className: 'custom-mouse-position-output',
+	        target: document.getElementById('custom-mouse-position-output'),
+	        undefinedHTML: 'undefined, undefined'
+	    });
+		
 		this.map = new ol.Map({
 			interactions: ol.interaction.defaults().extend([
 			    new ol.interaction.DragRotateAndZoom()
@@ -75,7 +83,8 @@ viewer.core = {
       		controls: [
 				new ol.control.Zoom(),
 				new ol.control.ScaleLine(),					
-      			new ol.control.OverviewMap({collapsed: false})
+      			new ol.control.OverviewMap({collapsed: false}),
+      			mousePositionControl
       		],
       		renderer: 'canvas',
       		target: 'map',
@@ -86,6 +95,21 @@ viewer.core = {
         		maxZoom: 19,
             	zoom: conf.view.zoom
         	})
+		});
+		
+		var projectionSelect = document.getElementById('custom-mouse-position-projection');
+	    projectionSelect.addEventListener('change', function(event) {
+	    	mousePositionControl.setProjection(ol.proj.get(event.target.value));
+	    });
+		
+		$(document).on('sidebar:opened', function(){
+			$('.ol-scale-line').css('left', '408px');
+			$('.custom-mouse-position').css('left', '530px');
+		});
+		
+		$(document).on('sidebar:closed', function(){
+			$('.ol-scale-line').css('left', '8px');
+			$('.custom-mouse-position').css('left', '130px');
 		});
     },
     
