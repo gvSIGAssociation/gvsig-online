@@ -476,6 +476,7 @@ function _init() {
 						$('body').addClass('control-sidebar-open');
 					//}					
 				}
+				sidebar.trigger("sidebar:opened");
 			},
 			//Close the control sidebar
 			close: function (sidebar, slide) {
@@ -487,6 +488,7 @@ function _init() {
 				} else {
 					$('body').removeClass('control-sidebar-open');
 				}
+				sidebar.trigger("sidebar:closed");
 			},
 			_fix: function (sidebar) {
 				var _this = this;

@@ -349,7 +349,7 @@ def project_delete(request, pid):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def project_load(request, pid):
     if core_utils.is_valid_project(request.user, pid):
-        return render_to_response('viewer.html', {'pid': pid}, context_instance=RequestContext(request))
+        return render_to_response('viewer.html', {'supported_crs': gvsigol.settings.SUPPORTED_CRS, 'pid': pid}, context_instance=RequestContext(request))
     else:
         return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
 
