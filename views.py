@@ -506,5 +506,12 @@ def get_location_address(request):
         
         return HttpResponse(json.dumps(location, indent=4), content_type='application/json')
     
-def export(request):   
-    return render_to_response('app_print_template.html', {}, context_instance=RequestContext(request))
+def export(request, pid):   
+    p = Project.objects.get(id=pid)
+    image = ''
+    if "no_project.png" in p.image.url:
+        image = p.image.url.replace(settings.MEDIA_URL, '')
+    else:
+        image = p.image.url
+
+    return render_to_response('app_print_template.html', {'print_logo_url': urllib.unquote(image)}, context_instance=RequestContext(request))
