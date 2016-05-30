@@ -73,7 +73,7 @@ viewer.core = {
 	        projection: 'EPSG:4326',
 	        className: 'custom-mouse-position-output',
 	        target: document.getElementById('custom-mouse-position-output'),
-	        undefinedHTML: 'undefined, undefined'
+	        undefinedHTML: '----------, ----------'
 	    });
 		
 		this.map = new ol.Map({
@@ -104,12 +104,12 @@ viewer.core = {
 		
 		$(document).on('sidebar:opened', function(){
 			$('.ol-scale-line').css('left', '408px');
-			$('.custom-mouse-position').css('left', '530px');
+			$('.custom-mouse-position').css('left', '580px');
 		});
 		
 		$(document).on('sidebar:closed', function(){
 			$('.ol-scale-line').css('left', '8px');
-			$('.custom-mouse-position').css('left', '130px');
+			$('.custom-mouse-position').css('left', '180px');
 		});
     },
     
