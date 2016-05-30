@@ -271,7 +271,7 @@ CalculateClosedControl.prototype.getClosed = function(x, y) {
 				view2D.fit(self.source.getExtent(), self.map.getSize());
 				
 			} else{
-				alert("Punto no posicionado sobre la red.");
+				messageBox.show('warning', gettext('Punto no posicionado sobre la red.'));
 			}
 	  	},
 		error: function(response){}
