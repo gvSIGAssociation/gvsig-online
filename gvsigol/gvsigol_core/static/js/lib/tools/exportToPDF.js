@@ -23,8 +23,9 @@
 /**
  * TODO
  */
-var exportToPDF = function(map) {
+var exportToPDF = function(conf, map) {
 
+	this.conf = conf;
 	this.map = map;
 	
 	this.id = "export-to-pdf";
@@ -84,7 +85,7 @@ exportToPDF.prototype.handler = function(e) {
 		
 		window.map = self.map;
 		window.title = title;
-		window.open('/gvsigonline/core/export/');       
+		window.open('/gvsigonline/core/export/' + self.conf.pid + '/');       
 		window.focus();
 		
 		$('#float-modal').modal('hide');
