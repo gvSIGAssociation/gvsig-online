@@ -126,6 +126,26 @@
 		</aside>
 
 		<div id="map">
+			
+			<table id="mouse-position" class="custom-mouse-position ol-unselectable ol-control">
+				<tr>
+					<td id="custom-mouse-position-output"></td>
+					<td id="custom-mouse-position-form" class="custom-mouse-position-form">
+						<form>
+					      	<select id="custom-mouse-position-projection" class="custom-mouse-position-projection">
+					      		{% for key, value in supported_crs.items %}
+						      		{% if key == "4326" %}
+						        		<option value="{{value.code}}" selected>{{value.code}}</option>
+						        	{% else %}
+						        		<option value="{{value.code}}">{{value.code}}</option>
+						        	{% endif %}
+					        	{% endfor %}
+					      	</select>
+					    </form>
+					</td>
+				</tr>
+			</table>
+			
 			<div id="toolbar" class="ol-toolbar ol-unselectable ol-control"></div>
 
 			<div class="modal" id="float-modal" tabindex="-1" role="dialog" aria-labelledby="myFloatModal">
