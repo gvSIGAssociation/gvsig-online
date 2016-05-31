@@ -179,6 +179,8 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 	
 	$("body").overlay();
 	
+	this.source.clear();
+	
 	var self = this;
 	this.showFirst = true;
 	
@@ -222,7 +224,10 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 				  	success	:function(response){
 				  		if (response.features) {
 				  			for (var i in response.features) {
-				  				features.push(response.features[i]);
+				  				features.push({
+				  					crs: response.crs,
+				  					feature: response.features[i]
+				  				});
 				  			}
 				  		}
 				  	},
@@ -248,7 +253,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 	var html = '<ul class="products-list product-list-in-box">';
 	for (var i in features) {
 		
-		var fid = features[i].id;
+		var fid = features[i].feature.id;
 		
 		
 		html += '<li class="item">';
@@ -257,6 +262,27 @@ getFeatureInfo.prototype.showInfo = function(features){
 		html += 		'<span class="label label-info pull-right">' + gettext('More info') + '</span></a>';
 		html += 	'</div>';
 		html += '</li>';
+		
+		var newFeature = new ol.Feature();
+  		var sourceCRS = 'EPSG:' + features[i].crs.properties.name.split('::')[1];
+  		var projection = new ol.proj.Projection({
+    		code: sourceCRS,
+    	});
+    	ol.proj.addProjection(projection);
+    	if (features[i].feature.geometry.type == 'Point') {
+    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates));				
+    	} else if (features[i].feature.geometry.type == 'MultiPoint') {
+    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates[0]));				
+    	} else if (features[i].feature.geometry.type == 'LineString' || features[i].feature.geometry.type == 'MultiLineString') {
+    		newFeature.setGeometry(new ol.geom.MultiLineString([features[i].feature.geometry.coordinates[0]]));
+    	} else if (features[i].feature.geometry.type == 'Polygon' || features[i].feature.geometry.type == 'MultiPolygon') {
+    		newFeature.setGeometry(new ol.geom.MultiPolygon(features[i].feature.geometry.coordinates));
+    	}
+    	newFeature.setProperties(features[i].feature.properties);
+		newFeature.setId(fid);
+				
+		newFeature.getGeometry().transform(projection, 'EPSG:3857');
+		this.source.addFeature(newFeature);
 		
 	}	
 	html += '</ul>';
@@ -276,8 +302,8 @@ getFeatureInfo.prototype.showInfo = function(features){
 getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 	var selectedFeature = null;
 	for (var i in features) {
-		if (fid == features[i].id) {
-			selectedFeature = features[i]; 
+		if (fid == features[i].feature.id) {
+			selectedFeature = features[i].feature; 
 		}
 	}
 	var detailsTab = $('#details-tab');
@@ -351,6 +377,9 @@ getFeatureInfo.prototype.getLayerTitle = function(feature){
  */
 getFeatureInfo.prototype.deactivate = function() {			
 	this.$button.removeClass('button-active');
+	this.source.clear();
+	this.map.removeLayer(this.resultLayer);
+	this.map.un('click', this.clickHandler, this);
 	this.active = false;
 	this.hideResultTab();
 	this.popup.hide();
