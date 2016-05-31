@@ -360,8 +360,8 @@ layerTree.prototype.createOverlayUI = function(layer) {
     		}
     	}
     }
-	ui += '			<label style="display: block; margin-top: 8px;">' + gettext('Opacity') + '<span id="layer-opacity-output-' + layer.id + '" class="margin-l-15 gol-slider-output">%</span></label>';
-	ui += '			<div id="layer-opacity-slider" data-layerid="' + layer.id + '" class="layer-opacity-slider"><div/>';
+	ui += '			<label style="display: block; margin-top: 8px; width: 95%;">' + gettext('Opacity') + '<span id="layer-opacity-output-' + layer.id + '" class="margin-l-15 gol-slider-output">%</span></label>';
+	ui += '			<div id="layer-opacity-slider" data-layerid="' + layer.id + '" class="layer-opacity-slider"></div>';
 	ui += '		</div>';
 	ui += '</div>';
 	
