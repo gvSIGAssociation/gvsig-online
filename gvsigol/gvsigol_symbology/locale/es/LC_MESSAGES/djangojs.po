@@ -14,5 +14,134 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-msgid "Loading components. Please wait"
-msgstr "Cargando componentes. Por favor espere"
+msgid "Border"
+msgstr "Borde"
+
+msgid "With border"
+msgstr "Con borde"
+
+msgid "Border color"
+msgstr "Color del borde"
+
+msgid "Border size"
+msgstr "Tamaño del borde"
+
+msgid "Border opacity"
+msgstr "Opacidad del borde"
+
+msgid "Border type"
+msgstr "Tipo del borde"
+
+msgid "Solid"
+msgstr "Sólido"
+
+msgid "Dotted"
+msgstr "Punteado"
+
+msgid "Stripped"
+msgstr "Rayado"
+
+msgid "Graphic"
+msgstr "Gráfico"
+
+msgid "Fill"
+msgstr "Relleno"
+
+msgid "Fill color"
+msgstr "Color del relleno"
+
+msgid "Fill opacity"
+msgstr "Opacidad del relleno"
+
+msgid "Rotation"
+msgstr "Rotación"
+
+msgid "Select shape"
+msgstr "Seleccionar forma"
+
+msgid "Size"
+msgstr "Tamaño"
+
+msgid "Rule"
+msgstr "Regla"
+
+msgid "Normal"
+msgstr "Normal"
+
+msgid "Cursive"
+msgstr "Cursiva"
+
+msgid "Oblique"
+msgstr "Oblicua"
+
+msgid "Bold"
+msgstr "Negrita"
+
+msgid "Circle"
+msgstr "Círculo"
+
+msgid "Square"
+msgstr "Cuadrado"
+
+msgid "Triangle"
+msgstr "Triángulo"
+
+msgid "Star"
+msgstr "Estrella"
+
+msgid "Cross"
+msgstr "Cruz"
+
+msgid "Font"
+msgstr "Fuente"
+
+msgid "Halo"
+msgstr "Sombra"
+
+msgid "Vendor"
+msgstr "Vendor"
+
+msgid "Label field"
+msgstr "Campo de la etiqueta"
+
+msgid "Font family"
+msgstr "Familia de la fuente"
+
+msgid "Font size"
+msgstr "Tamaño de la fuente"
+
+msgid "Font color"
+msgstr "Color de la fuente"
+
+msgid "Font weight"
+msgstr "Grosor de la fuente"
+
+msgid "Font style"
+msgstr "Estilo de la fuente"
+
+msgid "Halo color"
+msgstr "Color del sombreado"
+
+msgid "Halo opacity"
+msgstr "Opacidad del sombreado"
+
+msgid "Halo radius"
+msgstr "Radio del sombreado"
+
+msgid "Maximum number of repetitions"
+msgstr "Máximo número de repeticiones"
+
+msgid "Maximum label length (in pixels)"
+msgstr "Longitud máxima de la etiqueta (en píxels)"
+
+msgid "Minimum space surround tag"
+msgstr "Mínimo espacio alrededor de la etiqueta"
+
+msgid "Solve overlaps"
+msgstr "Resolver solapes"
+
+msgid "Image symbols can only be edited from the library"
+msgstr "Los símbolos de tipo imagen solo pueden ser editados desde la biblioteca"
+
+msgid "Selected symbol is not compatible with the layer"
+msgstr "El símbolo seleccionado no es compatible con la geometría de la capa"
