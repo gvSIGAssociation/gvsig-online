@@ -1,0 +1,292 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-06-01 18:00+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: utils.py:149
+msgid "New user account"
+msgstr "Nueva cuenta de usuario"
+
+#: utils.py:165
+msgid "Account data"
+msgstr "Datos de la cuenta"
+
+#: utils.py:166 templates/home.html:18
+msgid "Username"
+msgstr "Nombre de usuario"
+
+#: utils.py:167
+msgid "First name"
+msgstr "Nombre"
+
+#: utils.py:168
+msgid "Last name"
+msgstr "Apellidos"
+
+#: utils.py:169 templates/home.html:20
+msgid "Email"
+msgstr "Correo electrónico"
+
+#: utils.py:170 utils.py:182 templates/home.html:30
+msgid "Password"
+msgstr "Contraseña"
+
+#: utils.py:178 templates/home.html:40 templates/home.html.py:41
+msgid "New password"
+msgstr "Nueva contraseña"
+
+#: utils.py:180
+msgid "This is your new temporary password"
+msgstr "Esta es su contraseña temporal"
+
+#: views.py:146
+msgid "You must enter an project name"
+msgstr "Debe introducir un nombre de proyecto"
+
+#: views.py:196 views.py:322
+msgid "Project name already exists"
+msgstr "El nombre del proyecto ya existe"
+
+#: templates/404.html:10
+msgid "Page not found"
+msgstr "Página no encontrada"
+
+#: templates/404.html:13
+msgid "We could not find the page you were looking for. Meanwhile, you may"
+msgstr ""
+"No hemos podido encontrar la página que estabas buscando . Mientras tanto, "
+"puede"
+
+#: templates/404.html:14 templates/500.html:14
+msgid "return to dashboard"
+msgstr "volver al panel de control"
+
+#: templates/500.html:10
+msgid "Something went wrong"
+msgstr "Algo salió mal"
+
+#: templates/500.html:13
+msgid "We will work on fixing that right away. Meanwhile, you may"
+msgstr ""
+"Estamos trabajando en la resolución del problema. Mientras tanto, puede"
+
+#: templates/base.html:69 templates/viewer.html:91
+msgid "Sign out"
+msgstr "Cerrar sesión"
+
+#: templates/base.html:87 templates/viewer.html:88
+msgid "Dashboard"
+msgstr "Panel de control"
+
+#: templates/base.html:93
+msgid "Home"
+msgstr "Inicio"
+
+#: templates/base.html:124
+msgid "All rights reserved"
+msgstr "Todos los derechos reservados"
+
+#: templates/dashboard_core_menu.html:6
+msgid "Projects"
+msgstr "Proyectos"
+
+#: templates/home.html:22
+msgid "Is admin?"
+msgstr "¿Es administrador?"
+
+#: templates/home.html:24
+msgid "You are logged in as an administrator user"
+msgstr "Ha iniciado sesión como usuario administrador"
+
+#: templates/home.html:26
+msgid "You are logged in as an non-administrator user"
+msgstr "Ha iniciado sesión como usuario no administrador"
+
+#: templates/home.html:28
+msgid "Last login"
+msgstr "Último acceso"
+
+#: templates/home.html:31
+msgid "Click here"
+msgstr "Click aquí"
+
+#: templates/home.html:31
+msgid "to update your password"
+msgstr "para actualizar su contraseña"
+
+#: templates/home.html:35
+msgid "Passwords doesn't match"
+msgstr "Las contraseñas no coinciden"
+
+#: templates/home.html:47 templates/home.html.py:48
+msgid "Repeat new password"
+msgstr "Repetir contraseña"
+
+#: templates/home.html:53
+msgid "Update password"
+msgstr "Actualizar contraseña"
+
+#: templates/home.html:64 templates/project_list.html:11
+msgid "Projects list"
+msgstr "Lista de proyectos"
+
+#: templates/home.html:67 templates/project_add.html:12
+#: templates/project_list.html:14
+msgid "Add project"
+msgstr "Añadir proyecto"
+
+#: templates/home.html:79
+msgid "Load project"
+msgstr "Cargar proyecto"
+
+#: templates/project_add.html:14 templates/project_update.html:14
+msgid "Save"
+msgstr "Guardar"
+
+#: templates/project_add.html:28 templates/project_list.html:24
+#: templates/project_update.html:28
+msgid "Name"
+msgstr "Nombre"
+
+#: templates/project_add.html:29 templates/project_update.html:29
+msgid "Project name"
+msgstr "Nobre del proyecto"
+
+#: templates/project_add.html:35 templates/project_list.html:25
+#: templates/project_update.html:35
+msgid "Description"
+msgstr "Descripción"
+
+#: templates/project_add.html:36 templates/project_update.html:36
+msgid "Project description"
+msgstr "Descripción del proyecto"
+
+#: templates/project_add.html:51
+msgid "Select image"
+msgstr "Seleccionar imagen"
+
+#: templates/project_add.html:58 templates/project_update.html:51
+msgid "Assign user groups"
+msgstr "Asignar grupos de usuarios"
+
+#: templates/project_add.html:71 templates/project_update.html:65
+#: templates/project_update.html.py:67
+msgid "Assign user group"
+msgstr "Asignar grupo de usuarios"
+
+#: templates/project_add.html:85 templates/project_update.html:82
+msgid "Assign layer groups"
+msgstr "Asignar grupos de capas"
+
+#: templates/project_add.html:98 templates/project_update.html:96
+#: templates/project_update.html.py:98
+msgid "Assign layer group"
+msgstr "Asignar grupo de capas"
+
+#: templates/project_list.html:56 templates/project_list.html.py:103
+msgid "Delete project"
+msgstr "Eliminar proyecto"
+
+#: templates/project_list.html:59
+msgid "The project will be removed, Do you want continue?"
+msgstr "El proyecto será eliminado, ¿Desea continuar?"
+
+#: templates/project_list.html:62 templates/viewer.html:162
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: templates/project_list.html:63 templates/viewer.html:163
+msgid "Accept"
+msgstr "Aceptar"
+
+#: templates/project_list.html:79
+msgid "Processing request..."
+msgstr "Procesando petición..."
+
+#: templates/project_list.html:80
+#, python-format
+msgid "Search%(sep)s"
+msgstr "Buscar%(sep)s"
+
+#: templates/project_list.html:81
+#, python-format
+msgid "Showing %(numrecords)s records"
+msgstr "Mostrando %(numrecords)s registros"
+
+#: templates/project_list.html:82
+#, python-format
+msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
+msgstr "Mostrando desde %(start)s a %(end)s de %(numrecords)s registros"
+
+#: templates/project_list.html:83
+msgid "Showing from 0 to 0 of 0 records"
+msgstr "Mostrando desde 0 a 0 de 0 registros"
+
+#: templates/project_list.html:84
+#, python-format
+msgid "Filtering %(max)s records"
+msgstr "Filtrando %(max)s registros"
+
+#: templates/project_list.html:86
+msgid "Loading..."
+msgstr "Cargando..."
+
+#: templates/project_list.html:87 templates/project_list.html.py:88
+msgid "No records available"
+msgstr "No hay registros disponibles"
+
+#: templates/project_list.html:90
+msgid "First"
+msgstr "Primero"
+
+#: templates/project_list.html:91
+msgid "Previous"
+msgstr "Anterior"
+
+#: templates/project_list.html:92
+msgid "Next"
+msgstr "Siguiente"
+
+#: templates/project_list.html:93
+msgid "Last"
+msgstr "Último"
+
+#: templates/project_list.html:96
+#, python-format
+msgid "%(sep)sSort ascending"
+msgstr "%(sep)sOrden ascendente"
+
+#: templates/project_list.html:97
+#, python-format
+msgid "%(sep)sSort descending"
+msgstr "%(sep)sOrden descendente"
+
+#: templates/project_list.html:107 templates/project_update.html:12
+msgid "Update project"
+msgstr "Actualizar proyecto"
+
+#: templates/viewer.html:59
+msgid "Search"
+msgstr "Buscar"
+
+#: templates/viewer.html:258
+msgid "Close"
+msgstr "Cerrar"
+
+#~ msgid "Manage projects"
+#~ msgstr "Administrar proyectos"
