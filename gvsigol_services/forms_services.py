@@ -27,20 +27,20 @@ from django import forms
 import json
 
 class WorkspaceForm(forms.Form):   
-    name = forms.CharField(required=True, max_length=250, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1'}))
-    description = forms.CharField(required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '2'}))
+    name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1'}))
+    description = forms.CharField(label=_(u'Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '2'}))
     uri = forms.CharField(required=True, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))
-    wms_endpoint = forms.CharField(required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '4'}))
-    wfs_endpoint = forms.CharField(required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '5'}))
-    wcs_endpoint = forms.CharField(required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '6'}))
-    cache_endpoint = forms.CharField(required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '7'}))
+    wms_endpoint = forms.CharField(label=_(u'WMS URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '4'}))
+    wfs_endpoint = forms.CharField(label=_(u'WFS URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '5'}))
+    wcs_endpoint = forms.CharField(label=_(u'WCS URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '6'}))
+    cache_endpoint = forms.CharField(label=_(u'Cache URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '7'}))
 
 class DatastoreForm(forms.Form):
-    workspace = forms.ModelChoiceField(required=True, queryset=Workspace.objects.all(), widget=forms.Select(attrs={'class':'form-control'}))
-    type = forms.ChoiceField(choices=backend.getSupportedTypes(), required=True, widget=forms.Select(attrs={'class':'form-control'}))  
-    name = forms.CharField(required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
-    description = forms.CharField(required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))
-    connection_params = forms.CharField(required=True, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))
+    workspace = forms.ModelChoiceField(label=_(u'Workspace'), required=True, queryset=Workspace.objects.all(), widget=forms.Select(attrs={'class':'form-control'}))
+    type = forms.ChoiceField(label=_(u'Type'), choices=backend.getSupportedTypes(), required=True, widget=forms.Select(attrs={'class':'form-control'}))  
+    name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
+    description = forms.CharField(label=_(u'Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))
+    connection_params = forms.CharField(label=_(u'Connection params'), required=True, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))
 
     def __init__(self, session, *args, **kwargs):
         self.session = session
@@ -67,10 +67,10 @@ class DatastoreUpdateForm(forms.ModelForm):
     class Meta:
         model = Datastore
         fields = ['type', 'name', 'description', 'connection_params']
-    type = forms.CharField(required=True, max_length=250, widget=forms.TextInput(attrs={'class':'form-control', 'readonly': 'true'}))
-    name = forms.CharField(required=True, max_length=250, widget=forms.TextInput(attrs={'class':'form-control', 'readonly': 'true'}))   
-    description = forms.CharField(required=False, max_length=500, widget=forms.TextInput(attrs={'class':'form-control', 'tabindex': '1'}))
-    connection_params = forms.CharField(required=True, widget=forms.Textarea(attrs={'class':'form-control', 'tabindex': '2'}))
+    type = forms.CharField(label=_(u'Type'), required=True, max_length=250, widget=forms.TextInput(attrs={'class':'form-control', 'readonly': 'true'}))
+    name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class':'form-control', 'readonly': 'true'}))   
+    description = forms.CharField(label=_(u'Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class':'form-control', 'tabindex': '1'}))
+    connection_params = forms.CharField(label=_(u'Connection params'), required=True, widget=forms.Textarea(attrs={'class':'form-control', 'tabindex': '2'}))
     
     def clean(self):
         cleaned_data = super(DatastoreUpdateForm, self).clean()
@@ -88,10 +88,10 @@ class LayerForm(forms.ModelForm):
     class Meta:
         model = Layer
         fields = ['datastore', 'name', 'title', 'layer_group', 'visible', 'queryable']
-    datastore = forms.ModelChoiceField(required=True, queryset=Datastore.objects.all(), widget=forms.Select(attrs={'class' : 'form-control'}))
-    name = forms.CharField(required=True, widget=forms.Select(attrs={'class' : 'form-control'}))
-    title = forms.CharField(required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    layer_group = forms.ModelChoiceField(required=True, queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class' : 'form-control'}))
+    datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=True, queryset=Datastore.objects.all(), widget=forms.Select(attrs={'class' : 'form-control'}))
+    name = forms.CharField(label=_(u'Name'), required=True, widget=forms.Select(attrs={'class' : 'form-control'}))
+    title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class' : 'form-control'}))
     #visible = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
     #queryable = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
 
@@ -99,10 +99,10 @@ class LayerUpdateForm(forms.ModelForm):
     class Meta:
         model = Layer
         fields = ['datastore', 'name', 'title', 'layer_group', 'visible', 'queryable']
-    datastore = forms.ModelChoiceField(required=True, queryset=Datastore.objects.all(), widget=forms.Select(attrs={'class' : 'validate', 'readonly': 'true'}))
-    name = forms.CharField(required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'validate', 'readonly': 'true'}))
-    title = forms.CharField(required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'validate'}))
-    layer_group = forms.ModelChoiceField(required=True, queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class' : 'validate'}))
+    datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=True, queryset=Datastore.objects.all(), widget=forms.Select(attrs={'class' : 'validate', 'readonly': 'true'}))
+    name = forms.CharField(label=_(u'Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'validate', 'readonly': 'true'}))
+    title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'validate'}))
+    layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class' : 'validate'}))
     #visible = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
     #queryable = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
     #cached = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
