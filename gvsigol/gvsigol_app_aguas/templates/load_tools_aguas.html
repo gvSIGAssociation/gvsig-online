@@ -4,7 +4,13 @@
 	var map = viewer.core.getMap();
 	var tool = new CalculateClosedControl(map);
 	viewer.core.loadTool(tool);
+	
+	//Al añadir una nueva entrada en la barra de herramientas debemos
+	//desplazar la barra de edición para evitar solapes
 	$('.editionbar').css("top","260");
+	
+	//Ocultamos la búsqueda en la tabla de atributos
+	$('.dataTables_filter').css("display","none");
 	
 	var bases = map.getLayers();
 	bases.forEach(function(layer){
