@@ -1,0 +1,211 @@
+#    gvSIG Online.
+#    Copyright (C) 2007-2015 gvSIG Association.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# export_a4h.html
+msgid "Printing date"
+msgstr "Fecha de impresión"
+
+msgid "Printing message"
+msgstr "Mensaje de impresión"
+
+# viewer.js
+msgid "Blank"
+msgstr "Vacía"
+
+msgid "OpenStreetMap"
+msgstr "OpenStreetMap"
+
+# attributeTable.js
+msgid "Processing request"
+msgstr "Procesando petición"
+
+msgid "Search"
+msgstr "Buscar"
+
+msgid "Showing"
+msgstr "Mostrando"
+
+msgid "Showing from"
+msgstr "Mostrando desde"
+
+msgid "registers"
+msgstr "registros"
+
+msgid "to"
+msgstr "a"
+
+msgid "of"
+msgstr "de"
+
+msgid "Filtering"
+msgstr "Filtrando"
+
+msgid "Loading"
+msgstr "Cargando"
+
+msgid "No records available"
+msgstr "No hay registros disponibles"
+
+msgid "First"
+msgstr "Primero"
+
+msgid "Previous"
+msgstr "Anterior"
+
+msgid "Next"
+msgstr "Siguiente"
+
+msgid "Last"
+msgstr "Último"
+
+msgid "Sort ascending"
+msgstr "Orden ascendente"
+
+msgid "Sort descending"
+msgstr "Orden descendente"
+
+msgid "Zoom to selection"
+msgstr "Zoom a la selección"
+
+msgid "Clear selection"
+msgstr "Limpiar selección"
+
+# editionBar.js
+msgid "Add point"
+msgstr "Añadir punto"
+
+msgid "Add line"
+msgstr "Añadir línea"
+
+msgid "Add polygon"
+msgstr "Añadir polígono"
+
+msgid "Edit feature"
+msgstr "Editar elemento"
+
+msgid "Remove feature"
+msgstr "Eliminar elemento"
+
+msgid "Stop edition"
+msgstr "Terminar edición"
+
+msgid "New feature"
+msgstr "Nuevo elemento"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Failed to save the new record. Please check values"
+msgstr "Error al guardar el nuevo elemento. Por favor revise los valores"
+
+# exportToPDF.js
+msgid "Map title"
+msgstr "Título del mapa"
+
+msgid "Print"
+msgstr "Imprimir"
+
+
+# geolocation.js
+msgid "Get current location"
+msgstr "Conseguir posición actual"
+
+# getFeatureInfo.js
+msgid "Point information"
+msgstr "Información en el punto"
+
+msgid "No layers available"
+msgstr "No hay capas disponibles"
+
+msgid "More info"
+msgstr "Más información"
+
+msgid "Open"
+msgstr "Abrir"
+
+# measureArea.js
+msgid "Measure area"
+msgstr "Medir área"
+
+msgid "Click to continue measuring"
+msgstr "Click para continuar midiendo"
+
+msgid "Click to start measuring"
+msgstr "Click para empezar a medir"
+
+# measureLength.js
+msgid "Measure length"
+msgstr "Medir distancia"
+
+# measureLength.js
+msgid "Search by coordinate"
+msgstr "Buscar por coordenadas"
+
+msgid "Select projection"
+msgstr "Seleccionar proyección"
+
+msgid "Latitude"
+msgstr "Latitud"
+
+msgid "Longitude"
+msgstr "Longitud"
+
+msgid "Find"
+msgstr "Encontrar"
+
+# messageBox.js
+msgid "Success"
+msgstr "Realizado"
+
+msgid "Warning"
+msgstr "Aviso"
+
+# layerTree.js
+msgid "Base layers"
+msgstr "Capas base"
+
+msgid "None"
+msgstr "Ninguna"
+
+msgid "Bing roads"
+msgstr "Bing carreteras"
+
+msgid "Bing aerial"
+msgstr "Bing aérea"
+
+msgid "Bing aerial with labels"
+msgstr "Bing aérea con etiquetas"
+
+msgid "You are editing the layer"
+msgstr "Usted está editando la capa"
+
+msgid "Layer metadata"
+msgstr "Metadatos de la capa"
+
+msgid "Attribute table"
+msgstr "Tabla de atributos"
+
+msgid "Edit layer"
+msgstr "Editar capa"
+
+msgid "Opacity"
+msgstr "Opacidad"
+
+msgid "Show in geonetwork"
+msgstr "Mostrar en geonetwork"
