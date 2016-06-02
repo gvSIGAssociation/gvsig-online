@@ -590,7 +590,7 @@ class Geoserver():
         
     def createCoverage(self, workspace, coveragestore, name, title, session):
         try:
-            return self.rest_catalog.create_coverage(name, title, coveragestore, workspace.name, user=session['username'], password=session['password'])
+            return self.rest_catalog.create_coverage(name, title, coveragestore.name, workspace.name, user=session['username'], password=session['password'])
         except rest_geoserver.FailedRequestError as e:
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
@@ -666,7 +666,7 @@ class Geoserver():
                     return []
                 else:
                     # we can't get the name of the coverage, so we just offer a sensible, non existing name
-                    return [self._get_unique_resource_name(datastore, workspace)]
+                    return [self._get_unique_resource_name(datastore, workspace, session)]
         except:
             e = sys.exc_info()[0]
             pass
