@@ -157,8 +157,8 @@ attributeTable.prototype.createTable = function(featureType) {
 	            last		: gettext("Last")
 	        },
 	        aria: {
-	            sortAscending:  ": " + gettext("Sort Ascending"),
-	            sortDescending: ": " + gettext("Sort Descending")
+	            sortAscending:  ": " + gettext("Sort ascending"),
+	            sortDescending: ": " + gettext("Sort descending")
 	        }
 	    },
 	    select: 'single',
