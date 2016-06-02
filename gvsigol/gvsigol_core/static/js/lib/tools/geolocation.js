@@ -32,7 +32,7 @@ var geolocation = function(map) {
 	var button = document.createElement('button');
 	button.setAttribute("id", this.id);
 	button.setAttribute("class", "toolbar-button");
-	button.setAttribute("title", gettext('Get current position'));
+	button.setAttribute("title", gettext('Get current location'));
 	var icon = document.createElement('i');
 	icon.setAttribute("class", "fa fa-dot-circle-o");
 	button.appendChild(icon);

@@ -64,7 +64,7 @@ layerTree.prototype.createTree = function() {
 	tree += '					</div>';
 	tree += '				</div>';
 	tree += '				<div id="baselayers-group" class="box-body" style="display: block; font-size: 12px;">';
-	tree += 					self.createBaseLayerUI(gettext('Ninguna'), true);
+	tree += 					self.createBaseLayerUI(gettext('None'), true);
 	tree += 					self.createBaseLayerUI('OpenStreetMap', true);
 	if (this.conf.base_layers.bing.active) {
 		tree += 				self.createBaseLayerUI(gettext("Bing roads"), false);
