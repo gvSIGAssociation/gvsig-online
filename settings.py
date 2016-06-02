@@ -55,15 +55,15 @@ INSTALLED_APPS = [
     'gvsigol_services',
     'gvsigol_symbology',
     'gvsigol_core',
-    'gvsigol_app_dev',
-    #'gvsigol_app_aguas',
+    #'gvsigol_app_dev',
+    'gvsigol_app_aguas',
 ]
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware', 
     'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
@@ -90,6 +90,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'gvsigol_core.context_processors.global_settings',
                 'django.contrib.messages.context_processors.messages',
+                'django.core.context_processors.i18n',
             ],
         },
     },
@@ -159,7 +160,9 @@ USE_L10N = True
 USE_TZ = True
 LANGUAGES = (
     ('es', _('Spanish')),
+    ('ca', _('Catalan')),    
     ('en', _('English')),   
+    
 )
 LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol_core/locale'),
@@ -167,7 +170,7 @@ LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol_services/locale'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/locale'),
     #os.path.join(BASE_DIR, 'gvsigol_app_dev/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_app_aguas/locale'),
+    #os.path.join(BASE_DIR, 'gvsigol_app_aguas/locale'),
 )
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -192,8 +195,8 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_auth/static'),
     os.path.join(BASE_DIR, 'gvsigol_services/static'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
-    os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
-    #os.path.join(BASE_DIR, 'gvsigol_app_aguas/static'),
+    #os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
+    os.path.join(BASE_DIR, 'gvsigol_app_aguas/static'),
 )
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
