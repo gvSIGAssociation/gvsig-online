@@ -9,9 +9,6 @@
 	//desplazar la barra de edición para evitar solapes
 	$('.editionbar').css("top","260");
 	
-	//Ocultamos la búsqueda en la tabla de atributos
-	$('.dataTables_filter').css("display","none");
-	
 	var bases = map.getLayers();
 	bases.forEach(function(layer){
 		if (layer.baselayer) {
