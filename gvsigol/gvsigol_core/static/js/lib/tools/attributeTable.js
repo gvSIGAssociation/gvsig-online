@@ -23,11 +23,12 @@
 /**
  * TODO
  */
-var attributeTable = function(layer, map, prefix) {	
+var attributeTable = function(layer, map, tool_conf) {	
 	this.id = "data-table";
 	this.map = map;
 	this.layer = layer;	
-	this.prefix = prefix;
+	this.prefix = tool_conf.private_fields_prefix;
+	this.showSearch = tool_conf.show_search;
 	this.source = new ol.source.Vector();				
 	this.resultLayer = new ol.layer.Vector({
 		source: this.source,
@@ -163,6 +164,7 @@ attributeTable.prototype.createTable = function(featureType) {
 	    },
 	    select: 'single',
         "processing": true,
+        "searching": this.showSearch,
         "serverSide": true,
         "sCharSet": "utf-8",
         "scrollX": true,
