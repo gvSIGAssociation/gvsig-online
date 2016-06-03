@@ -281,7 +281,8 @@ GVSIGOL_TOOLS = {
         'private_fields_prefix': '_'
     },
     'attribute_table': {
-        'private_fields_prefix': '_'
+        'private_fields_prefix': '_',
+        'show_search': False
     }
 }
 
