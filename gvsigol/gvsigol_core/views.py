@@ -228,6 +228,20 @@ def project_update(request, pid):
                 assigned_usergroups.append(int(key.split('-')[1]))
                 
         project = Project.objects.get(id=int(pid))
+        
+        old_layer_groups = []
+        for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
+            old_layer_groups.append(lg.layer_group.id)
+            
+        layer_groups_diff = None
+        toc_structure = None
+        if len(assigned_layergroups) > len(old_layer_groups):
+            layer_groups_diff = list(set(assigned_layergroups) - set(old_layer_groups))
+            toc_structure = core_utils.toc_add_layergroups(project.toc_order, layer_groups_diff)
+            
+        elif len(old_layer_groups) > len(assigned_layergroups):
+            layer_groups_diff = list(set(old_layer_groups) - set(assigned_layergroups))
+            toc_structure = core_utils.toc_remove_layergroups(project.toc_order, layer_groups_diff)
                
         exists = False
         projects = Project.objects.all()
@@ -246,7 +260,7 @@ def project_update(request, pid):
             project.center_lon = longitude
             project.zoom = int(zoom)
             project.extent = extent
-            project.toc_order = core_utils.get_json_toc(assigned_layergroups)
+            project.toc_order = toc_structure
             project.save()
             
             for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
@@ -288,7 +302,7 @@ def project_update(request, pid):
                 project.center_lon = longitude
                 project.zoom = int(zoom)
                 project.extent = extent
-                project.toc_order = core_utils.get_json_toc(assigned_layergroups)
+                project.toc_order = toc_structure
                 project.save()
                 
                 for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
@@ -461,11 +475,11 @@ def project_get_conf(request):
                 workspaces.append(w)
             
             if len(layers) > 0:   
-                ordered_layers = sorted(layers, key=itemgetter('order'))
+                ordered_layers = sorted(layers, key=itemgetter('order'), reverse=True)
                 conf_group['layers'] = ordered_layers
                 layer_groups.append(conf_group)
             
-        ordered_layer_groups = sorted(layer_groups, key=itemgetter('groupOrder'))
+        ordered_layer_groups = sorted(layer_groups, key=itemgetter('groupOrder'), reverse=True)
         
         geoserver_url = gvsigol.settings.GVSIGOL_SERVICES['URL']
         split_geoserver_url = geoserver_url.split('//')
@@ -513,7 +527,11 @@ def toc_update(request, pid):
     else:
         project = Project.objects.get(id=int(pid))      
         toc = json.loads(project.toc_order)
-        ordered_toc = sorted(toc.iteritems(), key=lambda (x, y): y['order'])
+        for g in toc:
+            group = toc.get(g)
+            ordered_layers = sorted(group.get('layers').iteritems(), key=lambda (x, y): y['order'], reverse=True)
+            group['layers'] = ordered_layers
+        ordered_toc = sorted(toc.iteritems(), key=lambda (x, y): y['order'], reverse=True)
         return render_to_response('toc_update.html', {'toc': ordered_toc, 'pid': pid}, context_instance=RequestContext(request))
     
 def search_candidates(request):

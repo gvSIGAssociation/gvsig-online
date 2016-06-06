@@ -283,6 +283,7 @@ viewer.core = {
 			layerGroup.queryable = true;
 			layerGroup.isTimeLayer = false;
 			layerGroup.isLayerGroup = true;
+			layerGroup.setZIndex(parseInt(group.groupOrder));
 			this.map.addLayer(layerGroup);
 		}
 	},
