@@ -51,8 +51,7 @@ class Datastore(models.Model):
 class LayerGroup(models.Model):
     name = models.CharField(max_length=150) 
     title = models.CharField(max_length=500, null=True, blank=True) 
-    cached = models.BooleanField(default=False) 
-    order = models.IntegerField(null=False, default=0) 
+    cached = models.BooleanField(default=False)
     
     def __unicode__(self):
         return self.name
@@ -70,7 +69,6 @@ class Layer(models.Model):
     queryable = models.BooleanField(default=True)
     cached = models.BooleanField(default=True)
     single_image = models.BooleanField(default=False)
-    order = models.IntegerField(null=False, default=0)
     
     def __unicode__(self):
         return self.name

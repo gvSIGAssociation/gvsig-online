@@ -23,9 +23,10 @@
 from django.core.mail import send_mail
 from django.utils.translation import ugettext as _
 from gvsigol_core.models import Project, ProjectUserGroup, ProjectLayerGroup
-from gvsigol_services.models import LayerGroup
+from gvsigol_services.models import LayerGroup, Layer
 from gvsigol_auth.models import UserGroup, UserGroupUser
 import gvsigol.settings
+import json
 
 def is_valid_project(user, pid):
     valid = False
@@ -143,6 +144,34 @@ def get_all_layer_groups_checked_by_project(project):
             layer_groups.append(layer_group)
         
     return layer_groups
+
+def get_json_toc(project_layergroups):
+    toc = {}
+    count1 = 1
+    for lg in project_layergroups:
+        lg_count = count1 * 1000
+        toc_layergroup = {}
+        layer_group = LayerGroup.objects.get(id=lg)
+        toc_layergroup['name'] = layer_group.name
+        toc_layergroup['title'] = layer_group.title
+        toc_layergroup['order'] = lg_count
+        
+        toc_layers = {}
+        layers_in_group = Layer.objects.filter(layer_group_id=layer_group.id)
+        count2 = 1
+        for l in layers_in_group: 
+            toc_layers[l.name] = {
+                'name': l.name,
+                'title': l.title,
+                'order': lg_count + count2
+            }
+            count2 += 1
+        toc_layergroup['layers'] = toc_layers
+        toc[layer_group.name] = toc_layergroup
+        count1 += 1
+        
+    return json.dumps(toc)
+        
         
 def sendMail(user, password):
             
