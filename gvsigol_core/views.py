@@ -156,7 +156,8 @@ def project_add(request):
                     center_lat = latitude,
                     center_lon = longitude,
                     zoom = int(zoom),
-                    extent = extent
+                    extent = extent,
+                    toc_order = core_utils.get_json_toc(assigned_layergroups)
                 )
             else:
                 project = Project(
@@ -165,7 +166,8 @@ def project_add(request):
                     center_lat = latitude,
                     center_lon = longitude,
                     zoom = int(zoom),
-                    extent = extent
+                    extent = extent,
+                    toc_order = core_utils.get_json_toc(assigned_layergroups)
                 )
             project.save()
             
@@ -244,6 +246,7 @@ def project_update(request, pid):
             project.center_lon = longitude
             project.zoom = int(zoom)
             project.extent = extent
+            project.toc_order = core_utils.get_json_toc(assigned_layergroups)
             project.save()
             
             for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
@@ -285,6 +288,7 @@ def project_update(request, pid):
                 project.center_lon = longitude
                 project.zoom = int(zoom)
                 project.extent = extent
+                project.toc_order = core_utils.get_json_toc(assigned_layergroups)
                 project.save()
                 
                 for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
@@ -359,6 +363,7 @@ def project_get_conf(request):
         pid = request.POST.get('pid')
         
         project = Project.objects.get(id=int(pid))
+        toc = json.loads(project.toc_order)
             
         project_layers_groups = ProjectLayerGroup.objects.filter(project_id=project.id)
         layer_groups = []
@@ -370,10 +375,10 @@ def project_get_conf(request):
             conf_group = {}
             conf_group['groupTitle'] = group.title
             conf_group['groupId'] = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
-            conf_group['groupOrder'] = group.order
+            conf_group['groupOrder'] = toc.get(group.name).get('order')
             conf_group['groupName'] = group.name
             conf_group['cached'] = group.cached
-            layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('order')
+            layers_in_group = Layer.objects.filter(layer_group_id=group.id)
             layers = []
             for l in layers_in_group:
                 read_roles = services_utils.get_read_roles(l)
@@ -386,6 +391,7 @@ def project_get_conf(request):
                 layer['visible'] = l.visible 
                 layer['queryable'] = l.queryable 
                 layer['cached'] = l.cached
+                layer['order'] = toc.get(group.name).get('layers').get(l.name).get('order')
                 layer['single_image'] = l.single_image
                 layer['read_roles'] = read_roles
                 layer['write_roles'] = write_roles
@@ -455,7 +461,8 @@ def project_get_conf(request):
                 workspaces.append(w)
             
             if len(layers) > 0:   
-                conf_group['layers'] = layers
+                ordered_layers = sorted(layers, key=itemgetter('order'))
+                conf_group['layers'] = ordered_layers
                 layer_groups.append(conf_group)
             
         ordered_layer_groups = sorted(layer_groups, key=itemgetter('groupOrder'))
@@ -491,6 +498,23 @@ def project_get_conf(request):
         } 
         
         return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
+
+        
+        
+    
+def toc_update(request, pid):
+    if request.method == 'POST':
+        project = Project.objects.get(id=int(pid))
+        toc = request.POST.get('toc')
+        project.toc_order = toc
+        project.save()       
+        return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+    
+    else:
+        project = Project.objects.get(id=int(pid))      
+        toc = json.loads(project.toc_order)
+        ordered_toc = sorted(toc.iteritems(), key=lambda (x, y): y['order'])
+        return render_to_response('toc_update.html', {'toc': ordered_toc, 'pid': pid}, context_instance=RequestContext(request))
     
 def search_candidates(request):
     if request.method == 'GET':
