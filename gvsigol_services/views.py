@@ -32,6 +32,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.translation import ugettext as _
 from gvsigol_auth.utils import admin_required
 from django.core.urlresolvers import reverse
+from gvsigol_core import utils as core_utils
 from gvsigol_auth.models import UserGroup
 import gvsigol.settings
 import rest_geoserver
@@ -239,6 +240,7 @@ def layer_delete(request, layer_id):
             gn_backend.metadata_delete(request.session, layer)
             Layer.objects.all().filter(pk=layer_id).delete()
             mapservice_backend.setDataRules(request.session)
+            core_utils.toc_remove_layer(layer)
             mapservice_backend.createOrUpdateGeoserverLayerGroup(layer.layer_group, request.session)
             mapservice_backend.reload_nodes(request.session)
             return HttpResponseRedirect(reverse('datastore_list'))
@@ -322,6 +324,7 @@ def layer_add(request):
                     newRecord.save()
                     return HttpResponseRedirect(reverse('layer_update', kwargs={'layer_id': newRecord.id}))
                 newRecord.save()
+                core_utils.toc_add_layer(newRecord)
                 mapservice_backend.createOrUpdateGeoserverLayerGroup(newRecord.layer_group, request.session)
                 mapservice_backend.reload_nodes(request.session)
                 return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
@@ -381,6 +384,7 @@ def layer_update(request, layer_id):
             new_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
             
             if old_layer_group.id != new_layer_group.id:
+                core_utils.toc_update_layer(layer)
                 mapservice_backend.createOrUpdateGeoserverLayerGroup(old_layer_group, request.session)
                 mapservice_backend.createOrUpdateGeoserverLayerGroup(new_layer_group, request.session)
                                 
@@ -616,11 +620,14 @@ def layergroup_update(request, lgid):
         for lg in layergroups:
             if name == lg.name:
                 exists = True
-                
+        
+        old_name = layergroup.name
+        
         if sameName:
             layergroup.title = title
             layergroup.cached = cached
             layergroup.save()   
+            core_utils.toc_update_layer_group(layergroup, old_name, name)
             mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup, request.session)
             mapservice_backend.reload_nodes(request.session)
             return redirect('layergroup_list')
@@ -635,6 +642,7 @@ def layergroup_update(request, lgid):
                 layergroup.title = title
                 layergroup.cached = cached
                 layergroup.save()
+                core_utils.toc_update_layer_group(layergroup, old_name, name)
                 mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup, request.session)
                 mapservice_backend.reload_nodes(request.session)
                 return redirect('layergroup_list')
@@ -704,6 +712,7 @@ def layer_upload(request):
                         layer.save()
                         return HttpResponseRedirect(reverse('layer_update', kwargs={'layer_id': layer.id}))
                     layer.save()
+                    core_utils.toc_add_layer(layer)
                     mapservice_backend.createOrUpdateGeoserverLayerGroup(layer.layer_group, request.session)
                     return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer.id}))
                 except WrongTimePattern:
@@ -741,23 +750,10 @@ def layer_upload(request):
         else:
             (form, template, file_accepts) = mapservice_backend.getUploadForm(dstype)
             if form is not None:
-                '''
-                styles = []
-                for s in mapservice_backend.getStyles(session=request.session):
-                    if s.name != 'generic':
-                        style = {}
-                        style['name'] = s.name
-                        if s.workspace == None:
-                            style['workspace'] = "*"
-                        else:
-                            style['workspace'] = s.workspace
-                        styles.append(style)
-                '''
                 data = {
                     'form': form(),
                     'type': dstype,
                     'file_accepts': file_accepts
-                    #'styles': styles
                 }
                 return render(request, template, data)
     return HttpResponseBadRequest()
@@ -793,6 +789,7 @@ def layer_create(request):
                         l.save()
                         return HttpResponseRedirect(reverse('layer_update', kwargs={'layer_id': l.id}))
                     l.save()
+                    core_utils.toc_add_layer(layer)
                     mapservice_backend.createOrUpdateGeoserverLayerGroup(l.layer_group, request.session)
                     return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': l.id}))
                 except rest_geoserver.RequestError as e:

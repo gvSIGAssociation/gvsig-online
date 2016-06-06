@@ -171,8 +171,88 @@ def get_json_toc(project_layergroups):
         count1 += 1
         
     return json.dumps(toc)
+
+def toc_add_layergroups(toc_structure, layer_groups): 
+    json_toc = json.loads(toc_structure)
+    indexes = []
+    for key in json_toc:
+        indexes.append(int(json_toc.get(key).get('order')))
+    count1 = (max(indexes) / 1000) + 1
+    for lg in layer_groups:
+        lg_count = count1 * 1000
+        toc_layergroup = {}
+        layer_group = LayerGroup.objects.get(id=lg)
+        toc_layergroup['name'] = layer_group.name
+        toc_layergroup['title'] = layer_group.title
+        toc_layergroup['order'] = lg_count
         
+        toc_layers = {}
+        layers_in_group = Layer.objects.filter(layer_group_id=layer_group.id)
+        count2 = 1
+        for l in layers_in_group: 
+            toc_layers[l.name] = {
+                'name': l.name,
+                'title': l.title,
+                'order': lg_count + count2
+            }
+            count2 += 1
+        toc_layergroup['layers'] = toc_layers
+        json_toc[layer_group.name] = toc_layergroup
+        count1 += 1
         
+    return json.dumps(json_toc)
+
+def toc_update_layer_group(old_layergroup, old_name, new_name): 
+    projects_by_layergroup = ProjectLayerGroup.objects.filter(layer_group=old_layergroup)
+    for p in projects_by_layergroup:
+        json_toc = p.project.toc_order
+        toc = json.loads(json_toc)
+        toc[old_name]['name'] = new_name
+        toc[new_name] = toc.pop(old_name)
+        p.project.toc_order = json.dumps(toc)
+        p.project.save()
+   
+def toc_remove_layergroups(toc_structure, layer_groups): 
+    json_toc = json.loads(toc_structure)
+    for lg in layer_groups:
+        layergroup = LayerGroup.objects.get(id=lg)
+        if json_toc.has_key(layergroup.name):
+            del json_toc[layergroup.name]
+            
+    return json.dumps(json_toc)
+
+def toc_add_layer(layer): 
+    projects_by_layergroup = ProjectLayerGroup.objects.filter(layer_group=layer.layer_group)
+    for p in projects_by_layergroup:
+        json_toc = p.project.toc_order
+        toc = json.loads(json_toc)
+        if toc.has_key(layer.layer_group.name):
+            indexes = []
+            for l in toc.get(layer.layer_group.name).get('layers'):
+                indexes.append(int(toc.get(layer.layer_group.name).get('layers').get(l).get('order')))
+            count = max(indexes) + 1
+            toc.get(layer.layer_group.name).get('layers')[layer.name] = {
+                'name': layer.name,
+                'title': layer.title,
+                'order': count
+            }
+        p.project.toc_order = json.dumps(toc)
+        p.project.save()
+
+def toc_update_layer(layer): 
+    print 'Update TOC layer'
+
+def toc_remove_layer(layer): 
+    projects_by_layergroup = ProjectLayerGroup.objects.filter(layer_group=layer.layer_group)
+    for p in projects_by_layergroup:
+        json_toc = p.project.toc_order
+        toc = json.loads(json_toc)
+        if toc.has_key(layer.layer_group.name):
+            del toc.get(layer.layer_group.name).get('layers')[layer.name]
+        p.project.toc_order = json.dumps(toc)
+        p.project.save()
+
+       
 def sendMail(user, password):
             
     subject = _(u'New user account')
