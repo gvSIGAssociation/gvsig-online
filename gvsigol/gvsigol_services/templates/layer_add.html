@@ -107,6 +107,9 @@
 
 {% block extra-scripts %}
 <script type="text/javascript">
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-layers').addClass("active");
+	
 	$('.save-button').click( function() {
 		$("body").overlay();
 	});

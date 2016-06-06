@@ -38,10 +38,10 @@
 								</div>
 							</div>
 							<div class="box-body">
-								{% for lkey, layer in g.1.layers.items %}
-								<div data-name="{{layer.name}}" data-title="{{layer.title}}" data-order="{{layer.order}}" class="box box-default layer-item" style="border-top: none;">
+								{% for layer in g.1.layers %}
+								<div data-name="{{layer.1.name}}" data-title="{{layer.1.title}}" data-order="{{layer.1.order}}" class="box box-default layer-item" style="border-top: none;">
 									<div class="box-header">
-										<span class="text">{{layer.title}}</span>
+										<span class="text">{{layer.1.title}}</span>
 										<div class="box-tools pull-right">
 											<button class="btn btn-box-tool btn-box-tool-custom move-down">
 												<i class="fa fa-angle-down"></i>
@@ -93,7 +93,7 @@
 			var groupList = root.children();
 			for (var i=0; i<groupList.length; i++) {
 				var g = groupList[i];
-				var groupOrder = (i + 1) * 1000;
+				var groupOrder = (groupList.length - i) * 1000;
 				var groupName = g.dataset.name;
 				var groupTitle = g.dataset.title;
 				
@@ -101,7 +101,7 @@
 				var layerList = g.children[1].children;
 				for (var j=0; j<layerList.length; j++) {
 					var l = layerList[j];
-					var layerOrder = groupOrder + (j+1);
+					var layerOrder = groupOrder + (layerList.length - j);
 					var layerName = l.dataset.name;
 					var layerTitle = l.dataset.title;
 					var layer = {
