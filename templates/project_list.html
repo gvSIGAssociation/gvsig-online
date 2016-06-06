@@ -25,6 +25,7 @@
 							<th>{% trans "Description" %}</th>
 							<th></th>
 							<th></th>
+							<th></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -33,6 +34,7 @@
 							<td>{{ project.id }}</td>
 							<td>{{ project.name }}</td>
 							<td>{{ project.description }}</td>
+							<td></td>
 							<td></td>
 							<td></td>
 						</tr>
@@ -104,6 +106,10 @@ $(document).ready(function() {
 	    },{
 	        "targets": -2,
 	        "data": null,
+	        "defaultContent": '<button type="button" name="button-update-toc" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "TOC order" %}' + '" class="btn btn-warning"><i class="fa fa-sort-numeric-asc"></i></button>'
+	    },{
+	        "targets": -3,
+	        "data": null,
 	        "defaultContent": '<button type="button" name="button-update-project" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update project" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
 	    }],
 	    "dom": 'T<"clear">lfrtip',
@@ -115,6 +121,10 @@ $(document).ready(function() {
 	    var data = row.data();     
 	    if (this.name == "button-update-project") {
 	    	updateProject(data);
+	    	
+	    } else if (this.name == "button-update-toc"){
+	        updateToc(data);   
+	        
 	    } else if (this.name == "button-delete-project"){
 	        deleteProject(data, row);   
 	    }
@@ -126,6 +136,10 @@ $(document).ready(function() {
 
 	function updateProject(data){			
 		location.href = '/gvsigonline/core/project_update/' + data[0] + '/';
+	}
+	
+	function updateToc(data){			
+		location.href = '/gvsigonline/core/toc_update/' + data[0] + '/';
 	}
 
 	function deleteProject(data, row){

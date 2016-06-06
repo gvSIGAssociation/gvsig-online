@@ -233,12 +233,14 @@ viewer.core = {
 				wmsLayer.namespace = layerConf.namespace;
 				wmsLayer.workspace = layerConf.workspace
 				wmsLayer.crs = layerConf.crs;
+				wmsLayer.order = layerConf.order;
 				if (layerConf.is_time_layer) {
 					wmsLayer.isTimeLayer = true;
 					wmsLayer.timeParams = layerConf.time_params;
 				} else {
 					wmsLayer.isTimeLayer = false;
 				}
+				wmsLayer.setZIndex(parseInt(layerConf.order));
 				this.map.addLayer(wmsLayer);
 			}
 		}
