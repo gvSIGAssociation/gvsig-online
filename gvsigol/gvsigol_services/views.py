@@ -384,7 +384,7 @@ def layer_update(request, layer_id):
             new_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
             
             if old_layer_group.id != new_layer_group.id:
-                core_utils.toc_update_layer(layer)
+                core_utils.toc_move_layer(layer, old_layer_group)
                 mapservice_backend.createOrUpdateGeoserverLayerGroup(old_layer_group, request.session)
                 mapservice_backend.createOrUpdateGeoserverLayerGroup(new_layer_group, request.session)
                                 
@@ -663,11 +663,15 @@ def layergroup_delete(request, lgid):
     if request.method == 'POST':
         layergroup = LayerGroup.objects.get(id=int(lgid))
         layers = Layer.objects.filter(layer_group_id=layergroup.id)    
+        projects_by_layergroup = ProjectLayerGroup.objects.filter(layer_group_id=layergroup.id)
+        for p in projects_by_layergroup:
+            p.project.toc_order = core_utils.toc_remove_layergroups(p.project.toc_order, [layergroup.id])
+            p.project.save()
         for layer in layers:  
             if mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer, session=request.session):
-                layer.delete()
-        layergroup.delete()
+                layer.delete()       
         mapservice_backend.deleteGeoserverLayerGroup(layergroup, request.session)
+        layergroup.delete()
         mapservice_backend.setDataRules(session=request.session)
         mapservice_backend.reload_nodes(request.session)
         response = {
@@ -789,7 +793,7 @@ def layer_create(request):
                         l.save()
                         return HttpResponseRedirect(reverse('layer_update', kwargs={'layer_id': l.id}))
                     l.save()
-                    core_utils.toc_add_layer(layer)
+                    core_utils.toc_add_layer(l)
                     mapservice_backend.createOrUpdateGeoserverLayerGroup(l.layer_group, request.session)
                     return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': l.id}))
                 except rest_geoserver.RequestError as e:

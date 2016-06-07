@@ -230,17 +230,31 @@ def toc_add_layer(layer):
             indexes = []
             for l in toc.get(layer.layer_group.name).get('layers'):
                 indexes.append(int(toc.get(layer.layer_group.name).get('layers').get(l).get('order')))
-            count = max(indexes) + 1
+            
+            if len(indexes) > 0:
+                order = max(indexes) + 1
+            else:
+                lg_order = toc.get(layer.layer_group.name).get('order')
+                order = int(lg_order) + 1
+                
             toc.get(layer.layer_group.name).get('layers')[layer.name] = {
                 'name': layer.name,
                 'title': layer.title,
-                'order': count
+                'order': order
             }
         p.project.toc_order = json.dumps(toc)
         p.project.save()
 
-def toc_update_layer(layer): 
-    print 'Update TOC layer'
+def toc_move_layer(layer, old_layer_group): 
+    projects_by_layergroup = ProjectLayerGroup.objects.filter(layer_group=old_layer_group)
+    for p in projects_by_layergroup:
+        json_toc = p.project.toc_order
+        toc = json.loads(json_toc)
+        if toc.has_key(old_layer_group.name):
+            del toc.get(old_layer_group.name).get('layers')[layer.name]
+        p.project.toc_order = json.dumps(toc)
+        p.project.save()
+    toc_add_layer(layer)
 
 def toc_remove_layer(layer): 
     projects_by_layergroup = ProjectLayerGroup.objects.filter(layer_group=layer.layer_group)
