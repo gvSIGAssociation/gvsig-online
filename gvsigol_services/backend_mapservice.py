@@ -1056,6 +1056,16 @@ class Geoserver():
             if _valid_sql_name_regex.search(schema) == None:
                 raise InvalidValue(-1, _("The connection parameters contain an invalid schema: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db)) 
 
+            #rename files with special characters
+            files = os.listdir(dir_path)
+            under_score = ['(',')','[',']'] #Anything to be replaced with '_' put in this list.            
+            for f in files:
+                copy_f = f
+                for char in copy_f:                    
+                    if (char in under_score): copy_f = copy_f.replace(char,'_')
+                if (f != copy_f):
+                    os.rename(os.path.join(dir_path, f),os.path.join(dir_path, copy_f))
+            
             # load SHP       
             files = [f for f in os.listdir(dir_path) if f.lower()[-4:]==".shp"]
             
