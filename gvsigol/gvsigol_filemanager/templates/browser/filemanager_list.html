@@ -1,0 +1,85 @@
+{% extends "filemanager_base.html" %}
+{% load i18n static %}
+
+{% block content %}
+
+	{% include "filemanager_breadcrumbs.html" %}
+	
+	<table class="table">
+	 	<thead>
+	    	<tr>
+		      	{% if popup %}
+		      		<th>{% trans "Select" %}</th>
+		      	{% endif %}
+		      	<th>{% trans "Name" %}</th>
+		      	<th>{% trans "Size" %}</th>
+		      	<th>{% trans "Date" %}</th>
+		      	{% if not popup %}
+		      		{% if not first_level %}
+		      			<th>{% trans "Actions" %}</th>
+		      		{% endif %}
+		      	{% endif %}
+	    	</tr>
+	  	</thead>
+	  	<tbody>
+	    	{% for file in files %}
+	    	<tr>
+	      		{% if popup %}
+	      			{% if file.filetype == "Directory" %}
+	      				<td></td>
+	      			{% else %}
+	      				<td><a href="javascript: Filemanager.select('{{file.filepath}}');">{% trans "Select" %}</a></td>
+	      			{% endif %}
+	      		{% endif %}
+	      		{% if file.filetype == "Directory" %}
+	      			<td><img src="{% static "img/folder.png" %}" style="margin-right: 5px;"><a href="?path={{file.filepath}}{% if popup %}&amp;popup=1{% endif %}">{{file.filename}}</a></td>
+	      		{% else %}
+	      			<td>{{file.filename}}</td>
+	      		{% endif %}
+	      		<td>{{file.filesize}}</td>
+	      		<td>{{file.filedate}}</td>
+	      		{% if not popup %}
+<!-- 	      			<td><a href="{% url 'filemanager:detail' %}?path={{file.filepath}}">{% trans "Details" %}</a></td> -->
+					{% if not first_level %}
+	      			<td>
+		      			<div class="btn-group">
+		                  	<button type="button" class="btn btn-box-tool dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+	                    		<i class="fa fa-wrench"></i>
+	                    	</button>
+	                    	<ul class="dropdown-menu" role="menu">
+	                    	{% if file.filetype == "Directory" %}
+	                    		<li><a href="#"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete directory" %}</a></li>                 		
+	                  		{% else %}
+	                  			{% if file.fileformat == "shapefile" %}
+				      				<li><a href="#"><i class="fa fa-times" style="color: #3c8dbc;"></i> {% trans "Export to database" %}</a></li>
+				      				<li class="divider"></li>
+				      			{% endif %}                    		
+	                    		<li><a href="#"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete file" %}</a></li>
+				      		{% endif %}
+				      		</ul>
+		                </div>
+	                </td>
+	                {% endif %}
+	      		{% endif %}
+	    	</tr>
+	    	{% empty %}
+	    	<tr>
+	      		<td colspan="5">
+	        		{% trans "Nothing to see here." %}
+	      		</td>
+	    	</tr>
+	    	{% endfor %}
+	  	</tbody>
+	</table>
+	<div>
+		{% if not first_level %}
+	  		<a href="{% url 'filemanager:create-directory' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-primary"><i class="fa fa-plus margin-r-5"></i>{% trans "Create directory" %}</a>
+	  		<a href="{% url 'filemanager:upload' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-primary"><i class="fa fa-upload margin-r-5"></i>{% trans "Upload" %}</a>
+	  	{% endif %}
+	</div>
+
+	{% if popup %}
+		<script src="{% static "js/filemanager.js" %}"></script>
+	{% endif %}
+	
+{% endblock %}
