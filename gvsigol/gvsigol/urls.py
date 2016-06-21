@@ -55,3 +55,8 @@ if 'gvsigol_symbology' in settings.INSTALLED_APPS:
     urlpatterns += patterns('',
         url(r'^gvsigonline/symbology/', include('gvsigol_symbology.urls')),
     )
+    
+if 'gvsigol_filemanager' in settings.INSTALLED_APPS:
+    urlpatterns += patterns('',
+        url(r'^gvsigonline/filemanager/', include('gvsigol_filemanager.urls', namespace='filemanager')),      
+    )
