@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'gvsigol_auth',
     'gvsigol_services',
     'gvsigol_symbology',
+    'gvsigol_filemanager',
     'gvsigol_core',
     ##GVSIG_ONLINE_APPS##
 ]
@@ -79,7 +80,8 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'gvsigol_auth/templates'),
             os.path.join(BASE_DIR, 'gvsigol_core/templates'),
             os.path.join(BASE_DIR, 'gvsigol_services/templates'),
-            os.path.join(BASE_DIR, 'gvsigol_symbology/templates'),            
+            os.path.join(BASE_DIR, 'gvsigol_symbology/templates'),
+            os.path.join(BASE_DIR, 'gvsigol_filemanager/templates'),            
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -167,6 +169,7 @@ LOCALE_PATHS = (
     '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol_services/locale',
     '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol_symbology/locale',
     '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol_auth/locale',
+    '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol_filemanager/locale',
 )
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -269,3 +272,8 @@ GVSIGOL_BASE_LAYERS = {
         'key': '##BING_API_KEY##'
     }
 }
+
+FILEMANAGER_DIRECTORY = os.path.join(MEDIA_ROOT, 'data')
+FILEMANAGER_MEDIA_ROOT = os.path.join(MEDIA_ROOT, FILEMANAGER_DIRECTORY)
+FILEMANAGER_MEDIA_URL = os.path.join(MEDIA_URL, FILEMANAGER_DIRECTORY)
+FILEMANAGER_STORAGE = FileSystemStorage(location=FILEMANAGER_MEDIA_ROOT, base_url=FILEMANAGER_MEDIA_URL)
