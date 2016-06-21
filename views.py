@@ -43,6 +43,8 @@ import utils
 import json
 import re
 
+from gvsigol.settings import MEDIA_ROOT
+
 _valid_layer_group_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 
