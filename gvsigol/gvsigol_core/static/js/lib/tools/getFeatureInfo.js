@@ -316,22 +316,26 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 	ui += 	'<div class="box-body" style="padding: 20px;">';
 	ui += 		'<ul class="products-list product-list-in-box">';
 	for (var key in selectedFeature.properties) {
+		var value = selectedFeature.properties[key];
+		if (value == "null" || value == null) {
+			value = "";
+		}
 		if (selectedFeature.properties[key] != null && selectedFeature.properties[key].toString().indexOf('http') > -1) {
 			ui += '<li class="item">';
 			ui += 	'<div class="feature-info">';
-			ui += 		'<a href="' + selectedFeature.properties[key] + '" class="product-title">' + key;
+			ui += 		'<a href="' + value + '" class="product-title">' + key;
 			ui += 			'<span class="label label-warning pull-right">' + gettext('Open') + '</span>';
 			ui += 		'</a>';
-			ui += 		'<span class="product-description">' + selectedFeature.properties[key] + '</span>';
+			ui += 		'<span class="product-description">' + value + '</span>';
 			ui += 	'</div>';
 			ui += '</li>';
 			
 		} else {
-			if (!key.startsWith(this.prefix)) {				
+			if (!key.startsWith(this.prefix)) {	
 				ui += '<li class="item">';
 				ui += 	'<div class="feature-info">';
 				ui += 		'<a href="javascript:void(0)" class="product-title">' + key + '</a>';
-				ui += 		'<span class="product-description">' + selectedFeature.properties[key] + '</span>';
+				ui += 		'<span class="product-description">' + value + '</span>';
 				ui += 	'</div>';
 				ui += '</li>';
 			}
