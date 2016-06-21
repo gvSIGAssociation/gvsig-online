@@ -28,7 +28,7 @@ from django.utils.translation import ugettext as _
 from forms import UserCreateForm, UserGroupForm
 from models import UserGroupUser, UserGroup
 from django.contrib.auth.models import User
-from backend import backend as ldap_backend
+from gvsigol_auth.services import services as core_services
 import random, string
 from utils import admin_required
 import utils as auth_utils
@@ -73,7 +73,7 @@ def password_update(request):
             user.set_password(password1)
             user.save()
             
-            ldap_backend.change_user_password(user, password1)
+            core_services.ldap_change_user_password(user, password1)
             
             response = {'success': True}
             
@@ -91,7 +91,7 @@ def password_reset(request):
             temp_pass = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
             user.set_password(temp_pass)
             user.save()
-            ldap_backend.change_user_password(user, temp_pass)
+            core_services.ldap_change_user_password(user, temp_pass)
             auth_utils.send_reset_password_email(user.email, temp_pass)
             return redirect('password_reset_success')
             
@@ -166,9 +166,9 @@ def user_add(request):
                     user.save()
                     
                     if user.is_staff:
-                        ldap_backend.add_user(user, form.data['password1'], True)
+                        core_services.ldap_add_user(user, form.data['password1'], True)
                         admin_group = UserGroup.objects.get(name__exact='admin')
-                        ldap_backend.add_group_member(user, admin_group)
+                        core_services.ldap_add_group_member(user, admin_group)
                         usergroup_user = UserGroupUser(
                             user = user,
                             user_group = admin_group
@@ -176,7 +176,7 @@ def user_add(request):
                         usergroup_user.save()
                         
                     else:
-                        ldap_backend.add_user(user, form.data['password1'], False)
+                        core_services.ldap_add_user(user, form.data['password1'], False)
                         
                     for ag in assigned_groups:
                         user_group = UserGroup.objects.get(id=ag)
@@ -185,7 +185,7 @@ def user_add(request):
                             user_group = user_group
                         )
                         usergroup_user.save()
-                        ldap_backend.add_group_member(user, user_group)
+                        core_services.ldap_add_group_member(user, user_group)
                         
                     auth_utils.sendMail(user, form.data['password1'])
     
@@ -235,19 +235,19 @@ def user_update(request, uid):
             user.is_staff = True
             user.save()
             admin_group = UserGroup.objects.get(name__exact='admin')
-            ldap_backend.add_group_member(user, admin_group)
+            core_services.ldap_add_group_member(user, admin_group)
             assigned_groups.append(admin_group.id)
         
         if user.is_staff and not is_staff:
             user.is_staff = False
             user.save()
             admin_group = UserGroup.objects.get(name__exact='admin')
-            ldap_backend.delete_group_member(user, admin_group)
+            core_services.ldap_delete_group_member(user, admin_group)
         
         groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
         for ugu in  groups_by_user:
             user_group = UserGroup.objects.get(id=ugu.user_group.id)
-            ldap_backend.delete_group_member(user, user_group)
+            core_services.ldap_delete_group_member(user, user_group)
             ugu.delete()
                   
         for ag in assigned_groups:
@@ -257,7 +257,7 @@ def user_update(request, uid):
                 user_group = user_group
             )
             usergroup_user.save()
-            ldap_backend.add_group_member(user, user_group)
+            core_services.ldap_add_group_member(user, user_group)
             
         return redirect('user_list')
                 
@@ -277,10 +277,10 @@ def user_delete(request, uid):
         groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
         for ugu in  groups_by_user:
             user_group = UserGroup.objects.get(id=ugu.user_group.id)
-            ldap_backend.delete_group_member(user, user_group)
+            core_services.ldap_delete_group_member(user, user_group)
         
-        ldap_backend.delete_default_group_member(user)   
-        ldap_backend.delete_user(user)           
+        core_services.ldap_delete_default_group_member(user)   
+        core_services.ldap_delete_user(user)           
         user.delete()
             
         response = {
@@ -325,7 +325,8 @@ def group_add(request):
             )
             group.save()
                 
-            ldap_backend.add_group(group)                               
+            core_services.ldap_add_group(group)
+            core_services.add_data_directory(group)                               
                       
             return redirect('group_list')
                 
@@ -343,7 +344,8 @@ def group_delete(request, gid):
     if request.method == 'POST':
         group = UserGroup.objects.get(id=int(gid))
         
-        ldap_backend.delete_group(group)           
+        core_services.ldap_delete_group(group)           
+        core_services.delete_data_directory(group)
         
         group.delete()
             

@@ -26,12 +26,13 @@ from django.utils.translation import ugettext as _
 from gvsigol.settings import GVSIGOL_LDAP
 from django.contrib.auth.models import User
 import ldap.modlist as modlist
-import gvsigol.settings
+from gvsigol import settings
+import shutil
 import ldap
 import sys
 import os
 
-class GvSigOnlineCore():
+class GvSigOnlineServices():
     
     def __init__(self, is_enabled, host, port, domain, username, password):
         self.is_enabled = is_enabled
@@ -49,16 +50,8 @@ class GvSigOnlineCore():
             self.ldap = ldap.initialize('ldap://' + host + ':' + port)
             self.ldap.simple_bind_s(username, password)
             
-    def create_default_directories(self):
-        thumbnails_path = gvsigol.settings.MEDIA_ROOT + "thumbnails/"
-        try: 
-            os.makedirs(thumbnails_path, mode=0777)
             
-        except OSError as e:
-            if not os.path.isdir(thumbnails_path):
-                raise
-            
-    def create_admin_group(self):
+    def ldap_create_admin_group(self):
         if self.is_enabled:
             try:
                 
@@ -82,7 +75,7 @@ class GvSigOnlineCore():
             except Exception as e:
                 pass           
             
-    def create_admin_user(self):
+    def ldap_create_admin_user(self):
         if self.is_enabled:
             try:
                 
@@ -120,7 +113,7 @@ class GvSigOnlineCore():
             except Exception as exc:
                 pass
         
-    def create_default_group(self):
+    def ldap_create_default_group(self):
         if self.is_enabled:
             try:
                 dn=str("cn=default,ou=groups," + self.domain)
@@ -136,9 +129,9 @@ class GvSigOnlineCore():
             except ldap.LDAPError, e:
                 pass
         
-    def add_group(self, group):
+    def ldap_add_group(self, group):
         if self.is_enabled:
-            last_gid = self.get_last_gid()    
+            last_gid = self.ldap_get_last_gid()    
             
             try:
                 last_gid = last_gid + 1
@@ -157,11 +150,11 @@ class GvSigOnlineCore():
                 print e 
         
         
-    def modify_group(self, old_group_name, new_group_name):
+    def ldap_modify_group(self, old_group_name, new_group_name):
         if self.is_enabled:
             print 'group modified'
         
-    def delete_group(self, group):    
+    def ldap_delete_group(self, group):    
         if self.is_enabled:   
             try:
                 dn = "cn=" + group.name + ",ou=groups," + self.domain
@@ -170,7 +163,7 @@ class GvSigOnlineCore():
             except ldap.LDAPError, e:
                 print e
         
-    def add_user(self, user, password, is_admin):
+    def ldap_add_user(self, user, password, is_admin):
         if self.is_enabled:
             # The dn of our new entry/object
             dn=str("cn=" + user.username + ",ou=users," + self.domain)
@@ -199,11 +192,11 @@ class GvSigOnlineCore():
             
             self.add_default_group_member(user)
         
-    def modify_user(self, group_id, group_name):
+    def ldap_modify_user(self, group_id, group_name):
         if self.is_enabled:
             print 'User modified'
         
-    def delete_user(self, user):
+    def ldap_delete_user(self, user):
         if self.is_enabled:
             try:
                 dn = "cn=" + user.username + ",ou=users," + self.domain
@@ -212,7 +205,7 @@ class GvSigOnlineCore():
             except ldap.LDAPError, e:
                 print e
             
-    def add_group_member(self, user, group):
+    def ldap_add_group_member(self, user, group):
         if self.is_enabled:
             add_member = [(ldap.MOD_ADD, 'memberUid', str(user.username))]
     
@@ -224,7 +217,7 @@ class GvSigOnlineCore():
                 print e
                 return False
             
-    def add_default_group_member(self, user):
+    def ldap_add_default_group_member(self, user):
         if self.is_enabled:
             add_member = [(ldap.MOD_ADD, 'memberUid', str(user.username))]
     
@@ -236,7 +229,7 @@ class GvSigOnlineCore():
                 print e
                 return False
             
-    def add_admin_group_member(self, user):
+    def ldap_add_admin_group_member(self, user):
         if self.is_enabled:
             add_member = [(ldap.MOD_ADD, 'memberUid', str(user.username))]
     
@@ -248,7 +241,7 @@ class GvSigOnlineCore():
                 print e
                 return False
         
-    def delete_group_member(self, user, group):
+    def ldap_delete_group_member(self, user, group):
         if self.is_enabled:
             delete_member = [(ldap.MOD_DELETE, 'memberUid', str(user.username))]
     
@@ -260,7 +253,7 @@ class GvSigOnlineCore():
                 print e
                 return False
             
-    def delete_default_group_member(self, user):
+    def ldap_delete_default_group_member(self, user):
         if self.is_enabled:
             delete_member = [(ldap.MOD_DELETE, 'memberUid', str(user.username))]
     
@@ -272,7 +265,7 @@ class GvSigOnlineCore():
                 print e
                 return False
         
-    def get_last_gid(self):
+    def ldap_get_last_gid(self):
         
         self.ldap.protocol_version = ldap.VERSION3        
         baseDN = "ou=groups," + self.domain
@@ -302,7 +295,7 @@ class GvSigOnlineCore():
             print e
     
        
-    def get_last_uid(self):
+    def ldap_get_last_uid(self):
         
         self.ldap.protocol_version = ldap.VERSION3        
         baseDN = "ou=users," + self.domain
@@ -332,7 +325,7 @@ class GvSigOnlineCore():
             print e
             
             
-    def get_uid(self, user_name):
+    def ldap_get_uid(self, user_name):
         
         self.ldap.protocol_version = ldap.VERSION3        
         baseDN = "ou=users," + self.domain
@@ -362,7 +355,7 @@ class GvSigOnlineCore():
             print e
             
             
-    def change_user_password(self, user, password):
+    def ldap_change_user_password(self, user, password):
         if self.is_enabled:
             user_dn = str("cn=" + user.username + ",ou=users," + self.domain)
             new_password = [(ldap.MOD_REPLACE, 'userPassword', str(password))]
@@ -381,8 +374,32 @@ class GvSigOnlineCore():
             lg.name = "__default__"
             lg.description = "Default group"
             lg.save()
+      
             
-def get_backend():
+    def add_data_directory(self, group):
+        path = settings.MEDIA_ROOT + "data/" + group.name
+        try: 
+            os.makedirs(path, mode=0777)
+            
+        except OSError as e:
+            if not os.path.isdir(path):
+                raise
+            
+    def delete_data_directory(self, group):
+        try: 
+            path = settings.MEDIA_ROOT + "data/" + group.name
+            if os.path.exists(path):
+                shutil.rmtree(path)
+                    
+            return True
+         
+        except Exception as e:
+            print('Error: %s' % e)
+            return False
+            
+    
+            
+def get_services():
     try:
         is_enabled = GVSIGOL_LDAP['ENABLED']
         host = GVSIGOL_LDAP['HOST']
@@ -393,14 +410,14 @@ def get_backend():
     except:
         raise ImproperlyConfigured
 
-    gvsigOnline = GvSigOnlineCore(is_enabled, host, port, domain, username, password)
+    gvsigOnline = GvSigOnlineServices(is_enabled, host, port, domain, username, password)
     if is_enabled:
-        gvsigOnline.create_default_group()
-        gvsigOnline.create_admin_group()
-        gvsigOnline.create_admin_user()
+        gvsigOnline.ldap_create_default_group()
+        gvsigOnline.ldap_create_admin_group()
+        gvsigOnline.ldap_create_admin_user()
 
     gvsigOnline.create_default_layer_group()
-    gvsigOnline.create_default_directories()
+
     return gvsigOnline
 
-backend = get_backend()
+services = get_services()
