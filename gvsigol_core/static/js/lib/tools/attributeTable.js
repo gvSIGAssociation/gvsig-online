@@ -120,7 +120,14 @@ attributeTable.prototype.createTable = function(featureType) {
 				properties.push(featureType[i].name);
 				propertiesWithType.push(featureType[i].name + '|' + featureType[i].type);
 				columns.push({
-					"data": featureType[i].name
+					"data": featureType[i].name,
+					"render": function ( data, type, full, meta ) {
+						var value = data;
+						if (data == "null" || data == null) {
+							value = "";
+						}
+						return value;
+					 }
 				});
 				var th = $("<th>", {text: featureType[i].name});
 				trow.append(th);
