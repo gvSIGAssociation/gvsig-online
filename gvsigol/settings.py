@@ -25,6 +25,7 @@ import os
 import ldap
 from django_auth_ldap.config import LDAPSearch
 from django.utils.translation import ugettext_lazy as _
+from django.core.files.storage import FileSystemStorage
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -54,9 +55,10 @@ INSTALLED_APPS = [
     'gvsigol_auth',
     'gvsigol_services',
     'gvsigol_symbology',
+    'gvsigol_filemanager',
     'gvsigol_core',
-    #'gvsigol_app_dev',
-    'gvsigol_app_aguas',
+    'gvsigol_app_dev',
+    #'gvsigol_app_aguas',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -80,7 +82,8 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'gvsigol_auth/templates'),
             os.path.join(BASE_DIR, 'gvsigol_core/templates'),
             os.path.join(BASE_DIR, 'gvsigol_services/templates'),
-            os.path.join(BASE_DIR, 'gvsigol_symbology/templates')
+            os.path.join(BASE_DIR, 'gvsigol_symbology/templates'),
+            os.path.join(BASE_DIR, 'gvsigol_filemanager/templates')
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -169,6 +172,7 @@ LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol_auth/locale'),
     os.path.join(BASE_DIR, 'gvsigol_services/locale'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/locale'),
+    os.path.join(BASE_DIR, 'gvsigol_filemanager/locale'),
     #os.path.join(BASE_DIR, 'gvsigol_app_dev/locale'),
     #os.path.join(BASE_DIR, 'gvsigol_app_aguas/locale'),
 )
@@ -195,8 +199,9 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_auth/static'),
     os.path.join(BASE_DIR, 'gvsigol_services/static'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
-    #os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
-    os.path.join(BASE_DIR, 'gvsigol_app_aguas/static'),
+    os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
+    os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
+    #os.path.join(BASE_DIR, 'gvsigol_app_aguas/static'),
 )
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -292,3 +297,8 @@ GVSIGOL_BASE_LAYERS = {
         'key': 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3'
     }
 }
+
+FILEMANAGER_DIRECTORY = os.path.join(MEDIA_ROOT, 'data')
+FILEMANAGER_MEDIA_ROOT = os.path.join(MEDIA_ROOT, FILEMANAGER_DIRECTORY)
+FILEMANAGER_MEDIA_URL = os.path.join(MEDIA_URL, FILEMANAGER_DIRECTORY)
+FILEMANAGER_STORAGE = FileSystemStorage(location=FILEMANAGER_MEDIA_ROOT, base_url=FILEMANAGER_MEDIA_URL)
