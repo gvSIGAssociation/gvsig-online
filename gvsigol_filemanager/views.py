@@ -6,6 +6,7 @@ from django.shortcuts import HttpResponse
 from django.http import HttpResponseBadRequest
 from django.core.urlresolvers import reverse_lazy
 from gvsigol.settings import FILEMANAGER_DIRECTORY
+from gvsigol_services.backend_mapservice import backend as mapservice
 from forms import DirectoryCreateForm
 from core import Filemanager
 
@@ -56,15 +57,20 @@ class BrowserView(FilemanagerMixin, TemplateView):
         return context
 
 
-class DetailView(FilemanagerMixin, TemplateView):
-    template_name = 'browser/filemanager_detail.html'
+class ExportToDatabaseView(FilemanagerMixin, TemplateView):
+    template_name = 'browser/export_to_database.html'
 
     def get_context_data(self, **kwargs):
-        context = super(DetailView, self).get_context_data(**kwargs)
-
+        context = super(ExportToDatabaseView, self).get_context_data(**kwargs)
+        
+        (form, template, file_accepts) = mapservice.getUploadForm('v_PostGIS')
+        context['form'] = form
         context['file'] = self.fm.file_details()
-
+        
         return context
+    
+    def post(self, request, *args, **kwargs):
+        print ''
 
 
 class UploadView(FilemanagerMixin, TemplateView):

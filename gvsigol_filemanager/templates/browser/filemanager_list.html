@@ -43,7 +43,6 @@
 	      		<td>{{file.filesize}}</td>
 	      		<td>{{file.filedate}}</td>
 	      		{% if not popup %}
-<!-- 	      			<td><a href="{% url 'filemanager:detail' %}?path={{file.filepath}}">{% trans "Details" %}</a></td> -->
 					{% if not first_level %}
 	      			<td>
 		      			<div class="btn-group">
@@ -55,7 +54,7 @@
 	                    		<li><a href="#" data-filepath="{{file.filepath}}" class="delete-file"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete directory" %}</a></li>                 		
 	                  		{% else %}
 	                  			{% if file.extension == "shp" %}
-				      				<li><a href="#" class="export-to-database" ><i class="fa fa-upload" style="color: #3c8dbc;"></i> {% trans "Export to database" %}</a></li>
+				      				<li><a href="{% url 'filemanager:export-to-database' %}?path={{file.filepath}}" class="export-to-database" ><i class="fa fa-upload" style="color: #3c8dbc;"></i> {% trans "Export to database" %}</a></li>
 				      				<li class="divider"></li>
 				      			{% endif %}                    		
 	                    		<li><a href="#" data-filepath="{{file.filepath}}" class="delete-file"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete file" %}</a></li>
@@ -90,6 +89,7 @@
 
 {% block extra-scripts %}	
 	<script>
+	$('#menu-manage-files').addClass("active");
 	$(document).ready(function(){	  	
 	  	$('.delete-file').on('click', function () {				
 	  		$("body").overlay();
@@ -109,23 +109,6 @@
 				},
 				error: function(){}
 			});
-		});
-	  	
-	  	$('.export-to-database').on('click', function () {				
-	  		/*$("body").overlay();
-			$.ajax({
-				type: 'POST',
-				async: false,
-				url: '/gvsigonline/symbology/library_delete/' + data[0] + '/',
-				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-				},
-				success	:function(response){
-					$.overlayout();
-					location.reload();
-				},
-				error: function(){}
-			});*/
 		});
 	});
 	</script>
