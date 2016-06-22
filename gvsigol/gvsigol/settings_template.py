@@ -25,6 +25,7 @@ import os
 import ldap
 from django_auth_ldap.config import LDAPSearch
 from django.utils.translation import ugettext_lazy as _
+from django.core.files.storage import FileSystemStorage
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
