@@ -5,6 +5,7 @@ urlpatterns = [
     url(r'^style_layer_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.style_layer_update', name='style_layer_update'),
     url(r'^select_legend_type/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.select_legend_type', name='select_legend_type'),
     url(r'^get_sld_body/$', 'gvsigol_symbology.views.get_sld_body', name='get_sld_body'),
+    url(r'^sld_import/$', 'gvsigol_symbology.views.sld_import', name='sld_import'),
     
     url(r'^unique_symbol_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views_unique_symbol.unique_symbol_add', name='unique_symbol_add'),
     url(r'^unique_symbol_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views_unique_symbol.unique_symbol_update', name='unique_symbol_update'),

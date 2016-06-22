@@ -157,6 +157,9 @@ def upload_library(file, library):
     return rules
 
 
+def upload_sld(file):
+    rules = []
+    return rules
     
             
 def check_library_path(library):
