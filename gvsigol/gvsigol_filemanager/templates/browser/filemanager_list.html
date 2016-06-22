@@ -34,7 +34,11 @@
 	      		{% if file.filetype == "Directory" %}
 	      			<td><img src="{% static "img/folder.png" %}" style="margin-right: 5px;"><a href="?path={{file.filepath}}{% if popup %}&amp;popup=1{% endif %}">{{file.filename}}</a></td>
 	      		{% else %}
-	      			<td>{{file.filename}}</td>
+	      			{% if file.extension == "shp" %}
+	      				<td><img width="32" src="{% static "img/shp.png" %}" style="margin-right: 5px;">{{file.filename}}</td>
+	      			{% elif file.extension == "tiff" %}
+	      				<td><img width="32" src="{% static "img/tiff.png" %}" style="margin-right: 5px;">{{file.filename}}</td>
+	      			{% endif %}
 	      		{% endif %}
 	      		<td>{{file.filesize}}</td>
 	      		<td>{{file.filedate}}</td>
@@ -48,13 +52,13 @@
 	                    	</button>
 	                    	<ul class="dropdown-menu" role="menu">
 	                    	{% if file.filetype == "Directory" %}
-	                    		<li><a href="#"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete directory" %}</a></li>                 		
+	                    		<li><a href="#" data-filepath="{{file.filepath}}" class="delete-file"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete directory" %}</a></li>                 		
 	                  		{% else %}
-	                  			{% if file.fileformat == "shapefile" %}
-				      				<li><a href="#"><i class="fa fa-times" style="color: #3c8dbc;"></i> {% trans "Export to database" %}</a></li>
+	                  			{% if file.extension == "shp" %}
+				      				<li><a href="#" class="export-to-database" ><i class="fa fa-upload" style="color: #3c8dbc;"></i> {% trans "Export to database" %}</a></li>
 				      				<li class="divider"></li>
 				      			{% endif %}                    		
-	                    		<li><a href="#"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete file" %}</a></li>
+	                    		<li><a href="#" data-filepath="{{file.filepath}}" class="delete-file"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete file" %}</a></li>
 				      		{% endif %}
 				      		</ul>
 		                </div>
@@ -82,4 +86,47 @@
 		<script src="{% static "js/filemanager.js" %}"></script>
 	{% endif %}
 	
+{% endblock %}
+
+{% block extra-scripts %}	
+	<script>
+	$(document).ready(function(){	  	
+	  	$('.delete-file').on('click', function () {				
+	  		$("body").overlay();
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: "{% url 'filemanager:delete-file' %}",
+				data: {
+					path: this.dataset.filepath
+				},
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				success	:function(response){
+					$.overlayout();
+					location.reload();
+				},
+				error: function(){}
+			});
+		});
+	  	
+	  	$('.export-to-database').on('click', function () {				
+	  		/*$("body").overlay();
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/symbology/library_delete/' + data[0] + '/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				success	:function(response){
+					$.overlayout();
+					location.reload();
+				},
+				error: function(){}
+			});*/
+		});
+	});
+	</script>
 {% endblock %}
