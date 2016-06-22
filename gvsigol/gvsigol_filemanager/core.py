@@ -68,9 +68,9 @@ class Filemanager(object):
             'fileurl': self.url,
         }
 
-    def directory_list(self, request):
+    def directory_list(self, request, first_level):
         listing = []
-        visible_extensions = ['shp', 'tiff', 'jpg']
+        visible_extensions = ['shp', 'geotif', 'geotiff', 'tif', 'tiff', 'jpg', 'jpeg', 'png']
         
         directories, files = FILEMANAGER_STORAGE.listdir(self.location)
 
@@ -85,10 +85,13 @@ class Filemanager(object):
             }
 
         for directoryname in directories:
-            groups = core_utils.get_groups_by_user(request.user)
-            for g in groups:
-                if directoryname == g:
-                    listing.append(_helper(directoryname, 'Directory', ''))
+            if first_level:
+                groups = core_utils.get_groups_by_user(request.user)
+                for g in groups:
+                    if directoryname == g:
+                        listing.append(_helper(directoryname, 'Directory', ''))
+            else:
+                listing.append(_helper(directoryname, 'Directory', ''))
 
         for filename in files:
             extension = filename.split('.')[1]

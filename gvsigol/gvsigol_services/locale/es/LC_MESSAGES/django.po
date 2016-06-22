@@ -639,7 +639,7 @@ msgstr "Actualizar almacén de datos"
 
 #: templates/layer_add.html:12
 msgid "Import layer from database"
-msgstr "Importar capa desde la base de datos"
+msgstr "Importar desde base de datos"
 
 #: templates/layer_add.html:40 templates/layer_update.html:44
 msgid "Data Store"
