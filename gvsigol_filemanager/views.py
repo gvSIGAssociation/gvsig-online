@@ -1,15 +1,18 @@
-import json
-
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import View
-from django.shortcuts import HttpResponse
+from django.shortcuts import HttpResponse, redirect
 from django.http import HttpResponseBadRequest
 from django.core.urlresolvers import reverse_lazy
 from gvsigol.settings import FILEMANAGER_DIRECTORY
 from gvsigol_services.backend_mapservice import backend as mapservice
+from django.utils.translation import ugettext_lazy as _
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
+from gvsigol_services import rest_geoserver
 from forms import DirectoryCreateForm
 from core import Filemanager
-
+import logging, sys
+import json
 
 class FilemanagerMixin(object):
     def dispatch(self, request, *args, **kwargs):
@@ -70,7 +73,31 @@ class ExportToDatabaseView(FilemanagerMixin, TemplateView):
         return context
     
     def post(self, request, *args, **kwargs):
-        print ''
+        (form_class, template, file_accepts) = mapservice.getUploadForm('v_PostGIS')
+        if form_class is not None:
+            form = form_class(request.POST, request.FILES)
+            if form.is_valid():
+                try:
+                    if mapservice.exportShpToPostgis(form.cleaned_data, session=request.session):
+                        return redirect("/gvsigonline/filemanager/?path=" + request.POST.get('directory_path'))
+                    
+                except rest_geoserver.RequestError as e:
+                    form.add_error(None, _(e.get_message()))
+                    return redirect("/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path'))
+                except Exception as exc:
+                    # ensure the ds gets cleaned if we've failed
+                    # FIXME: clean up disabled at the moment, as it has security implications
+                    # We should ensure which kind of exception we have got before deleting,
+                    # otherwise an attacker could use this method
+                    # in order to arbitrarily delete existing data stores  
+                    #mapservice_backend.deleteDatastore(ds.workspace, ds, "all", session=request.session)
+                    exctype, value = sys.exc_info()[:2]
+                    # use unicode with error='replace' because owslib sometimes raises exceptions using unexpected encodings
+                    exc_msg = unicode(str(exctype), errors='replace')+u" - "+unicode(value)  
+                    logging.exception(exc_msg)
+                    form.add_error(None, _("Error uploading the layer. Review the file format."))
+                    form.add_error(None, exc_msg)
+                    return redirect("/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path'))
 
 
 class UploadView(FilemanagerMixin, TemplateView):
