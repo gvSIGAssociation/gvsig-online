@@ -51,7 +51,7 @@ class BrowserView(FilemanagerMixin, TemplateView):
         if self.fm.location == FILEMANAGER_DIRECTORY:
             context['first_level'] = True
         context['popup'] = self.popup
-        context['files'] = self.fm.directory_list(self.request)
+        context['files'] = self.fm.directory_list(self.request, context['first_level'])
 
         return context
 
