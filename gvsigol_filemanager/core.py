@@ -6,6 +6,9 @@ from django.core.files.base import ContentFile
 import signals
 from gvsigol.settings import FILEMANAGER_DIRECTORY, FILEMANAGER_STORAGE
 from utils import sizeof_fmt
+from gvsigol_core import utils as core_utils
+import zipfile
+import shutil
 
 
 class Filemanager(object):
@@ -65,15 +68,16 @@ class Filemanager(object):
             'fileurl': self.url,
         }
 
-    def directory_list(self):
+    def directory_list(self, request):
         listing = []
-
+        visible_extensions = ['shp', 'tiff', 'jpg']
+        
         directories, files = FILEMANAGER_STORAGE.listdir(self.location)
 
-        def _helper(name, filetype):
+        def _helper(name, filetype, extension):
             return {
                 'filepath': os.path.join(self.path, name),
-                'fileformat': 'shapefile',
+                'extension': extension,
                 'filetype': filetype,
                 'filename': name,
                 'filedate': FILEMANAGER_STORAGE.modified_time(os.path.join(self.path, name)),
@@ -81,10 +85,15 @@ class Filemanager(object):
             }
 
         for directoryname in directories:
-            listing.append(_helper(directoryname, 'Directory'))
+            groups = core_utils.get_groups_by_user(request.user)
+            for g in groups:
+                if directoryname == g:
+                    listing.append(_helper(directoryname, 'Directory', ''))
 
         for filename in files:
-            listing.append(_helper(filename, 'File'))
+            extension = filename.split('.')[1]
+            if extension in visible_extensions:
+                listing.append(_helper(filename, 'File', extension))
 
         return listing
 
@@ -95,6 +104,32 @@ class Filemanager(object):
         FILEMANAGER_STORAGE.save(filepath, filedata)
         signals.filemanager_post_upload.send(sender=self.__class__, filename=filename, path=self.path, filepath=filepath)
         return filename
+    
+    def extract_zip(self, file, folder):
+        zfile = zipfile.ZipFile(file)
+        zfile.extractall(self.location)
+    
+    def delete(self, name):
+        try:
+            file = name.split('/')[-1]
+            filename = file.split('.')[0]
+            path = self.location.replace(file, '')
+            directories, files = FILEMANAGER_STORAGE.listdir(path)
+            if len(files) >= 1:
+                for f in files:
+                    if filename == f.split('.')[0]:
+                        FILEMANAGER_STORAGE.delete(path + f)
+                return True
+                    
+            else:
+                shutil.rmtree(self.location)
+                return True
+            
+        except Exception as e:
+            if e.errno == 21:
+                shutil.rmtree(e.filename)
+                return True
+            return False
 
     def create_directory(self, name):
         name = FILEMANAGER_STORAGE.get_valid_name(name)
