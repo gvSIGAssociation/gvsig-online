@@ -37,10 +37,13 @@
 					</div>
 					{% endif %}
 					
+					<input type="hidden" name="directory_path" value="{{file.directory}}">	
+					<input type="hidden" name="file_path" value="{{file.filepath}}">
+					
 					<div class="row">
 						<div class="col-md-12" style="margin-bottom: 20px;">
 							<label>{% trans "File" %}</label>
-							<input disabled id="id_file" class="form-control" type="text" name="file" value="{{file.fileurl}}">					
+							<input readonly id="id_file" class="form-control" type="text" name="file" value="{{file.fileurl}}">					
 						</div>
 					</div>	
 					
