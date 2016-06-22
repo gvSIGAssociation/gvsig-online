@@ -51,7 +51,7 @@ class BrowserView(FilemanagerMixin, TemplateView):
         if self.fm.location == FILEMANAGER_DIRECTORY:
             context['first_level'] = True
         context['popup'] = self.popup
-        context['files'] = self.fm.directory_list()
+        context['files'] = self.fm.directory_list(self.request)
 
         return context
 
@@ -79,14 +79,34 @@ class UploadFileView(FilemanagerMixin, View):
     def post(self, request, *args, **kwargs):
         if len(request.FILES) != 1:
             return HttpResponseBadRequest("Just a single file please.")
-
-        # TODO: get filepath and validate characters in name, validate mime type and extension
-        filename = self.fm.upload_file(filedata = request.FILES['files'])
+        
+        file = request.FILES['files']
+        extension = file.name.split(".")[1]
+        
+        if extension == "zip":
+            folder = file.name.split(".")[0]
+            self.fm.extract_zip(file, folder)
+            
+        else:
+            # TODO: get filepath and validate characters in name, validate mime type and extension
+            self.fm.upload_file(filedata = request.FILES['files'])
 
         return HttpResponse(json.dumps({
-            'files': [{'name': filename}],
+            'files': [],
             'path': request.POST.get('path'),
         }))
+        
+class DeleteFileView(FilemanagerMixin, View):
+    def post(self, request, *args, **kwargs):
+        if self.fm.delete(request.POST.get('path')):
+            return HttpResponse(json.dumps({
+                'success': True
+            }))
+            
+        else:
+            return HttpResponse(json.dumps({
+                'success': False
+            }))
 
 
 class DirectoryCreateView(FilemanagerMixin, FormView):
