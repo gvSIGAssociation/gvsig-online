@@ -23,11 +23,15 @@
 '''
 
 from django.shortcuts import render_to_response, RequestContext, redirect, HttpResponse
+from gvsigol_services.backend_mapservice import backend as mapservice_backend
+from gvsigol_symbology.sld_utils import get_style_from_library_symbol
 from django.contrib.auth.decorators import login_required
-from gvsigol_services.models import Layer
+from django.utils.translation import ugettext as _
+from models import Style, StyleLayer, StyleRule
 from gvsigol_auth.utils import admin_required
-from models import Style, StyleLayer
+from gvsigol_services.models import Layer
 from gvsigol_symbology import sld_utils
+from gvsigol_symbology import services
 import json
 
   
@@ -91,3 +95,47 @@ def get_sld_body(request):
             'sld_body': sld_body
         }
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@admin_required
+def sld_import(request):
+    if request.method == 'POST': 
+        name = request.POST.get('sld-name')
+        
+        message = ''
+        if name != '' and 'sld-file' in request.FILES: 
+            rules = services.upload_sld(request.FILES['sld-file'])
+            for rule in rules:               
+                
+                style = Style(
+                    name = rule.name,
+                    title = rule.name,
+                    is_default = False,
+                    type = "US"
+                )
+                style.save()
+                
+                style_rule = StyleRule(
+                    style = style,
+                    rule = rule
+                )
+                style_rule.save()
+                
+                sld_body = get_style_from_library_symbol(style.id, request.session)
+                mapservice_backend.createStyle(style.name, sld_body, request.session)
+                             
+            return redirect('style_layer_list')
+        
+        elif name == '' and 'sld-file' in request.FILES:
+            message = _('You must enter a name for the style')
+            
+        elif name != '' and not 'sld-file' in request.FILES:
+            message = _('You must select a file')
+            
+        elif name == '' and not 'sld-file' in request.FILES:
+            message = _('You must enter a name for the style and select a file')
+            
+        return render_to_response('sld_import.html', {'message': message}, context_instance=RequestContext(request))
+    
+    else:   
+        return render_to_response('sld_import.html', {}, context_instance=RequestContext(request))
