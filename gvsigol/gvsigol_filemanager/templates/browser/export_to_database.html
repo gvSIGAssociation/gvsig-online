@@ -39,13 +39,7 @@
 					
 					<input type="hidden" name="directory_path" value="{{file.directory}}">	
 					<input type="hidden" name="file_path" value="{{file.filepath}}">
-					
-					<div class="row">
-						<div class="col-md-12" style="margin-bottom: 20px;">
-							<label>{% trans "File" %}</label>
-							<input readonly id="id_file" class="form-control" type="text" name="file" value="{{file.fileurl}}">					
-						</div>
-					</div>	
+					<input id="id_file" class="form-control" type="hidden" name="file" value="{{file.fileurl}}">					
 					
 					<div class="row">
 						<div class="col-md-12 form-group">	
@@ -67,14 +61,7 @@
 							{{ form.name }}
 							<p class="text-muted">* {% trans "Layer will be uploaded to the selected data store" %}.</p>
 						</div>	
-					</div>
-					
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="id_layer_group">{% trans "Layer group" %}</label>
-							{{ form.layer_group }}						
-						</div>
-					</div>				
+					</div>			
 					
 					<div class="row">
 						<div class="col-md-6 form-group">
