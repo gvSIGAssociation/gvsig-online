@@ -43,7 +43,8 @@ geometry_types = (('Point', _('Point')), ('MultiPoint', _('Multipoint')),
 
 class ImageMosaicUploadForm(forms.Form): 
     workspace = forms.ModelChoiceField(label=_(u'Workspace'), required=True, queryset=Workspace.objects.all(), widget=forms.Select(attrs={'class':'form-control'}))
-    file = forms.FileField(label=_(u'File'), required=True, widget=forms.FileInput(attrs={'accept': 'application/zip'}))
+    #file = forms.FileField(label=_(u'File'), required=True, widget=forms.FileInput(attrs={'accept': 'application/zip'}))
+    file = forms.CharField(label=_(u'File'), required=True, max_length=500, widget=forms.TextInput(attrs={'id':'selected-file', 'readonly': 'readonly', 'class' : 'form-control'}))
     name = forms.CharField(label=_(u'Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     #style = forms.CharField(label=_(u'Name'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
@@ -57,7 +58,8 @@ class ImageMosaicUploadForm(forms.Form):
 
 class RasterLayerUploadForm(forms.Form):
     workspace = forms.ModelChoiceField(label=_(u'Workspace'), required=True, queryset=Workspace.objects.all(), widget=forms.Select(attrs={'class':'form-control'}))
-    file = forms.FileField(label=_(u'File'), required=True, widget=forms.FileInput(attrs={'accept': 'application/zip'}))
+    #file = forms.FileField(label=_(u'File'), required=True, widget=forms.FileInput(attrs={'accept': 'application/zip'}))
+    file = forms.CharField(label=_(u'File'), required=True, max_length=500, widget=forms.TextInput(attrs={'id':'selected-file', 'readonly': 'readonly', 'class' : 'form-control'}))
     name = forms.CharField(label=_(u'Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     #style = forms.CharField(label=_(u'Name'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))

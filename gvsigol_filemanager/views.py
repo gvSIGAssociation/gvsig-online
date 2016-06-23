@@ -52,10 +52,32 @@ class BrowserView(FilemanagerMixin, TemplateView):
         if self.fm.location == FILEMANAGER_DIRECTORY:
             context['first_level'] = True
         context['popup'] = self.popup
+        if self.popup:
+            context['extends_template'] = 'filemanager_base2.html'
+        else:
+            context['extends_template'] = 'filemanager_base.html'
         context['files'] = self.fm.directory_list(self.request, context['first_level'])
 
         return context
+'''   
+class PopupBrowserView(FilemanagerMixin, TemplateView):
+    template_name = 'browser/filemanager_list.html'
 
+    def dispatch(self, request, *args, **kwargs):
+        self.popup = self.request.GET.get('popup', 0) == '1'
+        return super(BrowserView, self).dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(BrowserView, self).get_context_data(**kwargs)
+        
+        context['first_level'] = False
+        if self.fm.location == FILEMANAGER_DIRECTORY:
+            context['first_level'] = True
+        context['popup'] = self.popup
+        context['files'] = self.fm.directory_list(self.request, context['first_level'])
+
+        return context
+'''
 
 class ExportToDatabaseView(FilemanagerMixin, TemplateView):
     template_name = 'browser/export_to_database.html'
