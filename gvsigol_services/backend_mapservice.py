@@ -91,11 +91,12 @@ class Geoserver():
         # disable upload to Postgis datastores, as it is not currently supported by Geoserver
         # have a look to: http://boundlessgeo.com/2012/10/adding-layers-to-geoserver-using-the-rest-api/
         #all_upload_types = ['v_PostGIS', 'c_WorldImage', 'c_GeoTIFF', 'c_ImageMosaic']
-        all_upload_types = ['c_WorldImage', 'c_GeoTIFF', 'c_ImageMosaic', 'v_SHP']
+        #all_upload_types = ['c_WorldImage', 'c_GeoTIFF', 'c_ImageMosaic', 'v_SHP']
+        all_upload_types = ['c_WorldImage', 'c_GeoTIFF', 'c_ImageMosaic']
 
         gdal_tools.OGR2OGR_PATH = GVSIGOL_SERVICES.get('OGR2OGR_PATH', gdal_tools.OGR2OGR_PATH)
-        if os.path.exists(gdal_tools.OGR2OGR_PATH):
-            all_upload_types.append('v_PostGIS')
+        #if os.path.exists(gdal_tools.OGR2OGR_PATH):
+        #    all_upload_types.append('v_PostGIS')
         
         self.supported_srs_plain = [ x[0] for x in forms_geoserver.supported_srs ]
         self.supported_encodings_plain = [ x[0] for x in forms_geoserver.supported_encodings ]
