@@ -1286,11 +1286,11 @@ class Geoserver():
                 return True
         return False
         
-    def uploadLayer(self, form_data, store_type, file_upload, session):
+    def uploadLayer(self, form_data, store_type, session):
         format_nature=store_type[:1]
         driver=store_type[2:]
         name = form_data['name']
-        file_path = None
+        file_path = form_data['file']
         folder_path = None
         
         if _valid_sql_name_regex.search(name) == None:
@@ -1303,18 +1303,19 @@ class Geoserver():
                 if self.datastore_exists(workspace.name, name, session):
                     raise UserInputError(-1, _("A data store exists with the same name: {0}. Choose a different layer name.").format(name))
                 try:
-                    file_path = self.__get_uncompressed_file_upload_path(file_upload, store_type)
-                    if store_type=="c_WorldImage":
-                        self.__rename_folder_contents(file_path, name)
-                        if not self.__check_prj_file(file_path):
-                            raise BadFormat(-1, _("Error: The .prj file is missing"))
+                    #file_path = self.__get_uncompressed_file_upload_path(file_upload, store_type)
+                    #if store_type=="c_WorldImage":
+                    #    self.__rename_folder_contents(file_path, name)
+                    #    if not self.__check_prj_file(file_path):
+                    #        raise BadFormat(-1, _("Error: The .prj file is missing"))
                     stats = self.__gdal_info_stats(file_path)
-                    if store_type!="c_GeoTIFF":
-                        folder_path = file_path
-                        file_path = self.__compress_folder(folder_path)
+                    #if store_type!="c_GeoTIFF":
+                    #    folder_path = file_path
+                    #    file_path = self.__compress_folder(folder_path)
                 finally:
-                    if folder_path:
-                        self.__delete_temporaries(folder_path)
+                    print 'delete_temporaries'
+                    #if folder_path:
+                    #    self.__delete_temporaries(folder_path)
                 
                 try:
                     if store_type=="c_ImageMosaic":
@@ -1350,8 +1351,9 @@ class Geoserver():
                         e.set_message(_("Error uploading the layer. Review the file format. Backend message: {0}").format(e.get_message()))
                     raise e
                 finally:
-                    if file_path:
-                        os.remove(file_path)
+                    print 'remove_file'
+                    #if file_path:
+                    #    os.remove(file_path)
                 ds = Datastore()
                 ds.name = name
                 ds.workspace = form_data['workspace']
@@ -1364,26 +1366,7 @@ class Geoserver():
                 params = { 'url': response_url}
                 ds.connection_params = json.dumps(params)
                 ds.save()
-            elif format_nature=="v":
-                self.__test_zip_structure(file_upload)
-                ds = form_data['datastore']
-                title = form_data['title']
-                if store_type=="v_PostGIS":
-                    # GML not supported for the moment. We could support them by using ogr2ogr instead pf shp2pgslq 
-                    #if file_upload.name[:-4].lower()==".gml":
-                    #    content_type = "application/gml+xml"
-                    self.__do_upload_postgis(name, ds, form_data, file_upload)
-                        #os.remove(zip_path)
-                    try:
-                        # layer has been uploaded to postgis, now register the layer on GS
-                        # we don't check the creation mode because the users sometimes choose the wrong one
-                        self.createFeaturetype(ds.workspace, ds, name, title, session)
-                    except:
-                        if creation_mode==forms_geoserver.MODE_CREATE:
-                            # assume the layer was created if mode is append or overwrite, so don't raise the exception 
-                            raise
-                else:                    
-                    self.rest_catalog.upload_feature_type(ds.workspace.name, ds.name, name, driver.lower(), file_upload, user=session['username'], password=session['password'])
+                
             else:
                 raise UnsupportedRequestError()
             try:
@@ -1404,8 +1387,9 @@ class Geoserver():
             l.save()
             return l
         finally:
-            if file_path:
-                self.__delete_temporaries(file_path)
+            print "delete_temporaries"
+            #if file_path:
+            #    self.__delete_temporaries(file_path)
                 
     def uploadMultiLayer(self, datastore, application, file_upload, session, table_definition):
         try:

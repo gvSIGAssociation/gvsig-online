@@ -27,6 +27,7 @@ from models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, Laye
 from forms_services import WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from backend_mapservice import gn_backend, WrongElevationPattern, WrongTimePattern, backend as mapservice_backend
+from gvsigol.settings import FILEMANAGER_DIRECTORY
 from gvsigol_core.models import ProjectLayerGroup
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.translation import ugettext as _
@@ -696,7 +697,6 @@ def layer_upload(request):
                 try:
                     layer = mapservice_backend.uploadLayer(form.cleaned_data,
                                                            dstype,
-                                                           request.FILES['file'],
                                                            session=request.session)
                     mapservice_backend.setDataRules(session=request.session)
                     style_name = layer.name + '_default'
@@ -743,7 +743,8 @@ def layer_upload(request):
             data = {
                 'form': form,
                 'type': dstype,
-                'file_accepts': file_accepts
+                'file_accepts': file_accepts,
+                'fm_directory': FILEMANAGER_DIRECTORY + "/"
                 #'styles': styles
             }
             mapservice_backend.reload_nodes(request.session)
@@ -759,7 +760,8 @@ def layer_upload(request):
                 data = {
                     'form': form(),
                     'type': dstype,
-                    'file_accepts': file_accepts
+                    'file_accepts': file_accepts,
+                    'fm_directory': FILEMANAGER_DIRECTORY + "/"
                 }
                 return render(request, template, data)
     return HttpResponseBadRequest()
