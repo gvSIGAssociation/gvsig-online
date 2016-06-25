@@ -1134,6 +1134,7 @@ class Geoserver():
                     try:
                         self.createFeaturetype(datastore.workspace, datastore, layer_name, layer_title, session)
                     except:
+                        print "ERROR en createFeaturetype"
                         raise
                     
                     try:
@@ -1171,7 +1172,7 @@ class Geoserver():
                     print "TODO: borrar la cache .."
                             
         except (rest_geoserver.RequestError):
-            print "Error Request"
+            print "Error Request" + rest_geoserver.RequestError.get_message()
             raise             
         except gdal_tools.GdalError as e:
             print "Error Gdal"
