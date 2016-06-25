@@ -1100,7 +1100,7 @@ class Geoserver():
 
             #rename files with special characters
             files = os.listdir(dir_path)
-            under_score = ['(',')','[',']'] #Anything to be replaced with '_' put in this list.            
+            under_score = ['(',')','[',']','-'] #Anything to be replaced with '_' put in this list.            
             for f in files:
                 copy_f = f
                 for char in copy_f:                    
