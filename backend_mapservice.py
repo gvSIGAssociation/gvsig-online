@@ -585,8 +585,10 @@ class Geoserver():
         try:
             return self.rest_catalog.create_feature_type(name, title, datastore.name, workspace.name, user=session['username'], password=session['password'])
         except rest_geoserver.FailedRequestError as e:
+            print ("ERROR createFeatureType failedrequest exception: " + e.get_message())
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
+            print ("ERROR createFeatureType unknown exception: " + e.get_message())
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
         
     def createCoverage(self, workspace, coveragestore, name, title, session):
@@ -1172,7 +1174,7 @@ class Geoserver():
                     print "TODO: borrar la cache .."
                             
         except (rest_geoserver.RequestError):
-            print "Error Request" + rest_geoserver.RequestError.get_message()
+            print "Error Request" 
             raise             
         except gdal_tools.GdalError as e:
             print "Error Gdal"
