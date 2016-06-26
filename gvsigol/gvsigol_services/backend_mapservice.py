@@ -161,6 +161,7 @@ class Geoserver():
             catalog.delete(ws, recurse=True)
             return True
         except Exception as e:
+            print str(e)
             return False
         
     def getBaseUrl(self):
