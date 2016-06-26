@@ -207,6 +207,7 @@ class Geoserver():
             response = catalog.save(ds) # FIXME: we should check response.status to ensure the operation was correct
             return True
         except Exception as e:
+            print str(e)
             return False
         
     def datastore_exists(self, workspace, name, session):
