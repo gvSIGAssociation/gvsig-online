@@ -101,9 +101,9 @@ $(document).ready(function() {
 		var size = $("#symbol-size").val();
 		
 	   	var formData = new FormData($(this)[0]); 	   	
-	   	
+	   	var symid = name;
 	   	if (name != '' && egFile != '') {
-	   		var externalGraphic = new ExternalGraphicSymbolizer(name, format, size, 'online_resource_replace');
+	   		var externalGraphic = new ExternalGraphicSymbolizer(symid, name, format, size, 'online_resource_replace');
 			var symbolizer = {
 				type: externalGraphic.type,
 				sld: externalGraphic.toXML(),
