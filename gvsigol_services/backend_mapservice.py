@@ -1176,8 +1176,8 @@ class Geoserver():
                 else:
                     print "TODO: borrar la cache .."
                             
-        except (rest_geoserver.RequestError):
-            print "Error Request" 
+        except rest_geoserver.RequestError as ex:
+            print "Error Request" + str(ex)
             raise             
         except gdal_tools.GdalError as e:
             print "Error Gdal"
