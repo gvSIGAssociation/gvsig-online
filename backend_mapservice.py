@@ -1135,8 +1135,8 @@ class Geoserver():
                 try:
                     gdal_tools.shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
                 except Exception as e:
-                     print "ERROR en shp2postgis ... Algunos shapefiles puede que no hayan subido "
-                
+                    print "ERROR en shp2postgis ... Algunos shapefiles puede que no hayan subido "
+                    continue 
                                 
                 if creation_mode==forms_geoserver.MODE_CREATE:
                     try:
