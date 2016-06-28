@@ -600,7 +600,8 @@ class Geoserver():
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
-        
+    #TODO: este metodo recrea el grupo de capas en Geoserver a partir de la informacion que hay en el modelo. Se deberian implementar los metodos
+    # que anyaden o borran capas de un grupo para ser mas eficiente.    
     def createOrUpdateGeoserverLayerGroup(self, layer_group, session):
         try:
             if layer_group.name != "__default__":
