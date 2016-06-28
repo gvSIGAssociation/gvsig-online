@@ -23,7 +23,7 @@
 '''
 
 from gvsigol.settings import GVSIGOL_SERVICES
-from models import Layer, LayerGroup
+from models import Layer, LayerGroup, Workspace, Datastore
 import requests
 import json
 
@@ -305,9 +305,11 @@ class Geoserver():
         if len(layers_in_group) > 0:   
             layers = []
             for l in layers_in_group:
+                datastore = Datastore.objects.get(id=l.datastore.id)
+                workspace = Workspace.objects.get(id=datastore.workspace_id)
                 layer = {}
                 layer["@type"] = "layer"
-                layer["name"] = l.name
+                layer["name"] = workspace.name + ":"+ l.name
                 layer["href"] = GVSIGOL_SERVICES['URL'] + '/layers/' + l.name + '.json'
                 layers.append(layer)
 
