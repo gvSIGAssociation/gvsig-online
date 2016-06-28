@@ -258,13 +258,14 @@ GVSIGOL_SEARCH = {
 }
 
 GVSIGOL_TOOLS = {
+    ##GVSIGOL_TOOLS##,
     'get_feature_info_control': {
         'private_fields_prefix': '_'
     },
     'attribute_table': {
         'private_fields_prefix': '_',
         'show_search': False
-    }
+    }    
 }
 
 GVSIGOL_BASE_LAYERS = {
