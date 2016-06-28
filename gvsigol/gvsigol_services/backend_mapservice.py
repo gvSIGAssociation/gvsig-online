@@ -1132,7 +1132,10 @@ class Geoserver():
                     layer_title = os.path.splitext(os.path.basename(f))[0]
                     layer_style = layer_name
                 shp_abs = os.path.join(dir_path, f)
-                gdal_tools.shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                try:
+                    gdal_tools.shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                except Exception as e:
+                     print "ERROR en shp2postgis ... Algunos shapefiles puede que no hayan subido "
                 
                                 
                 if creation_mode==forms_geoserver.MODE_CREATE:
@@ -1177,10 +1180,10 @@ class Geoserver():
                     print "TODO: borrar la cache .."
                             
         except rest_geoserver.RequestError as ex:
-            print "Error Request" + str(ex)
+            print "Error Request: " + str(ex)
             raise             
-        except gdal_tools.GdalError as e:
-            print "Error Gdal"
+        except gdal_tools.GdalError as ex:
+            print "Error Gdal: " + str(ex)
             raise rest_geoserver.RequestError(e.code, e.message)
         except Exception as e:
             logging.exception(e)
