@@ -14,10 +14,69 @@
 						<button type="submit" class="btn btn-success btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
 					</div>
 				</div>					
-				<div class="box-body">				
-				{{ form }}				
-				</div>						
-               </form>	
+				<div class="box-body">
+				
+					{% if form.errors %}
+					<div id="form-error" style="color:#ff0000;">
+						<ul>
+						{% for field in form %}
+							{% if field.errors %}
+								<li>{{field.label}}. {{ field.errors|striptags }}</li>
+							{% endif %}	
+						{% endfor %}
+						{% for field, msg in form.errors.iteritems %}
+							<li>{{ msg|striptags }}</li>
+						{% endfor %}
+						</ul>
+					</div>
+					{% endif %}
+					
+					<div class="row">
+						<div class="col-md-12 form-group">	
+							<label for="id_workspace">{% trans "Workspace" %}</label>
+							{{ form.workspace }}									
+						</div>
+					</div>	
+					
+					<div class="row">
+						<div class="col-md-12 form-group">	
+							<label for="id_workspace">{% trans "Type" %}</label>
+							{{ form.type }}									
+						</div>
+					</div>	
+					
+					<div class="row" id="select-file-row" style="display: none;">
+						<div class="col-md-2">
+							<a href="#" id="select-file-button" class="btn btn-primary btn-sm"><i class="fa fa-folder-open margin-r-5"></i>{% trans "Select file" %}</a>					
+						</div>
+						<div class="col-md-10">
+							{{ form.file }}			
+						</div>
+					</div>		
+					
+					<div class="row">		
+						<div class="col-md-12 form-group">
+							<label for="id_name">{% trans "Name" %}</label>
+							{{ form.name }}
+						</div>	
+					</div>
+					
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="id_description">{% trans "Description" %}</label>
+							{{ form.description }}						
+						</div>
+					</div>	
+					
+					<div class="row" id="connection-params-row">
+						<div class="col-md-12 form-group">
+							<label for="id_connection_params">{% trans "Connection params" %}</label>
+							{{ form.connection_params }}						
+						</div>
+					</div>
+					
+				</div>									
+			</form>	
 		</div>
 	</div>				
 </div>
@@ -41,6 +100,7 @@ $().ready(function(){
 	window.GOL = window.GOL || {};
 	window.GOL.DS_ADD = window.GOL.DS_ADD || {};
 	window.GOL.DS_ADD.dstypeChanged = function(type) {
+		
 		codemirror.setValue('');		
 		var code = '';
 		
@@ -60,26 +120,25 @@ $().ready(function(){
 			code += '\t "dbtype": "postgis" \n';
 			code += '}';
 			
-		} else if (type == 'c_WorldImage') {
-			code += '{ \n';
-			code += '\t "url": "file:coverages/img_sample/sample.jpg" \n';
-			code += '}';
-			
-		} else if (type == 'c_ArcGrid') {
-			code += '{ \n';
-			code += '\t "url": "file:coverages/MDT05-0640-H30-LIDAR.asc" \n';
-			code += '}';
-			
 		} else if (type == 'c_GeoTIFF') {
+			$('#select-file-row').css('display', 'block');
+			$('#connection-params-row').css('display', 'none');
 			code += '{ \n';
-			code += '\t "url": "file:coverages/img_sample/sample.tif" \n';
+			code += '\t "url": "url_replace" \n';
 			code += '}';
-			
 		}
 		
 		codemirror.setValue(code);
 
 	}
+	
+	$('#select-file-button').click(function (e) {
+		window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,");
+	});
+	
+	window.filemanagerCallback = function(url) {
+		document.querySelector("input[id=id_file]").value = "file://" + "{{fm_directory}}" + url;
+	};
 	
 	$("#id_type").change(function() {
 		var type = $('option:selected', $(this)).val();

@@ -119,22 +119,30 @@ class Geoserver():
             return True
         raise FailedRequestError(r.status_code, r.content)
     
-    def upload_coverage(self, workspace, store, filetype, file, user=None, password=None):
-        url = self.service_url + "/workspaces/" + workspace + "/coveragestores/" + store + "/file."+filetype
-        # don't use Accept header as it is not honored by Geoserver. See https://osgeo-org.atlassian.net/browse/GEOS-7401
-        #headers = {'content-type': content_type, 'Accept': 'application/json'}
-        headers = {'content-type': self.get_content_type(filetype)}
+    def create_coveragestore(self, workspace, store, filetype, file, user=None, password=None):
+        url = self.service_url + "/workspaces/" + workspace + "/coveragestores.json"
+        headers = {'content-type': "text/xml"}
+        
         if user and password:
             auth = (user, password)
         else:
             auth = self.session.auth
-        if isinstance(file, basestring):
-            with open(file, 'rb') as f:
-                r = self.session.put(url, data=f, headers=headers, auth=auth)
-        else:
-            r = self.session.put(url, data=file, headers=headers, auth=auth)
+            
+        data = ""
+        data += "<coverageStore>"
+        data +=     "<name>" + store + "</name>"
+        data +=     "<type>" + filetype + "</type>"
+        data +=     "<enabled>true</enabled>"
+        data +=     "<workspace>"
+        data +=         "<name>" + workspace + "</name>"      
+        data +=     "</workspace>"
+        data +=     "<__default>false</__default>"
+        data +=     "<url>" + file + "</url>"
+        data += "</coverageStore>"
+        
+        r = self.session.post(url, data=data, headers=headers, auth=auth)
         if r.status_code==201:
-            return r.text
+            return True
         raise UploadError(r.status_code, r.content)
 
     def upload_feature_type(self, workspace, store, name, filetype, file, user=None, password=None):
@@ -446,8 +454,8 @@ class Geoserver():
     def get_content_type(self, file_type):
         if file_type=="geotiff":
             return "image/tiff"
-        elif file_type=="":
-            return ""
+        elif file_type=="worldimage":
+            return "image/tiff"
         else:
             return "application/zip"
         
