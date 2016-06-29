@@ -18,7 +18,6 @@ urlpatterns = [
     url(r'^layer_delete/(?P<layer_id>[0-9]+)/$', 'gvsigol_services.views.layer_delete', name='layer_delete'),
     url(r'^cache_clear/(?P<layer_id>[0-9]+)/$', 'gvsigol_services.views.cache_clear', name='cache_clear'),
     url(r'^layergroup_cache_clear/(?P<layergroup_id>[0-9]+)/$', 'gvsigol_services.views.layergroup_cache_clear', name='layergroup_cache_clear'),
-    url(r'^layer_upload/$', 'gvsigol_services.views.layer_upload', name='layer_upload'),
     url(r'^layer_create/$', 'gvsigol_services.views.layer_create', name='layer_create'),
     url(r'^get_geom_tables/(?P<datastore_id>[0-9]+)/$', 'gvsigol_services.views.get_geom_tables', name='geom_tables'),
     url(r'^layergroup_list/$', 'gvsigol_services.views.layergroup_list', name='layergroup_list'),

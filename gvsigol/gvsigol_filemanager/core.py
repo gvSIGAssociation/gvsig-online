@@ -70,7 +70,7 @@ class Filemanager(object):
 
     def directory_list(self, request, first_level):
         listing = []
-        visible_extensions = ['shp', 'geotif', 'geotiff', 'tif', 'tiff', 'jpg', 'jpeg', 'png']
+        visible_extensions = ['shp', 'geotif', 'geotiff', 'tif', 'tiff']
         
         directories, files = FILEMANAGER_STORAGE.listdir(self.location)
 
