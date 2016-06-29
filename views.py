@@ -152,7 +152,12 @@ def datastore_list(request):
 @admin_required
 def datastore_add(request):
     if request.method == 'POST':
-        form = DatastoreForm(request.session, request.POST)
+        post_dict = request.POST.copy()
+        type = request.POST.get('type')
+        if type == 'c_GeoTIFF':
+            file = post_dict.get('file')
+            post_dict['connection_params'] = post_dict.get('connection_params').replace('url_replace', file)
+        form = DatastoreForm(request.session, post_dict)
         if form.is_valid():
             # first create the datastore on the backend
             if mapservice_backend.createDatastore(form.cleaned_data['workspace'],
@@ -162,7 +167,13 @@ def datastore_add(request):
                                                   form.cleaned_data['connection_params'],
                                                   session=request.session):
                 # save it on DB if successfully created
-                newRecord = Datastore(**form.cleaned_data)
+                newRecord = Datastore(
+                    workspace=form.cleaned_data['workspace'],
+                    type=form.cleaned_data['type'],
+                    name=form.cleaned_data['name'],
+                    description=form.cleaned_data['description'],
+                    connection_params=form.cleaned_data['connection_params']
+                )
                 newRecord.save()
                 mapservice_backend.reload_nodes(request.session)
                 return HttpResponseRedirect(reverse('datastore_list'))
@@ -172,7 +183,7 @@ def datastore_add(request):
             
     else:
         form = DatastoreForm(request.session)
-    return render(request, 'datastore_add.html', {'form': form})
+    return render(request, 'datastore_add.html', {'fm_directory': FILEMANAGER_DIRECTORY + "/", 'form': form})
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
@@ -681,90 +692,6 @@ def layergroup_delete(request, lgid):
             'deleted': True
         }     
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
-
-@require_http_methods(["GET", "POST", "HEAD"])
-@login_required(login_url='/gvsigonline/auth/login_user/')
-@admin_required
-def layer_upload(request):
-    if request.method == 'POST':
-        dstype = request.POST.get('id_dstype')
-        abstract = request.POST.get('md-abstract')
-            
-        (form_class, template, file_accepts) = mapservice_backend.getUploadForm(dstype)
-        if form_class is not None:
-            form = form_class(request.POST, request.FILES)
-            if form.is_valid():
-                try:
-                    layer = mapservice_backend.uploadLayer(form.cleaned_data,
-                                                           dstype,
-                                                           session=request.session)
-                    mapservice_backend.setDataRules(session=request.session)
-                    style_name = layer.name + '_default'
-                    mapservice_backend.createDefaultStyle(layer, style_name, session=request.session)
-                    mapservice_backend.setLayerStyle(layer.name, style_name, session=request.session)
-                    
-                    datastore = Datastore.objects.get(id=layer.datastore.id)
-                    workspace = Workspace.objects.get(id=datastore.workspace_id)
-                    mapservice_backend.addGridSubset(workspace, layer, session=request.session)
-                    layer.type = datastore.type
-                    layer.metadata_uuid = ''
-                    try:
-                        if gvsigol.settings.CATALOG_MODULE:
-                            properties = mapservice_backend.get_layer_properties(request.session, workspace, layer)
-                            muuid = gn_backend.metadata_insert(request.session, layer, abstract, workspace, properties)
-                            layer.metadata_uuid = muuid
-                    except Exception as exc:
-                        logging.exception(exc)
-                        layer.save()
-                        return HttpResponseRedirect(reverse('layer_update', kwargs={'layer_id': layer.id}))
-                    layer.save()
-                    core_utils.toc_add_layer(layer)
-                    mapservice_backend.createOrUpdateGeoserverLayerGroup(layer.layer_group, request.session)
-                    return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer.id}))
-                except WrongTimePattern:
-                    form.add_error(None, _("Date pattern doesn't match the uploaded file"))
-                except WrongElevationPattern:
-                    form.add_error(None, _("Elevation pattern doesn't match the uploaded file"))
-                except rest_geoserver.RequestError as e:
-                    form.add_error(None, _(e.get_message()))
-                except Exception as exc:
-                    # ensure the ds gets cleaned if we've failed
-                    # FIXME: clean up disabled at the moment, as it has security implications
-                    # We should ensure which kind of exception we have got before deleting,
-                    # otherwise an attacker could use this method
-                    # in order to arbitrarily delete existing data stores  
-                    #mapservice_backend.deleteDatastore(ds.workspace, ds, "all", session=request.session)
-                    exctype, value = sys.exc_info()[:2]
-                    # use unicode with error='replace' because owslib sometimes raises exceptions using unexpected encodings
-                    exc_msg = unicode(str(exctype), errors='replace')+u" - "+unicode(value)  
-                    logging.exception(exc_msg)
-                    form.add_error(None, _("Error uploading the layer. Review the file format."))
-                    form.add_error(None, exc_msg)
-            data = {
-                'form': form,
-                'type': dstype,
-                'file_accepts': file_accepts,
-                'fm_directory': FILEMANAGER_DIRECTORY + "/"
-                #'styles': styles
-            }
-            mapservice_backend.reload_nodes(request.session)
-            return render(request, template, data)
-    else:
-        dstype = request.GET.get('id_dstype')
-        if dstype is None:
-            data = { 'types':mapservice_backend.getSupportedUploadTypes() }
-            return render(request, 'layer_upload_dstype.html', data)
-        else:
-            (form, template, file_accepts) = mapservice_backend.getUploadForm(dstype)
-            if form is not None:
-                data = {
-                    'form': form(),
-                    'type': dstype,
-                    'file_accepts': file_accepts,
-                    'fm_directory': FILEMANAGER_DIRECTORY + "/"
-                }
-                return render(request, template, data)
-    return HttpResponseBadRequest()
 
 @require_http_methods(["GET", "POST", "HEAD"])
 @login_required(login_url='/gvsigonline/auth/login_user/')
