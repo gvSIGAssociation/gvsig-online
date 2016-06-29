@@ -219,12 +219,9 @@ GVSIGOL_SERVICES = {
     'URL': 'https://localhost/gs-test',
     'CLUSTER_NODES':[],
     'SUPPORTED_TYPES': (
-                        #('v_SHP', _('Shapefile folder')),
                         ('v_PostGIS', _('PostGIS vector')),
-                        ('c_WorldImage', _('JPG, Tiff and PNG + world file')),
-                        ('c_ArcGrid', _('ArcInfo ASCII Grid')),
+                        ('v_SHP', _('Shapefile folder')),                        
                         ('c_GeoTIFF', _('GeoTiff')),
-                        ('c_ImageMosaic', _('Image Mosaics, Time series or elevation series')),
     ),
     # if MOSAIC_DB entry is omitted, mosaic indexes will be stored as SHPs
     'MOSAIC_DB': {

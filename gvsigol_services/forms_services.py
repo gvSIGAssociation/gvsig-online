@@ -37,7 +37,8 @@ class WorkspaceForm(forms.Form):
 
 class DatastoreForm(forms.Form):
     workspace = forms.ModelChoiceField(label=_(u'Workspace'), required=True, queryset=Workspace.objects.all(), widget=forms.Select(attrs={'class':'form-control'}))
-    type = forms.ChoiceField(label=_(u'Type'), choices=backend.getSupportedTypes(), required=True, widget=forms.Select(attrs={'class':'form-control'}))  
+    type = forms.ChoiceField(label=_(u'Type'), choices=backend.getSupportedTypes(), required=True, widget=forms.Select(attrs={'class':'form-control'}))
+    file = forms.CharField(label=_(u'File'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))  
     name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     description = forms.CharField(label=_(u'Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))
     connection_params = forms.CharField(label=_(u'Connection params'), required=True, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))
