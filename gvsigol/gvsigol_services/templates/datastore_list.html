@@ -117,7 +117,13 @@ $(document).ready(function() {
 		var row = table.row($(this).parents('tr'));
 	    var data = row.data();     
 	    if (this.name == "button-update-datastore") {
-			updateDatastore(data);
+	    	if (data[3] == 'c_GeoTIFF') {
+	    		messageBox.show('warning', gettext('You can not update a data store type GeoTIFF. Delete it and create it again'));
+	    		
+	    	} else {
+	    		updateDatastore(data);
+	    	}
+			
 		} else if (this.name == "button-delete-datastore"){
         	deleteDatastore(data, row);   
         }
