@@ -397,7 +397,42 @@ class GvSigOnlineServices():
             print('Error: %s' % e)
             return False
             
+# Hacemos override de la clase para implementar la autenticacion pass-through con AD
+
+class GvSigOnlineServicesAD(GvSigOnlineServices):
     
+    # override
+    def ldap_add_user(self, user, password, is_admin):
+        ad_suffix = GVSIGOL_LDAP['AD']
+        if self.is_enabled:
+            # The dn of our new entry/object
+            dn=str("cn=" + user.username + ",ou=users," + self.domain)
+            
+            # A dict to help build the "body" of the object
+            attrs = {}
+            attrs['cn'] = str(user.username)
+            attrs['gidNumber'] = str('500')
+            attrs['givenName'] = str(user.first_name)
+            attrs['homeDirectory'] = str('/home/users/' + user.username)
+            if is_admin:
+                attrs['objectclass'] = ['top','posixAccount','inetOrgPerson','extensibleObject']
+                attrs['olcExtraAttrs'] = 'CAT_ALL_Administrator'
+            else:
+                attrs['objectclass'] = ['top','posixAccount','inetOrgPerson']
+            attrs['userPassword'] = '{SASL}' + str(user.username) + ad_suffix
+            attrs['uidNumber'] = str(GvSigOnlineServices.ldap_get_last_uid(self) + 1)
+            attrs['sn'] = str(user.username)
+            attrs['uid'] = str(user.username)
+            
+            # Convert our dict to nice syntax for the add-function using modlist-module
+            ldif = modlist.addModlist(attrs)
+            
+            # Do the actual synchronous add-operation to the ldapserver
+            self.ldap.add_s(dn,ldif)
+            
+            self.ldap_add_default_group_member(user)
+            #print "Creando usuario ..." + attrs['userPassword']
+     
             
 def get_services():
     try:
@@ -407,10 +442,15 @@ def get_services():
         domain = GVSIGOL_LDAP['DOMAIN']
         username = GVSIGOL_LDAP['USERNAME']
         password = GVSIGOL_LDAP['PASSWORD']
+        ad_suffix = GVSIGOL_LDAP['AD']
     except:
         raise ImproperlyConfigured
-
-    gvsigOnline = GvSigOnlineServices(is_enabled, host, port, domain, username, password)
+    
+    if not ad_suffix:
+        gvsigOnline = GvSigOnlineServices(is_enabled, host, port, domain, username, password)
+    else:        
+        gvsigOnline = GvSigOnlineServicesAD(is_enabled, host, port, domain, username, password)
+        
     if is_enabled:
         gvsigOnline.ldap_create_default_group()
         gvsigOnline.ldap_create_admin_group()
