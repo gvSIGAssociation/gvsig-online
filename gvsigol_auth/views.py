@@ -33,6 +33,7 @@ import random, string
 from utils import admin_required
 import utils as auth_utils
 import json
+from gvsigol.settings import GVSIGOL_LDAP
 
 def login_user(request):
     if request.user.is_authenticated():
@@ -203,9 +204,14 @@ def user_add(request):
             return render_to_response('user_add.html', {'form': form, 'groups': groups}, context_instance=RequestContext(request))
         
     else:
+        ad_suffix = GVSIGOL_LDAP['AD']
+        if not ad_suffix:
+            show_pass_form = True
+        else:
+            show_pass_form = False
         form = UserCreateForm()
         groups = auth_utils.get_all_groups()
-        return render_to_response('user_add.html', {'form': form, 'groups': groups}, context_instance=RequestContext(request))
+        return render_to_response('user_add.html', {'form': form, 'groups': groups, 'show_pass_form':show_pass_form}, context_instance=RequestContext(request))
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
