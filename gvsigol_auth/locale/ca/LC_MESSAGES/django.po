@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-06-01 09:58+0200\n"
+"POT-Creation-Date: 2016-06-30 09:49+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,73 +18,39 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend.py:79
-msgid "Group for admin users"
-msgstr "Grup per a usuaris administradors"
-
-#: forms.py:30 utils.py:98 templates/user_list.html:23
-#: templates/user_update.html:29 templates/user_update.html.py:30
+#: forms.py:30 templates/user_list.html.py:23 templates/user_update.html.py:29
+#: templates/user_update.html:30 utils.py:98
 msgid "First name"
 msgstr "Nom"
 
-#: forms.py:31 utils.py:99 templates/user_add.html:44
-#: templates/user_list.html:24 templates/user_update.html:33
-#: templates/user_update.html.py:34
+#: forms.py:31 templates/user_add.html.py:44 templates/user_list.html.py:24
+#: templates/user_update.html:33 templates/user_update.html.py:34 utils.py:99
 msgid "Last name"
 msgstr "Cognom"
 
-#: forms.py:32 utils.py:97 templates/login.html:52 templates/user_add.html:51
-#: templates/user_list.html:22 templates/user_update.html:40
-#: templates/user_update.html.py:41
+#: forms.py:32 templates/login.html.py:52 templates/user_add.html.py:51
+#: templates/user_list.html:22 templates/user_update.html.py:40
+#: templates/user_update.html:41 utils.py:97
 msgid "Username"
 msgstr "Nom d'usuari"
 
-#: forms.py:33 utils.py:100 templates/user_add.html:55
-#: templates/user_list.html:25 templates/user_update.html:44
-#: templates/user_update.html.py:45
+#: forms.py:33 templates/user_add.html.py:55 templates/user_list.html.py:25
+#: templates/user_update.html:44 templates/user_update.html.py:45 utils.py:100
 msgid "Email"
 msgstr "Correu electrònic"
 
-#: forms.py:34 utils.py:101 utils.py:113 templates/login.html:56
-#: templates/user_add.html:62
+#: forms.py:34 templates/login.html.py:56 templates/user_add.html.py:62
+#: utils.py:101 utils.py:113
 msgid "Password"
 msgstr "Contrasenya"
 
-#: forms.py:35 templates/user_add.html:66
+#: forms.py:35 templates/user_add.html.py:66
 msgid "Repeat password"
 msgstr "Repetir contrasenya"
 
-#: utils.py:80
-msgid "New user account"
-msgstr "Nou compte d'usuari"
-
-#: utils.py:96
-msgid "Account data"
-msgstr "Dades del compte"
-
-#: utils.py:109
-msgid "New password"
-msgstr "Nova contrasenya"
-
-#: utils.py:111
-msgid "This is your new temporary password"
-msgstr "Aquesta és la contrasenya temporal"
-
-#: views.py:53
-msgid "Your account has been disabled"
-msgstr "La contrasenya ha estat desactivada"
-
-#: views.py:56
-msgid "The username and password you have entered do not match our records"
-msgstr "L'usuari i contrasenya introduïts no coincideixen"
-
-#: views.py:99
-msgid "User account does not exist"
-msgstr "El compte d'usuari no existeix"
-
-#: views.py:196
-msgid "The username already exists"
-msgstr "El nom d'usuari ya existeix"
+#: services.py:72
+msgid "Group for admin users"
+msgstr "Grup per a usuaris administradors"
 
 #: templates/dashboard_auth_menu.html:4
 msgid "Users and groups"
@@ -94,24 +60,24 @@ msgstr "Usuaris y grups"
 msgid "Users"
 msgstr "Usuaris"
 
-#: templates/dashboard_auth_menu.html:7 templates/user_list.html:27
+#: templates/dashboard_auth_menu.html:7 templates/user_list.html.py:27
 msgid "Groups"
 msgstr "Grups"
 
-#: templates/group_add.html:12 templates/group_list.html:13
+#: templates/group_add.html:12 templates/group_list.html.py:13
 msgid "Add group"
 msgstr "Afegir grup"
 
-#: templates/group_add.html:14 templates/user_add.html:14
+#: templates/group_add.html:14 templates/user_add.html.py:14
 #: templates/user_update.html:14
 msgid "Save"
 msgstr "Guardar"
 
-#: templates/group_add.html:41 templates/group_list.html:22
+#: templates/group_add.html:41 templates/group_list.html.py:22
 msgid "Name"
 msgstr "Nom"
 
-#: templates/group_add.html:48 templates/group_list.html:23
+#: templates/group_add.html:48 templates/group_list.html.py:23
 msgid "Description"
 msgstr "Descripció"
 
@@ -127,43 +93,43 @@ msgstr "Eliminar grup"
 msgid "The group will be removed, Do you want continue?"
 msgstr "El grup serà eliminat , voleu continuar?"
 
-#: templates/group_list.html:58 templates/user_list.html:68
+#: templates/group_list.html:58 templates/user_list.html.py:68
 msgid "Cancel"
 msgstr "Cancel·lar"
 
-#: templates/group_list.html:59 templates/user_list.html:69
+#: templates/group_list.html:59 templates/user_list.html.py:69
 msgid "Accept"
 msgstr "Acceptar"
 
-#: templates/group_list.html:76 templates/user_list.html:86
+#: templates/group_list.html:76 templates/user_list.html.py:86
 msgid "Processing request..."
 msgstr "Processant petició"
 
-#: templates/group_list.html:77 templates/user_list.html:87
+#: templates/group_list.html:77 templates/user_list.html.py:87
 #, python-format
 msgid "Search%(sep)s"
 msgstr "Cercar%(sep)s"
 
-#: templates/group_list.html:78 templates/user_list.html:88
+#: templates/group_list.html:78 templates/user_list.html.py:88
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr "Mostrant %(numrecords)s registres"
 
-#: templates/group_list.html:79 templates/user_list.html:89
+#: templates/group_list.html:79 templates/user_list.html.py:89
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr "Mostrant des de %(start)s fins %(end)s de %(numrecords)s registres"
 
-#: templates/group_list.html:80 templates/user_list.html:90
+#: templates/group_list.html:80 templates/user_list.html.py:90
 msgid "Showing from 0 to 0 of 0 records"
 msgstr "Mostrant des de 0 fins 0 de 0 registres"
 
-#: templates/group_list.html:81 templates/user_list.html:91
+#: templates/group_list.html:81 templates/user_list.html.py:91
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr "Filtrant %(max)s registres"
 
-#: templates/group_list.html:83 templates/user_list.html:93
+#: templates/group_list.html:83 templates/user_list.html.py:93
 msgid "Loading..."
 msgstr "Carregant"
 
@@ -172,28 +138,28 @@ msgstr "Carregant"
 msgid "No records available"
 msgstr "No hi ha registres disponibles"
 
-#: templates/group_list.html:87 templates/user_list.html:97
+#: templates/group_list.html:87 templates/user_list.html.py:97
 msgid "First"
 msgstr "Primer"
 
-#: templates/group_list.html:88 templates/user_list.html:98
+#: templates/group_list.html:88 templates/user_list.html.py:98
 msgid "Previous"
 msgstr "Anterior"
 
-#: templates/group_list.html:89 templates/user_list.html:99
+#: templates/group_list.html:89 templates/user_list.html.py:99
 msgid "Next"
 msgstr "Següent"
 
-#: templates/group_list.html:90 templates/user_list.html:100
+#: templates/group_list.html:90 templates/user_list.html.py:100
 msgid "Last"
 msgstr "Últim"
 
-#: templates/group_list.html:93 templates/user_list.html:103
+#: templates/group_list.html:93 templates/user_list.html.py:103
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr "%(sep)sOrdre ascendent"
 
-#: templates/group_list.html:94 templates/user_list.html:104
+#: templates/group_list.html:94 templates/user_list.html.py:104
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr "%(sep)sordre descendent"
@@ -242,14 +208,15 @@ msgstr "Enviar"
 msgid ""
 "Your password has been updated. We've sent an email to your account with the "
 "new password"
-msgstr "La seva contrasenya ha estat actualitzada . Hem enviat un correu electrònic "
+msgstr ""
+"La seva contrasenya ha estat actualitzada . Hem enviat un correu electrònic "
 "amb la seva nova contrasenya"
 
 #: templates/password_reset_success.html:46
 msgid "Return"
 msgstr "Tornar"
 
-#: templates/user_add.html:12 templates/user_list.html:13
+#: templates/user_add.html:12 templates/user_list.html.py:13
 msgid "Add user"
 msgstr "Afegir usuari"
 
@@ -257,17 +224,17 @@ msgstr "Afegir usuari"
 msgid "First Name"
 msgstr "Nom"
 
-#: templates/user_add.html:76 templates/user_update.html:55
-#: templates/user_update.html.py:57
+#: templates/user_add.html:76 templates/user_update.html.py:55
+#: templates/user_update.html:57
 msgid "Is admin"
 msgstr "Es administrador"
 
-#: templates/user_add.html:83 templates/user_update.html:65
+#: templates/user_add.html:83 templates/user_update.html.py:65
 msgid "Assign groups"
 msgstr "Asignar grups"
 
-#: templates/user_add.html:96 templates/user_update.html:79
-#: templates/user_update.html.py:81
+#: templates/user_add.html:96 templates/user_update.html.py:79
+#: templates/user_update.html:81
 msgid "Assign group"
 msgstr "Asignar grup"
 
@@ -287,6 +254,38 @@ msgstr "Eliminar usuari"
 msgid "The user will be removed, Do you want continue?"
 msgstr "L'usuari serà eliminat , voleu continuar?"
 
-#: templates/user_list.html:114 templates/user_update.html:12
+#: templates/user_list.html:114 templates/user_update.html.py:12
 msgid "Update user"
 msgstr "Actualitzar usuari"
+
+#: utils.py:80
+msgid "New user account"
+msgstr "Nou compte d'usuari"
+
+#: utils.py:96
+msgid "Account data"
+msgstr "Dades del compte"
+
+#: utils.py:109
+msgid "New password"
+msgstr "Nova contrasenya"
+
+#: utils.py:111
+msgid "This is your new temporary password"
+msgstr "Aquesta és la contrasenya temporal"
+
+#: views.py:53
+msgid "Your account has been disabled"
+msgstr "La contrasenya ha estat desactivada"
+
+#: views.py:56
+msgid "The username and password you have entered do not match our records"
+msgstr "L'usuari i contrasenya introduïts no coincideixen"
+
+#: views.py:99
+msgid "User account does not exist"
+msgstr "El compte d'usuari no existeix"
+
+#: views.py:196
+msgid "The username already exists"
+msgstr "El nom d'usuari ya existeix"

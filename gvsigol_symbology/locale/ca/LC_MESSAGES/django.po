@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-06-02 15:56+0200\n"
+"POT-Creation-Date: 2016-06-30 09:50+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,43 +18,30 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: models.py:36 templates/select_legend_type.html:32
+#: models.py:36 templates/select_legend_type.html.py:32
 #: templates/select_legend_type.html:99
 msgid "Unique symbol"
 msgstr ""
 
-#: models.py:37 templates/select_legend_type.html:43
+#: models.py:37 templates/select_legend_type.html.py:43
 msgid "Unique values"
 msgstr ""
 
-#: models.py:38 templates/select_legend_type.html:53
+#: models.py:38 templates/select_legend_type.html.py:53
 msgid "Intervals"
 msgstr ""
 
-#: models.py:39 templates/select_legend_type.html:63
+#: models.py:39 templates/select_legend_type.html.py:63
 #: templates/select_legend_type.html:109
 msgid "Expressions"
 msgstr ""
 
-#: models.py:40 templates/select_legend_type.html:130
+#: models.py:40 templates/select_legend_type.html.py:130
 msgid "Color table"
 msgstr ""
 
 #: models.py:41
 msgid "Graphics"
-msgstr ""
-
-#: views_library.py:66 views_library.py:169
-msgid "You must enter a name for the library"
-msgstr ""
-
-#: views_library.py:172 templates/external_graphic_add.html:148
-#: templates/external_graphic_add.html:154
-msgid "You must select a file"
-msgstr ""
-
-#: views_library.py:175
-msgid "You must enter a name for the library and select a file"
 msgstr ""
 
 #: templates/base_symbology.html:74
@@ -69,7 +56,7 @@ msgstr ""
 msgid "Home"
 msgstr ""
 
-#: templates/base_symbology.html:129
+#: templates/base_symbology.html:130
 msgid "All rights reserved"
 msgstr ""
 
@@ -85,15 +72,16 @@ msgstr ""
 msgid "Symbol libraries"
 msgstr ""
 
-#: templates/external_graphic_add.html:12 templates/symbol_add.html:11
+#: templates/external_graphic_add.html:12 templates/symbol_add.html.py:11
 msgid "Create new symbol"
 msgstr ""
 
 #: templates/external_graphic_add.html:14
 #: templates/external_graphic_update.html:15 templates/library_add.html:14
-#: templates/library_import.html:14 templates/library_update.html:15
-#: templates/symbol_add.html:13 templates/symbol_update.html:14
-#: templates/unique_symbol_add.html:14 templates/unique_symbol_update.html:14
+#: templates/library_import.html.py:14 templates/library_update.html:15
+#: templates/sld_import.html.py:14 templates/symbol_add.html:13
+#: templates/symbol_update.html.py:14 templates/unique_symbol_add.html:14
+#: templates/unique_symbol_update.html:14
 msgid "Save"
 msgstr ""
 
@@ -101,7 +89,8 @@ msgstr ""
 #: templates/external_graphic_update.html:30 templates/library_add.html:40
 #: templates/library_add.html.py:41 templates/library_import.html:40
 #: templates/library_import.html.py:41 templates/library_update.html:41
-#: templates/library_update.html.py:42 templates/symbol_add.html:28
+#: templates/library_update.html.py:42 templates/sld_import.html:40
+#: templates/sld_import.html.py:41 templates/symbol_add.html:28
 #: templates/symbol_add.html.py:54 templates/symbol_update.html:28
 #: templates/symbol_update.html.py:54 templates/unique_symbol_add.html:25
 #: templates/unique_symbol_add.html:73 templates/unique_symbol_update.html:24
@@ -111,26 +100,26 @@ msgstr ""
 
 #: templates/external_graphic_add.html:30
 #: templates/external_graphic_update.html:31 templates/symbol_add.html:29
-#: templates/symbol_update.html:29
+#: templates/symbol_update.html.py:29
 msgid "Symbol name"
 msgstr ""
 
 #: templates/external_graphic_add.html:33
 #: templates/external_graphic_update.html:34 templates/symbol_add.html:32
-#: templates/symbol_update.html:32 templates/unique_symbol_add.html:31
+#: templates/symbol_update.html.py:32 templates/unique_symbol_add.html:31
 #: templates/unique_symbol_update.html:30
 msgid "Title"
 msgstr ""
 
 #: templates/external_graphic_add.html:34
 #: templates/external_graphic_update.html:35 templates/symbol_add.html:33
-#: templates/symbol_update.html:33
+#: templates/symbol_update.html.py:33
 msgid "Symbol title"
 msgstr ""
 
 #: templates/external_graphic_add.html:37
 #: templates/external_graphic_update.html:38 templates/symbol_add.html:36
-#: templates/symbol_update.html:36
+#: templates/symbol_update.html.py:36
 msgid ""
 "Specifies a title for the rule. The title is used in display lists and "
 "legends"
@@ -162,9 +151,14 @@ msgid "The file format is not supported"
 msgstr ""
 
 #: templates/external_graphic_add.html:147
-#: templates/external_graphic_add.html:151 templates/symbol_add.html:127
-#: templates/symbol_update.html:130 templates/unique_symbol_add.html:250
+#: templates/external_graphic_add.html:151 templates/symbol_add.html.py:127
+#: templates/symbol_update.html:130 templates/unique_symbol_add.html.py:250
 msgid "Field name is required"
+msgstr ""
+
+#: templates/external_graphic_add.html:148
+#: templates/external_graphic_add.html:154 views.py:133 views_library.py:172
+msgid "You must select a file"
 msgstr ""
 
 #: templates/external_graphic_update.html:12 templates/symbol_update.html:11
@@ -175,24 +169,24 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: templates/library_add.html:12 templates/library_list.html:13
+#: templates/library_add.html:12 templates/library_list.html.py:13
 msgid "Add library"
 msgstr ""
 
 #: templates/library_add.html:47 templates/library_add.html.py:48
 #: templates/library_import.html:47 templates/library_import.html.py:48
-#: templates/library_list.html:24 templates/library_update.html:48
-#: templates/library_update.html.py:49
+#: templates/library_list.html:24 templates/library_update.html.py:48
+#: templates/library_update.html:49
 msgid "Description"
 msgstr ""
 
-#: templates/library_add.html:55 templates/library_import.html:62
-#: templates/library_list.html:25 templates/library_update.html:57
-#: templates/library_update.html.py:59
+#: templates/library_add.html:55 templates/library_import.html.py:62
+#: templates/library_list.html:25 templates/library_update.html.py:57
+#: templates/library_update.html:59
 msgid "is public?"
 msgstr ""
 
-#: templates/library_import.html:12 templates/library_list.html:14
+#: templates/library_import.html:12 templates/library_list.html.py:14
 msgid "Import library"
 msgstr ""
 
@@ -220,35 +214,35 @@ msgstr ""
 msgid "Accept"
 msgstr ""
 
-#: templates/library_list.html:81 templates/style_layer_list.html:65
+#: templates/library_list.html:81 templates/style_layer_list.html.py:65
 msgid "Processing request..."
 msgstr ""
 
-#: templates/library_list.html:82 templates/style_layer_list.html:66
+#: templates/library_list.html:82 templates/style_layer_list.html.py:66
 #, python-format
 msgid "Search%(sep)s"
 msgstr ""
 
-#: templates/library_list.html:83 templates/style_layer_list.html:67
+#: templates/library_list.html:83 templates/style_layer_list.html.py:67
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr ""
 
-#: templates/library_list.html:84 templates/style_layer_list.html:68
+#: templates/library_list.html:84 templates/style_layer_list.html.py:68
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr ""
 
-#: templates/library_list.html:85 templates/style_layer_list.html:69
+#: templates/library_list.html:85 templates/style_layer_list.html.py:69
 msgid "Showing from 0 to 0 of 0 records"
 msgstr ""
 
-#: templates/library_list.html:86 templates/style_layer_list.html:70
+#: templates/library_list.html:86 templates/style_layer_list.html.py:70
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr ""
 
-#: templates/library_list.html:88 templates/style_layer_list.html:72
+#: templates/library_list.html:88 templates/style_layer_list.html.py:72
 msgid "Loading..."
 msgstr ""
 
@@ -257,33 +251,33 @@ msgstr ""
 msgid "No records available"
 msgstr ""
 
-#: templates/library_list.html:92 templates/style_layer_list.html:76
+#: templates/library_list.html:92 templates/style_layer_list.html.py:76
 msgid "First"
 msgstr ""
 
-#: templates/library_list.html:93 templates/style_layer_list.html:77
+#: templates/library_list.html:93 templates/style_layer_list.html.py:77
 msgid "Previous"
 msgstr ""
 
-#: templates/library_list.html:94 templates/style_layer_list.html:78
+#: templates/library_list.html:94 templates/style_layer_list.html.py:78
 msgid "Next"
 msgstr ""
 
-#: templates/library_list.html:95 templates/style_layer_list.html:79
+#: templates/library_list.html:95 templates/style_layer_list.html.py:79
 msgid "Last"
 msgstr ""
 
-#: templates/library_list.html:98 templates/style_layer_list.html:82
+#: templates/library_list.html:98 templates/style_layer_list.html.py:82
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr ""
 
-#: templates/library_list.html:99 templates/style_layer_list.html:83
+#: templates/library_list.html:99 templates/style_layer_list.html.py:83
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr ""
 
-#: templates/library_list.html:109 templates/library_update.html:13
+#: templates/library_list.html:109 templates/library_update.html.py:13
 msgid "Update library"
 msgstr ""
 
@@ -336,11 +330,11 @@ msgstr ""
 msgid "Expressions description"
 msgstr ""
 
-#: templates/select_legend_type.html:73 templates/select_legend_type.html:119
+#: templates/select_legend_type.html:74 templates/select_legend_type.html:119
 msgid "Import from SLD"
 msgstr ""
 
-#: templates/select_legend_type.html:75 templates/select_legend_type.html:121
+#: templates/select_legend_type.html:76 templates/select_legend_type.html:121
 #: templates/select_legend_type.html:152
 msgid "SLD legend description"
 msgstr ""
@@ -365,8 +359,12 @@ msgstr ""
 msgid "RMF legend description"
 msgstr ""
 
-#: templates/select_legend_type.html:150
+#: templates/select_legend_type.html:150 templates/sld_import.html.py:12
 msgid "Import SLD"
+msgstr ""
+
+#: templates/sld_import.html:47
+msgid "Select SLD"
 msgstr ""
 
 #: templates/style_layer_list.html:11
@@ -393,22 +391,22 @@ msgstr ""
 msgid "Add symbology"
 msgstr ""
 
-#: templates/symbol_add.html:46 templates/symbol_update.html:46
+#: templates/symbol_add.html:46 templates/symbol_update.html.py:46
 #: templates/unique_symbol_add.html:65 templates/unique_symbol_update.html:68
 msgid "Symbol elements"
 msgstr ""
 
-#: templates/symbol_add.html:55 templates/symbol_update.html:55
+#: templates/symbol_add.html:55 templates/symbol_update.html.py:55
 #: templates/unique_symbol_add.html:74 templates/unique_symbol_update.html:77
 msgid "Preview"
 msgstr ""
 
-#: templates/symbol_add.html:66 templates/symbol_update.html:66
+#: templates/symbol_add.html:66 templates/symbol_update.html.py:66
 #: templates/unique_symbol_add.html:86 templates/unique_symbol_update.html:89
 msgid "Append"
 msgstr ""
 
-#: templates/symbol_add.html:85 templates/symbol_update.html:85
+#: templates/symbol_add.html:85 templates/symbol_update.html.py:85
 #: templates/unique_symbol_add.html:145
 #: templates/unique_symbol_update.html:148
 msgid "Edit symbolizer"
@@ -479,4 +477,20 @@ msgstr ""
 #: templates/unique_symbol_add.html:131
 #: templates/unique_symbol_update.html:134
 msgid "Close"
+msgstr ""
+
+#: views.py:130
+msgid "You must enter a name for the style"
+msgstr ""
+
+#: views.py:136
+msgid "You must enter a name for the style and select a file"
+msgstr ""
+
+#: views_library.py:66 views_library.py:169
+msgid "You must enter a name for the library"
+msgstr ""
+
+#: views_library.py:175
+msgid "You must enter a name for the library and select a file"
 msgstr ""
