@@ -977,7 +977,7 @@ msgstr "URI"
 
 #: templates/workspace_list.html:56 templates/workspace_list.html.py:104
 msgid "Delete workspace"
-msgstr "Elimianr espacio de trabajo"
+msgstr "Eliminar espacio de trabajo"
 
 #: templates/workspace_list.html:59
 msgid ""
