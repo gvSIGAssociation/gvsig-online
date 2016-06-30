@@ -65,11 +65,11 @@
             dragDropHoverClass: "state-hover",
             errorClass: "ajax-file-upload-error",
             uploadButtonClass: "ajax-file-upload-green",
-            dragDropStr: "<span>" + gettext('Arrastrar archivos aquí')  + "</span>",
-            abortStr: gettext('Abortar'),
-            cancelStr: gettext('Cancelar'),
-            deletelStr: gettext('Eliminar'),
-            doneStr: gettext('Hecho'),
+            dragDropStr: "<span>" + gettext('Drag files here')  + "</span>",
+            abortStr: gettext('Abort'),
+            cancelStr: gettext('Cancel'),
+            deletelStr: gettext('Delete'),
+            doneStr: gettext('Done'),
             multiDragErrorStr: "Multiple File Drag &amp; Drop is not allowed.",
             extErrorStr: "is not allowed. Allowed extensions: ",
             duplicateErrorStr: "is not allowed. File already exists.",
@@ -108,7 +108,7 @@
         }
 
         var obj = this;
-        var uploadLabel = $('<div>' + gettext('Seleccionar') + ' ...' + '</div>');
+        var uploadLabel = $('<div>' + gettext('Select') + ' ...' + '</div>');
         $(uploadLabel).addClass(s.uploadButtonClass);
 
         // wait form ajax Form plugin and initialize
