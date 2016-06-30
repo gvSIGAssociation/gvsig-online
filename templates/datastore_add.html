@@ -105,11 +105,15 @@ $().ready(function(){
 		var code = '';
 		
 		if (type == 'v_SHP') {
+			$('#select-file-row').css('display', 'none');
+			$('#connection-params-row').css('display', 'block');
 			code += '{ \n';
 			code += '\t "url": "file:data/valencia-osm" \n';
 			code += '}';
 			
 		} else if (type == 'v_PostGIS') {
+			$('#select-file-row').css('display', 'none');
+			$('#connection-params-row').css('display', 'block');
 			code += '{ \n';
 			code += '\t "host": "localhost", \n';
 			code += '\t "port": "5432", \n';

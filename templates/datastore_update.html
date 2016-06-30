@@ -14,10 +14,11 @@
 							<button type="submit" class="btn btn-success btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
 						</div>
 					</div>
-					<label for="workspace_name">{% trans "Workspace" %}</label>
-					<input name="workspace_name" class="form-control" id="workspace_name" type="text" value="{{workspace_name}}" readonly>
-					<div class="box-body">				
-					{{ form }}				
+					
+					<div class="box-body">	
+						<label for="workspace_name">{% trans "Workspace" %}</label>
+						<input name="workspace_name" class="form-control" id="workspace_name" type="text" value="{{workspace_name}}" readonly>			
+						{{ form }}				
 					</div>	
 				</form>	
 			</div>				
@@ -49,11 +50,15 @@ $().ready(function(){
 		var code = '';
 		
 		if (type == 'v_SHP') {
+			$('#select-file-row').css('display', 'none');
+			$('#connection-params-row').css('display', 'block');
 			code += '{ \n';
 			code += '\t "url": "file:data/valencia-osm" \n';
 			code += '}';
 			
 		} else if (type == 'v_PostGIS') {
+			$('#select-file-row').css('display', 'none');
+			$('#connection-params-row').css('display', 'block');
 			code += '{ \n';
 			code += '\t "host": "localhost", \n';
 			code += '\t "port": "5432", \n';
@@ -63,28 +68,24 @@ $().ready(function(){
 			code += '\t "dbtype": "postgis" \n';
 			code += '}';
 			
-		} else if (type == 'c_WorldImage') {
-			code += '{ \n';
-			code += '\t "url": "file:coverages/img_sample/sample.jpg" \n';
-			code += '}';
-			
-		} else if (type == 'c_ArcGrid') {
-			code += '{ \n';
-			code += '\t "url": "file:coverages/MDT05-0640-H30-LIDAR.asc" \n';
-			code += '}';
-			
 		} else if (type == 'c_GeoTiff') {
+			$('#select-file-row').css('display', 'block');
+			$('#connection-params-row').css('display', 'none');
 			code += '{ \n';
 			code += '\t "url": "file:coverages/img_sample/sample.tif" \n';
-			code += '}';
-		} else if (type == 'c_ImageMosaic') {
-			code += '{ \n';
-			code += '\t "url": "file:coverages/mosaic" \n';
 			code += '}';
 		}
 		
 		codemirror.setValue(code);
 	});
+	
+	$('#select-file-button').click(function (e) {
+		window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,");
+	});
+	
+	window.filemanagerCallback = function(url) {
+		document.querySelector("input[id=id_file]").value = "file://" + "{{fm_directory}}" + url;
+	};
 });
 </script>
 {% endblock %}
