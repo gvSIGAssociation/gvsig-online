@@ -142,7 +142,8 @@ GVSIGOL_LDAP = {
     'PORT': '389',
     'DOMAIN': 'dc=test,dc=scolab,dc=eu',
     'USERNAME': 'cn=admin,dc=test,dc=scolab,dc=eu',
-    'PASSWORD': 'GE2wa8RE'
+    'PASSWORD': 'GE2wa8RE',
+    'AD': ''
 }
 
 AUTHENTICATION_BACKENDS = (

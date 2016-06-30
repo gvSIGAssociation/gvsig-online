@@ -25,14 +25,6 @@
 	<script>
 	$('#menu-manage-files').addClass("active");
 	$(document).ready(function(){
-		/*$('#fileupload').fileupload({
-	      	dataType: 'json',
-	      	done: function(e, data) {
-	        	$.each(data.result.files, function (index, file) {
-	        		$('<p/>').text(file.name).appendTo(document.body);
-	      		});
-	    	}
-	  	});*/
 	  	
 	  	var fileupload = $('#fileupload-component');
 		
@@ -44,14 +36,12 @@
 		   	formData: {},
 	    	onSuccess: function(files,data,xhr){
 	    		var json = JSON.parse(data);
-	    		$.overlayout();
 	    		location.href = '/gvsigonline/filemanager/?path=' + json.path;
 	    	},
 	    	onError: function(files,status,errMsg){}
 		});
 	  	
 	  	$('#upload-button').on('click', function () {		
-	  		$("body").overlay();
 			fileupload.appendExtraParams({'path': "{{path}}"});
 			fileupload.startUpload();
 		});
