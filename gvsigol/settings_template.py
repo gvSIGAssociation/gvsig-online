@@ -255,7 +255,7 @@ GVSIGOL_SEARCH = {
 }
 
 GVSIGOL_TOOLS = {
-    ##GVSIGOL_TOOLS##,
+    ##GVSIGOL_TOOLS##
     'get_feature_info_control': {
         'private_fields_prefix': '_'
     },
