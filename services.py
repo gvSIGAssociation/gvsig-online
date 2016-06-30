@@ -108,8 +108,8 @@ class GvSigOnlineServices():
                     )
                     usergroup_user.save()
                 
-                    self.add_default_group_member(admin_user)
-                    self.add_admin_group_member(admin_user)
+                    self.ldap_add_default_group_member(admin_user)
+                    self.ldap_add_admin_group_member(admin_user)
             except Exception as exc:
                 pass
         
@@ -180,7 +180,7 @@ class GvSigOnlineServices():
             else:
                 attrs['objectclass'] = ['top','posixAccount','inetOrgPerson']
             attrs['userPassword'] = str(password)
-            attrs['uidNumber'] = str(self.get_last_uid() + 1)
+            attrs['uidNumber'] = str(self.ldap_get_last_uid() + 1)
             attrs['sn'] = str(user.username)
             attrs['uid'] = str(user.username)
             
@@ -190,7 +190,7 @@ class GvSigOnlineServices():
             # Do the actual synchronous add-operation to the ldapserver
             self.ldap.add_s(dn,ldif)
             
-            self.add_default_group_member(user)
+            self.ldap_add_default_group_member(user)
         
     def ldap_modify_user(self, group_id, group_name):
         if self.is_enabled:
