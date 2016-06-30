@@ -14,5 +14,5 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-msgid ""
-msgstr ""
+msgid "You can not update a data store type GeoTIFF. Delete it and create it again"
+msgstr "No puede actualizar un almacén de tipo GeoTIFF. Borrelo y creelo de nuevo."
