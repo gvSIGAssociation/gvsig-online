@@ -345,18 +345,15 @@ LibrarySymbol.prototype.registerSymbolizerEvents = function(previewUrl) {
 		self.selected.updatePreview();	
 		self.updatePreview(previewUrl);
 	});
-	$('input[type=radio][name=symbol-is-vectorial]').change(function() {
-        if (this.value == 'vectorial') {
-        	self.selected.vectorial = true;
-        	self.updateForm();
-        	$("#symbolizer-preview").append('<td id="symbolizer-preview"><svg id="symbolizer-preview-' + self.selected.id + '" class="preview-svg"></svg></td>');
-        	self.selected.updatePreview();
-        	self.updatePreview(previewUrl);
+	$('input[type=checkbox][name=symbol-with-border]').change(function() {
+		var isChecked = $('#symbol-with-border').is(":checked");
+        if (isChecked) {
+        	$("#border-div").css('display', 'block');
+        	self.selected.with_border = true;
             
-        } else if (this.value == 'external-graphic') {
-        	self.selected.vectorial = false;
-        	self.updateForm();
-        	$("#symbolizer-preview").empty();
+        } else {
+        	$("#border-div").css('display', 'none');
+        	self.selected.with_border = false;
         }
     });
 	$("#shape").on('change', function(e) {
