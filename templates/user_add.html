@@ -56,7 +56,8 @@
 							    {{ form.email }}
 							</div>
 						</div>
-										
+						
+						{% if show_pass_form %}			
 						<div class="row">
 							<div class="col-md-6">
 								<label for="id_password">{% trans "Password" %}</label>
@@ -67,6 +68,7 @@
 							    {{ form.password2 }}
 							</div>
 						</div>
+						{% endif %}
 						
 						<br>
 						
