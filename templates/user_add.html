@@ -68,6 +68,9 @@
 							    {{ form.password2 }}
 							</div>
 						</div>
+						{% else %}
+							<input type="hidden" name="password1" value="scolab2010">
+							<input type="hidden" name="password2" value="scolab2010">  
 						{% endif %}
 						
 						<br>

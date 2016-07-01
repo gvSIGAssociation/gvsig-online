@@ -140,6 +140,11 @@ def user_list(request):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @admin_required
 def user_add(request):        
+    ad_suffix = GVSIGOL_LDAP['AD']
+    if not ad_suffix:
+        show_pass_form = True
+    else:
+        show_pass_form = False
     if request.method == 'POST':
         form = UserCreateForm(request.POST)
         if form.is_valid():
@@ -197,18 +202,14 @@ def user_add(request):
                 errors = []
                 errors.append({'message': _("The username already exists")})
                 groups = auth_utils.get_all_groups()
-                return render_to_response('user_add.html', {'form': form, 'groups': groups, 'errors': errors}, context_instance=RequestContext(request))
+                return render_to_response('user_add.html', {'form': form, 'groups': groups, 'errors': errors,'show_pass_form':show_pass_form}, context_instance=RequestContext(request))
 
         else:
             groups = auth_utils.get_all_groups()
-            return render_to_response('user_add.html', {'form': form, 'groups': groups}, context_instance=RequestContext(request))
+            return render_to_response('user_add.html', {'form': form, 'groups': groups, 'show_pass_form':show_pass_form}, context_instance=RequestContext(request))
         
     else:
-        ad_suffix = GVSIGOL_LDAP['AD']
-        if not ad_suffix:
-            show_pass_form = True
-        else:
-            show_pass_form = False
+        
         form = UserCreateForm()
         groups = auth_utils.get_all_groups()
         return render_to_response('user_add.html', {'form': form, 'groups': groups, 'show_pass_form':show_pass_form}, context_instance=RequestContext(request))
