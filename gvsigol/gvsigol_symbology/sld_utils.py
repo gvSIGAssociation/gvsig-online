@@ -720,7 +720,7 @@ def create_basic_sld(library, symbol, resource_folder_path):
         sld += symbolizer.sld
         if '<ExternalGraphic>' in symbolizer.sld:
             json_symbolizer = json.loads(symbolizer.json)
-            local_path = json_symbolizer.get('online_resource').replace('/media/', '')
+            local_path = json_symbolizer.get('online_resource').replace(gvsigol.settings.MEDIA_URL, '')
             file_name = local_path.split('/')[-1]
             absolute_path = gvsigol.settings.MEDIA_ROOT + local_path
             utils.copy(absolute_path, resource_folder_path + file_name)
