@@ -5,7 +5,7 @@ urlpatterns = [
     url(r'^style_layer_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.style_layer_update', name='style_layer_update'),
     url(r'^select_legend_type/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.select_legend_type', name='select_legend_type'),
     url(r'^get_sld_body/$', 'gvsigol_symbology.views.get_sld_body', name='get_sld_body'),
-    url(r'^sld_import/$', 'gvsigol_symbology.views.sld_import', name='sld_import'),
+    url(r'^sld_import/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.sld_import', name='sld_import'),
     
     url(r'^unique_symbol_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views_unique_symbol.unique_symbol_add', name='unique_symbol_add'),
     url(r'^unique_symbol_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views_unique_symbol.unique_symbol_update', name='unique_symbol_update'),
@@ -14,6 +14,7 @@ urlpatterns = [
     url(r'^library_add/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views_library.library_add', name='library_add'),
     url(r'^library_update/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views_library.library_update', name='library_update'),
     url(r'^library_import/$', 'gvsigol_symbology.views_library.library_import', name='library_import'),
+    url(r'^library_export/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views_library.library_export', name='library_export'),
     url(r'^library_delete/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views_library.library_delete', name='library_delete'),   
     url(r'^symbol_add/(?P<library_id>[0-9]+)/(?P<symbol_type>\w+)/$', 'gvsigol_symbology.views_library.symbol_add', name='symbol_add'),
     url(r'^symbol_update/(?P<symbol_id>[0-9]+)/$', 'gvsigol_symbology.views_library.symbol_update', name='symbol_update'),

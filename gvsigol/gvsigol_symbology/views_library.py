@@ -179,6 +179,17 @@ def library_import(request):
     else:   
         return render_to_response('library_import.html', {}, context_instance=RequestContext(request))
     
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@admin_required
+def library_export(request, library_id):
+    library = Library.objects.get(id=library_id)
+    library_rules = LibraryRule.objects.filter(library_id=library.id)
+
+    response = services.export_library(library, library_rules)
+    
+    return response
+    
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @admin_required
