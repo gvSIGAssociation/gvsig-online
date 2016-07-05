@@ -7,7 +7,7 @@
 		<div class="col-md-12">
 			<div class="box box-primary">
 
-				<form role="form" method="post" enctype="multipart/form-data" action="/gvsigonline/symbology/sld_import/">
+				<form role="form" method="post" enctype="multipart/form-data" action="/gvsigonline/symbology/sld_import/{{layer_id}}/">
 					<div class="box-header with-border">
 						<h3 class="box-title">{% trans "Import SLD" %}</h3>
 						<div class="box-tools pull-right">
@@ -38,7 +38,7 @@
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<label>{% trans "Name" %}</label>
-								<input placeholder="{% trans 'Name' %}" name="sld-name" id="sld-name" type="text" class="form-control">	
+								<input readonly name="sld-name" id="sld-name" value="{{style_name}}" type="text" class="form-control">	
 							</div>
 						</div>
 						
@@ -58,7 +58,7 @@
 {% block extra-scripts %}
 <script>
 	$('#menu-manage-symbology').addClass("active");
-	$('#submenu-libraries').addClass("active");
+	$('#submenu-styles').addClass("active");
 	$('.save-button').click( function() {
 		$("body").overlay();
 	});
