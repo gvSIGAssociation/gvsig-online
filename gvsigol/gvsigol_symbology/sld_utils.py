@@ -847,11 +847,9 @@ def get_json_from_sld(sld, name, library):
                 for l in complex_line:
                     json_data = {}
                     stroke = l['Stroke']
-                    opacity = l['Graphic']['Opacity']
                     json_data['name'] = name
                     json_data['type'] = 'LineSymbolizer'
                     json_data['order'] = 0
-                    json_data['opacity'] = int(opacity)
                     json_data['border_color'] = extract_property('stroke', stroke['CssParameter'])
                     json_data['border_size'] = extract_property('stroke-width', stroke['CssParameter'])
                     json_data['border_opacity'] = extract_property('stroke-opacity', stroke['CssParameter'])
@@ -890,12 +888,10 @@ def get_json_from_sld(sld, name, library):
                
         elif 'LineSymbolizer' in doc:
             json_data = {}
-            graphic = doc['LineSymbolizer']['Graphic']
             stroke = doc['LineSymbolizer']['Stroke']
             json_data['name'] = name
             json_data['type'] = 'LineSymbolizer'
             json_data['order'] = 0
-            json_data['opacity'] = float(graphic['Opacity'])
             json_data['border_color'] = extract_property('stroke', stroke['CssParameter'])
             json_data['border_size'] = extract_property('stroke-width', stroke['CssParameter'])
             json_data['border_opacity'] = extract_property('stroke-opacity', stroke['CssParameter'])
@@ -904,13 +900,11 @@ def get_json_from_sld(sld, name, library):
             
         elif 'PolygonSymbolizer' in doc:
             json_data = {}
-            graphic = doc['PolygonSymbolizer']['Graphic']
             fill = doc['PolygonSymbolizer']['Fill']
             stroke = doc['PolygonSymbolizer']['Stroke']
             json_data['name'] = name
             json_data['type'] = 'PolygonSymbolizer'
             json_data['order'] = 0
-            json_data['opacity'] = float(graphic['Opacity'])
             json_data['fill_color'] = extract_property('fill', fill['CssParameter'])
             json_data['fill_opacity'] = extract_property('fill-opacity', fill['CssParameter'])
             json_data['border_color'] = extract_property('stroke', stroke['CssParameter'])
