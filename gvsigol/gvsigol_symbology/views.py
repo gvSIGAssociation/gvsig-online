@@ -25,11 +25,11 @@
 from django.shortcuts import render_to_response, RequestContext, redirect, HttpResponse
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
 from gvsigol_symbology.sld_utils import get_style_from_library_symbol
+from gvsigol_services.models import Workspace, Datastore, Layer
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from models import Style, StyleLayer, StyleRule
 from gvsigol_auth.utils import admin_required
-from gvsigol_services.models import Layer
 from gvsigol_symbology import sld_utils
 from gvsigol_symbology import services
 import json
@@ -98,7 +98,7 @@ def get_sld_body(request):
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @admin_required
-def sld_import(request):
+def sld_import(request, layer_id):
     if request.method == 'POST': 
         name = request.POST.get('sld-name')
         
@@ -138,4 +138,15 @@ def sld_import(request):
         return render_to_response('sld_import.html', {'message': message}, context_instance=RequestContext(request))
     
     else:   
-        return render_to_response('sld_import.html', {}, context_instance=RequestContext(request))
+        layer = Layer.objects.get(id=int(layer_id))
+        index = len(StyleLayer.objects.filter(layer=layer))
+        
+        datastore = Datastore.objects.get(id=layer.datastore_id)
+        workspace = Workspace.objects.get(id=datastore.workspace_id)
+        
+        response = {
+            'layer_id': layer_id,
+            'style_name': workspace.name + '_' + layer.name + '_' + str(index)
+        }
+        
+        return render_to_response('sld_import.html', response, context_instance=RequestContext(request))

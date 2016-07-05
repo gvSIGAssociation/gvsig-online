@@ -35,19 +35,22 @@ import utils
 import json
 import re
 
+#from sld import StyledLayerDescriptor
 
-def export_library(library, symbols):
+
+def export_library(library, library_rules):
     dir_path = tempfile.mkdtemp(suffix='', prefix='tmp-library-')
     resource_path = dir_path+"/resources/"
     os.makedirs(resource_path)
     i=0
-    for symbol in symbols:
+    for library_rule in library_rules:
         try:
-            file = open(dir_path+"/symbol-"+symbol.name+"-"+str(i)+".sld",'w+')
-            file.write(sld_utils.create_basic_sld(library, symbol, resource_path))
+            file = open(dir_path+"/symbol-"+library_rule.rule.name+"-"+str(i)+".sld",'w+')
+            file.write(sld_utils.create_basic_sld(library, library_rule.rule, resource_path))
             file.close()
-        except:
-            print('Something went wrong creating SLD file for symbol nº'+str(i))
+            
+        except Exception as e:
+            print('Something went wrong creating SLD file for symbol nº' + str(i))
             
         i=i+1
    
@@ -122,7 +125,7 @@ def upload_library(file, library):
                             )
                             rule.save()
                             
-                            symbolizers = sld_utils.get_json_from_sld(sld, name, library)
+                            symbolizers = sld_utils.get_json_from_sld(sld, name, library.name)
                             for s in symbolizers:
                                 scount = 0
                                 stype = s['type']
@@ -156,10 +159,56 @@ def upload_library(file, library):
     
     return rules
 
-
 def upload_sld(file):
+    
+    #sld = StyledLayerDescriptor(file) 
+    #sld_rules = sld.NamedLayer.UserStyle.FeatureTypeStyle.Rules
     rules = []
+    #if len(sld_rules) >= 1:
+    #    for r in sld_rules:
+    #        print r
+    #        type = get_symbolizer_type(r)
+
+            #rule = Rule(
+            #    name = '' if r.Name is None else r.Name,
+            #    title = '' if r.Title is None else r.Title,
+            #    type = type,
+            #    minscale = -1 if r.MaxScaleDenominator is None else r.MaxScaleDenominator,
+            #    maxscale = -1 if r.MinScaleDenominator is None else r.MinScaleDenominator
+            #)
+            #rule.save()
+
+            #symbolizers = sld_utils.get_json_from_sld(sld, name, library.name)
+            #for s in symbolizers:
+            #    scount = 0
+            #    stype = s['type']
+            #    rule.type = stype
+            #    rule.save()
+            #    s = json.dumps(s).replace("'", '"')
+            #    symbolizer = Symbolizer(
+            #        rule = rule,
+            #        type = stype,
+            #        sld = sld,
+            #        json = s.encode('utf-8'),
+            #        order = scount
+            #    )
+            #    symbolizer.save()
+            #    scount += 1
+                
     return rules
+                
+def get_symbolizer_type(r):
+    type = ''
+    if r.PointSymbolizer is not None:
+        type = 'PointSymbolizer'
+    elif r.LineSymbolizer is not None:
+        type = 'LineSymbolizer'
+    elif r.PolygonSymbolizer is not None:
+        type = 'PolygonSymbolizer'
+    elif r.TextSymbolizer is not None:
+        type = 'TextSymbolizer'
+        
+    return type
     
             
 def check_library_path(library):
