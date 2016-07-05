@@ -58,8 +58,8 @@ ExternalGraphicSymbolizer.prototype.toXML = function(){
 	xml += 			'<OnlineResource xlink:type="simple" xlink:href="' + this.online_resource + '" />';
 	xml += 			'<Format>' + this.format + '</Format>';
 	xml += 		'</ExternalGraphic>';
+	xml += 		'<Size>' + this.size + '</Size>';
 	xml += 	'</Graphic>';
-	xml += 	'<Size>' + this.size + '</Size>';
 	xml += '</PointSymbolizer>';
 	
 	return xml;

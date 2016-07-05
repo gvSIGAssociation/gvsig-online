@@ -17,7 +17,6 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-#from twisted.test.test_tcp_internals import resource
 
 '''
 @author: Jose Badia <jbadia@scolab.es>
@@ -31,6 +30,7 @@ from xml.sax.saxutils import escape
 import gvsigol.settings
 import xmltodict
 import json
+import utils
 import re
 
 def parentesis_operation(operators, filter, auxTranslations, fields):
@@ -552,10 +552,8 @@ def get_geometry_sld(layer_id, filter, session):
 
 def get_sld_style(layer_id, style_id, session):
     sld = "<StyledLayerDescriptor version=\"1.0.0\" xmlns=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" "
-    sld += "xmlns:sld=\"http://www.opengis.net/sld\"  xmlns:gml=\"http://www.opengis.net/gml\" " 
     sld +=   "xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
     sld +=   "xsi:schemaLocation=\"http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd\">"
-    #sld = "<sld:StyledLayerDescriptor xmlns=\"http://www.opengis.net/sld\" xmlns:sld=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:gml=\"http://www.opengis.net/gml\" version=\"1.0.0\">"
     sld += "<NamedLayer>"
     
     layer = Layer.objects.get(id=layer_id)
@@ -609,10 +607,8 @@ def get_sld_style(layer_id, style_id, session):
 
 def get_style_from_library_symbol(style_id, session):
     sld = "<StyledLayerDescriptor version=\"1.0.0\" xmlns=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" "
-    sld += "xmlns:sld=\"http://www.opengis.net/sld\"  xmlns:gml=\"http://www.opengis.net/gml\" " 
     sld +=   "xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
     sld +=   "xsi:schemaLocation=\"http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd\">"
-    #sld = "<sld:StyledLayerDescriptor xmlns=\"http://www.opengis.net/sld\" xmlns:sld=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:gml=\"http://www.opengis.net/gml\" version=\"1.0.0\">"
     sld += "<NamedLayer>"
     
     style = Style.objects.get(id=style_id)
@@ -651,7 +647,6 @@ def get_style_from_library_symbol(style_id, session):
 
 def get_sld_body(json_data):
     sld = "<StyledLayerDescriptor version=\"1.0.0\" xmlns=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" "
-    sld += "xmlns:sld=\"http://www.opengis.net/sld\"  xmlns:gml=\"http://www.opengis.net/gml\" " 
     sld +=   "xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
     sld +=   "xsi:schemaLocation=\"http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd\">"
     sld += "<NamedLayer>"  
@@ -705,7 +700,6 @@ def get_clean_sld(sld_code, symbol):
 
 def create_basic_sld(library, symbol, resource_folder_path):
     sld = "<StyledLayerDescriptor version=\"1.0.0\" xmlns=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" "
-    sld += "xmlns:sld=\"http://www.opengis.net/sld\"  xmlns:gml=\"http://www.opengis.net/gml\" " 
     sld +=   "xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
     sld +=   "xsi:schemaLocation=\"http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd\">"
     sld += "<NamedLayer>"
@@ -714,16 +708,22 @@ def create_basic_sld(library, symbol, resource_folder_path):
     
     sld += "<UserStyle>"
     sld += "<Name>"+ library.name +"</Name>"
-    sld += "<Title>"+ escape(library.title) +"</Title>"
+    sld += "<Title>"+ escape(library.description) +"</Title>"
     sld += "<Abstract>"+ escape(library.description) +"</Abstract>"
     sld += "<FeatureTypeStyle>"
     
     sld += "<Rule>"
     sld += "<Name>"+ escape(symbol.name) +"</Name>"
         
-    symbs = get_symbolizers(symbol.sld_code)
-    for symb in symbs:
-        sld += get_graphics_sld(symb, resource_folder_path)
+    symbolizers = Symbolizer.objects.filter(rule = symbol)
+    for symbolizer in symbolizers:
+        sld += symbolizer.sld
+        if '<ExternalGraphic>' in symbolizer.sld:
+            json_symbolizer = json.loads(symbolizer.json)
+            local_path = json_symbolizer.get('online_resource').replace('/media/', '')
+            file_name = local_path.split('/')[-1]
+            absolute_path = gvsigol.settings.MEDIA_ROOT + local_path
+            utils.copy(absolute_path, resource_folder_path + file_name)
             
     sld += "</Rule>"
     
@@ -761,10 +761,8 @@ def get_sld_style2(request, layer_id, style_id):
         if data:
             datos = json.loads(data)
             sld = "<StyledLayerDescriptor version=\"1.0.0\" xmlns=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" "
-            sld += "xmlns:sld=\"http://www.opengis.net/sld\"  xmlns:gml=\"http://www.opengis.net/gml\" " 
             sld +=   "xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
             sld +=   "xsi:schemaLocation=\"http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd\">"
-            #sld = "<sld:StyledLayerDescriptor xmlns=\"http://www.opengis.net/sld\" xmlns:sld=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:gml=\"http://www.opengis.net/gml\" version=\"1.0.0\">"
             sld += "<NamedLayer>"
             
             layer = Layer.objects.get(id=layer_id)
@@ -871,7 +869,7 @@ def get_json_from_sld(sld, name, library):
                 json_data['size'] = int(graphic['Size'])
                 online_resource = external_graphic['OnlineResource']['@xlink:href']
                 image = online_resource.split('/')[-1]
-                json_data['online_resource'] = gvsigol.settings.MEDIA_URL + 'symbol_libraries/' + library.name + '/' + image
+                json_data['online_resource'] = gvsigol.settings.MEDIA_URL + 'symbol_libraries/' + library + '/' + image
                 json_data['format'] = external_graphic['Format']
                 
             elif 'Mark' in graphic:
