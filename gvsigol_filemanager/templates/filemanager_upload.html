@@ -35,13 +35,15 @@
 		   	autoSubmit:false,
 		   	formData: {},
 	    	onSuccess: function(files,data,xhr){
+	    		$.overlayout();
 	    		var json = JSON.parse(data);
 	    		location.href = '/gvsigonline/filemanager/?path=' + json.path;
 	    	},
 	    	onError: function(files,status,errMsg){}
 		});
 	  	
-	  	$('#upload-button').on('click', function () {		
+	  	$('#upload-button').on('click', function () {
+	  		$("body").overlay();
 			fileupload.appendExtraParams({'path': "{{path}}"});
 			fileupload.startUpload();
 		});
