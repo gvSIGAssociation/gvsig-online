@@ -27,17 +27,20 @@
 	$(document).ready(function(){
 	  	
 	  	var fileupload = $('#fileupload-component');
-		
+		var path = '';
 	  	fileupload.uploadFile({
 		   	url: "{% url 'filemanager:upload-file' %}",
 		   	fileName: "files",
 		   	multiple: true,
 		   	autoSubmit:false,
 		   	formData: {},
-	    	onSuccess: function(files,data,xhr){
-	    		$.overlayout();
+		   	onSuccess: function(files,data,xhr){
 	    		var json = JSON.parse(data);
-	    		location.href = '/gvsigonline/filemanager/?path=' + json.path;
+	    		path = json.path;
+	    	},
+		   	afterUploadAll: function(files,data,xhr){
+	    		$.overlayout();
+	    		location.href = '/gvsigonline/filemanager/?path=' + path;
 	    	},
 	    	onError: function(files,status,errMsg){}
 		});
