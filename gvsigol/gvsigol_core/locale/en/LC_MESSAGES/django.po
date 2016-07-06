@@ -1,0 +1,294 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-06-30 09:49+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: templates/404.html:10
+msgid "Page not found"
+msgstr ""
+
+#: templates/404.html:13
+msgid "We could not find the page you were looking for. Meanwhile, you may"
+msgstr ""
+
+#: templates/404.html:14 templates/500.html.py:14
+msgid "return to dashboard"
+msgstr ""
+
+#: templates/500.html:10
+msgid "Something went wrong"
+msgstr ""
+
+#: templates/500.html:13
+msgid "We will work on fixing that right away. Meanwhile, you may"
+msgstr ""
+
+#: templates/base.html:70 templates/viewer.html.py:91
+msgid "Sign out"
+msgstr ""
+
+#: templates/base.html:88 templates/viewer.html.py:88
+msgid "Dashboard"
+msgstr ""
+
+#: templates/base.html:94
+msgid "Home"
+msgstr ""
+
+#: templates/base.html:126
+msgid "All rights reserved"
+msgstr ""
+
+#: templates/dashboard_core_menu.html:6
+msgid "Projects"
+msgstr ""
+
+#: templates/home.html:18 utils.py:289
+msgid "Username"
+msgstr ""
+
+#: templates/home.html:20 utils.py:292
+msgid "Email"
+msgstr ""
+
+#: templates/home.html:22
+msgid "Is admin?"
+msgstr ""
+
+#: templates/home.html:24
+msgid "You are logged in as an administrator user"
+msgstr ""
+
+#: templates/home.html:26
+msgid "You are logged in as an non-administrator user"
+msgstr ""
+
+#: templates/home.html:28
+msgid "Last login"
+msgstr ""
+
+#: templates/home.html:30 utils.py:293 utils.py:305
+msgid "Password"
+msgstr ""
+
+#: templates/home.html:31
+msgid "Click here"
+msgstr ""
+
+#: templates/home.html:31
+msgid "to update your password"
+msgstr ""
+
+#: templates/home.html:35
+msgid "Passwords doesn't match"
+msgstr ""
+
+#: templates/home.html:40 templates/home.html.py:41 utils.py:301
+msgid "New password"
+msgstr ""
+
+#: templates/home.html:47 templates/home.html.py:48
+msgid "Repeat new password"
+msgstr ""
+
+#: templates/home.html:53
+msgid "Update password"
+msgstr ""
+
+#: templates/home.html:64 templates/project_list.html.py:11
+msgid "Projects list"
+msgstr ""
+
+#: templates/home.html:67 templates/project_add.html.py:12
+#: templates/project_list.html:14
+msgid "Add project"
+msgstr ""
+
+#: templates/home.html:79
+msgid "Load project"
+msgstr ""
+
+#: templates/project_add.html:14 templates/project_update.html.py:14
+#: templates/toc_update.html:13
+msgid "Save"
+msgstr ""
+
+#: templates/project_add.html:28 templates/project_list.html.py:24
+#: templates/project_update.html:28
+msgid "Name"
+msgstr ""
+
+#: templates/project_add.html:29 templates/project_update.html.py:29
+msgid "Project name"
+msgstr ""
+
+#: templates/project_add.html:35 templates/project_list.html.py:25
+#: templates/project_update.html:35
+msgid "Description"
+msgstr ""
+
+#: templates/project_add.html:36 templates/project_update.html.py:36
+msgid "Project description"
+msgstr ""
+
+#: templates/project_add.html:51
+msgid "Select image"
+msgstr ""
+
+#: templates/project_add.html:58 templates/project_update.html.py:51
+msgid "Assign user groups"
+msgstr ""
+
+#: templates/project_add.html:71 templates/project_update.html.py:65
+#: templates/project_update.html:67
+msgid "Assign user group"
+msgstr ""
+
+#: templates/project_add.html:85 templates/project_update.html.py:82
+msgid "Assign layer groups"
+msgstr ""
+
+#: templates/project_add.html:98 templates/project_update.html.py:96
+#: templates/project_update.html:98
+msgid "Assign layer group"
+msgstr ""
+
+#: templates/project_list.html:58 templates/project_list.html.py:105
+msgid "Delete project"
+msgstr ""
+
+#: templates/project_list.html:61
+msgid "The project will be removed, Do you want continue?"
+msgstr ""
+
+#: templates/project_list.html:64 templates/viewer.html.py:162
+msgid "Cancel"
+msgstr ""
+
+#: templates/project_list.html:65 templates/viewer.html.py:163
+msgid "Accept"
+msgstr ""
+
+#: templates/project_list.html:81
+msgid "Processing request..."
+msgstr ""
+
+#: templates/project_list.html:82
+#, python-format
+msgid "Search%(sep)s"
+msgstr ""
+
+#: templates/project_list.html:83
+#, python-format
+msgid "Showing %(numrecords)s records"
+msgstr ""
+
+#: templates/project_list.html:84
+#, python-format
+msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
+msgstr ""
+
+#: templates/project_list.html:85
+msgid "Showing from 0 to 0 of 0 records"
+msgstr ""
+
+#: templates/project_list.html:86
+#, python-format
+msgid "Filtering %(max)s records"
+msgstr ""
+
+#: templates/project_list.html:88
+msgid "Loading..."
+msgstr ""
+
+#: templates/project_list.html:89 templates/project_list.html.py:90
+msgid "No records available"
+msgstr ""
+
+#: templates/project_list.html:92
+msgid "First"
+msgstr ""
+
+#: templates/project_list.html:93
+msgid "Previous"
+msgstr ""
+
+#: templates/project_list.html:94
+msgid "Next"
+msgstr ""
+
+#: templates/project_list.html:95
+msgid "Last"
+msgstr ""
+
+#: templates/project_list.html:98
+#, python-format
+msgid "%(sep)sSort ascending"
+msgstr ""
+
+#: templates/project_list.html:99
+#, python-format
+msgid "%(sep)sSort descending"
+msgstr ""
+
+#: templates/project_list.html:109
+msgid "TOC order"
+msgstr ""
+
+#: templates/project_list.html:113 templates/project_update.html.py:12
+msgid "Update project"
+msgstr ""
+
+#: templates/toc_update.html:11
+msgid "Update TOC"
+msgstr ""
+
+#: templates/viewer.html:59
+msgid "Search"
+msgstr ""
+
+#: templates/viewer.html:258
+msgid "Close"
+msgstr ""
+
+#: utils.py:272
+msgid "New user account"
+msgstr ""
+
+#: utils.py:288
+msgid "Account data"
+msgstr ""
+
+#: utils.py:290
+msgid "First name"
+msgstr ""
+
+#: utils.py:291
+msgid "Last name"
+msgstr ""
+
+#: utils.py:303
+msgid "This is your new temporary password"
+msgstr ""
+
+#: views.py:146
+msgid "You must enter an project name"
+msgstr ""
+
+#: views.py:198 views.py:340
+msgid "Project name already exists"
+msgstr ""
