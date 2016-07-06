@@ -122,11 +122,12 @@ class Filemanager(object):
                 for f in files:
                     if filename == f.split('.')[0]:
                         FILEMANAGER_STORAGE.delete(path + f)
-                return True
-                    
-            else:
-                shutil.rmtree(self.location)
-                return True
+                        
+            if len(directories) >= 1:
+                for d in directories:
+                    if filename == d.split('.')[0]:
+                        FILEMANAGER_STORAGE.delete(path + d)
+            return True
             
         except Exception as e:
             if e.errno == 21:
