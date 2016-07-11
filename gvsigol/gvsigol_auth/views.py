@@ -29,12 +29,14 @@ from forms import UserCreateForm, UserGroupForm
 from models import UserGroupUser, UserGroup
 from django.contrib.auth.models import User
 from gvsigol_auth.services import services as core_services
+from django.views.decorators.csrf import csrf_exempt
 import random, string
 from utils import admin_required
 import utils as auth_utils
 import json
 from gvsigol.settings import GVSIGOL_LDAP
 
+@csrf_exempt
 def login_user(request):
     if request.user.is_authenticated():
         logout_user(request)
