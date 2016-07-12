@@ -262,7 +262,7 @@ def delete_library_dir(library):
         return False
     
 def get_online_resource(library, file_name):
-    return settings.MEDIA_URL + "symbol_libraries/" + library.name + "/" + file_name
+    return settings.MEDIA_URL.replace('https','http') + "symbol_libraries/" + library.name + "/" + file_name
 
 def get_layer_field_description(layer_id, session):
     layer = Layer.objects.get(id=layer_id)
