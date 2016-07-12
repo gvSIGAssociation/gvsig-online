@@ -867,7 +867,7 @@ def get_json_from_sld(sld, name, library):
                 json_data['size'] = int(graphic['Size'])
                 online_resource = external_graphic['OnlineResource']['@xlink:href']
                 image = online_resource.split('/')[-1]
-                json_data['online_resource'] = gvsigol.settings.MEDIA_URL + 'symbol_libraries/' + library + '/' + image
+                json_data['online_resource'] = gvsigol.settings.MEDIA_URL.replace('https','http') + 'symbol_libraries/' + library + '/' + image
                 json_data['format'] = external_graphic['Format']
                 
             elif 'Mark' in graphic:
