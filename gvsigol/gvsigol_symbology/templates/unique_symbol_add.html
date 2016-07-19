@@ -173,7 +173,6 @@ $(document).ready(function() {
 	var featureType = "{{featureType}}";
 	var fields = {{fields|safe}};
 	var alphanumericFields = {{alphanumeric_fields|safe}};
-	var sldFilterValues = {{sldFilterValues|safe}};
 	var fonts = {{ fonts|safe }};
 	var rule_opts = "";
 	var previewPointUrl = "{{preview_point_url}}";
@@ -188,7 +187,7 @@ $(document).ready(function() {
 	var map = new ol.Map({
 		layers: [
 		    new ol.layer.Tile({
-            	source: new ol.source.MapQuest({layer: 'osm'})
+            	source: new ol.source.OSM()
           	})
 		],
 		target: "map",

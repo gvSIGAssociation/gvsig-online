@@ -21,42 +21,38 @@
  */
  
  
-var PointSymbolizer = function(id, rule, symbologyUtils, symbolizer_object, previewUrl) {
-	this.id = 'pointsymbolizer' + id;
-	this.type = 'PointSymbolizer';
-	this.name = 'PointSymbolizer ' + id;
-	this.shape = 'circle';
-	this.fill_color = "#000000";
+var MarkSymbolizer = function(rule, options, previewUrl, symutils) {
+	this.id = 'marksymbolizer' + symutils.generateUUID();
+	this.type = 'MarkSymbolizer';
+	this.well_known_name = 'circle';
+	this.fill = "#000000";
 	this.fill_opacity = 0.5;
-	this.with_border = false;
-	this.border_color = "#000000";
-	this.border_size = 1;
-	this.border_opacity = 1;
-	this.border_type = "solid";
+	this.stroke = "#000000";
+	this.stroke_width = 1;
+	this.stroke_opacity = 1;
 	this.rotation = 0;
 	this.order = 0;
 	this.size = 10;
+	this.opacity = 1;
 	this.rule = rule;
 	this.previewUrl = previewUrl;
-	this.symbologyUtils = symbologyUtils;
+	this.symbologyUtils = symutils;
 	
-	if (symbolizer_object) {
-		this.name = symbolizer_object.name;
-		this.shape = symbolizer_object.shape;
-		this.fill_color = symbolizer_object.fill_color;
-		this.fill_opacity = parseFloat(symbolizer_object.fill_opacity) || 0.5;
-		this.with_border = symbolizer_object.with_border;
-		this.border_color = symbolizer_object.border_color;
-		this.border_size = parseInt(symbolizer_object.border_size);
-		this.border_opacity = parseFloat(symbolizer_object.border_opacity) || 1.0;
-		this.border_type = symbolizer_object.border_type;
-		this.rotation = parseInt(symbolizer_object.rotation) || 0;
-		this.order = parseInt(symbolizer_object.order) || 0;
-		this.size = parseInt(symbolizer_object.size);
+	if (options) {
+		this.well_known_name = options.well_known_name;
+		this.fill = options.fill;
+		this.fill_opacity = parseFloat(options.fill_opacity) || 0.5;
+		this.stroke = options.stroke;
+		this.stroke_width = parseInt(options.stroke_width);
+		this.stroke_opacity = parseFloat(options.stroke_opacity) || 1.0;
+		this.rotation = parseInt(options.rotation) || 0;
+		this.order = parseInt(options.order) || 0;
+		this.size = parseInt(options.size);
+		this.opacity = parseFloat(options.opacity) || 1.0;
 	}
 };
 
-PointSymbolizer.prototype.getTableUI = function() {
+MarkSymbolizer.prototype.getTableUI = function() {
 	var ui = '';
 	ui += '<tr data-rowid="' + this.id + '">';
 	ui += 	'<td>'
@@ -65,7 +61,6 @@ PointSymbolizer.prototype.getTableUI = function() {
 	ui += 			'<i class="fa fa-ellipsis-v"></i>';
 	ui += 		'</span>';
 	ui += 	'</td>';
-	ui += 	'<td><span class="text-muted">' + this.name + '</span></td>';
 	ui += 	'<td id="symbolizer-preview-div-' + this.id + '"></td>';	
 	ui += 	'<td><a class="edit-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
 	ui += 	'<td><a class="delete-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
@@ -74,25 +69,25 @@ PointSymbolizer.prototype.getTableUI = function() {
 	return ui;
 };
 
-PointSymbolizer.prototype.getTabMenu = function() {
+MarkSymbolizer.prototype.getTabMenu = function() {
 	var ui = '';
 	ui += '<li class="active"><a href="#graphic-tab" data-toggle="tab">' + gettext('Graphic') + '</a></li>';
 	ui += '<li><a href="#fill-tab" data-toggle="tab">' + gettext('Fill') + '</a></li>';
-	ui += '<li><a href="#border-tab" data-toggle="tab">' + gettext('Border') + '</a></li>';
+	ui += '<li><a href="#stroke-tab" data-toggle="tab">' + gettext('Stroke') + '</a></li>';
 	ui += '<li><a href="#rotation-tab" data-toggle="tab">' + gettext('Rotation') + '</a></li>';
 	
 	return ui;	
 };
 
-PointSymbolizer.prototype.getGraphicTabUI = function() {
+MarkSymbolizer.prototype.getGraphicTabUI = function() {
 	var ui = '';
 	ui += '<div class="tab-pane active" id="graphic-tab">';
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
 	ui += 			'<label>' + gettext('Select shape') + '</label>';
-	ui += 			'<select id="shape" class="form-control">';
+	ui += 			'<select id="well-known-name" class="form-control">';
 	for (var i=0; i < this.symbologyUtils.shapes.length; i++) {
-		if (this.symbologyUtils.shapes[i].value == this.shape) {
+		if (this.symbologyUtils.shapes[i].value == this.well_known_name) {
 			ui += '<option value="' + this.symbologyUtils.shapes[i].value + '" selected>' + this.symbologyUtils.shapes[i].title + '</option>';
 		} else {
 			ui += '<option value="' + this.symbologyUtils.shapes[i].value + '">' + this.symbologyUtils.shapes[i].title + '</option>';
@@ -112,13 +107,13 @@ PointSymbolizer.prototype.getGraphicTabUI = function() {
 	return ui;
 };
 
-PointSymbolizer.prototype.getFillTabUI = function() {
+MarkSymbolizer.prototype.getFillTabUI = function() {
 	var ui = '';
 	ui += '<div class="tab-pane" id="fill-tab">';
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
 	ui += 			'<label>' + gettext('Fill color') + '</label>';
-	ui += 			'<input id="fill-color-chooser" type="color" value="' + this.fill_color + '" class="form-control color-chooser">';					
+	ui += 			'<input id="fill-color-chooser" type="color" value="' + this.fill + '" class="form-control color-chooser">';					
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += 	'<div class="row">';
@@ -132,60 +127,33 @@ PointSymbolizer.prototype.getFillTabUI = function() {
 	return ui;
 };
 
-PointSymbolizer.prototype.getBorderTabUI = function() {
+MarkSymbolizer.prototype.getStrokeTabUI = function() {
 	var ui = '';
-	ui += '<div class="tab-pane" id="border-tab">';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 checkbox">';
-	ui += 			'<label>';
-	if (this.with_border) {
-		ui += '<input type="checkbox" id="symbol-with-border" name="symbol-with-border" checked/>' + gettext('With border');
-	} else {
-		ui += '<input type="checkbox" id="symbol-with-border" name="symbol-with-border"/>' + gettext('With border');
-	}	
-	ui += 			'</label>';
-	ui += 		'</div>';
-	ui += 	'</div>';
-	if (this.with_border) {
-		ui += 	'<div id="border-div" style="display: block;">';
-	} else {
-		ui += 	'<div id="border-div" style="display: none;">';
-	}
+	ui += '<div class="tab-pane" id="stroke-tab">';
 	ui += 		'<div class="row">';
 	ui += 			'<div class="col-md-12 form-group">';
-	ui += 				'<label>' + gettext('Border color') + '</label>';
-	ui += 				'<input id="border-color-chooser" type="color" value="' + this.border_color + '" class="form-control color-chooser">';					
+	ui += 				'<label>' + gettext('Stroke color') + '</label>';
+	ui += 				'<input id="stroke-color-chooser" type="color" value="' + this.stroke + '" class="form-control color-chooser">';					
 	ui += 			'</div>';
 	ui += 		'</div>';
 	ui += 		'<div class="row">';
 	ui += 			'<div class="col-md-12 form-group">';
-	ui += 				'<label>' + gettext('Border size') + '</label>';
-	ui += 				'<input id="border-size" type="number" class="form-control" value="' + parseInt(this.border_size) + '">';					
+	ui += 				'<label>' + gettext('Stroke width') + '</label>';
+	ui += 				'<input id="stroke-width" type="number" class="form-control" value="' + parseInt(this.stroke_width) + '">';					
 	ui += 			'</div>';
 	ui += 		'</div>';
 	ui += 		'<div class="row">';
 	ui += 			'<div class="col-md-12 form-group">';
-	ui += 				'<label style="display: block;">' + gettext('Border opacity') + '<span id="border-opacity-output" class="margin-l-15 gol-slider-output">' + (this.border_opacity * 100) + '%</span>' + '</label>';
-	ui += 				'<div id="border-opacity-slider"></div>';
+	ui += 				'<label style="display: block;">' + gettext('Stroke opacity') + '<span id="stroke-opacity-output" class="margin-l-15 gol-slider-output">' + (this.stroke_opacity * 100) + '%</span>' + '</label>';
+	ui += 				'<div id="stroke-opacity-slider"></div>';
 	ui += 			'</div>';					 
 	ui += 		'</div>';
-	ui += 		'<div class="row">';
-	ui += 			'<div class="col-md-12 form-group">';
-	ui += 				'<label>' + gettext('Border type') + '</label>';
-	ui += 				'<select id="border-type" class="form-control">';
-	ui += 					'<option value="solid">' + gettext('Solid') + '</option>';
-	ui += 					'<option value="dotted">' + gettext('Dotted') + '</option>';
-	ui += 					'<option value="stripped">' + gettext('Stripped') + '</option>';
-	ui += 				'</select>';
-	ui += 			'</div>';
-	ui += 		'</div>';
-	ui += 	'</div>';
 	ui += '</div>';
 	
 	return ui;
 };
 
-PointSymbolizer.prototype.getRotationTabUI = function() {
+MarkSymbolizer.prototype.getRotationTabUI = function() {
 	var ui = '';
 	ui += '<div class="tab-pane" id="rotation-tab">';
 	ui += 	'<div class="row">';
@@ -199,7 +167,76 @@ PointSymbolizer.prototype.getRotationTabUI = function() {
 	return ui;
 };
 
-PointSymbolizer.prototype.updatePreview = function() {	
+MarkSymbolizer.prototype.registerEvents = function(rule) {
+	var self = this;
+	
+	$("#graphic-size").on('change', function(e) {
+		self.size = this.value;
+		self.updatePreview();	
+		rule.updatePreview(self.previewUrl);
+	});
+
+	$("#well-known-name").on('change', function(e) {
+		self.well_known_name = this.value;
+		self.updatePreview();	
+		rule.updatePreview(self.previewUrl);
+	});
+	$( "#fill-opacity-slider" ).slider({
+	    min: 0,
+	    max: 100,
+	    value: (self.fill_opacity * 100),
+	    change: function( event, ui ) {
+	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
+	    	self.fill_opacity = opacity;
+	    	self.updatePreview();
+	    	rule.updatePreview(self.previewUrl);
+	    },
+	    slide: function( event, ui ) {
+	    	$("#fill-opacity-output").text(ui.value + '%');
+	    }
+	});	
+	$("#fill-color-chooser").on('change', function(e) {
+		self.fill = this.value;
+		self.updatePreview();	
+		rule.updatePreview(self.previewUrl);
+	});	
+	$("#stroke-color-chooser").on('change', function(e) {
+		self.stroke = this.value;
+		self.updatePreview();	
+		rule.updatePreview(self.previewUrl);
+	});
+	$( "#stroke-opacity-slider" ).slider({
+	    min: 0,
+	    max: 100,
+	    value: (self.stroke_opacity * 100),
+	    change: function( event, ui ) {
+	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
+	    	self.stroke_opacity = opacity;
+	    	self.updatePreview();
+	    	rule.updatePreview(self.previewUrl);
+	    },
+	    slide: function( event, ui ) {
+	    	$("#stroke-opacity-output").text(ui.value + '%');
+	    }
+	});
+	$("#stroke-width").on('change', function(e) {
+		self.stroke_width = this.value;
+		self.updatePreview();	
+		rule.updatePreview(self.previewUrl);
+	});
+	$( "#rotation-slider" ).slider({
+	    min: 0,
+	    max: 360,
+	    value: self.rotation,
+	    slide: function( event, ui ) {
+	    	var rotation = ui.value;
+	    	$("#rotation-output").text(rotation + 'º');
+	    	self.rotation = rotation;
+	    }
+	});
+};
+
+MarkSymbolizer.prototype.updatePreview = function() {	
 	var sldBody = this.toSLDBody();
 	var url = this.previewUrl + '&SLD_BODY=' + encodeURIComponent(sldBody);
 	var ui = '<img id="symbolizer-preview-' + this.id + '" src="' + url + '" class="symbolizer-preview-' + this.id + '"></img>';
@@ -207,24 +244,22 @@ PointSymbolizer.prototype.updatePreview = function() {
 	$("#symbolizer-preview-div-" + this.id).append(ui);
 };
 
-PointSymbolizer.prototype.toXML = function(){
+MarkSymbolizer.prototype.toXML = function(){
 	
 	var xml = '';
 	xml += '<PointSymbolizer>';
 	xml += 	'<Graphic>';
 	xml += 		'<Mark>';
-	xml += 			'<WellKnownName>' + this.shape + '</WellKnownName>';
+	xml += 			'<WellKnownName>' + this.well_known_name + '</WellKnownName>';
 	xml += 			'<Fill>';
-	xml += 				'<CssParameter name="fill">' + this.fill_color + '</CssParameter>';
+	xml += 				'<CssParameter name="fill">' + this.fill + '</CssParameter>';
 	xml += 				'<CssParameter name="fill-opacity">' + this.fill_opacity + '</CssParameter>';
 	xml += 			'</Fill>';
-	if (this.with_border) {
-		xml += 			'<Stroke>';
-		xml += 				'<CssParameter name="stroke">' + this.border_color + '</CssParameter>';
-		xml += 				'<CssParameter name="stroke-width">' + this.border_size + '</CssParameter>';
-		xml += 				'<CssParameter name="stroke-opacity">' + this.border_opacity + '</CssParameter>';
-		xml += 			'</Stroke>';
-	}
+	xml += 			'<Stroke>';
+	xml += 				'<CssParameter name="stroke">' + this.stroke + '</CssParameter>';
+	xml += 				'<CssParameter name="stroke-width">' + this.stroke_width + '</CssParameter>';
+	xml += 				'<CssParameter name="stroke-opacity">' + this.stroke_opacity + '</CssParameter>';
+	xml += 			'</Stroke>';
 	xml += 		'</Mark>';
 	xml += 		'<Opacity>1</Opacity>';
 	xml += 		'<Size>' + this.size + '</Size>';
@@ -235,36 +270,34 @@ PointSymbolizer.prototype.toXML = function(){
 	return xml;
 };
 
-PointSymbolizer.prototype.toSLDBody = function(){
+MarkSymbolizer.prototype.toSLDBody = function(){
 	
 	var sld = '';
 	sld += '<StyledLayerDescriptor version=\"1.0.0\" xmlns=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" ';
 	sld +=  'xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ';
 	sld +=  'xsi:schemaLocation=\"http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd\">';
 	sld += 	'<NamedLayer>';  
-	sld +=  	'<Name>' + this.name + '</Name>';  
+	sld +=  	'<Name>Mark</Name>';  
 	sld +=      '<UserStyle>';
-	sld +=          '<Name>' + this.name + '</Name>';
-	sld +=          '<Title>' + this.name + '</Title>';
+	sld +=          '<Name>Mark</Name>';
+	sld +=          '<Title>Mark</Title>';
 	sld +=          '<FeatureTypeStyle>';
 	sld +=          	'<Rule>';
-	sld +=          		'<Name>' + this.name + '</Name>';
-	sld +=          		'<Title>' + this.name + '</Title>';
+	sld +=          		'<Name>Mark</Name>';
+	sld +=          		'<Title>Mark</Title>';
 	sld += 					'<PointSymbolizer>';
 	sld += 						'<Graphic>';
 	sld += 							'<Mark>';
-	sld += 								'<WellKnownName>' + this.shape + '</WellKnownName>';
+	sld += 								'<WellKnownName>' + this.well_known_name + '</WellKnownName>';
 	sld += 								'<Fill>';
-	sld += 									'<CssParameter name="fill">' + this.fill_color + '</CssParameter>';
+	sld += 									'<CssParameter name="fill">' + this.fill + '</CssParameter>';
 	sld += 									'<CssParameter name="fill-opacity">' + this.fill_opacity + '</CssParameter>';
 	sld += 								'</Fill>';
-	if (this.with_border) {
-		sld += 							'<Stroke>';
-		sld += 								'<CssParameter name="stroke">' + this.border_color + '</CssParameter>';
-		sld += 								'<CssParameter name="stroke-width">' + this.border_size + '</CssParameter>';
-		sld += 								'<CssParameter name="stroke-opacity">' + this.border_opacity + '</CssParameter>';
-		sld += 							'</Stroke>';
-	}
+	sld += 								'<Stroke>';
+	sld += 									'<CssParameter name="stroke">' + this.stroke + '</CssParameter>';
+	sld += 									'<CssParameter name="stroke-width">' + this.stroke_width + '</CssParameter>';
+	sld += 									'<CssParameter name="stroke-opacity">' + this.stroke_opacity + '</CssParameter>';
+	sld += 								'</Stroke>';
 	sld += 							'</Mark>';
 	sld += 							'<Opacity>1</Opacity>';
 	sld += 							'<Size>' + this.size + '</Size>';
@@ -280,23 +313,21 @@ PointSymbolizer.prototype.toSLDBody = function(){
 	return sld;
 };
 
-PointSymbolizer.prototype.toJSON = function(){
+MarkSymbolizer.prototype.toJSON = function(){
 	
 	var object = {
 		id: this.id,
 		type: this.type,
-		name: this.name,
-		shape: this.shape,
-		fill_color: this.fill_color,
+		well_known_name: this.well_known_name,
+		fill: this.fill,
 		fill_opacity: this.fill_opacity,
-		with_border: this.with_border,
-		border_color: this.border_color,
-		border_size: this.border_size,
-		border_opacity: this.border_opacity,
-		border_type: this.border_type,
+		stroke: this.stroke,
+		stroke_width: this.stroke_width,
+		stroke_opacity: this.stroke_opacity,
 		rotation: this.rotation,
 		order: this.order,
 		size: this.size,
+		opacity: this.opacity
 	};
 	
 	return JSON.stringify(object);

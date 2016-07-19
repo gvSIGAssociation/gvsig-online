@@ -104,10 +104,9 @@ $(document).ready(function() {
 		
 	   	var formData = new FormData($(this)[0]); 	   	
 	   	
-   		var externalGraphic = new ExternalGraphicSymbolizer(0, name, format, size, '{{rule.symbolizer_online_resource}}');
+   		var externalGraphic = new ExternalGraphicSymbolizer(name, format, size, '{{rule.symbolizer_online_resource}}');
 		var symbolizer = {
 			type: externalGraphic.type,
-			sld: externalGraphic.toXML(),
 			json: externalGraphic.toJSON(),
 			order: 0
 		};
@@ -116,7 +115,7 @@ $(document).ready(function() {
 			file_name: old,
 			name: name,
 			title: title,
-			filter: "",
+			order: 0,
 			symbolizers: [symbolizer]
 		};
 		

@@ -19,20 +19,17 @@
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
 
-from __builtin__ import isinstance
 from models import Layer, LayerGroup, Datastore, Workspace, DataRule, LayerReadGroup, LayerWriteGroup
-from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer,\
-    StyleRule
+from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer
+from gvsigol_symbology import services as symbology_services
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
 from gvsigol.settings import GVSIGOL_SERVICES
 from gvsigol.settings import GVSIGOL_CATALOG
-from geoserver.support import DimensionInfo
 from backend_postgis import Introspect
 from owslib.wms import WebMapService
 import xml.etree.ElementTree as ET
 import geoserver.catalog as gscat
-from django.db.models import Max
 import forms_geoserver
 import rest_geonetwork
 import rest_geoserver
@@ -323,173 +320,18 @@ class Geoserver():
         except Exception as e:
             return False
         
-    def createDefaultStyle(self, layer, name, session):
-        """
-        Create new style
-        """
-        data = ''
-        symbolizer = ''
-        
+    def createDefaultStyle(self, layer, style_name, session):
         geom_type = self.get_geometry_type(layer, session)
-        symbol_type = None
-        if geom_type == 'point':
-            symbol_type = 'PointSymbolizer'           
-        elif geom_type == 'line':
-            symbol_type = 'LineSymbolizer'
-        elif geom_type == 'polygon':
-            symbol_type = 'PolygonSymbolizer'
-        elif geom_type == 'raster':
-            symbol_type = 'RasterSymbolizer'
-        
-        data += '<?xml version="1.0" encoding="ISO-8859-1"?>' 
-        data += '<StyledLayerDescriptor version="1.0.0" xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" '
-        data += 'xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
-        data += 'xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd">'
-        data +=     '<NamedLayer>' 
-        data +=         '<Name>Default Styler</Name>' 
-        data +=         '<UserStyle>' 
-        data +=             '<Name>' + name + '</Name>'
-        data +=             '<Title>Style for: ' + layer.title + '</Title>' 
-        data +=             '<FeatureTypeStyle>' 
-        data +=                 '<Rule>' 
-        
-        if symbol_type == 'PolygonSymbolizer':
-            symbolizer +=   '<PolygonSymbolizer>' 
-            symbolizer +=       '<Fill>' 
-            symbolizer +=           '<CssParameter name="fill">#383838</CssParameter>' 
-            symbolizer +=           '<CssParameter name="fill-opacity">0.6</CssParameter>'
-            symbolizer +=       '</Fill>' 
-            symbolizer +=       '<Stroke>' 
-            symbolizer +=           '<CssParameter name="stroke">#000000</CssParameter>' 
-            symbolizer +=           '<CssParameter name="stroke-width">1</CssParameter>' 
-            symbolizer +=       '</Stroke>' 
-            symbolizer +=   '</PolygonSymbolizer>'
+        style_type = 'US'
+        if geom_type == 'raster':
+            style_type = 'CT'
             
-        elif symbol_type == 'LineSymbolizer':
-            symbolizer +=   '<LineSymbolizer>' 
-            symbolizer +=       '<Stroke>' 
-            symbolizer +=           '<CssParameter name="stroke">#000000</CssParameter>' 
-            symbolizer +=           '<CssParameter name="stroke-width">1</CssParameter>' 
-            symbolizer +=       '</Stroke>' 
-            symbolizer +=   '</LineSymbolizer>'
-            
-        elif symbol_type == 'PointSymbolizer':
-            symbolizer +=   '<PointSymbolizer>' 
-            symbolizer +=       '<Graphic>'
-            symbolizer +=           '<Mark>'
-            symbolizer +=               '<WellKnownName>circle</WellKnownName>'
-            symbolizer +=               '<Fill>' 
-            symbolizer +=                   '<CssParameter name="fill">#383838</CssParameter>' 
-            symbolizer +=                   '<CssParameter name="fill-opacity">0.6</CssParameter>'
-            symbolizer +=               '</Fill>' 
-            symbolizer +=               '<Stroke>' 
-            symbolizer +=                   '<CssParameter name="stroke">#000000</CssParameter>' 
-            symbolizer +=                   '<CssParameter name="stroke-width">1</CssParameter>' 
-            symbolizer +=               '</Stroke>' 
-            symbolizer +=               '<Opacity>1.0</Opacity>'
-            symbolizer +=               '<Size>6</Size>'
-            symbolizer +=           '</Mark>'
-            symbolizer +=       '</Graphic>'
-            symbolizer +=   '</PointSymbolizer>'
-            
-        elif symbol_type == 'RasterSymbolizer':
-            symbolizer +=   '<RasterSymbolizer>'
-            symbolizer +=       '<Opacity>1.0</Opacity>'
-            symbolizer +=   '</RasterSymbolizer>'
-            
-        data += symbolizer 
-        data +=                 '</Rule>' 
-        data +=             '</FeatureTypeStyle>' 
-        data +=         '</UserStyle>' 
-        data +=     '</NamedLayer>' 
-        data += '</StyledLayerDescriptor>'
-        
+        sld_body = symbology_services.create_default_style(session, layer.id, style_name, style_type, geom_type)
+     
         try:
             catalog = self.getGsconfig(session)
-            if catalog.get_style(name, workspace=None) == None:
-                catalog.create_style(name, data.encode('utf-8'), overwrite=False, workspace=None, style_format="sld10", raw=False)
-            tp = 'US'
-            if geom_type == 'raster':
-                tp = 'CT'
-                
-            style = Style(name=name, title=_('Style for: ') + layer.title, is_default=True, type=tp, order=0)
-            style.save()
-
-            style_layer = StyleLayer(style=style, layer=layer)
-            style_layer.save()
-            
-            rule = Rule(
-                name = _('Default symbol'),
-                title = _('Default symbol'),
-                type = symbol_type,
-                order = 0,
-                minscale = -1,
-                maxscale = -1
-            )
-            rule.save()
-            
-            style_rule = StyleRule(
-                style=style,
-                rule=rule
-            )
-            style_rule.save()
-            
-            json = None
-            if symbol_type == 'PointSymbolizer':
-                json = {
-                    "id":"pointsymbolizer0",
-                    "type":"PointSymbolizer",
-                    "name":"PointSymbolizer 0",
-                    "shape": "circle",
-                    "fill_color":"#383838",
-                    "fill_opacity":0.6,
-                    "border_color":"#000000",
-                    "border_size":1,
-                    "border_opacity":1,
-                    "border_type":"solid",
-                    "rotation":0,
-                    "size":10,
-                    "order":0
-                }
-                
-            elif symbol_type == 'LineSymbolizer':
-                json = {
-                    "id":"linesymbolizer0",
-                    "type":"LineSymbolizer",
-                    "name":"LineSymbolizer 0",
-                    "fill_color":"#383838",
-                    "fill_opacity":0.5,
-                    "border_color":"#000000",
-                    "border_size":1,
-                    "border_opacity":1,
-                    "border_type":"solid",
-                    "rotation":0,
-                    "order":0
-                }
-                
-            elif symbol_type == 'PolygonSymbolizer':
-                json = {
-                    "id":"polygonsymbolizer0",
-                    "type":"PolygonSymbolizer",
-                    "name":"PolygonSymbolizer 0",
-                    "fill_color":"#383838",
-                    "fill_opacity":0.5,
-                    "border_color":"#000000",
-                    "border_size":1,
-                    "border_opacity":1,
-                    "border_type":"solid",
-                    "rotation":0,
-                    "order":0
-                }
-            
-            symb = Symbolizer(
-                rule=rule,
-                type=symbol_type,
-                sld=symbolizer,
-                json= str(json).replace("'", '"'),
-                order=0
-            )   
-            symb.save()
+            if catalog.get_style(style_name, workspace=None) == None:
+                catalog.create_style(style_name, sld_body.encode('utf-8'), overwrite=False, workspace=None, style_format="sld10", raw=False)
                     
             return True
         
@@ -543,6 +385,7 @@ class Geoserver():
                 gs_style = catalog.get_style(style.name, workspace=None)
                 catalog.delete(gs_style, purge=True, recurse=False)
                 layer_style.delete()
+                '''
                 style_rules = StyleRule.objects.filter(style=style)
                 for style_rule in style_rules:
                     rule = Rule.objects.filter(id=style_rule.rule.id)
@@ -551,6 +394,7 @@ class Geoserver():
                         symbolizer.delete()
                     rule.delete()
                     style_rule.delete()
+                '''
                 style.delete()
                 
             return True
