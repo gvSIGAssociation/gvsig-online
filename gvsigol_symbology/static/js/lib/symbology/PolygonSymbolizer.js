@@ -21,34 +21,25 @@
  */
  
  
-var PolygonSymbolizer = function(id, rule, symbolizer_object, previewUrl) {
-	this.id = 'polygonsymbolizer' + id;
+var PolygonSymbolizer = function(rule, options, previewUrl, symutils) {
+	this.id = 'polygonsymbolizer' + symutils.generateUUID();
 	this.type = 'PolygonSymbolizer';
-	this.name = 'PolygonSymbolizer ' + id;
-	this.fill_color = "#000000";
+	this.fill = "#000000";
 	this.fill_opacity = 0.5;
-	this.with_border = true;
-	this.border_color = "#000000";
-	this.border_size = 1;
-	this.border_opacity = 1;
-	this.border_type = "solid";
-	this.rotation = 0;
+	this.stroke = "#000000";
+	this.stroke_width = 1;
+	this.stroke_opacity = 1;
 	this.order = 0;
 	this.rule = rule;
 	this.previewUrl = previewUrl;
 	
-	if (symbolizer_object) {
-		this.name = symbolizer_object.name;
-		this.shape = symbolizer_object.shape;
-		this.fill_color = symbolizer_object.fill_color;
-		this.fill_opacity = symbolizer_object.fill_opacity;
-		this.with_border = symbolizer_object.with_border;
-		this.border_color = symbolizer_object.border_color;
-		this.border_size = symbolizer_object.border_size;
-		this.border_opacity = symbolizer_object.border_opacity;
-		this.border_type = symbolizer_object.border_type;
-		this.rotation = symbolizer_object.rotation;
-		this.order = symbolizer_object.order;
+	if (options) {
+		this.fill = options.fill;
+		this.fill_opacity = options.fill_opacity;
+		this.stroke = options.stroke;
+		this.stroke_width = options.stroke_width;
+		this.stroke_opacity = options.stroke_opacity;
+		this.order = options.order;
 	}
 };
 
@@ -61,7 +52,6 @@ PolygonSymbolizer.prototype.getTableUI = function() {
 	ui += 			'<i class="fa fa-ellipsis-v"></i>';
 	ui += 		'</span>';
 	ui += 	'</td>';
-	ui += 	'<td><span class="text-muted">' + this.name + '</span></td>';
 	ui += 	'<td id="symbolizer-preview-div-' + this.id + '"></td>';
 	ui += 	'<td><a class="edit-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
 	ui += 	'<td><a class="delete-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
@@ -73,8 +63,7 @@ PolygonSymbolizer.prototype.getTableUI = function() {
 PolygonSymbolizer.prototype.getTabMenu = function() {
 	var ui = '';
 	ui += '<li class="active"><a href="#fill-tab" data-toggle="tab">' + gettext('Fill') + '</a></li>';
-	ui += '<li><a href="#border-tab" data-toggle="tab">' + gettext('Border') + '</a></li>';
-	ui += '<li><a href="#rotation-tab" data-toggle="tab">' + gettext('Rotation') + '</a></li>';
+	ui += '<li><a href="#stroke-tab" data-toggle="tab">' + gettext('Stroke') + '</a></li>';
 	
 	return ui;	
 };
@@ -85,7 +74,7 @@ PolygonSymbolizer.prototype.getFillTabUI = function() {
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
 	ui += 			'<label>' + gettext('Fill color') + '</label>';
-	ui += 			'<input id="fill-color-chooser" type="color" value="' + this.fill_color + '" class="form-control color-chooser">';					
+	ui += 			'<input id="fill-color-chooser" type="color" value="' + this.fill + '" class="form-control color-chooser">';					
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += 	'<div class="row">';
@@ -99,65 +88,78 @@ PolygonSymbolizer.prototype.getFillTabUI = function() {
 	return ui;
 };
 
-PolygonSymbolizer.prototype.getBorderTabUI = function() {
+PolygonSymbolizer.prototype.getStrokeTabUI = function() {
 	var ui = '';
-	ui += '<div class="tab-pane" id="border-tab">';
+	ui += '<div class="tab-pane" id="stroke-tab">';
 	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 checkbox">';
-	ui += 			'<label>';
-	if (this.with_border) {
-		ui += '<input type="checkbox" id="symbol-with-border" name="symbol-with-border" checked/>' + gettext('With border');
-	} else {
-		ui += '<input type="checkbox" id="symbol-with-border" name="symbol-with-border"/>' + gettext('With border');
-	}	
-	ui += 			'</label>';
+	ui += 		'<div class="col-md-12 form-group">';
+	ui += 			'<label>' + gettext('Stroke color') + '</label>';
+	ui += 			'<input id="stroke-color-chooser" type="color" value="' + this.stroke + '" class="form-control color-chooser">';					
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Border color') + '</label>';
-	ui += 			'<input id="border-color-chooser" type="color" value="' + this.border_color + '" class="form-control color-chooser">';					
+	ui += 			'<label>' + gettext('Stroke width') + '</label>';
+	ui += 			'<input id="stroke-width" type="number" class="form-control" value="' + parseInt(this.stroke_width) + '">';					
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Border size') + '</label>';
-	ui += 			'<input id="border-size" type="number" class="form-control" value="' + parseInt(this.border_size) + '">';					
-	ui += 		'</div>';
-	ui += 	'</div>';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label style="display: block;">' + gettext('Border opacity') + '<span id="border-opacity-output" class="margin-l-15 gol-slider-output">' + (this.border_opacity * 100) + '%</span>' + '</label>';
-	ui += 			'<div id="border-opacity-slider"></div>';
+	ui += 			'<label style="display: block;">' + gettext('Stroke opacity') + '<span id="stroke-opacity-output" class="margin-l-15 gol-slider-output">' + (this.stroke_opacity * 100) + '%</span>' + '</label>';
+	ui += 			'<div id="stroke-opacity-slider"></div>';
 	ui += 		'</div>';					 
-	ui += 	'</div>';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Border type') + '</label>';
-	ui += 			'<select id="border-type" class="form-control">';
-	ui += 				'<option value="solid">' + gettext('Solid') + '</option>';
-	ui += 				'<option value="dotted">' + gettext('Dotted') + '</option>';
-	ui += 				'<option value="stripped">' + gettext('Stripped') + '</option>';
-	ui += 			'</select>';
-	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += '</div>';
 	
 	return ui;
 };
 
-PolygonSymbolizer.prototype.getRotationTabUI = function() {
-	var ui = '';
-	ui += '<div class="tab-pane" id="rotation-tab">';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label style="display: block;">' + gettext('Rotation') + '<span id="rotation-output" class="margin-l-15 gol-slider-output">' + this.rotation + 'º</span>' + '</label>';
-	ui += 			'<div id="rotation-slider"><div/>';
-	ui += 		'</div>';			 
-	ui += 	'</div>';
-	ui += '</div>';
-	
-	return ui;
+PolygonSymbolizer.prototype.registerEvents = function(rule) {
+	var self = this;
+
+	$( "#fill-opacity-slider" ).slider({
+	    min: 0,
+	    max: 100,
+	    value: (self.fill_opacity * 100),
+	    change: function( event, ui ) {
+	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
+	    	self.fill_opacity = opacity;
+	    	self.updatePreview();
+	    	rule.updatePreview(self.previewUrl);
+	    },
+	    slide: function( event, ui ) {
+	    	$("#fill-opacity-output").text(ui.value + '%');
+	    }
+	});	
+	$("#fill-color-chooser").on('change', function(e) {
+		self.fill = this.value;
+		self.updatePreview();	
+		rule.updatePreview(self.previewUrl);
+	});	
+	$("#stroke-color-chooser").on('change', function(e) {
+		self.stroke = this.value;
+		self.updatePreview();
+		rule.updatePreview(self.previewUrl);
+	});
+	$( "#stroke-opacity-slider" ).slider({
+	    min: 0,
+	    max: 100,
+	    value: (self.stroke_opacity * 100),
+	    change: function( event, ui ) {
+	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
+	    	self.stroke_opacity = opacity;
+	    	self.updatePreview();
+	    	rule.updatePreview(self.previewUrl);
+	    },
+	    slide: function( event, ui ) {
+	    	$("#stroke-opacity-output").text(ui.value + '%');
+	    }
+	});
+	$("#stroke-size").on('change', function(e) {
+		self.stroke_width = this.value;
+		self.updatePreview();	
+		rule.updatePreview(self.previewUrl);
+	});
 };
 
 PolygonSymbolizer.prototype.updatePreview = function() {	
@@ -168,24 +170,6 @@ PolygonSymbolizer.prototype.updatePreview = function() {
 	$("#symbolizer-preview-div-" + this.id).append(ui);
 };
 
-PolygonSymbolizer.prototype.toXML = function(){
-	
-	var xml = '';
-	xml += '<PolygonSymbolizer>';
-	xml += 	'<Fill>';
-	xml += 		'<CssParameter name="fill">' + this.fill_color + '</CssParameter>';
-	xml += 		'<CssParameter name="fill-opacity">' + this.fill_opacity + '</CssParameter>';
-	xml += 	'</Fill>';
-	xml += 	'<Stroke>';
-	xml += 		'<CssParameter name="stroke">' + this.border_color + '</CssParameter>';
-	xml += 		'<CssParameter name="stroke-width">' + this.border_size + '</CssParameter>';
-	xml += 		'<CssParameter name="stroke-opacity">' + this.border_opacity + '</CssParameter>';
-	xml += 	'</Stroke>';
-	xml += '</PolygonSymbolizer>';
-	
-	return xml;
-};
-
 PolygonSymbolizer.prototype.toSLDBody = function(){
 	
 	var sld = '';
@@ -193,23 +177,23 @@ PolygonSymbolizer.prototype.toSLDBody = function(){
 	sld +=  'xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ';
 	sld +=  'xsi:schemaLocation=\"http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd\">';
 	sld += 	'<NamedLayer>';  
-	sld +=  	'<Name>' + this.name + '</Name>';  
+	sld +=  	'<Name>polygon</Name>';  
 	sld +=      '<UserStyle>';
-	sld +=          '<Name>' + this.name + '</Name>';
-	sld +=          '<Title>' + this.name + '</Title>';
+	sld +=          '<Name>polygon</Name>';
+	sld +=          '<Title>polygon</Title>';
 	sld +=          '<FeatureTypeStyle>';
 	sld +=          	'<Rule>';
-	sld +=          		'<Name>' + this.name + '</Name>';
-	sld +=          		'<Title>' + this.name + '</Title>';
+	sld +=          		'<Name>polygon</Name>';
+	sld +=          		'<Title>polygon</Title>';
 	sld += 					'<PolygonSymbolizer>';
 	sld += 						'<Fill>';
-	sld += 							'<CssParameter name="fill">' + this.fill_color + '</CssParameter>';
+	sld += 							'<CssParameter name="fill">' + this.fill + '</CssParameter>';
 	sld += 							'<CssParameter name="fill-opacity">' + this.fill_opacity + '</CssParameter>';
 	sld += 						'</Fill>';
 	sld += 						'<Stroke>';
-	sld += 							'<CssParameter name="stroke">' + this.border_color + '</CssParameter>';
-	sld += 							'<CssParameter name="stroke-width">' + this.border_size + '</CssParameter>';
-	sld += 							'<CssParameter name="stroke-opacity">' + this.border_opacity + '</CssParameter>';
+	sld += 							'<CssParameter name="stroke">' + this.stroke + '</CssParameter>';
+	sld += 							'<CssParameter name="stroke-width">' + this.stroke_width + '</CssParameter>';
+	sld += 							'<CssParameter name="stroke-opacity">' + this.stroke_opacity + '</CssParameter>';
 	sld += 						'</Stroke>';
 	sld += 					'</PolygonSymbolizer>';
 	sld +=          	'</Rule>';
@@ -221,20 +205,34 @@ PolygonSymbolizer.prototype.toSLDBody = function(){
 	return sld;
 };
 
+PolygonSymbolizer.prototype.toXML = function(){
+	
+	var xml = '';
+	xml += '<PolygonSymbolizer>';
+	xml += 	'<Fill>';
+	xml += 		'<CssParameter name="fill">' + this.fill + '</CssParameter>';
+	xml += 		'<CssParameter name="fill-opacity">' + this.fill_opacity + '</CssParameter>';
+	xml += 	'</Fill>';
+	xml += 	'<Stroke>';
+	xml += 		'<CssParameter name="stroke">' + this.stroke + '</CssParameter>';
+	xml += 		'<CssParameter name="stroke-width">' + this.stroke_width + '</CssParameter>';
+	xml += 		'<CssParameter name="stroke-opacity">' + this.stroke_opacity + '</CssParameter>';
+	xml += 	'</Stroke>';
+	xml += '</PolygonSymbolizer>';
+	
+	return xml;
+};
+
 PolygonSymbolizer.prototype.toJSON = function(){
 	
 	var object = {
 		id: this.id,
 		type: this.type,
-		name: this.name,
-		fill_color: this.fill_color,
+		fill: this.fill,
 		fill_opacity: this.fill_opacity,
-		with_border: this.with_border,
-		border_color: this.border_color,
-		border_size: this.border_size,
-		border_opacity: this.border_opacity,
-		border_type: this.border_type,
-		rotation: this.rotation,
+		stroke: this.stroke,
+		stroke_width: this.stroke_width,
+		stroke_opacity: this.stroke_opacity,
 		order: this.order
 	};
 	

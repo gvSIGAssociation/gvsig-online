@@ -20,43 +20,37 @@
  * @author: Javier Rodrigo <jrodrigo@scolab.es>
  */
  
-var TextSymbolizer = function(id, symbologyUtils, rule, symbolizer_object) {
-	this.id = 'textsymbolizer' + id;
+var TextSymbolizer = function(rule, options, symutils) {
+	this.id = 'textsymbolizer' + symutils.generateUUID();
 	this.type = 'TextSymbolizer';
-	this.name = 'TextSymbolizer ' + id;
-	this.field = '';
+	this.name = 'TextSymbolizer ' + this.id;
+	this.label = '';
 	this.font_family = 'Arial';
 	this.font_size= 12;
-	this.font_color = "#000000";
 	this.font_weight = "normal";
 	this.font_style = "normal";
-	this.halo_color = "#ffffff";
-	this.halo_opacity = 0;
+	this.fill = "#000000";
+	this.fill_opacity = 1.0;
+	this.halo_fill = "#ffffff";
+	this.halo_fill_opacity = 0;
 	this.halo_radius = 1;
-	this.max_iterations = 1;
-	this.max_length = 100;
-	this.min_wrapper = 0;
-	this.solve_overlaps = true;
 	this.order = 0;
-	this.symbologyUtils = symbologyUtils;
+	this.symbologyUtils = symutils;
 	this.rule = rule;
 	
-	if (symbolizer_object) {
-		this.name = symbolizer_object.name;
-		this.field = symbolizer_object.field;
-		this.font_family = symbolizer_object.font_family;
-		this.font_size = symbolizer_object.font_size;
-		this.font_color = symbolizer_object.font_color;
-		this.font_weight = symbolizer_object.font_weight;
-		this.font_style = symbolizer_object.font_style;
-		this.halo_color = symbolizer_object.halo_color;
-		this.halo_opacity = symbolizer_object.halo_opacity;
-		this.halo_radius = symbolizer_object.halo_radius;
-		this.max_iterations = symbolizer_object.max_iterations;
-		this.max_length = symbolizer_object.max_length;
-		this.min_wrapper = symbolizer_object.min_wrapper;
-		this.solve_overlaps = symbolizer_object.solve_overlaps;
-		this.order = symbolizer_object.order;
+	if (options) {
+		this.name = options.name;
+		this.label = options.label;
+		this.font_family = options.font_family;
+		this.font_size = options.font_size;
+		this.font_weight = options.font_weight;
+		this.font_style = options.font_style;
+		this.fill = options.fill;
+		this.fill_opacity = options.fill_opacity;
+		this.halo_fill = options.halo_fill;
+		this.halo_fill_opacity = options.halo_fill_opacity;
+		this.halo_radius = options.halo_radius;
+		this.order = options.order;
 	}
 };
 
@@ -82,7 +76,6 @@ TextSymbolizer.prototype.getTabMenu = function() {
 	var ui = '';
 	ui += '<li class="active"><a href="#label-font-tab" data-toggle="tab">' + gettext('Font') + '</a></li>';
 	ui += '<li><a href="#label-halo-tab" data-toggle="tab">' + gettext('Halo') + '</a></li>';
-	ui += '<li><a href="#label-vendor-tab" data-toggle="tab">' + gettext('Vendor') + '</a></li>'; 
 	
 	return ui;	
 };
@@ -99,12 +92,12 @@ TextSymbolizer.prototype.getFontTabUI = function() {
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
 	ui += 			'<label>' + gettext('Label field') + '</label>';
-	ui += 			'<select id="label-field" class="form-control">';
+	ui += 			'<select id="label-label" class="form-control">';
 	for (var i=0; i < fields.length; i++) {
-		if (this.field == '') {
-			this.field = fields[0].name;
+		if (this.label == '') {
+			this.label = fields[0].name;
 		} else {
-			if (fields[i].name == this.field) {
+			if (fields[i].name == this.label) {
 				ui += '<option value="' + fields[i].name + '" selected>' + fields[i].name + '</option>';
 			} else {
 				ui += '<option value="' + fields[i].name + '">' + fields[i].name + '</option>';
@@ -137,7 +130,7 @@ TextSymbolizer.prototype.getFontTabUI = function() {
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
 	ui += 			'<label>' + gettext('Font color') + '</label>';
-	ui += 			'<input id="label-font-color" type="color" value="' + this.font_color + '" class="form-control color-chooser">';					
+	ui += 			'<input id="label-fill" type="color" value="' + this.fill + '" class="form-control color-chooser">';					
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += 	'<div class="row">';
@@ -179,13 +172,13 @@ TextSymbolizer.prototype.getHaloTabUI = function() {
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
 	ui += 			'<label>' + gettext('Halo color') + '</label>';
-	ui += 			'<input id="label-halo-color" type="color" value="' + this.halo_color + '" class="form-control color-chooser">';					
+	ui += 			'<input id="label-halo-fill" type="color" value="' + this.halo_fill + '" class="form-control color-chooser">';					
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label style="display: block;">' + gettext('Halo opacity') + '<span id="halo-opacity-output" class="margin-l-15 gol-slider-output">' + (this.halo_opacity * 100) + '%</span>' + '</label>';
-	ui += 			'<div id="halo-opacity-slider"></div>';
+	ui += 			'<label style="display: block;">' + gettext('Halo opacity') + '<span id="halo-fill-opacity-output" class="margin-l-15 gol-slider-output">' + (this.halo_fill_opacity * 100) + '%</span>' + '</label>';
+	ui += 			'<div id="halo-fill-opacity-slider"></div>';
 	ui += 		'</div>';					 
 	ui += 	'</div>';
 	ui += 	'<div class="row">';
@@ -199,41 +192,72 @@ TextSymbolizer.prototype.getHaloTabUI = function() {
 	return ui;
 };
 
-TextSymbolizer.prototype.getVendorTabUI = function() {
-	var ui = '';
-	ui += '<div class="tab-pane" id="label-vendor-tab">';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Maximum number of repetitions') + '</label>';
-	ui += 			'<input id="label-max-iterations" type="number" class="form-control" value="' + parseInt(this.max_iterations) + '">';					
-	ui += 		'</div>';
-	ui += 	'</div>';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Maximum label length (in pixels)') + '</label>';
-	ui += 			'<input id="label-max-length" type="number" class="form-control" value="' + parseInt(this.max_length) + '">';					
-	ui += 		'</div>';
-	ui += 	'</div>';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Minimum space surround tag') + '</label>';
-	ui += 			'<input id="label-min-wrapper" type="number" class="form-control" value="' + parseInt(this.min_wrapper) + '">';					
-	ui += 		'</div>';
-	ui += 	'</div>';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 checkbox">';
-	ui += 			'<label>';
-	if (this.solve_overlaps) {
-		ui += '<input type="checkbox" id="label-solve-overlaps" name="label-solve-overlaps" checked/>' + gettext('Solve overlaps');
-	} else {
-		ui += '<input type="checkbox" id="label-solve-overlaps" name="label-solve-overlaps"/>' + gettext('Solve overlaps');
-	}	
-	ui += 			'</label>';	
-	ui += 		'</div>';
-	ui += 	'</div>';
-	ui += '</div>';
+TextSymbolizer.prototype.registerEvents = function() {
+	var self = this;
 	
-	return ui;
+	$('#label-label').on('change', function() {
+		self.label = this.value;
+		self.updatePreview();
+	});
+	
+	$('#label-font-family').on('change', function() {
+		self.font_family = this.value;
+		self.updatePreview();
+	});
+	
+	$('#label-font-size').on('change', function() {
+		self.font_size = this.value;
+		self.updatePreview();
+	});
+	
+	$('#label-font-weight').on('change', function() {
+		self.font_weight = this.value;
+		self.updatePreview();
+	});
+	
+	$('#label-font-style').on('change', function() {
+		self.font_style = this.value;
+		self.updatePreview();
+	});
+	
+	$('#label-fill').on('change', function() {
+		self.fill = this.value;
+		self.updatePreview();
+	});
+	
+	$('#label-fill-opacity').on('change', function() {
+		self.fill_opacity = this.value;
+		self.updatePreview();
+	});
+	
+	$('#label-halo-fill').on('change', function() {
+		self.halo_fill = this.value;		
+		self.updatePreview();
+	});
+	
+	$('#label-halo-fill-opacity').on('change', function() {
+		self.halo_fill_opacity = this.value;
+		self.updatePreview();
+	});
+	
+	$('#label-halo-radius').on('change', function() {
+		self.halo_radius = this.value;		
+		self.updatePreview();
+	});
+	
+	$( "#halo-fill-opacity-slider" ).slider({
+	    min: 0,
+	    max: 100,
+	    value: (self.halo_fill_opacity * 100),
+	    change: function( event, ui ) {
+	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
+	    	self.halo_fill_opacity = opacity;
+	    	self.updatePreview();
+	    },
+	    slide: function( event, ui ) {
+	    	$("#halo-fill-opacity-output").text(ui.value + '%');
+	    }
+	});
 };
 
 TextSymbolizer.prototype.updatePreview = function() {
@@ -241,15 +265,14 @@ TextSymbolizer.prototype.updatePreview = function() {
 	$("#label-preview-" + this.id).empty();
 	var previewElement = Snap("#label-preview-" + this.id);
 	
-	var f_Shadow = previewElement.filter(Snap.filter.shadow(0, 0, this.halo_color, parseFloat(this.halo_opacity)));
+	var f_Shadow = previewElement.filter(Snap.filter.shadow(0, 0, 4, this.halo_fill, parseFloat(this.halo_fill_opacity)));
 	
 	var attributes = {
 		fontSize: this.font_size, 
 		fontFamily: this.font_family,
-		fill: this.font_color,
+		fill: this.fill,
 		fontWeight: this.font_weight,
-		fontStyle: this.font_style/*,
-		filter : f_Shadow*/
+		fontStyle: this.font_style
 	}
 
 	preview = previewElement.text(10,20, "Text");
@@ -265,12 +288,13 @@ TextSymbolizer.prototype.toXML = function(){
 	var xml = '';
 	xml += '<TextSymbolizer>';
 	xml += 	'<Label>';
-	xml += 		'<ogc:PropertyName>' + this.field + '</ogc:PropertyName>';
+	xml += 		'<ogc:PropertyName>' + this.label + '</ogc:PropertyName>';
 	xml +=  '</Label>';
 	xml += 	'<Font>';
 	xml += 		'<CssParameter name="font-family">' + this.font_family + '</CssParameter>';
 	xml += 		'<CssParameter name="font-size">' + this.font_size + '</CssParameter>';
 	xml += 		'<CssParameter name="font-style">' + this.font_style + '</CssParameter>';
+	xml += 		'<CssParameter name="font-weight">' + this.font_weight + '</CssParameter>';
 	xml += 	'</Font>';
 	xml += 	'<LabelPlacement>';
 	xml += 		'<PointPlacement>';
@@ -281,8 +305,8 @@ TextSymbolizer.prototype.toXML = function(){
 	xml += 		'</PointPlacement>';
 	xml += 	'</LabelPlacement>';
 	xml += 	'<Fill>';
-	xml += 		'<CssParameter name="fill">' + this.font_color + '</CssParameter>';
-	xml += 		'<CssParameter name="fill-opacity">1</CssParameter>';
+	xml += 		'<CssParameter name="fill">' + this.fill + '</CssParameter>';
+	xml += 		'<CssParameter name="fill-opacity">' + this.fill_opacity + '</CssParameter>';
 	xml += 	'</Fill>';
 	xml += '</TextSymbolizer>';
 	
@@ -295,19 +319,16 @@ TextSymbolizer.prototype.toJSON = function(){
 		id: this.id,
 		type: this.type,
 		name: this.name,
-		field: this.field,
+		label: this.label,
 		font_family: this.font_family,
 		font_size: this.font_size,
-		font_color: this.font_color,
 		font_weight: this.font_weight,
 		font_style: this.font_style,
-		halo_color: this.halo_color,
-		halo_opacity: this.halo_opacity,
+		fill: this.fill,
+		fill_opacity: this.fill_opacity,
+		halo_fill: this.halo_fill,
+		halo_fill_opacity: this.halo_fill_opacity,
 		halo_radius: this.halo_radius,
-		max_iterations: this.max_iterations,
-		max_length: this.max_length,
-		min_wrapper: this.min_wrapper,
-		solve_overlaps: this.solve_overlaps,
 		order: this.order
 	};
 	

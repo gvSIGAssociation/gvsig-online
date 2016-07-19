@@ -50,17 +50,6 @@
 							</div>
 						</div>
 						
-						<div class="row">
-							<div class="checkbox col-md-6">								
-								<label>
-									{% if library.is_public %}
-									<input type="checkbox" name="library-is-public" id="library-is-public" checked/>{% trans "is public?" %}
-									{% else %}
-									<input type="checkbox" name="library-is-public" id="library-is-public" />{% trans "is public?" %}
-									{% endif %}
-								</label>
-							</div>
-						</div>	
 					</form>
 					
 					<div class="row">
@@ -103,24 +92,52 @@ $(document).ready(function() {
 	var librarySymbol = new LibrarySymbol(previewPointUrl, previewLineUrl, previewPolygonUrl, symbologyUtils);
 	
 	"{% for rule in rules %}"
+		var rule_opts = {
+			name: "{{rule.name}}",
+			title: "{{rule.title}}",
+		};
+		
 		var symbolizers = {{rule.symbolizers|safe}};
 		if (symbolizers.length > 0) {
-			var symbol = '';		
-			"{% if rule.type == 'ExternalGraphicSymbolizer' %}"
-				var graphic = JSON.parse(symbolizers[0].json);
+			var symbol = '';	
+			var json_symbolizers = JSON.parse(symbolizers[0].json);
+			var isEG = false;
+			var featureType = null;
+			
+			if (json_symbolizers[0].model == 'gvsigol_symbology.externalgraphicsymbolizer') {
+				isEG = true;
+				
+			} else if (json_symbolizers[0].model == 'gvsigol_symbology.marksymbolizer'){
+				featureType = 'MarkSymbolizer';
+				
+			} else if (json_symbolizers[0].model == 'gvsigol_symbology.linesymbolizer'){
+				featureType = 'LineSymbolizer';
+				
+			} else if (json_symbolizers[0].model == 'gvsigol_symbology.polygonsymbolizer'){
+				featureType = 'PolygonSymbolizer';
+			}
+			
+			if (isEG) {
+				var externalGraphic = json_symbolizers[0].fields;
 				symbol += '<li>';
-				symbol += 	'<img style="height: ' + graphic.size + 'px; width: auto;" src="' + graphic.online_resource + '" class="preview-eg"></img>';
+				symbol += 	'<img style="height: ' + externalGraphic.size + 'px; width: auto;" src="' + externalGraphic.online_resource + '" class="preview-eg"></img>';
 				symbol += 	'<a class="users-list-name" href="/gvsigonline/symbology/symbol_update/{{rule.id}}/">{{rule.name}}</a>';
 				symbol += '</li>';
 				$(".users-list").append(symbol);
-			"{% else %}"
+				var r = new Rule("{{rule.id}}", 'ExternalGraphicSymbolizer',rule_opts);
+				librarySymbol.appendRule(r);
+				
+			} else {
 				symbol += '<li>';
 				symbol += 	'<div id="library-symbol-preview-div-{{rule.id}}"></div>';
 				symbol += 	'<a class="users-list-name" href="/gvsigonline/symbology/symbol_update/{{rule.id}}/">{{rule.name}}</a>';
 				symbol += '</li>';
 				$(".users-list").append(symbol);
-				librarySymbol.libraryPreview("{{rule.id}}", symbolizers);
-			"{% endif %}"
+				var r = new Rule("{{rule.id}}", featureType, rule_opts);
+				librarySymbol.setFeatureType(featureType);
+				librarySymbol.appendRule(r);
+				librarySymbol.libraryPreview(r, symbolizers);
+			}
 		}			
 	"{% endfor %}"
 	
@@ -131,7 +148,7 @@ $(document).ready(function() {
 	
 	$("#add-new-point").on('click', function(e){
 		e.preventDefault();
-		location.href = "/gvsigonline/symbology/symbol_add/{{library.id}}/PointSymbolizer/";
+		location.href = "/gvsigonline/symbology/symbol_add/{{library.id}}/MarkSymbolizer/";
 	});
 	$("#add-new-line").on('click', function(e){
 		e.preventDefault();

@@ -41,10 +41,10 @@ SymbologyUtils.prototype.fontWeights = [
 SymbologyUtils.prototype.shapes = [
 	{value: 'circle', title: gettext('Circle')},
 	{value: 'square', title: gettext('Square')},
-	{value: 'triangle', title: gettext('Triangle')}/*,
+	{value: 'triangle', title: gettext('Triangle')},
 	{value: 'star', title: gettext('Star')},
 	{value: 'cross', title: gettext('Cross')},
-	{value: 'x', title: 'X'}*/
+	{value: 'x', title: 'X'}
 ];
 
 SymbologyUtils.prototype.external_graphic_formats = [
@@ -176,4 +176,11 @@ SymbologyUtils.prototype.reloadLayerPreview = function(sld_body){
 			}
 		};
 	}, this);
+};
+
+SymbologyUtils.prototype.generateUUID = function() {
+    var S4 = function() {
+       return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+    };
+    return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
 };
