@@ -26,7 +26,7 @@
 					<div id="form-error" style="color:#ff0000;"></div>
 					<div class="form-group">
 						<label>{% trans "Name" %}</label>
-						<input placeholder="{% trans 'Symbol name' %}" name="symbol-name" id="symbol-name" type="text" value="{{rule.name}}" class="form-control">
+						<input readonly placeholder="{% trans 'Symbol name' %}" name="symbol-name" id="symbol-name" type="text" value="{{rule.name}}" class="form-control">
 					</div>	
 					<div class="form-group">
 						<label>{% trans "Title" %}</label>
@@ -51,7 +51,6 @@
 										<thead>
 											<tr>
 												<th></th>
-												<th>{% trans "Name" %}</th>
 												<th>{% trans "Preview" %}</th>
 												<th></th>
 											</tr>
@@ -112,10 +111,17 @@ $(document).ready(function() {
 	var librarySymbol = new LibrarySymbol(previewPointUrl, previewLineUrl, previewPolygonUrl, symbologyUtils);
 	
 	var symbolizers = {{rule.symbolizers|safe}};
-	librarySymbol.loadSymbolizers(symbolizers);
+	librarySymbol.setFeatureType("{{rule.type}}");
+	var rule_opts = {
+		name: "{{rule.name}}",
+		title: "{{rule.title}}",
+	};
+	var r = new Rule("{{rule.id}}","{{rule.type}}",rule_opts);
+	librarySymbol.appendRule(r);
+	librarySymbol.loadSymbolizers(r, symbolizers);
 	
 	$("#append-symbol-button").on('click', function(e){
-		librarySymbol.appendSymbolizer("{{rule.type}}");
+		librarySymbol.appendSymbolizer(r, "{{rule.type}}");
 	});
 	
 	$("#update-symbol").on('click', function(e){

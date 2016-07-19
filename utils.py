@@ -20,9 +20,13 @@
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
-from models import  StyleLayer
+
+from models import  StyleLayer, Symbolizer
+from django.core import serializers
+from gvsigol import settings
 import tempfile, zipfile
 import os, shutil, errno
+import sld_utils
 import psycopg2
 import json
 
@@ -79,6 +83,15 @@ def copyrecursively(source_folder, destination_folder):
             dst_path = os.path.join(destination_folder, src_path.replace(source_folder, ""))
             if not os.path.exists(dst_path):
                 os.mkdir(dst_path)
+                
+def copy_resources(symbol, resource_path):
+    symbolizers = Symbolizer.objects.filter(rule = symbol)
+    for symbolizer in symbolizers:
+        if hasattr(symbolizer, 'externalgraphicsymbolizer'):
+            local_path = symbolizer.externalgraphicsymbolizer.online_resource.replace(settings.MEDIA_URL, '')
+            file_name = local_path.split('/')[-1]
+            absolute_path = settings.MEDIA_ROOT + local_path
+            copy(absolute_path, resource_path + file_name)
 
 def copy(src, dest):
     try:
@@ -185,3 +198,127 @@ def create_style_name(layer):
     style_name = layer.name + '_' + str(index)
     
     return style_name
+
+def get_symbolizer_type(r):
+    type = ''
+    if r.PointSymbolizer is not None:
+        type = 'PointSymbolizer'
+    elif r.LineSymbolizer is not None:
+        type = 'LineSymbolizer'
+    elif r.PolygonSymbolizer is not None:
+        type = 'PolygonSymbolizer'
+    elif r.TextSymbolizer is not None:
+        type = 'TextSymbolizer'
+        
+    return type
+    
+            
+def check_library_path(library):
+    library_path = settings.MEDIA_ROOT + "symbol_libraries/" + library.name + "/"
+    try:        
+        os.mkdir(library_path)
+        return library_path
+     
+    except OSError as e:
+        print('Info: %s' % e)
+        return library_path
+    
+            
+def save_external_graphic(library_path, file, file_name):    
+    try: 
+        file_path = library_path + file_name
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        with open(file_path, 'wb+') as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+                
+        return True
+     
+    except Exception as e:
+        return False
+    
+def delete_external_graphic_img(library, file_name):    
+    try: 
+        library_path = settings.MEDIA_ROOT + "symbol_libraries/" + library.name + "/"
+        file_path = library_path + file_name
+        if os.path.exists(file_path):
+            os.remove(file_path)
+                
+        return True
+     
+    except Exception as e:
+        print('Error: %s' % e)
+        return False
+    
+def delete_library_dir(library):    
+    try: 
+        library_path = settings.MEDIA_ROOT + "symbol_libraries/" + library.name
+        if os.path.exists(library_path):
+            shutil.rmtree(library_path)
+                
+        return True
+     
+    except Exception as e:
+        print('Error: %s' % e)
+        return False
+    
+def get_online_resource(library, file_name):
+    return settings.MEDIA_URL + "symbol_libraries/" + library.name + "/" + file_name
+
+def get_fields(resource):
+    fields = None
+    if resource != None:
+        fields = resource.get('featureType').get('attributes').get('attribute')
+        
+    return fields
+
+def get_alphanumeric_fields(fields):
+    alphanumeric_fields = []
+    for field in fields:
+        if not field.get('binding').startswith('com.vividsolutions.jts.geom'):
+            alphanumeric_fields.append(field)
+            
+    return alphanumeric_fields
+
+def get_feature_type(fields):
+    featureType = None
+    for field in fields:
+        if field.get('binding').startswith('com.vividsolutions.jts.geom'):
+            auxType = field.get('binding').replace('com.vividsolutions.jts.geom.', '')
+            if auxType == "Point" or auxType == "MultiPoint":
+                featureType = "PointSymbolizer"
+            if auxType == "Line" or auxType == "MultiLineString":
+                featureType = "LineSymbolizer"
+            if auxType == "Polygon" or auxType == "MultiPolygon":
+                featureType = "PolygonSymbolizer"
+                
+    return featureType
+
+def symbolizer_to_json(symbolizer):
+    json_symbolizer = {}
+    
+    if hasattr(symbolizer, 'polygonsymbolizer'):
+        json_symbolizer['type'] = 'PolygonSymbolizer'
+        json_symbolizer['order'] = symbolizer.order
+        json_symbolizer['json'] = serializers.serialize('json', [ symbolizer.polygonsymbolizer, ])
+        
+    elif hasattr(symbolizer, 'linesymbolizer'):
+        json_symbolizer['type'] = 'LineSymbolizer'
+        json_symbolizer['order'] = symbolizer.order
+        json_symbolizer['json'] = serializers.serialize('json', [ symbolizer.linesymbolizer, ])
+        
+    elif hasattr(symbolizer, 'marksymbolizer'):
+        json_symbolizer['type'] = 'MarkSymbolizer'
+        json_symbolizer['order'] = symbolizer.order
+        json_symbolizer['json'] = serializers.serialize('json', [ symbolizer.marksymbolizer])
+        
+    elif hasattr(symbolizer, 'externalgraphicsymbolizer'):
+        json_symbolizer['type'] = 'ExternalGraphicSymbolizer'
+        json_symbolizer['json'] = serializers.serialize('json', [ symbolizer.externalgraphicsymbolizer])
+        
+    elif hasattr(symbolizer, 'textsymbolizer'):
+        json_symbolizer['type'] = 'TextSymbolizer'
+        json_symbolizer['json'] = serializers.serialize('json', [ symbolizer.textsymbolizer, ])
+        
+    return json_symbolizer

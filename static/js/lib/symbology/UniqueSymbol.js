@@ -46,13 +46,13 @@ UniqueSymbol.prototype.appendSymbolizer = function() {
 	
 	var symbolizer = null;
 	if (this.featureType == 'PointSymbolizer') {
-		symbolizer = new PointSymbolizer(this.rule.getNextSymbolizerId(), this.rule, this.symbologyUtils, null, this.previewPointUrl);
+		symbolizer = new MarkSymbolizer(this.rule, null, this.previewPointUrl, this.symbologyUtils);
 		
 	} else if (this.featureType == 'LineSymbolizer') {
-		symbolizer = new LineSymbolizer(this.rule.getNextSymbolizerId(), this.rule, null, this.previewLineUrl);
+		symbolizer = new LineSymbolizer(this.rule, null, this.previewLineUrl, this.symbologyUtils);
 		
 	} else if (this.featureType == 'PolygonSymbolizer') {
-		symbolizer = new PolygonSymbolizer(this.rule.getNextSymbolizerId(), this.rule, null, this.previewPolygonUrl);
+		symbolizer = new PolygonSymbolizer(this.rule, null, this.previewPolygonUrl, this.symbologyUtils);
 	}
 	
 	$('#table-symbolizers tbody').append(symbolizer.getTableUI());
@@ -93,18 +93,7 @@ UniqueSymbol.prototype.appendSymbolizer = function() {
 UniqueSymbol.prototype.appendLabel = function() {
 	var self = this;
 	
-	var previewUrl = null;
-	if (this.featureType == 'PointSymbolizer') {
-		previewUrl = this.previewPointUrl;
-		
-	} else if (this.featureType == 'LineSymbolizer') {
-		previewUrl = this.previewLineUrl;
-		
-	} else if (this.featureType == 'PolygonSymbolizer') {
-		previewUrl = this.previewPolygonUrl;
-	}
-	
-	var label = new TextSymbolizer(this.rule.getNextLabelId(), this.symbologyUtils, this.rule, null, previewUrl);
+	var label = new TextSymbolizer(this.rule, null, this.symbologyUtils);
 	$('#table-symbolizers tbody').append(label.getTableUI());
 	$('#table-symbolizers-body').sortable({
 		placeholder: "sort-highlight",
@@ -144,28 +133,29 @@ UniqueSymbol.prototype.loadSymbols = function(symbolizers) {
 	this.rule.removeAllLabels();
 	for (var i=0; i<symbolizers.length; i++) {
 		var symbolizer = JSON.parse(symbolizers[i].json);
-		if (symbolizer.type == 'TextSymbolizer') {
-			this.loadTextSymbolizer(symbolizer);
-		} else if (symbolizer.type == 'ExternalGraphicSymbolizer') {
-			this.loadExternalGraphicSymbolizer(symbolizer);
+		if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer') {
+			this.loadTextSymbolizer(symbolizer[0].fields);
+		} else if (symbolizer.type == 'gvsigol_symbology.externalgraphic') {
+			this.loadExternalGraphicSymbolizer(symbolizer[0].fields);
 		} else {
 			this.loadSymbolizer(symbolizer);
 		}		
 	}
 };
 
-UniqueSymbol.prototype.loadSymbolizer = function(symbolizer_object) {
+UniqueSymbol.prototype.loadSymbolizer = function(options) {
 	var self = this;
 	
 	var symbolizer = null;
 	if (this.featureType == 'PointSymbolizer') {
-		symbolizer = new PointSymbolizer(this.rule.getNextSymbolizerId(), this.rule, this.symbologyUtils, symbolizer_object, this.previewPointUrl);
+		var ext_opts = $.extend( options[0].fields, options[1].fields );
+		symbolizer = new MarkSymbolizer(this.rule, ext_opts, this.previewPointUrl, this.symbologyUtils);
 		
 	} else if (this.featureType == 'LineSymbolizer') {
-		symbolizer = new LineSymbolizer(this.rule.getNextSymbolizerId(), this.rule, symbolizer_object, this.previewLineUrl);
+		symbolizer = new LineSymbolizer(this.rule, options, this.previewLineUrl, this.symbologyUtils);
 		
 	} else if (this.featureType == 'PolygonSymbolizer') {
-		symbolizer = new PolygonSymbolizer(this.rule.getNextSymbolizerId(), this.rule, symbolizer_object, this.previewPolygonUrl);
+		symbolizer = new PolygonSymbolizer(this.rule, options, this.previewPolygonUrl, this.symbologyUtils);
 	}
 	
 	$('#table-symbolizers tbody').append(symbolizer.getTableUI());
@@ -275,18 +265,18 @@ UniqueSymbol.prototype.libraryPreview = function(rid,json_symbolizers) {
 	var scount = 0;
 	var previewUrl = null;
 	for (var i=0; i<json_symbolizers.length; i++) {
-		var symbolizer_object = JSON.parse(json_symbolizers[i].json);
+		var options = JSON.parse(json_symbolizers[i].json);
 		var symbolizer = null;
-		if (symbolizer_object.type == 'PointSymbolizer') {
-			symbolizer = new PointSymbolizer(this.count, this, this.symbologyUtils, symbolizer_object, this.previewPointUrl);
+		if (symbolizer_object.type == 'Mark') {
+			symbolizer = new MarkSymbolizer(this.rule, options, this.previewPointUrl, this.symbologyUtils);
 			previewUrl = this.previewPointUrl;
 			
 		} else if (symbolizer_object.type == 'LineSymbolizer') {
-			symbolizer = new LineSymbolizer(this.count, this, symbolizer_object, this.previewLineUrl);
+			symbolizer = new LineSymbolizer(this.rule, options, this.previewLineUrl, this.symbologyUtils);
 			previewUrl = this.previewLineUrl;
 			
 		} else if (symbolizer_object.type == 'PolygonSymbolizer') {
-			symbolizer = new PolygonSymbolizer(this.count, this, symbolizer_object, this.previewPolygonUrl);
+			symbolizer = new PolygonSymbolizer(this.rule, options, this.previewPolygonUrl, this.symbologyUtils);
 			previewUrl = this.previewPolygonUrl;
 			
 		} else if (symbolizer_object.type == 'TextSymbolizer') {
@@ -313,195 +303,34 @@ UniqueSymbol.prototype.updateForm = function() {
 	$('#tab-content').empty();	
 	
 	$('#tab-menu').append(this.selected.getTabMenu());
-	if (this.selected.type == 'PointSymbolizer') {
+	if (this.selected.type == 'Mark') {
 		$('#tab-content').append(this.selected.getGraphicTabUI());
 		$('#tab-content').append(this.selected.getFillTabUI());
-		$('#tab-content').append(this.selected.getBorderTabUI());
+		$('#tab-content').append(this.selected.getStrokeTabUI());
 		$('#tab-content').append(this.selected.getRotationTabUI());		
 		$('.nav-tabs a[href="#graphic-tab"]').tab('show');
-		this.registerSymbolizerEvents();
+		this.selected.registerEvents();
 		
 	} else if (this.selected.type == 'ExternalGraphicSymbolizer') {
-		this.registerSymbolizerEvents();
+		this.selected.registerEvents();
 		
 	} else if (this.selected.type == 'LineSymbolizer') {
-		$('#tab-content').append(this.selected.getBorderTabUI());
-		$('.nav-tabs a[href="#border-tab"]').tab('show');
-		this.registerSymbolizerEvents();
+		$('#tab-content').append(this.selected.getStrokeTabUI());
+		$('.nav-tabs a[href="#stroke-tab"]').tab('show');
+		this.selected.registerEvents();
 		
 	} else if (this.selected.type == 'PolygonSymbolizer') {
 		$('#tab-content').append(this.selected.getFillTabUI());
-		$('#tab-content').append(this.selected.getBorderTabUI());
-		$('#tab-content').append(this.selected.getRotationTabUI());
+		$('#tab-content').append(this.selected.getStrokeTabUI());
 		$('.nav-tabs a[href="#fill-tab"]').tab('show');
-		this.registerSymbolizerEvents();
+		this.selected.registerEvents();
 		
 	} else if (this.selected.type == 'TextSymbolizer') {
 		$('#tab-content').append(this.selected.getFontTabUI());
 		$('#tab-content').append(this.selected.getHaloTabUI());
-		$('#tab-content').append(this.selected.getVendorTabUI());
 		$('.nav-tabs a[href="#label-font-tab"]').tab('show');
-		this.registerLabelEvents();
+		this.selected.registerEvents();
 	}
-};
-
-UniqueSymbol.prototype.registerSymbolizerEvents = function() {
-	var self = this;
-	
-	$("#graphic-size").on('change', function(e) {
-		self.selected.size = this.value;
-		self.selected.updatePreview();	
-		//self.updatePreview();
-	});
-	$('input[type=checkbox][name=symbol-with-border]').change(function() {
-		var isChecked = $('#symbol-with-border').is(":checked");
-        if (isChecked) {
-        	$("#border-div").css('display', 'block');
-        	self.selected.with_border = true;
-            
-        } else {
-        	$("#border-div").css('display', 'none');
-        	self.selected.with_border = false;
-        }
-    });
-	$("#shape").on('change', function(e) {
-		self.selected.shape = this.value;
-		self.selected.updatePreview();	
-	});
-	$( "#fill-opacity-slider" ).slider({
-	    min: 0,
-	    max: 100,
-	    value: (self.selected.fill_opacity * 100),
-	    change: function( event, ui ) {
-	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
-	    	self.selected.fill_opacity = opacity;
-	    	self.selected.updatePreview();
-	    },
-	    slide: function( event, ui ) {
-	    	$("#fill-opacity-output").text(ui.value + '%');
-	    }
-	});	
-	$("#fill-color-chooser").on('change', function(e) {
-		self.selected.fill_color = this.value;
-		self.selected.updatePreview();	
-	});	
-	$('#symbol-with-border').on('change', function() {
-		self.selected.with_border = this.checked;		
-		self.selected.updatePreview();
-	});
-	$("#border-color-chooser").on('change', function(e) {
-		self.selected.border_color = this.value;
-		self.selected.updatePreview();	
-	});
-	$( "#border-opacity-slider" ).slider({
-	    min: 0,
-	    max: 100,
-	    value: (self.selected.border_opacity * 100),
-	    change: function( event, ui ) {
-	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
-	    	self.selected.border_opacity = opacity;
-	    	self.selected.updatePreview();
-	    },
-	    slide: function( event, ui ) {
-	    	$("#border-opacity-output").text(ui.value + '%');
-	    }
-	});
-	$("#border-size").on('change', function(e) {
-		self.selected.border_size = this.value;
-		self.selected.updatePreview();	
-	});
-	$('#border-type').on('change', function() {
-		self.selected.border_type = this.value;
-		self.selected.updatePreview();
-	});
-	$( "#rotation-slider" ).slider({
-	    min: 0,
-	    max: 360,
-	    value: self.selected.rotation,
-	    slide: function( event, ui ) {
-	    	var rotation = ui.value;
-	    	$("#rotation-output").text(rotation + 'º');
-	    	self.selected.rotation = rotation;
-	    }
-	});
-};
-
-UniqueSymbol.prototype.registerLabelEvents = function() {
-	var self = this;
-	
-	$('#label-field').on('change', function() {
-		self.selected.field = this.value;
-		self.selected.updatePreview();
-	});
-	
-	$('#label-font-family').on('change', function() {
-		self.selected.font_family = this.value;
-		self.selected.updatePreview();
-	});
-	
-	$('#label-font-size').on('change', function() {
-		self.selected.font_size = this.value;
-		self.selected.updatePreview();
-	});
-	
-	$('#label-font-color').on('change', function() {
-		self.selected.font_color = this.value;		
-		self.selected.updatePreview();
-	});
-	
-	$('#label-font-weight').on('change', function() {
-		self.selected.font_weight = this.value;
-		self.selected.updatePreview();
-	});
-	
-	$('#label-font-style').on('change', function() {
-		self.selected.font_style = this.value;
-		self.selected.updatePreview();
-	});
-	
-	$('#label-halo-color').on('change', function() {
-		self.selected.halo_color = this.value;		
-		self.selected.updatePreview();
-	});
-	
-	$('#label-halo-radius').on('change', function() {
-		self.selected.halo_radius = this.value;		
-		self.selected.updatePreview();
-	});
-	
-	$( "#halo-opacity-slider" ).slider({
-	    min: 0,
-	    max: 100,
-	    value: (self.selected.halo_opacity * 100),
-	    change: function( event, ui ) {
-	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
-	    	self.selected.halo_opacity = opacity;
-	    	self.selected.updatePreview();
-	    },
-	    slide: function( event, ui ) {
-	    	$("#halo-opacity-output").text(ui.value + '%');
-	    }
-	});
-	
-	$('#label-max-iterations').on('change', function() {
-		self.selected.max_iterations = this.value;		
-		self.selected.updatePreview();
-	});
-	
-	$('#label-max-length').on('change', function() {
-		self.selected.max_length = this.value;		
-		self.selected.updatePreview();
-	});
-	
-	$('#label-min-wrapper').on('change', function() {
-		self.selected.min_wrapper = this.value;		
-		self.selected.updatePreview();
-	});
-	
-	$('#label-solve-overlaps').on('change', function() {
-		self.selected.solve_overlaps = this.checked;		
-		self.selected.updatePreview();
-	});
 };
 
 UniqueSymbol.prototype.save = function(layerId) {
@@ -510,7 +339,6 @@ UniqueSymbol.prototype.save = function(layerId) {
 	for (var i=0; i < this.rule.getSymbolizers().length; i++) {
 		var symbolizer = {
 			type: this.rule.getSymbolizers()[i].type,
-			sld: this.rule.getSymbolizers()[i].toXML(),
 			json: this.rule.getSymbolizers()[i].toJSON(),
 			order: this.rule.getSymbolizers()[i].order
 		};
@@ -520,7 +348,6 @@ UniqueSymbol.prototype.save = function(layerId) {
 	for (var i=0; i < this.rule.getLabels().length; i++) {
 		var label = {
 			type: this.rule.getLabels()[i].type,
-			sld: this.rule.getLabels()[i].toXML(),
 			json: this.rule.getLabels()[i].toJSON(),
 			order: this.rule.getLabels()[i].order
 		};
@@ -567,7 +394,6 @@ UniqueSymbol.prototype.update = function(layerId, styleId) {
 	for (var i=0; i < this.rule.getSymbolizers().length; i++) {
 		var symbolizer = {
 			type: this.rule.getSymbolizers()[i].type,
-			sld: this.rule.getSymbolizers()[i].toXML(),
 			json: this.rule.getSymbolizers()[i].toJSON(),
 			order: this.rule.getSymbolizers()[i].order
 		};
@@ -577,7 +403,6 @@ UniqueSymbol.prototype.update = function(layerId, styleId) {
 	for (var i=0; i < this.rule.getLabels().length; i++) {
 		var label = {
 			type: this.rule.getLabels()[i].type,
-			sld: this.rule.getLabels()[i].toXML(),
 			json: this.rule.getLabels()[i].toJSON(),
 			order: this.rule.getLabels()[i].order
 		};
