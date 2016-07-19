@@ -21,29 +21,21 @@
  */
  
  
-var LineSymbolizer = function(id, rule, symbolizer_object, previewUrl) {
-	this.id = 'linesymbolizer' + id;
+var LineSymbolizer = function(rule, options, previewUrl, symutils) {
+	this.id = 'linesymbolizer' + symutils.generateUUID();
 	this.type = 'LineSymbolizer';
-	this.name = 'LineSymbolizer ' + id;
-	this.fill_color = "#000000";
-	this.fill_opacity = 0.5;
-	this.border_color = "#000000";
-	this.border_size = 1;
-	this.border_opacity = 1;
-	this.border_type = "solid";
+	this.stroke = "#000000";
+	this.stroke_width = 1;
+	this.stroke_opacity = 1;
 	this.order = 0;
 	this.rule = rule;
 	this.previewUrl = previewUrl;
 	
-	if (symbolizer_object) {
-		this.name = symbolizer_object.name;
-		this.fill_color = symbolizer_object.fill_color;
-		this.fill_opacity = symbolizer_object.fill_opacity;
-		this.border_color = symbolizer_object.border_color;
-		this.border_size = symbolizer_object.border_size;
-		this.border_opacity = symbolizer_object.border_opacity;
-		this.border_type = symbolizer_object.border_type;
-		this.order = symbolizer_object.order;
+	if (options) {
+		this.stroke = options.stroke;
+		this.stroke_width = options.stroke_width;
+		this.stroke_opacity = options.stroke_opacity;
+		this.order = options.order;
 	}
 };
 
@@ -56,7 +48,6 @@ LineSymbolizer.prototype.getTableUI = function() {
 	ui += 			'<i class="fa fa-ellipsis-v"></i>';
 	ui += 		'</span>';
 	ui += 	'</td>';
-	ui += 	'<td><span class="text-muted">' + this.name + '</span></td>';
 	ui += 	'<td id="symbolizer-preview-div-' + this.id + '"></td>';	
 	ui += 	'<td><a class="edit-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
 	ui += 	'<td><a class="delete-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
@@ -67,56 +58,64 @@ LineSymbolizer.prototype.getTableUI = function() {
 
 LineSymbolizer.prototype.getTabMenu = function() {
 	var ui = '';
-	ui += '<li class="active"><a href="#border-tab" data-toggle="tab">' + gettext('Border') + '</a></li>';
+	ui += '<li class="active"><a href="#stroke-tab" data-toggle="tab">' + gettext('Stroke') + '</a></li>';
 	
 	return ui;	
 };
 
-LineSymbolizer.prototype.getBorderTabUI = function() {
+LineSymbolizer.prototype.getStrokeTabUI = function() {
 	var ui = '';
-	ui += '<div class="tab-pane active" id="border-tab">';
+	ui += '<div class="tab-pane active" id="stroke-tab">';
 	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 checkbox">';
-	ui += 			'<label>';
-	if (this.with_border) {
-		ui += '<input type="checkbox" id="symbol-with-border" name="symbol-with-border" checked/>' + gettext('With border');
-	} else {
-		ui += '<input type="checkbox" id="symbol-with-border" name="symbol-with-border"/>' + gettext('With border');
-	}	
-	ui += 			'</label>';
+	ui += 		'<div class="col-md-12 form-group">';
+	ui += 			'<label>' + gettext('Stroke color') + '</label>';
+	ui += 			'<input id="stroke-color-chooser" type="color" value="' + this.stroke + '" class="form-control color-chooser">';					
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Border color') + '</label>';
-	ui += 			'<input id="border-color-chooser" type="color" value="' + this.border_color + '" class="form-control color-chooser">';					
+	ui += 			'<label>' + gettext('Stroke width') + '</label>';
+	ui += 			'<input id="stroke-width" type="number" class="form-control" value="' + parseInt(this.stroke_width) + '">';					
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Border size') + '</label>';
-	ui += 			'<input id="border-size" type="number" class="form-control" value="' + parseInt(this.border_size) + '">';					
-	ui += 		'</div>';
-	ui += 	'</div>';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label style="display: block;">' + gettext('Border opacity') + '<span id="border-opacity-output" class="margin-l-15 gol-slider-output">' + (this.border_opacity * 100) + '%</span>' + '</label>';
-	ui += 			'<div id="border-opacity-slider"></div>';
+	ui += 			'<label style="display: block;">' + gettext('Stroke opacity') + '<span id="stroke-opacity-output" class="margin-l-15 gol-slider-output">' + (this.stroke_opacity * 100) + '%</span>' + '</label>';
+	ui += 			'<div id="stroke-opacity-slider"></div>';
 	ui += 		'</div>';					 
-	ui += 	'</div>';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Border type') + '</label>';
-	ui += 			'<select id="border-type" class="form-control">';
-	ui += 				'<option value="solid">' + gettext('Solid') + '</option>';
-	ui += 				'<option value="dotted">' + gettext('Dotted') + '</option>';
-	ui += 				'<option value="stripped">' + gettext('Stripped') + '</option>';
-	ui += 			'</select>';
-	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += '</div>';
 	
 	return ui;
+};
+
+LineSymbolizer.prototype.registerEvents = function(rule) {
+	var self = this;
+	
+	$("#stroke-color-chooser").on('change', function(e) {
+		self.stroke = this.value;
+		self.updatePreview();	
+		rule.updatePreview(self.previewUrl);
+	});
+	$( "#stroke-opacity-slider" ).slider({
+	    min: 0,
+	    max: 100,
+	    value: (self.stroke_opacity * 100),
+	    change: function( event, ui ) {
+	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
+	    	self.stroke_opacity = opacity;
+	    	self.updatePreview();
+	    	rule.updatePreview(self.previewUrl);
+	    },
+	    slide: function( event, ui ) {
+	    	$("#stroke-opacity-output").text(ui.value + '%');
+	    }
+	});
+	$("#stroke-width").on('change', function(e) {
+		self.stroke_width = this.value;
+		self.updatePreview();	
+		rule.updatePreview(self.previewUrl);
+	});
 };
 
 LineSymbolizer.prototype.updatePreview = function() {	
@@ -132,9 +131,9 @@ LineSymbolizer.prototype.toXML = function(){
 	var xml = '';
 	xml += '<LineSymbolizer>';
 	xml += 	'<Stroke>';
-	xml += 		'<CssParameter name="stroke">' + this.border_color + '</CssParameter>';
-	xml += 		'<CssParameter name="stroke-width">' + this.border_size + '</CssParameter>';
-	xml += 		'<CssParameter name="stroke-opacity">' + this.border_opacity + '</CssParameter>';
+	xml += 		'<CssParameter name="stroke">' + this.stroke + '</CssParameter>';
+	xml += 		'<CssParameter name="stroke-width">' + this.stroke_width + '</CssParameter>';
+	xml += 		'<CssParameter name="stroke-opacity">' + this.stroke_opacity + '</CssParameter>';
 	xml += 	'</Stroke>';
 	xml += '</LineSymbolizer>';
 	
@@ -148,19 +147,19 @@ LineSymbolizer.prototype.toSLDBody = function(){
 	sld +=  'xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ';
 	sld +=  'xsi:schemaLocation=\"http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd\">';
 	sld += 	'<NamedLayer>';  
-	sld +=  	'<Name>' + this.name + '</Name>';  
+	sld +=  	'<Name>Line</Name>';  
 	sld +=      '<UserStyle>';
-	sld +=          '<Name>' + this.name + '</Name>';
-	sld +=          '<Title>' + this.name + '</Title>';
+	sld +=          '<Name>Line</Name>';
+	sld +=          '<Title>Line</Title>';
 	sld +=          '<FeatureTypeStyle>';
 	sld +=          	'<Rule>';
-	sld +=          		'<Name>' + this.name + '</Name>';
-	sld +=          		'<Title>' + this.name + '</Title>';
+	sld +=          		'<Name>Line</Name>';
+	sld +=          		'<Title>Line</Title>';
 	sld += 					'<LineSymbolizer>';
 	sld += 						'<Stroke>';
-	sld += 							'<CssParameter name="stroke">' + this.border_color + '</CssParameter>';
-	sld += 							'<CssParameter name="stroke-width">' + this.border_size + '</CssParameter>';
-	sld += 							'<CssParameter name="stroke-opacity">' + this.border_opacity + '</CssParameter>';
+	sld += 							'<CssParameter name="stroke">' + this.stroke + '</CssParameter>';
+	sld += 							'<CssParameter name="stroke-width">' + this.stroke_width + '</CssParameter>';
+	sld += 							'<CssParameter name="stroke-opacity">' + this.stroke_opacity + '</CssParameter>';
 	sld += 						'</Stroke>';
 	sld += 					'</LineSymbolizer>';
 	sld +=          	'</Rule>';
@@ -177,13 +176,9 @@ LineSymbolizer.prototype.toJSON = function(){
 	var object = {
 		id: this.id,
 		type: this.type,
-		name: this.name,
-		fill_color: this.fill_color,
-		fill_opacity: this.fill_opacity,
-		border_color: this.border_color,
-		border_size: this.border_size,
-		border_opacity: this.border_opacity,
-		border_type: this.border_type,
+		stroke: this.stroke,
+		stroke_width: this.stroke_width,
+		stroke_opacity: this.stroke_opacity,
 		order: this.order
 	};
 	
