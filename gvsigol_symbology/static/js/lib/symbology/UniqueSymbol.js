@@ -63,12 +63,14 @@ UniqueSymbol.prototype.appendSymbolizer = function() {
 		forcePlaceholderSize: true,
 		zIndex: 999999
 	});
-	$("#table-symbolizers-body").on("sortupdate", function(event, ui){
-		/*var rows = ui.item[0].parentNode.children;
+	$("#table-symbolizers-body").on("sortupdate", function(event, ui){			
+		var rows = ui.item[0].parentNode.children;
 		for(var i=0; i < rows.length; i++) {
 			var symbol = self.rule.getSymbolizerById(rows[i].dataset.rowid);
-			symbol.order = i;
-		}*/		
+			if (symbol) {
+				symbol.order = i;
+			}
+		}
 	});
 	
 	$(".edit-symbolizer-link").on('click', function(e){	
@@ -133,12 +135,15 @@ UniqueSymbol.prototype.loadSymbols = function(symbolizers) {
 	this.rule.removeAllLabels();
 	for (var i=0; i<symbolizers.length; i++) {
 		var symbolizer = JSON.parse(symbolizers[i].json);
+		var order = symbolizers[i].order;
+		var options = symbolizer[0].fields;
+		options['order'] = order;
 		if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer') {
-			this.loadTextSymbolizer(symbolizer[0].fields);
+			this.loadTextSymbolizer(options);
 		} else if (symbolizer.type == 'gvsigol_symbology.externalgraphic') {
-			this.loadExternalGraphicSymbolizer(symbolizer[0].fields);
+			this.loadExternalGraphicSymbolizer(options);
 		} else {
-			this.loadSymbolizer(symbolizer);
+			this.loadSymbolizer(options);
 		}		
 	}
 };
@@ -167,11 +172,13 @@ UniqueSymbol.prototype.loadSymbolizer = function(options) {
 		zIndex: 999999
 	});
 	$("#table-symbolizers-body").on("sortupdate", function(event, ui){
-		/*var rows = ui.item[0].parentNode.children;
+		var rows = ui.item[0].parentNode.children;
 		for(var i=0; i < rows.length; i++) {
 			var symbol = self.rule.getSymbolizerById(rows[i].dataset.rowid);
-			symbol.order = i;
-		}*/		
+			if (symbol) {
+				symbol.order = i;
+			}
+		}	
 	});
 	
 	$(".edit-symbolizer-link").on('click', function(e){	
@@ -193,23 +200,16 @@ UniqueSymbol.prototype.loadSymbolizer = function(options) {
 	this.updateForm();
 };
 
-UniqueSymbol.prototype.loadTextSymbolizer = function(symbolizer_object) {
+UniqueSymbol.prototype.loadTextSymbolizer = function(options) {
 	var self = this;
 	
-	var label = new TextSymbolizer(this.rule.getNextLabelId(), this.symbologyUtils, this.rule, symbolizer_object);
+	var label = new TextSymbolizer(this.rule, options, this.symbologyUtils);
 	$('#table-symbolizers tbody').append(label.getTableUI());
 	$("#table-symbolizers-body").sortable({
 		placeholder: "sort-highlight",
 		handle: ".handle",
 		forcePlaceholderSize: true,
 		zIndex: 999999
-	});
-	$("#table-symbolizers-body").on("sortupdate", function(event, ui){
-		/*var rows = ui.item[0].parentNode.children;
-		for(var i=0; i < rows.length; i++) {
-			var symbol = self.rule.getSymbolizerById(rows[i].dataset.rowid);
-			symbol.order = i;
-		}*/		
 	});
 	
 	$(".edit-label-link").on('click', function(e){	

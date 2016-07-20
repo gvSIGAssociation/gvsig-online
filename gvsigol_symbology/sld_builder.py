@@ -177,7 +177,7 @@ def get_fill(s):
     
     fill_opacity = sld.CssParameter()
     fill_opacity.set_name('fill-opacity')
-    fill_opacity.set_valueOf_(s.fill_opacity)
+    fill_opacity.set_valueOf_(str(s.fill_opacity))
     fill.add_CssParameter(fill_opacity)
     
     return fill
@@ -192,12 +192,12 @@ def get_stroke(s):
     
     stroke_width = sld.CssParameter()
     stroke_width.set_name('stroke-width')
-    stroke_width.set_valueOf_(s.stroke_width)
+    stroke_width.set_valueOf_(str(s.stroke_width))
     stroke.add_CssParameter(stroke_width)
     
     stroke_opacity = sld.CssParameter()
     stroke_opacity.set_name('stroke-opacity')
-    stroke_opacity.set_valueOf_(s.stroke_opacity)
+    stroke_opacity.set_valueOf_(str(s.stroke_opacity))
     stroke.add_CssParameter(stroke_opacity)
     
     return stroke

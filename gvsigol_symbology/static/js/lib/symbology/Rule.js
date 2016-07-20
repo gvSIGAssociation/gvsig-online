@@ -34,8 +34,12 @@ var Rule = function(id, featureType, rule_opts) {
 	this.labels = new Array();
 	
 	if (rule_opts) {
+		this.id = rule_opts.id;
 		this.name = rule_opts.name;
-		this.title = rule_opts.title;			
+		this.title = rule_opts.title;	
+		this.minscale = parseInt(rule_opts.minscale);
+		this.maxscale = parseInt(rule_opts.maxscale);
+		this.order = parseInt(rule_opts.order);
 	}
 	
 };

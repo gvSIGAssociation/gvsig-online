@@ -23,7 +23,6 @@
 var TextSymbolizer = function(rule, options, symutils) {
 	this.id = 'textsymbolizer' + symutils.generateUUID();
 	this.type = 'TextSymbolizer';
-	this.name = 'TextSymbolizer ' + this.id;
 	this.label = '';
 	this.font_family = 'Arial';
 	this.font_size= 12;
@@ -39,7 +38,6 @@ var TextSymbolizer = function(rule, options, symutils) {
 	this.rule = rule;
 	
 	if (options) {
-		this.name = options.name;
 		this.label = options.label;
 		this.font_family = options.font_family;
 		this.font_size = options.font_size;
@@ -63,7 +61,6 @@ TextSymbolizer.prototype.getTableUI = function() {
 	ui += 			'<i class="fa fa-ellipsis-v"></i>';
 	ui += 		'</span>';
 	ui += 	'</td>';
-	ui += 	'<td><span class="text-muted">' + this.name + '</span></td>';
 	ui += 	'<td id="label-preview"><svg id="label-preview-' + this.id + '" class="label-preview-svg"></svg></td>';	
 	ui += 	'<td><a class="edit-label-link" data-labelid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
 	ui += 	'<td><a class="delete-label-link" data-labelid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
@@ -318,7 +315,6 @@ TextSymbolizer.prototype.toJSON = function(){
 	var object = {
 		id: this.id,
 		type: this.type,
-		name: this.name,
 		label: this.label,
 		font_family: this.font_family,
 		font_size: this.font_size,
