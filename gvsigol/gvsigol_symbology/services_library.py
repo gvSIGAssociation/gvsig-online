@@ -417,9 +417,9 @@ def upload_library(name, description, file, session):
             scount = 0
             for s in r.Symbolizer:
                 if s.original_tagname_ == 'PointSymbolizer':
-                    opacity = 1 if s.Graphic.Opacity is None else s.Graphic.Opacity
-                    rotation = 0 if s.Graphic.Rotation is None else s.Graphic.Rotation
-                    size = 8 if s.Graphic.Size is None else s.Graphic.Size
+                    opacity = s.Graphic.Opacity.valueOf_
+                    rotation = s.Graphic.Rotation.valueOf_
+                    size = s.Graphic.Size.valueOf_
                     if len(s.Graphic.Mark) >= 1:
                         mark = s.Graphic.Mark[0]
                         symbolizer = MarkSymbolizer(
@@ -439,13 +439,15 @@ def upload_library(name, description, file, session):
                         
                     if len(s.Graphic.ExternalGraphic) >= 1:
                         external_graphic = s.Graphic.ExternalGraphic[0]
+                        online_resource = external_graphic.OnlineResource.href.split('/')
+                        online_resource[-2] = library.name
                         symbolizer = ExternalGraphicSymbolizer(
                             rule = rule,
                             order = scount,
                             opacity = opacity,
                             size = size,
                             rotation = rotation,
-                            online_resource = external_graphic.OnlineResource.href,
+                            online_resource = "/".join(online_resource),
                             format = external_graphic.Format
                         )
                         symbolizer.save()
