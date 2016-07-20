@@ -173,13 +173,17 @@ MarkSymbolizer.prototype.registerEvents = function(rule) {
 	$("#graphic-size").on('change', function(e) {
 		self.size = this.value;
 		self.updatePreview();	
-		rule.updatePreview(self.previewUrl);
+		if (rule) {
+    		rule.updatePreview(self.previewUrl);
+    	}
 	});
 
 	$("#well-known-name").on('change', function(e) {
 		self.well_known_name = this.value;
 		self.updatePreview();	
-		rule.updatePreview(self.previewUrl);
+		if (rule) {
+    		rule.updatePreview(self.previewUrl);
+    	}
 	});
 	$( "#fill-opacity-slider" ).slider({
 	    min: 0,
@@ -189,7 +193,9 @@ MarkSymbolizer.prototype.registerEvents = function(rule) {
 	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
 	    	self.fill_opacity = opacity;
 	    	self.updatePreview();
-	    	rule.updatePreview(self.previewUrl);
+	    	if (rule) {
+	    		rule.updatePreview(self.previewUrl);
+	    	}
 	    },
 	    slide: function( event, ui ) {
 	    	$("#fill-opacity-output").text(ui.value + '%');
@@ -198,12 +204,16 @@ MarkSymbolizer.prototype.registerEvents = function(rule) {
 	$("#fill-color-chooser").on('change', function(e) {
 		self.fill = this.value;
 		self.updatePreview();	
-		rule.updatePreview(self.previewUrl);
+		if (rule) {
+    		rule.updatePreview(self.previewUrl);
+    	}
 	});	
 	$("#stroke-color-chooser").on('change', function(e) {
 		self.stroke = this.value;
 		self.updatePreview();	
-		rule.updatePreview(self.previewUrl);
+		if (rule) {
+    		rule.updatePreview(self.previewUrl);
+    	}
 	});
 	$( "#stroke-opacity-slider" ).slider({
 	    min: 0,
@@ -213,7 +223,9 @@ MarkSymbolizer.prototype.registerEvents = function(rule) {
 	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
 	    	self.stroke_opacity = opacity;
 	    	self.updatePreview();
-	    	rule.updatePreview(self.previewUrl);
+	    	if (rule) {
+	    		rule.updatePreview(self.previewUrl);
+	    	}
 	    },
 	    slide: function( event, ui ) {
 	    	$("#stroke-opacity-output").text(ui.value + '%');
@@ -222,7 +234,9 @@ MarkSymbolizer.prototype.registerEvents = function(rule) {
 	$("#stroke-width").on('change', function(e) {
 		self.stroke_width = this.value;
 		self.updatePreview();	
-		rule.updatePreview(self.previewUrl);
+		if (rule) {
+    		rule.updatePreview(self.previewUrl);
+    	}
 	});
 	$( "#rotation-slider" ).slider({
 	    min: 0,

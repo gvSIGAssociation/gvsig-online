@@ -84,7 +84,7 @@ def get_named_layer(layer_name, user_style):
 def get_user_style(name, title, is_default, feature_type_style):
     user_style = sld.UserStyle()
     user_style.set_Name(name)
-    user_style.set_Title(title)
+    user_style.set_Title(name)
     user_style.set_IsDefault(is_default)
     user_style.add_FeatureTypeStyle(feature_type_style)
 
@@ -97,7 +97,7 @@ def get_feature_type_style():
 def get_rule(r, symbolizers):
     rule = sld.Rule()
     rule.set_Name(r.name)
-    rule.set_Title(r.title)
+    rule.set_Title(r.title.encode('ascii', 'ignore'))
     rule.set_Abstract(r.abstract)
     rule.set_Filter(None if r.filter=='' else None)
     if r.minscale >= 0:
@@ -137,6 +137,9 @@ def get_symbolizer(s):
         mark.set_Fill(get_fill(s.marksymbolizer))
         mark.set_Stroke(get_stroke(s.marksymbolizer))
         graphic.add_Mark(mark)
+        graphic.set_Opacity(str(s.marksymbolizer.opacity))
+        graphic.set_Size(str(s.marksymbolizer.size))
+        graphic.set_Rotation(str(s.marksymbolizer.rotation))
         symbolizer.set_Graphic(graphic)
         
     elif hasattr(s, 'externalgraphicsymbolizer'):
@@ -148,6 +151,9 @@ def get_symbolizer(s):
         externalgraphic.set_OnlineResource(o_resource)
         externalgraphic.set_Format(s.externalgraphicsymbolizer.format)
         graphic.add_ExternalGraphic(externalgraphic)
+        graphic.set_Opacity(str(s.externalgraphicsymbolizer.opacity))
+        graphic.set_Size(str(s.externalgraphicsymbolizer.size))
+        graphic.set_Rotation(str(s.externalgraphicsymbolizer.rotation))
         symbolizer.set_Graphic(graphic)
         
     elif hasattr(s, 'textsymbolizer'):
