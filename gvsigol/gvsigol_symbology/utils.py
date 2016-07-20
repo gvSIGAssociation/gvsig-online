@@ -315,10 +315,12 @@ def symbolizer_to_json(symbolizer):
         
     elif hasattr(symbolizer, 'externalgraphicsymbolizer'):
         json_symbolizer['type'] = 'ExternalGraphicSymbolizer'
+        json_symbolizer['order'] = symbolizer.order
         json_symbolizer['json'] = serializers.serialize('json', [ symbolizer.externalgraphicsymbolizer])
         
     elif hasattr(symbolizer, 'textsymbolizer'):
         json_symbolizer['type'] = 'TextSymbolizer'
+        json_symbolizer['order'] = symbolizer.order
         json_symbolizer['json'] = serializers.serialize('json', [ symbolizer.textsymbolizer, ])
         
     return json_symbolizer

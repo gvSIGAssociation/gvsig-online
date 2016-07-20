@@ -152,19 +152,19 @@ def update_style(session, json_data, layer_id, style_id):
     style = Style.objects.get(id=int(style_id))
     layer = Layer.objects.get(id=int(layer_id))
     
-    style.title = json_data.get('title')
-    style.is_default = json_data.get('is_default')
-    style.save()
-    
-    if style.is_default:
+    if json_data.get('is_default'):
         layer_styles = StyleLayer.objects.filter(layer=layer)
         for ls in layer_styles:
             s = Style.objects.get(id=ls.style.id)
             s.is_default = False
+            s.save()
         datastore = layer.datastore
         workspace = datastore.workspace
         mapservice.setLayerStyle(workspace.name+":"+layer.name, style.name, session)
     
+    style.title = json_data.get('title')
+    style.is_default = json_data.get('is_default')
+    style.save()
     
     json_rule = json_data.get('rule')
     rule = Rule.objects.get(style=style)

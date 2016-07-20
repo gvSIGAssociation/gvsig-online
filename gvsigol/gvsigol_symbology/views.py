@@ -235,8 +235,8 @@ def library_update(request, library_id):
                 'id': r.id,
                 'name': r.name,
                 'title': r.title,
-                'minscale': r.minscale,
-                'maxscale': r.maxscale,
+                'minscale': -1,
+                'maxscale': -1,
                 'order': r.order,
                 'symbolizers': json.dumps(symbolizers)
             }

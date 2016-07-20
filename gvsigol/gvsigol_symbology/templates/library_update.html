@@ -93,8 +93,12 @@ $(document).ready(function() {
 	
 	"{% for rule in rules %}"
 		var rule_opts = {
+			id: "{{rule.id}}",
 			name: "{{rule.name}}",
 			title: "{{rule.title}}",
+			minscale: "{{rule.minscale}}",
+			maxscale: "{{rule.maxscale}}",
+			order: "{{rule.order}}"
 		};
 		
 		var symbolizers = {{rule.symbolizers|safe}};
