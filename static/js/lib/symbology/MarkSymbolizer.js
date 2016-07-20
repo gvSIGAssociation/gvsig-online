@@ -41,14 +41,14 @@ var MarkSymbolizer = function(rule, options, previewUrl, symutils) {
 	if (options) {
 		this.well_known_name = options.well_known_name;
 		this.fill = options.fill;
-		this.fill_opacity = parseFloat(options.fill_opacity) || 0.5;
+		this.fill_opacity = parseFloat(options.fill_opacity);
 		this.stroke = options.stroke;
 		this.stroke_width = parseInt(options.stroke_width);
-		this.stroke_opacity = parseFloat(options.stroke_opacity) || 1.0;
-		this.rotation = parseInt(options.rotation) || 0;
-		this.order = parseInt(options.order) || 0;
+		this.stroke_opacity = parseFloat(options.stroke_opacity);
+		this.rotation = parseInt(options.rotation);
+		this.order = parseInt(options.order);
 		this.size = parseInt(options.size);
-		this.opacity = parseFloat(options.opacity) || 1.0;
+		this.opacity = parseFloat(options.opacity);
 	}
 };
 

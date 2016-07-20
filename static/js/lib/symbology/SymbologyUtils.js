@@ -129,12 +129,12 @@ SymbologyUtils.prototype.centerMap = function(layerName, wfsUrl) {
 };
 
 SymbologyUtils.prototype.updateMap = function(rule, layerName) {
-	var symbolizers = rule.getSymbolizers();
+	var symbolizers = rule.getSymbolizers().slice(0);
 	var labels = rule.getLabels();
 	if (labels.length >= 1) {
 		symbolizers.push(labels[0]);
 	}
-	var sldBody = this.getSLDBody(rule.getSymbolizers(), layerName, layerName);
+	var sldBody = this.getSLDBody(symbolizers, layerName, layerName);
 	this.reloadLayerPreview(sldBody);
 };
 
