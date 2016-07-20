@@ -125,7 +125,9 @@ PolygonSymbolizer.prototype.registerEvents = function(rule) {
 	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
 	    	self.fill_opacity = opacity;
 	    	self.updatePreview();
-	    	rule.updatePreview(self.previewUrl);
+	    	if (rule) {
+	    		rule.updatePreview(self.previewUrl);
+	    	}	
 	    },
 	    slide: function( event, ui ) {
 	    	$("#fill-opacity-output").text(ui.value + '%');
@@ -134,12 +136,16 @@ PolygonSymbolizer.prototype.registerEvents = function(rule) {
 	$("#fill-color-chooser").on('change', function(e) {
 		self.fill = this.value;
 		self.updatePreview();	
-		rule.updatePreview(self.previewUrl);
+		if (rule) {
+    		rule.updatePreview(self.previewUrl);
+    	}
 	});	
 	$("#stroke-color-chooser").on('change', function(e) {
 		self.stroke = this.value;
 		self.updatePreview();
-		rule.updatePreview(self.previewUrl);
+		if (rule) {
+    		rule.updatePreview(self.previewUrl);
+    	}
 	});
 	$( "#stroke-opacity-slider" ).slider({
 	    min: 0,
@@ -149,7 +155,9 @@ PolygonSymbolizer.prototype.registerEvents = function(rule) {
 	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
 	    	self.stroke_opacity = opacity;
 	    	self.updatePreview();
-	    	rule.updatePreview(self.previewUrl);
+	    	if (rule) {
+	    		rule.updatePreview(self.previewUrl);
+	    	}
 	    },
 	    slide: function( event, ui ) {
 	    	$("#stroke-opacity-output").text(ui.value + '%');
@@ -158,7 +166,9 @@ PolygonSymbolizer.prototype.registerEvents = function(rule) {
 	$("#stroke-size").on('change', function(e) {
 		self.stroke_width = this.value;
 		self.updatePreview();	
-		rule.updatePreview(self.previewUrl);
+		if (rule) {
+    		rule.updatePreview(self.previewUrl);
+    	}
 	});
 };
 

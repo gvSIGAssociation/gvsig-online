@@ -3270,11 +3270,14 @@ class Graphic(GeneratedsSuper):
         for Mark_ in self.Mark:
             Mark_.export(outfile, level, namespace_='sld:', name_='Mark', pretty_print=pretty_print)
         if self.Opacity is not None:
-            self.Opacity.export(outfile, level, namespace_='sld:', name_='Opacity', pretty_print=pretty_print)
+            outfile.write('<%sOpacity>%s</%sOpacity>%s' % (namespace_, self.gds_encode(self.gds_format_string(quote_xml(self.Opacity), input_name='Opacity')), namespace_, eol_))
+            #self.Opacity.export(outfile, level, namespace_='sld:', name_='Opacity', pretty_print=pretty_print)
         if self.Size is not None:
-            self.Size.export(outfile, level, namespace_='sld:', name_='Size', pretty_print=pretty_print)
+            outfile.write('<%sSize>%s</%sSize>%s' % (namespace_, self.gds_encode(self.gds_format_string(quote_xml(self.Size), input_name='Size')), namespace_, eol_))
+            #self.Size.export(outfile, level, namespace_='sld:', name_='Size', pretty_print=pretty_print)
         if self.Rotation is not None:
-            self.Rotation.export(outfile, level, namespace_='sld:', name_='Rotation', pretty_print=pretty_print)
+            outfile.write('<%sRotation>%s</%sRotation>%s' % (namespace_, self.gds_encode(self.gds_format_string(quote_xml(self.Rotation), input_name='Rotation')), namespace_, eol_))
+            #self.Rotation.export(outfile, level, namespace_='sld:', name_='Rotation', pretty_print=pretty_print)
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
