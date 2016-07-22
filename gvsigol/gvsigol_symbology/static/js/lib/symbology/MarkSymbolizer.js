@@ -21,8 +21,8 @@
  */
  
  
-var MarkSymbolizer = function(rule, options, previewUrl, symutils) {
-	this.id = 'marksymbolizer' + symutils.generateUUID();
+var MarkSymbolizer = function(rule, options, utils) {
+	this.id = 'marksymbolizer' + utils.generateUUID();
 	this.type = 'MarkSymbolizer';
 	this.well_known_name = 'circle';
 	this.fill = "#000000";
@@ -35,8 +35,7 @@ var MarkSymbolizer = function(rule, options, previewUrl, symutils) {
 	this.size = 10;
 	this.opacity = 1;
 	this.rule = rule;
-	this.previewUrl = previewUrl;
-	this.symbologyUtils = symutils;
+	this.utils = utils;
 	
 	if (options) {
 		this.well_known_name = options.well_known_name;
@@ -62,8 +61,8 @@ MarkSymbolizer.prototype.getTableUI = function() {
 	ui += 		'</span>';
 	ui += 	'</td>';
 	ui += 	'<td id="symbolizer-preview-div-' + this.id + '"></td>';	
-	ui += 	'<td><a class="edit-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
-	ui += 	'<td><a class="delete-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
+	ui += 	'<td><a class="edit-symbolizer-link-' + this.rule.id + '" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
+	ui += 	'<td><a class="delete-symbolizer-link-' + this.rule.id + '" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
 	ui += '</tr>';	
 	
 	return ui;
@@ -86,11 +85,11 @@ MarkSymbolizer.prototype.getGraphicTabUI = function() {
 	ui += 		'<div class="col-md-12 form-group">';
 	ui += 			'<label>' + gettext('Select shape') + '</label>';
 	ui += 			'<select id="well-known-name" class="form-control">';
-	for (var i=0; i < this.symbologyUtils.shapes.length; i++) {
-		if (this.symbologyUtils.shapes[i].value == this.well_known_name) {
-			ui += '<option value="' + this.symbologyUtils.shapes[i].value + '" selected>' + this.symbologyUtils.shapes[i].title + '</option>';
+	for (var i=0; i < this.utils.shapes.length; i++) {
+		if (this.utils.shapes[i].value == this.well_known_name) {
+			ui += '<option value="' + this.utils.shapes[i].value + '" selected>' + this.utils.shapes[i].title + '</option>';
 		} else {
-			ui += '<option value="' + this.symbologyUtils.shapes[i].value + '">' + this.symbologyUtils.shapes[i].title + '</option>';
+			ui += '<option value="' + this.utils.shapes[i].value + '">' + this.utils.shapes[i].title + '</option>';
 		}
 	}
 	ui += 			'</select>';
@@ -174,7 +173,7 @@ MarkSymbolizer.prototype.registerEvents = function(rule) {
 		self.size = this.value;
 		self.updatePreview();	
 		if (rule) {
-    		rule.updatePreview(self.previewUrl);
+    		rule.updatePreview(self.utils.getPreviewUrl());
     	}
 	});
 
@@ -182,7 +181,7 @@ MarkSymbolizer.prototype.registerEvents = function(rule) {
 		self.well_known_name = this.value;
 		self.updatePreview();	
 		if (rule) {
-    		rule.updatePreview(self.previewUrl);
+    		rule.updatePreview(self.utils.getPreviewUrl());
     	}
 	});
 	$( "#fill-opacity-slider" ).slider({
@@ -194,7 +193,7 @@ MarkSymbolizer.prototype.registerEvents = function(rule) {
 	    	self.fill_opacity = opacity;
 	    	self.updatePreview();
 	    	if (rule) {
-	    		rule.updatePreview(self.previewUrl);
+	    		rule.updatePreview(self.utils.getPreviewUrl());
 	    	}
 	    },
 	    slide: function( event, ui ) {
@@ -205,14 +204,14 @@ MarkSymbolizer.prototype.registerEvents = function(rule) {
 		self.fill = this.value;
 		self.updatePreview();	
 		if (rule) {
-    		rule.updatePreview(self.previewUrl);
+    		rule.updatePreview(self.utils.getPreviewUrl());
     	}
 	});	
 	$("#stroke-color-chooser").on('change', function(e) {
 		self.stroke = this.value;
 		self.updatePreview();	
 		if (rule) {
-    		rule.updatePreview(self.previewUrl);
+    		rule.updatePreview(self.utils.getPreviewUrl());
     	}
 	});
 	$( "#stroke-opacity-slider" ).slider({
@@ -224,7 +223,7 @@ MarkSymbolizer.prototype.registerEvents = function(rule) {
 	    	self.stroke_opacity = opacity;
 	    	self.updatePreview();
 	    	if (rule) {
-	    		rule.updatePreview(self.previewUrl);
+	    		rule.updatePreview(self.utils.getPreviewUrl());
 	    	}
 	    },
 	    slide: function( event, ui ) {
@@ -235,7 +234,7 @@ MarkSymbolizer.prototype.registerEvents = function(rule) {
 		self.stroke_width = this.value;
 		self.updatePreview();	
 		if (rule) {
-    		rule.updatePreview(self.previewUrl);
+    		rule.updatePreview(self.utils.getPreviewUrl());
     	}
 	});
 	$( "#rotation-slider" ).slider({
@@ -252,7 +251,7 @@ MarkSymbolizer.prototype.registerEvents = function(rule) {
 
 MarkSymbolizer.prototype.updatePreview = function() {	
 	var sldBody = this.toSLDBody();
-	var url = this.previewUrl + '&SLD_BODY=' + encodeURIComponent(sldBody);
+	var url = this.utils.getPreviewUrl() + '&SLD_BODY=' + encodeURIComponent(sldBody);
 	var ui = '<img id="symbolizer-preview-' + this.id + '" src="' + url + '" class="symbolizer-preview-' + this.id + '"></img>';
 	$("#symbolizer-preview-div-" + this.id).empty();
 	$("#symbolizer-preview-div-" + this.id).append(ui);

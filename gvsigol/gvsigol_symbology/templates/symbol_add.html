@@ -103,17 +103,17 @@
 <script>
 $(document).ready(function() {
 	
-	$("#append-symbol-button").on('click', function(e){
-		var r = new Rule(0, "{{symbol_type}}",null);
-		librarySymbol.appendSymbolizer(r, "{{symbol_type}}");
-	});
-	
 	var previewPointUrl = "{{preview_point_url}}";
 	var previewLineUrl = "{{preview_line_url}}";
 	var previewPolygonUrl = "{{preview_polygon_url}}";
 	
 	var symbologyUtils = new SymbologyUtils([],[]);
 	var librarySymbol = new LibrarySymbol(previewPointUrl, previewLineUrl, previewPolygonUrl, symbologyUtils);
+	
+	$("#append-symbol-button").on('click', function(e){
+		var r = new Rule(1, "rule_1", "Rule 1", null, symbologyUtils);
+		librarySymbol.appendSymbolizer(r, "{{symbol_type}}");
+	});
 	
 	$("#save-symbol").on('click', function(e){
 		$("#form-error").empty();

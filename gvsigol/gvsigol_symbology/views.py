@@ -31,9 +31,10 @@ from models import Style, StyleLayer, Rule, Library, LibraryRule, Symbolizer
 from gvsigol_auth.utils import admin_required
 from gvsigol import settings
 from gvsigol_symbology import services, services_library, services_unique_symbol,\
-    sld_builder
+    services_unique_values
 import utils
 import json
+import ast
   
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @admin_required
@@ -59,6 +60,36 @@ def style_layer_update(request, layer_id, style_id):
     style = Style.objects.get(id=int(style_id))
     if (style.type == 'US'):
         return redirect('unique_symbol_update', layer_id=layer_id, style_id=style_id)
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@admin_required
+def style_layer_delete(request):
+    if request.method == 'POST':
+        style_id = request.POST.get('style_id')
+        layer_id = request.POST.get('layer_id')
+        
+        style = Style.objects.get(id=int(style_id))
+        layer = Layer.objects.get(id=int(layer_id))
+        layer_styles = StyleLayer.objects.filter(layer=layer)
+        
+        message = ''
+        success = False
+        if len(layer_styles) <= 1:
+            message = _('The layer must contain at least one style')
+        else:
+            if (style.is_default):
+                message = _('Can not delete a default style')
+            else:
+                try:
+                    services_unique_symbol.delete_style(request.session, style_id)
+                    success = True
+                    
+                except Exception as e:
+                    message = e.message
+                    pass
+                
+            
+        return HttpResponse(json.dumps({'success': success, 'message': message}, indent=4), content_type='application/json')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @admin_required
@@ -139,6 +170,41 @@ def unique_symbol_update(request, layer_id, style_id):
         response['rule'] = json.dumps(rule)        
         
         return render_to_response('unique_symbol_update.html', response, context_instance=RequestContext(request))
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@admin_required
+def unique_values_add(request, layer_id):
+    if request.method == 'POST':
+        print ''
+        
+    else:                 
+        response = services_unique_values.get_conf(request.session, layer_id) 
+        return render_to_response('unique_values_add.html', response, context_instance=RequestContext(request))
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@admin_required
+def unique_values_update(request, layer_id, style_id):  
+    if request.method == 'POST':
+        print ''
+        
+    else:                
+        response = {}      
+        return render_to_response('unique_values_update.html', response, context_instance=RequestContext(request))
+    
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@admin_required
+def get_unique_values(request):
+    if request.method == 'POST':
+        layer_id = request.POST.get('layer_id')
+        field = request.POST.get('field')
+        
+        layer = Layer.objects.get(id=layer_id)
+        connection = ast.literal_eval(layer.datastore.connection_params)
+        
+        unique_fields = utils.get_distinct_query(connection, layer.name, field)
+    
+        return HttpResponse(json.dumps({'values': unique_fields}, indent=4), content_type='application/json')
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @admin_required
@@ -311,18 +377,17 @@ def get_symbols_from_library(request):
             r = Rule.objects.get(id=lr.rule.id)
             symbolizers = []
             for s in Symbolizer.objects.filter(rule=r).order_by('order'):
-                symbolizers.append({
-                    'type': s.type,
-                    'json': s.json
-                })
+                symbolizers.append(utils.symbolizer_to_json(s))
+                
             rule = {
                 'id': r.id,
                 'name': r.name,
                 'title': r.title,
-                'minscale': r.minscale,
-                'maxscale': r.maxscale,
-                'order': r.order,
-                'type': r.type,
+                'abstract': '',
+                'filter': '',
+                'minscale': -1,
+                'maxscale': -1,
+                'order': 0,
                 'symbolizers': symbolizers
             }
             rules.append(rule)

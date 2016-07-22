@@ -21,8 +21,8 @@
  */
  
  
-var PolygonSymbolizer = function(rule, options, previewUrl, symutils) {
-	this.id = 'polygonsymbolizer' + symutils.generateUUID();
+var PolygonSymbolizer = function(rule, options, utils) {
+	this.id = 'polygonsymbolizer' + utils.generateUUID();
 	this.type = 'PolygonSymbolizer';
 	this.fill = "#000000";
 	this.fill_opacity = 0.5;
@@ -31,7 +31,7 @@ var PolygonSymbolizer = function(rule, options, previewUrl, symutils) {
 	this.stroke_opacity = 1;
 	this.order = 0;
 	this.rule = rule;
-	this.previewUrl = previewUrl;
+	this.utils = utils;
 	
 	if (options) {
 		this.fill = options.fill;
@@ -53,8 +53,8 @@ PolygonSymbolizer.prototype.getTableUI = function() {
 	ui += 		'</span>';
 	ui += 	'</td>';
 	ui += 	'<td id="symbolizer-preview-div-' + this.id + '"></td>';
-	ui += 	'<td><a class="edit-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
-	ui += 	'<td><a class="delete-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
+	ui += 	'<td><a class="edit-symbolizer-link-' + this.rule.id + '" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
+	ui += 	'<td><a class="delete-symbolizer-link-' + this.rule.id + '" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
 	ui += '</tr>';	
 	
 	return ui;
@@ -114,7 +114,7 @@ PolygonSymbolizer.prototype.getStrokeTabUI = function() {
 	return ui;
 };
 
-PolygonSymbolizer.prototype.registerEvents = function(rule) {
+PolygonSymbolizer.prototype.registerEvents = function() {
 	var self = this;
 
 	$( "#fill-opacity-slider" ).slider({
@@ -125,9 +125,7 @@ PolygonSymbolizer.prototype.registerEvents = function(rule) {
 	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
 	    	self.fill_opacity = opacity;
 	    	self.updatePreview();
-	    	if (rule) {
-	    		rule.updatePreview(self.previewUrl);
-	    	}	
+	    	self.rule.preview();
 	    },
 	    slide: function( event, ui ) {
 	    	$("#fill-opacity-output").text(ui.value + '%');
@@ -136,16 +134,12 @@ PolygonSymbolizer.prototype.registerEvents = function(rule) {
 	$("#fill-color-chooser").on('change', function(e) {
 		self.fill = this.value;
 		self.updatePreview();	
-		if (rule) {
-    		rule.updatePreview(self.previewUrl);
-    	}
+		self.rule.preview();
 	});	
 	$("#stroke-color-chooser").on('change', function(e) {
 		self.stroke = this.value;
 		self.updatePreview();
-		if (rule) {
-    		rule.updatePreview(self.previewUrl);
-    	}
+		self.rule.preview();
 	});
 	$( "#stroke-opacity-slider" ).slider({
 	    min: 0,
@@ -155,9 +149,7 @@ PolygonSymbolizer.prototype.registerEvents = function(rule) {
 	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
 	    	self.stroke_opacity = opacity;
 	    	self.updatePreview();
-	    	if (rule) {
-	    		rule.updatePreview(self.previewUrl);
-	    	}
+	    	self.rule.preview();
 	    },
 	    slide: function( event, ui ) {
 	    	$("#stroke-opacity-output").text(ui.value + '%');
@@ -166,15 +158,13 @@ PolygonSymbolizer.prototype.registerEvents = function(rule) {
 	$("#stroke-size").on('change', function(e) {
 		self.stroke_width = this.value;
 		self.updatePreview();	
-		if (rule) {
-    		rule.updatePreview(self.previewUrl);
-    	}
+		self.rule.preview();
 	});
 };
 
 PolygonSymbolizer.prototype.updatePreview = function() {	
 	var sldBody = this.toSLDBody();
-	var url = this.previewUrl + '&SLD_BODY=' + encodeURIComponent(sldBody);
+	var url = this.utils.getPreviewUrl() + '&SLD_BODY=' + encodeURIComponent(sldBody);
 	var ui = '<img id="symbolizer-preview-' + this.id + '" src="' + url + '" class="symbolizer-preview-' + this.id + '"></img>';
 	$("#symbolizer-preview-div-" + this.id).empty();
 	$("#symbolizer-preview-div-" + this.id).append(ui);
