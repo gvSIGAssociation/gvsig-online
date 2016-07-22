@@ -58,21 +58,24 @@ LibrarySymbol.prototype.loadSymbolizers = function(r, json_symbolizers) {
 		
 		var symbolizer = null;
 		if (this.featureType == 'MarkSymbolizer') {
-			symbolizer = new MarkSymbolizer(r, options, this.previewPointUrl, this.symbologyUtils);
+			var utils = new LibraryUtils(this.previewPointUrl);
+			symbolizer = new MarkSymbolizer(r, options, utils);
 			$('#table-symbolizers tbody').append(symbolizer.getTableUI());
 			this.symbolizers.push(symbolizer);
 			symbolizer.updatePreview();
 			previewUrl = this.previewPointUrl;
 			
 		} else if (this.featureType == 'LineSymbolizer') {
-			symbolizer = new LineSymbolizer(r, options, this.previewLineUrl, this.symbologyUtils);
+			var utils = new LibraryUtils(this.previewLineUrl);
+			symbolizer = new LineSymbolizer(r, options, utils);
 			$('#table-symbolizers tbody').append(symbolizer.getTableUI());
 			this.symbolizers.push(symbolizer);
 			symbolizer.updatePreview();
 			previewUrl = this.previewLineUrl;
 			
 		} else if (this.featureType == 'PolygonSymbolizer') {
-			symbolizer = new PolygonSymbolizer(r, options, this.previewPolygonUrl, this.symbologyUtils);
+			var utils = new LibraryUtils(this.previewPolygonUrl);
+			symbolizer = new PolygonSymbolizer(r, options, utils);
 			$('#table-symbolizers tbody').append(symbolizer.getTableUI());
 			this.symbolizers.push(symbolizer);
 			symbolizer.updatePreview();
@@ -119,15 +122,18 @@ LibrarySymbol.prototype.appendSymbolizer = function(rule, featureType) {
 	var previewUrl = null;
 	var symbolizer = null;
 	if (this.featureType == 'MarkSymbolizer') {
-		symbolizer = new MarkSymbolizer(rule, null, this.previewPointUrl, this.symbologyUtils);
+		var utils = new LibraryUtils(this.previewPointUrl);
+		symbolizer = new MarkSymbolizer(rule, null, utils);
 		previewUrl = this.previewPointUrl;
 		
 	} else if (this.featureType == 'LineSymbolizer') {
-		symbolizer = new LineSymbolizer(rule, null, this.previewLineUrl, this.symbologyUtils);
+		var utils = new LibraryUtils(this.previewLineUrl);
+		symbolizer = new LineSymbolizer(rule, null, utils);
 		previewUrl = this.previewLineUrl;
 		
 	} else if (this.featureType == 'PolygonSymbolizer') {
-		symbolizer = new PolygonSymbolizer(rule, null, this.previewPolygonUrl, this.symbologyUtils);
+		var utils = new LibraryUtils(this.previewPolygonUrl);
+		symbolizer = new PolygonSymbolizer(rule, null, this.previewPolygonUrl, utils);
 		previewUrl = this.previewPolygonUrl;
 	}
 	
@@ -289,15 +295,18 @@ LibrarySymbol.prototype.libraryPreview = function(r, json_symbolizers) {
 		
 		var symbolizer = null;
 		if (this.featureType == 'MarkSymbolizer') {
-			symbolizer = new MarkSymbolizer(r, options, this.previewPointUrl, this.symbologyUtils);
+			var utils = new LibraryUtils(this.previewPointUrl);
+			symbolizer = new MarkSymbolizer(r, options, utils);
 			previewUrl = this.previewPointUrl;
 			
 		} else if (this.featureType == 'LineSymbolizer') {
-			symbolizer = new LineSymbolizer(r, options, this.previewLineUrl, this.symbologyUtils);
+			var utils = new LibraryUtils(this.previewLineUrl);
+			symbolizer = new LineSymbolizer(r, options, utils);
 			previewUrl = this.previewLineUrl;
 			
 		} else if (this.featureType == 'PolygonSymbolizer') {
-			symbolizer = new PolygonSymbolizer(r, options, this.previewPolygonUrl, this.symbologyUtils);
+			var utils = new LibraryUtils(this.previewPolygonUrl);
+			symbolizer = new PolygonSymbolizer(r, options, utils);
 			previewUrl = this.previewPolygonUrl;
 			
 		}

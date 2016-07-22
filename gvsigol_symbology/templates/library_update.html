@@ -88,7 +88,7 @@ $(document).ready(function() {
 	var previewLineUrl = "{{preview_line_url}}";
 	var previewPolygonUrl = "{{preview_polygon_url}}";
 	
-	var symbologyUtils = new SymbologyUtils([],[]);
+	var symbologyUtils = new SymbologyUtils(null, null, null, null, [],[]);
 	var librarySymbol = new LibrarySymbol(previewPointUrl, previewLineUrl, previewPolygonUrl, symbologyUtils);
 	
 	"{% for rule in rules %}"
@@ -128,7 +128,7 @@ $(document).ready(function() {
 				symbol += 	'<a class="users-list-name" href="/gvsigonline/symbology/symbol_update/{{rule.id}}/">{{rule.name}}</a>';
 				symbol += '</li>';
 				$(".users-list").append(symbol);
-				var r = new Rule("{{rule.id}}", 'ExternalGraphicSymbolizer',rule_opts);
+				var r = new Rule("{{rule.id}}", "{{rule.name}}", "{{rule.title}}", rule_opts, symbologyUtils);
 				librarySymbol.appendRule(r);
 				
 			} else {
@@ -137,7 +137,7 @@ $(document).ready(function() {
 				symbol += 	'<a class="users-list-name" href="/gvsigonline/symbology/symbol_update/{{rule.id}}/">{{rule.name}}</a>';
 				symbol += '</li>';
 				$(".users-list").append(symbol);
-				var r = new Rule("{{rule.id}}", featureType, rule_opts);
+				var r = new Rule("{{rule.id}}", "{{rule.name}}", "{{rule.title}}", rule_opts, symbologyUtils);
 				librarySymbol.setFeatureType(featureType);
 				librarySymbol.appendRule(r);
 				librarySymbol.libraryPreview(r, symbolizers);

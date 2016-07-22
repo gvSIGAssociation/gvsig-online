@@ -3,11 +3,16 @@ from django.conf.urls import url
 urlpatterns = [    
     url(r'^style_layer_list/$', 'gvsigol_symbology.views.style_layer_list', name='style_layer_list'),
     url(r'^style_layer_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.style_layer_update', name='style_layer_update'),
+    url(r'^style_layer_delete/$', 'gvsigol_symbology.views.style_layer_delete', name='style_layer_delete'),
     url(r'^select_legend_type/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.select_legend_type', name='select_legend_type'),
     url(r'^sld_import/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.sld_import', name='sld_import'),
     
     url(r'^unique_symbol_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.unique_symbol_add', name='unique_symbol_add'),
     url(r'^unique_symbol_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.unique_symbol_update', name='unique_symbol_update'),
+    
+    url(r'^unique_values_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.unique_values_add', name='unique_values_add'),
+    url(r'^unique_values_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.unique_values_update', name='unique_values_update'),
+    url(r'^get_unique_values/$', 'gvsigol_symbology.views.get_unique_values', name='get_unique_values'),
     
     url(r'^library_list/$', 'gvsigol_symbology.views.library_list', name='library_list'),
     url(r'^library_add/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views.library_add', name='library_add'),

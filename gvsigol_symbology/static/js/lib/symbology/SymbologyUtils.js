@@ -20,11 +20,13 @@
  * @author: Javi Rodrigo <jrodrigo@scolab.es>
  */
 
-var SymbologyUtils = function(map, layer, fonts, alphanumericFields) {
+var SymbologyUtils = function(map, layer, featureType, previewUrl, fonts, alphanumericFields) {
 	this.map = map;
 	this.layer = layer;
 	this.fonts = fonts;
 	this.alphanumericFields = alphanumericFields;
+	this.previewUrl = previewUrl;
+	this.featureType = featureType;
 };
 
 SymbologyUtils.prototype.fontStyles = [
@@ -128,14 +130,20 @@ SymbologyUtils.prototype.centerMap = function(layerName, wfsUrl) {
 	});
 };
 
-SymbologyUtils.prototype.updateMap = function(rule, layerName) {
-	var symbolizers = rule.getSymbolizers().slice(0);
-	var labels = rule.getLabels();
-	if (labels.length >= 1) {
-		symbolizers.push(labels[0]);
+SymbologyUtils.prototype.updateMap = function(style, layerName) {
+	if (style.rule) {
+		var symbolizers = style.rule.getSymbolizers().slice(0);
+		if (style.label) {
+			symbolizers.push(style.label);
+		}
+		var sldBody = this.getSLDBody(symbolizers, layerName, layerName);
+		this.reloadLayerPreview(sldBody);
 	}
-	var sldBody = this.getSLDBody(symbolizers, layerName, layerName);
-	this.reloadLayerPreview(sldBody);
+	
+	if (style.rules) {
+		
+	}
+	
 };
 
 SymbologyUtils.prototype.getSLDBody = function(symbolizers, name, title) {
@@ -183,4 +191,12 @@ SymbologyUtils.prototype.generateUUID = function() {
        return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
     };
     return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+};
+
+SymbologyUtils.prototype.getPreviewUrl = function() {
+    return this.previewUrl;
+};
+
+SymbologyUtils.prototype.getFeatureType = function() {
+    return this.featureType;
 };

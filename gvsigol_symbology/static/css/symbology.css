@@ -71,3 +71,8 @@
 .users-list-name {
     overflow: visible;
 }
+
+.rule-preview{
+	display: inline-block;
+    margin-right: 20px;
+}

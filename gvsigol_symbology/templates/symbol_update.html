@@ -113,10 +113,14 @@ $(document).ready(function() {
 	var symbolizers = {{rule.symbolizers|safe}};
 	librarySymbol.setFeatureType("{{rule.type}}");
 	var rule_opts = {
+		id: "{{rule.id}}",
 		name: "{{rule.name}}",
 		title: "{{rule.title}}",
+		minscale: "{{rule.minscale}}",
+		maxscale: "{{rule.maxscale}}",
+		order: "{{rule.order}}"
 	};
-	var r = new Rule("{{rule.id}}","{{rule.type}}",rule_opts);
+	var r = new Rule("{{rule.id}}", "{{rule.name}}", "{{rule.title}}", rule_opts, symbologyUtils);
 	librarySymbol.appendRule(r);
 	librarySymbol.loadSymbolizers(r, symbolizers);
 	
