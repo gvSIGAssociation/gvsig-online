@@ -20,8 +20,8 @@
  * @author: Javier Rodrigo <jrodrigo@scolab.es>
  */
  
-var TextSymbolizer = function(rule, options, symutils) {
-	this.id = 'textsymbolizer' + symutils.generateUUID();
+var TextSymbolizer = function(rule, options, utils) {
+	this.id = 'textsymbolizer' + utils.generateUUID();
 	this.type = 'TextSymbolizer';
 	this.label = '';
 	this.font_family = 'Arial';
@@ -34,7 +34,7 @@ var TextSymbolizer = function(rule, options, symutils) {
 	this.halo_fill_opacity = 0;
 	this.halo_radius = 1;
 	this.order = 0;
-	this.symbologyUtils = symutils;
+	this.utils = utils;
 	this.rule = rule;
 	
 	if (options) {
@@ -79,10 +79,10 @@ TextSymbolizer.prototype.getTabMenu = function() {
 
 TextSymbolizer.prototype.getFontTabUI = function() {
 	
-	var fields = this.symbologyUtils.getAlphanumericFields();
-	var fonts = this.symbologyUtils.getFonts();
-	var fontWeights = this.symbologyUtils.getFontWeights();
-	var fontStyles = this.symbologyUtils.getFontStyles();
+	var fields = this.utils.getAlphanumericFields();
+	var fonts = this.utils.getFonts();
+	var fontWeights = this.utils.getFontWeights();
+	var fontStyles = this.utils.getFontStyles();
 	
 	var ui = '';
 	ui += '<div class="tab-pane active" id="label-font-tab">';
@@ -194,52 +194,52 @@ TextSymbolizer.prototype.registerEvents = function() {
 	
 	$('#label-label').on('change', function() {
 		self.label = this.value;
-		self.updatePreview();
+		//self.updatePreview();
 	});
 	
 	$('#label-font-family').on('change', function() {
 		self.font_family = this.value;
-		self.updatePreview();
+		//self.updatePreview();
 	});
 	
 	$('#label-font-size').on('change', function() {
 		self.font_size = this.value;
-		self.updatePreview();
+		//self.updatePreview();
 	});
 	
 	$('#label-font-weight').on('change', function() {
 		self.font_weight = this.value;
-		self.updatePreview();
+		//self.updatePreview();
 	});
 	
 	$('#label-font-style').on('change', function() {
 		self.font_style = this.value;
-		self.updatePreview();
+		//self.updatePreview();
 	});
 	
 	$('#label-fill').on('change', function() {
 		self.fill = this.value;
-		self.updatePreview();
+		//self.updatePreview();
 	});
 	
 	$('#label-fill-opacity').on('change', function() {
 		self.fill_opacity = this.value;
-		self.updatePreview();
+		//self.updatePreview();
 	});
 	
 	$('#label-halo-fill').on('change', function() {
 		self.halo_fill = this.value;		
-		self.updatePreview();
+		//self.updatePreview();
 	});
 	
 	$('#label-halo-fill-opacity').on('change', function() {
 		self.halo_fill_opacity = this.value;
-		self.updatePreview();
+		//self.updatePreview();
 	});
 	
 	$('#label-halo-radius').on('change', function() {
 		self.halo_radius = this.value;		
-		self.updatePreview();
+		//self.updatePreview();
 	});
 	
 	$( "#halo-fill-opacity-slider" ).slider({
@@ -249,7 +249,7 @@ TextSymbolizer.prototype.registerEvents = function() {
 	    change: function( event, ui ) {
 	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
 	    	self.halo_fill_opacity = opacity;
-	    	self.updatePreview();
+	    	//self.updatePreview();
 	    },
 	    slide: function( event, ui ) {
 	    	$("#halo-fill-opacity-output").text(ui.value + '%');
@@ -257,7 +257,7 @@ TextSymbolizer.prototype.registerEvents = function() {
 	});
 };
 
-TextSymbolizer.prototype.updatePreview = function() {
+/*TextSymbolizer.prototype.updatePreview = function() {
 	var preview = null;
 	$("#label-preview-" + this.id).empty();
 	var previewElement = Snap("#label-preview-" + this.id);
@@ -274,11 +274,7 @@ TextSymbolizer.prototype.updatePreview = function() {
 
 	preview = previewElement.text(10,20, "Text");
 	preview.attr(attributes);
-
-	if (this.rule != null) {
-		//this.rule.updatePreview();
-	}
-};
+};*/
 
 TextSymbolizer.prototype.toXML = function(){
 	
@@ -305,6 +301,13 @@ TextSymbolizer.prototype.toXML = function(){
 	xml += 		'<CssParameter name="fill">' + this.fill + '</CssParameter>';
 	xml += 		'<CssParameter name="fill-opacity">' + this.fill_opacity + '</CssParameter>';
 	xml += 	'</Fill>';
+	xml += 	'<Halo>';
+	xml += 		'<Radius>' + this.halo_radius + '</Radius>';
+	xml += 		'<Fill>';
+	xml += 			'<CssParameter name="fill">' + this.halo_fill + '</CssParameter>';
+	xml += 			'<CssParameter name="fill-opacity">' + this.halo_fill_opacity + '</CssParameter>';
+	xml += 		'</Fill>';
+	xml += 	'</Halo>';
 	xml += '</TextSymbolizer>';
 	
 	return xml;
