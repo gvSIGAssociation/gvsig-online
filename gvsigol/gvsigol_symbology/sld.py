@@ -4196,7 +4196,8 @@ class Halo(GeneratedsSuper):
         else:
             eol_ = ''
         if self.Radius is not None:
-            self.Radius.export(outfile, level, namespace_='sld:', name_='Radius', pretty_print=pretty_print)
+            #self.Radius.export(outfile, level, namespace_='sld:', name_='Radius', pretty_print=pretty_print)
+            outfile.write('<%sRadius>%s</%sRadius>%s' % (namespace_, self.gds_encode(self.gds_format_string(quote_xml(self.Radius), input_name='Radius')), namespace_, eol_))
         if self.Fill is not None:
             self.Fill.export(outfile, level, namespace_='sld:', name_='Fill', pretty_print=pretty_print)
     def build(self, node):

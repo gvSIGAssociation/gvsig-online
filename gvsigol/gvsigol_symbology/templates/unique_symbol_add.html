@@ -8,9 +8,10 @@
 		<div class="box box-primary">
 		
 			<div class="box-header with-border step-2">
-				<h3 class="box-title">{% trans "Update style" %}</h3>
+				<h3 class="box-title">{% trans "Add new style" %}</h3>
 				<div class="box-tools pull-right">
 					<button id="refresh-preview" class="btn btn-sm btn-warning refresh-preview"><i class="fa fa-refresh margin-r-5"></i> {% trans "Update preview" %}</button>
+					<button id="show-label" class="btn btn-sm btn-primary refresh-preview"><i class="fa fa-tags margin-r-5"></i> {% trans "Labeling" %}</button>
 					<button id="save-legend" class="btn btn-sm btn-success save-legend"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
 				</div>
 			</div>
@@ -58,36 +59,9 @@
 					</div>						
 				</div>
 				
-				<div class="row">
-					<div class="col-md-12">
-						<div class="box box-primary">
-							<div class="box-header with-border">
-								<h3 class="box-title">{% trans "Symbol elements" %}</h3>
-							</div>
-							<div class="box-body">
-								<div class="table-responsive">
-									<table id="table-symbolizers" class="table no-margin">
-										<thead>
-											<tr>
-												<th></th>
-												<th>{% trans "Preview" %}</th>
-												<th></th>
-											</tr>
-										</thead>
-										<tbody id="table-symbolizers-body">
-										</tbody>
-									</table>
-								</div>
-							</div>
-
-							<div class="box-footer clearfix">
-								<a id="append-label-button" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-tags margin-r-5"></i>{% trans "Append label" %}</a>
-								<a id="append-symbol-button" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-star-o margin-r-5"></i>{% trans "Append" %}</a>
-								<a id="import-symbol-button" data-toggle="modal" data-target="#modal-import-symbol" href="" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-download margin-r-5"></i>{% trans "Import" %}</a>
-							</div>
-						</div>
-					</div>
+				<div id="rules" class="row">
 				</div>
+
 			</div>
 		</div>
 	</div>
@@ -170,13 +144,10 @@ $(document).ready(function() {
 	var layerName = "{{layer_name}}";
 	var styleId = "{{style.id}}";
 	var featureType = "{{featureType}}";
-	var fields = {{fields|safe}};
-	var alphanumericFields = {{alphanumeric_fields|safe}};
+	var jsonAlphanumericFields = {{json_alphanumeric_fields|safe}};
 	var fonts = {{ fonts|safe }};
 	var rule_opts = "";
-	var previewPointUrl = "{{preview_point_url}}";
-	var previewLineUrl = "{{preview_line_url}}";
-	var previewPolygonUrl = "{{preview_polygon_url}}";
+	var previewUrl = "{{preview_url}}";
 	var supported_crs = {{supported_crs|safe}};
 	
 	for (var crs in supported_crs) {
@@ -208,14 +179,14 @@ $(document).ready(function() {
 	});
 	map.addLayer(wmsLayer);
 	
-	var symbologyUtils = new SymbologyUtils(map, wmsLayer, fonts, alphanumericFields);
-	var uniqueSymbol = new UniqueSymbol(featureType, layerName, symbologyUtils, null, previewPointUrl, previewLineUrl, previewPolygonUrl);
+	var utils = new SymbologyUtils(map, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
+	var uniqueSymbol = new UniqueSymbol(layerName, utils, null);
 	
-	symbologyUtils.centerMap(layerName, wfsUrl);
+	utils.centerMap(layerName, wfsUrl);
 	
-	if (uniqueSymbol.getRule().getNextLabelId() >= 1) {
-		$('#append-label-button').css('display', 'none');
-	}
+	$("#show-label").on('click', function(e){
+		uniqueSymbol.showLabel();
+	});
 	
 	$("#style-title").on('change', function(e){
 		var rule = uniqueSymbol.getRule();
@@ -230,14 +201,6 @@ $(document).ready(function() {
 	$("#symbol-maxscale").on('change', function(e){
 		var rule = uniqueSymbol.getRule();
 		rule.maxscale = this.value;
-	});
-	
-	$("#append-symbol-button").on('click', function(e){
-		uniqueSymbol.appendSymbolizer();
-	});
-	
-	$("#append-label-button").on('click', function(e){
-		uniqueSymbol.appendLabel();
 	});
 
 	$("#save-legend").on('click', function(e){
@@ -255,61 +218,7 @@ $(document).ready(function() {
 		uniqueSymbol.refreshMap();
 	});
 	
-	var rules = null;
-	$("#select-library").on('change', function(e) {
-		$(".users-list").empty();
-		$.ajax({
-			type: "POST",
-			async: false,
-			url: "/gvsigonline/symbology/get_symbols_from_library/",
-			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-			},
-			data: {
-				library_id: this.value
-			},
-			success: function(response){
-				rules = response.rules;
-				
-				for (var i=0; i<response.rules.length; i++) {
-					var symbolizers = response.rules[i].symbolizers;
-					var symbol = '';				
-					if (response.rules[i].type == 'ExternalGraphicSymbolizer') {
-						var graphic = JSON.parse(symbolizers[0].json);
-						symbol += '<li>';
-						symbol += 	'<img style="height: ' + graphic.size + 'px; width: auto;" src="' + graphic.online_resource + '" class="preview-eg"></img>';
-						symbol += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
-						symbol += '</li>';
-						$(".users-list").append(symbol);
-						
-					} else {
-						symbol += '<li>';
-						symbol += 	'<div id="library-symbol-preview-div-' + response.rules[i].id + '"></div>';
-						symbol += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
-						symbol += '</li>';
-						$(".users-list").append(symbol);
-					}
-					$(".users-list-name").on('click', function(e){
-						e.preventDefault();
-						for (var j=0; j<rules.length; j++) {
-							if (rules[j].id == this.dataset.rid) {
-								if (rules[j].type == featureType || (rules[j].type == 'ExternalGraphicSymbolizer' && featureType == 'PointSymbolizer')) {
-									uniqueSymbol.loadSymbols(rules[j].symbolizers);
-								} else {
-									messageBox.show('warning', gettext('Selected symbol is not compatible with the layer'));
-								}						
-							}
-						}	
-						$('#modal-import-symbol').modal('hide');
-					});
-					if (response.rules[i].type != 'ExternalGraphicSymbolizer'){
-						uniqueSymbol.libraryPreview(response.rules[i].id, symbolizers);
-					}
-				}
-			},
-		    error: function(){}
-		});
-	});
+	
 
 });
 </script>

@@ -40,18 +40,11 @@ def create_style(session, json_data, layer_id):
     datastore = layer.datastore
     workspace = datastore.workspace
     
-    if json_data.get('is_default'):
-        layer_styles = StyleLayer.objects.filter(layer=layer)
-        for ls in layer_styles:
-            s = Style.objects.get(id=ls.style.id)
-            s.is_default = False
-            s.save()
-    
     style = Style(
         name = json_data.get('name'),
         title = json_data.get('title'),
         is_default = json_data.get('is_default'),
-        type = 'US'
+        type = 'UV'
     )
     style.save()
     style_layer = StyleLayer(
@@ -59,6 +52,12 @@ def create_style(session, json_data, layer_id):
         layer = layer
     )
     style_layer.save()
+    
+    if style.is_default:
+        layer_styles = StyleLayer.objects.filter(layer=layer)
+        for ls in layer_styles:
+            s = Style.objects.get(id=ls.style.id)
+            s.is_default = False
     
     json_rule = json_data.get('rule')
     rule = Rule(
@@ -303,9 +302,10 @@ def get_conf(session, layer_id):
         preview_url = settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line'     
     elif feature_type == 'PolygonSymbolizer': 
         preview_url = settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
-                      
+                  
     conf = {
         'featureType': feature_type,
+        'fields': alphanumeric_fields,
         'json_alphanumeric_fields': json.dumps(alphanumeric_fields),
         'fonts': sorted_fonts,
         'layer_id': layer_id,

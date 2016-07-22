@@ -161,6 +161,7 @@ def get_symbolizer(s):
         symbolizer.set_Label(get_label(s.textsymbolizer))
         symbolizer.set_Font(get_font(s.textsymbolizer))
         symbolizer.set_Fill(get_fill(s.textsymbolizer))
+        symbolizer.set_Halo(get_halo(s.textsymbolizer))
         
     elif hasattr(s, 'rastersymbolizer'):
         symbolizer = sld.RasterSymbolizer()
@@ -237,7 +238,22 @@ def get_font(s):
 
 def get_halo(s):
     halo = sld.Halo()
-    #TODO    
+    
+    halo.set_Radius(str(s.halo_radius))
+    
+    halo_fill = sld.Fill()
+    
+    halo_fill_color = sld.CssParameter() 
+    halo_fill_color.set_name('fill')
+    halo_fill_color.set_valueOf_(s.halo_fill)
+    halo_fill.add_CssParameter(halo_fill_color)
+    
+    halo_fill_opacity = sld.CssParameter()
+    halo_fill_opacity.set_name('fill-opacity')
+    halo_fill_opacity.set_valueOf_(str(s.halo_fill_opacity))
+    halo_fill.add_CssParameter(halo_fill_opacity)
+    
+    halo.set_Fill(halo_fill)
     return halo
 
 def quote_xml(inStr):
