@@ -17,12 +17,7 @@
 			<div class="box-body">
 				{% csrf_token %}					
 				<div class="row">
-					<div class="col-md-3">
-						<div class="library-symbol-preview-div">
-							<svg id="library-symbol-preview-svg" class="library-symbol-preview-svg"></svg>
-						</div>
-					</div>
-					<div class="col-md-9">
+					<div class="col-md-12">
 						<div id="form-error" style="color:#ff0000;"></div>
 						<div class="form-group">
 							<label>{% trans "Name" %}</label>
@@ -39,34 +34,9 @@
 					
 				</div>
 				
-				<div class="row">
-					<div class="col-md-12">
-						<div class="box box-primary">
-							<div class="box-header with-border">
-								<h3 class="box-title">{% trans "Symbol elements" %}</h3>
-							</div>
-							<div class="box-body">
-								<div class="table-responsive">
-									<table id="table-symbolizers" class="table no-margin">
-										<thead>
-											<tr>
-												<th></th>
-												<th>{% trans "Preview" %}</th>
-												<th></th>
-											</tr>
-										</thead>
-										<tbody id="table-symbolizers-body">
-										</tbody>
-									</table>
-								</div>
-							</div>
-
-							<div class="box-footer clearfix">
-								<a id="append-symbol-button" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-plus margin-r-5"></i>{% trans "Append" %}</a>
-							</div>
-						</div>
-					</div>
-				</div>							
+				<div id="rules" class="row">
+				</div>
+											
            	</div>
 
 		</div>
@@ -107,13 +77,26 @@ $(document).ready(function() {
 	var previewLineUrl = "{{preview_line_url}}";
 	var previewPolygonUrl = "{{preview_polygon_url}}";
 	
-	var symbologyUtils = new SymbologyUtils([],[]);
+	var previewUrl = null;
+	var featureType = null;
+	if ("{{symbol_type}}" == "MarkSymbolizer") {
+		featureType = 'PointSymbolizer';
+		previewUrl = previewPointUrl;
+		
+	} else if ("{{symbol_type}}" == "LineSymbolizer") {
+		featureType = 'LineSymbolizer';
+		previewUrl = previewLineUrl;
+		
+	} else if ("{{symbol_type}}" == "PolygonSymbolizer") {
+		featureType = 'PolygonSymbolizer';
+		previewUrl = previewPolygonUrl;
+		
+	}
+	
+	var symbologyUtils = new SymbologyUtils(null, null, featureType, previewUrl, [],[]);
 	var librarySymbol = new LibrarySymbol(previewPointUrl, previewLineUrl, previewPolygonUrl, symbologyUtils);
 	
-	$("#append-symbol-button").on('click', function(e){
-		var r = new Rule(1, "rule_1", "Rule 1", null, symbologyUtils);
-		librarySymbol.appendSymbolizer(r, "{{symbol_type}}");
-	});
+	librarySymbol.addDefault();
 	
 	$("#save-symbol").on('click', function(e){
 		$("#form-error").empty();

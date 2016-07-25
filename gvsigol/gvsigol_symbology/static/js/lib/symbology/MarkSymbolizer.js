@@ -166,23 +166,19 @@ MarkSymbolizer.prototype.getRotationTabUI = function() {
 	return ui;
 };
 
-MarkSymbolizer.prototype.registerEvents = function(rule) {
+MarkSymbolizer.prototype.registerEvents = function() {
 	var self = this;
 	
 	$("#graphic-size").on('change', function(e) {
 		self.size = this.value;
 		self.updatePreview();	
-		if (rule) {
-    		rule.updatePreview(self.utils.getPreviewUrl());
-    	}
+		self.rule.preview();
 	});
 
 	$("#well-known-name").on('change', function(e) {
 		self.well_known_name = this.value;
 		self.updatePreview();	
-		if (rule) {
-    		rule.updatePreview(self.utils.getPreviewUrl());
-    	}
+		self.rule.preview();
 	});
 	$( "#fill-opacity-slider" ).slider({
 	    min: 0,
@@ -192,9 +188,7 @@ MarkSymbolizer.prototype.registerEvents = function(rule) {
 	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
 	    	self.fill_opacity = opacity;
 	    	self.updatePreview();
-	    	if (rule) {
-	    		rule.updatePreview(self.utils.getPreviewUrl());
-	    	}
+	    	self.rule.preview();
 	    },
 	    slide: function( event, ui ) {
 	    	$("#fill-opacity-output").text(ui.value + '%');
@@ -203,16 +197,12 @@ MarkSymbolizer.prototype.registerEvents = function(rule) {
 	$("#fill-color-chooser").on('change', function(e) {
 		self.fill = this.value;
 		self.updatePreview();	
-		if (rule) {
-    		rule.updatePreview(self.utils.getPreviewUrl());
-    	}
+		self.rule.preview();
 	});	
 	$("#stroke-color-chooser").on('change', function(e) {
 		self.stroke = this.value;
 		self.updatePreview();	
-		if (rule) {
-    		rule.updatePreview(self.utils.getPreviewUrl());
-    	}
+		self.rule.preview();
 	});
 	$( "#stroke-opacity-slider" ).slider({
 	    min: 0,
@@ -222,9 +212,7 @@ MarkSymbolizer.prototype.registerEvents = function(rule) {
 	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
 	    	self.stroke_opacity = opacity;
 	    	self.updatePreview();
-	    	if (rule) {
-	    		rule.updatePreview(self.utils.getPreviewUrl());
-	    	}
+	    	self.rule.preview();
 	    },
 	    slide: function( event, ui ) {
 	    	$("#stroke-opacity-output").text(ui.value + '%');
@@ -233,9 +221,7 @@ MarkSymbolizer.prototype.registerEvents = function(rule) {
 	$("#stroke-width").on('change', function(e) {
 		self.stroke_width = this.value;
 		self.updatePreview();	
-		if (rule) {
-    		rule.updatePreview(self.utils.getPreviewUrl());
-    	}
+		self.rule.preview();
 	});
 	$( "#rotation-slider" ).slider({
 	    min: 0,

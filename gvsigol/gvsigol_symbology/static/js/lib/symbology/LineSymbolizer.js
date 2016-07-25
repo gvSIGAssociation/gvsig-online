@@ -89,15 +89,13 @@ LineSymbolizer.prototype.getStrokeTabUI = function() {
 	return ui;
 };
 
-LineSymbolizer.prototype.registerEvents = function(rule) {
+LineSymbolizer.prototype.registerEvents = function() {
 	var self = this;
 	
 	$("#stroke-color-chooser").on('change', function(e) {
 		self.stroke = this.value;
 		self.updatePreview();	
-		if (rule) {
-    		rule.updatePreview(self.utils.getPreviewUrl());
-    	}
+		self.rule.preview();
 	});
 	$( "#stroke-opacity-slider" ).slider({
 	    min: 0,
@@ -107,9 +105,7 @@ LineSymbolizer.prototype.registerEvents = function(rule) {
 	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
 	    	self.stroke_opacity = opacity;
 	    	self.updatePreview();
-	    	if (rule) {
-	    		rule.updatePreview(self.utils.getPreviewUrl());
-	    	}
+	    	self.rule.preview();
 	    },
 	    slide: function( event, ui ) {
 	    	$("#stroke-opacity-output").text(ui.value + '%');
@@ -118,9 +114,7 @@ LineSymbolizer.prototype.registerEvents = function(rule) {
 	$("#stroke-width").on('change', function(e) {
 		self.stroke_width = this.value;
 		self.updatePreview();	
-		if (rule) {
-    		rule.updatePreview(self.utils.getPreviewUrl());
-    	}
+		self.rule.preview();
 	});
 };
 
