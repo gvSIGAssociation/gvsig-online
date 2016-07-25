@@ -130,19 +130,56 @@ SymbologyUtils.prototype.centerMap = function(layerName, wfsUrl) {
 	});
 };
 
-SymbologyUtils.prototype.updateMap = function(style, layerName) {
+SymbologyUtils.prototype.updateMap = function(style, name) {
+	
+	var sld = '';
+	sld += '<StyledLayerDescriptor version=\"1.0.0\" xmlns=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" ';
+	sld +=  'xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ';
+	sld +=  'xsi:schemaLocation=\"http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd\">';
+	sld += 	'<NamedLayer>';  
+	sld +=  	'<Name>' + name + '</Name>';  
+	sld +=      '<UserStyle>';
+	sld +=          '<Name>' + name + '</Name>';
+	sld +=          '<Title>' + name + '</Title>';
+	sld +=          '<FeatureTypeStyle>';
+	
 	if (style.rule) {
 		var symbolizers = style.rule.getSymbolizers().slice(0);
 		if (style.label) {
 			symbolizers.push(style.label);
 		}
-		var sldBody = this.getSLDBody(symbolizers, layerName, layerName);
-		this.reloadLayerPreview(sldBody);
+		sld +=          	'<Rule>';
+		sld +=          		'<Name>' + name + '</Name>';
+		sld +=          		'<Title>' + name + '</Title>';
+		for (var i=0; i < symbolizers.length; i++) {
+			sld += symbolizers[i].toXML()
+		}
+		sld +=          	'</Rule>';
 	}
 	
 	if (style.rules) {
+		for (var i=0; i<style.rules.length; i++) {
+			var symbolizers = style.rules[i].getSymbolizers().slice(0);
+			if (style.label) {
+				symbolizers.push(style.label);
+			}
+			sld +=          	'<Rule>';
+			sld +=          		'<Name>' + name + '</Name>';
+			sld +=          		'<Title>' + name + '</Title>';
+			for (var j=0; j < symbolizers.length; j++) {
+				sld += symbolizers[j].toXML()
+			}
+			sld +=          	'</Rule>';
+		}
 		
 	}
+	
+	sld +=          '</FeatureTypeStyle>';
+	sld +=      '</UserStyle>';
+	sld += 	'</NamedLayer>';
+	sld += '</StyledLayerDescriptor>';
+	
+	this.reloadLayerPreview(sld);
 	
 };
 
