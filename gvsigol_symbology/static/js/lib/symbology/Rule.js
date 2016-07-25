@@ -62,7 +62,7 @@ Rule.prototype.getTableUI = function(allowImport) {
 	ui += 					'<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
 	ui += 						'<i class="fa fa-plus"></i>';
 	ui += 					'</button>';
-	ui += 					'<button style="color:#f56954;" class="btn btn-box-tool btn-box-tool-custom">';
+	ui += 					'<button data-ruleid="' + this.id + '" style="color:#f56954;" class="btn btn-box-tool btn-box-tool-custom delete-rule">';
 	ui += 						'<i class="fa fa-times"></i>';
 	ui += 					'</button>';
 	ui += 				'</div>';
@@ -421,10 +421,14 @@ Rule.prototype.getObject = function() {
 		name: this.name,
 		title: this.title,
 		abstract: '',
-		filter: '',
+		filter: this.filter,
 		minscale: this.minscale,
 		maxscale: this.maxscale,
 		order: this.order
 	};
 	return object;
+};
+
+Rule.prototype.setFilter = function(filter) {
+	this.filter = filter;
 };
