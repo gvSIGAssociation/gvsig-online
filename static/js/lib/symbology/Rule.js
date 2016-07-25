@@ -48,7 +48,7 @@ var Rule = function(id, name, title, options, utils) {
 	
 };
 
-Rule.prototype.getTableUI = function() {
+Rule.prototype.getTableUI = function(allowImport) {
 	var self = this;
 	
 	var ui = '';
@@ -83,7 +83,9 @@ Rule.prototype.getTableUI = function() {
 	ui += 			'</div>';
 	ui += 			'<div class="box-footer clearfix">';
 	ui += 				'<a id="append-symbol-button-' + this.id + '" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-star-o margin-r-5"></i>' + gettext('Append symbolizer') + '</a>';
-	ui += 				'<a id="import-symbol-button-' + this.id + '" href="" data-toggle="modal" data-target="#modal-import-symbol-' + this.id + '" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-download margin-r-5"></i>' + gettext('Import from library') + '</a>';
+	if (allowImport){
+		ui += 			'<a id="import-symbol-button-' + this.id + '" href="" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-download margin-r-5"></i>' + gettext('Import from library') + '</a>';
+	}
 	ui += 			'</div>';
 	ui += 		'</div>';
 	ui += 	'</div>';
@@ -95,113 +97,27 @@ Rule.prototype.getTableUI = function() {
 Rule.prototype.registerEvents = function() {
 	var self = this;
 	
-	var modal = '';
-	modal += '<div class="modal fade" id="modal-import-symbol-' + this.id + '" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">';
-	modal += '<div class="modal-dialog" role="document">';
-	modal += '<div class="modal-content">';
-	modal += '<div class="modal-header">';
-	modal += '<button type="button" class="close" data-dismiss="modal" aria-label="Close">';
-	modal += '<span aria-hidden="true">&times;</span>';
-	modal += '</button>';
-	modal += '<h4 class="modal-title">' + gettext('Import library') + '</h4>';
-	modal += '</div>';
-	modal += '<div class="modal-body">';
-	modal += '<div class="row">';
-	modal += '<div class="col-md-12 form-group">';
-	modal += '<label>{% trans "Select library" %}</label>';
-	modal += '<select id="select-library-' + this.id + '" class="form-control">';
-	modal += '<option disabled selected value> -- ' + gettext('Select library') + ' -- </option>';
-	//modal += '{% for library in libraries %}';
-	modal += '<option value="21">kk</option>';
-	//modal += '{% endfor %}';
-	modal += '</select>';
-	modal += '</div>';
-	modal += '</div>';
-	modal += '<div class="row">';
-	modal += '<div class="col-md-12">';
-	modal += '<div class="box box-primary">';
-	modal += '<div class="box-body no-padding" style="max-height: 300px; overflow: auto;">';
-	modal += '<ul class="users-list clearfix">';
-	modal += '</ul>';
-	modal += '</div>';
-	modal += '</div>';
-	modal += '</div>';
-	modal += '</div>';
-	modal += '</div>';
-	modal += '<div class="modal-footer">';
-	modal += '<button id="button-import-symbol-close" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Close') + '</button>';
-	modal += '</div>';
-	modal += '</div>';
-	modal += '</div>';
-	modal += '</div>';
-	
-	$('body').append(modal);
-	
 	$("#append-symbol-button-" + this.id).on('click', function(e){
 		self.addSymbolizer();
 	});
 	
-	$("#select-library-" + this.id).on('change', function(e) {
+	$("#import-symbol-button-" + this.id).on('click', function(e){
+		e.preventDefault();
+		$('#modal-import-symbol').modal('show');
+		
 		$(".users-list").empty();
-		$.ajax({
-			type: "POST",
-			async: false,
-			url: "/gvsigonline/symbology/get_symbols_from_library/",
-			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-			},
-			data: {
-				library_id: this.value
-			},
-			success: function(response){
-				var symbols = response.rules;
-				
-				for (var i=0; i<symbols.length; i++) {
-					
-					var symbol = symbols[i];
-					
-					var symbolizers = symbol.symbolizers;
-					
-					var symbolView = '';				
-					if (symbolizers[0].type == 'ExternalGraphicSymbolizer') {
-						var graphic = JSON.parse(symbolizers[0].json);
-						symbolView += '<li>';
-						symbolView += 	'<img style="height: ' + graphic[0].fields.size + 'px; width: auto;" src="' + graphic[0].fields.online_resource + '" class="preview-eg"></img>';
-						symbolView += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
-						symbolView += '</li>';
-						$(".users-list").append(symbolView);
-						
-					} else {
-						symbolView += '<li>';
-						symbolView += 	'<div id="library-symbol-preview-div-' + response.rules[i].id + '"></div>';
-						symbolView += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
-						symbolView += '</li>';
-						$(".users-list").append(symbolView);
-						self.libraryPreview(symbol.id, symbolizers);
-					}
-					$(".users-list-name").on('click', function(e){
-						e.preventDefault();
-						for (var j=0; j<symbols.length; j++) {
-							if (symbols[j].id == this.dataset.rid) {
-								if (symbols[j].symbolizers[0].type == self.utils.getFeatureType() || 
-									(symbols[j].symbolizers[0].type == 'ExternalGraphicSymbolizer' && self.utils.getFeatureType() == 'PointSymbolizer') || 
-										(symbols[j].symbolizers[0].type == 'MarkSymbolizer' && self.utils.getFeatureType() == 'PointSymbolizer')) {
-									
-									self.loadLibrarySymbol(symbols[j].symbolizers);
-									
-								} else {
-									messageBox.show('warning', gettext('Selected symbol is not compatible with the layer'));
-									
-								}						
-							}
-						}	
-						$('#modal-import-symbol').modal('hide');
-					});
-				}
-			},
-		    error: function(){}
+		var libraryId = $("#select-library").val();
+		if (libraryId) {
+			self.getSymbolsFromLibrary(libraryId);
+		}
+		
+		$("#select-library").on('change', function(e) {
+			$(".users-list").empty();
+			self.getSymbolsFromLibrary(this.value);
 		});
 	});
+	
+	
 };
 
 Rule.prototype.preview = function() {
@@ -245,6 +161,70 @@ Rule.prototype.libraryPreview = function(rid,json_symbolizers) {
 	$("#library-symbol-preview-div-" + rid).empty();
 	$("#library-symbol-preview-div-" + rid).append(ui);
 };
+
+
+Rule.prototype.getSymbolsFromLibrary = function(libraryId) {
+	var self = this;
+	$.ajax({
+		type: "POST",
+		async: false,
+		url: "/gvsigonline/symbology/get_symbols_from_library/",
+		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		data: {
+			library_id: libraryId
+		},
+		success: function(response){
+			var symbols = response.rules;
+			
+			for (var i=0; i<symbols.length; i++) {
+				
+				var symbol = symbols[i];
+				
+				var symbolizers = symbol.symbolizers;
+				
+				var symbolView = '';				
+				if (symbolizers[0].type == 'ExternalGraphicSymbolizer') {
+					var graphic = JSON.parse(symbolizers[0].json);
+					symbolView += '<li>';
+					symbolView += 	'<img style="height: ' + graphic[0].fields.size + 'px; width: auto;" src="' + graphic[0].fields.online_resource + '" class="preview-eg"></img>';
+					symbolView += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
+					symbolView += '</li>';
+					$(".users-list").append(symbolView);
+					
+				} else {
+					symbolView += '<li>';
+					symbolView += 	'<div id="library-symbol-preview-div-' + response.rules[i].id + '"></div>';
+					symbolView += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
+					symbolView += '</li>';
+					$(".users-list").append(symbolView);
+					self.libraryPreview(symbol.id, symbolizers);
+				}
+				$(".users-list-name").on('click', function(e){
+					e.preventDefault();
+					for (var j=0; j<symbols.length; j++) {
+						if (symbols[j].id == this.dataset.rid) {
+							if (symbols[j].symbolizers[0].type == self.utils.getFeatureType() || 
+								(symbols[j].symbolizers[0].type == 'ExternalGraphicSymbolizer' && self.utils.getFeatureType() == 'PointSymbolizer') || 
+									(symbols[j].symbolizers[0].type == 'MarkSymbolizer' && self.utils.getFeatureType() == 'PointSymbolizer')) {
+								
+								self.loadLibrarySymbol(symbols[j].symbolizers);
+								
+							} else {
+								messageBox.show('warning', gettext('Selected symbol is not compatible with the layer'));
+								
+							}						
+						}
+					}	
+					$('#modal-import-symbol').modal('hide');
+				});
+			}
+		},
+	    error: function(){}
+	});
+};
+
 
 Rule.prototype.loadLibrarySymbol = function(symbolizers) {
 	
@@ -318,6 +298,7 @@ Rule.prototype.addSymbolizer = function(options) {
 	
 	this.symbolizers.push(symbolizer);
 	symbolizer.updatePreview();
+	this.preview();
 };
 
 Rule.prototype.addExternalGraphicSymbolizer = function(options) {
@@ -422,10 +403,12 @@ Rule.prototype.removeSymbolizer = function(id) {
 			tbody.removeChild(tbody.children[i]);
 		}
 	}
+	this.preview();
 };
 
 Rule.prototype.removeAllSymbolizers = function(id) {
 	this.symbolizers.splice(0, this.symbolizers.length);
+	this.preview();
 };
 
 Rule.prototype.removeLabel = function() {

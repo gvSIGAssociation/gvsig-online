@@ -18,57 +18,27 @@
 			<div class="box-body">
 				{% csrf_token %}					
 				<div class="row">
-				<div class="col-md-3">
-					<div class="library-symbol-preview-div">
-					</div>
-				</div>
-				<div class="col-md-9">
-					<div id="form-error" style="color:#ff0000;"></div>
-					<div class="form-group">
-						<label>{% trans "Name" %}</label>
-						<input readonly placeholder="{% trans 'Symbol name' %}" name="symbol-name" id="symbol-name" type="text" value="{{rule.name}}" class="form-control">
-					</div>	
-					<div class="form-group">
-						<label>{% trans "Title" %}</label>
-			    		<input placeholder="{% trans 'Symbol title' %}" name="symbol-title" id="symbol-title" type="text" value="{{rule.title}}" class="form-control">
-					</div>
-					<div class="form-group">
-						<p class="text-muted">* {% trans "Specifies a title for the rule. The title is used in display lists and legends" %}.</p>
-					</div>
-				</div>
-				
-			</div>
-				
-				<div class="row">
 					<div class="col-md-12">
-						<div class="box box-primary">
-							<div class="box-header with-border">
-								<h3 class="box-title">{% trans "Symbol elements" %}</h3>
-							</div>
-							<div class="box-body">
-								<div class="table-responsive">
-									<table id="table-symbolizers" class="table no-margin">
-										<thead>
-											<tr>
-												<th></th>
-												<th>{% trans "Preview" %}</th>
-												<th></th>
-											</tr>
-										</thead>
-										<tbody id="table-symbolizers-body">
-										</tbody>
-									</table>
-								</div>
-							</div>
-
-							<div class="box-footer clearfix">
-								<a id="append-symbol-button" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-star-o margin-r-5"></i>{% trans "Append" %}</a>
-							</div>
+						<div id="form-error" style="color:#ff0000;"></div>
+						<div class="form-group">
+							<label>{% trans "Name" %}</label>
+							<input readonly placeholder="{% trans 'Symbol name' %}" name="symbol-name" id="symbol-name" type="text" value="{{rule.name}}" class="form-control">
+						</div>	
+						<div class="form-group">
+							<label>{% trans "Title" %}</label>
+				    		<input placeholder="{% trans 'Symbol title' %}" name="symbol-title" id="symbol-title" type="text" value="{{rule.title}}" class="form-control">
+						</div>
+						<div class="form-group">
+							<p class="text-muted">* {% trans "Specifies a title for the rule. The title is used in display lists and legends" %}.</p>
 						</div>
 					</div>
-				</div>							
+					
+				</div>
+				
+				<div id="rules" class="row">
+				</div>			
+								
            	</div>
-
 		</div>
 	</div>				
 </div>
@@ -107,12 +77,27 @@ $(document).ready(function() {
 	var previewLineUrl = "{{preview_line_url}}";
 	var previewPolygonUrl = "{{preview_polygon_url}}";
 	
-	var symbologyUtils = new SymbologyUtils([],[]);
+	var previewUrl = null;
+	var featureType = null;
+	if ("{{rule.type}}" == "MarkSymbolizer") {
+		featureType = 'PointSymbolizer';
+		previewUrl = previewPointUrl;
+		
+	} else if ("{{rule.type}}" == "LineSymbolizer") {
+		featureType = 'LineSymbolizer';
+		previewUrl = previewLineUrl;
+		
+	} else if ("{{rule.type}}" == "PolygonSymbolizer") {
+		featureType = 'PolygonSymbolizer';
+		previewUrl = previewPolygonUrl;
+		
+	}
+	
+	var symbologyUtils = new SymbologyUtils(null, null, featureType, previewUrl, [],[]);
 	var librarySymbol = new LibrarySymbol(previewPointUrl, previewLineUrl, previewPolygonUrl, symbologyUtils);
 	
 	var symbolizers = {{rule.symbolizers|safe}};
-	librarySymbol.setFeatureType("{{rule.type}}");
-	var rule_opts = {
+	var options = {
 		id: "{{rule.id}}",
 		name: "{{rule.name}}",
 		title: "{{rule.title}}",
@@ -120,13 +105,7 @@ $(document).ready(function() {
 		maxscale: "{{rule.maxscale}}",
 		order: "{{rule.order}}"
 	};
-	var r = new Rule("{{rule.id}}", "{{rule.name}}", "{{rule.title}}", rule_opts, symbologyUtils);
-	librarySymbol.appendRule(r);
-	librarySymbol.loadSymbolizers(r, symbolizers);
-	
-	$("#append-symbol-button").on('click', function(e){
-		librarySymbol.appendSymbolizer(r, "{{rule.type}}");
-	});
+	librarySymbol.loadRule(options, symbolizers);
 	
 	$("#update-symbol").on('click', function(e){
 		$("#form-error").empty();
