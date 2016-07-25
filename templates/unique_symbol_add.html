@@ -181,6 +181,7 @@ $(document).ready(function() {
 	
 	var utils = new SymbologyUtils(map, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
 	var uniqueSymbol = new UniqueSymbol(layerName, utils, null);
+	uniqueSymbol.addDefault();
 	
 	utils.centerMap(layerName, wfsUrl);
 	

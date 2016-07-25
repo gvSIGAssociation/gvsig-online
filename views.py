@@ -175,7 +175,14 @@ def unique_symbol_update(request, layer_id, style_id):
 @admin_required
 def unique_values_add(request, layer_id):
     if request.method == 'POST':
-        print ''
+        style_data = request.POST['style_data']
+        json_data = json.loads(style_data)
+        
+        if services_unique_values.create_style(request.session, json_data, layer_id):            
+            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            
+        else:
+            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
         
     else:                 
         response = services_unique_values.get_conf(request.session, layer_id) 

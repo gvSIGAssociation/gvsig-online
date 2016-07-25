@@ -24,19 +24,26 @@
 var UniqueSymbol = function(layerName, utils, rule_opts) {
 	this.layerName = layerName;
 	this.utils = utils;
-	this.rule = new Rule(0, $("#style-name").val(), $("#style-name").val(), rule_opts, this.utils);
+	this.rule = null;
 	this.label = null;
 	
+	if (rule_opts != null) {
+		if (rule_opts.symbolizers != "") {
+			this.rule = new Rule(0, $("#style-name").val(), $("#style-name").val(), rule_opts, this.utils);
+			$('#rules').append(this.rule.getTableUI(true));
+			this.rule.registerEvents();
+			this.rule.preview();
+			this.loadRule(rule_opts.symbolizers);
+		}
+	}	
+};
+
+UniqueSymbol.prototype.addDefault = function() {
+	this.rule = new Rule(0, $("#style-name").val(), $("#style-name").val(), null, this.utils);
 	$('#rules').append(this.rule.getTableUI(true));
 	this.rule.registerEvents();
 	this.rule.addSymbolizer();
 	this.rule.preview();
-	
-	if (rule_opts != null) {
-		if (rule_opts.symbolizers != "") {
-			this.loadRule(rule_opts.symbolizers);
-		}
-	}	
 };
 
 UniqueSymbol.prototype.getRule = function() {
