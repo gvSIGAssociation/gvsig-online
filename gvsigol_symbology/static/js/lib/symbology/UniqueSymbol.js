@@ -27,7 +27,7 @@ var UniqueSymbol = function(layerName, utils, rule_opts) {
 	this.rule = new Rule(0, $("#style-name").val(), $("#style-name").val(), rule_opts, this.utils);
 	this.label = null;
 	
-	$('#rules').append(this.rule.getTableUI());
+	$('#rules').append(this.rule.getTableUI(true));
 	this.rule.registerEvents();
 	this.rule.addSymbolizer();
 	this.rule.preview();
