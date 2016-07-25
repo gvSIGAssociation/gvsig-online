@@ -135,7 +135,7 @@ def add_symbol(request, json_rule, library_id, symbol_type):
             )
             symbolizer.save()      
             
-        elif symbol_type == 'MarkSymbolizer':
+        elif symbol_type == 'MarkSymbolizer' or symbol_type == 'PointSymbolizer':
             symbolizer = MarkSymbolizer(
                 rule = rule,
                 order = json_rule.get('order'),

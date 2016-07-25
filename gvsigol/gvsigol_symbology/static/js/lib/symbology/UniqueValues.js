@@ -34,17 +34,45 @@ UniqueValues.prototype.getRules = function() {
 	return this.rules;
 };
 
+UniqueValues.prototype.getRuleById = function(id) {
+	for (var i=0; i < this.rules.length; i++) {
+		if (this.rules[i].id == id) {
+			return this.rules[i];
+		}
+	}
+};
+
 UniqueValues.prototype.addRule = function(rule) {
 	return this.rules.push(rule);
 };
 
-UniqueValues.prototype.load = function(values) {
+UniqueValues.prototype.deleteRule = function(id) {
+	for (var i=0; i < this.rules.length; i++) {
+		if (this.rules[i].id == id) {
+			this.rules.splice(i, 1);
+		}
+	}
+	var htmlRules = document.getElementById("rules");
+	for (var i=0; i<htmlRules.children.length; i++) {
+		if(htmlRules.children[i].dataset.ruleid == id) {
+			htmlRules.removeChild(htmlRules.children[i]);
+		}
+	}
+};
+
+UniqueValues.prototype.load = function(selectedField, values) {
 	$('#rules').empty();
 	this.rules.splice(0, this.rules.length);
 	for (var i=0; i<values.length; i++) {
-		var ruleName = "rule_" + 1;
+		var ruleName = "rule_" + i;
 		var ruleTitle = values[i];
 		var rule = new Rule(i, ruleName, ruleTitle, null, this.symbologyUtils);
+		var filter = {
+			operator: 'PropertyIsEqualTo',
+			property_name: selectedField,
+			literal: values[i]
+		};
+		rule.setFilter(filter);
 		$('#rules').append(rule.getTableUI(true));
 		rule.registerEvents();
 		rule.addSymbolizer();
@@ -54,5 +82,67 @@ UniqueValues.prototype.load = function(values) {
 };
 
 UniqueValues.prototype.refreshMap = function() {
-	this.symbologyUtils.updateMap(this.rule, this.layerName);
+	this.symbologyUtils.updateMap(this, this.layerName);
+};
+
+UniqueValues.prototype.save = function(layerId) {
+	
+	var style = {
+		name: $('#style-name').val(),
+		title: $('#style-title').val(),
+		is_default: $('#style-is-default').is(":checked"),
+		rules: new Array()
+	};
+	
+	for (var i=0; i<this.rules.length; i++) {
+		var symbolizers = new Array();
+		for (var j=0; j < this.rules[i].getSymbolizers().length; j++) {
+			var symbolizer = {
+				type: this.rules[i].getSymbolizers()[j].type,
+				json: this.rules[i].getSymbolizers()[j].toJSON(),
+				order: this.rules[i].getSymbolizers()[j].order
+			};
+			symbolizers.push(symbolizer);
+		}
+		
+		if (this.label != null) {
+			var l = {
+				type: this.label.type,
+				json: this.label.toJSON(),
+				order: this.label.order
+			};
+			symbolizers.push(l);
+		}
+		
+		symbolizers.sort(function(a, b){
+			return parseInt(b.order) - parseInt(a.order);
+		});
+		
+		var rule = {
+			rule: this.rules[i].getObject(),
+			symbolizers: symbolizers
+		};
+		style.rules.push(rule);
+	}
+	
+	$.ajax({
+		type: "POST",
+		async: false,
+		url: "/gvsigonline/symbology/unique_values_add/" + layerId + "/",
+		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		data: {
+			style_data: JSON.stringify(style)
+		},
+		success: function(response){
+			if (response.success) {
+				location.href = "/gvsigonline/symbology/style_layer_list/";
+			} else {
+				alert('Error');
+			}
+			
+		},
+	    error: function(){}
+	});
 };

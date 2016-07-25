@@ -195,12 +195,24 @@ $(document).ready(function() {
 	
 	utils.centerMap(layerName, wfsUrl);
 	
+	$("#save-legend").on('click', function(e){
+		if ($("#style-name").val() != '') {
+			uniqueValues.save(layerId);
+			
+		} else {
+			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
+			
+		}
+		
+	});
+	
 	$("#refresh-preview").on('click', function(e){
 		uniqueValues.refreshMap();
 	});
 	
 	$("#select-unique-values-field").on('change', function(e) {
 		$(".users-list").empty();
+		var selectedField = this.value;
 		$.ajax({
 			type: "POST",
 			async: false,
@@ -210,10 +222,13 @@ $(document).ready(function() {
 			},
 			data: {
 				layer_id: layerId,
-				field: this.value
+				field: selectedField
 			},
 			success: function(response){
-				uniqueValues.load(response.values);		
+				uniqueValues.load(selectedField, response.values);	
+				$(".delete-rule").on('click', function(e){
+					uniqueValues.deleteRule(this.dataset.ruleid);
+				});
 			},
 		    error: function(){}
 		});
