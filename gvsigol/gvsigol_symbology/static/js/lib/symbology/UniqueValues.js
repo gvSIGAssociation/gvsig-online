@@ -45,7 +45,7 @@ UniqueValues.prototype.load = function(values) {
 		var ruleName = "rule_" + 1;
 		var ruleTitle = values[i];
 		var rule = new Rule(i, ruleName, ruleTitle, null, this.symbologyUtils);
-		$('#rules').append(rule.getTableUI());
+		$('#rules').append(rule.getTableUI(true));
 		rule.registerEvents();
 		rule.addSymbolizer();
 		rule.preview();
