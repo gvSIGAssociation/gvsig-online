@@ -38,17 +38,7 @@ var TextSymbolizer = function(rule, options, utils) {
 	this.rule = rule;
 	
 	if (options) {
-		this.label = options.label;
-		this.font_family = options.font_family;
-		this.font_size = options.font_size;
-		this.font_weight = options.font_weight;
-		this.font_style = options.font_style;
-		this.fill = options.fill;
-		this.fill_opacity = options.fill_opacity;
-		this.halo_fill = options.halo_fill;
-		this.halo_fill_opacity = options.halo_fill_opacity;
-		this.halo_radius = options.halo_radius;
-		this.order = options.order;
+		$.extend(this, options);
 	}
 };
 

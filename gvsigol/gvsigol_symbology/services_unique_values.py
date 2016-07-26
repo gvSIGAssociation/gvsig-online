@@ -67,7 +67,7 @@ def create_style(session, json_data, layer_id):
             name = json_rule.get('name'),
             title = json_rule.get('title'),
             abstract = '',
-            filter = '',
+            filter = json.dumps(json_rule.get('filter')),
             minscale = json_rule.get('minscale'),
             maxscale = json_rule.get('maxscale'),
             order = json_rule.get('order')

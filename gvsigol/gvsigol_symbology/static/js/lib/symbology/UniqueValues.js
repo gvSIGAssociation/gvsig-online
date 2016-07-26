@@ -21,12 +21,12 @@
  */
  
  
-var UniqueValues = function(featureType, layerName, symbologyUtils, previewUrl) {
+var UniqueValues = function(featureType, layerName, utils, previewUrl) {
 	this.selected = null;
 	this.featureType = featureType;
 	this.layerName = layerName;
 	this.previewUrl = previewUrl;
-	this.symbologyUtils = symbologyUtils;
+	this.utils = utils;
 	this.rules = new Array();
 };
 
@@ -66,7 +66,7 @@ UniqueValues.prototype.load = function(selectedField, values) {
 	for (var i=0; i<values.length; i++) {
 		var ruleName = "rule_" + i;
 		var ruleTitle = values[i];
-		var rule = new Rule(i, ruleName, ruleTitle, null, this.symbologyUtils);
+		var rule = new Rule(i, ruleName, ruleTitle, null, this.utils);
 		var filter = {
 			operator: 'PropertyIsEqualTo',
 			property_name: selectedField,
@@ -75,14 +75,50 @@ UniqueValues.prototype.load = function(selectedField, values) {
 		rule.setFilter(filter);
 		$('#rules').append(rule.getTableUI(true));
 		rule.registerEvents();
-		rule.addSymbolizer();
+		var colors = this.utils.createColorRange('random', values.length);
+		rule.addSymbolizer({fill: colors[i]});
+		rule.preview();
+		this.addRule(rule);
+	}
+};
+
+UniqueValues.prototype.loadRules = function(rules) {
+	$('#rules').empty();
+	this.rules.splice(0, this.rules.length);
+	for (var i=0; i<rules.length; i++) {
+		var rule = new Rule(rules[i].id, rules[i].name, rules[i].title, null, this.utils);
+		
+		rule.removeAllSymbolizers();
+		rule.removeLabel();
+		$('#rules').append(rule.getTableUI(true));
+		
+		for (var j=0; j<rules[i].symbolizers.length; j++) {
+			
+			var symbolizer = JSON.parse(rules[i].symbolizers[j].json);
+			var order = rules[i].symbolizers[j].order;
+			var options = symbolizer[0].fields;
+			options['order'] = order;
+			
+			if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer') {
+				this.loadLabel(options);
+				
+			} else if (symbolizer.type == 'gvsigol_symbology.externalgraphic') {
+				rule.addExternalGraphicSymbolizer(options);
+				
+			} else {
+				rule.addSymbolizer(options);
+			}	
+			
+		}
+		
+		rule.registerEvents();
 		rule.preview();
 		this.addRule(rule);
 	}
 };
 
 UniqueValues.prototype.refreshMap = function() {
-	this.symbologyUtils.updateMap(this, this.layerName);
+	this.utils.updateMap(this, this.layerName);
 };
 
 UniqueValues.prototype.save = function(layerId) {
