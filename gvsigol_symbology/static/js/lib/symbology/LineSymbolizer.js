@@ -32,10 +32,7 @@ var LineSymbolizer = function(rule, options, utils) {
 	this.utils = utils;
 	
 	if (options) {
-		this.stroke = options.stroke;
-		this.stroke_width = options.stroke_width;
-		this.stroke_opacity = options.stroke_opacity;
-		this.order = options.order;
+		$.extend(this, options);
 	}
 };
 

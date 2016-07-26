@@ -34,13 +34,9 @@ var PolygonSymbolizer = function(rule, options, utils) {
 	this.utils = utils;
 	
 	if (options) {
-		this.fill = options.fill;
-		this.fill_opacity = options.fill_opacity;
-		this.stroke = options.stroke;
-		this.stroke_width = options.stroke_width;
-		this.stroke_opacity = options.stroke_opacity;
-		this.order = options.order;
+		$.extend(this, options);
 	}
+	console.log(this);
 };
 
 PolygonSymbolizer.prototype.getTableUI = function() {

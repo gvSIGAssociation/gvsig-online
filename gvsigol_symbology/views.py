@@ -58,8 +58,12 @@ def style_layer_list(request):
 @admin_required
 def style_layer_update(request, layer_id, style_id):
     style = Style.objects.get(id=int(style_id))
+    
     if (style.type == 'US'):
         return redirect('unique_symbol_update', layer_id=layer_id, style_id=style_id)
+    
+    elif (style.type == 'UV'):
+        return redirect('unique_values_update', layer_id=layer_id, style_id=style_id)
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @admin_required
@@ -195,7 +199,35 @@ def unique_values_update(request, layer_id, style_id):
         print ''
         
     else:                
-        response = {}      
+        style = Style.objects.get(id=int(style_id))
+        
+        style_rules = Rule.objects.filter(style=style)
+        rules = []
+        for r in style_rules:
+            symbolizers = []
+            for s in Symbolizer.objects.filter(rule=r).order_by('order'):
+                symbolizers.append(utils.symbolizer_to_json(s))
+                
+            rule = {
+                'id': r.id,
+                'name': r.name,
+                'title': r.title,
+                'abstract': '',
+                'filter': '',
+                'minscale': r.minscale,
+                'maxscale': r.maxscale,
+                'order': r.order,
+                'symbolizers': symbolizers
+            }
+            rules.append(rule)
+                         
+        response = services_unique_values.get_conf(request.session, layer_id)
+        
+        response['style'] = style
+        response['minscale'] = int(r.minscale)
+        response['maxscale'] = int(r.maxscale)
+        response['rules'] = json.dumps(rules)        
+        
         return render_to_response('unique_values_update.html', response, context_instance=RequestContext(request))
     
     
