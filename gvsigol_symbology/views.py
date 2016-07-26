@@ -196,7 +196,14 @@ def unique_values_add(request, layer_id):
 @admin_required
 def unique_values_update(request, layer_id, style_id):  
     if request.method == 'POST':
-        print ''
+        style_data = request.POST['style_data']
+        json_data = json.loads(style_data)
+        
+        if services_unique_values.update_style(request.session, json_data, layer_id, style_id):            
+            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            
+        else:
+            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
         
     else:                
         style = Style.objects.get(id=int(style_id))
@@ -213,7 +220,7 @@ def unique_values_update(request, layer_id, style_id):
                 'name': r.name,
                 'title': r.title,
                 'abstract': '',
-                'filter': '',
+                'filter': r.filter,
                 'minscale': r.minscale,
                 'maxscale': r.maxscale,
                 'order': r.order,

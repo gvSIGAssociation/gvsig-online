@@ -118,6 +118,8 @@ UniqueSymbol.prototype.updateLabelForm = function() {
 
 UniqueSymbol.prototype.save = function(layerId) {
 	
+	$("body").overlay();
+	
 	var symbolizers = new Array();
 	for (var i=0; i < this.rule.getSymbolizers().length; i++) {
 		var symbolizer = {
@@ -172,6 +174,8 @@ UniqueSymbol.prototype.save = function(layerId) {
 };
 
 UniqueSymbol.prototype.update = function(layerId, styleId) {
+	
+	$("body").overlay();
 	
 	var symbolizers = new Array();
 	for (var i=0; i < this.rule.getSymbolizers().length; i++) {
