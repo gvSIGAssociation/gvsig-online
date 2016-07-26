@@ -237,3 +237,73 @@ SymbologyUtils.prototype.getPreviewUrl = function() {
 SymbologyUtils.prototype.getFeatureType = function() {
     return this.featureType;
 };
+
+SymbologyUtils.prototype.createColorRange = function(type, num_colors, init_color, end_color){
+	var colors = [];
+	for(var i=0; i<num_colors; i++){
+		if(type == "default"){
+			colors.push("#000000");
+		}
+		if(type == "random"){
+			colors.push(this.getRandomColor());
+		}
+		if(type == "intervals"){
+			if(!init_color || !end_color){
+				init_color = "#FF0000";
+				end_color = "#0000FF"
+			}
+			colors.push(this.getIntervalColor(init_color, end_color, num_colors, i));
+		}
+	}
+	return colors;
+};
+
+SymbologyUtils.prototype.rgb2hex = function(rgb){
+	 var rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
+	 return (rgb && rgb.length === 4) ? "#" +
+	  ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
+	  ("0" + parseInt(rgb[2],10).toString(16)).slice(-2) +
+	  ("0" + parseInt(rgb[3],10).toString(16)).slice(-2) : '';
+};
+
+SymbologyUtils.prototype.convertHex = function(hex){
+    hex = hex.replace('#','');
+    r = parseInt(hex.substring(0,2), 16);
+    g = parseInt(hex.substring(2,4), 16);
+    b = parseInt(hex.substring(4,6), 16);
+
+    return {'red': r, 'green': g, 'blue': b};
+};
+
+SymbologyUtils.prototype.getIntervalColor = function(init_color, end_color, num_colors, it) {
+    var rgbinit = this.convertHex(init_color);
+    var rgbend = this.convertHex(end_color);
+    
+    if(it == 0){
+    	return init_color;
+    }
+    
+    if(it == num_colors-1){
+    	return end_color;
+    }
+    
+    var gapred = (rgbend.red - rgbinit.red)/num_colors;
+    var red = Math.round(rgbinit.red + (gapred*it));
+    
+    var gapgreen = (rgbend.green - rgbinit.green)/num_colors;
+    var green = Math.round(rgbinit.green + (gapgreen*it));
+    
+    var gapblue = (rgbend.blue - rgbinit.blue)/num_colors;
+    var blue = Math.round(rgbinit.blue + (gapblue*it));
+    
+    return this.rgb2hex("rgb("+red+","+green+","+blue+")");
+};
+
+SymbologyUtils.prototype.getRandomColor = function() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+};
