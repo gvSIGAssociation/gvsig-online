@@ -87,7 +87,9 @@ UniqueValues.prototype.loadRules = function(rules) {
 	this.rules.splice(0, this.rules.length);
 	for (var i=0; i<rules.length; i++) {
 		var rule = new Rule(rules[i].id, rules[i].name, rules[i].title, null, this.utils);
-		
+		var filter = JSON.parse(rules[i].filter);
+		rule.setFilter(filter);
+			
 		rule.removeAllSymbolizers();
 		rule.removeLabel();
 		$('#rules').append(rule.getTableUI(true));
@@ -122,6 +124,8 @@ UniqueValues.prototype.refreshMap = function() {
 };
 
 UniqueValues.prototype.save = function(layerId) {
+	
+	$("body").overlay();
 	
 	var style = {
 		name: $('#style-name').val(),
@@ -165,6 +169,70 @@ UniqueValues.prototype.save = function(layerId) {
 		type: "POST",
 		async: false,
 		url: "/gvsigonline/symbology/unique_values_add/" + layerId + "/",
+		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		data: {
+			style_data: JSON.stringify(style)
+		},
+		success: function(response){
+			if (response.success) {
+				location.href = "/gvsigonline/symbology/style_layer_list/";
+			} else {
+				alert('Error');
+			}
+			
+		},
+	    error: function(){}
+	});
+};
+
+UniqueValues.prototype.update = function(layerId, styleId) {
+	
+	$("body").overlay();
+	
+	var style = {
+		name: $('#style-name').val(),
+		title: $('#style-title').val(),
+		is_default: $('#style-is-default').is(":checked"),
+		rules: new Array()
+	};
+	
+	for (var i=0; i<this.rules.length; i++) {
+		var symbolizers = new Array();
+		for (var j=0; j < this.rules[i].getSymbolizers().length; j++) {
+			var symbolizer = {
+				type: this.rules[i].getSymbolizers()[j].type,
+				json: this.rules[i].getSymbolizers()[j].toJSON(),
+				order: this.rules[i].getSymbolizers()[j].order
+			};
+			symbolizers.push(symbolizer);
+		}
+		
+		if (this.label != null) {
+			var l = {
+				type: this.label.type,
+				json: this.label.toJSON(),
+				order: this.label.order
+			};
+			symbolizers.push(l);
+		}
+		
+		symbolizers.sort(function(a, b){
+			return parseInt(b.order) - parseInt(a.order);
+		});
+		
+		var rule = {
+			rule: this.rules[i].getObject(),
+			symbolizers: symbolizers
+		};
+		style.rules.push(rule);
+	}
+	
+	$.ajax({
+		type: "POST",
+		async: false,
+		url: "/gvsigonline/symbology/unique_values_update/" + layerId + "/" + styleId + "/",
 		beforeSend:function(xhr){
 			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},
