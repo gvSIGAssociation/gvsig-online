@@ -7208,6 +7208,126 @@ class PropertyIsLikeType(ComparisonOpsType):
 # end class PropertyIsLikeType
 
 
+class PropertyIsEqualTo(ComparisonOpsType):
+    subclass = None
+    superclass = ComparisonOpsType
+    def __init__(self, wildCard=None, singleChar=None, escape=None, PropertyName=None, Literal=None):
+        self.original_tagname_ = None
+        super(PropertyIsEqualTo, self).__init__()
+        self.wildCard = _cast(None, wildCard)
+        self.singleChar = _cast(None, singleChar)
+        self.escape = _cast(None, escape)
+        self.PropertyName = PropertyName
+        self.Literal = Literal
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, PropertyIsEqualTo)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if PropertyIsEqualTo.subclass:
+            return PropertyIsEqualTo.subclass(*args_, **kwargs_)
+        else:
+            return PropertyIsEqualTo(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_PropertyName(self): return self.PropertyName
+    def set_PropertyName(self, PropertyName): self.PropertyName = PropertyName
+    def get_Literal(self): return self.Literal
+    def set_Literal(self, Literal): self.Literal = Literal
+    def get_wildCard(self): return self.wildCard
+    def set_wildCard(self, wildCard): self.wildCard = wildCard
+    def get_singleChar(self): return self.singleChar
+    def set_singleChar(self, singleChar): self.singleChar = singleChar
+    def get_escape(self): return self.escape
+    def set_escape(self, escape): self.escape = escape
+    def hasContent_(self):
+        if (
+            self.PropertyName is not None or
+            self.Literal is not None or
+            super(PropertyIsEqualTo, self).hasContent_()
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='sld:', name_='PropertyIsEqualTo', namespacedef_='xmlns:sld="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" ', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None:
+            name_ = self.original_tagname_
+        showIndent(outfile, level, pretty_print)
+        namespace_='ogc:'
+        name_='PropertyIsEqualTo'
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='PropertyIsEqualTo')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_='sld:', name_='PropertyIsEqualTo', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write(PropertyIsEqualTo)
+    def exportAttributes(self, outfile, level, already_processed, namespace_='sld:', name_='PropertyIsEqualTo'):
+        super(PropertyIsEqualTo, self).exportAttributes(outfile, level, already_processed, namespace_, name_='PropertyIsEqualTo')
+        if self.wildCard is not None and 'wildCard' not in already_processed:
+            already_processed.add('wildCard')
+            outfile.write(' wildCard=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.wildCard), input_name='wildCard')), ))
+        if self.singleChar is not None and 'singleChar' not in already_processed:
+            already_processed.add('singleChar')
+            outfile.write(' singleChar=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.singleChar), input_name='singleChar')), ))
+        if self.escape is not None and 'escape' not in already_processed:
+            already_processed.add('escape')
+            outfile.write(' escape=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.escape), input_name='escape')), ))
+    def exportChildren(self, outfile, level, namespace_='sld:', name_='PropertyIsEqualTo', fromsubclass_=False, pretty_print=True):
+        super(PropertyIsEqualTo, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.PropertyName is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%s%s>%s</%s%s>%s' % ('ogc:', 'PropertyName', self.gds_encode(self.gds_format_string(quote_xml(self.PropertyName), input_name='PropertyName')),'ogc:', 'PropertyName', '\n'))
+        if self.Literal is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%s%s>%s</%s%s>%s' % ('ogc:', 'Literal', self.gds_encode(self.gds_format_string(quote_xml(self.Literal), input_name='Literal')),'ogc:', 'Literal', '\n'))
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('wildCard', node)
+        if value is not None and 'wildCard' not in already_processed:
+            already_processed.add('wildCard')
+            self.wildCard = value
+        value = find_attr_value_('singleChar', node)
+        if value is not None and 'singleChar' not in already_processed:
+            already_processed.add('singleChar')
+            self.singleChar = value
+        value = find_attr_value_('escape', node)
+        if value is not None and 'escape' not in already_processed:
+            already_processed.add('escape')
+            self.escape = value
+        super(PropertyIsEqualTo, self).buildAttributes(node, attrs, already_processed)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        if nodeName_ == 'PropertyName':
+            obj_ = PropertyNameType.factory()
+            obj_.build(child_)
+            self.PropertyName = obj_
+            obj_.original_tagname_ = 'PropertyName'
+        elif nodeName_ == 'Literal':
+            obj_ = LiteralType.factory()
+            obj_.build(child_)
+            self.Literal = obj_
+            obj_.original_tagname_ = 'Literal'
+        super(PropertyIsEqualTo, self).buildChildren(child_, node, nodeName_, True)
+# end class PropertyIsLikeType
+
+
 class PropertyIsNullType(ComparisonOpsType):
     subclass = None
     superclass = ComparisonOpsType

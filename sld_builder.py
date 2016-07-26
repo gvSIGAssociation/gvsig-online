@@ -26,6 +26,7 @@ from models import Rule, Symbolizer
 from gvsigol_symbology import sld
 from lxml import etree
 import StringIO
+import json
 import sys
 import re
 
@@ -99,7 +100,12 @@ def get_rule(r, symbolizers):
     rule.set_Name(r.name)
     rule.set_Title(r.title.encode('ascii', 'ignore'))
     rule.set_Abstract(r.abstract)
-    rule.set_Filter(None if r.filter=='' else None)
+    if r.filter == '':
+        rule.set_Filter(None)
+    else:
+        filter = getFilter(r.filter)
+        rule.set_Filter(filter)
+        
     if r.minscale >= 0:
         rule.set_MinScaleDenominator(r.minscale)
     if r.maxscale >= 0:
@@ -112,7 +118,7 @@ def get_sld_body(style_layer_descriptor, named_layer):
     style_layer_descriptor.add_NamedLayer(named_layer)
     output = StringIO.StringIO()
     style_layer_descriptor.export(output, 0)
-    #style_layer_descriptor.export(sys.stdout, 0)
+    style_layer_descriptor.export(sys.stdout, 0)
     sld_body = output.getvalue()
     output.close()
     
@@ -210,6 +216,18 @@ def get_label(s):
     
     return label.build(node)
 
+def getFilter(f):
+    filt = sld.FilterType()
+    
+    json_filter = json.loads(f)
+    
+    operation = sld.PropertyIsEqualTo()
+    operation.set_PropertyName(json_filter.get('property_name'))
+    operation.set_Literal(json_filter.get('literal'))
+
+    filt.set_comparisonOps(operation)
+    
+    return filt
 
 def get_font(s):
     font = sld.Font()
