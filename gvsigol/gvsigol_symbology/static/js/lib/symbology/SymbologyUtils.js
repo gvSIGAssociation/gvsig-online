@@ -55,6 +55,22 @@ SymbologyUtils.prototype.external_graphic_formats = [
 	{value: 'image/gif', title: 'image/gif'}
 ];
 
+SymbologyUtils.prototype.filter_operations = [
+ 	{value: 'is_equal_to', title: gettext('Is equal to') + '  ( [field] == [value] )'},
+ 	{value: 'is_null', title: gettext('Is null') + '  ( [field] == null )'},
+ 	{value: 'is_like', title: gettext('Contains') + '  ( %pattern% )'},
+ 	{value: 'is_not_equal', title: gettext('Is not equal') + '  ( [field] != [value] )'},
+ 	{value: 'is_greater_than', title: gettext('Is greater than') + '  ( [field] > [value] )'},
+ 	{value: 'is_greater_than_or_equal_to', title: gettext('Is greater than or equal to') + '  ( [field] >= [value] )'},
+ 	{value: 'is_less_than', title: gettext('Is less than') + '  ( [field] < [value] )'},
+ 	{value: 'is_less_than_or_equal_to', title: gettext('Is less than or equal to') + '  ( [field] <= [value] )'},
+ 	{value: 'is_between', title: gettext('Is between') + '  ( [value1] <= [field] <= [value2] )'},
+];
+
+SymbologyUtils.prototype.getFilterOperations = function(element){
+	return this.filter_operations;
+};
+
 SymbologyUtils.prototype.getFonts = function(element){
 	return this.fonts;
 };
