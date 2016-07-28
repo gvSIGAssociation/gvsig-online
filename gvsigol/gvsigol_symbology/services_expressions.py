@@ -52,7 +52,7 @@ def create_style(session, json_data, layer_id):
         name = json_data.get('name'),
         title = json_data.get('title'),
         is_default = json_data.get('is_default'),
-        type = 'UV'
+        type = 'EX'
     )
     style.save()
     style_layer = StyleLayer(

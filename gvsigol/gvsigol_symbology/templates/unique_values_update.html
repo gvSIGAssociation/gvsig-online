@@ -68,7 +68,11 @@
 						<select id="select-unique-values-field" class="form-control">
 							<option disabled selected value> -- {% trans "Select field" %} -- </option>
 							{% for field in fields %}
-							<option value="{{field.name}}">{{field.name}}</option>
+								{% if field.name == property_name %}
+									<option selected value="{{field.name}}">{{field.name}}</option>
+								{% else %}
+									<option value="{{field.name}}">{{field.name}}</option>
+								{% endif %}
 							{% endfor %}
 						</select>
 					</div>
@@ -197,12 +201,26 @@ $(document).ready(function() {
 	var utils = new SymbologyUtils(map, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
 	var uniqueValues = new UniqueValues(featureType, layerName, utils, previewUrl);
 	uniqueValues.loadRules(rules);
+	$(".delete-rule").on('click', function(e){
+		uniqueValues.deleteRule(this.dataset.ruleid);
+	});
 	
 	utils.centerMap(layerName, wfsUrl);
 	
+	$("#show-label").on('click', function(e){
+		uniqueValues.showLabel();
+	});
+	
 	$("#save-legend").on('click', function(e){
 		if ($("#style-name").val() != '') {
-			uniqueValues.update(layerId, styleId);
+			var selectedField = $('#select-unique-values-field').val();
+			
+			if (selectedField == null) {
+				messageBox.show('warning', gettext('You must select a field'));
+				
+			} else {
+				uniqueValues.update(layerId, styleId);
+			}
 			
 		} else {
 			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');

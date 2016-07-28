@@ -221,11 +221,18 @@ def getFilter(f):
     
     json_filter = json.loads(f)
     
-    operation = sld.PropertyIsEqualTo()
-    operation.set_PropertyName(json_filter.get('property_name'))
-    operation.set_Literal(json_filter.get('literal'))
-
-    filt.set_comparisonOps(operation)
+    if json_filter.get('type') == 'is_equal':
+        operation = sld.PropertyIsEqualTo()
+        operation.set_PropertyName(json_filter.get('property_name'))
+        operation.set_Literal(json_filter.get('literal'))
+        filt.set_comparisonOps(operation)
+        
+    elif json_filter.get('type') == 'between':
+        operation = sld.PropertyIsBetweenType()
+        operation.set_PropertyName(json_filter.get('property_name'))
+        operation.set_LowerBoundary(json_filter.get('lower_boundary'))
+        operation.set_UpperBoundary(json_filter.get('upper_boundary'))
+        filt.set_comparisonOps(operation)
     
     return filt
 

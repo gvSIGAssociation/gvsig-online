@@ -30,7 +30,7 @@ var UniqueSymbol = function(layerName, utils, rule_opts) {
 	if (rule_opts != null) {
 		if (rule_opts.symbolizers != "") {
 			this.rule = new Rule(0, $("#style-name").val(), $("#style-name").val(), rule_opts, this.utils);
-			$('#rules').append(this.rule.getTableUI(true));
+			$('#rules').append(this.rule.getTableUI(true, 'unique'));
 			this.rule.registerEvents();
 			this.rule.preview();
 			this.loadRule(rule_opts.symbolizers);
@@ -40,7 +40,7 @@ var UniqueSymbol = function(layerName, utils, rule_opts) {
 
 UniqueSymbol.prototype.addDefault = function() {
 	this.rule = new Rule(0, $("#style-name").val(), $("#style-name").val(), null, this.utils);
-	$('#rules').append(this.rule.getTableUI(true));
+	$('#rules').append(this.rule.getTableUI(true, 'unique'));
 	this.rule.registerEvents();
 	this.rule.addSymbolizer();
 	this.rule.preview();
@@ -92,6 +92,8 @@ UniqueSymbol.prototype.loadRule = function(symbolizers) {
 UniqueSymbol.prototype.loadLabel = function(options) {
 	if (this.label) {
 		this.label = null;
+		this.label = new TextSymbolizer(this.rule, options, this.utils);
+		this.updateLabelForm();
 		
 	} else {
 		this.label = new TextSymbolizer(this.rule, options, this.utils);
