@@ -29,6 +29,7 @@ var Expressions = function(featureType, layerName, utils, previewUrl) {
 	this.utils = utils;
 	this.rules = new Array();
 	this.label = null;
+	this.expressions_counter = 0;
 };
 
 Expressions.prototype.showLabel = function() {
@@ -69,6 +70,8 @@ Expressions.prototype.updateLabelForm = function() {
 };
 
 Expressions.prototype.addNewRule = function() {
+	var self = this;
+	
 	var id = this.rules.length;
 	var name = gettext('rule') + '_' + id;
 	var title = gettext('Rule') + ' ' + id;
@@ -78,6 +81,298 @@ Expressions.prototype.addNewRule = function() {
 	rule.addSymbolizer();
 	rule.preview();
 	this.addRule(rule);
+	
+	$(".create-expression").on('click', function(e){
+		e.preventDefault();
+		self.getFilterFormUI(this.dataset.ruleid);
+		$('#modal-expression').modal('show');
+	});
+};
+
+Expressions.prototype.getFilterFormUI = function(ruleid) {
+	var self = this;
+	
+	$('#modal-expression-content').empty();
+	
+	var operations = this.utils.getFilterOperations();
+	var fields = this.utils.getAlphanumericFields();
+	
+	var ui = '';
+	ui += '<div class="box box-primary">';
+	ui += 	'<div class="box-header with-border">';
+	ui += 		'<h3 class="box-title">' + gettext('Expressions') + '</h3>';
+	ui += 		'<div class="box-tools pull-right">';
+	//ui += 			'<button id="add-new-expression" class="btn btn-sm btn-success margin-r-5"><i class="fa fa-plus margin-r-5"></i> ' + gettext('Add expression') + '</button>';
+	ui += 			'<button id="save-filter" data-ruleid="' + ruleid + '" class="btn btn-sm btn-primary save-filter"><i class="fa fa-floppy-o margin-r-5"></i> ' + gettext('Save filter') + '</button>';
+	ui += 		'</div>';
+	ui += 	'</div>';
+	ui += 	'<div class="box-body">';
+	ui += 		'<div id="expressions-list" class="expressions-list">';
+	ui += 			'<div class="box">';
+	ui += 				'<div class="box-header">';
+	ui += 					'<div class="box-tools pull-right">';
+	ui += 						'<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
+	ui += 							'<i class="fa fa-minus"></i>';
+	ui += 						'</button>';
+	ui += 					'</div>';
+	ui += 				'</div>';
+	ui += 				'<div class="box-body">';
+	ui += 					'<div class="row">';
+	ui += 						'<div class="col-md-6 form-group">';
+	ui += 							'<label>' + gettext('Select field') + '</label>';
+	ui += 							'<select id="expression-field" class="form-control">';
+	ui += 								'<option disabled selected value> -- ' + gettext('Select field') + ' -- </option>';
+	for (var i in fields) {
+		ui += 							'<option data-type="' + fields[i].binding + '" value="' + fields[i].name + '">' + fields[i].name + '</option>';
+	}	
+	ui += 							'</select>';
+	ui += 						'</div>';
+	ui += 						'<div class="col-md-6 form-group">';
+	ui += 							'<label>' + gettext('Select operation') + '</label>';
+	ui += 							'<select id="expression-operation" class="form-control">';
+	ui += 								'<option disabled selected value> -- ' + gettext('Select operation') + ' -- </option>';
+	for (var i in operations) {
+		ui += 							'<option value="' + operations[i].value + '">' + operations[i].title + '</option>';
+	}	
+	ui += 							'</select>';
+	ui += 						'</div>';
+	ui += 					'</div>';
+	ui += 					'<div id="expression-values" class="row">';
+	ui += 					'</div>';
+	ui += 				'</div>';
+	ui += 			'</div>';
+	ui += 		'</div>';
+	ui += 		'<div class="row">';
+	ui += 			'<div class="col-md-12 form-group">';
+	ui += 				'<label>' + gettext('Filter preview') + '</label>';
+	ui += 				'<textarea id="filter-output" name="code">	';					
+	ui += 			'</div>';
+	ui += 		'</div>';
+	ui += 	'</div>';
+	ui += '</div>';
+	
+	$('#modal-expression-content').append(ui);
+	
+	var filterOutput = document.getElementById('filter-output');
+	var codemirror = CodeMirror.fromTextArea(filterOutput, {
+		value: "",
+		mode:  "javascript",
+		theme: "xq-dark",
+		lineNumbers: true
+	});
+	var filterOutputContentcode = '';
+	codemirror.setValue(filterOutputContentcode);
+	
+	$('#expression-field').on('change', function(e) {
+		
+		var twoValues = false;
+		if ( $('#expression-operation').val() == 'is_between' ) {
+			twoValues = true;
+		}
+		var inputs = '';
+		
+		if (this.selectedOptions[0].dataset.type.indexOf('java.math') > -1){
+			if (twoValues) {
+				inputs += '<div id="expression-values" class="col-md-6 form-group">';
+				inputs += 	'<label>' + gettext('Value 1') + '</label>';
+				inputs += 	'<input name="expresion-value-1" id="expresion-value-1" type="number" step="any" value="0" class="form-control">';
+				inputs += '</div>';
+				inputs += '<div id="expression-values" class="col-md-6 form-group">';
+				inputs += 	'<label>' + gettext('Value 2') + '</label>';
+				inputs += 	'<input name="expresion-value-2" id="expresion-value-2" type="number" step="any" value="0" class="form-control">';
+				inputs += '</div>';
+				
+			} else {
+				inputs += '<div id="expression-values" class="col-md-12 form-group">';
+				inputs += 	'<label>' + gettext('Value') + '</label>';
+				inputs += 	'<input name="expresion-value-1" id="expresion-value-1" type="number" step="any" value="0" class="form-control">';
+				inputs += '</div>';
+			}
+			
+		} else if (this.selectedOptions[0].dataset.type == 'java.lang.String'){
+			if (twoValues) {
+				inputs += '<div id="expression-values" class="col-md-6 form-group">';
+				inputs += 	'<label>' + gettext('Value 1') + '</label>';
+				inputs += 	'<input name="expresion-value-1" id="expresion-value-1" type="text" class="form-control">';
+				inputs += '</div>';
+				inputs += '<div id="expression-values" class="col-md-6 form-group">';
+				inputs += 	'<label>' + gettext('Value 2') + '</label>';
+				inputs += 	'<input name="expresion-value-2" id="expresion-value-2" type="text" class="form-control">';
+				inputs += '</div>';
+				
+			} else {
+				
+				inputs += '<div id="expression-values" class="col-md-12 form-group">';
+				inputs += 	'<label>' + gettext('Value') + '</label>';
+				inputs += 	'<input name="expresion-value-1" id="expresion-value-1" type="text" class="form-control">';
+				inputs += '</div>';
+			}
+		}
+		$('#expression-values').empty();
+		$('#expression-values').append(inputs);
+		
+		$('#expresion-value-1').on('change', function(){
+			var filterOutputContentcode = '';
+			
+			var value1 = $('#expresion-value-1').val();
+			var value2 = $('#expresion-value-2').val();
+			var field = $('#expression-field').val();
+			var operation = $('#expression-operation').val();
+			
+			filterOutputContentcode = '\t' + value1 + ' <= ' + field + ' <= ' + value2;
+			codemirror.setValue(filterOutputContentcode);
+		});
+		
+		$('#expresion-value-2').on('change', function(){
+			var filterOutputContentcode = '';
+			
+			var value1 = $('#expresion-value-1').val();
+			var value2 = $('#expresion-value-2').val();
+			var field = $('#expression-field').val();
+			var operation = $('#expression-operation').val();
+			
+			filterOutputContentcode = '\t' + value1 + ' <= ' + field + ' <= ' + value2;
+			codemirror.setValue(filterOutputContentcode);
+		});
+		
+	});
+	
+	$('#expression-operation').on('change', function(e) {
+		
+		var twoValues = false;
+		if ( this.value == 'is_between' ) {
+			twoValues = true;
+		}
+		var inputs = '';
+		
+		if ($('#expression-field')[0].selectedOptions[0].dataset.type.indexOf('java.math') > -1){
+			if (twoValues) {
+				inputs += '<div id="expression-values" class="col-md-6 form-group">';
+				inputs += 	'<label>' + gettext('Value 1') + '</label>';
+				inputs += 	'<input name="expresion-value-1" id="expresion-value-1" type="number" step="any" value="0" class="form-control">';
+				inputs += '</div>';
+				inputs += '<div id="expression-values" class="col-md-6 form-group">';
+				inputs += 	'<label>' + gettext('Value 2') + '</label>';
+				inputs += 	'<input name="expresion-value-2" id="expresion-value-2" type="number" step="any" value="0" class="form-control">';
+				inputs += '</div>';
+				
+			} else {
+				inputs += '<div id="expression-values" class="col-md-12 form-group">';
+				inputs += 	'<label>' + gettext('Value') + '</label>';
+				inputs += 	'<input name="expresion-value-1" id="expresion-value-1" type="number" step="any" value="0" class="form-control">';
+				inputs += '</div>';
+			}
+			
+		} else if ($('#expression-field')[0].selectedOptions[0].dataset.type == 'java.lang.String'){
+			if (twoValues) {
+				inputs += '<div id="expression-values" class="col-md-6 form-group">';
+				inputs += 	'<label>' + gettext('Value 1') + '</label>';
+				inputs += 	'<input name="expresion-value-1" id="expresion-value-1" type="text" class="form-control">';
+				inputs += '</div>';
+				inputs += '<div id="expression-values" class="col-md-6 form-group">';
+				inputs += 	'<label>' + gettext('Value 2') + '</label>';
+				inputs += 	'<input name="expresion-value-2" id="expresion-value-2" type="text" class="form-control">';
+				inputs += '</div>';
+				
+			} else {
+				
+				inputs += '<div id="expression-values" class="col-md-12 form-group">';
+				inputs += 	'<label>' + gettext('Value') + '</label>';
+				inputs += 	'<input name="expresion-value-1" id="expresion-value-1" type="text" class="form-control">';
+				inputs += '</div>';
+			}
+		}
+		$('#expression-values').empty();
+		$('#expression-values').append(inputs);
+		
+		$('#expresion-value-1').on('change paste keyup', function(){
+			
+			var value1 = $('#expresion-value-1').val();
+			var value2 = $('#expresion-value-2').val();
+			var field = $('#expression-field').val();
+			var operation = $('#expression-operation').val();
+		 	
+			var filterOutputContentcode = self.getFilterOutput(field, operation, value1, value2);
+			codemirror.setValue(filterOutputContentcode);
+		});
+		
+		$('#expresion-value-2').on('change paste keyup', function(){
+			var filterOutputContentcode = '';
+			
+			var value1 = $('#expresion-value-1').val();
+			var value2 = $('#expresion-value-2').val();
+			var field = $('#expression-field').val();
+			var operation = $('#expression-operation').val();
+			
+			var filterOutputContentcode = self.getFilterOutput(field, operation, value1, value2);
+			codemirror.setValue(filterOutputContentcode);
+		});
+		
+	});
+	
+	$('.save-filter').on('click', function(){
+		var ruleid = this.dataset.ruleid;
+		var rule = self.getRuleById(ruleid);
+		
+		var value1 = $('#expresion-value-1').val();
+		var value2 = $('#expresion-value-2').val();
+		var field = $('#expression-field').val();
+		var operation = $('#expression-operation').val();
+		
+		var filterOutputContentcode = self.getFilterOutput(field, operation, value1, value2);
+		
+		var filter = {
+			type: operation,
+			property_name: field,
+			value1: value1
+		};
+		if (operation == 'is_between') {
+			filter['value2'] = value2;
+		}
+		rule.setFilter(filter);
+		
+		$('#rule-title-' + ruleid).text(filterOutputContentcode);
+		$('#modal-expression').modal('hide');
+	});
+	
+	this.registerFilterEvents();
+	
+};
+
+Expressions.prototype.getFilterOutput = function(field, operation, value1, value2) {
+	var filterOutputContentcode = '';
+	if (operation == 'is_equal_to') {
+		filterOutputContentcode = '\t' + field + ' = ' + value1;
+		
+	} else if (operation == 'is_null') {
+		filterOutputContentcode = '\t' + field + ' = null';
+		
+	} else if (operation == 'is_like') {
+		filterOutputContentcode = '\t' + field + ' %' + value1 + '%';
+		
+	} else if (operation == 'is_not_equal') {
+		filterOutputContentcode = '\t' + field + ' <> ' + value1;
+		
+	} else if (operation == 'is_greater_than') {
+		filterOutputContentcode = '\t' + field + ' > ' + value1;
+		
+	} else if (operation == 'is_greater_than_or_equal_to') {
+		filterOutputContentcode = '\t' + field + ' >= ' + value1;
+		
+	} else if (operation == 'is_less_than') {
+		filterOutputContentcode = '\t' + field + ' < ' + value1;
+		
+	} else if (operation == 'is_less_than_or_equal_to') {
+		filterOutputContentcode = '\t' + field + ' <= ' + value1;
+		
+	} else if (operation == 'is_between') {
+		filterOutputContentcode = '\t' + value1 + ' <= ' + field + ' <= ' + value2;
+		
+	}
+	return filterOutputContentcode;
+};
+
+Expressions.prototype.registerFilterEvents = function() {
 };
 
 Expressions.prototype.getRules = function() {

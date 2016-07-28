@@ -61,7 +61,7 @@
 				
 				<div class="row">
 					<div class="col-md-12 form-group">
-						<button id="add-expression" class="btn btn-sm btn-success refresh-preview"><i class="fa fa-plus-circle margin-r-5"></i> {% trans "Add new rule" %}</button>
+						<button id="add-expression" class="btn btn-sm btn-success refresh-preview"><i class="fa fa-plus margin-r-5"></i> {% trans "Add new rule" %}</button>
 						<span class="text-muted">{% trans "Creates a new rule based on an expression" %}</span>
 					</div>
 				</div>
@@ -144,15 +144,8 @@
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
-				<h4 class="modal-title">{% trans "Creates a new rule based on an expression" %}</h4>
 			</div>
-			<div class="modal-body">
-				<div class="nav-tabs-custom">
-	            	<ul id="tab-menu" class="nav nav-tabs">				                        
-	            	</ul>
-	            	<div id="tab-content" class="tab-content">
-	            	</div>
-       			</div>
+			<div id="modal-expression-content" class="modal-body">
 			</div>
 		</div>
 	</div>
