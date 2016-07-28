@@ -8,7 +8,7 @@
 		<div class="box box-primary">
 		
 			<div class="box-header with-border step-2">
-				<h3 class="box-title">{% trans "Add new style" %}</h3>
+				<h3 class="box-title">{% trans "Update style" %}</h3>
 				<div class="box-tools pull-right">
 					<button id="refresh-preview" class="btn btn-sm btn-warning refresh-preview"><i class="fa fa-refresh margin-r-5"></i> {% trans "Update preview" %}</button>
 					<button id="show-label" class="btn btn-sm btn-primary refresh-preview"><i class="fa fa-tags margin-r-5"></i> {% trans "Labeling" %}</button>
@@ -18,29 +18,28 @@
 
 			<div class="box-body">
 			
-				<div class="row">					
+				<div class="row">
 					<div class="col-md-6">
-						<div id="form-error" style="color:#ff0000;"></div>
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<label>{% trans "Name" %}</label>
-								<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" value="{{style_name}}" type="text" class="form-control">	
+								<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" type="text" value="{{style.name}}" class="form-control">	
 							</div>
 						</div>
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<label>{% trans "Title" %}</label>
-								<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" type="text" class="form-control">	
+								<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" type="text" value="{{style.title}}" class="form-control">	
 							</div>
 						</div>
 						<div class="row">
 							<div class="col-md-6 form-group">
 								<label>{% trans "Min. scale" %}</label>
-					    		<input placeholder="{% trans 'Minimum scale denominator' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="-1" class="form-control">
+					    		<input placeholder="{% trans 'Minimum scale denominator' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="{{minscale}}" class="form-control">
 							</div>
 							<div class="col-md-6 form-group">
 								<label>{% trans "Max. scale" %}</label>
-					    		<input placeholder="{% trans 'Maximum scale denominator' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="-1" class="form-control">
+					    		<input placeholder="{% trans 'Maximum scale denominator' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="{{maxscale}}" class="form-control">
 							</div>
 							<div class="col-md-12 form-group">
 								<p class="text-muted">* {% trans "Specifies the minimum and maximum scale denominator (inclusive) for the scale range in which this rule applies" %}.</p>
@@ -49,7 +48,11 @@
 						<div class="row">
 							<div class="checkbox col-md-12">								
 								<label>
+									{% if style.is_default %}
+									<input type="checkbox" name="style-is-default" id="style-is-default" checked/>{% trans "Set as default style" %}
+									{% else %}
 									<input type="checkbox" name="style-is-default" id="style-is-default"/>{% trans "Set as default style" %}
+									{% endif %}
 								</label>
 							</div>
 						</div>
@@ -61,19 +64,27 @@
 				
 				<div class="row">
 					<div class="col-md-6 form-group">
-						<label>{% trans "Select field to generate unique values" %}</label>
-						<select id="select-unique-values-field" class="form-control">
+						<label>{% trans "Select numeric field" %}</label>
+						<select id="select-numeric-field" class="form-control">
 							<option disabled selected value> -- {% trans "Select field" %} -- </option>
-							{% for field in fields %}
-							<option value="{{field.name}}">{{field.name}}</option>
+							{% for field in numeric_fields %}
+								{% if field.name == property_name %}
+									<option selected value="{{field.name}}">{{field.name}}</option>
+								{% else %}
+									<option value="{{field.name}}">{{field.name}}</option>
+								{% endif %}
 							{% endfor %}
 						</select>
+					</div>
+					<div class="col-md-6 form-group">
+						<label>{% trans "Select number of intervals" %}</label>
+			    		<input name="number-of-intervals" id="number-of-intervals" type="number" step="any" value="{{intervals}}" class="form-control">
 					</div>
 				</div>
 				
 				<div id="rules" class="row">
 				</div>
-				
+	
 			</div>
 		</div>
 	</div>
@@ -158,7 +169,7 @@ $(document).ready(function() {
 	var featureType = "{{featureType}}";
 	var jsonAlphanumericFields = {{json_alphanumeric_fields|safe}};
 	var fonts = {{ fonts|safe }};
-	var rule_opts = "";
+	var rules = {{ rules|safe }};
 	var previewUrl = "{{preview_url}}";
 	var supported_crs = {{supported_crs|safe}};
 	
@@ -192,24 +203,31 @@ $(document).ready(function() {
 	map.addLayer(wmsLayer);
 	
 	var utils = new SymbologyUtils(map, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
-	var uniqueValues = new UniqueValues(featureType, layerName, utils, previewUrl);
+	var intervals = new Intervals(featureType, layerName, utils, previewUrl);
+	intervals.loadRules(rules);
+	$(".delete-rule").on('click', function(e){
+		intervals.deleteRule(this.dataset.ruleid);
+	});
 	
 	utils.centerMap(layerName, wfsUrl);
 	
 	$("#show-label").on('click', function(e){
-		uniqueValues.showLabel();
+		intervals.showLabel();
 	});
 	
 	$("#save-legend").on('click', function(e){
 		if ($("#style-name").val() != '') {
-
-			var selectedField = $('#select-unique-values-field').val();
+			var selectedField = $('#select-numeric-field').val();
+			var numberOfIntervals = $('#number-of-intervals').val();
 			
 			if (selectedField == null) {
 				messageBox.show('warning', gettext('You must select a field'));
 				
+			} else if (parseInt(numberOfIntervals) <= 0 ) {
+				messageBox.show('warning', gettext('The number of intervals must be greater than 0'));
+				
 			} else {
-				uniqueValues.save(layerId);
+				intervals.update(layerId, styleId);
 			}
 			
 		} else {
@@ -220,31 +238,79 @@ $(document).ready(function() {
 	});
 	
 	$("#refresh-preview").on('click', function(e){
-		uniqueValues.refreshMap();
+		intervals.refreshMap();
 	});
 	
-	$("#select-unique-values-field").on('change', function(e) {
+	$("#select-numeric-field").on('change', function(e) {
 		$(".users-list").empty();
 		var selectedField = this.value;
-		$.ajax({
-			type: "POST",
-			async: false,
-			url: "/gvsigonline/symbology/get_unique_values/",
-			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-			},
-			data: {
-				layer_id: layerId,
-				field: selectedField
-			},
-			success: function(response){
-				uniqueValues.load(selectedField, response.values);	
-				$(".delete-rule").on('click', function(e){
-					uniqueValues.deleteRule(this.dataset.ruleid);
-				});
-			},
-		    error: function(){}
-		});
+		var numberOfIntervals = $('#number-of-intervals').val();
+		
+		if (selectedField == null) {
+			messageBox.show('warning', gettext('You must select a field'));
+			
+		} else if (parseInt(numberOfIntervals) <= 0 ) {
+			messageBox.show('warning', gettext('The number of intervals must be greater than 0'));
+			
+		} else {
+			$.ajax({
+				type: "POST",
+				async: false,
+				url: "/gvsigonline/symbology/get_minmax_values/",
+				beforeSend:function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				data: {
+					layer_id: layerId,
+					field: selectedField
+				},
+				success: function(response){
+					intervals.load(response, selectedField, numberOfIntervals);	
+					$(".delete-rule").on('click', function(e){
+						intervals.deleteRule(this.dataset.ruleid);
+					});
+				},
+			    error: function(){}
+			});
+			
+		}
+		
+	});
+	
+	$('#number-of-intervals').on('change', function(e) {
+		
+		$(".users-list").empty();
+		var selectedField = $('#select-numeric-field').val();
+		var numberOfIntervals = this.value;
+		
+		if (selectedField == null) {
+			messageBox.show('warning', gettext('You must select a field'));
+			
+		} else if (parseInt(numberOfIntervals) <= 0 ) {
+			messageBox.show('warning', gettext('The number of intervals must be greater than 0'));
+			
+		} else {
+			$.ajax({
+				type: "POST",
+				async: false,
+				url: "/gvsigonline/symbology/get_minmax_values/",
+				beforeSend:function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				data: {
+					layer_id: layerId,
+					field: selectedField
+				},
+				success: function(response){
+					intervals.load(response, selectedField, numberOfIntervals);	
+					$(".delete-rule").on('click', function(e){
+						intervals.deleteRule(this.dataset.ruleid);
+					});
+				},
+			    error: function(){}
+			});
+			
+		}	
 	});
 
 });

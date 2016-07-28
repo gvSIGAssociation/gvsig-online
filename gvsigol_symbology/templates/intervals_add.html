@@ -61,13 +61,17 @@
 				
 				<div class="row">
 					<div class="col-md-6 form-group">
-						<label>{% trans "Select field to generate unique values" %}</label>
-						<select id="select-unique-values-field" class="form-control">
+						<label>{% trans "Select numeric field" %}</label>
+						<select id="select-numeric-field" class="form-control">
 							<option disabled selected value> -- {% trans "Select field" %} -- </option>
-							{% for field in fields %}
+							{% for field in numeric_fields %}
 							<option value="{{field.name}}">{{field.name}}</option>
 							{% endfor %}
 						</select>
+					</div>
+					<div class="col-md-6 form-group">
+						<label>{% trans "Select number of intervals" %}</label>
+			    		<input name="number-of-intervals" id="number-of-intervals" type="number" step="any" value="8" class="form-control">
 					</div>
 				</div>
 				
@@ -192,24 +196,27 @@ $(document).ready(function() {
 	map.addLayer(wmsLayer);
 	
 	var utils = new SymbologyUtils(map, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
-	var uniqueValues = new UniqueValues(featureType, layerName, utils, previewUrl);
+	var intervals = new Intervals(featureType, layerName, utils, previewUrl);
 	
 	utils.centerMap(layerName, wfsUrl);
 	
 	$("#show-label").on('click', function(e){
-		uniqueValues.showLabel();
+		intervals.showLabel();
 	});
 	
 	$("#save-legend").on('click', function(e){
-		if ($("#style-name").val() != '') {
-
-			var selectedField = $('#select-unique-values-field').val();
+		if ($("#style-name").val() != '') {	
+			var selectedField = $('#select-numeric-field').val();
+			var numberOfIntervals = $('#number-of-intervals').val();
 			
 			if (selectedField == null) {
 				messageBox.show('warning', gettext('You must select a field'));
 				
+			} else if (parseInt(numberOfIntervals) <= 0 ) {
+				messageBox.show('warning', gettext('The number of intervals must be greater than 0'));
+				
 			} else {
-				uniqueValues.save(layerId);
+				intervals.save(layerId);
 			}
 			
 		} else {
@@ -220,31 +227,79 @@ $(document).ready(function() {
 	});
 	
 	$("#refresh-preview").on('click', function(e){
-		uniqueValues.refreshMap();
+		intervals.refreshMap();
 	});
 	
-	$("#select-unique-values-field").on('change', function(e) {
+	$("#select-numeric-field").on('change', function(e) {
 		$(".users-list").empty();
 		var selectedField = this.value;
-		$.ajax({
-			type: "POST",
-			async: false,
-			url: "/gvsigonline/symbology/get_unique_values/",
-			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-			},
-			data: {
-				layer_id: layerId,
-				field: selectedField
-			},
-			success: function(response){
-				uniqueValues.load(selectedField, response.values);	
-				$(".delete-rule").on('click', function(e){
-					uniqueValues.deleteRule(this.dataset.ruleid);
-				});
-			},
-		    error: function(){}
-		});
+		var numberOfIntervals = $('#number-of-intervals').val();
+		
+		if (selectedField == null) {
+			messageBox.show('warning', gettext('You must select a field'));
+			
+		} else if (parseInt(numberOfIntervals) <= 0 ) {
+			messageBox.show('warning', gettext('The number of intervals must be greater than 0'));
+			
+		} else {
+			$.ajax({
+				type: "POST",
+				async: false,
+				url: "/gvsigonline/symbology/get_minmax_values/",
+				beforeSend:function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				data: {
+					layer_id: layerId,
+					field: selectedField
+				},
+				success: function(response){
+					intervals.load(response, selectedField, numberOfIntervals);	
+					$(".delete-rule").on('click', function(e){
+						intervals.deleteRule(this.dataset.ruleid);
+					});
+				},
+			    error: function(){}
+			});
+			
+		}
+		
+	});
+	
+	$('#number-of-intervals').on('change', function(e) {
+		
+		$(".users-list").empty();
+		var selectedField = $('#select-numeric-field').val();
+		var numberOfIntervals = this.value;
+		
+		if (selectedField == null) {
+			messageBox.show('warning', gettext('You must select a field'));
+			
+		} else if (parseInt(numberOfIntervals) <= 0 ) {
+			messageBox.show('warning', gettext('The number of intervals must be greater than 0'));
+			
+		} else {
+			$.ajax({
+				type: "POST",
+				async: false,
+				url: "/gvsigonline/symbology/get_minmax_values/",
+				beforeSend:function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				data: {
+					layer_id: layerId,
+					field: selectedField
+				},
+				success: function(response){
+					intervals.load(response, selectedField, numberOfIntervals);	
+					$(".delete-rule").on('click', function(e){
+						intervals.deleteRule(this.dataset.ruleid);
+					});
+				},
+			    error: function(){}
+			});
+			
+		}	
 	});
 
 });

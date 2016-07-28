@@ -14,6 +14,13 @@ urlpatterns = [
     url(r'^unique_values_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.unique_values_update', name='unique_values_update'),
     url(r'^get_unique_values/$', 'gvsigol_symbology.views.get_unique_values', name='get_unique_values'),
     
+    url(r'^intervals_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.intervals_add', name='intervals_add'),
+    url(r'^intervals_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.intervals_update', name='intervals_update'),
+    url(r'^get_minmax_values/$', 'gvsigol_symbology.views.get_minmax_values', name='get_minmax_values'),
+    
+    url(r'^expressions_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.expressions_add', name='expressions_add'),
+    url(r'^expressions_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.expressions_update', name='expressions_update'),
+    
     url(r'^library_list/$', 'gvsigol_symbology.views.library_list', name='library_list'),
     url(r'^library_add/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views.library_add', name='library_add'),
     url(r'^library_update/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views.library_update', name='library_update'),

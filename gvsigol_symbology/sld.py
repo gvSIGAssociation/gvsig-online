@@ -7418,10 +7418,11 @@ class PropertyIsNullType(ComparisonOpsType):
 class PropertyIsBetweenType(ComparisonOpsType):
     subclass = None
     superclass = ComparisonOpsType
-    def __init__(self, expression=None, LowerBoundary=None, UpperBoundary=None):
+    def __init__(self, expression=None, PropertyName=None, LowerBoundary=None, UpperBoundary=None):
         self.original_tagname_ = None
         super(PropertyIsBetweenType, self).__init__()
         self.expression = expression
+        self.PropertyName = PropertyName
         self.LowerBoundary = LowerBoundary
         self.UpperBoundary = UpperBoundary
     def factory(*args_, **kwargs_):
@@ -7437,6 +7438,8 @@ class PropertyIsBetweenType(ComparisonOpsType):
     factory = staticmethod(factory)
     def get_expression(self): return self.expression
     def set_expression(self, expression): self.expression = expression
+    def get_PropertyName(self): return self.propertyName
+    def set_PropertyName(self, PropertyName): self.PropertyName = PropertyName
     def get_LowerBoundary(self): return self.LowerBoundary
     def set_LowerBoundary(self, LowerBoundary): self.LowerBoundary = LowerBoundary
     def get_UpperBoundary(self): return self.UpperBoundary
@@ -7459,6 +7462,8 @@ class PropertyIsBetweenType(ComparisonOpsType):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
+        namespace_='ogc:'
+        name_='PropertyIsBetween'
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='PropertyIsBetweenType')
@@ -7477,12 +7482,27 @@ class PropertyIsBetweenType(ComparisonOpsType):
             eol_ = '\n'
         else:
             eol_ = ''
-        if self.expression is not None:
-            self.expression.export(outfile, level, namespace_, name_='expression', pretty_print=pretty_print)
-        if self.LowerBoundary is not None:
-            self.LowerBoundary.export(outfile, level, namespace_, name_='LowerBoundary', pretty_print=pretty_print)
+            
+        if self.PropertyName is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%s%s>%s</%s%s>%s' % ('ogc:', 'PropertyName', self.gds_encode(self.gds_format_string(quote_xml(self.PropertyName), input_name='PropertyName')),'ogc:', 'PropertyName', '\n'))
+            
+        if self.LowerBoundary is not None: 
+            showIndent(outfile, level, pretty_print) 
+            outfile.write('<%s%s>%s' % ('ogc:', 'LowerBoundary', '\n'))
+            showIndent(outfile, level+1, pretty_print)
+            outfile.write('<%s%s>%s</%s%s>%s' % ('ogc:', 'Literal', self.gds_encode(self.gds_format_string(quote_xml(self.LowerBoundary), input_name='Literal')),'ogc:', 'Literal', '\n'))
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % ('ogc:', 'LowerBoundary', '\n'))       
+            
         if self.UpperBoundary is not None:
-            self.UpperBoundary.export(outfile, level, namespace_, name_='UpperBoundary', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%s%s>%s' % ('ogc:', 'UpperBoundary', '\n'))
+            showIndent(outfile, level+1, pretty_print)
+            outfile.write('<%s%s>%s</%s%s>%s' % ('ogc:', 'Literal', self.gds_encode(self.gds_format_string(quote_xml(self.UpperBoundary), input_name='Literal')),'ogc:', 'Literal', '\n'))
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % ('ogc:', 'UpperBoundary', '\n')) 
+            
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)

@@ -281,6 +281,14 @@ def get_alphanumeric_fields(fields):
             
     return alphanumeric_fields
 
+def get_numeric_fields(fields):
+    numeric_fields = []
+    for field in fields:
+        if field.get('binding').startswith('java.math'):
+            numeric_fields.append(field)
+            
+    return numeric_fields
+
 def get_feature_type(fields):
     featureType = None
     for field in fields:
