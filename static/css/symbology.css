@@ -76,3 +76,8 @@
 	display: inline-block;
     margin-right: 20px;
 }
+
+.CodeMirror {
+  border: 1px solid #eee;
+  height: auto;
+}

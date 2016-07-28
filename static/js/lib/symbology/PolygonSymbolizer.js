@@ -36,7 +36,6 @@ var PolygonSymbolizer = function(rule, options, utils) {
 	if (options) {
 		$.extend(this, options);
 	}
-	console.log(this);
 };
 
 PolygonSymbolizer.prototype.getTableUI = function() {
