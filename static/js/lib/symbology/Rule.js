@@ -48,24 +48,35 @@ var Rule = function(id, name, title, options, utils) {
 	
 };
 
-Rule.prototype.getTableUI = function(allowImport) {
+Rule.prototype.getTableUI = function(allowImport, type) {
 	var self = this;
 	
 	var ui = '';
 	
 	ui += '<div data-ruleid="' + this.id + '" class="col-md-12">';
-	ui += 	'<div class="box box-primary collapsed-box">';
+	if(type == 'unique') {
+		ui += 	'<div class="box box-primary">';
+	} else {
+		ui += 	'<div class="box box-primary collapsed-box">';
+	}
 	ui += 		'<div class="box-header with-border">';
 	ui += 			'<div class="rule-preview" id="rule-preview-' + this.id + '"></div>';
 	ui += 				'<h3 class="box-title">' + this.title + '</h3>';
-	ui += 				'<div class="box-tools pull-right">';
-	ui += 					'<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
-	ui += 						'<i class="fa fa-plus"></i>';
-	ui += 					'</button>';
-	ui += 					'<button data-ruleid="' + this.id + '" style="color:#f56954;" class="btn btn-box-tool btn-box-tool-custom delete-rule">';
-	ui += 						'<i class="fa fa-times"></i>';
-	ui += 					'</button>';
-	ui += 				'</div>';
+	if(type != 'unique') {
+		ui += 			'<div class="box-tools pull-right">';
+		ui += 				'<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
+		ui += 					'<i class="fa fa-plus"></i>';
+		ui += 				'</button>';
+		if(type != 'unique') {
+			ui += 			'<button id="create-expression-' + this.id + '" data-ruleid="' + this.id + '" style="color:#3c8dbc;" class="btn btn-box-tool btn-box-tool-custom create-expression">';
+			ui += 				'<i class="fa fa-cogs"></i>';
+			ui += 			'</button>';
+		}
+		ui += 				'<button data-ruleid="' + this.id + '" style="color:#f56954;" class="btn btn-box-tool btn-box-tool-custom delete-rule">';
+		ui += 					'<i class="fa fa-times"></i>';
+		ui += 				'</button>';
+		ui += 			'</div>';
+	}
 	ui += 			'</div>';
 	ui += 			'<div class="box-body">';
 	ui += 				'<div class="table-responsive">';
@@ -99,6 +110,11 @@ Rule.prototype.registerEvents = function() {
 	
 	$("#append-symbol-button-" + this.id).on('click', function(e){
 		self.addSymbolizer();
+	});
+	
+	$("#create-expression-" + this.id).on('click', function(e){
+		e.preventDefault();
+		$('#modal-expression').modal('show');
 	});
 	
 	$("#import-symbol-button-" + this.id).on('click', function(e){
