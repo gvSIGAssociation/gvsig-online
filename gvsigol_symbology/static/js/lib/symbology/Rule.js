@@ -61,7 +61,7 @@ Rule.prototype.getTableUI = function(allowImport, type) {
 	}
 	ui += 		'<div class="box-header with-border">';
 	ui += 			'<div class="rule-preview" id="rule-preview-' + this.id + '"></div>';
-	ui += 				'<h3 class="box-title">' + this.title + '</h3>';
+	ui += 				'<h3 id="rule-title-' + this.id + '" class="box-title">' + this.title + '</h3>';
 	if(type != 'unique') {
 		ui += 			'<div class="box-tools pull-right">';
 		ui += 				'<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
@@ -69,7 +69,7 @@ Rule.prototype.getTableUI = function(allowImport, type) {
 		ui += 				'</button>';
 		if(type != 'unique') {
 			ui += 			'<button id="create-expression-' + this.id + '" data-ruleid="' + this.id + '" style="color:#3c8dbc;" class="btn btn-box-tool btn-box-tool-custom create-expression">';
-			ui += 				'<i class="fa fa-cogs"></i>';
+			ui += 				'<i class="fa fa-filter"></i>';
 			ui += 			'</button>';
 		}
 		ui += 				'<button data-ruleid="' + this.id + '" style="color:#f56954;" class="btn btn-box-tool btn-box-tool-custom delete-rule">';
@@ -110,11 +110,6 @@ Rule.prototype.registerEvents = function() {
 	
 	$("#append-symbol-button-" + this.id).on('click', function(e){
 		self.addSymbolizer();
-	});
-	
-	$("#create-expression-" + this.id).on('click', function(e){
-		e.preventDefault();
-		$('#modal-expression').modal('show');
 	});
 	
 	$("#import-symbol-button-" + this.id).on('click', function(e){
