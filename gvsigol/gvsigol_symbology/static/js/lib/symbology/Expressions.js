@@ -21,7 +21,7 @@
  */
  
  
-var UniqueValues = function(featureType, layerName, utils, previewUrl) {
+var Expressions = function(featureType, layerName, utils, previewUrl) {
 	this.selected = null;
 	this.featureType = featureType;
 	this.layerName = layerName;
@@ -31,7 +31,7 @@ var UniqueValues = function(featureType, layerName, utils, previewUrl) {
 	this.label = null;
 };
 
-UniqueValues.prototype.showLabel = function() {
+Expressions.prototype.showLabel = function() {
 	if (this.label) {
 		this.updateLabelForm();
 		$('#modal-symbolizer').modal('show');
@@ -43,7 +43,7 @@ UniqueValues.prototype.showLabel = function() {
 	}
 };
 
-UniqueValues.prototype.loadLabel = function(options) {
+Expressions.prototype.loadLabel = function(options) {
 	if (this.label) {
 		this.label = null;
 		this.label = new TextSymbolizer(this.rule, options, this.utils);
@@ -55,7 +55,7 @@ UniqueValues.prototype.loadLabel = function(options) {
 	}
 };
 
-UniqueValues.prototype.updateLabelForm = function() {
+Expressions.prototype.updateLabelForm = function() {
 	$('#tab-menu').empty();
 	$('#tab-content').empty();	
 	
@@ -68,11 +68,23 @@ UniqueValues.prototype.updateLabelForm = function() {
 	
 };
 
-UniqueValues.prototype.getRules = function() {
+Expressions.prototype.addNewRule = function() {
+	var id = this.rules.length;
+	var name = gettext('rule') + '_' + id;
+	var title = gettext('Rule') + ' ' + id;
+	var rule = new Rule(id, name, title, null, this.utils);
+	$('#rules').append(rule.getTableUI(true, 'expressions'));
+	rule.registerEvents();
+	rule.addSymbolizer();
+	rule.preview();
+	this.addRule(rule);
+};
+
+Expressions.prototype.getRules = function() {
 	return this.rules;
 };
 
-UniqueValues.prototype.getRuleById = function(id) {
+Expressions.prototype.getRuleById = function(id) {
 	for (var i=0; i < this.rules.length; i++) {
 		if (this.rules[i].id == id) {
 			return this.rules[i];
@@ -80,11 +92,11 @@ UniqueValues.prototype.getRuleById = function(id) {
 	}
 };
 
-UniqueValues.prototype.addRule = function(rule) {
+Expressions.prototype.addRule = function(rule) {
 	return this.rules.push(rule);
 };
 
-UniqueValues.prototype.deleteRule = function(id) {
+Expressions.prototype.deleteRule = function(id) {
 	for (var i=0; i < this.rules.length; i++) {
 		if (this.rules[i].id == id) {
 			this.rules.splice(i, 1);
@@ -98,7 +110,7 @@ UniqueValues.prototype.deleteRule = function(id) {
 	}
 };
 
-UniqueValues.prototype.load = function(selectedField, values) {
+Expressions.prototype.load = function(selectedField, values) {
 	$('#rules').empty();
 	this.rules.splice(0, this.rules.length);
 	for (var i=0; i<values.length; i++) {
@@ -112,7 +124,7 @@ UniqueValues.prototype.load = function(selectedField, values) {
 			literal: values[i]
 		};
 		rule.setFilter(filter);
-		$('#rules').append(rule.getTableUI(true, 'unique_values'));
+		$('#rules').append(rule.getTableUI(true, 'expressions'));
 		rule.registerEvents();
 		var colors = this.utils.createColorRange('random', values.length);
 		rule.addSymbolizer({fill: colors[i]});
@@ -121,7 +133,7 @@ UniqueValues.prototype.load = function(selectedField, values) {
 	}
 };
 
-UniqueValues.prototype.loadRules = function(rules) {
+Expressions.prototype.loadRules = function(rules) {
 	$('#rules').empty();
 	this.rules.splice(0, this.rules.length);
 	for (var i=0; i<rules.length; i++) {
@@ -131,7 +143,7 @@ UniqueValues.prototype.loadRules = function(rules) {
 			
 		rule.removeAllSymbolizers();
 		rule.removeLabel();
-		$('#rules').append(rule.getTableUI(true, 'unique_values'));
+		$('#rules').append(rule.getTableUI(true, 'expressions'));
 		
 		for (var j=0; j<rules[i].symbolizers.length; j++) {
 			
@@ -158,11 +170,11 @@ UniqueValues.prototype.loadRules = function(rules) {
 	}
 };
 
-UniqueValues.prototype.refreshMap = function() {
+Expressions.prototype.refreshMap = function() {
 	this.utils.updateMap(this, this.layerName);
 };
 
-UniqueValues.prototype.save = function(layerId) {
+Expressions.prototype.save = function(layerId) {
 	
 	$("body").overlay();
 	
@@ -226,7 +238,7 @@ UniqueValues.prototype.save = function(layerId) {
 	});
 };
 
-UniqueValues.prototype.update = function(layerId, styleId) {
+Expressions.prototype.update = function(layerId, styleId) {
 	
 	$("body").overlay();
 	

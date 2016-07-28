@@ -21,7 +21,7 @@
  */
  
  
-var UniqueValues = function(featureType, layerName, utils, previewUrl) {
+var Intervals = function(featureType, layerName, utils, previewUrl) {
 	this.selected = null;
 	this.featureType = featureType;
 	this.layerName = layerName;
@@ -31,7 +31,7 @@ var UniqueValues = function(featureType, layerName, utils, previewUrl) {
 	this.label = null;
 };
 
-UniqueValues.prototype.showLabel = function() {
+Intervals.prototype.showLabel = function() {
 	if (this.label) {
 		this.updateLabelForm();
 		$('#modal-symbolizer').modal('show');
@@ -43,7 +43,7 @@ UniqueValues.prototype.showLabel = function() {
 	}
 };
 
-UniqueValues.prototype.loadLabel = function(options) {
+Intervals.prototype.loadLabel = function(options) {
 	if (this.label) {
 		this.label = null;
 		this.label = new TextSymbolizer(this.rule, options, this.utils);
@@ -55,7 +55,7 @@ UniqueValues.prototype.loadLabel = function(options) {
 	}
 };
 
-UniqueValues.prototype.updateLabelForm = function() {
+Intervals.prototype.updateLabelForm = function() {
 	$('#tab-menu').empty();
 	$('#tab-content').empty();	
 	
@@ -68,11 +68,11 @@ UniqueValues.prototype.updateLabelForm = function() {
 	
 };
 
-UniqueValues.prototype.getRules = function() {
+Intervals.prototype.getRules = function() {
 	return this.rules;
 };
 
-UniqueValues.prototype.getRuleById = function(id) {
+Intervals.prototype.getRuleById = function(id) {
 	for (var i=0; i < this.rules.length; i++) {
 		if (this.rules[i].id == id) {
 			return this.rules[i];
@@ -80,11 +80,11 @@ UniqueValues.prototype.getRuleById = function(id) {
 	}
 };
 
-UniqueValues.prototype.addRule = function(rule) {
+Intervals.prototype.addRule = function(rule) {
 	return this.rules.push(rule);
 };
 
-UniqueValues.prototype.deleteRule = function(id) {
+Intervals.prototype.deleteRule = function(id) {
 	for (var i=0; i < this.rules.length; i++) {
 		if (this.rules[i].id == id) {
 			this.rules.splice(i, 1);
@@ -98,30 +98,61 @@ UniqueValues.prototype.deleteRule = function(id) {
 	}
 };
 
-UniqueValues.prototype.load = function(selectedField, values) {
+Intervals.prototype.load = function(response, selectedField, numberOfIntervals) {
 	$('#rules').empty();
 	this.rules.splice(0, this.rules.length);
-	for (var i=0; i<values.length; i++) {
-		var ruleName = "rule_" + i;
-		var ruleTitle = values[i];
+	
+	var minMax = JSON.parse(response);
+	var colors = this.utils.createColorRange('intervals', numberOfIntervals);
+	
+	for (var i=0; i<numberOfIntervals; i++) {
+		
+		var min = this.getMinValueForInterval(minMax.min, minMax.max, i, numberOfIntervals);
+		var max = this.getMaxValueForInterval(minMax.min, minMax.max, i, numberOfIntervals);
+		
+		var fieldFilter = min + "<=" + selectedField + "<=" + max;
+		var fieldName = min + "-" + max;
+		
+		var ruleName = min + "-" + max;
+		var ruleTitle = min + "-" + max;
 		var rule = new Rule(i, ruleName, ruleTitle, null, this.utils);
+		
 		var filter = {
-			type: 'is_equal',
-			operator: 'PropertyIsEqualTo',
+			type: 'between',
 			property_name: selectedField,
-			literal: values[i]
+			lower_boundary: min,		
+			upper_boundary: max
 		};
 		rule.setFilter(filter);
-		$('#rules').append(rule.getTableUI(true, 'unique_values'));
-		rule.registerEvents();
-		var colors = this.utils.createColorRange('random', values.length);
+		
+		$('#rules').append(rule.getTableUI(true, 'intervals'));
 		rule.addSymbolizer({fill: colors[i]});
 		rule.preview();
 		this.addRule(rule);
 	}
 };
 
-UniqueValues.prototype.loadRules = function(rules) {
+Intervals.prototype.getMinValueForInterval = function(min, max, it, numberOfIntervals){
+	if(it == 0){
+		return min;
+	}
+	var gap = (max-min)/numberOfIntervals;
+	var value = min + (gap*it);
+	
+	return value;
+}
+
+Intervals.prototype.getMaxValueForInterval = function(min, max, it, numberOfIntervals){
+	if(it == numberOfIntervals-1){
+		return max;
+	}
+	var gap = (max-min)/numberOfIntervals;
+	var value = min + (gap*(it+1));
+	
+	return value;
+}
+
+Intervals.prototype.loadRules = function(rules) {
 	$('#rules').empty();
 	this.rules.splice(0, this.rules.length);
 	for (var i=0; i<rules.length; i++) {
@@ -131,7 +162,7 @@ UniqueValues.prototype.loadRules = function(rules) {
 			
 		rule.removeAllSymbolizers();
 		rule.removeLabel();
-		$('#rules').append(rule.getTableUI(true, 'unique_values'));
+		$('#rules').append(rule.getTableUI(true, 'intervals'));
 		
 		for (var j=0; j<rules[i].symbolizers.length; j++) {
 			
@@ -158,11 +189,11 @@ UniqueValues.prototype.loadRules = function(rules) {
 	}
 };
 
-UniqueValues.prototype.refreshMap = function() {
+Intervals.prototype.refreshMap = function() {
 	this.utils.updateMap(this, this.layerName);
 };
 
-UniqueValues.prototype.save = function(layerId) {
+Intervals.prototype.save = function(layerId) {
 	
 	$("body").overlay();
 	
@@ -207,7 +238,7 @@ UniqueValues.prototype.save = function(layerId) {
 	$.ajax({
 		type: "POST",
 		async: false,
-		url: "/gvsigonline/symbology/unique_values_add/" + layerId + "/",
+		url: "/gvsigonline/symbology/intervals_add/" + layerId + "/",
 		beforeSend:function(xhr){
 			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},
@@ -226,7 +257,7 @@ UniqueValues.prototype.save = function(layerId) {
 	});
 };
 
-UniqueValues.prototype.update = function(layerId, styleId) {
+Intervals.prototype.update = function(layerId, styleId) {
 	
 	$("body").overlay();
 	

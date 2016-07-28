@@ -52,7 +52,7 @@ def create_style(session, json_data, layer_id):
         name = json_data.get('name'),
         title = json_data.get('title'),
         is_default = json_data.get('is_default'),
-        type = 'UV'
+        type = 'IN'
     )
     style.save()
     style_layer = StyleLayer(
@@ -295,6 +295,7 @@ def get_conf(session, layer_id):
     fields = utils.get_fields(resource)
     feature_type = utils.get_feature_type(fields)
     alphanumeric_fields = utils.get_alphanumeric_fields(fields)
+    numeric_fields = utils.get_numeric_fields(fields)
        
     supported_fonts_str = mapservice.getSupportedFonts(session)
     supported_fonts = json.loads(supported_fonts_str)
@@ -319,6 +320,7 @@ def get_conf(session, layer_id):
     conf = {
         'featureType': feature_type,
         'fields': alphanumeric_fields,
+        'numeric_fields': numeric_fields,
         'json_alphanumeric_fields': json.dumps(alphanumeric_fields),
         'fonts': sorted_fonts,
         'layer_id': layer_id,
