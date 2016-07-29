@@ -70,7 +70,7 @@ def create_default_style(session, layer_id, style_name, style_type, geom_type):
         name = 'Default symbol',
         title = 'Default symbol',
         abstract = '',
-        filter = '',
+        filter = str(""),
         minscale = -1,
         maxscale = -1,
         order = 0

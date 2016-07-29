@@ -233,7 +233,7 @@ $(document).ready(function() {
 	
 	$("#save-legend").on('click', function(e){
 		if ($("#style-name").val() != '') {
-			expressions.save(layerId);
+			expressions.update(layerId, styleId);
 			
 		} else {
 			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
