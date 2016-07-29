@@ -78,7 +78,7 @@ UniqueSymbol.prototype.loadRule = function(symbolizers) {
 		if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer') {
 			this.loadLabel(options);
 			
-		} else if (symbolizer.type == 'gvsigol_symbology.externalgraphic') {
+		} else if (symbolizer[0].model == 'gvsigol_symbology.externalgraphicsymbolizer') {
 			this.rule.addExternalGraphicSymbolizer(options);
 			
 		} else {

@@ -465,12 +465,15 @@ Expressions.prototype.load = function(selectedField, values) {
 };
 
 Expressions.prototype.loadRules = function(rules) {
+	var self = this;
 	$('#rules').empty();
 	this.rules.splice(0, this.rules.length);
 	for (var i=0; i<rules.length; i++) {
 		var rule = new Rule(rules[i].id, rules[i].name, rules[i].title, null, this.utils);
-		var filter = JSON.parse(rules[i].filter);
-		rule.setFilter(filter);
+		if (rules[i].filter != '') {
+			var filter = JSON.parse(rules[i].filter);
+			rule.setFilter(filter);
+		}
 			
 		rule.removeAllSymbolizers();
 		rule.removeLabel();
@@ -498,6 +501,15 @@ Expressions.prototype.loadRules = function(rules) {
 		rule.registerEvents();
 		rule.preview();
 		this.addRule(rule);
+		
+		$(".create-expression").on('click', function(e){
+			e.preventDefault();
+			self.getFilterFormUI(this.dataset.ruleid);
+			$('#modal-expression').modal('show');
+			$('.CodeMirror').each(function(i, el){
+			    el.CodeMirror.refresh();
+			});
+		});
 	}
 };
 
