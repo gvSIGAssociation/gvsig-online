@@ -63,14 +63,9 @@
 				</div>
 				
 				<div class="row">
-					<div class="col-md-6 form-group">
-						<label>{% trans "Select field to generate unique values" %}</label>
-						<select id="select-unique-values-field" class="form-control">
-							<option disabled selected value> -- {% trans "Select field" %} -- </option>
-							{% for field in fields %}
-							<option value="{{field.name}}">{{field.name}}</option>
-							{% endfor %}
-						</select>
+					<div class="col-md-12 form-group">
+						<button id="add-expression" class="btn btn-sm btn-success refresh-preview"><i class="fa fa-plus margin-r-5"></i> {% trans "Add new rule" %}</button>
+						<span class="text-muted">{% trans "Creates a new rule based on an expression" %}</span>
 					</div>
 				</div>
 				
@@ -143,6 +138,36 @@
 		</div>
 	</div>
 </div> 
+
+<!-- Modal -->
+<div class="modal fade" id="modal-expression" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div id="modal-expression-content" class="modal-body">
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-edit-rule" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div id="modal-edit-rule-content" class="modal-body">
+			</div>
+		</div>
+	</div>
+</div>
 {% endblock %}
 
 {% block extra-scripts %}
@@ -195,17 +220,20 @@ $(document).ready(function() {
 	map.addLayer(wmsLayer);
 	
 	var utils = new SymbologyUtils(map, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
-	var uniqueValues = new UniqueValues(featureType, layerName, utils, previewUrl);
-	uniqueValues.loadRules(rules);
+	var expressions = new Expressions(featureType, layerName, utils, previewUrl);
+	expressions.loadRules(rules);
 	$(".delete-rule").on('click', function(e){
-		uniqueValues.deleteRule(this.dataset.ruleid);
+		expressions.deleteRule(this.dataset.ruleid);
 	});
-	
 	utils.centerMap(layerName, wfsUrl);
+	
+	$("#show-label").on('click', function(e){
+		expressions.showLabel();
+	});
 	
 	$("#save-legend").on('click', function(e){
 		if ($("#style-name").val() != '') {
-			uniqueValues.update(layerId, styleId);
+			expressions.save(layerId);
 			
 		} else {
 			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
@@ -215,30 +243,13 @@ $(document).ready(function() {
 	});
 	
 	$("#refresh-preview").on('click', function(e){
-		uniqueValues.refreshMap();
+		expressions.refreshMap();
 	});
 	
-	$("#select-unique-values-field").on('change', function(e) {
-		$(".users-list").empty();
-		var selectedField = this.value;
-		$.ajax({
-			type: "POST",
-			async: false,
-			url: "/gvsigonline/symbology/get_unique_values/",
-			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-			},
-			data: {
-				layer_id: layerId,
-				field: selectedField
-			},
-			success: function(response){
-				uniqueValues.load(selectedField, response.values);	
-				$(".delete-rule").on('click', function(e){
-					uniqueValues.deleteRule(this.dataset.ruleid);
-				});
-			},
-		    error: function(){}
+	$("#add-expression").on('click', function(e) {
+		expressions.addNewRule();
+		$(".delete-rule").on('click', function(e){
+			expressions.deleteRule(this.dataset.ruleid);
 		});
 	});
 

@@ -109,7 +109,7 @@ UniqueValues.prototype.load = function(selectedField, values) {
 			type: 'is_equal',
 			operator: 'PropertyIsEqualTo',
 			property_name: selectedField,
-			literal: values[i]
+			value1: values[i]
 		};
 		rule.setFilter(filter);
 		$('#rules').append(rule.getTableUI(true, 'unique_values'));
