@@ -100,7 +100,7 @@ def get_rule(r, symbolizers):
     rule.set_Name(r.name)
     rule.set_Title(r.title.encode('ascii', 'ignore'))
     rule.set_Abstract(r.abstract)
-    if r.filter == '':
+    if r.filter == "":
         rule.set_Filter(None)
     else:
         filter = getFilter(r.filter)

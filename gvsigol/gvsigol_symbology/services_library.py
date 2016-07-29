@@ -77,8 +77,8 @@ def add_symbol(request, json_rule, library_id, symbol_type):
         style = style,
         name = name,
         title = title,
-        abstract = '',
-        filter = '',
+        abstract = "",
+        filter = str(""),
         minscale = json_rule.get('minscale'),
         maxscale = json_rule.get('maxscale'),
         order = json_rule.get('order')
@@ -401,7 +401,7 @@ def upload_library(name, description, file, session):
                 name = r.Name,
                 title = r.Title,
                 abstract = '',
-                filter = '',
+                filter = str(""),
                 minscale = -1 if r.MinScaleDenominator is None else r.MinScaleDenominator,
                 maxscale = -1 if r.MaxScaleDenominator is None else r.MaxScaleDenominator,
                 order = 0
