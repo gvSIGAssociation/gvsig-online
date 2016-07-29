@@ -67,11 +67,18 @@ Rule.prototype.getTableUI = function(allowImport, type) {
 		ui += 				'<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
 		ui += 					'<i class="fa fa-plus"></i>';
 		ui += 				'</button>';
-		if(type != 'unique') {
-			ui += 			'<button id="create-expression-' + this.id + '" data-ruleid="' + this.id + '" style="color:#3c8dbc;" class="btn btn-box-tool btn-box-tool-custom create-expression">';
-			ui += 				'<i class="fa fa-filter"></i>';
-			ui += 			'</button>';
+		ui += 				'<div class="btn-group">';
+		ui += 					'<button style="color:#3c8dbc;" data-toggle="dropdown" class="btn btn-box-tool btn-box-tool-custom dropdown-toggle">';
+		ui += 						'<i class="fa fa-wrench"></i>';
+		ui += 					'</button>';
+		ui += 					'<ul class="dropdown-menu" role="menu">';
+		ui += 						'<li><a href="#" id="edit-rule-' + this.id + '" data-ruleid="' + this.id + '"><i class="fa fa-edit m-r-5"></i> ' + gettext('Edit rule') + '</a></li>';
+		if(type == 'expressions') {
+			ui += 					'<li><a href="#" class="create-expression" id="create-expression-' + this.id + '" data-ruleid="' + this.id + '"><i class="fa fa-filter m-r-5"></i> ' + gettext('Edit filter') + '</a></li>';
+			
 		}
+		ui += 					'</ul>';
+		ui += 				'</div>';
 		ui += 				'<button data-ruleid="' + this.id + '" style="color:#f56954;" class="btn btn-box-tool btn-box-tool-custom delete-rule">';
 		ui += 					'<i class="fa fa-times"></i>';
 		ui += 				'</button>';
@@ -107,6 +114,45 @@ Rule.prototype.getTableUI = function(allowImport, type) {
 
 Rule.prototype.registerEvents = function() {
 	var self = this;
+	
+	$("#edit-rule-" + this.id).on('click', function(e){
+		var ui = '';
+		ui += '<div class="box">';
+		ui += 	'<div class="box-body">';
+		ui += 		'<div class="row">';
+		ui += 			'<div class="col-md-12 form-group">';
+		ui += 				'<label>' + gettext('Rule name') + '</label>';
+		ui += 				'<input id="r-name-' + self.id + '" type="text" value="' + self.name + '" class="form-control">';
+		ui += 			'</div>';
+		ui += 			'<div class="col-md-12 form-group">';
+		ui += 				'<label>' + gettext('Rule title') + '</label>';
+		ui += 				'<input id="r-title-' + self.id + '" type="text" value="' + self.title + '" class="form-control">';
+		ui += 			'</div>';
+		ui += 		'</div>';
+		ui += 	'</div>';
+		ui += 	'<div class="box-footer clearfix">';
+		ui += 		'<button id="save-rule-metadata-' + self.id + '" class="btn btn-sm btn-success btn-flat pull-right margin-r-5">';
+		ui += 			'<i class="fa fa-floppy-o margin-r-5"></i>' + gettext('Save');
+		ui += 		'</button>';
+		ui += 	'</div>';
+		ui += '</div>';
+		
+		$('#modal-edit-rule-content').empty();
+		$('#modal-edit-rule-content').append(ui);
+		
+		$("#save-rule-metadata-" + self.id).on('click', function(e){
+			var name = $("#r-name-" + self.id).val();
+			var title = $("#r-title-" + self.id).val();
+			self.name = name;
+			self.title = title;
+			
+			$('#rule-title-' + self.id).text(title);
+			
+			$('#modal-edit-rule').modal('hide');
+		});
+		
+		$('#modal-edit-rule').modal('show');
+	});
 	
 	$("#append-symbol-button-" + this.id).on('click', function(e){
 		self.addSymbolizer();
