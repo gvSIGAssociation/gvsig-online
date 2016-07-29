@@ -25,8 +25,8 @@ var Rule = function(id, name, title, options, utils) {
 	this.id = id;
 	this.name = name;
 	this.title = title;
-	this.abstract = '';
-	this.filter = '';
+	this.abstract = "";
+	this.filter = "";
 	this.minscale = -1;
 	this.maxscale = -1;
 	this.order = 0;
@@ -39,8 +39,8 @@ var Rule = function(id, name, title, options, utils) {
 		this.id = options.id;
 		this.name = options.name;
 		this.title = options.title;
-		this.abstract = '';
-		this.filter = '';
+		this.abstract = "";
+		this.filter = "";
 		this.minscale = parseInt(options.minscale);
 		this.maxscale = parseInt(options.maxscale);
 		this.order = parseInt(options.order);
@@ -296,7 +296,7 @@ Rule.prototype.loadLibrarySymbol = function(symbolizers) {
 		var options = symbolizer[0].fields;
 		options['order'] = order;
 		
-		if (symbolizer.type == 'gvsigol_symbology.externalgraphic') {
+		if (symbolizer[0].model == 'gvsigol_symbology.externalgraphicsymbolizer') {
 			this.addExternalGraphicSymbolizer(options);
 			
 		} else {
@@ -381,7 +381,7 @@ Rule.prototype.addExternalGraphicSymbolizer = function(options) {
 		self.removeSymbolizer(this.dataset.symbolizerid);
 	});
 	
-	this.rule.appendSymbolizer(symbolizer);
+	this.symbolizers.push(symbolizer);
 };
 
 Rule.prototype.setLabel = function(label) {

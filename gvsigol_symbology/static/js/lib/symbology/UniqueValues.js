@@ -106,7 +106,7 @@ UniqueValues.prototype.load = function(selectedField, values) {
 		var ruleTitle = values[i];
 		var rule = new Rule(i, ruleName, ruleTitle, null, this.utils);
 		var filter = {
-			type: 'is_equal',
+			type: 'is_equal_to',
 			operator: 'PropertyIsEqualTo',
 			property_name: selectedField,
 			value1: values[i]
@@ -115,7 +115,7 @@ UniqueValues.prototype.load = function(selectedField, values) {
 		$('#rules').append(rule.getTableUI(true, 'unique_values'));
 		rule.registerEvents();
 		var colors = this.utils.createColorRange('random', values.length);
-		rule.addSymbolizer({fill: colors[i]});
+		rule.addSymbolizer({fill: colors[i], stroke: colors[i]});
 		rule.preview();
 		this.addRule(rule);
 	}

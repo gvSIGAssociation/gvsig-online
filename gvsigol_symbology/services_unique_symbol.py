@@ -65,8 +65,8 @@ def create_style(session, json_data, layer_id):
         style = style,
         name = json_rule.get('name'),
         title = json_rule.get('title'),
-        abstract = '',
-        filter = '',
+        abstract = "",
+        filter = str(""),
         minscale = json_rule.get('minscale'),
         maxscale = json_rule.get('maxscale'),
         order = json_rule.get('order')
@@ -98,11 +98,14 @@ def create_style(session, json_data, layer_id):
             )
             symbolizer.save()      
             
-        elif sym.get('type') == 'Mark':
+        elif sym.get('type') == 'MarkSymbolizer':
             json_sym = json.loads(sym.get('json'))
             symbolizer = MarkSymbolizer(
                 rule = rule,
                 order = int(sym.get('order')),
+                opacity = json_sym.get('opacity'),
+                size = json_sym.get('size'),
+                rotation = json_sym.get('rotation'),
                 well_known_name = json_sym.get('well_known_name'),
                 fill = json_sym.get('fill'),
                 fill_opacity = json_sym.get('fill_opacity'),
@@ -117,6 +120,9 @@ def create_style(session, json_data, layer_id):
             symbolizer = ExternalGraphicSymbolizer(
                 rule = rule,
                 order = int(sym.get('order')),
+                opacity = json_sym.get('opacity'),
+                size = json_sym.get('size'),
+                rotation = json_sym.get('rotation'),
                 online_resource = json_sym.get('online_resource'),
                 format = json_sym.get('format')                 
             )
@@ -203,11 +209,14 @@ def update_style(session, json_data, layer_id, style_id):
             )
             symbolizer.save()      
             
-        elif sym.get('type') == 'Mark':
+        elif sym.get('type') == 'MarkSymbolizer':
             json_sym = json.loads(sym.get('json'))
             symbolizer = MarkSymbolizer(
                 rule = rule,
                 order = int(sym.get('order')),
+                opacity = json_sym.get('opacity'),
+                size = json_sym.get('size'),
+                rotation = json_sym.get('rotation'),
                 well_known_name = json_sym.get('well_known_name'),
                 fill = json_sym.get('fill'),
                 fill_opacity = json_sym.get('fill_opacity'),
@@ -217,11 +226,14 @@ def update_style(session, json_data, layer_id, style_id):
             )
             symbolizer.save()  
             
-        elif sym.get('type') == 'ExternalGraphic':
+        elif sym.get('type') == 'ExternalGraphicSymbolizer':
             json_sym = json.loads(sym.get('json'))
             symbolizer = ExternalGraphicSymbolizer(
                 rule = rule,
                 order = int(sym.get('order')),
+                opacity = json_sym.get('opacity'),
+                size = json_sym.get('size'),
+                rotation = json_sym.get('rotation'),
                 online_resource = json_sym.get('online_resource'),
                 format = json_sym.get('format')                 
             )
