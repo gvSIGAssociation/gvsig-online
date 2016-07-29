@@ -120,8 +120,8 @@ Intervals.prototype.load = function(response, selectedField, numberOfIntervals) 
 		var filter = {
 			type: 'between',
 			property_name: selectedField,
-			lower_boundary: min,		
-			upper_boundary: max
+			value1: min,		
+			value2: max
 		};
 		rule.setFilter(filter);
 		
