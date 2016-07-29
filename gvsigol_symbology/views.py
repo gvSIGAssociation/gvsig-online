@@ -68,6 +68,9 @@ def style_layer_update(request, layer_id, style_id):
     elif (style.type == 'IN'):
         return redirect('intervals_update', layer_id=layer_id, style_id=style_id)
     
+    elif (style.type == 'EX'):
+        return redirect('expressions_update', layer_id=layer_id, style_id=style_id)
+    
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @admin_required
 def style_layer_delete(request):
