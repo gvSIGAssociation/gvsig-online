@@ -3586,6 +3586,14 @@ class TextSymbolizer(SymbolizerType):
             self.Halo.export(outfile, level, namespace_='sld:', name_='Halo', pretty_print=pretty_print)
         if self.Fill is not None:
             self.Fill.export(outfile, level, namespace_='sld:', name_='Fill', pretty_print=pretty_print)
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<VendorOption name="conflictResolution">true</VendorOption>\n')
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<VendorOption name="autoWrap">100</VendorOption>\n')
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<VendorOption name="spaceAround">0</VendorOption>\n') 
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<VendorOption name="polygonAlign">mbr</VendorOption>\n')
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -6811,32 +6819,32 @@ class FilterType(GeneratedsSuper):
             self.comparisonOps = obj_
             obj_.original_tagname_ = 'comparisonOps'
         elif nodeName_ == 'PropertyIsEqualTo':
-            obj_ = BinaryComparisonOpType.factory()
+            obj_ = PropertyIsEqualTo.factory()
             obj_.build(child_)
             self.comparisonOps = obj_
             obj_.original_tagname_ = 'PropertyIsEqualTo'
         elif nodeName_ == 'PropertyIsNotEqualTo':
-            obj_ = BinaryComparisonOpType.factory()
+            obj_ = PropertyIsNotEqualTo.factory()
             obj_.build(child_)
             self.comparisonOps = obj_
             obj_.original_tagname_ = 'PropertyIsNotEqualTo'
         elif nodeName_ == 'PropertyIsLessThan':
-            obj_ = BinaryComparisonOpType.factory()
+            obj_ = PropertyIsLessThan.factory()
             obj_.build(child_)
             self.comparisonOps = obj_
             obj_.original_tagname_ = 'PropertyIsLessThan'
         elif nodeName_ == 'PropertyIsGreaterThan':
-            obj_ = BinaryComparisonOpType.factory()
+            obj_ = PropertyIsLessThan.factory()
             obj_.build(child_)
             self.comparisonOps = obj_
             obj_.original_tagname_ = 'PropertyIsGreaterThan'
         elif nodeName_ == 'PropertyIsLessThanOrEqualTo':
-            obj_ = BinaryComparisonOpType.factory()
+            obj_ = PropertyIsLessThanOrEqualTo.factory()
             obj_.build(child_)
             self.comparisonOps = obj_
             obj_.original_tagname_ = 'PropertyIsLessThanOrEqualTo'
         elif nodeName_ == 'PropertyIsGreaterThanOrEqualTo':
-            obj_ = BinaryComparisonOpType.factory()
+            obj_ = PropertyIsGreaterThanOrEqualTo.factory()
             obj_.build(child_)
             self.comparisonOps = obj_
             obj_.original_tagname_ = 'PropertyIsGreaterThanOrEqualTo'
@@ -7141,6 +7149,8 @@ class PropertyIsLikeType(ComparisonOpsType):
             eol_ = ''
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
+        namespace_='ogc:'
+        name_='PropertyIsLike'
         showIndent(outfile, level, pretty_print)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         already_processed = set()
@@ -7170,9 +7180,11 @@ class PropertyIsLikeType(ComparisonOpsType):
         else:
             eol_ = ''
         if self.PropertyName is not None:
-            self.PropertyName.export(outfile, level, namespace_='ogc:', name_='PropertyName', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%s%s>%s</%s%s>%s' % ('ogc:', 'PropertyName', self.gds_encode(self.gds_format_string(quote_xml(self.PropertyName), input_name='PropertyName')),'ogc:', 'PropertyName', '\n'))
         if self.Literal is not None:
-            self.Literal.export(outfile, level, namespace_='ogc:', name_='Literal', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%s%s>%s</%s%s>%s' % ('ogc:', 'Literal', self.gds_encode(self.gds_format_string(quote_xml(self.Literal), input_name='Literal')),'ogc:', 'Literal', '\n'))
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -7196,15 +7208,17 @@ class PropertyIsLikeType(ComparisonOpsType):
         super(PropertyIsLikeType, self).buildAttributes(node, attrs, already_processed)
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'PropertyName':
-            obj_ = PropertyNameType.factory()
-            obj_.build(child_)
-            self.PropertyName = obj_
-            obj_.original_tagname_ = 'PropertyName'
+            #obj_ = PropertyNameType.factory()
+            #obj_.build(child_)
+            #self.PropertyName = obj_
+            #obj_.original_tagname_ = 'PropertyName'
+            self.PropertyName = child_.text
         elif nodeName_ == 'Literal':
-            obj_ = LiteralType.factory()
-            obj_.build(child_)
-            self.Literal = obj_
-            obj_.original_tagname_ = 'Literal'
+            #obj_ = LiteralType.factory()
+            #obj_.build(child_)
+            #self.Literal = obj_
+            #obj_.original_tagname_ = 'Literal'
+            self.Literal = child_.text
         super(PropertyIsLikeType, self).buildChildren(child_, node, nodeName_, True)
 # end class PropertyIsLikeType
 
@@ -7316,17 +7330,625 @@ class PropertyIsEqualTo(ComparisonOpsType):
         super(PropertyIsEqualTo, self).buildAttributes(node, attrs, already_processed)
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'PropertyName':
-            obj_ = PropertyNameType.factory()
-            obj_.build(child_)
-            self.PropertyName = obj_
-            obj_.original_tagname_ = 'PropertyName'
+            #obj_ = PropertyNameType.factory()
+            #obj_.build(child_)
+            #self.PropertyName = obj_
+            #obj_.original_tagname_ = 'PropertyName'
+            self.PropertyName = child_.text
         elif nodeName_ == 'Literal':
-            obj_ = LiteralType.factory()
-            obj_.build(child_)
-            self.Literal = obj_
-            obj_.original_tagname_ = 'Literal'
+            #obj_ = LiteralType.factory()
+            #obj_.build(child_)
+            #self.Literal = obj_
+            #obj_.original_tagname_ = 'Literal'
+            self.Literal = child_.text
         super(PropertyIsEqualTo, self).buildChildren(child_, node, nodeName_, True)
 # end class PropertyIsLikeType
+
+class PropertyIsNotEqualTo(ComparisonOpsType):
+    subclass = None
+    superclass = ComparisonOpsType
+    def __init__(self, wildCard=None, singleChar=None, escape=None, PropertyName=None, Literal=None):
+        self.original_tagname_ = None
+        super(PropertyIsNotEqualTo, self).__init__()
+        self.wildCard = _cast(None, wildCard)
+        self.singleChar = _cast(None, singleChar)
+        self.escape = _cast(None, escape)
+        self.PropertyName = PropertyName
+        self.Literal = Literal
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, PropertyIsNotEqualTo)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if PropertyIsNotEqualTo.subclass:
+            return PropertyIsNotEqualTo.subclass(*args_, **kwargs_)
+        else:
+            return PropertyIsNotEqualTo(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_PropertyName(self): return self.PropertyName
+    def set_PropertyName(self, PropertyName): self.PropertyName = PropertyName
+    def get_Literal(self): return self.Literal
+    def set_Literal(self, Literal): self.Literal = Literal
+    def get_wildCard(self): return self.wildCard
+    def set_wildCard(self, wildCard): self.wildCard = wildCard
+    def get_singleChar(self): return self.singleChar
+    def set_singleChar(self, singleChar): self.singleChar = singleChar
+    def get_escape(self): return self.escape
+    def set_escape(self, escape): self.escape = escape
+    def hasContent_(self):
+        if (
+            self.PropertyName is not None or
+            self.Literal is not None or
+            super(PropertyIsNotEqualTo, self).hasContent_()
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='sld:', name_='PropertyIsNotEqualTo', namespacedef_='xmlns:sld="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" ', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None:
+            name_ = self.original_tagname_
+        showIndent(outfile, level, pretty_print)
+        namespace_='ogc:'
+        name_='PropertyIsNotEqualTo'
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='PropertyIsNotEqualTo')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_='sld:', name_='PropertyIsNotEqualTo', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write(PropertyIsNotEqualTo)
+    def exportAttributes(self, outfile, level, already_processed, namespace_='sld:', name_='PropertyIsNotEqualTo'):
+        super(PropertyIsNotEqualTo, self).exportAttributes(outfile, level, already_processed, namespace_, name_='PropertyIsNotEqualTo')
+        if self.wildCard is not None and 'wildCard' not in already_processed:
+            already_processed.add('wildCard')
+            outfile.write(' wildCard=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.wildCard), input_name='wildCard')), ))
+        if self.singleChar is not None and 'singleChar' not in already_processed:
+            already_processed.add('singleChar')
+            outfile.write(' singleChar=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.singleChar), input_name='singleChar')), ))
+        if self.escape is not None and 'escape' not in already_processed:
+            already_processed.add('escape')
+            outfile.write(' escape=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.escape), input_name='escape')), ))
+    def exportChildren(self, outfile, level, namespace_='sld:', name_='PropertyIsNotEqualTo', fromsubclass_=False, pretty_print=True):
+        super(PropertyIsNotEqualTo, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.PropertyName is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%s%s>%s</%s%s>%s' % ('ogc:', 'PropertyName', self.gds_encode(self.gds_format_string(quote_xml(self.PropertyName), input_name='PropertyName')),'ogc:', 'PropertyName', '\n'))
+        if self.Literal is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%s%s>%s</%s%s>%s' % ('ogc:', 'Literal', self.gds_encode(self.gds_format_string(quote_xml(self.Literal), input_name='Literal')),'ogc:', 'Literal', '\n'))
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('wildCard', node)
+        if value is not None and 'wildCard' not in already_processed:
+            already_processed.add('wildCard')
+            self.wildCard = value
+        value = find_attr_value_('singleChar', node)
+        if value is not None and 'singleChar' not in already_processed:
+            already_processed.add('singleChar')
+            self.singleChar = value
+        value = find_attr_value_('escape', node)
+        if value is not None and 'escape' not in already_processed:
+            already_processed.add('escape')
+            self.escape = value
+        super(PropertyIsNotEqualTo, self).buildAttributes(node, attrs, already_processed)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        if nodeName_ == 'PropertyName':
+            #obj_ = PropertyNameType.factory()
+            #obj_.build(child_)
+            #self.PropertyName = obj_
+            #obj_.original_tagname_ = 'PropertyName'
+            self.PropertyName = child_.text
+        elif nodeName_ == 'Literal':
+            #obj_ = LiteralType.factory()
+            #obj_.build(child_)
+            #self.Literal = obj_
+            #obj_.original_tagname_ = 'Literal'
+            self.Literal = child_.text
+        super(PropertyIsNotEqualTo, self).buildChildren(child_, node, nodeName_, True)
+# end class PropertyIsNotEqualTo
+
+class PropertyIsGreaterThan(ComparisonOpsType):
+    subclass = None
+    superclass = ComparisonOpsType
+    def __init__(self, wildCard=None, singleChar=None, escape=None, PropertyName=None, Literal=None):
+        self.original_tagname_ = None
+        super(PropertyIsGreaterThan, self).__init__()
+        self.wildCard = _cast(None, wildCard)
+        self.singleChar = _cast(None, singleChar)
+        self.escape = _cast(None, escape)
+        self.PropertyName = PropertyName
+        self.Literal = Literal
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, PropertyIsGreaterThan)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if PropertyIsGreaterThan.subclass:
+            return PropertyIsGreaterThan.subclass(*args_, **kwargs_)
+        else:
+            return PropertyIsGreaterThan(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_PropertyName(self): return self.PropertyName
+    def set_PropertyName(self, PropertyName): self.PropertyName = PropertyName
+    def get_Literal(self): return self.Literal
+    def set_Literal(self, Literal): self.Literal = Literal
+    def get_wildCard(self): return self.wildCard
+    def set_wildCard(self, wildCard): self.wildCard = wildCard
+    def get_singleChar(self): return self.singleChar
+    def set_singleChar(self, singleChar): self.singleChar = singleChar
+    def get_escape(self): return self.escape
+    def set_escape(self, escape): self.escape = escape
+    def hasContent_(self):
+        if (
+            self.PropertyName is not None or
+            self.Literal is not None or
+            super(PropertyIsGreaterThan, self).hasContent_()
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='sld:', name_='PropertyIsGreaterThan', namespacedef_='xmlns:sld="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" ', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None:
+            name_ = self.original_tagname_
+        showIndent(outfile, level, pretty_print)
+        namespace_='ogc:'
+        name_='PropertyIsGreaterThan'
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='PropertyIsGreaterThan')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_='sld:', name_='PropertyIsGreaterThan', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write(PropertyIsGreaterThan)
+    def exportAttributes(self, outfile, level, already_processed, namespace_='sld:', name_='PropertyIsGreaterThan'):
+        super(PropertyIsGreaterThan, self).exportAttributes(outfile, level, already_processed, namespace_, name_='PropertyIsGreaterThan')
+        if self.wildCard is not None and 'wildCard' not in already_processed:
+            already_processed.add('wildCard')
+            outfile.write(' wildCard=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.wildCard), input_name='wildCard')), ))
+        if self.singleChar is not None and 'singleChar' not in already_processed:
+            already_processed.add('singleChar')
+            outfile.write(' singleChar=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.singleChar), input_name='singleChar')), ))
+        if self.escape is not None and 'escape' not in already_processed:
+            already_processed.add('escape')
+            outfile.write(' escape=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.escape), input_name='escape')), ))
+    def exportChildren(self, outfile, level, namespace_='sld:', name_='PropertyIsGreaterThan', fromsubclass_=False, pretty_print=True):
+        super(PropertyIsGreaterThan, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.PropertyName is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%s%s>%s</%s%s>%s' % ('ogc:', 'PropertyName', self.gds_encode(self.gds_format_string(quote_xml(self.PropertyName), input_name='PropertyName')),'ogc:', 'PropertyName', '\n'))
+        if self.Literal is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%s%s>%s</%s%s>%s' % ('ogc:', 'Literal', self.gds_encode(self.gds_format_string(quote_xml(self.Literal), input_name='Literal')),'ogc:', 'Literal', '\n'))
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('wildCard', node)
+        if value is not None and 'wildCard' not in already_processed:
+            already_processed.add('wildCard')
+            self.wildCard = value
+        value = find_attr_value_('singleChar', node)
+        if value is not None and 'singleChar' not in already_processed:
+            already_processed.add('singleChar')
+            self.singleChar = value
+        value = find_attr_value_('escape', node)
+        if value is not None and 'escape' not in already_processed:
+            already_processed.add('escape')
+            self.escape = value
+        super(PropertyIsGreaterThan, self).buildAttributes(node, attrs, already_processed)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        if nodeName_ == 'PropertyName':
+            #obj_ = PropertyNameType.factory()
+            #obj_.build(child_)
+            #self.PropertyName = obj_
+            #obj_.original_tagname_ = 'PropertyName'
+            self.PropertyName = child_.text
+        elif nodeName_ == 'Literal':
+            #obj_ = LiteralType.factory()
+            #obj_.build(child_)
+            #self.Literal = obj_
+            #obj_.original_tagname_ = 'Literal'
+            self.Literal = child_.text
+        super(PropertyIsGreaterThan, self).buildChildren(child_, node, nodeName_, True)
+# end class PropertyIsGreaterThan
+
+
+class PropertyIsGreaterThanOrEqualTo(ComparisonOpsType):
+    subclass = None
+    superclass = ComparisonOpsType
+    def __init__(self, wildCard=None, singleChar=None, escape=None, PropertyName=None, Literal=None):
+        self.original_tagname_ = None
+        super(PropertyIsGreaterThanOrEqualTo, self).__init__()
+        self.wildCard = _cast(None, wildCard)
+        self.singleChar = _cast(None, singleChar)
+        self.escape = _cast(None, escape)
+        self.PropertyName = PropertyName
+        self.Literal = Literal
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, PropertyIsGreaterThanOrEqualTo)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if PropertyIsGreaterThanOrEqualTo.subclass:
+            return PropertyIsGreaterThanOrEqualTo.subclass(*args_, **kwargs_)
+        else:
+            return PropertyIsGreaterThanOrEqualTo(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_PropertyName(self): return self.PropertyName
+    def set_PropertyName(self, PropertyName): self.PropertyName = PropertyName
+    def get_Literal(self): return self.Literal
+    def set_Literal(self, Literal): self.Literal = Literal
+    def get_wildCard(self): return self.wildCard
+    def set_wildCard(self, wildCard): self.wildCard = wildCard
+    def get_singleChar(self): return self.singleChar
+    def set_singleChar(self, singleChar): self.singleChar = singleChar
+    def get_escape(self): return self.escape
+    def set_escape(self, escape): self.escape = escape
+    def hasContent_(self):
+        if (
+            self.PropertyName is not None or
+            self.Literal is not None or
+            super(PropertyIsGreaterThanOrEqualTo, self).hasContent_()
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='sld:', name_='PropertyIsGreaterThanOrEqualTo', namespacedef_='xmlns:sld="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" ', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None:
+            name_ = self.original_tagname_
+        showIndent(outfile, level, pretty_print)
+        namespace_='ogc:'
+        name_='PropertyIsGreaterThanOrEqualTo'
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='PropertyIsGreaterThanOrEqualTo')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_='sld:', name_='PropertyIsGreaterThanOrEqualTo', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write(PropertyIsGreaterThanOrEqualTo)
+    def exportAttributes(self, outfile, level, already_processed, namespace_='sld:', name_='PropertyIsGreaterThanOrEqualTo'):
+        super(PropertyIsGreaterThanOrEqualTo, self).exportAttributes(outfile, level, already_processed, namespace_, name_='PropertyIsGreaterThanOrEqualTo')
+        if self.wildCard is not None and 'wildCard' not in already_processed:
+            already_processed.add('wildCard')
+            outfile.write(' wildCard=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.wildCard), input_name='wildCard')), ))
+        if self.singleChar is not None and 'singleChar' not in already_processed:
+            already_processed.add('singleChar')
+            outfile.write(' singleChar=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.singleChar), input_name='singleChar')), ))
+        if self.escape is not None and 'escape' not in already_processed:
+            already_processed.add('escape')
+            outfile.write(' escape=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.escape), input_name='escape')), ))
+    def exportChildren(self, outfile, level, namespace_='sld:', name_='PropertyIsGreaterThanOrEqualTo', fromsubclass_=False, pretty_print=True):
+        super(PropertyIsGreaterThanOrEqualTo, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.PropertyName is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%s%s>%s</%s%s>%s' % ('ogc:', 'PropertyName', self.gds_encode(self.gds_format_string(quote_xml(self.PropertyName), input_name='PropertyName')),'ogc:', 'PropertyName', '\n'))
+        if self.Literal is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%s%s>%s</%s%s>%s' % ('ogc:', 'Literal', self.gds_encode(self.gds_format_string(quote_xml(self.Literal), input_name='Literal')),'ogc:', 'Literal', '\n'))
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('wildCard', node)
+        if value is not None and 'wildCard' not in already_processed:
+            already_processed.add('wildCard')
+            self.wildCard = value
+        value = find_attr_value_('singleChar', node)
+        if value is not None and 'singleChar' not in already_processed:
+            already_processed.add('singleChar')
+            self.singleChar = value
+        value = find_attr_value_('escape', node)
+        if value is not None and 'escape' not in already_processed:
+            already_processed.add('escape')
+            self.escape = value
+        super(PropertyIsGreaterThanOrEqualTo, self).buildAttributes(node, attrs, already_processed)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        if nodeName_ == 'PropertyName':
+            #obj_ = PropertyNameType.factory()
+            #obj_.build(child_)
+            #self.PropertyName = obj_
+            #obj_.original_tagname_ = 'PropertyName'
+            self.PropertyName = child_.text
+        elif nodeName_ == 'Literal':
+            #obj_ = LiteralType.factory()
+            #obj_.build(child_)
+            #self.Literal = obj_
+            #obj_.original_tagname_ = 'Literal'
+            self.Literal = child_.text
+        super(PropertyIsGreaterThanOrEqualTo, self).buildChildren(child_, node, nodeName_, True)
+# end class PropertyIsGreaterThanOrEqualTo
+
+class PropertyIsLessThan(ComparisonOpsType):
+    subclass = None
+    superclass = ComparisonOpsType
+    def __init__(self, wildCard=None, singleChar=None, escape=None, PropertyName=None, Literal=None):
+        self.original_tagname_ = None
+        super(PropertyIsLessThan, self).__init__()
+        self.wildCard = _cast(None, wildCard)
+        self.singleChar = _cast(None, singleChar)
+        self.escape = _cast(None, escape)
+        self.PropertyName = PropertyName
+        self.Literal = Literal
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, PropertyIsLessThan)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if PropertyIsLessThan.subclass:
+            return PropertyIsLessThan.subclass(*args_, **kwargs_)
+        else:
+            return PropertyIsLessThan(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_PropertyName(self): return self.PropertyName
+    def set_PropertyName(self, PropertyName): self.PropertyName = PropertyName
+    def get_Literal(self): return self.Literal
+    def set_Literal(self, Literal): self.Literal = Literal
+    def get_wildCard(self): return self.wildCard
+    def set_wildCard(self, wildCard): self.wildCard = wildCard
+    def get_singleChar(self): return self.singleChar
+    def set_singleChar(self, singleChar): self.singleChar = singleChar
+    def get_escape(self): return self.escape
+    def set_escape(self, escape): self.escape = escape
+    def hasContent_(self):
+        if (
+            self.PropertyName is not None or
+            self.Literal is not None or
+            super(PropertyIsLessThan, self).hasContent_()
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='sld:', name_='PropertyIsLessThan', namespacedef_='xmlns:sld="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" ', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None:
+            name_ = self.original_tagname_
+        showIndent(outfile, level, pretty_print)
+        namespace_='ogc:'
+        name_='PropertyIsLessThan'
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='PropertyIsLessThan')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_='sld:', name_='PropertyIsLessThan', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write(PropertyIsLessThan)
+    def exportAttributes(self, outfile, level, already_processed, namespace_='sld:', name_='PropertyIsLessThan'):
+        super(PropertyIsLessThan, self).exportAttributes(outfile, level, already_processed, namespace_, name_='PropertyIsLessThan')
+        if self.wildCard is not None and 'wildCard' not in already_processed:
+            already_processed.add('wildCard')
+            outfile.write(' wildCard=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.wildCard), input_name='wildCard')), ))
+        if self.singleChar is not None and 'singleChar' not in already_processed:
+            already_processed.add('singleChar')
+            outfile.write(' singleChar=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.singleChar), input_name='singleChar')), ))
+        if self.escape is not None and 'escape' not in already_processed:
+            already_processed.add('escape')
+            outfile.write(' escape=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.escape), input_name='escape')), ))
+    def exportChildren(self, outfile, level, namespace_='sld:', name_='PropertyIsLessThan', fromsubclass_=False, pretty_print=True):
+        super(PropertyIsLessThan, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.PropertyName is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%s%s>%s</%s%s>%s' % ('ogc:', 'PropertyName', self.gds_encode(self.gds_format_string(quote_xml(self.PropertyName), input_name='PropertyName')),'ogc:', 'PropertyName', '\n'))
+        if self.Literal is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%s%s>%s</%s%s>%s' % ('ogc:', 'Literal', self.gds_encode(self.gds_format_string(quote_xml(self.Literal), input_name='Literal')),'ogc:', 'Literal', '\n'))
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('wildCard', node)
+        if value is not None and 'wildCard' not in already_processed:
+            already_processed.add('wildCard')
+            self.wildCard = value
+        value = find_attr_value_('singleChar', node)
+        if value is not None and 'singleChar' not in already_processed:
+            already_processed.add('singleChar')
+            self.singleChar = value
+        value = find_attr_value_('escape', node)
+        if value is not None and 'escape' not in already_processed:
+            already_processed.add('escape')
+            self.escape = value
+        super(PropertyIsLessThan, self).buildAttributes(node, attrs, already_processed)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        if nodeName_ == 'PropertyName':
+            #obj_ = PropertyNameType.factory()
+            #obj_.build(child_)
+            #self.PropertyName = obj_
+            #obj_.original_tagname_ = 'PropertyName'
+            self.PropertyName = child_.text
+        elif nodeName_ == 'Literal':
+            #obj_ = LiteralType.factory()
+            #obj_.build(child_)
+            #self.Literal = obj_
+            #obj_.original_tagname_ = 'Literal'
+            self.Literal = child_.text
+        super(PropertyIsLessThan, self).buildChildren(child_, node, nodeName_, True)
+# end class PropertyIsLessThan
+
+class PropertyIsLessThanOrEqualTo(ComparisonOpsType):
+    subclass = None
+    superclass = ComparisonOpsType
+    def __init__(self, wildCard=None, singleChar=None, escape=None, PropertyName=None, Literal=None):
+        self.original_tagname_ = None
+        super(PropertyIsLessThanOrEqualTo, self).__init__()
+        self.wildCard = _cast(None, wildCard)
+        self.singleChar = _cast(None, singleChar)
+        self.escape = _cast(None, escape)
+        self.PropertyName = PropertyName
+        self.Literal = Literal
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, PropertyIsLessThanOrEqualTo)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if PropertyIsLessThanOrEqualTo.subclass:
+            return PropertyIsLessThanOrEqualTo.subclass(*args_, **kwargs_)
+        else:
+            return PropertyIsLessThanOrEqualTo(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_PropertyName(self): return self.PropertyName
+    def set_PropertyName(self, PropertyName): self.PropertyName = PropertyName
+    def get_Literal(self): return self.Literal
+    def set_Literal(self, Literal): self.Literal = Literal
+    def get_wildCard(self): return self.wildCard
+    def set_wildCard(self, wildCard): self.wildCard = wildCard
+    def get_singleChar(self): return self.singleChar
+    def set_singleChar(self, singleChar): self.singleChar = singleChar
+    def get_escape(self): return self.escape
+    def set_escape(self, escape): self.escape = escape
+    def hasContent_(self):
+        if (
+            self.PropertyName is not None or
+            self.Literal is not None or
+            super(PropertyIsLessThanOrEqualTo, self).hasContent_()
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='sld:', name_='PropertyIsLessThanOrEqualTo', namespacedef_='xmlns:sld="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" ', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None:
+            name_ = self.original_tagname_
+        showIndent(outfile, level, pretty_print)
+        namespace_='ogc:'
+        name_='PropertyIsLessThanOrEqualTo'
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='PropertyIsLessThanOrEqualTo')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_='sld:', name_='PropertyIsLessThanOrEqualTo', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write(PropertyIsLessThanOrEqualTo)
+    def exportAttributes(self, outfile, level, already_processed, namespace_='sld:', name_='PropertyIsLessThanOrEqualTo'):
+        super(PropertyIsLessThanOrEqualTo, self).exportAttributes(outfile, level, already_processed, namespace_, name_='PropertyIsLessThanOrEqualTo')
+        if self.wildCard is not None and 'wildCard' not in already_processed:
+            already_processed.add('wildCard')
+            outfile.write(' wildCard=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.wildCard), input_name='wildCard')), ))
+        if self.singleChar is not None and 'singleChar' not in already_processed:
+            already_processed.add('singleChar')
+            outfile.write(' singleChar=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.singleChar), input_name='singleChar')), ))
+        if self.escape is not None and 'escape' not in already_processed:
+            already_processed.add('escape')
+            outfile.write(' escape=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.escape), input_name='escape')), ))
+    def exportChildren(self, outfile, level, namespace_='sld:', name_='PropertyIsLessThanOrEqualTo', fromsubclass_=False, pretty_print=True):
+        super(PropertyIsLessThanOrEqualTo, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.PropertyName is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%s%s>%s</%s%s>%s' % ('ogc:', 'PropertyName', self.gds_encode(self.gds_format_string(quote_xml(self.PropertyName), input_name='PropertyName')),'ogc:', 'PropertyName', '\n'))
+        if self.Literal is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%s%s>%s</%s%s>%s' % ('ogc:', 'Literal', self.gds_encode(self.gds_format_string(quote_xml(self.Literal), input_name='Literal')),'ogc:', 'Literal', '\n'))
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('wildCard', node)
+        if value is not None and 'wildCard' not in already_processed:
+            already_processed.add('wildCard')
+            self.wildCard = value
+        value = find_attr_value_('singleChar', node)
+        if value is not None and 'singleChar' not in already_processed:
+            already_processed.add('singleChar')
+            self.singleChar = value
+        value = find_attr_value_('escape', node)
+        if value is not None and 'escape' not in already_processed:
+            already_processed.add('escape')
+            self.escape = value
+        super(PropertyIsLessThanOrEqualTo, self).buildAttributes(node, attrs, already_processed)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        if nodeName_ == 'PropertyName':
+            #obj_ = PropertyNameType.factory()
+            #obj_.build(child_)
+            #self.PropertyName = obj_
+            #obj_.original_tagname_ = 'PropertyName'
+            self.PropertyName = child_.text
+        elif nodeName_ == 'Literal':
+            #obj_ = LiteralType.factory()
+            #obj_.build(child_)
+            #self.Literal = obj_
+            #obj_.original_tagname_ = 'Literal'
+            self.Literal = child_.text
+        super(PropertyIsLessThanOrEqualTo, self).buildChildren(child_, node, nodeName_, True)
+# end class PropertyIsLessThanOrEqualTo
 
 
 class PropertyIsNullType(ComparisonOpsType):
@@ -7369,6 +7991,8 @@ class PropertyIsNullType(ComparisonOpsType):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
+        namespace_='ogc:'
+        name_='PropertyIsNull'
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='PropertyIsNullType')
@@ -7388,7 +8012,9 @@ class PropertyIsNullType(ComparisonOpsType):
         else:
             eol_ = ''
         if self.PropertyName is not None:
-            self.PropertyName.export(outfile, level, namespace_='ogc:', name_='PropertyName', pretty_print=pretty_print)
+            #self.PropertyName.export(outfile, level, namespace_='ogc:', name_='PropertyName', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%s%s>%s</%s%s>%s' % ('ogc:', 'PropertyName', self.gds_encode(self.gds_format_string(quote_xml(self.PropertyName), input_name='PropertyName')),'ogc:', 'PropertyName', '\n'))
         if self.Literal is not None:
             self.Literal.export(outfile, level, namespace_='ogc:', name_='Literal', pretty_print=pretty_print)
     def build(self, node):
@@ -7402,15 +8028,18 @@ class PropertyIsNullType(ComparisonOpsType):
         super(PropertyIsNullType, self).buildAttributes(node, attrs, already_processed)
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'PropertyName':
-            obj_ = PropertyNameType.factory()
-            obj_.build(child_)
-            self.PropertyName = obj_
-            obj_.original_tagname_ = 'PropertyName'
+            #obj_ = PropertyNameType.factory()
+            #obj_.build(child_)
+            #self.PropertyName = obj_
+            #obj_.original_tagname_ = 'PropertyName'
+            self.PropertyName = child_.text
         elif nodeName_ == 'Literal':
-            obj_ = LiteralType.factory()
-            obj_.build(child_)
-            self.Literal = obj_
-            obj_.original_tagname_ = 'Literal'
+            #obj_ = LiteralType.factory()
+            #obj_.build(child_)
+            #self.Literal = obj_
+            #obj_.original_tagname_ = 'Literal'
+            self.Literal = child_.text
+            
         super(PropertyIsNullType, self).buildChildren(child_, node, nodeName_, True)
 # end class PropertyIsNullType
 
@@ -7553,10 +8182,11 @@ class PropertyIsBetweenType(ComparisonOpsType):
             self.expression = obj_
             obj_.original_tagname_ = 'Div'
         elif nodeName_ == 'PropertyName':
-            obj_ = PropertyNameType.factory()
-            obj_.build(child_)
-            self.expression = obj_
-            obj_.original_tagname_ = 'PropertyName'
+            #obj_ = PropertyNameType.factory()
+            #obj_.build(child_)
+            #self.expression = obj_
+            #obj_.original_tagname_ = 'PropertyName'
+            self.PropertyName = child_.text
         elif nodeName_ == 'Function':
             obj_ = FunctionType.factory()
             obj_.build(child_)
@@ -7572,11 +8202,13 @@ class PropertyIsBetweenType(ComparisonOpsType):
             obj_.build(child_)
             self.LowerBoundary = obj_
             obj_.original_tagname_ = 'LowerBoundary'
+            #self.LowerBoundary = child_.text
         elif nodeName_ == 'UpperBoundary':
             obj_ = UpperBoundaryType.factory()
             obj_.build(child_)
             self.UpperBoundary = obj_
             obj_.original_tagname_ = 'UpperBoundary'
+            #self.UpperBoundary = child_.text
         super(PropertyIsBetweenType, self).buildChildren(child_, node, nodeName_, True)
 # end class PropertyIsBetweenType
 
@@ -7684,20 +8316,22 @@ class LowerBoundaryType(GeneratedsSuper):
             self.expression = obj_
             obj_.original_tagname_ = 'Div'
         elif nodeName_ == 'PropertyName':
-            obj_ = PropertyNameType.factory()
-            obj_.build(child_)
-            self.expression = obj_
-            obj_.original_tagname_ = 'PropertyName'
+            #obj_ = PropertyNameType.factory()
+            #obj_.build(child_)
+            #self.expression = obj_
+            #obj_.original_tagname_ = 'PropertyName'
+            self.expression = child_.text
         elif nodeName_ == 'Function':
             obj_ = FunctionType.factory()
             obj_.build(child_)
             self.expression = obj_
             obj_.original_tagname_ = 'Function'
         elif nodeName_ == 'Literal':
-            obj_ = LiteralType.factory()
-            obj_.build(child_)
-            self.expression = obj_
-            obj_.original_tagname_ = 'Literal'
+            #obj_ = LiteralType.factory()
+            #obj_.build(child_)
+            #self.expression = obj_
+            #obj_.original_tagname_ = 'Literal'
+            self.expression = child_.text
 # end class LowerBoundaryType
 
 
@@ -7804,20 +8438,22 @@ class UpperBoundaryType(GeneratedsSuper):
             self.expression = obj_
             obj_.original_tagname_ = 'Div'
         elif nodeName_ == 'PropertyName':
-            obj_ = PropertyNameType.factory()
-            obj_.build(child_)
-            self.expression = obj_
-            obj_.original_tagname_ = 'PropertyName'
+            #obj_ = PropertyNameType.factory()
+            #obj_.build(child_)
+            #self.expression = obj_
+            #obj_.original_tagname_ = 'PropertyName'
+            self.expression = child_.text
         elif nodeName_ == 'Function':
             obj_ = FunctionType.factory()
             obj_.build(child_)
             self.expression = obj_
             obj_.original_tagname_ = 'Function'
         elif nodeName_ == 'Literal':
-            obj_ = LiteralType.factory()
-            obj_.build(child_)
-            self.expression = obj_
-            obj_.original_tagname_ = 'Literal'
+            #obj_ = LiteralType.factory()
+            #obj_.build(child_)
+            #self.expression = obj_
+            #obj_.original_tagname_ = 'Literal'
+            self.expression = child_.text
 # end class UpperBoundaryType
 
 
@@ -8419,32 +9055,32 @@ class BinaryLogicOpType(LogicOpsType):
             self.comparisonOps.append(obj_)
             obj_.original_tagname_ = 'comparisonOps'
         elif nodeName_ == 'PropertyIsEqualTo':
-            obj_ = BinaryComparisonOpType.factory()
+            obj_ = PropertyIsEqualTo.factory()
             obj_.build(child_)
             self.comparisonOps.append(obj_)
             obj_.original_tagname_ = 'PropertyIsEqualTo'
         elif nodeName_ == 'PropertyIsNotEqualTo':
-            obj_ = BinaryComparisonOpType.factory()
+            obj_ = PropertyIsNotEqualTo.factory()
             obj_.build(child_)
             self.comparisonOps.append(obj_)
             obj_.original_tagname_ = 'PropertyIsNotEqualTo'
         elif nodeName_ == 'PropertyIsLessThan':
-            obj_ = BinaryComparisonOpType.factory()
+            obj_ = PropertyIsLessThan.factory()
             obj_.build(child_)
             self.comparisonOps.append(obj_)
             obj_.original_tagname_ = 'PropertyIsLessThan'
         elif nodeName_ == 'PropertyIsGreaterThan':
-            obj_ = BinaryComparisonOpType.factory()
+            obj_ = PropertyIsGreaterThan.factory()
             obj_.build(child_)
             self.comparisonOps.append(obj_)
             obj_.original_tagname_ = 'PropertyIsGreaterThan'
         elif nodeName_ == 'PropertyIsLessThanOrEqualTo':
-            obj_ = BinaryComparisonOpType.factory()
+            obj_ = PropertyIsLessThanOrEqualTo.factory()
             obj_.build(child_)
             self.comparisonOps.append(obj_)
             obj_.original_tagname_ = 'PropertyIsLessThanOrEqualTo'
         elif nodeName_ == 'PropertyIsGreaterThanOrEqualTo':
-            obj_ = BinaryComparisonOpType.factory()
+            obj_ = PropertyIsGreaterThanOrEqualTo.factory()
             obj_.build(child_)
             self.comparisonOps.append(obj_)
             obj_.original_tagname_ = 'PropertyIsGreaterThanOrEqualTo'
@@ -8673,32 +9309,32 @@ class UnaryLogicOpType(LogicOpsType):
             self.comparisonOps = obj_
             obj_.original_tagname_ = 'comparisonOps'
         elif nodeName_ == 'PropertyIsEqualTo':
-            obj_ = BinaryComparisonOpType.factory()
+            obj_ = PropertyIsEqualTo.factory()
             obj_.build(child_)
             self.comparisonOps = obj_
             obj_.original_tagname_ = 'PropertyIsEqualTo'
         elif nodeName_ == 'PropertyIsNotEqualTo':
-            obj_ = BinaryComparisonOpType.factory()
+            obj_ = PropertyIsNotEqualTo.factory()
             obj_.build(child_)
             self.comparisonOps = obj_
             obj_.original_tagname_ = 'PropertyIsNotEqualTo'
         elif nodeName_ == 'PropertyIsLessThan':
-            obj_ = BinaryComparisonOpType.factory()
+            obj_ = PropertyIsLessThan.factory()
             obj_.build(child_)
             self.comparisonOps = obj_
             obj_.original_tagname_ = 'PropertyIsLessThan'
         elif nodeName_ == 'PropertyIsGreaterThan':
-            obj_ = BinaryComparisonOpType.factory()
+            obj_ = PropertyIsGreaterThan.factory()
             obj_.build(child_)
             self.comparisonOps = obj_
             obj_.original_tagname_ = 'PropertyIsGreaterThan'
         elif nodeName_ == 'PropertyIsLessThanOrEqualTo':
-            obj_ = BinaryComparisonOpType.factory()
+            obj_ = PropertyIsLessThanOrEqualTo.factory()
             obj_.build(child_)
             self.comparisonOps = obj_
             obj_.original_tagname_ = 'PropertyIsLessThanOrEqualTo'
         elif nodeName_ == 'PropertyIsGreaterThanOrEqualTo':
-            obj_ = BinaryComparisonOpType.factory()
+            obj_ = PropertyIsGreaterThanOrEqualTo.factory()
             obj_.build(child_)
             self.comparisonOps = obj_
             obj_.original_tagname_ = 'PropertyIsGreaterThanOrEqualTo'
@@ -13338,13 +13974,13 @@ GDSClassesMapping = {
     'Point': PointType,
     'Polygon': PolygonType,
     'PropertyIsBetween': PropertyIsBetweenType,
-    'PropertyIsEqualTo': BinaryComparisonOpType,
-    'PropertyIsGreaterThan': BinaryComparisonOpType,
-    'PropertyIsGreaterThanOrEqualTo': BinaryComparisonOpType,
-    'PropertyIsLessThan': BinaryComparisonOpType,
-    'PropertyIsLessThanOrEqualTo': BinaryComparisonOpType,
+    'PropertyIsEqualTo': PropertyIsEqualTo,
+    'PropertyIsGreaterThan': PropertyIsGreaterThan,
+    'PropertyIsGreaterThanOrEqualTo': PropertyIsGreaterThanOrEqualTo,
+    'PropertyIsLessThan': PropertyIsLessThan,
+    'PropertyIsLessThanOrEqualTo': PropertyIsLessThanOrEqualTo,
     'PropertyIsLike': PropertyIsLikeType,
-    'PropertyIsNotEqualTo': BinaryComparisonOpType,
+    'PropertyIsNotEqualTo': PropertyIsNotEqualTo,
     'PropertyIsNull': PropertyIsNullType,
     'PropertyName': PropertyNameType,
     'Radius': ParameterValueType,

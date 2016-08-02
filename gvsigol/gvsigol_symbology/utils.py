@@ -332,3 +332,56 @@ def symbolizer_to_json(symbolizer):
         json_symbolizer['json'] = serializers.serialize('json', [ symbolizer.textsymbolizer, ])
         
     return json_symbolizer
+
+def filter_to_json(filter):
+    json_filter = {}
+    
+    if filter.comparisonOps.original_tagname_ == 'PropertyIsEqualTo':
+        json_filter['type'] = 'is_equal_to'
+        json_filter['property_name'] = filter.comparisonOps.PropertyName
+        json_filter['value1'] = filter.comparisonOps.Literal
+        
+    elif filter.comparisonOps.original_tagname_ == 'PropertyIsNull':
+        json_filter['type'] = 'is_null'
+        json_filter['property_name'] = filter.comparisonOps.PropertyName
+        
+    elif filter.comparisonOps.original_tagname_ == 'PropertyIsLike':
+        json_filter['type'] = 'is_like'
+        json_filter['property_name'] = filter.comparisonOps.PropertyName
+        json_filter['value1'] = filter.comparisonOps.Literal
+        
+    elif filter.comparisonOps.original_tagname_ == 'PropertyIsNotEqualTo':
+        json_filter['type'] = 'is_not_equal_to'
+        json_filter['property_name'] = filter.comparisonOps.PropertyName
+        json_filter['value1'] = filter.comparisonOps.Literal
+        
+    elif filter.comparisonOps.original_tagname_ == 'PropertyIsGreaterThan':
+        json_filter['type'] = 'is_greater_than'
+        json_filter['property_name'] = filter.comparisonOps.PropertyName
+        json_filter['value1'] = filter.comparisonOps.Literal
+        
+    elif filter.comparisonOps.original_tagname_ == 'PropertyIsGreaterThanOrEqualTo':
+        json_filter['type'] = 'is_greater_than_or_equal_to'
+        json_filter['property_name'] = filter.comparisonOps.PropertyName
+        json_filter['value1'] = filter.comparisonOps.Literal
+        
+    elif filter.comparisonOps.original_tagname_ == 'PropertyIsLessThan':
+        json_filter['type'] = 'is_less_than'
+        json_filter['property_name'] = filter.comparisonOps.PropertyName
+        json_filter['value1'] = filter.comparisonOps.Literal
+        
+    elif filter.comparisonOps.original_tagname_ == 'PropertyIsLessThanOrEqualTo':
+        json_filter['type'] = 'is_less_than_or_equal_to'
+        json_filter['property_name'] = filter.comparisonOps.PropertyName
+        json_filter['value1'] = filter.comparisonOps.Literal
+        
+    elif filter.comparisonOps.original_tagname_ == 'PropertyIsBetween':
+        json_filter['type'] = 'is_between'
+        json_filter['property_name'] = filter.comparisonOps.PropertyName
+        json_filter['value1'] = filter.comparisonOps.LowerBoundary.expression
+        json_filter['value2'] = filter.comparisonOps.UpperBoundary.expression
+        
+    else:
+        json_filter = None
+        
+    return json_filter
