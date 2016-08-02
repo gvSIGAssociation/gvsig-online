@@ -404,33 +404,40 @@ def expressions_update(request, layer_id, style_id):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @admin_required
 def sld_import(request, layer_id):
+    layer = Layer.objects.get(id=int(layer_id))
+    index = len(StyleLayer.objects.filter(layer=layer))
+        
+    datastore = Datastore.objects.get(id=layer.datastore_id)
+    workspace = Workspace.objects.get(id=datastore.workspace_id)
+        
     if request.method == 'POST': 
-        name = request.POST.get('sld-name')
+        style_name = request.POST.get('sld-name')
         
-        message = ''
-        if name != '' and 'sld-file' in request.FILES: 
-            #TODO
-                             
-            return redirect('style_layer_list')
+        is_default = False
+        if 'style-is-default' in request.POST:
+            is_default = True
         
-        elif name == '' and 'sld-file' in request.FILES:
-            message = _('You must enter a name for the style')
+        if 'sld-file' in request.FILES: 
+            if services.sld_import(style_name, is_default, layer_id, request.FILES['sld-file'], request.session, mapservice):        
+                return redirect('style_layer_list')
+            else:
+                response = {
+                    'message': _('Error importing SLD'),
+                    'layer_id': layer_id,
+                    'style_name': workspace.name + '_' + layer.name + '_' + str(index)
+                }
+        
+        else:
+            response = {
+                'message': _('You must select a file'),
+                'layer_id': layer_id,
+                'style_name': workspace.name + '_' + layer.name + '_' + str(index)
+            }
             
-        elif name != '' and not 'sld-file' in request.FILES:
-            message = _('You must select a file')
             
-        elif name == '' and not 'sld-file' in request.FILES:
-            message = _('You must enter a name for the style and select a file')
-            
-        return render_to_response('sld_import.html', {'message': message}, context_instance=RequestContext(request))
+        return render_to_response('sld_import.html', response, context_instance=RequestContext(request))
     
     else:   
-        layer = Layer.objects.get(id=int(layer_id))
-        index = len(StyleLayer.objects.filter(layer=layer))
-        
-        datastore = Datastore.objects.get(id=layer.datastore_id)
-        workspace = Workspace.objects.get(id=datastore.workspace_id)
-        
         response = {
             'layer_id': layer_id,
             'style_name': workspace.name + '_' + layer.name + '_' + str(index)
