@@ -227,6 +227,51 @@ def getFilter(f):
         operation.set_Literal(json_filter.get('value1'))
         filt.set_comparisonOps(operation)
         
+    elif json_filter.get('type') == 'is_null':
+        operation = sld.PropertyIsNullType()
+        operation.set_PropertyName(json_filter.get('property_name'))
+        filt.set_comparisonOps(operation)
+        
+        
+    elif json_filter.get('type') == 'is_like':
+        operation = sld.PropertyIsLikeType()
+        operation.set_wildCard('*')
+        operation.set_singleChar('.')
+        operation.set_escape('!')
+        operation.set_PropertyName(json_filter.get('property_name'))
+        operation.set_Literal(json_filter.get('value1'))
+        filt.set_comparisonOps(operation)
+        
+    elif json_filter.get('type') == 'is_not_equal_to':
+        operation = sld.PropertyIsNotEqualTo()
+        operation.set_PropertyName(json_filter.get('property_name'))
+        operation.set_Literal(json_filter.get('value1'))
+        filt.set_comparisonOps(operation)
+        
+    elif json_filter.get('type') == 'is_greater_than':
+        operation = sld.PropertyIsGreaterThan()
+        operation.set_PropertyName(json_filter.get('property_name'))
+        operation.set_Literal(json_filter.get('value1'))
+        filt.set_comparisonOps(operation)
+        
+    elif json_filter.get('type') == 'is_greater_than_or_equal_to':
+        operation = sld.PropertyIsGreaterThanOrEqualTo()
+        operation.set_PropertyName(json_filter.get('property_name'))
+        operation.set_Literal(json_filter.get('value1'))
+        filt.set_comparisonOps(operation)
+        
+    elif json_filter.get('type') == 'is_less_than':
+        operation = sld.PropertyIsLessThan()
+        operation.set_PropertyName(json_filter.get('property_name'))
+        operation.set_Literal(json_filter.get('value1'))
+        filt.set_comparisonOps(operation)
+        
+    elif json_filter.get('type') == 'is_less_than_or_equal_to':
+        operation = sld.PropertyIsLessThanOrEqualTo()
+        operation.set_PropertyName(json_filter.get('property_name'))
+        operation.set_Literal(json_filter.get('value1'))
+        filt.set_comparisonOps(operation)
+        
     elif json_filter.get('type') == 'is_between':
         operation = sld.PropertyIsBetweenType()
         operation.set_PropertyName(json_filter.get('property_name'))
