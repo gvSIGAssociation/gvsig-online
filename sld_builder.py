@@ -118,7 +118,7 @@ def get_sld_body(style_layer_descriptor, named_layer):
     style_layer_descriptor.add_NamedLayer(named_layer)
     output = StringIO.StringIO()
     style_layer_descriptor.export(output, 0)
-    style_layer_descriptor.export(sys.stdout, 0)
+    #style_layer_descriptor.export(sys.stdout, 0)
     sld_body = output.getvalue()
     output.close()
     
