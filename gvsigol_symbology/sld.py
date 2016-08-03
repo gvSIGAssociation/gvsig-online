@@ -3594,6 +3594,8 @@ class TextSymbolizer(SymbolizerType):
         outfile.write('<VendorOption name="spaceAround">0</VendorOption>\n') 
         showIndent(outfile, level, pretty_print)
         outfile.write('<VendorOption name="polygonAlign">mbr</VendorOption>\n')
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<VendorOption name="followLine">true</VendorOption>\n')
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
