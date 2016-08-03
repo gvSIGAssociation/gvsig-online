@@ -60,36 +60,25 @@
 										<span class="product-description"> {% trans "Creates a legend defined by expressions" %} </span>
 									</div>
 								</li>
-								<li class="item">
-									<div class="product-img">
-										<span class="new-style-options-icon"><i class="fa fa-file-code-o"></i></span>
-									</div>
-									<div class="product-info">
-										<a href="/gvsigonline/symbology/sld_import/{{layer.id}}/" class="product-title">{% trans "Import from SLD" %}
-										</a> 
-										<span class="product-description"> {% trans "SLD legend description" %} </span>
-									</div>
-								</li>
+<!-- 								<li class="item"> -->
+<!-- 									<div class="product-img"> -->
+<!-- 										<span class="new-style-options-icon"><i class="fa fa-file-code-o"></i></span> -->
+<!-- 									</div> -->
+<!-- 									<div class="product-info"> -->
+<!-- 										<a href="/gvsigonline/symbology/sld_import/{{layer.id}}/" class="product-title">{% trans "Import from SLD" %} -->
+<!-- 										</a>  -->
+<!-- 										<span class="product-description"> {% trans "SLD legend description" %} </span> -->
+<!-- 									</div> -->
+<!-- 								</li> -->
 							
 							{% else %}
 								<li class="item">
 									<div class="product-img">
-										<span class="new-style-options-icon"><i class="fa fa-map-marker"></i></span>
+										<span class="new-style-options-icon"><i class="fa fa-picture-o"></i></span>
 									</div>
 									<div class="product-info">
-										<a href="javascript:void(0)" class="product-title">{% trans "Color table" %}
-										</a> 
-										<span class="product-description"> {% trans "Color table description" %} </span>
-									</div>
-								</li>
-								<li class="item">
-									<div class="product-img">
-										<span class="new-style-options-icon"><i class="fa fa-file-code-o"></i></span>
-									</div>
-									<div class="product-info">
-										<a href="javascript:void(0)" class="product-title">{% trans "Import SLD" %}
-										</a> 
-										<span class="product-description"> {% trans "SLD legend description" %} </span>
+										<a href="/gvsigonline/symbology/color_table_add/{{layer.id}}/" class="product-title">{% trans "Color table" %}</a> 
+										<span class="product-description"> {% trans "Creates a legend for a raster layer defined by a color table" %} </span>
 									</div>
 								</li>
 							{% endif %}

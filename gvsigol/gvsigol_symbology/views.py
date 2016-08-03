@@ -31,7 +31,7 @@ from models import Style, StyleLayer, Rule, Library, LibraryRule, Symbolizer
 from gvsigol_auth.utils import admin_required
 from gvsigol import settings
 from gvsigol_symbology import services, services_library, services_unique_symbol,\
-    services_unique_values, services_intervals, services_expressions
+    services_unique_values, services_intervals, services_expressions, services_color_table
 import utils
 import json
 import ast
@@ -70,6 +70,9 @@ def style_layer_update(request, layer_id, style_id):
     
     elif (style.type == 'EX'):
         return redirect('expressions_update', layer_id=layer_id, style_id=style_id)
+    
+    elif (style.type == 'CT'):
+        return redirect('color_table_update', layer_id=layer_id, style_id=style_id)
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @admin_required
@@ -399,6 +402,66 @@ def expressions_update(request, layer_id, style_id):
         response['rules'] = json.dumps(rules)        
         
         return render_to_response('expressions_update.html', response, context_instance=RequestContext(request))
+    
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@admin_required
+def color_table_add(request, layer_id):
+    if request.method == 'POST':
+        style_data = request.POST['style_data']
+        json_data = json.loads(style_data)
+        
+        if services_color_table.create_style(request.session, json_data, layer_id):            
+            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            
+        else:
+            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+        
+    else:                 
+        response = services_color_table.get_conf(request.session, layer_id)     
+        return render_to_response('color_table_add.html', response, context_instance=RequestContext(request))
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@admin_required
+def color_table_update(request, layer_id, style_id):  
+    if request.method == 'POST':
+        style_data = request.POST['style_data']
+        json_data = json.loads(style_data)
+        
+        if services_color_table.update_style(request.session, json_data, layer_id, style_id):            
+            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            
+        else:
+            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+        
+    else:
+        style = Style.objects.get(id=int(style_id))
+        
+        r = Rule.objects.get(style=style)
+        symbolizers = []
+        for s in Symbolizer.objects.filter(rule=r).order_by('order'):
+            symbolizers.append(utils.symbolizer_to_json(s))
+            
+        rule = {
+            'id': r.id,
+            'name': r.name,
+            'title': r.title,
+            'abstract': '',
+            'filter': '',
+            'minscale': r.minscale,
+            'maxscale': r.maxscale,
+            'order': r.order,
+            'symbolizers': symbolizers
+        }
+                         
+        response = services_color_table.get_conf(request.session, layer_id)
+        
+        response['style'] = style
+        response['minscale'] = int(r.minscale)
+        response['maxscale'] = int(r.maxscale)
+        response['rule'] = json.dumps(rule)        
+        
+        return render_to_response('color_table_update.html', response, context_instance=RequestContext(request))
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
