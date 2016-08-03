@@ -54,7 +54,7 @@ Rule.prototype.getTableUI = function(allowImport, type) {
 	var ui = '';
 	
 	ui += '<div data-ruleid="' + this.id + '" class="col-md-12">';
-	if(type == 'unique') {
+	if(type == 'unique' || type == 'colortable') {
 		ui += 	'<div class="box box-primary">';
 	} else {
 		ui += 	'<div class="box box-primary collapsed-box">';
@@ -100,7 +100,12 @@ Rule.prototype.getTableUI = function(allowImport, type) {
 	ui += 				'</div>';
 	ui += 			'</div>';
 	ui += 			'<div class="box-footer clearfix">';
-	ui += 				'<a id="append-symbol-button-' + this.id + '" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-star-o margin-r-5"></i>' + gettext('Append symbolizer') + '</a>';
+	if (type != 'colortable') {
+		ui += 			'<a id="append-symbol-button-' + this.id + '" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-star-o margin-r-5"></i>' + gettext('Append symbolizer') + '</a>';
+		
+	} else {
+		ui += 			'<a id="append-color-entry-button' + this.id + '" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-tint margin-r-5"></i>' + gettext('Append color entry') + '</a>';
+	}
 	if (allowImport){
 		ui += 			'<a id="import-symbol-button-' + this.id + '" href="" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-download margin-r-5"></i>' + gettext('Import from library') + '</a>';
 	}
@@ -155,6 +160,10 @@ Rule.prototype.registerEvents = function() {
 	});
 	
 	$("#append-symbol-button-" + this.id).on('click', function(e){
+		self.addSymbolizer();
+	});
+	
+	$("#append-color-entry-button-" + this.id).on('click', function(e){
 		self.addSymbolizer();
 	});
 	

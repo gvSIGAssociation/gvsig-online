@@ -146,6 +146,14 @@ SymbologyUtils.prototype.centerMap = function(layerName, wfsUrl) {
 	});
 };
 
+SymbologyUtils.prototype.centerMapToExtent = function(ext, epsg) {
+	var leftBottom = ol.proj.transform([ext.minx, ext.miny], epsg, 'EPSG:3857');
+	var rightTop = ol.proj.transform([ext.maxx, ext.maxy], epsg, 'EPSG:3857');
+	
+	var extent = $.merge(leftBottom, rightTop);
+	this.map.getView().fit(extent, this.map.getSize());			
+};
+
 SymbologyUtils.prototype.updateMap = function(style, name) {
 	
 	var sld = '';
