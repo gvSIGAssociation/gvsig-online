@@ -21,6 +21,9 @@ urlpatterns = [
     url(r'^expressions_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.expressions_add', name='expressions_add'),
     url(r'^expressions_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.expressions_update', name='expressions_update'),
     
+    url(r'^color_table_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.color_table_add', name='color_table_add'),
+    url(r'^color_table_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.color_table_update', name='color_table_update'),
+    
     url(r'^library_list/$', 'gvsigol_symbology.views.library_list', name='library_list'),
     url(r'^library_add/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views.library_add', name='library_add'),
     url(r'^library_update/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views.library_update', name='library_update'),

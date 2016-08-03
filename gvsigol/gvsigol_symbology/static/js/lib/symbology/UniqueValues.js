@@ -107,7 +107,6 @@ UniqueValues.prototype.load = function(selectedField, values) {
 		var rule = new Rule(i, ruleName, ruleTitle, null, this.utils);
 		var filter = {
 			type: 'is_equal_to',
-			operator: 'PropertyIsEqualTo',
 			property_name: selectedField,
 			value1: values[i]
 		};
