@@ -27,44 +27,48 @@ var ColorTable = function(layerName, utils, rule_opts) {
 	this.rule = null;
 	
 	if (rule_opts != null) {
-		if (rule_opts.symbolizers != "") {
+		if (rule_opts.entries.length > 0) {
 			this.rule = new Rule(0, $("#style-name").val(), $("#style-name").val(), rule_opts, this.utils);
-			$('#rules').append(this.rule.getTableUI(true, 'unique'));
-			this.rule.registerEvents();
-			this.rule.preview();
-			this.loadRule(rule_opts.symbolizers);
+			$('#rules').append(this.rule.getColorMapEntryUI());
+			this.rule.registerCMEEvents();
+			this.rule.previewRaster();
+			this.loadRule(rule_opts.entries);
+			
+		} else {
+			this.rule = new Rule(0, $("#style-name").val(), $("#style-name").val(), rule_opts, this.utils);
+			$('#rules').append(this.rule.getColorMapEntryUI());
+			this.rule.registerCMEEvents();
+			this.rule.previewRaster();
+			this.rule.addColorMapEntry();
 		}
 	}	
 };
 
 ColorTable.prototype.addDefaultEntries = function() {
 	this.rule = new Rule(0, $("#style-name").val(), $("#style-name").val(), null, this.utils);
-	$('#rules').append(this.rule.getTableUI(false, 'colortable'));
-	this.rule.registerEvents();
-	//this.rule.addSymbolizer();
-	this.rule.preview();
+	$('#rules').append(this.rule.getColorMapEntryUI());
+	this.rule.registerCMEEvents();
+	this.rule.addColorMapEntry();
+	this.rule.previewRaster();
 };
 
 ColorTable.prototype.getRule = function() {
 	return this.rule;
 };
 
-ColorTable.prototype.loadRule = function(symbolizers) {
+ColorTable.prototype.loadRule = function(entries) {
 	
-	$("#table-symbolizers-body").empty();
-	this.rule.removeAllSymbolizers();
+	$("#table-entries-body-" + this.rule.id).empty();
+	this.rule.removeAllEntries();
 	
-	for (var i=0; i<symbolizers.length; i++) {
+	for (var i=0; i<entries.length; i++) {
 		
-		var symbolizer = JSON.parse(symbolizers[i].json);
-		var order = symbolizers[i].order;
-		var options = symbolizer[0].fields;
-		options['order'] = order;
+		var entry = JSON.parse(entries[i]);
+		var options = entry[0].fields;
 		
-		this.rule.addSymbolizer(options);	
+		this.rule.addColorMapEntry(options);	
 		
 	}
-	this.rule.preview();
 };
 
 ColorTable.prototype.refreshMap = function() {
@@ -75,32 +79,27 @@ ColorTable.prototype.save = function(layerId) {
 	
 	$("body").overlay();
 	
-	var symbolizers = new Array();
-	for (var i=0; i < this.rule.getSymbolizers().length; i++) {
-		var symbolizer = {
-			type: this.rule.getSymbolizers()[i].type,
-			json: this.rule.getSymbolizers()[i].toJSON(),
-			order: this.rule.getSymbolizers()[i].order
+	var entries = new Array();
+	for (var i=0; i < this.rule.getEntries().length; i++) {
+		var entry = {
+			json: this.rule.getEntries()[i].toJSON(),
+			order: i
 		};
-		symbolizers.push(symbolizer);
+		entries.push(entry);
 	}
-	
-	symbolizers.sort(function(a, b){
-		return parseInt(b.order) - parseInt(a.order);
-	});
 	
 	var style = {
 		name: $('#style-name').val(),
 		title: $('#style-title').val(),
 		is_default: $('#style-is-default').is(":checked"),
 		rule: this.rule.getObject(),
-		symbolizers: symbolizers
+		entries: entries
 	}
 	
 	$.ajax({
 		type: "POST",
 		async: false,
-		url: "/gvsigonline/symbology/unique_symbol_add/" + layerId + "/",
+		url: "/gvsigonline/symbology/color_table_add/" + layerId + "/",
 		beforeSend:function(xhr){
 			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},
@@ -123,14 +122,13 @@ ColorTable.prototype.update = function(layerId, styleId) {
 	
 	$("body").overlay();
 	
-	var symbolizers = new Array();
-	for (var i=0; i < this.rule.getSymbolizers().length; i++) {
-		var symbolizer = {
-			type: this.rule.getSymbolizers()[i].type,
-			json: this.rule.getSymbolizers()[i].toJSON(),
-			order: this.rule.getSymbolizers()[i].order
+	var entries = new Array();
+	for (var i=0; i < this.rule.getEntries().length; i++) {
+		var entry = {
+			json: this.rule.getEntries()[i].toJSON(),
+			order: i
 		};
-		symbolizers.push(symbolizer);
+		entries.push(entry);
 	}
 	
 	var style = {
@@ -138,13 +136,13 @@ ColorTable.prototype.update = function(layerId, styleId) {
 		title: $('#style-title').val(),
 		is_default: $('#style-is-default').is(":checked"),
 		rule: this.rule.getObject(),
-		symbolizers: symbolizers
+		entries: entries
 	}
 	
 	$.ajax({
 		type: "POST",
 		async: false,
-		url: "/gvsigonline/symbology/unique_symbol_update/" + layerId + "/" + styleId + "/",
+		url: "/gvsigonline/symbology/color_table_update/" + layerId + "/" + styleId + "/",
 		beforeSend:function(xhr){
 			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},

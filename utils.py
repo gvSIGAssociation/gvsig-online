@@ -333,6 +333,10 @@ def symbolizer_to_json(symbolizer):
         
     return json_symbolizer
 
+def entry_to_json(entry):
+    json_entry = serializers.serialize('json', [ entry, ])       
+    return json_entry
+
 def filter_to_json(filter):
     json_filter = {}
     

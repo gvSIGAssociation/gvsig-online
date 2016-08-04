@@ -126,6 +126,7 @@ class ColorMap(models.Model):
     extended = models.BooleanField(default=False)
     
 class ColorMapEntry(models.Model):
+    order = models.IntegerField(null=False, default=0)
     color_map = models.ForeignKey(ColorMap, on_delete=models.CASCADE)
     color = models.CharField(max_length=100)
     quantity = models.IntegerField()

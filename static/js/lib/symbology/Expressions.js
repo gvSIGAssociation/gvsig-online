@@ -260,7 +260,7 @@ Expressions.prototype.getFilterOutput = function(field, operation, value1, value
 		filterOutputContentcode = '\t' + field + ' = null';
 		
 	} else if (operation == 'is_like') {
-		filterOutputContentcode = '\t' + field + ' %' + value1 + '%';
+		filterOutputContentcode = '\t' + field + ' ' + gettext('contains') + ' ' + value1;
 		
 	} else if (operation == 'is_not_equal') {
 		filterOutputContentcode = '\t' + field + ' <> ' + value1;
