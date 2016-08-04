@@ -11,7 +11,6 @@
 				<h3 class="box-title">{% trans "Update style" %}</h3>
 				<div class="box-tools pull-right">
 					<button id="refresh-preview" class="btn btn-sm btn-warning refresh-preview"><i class="fa fa-refresh margin-r-5"></i> {% trans "Update preview" %}</button>
-					<button id="show-label" class="btn btn-sm btn-primary refresh-preview"><i class="fa fa-tags margin-r-5"></i> {% trans "Labeling" %}</button>
 					<button id="save-legend" class="btn btn-sm btn-success save-legend"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
 				</div>
 			</div>
@@ -69,56 +68,16 @@
 		</div>
 	</div>
 </div>
-
+ 	
 <!-- Modal -->
-<div class="modal fade" id="modal-import-symbol" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal fade" id="modal-color-map-entry" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
-				<h4 class="modal-title">{% trans "Import symbol" %}</h4>
-			</div>
-			<div class="modal-body">
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<label>{% trans "Select library" %}</label>
-						<select id="select-library" class="form-control">
-							<option disabled selected value> -- {% trans "Select symbol library" %} -- </option>
-							{% for library in libraries %}
-							<option value="{{library.id}}">{{library.name}}</option>
-							{% endfor %}
-						</select>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-md-12">
-						<div class="box box-primary">
-							<div class="box-body no-padding" style="max-height: 300px; overflow: auto;">
-								<ul class="users-list clearfix">
-								</ul>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="modal-footer">
-				<button id="button-import-symbol-close" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
-			</div>
-		</div>
-	</div>
-</div>    	
-
-<!-- Modal -->
-<div class="modal fade" id="modal-symbolizer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-				<h4 class="modal-title">{% trans "Edit symbolizer" %}</h4>
+				<h4 class="modal-title">{% trans "Edit color map entry" %}</h4>
 			</div>
 			<div class="modal-body">
 				<div class="nav-tabs-custom">
@@ -143,15 +102,13 @@ $(document).ready(function() {
 	
 	var layerId = "{{layer_id}}";
 	var layerUrl = "{{layer_url}}";
-	var wfsUrl = "{{layer_wfs_url}}";
 	var layerName = "{{layer_name}}";
 	var styleId = "{{style.id}}";
-	var featureType = "{{featureType}}";
-	var jsonAlphanumericFields = {{json_alphanumeric_fields|safe}};
-	var fonts = {{ fonts|safe }};
-	var rule_opts = {{ rule|safe }};
+	var rule_opts = {{rule|safe}};
 	var previewUrl = "{{preview_url}}";
 	var supported_crs = {{supported_crs|safe}};
+	var extentEpsg = "{{extent_epsg}}";
+	var extent = {{extent|safe}}
 	
 	for (var crs in supported_crs) {
 		proj4.defs(supported_crs[crs].code, supported_crs[crs].definition);	
@@ -169,51 +126,52 @@ $(document).ready(function() {
 		    zoom: '2'
 		})
 	});
-	var wmsSource = new ol.source.ImageWMS({
+	var wmsSource = new ol.source.TileWMS({
 		url: layerUrl,
 		visible: true,
 		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
 		serverType: 'geoserver'
 	});
-	wmsLayer = new ol.layer.Image({
+	wmsLayer = new ol.layer.Tile({
 		id: 'preview-layer',
 		source: wmsSource,
 		visible: true
 	});
 	map.addLayer(wmsLayer);
 	
-	var utils = new SymbologyUtils(map, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
-	var uniqueSymbol = new UniqueSymbol(layerName, utils, rule_opts);
+	var utils = new SymbologyUtils(map, wmsLayer, 'RasterSymbolizer', previewUrl, [], []);
+	var colorTable = new ColorTable(layerName, utils, rule_opts);
 	
-	utils.centerMap(layerName, wfsUrl);
-	uniqueSymbol.refreshMap();
-	
-	$("#show-label").on('click', function(e){
-		uniqueSymbol.showLabel();
-	});
+	utils.centerMapToExtent(extent, extentEpsg);
 	
 	$("#style-title").on('change', function(e){
-		var rule = uniqueSymbol.getRule();
+		var rule = colorTable.getRule();
 		rule.title = this.value;
-		$("#rule-title").text(this.value);
 	});
 	
 	$("#symbol-minscale").on('change', function(e){
-		var rule = uniqueSymbol.getRule();
+		var rule = colorTable.getRule();
 		rule.minscale = this.value;
 	});
 	
 	$("#symbol-maxscale").on('change', function(e){
-		var rule = uniqueSymbol.getRule();
+		var rule = colorTable.getRule();
 		rule.maxscale = this.value;
 	});
 
 	$("#save-legend").on('click', function(e){
-		uniqueSymbol.update(layerId, styleId);
+		if ($("#style-name").val() != '') {
+			colorTable.update(layerId, styleId);
+			
+		} else {
+			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
+			
+		}
+		
 	});
 	
 	$("#refresh-preview").on('click', function(e){
-		uniqueSymbol.refreshMap();
+		colorTable.refreshMap();
 	});
 
 });

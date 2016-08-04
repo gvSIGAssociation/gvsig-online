@@ -22,7 +22,7 @@
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
-from models import Library, Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, TextSymbolizer, RasterSymbolizer
+from models import Library, Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, TextSymbolizer, RasterSymbolizer, ColorMap
 from django.utils.translation import ugettext_lazy as _
 from gvsigol_services.models import Layer
 from django.http import HttpResponse
@@ -114,8 +114,15 @@ def create_default_style(session, layer_id, style_name, style_type, geom_type):
         symbolizer.save()  
         
     elif symbol_type == 'RasterSymbolizer':
+        color_map = ColorMap(
+            type = 'ramp',
+            extended = False
+        )
+        color_map.save()
+        
         symbolizer = RasterSymbolizer(
             rule = rule,
+            color_map = color_map,
             order = 0,
             opacity = 1.0           
         )
@@ -286,3 +293,26 @@ def sld_import(name, is_default, layer_id, file, session, mapservice):
     else:
         utils.__delete_temporaries(filepath)
         return False
+    
+def delete_style(session, style_id, mapservice):
+    try:
+        style = Style.objects.get(id=int(style_id))
+        
+        if mapservice.deleteStyle(style.name, session):  
+            layer_styles = StyleLayer.objects.filter(style=style)   
+            for layer_style in layer_styles:
+                layer_style.delete()
+                
+            rules = Rule.objects.filter(style=style)
+            for rule in rules:
+                symbolizers = Symbolizer.objects.filter(rule=rule)
+                for symbolizer in symbolizers:
+                    if hasattr(symbolizer, 'rastersymbolizer'):
+                        symbolizer.rastersymbolizer.color_map.delete()
+                    symbolizer.delete()
+                rule.delete()
+        
+            style.delete()
+        
+    except Exception as e:
+        raise e

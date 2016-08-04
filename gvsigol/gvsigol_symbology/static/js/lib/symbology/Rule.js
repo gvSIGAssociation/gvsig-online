@@ -31,9 +31,11 @@ var Rule = function(id, name, title, options, utils) {
 	this.maxscale = -1;
 	this.order = 0;
 	this.symbolizers = new Array();
+	this.entries = new Array();
 	this.label = null;
 	this.utils = utils;
 	this.selected = null;
+	this.selectedCME = null;
 	
 	if (options) {
 		this.id = options.id;
@@ -54,7 +56,7 @@ Rule.prototype.getTableUI = function(allowImport, type) {
 	var ui = '';
 	
 	ui += '<div data-ruleid="' + this.id + '" class="col-md-12">';
-	if(type == 'unique' || type == 'colortable') {
+	if(type == 'unique') {
 		ui += 	'<div class="box box-primary">';
 	} else {
 		ui += 	'<div class="box box-primary collapsed-box">';
@@ -100,15 +102,53 @@ Rule.prototype.getTableUI = function(allowImport, type) {
 	ui += 				'</div>';
 	ui += 			'</div>';
 	ui += 			'<div class="box-footer clearfix">';
-	if (type != 'colortable') {
-		ui += 			'<a id="append-symbol-button-' + this.id + '" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-star-o margin-r-5"></i>' + gettext('Append symbolizer') + '</a>';
-		
-	} else {
-		ui += 			'<a id="append-color-entry-button' + this.id + '" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-tint margin-r-5"></i>' + gettext('Append color entry') + '</a>';
-	}
+	ui += 				'<a id="append-symbol-button-' + this.id + '" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-star-o margin-r-5"></i>' + gettext('Append symbolizer') + '</a>';
 	if (allowImport){
 		ui += 			'<a id="import-symbol-button-' + this.id + '" href="" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-download margin-r-5"></i>' + gettext('Import from library') + '</a>';
 	}
+	ui += 			'</div>';
+	ui += 		'</div>';
+	ui += 	'</div>';
+	ui += '</div>';
+	
+	return ui;
+};
+
+Rule.prototype.getColorMapEntryUI = function() {
+	var self = this;
+	
+	var ui = '';
+	
+	ui += '<div data-ruleid="' + this.id + '" class="col-md-12">';
+	ui += 	'<div class="box box-primary">';
+	ui += 		'<div class="box-header with-border">';
+	ui += 			'<div class="rule-preview" id="rule-preview-' + this.id + '"></div>';
+	ui += 				'<h3 id="rule-title-' + this.id + '" class="box-title">' + this.title + '</h3>';
+	ui += 				'<div class="box-tools pull-right">';
+	ui += 					'<button data-ruleid="' + this.id + '" style="color:#f56954;" class="btn btn-box-tool btn-box-tool-custom delete-rule">';
+	ui += 						'<i class="fa fa-times"></i>';
+	ui += 					'</button>';
+	ui += 				'</div>';
+	ui += 			'</div>';
+	ui += 			'<div class="box-body">';
+	ui += 				'<div class="table-responsive">';
+	ui += 					'<table id="rule-' + this.id + '-symbolizers" class="table no-margin">';
+	ui += 						'<thead>';
+	ui += 							'<tr>';
+	ui += 								'<th></th>';
+	ui += 								'<th>' + gettext('Color') + '</th>';
+	ui += 								'<th>' + gettext('Quantity') + '</th>';
+	ui += 								'<th>' + gettext('Label') + '</th>';
+	ui += 								'<th>' + gettext('Opacity') + '</th>';
+	ui +=	 							'<th></th>';											
+	ui += 							'</tr>';
+	ui += 						'</thead>';
+	ui += 						'<tbody id="table-entries-body-' + this.id + '"></tbody>';
+	ui += 					'</table>';
+	ui += 				'</div>';
+	ui += 			'</div>';
+	ui += 			'<div class="box-footer clearfix">';
+	ui += 				'<a id="append-color-entry-button-' + this.id + '" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-tint margin-r-5"></i>' + gettext('Append color map entry') + '</a>';
 	ui += 			'</div>';
 	ui += 		'</div>';
 	ui += 	'</div>';
@@ -164,7 +204,7 @@ Rule.prototype.registerEvents = function() {
 	});
 	
 	$("#append-color-entry-button-" + this.id).on('click', function(e){
-		self.addSymbolizer();
+		self.addColorMapEntry();
 	});
 	
 	$("#import-symbol-button-" + this.id).on('click', function(e){
@@ -186,6 +226,15 @@ Rule.prototype.registerEvents = function() {
 	
 };
 
+Rule.prototype.registerCMEEvents = function() {
+	var self = this;
+	
+	$("#append-color-entry-button-" + this.id).on('click', function(e){
+		self.addColorMapEntry();
+	});
+	
+};
+
 Rule.prototype.preview = function() {
 	this.symbolizers.sort(function(a, b){
 		return parseInt(b.order) - parseInt(a.order);
@@ -194,6 +243,13 @@ Rule.prototype.preview = function() {
 	var sldBody = this.utils.getSLDBody(this.symbolizers);
 	var url = this.utils.getPreviewUrl() + '&SLD_BODY=' + encodeURIComponent(sldBody);
 	var ui = '<img id="rule-preview-img" src="' + url + '" class="rule-preview"></img>';
+	$("#rule-preview-" + this.id).empty();
+	$("#rule-preview-" + this.id).append(ui);
+};
+
+Rule.prototype.previewRaster = function() {
+	var ui = '<img id="rule-preview-img" src="' + IMG_PATH + 'raster.png" class="rule-preview"></img>';
+		
 	$("#rule-preview-" + this.id).empty();
 	$("#rule-preview-" + this.id).append(ui);
 };
@@ -393,6 +449,45 @@ Rule.prototype.addExternalGraphicSymbolizer = function(options) {
 	this.symbolizers.push(symbolizer);
 };
 
+Rule.prototype.addColorMapEntry = function(options) {
+	var self = this;
+	
+	var colorMapEntry = new ColorMapEntry(this, options, this.utils);
+	
+	$('#rule-' + this.id + '-symbolizers tbody').append(colorMapEntry.getTableUI());
+	
+	$('#rule-' + this.id + '-symbolizers tbody').sortable({
+		placeholder: "sort-highlight",
+		handle: ".handle",
+		forcePlaceholderSize: true,
+		zIndex: 999999
+	});
+	
+	$('#rule-' + this.id + '-symbolizers tbody').on("sortupdate", function(event, ui){			
+		var rows = ui.item[0].parentNode.children;
+		for(var i=0; i < rows.length; i++) {
+			var cme = self.getCMEById(rows[i].dataset.rowid);
+			if (cme) {
+				cme.order = i;
+			}
+		}
+	});
+	
+	$(".edit-color-map-entry-link-" + this.id).on('click', function(e){	
+		e.preventDefault();
+		self.setSelectedCME(self.getCMEById(this.dataset.colormapentryid));
+		self.updateCMEForm();
+		$('#modal-color-map-entry').modal('show');
+	});
+	$(".delete-color-map-entry-link-" + this.id).one('click', function(e){	
+		e.preventDefault();
+		self.removeColorMapEntry(this.dataset.colormapentryid);
+	});
+	
+	colorMapEntry.updatePreview();
+	this.entries.push(colorMapEntry);
+};
+
 Rule.prototype.setLabel = function(label) {
 	this.label = label;
 };
@@ -403,6 +498,10 @@ Rule.prototype.getLabel = function() {
 
 Rule.prototype.setSelected = function(symbolizer) {
 	this.selected = symbolizer;
+};
+
+Rule.prototype.setSelectedCME = function(cme) {
+	this.selectedCME = cme;
 };
 
 Rule.prototype.updateForm = function() {
@@ -440,6 +539,16 @@ Rule.prototype.updateForm = function() {
 	}
 };
 
+Rule.prototype.updateCMEForm = function() {
+	$('#tab-menu').empty();
+	$('#tab-content').empty();	
+	
+	$('#tab-menu').append(this.selectedCME.getTabMenu());
+	$('#tab-content').append(this.selectedCME.getColorMapEntryTabUI());
+
+	this.selectedCME.registerEvents();
+};
+
 Rule.prototype.getNextSymbolizerId = function() {
 	return this.symbolizers.length;
 };
@@ -448,11 +557,23 @@ Rule.prototype.getSymbolizers = function() {
 	return this.symbolizers;
 };
 
+Rule.prototype.getEntries = function() {
+	return this.entries;
+};
+
 
 Rule.prototype.getSymbolizerById = function(id) {
 	for (var i=0; i < this.symbolizers.length; i++) {
 		if (this.symbolizers[i].id == id) {
 			return this.symbolizers[i];
+		}
+	}
+};
+
+Rule.prototype.getCMEById = function(id) {
+	for (var i=0; i < this.entries.length; i++) {
+		if (this.entries[i].id == id) {
+			return this.entries[i];
 		}
 	}
 };
@@ -472,9 +593,27 @@ Rule.prototype.removeSymbolizer = function(id) {
 	this.preview();
 };
 
+Rule.prototype.removeColorMapEntry = function(id) {
+	for (var i=0; i < this.entries.length; i++) {
+		if (this.entries[i].id == id) {
+			this.entries.splice(i, 1);
+		}
+	}
+	var tbody = document.getElementById('table-entries-body-' + this.id);
+	for (var i=0; i<tbody.children.length; i++) {
+		if(tbody.children[i].dataset.rowid == id) {
+			tbody.removeChild(tbody.children[i]);
+		}
+	}
+};
+
 Rule.prototype.removeAllSymbolizers = function(id) {
 	this.symbolizers.splice(0, this.symbolizers.length);
 	this.preview();
+};
+
+Rule.prototype.removeAllEntries = function(id) {
+	this.entries.splice(0, this.entries.length);
 };
 
 Rule.prototype.removeLabel = function() {
