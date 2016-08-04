@@ -175,8 +175,13 @@ SymbologyUtils.prototype.updateMap = function(style, name) {
 		sld +=          	'<Rule>';
 		sld +=          		'<Name>' + name + '</Name>';
 		sld +=          		'<Title>' + name + '</Title>';
-		for (var i=0; i < symbolizers.length; i++) {
-			sld += symbolizers[i].toXML()
+		if (style instanceof ColorTable) {
+			sld +=	this.getColorMap(style.rule.entries);
+			
+		} else {
+			for (var i=0; i < symbolizers.length; i++) {
+				sld += symbolizers[i].toXML()
+			}
 		}
 		sld +=          	'</Rule>';
 	}
@@ -263,6 +268,20 @@ SymbologyUtils.prototype.getFilter = function(json_filter) {
 	filter += '</ogc:Filter>';
 	
 	return filter;
+};
+
+SymbologyUtils.prototype.getColorMap = function(entries) {
+	var colorMap = '';
+	
+	colorMap += '<RasterSymbolizer>';
+	colorMap += '<ColorMap type="ramp" extended="false">';
+	for (var i=0; i<entries.length; i++) {
+		colorMap += '<ColorMapEntry color="' + entries[i].color + '" quantity="' + entries[i].quantity + '" label="' + entries[i].label + '" opacity="' + entries[i].opacity + '"/>';
+	}
+	colorMap += '</ColorMap>';
+	colorMap += '</RasterSymbolizer>';
+	
+	return colorMap;
 };
 
 SymbologyUtils.prototype.getSLDBody = function(symbolizers, name, title) {
