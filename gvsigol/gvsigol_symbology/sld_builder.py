@@ -22,7 +22,7 @@
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
-from models import Rule, Symbolizer
+from models import Rule, Symbolizer, ColorMapEntry
 from gvsigol_symbology import sld
 from lxml import etree
 import StringIO
@@ -171,6 +171,18 @@ def get_symbolizer(s):
         
     elif hasattr(s, 'rastersymbolizer'):
         symbolizer = sld.RasterSymbolizer()
+        color_map = sld.ColorMap()
+        
+        entries = ColorMapEntry.objects.filter(color_map=s.rastersymbolizer.color_map)
+        for e in entries:
+            entry = sld.ColorMapEntry()
+            entry.set_color(e.color)
+            entry.set_quantity(e.quantity)
+            entry.set_label(e.label)
+            entry.set_opacity(e.opacity)
+            color_map.add_ColorMapEntry(entry)
+            
+        symbolizer.set_ColorMap(color_map)
         
     return symbolizer
         

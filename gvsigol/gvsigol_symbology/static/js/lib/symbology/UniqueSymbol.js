@@ -64,7 +64,7 @@ UniqueSymbol.prototype.showLabel = function() {
 
 UniqueSymbol.prototype.loadRule = function(symbolizers) {
 	
-	$("#table-symbolizers-body").empty();
+	$("#table-symbolizers-body-" + this.rule.id).empty();
 	this.rule.removeAllSymbolizers();
 	this.rule.removeLabel();
 	
