@@ -190,6 +190,9 @@ SymbologyUtils.prototype.updateMap = function(style, name) {
 			sld +=          	'<Rule>';
 			sld +=          		'<Name>' + name + '</Name>';
 			sld +=          		'<Title>' + name + '</Title>';
+			if (style.rules[i].filter != '') {
+				sld +=	this.getFilter(style.rules[i].filter);
+			}
 			for (var j=0; j < symbolizers.length; j++) {
 				sld += symbolizers[j].toXML()
 			}
@@ -205,6 +208,61 @@ SymbologyUtils.prototype.updateMap = function(style, name) {
 	
 	this.reloadLayerPreview(sld);
 	
+};
+	
+SymbologyUtils.prototype.getFilter = function(json_filter) {
+	
+	var filter = '';
+	
+	filter += '<ogc:Filter>';
+	if (json_filter.type != 'is_between') {
+		var operator = '';
+		if (json_filter.type == 'is_equal_to') {
+			operator = 'PropertyIsEqualTo';
+			
+		} else if (json_filter.type == 'is_null') {
+			operator = 'PropertyIsNull';
+			
+		} else if (json_filter.type == 'is_like') {
+			operator = 'PropertyIsLike';
+			
+		} else if (json_filter.type == 'is_not_equal') {
+			operator = 'PropertyIsNotEqualTo';
+			
+		} else if (json_filter.type == 'is_greater_than') {
+			operator = 'PropertyIsGreaterThan';
+			
+		} else if (json_filter.type == 'is_greater_than_or_equal_to') {
+			operator = 'PropertyIsGreaterThanOrEqualTo';
+			
+		} else if (json_filter.type == 'is_less_than') {
+			operator = 'PropertyIsLessThan';
+			
+		} else if (json_filter.type == 'is_less_than_or_equal_to') {
+			operator = 'PropertyIsLessThanOrEqualTo';
+			
+		}
+		
+		filter += 	'<ogc:' + operator + '>';
+		filter += 		'<ogc:PropertyName>' + json_filter.property_name + '</ogc:PropertyName>';
+		filter += 		'<ogc:Literal>' + json_filter.value1 + '</ogc:Literal>';
+		filter += 	'</ogc:' + operator + '>';
+		
+	} else {
+		filter += 	'<ogc:PropertyIsBetween>';
+		filter += 		'<ogc:PropertyName>' + json_filter.property_name + '</ogc:PropertyName>';
+		filter += 		'<ogc:LowerBoundary>';
+		filter += 			'<ogc:Literal>' + json_filter.value1 + '</ogc:Literal>';
+		filter += 		'</ogc:LowerBoundary>';
+		filter += 		'<ogc:UpperBoundary>';
+		filter += 			'<ogc:Literal>' + json_filter.value2 + '</ogc:Literal>';
+		filter += 		'</ogc:UpperBoundary>';
+		filter += 	'</ogc:PropertyIsBetween>';
+		
+	}
+	filter += '</ogc:Filter>';
+	
+	return filter;
 };
 
 SymbologyUtils.prototype.getSLDBody = function(symbolizers, name, title) {
