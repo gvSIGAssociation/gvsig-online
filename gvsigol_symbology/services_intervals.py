@@ -274,27 +274,6 @@ def update_style(session, json_data, layer_id, style_id):
         return True
     else:
         return False
-    
-def delete_style(session, style_id):
-    try:
-        style = Style.objects.get(id=int(style_id))
-        
-        if mapservice.deleteStyle(style.name, session):  
-            layer_styles = StyleLayer.objects.filter(style=style)   
-            for layer_style in layer_styles:
-                layer_style.delete()
-                
-            rules = Rule.objects.filter(style=style)
-            for rule in rules:
-                symbolizers = Symbolizer.objects.filter(rule=rule)
-                for symbolizer in symbolizers:
-                    symbolizer.delete()
-                rule.delete()
-        
-            style.delete()
-        
-    except Exception as e:
-        raise e
 
 
 def get_conf(session, layer_id):

@@ -385,16 +385,16 @@ class Geoserver():
                 gs_style = catalog.get_style(style.name, workspace=None)
                 catalog.delete(gs_style, purge=True, recurse=False)
                 layer_style.delete()
-                '''
-                style_rules = StyleRule.objects.filter(style=style)
-                for style_rule in style_rules:
-                    rule = Rule.objects.filter(id=style_rule.rule.id)
+                
+                rules = Rule.objects.filter(style=style)
+                for rule in rules:
                     symbolizers = Symbolizer.objects.filter(rule=rule)
                     for symbolizer in symbolizers:
+                        if hasattr(symbolizer, 'rastersymbolizer'):
+                            symbolizer.rastersymbolizer.color_map.delete()
                         symbolizer.delete()
                     rule.delete()
-                    style_rule.delete()
-                '''
+                
                 style.delete()
                 
             return True

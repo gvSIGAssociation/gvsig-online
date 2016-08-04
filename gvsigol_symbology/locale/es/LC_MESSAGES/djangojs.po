@@ -14,23 +14,17 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-msgid "Border"
+msgid "Stroke"
 msgstr "Borde"
 
-msgid "With border"
-msgstr "Con borde"
-
-msgid "Border color"
+msgid "Stroke color"
 msgstr "Color del borde"
 
-msgid "Border size"
-msgstr "Tamaño del borde"
+msgid "Stroke width"
+msgstr "Anchura del borde"
 
-msgid "Border opacity"
+msgid "Stroke opacity"
 msgstr "Opacidad del borde"
-
-msgid "Border type"
-msgstr "Tipo del borde"
 
 msgid "Solid"
 msgstr "Sólido"
@@ -96,7 +90,7 @@ msgid "Font"
 msgstr "Fuente"
 
 msgid "Halo"
-msgstr "Sombra"
+msgstr "Halo"
 
 msgid "Vendor"
 msgstr "Vendor"
@@ -140,8 +134,116 @@ msgstr "Mínimo espacio alrededor de la etiqueta"
 msgid "Solve overlaps"
 msgstr "Resolver solapes"
 
-msgid "Image symbols can only be edited from the library"
-msgstr "Los símbolos de tipo imagen solo pueden ser editados desde la biblioteca"
+msgid "Color map entry"
+msgstr "Entrada de color"
+
+msgid "Color"
+msgstr "Color"
+
+msgid "Quantity"
+msgstr "Cantidad"
+
+msgid "Label"
+msgstr "Etiqueta"
+
+msgid "Opacity"
+msgstr "Opacidad"
+
+msgid "rule"
+msgstr "regla"
+
+msgid "Expressions"
+msgstr "Expresiones"
+
+msgid "Add expression"
+msgstr "Añadir expresión"
+
+msgid "Save filter"
+msgstr "Guardar filtro"
+
+msgid "Select field"
+msgstr "Seleccionar campo"
+
+msgid "Select operation"
+msgstr "Seleccionar operación"
+
+msgid "Filter preview"
+msgstr "Previsualizar filtro"
+
+msgid "Value"
+msgstr "Valor"
+
+msgid "Value1"
+msgstr "Valor 1"
+
+msgid "Value2"
+msgstr "Valor 2"
+
+msgid "Contains"
+msgstr "Contiene"
+
+msgid "contains"
+msgstr "contiene"
+
+msgid "Edit rule"
+msgstr "Editar regla"
+
+msgid "Edit filter"
+msgstr "Editar filtro"
+
+msgid "Preview"
+msgstr "Previsualizar"
+
+msgid "Append symbolizer"
+msgstr "Añadir simbolizador"
+
+msgid "Import from library"
+msgstr "Importar desde la librería"
+
+msgid "Append color map entry"
+msgstr "Añadir entrada de color"
+
+msgid "Rule name"
+msgstr "Nombre de la regla"
+
+msgid "Rule title"
+msgstr "Titulo de la regla"
+
+msgid "Save"
+msgstr "Guardar"
 
 msgid "Selected symbol is not compatible with the layer"
-msgstr "El símbolo seleccionado no es compatible con la geometría de la capa"
+msgstr "El símbolo seleccionado no es compatible con la capa"
+
+msgid "Image symbols can only be edited from the library"
+msgstr "Los símbolos de tipo imagen solo pueden ser editados desde la biblioteca de símbolos"
+
+msgid "Is equal to"
+msgstr "Es igual a"
+
+msgid "Is null"
+msgstr "Es nulo"
+
+msgid "Is not equal"
+msgstr "Es distinto a"
+
+msgid "Is greater than"
+msgstr "Es mayor a"
+
+msgid "Is greater than or equal to"
+msgstr "Es mayor o igual a"
+
+msgid "Is less than"
+msgstr "Es menor a"
+
+msgid "Is less than or equal to"
+msgstr "Es menor o igual a"
+
+msgid "Is between"
+msgstr "Está entre"
+
+msgid "You must select a field"
+msgstr "Debe seleccionar un campo"
+
+msgid "The number of intervals must be greater than 0"
+msgstr "El número de intervalos debe ser mayor que 0"

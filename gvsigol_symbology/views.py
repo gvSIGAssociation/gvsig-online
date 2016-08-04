@@ -27,7 +27,7 @@ from gvsigol_services.backend_mapservice import backend as mapservice
 from gvsigol_services.models import Workspace, Datastore, Layer
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
-from models import Style, StyleLayer, Rule, Library, LibraryRule, Symbolizer
+from models import Style, StyleLayer, Rule, Library, LibraryRule, Symbolizer, ColorMap, ColorMapEntry, RasterSymbolizer
 from gvsigol_auth.utils import admin_required
 from gvsigol import settings
 from gvsigol_symbology import services, services_library, services_unique_symbol,\
@@ -94,7 +94,7 @@ def style_layer_delete(request):
                 message = _('Can not delete a default style')
             else:
                 try:
-                    services_unique_symbol.delete_style(request.session, style_id)
+                    services.delete_style(request.session, style_id, mapservice)
                     success = True
                     
                 except Exception as e:
@@ -438,9 +438,11 @@ def color_table_update(request, layer_id, style_id):
         style = Style.objects.get(id=int(style_id))
         
         r = Rule.objects.get(style=style)
-        symbolizers = []
-        for s in Symbolizer.objects.filter(rule=r).order_by('order'):
-            symbolizers.append(utils.symbolizer_to_json(s))
+        rs = RasterSymbolizer.objects.get(rule=r)
+        cm = ColorMap.objects.get(id=rs.color_map.id)
+        entries = []
+        for e in ColorMapEntry.objects.filter(color_map=cm).order_by('order'):
+            entries.append(utils.entry_to_json(e))
             
         rule = {
             'id': r.id,
@@ -451,7 +453,7 @@ def color_table_update(request, layer_id, style_id):
             'minscale': r.minscale,
             'maxscale': r.maxscale,
             'order': r.order,
-            'symbolizers': symbolizers
+            'entries': entries
         }
                          
         response = services_color_table.get_conf(request.session, layer_id)
