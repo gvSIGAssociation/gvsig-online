@@ -210,6 +210,7 @@ STATICFILES_FINDERS = (
     #'compressor.finders.CompressorFinder',
 )
 
+PUBLIC_VIEWER = True
 CATALOG_MODULE = True
 GVSIGOL_CATALOG = {
     'URL': 'https://test.scolab.eu/geonetwork/srv/spa/'
