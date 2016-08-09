@@ -26,5 +26,6 @@ def global_settings(request):
     return {
         'CATALOG_MODULE': gvsigol.settings.CATALOG_MODULE,
         'INSTALLED_APPS': gvsigol.settings.INSTALLED_APPS,
-        'GVSIGOL_TOOLS': gvsigol.settings.GVSIGOL_TOOLS
+        'GVSIGOL_TOOLS': gvsigol.settings.GVSIGOL_TOOLS,
+        'PUBLIC_VIEWER': gvsigol.settings.PUBLIC_VIEWER,
     }

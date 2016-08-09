@@ -22,7 +22,7 @@
 '''
 from django.core.mail import send_mail
 from django.utils.translation import ugettext as _
-from gvsigol_core.models import Project, ProjectUserGroup, ProjectLayerGroup
+from gvsigol_core.models import Project, ProjectUserGroup, ProjectLayerGroup, PublicViewerLayerGroup
 from gvsigol_services.models import LayerGroup, Layer
 from gvsigol_auth.models import UserGroup, UserGroupUser
 import gvsigol.settings
@@ -145,6 +145,27 @@ def get_all_layer_groups_checked_by_project(project):
         
     return layer_groups
 
+def get_all_layer_groups_in_public_viewer(public_viewer):
+    groups_list = LayerGroup.objects.all()
+    pv_layer_groups =  PublicViewerLayerGroup.objects.filter(public_viewer_id=public_viewer.id)
+    checked = False
+    
+    layer_groups = []
+    for g in groups_list:
+        if g.name != '__default__':
+            layer_group = {}
+            for lgba in pv_layer_groups:
+                if lgba.layer_group_id == g.id:
+                    checked = True
+                    layer_group['checked'] = checked
+                           
+            layer_group['id'] = g.id
+            layer_group['name'] = g.name
+            layer_group['title'] = g.title
+            layer_groups.append(layer_group)
+        
+    return layer_groups
+
 def get_json_toc(project_layergroups):
     toc = {}
     count1 = 1
@@ -177,7 +198,10 @@ def toc_add_layergroups(toc_structure, layer_groups):
     indexes = []
     for key in json_toc:
         indexes.append(int(json_toc.get(key).get('order')))
-    count1 = (max(indexes) / 1000) + 1
+    if len(indexes) <= 0:
+        count1 = 1
+    else:
+        count1 = (max(indexes) / 1000) + 1
     for lg in layer_groups:
         lg_count = count1 * 1000
         toc_layergroup = {}
