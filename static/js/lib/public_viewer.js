@@ -143,7 +143,7 @@ viewer.core = {
     },
     
     _createWidgets: function(conf) {   
-    	this.layerTree = new layerTree(conf, this.map, false);
+    	this.layerTree = new layerTree(conf, this.map, true);
     	this.legend = new legend(conf, this.map);
     	this.search = new search(conf, this.map);
     },
@@ -232,14 +232,7 @@ viewer.core = {
 				wmsLayer.write_roles = layerConf.write_roles;
 				wmsLayer.namespace = layerConf.namespace;
 				wmsLayer.workspace = layerConf.workspace
-				wmsLayer.crs = layerConf.crs;
 				wmsLayer.order = layerConf.order;
-				if (layerConf.is_time_layer) {
-					wmsLayer.isTimeLayer = true;
-					wmsLayer.timeParams = layerConf.time_params;
-				} else {
-					wmsLayer.isTimeLayer = false;
-				}
 				wmsLayer.setZIndex(parseInt(layerConf.order));
 				this.map.addLayer(wmsLayer);
 			}
@@ -292,7 +285,7 @@ viewer.core = {
     	this.tools.push(new getFeatureInfo(this.map, conf.tools.get_feature_info_control.private_fields_prefix));
     	this.tools.push(new measureLength(this.map));
     	this.tools.push(new measureArea(this.map));
-    	this.tools.push(new exportToPDF(conf, this.map));
+    	//this.tools.push(new exportToPDF(conf, this.map));
     	this.tools.push(new searchByCoordinate(conf, this.map));
     	this.tools.push(new geolocation(this.map));
     	this.map.tools = this.tools;

@@ -23,9 +23,10 @@
 /**
  * TODO
  */
-var layerTree = function(conf, map) {
+var layerTree = function(conf, map, isPublic) {
 	this.map = map;	
 	this.conf = conf;
+	this.isPublic= isPublic;
 	this.editionBar = null;
 	this.$container = $('#layer-tree-tab');
 	this.createTree();
@@ -331,12 +332,6 @@ layerTree.prototype.createOverlayUI = function(layer) {
 	}
 	ui += '			<span class="text">' + layer.title + '</span>';
 	ui += '			<div class="box-tools pull-right">';
-//	ui += '				<button class="btn btn-box-tool btn-box-tool-custom">';
-//	ui += '					<i class="fa fa-angle-up"></i>';
-//	ui += '				</button>';
-//	ui += '				<button class="btn btn-box-tool btn-box-tool-custom">';
-//	ui += '					<i class="fa fa-angle-down"></i>';
-//	ui += '				</button>';
 	ui += '				<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
 	ui += '					<i class="fa fa-plus"></i>';
 	ui += '				</button>';
@@ -351,15 +346,17 @@ layerTree.prototype.createOverlayUI = function(layer) {
 		ui += '		<i class="fa fa-table"></i> ' + gettext('Attribute table');
 		ui += '	</a>';
     }	
-	if (mapLayer.is_vector) {
-    	if (mapLayer.write_roles.length >= 1) {
-    		if (this.userCanWrite(mapLayer)) {
-    			ui += '	<a id="start-edition-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool start-edition-link">';
-    			ui += '		<i class="fa fa-edit"></i> ' + gettext('Edit layer');
-    			ui += '	</a>';
-    		}
-    	}
-    }
+	if (!this.isPublic){
+		if (mapLayer.is_vector) {
+	    	if (mapLayer.write_roles.length >= 1) {
+	    		if (this.userCanWrite(mapLayer)) {
+	    			ui += '	<a id="start-edition-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool start-edition-link">';
+	    			ui += '		<i class="fa fa-edit"></i> ' + gettext('Edit layer');
+	    			ui += '	</a>';
+	    		}
+	    	}
+	    }
+	}
 	ui += '			<label style="display: block; margin-top: 8px; width: 95%;">' + gettext('Opacity') + '<span id="layer-opacity-output-' + layer.id + '" class="margin-l-15 gol-slider-output">%</span></label>';
 	ui += '			<div id="layer-opacity-slider" data-layerid="' + layer.id + '" class="layer-opacity-slider"></div>';
 	ui += '		</div>';
