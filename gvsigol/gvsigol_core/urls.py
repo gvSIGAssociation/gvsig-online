@@ -12,4 +12,7 @@ urlpatterns = [
     url(r'^search_candidates/$', 'gvsigol_core.views.search_candidates', name='search_candidates'),
     url(r'^get_location_address/$', 'gvsigol_core.views.get_location_address', name='get_location_address'),
     url(r'^export/(?P<pid>[0-9]+)/$', 'gvsigol_core.views.export', name='export'),
+    url(r'^public_viewer/$', 'gvsigol_core.views.public_viewer', name='public_viewer'),
+    url(r'^public_viewer_configuration/$', 'gvsigol_core.views.public_viewer_configuration', name='public_viewer_configuration'),
+    url(r'^public_viewer_get_conf/$', 'gvsigol_core.views.public_viewer_get_conf', name='public_viewer_get_conf'),
 ]
