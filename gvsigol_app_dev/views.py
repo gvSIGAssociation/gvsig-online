@@ -26,10 +26,7 @@ from gvsigol.settings import CATALOG_MODULE, GVSIGOL_CATALOG
 from django.shortcuts import redirect
 
 def index(request):
-    '''
     resp = {}
     if CATALOG_MODULE:
         resp['CATALOG_URL'] = GVSIGOL_CATALOG
     return render_to_response('index.html', resp, RequestContext(request))
-    '''
-    return redirect('home')
