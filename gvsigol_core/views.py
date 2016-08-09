@@ -22,10 +22,11 @@
 '''
 
 from django.shortcuts import render_to_response, RequestContext, HttpResponse, redirect
-from models import Project, ProjectUserGroup, ProjectLayerGroup
+from models import Project, ProjectUserGroup, ProjectLayerGroup, PublicViewer, PublicViewerLayerGroup
 from gvsigol_services.models import Workspace, Datastore, Layer, LayerGroup
 from gvsigol_auth.models import UserGroup, UserGroupUser
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
 from gvsigol_auth.utils import admin_required, is_admin_user
@@ -557,3 +558,182 @@ def export(request, pid):
         image = p.image.url
 
     return render_to_response('app_print_template.html', {'print_logo_url': urllib.unquote(image)}, context_instance=RequestContext(request))
+
+
+def public_viewer(request):
+    return render_to_response('public_viewer.html', {'supported_crs': gvsigol.settings.SUPPORTED_CRS}, context_instance=RequestContext(request))
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@admin_required
+def public_viewer_configuration(request):
+    if request.method == 'POST':
+        latitude = request.POST.get('center-lat')
+        longitude = request.POST.get('center-lon')
+        extent = request.POST.get('extent')
+        zoom = request.POST.get('zoom')
+                
+        assigned_layergroups = []
+        for key in request.POST:
+            if 'layergroup-' in key:
+                assigned_layergroups.append(int(key.split('-')[1]))
+                
+        public_viewer = PublicViewer.objects.all()[0]
+        
+        old_layer_groups = []
+        for lg in PublicViewerLayerGroup.objects.filter(public_viewer_id=public_viewer.id):
+            old_layer_groups.append(lg.layer_group.id)
+            
+        layer_groups_diff = None
+        toc_structure = None
+        if len(assigned_layergroups) > len(old_layer_groups):
+            layer_groups_diff = list(set(assigned_layergroups) - set(old_layer_groups))
+            toc_structure = core_utils.toc_add_layergroups(public_viewer.toc_order, layer_groups_diff)
+            
+        elif len(old_layer_groups) > len(assigned_layergroups):
+            layer_groups_diff = list(set(old_layer_groups) - set(assigned_layergroups))
+            toc_structure = core_utils.toc_remove_layergroups(public_viewer.toc_order, layer_groups_diff)
+
+        public_viewer.center_lat = latitude
+        public_viewer.center_lon = longitude
+        public_viewer.zoom = int(zoom)
+        public_viewer.extent = extent
+        public_viewer.toc_order = toc_structure
+        public_viewer.save()
+            
+        for lg in PublicViewerLayerGroup.objects.filter(public_viewer_id=public_viewer.id):
+            lg.delete()
+                
+        for alg in assigned_layergroups:
+            layergroup = LayerGroup.objects.get(id=alg)
+            public_viewer_layergroup = PublicViewerLayerGroup(
+                public_viewer = public_viewer,
+                layer_group = layergroup
+            )
+            public_viewer_layergroup.save()
+
+                
+        return redirect('home')
+                   
+    else:
+        public_viewer = None
+        if len(PublicViewer.objects.all()) <= 0:
+            public_viewer = PublicViewer(
+                center_lat = 0,
+                center_lon = 0,
+                zoom = 2,
+                extent = "",
+                toc_order = core_utils.get_json_toc([])
+            )
+            public_viewer.save()
+        
+        if len(PublicViewer.objects.all()) == 1:
+            public_viewer = PublicViewer.objects.all()[0]
+            
+        layer_groups = core_utils.get_all_layer_groups_in_public_viewer(public_viewer) 
+        return render_to_response('public_viewer_configuration.html', {'layergroups': layer_groups}, context_instance=RequestContext(request))
+    
+
+@csrf_exempt
+def public_viewer_get_conf(request):
+    if request.method == 'POST':
+        
+        public_viewer = None
+        if len(PublicViewer.objects.all()) <= 0:
+            public_viewer = PublicViewer(
+                center_lat = 0,
+                center_lon = 0,
+                zoom = 2,
+                extent = "",
+                toc_order = core_utils.get_json_toc([])
+            )
+            public_viewer.save()
+        
+        if len(PublicViewer.objects.all()) == 1:
+            public_viewer = PublicViewer.objects.all()[0]
+            
+        toc = json.loads(public_viewer.toc_order)
+            
+        project_layers_groups = PublicViewerLayerGroup.objects.filter(public_viewer_id=public_viewer.id)
+        layer_groups = []
+        workspaces = []
+        for project_group in project_layers_groups:            
+            group = LayerGroup.objects.get(id=project_group.layer_group_id)
+            
+            conf_group = {}
+            conf_group['groupTitle'] = group.title
+            conf_group['groupId'] = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
+            conf_group['groupOrder'] = toc.get(group.name).get('order')
+            conf_group['groupName'] = group.name
+            conf_group['cached'] = group.cached
+            layers_in_group = Layer.objects.filter(layer_group_id=group.id)
+            layers = []
+            for l in layers_in_group:
+                read_roles = services_utils.get_read_roles(l)
+                write_roles = services_utils.get_write_roles(l)
+                
+                if len(read_roles) <= 0:
+                    layer = {}                
+                    layer['name'] = l.name
+                    layer['title'] = l.title
+                    layer['abstract'] = l.abstract
+                    layer['visible'] = l.visible 
+                    layer['queryable'] = l.queryable 
+                    layer['cached'] = l.cached
+                    layer['order'] = toc.get(group.name).get('layers').get(l.name).get('order')
+                    layer['single_image'] = l.single_image
+                    layer['read_roles'] = read_roles
+                    layer['write_roles'] = write_roles
+                    
+                    datastore = Datastore.objects.get(id=l.datastore_id)
+                    workspace = Workspace.objects.get(id=datastore.workspace_id)
+                    
+                    if datastore.type == 'v_SHP' or datastore.type == 'v_PostGIS': 
+                        layer['is_vector'] = True
+                    else:
+                        layer['is_vector'] = False
+                        
+                    
+                    layer['wms_url'] = workspace.wms_endpoint
+                    layer['wfs_url'] = workspace.wfs_endpoint
+                    layer['namespace'] = workspace.uri
+                    layer['workspace'] = workspace.name                
+                    
+                    if l.cached:  
+                        layer['cache_url'] = workspace.cache_endpoint
+                    else:
+                        layer['cache_url'] = workspace.wms_endpoint
+                        
+                    layer['legend'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
+                    if 'http' in gvsigol.settings.GVSIGOL_CATALOG['URL']:
+                        if l.metadata_uuid is not None and l.metadata_uuid != '':
+                            layer['metadata'] = gvsigol.settings.GVSIGOL_CATALOG['URL'].split('//')
+                            
+                        else:
+                            layer['metadata'] = ''
+                        
+                    else:
+                        layer['metadata'] = ''
+                                                    
+                    layers.append(layer)
+            
+            if len(layers) > 0:   
+                ordered_layers = sorted(layers, key=itemgetter('order'), reverse=True)
+                conf_group['layers'] = ordered_layers
+                layer_groups.append(conf_group)
+            
+        ordered_layer_groups = sorted(layer_groups, key=itemgetter('groupOrder'), reverse=True)
+            
+        conf = {
+            "view": {
+                "center_lat": public_viewer.center_lat,
+                "center_lon": public_viewer.center_lon, 
+                "zoom": public_viewer.zoom 
+            }, 
+            'supported_crs': gvsigol.settings.SUPPORTED_CRS,
+            'layerGroups': ordered_layer_groups,
+            'tools': gvsigol.settings.GVSIGOL_TOOLS,
+            'base_layers': gvsigol.settings.GVSIGOL_BASE_LAYERS,
+            'geoserver_base_url': gvsigol.settings.GVSIGOL_SERVICES['URL']
+        } 
+        
+        return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
