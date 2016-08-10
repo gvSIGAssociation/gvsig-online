@@ -80,6 +80,7 @@ class Geoserver():
                 ('v_SHP', _('Shapefile folder')),
                 ('v_PostGIS', _('PostGIS vector')),
                 ('c_GeoTIFF', _('GeoTiff')),
+                ('e_WMS', _('Cascading WMS')),
             )
 
         gdal_tools.OGR2OGR_PATH = GVSIGOL_SERVICES.get('OGR2OGR_PATH', gdal_tools.OGR2OGR_PATH)
@@ -185,6 +186,17 @@ class Geoserver():
             elif format_nature == "c": # coverage (raster)
                 ds = catalog.create_coveragestore2(name, workspace.name)
                 ds.url = params_dict.get('url')
+            elif format_nature == "e": # cascading wms
+                #user = None
+                #password = None
+                #if params_dict.get('user') != 'wmsuser':
+                #    user = params_dict.get('user')
+                #if params_dict.get('password') != 'wmspassword':
+                #    password = params_dict.get('password')  
+                ws = catalog.get_workspace(workspace.name)
+                ds = catalog.create_wmsstore(name, ws, user=None, password=None)
+                ds.capabilitiesURL = params_dict.get('url')
+                
             else:
                 # unsupported
                 return False
@@ -225,6 +237,8 @@ class Geoserver():
                 ds.connection_parameters = params
             elif format_nature == "c": # coverage (raster)
                 ds.url = params_dict.get('url')
+            elif format_nature == "e": # cascading wms
+                ds.capabilitiesURL = params_dict.get('url')
             catalog.save(ds)
             return True
         except Exception as exc:
@@ -412,6 +426,8 @@ class Geoserver():
     def createResource(self, workspace, store, name, title, session):
         if store.type[0]=="v":
             return self.createFeaturetype(workspace, store, name, title, session)
+        elif store.type[0]=="e":
+            return self.createWMSLayer(workspace, store, name, title, session)
         else:
             return self.createCoverage(workspace, store, name, title, session)   
 
@@ -432,6 +448,19 @@ class Geoserver():
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
+    
+    def createWMSLayer(self, workspace, store, name, title, session):
+        try:
+            #return self.rest_catalog.create_wms_layer(name, title, coveragestore.name, workspace.name, user=session['username'], password=session['password'])
+            catalog = self.getGsconfig(session)
+            ws = catalog.get_workspace(workspace.name)
+            dst = catalog.get_store(store.name, ws)
+            return catalog.create_wmslayer(ws, dst, name, name)
+        except rest_geoserver.FailedRequestError as e:
+            raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
+        except Exception as e:
+            raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
+        
     #TODO: este metodo recrea el grupo de capas en Geoserver a partir de la informacion que hay en el modelo. Se deberian implementar los metodos
     # que anyaden o borran capas de un grupo para ser mas eficiente.    
     def createOrUpdateGeoserverLayerGroup(self, layer_group, session):
@@ -505,6 +534,9 @@ class Geoserver():
                 else:
                     # we can't get the name of the coverage, so we just offer a sensible, non existing name
                     return [self._get_unique_resource_name(datastore, workspace, session)]
+            elif (format_nature=='e'):
+                return store.get_resources(available=available)
+            
         except:
             e = sys.exc_info()[0]
             pass
