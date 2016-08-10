@@ -421,11 +421,12 @@ def project_get_conf(request):
                 
                 properties = capabilities.contents[workspace.name + ':' + l.name]
                 defaultCrs = properties.boundingBox[4]
-                epsg = gvsigol.settings.SUPPORTED_CRS[defaultCrs.split(':')[1]]
-                layer['crs'] = {
-                    'crs': defaultCrs,
-                    'units': epsg['units']
-                }
+                if defaultCrs.split(':')[1] in gvsigol.settings.SUPPORTED_CRS:
+                    epsg = gvsigol.settings.SUPPORTED_CRS[defaultCrs.split(':')[1]]
+                    layer['crs'] = {
+                        'crs': defaultCrs,
+                        'units': epsg['units']
+                    }
                 
                 if properties.timepositions is not None:
                     layer['is_time_layer'] = True
@@ -454,8 +455,12 @@ def project_get_conf(request):
                     layer['cache_url'] = authenticated_cache_url
                 else:
                     layer['cache_url'] = authenticated_wms_url
+                
+                if datastore.type == 'e_WMS':
+                    layer['legend'] = ""
+                else: 
+                    layer['legend'] = authenticated_wms_url + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
                     
-                layer['legend'] = authenticated_wms_url + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
                 if 'http' in gvsigol.settings.GVSIGOL_CATALOG['URL']:
                     if l.metadata_uuid is not None and l.metadata_uuid != '':
                         split_catalog_url = gvsigol.settings.GVSIGOL_CATALOG['URL'].split('//')
@@ -630,7 +635,7 @@ def public_viewer_configuration(request):
             public_viewer = PublicViewer.objects.all()[0]
             
         layer_groups = core_utils.get_all_layer_groups_in_public_viewer(public_viewer) 
-        return render_to_response('public_viewer_configuration.html', {'layergroups': layer_groups}, context_instance=RequestContext(request))
+        return render_to_response('public_viewer_configuration.html', {'public_viewer': public_viewer, 'layergroups': layer_groups}, context_instance=RequestContext(request))
     
 
 @csrf_exempt
@@ -702,8 +707,12 @@ def public_viewer_get_conf(request):
                         layer['cache_url'] = workspace.cache_endpoint
                     else:
                         layer['cache_url'] = workspace.wms_endpoint
+                    
+                    if datastore.type == 'e_WMS':
+                        layer['legend'] = ""
+                    else:
+                        layer['legend'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
                         
-                    layer['legend'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
                     if 'http' in gvsigol.settings.GVSIGOL_CATALOG['URL']:
                         if l.metadata_uuid is not None and l.metadata_uuid != '':
                             layer['metadata'] = gvsigol.settings.GVSIGOL_CATALOG['URL'].split('//')
