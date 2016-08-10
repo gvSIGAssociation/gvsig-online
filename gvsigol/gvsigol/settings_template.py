@@ -211,6 +211,7 @@ GVSIGOL_SERVICES = {
                         ('v_PostGIS', _('PostGIS vector')),
                         ('v_SHP', _('Shapefile folder')),                        
                         ('c_GeoTIFF', _('GeoTiff')),
+                        ('e_WMS', _('Cascading WMS')),
     ),
     # if MOSAIC_DB entry is omitted, mosaic indexes will be stored as SHPs
     'MOSAIC_DB': {
