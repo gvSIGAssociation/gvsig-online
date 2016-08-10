@@ -130,6 +130,19 @@ $().ready(function(){
 			code += '{ \n';
 			code += '\t "url": "url_replace" \n';
 			code += '}';
+			
+		}  else if (type == 'e_WMS') {
+			$('#select-file-row').css('display', 'none');
+			$('#connection-params-row').css('display', 'block');
+			code += '{ \n';
+			code += '\t "url": "https://demo.scolab.eu/geoserver/wms?request=getcapabilities" \n';
+			code += '}';
+			
+// 			code += '{ \n';
+// 			code += '\t "url": "https://test.scolab.eu/geoserver/wms?request=getcapabilities", // ' + gettext('URL to capabilities document') + ' \n';
+// 			code += '\t "user": "wmsuser", // * ' + gettext('Only required if service is authenticated') + ' \n';
+// 			code += '\t "password": "wmspassword", // * ' + gettext('Only required if service is authenticated') + ' \n';
+// 			code += '}';
 		}
 		
 		codemirror.setValue(code);

@@ -66,16 +66,18 @@ legend.prototype.getLegendsFromVisibleLayers = function() {
 	for (var i=0; i<layers.length; i++) {
 		if (!layers[i].baselayer) {
 			if (layers[i].wms_url && layers[i].getVisible()) {
-				html += 		'<div class="box box-widget">';
-				html += 			'<div class="box-header with-border">';
-				html += 				'<div class="user-block">';
-				html += 					'<span class="username"><a href="#">' + layers[i].title + '</a></span>';
-				html += 				'</div>';
-				html += 			'</div>';
-				html += 			'<div class="box-body">';
-				html += 				'<img class="img-responsive pad" src="' + layers[i].legend + '" alt="Photo">';
-				html += 			'</div>';
-				html += 		'</div>';
+				if (layers[i].legend != "") {
+					html += 		'<div class="box box-widget">';
+					html += 			'<div class="box-header with-border">';
+					html += 				'<div class="user-block">';
+					html += 					'<span class="username"><a href="#">' + layers[i].title + '</a></span>';
+					html += 				'</div>';
+					html += 			'</div>';
+					html += 			'<div class="box-body">';
+					html += 				'<img class="img-responsive pad" src="' + layers[i].legend + '" alt="Photo">';
+					html += 			'</div>';
+					html += 		'</div>';
+				}				
 			}						
 		}
 	}	
