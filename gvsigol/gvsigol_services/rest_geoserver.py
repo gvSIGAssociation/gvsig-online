@@ -119,6 +119,9 @@ class Geoserver():
             return True
         raise FailedRequestError(r.status_code, r.content)
     
+    def create_wms_layer(self, name, title, store, workspace, srs="EPSG:4326", content_type=None, user=None, password=None):
+        print 'create wms'
+    
     def create_coveragestore(self, workspace, store, filetype, file, user=None, password=None):
         url = self.service_url + "/workspaces/" + workspace + "/coveragestores.json"
         headers = {'content-type': "text/xml"}

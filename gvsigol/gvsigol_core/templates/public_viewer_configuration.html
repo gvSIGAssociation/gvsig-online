@@ -74,19 +74,17 @@
 <script type="text/javascript">
 	$('#menu-public-viewer').addClass("active");
 	$().ready(function() {
-		/**
-		  * Create the map.
-		  */
-		  var map = new ol.Map({
-				layers : [ new ol.layer.Tile({
-					source : new ol.source.OSM()
-				})],
-				target : 'project-map',
-				view : new ol.View({
-					center : [ 0, 0 ],
-					zoom : 2
-				})
-			});
+		
+	  var map = new ol.Map({
+			layers : [ new ol.layer.Tile({
+				source : new ol.source.OSM()
+			})],
+			target : 'project-map',
+			view : new ol.View({
+				center: ol.proj.transform([parseFloat('{{public_viewer.center_lon}}'), parseFloat('{{public_viewer.center_lat}}')], 'EPSG:4326', 'EPSG:3857'),
+			    zoom: '{{public_viewer.zoom}}'
+			})
+		});
 		
 		$('#project-form').submit(function() {
 			$("body").overlay();

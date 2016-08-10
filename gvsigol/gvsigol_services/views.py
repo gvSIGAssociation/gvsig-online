@@ -320,28 +320,32 @@ def layer_add(request):
                 newRecord.single_image = single_image
                 newRecord.abstract = abstract
                 newRecord.save()
-                style_name = newRecord.name + '_default'
-                mapservice_backend.createDefaultStyle(newRecord, style_name, session=request.session)
-                mapservice_backend.setLayerStyle(newRecord.name, style_name, session=request.session)
                 
-                datastore = Datastore.objects.get(id=newRecord.datastore.id)
-                workspace = Workspace.objects.get(id=datastore.workspace_id)
-                mapservice_backend.addGridSubset(workspace, newRecord, session=request.session)
-                newRecord.metadata_uuid = ''
-                try:
-                    if gvsigol.settings.CATALOG_MODULE:
-                        properties = mapservice_backend.get_layer_properties(request.session, workspace, newRecord)
-                        muuid = gn_backend.metadata_insert(request.session, newRecord, abstract, workspace, properties)
-                        newRecord.metadata_uuid = muuid
-                except Exception as exc:
-                    logging.exception(exc)
+                if form.cleaned_data['datastore'].type != 'e_WMS':
+                    style_name = newRecord.name + '_default'
+                    mapservice_backend.createDefaultStyle(newRecord, style_name, session=request.session)
+                    mapservice_backend.setLayerStyle(newRecord.name, style_name, session=request.session)
+                
+                    datastore = Datastore.objects.get(id=newRecord.datastore.id)
+                    workspace = Workspace.objects.get(id=datastore.workspace_id)
+                    mapservice_backend.addGridSubset(workspace, newRecord, session=request.session)
+                    newRecord.metadata_uuid = ''
+                    try:
+                        if gvsigol.settings.CATALOG_MODULE:
+                            properties = mapservice_backend.get_layer_properties(request.session, workspace, newRecord)
+                            muuid = gn_backend.metadata_insert(request.session, newRecord, abstract, workspace, properties)
+                            newRecord.metadata_uuid = muuid
+                    except Exception as exc:
+                        logging.exception(exc)
+                        newRecord.save()
+                        return HttpResponseRedirect(reverse('layer_update', kwargs={'layer_id': newRecord.id}))
                     newRecord.save()
-                    return HttpResponseRedirect(reverse('layer_update', kwargs={'layer_id': newRecord.id}))
-                newRecord.save()
+                    
                 core_utils.toc_add_layer(newRecord)
                 mapservice_backend.createOrUpdateGeoserverLayerGroup(newRecord.layer_group, request.session)
                 mapservice_backend.reload_nodes(request.session)
                 return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
+            
             except Exception as e:
                 try:
                     msg = e.get_message()
