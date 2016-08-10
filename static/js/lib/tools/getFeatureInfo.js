@@ -263,27 +263,28 @@ getFeatureInfo.prototype.showInfo = function(features){
 		html += 	'</div>';
 		html += '</li>';
 		
-		var newFeature = new ol.Feature();
-  		var sourceCRS = 'EPSG:' + features[i].crs.properties.name.split('::')[1];
-  		var projection = new ol.proj.Projection({
-    		code: sourceCRS,
-    	});
-    	ol.proj.addProjection(projection);
-    	if (features[i].feature.geometry.type == 'Point') {
-    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates));				
-    	} else if (features[i].feature.geometry.type == 'MultiPoint') {
-    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates[0]));				
-    	} else if (features[i].feature.geometry.type == 'LineString' || features[i].feature.geometry.type == 'MultiLineString') {
-    		newFeature.setGeometry(new ol.geom.MultiLineString([features[i].feature.geometry.coordinates[0]]));
-    	} else if (features[i].feature.geometry.type == 'Polygon' || features[i].feature.geometry.type == 'MultiPolygon') {
-    		newFeature.setGeometry(new ol.geom.MultiPolygon(features[i].feature.geometry.coordinates));
-    	}
-    	newFeature.setProperties(features[i].feature.properties);
-		newFeature.setId(fid);
-				
-		newFeature.getGeometry().transform(projection, 'EPSG:3857');
-		this.source.addFeature(newFeature);
-		
+		if (features[i].crs) {
+			var newFeature = new ol.Feature();
+	  		var sourceCRS = 'EPSG:' + features[i].crs.properties.name.split('::')[1];
+	  		var projection = new ol.proj.Projection({
+	    		code: sourceCRS,
+	    	});
+	    	ol.proj.addProjection(projection);
+	    	if (features[i].feature.geometry.type == 'Point') {
+	    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates));				
+	    	} else if (features[i].feature.geometry.type == 'MultiPoint') {
+	    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates[0]));				
+	    	} else if (features[i].feature.geometry.type == 'LineString' || features[i].feature.geometry.type == 'MultiLineString') {
+	    		newFeature.setGeometry(new ol.geom.MultiLineString([features[i].feature.geometry.coordinates[0]]));
+	    	} else if (features[i].feature.geometry.type == 'Polygon' || features[i].feature.geometry.type == 'MultiPolygon') {
+	    		newFeature.setGeometry(new ol.geom.MultiPolygon(features[i].feature.geometry.coordinates));
+	    	}
+	    	newFeature.setProperties(features[i].feature.properties);
+			newFeature.setId(fid);
+					
+			newFeature.getGeometry().transform(projection, 'EPSG:3857');
+			this.source.addFeature(newFeature);
+		}		
 	}	
 	html += '</ul>';
 	this.popup.show(self.mapCoordinates, '<div class="popup-wrapper">' + html + '</div>');	
