@@ -28,7 +28,7 @@ from forms_services import WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateF
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from backend_mapservice import gn_backend, WrongElevationPattern, WrongTimePattern, backend as mapservice_backend
 from gvsigol.settings import FILEMANAGER_DIRECTORY
-from gvsigol_core.models import ProjectLayerGroup
+from gvsigol_core.models import ProjectLayerGroup, PublicViewer
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.translation import ugettext as _
 from gvsigol_auth.utils import admin_required
@@ -685,6 +685,12 @@ def layergroup_delete(request, lgid):
         for p in projects_by_layergroup:
             p.project.toc_order = core_utils.toc_remove_layergroups(p.project.toc_order, [layergroup.id])
             p.project.save()
+            
+        if len(PublicViewer.objects.all()) == 1:
+            public_viewer = PublicViewer.objects.all()[0]
+            public_viewer.toc_order = core_utils.toc_remove_layergroups(public_viewer.toc_order, [layergroup.id])
+            public_viewer.save()
+            
         for layer in layers:  
             if mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer, session=request.session):
                 layer.delete()       
