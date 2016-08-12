@@ -197,6 +197,8 @@ STATICFILES_FINDERS = (
     #'compressor.finders.CompressorFinder',
 )
 
+GVSIGOL_VERSION = '2.0.0'
+
 PUBLIC_VIEWER = True
 CATALOG_MODULE = ##CATALOG_IS_ACTIVE##
 GVSIGOL_CATALOG = {

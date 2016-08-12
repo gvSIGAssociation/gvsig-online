@@ -22,7 +22,7 @@
 '''
 from django.core.mail import send_mail
 from django.utils.translation import ugettext as _
-from gvsigol_core.models import Project, ProjectUserGroup, ProjectLayerGroup, PublicViewerLayerGroup
+from gvsigol_core.models import Project, ProjectUserGroup, ProjectLayerGroup, PublicViewerLayerGroup, PublicViewer, PublicViewerLayerGroup
 from gvsigol_services.models import LayerGroup, Layer
 from gvsigol_auth.models import UserGroup, UserGroupUser
 import gvsigol.settings
@@ -235,6 +235,15 @@ def toc_update_layer_group(old_layergroup, old_name, new_name):
         toc[new_name] = toc.pop(old_name)
         p.project.toc_order = json.dumps(toc)
         p.project.save()
+        
+    if len(PublicViewer.objects.all()) == 1:
+        public_viewer = PublicViewer.objects.all()[0]
+        json_toc2 = public_viewer.toc_order
+        toc2 = json.loads(json_toc2)
+        toc2[old_name]['name'] = new_name
+        toc2[new_name] = toc2.pop(old_name)
+        public_viewer.toc_order = json.dumps(toc2)
+        public_viewer.save()
    
 def toc_remove_layergroups(toc_structure, layer_groups): 
     json_toc = json.loads(toc_structure)
@@ -268,6 +277,30 @@ def toc_add_layer(layer):
             }
         p.project.toc_order = json.dumps(toc)
         p.project.save()
+        
+    if len(PublicViewer.objects.all()) == 1:
+        public_viewer = PublicViewer.objects.all()[0]
+        json_toc2 = public_viewer.toc_order
+        toc2 = json.loads(json_toc2)
+        if toc2.has_key(layer.layer_group.name):
+            indexes = []
+            for l in toc2.get(layer.layer_group.name).get('layers'):
+                indexes.append(int(toc2.get(layer.layer_group.name).get('layers').get(l).get('order')))
+            
+            if len(indexes) > 0:
+                order = max(indexes) + 1
+            else:
+                lg_order = toc2.get(layer.layer_group.name).get('order')
+                order = int(lg_order) + 1
+                
+            toc2.get(layer.layer_group.name).get('layers')[layer.name] = {
+                'name': layer.name,
+                'title': layer.title,
+                'order': order
+            }
+        public_viewer.toc_order = json.dumps(toc2)
+        public_viewer.save()
+
 
 def toc_move_layer(layer, old_layer_group): 
     projects_by_layergroup = ProjectLayerGroup.objects.filter(layer_group=old_layer_group)
@@ -278,6 +311,16 @@ def toc_move_layer(layer, old_layer_group):
             del toc.get(old_layer_group.name).get('layers')[layer.name]
         p.project.toc_order = json.dumps(toc)
         p.project.save()
+        
+    if len(PublicViewer.objects.all()) == 1:
+        public_viewer = PublicViewer.objects.all()[0]
+        json_toc2 = public_viewer.toc_order
+        toc2 = json.loads(json_toc2)
+        if toc2.has_key(old_layer_group.name):
+            del toc2.get(old_layer_group.name).get('layers')[layer.name]
+        public_viewer.toc_order = json.dumps(toc2)
+        public_viewer.save()
+        
     toc_add_layer(layer)
 
 def toc_remove_layer(layer): 
@@ -289,6 +332,15 @@ def toc_remove_layer(layer):
             del toc.get(layer.layer_group.name).get('layers')[layer.name]
         p.project.toc_order = json.dumps(toc)
         p.project.save()
+        
+    if len(PublicViewer.objects.all()) == 1:
+        public_viewer = PublicViewer.objects.all()[0]
+        json_toc2 = public_viewer.toc_order
+        toc2 = json.loads(json_toc2)
+        if toc2.has_key(layer.layer_group.name):
+            del toc2.get(layer.layer_group.name).get('layers')[layer.name]
+        public_viewer.toc_order = json.dumps(toc2)
+        public_viewer.save()
 
        
 def sendMail(user, password):
