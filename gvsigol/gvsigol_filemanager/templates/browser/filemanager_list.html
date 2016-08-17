@@ -25,11 +25,7 @@
 	    	{% for file in files %}
 	    	<tr>
 	      		{% if popup %}
-	      			{% if file.filetype == "Directory" %}
-	      				<td></td>
-	      			{% else %}
 	      				<td><a href="javascript: Filemanager.select('{{file.filepath}}');"><i class="fa fa-file"></i></a></td>
-	      			{% endif %}
 	      		{% endif %}
 	      		{% if file.filetype == "Directory" %}
 	      			<td><img src="{% static "img/folder.png" %}" style="margin-right: 5px;"><a href="?path={{file.filepath}}{% if popup %}&amp;popup=1{% endif %}">{{file.filename}}</a></td>
