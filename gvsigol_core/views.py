@@ -746,3 +746,7 @@ def public_viewer_get_conf(request):
         } 
         
         return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
+    
+def ogc_services(request):
+    workspaces = Workspace.objects.all()           
+    return render_to_response('ogc_services.html', {'workspaces': workspaces}, RequestContext(request))

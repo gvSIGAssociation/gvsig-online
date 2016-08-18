@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+{% load i18n %}
+<html>
+<head>
+	
+	<title>gvSIG Online</title>
+	
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+	
+	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.6/css/bootstrap.min.css" %}">
+	<link rel="stylesheet" href="{% static "css/font-awesome-4.4.0/css/font-awesome.min.css" %}">
+	<link rel="stylesheet" href="{% static "css/fontcustom/fontcustom.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/ol-3.15.1/ol.css" %}">
+	<link rel="stylesheet" href="{% static "css/gvsigOL.css" %}">
+	<link rel="stylesheet" href="{% static "css/skins/_all-skins.min.css" %}">
+    
+	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+</head>
+
+<body class="hold-transition layout-top-nav">
+
+	<div class="wrapper">
+
+		<header class="main-header">
+			<nav class="navbar navbar-static-top navbar-grey">
+				<div class="container">
+					<div class="navbar-header">
+        				<img src="{% static "img/logo_small.png"%}">
+					</div>
+				</div>
+			</nav>
+		</header>
+
+		<div class="content-wrapper">
+			<div class="container">
+				<section class="content">
+					{% for workspace in workspaces %}			
+						<div class="box box-primary">
+							<div class="box-header with-border">
+								<h3 class="box-title" style="margin-right: 20px;">{{workspace.name}}</h3><span class="text-muted"> {{workspace.description}}</span>
+							</div>
+							<div class="box-body">
+								<ul class="products-list product-list-in-box">
+								
+									<li class="item">
+										<div class="product-img">
+											<img src="{% static "img/wms.jpg" %}" alt="WMS Service">
+										</div>
+										<div class="product-info">
+											<a data-url="{{workspace.wms_endpoint}}" href="#" class="product-title wms-capabilities-link">{% trans "WMS Service" %} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="label label-success pull-right"><i class="fa fa-angle-right margin-r-5"></i> {% trans "Show capabilities" %}</span></a> 
+											<span class="product-description"> {{workspace.wms_endpoint}}</span>
+										</div>
+									</li>
+									
+									<li class="item">
+										<div class="product-img">
+											<img src="{% static "img/wfs.jpeg" %}" alt="WFS Service">
+										</div>
+										<div class="product-info">
+											<a data-url="{{workspace.wfs_endpoint}}" href="#" class="product-title wfs-capabilities-link">{% trans "WFS Service" %} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="label label-success pull-right"><i class="fa fa-angle-right margin-r-5"></i> {% trans "Show capabilities" %}</span></a> 
+											<span class="product-description"> {{workspace.wfs_endpoint}}</span>
+										</div>
+									</li>
+									
+								</ul>
+							</div>
+						</div>
+					{% endfor %}
+				</section>
+			</div>
+		</div>
+
+		<footer class="main-footer">
+			<div class="pull-right hidden-xs">
+				<b>{% trans "Version" %}</b> {{GVSIGOL_VERSION}}
+			</div>
+			<strong>Copyright &copy; 2016 <a
+				href="http://www.scolab.es">SCOLAB</a>.
+			</strong> {% trans "All rights reserved" %}.
+		</footer>
+
+		
+	</div>
+	
+	<!-- Modal -->
+	<div class="modal fade" id="modal-capabilities" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title">{% trans "Service capabilities" %}</h4>
+				</div>
+				<div class="modal-body">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
+
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jQuery-2.1.4.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.cookie.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQueryUI/jquery-ui.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.easy-overlay.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.autocomplete.min.js" %}"></script>
+	<script>
+		$.widget.bridge('uibutton', $.ui.button);
+	</script>
+	<script type="text/javascript" src="{% static "js/vendors/bootstrap-3.3.6/js/bootstrap.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/slimScroll/jquery.slimscroll.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/fastclick/fastclick.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/proj4js/proj4.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/ol-3.15.1/ol.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/gvsigOL.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/widgets/messageBox.js" %}"></script>
+	<script>
+		var messageBox = new messageBox();
+	</script>
+	
+	<script type="text/javascript">
+	$().ready(function() {
+		$('.wms-capabilities-link').on('click', function(){
+			$('#modal-capabilities .modal-body').append(this.dataset.url);
+			$('#modal-capabilities').modal('show');
+		});
+		
+		$('.wfs-capabilities-link').on('click', function(){
+			$('#modal-capabilities .modal-body').append(this.dataset.url);
+			$('#modal-capabilities').modal('show');
+		});
+	});
+</script>
+	
+</body>
+</html>
