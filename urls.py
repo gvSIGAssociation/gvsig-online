@@ -15,4 +15,5 @@ urlpatterns = [
     url(r'^public_viewer/$', 'gvsigol_core.views.public_viewer', name='public_viewer'),
     url(r'^public_viewer_configuration/$', 'gvsigol_core.views.public_viewer_configuration', name='public_viewer_configuration'),
     url(r'^public_viewer_get_conf/$', 'gvsigol_core.views.public_viewer_get_conf', name='public_viewer_get_conf'),
+    url(r'^ogc_services/$', 'gvsigol_core.views.ogc_services', name='ogc_services'),
 ]
