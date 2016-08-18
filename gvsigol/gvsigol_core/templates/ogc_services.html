@@ -61,15 +61,15 @@
 										</div>
 									</li>
 									
-									<li class="item">
-										<div class="product-img">
-											<img src="{% static "img/wfs.jpeg" %}" alt="WFS Service">
-										</div>
-										<div class="product-info">
-											<a data-url="{{workspace.wfs_endpoint}}" href="#" class="product-title wfs-capabilities-link">{% trans "WFS Service" %} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="label label-success pull-right"><i class="fa fa-angle-right margin-r-5"></i> {% trans "Show capabilities" %}</span></a> 
-											<span class="product-description"> {{workspace.wfs_endpoint}}</span>
-										</div>
-									</li>
+<!-- 									<li class="item"> -->
+<!-- 										<div class="product-img"> -->
+<!-- 											<img src="{% static "img/wfs.jpeg" %}" alt="WFS Service"> -->
+<!-- 										</div> -->
+<!-- 										<div class="product-info"> -->
+<!-- 											<a data-url="{{workspace.wfs_endpoint}}" href="#" class="product-title wfs-capabilities-link">{% trans "WFS Service" %} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="label label-success pull-right"><i class="fa fa-angle-right margin-r-5"></i> {% trans "Show capabilities" %}</span></a>  -->
+<!-- 											<span class="product-description"> {{workspace.wfs_endpoint}}</span> -->
+<!-- 										</div> -->
+<!-- 									</li> -->
 									
 								</ul>
 							</div>
@@ -101,7 +101,7 @@
 					</button>
 					<h4 class="modal-title">{% trans "Service capabilities" %}</h4>
 				</div>
-				<div class="modal-body">
+				<div class="modal-body ativa-scroll">
 				</div>
 			</div>
 		</div>
@@ -129,16 +129,166 @@
 	</script>
 	
 	<script type="text/javascript">
+	  $(document).ready(ajustamodal);
+	  $(window).resize(ajustamodal);
+	  function ajustamodal() {
+	    var altura = $(window).height() - 155; //value corresponding to the modal heading + footer
+	    $(".ativa-scroll").css({"height":altura,"overflow-y":"auto"});
+	  }
+	</script>
+	
+	<script type="text/javascript">
 	$().ready(function() {
 		$('.wms-capabilities-link').on('click', function(){
-			$('#modal-capabilities .modal-body').append(this.dataset.url);
-			$('#modal-capabilities').modal('show');
+			var capabilitiesUrl = this.dataset.url + '?service=WMS&request=getCapabilities';
+			getWmsCapabilities(capabilitiesUrl);
 		});
 		
 		$('.wfs-capabilities-link').on('click', function(){
-			$('#modal-capabilities .modal-body').append(this.dataset.url);
-			$('#modal-capabilities').modal('show');
+			var capabilitiesUrl = this.dataset.url + '?service=WFS&request=getCapabilities';
+			getWfsCapabilities(capabilitiesUrl);
 		});
+		
+		function getWmsCapabilities(url){
+			var parser = new ol.format.WMSCapabilities();
+
+		  	fetch(url).then(function(response) {
+		   		return response.text();
+		   		
+		  	}).then(function(text) {
+		   		var jsonCapabilities = parser.read(text);
+		   		$('#modal-capabilities .modal-body').empty();
+		   		$('#modal-capabilities .modal-body').append(wmsCapabilitiesToHtml(jsonCapabilities));
+				$('#modal-capabilities').modal('show');
+				
+		   	});
+		}
+		
+		function getWfsCapabilities(url){
+			console.log('Get WFS Capabilities');
+		}
+		
+		function wmsCapabilitiesToHtml(jsonCapabilities){
+			var html = '';
+			html += '<section class="invoice">';
+			html += 	'<div class="row">';
+			html += 		'<div class="col-xs-12">';
+			html += 			'<h2 class="page-header">';
+			html += 				'<i class="fa fa-globe"></i> WMS Capabilities';
+			html += 				'<small class="pull-right">' + gettext('Version') + ': ' + jsonCapabilities.version + '</small>';
+			html += 			'</h2>';
+			html += 		'</div>';
+			html += 	'</div>';
+			html += 	'<div class="nav-tabs-custom">';
+			html += 		'<ul class="nav nav-tabs">';
+			html += 			'<li class="active"><a href="#tab_summary" data-toggle="tab">' + gettext('Summary') + '</a></li>';
+			html += 			'<li><a href="#tab_requests" data-toggle="tab">' + gettext('Requests') + '</a></li>';
+			html += 			'<li><a href="#tab_supported_crs" data-toggle="tab">' + gettext('Supported CRS') + '</a></li>';
+			html += 			'<li><a href="#tab_layers" data-toggle="tab">' + gettext('Layers') + '</a></li>';
+			html += 		'</ul>';
+			html += 		'<div class="tab-content">';
+			html += 			'<div class="tab-pane active" id="tab_summary">' + getWmsSummary(jsonCapabilities) + '</div>';
+			html += 			'<div class="tab-pane" id="tab_requests">' + getWmsRequests(jsonCapabilities) + '</div>';
+			html += 			'<div class="tab-pane" id="tab_supported_crs">' + getWmsSupportedCrs(jsonCapabilities) + '</div>';
+			html += 			'<div class="tab-pane" id="tab_layers">' + getWmsLayers(jsonCapabilities) + '</div>';
+			html += 		'</div>';
+			html += 	'</div>';
+			html += '</section>';
+			
+			return html;
+		}
+		
+		function getWmsSummary(jsonCapabilities){
+			var html = '';
+			
+			html += 	'<div class="row invoice-info">';
+			html += 		'<div class="col-sm-12 invoice-col">';
+			html += 			'<address>';
+			html += 				'<strong>Title</strong>: ' + jsonCapabilities.Service.Title  + '<br>';
+			html += 				'<strong>Abstract</strong>: ' + jsonCapabilities.Service.Abstract;
+			html += 			'</address>';
+			html += 		'</div>';
+			html += 		'<div class="col-sm-12 invoice-col">';
+			html += 			'<address>';
+			html += 				'<strong>' + gettext('Organization') + '</strong>: ' + jsonCapabilities.Service.ContactInformation.ContactPersonPrimary.ContactOrganization + '<br>';
+			html += 				'<strong>' + gettext('Contact person') + '</strong>: ' + jsonCapabilities.Service.ContactInformation.ContactPersonPrimary.ContactPerson + '<br>';
+			html += 				'<strong>' + gettext('Address') + '</strong>: ' + jsonCapabilities.Service.ContactInformation.ContactAddress.Address + '<br>';
+			html += 				'<strong>' + gettext('City') + '</strong>: ' + jsonCapabilities.Service.ContactInformation.ContactAddress.City + '<br>';
+			html += 				'<strong>' + gettext('Country') + '</strong>: ' + jsonCapabilities.Service.ContactInformation.ContactAddress.Country + '<br>';
+			html += 				'<strong>' + gettext('Email') + '</strong>: ' + jsonCapabilities.Service.ContactInformation.ContactElectronicMailAddress + '<br>';
+			html += 			'</address>';
+			html += 		'</div>';
+			html += 	'</div>';
+			
+			return html;
+		}
+		
+		function getWmsRequests(jsonCapabilities){
+			var html = '';
+			
+			for (key in jsonCapabilities.Capability.Request) {
+				html += '<div class="box box-solid">';
+				html += 	'<div class="box-header with-border">';
+				//html += 		'<i class="fa fa-check"></i>';
+				html += 		'<h3 class="box-title">' + key + '</h3>';
+				html += 	'</div>';
+				html += 	'<div class="box-body">';
+				html += 		'<ul>';
+				for (var i=0; i<jsonCapabilities.Capability.Request[key].Format.length; i++) {
+					html += 		'<li>' + jsonCapabilities.Capability.Request[key].Format[i] + '</li>';	
+				}
+				html += 		'</ul>';
+				html += 	'</div>';
+				html += '</div>';
+			}
+			
+			return html;
+		}
+		
+		function getWmsSupportedCrs(jsonCapabilities){
+			var html = '';
+			
+			html += '<div class="box box-solid">';
+			html += 	'<div class="box-header with-border">';
+			//html += 		'<i class="fa fa-check"></i>';
+			html += 		'<h3 class="box-title">' + gettext('Supported CRS') + '</h3>';
+			html += 	'</div>';
+			html += 	'<div class="box-body">';
+			html += 		'<ul>';
+			for (var i=0; i<jsonCapabilities.Capability.Layer.CRS.length; i++) {
+				html += 		'<li>' + jsonCapabilities.Capability.Layer.CRS[i] + '</li>';	
+			}
+			html += 		'</ul>';
+			html += 	'</div>';
+			html += '</div>';
+			
+			return html;
+		}
+		
+		function getWmsLayers(jsonCapabilities){
+			var html = '';
+			
+			html += 	'<div class="row invoice-info">';
+			html += 		'<div class="col-sm-12 invoice-col">';
+			html += 			'<address>';
+			html += 				'<strong>Title</strong>: ' + jsonCapabilities.Service.Title  + '<br>';
+			html += 				'<strong>Abstract</strong>: ' + jsonCapabilities.Service.Abstract;
+			html += 			'</address>';
+			html += 		'</div>';
+			html += 		'<div class="col-sm-12 invoice-col">';
+			html += 			'<address>';
+			html += 				'<strong>' + gettext('Organization') + '</strong>: ' + jsonCapabilities.Service.ContactInformation.ContactPersonPrimary.ContactOrganization + '<br>';
+			html += 				'<strong>' + gettext('Contact person') + '</strong>: ' + jsonCapabilities.Service.ContactInformation.ContactPersonPrimary.ContactPerson + '<br>';
+			html += 				'<strong>' + gettext('Address') + '</strong>: ' + jsonCapabilities.Service.ContactInformation.ContactAddress.Address + '<br>';
+			html += 				'<strong>' + gettext('City') + '</strong>: ' + jsonCapabilities.Service.ContactInformation.ContactAddress.City + '<br>';
+			html += 				'<strong>' + gettext('Country') + '</strong>: ' + jsonCapabilities.Service.ContactInformation.ContactAddress.Country + '<br>';
+			html += 				'<strong>' + gettext('Email') + '</strong>: ' + jsonCapabilities.Service.ContactInformation.ContactElectronicMailAddress + '<br>';
+			html += 			'</address>';
+			html += 		'</div>';
+			html += 	'</div>';
+			
+			return html;
+		}
 	});
 </script>
 	
