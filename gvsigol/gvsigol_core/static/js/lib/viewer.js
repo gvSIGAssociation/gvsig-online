@@ -84,7 +84,7 @@ viewer.core = {
 				new ol.control.Zoom(),
 				new ol.control.ScaleLine(),					
       			new ol.control.OverviewMap({collapsed: false})//,
-      			//mousePositionControl
+      			mousePositionControl
       		],
       		renderer: 'canvas',
       		target: 'map',
