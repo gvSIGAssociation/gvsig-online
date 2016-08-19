@@ -267,25 +267,41 @@
 		
 		function getWmsLayers(jsonCapabilities){
 			var html = '';
-			
-			html += 	'<div class="row invoice-info">';
-			html += 		'<div class="col-sm-12 invoice-col">';
-			html += 			'<address>';
-			html += 				'<strong>Title</strong>: ' + jsonCapabilities.Service.Title  + '<br>';
-			html += 				'<strong>Abstract</strong>: ' + jsonCapabilities.Service.Abstract;
-			html += 			'</address>';
-			html += 		'</div>';
-			html += 		'<div class="col-sm-12 invoice-col">';
-			html += 			'<address>';
-			html += 				'<strong>' + gettext('Organization') + '</strong>: ' + jsonCapabilities.Service.ContactInformation.ContactPersonPrimary.ContactOrganization + '<br>';
-			html += 				'<strong>' + gettext('Contact person') + '</strong>: ' + jsonCapabilities.Service.ContactInformation.ContactPersonPrimary.ContactPerson + '<br>';
-			html += 				'<strong>' + gettext('Address') + '</strong>: ' + jsonCapabilities.Service.ContactInformation.ContactAddress.Address + '<br>';
-			html += 				'<strong>' + gettext('City') + '</strong>: ' + jsonCapabilities.Service.ContactInformation.ContactAddress.City + '<br>';
-			html += 				'<strong>' + gettext('Country') + '</strong>: ' + jsonCapabilities.Service.ContactInformation.ContactAddress.Country + '<br>';
-			html += 				'<strong>' + gettext('Email') + '</strong>: ' + jsonCapabilities.Service.ContactInformation.ContactElectronicMailAddress + '<br>';
-			html += 			'</address>';
-			html += 		'</div>';
-			html += 	'</div>';
+          
+			var layers = jsonCapabilities.Capability.Layer.Layer;
+			for (var i=0; i<layers.length; i++) {
+				var bbox = layers[i].BoundingBox[0].extent[0] + ' ' + layers[i].BoundingBox[0].extent[1] + ' ' + layers[i].BoundingBox[0].extent[2] + ' ' + layers[i].BoundingBox[0].extent[3]
+				var gbbox = layers[i].EX_GeographicBoundingBox[0] + ' ' + layers[i].EX_GeographicBoundingBox[1] + ' ' + layers[i].EX_GeographicBoundingBox[2] + ' ' + layers[i].EX_GeographicBoundingBox[3]
+				if (i==0) {
+					html += '<div class="box box-primary">';
+				} else {
+					html += '<div class="box box-primary collapsed-box">';
+				}
+				html += 	'<div class="box-header with-border">';
+				html += 		'<h3 class="box-title">' + layers[i].Title + '</h3>';
+				html += 		'<div class="box-tools pull-right">';
+				if (i==0) {
+					html += 		'<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>';
+				} else {
+					html += 		'<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button>';
+				}
+				html += 		'</div>';
+				html += 	'</div>';
+				html += 	'<div class="box-body">';
+				html += 		'<div>';
+				html += 			'<strong>' + gettext('Name') + '</strong>: ' + layers[i].Name + '<br>';
+				html += 			'<strong>' + gettext('Title') + '</strong>: ' + layers[i].Title + '<br>';
+				html += 			'<strong>' + gettext('Abstract') + '</strong>: ' + layers[i].Abstract + '<br>';
+				html += 			'<strong>' + gettext('Queryable') + '</strong>: ' + layers[i].queryable + '<br>';
+				html += 			'<strong>' + gettext('MaxScaleDenominator') + '</strong>: ' + layers[i].MaxScaleDenominator + '<br>';
+				html += 			'<strong>' + gettext('MinScaleDenominator') + '</strong>: ' + layers[i].MinScaleDenominator + '<br>';
+				html += 			'<strong>' + gettext('Default CRS') + '</strong>: ' + layers[i].BoundingBox[0].crs + '<br>';
+				html += 			'<strong>' + gettext('BoundingBox') + '</strong>: ' + bbox + '<br>';
+				html += 			'<strong>' + gettext('GeographicBoundingBox') + '</strong>: ' + gbbox + '<br>';
+				html += 		'</div>';
+				html += 	'</div>';
+				html += '</div>';
+			}
 			
 			return html;
 		}
