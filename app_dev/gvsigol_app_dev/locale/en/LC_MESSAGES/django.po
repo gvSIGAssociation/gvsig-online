@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-06-02 17:11+0200\n"
+"POT-Creation-Date: 2016-08-05 13:25+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -57,24 +57,24 @@ msgstr ""
 msgid "Look up OGC services available"
 msgstr ""
 
-#: templates/index.html:132
+#: templates/index.html:132 templates/index.html.py:133
 msgid "Show available services"
 msgstr ""
 
-#: templates/index.html:144
+#: templates/index.html:145
 msgid "Metadata catalog"
 msgstr ""
 
-#: templates/index.html:146
+#: templates/index.html:147
 msgid ""
 "Search the metadata catalog for get information about the data and SDI "
 "services"
 msgstr ""
 
-#: templates/index.html:147
+#: templates/index.html:148 templates/index.html.py:149
 msgid "Access to metadata catalog"
 msgstr ""
 
-#: templates/index.html:170
+#: templates/index.html:172
 msgid "All rights reserved"
 msgstr ""
