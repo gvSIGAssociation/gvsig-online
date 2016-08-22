@@ -55,7 +55,7 @@ layerTree.prototype.createTree = function() {
 	tree += '<div class="box box-success">';
 	tree += '	<div class="box-body">';
 	tree += '		<ul class="layer-tree">';
-	tree += '			<li class="box box-default">';
+	tree += '			<li class="box box-default"; id="base-layers">';
 	tree += '				<div class="box-header with-border">';
 	tree += '					<span class="text">' + gettext('Base layers') + '</span>';
 	tree += '					<div class="box-tools pull-right">';
