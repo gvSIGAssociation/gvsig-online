@@ -1,0 +1,608 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-08-04 13:30+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: models.py:29
+msgid "Circle"
+msgstr ""
+
+#: models.py:30
+msgid "Square"
+msgstr ""
+
+#: models.py:31
+msgid "Triangle"
+msgstr ""
+
+#: models.py:32
+msgid "star"
+msgstr ""
+
+#: models.py:33
+msgid "Cross"
+msgstr ""
+
+#: models.py:43 templates/select_legend_type.html.py:32
+msgid "Unique symbol"
+msgstr ""
+
+#: models.py:44 templates/select_legend_type.html.py:41
+msgid "Unique values"
+msgstr ""
+
+#: models.py:45 templates/select_legend_type.html.py:50
+msgid "Intervals"
+msgstr ""
+
+#: models.py:46 templates/select_legend_type.html.py:59
+msgid "Expressions"
+msgstr ""
+
+#: models.py:47 templates/select_legend_type.html.py:80
+msgid "Color table"
+msgstr ""
+
+#: models.py:48
+msgid "Graphics"
+msgstr ""
+
+#: services.py:39
+msgid "Default style for: "
+msgstr ""
+
+#: services_library.py:63
+#, python-brace-format
+msgid "Invalid name: '{value}'. Name should not contain any special characters"
+msgstr ""
+
+#: services_library.py:66 services_library.py:169
+#, python-brace-format
+msgid ""
+"Invalid title: '{value}'. Title should not contain any special characters"
+msgstr ""
+
+#: templates/base_symbology.html:74
+msgid "Sign out"
+msgstr ""
+
+#: templates/base_symbology.html:92
+msgid "Dashboard"
+msgstr ""
+
+#: templates/base_symbology.html:98
+msgid "Home"
+msgstr ""
+
+#: templates/base_symbology.html:130
+msgid "All rights reserved"
+msgstr ""
+
+#: templates/color_table_add.html:11
+msgid "Add new color table"
+msgstr ""
+
+#: templates/color_table_add.html:13 templates/color_table_update.html:13
+#: templates/expressions_add.html:13 templates/expressions_update.html:13
+#: templates/intervals_add.html.py:13 templates/intervals_update.html:13
+#: templates/unique_symbol_add.html:13 templates/unique_symbol_update.html:13
+#: templates/unique_values_add.html:13 templates/unique_values_update.html:13
+msgid "Update preview"
+msgstr ""
+
+#: templates/color_table_add.html:14 templates/color_table_update.html:14
+#: templates/expressions_add.html:15 templates/expressions_update.html:15
+#: templates/external_graphic_add.html:14
+#: templates/external_graphic_update.html:15 templates/intervals_add.html:15
+#: templates/intervals_update.html.py:15 templates/library_add.html:14
+#: templates/library_import.html.py:14 templates/library_update.html:15
+#: templates/sld_import.html.py:14 templates/symbol_add.html:13
+#: templates/symbol_update.html.py:14 templates/unique_symbol_add.html:15
+#: templates/unique_symbol_update.html:15 templates/unique_values_add.html:15
+#: templates/unique_values_update.html:15
+msgid "Save"
+msgstr ""
+
+#: templates/color_table_add.html:25 templates/color_table_update.html:24
+#: templates/expressions_add.html:26 templates/expressions_update.html:25
+#: templates/external_graphic_add.html:29
+#: templates/external_graphic_update.html:30 templates/intervals_add.html:26
+#: templates/intervals_update.html.py:25 templates/library_add.html:40
+#: templates/library_add.html.py:41 templates/library_import.html:40
+#: templates/library_import.html.py:41 templates/library_update.html:41
+#: templates/library_update.html.py:42 templates/sld_import.html:40
+#: templates/symbol_add.html.py:23 templates/symbol_update.html:24
+#: templates/unique_symbol_add.html.py:26
+#: templates/unique_symbol_update.html:25 templates/unique_values_add.html:26
+#: templates/unique_values_update.html:25
+msgid "Name"
+msgstr ""
+
+#: templates/color_table_add.html:26 templates/color_table_update.html:25
+#: templates/expressions_add.html:27 templates/expressions_update.html:26
+#: templates/intervals_add.html.py:27 templates/intervals_update.html:26
+#: templates/select_legend_type.html:17 templates/unique_symbol_add.html:27
+#: templates/unique_symbol_update.html:26 templates/unique_values_add.html:27
+#: templates/unique_values_update.html:26
+msgid "Style name"
+msgstr ""
+
+#: templates/color_table_add.html:31 templates/color_table_update.html:30
+#: templates/expressions_add.html:32 templates/expressions_update.html:31
+#: templates/external_graphic_add.html:33
+#: templates/external_graphic_update.html:34 templates/intervals_add.html:32
+#: templates/intervals_update.html.py:31 templates/symbol_add.html:27
+#: templates/symbol_update.html.py:28 templates/unique_symbol_add.html:32
+#: templates/unique_symbol_update.html:31 templates/unique_values_add.html:32
+#: templates/unique_values_update.html:31
+msgid "Title"
+msgstr ""
+
+#: templates/color_table_add.html:32 templates/color_table_update.html:31
+#: templates/expressions_add.html:33 templates/expressions_update.html:32
+#: templates/intervals_add.html.py:33 templates/intervals_update.html:32
+#: templates/unique_symbol_add.html:33 templates/unique_symbol_update.html:32
+#: templates/unique_values_add.html:33 templates/unique_values_update.html:32
+msgid "Style title"
+msgstr ""
+
+#: templates/color_table_add.html:37 templates/color_table_update.html:36
+#: templates/expressions_add.html:38 templates/expressions_update.html:37
+#: templates/intervals_add.html.py:38 templates/intervals_update.html:37
+#: templates/unique_symbol_add.html:38 templates/unique_symbol_update.html:37
+#: templates/unique_values_add.html:38 templates/unique_values_update.html:37
+msgid "Min. scale"
+msgstr ""
+
+#: templates/color_table_add.html:38 templates/color_table_update.html:37
+#: templates/expressions_add.html:39 templates/expressions_update.html:38
+#: templates/intervals_add.html.py:39 templates/intervals_update.html:38
+#: templates/unique_symbol_add.html:39 templates/unique_symbol_update.html:38
+#: templates/unique_values_add.html:39 templates/unique_values_update.html:38
+msgid "Minimum scale denominator"
+msgstr ""
+
+#: templates/color_table_add.html:41 templates/color_table_update.html:40
+#: templates/expressions_add.html:42 templates/expressions_update.html:41
+#: templates/intervals_add.html.py:42 templates/intervals_update.html:41
+#: templates/unique_symbol_add.html:42 templates/unique_symbol_update.html:41
+#: templates/unique_values_add.html:42 templates/unique_values_update.html:41
+msgid "Max. scale"
+msgstr ""
+
+#: templates/color_table_add.html:42 templates/color_table_update.html:41
+#: templates/expressions_add.html:43 templates/expressions_update.html:42
+#: templates/intervals_add.html.py:43 templates/intervals_update.html:42
+#: templates/unique_symbol_add.html:43 templates/unique_symbol_update.html:42
+#: templates/unique_values_add.html:43 templates/unique_values_update.html:42
+msgid "Maximum scale denominator"
+msgstr ""
+
+#: templates/color_table_add.html:45 templates/color_table_update.html:44
+#: templates/expressions_add.html:46 templates/expressions_update.html:45
+#: templates/intervals_add.html.py:46 templates/intervals_update.html:45
+#: templates/unique_symbol_add.html:46 templates/unique_symbol_update.html:45
+#: templates/unique_values_add.html:46 templates/unique_values_update.html:45
+msgid ""
+"Specifies the minimum and maximum scale denominator (inclusive) for the "
+"scale range in which this rule applies"
+msgstr ""
+
+#: templates/color_table_add.html:51 templates/color_table_update.html:51
+#: templates/color_table_update.html:53 templates/expressions_add.html:52
+#: templates/expressions_update.html:52 templates/expressions_update.html:54
+#: templates/intervals_add.html.py:52 templates/intervals_update.html:52
+#: templates/intervals_update.html.py:54 templates/sld_import.html:55
+#: templates/unique_symbol_add.html.py:52
+#: templates/unique_symbol_update.html:52
+#: templates/unique_symbol_update.html:54 templates/unique_values_add.html:52
+#: templates/unique_values_update.html:52
+#: templates/unique_values_update.html:54
+msgid "Set as default style"
+msgstr ""
+
+#: templates/color_table_add.html:77 templates/color_table_update.html:80
+msgid "Edit color map entry"
+msgstr ""
+
+#: templates/color_table_add.html:165 templates/color_table_update.html:167
+#: templates/expressions_add.html:233 templates/expressions_update.html:239
+#: templates/external_graphic_add.html:147
+#: templates/external_graphic_add.html:151 templates/intervals_add.html:238
+#: templates/intervals_update.html.py:249 templates/symbol_add.html:110
+#: templates/symbol_update.html.py:119 templates/unique_symbol_add.html:212
+#: templates/unique_values_add.html:231
+#: templates/unique_values_update.html:241
+msgid "Field name is required"
+msgstr ""
+
+#: templates/color_table_update.html:11 templates/expressions_update.html:11
+#: templates/intervals_update.html:11 templates/style_layer_list.html.py:95
+#: templates/unique_symbol_update.html:11
+#: templates/unique_values_update.html:11
+msgid "Update style"
+msgstr ""
+
+#: templates/dashboard_symbology_menu.html:4
+msgid "Symbology"
+msgstr ""
+
+#: templates/dashboard_symbology_menu.html:6
+msgid "Layer styles"
+msgstr ""
+
+#: templates/dashboard_symbology_menu.html:7 templates/library_list.html:11
+msgid "Symbol libraries"
+msgstr ""
+
+#: templates/expressions_add.html:11 templates/intervals_add.html.py:11
+#: templates/unique_symbol_add.html:11 templates/unique_values_add.html:11
+msgid "Add new style"
+msgstr ""
+
+#: templates/expressions_add.html:14 templates/expressions_update.html:14
+#: templates/intervals_add.html.py:14 templates/intervals_update.html:14
+#: templates/unique_symbol_add.html:14 templates/unique_symbol_update.html:14
+#: templates/unique_values_add.html:14 templates/unique_values_update.html:14
+msgid "Labeling"
+msgstr ""
+
+#: templates/expressions_add.html:64 templates/expressions_update.html:67
+msgid "Add new rule"
+msgstr ""
+
+#: templates/expressions_add.html:65 templates/expressions_update.html:68
+msgid "Creates a new rule based on an expression"
+msgstr ""
+
+#: templates/expressions_add.html:85 templates/expressions_update.html:88
+#: templates/intervals_add.html.py:94 templates/intervals_update.html:101
+#: templates/unique_symbol_add.html:78 templates/unique_symbol_update.html:81
+#: templates/unique_values_add.html:90 templates/unique_values_update.html:97
+msgid "Import symbol"
+msgstr ""
+
+#: templates/expressions_add.html:90 templates/expressions_update.html:93
+#: templates/intervals_add.html.py:99 templates/intervals_update.html:106
+#: templates/unique_symbol_add.html:83 templates/unique_symbol_update.html:86
+#: templates/unique_values_add.html:95 templates/unique_values_update.html:102
+msgid "Select library"
+msgstr ""
+
+#: templates/expressions_add.html:92 templates/expressions_update.html:95
+#: templates/intervals_add.html.py:101 templates/intervals_update.html:108
+#: templates/unique_symbol_add.html:85 templates/unique_symbol_update.html:88
+#: templates/unique_values_add.html:97 templates/unique_values_update.html:104
+msgid "Select symbol library"
+msgstr ""
+
+#: templates/expressions_add.html:111 templates/expressions_update.html:114
+#: templates/intervals_add.html:120 templates/intervals_update.html.py:127
+#: templates/unique_symbol_add.html:104
+#: templates/unique_symbol_update.html:107
+#: templates/unique_values_add.html:116
+#: templates/unique_values_update.html:123
+msgid "Close"
+msgstr ""
+
+#: templates/expressions_add.html:125 templates/expressions_update.html:128
+#: templates/intervals_add.html:134 templates/intervals_update.html.py:141
+#: templates/symbol_add.html:54 templates/symbol_update.html.py:54
+#: templates/unique_symbol_add.html:118
+#: templates/unique_symbol_update.html:121
+#: templates/unique_values_add.html:130
+#: templates/unique_values_update.html:137
+msgid "Edit symbolizer"
+msgstr ""
+
+#: templates/external_graphic_add.html:12 templates/symbol_add.html.py:11
+msgid "Create new symbol"
+msgstr ""
+
+#: templates/external_graphic_add.html:30
+#: templates/external_graphic_update.html:31 templates/symbol_add.html:24
+#: templates/symbol_update.html.py:25
+msgid "Symbol name"
+msgstr ""
+
+#: templates/external_graphic_add.html:34
+#: templates/external_graphic_update.html:35 templates/symbol_add.html:28
+#: templates/symbol_update.html.py:29
+msgid "Symbol title"
+msgstr ""
+
+#: templates/external_graphic_add.html:37
+#: templates/external_graphic_update.html:38 templates/symbol_add.html:31
+#: templates/symbol_update.html.py:32
+msgid ""
+"Specifies a title for the rule. The title is used in display lists and "
+"legends"
+msgstr ""
+
+#: templates/external_graphic_add.html:40
+#: templates/external_graphic_update.html:41
+msgid "Select image"
+msgstr ""
+
+#: templates/external_graphic_add.html:44
+#: templates/external_graphic_update.html:45
+msgid "Size"
+msgstr ""
+
+#: templates/external_graphic_add.html:45
+#: templates/external_graphic_update.html:46
+msgid "Symbol size (in pixels)"
+msgstr ""
+
+#: templates/external_graphic_add.html:48
+#: templates/external_graphic_update.html:49
+msgid "Select format"
+msgstr ""
+
+#: templates/external_graphic_add.html:75
+#: templates/external_graphic_update.html:76
+msgid "The file format is not supported"
+msgstr ""
+
+#: templates/external_graphic_add.html:148
+#: templates/external_graphic_add.html:154 views.py:497 views.py:604
+msgid "You must select a file"
+msgstr ""
+
+#: templates/external_graphic_update.html:12 templates/symbol_update.html:11
+msgid "Update symbol"
+msgstr ""
+
+#: templates/external_graphic_update.html:14 templates/symbol_update.html:13
+msgid "Delete"
+msgstr ""
+
+#: templates/intervals_add.html:64 templates/intervals_update.html.py:67
+msgid "Select numeric field"
+msgstr ""
+
+#: templates/intervals_add.html:66 templates/intervals_update.html.py:69
+#: templates/unique_values_add.html:66 templates/unique_values_update.html:69
+msgid "Select field"
+msgstr ""
+
+#: templates/intervals_add.html:73 templates/intervals_update.html.py:80
+msgid "Select number of intervals"
+msgstr ""
+
+#: templates/library_add.html:12 templates/library_list.html.py:13
+msgid "Add library"
+msgstr ""
+
+#: templates/library_add.html:47 templates/library_add.html.py:48
+#: templates/library_import.html:47 templates/library_import.html.py:48
+#: templates/library_list.html:24 templates/library_update.html.py:48
+#: templates/library_update.html:49
+msgid "Description"
+msgstr ""
+
+#: templates/library_import.html:12 templates/library_list.html.py:14
+msgid "Import library"
+msgstr ""
+
+#: templates/library_import.html:54
+msgid "Select file"
+msgstr ""
+
+#: templates/library_list.html:23
+msgid "Library"
+msgstr ""
+
+#: templates/library_list.html:57 templates/library_list.html.py:105
+msgid "Delete library"
+msgstr ""
+
+#: templates/library_list.html:60
+msgid "Library will be removed, Do you want continue?"
+msgstr ""
+
+#: templates/library_list.html:63
+msgid "Cancel"
+msgstr ""
+
+#: templates/library_list.html:64
+msgid "Accept"
+msgstr ""
+
+#: templates/library_list.html:81 templates/style_layer_list.html.py:67
+msgid "Processing request..."
+msgstr ""
+
+#: templates/library_list.html:82 templates/style_layer_list.html.py:68
+#, python-format
+msgid "Search%(sep)s"
+msgstr ""
+
+#: templates/library_list.html:83 templates/style_layer_list.html.py:69
+#, python-format
+msgid "Showing %(numrecords)s records"
+msgstr ""
+
+#: templates/library_list.html:84 templates/style_layer_list.html.py:70
+#, python-format
+msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
+msgstr ""
+
+#: templates/library_list.html:85 templates/style_layer_list.html.py:71
+msgid "Showing from 0 to 0 of 0 records"
+msgstr ""
+
+#: templates/library_list.html:86 templates/style_layer_list.html.py:72
+#, python-format
+msgid "Filtering %(max)s records"
+msgstr ""
+
+#: templates/library_list.html:88 templates/style_layer_list.html.py:74
+msgid "Loading..."
+msgstr ""
+
+#: templates/library_list.html:89 templates/library_list.html.py:90
+#: templates/style_layer_list.html:75 templates/style_layer_list.html.py:76
+msgid "No records available"
+msgstr ""
+
+#: templates/library_list.html:92 templates/style_layer_list.html.py:78
+msgid "First"
+msgstr ""
+
+#: templates/library_list.html:93 templates/style_layer_list.html.py:79
+msgid "Previous"
+msgstr ""
+
+#: templates/library_list.html:94 templates/style_layer_list.html.py:80
+msgid "Next"
+msgstr ""
+
+#: templates/library_list.html:95 templates/style_layer_list.html.py:81
+msgid "Last"
+msgstr ""
+
+#: templates/library_list.html:98 templates/style_layer_list.html.py:84
+#, python-format
+msgid "%(sep)sSort ascending"
+msgstr ""
+
+#: templates/library_list.html:99 templates/style_layer_list.html.py:85
+#, python-format
+msgid "%(sep)sSort descending"
+msgstr ""
+
+#: templates/library_list.html:109
+msgid "Export library"
+msgstr ""
+
+#: templates/library_list.html:113 templates/library_update.html.py:13
+msgid "Update library"
+msgstr ""
+
+#: templates/library_update.html:59
+msgid "Library symbols"
+msgstr ""
+
+#: templates/library_update.html:61
+msgid "Add external graphic"
+msgstr ""
+
+#: templates/library_update.html:62
+msgid "Add point"
+msgstr ""
+
+#: templates/library_update.html:63
+msgid "Add line"
+msgstr ""
+
+#: templates/library_update.html:64
+msgid "Add polygon"
+msgstr ""
+
+#: templates/select_legend_type.html:11
+msgid "Create new style"
+msgstr ""
+
+#: templates/select_legend_type.html:18
+msgid "Insert style name"
+msgstr ""
+
+#: templates/select_legend_type.html:33
+msgid "Creates a legend of unique symbol"
+msgstr ""
+
+#: templates/select_legend_type.html:42
+msgid "Creates a legend of unique values"
+msgstr ""
+
+#: templates/select_legend_type.html:51
+msgid "Creates a legend defined by intervals"
+msgstr ""
+
+#: templates/select_legend_type.html:60
+msgid "Creates a legend defined by expressions"
+msgstr ""
+
+#: templates/select_legend_type.html:68
+msgid "Import from SLD"
+msgstr ""
+
+#: templates/select_legend_type.html:70
+msgid "SLD legend description"
+msgstr ""
+
+#: templates/select_legend_type.html:81
+msgid "Creates a legend for a raster layer defined by a color table"
+msgstr ""
+
+#: templates/sld_import.html:12
+msgid "Import SLD"
+msgstr ""
+
+#: templates/sld_import.html:47
+msgid "Select SLD"
+msgstr ""
+
+#: templates/style_layer_list.html:11
+msgid "Style list"
+msgstr ""
+
+#: templates/style_layer_list.html:19
+msgid "Layer name"
+msgstr ""
+
+#: templates/style_layer_list.html:20
+msgid "Asigned to layer group"
+msgstr ""
+
+#: templates/style_layer_list.html:21
+msgid "Styles"
+msgstr ""
+
+#: templates/style_layer_list.html:91
+msgid "Add style"
+msgstr ""
+
+#: templates/style_layer_list.html:99
+msgid "Delete style"
+msgstr ""
+
+#: templates/unique_values_add.html:64 templates/unique_values_update.html:67
+msgid "Select field to generate unique values"
+msgstr ""
+
+#: views.py:91
+msgid "The layer must contain at least one style"
+msgstr ""
+
+#: views.py:94
+msgid "Can not delete a default style"
+msgstr ""
+
+#: views.py:490
+msgid "Error importing SLD"
+msgstr ""
+
+#: views.py:538 views.py:601
+msgid "You must enter a name for the library"
+msgstr ""
+
+#: views.py:607
+msgid "You must enter a name for the library and select a file"
+msgstr ""
