@@ -176,7 +176,8 @@ def datastore_add(request):
                     type=form.cleaned_data['type'],
                     name=form.cleaned_data['name'],
                     description=form.cleaned_data['description'],
-                    connection_params=form.cleaned_data['connection_params']
+                    connection_params=form.cleaned_data['connection_params'],
+                    created_by=request.user.username
                 )
                 newRecord.save()
                 mapservice_backend.reload_nodes(request.session)
@@ -239,7 +240,7 @@ def datastore_delete(request, dsid):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_safe
-@admin_required
+#@admin_required
 def layer_list(request):
     response = {
         'layers': Layer.objects.all()
@@ -287,7 +288,7 @@ def backend_resource_list_available(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
-@admin_required
+#@admin_required
 def layer_add(request):
     if request.method == 'POST':
         form = LayerForm(request.POST)
@@ -359,6 +360,8 @@ def layer_add(request):
                 form.add_error(None, msg)
     else:
         form = LayerForm()
+        if not request.user.is_staff:
+            form.fields['layer_group'].queryset = LayerGroup.objects.filter(created_by__exact=request.user.username)
     return render(request, 'layer_add.html', {'form': form})
 
 
@@ -548,11 +551,15 @@ def resource_published(resource):
     
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@admin_required
+#@admin_required
 def layergroup_list(request):
     
-    layergroups_list = LayerGroup.objects.all()
-    
+    layergroups_list = None
+    if request.user.is_staff:
+        layergroups_list = LayerGroup.objects.all()
+    else:
+        layergroups_list = LayerGroup.objects.filter(created_by__exact=request.user.username)
+        
     layergroups = []
     for lg in layergroups_list:
         if lg.name != '__default__':
@@ -575,7 +582,7 @@ def layergroup_list(request):
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@admin_required
+#@admin_required
 def layergroup_add(request):
     if request.method == 'POST':
         name = request.POST.get('layergroup_name')
@@ -600,7 +607,8 @@ def layergroup_add(request):
                 layergroup = LayerGroup(
                     name = name,
                     title = title,
-                    cached = cached
+                    cached = cached,
+                    created_by = request.user.username
                 )
                 layergroup.save()
             
