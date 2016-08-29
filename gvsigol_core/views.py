@@ -158,7 +158,8 @@ def project_add(request):
                     center_lon = longitude,
                     zoom = int(zoom),
                     extent = extent,
-                    toc_order = core_utils.get_json_toc(assigned_layergroups)
+                    toc_order = core_utils.get_json_toc(assigned_layergroups),
+                    created_by = request.user.username
                 )
             else:
                 project = Project(
@@ -168,7 +169,8 @@ def project_add(request):
                     center_lon = longitude,
                     zoom = int(zoom),
                     extent = extent,
-                    toc_order = core_utils.get_json_toc(assigned_layergroups)
+                    toc_order = core_utils.get_json_toc(assigned_layergroups),
+                    created_by = request.user.username
                 )
             project.save()
             
