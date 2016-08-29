@@ -43,6 +43,7 @@ class Datastore(models.Model):
     name = models.CharField(max_length=250)
     description = models.CharField(max_length=500, null=True, blank=True)
     connection_params = models.TextField()
+    created_by = models.CharField(max_length=100)
     
     def __unicode__(self):
         return self.workspace.name + ":" + self.name
@@ -52,6 +53,7 @@ class LayerGroup(models.Model):
     name = models.CharField(max_length=150) 
     title = models.CharField(max_length=500, null=True, blank=True) 
     cached = models.BooleanField(default=False)
+    created_by = models.CharField(max_length=100)
     
     def __unicode__(self):
         return self.name
