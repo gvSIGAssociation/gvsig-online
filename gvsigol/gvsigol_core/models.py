@@ -14,6 +14,7 @@ class Project(models.Model):
     zoom = models.IntegerField(null=False, default=10)
     extent = models.CharField(max_length=250)
     toc_order = models.TextField(null=True, blank=True)
+    created_by = models.CharField(max_length=100)
     
     def __unicode__(self):
         return self.name + ' - ' + self.description

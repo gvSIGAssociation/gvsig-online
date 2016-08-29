@@ -29,6 +29,9 @@ from forms import UserCreateForm, UserGroupForm
 from models import UserGroupUser, UserGroup
 from django.contrib.auth.models import User
 from gvsigol_auth.services import services as core_services
+from gvsigol_services.backend_mapservice import backend as mapservice_backend
+from gvsigol_services import utils as services_utils
+from gvsigol_services.models import Workspace
 import random, string
 from utils import admin_required
 import utils as auth_utils
@@ -192,6 +195,55 @@ def user_add(request):
                         )
                         usergroup_user.save()
                         core_services.ldap_add_group_member(user, user_group)
+                     
+                     
+                    #User backend   
+                    ugroup = UserGroup(
+                        name = 'ug_' + form.data['username'],
+                        description = _(u'User group for') + ': ' + form.data['username']
+                    )
+                    ugroup.save()
+                    
+                    ugroup_user = UserGroupUser(
+                        user = user,
+                        user_group = ugroup
+                    )
+                    ugroup_user.save()
+                        
+                    core_services.ldap_add_group(ugroup)
+                    core_services.add_data_directory(ugroup)
+                    core_services.ldap_add_group_member(user, ugroup)
+                    
+                    url = mapservice_backend.getBaseUrl() + '/'
+                    ws_name = 'ws_' + form.data['username']
+                    
+                    if mapservice_backend.createWorkspace(
+                        request.session, 
+                        ws_name,
+                        url + ws_name,
+                        '',
+                        url + ws_name + '/wms',
+                        url + ws_name + '/wfs',
+                        url + ws_name + '/wcs',
+                        url + 'gwc/service/wms'):
+                            
+                        # save it on DB if successfully created
+                        newWs = Workspace(
+                            name = ws_name,
+                            description = '',
+                            uri = url + ws_name,
+                            wms_endpoint = url + ws_name + '/wms',
+                            wfs_endpoint = url + ws_name + '/wfs',
+                            wcs_endpoint = url + ws_name + '/wcs',
+                            cache_endpoint = url + 'gwc/service/wms'
+                        )
+                        newWs.save()
+                        
+                        ds_name = 'ds_' + form.data['username']
+                        services_utils.create_datastore(request, ds_name, newWs)
+                        
+                        mapservice_backend.reload_nodes(request.session)
+                        
                         
                     auth_utils.sendMail(user, form.data['password1'])
     

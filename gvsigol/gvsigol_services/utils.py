@@ -22,6 +22,10 @@
 '''
 from models import LayerReadGroup, LayerWriteGroup
 from gvsigol_auth.models import UserGroup
+from gvsigol_services.models import Datastore
+from gvsigol_services.backend_mapservice import backend as mapservice_backend
+from gvsigol import settings
+import psycopg2
 
 def get_all_user_groups_checked_by_layer(layer):
     groups_list = UserGroup.objects.all()
@@ -67,3 +71,74 @@ def get_write_roles(layer):
         roles.append(group.name)
         
     return roles
+
+#TODO: llevar al paquete del core   
+def create_datastore(request, ds_name, ws):
+    
+    ds_type = 'v_PostGIS'
+    description = 'BBDD ' + ds_name
+    
+    dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
+    dbport = settings.GVSIGOL_USERS_CARTODB['dbport']
+    dbname = settings.GVSIGOL_USERS_CARTODB['dbname']
+    dbuser = settings.GVSIGOL_USERS_CARTODB['dbuser']
+    dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
+    connection_params = '{ "host": "' + dbhost + '", "port": "' + dbport + '", "database": "' + dbname + '", "schema": "' + ds_name + '", "user": "' + dbuser + '", "passwd": "' + dbpassword + '", "dbtype": "postgis" }'
+    
+    if create_schema(ds_name):
+        if mapservice_backend.createDatastore(ws, ds_type, ds_name, description, connection_params, session=request.session):
+            # save it on DB if successfully created
+            datastore = Datastore(
+                workspace = ws, 
+                type = ds_type, 
+                name = ds_name, 
+                description = description, 
+                connection_params = connection_params
+            )
+            datastore.save()
+                
+            return datastore
+        
+#TODO: llevar al paquete del core            
+def create_schema(ds_name):
+    dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
+    dbport = settings.GVSIGOL_USERS_CARTODB['dbport']
+    dbname = settings.GVSIGOL_USERS_CARTODB['dbname']
+    dbuser = settings.GVSIGOL_USERS_CARTODB['dbuser']
+    dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
+    
+    connection = get_connection(dbhost, dbport, dbname, dbuser, dbpassword)
+    cursor = connection.cursor()
+    
+    try:        
+        create_schema = "CREATE SCHEMA IF NOT EXISTS " + ds_name + " AUTHORIZATION " + dbuser + ";"       
+        cursor.execute(create_schema)
+
+    except StandardError, e:
+        print "SQL Error", e
+        if e.pgcode == '42710':
+            return True
+        else:
+            return False
+    
+    close_connection(cursor, connection)
+    return True
+
+#TODO: llevar al paquete del core     
+def get_connection(host, port, database, user, password):    
+    try:
+        conn = psycopg2.connect("host=" + host +" port=" + port +" dbname=" + database +" user=" + user +" password="+ password);
+        conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+        print "Connect ..."
+        
+    except StandardError, e:
+        print "Failed to connect!", e
+        return []
+    
+    return conn;
+
+#TODO: llevar al paquete del core
+def close_connection(cursor, conn):
+    #Close connection and exit
+    cursor.close();
+    conn.close();
