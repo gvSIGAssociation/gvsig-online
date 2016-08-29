@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     'gvsigol_filemanager',
     'gvsigol_core',
     'gvsigol_app_dev',
-    #'gvsigol_app_aguas',
+    'gvsigol_app_worldwind'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -212,6 +212,14 @@ STATICFILES_FINDERS = (
 
 GVSIGOL_VERSION = '2.0.1'
 
+GVSIGOL_USERS_CARTODB = {
+    'dbhost': 'localhost',
+    'dbport': '5432',
+    'dbname': 'carto',
+    'dbuser': 'postgres',
+    'dbpassword': 'postgres'
+}
+
 PUBLIC_VIEWER = True
 CATALOG_MODULE = True
 GVSIGOL_CATALOG = {
@@ -278,8 +286,9 @@ SUPPORTED_CRS = {
 
 GVSIGOL_SEARCH = {
     'nominatim': {
-        'url': 'http://osm.gvsigonline.com/nominatim',
-        'country_codes': 'ES'
+        #'url': 'http://osm.gvsigonline.com/nominatim',
+        'url': 'http://nominatim.openstreetmap.org',
+        'country_codes': ''
     }
 }
 
