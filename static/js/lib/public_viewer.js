@@ -20,12 +20,12 @@
  * @author: Javier Rodrigo <jrodrigo@scolab.es>
  */
 
-var viewer = viewer || {};
+var publicViewer = publicViewer || {};
 
 /**
  * TODO
  */
-viewer.core = {
+publicViewer.core = {
 		
 	map: null,
 	
