@@ -387,7 +387,7 @@ def layer_add(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
-@admin_required
+#@admin_required
 def layer_update(request, layer_id):
     if request.method == 'POST':
         layer = Layer.objects.get(id=int(layer_id))
@@ -486,7 +486,7 @@ def layergroup_cache_clear(request, layergroup_id):
     
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@admin_required
+#@admin_required
 def layer_permissions_update(request, layer_id):
     if request.method == 'POST':
         assigned_read_roups = []
