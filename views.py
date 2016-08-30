@@ -37,10 +37,15 @@ import json
 import ast
   
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@admin_required
+#@admin_required
 def style_layer_list(request):
     ls = []
-    layers = Layer.objects.all()
+    
+    layers = None
+    if request.user.is_staff:
+        layers = Layer.objects.all()
+    else:
+        layers = Layer.objects.filter(created_by__exact=request.user.username)
     
     for lyr in layers:
         layerStyles = StyleLayer.objects.filter(layer=lyr)
