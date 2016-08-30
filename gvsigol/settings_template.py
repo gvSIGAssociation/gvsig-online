@@ -203,8 +203,8 @@ GVSIGOL_USERS_CARTODB = {
     'dbhost': 'localhost',
     'dbport': '5432',
     'dbname': 'carto',
-    'dbuser': 'postgres',
-    'dbpassword': 'postgres'
+    'dbuser': 'carto',
+    'dbpassword': 'carto52'
 }
 
 PUBLIC_VIEWER = True
