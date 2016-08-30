@@ -236,12 +236,13 @@ def user_add(request):
                             wms_endpoint = url + ws_name + '/wms',
                             wfs_endpoint = url + ws_name + '/wfs',
                             wcs_endpoint = url + ws_name + '/wcs',
-                            cache_endpoint = url + 'gwc/service/wms'
+                            cache_endpoint = url + 'gwc/service/wms',
+                            created_by = user.username
                         )
                         newWs.save()
                         
                         ds_name = 'ds_' + form.data['username']
-                        services_utils.create_datastore(request, ds_name, newWs)
+                        services_utils.create_datastore(request, user.username, ds_name, newWs)
                         
                         mapservice_backend.reload_nodes(request.session)
                         
