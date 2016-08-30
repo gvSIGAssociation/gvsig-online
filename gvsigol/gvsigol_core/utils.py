@@ -72,6 +72,21 @@ def get_all_groups():
         
     return groups
 
+def get_user_groups(user):
+    groups_list = UserGroup.objects.filter(name__exact='ug_' + user)
+    
+    groups = []
+    for g in groups_list:
+        if g.name != 'admin':
+            group = {}
+            group['id'] = g.id
+            group['name'] = g.name
+            group['description'] = g.description
+            group['checked'] = True
+            groups.append(group)
+        
+    return groups
+
 def get_all_groups_checked_by_user(user):
     groups_list = UserGroup.objects.all()
     groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
@@ -93,7 +108,7 @@ def get_all_groups_checked_by_user(user):
         
     return groups
 
-def get_groups_by_user(user):
+def get_group_names_by_user(user):
     groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
     
     groups = []
@@ -103,8 +118,21 @@ def get_groups_by_user(user):
         
     return groups
 
-def get_all_groups_checked_by_project(project):
-    groups_list = UserGroup.objects.all()
+def get_groups():
+    groups = []
+    for g in UserGroup.objects.all():
+        groups.append(g.name)
+        
+    return groups
+
+
+def get_all_groups_checked_by_project(request, project):
+    groups_list = None
+    if request.user.is_staff:
+        groups_list = UserGroup.objects.all()
+    else:
+        groups_list = UserGroup.objects.filter(name__exact='ug_' + request.user.username)
+        
     groups_by_project = ProjectUserGroup.objects.filter(project_id=project.id)
     checked = False
     
@@ -124,8 +152,14 @@ def get_all_groups_checked_by_project(project):
         
     return groups
 
-def get_all_layer_groups_checked_by_project(project):
-    groups_list = LayerGroup.objects.all()
+def get_all_layer_groups_checked_by_project(request, project):
+    
+    groups_list = None
+    if request.user.is_staff:
+        groups_list = LayerGroup.objects.all()
+    else:
+        groups_list = LayerGroup.objects.filter(created_by__exact=request.user.username)
+
     layer_groups_by_project = ProjectLayerGroup.objects.filter(project_id=project.id)
     checked = False
     

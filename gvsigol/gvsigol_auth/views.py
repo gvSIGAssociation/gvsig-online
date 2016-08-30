@@ -174,9 +174,9 @@ def user_add(request):
                     user.set_password(form.data['password1'])
                     user.save()
                     
+                    admin_group = UserGroup.objects.get(name__exact='admin')
                     if user.is_staff:
-                        core_services.ldap_add_user(user, form.data['password1'], True)
-                        admin_group = UserGroup.objects.get(name__exact='admin')
+                        core_services.ldap_add_user(user, form.data['password1'], True)                        
                         core_services.ldap_add_group_member(user, admin_group)
                         usergroup_user = UserGroupUser(
                             user = user,
@@ -186,6 +186,7 @@ def user_add(request):
                         
                     else:
                         core_services.ldap_add_user(user, form.data['password1'], False)
+                        core_services.ldap_add_group_member(user, admin_group)
                         
                     for ag in assigned_groups:
                         user_group = UserGroup.objects.get(id=ag)

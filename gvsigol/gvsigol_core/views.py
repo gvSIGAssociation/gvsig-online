@@ -92,10 +92,14 @@ def home(request):
         return render_to_response('home.html', {'projects': projects}, RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@admin_required
+#@admin_required
 def project_list(request):
     
-    project_list = Project.objects.all()
+    project_list = None
+    if request.user.is_staff:
+        project_list = Project.objects.all()
+    else:
+        project_list = Project.objects.filter(created_by__exact=request.user.username)
     
     projects = []
     for p in project_list:
@@ -111,7 +115,7 @@ def project_list(request):
     return render_to_response('project_list.html', response, context_instance=RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@admin_required
+#@admin_required
 def project_add(request):
     if request.method == 'POST':
         name = request.POST.get('project-name')
@@ -204,13 +208,23 @@ def project_add(request):
         return redirect('project_list')
     
     else:
-        layergroups = LayerGroup.objects.exclude(name='__default__')
-        groups = core_utils.get_all_groups()
+        layergroups = None
+        if request.user.is_staff:
+            layergroups = LayerGroup.objects.exclude(name='__default__')
+        else:
+            layergroups = LayerGroup.objects.exclude(name='__default__').filter(created_by__exact=request.user.username)
+        
+        groups = None
+        if request.user.is_staff:
+            groups = core_utils.get_all_groups()
+        else:
+            groups = core_utils.get_user_groups(request.user.username)
+            
         return render_to_response('project_add.html', {'layergroups': layergroups, 'groups': groups}, context_instance=RequestContext(request))
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@admin_required
+#@admin_required
 def project_update(request, pid):
     if request.method == 'POST':
         name = request.POST.get('project-name')
@@ -342,21 +356,21 @@ def project_update(request, pid):
             else:
                 message = _(u'Project name already exists')
                 project = Project.objects.get(id=int(pid))    
-                groups = core_utils.get_all_groups_checked_by_project(project)
-                layer_groups = core_utils.get_all_layer_groups_checked_by_project(project)  
+                groups = core_utils.get_all_groups_checked_by_project(request, project)
+                layer_groups = core_utils.get_all_layer_groups_checked_by_project(request, project)  
                 return render_to_response('project_update.html', {'message': message, 'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups}, context_instance=RequestContext(request))
                 
         
         
     else:
         project = Project.objects.get(id=int(pid))    
-        groups = core_utils.get_all_groups_checked_by_project(project)
-        layer_groups = core_utils.get_all_layer_groups_checked_by_project(project) 
+        groups = core_utils.get_all_groups_checked_by_project(request, project)
+        layer_groups = core_utils.get_all_layer_groups_checked_by_project(request, project) 
         return render_to_response('project_update.html', {'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups}, context_instance=RequestContext(request))
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@admin_required
+#@admin_required
 def project_delete(request, pid):        
     if request.method == 'POST':
         project = Project.objects.get(id=int(pid))
@@ -502,7 +516,7 @@ def project_get_conf(request):
                 'email': request.user.email,
                 'permissions': {
                     'is_admin': is_admin_user(request.user),
-                    'roles': core_utils.get_groups_by_user(request.user)
+                    'roles': core_utils.get_group_names_by_user(request.user)
                 }
             },
             "view": {

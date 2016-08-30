@@ -68,7 +68,11 @@
 											<a href="#" class="product-title">{{group.name}}
 												<div class="checkbox pull-right">													
 													<label>
-														<input type="checkbox" name="usergroup-{{group.id}}" id="usergroup-{{group.id}}"/>{% trans "Assign user group" %}
+														{% if group.checked %}
+															<input type="checkbox" name="usergroup-{{group.id}}" id="usergroup-{{group.id}}" checked/>{% trans "Assign user group" %}
+														{% else %}
+															<input type="checkbox" name="usergroup-{{group.id}}" id="usergroup-{{group.id}}"/>{% trans "Assign user group" %}
+														{% endif %}
 													</label>
 												</div>
 											</a> 
