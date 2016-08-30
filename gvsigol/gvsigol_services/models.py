@@ -32,6 +32,7 @@ class Workspace(models.Model):
     wfs_endpoint = models.CharField(max_length=500, null=True, blank=True)
     wcs_endpoint = models.CharField(max_length=500, null=True, blank=True)
     cache_endpoint = models.CharField(max_length=500, null=True, blank=True)
+    created_by = models.CharField(max_length=100)
     
     def __unicode__(self):
         return self.name
@@ -71,6 +72,7 @@ class Layer(models.Model):
     queryable = models.BooleanField(default=True)
     cached = models.BooleanField(default=True)
     single_image = models.BooleanField(default=False)
+    created_by = models.CharField(max_length=100)
     
     def __unicode__(self):
         return self.name

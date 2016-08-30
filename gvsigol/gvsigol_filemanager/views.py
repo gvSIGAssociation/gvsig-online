@@ -67,7 +67,7 @@ class ExportToDatabaseView(FilemanagerMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(ExportToDatabaseView, self).get_context_data(**kwargs)
         
-        (form, template, file_accepts) = mapservice.getUploadForm('v_PostGIS')
+        (form, template, file_accepts) = mapservice.getUploadForm('v_PostGIS', self.request)
         context['form'] = form
         if 'message' in self.request.session:
             if self.request.session['message'] != '':
@@ -78,7 +78,7 @@ class ExportToDatabaseView(FilemanagerMixin, TemplateView):
         return context
     
     def post(self, request, *args, **kwargs):
-        (form_class, template, file_accepts) = mapservice.getUploadForm('v_PostGIS')
+        (form_class, template, file_accepts) = mapservice.getUploadForm('v_PostGIS', self.request)
         if form_class is not None:
             form = form_class(request.POST, request.FILES)
             if form.is_valid():
