@@ -93,7 +93,8 @@ def create_datastore(request, ds_name, ws):
                 type = ds_type, 
                 name = ds_name, 
                 description = description, 
-                connection_params = connection_params
+                connection_params = connection_params,
+                created_by=request.user.username
             )
             datastore.save()
                 
