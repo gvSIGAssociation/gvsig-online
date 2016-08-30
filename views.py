@@ -80,6 +80,7 @@ def workspace_add(request):
                     
                 # save it on DB if successfully created
                 newWs = Workspace(**form.cleaned_data)
+                newWs.created_by = request.user.username
                 newWs.save()
                 mapservice_backend.reload_nodes(request.session)
                 return HttpResponseRedirect(reverse('workspace_list'))
@@ -144,16 +145,23 @@ def workspace_delete(request, wsid):
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_safe
-@admin_required
+#@admin_required
 def datastore_list(request):
+    
+    datastore_list = None
+    if request.user.is_staff:
+        datastore_list = Datastore.objects.all()
+    else:
+        datastore_list = Datastore.objects.filter(created_by__exact=request.user.username)
+        
     response = {
-        'datastores': Datastore.objects.values()
+        'datastores': datastore_list
     }
     return render_to_response('datastore_list.html', response, context_instance=RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
-@admin_required
+#@admin_required
 def datastore_add(request):
     if request.method == 'POST':
         post_dict = request.POST.copy()
@@ -188,11 +196,13 @@ def datastore_add(request):
             
     else:
         form = DatastoreForm(request.session)
+        if not request.user.is_staff:
+            form.fields['workspace'].queryset = Workspace.objects.filter(created_by__exact=request.user.username)
     return render(request, 'datastore_add.html', {'fm_directory': FILEMANAGER_DIRECTORY + "/", 'form': form})
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
-@admin_required
+#@admin_required
 def datastore_update(request, datastore_id):
     datastore = Datastore.objects.get(id=datastore_id)
     if datastore==None:
@@ -222,7 +232,7 @@ def datastore_update(request, datastore_id):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_POST
-@admin_required
+#@admin_required
 def datastore_delete(request, dsid):
     try:
         ds = Datastore.objects.get(id=dsid)
@@ -242,8 +252,15 @@ def datastore_delete(request, dsid):
 @require_safe
 #@admin_required
 def layer_list(request):
+    
+    layer_list = None
+    if request.user.is_staff:
+        layer_list = Layer.objects.all()
+    else:
+        layer_list = Layer.objects.filter(created_by__exact=request.user.username)
+        
     response = {
-        'layers': Layer.objects.all()
+        'layers': layer_list
     }
     return render_to_response('layer_list.html', response, context_instance=RequestContext(request))
     
@@ -269,8 +286,8 @@ def layer_delete(request, layer_id):
         return HttpResponseNotFound('<h1>Layer not found: {0}</h1>'.format(layer_id)) 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@require_safe
-@admin_required
+#@require_safe
+#@admin_required
 def backend_resource_list_available(request):
     """
     Lists the resources existing on a data store, retrieving the information
@@ -318,6 +335,7 @@ def layer_add(request):
                                       form.cleaned_data['title'], session=request.session)
                 # save it on DB if successfully created
                 newRecord = Layer(**form.cleaned_data)
+                newRecord.created_by = request.user.username
                 newRecord.type = form.cleaned_data['datastore'].type
                 newRecord.visible = is_visible
                 newRecord.queryable = is_queryable
@@ -327,12 +345,13 @@ def layer_add(request):
                 newRecord.save()
                 
                 if form.cleaned_data['datastore'].type != 'e_WMS':
-                    style_name = newRecord.name + '_default'
-                    mapservice_backend.createDefaultStyle(newRecord, style_name, session=request.session)
-                    mapservice_backend.setLayerStyle(newRecord.name, style_name, session=request.session)
-                
                     datastore = Datastore.objects.get(id=newRecord.datastore.id)
                     workspace = Workspace.objects.get(id=datastore.workspace_id)
+                    
+                    style_name = workspace.name + '_' + newRecord.name + '_default'
+                    mapservice_backend.createDefaultStyle(newRecord, style_name, session=request.session)
+                    mapservice_backend.setLayerStyle(newRecord.name, style_name, session=request.session)
+                 
                     mapservice_backend.addGridSubset(workspace, newRecord, session=request.session)
                     newRecord.metadata_uuid = ''
                     try:
@@ -361,6 +380,7 @@ def layer_add(request):
     else:
         form = LayerForm()
         if not request.user.is_staff:
+            form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
             form.fields['layer_group'].queryset = LayerGroup.objects.filter(created_by__exact=request.user.username)
     return render(request, 'layer_add.html', {'form': form})
 
@@ -456,7 +476,7 @@ def cache_clear(request, layer_id):
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
-@admin_required
+#@admin_required
 def layergroup_cache_clear(request, layergroup_id):
     if request.method == 'GET':
         layergroup = LayerGroup.objects.get(id=int(layergroup_id)) 
@@ -628,7 +648,7 @@ def layergroup_add(request):
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@admin_required
+#@admin_required
 def layergroup_update(request, lgid):
     if request.method == 'POST':
         name = request.POST.get('layergroup_name')
@@ -688,7 +708,7 @@ def layergroup_update(request, lgid):
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@admin_required
+#@admin_required
 def layergroup_delete(request, lgid):        
     if request.method == 'POST':
         layergroup = LayerGroup.objects.get(id=int(lgid))
@@ -728,12 +748,14 @@ def layer_create(request):
             if form.is_valid():
                 try:
                     l = mapservice_backend.createLayer(form.cleaned_data, layer_type, session=request.session)
-                    style_name = l.name + '_default'
-                    mapservice_backend.createDefaultStyle(l, style_name, session=request.session)
-                    mapservice_backend.setLayerStyle(l.name, style_name, session=request.session)
                     
                     datastore = Datastore.objects.get(id=l.datastore.id)
                     workspace = Workspace.objects.get(id=datastore.workspace_id)
+                    
+                    style_name = workspace.name + '_' + l.name + '_default'
+                    mapservice_backend.createDefaultStyle(l, style_name, session=request.session)
+                    mapservice_backend.setLayerStyle(l.name, style_name, session=request.session)
+                    
                     mapservice_backend.addGridSubset(workspace, l, session=request.session)
                     l.metadata_uuid = ''
                     try:
@@ -905,6 +927,7 @@ def get_layerinfo(request):
 
 #@login_required(login_url='/gvsigonline/auth/login_user/')
 
+'''
 @require_GET
 @csrf_exempt
 def get_layerinfo(request):
@@ -917,7 +940,7 @@ def get_layerinfo(request):
     else:
         layerJson = layersToXml(universallyReadableLayers)
     return HttpResponse(layerJson, content_type='application/json')
-
+'''
     
 def fill_layer_attrs(layer, permissions):
     row = {}

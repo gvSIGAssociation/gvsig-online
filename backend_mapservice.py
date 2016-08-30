@@ -574,12 +574,16 @@ class Geoserver():
             return (forms_geoserver.CreateFeatureTypeForm,  "geoserver/create_layer_feature_type.html")
         return (None, None)
     
-    def getUploadForm(self, datastore_type):
+    def getUploadForm(self, datastore_type, request):
         # ensure type is a supported data store type
         if datastore_type=="c_GeoTIFF":
             return (forms_geoserver.RasterLayerUploadForm, "geoserver/layer_upload_raster.html", "image/tiff")
         elif datastore_type=="v_PostGIS":
-            return (forms_geoserver.PostgisLayerUploadForm, "geoserver/layer_upload_postgis.html", "application/zip")
+            form = forms_geoserver.PostgisLayerUploadForm
+            if not request.user.is_staff:
+                form.base_fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
+                form.declared_fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
+            return (form, "geoserver/layer_upload_postgis.html", "application/zip")
         return (None, None, None)
     
     def __create_datastore_properties(self):
@@ -859,6 +863,7 @@ class Geoserver():
                     layer.title = layer_title
                     layer.type = datastore.type
                     layer.metadata_uuid = ''
+                    layer.created_by = session['username']
                     layer.save()
     
                     self.setDataRules(session=session)
@@ -867,7 +872,7 @@ class Geoserver():
                     if self.getStyle(layer_style, session): 
                         self.setLayerStyle(layer.name, layer_style, session=session)
                     else:
-                        style_name = layer_style + '_default'
+                        style_name = datastore.workspace.name + '_' + layer_style + '_default'
                         self.createDefaultStyle(layer, style_name, session=session)
                         self.setLayerStyle(layer.name, style_name, session=session)                        
                         
@@ -956,6 +961,7 @@ class Geoserver():
                     layer.title = layer_title
                     layer.type = datastore.type
                     layer.metadata_uuid = ''
+                    layer.created_by = session['username']
                     layer.save()
                     
                     self.setDataRules(session=session)
@@ -963,7 +969,7 @@ class Geoserver():
                     if self.getStyle(layer.name, session): 
                         self.setLayerStyle(layer.name, layer.name, session=session)
                     else:
-                        style_name = layer.name + '_default'
+                        style_name = datastore.workspace.name + '_' + layer.name + '_default'
                         self.createDefaultStyle(layer, style_name, session=session)
                         self.setLayerStyle(layer.name, style_name, session=session)                        
                         
@@ -1113,6 +1119,7 @@ class Geoserver():
         l.layer_group = form_data.get('layer_group', LayerGroup.objects.get(name='__default__'))
         l.title = title
         l.type = 'v_PostGIS_View'
+        l.created_by = session['username']
         l.save()
         return l
     
