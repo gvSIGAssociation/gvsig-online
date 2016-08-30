@@ -73,7 +73,7 @@ def get_write_roles(layer):
     return roles
 
 #TODO: llevar al paquete del core   
-def create_datastore(request, ds_name, ws):
+def create_datastore(request, username, ds_name, ws):
     
     ds_type = 'v_PostGIS'
     description = 'BBDD ' + ds_name
@@ -94,7 +94,7 @@ def create_datastore(request, ds_name, ws):
                 name = ds_name, 
                 description = description, 
                 connection_params = connection_params,
-                created_by=request.user.username
+                created_by=username
             )
             datastore.save()
                 
