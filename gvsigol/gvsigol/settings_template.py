@@ -199,6 +199,14 @@ STATICFILES_FINDERS = (
 
 GVSIGOL_VERSION = '2.0.0'
 
+GVSIGOL_USERS_CARTODB = {
+    'dbhost': 'localhost',
+    'dbport': '5432',
+    'dbname': 'carto',
+    'dbuser': 'postgres',
+    'dbpassword': 'postgres'
+}
+
 PUBLIC_VIEWER = True
 CATALOG_MODULE = ##CATALOG_IS_ACTIVE##
 GVSIGOL_CATALOG = {
