@@ -134,7 +134,7 @@ def get_distinct_query(connection, layer, field):
     cursor = conn.cursor()
     
     try:
-        sql = "SELECT DISTINCT("+ field +") FROM "+ layer +" ORDER BY "+ field +" ASC;"
+        sql = "SELECT DISTINCT(" + field + ") FROM " + connection.get('schema') + "." + layer + " ORDER BY " + field + " ASC;"
         
         cursor.execute(sql);
         rows = cursor.fetchall()
@@ -155,7 +155,7 @@ def get_minmax_query(connection, layer, field):
     cursor = conn.cursor()
     
     try:
-        sql = "SELECT MIN("+ field +") AS MinValue, MAX("+ field +") AS MaxValue FROM "+ layer +" WHERE "+ field +" IS NOT NULL;"
+        sql = "SELECT MIN("+ field +") AS MinValue, MAX("+ field +") AS MaxValue FROM " + connection.get('schema') + "." + layer +" WHERE "+ field +" IS NOT NULL;"
         
         cursor.execute(sql);
         rows = cursor.fetchall()
