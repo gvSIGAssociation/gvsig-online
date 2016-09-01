@@ -998,7 +998,7 @@ class Geoserver():
             print e
             
     def exportShpToPostgis(self, form_data, session):
-        name = form_data['name']
+        name = form_data['name'] + '_' + session['username']
         ds = form_data['datastore']
         shp_path = form_data['file'] 
         
