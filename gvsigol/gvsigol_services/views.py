@@ -605,7 +605,7 @@ def layergroup_list(request):
 #@admin_required
 def layergroup_add(request):
     if request.method == 'POST':
-        name = request.POST.get('layergroup_name')
+        name = request.POST.get('layergroup_name') + '_' + request.user.username
         title = request.POST.get('layergroup_title')
         
         cached = False
