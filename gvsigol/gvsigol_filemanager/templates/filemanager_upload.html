@@ -46,9 +46,13 @@
 		});
 	  	
 	  	$('#upload-button').on('click', function () {
-	  		$("body").overlay();
-			fileupload.appendExtraParams({'path': "{{path}}"});
-			fileupload.startUpload();
+	  		if (fileupload.getFileCount() >= 1) {
+	  			$("body").overlay();
+	  			fileupload.appendExtraParams({'path': "{{path}}"});
+				fileupload.startUpload();
+	  		} else {
+	  			messageBox.show('warning', gettext('You must select a file'));
+	  		}
 		});
 	});
 	</script>

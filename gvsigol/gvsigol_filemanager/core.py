@@ -86,7 +86,7 @@ class Filemanager(object):
 
         for directoryname in directories:
             if first_level:
-                if request.user.is_staff:
+                if request.user.is_superuser:
                     groups = core_utils.get_groups()
                 else:
                     groups = core_utils.get_group_names_by_user(request.user)

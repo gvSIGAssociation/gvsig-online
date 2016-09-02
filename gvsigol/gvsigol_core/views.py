@@ -29,7 +29,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
-from gvsigol_auth.utils import admin_required, is_admin_user
+from gvsigol_auth.utils import superuser_required, is_superuser
 import utils as core_utils
 from gvsigol_services.backend_geocoding import geocoder
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
@@ -86,17 +86,17 @@ def home(request):
             project['image'] = urllib.unquote(image)
             projects.append(project)
             
-    if len (projects_by_user) == 1 and not is_admin_user(user) and from_login:
+    if len (projects_by_user) == 1 and not is_superuser(user) and from_login:
         return redirect('project_load', pid=projects_by_user[0].project_id)
     else:
         return render_to_response('home.html', {'projects': projects}, RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@admin_required
+#@superuser_required
 def project_list(request):
     
     project_list = None
-    if request.user.is_staff:
+    if request.user.is_superuser:
         project_list = Project.objects.all()
     else:
         project_list = Project.objects.filter(created_by__exact=request.user.username)
@@ -115,7 +115,7 @@ def project_list(request):
     return render_to_response('project_list.html', response, context_instance=RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@admin_required
+#@superuser_required
 def project_add(request):
     if request.method == 'POST':
         name = request.POST.get('project-name')
@@ -209,13 +209,13 @@ def project_add(request):
     
     else:
         layergroups = None
-        if request.user.is_staff:
+        if request.user.is_superuser:
             layergroups = LayerGroup.objects.exclude(name='__default__')
         else:
             layergroups = LayerGroup.objects.exclude(name='__default__').filter(created_by__exact=request.user.username)
         
         groups = None
-        if request.user.is_staff:
+        if request.user.is_superuser:
             groups = core_utils.get_all_groups()
         else:
             groups = core_utils.get_user_groups(request.user.username)
@@ -224,7 +224,7 @@ def project_add(request):
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@admin_required
+#@superuser_required
 def project_update(request, pid):
     if request.method == 'POST':
         name = request.POST.get('project-name')
@@ -370,7 +370,7 @@ def project_update(request, pid):
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@admin_required
+#@superuser_required
 def project_delete(request, pid):        
     if request.method == 'POST':
         project = Project.objects.get(id=int(pid))
@@ -515,7 +515,7 @@ def project_get_conf(request):
                 'login': request.user.username,
                 'email': request.user.email,
                 'permissions': {
-                    'is_admin': is_admin_user(request.user),
+                    'is_superuser': is_superuser(request.user),
                     'roles': core_utils.get_group_names_by_user(request.user)
                 }
             },
@@ -585,7 +585,7 @@ def public_viewer(request):
     return render_to_response('public_viewer.html', {'supported_crs': gvsigol.settings.SUPPORTED_CRS}, context_instance=RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@admin_required
+@superuser_required
 def public_viewer_configuration(request):
     if request.method == 'POST':
         latitude = request.POST.get('center-lat')

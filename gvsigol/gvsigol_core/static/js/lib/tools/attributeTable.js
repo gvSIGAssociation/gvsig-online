@@ -143,8 +143,8 @@ attributeTable.prototype.createTable = function(featureType) {
 	thead.append(trow);
 	table.append(thead);
 	
-	$('#table-dialog').empty();
-	$('#table-dialog').append(table);
+	$('#modal-table-dialog .modal-body').empty();
+	$('#modal-table-dialog .modal-body').append(table);
 	
 	var dt = $('#table-' + this.layer.get("id")).DataTable({
 		language: {
@@ -191,6 +191,16 @@ attributeTable.prototype.createTable = function(featureType) {
 	    "bLengthChange": false
     });
 	dt.select.info( false );
+	
+	$('#table-' + this.layer.get("id")).on( 'draw.dt', function () {
+		var content = $("#modal-table-dialog .modal-content");
+		$("#modal-table-dialog").css("width", content[0].clientWidth);
+		$("#modal-table-dialog").css("height", content[0].clientHeight);
+		$("#modal-table-dialog").css("padding-left", "0px");
+		$(".modal-open .modal").css("overflow-x", "hidden");
+		$(".modal-open .modal").css("overflow-y", "hidden");
+		$(".modal-dialog").css("margin", "0");
+	});
 	
 	var htmlButtons = '';
 	htmlButtons += 	'<div>';

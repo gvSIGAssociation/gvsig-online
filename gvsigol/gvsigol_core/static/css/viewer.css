@@ -68,7 +68,7 @@ html, body {
 	left:180px;
 	padding:2px;
 	position:absolute;
-	z-index: 10000;
+	z-index: 1000;
 }
 
 .custom-mouse-position-output{
