@@ -51,10 +51,10 @@
 						<div class="row">
 							<div class="checkbox col-md-6">								
 								<label>
-									{% if user.is_staff %}
-									<input type="checkbox" name="is_staff" id="is_staff" checked/>{% trans "Is admin" %}
+									{% if user.is_superuser %}
+									<input type="checkbox" name="is_superuser" id="is_superuser" checked/>{% trans "Is admin" %}
 									{% else %}
-									<input type="checkbox" name="is_staff" id="is_staff" />{% trans "Is admin" %}
+									<input type="checkbox" name="is_superuser" id="is_superuser" />{% trans "Is admin" %}
 									{% endif %}
 								</label>
 							</div>

@@ -33,7 +33,7 @@ from gvsigol_services.backend_mapservice import backend as mapservice_backend
 from gvsigol_services import utils as services_utils
 from gvsigol_services.models import Workspace
 import random, string
-from utils import admin_required
+from utils import superuser_required
 import utils as auth_utils
 import json
 from gvsigol.settings import GVSIGOL_LDAP
@@ -111,7 +111,7 @@ def password_reset_success(request):
     return render_to_response('password_reset_success.html', {}, RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@admin_required
+@superuser_required
 def user_list(request):
     
     users_list = User.objects.all()
@@ -130,7 +130,7 @@ def user_list(request):
         user['username'] = u.username
         user['first_name'] = u.first_name
         user['last_name'] = u.last_name
-        user['is_admin'] = u.is_staff
+        user['is_superuser'] = u.is_superuser
         user['email'] = u.email
         user['groups'] = groups
         users.append(user)
@@ -141,7 +141,7 @@ def user_list(request):
     return render_to_response('user_list.html', response, context_instance=RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@admin_required
+@superuser_required
 def user_add(request):        
     ad_suffix = GVSIGOL_LDAP['AD']
     if not ad_suffix:
@@ -153,9 +153,9 @@ def user_add(request):
         if form.is_valid():
             assigned_groups = []
             
-            is_staff = False
-            if 'is_staff' in form.data:
-                is_staff = True
+            is_superuser = False
+            if 'is_superuser' in form.data:
+                is_superuser = True
             
             assigned_groups = []   
             for key in form.data:
@@ -169,13 +169,14 @@ def user_add(request):
                         first_name = u''.join(form.data['first_name']).encode('utf-8'),
                         last_name = u''.join(form.data['last_name']).encode('utf-8'),
                         email = form.data['email'],
-                        is_staff = is_staff,
+                        is_superuser = is_superuser,
+                        is_staff = True
                     )
                     user.set_password(form.data['password1'])
                     user.save()
                     
                     admin_group = UserGroup.objects.get(name__exact='admin')
-                    if user.is_staff:
+                    if user.is_superuser:
                         core_services.ldap_add_user(user, form.data['password1'], True)                        
                         core_services.ldap_add_group_member(user, admin_group)
                         usergroup_user = UserGroupUser(
@@ -270,7 +271,7 @@ def user_add(request):
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@admin_required
+@superuser_required
 def user_update(request, uid):        
     if request.method == 'POST':
         user = User.objects.get(id=int(uid))
@@ -280,28 +281,28 @@ def user_update(request, uid):
             if 'group-' in key:
                 assigned_groups.append(int(key.split('-')[1]))
         
-        is_staff = False
-        if 'is_staff' in request.POST:
-            is_staff = True
+        is_superuser = False
+        if 'is_superuser' in request.POST:
+            is_superuser = True
             
         user.first_name = request.POST.get('first_name')
         user.last_name = request.POST.get('last_name')
         user.email = request.POST.get('email')
         user.save()
         
-        if user.is_staff and is_staff:
+        if user.is_superuser and is_superuser:
             admin_group = UserGroup.objects.get(name__exact='admin')
             assigned_groups.append(admin_group.id)
             
-        if not user.is_staff and is_staff:
-            user.is_staff = True
+        if not user.is_superuser and is_superuser:
+            user.is_superuser = True
             user.save()
             admin_group = UserGroup.objects.get(name__exact='admin')
             core_services.ldap_add_group_member(user, admin_group)
             assigned_groups.append(admin_group.id)
         
-        if user.is_staff and not is_staff:
-            user.is_staff = False
+        if user.is_superuser and not is_superuser:
+            user.is_superuser = False
             user.save()
             admin_group = UserGroup.objects.get(name__exact='admin')
             core_services.ldap_delete_group_member(user, admin_group)
@@ -331,7 +332,7 @@ def user_update(request, uid):
         
         
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@admin_required
+@superuser_required
 def user_delete(request, uid):        
     if request.method == 'POST':
         user = User.objects.get(id=uid)
@@ -351,7 +352,7 @@ def user_delete(request, uid):
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@admin_required
+@superuser_required
 def group_list(request):
     
     groups_list = UserGroup.objects.all()
@@ -372,7 +373,7 @@ def group_list(request):
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@admin_required
+@superuser_required
 def group_add(request):        
     if request.method == 'POST':
         form = UserGroupForm(request.POST)
@@ -401,7 +402,7 @@ def group_add(request):
          
         
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@admin_required
+@superuser_required
 def group_delete(request, gid):        
     if request.method == 'POST':
         group = UserGroup.objects.get(id=int(gid))

@@ -163,7 +163,7 @@ class GvSigOnlineServices():
             except ldap.LDAPError, e:
                 print e
         
-    def ldap_add_user(self, user, password, is_admin):
+    def ldap_add_user(self, user, password, is_superuser):
         if self.is_enabled:
             # The dn of our new entry/object
             dn=str("cn=" + user.username + ",ou=users," + self.domain)
@@ -174,7 +174,7 @@ class GvSigOnlineServices():
             attrs['gidNumber'] = str('500')
             attrs['givenName'] = str(user.first_name)
             attrs['homeDirectory'] = str('/home/users/' + user.username)
-            if is_admin:
+            if is_superuser:
                 attrs['objectclass'] = ['top','posixAccount','inetOrgPerson','extensibleObject']
                 attrs['olcExtraAttrs'] = 'CAT_ALL_Administrator'
             else:
@@ -402,7 +402,7 @@ class GvSigOnlineServices():
 class GvSigOnlineServicesAD(GvSigOnlineServices):
     
     # override
-    def ldap_add_user(self, user, password, is_admin):
+    def ldap_add_user(self, user, password, is_superuser):
         ad_suffix = GVSIGOL_LDAP['AD']
         if self.is_enabled:
             # The dn of our new entry/object
@@ -414,7 +414,7 @@ class GvSigOnlineServicesAD(GvSigOnlineServices):
             attrs['gidNumber'] = str('500')
             attrs['givenName'] = str(user.first_name)
             attrs['homeDirectory'] = str('/home/users/' + user.username)
-            if is_admin:
+            if is_superuser:
                 attrs['objectclass'] = ['top','posixAccount','inetOrgPerson','extensibleObject']
                 attrs['olcExtraAttrs'] = 'CAT_ALL_Administrator'
             else:

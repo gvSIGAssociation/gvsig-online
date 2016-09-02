@@ -36,13 +36,14 @@ class UserCreateForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ("first_name", "last_name", "username", "email", "password1", "password2", "is_staff")
+        fields = ("first_name", "last_name", "username", "email", "password1", "password2", "is_superuser", "is_staff")
 
     def save(self, commit=True):
         user = super(UserCreateForm, self).save(commit=False)
         user.email = self.cleaned_data["email"]
         user.first_name = self.cleaned_data["first_name"]
         user.last_name = self.cleaned_data["last_name"]
+        user.is_superuser = self.cleaned_data["is_superuser"]
         user.is_staff = self.cleaned_data["is_staff"]
         if commit:
             user.save()
