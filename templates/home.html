@@ -20,7 +20,7 @@
 				<strong><i class="fa fa-envelope margin-r-5"></i> {% trans "Email" %}</strong>
 				<p class="text-muted">{{user.email}}</p><hr>
 				<strong><i class="fa fa-shield margin-r-5"></i> {% trans "Is admin?" %}</strong>
-				{% if user.is_staff%}
+				{% if user.is_superuser%}
 				<p class="text-muted">{% trans "You are logged in as an administrator user" %}</p><hr>
 				{% else %}
 				<p class="text-muted">{% trans "You are logged in as an non-administrator user" %}</p><hr>
@@ -63,7 +63,7 @@
 			<div class="box-header with-border">
 				<h3 class="box-title">{% trans "Projects list" %}</h3>
 				<div class="box-tools pull-right">
-					{% if user.is_staff %}
+					{% if user.is_superuser %}
 					<button id="button-add-project" class="btn btn-box-tool"><i class="fa fa-plus margin-r-5"></i> {% trans "Add project" %}</button>
 					{% endif %}
 				</div>

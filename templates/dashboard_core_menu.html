@@ -7,7 +7,7 @@
 	</a>
 </li>
 {% if PUBLIC_VIEWER %}
-{% if user.is_staff %}
+{% if user.is_superuser %}
 <li id="menu-public-viewer" class="treeview">
 	<a href="/gvsigonline/core/public_viewer_configuration/">
 		<i class="fa fa-map"></i>
