@@ -128,7 +128,7 @@ def get_groups():
 
 def get_all_groups_checked_by_project(request, project):
     groups_list = None
-    if request.user.is_staff:
+    if request.user.is_superuser:
         groups_list = UserGroup.objects.all()
     else:
         groups_list = UserGroup.objects.filter(name__exact='ug_' + request.user.username)
@@ -155,7 +155,7 @@ def get_all_groups_checked_by_project(request, project):
 def get_all_layer_groups_checked_by_project(request, project):
     
     groups_list = None
-    if request.user.is_staff:
+    if request.user.is_superuser:
         groups_list = LayerGroup.objects.all()
     else:
         groups_list = LayerGroup.objects.filter(created_by__exact=request.user.username)

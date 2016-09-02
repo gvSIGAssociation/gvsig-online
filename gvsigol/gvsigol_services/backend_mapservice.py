@@ -580,7 +580,7 @@ class Geoserver():
             return (forms_geoserver.RasterLayerUploadForm, "geoserver/layer_upload_raster.html", "image/tiff")
         elif datastore_type=="v_PostGIS":
             form = forms_geoserver.PostgisLayerUploadForm
-            if not request.user.is_staff:
+            if not request.user.is_superuser:
                 form.base_fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
                 form.declared_fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
             return (form, "geoserver/layer_upload_postgis.html", "application/zip")
