@@ -1,0 +1,83 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-08-05 13:25+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: templates/index.html:8
+msgid "Home"
+msgstr "Inicio"
+
+#: templates/index.html:60
+msgid "Dashboard"
+msgstr "Panel de control"
+
+#: templates/index.html:63
+msgid "Sign out"
+msgstr "Cerra sesión"
+
+#: templates/index.html:69
+msgid "Sign in"
+msgstr "Iniciar sesión"
+
+#: templates/index.html:108
+msgid "Welcome to gvSIG Online"
+msgstr "Bienvenidos a gvSIG Online"
+
+#: templates/index.html:117
+msgid "Public viewer"
+msgstr "Visor público"
+
+#: templates/index.html:119
+msgid "Display the territory, orthophotos and thematic mapping"
+msgstr "Visualiza el territorio, ortofotos y cartografía temática"
+
+#: templates/index.html:120
+msgid "Access to public viewer"
+msgstr "Acceder al visor público"
+
+#: templates/index.html:129
+msgid "Mapping services"
+msgstr "Servicios de mapas"
+
+#: templates/index.html:131
+msgid "Look up OGC services available"
+msgstr "Explora los servicios OGC disponibles"
+
+#: templates/index.html:132 templates/index.html.py:133
+msgid "Show available services"
+msgstr "Mostrar servicios disponibles"
+
+#: templates/index.html:145
+msgid "Metadata catalog"
+msgstr "Catálogo de metadatos"
+
+#: templates/index.html:147
+msgid ""
+"Search the metadata catalog for get information about the data and SDI "
+"services"
+msgstr ""
+"Busca en el catálogo de metadatos para obtener información acerca de los "
+"servcios IDE disponibles"
+
+#: templates/index.html:148 templates/index.html.py:149
+msgid "Access to metadata catalog"
+msgstr "Acceder al catálogo de metadatos"
+
+#: templates/index.html:172
+msgid "All rights reserved"
+msgstr "Todos los derechos reservados"
