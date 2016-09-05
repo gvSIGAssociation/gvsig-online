@@ -46,7 +46,7 @@ def not_found_view(request):
     response.status_code = 404
     return response
 
-#@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required(login_url='/gvsigonline/auth/login_user/')
 def home(request):
     user = User.objects.get(username=request.user.username)
     groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
