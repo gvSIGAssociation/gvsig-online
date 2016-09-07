@@ -23,7 +23,8 @@
 							<th>{% trans "First name" %}</th>
 							<th>{% trans "Last name" %}</th>
 							<th>{% trans "Email" %}</th>
-							<th>{% trans "Is admin?" %}</th>
+							<th>{% trans "is superuser" %}</th>
+							<th>{% trans "is staff" %}</th>
 							<th>{% trans "Groups" %}</th>
 							<th></th>
 							<th></th>
@@ -38,6 +39,7 @@
 							<td>{{ user.last_name }}</td>
 							<td>{{ user.email }}</td>
 							<td>{{ user.is_superuser }}</td>
+							<td>{{ user.is_staff }}</td>
 							<td>{{ user.groups }}</td>
 							<td></td>
 							<td></td>
