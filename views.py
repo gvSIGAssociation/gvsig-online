@@ -33,7 +33,7 @@ from gvsigol_services.backend_mapservice import backend as mapservice_backend
 from gvsigol_services import utils as services_utils
 from gvsigol_services.models import Workspace
 import random, string
-from utils import superuser_required
+from utils import superuser_required, staff_required
 import utils as auth_utils
 import json
 from gvsigol.settings import GVSIGOL_LDAP
@@ -111,7 +111,7 @@ def password_reset_success(request):
     return render_to_response('password_reset_success.html', {}, RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@superuser_required
+@staff_required
 def user_list(request):
     
     users_list = User.objects.all()
@@ -131,6 +131,7 @@ def user_list(request):
         user['first_name'] = u.first_name
         user['last_name'] = u.last_name
         user['is_superuser'] = u.is_superuser
+        user['is_staff'] = u.is_staff
         user['email'] = u.email
         user['groups'] = groups
         users.append(user)
@@ -156,6 +157,10 @@ def user_add(request):
             is_superuser = False
             if 'is_superuser' in form.data:
                 is_superuser = True
+                
+            is_staff = False
+            if 'is_staff' in form.data:
+                is_staff = True
             
             assigned_groups = []   
             for key in form.data:
@@ -170,7 +175,7 @@ def user_add(request):
                         last_name = u''.join(form.data['last_name']).encode('utf-8'),
                         email = form.data['email'],
                         is_superuser = is_superuser,
-                        is_staff = True
+                        is_staff = is_staff
                     )
                     user.set_password(form.data['password1'])
                     user.save()
@@ -285,9 +290,14 @@ def user_update(request, uid):
         if 'is_superuser' in request.POST:
             is_superuser = True
             
+        is_staff = False
+        if 'is_staff' in request.POST:
+            is_staff = True
+            
         user.first_name = request.POST.get('first_name')
         user.last_name = request.POST.get('last_name')
         user.email = request.POST.get('email')
+        user.is_staff = is_staff
         user.save()
         
         if user.is_superuser and is_superuser:
