@@ -37,6 +37,17 @@ def superuser_required(function):
     wrap.__name__=function.__name__
     return wrap
 
+def staff_required(function):
+    def wrap(request, *args, **kwargs):
+        if request.user.is_staff:
+            return function(request, *args, **kwargs)
+        else:
+            return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
+
+    wrap.__doc__=function.__doc__
+    wrap.__name__=function.__name__
+    return wrap
+
 def is_superuser(user):            
     return user.is_superuser
 

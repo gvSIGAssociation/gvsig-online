@@ -31,7 +31,7 @@ from gvsigol.settings import FILEMANAGER_DIRECTORY
 from gvsigol_core.models import ProjectLayerGroup, PublicViewer
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.translation import ugettext as _
-from gvsigol_auth.utils import superuser_required
+from gvsigol_auth.utils import superuser_required, staff_required
 from django.core.urlresolvers import reverse
 from gvsigol_core import utils as core_utils
 from gvsigol_auth.models import UserGroup
@@ -145,7 +145,7 @@ def workspace_delete(request, wsid):
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_safe
-#@superuser_required
+@staff_required
 def datastore_list(request):
     
     datastore_list = None
@@ -161,7 +161,7 @@ def datastore_list(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
-#@superuser_required
+@staff_required
 def datastore_add(request):
     if request.method == 'POST':
         post_dict = request.POST.copy()
@@ -202,7 +202,7 @@ def datastore_add(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
-#@superuser_required
+@staff_required
 def datastore_update(request, datastore_id):
     datastore = Datastore.objects.get(id=datastore_id)
     if datastore==None:
@@ -232,7 +232,7 @@ def datastore_update(request, datastore_id):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_POST
-#@superuser_required
+@staff_required
 def datastore_delete(request, dsid):
     try:
         ds = Datastore.objects.get(id=dsid)
@@ -250,7 +250,7 @@ def datastore_delete(request, dsid):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_safe
-#@superuser_required
+@staff_required
 def layer_list(request):
     
     layer_list = None
@@ -266,7 +266,7 @@ def layer_list(request):
     
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@superuser_required
+@staff_required
 def layer_delete(request, layer_id):
     try:
         layer = Layer.objects.get(pk=layer_id)
@@ -286,8 +286,7 @@ def layer_delete(request, layer_id):
         return HttpResponseNotFound('<h1>Layer not found: {0}</h1>'.format(layer_id)) 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@require_safe
-#@superuser_required
+@staff_required
 def backend_resource_list_available(request):
     """
     Lists the resources existing on a data store, retrieving the information
@@ -305,7 +304,7 @@ def backend_resource_list_available(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
-#@superuser_required
+@staff_required
 def layer_add(request):
     if request.method == 'POST':
         form = LayerForm(request.POST)
@@ -387,7 +386,7 @@ def layer_add(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
-#@superuser_required
+@staff_required
 def layer_update(request, layer_id):
     if request.method == 'POST':
         layer = Layer.objects.get(id=int(layer_id))
@@ -444,7 +443,7 @@ def layer_update(request, layer_id):
         return render(request, 'layer_update.html', {'layer': layer, 'workspace': workspace, 'form': form, 'layer_id': layer_id})
 
 @require_POST
-@superuser_required
+@staff_required
 def layer_boundingbox_from_data(request):
     try:
         #layer = Layer.objects.get(pk=layer_id)
@@ -464,7 +463,7 @@ def layer_boundingbox_from_data(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
-@superuser_required
+@staff_required
 def cache_clear(request, layer_id):
     if request.method == 'GET':
         layer = Layer.objects.get(id=int(layer_id)) 
@@ -476,7 +475,7 @@ def cache_clear(request, layer_id):
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
-#@superuser_required
+@staff_required
 def layergroup_cache_clear(request, layergroup_id):
     if request.method == 'GET':
         layergroup = LayerGroup.objects.get(id=int(layergroup_id)) 
@@ -486,7 +485,7 @@ def layergroup_cache_clear(request, layergroup_id):
     
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def layer_permissions_update(request, layer_id):
     if request.method == 'POST':
         assigned_read_roups = []
@@ -571,7 +570,7 @@ def resource_published(resource):
     
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def layergroup_list(request):
     
     layergroups_list = None
@@ -602,7 +601,7 @@ def layergroup_list(request):
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def layergroup_add(request):
     if request.method == 'POST':
         name = request.POST.get('layergroup_name') + '_' + request.user.username
@@ -648,7 +647,7 @@ def layergroup_add(request):
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def layergroup_update(request, lgid):
     if request.method == 'POST':
         name = request.POST.get('layergroup_name')
@@ -708,7 +707,7 @@ def layergroup_update(request, lgid):
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def layergroup_delete(request, lgid):        
     if request.method == 'POST':
         layergroup = LayerGroup.objects.get(id=int(lgid))
