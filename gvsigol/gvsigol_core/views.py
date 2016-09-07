@@ -249,16 +249,9 @@ def project_update(request, pid):
         old_layer_groups = []
         for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
             old_layer_groups.append(lg.layer_group.id)
-            
-        layer_groups_diff = None
-        toc_structure = None
-        if len(assigned_layergroups) > len(old_layer_groups):
-            layer_groups_diff = list(set(assigned_layergroups) - set(old_layer_groups))
-            toc_structure = core_utils.toc_add_layergroups(project.toc_order, layer_groups_diff)
-            
-        elif len(old_layer_groups) > len(assigned_layergroups):
-            layer_groups_diff = list(set(old_layer_groups) - set(assigned_layergroups))
-            toc_structure = core_utils.toc_remove_layergroups(project.toc_order, layer_groups_diff)
+    
+        core_utils.toc_remove_layergroups(project.toc_order, old_layer_groups)
+        toc_structure = core_utils.get_json_toc(assigned_layergroups)
                
         exists = False
         projects = Project.objects.all()
