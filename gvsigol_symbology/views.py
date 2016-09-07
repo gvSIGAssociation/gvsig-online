@@ -28,7 +28,7 @@ from gvsigol_services.models import Workspace, Datastore, Layer
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from models import Style, StyleLayer, Rule, Library, LibraryRule, Symbolizer, ColorMap, ColorMapEntry, RasterSymbolizer
-from gvsigol_auth.utils import superuser_required
+from gvsigol_auth.utils import superuser_required, staff_required
 from gvsigol import settings
 from gvsigol_symbology import services, services_library, services_unique_symbol,\
     services_unique_values, services_intervals, services_expressions, services_color_table
@@ -37,7 +37,7 @@ import json
 import ast
   
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def style_layer_list(request):
     ls = []
     
@@ -60,7 +60,7 @@ def style_layer_list(request):
     return render_to_response('style_layer_list.html', response, context_instance=RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def style_layer_update(request, layer_id, style_id):
     style = Style.objects.get(id=int(style_id))
     
@@ -80,7 +80,7 @@ def style_layer_update(request, layer_id, style_id):
         return redirect('color_table_update', layer_id=layer_id, style_id=style_id)
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def style_layer_delete(request):
     if request.method == 'POST':
         style_id = request.POST.get('style_id')
@@ -110,7 +110,7 @@ def style_layer_delete(request):
         return HttpResponse(json.dumps({'success': success, 'message': message}, indent=4), content_type='application/json')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def select_legend_type(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     
@@ -132,7 +132,7 @@ def select_legend_type(request, layer_id):
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def unique_symbol_add(request, layer_id):
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -149,7 +149,7 @@ def unique_symbol_add(request, layer_id):
         return render_to_response('unique_symbol_add.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def unique_symbol_update(request, layer_id, style_id):  
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -192,7 +192,7 @@ def unique_symbol_update(request, layer_id, style_id):
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def unique_values_add(request, layer_id):
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -209,7 +209,7 @@ def unique_values_add(request, layer_id):
         return render_to_response('unique_values_add.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def unique_values_update(request, layer_id, style_id):  
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -255,7 +255,7 @@ def unique_values_update(request, layer_id, style_id):
         return render_to_response('unique_values_update.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def get_unique_values(request):
     if request.method == 'POST':
         layer_id = request.POST.get('layer_id')
@@ -270,7 +270,7 @@ def get_unique_values(request):
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def intervals_add(request, layer_id):
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -287,7 +287,7 @@ def intervals_add(request, layer_id):
         return render_to_response('intervals_add.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def intervals_update(request, layer_id, style_id):  
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -334,7 +334,7 @@ def intervals_update(request, layer_id, style_id):
         return render_to_response('intervals_update.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def get_minmax_values(request):
     layer_id = request.POST.get('layer_id')
     field = request.POST.get('field')
@@ -347,7 +347,7 @@ def get_minmax_values(request):
     
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def expressions_add(request, layer_id):
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -364,7 +364,7 @@ def expressions_add(request, layer_id):
         return render_to_response('expressions_add.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def expressions_update(request, layer_id, style_id):  
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -410,7 +410,7 @@ def expressions_update(request, layer_id, style_id):
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def color_table_add(request, layer_id):
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -427,7 +427,7 @@ def color_table_add(request, layer_id):
         return render_to_response('color_table_add.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def color_table_update(request, layer_id, style_id):  
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -472,7 +472,7 @@ def color_table_update(request, layer_id, style_id):
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def sld_import(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     index = len(StyleLayer.objects.filter(layer=layer))
@@ -515,8 +515,7 @@ def sld_import(request, layer_id):
         
         return render_to_response('sld_import.html', response, context_instance=RequestContext(request))
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def library_list(request):
     response = {
         'libraries': Library.objects.all()
@@ -525,7 +524,7 @@ def library_list(request):
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def library_add(request, library_id):
     if request.method == 'POST': 
         name = request.POST.get('library-name')
@@ -548,7 +547,7 @@ def library_add(request, library_id):
 
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def library_update(request, library_id):      
     if request.method == 'POST': 
         lib_description = request.POST.get('library-description')
@@ -590,7 +589,7 @@ def library_update(request, library_id):
         return render_to_response('library_update.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def library_import(request):
     if request.method == 'POST': 
         name = request.POST.get('library-name')
@@ -622,7 +621,7 @@ def library_import(request):
     
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def library_export(request, library_id):
     library = Library.objects.get(id=library_id)
     library_rules = LibraryRule.objects.filter(library_id=library.id)
@@ -639,7 +638,7 @@ def library_export(request, library_id):
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def get_symbols_from_library(request):      
     if request.method == 'POST':  
         library_id = request.POST.get('library_id')
@@ -671,7 +670,7 @@ def get_symbols_from_library(request):
 
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def library_delete(request, library_id):
     library_rules = LibraryRule.objects.filter(library_id=library_id)
     for lib_rule in library_rules:
@@ -691,7 +690,7 @@ def library_delete(request, library_id):
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def symbol_add(request, library_id, symbol_type):
     if request.method == 'POST':
         data = request.POST['rule']
@@ -723,7 +722,7 @@ def symbol_add(request, library_id, symbol_type):
     
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def symbol_update(request, symbol_id):
     if request.method == 'POST':
         data = request.POST['rule']
@@ -761,7 +760,7 @@ def symbol_update(request, symbol_id):
             return render_to_response('symbol_update.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def symbol_delete(request):
     if request.method == 'POST':
         symbol_id = request.POST.get('symbol_id')

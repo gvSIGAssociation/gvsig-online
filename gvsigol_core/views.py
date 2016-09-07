@@ -29,7 +29,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
-from gvsigol_auth.utils import superuser_required, is_superuser
+from gvsigol_auth.utils import superuser_required, is_superuser, staff_required
 import utils as core_utils
 from gvsigol_services.backend_geocoding import geocoder
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
@@ -92,21 +92,37 @@ def home(request):
         return render_to_response('home.html', {'projects': projects}, RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def project_list(request):
     
     project_list = None
     if request.user.is_superuser:
         project_list = Project.objects.all()
     else:
-        project_list = Project.objects.filter(created_by__exact=request.user.username)
+        #project_list = Project.objects.filter(created_by__exact=request.user.username)
+        groups_by_user = UserGroupUser.objects.filter(user_id=request.user.id)
+        project_list = []
+        for usergroup_user in groups_by_user:
+            user_group = UserGroup.objects.get(id=usergroup_user.user_group_id)
+            projects_by_group = ProjectUserGroup.objects.filter(user_group_id=user_group.id)
+            for project_group in projects_by_group:
+                exists = False
+                for aux in project_list:
+                    if aux.project_id == project_group.project_id:
+                        exists = True
+                if not exists:
+                    project_list.append(project_group)
     
     projects = []
     for p in project_list:
         project = {}
-        project['id'] = p.id
-        project['name'] = p.name
-        project['description'] = p.description
+        if hasattr(p, 'project'):
+            pr = p.project
+        else:
+            pr = p
+        project['id'] = pr.id
+        project['name'] = pr.name
+        project['description'] = pr.description
         projects.append(project)
                       
     response = {
@@ -115,7 +131,7 @@ def project_list(request):
     return render_to_response('project_list.html', response, context_instance=RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def project_add(request):
     if request.method == 'POST':
         name = request.POST.get('project-name')
@@ -224,7 +240,7 @@ def project_add(request):
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def project_update(request, pid):
     if request.method == 'POST':
         name = request.POST.get('project-name')
@@ -363,7 +379,7 @@ def project_update(request, pid):
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#@superuser_required
+@staff_required
 def project_delete(request, pid):        
     if request.method == 'POST':
         project = Project.objects.get(id=int(pid))
