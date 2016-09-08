@@ -99,30 +99,14 @@ def project_list(request):
     if request.user.is_superuser:
         project_list = Project.objects.all()
     else:
-        #project_list = Project.objects.filter(created_by__exact=request.user.username)
-        groups_by_user = UserGroupUser.objects.filter(user_id=request.user.id)
-        project_list = []
-        for usergroup_user in groups_by_user:
-            user_group = UserGroup.objects.get(id=usergroup_user.user_group_id)
-            projects_by_group = ProjectUserGroup.objects.filter(user_group_id=user_group.id)
-            for project_group in projects_by_group:
-                exists = False
-                for aux in project_list:
-                    if aux.project_id == project_group.project_id:
-                        exists = True
-                if not exists:
-                    project_list.append(project_group)
+        project_list = Project.objects.filter(created_by__exact=request.user.username)
     
     projects = []
     for p in project_list:
         project = {}
-        if hasattr(p, 'project'):
-            pr = p.project
-        else:
-            pr = p
-        project['id'] = pr.id
-        project['name'] = pr.name
-        project['description'] = pr.description
+        project['id'] = p.id
+        project['name'] = p.name
+        project['description'] = p.description
         projects.append(project)
                       
     response = {
