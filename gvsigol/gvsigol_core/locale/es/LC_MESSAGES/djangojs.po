@@ -209,3 +209,63 @@ msgstr "Opacidad"
 
 msgid "Show in geonetwork"
 msgstr "Mostrar en geonetwork"
+
+msgid "Version"
+msgstr "Versión"
+
+msgid "Summary"
+msgstr "Resumen"
+
+msgid "Requests"
+msgstr "Peticiones"
+
+msgid "Supported CRS"
+msgstr "CRS soportados"
+
+msgid "Layers"
+msgstr "Capas"
+
+msgid "Organization"
+msgstr "Organización"
+
+msgid "Contact person"
+msgstr "Persona de contacto"
+
+msgid "Address"
+msgstr "Dirección"
+
+msgid "City"
+msgstr "Ciudad"
+
+msgid "Country"
+msgstr "País"
+
+msgid "Email"
+msgstr "Correo electrónico"
+
+msgid "Name"
+msgstr "Nombre"
+
+msgid "Title"
+msgstr "Título"
+
+msgid "Abstract"
+msgstr "Abstract"
+
+msgid "Queryable"
+msgstr "Consultable"
+
+msgid "MaxScaleDenominator"
+msgstr "Escala máxima"
+
+msgid "MinScaleDenominator"
+msgstr "Escala mínima"
+
+msgid "Default CRS"
+msgstr "CRS por defecto"
+
+msgid "BoundingBox"
+msgstr "BoundingBox"
+
+msgid "GeographicBoundingBox"
+msgstr "BoundingBox geográfica"

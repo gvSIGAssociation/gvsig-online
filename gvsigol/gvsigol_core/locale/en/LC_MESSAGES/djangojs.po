@@ -209,3 +209,63 @@ msgstr ""
 
 msgid "Show in geonetwork"
 msgstr ""
+
+msgid "Version"
+msgstr ""
+
+msgid "Summary"
+msgstr ""
+
+msgid "Requests"
+msgstr ""
+
+msgid "Supported CRS"
+msgstr ""
+
+msgid "Layers"
+msgstr ""
+
+msgid "Organization"
+msgstr ""
+
+msgid "Contact person"
+msgstr ""
+
+msgid "Address"
+msgstr ""
+
+msgid "City"
+msgstr ""
+
+msgid "Country"
+msgstr ""
+
+msgid "Email"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Title"
+msgstr ""
+
+msgid "Abstract"
+msgstr ""
+
+msgid "Queryable"
+msgstr ""
+
+msgid "MaxScaleDenominator"
+msgstr ""
+
+msgid "MinScaleDenominator"
+msgstr ""
+
+msgid "Default CRS"
+msgstr ""
+
+msgid "BoundingBox"
+msgstr ""
+
+msgid "GeographicBoundingBox"
+msgstr ""
