@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-04 13:30+0200\n"
+"POT-Creation-Date: 2016-09-08 09:45+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -63,40 +63,47 @@ msgid "Graphics"
 msgstr "Gráficas"
 
 #: services.py:39
-#| msgid "Set as default style"
 msgid "Default style for: "
 msgstr "Estilo por defecto para: "
 
 #: services_library.py:63
 #, python-brace-format
 msgid "Invalid name: '{value}'. Name should not contain any special characters"
-msgstr "Nombre inválido: '{value}'. El nombre no debe contener ningún caracter especial"
+msgstr ""
+"Nombre inválido: '{value}'. El nombre no debe contener ningún caracter "
+"especial"
 
 #: services_library.py:66 services_library.py:169
 #, python-brace-format
 msgid ""
 "Invalid title: '{value}'. Title should not contain any special characters"
 msgstr ""
-"Título inválido: '{value}'. El título no debe contener ningún caracter especial"
+"Título inválido: '{value}'. El título no debe contener ningún caracter "
+"especial"
 
-#: templates/base_symbology.html:74
+#: templates/base_symbology.html:74 templates/base_symbology_compress.html:74
 msgid "Sign out"
 msgstr "Cerrar sesión"
 
-#: templates/base_symbology.html:92
+#: templates/base_symbology.html:92 templates/base_symbology_compress.html:92
 msgid "Dashboard"
 msgstr "Panel de control"
 
-#: templates/base_symbology.html:98
+#: templates/base_symbology.html:98 templates/base_symbology_compress.html:98
 msgid "Home"
 msgstr "Inicio"
 
-#: templates/base_symbology.html:130
+#: templates/base_symbology.html:132
+#: templates/base_symbology_compress.html:132
+msgid "Version"
+msgstr "Versión"
+
+#: templates/base_symbology.html:136
+#: templates/base_symbology_compress.html:136
 msgid "All rights reserved"
 msgstr "Todos los derechos reservados"
 
 #: templates/color_table_add.html:11
-#| msgid "Color table"
 msgid "Add new color table"
 msgstr "Añadir nueva tabla de color"
 
@@ -251,13 +258,12 @@ msgstr "Simbología"
 msgid "Layer styles"
 msgstr "Estilos de capa"
 
-#: templates/dashboard_symbology_menu.html:7 templates/library_list.html:11
+#: templates/dashboard_symbology_menu.html:8 templates/library_list.html:11
 msgid "Symbol libraries"
 msgstr "Bibliotecas de símbolos"
 
 #: templates/expressions_add.html:11 templates/intervals_add.html.py:11
 #: templates/unique_symbol_add.html:11 templates/unique_values_add.html:11
-#| msgid "Create new style"
 msgid "Add new style"
 msgstr "Añadir nuevo estilo"
 
@@ -269,7 +275,6 @@ msgid "Labeling"
 msgstr "Etiquetado"
 
 #: templates/expressions_add.html:64 templates/expressions_update.html:67
-#| msgid "Add line"
 msgid "Add new rule"
 msgstr "Añadir nueva regla"
 
@@ -369,7 +374,7 @@ msgid "The file format is not supported"
 msgstr "El formato del archivo no está soportado"
 
 #: templates/external_graphic_add.html:148
-#: templates/external_graphic_add.html:154 views.py:497 views.py:604
+#: templates/external_graphic_add.html:154 views.py:502 views.py:608
 msgid "You must select a file"
 msgstr "Debe seleccionar un archivo"
 
@@ -382,13 +387,11 @@ msgid "Delete"
 msgstr "Eliminar"
 
 #: templates/intervals_add.html:64 templates/intervals_update.html.py:67
-#| msgid "Select file"
 msgid "Select numeric field"
 msgstr "Seleccionar un campo numérico"
 
 #: templates/intervals_add.html:66 templates/intervals_update.html.py:69
 #: templates/unique_values_add.html:66 templates/unique_values_update.html:69
-#| msgid "Select file"
 msgid "Select field"
 msgstr "Seleccionar un campo"
 
@@ -499,7 +502,6 @@ msgid "%(sep)sSort descending"
 msgstr "%(sep)sOrden descendente"
 
 #: templates/library_list.html:109
-#| msgid "Import library"
 msgid "Export library"
 msgstr "Exportar biblioteca"
 
@@ -536,7 +538,6 @@ msgid "Insert style name"
 msgstr "Introducir nombre del estilo"
 
 #: templates/select_legend_type.html:33
-#| msgid "Create unique symbol legend"
 msgid "Creates a legend of unique symbol"
 msgstr "Crea una leyenda de símbolo único"
 
@@ -589,12 +590,10 @@ msgid "Styles"
 msgstr "Estilos"
 
 #: templates/style_layer_list.html:91
-#| msgid "Add line"
 msgid "Add style"
 msgstr "Añadir estilo"
 
 #: templates/style_layer_list.html:99
-#| msgid "Update style"
 msgid "Delete style"
 msgstr "Eliminar estilo"
 
@@ -602,25 +601,23 @@ msgstr "Eliminar estilo"
 msgid "Select field to generate unique values"
 msgstr "Seleccionar campo para generar valores únicos"
 
-#: views.py:91
+#: views.py:96
 msgid "The layer must contain at least one style"
 msgstr "La capa debe contener al menos un estilo"
 
-#: views.py:94
-#| msgid "Set as default style"
+#: views.py:99
 msgid "Can not delete a default style"
 msgstr "No puede eliminar un estilo por defecto"
 
-#: views.py:490
-#| msgid "Import SLD"
+#: views.py:495
 msgid "Error importing SLD"
 msgstr "Error al importar SLD"
 
-#: views.py:538 views.py:601
+#: views.py:542 views.py:605
 msgid "You must enter a name for the library"
 msgstr "Debe introducir un nombre para la biblioteca"
 
-#: views.py:607
+#: views.py:611
 msgid "You must enter a name for the library and select a file"
 msgstr "Debe introducir un nombre para la biblioteca y seleccionar un archivo"
 
