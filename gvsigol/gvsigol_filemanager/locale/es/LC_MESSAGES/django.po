@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-06-30 10:16+0200\n"
+"POT-Creation-Date: 2016-09-08 09:44+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,7 +19,6 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: forms.py:5
-#| msgid "Delete directory"
 msgid "Directory name"
 msgstr "Nombre del directorio"
 
@@ -72,28 +71,28 @@ msgstr "Fecha"
 msgid "Actions"
 msgstr "Acciones"
 
-#: templates/browser/filemanager_list.html:54
+#: templates/browser/filemanager_list.html:50
 msgid "Delete directory"
 msgstr "Eliminar directorio"
 
-#: templates/browser/filemanager_list.html:57
+#: templates/browser/filemanager_list.html:53
 msgid "Export to database"
 msgstr "Exportar a base de datos"
 
-#: templates/browser/filemanager_list.html:60
+#: templates/browser/filemanager_list.html:56
 msgid "Delete file"
 msgstr "Eliminar archivo"
 
-#: templates/browser/filemanager_list.html:71
+#: templates/browser/filemanager_list.html:67
 msgid "Nothing to see here."
 msgstr "No hay archivos para mostrar"
 
-#: templates/browser/filemanager_list.html:80
+#: templates/browser/filemanager_list.html:76
 #: templates/filemanager_create_directory.html:13
 msgid "Create directory"
 msgstr "Crear directorio"
 
-#: templates/browser/filemanager_list.html:81
+#: templates/browser/filemanager_list.html:77
 #: templates/filemanager_upload.html:14
 msgid "Upload"
 msgstr "Subir"
