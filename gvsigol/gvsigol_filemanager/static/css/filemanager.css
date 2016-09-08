@@ -1,0 +1,7 @@
+.filemanager-field {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-color: red;
+  vertical-align: middle;
+}
