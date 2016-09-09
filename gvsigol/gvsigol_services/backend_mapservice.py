@@ -66,13 +66,15 @@ _valid_sql_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 class Geoserver():
     CREATE_TYPE_SQL_VIEW = "gs_sql_view"
     CREATE_TYPE_VECTOR_LAYER = "gs_vector_layer"
-    def __init__(self, base_url, cluster_nodes, supported_types=None):
+    def __init__(self, base_url, user, password, cluster_nodes, supported_types=None):
         self.base_url = base_url
         self.rest_url = self.base_url+"/rest"
         self.gwc_url = base_url+"/gwc/rest"
         self.cluster_nodes = cluster_nodes
         self.rest_catalog = rest_geoserver.Geoserver(self.rest_url, self.gwc_url)
         self.supported_types = supported_types
+        self.user = user
+        self.password = password
         if supported_types is not None:
             self.supported_types = supported_types
         else:
@@ -93,8 +95,8 @@ class Geoserver():
         self.layer_create_types = ((Geoserver.CREATE_TYPE_VECTOR_LAYER, _("Vector layer")),
                                    (Geoserver.CREATE_TYPE_SQL_VIEW, _("SQL View")))
     
-    def getGsconfig(self, session):
-        return gscat.Catalog(self.rest_url, session['username'], session['password'], disable_ssl_certificate_validation=True)
+    def getGsconfig(self):
+        return gscat.Catalog(self.rest_url, self.user, self.password, disable_ssl_certificate_validation=True)
     
     
     def getSupportedTypes(self):
@@ -115,35 +117,35 @@ class Geoserver():
     def getSupportedSRSs(self):
         return self.supported_SRSs
     
-    def getSupportedFonts(self, session):
-        return self.rest_catalog.get_fonts(user=session['username'], password=session['password'])
+    def getSupportedFonts(self):
+        return self.rest_catalog.get_fonts(user=self.user, password=self.password)
     
-    def reload_nodes(self, session):
+    def reload_nodes(self):
         try:
             if len(self.cluster_nodes) > 0:
                 for node in self.cluster_nodes:
-                    self.rest_catalog.reload(node, user=session['username'], password=session['password'])
+                    self.rest_catalog.reload(node, user=self.user, password=self.password)
             return True
         except Exception as e:
             print str(e)
             return False
         
-    def createWorkspace(self, session, name, uri, description=None,
+    def createWorkspace(self, name, uri, description=None,
                         wms_endpoint=None, wfs_endpoint=None,
                         wcs_endpoint=None, cache_endpoint=None):
         try:
-            self.getGsconfig(session).create_workspace(name, uri)
+            self.getGsconfig().create_workspace(name, uri)
             return True
         except Exception as e:
             print str(e)
             return False
         
-    def deleteWorkspace(self, workspace, session):
+    def deleteWorkspace(self, workspace):
         """
         Deletes a workspace and all its associated resources
         """
         try:
-            catalog = self.getGsconfig(session) 
+            catalog = self.getGsconfig() 
             ws = catalog.get_workspace(workspace.name)
             catalog.delete(ws, recurse=True)
             return True
@@ -154,9 +156,9 @@ class Geoserver():
     def getBaseUrl(self):
         return self.base_url
     
-    def getCapabilities(self, s):
+    def getCapabilities(self):
         try:
-            capabilities = WebMapService(self.base_url + "/wms", version='1.1.1', xml=None, username=s['username'], password=s['password'])
+            capabilities = WebMapService(self.base_url + "/wms", version='1.1.1', xml=None, username=self.user, password=self.password)
             return capabilities
         except Exception as e:
             print e
@@ -166,7 +168,7 @@ class Geoserver():
         capabilities = WebMapService(self.base_url + "/wms", version='1.1.1')
         return capabilities
 
-    def createDatastore(self, workspace, type, name, description, connection_params, session):
+    def createDatastore(self, workspace, type, name, description, connection_params):
         """
         Some valid drivers:
         '' (shape), 'PostGIS', 'WorldImage', 'ArcGrid', 'ImageMosaic', 'GeoTIFF'
@@ -175,7 +177,7 @@ class Geoserver():
             format_nature=type[:1]
             driver=type[2:]
             params_dict = json.loads(connection_params)
-            catalog = self.getGsconfig(session)
+            catalog = self.getGsconfig()
             if format_nature == "v": # vector
                 if driver == "SHP":
                     driver = None
@@ -208,26 +210,26 @@ class Geoserver():
             print str(e)
             return False
         
-    def datastore_exists(self, workspace, name, session):
+    def datastore_exists(self, workspace, name):
         try:
-            if self.getGsconfig(session).get_store(name, workspace=workspace):
+            if self.getGsconfig().get_store(name, workspace=workspace):
                 return True
         except:
             pass
         return False
     
-    def resource_exists(self, workspace, name, session):
+    def resource_exists(self, workspace, name):
         try:
-            if self.getGsconfig(session).get_resource(name, None, workspace):
+            if self.getGsconfig().get_resource(name, None, workspace):
                 return True
         except Exception as e:
             pass
         return False
 
-    def updateDatastore(self, workspace, dsname, description, dstype, conn_params, session):
+    def updateDatastore(self, workspace, dsname, description, dstype, conn_params):
         try:
             format_nature=dstype[:1]
-            catalog = self.getGsconfig(session)
+            catalog = self.getGsconfig()
             ds = catalog.get_store(dsname, workspace)
             params_dict = json.loads(conn_params)
             if format_nature == "v": # vector
@@ -245,12 +247,12 @@ class Geoserver():
             print exc
             return False
     
-    def deleteDatastore(self, workspace, datastore, session, purge=None):
+    def deleteDatastore(self, workspace, datastore, purge=None):
         """
         Deletes a datastore and all its associated resources
         """
         try:
-            catalog = self.getGsconfig(session)
+            catalog = self.getGsconfig()
             ds = catalog.get_store(datastore.name, workspace=workspace.name)
             if datastore.type=="c_ImageMosaic":
                 try:
@@ -266,9 +268,9 @@ class Geoserver():
         except Exception as e:
             return False
         
-    def getStyles(self, session):
+    def getStyles(self):
         try:                    
-            styles = self.getGsconfig(session).get_styles(workspace=None)                   
+            styles = self.getGsconfig().get_styles(workspace=None)                   
             return styles
         
         except:
@@ -276,21 +278,21 @@ class Geoserver():
             # FIXME: raise an exception
             return []
         
-    def getStyle(self, style_name, session):
+    def getStyle(self, style_name):
         try:
-            style = self.getGsconfig(session).get_style(style_name, workspace=None)
+            style = self.getGsconfig().get_style(style_name, workspace=None)
             return style
         
         except:
             e = sys.exc_info()[0]
             pass
         
-    def setLayerStyle(self, layer_name, style, session):
+    def setLayerStyle(self, layer_name, style):
         """
         Set default style
         """
         try:
-            catalog = self.getGsconfig(session)
+            catalog = self.getGsconfig()
             layer = catalog.get_layer(layer_name)
             layer.default_style = style
             catalog.save(layer)
@@ -308,12 +310,12 @@ class Geoserver():
             raise e
         
         
-    def get_geometry_type(self, layer, session):
+    def get_geometry_type(self, layer):
         try:           
             datastore = Datastore.objects.get(id=layer.datastore_id)
             if layer.type == 'v_PostGIS' or layer.type == 'v_PostGIS_View':
                 workspace = Workspace.objects.get(id=datastore.workspace_id)
-                result = self.rest_catalog.get_feature_type(workspace.name, datastore.name, layer.name, user=session['username'], password=session['password'])
+                result = self.rest_catalog.get_feature_type(workspace.name, datastore.name, layer.name, user=self.user, password=self.password)
                 attr_list = result['featureType']['attributes']['attribute']
                 type = ''
                 for attr in attr_list:
@@ -334,16 +336,16 @@ class Geoserver():
         except Exception as e:
             return False
         
-    def createDefaultStyle(self, layer, style_name, session):
-        geom_type = self.get_geometry_type(layer, session)
+    def createDefaultStyle(self, layer, style_name):
+        geom_type = self.get_geometry_type(layer)
         style_type = 'US'
         if geom_type == 'raster':
             style_type = 'CT'
             
-        sld_body = symbology_services.create_default_style(session, layer.id, style_name, style_type, geom_type)
+        sld_body = symbology_services.create_default_style(layer.id, style_name, style_type, geom_type)
      
         try:
-            catalog = self.getGsconfig(session)
+            catalog = self.getGsconfig()
             if catalog.get_style(style_name, workspace=None) == None:
                 catalog.create_style(style_name, sld_body.encode('utf-8'), overwrite=False, workspace=None, style_format="sld10", raw=False)
                     
@@ -352,36 +354,36 @@ class Geoserver():
         except Exception as e:
             return False
         
-    def createStyle(self, name, data, session):
+    def createStyle(self, name, data):
         """
         Create new style
         """
         try:
-            self.getGsconfig(session).create_style(name, data.encode('utf-8'), overwrite=False, workspace=None, style_format="sld10", raw=False)
+            self.getGsconfig().create_style(name, data.encode('utf-8'), overwrite=False, workspace=None, style_format="sld10", raw=False)
             return True
         
         except Exception as e:
             return False
         
-    def updateStyle(self, style_name, sld_body, session):
+    def updateStyle(self, style_name, sld_body):
         """
         Update a style
         """
             
         try:
-            self.rest_catalog.update_style(style_name, sld_body, user=session['username'], password=session['password'])
+            self.rest_catalog.update_style(style_name, sld_body, user=self.user, password=self.password)
             return True
         
         except Exception as e:
             print e
             return False
         
-    def deleteStyle(self, name, session):
+    def deleteStyle(self, name):
         """
         Delete a style
         """
         try:
-            catalog = self.getGsconfig(session)
+            catalog = self.getGsconfig()
             style = catalog.get_style(name, workspace=None)
             catalog.delete(style, purge=True, recurse=False)
             return True
@@ -389,13 +391,13 @@ class Geoserver():
         except Exception as e:
             return False
         
-    def deleteLayerStyles(self, lyr, session):
+    def deleteLayerStyles(self, lyr):
         try:
             layer_styles = StyleLayer.objects.filter(layer=lyr)
     
             for layer_style in layer_styles:
                 style = Style.objects.get(id=layer_style.style_id)
-                catalog = self.getGsconfig(session)
+                catalog = self.getGsconfig()
                 gs_style = catalog.get_style(style.name, workspace=None)
                 catalog.delete(gs_style, purge=True, recurse=False)
                 layer_style.delete()
@@ -416,24 +418,24 @@ class Geoserver():
         except Exception as e:
             return False
         
-    def updateBoundingBoxFromData(self, layer, session):
+    def updateBoundingBoxFromData(self, layer):
         store = layer.datastore
         if store.type[0]=="v":
-            self.rest_catalog.update_ft_bounding_box(layer.datastore.workspace.name, layer.datastore.name, layer.name, user=session['username'], password=session['password'])
+            self.rest_catalog.update_ft_bounding_box(layer.datastore.workspace.name, layer.datastore.name, layer.name, user=self.user, password=self.password)
         # not available/necessary for coverages
             
 
-    def createResource(self, workspace, store, name, title, session):
+    def createResource(self, workspace, store, name, title):
         if store.type[0]=="v":
-            return self.createFeaturetype(workspace, store, name, title, session)
+            return self.createFeaturetype(workspace, store, name, title)
         elif store.type[0]=="e":
-            return self.createWMSLayer(workspace, store, name, title, session)
+            return self.createWMSLayer(workspace, store, name, title)
         else:
-            return self.createCoverage(workspace, store, name, title, session)   
+            return self.createCoverage(workspace, store, name, title)   
 
-    def createFeaturetype(self, workspace, datastore, name, title, session):
+    def createFeaturetype(self, workspace, datastore, name, title):
         try:
-            return self.rest_catalog.create_feature_type(name, title, datastore.name, workspace.name, user=session['username'], password=session['password'])
+            return self.rest_catalog.create_feature_type(name, title, datastore.name, workspace.name, user=self.user, password=self.password)
         except rest_geoserver.FailedRequestError as e:
             print ("ERROR createFeatureType failedrequest exception: " + e.get_message())
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
@@ -441,18 +443,17 @@ class Geoserver():
             print ("ERROR createFeatureType unknown exception: " + e.get_message())
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
         
-    def createCoverage(self, workspace, coveragestore, name, title, session):
+    def createCoverage(self, workspace, coveragestore, name, title):
         try:
-            return self.rest_catalog.create_coverage(name, title, coveragestore.name, workspace.name, user=session['username'], password=session['password'])
+            return self.rest_catalog.create_coverage(name, title, coveragestore.name, workspace.name, user=self.user, password=self.password)
         except rest_geoserver.FailedRequestError as e:
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
     
-    def createWMSLayer(self, workspace, store, name, title, session):
+    def createWMSLayer(self, workspace, store, name, title):
         try:
-            #return self.rest_catalog.create_wms_layer(name, title, coveragestore.name, workspace.name, user=session['username'], password=session['password'])
-            catalog = self.getGsconfig(session)
+            catalog = self.getGsconfig()
             ws = catalog.get_workspace(workspace.name)
             dst = catalog.get_store(store.name, ws)
             return catalog.create_wmslayer(ws, dst, name, name)
@@ -463,27 +464,27 @@ class Geoserver():
         
     #TODO: este metodo recrea el grupo de capas en Geoserver a partir de la informacion que hay en el modelo. Se deberian implementar los metodos
     # que anyaden o borran capas de un grupo para ser mas eficiente.    
-    def createOrUpdateGeoserverLayerGroup(self, layer_group, session):
+    def createOrUpdateGeoserverLayerGroup(self, layer_group):
         try:
             if layer_group.name != "__default__":
-                return self.rest_catalog.create_or_update_gs_layer_group(layer_group.name, layer_group.title, user=session['username'], password=session['password'])
+                return self.rest_catalog.create_or_update_gs_layer_group(layer_group.name, layer_group.title, user=self.user, password=self.password)
             return True
         except rest_geoserver.FailedRequestError as e:
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer group. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer group could not be published"))
         
-    def deleteGeoserverLayerGroup(self, layer_group, session):
+    def deleteGeoserverLayerGroup(self, layer_group):
         try:
-            return self.rest_catalog.delete_gs_layer_group(layer_group, user=session['username'], password=session['password'])
+            return self.rest_catalog.delete_gs_layer_group(layer_group, user=self.user, password=self.password)
         except rest_geoserver.FailedRequestError as e:
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer group. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer group could not be published"))
     
-    def deleteResource(self, workspace, datastore, layer, session, purge=None):
+    def deleteResource(self, workspace, datastore, layer, purge=None):
         try:
-            catalog = self.getGsconfig(session)
+            catalog = self.getGsconfig()
             resource = catalog.get_resource(layer.name, datastore.name, workspace.name)
             # FIXME: should we purge the resource (i.e. delete the layer on disk/db)?
             if resource is not None:
@@ -497,9 +498,9 @@ class Geoserver():
             pass
         return True
 
-    def updateResource(self, workspace, datastore, name, title, session):
+    def updateResource(self, workspace, datastore, name, title):
         try:
-            catalog = self.getGsconfig(session)
+            catalog = self.getGsconfig()
             resource = catalog.get_resource(name, datastore, workspace)
             resource.name = name
             resource.title = title
@@ -509,17 +510,17 @@ class Geoserver():
             print exc
             return False
             
-    def _get_unique_resource_name(self, datastore, workspace, session):
+    def _get_unique_resource_name(self, datastore, workspace):
         name = datastore
         i = 0
-        while self.getGsconfig(session).get_resource(name, None, workspace):
+        while self.getGsconfig().get_resource(name, None, workspace):
             name = datastore + str(i)
             i = i + 1
         return name     
     
-    def getResources(self, workspace, datastore, dstype, session, available=False):
+    def getResources(self, workspace, datastore, dstype, available=False):
         try:
-            store = self.getGsconfig(session).get_store(datastore, workspace)
+            store = self.getGsconfig().get_store(datastore, workspace)
             format_nature=dstype[0]
             if (format_nature=='v'):
                 return store.get_resources(available=available)
@@ -533,7 +534,7 @@ class Geoserver():
                     return []
                 else:
                     # we can't get the name of the coverage, so we just offer a sensible, non existing name
-                    return [self._get_unique_resource_name(datastore, workspace, session)]
+                    return [self._get_unique_resource_name(datastore, workspace)]
             elif (format_nature=='e'):
                 return store.get_resources(available=available)
             
@@ -542,22 +543,22 @@ class Geoserver():
             pass
         
         
-    def getResourceInfo(self, workspace, store, featureType, type, session):
+    def getResourceInfo(self, workspace, store, featureType, type):
         if type == None:
             type = "json"
         url = self.rest_catalog.service_url + "/workspaces/" + workspace + "/datastores/" + store + "/featuretypes/" + featureType +"."+type
-        r = self.rest_catalog.session.get(url, auth=(session['username'], session['password']))
+        r = self.rest_catalog.session.get(url, auth=(self.user, self.password))
         if r.status_code==200:
             content = r.content
             jsonData = json.loads(content)
             return jsonData
         return None
     
-    def getRasterResourceInfo(self, workspace, store, featureType, type, session):
+    def getRasterResourceInfo(self, workspace, store, featureType, type):
         if type == None:
             type = "json"
         url = self.rest_catalog.service_url + "/workspaces/" + workspace + "/coveragestores/" + store + "/coverages/" + featureType +"."+type
-        r = self.rest_catalog.session.get(url, auth=(session['username'], session['password']))
+        r = self.rest_catalog.session.get(url, auth=(self.user, self.password))
         if r.status_code==200:
             content = r.content
             jsonData = json.loads(content)
@@ -656,7 +657,7 @@ class Geoserver():
                 raise BadFormat(-1, _("Bad file format. The provided zip file must not contain any subdirectory."))
         z.close()
     
-    def __update_raster_stats(self, workspace, coveragestore, coverage, old_conf, stats, session):
+    def __update_raster_stats(self, workspace, coveragestore, coverage, old_conf, stats):
         try:
             dimensions = old_conf["coverage"]["dimensions"]["coverageDimension"]
             for idx, d in enumerate(dimensions):
@@ -664,7 +665,7 @@ class Geoserver():
                 d["description"] = "GridSampleDimension[" + str(stats[idx][0]) + "," + str(stats[idx][1]) + "]"
                 d["range"] = {"min":stats[idx][0], "max": stats[idx][1]}
             #conf = { "coverage": { "dimensions": {"coverageDimension": dimensions }}}
-            self.rest_catalog.update_coverage(workspace, coveragestore, coverage, old_conf, user=session['username'], password=session['password'])
+            self.rest_catalog.update_coverage(workspace, coveragestore, coverage, old_conf, user=self.user, password=self.password)
             
         except rest_geoserver.RequestError as e:
             logging.error("__update_raster_stats failed!! Layer: " + coverage)
@@ -768,7 +769,7 @@ class Geoserver():
 
         raise rest_geoserver.RequestError(-1, _("Error uploading the layer. Review the file format."))
     
-    def __do_shpdir2postgis(self, datastore, application, dir_path, layergroup, session, table_definition, creation_mode, defaults):
+    def __do_shpdir2postgis(self, request, datastore, application, dir_path, layergroup, table_definition, creation_mode, defaults):
         try: 
             # get & sanitize parameters
             if 'srs' in defaults.keys():    
@@ -841,7 +842,7 @@ class Geoserver():
                                 
                 if creation_mode==forms_geoserver.MODE_CREATE:
                     try:
-                        self.createFeaturetype(datastore.workspace, datastore, layer_name, layer_title, session)
+                        self.createFeaturetype(datastore.workspace, datastore, layer_name, layer_title)
                     except:
                         print "ERROR en createFeaturetype"
                         raise
@@ -863,21 +864,21 @@ class Geoserver():
                     layer.title = layer_title
                     layer.type = datastore.type
                     layer.metadata_uuid = ''
-                    layer.created_by = session['username']
+                    layer.created_by = request.user.username
                     layer.save()
     
-                    self.setDataRules(session=session)
+                    self.setDataRules()
                     
                     # estilos                            
-                    if self.getStyle(layer_style, session): 
-                        self.setLayerStyle(layer.name, layer_style, session=session)
+                    if self.getStyle(layer_style): 
+                        self.setLayerStyle(layer.name, layer_style)
                     else:
                         style_name = datastore.workspace.name + '_' + layer_style + '_default'
-                        self.createDefaultStyle(layer, style_name, session=session)
-                        self.setLayerStyle(layer.name, style_name, session=session)                        
+                        self.createDefaultStyle(layer, style_name)
+                        self.setLayerStyle(layer.name, style_name)                        
                         
                     if layer.layer_group.name != "__default__":
-                        self.createOrUpdateGeoserverLayerGroup(layer.layer_group, session)
+                        self.createOrUpdateGeoserverLayerGroup(layer.layer_group)
                 else:
                     print "TODO: borrar la cache .."
                             
@@ -890,114 +891,8 @@ class Geoserver():
         except Exception as e:
             logging.exception(e)
             raise rest_geoserver.RequestError(-1, _("Error creating the layer. Review the file format."))
-    
-    def __do_multi_upload_postgis(self, datastore, application, zip_path, session, table_definition):
-        tmp_dir = None
-        try: 
-            # get & sanitize parameters
-            srs = 'EPSG:25830'
-            encoding = 'LATIN1'
-            creation_mode = 'CR'
-            if not encoding in self.supported_encodings_plain or not srs in self.supported_srs_plain:
-                raise rest_geoserver.RequestError()
-            # FIXME: sanitize connection parameters too!!!
-            # We are going to perform a command line execution with them,
-            # so we must be ABSOLUTELY sure that no code injection can be
-            # performed
-            ds_params = json.loads(datastore.connection_params) 
-            db = ds_params.get('database')
-            host = ds_params.get('host')
-            port = ds_params.get('port')
-            schema = ds_params.get('schema', "public")
-            port = str(int(port))
-            user = ds_params.get('user')
-            password = ds_params.get('passwd')
-        
-            if _valid_sql_name_regex.search(db) == None:
-                raise InvalidValue(-1, _("The connection parameters contain an invalid database name: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db))
-            if _valid_sql_name_regex.search(user) == None:
-                raise InvalidValue(-1, _("The connection parameters contain an invalid user name: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db))
-            if _valid_sql_name_regex.search(schema) == None:
-                raise InvalidValue(-1, _("The connection parameters contain an invalid schema: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db)) 
-
-            # extract SHP
-            tmp_dir = tempfile.mkdtemp()
-            with ZipFile(zip_path, 'r') as z:
-                z.extractall(tmp_dir)
-            files = [f for f in os.listdir(tmp_dir) if f.lower()[-4:]==".shp"]
             
-            for f in files:
-                if f in table_definition:
-                    table_def = table_definition[f]
-                    layer_name = table_def['name']
-                    layer_title = table_def['title']
-                    layer_group = table_def['group'] + '_' + application.name.lower()
-                    shp_abs = os.path.join(tmp_dir, f)
-                    gdal_tools.shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
-                    
-                    try:
-                        # layer has been uploaded to postgis, now register the layer on GS
-                        # we don't check the creation mode because the users sometimes choose the wrong one
-                        self.createFeaturetype(datastore.workspace, datastore, layer_name, layer_title, session)
-                    except:
-                        if creation_mode==forms_geoserver.MODE_CREATE:
-                            # assume the layer was created if mode is append or overwrite, so don't raise the exception 
-                            raise
-                        
-                    try:
-                        layer = Layer.objects.get(name=layer_name, datastore=datastore)
-                    except:
-                        # may me missing when creating a layer or when
-                        # appending / overwriting a layer created outside gvsig online
-                        layer = Layer()
-                        
-                    layer.datastore = datastore
-                    layer.name = layer_name
-                    layer.visible = False
-                    layer.queryable = True
-                    layer.cached = True
-                    layer.single_image = False
-                    layer.layer_group = LayerGroup.objects.get(name__exact=layer_group)
-                    layer.title = layer_title
-                    layer.type = datastore.type
-                    layer.metadata_uuid = ''
-                    layer.created_by = session['username']
-                    layer.save()
-                    
-                    self.setDataRules(session=session)
-                         
-                    if self.getStyle(layer.name, session): 
-                        self.setLayerStyle(layer.name, layer.name, session=session)
-                    else:
-                        style_name = datastore.workspace.name + '_' + layer.name + '_default'
-                        self.createDefaultStyle(layer, style_name, session=session)
-                        self.setLayerStyle(layer.name, style_name, session=session)                        
-                        
-                    if layer.layer_group.name != "__default__":
-                        self.createOrUpdateGeoserverLayerGroup(layer.layer_group, session)
-                            
-                        
-        except (rest_geoserver.RequestError):
-            raise 
-        except gdal_tools.GdalError as e:
-            raise rest_geoserver.RequestError(e.code, e.message)
-        except Exception as e:
-            logging.exception(e)
-        finally:
-            if tmp_dir:
-                shutil.rmtree(tmp_dir, ignore_errors=True)
-        raise rest_geoserver.RequestError(-1, _("Error uploading the layer. Review the file format."))
-
-                
-    def uploadMultiLayer(self, datastore, application, file_upload, session, table_definition):
-        try:
-            self.__test_zip_structure(file_upload)
-            self.__do_multi_upload_postgis(datastore, application, file_upload, session, table_definition)
-        
-        except Exception as e:
-            print e
-            
-    def exportShpToPostgis(self, form_data, session):
+    def exportShpToPostgis(self, form_data):
         name = form_data['name']
         ds = form_data['datastore']
         shp_path = form_data['file'] 
@@ -1013,9 +908,9 @@ class Geoserver():
             print e
             raise e
     
-    def shpdir2postgis(self, datastore, application, dir_path, layergroup, session, table_definition,creation_mode, defaults):
+    def shpdir2postgis(self, request, datastore, application, dir_path, layergroup, table_definition,creation_mode, defaults):
         try:
-            self.__do_shpdir2postgis(datastore, application, dir_path, layergroup, session, table_definition, creation_mode, defaults)        
+            self.__do_shpdir2postgis(request, datastore, application, dir_path, layergroup, table_definition, creation_mode, defaults)        
         except Exception as e:
             print e
             raise e
@@ -1065,7 +960,7 @@ class Geoserver():
         except:
             raise rest_geoserver.RequestError(_("Invalid field definition"))
         
-    def createLayer(self, form_data, layer_type, session):
+    def createLayer(self, request, form_data, layer_type):
         name = form_data['name']
 
         if _valid_sql_name_regex.search(name) == None:
@@ -1074,7 +969,7 @@ class Geoserver():
         datastore = form_data['datastore']
         workspace = datastore.workspace
         
-        if self.resource_exists(workspace.name, name, session):
+        if self.resource_exists(workspace.name, name):
             raise InvalidValue(-1, _("A layer already exists with this name: '{value}'").format(value=name))
         
         title = form_data.get('title')
@@ -1092,7 +987,7 @@ class Geoserver():
             
             try:
                 srid = srs.split(":")[1]
-                self.rest_catalog.create_sql_view(workspace.name, datastore.name, name, sql_statement, key_column, geom_column, geom_type, srid, None, title=title, user=session['username'], password=session['password'])
+                self.rest_catalog.create_sql_view(workspace.name, datastore.name, name, sql_statement, key_column, geom_column, geom_type, srid, None, title=title, user=self.user, password=self.password)
             except rest_geoserver.FailedRequestError as e:
                 if "Error occurred building feature type" in e.get_message():
                     e.message = _("Error occurred building the view. Review the SQL sentence")
@@ -1101,7 +996,7 @@ class Geoserver():
             fields = key_column = self.__field_def_to_gs(form_data.get('fields'), geom_type)
             try:
                 extraParams = {"nativeBoundingBox": {"minx": 0, "maxx": 1, "miny": 0, "maxy":1 , "crs":srs}}
-                self.rest_catalog.create_feature_type(name, title, datastore.name, workspace.name, srs=srs, fields=fields, user=session['username'], password=session['password'], extraParams=extraParams)
+                self.rest_catalog.create_feature_type(name, title, datastore.name, workspace.name, srs=srs, fields=fields, user=self.user, password=self.password, extraParams=extraParams)
             except rest_geoserver.FailedRequestError as e:
                 if "Error occurred building feature type" in e.get_message():
                     e.message = _("Error occurred building the view. Review the SQL sentence")
@@ -1119,20 +1014,20 @@ class Geoserver():
         l.layer_group = form_data.get('layer_group', LayerGroup.objects.get(name='__default__'))
         l.title = title
         l.type = 'v_PostGIS_View'
-        l.created_by = session['username']
+        l.created_by = request.user.username
         l.save()
         return l
     
-    def setDataRules(self, session):
+    def setDataRules(self):
         
         url = self.rest_catalog.get_service_url() + "/security/acl/layers.json"
         services_url = self.rest_catalog.get_service_url() + "/security/acl/services.json"
 
         rules = DataRule.objects.all()
         for r in rules:
-            self.rest_catalog.get_session().delete(self.rest_catalog.get_service_url() + "/security/acl/layers/" + r.path, verify=False, auth=(session['username'], session['password']))
+            self.rest_catalog.get_session().delete(self.rest_catalog.get_service_url() + "/security/acl/layers/" + r.path, verify=False, auth=(self.user, self.password))
             r.delete()
-        self.rest_catalog.get_session().delete(self.rest_catalog.get_service_url() + "/security/acl/services/wfs.Transaction", verify=False, auth=(session['username'], session['password']))
+        self.rest_catalog.get_session().delete(self.rest_catalog.get_service_url() + "/security/acl/services/wfs.Transaction", verify=False, auth=(self.user, self.password))
         
         layers = Layer.objects.all()  
         transaction_roles = [] 
@@ -1171,36 +1066,36 @@ class Geoserver():
                 write_rule.save()
                 data[write_rule_path] = write_rule_roles
                         
-            self.rest_catalog.get_session().post(url, json=data, verify=False, auth=(session['username'], session['password']))
+            self.rest_catalog.get_session().post(url, json=data, verify=False, auth=(self.user, self.password))
             
         if  len(transaction_roles) > 0:
             service = {}
             service_write_roles =  ",".join(transaction_roles)
             service['wfs.Transaction'] = service_write_roles
-            self.rest_catalog.get_session().post(services_url, json=service, verify=False, auth=(session['username'], session['password']))
+            self.rest_catalog.get_session().post(services_url, json=service, verify=False, auth=(self.user, self.password))
             
             
-    def clearCache(self, ws, layer, session):
+    def clearCache(self, ws, layer):
         try:
-            self.rest_catalog.clear_cache(ws, layer, user=session['username'], password=session['password'])
+            self.rest_catalog.clear_cache(ws, layer, user=self.user, password=self.password)
             return True
         
         except Exception as e:
             print e
             return False
         
-    def clearLayerGroupCache(self, name, session):
+    def clearLayerGroupCache(self, name):
         try:
-            self.rest_catalog.clear_layergroup_cache(name, user=session['username'], password=session['password'])
+            self.rest_catalog.clear_layergroup_cache(name, user=self.user, password=self.password)
             return True
         
         except Exception as e:
             print e
             return False
         
-    def addGridSubset(self, ws, layer, session):
+    def addGridSubset(self, ws, layer):
         try:
-            self.rest_catalog.add_grid_subset(ws, layer, user=session['username'], password=session['password'])
+            self.rest_catalog.add_grid_subset(ws, layer, user=self.user, password=self.password)
             return True
         
         except Exception as e:
@@ -1253,8 +1148,7 @@ class Geoserver():
             }
             
         req = requests.Session()
-        if 'username' in request.session and 'password' in request.session:
-            req.auth = (request.session['username'], request.session['password'])
+        req.auth = (self.user, self.password)
     
         response = req.post(url, data=values, verify=False)
         root = ET.fromstring(response.text)
@@ -1294,13 +1188,15 @@ def get_default_backend():
     try:
         backend_str = GVSIGOL_SERVICES.get('ENGINE', 'geoserver')
         base_url = GVSIGOL_SERVICES['URL']
+        user = GVSIGOL_SERVICES['USER']
+        password = GVSIGOL_SERVICES['PASSWORD']
         cluster_nodes = GVSIGOL_SERVICES['CLUSTER_NODES']
         supported_types = GVSIGOL_SERVICES.get('SUPPORTED_TYPES', None)
     except:
         raise ImproperlyConfigured
 
     if backend_str=='geoserver':
-        backend = Geoserver(base_url, cluster_nodes, supported_types)
+        backend = Geoserver(base_url, user, password, cluster_nodes, supported_types)
     else:
         raise ImproperlyConfigured
     return backend

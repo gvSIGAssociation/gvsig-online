@@ -43,8 +43,7 @@ class DatastoreForm(forms.Form):
     description = forms.CharField(label=_(u'Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))
     connection_params = forms.CharField(label=_(u'Connection params'), required=True, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))
 
-    def __init__(self, session, *args, **kwargs):
-        self.session = session
+    def __init__(self, *args, **kwargs):
         super(DatastoreForm, self).__init__(*args, **kwargs)
 
     def clean(self):
@@ -54,7 +53,7 @@ class DatastoreForm(forms.Form):
         connection_params = cleaned_data.get("connection_params")
 
         if name and workspace:
-            if backend.datastore_exists(workspace.name, name, self.session):
+            if backend.datastore_exists(workspace.name, name):
                 self.add_error('name', _("Datastore already exists")) 
         
         if connection_params:

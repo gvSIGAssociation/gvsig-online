@@ -83,7 +83,7 @@ class ExportToDatabaseView(FilemanagerMixin, TemplateView):
             form = form_class(request.POST, request.FILES)
             if form.is_valid():
                 try:
-                    if mapservice.exportShpToPostgis(form.cleaned_data, session=request.session):
+                    if mapservice.exportShpToPostgis(form.cleaned_data):
                         return redirect("/gvsigonline/filemanager/?path=" + request.POST.get('directory_path'))
                     
                 except rest_geoserver.RequestError as e:

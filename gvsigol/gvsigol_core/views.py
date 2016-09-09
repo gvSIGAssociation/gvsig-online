@@ -392,7 +392,7 @@ def project_get_conf(request):
         project_layers_groups = ProjectLayerGroup.objects.filter(project_id=project.id)
         layer_groups = []
         workspaces = []
-        capabilities = mapservice_backend.getCapabilities(request.session)
+        capabilities = mapservice_backend.getCapabilities()
         for project_group in project_layers_groups:            
             group = LayerGroup.objects.get(id=project_group.layer_group_id)
             
@@ -447,34 +447,24 @@ def project_get_conf(request):
                 else:
                     layer['is_time_layer'] = False
                     
-                split_wms_url = workspace.wms_endpoint.split('//')
-                authenticated_wms_url = split_wms_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_wms_url[1]
-                layer['wms_url'] = authenticated_wms_url
-                    
-                split_wfs_url = workspace.wfs_endpoint.split('//')
-                authenticated_wfs_url = split_wfs_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_wfs_url[1]
-                layer['wfs_url'] = authenticated_wfs_url
+                
+                layer['wms_url'] = core_utils.get_wms_url(request, workspace)
+                layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
                 layer['namespace'] = workspace.uri
                 layer['workspace'] = workspace.name                
-                #layer['wfs_url'] = workspace.wfs_endpoint
-                
                 if l.cached:  
-                    split_cache_url = workspace.cache_endpoint.split('//')
-                    authenticated_cache_url = split_cache_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_cache_url[1]
-                    layer['cache_url'] = authenticated_cache_url
+                    layer['cache_url'] = core_utils.get_cache_url(request, workspace)
                 else:
-                    layer['cache_url'] = authenticated_wms_url
+                    layer['cache_url'] = core_utils.get_wms_url(request, workspace)
                 
                 if datastore.type == 'e_WMS':
                     layer['legend'] = ""
                 else: 
-                    layer['legend'] = authenticated_wms_url + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
+                    layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
                     
                 if 'http' in gvsigol.settings.GVSIGOL_CATALOG['URL']:
                     if l.metadata_uuid is not None and l.metadata_uuid != '':
-                        split_catalog_url = gvsigol.settings.GVSIGOL_CATALOG['URL'].split('//')
-                        authenticated_catalog_url = split_catalog_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_catalog_url[1]  + 'catalog.search#/metadata/' + l.metadata_uuid
-                        layer['metadata'] = authenticated_catalog_url
+                        layer['metadata'] = core_utils.get_catalog_url(request, gvsigol.settings.GVSIGOL_CATALOG['URL'], l)
                         
                     else:
                         layer['metadata'] = ''
@@ -495,10 +485,6 @@ def project_get_conf(request):
                 layer_groups.append(conf_group)
             
         ordered_layer_groups = sorted(layer_groups, key=itemgetter('groupOrder'), reverse=True)
-        
-        geoserver_url = gvsigol.settings.GVSIGOL_SERVICES['URL']
-        split_geoserver_url = geoserver_url.split('//')
-        authenticated_geoserver_url = split_geoserver_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_geoserver_url[1]
             
         conf = {
             'pid': pid,
@@ -523,13 +509,11 @@ def project_get_conf(request):
             'tools': gvsigol.settings.GVSIGOL_TOOLS,
             'base_layers': gvsigol.settings.GVSIGOL_BASE_LAYERS,
             'is_public_project': False,
-            'geoserver_base_url': authenticated_geoserver_url
+            'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL'])
         } 
         
         return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
 
-        
-        
     
 def toc_update(request, pid):
     if request.method == 'POST':
