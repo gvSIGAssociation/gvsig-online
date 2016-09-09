@@ -17,6 +17,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from geoserver.workspace import Workspace
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
@@ -375,8 +376,56 @@ def toc_remove_layer(layer):
             del toc2.get(layer.layer_group.name).get('layers')[layer.name]
         public_viewer.toc_order = json.dumps(toc2)
         public_viewer.save()
+        
+def get_geoserver_base_url(request, url):
+    geoserver_url = None
+    if request.session['username'] is not None and request.session['password'] is not None:
+        split_geoserver_url = geoserver_url.split('//')
+        geoserver_url = split_geoserver_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_geoserver_url[1]
+    else:
+        geoserver_url = url
+        
+    return geoserver_url
+        
+def get_wms_url(request, workspace):
+    wms_url = None
+    if request.session['username'] is not None and request.session['password'] is not None:
+        split_wms_url = workspace.wms_endpoint.split('//')
+        wms_url = split_wms_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_wms_url[1]
+    else:
+        wms_url = workspace.wms_endpoint
+        
+    return wms_url
 
-       
+def get_wfs_url(request, workspace):
+    wfs_url = None
+    if request.session['username'] is not None and request.session['password'] is not None:
+        split_wfs_url = workspace.wfs_endpoint.split('//')
+        wfs_url = split_wfs_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_wfs_url[1]
+    else:
+        wfs_url = workspace.wfs_endpoint
+        
+    return wfs_url
+
+def get_cache_url(request, workspace):
+    cache_url = None
+    if request.session['username'] is not None and request.session['password'] is not None:
+        split_cache_url = workspace.cache_endpoint.split('//')
+        cache_url = split_cache_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_cache_url[1]
+    else:
+        cache_url = workspace.cache_endpoint
+        
+    return cache_url
+
+def get_catalog_url(request, url, layer):
+    catalog_url = None
+    if request.session['username'] is not None and request.session['password'] is not None:
+        split_catalog_url = url.split('//')
+        catalog_url = split_catalog_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_catalog_url[1]  + 'catalog.search#/metadata/' + layer.metadata_uuid
+    else:
+        catalog_url = url + 'catalog.search#/metadata/' + layer.metadata_uuid
+        
+    return catalog_url
 def sendMail(user, password):
             
     subject = _(u'New user account')

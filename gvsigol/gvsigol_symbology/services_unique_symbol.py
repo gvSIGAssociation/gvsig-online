@@ -25,6 +25,7 @@
 from models import Library, Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, TextSymbolizer
 from gvsigol_services.backend_mapservice import backend as mapservice
 from gvsigol_services.models import Layer, Datastore, Workspace
+from gvsigol_core import utils as core_utils
 from django.http import HttpResponse
 from gvsigol import settings
 import utils, sld_utils, sld_builder
@@ -35,7 +36,7 @@ import utils
 import json
 import re
 
-def create_style(session, json_data, layer_id):
+def create_style(request, json_data, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     datastore = layer.datastore
     workspace = datastore.workspace
@@ -147,15 +148,15 @@ def create_style(session, json_data, layer_id):
             symbolizer.save()
             
     sld_body = sld_builder.build_sld(layer, style)
-    if mapservice.createStyle(style.name, sld_body, session): 
+    if mapservice.createStyle(style.name, sld_body): 
         if style.is_default:
-            mapservice.setLayerStyle(workspace.name+":"+layer.name, style.name, session)
+            mapservice.setLayerStyle(workspace.name+":"+layer.name, style.name)
         return True
         
     else:
         return False
     
-def update_style(session, json_data, layer_id, style_id):   
+def update_style(request, json_data, layer_id, style_id):   
     style = Style.objects.get(id=int(style_id))
     layer = Layer.objects.get(id=int(layer_id))
     
@@ -167,7 +168,7 @@ def update_style(session, json_data, layer_id, style_id):
             s.save()
         datastore = layer.datastore
         workspace = datastore.workspace
-        mapservice.setLayerStyle(workspace.name+":"+layer.name, style.name, session)
+        mapservice.setLayerStyle(workspace.name+":"+layer.name, style.name)
     
     style.title = json_data.get('title')
     style.is_default = json_data.get('is_default')
@@ -258,34 +259,29 @@ def update_style(session, json_data, layer_id, style_id):
             symbolizer.save()
     
     sld_body = sld_builder.build_sld(layer, style)
-    if mapservice.updateStyle(style.name, sld_body, session): 
+    if mapservice.updateStyle(style.name, sld_body): 
         return True
     else:
         return False
 
 
-def get_conf(session, layer_id):
+def get_conf(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     index = len(StyleLayer.objects.filter(layer=layer))
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
     
-    resource = mapservice.getResourceInfo(workspace.name, datastore.name, layer.name, "json", session)
+    resource = mapservice.getResourceInfo(workspace.name, datastore.name, layer.name, "json", )
     fields = utils.get_fields(resource)
     feature_type = utils.get_feature_type(fields)
     alphanumeric_fields = utils.get_alphanumeric_fields(fields)
        
-    supported_fonts_str = mapservice.getSupportedFonts(session)
+    supported_fonts_str = mapservice.getSupportedFonts()
     supported_fonts = json.loads(supported_fonts_str)
     sorted_fonts = utils.sortFontsArray(supported_fonts.get("fonts"))
               
-    split_wms_url = workspace.wms_endpoint.split('//')
-    authenticated_wms_url = split_wms_url[0] + '//' + session['username'] + ':' + session['password'] + '@' + split_wms_url[1]
-    layer_url = authenticated_wms_url
-    
-    split_wfs_url = workspace.wfs_endpoint.split('//')
-    authenticated_wfs_url = split_wfs_url[0] + '//' + session['username'] + ':' + session['password'] + '@' + split_wfs_url[1]
-    layer_wfs_url = authenticated_wfs_url
+    layer_url = core_utils.get_wms_url(request, workspace)
+    layer_wfs_url = core_utils.get_wfs_url(request, workspace)
     
     preview_url = ''
     if feature_type == 'PointSymbolizer':

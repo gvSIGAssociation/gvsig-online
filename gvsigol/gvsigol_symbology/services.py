@@ -24,6 +24,7 @@
 
 from models import Library, Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, TextSymbolizer, RasterSymbolizer, ColorMap
 from django.utils.translation import ugettext_lazy as _
+from gvsigol_core import utils as core_utils
 from gvsigol_services.models import Layer
 from django.http import HttpResponse
 import utils, sld_builder
@@ -31,7 +32,7 @@ import tempfile
 import json
 import os
 
-def create_default_style(session, layer_id, style_name, style_type, geom_type):
+def create_default_style(layer_id, style_name, style_type, geom_type):
     layer = Layer.objects.get(id=int(layer_id))
     
     style = Style(
@@ -131,7 +132,7 @@ def create_default_style(session, layer_id, style_name, style_type, geom_type):
     sld_body = sld_builder.build_sld(layer, style)
     return sld_body
 
-def sld_import(name, is_default, layer_id, file, session, mapservice):
+def sld_import(name, is_default, layer_id, file, mapservice):
     
     layer = Layer.objects.get(id=int(layer_id))
     datastore = layer.datastore
@@ -284,9 +285,9 @@ def sld_import(name, is_default, layer_id, file, session, mapservice):
             scount+= 1
         
     sld_body = sld_builder.build_sld(layer, style)
-    if mapservice.createStyle(style.name, sld_body, session): 
+    if mapservice.createStyle(style.name, sld_body): 
         if style.is_default:
-            mapservice.setLayerStyle(workspace.name+":"+layer.name, style.name, session)
+            mapservice.setLayerStyle(workspace.name+":"+layer.name, style.name)
             utils.__delete_temporaries(filepath)
         return True
         
@@ -294,11 +295,11 @@ def sld_import(name, is_default, layer_id, file, session, mapservice):
         utils.__delete_temporaries(filepath)
         return False
     
-def delete_style(session, style_id, mapservice):
+def delete_style(style_id, mapservice):
     try:
         style = Style.objects.get(id=int(style_id))
         
-        if mapservice.deleteStyle(style.name, session):  
+        if mapservice.deleteStyle(style.name):  
             layer_styles = StyleLayer.objects.filter(style=style)   
             for layer_style in layer_styles:
                 layer_style.delete()

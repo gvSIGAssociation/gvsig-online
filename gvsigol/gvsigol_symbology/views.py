@@ -99,7 +99,7 @@ def style_layer_delete(request):
                 message = _('Can not delete a default style')
             else:
                 try:
-                    services.delete_style(request.session, style_id, mapservice)
+                    services.delete_style(style_id, mapservice)
                     success = True
                     
                 except Exception as e:
@@ -138,14 +138,14 @@ def unique_symbol_add(request, layer_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_unique_symbol.create_style(request.session, json_data, layer_id):            
+        if services_unique_symbol.create_style(request, json_data, layer_id):            
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
             return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
         
     else:                 
-        response = services_unique_symbol.get_conf(request.session, layer_id)     
+        response = services_unique_symbol.get_conf(request, layer_id)     
         return render_to_response('unique_symbol_add.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -155,7 +155,7 @@ def unique_symbol_update(request, layer_id, style_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_unique_symbol.update_style(request.session, json_data, layer_id, style_id):            
+        if services_unique_symbol.update_style(request, json_data, layer_id, style_id):            
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -181,7 +181,7 @@ def unique_symbol_update(request, layer_id, style_id):
             'symbolizers': symbolizers
         }
                          
-        response = services_unique_symbol.get_conf(request.session, layer_id)
+        response = services_unique_symbol.get_conf(request, layer_id)
         
         response['style'] = style
         response['minscale'] = int(r.minscale)
@@ -198,14 +198,14 @@ def unique_values_add(request, layer_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_unique_values.create_style(request.session, json_data, layer_id):            
+        if services_unique_values.create_style(request, json_data, layer_id):            
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
             return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
         
     else:                 
-        response = services_unique_values.get_conf(request.session, layer_id) 
+        response = services_unique_values.get_conf(request, layer_id) 
         return render_to_response('unique_values_add.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -215,7 +215,7 @@ def unique_values_update(request, layer_id, style_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_unique_values.update_style(request.session, json_data, layer_id, style_id):            
+        if services_unique_values.update_style(request, json_data, layer_id, style_id):            
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -244,7 +244,7 @@ def unique_values_update(request, layer_id, style_id):
             }
             rules.append(rule)
                          
-        response = services_unique_values.get_conf(request.session, layer_id)
+        response = services_unique_values.get_conf(request, layer_id)
         
         response['style'] = style
         response['minscale'] = int(r.minscale)
@@ -276,14 +276,14 @@ def intervals_add(request, layer_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_intervals.create_style(request.session, json_data, layer_id):            
+        if services_intervals.create_style(request, json_data, layer_id):            
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
             return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
         
     else:                 
-        response = services_intervals.get_conf(request.session, layer_id) 
+        response = services_intervals.get_conf(request, layer_id) 
         return render_to_response('intervals_add.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -293,7 +293,7 @@ def intervals_update(request, layer_id, style_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_intervals.update_style(request.session, json_data, layer_id, style_id):            
+        if services_intervals.update_style(request, json_data, layer_id, style_id):            
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -322,7 +322,7 @@ def intervals_update(request, layer_id, style_id):
             }
             rules.append(rule)
                          
-        response = services_intervals.get_conf(request.session, layer_id)
+        response = services_intervals.get_conf(request, layer_id)
         
         response['style'] = style
         response['minscale'] = int(r.minscale)
@@ -353,14 +353,14 @@ def expressions_add(request, layer_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_expressions.create_style(request.session, json_data, layer_id):            
+        if services_expressions.create_style(request, json_data, layer_id):            
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
             return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
         
     else:                 
-        response = services_expressions.get_conf(request.session, layer_id) 
+        response = services_expressions.get_conf(request, layer_id) 
         return render_to_response('expressions_add.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -370,7 +370,7 @@ def expressions_update(request, layer_id, style_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_expressions.update_style(request.session, json_data, layer_id, style_id):            
+        if services_expressions.update_style(request, json_data, layer_id, style_id):            
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -399,7 +399,7 @@ def expressions_update(request, layer_id, style_id):
             }
             rules.append(rule)
                          
-        response = services_expressions.get_conf(request.session, layer_id)
+        response = services_expressions.get_conf(request, layer_id)
         
         response['style'] = style
         response['minscale'] = int(r.minscale)
@@ -416,14 +416,14 @@ def color_table_add(request, layer_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_color_table.create_style(request.session, json_data, layer_id):            
+        if services_color_table.create_style(request, json_data, layer_id):            
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
             return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
         
     else:                 
-        response = services_color_table.get_conf(request.session, layer_id)     
+        response = services_color_table.get_conf(request, layer_id)     
         return render_to_response('color_table_add.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -433,7 +433,7 @@ def color_table_update(request, layer_id, style_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_color_table.update_style(request.session, json_data, layer_id, style_id):            
+        if services_color_table.update_style(request, json_data, layer_id, style_id):            
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -461,7 +461,7 @@ def color_table_update(request, layer_id, style_id):
             'entries': entries
         }
                          
-        response = services_color_table.get_conf(request.session, layer_id)
+        response = services_color_table.get_conf(request, layer_id)
         
         response['style'] = style
         response['minscale'] = int(r.minscale)
@@ -488,7 +488,7 @@ def sld_import(request, layer_id):
             is_default = True
         
         if 'sld-file' in request.FILES: 
-            if services.sld_import(style_name, is_default, layer_id, request.FILES['sld-file'], request.session, mapservice):        
+            if services.sld_import(style_name, is_default, layer_id, request.FILES['sld-file'], request, mapservice):        
                 return redirect('style_layer_list')
             else:
                 response = {
@@ -598,7 +598,7 @@ def library_import(request):
         
         try:            
             if name != '' and 'library-file' in request.FILES: 
-                services_library.upload_library(name, description, request.FILES['library-file'], request.session)                
+                services_library.upload_library(name, description, request.FILES['library-file'], request)                
                 return redirect('library_list')
             
             elif name == '' and 'library-file' in request.FILES:
@@ -769,7 +769,7 @@ def symbol_delete(request):
             rule = Rule.objects.get(id=int(symbol_id))
             library_rule = LibraryRule.objects.get(rule=rule)
             library_id = library_rule.library.id
-            services_library.delete_symbol(request.session, rule, library_rule)
+            services_library.delete_symbol(rule, library_rule)
             return HttpResponse(json.dumps({'library_id': library_id, 'success': True}, indent=4), content_type='application/json')
         
         except Exception as e:
