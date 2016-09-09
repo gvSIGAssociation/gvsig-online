@@ -38,6 +38,22 @@ import utils as auth_utils
 import json
 from gvsigol.settings import GVSIGOL_LDAP
 
+def login_remote_user(request):
+    if request.user.is_authenticated():
+        logout_user(request)
+        
+    if "REMOTE_USER" in request.META:
+        print request.META['REMOTE_USER']
+        authenticate(remote_user=request.META['REMOTE_USER'])
+        return redirect('home')
+    else:
+        a = authenticate(remote_user="admin")
+        if a.is_authenticated():
+            print "Autenticado"
+        else:
+            print "Pos no"
+        return redirect('home')
+
 def login_user(request):
     if request.user.is_authenticated():
         logout_user(request)
