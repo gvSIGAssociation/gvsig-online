@@ -116,6 +116,8 @@ DATABASES = {
 }
 POSTGIS_VERSION = (2, 1, 2)
 
+AUTH_WITH_REMOTE_USER = True
+
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
