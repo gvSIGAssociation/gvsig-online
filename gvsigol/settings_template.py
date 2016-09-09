@@ -200,11 +200,11 @@ STATICFILES_FINDERS = (
 GVSIGOL_VERSION = '2.1.0'
 
 GVSIGOL_USERS_CARTODB = {
-    'dbhost': 'localhost',
-    'dbport': '5432',
-    'dbname': 'carto',
-    'dbuser': 'carto',
-    'dbpassword': 'carto52'
+    'dbhost': '##DATABASE_HOST##',
+    'dbport': '##DATABASE_PORT##',
+    'dbname': 'gvsigonline',
+    'dbuser': '##DATABASE_USER##',
+    'dbpassword': '##DATABASE_PASSWORD##'
 }
 
 PUBLIC_VIEWER = True
