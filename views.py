@@ -64,10 +64,8 @@ def login_user(request):
         if AUTH_WITH_REMOTE_USER:
             if "HTTP_REMOTE_USER" in request.META:
                 print request.META['HTTP_REMOTE_USER']
-                username = None
-                password = None
-                request.session['username'] = username
-                request.session['password'] = password
+                request.session['username'] = None
+                request.session['password'] = None
                 user = authenticate(remote_user=request.META['HTTP_REMOTE_USER'])
                 if user is not None:
                     if user.is_active:
@@ -247,7 +245,6 @@ def user_add(request):
                         ws_name = 'ws_' + form.data['username']
                         
                         if mapservice_backend.createWorkspace(
-                            request.session, 
                             ws_name,
                             url + ws_name,
                             '',
@@ -272,7 +269,7 @@ def user_add(request):
                             ds_name = 'ds_' + form.data['username']
                             services_utils.create_datastore(request, user.username, ds_name, newWs)
                             
-                            mapservice_backend.reload_nodes(request.session)
+                            mapservice_backend.reload_nodes()
                         
                         
                     auth_utils.sendMail(user, form.data['password1'])
