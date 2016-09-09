@@ -36,23 +36,7 @@ import random, string
 from utils import superuser_required, staff_required
 import utils as auth_utils
 import json
-from gvsigol.settings import GVSIGOL_LDAP
-
-def login_remote_user(request):
-    if request.user.is_authenticated():
-        logout_user(request)
-        
-    if "REMOTE_USER" in request.META:
-        print request.META['REMOTE_USER']
-        authenticate(remote_user=request.META['REMOTE_USER'])
-        return redirect('home')
-    else:
-        a = authenticate(remote_user="admin")
-        if a.is_authenticated():
-            print "Autenticado"
-        else:
-            print "Pos no"
-        return redirect('home')
+from gvsigol.settings import GVSIGOL_LDAP, LOGOUT_PAGE_URL, MIDDLEWARE_CLASSES
 
 def login_user(request):
     if request.user.is_authenticated():
@@ -76,11 +60,28 @@ def login_user(request):
             errors.append({'message': _("The username and password you have entered do not match our records")})
             return render_to_response('login.html', {'errors': errors}, RequestContext(request))
         
-    return render_to_response('login.html', {'errors': errors}, RequestContext(request))
+    else:
+        if "REMOTE_USER" in request.META:
+            print request.META['REMOTE_USER']
+            user = authenticate(remote_user=request.META['REMOTE_USER'])
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    return redirect('home')
+            
+        else:
+            '''
+            user = authenticate(remote_user="admin")
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    return redirect('home')
+            '''
+            return render_to_response('login.html', {'errors': errors}, RequestContext(request))
 
 def logout_user(request):
     logout(request)
-    return redirect('/gvsigonline/')
+    return redirect(LOGOUT_PAGE_URL)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def password_update(request):  
