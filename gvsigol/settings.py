@@ -233,6 +233,8 @@ GVSIGOL_CATALOG = {
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
     'URL': 'https://localhost/gs-test',
+    'USER': 'admin',
+    'PASSWORD': 'admin52',
     'CLUSTER_NODES':[],
     'SUPPORTED_TYPES': (
                         ('v_PostGIS', _('PostGIS vector')),

@@ -70,7 +70,7 @@ def workspace_add(request):
         form = WorkspaceForm(request.POST)
         if form.is_valid():
             # first create the ws on the backend
-            if mapservice_backend.createWorkspace(request.session, form.cleaned_data['name'],
+            if mapservice_backend.createWorkspace(form.cleaned_data['name'],
                 form.cleaned_data['uri'],
                 form.cleaned_data['description'],
                 form.cleaned_data['wms_endpoint'],
@@ -82,7 +82,7 @@ def workspace_add(request):
                 newWs = Workspace(**form.cleaned_data)
                 newWs.created_by = request.user.username
                 newWs.save()
-                mapservice_backend.reload_nodes(request.session)
+                mapservice_backend.reload_nodes()
                 return HttpResponseRedirect(reverse('workspace_list'))
             else:
                 # FIXME: the backend should raise an exception to identify the cause (e.g. workspace exists, backend is offline)
@@ -128,14 +128,14 @@ def workspace_import(request):
 def workspace_delete(request, wsid):
     try:
         ws = Workspace.objects.get(id=wsid)
-        if mapservice_backend.deleteWorkspace(ws, request.session):
+        if mapservice_backend.deleteWorkspace(ws):
             datastores = Datastore.objects.filter(workspace_id=ws.id)
             for ds in datastores:
                 layers = Layer.objects.filter(datastore_id=ds.id)
                 for l in layers:
-                    mapservice_backend.deleteLayerStyles(l, request.session)
+                    mapservice_backend.deleteLayerStyles(l)
             ws.delete()
-            mapservice_backend.reload_nodes(request.session)
+            mapservice_backend.reload_nodes()
             return HttpResponseRedirect(reverse('workspace_list'))
         else:
             return HttpResponseBadRequest()
@@ -169,15 +169,14 @@ def datastore_add(request):
         if type == 'c_GeoTIFF':
             file = post_dict.get('file')
             post_dict['connection_params'] = post_dict.get('connection_params').replace('url_replace', file)
-        form = DatastoreForm(request.session, post_dict)
+        form = DatastoreForm(post_dict)
         if form.is_valid():
             # first create the datastore on the backend
             if mapservice_backend.createDatastore(form.cleaned_data['workspace'],
                                                   form.cleaned_data['type'],
                                                   form.cleaned_data['name'],
                                                   form.cleaned_data['description'],
-                                                  form.cleaned_data['connection_params'],
-                                                  session=request.session):
+                                                  form.cleaned_data['connection_params']):
                 # save it on DB if successfully created
                 newRecord = Datastore(
                     workspace=form.cleaned_data['workspace'],
@@ -188,14 +187,14 @@ def datastore_add(request):
                     created_by=request.user.username
                 )
                 newRecord.save()
-                mapservice_backend.reload_nodes(request.session)
+                mapservice_backend.reload_nodes()
                 return HttpResponseRedirect(reverse('datastore_list'))
             else:
                 # FIXME: the backend should raise an exception to identify the cause (e.g. datastore exists, backend is offline)
                 form.add_error(None, _('Error: Data store could not be created'))
             
     else:
-        form = DatastoreForm(request.session)
+        form = DatastoreForm()
         if not request.user.is_superuser:
             form.fields['workspace'].queryset = Workspace.objects.filter(created_by__exact=request.user.username)
     return render(request, 'datastore_add.html', {'fm_directory': FILEMANAGER_DIRECTORY + "/", 'form': form})
@@ -214,15 +213,14 @@ def datastore_update(request, datastore_id):
                 description = form.cleaned_data.get('description')
                 connection_params = form.cleaned_data.get('connection_params')
                 if mapservice_backend.updateDatastore(datastore.workspace.name, datastore.name,
-                                                      description, dstype, connection_params,
-                                                      request.session):
+                                                      description, dstype, connection_params):
                     # REST API does not allow to can't change the workspace or name of a datastore 
                     #datastore.workspace = workspace
                     #datastore.name = name
                     datastore.description = description
                     datastore.connection_params = connection_params
                     datastore.save()
-                    mapservice_backend.reload_nodes(request.session)
+                    mapservice_backend.reload_nodes()
                     return HttpResponseRedirect(reverse('datastore_list'))
                 else:
                     form.add_error(None, _("Error updating datastore"))
@@ -236,12 +234,12 @@ def datastore_update(request, datastore_id):
 def datastore_delete(request, dsid):
     try:
         ds = Datastore.objects.get(id=dsid)
-        if mapservice_backend.deleteDatastore(ds.workspace, ds, session=request.session):
+        if mapservice_backend.deleteDatastore(ds.workspace, ds):
             layers = Layer.objects.filter(datastore_id=ds.id)
             for l in layers:
-                mapservice_backend.deleteLayerStyles(l, session=request.session)
+                mapservice_backend.deleteLayerStyles(l)
             Datastore.objects.all().filter(name=ds.name).delete()
-            mapservice_backend.reload_nodes(request.session)
+            mapservice_backend.reload_nodes()
             return HttpResponseRedirect(reverse('datastore_list'))
         else:
             return HttpResponseBadRequest()
@@ -270,15 +268,15 @@ def layer_list(request):
 def layer_delete(request, layer_id):
     try:
         layer = Layer.objects.get(pk=layer_id)
-        mapservice_backend.deleteGeoserverLayerGroup(layer.layer_group, request.session)
-        if mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer, session=request.session):
-            mapservice_backend.deleteLayerStyles(layer, session=request.session)
+        mapservice_backend.deleteGeoserverLayerGroup(layer.layer_group)
+        if mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer):
+            mapservice_backend.deleteLayerStyles(layer)
             gn_backend.metadata_delete(request.session, layer)
             Layer.objects.all().filter(pk=layer_id).delete()
-            mapservice_backend.setDataRules(request.session)
+            mapservice_backend.setDataRules()
             core_utils.toc_remove_layer(layer)
-            mapservice_backend.createOrUpdateGeoserverLayerGroup(layer.layer_group, request.session)
-            mapservice_backend.reload_nodes(request.session)
+            mapservice_backend.createOrUpdateGeoserverLayerGroup(layer.layer_group)
+            mapservice_backend.reload_nodes()
             return HttpResponseRedirect(reverse('datastore_list'))
         else:
             return HttpResponseBadRequest()
@@ -297,7 +295,7 @@ def backend_resource_list_available(request):
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
         if ds:
-            resources = mapservice_backend.getResources(ds.workspace.name, ds.name, ds.type, available=True, session=request.session)
+            resources = mapservice_backend.getResources(ds.workspace.name, ds.name, ds.type, available=True)
             return HttpResponse(json.dumps(resources))
     return HttpResponseBadRequest()
     
@@ -331,7 +329,7 @@ def layer_add(request):
                 mapservice_backend.createResource(form.cleaned_data['datastore'].workspace,
                                       form.cleaned_data['datastore'],
                                       form.cleaned_data['name'],
-                                      form.cleaned_data['title'], session=request.session)
+                                      form.cleaned_data['title'])
                 # save it on DB if successfully created
                 newRecord = Layer(**form.cleaned_data)
                 newRecord.created_by = request.user.username
@@ -348,14 +346,14 @@ def layer_add(request):
                     workspace = Workspace.objects.get(id=datastore.workspace_id)
                     
                     style_name = workspace.name + '_' + newRecord.name + '_default'
-                    mapservice_backend.createDefaultStyle(newRecord, style_name, session=request.session)
-                    mapservice_backend.setLayerStyle(newRecord.name, style_name, session=request.session)
+                    mapservice_backend.createDefaultStyle(newRecord, style_name)
+                    mapservice_backend.setLayerStyle(newRecord.name, style_name)
                  
-                    mapservice_backend.addGridSubset(workspace, newRecord, session=request.session)
+                    mapservice_backend.addGridSubset(workspace, newRecord)
                     newRecord.metadata_uuid = ''
                     try:
                         if gvsigol.settings.CATALOG_MODULE:
-                            properties = mapservice_backend.get_layer_properties(request.session, workspace, newRecord)
+                            properties = mapservice_backend.get_layer_properties(workspace, newRecord)
                             muuid = gn_backend.metadata_insert(request.session, newRecord, abstract, workspace, properties)
                             newRecord.metadata_uuid = muuid
                     except Exception as exc:
@@ -365,8 +363,8 @@ def layer_add(request):
                     newRecord.save()
                     
                 core_utils.toc_add_layer(newRecord)
-                mapservice_backend.createOrUpdateGeoserverLayerGroup(newRecord.layer_group, request.session)
-                mapservice_backend.reload_nodes(request.session)
+                mapservice_backend.createOrUpdateGeoserverLayerGroup(newRecord.layer_group)
+                mapservice_backend.reload_nodes()
                 return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
             
             except Exception as e:
@@ -416,7 +414,7 @@ def layer_update(request, layer_id):
                 
         old_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
         
-        if mapservice_backend.updateResource(workspace, datastore, name, title, session=request.session):
+        if mapservice_backend.updateResource(workspace, datastore, name, title):
             layer.title = title
             layer.cached = cached
             layer.visible = is_visible
@@ -429,10 +427,10 @@ def layer_update(request, layer_id):
             
             if old_layer_group.id != new_layer_group.id:
                 core_utils.toc_move_layer(layer, old_layer_group)
-                mapservice_backend.createOrUpdateGeoserverLayerGroup(old_layer_group, request.session)
-                mapservice_backend.createOrUpdateGeoserverLayerGroup(new_layer_group, request.session)
+                mapservice_backend.createOrUpdateGeoserverLayerGroup(old_layer_group)
+                mapservice_backend.createOrUpdateGeoserverLayerGroup(new_layer_group)
                                 
-            mapservice_backend.reload_nodes(request.session)   
+            mapservice_backend.reload_nodes()   
             return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer_id}))
             
     else:
@@ -454,9 +452,9 @@ def layer_boundingbox_from_data(request):
         workspace = Workspace.objects.get(name=ws_name)
         layer_query_set = Layer.objects.filter(name=layer_name, datastore__workspace=workspace)
         layer = layer_query_set[0]
-        mapservice_backend.updateBoundingBoxFromData(layer, request.session)   
-        mapservice_backend.clearCache(workspace.name, layer, session=request.session)
-        mapservice_backend.reload_nodes(request.session)
+        mapservice_backend.updateBoundingBoxFromData(layer)   
+        mapservice_backend.clearCache(workspace.name, layer)
+        mapservice_backend.reload_nodes()
         return HttpResponse('{"response": "ok"}', content_type='application/json')
     except Exception as e:
         return HttpResponseNotFound('<h1>Layer not found: {0}</h1>'.format(layer.id))
@@ -469,8 +467,8 @@ def cache_clear(request, layer_id):
         layer = Layer.objects.get(id=int(layer_id)) 
         datastore = Datastore.objects.get(id=layer.datastore.id)
         workspace = Workspace.objects.get(id=datastore.workspace_id)
-        mapservice_backend.clearCache(workspace.name, layer, session=request.session)
-        mapservice_backend.reload_nodes(request.session)
+        mapservice_backend.clearCache(workspace.name, layer)
+        mapservice_backend.reload_nodes()
         return redirect('layer_list')
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -479,8 +477,8 @@ def cache_clear(request, layer_id):
 def layergroup_cache_clear(request, layergroup_id):
     if request.method == 'GET':
         layergroup = LayerGroup.objects.get(id=int(layergroup_id)) 
-        mapservice_backend.clearLayerGroupCache(layergroup.name, session=request.session)
-        mapservice_backend.reload_nodes(request.session)
+        mapservice_backend.clearLayerGroupCache(layergroup.name)
+        mapservice_backend.reload_nodes()
         return redirect('layergroup_list')
     
 
@@ -526,8 +524,8 @@ def layer_permissions_update(request, layer_id):
             except:
                 pass
                 
-        mapservice_backend.setDataRules(session=request.session)
-        mapservice_backend.reload_nodes(request.session)
+        mapservice_backend.setDataRules()
+        mapservice_backend.reload_nodes()
         return redirect('layer_list')
     else:
         try:
@@ -639,7 +637,7 @@ def layergroup_add(request):
             message = _(u'You must enter a name for layer group')
             return render_to_response('layergroup_add.html', {'message': message}, context_instance=RequestContext(request))
             
-        mapservice_backend.reload_nodes(request.session)
+        mapservice_backend.reload_nodes()
         return redirect('layergroup_list')
     
     else:
@@ -658,7 +656,7 @@ def layergroup_update(request, lgid):
             cached = True
         
         layergroup = LayerGroup.objects.get(id=int(lgid))
-        mapservice_backend.deleteGeoserverLayerGroup(layergroup, request.session)
+        mapservice_backend.deleteGeoserverLayerGroup(layergroup)
         
         sameName = False
         if layergroup.name == name:
@@ -677,8 +675,8 @@ def layergroup_update(request, lgid):
             layergroup.cached = cached
             layergroup.save()   
             core_utils.toc_update_layer_group(layergroup, old_name, name)
-            mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup, request.session)
-            mapservice_backend.reload_nodes(request.session)
+            mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
+            mapservice_backend.reload_nodes()
             return redirect('layergroup_list')
              
         else:      
@@ -692,8 +690,8 @@ def layergroup_update(request, lgid):
                 layergroup.cached = cached
                 layergroup.save()
                 core_utils.toc_update_layer_group(layergroup, old_name, name)
-                mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup, request.session)
-                mapservice_backend.reload_nodes(request.session)
+                mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
+                mapservice_backend.reload_nodes()
                 return redirect('layergroup_list')
                 
             else:
@@ -723,12 +721,12 @@ def layergroup_delete(request, lgid):
             public_viewer.save()
             
         for layer in layers:  
-            if mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer, session=request.session):
+            if mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer):
                 layer.delete()       
-        mapservice_backend.deleteGeoserverLayerGroup(layergroup, request.session)
+        mapservice_backend.deleteGeoserverLayerGroup(layergroup)
         layergroup.delete()
-        mapservice_backend.setDataRules(session=request.session)
-        mapservice_backend.reload_nodes(request.session)
+        mapservice_backend.setDataRules()
+        mapservice_backend.reload_nodes()
         response = {
             'deleted': True
         }     
@@ -746,20 +744,20 @@ def layer_create(request):
             form = form_class(request.POST)
             if form.is_valid():
                 try:
-                    l = mapservice_backend.createLayer(form.cleaned_data, layer_type, session=request.session)
+                    l = mapservice_backend.createLayer(form.cleaned_data, layer_type)
                     
                     datastore = Datastore.objects.get(id=l.datastore.id)
                     workspace = Workspace.objects.get(id=datastore.workspace_id)
                     
                     style_name = workspace.name + '_' + l.name + '_default'
-                    mapservice_backend.createDefaultStyle(l, style_name, session=request.session)
-                    mapservice_backend.setLayerStyle(l.name, style_name, session=request.session)
+                    mapservice_backend.createDefaultStyle(l, style_name)
+                    mapservice_backend.setLayerStyle(l.name, style_name)
                     
-                    mapservice_backend.addGridSubset(workspace, l, session=request.session)
+                    mapservice_backend.addGridSubset(workspace, l)
                     l.metadata_uuid = ''
                     try:
                         if gvsigol.settings.CATALOG_MODULE:
-                            properties = mapservice_backend.get_layer_properties(request.session, workspace, l)
+                            properties = mapservice_backend.get_layer_properties(workspace, l)
                             muuid = gn_backend.metadata_insert(request.session, l, abstract, workspace, properties)
                             l.metadata_uuid = muuid
                     except Exception as exc:
@@ -768,7 +766,7 @@ def layer_create(request):
                         return HttpResponseRedirect(reverse('layer_update', kwargs={'layer_id': l.id}))
                     l.save()
                     core_utils.toc_add_layer(l)
-                    mapservice_backend.createOrUpdateGeoserverLayerGroup(l.layer_group, request.session)
+                    mapservice_backend.createOrUpdateGeoserverLayerGroup(l.layer_group)
                     return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': l.id}))
                 except rest_geoserver.RequestError as e:
                     form.add_error(None, _(e.get_message()))
@@ -785,7 +783,7 @@ def layer_create(request):
                 'form': form,
                 'layer_type': layer_type
             }
-            mapservice_backend.reload_nodes(request.session)
+            mapservice_backend.reload_nodes()
             return render(request, template, data)
     else:
         layer_type = request.GET.get('id_layer_type')

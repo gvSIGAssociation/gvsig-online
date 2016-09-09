@@ -86,7 +86,7 @@ def create_datastore(request, username, ds_name, ws):
     connection_params = '{ "host": "' + dbhost + '", "port": "' + dbport + '", "database": "' + dbname + '", "schema": "' + ds_name + '", "user": "' + dbuser + '", "passwd": "' + dbpassword + '", "dbtype": "postgis" }'
     
     if create_schema(ds_name):
-        if mapservice_backend.createDatastore(ws, ds_type, ds_name, description, connection_params, session=request.session):
+        if mapservice_backend.createDatastore(ws, ds_type, ds_name, description, connection_params):
             # save it on DB if successfully created
             datastore = Datastore(
                 workspace = ws, 
