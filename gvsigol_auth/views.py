@@ -63,6 +63,10 @@ def login_user(request):
     else:
         if "HTTP_REMOTE_USER" in request.META:
             print request.META['HTTP_REMOTE_USER']
+            username = None
+            password = None
+            request.session['username'] = username
+            request.session['password'] = password
             user = authenticate(remote_user=request.META['HTTP_REMOTE_USER'])
             if user is not None:
                 if user.is_active:
