@@ -2,7 +2,6 @@ from django.conf.urls import url
 
 urlpatterns = [
     url(r'^login_user/$', 'gvsigol_auth.views.login_user', name='login_user'), 
-    url(r'^login_remote_user/$', 'gvsigol_auth.views.login_remote_user', name='login_remote_user'),
     url(r'^logout_user/$', 'gvsigol_auth.views.logout_user', name='logout_user'),
     
     url(r'^password_update/$', 'gvsigol_auth.views.password_update', name='password_update'),
