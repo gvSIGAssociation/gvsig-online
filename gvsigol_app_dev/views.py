@@ -23,16 +23,10 @@
 
 from django.shortcuts import render_to_response, RequestContext
 from gvsigol.settings import CATALOG_MODULE, GVSIGOL_CATALOG
-from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
-from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
-from django.contrib.auth import authenticate
 
 def index(request):
-    '''
     resp = {}
     if CATALOG_MODULE:
         resp['CATALOG_URL'] = GVSIGOL_CATALOG
     return render_to_response('index.html', resp, RequestContext(request))
-    '''
-    return redirect('login_remote_user')
