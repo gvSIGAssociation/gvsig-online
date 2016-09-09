@@ -61,9 +61,9 @@ def login_user(request):
             return render_to_response('login.html', {'errors': errors}, RequestContext(request))
         
     else:
-        if "REMOTE_USER" in request.META:
-            print request.META['REMOTE_USER']
-            user = authenticate(remote_user=request.META['REMOTE_USER'])
+        if "HTTP_REMOTE_USER" in request.META:
+            print request.META['HTTP_REMOTE_USER']
+            user = authenticate(remote_user=request.META['HTTP_REMOTE_USER'])
             if user is not None:
                 if user.is_active:
                     login(request, user)
