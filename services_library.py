@@ -24,6 +24,7 @@
 
 from models import Style, Library, Rule, LibraryRule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer
 from gvsigol_services.backend_mapservice import backend as mapservice
+from gvsigol_core import utils as core_utils
 from django.utils.translation import ugettext as _
 from django.http import HttpResponse
 import utils, sld_utils, sld_builder
@@ -152,11 +153,11 @@ def add_symbol(request, json_rule, library_id, symbol_type):
             symbolizer.save()  
             
     sld_body = sld_builder.build_library_symbol(rule)
-    if mapservice.createStyle(style.name, sld_body, request.session): 
+    if mapservice.createStyle(style.name, sld_body): 
         return True
         
     else:
-        mapservice.updateStyle(style.name, sld_body, request.session)
+        mapservice.updateStyle(style.name, sld_body)
         return True
     
 def update_symbol(request, json_rule, rule, library_rule):
@@ -245,9 +246,9 @@ def update_symbol(request, json_rule, rule, library_rule):
                 symbolizer.save()
     
         style = Style.objects.get(id=rule.style.id)
-        if mapservice.deleteStyle(style.name, request.session): 
+        if mapservice.deleteStyle(style.name): 
             sld_body = sld_builder.build_library_symbol(rule)
-            if not mapservice.createStyle(style.name, sld_body, request.session): 
+            if not mapservice.createStyle(style.name, sld_body): 
                 return False
             
         return True
@@ -255,7 +256,7 @@ def update_symbol(request, json_rule, rule, library_rule):
     except Exception as e:
         raise e
     
-def delete_symbol(session, rule, library_rule):
+def delete_symbol(rule, library_rule):
     try:
         symbolizers = Symbolizer.objects.filter(rule_id=rule.id)
         for symbolizer in symbolizers:
@@ -266,7 +267,7 @@ def delete_symbol(session, rule, library_rule):
         library_rule.delete()
 
         style = Style.objects.get(id=rule.style.id)
-        if mapservice.deleteStyle(style.name, session):            
+        if mapservice.deleteStyle(style.name):            
             style.delete()
             
         rule.delete()
@@ -365,7 +366,7 @@ def export_library(library, library_rules):
     return response
 
 
-def upload_library(name, description, file, session):
+def upload_library(name, description, file):
     
     library = Library(
         name = name,
@@ -481,7 +482,7 @@ def upload_library(name, description, file, session):
             sld_body = output.getvalue()
             output.close()
                 
-            mapservice.createStyle(style.name, sld_body, session)
+            mapservice.createStyle(style.name, sld_body)
     
     utils.__delete_temporaries(file_path)
 
