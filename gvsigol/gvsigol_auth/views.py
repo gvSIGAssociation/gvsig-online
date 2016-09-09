@@ -36,7 +36,7 @@ import random, string
 from utils import superuser_required, staff_required
 import utils as auth_utils
 import json
-from gvsigol.settings import GVSIGOL_LDAP, LOGOUT_PAGE_URL, MIDDLEWARE_CLASSES
+from gvsigol.settings import GVSIGOL_LDAP, LOGOUT_PAGE_URL, AUTH_WITH_REMOTE_USER
 
 def login_user(request):
     if request.user.is_authenticated():
@@ -61,17 +61,18 @@ def login_user(request):
             return render_to_response('login.html', {'errors': errors}, RequestContext(request))
         
     else:
-        if "HTTP_REMOTE_USER" in request.META:
-            print request.META['HTTP_REMOTE_USER']
-            username = None
-            password = None
-            request.session['username'] = username
-            request.session['password'] = password
-            user = authenticate(remote_user=request.META['HTTP_REMOTE_USER'])
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    return redirect('home')
+        if AUTH_WITH_REMOTE_USER:
+            if "HTTP_REMOTE_USER" in request.META:
+                print request.META['HTTP_REMOTE_USER']
+                username = None
+                password = None
+                request.session['username'] = username
+                request.session['password'] = password
+                user = authenticate(remote_user=request.META['HTTP_REMOTE_USER'])
+                if user is not None:
+                    if user.is_active:
+                        login(request, user)
+                        return redirect('home')
             
         else:
             '''
@@ -224,54 +225,54 @@ def user_add(request):
                         usergroup_user.save()
                         core_services.ldap_add_group_member(user, user_group)
                      
-                     
-                    #User backend   
-                    ugroup = UserGroup(
-                        name = 'ug_' + form.data['username'],
-                        description = _(u'User group for') + ': ' + form.data['username']
-                    )
-                    ugroup.save()
-                    
-                    ugroup_user = UserGroupUser(
-                        user = user,
-                        user_group = ugroup
-                    )
-                    ugroup_user.save()
-                        
-                    core_services.ldap_add_group(ugroup)
-                    core_services.add_data_directory(ugroup)
-                    core_services.ldap_add_group_member(user, ugroup)
-                    
-                    url = mapservice_backend.getBaseUrl() + '/'
-                    ws_name = 'ws_' + form.data['username']
-                    
-                    if mapservice_backend.createWorkspace(
-                        request.session, 
-                        ws_name,
-                        url + ws_name,
-                        '',
-                        url + ws_name + '/wms',
-                        url + ws_name + '/wfs',
-                        url + ws_name + '/wcs',
-                        url + 'gwc/service/wms'):
-                            
-                        # save it on DB if successfully created
-                        newWs = Workspace(
-                            name = ws_name,
-                            description = '',
-                            uri = url + ws_name,
-                            wms_endpoint = url + ws_name + '/wms',
-                            wfs_endpoint = url + ws_name + '/wfs',
-                            wcs_endpoint = url + ws_name + '/wcs',
-                            cache_endpoint = url + 'gwc/service/wms',
-                            created_by = user.username
+                    #User backend 
+                    if is_superuser or is_staff:  
+                        ugroup = UserGroup(
+                            name = 'ug_' + form.data['username'],
+                            description = _(u'User group for') + ': ' + form.data['username']
                         )
-                        newWs.save()
+                        ugroup.save()
                         
-                        ds_name = 'ds_' + form.data['username']
-                        services_utils.create_datastore(request, user.username, ds_name, newWs)
+                        ugroup_user = UserGroupUser(
+                            user = user,
+                            user_group = ugroup
+                        )
+                        ugroup_user.save()
+                            
+                        core_services.ldap_add_group(ugroup)
+                        core_services.add_data_directory(ugroup)
+                        core_services.ldap_add_group_member(user, ugroup)
                         
-                        mapservice_backend.reload_nodes(request.session)
+                        url = mapservice_backend.getBaseUrl() + '/'
+                        ws_name = 'ws_' + form.data['username']
+                        
+                        if mapservice_backend.createWorkspace(
+                            request.session, 
+                            ws_name,
+                            url + ws_name,
+                            '',
+                            url + ws_name + '/wms',
+                            url + ws_name + '/wfs',
+                            url + ws_name + '/wcs',
+                            url + 'gwc/service/wms'):
+                                
+                            # save it on DB if successfully created
+                            newWs = Workspace(
+                                name = ws_name,
+                                description = '',
+                                uri = url + ws_name,
+                                wms_endpoint = url + ws_name + '/wms',
+                                wfs_endpoint = url + ws_name + '/wfs',
+                                wcs_endpoint = url + ws_name + '/wcs',
+                                cache_endpoint = url + 'gwc/service/wms',
+                                created_by = user.username
+                            )
+                            newWs.save()
+                            
+                            ds_name = 'ds_' + form.data['username']
+                            services_utils.create_datastore(request, user.username, ds_name, newWs)
+                            
+                            mapservice_backend.reload_nodes(request.session)
                         
                         
                     auth_utils.sendMail(user, form.data['password1'])
