@@ -212,7 +212,7 @@ GVSIGOL_USERS_CARTODB = {
     'dbpassword': '##DATABASE_PASSWORD##'
 }
 
-PUBLIC_VIEWER = True
+PUBLIC_VIEWER = False
 CATALOG_MODULE = ##CATALOG_IS_ACTIVE##
 GVSIGOL_CATALOG = {
     'URL': '##GEONETWORK_API_URL##'
@@ -221,6 +221,8 @@ GVSIGOL_CATALOG = {
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
     'URL': '##GEOSERVER_BASE_URL##',
+    'USER': 'admin',
+    'PASSWORD': '##DATABASE_PASSWORD##',
     'CLUSTER_NODES':[##GEOSERVER_CLUSTER_NODES##],
     'SUPPORTED_TYPES': (
                         ('v_PostGIS', _('PostGIS vector')),
