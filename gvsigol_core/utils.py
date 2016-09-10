@@ -380,7 +380,7 @@ def toc_remove_layer(layer):
 def get_geoserver_base_url(request, url):
     geoserver_url = None
     if request.session['username'] is not None and request.session['password'] is not None:
-        split_geoserver_url = geoserver_url.split('//')
+        split_geoserver_url = url.split('//')
         geoserver_url = split_geoserver_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_geoserver_url[1]
     else:
         geoserver_url = url
