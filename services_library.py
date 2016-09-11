@@ -63,8 +63,8 @@ def add_symbol(request, json_rule, library_id, symbol_type):
     if _valid_name_regex.search(name) == None:
         raise InvalidValue(-1, _("Invalid name: '{value}'. Name should not contain any special characters").format(value=name))
         
-    if _valid_title_regex.search(title) == None:
-        raise InvalidValue(-1, _("Invalid title: '{value}'. Title should not contain any special characters").format(value=title))
+    #if _valid_title_regex.search(title) == None:
+    #    raise InvalidValue(-1, _("Invalid title: '{value}'. Title should not contain any special characters").format(value=title))
     
     style = Style(
         name = name,
