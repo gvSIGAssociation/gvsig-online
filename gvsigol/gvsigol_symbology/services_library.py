@@ -166,8 +166,8 @@ def update_symbol(request, json_rule, rule, library_rule):
         name = json_rule.get('name')
         title = json_rule.get('title')
         
-        if _valid_title_regex.search(title) == None:
-            raise InvalidValue(-1, _("Invalid title: '{value}'. Title should not contain any special characters").format(value=title))
+        #if _valid_title_regex.search(title) == None:
+        #    raise InvalidValue(-1, _("Invalid title: '{value}'. Title should not contain any special characters").format(value=title))
     
         rule.title = title
         rule.save()
