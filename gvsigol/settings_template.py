@@ -116,7 +116,7 @@ DATABASES = {
 }
 POSTGIS_VERSION = (2, 1, 2)
 
-AUTH_WITH_REMOTE_USER = True
+AUTH_WITH_REMOTE_USER = ##AUTH_WITH_REMOTE_USER##
 
 
 # Password validation
@@ -222,7 +222,7 @@ GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
     'URL': '##GEOSERVER_BASE_URL##',
     'USER': 'admin',
-    'PASSWORD': '##DATABASE_PASSWORD##',
+    'PASSWORD': '##GEOSERVER_ADMIN_PASS##',
     'CLUSTER_NODES':[##GEOSERVER_CLUSTER_NODES##],
     'SUPPORTED_TYPES': (
                         ('v_PostGIS', _('PostGIS vector')),
