@@ -179,7 +179,7 @@ LOCALE_PATHS = (
 )
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-LOGOUT_PAGE_URL = 'http://www.aguasdevalencia.es/'
+LOGOUT_PAGE_URL = '/gvsigonline/'
 
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
