@@ -598,7 +598,7 @@ def library_import(request):
         
         try:            
             if name != '' and 'library-file' in request.FILES: 
-                services_library.upload_library(name, description, request.FILES['library-file'], request)                
+                services_library.upload_library(name, description, request.FILES['library-file'])                
                 return redirect('library_list')
             
             elif name == '' and 'library-file' in request.FILES:
