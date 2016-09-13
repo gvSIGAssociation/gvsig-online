@@ -39,7 +39,7 @@
 	      		<td>{{file.filesize}}</td>
 	      		<td>{{file.filedate}}</td>
 	      		{% if not popup %}
-					{% if not first_level %}
+					{% if user.is_superuser or not first_level %}
 	      			<td>
 		      			<div class="btn-group">
 		                  	<button type="button" class="btn btn-box-tool dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
@@ -72,7 +72,7 @@
 	</table>
 	<div>
 		{% if not popup %}
-			{% if not first_level %}
+			{% if user.is_superuser or not first_level %}
 		  		<a href="{% url 'filemanager:create-directory' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-primary"><i class="fa fa-plus margin-r-5"></i>{% trans "Create directory" %}</a>
 		  		<a href="{% url 'filemanager:upload' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-primary"><i class="fa fa-upload margin-r-5"></i>{% trans "Upload" %}</a>
 		  	{% endif %}
