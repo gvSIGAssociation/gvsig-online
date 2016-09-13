@@ -284,7 +284,7 @@ measureArea.prototype.createMeasureTooltip = function() {
  * @param {ol.geom.Polygon} polygon
  * @return {string}
  */
-measureArea.prototype.formatArea = function(polygon) {
+/*measureArea.prototype.formatArea = function(polygon) {
 	var area = polygon.getArea();
   	var output;
   	if (area > 10000) {
@@ -293,6 +293,23 @@ measureArea.prototype.formatArea = function(polygon) {
     	output = (Math.round(area * 100) / 100) + ' ' + 'm<sup>2</sup>';
   	}
   	return output;
+};*/
+
+measureArea.prototype.formatArea = function(polygon) {
+	
+	var wgs84Sphere = new ol.Sphere(6378137);
+	var sourceProj = this.map.getView().getProjection();
+	var geom = /** @type {ol.geom.Polygon} */(polygon.clone().transform(sourceProj, 'EPSG:4326'));
+	var coordinates = geom.getLinearRing(0).getCoordinates();
+	var area = Math.abs(wgs84Sphere.geodesicArea(coordinates));
+
+	var output;
+	/*if (area > 10000) {
+		output = (Math.round(area / 1000000 * 100) / 100) + ' ' + 'km<sup>2</sup>';
+	} else {*/
+	    output = (Math.round(area * 100) / 100) + ' ' + 'm<sup>2</sup>';
+	//}
+	return output;
 };
 
 /**
