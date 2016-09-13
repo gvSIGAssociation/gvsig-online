@@ -379,7 +379,7 @@ class Geoserver():
         else:
             auth = self.session.auth
         r = self.session.post(url, data=xml, headers=headers, auth=auth)
-        if r.status_code==201:
+        if r.status_code==200:
             return True
         raise FailedRequestError(r.status_code, r.content)
     
@@ -392,7 +392,7 @@ class Geoserver():
         else:
             auth = self.session.auth
         r = self.session.post(url, data=xml, headers=headers, auth=auth)
-        if r.status_code==201:
+        if r.status_code==200:
             return True
         raise FailedRequestError(r.status_code, r.content)
     
