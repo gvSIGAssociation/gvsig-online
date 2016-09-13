@@ -179,7 +179,7 @@ LOCALE_PATHS = (
 )
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-LOGOUT_PAGE_URL = '/gvsigonline/'
+LOGOUT_PAGE_URL = '##LOGOUT_PAGE_URL##'
 
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
