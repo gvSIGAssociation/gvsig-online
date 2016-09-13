@@ -879,8 +879,8 @@ class Geoserver():
                         
                     if layer.layer_group.name != "__default__":
                         self.createOrUpdateGeoserverLayerGroup(layer.layer_group)
-                else:
-                    print "TODO: borrar la cache .."
+                #else:
+                #    print "TODO: borrar la cache .."
                             
         except rest_geoserver.RequestError as ex:
             print "Error Request: " + str(ex)
