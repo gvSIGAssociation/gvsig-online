@@ -134,7 +134,7 @@ def password_reset_success(request):
 @staff_required
 def user_list(request):
     
-    users_list = User.objects.all()
+    users_list = User.objects.exclude(username='admin')
     
     users = []
     for u in users_list:
@@ -169,9 +169,10 @@ def user_add(request):
         show_pass_form = True
     else:
         show_pass_form = False
+        
     if request.method == 'POST':
         form = UserCreateForm(request.POST)
-        if form.is_valid():
+        if form.is_valid():            
             assigned_groups = []
             
             is_superuser = False
@@ -187,7 +188,7 @@ def user_add(request):
                 if 'group-' in key:
                     assigned_groups.append(int(key.split('-')[1]))
             
-            try:   
+            try:            
                 if form.data['password1'] == form.data['password2']:
                     user = User(
                         username = form.data['username'],
@@ -384,16 +385,15 @@ def user_delete(request, uid):
 @superuser_required
 def group_list(request):
     
-    groups_list = UserGroup.objects.all()
+    groups_list = UserGroup.objects.exclude(name='admin')
     
     groups = []
     for g in groups_list:
-        if g.name != 'admin':
-            group = {}
-            group['id'] = g.id
-            group['name'] = g.name
-            group['description'] = g.description
-            groups.append(group)
+        group = {}
+        group['id'] = g.id
+        group['name'] = g.name
+        group['description'] = g.description
+        groups.append(group)
                       
     response = {
         'groups': groups
@@ -407,20 +407,25 @@ def group_add(request):
     if request.method == 'POST':
         form = UserGroupForm(request.POST)
         if form.is_valid():
-            
-            group_name = form.data['name']
-            group_description = form.data['description']
-            
-            group = UserGroup(
-                name = group_name,
-                description = group_description
-            )
-            group.save()
+            try:
+                if form.data['name'] == 'admin':
+                    raise Exception
                 
-            core_services.ldap_add_group(group)
-            core_services.add_data_directory(group)                               
-                      
-            return redirect('group_list')
+                group = UserGroup(
+                    name = form.data['name'],
+                    description = form.data['description']
+                )
+                group.save()
+                    
+                core_services.ldap_add_group(group)
+                core_services.add_data_directory(group)                               
+                          
+                return redirect('group_list')
+            
+            except Exception as e:
+                print str(e)
+                message = _("Admin is a reserved group")
+                return render_to_response('group_add.html', {'form': form, 'message': message}, context_instance=RequestContext(request))
                 
         else:
             return render_to_response('group_add.html', {'form': form}, context_instance=RequestContext(request))

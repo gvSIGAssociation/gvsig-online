@@ -453,8 +453,8 @@ def get_services():
         
     if is_enabled:
         gvsigOnline.ldap_create_default_group()
-        gvsigOnline.ldap_create_admin_group()
-        gvsigOnline.ldap_create_admin_user()
+        #gvsigOnline.ldap_create_admin_group()
+        #gvsigOnline.ldap_create_admin_user()
 
     gvsigOnline.create_default_layer_group()
 
