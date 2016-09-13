@@ -98,10 +98,13 @@ class Filemanager(object):
             if request.user.is_superuser:
                 listing.append(_helper(directoryname, 'Directory', ''))
             else: 
-                groups = core_utils.get_group_names_by_user(request.user)
-                for g in groups:
-                    if directoryname == g:
-                        listing.append(_helper(directoryname, 'Directory', ''))
+                if first_level:
+                    groups = core_utils.get_group_names_by_user(request.user)
+                    for g in groups:
+                        if directoryname == g:
+                            listing.append(_helper(directoryname, 'Directory', ''))
+                else:
+                    listing.append(_helper(directoryname, 'Directory', ''))
 
         for filename in files:
             extension = filename.split('.')[1]
