@@ -282,7 +282,7 @@ measureLength.prototype.createMeasureTooltip = function() {
  * @param {ol.geom.LineString} line
  * @return {string}
  */
-measureLength.prototype.formatLength = function(line) {
+/*measureLength.prototype.formatLength = function(line) {
   	var length = Math.round(line.getLength() * 100) / 100;
   	var output;
   	if (length > 100) {
@@ -291,6 +291,27 @@ measureLength.prototype.formatLength = function(line) {
     	output = (Math.round(length * 100) / 100) + ' ' + 'm';
   	}
   	return output;
+};*/
+
+measureLength.prototype.formatLength = function(line) {
+	var length = 0;
+	var wgs84Sphere = new ol.Sphere(6378137);
+		
+	var coordinates = line.getCoordinates();
+	var sourceProj = this.map.getView().getProjection();
+	for (var i = 0, ii = coordinates.length - 1; i < ii; ++i) {
+		var c1 = ol.proj.transform(coordinates[i], sourceProj, 'EPSG:4326');
+	    var c2 = ol.proj.transform(coordinates[i + 1], sourceProj, 'EPSG:4326');
+	    length += wgs84Sphere.haversineDistance(c1, c2);
+	}
+
+	var output;
+	if (length > 100) {
+		output = (Math.round(length / 1000 * 100) / 100) + ' ' + 'km';
+	} else {
+	    output = (Math.round(length * 100) / 100) + ' ' + 'm';
+	}
+	return output;
 };
 
 /**
