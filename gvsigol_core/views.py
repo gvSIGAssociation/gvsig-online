@@ -392,7 +392,6 @@ def project_get_conf(request):
         project_layers_groups = ProjectLayerGroup.objects.filter(project_id=project.id)
         layer_groups = []
         workspaces = []
-        capabilities = mapservice_backend.getCapabilities()
         for project_group in project_layers_groups:            
             group = LayerGroup.objects.get(id=project_group.layer_group_id)
             
@@ -428,26 +427,15 @@ def project_get_conf(request):
                 else:
                     layer['is_vector'] = False
                 
-                properties = capabilities.contents[workspace.name + ':' + l.name]
-                defaultCrs = properties.boundingBox[4]
+                layer_info = mapservice_backend.getResourceInfo(workspace.name, datastore.name, l.name, "json")
+                defaultCrs = layer_info['featureType']['srs']
                 if defaultCrs.split(':')[1] in gvsigol.settings.SUPPORTED_CRS:
                     epsg = gvsigol.settings.SUPPORTED_CRS[defaultCrs.split(':')[1]]
                     layer['crs'] = {
                         'crs': defaultCrs,
                         'units': epsg['units']
                     }
-                
-                if properties.timepositions is not None:
-                    layer['is_time_layer'] = True
-                    layer['time_params'] = {
-                        'default': properties.timepositions[0],
-                        'values': ','.join(properties.timepositions)
-                    }
-                
-                else:
-                    layer['is_time_layer'] = False
                     
-                
                 layer['wms_url'] = core_utils.get_wms_url(request, workspace)
                 layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
                 layer['namespace'] = workspace.uri

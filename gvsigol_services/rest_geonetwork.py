@@ -51,7 +51,7 @@ class Geonetwork():
         self.session.auth = None
     
     
-    def gn_insert_metadata(self, layer, abstract, ws, properties):
+    def gn_insert_metadata(self, layer, abstract, ws, layer_info):
         
         url = self.service_url + "xml.metadata.insert"
         headers = {'content-type': 'application/xml'}
@@ -63,7 +63,7 @@ class Geonetwork():
         xml +=      '<styleSheet>_none_</styleSheet>'
         xml +=      '<uuidAction>generateUUID</uuidAction>'
         xml +=      '<data><![CDATA['
-        xml +=          self.create_metadata(layer, abstract, ws, properties)
+        xml +=          self.create_metadata(layer, abstract, ws, layer_info)
         xml +=      ']]></data>'
         xml +=  '</request>'
         
@@ -77,12 +77,12 @@ class Geonetwork():
                     
         raise FailedRequestError(r.status_code, r.content)
     
-    def get_thumbnail(self, user, password, layer, ws, properties):
+    def get_thumbnail(self, user, password, layer, ws, layer_info):
         
-        maxx = str(properties.boundingBox[0])
-        maxy = str(properties.boundingBox[1])
-        minx = str(properties.boundingBox[2])
-        miny = str(properties.boundingBox[3])
+        maxx = str(layer_info['featureType']['nativeBoundingBox']['maxx'])
+        maxy = str(layer_info['featureType']['nativeBoundingBox']['maxy'])
+        minx = str(layer_info['featureType']['nativeBoundingBox']['minx'])
+        miny = str(layer_info['featureType']['nativeBoundingBox']['miny'])
         bbox = maxx + "," + maxy + "," + minx + "," + miny 
         
         split_wms_url = ws.wms_endpoint.split('//')
@@ -94,7 +94,7 @@ class Geonetwork():
             'REQUEST': 'GetMap',
             'LAYERS': ws.name + ":" + layer.name,
             'FORMAT': 'image/png',
-            'SRS': properties.boundingBox[4],
+            'SRS': layer_info['featureType']['nativeBoundingBox']['crs'],
             'HEIGHT': '550',
             'WIDTH': '768',
             'BBOX': bbox
@@ -155,12 +155,12 @@ class Geonetwork():
         raise FailedRequestError(r.status_code, r.content)
     
     
-    def create_metadata(self, layer, abstract, ws, properties):
+    def create_metadata(self, layer, abstract, ws, layer_info):
         
-        maxx = str(properties.boundingBox[0])
-        maxy = str(properties.boundingBox[1])
-        minx = str(properties.boundingBox[2])
-        miny = str(properties.boundingBox[3])
+        maxx = str(layer_info['featureType']['nativeBoundingBox']['maxx'])
+        maxy = str(layer_info['featureType']['nativeBoundingBox']['maxy'])
+        minx = str(layer_info['featureType']['nativeBoundingBox']['minx'])
+        miny = str(layer_info['featureType']['nativeBoundingBox']['miny'])
         
         metadata =  '<gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" '
         metadata +=     'xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:gmx="http://www.isotc211.org/2005/gmx" '
