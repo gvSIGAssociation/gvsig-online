@@ -27,7 +27,6 @@ from django.utils.translation import ugettext_lazy as _
 from gvsigol.settings import GVSIGOL_SERVICES
 from gvsigol.settings import GVSIGOL_CATALOG
 from backend_postgis import Introspect
-from owslib.wms import WebMapService
 import xml.etree.ElementTree as ET
 import geoserver.catalog as gscat
 import forms_geoserver
@@ -155,18 +154,6 @@ class Geoserver():
         
     def getBaseUrl(self):
         return self.base_url
-    
-    def getCapabilities(self):
-        try:
-            capabilities = WebMapService(self.base_url + "/wms", version='1.1.1', xml=None, username=self.user, password=self.password)
-            return capabilities
-        except Exception as e:
-            print e
-            return False
-    
-    def getCapabilities_without_auth(self):
-        capabilities = WebMapService(self.base_url + "/wms", version='1.1.1')
-        return capabilities
 
     def createDatastore(self, workspace, type, name, description, connection_params):
         """
@@ -298,17 +285,7 @@ class Geoserver():
             catalog.save(layer)
             return True
         except Exception as e:
-            return False
-        
-    def get_layer_properties(self, s, ws, layer):
-        try:
-            properties = WebMapService(self.base_url + "/wms", version='1.1.1', xml=None, username=s['username'], password=s['password'])
-            layer_properties = properties[ws.name + ':' + layer.name]
-            return layer_properties
-        
-        except Exception as e:
-            raise e
-        
+            return False     
         
     def get_geometry_type(self, layer):
         try:           
@@ -1160,10 +1137,10 @@ class Geonetwork():
     def __init__(self, service_url):
         self.rest_geonetwork = rest_geonetwork.Geonetwork(service_url)
         
-    def metadata_insert(self, session, layer, abstract, ws, properties):
+    def metadata_insert(self, session, layer, abstract, ws, layer_info):
         self.rest_geonetwork.gn_auth(session['username'], session['password'])
-        uuid = self.rest_geonetwork.gn_insert_metadata(layer, abstract, ws, properties)
-        thumbnail_url = self.rest_geonetwork.get_thumbnail(session['username'], session['password'], layer, ws, properties)
+        uuid = self.rest_geonetwork.gn_insert_metadata(layer, abstract, ws, layer_info)
+        thumbnail_url = self.rest_geonetwork.get_thumbnail(session['username'], session['password'], layer, ws, layer_info)
         self.rest_geonetwork.add_thumbnail(uuid, thumbnail_url)
         self.rest_geonetwork.set_metadata_privileges(uuid)
         self.rest_geonetwork.gn_unauth()
