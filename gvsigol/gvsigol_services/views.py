@@ -353,8 +353,8 @@ def layer_add(request):
                     newRecord.metadata_uuid = ''
                     try:
                         if gvsigol.settings.CATALOG_MODULE:
-                            properties = mapservice_backend.get_layer_properties(workspace, newRecord)
-                            muuid = gn_backend.metadata_insert(request.session, newRecord, abstract, workspace, properties)
+                            layer_info = mapservice_backend.getResourceInfo(workspace.name, datastore.name, newRecord.name, "json")
+                            muuid = gn_backend.metadata_insert(request.session, newRecord, abstract, workspace, layer_info)
                             newRecord.metadata_uuid = muuid
                     except Exception as exc:
                         logging.exception(exc)
@@ -757,8 +757,8 @@ def layer_create(request):
                     l.metadata_uuid = ''
                     try:
                         if gvsigol.settings.CATALOG_MODULE:
-                            properties = mapservice_backend.get_layer_properties(workspace, l)
-                            muuid = gn_backend.metadata_insert(request.session, l, abstract, workspace, properties)
+                            layer_info = mapservice_backend.getResourceInfo(workspace.name, datastore.name, l.name, "json")
+                            muuid = gn_backend.metadata_insert(request.session, l, abstract, workspace, layer_info)
                             l.metadata_uuid = muuid
                     except Exception as exc:
                         logging.exception(exc)

@@ -274,7 +274,6 @@ publicViewer.core = {
 			layerGroup.title = group.groupTitle;
 			layerGroup.legend = conf.geoserver_base_url + '/wms' + '?SERVICE=WMS&VERSION=1.1.1&layer=' + group.groupName + '&REQUEST=getlegendgraphic&FORMAT=image/png';
 			layerGroup.queryable = true;
-			layerGroup.isTimeLayer = false;
 			layerGroup.isLayerGroup = true;
 			layerGroup.setZIndex(parseInt(group.groupOrder));
 			this.map.addLayer(layerGroup);
