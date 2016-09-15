@@ -234,12 +234,6 @@ viewer.core = {
 				wmsLayer.workspace = layerConf.workspace
 				wmsLayer.crs = layerConf.crs;
 				wmsLayer.order = layerConf.order;
-				if (layerConf.is_time_layer) {
-					wmsLayer.isTimeLayer = true;
-					wmsLayer.timeParams = layerConf.time_params;
-				} else {
-					wmsLayer.isTimeLayer = false;
-				}
 				wmsLayer.setZIndex(parseInt(layerConf.order));
 				this.map.addLayer(wmsLayer);
 			}
@@ -281,7 +275,6 @@ viewer.core = {
 			layerGroup.title = group.groupTitle;
 			layerGroup.legend = conf.geoserver_base_url + '/wms' + '?SERVICE=WMS&VERSION=1.1.1&layer=' + group.groupName + '&REQUEST=getlegendgraphic&FORMAT=image/png';
 			layerGroup.queryable = true;
-			layerGroup.isTimeLayer = false;
 			layerGroup.isLayerGroup = true;
 			layerGroup.setZIndex(parseInt(group.groupOrder));
 			this.map.addLayer(layerGroup);
