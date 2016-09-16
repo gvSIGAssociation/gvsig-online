@@ -796,14 +796,16 @@ class Geoserver():
             files = [f for f in os.listdir(dir_path) if f.lower()[-4:]==".shp"]
             
             for f in files:
+                has_style = False
                 if f in table_definition:
                     table_def = table_definition[f]
                     layer_name = table_def['name']
                     layer_title = table_def['title']
                     try:
                         original_style_name = table_def['style']
+                        has_style = True
+                        
                     except Exception as e:
-                        original_style_name = "Desconocido"
                         print e
                     #layer_group = table_def['group'] + '_' + application.name.lower()
                 else:
@@ -849,9 +851,16 @@ class Geoserver():
                     # estilos                            
                     if self.getStyle(original_style_name): 
                         self.setLayerStyle(layer.name, original_style_name)
+                        
                     else:
                         cloned_style_name = datastore.workspace.name + '_' + original_style_name + '_default'
-                        symbology_services.clone_style(self, layer, original_style_name, cloned_style_name)                       
+                        if has_style:                            
+                            symbology_services.clone_style(self, layer, original_style_name, cloned_style_name) 
+                            
+                        else:
+                            self.createDefaultStyle(layer, cloned_style_name)
+                            self.setLayerStyle(layer.name, cloned_style_name)
+                                                  
                         
                     if layer.layer_group.name != "__default__":
                         self.createOrUpdateGeoserverLayerGroup(layer.layer_group)
