@@ -295,6 +295,94 @@ def sld_import(name, is_default, layer_id, file, mapservice):
         utils.__delete_temporaries(filepath)
         return False
     
+def clone_style(mapservice, layer, original_style_name, cloned_style_name):
+    original_style = Style.objects.get(name__exact=original_style_name)
+    
+    style = Style(
+        name = cloned_style_name,
+        title = cloned_style_name,
+        is_default = True,
+        type = 'US'
+    )
+    style.save()
+    
+    style_layer = StyleLayer(
+        style = style,
+        layer = layer
+    )
+    style_layer.save()
+    
+    rule = Rule(
+        style = style,
+        name = 'Default symbol',
+        title = 'Default symbol',
+        abstract = '',
+        filter = str(""),
+        minscale = -1,
+        maxscale = -1,
+        order = 0
+    )
+    rule.save()
+    
+    original_rules = Rule.objects.filter(style=original_style)
+    for original_rule in original_rules:
+        original_symbolizers = Symbolizer.objects.filter(rule=original_rule)
+        for original_symbolizer in original_symbolizers:
+            if hasattr(original_symbolizer, 'externalgraphicsymbolizer'):
+                symbolizer = ExternalGraphicSymbolizer(
+                    rule = rule,
+                    order = original_symbolizer.externalgraphicsymbolizer.order,
+                    opacity = original_symbolizer.externalgraphicsymbolizer.opacity,
+                    size = original_symbolizer.externalgraphicsymbolizer.size,
+                    rotation = original_symbolizer.externalgraphicsymbolizer.rotation,
+                    online_resource = original_symbolizer.externalgraphicsymbolizer.online_resource,
+                    format = original_symbolizer.externalgraphicsymbolizer.format,
+                )
+                symbolizer.save()
+                    
+            elif hasattr(original_symbolizer, 'polygonsymbolizer'):
+                symbolizer = PolygonSymbolizer(
+                    rule = rule,
+                    order = original_symbolizer.polygonsymbolizer.order,
+                    fill = original_symbolizer.polygonsymbolizer.fill,
+                    fill_opacity = original_symbolizer.polygonsymbolizer.fill_opacity,
+                    stroke = original_symbolizer.polygonsymbolizer.stroke,
+                    stroke_width = original_symbolizer.polygonsymbolizer.stroke_width,
+                    stroke_opacity = original_symbolizer.polygonsymbolizer.stroke_opacity                  
+                )
+                symbolizer.save()
+            
+            elif hasattr(original_symbolizer, 'linesymbolizer'):
+                symbolizer = LineSymbolizer(
+                    rule = rule,
+                    order = original_symbolizer.linesymbolizer.order,
+                    stroke = original_symbolizer.linesymbolizer.stroke,
+                    stroke_width = original_symbolizer.linesymbolizer.stroke_width,
+                    stroke_opacity = original_symbolizer.linesymbolizer.stroke_opacity                
+                )
+                symbolizer.save()      
+                
+            elif hasattr(original_symbolizer, 'marksymbolizer'):
+                symbolizer = MarkSymbolizer(
+                    rule = rule,
+                    order = original_symbolizer.marksymbolizer.order,
+                    opacity = original_symbolizer.marksymbolizer.opacity,
+                    size = original_symbolizer.marksymbolizer.size,
+                    rotation = original_symbolizer.marksymbolizer.rotation,
+                    well_known_name = original_symbolizer.marksymbolizer.well_known_name,
+                    fill = original_symbolizer.marksymbolizer.fill,
+                    fill_opacity = original_symbolizer.marksymbolizer.fill_opacity,
+                    stroke = original_symbolizer.marksymbolizer.stroke,
+                    stroke_width = original_symbolizer.marksymbolizer.stroke_width,
+                    stroke_opacity = original_symbolizer.marksymbolizer.stroke_opacity                
+                )
+                symbolizer.save() 
+                
+    sld_body = sld_builder.build_library_symbol(rule)
+    if mapservice.createStyle(style.name, sld_body): 
+        mapservice.setLayerStyle(layer.name, cloned_style_name)
+        return True 
+    
 def delete_style(style_id, mapservice):
     try:
         style = Style.objects.get(id=int(style_id))
