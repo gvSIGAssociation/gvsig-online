@@ -801,15 +801,15 @@ class Geoserver():
                     layer_name = table_def['name']
                     layer_title = table_def['title']
                     try:
-                        layer_style = table_def['style']
+                        original_style_name = table_def['style']
                     except Exception as e:
-                        layer_style = "Desconocido"
+                        original_style_name = "Desconocido"
                         print e
                     #layer_group = table_def['group'] + '_' + application.name.lower()
                 else:
                     layer_name = os.path.splitext(os.path.basename(f))[0]
                     layer_title = os.path.splitext(os.path.basename(f))[0]
-                    layer_style = layer_name
+                    original_style_name = layer_name
                 shp_abs = os.path.join(dir_path, f)
                 try:
                     gdal_tools.shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
@@ -847,12 +847,11 @@ class Geoserver():
                     self.setDataRules()
                     
                     # estilos                            
-                    if self.getStyle(layer_style): 
-                        self.setLayerStyle(layer.name, layer_style)
+                    if self.getStyle(original_style_name): 
+                        self.setLayerStyle(layer.name, original_style_name)
                     else:
-                        style_name = datastore.workspace.name + '_' + layer_style + '_default'
-                        self.createDefaultStyle(layer, style_name)
-                        self.setLayerStyle(layer.name, style_name)                        
+                        cloned_style_name = datastore.workspace.name + '_' + original_style_name + '_default'
+                        symbology_services.clone_style(self, layer, original_style_name, cloned_style_name)                       
                         
                     if layer.layer_group.name != "__default__":
                         self.createOrUpdateGeoserverLayerGroup(layer.layer_group)
