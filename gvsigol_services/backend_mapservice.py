@@ -848,19 +848,27 @@ class Geoserver():
     
                     self.setDataRules()
                     
-                    # estilos                            
-                    if self.getStyle(original_style_name): 
-                        self.setLayerStyle(layer.name, original_style_name)
-                        
+                    # estilos
+                    # si esta definido en la conf y existe, se clona con el nombre del ws
+                    # si no, se crea uno por defecto
+                    # TODO: si el clonado existe, habria que eliminarlo
+                    final_style_name = datastore.workspace.name + '_' + original_style_name
+                    
+                    print "Depurando ... eliminando el estilo que habia ..." + final_style_name
+                    cloned_style = self.getStyle(final_style_name)
+                    to_delete = Style.objects.filter(name__exact=final_style_name)
+                    
+                    style_from_library = self.getStyle(original_style_name)
+                    if to_delete:
+                        symbology_services.delete_style(to_delete[0].id, self)
+                    if has_style and style_from_library is not None :       
+                        print "Depurando ... definido en la conf y existe ... Asi que clonamos: " +  final_style_name                       
+                        symbology_services.clone_style(self, layer, original_style_name, final_style_name)
                     else:
-                        cloned_style_name = datastore.workspace.name + '_' + original_style_name + '_default'
-                        if has_style:                            
-                            symbology_services.clone_style(self, layer, original_style_name, cloned_style_name) 
-                            
-                        else:
-                            self.createDefaultStyle(layer, cloned_style_name)
-                            self.setLayerStyle(layer.name, cloned_style_name)
-                                                  
+                        print "Depurando ... no existe en la conf o en la libreria ... Asi que creamos por defecto " + final_style_name                                               
+                        self.createDefaultStyle(layer, final_style_name)
+                        #self.setLayerStyle(layer.name, cloned_style_name)
+                        
                         
                     if layer.layer_group.name != "__default__":
                         self.createOrUpdateGeoserverLayerGroup(layer.layer_group)
