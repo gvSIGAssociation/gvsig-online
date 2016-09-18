@@ -806,6 +806,7 @@ class Geoserver():
                         has_style = True
                         
                     except Exception as e:
+                        original_style_name = layer_name
                         print e
                     #layer_group = table_def['group'] + '_' + application.name.lower()
                 else:
@@ -818,20 +819,23 @@ class Geoserver():
                 except Exception as e:
                     print "ERROR en shp2postgis ... Algunos shapefiles puede que no hayan subido "
                     continue 
-                                
+                
+                try:
+                    layer = Layer.objects.get(name=layer_name, datastore=datastore)
+                except:
+                    # may me missing when creating a layer or when
+                    # appending / overwriting a layer created outside gvsig online
+                    layer = Layer()                
+                    # TODO: si estamos en create mode es porque ha aparecido otro shape. Deberiamos borrar el proyecto y volverlo a crear  
+                            
                 if creation_mode==forms_geoserver.MODE_CREATE:
+                    
                     try:
                         self.createFeaturetype(datastore.workspace, datastore, layer_name, layer_title)
                     except:
                         print "ERROR en createFeaturetype"
                         raise
                     
-                    try:
-                        layer = Layer.objects.get(name=layer_name, datastore=datastore)
-                    except:
-                        # may me missing when creating a layer or when
-                        # appending / overwriting a layer created outside gvsig online
-                        layer = Layer()
                         
                     layer.datastore = datastore
                     layer.name = layer_name
@@ -846,34 +850,36 @@ class Geoserver():
                     layer.created_by = request.user.username
                     layer.save()
     
-                    self.setDataRules()
-                    
-                    # estilos
-                    # si esta definido en la conf y existe, se clona con el nombre del ws
-                    # si no, se crea uno por defecto
-                    # TODO: si el clonado existe, habria que eliminarlo
-                    final_style_name = datastore.workspace.name + '_' + original_style_name
-                    
-                    print "Depurando ... eliminando el estilo que habia ..." + final_style_name
-                    cloned_style = self.getStyle(final_style_name)
-                    to_delete = Style.objects.filter(name__exact=final_style_name)
-                    
-                    style_from_library = self.getStyle(original_style_name)
-                    if to_delete:
-                        symbology_services.delete_style(to_delete[0].id, self)
-                    if has_style and style_from_library is not None :       
-                        print "Depurando ... definido en la conf y existe ... Asi que clonamos: " +  final_style_name                       
-                        symbology_services.clone_style(self, layer, original_style_name, final_style_name)
-                    else:
-                        print "Depurando ... no existe en la conf o en la libreria ... Asi que creamos por defecto " + final_style_name                                               
-                        self.createDefaultStyle(layer, final_style_name)
-                        #self.setLayerStyle(layer.name, cloned_style_name)
+                    self.setDataRules()                                        
                         
                         
                     if layer.layer_group.name != "__default__":
                         self.createOrUpdateGeoserverLayerGroup(layer.layer_group)
                 #else:
                 #    print "TODO: borrar la cache .."
+                
+                # estilos: se ejecuta en modo create o update
+                # si esta definido en la conf y existe, se clona con el nombre del ws
+                # si no, se crea uno por defecto
+                # TODO: si el clonado existe, habria que eliminarlo
+                final_style_name = datastore.workspace.name + '_' + original_style_name
+                
+                print "Depurando ... eliminando el estilo que habia ..." + final_style_name
+                cloned_style = self.getStyle(final_style_name)
+                to_delete = Style.objects.filter(name__exact=final_style_name)
+                
+                style_from_library = self.getStyle(original_style_name)
+                if to_delete:
+                    symbology_services.delete_style(to_delete[0].id, self)
+                if has_style and style_from_library is not None :       
+                    print "Depurando ... definido en la conf y existe ... Asi que clonamos: " +  final_style_name                       
+                    symbology_services.clone_style(self, layer, original_style_name, final_style_name)
+                else:
+                    print "Depurando ... no existe en la conf o en la libreria ... Asi que creamos por defecto " + final_style_name   
+                    if layer.id is None:
+                        print "Houston tenemos un problema ...................................."                                          
+                    self.createDefaultStyle(layer, final_style_name)
+                    self.setLayerStyle(layer.name, final_style_name)
                             
         except rest_geoserver.RequestError as ex:
             print "Error Request: " + str(ex)
