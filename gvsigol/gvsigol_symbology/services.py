@@ -296,7 +296,10 @@ def sld_import(name, is_default, layer_id, file, mapservice):
         return False
     
 def clone_style(mapservice, layer, original_style_name, cloned_style_name):
-    original_style = Style.objects.get(name__exact=original_style_name)
+    try:
+        original_style = Style.objects.get(name__exact=original_style_name)
+    except:
+        original_style = Style.objects.filter(name__exact=original_style_name)[0]
     
     style = Style(
         name = cloned_style_name,
