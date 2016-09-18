@@ -862,9 +862,7 @@ class Geoserver():
                 # si esta definido en la conf y existe, se clona con el nombre del ws
                 # si no, se crea uno por defecto
                 # TODO: si el clonado existe, habria que eliminarlo
-                final_style_name = datastore.workspace.name + '_' + original_style_name
-                
-                cloned_style = self.getStyle(final_style_name)
+                final_style_name = datastore.workspace.name + '_' + original_style_name                
                 to_delete = Style.objects.filter(name__exact=final_style_name)
                 
                 style_from_library = self.getStyle(original_style_name)
