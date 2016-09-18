@@ -863,16 +863,17 @@ class Geoserver():
                 # si no, se crea uno por defecto
                 # TODO: si el clonado existe, habria que eliminarlo
                 final_style_name = datastore.workspace.name + '_' + original_style_name                
-                to_delete = Style.objects.filter(name__exact=final_style_name)
-                
-                style_from_library = self.getStyle(original_style_name)
-                if to_delete:
-                    symbology_services.delete_style(to_delete[0].id, self)
+                #to_delete = Style.objects.filter(name__exact=final_style_name)                
+                style_from_library = self.getStyle(original_style_name)                
+
                 if has_style and style_from_library is not None :       
                     symbology_services.clone_style(self, layer, original_style_name, final_style_name)
                 else:
                     self.createDefaultStyle(layer, final_style_name)
                     self.setLayerStyle(layer.name, final_style_name)
+                
+                #if to_delete:
+                #    symbology_services.delete_style(to_delete[0].id, self)
                             
         except rest_geoserver.RequestError as ex:
             print "Error Request: " + str(ex)
