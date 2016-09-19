@@ -427,8 +427,15 @@ def project_get_conf(request):
                 else:
                     layer['is_vector'] = False
                 
-                layer_info = mapservice_backend.getResourceInfo(workspace.name, datastore.name, l.name, "json")
-                defaultCrs = layer_info['featureType']['srs']
+                layer_info = None
+                defaultCrs = None
+                if datastore.type == 'v_PostGIS':
+                    layer_info = mapservice_backend.getResourceInfo(workspace.name, datastore.name, l.name, "json")
+                    defaultCrs = layer_info['featureType']['srs']
+                elif datastore.type == 'c_GeoTIFF':
+                    layer_info = mapservice_backend.getRasterResourceInfo(workspace.name, datastore.name, l.name, "json")
+                    defaultCrs = layer_info['coverage']['srs']
+                    
                 if defaultCrs.split(':')[1] in gvsigol.settings.SUPPORTED_CRS:
                     epsg = gvsigol.settings.SUPPORTED_CRS[defaultCrs.split(':')[1]]
                     layer['crs'] = {
