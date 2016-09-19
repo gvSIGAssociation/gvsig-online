@@ -48,7 +48,7 @@ from django.http.response import StreamingHttpResponse
 import os
 from django.contrib.auth.models import AnonymousUser
 
-from gvsigol.settings import MEDIA_ROOT
+from gvsigol.settings import MEDIA_ROOT, GVSIGOL_SERVICES
 
 _valid_layer_group_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
@@ -825,7 +825,13 @@ def get_datatable_data(request):
     
     if request.method == 'POST':      
         layer_name = request.POST.get('layer_name')
+        layer = Layer.objects.get(name__exact=layer_name)
+        datastore = Datastore.objects.get(id=layer.datastore_id)
+        workspace = Workspace.objects.get(id=datastore.workspace_id)
+                
         wfs_url = request.POST.get('wfs_url')
+        if len(GVSIGOL_SERVICES['CLUSTER_NODES']) >= 1:
+            wfs_url = GVSIGOL_SERVICES['CLUSTER_NODES'][0] + '/' + workspace.name + '/wfs'
         property_name = request.POST.get('property_name')
         properties_with_type = request.POST.get('properties_with_type')
         start_index = request.POST.get('start')
