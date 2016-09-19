@@ -159,14 +159,14 @@ AUTH_LDAP_USER_SEARCH = LDAPSearch("##LDAP_DN##", ldap.SCOPE_SUBTREE, "(uid=%(us
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
-LANGUAGE_CODE = 'en'
+LANGUAGE_CODE = 'es'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 LANGUAGES = (
-    #('es', _('Spanish')),
-    #('ca', _('Catalan')),    
+    ('es', _('Spanish')),
+    ('ca', _('Catalan')),    
     ('en', _('English')),   
     
 )
