@@ -887,7 +887,8 @@ def get_datatable_data(request):
         params = urllib.urlencode(values)
         req = requests.Session()
         if 'username' in request.session and 'password' in request.session:
-            req.auth = (request.session['username'], request.session['password'])
+            if request.session['username'] is not None and request.session['password'] is not None:
+                req.auth = (request.session['username'], request.session['password'])
         print wfs_url + "?" + params
         #response = req.get(wfs_url + "?" + params, verify=False)
         response = req.post(wfs_url, data=values, verify=False)
