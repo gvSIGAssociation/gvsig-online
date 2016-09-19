@@ -86,7 +86,7 @@ class GvSigOnlineServices():
                 attrs['givenName'] = ''
                 attrs['homeDirectory'] = '/home/users/admin'
                 attrs['objectclass'] = ['top','posixAccount','inetOrgPerson','extensibleObject']
-                attrs['userPassword'] = 'admin52'
+                attrs['userPassword'] = self.password
                 attrs['oclExtraAttrs'] = 'CAT_ALL_Administrator'
                 attrs['uidNumber'] = '1000'
                 attrs['sn'] = 'admin'
