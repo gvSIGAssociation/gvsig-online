@@ -386,13 +386,12 @@ def upload_library(name, description, file):
             
             style_name = sld.NamedLayer[0].UserStyle[0].Name
             style_title = sld.NamedLayer[0].UserStyle[0].Title
-            style_is_deafult = sld.NamedLayer[0].UserStyle[0].IsDefault
             r = sld.NamedLayer[0].UserStyle[0].FeatureTypeStyle[0].Rule[0]
             
             style = Style(
                 name = style_name,
                 title = style_title,
-                is_default = style_is_deafult,
+                is_default = True,
                 type = "US"
             )
             style.save()
