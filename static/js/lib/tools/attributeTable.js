@@ -181,6 +181,7 @@ attributeTable.prototype.createTable = function(featureType) {
             "data": function ( d ) {
                 d.wfs_url = self.layer.wfs_url;
                 d.layer_name = self.layer.layer_name;
+                d.workspace = self.layer.workspace;
                 d.property_name = properties.toString();
                 d.properties_with_type = propertiesWithType.toString();
             }
