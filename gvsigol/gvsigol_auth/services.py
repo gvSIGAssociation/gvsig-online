@@ -100,7 +100,9 @@ class GvSigOnlineServices():
             try:
                 # ensure the user exists both on django and ldap
                 if not User.objects.filter(username="admin").exists():
-                    admin_user = User.objects.create_superuser(username='admin', password='admin52', email='jrodrigo@scolab.es')
+                    admin_user = User.objects.create_superuser(username='admin', password=self.password, email='jrodrigo@scolab.es')
+                    admin_user.is_superuser = True
+                    admin_user.is_staff = True
                     admin_group = UserGroup.objects.get(name__exact='admin')
                     usergroup_user = UserGroupUser(
                         user = admin_user,
