@@ -73,14 +73,15 @@ def login_user(request):
                         return redirect('home')
             
         else:
-            '''
             user = authenticate(remote_user="admin")
+            request.session['username'] = None
+            request.session['password'] = None
             if user is not None:
                 if user.is_active:
                     login(request, user)
                     return redirect('home')
-            '''
-            return render_to_response('login.html', {'errors': errors}, RequestContext(request))
+            
+            #return render_to_response('login.html', {'errors': errors}, RequestContext(request))
 
 def logout_user(request):
     logout(request)
