@@ -58,7 +58,8 @@ INSTALLED_APPS = [
     'gvsigol_filemanager',
     'gvsigol_core',
     'gvsigol_app_dev',
-    'gvsigol_app_worldwind'
+    'gvsigol_app_worldwind',
+    'gvsigol_app_shps_folder',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -177,8 +178,9 @@ LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol_services/locale'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/locale'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/locale'),
-    #os.path.join(BASE_DIR, 'gvsigol_app_dev/locale'),
-    #os.path.join(BASE_DIR, 'gvsigol_app_aguas/locale'),
+    os.path.join(BASE_DIR, 'gvsigol_app_dev/locale'),
+    os.path.join(BASE_DIR, 'gvsigol_app_worldwind/locale'),
+    os.path.join(BASE_DIR, 'gvsigol_app_shps_folder/locale'),
 )
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -206,7 +208,8 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
     os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
-    #os.path.join(BASE_DIR, 'gvsigol_app_aguas/static'),
+    os.path.join(BASE_DIR, 'gvsigol_app_worldwind/static'),
+    os.path.join(BASE_DIR, 'gvsigol_app_shps_folder/static'),
 )
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -235,7 +238,7 @@ GVSIGOL_SERVICES = {
     'URL': 'https://localhost/gs-test',
     'USER': 'admin',
     'PASSWORD': 'admin52',
-    'CLUSTER_NODES':[],
+    'CLUSTER_NODES':['https://localhost/gs-test', 'https://localhost/gs-test'],
     'SUPPORTED_TYPES': (
                         ('v_PostGIS', _('PostGIS vector')),
                         ('v_SHP', _('Shapefile folder')),                        
@@ -304,7 +307,7 @@ GVSIGOL_TOOLS = {
     },
     'attribute_table': {
         'private_fields_prefix': '_',
-        'show_search': False
+        'show_search': True
     }
 }
 
