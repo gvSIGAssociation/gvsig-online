@@ -275,10 +275,14 @@ def toc_update_layer_group(old_layergroup, old_name, new_name):
         public_viewer = PublicViewer.objects.all()[0]
         json_toc2 = public_viewer.toc_order
         toc2 = json.loads(json_toc2)
-        toc2[old_name]['name'] = new_name
-        toc2[new_name] = toc2.pop(old_name)
-        public_viewer.toc_order = json.dumps(toc2)
-        public_viewer.save()
+        try:
+            toc2[old_name]['name'] = new_name
+            toc2[new_name] = toc2.pop(old_name)
+            public_viewer.toc_order = json.dumps(toc2)
+            public_viewer.save()
+            
+        except Exception as e:
+            print _('Public viewer TOC i sempty')
    
 def toc_remove_layergroups(toc_structure, layer_groups): 
     json_toc = json.loads(toc_structure)
