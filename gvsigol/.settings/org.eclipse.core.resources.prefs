@@ -1,0 +1,10 @@
+eclipse.preferences.version=1
+encoding//gvsigol/settings.py=utf-8
+encoding//gvsigol_auth/forms.py=utf-8
+encoding//gvsigol_auth/models.py=utf-8
+encoding//gvsigol_auth/utils.py=utf-8
+encoding//gvsigol_auth/views.py=utf-8
+encoding//gvsigol_core/utils.py=utf-8
+encoding//gvsigol_core/views.py=utf-8
+encoding//gvsigol_services/models.py=utf-8
+encoding//gvsigol_symbology/models.py=utf-8
