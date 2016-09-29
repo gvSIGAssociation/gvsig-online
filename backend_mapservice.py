@@ -867,9 +867,9 @@ class Geoserver():
                     print "DEBUG: has_style AND style_from_library"       
                     if creation_mode == 'CR':
                         if symbology_services.clone_style(self, layer, original_style_name, final_style_name) is False:
-                            print "DEBUG: Creation mode CR. Clone style False" 
+                            print "DEBUG: Creation mode CR. Clone style False. Creating default" 
                             self.createDefaultStyle(layer, final_style_name)
-                            self.setLayerStyle(layer.name, final_style_name)
+                            self.setLayerStyle(datastore.workspace.name + ":" + layer.name, final_style_name)
                         else:
                             print "DEBUG: Creation mode CR. Clone style True"
                     else:
@@ -879,7 +879,7 @@ class Geoserver():
                     print "DEBUG: NO has_style or style_from_library " + original_style_name
                     if creation_mode == 'CR':
                         self.createDefaultStyle(layer, final_style_name)
-                        self.setLayerStyle(layer.name, final_style_name)
+                        self.setLayerStyle( datastore.workspace.name + ":" + layer.name, final_style_name)
                 
                             
         except rest_geoserver.RequestError as ex:
