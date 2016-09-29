@@ -482,7 +482,7 @@ def upload_library(name, description, file):
             output.close()
                 
             mapservice.createStyle(style.name, sld_body)
-    
+    mapservice.reload_nodes()
     utils.__delete_temporaries(file_path)
 
 def upload_sld(file):
