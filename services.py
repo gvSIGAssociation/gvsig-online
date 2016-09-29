@@ -300,20 +300,24 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
     try:
         original_style = Style.objects.get(name__exact=original_style_name)
     except Exception as e:
+        print str(e)
         return False
         
     try:
         style = Style.objects.filter(name__exact=cloned_style_name)[0] 
         exists_cloned_style = True   
     except Exception as e:
+        print "DEBUG: Problem getting style .." + cloned_style_name
         print str(e)
         
     if exists_cloned_style:
+        print "DEBUG: Exists cloned style .." + cloned_style_name
         rule = original_rules = Rule.objects.filter(style=style)[0]
         symbolizers_to_delete = Symbolizer.objects.filter(rule=rule)
         for i in symbolizers_to_delete:
             i.delete()
-    else:                    
+    else:           
+        print "DEBUG: Not existe cloned style .." + cloned_style_name         
         style = Style(
             name = cloned_style_name,
             title = cloned_style_name,
@@ -398,10 +402,15 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
     sld_body = sld_builder.build_library_symbol(rule)
     s = mapservice.getStyle(style.name)
     if s is None:        
+        print "DEBUG: style not exists in Geoserver .. " + style.name
         if mapservice.createStyle(style.name, sld_body): 
             mapservice.setLayerStyle(layer.name, cloned_style_name)
+        else:
+            "DEBUG: problem creating style !!!!!" + style.name
     else:
+        print "DEBUG: Style exists in Geoserver .. " +style.name
         mapservice.updateStyle(style.name, sld_body)
+        mapservice.setLayerStyle(layer.name, cloned_style_name)
         
     return True
     
