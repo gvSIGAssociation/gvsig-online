@@ -404,13 +404,16 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
     if s is None:        
         print "DEBUG: style not exists in Geoserver .. " + style.name
         if mapservice.createStyle(style.name, sld_body): 
-            mapservice.setLayerStyle(layer.name, cloned_style_name)
+            aux = layer.datastore.workspace.name + ":"+ layer.name
+            mapservice.setLayerStyle(aux, cloned_style_name)
         else:
             "DEBUG: problem creating style !!!!!" + style.name
     else:
         print "DEBUG: Style exists in Geoserver .. " +style.name
         mapservice.updateStyle(style.name, sld_body)
-        mapservice.setLayerStyle(layer.name, cloned_style_name)
+        aux = layer.datastore.workspace.name + ":"+ layer.name
+        print "DEBUG: Setting style " + cloned_style_name + " to " + aux
+        mapservice.setLayerStyle(aux, cloned_style_name)
         
     return True
     
