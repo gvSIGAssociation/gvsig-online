@@ -871,8 +871,9 @@ class Geoserver():
                     else:
                         symbology_services.clone_style(self, layer, original_style_name, final_style_name)                        
                 else:
-                    self.createDefaultStyle(layer, final_style_name)
-                    self.setLayerStyle(layer.name, final_style_name)
+                    if creation_mode == 'CR':
+                        self.createDefaultStyle(layer, final_style_name)
+                        self.setLayerStyle(layer.name, final_style_name)
                 
                             
         except rest_geoserver.RequestError as ex:
