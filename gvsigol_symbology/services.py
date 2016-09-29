@@ -298,7 +298,7 @@ def sld_import(name, is_default, layer_id, file, mapservice):
 def clone_style(mapservice, layer, original_style_name, cloned_style_name):
     exists_cloned_style = False
     try:
-        original_style = Style.objects.get(name__exact=original_style_name)
+        original_style = Style.objects.filter(name__exact=original_style_name)[0]
     except Exception as e:
         print str(e)
         return False
@@ -312,7 +312,7 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
         
     if exists_cloned_style:
         print "DEBUG: Exists cloned style .." + cloned_style_name
-        rule = original_rules = Rule.objects.filter(style=style)[0]
+        rule = Rule.objects.filter(style=style)[0]
         symbolizers_to_delete = Symbolizer.objects.filter(rule=rule)
         for i in symbolizers_to_delete:
             i.delete()
