@@ -296,37 +296,51 @@ def sld_import(name, is_default, layer_id, file, mapservice):
         return False
     
 def clone_style(mapservice, layer, original_style_name, cloned_style_name):
+    exists_cloned_style = False
     try:
         original_style = Style.objects.get(name__exact=original_style_name)
-    except:
-        original_style = Style.objects.filter(name__exact=original_style_name)[0]
+    except Exception as e:
+        return False
+        
+    try:
+        style = Style.objects.filter(name__exact=cloned_style_name)[0] 
+        exists_cloned_style = True   
+    except Exception as e:
+        print str(e)
+        
+    if exists_cloned_style:
+        rule = original_rules = Rule.objects.filter(style=style)[0]
+        symbolizers_to_delete = Symbolizer.objects.filter(rule=rule)
+        for i in symbolizers_to_delete:
+            i.delete()
+    else:                    
+        style = Style(
+            name = cloned_style_name,
+            title = cloned_style_name,
+            is_default = True,
+            type = 'US'
+        )
+        style.save()
+        
+        style_layer = StyleLayer(
+            style = style,
+            layer = layer
+        )
+        style_layer.save()
     
-    style = Style(
-        name = cloned_style_name,
-        title = cloned_style_name,
-        is_default = True,
-        type = 'US'
-    )
-    style.save()
-    
-    style_layer = StyleLayer(
-        style = style,
-        layer = layer
-    )
-    style_layer.save()
-    
-    rule = Rule(
-        style = style,
-        name = 'Default symbol',
-        title = 'Default symbol',
-        abstract = '',
-        filter = str(""),
-        minscale = -1,
-        maxscale = -1,
-        order = 0
-    )
-    rule.save()
-    
+        rule = Rule(
+            style = style,
+            name = 'Default symbol',
+            title = 'Default symbol',
+            abstract = '',
+            filter = str(""),
+            minscale = -1,
+            maxscale = -1,
+            order = 0
+        )
+        rule.save()
+        
+
     original_rules = Rule.objects.filter(style=original_style)
     for original_rule in original_rules:
         original_symbolizers = Symbolizer.objects.filter(rule=original_rule)
@@ -382,9 +396,14 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
                 symbolizer.save() 
                 
     sld_body = sld_builder.build_library_symbol(rule)
-    if mapservice.createStyle(style.name, sld_body): 
-        mapservice.setLayerStyle(layer.name, cloned_style_name)
-        return True 
+    s = mapservice.getStyle(style.name)
+    if s is None:        
+        if mapservice.createStyle(style.name, sld_body): 
+            mapservice.setLayerStyle(layer.name, cloned_style_name)
+    else:
+        mapservice.updateStyle(style.name, sld_body)
+        
+    return True
     
 def delete_style(style_id, mapservice):
     try:
