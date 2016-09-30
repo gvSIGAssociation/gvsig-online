@@ -120,6 +120,7 @@ class Geoserver():
         return self.rest_catalog.get_fonts(user=self.user, password=self.password)
     
     def reload_nodes(self):
+        print "DEBUG: Reloading Geoserver nodes ......"
         try:
             if len(self.cluster_nodes) > 0:
                 for node in self.cluster_nodes:
