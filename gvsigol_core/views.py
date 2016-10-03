@@ -31,7 +31,6 @@ from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
 from gvsigol_auth.utils import superuser_required, is_superuser, staff_required
 import utils as core_utils
-from gvsigol_services.backend_geocoding import geocoder
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
 from gvsigol import settings
 import gvsigol_services.utils as services_utils
@@ -527,20 +526,6 @@ def toc_update(request, pid):
             group['layers'] = ordered_layers
         ordered_toc = sorted(toc.iteritems(), key=lambda (x, y): y['order'], reverse=True)
         return render_to_response('toc_update.html', {'toc': ordered_toc, 'pid': pid}, context_instance=RequestContext(request))
-    
-def search_candidates(request):
-    if request.method == 'GET':
-        query = request.GET.get('query')           
-        suggestions = geocoder.search_candidates(query)
-            
-        return HttpResponse(json.dumps(suggestions, indent=4), content_type='application/json')
-
-def get_location_address(request):
-    if request.method == 'POST':
-        query = request.POST.get('query')
-        location = geocoder.get_location_address(query)
-        
-        return HttpResponse(json.dumps(location, indent=4), content_type='application/json')
     
 def export(request, pid):   
     p = Project.objects.get(id=pid)

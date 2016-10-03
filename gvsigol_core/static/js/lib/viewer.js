@@ -145,7 +145,6 @@ viewer.core = {
     _createWidgets: function(conf) {   
     	this.layerTree = new layerTree(conf, this.map, false);
     	this.legend = new legend(conf, this.map);
-    	this.search = new search(conf, this.map);
     },
     
     _loadBaseLayers: function(conf) {		
