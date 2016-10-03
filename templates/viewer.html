@@ -61,21 +61,10 @@
 	<header class="main-header map-header">
 
 		<!-- Header Navbar: style can be found in header.less -->
-		<nav class="navbar navbar-static-top" style="margin-left:0px;" role="navigation">
+		<nav id="viewer-navbar" class="navbar navbar-static-top" style="margin-left:0px;" role="navigation">
 			
 			<!-- Sidebar toggle button-->
           	<a href="#" class="sidebar-toggle" data-toggle="control-sidebar" role="button"></a>
-
-			<div class="viewer-search-form">
-				<div class="input-group">
-					<input type="text" name="search-widget-input" id="autocomplete" class="form-control" placeholder="{% trans "Search" %}..."> 
-					<span class="input-group-btn">
-						<button type="submit" name="search" id="search-btn" class="btn btn-flat">
-							<i class="fa fa-search"></i>
-						</button>
-					</span>
-				</div>
-			</div>
 
 			<div class="navbar-custom-menu">
 				<ul class="nav navbar-nav">
@@ -187,7 +176,6 @@
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.cookie.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.easy-overlay.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQueryUI/jquery-ui.min.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.autocomplete.min.js" %}"></script>
 	<script>
 		$.widget.bridge('uibutton', $.ui.button);
 		$("body").overlay();
@@ -216,7 +204,6 @@
 		
 	<script type="text/javascript" src="{% static "js/lib/widgets/layerTree.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/widgets/legend.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/lib/widgets/search.js" %}"></script>
 	
 	<script type="text/javascript" src="{% static "js/lib/viewer.js" %}"></script>
 	
