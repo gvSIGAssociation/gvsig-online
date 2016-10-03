@@ -267,13 +267,6 @@ SUPPORTED_CRS = {
     ##SUPORTED_CRS## 
 }
 
-GVSIGOL_SEARCH = {
-    'nominatim': {
-        'url': '##NOMINATIM_URL##',
-        'country_codes': '##NOMINATIM_COUNTRY_CODES##'
-    }
-}
-
 GVSIGOL_TOOLS = {
     ##GVSIGOL_TOOLS##
     'get_feature_info_control': {
