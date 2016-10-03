@@ -116,17 +116,6 @@ html, body {
   color: #000;
 }
 
-.skin-blue .viewer-search-form {
-	border-radius: 3px;
-    border: 1px solid #374850;
-    margin: 0px 10px;
-    margin-top: 5px;
-    overflow: hidden;
-    text-overflow: clip;
-    width: 20%;
-    display: inline-block;
-}
-
 .ol-toolbar {
 	left: auto;
     right: 6px;

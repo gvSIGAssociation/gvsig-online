@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'gvsigol_app_dev',
     'gvsigol_app_worldwind',
     'gvsigol_app_shps_folder',
+    'gvsigol_app_geocoding'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -290,14 +291,6 @@ SUPPORTED_CRS = {
         'title': 'ETRS89 / UTM zone 30N',
         'definition': '+proj=utm +zone=30 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
         'units': 'meters'
-    }
-}
-
-GVSIGOL_SEARCH = {
-    'nominatim': {
-        #'url': 'http://osm.gvsigonline.com/nominatim',
-        'url': 'http://nominatim.openstreetmap.org',
-        'country_codes': ''
     }
 }
 
