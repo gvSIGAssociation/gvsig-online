@@ -431,6 +431,9 @@ def project_get_conf(request):
                 if datastore.type == 'v_PostGIS':
                     layer_info = mapservice_backend.getResourceInfo(workspace.name, datastore.name, l.name, "json")
                     defaultCrs = layer_info['featureType']['srs']
+                elif datastore.type == 'e_WMS':
+                    layer_info = mapservice_backend.getWmsResourceInfo(workspace.name, datastore.name, l.name, "json")
+                    defaultCrs = 'EPSG:4326'
                 elif datastore.type == 'c_GeoTIFF':
                     layer_info = mapservice_backend.getRasterResourceInfo(workspace.name, datastore.name, l.name, "json")
                     defaultCrs = layer_info['coverage']['srs']
