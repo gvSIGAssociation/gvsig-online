@@ -135,6 +135,7 @@
 
 	function updateResourceList(id_datastore) {
 		if (id_datastore) {
+			$("body").overlay();
 			$.getJSON("{% url 'backend_resource_list_available' %}", {id_datastore: id_datastore}, function(data){
 				var name_select = $("#id_name");
 				var previousValue = name_select.val();
@@ -159,11 +160,13 @@
 				}
 				var text = '{% trans "Choose resource" %}';
 				rebuildSelect(name_select, text, placeholderSelected, options);
+				$.overlayout();
 				
 			}).fail(function() {
 				var name_select = $("#id_name");
 				var text = "{% trans 'Service is unavailable' %}";
 				rebuildSelect(name_select, text, true);
+				$.overlayout();
 			});
 		}
 		else {
