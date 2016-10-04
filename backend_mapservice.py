@@ -532,6 +532,17 @@ class Geoserver():
             return jsonData
         return None
     
+    def getWmsResourceInfo(self, workspace, store, featureType, type):
+        if type == None:
+            type = "json"
+        url = self.rest_catalog.service_url + "/workspaces/" + workspace + "/wmsstores/" + store + "/featuretypes/" + featureType +"."+type
+        r = self.rest_catalog.session.get(url, auth=(self.user, self.password))
+        if r.status_code==200:
+            content = r.content
+            jsonData = json.loads(content)
+            return jsonData
+        return None
+    
     def getRasterResourceInfo(self, workspace, store, featureType, type):
         if type == None:
             type = "json"
