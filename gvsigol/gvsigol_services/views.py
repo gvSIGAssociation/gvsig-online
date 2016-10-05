@@ -50,7 +50,7 @@ from django.contrib.auth.models import AnonymousUser
 
 from gvsigol.settings import MEDIA_ROOT, GVSIGOL_SERVICES
 
-_valid_layer_group_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
+_valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -69,24 +69,28 @@ def workspace_add(request):
     if request.method == 'POST':
         form = WorkspaceForm(request.POST)
         if form.is_valid():
-            # first create the ws on the backend
-            if mapservice_backend.createWorkspace(form.cleaned_data['name'],
-                form.cleaned_data['uri'],
-                form.cleaned_data['description'],
-                form.cleaned_data['wms_endpoint'],
-                form.cleaned_data['wfs_endpoint'],
-                form.cleaned_data['wcs_endpoint'],
-                form.cleaned_data['cache_endpoint']):
-                    
-                # save it on DB if successfully created
-                newWs = Workspace(**form.cleaned_data)
-                newWs.created_by = request.user.username
-                newWs.save()
-                mapservice_backend.reload_nodes()
-                return HttpResponseRedirect(reverse('workspace_list'))
+            name = form.cleaned_data['name']
+            if _valid_name_regex.search(name) == None:
+                form.add_error(None, _("Invalid workspace name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name))
             else:
-                # FIXME: the backend should raise an exception to identify the cause (e.g. workspace exists, backend is offline)
-                form.add_error(None, _("Error: workspace could not be created"))
+                # first create the ws on the backend
+                if mapservice_backend.createWorkspace(form.cleaned_data['name'],
+                    form.cleaned_data['uri'],
+                    form.cleaned_data['description'],
+                    form.cleaned_data['wms_endpoint'],
+                    form.cleaned_data['wfs_endpoint'],
+                    form.cleaned_data['wcs_endpoint'],
+                    form.cleaned_data['cache_endpoint']):
+                        
+                    # save it on DB if successfully created
+                    newWs = Workspace(**form.cleaned_data)
+                    newWs.created_by = request.user.username
+                    newWs.save()
+                    mapservice_backend.reload_nodes()
+                    return HttpResponseRedirect(reverse('workspace_list'))
+                else:
+                    # FIXME: the backend should raise an exception to identify the cause (e.g. workspace exists, backend is offline)
+                    form.add_error(None, _("Error: workspace could not be created"))
                 
     else:
         form = WorkspaceForm()
@@ -171,27 +175,31 @@ def datastore_add(request):
             post_dict['connection_params'] = post_dict.get('connection_params').replace('url_replace', file)
         form = DatastoreForm(post_dict)
         if form.is_valid():
-            # first create the datastore on the backend
-            if mapservice_backend.createDatastore(form.cleaned_data['workspace'],
-                                                  form.cleaned_data['type'],
-                                                  form.cleaned_data['name'],
-                                                  form.cleaned_data['description'],
-                                                  form.cleaned_data['connection_params']):
-                # save it on DB if successfully created
-                newRecord = Datastore(
-                    workspace=form.cleaned_data['workspace'],
-                    type=form.cleaned_data['type'],
-                    name=form.cleaned_data['name'],
-                    description=form.cleaned_data['description'],
-                    connection_params=form.cleaned_data['connection_params'],
-                    created_by=request.user.username
-                )
-                newRecord.save()
-                mapservice_backend.reload_nodes()
-                return HttpResponseRedirect(reverse('datastore_list'))
+            name = form.cleaned_data['name']
+            if _valid_name_regex.search(name) == None:
+                form.add_error(None, _("Invalid datastore name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name))
             else:
-                # FIXME: the backend should raise an exception to identify the cause (e.g. datastore exists, backend is offline)
-                form.add_error(None, _('Error: Data store could not be created'))
+                # first create the datastore on the backend
+                if mapservice_backend.createDatastore(form.cleaned_data['workspace'],
+                                                      form.cleaned_data['type'],
+                                                      form.cleaned_data['name'],
+                                                      form.cleaned_data['description'],
+                                                      form.cleaned_data['connection_params']):
+                    # save it on DB if successfully created
+                    newRecord = Datastore(
+                        workspace=form.cleaned_data['workspace'],
+                        type=form.cleaned_data['type'],
+                        name=form.cleaned_data['name'],
+                        description=form.cleaned_data['description'],
+                        connection_params=form.cleaned_data['connection_params'],
+                        created_by=request.user.username
+                    )
+                    newRecord.save()
+                    mapservice_backend.reload_nodes()
+                    return HttpResponseRedirect(reverse('datastore_list'))
+                else:
+                    # FIXME: the backend should raise an exception to identify the cause (e.g. datastore exists, backend is offline)
+                    form.add_error(None, _('Error: Data store could not be created'))
             
     else:
         form = DatastoreForm()
@@ -610,7 +618,7 @@ def layergroup_add(request):
             cached = True
         
         if name != '':
-            if _valid_layer_group_name_regex.search(name) == None:
+            if _valid_name_regex.search(name) == None:
                 message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
                 return render_to_response('layergroup_add.html', {'message': message}, context_instance=RequestContext(request))
         
@@ -681,7 +689,7 @@ def layergroup_update(request, lgid):
              
         else:      
             if not exists:   
-                if _valid_layer_group_name_regex.search(name) == None:
+                if _valid_name_regex.search(name) == None:
                     message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
                     return render_to_response('layergroup_add.html', {'message': message}, context_instance=RequestContext(request))
                 

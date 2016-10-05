@@ -14,7 +14,21 @@
 							<button type="submit" class="btn btn-success btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
 						</div>
 					</div>	
-					<div class="box-body">				
+					<div class="box-body">	
+					{% if form.errors %}
+					<div id="form-error" style="color:#ff0000;">
+						<ul>
+						{% for field in form %}
+							{% if field.errors %}
+								<li>{{field.label}}. {{ field.errors|striptags }}</li>
+							{% endif %}	
+						{% endfor %}
+						{% for field, msg in form.errors.iteritems %}
+							<li>{{ msg|striptags }}</li>
+						{% endfor %}
+						</ul>
+					</div>
+					{% endif %}			
 					{{ form }}				
 					</div>	
                 </form>	
