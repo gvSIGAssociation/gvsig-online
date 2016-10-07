@@ -68,6 +68,17 @@ viewer.core = {
         });
 		osm.baselayer = true;
 		
+		var cartociudad = new ol.layer.Tile({
+			id: this._nextLayerId(),
+			source: new ol.source.TileWMS({
+				url: 'http://www.ign.es/wms-c/ign-base',
+				visible: false,
+				params: {'LAYERS': 'IGNBaseTodo', 'FORMAT': 'image/png', 'VERSION': '1.1.1'}
+			}),
+			visible: false
+		});
+		cartociudad.baselayer = true;
+		
 		var mousePositionControl = new ol.control.MousePosition({
 	        coordinateFormat: ol.coordinate.createStringXY(4),
 	        projection: 'EPSG:4326',
@@ -88,7 +99,7 @@ viewer.core = {
       		],
       		renderer: 'canvas',
       		target: 'map',
-      		layers: [blank, osm],
+      		layers: [blank, osm, cartociudad],
 			view: new ol.View({
         		center: ol.proj.transform([parseFloat(conf.view.center_lon), parseFloat(conf.view.center_lat)], 'EPSG:4326', 'EPSG:3857'),
         		minZoom: 0,
