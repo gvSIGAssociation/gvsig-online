@@ -358,9 +358,9 @@ def user_update(request, uid):
                 
         
     else:
-        user = User.objects.get(id=int(uid))    
-        groups = auth_utils.get_all_groups_checked_by_user(user)
-        return render_to_response('user_update.html', {'uid': uid, 'user': user, 'groups': groups}, context_instance=RequestContext(request))
+        selected_user = User.objects.get(id=int(uid))    
+        groups = auth_utils.get_all_groups_checked_by_user(selected_user)
+        return render_to_response('user_update.html', {'uid': uid, 'selected_user': selected_user, 'user': request.user, 'groups': groups}, context_instance=RequestContext(request))
         
         
 @login_required(login_url='/gvsigonline/auth/login_user/')
