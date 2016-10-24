@@ -210,7 +210,7 @@ Expressions.prototype.getFilterFormUI = function(ruleid) {
 Expressions.prototype.getFilterInputs = function(type, twoValues) {
 	var inputs = '';
 	
-	if (type.indexOf('java.math') > -1){
+	if (type.indexOf('java.math') > -1 || type.indexOf('java.lang.Double') > -1){
 		if (twoValues) {
 			inputs += '<div id="expression-values" class="col-md-6 form-group">';
 			inputs += 	'<label>' + gettext('Value 1') + '</label>';
