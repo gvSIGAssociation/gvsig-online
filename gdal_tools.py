@@ -108,11 +108,12 @@ def shp2postgis(shp_path, table_name, srs, host, port, dbname, schema, user, pas
     elif creation_mode==MODE_OVERWRITE:
         args.extend(['-overwrite'])
     args.extend(["-nln", schema+"."+table_name])
+    args.extend(["-dim", "2"])
     args.extend(["-s_srs", srs, "-a_srs", srs])
     # GDAL >=1.9 && < 2.0
     if encoding != "autodetect":
         args.extend(["--config", "SHAPE_ENCODING", encoding])
-    args.extend(["-lco", "LAUNDER=NO"])
+    args.extend(["-lco", "LAUNDER=YES"])
     args.extend([conn_string, shp_path])
     print " ".join(args).replace("password='{password}'".format(password=password), "password='xxxxxx'")
     p = subprocess.Popen(args, stdin=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=-1)
