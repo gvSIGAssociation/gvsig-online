@@ -69,21 +69,24 @@ def home(request):
                 projects_by_user.append(project_group)
     
     projects = []
-    if len (projects_by_user) > 0:
-        for ua in projects_by_user:
-            a = Project.objects.get(id=ua.project_id)
-            image = ''
-            if "no_project.png" in a.image.url:
-                image = a.image.url.replace(settings.MEDIA_URL, '')
-            else:
-                image = a.image.url
-                
-            project = {}
-            project['id'] = a.id
-            project['name'] = a.name
-            project['description'] = a.description
-            project['image'] = urllib.unquote(image)
-            projects.append(project)
+    if request.user.is_superuser:
+        projects = Project.objects.all()
+    else:
+        if len (projects_by_user) > 0:
+            for ua in projects_by_user:
+                a = Project.objects.get(id=ua.project_id)
+                image = ''
+                if "no_project.png" in a.image.url:
+                    image = a.image.url.replace(settings.MEDIA_URL, '')
+                else:
+                    image = a.image.url
+                    
+                project = {}
+                project['id'] = a.id
+                project['name'] = a.name
+                project['description'] = a.description
+                project['image'] = urllib.unquote(image)
+                projects.append(project)
             
     if len (projects_by_user) == 1 and not is_superuser(user) and from_login:
         return redirect('project_load', pid=projects_by_user[0].project_id)
