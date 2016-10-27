@@ -465,7 +465,7 @@ editionBar.prototype.deactivateControls = function() {
 	if (this.drawInteraction != null) {
 		this.map.removeInteraction(this.drawInteraction);
 		this.drawInteraction = null;
-		this.source.clear();
+		//this.source.clear();
 	}
 	
 	if (this.modifyInteraction != null) {
@@ -537,6 +537,8 @@ editionBar.prototype.createFeatureForm = function(feature) {
 			ui += '</div>';
 		}
 	}
+	ui +=       	'<div id="edition-error">';
+	ui +=       	'</div>';
 	ui += 		'</div>';
 	ui += 		'<div class="box-footer text-right">';
 	ui += 			'<button id="save-feature" class="btn btn-default margin-r-5">' + gettext('Save') + '</button>';
@@ -619,6 +621,8 @@ editionBar.prototype.editFeatureForm = function(feature) {
 			ui += '</div>';
 		}
 	}
+	ui +=       	'<div id="edition-error">';
+	ui +=       	'</div>';
 	ui += 		'</div>';
 	ui += 		'<div class="box-footer text-right">';
 	ui += 			'<button id="edit-feature" class="btn btn-default margin-r-5">' + gettext('Save') + '</button>';
@@ -732,6 +736,7 @@ editionBar.prototype.transactWFS = function(p,f) {
 	var success = false;
 
 	var cloned = f.clone();	
+	var prop = cloned.getGeometry().getProperties();
 	cloned.getGeometry().transform('EPSG:3857',this.selectedLayer.crs.crs);
 	cloned.setId(f.getId());
 	
@@ -751,19 +756,26 @@ editionBar.prototype.transactWFS = function(p,f) {
 				properties[geometryName] = cloned.getGeometry();
 			}
 			var coordinates = cloned.getGeometry().getCoordinates();
-			/*if (this.geometryType == 'point') {
-				coordinates[0].reverse();
+			if (this.geometryType == 'Point' || this.geometryType == 'MultiPoint') {
+				if (coordinates.length == 1 && coordinates[0].length == 2) {
+					coordinates[0].reverse();
+				} else if (coordinates.length == 2) {
+					coordinates.reverse();
+				}
 				
-			} else if (this.geometryType == 'line'){
+				
+			} else if (this.geometryType == 'LineString' || this.geometryType == 'MultiLineString'){
 				for (var j=0; j<coordinates[0].length; j++) {
 					coordinates[0][j].reverse();
 				}
 				
-			} else if (this.geometryType == 'polygon'){
-				for (var j=0; j<coordinates[0][0].length; j++) {
-					coordinates[0][0][j].reverse();
+			} else if (this.geometryType == 'Polygon' || this.geometryType == 'MultiPolygon'){
+				for (var j=0; j<coordinates[0].length; j++) {
+					for (var k=0; k<coordinates[0][j].length; k++) {
+						coordinates[0][j][k].reverse();
+					}
 				}
-			}*/
+			}
 			
 			cloned.getGeometry().setCoordinates(coordinates);
 			cloned.setGeometryName(geometryName);
@@ -774,9 +786,15 @@ editionBar.prototype.transactWFS = function(p,f) {
 			}
 			
 			var feature = new ol.Feature();
-			feature.setGeometry(cloned.getGeometry());				
+			feature.setGeometry(cloned.getGeometry());	
+			feature.setGeometryName(geometryName);
 			feature.setProperties(properties);
 			feature.setId(f.getId());
+			
+			if (geometryName != 'geometry') {
+				feature.values_['geometry'] = null;
+				delete feature.values_['geometry'];
+			}
 			
 			node = this.formatWFS.writeTransaction(null,[feature],null,this.formatGML);
 			break;
@@ -813,8 +831,14 @@ editionBar.prototype.transactWFS = function(p,f) {
 			}
 			
 		} catch (err) {
-			$('#form-error').empty();
-			$('#form-error').append('<p> * ' + gettext('Failed to save the new record. Please check values') + '</p>');
+			$('#edition-error').empty();
+			var ui = '';
+			ui += '<div class="alert alert-danger alert-dismissible">';
+			ui += 	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
+			ui +=   '<h4><i class="icon fa fa-ban"></i> Error!</h4>';
+			ui +=   gettext('Failed to save the new record. Please check values');
+			ui += '</div>';
+			$('#edition-error').append(ui);
 			success = false;
 		}
 		
