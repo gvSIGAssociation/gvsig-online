@@ -4700,3 +4700,7 @@ table.text-center th {
 .gol-slider-output {
 	font-weight: 400;
 }
+
+.dropdown-menu-filemanager{
+	position: relative;
+}
