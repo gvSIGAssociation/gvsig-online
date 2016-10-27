@@ -144,6 +144,7 @@
 				if (data==null || data.length==0) {
 					var text = "{% trans 'Data store contains no resources to publish' %}";
 					rebuildSelect(name_select, text, true);
+					$.overlayout();
 					return;
 				}
 				var options = [];

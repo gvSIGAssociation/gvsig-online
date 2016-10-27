@@ -45,7 +45,7 @@
 		                  	<button type="button" class="btn btn-box-tool dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
 	                    		<i class="fa fa-wrench"></i>
 	                    	</button>
-	                    	<ul class="dropdown-menu" role="menu">
+	                    	<ul class="dropdown-menu dropdown-menu-right" role="menu">
 	                    	{% if file.filetype == "Directory" %}
 	                    		<li><a href="#" data-filepath="{{file.filepath}}" class="delete-file"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete directory" %}</a></li>                 		
 	                  		{% else %}

@@ -5,3 +5,7 @@
   background-color: red;
   vertical-align: middle;
 }
+
+.dropdown-menu-filemanager{
+	position: relative;
+}
