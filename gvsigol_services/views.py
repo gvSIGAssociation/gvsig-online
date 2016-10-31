@@ -1,6 +1,6 @@
 '''
     gvSIG Online.
-    Copyright (C) 2007-2015 gvSIG Association.
+    Copyright (C) 2007-2016 gvSIG Association.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -43,10 +43,6 @@ import urllib
 import utils
 import json
 import re
-import time
-from django.http.response import StreamingHttpResponse
-import os
-from django.contrib.auth.models import AnonymousUser
 
 from gvsigol.settings import MEDIA_ROOT, GVSIGOL_SERVICES
 
@@ -922,84 +918,4 @@ def get_datatable_data(request):
         }
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
-    
-@require_GET
-@login_required(login_url='/gvsigonline/auth/login_user/')
-def get_layerinfo(request):
-    user = request.user
-    readWriteLayers = Layer.objects.filter(layerwritegroup__group__usergroupuser__user=user)
-    readOnlyLayers = Layer.objects.filter(layerreadgroup__group__usergroupuser__user=user).exclude(layerwritegroup__group__usergroupuser__user=user)
-    universallyReadableLayers = Layer.objects.exclude(layerreadgroup__layer__isnull=False)
-    layerJson = layersToXml(readOnlyLayers, universallyReadableLayers, readWriteLayers)
-    return HttpResponse(layerJson, content_type='application/json')
 
-
-#@login_required(login_url='/gvsigonline/auth/login_user/')
-
-'''
-@require_GET
-@csrf_exempt
-def get_layerinfo(request):
-    universallyReadableLayers = Layer.objects.exclude(layerreadgroup__layer__isnull=False)
-    if not isinstance(request.user, AnonymousUser) :
-        user = request.user
-        readWriteLayers = Layer.objects.filter(layerwritegroup__group__usergroupuser__user=user)
-        readOnlyLayers = Layer.objects.filter(layerreadgroup__group__usergroupuser__user=user).exclude(layerwritegroup__group__usergroupuser__user=user)
-        layerJson = layersToXml(readOnlyLayers, universallyReadableLayers, readWriteLayers)
-    else:
-        layerJson = layersToXml(universallyReadableLayers)
-    return HttpResponse(layerJson, content_type='application/json')
-'''
-    
-def fill_layer_attrs(layer, permissions):
-    row = {}
-    row['name'] = layer.name
-    row['title'] = layer.title
-    row['abstract'] = layer.abstract
-    row['geomtype'] = 'polygon_xy'  #FIXME
-    row['srid'] = 4326 #FIXME
-    row['permissions'] = permissions
-    row['last-modified'] = long(time.time())   #FIXME
-    return row
-
-
-def layersToXml(universallyReadableLayers, readOnlyLayers=[], readWriteLayers=[]):
-    result = []
-    # the queries get some layers repeated if the user has several groups,
-    # so we use a set to keep them unique
-    layerIds = set()
-    for layer in readWriteLayers:
-        if not layer.id in layerIds:
-            row = fill_layer_attrs(layer, 'read-write')
-            result.append(row)
-            layerIds.add(layer.id)
-            
-    for layer in readOnlyLayers:
-        if not layer.id in layerIds:
-            row = fill_layer_attrs(layer, 'read-only')
-            result.append(row)
-            layerIds.add(layer.id)
-    
-    for layer in universallyReadableLayers:
-        if not layer.id in layerIds:
-            row = fill_layer_attrs(layer, 'read-only')
-            result.append(row)
-            layerIds.add(layer.id)
-            
-    layerStr = json.dumps(result)
-    return layerStr 
-
-#@login_required(login_url='/gvsigonline/auth/login_user/')
-
-@csrf_exempt
-def sync_download(request):
-    path = "/tmp/db2.sqlite"
-    f = open(path)
-    response = StreamingHttpResponse(f, content_type='application/spatialite')
-    response['Content-Disposition'] = 'attachment; filename=db.sqlite'
-    response['Content-Length'] = os.path.getsize(path)
-    return response
-    
-@login_required(login_url='/gvsigonline/auth/login_user/')
-def sync_upload(request):
-    pass
