@@ -25,6 +25,7 @@
 from models import Library, Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, TextSymbolizer, RasterSymbolizer, ColorMap
 from django.utils.translation import ugettext_lazy as _
 from gvsigol_core import utils as core_utils
+from gvsigol_core import geom
 from gvsigol_services.models import Layer
 from django.http import HttpResponse
 import utils, sld_builder
@@ -55,13 +56,13 @@ def create_default_style(layer_id, style_name, style_type, geom_type):
             s.is_default = False
             
     symbol_type = None
-    if geom_type == 'point':
+    if geom.isPoint(geom_type):
         symbol_type = 'MarkSymbolizer'           
-    elif geom_type == 'line':
+    elif geom.isLine(geom_type):
         symbol_type = 'LineSymbolizer'
-    elif geom_type == 'polygon':
+    elif geom.isPolygon(geom_type):
         symbol_type = 'PolygonSymbolizer'
-    elif geom_type == 'raster':
+    elif geom.isRaster(geom_type):
         symbol_type = 'RasterSymbolizer'
     
     rule = Rule(
