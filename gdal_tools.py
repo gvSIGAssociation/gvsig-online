@@ -26,6 +26,7 @@ import StringIO as io
 import subprocess
 import logging
 import re
+import os
 
 OGR2OGR_PATH = '/usr/bin/ogr2ogr'
 GDALINFO_PATH = '/usr/bin/gdalinfo'
@@ -125,3 +126,61 @@ def shp2postgis(shp_path, table_name, srs, host, port, dbname, schema, user, pas
         logging.error(msg)
         raise GdalError(rc, msg)
     return args
+
+def postgis2spatialite(table_name, out_spatialite_path, pg_conn_str, out_table_name=None, srs=None, creation_mode=MODE_CREATE, update=True):
+    """
+    Exports a single postgis table to spatialite
+    """
+    if not out_table_name:
+        out_table_name = table_name
+    args = [OGR2OGR_PATH, "-f", "SQLite", "-dsco", "SPATIALITE=YES", out_spatialite_path]
+    if update:
+        if os.path.exists(out_spatialite_path):
+        # we behave different to OGR, we allow the database to be created in update mode
+            args.extend("-update")
+    if creation_mode==MODE_APPEND:
+        args.extend(["-append"])
+    elif creation_mode==MODE_OVERWRITE:
+        args.extend(['-overwrite'])
+    args.extend(["-nln", out_table_name])
+    if srs:
+        args.extend(["-s_srs", srs, "-a_srs", srs])
+    args.extend(["-lco", "LAUNDER=NO"])
+    safe_args = list(args)
+    args.extend([unicode(pg_conn_str), table_name])
+    safe_args.extend([pg_conn_str.getSafeString(), table_name])
+    print " ".join(safe_args)
+    p = subprocess.Popen(args, stdin=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=-1)
+    output, err = p.communicate()
+    rc = p.returncode
+    print "return code: " + str(rc)
+    if rc>0:
+        msg = _("Error exporting layer from PostGIS to Spatialite. Ogr2ogr error: {msg}").format(msg=err)
+        logging.error(msg)
+        raise GdalError(rc, msg)
+    return args
+
+
+class PgConnectionString():
+    conn_string_tpl = u"PG:host='{host}' port='{port}' user='{user}' dbname='{dbname}' password='{password}'"
+    def __init__(self, host=None, port=None, dbname=None, schema=None, user=None, password=None):
+        self.host = host
+        self.port = port
+        self.dbname = dbname
+        self.schema = schema
+        self.user = user
+        self.password = password
+        
+    def __unicode__(self):
+        return self.conn_string_tpl.format(host=self.host, port=self.port, user=self.user, dbname=self.dbname, password=self.password, schema=self.schema)
+    
+    def __str__(self):
+        return self.__unicode__().encode('utf-8') 
+    
+    def getSafeString(self):
+        """
+        Returns the connection string, replacing the password by 'xxxxxx' and wrapping it in double quotes
+        """
+        return '"' + self.conn_string_tpl.format(host=self.host, port=self.port, user=self.user, dbname=self.dbname, password='xxxxxx', schema=self.schema) + '"'
+        
+    
