@@ -15,6 +15,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from gvsigol_core.geom import RASTER
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
@@ -40,6 +41,7 @@ import gdal_tools
 import logging
 import json
 import re
+from gvsigol_core import geom
 
 class UnsupportedRequestError(Exception):
     pass
@@ -295,29 +297,51 @@ class Geoserver():
                 workspace = Workspace.objects.get(id=datastore.workspace_id)
                 result = self.rest_catalog.get_feature_type(workspace.name, datastore.name, layer.name, user=self.user, password=self.password)
                 attr_list = result['featureType']['attributes']['attribute']
-                type = ''
                 for attr in attr_list:
-                    if 'com.vividsolutions.jts.geom' in attr['binding']:
-                        geom = attr['binding']
-                        if 'Polygon' in geom:
-                            type = 'polygon'
-                        elif 'LineString' in geom:
-                            type = 'line'                           
-                        elif 'Point' in geom:
-                            type = 'point'
-                
-                return type
-            
+                    geom_type = geom.fromJTS(attr['binding'])
+                    if geom_type != None:
+                        return geom_type
             else:
                 return 'raster'
         
         except Exception as e:
             return False
+    
+    def get_geometry_info(self, layer, as_srid=True):
+        """
+        Returns an object containing the geometry the_type and the SRS of the layer.
+        Example: {'geomtype': 'Polygon', 'srs': 4326} 
         
+        :param layer: A Layer django object
+        :param as_srid: If True, it returns a numeric EPSG code. If False, it returns
+              an string SRS definition (exactly as defined in the map service). 
+        """
+        try:           
+            datastore = Datastore.objects.get(id=layer.datastore_id)
+            the_type = "unknown"
+            if layer.type == 'v_PostGIS' or layer.type == 'v_PostGIS_View':
+                workspace = Workspace.objects.get(id=datastore.workspace_id)
+                result = self.rest_catalog.get_feature_type(workspace.name, datastore.name, layer.name, user=self.user, password=self.password)
+                attr_list = result['featureType']['attributes']['attribute']
+                for attr in attr_list:
+                    geom_type = geom.fromJTS(attr['binding'])
+                    if geom_type != None:
+                        the_type = geom_type
+                        break;
+            else:
+                the_type = 'raster'
+            srs = result['featureType']['srs']
+            if as_srid:
+                srs = geom.epsgToSrid(srs)
+            return {"geomtype": the_type, "srs": srs}
+        
+        except Exception as e:
+            return False
+    
     def createDefaultStyle(self, layer, style_name):
         geom_type = self.get_geometry_type(layer)
         style_type = 'US'
-        if geom_type == 'raster':
+        if geom_type == RASTER:
             style_type = 'CT'
             
         sld_body = symbology_services.create_default_style(layer.id, style_name, style_type, geom_type)

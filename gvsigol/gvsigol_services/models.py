@@ -76,6 +76,9 @@ class Layer(models.Model):
     
     def __unicode__(self):
         return self.name
+    
+    def get_qualified_name(self):
+        return self.datastore.workspace.name + ":" + self.name
 
 
 class LayerReadGroup(models.Model):
@@ -91,3 +94,12 @@ class LayerWriteGroup(models.Model):
 class DataRule(models.Model):
     path = models.CharField(max_length=500)
     roles = models.CharField(max_length=500)
+
+class LayerLock(models.Model):
+    layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
+    created_by = models.CharField(max_length=100)
+    
+    def __unicode__(self):
+        return self.layer.name
+    
