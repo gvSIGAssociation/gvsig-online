@@ -35,6 +35,12 @@ for app in settings.INSTALLED_APPS:
         urlpatterns += patterns('',
             url(r'^gvsigonline/', include(app + '.urls')),
         )
+        
+for plugin in settings.INSTALLED_APPS:
+    if 'gvsigol_plugin_' in plugin:
+        urlpatterns += patterns('',
+            url(r'^gvsigonline/', include(plugin + '.urls')),
+        )
     
 if 'gvsigol_core' in settings.INSTALLED_APPS:
     urlpatterns += patterns('',
