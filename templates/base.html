@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 {% load staticfiles %}
 {% load i18n %}
+{% load include_if_exists %}
 <html>
 <head>
 	
@@ -25,7 +26,15 @@
     {% for app in INSTALLED_APPS %}												  
 		{% if 'gvsigol_app_' in app %}	
 			{% with "load_css_"|add:app|cut:"gvsigol_app_"|add:".html" as aux %}	   			 	
-				{% include aux %}	
+				{% include_if_exists aux %}
+			{% endwith %}
+		{% endif %}		    					
+	{% endfor %}
+	
+	{% for plugin in INSTALLED_APPS %}												  
+		{% if 'gvsigol_plugin_' in plugin %}	
+			{% with "load_css_"|add:plugin|cut:"gvsigol_plugin_"|add:".html" as aux %}	   			 	
+				{% include_if_exists aux %}
 			{% endwith %}
 		{% endif %}		    					
 	{% endfor %}
@@ -104,13 +113,15 @@
 						{% include "dashboard_core_menu.html" %}
 							
 						{% if user.is_superuser %}
-							{% for app in INSTALLED_APPS %}												  
-		    					{% if 'gvsigol_app_' in app %}	
-		    						{% with "dashboard_"|add:app|cut:"gvsigol_app_"|add:"_menu.html" as aux %}	    	
-										{% include aux %}	
+						
+							{% for plugin in INSTALLED_APPS %}												  
+		    					{% if 'gvsigol_plugin_' in plugin %}	
+		    						{% with "dashboard_"|add:plugin|cut:"gvsigol_plugin_"|add:"_menu.html" as aux %}	    	
+										{% include_if_exists aux %}	
 									{% endwith %}
 		    					{% endif %}		    					
 		    				{% endfor %}
+		    				
 						{% endif %}			
 					{% endif %}						
 				</ul>				
