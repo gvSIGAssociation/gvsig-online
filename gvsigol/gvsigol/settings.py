@@ -58,9 +58,9 @@ INSTALLED_APPS = [
     'gvsigol_filemanager',
     'gvsigol_core',
     'gvsigol_app_dev',
-    'gvsigol_app_worldwind',
-    'gvsigol_app_shps_folder',
-    'gvsigol_app_geocoding'
+    'gvsigol_plugin_worldwind',
+    'gvsigol_plugin_shps_folder',
+    'gvsigol_plugin_geocoding'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -142,22 +142,22 @@ AUTH_PASSWORD_VALIDATORS = [
 
 GVSIGOL_LDAP = {
     'ENABLED': True,
-    'HOST':'test.scolab.eu',
+    'HOST':'test.gvsigonline.com',
     'PORT': '389',
-    'DOMAIN': 'dc=test,dc=scolab,dc=eu',
-    'USERNAME': 'cn=admin,dc=test,dc=scolab,dc=eu',
+    'DOMAIN': 'dc=test,dc=gvsigonline,dc=com',
+    'USERNAME': 'cn=admin,dc=test,dc=gvsigonline,dc=com',
     'PASSWORD': 'GE2wa8RE',
     'AD': ''
 }
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.RemoteUserBackend',
-    'django_auth_ldap.backend.LDAPBackend',
-    #'django.contrib.auth.backends.ModelBackend',
+    #'django.contrib.auth.backends.RemoteUserBackend',
+    #'django_auth_ldap.backend.LDAPBackend',
+    'django.contrib.auth.backends.ModelBackend',
 )
-AUTH_LDAP_SERVER_URI = "ldap://test.scolab.eu:389"
-AUTH_LDAP_ROOT_DN = "dc=test,dc=scolab,dc=eu"
-AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=test,dc=scolab,dc=eu", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
+AUTH_LDAP_SERVER_URI = "ldap://test.gvsigonline.com:389"
+AUTH_LDAP_ROOT_DN = "dc=test,dc=gvsigonline,dc=com"
+AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=test,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 
 
 # Internationalization
@@ -180,8 +180,8 @@ LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol_symbology/locale'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/locale'),
     os.path.join(BASE_DIR, 'gvsigol_app_dev/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_app_worldwind/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_app_shps_folder/locale'),
+    os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/locale'),
+    os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/locale'),
 )
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -209,8 +209,8 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
     os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
-    os.path.join(BASE_DIR, 'gvsigol_app_worldwind/static'),
-    os.path.join(BASE_DIR, 'gvsigol_app_shps_folder/static'),
+    os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/static'),
+    os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/static'),
 )
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -223,7 +223,7 @@ GVSIGOL_VERSION = '2.1.0'
 GVSIGOL_USERS_CARTODB = {
     'dbhost': 'localhost',
     'dbport': '5432',
-    'dbname': 'carto',
+    'dbname': 'gvsigonline_v2',
     'dbuser': 'postgres',
     'dbpassword': 'postgres'
 }
@@ -236,10 +236,10 @@ GVSIGOL_CATALOG = {
 
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
-    'URL': 'https://localhost/gs-test',
+    'URL': 'https://localhost/gs-local',
     'USER': 'admin',
-    'PASSWORD': 'admin52',
-    'CLUSTER_NODES':['https://localhost/gs-test', 'https://localhost/gs-test'],
+    'PASSWORD': 'geoserver',
+    'CLUSTER_NODES':[],
     'SUPPORTED_TYPES': (
                         ('v_PostGIS', _('PostGIS vector')),
                         ('v_SHP', _('Shapefile folder')),                        
