@@ -143,7 +143,7 @@ def layersToJson(universallyReadableLayers, readOnlyLayers=[], readWriteLayers=[
 @csrf_exempt
 def sync_download(request):
     locked_layers = []
-    tables = []
+    prepared_tables = []
     try:
         request_params = json.loads(request.body)
         layers = request_params["layers"]
@@ -162,15 +162,14 @@ def sync_download(request):
             user = params_dict["user"]
             password = params_dict["passwd"]
             conn = gdal_tools.PgConnectionString(host, port, dbname, schema, user, password)
-            tables.append({"layer": lock.layer.name, "connection": conn})
+            prepared_tables.append({"layer": lock.layer, "connection": conn})
         
         (fd, file_path) = tempfile.mkstemp(suffix=".sqlite", prefix="syncdwld_")
         os.close(fd)
         os.remove(file_path)
-        if len(tables)>0:
-            gdal_tools.postgis2spatialite(tables[0]["layer"], file_path, tables[0]["connection"])
-            for table in tables[1:]:
-                gdal_tools.postgis2spatialite(table["layer"], file_path, table["connection"])
+        if len(prepared_tables)>0:
+            for table in prepared_tables:
+                gdal_tools.postgis2spatialite(table["layer"].name, file_path, table["connection"], out_table_name=table["layer"].get_qualified_name())
             
             file = TemporaryFileWrapper(file_path)
             response = FileResponse(file, content_type='application/spatialite')
@@ -235,9 +234,10 @@ def remove_layer_lock(qualified_layer_name, user):
 #@login_required(login_url='/gvsigonline/auth/login_user/')
 @csrf_exempt
 def sync_upload(request):
+    tmpfile = None
     if request.is_ajax():
         if request.method == 'POST':
-            handle_uploaded_file_raw(request.body.read())
+            tmpfile = handle_uploaded_file_raw(request.body.read())
     elif 'fileupload' in request.FILES:
         tmpfile = handle_uploaded_file(request.FILES.get('fileupload'))    
     elif 'fileupload' in request.POST:
@@ -246,12 +246,18 @@ def sync_upload(request):
             tmpfile = handle_uploaded_file_base64(zipcontents)
         except:
             #syncLogger.exception("'zipfile' param missing or incorrect")
-            return HttpResponseBadRequest("'zipfile' param missing or incorrect")
+            return HttpResponseBadRequest("'fileupload' param missing or incorrect")
     else:
         #syncLogger.error("'zipfile' param missing or incorrect")
-        return HttpResponseBadRequest("'zipfile' param missing or incorrect") 
-
-
+        return HttpResponseBadRequest("'fileupload' param missing or incorrect")
+    if tmpfile:
+         # 1 - check if the file is a spatialite database
+         # 2 - check if the included tables are locked and writable by the user
+         # 3 - overwrite the tables in DB using the uploaded tables
+         # 4 - remove the table locks
+         # 5 - handle images
+         # 6 - remove the temporal file
+         pass
 
 
 def handle_uploaded_file(f):
