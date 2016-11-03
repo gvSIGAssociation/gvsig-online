@@ -74,7 +74,7 @@ def login_user(request):
             
         else:
             '''
-            user = authenticate(remote_user="admin")
+            user = authenticate(remote_user="root")
             request.session['username'] = None
             request.session['password'] = None
             if user is not None:
@@ -136,7 +136,7 @@ def password_reset_success(request):
 @staff_required
 def user_list(request):
     
-    users_list = User.objects.exclude(username='admin')
+    users_list = User.objects.exclude(username='root')
     
     users = []
     for u in users_list:

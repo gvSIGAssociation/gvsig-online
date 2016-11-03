@@ -79,18 +79,18 @@ class GvSigOnlineServices():
         if self.is_enabled:
             try:
                 
-                dn=str("cn=admin,ou=users," + self.domain)
+                dn=str("cn=root,ou=users," + self.domain)
                 attrs = {}
-                attrs['cn'] = 'admin'
+                attrs['cn'] = 'root'
                 attrs['gidNumber'] = '501'
                 attrs['givenName'] = ''
-                attrs['homeDirectory'] = '/home/users/admin'
+                attrs['homeDirectory'] = '/home/users/root'
                 attrs['objectclass'] = ['top','posixAccount','inetOrgPerson','extensibleObject']
                 attrs['userPassword'] = self.password
                 attrs['oclExtraAttrs'] = 'CAT_ALL_Administrator'
                 attrs['uidNumber'] = '1000'
-                attrs['sn'] = 'admin'
-                attrs['uid'] = 'admin'
+                attrs['sn'] = 'root'
+                attrs['uid'] = 'root'
             
                 ldif = modlist.addModlist(attrs)
                 self.ldap.add_s(dn,ldif)
@@ -99,11 +99,11 @@ class GvSigOnlineServices():
                 pass
             try:
                 # ensure the user exists both on django and ldap
-                if not User.objects.filter(username="admin").exists():
-                    admin_user = User.objects.create_superuser(username='admin', password=self.password, email='jrodrigo@scolab.es')
+                if not User.objects.filter(username="root").exists():
+                    admin_user = User.objects.create_superuser(username='root', password=self.password, email='info@scolab.es')
                     admin_user.is_superuser = True
                     admin_user.is_staff = True
-                    admin_group = UserGroup.objects.get(name__exact='admin')
+                    admin_group = UserGroup.objects.get(name__exact='root')
                     usergroup_user = UserGroupUser(
                         user = admin_user,
                         user_group = admin_group
