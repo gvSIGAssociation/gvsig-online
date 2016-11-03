@@ -221,7 +221,7 @@ GVSIGOL_CATALOG = {
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
     'URL': '##GEOSERVER_BASE_URL##',
-    'USER': 'admin',
+    'USER': 'root',
     'PASSWORD': '##GEOSERVER_ADMIN_PASS##',
     'CLUSTER_NODES':[##GEOSERVER_CLUSTER_NODES##],
     'SUPPORTED_TYPES': (
