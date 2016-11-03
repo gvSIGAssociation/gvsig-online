@@ -142,7 +142,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 GVSIGOL_LDAP = {
     'ENABLED': True,
-    'HOST':'test.gvsigonline.com',
+    'HOST':'devel.gvsigonline.com',
     'PORT': '389',
     'DOMAIN': 'dc=test,dc=gvsigonline,dc=com',
     'USERNAME': 'cn=admin,dc=test,dc=gvsigonline,dc=com',
@@ -152,10 +152,10 @@ GVSIGOL_LDAP = {
 
 AUTHENTICATION_BACKENDS = (
     #'django.contrib.auth.backends.RemoteUserBackend',
-    #'django_auth_ldap.backend.LDAPBackend',
-    'django.contrib.auth.backends.ModelBackend',
+    'django_auth_ldap.backend.LDAPBackend',
+    #'django.contrib.auth.backends.ModelBackend',
 )
-AUTH_LDAP_SERVER_URI = "ldap://test.gvsigonline.com:389"
+AUTH_LDAP_SERVER_URI = "ldap://devel.gvsigonline.com:389"
 AUTH_LDAP_ROOT_DN = "dc=test,dc=gvsigonline,dc=com"
 AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=test,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 
