@@ -15,6 +15,7 @@ class Project(models.Model):
     extent = models.CharField(max_length=250)
     toc_order = models.TextField(null=True, blank=True)
     created_by = models.CharField(max_length=100)
+    is_public = models.BooleanField(default=False)
     
     def __unicode__(self):
         return self.name + ' - ' + self.description
