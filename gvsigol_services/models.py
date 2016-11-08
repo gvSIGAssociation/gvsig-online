@@ -102,4 +102,29 @@ class LayerLock(models.Model):
     
     def __unicode__(self):
         return self.layer.name
+
+class LayerResource(models.Model):
+    """Stores resources (images, pdfs, etc) linked to specific features in a Layer"""
+    
+    """image files, stored in the file system"""
+    EXTERNAL_IMAGE = 1
+    """PDF files, stored in the file system""" 
+    EXTERNAL_PDF = 2
+    """.ODT or .DOC files, stored in the file system"""
+    EXTERNAL_DOC = 4
+    """any kind of resource file"""
+    EXTERNAL_FILE = 8
+    """Valid resource types"""
+    TYPE_CHOICES = (
+        (EXTERNAL_IMAGE, 'Image'),
+        (EXTERNAL_PDF, 'PDF'),
+        (EXTERNAL_DOC, 'DOC'),
+        (EXTERNAL_FILE, 'File'),
+    )
+    layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
+    """The primary key of the feature. This makes mandatory for
+    gvSIG Online layers to have a numeric, non-complex primary key"""
+    feature = models.IntegerField()
+    type = models.IntegerField(choices=TYPE_CHOICES)
+    path = models.CharField(max_length=500)
     
