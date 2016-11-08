@@ -127,4 +127,6 @@ class LayerResource(models.Model):
     feature = models.IntegerField()
     type = models.IntegerField(choices=TYPE_CHOICES)
     path = models.CharField(max_length=500)
-    
+    """The title of the resource (optional)"""
+    title = models.TextField(blank=True)
+    created = models.DateTimeField(auto_now_add=True)
