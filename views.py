@@ -740,40 +740,16 @@ def layergroup_delete(request, lgid):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @superuser_required
 def layer_create(request):
+    layer_type = "gs_vector_layer"
     if request.method == 'POST':
-        layer_type = request.POST.get('id_layer_type')
         abstract = request.POST.get('md-abstract')
         (form_class, template) = mapservice_backend.getLayerCreateForm(layer_type)
         if form_class is not None:
             form = form_class(request.POST)
             if form.is_valid():
                 try:
-                    l = mapservice_backend.createLayer(form.cleaned_data, layer_type)
+                    mapservice_backend.createTable(form.cleaned_data)
                     
-                    datastore = Datastore.objects.get(id=l.datastore.id)
-                    workspace = Workspace.objects.get(id=datastore.workspace_id)
-                    
-                    style_name = workspace.name + '_' + l.name + '_default'
-                    mapservice_backend.createDefaultStyle(l, style_name)
-                    mapservice_backend.setLayerStyle(l.name, style_name)
-                    
-                    mapservice_backend.addGridSubset(workspace, l)
-                    l.metadata_uuid = ''
-                    try:
-                        if gvsigol.settings.CATALOG_MODULE:
-                            layer_info = mapservice_backend.getResourceInfo(workspace.name, datastore.name, l.name, "json")
-                            muuid = gn_backend.metadata_insert(request.session, l, abstract, workspace, layer_info)
-                            l.metadata_uuid = muuid
-                    except Exception as exc:
-                        logging.exception(exc)
-                        l.save()
-                        return HttpResponseRedirect(reverse('layer_update', kwargs={'layer_id': l.id}))
-                    l.save()
-                    core_utils.toc_add_layer(l)
-                    mapservice_backend.createOrUpdateGeoserverLayerGroup(l.layer_group)
-                    return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': l.id}))
-                except rest_geoserver.RequestError as e:
-                    form.add_error(None, _(e.get_message()))
                 except Exception as exc:
                     # ensure the ds gets cleaned if we've failed
                     # FIXME: clean up disabled at the moment, as it has security implications
@@ -783,25 +759,23 @@ def layer_create(request):
                     #mapservice_backend.deleteDatastore(ds.workspace, ds, "all", session=request.session)
                     print exc
                     form.add_error(None, _("Error uploading the layer. Review the file format."))
-            data = {
-                'form': form,
-                'layer_type': layer_type
-            }
-            mapservice_backend.reload_nodes()
-            return render(request, template, data)
-    else:
-        layer_type = request.GET.get('id_layer_type')
-        if layer_type is None:
-            data = { 'types':mapservice_backend.getLayerCreateTypes() }
-            return render(request, 'layer_create_type_choice.html', data)
-        else:
-            (form_class, template) = mapservice_backend.getLayerCreateForm(layer_type)
-            if form_class is not None:
+                    
+            else:
                 data = {
-                    'form': form_class(),
+                    'form': form,
                     'layer_type': layer_type
                 }
                 return render(request, template, data)
+        
+    else:
+        (form_class, template) = mapservice_backend.getLayerCreateForm(layer_type)
+        if form_class is not None:
+            data = {
+                'form': form_class(),
+                'layer_type': layer_type
+            }
+            return render(request, template, data)
+        
     return HttpResponseBadRequest()
 
 

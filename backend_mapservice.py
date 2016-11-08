@@ -583,9 +583,9 @@ class Geoserver():
     
     def getLayerCreateForm(self, layer_type):
         if layer_type==Geoserver.CREATE_TYPE_SQL_VIEW:
-            return (forms_geoserver.CreateSqlViewForm,  "geoserver/create_layer_sql_view.html")
+            return (forms_geoserver.CreateSqlViewForm,  "layer_sql_view.html")
         if layer_type==Geoserver.CREATE_TYPE_VECTOR_LAYER:
-            return (forms_geoserver.CreateFeatureTypeForm,  "geoserver/create_layer_feature_type.html")
+            return (forms_geoserver.CreateFeatureTypeForm,  "layer_create.html")
         return (None, None)
     
     def getUploadForm(self, datastore_type, request):
@@ -1053,6 +1053,28 @@ class Geoserver():
         l.created_by = request.user.username
         l.save()
         return l
+    
+    def createTable(self, form):
+        datastore = form.get('datastore')
+        name = form.get('name')
+        geom_type = form.get('geom_type')
+        srs = form.get('srs').split(':')[1]
+        
+        try:
+            params = json.loads(datastore.connection_params)
+            host = params['host']
+            port = params['port']
+            dbname = params['database']
+            user = params['user']
+            passwd = params['passwd']
+            schema = params.get('schema', 'public')
+            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+            i.create_table(schema, name, geom_type, srs, [])
+            return True
+        
+        except Exception as e:
+            print str(e)
+            raise
     
     def setDataRules(self):
         

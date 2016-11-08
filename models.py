@@ -73,6 +73,7 @@ class Layer(models.Model):
     cached = models.BooleanField(default=True)
     single_image = models.BooleanField(default=False)
     created_by = models.CharField(max_length=100)
+    conf = models.TextField(null=True, blank=True)
     
     def __unicode__(self):
         return self.name
