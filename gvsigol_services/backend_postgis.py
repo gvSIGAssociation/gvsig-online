@@ -180,6 +180,16 @@ class Introspect:
         
         return [r[0] for r in self.cursor.fetchall()]
     
+    def create_table(self, schema, table_name, geom_type, srs, fields):
+        query = ""
+        query += "CREATE TABLE " + schema + "." + table_name + " ("
+        query += "    gid serial NOT NULL,"
+        query += "    wkb_geometry geometry(" + geom_type + "," + srs + "),"
+        query += "    CONSTRAINT " + table_name + "_pkey PRIMARY KEY (gid)"
+        query += ")"
+        
+        self.cursor.execute(query)
+        
     def close(self):
         """
         Closes the connection. The Introspect object can't be used afterwards
