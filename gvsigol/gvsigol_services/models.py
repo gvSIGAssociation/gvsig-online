@@ -131,3 +131,19 @@ class LayerResource(models.Model):
     """The title of the resource (optional)"""
     title = models.TextField(blank=True)
     created = models.DateTimeField(auto_now_add=True)
+    
+class Enumeration(models.Model):
+    name = models.CharField(max_length=150) 
+    title = models.CharField(max_length=500, null=True, blank=True)
+    created_by = models.CharField(max_length=100)
+    
+    def __unicode__(self):
+        return self.name
+    
+class EnumerationItem(models.Model):
+    name = models.CharField(max_length=150) 
+    selected = models.BooleanField(default=False)
+    order = models.IntegerField(null=False, default=0)
+    
+    def __unicode__(self):
+        return self.name
