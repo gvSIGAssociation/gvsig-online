@@ -337,9 +337,12 @@
 				
 			} else if ( field.type == 'enumeration') {
 				ui += '<div class="col-md-12 form-group">';
-				ui += 	'<label>' + gettext('Default value') + '</label>';
-				ui += 	'<input type="text" id="field-default-value-'+id+'" name="field-default-value" class="form-control" value="' + field.defaultValue + '">';
-				ui += 	'<p class="text-muted">* ' + gettext('Enter values ​​separated by semi-colons') + '.</p>';
+				ui += 	'<label>' + gettext('Select enumeration') + '</label>';
+				ui += 	'<select id="field-db-type" class="form-control">';
+						'{% for enum in enumerations %}'
+				ui += 	'<option value="{{enum.name}}">{{enum.name}}</option>';
+						'{% endfor%}'
+				ui += 	'</select>';
 				ui += '</div>';
 				
 			} else if ( field.type == 'integer' || field.type == 'double') {
@@ -385,9 +388,12 @@
 				
 			} else if ( $('#field-db-type').val() == 'enumeration') {
 				dv += '<div class="col-md-12 form-group">';
-				dv += 	'<label>' + gettext('Default value') + '</label>';
-				dv += 	'<input type="text" id="field-default-value-'+id+'" name="field-default-value" class="form-control" placeholder="' + gettext('value1;value2;value3;...') + '">';
-				dv += 	'<p class="text-muted">* ' + gettext('Enter values ​​separated by semi-colons') + '.</p>';
+				dv += 	'<label>' + gettext('Select enumeration') + '</label>';
+				dv += 	'<select id="field-db-type" class="form-control">';
+						'{% for enum in enumerations %}'
+				dv += 	'<option value="{{enum.name}}">{{enum.name}}</option>';
+						'{% endfor%}'
+				dv += 	'</select>';
 				dv += '</div>';
 				
 			} else if ( $('#field-db-type').val() == 'integer' || $('#field-db-type').val() == 'double') {
