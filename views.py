@@ -23,7 +23,7 @@ from django.shortcuts import render
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response, redirect, RequestContext
-from models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup
+from models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, Enumeration, EnumerationItem
 from forms_services import WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from backend_mapservice import gn_backend, WrongElevationPattern, WrongTimePattern, backend as mapservice_backend
@@ -777,6 +777,165 @@ def layer_create(request):
             return render(request, template, data)
         
     return HttpResponseBadRequest()
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def enumeration_list(request):
+    
+    enumeration_list = None
+    if request.user.is_superuser:
+        enumeration_list = Enumeration.objects.all()
+    else:
+        enumeration_list = Enumeration.objects.filter(created_by__exact=request.user.username)
+        
+    enumerations = []
+    for e in enumeration_list:
+        enum = {}
+        enum['id'] = e.id
+        enum['name'] = e.name
+        enum['title'] = e.title
+        enumerations.append(enum)
+                      
+    response = {
+        'enumerations': enumerations
+    }     
+    return render_to_response('enumeration_list.html', response, context_instance=RequestContext(request))
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def enumeration_add(request):
+    if request.method == 'POST':
+        name = request.POST.get('layergroup_name') + '_' + request.user.username
+        title = request.POST.get('layergroup_title')
+        
+        cached = False
+        if 'cached' in request.POST:
+            cached = True
+        
+        if name != '':
+            if _valid_name_regex.search(name) == None:
+                message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
+                return render_to_response('layergroup_add.html', {'message': message}, context_instance=RequestContext(request))
+        
+            exists = False
+            layergroups = LayerGroup.objects.all()
+            for lg in layergroups:
+                if name == lg.name:
+                    exists = True
+                    
+            if not exists:
+                layergroup = LayerGroup(
+                    name = name,
+                    title = title,
+                    cached = cached,
+                    created_by = request.user.username
+                )
+                layergroup.save()
+            
+            else:
+                message = _(u'Layer group name already exists')
+                return render_to_response('layergroup_add.html', {'message': message}, context_instance=RequestContext(request))
+            
+        else:
+            message = _(u'You must enter a name for layer group')
+            return render_to_response('layergroup_add.html', {'message': message}, context_instance=RequestContext(request))
+            
+        mapservice_backend.reload_nodes()
+        return redirect('layergroup_list')
+    
+    else:
+        return render_to_response('layergroup_add.html', {}, context_instance=RequestContext(request))
+    
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def enumeration_update(request, lgid):
+    if request.method == 'POST':
+        name = request.POST.get('layergroup_name')
+        title = request.POST.get('layergroup_title')
+        
+        cached = False
+        if 'cached' in request.POST:
+            cached = True
+        
+        layergroup = LayerGroup.objects.get(id=int(lgid))
+        mapservice_backend.deleteGeoserverLayerGroup(layergroup)
+        
+        sameName = False
+        if layergroup.name == name:
+            sameName = True
+            
+        exists = False
+        layergroups = LayerGroup.objects.all()
+        for lg in layergroups:
+            if name == lg.name:
+                exists = True
+        
+        old_name = layergroup.name
+        
+        if sameName:
+            layergroup.title = title
+            layergroup.cached = cached
+            layergroup.save()   
+            core_utils.toc_update_layer_group(layergroup, old_name, name)
+            mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
+            mapservice_backend.reload_nodes()
+            return redirect('layergroup_list')
+             
+        else:      
+            if not exists:   
+                if _valid_name_regex.search(name) == None:
+                    message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
+                    return render_to_response('layergroup_add.html', {'message': message}, context_instance=RequestContext(request))
+                
+                layergroup.name = name
+                layergroup.title = title
+                layergroup.cached = cached
+                layergroup.save()
+                core_utils.toc_update_layer_group(layergroup, old_name, name)
+                mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
+                mapservice_backend.reload_nodes()
+                return redirect('layergroup_list')
+                
+            else:
+                message = _(u'Layer group name already exists')
+                return render_to_response('layergroup_update.html', {'message': message, 'layergroup': layergroup}, context_instance=RequestContext(request))
+
+    else:
+        layergroup = LayerGroup.objects.get(id=int(lgid))
+        
+        return render_to_response('layergroup_update.html', {'lgid': lgid, 'layergroup': layergroup}, context_instance=RequestContext(request))
+    
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def enumeration_delete(request, lgid):        
+    if request.method == 'POST':
+        layergroup = LayerGroup.objects.get(id=int(lgid))
+        layers = Layer.objects.filter(layer_group_id=layergroup.id)    
+        projects_by_layergroup = ProjectLayerGroup.objects.filter(layer_group_id=layergroup.id)
+        for p in projects_by_layergroup:
+            p.project.toc_order = core_utils.toc_remove_layergroups(p.project.toc_order, [layergroup.id])
+            p.project.save()
+            
+        if len(PublicViewer.objects.all()) == 1:
+            public_viewer = PublicViewer.objects.all()[0]
+            public_viewer.toc_order = core_utils.toc_remove_layergroups(public_viewer.toc_order, [layergroup.id])
+            public_viewer.save()
+            
+        for layer in layers:  
+            if mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer):
+                layer.delete()       
+        mapservice_backend.deleteGeoserverLayerGroup(layergroup)
+        layergroup.delete()
+        mapservice_backend.setDataRules()
+        mapservice_backend.reload_nodes()
+        response = {
+            'deleted': True
+        }     
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 
 @require_GET

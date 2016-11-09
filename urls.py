@@ -24,6 +24,10 @@ urlpatterns = [
     url(r'^layergroup_add/$', 'gvsigol_services.views.layergroup_add', name='layergroup_add'),
     url(r'^layergroup_delete/(?P<lgid>[0-9]+)/$', 'gvsigol_services.views.layergroup_delete', name='layergroup_delete'),
     url(r'^layergroup_update/(?P<lgid>[0-9]+)/$', 'gvsigol_services.views.layergroup_update', name='layergroup_update'),
+    url(r'^enumeration_list/$', 'gvsigol_services.views.enumeration_list', name='enumeration_list'),
+    url(r'^enumeration_add/$', 'gvsigol_services.views.enumeration_add', name='enumeration_add'),
+    url(r'^enumeration_delete/(?P<lgid>[0-9]+)/$', 'gvsigol_services.views.enumeration_delete', name='enumeration_delete'),
+    url(r'^enumeration_update/(?P<lgid>[0-9]+)/$', 'gvsigol_services.views.enumeration_update', name='enumeration_update'),
     url(r'^layer_boundingbox_from_data/$', 'gvsigol_services.views.layer_boundingbox_from_data', name='layer_boundingbox_from_data'),
     url(r'^get_datatable_data/$', 'gvsigol_services.views.get_datatable_data', name='get_datatable_data'),
     

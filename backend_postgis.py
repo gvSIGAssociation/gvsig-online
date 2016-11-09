@@ -182,11 +182,15 @@ class Introspect:
     
     def create_table(self, schema, table_name, geom_type, srs, fields):
         query = ""
+        
+        query += "CREATE TYPE tipo AS ENUM ('tipo1', 'tipo2', 'tipo3');"
+        
         query += "CREATE TABLE " + schema + "." + table_name + " ("
         query += "    gid serial NOT NULL,"
         query += "    wkb_geometry geometry(" + geom_type + "," + srs + "),"
+        query += "    selected_type tipo,"
         query += "    CONSTRAINT " + table_name + "_pkey PRIMARY KEY (gid)"
-        query += ")"
+        query += ");"
         
         self.cursor.execute(query)
         
