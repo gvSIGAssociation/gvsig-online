@@ -141,6 +141,7 @@ class Enumeration(models.Model):
         return self.name
     
 class EnumerationItem(models.Model):
+    enumeration = models.ForeignKey(Enumeration, on_delete=models.CASCADE)
     name = models.CharField(max_length=150) 
     selected = models.BooleanField(default=False)
     order = models.IntegerField(null=False, default=0)
