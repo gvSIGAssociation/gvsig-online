@@ -7,9 +7,9 @@
 		<div class="col-md-12">
 			<div class="box box-primary">
 
-				<form role="form" method="post" action="/gvsigonline/services/layergroup_add/">
+				<form role="form" method="post" action="/gvsigonline/services/enumeration_add/">
 					<div class="box-header with-border">
-						<h3 class="box-title">{% trans "Add layer group" %}</h3>
+						<h3 class="box-title">{% trans "Add enumeration" %}</h3>
 						<div class="box-tools pull-right">
 							<button type="submit" class="btn btn-success btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
 						</div>
@@ -37,25 +37,34 @@
 										
 						<div class="row">
 							<div class="col-md-12">
-								<label for="layergroup_name">{% trans "Name" %}</label>
-								<input placeholder="{% trans 'Layer group name' %}" name="layergroup_name" id="layergroup_name" type="text" class="form-control">									
+								<label for="enumeration_name">{% trans "Name" %}</label>
+								<input name="enumeration_name" id="enumeration_name" type="text" class="form-control">									
 							</div>
 						</div>
 							
-						<div class="row">
-							<div class="col-md-12">
-								<label for="layergroup_title">{% trans "Title" %}</label>
-								<input placeholder="{% trans 'Layer group title' %}" name="layergroup_title" id="layergroup_title" type="text" class="form-control">								
-							</div>
-						</div>
+<!-- 						<div class="row"> -->
+<!-- 							<div class="col-md-12"> -->
+<!-- 								<label for="enumeration_title">{% trans "Title" %}</label> -->
+<!-- 								<input name="enumeration_title" id="enumeration_title" type="text" class="form-control">								 -->
+<!-- 							</div> -->
+<!-- 						</div> -->
 						
 						<br>
 						
-						<div class="row">
-							<div class="checkbox col-md-6">								
-								<label>
-									<input type="checkbox" name="cached" id="cached" />{% trans "Create cache for the layer group" %}
-								</label>
+						<div id="enumeration-items" class="row">
+							<div class="col-md-12">
+								<div class="box box-primary">
+									<div class="box-header with-border">
+										<h3 class="box-title">{% trans "Enumeration items" %}</h3>
+									</div>
+									<div id="enumeration-items-list" class="box-body">
+									</div>
+									<div class="box-footer clearfix">
+										<a id="add-item-button" href="javascript:void(0)" class="btn btn-box-tool pull-left margin-r-5">
+											<i class="fa fa-plus margin-r-5"></i>{% trans "Add item" %}
+										</a>
+									</div>
+								</div>
 							</div>
 						</div>
 
@@ -68,6 +77,34 @@
 {% block extra-scripts %}
 <script>
 	$('#menu-manage-services').addClass("active");
-	$('#submenu-layergroups').addClass("active");
+	$('#submenu-enumerations').addClass("active");
+	
+	$(document).ready(function() {
+		var itemCount = 0;
+		
+		$("#add-item-button").on('click', function(e){
+			
+			var ui = '';
+			
+			ui += '<div id="item-' + itemCount + '" class="row" style="margin-bottom: 15px;">';
+			ui += 	'<div class="col-md-10">';
+			ui += 		'<input placeholder="' + gettext('Insert item name') + '" name="item-content-' + itemCount + '" id="item-content-' + itemCount + '" type="text" class="form-control">';								
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-2">';
+			ui += 		'<button type="button" data-itemid="' + itemCount + '" id="delete-item-' + itemCount + '" class="delete-item btn btn-danger btn-sm"><i class="fa fa-times margin-r-5"></i> ' + gettext('Delete') + '</button>';								
+			ui += 	'</div>';
+			ui += '</div>';
+			
+			$('#enumeration-items-list').append(ui);
+			
+			$(".delete-item").on('click', function(e){
+				$('#item-' + this.dataset.itemid).remove();
+			});
+			
+			itemCount++;
+			
+		});
+			
+	});
 </script>
 {% endblock %}

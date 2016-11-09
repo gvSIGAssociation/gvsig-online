@@ -772,7 +772,8 @@ def layer_create(request):
         if form_class is not None:
             data = {
                 'form': form_class(),
-                'layer_type': layer_type
+                'layer_type': layer_type,
+                'enumerations': Enumeration.objects.all()
             }
             return render(request, template, data)
         
@@ -807,131 +808,88 @@ def enumeration_list(request):
 @staff_required
 def enumeration_add(request):
     if request.method == 'POST':
-        name = request.POST.get('layergroup_name') + '_' + request.user.username
-        title = request.POST.get('layergroup_title')
-        
-        cached = False
-        if 'cached' in request.POST:
-            cached = True
-        
+        name = request.POST.get('enumeration_name')
+        title = name
+                
         if name != '':
-            if _valid_name_regex.search(name) == None:
-                message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
-                return render_to_response('layergroup_add.html', {'message': message}, context_instance=RequestContext(request))
-        
             exists = False
-            layergroups = LayerGroup.objects.all()
-            for lg in layergroups:
-                if name == lg.name:
+            enumerations = Enumeration.objects.all()
+            for e in enumerations:
+                if name == e.name:
                     exists = True
                     
             if not exists:
-                layergroup = LayerGroup(
+                enum = Enumeration(
                     name = name,
                     title = title,
-                    cached = cached,
                     created_by = request.user.username
                 )
-                layergroup.save()
+                enum.save()
+                
+                for key in request.POST:
+                    if 'item-content' in key:
+                        item = EnumerationItem(
+                            enumeration = enum,
+                            name = request.POST.get(key),
+                            selected = False,
+                            order = 0
+                        )
+                        item.save()
             
             else:
-                message = _(u'Layer group name already exists')
-                return render_to_response('layergroup_add.html', {'message': message}, context_instance=RequestContext(request))
+                message = _(u'Enumeration name already exists')
+                return render_to_response('enumeration_add.html', {'message': message}, context_instance=RequestContext(request))
             
         else:
-            message = _(u'You must enter a name for layer group')
-            return render_to_response('layergroup_add.html', {'message': message}, context_instance=RequestContext(request))
-            
-        mapservice_backend.reload_nodes()
-        return redirect('layergroup_list')
-    
-    else:
-        return render_to_response('layergroup_add.html', {}, context_instance=RequestContext(request))
-    
-    
-@login_required(login_url='/gvsigonline/auth/login_user/')
-@staff_required
-def enumeration_update(request, lgid):
-    if request.method == 'POST':
-        name = request.POST.get('layergroup_name')
-        title = request.POST.get('layergroup_title')
-        
-        cached = False
-        if 'cached' in request.POST:
-            cached = True
-        
-        layergroup = LayerGroup.objects.get(id=int(lgid))
-        mapservice_backend.deleteGeoserverLayerGroup(layergroup)
-        
-        sameName = False
-        if layergroup.name == name:
-            sameName = True
-            
-        exists = False
-        layergroups = LayerGroup.objects.all()
-        for lg in layergroups:
-            if name == lg.name:
-                exists = True
-        
-        old_name = layergroup.name
-        
-        if sameName:
-            layergroup.title = title
-            layergroup.cached = cached
-            layergroup.save()   
-            core_utils.toc_update_layer_group(layergroup, old_name, name)
-            mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
-            mapservice_backend.reload_nodes()
-            return redirect('layergroup_list')
-             
-        else:      
-            if not exists:   
-                if _valid_name_regex.search(name) == None:
-                    message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
-                    return render_to_response('layergroup_add.html', {'message': message}, context_instance=RequestContext(request))
-                
-                layergroup.name = name
-                layergroup.title = title
-                layergroup.cached = cached
-                layergroup.save()
-                core_utils.toc_update_layer_group(layergroup, old_name, name)
-                mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
-                mapservice_backend.reload_nodes()
-                return redirect('layergroup_list')
-                
-            else:
-                message = _(u'Layer group name already exists')
-                return render_to_response('layergroup_update.html', {'message': message, 'layergroup': layergroup}, context_instance=RequestContext(request))
+            message = _(u'You must enter a name for enumeration')
+            return render_to_response('enumeration_add.html', {'message': message}, context_instance=RequestContext(request))
 
+        return redirect('enumeration_list')
+    
     else:
-        layergroup = LayerGroup.objects.get(id=int(lgid))
-        
-        return render_to_response('layergroup_update.html', {'lgid': lgid, 'layergroup': layergroup}, context_instance=RequestContext(request))
+        return render_to_response('enumeration_add.html', {}, context_instance=RequestContext(request))
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
-def enumeration_delete(request, lgid):        
+def enumeration_update(request, eid):
     if request.method == 'POST':
-        layergroup = LayerGroup.objects.get(id=int(lgid))
-        layers = Layer.objects.filter(layer_group_id=layergroup.id)    
-        projects_by_layergroup = ProjectLayerGroup.objects.filter(layer_group_id=layergroup.id)
-        for p in projects_by_layergroup:
-            p.project.toc_order = core_utils.toc_remove_layergroups(p.project.toc_order, [layergroup.id])
-            p.project.save()
+        name = request.POST.get('enumeration_name')
+        
+        enum = Enumeration.objects.get(id=int(eid))
+
+        enum.name = name
+        enum.save()
+        
+        items = EnumerationItem.objects.filter(enumeration_id=enum.id)
+        for i in items:
+            i.delete()
             
-        if len(PublicViewer.objects.all()) == 1:
-            public_viewer = PublicViewer.objects.all()[0]
-            public_viewer.toc_order = core_utils.toc_remove_layergroups(public_viewer.toc_order, [layergroup.id])
-            public_viewer.save()
+        for key in request.POST:
+            if 'item-content' in key:
+                item = EnumerationItem(
+                    enumeration = enum,
+                    name = request.POST.get(key),
+                    selected = False,
+                    order = 0
+                )
+                item.save()
+        
+        return redirect('enumeration_list')
             
-        for layer in layers:  
-            if mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer):
-                layer.delete()       
-        mapservice_backend.deleteGeoserverLayerGroup(layergroup)
-        layergroup.delete()
-        mapservice_backend.setDataRules()
-        mapservice_backend.reload_nodes()
+    else:
+        enum = Enumeration.objects.get(id=int(eid))
+        items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('name')
+        
+        return render_to_response('enumeration_update.html', {'eid': eid, 'enumeration': enum, 'items': items, 'count': len(items) + 1}, context_instance=RequestContext(request))
+    
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def enumeration_delete(request, eid):        
+    if request.method == 'POST':
+        enum = Enumeration.objects.get(id=int(eid))
+        enum.delete()
         response = {
             'deleted': True
         }     
