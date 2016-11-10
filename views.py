@@ -15,6 +15,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from string import lower
 
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
@@ -742,23 +743,85 @@ def layergroup_delete(request, lgid):
 def layer_create(request):
     layer_type = "gs_vector_layer"
     if request.method == 'POST':
+        
         abstract = request.POST.get('md-abstract')
+        is_visible = False
+        if 'visible' in request.POST:
+            is_visible = True
+        
+        is_queryable = False
+        if 'queryable' in request.POST:
+            is_queryable = True
+            
+        cached = False
+        if 'cached' in request.POST:
+            cached = True
+            
+        single_image = False
+        if 'single_image' in request.POST:
+            single_image = True
+            
         (form_class, template) = mapservice_backend.getLayerCreateForm(layer_type)
         if form_class is not None:
             form = form_class(request.POST)
             if form.is_valid():
                 try:
                     mapservice_backend.createTable(form.cleaned_data)
+
+                    # first create the resource on the backend
+                    mapservice_backend.createResource(form.cleaned_data['datastore'].workspace,
+                                          form.cleaned_data['datastore'],
+                                          form.cleaned_data['name'],
+                                          form.cleaned_data['title'])
+                    # save it on DB if successfully created
+                    newRecord = Layer(
+                        datastore = form.cleaned_data['datastore'],
+                        layer_group = form.cleaned_data['layer_group'],
+                        name = form.cleaned_data['name'],
+                        title = form.cleaned_data['title'],
+                        abstract = abstract,
+                        created_by = request.user.username,
+                        type = form.cleaned_data['datastore'].type,
+                        visible = is_visible,
+                        queryable = is_queryable,
+                        cached = cached,
+                        single_image = single_image   
+                    )
+                    newRecord.save()
                     
-                except Exception as exc:
-                    # ensure the ds gets cleaned if we've failed
-                    # FIXME: clean up disabled at the moment, as it has security implications
-                    # We should ensure which kind of exception we have got before deleting,
-                    # otherwise an attacker could use this method
-                    # in order to arbitrarily delete existing data stores  
-                    #mapservice_backend.deleteDatastore(ds.workspace, ds, "all", session=request.session)
-                    print exc
-                    form.add_error(None, _("Error uploading the layer. Review the file format."))
+                    if form.cleaned_data['datastore'].type != 'e_WMS':
+                        datastore = Datastore.objects.get(id=newRecord.datastore.id)
+                        workspace = Workspace.objects.get(id=datastore.workspace_id)
+                        
+                        style_name = workspace.name + '_' + newRecord.name + '_default'
+                        mapservice_backend.createDefaultStyle(newRecord, style_name)
+                        mapservice_backend.setLayerStyle(newRecord.name, style_name)
+                     
+                        mapservice_backend.addGridSubset(workspace, newRecord)
+                        newRecord.metadata_uuid = ''
+                        try:
+                            if gvsigol.settings.CATALOG_MODULE:
+                                layer_info = mapservice_backend.getResourceInfo(workspace.name, datastore.name, newRecord.name, "json")
+                                muuid = gn_backend.metadata_insert(request.session, newRecord, abstract, workspace, layer_info)
+                                newRecord.metadata_uuid = muuid
+                        except Exception as exc:
+                            logging.exception(exc)
+                            newRecord.save()
+                            return HttpResponseRedirect(reverse('layer_update', kwargs={'layer_id': newRecord.id}))
+                        newRecord.save()
+                        
+                    core_utils.toc_add_layer(newRecord)
+                    mapservice_backend.createOrUpdateGeoserverLayerGroup(newRecord.layer_group)
+                    mapservice_backend.reload_nodes()
+                    return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
+                
+                except Exception as e:
+                    try:
+                        msg = e.get_message()
+                    except:
+                        msg = _("Error: layer could not be published")
+                    # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
+                    form.add_error(None, msg)
                     
             else:
                 data = {
@@ -809,45 +872,43 @@ def enumeration_list(request):
 def enumeration_add(request):
     if request.method == 'POST':
         name = request.POST.get('enumeration_name')
-        title = name
+        title = request.POST.get('enumeration_title')
+        
+        aux_title = ''.join(title.encode('ASCII', 'ignore').split())[:4]
+        aux_title = aux_title.lower()
+        
+        name = name + '_' + re.sub("[!@#$%^&*()[]{};:,./<>?\|`~-=_+ ]", "", aux_title)
                 
-        if name != '':
-            exists = False
-            enumerations = Enumeration.objects.all()
-            for e in enumerations:
-                if name == e.name:
-                    exists = True
-                    
-            if not exists:
-                enum = Enumeration(
-                    name = name,
-                    title = title,
-                    created_by = request.user.username
-                )
-                enum.save()
-                
-                for key in request.POST:
-                    if 'item-content' in key:
-                        item = EnumerationItem(
-                            enumeration = enum,
-                            name = request.POST.get(key),
-                            selected = False,
-                            order = 0
-                        )
-                        item.save()
+        if title != '':
+            enum = Enumeration(
+                name = name,
+                title = title,
+                created_by = request.user.username
+            )
+            enum.save()
             
-            else:
-                message = _(u'Enumeration name already exists')
-                return render_to_response('enumeration_add.html', {'message': message}, context_instance=RequestContext(request))
+            for key in request.POST:
+                if 'item-content' in key:
+                    item = EnumerationItem(
+                        enumeration = enum,
+                        name = request.POST.get(key),
+                        selected = False,
+                        order = 0
+                    )
+                    item.save()
             
         else:
-            message = _(u'You must enter a name for enumeration')
-            return render_to_response('enumeration_add.html', {'message': message}, context_instance=RequestContext(request))
+            index = len(Enumeration.objects.all())
+            enum_name = '_enm' + str(index)
+            message = _(u'You must enter a title for enumeration')
+            return render_to_response('enumeration_add.html', {'message': message, 'enum_name': enum_name}, context_instance=RequestContext(request))
 
         return redirect('enumeration_list')
     
     else:
-        return render_to_response('enumeration_add.html', {}, context_instance=RequestContext(request))
+        index = len(Enumeration.objects.all())
+        enum_name = '_enm' + str(index)
+        return render_to_response('enumeration_add.html', {'enum_name': enum_name}, context_instance=RequestContext(request))
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -855,10 +916,12 @@ def enumeration_add(request):
 def enumeration_update(request, eid):
     if request.method == 'POST':
         name = request.POST.get('enumeration_name')
+        title = request.POST.get('enumeration_title')
         
         enum = Enumeration.objects.get(id=int(eid))
 
         enum.name = name
+        enum.title = title
         enum.save()
         
         items = EnumerationItem.objects.filter(enumeration_id=enum.id)
@@ -882,8 +945,31 @@ def enumeration_update(request, eid):
         items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('name')
         
         return render_to_response('enumeration_update.html', {'eid': eid, 'enumeration': enum, 'items': items, 'count': len(items) + 1}, context_instance=RequestContext(request))
+   
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@csrf_exempt
+def get_enumeration(request):
+    if request.method == 'POST':
+        enum_name = request.POST.get('enum_name')
+        enum = Enumeration.objects.get(name__exact=enum_name)
+        enum_items = EnumerationItem.objects.filter(enumeration_id=enum.id)
+        
+        items = []
+        for i in enum_items:
+            item = {}
+            item['name'] = i.name
+            item['selected'] = i.selected
+            items.append(item)
+            
+        response = {
+            'title': enum.title,
+            'items': items
+        }
+
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     
-    
+      
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def enumeration_delete(request, eid):        
@@ -1009,4 +1095,3 @@ def get_datatable_data(request):
         }
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
-

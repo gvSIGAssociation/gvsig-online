@@ -1059,6 +1059,7 @@ class Geoserver():
         name = form.get('name')
         geom_type = form.get('geom_type')
         srs = form.get('srs').split(':')[1]
+        fields = form.get('fields')
         
         try:
             params = json.loads(datastore.connection_params)
@@ -1069,7 +1070,7 @@ class Geoserver():
             passwd = params['passwd']
             schema = params.get('schema', 'public')
             i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-            i.create_table(schema, name, geom_type, srs, [])
+            i.create_table(schema, name, geom_type, srs, fields)
             return True
         
         except Exception as e:
