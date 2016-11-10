@@ -119,7 +119,7 @@ class CreateFeatureTypeForm(forms.Form):
     geom_type = forms.ChoiceField(label=_(u'Geometry type'), required=True, choices=geometry_types, widget=forms.Select(attrs={'class' : 'form-control'}))
     srs = forms.ChoiceField(label=_(u'SRS'), required=True, choices=supported_srs, widget=forms.Select(attrs={'class' : 'form-control'}))
     title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class' : 'form-control'}))
+    layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, initial="__default__", queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class' : 'form-control'}))
     visible = forms.BooleanField(label=_(u'Visible'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
     queryable = forms.BooleanField(label=_(u'Queryable'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
     cached = forms.BooleanField(label=_(u'Cached'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
