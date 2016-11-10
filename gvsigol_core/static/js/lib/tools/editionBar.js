@@ -496,6 +496,28 @@ editionBar.prototype.removeVectorLayer = function() {
 };
 
 
+/**
+ * @param {Event} e Browser event.
+ */
+editionBar.prototype.getEnumeration = function(enumName) {	
+	var enumeration = {};
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: "/gvsigonline/services/get_enumeration/",
+	  	data: {
+	  		'enum_name': enumName
+		},
+	  	success	:function(response){
+	  		enumeration.title = response.title;
+	  		enumeration.items = response.items;
+		},
+	  	error: function(){}
+	});
+	
+	return enumeration;
+};
+
 
 /**
  * @param {Event} e Browser event.
@@ -520,16 +542,26 @@ editionBar.prototype.createFeatureForm = function(feature) {
 	ui += 			'</div>';
 	for (var i=0; i<this.featureType.length; i++) {
 		if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
-			ui += '<div class="col-md-12 form-group">';
+			ui += '<div class="col-md-12 form-group" style="background-color: #fff;">';
 			ui += 	'<label style="color: #3c8dbc;">' + this.featureType[i].name + '</label>';
 			if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
 				ui += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control">';
 				
 			} else if (this.featureType[i].type == 'xsd:date') {
-				ui += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" placeholder="yyyy-mm-dd">';
+				ui += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="mm/dd/yyyy">';
 				
 			} else if (this.featureType[i].type == 'xsd:string') {
-				ui += '<input id="' + this.featureType[i].name + '" type="text" class="form-control">';
+				if (this.featureType[i].name.startsWith("_enm")) {
+					var enumeration = this.getEnumeration(this.featureType[i].name);
+					ui += 	'<select id="' + this.featureType[i].name + '" class="form-control">';
+					for (var j=0; j<enumeration.items.length; j++) {
+						ui += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+					}
+					ui += 	'</select>';
+					ui += '</div>';
+				} else {
+					ui += '<input id="' + this.featureType[i].name + '" type="text" class="form-control">';
+				}
 				
 			}  else if (this.featureType[i].type == 'xsd:boolean') {
 				ui += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';			
@@ -548,6 +580,8 @@ editionBar.prototype.createFeatureForm = function(feature) {
 	
 	this.detailsTab.append(ui);
 	$.gvsigOL.controlSidebar.open();
+	
+	//$('.datepicker').datepicker();
 	
 	$('#save-feature').on('click', function () {
 		var properties = {};
@@ -599,7 +633,7 @@ editionBar.prototype.editFeatureForm = function(feature) {
 	ui += 			'</div>';
 	for (var i=0; i<this.featureType.length; i++) {
 		if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
-			ui += '<div class="col-md-12 form-group">';
+			ui += '<div class="col-md-12 form-group" style="background-color: #fff;">';
 			ui += 	'<label style="color: #3c8dbc;">' + this.featureType[i].name + '</label>';
 			if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
 				ui += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
@@ -686,7 +720,7 @@ editionBar.prototype.removeFeatureForm = function(evt, feature) {
 	ui += 			'</div>';
 	for (var i=0; i<this.featureType.length; i++) {
 		if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
-			ui += '<div class="col-md-12 form-group">';
+			ui += '<div class="col-md-12 form-group" style="background-color: #fff;">';
 			ui += 	'<label style="color: #3c8dbc;">' + this.featureType[i].name + '</label>';
 			if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
 				ui += '<input disabled id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
