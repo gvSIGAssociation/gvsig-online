@@ -58,9 +58,11 @@ INSTALLED_APPS = [
     'gvsigol_filemanager',
     'gvsigol_core',
     'gvsigol_app_dev',
-    'gvsigol_plugin_worldwind',
-    'gvsigol_plugin_shps_folder',
-    'gvsigol_plugin_geocoding'
+    'gvsigol_app_sync',
+    #'gvsigol_app_aguas',
+    #'gvsigol_app_worldwind',
+    #'gvsigol_app_shps_folder',
+    #'gvsigol_app_geocoding'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -111,7 +113,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         #'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'gvsigonline_v2',
+        'NAME': 'gvsigonline2',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
         'HOST': 'localhost',
@@ -142,7 +144,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 GVSIGOL_LDAP = {
     'ENABLED': True,
-    'HOST':'devel.gvsigonline.com',
+    'HOST':'test.gvsigonline.com',
+#    'HOST':'devel.gvsigonline.com',
     'PORT': '389',
     'DOMAIN': 'dc=test,dc=gvsigonline,dc=com',
     'USERNAME': 'cn=admin,dc=test,dc=gvsigonline,dc=com',
@@ -155,7 +158,8 @@ AUTHENTICATION_BACKENDS = (
     'django_auth_ldap.backend.LDAPBackend',
     #'django.contrib.auth.backends.ModelBackend',
 )
-AUTH_LDAP_SERVER_URI = "ldap://devel.gvsigonline.com:389"
+
+AUTH_LDAP_SERVER_URI = "ldap://test.gvsigonline.com:389"
 AUTH_LDAP_ROOT_DN = "dc=test,dc=gvsigonline,dc=com"
 AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=test,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 
@@ -169,9 +173,8 @@ USE_L10N = True
 USE_TZ = True
 LANGUAGES = (
     ('es', _('Spanish')),
-    ('ca', _('Catalan')),    
-    ('en', _('English')),   
-    
+    ('ca', _('Catalan')),
+    ('en', _('English')),
 )
 LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol_core/locale'),
@@ -236,13 +239,15 @@ GVSIGOL_CATALOG = {
 
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
-    'URL': 'https://localhost/gs-local',
+    'URL': 'https://localhost/geoserver',
     'USER': 'admin',
-    'PASSWORD': 'geoserver',
+    'PASSWORD': 'admin52',
+    #'PASSWORD': 'geoserver',
+    #'CLUSTER_NODES':['https://localhost/gs-test', 'https://localhost/gs-test'],
     'CLUSTER_NODES':[],
     'SUPPORTED_TYPES': (
                         ('v_PostGIS', _('PostGIS vector')),
-                        ('v_SHP', _('Shapefile folder')),                        
+                        ('v_SHP', _('Shapefile folder')),
                         ('c_GeoTIFF', _('GeoTiff')),
                         ('e_WMS', _('Cascading WMS')),
     ),
