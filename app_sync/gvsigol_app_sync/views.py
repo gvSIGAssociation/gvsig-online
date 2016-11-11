@@ -16,6 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
+from gvsigol_services.backend_postgis import Introspect
+import gdaltools
 
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
@@ -43,6 +45,8 @@ import tempfile
 from gvsigol_services import gdal_tools
 from gvsigol_services.gdal_tools import MODE_OVERWRITE, MODE_APPEND
 from gvsigol_core import geom
+
+from spatialiteintrospect import introspect as sq_introspect
 
 
 #@login_required(login_url='/gvsigonline/auth/login_user/')
@@ -153,15 +157,9 @@ def sync_download(request):
             #FIXME: maybe we need to specify if we want the layer for reading or writing!!!! Assume we always want to write for the moment
             lock = add_layer_lock(layer, request.user)
             locked_layers.append(lock.layer.get_qualified_name())
-            conn_params = lock.layer.datastore.connection_params
-            params_dict = json.loads(conn_params)
-            host = params_dict["host"]
-            port = params_dict["port"]
-            dbname = params_dict["database"]
-            schema = params_dict["schema"]
-            user = params_dict["user"]
-            password = params_dict["passwd"]
-            conn = gdal_tools.PgConnectionString(host, port, dbname, schema, user, password)
+            conn = _get_layer_conn(lock.layer)
+            if not conn:
+                raise HttpResponseBadRequest("Bad request")
             prepared_tables.append({"layer": lock.layer, "connection": conn})
         
         (fd, file_path) = tempfile.mkstemp(suffix=".sqlite", prefix="syncdwld_")
@@ -211,6 +209,30 @@ def add_layer_lock(qualified_layer_name, user):
     new_lock.save()
     return new_lock
 
+def is_locked(qualified_layer_name, user, check_writable=False):
+    (ws_name, layer_name) = qualified_layer_name.split(":")
+    layer_filter = Layer.objects.filter(name=layer_name, datastore__workspace__name=ws_name)
+    
+    if check_writable:
+        is_writable = (layer_filter.filter(layerwritegroup__group__usergroupuser__user=user).count()>0)
+        if not is_writable:
+            raise PermissionDenied
+    layer = layer_filter[0]
+    return (LayerLock.objects.filter(layer=layer, user=user).count()>0)
+
+def get_layer_lock(qualified_layer_name, user, check_writable=False):
+    (ws_name, layer_name) = qualified_layer_name.split(":")
+    layer_filter = Layer.objects.filter(name=layer_name, datastore__workspace__name=ws_name)
+    
+    if check_writable:
+        is_writable = (layer_filter.filter(layerwritegroup__group__usergroupuser__user=user).count()>0)
+        if not is_writable:
+            raise PermissionDenied
+    layer = layer_filter[0]
+    locks = LayerLock.objects.filter(layer=layer, user=user)
+    if locks.count()>0:
+        return locks[0]
+
 def remove_layer_lock(qualified_layer_name, user):
     (ws_name, layer_name) = qualified_layer_name.split(":")
     layer_lock = LayerLock.objects.filter(layer__name=layer_name, layer__datastore__workspace__name=ws_name)
@@ -251,13 +273,53 @@ def sync_upload(request):
         #syncLogger.error("'zipfile' param missing or incorrect")
         return HttpResponseBadRequest("'fileupload' param missing or incorrect")
     if tmpfile:
-         # 1 - check if the file is a spatialite database
-         # 2 - check if the included tables are locked and writable by the user
-         # 3 - overwrite the tables in DB using the uploaded tables
-         # 4 - remove the table locks
-         # 5 - handle images
-         # 6 - remove the temporal file
-         pass
+        # 1 - check if the file is a spatialite database
+        # 2 - check if the included tables are locked and writable by the user
+        # 3 - overwrite the tables in DB using the uploaded tables
+        # 4 - remove the table locks
+        # 5 - handle images
+        # 6 - remove the temporal file
+        try:
+            db = sq_introspect.Introspect(tmpfile)
+            for t in db.get_tables():
+                lock = get_layer_lock(t, request.user, True)
+                if not lock:
+                    return HttpResponseBadRequest("Layer is not locked: {0}".format(t))
+                ogr = gdaltools.ogr2ogr()
+                geom_info = db.get_geometry_columns_info(t)
+                if len(geom_info)>0 and len(geom_info[0])==7:
+                    srs = "EPSG:"+str(geom_info[0][3])
+                    ogr.set_input(tmpfile, table_name=t, srs=srs)
+                    conn = _get_layer_conn(lock.layer)
+                    if not conn:
+                        raise HttpResponseBadRequest("Bad request")
+                    ogr.set_output(conn, table_name=layer.name)
+                    ogr.set_output_mode(ogr.MODE_LAYER_OVERWRITE, ogr.MODE_DS_UPDATE)
+                    ogr.execute()
+                    lock.delete()
+                    #FIXME: handle images
+        except sq_introspect.InvalidSqlite3Database:
+            return HttpResponseBadRequest("The file is not a valid Sqlite3 db")
+        except:
+            raise
+        finally:
+            db.close()
+            os.remove(tmpfile)
+
+
+def _get_layer_conn(layer):
+    try:
+        conn_params = layer.datastore.connection_params
+        params_dict = json.loads(conn_params)
+        host = params_dict["host"]
+        port = params_dict["port"]
+        dbname = params_dict["database"]
+        schema = params_dict["schema"]
+        user = params_dict["user"]
+        password = params_dict["passwd"]
+        return gdaltools.PgConnectionString(host, port, dbname, schema, user, password)
+    except:
+        pass
 
 
 def handle_uploaded_file(f):
