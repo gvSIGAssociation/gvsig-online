@@ -25,6 +25,7 @@ requests
 # Scolab tools
 spatialiteintrospect==1.2
 pygdaltools==0.1
+# *NOTE:* It requires having gdal tools installed in the system (gdal-bin package)
 
 # Other
 generateds
