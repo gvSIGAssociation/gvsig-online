@@ -548,7 +548,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 				ui += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control">';
 				
 			} else if (this.featureType[i].type == 'xsd:date') {
-				ui += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="mm/dd/yyyy">';
+				ui += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd">';
 				
 			} else if (this.featureType[i].type == 'xsd:string') {
 				if (this.featureType[i].name.startsWith("_enm")) {
@@ -639,10 +639,24 @@ editionBar.prototype.editFeatureForm = function(feature) {
 				ui += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
 				
 			} else if (this.featureType[i].type == 'xsd:date') {
-				ui += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" placeholder="yyyy-mm-dd" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+				ui += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + feature.getProperties()[this.featureType[i].name] + '">';
 				
-			} else if (this.featureType[i].type == 'xsd:string') {
-				ui += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+			} else if (this.featureType[i].type == 'xsd:string') {				
+				if (this.featureType[i].name.startsWith("_enm")) {
+					var enumeration = this.getEnumeration(this.featureType[i].name);
+					ui += 	'<select id="' + this.featureType[i].name + '" class="form-control">';
+					for (var j=0; j<enumeration.items.length; j++) {
+						if (enumeration.items[j].name == feature.getProperties()[this.featureType[i].name]) {
+							ui += '<option selected value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+						} else {
+							ui += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+						}
+					}
+					ui += 	'</select>';
+					ui += '</div>';
+				} else {
+					ui += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+				}
 				
 			}  else if (this.featureType[i].type == 'xsd:boolean') {
 				var checked = feature.getProperties()[this.featureType[i].name];
@@ -726,7 +740,7 @@ editionBar.prototype.removeFeatureForm = function(evt, feature) {
 				ui += '<input disabled id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
 				
 			} else if (this.featureType[i].type == 'xsd:date') {
-				ui += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" placeholder="yyyy-mm-dd" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+				ui += '<input disabled id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + feature.getProperties()[this.featureType[i].name] + '">';
 				
 			} else if (this.featureType[i].type == 'xsd:string') {
 				ui += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
@@ -826,8 +840,10 @@ editionBar.prototype.transactWFS = function(p,f) {
 			feature.setId(f.getId());
 			
 			if (geometryName != 'geometry') {
-				feature.values_['geometry'] = null;
-				delete feature.values_['geometry'];
+				if (feature.values_['geometry']) {
+					feature.values_['geometry'] = null;
+					delete feature.values_['geometry'];
+				}
 			}
 			
 			node = this.formatWFS.writeTransaction(null,[feature],null,this.formatGML);
