@@ -183,28 +183,35 @@ class Introspect:
     def create_table(self, schema, table_name, geom_type, srs, fields):
         query = ""
         
+        if geom_type == 'Point':
+            geom_type = 'MultiPoint'
+        if geom_type == 'LineString':
+            geom_type = 'MultiLineString'
+        if geom_type == 'Polygon':
+            geom_type = 'MultiPolygon'
+        
         query += "CREATE TABLE " + schema + "." + table_name + " ("
         query += "    gid serial NOT NULL,"
         query += "    wkb_geometry geometry(" + geom_type + "," + srs + "),"
         
         for field in fields:
             if field.get('type') == 'character_varying':
-                query += field.get('name') + " character varying,"
+                query += field.get('name').lower() + " character varying,"
                     
             elif field.get('type') == 'integer':
-                query += field.get('name') + " integer,"                    
+                query += field.get('name').lower() + " integer,"                    
                     
             elif field.get('type') == 'double':
-                query += field.get('name') + " double precision,"
+                query += field.get('name').lower() + " double precision,"
                     
             elif field.get('type') == 'boolean':
-                query += field.get('name') + " boolean DEFAULT FALSE,"
+                query += field.get('name').lower() + " boolean DEFAULT FALSE,"
                     
             elif field.get('type') == 'date':
-                query += field.get('name') + " date,"
+                query += field.get('name').lower() + " date,"
                 
             elif field.get('type') == 'enumeration':
-                query += field.get('name') + " character varying,"
+                query += field.get('name').lower() + " character varying,"
             
         query += "    CONSTRAINT " + table_name + "_pkey PRIMARY KEY (gid)"
         query += ");"
