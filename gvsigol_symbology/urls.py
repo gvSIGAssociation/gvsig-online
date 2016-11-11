@@ -56,4 +56,5 @@ urlpatterns = [
     #url(r'^style_layer_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.style_layer_update', name='style_layer_update'),
     #url(r'^symbol_upload/$', 'gvsigol_symbology.views.symbol_upload', name='symbol_upload'),
     #url(r'^load_rmf/$', 'gvsigol_symbology.views.load_rmf', name='load_rmf'),
+    
 ]
