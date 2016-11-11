@@ -1,0 +1,35 @@
+# django
+django==1.9.7
+djangorestframework
+markdown
+django-filter
+django-rest-auth
+django-formtools
+
+# auth
+python-ldap
+django-auth-l
+
+#Instalamos también el driver de PostgreSQL para python:
+psycopg2
+# *NOTA:* Es necesario instalar previamente la librería _libpq-dev_
+
+#Instalamos Pillow para que django soporte la gestión de imágenes;
+Pillow
+# *NOTA:* Es necesario instalar previamente la librería _libjpeg-dev_
+
+# gsconfig
+gsconfig
+requests
+
+# Scolab tools
+spatialiteintrospect==1.2
+pygdaltools==0.1
+
+# Other
+generateds
+lxml
+xmltodict
+python-dateutil pytz
+
+
