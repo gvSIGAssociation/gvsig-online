@@ -57,7 +57,6 @@ INSTALLED_APPS = [
     'gvsigol_symbology',
     'gvsigol_filemanager',
     'gvsigol_core',
-    'gvsigol_sync',
     ##GVSIG_ONLINE_APPS##
 ]
 
