@@ -70,21 +70,33 @@ def home(request):
     
     projects = []
     if request.user.is_superuser:
-        projects = Project.objects.all()
+        for p in Project.objects.all():
+            image = ''
+            if "no_project.png" in p.image.url:
+                image = p.image.url.replace(settings.MEDIA_URL, '')
+            else:
+                image = p.image.url
+                
+            project = {}
+            project['id'] = p.id
+            project['name'] = p.name
+            project['description'] = p.description
+            project['image'] = urllib.unquote(image)
+            projects.append(project)
     else:
         if len (projects_by_user) > 0:
             for ua in projects_by_user:
-                a = Project.objects.get(id=ua.project_id)
+                p = Project.objects.get(id=ua.project_id)
                 image = ''
-                if "no_project.png" in a.image.url:
-                    image = a.image.url.replace(settings.MEDIA_URL, '')
+                if "no_project.png" in p.image.url:
+                    image = p.image.url.replace(settings.MEDIA_URL, '')
                 else:
-                    image = a.image.url
+                    image = p.image.url
                     
                 project = {}
-                project['id'] = a.id
-                project['name'] = a.name
-                project['description'] = a.description
+                project['id'] = p.id
+                project['name'] = p.name
+                project['description'] = p.description
                 project['image'] = urllib.unquote(image)
                 projects.append(project)
             
