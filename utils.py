@@ -143,3 +143,18 @@ def close_connection(cursor, conn):
     #Close connection and exit
     cursor.close();
     conn.close();
+    
+def get_fields(resource):
+    fields = None
+    if resource != None:
+        fields = resource.get('featureType').get('attributes').get('attribute')
+        
+    return fields
+
+def get_alphanumeric_fields(fields):
+    alphanumeric_fields = []
+    for field in fields:
+        if not field.get('binding').startswith('com.vividsolutions.jts.geom'):
+            alphanumeric_fields.append(field)
+            
+    return alphanumeric_fields
