@@ -16,6 +16,7 @@ urlpatterns = [
     url(r'^get_resources_from_workspace/$', 'gvsigol_services.views.get_resources_from_workspace', name='get_resources_from_workspace'),
     url(r'^layer_update/(?P<layer_id>[0-9]+)/$', 'gvsigol_services.views.layer_update', name='layer_update'),
     url(r'^layer_delete/(?P<layer_id>[0-9]+)/$', 'gvsigol_services.views.layer_delete', name='layer_delete'),
+    url(r'^layer_config/(?P<layer_id>[0-9]+)/$', 'gvsigol_services.views.layer_config', name='layer_config'),
     url(r'^cache_clear/(?P<layer_id>[0-9]+)/$', 'gvsigol_services.views.cache_clear', name='cache_clear'),
     url(r'^layergroup_cache_clear/(?P<layergroup_id>[0-9]+)/$', 'gvsigol_services.views.layergroup_cache_clear', name='layergroup_cache_clear'),
     url(r'^layer_create/$', 'gvsigol_services.views.layer_create', name='layer_create'),

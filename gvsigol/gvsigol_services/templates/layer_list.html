@@ -27,6 +27,7 @@
 							<th></th>
 							<th></th>
 							<th></th>
+							<th></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -37,6 +38,7 @@
 							<td>{{ layer.title }}</td>
 							<td>{{ layer.datastore.name }}</td>
 							<td>{{ layer.layer_group.name }} ({{layer.layer_group.title }})</td>
+							<td></td>
 							<td></td>
 							<td></td>
 							<td></td>
@@ -114,6 +116,10 @@ $(document).ready(function() {
 	  	},{
 	      	"targets": -3,
 	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Configure layer" %}' + '" class="btn bg-purple"><i class="fa fa-cogs"></i></button>'
+	  	},{
+	      	"targets": -4,
+	       	"data": null,
 	        "defaultContent": '<button type="button" name="button-update-layer" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update layer" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
 	  	}],
 	    "dom": 'T<"clear">lfrtip',
@@ -126,7 +132,10 @@ $(document).ready(function() {
 	    if (this.name == "button-update-layer") {
 	        updateLayer(data);
 	        
-	    } else if (this.name == "button-clear-cache"){
+	    } else if (this.name == "button-config-layer"){
+			configLayer(data, row);
+			
+		} else if (this.name == "button-clear-cache"){
 			clearCache(data, row);
 			
 		} else if (this.name == "button-delete-layer"){
@@ -143,6 +152,10 @@ $(document).ready(function() {
 	
 	function updateLayer(data){			
 		location.href = '/gvsigonline/services/layer_update/' + data[0] + '/';
+	}
+	
+	function configLayer(data){			
+		location.href = '/gvsigonline/services/layer_config/' + data[0] + '/';
 	}
 	
 	function clearCache(data){			
