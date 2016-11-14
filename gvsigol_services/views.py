@@ -444,6 +444,61 @@ def layer_update(request, layer_id):
         workspace = Workspace.objects.get(id=datastore.workspace_id)
         form = LayerUpdateForm(instance=layer)
         return render(request, 'layer_update.html', {'layer': layer, 'workspace': workspace, 'form': form, 'layer_id': layer_id})
+    
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_http_methods(["GET", "POST", "HEAD"])
+@staff_required
+def layer_config(request, layer_id):
+    if request.method == 'POST':
+        layer = Layer.objects.get(id=int(layer_id))
+        
+        conf = {}
+        fields = []
+        counter = int(request.POST.get('counter'))
+        for i in range(1, counter+1):
+            field = {}
+            field['name'] = request.POST.get('field-name-' + str(i))
+            field['title'] = request.POST.get('field-title-' + str(i))
+            field['visible'] = False
+            if 'field-visible-' + str(i) in request.POST:
+                field['visible'] = True
+            fields.append(field)
+        conf['fields'] = fields
+        
+        json_conf = json.dumps(conf)
+        layer.conf = json_conf
+        layer.save()
+        
+        return redirect('layer_list')
+            
+    else:
+        layer = Layer.objects.get(id=int(layer_id))
+        fields = []
+        
+        try:
+            conf = json.loads(layer.conf)
+            for f in conf['fields']:
+                field = {}
+                field['name'] = f['name']
+                field['title'] = f['title']
+                field['visible'] = f['visible']
+                fields.append(field)
+                
+        except: 
+            datastore = Datastore.objects.get(id=layer.datastore_id)
+            workspace = Workspace.objects.get(id=datastore.workspace_id)
+            resource = mapservice_backend.getResourceInfo(workspace.name, datastore.name, layer.name, "json")
+            resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
+            for f in resource_fields:
+                field = {}
+                field['name'] = f['name']
+                field['title'] = f['name']
+                field['visible'] = True
+                fields.append(field)
+    
+        return render(request, 'layer_config.html', {'layer': layer, 'layer_id': layer.id, 'fields': fields})
+    
 
 @require_POST
 @staff_required
