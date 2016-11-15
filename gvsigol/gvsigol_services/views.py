@@ -574,13 +574,18 @@ def layer_permissions_update(request, layer_id):
                 pass
         
         LayerWriteGroup.objects.filter(layer=layer).delete()
+        agroup = UserGroup.objects.get(name__exact='admin')
+        lwag = LayerWriteGroup()
+        lwag.layer = layer
+        lwag.group = agroup
+        lwag.save()
         for group in assigned_write_groups:
             try:
                 group = UserGroup.objects.get(id=group)
-                lrg = LayerWriteGroup()
-                lrg.layer = layer
-                lrg.group = group
-                lrg.save()
+                lwg = LayerWriteGroup()
+                lwg.layer = layer
+                lwg.group = group
+                lwg.save()
             except:
                 pass
                 
