@@ -27,22 +27,22 @@
 						<div class="row">
 							<div class="col-md-6">
 								<label for="first_name">{% trans "First name" %}</label>
-								<input placeholder="{% trans 'First name' %}" class="form-control" name="first_name" id="first_name" type="text" value="{{user.first_name}}">							
+								<input placeholder="{% trans 'First name' %}" class="form-control" name="first_name" id="first_name" type="text" value="{{selected_user.first_name}}">							
 							</div>
 							<div class="col-md-6">
 								<label for="last_name">{% trans "Last name" %}</label>
-								<input placeholder="{% trans 'Last name' %}" class="form-control" name="last_name" id="last_name" type="text" value="{{user.last_name}}">								
+								<input placeholder="{% trans 'Last name' %}" class="form-control" name="last_name" id="last_name" type="text" value="{{selected_user.last_name}}">								
 							</div>
 						</div>
 										
 						<div class="row">
 							<div class="col-md-6 form-group">
 								<label for="username">{% trans "Username" %}</label>
-								<input disabled placeholder="{% trans 'Username' %}" class="form-control" name="username" id="username" type="text" value="{{user.username}}">								
+								<input disabled placeholder="{% trans 'Username' %}" class="form-control" name="username" id="username" type="text" value="{{selected_user.username}}">								
 							</div>
 							<div class="col-md-6 form-group">
 								<label for="email">{% trans "Email" %}</label>
-								<input placeholder="{% trans 'Email' %}" class="form-control" name="email" id="email" type="text" class="validate" value="{{user.email}}">								
+								<input placeholder="{% trans 'Email' %}" class="form-control" name="email" id="email" type="text" class="validate" value="{{selected_user.email}}">								
 							</div>
 						</div>
 						
@@ -51,7 +51,7 @@
 						<div class="row">
 							<div class="checkbox col-md-6">								
 								<label>
-									{% if user.is_superuser %}
+									{% if selected_user.is_superuser %}
 									<input type="checkbox" name="is_superuser" id="is_superuser" checked/>{% trans "Is superuser" %}
 									{% else %}
 									<input type="checkbox" name="is_superuser" id="is_superuser" />{% trans "Is superuser" %}
@@ -60,7 +60,7 @@
 							</div>
 							<div class="checkbox col-md-6">								
 								<label>
-									{% if user.is_staff %}
+									{% if selected_user.is_staff %}
 									<input type="checkbox" name=is_staff id="is_staff" checked/>{% trans "Can manage projects" %}
 									{% else %}
 									<input type="checkbox" name="is_staff" id="is_staff" />{% trans "Can manage projects" %}
