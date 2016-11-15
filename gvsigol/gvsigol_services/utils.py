@@ -39,14 +39,11 @@ def get_all_user_groups_checked_by_layer(layer):
             for lrg in read_groups:
                 if lrg.group_id == g.id:
                     group['read_checked'] = True
-                else:
-                    group['read_checked'] = False
             
             for lwg in write_groups:
                 if lwg.group_id == g.id:
                     group['write_checked'] = True
-                else:
-                    group['write_checked'] = False
+
             group['id'] = g.id
             group['name'] = g.name
             group['description'] = g.description
