@@ -40,6 +40,8 @@ import gdal_tools
 import logging
 import json
 import re
+from dbfread import DBF
+
 
 class UnsupportedRequestError(Exception):
     pass
@@ -823,6 +825,14 @@ class Geoserver():
                     layer_title = os.path.splitext(os.path.basename(f))[0]
                     original_style_name = layer_name
                 shp_abs = os.path.join(dir_path, f)
+                # skip if shapefile is empty
+                
+                dbf_abs = os.path.splitext(shp_abs)[0] + '.dbf'
+                table = DBF(dbf_abs)                
+                if len(table.records) == 0:
+                    print "Empty shapefile  ..................... "
+                    continue
+                # export to database
                 try:
                     gdal_tools.shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
                 except Exception as e:
