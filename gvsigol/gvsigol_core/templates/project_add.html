@@ -125,14 +125,22 @@
 		/**
 		  * Create the map.
 		  */
+	  	var aguas = new ol.layer.Tile({
+			label: 'Mapa base',
+		  	visible: true,
+		  	source: new ol.source.XYZ({
+		  		url: '/MapService.svc/GetImage/100/{x}/{y}/{z}'
+		    })
+		});
+		
 		var map = new ol.Map({
-			layers : [ new ol.layer.Tile({
+			layers : [/*new ol.layer.Tile({
 				source : new ol.source.OSM()
-			})],
+			}), */aguas],
 			target : 'project-map',
 			view : new ol.View({
-				center : [ 0, 0 ],
-				zoom : 2
+				center : [ 96616.40375246278, 4784346.474425752 ],
+				zoom : 7
 			})
 		});
 		
