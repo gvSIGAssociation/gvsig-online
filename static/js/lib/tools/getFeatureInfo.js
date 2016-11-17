@@ -218,9 +218,14 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 				
 			ajaxRequests.push(
 					$.ajax({
-					type: 'GET',
+					type: 'POST',
 					async: false,
-				  	url: url,							
+				  	url: '/gvsigonline/services/get_feature_info/',
+				  	data: {
+				  		url: url,
+				  		query_layer: qLayer.layer_name,
+				  		workspace: qLayer.workspace
+				  	},
 				  	success	:function(response){
 				  		if (response.features) {
 				  			for (var i in response.features) {

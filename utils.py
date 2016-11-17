@@ -285,7 +285,7 @@ def toc_update_layer_group(old_layergroup, old_name, new_name):
             public_viewer.save()
             
         except Exception as e:
-            print _('Public viewer TOC i sempty')
+            print _('Public viewer TOC is empty')
    
 def toc_remove_layergroups(toc_structure, layer_groups): 
     json_toc = json.loads(toc_structure)
