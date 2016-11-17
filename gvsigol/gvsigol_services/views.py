@@ -15,7 +15,6 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from string import lower
 
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
@@ -1056,6 +1055,51 @@ def get_geom_tables(request, datastore_id):
             pass
     return HttpResponseBadRequest()
 
+@csrf_exempt
+def get_feature_info(request):
+    if request.method == 'POST':      
+        url = request.POST.get('url')
+        query_layer = request.POST.get('query_layer')
+        ws = request.POST.get('workspace')
+        
+        w = Workspace.objects.get(name__exact=ws)
+        ds = Datastore.objects.get(workspace=w)
+        layers = Layer.objects.filter(name__exact=query_layer)
+        layer = None
+        for l in layers:
+            if l.datastore.id == ds.id:
+                layer = l
+        
+        req = requests.Session()
+        if 'username' in request.session and 'password' in request.session:
+            if request.session['username'] is not None and request.session['password'] is not None:
+                #req.auth = (request.session['username'], request.session['password'])
+                req.auth = ('admin', 'geoserver')
+
+        response = req.get(url, verify=False)
+        geojson = json.loads(response.text)
+        
+        features = None
+        if layer.conf is not None:
+            layer_conf = json.loads(layer.conf)
+            fields = layer_conf.get('fields')
+            formated_properties = {}
+            for p in geojson['features'][0].get('properties'):
+                for f in fields:
+                    if f.get('name') == p:
+                        if f.get('visible'):
+                            formated_properties[f.get('title')] = geojson['features'][0].get('properties')[p]
+            geojson['features'][0]['properties'] = formated_properties
+            features = geojson['features']
+                
+        else:    
+            features = geojson['features']
+                
+        response = {
+            'features': features
+        }
+
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 @csrf_exempt
 def get_datatable_data(request):
