@@ -70,21 +70,36 @@ def home(request):
                 projects_by_user.append(project_group)
     
     projects = []
-    if len (projects_by_user) > 0:
-        for ua in projects_by_user:
-            a = Project.objects.get(id=ua.project_id)
+    if request.user.is_superuser:
+        for p in Project.objects.all():
             image = ''
-            if "no_project.png" in a.image.url:
-                image = a.image.url.replace(settings.MEDIA_URL, '')
+            if "no_project.png" in p.image.url:
+                image = p.image.url.replace(settings.MEDIA_URL, '')
             else:
-                image = a.image.url
+                image = p.image.url
                 
             project = {}
-            project['id'] = a.id
-            project['name'] = a.name
-            project['description'] = a.description
+            project['id'] = p.id
+            project['name'] = p.name
+            project['description'] = p.description
             project['image'] = urllib.unquote(image)
             projects.append(project)
+    else:
+        if len (projects_by_user) > 0:
+            for ua in projects_by_user:
+                p = Project.objects.get(id=ua.project_id)
+                image = ''
+                if "no_project.png" in p.image.url:
+                    image = p.image.url.replace(settings.MEDIA_URL, '')
+                else:
+                    image = p.image.url
+                    
+                project = {}
+                project['id'] = p.id
+                project['name'] = p.name
+                project['description'] = p.description
+                project['image'] = urllib.unquote(image)
+                projects.append(project)
             
     if len (projects_by_user) == 1 and not is_superuser(user) and from_login:
         return redirect('project_load', pid=projects_by_user[0].project_id)
@@ -432,6 +447,9 @@ def project_get_conf(request):
                 if datastore.type == 'v_PostGIS':
                     layer_info = mapservice_backend.getResourceInfo(workspace.name, datastore.name, l.name, "json")
                     defaultCrs = layer_info['featureType']['srs']
+                elif datastore.type == 'e_WMS':
+                    layer_info = mapservice_backend.getWmsResourceInfo(workspace.name, datastore.name, l.name, "json")
+                    defaultCrs = 'EPSG:4326'
                 elif datastore.type == 'c_GeoTIFF':
                     layer_info = mapservice_backend.getRasterResourceInfo(workspace.name, datastore.name, l.name, "json")
                     defaultCrs = layer_info['coverage']['srs']
