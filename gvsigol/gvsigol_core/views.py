@@ -532,7 +532,11 @@ def toc_update(request, pid):
         project = Project.objects.get(id=int(pid))
         toc = request.POST.get('toc')
         project.toc_order = toc
-        project.save()       
+        project.save()      
+        
+        toc_object = json.loads(toc)
+        mapservice_backend.createOrUpdateSortedGeoserverLayerGroup(toc_object)
+         
         return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
     
     else:

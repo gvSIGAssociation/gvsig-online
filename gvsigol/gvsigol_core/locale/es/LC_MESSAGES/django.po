@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-08 09:44+0200\n"
+"POT-Creation-Date: 2016-11-17 18:05+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -41,27 +41,27 @@ msgid "We will work on fixing that right away. Meanwhile, you may"
 msgstr ""
 "Estamos trabajando en la resolución del problema. Mientras tanto, puede"
 
-#: templates/base.html:70 templates/base_compress.html.py:70
-#: templates/public_viewer.html:91 templates/public_viewer_compress.html:91
-#: templates/viewer.html.py:103 templates/viewer_compress.html:103
+#: templates/base.html:79 templates/base_compress.html.py:79
+#: templates/public_viewer.html:80 templates/public_viewer_compress.html:80
+#: templates/viewer.html.py:102 templates/viewer_compress.html:101
 msgid "Sign out"
 msgstr "Cerrar sesión"
 
-#: templates/base.html:88 templates/base_compress.html.py:88
-#: templates/viewer.html:100 templates/viewer_compress.html.py:100
+#: templates/base.html:97 templates/base_compress.html.py:97
+#: templates/viewer.html:99 templates/viewer_compress.html.py:98
 msgid "Dashboard"
 msgstr "Panel de control"
 
-#: templates/base.html:94 templates/base_compress.html.py:94
+#: templates/base.html:103 templates/base_compress.html.py:103
 msgid "Home"
 msgstr "Inicio"
 
-#: templates/base.html:128 templates/base_compress.html.py:128
+#: templates/base.html:139 templates/base_compress.html.py:139
 #: templates/ogc_services.html:84
 msgid "Version"
 msgstr "Versión"
 
-#: templates/base_compress.html:132 templates/ogc_services.html.py:88
+#: templates/base_compress.html:143 templates/ogc_services.html.py:88
 msgid "All rights reserved"
 msgstr "Todos los derechos reservados"
 
@@ -73,11 +73,11 @@ msgstr "Proyectos"
 msgid "Public viewer"
 msgstr "Visor público"
 
-#: templates/home.html:18 utils.py:399
+#: templates/home.html:18 utils.py:455
 msgid "Username"
 msgstr "Nombre de usuario"
 
-#: templates/home.html:20 utils.py:402
+#: templates/home.html:20 utils.py:458
 msgid "Email"
 msgstr "Correo electrónico"
 
@@ -86,17 +86,14 @@ msgid "Is admin?"
 msgstr "¿Es administrador?"
 
 #: templates/home.html:24
-#| msgid "You are logged in as an administrator user"
 msgid "You are logged in as root"
 msgstr "Ha iniciado sesión como superusuario"
 
 #: templates/home.html:26
-#| msgid "You are logged in as an administrator user"
 msgid "You are logged in as management user"
 msgstr "Ha iniciado sesión como usuario de gestión"
 
 #: templates/home.html:28
-#| msgid "You are logged in as an administrator user"
 msgid "You are logged in as basic user"
 msgstr "Ha iniciado sesión como usuario con permisos restringidos"
 
@@ -104,7 +101,7 @@ msgstr "Ha iniciado sesión como usuario con permisos restringidos"
 msgid "Last login"
 msgstr "Último acceso"
 
-#: templates/home.html:32 utils.py:403 utils.py:415
+#: templates/home.html:32 utils.py:459 utils.py:471
 msgid "Password"
 msgstr "Contraseña"
 
@@ -120,7 +117,7 @@ msgstr "para actualizar su contraseña"
 msgid "Passwords doesn't match"
 msgstr "Las contraseñas no coinciden"
 
-#: templates/home.html:42 templates/home.html.py:43 utils.py:411
+#: templates/home.html:42 templates/home.html.py:43 utils.py:467
 msgid "New password"
 msgstr "Nueva contraseña"
 
@@ -217,15 +214,15 @@ msgstr "Eliminar proyecto"
 msgid "The project will be removed, Do you want continue?"
 msgstr "El proyecto será eliminado, ¿Desea continuar?"
 
-#: templates/project_list.html:62 templates/public_viewer.html.py:162
-#: templates/public_viewer_compress.html:162 templates/viewer.html.py:174
-#: templates/viewer_compress.html:174
+#: templates/project_list.html:62 templates/public_viewer.html.py:151
+#: templates/public_viewer_compress.html:151 templates/viewer.html.py:173
+#: templates/viewer_compress.html:172
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: templates/project_list.html:63 templates/public_viewer.html.py:163
-#: templates/public_viewer_compress.html:163 templates/viewer.html.py:175
-#: templates/viewer_compress.html:175
+#: templates/project_list.html:63 templates/public_viewer.html.py:152
+#: templates/public_viewer_compress.html:152 templates/viewer.html.py:174
+#: templates/viewer_compress.html:173
 msgid "Accept"
 msgstr "Aceptar"
 
@@ -299,21 +296,16 @@ msgstr "Orden del TOC"
 msgid "Update project"
 msgstr "Actualizar proyecto"
 
-#: templates/public_viewer.html:62 templates/public_viewer_compress.html:62
-#: templates/viewer.html.py:71 templates/viewer_compress.html:71
-msgid "Search"
-msgstr "Buscar"
-
-#: templates/public_viewer.html:80 templates/public_viewer_compress.html:80
+#: templates/public_viewer.html:69 templates/public_viewer_compress.html:69
 msgid "Anonymous"
 msgstr "Anónimo"
 
-#: templates/public_viewer.html:86 templates/public_viewer_compress.html:86
+#: templates/public_viewer.html:75 templates/public_viewer_compress.html:75
 msgid "Anonymous user"
 msgstr "Usuario anónimo"
 
-#: templates/public_viewer.html:254 templates/public_viewer_compress.html:241
-#: templates/viewer.html.py:277 templates/viewer_compress.html:259
+#: templates/public_viewer.html:241 templates/public_viewer_compress.html:229
+#: templates/viewer.html.py:283 templates/viewer_compress.html:263
 msgid "Close"
 msgstr "Cerrar"
 
@@ -325,33 +317,41 @@ msgstr "Configuración del visor público"
 msgid "Update TOC"
 msgstr "Actualizar TOC"
 
-#: utils.py:382
+#: utils.py:288
+#| msgid "Public viewer"
+msgid "Public viewer TOC is empty"
+msgstr "Visor público"
+
+#: utils.py:438
 msgid "New user account"
 msgstr "Nueva cuenta de usuario"
 
-#: utils.py:398
+#: utils.py:454
 msgid "Account data"
 msgstr "Datos de la cuenta"
 
-#: utils.py:400
+#: utils.py:456
 msgid "First name"
 msgstr "Nombre"
 
-#: utils.py:401
+#: utils.py:457
 msgid "Last name"
 msgstr "Apellidos"
 
-#: utils.py:413
+#: utils.py:469
 msgid "This is your new temporary password"
 msgstr "Esta es su contraseña temporal"
 
-#: views.py:151
+#: views.py:165
 msgid "You must enter an project name"
 msgstr "Debe introducir un nombre de proyecto"
 
-#: views.py:205 views.py:350
+#: views.py:219 views.py:364
 msgid "Project name already exists"
 msgstr "El nombre del proyecto ya existe"
+
+#~ msgid "Search"
+#~ msgstr "Buscar"
 
 #~ msgid "You are logged in as an non-administrator user"
 #~ msgstr "Ha iniciado sesión como usuario no administrador"
