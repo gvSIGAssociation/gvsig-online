@@ -343,6 +343,55 @@ class Geoserver():
                 
         raise FailedRequestError(r.status_code, r.content)
     
+    def create_or_update_sorted_gs_layer_group(self, toc, content_type=None, user=None, password=None):  
+        
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+        
+        # delete the layergroup if exists
+        for toc_group in toc:
+            response_get = self.session.get(self.service_url + "/layergroups/" + toc[toc_group].get('name') + ".json", auth=auth)
+            if response_get.status_code==200:
+                r = self.session.delete(self.service_url + "/layergroups/" + toc[toc_group].get('name') + ".json", params={}, auth=auth)
+            
+            group = LayerGroup.objects.get(name__exact=toc[toc_group].get('name'))
+            layers_in_group = Layer.objects.filter(layer_group_id=group.id)
+            layers_in_toc = sorted(toc[toc_group].get('layers').iteritems(), key=lambda (x, y): y['order'], reverse=True)
+        
+            if len(layers_in_group) > 0:   
+                layers = []
+                for tl in layers_in_toc:
+                    for l in layers_in_group:
+                        if l.name == tl[1]['name']:
+                            datastore = Datastore.objects.get(id=l.datastore.id)
+                            workspace = Workspace.objects.get(id=datastore.workspace_id)
+                            layer = {}
+                            layer["@type"] = "layer"
+                            layer["name"] = workspace.name + ":"+ l.name
+                            layer["href"] = GVSIGOL_SERVICES['URL'] + '/layers/' + l.name + '.json'
+                            layers.append(layer)
+
+                data = {
+                    "layerGroup": {
+                        "name": group.name,
+                        "mode": "SINGLE",
+                        "title": group.name,
+                        "publishables": {
+                            "published": layers
+                            }
+                    }
+                }
+                r = self.session.post(self.service_url + "/layergroups/", json=data, auth=auth)
+                if r.status_code==201:
+                    return True
+            
+            else:
+                return True
+                
+        raise FailedRequestError(r.status_code, r.content)
+    
     def delete_gs_layer_group(self, layer_group, content_type=None, user=None, password=None):  
         
         if user and password:
