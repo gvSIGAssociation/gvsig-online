@@ -177,14 +177,15 @@ def user_add(request):
         if form.is_valid():            
             assigned_groups = []
             
-            is_superuser = False
-            if 'is_superuser' in form.data:
-                is_superuser = True
-                
             is_staff = False
             if 'is_staff' in form.data:
                 is_staff = True
-            
+                
+            is_superuser = False
+            if 'is_superuser' in form.data:
+                is_superuser = True
+                is_staff = True
+
             assigned_groups = []   
             for key in form.data:
                 if 'group-' in key:
