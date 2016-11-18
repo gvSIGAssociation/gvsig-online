@@ -458,8 +458,10 @@ class Geoserver():
         try:
             return self.rest_catalog.create_or_update_sorted_gs_layer_group(toc, user=self.user, password=self.password)
         except rest_geoserver.FailedRequestError as e:
+            print e
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer group. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
+            print e
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer group could not be published"))
         
     def deleteGeoserverLayerGroup(self, layer_group):
