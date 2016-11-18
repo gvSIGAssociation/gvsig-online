@@ -900,7 +900,8 @@ class Geoserver():
                         self.createDefaultStyle(layer, final_style_name)
                         self.setLayerStyle( datastore.workspace.name + ":" + layer.name, final_style_name)
                 
-                            
+            print "DEBUG: Se ha terminado la creacion de capas ........................................."       
+                
         except rest_geoserver.RequestError as ex:
             print "Error Request: " + str(ex)
             raise             
