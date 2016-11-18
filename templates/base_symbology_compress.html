@@ -120,7 +120,7 @@
 						
 							{% for plugin in INSTALLED_APPS %}												  
 		    					{% if 'gvsigol_plugin_' in plugin %}	
-		    						{% with "dashboard_"|add:app|cut:"gvsigol_plugin_"|add:"_menu.html" as aux %}	    	
+		    						{% with "dashboard_"|add:plugin|cut:"gvsigol_plugin_"|add:"_menu.html" as aux %}	    	
 										{% include_if_exists aux %}	
 									{% endwith %}
 		    					{% endif %}		    					
