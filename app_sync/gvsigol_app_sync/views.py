@@ -51,7 +51,7 @@ from spatialiteintrospect import introspect as sq_introspect
 
 #@login_required(login_url='/gvsigonline/auth/login_user/')
 @require_GET
-@csrf_exempt
+#@csrf_exempt
 def get_layerinfo(request):
     """
     For the moment return only writable layers, until we manage read-only layers
@@ -166,9 +166,20 @@ def sync_download(request):
         os.close(fd)
         os.remove(file_path)
         if len(prepared_tables)>0:
+            ogr = gdaltools.ogr2ogr()
+            ogr.ogr.set_output_mode(
+                    layer_mode=ogr.MODE_LAYER_CREATE,
+                    data_source_mode=ogr.MODE_DS_CREATE_OR_UPDATE)
             for table in prepared_tables:
-                gdal_tools.postgis2spatialite(table["layer"].name, file_path, table["connection"], out_table_name=table["layer"].get_qualified_name())
-            
+                ogr.set_input(
+                        table["connection"],
+                        table_name=table["layer"].name
+                ).set_output(
+                        file_path,
+                        table_name=table["layer"].get_qualified_name()
+                ).execute()
+
+            gdaltools.ogrinfo(file_path, sql="SELECT UpdateLayerStatistics()")
             file = TemporaryFileWrapper(file_path)
             response = FileResponse(file, content_type='application/spatialite')
             #response['Content-Disposition'] = 'attachment; filename=db.sqlite'
@@ -331,6 +342,7 @@ def handle_uploaded_file(f):
     print path
     return path
 
+
 def handle_uploaded_file_base64(fileupload):
     header="data:application/zip;base64,"
     if fileupload[0:len(header)]==header:
@@ -343,6 +355,7 @@ def handle_uploaded_file_base64(fileupload):
     print path
     return path
 
+
 def handle_uploaded_file_raw(fileupload):
     #buf=f1.read(1024)
     (destination, path) = tempfile.mkstemp(suffix='.sqlite', dir='/tmp')
@@ -350,6 +363,7 @@ def handle_uploaded_file_raw(fileupload):
     destination.close()
     print path
     return path
+
 
 class TemporaryFileWrapper(tempfile._TemporaryFileWrapper):
     """
@@ -377,7 +391,8 @@ class TemporaryFileWrapper(tempfile._TemporaryFileWrapper):
         else:
             file = open(file_path, "r")
         tempfile._TemporaryFileWrapper.__init__(self, file, file_path)
-    
+
+
     def close(self):
         # we can't use os.O_TEMPORARY flag if we are not creating the file,
         # so we need to implement close() also for windows
@@ -388,12 +403,14 @@ class TemporaryFileWrapper(tempfile._TemporaryFileWrapper):
             finally:
                 if self.delete:
                     self.unlink(self.name)
-    
+
+
     def __del__(self):
         # we can't use os.O_TEMPORARY flag if we are not creating the file,
         # so we need to implement __del__() also for windows
         self.close()
-    
+
+
     def __exit__(self, exc, value, tb):
         # we can't use os.O_TEMPORARY flag if we are not creating the file,
         # so we need to implement __exit__() also for windows
