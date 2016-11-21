@@ -167,7 +167,7 @@ def sync_download(request):
         os.remove(file_path)
         if len(prepared_tables)>0:
             ogr = gdaltools.ogr2ogr()
-            ogr.ogr.set_output_mode(
+            ogr.set_output_mode(
                     layer_mode=ogr.MODE_LAYER_CREATE,
                     data_source_mode=ogr.MODE_DS_CREATE_OR_UPDATE)
             for table in prepared_tables:
