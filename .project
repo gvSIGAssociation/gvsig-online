@@ -4,7 +4,7 @@
 	<comment></comment>
 	<projects>
 		<project>app_dev</project>
-		<project>app_sync</project>
+		<project>plugin_sync</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -24,9 +24,9 @@
 			<location>/home/cesar/projects/scolab/gvsig-online/wsgol2/app_dev/gvsigol_app_dev</location>
 		</link>
 		<link>
-			<name>gvsigol_app_sync</name>
+			<name>gvsigol_plugin_sync</name>
 			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/app_sync/gvsigol_app_sync</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/plugin_sync/gvsigol_plugin_sync</locationURI>
 		</link>
 		<link>
 			<name>locale</name>
