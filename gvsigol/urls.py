@@ -66,8 +66,3 @@ if 'gvsigol_filemanager' in settings.INSTALLED_APPS:
     urlpatterns += patterns('',
         url(r'^gvsigonline/filemanager/', include('gvsigol_filemanager.urls', namespace='filemanager')),      
     )
-
-if 'gvsigol_app_sync' in settings.INSTALLED_APPS:
-    urlpatterns += patterns('',
-        url(r'^gvsigonline/sync/', include('gvsigol_app_sync.urls')),
-    )
