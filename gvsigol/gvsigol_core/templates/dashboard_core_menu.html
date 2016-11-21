@@ -1,0 +1,18 @@
+{% load staticfiles %}
+{% load i18n %}
+<li id="menu-manage-projects" class="treeview">
+	<a href="/gvsigonline/core/project_list/">
+		<i class="fa fa-cubes"></i>
+		<span>{% trans "Projects" %}</span> 
+	</a>
+</li>
+{% if PUBLIC_VIEWER %}
+{% if user.is_superuser %}
+<li id="menu-public-viewer" class="treeview">
+	<a href="/gvsigonline/core/public_viewer_configuration/">
+		<i class="fa fa-map"></i>
+		<span>{% trans "Public viewer" %}</span> 
+	</a>
+</li>
+{% endif %}
+{% endif %}
