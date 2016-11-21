@@ -18,6 +18,8 @@
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
 from gvsigol_services.backend_postgis import Introspect
 import gdaltools
+import shutil
+from _io import DEFAULT_BUFFER_SIZE
 
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
@@ -36,6 +38,7 @@ from django.views.decorators.http import require_http_methods, require_safe,requ
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import PermissionDenied
 
+from django.http import JsonResponse
 
 
 
@@ -48,10 +51,10 @@ from gvsigol_core import geom
 
 from spatialiteintrospect import introspect as sq_introspect
 
+DEFAULT_BUFFER_SIZE = 1048576
 
-#@login_required(login_url='/gvsigonline/auth/login_user/')
-@require_GET
-#@csrf_exempt
+
+@require_safe
 def get_layerinfo(request):
     """
     For the moment return only writable layers, until we manage read-only layers
@@ -74,9 +77,8 @@ def get_layerinfo(request):
         layerJson = layersToJson([], [], [])
     return HttpResponse(layerJson, content_type='application/json')
 
-#@login_required(login_url='/gvsigonline/auth/login_user/')
+
 @require_GET
-@csrf_exempt
 def get_layerinfo_by_project(request, project):
     """
     For the moment return only writable layers, until we manage read-only layers
@@ -143,8 +145,7 @@ def layersToJson(universallyReadableLayers, readOnlyLayers=[], readWriteLayers=[
     layerStr = json.dumps(result)
     return layerStr 
 
-#@login_required(login_url='/gvsigonline/auth/login_user/')
-@csrf_exempt
+@login_required(login_url='/gvsigonline/auth/login_user/')
 def sync_download(request):
     locked_layers = []
     prepared_tables = []
@@ -229,20 +230,25 @@ def is_locked(qualified_layer_name, user, check_writable=False):
         if not is_writable:
             raise PermissionDenied
     layer = layer_filter[0]
-    return (LayerLock.objects.filter(layer=layer, user=user).count()>0)
+    return (LayerLock.objects.filter(layer=layer, created_by=user.username).count()>0)
 
 def get_layer_lock(qualified_layer_name, user, check_writable=False):
-    (ws_name, layer_name) = qualified_layer_name.split(":")
-    layer_filter = Layer.objects.filter(name=layer_name, datastore__workspace__name=ws_name)
-    
-    if check_writable:
-        is_writable = (layer_filter.filter(layerwritegroup__group__usergroupuser__user=user).count()>0)
-        if not is_writable:
-            raise PermissionDenied
-    layer = layer_filter[0]
-    locks = LayerLock.objects.filter(layer=layer, user=user)
-    if locks.count()>0:
-        return locks[0]
+    name_parts = qualified_layer_name.split(":")
+    if len(name_parts)==2:
+        (ws_name, layer_name) = name_parts
+        layer_filter = Layer.objects.filter(name=layer_name, datastore__workspace__name=ws_name)
+        
+        if check_writable:
+            is_writable = (layer_filter.filter(layerwritegroup__group__usergroupuser__user=user).count()>0)
+            if not is_writable:
+                raise PermissionDenied
+        layer = layer_filter[0]
+        locks = LayerLock.objects.filter(layer=layer, created_by=user.username)
+        if locks.count()>0:
+            return locks[0]
+        else:
+            raise LayerNotLocked(qualified_layer_name)
+    return None
 
 def remove_layer_lock(qualified_layer_name, user):
     (ws_name, layer_name) = qualified_layer_name.split(":")
@@ -264,15 +270,12 @@ def remove_layer_lock(qualified_layer_name, user):
   #layers:[ "cities", "roads"],
   #bbox: { xmin: 32.2, xmax: 33.2, ymin: 0.2, ymax: 0.4}
 
-#@login_required(login_url='/gvsigonline/auth/login_user/')
-@csrf_exempt
+@login_required(login_url='/gvsigonline/auth/login_user/')
 def sync_upload(request):
     tmpfile = None
-    if request.is_ajax():
-        if request.method == 'POST':
-            tmpfile = handle_uploaded_file_raw(request.body.read())
-    elif 'fileupload' in request.FILES:
-        tmpfile = handle_uploaded_file(request.FILES.get('fileupload'))    
+    
+    if 'fileupload' in request.FILES:
+        tmpfile = handle_uploaded_file(request.FILES.get('fileupload'))
     elif 'fileupload' in request.POST:
         try:
             zipcontents = request.POST.get('fileupload')
@@ -280,6 +283,8 @@ def sync_upload(request):
         except:
             #syncLogger.exception("'zipfile' param missing or incorrect")
             return HttpResponseBadRequest("'fileupload' param missing or incorrect")
+    elif request.method == 'POST':
+        tmpfile = handle_uploaded_file_raw(request)
     else:
         #syncLogger.error("'zipfile' param missing or incorrect")
         return HttpResponseBadRequest("'fileupload' param missing or incorrect")
@@ -292,30 +297,32 @@ def sync_upload(request):
         # 6 - remove the temporal file
         try:
             db = sq_introspect.Introspect(tmpfile)
-            for t in db.get_tables():
+            for t in db.get_geometry_tables():
                 lock = get_layer_lock(t, request.user, True)
-                if not lock:
-                    return HttpResponseBadRequest("Layer is not locked: {0}".format(t))
-                ogr = gdaltools.ogr2ogr()
-                geom_info = db.get_geometry_columns_info(t)
-                if len(geom_info)>0 and len(geom_info[0])==7:
-                    srs = "EPSG:"+str(geom_info[0][3])
-                    ogr.set_input(tmpfile, table_name=t, srs=srs)
-                    conn = _get_layer_conn(lock.layer)
-                    if not conn:
-                        raise HttpResponseBadRequest("Bad request")
-                    ogr.set_output(conn, table_name=layer.name)
-                    ogr.set_output_mode(ogr.MODE_LAYER_OVERWRITE, ogr.MODE_DS_UPDATE)
-                    ogr.execute()
-                    lock.delete()
-                    #FIXME: handle images
+                if lock:
+                    ogr = gdaltools.ogr2ogr()
+                    geom_info = db.get_geometry_columns_info(t)
+                    if len(geom_info)>0 and len(geom_info[0])==7:
+                        srs = "EPSG:"+str(geom_info[0][3])
+                        ogr.set_input(tmpfile, table_name=t, srs=srs)
+                        conn = _get_layer_conn(lock.layer)
+                        if not conn:
+                            raise HttpResponseBadRequest("Bad request")
+                        ogr.set_output(conn, table_name=lock.layer.name)
+                        ogr.set_output_mode(ogr.MODE_LAYER_OVERWRITE, ogr.MODE_DS_UPDATE)
+                        ogr.execute()
+                        lock.delete()
+                        #FIXME: handle images
         except sq_introspect.InvalidSqlite3Database:
             return HttpResponseBadRequest("The file is not a valid Sqlite3 db")
+        except LayerNotLocked as e:
+            return HttpResponseBadRequest("Layer is not locked: {0}".format(e.layer))
         except:
             raise
         finally:
             db.close()
             os.remove(tmpfile)
+    return JsonResponse({'response': 'OK'})
 
 
 def _get_layer_conn(layer):
@@ -356,10 +363,10 @@ def handle_uploaded_file_base64(fileupload):
     return path
 
 
-def handle_uploaded_file_raw(fileupload):
-    #buf=f1.read(1024)
-    (destination, path) = tempfile.mkstemp(suffix='.sqlite', dir='/tmp')
-    destination.write(fileupload.read())
+def handle_uploaded_file_raw(request):
+    (fd_dest, path) = tempfile.mkstemp(suffix='.sqlite', dir='/tmp')
+    destination = os.fdopen(fd_dest, "w", DEFAULT_BUFFER_SIZE)
+    shutil.copyfileobj(request, destination, DEFAULT_BUFFER_SIZE)
     destination.close()
     print path
     return path
@@ -425,8 +432,13 @@ class LayerLockingException(BaseException):
 
 class LayerNotLocked(LayerLockingException):
     """The requested layer lock does not exist"""
-    pass
+    
+    def __init__(self, layer=None):
+        self.layer = layer
+
 
 class LayerLocked(LayerLockingException):
     """The layer already has a lock"""
-    pass
+
+    def __init__(self, layer=None):
+        self.layer = layer
