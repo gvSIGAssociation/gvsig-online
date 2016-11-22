@@ -15,11 +15,6 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from gvsigol_services.backend_mapservice import backend as mapservice_backend
-from gvsigol_services.backend_postgis import Introspect
-import gdaltools
-import shutil
-from _io import DEFAULT_BUFFER_SIZE
 
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
@@ -28,6 +23,7 @@ from _io import DEFAULT_BUFFER_SIZE
 # generic python modules
 import json
 import time, os
+import shutil
 
 # django libs
 from django.http.response import StreamingHttpResponse, FileResponse
@@ -40,8 +36,6 @@ from django.core.exceptions import PermissionDenied
 
 from django.http import JsonResponse
 
-
-
 # gvsig online modules
 from gvsigol_services.models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, LayerLock
 import tempfile
@@ -49,7 +43,13 @@ from gvsigol_services import gdal_tools
 from gvsigol_services.gdal_tools import MODE_OVERWRITE, MODE_APPEND
 from gvsigol_core import geom
 
+from gvsigol_services.backend_mapservice import backend as mapservice_backend
+from gvsigol_services.backend_postgis import Introspect
+
+# external libs
+import gdaltools
 from spatialiteintrospect import introspect as sq_introspect
+
 
 DEFAULT_BUFFER_SIZE = 1048576
 
@@ -146,6 +146,7 @@ def layersToJson(universallyReadableLayers, readOnlyLayers=[], readWriteLayers=[
     return layerStr 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@require_POST
 def sync_download(request):
     locked_layers = []
     prepared_tables = []
@@ -235,6 +236,7 @@ def is_locked(qualified_layer_name, user, check_writable=False):
 def get_layer_lock(qualified_layer_name, user, check_writable=False):
     name_parts = qualified_layer_name.split(":")
     if len(name_parts)==2:
+        # only consider tables having a proper qualified name (e.g., using the schema: workspace:layer_name)
         (ws_name, layer_name) = name_parts
         layer_filter = Layer.objects.filter(name=layer_name, datastore__workspace__name=ws_name)
         
@@ -264,16 +266,13 @@ def remove_layer_lock(qualified_layer_name, user):
         layer_lock.delete()
         return True
     raise LayerNotLocked()
-    
-    
 
-  #layers:[ "cities", "roads"],
-  #bbox: { xmin: 32.2, xmax: 33.2, ymin: 0.2, ymax: 0.4}
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@require_POST
 def sync_upload(request):
     tmpfile = None
-    
+
     if 'fileupload' in request.FILES:
         tmpfile = handle_uploaded_file(request.FILES.get('fileupload'))
     elif 'fileupload' in request.POST:
@@ -342,7 +341,6 @@ def _get_layer_conn(layer):
 
 def handle_uploaded_file(f):
     (destination, path) = tempfile.mkstemp(suffix='.sqlite', dir='/tmp')
-    #destination = tempfile.TemporaryFile()
     for chunk in f.chunks():
         destination.write(chunk)
     destination.close()
