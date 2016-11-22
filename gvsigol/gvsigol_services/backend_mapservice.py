@@ -779,21 +779,7 @@ class Geoserver():
             # We are going to perform a command line execution with them,
             # so we must be ABSOLUTELY sure that no code injection can be
             # performed
-            ds_params = json.loads(datastore.connection_params) 
-            db = ds_params.get('database')
-            host = ds_params.get('host')
-            port = ds_params.get('port')
-            schema = ds_params.get('schema', "public")
-            port = str(int(port))
-            user = ds_params.get('user')
-            password = ds_params.get('passwd')
-        
-            if _valid_sql_name_regex.search(db) == None:
-                raise InvalidValue(-1, _("The connection parameters contain an invalid database name: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db))
-            if _valid_sql_name_regex.search(user) == None:
-                raise InvalidValue(-1, _("The connection parameters contain an invalid user name: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db))
-            if _valid_sql_name_regex.search(schema) == None:
-                raise InvalidValue(-1, _("The connection parameters contain an invalid schema: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db)) 
+             
 
             #rename files with special characters
             files = os.listdir(dir_path)
@@ -808,100 +794,17 @@ class Geoserver():
             # load SHP       
             files = [f for f in os.listdir(dir_path) if f.lower()[-4:]==".shp"]
             
-            for f in files:
-                has_style = False
-                if f in table_definition:
-                    table_def = table_definition[f]
-                    layer_name = table_def['name']
-                    layer_title = table_def['title']
-                    try:
-                        original_style_name = table_def['style']
-                        has_style = True
-                        
-                    except Exception as e:
-                        original_style_name = layer_name
-                        print e
-                    #layer_group = table_def['group'] + '_' + application.name.lower()
-                else:
-                    layer_name = os.path.splitext(os.path.basename(f))[0]
-                    layer_title = os.path.splitext(os.path.basename(f))[0]
-                    original_style_name = layer_name
-                shp_abs = os.path.join(dir_path, f)
-                # skip if shapefile is empty
-                
-                dbf_abs = os.path.splitext(shp_abs)[0] + '.dbf'
-                table = DBF(dbf_abs)                
-                if len(table.records) == 0:
-                    print "Empty shapefile  ..................... "
-                    continue
-                # export to database
-                try:
-                    gdal_tools.shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
-                except Exception as e:
-                    print "ERROR en shp2postgis ... Algunos shapefiles puede que no hayan subido "
-                    continue 
-                
-                try:
-                    layer = Layer.objects.get(name=layer_name, datastore=datastore)
-                except:
-                    # may me missing when creating a layer or when
-                    # appending / overwriting a layer created outside gvsig online
-                    layer = Layer()                
-                    # TODO: si estamos en create mode es porque ha aparecido otro shape. Deberiamos borrar el proyecto y volverlo a crear  
-                            
-                if creation_mode==forms_geoserver.MODE_CREATE:
-                    
-                    try:
-                        self.createFeaturetype(datastore.workspace, datastore, layer_name, layer_title)
-                    except:
-                        print "ERROR en createFeaturetype"
-                        raise
-                    
-                        
-                    layer.datastore = datastore
-                    layer.name = layer_name
-                    layer.visible = False
-                    layer.queryable = True
-                    layer.cached = True
-                    layer.single_image = False
-                    layer.layer_group = layergroup
-                    layer.title = layer_title
-                    layer.type = datastore.type
-                    layer.metadata_uuid = ''
-                    layer.created_by = request.user.username
-                    layer.save()
-    
-                    self.setDataRules()                                        
-                        
-                        
-                    if layer.layer_group.name != "__default__":
-                        self.createOrUpdateGeoserverLayerGroup(layer.layer_group)
-                
-                # estilos: se ejecuta en modo create o update
-                # si esta definido en la conf y existe, se clona con el nombre del ws
-                # si no, se crea uno por defecto
-                # 
-                final_style_name = datastore.workspace.name + '_' + original_style_name                
-                style_from_library = self.getStyle(original_style_name)                
+            defined_files = []
+            for t in table_definition:
+                for f in files:
+                    if f == t['file']:
+                        defined_files.append(f)
 
-                if has_style and style_from_library is not None :
-                    print "DEBUG: has_style AND style_from_library"       
-                    if creation_mode == 'CR':
-                        if symbology_services.clone_style(self, layer, original_style_name, final_style_name) is False:
-                            print "DEBUG: Creation mode CR. Clone style False. Creating default" 
-                            self.createDefaultStyle(layer, final_style_name)
-                            self.setLayerStyle(datastore.workspace.name + ":" + layer.name, final_style_name)
-                        else:
-                            print "DEBUG: Creation mode CR. Clone style True"
-                    else:
-                        print "DEBUG: Has style and style_from_library. Creation mode UPDATE"
-                        symbology_services.clone_style(self, layer, original_style_name, final_style_name)                        
-                else:
-                    print "DEBUG: NO has_style or style_from_library " + original_style_name
-                    if creation_mode == 'CR':
-                        self.createDefaultStyle(layer, final_style_name)
-                        self.setLayerStyle( datastore.workspace.name + ":" + layer.name, final_style_name)
-                
+            not_defined_files = tuple(x for x in files if x not in set(defined_files)) 
+            
+            self.createLayersFromFiles(True, table_definition, defined_files, dir_path, creation_mode, srs, encoding, datastore, layergroup, request.user.username)
+            self.createLayersFromFiles(False, table_definition, not_defined_files, dir_path, creation_mode, srs, encoding, datastore, layergroup, request.user.username)
+              
             print "DEBUG: Se ha terminado la creacion de capas ........................................."       
                 
         except rest_geoserver.RequestError as ex:
@@ -909,11 +812,130 @@ class Geoserver():
             raise             
         except gdal_tools.GdalError as ex:
             print "Error Gdal: " + str(ex)
-            raise rest_geoserver.RequestError(e.code, e.message)
+            raise rest_geoserver.RequestError(ex.code, ex.message)
         except Exception as e:
             logging.exception(e)
             raise rest_geoserver.RequestError(-1, _("Error creating the layer. Review the file format."))
+        
+    def createLayersFromFiles(self, defined, table_definition, files, dir_path, creation_mode, srs, encoding, datastore, layergroup, username):
+        for f in files:
+            has_style = False
+            if defined:
+                table_def = self.getTableDefinition(f, table_definition)
+                layer_name = table_def['name']
+                layer_title = table_def['title']
+                try:
+                    original_style_name = table_def['style']
+                    has_style = True
+                    
+                except Exception as e:
+                    original_style_name = layer_name
+                    print e
+                #layer_group = table_def['group'] + '_' + application.name.lower()
+            else:
+                layer_name = os.path.splitext(os.path.basename(f))[0]
+                layer_title = os.path.splitext(os.path.basename(f))[0]
+                original_style_name = layer_name
+            shp_abs = os.path.join(dir_path, f)
+            # skip if shapefile is empty
             
+            dbf_abs = os.path.splitext(shp_abs)[0] + '.dbf'
+            table = DBF(dbf_abs)                
+            if len(table.records) == 0:
+                print "Empty shapefile  ..................... "
+                continue
+            # export to database
+            ds_params = json.loads(datastore.connection_params) 
+            db = ds_params.get('database')
+            host = ds_params.get('host')
+            port = ds_params.get('port')
+            schema = ds_params.get('schema', "public")
+            port = str(int(port))
+            user = ds_params.get('user')
+            password = ds_params.get('passwd')
+        
+            if _valid_sql_name_regex.search(db) == None:
+                raise InvalidValue(-1, _("The connection parameters contain an invalid database name: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db))
+            if _valid_sql_name_regex.search(user) == None:
+                raise InvalidValue(-1, _("The connection parameters contain an invalid user name: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db))
+            if _valid_sql_name_regex.search(schema) == None:
+                raise InvalidValue(-1, _("The connection parameters contain an invalid schema: {value}. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=db))
+            
+            try:
+                gdal_tools.shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                
+            except Exception as e:
+                print "ERROR en shp2postgis ... Algunos shapefiles puede que no hayan subido "
+                continue 
+            
+            try:
+                layer = Layer.objects.get(name=layer_name, datastore=datastore)
+            except:
+                # may me missing when creating a layer or when
+                # appending / overwriting a layer created outside gvsig online
+                layer = Layer()                
+                # TODO: si estamos en create mode es porque ha aparecido otro shape. Deberiamos borrar el proyecto y volverlo a crear  
+                        
+            if creation_mode==forms_geoserver.MODE_CREATE:
+                
+                try:
+                    self.createFeaturetype(datastore.workspace, datastore, layer_name, layer_title)
+                except:
+                    print "ERROR en createFeaturetype"
+                    raise
+                
+                    
+                layer.datastore = datastore
+                layer.name = layer_name
+                layer.visible = False
+                layer.queryable = True
+                layer.cached = True
+                layer.single_image = False
+                layer.layer_group = layergroup
+                layer.title = layer_title
+                layer.type = datastore.type
+                layer.metadata_uuid = ''
+                layer.created_by = username
+                layer.save()
+
+                self.setDataRules()                                        
+                    
+                    
+                if layer.layer_group.name != "__default__":
+                    self.createOrUpdateGeoserverLayerGroup(layer.layer_group)
+            
+            # estilos: se ejecuta en modo create o update
+            # si esta definido en la conf y existe, se clona con el nombre del ws
+            # si no, se crea uno por defecto
+            # 
+            final_style_name = datastore.workspace.name + '_' + original_style_name                
+            style_from_library = self.getStyle(original_style_name)                
+
+            if has_style and style_from_library is not None :
+                print "DEBUG: has_style AND style_from_library"       
+                if creation_mode == 'CR':
+                    if symbology_services.clone_style(self, layer, original_style_name, final_style_name) is False:
+                        print "DEBUG: Creation mode CR. Clone style False. Creating default" 
+                        self.createDefaultStyle(layer, final_style_name)
+                        self.setLayerStyle(datastore.workspace.name + ":" + layer.name, final_style_name)
+                    else:
+                        print "DEBUG: Creation mode CR. Clone style True"
+                else:
+                    print "DEBUG: Has style and style_from_library. Creation mode UPDATE"
+                    symbology_services.clone_style(self, layer, original_style_name, final_style_name)                        
+            else:
+                print "DEBUG: NO has_style or style_from_library " + original_style_name
+                if creation_mode == 'CR':
+                    self.createDefaultStyle(layer, final_style_name)
+                    self.setLayerStyle( datastore.workspace.name + ":" + layer.name, final_style_name)
+                    
+    def getTableDefinition(self, file, table_definition):
+        definition = None
+        for t in table_definition:
+            if t['file'] == file:
+                definition = t
+        return definition
+                
     def exportShpToPostgis(self, form_data):
         name = form_data['name']
         ds = form_data['datastore']
