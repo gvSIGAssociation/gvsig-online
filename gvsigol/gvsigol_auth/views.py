@@ -308,13 +308,14 @@ def user_update(request, uid):
         for key in request.POST:
             if 'group-' in key:
                 assigned_groups.append(int(key.split('-')[1]))
-        
-        is_superuser = False
-        if 'is_superuser' in request.POST:
-            is_superuser = True
             
         is_staff = False
         if 'is_staff' in request.POST:
+            is_staff = True
+            
+        is_superuser = False
+        if 'is_superuser' in request.POST:
+            is_superuser = True
             is_staff = True
             
         user.first_name = request.POST.get('first_name')
