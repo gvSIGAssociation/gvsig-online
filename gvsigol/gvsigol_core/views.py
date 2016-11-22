@@ -52,6 +52,8 @@ def home(request):
     user = User.objects.get(username=request.user.username)
     groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
     
+    print 'Accediendo desde ' + request.META['HTTP_REFERER']
+    
     from_login = False
     if 'HTTP_REFERER' in request.META:
         if request.META['HTTP_REFERER'].endswith('gvsigonline') or request.META['HTTP_REFERER'].endswith('gvsigonline/'):
