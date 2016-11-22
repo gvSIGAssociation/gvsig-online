@@ -53,7 +53,7 @@ def home(request):
     groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
     
     for key in request.META:
-        print 'Accediendo desde ' + request.META[key]
+        print key + ' -> ' + request.META[key]
     
     
     from_login = False
