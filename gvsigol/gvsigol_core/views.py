@@ -52,14 +52,9 @@ def home(request):
     user = User.objects.get(username=request.user.username)
     groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
     
-    for key in request.META:
-        print key + ' -> ' + request.META[key]
-    
-    
     from_login = False
-    if 'HTTP_REFERER' in request.META:
-        if request.META['HTTP_REFERER'].endswith('gvsigonline') or request.META['HTTP_REFERER'].endswith('gvsigonline/'):
-            from_login = True
+    if not 'HTTP_REFERER' in request.META:
+        from_login = True
     
     projects_by_user = []
     for usergroup_user in groups_by_user:
