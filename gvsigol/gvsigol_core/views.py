@@ -54,7 +54,7 @@ def home(request):
     
     from_login = False
     if 'HTTP_REFERER' in request.META:
-        if 'auth/login_user' in request.META['HTTP_REFERER']:
+        if request.META['HTTP_REFERER'].endswith('gvsigonline') or request.META['HTTP_REFERER'].endswith('gvsigonline/'):
             from_login = True
     
     projects_by_user = []
