@@ -41,7 +41,6 @@ from gvsigol.settings import GVSIGOL_LDAP, LOGOUT_PAGE_URL, AUTH_WITH_REMOTE_USE
 def login_user(request):
     if request.user.is_authenticated():
         logout_user(request)
-        print "TEST 1"
         
     errors = []
     if request.method == "POST":
@@ -53,7 +52,6 @@ def login_user(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
-                print "TEST 2"
                 return redirect('home')
             
             else:
