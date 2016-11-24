@@ -277,7 +277,7 @@ def user_add(request):
                             mapservice_backend.reload_nodes()
                         
                         
-                    auth_utils.sendMail(user, form.data['password1'])
+                    #auth_utils.sendMail(user, form.data['password1'])
     
                     return redirect('user_list')
             
