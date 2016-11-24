@@ -185,8 +185,8 @@ LOGOUT_PAGE_URL = '##LOGOUT_PAGE_URL##'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'sigayto@gmail.com'
-EMAIL_HOST_PASSWORD = 'Aguas2016'
+EMAIL_HOST_USER = 'sigayto@scolab.es'
+EMAIL_HOST_PASSWORD = 'Ahjuin4a'
 EMAIL_PORT = 587
 SITE_ID=1
 
