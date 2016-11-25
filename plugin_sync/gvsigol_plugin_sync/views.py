@@ -16,14 +16,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-'''
-@author: Cesar Martinez <cmartinez@scolab.es>
-'''
 
 # generic python modules
 import json
 import time, os
 import shutil
+import tempfile
+import io
+from io import BytesIO
+import logging
+import sqlite3
 
 # django libs
 from django.http.response import StreamingHttpResponse, FileResponse
@@ -33,23 +35,28 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import PermissionDenied
+from django.utils import timezone
 
 from django.http import JsonResponse
 
 # gvsig online modules
-from gvsigol_services.models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, LayerLock
-import tempfile
-from gvsigol_services import gdal_tools
-from gvsigol_services.gdal_tools import MODE_OVERWRITE, MODE_APPEND
+from gvsigol_services.models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, LayerLock,\
+    LayerResource
 from gvsigol_core import geom
 
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
 from gvsigol_services.backend_postgis import Introspect
+from gvsigol.settings import MEDIA_ROOT
 
 # external libs
 import gdaltools
 from spatialiteintrospect import introspect as sq_introspect
+from PIL import Image
 
+
+'''
+@author: Cesar Martinez Izquierdo - http://www.scolab.es
+'''
 
 DEFAULT_BUFFER_SIZE = 1048576
 
@@ -148,7 +155,7 @@ def layersToJson(universallyReadableLayers, readOnlyLayers=[], readWriteLayers=[
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_POST
 def sync_download(request):
-    locked_layers = []
+    locks = []
     prepared_tables = []
     try:
         request_params = json.loads(request.body)
@@ -158,7 +165,7 @@ def sync_download(request):
         for layer in layers:
             #FIXME: maybe we need to specify if we want the layer for reading or writing!!!! Assume we always want to write for the moment
             lock = add_layer_lock(layer, request.user)
-            locked_layers.append(lock.layer.get_qualified_name())
+            locks.append(lock)
             conn = _get_layer_conn(lock.layer)
             if not conn:
                 raise HttpResponseBadRequest("Bad request")
@@ -182,6 +189,8 @@ def sync_download(request):
                 ).execute()
 
             gdaltools.ogrinfo(file_path, sql="SELECT UpdateLayerStatistics()")
+            locked_layers = [ lock.layer for lock in locks]
+            _copy_images(locked_layers, file_path)
             file = TemporaryFileWrapper(file_path)
             response = FileResponse(file, content_type='application/spatialite')
             #response['Content-Disposition'] = 'attachment; filename=db.sqlite'
@@ -189,16 +198,11 @@ def sync_download(request):
             return response
         else:
             return HttpResponseBadRequest("Bad request")
-        
-    except LayerLockingException:
-        for layer in locked_layers:
-            remove_layer_lock(layer, request.user)
-        raise
-    except Exception:
-        for layer in locked_layers:
-            remove_layer_lock(layer, request.user)
-        #FIXME: raise a specific exception
-        raise
+
+    except Exception as exc:
+        for layer in locks:
+            remove_layer_lock(lock.layer, request.user)
+        logging.error("sync_download error")
         return HttpResponseBadRequest("Bad request")
 
 def add_layer_lock(qualified_layer_name, user):
@@ -252,17 +256,17 @@ def get_layer_lock(qualified_layer_name, user, check_writable=False):
             raise LayerNotLocked(qualified_layer_name)
     return None
 
-def remove_layer_lock(qualified_layer_name, user):
-    (ws_name, layer_name) = qualified_layer_name.split(":")
-    layer_lock = LayerLock.objects.filter(layer__name=layer_name, layer__datastore__workspace__name=ws_name)
+def remove_layer_lock(layer, user, check_writable=False):
+    layer_lock = LayerLock.objects.filter(layer=layer)
     if len(layer_lock)==1:
         if layer_lock.filter(created_by=user.username).count()!=1:
             # the layer was locked by a different user!!
             raise PermissionDenied()
-        layer_filter = Layer.objects.filter(name=layer_name, datastore__workspace__name=ws_name)
-        is_writable = (layer_filter.filter(layerwritegroup__group__usergroupuser__user=user).count()>0)
-        if not is_writable:
-            raise PermissionDenied()
+        if check_writable:
+            layer_filter = Layer.objects.filter(id=layer.id)
+            is_writable = (layer_filter.filter(layerwritegroup__group__usergroupuser__user=user).count()>0)
+            if not is_writable:
+                raise PermissionDenied()
         layer_lock.delete()
         return True
     raise LayerNotLocked()
@@ -296,9 +300,14 @@ def sync_upload(request):
         # 6 - remove the temporal file
         try:
             db = sq_introspect.Introspect(tmpfile)
-            for t in db.get_geometry_tables():
-                lock = get_layer_lock(t, request.user, True)
-                if lock:
+            try:
+                tables = db.get_geometry_tables()
+                locks = []
+                for t in tables:
+                    # first check all the layers are properly locked and writable
+                    lock = get_layer_lock(t, request.user, check_writable=True)
+                    locks.append(lock)
+                for lock in locks:
                     ogr = gdaltools.ogr2ogr()
                     geom_info = db.get_geometry_columns_info(t)
                     if len(geom_info)>0 and len(geom_info[0])==7:
@@ -310,8 +319,28 @@ def sync_upload(request):
                         ogr.set_output(conn, table_name=lock.layer.name)
                         ogr.set_output_mode(ogr.MODE_LAYER_OVERWRITE, ogr.MODE_DS_UPDATE)
                         ogr.execute()
-                        lock.delete()
-                        #FIXME: handle images
+            finally:
+                db.close()
+            
+            import time
+            # approach 1
+            t1 = time.clock()
+            layers = [ lock.layer for lock in locks]
+            replacer = ResourceReplacer(tmpfile, layers)
+            replacer.process()
+            t2 = time.clock()
+            
+            # approach 2
+            _remove_existing_images(layers)
+            _extract_images(tmpfile)
+            t3 = time.clock()
+            
+            print "Time approach 1: " + str(t2-t1)
+            print "Time approach 2: " + str(t3-t2)
+            
+            # everything was fine, release the locks now
+            for lock in locks:
+                lock.delete()
         except sq_introspect.InvalidSqlite3Database:
             return HttpResponseBadRequest("The file is not a valid Sqlite3 db")
         except LayerNotLocked as e:
@@ -319,9 +348,122 @@ def sync_upload(request):
         except:
             raise
         finally:
-            db.close()
             os.remove(tmpfile)
     return JsonResponse({'response': 'OK'})
+
+def _remove_existing_images(tables):
+    resources = LayerResource.objects.filter(layer__name__in=tables, type=LayerResource.EXTERNAL_IMAGE)
+    for r in resources:
+        img_path = r.path
+        if os.path.isfile(img_path):
+            os.remove(img_path)
+    resources.delete()
+    for r in resources:
+        # should print nothing as we have removed all the resources
+        print r
+
+def _extract_images(db_path):
+    """
+    Extracts images from the sqlite database to the server side (LayerResource
+    table + file system images)
+    """
+    conn = sqlite3.connect(db_path)    
+    try:
+        cursor = conn.cursor()
+        sql = "SELECT id, restable, rowidfk, resblob, resname FROM geopap_resource WHERE type = 'BLOB_IMAGE'"
+        result = cursor.execute(sql)
+        for row in result:
+            (ws_name, layer_name) = row[1].split(":")
+            layer = Layer.objects.get(name=layer_name, datastore__workspace__name=ws_name)
+            (fd, f) = tempfile.mkstemp(suffix=".JPG", prefix="img-gol-", dir=MEDIA_ROOT)
+            output_file = os.fdopen(fd, "wb")
+            try:
+                output_file.write(row[3])
+                res = LayerResource()
+                res.id = row[0]
+                res.feature = row[2]
+                res.layer = layer
+                res.path = f
+                res.title = row[4]
+                res.type = LayerResource.EXTERNAL_IMAGE
+                res.created = timezone.now()
+                res.save()
+            finally:
+                output_file.close()
+
+
+    finally:
+        conn.close()
+
+def _get_image_row():
+    server_resources = LayerResource.objects.filter(layer__name__in=layers, type=LayerResource.EXTERNAL_IMAGE)
+    for r in server_resources:
+        img_buffer = io.open(r.path, mode='rb')
+        """
+        img_buffer = open(r.path, mode='rb')
+        imgblob = img.read()
+        img.close()
+        """
+        
+        thumb_buffer = BytesIO()
+        img = Image.open(r.path)
+        img.thumbnail([100, 100])
+        img.save(thumb_buffer, "JPEG")
+        #thumb_blob = thumb_buffer.getvalue()
+        yield (r.id, r.layer, 'BLOB_IMAGE', r.title, r.feature, r.path, img_buffer, thumb_buffer)
+
+def _copy_images2(layers, db_path):
+    """
+    Copies images for the provided layers from LayerResource to a SpatialiteDb
+    """
+    conn = sqlite3.connect(db_path)
+    sql_create = """CREATE TABLE geopap_resource (id integer PRIMARY KEY NOT NULL, restable text, type integer, resname TEXT, rowidfk TEXT, respath TEXT, resblob BLOB, resthumb BLOB)"""
+    conn.execute()
+    try:
+        cursor = conn.cursor()
+        sql = "INSERT INTO geopap_resource (id, restable, type, resname, rowidfk, respath, resblob, resthumb) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        cursor.executemany(sql, _get_image_row())
+        cursor.commit()
+    finally:
+        conn.close()
+
+
+
+def _copy_images(layers, db_path):
+    """
+    Copies images for the provided layers from LayerResource to a SpatialiteDb
+    """
+    server_resources = LayerResource.objects.filter(layer__name__in=layers, type=LayerResource.EXTERNAL_IMAGE)
+    conn = sqlite3.connect(db_path)
+    sql_create = """CREATE TABLE geopap_resource (id integer PRIMARY KEY NOT NULL, restable text, type integer, resname TEXT, rowidfk TEXT, respath TEXT, resblob BLOB, resthumb BLOB)"""
+    conn.execute(sql_create)
+    # some PRAMA for faster inserts
+    conn.execute("PRAGMA synchronous = OFF")
+    conn.execute("PRAGMA journal_mode = MEMORY")
+    try:
+        cursor = conn.cursor()
+        sql = "INSERT INTO geopap_resource (id, restable, type, resname, rowidfk, respath, resblob, resthumb) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        for r in server_resources:
+            # FIXME: we are loading in memory the whole image
+            # We should investigate if we can pass an iterable to cursor.execute.
+            # It seems to NOT be supported for the moment, but we can check again in future versions 
+            thumb_buffer = BytesIO()
+            img = Image.open(r.path)
+            img.thumbnail([100, 100])
+            img.save(thumb_buffer, "JPEG")
+            
+            img = open(r.path, mode='rb')
+            img_bytes = img.read()
+            img_buffer = buffer(img_bytes)
+            img.close()
+            #thumb_blob = thumb_buffer.getvalue()
+            cursor.execute(sql, (r.id, r.layer.get_qualified_name(), 'BLOB_IMAGE', r.title, r.feature, r.path, img_buffer, buffer(thumb_buffer.getvalue())))
+            img.close()
+            thumb_buffer.close()
+        conn.commit()
+
+    finally:
+        conn.close()
 
 
 def _get_layer_conn(layer):
@@ -368,6 +510,99 @@ def handle_uploaded_file_raw(request):
     destination.close()
     print path
     return path
+
+class ResourceReplacer():
+    """
+    Compares existing resources with the uploaded ones and performs and efficient
+    update of the LayerResources tables, considering only deletions and insertions.
+    """
+    
+    def __init__(self, db_path, layers):
+        self.db_path = db_path
+        self.layers = layers
+        self.sqlite_conn = None
+    
+    def _get_sqlite_iterator(self):
+        self.sqlite_conn = sqlite3.connect(self.db_path)
+        cursor = self.sqlite_conn.cursor()
+        sql = "SELECT id, restable, rowidfk, resblob, resname, respath FROM geopap_resource WHERE type = 'BLOB_IMAGE' ORDER BY id"
+        return cursor.execute(sql)
+
+    def process(self):
+        """
+        The strategy to follow is:
+        - any resource id present in the sqlite and missing in the server is
+        considered an insert
+        - any resource id present in the server and missing in the sqlite is
+        considered a deletion
+        - if the ids are present in both sides, we consider this to be a
+        replacement (deletion + insert) if the path field differs. Otherwise we
+        consider to be the same resource and we ignore it 
+        """
+        try:
+            sqlite_resources = self._get_sqlite_iterator()
+            server_resources = LayerResource.objects.filter(layer__in=self.layers, type=LayerResource.EXTERNAL_IMAGE).order_by("id").iterator()
+
+            sq_res = self._get_next(sqlite_resources)
+            srv_res = self._get_next(server_resources)
+            while sq_res or srv_res:
+                if sq_res and srv_res:
+                    if sq_res[0] == srv_res.id:
+                        if sq_res[5] != srv_res.path:
+                            self._remove_resource(srv_res)
+                            self._insert(sq_res)
+                        sq_res = self._get_next(sqlite_resources)
+                        srv_res = self._get_next(server_resources)
+                    elif sq_res[0] > srv_res.id:
+                        self._remove_resource(srv_res)
+                        srv_res = self._get_next(server_resources)
+                    else:
+                        self._insert(sq_res)
+                        sq_res = self._get_next(sqlite_resources)
+                elif sq_res:
+                    self._insert(sq_res)
+                    sq_res = self._get_next(sqlite_resources)
+                else:
+                    self._remove_resource(srv_res)
+                    srv_res = self._get_next(server_resources)
+        finally:
+            if self.sqlite_conn:
+                self.sqlite_conn.close()
+
+    def _remove_resource(self, resource):
+        if os.path.isfile(resource.path):
+            os.remove(resource.path)
+        resource.delete()
+
+    def _insert(self, newres):
+        # FIXME: maybe we should process the resources by layer to avoid
+        # getting the layer object again and again
+        (ws_name, layer_name) = newres[1].split(":")
+        layer = Layer.objects.get(name=layer_name, datastore__workspace__name=ws_name)
+        
+        (fd, f) = tempfile.mkstemp(suffix=".JPG", prefix="img-gol-", dir="/tmp/")
+        output_file = os.fdopen(fd, "wb")
+        try:
+            output_file.write(newres[3])
+            res = LayerResource()
+            res.id = newres[0]
+            res.feature = newres[2]
+            res.layer = layer
+            res.path = f
+            res.title = newres[4]
+            res.type = LayerResource.EXTERNAL_IMAGE
+            res.save(force_insert=True)
+        finally:
+            output_file.close()
+
+    def _get_next(self, iterator):
+        """
+        Returns the next object in the iterable or None if we have finished
+        """
+        try:
+            return next(iterator)
+        except StopIteration:
+            return None
 
 
 class TemporaryFileWrapper(tempfile._TemporaryFileWrapper):
