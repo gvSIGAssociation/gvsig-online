@@ -14,6 +14,7 @@
 	<link rel="stylesheet" href="{% static "js/vendors/jQueryUI/jquery-ui.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.6/css/bootstrap.min.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-datepicker-1.6.4-dist/css/bootstrap-datepicker.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-lightbox/ekko-lightbox.min.css" %}">
 	<link rel="stylesheet" href="{% static "css/font-awesome-4.4.0/css/font-awesome.min.css" %}">
 	<link rel="stylesheet" href="{% static "css/fontcustom/fontcustom.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/DataTables-1.10.11/media/css/jquery.dataTables.css" %}">
@@ -194,6 +195,7 @@
 	<script type="text/javascript" src="{% static "js/vendors/bootstrap-datepicker-1.6.4-dist/js/bootstrap-datepicker.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/DataTables-1.10.11/media/js/jquery.dataTables.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/DataTables-1.10.11/extensions/Select/js/dataTables.select.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/bootstrap-lightbox/ekko-lightbox.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/proj4js/proj4.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/ol-3.15.1/ol-debug.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/ol-3.15.1/ol3-popup.js" %}"></script>
@@ -224,6 +226,11 @@
 		    handle: ".modal-header",
 		    containment: "#map", 
 		    scroll: false
+		});
+		
+		$(document).on('click', '[data-toggle="lightbox"]', function(event) {
+		    event.preventDefault();
+		    $(this).ekkoLightbox();
 		});
 	
 		$.ajax({
