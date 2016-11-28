@@ -1085,6 +1085,18 @@ def get_feature_info(request):
             layer_conf = json.loads(layer.conf)
             fields = layer_conf.get('fields')
             for i in range(0, len(geojson['features'])):
+                fid = geojson['features'][i].get('id').split('.')[1]
+                layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
+                resources = []
+                for lr in layer_resources:
+                    type = 'image' 
+                    resource = {
+                        'type': type,
+                        'url': lr.path
+                    }
+                    resources.append(resource)
+                geojson['features'][i]['resources'] = resources
+                    
                 formated_properties = {}
                 for p in geojson['features'][i].get('properties'):
                     for f in fields:
@@ -1092,6 +1104,7 @@ def get_feature_info(request):
                             if f.get('visible'):
                                 formated_properties[f.get('title')] = geojson['features'][i].get('properties')[p]
                 geojson['features'][i]['properties'] = formated_properties
+                
             features = geojson['features']
                 
         else: 
