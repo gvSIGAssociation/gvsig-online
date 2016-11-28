@@ -46,7 +46,7 @@ from gvsigol_core import geom
 
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
 from gvsigol_services.backend_postgis import Introspect
-from gvsigol.settings import MEDIA_ROOT
+from gvsigol_services import utils
 
 # external libs
 import gdaltools
@@ -367,7 +367,8 @@ def _extract_images(db_path):
     Extracts images from the sqlite database to the server side (LayerResource
     table + file system images)
     """
-    conn = sqlite3.connect(db_path)    
+    conn = sqlite3.connect(db_path)
+    image_dir = utils.get_resources_dir(LayerResource.EXTERNAL_IMAGE)
     try:
         cursor = conn.cursor()
         sql = "SELECT id, restable, rowidfk, resblob, resname FROM geopap_resource WHERE type = 'BLOB_IMAGE'"
@@ -375,7 +376,7 @@ def _extract_images(db_path):
         for row in result:
             (ws_name, layer_name) = row[1].split(":")
             layer = Layer.objects.get(name=layer_name, datastore__workspace__name=ws_name)
-            (fd, f) = tempfile.mkstemp(suffix=".JPG", prefix="img-gol-", dir=MEDIA_ROOT)
+            (fd, f) = tempfile.mkstemp(suffix=".JPG", prefix="img-gol-", dir=image_dir)
             output_file = os.fdopen(fd, "wb")
             try:
                 output_file.write(row[3])
@@ -488,6 +489,7 @@ class ResourceReplacer():
         self.db_path = db_path
         self.layers = layers
         self.sqlite_conn = None
+        self.image_dir = utils.get_resources_dir(LayerResource.EXTERNAL_IMAGE)
     
     def _get_sqlite_iterator(self):
         self.sqlite_conn = sqlite3.connect(self.db_path)
@@ -547,7 +549,7 @@ class ResourceReplacer():
         (ws_name, layer_name) = newres[1].split(":")
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=ws_name)
         
-        (fd, f) = tempfile.mkstemp(suffix=".JPG", prefix="img-gol-", dir=MEDIA_ROOT)
+        (fd, f) = tempfile.mkstemp(suffix=".JPG", prefix="img-gol-", dir=self.image_dir)
         output_file = os.fdopen(fd, "wb")
         try:
             output_file.write(newres[3])
