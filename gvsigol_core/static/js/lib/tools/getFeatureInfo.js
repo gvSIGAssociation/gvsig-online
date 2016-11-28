@@ -314,42 +314,62 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 	}
 	var detailsTab = $('#details-tab');
 	
-	var ui = '';
-	ui += '<div class="box box-primary">';
-	ui += 	'<div class="box-header with-border" style="font-weight: bold;">';
-	ui += 		'<span class="text">' + selectedFeature.id + '</span>';
-	ui += 	'</div>';
-	ui += 	'<div class="box-body" style="padding: 20px;">';
-	ui += 		'<ul class="products-list product-list-in-box">';
+	var infoContent = '';
+	infoContent += '<div class="box box-default">';
+	infoContent += 	'<div class="box-header with-border">';
+	infoContent += 		'<span class="text">' + selectedFeature.id + '</span>';
+	infoContent += 	'</div>';
+	infoContent += 	'<div class="box-body" style="padding: 20px;">';
+	infoContent += 		'<ul class="products-list product-list-in-box">';
 	for (var key in selectedFeature.properties) {
 		var value = selectedFeature.properties[key];
 		if (value == "null" || value == null) {
 			value = "";
 		}
-		if (selectedFeature.properties[key] != null && selectedFeature.properties[key].toString().indexOf('http') > -1) {
-			ui += '<li class="item">';
-			ui += 	'<div class="feature-info">';
-			ui += 		'<a href="' + value + '" class="product-title">' + key;
-			ui += 			'<span class="label label-warning pull-right">' + gettext('Open') + '</span>';
-			ui += 		'</a>';
-			ui += 		'<span class="product-description">' + value + '</span>';
-			ui += 	'</div>';
-			ui += '</li>';
-			
-		} else {
-			if (!key.startsWith(this.prefix)) {	
-				ui += '<li class="item">';
-				ui += 	'<div class="feature-info">';
-				ui += 		'<a href="javascript:void(0)" class="product-title">' + key + '</a>';
-				ui += 		'<span class="product-description">' + value + '</span>';
-				ui += 	'</div>';
-				ui += '</li>';
-			}
-			
+		if (!key.startsWith(this.prefix)) {	
+			infoContent += '<li class="item">';
+			infoContent += 	'<div class="feature-info">';
+			infoContent += 		'<a href="javascript:void(0)" class="product-title">' + key + '</a>';
+			infoContent += 		'<span class="product-description">' + value + '</span>';
+			infoContent += 	'</div>';
+			infoContent += '</li>';
 		}
 	}
-	ui += 		'</ul>';
-	ui += 	'</div>';
+	infoContent += 		'</ul>';
+	infoContent += 	'</div>';
+	infoContent += '</div>';
+	
+	var resourcesContent = '';
+	resourcesContent += '<div class="box box-default">';
+	resourcesContent += 	'<div class="box-body" style="padding: 20px;">';
+	resourcesContent += 		'<ul style="list-style: none;">';
+	for (var i=0; i<selectedFeature.resources.length; i++) {
+		if (selectedFeature.resources[i].type == 'image') {	
+			resourcesContent += '<li style="padding: 20px;">';
+			resourcesContent += '<a href="' + selectedFeature.resources[i].url + '" data-toggle="lightbox" data-gallery="example-gallery">';
+			resourcesContent += '	<img src="' + selectedFeature.resources[i].url + '" class="img-fluid adjust-image">';
+			resourcesContent += '</a>';
+			resourcesContent += '</li>';
+		}
+	}
+	resourcesContent += 		'</ul>';
+	resourcesContent += 	'</div>';
+	resourcesContent += '</div>';
+	
+	var ui = '';
+	ui += '<div class="nav-tabs-custom">';
+	ui += '<ul class="nav nav-tabs">';
+	ui += '<li class="active"><a href="#tab_info_content" data-toggle="tab" aria-expanded="true" style="font-weight: bold;">' + gettext('Feature info') + '</a></li>';
+	ui += '<li class=""><a href="#tab_resources_content" data-toggle="tab" aria-expanded="false" style="font-weight: bold;">' + gettext('Multimedia resources') + '</a></li>';
+	ui += '</ul>';
+	ui += '<div class="tab-content">';
+	ui += '<div class="tab-pane active" id="tab_info_content">';
+	ui += infoContent;
+	ui += '</div>';
+	ui += '<div class="tab-pane" id="tab_resources_content">';
+	ui += resourcesContent;
+	ui += '</div>';
+	ui += '</div>';
 	ui += '</div>';
 	
 	detailsTab.empty();
