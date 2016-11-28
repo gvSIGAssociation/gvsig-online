@@ -17,15 +17,17 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from gvsigol.settings import MEDIA_ROOT
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 from models import LayerReadGroup, LayerWriteGroup
 from gvsigol_auth.models import UserGroup
-from gvsigol_services.models import Datastore
+from gvsigol_services.models import Datastore, LayerResource
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
 from gvsigol import settings
 import psycopg2
+import os
 
 def get_all_user_groups_checked_by_layer(layer):
     groups_list = UserGroup.objects.all()
@@ -155,3 +157,19 @@ def get_alphanumeric_fields(fields):
             alphanumeric_fields.append(field)
             
     return alphanumeric_fields
+
+def get_resources_dir(resource_type):
+    
+    if resource_type == LayerResource.EXTERNAL_IMAGE:
+        the_path = os.path.join(MEDIA_ROOT, "resources/image") 
+    elif  resource_type == LayerResource.EXTERNAL_PDF:
+        the_path = os.path.join(MEDIA_ROOT, "resources/pdf")
+    elif  resource_type == LayerResource.EXTERNAL_DOC:
+        the_path = os.path.join(MEDIA_ROOT, "resources/docs")
+    elif  resource_type == LayerResource.EXTERNAL_VIDEO:
+        the_path = os.path.join(MEDIA_ROOT, "resources/videos")
+    else:
+        the_path = os.path.join(MEDIA_ROOT, "resources/files")
+    if not os.path.exists(the_path):
+        os.makedirs(the_path, 0700)
+    return the_path
