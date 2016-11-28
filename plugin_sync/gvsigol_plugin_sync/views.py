@@ -70,7 +70,7 @@ def get_layerinfo(request):
     universallyReadableLayers = Layer.objects.exclude(layerreadgroup__layer__isnull=False)
     if not isinstance(request.user, AnonymousUser) :
         user = request.user
-        readWriteLayers = Layer.objects.filter(layerwritegroup__group__usergroupuser__user=user)
+        readWriteLayers = Layer.objects.filter(layerwritegroup__group__usergroupuser__user=user, layerlock__isnull=True)
         readOnlyLayers = Layer.objects.filter(layerreadgroup__group__usergroupuser__user=user).exclude(layerwritegroup__group__usergroupuser__user=user)
         layerJson = layersToJson(universallyReadableLayers, readOnlyLayers, readWriteLayers)
     else:
@@ -78,7 +78,7 @@ def get_layerinfo(request):
     """
     if not isinstance(request.user, AnonymousUser) :
         user = request.user
-        readWriteLayers = Layer.objects.filter(layerwritegroup__group__usergroupuser__user=user)
+        readWriteLayers = Layer.objects.filter(layerwritegroup__group__usergroupuser__user=user, layerlock__isnull=True)
         layerJson = layersToJson([], [], readWriteLayers)
     else:
         layerJson = layersToJson([], [], [])
@@ -94,7 +94,7 @@ def get_layerinfo_by_project(request, project):
     universallyReadableLayers = Layer.objects.exclude(layerreadgroup__layer__isnull=False).filter(layer_group__projectlayergroup__project=project)
     if not isinstance(request.user, AnonymousUser) :
         user = request.user
-        readWriteLayers = Layer.objects.filter(layerwritegroup__group__usergroupuser__user=user).filter(layer_group__projectlayergroup__project=project)
+        readWriteLayers = Layer.objects.filter(layerwritegroup__group__usergroupuser__user=user, layerlock__isnull=True).filter(layer_group__projectlayergroup__project=project)
         readOnlyLayers = Layer.objects.filter(layerreadgroup__group__usergroupuser__user=user).filter(layer_group__projectlayergroup__project=project).exclude(layerwritegroup__group__usergroupuser__user=user)
         layerJson = layersToJson(universallyReadableLayers, readOnlyLayers, readWriteLayers)
     else:
@@ -102,7 +102,7 @@ def get_layerinfo_by_project(request, project):
     """
     if not isinstance(request.user, AnonymousUser) :
         user = request.user
-        readWriteLayers = Layer.objects.filter(layerwritegroup__group__usergroupuser__user=user).filter(layer_group__projectlayergroup__project=project)
+        readWriteLayers = Layer.objects.filter(layerwritegroup__group__usergroupuser__user=user, layerlock__isnull=True).filter(layer_group__projectlayergroup__project=project)
         layerJson = layersToJson([], [], readWriteLayers)
     else:
         layerJson = layersToJson([], [], [])
@@ -219,7 +219,7 @@ def add_layer_lock(qualified_layer_name, user):
     #is_locked = (LayerLock.objects.filter(layer__name=layer_name, layer__datastore__workspace__name=ws_name).count()>0)
     is_locked = (LayerLock.objects.filter(layer=layer).count()>0)
     if is_locked:
-        raise LayerLocked
+        raise LayerLocked(qualified_layer_name)
     new_lock = LayerLock()
     new_lock.layer = layer
     new_lock.created_by = user.username
@@ -324,19 +324,19 @@ def sync_upload(request):
             
             import time
             # approach 1
-            t1 = time.clock()
+            #t1 = time.clock()
             layers = [ lock.layer for lock in locks]
             replacer = ResourceReplacer(tmpfile, layers)
             replacer.process()
-            t2 = time.clock()
+            #t2 = time.clock()
             
             # approach 2
-            _remove_existing_images(layers)
-            _extract_images(tmpfile)
-            t3 = time.clock()
+            #_remove_existing_images(layers)
+            #_extract_images(tmpfile)
             
-            print "Time approach 1: " + str(t2-t1)
-            print "Time approach 2: " + str(t3-t2)
+            #t3 = time.clock()
+            #print "Time approach 1: " + str(t2-t1)
+            #print "Time approach 2: " + str(t3-t2)
             
             # everything was fine, release the locks now
             for lock in locks:
@@ -577,7 +577,7 @@ class ResourceReplacer():
         (ws_name, layer_name) = newres[1].split(":")
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=ws_name)
         
-        (fd, f) = tempfile.mkstemp(suffix=".JPG", prefix="img-gol-", dir="/tmp/")
+        (fd, f) = tempfile.mkstemp(suffix=".JPG", prefix="img-gol-", dir=MEDIA_ROOT)
         output_file = os.fdopen(fd, "wb")
         try:
             output_file.write(newres[3])
@@ -656,7 +656,7 @@ class TemporaryFileWrapper(tempfile._TemporaryFileWrapper):
         return result
 
 
-class LayerLockingException(BaseException):
+class LayerLockingException(Exception):
     pass
 
 
