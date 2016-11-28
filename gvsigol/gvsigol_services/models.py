@@ -115,12 +115,15 @@ class LayerResource(models.Model):
     EXTERNAL_DOC = 4
     """any kind of resource file"""
     EXTERNAL_FILE = 8
+    """video files"""
+    EXTERNAL_VIDEO = 16
     """Valid resource types"""
     TYPE_CHOICES = (
         (EXTERNAL_IMAGE, 'Image'),
         (EXTERNAL_PDF, 'PDF'),
         (EXTERNAL_DOC, 'DOC'),
         (EXTERNAL_FILE, 'File'),
+        (EXTERNAL_VIDEO, 'Video'),
     )
     layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
     """The primary key of the feature. This makes mandatory for
