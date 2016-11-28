@@ -395,36 +395,6 @@ def _extract_images(db_path):
     finally:
         conn.close()
 
-def _get_image_row():
-    server_resources = LayerResource.objects.filter(layer__name__in=layers, type=LayerResource.EXTERNAL_IMAGE)
-    for r in server_resources:
-        thumb_buffer = BytesIO()
-        img = Image.open(r.path)
-        img.thumbnail([100, 100])
-        img.save(thumb_buffer, "JPEG")
-        
-        img = open(r.path, mode='rb')
-        img_bytes = img.read()
-        img_buffer = buffer(img_bytes)
-        img.close()
-        yield (r.id, r.layer.get_qualified_name(), 'BLOB_IMAGE', r.title, r.feature, r.path, img_buffer, buffer(thumb_buffer.getvalue()))
-
-def _copy_images2(layers, db_path):
-    """
-    Copies images for the provided layers from LayerResource to a SpatialiteDb
-    """
-    conn = sqlite3.connect(db_path)
-    sql_create = """CREATE TABLE geopap_resource (id integer PRIMARY KEY NOT NULL, restable text, type integer, resname TEXT, rowidfk TEXT, respath TEXT, resblob BLOB, resthumb BLOB)"""
-    conn.execute()
-    try:
-        cursor = conn.cursor()
-        sql = "INSERT INTO geopap_resource (id, restable, type, resname, rowidfk, respath, resblob, resthumb) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-        cursor.executemany(sql, _get_image_row())
-        cursor.commit()
-    finally:
-        conn.close()
-
-
 
 def _copy_images(layers, db_path):
     """
