@@ -398,19 +398,16 @@ def _extract_images(db_path):
 def _get_image_row():
     server_resources = LayerResource.objects.filter(layer__name__in=layers, type=LayerResource.EXTERNAL_IMAGE)
     for r in server_resources:
-        img_buffer = io.open(r.path, mode='rb')
-        """
-        img_buffer = open(r.path, mode='rb')
-        imgblob = img.read()
-        img.close()
-        """
-        
         thumb_buffer = BytesIO()
         img = Image.open(r.path)
         img.thumbnail([100, 100])
         img.save(thumb_buffer, "JPEG")
-        #thumb_blob = thumb_buffer.getvalue()
-        yield (r.id, r.layer, 'BLOB_IMAGE', r.title, r.feature, r.path, img_buffer, thumb_buffer)
+        
+        img = open(r.path, mode='rb')
+        img_bytes = img.read()
+        img_buffer = buffer(img_bytes)
+        img.close()
+        yield (r.id, r.layer.get_qualified_name(), 'BLOB_IMAGE', r.title, r.feature, r.path, img_buffer, buffer(thumb_buffer.getvalue()))
 
 def _copy_images2(layers, db_path):
     """
