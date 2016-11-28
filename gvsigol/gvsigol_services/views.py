@@ -15,6 +15,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from gvsigol_services.models import LayerResource
 
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
@@ -1073,8 +1074,8 @@ def get_feature_info(request):
         req = requests.Session()
         if 'username' in request.session and 'password' in request.session:
             if request.session['username'] is not None and request.session['password'] is not None:
-                req.auth = (request.session['username'], request.session['password'])
-                #req.auth = ('admin', 'geoserver')
+                #req.auth = (request.session['username'], request.session['password'])
+                req.auth = ('admin', 'geoserver')
 
         response = req.get(url, verify=False)
         geojson = json.loads(response.text)
@@ -1083,16 +1084,30 @@ def get_feature_info(request):
         if layer.conf is not None:
             layer_conf = json.loads(layer.conf)
             fields = layer_conf.get('fields')
-            formated_properties = {}
-            for p in geojson['features'][0].get('properties'):
-                for f in fields:
-                    if f.get('name') == p:
-                        if f.get('visible'):
-                            formated_properties[f.get('title')] = geojson['features'][0].get('properties')[p]
-            geojson['features'][0]['properties'] = formated_properties
+            for i in range(0, len(geojson['features'])):
+                formated_properties = {}
+                for p in geojson['features'][i].get('properties'):
+                    for f in fields:
+                        if f.get('name') == p:
+                            if f.get('visible'):
+                                formated_properties[f.get('title')] = geojson['features'][i].get('properties')[p]
+                geojson['features'][i]['properties'] = formated_properties
             features = geojson['features']
                 
-        else:    
+        else: 
+            for i in range(0, len(geojson['features'])):
+                fid = geojson['features'][i].get('id').split('.')[1]
+                layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
+                resources = []
+                for lr in layer_resources:
+                    type = 'image' 
+                    resource = {
+                        'type': type,
+                        'url': lr.path
+                    }
+                    resources.append(resource)
+                geojson['features'][i]['resources'] = resources
+                
             features = geojson['features']
                 
         response = {
