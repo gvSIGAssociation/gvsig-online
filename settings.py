@@ -57,12 +57,11 @@ INSTALLED_APPS = [
     'gvsigol_symbology',
     'gvsigol_filemanager',
     'gvsigol_core',
-    'gvsigol_app_dev',
-    'gvsigol_app_sync',
-    #'gvsigol_app_aguas',
-    #'gvsigol_app_worldwind',
-    #'gvsigol_app_shps_folder',
-    #'gvsigol_app_geocoding'
+    'gvsigol_app_zapopan',
+    'gvsigol_plugin_worldwind',
+    'gvsigol_plugin_shps_folder',
+    'gvsigol_plugin_geocoding',
+    'gvsigol_plugin_sync',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -113,7 +112,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         #'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'gvsigonline2',
+        'NAME': 'gvsigonline_v2',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
         'HOST': 'localhost',
@@ -143,9 +142,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 GVSIGOL_LDAP = {
-    'ENABLED': True,
-    'HOST':'test.gvsigonline.com',
-#    'HOST':'devel.gvsigonline.com',
+    'ENABLED': False,
+    'HOST':'devel.gvsigonline.com',
     'PORT': '389',
     'DOMAIN': 'dc=test,dc=gvsigonline,dc=com',
     'USERNAME': 'cn=admin,dc=test,dc=gvsigonline,dc=com',
@@ -155,11 +153,10 @@ GVSIGOL_LDAP = {
 
 AUTHENTICATION_BACKENDS = (
     #'django.contrib.auth.backends.RemoteUserBackend',
-    'django_auth_ldap.backend.LDAPBackend',
-    #'django.contrib.auth.backends.ModelBackend',
+    #'django_auth_ldap.backend.LDAPBackend',
+    'django.contrib.auth.backends.ModelBackend',
 )
-
-AUTH_LDAP_SERVER_URI = "ldap://test.gvsigonline.com:389"
+AUTH_LDAP_SERVER_URI = "ldap://devel.gvsigonline.com:389"
 AUTH_LDAP_ROOT_DN = "dc=test,dc=gvsigonline,dc=com"
 AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=test,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 
@@ -173,8 +170,9 @@ USE_L10N = True
 USE_TZ = True
 LANGUAGES = (
     ('es', _('Spanish')),
-    ('ca', _('Catalan')),
-    ('en', _('English')),
+    ('ca', _('Catalan')),    
+    ('en', _('English')),   
+    
 )
 LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol_core/locale'),
@@ -182,7 +180,7 @@ LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol_services/locale'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/locale'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_app_dev/locale'),
+    os.path.join(BASE_DIR, 'gvsigol_app_zapopan/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/locale'),
 )
@@ -211,7 +209,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_services/static'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
-    os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
+    os.path.join(BASE_DIR, 'gvsigol_app_zapopan/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/static'),
 )
@@ -221,7 +219,7 @@ STATICFILES_FINDERS = (
     #'compressor.finders.CompressorFinder',
 )
 
-GVSIGOL_VERSION = '2.1.0'
+GVSIGOL_VERSION = '2.1.4'
 
 GVSIGOL_USERS_CARTODB = {
     'dbhost': 'localhost',
@@ -239,15 +237,13 @@ GVSIGOL_CATALOG = {
 
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
-    'URL': 'https://localhost/geoserver',
+    'URL': 'https://localhost/gs-local',
     'USER': 'admin',
-    'PASSWORD': 'admin52',
-    #'PASSWORD': 'geoserver',
-    #'CLUSTER_NODES':['https://localhost/gs-test', 'https://localhost/gs-test'],
+    'PASSWORD': 'geoserver',
     'CLUSTER_NODES':[],
     'SUPPORTED_TYPES': (
                         ('v_PostGIS', _('PostGIS vector')),
-                        ('v_SHP', _('Shapefile folder')),
+                        ('v_SHP', _('Shapefile folder')),                        
                         ('c_GeoTIFF', _('GeoTiff')),
                         ('e_WMS', _('Cascading WMS')),
     ),
