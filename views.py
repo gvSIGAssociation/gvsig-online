@@ -1131,11 +1131,6 @@ def get_feature_info(request):
 
 @csrf_exempt
 def get_datatable_data(request):
-    
-    #if sys.getdefaultencoding() != 'utf-8':
-    #    reload(sys)  # Reload does the trick!
-    #    sys.setdefaultencoding('utf-8')
-    
     if request.method == 'POST':      
         layer_name = request.POST.get('layer_name')
         workspace = request.POST.get('workspace')     
@@ -1166,7 +1161,7 @@ def get_datatable_data(request):
                 'STARTINDEX': start_index,
                 'PROPERTYNAME': encoded_property_name
             }
-            recordsTotal = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, '')
+            recordsTotal = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, None)
             recordsFiltered = recordsTotal
             
         else:
@@ -1183,6 +1178,12 @@ def get_datatable_data(request):
                     filter += '<PropertyName>' + p.split('|')[0] + '</PropertyName>'
                     filter += '<Literal>*' + encoded_value.replace('?', '.') + '*' + '</Literal>'
                     filter += '</PropertyIsLike>'
+                elif p.split('|')[1] == 'xsd:double' or p.split('|')[1] == 'xsd:decimal' or p.split('|')[1] == 'xsd:integer' or p.split('|')[1] == 'xsd:int' or p.split('|')[1] == 'xsd:long':
+                    aux_property_name += p.split('|')[0] + ','
+                    filter += '<PropertyIsEqualTo>'
+                    filter += '<PropertyName>' + p.split('|')[0] + '</PropertyName>'
+                    filter += '<Literal>' + search_value + '</Literal>'
+                    filter += '</PropertyIsEqualTo>'
             filter += '</Or>'
             filter += '</Filter>'
             
@@ -1197,7 +1198,7 @@ def get_datatable_data(request):
                 'PROPERTYNAME': encoded_property_name,
                 'filter': filter
             }
-            recordsTotal = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, '')
+            recordsTotal = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, None)
             recordsFiltered = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, filter)
 
         params = urllib.urlencode(values)
@@ -1205,8 +1206,8 @@ def get_datatable_data(request):
         if 'username' in request.session and 'password' in request.session:
             if request.session['username'] is not None and request.session['password'] is not None:
                 req.auth = (request.session['username'], request.session['password'])
+                
         print wfs_url + "?" + params
-        #response = req.get(wfs_url + "?" + params, verify=False)
         response = req.post(wfs_url, data=values, verify=False)
         jsonString = response.text
         geojson = json.loads(jsonString)
