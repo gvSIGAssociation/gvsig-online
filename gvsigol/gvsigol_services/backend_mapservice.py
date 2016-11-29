@@ -39,6 +39,7 @@ import sys, os, shutil
 import requests
 import gdal_tools
 import logging
+import urllib
 import json
 import re
 from gvsigol_core import geom
@@ -1193,7 +1194,17 @@ class Geoserver():
             raise
         
     def getFeatureCount(self, request, url, layer_name, f):   
-        if filter != '':
+        if f == None:
+            values = {
+                'SERVICE': 'WFS',
+                'VERSION': '1.1.0',
+                'REQUEST': 'GetFeature',
+                'TYPENAME': layer_name,
+                'OUTPUTFORMAT': 'text/xml; subtype=gml/3.1.1',
+                'RESULTTYPE': 'hits'
+            }
+            
+        else:
             values = {
                 'SERVICE': 'WFS',
                 'VERSION': '1.1.0',
@@ -1204,19 +1215,8 @@ class Geoserver():
                 'FILTER': f.encode('utf-8')
             }
             
-        else:
-            values = {
-                'SERVICE': 'WFS',
-                'VERSION': '1.1.0',
-                'REQUEST': 'GetFeature',
-                'TYPENAME': layer_name,
-                'OUTPUTFORMAT': 'text/xml; subtype=gml/3.1.1',
-                'RESULTTYPE': 'hits'
-            }
-            
         req = requests.Session()
         req.auth = (self.user, self.password)
-    
         response = req.post(url, data=values, verify=False)
         root = ET.fromstring(response.text)
         numberOfFeatures = int(root.attrib['numberOfFeatures'])
