@@ -277,6 +277,8 @@ GVSIGOL_TOOLS = {
         'show_search': True
     }    
 }
+                     
+GVSIGOL_ENABLE_ENUMERATIONS = True
 
 GVSIGOL_BASE_LAYERS = {
     'bing': {

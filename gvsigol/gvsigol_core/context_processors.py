@@ -29,4 +29,5 @@ def global_settings(request):
         'INSTALLED_APPS': gvsigol.settings.INSTALLED_APPS,
         'GVSIGOL_TOOLS': gvsigol.settings.GVSIGOL_TOOLS,
         'PUBLIC_VIEWER': gvsigol.settings.PUBLIC_VIEWER,
+        'GVSIGOL_ENABLE_ENUMERATIONS': gvsigol.settings.GVSIGOL_ENABLE_ENUMERATIONS,
     }
