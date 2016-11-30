@@ -269,3 +269,9 @@ msgstr "BoundingBox"
 
 msgid "GeographicBoundingBox"
 msgstr "BoundingBox geográfica"
+
+msgid "Feature info"
+msgstr "Información del elemento"
+
+msgid "Multimedia resources"
+msgstr "Recursos multimedia"

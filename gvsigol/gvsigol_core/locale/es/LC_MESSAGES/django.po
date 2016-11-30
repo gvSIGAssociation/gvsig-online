@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-17 18:05+0100\n"
+"POT-Creation-Date: 2016-11-29 18:54+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,12 +43,12 @@ msgstr ""
 
 #: templates/base.html:79 templates/base_compress.html.py:79
 #: templates/public_viewer.html:80 templates/public_viewer_compress.html:80
-#: templates/viewer.html.py:102 templates/viewer_compress.html:101
+#: templates/viewer.html.py:103 templates/viewer_compress.html:102
 msgid "Sign out"
 msgstr "Cerrar sesión"
 
 #: templates/base.html:97 templates/base_compress.html.py:97
-#: templates/viewer.html:99 templates/viewer_compress.html.py:98
+#: templates/viewer.html:100 templates/viewer_compress.html.py:99
 msgid "Dashboard"
 msgstr "Panel de control"
 
@@ -215,14 +215,14 @@ msgid "The project will be removed, Do you want continue?"
 msgstr "El proyecto será eliminado, ¿Desea continuar?"
 
 #: templates/project_list.html:62 templates/public_viewer.html.py:151
-#: templates/public_viewer_compress.html:151 templates/viewer.html.py:173
-#: templates/viewer_compress.html:172
+#: templates/public_viewer_compress.html:151 templates/viewer.html.py:174
+#: templates/viewer_compress.html:173
 msgid "Cancel"
 msgstr "Cancelar"
 
 #: templates/project_list.html:63 templates/public_viewer.html.py:152
-#: templates/public_viewer_compress.html:152 templates/viewer.html.py:174
-#: templates/viewer_compress.html:173
+#: templates/public_viewer_compress.html:152 templates/viewer.html.py:175
+#: templates/viewer_compress.html:174
 msgid "Accept"
 msgstr "Aceptar"
 
@@ -305,7 +305,7 @@ msgid "Anonymous user"
 msgstr "Usuario anónimo"
 
 #: templates/public_viewer.html:241 templates/public_viewer_compress.html:229
-#: templates/viewer.html.py:283 templates/viewer_compress.html:263
+#: templates/viewer.html.py:290 templates/viewer_compress.html:270
 msgid "Close"
 msgstr "Cerrar"
 
@@ -318,7 +318,6 @@ msgid "Update TOC"
 msgstr "Actualizar TOC"
 
 #: utils.py:288
-#| msgid "Public viewer"
 msgid "Public viewer TOC is empty"
 msgstr "Visor público"
 
