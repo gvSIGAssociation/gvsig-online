@@ -57,7 +57,7 @@ INSTALLED_APPS = [
     'gvsigol_symbology',
     'gvsigol_filemanager',
     'gvsigol_core',
-    'gvsigol_app_zapopan',
+    'gvsigol_app_dev',
     'gvsigol_plugin_worldwind',
     'gvsigol_plugin_shps_folder',
     'gvsigol_plugin_geocoding',
@@ -180,7 +180,7 @@ LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol_services/locale'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/locale'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_app_zapopan/locale'),
+    os.path.join(BASE_DIR, 'gvsigol_app_dev/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/locale'),
 )
@@ -209,7 +209,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_services/static'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
-    os.path.join(BASE_DIR, 'gvsigol_app_zapopan/static'),
+    os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/static'),
 )
@@ -304,6 +304,8 @@ GVSIGOL_TOOLS = {
         'show_search': True
     }
 }
+
+GVSIGOL_ENABLE_ENUMERATIONS = True
 
 GVSIGOL_BASE_LAYERS = {
     'bing': {
