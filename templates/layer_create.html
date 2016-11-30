@@ -189,10 +189,14 @@
 	},{
 		key: 'date',
 		value: 'Date'
-	},{
+	}];
+	
+	"{% if GVSIGOL_ENABLE_ENUMERATIONS %}"
+	fieldTypes.push({
 		key: 'enumeration',
 		value: 'Enumeration'
-	}];
+	});
+	"{% endif %}"
 	
 	function addField(field) {
 		
