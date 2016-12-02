@@ -271,10 +271,14 @@ def remove_layer_lock(layer, user, check_writable=False):
         return True
     raise LayerNotLocked()
 
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_POST
+def sync_commit(request):
+    return sync_upload(request, False)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_POST
-def sync_upload(request):
+def sync_upload(request, release_locks=True):
     tmpfile = None
 
     if 'fileupload' in request.FILES:
@@ -338,9 +342,11 @@ def sync_upload(request):
             #print "Time approach 1: " + str(t2-t1)
             #print "Time approach 2: " + str(t3-t2)
             
-            # everything was fine, release the locks now
-            for lock in locks:
-                lock.delete()
+
+            if release_locks:
+                for lock in locks:
+                    # everything was fine, release the locks now
+                    lock.delete()
         except sq_introspect.InvalidSqlite3Database:
             return HttpResponseBadRequest("The file is not a valid Sqlite3 db")
         except LayerNotLocked as e:
