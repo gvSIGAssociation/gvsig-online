@@ -161,14 +161,15 @@ h6,
 }
 /* General Links */
 a {
-  color: #3c8dbc;
+  /*color: #3c8dbc;*/
+  color: #666666;
 }
 a:hover,
 a:active,
 a:focus {
   outline: none;
   text-decoration: none;
-  color: #72afd2;
+  color: #383838;
 }
 /* Page Header */
 .page-header {
@@ -1744,8 +1745,6 @@ a:focus {
   font-size: 14px;
   font-weight: bold;
   background: transparent;
-  /*color: #97a0b3;*/
-  color: #3c8dbc;
 }
 .btn-box-tool-custom {
   color: #97a0b3;
