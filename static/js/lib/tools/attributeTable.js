@@ -205,8 +205,8 @@ attributeTable.prototype.createTable = function(featureType) {
 	
 	var htmlButtons = '';
 	htmlButtons += 	'<div>';
-	htmlButtons += 		'<a href="#" id="zoom-to-selection-button" style="margin-right: 20px;" class="btn btn-primary">' + gettext('Zoom to selection');
-	htmlButtons += 		'<a href="#" id="clear-selection-button" class="btn btn-primary">' + gettext('Clear selection');
+	htmlButtons += 		'<a href="#" id="zoom-to-selection-button" style="margin-right: 20px;" class="btn btn-default">' + gettext('Zoom to selection');
+	htmlButtons += 		'<a href="#" id="clear-selection-button" class="btn btn-default">' + gettext('Clear selection');
 	htmlButtons += 	'</div>';
 	$("div.table-toolbar").html(htmlButtons);
 	$("#zoom-to-selection-button").click(function(){
