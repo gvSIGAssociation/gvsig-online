@@ -111,7 +111,7 @@ searchByCoordinate.prototype.handler = function(e) {
 	
 	var buttons = '';
 	buttons += '<button id="float-modal-cancel-coord" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
-	buttons += '<button id="float-modal-accept-coord" type="button" class="btn btn-primary">' + gettext('Find') + '</button>';
+	buttons += '<button id="float-modal-accept-coord" type="button" class="btn btn-default">' + gettext('Find') + '</button>';
 	
 	$('#float-modal .modal-footer').empty();
 	$('#float-modal .modal-footer').append(buttons);

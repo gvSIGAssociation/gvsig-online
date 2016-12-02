@@ -451,7 +451,7 @@ layerTree.prototype.showMetadata = function(layer) {
 	var buttons = '';
 	buttons += '<button id="float-modal-cancel-metadata" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
 	if (layer.metadata != '') {
-		buttons += '<button id="float-modal-show-metadata" type="button" class="btn btn-primary">' + gettext('Show in geonetwork') + '</button>';
+		buttons += '<button id="float-modal-show-metadata" type="button" class="btn btn-default">' + gettext('Show in geonetwork') + '</button>';
 	}
 	
 	$('#float-modal .modal-footer').empty();
