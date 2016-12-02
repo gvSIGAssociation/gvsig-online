@@ -44,7 +44,7 @@
 			<div class="container">
 				<section class="content">
 					{% for workspace in workspaces %}			
-						<div class="box box-primary">
+						<div class="box">
 							<div class="box-header with-border">
 								<h3 class="box-title" style="margin-right: 20px;">{{workspace.name}}</h3><span class="text-muted"> {{workspace.description}}</span>
 							</div>
@@ -56,7 +56,7 @@
 											<img src="{% static "img/wms.jpg" %}" alt="WMS Service">
 										</div>
 										<div class="product-info">
-											<a data-url="{{workspace.wms_endpoint}}" href="#" class="product-title wms-capabilities-link">{% trans "WMS Service" %} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="label label-success pull-right"><i class="fa fa-angle-right margin-r-5"></i> {% trans "Show capabilities" %}</span></a> 
+											<a data-url="{{workspace.wms_endpoint}}" href="#" class="product-title wms-capabilities-link">{% trans "WMS Service" %} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="label label-primary pull-right"><i class="fa fa-angle-right margin-r-5"></i> {% trans "Show capabilities" %}</span></a> 
 											<span class="product-description"> {{workspace.wms_endpoint}}</span>
 										</div>
 									</li>
@@ -273,9 +273,9 @@
 					var bbox = layers[i].BoundingBox[0].extent[0] + ' ' + layers[i].BoundingBox[0].extent[1] + ' ' + layers[i].BoundingBox[0].extent[2] + ' ' + layers[i].BoundingBox[0].extent[3]
 					var gbbox = layers[i].EX_GeographicBoundingBox[0] + ' ' + layers[i].EX_GeographicBoundingBox[1] + ' ' + layers[i].EX_GeographicBoundingBox[2] + ' ' + layers[i].EX_GeographicBoundingBox[3]
 					if (i==0) {
-						html += '<div class="box box-primary">';
+						html += '<div class="box">';
 					} else {
-						html += '<div class="box box-primary collapsed-box">';
+						html += '<div class="box collapsed-box">';
 					}
 					html += 	'<div class="box-header with-border">';
 					html += 		'<h3 class="box-title">' + layers[i].Title + '</h3>';
