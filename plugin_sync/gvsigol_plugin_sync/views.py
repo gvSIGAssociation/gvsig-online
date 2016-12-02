@@ -188,6 +188,7 @@ def sync_download(request):
                         table_name=table["layer"].get_qualified_name()
                 ).execute()
 
+            logging.info(gdaltools.Wrapper.BASEPATH)
             gdaltools.ogrinfo(file_path, sql="SELECT UpdateLayerStatistics()")
             locked_layers = [ lock.layer for lock in locks]
             _copy_images(locked_layers, file_path)
