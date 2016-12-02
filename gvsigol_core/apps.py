@@ -16,5 +16,6 @@ class GvsigolCoreConfig(AppConfig):
     def config_gdaltools(self):
         import gdaltools
         from gvsigol.settings import GVSIGOL_SERVICES
-        if GVSIGOL_SERVICES.get(GDALTOOLS_BASEPATH) != '':
-            gdaltools.Wrapper.BASEPATH = GVSIGOL_SERVICES.get(GDALTOOLS_BASEPATH)
+        forced_gdal_base_path =  GVSIGOL_SERVICES.get("GDALTOOLS_BASEPATH")
+        if forced_gdal_base_path and forced_gdal_base_path != '':
+            gdaltools.Wrapper.BASEPATH = forced_gdal_base_path
