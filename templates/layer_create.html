@@ -11,7 +11,7 @@
 				<div class="box-header with-border">
 					<h3 class="box-title">{% trans "Create empty layer" %}</h3>
 					<div class="box-tools pull-right">
-						<button type="submit" class="btn btn-primary btn-sm save-button">{% trans "Next" %} <i class="fa fa-angle-right margin-l-5"></i></button>					
+						<button type="submit" class="btn btn-default btn-sm save-button">{% trans "Next" %} <i class="fa fa-angle-right margin-l-5"></i></button>					
 					</div>
 				</div>
 			
@@ -338,10 +338,10 @@
 		var buttons = '';
 		buttons += '<button id="add-field-cancel" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
 		if (mode == 'create') {
-			buttons += '<button id="add-field-accept" type="button" class="btn btn-primary">' + gettext('Save field') + '</button>';
+			buttons += '<button id="add-field-accept" type="button" class="btn btn-default">' + gettext('Save field') + '</button>';
 			
 		} else if (mode == 'update') {
-			buttons += '<button id="update-field-accept" data-fieldid="'+field.id+'" type="button" class="btn btn-primary">' + gettext('Edit field') + '</button>';
+			buttons += '<button id="update-field-accept" data-fieldid="'+field.id+'" type="button" class="btn btn-default">' + gettext('Edit field') + '</button>';
 		}
 		
 		
