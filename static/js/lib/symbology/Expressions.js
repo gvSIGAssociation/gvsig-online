@@ -104,7 +104,7 @@ Expressions.prototype.getFilterFormUI = function(ruleid) {
 	var dataType = '';
 	
 	var ui = '';
-	ui += '<div class="box box-primary">';
+	ui += '<div class="box">';
 	ui += 	'<div class="box-header with-border">';
 	ui += 		'<h3 class="box-title">' + gettext('Expressions') + '</h3>';
 	ui += 		'<div class="box-tools pull-right">';
