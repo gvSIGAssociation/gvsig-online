@@ -52,7 +52,7 @@ layerTree.prototype.createTree = function() {
 	var groupCount = 1;
 	
 	var tree = '';
-	tree += '<div class="box box-success">';
+	tree += '<div class="box">';
 	tree += '	<div class="box-body">';
 	tree += '		<ul class="layer-tree">';
 	tree += '			<li class="box box-default"; id="base-layers">';

@@ -286,6 +286,20 @@ GVSIGOL_BASE_LAYERS = {
         'key': '##BING_API_KEY##'
     }
 }
+                     
+#skin-blue
+#skin-blue-light
+#skin-red
+#skin-red-light
+#skin-black
+#skin-black-light
+#skin-green
+#skin-green-light
+#skin-purple
+#skin-purple-light
+#skin-yellow
+#skin-yellow-light
+GVSIGOL_SKIN = '##GVSIGOL_SKIN##'
 
 FILEMANAGER_DIRECTORY = '##FILEMANAGER_DIRECTORY##'
 FILEMANAGER_MEDIA_ROOT = os.path.join(MEDIA_ROOT, FILEMANAGER_DIRECTORY)

@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'gvsigol_filemanager',
     'gvsigol_core',
     'gvsigol_app_dev',
+    #'gvsigol_app_pobla',
     'gvsigol_plugin_worldwind',
     'gvsigol_plugin_shps_folder',
     'gvsigol_plugin_geocoding',
@@ -181,6 +182,7 @@ LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol_symbology/locale'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/locale'),
     os.path.join(BASE_DIR, 'gvsigol_app_dev/locale'),
+    #os.path.join(BASE_DIR, 'gvsigol_app_pobla/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/locale'),
 )
@@ -210,6 +212,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
     os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
+    #os.path.join(BASE_DIR, 'gvsigol_app_pobla/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/static'),
 )
@@ -313,6 +316,20 @@ GVSIGOL_BASE_LAYERS = {
         'key': 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3'
     }
 }
+
+#skin-blue
+#skin-blue-light
+#skin-red
+#skin-red-light
+#skin-black
+#skin-black-light
+#skin-green
+#skin-green-light
+#skin-purple
+#skin-purple-light
+#skin-yellow
+#skin-yellow-light
+GVSIGOL_SKIN = "skin-blue"
 
 FILEMANAGER_DIRECTORY = os.path.join(MEDIA_ROOT, 'data')
 FILEMANAGER_MEDIA_ROOT = os.path.join(MEDIA_ROOT, FILEMANAGER_DIRECTORY)

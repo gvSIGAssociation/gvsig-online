@@ -57,9 +57,9 @@ Rule.prototype.getTableUI = function(allowImport, type) {
 	
 	ui += '<div data-ruleid="' + this.id + '" class="col-md-12">';
 	if(type == 'unique') {
-		ui += 	'<div class="box box-primary">';
+		ui += 	'<div class="box">';
 	} else {
-		ui += 	'<div class="box box-primary collapsed-box">';
+		ui += 	'<div class="box collapsed-box">';
 	}
 	ui += 		'<div class="box-header with-border">';
 	ui += 			'<div class="rule-preview" id="rule-preview-' + this.id + '"></div>';
@@ -120,7 +120,7 @@ Rule.prototype.getColorMapEntryUI = function() {
 	var ui = '';
 	
 	ui += '<div data-ruleid="' + this.id + '" class="col-md-12">';
-	ui += 	'<div class="box box-primary">';
+	ui += 	'<div class="box">';
 	ui += 		'<div class="box-header with-border">';
 	ui += 			'<div class="rule-preview" id="rule-preview-' + this.id + '"></div>';
 	ui += 				'<h3 id="rule-title-' + this.id + '" class="box-title">' + this.title + '</h3>';
