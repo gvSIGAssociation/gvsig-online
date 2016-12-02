@@ -72,7 +72,7 @@ exportToPDF.prototype.handler = function(e) {
 	
 	var buttons = '';
 	buttons += '<button id="float-modal-cancel-print" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
-	buttons += '<button id="float-modal-accept-print" type="button" class="btn btn-primary">' + gettext('Print') + '</button>';
+	buttons += '<button id="float-modal-accept-print" type="button" class="btn btn-default">' + gettext('Print') + '</button>';
 	
 	$('#float-modal .modal-footer').empty();
 	$('#float-modal .modal-footer').append(buttons);

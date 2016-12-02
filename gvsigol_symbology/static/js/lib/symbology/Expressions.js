@@ -109,7 +109,7 @@ Expressions.prototype.getFilterFormUI = function(ruleid) {
 	ui += 		'<h3 class="box-title">' + gettext('Expressions') + '</h3>';
 	ui += 		'<div class="box-tools pull-right">';
 	//ui += 			'<button id="add-new-expression" class="btn btn-sm btn-success margin-r-5"><i class="fa fa-plus margin-r-5"></i> ' + gettext('Add expression') + '</button>';
-	ui += 			'<button id="save-filter" data-ruleid="' + ruleid + '" class="btn btn-sm btn-primary save-filter"><i class="fa fa-floppy-o margin-r-5"></i> ' + gettext('Save filter') + '</button>';
+	ui += 			'<button id="save-filter" data-ruleid="' + ruleid + '" class="btn btn-sm btn-default save-filter"><i class="fa fa-floppy-o margin-r-5"></i> ' + gettext('Save filter') + '</button>';
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += 	'<div class="box-body">';
