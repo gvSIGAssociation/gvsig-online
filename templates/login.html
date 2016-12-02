@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 {% load staticfiles %}
 {% load i18n %}
+{% load include_if_exists %}
 <html>
 	<head>
     	<meta charset="utf-8">
@@ -50,11 +51,11 @@
 		          	</div>
 		          	<div class="row">
 		            	<div class="col-md-12">
-		              		<button type="submit" class="btn btn-primary btn-block btn-flat">{% trans "Sign In" %}</button>
+		              		<button type="submit" class="btn btn-primary btn-block btn-flat login-submit">{% trans "Sign In" %}</button>
 		            	</div><!-- /.col -->
 		          	</div>
 		        </form>
-        		<a href="/gvsigonline/auth/password_reset/">{% trans "I forgot my password" %}</a><br>
+        		<a class="login-submit-text" href="/gvsigonline/auth/password_reset/">{% trans "I forgot my password" %}</a><br>
       		</div><!-- /.login-box-body -->
     	</div><!-- /.login-box -->
 
@@ -62,5 +63,13 @@
 		<script src="{% static "js/vendors/jQuery/jQuery-2.1.4.min.js" %}"></script>
 		<!-- Bootstrap 3.3.6 -->
 		<script src="{% static "js/vendors/bootstrap-3.3.6/js/bootstrap.min.js" %}"></script>
+		
+		{% for app in INSTALLED_APPS %}												  
+			{% if 'gvsigol_app_' in app %}	
+				{% with "load_js_"|add:app|cut:"gvsigol_app_"|add:".html" as aux %}	   			 	
+					{% include_if_exists aux %}
+				{% endwith %}
+			{% endif %}		    					
+		{% endfor %}
 	</body>
 </html>
