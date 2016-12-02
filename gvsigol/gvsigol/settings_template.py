@@ -239,8 +239,11 @@ GVSIGOL_SERVICES = {
                   'user': '##DATABASE_USER##',
                   'passwd': '##DATABASE_PASSWORD##'
     },
+    # NOTE: we are migrating gdal_tools to the external library pygdaltools.
+    # In the future we will only need GDALTOOLS_BASEPATH variable 
     # OGR path is only necessary if different from the one defined on gdal_tools.OGR2OGR_PATH
-    'OGR2OGR_PATH': '/usr/bin/ogr2ogr'
+    'OGR2OGR_PATH': '##OGR2OGR_PATH##',
+    'GDALTOOLS_BASEPATH': '##GDALTOOLS_BASEPATH##'
 }
 
 # Must be a valid iconv encoding name. Use iconv --list on Linux to see valid names 
