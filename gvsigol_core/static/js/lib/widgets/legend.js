@@ -60,7 +60,7 @@ legend.prototype.reloadLegend = function() {
 legend.prototype.getLegendsFromVisibleLayers = function() {
 	
 	var html = '';
-	html += '<div class="box box-success">';
+	html += '<div class="box">';
 	html += '	<div class="box-body">';
 	var layers = this.map.getLayers().getArray();
 	for (var i=0; i<layers.length; i++) {

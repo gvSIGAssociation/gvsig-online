@@ -530,7 +530,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 	var self = this;
 	
 	var ui = '';
-	ui += '<div class="box box-success">';
+	ui += '<div class="box">';
 	ui += 		'<div class="box-header with-border">';
 	ui += 			'<h3 class="box-title">' + gettext('New feature') + '</h3>';
 	ui += 			'<div class="box-tools pull-right">';
@@ -621,7 +621,7 @@ editionBar.prototype.editFeatureForm = function(feature) {
 	var self = this;
 	
 	var ui = '';
-	ui += '<div class="box box-success">';
+	ui += '<div class="box">';
 	ui += 		'<div class="box-header with-border">';
 	ui += 			'<h3 class="box-title">' + gettext('Edit feature') + '</h3>';
 	ui += 			'<div class="box-tools pull-right">';
@@ -722,7 +722,7 @@ editionBar.prototype.removeFeatureForm = function(evt, feature) {
 	var self = this;
 	
 	var ui = '';
-	ui += '<div class="box box-success">';
+	ui += '<div class="box">';
 	ui += 		'<div class="box-header with-border">';
 	ui += 			'<h3 class="box-title">' + gettext('Remove feature') + '</h3>';
 	ui += 			'<div class="box-tools pull-right">';
