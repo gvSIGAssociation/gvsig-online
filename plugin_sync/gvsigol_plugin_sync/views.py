@@ -150,7 +150,7 @@ def layersToJson(universallyReadableLayers, readOnlyLayers=[], readWriteLayers=[
             layerIds.add(layer.id)
             
     layerStr = json.dumps(result)
-    return layerStr 
+    return layerStr
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_POST
@@ -180,9 +180,13 @@ def sync_download(request):
                     layer_mode=ogr.MODE_LAYER_CREATE,
                     data_source_mode=ogr.MODE_DS_CREATE_OR_UPDATE)
             for table in prepared_tables:
+                if table["connection"].schema:
+                    in_tbl_name = table["connection"].schema + "." + table["layer"].name
+                else:
+                    in_tbl_name = table["layer"].name
                 ogr.set_input(
                         table["connection"],
-                        table_name=table["layer"].name
+                        table_name=in_tbl_name
                 ).set_output(
                         file_path,
                         table_name=table["layer"].get_qualified_name()
@@ -321,7 +325,11 @@ def sync_upload(request, release_locks=True):
                         conn = _get_layer_conn(lock.layer)
                         if not conn:
                             raise HttpResponseBadRequest("Bad request")
-                        ogr.set_output(conn, table_name=lock.layer.name)
+                        if conn.schema:
+                            tbl_name = conn.schema + "." + lock.layer.name
+                        else:
+                            tbl_name = lock.layer.name
+                        ogr.set_output(conn, table_name=tbl_name)
                         ogr.set_output_mode(ogr.MODE_LAYER_OVERWRITE, ogr.MODE_DS_UPDATE)
                         ogr.execute()
             finally:
