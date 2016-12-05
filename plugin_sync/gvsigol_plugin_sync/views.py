@@ -569,13 +569,12 @@ class ResourceReplacer():
         try:
             output_file.write(newres[3])
             res = LayerResource()
-            res.id = newres[0]
             res.feature = newres[2]
             res.layer = layer
             res.path = f
             res.title = newres[4]
             res.type = LayerResource.EXTERNAL_IMAGE
-            res.save(force_insert=True)
+            res.save()
         finally:
             output_file.close()
 
