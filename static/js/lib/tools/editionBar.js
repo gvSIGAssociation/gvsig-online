@@ -345,6 +345,7 @@ editionBar.prototype.stopEditionHandler = function(e) {
 	this.deactivateControls();
 	this.removeVectorLayer();
 	$('#editionbar').remove();
+	this.removeLayerLock();
 	this.layerTree.editionBar = null;
 	delete this.layerTree.editionBar;
 	this.showLayersTab();
@@ -912,6 +913,29 @@ editionBar.prototype.updateServiceBoundingBox = function(workspace,layerName) {
 		},
 	  	beforeSend:function(xhr){
 	    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+	  	}
+	});
+};
+
+/**
+ * TODO
+ */
+editionBar.prototype.removeLayerLock = function() {
+	var self = this;
+	$.ajax({
+		type: 'POST',
+		async: true,
+	  	url: '/gvsigonline/services/remove_layer_lock/',
+	  	data: {
+		  	workspace: self.selectedLayer.workspace,
+		  	layer: self.selectedLayer.layer_name
+		},
+	  	beforeSend:function(xhr){
+	    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+	  	},
+	  	success	:function(response){},
+	  	error: function(){
+	  		messageBox.show('error', gettext('Failed to remove layer lock'));
 	  	}
 	});
 };

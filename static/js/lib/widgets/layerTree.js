@@ -221,6 +221,7 @@ layerTree.prototype.createTree = function() {
 			
 			var featureType = self.describeFeatureType(selectedLayer);
 			self.editionBar = new editionBar(self, self.map, featureType, selectedLayer);
+			self.addLayerLock(selectedLayer);
 			
 		} else {
 			messageBox.show('warning', gettext('You are editing the layer') + ': ' + self.editionBar.getSelectedLayer().title);
@@ -405,6 +406,28 @@ layerTree.prototype.describeFeatureType = function(layer) {
 	});
 	
 	return featureType;
+};
+
+/**
+ * TODO
+ */
+layerTree.prototype.addLayerLock = function(layer) {
+	$.ajax({
+		type: 'POST',
+		async: true,
+	  	url: '/gvsigonline/services/add_layer_lock/',
+	  	data: {
+		  	workspace: layer.workspace,
+		  	layer: layer.layer_name
+		},
+	  	beforeSend:function(xhr){
+	    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+	  	},
+	  	success	:function(response){},
+	  	error: function(){
+	  		messageBox.show('error', gettext('The layer you are trying to edit is locked'));
+	  	}
+	});
 };
 
 /**
