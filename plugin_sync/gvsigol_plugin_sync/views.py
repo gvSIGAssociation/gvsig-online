@@ -17,46 +17,39 @@
 '''
 
 
-# generic python modules
-import json
-import time, os
-import shutil
-import tempfile
-import io
-from io import BytesIO
-import logging
-import sqlite3
-
-# django libs
-from django.http.response import StreamingHttpResponse, FileResponse
-from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
-from django.contrib.auth.models import AnonymousUser
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
-from django.views.decorators.csrf import csrf_exempt
-from django.core.exceptions import PermissionDenied
-from django.utils import timezone
-
-from django.http import JsonResponse
-
-# gvsig online modules
-from gvsigol_services.models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, LayerLock,\
-    LayerResource
-from gvsigol_core import geom
-
-from gvsigol_services.backend_mapservice import backend as mapservice_backend
-from gvsigol_services.backend_postgis import Introspect
-from gvsigol_services import utils
-
-# external libs
-import gdaltools
-from spatialiteintrospect import introspect as sq_introspect
-from PIL import Image
-
-
 '''
 @author: Cesar Martinez Izquierdo - http://www.scolab.es
 '''
+
+from io import BytesIO
+import io
+import json
+import logging
+import shutil
+import sqlite3
+import tempfile
+import time, os
+
+from PIL import Image
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import AnonymousUser
+from django.core.exceptions import PermissionDenied
+from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
+from django.http import JsonResponse
+from django.http.response import StreamingHttpResponse, FileResponse
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods, require_safe, require_POST, require_GET
+import gdaltools
+from spatialiteintrospect import introspect as sq_introspect
+
+from gvsigol_core import geom
+from gvsigol_services import utils
+from gvsigol_services.backend_mapservice import backend as mapservice_backend
+from gvsigol_services.backend_postgis import Introspect
+from gvsigol_services.models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, LayerLock, \
+    LayerResource
+from gvsigol_services.locks_utils import *
 
 DEFAULT_BUFFER_SIZE = 1048576
 
@@ -164,7 +157,7 @@ def sync_download(request):
         bbox = request_params.get("bbox", None)
         for layer in layers:
             #FIXME: maybe we need to specify if we want the layer for reading or writing!!!! Assume we always want to write for the moment
-            lock = add_layer_lock(layer, request.user)
+            lock = add_layer_lock(layer, request.user, lock_type=LayerLock.SYNC_LOCK)
             locks.append(lock)
             conn = _get_layer_conn(lock.layer)
             if not conn:
@@ -210,71 +203,6 @@ def sync_download(request):
         logging.error("sync_download error")
         return HttpResponseBadRequest("Bad request")
 
-def add_layer_lock(qualified_layer_name, user):
-    (ws_name, layer_name) = qualified_layer_name.split(":")
-    layer_filter = Layer.objects.filter(name=layer_name, datastore__workspace__name=ws_name)
-    #ugu = UserGroupUser.objects.filter(user=user)
-    #lwg = LayerWriteGroup.objects.filter(group__usergroupuser__user=user)
-    is_writable = (layer_filter.filter(layerwritegroup__group__usergroupuser__user=user).count()>0)
-    
-    if not is_writable:
-        raise PermissionDenied
-    layer = layer_filter[0]
-    
-    #is_locked = (LayerLock.objects.filter(layer__name=layer_name, layer__datastore__workspace__name=ws_name).count()>0)
-    is_locked = (LayerLock.objects.filter(layer=layer).count()>0)
-    if is_locked:
-        raise LayerLocked(qualified_layer_name)
-    new_lock = LayerLock()
-    new_lock.layer = layer
-    new_lock.created_by = user.username
-    new_lock.save()
-    return new_lock
-
-def is_locked(qualified_layer_name, user, check_writable=False):
-    (ws_name, layer_name) = qualified_layer_name.split(":")
-    layer_filter = Layer.objects.filter(name=layer_name, datastore__workspace__name=ws_name)
-    
-    if check_writable:
-        is_writable = (layer_filter.filter(layerwritegroup__group__usergroupuser__user=user).count()>0)
-        if not is_writable:
-            raise PermissionDenied
-    layer = layer_filter[0]
-    return (LayerLock.objects.filter(layer=layer, created_by=user.username).count()>0)
-
-def get_layer_lock(qualified_layer_name, user, check_writable=False):
-    name_parts = qualified_layer_name.split(":")
-    if len(name_parts)==2:
-        # only consider tables having a proper qualified name (e.g., using the schema: workspace:layer_name)
-        (ws_name, layer_name) = name_parts
-        layer_filter = Layer.objects.filter(name=layer_name, datastore__workspace__name=ws_name)
-        
-        if check_writable:
-            is_writable = (layer_filter.filter(layerwritegroup__group__usergroupuser__user=user).count()>0)
-            if not is_writable:
-                raise PermissionDenied
-        layer = layer_filter[0]
-        locks = LayerLock.objects.filter(layer=layer, created_by=user.username)
-        if locks.count()>0:
-            return locks[0]
-        else:
-            raise LayerNotLocked(qualified_layer_name)
-    return None
-
-def remove_layer_lock(layer, user, check_writable=False):
-    layer_lock = LayerLock.objects.filter(layer=layer)
-    if len(layer_lock)==1:
-        if layer_lock.filter(created_by=user.username).count()!=1:
-            # the layer was locked by a different user!!
-            raise PermissionDenied()
-        if check_writable:
-            layer_filter = Layer.objects.filter(id=layer.id)
-            is_writable = (layer_filter.filter(layerwritegroup__group__usergroupuser__user=user).count()>0)
-            if not is_writable:
-                raise PermissionDenied()
-        layer_lock.delete()
-        return True
-    raise LayerNotLocked()
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_POST
@@ -314,7 +242,7 @@ def sync_upload(request, release_locks=True):
                 locks = []
                 for t in tables:
                     # first check all the layers are properly locked and writable
-                    lock = get_layer_lock(t, request.user, check_writable=True)
+                    lock = get_layer_lock(t, request.user, check_writable=True, lock_type=LayerLock.SYNC_LOCK)
                     locks.append(lock)
                 for lock in locks:
                     ogr = gdaltools.ogr2ogr()
@@ -641,20 +569,3 @@ class TemporaryFileWrapper(tempfile._TemporaryFileWrapper):
         self.close()
         return result
 
-
-class LayerLockingException(Exception):
-    pass
-
-
-class LayerNotLocked(LayerLockingException):
-    """The requested layer lock does not exist"""
-    
-    def __init__(self, layer=None):
-        self.layer = layer
-
-
-class LayerLocked(LayerLockingException):
-    """The layer already has a lock"""
-
-    def __init__(self, layer=None):
-        self.layer = layer
