@@ -48,6 +48,7 @@ import utils
 import json
 import re
 import os
+import locks_utils
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
@@ -1243,36 +1244,24 @@ def get_datatable_data(request):
         }
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
-    
+
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def add_layer_lock(request):
+    layer_name = None
     try:
         ws_name = request.POST['workspace']
         layer_name = request.POST['layer']
+        
         if ":" in layer_name:
             layer_name = layer_name.split(":")[1]
-        
-        layer_filter = Layer.objects.filter(name=layer_name, datastore__workspace__name=ws_name)
-        is_writable = (layer_filter.filter(layerwritegroup__group__usergroupuser__user=request.user).count()>0)
-        
-        if not is_writable:
-            raise PermissionDenied
-        layer = layer_filter[0]
-        
-        #is_locked = (LayerLock.objects.filter(layer__name=layer_name, layer__datastore__workspace__name=ws_name).count()>0)
-        is_locked = (LayerLock.objects.filter(layer=layer).count()>0)
-        if is_locked:
-            raise LayerLocked(layer_name)
-        new_lock = LayerLock()
-        new_lock.layer = layer
-        new_lock.created_by = request.user.username
-        new_lock.save()
-
+        qualified_layer_name = ws_name + ":" + layer_name
+        locks_utils.add_layer_lock(qualified_layer_name, request.user)
         return HttpResponse('{"response": "ok"}', content_type='application/json')
-    
     except Exception as e:
-        return HttpResponseNotFound('<h1>Layer is locked: {0}</h1>'.format(layer.id))
-    
+        return HttpResponseNotFound('<h1>Layer is locked: {0}</h1>'.format(layer_name))
+
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def remove_layer_lock(request):
     try:
@@ -1280,42 +1269,8 @@ def remove_layer_lock(request):
         layer_name = request.POST['layer']
         if ":" in layer_name:
             layer_name = layer_name.split(":")[1]
-        check_writable=False
-        
-        layer_filter = Layer.objects.filter(name=layer_name, datastore__workspace__name=ws_name)
-        is_writable = (layer_filter.filter(layerwritegroup__group__usergroupuser__user=request.user).count()>0)
-        
-        if not is_writable:
-            raise PermissionDenied
-        layer = layer_filter[0]
-            
-        layer_lock = LayerLock.objects.filter(layer=layer)
-        if len(layer_lock)==1:
-            if layer_lock.filter(created_by=request.user.username).count()!=1:
-                # the layer was locked by a different user!!
-                raise PermissionDenied()
-            if check_writable:
-                layer_filter = Layer.objects.filter(id=layer.id)
-                is_writable = (layer_filter.filter(layerwritegroup__group__usergroupuser__user=request.user).count()>0)
-                if not is_writable:
-                    raise PermissionDenied()
-            layer_lock.delete()
-            return HttpResponse('{"response": "ok"}', content_type='application/json')
-    
+        layer = Layer.objects.get(name=layer_name, datastore__workspace__name=ws_name)
+        locks_utils.remove_layer_lock(layer, request.user, check_writable=True)
+        return HttpResponse('{"response": "ok"}', content_type='application/json')
     except Exception as e:
         return HttpResponseNotFound('<h1>Layer not locked: {0}</h1>'.format(layer.id))
-    
-class LayerLockingException(Exception):
-    pass
-
-class LayerNotLocked(LayerLockingException):
-    """The requested layer lock does not exist"""
-    
-    def __init__(self, layer=None):
-        self.layer = layer
-    
-class LayerLocked(LayerLockingException):
-    """The layer already has a lock"""
-
-    def __init__(self, layer=None):
-        self.layer = layer
