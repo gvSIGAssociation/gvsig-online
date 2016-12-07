@@ -103,7 +103,7 @@ def create_style(request, json_data, layer_id):
     sld_body = sld_builder.build_sld(layer, style)
     if mapservice.createStyle(style.name, sld_body): 
         if style.is_default:
-            mapservice.setLayerStyle(workspace.name+":"+layer.name, style.name)
+            mapservice.setLayerStyle(layer, style.name)
         return True
         
     else:
@@ -121,7 +121,7 @@ def update_style(request, json_data, layer_id, style_id):
             s.save()
         datastore = layer.datastore
         workspace = datastore.workspace
-        mapservice.setLayerStyle(workspace.name+":"+layer.name, style.name)
+        mapservice.setLayerStyle(layer, style.name)
     
     style.title = json_data.get('title')
     style.is_default = json_data.get('is_default')
@@ -166,7 +166,7 @@ def update_style(request, json_data, layer_id, style_id):
         color_map_entry.save()
     
     sld_body = sld_builder.build_sld(layer, style)
-    if mapservice.updateStyle(style.name, sld_body): 
+    if mapservice.updateStyle(layer, style.name, sld_body): 
         return True
     else:
         return False

@@ -23,6 +23,9 @@ from __future__ import unicode_literals
 '''
 from django.db import models
 from gvsigol_auth.models import UserGroup
+from gvsigol import settings
+from django.dispatch import receiver
+import os
 
 class Workspace(models.Model):
     name = models.CharField(max_length=250, unique=True)
@@ -73,6 +76,7 @@ class Layer(models.Model):
     cached = models.BooleanField(default=True)
     single_image = models.BooleanField(default=False)
     created_by = models.CharField(max_length=100)
+    thumbnail = models.ImageField(upload_to='thumbnails', default=settings.STATIC_URL + 'img/no_thumbnail.jpg', null=True, blank=True)
     conf = models.TextField(null=True, blank=True)
     
     def __unicode__(self):
@@ -80,7 +84,6 @@ class Layer(models.Model):
     
     def get_qualified_name(self):
         return self.datastore.workspace.name + ":" + self.name
-
 
 class LayerReadGroup(models.Model):
     layer = models.ForeignKey(Layer)
