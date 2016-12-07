@@ -92,7 +92,7 @@ class LayerReadGroup(models.Model):
     
 class LayerWriteGroup(models.Model):
     layer = models.ForeignKey(Layer)
-    group = models.ForeignKey(UserGroup)    
+    group = models.ForeignKey(UserGroup)
     
     
 class DataRule(models.Model):
@@ -100,33 +100,43 @@ class DataRule(models.Model):
     roles = models.CharField(max_length=500)
 
 class LayerLock(models.Model):
+    """locks created from geoportal"""
+    GEOPORTAL_LOCK = 0
+    """locks created from sync API"""
+    SYNC_LOCK = 1
+    """Valid lock types"""
+    TYPE_CHOICES = (
+        (GEOPORTAL_LOCK, 'Geoportal'),
+        (SYNC_LOCK, 'Sync')
+    )
     layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
     created_by = models.CharField(max_length=100)
+    type = models.IntegerField(choices=TYPE_CHOICES, default=GEOPORTAL_LOCK) 
     
     def __unicode__(self):
         return self.layer.name
 
 class LayerResource(models.Model):
     """Stores resources (images, pdfs, etc) linked to specific features in a Layer"""
-    
+
     """image files, stored in the file system"""
     EXTERNAL_IMAGE = 1
     """PDF files, stored in the file system""" 
     EXTERNAL_PDF = 2
     """.ODT or .DOC files, stored in the file system"""
-    EXTERNAL_DOC = 4
+    EXTERNAL_DOC = 3
     """any kind of resource file"""
-    EXTERNAL_FILE = 8
+    EXTERNAL_FILE = 4
     """video files"""
-    EXTERNAL_VIDEO = 16
+    EXTERNAL_VIDEO = 5
     """Valid resource types"""
     TYPE_CHOICES = (
         (EXTERNAL_IMAGE, 'Image'),
         (EXTERNAL_PDF, 'PDF'),
         (EXTERNAL_DOC, 'DOC'),
-        (EXTERNAL_FILE, 'File'),
         (EXTERNAL_VIDEO, 'Video'),
+        (EXTERNAL_FILE, 'File'),
     )
     layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
     """The primary key of the feature. This makes mandatory for
