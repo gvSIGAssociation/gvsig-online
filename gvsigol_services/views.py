@@ -15,40 +15,41 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from gvsigol_services.models import LayerResource
+from gvsigol_services.rest_geoserver import FailedRequestError
 
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
-from django.shortcuts import render
-from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render_to_response, redirect, RequestContext
-from models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, Enumeration, EnumerationItem
+from models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, Enumeration, EnumerationItem,\
+    LayerLock
 from forms_services import WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
-from backend_mapservice import gn_backend, WrongElevationPattern, WrongTimePattern, backend as mapservice_backend
-from gvsigol.settings import FILEMANAGER_DIRECTORY
-from gvsigol_core.models import ProjectLayerGroup, PublicViewer
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.translation import ugettext as _
+from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
+from django.shortcuts import render_to_response, redirect, RequestContext
+from backend_mapservice import gn_backend, backend as mapservice_backend
 from gvsigol_auth.utils import superuser_required, staff_required
+from gvsigol_core.models import ProjectLayerGroup, PublicViewer
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import PermissionDenied
+from gvsigol.settings import FILEMANAGER_DIRECTORY
+from django.utils.translation import ugettext as _
+from gvsigol_services.models import LayerResource
+from gvsigol.settings import GVSIGOL_SERVICES
 from django.core.urlresolvers import reverse
 from gvsigol_core import utils as core_utils
 from gvsigol_auth.models import UserGroup
+from django.shortcuts import render
 import gvsigol.settings
-import rest_geoserver
-import logging, sys
 import requests
+import logging
 import urllib
 import utils
 import json
 import re
-
-from gvsigol.settings import MEDIA_ROOT, GVSIGOL_SERVICES
+import os
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
-
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_safe
@@ -105,7 +106,7 @@ def workspace_import(request):
     if request.method == 'POST':
         #form = None #FIXME
         #if form.is_valid():
-         #    #get existing ws and associated resources from Geoserver REST API 
+        #    #get existing ws and associated resources from Geoserver REST API 
         #    pass
         ##
         # get selected ws
@@ -267,7 +268,6 @@ def layer_list(request):
     }
     return render_to_response('layer_list.html', response, context_instance=RequestContext(request))
     
-
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def layer_delete(request, layer_id):
@@ -277,6 +277,8 @@ def layer_delete(request, layer_id):
         if mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer):
             mapservice_backend.deleteLayerStyles(layer)
             gn_backend.metadata_delete(request.session, layer)
+            if os.path.isfile(layer.thumbnail.path):
+                os.remove(layer.thumbnail.path)
             Layer.objects.all().filter(pk=layer_id).delete()
             mapservice_backend.setDataRules()
             core_utils.toc_remove_layer(layer)
@@ -285,7 +287,8 @@ def layer_delete(request, layer_id):
             return HttpResponseRedirect(reverse('datastore_list'))
         else:
             return HttpResponseBadRequest()
-    except:
+        
+    except Exception as e:
         return HttpResponseNotFound('<h1>Layer not found: {0}</h1>'.format(layer_id)) 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -352,9 +355,11 @@ def layer_add(request):
                     
                     style_name = workspace.name + '_' + newRecord.name + '_default'
                     mapservice_backend.createDefaultStyle(newRecord, style_name)
-                    mapservice_backend.setLayerStyle(newRecord.name, style_name)
+                    mapservice_backend.setLayerStyle(newRecord, style_name)
+                    
+                    mapservice_backend.updateThumbnail(newRecord)
                  
-                    mapservice_backend.addGridSubset(workspace, newRecord)
+                    #mapservice_backend.addGridSubset(workspace, newRecord)
                     newRecord.metadata_uuid = ''
                     try:
                         if gvsigol.settings.CATALOG_MODULE:
@@ -514,8 +519,10 @@ def layer_boundingbox_from_data(request):
         layer = layer_query_set[0]
         mapservice_backend.updateBoundingBoxFromData(layer)   
         mapservice_backend.clearCache(workspace.name, layer)
+        mapservice_backend.updateThumbnail(layer)
         mapservice_backend.reload_nodes()
         return HttpResponse('{"response": "ok"}', content_type='application/json')
+    
     except Exception as e:
         return HttpResponseNotFound('<h1>Layer not found: {0}</h1>'.format(layer.id))
 
@@ -855,7 +862,8 @@ def layer_create(request):
                         
                         style_name = workspace.name + '_' + newRecord.name + '_default'
                         mapservice_backend.createDefaultStyle(newRecord, style_name)
-                        mapservice_backend.setLayerStyle(newRecord.name, style_name)
+                        mapservice_backend.setLayerStyle(newRecord, style_name)
+                        mapservice_backend.updateThumbnail(newRecord)
                      
                         mapservice_backend.addGridSubset(workspace, newRecord)
                         newRecord.metadata_uuid = ''
@@ -882,6 +890,13 @@ def layer_create(request):
                         msg = _("Error: layer could not be published")
                     # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
                     form.add_error(None, msg)
+                    
+                    data = {
+                        'form': form,
+                        'message': msg,
+                        'layer_type': layer_type
+                    }
+                    return render(request, template, data)
                     
             else:
                 data = {
@@ -1228,3 +1243,79 @@ def get_datatable_data(request):
         }
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+def add_layer_lock(request):
+    try:
+        ws_name = request.POST['workspace']
+        layer_name = request.POST['layer']
+        if ":" in layer_name:
+            layer_name = layer_name.split(":")[1]
+        
+        layer_filter = Layer.objects.filter(name=layer_name, datastore__workspace__name=ws_name)
+        is_writable = (layer_filter.filter(layerwritegroup__group__usergroupuser__user=request.user).count()>0)
+        
+        if not is_writable:
+            raise PermissionDenied
+        layer = layer_filter[0]
+        
+        #is_locked = (LayerLock.objects.filter(layer__name=layer_name, layer__datastore__workspace__name=ws_name).count()>0)
+        is_locked = (LayerLock.objects.filter(layer=layer).count()>0)
+        if is_locked:
+            raise LayerLocked(layer_name)
+        new_lock = LayerLock()
+        new_lock.layer = layer
+        new_lock.created_by = request.user.username
+        new_lock.save()
+
+        return HttpResponse('{"response": "ok"}', content_type='application/json')
+    
+    except Exception as e:
+        return HttpResponseNotFound('<h1>Layer is locked: {0}</h1>'.format(layer.id))
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+def remove_layer_lock(request):
+    try:
+        ws_name = request.POST['workspace']
+        layer_name = request.POST['layer']
+        if ":" in layer_name:
+            layer_name = layer_name.split(":")[1]
+        check_writable=False
+        
+        layer_filter = Layer.objects.filter(name=layer_name, datastore__workspace__name=ws_name)
+        is_writable = (layer_filter.filter(layerwritegroup__group__usergroupuser__user=request.user).count()>0)
+        
+        if not is_writable:
+            raise PermissionDenied
+        layer = layer_filter[0]
+            
+        layer_lock = LayerLock.objects.filter(layer=layer)
+        if len(layer_lock)==1:
+            if layer_lock.filter(created_by=request.user.username).count()!=1:
+                # the layer was locked by a different user!!
+                raise PermissionDenied()
+            if check_writable:
+                layer_filter = Layer.objects.filter(id=layer.id)
+                is_writable = (layer_filter.filter(layerwritegroup__group__usergroupuser__user=request.user).count()>0)
+                if not is_writable:
+                    raise PermissionDenied()
+            layer_lock.delete()
+            return HttpResponse('{"response": "ok"}', content_type='application/json')
+    
+    except Exception as e:
+        return HttpResponseNotFound('<h1>Layer not locked: {0}</h1>'.format(layer.id))
+    
+class LayerLockingException(Exception):
+    pass
+
+class LayerNotLocked(LayerLockingException):
+    """The requested layer lock does not exist"""
+    
+    def __init__(self, layer=None):
+        self.layer = layer
+    
+class LayerLocked(LayerLockingException):
+    """The layer already has a lock"""
+
+    def __init__(self, layer=None):
+        self.layer = layer

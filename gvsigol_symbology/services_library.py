@@ -157,7 +157,7 @@ def add_symbol(request, json_rule, library_id, symbol_type):
         return True
         
     else:
-        mapservice.updateStyle(style.name, sld_body)
+        mapservice.updateStyle(None, style.name, sld_body)
         return True
     
 def update_symbol(request, json_rule, rule, library_rule):
