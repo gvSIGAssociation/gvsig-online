@@ -84,9 +84,11 @@ class Geoserver():
         ft = {
                 'name': name, 'title': title, 'enabled': True,
                 "store": {"@class": "dataStore", "name": qualified_store},
-                "maxFeatures": maxFeatures,
-                "nativeBoundingBox": {"minx": 0, "maxx": 1, "miny": 0, "maxy":1 , "crs":srs}
+                "maxFeatures": maxFeatures
               }
+        if srs is not None:
+            ft['nativeBoundingBox'] = {"minx": 0, "maxx": 1, "miny": 0, "maxy":1 , "crs":srs}
+            
         try:
             ft.update(extraParams)
         except:
