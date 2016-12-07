@@ -84,7 +84,8 @@ class Geoserver():
         ft = {
                 'name': name, 'title': title, 'enabled': True,
                 "store": {"@class": "dataStore", "name": qualified_store},
-                "maxFeatures": maxFeatures
+                "maxFeatures": maxFeatures,
+                "nativeBoundingBox": {"minx": 0, "maxx": 1, "miny": 0, "maxy":1 , "crs":srs}
               }
         try:
             ft.update(extraParams)

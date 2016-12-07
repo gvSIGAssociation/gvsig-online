@@ -31,6 +31,8 @@ urlpatterns = [
     url(r'^enumeration_update/(?P<eid>[0-9]+)/$', 'gvsigol_services.views.enumeration_update', name='enumeration_update'),
     url(r'^get_enumeration/$', 'gvsigol_services.views.get_enumeration', name='get_enumeration'),
     url(r'^layer_boundingbox_from_data/$', 'gvsigol_services.views.layer_boundingbox_from_data', name='layer_boundingbox_from_data'),
+    url(r'^add_layer_lock/$', 'gvsigol_services.views.add_layer_lock', name='add_layer_lock'),
+    url(r'^remove_layer_lock/$', 'gvsigol_services.views.remove_layer_lock', name='remove_layer_lock'),
     url(r'^get_feature_info/$', 'gvsigol_services.views.get_feature_info', name='get_feature_info'),
     url(r'^get_datatable_data/$', 'gvsigol_services.views.get_datatable_data', name='get_datatable_data'),
 ]

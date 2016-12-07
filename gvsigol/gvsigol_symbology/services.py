@@ -288,7 +288,7 @@ def sld_import(name, is_default, layer_id, file, mapservice):
     sld_body = sld_builder.build_sld(layer, style)
     if mapservice.createStyle(style.name, sld_body): 
         if style.is_default:
-            mapservice.setLayerStyle(workspace.name+":"+layer.name, style.name)
+            mapservice.setLayerStyle(layer, style.name)
             utils.__delete_temporaries(filepath)
         return True
         
@@ -406,15 +406,15 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
         print "DEBUG: style not exists in Geoserver .. " + style.name
         if mapservice.createStyle(style.name, sld_body): 
             aux = layer.datastore.workspace.name + ":"+ layer.name
-            mapservice.setLayerStyle(aux, cloned_style_name)
+            mapservice.setLayerStyle(layer, cloned_style_name)
         else:
             "DEBUG: problem creating style !!!!!" + style.name
     else:
         print "DEBUG: Style exists in Geoserver .. " +style.name
-        mapservice.updateStyle(style.name, sld_body)
+        mapservice.updateStyle(layer, style.name, sld_body)
         aux = layer.datastore.workspace.name + ":"+ layer.name
         print "DEBUG: Setting style " + cloned_style_name + " to " + aux
-        mapservice.setLayerStyle(aux, cloned_style_name)
+        mapservice.setLayerStyle(layer, cloned_style_name)
         
     return True
     

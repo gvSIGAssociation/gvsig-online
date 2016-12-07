@@ -25,8 +25,7 @@ from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer
 from gvsigol_symbology import services as symbology_services
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
-from gvsigol.settings import GVSIGOL_SERVICES
-from gvsigol.settings import GVSIGOL_CATALOG
+from gvsigol import settings
 from backend_postgis import Introspect
 import xml.etree.ElementTree as ET
 import geoserver.catalog as gscat
@@ -40,6 +39,8 @@ import requests
 import gdal_tools
 import logging
 import urllib
+import random
+import string
 import json
 import re
 from gvsigol_core import geom
@@ -87,7 +88,7 @@ class Geoserver():
                 ('e_WMS', _('Cascading WMS')),
             )
 
-        gdal_tools.OGR2OGR_PATH = GVSIGOL_SERVICES.get('OGR2OGR_PATH', gdal_tools.OGR2OGR_PATH)
+        gdal_tools.OGR2OGR_PATH = settings.GVSIGOL_SERVICES.get('OGR2OGR_PATH', gdal_tools.OGR2OGR_PATH)
         
         self.supported_srs_plain = [ x[0] for x in forms_geoserver.supported_srs ]
         self.supported_encodings_plain = [ x[0] for x in forms_geoserver.supported_encodings ]
@@ -278,16 +279,19 @@ class Geoserver():
             e = sys.exc_info()[0]
             pass
         
-    def setLayerStyle(self, layer_name, style):
+    def setLayerStyle(self, layer, style):
         """
         Set default style
         """
         try:
+            layer_name = layer.datastore.workspace.name + ":" + layer.name
             catalog = self.getGsconfig()
-            layer = catalog.get_layer(layer_name)
-            layer.default_style = style
-            catalog.save(layer)
+            gs_layer = catalog.get_layer(layer_name)
+            gs_layer.default_style = style
+            catalog.save(gs_layer)
+            
             return True
+        
         except Exception as e:
             return False     
         
@@ -368,18 +372,32 @@ class Geoserver():
         except Exception as e:
             return False
         
-    def updateStyle(self, style_name, sld_body):
+    def updateStyle(self, layer, style_name, sld_body):
         """
         Update a style
         """
             
         try:
             self.rest_catalog.update_style(style_name, sld_body, user=self.user, password=self.password)
+            if layer is not None:
+                self.updateThumbnail(layer)
             return True
         
         except Exception as e:
             print e
             return False
+        
+    def updateThumbnail(self, layer):
+        if not 'no_thumbnail.jpg' in layer.thumbnail.name:
+            if os.path.isfile(layer.thumbnail.path):
+                os.remove(layer.thumbnail.path)
+        
+        try:   
+            layer.thumbnail = self.getThumbnail(layer.datastore.workspace, layer.datastore, layer)
+            layer.save()
+        except Exception as e:
+            print e.message
+            pass
         
     def deleteStyle(self, name):
         """
@@ -610,7 +628,7 @@ class Geoserver():
         return (None, None, None)
     
     def __create_datastore_properties(self):
-        mosaic_db = GVSIGOL_SERVICES.get('MOSAIC_DB')
+        mosaic_db = settings.GVSIGOL_SERVICES.get('MOSAIC_DB')
         if mosaic_db is not None:
             (fd, abspath) = tempfile.mkstemp()
             os.write(fd, "SPI=org.geotools.data.postgis.PostgisNGDataStoreFactory\n")
@@ -914,7 +932,7 @@ class Geoserver():
                         if symbology_services.clone_style(self, layer, original_style_name, final_style_name) is False:
                             print "DEBUG: Creation mode CR. Clone style False. Creating default" 
                             self.createDefaultStyle(layer, final_style_name)
-                            self.setLayerStyle(datastore.workspace.name + ":" + layer.name, final_style_name)
+                            self.setLayerStyle(layer, final_style_name)
                         else:
                             print "DEBUG: Creation mode CR. Clone style True"
                     else:
@@ -924,7 +942,7 @@ class Geoserver():
                     print "DEBUG: NO has_style or style_from_library " + original_style_name
                     if creation_mode == 'CR':
                         self.createDefaultStyle(layer, final_style_name)
-                        self.setLayerStyle( datastore.workspace.name + ":" + layer.name, final_style_name)
+                        self.setLayerStyle(layer, final_style_name)
                 
                             
         except rest_geoserver.RequestError as ex:
@@ -1222,6 +1240,43 @@ class Geoserver():
         numberOfFeatures = int(root.attrib['numberOfFeatures'])
         
         return numberOfFeatures
+    
+    def getThumbnail(self, ws, ds, layer):
+        layer_info = self.getResourceInfo(ws.name, ds.name, layer.name, "json")
+        maxx = str(layer_info['featureType']['nativeBoundingBox']['maxx'])
+        maxy = str(layer_info['featureType']['nativeBoundingBox']['maxy'])
+        minx = str(layer_info['featureType']['nativeBoundingBox']['minx'])
+        miny = str(layer_info['featureType']['nativeBoundingBox']['miny'])
+        bbox = minx + "," + miny + "," + maxx + "," + maxy 
+        
+        values = {
+            'SERVICE': 'WMS',
+            'VERSION': '1.1.1',
+            'REQUEST': 'GetMap',
+            'LAYERS': ws.name + ":" + layer.name,
+            'FORMAT': 'image/png',
+            'SRS': layer_info['featureType']['nativeBoundingBox']['crs'],
+            'HEIGHT': '550',
+            'WIDTH': '768',
+            'BBOX': bbox
+        }
+                
+        iname = ''.join(random.choice(string.ascii_uppercase) for i in range(8))
+        iname += '.png'
+        
+        params = urllib.urlencode(values)
+        
+        req = requests.Session()
+        req.auth = (self.user, self.password)
+        #print ws.wms_endpoint + "?" + params
+        response = req.get(ws.wms_endpoint + "?" + params, verify=False, stream=True)
+        with open(settings.MEDIA_ROOT + "thumbnails/" + iname, 'wb') as f:
+            for block in response.iter_content(1024):
+                if not block:
+                    break
+                f.write(block)
+                
+        return os.path.join("thumbnails/", iname)
 
 class Geonetwork():
     def __init__(self, service_url):
@@ -1253,12 +1308,12 @@ class Geonetwork():
 
 def get_default_backend():
     try:
-        backend_str = GVSIGOL_SERVICES.get('ENGINE', 'geoserver')
-        base_url = GVSIGOL_SERVICES['URL']
-        user = GVSIGOL_SERVICES['USER']
-        password = GVSIGOL_SERVICES['PASSWORD']
-        cluster_nodes = GVSIGOL_SERVICES['CLUSTER_NODES']
-        supported_types = GVSIGOL_SERVICES.get('SUPPORTED_TYPES', None)
+        backend_str = settings.GVSIGOL_SERVICES.get('ENGINE', 'geoserver')
+        base_url = settings.GVSIGOL_SERVICES['URL']
+        user = settings.GVSIGOL_SERVICES['USER']
+        password = settings.GVSIGOL_SERVICES['PASSWORD']
+        cluster_nodes = settings.GVSIGOL_SERVICES['CLUSTER_NODES']
+        supported_types = settings.GVSIGOL_SERVICES.get('SUPPORTED_TYPES', None)
     except:
         raise ImproperlyConfigured
 
@@ -1270,7 +1325,7 @@ def get_default_backend():
 
 def get_geonetwork_backend():
     try:
-        service_url = GVSIGOL_CATALOG['URL']
+        service_url = settings.GVSIGOL_CATALOG['URL']
         gn_backend = Geonetwork(service_url)
         
     except:
