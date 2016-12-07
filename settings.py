@@ -233,9 +233,9 @@ GVSIGOL_USERS_CARTODB = {
 }
 
 PUBLIC_VIEWER = True
-CATALOG_MODULE = False
+CATALOG_MODULE = True
 GVSIGOL_CATALOG = {
-    'URL': 'https://test.scolab.eu/geonetwork/srv/spa/'
+    'URL': 'http://localhost:8080/geonetwork/srv/spa/'
 }
 
 GVSIGOL_SERVICES = {
