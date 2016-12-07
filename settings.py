@@ -332,7 +332,7 @@ GVSIGOL_BASE_LAYERS = {
 #skin-purple-light
 #skin-yellow
 #skin-yellow-light
-GVSIGOL_SKIN = "skin-blue"
+GVSIGOL_SKIN = "skin-pobla"
 
 FILEMANAGER_DIRECTORY = os.path.join(MEDIA_ROOT, 'data')
 FILEMANAGER_MEDIA_ROOT = os.path.join(MEDIA_ROOT, FILEMANAGER_DIRECTORY)
