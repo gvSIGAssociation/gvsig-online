@@ -1283,10 +1283,11 @@ class Geonetwork():
         self.rest_geonetwork = rest_geonetwork.Geonetwork(service_url)
         
     def metadata_insert(self, session, layer, abstract, ws, layer_info):
-        self.rest_geonetwork.gn_auth(session['username'], session['password'])
+        #self.rest_geonetwork.gn_auth(session['username'], session['password'])
+        self.rest_geonetwork.gn_auth('admin', 'admin')
         uuid = self.rest_geonetwork.gn_insert_metadata(layer, abstract, ws, layer_info)
-        thumbnail_url = self.rest_geonetwork.get_thumbnail(session['username'], session['password'], layer, ws, layer_info)
-        self.rest_geonetwork.add_thumbnail(uuid, thumbnail_url)
+        #thumbnail_url = self.rest_geonetwork.get_thumbnail(session['username'], session['password'], layer, ws, layer_info)
+        self.rest_geonetwork.add_thumbnail(uuid, layer.thumbnail.url)
         self.rest_geonetwork.set_metadata_privileges(uuid)
         self.rest_geonetwork.gn_unauth()
         return uuid
@@ -1294,7 +1295,8 @@ class Geonetwork():
     def metadata_delete(self, session, layer):
         try:
             if layer.metadata_uuid != '':
-                self.rest_geonetwork.gn_auth(session['username'], session['password'])
+                #self.rest_geonetwork.gn_auth(session['username'], session['password'])
+                self.rest_geonetwork.gn_auth('admin', 'admin')
                 self.rest_geonetwork.gn_delete_metadata(layer)
                 self.rest_geonetwork.gn_unauth()
                 return True
