@@ -1268,7 +1268,7 @@ class Geoserver():
         
         req = requests.Session()
         req.auth = (self.user, self.password)
-        #print ws.wms_endpoint + "?" + params
+        print ws.wms_endpoint + "?" + params
         response = req.get(ws.wms_endpoint + "?" + params, verify=False, stream=True)
         with open(settings.MEDIA_ROOT + "thumbnails/" + iname, 'wb') as f:
             for block in response.iter_content(1024):
