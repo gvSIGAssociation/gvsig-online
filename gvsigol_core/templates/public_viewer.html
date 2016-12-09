@@ -195,14 +195,6 @@
 	
 	<script type="text/javascript" src="{% static "js/lib/public_viewer.js" %}"></script>
 	
-	{% for app in INSTALLED_APPS %}												  
-		{% if 'gvsigol_app_' in app %}	
-			{% with "load_js_"|add:app|cut:"gvsigol_app_"|add:".html" as aux %}	   			 	
-				{% include_if_exists aux %}
-			{% endwith %}
-		{% endif %}		    					
-	{% endfor %}
-	
 	<script type="text/javascript">
 	
 		$("#modal-table-dialog").draggable({
@@ -229,6 +221,14 @@
 			}
 		});
 	</script>
+	
+	{% for app in INSTALLED_APPS %}												  
+		{% if 'gvsigol_app_' in app %}	
+			{% with "load_public_js_"|add:app|cut:"gvsigol_app_"|add:".html" as aux %}	   			 	
+				{% include_if_exists aux %}
+			{% endwith %}
+		{% endif %}		    					
+	{% endfor %}
 
 	<script>
 	$(document).ready(function() {
