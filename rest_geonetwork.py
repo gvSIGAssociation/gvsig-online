@@ -157,10 +157,11 @@ class Geonetwork():
     
     def create_metadata(self, layer, abstract, ws, layer_info):
         
-        maxx = str(layer_info['featureType']['nativeBoundingBox']['maxx'])
-        maxy = str(layer_info['featureType']['nativeBoundingBox']['maxy'])
-        minx = str(layer_info['featureType']['nativeBoundingBox']['minx'])
-        miny = str(layer_info['featureType']['nativeBoundingBox']['miny'])
+        maxx = str(layer_info['featureType']['latLonBoundingBox']['maxx'])
+        maxy = str(layer_info['featureType']['latLonBoundingBox']['maxy'])
+        minx = str(layer_info['featureType']['latLonBoundingBox']['minx'])
+        miny = str(layer_info['featureType']['latLonBoundingBox']['miny'])
+        crs = str(layer_info['featureType']['nativeBoundingBox']['crs'])
         
         metadata =  '<gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" '
         metadata +=     'xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:gmx="http://www.isotc211.org/2005/gmx" '
@@ -183,7 +184,7 @@ class Geonetwork():
         metadata +=             '<gmd:referenceSystemIdentifier>'
         metadata +=                 '<gmd:RS_Identifier>'
         metadata +=                     '<gmd:code>'
-        metadata +=                         '<gco:CharacterString>WGS 1984</gco:CharacterString>'
+        metadata +=                         '<gco:CharacterString>' + crs + '</gco:CharacterString>'
         metadata +=                     '</gmd:code>'
         metadata +=                 '</gmd:RS_Identifier>'
         metadata +=             '</gmd:referenceSystemIdentifier>'
