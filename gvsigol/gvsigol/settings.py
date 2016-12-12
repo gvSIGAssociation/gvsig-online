@@ -222,7 +222,7 @@ STATICFILES_FINDERS = (
     #'compressor.finders.CompressorFinder',
 )
 
-GVSIGOL_VERSION = '2.1.4'
+GVSIGOL_VERSION = '2.1.5'
 
 GVSIGOL_USERS_CARTODB = {
     'dbhost': 'localhost',
@@ -332,7 +332,7 @@ GVSIGOL_BASE_LAYERS = {
 #skin-purple-light
 #skin-yellow
 #skin-yellow-light
-GVSIGOL_SKIN = "skin-pobla"
+GVSIGOL_SKIN = "skin-blue"
 
 FILEMANAGER_DIRECTORY = os.path.join(MEDIA_ROOT, 'data')
 FILEMANAGER_MEDIA_ROOT = os.path.join(MEDIA_ROOT, FILEMANAGER_DIRECTORY)
