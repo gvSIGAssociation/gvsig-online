@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+<div class="row">
+	<div class="col-md-12">
+		<div class="box">
+
+			<form role="form" method="post" action="/gvsigonline/services/layer_create/">
+				<div class="box-header with-border">
+					<h3 class="box-title">{% trans "Create empty layer" %}</h3>
+					<div class="box-tools pull-right">
+						<button type="submit" class="btn btn-default btn-sm save-button">{% trans "Next" %} <i class="fa fa-angle-right margin-l-5"></i></button>					
+					</div>
+				</div>
+			
+				<div class="box-body">
+				{% csrf_token %}					
+					{% if form.errors %}
+					<div id="form-error" style="color:#ff0000;">
+						<ul>
+						{% for field in form %}
+							{% if field.errors %}
+								<li>{{field.label}}. {{ field.errors|striptags }}</li>
+							{% endif %}	
+						{% endfor %}
+						</ul>
+					</div>
+					{% endif %}
+							
+					{% if message %}
+					<div id="form-error" style="color:#ff0000;">
+						<p>* {{ message }}</p>
+					</div>
+					{% endif %}
+									
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="id_datastore">{% trans "Data Store" %}</label>
+							{{ form.datastore }}						
+						</div>
+					</div>
+									
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="id_name">{% trans "Resource name" %}</label>
+							{{ form.name }}						
+						</div>
+					</div>		
+					
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="id_title">{% trans "Title" %}</label>
+							{{ form.title }}						
+						</div>
+					</div>		
+					
+					<div class="row">
+						<div class="col-md-6 form-group">
+							<label for="id_geom_type">{% trans "Geometry type" %}</label>	
+							{{ form.geom_type }}						
+						</div>
+						<div class="col-md-6 form-group">	
+							<label for="id_srs">{% trans "Coordinate reference system" %}</label>	
+							{{ form.srs }}							
+						</div>
+					</div>	
+					
+					<div id="layer-fields" class="row">
+						<div class="col-md-12">
+							<div class="box">
+								<div class="box-header with-border">
+									<h3 class="box-title">{% trans "Field list" %}</h3>
+								</div>
+								<div class="box-body">
+									<div class="table-responsive">
+										<table id="field-list-table" class="table no-margin">
+											<thead>
+												<tr>
+													<th>{% trans "Field name" %}</th>
+													<th>{% trans "Field type" %}</th>
+													<th></th>
+												</tr>
+											</thead>
+											<tbody id="field-list-table-body"></tbody>
+										</table>
+									</div>
+								</div>
+								<div class="box-footer clearfix">
+									<a id="add-field-button" href="javascript:void(0)" class="btn btn-box-tool pull-left margin-r-5">
+										<i class="fa fa-plus margin-r-5"></i>{% trans "Add field" %}
+									</a>
+								</div>
+								<input type="hidden" name="fields" id="fields" value="{{form.fields.value|default_if_none:''}}" />
+							</div>
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="id_layer_group">{% trans "Layer group" %}</label>
+							{{ form.layer_group }}						
+						</div>
+					</div>	
+					
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<span>{% trans "Layer properties in the viewer" %}.</span>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-4 form-group">
+							<input type="checkbox" name="visible" id="visible"/>
+							<label for="visible">{% trans "Visible" %}</label>														
+						</div>
+						<div class="col-md-4 form-group">
+							<input type="checkbox" name="cached" id="cached" checked/>
+							<label for="cached">{% trans "Cached" %}</label>	
+						</div>
+						<div class="col-md-4 form-group">
+							<input type="checkbox" name="queryable" id="queryable" checked/>
+							<label for="queryable">{% trans "Queryable" %}</label>
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="col-md-4 form-group">
+							<input type="checkbox" name="single_image" id="single_image" />	
+							<label for="single_image">{% trans "Single image (No tiles)" %}</label>											
+						</div>
+					</div>
+					
+					<br/>
+			
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="md-abstract">{% trans "Metadata: Abstract" %}</label>
+				        	<textarea class="form-control" name="md-abstract" id="md-abstract" rows="5">{% trans "Some description of the layer" %}</textarea>	     	
+				        </div>
+					</div>					
+            	</div>
+			</form>		
+		</div>
+	</div>				
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-new-layer-field" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title">{% trans "New field" %}</h4>
+			</div>
+			<div class="modal-body">
+			</div>
+			<div class="modal-footer">
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script type="text/javascript">
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-layers').addClass("active");
+	
+	$('.save-button').click( function() {
+		$("body").overlay();
+	});
+	
+	var fields = new Array();
+	var fieldTypes = [{
+		key: 'character_varying',
+		value: 'Text'
+	},{
+		key: 'integer',
+		value: 'Integer'
+	},{
+		key: 'double',
+		value: 'Double'
+	},{
+		key: 'boolean',
+		value: 'Boolean'
+	},{
+		key: 'date',
+		value: 'Date'
+	}];
+	
+	"{% if GVSIGOL_ENABLE_ENUMERATIONS %}"
+	fieldTypes.push({
+		key: 'enumeration',
+		value: 'Enumeration'
+	});
+	"{% endif %}"
+	
+	function addField(field) {
+		
+		fields.push(field);
+		
+		var ui = '';
+		ui += '<tr data-rowid="' + field.id + '">';
+		ui += 	'<td id="field-name-' + field.id + '">' + field.name + '</td>';
+		ui += 	'<td id="field-type-' + field.id + '">' + field.type + '</td>';
+		ui += 	'<td><a class="edit-field-' + field.id + '" data-fieldid="' + field.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
+		ui += 	'<td><a class="delete-field-' + field.id + '" data-fieldid="' + field.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
+		ui += '</tr>';
+		
+		$('#field-list-table tbody').append(ui);	
+		
+		$(".edit-field-" + field.id).on('click', function(e){	
+			e.preventDefault();
+			createModalContent(field.id, 'update');
+		});
+		
+		$(".delete-field-" + field.id).on('click', function(e){	
+			e.preventDefault();
+			deleteField(field.id);
+		});
+	};
+	
+	function updateField(field) {
+		for (var i=0; i < fields.length; i++) {
+			if (fields[i].id == field.id) {
+				fields[i] = null;
+				fields[i] = field;
+			}
+		}
+		$('#field-name-'+field.id).text(field.name);
+		$('#field-type-'+field.id).text(field.type);
+		$('#field-default-value-'+field.id).text(field.defaultValue);
+	};
+	
+	function deleteField(id) {
+		for (var i=0; i < fields.length; i++) {
+			if (fields[i].id == id) {
+				fields.splice(i, 1);
+			}
+		}
+		var tbody = document.getElementById('field-list-table-body');
+		for (var i=0; i<tbody.children.length; i++) {
+			if(tbody.children[i].dataset.rowid == id) {
+				tbody.removeChild(tbody.children[i]);
+			}
+		}
+	};
+	
+	function getFieldById(id) {
+		for (var i=0; i < fields.length; i++) {
+			if (fields[i].id == id) {
+				return fields[i];
+			}
+		}
+	};
+	
+	function validateRegex(pattern) {
+		return /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(pattern);
+	};
+	
+	function createModalContent(fid, mode){
+		$('#modal-new-layer-field .modal-body').empty();
+		
+		var id = Math.random().toString(36).slice(2);
+		var ui = '';
+		
+		var field = null;
+		if (mode == 'update') {
+			field = getFieldById(fid);
+		}
+		
+		ui += '<div id="field-errors" class="row">';
+		ui += '</div>';
+		
+		ui += '<div class="row">';
+		ui += 	'<div class="col-md-12 form-group">';
+		ui += 		'<label>' + gettext('Select type') + '</label>';
+		ui += 		'<select id="field-db-type" class="form-control">';
+		if (mode == 'create') {
+			ui += 		'<option disabled selected value> -- ' + gettext('Select type') + ' -- </option>';
+			for (var i=0; i<fieldTypes.length; i++) {
+				ui += 	'<option value="' + fieldTypes[i].key + '">' + fieldTypes[i].value + '</option>';
+			}
+		} else if (mode == 'update') {
+			for (var i=0; i<fieldTypes.length; i++) {
+				if (fieldTypes[i].key == field.type) {
+					ui += 	'<option selected value="' + fieldTypes[i].key + '">' + fieldTypes[i].value + '</option>';
+				} else {
+					ui += 	'<option value="' + fieldTypes[i].key + '">' + fieldTypes[i].value + '</option>';	
+				}
+			}
+		}
+		ui += 		'</select>';
+		ui += 	'</div>';
+		ui += '</div>';	
+		
+		if (mode == 'create') {
+			ui += '<div id="div-name" class="row">';
+			ui += '</div>';
+			
+		} else if (mode == 'update') {
+			
+			ui += '<div id="div-name" class="row">';
+			if ( field.type == 'enumeration') {
+				ui += '<div class="col-md-12 form-group">';
+				ui += 	'<label>' + gettext('Select enumeration') + '</label>';
+				ui += 	'<select id="field-default-value-'+id+'" class="form-control">';
+						'{% for enum in enumerations %}'
+							if ( '{{enum.name}}' == field.defaultValue) {
+								ui += '<option selected value="{{enum.name}}">{{enum.title}}</option>';
+							} else {
+								ui += '<option value="{{enum.name}}">{{enum.title}}</option>';
+							}
+						'{% endfor%}'
+				ui += 	'</select>';
+				ui += '</div>';
+				
+			} else {
+				ui += '<div class="row">';
+				ui += 	'<div class="col-md-12 form-group">';
+				ui += 		'<label>' + gettext('Field name') + '</label>';
+				if (mode == 'create') {
+					ui += 		'<input type="text" id="field-name-'+id+'" name="field-name-'+id+'" class="form-control">';
+				} else if (mode == 'update') {
+					ui += 		'<input type="text" id="field-name-'+id+'" name="field-name-'+id+'" class="form-control" value="' + field.name + '">';
+				}
+				ui += 	'</div>';
+				ui += '</div>';
+			}
+			ui += '</div>';
+		}
+		
+		$('#modal-new-layer-field .modal-body').append(ui);
+		
+		var buttons = '';
+		buttons += '<button id="add-field-cancel" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
+		if (mode == 'create') {
+			buttons += '<button id="add-field-accept" type="button" class="btn btn-default">' + gettext('Save field') + '</button>';
+			
+		} else if (mode == 'update') {
+			buttons += '<button id="update-field-accept" data-fieldid="'+field.id+'" type="button" class="btn btn-default">' + gettext('Edit field') + '</button>';
+		}
+		
+		
+		$('#modal-new-layer-field .modal-footer').empty();
+		$('#modal-new-layer-field .modal-footer').append(buttons);
+		
+		$('#field-db-type').on('change', function(e) {
+			
+			var dv = '';
+			
+			if ( $('#field-db-type').val() == 'enumeration') {
+				dv += '<div class="col-md-12 form-group">';
+				dv += 	'<label>' + gettext('Select enumeration') + '</label>';
+				dv += 	'<select id="field-name-'+id+'" class="form-control">';
+						'{% for enum in enumerations %}'
+				dv += 	'<option value="{{enum.name}}">{{enum.title}}</option>';
+						'{% endfor%}'
+				dv += 	'</select>';
+				dv += '</div>';
+				
+			} else {
+				dv += '<div class="col-md-12 form-group">';
+				dv += 	'<label>' + gettext('Field name') + '</label>';
+				dv += 	'<input type="text" id="field-name-'+id+'" name="field-name-'+id+'" class="form-control">';
+				dv += '</div>';
+			}
+			
+			$('#div-name').empty();
+			$('#div-name').append(dv);
+		});
+		
+		$('#add-field-accept').on('click', function () {
+			var name = $('#field-name-'+id).val();
+			var type = $('#field-db-type').val();
+			
+			if (validateRegex(name)) {
+				var field = {
+					id: id,
+					name: name,
+					type: type
+				};
+				
+				addField(field);
+				
+				$('#modal-new-layer-field').modal('hide');
+				
+			} else {
+				var error = '<p class="text-muted" style="color: #ff0000; padding: 10px;">* ' + gettext('Invalid name: Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers') + '.</p>';
+				$('#field-errors').empty();
+ 				$('#field-errors').append(error);
+			}
+			
+		});
+		
+		$('#update-field-accept').on('click', function () {
+			var name = $('#field-name-'+id).val();
+			var type = $('#field-db-type').val();
+			
+			if (validateRegex(name)) {
+				var field = {
+					id: this.dataset.fieldid,
+					name: name,
+					type: type
+				};
+				
+				updateField(field);
+				
+				$('#modal-new-layer-field').modal('hide');
+				
+			} else {
+				var error = '<p class="text-muted" style="color: #ff0000; padding: 10px;">* ' + gettext('Invalid name: Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers') + '.</p>';
+				$('#field-errors').empty();
+ 				$('#field-errors').append(error);
+			}
+			
+		});
+		
+		$('#modal-new-layer-field').modal('show');
+	};
+	
+	$(document).ready(function() {
+		// translate default layer group
+		var lgs = $("#id_layer_group");
+		var lg_options = $("#id_layer_group option");
+		for (var i=0; i<lg_options.length; i++) {
+			text = $(lg_options[i]).text();
+			if (text=="__default__") {
+				$(lg_options[i]).html('{% trans "Default" %}');
+			}
+		}
+		
+		$("#add-field-button").on('click', function(e){
+			createModalContent(null, 'create');
+		});
+		
+		$("form").submit(function(event) {
+			var fieldsAsStr;
+			if (fields.length > 0) {
+				fieldsAsStr = JSON.stringify(fields);
+				
+			} else {
+				$("#form-error").html("<p>{% trans 'At least one field must be defined' %}</p>").show();
+			}
+			
+			$("#fields").val(fieldsAsStr);
+		});
+	});
+</script>
+{% endblock %}
