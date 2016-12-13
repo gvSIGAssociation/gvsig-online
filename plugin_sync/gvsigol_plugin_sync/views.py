@@ -51,6 +51,7 @@ from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, LayerLock, \
     LayerResource
 from gvsigol_services.locks_utils import *
+from gvsigol_services.backend_mapservice import backend as mapservice_backend
 
 DEFAULT_BUFFER_SIZE = 1048576
 
@@ -264,6 +265,7 @@ def sync_upload(request, release_locks=True):
                         ogr.set_output(conn, table_name=tbl_name)
                         ogr.set_output_mode(ogr.MODE_LAYER_OVERWRITE, ogr.MODE_DS_UPDATE)
                         ogr.execute()
+                        mapservice_backend.updateBoundingBoxFromData(lock.layer)
             finally:
                 db.close()
             
