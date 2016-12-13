@@ -105,19 +105,20 @@ def get_layerinfo_by_project(request, project):
 def fill_layer_attrs(layer, permissions):
     row = {}
     geom_info = mapservice_backend.get_geometry_info(layer)
-    srid = geom_info['srs']
-    if srid is None:
-        srid = 'unknown'
-    geom_type = geom_info['geomtype']
-    row['name'] = layer.get_qualified_name()
-    row['title'] = layer.title
-    row['abstract'] = layer.abstract
-    row['geomtype'] = geom.toGeopaparazzi(geom_type)
-    row['srid'] = srid
-    row['permissions'] = permissions
-    # last-modified excluded for the moment
-    #row['last-modified'] = long(time.time())   #FIXME
-    return row
+    if geom_info:
+        srid = geom_info['srs']
+        if srid is None:
+            srid = 'unknown'
+        geom_type = geom_info['geomtype']
+        row['name'] = layer.get_qualified_name()
+        row['title'] = layer.title
+        row['abstract'] = layer.abstract
+        row['geomtype'] = geom.toGeopaparazzi(geom_type)
+        row['srid'] = srid
+        row['permissions'] = permissions
+        # last-modified excluded for the moment
+        #row['last-modified'] = long(time.time())   #FIXME
+        return row
 
 def layersToJson(universallyReadableLayers, readOnlyLayers=[], readWriteLayers=[]):
     result = []
@@ -127,20 +128,23 @@ def layersToJson(universallyReadableLayers, readOnlyLayers=[], readWriteLayers=[
     for layer in readWriteLayers:
         if not layer.id in layerIds:
             row = fill_layer_attrs(layer, 'read-write')
-            result.append(row)
-            layerIds.add(layer.id)
+            if row:
+                result.append(row)
+                layerIds.add(layer.id)
             
     for layer in readOnlyLayers:
         if not layer.id in layerIds:
             row = fill_layer_attrs(layer, 'read-only')
-            result.append(row)
-            layerIds.add(layer.id)
+            if row:
+                result.append(row)
+                layerIds.add(layer.id)
     
     for layer in universallyReadableLayers:
         if not layer.id in layerIds:
             row = fill_layer_attrs(layer, 'read-only')
-            result.append(row)
-            layerIds.add(layer.id)
+            if row:
+                result.append(row)
+                layerIds.add(layer.id)
             
     layerStr = json.dumps(result)
     return layerStr
