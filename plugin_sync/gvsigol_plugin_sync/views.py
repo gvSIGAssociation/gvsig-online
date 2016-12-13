@@ -43,6 +43,7 @@ from django.views.decorators.http import require_http_methods, require_safe, req
 import gdaltools
 from spatialiteintrospect import introspect as sq_introspect
 
+from gvsigol import settings
 from gvsigol_core import geom
 from gvsigol_services import utils
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
