@@ -1331,15 +1331,14 @@ def get_default_backend():
 
 def get_geonetwork_backend():
     try:
-        service_url = settings.GVSIGOL_CATALOG['URL']
-        user = settings.GVSIGOL_CATALOG['USER']
-        password = settings.GVSIGOL_CATALOG['PASSWORD']
-        gn_backend = Geonetwork(service_url, user, password)
-        
+        if settings.CATALOG_MODULE:
+            service_url = settings.GVSIGOL_CATALOG['URL']
+            user = settings.GVSIGOL_CATALOG['USER']
+            password = settings.GVSIGOL_CATALOG['PASSWORD']
+            gn_backend = Geonetwork(service_url, user, password)
+            return gn_backend
     except:
         raise ImproperlyConfigured
-
-    return gn_backend
 
 backend = get_default_backend()
 gn_backend = get_geonetwork_backend()
