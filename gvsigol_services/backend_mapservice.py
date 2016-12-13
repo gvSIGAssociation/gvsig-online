@@ -341,7 +341,8 @@ class Geoserver():
             return {"geomtype": the_type, "srs": srs}
         
         except Exception as e:
-            return False
+            logging.error("Error retrieving geometry info")
+            return None
     
     def createDefaultStyle(self, layer, style_name):
         geom_type = self.get_geometry_type(layer)
