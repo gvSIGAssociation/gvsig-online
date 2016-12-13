@@ -394,6 +394,11 @@ class Geoserver():
         
         try:   
             layer.thumbnail = self.getThumbnail(layer.datastore.workspace, layer.datastore, layer)
+            if settings.CATALOG_MODULE:
+                gn_backend.metadata_delete(layer)
+                layer_info = self.getResourceInfo(layer.datastore.workspace.name, layer.datastore.name, layer.name, "json")
+                muuid = gn_backend.metadata_insert(layer, layer.abstract, layer.datastore.workspace, layer_info)
+                layer.metadata_uuid = muuid
             layer.save()
         except Exception as e:
             print e.message
@@ -1279,24 +1284,23 @@ class Geoserver():
         return os.path.join("thumbnails/", iname)
 
 class Geonetwork():
-    def __init__(self, service_url):
+    def __init__(self, service_url, user, password):
         self.rest_geonetwork = rest_geonetwork.Geonetwork(service_url)
+        self.user = user
+        self.password = password
         
-    def metadata_insert(self, session, layer, abstract, ws, layer_info):
-        self.rest_geonetwork.gn_auth(session['username'], session['password'])
-        #self.rest_geonetwork.gn_auth('admin', 'admin')
+    def metadata_insert(self, layer, abstract, ws, layer_info):
+        self.rest_geonetwork.gn_auth(self.user, self.password)
         uuid = self.rest_geonetwork.gn_insert_metadata(layer, abstract, ws, layer_info)
-        #thumbnail_url = self.rest_geonetwork.get_thumbnail(session['username'], session['password'], layer, ws, layer_info)
         self.rest_geonetwork.add_thumbnail(uuid, layer.thumbnail.url)
         self.rest_geonetwork.set_metadata_privileges(uuid)
         self.rest_geonetwork.gn_unauth()
         return uuid
         
-    def metadata_delete(self, session, layer):
+    def metadata_delete(self, layer):
         try:
             if layer.metadata_uuid != '':
-                self.rest_geonetwork.gn_auth(session['username'], session['password'])
-                #self.rest_geonetwork.gn_auth('admin', 'admin')
+                self.rest_geonetwork.gn_auth(self.user, self.password)
                 self.rest_geonetwork.gn_delete_metadata(layer)
                 self.rest_geonetwork.gn_unauth()
                 return True
@@ -1328,7 +1332,9 @@ def get_default_backend():
 def get_geonetwork_backend():
     try:
         service_url = settings.GVSIGOL_CATALOG['URL']
-        gn_backend = Geonetwork(service_url)
+        user = settings.GVSIGOL_CATALOG['USER']
+        password = settings.GVSIGOL_CATALOG['PASSWORD']
+        gn_backend = Geonetwork(service_url, user, password)
         
     except:
         raise ImproperlyConfigured

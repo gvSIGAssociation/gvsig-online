@@ -277,7 +277,7 @@ def layer_delete(request, layer_id):
         mapservice_backend.deleteGeoserverLayerGroup(layer.layer_group)
         if mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer):
             mapservice_backend.deleteLayerStyles(layer)
-            gn_backend.metadata_delete(request.session, layer)
+            gn_backend.metadata_delete(layer)
             if os.path.isfile(layer.thumbnail.path):
                 os.remove(layer.thumbnail.path)
             Layer.objects.all().filter(pk=layer_id).delete()
@@ -365,7 +365,7 @@ def layer_add(request):
                     try:
                         if gvsigol.settings.CATALOG_MODULE:
                             layer_info = mapservice_backend.getResourceInfo(workspace.name, datastore.name, newRecord.name, "json")
-                            muuid = gn_backend.metadata_insert(request.session, newRecord, abstract, workspace, layer_info)
+                            muuid = gn_backend.metadata_insert(newRecord, abstract, workspace, layer_info)
                             newRecord.metadata_uuid = muuid
                     except Exception as exc:
                         logging.exception(exc)
@@ -871,7 +871,7 @@ def layer_create(request):
                         try:
                             if gvsigol.settings.CATALOG_MODULE:
                                 layer_info = mapservice_backend.getResourceInfo(workspace.name, datastore.name, newRecord.name, "json")
-                                muuid = gn_backend.metadata_insert(request.session, newRecord, abstract, workspace, layer_info)
+                                muuid = gn_backend.metadata_insert(newRecord, abstract, workspace, layer_info)
                                 newRecord.metadata_uuid = muuid
                         except Exception as exc:
                             logging.exception(exc)
