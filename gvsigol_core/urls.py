@@ -10,8 +10,8 @@ urlpatterns = [
     url(r'^project_get_conf/$', 'gvsigol_core.views.project_get_conf', name='project_get_conf'),
     url(r'^toc_update/(?P<pid>[0-9]+)/$', 'gvsigol_core.views.toc_update', name='toc_update'),
     url(r'^export/(?P<pid>[0-9]+)/$', 'gvsigol_core.views.export', name='export'),
-    url(r'^public_viewer/$', 'gvsigol_core.views.public_viewer', name='public_viewer'),
-    url(r'^public_viewer_configuration/$', 'gvsigol_core.views.public_viewer_configuration', name='public_viewer_configuration'),
-    url(r'^public_viewer_get_conf/$', 'gvsigol_core.views.public_viewer_get_conf', name='public_viewer_get_conf'),
     url(r'^ogc_services/$', 'gvsigol_core.views.ogc_services', name='ogc_services'),
+    url(r'^select_public_project/$', 'gvsigol_core.views.select_public_project', name='select_public_project'),
+    url(r'^public_project_load/(?P<pid>[0-9]+)/$', 'gvsigol_core.views.public_project_load', name='public_project_load'),
+    url(r'^public_viewer_get_conf/$', 'gvsigol_core.views.public_viewer_get_conf', name='public_viewer_get_conf'),
 ]

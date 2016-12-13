@@ -4703,3 +4703,7 @@ table.text-center th {
 .dropdown-menu-filemanager{
 	position: relative;
 }
+
+.background-grey {
+	background-color: #fafafa;
+}
