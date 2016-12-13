@@ -40,7 +40,7 @@ from django.core.urlresolvers import reverse
 from gvsigol_core import utils as core_utils
 from gvsigol_auth.models import UserGroup
 from django.shortcuts import render
-import gvsigol.settings
+from gvsigol import settings
 import requests
 import logging
 import urllib
@@ -363,7 +363,7 @@ def layer_add(request):
                     #mapservice_backend.addGridSubset(workspace, newRecord)
                     newRecord.metadata_uuid = ''
                     try:
-                        if gvsigol.settings.CATALOG_MODULE:
+                        if settings.CATALOG_MODULE:
                             layer_info = mapservice_backend.getResourceInfo(workspace.name, datastore.name, newRecord.name, "json")
                             muuid = gn_backend.metadata_insert(newRecord, abstract, workspace, layer_info)
                             newRecord.metadata_uuid = muuid
@@ -869,7 +869,7 @@ def layer_create(request):
                         mapservice_backend.addGridSubset(workspace, newRecord)
                         newRecord.metadata_uuid = ''
                         try:
-                            if gvsigol.settings.CATALOG_MODULE:
+                            if settings.CATALOG_MODULE:
                                 layer_info = mapservice_backend.getResourceInfo(workspace.name, datastore.name, newRecord.name, "json")
                                 muuid = gn_backend.metadata_insert(newRecord, abstract, workspace, layer_info)
                                 newRecord.metadata_uuid = muuid
@@ -1105,10 +1105,11 @@ def get_feature_info(request):
                 layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
                 resources = []
                 for lr in layer_resources:
+                    abs_server_path = os.path.join(settings.MEDIA_URL, lr.path)
                     type = 'image' 
                     resource = {
                         'type': type,
-                        'url': lr.path
+                        'url': abs_server_path
                     }
                     resources.append(resource)
                 geojson['features'][i]['resources'] = resources
@@ -1129,10 +1130,11 @@ def get_feature_info(request):
                 layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
                 resources = []
                 for lr in layer_resources:
+                    abs_server_path = os.path.join(settings.MEDIA_URL, lr.path)
                     type = 'image' 
                     resource = {
                         'type': type,
-                        'url': lr.path
+                        'url': abs_server_path
                     }
                     resources.append(resource)
                 geojson['features'][i]['resources'] = resources
@@ -1222,6 +1224,7 @@ def get_datatable_data(request):
         if 'username' in request.session and 'password' in request.session:
             if request.session['username'] is not None and request.session['password'] is not None:
                 req.auth = (request.session['username'], request.session['password'])
+                #req.auth = ('admin', 'geoserver')
                 
         print wfs_url + "?" + params
         response = req.post(wfs_url, data=values, verify=False)
