@@ -61,6 +61,14 @@ def is_valid_project(user, pid):
     except Exception as e:
         print e
         return valid
+    
+def is_valid_public_project(pid):
+    valid = False
+    project = Project.objects.get(id=int(pid))
+    if project.is_public:
+        valid = True
+                        
+    return valid
 
 def get_all_groups():
     groups_list = UserGroup.objects.all()
@@ -386,9 +394,10 @@ def toc_remove_layer(layer):
         
 def get_geoserver_base_url(request, url):
     geoserver_url = None
-    if request.session['username'] is not None and request.session['password'] is not None:
-        split_geoserver_url = url.split('//')
-        geoserver_url = split_geoserver_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_geoserver_url[1]
+    if 'username' in request.session:
+        if request.session['username'] is not None and request.session['password'] is not None:
+            split_geoserver_url = url.split('//')
+            geoserver_url = split_geoserver_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_geoserver_url[1]
     else:
         geoserver_url = url
         
@@ -396,9 +405,10 @@ def get_geoserver_base_url(request, url):
         
 def get_wms_url(request, workspace):
     wms_url = None
-    if request.session['username'] is not None and request.session['password'] is not None:
-        split_wms_url = workspace.wms_endpoint.split('//')
-        wms_url = split_wms_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_wms_url[1]
+    if 'username' in request.session:
+        if request.session['username'] is not None and request.session['password'] is not None:
+            split_wms_url = workspace.wms_endpoint.split('//')
+            wms_url = split_wms_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_wms_url[1]
     else:
         wms_url = workspace.wms_endpoint
         
@@ -406,9 +416,10 @@ def get_wms_url(request, workspace):
 
 def get_wfs_url(request, workspace):
     wfs_url = None
-    if request.session['username'] is not None and request.session['password'] is not None:
-        split_wfs_url = workspace.wfs_endpoint.split('//')
-        wfs_url = split_wfs_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_wfs_url[1]
+    if 'username' in request.session:
+        if request.session['username'] is not None and request.session['password'] is not None:
+            split_wfs_url = workspace.wfs_endpoint.split('//')
+            wfs_url = split_wfs_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_wfs_url[1]
     else:
         wfs_url = workspace.wfs_endpoint
         
@@ -416,9 +427,10 @@ def get_wfs_url(request, workspace):
 
 def get_cache_url(request, workspace):
     cache_url = None
-    if request.session['username'] is not None and request.session['password'] is not None:
-        split_cache_url = workspace.cache_endpoint.split('//')
-        cache_url = split_cache_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_cache_url[1]
+    if 'username' in request.session:
+        if request.session['username'] is not None and request.session['password'] is not None:
+            split_cache_url = workspace.cache_endpoint.split('//')
+            cache_url = split_cache_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_cache_url[1]
     else:
         cache_url = workspace.cache_endpoint
         
@@ -426,9 +438,10 @@ def get_cache_url(request, workspace):
 
 def get_catalog_url(request, url, layer):
     catalog_url = None
-    if request.session['username'] is not None and request.session['password'] is not None:
-        split_catalog_url = url.split('//')
-        catalog_url = split_catalog_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_catalog_url[1]  + 'catalog.search#/metadata/' + layer.metadata_uuid
+    if 'username' in request.session:
+        if request.session['username'] is not None and request.session['password'] is not None:
+            split_catalog_url = url.split('//')
+            catalog_url = split_catalog_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_catalog_url[1]  + 'catalog.search#/metadata/' + layer.metadata_uuid
     else:
         catalog_url = url + 'catalog.search#/metadata/' + layer.metadata_uuid
         

@@ -121,6 +121,7 @@ def project_list(request):
         project['id'] = p.id
         project['name'] = p.name
         project['description'] = p.description
+        project['is_public'] = p.is_public
         projects.append(project)
                       
     response = {
@@ -138,6 +139,10 @@ def project_add(request):
         longitude = request.POST.get('center-lon')
         extent = request.POST.get('extent')
         zoom = request.POST.get('zoom')
+        
+        is_public = False
+        if 'is_public' in request.POST:
+            is_public = True
             
         has_image = False
         if 'project-image' in request.FILES:
@@ -177,7 +182,8 @@ def project_add(request):
                     zoom = int(zoom),
                     extent = extent,
                     toc_order = core_utils.get_json_toc(assigned_layergroups),
-                    created_by = request.user.username
+                    created_by = request.user.username,
+                    is_public = is_public
                 )
             else:
                 project = Project(
@@ -188,7 +194,8 @@ def project_add(request):
                     zoom = int(zoom),
                     extent = extent,
                     toc_order = core_utils.get_json_toc(assigned_layergroups),
-                    created_by = request.user.username
+                    created_by = request.user.username,
+                    is_public = is_public
                 )
             project.save()
             
@@ -247,6 +254,10 @@ def project_update(request, pid):
         longitude = request.POST.get('center-lon')
         extent = request.POST.get('extent')
         zoom = request.POST.get('zoom')
+        
+        is_public = False
+        if 'is_public' in request.POST:
+            is_public = True
                 
         assigned_layergroups = []
         for key in request.POST:
@@ -285,6 +296,7 @@ def project_update(request, pid):
             project.zoom = int(zoom)
             project.extent = extent
             project.toc_order = toc_structure
+            project.is_public = is_public
             project.save()
             
             for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
@@ -327,6 +339,7 @@ def project_update(request, pid):
                 project.zoom = int(zoom)
                 project.extent = extent
                 project.toc_order = toc_structure
+                project.is_public = is_public
                 project.save()
                 
                 for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
@@ -558,95 +571,55 @@ def export(request, pid):
         image = p.image.url
 
     return render_to_response('app_print_template.html', {'print_logo_url': urllib.unquote(image)}, context_instance=RequestContext(request))
-
-
-def public_viewer(request):
-    return render_to_response('public_viewer.html', {'supported_crs': gvsigol.settings.SUPPORTED_CRS}, context_instance=RequestContext(request))
-
-@login_required(login_url='/gvsigonline/auth/login_user/')
-@superuser_required
-def public_viewer_configuration(request):
-    if request.method == 'POST':
-        latitude = request.POST.get('center-lat')
-        longitude = request.POST.get('center-lon')
-        extent = request.POST.get('extent')
-        zoom = request.POST.get('zoom')
-                
-        assigned_layergroups = []
-        for key in request.POST:
-            if 'layergroup-' in key:
-                assigned_layergroups.append(int(key.split('-')[1]))
-                
-        public_viewer = PublicViewer.objects.all()[0]
-        
-        old_layer_groups = []
-        for lg in PublicViewerLayerGroup.objects.filter(public_viewer_id=public_viewer.id):
-            old_layer_groups.append(lg.layer_group.id)
     
-        core_utils.toc_remove_layergroups(public_viewer.toc_order, old_layer_groups)
-        toc_structure = core_utils.get_json_toc(assigned_layergroups)
+def ogc_services(request):
+    workspaces = Workspace.objects.all()           
+    return render_to_response('ogc_services.html', {'workspaces': workspaces}, RequestContext(request))
 
-        public_viewer.center_lat = latitude
-        public_viewer.center_lon = longitude
-        public_viewer.zoom = int(zoom)
-        public_viewer.extent = extent
-        public_viewer.toc_order = toc_structure
-        public_viewer.save()
+def select_public_project(request):  
+    public_projects = Project.objects.filter(is_public=True)
+    
+    projects = []
+    
+    if len (public_projects) <= 0:
+        return render_to_response('select_public_project.html', {'projects': projects}, RequestContext(request))
+    
+    elif len (public_projects) == 1:
+        return redirect('public_project_load', pid=public_projects[0].id)
+    
+    elif len (public_projects) > 1:
+        for pp in public_projects:
+            p = Project.objects.get(id=pp.id)
+            image = ''
+            if "no_project.png" in p.image.url:
+                image = p.image.url.replace(settings.MEDIA_URL, '')
+            else:
+                image = p.image.url
+                    
+            project = {}
+            project['id'] = p.id
+            project['name'] = p.name
+            project['description'] = p.description
+            project['image'] = urllib.unquote(image)
+            projects.append(project)
             
-        for lg in PublicViewerLayerGroup.objects.filter(public_viewer_id=public_viewer.id):
-            lg.delete()
-                
-        for alg in assigned_layergroups:
-            layergroup = LayerGroup.objects.get(id=alg)
-            public_viewer_layergroup = PublicViewerLayerGroup(
-                public_viewer = public_viewer,
-                layer_group = layergroup
-            )
-            public_viewer_layergroup.save()
-
-                
-        return redirect('home')
-                   
+        return render_to_response('select_public_project.html', {'projects': projects}, RequestContext(request))
+    
+def public_project_load(request, pid):
+    if core_utils.is_valid_public_project(pid):
+        return render_to_response('public_viewer.html', {'supported_crs': gvsigol.settings.SUPPORTED_CRS, 'pid': pid}, context_instance=RequestContext(request))
     else:
-        public_viewer = None
-        if len(PublicViewer.objects.all()) <= 0:
-            public_viewer = PublicViewer(
-                center_lat = 0,
-                center_lon = 0,
-                zoom = 2,
-                extent = "",
-                toc_order = core_utils.get_json_toc([])
-            )
-            public_viewer.save()
-        
-        if len(PublicViewer.objects.all()) == 1:
-            public_viewer = PublicViewer.objects.all()[0]
+        return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
             
-        layer_groups = core_utils.get_all_layer_groups_in_public_viewer(public_viewer) 
-        return render_to_response('public_viewer_configuration.html', {'public_viewer': public_viewer, 'layergroups': layer_groups}, context_instance=RequestContext(request))
-    
-
 @csrf_exempt
 def public_viewer_get_conf(request):
     if request.method == 'POST':
+        pid = request.POST.get('pid')
         
-        public_viewer = None
-        if len(PublicViewer.objects.all()) <= 0:
-            public_viewer = PublicViewer(
-                center_lat = 0,
-                center_lon = 0,
-                zoom = 2,
-                extent = "",
-                toc_order = core_utils.get_json_toc([])
-            )
-            public_viewer.save()
-        
-        if len(PublicViewer.objects.all()) == 1:
-            public_viewer = PublicViewer.objects.all()[0]
+        project = Project.objects.get(id=int(pid))
+        toc = json.loads(project.toc_order)
             
-        toc = json.loads(public_viewer.toc_order)
-            
-        project_layers_groups = PublicViewerLayerGroup.objects.filter(public_viewer_id=public_viewer.id)
+        project_layers_groups = ProjectLayerGroup.objects.filter(project_id=project.id)
         layer_groups = []
         workspaces = []
         for project_group in project_layers_groups:            
@@ -684,26 +657,43 @@ def public_viewer_get_conf(request):
                         layer['is_vector'] = True
                     else:
                         layer['is_vector'] = False
-                        
                     
-                    layer['wms_url'] = workspace.wms_endpoint
-                    layer['wfs_url'] = workspace.wfs_endpoint
+                    layer_info = None
+                    defaultCrs = None
+                    if datastore.type == 'v_PostGIS':
+                        layer_info = mapservice_backend.getResourceInfo(workspace.name, datastore.name, l.name, "json")
+                        defaultCrs = layer_info['featureType']['srs']
+                    elif datastore.type == 'e_WMS':
+                        layer_info = mapservice_backend.getWmsResourceInfo(workspace.name, datastore.name, l.name, "json")
+                        defaultCrs = 'EPSG:4326'
+                    elif datastore.type == 'c_GeoTIFF':
+                        layer_info = mapservice_backend.getRasterResourceInfo(workspace.name, datastore.name, l.name, "json")
+                        defaultCrs = layer_info['coverage']['srs']
+                        
+                    if defaultCrs.split(':')[1] in gvsigol.settings.SUPPORTED_CRS:
+                        epsg = gvsigol.settings.SUPPORTED_CRS[defaultCrs.split(':')[1]]
+                        layer['crs'] = {
+                            'crs': defaultCrs,
+                            'units': epsg['units']
+                        }
+                        
+                    layer['wms_url'] = core_utils.get_wms_url(request, workspace)
+                    layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
                     layer['namespace'] = workspace.uri
                     layer['workspace'] = workspace.name                
-                    
                     if l.cached:  
-                        layer['cache_url'] = workspace.cache_endpoint
+                        layer['cache_url'] = core_utils.get_cache_url(request, workspace)
                     else:
-                        layer['cache_url'] = workspace.wms_endpoint
+                        layer['cache_url'] = core_utils.get_wms_url(request, workspace)
                     
                     if datastore.type == 'e_WMS':
                         layer['legend'] = ""
-                    else:
-                        layer['legend'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
+                    else: 
+                        layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
                         
                     if 'http' in gvsigol.settings.GVSIGOL_CATALOG['URL']:
                         if l.metadata_uuid is not None and l.metadata_uuid != '':
-                            layer['metadata'] = gvsigol.settings.GVSIGOL_CATALOG['URL'].split('//')
+                            layer['metadata'] = core_utils.get_catalog_url(request, gvsigol.settings.GVSIGOL_CATALOG['URL'], l)
                             
                         else:
                             layer['metadata'] = ''
@@ -712,6 +702,11 @@ def public_viewer_get_conf(request):
                         layer['metadata'] = ''
                                                     
                     layers.append(layer)
+                    
+                    w = {}
+                    w['name'] = workspace.name
+                    w['wms_url'] = workspace.wms_endpoint
+                    workspaces.append(w)
             
             if len(layers) > 0:   
                 ordered_layers = sorted(layers, key=itemgetter('order'), reverse=True)
@@ -721,20 +716,19 @@ def public_viewer_get_conf(request):
         ordered_layer_groups = sorted(layer_groups, key=itemgetter('groupOrder'), reverse=True)
             
         conf = {
+            'pid': pid,
             "view": {
-                "center_lat": public_viewer.center_lat,
-                "center_lon": public_viewer.center_lon, 
-                "zoom": public_viewer.zoom 
+                "center_lat": project.center_lat,
+                "center_lon": project.center_lon, 
+                "zoom": project.zoom 
             }, 
             'supported_crs': gvsigol.settings.SUPPORTED_CRS,
+            'workspaces': workspaces,
             'layerGroups': ordered_layer_groups,
             'tools': gvsigol.settings.GVSIGOL_TOOLS,
             'base_layers': gvsigol.settings.GVSIGOL_BASE_LAYERS,
-            'geoserver_base_url': gvsigol.settings.GVSIGOL_SERVICES['URL']
+            'is_public_project': True,
+            'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL'])
         } 
         
         return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
-    
-def ogc_services(request):
-    workspaces = Workspace.objects.all()           
-    return render_to_response('ogc_services.html', {'workspaces': workspaces}, RequestContext(request))
