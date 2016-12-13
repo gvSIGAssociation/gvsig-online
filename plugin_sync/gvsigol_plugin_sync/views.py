@@ -326,11 +326,12 @@ def _extract_images(db_path):
             output_file = os.fdopen(fd, "wb")
             try:
                 output_file.write(row[3])
+                server_path = os.path.relpath(f, settings.MEDIA_ROOT)
                 res = LayerResource()
                 res.id = row[0]
                 res.feature = row[2]
                 res.layer = layer
-                res.path = f
+                res.path = server_path
                 res.title = row[4]
                 res.type = LayerResource.EXTERNAL_IMAGE
                 res.created = timezone.now()
@@ -362,15 +363,17 @@ def _copy_images(layers, db_path):
             # We should investigate if we can pass an iterable to cursor.execute.
             # It seems to NOT be supported for the moment, but we can check again in future versions 
             thumb_buffer = BytesIO()
-            img = Image.open(r.path)
+            abs_path = abs_server_path = os.path.join(settings.MEDIA_ROOT, r.path)
+            img = Image.open(abs_path)
             img.thumbnail([100, 100])
             img.save(thumb_buffer, "JPEG")
             
-            img = open(r.path, mode='rb')
+            img = open(abs_path, mode='rb')
             img_bytes = img.read()
             img_buffer = buffer(img_bytes)
             img.close()
-            #thumb_blob = thumb_buffer.getvalue()
+
+            # NOTE: we insert r.path in the sqlite, as it is useful for selectively replacing images when uploading again 
             cursor.execute(sql, (r.id, r.layer.get_qualified_name(), 'BLOB_IMAGE', r.title, r.feature, r.path, img_buffer, buffer(thumb_buffer.getvalue())))
             img.close()
             thumb_buffer.close()
@@ -499,10 +502,11 @@ class ResourceReplacer():
         output_file = os.fdopen(fd, "wb")
         try:
             output_file.write(newres[3])
+            server_path = os.path.relpath(f, settings.MEDIA_ROOT)
             res = LayerResource()
             res.feature = newres[2]
             res.layer = layer
-            res.path = f
+            res.path = server_path
             res.title = newres[4]
             res.type = LayerResource.EXTERNAL_IMAGE
             res.save()
