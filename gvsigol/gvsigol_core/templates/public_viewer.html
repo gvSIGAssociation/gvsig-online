@@ -78,7 +78,7 @@
 							</li>
 							<li class="user-footer">
 								<div class="pull-right">
-									<a href="/gvsigonline/" class="btn btn-default btn-flat">{% trans "Sign out" %}</a>
+									<a href="/gvsigonline/" class="btn btn-default btn-flat">{% trans "Exit" %}</a>
 								</div>
 							</li>
 						</ul>
@@ -198,9 +198,11 @@
 	<script type="text/javascript">
 	
 		$("#modal-table-dialog").draggable({
-		    handle: ".modal-header"
+		    handle: ".modal-header",
+		    containment: "#map", 
+		    scroll: false
 		});
-		
+
 		$.ajax({
 			type : 'POST',
 			async : false,
