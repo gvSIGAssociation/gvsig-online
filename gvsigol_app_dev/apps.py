@@ -7,8 +7,12 @@ class GvsigolDevConfig(AppConfig):
     name = 'gvsigol_app_dev'
 
     def ready(self):
-        # ensure we have a proper environment
-        self._ensure_admin_group()
+        try:
+            # ensure we have a proper environment
+            self._ensure_admin_group()
+        except:
+            # Don't fail when we are migrating applications!!
+            pass
     
     def _ensure_admin_group(self):
         from gvsigol_auth.models import UserGroup, UserGroupUser
