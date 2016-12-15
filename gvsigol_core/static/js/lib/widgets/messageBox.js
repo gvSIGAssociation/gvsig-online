@@ -56,6 +56,9 @@ messageBox.prototype.show = function(type, msg) {
 		icon = 'fa-ban';
 	}
 	
+	// remove any previous content
+	$('#modal-error').remove();
+	
 	var ui = '';
 	ui += '<div class="modal fade" id="modal-error" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">';
 	ui += 	'<div class="modal-dialog" role="document">';
@@ -69,7 +72,7 @@ messageBox.prototype.show = function(type, msg) {
 	ui += 			'</div>';
 	ui += 		'</div>';
 	ui += 	'</div>';
-	ui += '</div>'; 	
+	ui += '</div>';
 	$('body').append(ui);
 	$('#modal-error').modal('show');
 };
