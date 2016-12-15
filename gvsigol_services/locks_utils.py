@@ -38,9 +38,21 @@ def add_layer_lock(qualified_layer_name, user, lock_type=LayerLock.GEOPORTAL_LOC
     layer = layer_filter[0]
     
     #is_locked = (LayerLock.objects.filter(layer__name=layer_name, layer__datastore__workspace__name=ws_name).count()>0)
-    is_locked = (LayerLock.objects.filter(layer=layer).count()>0)
+    locks = LayerLock.objects.filter(layer=layer)
+    is_locked = (locks.count()>0)
     if is_locked:
-        raise LayerLocked(qualified_layer_name)
+        if lock_type != LayerLock.GEOPORTAL_LOCK:
+            raise LayerLocked(qualified_layer_name)
+        else:
+            #We allow simultaneous editions from the Geoportal (WFS), even from different users
+            for lock in locks:
+                if lock.type != LayerLock.GEOPORTAL_LOCK:
+                    raise LayerLocked(qualified_layer_name)
+                elif lock.created_by == user.username:
+                    # if the user has the lock, we don't need to create a new one
+                    return lock
+
+    # The user is allowed to create a new lock
     new_lock = LayerLock()
     new_lock.layer = layer
     new_lock.created_by = user.username
@@ -49,6 +61,10 @@ def add_layer_lock(qualified_layer_name, user, lock_type=LayerLock.GEOPORTAL_LOC
     return new_lock
 
 def is_locked(qualified_layer_name, user, check_writable=False):
+    """
+    Returns True if the user has a lock on the provided layer.
+    If user is None, returns True if any user as a lock on the provided layer
+    """
     (ws_name, layer_name) = qualified_layer_name.split(":")
     layer_filter = Layer.objects.filter(name=layer_name, datastore__workspace__name=ws_name)
     
@@ -57,7 +73,12 @@ def is_locked(qualified_layer_name, user, check_writable=False):
         if not is_writable:
             raise PermissionDenied
     layer = layer_filter[0]
-    return (LayerLock.objects.filter(layer=layer, created_by=user.username).count()>0)
+    if user:
+        # count only locks created by the user
+        return (LayerLock.objects.filter(layer=layer, created_by=user.username).count()>0)
+    else:
+        # count all the locks on the layer
+        return (LayerLock.objects.filter(layer=layer).count()>0)
 
 def get_layer_lock(qualified_layer_name, user, check_writable=False, lock_type=None):
     name_parts = qualified_layer_name.split(":")
@@ -81,11 +102,15 @@ def get_layer_lock(qualified_layer_name, user, check_writable=False, lock_type=N
     return None
 
 def remove_layer_lock(layer, user, check_writable=False):
+    """
+    Removes the locks created by the user on a layer.
+    If user is None, remove all the locks on the layer.
+    """
     layer_lock = LayerLock.objects.filter(layer=layer)
-    if len(layer_lock)==1:
-        if layer_lock.filter(created_by=user.username).count()!=1:
-            # the layer was locked by a different user!!
-            raise PermissionDenied()
+    all_locks_count = layer_lock.count()
+    if user:
+        layer_lock = layer_lock.filter(created_by=user.username)
+    if layer_lock.count()>0:
         if check_writable:
             layer_filter = Layer.objects.filter(id=layer.id)
             is_writable = (layer_filter.filter(layerwritegroup__group__usergroupuser__user=user).count()>0)
@@ -93,8 +118,10 @@ def remove_layer_lock(layer, user, check_writable=False):
                 raise PermissionDenied()
         layer_lock.delete()
         return True
+    elif all_locks_count > 0:
+        # the layer was locked by another user
+        raise PermissionDenied()
     raise LayerNotLocked()
-
 
 class LayerLockingException(Exception):
     pass
