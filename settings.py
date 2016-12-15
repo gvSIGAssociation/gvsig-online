@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'gvsigol_plugin_shps_folder',
     'gvsigol_plugin_geocoding',
     'gvsigol_plugin_sync',
+    'gvsigol_plugin_catastro',
 ]
 
 MIDDLEWARE_CLASSES = [
