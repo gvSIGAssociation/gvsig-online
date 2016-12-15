@@ -1078,67 +1078,73 @@ def get_feature_info(request):
         url = request.POST.get('url')
         query_layer = request.POST.get('query_layer')
         ws = request.POST.get('workspace')
-        
-        w = Workspace.objects.get(name__exact=ws)
-        ds = Datastore.objects.get(workspace=w)
-        layers = Layer.objects.filter(name__exact=query_layer)
-        layer = None
-        for l in layers:
-            if l.datastore.id == ds.id:
-                layer = l
-        
+
         req = requests.Session()
         if 'username' in request.session and 'password' in request.session:
             if request.session['username'] is not None and request.session['password'] is not None:
                 req.auth = (request.session['username'], request.session['password'])
                 #req.auth = ('admin', 'geoserver')
+                
+        features = None           
+        try:
+            w = Workspace.objects.get(name__exact=ws)
+            ds = Datastore.objects.get(workspace=w)
+            layers = Layer.objects.filter(name__exact=query_layer)
+            layer = None
+            for l in layers:
+                if l.datastore.id == ds.id:
+                    layer = l
 
-        response = req.get(url, verify=False)
-        geojson = json.loads(response.text)
-        
-        features = None
-        if layer.conf is not None:
-            layer_conf = json.loads(layer.conf)
-            fields = layer_conf.get('fields')
-            for i in range(0, len(geojson['features'])):
-                fid = geojson['features'][i].get('id').split('.')[1]
-                layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
-                resources = []
-                for lr in layer_resources:
-                    abs_server_path = os.path.join(settings.MEDIA_URL, lr.path)
-                    type = 'image' 
-                    resource = {
-                        'type': type,
-                        'url': abs_server_path
-                    }
-                    resources.append(resource)
-                geojson['features'][i]['resources'] = resources
+            response = req.get(url, verify=False)
+            geojson = json.loads(response.text)
+
+            if layer.conf is not None:
+                layer_conf = json.loads(layer.conf)
+                fields = layer_conf.get('fields')
+                for i in range(0, len(geojson['features'])):
+                    fid = geojson['features'][i].get('id').split('.')[1]
+                    layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
+                    resources = []
+                    for lr in layer_resources:
+                        abs_server_path = os.path.join(settings.MEDIA_URL, lr.path)
+                        type = 'image' 
+                        resource = {
+                            'type': type,
+                            'url': abs_server_path
+                        }
+                        resources.append(resource)
+                    geojson['features'][i]['resources'] = resources
+                        
+                    formated_properties = {}
+                    for p in geojson['features'][i].get('properties'):
+                        for f in fields:
+                            if f.get('name') == p:
+                                if f.get('visible'):
+                                    formated_properties[f.get('title')] = geojson['features'][i].get('properties')[p]
+                    geojson['features'][i]['properties'] = formated_properties
                     
-                formated_properties = {}
-                for p in geojson['features'][i].get('properties'):
-                    for f in fields:
-                        if f.get('name') == p:
-                            if f.get('visible'):
-                                formated_properties[f.get('title')] = geojson['features'][i].get('properties')[p]
-                geojson['features'][i]['properties'] = formated_properties
-                
-            features = geojson['features']
-                
-        else: 
-            for i in range(0, len(geojson['features'])):
-                fid = geojson['features'][i].get('id').split('.')[1]
-                layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
-                resources = []
-                for lr in layer_resources:
-                    abs_server_path = os.path.join(settings.MEDIA_URL, lr.path)
-                    type = 'image' 
-                    resource = {
-                        'type': type,
-                        'url': abs_server_path
-                    }
-                    resources.append(resource)
-                geojson['features'][i]['resources'] = resources
-                
+                features = geojson['features']
+                    
+            else: 
+                for i in range(0, len(geojson['features'])):
+                    fid = geojson['features'][i].get('id').split('.')[1]
+                    layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
+                    resources = []
+                    for lr in layer_resources:
+                        abs_server_path = os.path.join(settings.MEDIA_URL, lr.path)
+                        type = 'image' 
+                        resource = {
+                            'type': type,
+                            'url': abs_server_path
+                        }
+                        resources.append(resource)
+                    geojson['features'][i]['resources'] = resources
+                    
+                features = geojson['features']
+            
+        except Exception as e:
+            response = req.get(url, verify=False)
+            geojson = json.loads(response.text)
             features = geojson['features']
                 
         response = {
