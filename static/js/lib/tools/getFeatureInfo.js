@@ -109,10 +109,6 @@ getFeatureInfo.prototype.handler = function(e) {
 			this.active = true;
 			this.$button.trigger('control-active', [this]);
 	    	
-	    	/*this.resultPanelContent = $('#results .sidebar-pane-content');
-	    	this.resultHeader = $('#results .sidebar-header');
-	    	this.resultsTab = $('#results-tab');*/
-	    	
 	    	var self = this;
 
 			this.map.on('click', this.clickHandler, self);		
@@ -215,9 +211,29 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 				this.map.getView().getProjection().getCode(),
 				{'INFO_FORMAT': 'application/json', 'FEATURE_COUNT': '100'}
 			);
+			
+			var req = null;
+			if (qLayer.layer_name == 'plg_catastro') {
+				req = $.ajax({
+					type: 'POST',
+					async: false,
+				  	url: url,
+				  	success	:function(response){
+				  		var tempDiv = document.createElement('div');
+						tempDiv.innerHTML = response;
+						if (tempDiv.childNodes[4]) {
+							features.push({
+			  					type: 'catastro',
+			  					text: tempDiv.childNodes[4].childNodes[0].textContent,
+			  					href: tempDiv.childNodes[4].childNodes[0].href
+			  				});
+						}
+				  	},
+				  	error: function(){}
+				});
 				
-			ajaxRequests.push(
-					$.ajax({
+			} else {
+				req = $.ajax({
 					type: 'POST',
 					async: false,
 				  	url: '/gvsigonline/services/get_feature_info/',
@@ -230,6 +246,7 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 				  		if (response.features) {
 				  			for (var i in response.features) {
 				  				features.push({
+				  					type: 'feature',
 				  					crs: response.crs,
 				  					feature: response.features[i]
 				  				});
@@ -237,8 +254,10 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 				  		}
 				  	},
 				  	error: function(){}
-				})
-			);
+				});
+			}
+				
+			ajaxRequests.push(req);
 		}
 		
 		$.when(undefined, ajaxRequests).then(function(){ 
@@ -256,39 +275,53 @@ getFeatureInfo.prototype.showInfo = function(features){
 	var self = this;
 
 	var html = '<ul class="products-list product-list-in-box">';
+	
+	var wgs84 = ol.proj.transform(self.mapCoordinates, 'EPSG:3857', 'EPSG:4326')
+	html += '<li class="item">';
+	html += 	'<div class="feature-info">';
+	html += 		'<span style="font-weight: bold; font-size: 12px;">' + gettext('Coordinates') + ':</span>' + ' <span>' + wgs84 + '</span>';	
+	html += 	'</div>';
+	html += '</li>';
+	
 	for (var i in features) {
-		
-		var fid = features[i].feature.id;
-		
-		
-		html += '<li class="item">';
-		html += 	'<div class="feature-info">';
-		html += 		'<a href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;">' + fid;
-		html += 		'<span class="label label-info pull-right">' + gettext('More info') + '</span></a>';
-		html += 	'</div>';
-		html += '</li>';
-		
-		if (features[i].crs) {
-			var newFeature = new ol.Feature();
-	  		var sourceCRS = 'EPSG:' + features[i].crs.properties.name.split('::')[1];
-	  		var projection = new ol.proj.Projection({
-	    		code: sourceCRS,
-	    	});
-	    	ol.proj.addProjection(projection);
-	    	if (features[i].feature.geometry.type == 'Point') {
-	    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates));				
-	    	} else if (features[i].feature.geometry.type == 'MultiPoint') {
-	    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates[0]));				
-	    	} else if (features[i].feature.geometry.type == 'LineString' || features[i].feature.geometry.type == 'MultiLineString') {
-	    		newFeature.setGeometry(new ol.geom.MultiLineString([features[i].feature.geometry.coordinates[0]]));
-	    	} else if (features[i].feature.geometry.type == 'Polygon' || features[i].feature.geometry.type == 'MultiPolygon') {
-	    		newFeature.setGeometry(new ol.geom.MultiPolygon(features[i].feature.geometry.coordinates));
-	    	}
-	    	newFeature.setProperties(features[i].feature.properties);
-			newFeature.setId(fid);
-					
-			newFeature.getGeometry().transform(projection, 'EPSG:3857');
-			this.source.addFeature(newFeature);
+		if (features[i].type == 'feature') {
+			var fid = features[i].feature.id;
+			html += '<li class="item">';
+			html += 	'<div class="feature-info">';
+			html += 		'<a href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;">' + fid;
+			html += 		'<span class="label label-info pull-right">' + gettext('More info') + '</span></a>';
+			html += 	'</div>';
+			html += '</li>';
+			
+			if (features[i].crs) {
+				var newFeature = new ol.Feature();
+		  		var sourceCRS = 'EPSG:' + features[i].crs.properties.name.split('::')[1];
+		  		var projection = new ol.proj.Projection({
+		    		code: sourceCRS,
+		    	});
+		    	ol.proj.addProjection(projection);
+		    	if (features[i].feature.geometry.type == 'Point') {
+		    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates));				
+		    	} else if (features[i].feature.geometry.type == 'MultiPoint') {
+		    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates[0]));				
+		    	} else if (features[i].feature.geometry.type == 'LineString' || features[i].feature.geometry.type == 'MultiLineString') {
+		    		newFeature.setGeometry(new ol.geom.MultiLineString([features[i].feature.geometry.coordinates[0]]));
+		    	} else if (features[i].feature.geometry.type == 'Polygon' || features[i].feature.geometry.type == 'MultiPolygon') {
+		    		newFeature.setGeometry(new ol.geom.MultiPolygon(features[i].feature.geometry.coordinates));
+		    	}
+		    	newFeature.setProperties(features[i].feature.properties);
+				newFeature.setId(fid);
+						
+				newFeature.getGeometry().transform(projection, 'EPSG:3857');
+				this.source.addFeature(newFeature);
+			}
+			
+		} else if (features[i].type == 'catastro') {
+			html += '<li class="item">';
+			html += 	'<div class="feature-info">';
+			html += 		'Ref. Catastral: <a target="_blank" href="' + features[i].href + '" class="product-title item-fid" style="color: #00c0ef;">' + features[i].text;	
+			html += 	'</div>';
+			html += '</li>';
 		}		
 	}	
 	html += '</ul>';
@@ -308,74 +341,84 @@ getFeatureInfo.prototype.showInfo = function(features){
 getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 	var selectedFeature = null;
 	for (var i in features) {
-		if (fid == features[i].feature.id) {
-			selectedFeature = features[i].feature; 
+		if (features[i].type == 'feature') {
+			if (fid == features[i].feature.id) {
+				selectedFeature = features[i].feature; 
+			}
 		}
 	}
-	var detailsTab = $('#details-tab');
 	
-	var infoContent = '';
-	infoContent += '<div class="box box-default">';
-	infoContent += 	'<div class="box-header with-border">';
-	infoContent += 		'<span class="text">' + selectedFeature.id + '</span>';
-	infoContent += 	'</div>';
-	infoContent += 	'<div class="box-body" style="padding: 20px;">';
-	infoContent += 		'<ul class="products-list product-list-in-box">';
-	for (var key in selectedFeature.properties) {
-		var value = selectedFeature.properties[key];
-		if (value == "null" || value == null) {
-			value = "";
+	if (selectedFeature.type.toLowerCase() == 'feature') {
+		var detailsTab = $('#details-tab');
+		var infoContent = '';
+		infoContent += '<div class="box box-default">';
+		infoContent += 	'<div class="box-header with-border">';
+		infoContent += 		'<span class="text">' + selectedFeature.id + '</span>';
+		infoContent += 	'</div>';
+		infoContent += 	'<div class="box-body" style="padding: 20px;">';
+		infoContent += 		'<ul class="products-list product-list-in-box">';
+		for (var key in selectedFeature.properties) {
+			var value = selectedFeature.properties[key];
+			if (value == "null" || value == null) {
+				value = "";
+			}
+			if (!key.startsWith(this.prefix)) {	
+				infoContent += '<li class="item">';
+				infoContent += 	'<div class="feature-info">';
+				infoContent += 		'<a href="javascript:void(0)" class="product-title">' + key + '</a>';
+				infoContent += 		'<span class="product-description">' + value + '</span>';
+				infoContent += 	'</div>';
+				infoContent += '</li>';
+			}
 		}
-		if (!key.startsWith(this.prefix)) {	
-			infoContent += '<li class="item">';
-			infoContent += 	'<div class="feature-info">';
-			infoContent += 		'<a href="javascript:void(0)" class="product-title">' + key + '</a>';
-			infoContent += 		'<span class="product-description">' + value + '</span>';
-			infoContent += 	'</div>';
-			infoContent += '</li>';
+		infoContent += 		'</ul>';
+		infoContent += 	'</div>';
+		infoContent += '</div>';
+		
+		if (selectedFeature.resources) {
+			var resourcesContent = '';
+			resourcesContent += '<div class="box box-default">';
+			resourcesContent += 	'<div class="box-body" style="padding: 20px;">';
+			resourcesContent += 		'<ul style="list-style: none;">';
+			for (var i=0; i<selectedFeature.resources.length; i++) {
+				if (selectedFeature.resources[i].type == 'image') {	
+					resourcesContent += '<li style="padding: 20px;">';
+					resourcesContent += '<a href="' + selectedFeature.resources[i].url + '" data-toggle="lightbox" data-gallery="example-gallery">';
+					resourcesContent += '	<img src="' + selectedFeature.resources[i].url + '" class="img-fluid adjust-image">';
+					resourcesContent += '</a>';
+					resourcesContent += '</li>';
+				}
+			}
+			resourcesContent += 		'</ul>';
+			resourcesContent += 	'</div>';
+			resourcesContent += '</div>';
 		}
+		
+		var ui = '';
+		ui += '<div class="nav-tabs-custom">';
+		ui += '<ul class="nav nav-tabs">';
+		if (selectedFeature.resources) {
+			ui += '<li class="active"><a href="#tab_info_content" data-toggle="tab" aria-expanded="true" style="font-weight: bold;">' + gettext('Feature info') + '</a></li>';
+		}
+		ui += '<li class=""><a href="#tab_resources_content" data-toggle="tab" aria-expanded="false" style="font-weight: bold;">' + gettext('Multimedia resources') + '</a></li>';
+		ui += '</ul>';
+		ui += '<div class="tab-content">';
+		ui += '<div class="tab-pane active" id="tab_info_content">';
+		ui += infoContent;
+		ui += '</div>';
+		if (selectedFeature.resources) {
+			ui += '<div class="tab-pane" id="tab_resources_content">';
+			ui += resourcesContent;
+			ui += '</div>';
+		}
+		ui += '</div>';
+		ui += '</div>';
+		
+		detailsTab.empty();
+		$.gvsigOL.controlSidebar.open();
+		$('.nav-tabs a[href="#details-tab"]').tab('show');
+		detailsTab.append(ui);
 	}
-	infoContent += 		'</ul>';
-	infoContent += 	'</div>';
-	infoContent += '</div>';
-	
-	var resourcesContent = '';
-	resourcesContent += '<div class="box box-default">';
-	resourcesContent += 	'<div class="box-body" style="padding: 20px;">';
-	resourcesContent += 		'<ul style="list-style: none;">';
-	for (var i=0; i<selectedFeature.resources.length; i++) {
-		if (selectedFeature.resources[i].type == 'image') {	
-			resourcesContent += '<li style="padding: 20px;">';
-			resourcesContent += '<a href="' + selectedFeature.resources[i].url + '" data-toggle="lightbox" data-gallery="example-gallery">';
-			resourcesContent += '	<img src="' + selectedFeature.resources[i].url + '" class="img-fluid adjust-image">';
-			resourcesContent += '</a>';
-			resourcesContent += '</li>';
-		}
-	}
-	resourcesContent += 		'</ul>';
-	resourcesContent += 	'</div>';
-	resourcesContent += '</div>';
-	
-	var ui = '';
-	ui += '<div class="nav-tabs-custom">';
-	ui += '<ul class="nav nav-tabs">';
-	ui += '<li class="active"><a href="#tab_info_content" data-toggle="tab" aria-expanded="true" style="font-weight: bold;">' + gettext('Feature info') + '</a></li>';
-	ui += '<li class=""><a href="#tab_resources_content" data-toggle="tab" aria-expanded="false" style="font-weight: bold;">' + gettext('Multimedia resources') + '</a></li>';
-	ui += '</ul>';
-	ui += '<div class="tab-content">';
-	ui += '<div class="tab-pane active" id="tab_info_content">';
-	ui += infoContent;
-	ui += '</div>';
-	ui += '<div class="tab-pane" id="tab_resources_content">';
-	ui += resourcesContent;
-	ui += '</div>';
-	ui += '</div>';
-	ui += '</div>';
-	
-	detailsTab.empty();
-	$.gvsigOL.controlSidebar.open();
-	$('.nav-tabs a[href="#details-tab"]').tab('show');
-	detailsTab.append(ui);
 	
 };
 
