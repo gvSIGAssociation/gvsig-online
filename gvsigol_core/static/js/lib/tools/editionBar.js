@@ -533,89 +533,126 @@ editionBar.prototype.getEnumeration = function(enumName) {
  * @param {Event} e Browser event.
  */
 editionBar.prototype.createFeatureForm = function(feature) {	
-	
-	this.showDetailsTab();
-	
-	this.detailsTab.empty();	
-	var self = this;
-	
-	var ui = '';
-	ui += '<div class="box">';
-	ui += 		'<div class="box-header with-border">';
-	ui += 			'<h3 class="box-title">' + gettext('New feature') + '</h3>';
-	ui += 			'<div class="box-tools pull-right">';
-	//ui += 				'<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>';
-	ui += 			'</div>';
-	ui += 		'</div>';
-	ui += 		'<div class="box-body no-padding">';
-	ui += 			'<div id="col-md-12 form-group form-error" style="color:#ff0000;">';
-	ui += 			'</div>';
-	for (var i=0; i<this.featureType.length; i++) {
-		if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
-			ui += '<div class="col-md-12 form-group" style="background-color: #fff;">';
-			ui += 	'<label style="color: #3c8dbc;">' + this.featureType[i].name + '</label>';
-			if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
-				ui += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control">';
-				
-			} else if (this.featureType[i].type == 'xsd:date') {
-				ui += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd">';
-				
-			} else if (this.featureType[i].type == 'xsd:string') {
-				if (this.featureType[i].name.startsWith("_enm")) {
-					var enumeration = this.getEnumeration(this.featureType[i].name);
-					ui += 	'<select id="' + this.featureType[i].name + '" class="form-control">';
-					for (var j=0; j<enumeration.items.length; j++) {
-						ui += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+	if (feature) {
+		this.showDetailsTab();
+		this.detailsTab.empty();	
+		var self = this;
+		
+		var featureProperties = '';
+		featureProperties += '<div class="box">';
+		featureProperties += 	'<div class="box-body no-padding">';
+		featureProperties += 		'<div id="col-md-12 form-group form-error" style="color:#ff0000;">';
+		featureProperties += 		'</div>';
+		for (var i=0; i<this.featureType.length; i++) {
+			if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
+				featureProperties += '<div class="col-md-12 form-group" style="background-color: #fff;">';
+				featureProperties += 	'<label style="color: #444;">' + this.featureType[i].name + '</label>';
+				if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
+					featureProperties += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control">';
+					
+				} else if (this.featureType[i].type == 'xsd:date') {
+					featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd">';
+					
+				} else if (this.featureType[i].type == 'xsd:string') {
+					if (this.featureType[i].name.startsWith("_enm")) {
+						var enumeration = this.getEnumeration(this.featureType[i].name);
+						featureProperties += 	'<select id="' + this.featureType[i].name + '" class="form-control">';
+						for (var j=0; j<enumeration.items.length; j++) {
+							featureProperties += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+						}
+						featureProperties += 	'</select>';
+						featureProperties += '</div>';
+					} else {
+						featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control">';
 					}
-					ui += 	'</select>';
-					ui += '</div>';
-				} else {
-					ui += '<input id="' + this.featureType[i].name + '" type="text" class="form-control">';
+					
+				}  else if (this.featureType[i].type == 'xsd:boolean') {
+					featureProperties += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';			
 				}
-				
-			}  else if (this.featureType[i].type == 'xsd:boolean') {
-				ui += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';			
-			}
-			ui += '</div>';
-		}
-	}
-	ui +=       	'<div id="edition-error">';
-	ui +=       	'</div>';
-	ui += 		'</div>';
-	ui += 		'<div class="box-footer text-right">';
-	ui += 			'<button id="save-feature" class="btn btn-default margin-r-5">' + gettext('Save') + '</button>';
-	ui += 			'<button id="save-feature-cancel" class="btn btn-default">' + gettext('Cancel') + '</button>';
-	ui += 		'</div>';
-	ui += '</div>';
-	
-	this.detailsTab.append(ui);
-	$.gvsigOL.controlSidebar.open();
-	
-	//$('.datepicker').datepicker();
-	
-	$('#save-feature').on('click', function () {
-		var properties = {};
-		for (var i=0; i<self.featureType.length; i++) {
-			if ((self.featureType[i].type.indexOf('gml:') == -1) && self.featureType[i].name != 'id') {
-				var field = $('#' + self.featureType[i].name)[0];
-				if (self.featureType[i].type == 'xsd:boolean') {
-					properties[field.id] = field.checked;
-				} else {
-					properties[field.id] = field.value;
-				}				
+				featureProperties += '</div>';
 			}
 		}
-		feature.setProperties(properties);
-		if (self.transactWFS('insert', feature)) {
-			self.selectedLayer.getSource().updateParams({"time": Date.now()});
+		featureProperties +=       '<div id="edition-error">';
+		featureProperties +=       '</div>';
+		featureProperties += 	'</div>';
+		featureProperties += 	'<div class="box-footer text-right">';
+		featureProperties += 		'<button id="save-feature" class="btn btn-default margin-r-5">' + gettext('Save') + '</button>';
+		featureProperties += 		'<button id="save-feature-cancel" class="btn btn-default">' + gettext('Cancel') + '</button>';
+		featureProperties += 	'</div>';
+		featureProperties += '</div>';
+		
+		var featureResources = '';
+		featureResources += '<div class="box">';
+		featureResources += 	'<div id="upload-resources">';
+		featureResources += 		'<div id="fileupload-component" class="fileupload-component"></div>';
+		featureResources += 	'</div>';
+		featureResources += 	'<div id="resources-list">';
+		featureResources += 	'</div>';
+		featureResources += '</div>';
+		
+		var ui = '';
+		ui += '<div class="nav-tabs-custom">';
+		ui += 	'<ul class="nav nav-tabs">';
+		ui += 		'<li class="active"><a href="#edit_feature_properties" data-toggle="tab" aria-expanded="true" style="font-weight: bold;">' + gettext('Feature properties') + '</a></li>';
+		ui += 		'<li class=""><a href="#edit_feature_resources" data-toggle="tab" aria-expanded="false" style="font-weight: bold;">' + gettext('Feature resources') + '</a></li>';
+		ui += 	'</ul>';
+		ui += 	'<div class="tab-content">';
+		ui += 		'<div class="tab-pane active" id="edit_feature_properties">';
+		ui += 			featureProperties
+		ui += 		'</div>';
+		ui += 		'<div class="tab-pane" id="edit_feature_resources">';
+		ui += 			featureResources;
+		ui += 		'</div>';
+		ui += 	'</div>';
+		ui += '</div>';
+		
+		this.detailsTab.append(ui);
+		$.gvsigOL.controlSidebar.open();
+		
+		var fileupload = $('#fileupload-component');
+		var path = '';
+	  	fileupload.uploadFile({
+		   	url: '/gvsigonline/services/upload_resources/',
+		   	fileName: 'files',
+		   	multiple: true,
+		   	autoSubmit:false,
+		   	formData: {},
+		   	onSuccess: function(files,data,xhr){
+		   		console.log('Update resource list');
+	    	},
+		   	afterUploadAll: function(files,data,xhr){
+		   		$.overlayout();
+	    		console.log('All resources has been uploaded');
+	    	},
+	    	onError: function(files,status,errMsg){}
+		});
+		
+		$('#save-feature').on('click', function () {
+			var properties = {};
+			for (var i=0; i<self.featureType.length; i++) {
+				if ((self.featureType[i].type.indexOf('gml:') == -1) && self.featureType[i].name != 'id') {
+					var field = $('#' + self.featureType[i].name)[0];
+					if (self.featureType[i].type == 'xsd:boolean') {
+						properties[field.id] = field.checked;
+					} else {
+						properties[field.id] = field.value;
+					}				
+				}
+			}
+			feature.setProperties(properties);
+			if (self.transactWFS('insert', feature)) {
+				$("body").overlay();
+				fileupload.startUpload();
+				self.selectedLayer.getSource().updateParams({"time": Date.now()});
+				self.showLayersTab();
+			}		
+		});
+		
+		$('#save-feature-cancel').on('click', function () {
+			self.source.removeFeature(feature);
 			self.showLayersTab();
-		}		
-	});
-	
-	$('#save-feature-cancel').on('click', function () {
-		self.source.removeFeature(feature);
-		self.showLayersTab();
-	});
+		});
+	}
 
 };
 
@@ -624,99 +661,149 @@ editionBar.prototype.createFeatureForm = function(feature) {
  * @param {Event} e Browser event.
  */
 editionBar.prototype.editFeatureForm = function(feature) {	
-	
-	this.showDetailsTab();
-	
-	this.detailsTab.empty();	
-	var self = this;
-	
-	var ui = '';
-	ui += '<div class="box">';
-	ui += 		'<div class="box-header with-border">';
-	ui += 			'<h3 class="box-title">' + gettext('Edit feature') + '</h3>';
-	ui += 			'<div class="box-tools pull-right">';
-	//ui += 				'<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>';
-	ui += 			'</div>';
-	ui += 		'</div>';
-	ui += 		'<div class="box-body no-padding">';
-	ui += 			'<div id="col-md-12 form-group form-error" style="color:#ff0000;">';
-	ui += 			'</div>';
-	for (var i=0; i<this.featureType.length; i++) {
-		if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
-			ui += '<div class="col-md-12 form-group" style="background-color: #fff;">';
-			ui += 	'<label style="color: #3c8dbc;">' + this.featureType[i].name + '</label>';
-			if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
-				ui += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
-				
-			} else if (this.featureType[i].type == 'xsd:date') {
-				ui += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + feature.getProperties()[this.featureType[i].name] + '">';
-				
-			} else if (this.featureType[i].type == 'xsd:string') {				
-				if (this.featureType[i].name.startsWith("_enm")) {
-					var enumeration = this.getEnumeration(this.featureType[i].name);
-					ui += 	'<select id="' + this.featureType[i].name + '" class="form-control">';
-					for (var j=0; j<enumeration.items.length; j++) {
-						if (enumeration.items[j].name == feature.getProperties()[this.featureType[i].name]) {
-							ui += '<option selected value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+	if (feature) {
+		this.showDetailsTab();
+		this.detailsTab.empty();	
+		var self = this;
+		
+		var featureProperties = '';
+		featureProperties += '<div class="box">';
+		featureProperties += 	'<div class="box-body no-padding">';
+		featureProperties += 		'<div id="col-md-12 form-group form-error" style="color:#ff0000;">';
+		featureProperties += 		'</div>';
+		for (var i=0; i<this.featureType.length; i++) {
+			if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
+				featureProperties += '<div class="col-md-12 form-group" style="background-color: #fff;">';
+				featureProperties += 	'<label style="color: #444;">' + this.featureType[i].name + '</label>';
+				if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
+					featureProperties += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+					
+				} else if (this.featureType[i].type == 'xsd:date') {
+					featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+					
+				} else if (this.featureType[i].type == 'xsd:string') {				
+					if (this.featureType[i].name.startsWith("_enm")) {
+						var enumeration = this.getEnumeration(this.featureType[i].name);
+						featureProperties += 	'<select id="' + this.featureType[i].name + '" class="form-control">';
+						for (var j=0; j<enumeration.items.length; j++) {
+							if (enumeration.items[j].name == feature.getProperties()[this.featureType[i].name]) {
+								featureProperties += '<option selected value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+							} else {
+								featureProperties += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+							}
+						}
+						featureProperties += 	'</select>';
+						featureProperties += '</div>';
+					} else {
+						featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+					}
+					
+				}  else if (this.featureType[i].type == 'xsd:boolean') {
+					var checked = feature.getProperties()[this.featureType[i].name];
+					if (checked) {
+						featureProperties += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox" checked>';
+					} else {
+						featureProperties += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';
+					}				
+				}
+				featureProperties += '</div>';
+			}
+		}
+		featureProperties +=		'<div id="edition-error">';
+		featureProperties +=      '</div>';
+		featureProperties += 	'</div>';
+		featureProperties += 	'<div class="box-footer text-right">';
+		featureProperties += 		'<button id="edit-feature" class="btn btn-default margin-r-5">' + gettext('Save') + '</button>';
+		featureProperties += 		'<button id="edit-feature-cancel" class="btn btn-default">' + gettext('Cancel') + '</button>';
+		featureProperties += 	'</div>';
+		featureProperties += '</div>';
+		
+		var featureResources = '';
+		featureResources += '<div class="box">';
+		featureResources += 	'<div id="upload-resources">';
+		featureResources += 		'<div id="fileupload-component" class="fileupload-component"></div>';
+		featureResources += 		'<div style="margin-top: 30px;">';
+		featureResources += 			'<button id="upload-button" type="submit" class="btn btn-default btn-block"><i class="fa fa-upload margin-r-5"></i> ' + gettext('Upload') + '</button>';				
+		featureResources += 		'</div>';
+		featureResources += 	'</div>';
+		featureResources += 	'<div id="resources-list">';
+		featureResources += 	'</div>';
+		featureResources += '</div>';
+		
+		var ui = '';
+		ui += '<div class="nav-tabs-custom">';
+		ui += 	'<ul class="nav nav-tabs">';
+		ui += 		'<li class="active"><a href="#edit_feature_properties" data-toggle="tab" aria-expanded="true" style="font-weight: bold;">' + gettext('Feature properties') + '</a></li>';
+		ui += 		'<li class=""><a href="#edit_feature_resources" data-toggle="tab" aria-expanded="false" style="font-weight: bold;">' + gettext('Feature resources') + '</a></li>';
+		ui += 	'</ul>';
+		ui += 	'<div class="tab-content">';
+		ui += 		'<div class="tab-pane active" id="edit_feature_properties">';
+		ui += 			featureProperties
+		ui += 		'</div>';
+		ui += 		'<div class="tab-pane" id="edit_feature_resources">';
+		ui += 			featureResources;
+		ui += 		'</div>';
+		ui += 	'</div>';
+		ui += '</div>';
+		
+		this.detailsTab.append(ui);
+		$.gvsigOL.controlSidebar.open();
+		
+		var fileupload = $('#fileupload-component');
+		var path = '';
+	  	fileupload.uploadFile({
+		   	url: '/gvsigonline/services/upload_resources/',
+		   	fileName: 'files',
+		   	multiple: true,
+		   	autoSubmit:false,
+		   	formData: {},
+		   	onSuccess: function(files,data,xhr){
+		   		console.log('Update resource list');
+	    	},
+		   	afterUploadAll: function(files,data,xhr){
+		   		$.overlayout();
+	    		console.log('All resources has been uploaded');
+	    	},
+	    	onError: function(files,status,errMsg){}
+		});
+	  	
+	  	$('#upload-button').on('click', function () {
+	  		if (fileupload.getFileCount() >= 1) {
+	  			$("body").overlay();
+	  			//fileupload.appendExtraParams({});
+				fileupload.startUpload();
+	  		} else {
+	  			messageBox.show('warning', gettext('You must select a file'));
+	  		}
+		});
+		
+		$('#edit-feature').on('click', function () {
+			var properties = {};
+			for (var i=0; i<self.featureType.length; i++) {
+				if (self.featureType[i].type.indexOf('gml:') == -1) {
+					if (self.featureType[i].name != 'id') {
+						var field = $('#' + self.featureType[i].name)[0];
+						if (self.featureType[i].type == 'xsd:boolean') {
+							properties[field.id] = field.checked;
 						} else {
-							ui += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+							properties[field.id] = field.value;
 						}
 					}
-					ui += 	'</select>';
-					ui += '</div>';
-				} else {
-					ui += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
-				}
-				
-			}  else if (this.featureType[i].type == 'xsd:boolean') {
-				var checked = feature.getProperties()[this.featureType[i].name];
-				if (checked) {
-					ui += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox" checked>';
-				} else {
-					ui += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';
-				}				
-			}
-			ui += '</div>';
-		}
-	}
-	ui +=       	'<div id="edition-error">';
-	ui +=       	'</div>';
-	ui += 		'</div>';
-	ui += 		'<div class="box-footer text-right">';
-	ui += 			'<button id="edit-feature" class="btn btn-default margin-r-5">' + gettext('Save') + '</button>';
-	ui += 			'<button id="edit-feature-cancel" class="btn btn-default">' + gettext('Cancel') + '</button>';
-	ui += 		'</div>';
-	ui += '</div>';
-	
-	this.detailsTab.append(ui);
-	$.gvsigOL.controlSidebar.open();
-	
-	$('#edit-feature').on('click', function () {
-		var properties = {};
-		for (var i=0; i<self.featureType.length; i++) {
-			if (self.featureType[i].type.indexOf('gml:') == -1) {
-				if (self.featureType[i].name != 'id') {
-					var field = $('#' + self.featureType[i].name)[0];
-					if (self.featureType[i].type == 'xsd:boolean') {
-						properties[field.id] = field.checked;
-					} else {
-						properties[field.id] = field.value;
-					}
 				}
 			}
-		}
-		feature.setProperties(properties);
-		if (self.transactWFS('update', feature)) {
-			self.selectedLayer.getSource().updateParams({"time": Date.now()});
+			feature.setProperties(properties);
+			if (self.transactWFS('update', feature)) {
+				self.selectedLayer.getSource().updateParams({"time": Date.now()});
+				self.selectInteraction.getFeatures().clear();
+				self.showLayersTab();
+			}		
+		});
+		
+		$('#edit-feature-cancel').on('click', function () {
 			self.selectInteraction.getFeatures().clear();
 			self.showLayersTab();
-		}		
-	});
-	
-	$('#edit-feature-cancel').on('click', function () {
-		self.selectInteraction.getFeatures().clear();
-		self.showLayersTab();
-	});
+		});
+	}
 
 };
 
@@ -745,7 +832,7 @@ editionBar.prototype.removeFeatureForm = function(evt, feature) {
 	for (var i=0; i<this.featureType.length; i++) {
 		if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
 			ui += '<div class="col-md-12 form-group" style="background-color: #fff;">';
-			ui += 	'<label style="color: #3c8dbc;">' + this.featureType[i].name + '</label>';
+			ui += 	'<label style="color: #444;">' + this.featureType[i].name + '</label>';
 			if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
 				ui += '<input disabled id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
 				
