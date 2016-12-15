@@ -1,0 +1,67 @@
+{% load staticfiles %}
+<script type="text/javascript">
+
+	$.ajax({
+		type : 'POST',
+		async : false,
+		url : '/gvsigonline/catastro/get_conf/',
+		beforeSend : function(xhr) {
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		success : function(response) {
+			var map = viewer.core.getMap();
+			
+			var id = viewer.core._nextLayerId();
+			
+			var layers = map.getLayers();
+			var zindex = 0;
+			layers.forEach(function(layer){
+				if (layer.baselayer) {
+					zindex = layer.getZIndex();
+				}						
+			}, this);
+			
+			var catastro = new ol.layer.Tile({
+				id: id,
+				label: 'Catastro',
+			  	visible: false,
+			  	source: new ol.source.TileWMS({
+					url: response.url_catastro,
+					params: {
+						'LAYERS': 'Catastro', 
+						'FORMAT': 'image/png', 
+						'VERSION': '1.1.1',
+						'SRS': 'EPSG:3785'
+					}
+				})
+			});
+			catastro.baselayer = false;
+			catastro.queryable = true;
+			catastro.layer_name = 'plg_catastro';
+			catastro.wms_url = response.url_catastro;
+			catastro.setZIndex(zindex + 1);
+			
+			layers.insertAt(0, catastro);	    
+			
+			var ui = '';
+			ui += '<div style="margin-left:20px;">';
+			ui += 	'<input type="checkbox" id="catastro_checkbox">';
+			ui += 	'<span class="text">Catastro</span>';
+			ui += '</div>';
+			
+			$('#baselayers-group').append(ui);
+			
+			$("#catastro_checkbox").change(function (e) {
+				if (catastro.getVisible() == true) {
+					catastro.setVisible(false);
+				} else {
+					catastro.setVisible(true);
+				}
+			});
+		},
+		error : function() {
+			alert("Error loading plugin");
+		}
+	});
+	
+</script>
