@@ -159,6 +159,7 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 		        '&outputFormat=json';
 		    $.ajax({
 		    	url: url,
+		    	editionBar: this_,
 		    	success: function(response) {
 		    		
 		    		this_.formatGML = new ol.format.GML({
@@ -186,6 +187,12 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 		    		} catch (e) {
 		    			console.log(e);
 		    		}
+		    	},
+		    	error: function(jqXHR, textStatus) {
+		    		this.editionBar.stopEditionHandler();
+		    		$.overlayout();
+		    		messageBox.show('error', gettext('Error starting edition'));
+		    		console.log(textStatus);
 		    	}
 		    });
 		},
@@ -341,7 +348,9 @@ editionBar.prototype.removeHandler = function(e) {
  * @param {Event} e Browser event.
  */
 editionBar.prototype.stopEditionHandler = function(e) {
-	e.preventDefault();
+	if (e!=null) {
+		e.preventDefault();
+	}
 	this.deactivateControls();
 	this.removeVectorLayer();
 	$('#editionbar').remove();
