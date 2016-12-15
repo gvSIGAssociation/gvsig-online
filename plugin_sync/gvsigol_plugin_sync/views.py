@@ -251,10 +251,11 @@ def sync_upload(request, release_locks=True):
                     locks.append(lock)
                 for lock in locks:
                     ogr = gdaltools.ogr2ogr()
-                    geom_info = db.get_geometry_columns_info(t)
+                    qualified_layer_name = lock.layer.get_qualified_name()
+                    geom_info = db.get_geometry_columns_info(qualified_layer_name)
                     if len(geom_info)>0 and len(geom_info[0])==7:
                         srs = "EPSG:"+str(geom_info[0][3])
-                        ogr.set_input(tmpfile, table_name=t, srs=srs)
+                        ogr.set_input(tmpfile, table_name=qualified_layer_name, srs=srs)
                         conn = _get_layer_conn(lock.layer)
                         if not conn:
                             raise HttpResponseBadRequest("Bad request")
@@ -266,6 +267,8 @@ def sync_upload(request, release_locks=True):
                         ogr.set_output_mode(ogr.MODE_LAYER_OVERWRITE, ogr.MODE_DS_UPDATE)
                         ogr.execute()
                         mapservice_backend.updateBoundingBoxFromData(lock.layer)
+                    else:
+                        raise HttpResponseBadRequest("The layer can't be read: {0}".format(lock.layer.get_qualified_name())) 
             finally:
                 db.close()
             
