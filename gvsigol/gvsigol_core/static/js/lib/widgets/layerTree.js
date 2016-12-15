@@ -218,14 +218,10 @@ layerTree.prototype.createTree = function() {
 					}
 				}						
 			}, this);
-			
-			var featureType = self.describeFeatureType(selectedLayer);
-			self.editionBar = new editionBar(self, self.map, featureType, selectedLayer);
-			self.addLayerLock(selectedLayer);
-			
+
+			self.startEdition(selectedLayer, self);
 		} else {
 			messageBox.show('warning', gettext('You are editing the layer') + ': ' + self.editionBar.getSelectedLayer().title);
-			
 		}
 	});
 	
@@ -409,9 +405,9 @@ layerTree.prototype.describeFeatureType = function(layer) {
 };
 
 /**
- * TODO
+ * Tries to add a layer lock and starts edition on success
  */
-layerTree.prototype.addLayerLock = function(layer) {
+layerTree.prototype.startEdition = function(layer, layerTree) {
 	$.ajax({
 		type: 'POST',
 		async: true,
@@ -420,10 +416,19 @@ layerTree.prototype.addLayerLock = function(layer) {
 		  	workspace: layer.workspace,
 		  	layer: layer.layer_name
 		},
+		origdata: {
+			layer: layer,
+			layertree: layerTree
+		},
 	  	beforeSend:function(xhr){
 	    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 	  	},
-	  	success	:function(response){},
+	  	success	:function(response){
+	  		var self = this.origdata.layertree;
+	  		var selectedLayer = this.origdata.layer;
+	  		var featureType = self.describeFeatureType(selectedLayer);
+	  		self.editionBar = new editionBar(self, self.map, featureType, selectedLayer);
+	  	},
 	  	error: function(){
 	  		messageBox.show('error', gettext('The layer you are trying to edit is locked'));
 	  	}
