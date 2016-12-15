@@ -269,7 +269,7 @@ def sync_upload(request, release_locks=True):
             finally:
                 db.close()
             
-            import time
+            #import time
             # approach 1
             #t1 = time.clock()
             layers = [ lock.layer for lock in locks]
