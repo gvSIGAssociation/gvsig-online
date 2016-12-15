@@ -348,78 +348,79 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 		}
 	}
 	
-	if (selectedFeature.type.toLowerCase() == 'feature') {
-		var detailsTab = $('#details-tab');
-		var infoContent = '';
-		infoContent += '<div class="box box-default">';
-		infoContent += 	'<div class="box-header with-border">';
-		infoContent += 		'<span class="text">' + selectedFeature.id + '</span>';
-		infoContent += 	'</div>';
-		infoContent += 	'<div class="box-body" style="padding: 20px;">';
-		infoContent += 		'<ul class="products-list product-list-in-box">';
-		for (var key in selectedFeature.properties) {
-			var value = selectedFeature.properties[key];
-			if (value == "null" || value == null) {
-				value = "";
-			}
-			if (!key.startsWith(this.prefix)) {	
-				infoContent += '<li class="item">';
-				infoContent += 	'<div class="feature-info">';
-				infoContent += 		'<a href="javascript:void(0)" class="product-title">' + key + '</a>';
-				infoContent += 		'<span class="product-description">' + value + '</span>';
-				infoContent += 	'</div>';
-				infoContent += '</li>';
-			}
-		}
-		infoContent += 		'</ul>';
-		infoContent += 	'</div>';
-		infoContent += '</div>';
-		
-		if (selectedFeature.resources) {
-			var resourcesContent = '';
-			resourcesContent += '<div class="box box-default">';
-			resourcesContent += 	'<div class="box-body" style="padding: 20px;">';
-			resourcesContent += 		'<ul style="list-style: none;">';
-			for (var i=0; i<selectedFeature.resources.length; i++) {
-				if (selectedFeature.resources[i].type == 'image') {	
-					resourcesContent += '<li style="padding: 20px;">';
-					resourcesContent += '<a href="' + selectedFeature.resources[i].url + '" data-toggle="lightbox" data-gallery="example-gallery">';
-					resourcesContent += '	<img src="' + selectedFeature.resources[i].url + '" class="img-fluid adjust-image">';
-					resourcesContent += '</a>';
-					resourcesContent += '</li>';
+	if (selectedFeature != null) {
+		if (selectedFeature.type.toLowerCase() == 'feature') {
+			var detailsTab = $('#details-tab');
+			var infoContent = '';
+			infoContent += '<div class="box box-default">';
+			infoContent += 	'<div class="box-header with-border">';
+			infoContent += 		'<span class="text">' + selectedFeature.id + '</span>';
+			infoContent += 	'</div>';
+			infoContent += 	'<div class="box-body" style="padding: 20px;">';
+			infoContent += 		'<ul class="products-list product-list-in-box">';
+			for (var key in selectedFeature.properties) {
+				var value = selectedFeature.properties[key];
+				if (value == "null" || value == null) {
+					value = "";
+				}
+				if (!key.startsWith(this.prefix)) {	
+					infoContent += '<li class="item">';
+					infoContent += 	'<div class="feature-info">';
+					infoContent += 		'<a href="javascript:void(0)" class="product-title">' + key + '</a>';
+					infoContent += 		'<span class="product-description">' + value + '</span>';
+					infoContent += 	'</div>';
+					infoContent += '</li>';
 				}
 			}
-			resourcesContent += 		'</ul>';
-			resourcesContent += 	'</div>';
-			resourcesContent += '</div>';
-		}
-		
-		var ui = '';
-		ui += '<div class="nav-tabs-custom">';
-		ui += '<ul class="nav nav-tabs">';
-		if (selectedFeature.resources) {
-			ui += '<li class="active"><a href="#tab_info_content" data-toggle="tab" aria-expanded="true" style="font-weight: bold;">' + gettext('Feature info') + '</a></li>';
-		}
-		ui += '<li class=""><a href="#tab_resources_content" data-toggle="tab" aria-expanded="false" style="font-weight: bold;">' + gettext('Multimedia resources') + '</a></li>';
-		ui += '</ul>';
-		ui += '<div class="tab-content">';
-		ui += '<div class="tab-pane active" id="tab_info_content">';
-		ui += infoContent;
-		ui += '</div>';
-		if (selectedFeature.resources) {
-			ui += '<div class="tab-pane" id="tab_resources_content">';
-			ui += resourcesContent;
+			infoContent += 		'</ul>';
+			infoContent += 	'</div>';
+			infoContent += '</div>';
+			
+			if (selectedFeature.resources) {
+				var resourcesContent = '';
+				resourcesContent += '<div class="box box-default">';
+				resourcesContent += 	'<div class="box-body" style="padding: 20px;">';
+				resourcesContent += 		'<ul style="list-style: none;">';
+				for (var i=0; i<selectedFeature.resources.length; i++) {
+					if (selectedFeature.resources[i].type == 'image') {	
+						resourcesContent += '<li style="padding: 20px;">';
+						resourcesContent += '<a href="' + selectedFeature.resources[i].url + '" data-toggle="lightbox" data-gallery="example-gallery">';
+						resourcesContent += '	<img src="' + selectedFeature.resources[i].url + '" class="img-fluid adjust-image">';
+						resourcesContent += '</a>';
+						resourcesContent += '</li>';
+					}
+				}
+				resourcesContent += 		'</ul>';
+				resourcesContent += 	'</div>';
+				resourcesContent += '</div>';
+			}
+			
+			var ui = '';
+			ui += '<div class="nav-tabs-custom">';
+			ui += '<ul class="nav nav-tabs">';
+			if (selectedFeature.resources) {
+				ui += '<li class="active"><a href="#tab_info_content" data-toggle="tab" aria-expanded="true" style="font-weight: bold;">' + gettext('Feature info') + '</a></li>';
+			}
+			ui += '<li class=""><a href="#tab_resources_content" data-toggle="tab" aria-expanded="false" style="font-weight: bold;">' + gettext('Multimedia resources') + '</a></li>';
+			ui += '</ul>';
+			ui += '<div class="tab-content">';
+			ui += '<div class="tab-pane active" id="tab_info_content">';
+			ui += infoContent;
 			ui += '</div>';
+			if (selectedFeature.resources) {
+				ui += '<div class="tab-pane" id="tab_resources_content">';
+				ui += resourcesContent;
+				ui += '</div>';
+			}
+			ui += '</div>';
+			ui += '</div>';
+			
+			detailsTab.empty();
+			$.gvsigOL.controlSidebar.open();
+			$('.nav-tabs a[href="#details-tab"]').tab('show');
+			detailsTab.append(ui);
 		}
-		ui += '</div>';
-		ui += '</div>';
-		
-		detailsTab.empty();
-		$.gvsigOL.controlSidebar.open();
-		$('.nav-tabs a[href="#details-tab"]').tab('show');
-		detailsTab.append(ui);
 	}
-	
 };
 
 
