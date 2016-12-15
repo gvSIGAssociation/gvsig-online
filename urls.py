@@ -35,4 +35,6 @@ urlpatterns = [
     url(r'^remove_layer_lock/$', 'gvsigol_services.views.remove_layer_lock', name='remove_layer_lock'),
     url(r'^get_feature_info/$', 'gvsigol_services.views.get_feature_info', name='get_feature_info'),
     url(r'^get_datatable_data/$', 'gvsigol_services.views.get_datatable_data', name='get_datatable_data'),
+    url(r'^upload_resources/$', 'gvsigol_services.views.upload_resources', name='upload_resources'),
+    url(r'^delete_resource/(?P<rid>[0-9]+)/$', 'gvsigol_services.views.delete_resource', name='delete_resource'),
 ]
