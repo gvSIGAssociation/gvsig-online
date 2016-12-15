@@ -541,8 +541,6 @@ editionBar.prototype.createFeatureForm = function(feature) {
 		var featureProperties = '';
 		featureProperties += '<div class="box">';
 		featureProperties += 	'<div class="box-body no-padding">';
-		featureProperties += 		'<div id="col-md-12 form-group form-error" style="color:#ff0000;">';
-		featureProperties += 		'</div>';
 		for (var i=0; i<this.featureType.length; i++) {
 			if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
 				featureProperties += '<div class="col-md-12 form-group" style="background-color: #fff;">';
@@ -572,7 +570,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 				featureProperties += '</div>';
 			}
 		}
-		featureProperties +=       '<div id="edition-error">';
+		featureProperties +=       '<div class="col-md-12 form-group" id="edition-error">';
 		featureProperties +=       '</div>';
 		featureProperties += 	'</div>';
 		featureProperties += 	'<div class="box-footer text-right">';
@@ -669,8 +667,6 @@ editionBar.prototype.editFeatureForm = function(feature) {
 		var featureProperties = '';
 		featureProperties += '<div class="box">';
 		featureProperties += 	'<div class="box-body no-padding">';
-		featureProperties += 		'<div id="col-md-12 form-group form-error" style="color:#ff0000;">';
-		featureProperties += 		'</div>';
 		for (var i=0; i<this.featureType.length; i++) {
 			if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
 				featureProperties += '<div class="col-md-12 form-group" style="background-color: #fff;">';
@@ -709,7 +705,7 @@ editionBar.prototype.editFeatureForm = function(feature) {
 				featureProperties += '</div>';
 			}
 		}
-		featureProperties +=		'<div id="edition-error">';
+		featureProperties +=		'<div class="col-md-12 form-group" id="edition-error">';
 		featureProperties +=      '</div>';
 		featureProperties += 	'</div>';
 		featureProperties += 	'<div class="box-footer text-right">';
@@ -827,8 +823,6 @@ editionBar.prototype.removeFeatureForm = function(evt, feature) {
 	ui += 			'</div>';
 	ui += 		'</div>';
 	ui += 		'<div class="box-body no-padding">';
-	ui += 			'<div id="col-md-12 form-group form-error" style="color:#ff0000;">';
-	ui += 			'</div>';
 	for (var i=0; i<this.featureType.length; i++) {
 		if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
 			ui += '<div class="col-md-12 form-group" style="background-color: #fff;">';
