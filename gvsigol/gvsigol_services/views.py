@@ -1283,3 +1283,11 @@ def remove_layer_lock(request):
         return HttpResponse('{"response": "ok"}', content_type='application/json')
     except Exception as e:
         return HttpResponseNotFound('<h1>Layer not locked: {0}</h1>'.format(layer.id))
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+def upload_resources(request):
+    print 'upload resources'
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+def delete_resource(request, rid):
+    print 'delete resource'
