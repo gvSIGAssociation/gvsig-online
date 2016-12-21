@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-08 09:43+0200\n"
+"POT-Creation-Date: 2016-12-21 12:37+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,7 +28,7 @@ msgstr "Nombre"
 msgid "Last name"
 msgstr "Apellidos"
 
-#: forms.py:32 templates/login.html.py:52 templates/user_add.html.py:51
+#: forms.py:32 templates/login.html.py:45 templates/user_add.html.py:51
 #: templates/user_list.html:22 templates/user_update.html.py:40
 #: templates/user_update.html:41 utils.py:108
 msgid "Username"
@@ -39,7 +39,7 @@ msgstr "Nombre de usuario"
 msgid "Email"
 msgstr "Correo electrónico"
 
-#: forms.py:34 templates/login.html.py:56 templates/user_add.html.py:63
+#: forms.py:34 templates/login.html.py:49 templates/user_add.html.py:63
 #: utils.py:112 utils.py:124
 msgid "Password"
 msgstr "Contraseña"
@@ -180,31 +180,31 @@ msgstr "Usted no dispone de permisos de administración. Usted puede"
 msgid "return to dashboard"
 msgstr "regresar al panel de control"
 
-#: templates/login.html:45
+#: templates/login.html:38
 msgid "Sign in to start your session"
 msgstr "Inicie sesión con su usuario"
 
-#: templates/login.html:61
+#: templates/login.html:54
 msgid "Sign In"
 msgstr "Iniciar sesión"
 
-#: templates/login.html:65
+#: templates/login.html:58
 msgid "I forgot my password"
 msgstr "He olvidado mi contraseña"
 
-#: templates/password_reset.html:45
+#: templates/password_reset.html:38
 msgid "Enter your username to retrieve your password"
 msgstr "Introduzca su nombre de usuario para recuperar su contraseña"
 
-#: templates/password_reset.html:52
+#: templates/password_reset.html:45
 msgid "Insert your username"
 msgstr "Introduzca su nombre de usuario"
 
-#: templates/password_reset.html:57
+#: templates/password_reset.html:50
 msgid "Send"
 msgstr "Enviar"
 
-#: templates/password_reset_success.html:45
+#: templates/password_reset_success.html:38
 msgid ""
 "Your password has been updated. We've sent an email to your account with the "
 "new password"
@@ -212,7 +212,7 @@ msgstr ""
 "Su contraseña ha sido actualizada. Hemos enviado un correo a su cuenta con "
 "sunueva constraseña"
 
-#: templates/password_reset_success.html:46
+#: templates/password_reset_success.html:39
 msgid "Return"
 msgstr "Volver"
 
@@ -291,18 +291,21 @@ msgstr "Su cuenta ha sido deshabilitada"
 msgid "The username and password you have entered do not match our records"
 msgstr "El nombre de usuario y contraseña no coinciden"
 
-#: views.py:103
+#: views.py:125
 msgid "User account does not exist"
 msgstr "La cuenta de usuario no existe"
 
-#: views.py:210
-#| msgid "Users and groups"
+#: views.py:234
 msgid "User group for"
 msgstr "Grupo de usuario para"
 
-#: views.py:263
+#: views.py:286
 msgid "The username already exists"
 msgstr "El nombre de usuario ya existe"
+
+#: views.py:431
+msgid "Admin is a reserved group"
+msgstr "Admin es un grupo reservado"
 
 #~ msgid "Is admin"
 #~ msgstr "Es administrador"
