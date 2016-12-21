@@ -171,6 +171,7 @@ LANGUAGES = (
     
 )
 LOCALE_PATHS = (
+    '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol/locale',
     '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol_core/locale',
     '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol_services/locale',
     '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol_symbology/locale',

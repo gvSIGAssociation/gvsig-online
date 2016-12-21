@@ -40,6 +40,20 @@
 					<div class="navbar-custom-menu">
 						<ul class="nav navbar-nav">
 							{% if user.is_authenticated %}
+							<li>
+								<form id="select-language-form" action="{% url 'set_language' %}" method="post">{% csrf_token %}
+								    <select id="select-language" name="language" class="form-control" style="margin-top: 10px;">
+								        {% get_current_language as LANGUAGE_CODE %}
+								        {% get_available_languages as LANGUAGES %}
+								        {% get_language_info_list for LANGUAGES as languages %}
+								        {% for language in languages %}
+								            <option style="" value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected="selected"{% endif %}>
+								                {% trans language.name_local %} ({{ language.code }})
+								            </option>
+								        {% endfor %}								      
+								    </select>		
+							    </form>							 
+						    </li>
 							<li class="dropdown user user-menu">
 								<a href="#" class="dropdown-toggle" data-toggle="dropdown">
 <!-- 									<img src="{% static "img/user.png" %}" class="user-image" alt="User Image"> -->
@@ -66,6 +80,20 @@
 								</ul>
 							</li>
 							{% else %}
+							<li>
+								<form id="select-language-form" action="{% url 'set_language' %}" method="post">{% csrf_token %}
+								    <select id="select-language" name="language" class="form-control" style="margin-top: 10px;">
+								        {% get_current_language as LANGUAGE_CODE %}
+								        {% get_available_languages as LANGUAGES %}
+								        {% get_language_info_list for LANGUAGES as languages %}
+								        {% for language in languages %}
+								            <option style="" value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected="selected"{% endif %}>
+								                {% trans language.name_local %} ({{ language.code }})
+								            </option>
+								        {% endfor %}								      
+								    </select>		
+							    </form>							 
+						    </li>
 							<li><a href="/gvsigonline/auth/login_user/">{% trans "Sign in" %}</a></li>
 							{% endif %}
 						</ul>
@@ -168,5 +196,12 @@
 
 	<script src="{% static "js/vendors/jQuery/jQuery-2.1.4.min.js" %}"></script>
 	<script src="{% static "js/vendors/bootstrap-3.3.6/js/bootstrap.min.js" %}"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+	    	$("#select-language").change(function() {
+	    		$("#select-language-form").submit();
+			});
+	    });
+	</script>
 </body>
 </html>
