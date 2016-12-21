@@ -65,7 +65,21 @@
 			<nav class="navbar navbar-static-top" role="navigation">
 				<a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button"> <span class="sr-only">Toggle navigation</span></a>				
 				<div class="navbar-custom-menu">
-					<ul class="nav navbar-nav">				
+					<ul class="nav navbar-nav">	
+						<li>
+							<form id="select-language-form" action="{% url 'set_language' %}" method="post">{% csrf_token %}
+							    <select id="select-language" name="language" class="form-control" style="margin-top: 10px;">
+							        {% get_current_language as LANGUAGE_CODE %}
+							        {% get_available_languages as LANGUAGES %}
+							        {% get_language_info_list for LANGUAGES as languages %}
+							        {% for language in languages %}
+							            <option style="" value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected="selected"{% endif %}>
+							                {{ language.name_local }} ({{ language.code }})
+							            </option>
+							        {% endfor %}								      
+							    </select>		
+						    </form>							 
+					    </li>			
 						<li class="dropdown user user-menu">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown"> 
 								<img src="{% static "img/user.png" %}" class="user-image" alt="User Image"> 
@@ -179,6 +193,14 @@
 	<script type="text/javascript" src="{% static "js/dist/gvsigol-compress.js" %}"></script>
 	<script>
 		var messageBox = new messageBox();
+	</script>
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
+	    	$("#select-language").change(function() {
+	    		$("#select-language-form").submit();
+			});
+	    });
 	</script>
 
 	{% block extra-scripts %}{% endblock %}
