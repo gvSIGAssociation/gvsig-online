@@ -611,7 +611,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 		var path = '';
 	  	fileupload.uploadFile({
 		   	url: '/gvsigonline/services/upload_resources/',
-		   	fileName: 'files',
+		   	fileName: 'resource',
 		   	multiple: true,
 		   	autoSubmit:false,
 		   	formData: {},
@@ -638,8 +638,14 @@ editionBar.prototype.createFeatureForm = function(feature) {
 				}
 			}
 			feature.setProperties(properties);
-			if (self.transactWFS('insert', feature)) {
+			var transaction = self.transactWFS('insert', feature);
+			if (transaction.success) {
 				$("body").overlay();
+				fileupload.appendExtraParams({
+					layer_name: self.selectedLayer.layer_name,
+					workspace: self.selectedLayer.workspace,
+					fid: transaction.fid
+				});
 				fileupload.startUpload();
 				self.selectedLayer.getSource().updateParams({"time": Date.now()});
 				self.showLayersTab();
@@ -749,7 +755,7 @@ editionBar.prototype.editFeatureForm = function(feature) {
 		var path = '';
 	  	fileupload.uploadFile({
 		   	url: '/gvsigonline/services/upload_resources/',
-		   	fileName: 'files',
+		   	fileName: 'resource',
 		   	multiple: true,
 		   	autoSubmit:false,
 		   	formData: {},
@@ -788,7 +794,8 @@ editionBar.prototype.editFeatureForm = function(feature) {
 				}
 			}
 			feature.setProperties(properties);
-			if (self.transactWFS('update', feature)) {
+			var transaction = self.transactWFS('update', feature);
+			if (transaction.success) {
 				self.selectedLayer.getSource().updateParams({"time": Date.now()});
 				self.selectInteraction.getFeatures().clear();
 				self.showLayersTab();
@@ -850,7 +857,8 @@ editionBar.prototype.removeFeatureForm = function(evt, feature) {
 	$.gvsigOL.controlSidebar.open();
 	
 	$('#remove-feature').on('click', function () {
-		if (self.transactWFS('delete', feature)) {
+		var transaction = self.transactWFS('delete', feature);
+		if (transaction.success) {
 			self.wfsLayer.getSource().removeFeature(feature);
 			self.removeInteraction.getFeatures().clear();
 			self.selectedLayer.getSource().updateParams({"time": Date.now()});
@@ -873,6 +881,7 @@ editionBar.prototype.removeFeatureForm = function(evt, feature) {
 editionBar.prototype.transactWFS = function(p,f) {
 	var self = this;
 	var success = false;
+	var fid = null;
 
 	var cloned = f.clone();	
 	var prop = cloned.getGeometry().getProperties();
@@ -956,6 +965,7 @@ editionBar.prototype.transactWFS = function(p,f) {
 		try {
 			var resp = self.formatWFS.readTransactionResponse(response);
 			f.setId(resp.insertIds[0]);
+			fid = resp.insertIds[0].split('.')[1];
 			success = true;
 			if (p=="insert"||p=="update") {
 				/* Trigger a bounding box recalculating after insertions or
@@ -985,7 +995,10 @@ editionBar.prototype.transactWFS = function(p,f) {
 		
 	});
 	
-	return success;
+	return {
+		success: success,
+		fid: fid
+	};
 };
 
 /**
