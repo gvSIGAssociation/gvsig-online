@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-08 09:43+0200\n"
+"POT-Creation-Date: 2016-12-21 12:37+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,7 +28,7 @@ msgstr "Nom"
 msgid "Last name"
 msgstr "Cognom"
 
-#: forms.py:32 templates/login.html.py:52 templates/user_add.html.py:51
+#: forms.py:32 templates/login.html.py:45 templates/user_add.html.py:51
 #: templates/user_list.html:22 templates/user_update.html.py:40
 #: templates/user_update.html:41 utils.py:108
 msgid "Username"
@@ -39,7 +39,7 @@ msgstr "Nom d'usuari"
 msgid "Email"
 msgstr "Correu electrònic"
 
-#: forms.py:34 templates/login.html.py:56 templates/user_add.html.py:63
+#: forms.py:34 templates/login.html.py:49 templates/user_add.html.py:63
 #: utils.py:112 utils.py:124
 msgid "Password"
 msgstr "Contrasenya"
@@ -180,31 +180,31 @@ msgstr "Vostè no té permisos d'administració. Voste pot"
 msgid "return to dashboard"
 msgstr "tornar al panell de control"
 
-#: templates/login.html:45
+#: templates/login.html:38
 msgid "Sign in to start your session"
 msgstr "Entreu amb el seu usuari"
 
-#: templates/login.html:61
+#: templates/login.html:54
 msgid "Sign In"
 msgstr "Iniciar sessió"
 
-#: templates/login.html:65
+#: templates/login.html:58
 msgid "I forgot my password"
 msgstr "He oblidat la contrasenya"
 
-#: templates/password_reset.html:45
+#: templates/password_reset.html:38
 msgid "Enter your username to retrieve your password"
 msgstr "Introduiu el vostre nom d'usuari per recuperar la contrasenya"
 
-#: templates/password_reset.html:52
+#: templates/password_reset.html:45
 msgid "Insert your username"
 msgstr "Introduiu el vostre nom d'usuari"
 
-#: templates/password_reset.html:57
+#: templates/password_reset.html:50
 msgid "Send"
 msgstr "Enviar"
 
-#: templates/password_reset_success.html:45
+#: templates/password_reset_success.html:38
 msgid ""
 "Your password has been updated. We've sent an email to your account with the "
 "new password"
@@ -212,7 +212,7 @@ msgstr ""
 "La seva contrasenya ha estat actualitzada . Hem enviat un correu electrònic "
 "amb la seva nova contrasenya"
 
-#: templates/password_reset_success.html:46
+#: templates/password_reset_success.html:39
 msgid "Return"
 msgstr "Tornar"
 
@@ -227,12 +227,12 @@ msgstr "Nom"
 #: templates/user_add.html:81 templates/user_update.html.py:55
 #: templates/user_update.html:57
 msgid "Is superuser"
-msgstr ""
+msgstr "És superusuari"
 
 #: templates/user_add.html:86 templates/user_update.html.py:64
 #: templates/user_update.html:66
 msgid "Can manage projects"
-msgstr ""
+msgstr "Pot gestionar projectes"
 
 #: templates/user_add.html:93 templates/user_update.html.py:74
 msgid "Assign groups"
@@ -249,11 +249,11 @@ msgstr "Llistat d'usuaris"
 
 #: templates/user_list.html:26
 msgid "is superuser"
-msgstr ""
+msgstr "És superusuari"
 
 #: templates/user_list.html:27
 msgid "is staff"
-msgstr ""
+msgstr "Gestiona projectes"
 
 #: templates/user_list.html:64 templates/user_list.html.py:112
 msgid "Delete user"
@@ -291,19 +291,22 @@ msgstr "La contrasenya ha estat desactivada"
 msgid "The username and password you have entered do not match our records"
 msgstr "L'usuari i contrasenya introduïts no coincideixen"
 
-#: views.py:103
+#: views.py:125
 msgid "User account does not exist"
 msgstr "El compte d'usuari no existeix"
 
-#: views.py:210
-#, fuzzy
+#: views.py:234
 #| msgid "Users and groups"
 msgid "User group for"
-msgstr "Usuaris y grups"
+msgstr "Grup d'usuaris per"
 
-#: views.py:263
+#: views.py:286
 msgid "The username already exists"
 msgstr "El nom d'usuari ya existeix"
+
+#: views.py:431
+msgid "Admin is a reserved group"
+msgstr "Admin és un grup reservat"
 
 #~ msgid "Is admin"
 #~ msgstr "Es administrador"
