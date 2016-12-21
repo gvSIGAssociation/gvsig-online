@@ -40,7 +40,9 @@ from django.core.urlresolvers import reverse
 from gvsigol_core import utils as core_utils
 from gvsigol_auth.models import UserGroup
 from django.shortcuts import render
+from django.utils import timezone
 from gvsigol import settings
+import locks_utils
 import requests
 import logging
 import urllib
@@ -48,7 +50,7 @@ import utils
 import json
 import re
 import os
-import locks_utils
+
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
@@ -1285,9 +1287,37 @@ def remove_layer_lock(request):
         return HttpResponseNotFound('<h1>Layer not locked: {0}</h1>'.format(layer.id))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@csrf_exempt
 def upload_resources(request):
-    print 'upload resources'
+    if request.method == 'POST':
+        ws_name = request.POST.get('workspace')
+        layer_name = request.POST.get('layer_name')
+        fid = request.POST.get('fid')
+        if ":" in layer_name:
+            layer_name = layer_name.split(":")[1]
+        layer = Layer.objects.get(name=layer_name, datastore__workspace__name=ws_name)
+        if 'resource' in request.FILES:
+            (saved, path) = utils.save_resource(request.FILES['resource'])
+            if saved:
+                res = LayerResource()
+                res.feature = int(fid)
+                res.layer = layer
+                res.path = path
+                res.title = ''
+                res.type = LayerResource.EXTERNAL_IMAGE
+                res.created = timezone.now()
+                res.save()
+                response = {'success': True}
+                
+            else:
+                response = {'success': False}
+            
+    return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@csrf_exempt
 def delete_resource(request, rid):
-    print 'delete resource'
+    response = {
+        'success': True
+    }
+    return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
