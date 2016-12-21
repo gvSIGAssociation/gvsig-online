@@ -173,3 +173,30 @@ def get_resources_dir(resource_type):
     if not os.path.exists(the_path):
         os.makedirs(the_path, 0700)
     return the_path
+
+def save_resource(file):    
+    try: 
+        file_path = os.path.join(get_resources_dir(LayerResource.EXTERNAL_IMAGE), file.name)
+        relative_path = file_path.replace(MEDIA_ROOT, '')
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        with open(file_path, 'wb+') as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+        return [True, relative_path]
+     
+    except Exception as e:
+        return [False, '']
+    
+def delete_resource(library, file_name):    
+    try: 
+        library_path = settings.MEDIA_ROOT + "symbol_libraries/" + library.name + "/"
+        file_path = library_path + file_name
+        if os.path.exists(file_path):
+            os.remove(file_path)
+                
+        return True
+     
+    except Exception as e:
+        print('Error: %s' % e)
+        return False
