@@ -21,11 +21,11 @@
 				}						
 			}, this);
 			
-			var catastro = new ol.layer.Tile({
+			var catastro = new ol.layer.Image({
 				id: id,
 				label: 'Catastro',
 			  	visible: false,
-			  	source: new ol.source.TileWMS({
+			  	source: new ol.source.ImageWMS({
 					url: response.url_catastro,
 					params: {
 						'LAYERS': 'Catastro', 
