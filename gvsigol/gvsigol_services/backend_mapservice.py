@@ -1249,10 +1249,10 @@ class Geoserver():
     
     def getThumbnail(self, ws, ds, layer):
         layer_info = self.getResourceInfo(ws.name, ds.name, layer.name, "json")
-        maxx = str(layer_info['featureType']['nativeBoundingBox']['maxx'])
-        maxy = str(layer_info['featureType']['nativeBoundingBox']['maxy'])
-        minx = str(layer_info['featureType']['nativeBoundingBox']['minx'])
-        miny = str(layer_info['featureType']['nativeBoundingBox']['miny'])
+        maxx = str(layer_info['featureType']['latLonBoundingBox']['maxx'])
+        maxy = str(layer_info['featureType']['latLonBoundingBox']['maxy'])
+        minx = str(layer_info['featureType']['latLonBoundingBox']['minx'])
+        miny = str(layer_info['featureType']['latLonBoundingBox']['miny'])
         bbox = minx + "," + miny + "," + maxx + "," + maxy 
         
         values = {
@@ -1261,7 +1261,7 @@ class Geoserver():
             'REQUEST': 'GetMap',
             'LAYERS': ws.name + ":" + layer.name,
             'FORMAT': 'image/png',
-            'SRS': layer_info['featureType']['nativeBoundingBox']['crs'],
+            'SRS': 'EPSG:4326',
             'HEIGHT': '550',
             'WIDTH': '768',
             'BBOX': bbox
