@@ -237,6 +237,14 @@
 			{% endwith %}
 		{% endif %}		    					
 	{% endfor %}
+	
+	{% for plugin in INSTALLED_APPS %}												  
+		{% if 'gvsigol_plugin_' in plugin %}	
+			{% with "load_public_js_"|add:plugin|cut:"gvsigol_plugin_"|add:".html" as aux %}	   			 	
+				{% include_if_exists aux %}
+			{% endwith %}
+		{% endif %}		    					
+	{% endfor %}
 
 	<script>
 	$(document).ready(function() {
