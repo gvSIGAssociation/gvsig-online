@@ -69,7 +69,7 @@
 						        {% get_language_info_list for LANGUAGES as languages %}
 						        {% for language in languages %}
 						            <option style="" value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected="selected"{% endif %}>
-						                {% trans language.name_translated %} ({{ language.code }})
+						                {% trans language.name_translated %}
 						            </option>
 						        {% endfor %}								      
 						    </select>		
@@ -247,6 +247,14 @@
 	{% for app in INSTALLED_APPS %}												  
 		{% if 'gvsigol_app_' in app %}	
 			{% with "load_public_js_"|add:app|cut:"gvsigol_app_"|add:".html" as aux %}	   			 	
+				{% include_if_exists aux %}
+			{% endwith %}
+		{% endif %}		    					
+	{% endfor %}
+	
+	{% for plugin in INSTALLED_APPS %}												  
+		{% if 'gvsigol_plugin_' in plugin %}	
+			{% with "load_public_js_"|add:plugin|cut:"gvsigol_plugin_"|add:".html" as aux %}	   			 	
 				{% include_if_exists aux %}
 			{% endwith %}
 		{% endif %}		    					
