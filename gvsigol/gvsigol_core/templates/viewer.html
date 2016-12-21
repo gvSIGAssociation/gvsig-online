@@ -89,7 +89,7 @@
 						        {% get_language_info_list for LANGUAGES as languages %}
 						        {% for language in languages %}
 						            <option style="" value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected="selected"{% endif %}>
-						                {% trans language.name_translated %} ({{ language.code }})
+						                {% trans language.name_translated %}
 						            </option>
 						        {% endfor %}								      
 						    </select>		
