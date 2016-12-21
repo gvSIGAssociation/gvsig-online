@@ -61,8 +61,20 @@
 			<div class="navbar-custom-menu">
 				<ul class="nav navbar-nav">
 					
-<!-- 					<li><a href="#" id="export-to-pdf" class="dropdown-toggle"> <i class="fa fa-print"></i></a> -->
-<!-- 					</li> -->
+					<li>
+						<form id="select-language-form" action="{% url 'set_language' %}" method="post">{% csrf_token %}
+						    <select id="select-language" name="language" class="form-control" style="margin-top: 10px;">
+						        {% get_current_language as LANGUAGE_CODE %}
+						        {% get_available_languages as LANGUAGES %}
+						        {% get_language_info_list for LANGUAGES as languages %}
+						        {% for language in languages %}
+						            <option style="" value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected="selected"{% endif %}>
+						                {{ language.name_local }} ({{ language.code }})
+						            </option>
+						        {% endfor %}								      
+						    </select>		
+					    </form>							 
+				    </li>
 					
 					<li class="dropdown user user-menu">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown"> 
@@ -179,6 +191,14 @@
 	<script type="text/javascript" src="{% static "js/dist/gvsigol-compress.js" %}"></script>
 	<script>
 		var messageBox = new messageBox();
+	</script>
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
+	    	$("#select-language").change(function() {
+	    		$("#select-language-form").submit();
+			});
+	    });
 	</script>
 	
 	<script type="text/javascript">
