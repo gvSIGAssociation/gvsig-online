@@ -279,7 +279,8 @@ def layer_delete(request, layer_id):
         mapservice_backend.deleteGeoserverLayerGroup(layer.layer_group)
         if mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer):
             mapservice_backend.deleteLayerStyles(layer)
-            gn_backend.metadata_delete(layer)
+            if settings.CATALOG_MODULE:
+                gn_backend.metadata_delete(layer)
             if os.path.isfile(layer.thumbnail.path):
                 os.remove(layer.thumbnail.path)
             Layer.objects.all().filter(pk=layer_id).delete()
