@@ -1286,6 +1286,30 @@ def remove_layer_lock(request):
         return HttpResponse('{"response": "ok"}', content_type='application/json')
     except Exception as e:
         return HttpResponseNotFound('<h1>Layer not locked: {0}</h1>'.format(layer.id))
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_safe
+@staff_required
+def lock_list(request):
+    
+    lock_list = None
+    if request.user.is_superuser:
+        lock_list = LayerLock.objects.all()
+    else:
+        lock_list = LayerLock.objects.filter(created_by__exact=request.user.username)
+        
+    response = {
+        'locks': lock_list
+    }
+    return render_to_response('lock_list.html', response, context_instance=RequestContext(request))
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_http_methods(["GET", "POST", "HEAD"])
+@staff_required
+def unlock_layer(request, lock_id):
+    lock = LayerLock.objects.get(id=int(lock_id))
+    lock.delete()
+    return redirect('lock_list')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @csrf_exempt
