@@ -640,13 +640,15 @@ editionBar.prototype.createFeatureForm = function(feature) {
 			feature.setProperties(properties);
 			var transaction = self.transactWFS('insert', feature);
 			if (transaction.success) {
-				$("body").overlay();
-				fileupload.appendExtraParams({
-					layer_name: self.selectedLayer.layer_name,
-					workspace: self.selectedLayer.workspace,
-					fid: transaction.fid
-				});
-				fileupload.startUpload();
+				if (fileupload.getFileCount() >= 1) {
+					$("body").overlay();
+					fileupload.appendExtraParams({
+						layer_name: self.selectedLayer.layer_name,
+						workspace: self.selectedLayer.workspace,
+						fid: transaction.fid
+					});
+					fileupload.startUpload();
+				}
 				self.selectedLayer.getSource().updateParams({"time": Date.now()});
 				self.showLayersTab();
 			}		
