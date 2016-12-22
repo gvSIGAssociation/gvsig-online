@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-12-21 13:00+0100\n"
+"POT-Creation-Date: 2016-12-22 10:22+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,7 +49,7 @@ msgid "Error publishing the layer. Backend error: {msg}"
 msgstr "Error publicando la capa. Error: {msg}"
 
 #: backend_mapservice.py:471 backend_mapservice.py:479
-#: backend_mapservice.py:490 views.py:387 views.py:893
+#: backend_mapservice.py:490 views.py:388 views.py:894
 msgid "Error: layer could not be published"
 msgstr "Error: la capa no puede ser publicada"
 
@@ -389,6 +389,7 @@ msgstr "Caché URL"
 #: forms_services.py:40 forms_services.py:70 templates/datastore_add.html:43
 #: templates/datastore_list.html.py:24
 #: templates/geoserver/create_layer_feature_type.html:77
+#: templates/lock_list.html:22
 msgid "Type"
 msgstr "Tipo"
 
@@ -445,6 +446,10 @@ msgstr "Enumeraciones"
 msgid "Layers"
 msgstr "Capas"
 
+#: templates/dashboard_services_menu.html:15 templates/lock_list.html.py:11
+msgid "Locks"
+msgstr "Bloqueos"
+
 #: templates/datastore_add.html:12 templates/datastore_list.html.py:13
 msgid "Add datastore"
 msgstr "Añadir almacén de datos"
@@ -490,14 +495,14 @@ msgstr "Aceptar"
 #: templates/datastore_list.html:82 templates/enumeration_list.html.py:78
 #: templates/geoserver/create_layer_sql_view.html:249
 #: templates/layer_list.html:89 templates/layergroup_list.html.py:86
-#: templates/workspace_list.html:80
+#: templates/lock_list.html:59 templates/workspace_list.html.py:80
 msgid "Processing request..."
 msgstr "Procesando petición..."
 
 #: templates/datastore_list.html:83 templates/enumeration_list.html.py:79
 #: templates/geoserver/create_layer_sql_view.html:250
 #: templates/layer_list.html:90 templates/layergroup_list.html.py:87
-#: templates/workspace_list.html:81
+#: templates/lock_list.html:60 templates/workspace_list.html.py:81
 #, python-format
 msgid "Search%(sep)s"
 msgstr "Buscar%(sep)s"
@@ -505,7 +510,7 @@ msgstr "Buscar%(sep)s"
 #: templates/datastore_list.html:84 templates/enumeration_list.html.py:80
 #: templates/geoserver/create_layer_sql_view.html:251
 #: templates/layer_list.html:91 templates/layergroup_list.html.py:88
-#: templates/workspace_list.html:82
+#: templates/lock_list.html:61 templates/workspace_list.html.py:82
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr "Mostrando %(numrecords)s registros"
@@ -513,7 +518,7 @@ msgstr "Mostrando %(numrecords)s registros"
 #: templates/datastore_list.html:85 templates/enumeration_list.html.py:81
 #: templates/geoserver/create_layer_sql_view.html:252
 #: templates/layer_list.html:92 templates/layergroup_list.html.py:89
-#: templates/workspace_list.html:83
+#: templates/lock_list.html:62 templates/workspace_list.html.py:83
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr "Mostrando desde %(start)s a %(end)s de %(numrecords)s registros"
@@ -521,14 +526,14 @@ msgstr "Mostrando desde %(start)s a %(end)s de %(numrecords)s registros"
 #: templates/datastore_list.html:86 templates/enumeration_list.html.py:82
 #: templates/geoserver/create_layer_sql_view.html:253
 #: templates/layer_list.html:93 templates/layergroup_list.html.py:90
-#: templates/workspace_list.html:84
+#: templates/lock_list.html:63 templates/workspace_list.html.py:84
 msgid "Showing from 0 to 0 of 0 records"
 msgstr "Mostrando desde 0 a 0 de 0 registros"
 
 #: templates/datastore_list.html:87 templates/enumeration_list.html.py:83
 #: templates/geoserver/create_layer_sql_view.html:254
 #: templates/layer_list.html:94 templates/layergroup_list.html.py:91
-#: templates/workspace_list.html:85
+#: templates/lock_list.html:64 templates/workspace_list.html.py:85
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr "Filtrando %(max)s registros"
@@ -536,7 +541,7 @@ msgstr "Filtrando %(max)s registros"
 #: templates/datastore_list.html:89 templates/enumeration_list.html.py:85
 #: templates/geoserver/create_layer_sql_view.html:256
 #: templates/layer_list.html:96 templates/layergroup_list.html.py:93
-#: templates/workspace_list.html:87
+#: templates/lock_list.html:66 templates/workspace_list.html.py:87
 msgid "Loading..."
 msgstr "Cargando..."
 
@@ -546,6 +551,7 @@ msgstr "Cargando..."
 #: templates/geoserver/create_layer_sql_view.html:258
 #: templates/layer_list.html:97 templates/layer_list.html.py:98
 #: templates/layergroup_list.html:94 templates/layergroup_list.html.py:95
+#: templates/lock_list.html:67 templates/lock_list.html.py:68
 #: templates/workspace_list.html:88 templates/workspace_list.html.py:89
 msgid "No records available"
 msgstr "No hay registros disponibles"
@@ -553,14 +559,14 @@ msgstr "No hay registros disponibles"
 #: templates/datastore_list.html:93 templates/enumeration_list.html.py:89
 #: templates/geoserver/create_layer_sql_view.html:260
 #: templates/layer_list.html:100 templates/layergroup_list.html.py:97
-#: templates/workspace_list.html:91
+#: templates/lock_list.html:70 templates/workspace_list.html.py:91
 msgid "First"
 msgstr "Primero"
 
 #: templates/datastore_list.html:94 templates/enumeration_list.html.py:90
 #: templates/geoserver/create_layer_sql_view.html:261
 #: templates/layer_list.html:101 templates/layergroup_list.html.py:98
-#: templates/workspace_list.html:92
+#: templates/lock_list.html:71 templates/workspace_list.html.py:92
 msgid "Previous"
 msgstr "Anterior"
 
@@ -568,21 +574,22 @@ msgstr "Anterior"
 #: templates/geoserver/create_layer_sql_view.html:262
 #: templates/layer_add.html:14 templates/layer_create.html.py:14
 #: templates/layer_list.html:102 templates/layer_update.html.py:131
-#: templates/layergroup_list.html:99 templates/workspace_list.html.py:93
+#: templates/layergroup_list.html:99 templates/lock_list.html.py:72
+#: templates/workspace_list.html:93
 msgid "Next"
 msgstr "Siguiente"
 
 #: templates/datastore_list.html:96 templates/enumeration_list.html.py:92
 #: templates/geoserver/create_layer_sql_view.html:263
 #: templates/layer_list.html:103 templates/layergroup_list.html.py:100
-#: templates/workspace_list.html:94
+#: templates/lock_list.html:73 templates/workspace_list.html.py:94
 msgid "Last"
 msgstr "Último"
 
 #: templates/datastore_list.html:99 templates/enumeration_list.html.py:95
 #: templates/geoserver/create_layer_sql_view.html:266
 #: templates/layer_list.html:106 templates/layergroup_list.html.py:103
-#: templates/workspace_list.html:97
+#: templates/lock_list.html:76 templates/workspace_list.html.py:97
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr "%(sep)sOrden ascendente"
@@ -590,7 +597,7 @@ msgstr "%(sep)sOrden ascendente"
 #: templates/datastore_list.html:100 templates/enumeration_list.html.py:96
 #: templates/geoserver/create_layer_sql_view.html:267
 #: templates/layer_list.html:107 templates/layergroup_list.html.py:104
-#: templates/workspace_list.html:98
+#: templates/lock_list.html:77 templates/workspace_list.html.py:98
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr "%(sep)sOrden descendente"
@@ -938,11 +945,11 @@ msgid "Add field"
 msgstr "Añadir campo"
 
 #: templates/layer_list.html:11
-msgid "Groups list"
-msgstr "List ade grupos"
+#| msgid "Layers"
+msgid "Layer list"
+msgstr "Lista de capas"
 
 #: templates/layer_list.html:23
-#| msgid "Previous"
 msgid "Preview"
 msgstr "Previsualización"
 
@@ -966,7 +973,7 @@ msgstr "Actualizar capa"
 msgid "Layer permissions"
 msgstr "Permisos de la capa"
 
-#: templates/layer_permissions_add.html:40
+#: templates/layer_permissions_add.html:40 templates/lock_list.html.py:19
 msgid "Layer"
 msgstr "Capa"
 
@@ -1047,6 +1054,28 @@ msgstr "El grupo de capas será eliminado, ¿Desea continuar?"
 msgid "Update layer group"
 msgstr "Actualizar grupo de capas"
 
+#: templates/lock_list.html:20
+msgid "Date"
+msgstr "Fecha"
+
+#: templates/lock_list.html:21
+#| msgid "Create"
+msgid "Created by"
+msgstr "Creado por"
+
+#: templates/lock_list.html:34
+msgid "GEOPORTAL"
+msgstr "GEOPORTAL"
+
+#: templates/lock_list.html:36
+msgid "MOBILE"
+msgstr "MÓVIL"
+
+#: templates/lock_list.html:83
+#| msgid "Upload layer"
+msgid "Unlock layer"
+msgstr "Desbloquear capa"
+
 #: templates/workspace_add.html:12 templates/workspace_list.html.py:13
 msgid "Add workspace"
 msgstr "Añadir espacio de trabajo"
@@ -1076,9 +1105,9 @@ msgid ""
 "an underscore (_). Subsequent characters can be letters, underscores or "
 "numbers"
 msgstr ""
-"nombre del workspace no válido: '{value}'. Los identificadores deben comenzar "
-"con una letra o un guion bajo (_). Los siguientes caracteres pueden ser "
-"letras, guiones o números"
+"nombre del workspace no válido: '{value}'. Los identificadores deben "
+"comenzar con una letra o un guion bajo (_). Los siguientes caracteres pueden "
+"ser letras, guiones o números"
 
 #: views.py:94
 msgid "Error: workspace could not be created"
@@ -1107,7 +1136,7 @@ msgstr "Almacén de datos no encontrado"
 msgid "Error updating datastore"
 msgstr "Error actualizndo el almacén de datos"
 
-#: views.py:689 views.py:760
+#: views.py:690 views.py:761
 #, python-brace-format
 msgid ""
 "Invalid layer group name: '{value}'. Identifiers must begin with a letter or "
@@ -1118,17 +1147,20 @@ msgstr ""
 "comenzar con una letra o un guión bajo (_). Los siguientes caracteres pueden "
 "ser letras, guiones, o números"
 
-#: views.py:708 views.py:773
+#: views.py:709 views.py:774
 msgid "Layer group name already exists"
 msgstr "El nombre del grupo de capas ya exsite"
 
-#: views.py:712
+#: views.py:713
 msgid "You must enter a name for layer group"
 msgstr "Debe introducir un nombre para el grupo de capas"
 
-#: views.py:981
+#: views.py:982
 msgid "You must enter a title for enumeration"
 msgstr "Debe introducir un título para la enumeración"
+
+#~ msgid "Groups list"
+#~ msgstr "List ade grupos"
 
 #~ msgid "Layer type"
 #~ msgstr "Tipo de capa"
@@ -1175,9 +1207,6 @@ msgstr "Debe introducir un título para la enumeración"
 
 #~ msgid "Elevation pattern doesn't match the uploaded file"
 #~ msgstr "El patrón de elevación no coincide con el fichero seleccionado"
-
-#~ msgid "Upload layer"
-#~ msgstr "Subir capa"
 
 #~ msgid "Import layer"
 #~ msgstr "Importar capa"

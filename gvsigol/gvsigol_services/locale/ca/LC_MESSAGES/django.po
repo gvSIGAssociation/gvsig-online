@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-12-21 13:00+0100\n"
+"POT-Creation-Date: 2016-12-22 10:22+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,7 +49,7 @@ msgid "Error publishing the layer. Backend error: {msg}"
 msgstr "Error publicant la capa. Error: {msg}"
 
 #: backend_mapservice.py:471 backend_mapservice.py:479
-#: backend_mapservice.py:490 views.py:387 views.py:893
+#: backend_mapservice.py:490 views.py:388 views.py:894
 msgid "Error: layer could not be published"
 msgstr "Error: La capa no pot ser publicada"
 
@@ -68,7 +68,8 @@ msgstr "Error: El grup de capes no pot ser publicat"
 msgid ""
 "Bad file format. The provided zip file must not contain any subdirectory."
 msgstr ""
-"Format d'arxiu incorrecte. L'arxiu zip proporcionada no ha de contenir cap subdirectori."
+"Format d'arxiu incorrecte. L'arxiu zip proporcionada no ha de contenir cap "
+"subdirectori."
 
 #: backend_mapservice.py:747 backend_mapservice.py:798
 #: backend_mapservice.py:970 backend_mapservice.py:1036
@@ -77,9 +78,9 @@ msgid ""
 "Invalid layer name: '{value}'. Identifiers must begin with a letter or an "
 "underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr ""
-"Nom de la capa no vàlid: '{value}'. Els identificadors han de començar "
-"amb una lletra o un guió baix (_). Els següents caràcters poden ser"
-"lletres, guions o nombres"
+"Nom de la capa no vàlid: '{value}'. Els identificadors han de començar amb "
+"una lletra o un guió baix (_). Els següents caràcters poden serlletres, "
+"guions o nombres"
 
 #: backend_mapservice.py:749 backend_mapservice.py:800
 #: backend_mapservice.py:848
@@ -89,9 +90,9 @@ msgid ""
 "Identifiers must begin with a letter or an underscore (_). Subsequent "
 "characters can be letters, underscores or numbers"
 msgstr ""
-"Els paràmetres de connexió de base de dades contenen un nom no vàlid: {value}. "
-"Els Identificadors han de començar amb una lletra o un guió baix (_). " 
-"Els següents caràcters poden ser lletres, guions o nombres"
+"Els paràmetres de connexió de base de dades contenen un nom no vàlid: "
+"{value}. Els Identificadors han de començar amb una lletra o un guió baix "
+"(_). Els següents caràcters poden ser lletres, guions o nombres"
 
 #: backend_mapservice.py:751 backend_mapservice.py:802
 #: backend_mapservice.py:850
@@ -101,9 +102,9 @@ msgid ""
 "must begin with a letter or an underscore (_). Subsequent characters can be "
 "letters, underscores or numbers"
 msgstr ""
-"Els paràmetres de connexió de base de dades contenen un nom d'usuari no vàlid: {value}. "
-"Els Identificadors han de començar amb una lletra o un guió baix (_). " 
-"Els següents caràcters poden ser lletres, guions o nombres"
+"Els paràmetres de connexió de base de dades contenen un nom d'usuari no "
+"vàlid: {value}. Els Identificadors han de començar amb una lletra o un guió "
+"baix (_). Els següents caràcters poden ser lletres, guions o nombres"
 
 #: backend_mapservice.py:753 backend_mapservice.py:804
 #: backend_mapservice.py:852
@@ -113,9 +114,9 @@ msgid ""
 "must begin with a letter or an underscore (_). Subsequent characters can be "
 "letters, underscores or numbers"
 msgstr ""
-"Els paràmetres de connexió de base de dades contenen un esquema no vàlid: {value}. "
-"Els Identificadors han de començar amb una lletra o un guió baix (_). " 
-"Els següents caràcters poden ser lletres, guions o nombres"
+"Els paràmetres de connexió de base de dades contenen un esquema no vàlid: "
+"{value}. Els Identificadors han de començar amb una lletra o un guió baix "
+"(_). Els següents caràcters poden ser lletres, guions o nombres"
 
 #: backend_mapservice.py:775 backend_mapservice.py:816
 msgid "Error uploading the layer. Review the file format."
@@ -388,6 +389,7 @@ msgstr ""
 #: forms_services.py:40 forms_services.py:70 templates/datastore_add.html:43
 #: templates/datastore_list.html.py:24
 #: templates/geoserver/create_layer_feature_type.html:77
+#: templates/lock_list.html:22
 msgid "Type"
 msgstr "Tipus"
 
@@ -417,7 +419,8 @@ msgstr "Error carregant la capa a PostGIS. Error de Ogr2ogr: {msg}"
 #: gdal_tools.py:158 gdal_tools.py:219
 #, python-brace-format
 msgid "Error exporting layer from PostGIS to Spatialite. Ogr2ogr error: {msg}"
-msgstr "Error exportant la capa d'PostGIS a Spatialite. Error de Ogr2ogr: {msg}"
+msgstr ""
+"Error exportant la capa d'PostGIS a Spatialite. Error de Ogr2ogr: {msg}"
 
 #: templates/dashboard_services_menu.html:4
 msgid "Services"
@@ -442,6 +445,10 @@ msgstr "Enumeracions"
 #: templates/dashboard_services_menu.html:14
 msgid "Layers"
 msgstr "Capes"
+
+#: templates/dashboard_services_menu.html:15 templates/lock_list.html.py:11
+msgid "Locks"
+msgstr "Bloquejos"
 
 #: templates/datastore_add.html:12 templates/datastore_list.html.py:13
 msgid "Add datastore"
@@ -488,14 +495,14 @@ msgstr "Acceptar"
 #: templates/datastore_list.html:82 templates/enumeration_list.html.py:78
 #: templates/geoserver/create_layer_sql_view.html:249
 #: templates/layer_list.html:89 templates/layergroup_list.html.py:86
-#: templates/workspace_list.html:80
+#: templates/lock_list.html:59 templates/workspace_list.html.py:80
 msgid "Processing request..."
 msgstr "Processant petició"
 
 #: templates/datastore_list.html:83 templates/enumeration_list.html.py:79
 #: templates/geoserver/create_layer_sql_view.html:250
 #: templates/layer_list.html:90 templates/layergroup_list.html.py:87
-#: templates/workspace_list.html:81
+#: templates/lock_list.html:60 templates/workspace_list.html.py:81
 #, python-format
 msgid "Search%(sep)s"
 msgstr "Cercar%(sep)s"
@@ -503,7 +510,7 @@ msgstr "Cercar%(sep)s"
 #: templates/datastore_list.html:84 templates/enumeration_list.html.py:80
 #: templates/geoserver/create_layer_sql_view.html:251
 #: templates/layer_list.html:91 templates/layergroup_list.html.py:88
-#: templates/workspace_list.html:82
+#: templates/lock_list.html:61 templates/workspace_list.html.py:82
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr "Mostrant %(numrecords)s registres"
@@ -511,7 +518,7 @@ msgstr "Mostrant %(numrecords)s registres"
 #: templates/datastore_list.html:85 templates/enumeration_list.html.py:81
 #: templates/geoserver/create_layer_sql_view.html:252
 #: templates/layer_list.html:92 templates/layergroup_list.html.py:89
-#: templates/workspace_list.html:83
+#: templates/lock_list.html:62 templates/workspace_list.html.py:83
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr "Mostrant des de %(start)s fins a %(end)s de %(numrecords)s registres"
@@ -519,14 +526,14 @@ msgstr "Mostrant des de %(start)s fins a %(end)s de %(numrecords)s registres"
 #: templates/datastore_list.html:86 templates/enumeration_list.html.py:82
 #: templates/geoserver/create_layer_sql_view.html:253
 #: templates/layer_list.html:93 templates/layergroup_list.html.py:90
-#: templates/workspace_list.html:84
+#: templates/lock_list.html:63 templates/workspace_list.html.py:84
 msgid "Showing from 0 to 0 of 0 records"
 msgstr "Mostrant des de 0 fins a 0 de 0 registres"
 
 #: templates/datastore_list.html:87 templates/enumeration_list.html.py:83
 #: templates/geoserver/create_layer_sql_view.html:254
 #: templates/layer_list.html:94 templates/layergroup_list.html.py:91
-#: templates/workspace_list.html:85
+#: templates/lock_list.html:64 templates/workspace_list.html.py:85
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr "Filtrant %(max)s registres"
@@ -534,7 +541,7 @@ msgstr "Filtrant %(max)s registres"
 #: templates/datastore_list.html:89 templates/enumeration_list.html.py:85
 #: templates/geoserver/create_layer_sql_view.html:256
 #: templates/layer_list.html:96 templates/layergroup_list.html.py:93
-#: templates/workspace_list.html:87
+#: templates/lock_list.html:66 templates/workspace_list.html.py:87
 msgid "Loading..."
 msgstr "Carregant..."
 
@@ -544,6 +551,7 @@ msgstr "Carregant..."
 #: templates/geoserver/create_layer_sql_view.html:258
 #: templates/layer_list.html:97 templates/layer_list.html.py:98
 #: templates/layergroup_list.html:94 templates/layergroup_list.html.py:95
+#: templates/lock_list.html:67 templates/lock_list.html.py:68
 #: templates/workspace_list.html:88 templates/workspace_list.html.py:89
 msgid "No records available"
 msgstr "No hi ha registres disponibles"
@@ -551,14 +559,14 @@ msgstr "No hi ha registres disponibles"
 #: templates/datastore_list.html:93 templates/enumeration_list.html.py:89
 #: templates/geoserver/create_layer_sql_view.html:260
 #: templates/layer_list.html:100 templates/layergroup_list.html.py:97
-#: templates/workspace_list.html:91
+#: templates/lock_list.html:70 templates/workspace_list.html.py:91
 msgid "First"
 msgstr "Primer"
 
 #: templates/datastore_list.html:94 templates/enumeration_list.html.py:90
 #: templates/geoserver/create_layer_sql_view.html:261
 #: templates/layer_list.html:101 templates/layergroup_list.html.py:98
-#: templates/workspace_list.html:92
+#: templates/lock_list.html:71 templates/workspace_list.html.py:92
 msgid "Previous"
 msgstr "Anterior"
 
@@ -566,21 +574,22 @@ msgstr "Anterior"
 #: templates/geoserver/create_layer_sql_view.html:262
 #: templates/layer_add.html:14 templates/layer_create.html.py:14
 #: templates/layer_list.html:102 templates/layer_update.html.py:131
-#: templates/layergroup_list.html:99 templates/workspace_list.html.py:93
+#: templates/layergroup_list.html:99 templates/lock_list.html.py:72
+#: templates/workspace_list.html:93
 msgid "Next"
 msgstr "Següent"
 
 #: templates/datastore_list.html:96 templates/enumeration_list.html.py:92
 #: templates/geoserver/create_layer_sql_view.html:263
 #: templates/layer_list.html:103 templates/layergroup_list.html.py:100
-#: templates/workspace_list.html:94
+#: templates/lock_list.html:73 templates/workspace_list.html.py:94
 msgid "Last"
 msgstr "Últim"
 
 #: templates/datastore_list.html:99 templates/enumeration_list.html.py:95
 #: templates/geoserver/create_layer_sql_view.html:266
 #: templates/layer_list.html:106 templates/layergroup_list.html.py:103
-#: templates/workspace_list.html:97
+#: templates/lock_list.html:76 templates/workspace_list.html.py:97
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr "%(sep)sOrdre ascendent"
@@ -588,7 +597,7 @@ msgstr "%(sep)sOrdre ascendent"
 #: templates/datastore_list.html:100 templates/enumeration_list.html.py:96
 #: templates/geoserver/create_layer_sql_view.html:267
 #: templates/layer_list.html:107 templates/layergroup_list.html.py:104
-#: templates/workspace_list.html:98
+#: templates/lock_list.html:77 templates/workspace_list.html.py:98
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr "%(sep)sOrdre descendent"
@@ -936,8 +945,9 @@ msgid "Add field"
 msgstr "Anyadir camp"
 
 #: templates/layer_list.html:11
-msgid "Groups list"
-msgstr "Llistat de grups"
+#| msgid "Layers"
+msgid "Layer list"
+msgstr "Llistat de capes"
 
 #: templates/layer_list.html:23
 msgid "Preview"
@@ -963,7 +973,7 @@ msgstr "Actualitzar capa"
 msgid "Layer permissions"
 msgstr "Permisos de la capa"
 
-#: templates/layer_permissions_add.html:40
+#: templates/layer_permissions_add.html:40 templates/lock_list.html.py:19
 msgid "Layer"
 msgstr "Capa"
 
@@ -1000,7 +1010,8 @@ msgid ""
 "\t\t\t\t\t\t\t\tcreation persistently fails"
 msgstr ""
 "La capa s'ha creat correctament, però \n"
-"\t\t\t\t\t\t\t\tla creació de la metadada ha fallat. Podeu crear directament la \n"
+"\t\t\t\t\t\t\t\tla creació de la metadada ha fallat. Podeu crear directament "
+"la \n"
 "\t\t\t\t\t\t\t\tmetadada en el catàleg i copiar el UUID \n"
 "\t\t\t\t\t\t\t\ta aquest formulari. \n"
 "\t\t\t\t\t\t\t\tPer favor contacti amb l'administrador del sistema si \n"
@@ -1043,6 +1054,28 @@ msgstr "El grup de capes serà eliminat, desitja continuar?"
 msgid "Update layer group"
 msgstr "Actualitzar grup de capes"
 
+#: templates/lock_list.html:20
+msgid "Date"
+msgstr "Data"
+
+#: templates/lock_list.html:21
+#| msgid "Create"
+msgid "Created by"
+msgstr "Creat per"
+
+#: templates/lock_list.html:34
+msgid "GEOPORTAL"
+msgstr "GEOPORTAL"
+
+#: templates/lock_list.html:36
+msgid "MOBILE"
+msgstr "MÒBIL"
+
+#: templates/lock_list.html:83
+#| msgid "Upload vector layer"
+msgid "Unlock layer"
+msgstr "Desbloquejar capa"
+
 #: templates/workspace_add.html:12 templates/workspace_list.html.py:13
 msgid "Add workspace"
 msgstr "Anyadir espai de treball"
@@ -1062,8 +1095,7 @@ msgstr "Eliminar espai de treball"
 #: templates/workspace_list.html:59
 msgid ""
 "The workspace and its registered data stores and resources will be deleted"
-msgstr ""
-"L'espai de treball i els recursos assignats al mateix seran eliminats"
+msgstr "L'espai de treball i els recursos assignats al mateix seran eliminats"
 
 #: views.py:75
 #, python-brace-format
@@ -1072,8 +1104,8 @@ msgid ""
 "an underscore (_). Subsequent characters can be letters, underscores or "
 "numbers"
 msgstr ""
-"Nom de l'espai de treball no vàlid: '{value}'. Els identificadors han de començar "
-"amb una lletra o un guió baix (_). Els següents caràcters poden ser "
+"Nom de l'espai de treball no vàlid: '{value}'. Els identificadors han de "
+"començar amb una lletra o un guió baix (_). Els següents caràcters poden ser "
 "lletres, guions o números"
 
 #: views.py:94
@@ -1087,9 +1119,9 @@ msgid ""
 "an underscore (_). Subsequent characters can be letters, underscores or "
 "numbers"
 msgstr ""
-"Nom del magatzem no vàlid: '{value}'. Els identificadors han de començar "
-"amb una lletra o un guió baix (_). Els següents caràcters poden ser "
-"lletres, guions o números"
+"Nom del magatzem no vàlid: '{value}'. Els identificadors han de començar amb "
+"una lletra o un guió baix (_). Els següents caràcters poden ser lletres, "
+"guions o números"
 
 #: views.py:203
 msgid "Error: Data store could not be created"
@@ -1103,25 +1135,28 @@ msgstr "Magatzem de dades no trobat"
 msgid "Error updating datastore"
 msgstr "Error actualitzant magatzem"
 
-#: views.py:689 views.py:760
+#: views.py:690 views.py:761
 #, python-brace-format
 msgid ""
 "Invalid layer group name: '{value}'. Identifiers must begin with a letter or "
 "an underscore (_). Subsequent characters can be letters, underscores or "
 "numbers"
 msgstr ""
-"Nom del grup de capes no vàlid: '{value}'. Els identificadors han de començar "
-"amb una lletra o un guió baix (_). Els següents caràcters poden ser "
+"Nom del grup de capes no vàlid: '{value}'. Els identificadors han de "
+"començar amb una lletra o un guió baix (_). Els següents caràcters poden ser "
 "lletres, guions o números"
 
-#: views.py:708 views.py:773
+#: views.py:709 views.py:774
 msgid "Layer group name already exists"
 msgstr "El nom del grup de capes ja existeix"
 
-#: views.py:712
+#: views.py:713
 msgid "You must enter a name for layer group"
 msgstr "Ha d'introduir un nom per al grup de capes"
 
-#: views.py:981
+#: views.py:982
 msgid "You must enter a title for enumeration"
 msgstr "Ha d'introduir un títol pe l'enumeració"
+
+#~ msgid "Groups list"
+#~ msgstr "Llistat de grups"
