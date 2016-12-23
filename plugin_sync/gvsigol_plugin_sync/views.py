@@ -371,7 +371,7 @@ def _copy_images(layers, db_path):
             # We should investigate if we can pass an iterable to cursor.execute.
             # It seems to NOT be supported for the moment, but we can check again in future versions 
             thumb_buffer = BytesIO()
-            abs_path = abs_server_path = os.path.join(settings.MEDIA_ROOT, r.path)
+            abs_path = os.path.join(settings.MEDIA_ROOT, r.path)
             img = Image.open(abs_path)
             img.thumbnail([100, 100])
             img.save(thumb_buffer, "JPEG")
