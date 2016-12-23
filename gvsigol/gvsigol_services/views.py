@@ -1193,24 +1193,22 @@ def get_datatable_data(request):
             
         else:
             properties = properties_with_type.split(',')
-            aux_property_name = ''
             encoded_value = search_value.encode('ascii', 'replace')
             
             filter = '<Filter>'
             filter += '<Or>'
             for p in properties:
                 if p.split('|')[1] == 'xsd:string':
-                    aux_property_name += p.split('|')[0] + ','
                     filter += '<PropertyIsLike matchCase="false" wildCard="*" singleChar="." escape="!">'
                     filter += '<PropertyName>' + p.split('|')[0] + '</PropertyName>'
                     filter += '<Literal>*' + encoded_value.replace('?', '.') + '*' + '</Literal>'
                     filter += '</PropertyIsLike>'
                 elif p.split('|')[1] == 'xsd:double' or p.split('|')[1] == 'xsd:decimal' or p.split('|')[1] == 'xsd:integer' or p.split('|')[1] == 'xsd:int' or p.split('|')[1] == 'xsd:long':
-                    aux_property_name += p.split('|')[0] + ','
-                    filter += '<PropertyIsEqualTo>'
-                    filter += '<PropertyName>' + p.split('|')[0] + '</PropertyName>'
-                    filter += '<Literal>' + search_value + '</Literal>'
-                    filter += '</PropertyIsEqualTo>'
+                    if search_value.isdigit():
+                        filter += '<PropertyIsEqualTo>'
+                        filter += '<PropertyName>' + p.split('|')[0] + '</PropertyName>'
+                        filter += '<Literal>' + search_value + '</Literal>'
+                        filter += '</PropertyIsEqualTo>'
             filter += '</Or>'
             filter += '</Filter>'
             
