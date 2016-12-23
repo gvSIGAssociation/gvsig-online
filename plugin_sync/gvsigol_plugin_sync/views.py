@@ -55,6 +55,8 @@ from gvsigol_services.backend_mapservice import backend as mapservice_backend
 
 DEFAULT_BUFFER_SIZE = 1048576
 
+logger = logging.getLogger(__name__)
+
 
 @require_safe
 def get_layerinfo(request):
@@ -205,7 +207,7 @@ def sync_download(request):
     except Exception as exc:
         for layer in locks:
             remove_layer_lock(lock.layer, request.user)
-        logging.error("sync_download error")
+        logger.exception("sync_download error")
         return HttpResponseBadRequest("Bad request")
 
 
