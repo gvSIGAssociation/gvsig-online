@@ -50,6 +50,7 @@ import utils
 import json
 import re
 import os
+logger = logging.getLogger(__name__)
 
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
@@ -1106,10 +1107,13 @@ def get_feature_info(request):
                 fields = layer_conf.get('fields')
                 for i in range(0, len(geojson['features'])):
                     fid = geojson['features'][i].get('id').split('.')[1]
+                    logger.debug("Feature info - resources - feature id: " + str(fid))
                     layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
                     resources = []
                     for lr in layer_resources:
+                        logger.debug("Feature info - resources - lr.path: " + str(lr.path))
                         abs_server_path = os.path.join(settings.MEDIA_URL, lr.path)
+                        logger.debug("Feature info - resources - abspath: " + abs_server_path)
                         type = 'image' 
                         resource = {
                             'type': type,
@@ -1131,10 +1135,13 @@ def get_feature_info(request):
             else: 
                 for i in range(0, len(geojson['features'])):
                     fid = geojson['features'][i].get('id').split('.')[1]
+                    logger.debug("Feature info - resources - feature id: " + str(fid))
                     layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
                     resources = []
                     for lr in layer_resources:
+                        logger.debug("Feature info - resources - lr.path: " + str(lr.path))
                         abs_server_path = os.path.join(settings.MEDIA_URL, lr.path)
+                        logger.debug("Feature info - resources - abspath: " + abs_server_path)
                         type = 'image' 
                         resource = {
                             'type': type,
