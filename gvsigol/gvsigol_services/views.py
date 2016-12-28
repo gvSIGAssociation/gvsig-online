@@ -1092,7 +1092,7 @@ def get_feature_info(request):
         features = None           
         try:
             w = Workspace.objects.get(name__exact=ws)
-            logger.debug("Feature info - ws" + str(ws.name))
+            logger.debug("Feature info - ws" + str(w.name))
             ds = Datastore.objects.get(workspace=w)
             logger.debug("Feature info - ws" + str(ds.name))
             layers = Layer.objects.filter(name__exact=query_layer)
