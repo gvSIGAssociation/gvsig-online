@@ -1163,7 +1163,7 @@ def get_feature_info(request):
                 features = geojson['features']
             
         except Exception as e:
-            logger.exeption("get_feature_info")
+            logger.exception("get_feature_info")
             response = req.get(url, verify=False)
             geojson = json.loads(response.text)
             features = geojson['features']
