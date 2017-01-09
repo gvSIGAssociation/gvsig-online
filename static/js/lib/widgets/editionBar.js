@@ -29,6 +29,7 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	var this_ = this;
 	this.map = map;
 	this.layerTree = layerTree;
+	this.resourceManager = new ResourceManager(layerTree.conf);
 	this.selectedLayer = selectedLayer;
 	this.featureType = featureType;
 	this.detailsTab = $('#details-tab');
@@ -579,15 +580,6 @@ editionBar.prototype.createFeatureForm = function(feature) {
 		featureProperties += 	'</div>';
 		featureProperties += '</div>';
 		
-		var featureResources = '';
-		featureResources += '<div class="box">';
-		featureResources += 	'<div id="upload-resources">';
-		featureResources += 		'<div id="fileupload-component" class="fileupload-component"></div>';
-		featureResources += 	'</div>';
-		featureResources += 	'<div id="resources-list">';
-		featureResources += 	'</div>';
-		featureResources += '</div>';
-		
 		var ui = '';
 		ui += '<div class="nav-tabs-custom">';
 		ui += 	'<ul class="nav nav-tabs">';
@@ -599,7 +591,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 		ui += 			featureProperties
 		ui += 		'</div>';
 		ui += 		'<div class="tab-pane" id="edit_feature_resources">';
-		ui += 			featureResources;
+		ui += 			this.resourceManager.getUI();
 		ui += 		'</div>';
 		ui += 	'</div>';
 		ui += '</div>';
@@ -607,23 +599,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 		this.detailsTab.append(ui);
 		$.gvsigOL.controlSidebar.open();
 		
-		var fileupload = $('#fileupload-component');
-		var path = '';
-	  	fileupload.uploadFile({
-		   	url: '/gvsigonline/services/upload_resources/',
-		   	fileName: 'resource',
-		   	multiple: true,
-		   	autoSubmit:false,
-		   	formData: {},
-		   	onSuccess: function(files,data,xhr){
-		   		console.log('Update resource list');
-	    	},
-		   	afterUploadAll: function(files,data,xhr){
-		   		$.overlayout();
-	    		console.log('All resources has been uploaded');
-	    	},
-	    	onError: function(files,status,errMsg){}
-		});
+		var uploader = this.resourceManager.createUploader();
 		
 		$('#save-feature').on('click', function () {
 			var properties = {};
@@ -640,14 +616,14 @@ editionBar.prototype.createFeatureForm = function(feature) {
 			feature.setProperties(properties);
 			var transaction = self.transactWFS('insert', feature);
 			if (transaction.success) {
-				if (fileupload.getFileCount() >= 1) {
+				if (uploader.getFileCount() >= 1) {
 					$("body").overlay();
-					fileupload.appendExtraParams({
+					uploader.appendExtraParams({
 						layer_name: self.selectedLayer.layer_name,
 						workspace: self.selectedLayer.workspace,
 						fid: transaction.fid
 					});
-					fileupload.startUpload();
+					uploader.startUpload();
 				}
 				self.selectedLayer.getSource().updateParams({"time": Date.now()});
 				self.showLayersTab();
@@ -720,19 +696,7 @@ editionBar.prototype.editFeatureForm = function(feature) {
 		featureProperties += 		'<button id="edit-feature" class="btn btn-default margin-r-5">' + gettext('Save') + '</button>';
 		featureProperties += 		'<button id="edit-feature-cancel" class="btn btn-default">' + gettext('Cancel') + '</button>';
 		featureProperties += 	'</div>';
-		featureProperties += '</div>';
-		
-		var featureResources = '';
-		featureResources += '<div class="box">';
-		featureResources += 	'<div id="upload-resources">';
-		featureResources += 		'<div id="fileupload-component" class="fileupload-component"></div>';
-		featureResources += 		'<div style="margin-top: 30px;">';
-		featureResources += 			'<button id="upload-button" type="submit" class="btn btn-default btn-block"><i class="fa fa-upload margin-r-5"></i> ' + gettext('Upload') + '</button>';				
-		featureResources += 		'</div>';
-		featureResources += 	'</div>';
-		featureResources += 	'<div id="resources-list">';
-		featureResources += 	'</div>';
-		featureResources += '</div>';
+		featureProperties += '</div>';	
 		
 		var ui = '';
 		ui += '<div class="nav-tabs-custom">';
@@ -745,7 +709,7 @@ editionBar.prototype.editFeatureForm = function(feature) {
 		ui += 			featureProperties
 		ui += 		'</div>';
 		ui += 		'<div class="tab-pane" id="edit_feature_resources">';
-		ui += 			featureResources;
+		ui += 			this.resourceManager.getUI();
 		ui += 		'</div>';
 		ui += 	'</div>';
 		ui += '</div>';
@@ -753,33 +717,8 @@ editionBar.prototype.editFeatureForm = function(feature) {
 		this.detailsTab.append(ui);
 		$.gvsigOL.controlSidebar.open();
 		
-		var fileupload = $('#fileupload-component');
-		var path = '';
-	  	fileupload.uploadFile({
-		   	url: '/gvsigonline/services/upload_resources/',
-		   	fileName: 'resource',
-		   	multiple: true,
-		   	autoSubmit:false,
-		   	formData: {},
-		   	onSuccess: function(files,data,xhr){
-		   		console.log('Update resource list');
-	    	},
-		   	afterUploadAll: function(files,data,xhr){
-		   		$.overlayout();
-	    		console.log('All resources has been uploaded');
-	    	},
-	    	onError: function(files,status,errMsg){}
-		});
-	  	
-	  	$('#upload-button').on('click', function () {
-	  		if (fileupload.getFileCount() >= 1) {
-	  			$("body").overlay();
-	  			//fileupload.appendExtraParams({});
-				fileupload.startUpload();
-	  		} else {
-	  			messageBox.show('warning', gettext('You must select a file'));
-	  		}
-		});
+		this.resourceManager.loadResources(this.selectedLayer, feature);
+		var uploader = this.resourceManager.createUploader();
 		
 		$('#edit-feature').on('click', function () {
 			var properties = {};
@@ -798,6 +737,15 @@ editionBar.prototype.editFeatureForm = function(feature) {
 			feature.setProperties(properties);
 			var transaction = self.transactWFS('update', feature);
 			if (transaction.success) {
+				if (uploader.getFileCount() >= 1) {
+					$("body").overlay();
+					uploader.appendExtraParams({
+						layer_name: self.selectedLayer.layer_name,
+						workspace: self.selectedLayer.workspace,
+						fid: transaction.fid
+					});
+					uploader.startUpload();
+				}
 				self.selectedLayer.getSource().updateParams({"time": Date.now()});
 				self.selectInteraction.getFeatures().clear();
 				self.showLayersTab();
@@ -861,10 +809,13 @@ editionBar.prototype.removeFeatureForm = function(evt, feature) {
 	$('#remove-feature').on('click', function () {
 		var transaction = self.transactWFS('delete', feature);
 		if (transaction.success) {
-			self.wfsLayer.getSource().removeFeature(feature);
-			self.removeInteraction.getFeatures().clear();
-			self.selectedLayer.getSource().updateParams({"time": Date.now()});
-			self.showLayersTab();
+			var deleted = self.resourceManager.deleteResources(self.selectedLayer, feature);
+			if (deleted) {
+				self.wfsLayer.getSource().removeFeature(feature);
+				self.removeInteraction.getFeatures().clear();
+				self.selectedLayer.getSource().updateParams({"time": Date.now()});
+				self.showLayersTab();
+			}
 		}		
 	});
 	
@@ -966,8 +917,12 @@ editionBar.prototype.transactWFS = function(p,f) {
 	}).success(function(response, status, request) {
 		try {
 			var resp = self.formatWFS.readTransactionResponse(response);
-			f.setId(resp.insertIds[0]);
-			fid = resp.insertIds[0].split('.')[1];
+			if (resp.insertIds[0] == 'none') {
+				fid = f.getId().split('.')[1];
+			} else {
+				f.setId(resp.insertIds[0]);
+				fid = resp.insertIds[0].split('.')[1];
+			}
 			success = true;
 			if (p=="insert"||p=="update") {
 				/* Trigger a bounding box recalculating after insertions or
