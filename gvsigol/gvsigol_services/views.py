@@ -27,6 +27,7 @@ from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpRespon
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
 from django.shortcuts import render_to_response, redirect, RequestContext
 from backend_mapservice import gn_backend, backend as mapservice_backend
+from gvsigol_services.backend_resources import resource_manager
 from gvsigol_auth.utils import superuser_required, staff_required
 from gvsigol_core.models import ProjectLayerGroup, PublicViewer
 from django.contrib.auth.decorators import login_required
@@ -1328,6 +1329,37 @@ def unlock_layer(request, lock_id):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @csrf_exempt
+def get_feature_resources(request):
+    if request.method == 'POST':      
+        query_layer = request.POST.get('query_layer')
+        workspace = request.POST.get('workspace')
+        fid = request.POST.get('fid')
+        try:
+            layer = Layer.objects.get(name=query_layer, datastore__workspace__name=workspace)
+            layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=int(fid))
+            resources = []
+            for lr in layer_resources:
+                abs_server_path = os.path.join(settings.MEDIA_URL, lr.path)
+                type = 'image' 
+                resource = {
+                    'type': type,
+                    'url': abs_server_path,
+                    'rid': lr.id
+                }
+                resources.append(resource)
+
+            
+        except Exception as e:
+            print e.message
+                
+        response = {
+            'resources': resources
+        }
+
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@csrf_exempt
 def upload_resources(request):
     if request.method == 'POST':
         ws_name = request.POST.get('workspace')
@@ -1337,7 +1369,7 @@ def upload_resources(request):
             layer_name = layer_name.split(":")[1]
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=ws_name)
         if 'resource' in request.FILES:
-            (saved, path) = utils.save_resource(request.FILES['resource'])
+            (saved, path) = resource_manager.save_resource(request.FILES['resource'])
             if saved:
                 res = LayerResource()
                 res.feature = int(fid)
@@ -1356,8 +1388,39 @@ def upload_resources(request):
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @csrf_exempt
-def delete_resource(request, rid):
-    response = {
-        'success': True
-    }
-    return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+def delete_resource(request):
+    if request.method == 'POST':
+        rid = request.POST.get('rid')
+        try:
+            resource = LayerResource.objects.get(id=int(rid)) 
+            resource.delete()
+            resource_manager.delete_resource(resource)
+            response = {'deleted': True}
+            
+        except Exception as e:
+            response = {'deleted': False}
+            pass
+        
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@csrf_exempt
+def delete_resources(request):
+    if request.method == 'POST':      
+        query_layer = request.POST.get('query_layer')
+        workspace = request.POST.get('workspace')
+        fid = request.POST.get('fid')
+        try:
+            layer = Layer.objects.get(name=query_layer, datastore__workspace__name=workspace)
+            layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=int(fid))
+            for resource in layer_resources:
+                resource_manager.delete_resource(resource)
+                resource.delete()
+            response = {'deleted': True}
+    
+        except Exception as e:
+            print e.message
+            response = {'deleted': False}
+            pass
+
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
