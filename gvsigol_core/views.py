@@ -534,7 +534,8 @@ def project_get_conf(request):
             'tools': gvsigol.settings.GVSIGOL_TOOLS,
             'base_layers': gvsigol.settings.GVSIGOL_BASE_LAYERS,
             'is_public_project': False,
-            'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL'])
+            'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL']),
+            'resource_manager': gvsigol.settings.GVSIGOL_RESOURCE_MANAGER
         } 
         
         return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
@@ -728,7 +729,8 @@ def public_viewer_get_conf(request):
             'tools': gvsigol.settings.GVSIGOL_TOOLS,
             'base_layers': gvsigol.settings.GVSIGOL_BASE_LAYERS,
             'is_public_project': True,
-            'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL'])
+            'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL']),
+            'resource_manager': gvsigol.settings.GVSIGOL_RESOURCE_MANAGER
         } 
         
         return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
