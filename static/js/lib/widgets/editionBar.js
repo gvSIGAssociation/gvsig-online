@@ -29,7 +29,12 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	var this_ = this;
 	this.map = map;
 	this.layerTree = layerTree;
-	this.resourceManager = new ResourceManager(layerTree.conf);
+	this.resourceManager = null;
+	if (layerTree.conf.resource_manager == 'gvsigol') {
+		this.resourceManager = new GvsigolResourceManager();
+	} else if (layerTree.conf.resource_manager == 'alfresco') {
+		this.resourceManager = new AlfrescoResourceManager();
+	}
 	this.selectedLayer = selectedLayer;
 	this.featureType = featureType;
 	this.detailsTab = $('#details-tab');
@@ -599,7 +604,10 @@ editionBar.prototype.createFeatureForm = function(feature) {
 		this.detailsTab.append(ui);
 		$.gvsigOL.controlSidebar.open();
 		
-		var uploader = this.resourceManager.createUploader();
+		var uploader = null;
+		if (this.resourceManager.getEngine() == 'gvsigol') {
+			uploader = this.resourceManager.createUploader();
+		}
 		
 		$('#save-feature').on('click', function () {
 			var properties = {};
@@ -616,14 +624,16 @@ editionBar.prototype.createFeatureForm = function(feature) {
 			feature.setProperties(properties);
 			var transaction = self.transactWFS('insert', feature);
 			if (transaction.success) {
-				if (uploader.getFileCount() >= 1) {
-					$("body").overlay();
-					uploader.appendExtraParams({
-						layer_name: self.selectedLayer.layer_name,
-						workspace: self.selectedLayer.workspace,
-						fid: transaction.fid
-					});
-					uploader.startUpload();
+				if (self.resourceManager.getEngine() == 'gvsigol') {
+					if (uploader.getFileCount() >= 1) {
+						$("body").overlay();
+						uploader.appendExtraParams({
+							layer_name: self.selectedLayer.layer_name,
+							workspace: self.selectedLayer.workspace,
+							fid: transaction.fid
+						});
+						uploader.startUpload();
+					}
 				}
 				self.selectedLayer.getSource().updateParams({"time": Date.now()});
 				self.showLayersTab();
@@ -716,9 +726,12 @@ editionBar.prototype.editFeatureForm = function(feature) {
 		
 		this.detailsTab.append(ui);
 		$.gvsigOL.controlSidebar.open();
-		
-		this.resourceManager.loadResources(this.selectedLayer, feature);
-		var uploader = this.resourceManager.createUploader();
+
+		var uploader = null;
+		if (this.resourceManager.getEngine() == 'gvsigol') {
+			this.resourceManager.loadResources(this.selectedLayer, feature);
+			uploader = this.resourceManager.createUploader();
+		}
 		
 		$('#edit-feature').on('click', function () {
 			var properties = {};
@@ -737,14 +750,16 @@ editionBar.prototype.editFeatureForm = function(feature) {
 			feature.setProperties(properties);
 			var transaction = self.transactWFS('update', feature);
 			if (transaction.success) {
-				if (uploader.getFileCount() >= 1) {
-					$("body").overlay();
-					uploader.appendExtraParams({
-						layer_name: self.selectedLayer.layer_name,
-						workspace: self.selectedLayer.workspace,
-						fid: transaction.fid
-					});
-					uploader.startUpload();
+				if (self.resourceManager.getEngine() == 'gvsigol') {
+					if (uploader.getFileCount() >= 1) {
+						$("body").overlay();
+						uploader.appendExtraParams({
+							layer_name: self.selectedLayer.layer_name,
+							workspace: self.selectedLayer.workspace,
+							fid: transaction.fid
+						});
+						uploader.startUpload();
+					}
 				}
 				self.selectedLayer.getSource().updateParams({"time": Date.now()});
 				self.selectInteraction.getFeatures().clear();

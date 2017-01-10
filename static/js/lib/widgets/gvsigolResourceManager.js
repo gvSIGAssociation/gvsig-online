@@ -24,36 +24,29 @@
 /**
  * TODO
  */
-var ResourceManager = function(conf) {
-	this.conf = conf;
+var GvsigolResourceManager = function() {
+	this.engine = 'gvsigol';
 	this.initialize();
 };
 
 /**
  * TODO.
  */
-ResourceManager.prototype.initialize = function() {
+GvsigolResourceManager.prototype.initialize = function() {
 	var self = this;
 };
 
 /**
  * TODO.
  */
-ResourceManager.prototype.getUI = function() {
-	var ui = '';
-	if (this.conf.resource_manager.ENGINE == 'gvsigol') {
-		ui = this.getCustomUI();
-	} else if (this.conf.resource_manager.ENGINE == 'alfresco') {
-		ui = this.getAlfrescoUI();
-	}
-	
-	return ui;
+GvsigolResourceManager.prototype.getEngine = function() {
+	return this.engine;
 };
 
 /**
  * TODO.
  */
-ResourceManager.prototype.getCustomUI = function() {
+GvsigolResourceManager.prototype.getUI = function() {
 	var ui = '';
 	ui += '<div class="box">';
 	ui += 	'<div id="upload-resources">';
@@ -69,7 +62,7 @@ ResourceManager.prototype.getCustomUI = function() {
 /**
  * TODO.
  */
-ResourceManager.prototype.createUploader = function() {
+GvsigolResourceManager.prototype.createUploader = function() {
 	var uploader = $('#fileupload-component');
 	uploader.uploadFile({
 	   	url: '/gvsigonline/services/upload_resources/',
@@ -96,7 +89,7 @@ ResourceManager.prototype.createUploader = function() {
 /**
  * TODO.
  */
-ResourceManager.prototype.loadResources = function(layer, feature) {
+GvsigolResourceManager.prototype.loadResources = function(layer, feature) {
 	var self = this;
 	var resourceList = $('#resources-list');
 	var resources = this.getFeatureResources(layer, feature);
@@ -133,7 +126,7 @@ ResourceManager.prototype.loadResources = function(layer, feature) {
 /**
  * TODO.
  */
-ResourceManager.prototype.deleteResource = function(rid) {
+GvsigolResourceManager.prototype.deleteResource = function(rid) {
 	var deleted = false;
 	$.ajax({
 		type: 'POST',
@@ -156,7 +149,7 @@ ResourceManager.prototype.deleteResource = function(rid) {
 /**
  * TODO.
  */
-ResourceManager.prototype.deleteResources = function(layer, feature) {
+GvsigolResourceManager.prototype.deleteResources = function(layer, feature) {
 	var deleted = false;
 	$.ajax({
 		type: 'POST',
@@ -181,7 +174,7 @@ ResourceManager.prototype.deleteResources = function(layer, feature) {
 /**
  * TODO.
  */
-ResourceManager.prototype.getFeatureResources = function(layer, feature) {
+GvsigolResourceManager.prototype.getFeatureResources = function(layer, feature) {
 	var resources = null;
 	$.ajax({
 		type: 'POST',
@@ -199,20 +192,4 @@ ResourceManager.prototype.getFeatureResources = function(layer, feature) {
 	});
 	
 	return resources;
-};
-
-/**
- * TODO.
- */
-ResourceManager.prototype.getAlfrescoUI = function() {
-	var ui = '';
-	ui += '<div class="box">';
-	ui += 	'<div id="upload-resources">';
-	ui += 		'<div id="fileupload-component" class="fileupload-component"></div>';
-	ui += 	'</div>';
-	ui += 	'<div id="resources-list">';
-	ui += 	'</div>';
-	ui += '</div>';
-	
-	return ui;
 };
