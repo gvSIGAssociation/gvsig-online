@@ -42,3 +42,5 @@ python-dateutil==2.5.2
 
 argparse==1.2.1
 wsgiref==0.1.2
+
+cmislib==0.5.1
