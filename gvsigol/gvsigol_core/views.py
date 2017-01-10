@@ -510,6 +510,10 @@ def project_get_conf(request):
                 layer_groups.append(conf_group)
             
         ordered_layer_groups = sorted(layer_groups, key=itemgetter('groupOrder'), reverse=True)
+        
+        resource_manager = 'gvsigol'
+        if 'gvsigol_plugin_alfresco' in gvsigol.settings.INSTALLED_APPS:
+            resource_manager = 'alfresco'
             
         conf = {
             'pid': pid,
@@ -535,7 +539,7 @@ def project_get_conf(request):
             'base_layers': gvsigol.settings.GVSIGOL_BASE_LAYERS,
             'is_public_project': False,
             'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL']),
-            'resource_manager': gvsigol.settings.GVSIGOL_RESOURCE_MANAGER
+            'resource_manager': resource_manager
         } 
         
         return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
@@ -715,6 +719,10 @@ def public_viewer_get_conf(request):
                 layer_groups.append(conf_group)
             
         ordered_layer_groups = sorted(layer_groups, key=itemgetter('groupOrder'), reverse=True)
+        
+        resource_manager = 'gvsigol'
+        if 'gvsigol_plugin_alfresco' in gvsigol.settings.INSTALLED_APPS:
+            resource_manager = 'alfresco'
             
         conf = {
             'pid': pid,
@@ -730,7 +738,7 @@ def public_viewer_get_conf(request):
             'base_layers': gvsigol.settings.GVSIGOL_BASE_LAYERS,
             'is_public_project': True,
             'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL']),
-            'resource_manager': gvsigol.settings.GVSIGOL_RESOURCE_MANAGER
+            'resource_manager': resource_manager
         } 
         
         return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')

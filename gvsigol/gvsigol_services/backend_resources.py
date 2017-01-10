@@ -19,10 +19,7 @@
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
-
 from models import LayerResource
-from django.core.exceptions import ImproperlyConfigured
-from django.utils.translation import ugettext_lazy as _
 from gvsigol import settings
 import logging
 import utils
@@ -58,24 +55,5 @@ class GvsigolRM():
                 os.remove(path)  
         except Exception as e:
             raise e
-        
-class AlfrescoRM():
-    def __init__(self):
-        logger.info('Initializing alfresco resource manager')
 
-def get_resource_manager():
-    try:
-        rm_engine = settings.GVSIGOL_RESOURCE_MANAGER.get('ENGINE', 'gvsigol')        
-    except:
-        raise ImproperlyConfigured
-
-    if rm_engine=='gvsigol':
-        rm = GvsigolRM()        
-    elif rm_engine=='alfresco':
-        rm = AlfrescoRM()    
-    else:
-        raise ImproperlyConfigured
-    
-    return rm
-
-resource_manager = get_resource_manager()
+resource_manager = GvsigolRM()
