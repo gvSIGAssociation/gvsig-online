@@ -42,6 +42,7 @@ from gvsigol_core import utils as core_utils
 from gvsigol_auth.models import UserGroup
 from django.shortcuts import render
 from django.utils import timezone
+
 from gvsigol import settings
 import locks_utils
 import requests
@@ -52,6 +53,9 @@ import json
 import re
 import os
 logger = logging.getLogger(__name__)
+
+from cmislib import CmisClient
+from cmislib.model import TYPES_COLL
 
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
