@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'gvsigol_plugin_geocoding',
     'gvsigol_plugin_sync',
     'gvsigol_plugin_catastro',
+    'gvsigol_plugin_alfresco',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -345,7 +346,3 @@ FILEMANAGER_DIRECTORY = os.path.join(MEDIA_ROOT, 'data')
 FILEMANAGER_MEDIA_ROOT = os.path.join(MEDIA_ROOT, FILEMANAGER_DIRECTORY)
 FILEMANAGER_MEDIA_URL = os.path.join(MEDIA_URL, FILEMANAGER_DIRECTORY)
 FILEMANAGER_STORAGE = FileSystemStorage(location=FILEMANAGER_MEDIA_ROOT, base_url=FILEMANAGER_MEDIA_URL, file_permissions_mode=0o666)
-
-GVSIGOL_RESOURCE_MANAGER = {
-    'ENGINE': 'gvsigol'
-}
