@@ -22,8 +22,8 @@
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
 from django.http import HttpResponseBadRequest
+from gvsigol_plugin_alfresco import settings
 from cmislib import CmisClient
-import settings
 import logging
 
 logger = logging.getLogger(__name__)
@@ -50,8 +50,41 @@ class AlfrescoRM():
     
     def get_sites(self, repository):
         logger.info('Getting list of sites ...')
-        sites = repository.query("select * from cmis:folder where cmis:objectTypeId='F:st:site'")
+        alfresco_sites = repository.query("select * from cmis:folder where cmis:objectTypeId='F:st:site'")
+        
+        sites = []
+        for s in alfresco_sites:
+            obj = repository.getObject(s.id)
+            s = {}
+            for key,val in obj.properties.items():
+                if key=='cmis:name' or key=='cmis:title' or key=='cmis:description' or key=='cmis:path' or key=='cmis:objectId' or key=='cmis:objectTypeId' or key=='cmis:parentId':
+                    s[key] = val
+            document_library = repository.getObjectByPath(s['cmis:path'] + '/documentLibrary')
+            children = document_library.getChildren()  
+            folders = []
+            for child in children:
+                if child.properties['cmis:objectTypeId'] == 'cmis:folder':
+                    folder = {
+                        'name': child.properties['cmis:name'],
+                        'description': child.properties['cmis:description'],
+                        'objectId': child.properties['cmis:objectId'],
+                        'path': child.properties['cmis:path'],
+                        'parent': child.properties['cmis:parentId']
+                    }
+                    folders.append(folder)
+            s['folders'] = folders
+            sites.append(s)
+            
         return sites
+    
+    def get_folder_content(self, repository, object_id):
+        logger.info('Getting site content ...')
+        object_id = object_id.replace('workspace://SpacesStore/', '')
+        site = repository.getObject(object_id)
+        path = site.properties['cmis:path'] + '/documentLibrary'
+        document_library = repository.getObjectByPath(path)
+        content = document_library.getChildren()
+        return content
 
 def get_resource_manager():
     try:
