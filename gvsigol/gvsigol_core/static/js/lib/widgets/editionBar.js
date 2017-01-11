@@ -29,13 +29,13 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	var this_ = this;
 	this.map = map;
 	this.layerTree = layerTree;
+	this.selectedLayer = selectedLayer;
 	this.resourceManager = null;
 	if (layerTree.conf.resource_manager == 'gvsigol') {
-		this.resourceManager = new GvsigolResourceManager();
+		this.resourceManager = new GvsigolResourceManager(this.selectedLayer);
 	} else if (layerTree.conf.resource_manager == 'alfresco') {
-		this.resourceManager = new AlfrescoResourceManager();
-	}
-	this.selectedLayer = selectedLayer;
+		this.resourceManager = new AlfrescoResourceManager(this.selectedLayer);
+	}	
 	this.featureType = featureType;
 	this.detailsTab = $('#details-tab');
 	this.geometryType = null;
@@ -596,7 +596,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 		ui += 			featureProperties
 		ui += 		'</div>';
 		ui += 		'<div class="tab-pane" id="edit_feature_resources">';
-		ui += 			this.resourceManager.getUI();
+		ui += 			this.resourceManager.getUI(feature);
 		ui += 		'</div>';
 		ui += 	'</div>';
 		ui += '</div>';
@@ -719,17 +719,18 @@ editionBar.prototype.editFeatureForm = function(feature) {
 		ui += 			featureProperties
 		ui += 		'</div>';
 		ui += 		'<div class="tab-pane" id="edit_feature_resources">';
-		ui += 			this.resourceManager.getUI();
+		ui += 			this.resourceManager.getUI(feature);
 		ui += 		'</div>';
 		ui += 	'</div>';
 		ui += '</div>';
 		
 		this.detailsTab.append(ui);
 		$.gvsigOL.controlSidebar.open();
+		this.resourceManager.registerEvents();
 
 		var uploader = null;
 		if (this.resourceManager.getEngine() == 'gvsigol') {
-			this.resourceManager.loadResources(this.selectedLayer, feature);
+			this.resourceManager.loadResources(feature);
 			uploader = this.resourceManager.createUploader();
 		}
 		
@@ -824,7 +825,7 @@ editionBar.prototype.removeFeatureForm = function(evt, feature) {
 	$('#remove-feature').on('click', function () {
 		var transaction = self.transactWFS('delete', feature);
 		if (transaction.success) {
-			var deleted = self.resourceManager.deleteResources(self.selectedLayer, feature);
+			var deleted = self.resourceManager.deleteResources(feature);
 			if (deleted) {
 				self.wfsLayer.getSource().removeFeature(feature);
 				self.removeInteraction.getFeatures().clear();
