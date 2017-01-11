@@ -34,24 +34,39 @@ logger = logging.getLogger(__name__)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @csrf_exempt
-def get_repository(request):    
+def get_sites(request):    
     try:
         default_repo = resource_manager.get_default_repository() 
-        sites = resource_manager.get_sites(default_repo)
-        
-        repository = {}
-        for site in sites:
-            obj = default_repo.getObject(site.id)
-            # properties items are key-value TUPLES ..
-            for key,val in obj.properties.items():
-                if key=='cm:name' or key=='cm:title' or key=='cmis:path':
-                    print key,'=',val
-                    
+        sites =  resource_manager.get_sites(default_repo)
+                         
         response = {
-            'repository': repository
+            'sites': json.dumps(sites)
         }
         
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
                     
     except Exception as e:
         return HttpResponseBadRequest('<h1>Failed to get respository</h1>')
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@csrf_exempt
+def get_folder_content(request):
+    if request.method == 'POST':      
+        object_id = request.POST.get('object_id')    
+        
+        try:
+            default_repo = resource_manager.get_default_repository()
+            site_content = resource_manager.get_site_content(default_repo, object_id)
+            
+            for item in site_content:
+                if item.properties['cmis:objectTypeId'] == 'cmis:folder':
+                    print item
+                        
+            response = {
+                'site_content': ''
+            }
+            
+            return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+                        
+        except Exception as e:
+            return HttpResponseBadRequest('<h1>Failed to get site content</h1>')
