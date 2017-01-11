@@ -1097,9 +1097,7 @@ def get_feature_info(request):
         features = None           
         try:
             w = Workspace.objects.get(name__exact=ws)
-            #logger.debug("Feature info - ws" + str(ws.name))
             ds = Datastore.objects.get(workspace=w)
-            #logger.debug("Feature info - ws" + str(ds.name))
             layers = Layer.objects.filter(name__exact=query_layer)
             
             layer = None
@@ -1114,16 +1112,11 @@ def get_feature_info(request):
                 layer_conf = json.loads(layer.conf)
                 fields = layer_conf.get('fields')
                 for i in range(0, len(geojson['features'])):
-                    #logger.debug("Feature info - parsing fid")
-                    #logger.debug(str(geojson))
                     fid = geojson['features'][i].get('id').split('.')[1]
-                    #logger.debug("Feature info - resources - feature id: " + str(fid))
                     layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
                     resources = []
                     for lr in layer_resources:
-                        #logger.debug("Feature info - resources - lr.path: " + str(lr.path))
                         abs_server_path = os.path.join(settings.MEDIA_URL, lr.path)
-                        #logger.debug("Feature info - resources - abspath: " + abs_server_path)
                         type = 'image' 
                         resource = {
                             'type': type,
@@ -1170,6 +1163,8 @@ def get_feature_info(request):
             logger.exception("get_feature_info")
             response = req.get(url, verify=False)
             geojson = json.loads(response.text)
+            for i in range(0, len(geojson['features'])):
+                geojson['features'][i]['resources'] = []
             features = geojson['features']
                 
         response = {
