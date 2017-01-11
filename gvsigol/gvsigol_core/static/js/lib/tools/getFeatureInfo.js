@@ -376,7 +376,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 			infoContent += 	'</div>';
 			infoContent += '</div>';
 			
-			if (selectedFeature.resources) {
+			if (selectedFeature.resources && (selectedFeature.resources.length > 0)) {
 				var resourcesContent = '';
 				resourcesContent += '<div class="box box-default">';
 				resourcesContent += 	'<div class="box-body" style="padding: 20px;">';
@@ -398,16 +398,16 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 			var ui = '';
 			ui += '<div class="nav-tabs-custom">';
 			ui += '<ul class="nav nav-tabs">';
-			if (selectedFeature.resources) {
-				ui += '<li class="active"><a href="#tab_info_content" data-toggle="tab" aria-expanded="true" style="font-weight: bold;">' + gettext('Feature info') + '</a></li>';
+			ui += 		'<li class="active"><a href="#tab_info_content" data-toggle="tab" aria-expanded="true" style="font-weight: bold;">' + gettext('Feature info') + '</a></li>';
+			if (selectedFeature.resources && (selectedFeature.resources.length > 0)) {
+				ui += 	'<li class=""><a href="#tab_resources_content" data-toggle="tab" aria-expanded="false" style="font-weight: bold;">' + gettext('Multimedia resources') + '</a></li>';
 			}
-			ui += '<li class=""><a href="#tab_resources_content" data-toggle="tab" aria-expanded="false" style="font-weight: bold;">' + gettext('Multimedia resources') + '</a></li>';
 			ui += '</ul>';
 			ui += '<div class="tab-content">';
 			ui += '<div class="tab-pane active" id="tab_info_content">';
 			ui += infoContent;
 			ui += '</div>';
-			if (selectedFeature.resources) {
+			if (selectedFeature.resources && (selectedFeature.resources.length > 0)) {
 				ui += '<div class="tab-pane" id="tab_resources_content">';
 				ui += resourcesContent;
 				ui += '</div>';
