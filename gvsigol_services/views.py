@@ -1137,16 +1137,11 @@ def get_feature_info(request):
                     
             else: 
                 for i in range(0, len(geojson['features'])):
-                    #logger.debug("Feature info - parsing fid")
-                    #logger.debug(str(geojson))
                     fid = geojson['features'][i].get('id').split('.')[1]
-                    #logger.debug("Feature info - resources - feature id: " + str(fid))
                     layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
                     resources = []
                     for lr in layer_resources:
-                        #logger.debug("Feature info - resources - lr.path: " + str(lr.path))
                         abs_server_path = os.path.join(settings.MEDIA_URL, lr.path)
-                        #logger.debug("Feature info - resources - abspath: " + abs_server_path)
                         type = 'image' 
                         resource = {
                             'type': type,
@@ -1158,7 +1153,6 @@ def get_feature_info(request):
                 features = geojson['features']
             
         except Exception as e:
-            #logger.exeption("get_feature_info")
             print e.message
             logger.exception("get_feature_info")
             response = req.get(url, verify=False)
@@ -1338,11 +1332,30 @@ def get_feature_resources(request):
             layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=int(fid))
             resources = []
             for lr in layer_resources:
-                abs_server_path = os.path.join(settings.MEDIA_URL, lr.path)
-                type = 'image' 
+                url = None
+                type = None 
+                if lr.type == LayerResource.EXTERNAL_IMAGE:
+                    type = 'image'
+                    url = os.path.join(settings.MEDIA_URL, lr.path)
+                elif lr.type == LayerResource.EXTERNAL_PDF:
+                    type = 'pdf'
+                    url = os.path.join(settings.MEDIA_URL, lr.path)
+                elif lr.type == LayerResource.EXTERNAL_DOC:
+                    type = 'doc'
+                    url = os.path.join(settings.MEDIA_URL, lr.path)
+                elif lr.type == LayerResource.EXTERNAL_FILE:
+                    type = 'file'
+                    url = os.path.join(settings.MEDIA_URL, lr.path)
+                elif lr.type == LayerResource.EXTERNAL_VIDEO:
+                    type = 'video'
+                    url = os.path.join(settings.MEDIA_URL, lr.path)
+                elif lr.type == LayerResource.EXTERNAL_ALFRESCO_DIR:
+                    type = 'alfresco_dir'
+                    url = lr.path
+                    
                 resource = {
                     'type': type,
-                    'url': abs_server_path,
+                    'url': url,
                     'rid': lr.id
                 }
                 resources.append(resource)

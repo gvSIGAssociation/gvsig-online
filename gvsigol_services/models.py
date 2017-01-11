@@ -130,6 +130,8 @@ class LayerResource(models.Model):
     EXTERNAL_FILE = 4
     """video files"""
     EXTERNAL_VIDEO = 5
+    """alfresco directory"""
+    EXTERNAL_ALFRESCO_DIR = 6
     """Valid resource types"""
     TYPE_CHOICES = (
         (EXTERNAL_IMAGE, 'Image'),
