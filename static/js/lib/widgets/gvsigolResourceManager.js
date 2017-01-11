@@ -24,7 +24,8 @@
 /**
  * TODO
  */
-var GvsigolResourceManager = function() {
+var GvsigolResourceManager = function(selectedLayer) {
+	this.selectedLayer = selectedLayer;
 	this.engine = 'gvsigol';
 	this.initialize();
 };
@@ -62,6 +63,13 @@ GvsigolResourceManager.prototype.getUI = function() {
 /**
  * TODO.
  */
+GvsigolResourceManager.prototype.registerEvents = function() {
+	
+};
+
+/**
+ * TODO.
+ */
 GvsigolResourceManager.prototype.createUploader = function() {
 	var uploader = $('#fileupload-component');
 	uploader.uploadFile({
@@ -89,10 +97,10 @@ GvsigolResourceManager.prototype.createUploader = function() {
 /**
  * TODO.
  */
-GvsigolResourceManager.prototype.loadResources = function(layer, feature) {
+GvsigolResourceManager.prototype.loadResources = function(feature) {
 	var self = this;
 	var resourceList = $('#resources-list');
-	var resources = this.getFeatureResources(layer, feature);
+	var resources = this.getFeatureResources(feature);
 	for (var i=0; i<resources.length; i++) {
 		var resource = '';
 		resource += '<div class="box box-default">';
@@ -149,15 +157,15 @@ GvsigolResourceManager.prototype.deleteResource = function(rid) {
 /**
  * TODO.
  */
-GvsigolResourceManager.prototype.deleteResources = function(layer, feature) {
+GvsigolResourceManager.prototype.deleteResources = function(feature) {
 	var deleted = false;
 	$.ajax({
 		type: 'POST',
 		async: false,
 	  	url: '/gvsigonline/services/delete_resources/',
 	  	data: {
-	  		query_layer: layer.layer_name,
-	  		workspace: layer.workspace,
+	  		query_layer: this.selectedLayer.layer_name,
+	  		workspace: this.selectedLayer.workspace,
 	  		fid: feature.getId().split('.')[1]
 	  	},
 	  	success	:function(response){
@@ -174,15 +182,15 @@ GvsigolResourceManager.prototype.deleteResources = function(layer, feature) {
 /**
  * TODO.
  */
-GvsigolResourceManager.prototype.getFeatureResources = function(layer, feature) {
+GvsigolResourceManager.prototype.getFeatureResources = function(feature) {
 	var resources = null;
 	$.ajax({
 		type: 'POST',
 		async: false,
 	  	url: '/gvsigonline/services/get_feature_resources/',
 	  	data: {
-	  		query_layer: layer.layer_name,
-	  		workspace: layer.workspace,
+	  		query_layer: this.selectedLayer.layer_name,
+	  		workspace: this.selectedLayer.workspace,
 	  		fid: feature.getId().split('.')[1]
 	  	},
 	  	success	:function(response){
