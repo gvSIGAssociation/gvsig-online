@@ -388,6 +388,33 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 						resourcesContent += '	<img src="' + selectedFeature.resources[i].url + '" class="img-fluid adjust-image">';
 						resourcesContent += '</a>';
 						resourcesContent += '</li>';
+						
+					} else if (selectedFeature.resources[i].type == 'alfresco_dir') {
+						
+						var resourcePath = selectedFeature.resources[i].url.split('|')[1]
+						var splitedPath = resourcePath.split('/')
+						var folderName = splitedPath[splitedPath.length-1]
+						
+						resourcesContent += '<li>';
+						resourcesContent += '<div class="box box-primary">';
+						resourcesContent += 	'<div class="box-body">';
+						resourcesContent += 		'<ul class="products-list product-list-in-box">';
+						resourcesContent += 			'<li class="item">';
+						resourcesContent += 				'<div class="product-img">';
+						resourcesContent += 					'<i style="font-size: 48px; color: #f39c12 !important;" class="fa fa-folder-open"></i>';
+						resourcesContent += 				'</div>';
+						resourcesContent += 				'<div class="product-info">';
+						resourcesContent += 					'<a id="resource-title" href="javascript:void(0)" class="product-title">' + folderName + '</a>';
+						resourcesContent += 					'<span id="resource-description" class="product-description">' + resourcePath + '</span>';
+						resourcesContent += 				'</div>';
+						resourcesContent += 			'</li>';
+						resourcesContent += 		'</ul>';
+						resourcesContent += 	'</div>';
+						resourcesContent += 	'<div class="box-footer text-center">';
+						resourcesContent += 		'<a id="view-resources" data-url="' + selectedFeature.resources[i].url + '" href="javascript:void(0)" style="margin-right: 10px;"><i class="fa fa-eye"></i> ' + gettext('View resources') + '</a>';
+						resourcesContent += 	'</div>';
+						resourcesContent += '</div>';
+						resourcesContent += '</li>';
 					}
 				}
 				resourcesContent += 		'</ul>';
@@ -419,6 +446,14 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 			$.gvsigOL.controlSidebar.open();
 			$('.nav-tabs a[href="#details-tab"]').tab('show');
 			detailsTab.append(ui);
+			
+			$('#view-resources').on('click', function (e) {
+				e.preventDefault();
+				var url = this.dataset.url
+				if (url != '#') {
+					window.open(url,'_blank','width=780,height=600,left=150,top=200,toolbar=0,status=0');
+				}
+			});
 		}
 	}
 };
