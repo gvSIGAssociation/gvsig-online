@@ -20,7 +20,6 @@
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.translation import ugettext_lazy as _
 from django.http import HttpResponseBadRequest
 from gvsigol_plugin_alfresco import settings
 from cmislib import CmisClient
@@ -32,30 +31,33 @@ class UnsupportedRequestError(Exception):
     pass
         
 class AlfrescoRM():
-    def __init__(self, alfresco_cmis_rest_api_url, alfresco_admin_user, alfresco_admin_password):
+    def __init__(self, alfresco_repository_url, alfresco_cmis_rest_api_url, alfresco_admin_user, alfresco_admin_password):
+        self.alfresco_repository_url = alfresco_repository_url
         self.alfresco_cmis_rest_api_url = alfresco_cmis_rest_api_url
         self.alfresco_admin_user = alfresco_admin_user
         self.alfresco_admin_password = alfresco_admin_password
         
         try:
-            logger.info('Initializing alfresco resource manager ...')
             self.cmis_client = CmisClient(self.alfresco_cmis_rest_api_url, self.alfresco_admin_user, self.alfresco_admin_password)
             
-        except Exception as e:
+        except:
             return HttpResponseBadRequest('<h1>Failed to connect to Alfresco</h1>')
      
+    def get_repository_url(self):
+        return self.alfresco_repository_url
+    
     def get_default_repository(self):
         default_repository = self.cmis_client.getRepository(self.cmis_client.defaultRepository.id)
         return default_repository
     
     def get_sites(self, repository):
-        logger.info('Getting list of sites ...')
         alfresco_sites = repository.query("select * from cmis:folder where cmis:objectTypeId='F:st:site'")
         
         sites = []
         for s in alfresco_sites:
             obj = repository.getObject(s.id)
             s = {}
+            s['isSite'] = True
             for key,val in obj.properties.items():
                 if key=='cmis:name' or key=='cmis:title' or key=='cmis:description' or key=='cmis:path' or key=='cmis:objectId' or key=='cmis:objectTypeId' or key=='cmis:parentId':
                     s[key] = val
@@ -69,7 +71,8 @@ class AlfrescoRM():
                         'description': child.properties['cmis:description'],
                         'objectId': child.properties['cmis:objectId'],
                         'path': child.properties['cmis:path'],
-                        'parent': child.properties['cmis:parentId']
+                        'parent': child.properties['cmis:parentId'],
+                        'url': self.alfresco_repository_url + '#filter=path|' + child.properties['cmis:path']
                     }
                     folders.append(folder)
             s['folders'] = folders
@@ -78,20 +81,40 @@ class AlfrescoRM():
         return sites
     
     def get_folder_content(self, repository, object_id):
-        logger.info('Getting site content ...')
         object_id = object_id.replace('workspace://SpacesStore/', '')
-        site = repository.getObject(object_id)
-        path = site.properties['cmis:path'] + '/documentLibrary'
-        document_library = repository.getObjectByPath(path)
-        content = document_library.getChildren()
+        f = repository.getObject(object_id)
+        
+        content = {}
+        content['isSite'] = False
+        for key,val in f.properties.items():
+            if key=='cmis:name' or key=='cmis:title' or key=='cmis:description' or key=='cmis:path' or key=='cmis:objectId' or key=='cmis:objectTypeId' or key=='cmis:parentId':
+                content[key] = val
+                    
+        folderChildren = f.getChildren()
+        
+        folders = []
+        for child in folderChildren:
+            if child.properties['cmis:objectTypeId'] == 'cmis:folder':
+                folder = {
+                    'name': child.properties['cmis:name'],
+                    'description': child.properties['cmis:description'],
+                    'objectId': child.properties['cmis:objectId'],
+                    'path': child.properties['cmis:path'],
+                    'parent': child.properties['cmis:parentId'],
+                    'url': self.alfresco_repository_url + '#filter=path|' + child.properties['cmis:path']
+                }
+                folders.append(folder)
+        content['folders'] = folders
+                    
         return content
 
 def get_resource_manager():
     try:
+        alfresco_repository_url = settings.ALFRESCO_REPOSITORY_URL
         alfresco_cmis_rest_api_url = settings.ALFRESCO_CMIS_REST_API_URL
         alfresco_admin_user = settings.ALFRESCO_ADMIN_USER
         alfresco_admin_password = settings.ALFRESCO_ADMIN_PASSWORD
-        rm = AlfrescoRM(alfresco_cmis_rest_api_url, alfresco_admin_user, alfresco_admin_password) 
+        rm = AlfrescoRM(alfresco_repository_url, alfresco_cmis_rest_api_url, alfresco_admin_user, alfresco_admin_password) 
     except:
         raise ImproperlyConfigured
     

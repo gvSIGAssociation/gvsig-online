@@ -48,13 +48,40 @@ AlfrescoResourceManager.prototype.getEngine = function() {
  * TODO.
  */
 AlfrescoResourceManager.prototype.getUI = function(feature) {
-	var resourceFolder = this.getFeatureResources(feature)[0].url;
+	var resourceFolderUrl = null;
+	var resourcePath = null;
+	var splitedPath = null;
+	var folderName = null;
+	if (feature.getId()) {
+		resourceFolderUrl = this.getFeatureResources(feature)[0].url;
+		resourcePath = resourceFolderUrl.split('|')[1]
+		splitedPath = resourcePath.split('/')
+		folderName = splitedPath[splitedPath.length-1]
+	} else {
+		resourceFolderUrl = '#';
+		resourcePath = ''
+		folderName = ' ... '
+	}
+	
 	var ui = '';
-	ui += '<div class="input-group">';
-	ui += 	'<input readonly type="text" name="message" class="form-control" value="' + resourceFolder + '">';
-	ui += 	'<span class="input-group-btn">';
-	ui += 		'<button id="open-explorer" type="button" class="btn btn-primary btn-flat"><i class="fa fa-folder margin-r-5"></i>' + gettext('Explore') + '</button>';
-	ui += 	'</span>';
+	ui += '<div class="box box-primary">';
+	ui += 	'<div class="box-body">';
+	ui += 		'<ul class="products-list product-list-in-box">';
+	ui += 			'<li class="item">';
+	ui += 				'<div class="product-img">';
+	ui += 					'<i style="font-size: 48px; color: #f39c12 !important;" class="fa fa-folder-open"></i>';
+	ui += 				'</div>';
+	ui += 				'<div class="product-info">';
+	ui += 					'<a id="resource-title" href="javascript:void(0)" class="product-title">' + folderName + '</a>';
+	ui += 					'<span id="resource-description" class="product-description">' + resourcePath + '</span>';
+	ui += 				'</div>';
+	ui += 			'</li>';
+	ui += 		'</ul>';
+	ui += 	'</div>';
+	ui += 	'<div class="box-footer text-center">';
+	ui += 		'<a id="open-explorer" href="javascript:void(0)" style="margin-right: 10px;"><i class="fa fa-folder-open"></i> ' + gettext('Select resource folder') + '</a>';
+	ui += 		'<a id="view-resources" data-url="' + resourceFolderUrl + '" href="javascript:void(0)" style="margin-right: 10px;"><i class="fa fa-eye"></i> ' + gettext('View resources') + '</a>';
+	ui += 	'</div>';
 	ui += '</div>';
 	
 	return ui;
@@ -65,8 +92,17 @@ AlfrescoResourceManager.prototype.getUI = function(feature) {
  */
 AlfrescoResourceManager.prototype.registerEvents = function() {
 	var self = this;
-	$('#open-explorer').on('click', function () {
+	$('#open-explorer').on('click', function (e) {
+		e.preventDefault();
 		self.openExplorer();
+	});
+	
+	$('#view-resources').on('click', function (e) {
+		e.preventDefault();
+		var url = this.dataset.url
+		if (url != '#') {
+			window.open(url,'_blank','width=780,height=600,left=150,top=200,toolbar=0,status=0');
+		}
 	});
 };
 
@@ -75,8 +111,6 @@ AlfrescoResourceManager.prototype.registerEvents = function() {
  */
 AlfrescoResourceManager.prototype.openExplorer = function() {
 	var self = this;
-	$("body").overlay();
-	
 	var sites = this.getSites();
 	
 	var select = '';
@@ -124,18 +158,53 @@ AlfrescoResourceManager.prototype.openExplorer = function() {
 				selectedSite = sites[i];
 			}
 		}
-		var content = self.createContent(selectedSite['cmis:path'] + '/documentlibrary', selectedSite.folders);
-		
-		$('#explorer-content').empty();
-		$('#explorer-content').append(content);
-		
-		$('.alfresco-link').click(function(){
-			window.open('https://devel.gvsigonline.com/share/page/site/swsdp/documentlibrary','_blank','width=640,height=480,left=150,top=200,toolbar=0,status=0');
-		});
-		
-		$('.select-resource-link').click(function(){
-			console.log();
-		});
+		self.createContent(selectedSite['isSite'], selectedSite['cmis:parentId'], selectedSite['cmis:path'] + '/documentlibrary', selectedSite.folders);
+	});
+};
+
+/**
+ * TODO.
+ */
+AlfrescoResourceManager.prototype.saveResource = function(fid) {
+	var self = this;
+	var resourcePath = $('#resource-description').text();
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: '/gvsigonline/alfresco/save_resource/',
+	  	data: {
+	  		path: resourcePath,
+	  		layer_name: self.selectedLayer.layer_name,
+			workspace: self.selectedLayer.workspace,
+			fid: fid
+	  	},
+	  	success	:function(response){},
+	  	error: function(){
+	  		messageBox.show('error', gettext('Error saving resource'));
+	  	}
+	});
+};
+
+/**
+ * TODO.
+ */
+AlfrescoResourceManager.prototype.updateResource = function(fid) {
+	var self = this;
+	var resourcePath = $('#resource-description').text();
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: '/gvsigonline/alfresco/update_resource/',
+	  	data: {
+	  		path: resourcePath,
+	  		layer_name: self.selectedLayer.layer_name,
+			workspace: self.selectedLayer.workspace,
+			fid: fid
+	  	},
+	  	success	:function(response){},
+	  	error: function(){
+	  		messageBox.show('error', gettext('Error saving resource'));
+	  	}
 	});
 };
 
@@ -153,13 +222,41 @@ AlfrescoResourceManager.prototype.getFeatureResources = function(feature) {
 	  		workspace: this.selectedLayer.workspace,
 	  		fid: feature.getId().split('.')[1]
 	  	},
+	  	beforeSend: function(){
+	  		$("body").overlay();
+	  	},
 	  	success	:function(response){
 	  		resources = response.resources;
 	  	},
 	  	error: function(){}
 	});
-	
+	$.overlayout();
 	return resources;
+};
+
+/**
+ * TODO.
+ */
+AlfrescoResourceManager.prototype.deleteResources = function(feature) {
+	var deleted = false;
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: '/gvsigonline/services/delete_resources/',
+	  	data: {
+	  		query_layer: this.selectedLayer.layer_name,
+	  		workspace: this.selectedLayer.workspace,
+	  		fid: feature.getId().split('.')[1]
+	  	},
+	  	success	:function(response){
+	  		if (response.deleted) {
+	  			deleted = true;
+	  		}
+	  	}, 
+	  	error: function(){}
+	});
+	
+	return deleted;
 };
 
 /**
@@ -172,8 +269,11 @@ AlfrescoResourceManager.prototype.getSites = function() {
 		async: false,
 	  	url: '/gvsigonline/alfresco/get_sites/',
 	  	data: {},
+	  	beforeSend: function(){
+	  		$("body").overlay();
+	  	},
 	  	success	:function(response){
-	  		sites = JSON.parse(response.sites);
+	  		sites = response.sites;
 	  	},
 	  	error: function(){}
 	});
@@ -184,45 +284,52 @@ AlfrescoResourceManager.prototype.getSites = function() {
 /**
  * TODO.
  */
-AlfrescoResourceManager.prototype.getSiteContent = function(objectId) {
-	$("body").overlay();
-	var siteContent = null;
+AlfrescoResourceManager.prototype.getFolderContent = function(objectId) {
+	var folderContent = null;
 	$.ajax({
 		type: 'POST',
 		async: false,
-	  	url: '/gvsigonline/alfresco/get_site_content/',
+	  	url: '/gvsigonline/alfresco/get_folder_content/',
 	  	data: {
 	  		object_id: objectId
 	  	},
+	  	beforeSend: function(){
+	  		$("body").overlay();
+	  	},
 	  	success	:function(response){
-	  		siteContent = JSON.parse(response.site_content);
+	  		folderContent = response.folder_content;
 	  	},
 	  	error: function(){}
 	});
 	$.overlayout();
-	return siteContent;
+	return folderContent;
 };
 
 /**
  * TODO.
  */
-AlfrescoResourceManager.prototype.createContent = function(currentPath, folders) {
+AlfrescoResourceManager.prototype.createContent = function(isSite, parent, currentPath, folders) {
 	var content = '';
 	content += '<div class="box">';
 	content += 	'<div class="box-header with-border">';
 	content += 		'<h3 class="box-title">' + currentPath + '</h3>';
+	if (!isSite) {
+		content += 		'<div class="box-tools pull-right">';
+		content += 			'<button id="button-parent-directory" data-parentid="' + parent + '" class="btn btn-box-tool"><i class="fa fa-chevron-up margin-r-5"></i> ' + gettext('Parent directory') + '</button>';
+		content += 		'</div>';
+	}
 	content += 	'</div>';
-	content += 	'<div class="box-body">';
+	content += 	'<div class="box-body" style="max-height: 200px; overflow: auto;">';
 	content += 		'<ul class="products-list product-list-in-box">';
 	for (var i=0; i<folders.length; i++) {
 		content += 		'<li class="item">';
 		content += 			'<div class="product-img">';
-		content += 				'<i class="fa fa-folder" style="font-size: 32px;"></i>';
+		content += 				'<i class="fa fa-folder" style="font-size: 32px; color: #f39c12 !important;"></i>';
 		content += 			'</div>';
 		content += 			'<div class="product-info">';
-		content += 				'<a href="/gvsigonline/alfresco/get_folder_content/" class="product-title">' + folders[i].name + ' <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="pull-right"><i class="fa fa-folder-open margin-r-5"></i> ' + gettext('Open') + '</span></a>';
-		content += 				'<a href="javascript:void(0)" class="alfresco-link"><span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="pull-right"><i class="fa fa-external-link margin-r-5"></i> ' + gettext('Open in alfresco') + '</span></a>';
-		content += 				'<a href="javascript:void(0)" class="select-resource-link"><span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="pull-right"><i class="fa fa-hand-pointer-o margin-r-5"></i> ' + gettext('Select') + '</span></a>';
+		content += 				'<a href="javascript:void(0)" data-objectid="' + folders[i].objectId + '" class="open-folder product-title">' + folders[i].name + ' <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="pull-right"><i class="fa fa-folder-open margin-r-5"></i> ' + gettext('Open') + '</span></a>';
+		content += 				'<a href="javascript:void(0)" data-externallink="' + folders[i].url + '" class="alfresco-link"><span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="pull-right"><i class="fa fa-external-link margin-r-5"></i> ' + gettext('Open in alfresco') + '</span></a>';
+		content += 				'<a href="javascript:void(0)" data-resourcepath="' + folders[i].path + '" data-externallink="' + folders[i].url + '" class="select-resource-link"><span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="pull-right"><i class="fa fa-hand-pointer-o margin-r-5"></i> ' + gettext('Select') + '</span></a>';
 		content += 				'<span class="product-description"> ' + folders[i].description + '</span>';
 		content += 			'</div>';
 		content += 		'</li>';
@@ -231,5 +338,46 @@ AlfrescoResourceManager.prototype.createContent = function(currentPath, folders)
 	content += 	'</div>';
 	content += '</div>';
 	
-	return content;
+	$('#explorer-content').empty();
+	$('#explorer-content').append(content);
+	
+	this.registerFolderEvents();
+};
+
+/**
+ * TODO.
+ */
+AlfrescoResourceManager.prototype.registerFolderEvents = function() {
+	var self = this;
+	
+	$('#button-parent-directory').click(function(e){
+		e.preventDefault();
+		var parentId = this.dataset.parentid;
+		var folderContent = self.getFolderContent(parentId);
+		self.createContent(folderContent['isSite'], folderContent['cmis:parentId'], folderContent['cmis:path'], folderContent.folders);
+	});
+	
+	$('.open-folder').click(function(e){
+		e.preventDefault();
+		var objectId = this.dataset.objectid;
+		var folderContent = self.getFolderContent(objectId);
+		self.createContent(folderContent['isSite'], folderContent['cmis:parentId'], folderContent['cmis:path'], folderContent.folders);
+	});
+	
+	$('.alfresco-link').click(function(e){
+		e.preventDefault();
+		var externalLink = this.dataset.externallink;
+		window.open(externalLink,'_blank','width=780,height=600,left=150,top=200,toolbar=0,status=0');
+	});
+	
+	$('.select-resource-link').click(function(e){
+		e.preventDefault();
+		var resourcePath = this.dataset.resourcepath;
+		var externalLink = this.dataset.externallink;
+		var splitedPath = resourcePath.split('/')
+		var folderName = splitedPath[splitedPath.length-1]
+		$('#resource-title').text(folderName);
+		$('#resource-description').text(resourcePath);
+		$('#view-resources').attr('data-url', externalLink);
+	});
 };
