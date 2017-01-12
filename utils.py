@@ -173,3 +173,27 @@ def get_resources_dir(resource_type):
     if not os.path.exists(the_path):
         os.makedirs(the_path, 0700)
     return the_path
+
+def get_resource_type(lr):
+    url = None
+    type = None 
+    if lr.type == LayerResource.EXTERNAL_IMAGE:
+        type = 'image'
+        url = os.path.join(settings.MEDIA_URL, lr.path)
+    elif lr.type == LayerResource.EXTERNAL_PDF:
+        type = 'pdf'
+        url = os.path.join(settings.MEDIA_URL, lr.path)
+    elif lr.type == LayerResource.EXTERNAL_DOC:
+        type = 'doc'
+        url = os.path.join(settings.MEDIA_URL, lr.path)
+    elif lr.type == LayerResource.EXTERNAL_FILE:
+        type = 'file'
+        url = os.path.join(settings.MEDIA_URL, lr.path)
+    elif lr.type == LayerResource.EXTERNAL_VIDEO:
+        type = 'video'
+        url = os.path.join(settings.MEDIA_URL, lr.path)
+    elif lr.type == LayerResource.EXTERNAL_ALFRESCO_DIR:
+        type = 'alfresco_dir'
+        url = lr.path
+    
+    return [type, url]

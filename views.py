@@ -1116,11 +1116,10 @@ def get_feature_info(request):
                     layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
                     resources = []
                     for lr in layer_resources:
-                        abs_server_path = os.path.join(settings.MEDIA_URL, lr.path)
-                        type = 'image' 
+                        (type, url) = utils.get_resource_type(lr)
                         resource = {
                             'type': type,
-                            'url': abs_server_path
+                            'url': url
                         }
                         resources.append(resource)
                     geojson['features'][i]['resources'] = resources
@@ -1141,11 +1140,10 @@ def get_feature_info(request):
                     layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
                     resources = []
                     for lr in layer_resources:
-                        abs_server_path = os.path.join(settings.MEDIA_URL, lr.path)
-                        type = 'image' 
+                        (type, url) = utils.get_resource_type(lr)
                         resource = {
                             'type': type,
-                            'url': abs_server_path
+                            'url': url
                         }
                         resources.append(resource)
                     geojson['features'][i]['resources'] = resources
