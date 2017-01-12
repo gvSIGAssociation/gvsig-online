@@ -21,11 +21,12 @@
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
-
+from gvsigol_services.models import Layer, LayerResource
 from gvsigol_plugin_alfresco.services import resource_manager
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
 
 import logging
 import json
@@ -40,12 +41,12 @@ def get_sites(request):
         sites =  resource_manager.get_sites(default_repo)
                          
         response = {
-            'sites': json.dumps(sites)
+            'sites': sites
         }
         
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
                     
-    except Exception as e:
+    except:
         return HttpResponseBadRequest('<h1>Failed to get respository</h1>')
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -56,17 +57,69 @@ def get_folder_content(request):
         
         try:
             default_repo = resource_manager.get_default_repository()
-            site_content = resource_manager.get_site_content(default_repo, object_id)
-            
-            for item in site_content:
-                if item.properties['cmis:objectTypeId'] == 'cmis:folder':
-                    print item
+            folder_content = resource_manager.get_folder_content(default_repo, object_id)
                         
             response = {
-                'site_content': ''
+                'folder_content': folder_content
             }
             
             return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
                         
-        except Exception as e:
-            return HttpResponseBadRequest('<h1>Failed to get site content</h1>')
+        except:
+            return HttpResponseBadRequest('<h1>Failed to get folder content</h1>')
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@csrf_exempt
+def save_resource(request):
+    if request.method == 'POST':      
+        path = request.POST.get('path')  
+        ws_name = request.POST.get('workspace')
+        layer_name = request.POST.get('layer_name')
+        fid = request.POST.get('fid')
+ 
+        try:
+            if ":" in layer_name:
+                layer_name = layer_name.split(":")[1]
+            layer = Layer.objects.get(name=layer_name, datastore__workspace__name=ws_name) 
+        
+            res = LayerResource()
+            res.feature = int(fid)
+            res.layer = layer
+            res.path = resource_manager.get_repository_url() + '#filter=path|' + path
+            res.title = ''
+            res.type = LayerResource.EXTERNAL_ALFRESCO_DIR
+            res.created = timezone.now()
+            res.save()
+                        
+            response = {'success': True}
+            
+            return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+                        
+        except:
+            return HttpResponseBadRequest('<h1>Failed to get folder content</h1>')
+        
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@csrf_exempt
+def update_resource(request):
+    if request.method == 'POST':      
+        path = request.POST.get('path')  
+        ws_name = request.POST.get('workspace')
+        layer_name = request.POST.get('layer_name')
+        fid = request.POST.get('fid')
+          
+        try:
+            if ":" in layer_name:
+                layer_name = layer_name.split(":")[1]
+            layer = Layer.objects.get(name=layer_name, datastore__workspace__name=ws_name)
+            layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=int(fid))
+            
+            for resource in layer_resources:
+                resource.path = resource_manager.get_repository_url() + '#filter=path|' + path
+                resource.save()
+                        
+            response = {'success': True}
+            
+            return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+                        
+        except:
+            return HttpResponseBadRequest('<h1>Failed to get folder content</h1>')
