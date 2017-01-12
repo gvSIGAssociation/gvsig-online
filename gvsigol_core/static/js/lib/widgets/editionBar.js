@@ -603,6 +603,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 		
 		this.detailsTab.append(ui);
 		$.gvsigOL.controlSidebar.open();
+		this.resourceManager.registerEvents();
 		
 		var uploader = null;
 		if (this.resourceManager.getEngine() == 'gvsigol') {
@@ -634,6 +635,9 @@ editionBar.prototype.createFeatureForm = function(feature) {
 						});
 						uploader.startUpload();
 					}
+					
+				} else if (self.resourceManager.getEngine() == 'alfresco'){
+					self.resourceManager.saveResource(transaction.fid);
 				}
 				self.selectedLayer.getSource().updateParams({"time": Date.now()});
 				self.showLayersTab();
@@ -761,6 +765,9 @@ editionBar.prototype.editFeatureForm = function(feature) {
 						});
 						uploader.startUpload();
 					}
+					
+				} else if (self.resourceManager.getEngine() == 'alfresco'){
+					self.resourceManager.updateResource(transaction.fid);
 				}
 				self.selectedLayer.getSource().updateParams({"time": Date.now()});
 				self.selectInteraction.getFeatures().clear();
