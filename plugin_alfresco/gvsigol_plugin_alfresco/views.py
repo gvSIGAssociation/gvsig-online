@@ -116,6 +116,16 @@ def update_resource(request):
             for resource in layer_resources:
                 resource.path = resource_manager.get_repository_url() + '#filter=path|' + path
                 resource.save()
+                
+            if len(layer_resources) <= 0:
+                resource = LayerResource()
+                resource.feature = int(fid)
+                resource.layer = layer
+                resource.path = resource_manager.get_repository_url() + '#filter=path|' + path
+                resource.title = ''
+                resource.type = LayerResource.EXTERNAL_ALFRESCO_DIR
+                resource.created = timezone.now()
+                resource.save()
                         
             response = {'success': True}
             
@@ -123,3 +133,20 @@ def update_resource(request):
                         
         except:
             return HttpResponseBadRequest('<h1>Failed to get folder content</h1>')
+        
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@csrf_exempt
+def delete_resource(request):
+    if request.method == 'POST':
+        rid = request.POST.get('rid')
+        try:
+            resource = LayerResource.objects.get(id=int(rid)) 
+            resource.delete()
+            resource_manager.delete_resource(resource)
+            response = {'deleted': True}
+            
+        except Exception as e:
+            response = {'deleted': False}
+            pass
+        
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
