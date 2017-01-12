@@ -48,19 +48,22 @@ AlfrescoResourceManager.prototype.getEngine = function() {
  * TODO.
  */
 AlfrescoResourceManager.prototype.getUI = function(feature) {
-	var resourceFolderUrl = null;
-	var resourcePath = null;
-	var splitedPath = null;
-	var folderName = null;
+	var resourceFolderUrl = '#';
+	var resourcePath = '';
+	var folderName = ' ... ';
+	var showRemove = false;
+	var rid = null;
 	if (feature.getId()) {
-		resourceFolderUrl = this.getFeatureResources(feature)[0].url;
-		resourcePath = resourceFolderUrl.split('|')[1]
-		splitedPath = resourcePath.split('/')
-		folderName = splitedPath[splitedPath.length-1]
-	} else {
-		resourceFolderUrl = '#';
-		resourcePath = ''
-		folderName = ' ... '
+		var resources = this.getFeatureResources(feature);
+		if (resources.length > 0) {
+			resourceFolderUrl = resources[0].url;
+			resourcePath = resourceFolderUrl.split('|')[1];
+			var splitedPath = resourcePath.split('/');
+			folderName = splitedPath[splitedPath.length-1];
+			showRemove = true;
+			rid = resources[0].rid;
+		}
+		
 	}
 	
 	var ui = '';
@@ -81,6 +84,9 @@ AlfrescoResourceManager.prototype.getUI = function(feature) {
 	ui += 	'<div class="box-footer text-center">';
 	ui += 		'<a id="open-explorer" href="javascript:void(0)" style="margin-right: 10px;"><i class="fa fa-folder-open"></i> ' + gettext('Select resource folder') + '</a>';
 	ui += 		'<a id="view-resources" data-url="' + resourceFolderUrl + '" href="javascript:void(0)" style="margin-right: 10px;"><i class="fa fa-eye"></i> ' + gettext('View resources') + '</a>';
+	if (showRemove) {
+		ui += 	'<a id="remove-resource" data-rid="' + rid + '" href="javascript:void(0)" style="margin-right: 10px;"><i class="fa fa-trash"></i> ' + gettext('Delete') + '</a>';
+	}
 	ui += 	'</div>';
 	ui += '</div>';
 	
@@ -103,6 +109,16 @@ AlfrescoResourceManager.prototype.registerEvents = function() {
 		if (url != '#') {
 			window.open(url,'_blank','width=780,height=600,left=150,top=200,toolbar=0,status=0');
 		}
+	});
+	
+	$('#remove-resource').on('click', function (e) {
+		e.preventDefault();
+		if (self.deleteResource(this.dataset.rid)) {
+			$('#resource-title').text(' ... ');
+			$('#resource-description').text('');
+			$('#view-resources').attr('data-url', '#');
+		}
+		
 	});
 };
 
@@ -168,21 +184,23 @@ AlfrescoResourceManager.prototype.openExplorer = function() {
 AlfrescoResourceManager.prototype.saveResource = function(fid) {
 	var self = this;
 	var resourcePath = $('#resource-description').text();
-	$.ajax({
-		type: 'POST',
-		async: false,
-	  	url: '/gvsigonline/alfresco/save_resource/',
-	  	data: {
-	  		path: resourcePath,
-	  		layer_name: self.selectedLayer.layer_name,
-			workspace: self.selectedLayer.workspace,
-			fid: fid
-	  	},
-	  	success	:function(response){},
-	  	error: function(){
-	  		messageBox.show('error', gettext('Error saving resource'));
-	  	}
-	});
+	if (resourcePath != '') {
+		$.ajax({
+			type: 'POST',
+			async: false,
+		  	url: '/gvsigonline/alfresco/save_resource/',
+		  	data: {
+		  		path: resourcePath,
+		  		layer_name: self.selectedLayer.layer_name,
+				workspace: self.selectedLayer.workspace,
+				fid: fid
+		  	},
+		  	success	:function(response){},
+		  	error: function(){
+		  		messageBox.show('error', gettext('Error saving resource'));
+		  	}
+		});
+	}
 };
 
 /**
@@ -191,21 +209,23 @@ AlfrescoResourceManager.prototype.saveResource = function(fid) {
 AlfrescoResourceManager.prototype.updateResource = function(fid) {
 	var self = this;
 	var resourcePath = $('#resource-description').text();
-	$.ajax({
-		type: 'POST',
-		async: false,
-	  	url: '/gvsigonline/alfresco/update_resource/',
-	  	data: {
-	  		path: resourcePath,
-	  		layer_name: self.selectedLayer.layer_name,
-			workspace: self.selectedLayer.workspace,
-			fid: fid
-	  	},
-	  	success	:function(response){},
-	  	error: function(){
-	  		messageBox.show('error', gettext('Error saving resource'));
-	  	}
-	});
+	if (resourcePath != '') {
+		$.ajax({
+			type: 'POST',
+			async: false,
+		  	url: '/gvsigonline/alfresco/update_resource/',
+		  	data: {
+		  		path: resourcePath,
+		  		layer_name: self.selectedLayer.layer_name,
+				workspace: self.selectedLayer.workspace,
+				fid: fid
+		  	},
+		  	success	:function(response){},
+		  	error: function(){
+		  		messageBox.show('error', gettext('Error saving resource'));
+		  	}
+		});
+	}
 };
 
 /**
@@ -247,6 +267,29 @@ AlfrescoResourceManager.prototype.deleteResources = function(feature) {
 	  		query_layer: this.selectedLayer.layer_name,
 	  		workspace: this.selectedLayer.workspace,
 	  		fid: feature.getId().split('.')[1]
+	  	},
+	  	success	:function(response){
+	  		if (response.deleted) {
+	  			deleted = true;
+	  		}
+	  	}, 
+	  	error: function(){}
+	});
+	
+	return deleted;
+};
+
+/**
+ * TODO.
+ */
+AlfrescoResourceManager.prototype.deleteResource = function(rid) {
+	var deleted = false;
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: '/gvsigonline/services/delete_resource/',
+	  	data: {
+	  		rid: rid
 	  	},
 	  	success	:function(response){
 	  		if (response.deleted) {
