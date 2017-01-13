@@ -225,6 +225,11 @@
 		    containment: "#map", 
 		    scroll: false
 		});
+		
+		$(document).on('click', '[data-toggle="lightbox"]', function(event) {
+		    event.preventDefault();
+		    $(this).ekkoLightbox();
+		});
 
 		$.ajax({
 			type : 'POST',
