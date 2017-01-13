@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="box padding-20">
+			<form role="form" method="post" action="/gvsigonline/services/datastore_add/">
+				{% csrf_token %}
+				<div class="box-header with-border">
+					<h3 class="box-title">{% trans "Add datastore" %}</h3>
+					<div class="box-tools pull-right">
+						<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+					</div>
+				</div>					
+				<div class="box-body">
+				
+					{% if form.errors %}
+					<div id="form-error" style="color:#ff0000;">
+						<ul>
+						{% for field in form %}
+							{% if field.errors %}
+								<li>{{field.label}}. {{ field.errors|striptags }}</li>
+							{% endif %}	
+						{% endfor %}
+						{% for field, msg in form.errors.iteritems %}
+							<li>{{ msg|striptags }}</li>
+						{% endfor %}
+						</ul>
+					</div>
+					{% endif %}
+					
+					<div class="row">
+						<div class="col-md-12 form-group">	
+							<label for="id_workspace">{% trans "Workspace" %}</label>
+							{{ form.workspace }}									
+						</div>
+					</div>	
+					
+					<div class="row">
+						<div class="col-md-12 form-group">	
+							<label for="id_workspace">{% trans "Type" %}</label>
+							{{ form.type }}									
+						</div>
+					</div>	
+					
+					<div class="row" id="select-file-row" style="display: none;">
+						<div class="col-md-2">
+							<a href="#" id="select-file-button" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>{% trans "Select file" %}</a>					
+						</div>
+						<div class="col-md-10">
+							{{ form.file }}			
+						</div>
+					</div>		
+					
+					<div class="row">		
+						<div class="col-md-12 form-group">
+							<label for="id_name">{% trans "Name" %}</label>
+							{{ form.name }}
+						</div>	
+					</div>
+					
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="id_description">{% trans "Description" %}</label>
+							{{ form.description }}						
+						</div>
+					</div>	
+					
+					<div class="row" id="connection-params-row">
+						<div class="col-md-12 form-group">
+							<label for="id_connection_params">{% trans "Connection params" %}</label>
+							{{ form.connection_params }}						
+						</div>
+					</div>
+					
+				</div>									
+			</form>	
+		</div>
+	</div>				
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-datastores').addClass("active");
+</script>
+<script type="text/javascript">
+$().ready(function(){ 
+	var connectionParams = document.getElementById('id_connection_params');
+	var codemirror = CodeMirror.fromTextArea(connectionParams, {
+		value: "",
+		mode:  "javascript",
+		theme: "xq-dark",
+		lineNumbers: true
+	});
+	
+	window.GOL = window.GOL || {};
+	window.GOL.DS_ADD = window.GOL.DS_ADD || {};
+	window.GOL.DS_ADD.dstypeChanged = function(type) {
+		
+		codemirror.setValue('');		
+		var code = '';
+		
+		if (type == 'v_SHP') {
+			$('#select-file-row').css('display', 'none');
+			$('#connection-params-row').css('display', 'block');
+			code += '{ \n';
+			code += '\t "url": "file:data/valencia-osm" \n';
+			code += '}';
+			
+		} else if (type == 'v_PostGIS') {
+			$('#select-file-row').css('display', 'none');
+			$('#connection-params-row').css('display', 'block');
+			code += '{ \n';
+			code += '\t "host": "localhost", \n';
+			code += '\t "port": "5432", \n';
+			code += '\t "database": "mydatabase", \n';
+			code += '\t "schema": "public", \n';
+			code += '\t "user": "postgres", \n';
+			code += '\t "passwd": "postgres", \n';
+			code += '\t "dbtype": "postgis" \n';
+			code += '}';
+			
+		} else if (type == 'c_GeoTIFF') {
+			$('#select-file-row').css('display', 'block');
+			$('#connection-params-row').css('display', 'none');
+			code += '{ \n';
+			code += '\t "url": "url_replace" \n';
+			code += '}';
+			
+		}  else if (type == 'e_WMS') {
+			$('#select-file-row').css('display', 'none');
+			$('#connection-params-row').css('display', 'block');
+			code += '{ \n';
+			code += '\t "url": "https://demo.scolab.eu/geoserver/wms?request=getcapabilities" \n';
+			code += '}';
+			
+// 			code += '{ \n';
+// 			code += '\t "url": "https://test.scolab.eu/geoserver/wms?request=getcapabilities", // ' + gettext('URL to capabilities document') + ' \n';
+// 			code += '\t "user": "wmsuser", // * ' + gettext('Only required if service is authenticated') + ' \n';
+// 			code += '\t "password": "wmspassword", // * ' + gettext('Only required if service is authenticated') + ' \n';
+// 			code += '}';
+		}
+		
+		codemirror.setValue(code);
+
+	}
+	
+	$('#select-file-button').click(function (e) {
+		window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,");
+	});
+	
+	window.filemanagerCallback = function(url) {
+		document.querySelector("input[id=id_file]").value = "file://" + "{{fm_directory}}" + url;
+	};
+	
+	$("#id_type").change(function() {
+		var type = $('option:selected', $(this)).val();
+		GOL.DS_ADD.dstypeChanged(type);
+	});
+	
+	GOL.DS_ADD.dstypeChanged($("#id_type").val());
+});
+</script>
+{% endblock %}
