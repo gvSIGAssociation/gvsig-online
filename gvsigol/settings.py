@@ -65,7 +65,7 @@ INSTALLED_APPS = [
     'gvsigol_plugin_geocoding',
     'gvsigol_plugin_sync',
     'gvsigol_plugin_catastro',
-    'gvsigol_plugin_alfresco',
+    #'gvsigol_plugin_alfresco',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -228,7 +228,7 @@ STATICFILES_FINDERS = (
     #'compressor.finders.CompressorFinder',
 )
 
-GVSIGOL_VERSION = '2.1.5'
+GVSIGOL_VERSION = '2.1.6'
 
 GVSIGOL_USERS_CARTODB = {
     'dbhost': 'localhost',
