@@ -44,3 +44,6 @@ argparse==1.2.1
 wsgiref==0.1.2
 
 cmislib==0.5.1
+
+sphinx==1.5.1
+sphinx_rtd_theme
