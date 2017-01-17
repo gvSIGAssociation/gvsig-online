@@ -58,14 +58,14 @@ INSTALLED_APPS = [
     'gvsigol_filemanager',
     'gvsigol_core',
     #'gvsigol_app_dev',
-    #'gvsigol_app_pobla',
-    'gvsigol_app_benicarlo',
+    'gvsigol_app_pobla',
+    #'gvsigol_app_benicarlo',
     'gvsigol_plugin_worldwind',
-    'gvsigol_plugin_shps_folder',
+    #'gvsigol_plugin_shps_folder',
     'gvsigol_plugin_geocoding',
     'gvsigol_plugin_sync',
     'gvsigol_plugin_catastro',
-    'gvsigol_plugin_alfresco',
+    #'gvsigol_plugin_alfresco',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -185,9 +185,9 @@ LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol_services/locale'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/locale'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_app_dev/locale'),
+    #os.path.join(BASE_DIR, 'gvsigol_app_dev/locale'),
     os.path.join(BASE_DIR, 'gvsigol_app_pobla/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_app_benicarlo/locale'),
+    #os.path.join(BASE_DIR, 'gvsigol_app_benicarlo/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/locale'),
 )
@@ -217,8 +217,8 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
     #os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
-    #os.path.join(BASE_DIR, 'gvsigol_app_pobla/static'),
-    os.path.join(BASE_DIR, 'gvsigol_app_benicarlo/static'),
+    os.path.join(BASE_DIR, 'gvsigol_app_pobla/static'),
+    #os.path.join(BASE_DIR, 'gvsigol_app_benicarlo/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/static'),
 )
@@ -340,7 +340,9 @@ GVSIGOL_BASE_LAYERS = {
 #skin-purple-light
 #skin-yellow
 #skin-yellow-light
-GVSIGOL_SKIN = "skin-blue"
+GVSIGOL_SKIN = "skin-pobla"
+
+GVSIGOL_APP_DOWNLOAD_LINK = 'https://sigpobla.gvsigonline.com/media/data/documentacion/geopaparazzi-23-dic-2016.apk'
 
 FILEMANAGER_DIRECTORY = os.path.join(MEDIA_ROOT, 'data')
 FILEMANAGER_MEDIA_ROOT = os.path.join(MEDIA_ROOT, FILEMANAGER_DIRECTORY)

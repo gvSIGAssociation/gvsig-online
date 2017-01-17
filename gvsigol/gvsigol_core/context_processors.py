@@ -31,4 +31,5 @@ def global_settings(request):
         'PUBLIC_VIEWER': gvsigol.settings.PUBLIC_VIEWER,
         'GVSIGOL_ENABLE_ENUMERATIONS': gvsigol.settings.GVSIGOL_ENABLE_ENUMERATIONS,
         'GVSIGOL_SKIN': gvsigol.settings.GVSIGOL_SKIN,
+        'GVSIGOL_APP_DOWNLOAD_LINK': gvsigol.settings.GVSIGOL_APP_DOWNLOAD_LINK,
     }
