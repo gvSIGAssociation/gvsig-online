@@ -163,11 +163,24 @@
 				        	</div>       	
 				      	</div>
 			      	</div>
-			      	{% if CATALOG_MODULE %}
+			      	
 			      	<div class="row clear-row-20">
-						<div class="col-md-6">
+			      		<div class="col-md-6">
 				      		<div class="attachment-block clearfix">
 				                <img class="attachment-img" src="{% static "img/promo-img3.png"%}" alt="Image">			
+				                <div class="attachment-pushed">
+				                  	<h4 class="attachment-heading"><a href="https://devel.gvsigonline.com/docs/web/" target="_blank">{% trans "Documentation" %}</a></h4>	
+				                  	<div class="attachment-text">
+				                		{% trans "New, attractive and enriched gvSIG Online documentation is now available on-line" %}.
+										<a href="https://devel.gvsigonline.com/docs/web/" class="text-info" target="_blank">{% trans "Explore documentation" %}</a>
+				                  	</div>
+				                </div>
+				            </div>       	
+				      	</div>
+				      	{% if CATALOG_MODULE %}
+						<div class="col-md-6">
+				      		<div class="attachment-block clearfix">
+				                <img class="attachment-img" src="{% static "img/promo-img4.png"%}" alt="Image">			
 				                <div class="attachment-pushed">
 				                  	<h4 class="attachment-heading"><a href="{{CATALOG_URL}}catalog.search#/home" target="_blank">{% trans "Metadata catalog" %}</a></h4>	
 				                  	<div class="attachment-text">
@@ -177,8 +190,8 @@
 				                </div>
 				            </div>       	
 				      	</div>
-			      	</div>
-			      	{% endif %}
+				      	{% endif %}
+			      	</div>			      	
 				</section>				
 			</div>			
 		</div>
