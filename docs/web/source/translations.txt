@@ -1,0 +1,12 @@
+#Activamos el entorno virtual con python3 ya que el builder gettext no funciona con el 2
+source /home/jrodrigo/virtualenvs/p3/bin/activate
+cd /home/jrodrigo/workspace/gvsigonline-v2/docs/web
+sphinx-build -b gettext source build/locale
+sphinx-intl update -p build/locale -l es -l en -l fr
+sphinx-intl build
+
+#Desactivamos el entorno virtual con python3 ya que el builder html no funciona con el 3
+deactivate
+sphinx-build -b html -D language=es source build/lang/es
+sphinx-build -b html -D language=en source build/lang/en
+sphinx-build -b html -D language=fr source build/lang/fr
