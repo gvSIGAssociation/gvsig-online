@@ -129,7 +129,7 @@ class ColorMapEntry(models.Model):
     order = models.IntegerField(null=False, default=0)
     color_map = models.ForeignKey(ColorMap, on_delete=models.CASCADE)
     color = models.CharField(max_length=100)
-    quantity = models.IntegerField()
+    quantity = models.FloatField()
     label = models.CharField(max_length=100)
     opacity = models.FloatField(default=1.0)
     
