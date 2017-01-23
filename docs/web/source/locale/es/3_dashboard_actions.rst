@@ -121,7 +121,7 @@ Sobre cada una de las capas podemos realizar las siguientes operaciones:
 
 Publicar capa
 *************
-Para publicar una capa existente en un almacén de datos. Seleccionaremos el botón *"Publicar capa"*, una vez accedamos a la vista de publicación nos aparecerá un formulario.
+Para publicar una capa existente en un almacén de datos, seleccionaremos el botón *"Publicar capa"*, una vez accedamos a la vista de publicación aparecerá el siguiente formulario.
 
 .. image:: ../../_static/images/publish1.png
    :align: center
@@ -152,10 +152,44 @@ Por último aplicaremos los permisos de lectura y escritura a la capa.
    	
 Crear capa vacía
 ****************
-TODO
+Para crear una capa vacía, seleccionaremos el botón *"Crear capa vacía"*, una vez accedamos a la vista aparecerá el siguiente formulario.
 
 .. image:: ../../_static/images/create_layer1.png
    :align: center
+   
+Los pasos para crear una capa vacía son los siguientes:
+
+*	Seleccionamos el almacén de datos donde se creará la capa (será un almacén de datos PostGIS).
+
+*	Introducimos un nombre para la capa.
+
+*	Introducimos un título para la capa.
+
+*	Seleccionamos en el desplegable el tipo de geometría (Punto, Multipunto, Linea, MultiLinea, Polígono, MultiPolígono).
+
+*	Seleccionamos en el desplegable el sistema de referencia de coordenadas (Aparecerán los habilitados para la aplicación).
+
+*	Añadimos uno o más campos para la capa, para ello seleccionamos el botón *"Añadir campo"* y se nos mostrará un diálogo donde podremos seleccionar el tipo de campo y un nombre para el mismo.
+
+.. image:: ../../_static/images/select_field.png
+   :align: center
+   
+.. note::
+   Los tipos de campo soportados son: Texto, Entero, Doble, Fecha, Enumeración (se han de definir previamente)
+
+*	Seleccionamos las propiedades de la capa en el visor (visible, cacheada, imagen simple, consultable).
+
+*	Si lo deseamos podemos introducir una descripción de la capa.
+
+*	A continuación seleccionamos el botón *"Siguiente"*, lo que nos llevará a la vista de permisos.
+
+Por último aplicaremos los permisos de lectura y escritura a la capa.
+
+.. image:: ../../_static/images/permissions.png
+   :align: center
+   
+.. note::
+   	Por defecto todas las capas pueden ser leídas por cualquier usuario, pero solo pueden ser escritas por los usuarios con rol de **superusuario**.
 
 
 3.2.4 Gestión de bloqueos
@@ -167,8 +201,15 @@ Podemos consultar los bloqueos activos desde el listado de bloqueos, así como d
 
 3.2.5 Crear, modificar y eliminar enumeraciones
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-TODO
+Puede añadir(1), actualizar(2) y eliminar(3) enumeraciones seleccionando la vista con el listado de enumeraciones desde el menú principal.
 
+.. image:: ../../_static/images/enum1.png
+   :align: center
+
+Desde el formulario de enumeraciones podremos añadir o eliminar los items que forman parte de la enumeración.
+
+.. image:: ../../_static/images/enum2.png
+   :align: center
 
 3.3 Gestionar archivos
 ----------------------
@@ -179,7 +220,8 @@ TODO
 Podremos crear todos los subdirectorios que deseemos para organizar nuestros archivos dentro de un directorio raíz. 
 Para ellos seleccionaremos el botón *“crear directorio”*, e introduciremos el nombre del nuevo directorio.
 
-|100002010000068B0000010873918762_png|
+.. image:: ../../_static/images/dirs2.png
+   :align: center
 
 Con esto se habrá creado un nuevo subdirectorio dentro del directorio raíz.
 
@@ -210,21 +252,25 @@ de metadatos. Entre ellos destaca:
 
 Por tanto ya sea seleccionando uno a uno o comprimidos tendremos especial atención en que todos ellos estén presentes.
 
-|1000020100000684000001F61189782B_png|
+.. image:: ../../_static/images/dirs3.png
+   :align: center
 
 Una vez subido los archivos nos aparecerá en el directorio donde lo hayamos subido, aunque únicamente veremos el archivo con extensión *"SHP"*.
 
-|1000020100000695000001376BA0C7E1_png|
+.. image:: ../../_static/images/dirs4.png
+   :align: center
 
 Para eliminar el archivo shapefile seleccionaremos en el menú de operaciones la opción *“eliminar archivo”*, esto borrará en el servidor tanto el archivo shp como el resto de archivos asociados (.shx, .dbf, .prj, …).
 
 Entre las operaciones que podemos realizar sobre los archivos de tipo shapefile, se encuentra la de *“Exportar a base de datos”*, para ello seleccionamos la operación en el menú de operaciones del archivo.
 
-|100002010000069400000137DD1411FC_png|
+.. image:: ../../_static/images/dirs5.png
+   :align: center
 
 A continuación se mostrará el formulario con los parámetros necesarios para realizar la exportación.
 
-|100002010000068E000001770D7737A4_png|
+.. image:: ../../_static/images/dirs6.png
+   :align: center
 
 En el formulario deberemos elegir el almacén de datos de destino (de tipo base de datos PostGIS), así como especificar el sistema de referencia de coordenadas (CRS) y la codificación de caracteres de la capa a subir.
 
@@ -248,11 +294,13 @@ Para subirlos procederemos de la misma forma que con los archivos shapefile, sol
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Para crear un nuevo proyecto seleccionaremos en el menú de la izquierda la opción *"Proyectos"*, lo que nos llevará a la vista listado deproyectos.
 
-|1000020100000780000001BC2554AE2C_png|
+.. image:: ../../_static/images/project1.png
+   :align: center
 
 A continuación seleccionamos la opción *"Añadir proyecto"*, que se encuentra en la parte superior derecha, para abrir la vista que nos permitirá crear un nuevo proyecto.
 
-|10000201000007700000038A08741B24_png|
+.. image:: ../../_static/images/project2.png
+   :align: center
 
 El formulario para crear un nuevo proyecto está formado por los siguientes campos:
 
@@ -268,7 +316,8 @@ El formulario para crear un nuevo proyecto está formado por los siguientes camp
 
 Además de estos campos en la parte inferior aparecerán dos listados:
 
-|100002010000066C000001EB8B677957_png|
+.. image:: ../../_static/images/project3.png
+   :align: center
 
 *   **Grupos de usuario**: Grupos de usuario(roles) para los que el proyecto estará disponible. Los usuarios administradores tendrán acceso a todos los proyectos.
 
@@ -282,17 +331,38 @@ Para cada uno de los proyectos es posible definir un orden particular de las cap
 
 A continuación en la vista aparecerán los grupos de capas y dentro de ellos si los desplegamos las capas. Las capas pueden ser ordenadas mediante las flechas que se encuentran en la parte derecha de las mismas, mientras que los grupos de capas pueden ser ordenados usando la técnica de arrastrar y soltar.
 
-|1000020100000694000001C21AD35E12_png|
+.. image:: ../../_static/images/project4.png
+   :align: center
 
 
 3.5 Gestionar simbología
 ------------------------
+Para crear o modificar la leyenda de una capa seleccionaremos la entrada *"Estilos de capa"* en el menú de simbología.
+
+.. image:: ../../_static/images/sym1.png
+   :align: center
+
+Aparecerá un listado con las capas disponibles. Cada capa del listado dispone de un selector donde se muestran las leyendas o estilos disponibles para la capa. 
+Estas leyendas se podrán seleccionar para ser modificadas(2).
+También podremos añadir una nueva leyenda a la capa seleccionando el botón añadir(1).
+
+Si seleccionamos el botón el botón añadir se nos mostrará una vista para que seleccionemos el tipo de leyenda que deseamos crear.
+En caso de que la capa sea de tipo vectorial el menú que se nos mostrará será el siguiente:
+
+.. image:: ../../_static/images/sym2.png
+   :align: center
+   
+Y si es de tipo raster de esta forma:
+
+.. image:: ../../_static/images/sym3.png
+   :align: center
 
 3.5.1 Leyenda de símbolo único
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 La leyenda de símbolo único es la más simple de todas y nos permite definir un estilo que será aplicado a todos los elementos de una capa de la misma forma, sin hacer ningún tipo de distinción.
 
-|100002010000067E0000024F0C8625B0_png|
+.. image:: ../../_static/images/sym4.png
+   :align: center
 
 
 La vista para crear una leyenda de símbolo único está divida en tres áreas:
@@ -318,40 +388,46 @@ Tenemos 3 opciones:
 
 *   **Importar un símbolo desde una biblioteca:** Se nos mostrará un dialogo con desplegable donde seleccionaremos la biblioteca de símbolos. A continuación seleccionaremos el símbolo.
 
-|10000201000001200000002A6A1F01B9_png|
-
-|10000201000002730000011396096EA6_png|
+.. image:: ../../_static/images/sym5.png
+   :align: center
 
 *   **Añadir uno o varios simbolizadores:** Como hemos comentado anteriormente un símbolo puede estar formado por uno o más simbolizadores.
 
-|10000201000001200000002A6A1F01B9_png|
+.. image:: ../../_static/images/sym6.png
+   :align: center
 
 Podremos editar o eliminar un simbolizador desde los botones que se encuentran en la parte derecha.
 
-|100002010000062E0000004ED4160A40_png|
+.. image:: ../../_static/images/sym7.png
+   :align: center
 
 Al seleccionar el botón de edición se abrirá un dialogo donde podremos configurar los valores de las propiedades del simbolizador en función de us tipo.
 
-|10000201000002650000014A9E6B1115_png|
+.. image:: ../../_static/images/sym8.png
+   :align: center
 
 En caso de tener varios simbolizadores podemos definir el orden de visualización de los mismos mediante la técnica de arrastrar y soltar. Para ello seleccionaremos el simbolizador y lo arrastraremos a la posición deseada.
 
-|1000020100000641000000B45326936D_png|
+.. image:: ../../_static/images/sym9.png
+   :align: center
 
 *   **Añadir una etiqueta:**Las etiquetas son tipo especial de simbolizadores de tipo texto. Para añadir una nueva etiqueta seleccionaremos el botón *"Añadir etiqueta"*.
     Solo podremos añadir una etiqueta por símbolo por tanto una vez añadida una etiqueta el botón desaparecerá, y solo volverá a aparecer si esta es eliminada.
 
-|10000201000001200000002A6A1F01B9_png|
+.. image:: ../../_static/images/sym10.png
+   :align: center
 
-Como cualquier otro simobolizador una vez añadida podremos editar sus propiedades.
+Como cualquier otro simbolizador una vez añadida podremos editar sus propiedades.
 
-|100002010000025F000002736533B86D_png|
+.. image:: ../../_static/images/sym11.png
+   :align: center
 
 3.5.2 Leyenda de valores únicos
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 La leyenda de valores únicos genera una clasificación de símbolos en función de un campo de la capa.
 
-|100002010000066F0000037F31B49968_png|
+.. image:: ../../_static/images/sym12.png
+   :align: center
 
 Seleccionaremos el campo por el que deseamos realizar la clasificación (1), y a continuación se crearán de forma automática las clases correspondientes.
 
@@ -361,9 +437,10 @@ Cada una de las clases creadas puede ser modificada de la misma forma que si se 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 El tipo de leyenda más habitual para representar datos numéricos quizá sea la de intervalos, que permite clasificar los valores disponibles en los distintos elementos en una serie de rangos.
 Para generar la leyenda de intervalos en primer lugar seleccionaremos el campo por el que deseamos realizar la clasificación (1) (solo aparecerán los campos numéricos),
-y a continuación seleccionaremos el número de intervalos ().
+y a continuación seleccionaremos el número de intervalos (2).
 
-|10000201000006730000037EE47B6A4B_png|
+.. image:: ../../_static/images/sym13.png
+   :align: center
 
 Cada una de las clases creadas puede ser modificada de la misma forma que si se tratara de un símbolo único.
 
@@ -377,11 +454,13 @@ Cada una de las clases creadas puede ser modificada de la misma forma que si se 
 
 Para definir la condición de filtrado seleccionaremos en el menú de herramientas la opción *"Editar filtro"* (2).
 
-|100002010000067300000116AD76FB10_png|
+.. image:: ../../_static/images/sym14.png
+   :align: center
 
 A continuación se nos mostrará un diálogo, desde donde podremos definir el filtro con la condición deseada.
 
-|1000020100000261000001C7407B359A_png|
+.. image:: ../../_static/images/sym15.png
+   :align: center
 
 3.5.5 Mapa de color (ráster)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -389,15 +468,15 @@ Mediante esta leyenda podremos asignar una tabla de colores a una capa de tipo r
 
 Para añadir una nueva entrada a la tabla de colores seleccionaremos el botón *"Añadir entrada de color"* (1).
 
-|100002010000067A0000029A809A286E_png|
-
-|100002010000001500000017FA9CFD1C_png|
+.. image:: ../../_static/images/sym16.png
+   :align: center
 
 Podremos añadir tantas entradas de color como deseemos. Para editar los valores de cada una de las entradas seleccionaremos el botón editar.
 
 A continuación se nos mostrará un dialogo para que configuremos los valores.
 
-|100002010000025F000001C514240607_png|
+.. image:: ../../_static/images/sym17.png
+   :align: center
 
 *   **Color:** Seleccionaremos el color deseado para la entrada.
 
@@ -415,7 +494,8 @@ Las bibliotecas de símbolos nos permiten crear y agrupar símbolos genéricos q
 
 Para crear una nueva biblioteca de símbolos seleccionaremos la entrada *"Bibliotecas de símbolos"* en el menú de simbología.
 
-|1000020100000774000001CFFA76A596_png|
+.. image:: ../../_static/images/sym18.png
+   :align: center
 
 Para crea una nueva biblioteca seleccionaremos el botón *"Añadir biblioteca"* que se encuentra en la parte superior derecha, y rellenaremos los campos nombre y descripción en el formulario.
 
@@ -428,14 +508,16 @@ Podremos añadir 4 tipos de símbolos: Gráficos externos (imágenes), puntos, l
 El interfaz para añadir puntos líneas y polígonos es similar al descrito en el punto 6.2.1.
 En caso de que el símbolo que deseemos añadir sea de tipo imagen el interfaz nos permitirá seleccionar la imagen desde nuestro sistema de ficheros local.
 
-|100002010000067A000001BC75651FB5_png|
+.. image:: ../../_static/images/sym19.png
+   :align: center
 
 .. note::
    Actualmente únicamente se soportan imágenes en formato PNG.
 
 Conforme vayamos añadiendo símbolos estos irán apareciendo en la vista de la biblioteca, desde donde podremos seleccionarlos para modificarlos o eliminarlos.
 
-|100002010000067F00000166CFF00956_png|
+.. image:: ../../_static/images/sym20.png
+   :align: center
 
 Podremos exportar cualquier biblioteca de símbolos, para tener un resguardo de la misma y poder restaurarla posteriormente o compartirla con otros usuarios de la aplicación. Para ello seleccionaremos el botón naranja.
 
