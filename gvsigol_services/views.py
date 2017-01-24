@@ -373,8 +373,8 @@ def layer_add(request):
                     newRecord.metadata_uuid = ''
                     try:
                         if settings.CATALOG_MODULE:
-                            layer_info = mapservice_backend.getResourceInfo(workspace.name, datastore.name, newRecord.name, "json")
-                            muuid = gn_backend.metadata_insert(newRecord, abstract, workspace, layer_info)
+                            (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, newRecord.name, "json")
+                            muuid = gn_backend.metadata_insert(newRecord, abstract, workspace, layer_info, ds_type)
                             newRecord.metadata_uuid = muuid
                     except Exception as exc:
                         logging.exception(exc)
@@ -503,7 +503,7 @@ def layer_config(request, layer_id):
         except: 
             datastore = Datastore.objects.get(id=layer.datastore_id)
             workspace = Workspace.objects.get(id=datastore.workspace_id)
-            resource = mapservice_backend.getResourceInfo(workspace.name, datastore.name, layer.name, "json")
+            (ds_type, resource) = mapservice_backend.getResourceInfo(workspace.name, datastore, layer.name, "json")
             resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
             for f in resource_fields:
                 field = {}
@@ -879,8 +879,8 @@ def layer_create(request):
                         newRecord.metadata_uuid = ''
                         try:
                             if settings.CATALOG_MODULE:
-                                layer_info = mapservice_backend.getResourceInfo(workspace.name, datastore.name, newRecord.name, "json")
-                                muuid = gn_backend.metadata_insert(newRecord, abstract, workspace, layer_info)
+                                (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, newRecord.name, "json")
+                                muuid = gn_backend.metadata_insert(newRecord, abstract, workspace, layer_info, ds_type)
                                 newRecord.metadata_uuid = muuid
                         except Exception as exc:
                             logging.exception(exc)
