@@ -193,6 +193,7 @@ SITE_ID=1
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
+BASE_URL = '##BASE_URL##'
 MEDIA_ROOT = '/var/www/media/'
 MEDIA_URL = '##BASE_URL##/media/'
 STATIC_URL = '/static/'
