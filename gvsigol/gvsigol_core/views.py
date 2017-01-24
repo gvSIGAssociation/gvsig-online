@@ -742,3 +742,7 @@ def public_viewer_get_conf(request):
         } 
         
         return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
+    
+def documentation(request):
+    #https://devel.gvsigonline.com/docs/web/
+    return render_to_response('documentation.html', {}, RequestContext(request))
