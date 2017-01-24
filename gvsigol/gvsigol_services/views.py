@@ -816,7 +816,7 @@ def layergroup_delete(request, lgid):
 
 @require_http_methods(["GET", "POST", "HEAD"])
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@superuser_required
+@staff_required
 def layer_create(request):
     layer_type = "gs_vector_layer"
     if request.method == 'POST':

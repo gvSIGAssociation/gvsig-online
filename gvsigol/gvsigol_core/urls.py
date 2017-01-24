@@ -14,4 +14,5 @@ urlpatterns = [
     url(r'^select_public_project/$', 'gvsigol_core.views.select_public_project', name='select_public_project'),
     url(r'^public_project_load/(?P<pid>[0-9]+)/$', 'gvsigol_core.views.public_project_load', name='public_project_load'),
     url(r'^public_viewer_get_conf/$', 'gvsigol_core.views.public_viewer_get_conf', name='public_viewer_get_conf'),
+    url(r'^documentation/$', 'gvsigol_core.views.documentation', name='documentation'),
 ]
