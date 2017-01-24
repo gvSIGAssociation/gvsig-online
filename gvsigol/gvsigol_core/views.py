@@ -738,5 +738,12 @@ def public_viewer_get_conf(request):
         return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
     
 def documentation(request):
-    #https://devel.gvsigonline.com/docs/web/
-    return render_to_response('documentation.html', {}, RequestContext(request))
+    lang = request.LANGUAGE_CODE
+    response = {
+        'intro_url': settings.BASE_URL + '/docs/web/intro/' + lang + '/',
+        'admin_guide_url': settings.BASE_URL + '/docs/web/dashboard/' + lang + '/',
+        'viewer_url': settings.BASE_URL + '/docs/web/viewer/' + lang + '/',
+        'plugins_url': settings.BASE_URL + '/docs/web/plugins/' + lang + '/',
+        'mobile_url': settings.BASE_URL + '/docs/mobile/' + lang + '/'
+    }
+    return render_to_response('documentation.html', response, RequestContext(request))
