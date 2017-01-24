@@ -51,7 +51,7 @@ class Geonetwork():
         self.session.auth = None
     
     
-    def gn_insert_metadata(self, layer, abstract, ws, layer_info):
+    def gn_insert_metadata(self, layer, abstract, ws, layer_info, ds_type):
         
         url = self.service_url + "xml.metadata.insert"
         headers = {'content-type': 'application/xml'}
@@ -63,7 +63,7 @@ class Geonetwork():
         xml +=      '<styleSheet>_none_</styleSheet>'
         xml +=      '<uuidAction>generateUUID</uuidAction>'
         xml +=      '<data><![CDATA['
-        xml +=          self.create_metadata(layer, abstract, ws, layer_info)
+        xml +=          self.create_metadata(layer, abstract, ws, layer_info, ds_type)
         xml +=      ']]></data>'
         xml +=  '</request>'
         
@@ -155,13 +155,13 @@ class Geonetwork():
         raise FailedRequestError(r.status_code, r.content)
     
     
-    def create_metadata(self, layer, abstract, ws, layer_info):
+    def create_metadata(self, layer, abstract, ws, layer_info, ds_type):
         
-        maxx = str(layer_info['featureType']['latLonBoundingBox']['maxx'])
-        maxy = str(layer_info['featureType']['latLonBoundingBox']['maxy'])
-        minx = str(layer_info['featureType']['latLonBoundingBox']['minx'])
-        miny = str(layer_info['featureType']['latLonBoundingBox']['miny'])
-        crs = str(layer_info['featureType']['nativeBoundingBox']['crs'])
+        maxx = str(layer_info[ds_type]['latLonBoundingBox']['maxx'])
+        maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
+        minx = str(layer_info[ds_type]['latLonBoundingBox']['minx'])
+        miny = str(layer_info[ds_type]['latLonBoundingBox']['miny'])
+        crs = str(layer_info[ds_type]['nativeBoundingBox']['crs'])
         
         metadata =  '<gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" '
         metadata +=     'xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:gmx="http://www.isotc211.org/2005/gmx" '

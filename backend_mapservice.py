@@ -397,8 +397,8 @@ class Geoserver():
             layer.thumbnail = self.getThumbnail(layer.datastore.workspace, layer.datastore, layer)
             if settings.CATALOG_MODULE:
                 gn_backend.metadata_delete(layer)
-                layer_info = self.getResourceInfo(layer.datastore.workspace.name, layer.datastore.name, layer.name, "json")
-                muuid = gn_backend.metadata_insert(layer, layer.abstract, layer.datastore.workspace, layer_info)
+                (ds_type, layer_info) = self.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
+                muuid = gn_backend.metadata_insert(layer, layer.abstract, layer.datastore.workspace, layer_info, ds_type)
                 layer.metadata_uuid = muuid
             layer.save()
         except Exception as e:
@@ -581,34 +581,24 @@ class Geoserver():
     def getResourceInfo(self, workspace, store, featureType, type):
         if type == None:
             type = "json"
-        url = self.rest_catalog.service_url + "/workspaces/" + workspace + "/datastores/" + store + "/featuretypes/" + featureType +"."+type
+            
+        url = None
+        if store.type == 'v_PostGIS':
+            url = self.rest_catalog.service_url + "/workspaces/" + workspace + "/datastores/" + store.name + "/featuretypes/" + featureType +"."+type
+            ds_type = 'featureType'
+        elif store.type == 'e_WMS':
+            url = self.rest_catalog.service_url + "/workspaces/" + workspace + "/wmsstores/" + store.name + "/featuretypes/" + featureType +"."+type
+            ds_type = 'wms'
+        elif store.type == 'c_GeoTIFF':
+            url = self.rest_catalog.service_url + "/workspaces/" + workspace + "/coveragestores/" + store.name + "/coverages/" + featureType +"."+type
+            ds_type = 'coverage'
+            
         r = self.rest_catalog.session.get(url, auth=(self.user, self.password))
         if r.status_code==200:
             content = r.content
             jsonData = json.loads(content)
-            return jsonData
-        return None
-    
-    def getWmsResourceInfo(self, workspace, store, featureType, type):
-        if type == None:
-            type = "json"
-        url = self.rest_catalog.service_url + "/workspaces/" + workspace + "/wmsstores/" + store + "/featuretypes/" + featureType +"."+type
-        r = self.rest_catalog.session.get(url, auth=(self.user, self.password))
-        if r.status_code==200:
-            content = r.content
-            jsonData = json.loads(content)
-            return jsonData
-        return None
-    
-    def getRasterResourceInfo(self, workspace, store, featureType, type):
-        if type == None:
-            type = "json"
-        url = self.rest_catalog.service_url + "/workspaces/" + workspace + "/coveragestores/" + store + "/coverages/" + featureType +"."+type
-        r = self.rest_catalog.session.get(url, auth=(self.user, self.password))
-        if r.status_code==200:
-            content = r.content
-            jsonData = json.loads(content)
-            return jsonData
+            return [ds_type, jsonData]
+        
         return None
 
     def getLayerCreateTypes(self):
@@ -1248,11 +1238,12 @@ class Geoserver():
         return numberOfFeatures
     
     def getThumbnail(self, ws, ds, layer):
-        layer_info = self.getResourceInfo(ws.name, ds.name, layer.name, "json")
-        maxx = str(layer_info['featureType']['latLonBoundingBox']['maxx'])
-        maxy = str(layer_info['featureType']['latLonBoundingBox']['maxy'])
-        minx = str(layer_info['featureType']['latLonBoundingBox']['minx'])
-        miny = str(layer_info['featureType']['latLonBoundingBox']['miny'])
+        (ds_type, layer_info) = self.getResourceInfo(ws.name, ds, layer.name, "json")
+        maxx = str(layer_info[ds_type]['latLonBoundingBox']['maxx'])
+        maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
+        minx = str(layer_info[ds_type]['latLonBoundingBox']['minx'])
+        miny = str(layer_info[ds_type]['latLonBoundingBox']['miny'])
+            
         bbox = minx + "," + miny + "," + maxx + "," + maxy 
         
         values = {
@@ -1290,9 +1281,9 @@ class Geonetwork():
         self.user = user
         self.password = password
         
-    def metadata_insert(self, layer, abstract, ws, layer_info):
+    def metadata_insert(self, layer, abstract, ws, layer_info, ds_type):
         self.rest_geonetwork.gn_auth(self.user, self.password)
-        uuid = self.rest_geonetwork.gn_insert_metadata(layer, abstract, ws, layer_info)
+        uuid = self.rest_geonetwork.gn_insert_metadata(layer, abstract, ws, layer_info, ds_type)
         self.rest_geonetwork.add_thumbnail(uuid, layer.thumbnail.url)
         self.rest_geonetwork.set_metadata_privileges(uuid)
         self.rest_geonetwork.gn_unauth()
