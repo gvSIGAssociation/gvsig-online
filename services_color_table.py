@@ -178,7 +178,7 @@ def get_conf(request, layer_id):
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
     
-    resource = mapservice.getRasterResourceInfo(workspace.name, datastore.name, layer.name, "json")
+    (ds_type, resource) = mapservice.getResourceInfo(workspace.name, datastore, layer.name, "json")
 
     layer_url = core_utils.get_wms_url(request, workspace)
     layer_wfs_url = core_utils.get_wfs_url(request, workspace)
