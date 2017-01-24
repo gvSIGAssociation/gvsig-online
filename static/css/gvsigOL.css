@@ -200,6 +200,7 @@ a:focus {
   min-height: 50px;
   border-radius: 0;
 }
+
 .layout-top-nav .main-header > .navbar {
   margin-left: 0;
 }
@@ -2506,6 +2507,12 @@ a:focus {
   width: 50px;
   height: 50px;
 }
+
+.products-list .product-img i {
+  font-size: 32px;
+  color: #3c8dbc;
+}
+
 .products-list .product-info {
   margin-left: 60px;
 }
