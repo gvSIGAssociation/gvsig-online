@@ -217,7 +217,7 @@ PUBLIC_VIEWER = True
 CATALOG_MODULE = ##CATALOG_IS_ACTIVE##
 GVSIGOL_CATALOG = {
     'URL': '##GEONETWORK_API_URL##',
-    'USER': 'root',
+    'USER': 'admin',
     'PASSWORD': '##GEOSERVER_ADMIN_PASS##'
 }
 
