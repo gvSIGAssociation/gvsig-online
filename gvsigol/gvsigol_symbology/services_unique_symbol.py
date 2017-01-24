@@ -271,7 +271,7 @@ def get_conf(request, layer_id):
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
     
-    resource = mapservice.getResourceInfo(workspace.name, datastore.name, layer.name, "json", )
+    (ds_type, resource) = mapservice.getResourceInfo(workspace.name, datastore, layer.name, "json", )
     fields = utils.get_fields(resource)
     feature_type = utils.get_feature_type(fields)
     alphanumeric_fields = utils.get_alphanumeric_fields(fields)

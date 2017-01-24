@@ -206,6 +206,7 @@ SITE_ID=1
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
+BASE_URL = 'https://localhost'
 MEDIA_ROOT = '/var/www/media/'
 MEDIA_URL = 'https://localhost/media/'
 STATIC_URL = '/gvsigonline/static/'
@@ -239,7 +240,7 @@ GVSIGOL_USERS_CARTODB = {
 }
 
 PUBLIC_VIEWER = True
-CATALOG_MODULE = False
+CATALOG_MODULE = True
 GVSIGOL_CATALOG = {
     'URL': 'http://localhost:8080/geonetwork/srv/spa/',
     'USER': 'admin',
