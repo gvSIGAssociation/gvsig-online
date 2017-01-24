@@ -43,8 +43,8 @@ search.prototype.initUI = function() {
 	this.map.addOverlay(this.popup);
 	
 	$('#autocomplete').autocomplete({
-		//serviceUrl: '/gvsigonline/geocoding/search_candidates/',
-		serviceUrl: self.conf.candidates_url,
+		serviceUrl: '/gvsigonline/geocoding/search_candidates/',
+		//serviceUrl: self.conf.candidates_url,
 		paramName: 'q',
 		params: {
 			limit: 10,
@@ -52,12 +52,12 @@ search.prototype.initUI = function() {
 		},
 		transformResult: function(response) {
 	        jsonResponse = JSON.parse(response);
-	        // don't forget to handle errors because of a bad json
-	        if (jsonResponse.length > 0) {
+	        if (jsonResponse.suggestions.length > 0) {
 	        	return {
-		            suggestions: $.map(jsonResponse, function(item) {
+		            suggestions: $.map(jsonResponse.suggestions, function(item) {
 		                return { 
-		                	value: item.address, 
+		                	//value: item.address,
+		                	value: item.value,
 		                	type: item.type,
 		                	data: item 
 		                };
@@ -68,18 +68,21 @@ search.prototype.initUI = function() {
 	    },
 	    onSelect: function (suggestion) {
 	        $.ajax({
-				type: 'GET',
+				//type: 'GET',
+	        	type: 'POST',
 				async: false,
-			  	url: self.conf.find_url,
+			  	//url: self.conf.find_url,
+			  	url: '/gvsigonline/geocoding/get_location_address/',
 			  	beforeSend:function(xhr){
 			    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 			  	},
 			  	data: {
+			  		'q': suggestion.data.data/*,
 			  		'q': suggestion.data.address,
 			  		'type': suggestion.data.type,
 			  		'tip_via': suggestion.data.tip_via,
 			  		'id': suggestion.data.id,
-			  		'portal': suggestion.data.portalNumber
+			  		'portal': suggestion.data.portalNumber*/
 				},
 			  	success	:function(response){
 			  		self.locate(response);
@@ -90,11 +93,22 @@ search.prototype.initUI = function() {
 	});
 };
 
+/**
+ * TODO.
+ */
+search.prototype.locate = function(location) {	
+	var self = this;	
+	var coordinate = ol.proj.transform([parseFloat(location.longitude), parseFloat(location.latitude)], 'EPSG:4326', 'EPSG:3857');	
+	this.popup.show(coordinate, '<div><p>' + location.title + '</p></div>');
+	this.map.getView().setCenter(coordinate);
+	this.map.getView().setZoom(14);
+};
+
 
 /**
  * TODO.
  */
-search.prototype.locate = function(loc) {	
+/*search.prototype.locate = function(loc) {	
 	var self = this;
 	$.ajax({
 		type: 'GET',
@@ -119,4 +133,4 @@ search.prototype.locate = function(loc) {
 		},
 	  	error: function(){}
 	});
-};
+};*/

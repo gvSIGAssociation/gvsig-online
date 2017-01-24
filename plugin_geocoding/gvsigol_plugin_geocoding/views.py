@@ -38,14 +38,14 @@ def get_conf(request):
 
 def search_candidates(request):
     if request.method == 'GET':
-        query = request.GET.get('query')           
+        query = request.GET.get('q')           
         suggestions = geocoder.search_candidates(query)
             
         return HttpResponse(json.dumps(suggestions, indent=4), content_type='application/json')
 
 def get_location_address(request):
     if request.method == 'POST':
-        query = request.POST.get('query')
+        query = request.POST.get('q')
         location = geocoder.get_location_address(query)
         
         return HttpResponse(json.dumps(location, indent=4), content_type='application/json')
