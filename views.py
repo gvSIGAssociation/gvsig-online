@@ -456,15 +456,12 @@ def project_get_conf(request):
                 
                 layer_info = None
                 defaultCrs = None
-                if datastore.type == 'v_PostGIS':
-                    layer_info = mapservice_backend.getResourceInfo(workspace.name, datastore.name, l.name, "json")
-                    defaultCrs = layer_info['featureType']['srs']
-                elif datastore.type == 'e_WMS':
-                    layer_info = mapservice_backend.getWmsResourceInfo(workspace.name, datastore.name, l.name, "json")
+                if datastore.type == 'e_WMS':
+                    (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
                     defaultCrs = 'EPSG:4326'
-                elif datastore.type == 'c_GeoTIFF':
-                    layer_info = mapservice_backend.getRasterResourceInfo(workspace.name, datastore.name, l.name, "json")
-                    defaultCrs = layer_info['coverage']['srs']
+                else:
+                    (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
+                    defaultCrs = layer_info[ds_type]['srs']
                     
                 if defaultCrs.split(':')[1] in gvsigol.settings.SUPPORTED_CRS:
                     epsg = gvsigol.settings.SUPPORTED_CRS[defaultCrs.split(':')[1]]
@@ -665,15 +662,12 @@ def public_viewer_get_conf(request):
                     
                     layer_info = None
                     defaultCrs = None
-                    if datastore.type == 'v_PostGIS':
-                        layer_info = mapservice_backend.getResourceInfo(workspace.name, datastore.name, l.name, "json")
-                        defaultCrs = layer_info['featureType']['srs']
-                    elif datastore.type == 'e_WMS':
-                        layer_info = mapservice_backend.getWmsResourceInfo(workspace.name, datastore.name, l.name, "json")
+                    if datastore.type == 'e_WMS':
+                        (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
                         defaultCrs = 'EPSG:4326'
-                    elif datastore.type == 'c_GeoTIFF':
-                        layer_info = mapservice_backend.getRasterResourceInfo(workspace.name, datastore.name, l.name, "json")
-                        defaultCrs = layer_info['coverage']['srs']
+                    else:
+                        (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
+                        defaultCrs = layer_info[ds_type]['srs']
                         
                     if defaultCrs.split(':')[1] in gvsigol.settings.SUPPORTED_CRS:
                         epsg = gvsigol.settings.SUPPORTED_CRS[defaultCrs.split(':')[1]]
