@@ -1,4 +1,4 @@
-Guía de administración
+Guia d'administració
 ======================
 
 .. toctree::

@@ -1,4 +1,4 @@
-Visor de mapas
+Visor de mapes
 ==============
 
 .. toctree::

@@ -1,5 +1,5 @@
-Visor de mapas
-==============
+Map viewer
+==========
 
 .. toctree::
    :maxdepth: 2
