@@ -11,6 +11,6 @@ La pantalla principal de contiene diversas secciones. Las más relevantes son:
 
 *   Gestión de capas base (o mapa base), donde podremos configurar las capas de fondo
 
-.. image:: ../images/mobile1.png
+.. image:: ../_static/images/mobile1.png
    :align: center
 
