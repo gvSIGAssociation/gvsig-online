@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-05 13:25+0200\n"
+"POT-Creation-Date: 2017-01-30 10:09+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,51 +22,65 @@ msgstr ""
 msgid "Home"
 msgstr "Inicio"
 
-#: templates/index.html:60
+#: templates/index.html:74
 msgid "Dashboard"
 msgstr "Panel de control"
 
-#: templates/index.html:63
+#: templates/index.html:77
 msgid "Sign out"
 msgstr "Cerra sesión"
 
-#: templates/index.html:69
+#: templates/index.html:97
 msgid "Sign in"
 msgstr "Iniciar sesión"
 
-#: templates/index.html:108
+#: templates/index.html:136
 msgid "Welcome to gvSIG Online"
 msgstr "Bienvenidos a gvSIG Online"
 
-#: templates/index.html:117
+#: templates/index.html:145
 msgid "Public viewer"
 msgstr "Visor público"
 
-#: templates/index.html:119
+#: templates/index.html:147
 msgid "Display the territory, orthophotos and thematic mapping"
 msgstr "Visualiza el territorio, ortofotos y cartografía temática"
 
-#: templates/index.html:120
+#: templates/index.html:148
 msgid "Access to public viewer"
 msgstr "Acceder al visor público"
 
-#: templates/index.html:129
+#: templates/index.html:157
 msgid "Mapping services"
 msgstr "Servicios de mapas"
 
-#: templates/index.html:131
+#: templates/index.html:159
 msgid "Look up OGC services available"
 msgstr "Explora los servicios OGC disponibles"
 
-#: templates/index.html:132 templates/index.html.py:133
+#: templates/index.html:160
 msgid "Show available services"
 msgstr "Mostrar servicios disponibles"
 
-#: templates/index.html:145
+#: templates/index.html:172
+msgid "Documentation"
+msgstr "Documentación"
+
+#: templates/index.html:174
+msgid ""
+"New, attractive and enriched gvSIG Online documentation is now available on-line"
+msgstr ""
+"Ahora la documentación está disponible en linea"
+
+#: templates/index.html:175
+msgid "Explore documentation"
+msgstr "Explorar documentación"
+
+#: templates/index.html:185
 msgid "Metadata catalog"
 msgstr "Catálogo de metadatos"
 
-#: templates/index.html:147
+#: templates/index.html:187
 msgid ""
 "Search the metadata catalog for get information about the data and SDI "
 "services"
@@ -74,10 +88,9 @@ msgstr ""
 "Busca en el catálogo de metadatos para obtener información acerca de los "
 "servcios IDE disponibles"
 
-#: templates/index.html:148 templates/index.html.py:149
+#: templates/index.html:188
 msgid "Access to metadata catalog"
 msgstr "Acceder al catálogo de metadatos"
 
-#: templates/index.html:172
-msgid "All rights reserved"
-msgstr "Todos los derechos reservados"
+#~ msgid "All rights reserved"
+#~ msgstr "Todos los derechos reservados"
