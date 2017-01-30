@@ -5,6 +5,6 @@ Plugins
    :maxdepth: 2
    
    catastro
-   alfresco
    geocoding
+   alfresco
    catalog
