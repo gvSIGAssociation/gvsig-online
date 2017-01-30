@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-12-21 12:43+0100\n"
+"POT-Creation-Date: 2017-01-30 10:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,12 +38,12 @@ msgid "We will work on fixing that right away. Meanwhile, you may"
 msgstr ""
 
 #: templates/base.html:94 templates/base_compress.html.py:93
-#: templates/viewer.html:119 templates/viewer_compress.html.py:117
+#: templates/viewer.html:119 templates/viewer_compress.html.py:118
 msgid "Sign out"
 msgstr ""
 
 #: templates/base.html:112 templates/base_compress.html.py:111
-#: templates/viewer.html:116 templates/viewer_compress.html.py:114
+#: templates/viewer.html:116 templates/viewer_compress.html.py:115
 msgid "Dashboard"
 msgstr ""
 
@@ -52,7 +52,8 @@ msgid "Home"
 msgstr ""
 
 #: templates/base.html:154 templates/base_compress.html.py:153
-#: templates/ogc_services.html:84 templates/select_public_project.html:77
+#: templates/documentation.html:116 templates/ogc_services.html.py:84
+#: templates/select_public_project.html:77
 msgid "Version"
 msgstr ""
 
@@ -62,6 +63,62 @@ msgstr ""
 
 #: templates/dashboard_core_menu.html:6
 msgid "Projects"
+msgstr ""
+
+#: templates/documentation.html:48
+msgid "Web application"
+msgstr ""
+
+#: templates/documentation.html:57
+msgid "Introduction and concepts"
+msgstr ""
+
+#: templates/documentation.html:58
+msgid ""
+"Features of the platform and license. Definition of the objects and entities "
+"that are part of the environment."
+msgstr ""
+
+#: templates/documentation.html:66
+msgid "Administration Guide"
+msgstr ""
+
+#: templates/documentation.html:67
+msgid ""
+"This guide is intended for platform admin users. It teaches the steps to "
+"carry out the management of users and groups, services, symbology, "
+"projects ... "
+msgstr ""
+
+#: templates/documentation.html:75
+msgid "Map viewer user manual"
+msgstr ""
+
+#: templates/documentation.html:76
+msgid ""
+"This manual provides a review of each of the features offered by the map "
+"viewer"
+msgstr ""
+
+#: templates/documentation.html:84
+msgid "Plugins"
+msgstr ""
+
+#: templates/documentation.html:85
+msgid "Plugins add features that are not initially present on the platform"
+msgstr ""
+
+#: templates/documentation.html:94
+msgid "Mobile application"
+msgstr ""
+
+#: templates/documentation.html:103
+msgid "User manual"
+msgstr ""
+
+#: templates/documentation.html:104
+msgid ""
+"Learn how to manage geographic information from a mobile device or tablet"
 msgstr ""
 
 #: templates/home.html:18 utils.py:468
@@ -208,15 +265,15 @@ msgstr ""
 msgid "The project will be removed, Do you want continue?"
 msgstr ""
 
-#: templates/project_list.html:64 templates/public_viewer.html.py:164
-#: templates/public_viewer_compress.html:164 templates/viewer.html.py:190
-#: templates/viewer_compress.html:188
+#: templates/project_list.html:64 templates/public_viewer.html.py:165
+#: templates/public_viewer_compress.html:165 templates/viewer.html.py:190
+#: templates/viewer_compress.html:189
 msgid "Cancel"
 msgstr ""
 
-#: templates/project_list.html:65 templates/public_viewer.html.py:165
-#: templates/public_viewer_compress.html:165 templates/viewer.html.py:191
-#: templates/viewer_compress.html:189
+#: templates/project_list.html:65 templates/public_viewer.html.py:166
+#: templates/public_viewer_compress.html:166 templates/viewer.html.py:191
+#: templates/viewer_compress.html:190
 msgid "Accept"
 msgstr ""
 
@@ -290,20 +347,20 @@ msgstr ""
 msgid "Update project"
 msgstr ""
 
-#: templates/public_viewer.html:82 templates/public_viewer_compress.html:82
+#: templates/public_viewer.html:83 templates/public_viewer_compress.html:83
 msgid "Anonymous"
 msgstr ""
 
-#: templates/public_viewer.html:88 templates/public_viewer_compress.html:88
+#: templates/public_viewer.html:89 templates/public_viewer_compress.html:89
 msgid "Anonymous user"
 msgstr ""
 
-#: templates/public_viewer.html:93 templates/public_viewer_compress.html:93
+#: templates/public_viewer.html:94 templates/public_viewer_compress.html:94
 msgid "Exit"
 msgstr ""
 
-#: templates/public_viewer.html:272 templates/public_viewer_compress.html:258
-#: templates/viewer.html.py:315 templates/viewer_compress.html:293
+#: templates/public_viewer.html:288 templates/public_viewer_compress.html:273
+#: templates/viewer.html.py:316 templates/viewer_compress.html:295
 msgid "Close"
 msgstr ""
 
