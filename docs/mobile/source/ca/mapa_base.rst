@@ -5,12 +5,12 @@ Es posible modificar el mapa base, es decir, la capa de fondo que usamos como re
 
 Esta opción está accesible desde la pantalla principal de la aplicación.
 
-.. image:: ../_static/images/mobile28.png
+.. image:: ../images/mobile28.png
    :align: center
 
 En el formulario que aparece, podemos elegir alguna de las capas base previamente cargadas en la aplicación, o añadir una nueva usando el botón naranja *"+"*.
 
-.. image:: ../_static/images/mobile29.png
+.. image:: ../images/mobile29.png
    :align: center
 
 Existen distintos formatos aceptados, como ficheros Mbtiles o servicios WMTS con caché local. 

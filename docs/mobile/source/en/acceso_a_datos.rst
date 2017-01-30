@@ -10,12 +10,12 @@ Para poder conectarse a gvSIG Online, deberemos configurar los parámetros de co
 
 Accederemos a la configuración desde el menú principal, pulsando sobre el botón de configuración:
 
-.. image:: ../_static/images/mobile11.png
+.. image:: ../images/mobile11.png
    :align: center
    
 A continuación seleccionaremos *"Configuración de sincronización de proyectos en la nube"*, y nos aparecerá un diálogo en el que introducir los parámetros de conexión mencionados:
 
-.. image:: ../_static/images/mobile12.png
+.. image:: ../images/mobile12.png
    :align: center
 
 Flujo de trabajo
@@ -34,16 +34,16 @@ Descarga de las capas
 ---------------------
 Usaremos la opción de Importación de datos, seleccionando la opción *"Datos en la nube"* como fuente de la importación.
 
-.. image:: ../_static/images/mobile13.png
+.. image:: ../images/mobile13.png
    :align: center
    
-.. image:: ../_static/images/mobile14.png
+.. image:: ../images/mobile14.png
    :align: center
    
 A continuación nos aparecerá un diálogo en el que seleccionaremos las capas a descargar de una lista de capas disponibles. Sólo aparecerán las capas sobre las que el usuario tenga permisos de escritura y que no estén bloqueadas por otro usuario. 
 Las capas se descargarán en forma de base de datos Spatialite, que se almacenan en un único fichero, usando la extensión *".sqlite"*.
 
-.. image:: ../_static/images/mobile15.png
+.. image:: ../images/mobile15.png
    :align: center
    
 Deberemos dar un nombre significativo a dicha base de datos (por defecto se le asigna un nombre aleatorio), ya que a continuación vamos a trabajar con ese fichero de base de datos.
@@ -55,7 +55,7 @@ así como la capa que queremos poner en edición.
 
 Para ello, accederemos desde el menú contextual del mapa, seleccionando la opción *"Listado de datos Spatialite"*.
 
-.. image:: ../_static/images/mobile16.png
+.. image:: ../images/mobile16.png
    :align: center
 
 Desde aquí, usaremos el botón de añadir base de datos (+), y seleccionaremos el fichero de datos Spatialite previamente creado.
@@ -66,7 +66,7 @@ Cerramos el diálogo, y se mostrará el mapa con las capas que hayamos seleccion
 
 Para iniciar la edición, realizaremos una pulsación larga sobre el icono del lápiz y seleccionaremos la capa que queremos editar.
 
-.. image:: ../_static/images/mobile17.png
+.. image:: ../images/mobile17.png
    :align: center
    
 Salimos del diálogo, y volvemos a pulsar sobre el lápiz para activar la edición.
@@ -79,14 +79,14 @@ Exportación de las capas a gvSIG Online
 ---------------------------------------
 Una vez finalizada la edición de las capas, volveremos a cargarlas en gvSIG Online usando la opción de exportación de datos, seleccionando *"Datos en la nube"* como fuente de la exportación, y a continuación elegiremos el fichero Spatialite que contiene las capas editadas.
 
-.. image:: ../_static/images/mobile18.png
+.. image:: ../images/mobile18.png
    :align: center
 
 Se subirá toda la base de datos Spatialite a gvSIG Online, donde se comprobará que el usuario tuviese permisos de escritura sobre las capas que contiene, y que exista un bloqueo del usuario sobre las mismas (de lo contrario se mostrará un error al usuario).
 
 Existen dos opciones diferentes a la hora de subir el fichero: *"Subir"* y *"Subir y finalizar"*:
 
-.. image:: ../_static/images/mobile19.png
+.. image:: ../images/mobile19.png
    :align: center
 
 La opción *"Subir"* nos permite cargar en gvSIG Online los datos que hayamos modificado en desde gvSIG Mobile, pero mantiene el bloqueo sobre la(s) capa(s) subidas, de forma que podemos continuar con la edición desde la aplicación móvil. 
