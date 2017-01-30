@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-05 13:25+0200\n"
+"POT-Creation-Date: 2017-01-30 10:09+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,62 +20,74 @@ msgstr ""
 
 #: templates/index.html:8
 msgid "Home"
-msgstr ""
+msgstr "Inici"
 
-#: templates/index.html:60
+#: templates/index.html:73
 msgid "Dashboard"
-msgstr ""
+msgstr "Panell de control"
 
-#: templates/index.html:63
+#: templates/index.html:76
 msgid "Sign out"
-msgstr ""
+msgstr "Tancar sessió"
 
-#: templates/index.html:69
+#: templates/index.html:96
 msgid "Sign in"
-msgstr ""
+msgstr "Iniciar sessió"
 
-#: templates/index.html:108
-msgid "Welcome to gvSIG Online"
-msgstr ""
+#: templates/index.html:135
+msgid "Welcome to the Geographic Information Service of La Pobla de Vallbona"
+msgstr "Benvinguts al Sistema d'Informació Geogràfica de La Pobla de Vallbona"
 
-#: templates/index.html:117
+#: templates/index.html:144
 msgid "Public viewer"
-msgstr ""
+msgstr "Visor públic"
 
-#: templates/index.html:119
+#: templates/index.html:146
 msgid "Display the territory, orthophotos and thematic mapping"
-msgstr ""
-
-#: templates/index.html:120
-msgid "Access to public viewer"
-msgstr ""
-
-#: templates/index.html:129
-msgid "Mapping services"
-msgstr ""
-
-#: templates/index.html:131
-msgid "Look up OGC services available"
-msgstr ""
-
-#: templates/index.html:132 templates/index.html.py:133
-msgid "Show available services"
-msgstr ""
-
-#: templates/index.html:145
-msgid "Metadata catalog"
-msgstr ""
+msgstr "Visualitza el territori, ortofotos i cartografia temàtica"
 
 #: templates/index.html:147
+msgid "Access to public viewer"
+msgstr "Accedir al visor públic"
+
+#: templates/index.html:156
+msgid "Mapping services"
+msgstr "Serveis de mapes"
+
+#: templates/index.html:158
+msgid "Look up OGC services available"
+msgstr "Explora els serveis OGC disponibles"
+
+#: templates/index.html:159
+msgid "Show available services"
+msgstr "Mostra serveis disponibles"
+
+#: templates/index.html:170
+msgid "Documentation"
+msgstr "Documentació"
+
+#: templates/index.html:172
+msgid ""
+"New, attractive and enriched gvSIG Online documentation is now available on-line"
+msgstr ""
+"Ara la documentació està disponible en línia"
+
+#: templates/index.html:173
+msgid "Explore documentation"
+msgstr "Explorar documentació"
+
+#: templates/index.html:183
+msgid "Metadata catalog"
+msgstr "Catàleg de metadades"
+
+#: templates/index.html:185
 msgid ""
 "Search the metadata catalog for get information about the data and SDI "
 "services"
 msgstr ""
+"Explore el catàleg de metadades per obtenir informació sobre les dades i els "
+"serveis IDE"
 
-#: templates/index.html:148 templates/index.html.py:149
+#: templates/index.html:186
 msgid "Access to metadata catalog"
-msgstr ""
-
-#: templates/index.html:172
-msgid "All rights reserved"
-msgstr ""
+msgstr "Accedir al catàleg de metadades"
