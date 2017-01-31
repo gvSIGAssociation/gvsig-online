@@ -62,7 +62,7 @@
 				<a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button"> <span class="sr-only">Toggle navigation</span></a>				
 				<div class="navbar-custom-menu">
 					<ul class="nav navbar-nav">	
-					
+						<li><a href="/gvsigonline/core/documentation/" target="_blank" id="help" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-question-circle"></i></a></li>
 						<li>
 							<form id="select-language-form" action="{% url 'set_language' %}" method="post">{% csrf_token %}
 							    <select id="select-language" name="language" class="form-control" style="margin-top: 10px;">
@@ -76,7 +76,8 @@
 							        {% endfor %}								      
 							    </select>		
 						    </form>							 
-					    </li>			
+					    </li>	
+							
 						<li class="dropdown user user-menu">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown"> 
 								<img src="{% static "img/user.png" %}" class="user-image" alt="User Image"> 
@@ -183,7 +184,7 @@
 	<script>
 		var messageBox = new messageBox();
 	</script>
-	
+
 	<script type="text/javascript">
 		$(document).ready(function(){
 	    	$("#select-language").change(function() {

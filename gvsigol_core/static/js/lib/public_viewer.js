@@ -29,6 +29,8 @@ publicViewer.core = {
 		
 	map: null,
 	
+	conf: null,
+	
 	toolbar: null,
 	
 	tools: new Array(),
@@ -42,15 +44,16 @@ publicViewer.core = {
 	layerCount: 0,
 		
     initialize: function(conf) {
-    	this._createMap(conf);
+    	this.conf = conf;
+    	this._createMap();
     	this._initToolbar();
-    	this._loadLayers(conf);
-    	this._createWidgets(conf);    	    	
-    	this._loadTools(conf);
+    	this._loadLayers();
+    	this._createWidgets();    	    	
+    	this._loadTools();
     },
     
-    _createMap: function(conf) {
-    	
+    _createMap: function() {
+    	var self = this;
     	var blank = new ol.layer.Tile({
     		id: this._nextLayerId(),
     		label: gettext('Blank'),
@@ -90,10 +93,10 @@ publicViewer.core = {
       		target: 'map',
       		layers: [blank, osm],
 			view: new ol.View({
-        		center: ol.proj.transform([parseFloat(conf.view.center_lon), parseFloat(conf.view.center_lat)], 'EPSG:4326', 'EPSG:3857'),
+        		center: ol.proj.transform([parseFloat(self.conf.view.center_lon), parseFloat(self.conf.view.center_lat)], 'EPSG:4326', 'EPSG:3857'),
         		minZoom: 0,
         		maxZoom: 19,
-            	zoom: conf.view.zoom
+            	zoom: self.conf.view.zoom
         	})
 		});
 		
@@ -136,20 +139,20 @@ publicViewer.core = {
     	});
     },
     
-    _loadLayers: function(conf) {
-    	this._loadBaseLayers(conf);
-    	this._loadOverlays(conf);
-    	this._loadLayerGroups(conf);
+    _loadLayers: function() {
+    	this._loadBaseLayers();
+    	this._loadOverlays();
+    	this._loadLayerGroups();
     },
     
-    _createWidgets: function(conf) {   
-    	this.layerTree = new layerTree(conf, this.map, true);
-    	this.legend = new legend(conf, this.map);
+    _createWidgets: function() {   
+    	this.layerTree = new layerTree(this.conf, this.map, true);
+    	this.legend = new legend(this.conf, this.map);
     },
     
-    _loadBaseLayers: function(conf) {		
+    _loadBaseLayers: function() {		
 		//BING LAYERS
-    	if (conf.base_layers.bing.active) {
+    	if (this.conf.base_layers.bing.active) {
     		var bingTypes = [
     		    'Road',
     		    'Aerial',
@@ -163,7 +166,7 @@ publicViewer.core = {
     				label: bingTypes[i],
     				preload: Infinity,
     				source: new ol.source.BingMaps({
-    					key: conf.base_layers.bing.key,
+    					key: this.conf.base_layers.bing.key,
     					imagerySet: bingTypes[i]
     				})
     			});
@@ -173,10 +176,10 @@ publicViewer.core = {
     	}
 	},
 	
-	_loadOverlays: function(conf) {
+	_loadOverlays: function() {
 		var self = this;
-		for (var i=0; i<conf.layerGroups.length; i++) {			
-			var group = conf.layerGroups[i];
+		for (var i=0; i<this.conf.layerGroups.length; i++) {			
+			var group = this.conf.layerGroups[i];
 			for (var k=0; k<group.layers.length; k++) {
 				var layerConf = group.layers[k];
 				var layerId = this._nextLayerId();
@@ -238,17 +241,17 @@ publicViewer.core = {
 		}
 	},
 	
-	_loadLayerGroups: function(conf) {
+	_loadLayerGroups: function() {
 		var self = this;
-		for (var i=0; i<conf.layerGroups.length; i++) {			
-			var group = conf.layerGroups[i];
+		for (var i=0; i<this.conf.layerGroups.length; i++) {			
+			var group = this.conf.layerGroups[i];
 			var url = null;
 			var cached = group.cached;
 			
 			if (cached) {
-				url = conf.geoserver_base_url + '/gwc/service/wms';
+				url = this.conf.geoserver_base_url + '/gwc/service/wms';
 			} else {
-				url = conf.geoserver_base_url + '/wms';
+				url = this.conf.geoserver_base_url + '/wms';
 			}
 			
 			var layerGroupSource = new ol.source.TileWMS({
@@ -268,10 +271,10 @@ publicViewer.core = {
 			});
 			layerGroup.baselayer = false;
 			layerGroup.layer_name = group.groupName;
-			layerGroup.wms_url = conf.geoserver_base_url + '/wms';
-			layerGroup.wfs_url = conf.geoserver_base_url + '/wfs';
+			layerGroup.wms_url = this.conf.geoserver_base_url + '/wms';
+			layerGroup.wfs_url = this.conf.geoserver_base_url + '/wfs';
 			layerGroup.title = group.groupTitle;
-			layerGroup.legend = conf.geoserver_base_url + '/wms' + '?SERVICE=WMS&VERSION=1.1.1&layer=' + group.groupName + '&REQUEST=getlegendgraphic&FORMAT=image/png';
+			layerGroup.legend = this.conf.geoserver_base_url + '/wms' + '?SERVICE=WMS&VERSION=1.1.1&layer=' + group.groupName + '&REQUEST=getlegendgraphic&FORMAT=image/png';
 			layerGroup.queryable = true;
 			layerGroup.isLayerGroup = true;
 			layerGroup.setZIndex(parseInt(group.groupOrder));
@@ -279,12 +282,12 @@ publicViewer.core = {
 		}
 	},
 	
-	_loadTools: function(conf) {
-    	this.tools.push(new getFeatureInfo(this.map, conf.tools.get_feature_info_control.private_fields_prefix));
+	_loadTools: function() {
+    	this.tools.push(new getFeatureInfo(this.map, this.conf.tools.get_feature_info_control.private_fields_prefix));
     	this.tools.push(new measureLength(this.map));
     	this.tools.push(new measureArea(this.map));
-    	//this.tools.push(new exportToPDF(conf, this.map));
-    	this.tools.push(new searchByCoordinate(conf, this.map));
+    	//this.tools.push(new exportToPDF(this.conf, this.map));
+    	this.tools.push(new searchByCoordinate(this.conf, this.map));
     	this.tools.push(new geolocation(this.map));
     	this.map.tools = this.tools;
     },
@@ -296,6 +299,10 @@ publicViewer.core = {
     
     getMap: function(){
     	return this.map;
+    },
+    
+    getConf: function(){
+    	return this.conf;
     },
     
     _nextLayerId: function() {
