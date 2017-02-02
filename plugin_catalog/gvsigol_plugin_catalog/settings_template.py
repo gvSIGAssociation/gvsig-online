@@ -1,0 +1,4 @@
+# -*- coding: utf-8 -*-
+CATALOG_URL = '##GEONETWORK_API_URL##'
+CATALOG_USER = 'admin'
+CATALOG_PASSWORD = '##GEOSERVER_ADMIN_PASS##'
