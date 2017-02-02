@@ -22,11 +22,13 @@
 '''
 
 from django.shortcuts import render_to_response, RequestContext
-from gvsigol.settings import CATALOG_MODULE, GVSIGOL_CATALOG
-from django.shortcuts import redirect
+from gvsigol_plugin_catalog import settings as catalog_settings
+from gvsigol import settings
 
 def index(request):
     resp = {}
-    if CATALOG_MODULE:
-        resp['CATALOG_URL'] = GVSIGOL_CATALOG['URL']
+    
+    if 'gvsigol_plugin_catalog' in settings.INSTALLED_APPS:
+        resp['CATALOG_URL'] = catalog_settings.CATALOG_URL
+        
     return render_to_response('index.html', resp, RequestContext(request))
