@@ -22,7 +22,7 @@
 '''
 
 from django.shortcuts import render_to_response, RequestContext, HttpResponse, redirect
-from models import Project, ProjectUserGroup, ProjectLayerGroup, PublicViewer, PublicViewerLayerGroup
+from models import Project, ProjectUserGroup, ProjectLayerGroup
 from gvsigol_services.models import Workspace, Datastore, Layer, LayerGroup
 from gvsigol_auth.models import UserGroup, UserGroupUser
 from django.contrib.auth.decorators import login_required
@@ -473,7 +473,8 @@ def project_get_conf(request):
                 layer['wms_url'] = core_utils.get_wms_url(request, workspace)
                 layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
                 layer['namespace'] = workspace.uri
-                layer['workspace'] = workspace.name                
+                layer['workspace'] = workspace.name   
+                layer['metadata'] = core_utils.get_catalog_url(request, l)             
                 if l.cached:  
                     layer['cache_url'] = core_utils.get_cache_url(request, workspace)
                 else:
@@ -483,16 +484,6 @@ def project_get_conf(request):
                     layer['legend'] = ""
                 else: 
                     layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                    
-                if 'http' in gvsigol.settings.GVSIGOL_CATALOG['URL']:
-                    if l.metadata_uuid is not None and l.metadata_uuid != '':
-                        layer['metadata'] = core_utils.get_catalog_url(request, gvsigol.settings.GVSIGOL_CATALOG['URL'], l)
-                        
-                    else:
-                        layer['metadata'] = ''
-                    
-                else:
-                    layer['metadata'] = ''
                                                 
                 layers.append(layer)
                 
@@ -679,7 +670,8 @@ def public_viewer_get_conf(request):
                     layer['wms_url'] = core_utils.get_wms_url(request, workspace)
                     layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
                     layer['namespace'] = workspace.uri
-                    layer['workspace'] = workspace.name                
+                    layer['workspace'] = workspace.name  
+                    layer['metadata'] = core_utils.get_catalog_url(request, l)             
                     if l.cached:  
                         layer['cache_url'] = core_utils.get_cache_url(request, workspace)
                     else:
@@ -689,17 +681,7 @@ def public_viewer_get_conf(request):
                         layer['legend'] = ""
                     else: 
                         layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                        
-                    if 'http' in gvsigol.settings.GVSIGOL_CATALOG['URL']:
-                        if l.metadata_uuid is not None and l.metadata_uuid != '':
-                            layer['metadata'] = core_utils.get_catalog_url(request, gvsigol.settings.GVSIGOL_CATALOG['URL'], l)
-                            
-                        else:
-                            layer['metadata'] = ''
-                        
-                    else:
-                        layer['metadata'] = ''
-                                                    
+                         
                     layers.append(layer)
                     
                     w = {}

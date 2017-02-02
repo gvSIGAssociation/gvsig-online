@@ -35,21 +35,3 @@ class ProjectLayerGroup(models.Model):
     
     def __unicode__(self):
         return self.project.name + ' - ' + self.layer_group.name
-
-
-class PublicViewer(models.Model):
-    center_lat = models.CharField(max_length=100)
-    center_lon = models.CharField(max_length=100)
-    zoom = models.IntegerField(null=False, default=10)
-    extent = models.CharField(max_length=250)
-    toc_order = models.TextField(null=True, blank=True)
-    
-    def __unicode__(self):
-        return self.name + ' - ' + self.description
-    
-class PublicViewerLayerGroup(models.Model):
-    public_viewer = models.ForeignKey(PublicViewer)
-    layer_group = models.ForeignKey(LayerGroup)
-    
-    def __unicode__(self):
-        return self.project.name + ' - ' + self.layer_group.name

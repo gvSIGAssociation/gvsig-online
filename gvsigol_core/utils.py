@@ -23,10 +23,10 @@ from geoserver.workspace import Workspace
 '''
 from django.core.mail import send_mail
 from django.utils.translation import ugettext as _
-from gvsigol_core.models import Project, ProjectUserGroup, ProjectLayerGroup, PublicViewerLayerGroup, PublicViewer, PublicViewerLayerGroup
+from gvsigol_core.models import Project, ProjectUserGroup, ProjectLayerGroup
 from gvsigol_services.models import LayerGroup, Layer
 from gvsigol_auth.models import UserGroup, UserGroupUser
-import gvsigol.settings
+from gvsigol import settings
 import json
 
 def is_valid_project(user, pid):
@@ -191,27 +191,6 @@ def get_all_layer_groups_checked_by_project(request, project):
         
     return layer_groups
 
-def get_all_layer_groups_in_public_viewer(public_viewer):
-    groups_list = LayerGroup.objects.all()
-    pv_layer_groups =  PublicViewerLayerGroup.objects.filter(public_viewer_id=public_viewer.id)
-    checked = False
-    
-    layer_groups = []
-    for g in groups_list:
-        if g.name != '__default__':
-            layer_group = {}
-            for lgba in pv_layer_groups:
-                if lgba.layer_group_id == g.id:
-                    checked = True
-                    layer_group['checked'] = checked
-                           
-            layer_group['id'] = g.id
-            layer_group['name'] = g.name
-            layer_group['title'] = g.title
-            layer_groups.append(layer_group)
-        
-    return layer_groups
-
 def get_json_toc(project_layergroups):
     toc = {}
     count1 = 1
@@ -281,19 +260,6 @@ def toc_update_layer_group(old_layergroup, old_name, new_name):
         toc[new_name] = toc.pop(old_name)
         p.project.toc_order = json.dumps(toc)
         p.project.save()
-        
-    if len(PublicViewer.objects.all()) == 1:
-        public_viewer = PublicViewer.objects.all()[0]
-        json_toc2 = public_viewer.toc_order
-        toc2 = json.loads(json_toc2)
-        try:
-            toc2[old_name]['name'] = new_name
-            toc2[new_name] = toc2.pop(old_name)
-            public_viewer.toc_order = json.dumps(toc2)
-            public_viewer.save()
-            
-        except Exception as e:
-            print _('Public viewer TOC is empty')
    
 def toc_remove_layergroups(toc_structure, layer_groups): 
     json_toc = json.loads(toc_structure)
@@ -327,29 +293,6 @@ def toc_add_layer(layer):
             }
         p.project.toc_order = json.dumps(toc)
         p.project.save()
-        
-    if len(PublicViewer.objects.all()) == 1:
-        public_viewer = PublicViewer.objects.all()[0]
-        json_toc2 = public_viewer.toc_order
-        toc2 = json.loads(json_toc2)
-        if toc2.has_key(layer.layer_group.name):
-            indexes = []
-            for l in toc2.get(layer.layer_group.name).get('layers'):
-                indexes.append(int(toc2.get(layer.layer_group.name).get('layers').get(l).get('order')))
-            
-            if len(indexes) > 0:
-                order = max(indexes) + 1
-            else:
-                lg_order = toc2.get(layer.layer_group.name).get('order')
-                order = int(lg_order) + 1
-                
-            toc2.get(layer.layer_group.name).get('layers')[layer.name] = {
-                'name': layer.name,
-                'title': layer.title,
-                'order': order
-            }
-        public_viewer.toc_order = json.dumps(toc2)
-        public_viewer.save()
 
 
 def toc_move_layer(layer, old_layer_group): 
@@ -362,15 +305,6 @@ def toc_move_layer(layer, old_layer_group):
         p.project.toc_order = json.dumps(toc)
         p.project.save()
         
-    if len(PublicViewer.objects.all()) == 1:
-        public_viewer = PublicViewer.objects.all()[0]
-        json_toc2 = public_viewer.toc_order
-        toc2 = json.loads(json_toc2)
-        if toc2.has_key(old_layer_group.name):
-            del toc2.get(old_layer_group.name).get('layers')[layer.name]
-        public_viewer.toc_order = json.dumps(toc2)
-        public_viewer.save()
-        
     toc_add_layer(layer)
 
 def toc_remove_layer(layer): 
@@ -382,15 +316,6 @@ def toc_remove_layer(layer):
             del toc.get(layer.layer_group.name).get('layers')[layer.name]
         p.project.toc_order = json.dumps(toc)
         p.project.save()
-        
-    if len(PublicViewer.objects.all()) == 1:
-        public_viewer = PublicViewer.objects.all()[0]
-        json_toc2 = public_viewer.toc_order
-        toc2 = json.loads(json_toc2)
-        if toc2.has_key(layer.layer_group.name):
-            del toc2.get(layer.layer_group.name).get('layers')[layer.name]
-        public_viewer.toc_order = json.dumps(toc2)
-        public_viewer.save()
         
 def get_geoserver_base_url(request, url):
     geoserver_url = None
@@ -436,16 +361,19 @@ def get_cache_url(request, workspace):
         
     return cache_url
 
-def get_catalog_url(request, url, layer):
-    catalog_url = None
-    if 'username' in request.session:
-        if request.session['username'] is not None and request.session['password'] is not None:
-            split_catalog_url = url.split('//')
-            catalog_url = split_catalog_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_catalog_url[1]  + 'catalog.search#/metadata/' + layer.metadata_uuid
-    else:
-        catalog_url = url + 'catalog.search#/metadata/' + layer.metadata_uuid
+def get_catalog_url(request, layer):
+    url = settings.CATALOG_URL
+    catalog_url = ''
+    if 'gvsigol_plugin_catalog' in settings.INSTALLED_APPS:
+        if 'username' in request.session:
+            if request.session['username'] is not None and request.session['password'] is not None:
+                split_catalog_url = url.split('//')
+                catalog_url = split_catalog_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_catalog_url[1]  + 'catalog.search#/metadata/' + layer.metadata_uuid
+        else:
+            catalog_url = url + 'catalog.search#/metadata/' + layer.metadata_uuid
         
     return catalog_url
+
 def sendMail(user, password):
             
     subject = _(u'New user account')
@@ -472,7 +400,7 @@ def sendMail(user, password):
     body = body + '  - ' + _(u'Password') + ': ' + password + '\n'
     
     toAddress = [user.email]           
-    fromAddress = gvsigol.settings.EMAIL_HOST_USER
+    fromAddress = settings.EMAIL_HOST_USER
     send_mail(subject, body, fromAddress, toAddress, fail_silently=False)
     
 def send_reset_password_email(email, temp_pass):
@@ -484,5 +412,5 @@ def send_reset_password_email(email, temp_pass):
     body = body + '  - ' + _(u'Password') + ': ' + temp_pass + '\n\n'
     
     toAddress = [email]           
-    fromAddress = gvsigol.settings.EMAIL_HOST_USER
+    fromAddress = settings.EMAIL_HOST_USER
     send_mail(subject, body, fromAddress, toAddress, fail_silently=False)
