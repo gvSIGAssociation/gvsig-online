@@ -365,13 +365,19 @@ def get_catalog_url(request, layer):
     catalog_url = ''
     if 'gvsigol_plugin_catalog' in settings.INSTALLED_APPS:
         from gvsigol_plugin_catalog import settings as catalog_settings
+        from gvsigol_plugin_catalog.models import  LayerMetadata
+        
         url = catalog_settings.CATALOG_URL
-        if 'username' in request.session:
-            if request.session['username'] is not None and request.session['password'] is not None:
-                split_catalog_url = url.split('//')
-                catalog_url = split_catalog_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_catalog_url[1]  + 'catalog.search#/metadata/' + layer.metadata_uuid
-        else:
-            catalog_url = url + 'catalog.search#/metadata/' + layer.metadata_uuid
+        try: 
+            lm = LayerMetadata.objects.get(layer=layer)
+            if 'username' in request.session:
+                if request.session['username'] is not None and request.session['password'] is not None:
+                    split_catalog_url = url.split('//')
+                    catalog_url = split_catalog_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_catalog_url[1]  + 'catalog.search#/metadata/' + lm.metadata_uuid
+            else:
+                catalog_url = url + 'catalog.search#/metadata/' + lm.metadata_uuid
+        except Exception as e:
+            pass
         
     return catalog_url
 
