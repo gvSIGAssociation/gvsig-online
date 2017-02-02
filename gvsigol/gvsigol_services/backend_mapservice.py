@@ -25,16 +25,17 @@ from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer
 from gvsigol_symbology import services as symbology_services
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
-from gvsigol import settings
 from backend_postgis import Introspect
 import xml.etree.ElementTree as ET
 import geoserver.catalog as gscat
-import forms_geoserver
-import rest_geonetwork
-import rest_geoserver
+from gvsigol_core import geom
+from gvsigol import settings
 from zipfile import ZipFile
 import tempfile, zipfile
 import sys, os, shutil
+import forms_geoserver
+import rest_geoserver
+import signals
 import requests
 import gdal_tools
 import logging
@@ -43,7 +44,6 @@ import random
 import string
 import json
 import re
-from gvsigol_core import geom
 
 class UnsupportedRequestError(Exception):
     pass
@@ -82,7 +82,7 @@ class Geoserver():
             self.supported_types = supported_types
         else:
             self.supported_types = (
-                ('v_SHP', _('Shapefile folder')),
+                #('v_SHP', _('Shapefile folder')),
                 ('v_PostGIS', _('PostGIS vector')),
                 ('c_GeoTIFF', _('GeoTiff')),
                 ('e_WMS', _('Cascading WMS')),
@@ -108,7 +108,7 @@ class Geoserver():
     def getSupportedVectorTypes(self):
         return (
             ('v_PostGIS', _('PostGIS vector')),
-            ('v_SHP', _('Shapefile folder')),       
+            #('v_SHP', _('Shapefile folder')),       
         )
     
     def getSupportedUploadTypes(self):
@@ -381,26 +381,26 @@ class Geoserver():
         try:
             self.rest_catalog.update_style(style_name, sld_body, user=self.user, password=self.password)
             if layer is not None:
-                self.updateThumbnail(layer)
+                self.updateThumbnail(layer, 'update')
             return True
         
         except Exception as e:
             print e
             return False
         
-    def updateThumbnail(self, layer):
+    def updateThumbnail(self, layer, mode):
         if not 'no_thumbnail.jpg' in layer.thumbnail.name:
             if os.path.isfile(layer.thumbnail.path):
                 os.remove(layer.thumbnail.path)
         
         try:   
             layer.thumbnail = self.getThumbnail(layer.datastore.workspace, layer.datastore, layer)
-            if settings.CATALOG_MODULE:
-                gn_backend.metadata_delete(layer)
-                (ds_type, layer_info) = self.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
-                muuid = gn_backend.metadata_insert(layer, layer.abstract, layer.datastore.workspace, layer_info, ds_type)
-                layer.metadata_uuid = muuid
-            layer.save()
+            if mode == 'create':
+                signals.layer_created.send(sender=None, layer=layer)
+                
+            elif mode == 'update':
+                signals.layer_updated.send(sender=None, layer=layer)
+
         except Exception as e:
             print e.message
             pass
@@ -905,7 +905,6 @@ class Geoserver():
                     layer.layer_group = layergroup
                     layer.title = layer_title
                     layer.type = datastore.type
-                    layer.metadata_uuid = ''
                     layer.created_by = request.user.username
                     layer.save()
     
@@ -1273,36 +1272,7 @@ class Geoserver():
                     break
                 f.write(block)
                 
-        return os.path.join("thumbnails/", iname)
-
-class Geonetwork():
-    def __init__(self, service_url, user, password):
-        self.rest_geonetwork = rest_geonetwork.Geonetwork(service_url)
-        self.user = user
-        self.password = password
-        
-    def metadata_insert(self, layer, abstract, ws, layer_info, ds_type):
-        self.rest_geonetwork.gn_auth(self.user, self.password)
-        uuid = self.rest_geonetwork.gn_insert_metadata(layer, abstract, ws, layer_info, ds_type)
-        self.rest_geonetwork.add_thumbnail(uuid, layer.thumbnail.url)
-        self.rest_geonetwork.set_metadata_privileges(uuid)
-        self.rest_geonetwork.gn_unauth()
-        return uuid
-        
-    def metadata_delete(self, layer):
-        try:
-            if layer.metadata_uuid != '':
-                self.rest_geonetwork.gn_auth(self.user, self.password)
-                self.rest_geonetwork.gn_delete_metadata(layer)
-                self.rest_geonetwork.gn_unauth()
-                return True
-            else:
-                return True
-        
-        except Exception as e:
-            print e
-            return False
-        
+        return os.path.join("thumbnails/", iname)        
 
 def get_default_backend():
     try:
@@ -1321,16 +1291,4 @@ def get_default_backend():
         raise ImproperlyConfigured
     return backend
 
-def get_geonetwork_backend():
-    try:
-        if settings.CATALOG_MODULE:
-            service_url = settings.GVSIGOL_CATALOG['URL']
-            user = settings.GVSIGOL_CATALOG['USER']
-            password = settings.GVSIGOL_CATALOG['PASSWORD']
-            gn_backend = Geonetwork(service_url, user, password)
-            return gn_backend
-    except:
-        raise ImproperlyConfigured
-
 backend = get_default_backend()
-gn_backend = get_geonetwork_backend()

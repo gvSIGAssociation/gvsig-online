@@ -26,13 +26,12 @@ from forms_services import WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateF
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
 from django.shortcuts import render_to_response, redirect, RequestContext
-from backend_mapservice import gn_backend, backend as mapservice_backend
+from backend_mapservice import backend as mapservice_backend
 from gvsigol_services.backend_resources import resource_manager
 from gvsigol_auth.utils import superuser_required, staff_required
-from gvsigol_core.models import ProjectLayerGroup, PublicViewer
+from gvsigol_core.models import ProjectLayerGroup
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-from django.core.exceptions import PermissionDenied
 from gvsigol.settings import FILEMANAGER_DIRECTORY
 from django.utils.translation import ugettext as _
 from gvsigol_services.models import LayerResource
@@ -42,21 +41,17 @@ from gvsigol_core import utils as core_utils
 from gvsigol_auth.models import UserGroup
 from django.shortcuts import render
 from django.utils import timezone
-
 from gvsigol import settings
 import locks_utils
 import requests
 import logging
+import signals
 import urllib
 import utils
 import json
 import re
 import os
 logger = logging.getLogger(__name__)
-
-from cmislib import CmisClient
-from cmislib.model import TYPES_COLL
-
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
@@ -285,8 +280,7 @@ def layer_delete(request, layer_id):
         mapservice_backend.deleteGeoserverLayerGroup(layer.layer_group)
         if mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer):
             mapservice_backend.deleteLayerStyles(layer)
-            if settings.CATALOG_MODULE:
-                gn_backend.metadata_delete(layer)
+            signals.layer_deleted.send(sender=None, layer=layer)
             if os.path.isfile(layer.thumbnail.path):
                 os.remove(layer.thumbnail.path)
             Layer.objects.all().filter(pk=layer_id).delete()
@@ -366,20 +360,7 @@ def layer_add(request):
                     style_name = workspace.name + '_' + newRecord.name + '_default'
                     mapservice_backend.createDefaultStyle(newRecord, style_name)
                     mapservice_backend.setLayerStyle(newRecord, style_name)
-                    
-                    mapservice_backend.updateThumbnail(newRecord)
-                 
-                    #mapservice_backend.addGridSubset(workspace, newRecord)
-                    newRecord.metadata_uuid = ''
-                    try:
-                        if settings.CATALOG_MODULE:
-                            (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, newRecord.name, "json")
-                            muuid = gn_backend.metadata_insert(newRecord, abstract, workspace, layer_info, ds_type)
-                            newRecord.metadata_uuid = muuid
-                    except Exception as exc:
-                        logging.exception(exc)
-                        newRecord.save()
-                        return HttpResponseRedirect(reverse('layer_update', kwargs={'layer_id': newRecord.id}))
+                    mapservice_backend.updateThumbnail(newRecord, 'create')
                     newRecord.save()
                     
                 core_utils.toc_add_layer(newRecord)
@@ -429,8 +410,6 @@ def layer_update(request, layer_id):
         single_image = False
         if 'single_image' in request.POST:
             single_image = True
-        if not layer.metadata_uuid:
-            layer.metadata_uuid = request.POST.get('metadata_uuid')
                 
         old_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
         
@@ -529,7 +508,7 @@ def layer_boundingbox_from_data(request):
         layer = layer_query_set[0]
         mapservice_backend.updateBoundingBoxFromData(layer)   
         mapservice_backend.clearCache(workspace.name, layer)
-        mapservice_backend.updateThumbnail(layer)
+        mapservice_backend.updateThumbnail(layer, 'update')
         mapservice_backend.reload_nodes()
         return HttpResponse('{"response": "ok"}', content_type='application/json')
     
@@ -797,11 +776,6 @@ def layergroup_delete(request, lgid):
             p.project.toc_order = core_utils.toc_remove_layergroups(p.project.toc_order, [layergroup.id])
             p.project.save()
             
-        if len(PublicViewer.objects.all()) == 1:
-            public_viewer = PublicViewer.objects.all()[0]
-            public_viewer.toc_order = core_utils.toc_remove_layergroups(public_viewer.toc_order, [layergroup.id])
-            public_viewer.save()
-            
         for layer in layers:  
             if mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer):
                 layer.delete()       
@@ -873,19 +847,7 @@ def layer_create(request):
                         style_name = workspace.name + '_' + newRecord.name + '_default'
                         mapservice_backend.createDefaultStyle(newRecord, style_name)
                         mapservice_backend.setLayerStyle(newRecord, style_name)
-                        mapservice_backend.updateThumbnail(newRecord)
-                     
-                        mapservice_backend.addGridSubset(workspace, newRecord)
-                        newRecord.metadata_uuid = ''
-                        try:
-                            if settings.CATALOG_MODULE:
-                                (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, newRecord.name, "json")
-                                muuid = gn_backend.metadata_insert(newRecord, abstract, workspace, layer_info, ds_type)
-                                newRecord.metadata_uuid = muuid
-                        except Exception as exc:
-                            logging.exception(exc)
-                            newRecord.save()
-                            return HttpResponseRedirect(reverse('layer_update', kwargs={'layer_id': newRecord.id}))
+                        mapservice_backend.updateThumbnail(newRecord, 'create')
                         newRecord.save()
                         
                     core_utils.toc_add_layer(newRecord)

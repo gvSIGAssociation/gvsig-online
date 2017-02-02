@@ -70,7 +70,6 @@ class Layer(models.Model):
     title = models.CharField(max_length=150)
     abstract = models.CharField(max_length=5000)
     type = models.CharField(max_length=150)
-    metadata_uuid = models.CharField(max_length=100, null=True, blank=True)
     visible = models.BooleanField(default=True)
     queryable = models.BooleanField(default=True)
     cached = models.BooleanField(default=True)

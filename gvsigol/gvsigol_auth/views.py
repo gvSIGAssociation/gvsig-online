@@ -194,10 +194,10 @@ def user_add(request):
             try:            
                 if form.data['password1'] == form.data['password2']:
                     user = User(
-                        username = form.data['username'],
+                        username = form.data['username'].lower(),
                         first_name = u''.join(form.data['first_name']).encode('utf-8'),
                         last_name = u''.join(form.data['last_name']).encode('utf-8'),
-                        email = form.data['email'],
+                        email = form.data['email'].lower(),
                         is_superuser = is_superuser,
                         is_staff = is_staff
                     )
@@ -230,8 +230,8 @@ def user_add(request):
                     #User backend 
                     if is_superuser or is_staff:  
                         ugroup = UserGroup(
-                            name = 'ug_' + form.data['username'],
-                            description = _(u'User group for') + ': ' + form.data['username']
+                            name = 'ug_' + form.data['username'].lower(),
+                            description = _(u'User group for') + ': ' + form.data['username'].lower()
                         )
                         ugroup.save()
                         
@@ -246,7 +246,7 @@ def user_add(request):
                         core_services.ldap_add_group_member(user, ugroup)
                         
                         url = mapservice_backend.getBaseUrl() + '/'
-                        ws_name = 'ws_' + form.data['username']
+                        ws_name = 'ws_' + form.data['username'].lower()
                         
                         if mapservice_backend.createWorkspace(
                             ws_name,
@@ -270,7 +270,7 @@ def user_add(request):
                             )
                             newWs.save()
                             
-                            ds_name = 'ds_' + form.data['username']
+                            ds_name = 'ds_' + form.data['username'].lower()
                             services_utils.create_datastore(request, user.username, ds_name, newWs)
                             
                             mapservice_backend.reload_nodes()
