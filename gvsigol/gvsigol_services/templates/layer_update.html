@@ -52,25 +52,6 @@
 							<input readonly="true" name="name" id="name" type="text" class="form-control" value="{{layer.name}}">
 						</div>
 					</div>
-
-					{% if not layer.metadata_uuid %}
-					<div class="row">
-						<div class="col-md-6 form-group">
-							<label for="metadata_uuid">{% trans "Metadata UUID" %}</label>
-							<input name="metadata_uuid" id="metadata_uuid" type="text" class="form-control" value="{{layer.metadata_uuid}}">
-						</div>
-						<div class="col-md-6 form-group">
-							<div class="callout callout-danger">
-								{% blocktrans %}The layer has been correctly created, but
-								metadata creation failed. You can directly create the
-								metadata on the Catalog and copy the metadata UUID
-								to this form.
-								Please contact the system administrator if metadata
-								creation persistently fails{% endblocktrans %}
-							</div>
-						</div>
-					</div>
-					{% endif %}
 				
 					<div class="row">
 						<div class="col-md-12 form-group">

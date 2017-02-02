@@ -1,7 +1,7 @@
 var Filemanager = {
   show: function(id, url) {
     var doc = document;
-    var filemanagerWindow = window.open(url, id, 'height=480,width=640,resizable=yes');
+    var filemanagerWindow = window.open(url, id, 'scrollbars=1,height=480,width=640,resizable=yes');
     filemanagerWindow.focus();
 
     window.filemanagerCallback = function(url) {
