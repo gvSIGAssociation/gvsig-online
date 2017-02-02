@@ -57,15 +57,17 @@ INSTALLED_APPS = [
     'gvsigol_symbology',
     'gvsigol_filemanager',
     'gvsigol_core',
-    #'gvsigol_app_dev',
+    'gvsigol_app_dev',
     #'gvsigol_app_pobla',
-    'gvsigol_app_benicarlo',
+    #'gvsigol_app_benicarlo',
     'gvsigol_plugin_worldwind',
     'gvsigol_plugin_shps_folder',
     'gvsigol_plugin_geocoding',
     'gvsigol_plugin_sync',
     'gvsigol_plugin_catastro',
-    #'gvsigol_plugin_alfresco',
+    'gvsigol_plugin_alfresco',
+    'gvsigol_plugin_print',
+    #'gvsigol_plugin_catalog',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -217,9 +219,9 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_services/static'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
-    #os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
+    os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
     #os.path.join(BASE_DIR, 'gvsigol_app_pobla/static'),
-    os.path.join(BASE_DIR, 'gvsigol_app_benicarlo/static'),
+    #os.path.join(BASE_DIR, 'gvsigol_app_benicarlo/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/static'),
 )
@@ -229,7 +231,7 @@ STATICFILES_FINDERS = (
     #'compressor.finders.CompressorFinder',
 )
 
-GVSIGOL_VERSION = '2.1.6'
+GVSIGOL_VERSION = '2.1.7'
 
 GVSIGOL_USERS_CARTODB = {
     'dbhost': 'localhost',
@@ -240,12 +242,6 @@ GVSIGOL_USERS_CARTODB = {
 }
 
 PUBLIC_VIEWER = True
-CATALOG_MODULE = True
-GVSIGOL_CATALOG = {
-    'URL': 'http://localhost:8080/geonetwork/srv/spa/',
-    'USER': 'admin',
-    'PASSWORD': 'admin'
-}
 
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
@@ -255,7 +251,7 @@ GVSIGOL_SERVICES = {
     'CLUSTER_NODES':[],
     'SUPPORTED_TYPES': (
                         ('v_PostGIS', _('PostGIS vector')),
-                        ('v_SHP', _('Shapefile folder')),                        
+                        #('v_SHP', _('Shapefile folder')),                        
                         ('c_GeoTIFF', _('GeoTiff')),
                         ('e_WMS', _('Cascading WMS')),
     ),

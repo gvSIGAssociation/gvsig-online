@@ -204,7 +204,7 @@ STATICFILES_FINDERS = (
     #'compressor.finders.CompressorFinder',
 )
 
-GVSIGOL_VERSION = '2.1.6'
+GVSIGOL_VERSION = '2.1.7'
 
 GVSIGOL_USERS_CARTODB = {
     'dbhost': '##DATABASE_HOST##',
@@ -215,12 +215,6 @@ GVSIGOL_USERS_CARTODB = {
 }
 
 PUBLIC_VIEWER = True
-CATALOG_MODULE = ##CATALOG_IS_ACTIVE##
-GVSIGOL_CATALOG = {
-    'URL': '##GEONETWORK_API_URL##',
-    'USER': 'admin',
-    'PASSWORD': '##GEOSERVER_ADMIN_PASS##'
-}
 
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
