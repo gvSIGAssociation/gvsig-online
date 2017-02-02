@@ -361,10 +361,11 @@ def get_cache_url(request, workspace):
         
     return cache_url
 
-def get_catalog_url(request, layer):
-    url = settings.CATALOG_URL
+def get_catalog_url(request, layer):   
     catalog_url = ''
     if 'gvsigol_plugin_catalog' in settings.INSTALLED_APPS:
+        from gvsigol_plugin_catalog import settings as catalog_settings
+        url = catalog_settings.CATALOG_URL
         if 'username' in request.session:
             if request.session['username'] is not None and request.session['password'] is not None:
                 split_catalog_url = url.split('//')
