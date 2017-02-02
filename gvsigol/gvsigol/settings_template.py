@@ -224,7 +224,7 @@ GVSIGOL_SERVICES = {
     'CLUSTER_NODES':[##GEOSERVER_CLUSTER_NODES##],
     'SUPPORTED_TYPES': (
                         ('v_PostGIS', _('PostGIS vector')),
-                        ('v_SHP', _('Shapefile folder')),                        
+                        #('v_SHP', _('Shapefile folder')),                        
                         ('c_GeoTIFF', _('GeoTiff')),
                         ('e_WMS', _('Cascading WMS')),
     ),
