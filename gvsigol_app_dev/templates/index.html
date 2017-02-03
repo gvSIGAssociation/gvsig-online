@@ -180,6 +180,19 @@
 				            </div>       	
 				      	</div>
 				      	{% endif %}
+				      	{% if GVSIGOL_APP_DOWNLOAD_LINK %}
+				      	<div class="col-md-6">
+				      		<div class="attachment-block clearfix">
+				                <img class="attachment-img" src="{% static "img/mobile-app.png"%}" alt="Image">			
+				                <div class="attachment-pushed">
+				                  	<h4 class="attachment-heading"><a href="{{GVSIGOL_APP_DOWNLOAD_LINK}}">{% trans "Download app" %}</a></h4>	
+				                  	<div class="attachment-text">
+										<a href="{{GVSIGOL_APP_DOWNLOAD_LINK}}" class="text-info">{% trans "Download" %}</a> {% trans "mobile application" %}
+				                  	</div>
+				                </div>
+				            </div>       	
+				      	</div>
+				      	{% endif %}
 			      	</div>			      	
 				</section>				
 			</div>			
