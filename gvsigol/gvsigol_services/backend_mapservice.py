@@ -21,6 +21,7 @@ from gvsigol_core.geom import RASTER
 '''
 
 from models import Layer, LayerGroup, Datastore, Workspace, DataRule, LayerReadGroup, LayerWriteGroup
+from forms_geoserver import PostgisLayerUploadForm, RasterLayerUploadForm
 from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer
 from gvsigol_symbology import services as symbology_services
 from django.core.exceptions import ImproperlyConfigured
@@ -614,18 +615,17 @@ class Geoserver():
     def getUploadForm(self, datastore_type, request):
         # ensure type is a supported data store type
         if datastore_type=="c_GeoTIFF":
-            return (forms_geoserver.RasterLayerUploadForm, "geoserver/layer_upload_raster.html", "image/tiff")
+            return RasterLayerUploadForm()
+        
         elif datastore_type=="v_PostGIS":
             form = None
             if request.user.is_superuser:
-                form = forms_geoserver.PostgisLayerUploadForm
+                form = PostgisLayerUploadForm()
             else:
-                form = forms_geoserver.PostgisLayerUploadForm
-                form.base_fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
-                form.declared_fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
+                form = PostgisLayerUploadForm()
+                form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
                 
-            return (form, "geoserver/layer_upload_postgis.html", "application/zip")
-        return (None, None, None)
+            return form
     
     def __create_datastore_properties(self):
         mosaic_db = settings.GVSIGOL_SERVICES.get('MOSAIC_DB')
