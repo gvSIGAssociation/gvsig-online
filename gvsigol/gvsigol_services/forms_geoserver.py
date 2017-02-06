@@ -97,6 +97,10 @@ class PostgisLayerUploadForm(forms.Form):
     #queryable = forms.BooleanField(label=_(u'Queryable'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
     #cached = forms.BooleanField(label=_(u'Cached'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
     #single_image = forms.BooleanField(label=_(u'Single image'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    
+    def clean(self):
+        cleaned_data = super(PostgisLayerUploadForm, self).clean()
+        return cleaned_data
 
 class CreateSqlViewForm(forms.Form):
     datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=True, queryset=Datastore.objects.filter(type="v_PostGIS"), widget=forms.Select(attrs={'class':'form-control'}))
