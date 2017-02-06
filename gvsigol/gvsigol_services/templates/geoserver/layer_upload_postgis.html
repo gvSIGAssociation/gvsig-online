@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="box">
+
+			<form role="form" enctype="multipart/form-data" method="post" action="/gvsigonline/services/layer_upload/">
+				<div class="box-header">
+					<div class="box-tools pull-right">
+						<button id="upload-button" type="submit" class="btn btn-default btn-sm save-button">{% trans "Upload vector layer" %} <i class="fa fa-upload margin-l-5"></i></button>
+						<input type="hidden" name="id_dstype" value="{{ type }}">					
+					</div>
+				</div>
+			
+				<div class="box-body">
+				{% csrf_token %}					
+					{% if form.errors %}
+					<div id="form-error" style="color:#ff0000;">
+						<ul>
+						{% for field in form %}
+							{% if field.errors %}
+								<li>{{field.label}}. {{ field.errors|striptags }}</li>
+							{% endif %}	
+						{% endfor %}
+						{% for field, msg in form.errors.iteritems %}
+							<li>{{ msg|striptags }}</li>
+						{% endfor %}
+						</ul>
+					</div>
+					{% endif %}
+							
+					{% if message %}
+					<div id="form-error" style="color:#ff0000;">
+						<p>* {{ message }}</p>
+					</div>
+					{% endif %}
+					
+					<div class="row">
+						<div class="col-md-12" style="margin-bottom: 20px;">
+							<label>{% trans "File" %}</label>
+							<input id="id_file" type="file" name="file" accept="{{ file_accepts }}">					
+						</div>
+					</div>	
+					
+					<div class="row">
+						<div class="col-md-12 form-group">	
+							<label for="id_mode">{% trans "Table creation mode" %}</label>
+							{{ form.mode }}									
+						</div>
+					</div>
+									
+					<div class="row">
+						<div class="col-md-12 form-group">	
+							<label for="id_datastore">{% trans "Data store" %}</label>
+							{{ form.datastore }}									
+						</div>
+					</div>
+							
+					<div class="row">		
+						<div class="col-md-12 form-group">
+							<label for="id_name">{% trans "Name" %}</label>
+							{{ form.name }}
+							<p class="text-muted">* {% trans "Layer will be uploaded to the selected data store" %}.</p>
+						</div>	
+					</div>
+					
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="id_title">{% trans "Title" %}</label>
+							{{ form.title }}						
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="id_layer_group">{% trans "Layer group" %}</label>
+							{{ form.layer_group }}						
+						</div>
+					</div>				
+					
+					<div class="row">
+						<div class="col-md-6 form-group">
+							<label for="id_encoding">{% trans "Character encoding" %}</label>	
+							{{ form.encoding }}						
+						</div>
+						<div class="col-md-6 form-group">	
+							<label for="id_srs">{% trans "Coordinate reference system" %}</label>	
+							{{ form.srs }}							
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<span>{% trans "Layer properties in the viewer" %}.</span>
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="col-md-4 form-group">
+							<input type="checkbox" name="visible" id="visible"/>
+							<label for="visible">{% trans "Visible" %}</label>														
+						</div>
+						<div class="col-md-4 form-group">
+							<input type="checkbox" name="cached" id="cached" checked/>
+							<label for="cached">{% trans "Cached" %}</label>	
+						</div>
+						<div class="col-md-4 form-group">
+							<input type="checkbox" name="queryable" id="queryable" checked/>
+							<label for="queryable">{% trans "Queryable" %}</label>
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="col-md-4 form-group">
+							<input type="checkbox" name="single_image" id="single_image" />	
+							<label for="single_image">{% trans "Single image (No tiles)" %}</label>											
+						</div>
+					</div>
+					
+					<br/>
+			
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="md-abstract">{% trans "Metadata: Abstract" %}</label>
+				        	<textarea class="form-control" name="md-abstract" id="md-abstract" rows="5">{% trans "Some description of the layer" %}</textarea>	     	
+				        </div>
+					</div>	
+									
+            	</div>
+			</form>		
+		</div>
+	</div>				
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script type="text/javascript">
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-layers').addClass("active");
+	$(document).ready(function() {
+		// translate default layer group
+		var lgs = $("#id_layer_group");
+		var lg_options = $("#id_layer_group option");
+		for (var i=0; i<lg_options.length; i++) {
+			text = $(lg_options[i]).text();
+			if (text=="__default__") {
+				$(lg_options[i]).html('{% trans "Default" %}');
+			}
+			if (lgs.val()=="") {
+				lgs.val(1);
+			}
+		}
+	});
+	
+	$('#upload-button').click(function (e) {
+		$("body").overlay();
+	});
+</script>
+{% endblock %}
