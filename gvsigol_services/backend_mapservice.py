@@ -614,14 +614,16 @@ class Geoserver():
     def getUploadForm(self, datastore_type, request):
         # ensure type is a supported data store type
         if datastore_type=="c_GeoTIFF":
-            return (forms_geoserver.RasterLayerUploadForm(), "geoserver/layer_upload_raster.html", "image/tiff")
+            return (forms_geoserver.RasterLayerUploadForm, "geoserver/layer_upload_raster.html", "image/tiff")
         elif datastore_type=="v_PostGIS":
-            form = forms_geoserver.PostgisLayerUploadForm()
-            if not request.user.is_superuser:
+            form = None
+            if request.user.is_superuser:
+                form = forms_geoserver.PostgisLayerUploadForm
+            else:
+                form = forms_geoserver.PostgisLayerUploadForm
                 form.base_fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
                 form.declared_fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
-                for qs in form.base_fields['datastore'].queryset:
-                    print qs
+                
             return (form, "geoserver/layer_upload_postgis.html", "application/zip")
         return (None, None, None)
     
