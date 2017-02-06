@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+{% load i18n %}
+{% load include_if_exists %}
+<html>
+<head>
+	
+	<title>gvSIG Online</title>
+	
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+	
+	<link rel="stylesheet" href="{% static "js/vendors/jQueryUI/jquery-ui.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.6/css/bootstrap.min.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-lightbox/ekko-lightbox.min.css" %}">
+	<link rel="stylesheet" href="{% static "css/font-awesome-4.4.0/css/font-awesome.min.css" %}">
+	<link rel="stylesheet" href="{% static "css/fontcustom/fontcustom.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/DataTables-1.10.11/media/css/jquery.dataTables.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/DataTables-1.10.11/extensions/Select/css/select.dataTables.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/ol-3.15.1/ol.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/ol-3.15.1/ol3-popup.css" %}">	
+	<link rel="stylesheet" href="{% static "css/gvsigOL.css" %}">
+	<link rel="stylesheet" href="{% static "css/viewer.css" %}">	
+	<link rel="stylesheet" href="{% static "css/skins/_all-skins.min.css" %}">
+	<link rel="stylesheet" href="{% static "css/toc.css" %}">
+
+	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+</head>
+
+<body class="{{GVSIGOL_SKIN}}">
+
+	<!-- Modal -->
+	<div class="modal fade" id="modal-table-dialog" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body"></div>
+			</div>
+		</div>
+	</div>
+	
+	<header class="main-header map-header">
+
+		<!-- Header Navbar: style can be found in header.less -->
+		<nav id="viewer-navbar" class="navbar navbar-static-top gvsigol-navbar" style="margin-left:0px;" role="navigation">
+			
+			<!-- Sidebar toggle button-->
+          	<a href="#" class="sidebar-toggle" data-toggle="control-sidebar" role="button"></a>
+
+			<div class="navbar-custom-menu">
+				<ul class="nav navbar-nav">
+					
+					<li>
+						<form id="select-language-form" action="{% url 'set_language' %}" method="post">{% csrf_token %}
+						    <select id="select-language" name="language" class="form-control" style="margin-top: 10px;">
+						        {% get_current_language as LANGUAGE_CODE %}
+						        {% get_available_languages as LANGUAGES %}
+						        {% get_language_info_list for LANGUAGES as languages %}
+						        {% for language in languages %}
+						            <option style="" value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected="selected"{% endif %}>
+						                {% trans language.name_translated %}
+						            </option>
+						        {% endfor %}								      
+						    </select>		
+					    </form>							 
+				    </li>
+					
+					<li class="dropdown user user-menu">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown"> 
+							<img src="{% static "img/user.png" %}" class="user-image" alt="User Image"> 
+							<span class="hidden-xs">{% trans "Anonymous" %}</span>
+						</a>
+						<ul class="dropdown-menu">
+							<li class="user-header">
+								<img src="{% static "img/user.png" %}" class="img-circle" alt="User Image">
+								<p>
+									<small>{% trans "Anonymous user" %}</small>
+								</p>
+							</li>
+							<li class="user-footer">
+								<div class="pull-right">
+									<a href="/gvsigonline/" class="btn btn-default btn-flat">{% trans "Exit" %}</a>
+								</div>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</div>
+			
+			<div class="navbar-custom-menu">
+				<ul id="toolbar-buttons" class="nav navbar-nav">
+					<li><a href="/gvsigonline/core/documentation/" target="_blank" id="help" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-question-circle"></i></a></li>
+				</ul>
+			</div>
+
+		</nav>
+	</header>
+	
+	<div id="container">
+		<aside class="control-sidebar control-sidebar-light" style="position: fixed; height: 100%;">
+
+			<ul class="nav nav-tabs nav-justified control-sidebar-tabs">
+				<li class="active"><a href="#layer-tree-tab" data-toggle="tab"><i class="icon-layers"></i></a></li>
+				<li><a href="#legend-tab" data-toggle="tab"><i class="fa fa-tags"></i></a></li>
+				<li><a href="#details-tab" data-toggle="tab"><i class="fa fa-list-alt"></i></a></li>
+			</ul>
+
+			<div class="tab-content" style="height: 100%;">
+			
+				<!-- Layer tree -->
+				<div class="tab-pane active" id="layer-tree-tab" style="overflow-y: auto; height: 100%;">
+				</div>
+				
+				<!-- Legend -->
+				<div class="tab-pane" id="legend-tab" style="overflow-y: auto; height: 100%;">
+				</div>
+				
+				<!-- Details -->
+				<div class="tab-pane" id="details-tab" style="overflow-y: auto; height: 100%;">
+				</div>
+				
+			</div>			
+		</aside>
+
+		<div id="map">
+			
+			<table id="mouse-position" class="custom-mouse-position ol-unselectable ol-control">
+				<tr>
+					<td id="custom-mouse-position-output"></td>
+					<td id="custom-mouse-position-form" class="custom-mouse-position-form">
+						<form>
+					      	<select id="custom-mouse-position-projection" class="custom-mouse-position-projection">
+					      		{% for key, value in supported_crs.items %}
+						      		{% if key == "4326" %}
+						        		<option value="{{value.code}}" selected>{{value.code}}</option>
+						        	{% else %}
+						        		<option value="{{value.code}}">{{value.code}}</option>
+						        	{% endif %}
+					        	{% endfor %}
+					      	</select>
+					    </form>
+					</td>
+				</tr>
+			</table>
+			
+			<div id="toolbar" class="ol-toolbar ol-unselectable ol-control"></div>
+
+			<div class="modal" id="float-modal" tabindex="-1" role="dialog" aria-labelledby="myFloatModal">
+				<div class="modal-dialog modal-lg" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+							<h4 class="modal-title" id="myModalLabel"></h4>
+						</div>
+						<div class="modal-body"></div>
+						<div class="modal-footer">
+							<button id="float-modal-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+							<button id="float-modal-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+		</div>	
+	</div>
+
+	<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
+	
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jQuery-2.1.4.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.cookie.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.easy-overlay.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQueryUI/jquery-ui.min.js" %}"></script>
+	<script>
+		$.widget.bridge('uibutton', $.ui.button);
+		$("body").overlay();
+	</script>
+	<script type="text/javascript" src="{% static "js/vendors/bootstrap-3.3.6/js/bootstrap.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/DataTables-1.10.11/media/js/jquery.dataTables.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/DataTables-1.10.11/extensions/Select/js/dataTables.select.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/bootstrap-lightbox/ekko-lightbox.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/proj4js/proj4.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/ol-3.15.1/ol.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/ol-3.15.1/ol3-popup.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/gvsigOL.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/widgets/messageBox.js" %}"></script>
+	<script>
+		var messageBox = new messageBox();
+	</script>
+	
+	<script type="text/javascript" src="{% static "js/lib/tools/getFeatureInfo.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/tools/attributeTable.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/tools/measureLength.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/tools/measureArea.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/tools/exportToPDF.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/tools/geolocation.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/tools/searchByCoordinate.js" %}"></script>
+	
+	<script type="text/javascript" src="{% static "js/lib/widgets/gvsigolResourceManager.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/widgets/editionBar.js" %}"></script>		
+	<script type="text/javascript" src="{% static "js/lib/widgets/layerTree.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/widgets/legend.js" %}"></script>
+	
+	<script type="text/javascript" src="{% static "js/lib/public_viewer.js" %}"></script>
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
+	    	$("#select-language").change(function() {
+	    		$("#select-language-form").submit();
+			});
+	    });
+	</script>
+	
+	<script type="text/javascript">
+	
+		$("#modal-table-dialog").draggable({
+		    handle: ".modal-header",
+		    containment: "#map", 
+		    scroll: false
+		});
+		
+		$(document).on('click', '[data-toggle="lightbox"]', function(event) {
+		    event.preventDefault();
+		    $(this).ekkoLightbox();
+		});
+
+		$.ajax({
+			type : 'POST',
+			async : false,
+			url : '/gvsigonline/core/public_viewer_get_conf/',
+			data : {
+				pid : '{{pid}}'
+			},
+			beforeSend : function(xhr) {
+				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			success : function(response) {
+				for (var key in response.supported_crs) {
+					proj4.defs(response.supported_crs[key].code, response.supported_crs[key].definition);	
+				}
+				publicViewer.core.initialize(response);
+			},
+			error : function() {
+			}
+		});
+	</script>
+	
+	{% for app in INSTALLED_APPS %}												  
+		{% if 'gvsigol_app_' in app %}	
+			{% with "load_public_js_"|add:app|cut:"gvsigol_app_"|add:".html" as aux %}	   			 	
+				{% include_if_exists aux %}
+			{% endwith %}
+		{% endif %}		    					
+	{% endfor %}
+	
+	{% for plugin in INSTALLED_APPS %}												  
+		{% if 'gvsigol_plugin_' in plugin %}	
+			{% with "load_public_js_"|add:plugin|cut:"gvsigol_plugin_"|add:".html" as aux %}	   			 	
+				{% include_if_exists aux %}
+			{% endwith %}
+		{% endif %}		    					
+	{% endfor %}
+
+	<script>
+	$(document).ready(function() {
+		
+		$.overlayout();
+		
+		$("#table-dialog").dialog({
+			dialogClass: "no-close table-dialog",
+			autoOpen: false,
+		    width: 'auto', // overcomes width:'auto' and maxWidth bug
+		    maxWidth: 700,
+		    height: 'auto',
+		    maxHeight: 700,
+		    modal: false,
+		    fluid: true, //new option
+		    resizable: false,
+		    buttons: [{
+		    	id: 'td-close-button',
+		    	text: '{% trans "Close" %}',
+		    	"class": "btn btn-default",
+		        click: function() {
+		        	$( this ).dialog("close");
+		       	}
+		   	}]
+		});
+
+		// on window resize run function
+		$(window).resize(function () {
+		    fluidDialog();
+		});
+
+		// catch dialog if opened within a viewport smaller than the dialog width
+		$(document).on("dialogopen", ".ui-dialog", function (event, ui) {
+		    fluidDialog();
+		});
+
+		function fluidDialog() {
+		    var $visible = $(".ui-dialog:visible");
+		    // each open dialog
+		    $visible.each(function () {
+		        var $this = $(this);
+		        var dialog = $this.find(".ui-dialog-content").data("ui-dialog");
+		        // if fluid option == true
+		        if (dialog.options.fluid) {
+		            var wWidth = $(window).width();
+		            // check window width against dialog width
+		            if (wWidth < (parseInt(dialog.options.maxWidth) + 50))  {
+		                // keep dialog from filling entire screen
+		                $this.css("max-width", "90%");
+		            } else {
+		                // fix maxWidth bug
+		                $this.css("max-width", dialog.options.maxWidth + "px");
+		            }
+		            //reposition dialog
+		            dialog.option("position", dialog.options.position);
+		        }
+		    });
+
+		}
+		
+	});
+	</script>
+</body>
+</html>
