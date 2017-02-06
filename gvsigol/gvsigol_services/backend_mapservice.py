@@ -622,7 +622,8 @@ class Geoserver():
                 form = forms_geoserver.PostgisLayerUploadForm
             else:
                 form = forms_geoserver.PostgisLayerUploadForm
-                form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
+                if form.fields:
+                    form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
                 
             return form
     
