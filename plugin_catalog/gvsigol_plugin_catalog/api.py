@@ -118,7 +118,13 @@ class Geonetwork():
         maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
         minx = str(layer_info[ds_type]['latLonBoundingBox']['minx'])
         miny = str(layer_info[ds_type]['latLonBoundingBox']['miny'])
-        crs = str(layer_info[ds_type]['nativeBoundingBox']['crs'])
+        crs_object = layer_info[ds_type]['nativeBoundingBox']['crs']
+        
+        crs = None
+        if isinstance(crs_object,dict):
+            crs = str(crs_object['$'])
+        else:
+            crs = str(crs_object)
         
         metadata =  '<gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" '
         metadata +=     'xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:gmx="http://www.isotc211.org/2005/gmx" '
