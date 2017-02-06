@@ -21,7 +21,6 @@ from gvsigol_core.geom import RASTER
 '''
 
 from models import Layer, LayerGroup, Datastore, Workspace, DataRule, LayerReadGroup, LayerWriteGroup
-from forms_geoserver import PostgisLayerUploadForm, RasterLayerUploadForm
 from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer
 from gvsigol_symbology import services as symbology_services
 from django.core.exceptions import ImproperlyConfigured
@@ -615,14 +614,14 @@ class Geoserver():
     def getUploadForm(self, datastore_type, request):
         # ensure type is a supported data store type
         if datastore_type=="c_GeoTIFF":
-            return RasterLayerUploadForm()
+            return forms_geoserver.RasterLayerUploadForm
         
         elif datastore_type=="v_PostGIS":
             form = None
             if request.user.is_superuser:
-                form = PostgisLayerUploadForm()
+                form = forms_geoserver.PostgisLayerUploadForm
             else:
-                form = PostgisLayerUploadForm()
+                form = forms_geoserver.PostgisLayerUploadForm
                 form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
                 
             return form
