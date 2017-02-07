@@ -22,17 +22,17 @@
 '''
 
 from django.shortcuts import render_to_response, RequestContext
-from gvsigol_plugin_catalog import settings as catalog_settings
-from gvsigol_plugin_sync import settings as sync_settings
 from gvsigol import settings
 
 def index(request):
     resp = {}
     
     if 'gvsigol_plugin_catalog' in settings.INSTALLED_APPS:
+        from gvsigol_plugin_catalog import settings as catalog_settings
         resp['CATALOG_URL'] = catalog_settings.CATALOG_URL
         
     if 'gvsigol_plugin_sync' in settings.INSTALLED_APPS:
+        from gvsigol_plugin_sync import settings as sync_settings
         resp['GVSIGOL_APP_DOWNLOAD_LINK'] = sync_settings.GVSIGOL_APP_DOWNLOAD_LINK
         
     return render_to_response('index.html', resp, RequestContext(request))
