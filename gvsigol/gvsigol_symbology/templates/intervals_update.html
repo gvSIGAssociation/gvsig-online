@@ -226,6 +226,20 @@ $(document).ready(function() {
 	
 	utils.centerMap(layerName, wfsUrl);
 	
+	$("#symbol-minscale").on('change', function(e){
+		var rules = intervals.getRules();
+		for (var i=0; i<rules.length; i++) {
+			rules[i].minscale = this.value;
+		}
+	});
+	
+	$("#symbol-maxscale").on('change', function(e){
+		var rules = intervals.getRules();
+		for (var i=0; i<rules.length; i++) {
+			rules[i].maxscale = this.value;
+		}
+	});
+	
 	$("#show-label").on('click', function(e){
 		intervals.showLabel();
 	});

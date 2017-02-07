@@ -251,17 +251,19 @@ layerTree.prototype.getLayerFromMap = function(tocLayer) {
 		if (layer.baselayer == false) {
 			if (layer.get('id')==tocLayer.id) {
 				mapLayer = layer;
-			}
-			if (layer.getSource().params_) {
-				if (layer.getSource().getParams().LAYERS.indexOf(tocLayer.name) > -1) {
-					mapLayer = layer;
+			}/* else {
+				if (layer.getSource().params_) {
+					if (layer.getSource().getParams().LAYERS.indexOf(tocLayer.name) > -1) {
+						mapLayer = layer;
+					}
+					
+				} else {
+					if (tocLayer.name == layer.layer_name) {
+						mapLayer = layer;
+					}
 				}
-				
-			} else {
-				if (tocLayer.name == layer.layer_name) {
-					mapLayer = layer;
-				}
-			}
+			}*/
+			
 		}
 	}, this);
 	return mapLayer;
@@ -277,7 +279,7 @@ layerTree.prototype.getGroupLayerFromMap = function(tocLayer) {
 		if (layer.baselayer == false) {
 			if (layer.get('id')==tocLayer) {
 				mapLayer = layer;
-			}
+			}/*
 			if (layer.getSource().params_) {
 				if (layer.getSource().getParams().LAYERS.indexOf(tocLayer.name) > -1) {
 					mapLayer = layer;
@@ -287,7 +289,7 @@ layerTree.prototype.getGroupLayerFromMap = function(tocLayer) {
 				if (tocLayer.name == layer.layer_name) {
 					mapLayer = layer;
 				}
-			}
+			}*/
 		}
 	}, this);
 	return mapLayer;
