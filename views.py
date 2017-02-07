@@ -281,8 +281,9 @@ def layer_delete(request, layer_id):
         if mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer):
             mapservice_backend.deleteLayerStyles(layer)
             signals.layer_deleted.send(sender=None, layer=layer)
-            if os.path.isfile(layer.thumbnail.path):
-                os.remove(layer.thumbnail.path)
+            if not 'no_thumbnail.jpg' in layer.thumbnail.name:
+                if os.path.isfile(layer.thumbnail.path):
+                    os.remove(layer.thumbnail.path)
             Layer.objects.all().filter(pk=layer_id).delete()
             mapservice_backend.setDataRules()
             core_utils.toc_remove_layer(layer)
@@ -360,7 +361,7 @@ def layer_add(request):
                     style_name = workspace.name + '_' + newRecord.name + '_default'
                     mapservice_backend.createDefaultStyle(newRecord, style_name)
                     mapservice_backend.setLayerStyle(newRecord, style_name)
-                    mapservice_backend.updateThumbnail(newRecord, 'create')
+                    newRecord = mapservice_backend.updateThumbnail(newRecord, 'create')
                     newRecord.save()
                     
                 core_utils.toc_add_layer(newRecord)
