@@ -175,7 +175,7 @@ Intervals.prototype.loadRules = function(rules) {
 			if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer') {
 				this.loadLabel(options);
 				
-			} else if (symbolizer.type == 'gvsigol_symbology.externalgraphic') {
+			} else if (symbolizer[0].model == 'gvsigol_symbology.externalgraphicsymbolizer') {
 				rule.addExternalGraphicSymbolizer(options);
 				
 			} else {

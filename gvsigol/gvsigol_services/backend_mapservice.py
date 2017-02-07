@@ -400,7 +400,9 @@ class Geoserver():
                 
             elif mode == 'update':
                 signals.layer_updated.send(sender=None, layer=layer)
-
+                
+            return layer
+        
         except Exception as e:
             print e.message
             pass
