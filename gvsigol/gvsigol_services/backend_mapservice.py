@@ -395,6 +395,7 @@ class Geoserver():
         
         try:   
             layer.thumbnail = self.getThumbnail(layer.datastore.workspace, layer.datastore, layer)
+            layer.save()
             if mode == 'create':
                 signals.layer_created.send(sender=None, layer=layer)
                 
