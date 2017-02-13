@@ -1060,13 +1060,15 @@ def get_feature_info(request):
         features = None           
         try:
             w = Workspace.objects.get(name__exact=ws)
-            ds = Datastore.objects.get(workspace=w)
-            layers = Layer.objects.filter(name__exact=query_layer)
+            #ds = Datastore.objects.filter(workspace=w)
+            #layers = Layer.objects.filter(name__exact=query_layer)
             
-            layer = None
-            for l in layers:
-                if l.datastore.id == ds.id:
-                    layer = l
+            #layer = None
+            #for l in layers:
+            #    if l.datastore.id == ds.id:
+            #        layer = l
+                    
+            layer = Layer.objects.get(name=query_layer, datastore__workspace__name=w.name)
 
             response = req.get(url, verify=False)
             geojson = json.loads(response.text)
