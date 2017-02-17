@@ -174,11 +174,33 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 		    			srsName: this_.selectedLayer.crs.crs
 		    		});
 		    		
-			  		var proj = new ol.proj.Projection({
-			    		code: this_.selectedLayer.crs.crs,
-			    		axisOrientation: 'neu'
-			    	});
-			    	ol.proj.addProjection(proj);
+		    		// This should directly work for 4326 && 3857 according to OL3 docs.
+		    		// It will also work for other CRSs if properly registered
+		    		var proj = null;
+		    		if (response.crs && response.crs.properties && response.crs.properties.name) {
+		    			proj = ol.proj.get(response.crs.properties.name);
+		    		}
+		    		if (proj==null) { // the CRS was not registered
+		    			
+			    		// Support some common CRSs using 'neu' axis order.
+		    			// This should better be done by including the right
+		    			// proj4js definitions for the configured CRSs.
+		    			if (this_.selectedLayer.crs.crs=="EPSG:4258" ||
+		    					this_.selectedLayer.crs.crs=="EPSG:3034" ||
+		    					this_.selectedLayer.crs.crs=="EPSG:3035")
+		    				proj = new ol.proj.Projection({
+					    		code: this_.selectedLayer.crs.crs,
+					    		axisOrientation: 'neu'
+					    	});
+		    			else {
+		    				// In general, assume 'enu' axis order
+		    				proj = new ol.proj.Projection({
+		    					code: this_.selectedLayer.crs.crs
+		    				});
+		    			}
+		    			ol.proj.addProjection(proj);
+		    		}
+		    		this_.selectedLayer.crs.olcrs = proj;
 			    	
 		    		var format = new ol.format.GeoJSON();
 		    		var features = format.readFeatures(response);
@@ -861,7 +883,7 @@ editionBar.prototype.transactWFS = function(p,f) {
 
 	var cloned = f.clone();	
 	var prop = cloned.getGeometry().getProperties();
-	cloned.getGeometry().transform('EPSG:3857',this.selectedLayer.crs.crs);
+	cloned.getGeometry().transform('EPSG:3857', this.selectedLayer.crs.olcrs);
 	cloned.setId(f.getId());
 	
 	switch(p) {
@@ -879,29 +901,31 @@ editionBar.prototype.transactWFS = function(p,f) {
 			if (geometryName != 'geometry') {
 				properties[geometryName] = cloned.getGeometry();
 			}
-			var coordinates = cloned.getGeometry().getCoordinates();
-			if (this.geometryType == 'Point' || this.geometryType == 'MultiPoint') {
-				if (coordinates.length == 1 && coordinates[0].length == 2) {
-					coordinates[0].reverse();
-				} else if (coordinates.length == 2) {
-					coordinates.reverse();
-				}
-				
-				
-			} else if (this.geometryType == 'LineString' || this.geometryType == 'MultiLineString'){
-				for (var j=0; j<coordinates[0].length; j++) {
-					coordinates[0][j].reverse();
-				}
-				
-			} else if (this.geometryType == 'Polygon' || this.geometryType == 'MultiPolygon'){
-				for (var j=0; j<coordinates[0].length; j++) {
-					for (var k=0; k<coordinates[0][j].length; k++) {
-						coordinates[0][j][k].reverse();
+			if (this.selectedLayer.crs.olcrs.axisOrientation_=='neu') {
+				var coordinates = cloned.getGeometry().getCoordinates();
+				if (this.geometryType == 'Point' || this.geometryType == 'MultiPoint') {
+					if (coordinates.length == 1 && coordinates[0].length == 2) {
+						coordinates[0].reverse();
+					} else if (coordinates.length == 2) {
+						coordinates.reverse();
+					}
+					
+					
+				} else if (this.geometryType == 'LineString' || this.geometryType == 'MultiLineString'){
+					for (var j=0; j<coordinates[0].length; j++) {
+						coordinates[0][j].reverse();
+					}
+					
+				} else if (this.geometryType == 'Polygon' || this.geometryType == 'MultiPolygon'){
+					for (var j=0; j<coordinates[0].length; j++) {
+						for (var k=0; k<coordinates[0][j].length; k++) {
+							coordinates[0][j][k].reverse();
+						}
 					}
 				}
+				
+				cloned.getGeometry().setCoordinates(coordinates);
 			}
-			
-			cloned.getGeometry().setCoordinates(coordinates);
 			cloned.setGeometryName(geometryName);
 			
 			if (geometryName != 'geometry') {
