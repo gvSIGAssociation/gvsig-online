@@ -37,6 +37,16 @@
 					</div>
 					{% endif %}
 					
+					<div class="row" style="margin-top:20px;">
+						<div class="col-md-12 form-group">
+							<div class="alert alert-warning alert-dismissible">
+				                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+				                <h4><i class="icon fa fa-warning"></i> {% trans "Warning!" %}</h4>
+				                {% trans "Before exporting the shapefile check the name of the columns. Column names can not contain spaces or special characters." %}
+				            </div>
+		            	</div>
+					</div>
+					
 					<input type="hidden" name="directory_path" value="{{file.directory}}">	
 					<input type="hidden" name="file_path" value="{{file.filepath}}">
 					<input id="id_file" class="form-control" type="hidden" name="file" value="{{file.fileurl}}">					
