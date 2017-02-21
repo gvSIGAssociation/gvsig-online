@@ -269,3 +269,8 @@ msgstr "BoundingBox"
 
 msgid "GeographicBoundingBox"
 msgstr "BoundingBox geográfica"
+
+
+#cleanMap.js
+msgid "Clean map"
+msgstr "Netejar mapa"

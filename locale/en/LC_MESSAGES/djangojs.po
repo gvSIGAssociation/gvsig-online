@@ -269,3 +269,7 @@ msgstr ""
 
 msgid "GeographicBoundingBox"
 msgstr ""
+
+#cleanMap.js
+msgid "Clean map"
+msgstr ""

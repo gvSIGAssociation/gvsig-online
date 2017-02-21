@@ -127,7 +127,7 @@ html, body {
 .editionbar {
 	left: auto;
     right: 6px;
-    top: 260px;
+    top: 290px;
     z-index: 1000;
     box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
 }
