@@ -640,7 +640,9 @@ editionBar.prototype.createFeatureForm = function(feature) {
 					if (self.featureType[i].type == 'xsd:boolean') {
 						properties[field.id] = field.checked;
 					} else {
-						properties[field.id] = field.value;
+						if (field.value != '' && field.value != null && field.value != 'null') {
+							properties[field.id] = field.value;
+						}						
 					}				
 				}
 			}
@@ -769,7 +771,9 @@ editionBar.prototype.editFeatureForm = function(feature) {
 						if (self.featureType[i].type == 'xsd:boolean') {
 							properties[field.id] = field.checked;
 						} else {
-							properties[field.id] = field.value;
+							if (field.value != '' && field.value != null && field.value != 'null') {
+								properties[field.id] = field.value;
+							}	
 						}
 					}
 				}
