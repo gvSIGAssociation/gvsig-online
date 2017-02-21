@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-01-30 10:13+0100\n"
+"POT-Creation-Date: 2017-02-21 10:01+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -41,27 +41,27 @@ msgid "We will work on fixing that right away. Meanwhile, you may"
 msgstr ""
 "Estamos trabajando en la resolución del problema. Mientras tanto, puede"
 
-#: templates/base.html:94 templates/base_compress.html.py:93
-#: templates/viewer.html:119 templates/viewer_compress.html.py:118
+#: templates/base.html:95 templates/base_compress.html.py:95
+#: templates/viewer.html:116 templates/viewer_compress.html.py:115
 msgid "Sign out"
 msgstr "Cerrar sesión"
 
-#: templates/base.html:112 templates/base_compress.html.py:111
-#: templates/viewer.html:116 templates/viewer_compress.html.py:115
+#: templates/base.html:113 templates/base_compress.html.py:113
+#: templates/viewer.html:113 templates/viewer_compress.html.py:112
 msgid "Dashboard"
 msgstr "Panel de control"
 
-#: templates/base.html:118 templates/base_compress.html.py:117
+#: templates/base.html:119 templates/base_compress.html.py:119
 msgid "Home"
 msgstr "Inicio"
 
-#: templates/base.html:154 templates/base_compress.html.py:153
+#: templates/base.html:155 templates/base_compress.html.py:155
 #: templates/documentation.html:116 templates/ogc_services.html.py:84
 #: templates/select_public_project.html:77
 msgid "Version"
 msgstr "Versión"
 
-#: templates/base_compress.html:157 templates/ogc_services.html.py:88
+#: templates/base_compress.html:159 templates/ogc_services.html.py:88
 msgid "All rights reserved"
 msgstr "Todos los derechos reservados"
 
@@ -82,8 +82,8 @@ msgid ""
 "Features of the platform and license. Definition of the objects and entities "
 "that are part of the environment."
 msgstr ""
-"Características de la plataforma y licencia. Definición de objectos y entidades "
-"que son parte del entorno."
+"Características de la plataforma y licencia. Definición de objectos y "
+"entidades que son parte del entorno."
 
 #: templates/documentation.html:66
 msgid "Administration Guide"
@@ -95,9 +95,9 @@ msgid ""
 "carry out the management of users and groups, services, symbology, "
 "projects ... "
 msgstr ""
-"Esta guía está destinada para los usuarios administradores de la plataforma. Muestra los pasos para "
-"llevar a cabo la gestión de usuarios y grupos, servicios, simbología, "
-"proyectos ..."
+"Esta guía está destinada para los usuarios administradores de la plataforma. "
+"Muestra los pasos para llevar a cabo la gestión de usuarios y grupos, "
+"servicios, simbología, proyectos ..."
 
 #: templates/documentation.html:75
 msgid "Map viewer user manual"
@@ -108,8 +108,8 @@ msgid ""
 "This manual provides a review of each of the features offered by the map "
 "viewer"
 msgstr ""
-"Este manual proporciona una revisión de cada una de las características ofrecidas por "
-"el visor de mapas"
+"Este manual proporciona una revisión de cada una de las características "
+"ofrecidas por el visor de mapas"
 
 #: templates/documentation.html:84
 msgid "Plugins"
@@ -117,14 +117,15 @@ msgstr "Plugins"
 
 #: templates/documentation.html:85
 msgid "Plugins add features that are not initially present on the platform"
-msgstr "Los plugins añaden funcionalidades que no están presentes inicialmente en la plataforma"
+msgstr ""
+"Los plugins añaden funcionalidades que no están presentes inicialmente en la "
+"plataforma"
 
 #: templates/documentation.html:94
 msgid "Mobile application"
 msgstr "Aplicación móvil"
 
 #: templates/documentation.html:103
-#| msgid "Username"
 msgid "User manual"
 msgstr "Manual de usuario"
 
@@ -132,13 +133,14 @@ msgstr "Manual de usuario"
 msgid ""
 "Learn how to manage geographic information from a mobile device or tablet"
 msgstr ""
-"Aprenda a administrar la información geográfica desde un dispositivo móvil o una tableta"
+"Aprenda a administrar la información geográfica desde un dispositivo móvil o "
+"una tableta"
 
-#: templates/home.html:18 utils.py:468
+#: templates/home.html:18 utils.py:403
 msgid "Username"
 msgstr "Nombre de usuario"
 
-#: templates/home.html:20 utils.py:471
+#: templates/home.html:20 utils.py:406
 msgid "Email"
 msgstr "Correo electrónico"
 
@@ -162,7 +164,7 @@ msgstr "Ha iniciado sesión como usuario con permisos restringidos"
 msgid "Last login"
 msgstr "Último acceso"
 
-#: templates/home.html:32 utils.py:472 utils.py:484
+#: templates/home.html:32 utils.py:407 utils.py:419
 msgid "Password"
 msgstr "Contraseña"
 
@@ -178,7 +180,7 @@ msgstr "para actualizar su contraseña"
 msgid "Passwords doesn't match"
 msgstr "Las contraseñas no coinciden"
 
-#: templates/home.html:42 templates/home.html.py:43 utils.py:480
+#: templates/home.html:42 templates/home.html.py:43 utils.py:415
 msgid "New password"
 msgstr "Nueva contraseña"
 
@@ -278,15 +280,15 @@ msgstr "Eliminar proyecto"
 msgid "The project will be removed, Do you want continue?"
 msgstr "El proyecto será eliminado, ¿Desea continuar?"
 
-#: templates/project_list.html:64 templates/public_viewer.html.py:165
-#: templates/public_viewer_compress.html:165 templates/viewer.html.py:190
-#: templates/viewer_compress.html:189
+#: templates/project_list.html:64 templates/public_viewer.html.py:171
+#: templates/public_viewer_compress.html:171 templates/viewer.html.py:194
+#: templates/viewer_compress.html:193
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: templates/project_list.html:65 templates/public_viewer.html.py:166
-#: templates/public_viewer_compress.html:166 templates/viewer.html.py:191
-#: templates/viewer_compress.html:190
+#: templates/project_list.html:65 templates/public_viewer.html.py:172
+#: templates/public_viewer_compress.html:172 templates/viewer.html.py:195
+#: templates/viewer_compress.html:194
 msgid "Accept"
 msgstr "Aceptar"
 
@@ -372,8 +374,8 @@ msgstr "Usuario anónimo"
 msgid "Exit"
 msgstr "Salir"
 
-#: templates/public_viewer.html:288 templates/public_viewer_compress.html:273
-#: templates/viewer.html.py:316 templates/viewer_compress.html:295
+#: templates/public_viewer.html:295 templates/public_viewer_compress.html:279
+#: templates/viewer.html.py:321 templates/viewer_compress.html:299
 msgid "Close"
 msgstr "Cerrar"
 
@@ -381,27 +383,23 @@ msgstr "Cerrar"
 msgid "Update TOC"
 msgstr "Actualizar TOC"
 
-#: utils.py:296
-msgid "Public viewer TOC is empty"
-msgstr "Visor público"
-
-#: utils.py:451
+#: utils.py:386
 msgid "New user account"
 msgstr "Nueva cuenta de usuario"
 
-#: utils.py:467
+#: utils.py:402
 msgid "Account data"
 msgstr "Datos de la cuenta"
 
-#: utils.py:469
+#: utils.py:404
 msgid "First name"
 msgstr "Nombre"
 
-#: utils.py:470
+#: utils.py:405
 msgid "Last name"
 msgstr "Apellidos"
 
-#: utils.py:482
+#: utils.py:417
 msgid "This is your new temporary password"
 msgstr "Esta es su contraseña temporal"
 
@@ -412,6 +410,9 @@ msgstr "Debe introducir un nombre de proyecto"
 #: views.py:226 views.py:377
 msgid "Project name already exists"
 msgstr "El nombre del proyecto ya existe"
+
+#~ msgid "Public viewer TOC is empty"
+#~ msgstr "Visor público"
 
 #~ msgid "Public viewer"
 #~ msgstr "Visor público"
