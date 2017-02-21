@@ -24,16 +24,24 @@
  * TODO
  */
 var print = function(conf, map) {
-
+	var self = this;
 	this.conf = conf;
 	this.map = map;
 	
 	this.id = "print";
-	
 	this.$button = $("#print");
-
+	
+	this.detailsTab = $('#details-tab');
+	this.defaultClientInfo = {
+		width: 780, 
+		height: 330
+	};
+	
+	this.lastAngle = 0;
+	this.extentLayer = null;
+	this.capabilities = null;
+	
 	var this_ = this;
-  
 	var handler = function(e) {
 		this_.handler(e);
 	};
@@ -60,59 +68,189 @@ print.prototype.handler = function(e) {
 	e.preventDefault();
 	var self = this;
 	
-	var templates = this.getTemplates();
-	
-	var ui = '';
-	ui += '<div id="field-errors" class="row">';
-	ui += '</div>';
-	ui += '<div class="row">';
-	ui += 	'<div class="col-md-12 form-group">';
-	ui += 		'<label>' + gettext('Select print template') + '</label>';
-	ui += 		'<select id="print-template" class="form-control">';
-	ui += 			'<option disabled selected value> -- ' + gettext('Select template') + ' -- </option>';
-	for (var i=0; i<templates.length; i++) {
-		ui += 		'<option value="' + templates[i] + '">' + templates[i] + '</option>';
+	if (!this.active) {
+		this.extentLayer = new ol.layer.Vector({
+			source: new ol.source.Vector()
+		});
+		this.map.addLayer(this.extentLayer);
+		
+		this.showDetailsTab();
+		this.detailsTab.empty();
+		
+		this.renderPrintExtent(this.defaultClientInfo);
+		this.map.getView().on('propertychange', function() {
+	        self.extentLayer.getSource().clear();
+	        self.lastAngle = 0;
+	        if (self.capabilities != null) {
+	        	self.renderPrintExtent(self.capabilities.layouts[0].attributes[2].clientInfo);
+	        } else {
+	        	self.renderPrintExtent(self.defaultClientInfo);
+	        }
+	        
+	    });
+		
+		var templates = this.getTemplates();
+		
+		var ui = '';
+		ui += '<div class="box box-default">';
+		ui += 	'<div class="box-header with-border">';
+		ui += 		'<h3 class="box-title">' + gettext('Print params') + '</h3>';
+		ui += 	'</div>';
+		ui += 	'<div class="box-body">';
+		ui += 		'<div id="field-errors" class="row"></div>';
+		ui += 		'<div class="row">';
+		ui += 			'<div class="col-md-12 form-group">';
+		ui += 				'<label>' + gettext('Select print template') + '</label>';
+		ui += 				'<select id="print-template" class="form-control">';
+		ui += 					'<option disabled selected value="empty"> -- ' + gettext('Select template') + ' -- </option>';
+		for (var i=0; i<templates.length; i++) {
+			if (templates[i] != 'default') {
+				ui += 	'<option value="' + templates[i] + '">' + templates[i] + '</option>';
+			}
+		}
+		ui += 				'</select>';
+		ui += 			'</div>';
+		ui += 			'<div class="col-md-12 form-group">';
+		ui += 				'<label>' + gettext('Title') + '</label>';
+		ui += 				'<input id="print-title" type="text" class="form-control" value="' + this.conf.project_name + '">';
+		ui += 			'</div>';
+		ui += 			'<div class="col-md-12 form-group">';
+		ui += 				'<label>' + gettext('Legal warning') + '</label>';
+		ui += 				'<textarea class="form-control" name="print-legal" id="print-legal" rows="5">' + gettext('Print message') + '</textarea>';
+		ui += 			'</div>';
+		ui += 			'<div class="col-md-12 form-group">';
+		ui += 				'<label>' + gettext('Rotation') + '</label>';
+		ui += 				'<input id="print-rotation" type="number" step="any" class="form-control" value="0">';
+		ui += 			'</div>';
+		ui += 		'</div>';
+		ui += 	'</div>';
+		ui += 	'<div class="box-footer clearfix">';
+		ui += 		'<a href="javascript:void(0)" id="accept-print" class="btn btn-sm btn-primary btn-flat pull-right"><i class="fa fa-print margin-r-5"></i>' + gettext('Print') + '</a>';
+		ui += 		'<a href="javascript:void(0)" id="cancel-print" class="btn btn-sm btn-danger btn-flat pull-right margin-r-10"><i class="fa fa-times margin-r-5"></i>' + gettext('Cancel') + '</a>';
+		ui += 	'</div>';
+		ui += '</div>';
+		
+		this.detailsTab.append(ui);
+		$.gvsigOL.controlSidebar.open();
+		
+		$('#print-template').on('change', function(e) {
+			var template = $('#print-template').val();
+			
+			self.capabilities = self.getCapabilities(template);
+		});
+		
+		$('#print-rotation').on('change', function(e) {
+			var feature = self.extentLayer.getSource().getFeatures()[0];
+		    var center = self.map.getView().getCenter();
+		    var radiansAngle = (this.value * 2 * Math.PI) / 360;
+		    var radiansLastAngle = ((360-self.lastAngle) * 2 * Math.PI) / 360;
+		    feature.getGeometry().rotate(radiansLastAngle, center);
+			feature.getGeometry().rotate(radiansAngle, center);
+			self.extentLayer.getSource().dispatchEvent('change');
+			self.lastAngle = this.value;
+		});
+		
+		$('#accept-print').on('click', function () {
+			var template = $('#print-template').val();
+			if (template != null) {
+				$("body").overlay();
+				self.createPrintJob(template);
+			} else {
+				messageBox.show('warning', gettext('You must select a template'));
+			}
+			
+		});
+		
+		$('#cancel-print').on('click', function () {
+			self.removeExtentLayer();
+			self.showLayersTab();
+			self.capabilities = null;
+			self.active = false;
+		});
+		
+		this.active = true;
 	}
-	ui += 		'</select>';
-	ui += 	'</div>';
-	ui += '</div>';
-	ui += '<div id="capabilities-form" class="row">';
-	ui += '</div>';
-	
-	$('#float-modal .modal-body').empty();
-	$('#float-modal .modal-body').append(ui);
-	
-	var buttons = '';
-	buttons += '<button id="float-modal-cancel-print" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
-	buttons += '<button id="float-modal-accept-print" type="button" class="btn btn-default">' + gettext('Print') + '</button>';
-	
-	$('#float-modal .modal-footer').empty();
-	$('#float-modal .modal-footer').append(buttons);
-	
-	$("#float-modal").modal('show');
-	
-	$('#print-template').on('change', function(e) {
-		var template = $('#print-template').val();
-		
-		var capabilities = self.getCapabilities(template);
-		
-		var form = '';
-		form += '<div class="col-md-12 form-group">';
-		/*form += 	'<label>' + gettext('Select enumeration') + '</label>';
-		form += 	'<select id="field-name-'+id+'" class="form-control">';
-				'{% for enum in enumerations %}'
-		form += 	'<option value="{{enum.name}}">{{enum.title}}</option>';
-				'{% endfor%}'
-		form += 	'</select>';*/
-		form += '</div>';
-		
-		$('#capabilities-form').empty();
-		$('#capabilities-form').append(form);
+};
+
+/**
+ * TODO
+ */
+print.prototype.createPrintJob = function(template) {
+	var self = this;
+	var title = $('#print-title').val();
+	var legalWarning = $('#print-legal').val();
+	var rotation = $('#print-rotation').val();
+	$.ajax({
+		type: 'POST',
+		async: true,
+	  	url: 'https://localhost/print/print/' + template + '/report.pdf',
+	  	processData: false,
+	    contentType: 'application/json',
+	  	data: JSON.stringify({
+	  		"layout": "A4 landscape",
+		  	"outputFormat": "pdf",
+		  	"attributes": {
+		  		"title": title,
+		  		"legalWarning": legalWarning,
+		  		"map": {
+		  			"projection": "EPSG:3857",
+		  			"dpi": 254,
+		  			"rotation": rotation,
+		  			"center": self.map.getView().getCenter(),
+		  			"scale": self.getCurrentScale(),
+		  			"layers": [{
+			  	        "baseURL": "http://localhost:8080/geoserver/wms",
+			  	        "opacity": 1,
+		  				"type": "WMS",
+		  				"layers": ["ws_jrodrigo:lugares_interes"],
+		  				"imageFormat": "image/png",
+		  				//"styles": ["line"],
+		  				"customParams": {
+		  					"TRANSPARENT": "true"
+		  				}
+		  	        },{
+		  				"baseURL": "http://a.tile.openstreetmap.org",
+			  	        "type": "OSM",
+			  	        "imageExtension": "png"
+		  			}]
+		  	    }
+		  	}
+		}),
+	  	success	:function(response){
+	  		self.getReport(response);
+	  	},
+	  	error: function(){}
 	});
-	
-	$('#float-modal-accept-print').on('click', function () {
-		console.log('print');
-		$('#float-modal').modal('hide');
+};
+
+print.prototype.getCurrentScale = function () {
+    var view = this.map.getView();
+    var resolution = view.getResolution();
+    var units = this.map.getView().getProjection().getUnits();
+    var dpi = 25.4 / 0.28;
+    var mpu = ol.proj.METERS_PER_UNIT[units];
+    var scale = resolution * mpu * 39.37 * dpi;
+    return scale;
+};
+
+/**
+ * TODO
+ */
+print.prototype.getReport = function(reportInfo) {
+	var self = this;
+	$.ajax({
+		type: 'GET',
+		async: true,
+	  	url: 'https://localhost/print' + reportInfo.statusURL,
+	  	success	:function(response){
+	  		if (response.done) {
+	  			$.overlayout();
+	  			window.open(reportInfo.downloadURL);
+	  		} else {
+	  			self.getReport(reportInfo);
+	  		}
+	  	},
+	  	error: function(){}
 	});
 };
 
@@ -153,7 +291,62 @@ print.prototype.getCapabilities = function(template) {
 /**
  * TODO
  */
+print.prototype.renderPrintExtent = function(clientInfo) {
+    var mapComponentWidth = this.map.getSize()[0];
+    var mapComponentHeight = this.map.getSize()[1];
+    var currentMapRatio = mapComponentWidth / mapComponentHeight;
+    var scaleFactor = 0.6;
+    var desiredPrintRatio = clientInfo.width / clientInfo.height;
+    var targetWidth;
+    var targetHeight;
+    var geomExtent;
+    var feat;
+
+    if (desiredPrintRatio >= currentMapRatio) {
+        targetWidth = mapComponentWidth * scaleFactor;
+        targetHeight = targetWidth / desiredPrintRatio;
+    } else {
+        targetHeight = mapComponentHeight * scaleFactor;
+        targetWidth = targetHeight * desiredPrintRatio;
+    }
+
+    geomExtent = this.map.getView().calculateExtent([
+        targetWidth,
+        targetHeight
+    ]);
+    feat = new ol.Feature(ol.geom.Polygon.fromExtent(geomExtent));
+    this.extentLayer.getSource().addFeature(feat);
+    return feat;
+};
+
+/**
+ * TODO
+ */
 print.prototype.deactivate = function() {			
 	this.$button.removeClass('button-active');
 	this.active = false;
+};
+
+/**
+ * TODO
+ */
+print.prototype.showDetailsTab = function(p,f) {
+	$('.nav-tabs a[href="#details-tab"]').tab('show');
+};
+
+/**
+ * @param {Event} e Browser event.
+ */
+print.prototype.removeExtentLayer = function() {	
+	this.extentLayer.getSource().clear();
+	this.map.removeLayer(this.extentLayer);
+
+};
+
+/**
+ * TODO
+ */
+print.prototype.showLayersTab = function(p,f) {
+	this.detailsTab.empty();
+	$('.nav-tabs a[href="#layer-tree-tab"]').tab('show');
 };

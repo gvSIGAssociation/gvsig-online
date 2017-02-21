@@ -1,4 +1,5 @@
 from gvsigol_services.backend_mapservice import backend as mapservice
+from gvsigol_services.forms_geoserver import PostgisLayerUploadForm
 from django.views.generic import TemplateView, FormView
 from django.shortcuts import HttpResponse, redirect
 from django.utils.translation import ugettext as _
@@ -67,7 +68,7 @@ class ExportToDatabaseView(FilemanagerMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(ExportToDatabaseView, self).get_context_data(**kwargs)
         
-        form = mapservice.getUploadForm('v_PostGIS', self.request)
+        form = mapservice.getUploadForm('v_PostGIS', self.request.user)
         context['form'] = form
         if 'message' in self.request.session:
             if self.request.session['message'] != '':
@@ -78,25 +79,23 @@ class ExportToDatabaseView(FilemanagerMixin, TemplateView):
         return context
     
     def post(self, request, *args, **kwargs):
-        form_class = mapservice.getUploadForm('v_PostGIS', self.request)
-        if form_class is not None:
-            form = form_class(request.POST, request.FILES)
-            if form.is_valid():
-                try:
-                    if mapservice.exportShpToPostgis(form.cleaned_data):
-                        return redirect("/gvsigonline/filemanager/?path=" + request.POST.get('directory_path'))
-                    
-                except rest_geoserver.RequestError as e:
-                    message = e.server_message
-                    request.session['message'] = message
-                    return redirect("/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path'))
-                    
-                except Exception as exc:
-                    request.session['message'] = _('Server error')
-                    return redirect("/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path'))
-            else:
-                request.session['message'] = _('You must fill in all fields')
+        form = PostgisLayerUploadForm(request.POST, request.FILES, user=request.user)
+        if form.is_valid():
+            try:
+                if mapservice.exportShpToPostgis(form.cleaned_data):
+                    return redirect("/gvsigonline/filemanager/?path=" + request.POST.get('directory_path'))
+                
+            except rest_geoserver.RequestError as e:
+                message = e.server_message
+                request.session['message'] = message
                 return redirect("/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path'))
+                
+            except Exception as exc:
+                request.session['message'] = _('Server error')
+                return redirect("/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path'))
+        else:
+            request.session['message'] = _('You must fill in all fields')
+            return redirect("/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path'))
 
 class UploadView(FilemanagerMixin, TemplateView):
     template_name = 'filemanager_upload.html'
