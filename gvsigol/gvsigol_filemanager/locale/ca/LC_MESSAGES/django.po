@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-12-21 12:57+0100\n"
+"POT-Creation-Date: 2017-02-21 10:03+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,32 +26,44 @@ msgstr "Nom del directori"
 msgid "Export"
 msgstr "Exportar"
 
-#: templates/browser/export_to_database.html:46
+#: templates/browser/export_to_database.html:44
+msgid "Warning!"
+msgstr "Avís!"
+
+#: templates/browser/export_to_database.html:45
+msgid ""
+"Before exporting the shapefile check the name of the columns. Column names "
+"can not contain spaces or special characters."
+msgstr ""
+"Abans d'exportar el shapefile revisi el nom de les columnes. El nom "
+"de les columnes no pot contenir espais ni caràcters especials."
+
+#: templates/browser/export_to_database.html:56
 msgid "Table creation mode"
 msgstr "Mode de creació de la taula"
 
-#: templates/browser/export_to_database.html:53
+#: templates/browser/export_to_database.html:63
 msgid "Data store"
 msgstr "Magatzem de dades"
 
-#: templates/browser/export_to_database.html:60
+#: templates/browser/export_to_database.html:70
 #: templates/browser/filemanager_list.html:14
 msgid "Name"
 msgstr "Nom"
 
-#: templates/browser/export_to_database.html:62
+#: templates/browser/export_to_database.html:72
 msgid "Layer will be uploaded to the selected data store"
 msgstr "La capa serà pujada al magatzem seleccionat"
 
-#: templates/browser/export_to_database.html:68
+#: templates/browser/export_to_database.html:78
 msgid "Character encoding"
 msgstr "Codificació de caracters"
 
-#: templates/browser/export_to_database.html:72
+#: templates/browser/export_to_database.html:82
 msgid "Coordinate reference system"
 msgstr "sistema de coordenades"
 
-#: templates/browser/export_to_database.html:95
+#: templates/browser/export_to_database.html:105
 msgid "Default"
 msgstr "Per defecte"
 
@@ -101,10 +113,10 @@ msgstr "Pujar"
 msgid "File manager"
 msgstr "Administrador de arxius"
 
-#: views.py:95
+#: views.py:94
 msgid "Server error"
 msgstr "Error del servidor"
 
-#: views.py:98
+#: views.py:97
 msgid "You must fill in all fields"
 msgstr "Ha d'omplir tots els camps"

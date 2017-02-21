@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-12-21 12:57+0100\n"
+"POT-Creation-Date: 2017-02-21 10:03+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,32 +25,42 @@ msgstr ""
 msgid "Export"
 msgstr ""
 
-#: templates/browser/export_to_database.html:46
+#: templates/browser/export_to_database.html:44
+msgid "Warning!"
+msgstr ""
+
+#: templates/browser/export_to_database.html:45
+msgid ""
+"Before exporting the shapefile check the name of the columns. Column names "
+"can not contain spaces or special characters."
+msgstr ""
+
+#: templates/browser/export_to_database.html:56
 msgid "Table creation mode"
 msgstr ""
 
-#: templates/browser/export_to_database.html:53
+#: templates/browser/export_to_database.html:63
 msgid "Data store"
 msgstr ""
 
-#: templates/browser/export_to_database.html:60
+#: templates/browser/export_to_database.html:70
 #: templates/browser/filemanager_list.html:14
 msgid "Name"
 msgstr ""
 
-#: templates/browser/export_to_database.html:62
+#: templates/browser/export_to_database.html:72
 msgid "Layer will be uploaded to the selected data store"
 msgstr ""
 
-#: templates/browser/export_to_database.html:68
+#: templates/browser/export_to_database.html:78
 msgid "Character encoding"
 msgstr ""
 
-#: templates/browser/export_to_database.html:72
+#: templates/browser/export_to_database.html:82
 msgid "Coordinate reference system"
 msgstr ""
 
-#: templates/browser/export_to_database.html:95
+#: templates/browser/export_to_database.html:105
 msgid "Default"
 msgstr ""
 
@@ -100,10 +110,10 @@ msgstr ""
 msgid "File manager"
 msgstr ""
 
-#: views.py:95
+#: views.py:94
 msgid "Server error"
 msgstr ""
 
-#: views.py:98
+#: views.py:97
 msgid "You must fill in all fields"
 msgstr ""
