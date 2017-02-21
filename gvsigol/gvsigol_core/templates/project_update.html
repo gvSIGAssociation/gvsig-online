@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="box">
+
+				<form id="project-form" role="form" method="post" action="/gvsigonline/core/project_update/{{pid}}/">
+					<div class="box-header with-border">
+						<h3 class="box-title">{% trans "Update project" %}</h3>
+						<div class="box-tools pull-right">
+							<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+						</div>
+					</div>
+					
+					<div class="box-body">
+						{% csrf_token %}													
+						{% if message %}
+						<div id="form-error" style="color:#ff0000;">
+							<p>* {{ message }}</p>
+						</div>
+						{% endif %}
+										
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="project-name">{% trans "Name" %}</label>
+								<input placeholder="{% trans 'Project name' %}" name="project-name" id="project-name" type="text" class="form-control" value="{{project.name}}">						
+							</div>
+						</div>
+										
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="project-description">{% trans "Description" %}</label>
+								<input placeholder="{% trans 'Project description' %}" name="project-description" id="project-description" type="text" class="form-control" value="{{project.description}}">						
+							</div>
+						</div>	
+						
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="is_public">{% trans "Is public?" %}</label>&nbsp;&nbsp;
+								{% if project.is_public %}
+								<input type="checkbox" name="is_public"  id="is_public" checked/>
+								{% else %}
+								<input type="checkbox" name="is_public"  id="is_public"/>
+								{% endif %}								
+							</div>
+						</div>	
+						
+						<div class="row">
+							<div id="project-map" class="mini-map"></div>
+						</div>
+						
+						<input type="hidden" name="center-lat" id="center-lat">
+						<input type="hidden" name="center-lon" id="center-lon">
+						<input type="hidden" name="extent" id="extent">
+						<input type="hidden" name="zoom" id="zoom">		
+						
+						<div class="box">
+							<div class="box-header with-border">
+								<h3 class="box-title">{% trans "Assign user groups" %}</h3>
+							</div>
+							<div class="box-body">
+								<ul class="products-list product-list-in-box">
+									{% for group in groups %}
+									<li class="item">
+										<div class="product-img">
+											<img src="{% static "img/users.png" %}" alt="Users Image">
+										</div>
+										<div class="product-info">
+											<a href="javascript:void(0)" class="product-title">{{group.name}}
+												<div class="checkbox pull-right">													
+													<label>
+														{% if group.checked %}
+															<input type="checkbox" name="usergroup-{{group.id}}" id="usergroup-{{group.id}}" checked/>{% trans "Assign user group" %}
+														{% else %}
+															<input type="checkbox" name="usergroup-{{group.id}}" id="usergroup-{{group.id}}"/>{% trans "Assign user group" %}
+														{% endif %}
+													</label>
+												</div>
+											</a> 
+											<span class="product-description">{{group.description}}</span>
+										</div>
+									</li> 
+									{% endfor %}
+								</ul>
+							</div>
+						</div>
+						
+						<div class="box">
+							<div class="box-header with-border">
+								<h3 class="box-title">{% trans "Assign layer groups" %}</h3>
+							</div>
+							<div class="box-body">
+								<ul class="products-list product-list-in-box">
+									{% for layergroup in layergroups %}
+									<li class="item">
+										<div class="product-img">
+											<img src="{% static "img/layers.png" %}" alt="Layers Image">
+										</div>
+										<div class="product-info">
+											<a href="javascript:void(0)" class="product-title">{{layergroup.name}}
+												<div class="checkbox pull-right">													
+													<label>
+														{% if layergroup.checked %}
+															<input type="checkbox" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}" checked/>{% trans "Assign layer group" %}
+														{% else %}
+															<input type="checkbox" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}"/>{% trans "Assign layer group" %}
+														{% endif %}
+													</label>
+												</div>
+											</a> 
+											<span class="product-description">{{layergroup.description}}</span>
+										</div>
+									</li> 
+									{% endfor %}
+								</ul>
+							</div>
+						</div>
+													
+					</div>
+				</form>		
+			</div>
+		</div>				
+	</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script type="text/javascript">
+	$('#menu-manage-projects').addClass("active");
+	$().ready(function() {
+		/**
+		  * Create the map.
+		  */
+		var map = new ol.Map({
+			layers : [ new ol.layer.Tile({
+				source : new ol.source.OSM()
+			})],
+			target : 'project-map',
+			view : new ol.View({
+				center: ol.proj.transform([parseFloat('{{project.center_lon}}'), parseFloat('{{project.center_lat}}')], 'EPSG:4326', 'EPSG:3857'),
+			    zoom: '{{project.zoom}}'
+			})
+		});
+		
+		$('#project-form').submit(function() {
+			$("body").overlay();
+			var coordinate = map.getView().getCenter();
+			var transformedCoordinate = ol.proj.transform(coordinate, 'EPSG:3857', 'EPSG:4326');
+			var extent = map.getView().calculateExtent(map.getSize()); 
+			var zoom = map.getView().getZoom();
+
+			$("#center-lat").val(transformedCoordinate[1]);
+			$("#center-lon").val(transformedCoordinate[0]);
+			$("#extent").val(extent);
+			$("#zoom").val(zoom);
+		});
+	});
+</script>
+{% endblock %}
