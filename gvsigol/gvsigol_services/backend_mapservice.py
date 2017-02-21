@@ -607,30 +607,20 @@ class Geoserver():
     def getLayerCreateTypes(self):
         return self.layer_create_types
     
-    def getLayerCreateForm(self, layer_type):
+    def getLayerCreateForm(self, layer_type, user):
         if layer_type==Geoserver.CREATE_TYPE_SQL_VIEW:
             return (forms_geoserver.CreateSqlViewForm,  "layer_sql_view.html")
         if layer_type==Geoserver.CREATE_TYPE_VECTOR_LAYER:
-            return (forms_geoserver.CreateFeatureTypeForm,  "layer_create.html")
+            return (forms_geoserver.CreateFeatureTypeForm(user=user),  "layer_create.html")
         return (None, None)
     
-    def getUploadForm(self, datastore_type, request):
+    def getUploadForm(self, datastore_type, user):
         # ensure type is a supported data store type
         if datastore_type=="c_GeoTIFF":
             return forms_geoserver.RasterLayerUploadForm
         
         elif datastore_type=="v_PostGIS":
-            form = None
-            if request.user.is_superuser:
-                form = forms_geoserver.PostgisLayerUploadForm
-            else:
-                form = forms_geoserver.PostgisLayerUploadForm
-                try:
-                    form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
-                except Exception as e:
-                    pass
-                
-            return form
+            return forms_geoserver.PostgisLayerUploadForm(user=user)
     
     def __create_datastore_properties(self):
         mosaic_db = settings.GVSIGOL_SERVICES.get('MOSAIC_DB')

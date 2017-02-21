@@ -83,7 +83,7 @@ class VectorLayerUploadForm(forms.Form):
 
 
 class PostgisLayerUploadForm(forms.Form):
-    datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=True, queryset=Datastore.objects.filter(type="v_PostGIS"), widget=forms.Select(attrs={'class':'form-control'}))
+    datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=True, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class':'form-control'}))
     #file = forms.FileField(label=_(u'File'), required=True, widget=forms.FileInput(attrs={'accept': 'application/zip'}))
     file = forms.CharField(label=_(u'File'), required=True, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     mode = forms.ChoiceField(label=_(u'Mode'), required=True, choices=postgis_modes, widget=forms.Select(attrs={'class':'form-control'}))
@@ -97,6 +97,20 @@ class PostgisLayerUploadForm(forms.Form):
     #queryable = forms.BooleanField(label=_(u'Queryable'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
     #cached = forms.BooleanField(label=_(u'Cached'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
     #single_image = forms.BooleanField(label=_(u'Single image'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)  
+        super(PostgisLayerUploadForm, self).__init__(*args, **kwargs)
+        if user.is_superuser:
+            qs = Datastore.objects.all()
+        else:
+            qs = Datastore.objects.filter(type="v_PostGIS").filter(created_by__exact=user.username)
+            
+        self.fields["datastore"] = forms.ModelChoiceField(
+            label=_(u'Datastore'), required=True,
+            queryset=qs,
+            widget=forms.Select(attrs={'class':'form-control'})
+        )
     
     def clean(self):
         cleaned_data = super(PostgisLayerUploadForm, self).clean()
@@ -118,7 +132,7 @@ class CreateSqlViewForm(forms.Form):
     single_image = forms.BooleanField(label=_(u'Single image'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
 
 class CreateFeatureTypeForm(forms.Form):
-    datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=True, queryset=Datastore.objects.filter(type="v_PostGIS"), widget=forms.Select(attrs={'class':'form-control'}))
+    datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=True, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class':'form-control'}))
     name = forms.CharField(label=_(u'Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     geom_type = forms.ChoiceField(label=_(u'Geometry type'), required=True, choices=geometry_types, widget=forms.Select(attrs={'class' : 'form-control'}))
     srs = forms.ChoiceField(label=_(u'SRS'), required=True, choices=supported_srs, widget=forms.Select(attrs={'class' : 'form-control'}))
@@ -129,7 +143,20 @@ class CreateFeatureTypeForm(forms.Form):
     cached = forms.BooleanField(label=_(u'Cached'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
     single_image = forms.BooleanField(label=_(u'Single image'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
     fields = forms.CharField(label=_(u'Fields'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-
+    
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)  
+        super(CreateFeatureTypeForm, self).__init__(*args, **kwargs)
+        if user.is_superuser:
+            qs = Datastore.objects.all()
+        else:
+            qs = Datastore.objects.filter(type="v_PostGIS").filter(created_by__exact=user.username)
+            
+        self.fields["datastore"] = forms.ModelChoiceField(
+            label=_(u'Datastore'), required=True,
+            queryset=qs,
+            widget=forms.Select(attrs={'class':'form-control'})
+        )
 
     def clean(self):
         cleaned_data = super(CreateFeatureTypeForm, self).clean()

@@ -505,6 +505,7 @@ def project_get_conf(request):
             
         conf = {
             'pid': pid,
+            'project_name': project.name,
             'user': {
                 'id': request.user.id,
                 'username': request.user.first_name + ' ' + request.user.last_name,

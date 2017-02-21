@@ -813,7 +813,7 @@ def layer_create(request):
         if 'single_image' in request.POST:
             single_image = True
             
-        (form_class, template) = mapservice_backend.getLayerCreateForm(layer_type)
+        (form_class, template) = mapservice_backend.getLayerCreateForm(layer_type, request.user)
         if form_class is not None:
             form = form_class(request.POST)
             if form.is_valid():
@@ -879,10 +879,11 @@ def layer_create(request):
                 return render(request, template, data)
         
     else:
-        (form_class, template) = mapservice_backend.getLayerCreateForm(layer_type)
+        (form_class, template) = mapservice_backend.getLayerCreateForm(layer_type, request.user)
         if form_class is not None:
+            #form_class.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
             data = {
-                'form': form_class(),
+                'form': form_class,
                 'layer_type': layer_type,
                 'enumerations': Enumeration.objects.all()
             }
