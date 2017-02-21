@@ -95,7 +95,7 @@ publicViewer.core = {
 			view: new ol.View({
         		center: ol.proj.transform([parseFloat(self.conf.view.center_lon), parseFloat(self.conf.view.center_lat)], 'EPSG:4326', 'EPSG:3857'),
         		minZoom: 0,
-        		maxZoom: 19,
+        		maxZoom: 21,
             	zoom: self.conf.view.zoom
         	})
 		});
@@ -289,6 +289,7 @@ publicViewer.core = {
     	//this.tools.push(new exportToPDF(this.conf, this.map));
     	this.tools.push(new searchByCoordinate(this.conf, this.map));
     	this.tools.push(new geolocation(this.map));
+    	this.tools.push(new cleanMap(this.map));
     	this.map.tools = this.tools;
     },
     

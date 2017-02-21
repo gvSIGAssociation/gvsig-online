@@ -275,3 +275,7 @@ msgstr "Información del elemento"
 
 msgid "Multimedia resources"
 msgstr "Recursos multimedia"
+
+#cleanMap.js
+msgid "Clean map"
+msgstr "Limpiar mapa"
