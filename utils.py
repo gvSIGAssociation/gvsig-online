@@ -139,7 +139,8 @@ def get_distinct_query(connection, layer, field):
         cursor.execute(sql);
         rows = cursor.fetchall()
         for row in rows:
-            values.append(row[0])
+            if row[0] is not None:
+                values.append(row[0])
 
     except StandardError, e:
         print "Fallo en el select", e
