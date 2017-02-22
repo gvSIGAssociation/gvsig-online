@@ -23,6 +23,7 @@ from gvsigol_services.rest_geoserver import FailedRequestError
 from models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, Enumeration, EnumerationItem,\
     LayerLock
 from forms_services import WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm
+from forms_geoserver import CreateFeatureTypeForm
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
 from django.shortcuts import render_to_response, redirect, RequestContext
@@ -813,81 +814,77 @@ def layer_create(request):
         if 'single_image' in request.POST:
             single_image = True
             
-        (form_class, template) = mapservice_backend.getLayerCreateForm(layer_type, request.user)
-        if form_class is not None:
-            form = form_class(request.POST)
-            if form.is_valid():
-                try:
-                    mapservice_backend.createTable(form.cleaned_data)
+        form = CreateFeatureTypeForm(request.POST, user=request.user)
+        if form.is_valid():
+            try:
+                mapservice_backend.createTable(form.cleaned_data)
 
-                    # first create the resource on the backend
-                    mapservice_backend.createResource(form.cleaned_data['datastore'].workspace,
-                                          form.cleaned_data['datastore'],
-                                          form.cleaned_data['name'],
-                                          form.cleaned_data['title'])
-                    # save it on DB if successfully created
-                    newRecord = Layer(
-                        datastore = form.cleaned_data['datastore'],
-                        layer_group = form.cleaned_data['layer_group'],
-                        name = form.cleaned_data['name'],
-                        title = form.cleaned_data['title'],
-                        abstract = abstract,
-                        created_by = request.user.username,
-                        type = form.cleaned_data['datastore'].type,
-                        visible = is_visible,
-                        queryable = is_queryable,
-                        cached = cached,
-                        single_image = single_image   
-                    )
+                # first create the resource on the backend
+                mapservice_backend.createResource(form.cleaned_data['datastore'].workspace,
+                                      form.cleaned_data['datastore'],
+                                      form.cleaned_data['name'],
+                                      form.cleaned_data['title'])
+                # save it on DB if successfully created
+                newRecord = Layer(
+                    datastore = form.cleaned_data['datastore'],
+                    layer_group = form.cleaned_data['layer_group'],
+                    name = form.cleaned_data['name'],
+                    title = form.cleaned_data['title'],
+                    abstract = abstract,
+                    created_by = request.user.username,
+                    type = form.cleaned_data['datastore'].type,
+                    visible = is_visible,
+                    queryable = is_queryable,
+                    cached = cached,
+                    single_image = single_image   
+                )
+                newRecord.save()
+                
+                if form.cleaned_data['datastore'].type != 'e_WMS':
+                    datastore = Datastore.objects.get(id=newRecord.datastore.id)
+                    workspace = Workspace.objects.get(id=datastore.workspace_id)
+                    
+                    style_name = workspace.name + '_' + newRecord.name + '_default'
+                    mapservice_backend.createDefaultStyle(newRecord, style_name)
+                    mapservice_backend.setLayerStyle(newRecord, style_name)
+                    mapservice_backend.updateThumbnail(newRecord, 'create')
                     newRecord.save()
                     
-                    if form.cleaned_data['datastore'].type != 'e_WMS':
-                        datastore = Datastore.objects.get(id=newRecord.datastore.id)
-                        workspace = Workspace.objects.get(id=datastore.workspace_id)
-                        
-                        style_name = workspace.name + '_' + newRecord.name + '_default'
-                        mapservice_backend.createDefaultStyle(newRecord, style_name)
-                        mapservice_backend.setLayerStyle(newRecord, style_name)
-                        mapservice_backend.updateThumbnail(newRecord, 'create')
-                        newRecord.save()
-                        
-                    core_utils.toc_add_layer(newRecord)
-                    mapservice_backend.createOrUpdateGeoserverLayerGroup(newRecord.layer_group)
-                    mapservice_backend.reload_nodes()
-                    return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
+                core_utils.toc_add_layer(newRecord)
+                mapservice_backend.createOrUpdateGeoserverLayerGroup(newRecord.layer_group)
+                mapservice_backend.reload_nodes()
+                return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
+            
+            except Exception as e:
+                try:
+                    msg = e.get_message()
+                except:
+                    msg = _("Error: layer could not be published")
+                # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
+                form.add_error(None, msg)
                 
-                except Exception as e:
-                    try:
-                        msg = e.get_message()
-                    except:
-                        msg = _("Error: layer could not be published")
-                    # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
-                    form.add_error(None, msg)
-                    
-                    data = {
-                        'form': form,
-                        'message': msg,
-                        'layer_type': layer_type
-                    }
-                    return render(request, template, data)
-                    
-            else:
                 data = {
                     'form': form,
+                    'message': msg,
                     'layer_type': layer_type
                 }
-                return render(request, template, data)
+                return render(request, "layer_create.html", data)
+                
+        else:
+            data = {
+                'form': form,
+                'layer_type': layer_type
+            }
+            return render(request, "layer_create.html", data)
         
     else:
-        (form_class, template) = mapservice_backend.getLayerCreateForm(layer_type, request.user)
-        if form_class is not None:
-            #form_class.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
-            data = {
-                'form': form_class,
-                'layer_type': layer_type,
-                'enumerations': Enumeration.objects.all()
-            }
-            return render(request, template, data)
+        form = CreateFeatureTypeForm(user=request.user)
+        data = {
+            'form': form,
+            'layer_type': layer_type,
+            'enumerations': Enumeration.objects.all()
+        }
+        return render(request, "layer_create.html", data)
         
     return HttpResponseBadRequest()
 
