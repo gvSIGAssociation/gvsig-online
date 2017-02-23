@@ -944,15 +944,9 @@ editionBar.prototype.transactWFS = function(p,f) {
 			feature.setId(f.getId());
 			
 			if (geometryName != 'geometry') {
-				/*if (feature.values_['geometry']) {
+				if (feature.values_['geometry']) {
 					feature.values_['geometry'] = null;
 					delete feature.values_['geometry'];
-				}*/
-				if (feature.getProperties()['geometry']) {
-					var props = feature.getProperties();
-					props['geometry'] = null;
-					delete props['geometry'];
-					feature.setProperties(props);
 				}
 			}
 			
