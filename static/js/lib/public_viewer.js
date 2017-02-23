@@ -95,7 +95,7 @@ publicViewer.core = {
 			view: new ol.View({
         		center: ol.proj.transform([parseFloat(self.conf.view.center_lon), parseFloat(self.conf.view.center_lat)], 'EPSG:4326', 'EPSG:3857'),
         		minZoom: 0,
-        		maxZoom: 21,
+        		maxZoom: 22,
             	zoom: self.conf.view.zoom
         	})
 		});
