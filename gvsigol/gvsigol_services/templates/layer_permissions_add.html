@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+<div class="row">
+	<div class="col-md-12">
+		<div class="box">
+
+			<form role="form" method="post" action="/gvsigonline/services/layer_permissions/{{ layer_id }}/">
+				<div class="box-header with-border">
+					<h3 class="box-title">{% trans "Layer permissions" %}</h3>
+					<div class="box-tools pull-right">
+						<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+					</div>
+				</div>		
+			
+				<div class="box-body">
+				{% csrf_token %}					
+					{% if form.errors %}
+					<div id="form-error" style="color:#ff0000;">
+						<ul>
+						{% for field in form %}
+							{% if field.errors %}
+								<li>{{field.label}}. {{ field.errors|striptags }}</li>
+							{% endif %}	
+						{% endfor %}
+						</ul>
+					</div>
+					{% endif %}
+							
+					{% if message %}
+					<div id="form-error" style="color:#ff0000;">
+						<p>* {{ message }}</p>
+					</div>
+					{% endif %}
+				
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="id-name">{% trans "Layer" %}</label>
+							<input class="form-control" name="id-name" id="id-name" type="text" readonly value="{{ name }}">												    
+						</div>
+					</div>
+				
+					<div class="row">
+						<div class="col-md-12 form-group">
+							{% trans "Warning: Layer will be public if no read group is assigned" %}
+						</div>
+					</div>
+					
+					<div class="box">
+						<div class="box-header with-border">
+							<h3 class="box-title">{% trans "Make layer readable only for the following groups" %}</h3>
+						</div>
+						<div class="box-body">
+							<ul class="products-list product-list-in-box">
+								{% for group in groups %}
+								<li class="item">
+									<div class="product-img">
+										<img src="{% static "img/users.png" %}" alt="Users Image">
+									</div>
+									<div class="product-info">
+										<a href="javascript:void(0)" class="product-title">{{group.name}}
+											<div class="checkbox pull-right">													
+												<label>
+													{% if group.read_checked %}
+														<input type="checkbox" name="read-usergroup-{{group.id}}" id="read-usergroup-{{group.id}}" checked/>{% trans "Assign user group" %}
+													{% else %}
+														<input type="checkbox" name="read-usergroup-{{group.id}}" id="read-usergroup-{{group.id}}"/>{% trans "Assign user group" %}
+													{% endif %}
+												</label>
+											</div>
+										</a> 
+										<span class="product-description">{{group.description}}</span>
+									</div>
+								</li> 
+								{% endfor %}
+							</ul>
+						</div>
+					</div>
+					
+					<div class="box">
+						<div class="box-header with-border">
+							<h3 class="box-title">{% trans "Make layer writeable only for the following groups" %}</h3>
+						</div>
+						<div class="box-body">
+							<ul class="products-list product-list-in-box">
+								{% for group in groups %}
+								<li class="item">
+									<div class="product-img">
+										<img src="{% static "img/users.png" %}" alt="Users Image">
+									</div>
+									<div class="product-info">
+										<a href="javascript:void(0)" class="product-title">{{group.name}}
+											<div class="checkbox pull-right">													
+												<label>
+													{% if group.write_checked %}
+														<input type="checkbox" name="write-usergroup-{{group.id}}" id="write-usergroup-{{group.id}}" checked/>{% trans "Assign user group" %}
+													{% else %}
+														<input type="checkbox" name="write-usergroup-{{group.id}}" id="write-usergroup-{{group.id}}"/>{% trans "Assign user group" %}
+													{% endif %}
+												</label>
+											</div>
+										</a> 
+										<span class="product-description">{{group.description}}</span>
+									</div>
+								</li> 
+								{% endfor %}
+							</ul>
+						</div>
+					</div>
+				</div>
+			</form>	
+					
+		</div>
+	</div>
+</div>
+{% endblock %}
