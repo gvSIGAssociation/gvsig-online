@@ -1,0 +1,19 @@
+{% load staticfiles %}
+<script>
+	var IMG_PATH = '{% static "img/" %}';
+</script>
+<script type="text/javascript" src="{% static "js/lib/tools/print.js" %}"></script>
+<script type="text/javascript">
+
+	var button = '';
+	button += '<li><a href="#" id="print" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-print"></i></a></li>';
+
+	$('#toolbar-buttons').append(button);
+	
+	var map = publicViewer.core.getMap();
+	var conf = publicViewer.core.getConf();
+	
+	var tool = new print(conf, map);
+	publicViewer.core.loadTool(tool);
+	
+</script>
