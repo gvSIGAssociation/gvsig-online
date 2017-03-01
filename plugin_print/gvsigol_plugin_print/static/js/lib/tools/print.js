@@ -185,10 +185,11 @@ print.prototype.createPrintJob = function(template) {
 	var printLayers = new Array();
 	var legends = new Array();
 	for (var i=0; i<mapLayers.length; i++) {
-		if (!mapLayers[i].baselayer) {
+		if (!mapLayers[i].baselayer && mapLayers[i].layer_name != 'plg_catastro' && !(mapLayers[i] instanceof ol.layer.Vector)) {
 			if (mapLayers[i].getVisible()) {
 				var layer = {
-					"baseURL": "http://localhost/gs-local/ws_jrodrigo/wms",
+					//"baseURL": "http://localhost/gs-local/ws_jrodrigo/wms",
+					"baseURL": mapLayers[i].wms_url,
 			  	    "opacity": 1,
 			  	    "type": "WMS",
 		  			"layers": [mapLayers[i].workspace + ':' + mapLayers[i].layer_name],
@@ -199,14 +200,14 @@ print.prototype.createPrintJob = function(template) {
 		  	    };
 				printLayers.push(layer);
 				
-				/*var legend = {
-					"name": mapLayers[i].title,
-		            "icons": [mapLayers[i].legend]
-		        };*/
 				var legend = {
 					"name": mapLayers[i].title,
+		            "icons": [mapLayers[i].legend]
+		        };
+				/*var legend = {
+					"name": mapLayers[i].title,
 			        "icons": ["http://localhost:8080/geoserver/ws_jrodrigo/wms?SERVICE=WMS&VERSION=1.1.1&layer=parcelas_no_urb&REQUEST=getlegendgraphic&FORMAT=image/png"]
-			    };
+			    };*/
 				legends.push(legend);
 			}									
 		}
