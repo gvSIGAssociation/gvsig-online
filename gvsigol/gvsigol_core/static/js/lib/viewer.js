@@ -63,6 +63,7 @@ viewer.core = {
     	       url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWNgYGD4DwABBAEAHnOcQAAAAABJRU5ErkJggg=="
     	    })
     	});
+    	blank.baselayer = true;
     	
     	var osm = new ol.layer.Tile({
     		id: this._nextLayerId(),
@@ -224,12 +225,14 @@ viewer.core = {
 				wmsLayer.baselayer = false;
 				wmsLayer.layer_name = layerConf.name;
 				wmsLayer.wms_url = layerConf.wms_url;
+				wmsLayer.wms_url_no_auth = layerConf.wms_url_no_auth;
 				wmsLayer.wfs_url = layerConf.wfs_url;
 				wmsLayer.cache_url = layerConf.cache_url;
 				wmsLayer.title = layerConf.title;
 				wmsLayer.abstract = layerConf.abstract;
 				wmsLayer.metadata = layerConf.metadata;
 				wmsLayer.legend = layerConf.legend;
+				wmsLayer.legend_no_auth = layerConf.legend_no_auth;
 				wmsLayer.queryable = layerConf.queryable;
 				wmsLayer.is_vector = layerConf.is_vector;
 				wmsLayer.write_roles = layerConf.write_roles;

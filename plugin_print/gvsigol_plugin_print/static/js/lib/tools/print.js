@@ -189,7 +189,7 @@ print.prototype.createPrintJob = function(template) {
 			if (mapLayers[i].getVisible()) {
 				var layer = {
 					//"baseURL": "http://localhost/gs-local/ws_jrodrigo/wms",
-					"baseURL": mapLayers[i].wms_url,
+					"baseURL": mapLayers[i].wms_url_no_auth,
 			  	    "opacity": 1,
 			  	    "type": "WMS",
 		  			"layers": [mapLayers[i].workspace + ':' + mapLayers[i].layer_name],
@@ -202,7 +202,7 @@ print.prototype.createPrintJob = function(template) {
 				
 				var legend = {
 					"name": mapLayers[i].title,
-		            "icons": [mapLayers[i].legend]
+		            "icons": [mapLayers[i].legend_no_auth]
 		        };
 				/*var legend = {
 					"name": mapLayers[i].title,
