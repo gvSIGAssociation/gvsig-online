@@ -471,6 +471,7 @@ def project_get_conf(request):
                     }
                     
                 layer['wms_url'] = core_utils.get_wms_url(request, workspace)
+                layer['wms_url_no_auth'] = workspace.wms_endpoint
                 layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
                 layer['namespace'] = workspace.uri
                 layer['workspace'] = workspace.name   
@@ -484,7 +485,8 @@ def project_get_conf(request):
                     layer['legend'] = ""
                 else: 
                     layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                                                
+                    layer['legend_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
+                    
                 layers.append(layer)
                 
                 w = {}
