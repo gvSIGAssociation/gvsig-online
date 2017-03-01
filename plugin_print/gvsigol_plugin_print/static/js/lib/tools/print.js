@@ -23,8 +23,9 @@
 /**
  * TODO
  */
-var print = function(conf, map) {
+var print = function(printProvider, conf, map) {
 	var self = this;
+	this.printProvider = printProvider;
 	this.conf = conf;
 	this.map = map;
 	
@@ -32,10 +33,6 @@ var print = function(conf, map) {
 	this.$button = $("#print");
 	
 	this.detailsTab = $('#details-tab');
-	this.defaultClientInfo = {
-		width: 780, 
-		height: 330
-	};
 	
 	this.lastAngle = 0;
 	this.extentLayer = null;
@@ -77,16 +74,12 @@ print.prototype.handler = function(e) {
 		this.showDetailsTab();
 		this.detailsTab.empty();
 		
-		this.renderPrintExtent(this.defaultClientInfo);
+		this.capabilities = this.getCapabilities('a4_landscape');
+		this.renderPrintExtent(this.capabilities.layouts[0].attributes[3].clientInfo);
 		this.map.getView().on('propertychange', function() {
 	        self.extentLayer.getSource().clear();
 	        self.lastAngle = 0;
-	        if (self.capabilities != null) {
-	        	self.renderPrintExtent(self.capabilities.layouts[0].attributes[2].clientInfo);
-	        } else {
-	        	self.renderPrintExtent(self.defaultClientInfo);
-	        }
-	        
+	        self.renderPrintExtent(self.capabilities.layouts[0].attributes[3].clientInfo); 
 	    });
 		
 		var templates = this.getTemplates();
@@ -105,7 +98,11 @@ print.prototype.handler = function(e) {
 		ui += 					'<option disabled selected value="empty"> -- ' + gettext('Select template') + ' -- </option>';
 		for (var i=0; i<templates.length; i++) {
 			if (templates[i] != 'default') {
-				ui += 	'<option value="' + templates[i] + '">' + templates[i] + '</option>';
+				if (templates[i] == 'a4_landscape') {
+					ui += 	'<option value="' + templates[i] + '" selected>' + templates[i] + '</option>';
+				} else {
+					ui += 	'<option value="' + templates[i] + '">' + templates[i] + '</option>';
+				}
 			}
 		}
 		ui += 				'</select>';
@@ -116,7 +113,7 @@ print.prototype.handler = function(e) {
 		ui += 			'</div>';
 		ui += 			'<div class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Legal warning') + '</label>';
-		ui += 				'<textarea class="form-control" name="print-legal" id="print-legal" rows="5">' + gettext('Print message') + '</textarea>';
+		ui += 				'<textarea class="form-control" name="print-legal" id="print-legal" rows="5">' + this.printProvider.legal_warning + '</textarea>';
 		ui += 			'</div>';
 		ui += 			'<div class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Rotation') + '</label>';
@@ -135,8 +132,11 @@ print.prototype.handler = function(e) {
 		
 		$('#print-template').on('change', function(e) {
 			var template = $('#print-template').val();
-			
 			self.capabilities = self.getCapabilities(template);
+			
+			self.extentLayer.getSource().clear();
+	        self.lastAngle = 0;
+	        self.renderPrintExtent(self.capabilities.layouts[0].attributes[3].clientInfo);
 		});
 		
 		$('#print-rotation').on('change', function(e) {
@@ -180,14 +180,52 @@ print.prototype.createPrintJob = function(template) {
 	var title = $('#print-title').val();
 	var legalWarning = $('#print-legal').val();
 	var rotation = $('#print-rotation').val();
+	
+	var mapLayers = this.map.getLayers().getArray();
+	var printLayers = new Array();
+	var legends = new Array();
+	for (var i=0; i<mapLayers.length; i++) {
+		if (!mapLayers[i].baselayer) {
+			if (mapLayers[i].getVisible()) {
+				var layer = {
+					"baseURL": "http://localhost/gs-local/ws_jrodrigo/wms",
+			  	    "opacity": 1,
+			  	    "type": "WMS",
+		  			"layers": [mapLayers[i].workspace + ':' + mapLayers[i].layer_name],
+		  			"imageFormat": "image/png",
+		  			"customParams": {
+		  				"TRANSPARENT": "true"
+		  			}
+		  	    };
+				printLayers.push(layer);
+				
+				/*var legend = {
+					"name": mapLayers[i].title,
+		            "icons": [mapLayers[i].legend]
+		        };*/
+				var legend = {
+					"name": mapLayers[i].title,
+			        "icons": ["http://localhost:8080/geoserver/ws_jrodrigo/wms?SERVICE=WMS&VERSION=1.1.1&layer=parcelas_no_urb&REQUEST=getlegendgraphic&FORMAT=image/png"]
+			    };
+				legends.push(legend);
+			}									
+		}
+	}
+	
+	printLayers.push({
+		"baseURL": "http://a.tile.openstreetmap.org",
+  	    "type": "OSM",
+  	    "imageExtension": "png"
+	});
+	
 	$.ajax({
 		type: 'POST',
 		async: true,
-	  	url: 'https://localhost/print/print/' + template + '/report.pdf',
+	  	url: self.printProvider.url + '/print/' + template + '/report.pdf',
 	  	processData: false,
 	    contentType: 'application/json',
 	  	data: JSON.stringify({
-	  		"layout": "A4 landscape",
+	  		"layout": self.capabilities.layouts[0].name,
 		  	"outputFormat": "pdf",
 		  	"attributes": {
 		  		"title": title,
@@ -198,22 +236,17 @@ print.prototype.createPrintJob = function(template) {
 		  			"rotation": rotation,
 		  			"center": self.map.getView().getCenter(),
 		  			"scale": self.getCurrentScale(),
-		  			"layers": [{
-			  	        "baseURL": "http://localhost:8080/geoserver/wms",
-			  	        "opacity": 1,
-		  				"type": "WMS",
-		  				"layers": ["ws_jrodrigo:lugares_interes"],
-		  				"imageFormat": "image/png",
-		  				//"styles": ["line"],
-		  				"customParams": {
-		  					"TRANSPARENT": "true"
-		  				}
-		  	        },{
-		  				"baseURL": "http://a.tile.openstreetmap.org",
-			  	        "type": "OSM",
-			  	        "imageExtension": "png"
-		  			}]
-		  	    }
+		  			"layers": printLayers
+		  	    },
+		  	    "legend": {
+		  	    	"name": "",
+		            "classes": legends
+		  	    	/*"classes":[{
+						"name": "Parcelas no urbanizables",
+			            "icons": ["http://localhost:8080/geoserver/ws_jrodrigo/wms?SERVICE=WMS&VERSION=1.1.1&layer=parcelas_no_urb&REQUEST=getlegendgraphic&FORMAT=image/png"]
+			        }]*/
+		        },
+		        "crs": "EPSG:3857",
 		  	}
 		}),
 	  	success	:function(response){
@@ -241,7 +274,7 @@ print.prototype.getReport = function(reportInfo) {
 	$.ajax({
 		type: 'GET',
 		async: true,
-	  	url: 'https://localhost/print' + reportInfo.statusURL,
+	  	url: self.printProvider.url + reportInfo.statusURL,
 	  	success	:function(response){
 	  		if (response.done) {
 	  			$.overlayout();
@@ -262,7 +295,7 @@ print.prototype.getTemplates = function() {
 	$.ajax({
 		type: 'GET',
 		async: false,
-	  	url: 'https://localhost/print/print/apps.json',
+	  	url: this.printProvider.url + '/print/apps.json',
 	  	success	:function(response){
 	  		templates = response;
 	  	},
@@ -279,7 +312,7 @@ print.prototype.getCapabilities = function(template) {
 	$.ajax({
 		type: 'GET',
 		async: false,
-	  	url: 'https://localhost/print/print/' + template + '/capabilities.json',
+	  	url: this.printProvider.url + '/print/' + template + '/capabilities.json',
 	  	success	:function(response){
 	  		capabilities = response;
 	  	},
