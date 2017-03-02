@@ -559,8 +559,14 @@ def layer_permissions_update(request, layer_id):
         except Exception as e:
             return HttpResponseNotFound('<h1>Layer not found{0}</h1>'.format(layer.name))
         
+        agroup = UserGroup.objects.get(name__exact='admin')
+        
         # clean existing groups and assign them again
         LayerReadGroup.objects.filter(layer=layer).delete()
+        lrag = LayerReadGroup()
+        lrag.layer = layer
+        lrag.group = agroup
+        lrag.save()
         for group in assigned_read_roups:
             try:
                 group = UserGroup.objects.get(id=group)
@@ -572,7 +578,6 @@ def layer_permissions_update(request, layer_id):
                 pass
         
         LayerWriteGroup.objects.filter(layer=layer).delete()
-        agroup = UserGroup.objects.get(name__exact='admin')
         lwag = LayerWriteGroup()
         lwag.layer = layer
         lwag.group = agroup

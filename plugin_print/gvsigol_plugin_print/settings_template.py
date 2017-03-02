@@ -2,5 +2,5 @@
 
 PRINT_PROVIDER = {
     'url': '##PRINT_URL##',
-    'legal_warning': '##PRINT_LEGAL_WARNING##'
+    'legal_warning': 'La información y cartografía disponible en este geoportal es propiedad de ........'
 }
