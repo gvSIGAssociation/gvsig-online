@@ -1,0 +1,397 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-02-21 10:01+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: templates/404.html:10
+msgid "Page not found"
+msgstr ""
+
+#: templates/404.html:13
+msgid "We could not find the page you were looking for. Meanwhile, you may"
+msgstr ""
+
+#: templates/404.html:14 templates/500.html.py:14
+msgid "return to dashboard"
+msgstr ""
+
+#: templates/500.html:10
+msgid "Something went wrong"
+msgstr ""
+
+#: templates/500.html:13
+msgid "We will work on fixing that right away. Meanwhile, you may"
+msgstr ""
+
+#: templates/base.html:95 templates/base_compress.html.py:95
+#: templates/viewer.html:116 templates/viewer_compress.html.py:115
+msgid "Sign out"
+msgstr ""
+
+#: templates/base.html:113 templates/base_compress.html.py:113
+#: templates/viewer.html:113 templates/viewer_compress.html.py:112
+msgid "Dashboard"
+msgstr ""
+
+#: templates/base.html:119 templates/base_compress.html.py:119
+msgid "Home"
+msgstr ""
+
+#: templates/base.html:155 templates/base_compress.html.py:155
+#: templates/documentation.html:116 templates/ogc_services.html.py:84
+#: templates/select_public_project.html:77
+msgid "Version"
+msgstr ""
+
+#: templates/base_compress.html:159 templates/ogc_services.html.py:88
+msgid "All rights reserved"
+msgstr ""
+
+#: templates/dashboard_core_menu.html:6
+msgid "Projects"
+msgstr ""
+
+#: templates/documentation.html:48
+msgid "Web application"
+msgstr ""
+
+#: templates/documentation.html:57
+msgid "Introduction and concepts"
+msgstr ""
+
+#: templates/documentation.html:58
+msgid ""
+"Features of the platform and license. Definition of the objects and entities "
+"that are part of the environment."
+msgstr ""
+
+#: templates/documentation.html:66
+msgid "Administration Guide"
+msgstr ""
+
+#: templates/documentation.html:67
+msgid ""
+"This guide is intended for platform admin users. It teaches the steps to "
+"carry out the management of users and groups, services, symbology, "
+"projects ... "
+msgstr ""
+
+#: templates/documentation.html:75
+msgid "Map viewer user manual"
+msgstr ""
+
+#: templates/documentation.html:76
+msgid ""
+"This manual provides a review of each of the features offered by the map "
+"viewer"
+msgstr ""
+
+#: templates/documentation.html:84
+msgid "Plugins"
+msgstr ""
+
+#: templates/documentation.html:85
+msgid "Plugins add features that are not initially present on the platform"
+msgstr ""
+
+#: templates/documentation.html:94
+msgid "Mobile application"
+msgstr ""
+
+#: templates/documentation.html:103
+msgid "User manual"
+msgstr ""
+
+#: templates/documentation.html:104
+msgid ""
+"Learn how to manage geographic information from a mobile device or tablet"
+msgstr ""
+
+#: templates/home.html:18 utils.py:403
+msgid "Username"
+msgstr ""
+
+#: templates/home.html:20 utils.py:406
+msgid "Email"
+msgstr ""
+
+#: templates/home.html:22
+msgid "Is admin?"
+msgstr ""
+
+#: templates/home.html:24
+msgid "You are logged in as root"
+msgstr ""
+
+#: templates/home.html:26
+msgid "You are logged in as management user"
+msgstr ""
+
+#: templates/home.html:28
+msgid "You are logged in as basic user"
+msgstr ""
+
+#: templates/home.html:30
+msgid "Last login"
+msgstr ""
+
+#: templates/home.html:32 utils.py:407 utils.py:419
+msgid "Password"
+msgstr ""
+
+#: templates/home.html:33
+msgid "Click here"
+msgstr ""
+
+#: templates/home.html:33
+msgid "to update your password"
+msgstr ""
+
+#: templates/home.html:37
+msgid "Passwords doesn't match"
+msgstr ""
+
+#: templates/home.html:42 templates/home.html.py:43 utils.py:415
+msgid "New password"
+msgstr ""
+
+#: templates/home.html:49 templates/home.html.py:50
+msgid "Repeat new password"
+msgstr ""
+
+#: templates/home.html:55
+msgid "Update password"
+msgstr ""
+
+#: templates/home.html:66 templates/project_list.html.py:11
+#: templates/select_public_project.html:48
+msgid "Projects list"
+msgstr ""
+
+#: templates/home.html:69 templates/project_add.html.py:12
+#: templates/project_list.html:13 templates/select_public_project.html:51
+msgid "Add project"
+msgstr ""
+
+#: templates/home.html:81 templates/select_public_project.html.py:63
+msgid "Load project"
+msgstr ""
+
+#: templates/ogc_services.html:59
+msgid "WMS Service"
+msgstr ""
+
+#: templates/ogc_services.html:59 templates/ogc_services.html.py:69
+msgid "Show capabilities"
+msgstr ""
+
+#: templates/ogc_services.html:69
+msgid "WFS Service"
+msgstr ""
+
+#: templates/ogc_services.html:102
+msgid "Service capabilities"
+msgstr ""
+
+#: templates/project_add.html:14 templates/project_update.html.py:14
+#: templates/toc_update.html:13
+msgid "Save"
+msgstr ""
+
+#: templates/project_add.html:28 templates/project_list.html.py:22
+#: templates/project_update.html:28
+msgid "Name"
+msgstr ""
+
+#: templates/project_add.html:29 templates/project_update.html.py:29
+msgid "Project name"
+msgstr ""
+
+#: templates/project_add.html:35 templates/project_list.html.py:23
+#: templates/project_update.html:35
+msgid "Description"
+msgstr ""
+
+#: templates/project_add.html:36 templates/project_update.html.py:36
+msgid "Project description"
+msgstr ""
+
+#: templates/project_add.html:42 templates/project_list.html.py:24
+#: templates/project_update.html:42
+msgid "Is public?"
+msgstr ""
+
+#: templates/project_add.html:58
+msgid "Select image"
+msgstr ""
+
+#: templates/project_add.html:65 templates/project_update.html.py:62
+msgid "Assign user groups"
+msgstr ""
+
+#: templates/project_add.html:79 templates/project_add.html.py:81
+#: templates/project_update.html:76 templates/project_update.html.py:78
+msgid "Assign user group"
+msgstr ""
+
+#: templates/project_add.html:96 templates/project_update.html.py:93
+msgid "Assign layer groups"
+msgstr ""
+
+#: templates/project_add.html:109 templates/project_update.html.py:107
+#: templates/project_update.html:109
+msgid "Assign layer group"
+msgstr ""
+
+#: templates/project_list.html:58 templates/project_list.html.py:105
+msgid "Delete project"
+msgstr ""
+
+#: templates/project_list.html:61
+msgid "The project will be removed, Do you want continue?"
+msgstr ""
+
+#: templates/project_list.html:64 templates/public_viewer.html.py:171
+#: templates/public_viewer_compress.html:171 templates/viewer.html.py:194
+#: templates/viewer_compress.html:193
+msgid "Cancel"
+msgstr ""
+
+#: templates/project_list.html:65 templates/public_viewer.html.py:172
+#: templates/public_viewer_compress.html:172 templates/viewer.html.py:195
+#: templates/viewer_compress.html:194
+msgid "Accept"
+msgstr ""
+
+#: templates/project_list.html:81
+msgid "Processing request..."
+msgstr ""
+
+#: templates/project_list.html:82
+#, python-format
+msgid "Search%(sep)s"
+msgstr ""
+
+#: templates/project_list.html:83
+#, python-format
+msgid "Showing %(numrecords)s records"
+msgstr ""
+
+#: templates/project_list.html:84
+#, python-format
+msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
+msgstr ""
+
+#: templates/project_list.html:85
+msgid "Showing from 0 to 0 of 0 records"
+msgstr ""
+
+#: templates/project_list.html:86
+#, python-format
+msgid "Filtering %(max)s records"
+msgstr ""
+
+#: templates/project_list.html:88
+msgid "Loading..."
+msgstr ""
+
+#: templates/project_list.html:89 templates/project_list.html.py:90
+msgid "No records available"
+msgstr ""
+
+#: templates/project_list.html:92
+msgid "First"
+msgstr ""
+
+#: templates/project_list.html:93
+msgid "Previous"
+msgstr ""
+
+#: templates/project_list.html:94
+msgid "Next"
+msgstr ""
+
+#: templates/project_list.html:95
+msgid "Last"
+msgstr ""
+
+#: templates/project_list.html:98
+#, python-format
+msgid "%(sep)sSort ascending"
+msgstr ""
+
+#: templates/project_list.html:99
+#, python-format
+msgid "%(sep)sSort descending"
+msgstr ""
+
+#: templates/project_list.html:109
+msgid "TOC order"
+msgstr ""
+
+#: templates/project_list.html:113 templates/project_update.html.py:12
+msgid "Update project"
+msgstr ""
+
+#: templates/public_viewer.html:83 templates/public_viewer_compress.html:83
+msgid "Anonymous"
+msgstr ""
+
+#: templates/public_viewer.html:89 templates/public_viewer_compress.html:89
+msgid "Anonymous user"
+msgstr ""
+
+#: templates/public_viewer.html:94 templates/public_viewer_compress.html:94
+msgid "Exit"
+msgstr ""
+
+#: templates/public_viewer.html:295 templates/public_viewer_compress.html:279
+#: templates/viewer.html.py:321 templates/viewer_compress.html:299
+msgid "Close"
+msgstr ""
+
+#: templates/toc_update.html:11
+msgid "Update TOC"
+msgstr ""
+
+#: utils.py:386
+msgid "New user account"
+msgstr ""
+
+#: utils.py:402
+msgid "Account data"
+msgstr ""
+
+#: utils.py:404
+msgid "First name"
+msgstr ""
+
+#: utils.py:405
+msgid "Last name"
+msgstr ""
+
+#: utils.py:417
+msgid "This is your new temporary password"
+msgstr ""
+
+#: views.py:170
+msgid "You must enter an project name"
+msgstr ""
+
+#: views.py:226 views.py:377
+msgid "Project name already exists"
+msgstr ""
