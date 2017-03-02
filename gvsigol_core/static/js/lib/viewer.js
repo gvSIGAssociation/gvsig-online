@@ -277,9 +277,11 @@ viewer.core = {
 			layerGroup.baselayer = false;
 			layerGroup.layer_name = group.groupName;
 			layerGroup.wms_url = this.conf.geoserver_base_url + '/wms';
+			layerGroup.wms_url_no_auth = this.conf.geoserver_base_url_no_auth + '/wms';
 			layerGroup.wfs_url = this.conf.geoserver_base_url + '/wfs';
 			layerGroup.title = group.groupTitle;
 			layerGroup.legend = this.conf.geoserver_base_url + '/wms' + '?SERVICE=WMS&VERSION=1.1.1&layer=' + group.groupName + '&REQUEST=getlegendgraphic&FORMAT=image/png';
+			layerGroup.legend_no_auth = this.conf.geoserver_base_url_no_auth + '/wms' + '?SERVICE=WMS&VERSION=1.1.1&layer=' + group.groupName + '&REQUEST=getlegendgraphic&FORMAT=image/png';
 			layerGroup.queryable = true;
 			layerGroup.isLayerGroup = true;
 			layerGroup.setZIndex(parseInt(group.groupOrder));

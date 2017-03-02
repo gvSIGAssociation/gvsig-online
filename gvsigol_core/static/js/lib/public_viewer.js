@@ -62,6 +62,7 @@ publicViewer.core = {
     	       url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWNgYGD4DwABBAEAHnOcQAAAAABJRU5ErkJggg=="
     	    })
     	});
+    	blank.baselayer = true;
     	
     	var osm = new ol.layer.Tile({
     		id: this._nextLayerId(),
