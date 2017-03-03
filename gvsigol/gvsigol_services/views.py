@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from gvsigol_services.rest_geoserver import FailedRequestError
-
+from geoserver import workspace
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
@@ -297,6 +297,24 @@ def layer_delete(request, layer_id):
     except Exception as e:
         return HttpResponseNotFound('<h1>Layer not found: {0}</h1>'.format(layer_id)) 
 
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def backend_datastore_list(request):
+    """
+    Lists the resources existing on a data store, retrieving the information
+    directly from the backend (which may differ from resources available on
+    Django DB). Useful to register new resources on Django DB. 
+    """
+    if 'id_workspace' in request.GET:
+        id_ws = request.GET['id_workspace']
+        ws = Workspace.objects.get(id=id_ws)
+        if ws:
+            datastores = mapservice_backend.getDataStores(ws)
+            return HttpResponse(json.dumps(datastores))
+    return HttpResponseBadRequest()
+
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def backend_resource_list_available(request):
@@ -312,7 +330,30 @@ def backend_resource_list_available(request):
             resources = mapservice_backend.getResources(ds.workspace.name, ds.name, ds.type, available=True)
             return HttpResponse(json.dumps(resources))
     return HttpResponseBadRequest()
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def backend_fields_list(request):
+    """
+    Lists the resources existing on a data store, retrieving the information
+    directly from the backend (which may differ from resources available on
+    Django DB). Useful to register new resources on Django DB. 
+    """
     
+    if 'name_datastore' in request.GET and 'id_workspace' in request.GET and 'name_resource' in request.GET:
+        name = request.GET['name_resource']
+        ds_name = request.GET['name_datastore']
+        id_ws = request.GET['id_workspace']
+        ws = Workspace.objects.get(id=id_ws)
+        ds = Datastore.objects.get(name=ds_name, workspace=ws)
+        if ds:
+            resources = mapservice_backend.getResource(ds.workspace.name, ds.name, name)
+            return HttpResponse(json.dumps(resources))
+    
+    return HttpResponseBadRequest()    
+
+
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
