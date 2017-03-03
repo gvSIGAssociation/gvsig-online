@@ -32,6 +32,8 @@
 	      		{% else %}
 	      			{% if file.extension == "shp" %}
 	      				<td><img width="32" src="{% static "img/shp.png" %}" style="margin-right: 5px;">{{file.filename}}</td>
+	      			{% elif file.extension == "dbf" %}
+	      				<td><img width="32" src="{% static "img/dbf.png" %}" style="margin-right: 5px;">{{file.filename}}</td>
 	      			{% elif file.extension == "tif" or file.extension == "tiff" or file.extension == "geotiff" %}
 	      				<td><img width="32" src="{% static "img/tiff.png" %}" style="margin-right: 5px;">{{file.filename}}</td>
 	      			{% endif %}
@@ -49,7 +51,7 @@
 	                    	{% if file.filetype == "Directory" %}
 	                    		<li><a href="#" data-filepath="{{file.filepath}}" class="delete-file"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete directory" %}</a></li>                 		
 	                  		{% else %}
-	                  			{% if file.extension == "shp" %}
+	                  			{% if file.extension == "shp" or file.extension == "dbf" %}
 				      				<li><a href="{% url 'filemanager:export-to-database' %}?path={{file.filepath}}" class="export-to-database" ><i class="fa fa-upload" style="color: #3c8dbc;"></i> {% trans "Export to database" %}</a></li>
 				      				<li class="divider"></li>
 				      			{% endif %}                    		
