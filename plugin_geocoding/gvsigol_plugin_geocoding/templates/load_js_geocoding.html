@@ -2,8 +2,12 @@
 <script>
 	var IMG_PATH = '{% static "img/" %}';
 </script>
+<link href="{% static "css/ol3-contextmenu.min.css" %}" rel="stylesheet">
+<script src="{% static "js/vendors/geocoding/ol3-contextmenu.js" %}"></script>
 <script type="text/javascript" src="{% static "js/vendors/geocoding/jquery.autocomplete.js" %}"></script>
 <script type="text/javascript" src="{% static "js/lib/widgets/search.js" %}"></script>
+
+
 <script type="text/javascript">
 
 	$.ajax({

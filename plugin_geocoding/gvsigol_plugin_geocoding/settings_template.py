@@ -2,9 +2,9 @@
 
 GEOCODING_PROVIDER = {
     'cartociudad': {
-        'candidates_url': '/services/api/geocoder/candidates',
-        'find_url': '/services/api/geocoder/find',
-        'reverse_url': '/services/api/geocoder/reverseGeocode'
+        'candidates_url': '/geocoder/api/geocoder/candidates',
+        'find_url': '/geocoder/api/geocoder/find',
+        'reverse_url': '/geocoder/api/geocoder/reverseGeocode'
     },
     'nominatim': {
         'url': 'http://osm.gvsigonline.com/nominatim',

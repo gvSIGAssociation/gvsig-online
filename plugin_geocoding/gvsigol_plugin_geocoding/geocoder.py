@@ -20,49 +20,87 @@
 '''
 
 from django.core.exceptions import ImproperlyConfigured
-from settings import GEOCODING_PROVIDER
-from geopy.geocoders import Nominatim
 from urlparse import urlparse
+import settings
+from cartociudad import Cartociudad
+from nominatim import Nominatim 
+import json, ast
 
 class Geocoder():
     
-    def __init__(self, url, country_codes):
-        url_params = urlparse(url)
-        scheme = url_params.scheme
-        domain = url_params.netloc + url_params.path
-        self.geolocator = Nominatim(country_bias=country_codes, scheme=scheme, domain=domain)
+    def __init__(self):
+        self.geocoders=[]#
+        
+    def add_provider(self, provider):
+        for geocoder in self.geocoders:
+            type = provider.type
+            if type == 'user':
+                type = 'cartociudad'
+            if geocoder.has_key(type):
+                geocoder[type].append(provider)
+                return
+        
+        geocoder = {}
+        if provider.type == 'nominatim':
+            geocoder[provider.type] = Nominatim(provider)
+            self.geocoders.append(geocoder)
+            
+        if provider.type == 'cartociudad' or provider.type == 'user':
+            geocoder['cartociudad'] = Cartociudad(provider)
+            self.geocoders.append(geocoder)
         
           
     def search_candidates(self, query):
-        locations = self.geolocator.geocode(query,exactly_one=False)
         suggestions = []
-        for l in locations:
-            suggestion = {}
-            suggestion['type'] = 'country'
-            suggestion['value'] = l.address
-            suggestion['data'] = l._raw['lat'] + ',' + l._raw['lon'] 
-            suggestions.append(suggestion)
-                
+        
+        for geocoder_types in self.geocoders:
+            for geocoder_type in geocoder_types:
+                geocoder = geocoder_types[geocoder_type]
+                if suggestions == []:
+                    suggestions = geocoder.geocode(query, exactly_one=False)
+                else:
+                    aux = geocoder.geocode(query, exactly_one=False)
+                    suggestions = suggestions + aux
+                 
         response = {
-            "query": "Unit",
+            "query": query,
             "suggestions": suggestions
         }
         
         return response
     
-        
-    def get_location_address(self, query):
+    
+    def find_candidate(self, address):
+        location = {}
+        address_json = json.loads(address)
+        type = address_json["address[source]"]
+        if type == 'user':
+            type = 'cartociudad'
+                
+        for geocoder_types in self.geocoders:
+            for geocoder_type in geocoder_types:
+                geocoder = geocoder_types[geocoder_type]
+                if geocoder.get_type() == type:
+                    location = geocoder.find(address,exactly_one=True)
+                 
+        response = {
+            "address": location
+        }
+   
+        return response
+            
+    def get_location_address(self, query, type):
         point = query.split(',')
         coordinate = [point[0], point[1]]
-        loc = self.geolocator.reverse(coordinate,exactly_one=True,language='es')
-        location = {
-            'title': loc.address,
-            'address': loc._raw['address'],
-            'latitude': loc.latitude,
-            'longitude': loc.longitude
-        }
+        loc = {}
         
-        return location
+        for geocoder_types in self.geocoders:
+            for geocoder_type in geocoder_types:
+                geocoder = geocoder_types[geocoder_type]
+                if geocoder.get_type() == type:
+                    loc = geocoder.reverse(coordinate,exactly_one=True,language='es')
+
+        return loc
     
     
     def get_reverse_location(self, lat, lon):
@@ -78,15 +116,3 @@ class Geocoder():
         return location
         
 
-def get_geocoder():
-    try:
-        url = GEOCODING_PROVIDER['nominatim']['url']
-        country_codes = GEOCODING_PROVIDER['nominatim']['country_codes']
-        
-    except:
-        raise ImproperlyConfigured
-    
-    gvsigOnline = Geocoder(url, country_codes)
-    return gvsigOnline
-
-geocoder = get_geocoder()
