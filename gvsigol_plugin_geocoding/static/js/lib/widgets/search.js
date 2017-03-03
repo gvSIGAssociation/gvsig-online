@@ -17,7 +17,7 @@
  */
 
 /**
- * @author: Javier Rodrigo <jrodrigo@scolab.es>
+ * @author: José Badía <jbadia@scolab.es>
  */
 
 /**
@@ -42,22 +42,74 @@ search.prototype.initUI = function() {
 	this.popup = new ol.Overlay.Popup();
 	this.map.addOverlay(this.popup);
 	
+	var contextmenu = new ContextMenu({
+	  width: 170,
+	  defaultItems: false, // defaultItems are (for now) Zoom In/Zoom Out
+	  items: [
+	    {
+	      text: 'Dirección de Nominatim',
+	      classname: 'some-style-class', // add some CSS rules
+	      callback: function (obj) {
+	      	var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
+	        $.ajax({
+	        	type: 'POST',
+				async: false,
+			  	url: '/gvsigonline/geocoding/get_location_address/',
+			  	beforeSend:function(xhr){
+			    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			  	},
+			  	data: {
+			  		'coord': coordinate[0] + ","+ coordinate[1],
+			  		'type': 'nominatim'
+				},
+			  	success	:function(response){
+			  		self.locate(response, false);
+				},
+			  	error: function(){}
+			});
+			}
+	   	 },{
+		      text: 'Dirección de CartoCiudad',
+		      classname: 'some-style-class', // add some CSS rules
+		      callback: function (obj) {
+		      	var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
+		        $.ajax({
+		        	type: 'POST',
+					async: false,
+				  	url: '/gvsigonline/geocoding/get_location_address/',
+				  	beforeSend:function(xhr){
+				    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				  	},
+				  	data: {
+				  		'coord': coordinate[0] + ","+ coordinate[1],
+				  		'type': 'cartociudad'
+					},
+				  	success	:function(response){
+				  		self.locate(response, false);
+					},
+				  	error: function(){}
+				});
+				}
+		   	 }
+	  ]
+	});
+	this.map.addControl(contextmenu);
+	
 	$('#autocomplete').autocomplete({
 		serviceUrl: '/gvsigonline/geocoding/search_candidates/',
-		//serviceUrl: self.conf.candidates_url,
 		paramName: 'q',
 		params: {
 			limit: 10,
 			countrycodes: 'es'
 		},
+		groupBy: 'category',
 		transformResult: function(response) {
 	        jsonResponse = JSON.parse(response);
 	        if (jsonResponse.suggestions.length > 0) {
 	        	return {
 		            suggestions: $.map(jsonResponse.suggestions, function(item) {
 		                return { 
-		                	//value: item.address,
-		                	value: item.value,
+		                	value: item.address,
 		                	type: item.type,
 		                	data: item 
 		                };
@@ -67,70 +119,58 @@ search.prototype.initUI = function() {
 	        
 	    },
 	    onSelect: function (suggestion) {
-	        $.ajax({
-				//type: 'GET',
-	        	type: 'POST',
-				async: false,
-			  	//url: self.conf.find_url,
-			  	url: '/gvsigonline/geocoding/get_location_address/',
-			  	beforeSend:function(xhr){
-			    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-			  	},
-			  	data: {
-			  		'q': suggestion.data.data/*,
-			  		'q': suggestion.data.address,
-			  		'type': suggestion.data.type,
-			  		'tip_via': suggestion.data.tip_via,
-			  		'id': suggestion.data.id,
-			  		'portal': suggestion.data.portalNumber*/
-				},
-			  	success	:function(response){
-			  		self.locate(response);
-				},
-			  	error: function(){}
-			});
-	    }
+		        $.ajax({
+		        	type: 'POST',
+					async: false,
+				  	url: '/gvsigonline/geocoding/find_candidate/',
+				  	beforeSend:function(xhr){
+				    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				  	},
+				  	data: {
+				  		'address': suggestion.data
+					},
+				  	success	:function(response){
+				  		if(response.address){
+				  			self.locate(response.address, true);
+				  		}
+					},
+				  	error: function(){}
+				});
+			}
+	    
 	});
 };
 
 /**
  * TODO.
  */
-search.prototype.locate = function(location) {	
+search.prototype.locate = function(address, fromCombo) {	
 	var self = this;	
-	var coordinate = ol.proj.transform([parseFloat(location.longitude), parseFloat(location.latitude)], 'EPSG:4326', 'EPSG:3857');	
-	this.popup.show(coordinate, '<div><p>' + location.title + '</p></div>');
-	this.map.getView().setCenter(coordinate);
-	this.map.getView().setZoom(14);
+	if(address != null){
+		var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], 'EPSG:4326', 'EPSG:3857');	
+		if(fromCombo){
+			this.popup.show(coordinate, '<div><p>' + $("#autocomplete").val() + '</p></div>');
+		}else{
+			if(address.source == "cartociudad"){
+				var callejero = "";
+				if(address.tip_via && (address.tip_via.trim() != 0)){
+					callejero = address.tip_via + " ";
+				}
+				callejero = callejero + address.address;
+				if(address.portalNumber && (address.portalNumber != 0)){
+					callejero = callejero + " " + address.portalNumber;
+				}
+				if(address.muni && (address.muni.trim() != 0)){
+					callejero = callejero + ", " + address.muni;
+				}
+				this.popup.show(coordinate, '<div><p>' + callejero + '</p></div>');
+			}else{
+				this.popup.show(coordinate, '<div><p>' + address.address + '</p></div>');
+			}
+		}
+		this.map.getView().setCenter(coordinate);
+	}
 };
 
 
-/**
- * TODO.
- */
-/*search.prototype.locate = function(loc) {	
-	var self = this;
-	$.ajax({
-		type: 'GET',
-		async: false,
-	  	url: self.conf.reverse_url,
-	  	beforeSend:function(xhr){
-	    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-	  	},
-	  	data: {
-	  		'lon': loc.lng,
-	  		'lat': loc.lat
-		},
-	  	success	:function(response){
-	  		var tipVia = '';
-	  		if (response.tip_via != null) {
-	  			tipVia = response.tip_via;
-	  		}
-	  		var coordinate = ol.proj.transform([parseFloat(response.lng), parseFloat(response.lat)], 'EPSG:4326', 'EPSG:3857');	
-	  		self.popup.show(coordinate, '<div><p>' + tipVia + ' ' + response.address + ' ' + response.portalNumber + ',' + response.muni + ' ,' + response.postalCode + ' (' + response.province + ')' + '</p></div>');
-	  		self.map.getView().setCenter(coordinate);
-	  		self.map.getView().setZoom(14);
-		},
-	  	error: function(){}
-	});
-};*/
+
