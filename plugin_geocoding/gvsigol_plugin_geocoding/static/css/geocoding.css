@@ -16,3 +16,50 @@
 .autocomplete-suggestions strong { font-weight: bold; color: #000; }
 .autocomplete-group { padding: 2px 5px; }
 .autocomplete-group strong { font-weight: bold; font-size: 16px; color: #000; display: block; border-bottom: 1px solid #000; }
+
+.form-control.image-form-control{ height: auto; background-color: #eee; margin-bottom:5px}
+.form-control.image-form-control img{ height: 48px;}
+
+.btn-default.upload-form-button {width: 100%;}
+.upload-form-button-div {padding: 10px 25px;}
+
+ #sortable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+ .ui-state-highlight { height:50px; background-color:#ecf0f5}
+ 
+tr.ui-state-default.ui-sortable-handle{ height:50px}
+
+.id-row.default-field{color:#ddd}
+
+.box-header.process-title .title{display: inline-block;font-size: 18px;margin: 0;line-height: 1;}
+#process-resume{margin: 10px 20px;padding: 10px 20px;background-color: #ecf0f5;}
+
+#process-resume .fa-info-circle{color:blue}
+
+#process-resume.idle{background-color: #e6e6ff;}
+#process-resume.idle.complete{background-color: #e6f3e6;}
+#process-resume.busy{background-color: #ecf0f5;}
+#process-resume.error{background-color: #F4B0B0;}
+
+
+.idle-message i,
+.busy-message i,
+.complete-message i{margin-right:10px;}
+.complete-message{color:green}
+.error-message{color:red}
+
+.idle-message, .complete-message, .error-message{display:none}
+.idle .idle-message{display:block}
+.idle.complete .idle-message{display:none}
+.idle .complete-message{display:none}
+.idle.complete .complete-message{display:block}
+.error .error-message{display:block}
+
+.error .none-message,
+.idle .none-message,
+.busy .none-message,
+.idle.complete .none-message{display:none}
+
+.busy-message{display:none}
+.busy .busy-message{display:block}
+
+.last_update{color: #c0c0c0; font-size: 11px; margin: 0px;}

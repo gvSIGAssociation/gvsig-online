@@ -1,0 +1,397 @@
+{% extends "base.html" %} 
+{% load staticfiles %} 
+{% load i18n %} 
+
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="box">
+
+			<form id="provider-form" enctype="multipart/form-data" role="form"
+				method="post"
+				action="/gvsigonline/geocoding/provider_update/{{provider_id}}/">
+					<div class="box-header with-border">
+						<h3 class="box-title">{% trans "Update provider" %}</h3>
+						<div class="box-tools pull-right">
+							<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+						</div>
+					</div>
+				
+					<div class="box-body">
+						{% csrf_token %}													
+						{% if form.errors %}
+							<div id="form-error" style="color:#ff0000;">
+								<ul>
+								{% for field in form %}
+									{% if field.errors %}
+										<li>{{field.label}}. {{ field.errors|striptags }}</li>
+									{% endif %}	
+								{% endfor %}
+								</ul>
+							</div>
+						{% endif %}
+						
+						{% if message %}
+							<div id="form-error" style="color:#ff0000;">
+								<p>* {{ message }}</p>
+							</div>
+						{% endif %}
+						
+						<div class="row">
+							<div class="col-md-12 form-group">	
+								<label for="id_type">{% trans "Type" %}</label>
+								{{ form.type }}									
+							</div>
+						</div>
+						
+						<div class="row user-param cartociudad-param hidden">
+							<div class="col-md-12 form-group">	
+								<label for="id_workspace">{% trans "Workspace" %}</label>
+								{{ form.workspace }}									
+							</div>
+						</div>
+						
+						<div class="row user-param cartociudad-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_datastore">{% trans "Data Store" %}</label>
+								{{ form.datastore }}						
+							</div>
+						</div>
+										
+						<div class="row user-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_resource">{% trans "Resource name" %}</label>
+								{{ form.resource }}						
+							</div>
+						</div>	
+						
+						<div class="row user-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_id_field">{% trans "ID Field" %}</label>
+								{{ form.id_field }}						
+							</div>
+						</div>	
+						
+						<div class="row user-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_text_field">{% trans "Text Field" %}</label>
+								{{ form.text_field }}						
+							</div>
+						</div>	
+						
+						<div class="row user-param hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_geom_field">{% trans "Geom Field" %}</label>
+								{{ form.geom_field }}						
+							</div>
+						</div>	
+						
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="id_category">{% trans "Category" %}</label>
+								{{ form.category }}						
+							</div>
+						</div>	
+						
+						<div class="row nominatim-param" id="params-row">
+							<div class="col-md-12 form-group">
+								<label for="id_params">{% trans "Params" %}</label>
+								{{ form.params }}						
+							</div>
+						</div>
+	
+						<div class="row">
+							<div class="col-md-12" style="margin-bottom: 20px;">
+								<label>{% trans "Select image" %}</label>
+								<input id="id_image" name="image" type="file" class="file" data-show-preview="true">						
+							</div>
+						</div>	
+							
+					</div>	
+				</form>	
+				
+				
+				{% if type != "nominatim" %}
+					<div class="box-header process-title">
+								<h3 class="title">{% trans "Import process status" %}</h3>
+						</div>
+
+			<div id="process-resume" class="box-body">
+				<div class="row">
+
+					<div class="col-md-12 form-group">
+
+						<p class="last_update">
+							{% trans "Last Update" %}: <label>---</label>
+						</p>
+						<div class="info">
+							<div class="none-message">
+								<strong><i class="fa fa-info-circle" aria-hidden="true"></i>
+									<span>{% trans "No data uplodaded" %} </span> </strong>
+							</div>
+							
+							<div class="error-message">
+								<strong><i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+									<span>{% trans "Error in process" %} </span></strong> <span class="error-details"> </span>
+							</div>
+						
+							<div class="idle-message">
+								<strong><i class="fa fa-info-circle" aria-hidden="true"></i>
+									{% trans "No information available" %} </span> </strong>
+							</div>
+
+
+							<div class="busy-message">
+								<strong class="indexing-during"><i
+									class="fa fa-spinner fa-pulse fa-spin fa-fw"></i> {% trans "Indexing since" %} <label>0:12:11.263</label></span>
+								</strong>
+								<div class="details">
+									<p>
+										<label> {% trans "Request" %}:</label> <label class="request"> 0 </label> &nbsp;&nbsp;&nbsp;
+										<label>	{% trans "Fetched" %}:</label> <label class="fetched"> 0 </label> &nbsp;&nbsp;&nbsp;
+										<label>	{% trans "Skipped" %}:</label> <label class="skipped"> 0 </label> &nbsp;&nbsp;&nbsp;
+										<label>	{% trans "Processed" %}:</label> <label class="processed"> 0 </label>
+									</p>
+								</div>
+							</div>
+
+							<div class="complete-message">
+								<strong class="result_import"><i class="fa fa-check"
+									aria-hidden="true"></i> <label class="result-message"></label>&nbsp;<label
+									class="result-time"></label></span> </strong>
+								<div class="details">
+									<p>
+										<label> {% trans "Request" %}:</label> <label class="request"> 0 </label> &nbsp;&nbsp;&nbsp;
+										<label>	{% trans "Fetched" %}:</label> <label class="fetched"> 0 </label> &nbsp;&nbsp;&nbsp;
+										<label>	{% trans "Skipped" %}:</label> <label class="skipped"> 0 </label> &nbsp;&nbsp;&nbsp;
+										<label>	{% trans "Processed" %}:</label> <label class="processed"> 0 </label>
+									</p>
+								</div>
+							</div>
+
+							<button class="abort-import hidden">Refresh status</button>
+						</div>
+						
+								<div class="box-body">
+				<div class="row">
+					<div class="col-md-6 upload-form-button-div">
+						<button
+							class="btn btn-default upload-form-button delta-import-button btn-sm">
+							<i class="fa fa-refresh margin-r-5"></i> {% trans "Update data"	%}
+						</button>
+					</div>
+
+					<div class="col-md-6 upload-form-button-div">
+						<button
+							class="btn btn-default upload-form-button full-import-button btn-sm">
+							<i class="fa fa-cloud-upload margin-r-5"></i> {% trans "Upload full data" %}
+						</button>
+					</div>
+				</div>
+			</div>
+
+					</div>
+				</div>
+			</div>
+			
+			{% endif %}
+			<div class="row">
+							
+						</div>
+		</div>
+	</div>
+</div>
+{% endblock %} {% block extra-scripts %}
+<script type="text/javascript">
+	var params = JSON.parse('{{ params | escapejs }}');
+	$('#menu-manage-geocoding').addClass("active");
+	
+	$('.save-button').click( function() {
+		$("body").overlay();
+	});
+	
+	
+	$('.abort-import').click( function() {
+		startImportProcessStatus()
+	});
+	
+	var interval = null;
+	
+	var connectionParams = document.getElementById('id_params');
+	var codemirror = CodeMirror.fromTextArea(connectionParams, {
+		value: "",
+		mode:  "javascript",
+		theme: "xq-dark",
+		lineNumbers: true
+	});
+	
+	window.GOL = window.GOL || {};
+	window.GOL.DS_ADD = window.GOL.DS_ADD || {};
+	window.GOL.DS_ADD.dstypeChanged = function(type) {
+		codemirror.setValue('');		
+		var code = params;
+		$('#select-file-row').css('display', 'none');
+		$('#connection-params-row').css('display', 'block');
+		codemirror.setValue(code);
+	
+	}
+	
+	
+	function updateForm(type){
+		$("[class$=-param]").addClass("hidden");
+		$("."+type+"-param").removeClass("hidden");
+		
+ 		GOL.DS_ADD.dstypeChanged(type);
+	}
+	
+	
+	function actualizarInfoPanel(data){
+		if(data.status){
+			if(data.status == 500){
+				data.status = "error";
+			}
+			$("#process-resume").removeClass();
+			$("#process-resume").addClass("box-body").addClass(data.status);
+		}
+		
+		if(data.status=="idle" && data.statusMessages["Time taken"]){
+			$("#process-resume").addClass("box-body").addClass("complete");
+		}
+		if(data.statusMessages){
+			if(data.statusMessages["Full Dump Started"]){
+				$(".last_update label").text(data.statusMessages["Full Dump Started"]);
+			}
+			if(data.statusMessages["Time Elapsed"]){
+				$(".indexing-during label").text(data.statusMessages["Time Elapsed"]);
+			}
+			
+			if(data.statusMessages["Total Requests made to DataSource"]){
+				$(".details .request").text(data.statusMessages["Total Requests made to DataSource"]);
+			}
+			if(data.statusMessages["Total Rows Fetched"]){
+				$(".details .fetched").text(data.statusMessages["Total Rows Fetched"]);
+			}
+			if(data.statusMessages["Total Documents Processed"]){
+				$(".details .processed").text(data.statusMessages["Total Documents Processed"]);
+			}
+			if(data.statusMessages["Total Documents Skipped"]){
+				$(".details .skipped").text(data.statusMessages["Total Documents Skipped"]);
+			}
+			
+			if(data.statusMessages[""]){
+				$(".result_import .result-message").text(data.statusMessages[""]);
+			}
+			
+			/*
+			if(data.statusMessage["Committed"]){
+				$(".details .skipped").text(data.statusMessage["Committed"]);
+			}
+			if(data.statusMessage["Total Documents Failed"]){
+				$(".details .skipped").text(data.statusMessage["Total Documents Failed"]);
+			}
+			*/
+			if(data.statusMessages["Time taken"]){
+				$(".result_import .result-time").text(' ({% trans "Duration" %}: ' + data.statusMessages["Time taken"]+")");
+			}
+			
+			
+						
+		}
+		
+		if(data.responseText){
+			$(".error .error-details").text(data.responseText);
+		}
+		
+		if(data.status == "error"){
+			if(interval != null){
+	  			clearInterval(interval);
+	  			interval = null;
+	  		}
+		}
+		
+		
+	}
+	
+	function getImportProcessStatus(){
+		$.ajax({
+			//type: 'GET',
+        	type: 'POST',
+			async: true,
+		  	url: '/gvsigonline/geocoding/provider_import_status/{{provider_id}}/',
+		  	beforeSend:function(xhr){
+		    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		  	},
+		  	success	:function(response){
+		  		actualizarInfoPanel(response);	  		
+			},
+		  	error: function(response){
+				if(interval != null){
+		  			clearInterval(interval);
+		  			interval = null;
+		  		}
+				actualizarInfoPanel(response);	
+		  	}
+		});
+		return false;
+		
+	}
+	
+	function startImportProcessStatus(){
+		$("#process-resume").removeClass("hidden");
+		interval = setInterval(function(){ 
+			getImportProcessStatus();
+		}, 5000);
+	}
+	
+	$('.delta-import-button').click( function() {
+		startImportProcessStatus();
+		$.ajax({
+			//type: 'GET',
+        	type: 'POST',
+			async: true,
+		  	url: '/gvsigonline/geocoding/provider_delta_import/{{provider_id}}/',
+		  	beforeSend:function(xhr){
+		    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		  	},
+		  	success	:function(response){
+		  		getImportProcessStatus();
+			},
+		  	error: function(){
+		  		getImportProcessStatus();
+		  	}
+		});
+		
+		//window.location.replace("/gvsigonline/geocoding/provider_delta_import/{{provider_id}}/");
+		return false;
+	});
+	
+	$('.full-import-button').click( function() {
+		startImportProcessStatus();
+		$.ajax({
+			//type: 'GET',
+        	type: 'POST',
+			async: true,
+		  	url: '/gvsigonline/geocoding/provider_full_import/{{provider_id}}/',
+		  	beforeSend:function(xhr){
+		    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		  	},
+		  	success	:function(response){
+		  		getImportProcessStatus();
+			},
+		  	error: function(){
+		  		getImportProcessStatus();
+		  	}
+		});
+		
+		
+		//window.location.replace("/gvsigonline/geocoding/provider_full_import/{{provider_id}}/");
+		return false;
+	});
+	
+	
+	$().ready(function() {
+		updateForm($('#id_type').val());
+		getImportProcessStatus();
+	});
+</script>
+{% endblock %}
