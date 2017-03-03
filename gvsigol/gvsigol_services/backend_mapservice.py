@@ -555,6 +555,15 @@ class Geoserver():
             name = datastore + str(i)
             i = i + 1
         return name     
+     
+    def getDataStores(self, workspace):
+        ws = self.getGsconfig().get_workspace(workspace.name)
+        stores = self.getGsconfig().get_stores(ws)
+        resources = []
+        for store in stores:
+             resources.append(store.name)
+        return resources
+    
     
     def getResources(self, workspace, datastore, dstype, available=False):
         try:
@@ -580,7 +589,15 @@ class Geoserver():
             e = sys.exc_info()[0]
             pass
         
+         
+    def getResource(self, workspace, datastore, resource):
+        resource_obj = self.getGsconfig().get_resource(resource, datastore, workspace)
+        if resource_obj:
+            return resource_obj.attributes
         
+        return None
+
+  
     def getResourceInfo(self, workspace, store, featureType, type):
         if type == None:
             type = "json"
