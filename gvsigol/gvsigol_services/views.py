@@ -562,11 +562,12 @@ def layer_permissions_update(request, layer_id):
         agroup = UserGroup.objects.get(name__exact='admin')
         
         # clean existing groups and assign them again
-        LayerReadGroup.objects.filter(layer=layer).delete()
-        lrag = LayerReadGroup()
-        lrag.layer = layer
-        lrag.group = agroup
-        lrag.save()
+        if len(assigned_read_roups) > 0:
+            LayerReadGroup.objects.filter(layer=layer).delete()
+            lrag = LayerReadGroup()
+            lrag.layer = layer
+            lrag.group = agroup
+            lrag.save()
         for group in assigned_read_roups:
             try:
                 group = UserGroup.objects.get(id=group)
