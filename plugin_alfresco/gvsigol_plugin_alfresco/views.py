@@ -46,8 +46,8 @@ def get_sites(request):
         
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
                     
-    except:
-        return HttpResponseBadRequest('<h1>Failed to get respository</h1>')
+    except Exception as e:
+        return HttpResponseBadRequest(e.message)
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @csrf_exempt
