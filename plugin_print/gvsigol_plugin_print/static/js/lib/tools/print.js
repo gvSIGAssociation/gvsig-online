@@ -192,12 +192,17 @@ print.prototype.createPrintJob = function(template) {
 					"baseURL": mapLayers[i].wms_url_no_auth,
 			  	    "opacity": 1,
 			  	    "type": "WMS",
-		  			"layers": [mapLayers[i].workspace + ':' + mapLayers[i].layer_name],
+		  			//"layers": [mapLayers[i].workspace + ':' + mapLayers[i].layer_name],
 		  			"imageFormat": "image/png",
 		  			"customParams": {
 		  				"TRANSPARENT": "true"
 		  			}
 		  	    };
+				if (mapLayers[i].isLayerGroup) {
+					layer['layers'] = [mapLayers[i].layer_name];
+				} else {
+					layer['layers'] = [mapLayers[i].workspace + ':' + mapLayers[i].layer_name];
+				}
 				printLayers.push(layer);
 				
 				var legend = {
@@ -242,10 +247,6 @@ print.prototype.createPrintJob = function(template) {
 		  	    "legend": {
 		  	    	"name": "",
 		            "classes": legends
-		  	    	/*"classes":[{
-						"name": "Parcelas no urbanizables",
-			            "icons": ["http://localhost:8080/geoserver/ws_jrodrigo/wms?SERVICE=WMS&VERSION=1.1.1&layer=parcelas_no_urb&REQUEST=getlegendgraphic&FORMAT=image/png"]
-			        }]*/
 		        },
 		        "crs": "EPSG:3857",
 		  	}
@@ -255,6 +256,7 @@ print.prototype.createPrintJob = function(template) {
 	  	},
 	  	error: function(){}
 	});
+	
 };
 
 print.prototype.getCurrentScale = function () {
