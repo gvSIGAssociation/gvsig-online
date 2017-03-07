@@ -422,21 +422,21 @@ def delete_style(style_id, mapservice):
     try:
         style = Style.objects.get(id=int(style_id))
         
-        if mapservice.deleteStyle(style.name):  
-            layer_styles = StyleLayer.objects.filter(style=style)   
-            for layer_style in layer_styles:
-                layer_style.delete()
+        mapservice.deleteStyle(style.name)
+        layer_styles = StyleLayer.objects.filter(style=style)   
+        for layer_style in layer_styles:
+            layer_style.delete()
                 
-            rules = Rule.objects.filter(style=style)
-            for rule in rules:
-                symbolizers = Symbolizer.objects.filter(rule=rule)
-                for symbolizer in symbolizers:
-                    if hasattr(symbolizer, 'rastersymbolizer'):
-                        symbolizer.rastersymbolizer.color_map.delete()
-                    symbolizer.delete()
-                rule.delete()
-        
-            style.delete()
+        rules = Rule.objects.filter(style=style)
+        for rule in rules:
+            symbolizers = Symbolizer.objects.filter(rule=rule)
+            for symbolizer in symbolizers:
+                if hasattr(symbolizer, 'rastersymbolizer'):
+                    symbolizer.rastersymbolizer.color_map.delete()
+                symbolizer.delete()
+            rule.delete()
+    
+        style.delete()
         
     except Exception as e:
         raise e
