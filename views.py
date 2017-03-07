@@ -279,23 +279,21 @@ def layer_delete(request, layer_id):
     try:
         layer = Layer.objects.get(pk=layer_id)
         mapservice_backend.deleteGeoserverLayerGroup(layer.layer_group)
-        if mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer):
-            mapservice_backend.deleteLayerStyles(layer)
-            signals.layer_deleted.send(sender=None, layer=layer)
-            if not 'no_thumbnail.jpg' in layer.thumbnail.name:
-                if os.path.isfile(layer.thumbnail.path):
-                    os.remove(layer.thumbnail.path)
-            Layer.objects.all().filter(pk=layer_id).delete()
-            mapservice_backend.setDataRules()
-            core_utils.toc_remove_layer(layer)
-            mapservice_backend.createOrUpdateGeoserverLayerGroup(layer.layer_group)
-            mapservice_backend.reload_nodes()
-            return HttpResponseRedirect(reverse('datastore_list'))
-        else:
-            return HttpResponseBadRequest()
+        mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer)
+        mapservice_backend.deleteLayerStyles(layer)
+        signals.layer_deleted.send(sender=None, layer=layer)
+        if not 'no_thumbnail.jpg' in layer.thumbnail.name:
+            if os.path.isfile(layer.thumbnail.path):
+                os.remove(layer.thumbnail.path)
+        Layer.objects.all().filter(pk=layer_id).delete()
+        mapservice_backend.setDataRules()
+        core_utils.toc_remove_layer(layer)
+        mapservice_backend.createOrUpdateGeoserverLayerGroup(layer.layer_group)
+        mapservice_backend.reload_nodes()
+        return HttpResponseRedirect(reverse('datastore_list'))
         
     except Exception as e:
-        return HttpResponseNotFound('<h1>Layer not found: {0}</h1>'.format(layer_id)) 
+        return HttpResponseNotFound('<h1>Error deleting layer: {0}</h1>'.format(layer_id)) 
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -826,8 +824,10 @@ def layergroup_delete(request, lgid):
             p.project.save()
             
         for layer in layers:  
-            if mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer):
-                layer.delete()       
+            default_layer_group = LayerGroup.objects.get(name__exact='__default__')
+            layer.layer_group = default_layer_group
+            layer.save()  
+                 
         mapservice_backend.deleteGeoserverLayerGroup(layergroup)
         layergroup.delete()
         mapservice_backend.setDataRules()

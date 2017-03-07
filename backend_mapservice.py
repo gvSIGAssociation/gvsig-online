@@ -530,10 +530,13 @@ class Geoserver():
                     catalog.delete(resource, purge, True)
                 except Exception as e:
                     # only fail if layer exists but deletion failed
-                    return False
+                    print e.message
+                    pass
         except:
             # only fail if layer exists but deletion failed
+            print e.message
             pass
+        
         return True
 
     def updateResource(self, workspace, datastore, name, title):
