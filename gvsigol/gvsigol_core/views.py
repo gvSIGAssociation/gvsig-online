@@ -275,8 +275,10 @@ def project_update(request, pid):
         for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
             old_layer_groups.append(lg.layer_group.id)
     
-        core_utils.toc_remove_layergroups(project.toc_order, old_layer_groups)
-        toc_structure = core_utils.get_json_toc(assigned_layergroups)
+        if set(assigned_layergroups) != set(old_layer_groups):
+            core_utils.toc_remove_layergroups(project.toc_order, old_layer_groups)
+            toc_structure = core_utils.get_json_toc(assigned_layergroups)
+            project.toc_order = toc_structure
                
         exists = False
         projects = Project.objects.all()
@@ -295,7 +297,6 @@ def project_update(request, pid):
             project.center_lon = longitude
             project.zoom = int(zoom)
             project.extent = extent
-            project.toc_order = toc_structure
             project.is_public = is_public
             project.save()
             
@@ -338,7 +339,6 @@ def project_update(request, pid):
                 project.center_lon = longitude
                 project.zoom = int(zoom)
                 project.extent = extent
-                project.toc_order = toc_structure
                 project.is_public = is_public
                 project.save()
                 
