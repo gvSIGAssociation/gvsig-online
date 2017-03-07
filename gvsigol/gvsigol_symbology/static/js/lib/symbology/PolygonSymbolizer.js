@@ -150,7 +150,7 @@ PolygonSymbolizer.prototype.registerEvents = function() {
 	    	$("#stroke-opacity-output").text(ui.value + '%');
 	    }
 	});
-	$("#stroke-size").on('change', function(e) {
+	$("#stroke-width").on('change', function(e) {
 		self.stroke_width = this.value;
 		self.updatePreview();	
 		self.rule.preview();
