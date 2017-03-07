@@ -409,17 +409,14 @@ class Geoserver():
             pass
         
     def deleteStyle(self, name):
-        """
-        Delete a style
-        """
         try:
             catalog = self.getGsconfig()
             style = catalog.get_style(name, workspace=None)
             catalog.delete(style, purge=True, recurse=False)
-            return True
         
         except Exception as e:
-            return False
+            print e.message
+            pass
         
     def deleteLayerStyles(self, lyr):
         try:
