@@ -13,6 +13,7 @@
 	
 	<link rel="stylesheet" href="{% static "js/vendors/jQueryUI/jquery-ui.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.6/css/bootstrap.min.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-datepicker-1.6.4-dist/css/bootstrap-datepicker.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-lightbox/ekko-lightbox.min.css" %}">
 	<link rel="stylesheet" href="{% static "css/font-awesome-4.4.0/css/font-awesome.min.css" %}">
 	<link rel="stylesheet" href="{% static "css/fontcustom/fontcustom.css" %}">
@@ -134,9 +135,9 @@
 		<aside class="control-sidebar control-sidebar-light" style="position: fixed; height: 100%;">
 
 			<ul class="nav nav-tabs nav-justified control-sidebar-tabs">
-				<li class="active"><a href="#layer-tree-tab" data-toggle="tab"><i class="icon-layers"></i></a></li>
-				<li><a href="#legend-tab" data-toggle="tab"><i class="fa fa-tags"></i></a></li>
-				<li><a href="#details-tab" data-toggle="tab"><i class="fa fa-list-alt"></i></a></li>
+				<li class="active" title="{% trans "Layer tree" %}"><a href="#layer-tree-tab" data-toggle="tab"><i class="icon-layers"></i></a></li>
+				<li title="{% trans "Legend" %}"><a href="#legend-tab" data-toggle="tab"><i class="fa fa-tags"></i></a></li>
+				<li title="{% trans "Details" %}"><a href="#details-tab" data-toggle="tab"><i class="fa fa-list-alt"></i></a></li>
 			</ul>
 
 			<div class="tab-content" style="height: 100%;">
@@ -211,6 +212,7 @@
 		$("body").overlay();
 	</script>
 	<script type="text/javascript" src="{% static "js/vendors/bootstrap-3.3.6/js/bootstrap.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/bootstrap-datepicker-1.6.4-dist/js/bootstrap-datepicker.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/DataTables-1.10.11/media/js/jquery.dataTables.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/DataTables-1.10.11/extensions/Select/js/dataTables.select.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/bootstrap-lightbox/ekko-lightbox.min.js" %}"></script>
