@@ -389,6 +389,30 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 						resourcesContent += '</a>';
 						resourcesContent += '</li>';
 						
+					} else if  (selectedFeature.resources[i].type == 'pdf') {
+						resourcesContent += '<li style="padding: 20px;">';
+						resourcesContent += '<a href="' + selectedFeature.resources[i].url + '" target="_blank">';
+						resourcesContent += 	'<i style="font-size:24px;" class="fa fa-file-pdf-o margin-r-5"></i>';
+						resourcesContent += 	'<span style="color:#00c0ef;">' + selectedFeature.resources[i].name + '</span>';
+						resourcesContent += '</a>';
+						resourcesContent += '</li>';
+						
+					} else if  (selectedFeature.resources[i].type == 'video') {
+						resourcesContent += '<li style="padding: 20px;">';
+						resourcesContent += '<a href="' + selectedFeature.resources[i].url + '" target="_blank">';
+						resourcesContent += 	'<i style="font-size:24px;" class="fa fa-file-video-o margin-r-5"></i>';
+						resourcesContent += 	'<span style="color:#00c0ef;">' + selectedFeature.resources[i].name + '</span>';
+						resourcesContent += '</a>';
+						resourcesContent += '</li>';
+						
+					} else if  (selectedFeature.resources[i].type == 'file') {
+						resourcesContent += '<li style="padding: 20px;">';
+						resourcesContent += '<a href="' + selectedFeature.resources[i].url + '" target="_blank">';
+						resourcesContent += 	'<i style="font-size:24px;" class="fa fa-file margin-r-5"></i>';
+						resourcesContent += 	'<span style="color:#00c0ef;">' + selectedFeature.resources[i].name + '</span>';
+						resourcesContent += '</a>';
+						resourcesContent += '</li>';
+						
 					} else if (selectedFeature.resources[i].type == 'alfresco_dir') {
 						
 						var resourcePath = selectedFeature.resources[i].url.split('|')[1]
