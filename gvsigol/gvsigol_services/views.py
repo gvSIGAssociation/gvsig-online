@@ -1129,7 +1129,8 @@ def get_feature_info(request):
                         (type, url) = utils.get_resource_type(lr)
                         resource = {
                             'type': type,
-                            'url': url
+                            'url': url,
+                            'name': lr.path.split('/')[-1]
                         }
                         resources.append(resource)
                     geojson['features'][i]['resources'] = resources
@@ -1153,7 +1154,8 @@ def get_feature_info(request):
                         (type, url) = utils.get_resource_type(lr)
                         resource = {
                             'type': type,
-                            'url': url
+                            'url': url,
+                            'name': lr.path.split('/')[-1]
                         }
                         resources.append(resource)
                     geojson['features'][i]['resources'] = resources
@@ -1345,18 +1347,23 @@ def get_feature_resources(request):
                 if lr.type == LayerResource.EXTERNAL_IMAGE:
                     type = 'image'
                     url = os.path.join(settings.MEDIA_URL, lr.path)
+                    name = lr.path.split('/')[-1]
                 elif lr.type == LayerResource.EXTERNAL_PDF:
                     type = 'pdf'
                     url = os.path.join(settings.MEDIA_URL, lr.path)
+                    name = lr.path.split('/')[-1]
                 elif lr.type == LayerResource.EXTERNAL_DOC:
                     type = 'doc'
                     url = os.path.join(settings.MEDIA_URL, lr.path)
+                    name = lr.path.split('/')[-1]
                 elif lr.type == LayerResource.EXTERNAL_FILE:
                     type = 'file'
                     url = os.path.join(settings.MEDIA_URL, lr.path)
+                    name = lr.path.split('/')[-1]
                 elif lr.type == LayerResource.EXTERNAL_VIDEO:
                     type = 'video'
                     url = os.path.join(settings.MEDIA_URL, lr.path)
+                    name = lr.path.split('/')[-1]
                 elif lr.type == LayerResource.EXTERNAL_ALFRESCO_DIR:
                     type = 'alfresco_dir'
                     url = lr.path
@@ -1364,6 +1371,7 @@ def get_feature_resources(request):
                 resource = {
                     'type': type,
                     'url': url,
+                    'name': name,
                     'rid': lr.id
                 }
                 resources.append(resource)
@@ -1389,14 +1397,25 @@ def upload_resources(request):
             layer_name = layer_name.split(":")[1]
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=ws_name)
         if 'resource' in request.FILES:
-            (saved, path) = resource_manager.save_resource(request.FILES['resource'])
+            type = None
+            resource = request.FILES['resource']
+            if 'image/' in resource.content_type:
+                type = LayerResource.EXTERNAL_IMAGE
+            elif resource.content_type == 'application/pdf':
+                type = LayerResource.EXTERNAL_PDF
+            elif 'video/' in resource.content_type:
+                type = LayerResource.EXTERNAL_VIDEO
+            else:
+                type = LayerResource.EXTERNAL_FILE
+                
+            (saved, path) = resource_manager.save_resource(resource, type)
             if saved:
                 res = LayerResource()
                 res.feature = int(fid)
                 res.layer = layer
                 res.path = path
                 res.title = ''
-                res.type = LayerResource.EXTERNAL_IMAGE
+                res.type = type
                 res.created = timezone.now()
                 res.save()
                 response = {'success': True}

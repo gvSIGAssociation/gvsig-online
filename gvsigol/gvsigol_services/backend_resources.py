@@ -34,9 +34,9 @@ class GvsigolRM():
     def __init__(self):
         logger.info('Initializing gvsigol resource manager')
     
-    def save_resource(self, resource):
+    def save_resource(self, resource, type):
         try: 
-            file_path = os.path.join(utils.get_resources_dir(LayerResource.EXTERNAL_IMAGE), resource.name)
+            file_path = os.path.join(utils.get_resources_dir(type), resource.name)
             relative_path = file_path.replace(settings.MEDIA_ROOT, '')
             if os.path.exists(file_path):
                 os.remove(file_path)
