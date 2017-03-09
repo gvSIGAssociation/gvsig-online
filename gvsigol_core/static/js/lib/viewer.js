@@ -251,18 +251,20 @@ viewer.core = {
 		for (var i=0; i<this.conf.layerGroups.length; i++) {			
 			var group = this.conf.layerGroups[i];
 			var url = null;
+			var params = null;
 			var cached = group.cached;
 			
 			if (cached) {
 				url = this.conf.geoserver_base_url + '/gwc/service/wms';
+				params = {'LAYERS': group.groupName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'};
 			} else {
 				url = this.conf.geoserver_base_url + '/wms';
+				params = {'LAYERS': group.groupName, 'FORMAT': 'image/png', 'VERSION': '1.1.0'};
 			}
 			
 			var layerGroupSource = new ol.source.TileWMS({
 				url: url,
-				params: {'LAYERS': group.groupName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
-				//crossOrigin: '*',
+				params: params,
 				serverType: 'geoserver'
 			});
 			var layerGroup = new ol.layer.Tile({			
