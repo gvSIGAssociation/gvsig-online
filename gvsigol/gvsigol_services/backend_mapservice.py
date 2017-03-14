@@ -564,7 +564,7 @@ class Geoserver():
              resources.append(store.name)
         return resources
     
-    
+    '''
     def getResources(self, workspace, datastore, dstype, available=False):
         try:
             store = self.getGsconfig().get_store(datastore, workspace)
@@ -588,7 +588,35 @@ class Geoserver():
         except:
             e = sys.exc_info()[0]
             pass
-        
+    '''    
+    def getResources(self, workspace, datastore, dstype, type):
+        try:
+            available = False
+            if type == 'available' or type == 'available_with_geom':
+                available = True
+            store = self.getGsconfig().get_store(datastore, workspace)
+            format_nature=dstype[0]
+            if (format_nature=='v'):
+                return self.rest_catalog.get_resources(workspace, datastore, type, self.user, self.password)
+                #return store.get_resources(available=available)
+            elif (format_nature=='c'):
+                driver=dstype[2:]
+                resources_obj = store.get_resources()
+                # The API doesn't allow to retrieve the available coverages nor their names,
+                # but these drivers allow a single coverage to be published on the coverage store
+                if len(resources_obj) > 0:
+                    # there is no available coverages if they is already one published coverage
+                    return []
+                else:
+                    # we can't get the name of the coverage, so we just offer a sensible, non existing name
+                    return [self._get_unique_resource_name(datastore, workspace)]
+            elif (format_nature=='e'):
+                return store.get_resources(available=available)
+            
+        except:
+            e = sys.exc_info()[0]
+            pass 
+    
          
     def getResource(self, workspace, datastore, resource):
         resource_obj = self.getGsconfig().get_resource(resource, datastore, workspace)
