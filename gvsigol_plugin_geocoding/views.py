@@ -23,6 +23,7 @@
 '''
 
 from django.shortcuts import render_to_response, RequestContext, redirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from geocoder import Geocoder
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
@@ -36,6 +37,7 @@ from gvsigol import settings
 from gvsigol_plugin_geocoding.utils import *
 import json
 from gvsigol_services.models import Workspace, Datastore
+from gvsigol_services.views import backend_resource_list_available
 
 
 providers_order = []
@@ -331,5 +333,27 @@ def get_geocoder():
         set_providers_to_geocoder()
     
     return geocoder
+
+
+login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def get_resource_list_available(request):
+    """
+    Lists the resources existing on a data store, retrieving the information
+    directly from the backend (which may differ from resurces available on
+    Django DB). Useful to register new resources on Django DB. 
+    """
+    if 'name_datastore' in request.GET and 'id_workspace' in request.GET:
+        id_ws = request.GET['id_workspace']
+        ds_name = request.GET['name_datastore']
+        ws = Workspace.objects.get(id=id_ws)
+        ds_list = Datastore.objects.filter(workspace=ws,name=ds_name)
+        if ds_list.__len__() > 0:
+            ds = ds_list.first()
+            #return redirect('backend_resource_list_available', {'id_datastore': ds.id})
+            return HttpResponse(json.dumps({'id_datastore': ds.id}, indent=4), content_type='application/json')
+        
+    return HttpResponseBadRequest()
+
 
 

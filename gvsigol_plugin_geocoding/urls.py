@@ -16,5 +16,7 @@ urlpatterns = [
     url(r'^geocoding/provider_import_status/(?P<provider_id>[0-9]+)/$', 'gvsigol_plugin_geocoding.views.provider_import_status', name='provider_import_status'),
     
     url(r'^geocoding/upload_shp_cartociudad/(?P<provider_id>[0-9]+)/$', 'gvsigol_plugin_geocoding.views.upload_shp_cartociudad', name='upload_shp_cartociudad'),
+    
+    url(r'^geocoding/get_resource_list_available/$', 'gvsigol_plugin_geocoding.views.get_resource_list_available', name='get_resource_list_available'),
 ]
 
