@@ -23,7 +23,7 @@ from __future__ import unicode_literals
 '''
 from django.db import models
 from gvsigol import settings
-from gvsigol_services.models import Datastore
+#from gvsigol_services.models import Datastore
 from django.utils.translation import ugettext as _
 
 

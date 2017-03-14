@@ -39,11 +39,11 @@
 							<td class="row-id default-field">{% trans "(Default)" %}</td>
 							{% endif %}
 							{% with prov.params|safe as params_json %}  
-							{% if prov.type = 'nominatim' %}
+							{% if prov.type == 'nominatim' or prov.type == 'googlemaps' %}
 							<td>{{ prov.params }}</td>
-							{% elif prov.type = 'cartociudad' %}
+							{% elif prov.type == 'cartociudad' %}
 							<td>{{ prov.params }}</td>
-							{% elif prov.type = 'user' %}
+							{% elif prov.type == 'user' %}
 							<td>{{ prov.params }}</td>
 							{% endif %}
 							{% endwith %}

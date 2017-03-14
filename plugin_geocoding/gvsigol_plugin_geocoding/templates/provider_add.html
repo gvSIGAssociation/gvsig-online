@@ -91,7 +91,7 @@
 							</div>
 						</div>	
 						
-						<div class="row nominatim-param" id="params-row">
+						<div class="row nominatim-param googlemaps-param" id="params-row">
 							<div class="col-md-12 form-group">
 								<label for="id_params">{% trans "Params" %}</label>
 								{{ form.params }}						
@@ -232,32 +232,42 @@
 	function updateResourceList(id_workspace, id_datastore) {
 		if (id_workspace && id_datastore) {
 			$("body").overlay();
-			$.getJSON("{% url 'backend_resource_list_available' %}", {name_datastore: id_datastore, id_workspace: id_workspace}, function(data){
-				var name_select = $("#id_resource");
-				var previousValue = name_select.val();
-				var placeholderSelected = true;
-				
-				if (data==null || data.length==0) {
-					var text = "{% trans 'Data store contains no resources to publish' %}";
-					rebuildSelect(name_select, text, true);
-					$.overlayout();
-					return;
+			$.getJSON("{% url 'get_resource_list_available' %}", {name_datastore: id_datastore, id_workspace: id_workspace}, function(data2){
+				if(data2){
+					var id_ds = data2["id_datastore"];
+					$.getJSON("{% url 'backend_resource_list' %}", {id_datastore: id_ds, type: "all"}, function(data){
+						var name_select = $("#id_resource");
+						var previousValue = name_select.val();
+						var placeholderSelected = true;
+						
+						if (data==null || data.length==0) {
+							var text = "{% trans 'Data store contains no resources to publish' %}";
+							rebuildSelect(name_select, text, true);
+							$.overlayout();
+							return;
+						}
+						var options = [];
+						for (var i=0; i<data.length; i++) {
+							var attribs = {
+								value: data[i],
+								text: data[i]
+							};
+							if (previousValue == data[i]) {
+								attribs['selected']='true';
+								placeholderSelected = false;
+							}
+							options.push($('<option>', attribs));
+						}
+						var text = '{% trans "Choose resource" %}';
+						rebuildSelect(name_select, text, placeholderSelected, options);
+						$.overlayout();
+					}).fail(function() {
+						var name_select = $("#id_resource");
+						var text = "{% trans 'Service is unavailable' %}";
+						rebuildSelect(name_select, text, true);
+						$.overlayout();
+					});
 				}
-				var options = [];
-				for (var i=0; i<data.length; i++) {
-					var attribs = {
-						value: data[i],
-						text: data[i]
-					};
-					if (previousValue == data[i]) {
-						attribs['selected']='true';
-						placeholderSelected = false;
-					}
-					options.push($('<option>', attribs));
-				}
-				var text = '{% trans "Choose resource" %}';
-				rebuildSelect(name_select, text, placeholderSelected, options);
-				$.overlayout();
 				
 			}).fail(function() {
 				var name_select = $("#id_resource");

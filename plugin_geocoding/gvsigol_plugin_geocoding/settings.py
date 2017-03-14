@@ -36,6 +36,7 @@ CARTOCIUDAD_PARAMS = {
 GEOCODING_PROVIDER_NAME='nominatim'
 
 GEOCODING_SUPPORTED_TYPES = (
+                ('googlemaps', _('Servicios de Google Maps')),
                 ('nominatim', _('Servicios de Nominatim')),
                 ('cartociudad', _('Cartografía de CartoCiudad')),
                 ('user', _('Otras fuentes de datos')),
@@ -56,6 +57,12 @@ GEOCODING_PROVIDER = {
         'url': 'http://nominatim.openstreetmap.org',
         'country_codes': ''
     },
+    'googlemaps': {
+        'candidates_url': 'https://maps.googleapis.com/maps/api/place/autocomplete/json',
+        'find_url': 'https://maps.googleapis.com/maps/api/geocode/json',
+        'reverse_url': 'https://maps.googleapis.com/maps/api/geocode/json',
+        'key': 'AIzaSyDRJwLAQS6t8LP-rnv0IBhkp6fT4lHjV1w'
+    },
     'user':{
         'candidates_url': 'http://localhost:8090/geocodersolr/api/geocoder/candidatesJsonp',
         'find_url': 'http://localhost:8090/geocodersolr/api/geocoder/findJsonp',
@@ -71,10 +78,10 @@ STATIC_URL = '/gvsigonline/static/'
 LAST_MODIFIED_FIELD_NAME="last_modified"
 
 URL_SOLR="http://localhost:8983/solr/"
-DIR_SOLR_CONFIG="/home/jose/apps/solr-6.3.0/server/solr/cartociudad/conf/"
+DIR_SOLR_CONFIG="/home/jose/apps/solr-6.3.0/server/solr/gvsigonline/conf/"
 FILE_DATE_CONFIG="data-config.xml"
 FILE_SOLR_CONFIG="solrconfig.xml"
-SOLR_CORE_NAME="cartociudad"
+SOLR_CORE_NAME="gvsigonline"
 
 CARTOCIUDAD_SHP_CODIGO_POSTAL="CODIGO_POSTAL.shp"
 CARTOCIUDAD_DB_CODIGO_POSTAL="codigo_postal"
