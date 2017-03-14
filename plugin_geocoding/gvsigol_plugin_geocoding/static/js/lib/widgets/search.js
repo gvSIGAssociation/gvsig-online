@@ -90,7 +90,29 @@ search.prototype.initUI = function() {
 				  	error: function(){}
 				});
 				}
-		   	 }
+		   	 },{
+			      text: 'Dirección de Google Maps',
+			      classname: 'some-style-class', // add some CSS rules
+			      callback: function (obj) {
+			      	var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
+			        $.ajax({
+			        	type: 'POST',
+						async: false,
+					  	url: '/gvsigonline/geocoding/get_location_address/',
+					  	beforeSend:function(xhr){
+					    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+					  	},
+					  	data: {
+					  		'coord': coordinate[0] + ","+ coordinate[1],
+					  		'type': 'googlemaps'
+						},
+					  	success	:function(response){
+					  		self.locate(response, false);
+						},
+					  	error: function(){}
+					});
+					}
+			   	 }
 	  ]
 	});
 	this.map.addControl(contextmenu);

@@ -15,6 +15,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from gvsigol_plugin_geocoding.googlemaps import GoogleMaps
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
@@ -43,6 +44,10 @@ class Geocoder():
         geocoder = {}
         if provider.type == 'nominatim':
             geocoder[provider.type] = Nominatim(provider)
+            self.geocoders.append(geocoder)
+            
+        if provider.type == 'googlemaps':
+            geocoder[provider.type] = GoogleMaps(provider)
             self.geocoders.append(geocoder)
             
         if provider.type == 'cartociudad' or provider.type == 'user':
