@@ -567,10 +567,16 @@ def layer_boundingbox_from_data(request):
         workspace = Workspace.objects.get(name=ws_name)
         layer_query_set = Layer.objects.filter(name=layer_name, datastore__workspace=workspace)
         layer = layer_query_set[0]
-        mapservice_backend.updateBoundingBoxFromData(layer)   
+        
+        mapservice_backend.updateBoundingBoxFromData(layer)  
         mapservice_backend.clearCache(workspace.name, layer)
         mapservice_backend.updateThumbnail(layer, 'update')
+        
+        layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
+        mapservice_backend.createOrUpdateGeoserverLayerGroup(layer_group)
+        mapservice_backend.clearLayerGroupCache(layer_group.name)
         mapservice_backend.reload_nodes()
+        
         return HttpResponse('{"response": "ok"}', content_type='application/json')
     
     except Exception as e:
