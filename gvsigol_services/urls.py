@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^datastore_delete/(?P<dsid>\d+)/$', 'gvsigol_services.views.datastore_delete', name='datastore_delete'),
     url(r'^backend_datastore_list/$', 'gvsigol_services.views.backend_datastore_list', name='backend_datastore_list'),
     url(r'^backend_resource_list_available/$', 'gvsigol_services.views.backend_resource_list_available', name='backend_resource_list_available'),
+    url(r'^backend_resource_list/$', 'gvsigol_services.views.backend_resource_list', name='backend_resource_list'),
     url(r'^backend_fields_list/$', 'gvsigol_services.views.backend_fields_list', name='backend_fields_list'),
     url(r'^layer_list/$', 'gvsigol_services.views.layer_list', name='layer_list'),
     url(r'^layer_add/$', 'gvsigol_services.views.layer_add', name='layer_add'),
