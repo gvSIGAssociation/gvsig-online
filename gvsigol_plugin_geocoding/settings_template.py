@@ -25,14 +25,6 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-CARTOCIUDAD_PARAMS = {
-    'host' : 'cartociudad.gvsigonline.com',
-    'port' : '5432',
-    'database': 'cartociudad',
-    'user' : 'cartoadmin',
-    'passwd' : 'cartoadmin104'
-}
-
 GEOCODING_PROVIDER_NAME='nominatim'
 
 GEOCODING_SUPPORTED_TYPES = (
@@ -44,10 +36,9 @@ GEOCODING_SUPPORTED_TYPES = (
 
 GEOCODING_PROVIDER = {
     'cartociudad': {
-        'url': 'https://localhost/gc',
-        'candidates_url': 'http://localhost:8090/geocodersolr/api/geocoder/candidatesJsonp',
-        'find_url': 'http://localhost:8090/geocodersolr/api/geocoder/findJsonp',
-        'reverse_url': 'http://localhost:8090/geocodersolr/api/geocoder/reverseGeocode',
+        'candidates_url': '##GEOCODER_URL##/api/geocoder/candidatesJsonp',
+        'find_url': '##GEOCODER_URL##/api/geocoder/findJsonp',
+        'reverse_url': '##GEOCODER_URL##/api/geocoder/reverseGeocode',
         'country_codes': 'es',
         'autocancel': True,
         'max_results': 10
@@ -64,9 +55,9 @@ GEOCODING_PROVIDER = {
         'key': 'AIzaSyDRJwLAQS6t8LP-rnv0IBhkp6fT4lHjV1w'
     },
     'user':{
-        'candidates_url': 'http://localhost:8090/geocodersolr/api/geocoder/candidatesJsonp',
-        'find_url': 'http://localhost:8090/geocodersolr/api/geocoder/findJsonp',
-        'reverse_url': 'http://localhost:8090/geocodersolr/api/geocoder/reverseGeocode',
+        'candidates_url': '##GEOCODER_URL##/api/geocoder/candidatesJsonp',
+        'find_url': '##GEOCODER_URL##/api/geocoder/findJsonp',
+        'reverse_url': '##GEOCODER_URL##/api/geocoder/reverseGeocode',
         'country_codes': 'es',
         'autocancel': True,
         'max_results': 10
@@ -77,8 +68,8 @@ STATIC_URL = '/gvsigonline/static/'
 
 LAST_MODIFIED_FIELD_NAME="last_modified"
 
-URL_SOLR="http://localhost:8983/solr/"
-DIR_SOLR_CONFIG="/home/jose/apps/solr-6.3.0/server/solr/gvsigonline/conf/"
+URL_SOLR="##SOLR_URL##"
+DIR_SOLR_CONFIG="/opt/solr/server/solr/gvsigonline/conf/"
 FILE_DATE_CONFIG="data-config.xml"
 FILE_SOLR_CONFIG="solrconfig.xml"
 SOLR_CORE_NAME="gvsigonline"
@@ -110,12 +101,6 @@ CARTOCIUDAD_DB_MUNICIPIO="municipio"
 CARTOCIUDAD_SHP_PROVINCIA="recintos_provinciales_inspire_peninbal_etrs89.shp"
 CARTOCIUDAD_DB_PROVINCIA="provincia"
     
-CARTOCIUDAD_SRID="4258"
-CARTOCIUDAD_DB_SCHEMA="public"
-CARTOCIUDAD_DB_HOST="localhost"
-CARTOCIUDAD_DB_PORT="5432"
-CARTOCIUDAD_DB_USER="postgres"
-CARTOCIUDAD_DB_DATABASE="cartociudad_valencia"
 
 SQL_SOUNDEXESP_FILE_NAME="soundexesp2.sql"
    
