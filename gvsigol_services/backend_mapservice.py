@@ -1199,7 +1199,67 @@ class Geoserver():
             service['wfs.Transaction'] = service_write_roles
             self.rest_catalog.get_session().post(services_url, json=service, verify=False, auth=(self.user, self.password))
             
-            
+
+    def setLayerDataRules(self, layer, read_groups, write_groups):
+        url = self.rest_catalog.get_service_url() + "/security/acl/layers.json"
+        who_can_read = [ "ROLE_"+ g.name.upper() for g in read_groups ]
+        who_can_write = [ "ROLE_"+ g.name.upper() for g in write_groups ]
+        
+        read_rule_path = layer.datastore.workspace.name + "." + layer.name + ".r"
+        if len(who_can_read)>0:
+            read_rule_roles = ",".join(who_can_read)
+            read_rule = DataRule(
+                path = read_rule_path,
+                roles = read_rule_roles
+                )
+            read_rule.save()
+            data = { read_rule_path: read_rule_roles}
+            # try to modify the rule
+            result = self.rest_catalog.get_session().put(url, json=data, verify=False, auth=(self.user, self.password))
+            if result.status_code == 409:
+                # If modifying failed, try to add the rule.
+                # We could delete and then add, but it is safer in this way (the layer remains protected in every instant)
+                # It also safe if the geoserver/gvsigol rules get incoherent
+                result = self.rest_catalog.get_session().post(url, json=data, verify=False, auth=(self.user, self.password))
+        else:
+            self.rest_catalog.get_session().delete(self.rest_catalog.get_service_url() + "/security/acl/layers/" + read_rule_path, verify=False, auth=(self.user, self.password))
+            rules = DataRule.objects.filter(path=read_rule_path)
+            rules.delete()
+
+        write_rule_path = layer.datastore.workspace.name + "." + layer.name + ".w"
+        # now add the rule if necessary
+        if len(who_can_write)>0:
+            write_rule_roles =  ",".join(who_can_write)
+            write_rule = DataRule(
+                path = write_rule_path,
+                roles = write_rule_roles
+                )
+            write_rule.save()
+            data = { write_rule_path: write_rule_roles}
+            # try to modify the rule
+            result = self.rest_catalog.get_session().put(url, json=data, verify=False, auth=(self.user, self.password))
+            if result.status_code == 409:
+                # If modifying failed, try to add the rule.
+                # We could delete and then add, but it is safer in this way (the layer remains protected in every instant)
+                # It also safe if the geoserver/gvsigol rules get incoherent 
+                result = self.rest_catalog.get_session().post(url, json=data, verify=False, auth=(self.user, self.password))
+        else:
+            # clean any existing write rule for the layer 
+            self.rest_catalog.get_session().delete(self.rest_catalog.get_service_url() + "/security/acl/layers/" + write_rule_path, verify=False, auth=(self.user, self.password))
+            rules = DataRule.objects.filter(path=write_rule_path)
+            rules.delete()
+
+        write_groups_query = LayerWriteGroup.objects.all()
+        transaction_roles = [ "ROLE_"+ g.group.name.upper() for g in write_groups_query ]
+        if  len(transaction_roles) > 0:
+            services_url = self.rest_catalog.get_service_url() + "/security/acl/services.json"
+            service = {}
+            service_write_roles =  ",".join(transaction_roles)
+            service['wfs.Transaction'] = service_write_roles
+            result = self.rest_catalog.get_session().put(services_url, json=service, verify=False, auth=(self.user, self.password))
+            if result.status_code == 409:
+                self.rest_catalog.get_session().post(services_url, json=service, verify=False, auth=(self.user, self.password))
+
     def clearCache(self, ws, layer):
         try:
             self.rest_catalog.clear_cache(ws, layer, user=self.user, password=self.password)

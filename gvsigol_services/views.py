@@ -626,6 +626,9 @@ def layer_permissions_update(request, layer_id):
         
         agroup = UserGroup.objects.get(name__exact='admin')
         
+        read_groups = []
+        write_groups = []
+        
         # clean existing groups and assign them again if necessary
         LayerReadGroup.objects.filter(layer=layer).delete()
         if len(assigned_read_roups) > 0:
@@ -633,6 +636,7 @@ def layer_permissions_update(request, layer_id):
             lrag.layer = layer
             lrag.group = agroup
             lrag.save()
+            read_groups.append(agroup)
         for group in assigned_read_roups:
             try:
                 group = UserGroup.objects.get(id=group)
@@ -640,6 +644,7 @@ def layer_permissions_update(request, layer_id):
                 lrg.layer = layer
                 lrg.group = group
                 lrg.save()
+                read_groups.append(group)
             except:
                 pass
         
@@ -648,6 +653,7 @@ def layer_permissions_update(request, layer_id):
         lwag.layer = layer
         lwag.group = agroup
         lwag.save()
+        write_groups.append(agroup)
         for group in assigned_write_groups:
             try:
                 group = UserGroup.objects.get(id=group)
@@ -655,10 +661,12 @@ def layer_permissions_update(request, layer_id):
                 lwg.layer = layer
                 lwg.group = group
                 lwg.save()
+                write_groups.append(group)
             except:
                 pass
                 
-        mapservice_backend.setDataRules()
+                
+        mapservice_backend.setLayerDataRules(layer, read_groups, write_groups)
         mapservice_backend.reload_nodes()
         return redirect('layer_list')
     else:
