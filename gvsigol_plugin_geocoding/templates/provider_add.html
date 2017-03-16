@@ -26,6 +26,9 @@
 									{% endif %}	
 								{% endfor %}
 								</ul>
+								{% if form.errors %}
+										{{form.errors}}
+									{% endif %}	
 							</div>
 						{% endif %}
 						

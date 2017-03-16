@@ -36,7 +36,10 @@ class GoogleMaps():
         self.append(provider)
         self.category = provider.category
         
-        
+    
+    def is_unique_instance(self):
+        return True
+    
     def get_type(self):
         return 'googlemaps'
         

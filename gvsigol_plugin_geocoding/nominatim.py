@@ -34,6 +34,10 @@ class Nominatim():
         self.append(provider)
         
         
+    def is_unique_instance(self):
+        return True  
+    
+        
     def get_type(self):
         return 'nominatim'
     
