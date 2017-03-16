@@ -167,7 +167,7 @@ def create_XML_config(provider):
         tree = ET.ElementTree(root)
         tree.write(fname)
     except Exception as e:
-        logger.error('ERROR: writing Solr configuration ->' + e)
+        logging.error('ERROR: writing Solr configuration ->' + e)
 
         return False
 
