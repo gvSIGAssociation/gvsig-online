@@ -35,6 +35,10 @@ class Cartociudad():
         
     def get_type(self):
         return 'cartociudad'
+    
+    
+    def is_unique_instance(self):
+        return False
         
         
     def append(self, provider):

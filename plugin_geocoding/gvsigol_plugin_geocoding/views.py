@@ -64,6 +64,7 @@ def provider_list(request):
 def provider_add(request):        
     if request.method == 'POST':
         form = ProviderForm(request.POST, request.FILES)
+        has_errors = False
         try:
             newProvider = Provider()
             
@@ -95,34 +96,41 @@ def provider_add(request):
                 
                 if type=='cartociudad':
                     if not isValidCartociudadDB():
-                        msg = _("Error: DataStore has not a valid CartoCiudad schema")
-                        # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
-                        form.add_error(None, msg)
-                        return render(request,'provider_add.html',{'form': form, 'settings': json.dumps(geocoding_setting.GEOCODING_PROVIDER) })
+                        form.add_error(None, _("Error: DataStore has not a valid CartoCiudad schema"))
+                        has_errors = True
                     params = {
                         'datastore_id': ds.id,
                     } 
-                
-            newProvider.params = json.dumps(params)
-                
-        
-            newProvider.order = Provider.objects.all().count()+1
-            if request.FILES.get('image'):
-                newProvider.image = request.FILES.get('image')  
+            
+            else:
+                prov = Provider.objects.filter(type=type)
+                if prov and prov.__len__() > 0:
+                    form.add_error(None, _("Error: this type of provider is already added to the project"))
+                    has_errors = True
+            
+            if not has_errors:       
+                newProvider.params = json.dumps(params)
                     
-            newProvider.save()  
             
-            #set_providers_actives()
-            set_providers_to_geocoder()
-            
-            return redirect('provider_update', provider_id=newProvider.pk)
+                newProvider.order = Provider.objects.all().count()+1
+                if request.FILES.get('image'):
+                    newProvider.image = request.FILES.get('image')  
+                        
+                newProvider.save()  
+                
+                #set_providers_actives()
+                set_providers_to_geocoder()
+                
+                if newProvider.type == 'nominatim' or newProvider.type == 'googlemaps':
+                    return redirect('provider_list')
+                
+                return redirect('provider_update', provider_id=newProvider.pk)
             
         except Exception as e:
             try:
                 msg = e.get_message()
             except:
                 msg = _("Error: provider could not be published")
-            # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
             form.add_error(None, msg)
 
     else:
@@ -263,26 +271,7 @@ def get_conf(request):
 def upload_shp_cartociudad(request, provider_id):
     provider = Provider.objects.get(pk=provider_id)
     create_cartociudad_config(provider)
-    
-    '''
-    provider = Provider.objects.get(pk=provider_id)
-    if request.method == 'GET':
-        file = request.GET.get('file')
-        file_municipios = request.GET.get('file_municipios')  
-        
-        unzip_file('/home/jose/Cartografia/Cartociudad_Valencia/lineas_limite.zip', provider)
-        unzip_file('/home/jose/Cartografia/Cartociudad_Valencia/CARTOCIUDAD_CALLEJERO_VALENCIA.zip', provider)
-        
-        export_shp_municipios_to_postgis(provider)
-
-        export_dbf_to_postgis(provider)
-        export_shp_to_postgis(provider)
-
-        cartociudad_full_import(provider)
-        remove_temp_files(provider)
-        
-        return HttpResponse('Hola provider:'+ provider_id, status=200)
-    '''        
+     
     return HttpResponse('OK ', status=200)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')

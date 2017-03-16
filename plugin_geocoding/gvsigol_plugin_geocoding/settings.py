@@ -25,14 +25,6 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-CARTOCIUDAD_PARAMS = {
-    'host' : 'cartociudad.gvsigonline.com',
-    'port' : '5432',
-    'database': 'cartociudad',
-    'user' : 'cartoadmin',
-    'passwd' : 'cartoadmin104'
-}
-
 GEOCODING_PROVIDER_NAME='nominatim'
 
 GEOCODING_SUPPORTED_TYPES = (
@@ -44,7 +36,7 @@ GEOCODING_SUPPORTED_TYPES = (
 
 GEOCODING_PROVIDER = {
     'cartociudad': {
-        'url': 'https://localhost/gc',
+        #'url': 'https://localhost/gc',
         'candidates_url': 'http://localhost:8090/geocodersolr/api/geocoder/candidatesJsonp',
         'find_url': 'http://localhost:8090/geocodersolr/api/geocoder/findJsonp',
         'reverse_url': 'http://localhost:8090/geocodersolr/api/geocoder/reverseGeocode',
@@ -109,13 +101,6 @@ CARTOCIUDAD_DB_MUNICIPIO="municipio"
 
 CARTOCIUDAD_SHP_PROVINCIA="recintos_provinciales_inspire_peninbal_etrs89.shp"
 CARTOCIUDAD_DB_PROVINCIA="provincia"
-    
-CARTOCIUDAD_SRID="4258"
-CARTOCIUDAD_DB_SCHEMA="public"
-CARTOCIUDAD_DB_HOST="localhost"
-CARTOCIUDAD_DB_PORT="5432"
-CARTOCIUDAD_DB_USER="postgres"
-CARTOCIUDAD_DB_DATABASE="cartociudad_valencia"
 
 SQL_SOUNDEXESP_FILE_NAME="soundexesp2.sql"
    

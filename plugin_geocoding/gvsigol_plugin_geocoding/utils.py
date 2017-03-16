@@ -122,8 +122,6 @@ def create_XML_config(provider):
      
     try:
         datastore_params = json.loads(datastore.connection_params)
-        cartociudad_params = settings.CARTOCIUDAD_PARAMS
-        
         root = ET.Element("dataConfig")
         
         ET.SubElement(
@@ -672,7 +670,7 @@ def unzip_file(file, provider):
     zip_ref.close()
 
 
-
+'''
 def export_shp_to_postgis(provider):
     current_id = str(provider.pk)
     path = os.path.join(tempfile.gettempdir(),'shp2psql',current_id + '_shp2psql')
@@ -750,7 +748,7 @@ def remove_temp_files(provider):
     current_id = str(provider.pk)
     path = os.path.join(tempfile.gettempdir(),'shp2psql',current_id + '_shp2psql')
     shutil.rmtree(path)
-    
+'''    
     
        
 class PCParser(ET2.XMLTreeBuilder):
