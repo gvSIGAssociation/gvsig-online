@@ -36,6 +36,7 @@ import tempfile
 from subprocess import call
 from dbfpy import dbf
 import shutil
+import logging
 
 '''
 @author: José Badía <jbadia@scolab.es>
@@ -166,7 +167,8 @@ def create_XML_config(provider):
         tree = ET.ElementTree(root)
         tree.write(fname)
     except Exception as e:
-        #self.add_error('connection_params', _("Error: Invalid JSON format"))
+        logger.error('ERROR: writing Solr configuration ->' + e)
+
         return False
 
     return True
