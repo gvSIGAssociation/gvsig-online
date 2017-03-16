@@ -103,8 +103,7 @@ class Cartociudad():
         return self.get_json_from_url(self.urls['reverse_url'], params)
     
     
-    @staticmethod   
-    def get_json_from_url(url, params):
+    def get_json_from_url(self, url, params):
         response = requests.get(url=url, params=params)
         if response.status_code == 200:
             respuesta = response.content
@@ -113,6 +112,12 @@ class Cartociudad():
     
             data = json.loads(respuesta)
             if data:
+                for datum in data:
+                    if datum['source'] == 'user':
+                        for provider in self.providers:
+                            table_name = provider.type+'-'+str(provider.pk)
+                            if datum['resource'] == table_name:
+                                datum['image'] = str(provider.image)
                 return data
         return []
     

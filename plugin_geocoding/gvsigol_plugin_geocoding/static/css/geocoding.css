@@ -68,4 +68,4 @@ tr.ui-state-default.ui-sortable-handle{ height:50px}
 
 .provider-img-change{float:left;margin-left:30px; margin-top:10px;}
 .provider-img{float:left; border: 1px solid grey; padding: 10px;}
-.provider-img img{width: 50px;}
+.provider-img img{height: 50px;}

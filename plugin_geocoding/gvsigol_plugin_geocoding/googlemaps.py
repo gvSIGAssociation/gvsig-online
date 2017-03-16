@@ -57,19 +57,23 @@ class GoogleMaps():
             'key': self.key
         }
 
-        
-        
-        json_results = self.get_json_from_url(self.urls['candidates_url'], params)
         parse_results = []
-        if 'predictions' in json_results:
-            for result in json_results['predictions']:
-                parse_result = {
-                    'address': result['description'],
-                    'type': 'googlemaps', 
-                    'source': 'googlemaps', 
-                    'category': self.category,
-                    'data': result
-                }
+        
+        if self.providers.__len__() > 0 :
+            provider = self.providers[0]
+        
+            json_results = self.get_json_from_url(self.urls['candidates_url'], params)
+            
+            if 'predictions' in json_results:
+                for result in json_results['predictions']:
+                    parse_result = {
+                        'address': result['description'],
+                        'type': 'googlemaps', 
+                        'source': 'googlemaps', 
+                        'category': self.category,
+                        'data': result, 
+                        'image': str(provider.image)
+                    }
                 parse_results.append(parse_result)
         return parse_results
     
