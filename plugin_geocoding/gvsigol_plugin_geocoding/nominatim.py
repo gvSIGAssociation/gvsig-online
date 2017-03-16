@@ -71,6 +71,7 @@ class Nominatim():
                     suggestion['lat'] = l._raw['lat']
                     suggestion['lng'] = l._raw['lon'] 
                     suggestion['image'] = str(geolocator['provider'].image)
+                    suggestion['category'] = geolocator['provider'].category
                     suggestions.append(suggestion)
             i=i+1
                 
