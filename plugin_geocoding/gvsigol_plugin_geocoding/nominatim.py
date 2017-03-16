@@ -49,7 +49,10 @@ class Nominatim():
         url_params = urlparse(url)
         scheme = url_params.scheme
         domain = url_params.netloc + url_params.path
-        self.geolocators.append(Nominatim_geocoder(country_bias=country_code, scheme=scheme, domain=domain))
+        self.geolocators.append({
+            'geocoder': Nominatim_geocoder(country_bias=country_code, scheme=scheme, domain=domain), 
+            'provider': provider
+        })
         
         
     def geocode(self, query, exactly_one):
@@ -57,16 +60,17 @@ class Nominatim():
         
         i=1
         for geolocator in self.geolocators:
-            locations = geolocator.geocode(query,exactly_one=False)
+            locations = geolocator['geocoder'].geocode(query,exactly_one=False)
             if locations:
                 for l in locations:
                     suggestion = {}
                     suggestion['source'] = 'nominatim'
-                    suggestion['type'] = 'nominatim-'+ str(i)
+                    suggestion['type'] = 'nominatim-'+ str(geolocator['provider'].id)
                     suggestion['address'] = l.address
                     suggestion['id'] = l.address
                     suggestion['lat'] = l._raw['lat']
                     suggestion['lng'] = l._raw['lon'] 
+                    suggestion['image'] = str(geolocator['provider'].image)
                     suggestions.append(suggestion)
             i=i+1
                 
@@ -93,7 +97,7 @@ class Nominatim():
         coordinate2 = [coordinate[1], coordinate[0]]
         suggestion = {}
         for geolocator in self.geolocators:
-            l = geolocator.reverse(coordinate2,exactly_one=True,language='es')
+            l = geolocator['geocoder'].reverse(coordinate2,exactly_one=True,language='es')
             suggestion = {}
             suggestion['source'] = 'nominatim'
             suggestion['type'] = 'nominatim'

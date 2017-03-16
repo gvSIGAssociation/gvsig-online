@@ -160,7 +160,13 @@ def provider_update(request, provider_id):
         return HttpResponseNotFound(_('Provider not found'))
 
     if request.method == 'POST':
-        #form = ProviderUpdateForm(request.POST)
+        form = ProviderUpdateForm(request.POST)
+        provider.category = request.POST['category']
+        if request.FILES.get('image'):
+            provider.image = request.FILES.get('image')  
+        
+        provider.save()
+        set_providers_to_geocoder()
         return redirect('provider_list')
     else:
         form = ProviderUpdateForm(instance=provider)

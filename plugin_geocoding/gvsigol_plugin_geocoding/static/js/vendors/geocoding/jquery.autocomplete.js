@@ -685,7 +685,11 @@
                     html += formatGroup(suggestion, value, i);
                 }
 
-                html += '<div class="' + className + '" data-index="' + i + '">' + '<img style="margin-right: 5px;" height="12" width="12" src="' + IMG_PATH + "geocoding/" + suggestion.type + '.png">' + formatResult(suggestion, value, i) + '</div>';
+                if(suggestion.data && suggestion.data.image){
+                	html += '<div class="' + className + '" data-index="' + i + '">' + '<img style="margin-right: 5px;" height="12" width="12" src="' + LOADED_IMG_PATH /*+ "geocoding/"*/ + suggestion.data.image + '">' + formatResult(suggestion, value, i) + '</div>';
+                }else{
+                	html += '<div class="' + className + '" data-index="' + i + '">' + '<img style="margin-right: 5px;" height="12" width="12" src="' + IMG_PATH + "geocoding/" + suggestion.type.toLowerCase() + '.png">' + formatResult(suggestion, value, i) + '</div>';
+                }
             });
 
             this.adjustContainerWidth();
