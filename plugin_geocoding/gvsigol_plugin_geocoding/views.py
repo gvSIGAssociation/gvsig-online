@@ -163,11 +163,11 @@ def isValidCartociudadDB(datastore):
     if not geocoding_setting.CARTOCIUDAD_DB_PORTAL_PK in resources:
         resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_PORTAL_PK)
         
-    if not geocoding_setting.CARTOCIUDAD_DB_MANZANA in resources:
-        resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_MANZANA)
+    #if not geocoding_setting.CARTOCIUDAD_DB_MANZANA in resources:
+    #    resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_MANZANA)
         
-    if not geocoding_setting.CARTOCIUDAD_DB_LINEA_AUXILIAR in resources:
-        resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_LINEA_AUXILIAR)
+    #if not geocoding_setting.CARTOCIUDAD_DB_LINEA_AUXILIAR in resources:
+    #    resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_LINEA_AUXILIAR)
         
     if not geocoding_setting.CARTOCIUDAD_DB_MUNICIPIO_VIAL in resources:
         resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_MUNICIPIO_VIAL)
