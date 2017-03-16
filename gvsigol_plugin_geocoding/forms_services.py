@@ -53,18 +53,18 @@ class ProviderUpdateForm(forms.ModelForm):
         model = Provider
         fields = ['type', 'workspace', 'datastore', 'resource', 'params']
         
-    type = forms.CharField(label=_(u'Type'), disabled=True, required=True, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    type = forms.ChoiceField(label=_(u'Type'), choices=settings.GEOCODING_SUPPORTED_TYPES, disabled=True, required=True, widget=forms.Select(attrs={'class' : 'form-control'}))
        
-    workspace = forms.CharField(label=_(u'Workspace'), disabled=False, required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))  
-    datastore = forms.CharField(label=_(u'Datastore'), disabled=False, required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))  
-    resource = forms.CharField(label=_(u'Resource'), disabled=False, required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'})) 
+    workspace = forms.CharField(label=_(u'Workspace'), disabled=True, required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))  
+    datastore = forms.CharField(label=_(u'Datastore'), disabled=True, required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))  
+    resource = forms.CharField(label=_(u'Resource'), disabled=True, required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'})) 
     
-    id_field = forms.CharField(label=_(u'Id'), disabled=False, required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))  
-    text_field = forms.CharField(label=_(u'Text'), disabled=False, required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))  
-    geom_field = forms.CharField(label=_(u'Geom'), disabled=False, required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'})) 
+    id_field = forms.CharField(label=_(u'Id'), disabled=True, required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))  
+    text_field = forms.CharField(label=_(u'Text'), disabled=True, required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))  
+    geom_field = forms.CharField(label=_(u'Geom'), disabled=True, required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'})) 
     
-    category = forms.CharField(label=_(u'Category'),  required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    category = forms.CharField(label=_(u'Category'),  required=True, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     
-    params = forms.CharField(label=_(u'Parameters'), required=False, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))
+    params = forms.CharField(label=_(u'Parameters'), required=True, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))
 
     
