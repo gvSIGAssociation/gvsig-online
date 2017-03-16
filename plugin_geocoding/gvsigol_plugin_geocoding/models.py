@@ -23,9 +23,10 @@ from __future__ import unicode_literals
 '''
 from django.db import models
 from gvsigol import settings
-#from gvsigol_services.models import Datastore
+from gvsigol_plugin_geocoding import settings as geocoding_setting
+from gvsigol_services.models import Datastore
 from django.utils.translation import ugettext as _
-
+import json
 
 
 class Provider(models.Model):   
@@ -44,4 +45,17 @@ class Provider(models.Model):
     last_update = models.DateTimeField(auto_now_add=False, null=True, blank=True) 
     
     def __unicode__(self):
-        return  self.type + '-' + self.pk
+        values = dict(geocoding_setting.GEOCODING_SUPPORTED_TYPES).get(self.type)
+        cadena = unicode(values)
+        
+        if self.type == 'googlemaps' or self.type == 'nominatim':
+            return cadena
+        
+        params = json.loads(self.params)
+        datastore = Datastore.objects.get(id=params['datastore_id'])
+        cadena = cadena + '  (' + str(datastore.name)
+        if self.type == 'user':
+            cadena = cadena + ' - ' + params['resource'] #+ ' (' + params['id_field'] + ', ' + params['text_field'] + ', ' + params['geom_field'] + ')'           
+        cadena = cadena + ')'
+        
+        return  cadena

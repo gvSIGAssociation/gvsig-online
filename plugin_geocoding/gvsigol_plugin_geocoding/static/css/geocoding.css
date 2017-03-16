@@ -37,6 +37,8 @@ tr.ui-state-default.ui-sortable-handle{ height:50px}
 
 #process-resume.idle{background-color: #e6e6ff;}
 #process-resume.idle.complete{background-color: #e6f3e6;}
+
+.list-no-button .btn-success {display:none;}
 #process-resume.busy{background-color: #ecf0f5;}
 #process-resume.error{background-color: #F4B0B0;}
 
