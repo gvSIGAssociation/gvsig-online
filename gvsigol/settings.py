@@ -192,6 +192,7 @@ LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol_app_benicarlo/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/locale'),
+    os.path.join(BASE_DIR, 'gvsigol_plugin_geocoding/locale'),
 )
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -224,6 +225,7 @@ STATICFILES_DIRS = (
     #os.path.join(BASE_DIR, 'gvsigol_app_benicarlo/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/static'),
+    os.path.join(BASE_DIR, 'gvsigol_plugin_geocoding/static'),
 )
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
