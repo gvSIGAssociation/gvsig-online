@@ -37,7 +37,9 @@ from gvsigol import settings
 from gvsigol_plugin_geocoding.utils import *
 import json
 from gvsigol_services.models import Workspace, Datastore
-from gvsigol_services.views import backend_resource_list_available
+from gvsigol_services.views import backend_resource_list_available,\
+    backend_resource_list
+from gvsigol_services.backend_mapservice import backend as mapservice_backend
 
 
 providers_order = []
@@ -95,8 +97,9 @@ def provider_add(request):
                     }
                 
                 if type=='cartociudad':
-                    if not isValidCartociudadDB():
-                        form.add_error(None, _("Error: DataStore has not a valid CartoCiudad schema"))
+                    resources_needed = isValidCartociudadDB(ds)
+                    if resources_needed.__len__() > 0:
+                        form.add_error(None, _("Error: DataStore has not a valid CartoCiudad schema (Needed " + ', '.join(resources_needed) + ")"))
                         has_errors = True
                     params = {
                         'datastore_id': ds.id,
@@ -147,8 +150,38 @@ def provider_add(request):
     return render(request,'provider_add.html',{'form': form, 'settings': json.dumps(geocoding_setting.GEOCODING_PROVIDER) })
 
 
-def isValidCartociudadDB():
-    return True
+def isValidCartociudadDB(datastore):
+    resources = mapservice_backend.getResources(datastore.workspace.name, datastore.name, datastore.type, "all")
+    resources_needed = []
+    
+    if not geocoding_setting.CARTOCIUDAD_DB_CODIGO_POSTAL in resources:
+        resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_CODIGO_POSTAL)
+        
+    if not geocoding_setting.CARTOCIUDAD_DB_TRAMO_VIAL in resources:
+        resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_TRAMO_VIAL)
+        
+    if not geocoding_setting.CARTOCIUDAD_DB_PORTAL_PK in resources:
+        resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_PORTAL_PK)
+        
+    if not geocoding_setting.CARTOCIUDAD_DB_MANZANA in resources:
+        resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_MANZANA)
+        
+    if not geocoding_setting.CARTOCIUDAD_DB_LINEA_AUXILIAR in resources:
+        resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_LINEA_AUXILIAR)
+        
+    if not geocoding_setting.CARTOCIUDAD_DB_MUNICIPIO_VIAL in resources:
+        resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_MUNICIPIO_VIAL)
+        
+    if not geocoding_setting.CARTOCIUDAD_DB_MUNICIPIO in resources:
+        resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_MUNICIPIO)
+        
+    if not geocoding_setting.CARTOCIUDAD_DB_PROVINCIA in resources:
+        resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_PROVINCIA)
+        
+    if not geocoding_setting.CARTOCIUDAD_DB_TOPONIMO in resources:
+        resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_TOPONIMO)
+
+    return resources_needed
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
