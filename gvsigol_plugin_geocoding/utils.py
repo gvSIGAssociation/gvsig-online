@@ -45,8 +45,8 @@ import shutil
 http://localhost:8983/solr/cartociudad/dataimport2?_=1487864250477&command=status&indent=on&wt=json
 '''
 def status_solr_import(provider):
-    url = geocoding_settings.URL_SOLR+geocoding_settings.SOLR_CORE_NAME+"/dataimport-"+str(provider.pk)+"?command=status&indent=on&wt=json"
-    #url = geocoding_settings.URL_SOLR+geocoding_settings.SOLR_CORE_NAME+"/dataimport2?command=status&indent=on&wt=json"
+    url = geocoding_settings.URL_SOLR+'/'+geocoding_settings.SOLR_CORE_NAME+"/dataimport-"+str(provider.pk)+"?command=status&indent=on&wt=json"
+    #url = geocoding_settings.URL_SOLR+'/'+geocoding_settings.SOLR_CORE_NAME+"/dataimport2?command=status&indent=on&wt=json"
     req = urllib2.urlopen(url)
     if req.code != 200:
         return None
@@ -57,7 +57,7 @@ def status_solr_import(provider):
 http://localhost:8983/solr/admin/cores?action=RELOAD&core=<core_name>
 '''
 def reload_solr_config():
-    url = geocoding_settings.URL_SOLR+"admin/cores?action=RELOAD&core="+geocoding_settings.SOLR_CORE_NAME
+    url = geocoding_settings.URL_SOLR+"/admin/cores?action=RELOAD&core="+geocoding_settings.SOLR_CORE_NAME
     req = urllib2.urlopen(url)
     if req.code != 200:
         return False
@@ -69,7 +69,7 @@ http://localhost:8983/solr/<core_name>/update?stream.body=<delete><query>table_n
 '''  
 def remove_solr_data(provider):
     resource = provider.type+"-"+str(provider.pk)
-    url = geocoding_settings.URL_SOLR+geocoding_settings.SOLR_CORE_NAME+"/update?stream.body=<delete><query>resource:"+resource+"</query></delete>&commit=true"
+    url = geocoding_settings.URL_SOLR+'/'+geocoding_settings.SOLR_CORE_NAME+"/update?stream.body=<delete><query>resource:"+resource+"</query></delete>&commit=true"
     req = urllib2.urlopen(url)
     if req.code != 200:
         return False
@@ -80,7 +80,7 @@ def remove_solr_data(provider):
 http://localhost:8983/solr/<core_name>/dataimport-<dataStoreID>?command=full-import
 ''' 
 def full_import_solr_data(provider):
-    url = geocoding_settings.URL_SOLR+geocoding_settings.SOLR_CORE_NAME+"/dataimport-"+str(provider.pk)+"?command=full-import&clean=false"
+    url = geocoding_settings.URL_SOLR+'/'+geocoding_settings.SOLR_CORE_NAME+"/dataimport-"+str(provider.pk)+"?command=full-import&clean=false"
     req = urllib2.urlopen(url)
     if req.code != 200:
         return False
@@ -88,7 +88,7 @@ def full_import_solr_data(provider):
 
 
 def delta_import_solr_data(provider):
-    url = geocoding_settings.URL_SOLR+geocoding_settings.SOLR_CORE_NAME+"/dataimport-"+str(provider.pk)+"?command=delta-import"
+    url = geocoding_settings.URL_SOLR+'/'+geocoding_settings.SOLR_CORE_NAME+"/dataimport-"+str(provider.pk)+"?command=delta-import"
     req = urllib2.urlopen(url)
     if req.code != 200:
         return False
