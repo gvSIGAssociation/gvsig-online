@@ -40,7 +40,7 @@ GEOCODING_PROVIDER = {
         'candidates_url': 'http://localhost:8090/geocodersolr/api/geocoder/candidatesJsonp',
         'find_url': 'http://localhost:8090/geocodersolr/api/geocoder/findJsonp',
         'reverse_url': 'http://localhost:8090/geocodersolr/api/geocoder/reverseGeocode',
-        #'country_codes': 'es',
+        'country_codes': 'es',
         'autocancel': True,
         'max_results': 10
     },
@@ -59,7 +59,7 @@ GEOCODING_PROVIDER = {
         'candidates_url': 'http://localhost:8090/geocodersolr/api/geocoder/candidatesJsonp',
         'find_url': 'http://localhost:8090/geocodersolr/api/geocoder/findJsonp',
         'reverse_url': 'http://localhost:8090/geocodersolr/api/geocoder/reverseGeocode',
-        #'country_codes': 'es',
+        'country_codes': 'es',
         'autocancel': True,
         'max_results': 10
     }
