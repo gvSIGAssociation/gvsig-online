@@ -69,7 +69,7 @@ STATIC_URL = '/gvsigonline/static/'
 
 LAST_MODIFIED_FIELD_NAME="last_modified"
 
-URL_SOLR="http://localhost:8983/solr/"
+URL_SOLR="http://localhost:8983/solr"
 DIR_SOLR_CONFIG="/home/jose/apps/solr-6.3.0/server/solr/gvsigonline/conf/"
 FILE_DATE_CONFIG="data-config.xml"
 FILE_SOLR_CONFIG="solrconfig.xml"
