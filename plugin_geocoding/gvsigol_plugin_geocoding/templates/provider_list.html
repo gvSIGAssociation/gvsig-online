@@ -39,11 +39,7 @@
 							<td class="row-id default-field">{% trans "(Default)" %}</td>
 							{% endif %}
 							<td>{{ prov }}</td>
-							{% if prov.type == 'nominatim' or prov.type == 'googlemaps' %}
-								<td class="list-no-button"></td>
-							{% else %}
-								<td></td>
-							{% endif %}
+							<td></td>
 							<td></td>
 						</tr>
 						{% endfor %}

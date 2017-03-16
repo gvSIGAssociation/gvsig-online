@@ -102,9 +102,14 @@
 	
 						<div class="row">
 							<div class="col-md-12" style="margin-bottom: 20px;">
-								<label>{% trans "Select image" %}</label>
-								<input id="id_image" name="image" type="file" class="file" data-show-preview="true">						
-							</div>
+								<div class="provider-img">
+									<img src={{image_photo_url}} alt="Provider Image">
+								</div>
+								<div class="provider-img-change">
+									<label>{% trans "Change image?" %}</label>
+									<input id="id_image" name="image" type="file" class="file" data-show-preview="true">						
+								</div>
+							</div>	
 						</div>	
 							
 					</div>	
