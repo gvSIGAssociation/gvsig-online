@@ -112,7 +112,7 @@ def delta_import_solr_data(provider):
         </dataConfig>
         
 '''
-def create_XML_config(provider):
+def create_XML_config(provider, has_soundex):
     params = json.loads(provider.params)
     datastore_id = params["datastore_id"]
     datastore = Datastore.objects.get(id=datastore_id)
@@ -137,9 +137,12 @@ def create_XML_config(provider):
         
         resource = provider.type+'-'+str(provider.pk)
         
-        query_str="select "+params["id_field"]+" as obj_id, "+params["text_field"]+" as text, '" + resource + "-'||id as calculated_id, '" + resource + "' as resource, now() as last_modification, '" + params["resource"] +"' as table_name, '" + provider.category +"' as category, ST_X(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as longitud, ST_Y(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as latitud, 'user' as source  from " + datastore_params["schema"] + "." + params["resource"]
-        delta_import_str="select "+params["id_field"]+" as obj_id, "+params["text_field"]+" as text, '" + resource + "-'||id as calculated_id, '" + resource + "' as resource, now() as last_modification, '" + params["resource"] +"' as table_name, '" + provider.category +"' as category, ST_X(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as longitud, ST_Y(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as latitud, 'user' as source  from " + datastore_params["schema"] + "." + params["resource"] + " where id='${dataimporter.delta.id}'"
-        delta_str="select "+params["id_field"]+" as obj_id, "+params["text_field"]+" as text, '" + resource + "-'||id as calculated_id, '" + resource + "' as resource, now() as last_modification, '" + params["resource"] +"' as table_name , '" + provider.category +"' as category, ST_X(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as longitud, ST_Y(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as latitud, 'user' as source from " + datastore_params["schema"] + "." + params["resource"] + " where "+ geocoding_settings.LAST_MODIFIED_FIELD_NAME +" > '${dataimporter.last_index_time}'"
+        query_str="select "
+        if has_soundex:
+            query_str = query_str + "soundexesp2("+params["text_field"]+") as soundexesp, "
+        query_str= query_str + params["id_field"]+" as obj_id, "+params["text_field"]+" as text, '" + resource + "-'||id as calculated_id, '" + resource + "' as resource, now() as last_modification, '" + params["resource"] +"' as table_name, '" + provider.category +"' as category, ST_X(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as longitud, ST_Y(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as latitud, 'user' as source  from " + datastore_params["schema"] + "." + params["resource"]
+        delta_import_str= query_str + " where id='${dataimporter.delta.id}'"
+        delta_str= query_str + " where "+ geocoding_settings.LAST_MODIFIED_FIELD_NAME +" > '${dataimporter.last_index_time}'"
         
         document = ET.SubElement(root, "document")
         entity = ET.SubElement(
@@ -155,6 +158,8 @@ def create_XML_config(provider):
         ET.SubElement(entity, "field", column="calculated_id", name="id")
         ET.SubElement(entity, "field", column="obj_id", name="obj_id")
         ET.SubElement(entity, "field", column="text", name="text")
+        if has_soundex:
+            ET.SubElement(entity, "field", column="soundexesp", name="soundexesp")
         ET.SubElement(entity, "field", column="table_name", name="table_name")
         ET.SubElement(entity, "field", column="resource", name="tipo")
         ET.SubElement(entity, "field", column="last_modification", name="last_modification")
@@ -173,7 +178,26 @@ def create_XML_config(provider):
 
     return True
 
-def create_cartociudad_config(provider):
+def configure_datastore(provider):
+    params = json.loads(provider.params)
+    datastore_id = params["datastore_id"]
+    datastore = Datastore.objects.get(id=datastore_id)    
+    datastore_params = json.loads(datastore.connection_params)
+
+    
+    command = "psql -h " + datastore_params['host'] + " -p " + datastore_params['port'] + " -U " + datastore_params['user'] +" -w -d "+ datastore_params['database']
+    command4c = " -f " + os.path.join(os.path.dirname(geocoding_settings.BASE_DIR), "plugin_geocoding", "gvsigol_plugin_geocoding", "static", "sql", geocoding_settings.SQL_SOUNDEXESP_FILE_NAME)
+    output = call(command + command4c, shell=True)
+    
+    if output == 0:
+        return True
+    
+    return False
+    
+    
+    
+
+def create_cartociudad_config(provider, has_soundex):
     params = json.loads(provider.params)
     datastore_id = params["datastore_id"]
     datastore = Datastore.objects.get(id=datastore_id)
@@ -208,9 +232,10 @@ def create_cartociudad_config(provider):
         query_str= query_str + "m.nameunit as nom_muni, " 
         query_str= query_str + "substring(p.natcode from 5 for 2) as ine_prov, " 
         query_str= query_str + "p.nameunit as nom_prov, "
-        query_str= query_str + "soundexesp2(tv.nom_via) as soundexesp, " 
-        query_str= query_str + "soundexesp2(m.nameunit) as soundexesp_municipio, "
-        query_str= query_str + "soundexesp2(p.nameunit) as soundexesp_provincia, "
+        if has_soundex:
+            query_str= query_str + "soundexesp2(tv.nom_via) as soundexesp, " 
+            query_str= query_str + "soundexesp2(m.nameunit) as soundexesp_municipio, "
+            query_str= query_str + "soundexesp2(p.nameunit) as soundexesp_provincia, "
         query_str= query_str + "'cartociudad' as source, "
         query_str= query_str + "'" + provider.category +"' as category, "
         query_str= query_str + "'cartociudad-" + str(provider.pk) +"' as resource, "
@@ -255,10 +280,11 @@ def create_cartociudad_config(provider):
         ET.SubElement(entity, "field", column="ine_prov", name="ine_prov")
         ET.SubElement(entity, "field", column="nom_prov", name="nom_prov")
         #ET.SubElement(entity, "field", column="cod_postal", name="cod_postal")
-        ET.SubElement(entity, "field", column="soundexesp", name="soundexesp")
-        #ET.SubElement(entity, "field", column="soundexesp_ent_pob", name="soundexesp_ent_pob")
-        ET.SubElement(entity, "field", column="soundexesp_municipio", name="soundexesp_municipio")
-        ET.SubElement(entity, "field", column="soundexesp_provincia", name="soundexesp_provincia")
+        if has_soundex:
+            ET.SubElement(entity, "field", column="soundexesp", name="soundexesp")
+            #ET.SubElement(entity, "field", column="soundexesp_ent_pob", name="soundexesp_ent_pob")
+            ET.SubElement(entity, "field", column="soundexesp_municipio", name="soundexesp_municipio")
+            ET.SubElement(entity, "field", column="soundexesp_provincia", name="soundexesp_provincia")
         ET.SubElement(entity, "field", column="category", name="category")  
         
         
@@ -276,9 +302,10 @@ def create_cartociudad_config(provider):
         query_stra= query_stra + "m.nameunit as nom_muni, " 
         query_stra= query_stra + "substring(p.natcode from 5 for 2) as ine_prov, " 
         query_stra= query_stra + "p.nameunit as nom_prov, "
-        query_stra= query_stra + "soundexesp2(tv.nom_via) as soundexesp, " 
-        query_stra= query_stra + "soundexesp2(m.nameunit) as soundexesp_municipio, "
-        query_stra= query_stra + "soundexesp2(p.nameunit) as soundexesp_provincia, "
+        if has_soundex:
+            query_stra= query_stra + "soundexesp2(tv.nom_via) as soundexesp, " 
+            query_stra= query_stra + "soundexesp2(m.nameunit) as soundexesp_municipio, "
+            query_stra= query_stra + "soundexesp2(p.nameunit) as soundexesp_provincia, "
         query_stra= query_stra + "'cartociudad' as source, "
         query_stra= query_stra + "'" + provider.category +"' as category, "
         query_stra= query_stra + "'cartociudad-" + str(provider.pk) +"' as resource, "
@@ -323,10 +350,11 @@ def create_cartociudad_config(provider):
         ET.SubElement(entitya, "field", column="ine_prov", name="ine_prov")
         ET.SubElement(entitya, "field", column="nom_prov", name="nom_prov")
         #ET.SubElement(entitya, "field", column="cod_postal", name="cod_postal")
-        ET.SubElement(entitya, "field", column="soundexesp", name="soundexesp")
-        #ET.SubElement(entitya, "field", column="soundexesp_ent_pob", name="soundexesp_ent_pob")
-        ET.SubElement(entitya, "field", column="soundexesp_municipio", name="soundexesp_municipio")
-        ET.SubElement(entitya, "field", column="soundexesp_provincia", name="soundexesp_provincia")
+        if has_soundex:
+            ET.SubElement(entitya, "field", column="soundexesp", name="soundexesp")
+            #ET.SubElement(entitya, "field", column="soundexesp_ent_pob", name="soundexesp_ent_pob")
+            ET.SubElement(entitya, "field", column="soundexesp_municipio", name="soundexesp_municipio")
+            ET.SubElement(entitya, "field", column="soundexesp_provincia", name="soundexesp_provincia")
         ET.SubElement(entitya, "field", column="category", name="category")  
         
         
@@ -343,9 +371,10 @@ def create_cartociudad_config(provider):
         query_strb= query_strb + "m.nameunit as nom_muni, " 
         query_strb= query_strb + "substring(p.natcode from 5 for 2) as ine_prov, " 
         query_strb= query_strb + "p.nameunit as nom_prov, "
-        query_strb= query_strb + "soundexesp2(tv.nom_via) as soundexesp, " 
-        query_strb= query_strb + "soundexesp2(m.nameunit) as soundexesp_municipio, "
-        query_strb= query_strb + "soundexesp2(p.nameunit) as soundexesp_provincia, "
+        if has_soundex:
+            query_strb= query_strb + "soundexesp2(tv.nom_via) as soundexesp, " 
+            query_strb= query_strb + "soundexesp2(m.nameunit) as soundexesp_municipio, "
+            query_strb= query_strb + "soundexesp2(p.nameunit) as soundexesp_provincia, "
         query_strb= query_strb + "'cartociudad' as source, "
         query_strb= query_strb + "'" + provider.category +"' as category, "
         query_strb= query_strb + "'cartociudad-" + str(provider.pk) +"' as resource, "
@@ -388,10 +417,11 @@ def create_cartociudad_config(provider):
         ET.SubElement(entityb, "field", column="ine_prov", name="ine_prov")
         ET.SubElement(entityb, "field", column="nom_prov", name="nom_prov")
         #ET.SubElement(entityb, "field", column="cod_postal", name="cod_postal")
-        ET.SubElement(entityb, "field", column="soundexesp", name="soundexesp")
-        #ET.SubElement(entityb, "field", column="soundexesp_ent_pob", name="soundexesp_ent_pob")
-        ET.SubElement(entityb, "field", column="soundexesp_municipio", name="soundexesp_municipio")
-        ET.SubElement(entityb, "field", column="soundexesp_provincia", name="soundexesp_provincia")
+        if has_soundex:
+            ET.SubElement(entityb, "field", column="soundexesp", name="soundexesp")
+            #ET.SubElement(entityb, "field", column="soundexesp_ent_pob", name="soundexesp_ent_pob")
+            ET.SubElement(entityb, "field", column="soundexesp_municipio", name="soundexesp_municipio")
+            ET.SubElement(entityb, "field", column="soundexesp_provincia", name="soundexesp_provincia")
         ET.SubElement(entityb, "field", column="category", name="category")  
         
         
@@ -403,9 +433,10 @@ def create_cartociudad_config(provider):
         query_str2= query_str2 + "m.nameunit as nom_muni, " 
         query_str2= query_str2 + "substring(p.natcode from 5 for 2) as ine_prov, " 
         query_str2= query_str2 + "p.nameunit as nom_prov, "
-        query_str2= query_str2 + "soundexesp2(m.nameunit) as soundexesp, " 
-        query_str2= query_str2 + "soundexesp2(m.nameunit) as soundexesp_municipio, "
-        query_str2= query_str2 + "soundexesp2(p.nameunit) as soundexesp_provincia, "
+        if has_soundex:
+            query_str2= query_str2 + "soundexesp2(m.nameunit) as soundexesp, " 
+            query_str2= query_str2 + "soundexesp2(m.nameunit) as soundexesp_municipio, "
+            query_str2= query_str2 + "soundexesp2(p.nameunit) as soundexesp_provincia, "
         query_str2= query_str2 + "'cartociudad' as source, "
         query_str2= query_str2 + "'" + provider.category +"' as category, "
         query_str2= query_str2 + "'cartociudad-" + str(provider.pk) +"' as resource, "
@@ -443,10 +474,11 @@ def create_cartociudad_config(provider):
         ET.SubElement(entity2, "field", column="ine_prov", name="ine_prov")
         ET.SubElement(entity2, "field", column="nom_prov", name="nom_prov")
         #ET.SubElement(entity2, "field", column="cod_postal", name="cod_postal")
-        ET.SubElement(entity2, "field", column="soundexesp", name="soundexesp")
-        #ET.SubElement(entity2, "field", column="soundexesp_ent_pob", name="soundexesp_ent_pob")
-        ET.SubElement(entity2, "field", column="soundexesp_municipio", name="soundexesp_municipio")
-        ET.SubElement(entity2, "field", column="soundexesp_provincia", name="soundexesp_provincia")   
+        if has_soundex:
+            ET.SubElement(entity2, "field", column="soundexesp", name="soundexesp")
+            #ET.SubElement(entity2, "field", column="soundexesp_ent_pob", name="soundexesp_ent_pob")
+            ET.SubElement(entity2, "field", column="soundexesp_municipio", name="soundexesp_municipio")
+            ET.SubElement(entity2, "field", column="soundexesp_provincia", name="soundexesp_provincia")   
         ET.SubElement(entity2, "field", column="category", name="category")  
         
         
@@ -515,9 +547,10 @@ def create_cartociudad_config(provider):
         query_str4= query_str4 + "m.nameunit as nom_muni, "
         query_str4= query_str4 + "substring(p.natcode from 5 for 2) as ine_prov, "
         query_str4= query_str4 + "p.nameunit as nom_prov, " 
-        query_str4= query_str4 + "soundexesp2(tv.texto) as soundexesp, "
-        query_str4= query_str4 + "soundexesp2(m.nameunit) as soundexesp_municipio, "
-        query_str4= query_str4 + "soundexesp2(p.nameunit) as soundexesp_provincia,  "
+        if has_soundex:
+            query_str4= query_str4 + "soundexesp2(tv.texto) as soundexesp, "
+            query_str4= query_str4 + "soundexesp2(m.nameunit) as soundexesp_municipio, "
+            query_str4= query_str4 + "soundexesp2(p.nameunit) as soundexesp_provincia,  "
         query_str4= query_str4 + "'cartociudad' as source, "
         query_str4= query_str4 + "'" + provider.category +"' as category, "
         query_str4= query_str4 + "'cartociudad-" + str(provider.pk) +"' as resource, "
@@ -557,10 +590,11 @@ def create_cartociudad_config(provider):
         ET.SubElement(entity4, "field", column="ine_prov", name="ine_prov")
         ET.SubElement(entity4, "field", column="nom_prov", name="nom_prov")
         #ET.SubElement(entity4, "field", column="cod_postal", name="cod_postal")
-        ET.SubElement(entity4, "field", column="soundexesp", name="soundexesp")
-        #ET.SubElement(entity4, "field", column="soundexesp_ent_pob", name="soundexesp_ent_pob")
-        ET.SubElement(entity4, "field", column="soundexesp_municipio", name="soundexesp_municipio")
-        ET.SubElement(entity4, "field", column="soundexesp_provincia", name="soundexesp_provincia") 
+        if has_soundex:
+            ET.SubElement(entity4, "field", column="soundexesp", name="soundexesp")
+            #ET.SubElement(entity4, "field", column="soundexesp_ent_pob", name="soundexesp_ent_pob")
+            ET.SubElement(entity4, "field", column="soundexesp_municipio", name="soundexesp_municipio")
+            ET.SubElement(entity4, "field", column="soundexesp_provincia", name="soundexesp_provincia") 
         ET.SubElement(entity4, "field", column="tipo", name="tipo")
         ET.SubElement(entity4, "field", column="subtipo", name="subtipo") 
         ET.SubElement(entity4, "field", column="category", name="category")  
