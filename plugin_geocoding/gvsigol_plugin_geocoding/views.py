@@ -268,10 +268,11 @@ def provider_delete(request, provider_id):
 def provider_full_import(request, provider_id):
     provider = Provider.objects.get(pk=provider_id)
     has_config = False
+    correct_conf = configure_datastore(provider)
     if provider.type == 'cartociudad':
-        has_config = create_cartociudad_config(provider)
+        has_config = create_cartociudad_config(provider, correct_conf)
     else:
-        has_config = create_XML_config(provider)
+        has_config = create_XML_config(provider, correct_conf)
     if has_config:
         add_solr_config(provider)
         reload_solr_config()
