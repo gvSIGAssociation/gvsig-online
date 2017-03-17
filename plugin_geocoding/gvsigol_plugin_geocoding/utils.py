@@ -137,9 +137,9 @@ def create_XML_config(provider):
         
         resource = provider.type+'-'+str(provider.pk)
         
-        query_str="select *, '" + resource + "-'||id as calculated_id, '" + resource + "' as resource, now() as last_modification, '" + params["resource"] +"' as table_name, '" + provider.category +"' as category, ST_X(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as longitud, ST_Y(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as latitud, 'user' as source  from " + datastore_params["schema"] + "." + params["resource"]
-        delta_import_str="select *, '" + resource + "-'||id as calculated_id, '" + resource + "' as resource, now() as last_modification, '" + params["resource"] +"' as table_name, '" + provider.category +"' as category, ST_X(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as longitud, ST_Y(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as latitud, 'user' as source  from " + datastore_params["schema"] + "." + params["resource"] + " where id='${dataimporter.delta.id}'"
-        delta_str="select *, '" + resource + "-'||id as calculated_id, '" + resource + "' as resource, now() as last_modification, '" + params["resource"] +"' as table_name , '" + provider.category +"' as category, ST_X(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as longitud, ST_Y(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as latitud, 'user' as source from " + datastore_params["schema"] + "." + params["resource"] + " where "+ geocoding_settings.LAST_MODIFIED_FIELD_NAME +" > '${dataimporter.last_index_time}'"
+        query_str="select '"+params["id_field"]+"' as obj_id, '"+params["text_field"]+"' as text, '" + resource + "-'||id as calculated_id, '" + resource + "' as resource, now() as last_modification, '" + params["resource"] +"' as table_name, '" + provider.category +"' as category, ST_X(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as longitud, ST_Y(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as latitud, 'user' as source  from " + datastore_params["schema"] + "." + params["resource"]
+        delta_import_str="select '"+params["id_field"]+"' as obj_id, '"+params["text_field"]+"' as text, '" + resource + "-'||id as calculated_id, '" + resource + "' as resource, now() as last_modification, '" + params["resource"] +"' as table_name, '" + provider.category +"' as category, ST_X(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as longitud, ST_Y(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as latitud, 'user' as source  from " + datastore_params["schema"] + "." + params["resource"] + " where id='${dataimporter.delta.id}'"
+        delta_str="select '"+params["id_field"]+"' as obj_id, '"+params["text_field"]+"' as text, '" + resource + "-'||id as calculated_id, '" + resource + "' as resource, now() as last_modification, '" + params["resource"] +"' as table_name , '" + provider.category +"' as category, ST_X(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as longitud, ST_Y(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as latitud, 'user' as source from " + datastore_params["schema"] + "." + params["resource"] + " where "+ geocoding_settings.LAST_MODIFIED_FIELD_NAME +" > '${dataimporter.last_index_time}'"
         
         document = ET.SubElement(root, "document")
         entity = ET.SubElement(
@@ -153,8 +153,8 @@ def create_XML_config(provider):
                 )
         
         ET.SubElement(entity, "field", column="calculated_id", name="id")
-        ET.SubElement(entity, "field", column=params["id_field"], name="obj_id")
-        ET.SubElement(entity, "field", column=params["text_field"], name="text")
+        ET.SubElement(entity, "field", column="obj_id", name="obj_id")
+        ET.SubElement(entity, "field", column="text", name="text")
         ET.SubElement(entity, "field", column="table_name", name="table_name")
         ET.SubElement(entity, "field", column="resource", name="tipo")
         ET.SubElement(entity, "field", column="last_modification", name="last_modification")
