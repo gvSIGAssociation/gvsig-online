@@ -74,7 +74,7 @@ class GoogleMaps():
                         'data': result, 
                         'image': str(provider.image)
                     }
-                parse_results.append(parse_result)
+                    parse_results.append(parse_result)
         return parse_results
     
     
