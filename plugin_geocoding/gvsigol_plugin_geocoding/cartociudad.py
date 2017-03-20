@@ -106,7 +106,7 @@ class Cartociudad():
     def get_json_from_url(self, url, params):
         response = requests.get(url=url, params=params)
         if response.status_code == 200:
-            respuesta = response.text.decode('utf-8')
+            respuesta = response.text.encode(response.apparent_encoding)
             if respuesta.startswith('callback('):
                 respuesta = respuesta['callback('.__len__():-1]
             #srespuesta = respuesta.encode('utf-8')
