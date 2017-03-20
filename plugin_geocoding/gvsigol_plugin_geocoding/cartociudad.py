@@ -109,7 +109,8 @@ class Cartociudad():
             respuesta = response.content
             if respuesta.startswith('callback('):
                 respuesta = respuesta['callback('.__len__():-1]
-    
+            respuesta = respuesta.encode('utf-8')
+            
             data = json.loads(respuesta)
             if data and isinstance(data, list):
                 for datum in data:
