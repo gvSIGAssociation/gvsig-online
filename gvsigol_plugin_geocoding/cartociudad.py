@@ -111,13 +111,20 @@ class Cartociudad():
                 respuesta = respuesta['callback('.__len__():-1]
     
             data = json.loads(respuesta)
-            if data:
+            if data and isinstance(data, list):
                 for datum in data:
                     if datum['source'] == 'user':
                         for provider in self.providers:
                             table_name = provider.type+'-'+str(provider.pk)
                             if datum['resource'] == table_name:
                                 datum['image'] = str(provider.image)
+                return data
+            else:
+                if data['source'] == 'user':
+                    for provider in self.providers:
+                        table_name = provider.type+'-'+str(provider.pk)
+                        if data['resource'] == table_name:
+                            data['image'] = str(provider.image)
                 return data
         return []
     
