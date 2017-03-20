@@ -112,8 +112,14 @@ class Cartociudad():
                 respuesta = respuesta['callback('.__len__():-1]
             
             logging.error('['+response.apparent_encoding+'] ->' + respuesta)
-            
-            
+            try:
+                respuesta.decode('utf-8')
+            except UnicodeDecodeError:
+                logging.error( "it was not a ascii-encoded unicode string")
+            else:
+                logging.error( "It may have been an ascii-encoded unicode string")
+                respuesta = unicode(respuesta, 'utf-8')
+                        
             data = json.loads(respuesta)
             if isinstance(data, list):
                 for datum in data:
