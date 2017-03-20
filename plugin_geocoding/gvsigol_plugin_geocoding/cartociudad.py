@@ -25,6 +25,7 @@ import settings
 import urllib2
 import json, requests
 import logging
+from unicode_utils import fix_bad_unicode
 
 class Cartociudad():
     
@@ -107,18 +108,14 @@ class Cartociudad():
     def get_json_from_url(self, url, params):
         response = requests.get(url=url, params=params)
         if response.status_code == 200:
-            respuesta = response.content
+            respuesta = response.text
             if respuesta.startswith('callback('):
                 respuesta = respuesta['callback('.__len__():-1]
             
+            
+            respuesta = fix_bad_unicode(respuesta)
+            
             logging.error('['+response.apparent_encoding+'] ->' + respuesta)
-            try:
-                respuesta.decode('utf-8')
-            except UnicodeDecodeError:
-                logging.error( "it was not a ascii-encoded unicode string")
-            else:
-                logging.error( "It may have been an ascii-encoded unicode string")
-                respuesta = unicode(respuesta, 'utf-8')
                         
             data = json.loads(respuesta)
             if isinstance(data, list):
