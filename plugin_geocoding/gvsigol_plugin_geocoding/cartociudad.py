@@ -109,11 +109,12 @@ class Cartociudad():
             respuesta = response.content
             if respuesta.startswith('callback('):
                 respuesta = respuesta['callback('.__len__():-1]
-                
-            respuesta = unicode(respuesta, 'utf-8')
-
             
-            data = json.loads(respuesta)
+            if response.apparent_encoding == 'utf-8':
+                respuesta = unicode(respuesta, 'iso-8859-1')
+            respuesta3 = respuesta.encode('iso-8859-1')
+            
+            data = json.loads(respuesta3)
             if isinstance(data, list):
                 for datum in data:
                     if datum['source'] == 'user':
