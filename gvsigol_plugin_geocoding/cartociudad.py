@@ -106,13 +106,13 @@ class Cartociudad():
     def get_json_from_url(self, url, params):
         response = requests.get(url=url, params=params)
         if response.status_code == 200:
-            respuesta = response.content
+            respuesta = response.text
             if respuesta.startswith('callback('):
                 respuesta = respuesta['callback('.__len__():-1]
-            respuesta = respuesta.encode('utf-8')
+            #srespuesta = respuesta.encode('utf-8')
             
             data = json.loads(respuesta)
-            if data and isinstance(data, list):
+            if isinstance(data, list):
                 for datum in data:
                     if datum['source'] == 'user':
                         for provider in self.providers:
