@@ -24,6 +24,7 @@ from geopy.util import logger
 import settings
 import urllib2
 import json, requests
+import logging
 
 class Cartociudad():
     
@@ -110,8 +111,8 @@ class Cartociudad():
             if respuesta.startswith('callback('):
                 respuesta = respuesta['callback('.__len__():-1]
             
-            if not response.apparent_encoding == 'utf-8':
-                respuesta = unicode(respuesta, response.apparent_encoding)
+            logging.error('['+response.apparent_encoding+'] ->' + respuesta)
+            
             
             data = json.loads(respuesta)
             if isinstance(data, list):
