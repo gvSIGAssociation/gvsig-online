@@ -366,7 +366,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 				if (!key.startsWith(this.prefix)) {	
 					infoContent += '<li class="item">';
 					infoContent += 	'<div class="feature-info">';
-					if (!value.startsWith('http')) {
+					if ((typeof value == 'string' || value instanceof String) && !value.startsWith('http')) {
 						infoContent += 		'<a href="javascript:void(0)" class="product-title">' + key + '</a>';
 						infoContent += 		'<span class="product-description">' + value + '</span>';
 						
