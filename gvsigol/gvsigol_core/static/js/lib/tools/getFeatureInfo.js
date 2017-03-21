@@ -366,8 +366,14 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 				if (!key.startsWith(this.prefix)) {	
 					infoContent += '<li class="item">';
 					infoContent += 	'<div class="feature-info">';
-					infoContent += 		'<a href="javascript:void(0)" class="product-title">' + key + '</a>';
-					infoContent += 		'<span class="product-description">' + value + '</span>';
+					if (!value.startsWith('http')) {
+						infoContent += 		'<a href="javascript:void(0)" class="product-title">' + key + '</a>';
+						infoContent += 		'<span class="product-description">' + value + '</span>';
+						
+					} else {
+						infoContent += 		'<a href="javascript:void(0)" class="product-title">' + key + '</a>';
+						infoContent += 		'<a href="' + value + '" style="color: #00c0ef !important;" target="_blank" class="product-description">' + value + '</a>';
+					}
 					infoContent += 	'</div>';
 					infoContent += '</li>';
 				}
