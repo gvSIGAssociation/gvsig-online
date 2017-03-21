@@ -201,8 +201,8 @@ layerTree.prototype.createTree = function() {
 				}
 			}						
 		}, this);
-		var dataTable = new attributeTable(selectedLayer, self.map, self.conf.tools.attribute_table);
-		$('#modal-table-dialog').modal('show');
+		var dataTable = new attributeTable(selectedLayer, self.map);
+		dataTable.show();
 	});
 	
 	

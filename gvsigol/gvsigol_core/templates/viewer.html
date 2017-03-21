@@ -156,6 +156,15 @@
 				
 			</div>			
 		</aside>
+		
+		<div class="panel-wrapper">
+			<div class="panel-controller">
+				<div class="tab-controller">
+					<i class="fa fa-bars"></i>
+				</div>
+			</div>
+			<div class="panel-content"></div>
+		</div>
 
 		<div id="map">
 			
@@ -203,6 +212,15 @@
 
 	<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
 	
+	<script>
+		if (!String.prototype.startsWith) {
+			String.prototype.startsWith = function(searchString, position) {
+		    	position = position || 0;
+		    	return this.indexOf(searchString, position) === position;
+		  	};
+		}
+	</script>
+	
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jQuery-2.1.4.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.cookie.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.easy-overlay.js" %}"></script>
@@ -226,6 +244,8 @@
 	<script>
 		var messageBox = new messageBox();
 	</script>
+	
+	<script type="text/javascript" src="{% static "js/lib/widgets/bottomPanel.js" %}"></script>
 	
 	<script type="text/javascript" src="{% static "js/lib/tools/getFeatureInfo.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/tools/attributeTable.js" %}"></script>
@@ -252,6 +272,11 @@
 	</script>
 	
 	<script type="text/javascript">
+	
+		var bottomPanel = new bottomPanel();
+		$(document).on('click', '.tab-controller', function() {
+        	bottomPanel.togglePanel();
+        });
 	
 		$("#modal-table-dialog").draggable({
 		    handle: ".modal-header",
