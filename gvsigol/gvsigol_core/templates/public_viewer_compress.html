@@ -133,6 +133,15 @@
 				
 			</div>			
 		</aside>
+		
+		<div class="panel-wrapper">
+			<div class="panel-controller">
+				<div class="tab-controller">
+					<i class="fa fa-bars"></i>
+				</div>
+			</div>
+			<div class="panel-content"></div>
+		</div>
 
 		<div id="map">
 			
@@ -219,6 +228,11 @@
 	</script>
 	
 	<script type="text/javascript">
+	
+		var bottomPanel = new bottomPanel();
+		$(document).on('click', '.tab-controller', function() {
+	    	bottomPanel.togglePanel();
+	    });
 	
 		$("#modal-table-dialog").draggable({
 		    handle: ".modal-header",
