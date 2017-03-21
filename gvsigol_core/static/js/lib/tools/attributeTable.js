@@ -71,8 +71,8 @@ attributeTable.prototype.createUI = function() {
 	ui += 	'<div class="col-md-12">';
 	ui += 		'<div class="nav-tabs-custom">';
 	ui += 			'<ul class="nav nav-tabs">';
-	ui += 				'<li class="active"><a href="#tab_data" data-toggle="tab">' + gettext('Data table') + '</a></li>';
-	//ui += 				'<li><a href="#tab_filter" data-toggle="tab">' + gettext('Advanced filters') + '</a></li>';
+	ui += 				'<li class="active"><a href="#tab_data" data-toggle="tab"><i class="fa fa-table"></i></a></li>';
+	//ui += 				'<li><a href="#tab_filter" data-toggle="tab"><i class="fa fa-filter"></i></a></li>';
 	ui += 			'</ul>';
 	ui += 			'<div class="tab-content">';
 	ui += 				'<div class="tab-pane active" id="tab_data">';
