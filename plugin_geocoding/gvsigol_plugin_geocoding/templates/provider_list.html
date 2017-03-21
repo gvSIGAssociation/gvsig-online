@@ -32,11 +32,11 @@
 						<tr class="ui-state-default">
 							<td><i class="fa fa-sort" aria-hidden="true"></i></td>
 							<td class="row-id">{{ prov.id }}</td>
-							<td class="row-id">{{ prov.type }}</td>
+							<td class="row-type">{{ prov.type }}</td>
 							{% if prov.category %}
-							<td class="row-id">{{ prov.category }}</td>
+							<td class="row-category">{{ prov.category }}</td>
 							{% else %}
-							<td class="row-id default-field">{% trans "(Default)" %}</td>
+							<td class="row-category default-field">{% trans "(Default)" %}</td>
 							{% endif %}
 							<td>{{ prov }}</td>
 							<td></td>
