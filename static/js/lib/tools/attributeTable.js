@@ -23,32 +23,31 @@
 /**
  * TODO
  */
-var attributeTable = function(layer, map, tool_conf) {	
+var attributeTable = function(layer, map) {	
 	this.id = "data-table";
 	this.map = map;
 	this.layer = layer;	
-	this.prefix = tool_conf.private_fields_prefix;
-	this.showSearch = tool_conf.show_search;
 	this.source = new ol.source.Vector();				
 	this.resultLayer = new ol.layer.Vector({
 		source: this.source,
 	  	style: new ol.style.Style({
 	    	fill: new ol.style.Fill({
-	      		color: 'rgba(255, 255, 255, 0.2)'
+	      		color: 'rgba(255, 133, 27, 0.4)'
 	    	}),
 	    	stroke: new ol.style.Stroke({
-	      		color: '#0099ff',
+	      		color: '#ff851b',
 	      		width: 2
 	    	}),
 	    	image: new ol.style.Circle({
 	      		radius: 7,
 	      		fill: new ol.style.Fill({
-	        		color: '#0099ff'
+	        		color: '#ff851b'
 	      		})
 	    	})
 	  	})
 	});
 	this.resultLayer.baselayer = true;
+	this.resultLayer.setZIndex(99999999);
 	this.map.addLayer(this.resultLayer);
 	this.initialize();
 };
@@ -58,7 +57,37 @@ var attributeTable = function(layer, map, tool_conf) {
  */
 attributeTable.prototype.initialize = function() {
 	this.source.clear();
-	this.createTable(this.describeFeatureType());
+	this.createUI();
+};
+
+/**
+ * TODO
+ */
+attributeTable.prototype.createUI = function() {
+	
+	var ui = '';
+	
+	ui += '<div class="row">';
+	ui += 	'<div class="col-md-12">';
+	ui += 		'<div class="nav-tabs-custom">';
+	ui += 			'<ul class="nav nav-tabs">';
+	ui += 				'<li class="active"><a href="#tab_data" data-toggle="tab">' + gettext('Data table') + '</a></li>';
+	//ui += 				'<li><a href="#tab_filter" data-toggle="tab">' + gettext('Advanced filters') + '</a></li>';
+	ui += 			'</ul>';
+	ui += 			'<div class="tab-content">';
+	ui += 				'<div class="tab-pane active" id="tab_data">';
+	ui += 				'</div>';
+	//ui += 				'<div class="tab-pane" id="tab_filter">';
+	//ui += 				'</div>';
+	ui += 			'</div>';
+	ui += 		'</div>';
+	ui += 	'</div>';
+	ui += '</div>';
+	
+	$('.panel-content').empty();
+	$('.panel-content').append(ui);
+	
+	this.createTableUI(this.describeFeatureType());
 };
 
 /**
@@ -103,7 +132,7 @@ attributeTable.prototype.describeFeatureType = function() {
 /**
  * TODO
  */
-attributeTable.prototype.createTable = function(featureType) {
+attributeTable.prototype.createTableUI = function(featureType) {
 	
 	var self = this;
 	
@@ -143,8 +172,8 @@ attributeTable.prototype.createTable = function(featureType) {
 	thead.append(trow);
 	table.append(thead);
 	
-	$('#modal-table-dialog .modal-body').empty();
-	$('#modal-table-dialog .modal-body').append(table);
+	$('#tab_data').empty();
+	$('#tab_data').append(table);
 	
 	var dt = $('#table-' + this.layer.get("id")).DataTable({
 		language: {
@@ -193,16 +222,6 @@ attributeTable.prototype.createTable = function(featureType) {
     });
 	dt.select.info( false );
 	
-	/*$('#table-' + this.layer.get("id")).on( 'draw.dt', function () {
-		var content = $("#modal-table-dialog .modal-content");
-		$("#modal-table-dialog").css("width", content[0].clientWidth);
-		$("#modal-table-dialog").css("height", content[0].clientHeight);
-		$("#modal-table-dialog").css("padding-left", "0px");
-		$(".modal-open .modal").css("overflow-x", "hidden");
-		$(".modal-open .modal").css("overflow-y", "hidden");
-		$(".modal-dialog").css("margin", "0");
-	});*/
-	
 	var htmlButtons = '';
 	htmlButtons += 	'<div>';
 	htmlButtons += 		'<a href="#" id="zoom-to-selection-button" style="margin-right: 20px;" class="btn btn-default">' + gettext('Zoom to selection');
@@ -225,10 +244,6 @@ attributeTable.prototype.createTable = function(featureType) {
 
 };
 
-
-/**
- * TODO
- */
 /**
  * TODO
  */
@@ -291,5 +306,5 @@ attributeTable.prototype.zoomToFeature = function(fid) {
  * TODO
  */
 attributeTable.prototype.show = function() {
-	$('#table-dialog').dialog("open");
+	bottomPanel.showPanel();
 };

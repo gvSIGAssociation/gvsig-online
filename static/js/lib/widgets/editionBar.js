@@ -697,6 +697,7 @@ editionBar.prototype.editFeatureForm = function(feature) {
 					featureProperties += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
 					
 				} else if (this.featureType[i].type == 'xsd:date') {
+					var dbDate = feature.getProperties()[this.featureType[i].name];
 					featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + feature.getProperties()[this.featureType[i].name] + '">';
 					
 				} else if (this.featureType[i].type == 'xsd:string') {				
