@@ -227,7 +227,7 @@ def create_cartociudad_config(provider, has_soundex):
         query_str= query_str + "tv.nom_via as text, "
         query_str= query_str + "'callejero' as table_name, "
         query_str= query_str + "tv.tipo_via as tipo_via_id, " 
-        query_str= query_str + "tv.tipo_v_des as tipo_via, "
+        query_str= query_str + "tv.tip_via_in as tipo_via, "
         query_str= query_str + "mv.ine_mun as ine_mun, " 
         query_str= query_str + "m.nameunit as nom_muni, " 
         query_str= query_str + "substring(p.natcode from 5 for 2) as ine_prov, " 
@@ -240,9 +240,10 @@ def create_cartociudad_config(provider, has_soundex):
         query_str= query_str + "'" + provider.category +"' as category, "
         query_str= query_str + "'cartociudad-" + str(provider.pk) +"' as resource, "
         query_str= query_str + "now() as last_modified " 
+        #query_str= query_str + "ST_AsEWKT(ST_Force2D(tv.wkb_geometry)) as geom " 
         query_str= query_str + "FROM "
         query_str= query_str + datastore_params["schema"]+".municipio_vial mv, " 
-        query_str= query_str + "(SELECT DISTINCT(id_vial, nom_via, tipo_via, tipo_v_des), id_vial, nom_via, tipo_via, tipo_v_des FROM "+datastore_params["schema"]+".tramo_vial) tv, "
+        query_str= query_str + "(SELECT DISTINCT(id_vial, nom_via, tipo_via, tipo_v_des), id_vial, nom_via, tipo_via, tip_via_in FROM "+datastore_params["schema"]+".tramo_vial) tv, "
         query_str= query_str + "(SELECT DISTINCT(id_vial, tipo_porta), id_vial, tipo_porta FROM "+datastore_params["schema"]+".portal_pk) pk,"
         query_str= query_str + datastore_params["schema"]+".municipio m, " 
         query_str= query_str + datastore_params["schema"]+".provincia p "
@@ -286,7 +287,7 @@ def create_cartociudad_config(provider, has_soundex):
             ET.SubElement(entity, "field", column="soundexesp_municipio", name="soundexesp_municipio")
             ET.SubElement(entity, "field", column="soundexesp_provincia", name="soundexesp_provincia")
         ET.SubElement(entity, "field", column="category", name="category")  
-        
+        #ET.SubElement(entity, "field", column="geom", name="geom")  
         
         
         
@@ -297,7 +298,7 @@ def create_cartociudad_config(provider, has_soundex):
         query_stra= query_stra + "tv.nom_via as text, "
         query_stra= query_stra + "'carretera' as table_name, "
         query_stra= query_stra + "tv.tipo_via as tipo_via_id, " 
-        query_stra= query_stra + "tv.tipo_v_des as tipo_via, "
+        query_stra= query_stra + "tv.tip_via_in as tipo_via, "
         query_stra= query_stra + "mv.ine_mun as ine_mun, " 
         query_stra= query_stra + "m.nameunit as nom_muni, " 
         query_stra= query_stra + "substring(p.natcode from 5 for 2) as ine_prov, " 
@@ -310,9 +311,10 @@ def create_cartociudad_config(provider, has_soundex):
         query_stra= query_stra + "'" + provider.category +"' as category, "
         query_stra= query_stra + "'cartociudad-" + str(provider.pk) +"' as resource, "
         query_stra= query_stra + "now() as last_modified " 
+        #query_stra= query_stra + "ST_AsEWKT(ST_Force2D(tv.wkb_geometry)) as geom " 
         query_stra= query_stra + "FROM "
         query_stra= query_stra + datastore_params["schema"]+".municipio_vial mv, " 
-        query_stra= query_stra + "(SELECT DISTINCT(id_vial, nom_via, tipo_via, tipo_v_des), id_vial, nom_via, tipo_via, tipo_v_des FROM "+datastore_params["schema"]+".tramo_vial) tv, "
+        query_stra= query_stra + "(SELECT DISTINCT(id_vial, nom_via, tipo_via, tipo_v_des), id_vial, nom_via, tipo_via, tip_via_in FROM "+datastore_params["schema"]+".tramo_vial) tv, "
         query_stra= query_stra + "(SELECT DISTINCT(id_vial, tipo_porta), id_vial, tipo_porta FROM "+datastore_params["schema"]+".portal_pk) pk,"
         query_stra= query_stra + datastore_params["schema"]+".municipio m, " 
         query_stra= query_stra + datastore_params["schema"]+".provincia p "
@@ -356,6 +358,7 @@ def create_cartociudad_config(provider, has_soundex):
             ET.SubElement(entitya, "field", column="soundexesp_municipio", name="soundexesp_municipio")
             ET.SubElement(entitya, "field", column="soundexesp_provincia", name="soundexesp_provincia")
         ET.SubElement(entitya, "field", column="category", name="category")  
+        #ET.SubElement(entitya, "field", column="geom", name="geom")  
         
         
         
@@ -366,7 +369,7 @@ def create_cartociudad_config(provider, has_soundex):
         query_strb= query_strb + "tv.nom_via as text, "
         query_strb= query_strb + "'callejero' as table_name, "
         query_strb= query_strb + "tv.tipo_via as tipo_via_id, " 
-        query_strb= query_strb + "tv.tipo_v_des as tipo_via, "
+        query_strb= query_strb + "tv.tip_via_in as tipo_via, "
         query_strb= query_strb + "mv.ine_mun as ine_mun, " 
         query_strb= query_strb + "m.nameunit as nom_muni, " 
         query_strb= query_strb + "substring(p.natcode from 5 for 2) as ine_prov, " 
@@ -378,10 +381,11 @@ def create_cartociudad_config(provider, has_soundex):
         query_strb= query_strb + "'cartociudad' as source, "
         query_strb= query_strb + "'" + provider.category +"' as category, "
         query_strb= query_strb + "'cartociudad-" + str(provider.pk) +"' as resource, "
-        query_strb= query_strb + "now() as last_modified " 
+        query_strb= query_strb + "now() as last_modified "
+        #query_strb= query_strb + "ST_AsEWKT(ST_Force2D(tv.wkb_geometry)) as geom " 
         query_strb= query_strb + "FROM "
         query_strb= query_strb + datastore_params["schema"]+".municipio_vial mv, " 
-        query_strb= query_strb + "(SELECT DISTINCT(id_vial, nom_via, tipo_via, tipo_v_des), id_vial, nom_via, tipo_via, tipo_v_des FROM "+datastore_params["schema"]+".tramo_vial) tv, "
+        query_strb= query_strb + "(SELECT DISTINCT(id_vial, nom_via, tipo_via, tipo_v_des), id_vial, nom_via, tipo_via, tip_via_in FROM "+datastore_params["schema"]+".tramo_vial) tv, "
         query_strb= query_strb + datastore_params["schema"]+".municipio m, " 
         query_strb= query_strb + datastore_params["schema"]+".provincia p "
         query_strb= query_strb + "WHERE "
@@ -423,6 +427,7 @@ def create_cartociudad_config(provider, has_soundex):
             ET.SubElement(entityb, "field", column="soundexesp_municipio", name="soundexesp_municipio")
             ET.SubElement(entityb, "field", column="soundexesp_provincia", name="soundexesp_provincia")
         ET.SubElement(entityb, "field", column="category", name="category")  
+        #ET.SubElement(entityb, "field", column="geom", name="geom")  
         
         
         query_str2= "SELECT "
@@ -441,6 +446,7 @@ def create_cartociudad_config(provider, has_soundex):
         query_str2= query_str2 + "'" + provider.category +"' as category, "
         query_str2= query_str2 + "'cartociudad-" + str(provider.pk) +"' as resource, "
         query_str2= query_str2 + "now() as last_modified " 
+        #query_str2= query_str2 + "ST_AsEWKT(ST_Force2D(m.wkb_geometry)) as geom " 
         query_str2= query_str2 + "FROM "
         query_str2= query_str2 + datastore_params["schema"]+".municipio m, " 
         query_str2= query_str2 + datastore_params["schema"]+".provincia p "
@@ -480,7 +486,7 @@ def create_cartociudad_config(provider, has_soundex):
             ET.SubElement(entity2, "field", column="soundexesp_municipio", name="soundexesp_municipio")
             ET.SubElement(entity2, "field", column="soundexesp_provincia", name="soundexesp_provincia")   
         ET.SubElement(entity2, "field", column="category", name="category")  
-        
+        #ET.SubElement(entity2, "field", column="geom", name="geom") 
         
         
         
@@ -555,6 +561,7 @@ def create_cartociudad_config(provider, has_soundex):
         query_str4= query_str4 + "'" + provider.category +"' as category, "
         query_str4= query_str4 + "'cartociudad-" + str(provider.pk) +"' as resource, "
         query_str4= query_str4 + "now() as last_modified "
+        #query_str4= query_str4 + "ST_AsEWKT(ST_Force2D(tv.wkb_geometry)) as geom " 
         query_str4= query_str4 + "FROM "
         query_str4= query_str4 + datastore_params["schema"]+".toponimo tv, "
         query_str4= query_str4 + datastore_params["schema"]+".municipio m, "
@@ -598,7 +605,7 @@ def create_cartociudad_config(provider, has_soundex):
         ET.SubElement(entity4, "field", column="tipo", name="tipo")
         ET.SubElement(entity4, "field", column="subtipo", name="subtipo") 
         ET.SubElement(entity4, "field", column="category", name="category")  
-        
+        #ET.SubElement(entity4, "field", column="geom", name="geom") 
         
         tree = ET.ElementTree(root)
         tree.write(fname)
