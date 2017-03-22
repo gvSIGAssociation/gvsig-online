@@ -50,8 +50,10 @@ class Cartociudad():
         datastore_id = params["datastore_id"]
         datastore = Datastore.objects.get(id=datastore_id)
         connection_params = json.loads(datastore.connection_params)
-        
+        logging.error("[set_database_config] -> START PETITION")
         response = requests.get(url=self.urls['configuration_url'], params=connection_params)
+        logging.error("[set_database_config] -> " + str(response.status_code))
+        logging.error("[set_database_config] -> END PETITION")
         return response.status_code == 200
     
         
