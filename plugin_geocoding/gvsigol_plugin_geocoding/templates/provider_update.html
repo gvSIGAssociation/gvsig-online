@@ -103,7 +103,7 @@
 						<div class="row">
 							<div class="col-md-12" style="margin-bottom: 20px;">
 								<div class="provider-img">
-									<img src={{image_photo_url}} alt="Provider Image">
+									<img id="image-preview" src={{image_photo_url}} alt="Provider Image">
 								</div>
 								<div class="provider-img-change">
 									<label>{% trans "Change image?" %}</label>
@@ -393,6 +393,22 @@
 		return false;
 	});
 	
+	 function readURL(input) {
+	        if (input.files && input.files[0]) {
+	            var reader = new FileReader();
+	            
+	            reader.onload = function (e) {
+	                $('#image-preview').attr('src', e.target.result);
+	            }
+	            
+	            reader.readAsDataURL(input.files[0]);
+	        }
+	    }
+	
+	
+	$("#id_image").change(function(){
+        readURL(this);
+    });
 	
 	$().ready(function() {
 		updateForm($('#id_type').val());
