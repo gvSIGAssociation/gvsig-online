@@ -101,11 +101,17 @@
 							</div>
 						</div>
 	
+						
 						<div class="row">
 							<div class="col-md-12" style="margin-bottom: 20px;">
-								<label>{% trans "Select image" %}</label>
-								<input id="id_image" name="image" type="file" class="file" data-show-preview="true">						
-							</div>
+								<div class="provider-img">
+									<img id="image-preview" src="" alt="Provider Image">
+								</div>
+								<div class="provider-img-change">
+									<label>{% trans "Select image" %}</label>
+									<input id="id_image" name="image" type="file" class="file" data-show-preview="true">						
+								</div>
+							</div>	
 						</div>	
 							
 					</div>	
@@ -330,6 +336,23 @@
 			rebuildSelect(name_select, text, true);
 		}
 	};
+	
+	 function readURL(input) {
+	        if (input.files && input.files[0]) {
+	            var reader = new FileReader();
+	            
+	            reader.onload = function (e) {
+	                $('#image-preview').attr('src', e.target.result);
+	            }
+	            
+	            reader.readAsDataURL(input.files[0]);
+	        }
+	    }
+	
+	
+	$("#id_image").change(function(){
+     readURL(this);
+	 });
 	
 	
 	$().ready(function() {

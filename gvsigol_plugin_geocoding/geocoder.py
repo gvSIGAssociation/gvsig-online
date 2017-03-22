@@ -51,7 +51,7 @@ class Geocoder():
             self.geocoders.append(geocoder)
             
         if provider.type == 'cartociudad' or provider.type == 'user':
-            geocoder['cartociudad'] = Cartociudad(provider)
+            geocoder['cartociudad'] = Cartociudad(provider, provider.type)
             self.geocoders.append(geocoder)
         
           

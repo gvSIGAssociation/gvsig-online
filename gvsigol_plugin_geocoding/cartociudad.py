@@ -19,20 +19,21 @@
 '''
 @author: Jose Badia <jbadia@scolab.es>
 '''
+from gvsigol_services.models import Datastore
 from geopy.compat import urlencode
 from geopy.util import logger
 import settings
 import urllib2
 import json, requests
 import logging
-from unicode_utils import fix_bad_unicode
 
 class Cartociudad():
     
-    def __init__(self, provider):
+    def __init__(self, provider, type):
         self.urls = settings.GEOCODING_PROVIDER['cartociudad']
         self.providers=[]
         self.append(provider)
+        
         
         
     def get_type(self):
@@ -41,16 +42,30 @@ class Cartociudad():
     
     def is_unique_instance(self):
         return False
+    
+    
+    def set_database_config(self,provider):
+        params = json.loads(provider.params)
         
+        datastore_id = params["datastore_id"]
+        datastore = Datastore.objects.get(id=datastore_id)
+        connection_params = json.loads(datastore.connection_params)
+        
+        response = requests.get(url=self.urls['configuration_url'], params=connection_params)
+        return response.status_code == 200
+    
         
     def append(self, provider):
         self.providers.append(provider)
+        if provider.type == 'cartociudad':
+            self.set_database_config(provider)
         
     
     def geocode(self, query, exactly_one):
         '''
         http://localhost:8090/geocodersolr/api/geocoder/candidatesJsonp?q=casas&autocancel=true&limit=20&countrycodes=es
         '''
+
         params = {
             'q': query,
             'autocancel': self.urls['autocancel'],
@@ -107,13 +122,11 @@ class Cartociudad():
     
     def get_json_from_url(self, url, params):
         response = requests.get(url=url, params=params)
+        logging.error('[CartoCiudad] ->' + response.url)
         if response.status_code == 200:
             respuesta = response.text
             if respuesta.startswith('callback('):
                 respuesta = respuesta['callback('.__len__():-1]
-            
-            
-            respuesta = fix_bad_unicode(respuesta)
             
             logging.error('['+response.apparent_encoding+'] ->' + respuesta)
                         

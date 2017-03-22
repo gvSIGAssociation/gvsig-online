@@ -36,7 +36,7 @@ GEOCODING_SUPPORTED_TYPES = (
 
 GEOCODING_PROVIDER = {
     'cartociudad': {
-        #'url': 'https://localhost/gc',
+        'configuration_url': 'http://localhost:8090/geocodersolr/api/geocoder/configureSourceJsonp',
         'candidates_url': 'http://localhost:8090/geocodersolr/api/geocoder/candidatesJsonp',
         'find_url': 'http://localhost:8090/geocodersolr/api/geocoder/findJsonp',
         'reverse_url': 'http://localhost:8090/geocodersolr/api/geocoder/reverseGeocode',
