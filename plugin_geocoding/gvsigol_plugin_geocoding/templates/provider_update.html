@@ -93,14 +93,7 @@
 							</div>
 						</div>	
 						
-						<div class="row nominatim-param googlemaps-param" id="params-row">
-							<div class="col-md-12 form-group">
-								<label for="id_params">{% trans "Params" %}</label>
-								{{ form.params }}						
-							</div>
-						</div>
-	
-						<div class="row">
+						<div class="row nominatim-param googlemaps-param user-param">
 							<div class="col-md-12" style="margin-bottom: 20px;">
 								<div class="provider-img">
 									<img id="image-preview" src={{image_photo_url}} alt="Provider Image">
@@ -111,6 +104,18 @@
 								</div>
 							</div>	
 						</div>	
+						
+						<div class="row nominatim-param googlemaps-param" id="params-row">
+							<div class="col-md-12 form-group">
+								<label for="id_params">{% trans "Advanced params" %}</label>
+								<div id="advanced-params-button" class="pull-right"><i id="advanced-params-icon" class="fa fa-plus"></i></div>
+								<div id="advanced-params">
+									{{ form.params }}			
+								</div>							
+							</div>
+						</div>
+	
+						
 							
 					</div>	
 				</form>	
@@ -409,6 +414,17 @@
 	$("#id_image").change(function(){
         readURL(this);
     });
+	
+	$('#advanced-params').hide();
+	 $('#advanced-params-button').click(function(){
+		 if($("#advanced-params-icon").hasClass("fa-plus")){
+			 $("#advanced-params-icon").removeClass("fa-plus").addClass("fa-minus");
+		 }else{
+			 $("#advanced-params-icon").removeClass("fa-minus").addClass("fa-plus");
+		 }
+	         $('#advanced-params').slideToggle("slow");
+	         GOL.DS_ADD.dstypeChanged($('#id_type').val());
+	 });
 	
 	$().ready(function() {
 		updateForm($('#id_type').val());
