@@ -36,6 +36,7 @@ GEOCODING_SUPPORTED_TYPES = (
 
 GEOCODING_PROVIDER = {
     'cartociudad': {
+        'configuration_url': '##GEOCODER_URL##/api/geocoder/configureSourceJsonp',
         'candidates_url': '##GEOCODER_URL##/api/geocoder/candidatesJsonp',
         'find_url': '##GEOCODER_URL##/api/geocoder/findJsonp',
         'reverse_url': '##GEOCODER_URL##/api/geocoder/reverseGeocode',
