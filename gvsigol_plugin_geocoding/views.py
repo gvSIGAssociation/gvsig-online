@@ -69,25 +69,26 @@ def provider_add(request):
         has_errors = False
         try:
             newProvider = Provider()
-            
+            logging.error("[provider-add l.72] INICIO")
             type = request.POST.get('type')
             newProvider.type = type
             newProvider.category = request.POST.get('category')
             
             params = request.POST.get('params')
-            
+            logging.error("[provider-add l.78]")
             if type=='cartociudad' or type=='user':
                 workspace = request.POST.get('workspace')
                 datastore = request.POST.get('datastore')
+                logging.error("[provider-add l.82]")
                 ws = Workspace.objects.get(id=workspace)
                 ds = Datastore.objects.filter(workspace=ws, name=datastore).first()
-                
+                logging.error("[provider-add l.85]")
                 if type=='user':
                     resource = request.POST.get('resource')
                     id_field = request.POST.get('id_field')
                     text_field = request.POST.get('text_field')
                     geom_field = request.POST.get('geom_field')
-                
+                    logging.error("[provider-add l.91]")
                     params = {
                         'datastore_id': ds.id,
                         'resource': str(resource),
@@ -98,14 +99,16 @@ def provider_add(request):
                 
                 if type=='cartociudad':
                     resources_needed = isValidCartociudadDB(ds)
+                    logging.error("[provider-add l.102]")
                     if resources_needed.__len__() > 0:
                         form.add_error(None, _("Error: DataStore has not a valid CartoCiudad schema (Needed " + ', '.join(resources_needed) + ")"))
                         has_errors = True
                     params = {
                         'datastore_id': ds.id,
                     } 
+                    logging.error("[provider-add l.109]")
             
-            else:
+            if type != 'user':
                 prov = Provider.objects.filter(type=type)
                 if prov and prov.__len__() > 0:
                     form.add_error(None, _("Error: this type of provider is already added to the project"))
@@ -118,15 +121,16 @@ def provider_add(request):
                 newProvider.order = Provider.objects.all().count()+1
                 if request.FILES.get('image'):
                     newProvider.image = request.FILES.get('image')  
-                        
+                logging.error("[provider-add l.124]")
                 newProvider.save()  
                 
                 #set_providers_actives()
+                logging.error("[provider-add l.128]")
                 set_providers_to_geocoder()
-                
+                logging.error("[provider-add l.130]")
                 if newProvider.type == 'nominatim' or newProvider.type == 'googlemaps':
                     return redirect('provider_list')
-                
+                logging.error("[provider-add l.133] FINAL")
                 return redirect('provider_update', provider_id=newProvider.pk)
             
         except Exception as e:
@@ -258,7 +262,7 @@ def provider_delete(request, provider_id):
         set_providers_to_geocoder()
         
     except Exception as e:
-        return HttpResponse('Error deleting provider: ' + e, status=500)
+        return HttpResponse('Error deleting provider: ' + str(e), status=500)
     
     return redirect('provider_list')
 
