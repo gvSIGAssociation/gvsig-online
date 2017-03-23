@@ -1026,7 +1026,7 @@ def enumeration_add(request):
             
         else:
             index = len(Enumeration.objects.all())
-            enum_name = '_enm' + str(index)
+            enum_name = '@enm' + str(index)
             message = _(u'You must enter a title for enumeration')
             return render_to_response('enumeration_add.html', {'message': message, 'enum_name': enum_name}, context_instance=RequestContext(request))
 
@@ -1034,7 +1034,7 @@ def enumeration_add(request):
     
     else:
         index = len(Enumeration.objects.all())
-        enum_name = '_enm' + str(index)
+        enum_name = '@enm' + str(index)
         return render_to_response('enumeration_add.html', {'enum_name': enum_name}, context_instance=RequestContext(request))
     
     
