@@ -166,7 +166,7 @@ print.prototype.handler = function(e) {
 			self.showLayersTab();
 			self.capabilities = null;
 			self.active = false;
-			self.map.getView().off('propertychange');
+			self.map.getView().un('propertychange');
 		});
 		
 		this.active = true;
