@@ -1,0 +1,74 @@
+{% extends "base_symbology.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="box">
+
+				<form role="form" method="post" enctype="multipart/form-data" action="/gvsigonline/symbology/sld_import/{{layer_id}}/">
+					<div class="box-header with-border">
+						<h3 class="box-title">{% trans "Import SLD" %}</h3>
+						<div class="box-tools pull-right">
+							<button type="submit" class="btn btn-sm btn-default save-button"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+						</div>
+					</div>
+				
+					<div class="box-body">
+					{% csrf_token %}					
+						{% if form.errors %}
+						<div id="form-error" style="color:#ff0000;">
+							<ul>
+							{% for field in form %}
+								{% if field.errors %}
+									<li>{{field.label}}. {{ field.errors|striptags }}</li>
+								{% endif %}	
+							{% endfor %}
+							</ul>
+						</div>
+						{% endif %}
+								
+						{% if message %}
+						<div id="form-error" style="color:#ff0000;">
+							<p>* {{ message }}</p>
+						</div>
+						{% endif %}
+										
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label>{% trans "Name" %}</label>
+								<input readonly name="sld-name" id="sld-name" value="{{style_name}}" type="text" class="form-control">	
+							</div>
+						</div>
+						
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label>{% trans "Select SLD" %}</label>
+								<input id="library-file" name="sld-file" type="file" accept=".sld" class="file" data-show-preview="true">
+							</div>
+						</div>
+						
+						<div class="row">
+							<div class="checkbox col-md-12">								
+								<label>
+									<input type="checkbox" name="style-is-default" id="style-is-default"/>{% trans "Set as default style" %}
+								</label>
+							</div>
+						</div>
+											
+	            	</div>
+				</form>		
+			</div>
+		</div>				
+	</div>
+{% endblock %}
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-symbology').addClass("active");
+	$('#submenu-styles').addClass("active");
+	$('.save-button').click( function() {
+		$("body").overlay();
+	});
+</script>
+{% endblock %}
