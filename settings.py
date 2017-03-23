@@ -23,6 +23,7 @@
 
 import os
 import ldap
+import django.conf.locale
 from django_auth_ldap.config import LDAPSearch
 from django.utils.translation import ugettext_lazy as _
 from django.core.files.storage import FileSystemStorage
@@ -57,15 +58,16 @@ INSTALLED_APPS = [
     'gvsigol_symbology',
     'gvsigol_filemanager',
     'gvsigol_core',
-    #'gvsigol_app_dev',
-    'gvsigol_app_pobla',
+    'gvsigol_app_dev',
+    #'gvsigol_app_aguas'
+    #'gvsigol_app_pobla',
     #'gvsigol_app_benicarlo',
-    'gvsigol_plugin_worldwind',
-    'gvsigol_plugin_shps_folder',
-    'gvsigol_plugin_geocoding',
-    'gvsigol_plugin_sync',
-    'gvsigol_plugin_catastro',
-    'gvsigol_plugin_alfresco',
+    #'gvsigol_plugin_worldwind',
+    #'gvsigol_plugin_shps_folder',
+    #'gvsigol_plugin_geocoding',
+    #'gvsigol_plugin_sync',
+    #'gvsigol_plugin_catastro',
+    #'gvsigol_plugin_alfresco',
     'gvsigol_plugin_print',
     'gvsigol_plugin_catalog',
 ]
@@ -175,11 +177,25 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
+
+EXTRA_LANG_INFO = {
+    'va': {
+        'bidi': False,
+        'code': u'va',
+        'name': u'Valencian',
+        'name_local': u'Valencian'
+    },
+}
+
+# Add custom languages not provided by Django
+LANG_INFO = dict(django.conf.locale.LANG_INFO.items() + EXTRA_LANG_INFO.items())
+django.conf.locale.LANG_INFO = LANG_INFO
+
 LANGUAGES = (
     ('es', _('Spanish')),
+    ('va', _('Valencian')),
     ('ca', _('Catalan')), 
     ('en', _('English')),   
-    
 )
 LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol/locale'),
@@ -222,8 +238,8 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
     #os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
-    os.path.join(BASE_DIR, 'gvsigol_app_pobla/static'),
-    #os.path.join(BASE_DIR, 'gvsigol_app_benicarlo/static'),
+    #os.path.join(BASE_DIR, 'gvsigol_app_pobla/static'),
+    os.path.join(BASE_DIR, 'gvsigol_app_benicarlo/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_geocoding/static'),
@@ -304,6 +320,12 @@ SUPPORTED_CRS = {
     '25830': {
         'code': 'EPSG:25830',
         'title': 'ETRS89 / UTM zone 30N',
+        'definition': '+proj=utm +zone=30 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
+        'units': 'meters'
+    },
+    '25829': {
+        'code': 'EPSG:25829',
+        'title': 'ETRS89 / UTM zone 29N',
         'definition': '+proj=utm +zone=30 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
         'units': 'meters'
     }
