@@ -23,6 +23,7 @@
 
 import os
 import ldap
+import django.conf.locale
 from django_auth_ldap.config import LDAPSearch
 from django.utils.translation import ugettext_lazy as _
 from django.core.files.storage import FileSystemStorage
@@ -165,12 +166,27 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
+
+EXTRA_LANG_INFO = {
+    'va': {
+        'bidi': False,
+        'code': u'va',
+        'name': u'Valencian',
+        'name_local': u'Valencian'
+    },
+}
+
+# Add custom languages not provided by Django
+LANG_INFO = dict(django.conf.locale.LANG_INFO.items() + EXTRA_LANG_INFO.items())
+django.conf.locale.LANG_INFO = LANG_INFO
+
 LANGUAGES = (
     ('es', _('Spanish')),
-    ('ca', _('Catalan')),    
-    ('en', _('English')),   
-    
+    ('va', _('Valencian')),
+    ('ca', _('Catalan')), 
+    ('en', _('English')),      
 )
+
 LOCALE_PATHS = (
     '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol/locale',
     '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol_core/locale',
