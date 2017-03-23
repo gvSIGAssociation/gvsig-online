@@ -369,8 +369,19 @@ def get_geocoder():
     
     return geocoder
 
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def get_providers_activated(request):
+    providers = Provider.objects.all()
+    types = []
+    for provider in providers:
+        types.append(provider.type)
+       
+    return HttpResponse(json.dumps({'types': list(set(types))}, indent=4), content_type='application/json')    
+    
+    
 
-login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def get_resource_list_available(request):
     """

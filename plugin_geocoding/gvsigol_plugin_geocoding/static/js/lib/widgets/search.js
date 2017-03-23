@@ -38,85 +38,113 @@ var search = function(map, conf) {
  */
 search.prototype.initUI = function() {	
 	var self = this;
-	
+
 	this.popup = new ol.Overlay.Popup();
 	this.map.addOverlay(this.popup);
-	
-	var contextmenu = new ContextMenu({
-	  width: 170,
-	  defaultItems: false, // defaultItems are (for now) Zoom In/Zoom Out
-	  items: [
-	    {
-	      text: 'Dirección de Nominatim',
-	      classname: 'some-style-class', // add some CSS rules
-	      callback: function (obj) {
-	      	var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
-	        $.ajax({
-	        	type: 'POST',
-				async: false,
-			  	url: '/gvsigonline/geocoding/get_location_address/',
-			  	beforeSend:function(xhr){
-			    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-			  	},
-			  	data: {
-			  		'coord': coordinate[0] + ","+ coordinate[1],
-			  		'type': 'nominatim'
-				},
-			  	success	:function(response){
-			  		self.locate(response, false);
-				},
-			  	error: function(){}
-			});
-			}
-	   	 },{
-		      text: 'Dirección de CartoCiudad',
-		      classname: 'some-style-class', // add some CSS rules
-		      callback: function (obj) {
-		      	var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
-		        $.ajax({
-		        	type: 'POST',
-					async: false,
-				  	url: '/gvsigonline/geocoding/get_location_address/',
-				  	beforeSend:function(xhr){
-				    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-				  	},
-				  	data: {
-				  		'coord': coordinate[0] + ","+ coordinate[1],
-				  		'type': 'cartociudad'
-					},
-				  	success	:function(response){
-				  		self.locate(response, false);
-					},
-				  	error: function(){}
-				});
-				}
-		   	 },{
-			      text: 'Dirección de Google Maps',
-			      classname: 'some-style-class', // add some CSS rules
-			      callback: function (obj) {
-			      	var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
-			        $.ajax({
-			        	type: 'POST',
-						async: false,
-					  	url: '/gvsigonline/geocoding/get_location_address/',
-					  	beforeSend:function(xhr){
-					    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-					  	},
-					  	data: {
-					  		'coord': coordinate[0] + ","+ coordinate[1],
-					  		'type': 'googlemaps'
-						},
-					  	success	:function(response){
-					  		self.locate(response, false);
-						},
-					  	error: function(){}
+
+	$.ajax({
+		type: 'POST',
+		async: false,
+		url: '/gvsigonline/geocoding/get_providers_activated/',
+		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		success	:function(response){
+			var menus = [];
+			for(var i=0; i<response.types.length; i++){
+				if(response.types[i] == "nominatim"){
+					menus.push({
+						text: 'Dirección de Nominatim',
+						classname: 'some-style-class', // add some CSS rules
+						callback: function (obj) {
+							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
+							$.ajax({
+								type: 'POST',
+								async: false,
+								url: '/gvsigonline/geocoding/get_location_address/',
+								beforeSend:function(xhr){
+									xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+								},
+								data: {
+									'coord': coordinate[0] + ","+ coordinate[1],
+									'type': 'nominatim'
+								},
+								success	:function(response){
+									self.locate(response, false);
+								},
+								error: function(){}
+							});
+						}
 					});
-					}
-			   	 }
-	  ]
+				}
+
+				if(response.types[i] == "cartociudad"){
+					menus.push({
+						text: 'Dirección de CartoCiudad',
+						classname: 'some-style-class', // add some CSS rules
+						callback: function (obj) {
+							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
+							$.ajax({
+								type: 'POST',
+								async: false,
+								url: '/gvsigonline/geocoding/get_location_address/',
+								beforeSend:function(xhr){
+									xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+								},
+								data: {
+									'coord': coordinate[0] + ","+ coordinate[1],
+									'type': 'cartociudad'
+								},
+								success	:function(response){
+									self.locate(response, false);
+								},
+								error: function(){}
+							});
+						}
+					});
+				}
+
+				if(response.types[i] == "googlemaps"){
+					menus.push({
+						text: 'Dirección de Google Maps',
+						classname: 'some-style-class', // add some CSS rules
+						callback: function (obj) {
+							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
+							$.ajax({
+								type: 'POST',
+								async: false,
+								url: '/gvsigonline/geocoding/get_location_address/',
+								beforeSend:function(xhr){
+									xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+								},
+								data: {
+									'coord': coordinate[0] + ","+ coordinate[1],
+									'type': 'googlemaps'
+								},
+								success	:function(response){
+									self.locate(response, false);
+								},
+								error: function(){}
+							});
+						}
+					});
+				}
+			}
+
+			if(menus.length > 0){
+				var contextmenu = new ContextMenu({
+					width: 170,
+					defaultItems: false, // defaultItems are (for now) Zoom In/Zoom Out
+					items: menus
+				});
+				self.map.addControl(contextmenu);
+			}
+		},
+		error: function(){}
 	});
-	this.map.addControl(contextmenu);
-	
+
+
+
 	$('#autocomplete').autocomplete({
 		serviceUrl: '/gvsigonline/geocoding/search_candidates/',
 		paramName: 'q',
@@ -126,40 +154,40 @@ search.prototype.initUI = function() {
 		},
 		groupBy: 'category',
 		transformResult: function(response) {
-	        jsonResponse = JSON.parse(response);
-	        if (jsonResponse.suggestions.length > 0) {
-	        	return {
-		            suggestions: $.map(jsonResponse.suggestions, function(item) {
-		                return { 
-		                	value: item.address,
-		                	type: item.type,
-		                	data: item 
-		                };
-		            })
-		        };
-	        }
-	        
-	    },
-	    onSelect: function (suggestion) {
-		        $.ajax({
-		        	type: 'POST',
-					async: false,
-				  	url: '/gvsigonline/geocoding/find_candidate/',
-				  	beforeSend:function(xhr){
-				    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-				  	},
-				  	data: {
-				  		'address': suggestion.data
-					},
-				  	success	:function(response){
-				  		if(response.address){
-				  			self.locate(response.address, true);
-				  		}
-					},
-				  	error: function(){}
-				});
+			jsonResponse = JSON.parse(response);
+			if (jsonResponse.suggestions.length > 0) {
+				return {
+					suggestions: $.map(jsonResponse.suggestions, function(item) {
+						return { 
+							value: item.address,
+							type: item.type,
+							data: item 
+						};
+					})
+				};
 			}
-	    
+
+		},
+		onSelect: function (suggestion) {
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/geocoding/find_candidate/',
+				beforeSend:function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				data: {
+					'address': suggestion.data
+				},
+				success	:function(response){
+					if(response.address){
+						self.locate(response.address, true);
+					}
+				},
+				error: function(){}
+			});
+		}
+
 	});
 };
 
