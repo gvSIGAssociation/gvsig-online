@@ -318,6 +318,7 @@ def toc_remove_layer(layer):
         p.project.save()
         
 def get_geoserver_base_url(request, url):
+    '''
     geoserver_url = None
     if 'username' in request.session:
         if request.session['username'] is not None and request.session['password'] is not None:
@@ -327,8 +328,11 @@ def get_geoserver_base_url(request, url):
         geoserver_url = url
         
     return geoserver_url
-        
+    '''
+    return url
+   
 def get_wms_url(request, workspace):
+    '''
     wms_url = None
     if 'username' in request.session:
         if request.session['username'] is not None and request.session['password'] is not None:
@@ -338,8 +342,11 @@ def get_wms_url(request, workspace):
         wms_url = workspace.wms_endpoint
         
     return wms_url
+    '''
+    return workspace.wms_endpoint
 
 def get_wfs_url(request, workspace):
+    '''
     wfs_url = None
     if 'username' in request.session:
         if request.session['username'] is not None and request.session['password'] is not None:
@@ -349,8 +356,11 @@ def get_wfs_url(request, workspace):
         wfs_url = workspace.wfs_endpoint
         
     return wfs_url
+    '''
+    return workspace.wfs_endpoint
 
 def get_cache_url(request, workspace):
+    '''
     cache_url = None
     if 'username' in request.session:
         if request.session['username'] is not None and request.session['password'] is not None:
@@ -360,6 +370,8 @@ def get_cache_url(request, workspace):
         cache_url = workspace.cache_endpoint
         
     return cache_url
+    '''
+    return workspace.cache_endpoint
 
 def get_catalog_url(request, layer):   
     catalog_url = ''

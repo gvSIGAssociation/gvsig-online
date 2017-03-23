@@ -516,6 +516,10 @@ def project_get_conf(request):
                 'permissions': {
                     'is_superuser': is_superuser(request.user),
                     'roles': core_utils.get_group_names_by_user(request.user)
+                },
+                'credentials': {
+                    'username': request.session['username'],
+                    'password': request.session['password']
                 }
             },
             "view": {
