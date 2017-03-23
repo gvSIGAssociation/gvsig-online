@@ -54,7 +54,7 @@ También se puede añadir como proveedor de búsquedas el motor de Google Maps.
 
 Entre sus parámetros específicos se definen por defecto las rutas a los servicios (por si cambiaran poder editarlas). 
 
-También requiere indicar una key de Google que dé entrada a los servicios de Google (más información en .._API/Key de Google: https://developers.google.com/maps/documentation/javascript/get-api-key )
+También requiere indicar una key de Google que dé entrada a los servicios de Google (más información en API/Key de Google: https://developers.google.com/maps/documentation/javascript/get-api-key)
 
 
 .. image:: ../_static/images/google.png
@@ -78,6 +78,7 @@ CartoCiudad ofrece la posibilidad de descargar la cartografía por regiones y po
   - municipio_vial.dbf
   - toponimo.shp
   - codigo_postal.shp
+  
   
 - Luego se exportarán a una base de datos a través del menú 'Exportar', en el que se marcará como nombre el mismo del fichero (sin la extensión) EN MINÚSCULAS. El encodding será 'LATIN1' y el sistema de coordenadas será 'ETRS89 / UTM zone 30N'
 
