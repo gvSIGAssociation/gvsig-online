@@ -87,7 +87,7 @@ CartoCiudad ofrece la posibilidad de descargar la cartografía por regiones y po
   - codigo_postal.shp
   
   
-- Luego se exportarán a una base de datos a través del menú 'Exportar', en el que se marcará como nombre el mismo del fichero (sin la extensión) EN MINÚSCULAS. El encodding será 'LATIN1' y el sistema de coordenadas será 'ETRS89 / UTM zone 30N'
+- Luego se exportarán a una base de datos a través del menú 'Exportar', en el que se marcará como nombre el mismo del fichero (sin la extensión) EN MINÚSCULAS. El encodding será 'autodetectar' y el sistema de coordenadas será 'ETRS89 / UTM zone 30N'
 
 .. image:: ../_static/images/centro_descargas_4.png
    :align: center
@@ -111,8 +111,8 @@ Una vez realizada esta tarea, será necesario cargar la cartografía de regiones
 
 - Cargar en el 'Administrador de archivos' y exportar las capas:
   
-  - Dentro de 'recintos_municipales_inspire_peninbal_etr89' la capa que existe, a la que exportaremos con el nombre 'municipio', encoding 'LATIN1' y sistema de coordenadas será 'ETRS89 / UTM zone 30N'
-  - Dentro de 'recintos_provinciales_inspire_peninbal_etr89', exportar con el nombre 'provincia', encoding 'LATIN1' y sistema de coordenadas será 'ETRS89 / UTM zone 30N'
+  - Dentro de 'recintos_municipales_inspire_peninbal_etr89' la capa que existe, a la que exportaremos con el nombre 'municipio', encoding 'autodetectar' y sistema de coordenadas será 'ETRS89 / UTM zone 30N'
+  - Dentro de 'recintos_provinciales_inspire_peninbal_etr89', exportar con el nombre 'provincia', encoding 'autodetectar' y sistema de coordenadas será 'ETRS89 / UTM zone 30N'
   
 Por último, para dar de alta el proveedor, será necesario indicar el almacén de datos en el que se han exportado todas las capas indicadas. (NOTA: en esta opción no se ofrece la posibilidad de seleccionar icono, ya que disponen de los suyos propios para identificar las calles, toponimos, municipios y demás entidades que se indexan a través de este servicio.)
 
