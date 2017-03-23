@@ -244,10 +244,11 @@ viewer.core = {
 				
 				$.ajax({
 					url: wmsLayer.legend_no_auth,
-					async: false,
-					username: self.conf.user.credentials.username,
-					password: self.conf.user.credentials.password,	                
+					async: false,	                
 					method: 'GET',
+					headers: {
+						"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
+					},
 					error: function(jqXHR, textStatus, errorThrown){},
 					success: function(){
 						self.map.addLayer(wmsLayer);
