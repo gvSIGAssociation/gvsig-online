@@ -141,16 +141,10 @@ class Cartociudad():
     
     def get_json_from_url(self, url, params):
         response = requests.get(url=url, params=params)
-        logging.error('[CartoCiudad] ->' + response.url)
         if response.status_code == 200:
             respuesta = response.text
             if respuesta.startswith('callback('):
                 respuesta = respuesta['callback('.__len__():-1]
-            
-            logging.error('['+response.apparent_encoding+'] ->' + respuesta)
-            aux = respuesta.decode('utf-8')
-            respuesta_utf8 = aux.encode('latin-1')             
-            logging.error('[latin-1] ->' + respuesta_utf8)
             
             data = json.loads(respuesta)
             if isinstance(data, list):
