@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-22 16:40+0100\n"
+"POT-Creation-Date: 2017-03-23 10:06+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -36,7 +36,7 @@ msgstr "Almacén de datos"
 msgid "Resource"
 msgstr "Tabla a indexar"
 
-#: forms_services.py:42 forms_services.py:62 templates/provider_list.html.py:22
+#: forms_services.py:42 forms_services.py:62 templates/provider_list.html:22
 msgid "Id"
 msgstr "Campo identificativo del elemento"
 
@@ -306,7 +306,9 @@ msgstr "Duración"
 
 #: views.py:104
 msgid "Error: DataStore has not a valid CartoCiudad schema (Needed , "
-msgstr "Error: El almacén de datos no tiene un esquema ajustado a CartoCiudad (Se necesita , "
+msgstr ""
+"Error: El almacén de datos no tiene un esquema ajustado a CartoCiudad (Se "
+"necesita , "
 
 #: views.py:113
 msgid "Error: this type of provider is already added to the project"
