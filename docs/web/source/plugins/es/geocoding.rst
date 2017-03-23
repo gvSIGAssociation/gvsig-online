@@ -29,7 +29,7 @@ El plugin de geocoding permite definir hasta 4 tipos de servicios diferentes, ad
 
 En todos ellos se les puede indicar una categoría (para englobar los resultados de ese proveedor bajo un separador) y se les puede asignar un icono que marcará cada una de las sugerencias propuestas. Luego, según las características de cada uno, se requerirán unos parámetros u otros para que puedan funcionar:
 
-.. image:: ../_static/images/geocoding_2.png
+.. image:: ../_static/images/search_2.png
    :align: center
 
 
