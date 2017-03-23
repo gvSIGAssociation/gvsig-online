@@ -77,7 +77,6 @@ class Cartociudad():
         #url = "?".join((self.urls['candidates_url'], urlencode(params)))
         return self.get_json_from_url(self.urls['candidates_url'], params)
     
-    
     def find(self, address_str, exactly_one):
         '''
         http://localhost:8090/geocodersolr/api/geocoder/candidatesJsonp?q=casas&autocancel=true&limit=20&countrycodes=es
@@ -105,7 +104,17 @@ class Cartociudad():
         }
 
         #url = "?".join((self.urls['candidates_url'], urlencode(params)))
-        return self.get_json_from_url(self.urls['find_url'], params)
+        json_result =  self.get_json_from_url(self.urls['find_url'], params)
+        if not json_result:
+            updated_data = False
+            for provider in self.providers:
+                if provider.type == 'cartociudad':
+                    updated_data = self.set_database_config(provider)    
+            if updated_data:
+                json_result = self.get_json_from_url(self.urls['find_url'], params)
+                
+        return json_result
+        
         
         
 
@@ -117,7 +126,17 @@ class Cartociudad():
             'lat': coordinate[1],
             'lon': coordinate[0]
         }
-        return self.get_json_from_url(self.urls['reverse_url'], params)
+        
+        json_result =  self.get_json_from_url(self.urls['reverse_url'], params)
+        if not json_result:
+            updated_data = False
+            for provider in self.providers:
+                if provider.type == 'cartociudad':
+                    updated_data = self.set_database_config(provider)    
+            if updated_data:
+                json_result = self.get_json_from_url(self.urls['reverse_url'], params)
+                
+        return json_result
     
     
     def get_json_from_url(self, url, params):
