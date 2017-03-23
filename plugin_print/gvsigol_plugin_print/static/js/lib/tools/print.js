@@ -76,7 +76,7 @@ print.prototype.handler = function(e) {
 		
 		this.capabilities = this.getCapabilities('a4_landscape');
 		this.renderPrintExtent(this.capabilities.layouts[0].attributes[3].clientInfo);
-		this.map.getView().on('propertychange', function() {
+		var eventKey = this.map.getView().on('propertychange', function() {
 	        self.extentLayer.getSource().clear();
 	        self.lastAngle = 0;
 	        self.renderPrintExtent(self.capabilities.layouts[0].attributes[3].clientInfo); 
@@ -162,11 +162,11 @@ print.prototype.handler = function(e) {
 		});
 		
 		$('#cancel-print').on('click', function () {
+			self.map.getView().unByKey(eventKey);
 			self.removeExtentLayer();
 			self.showLayersTab();
 			self.capabilities = null;
 			self.active = false;
-			self.map.getView().un('propertychange');
 		});
 		
 		this.active = true;
