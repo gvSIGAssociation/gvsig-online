@@ -19,19 +19,19 @@ msgstr ""
 
 #: settings.py:194 settings_template.py:169
 msgid "Spanish"
-msgstr ""
+msgstr "Espanyol"
 
 #: settings.py:195
 msgid "Valencian"
-msgstr ""
+msgstr "Valencià"
 
 #: settings.py:196 settings_template.py:170
 msgid "Catalan"
-msgstr ""
+msgstr "Català"
 
 #: settings.py:197 settings_template.py:171
 msgid "English"
-msgstr ""
+msgstr "Anglés"
 
 #: settings.py:272 settings_template.py:227
 msgid "PostGIS vector"
@@ -43,4 +43,4 @@ msgstr ""
 
 #: settings.py:275 settings_template.py:230
 msgid "Cascading WMS"
-msgstr ""
+msgstr "WMS en cascada"

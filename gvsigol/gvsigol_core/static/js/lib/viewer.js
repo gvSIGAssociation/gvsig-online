@@ -241,7 +241,19 @@ viewer.core = {
 				wmsLayer.crs = layerConf.crs;
 				wmsLayer.order = layerConf.order;
 				wmsLayer.setZIndex(parseInt(layerConf.order));
-				this.map.addLayer(wmsLayer);
+				
+				$.ajax({
+					url: wmsLayer.legend_no_auth,
+					async: false,
+					username: self.conf.user.credentials.username,
+					password: self.conf.user.credentials.password,	                
+					method: 'GET',
+					error: function(jqXHR, textStatus, errorThrown){},
+					success: function(){
+						self.map.addLayer(wmsLayer);
+					}
+				});
+				//this.map.addLayer(wmsLayer);
 			}
 		}
 	},
