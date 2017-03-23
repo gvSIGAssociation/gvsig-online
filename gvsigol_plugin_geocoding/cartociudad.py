@@ -148,7 +148,10 @@ class Cartociudad():
                 respuesta = respuesta['callback('.__len__():-1]
             
             logging.error('['+response.apparent_encoding+'] ->' + respuesta)
-                        
+            aux = respuesta.decode('utf-8')
+            respuesta_utf8 = aux.encode('utf-8')             
+            logging.error('[utf-8] *->' + respuesta_utf8)
+            
             data = json.loads(respuesta)
             if isinstance(data, list):
                 for datum in data:
