@@ -32,16 +32,16 @@ var attributeTable = function(layer, map) {
 		source: this.source,
 	  	style: new ol.style.Style({
 	    	fill: new ol.style.Fill({
-	      		color: 'rgba(255, 133, 27, 0.4)'
+	      		color: 'rgba(204, 255, 0, 0.4)'
 	    	}),
 	    	stroke: new ol.style.Stroke({
-	      		color: '#ff851b',
+	      		color: '#CCFF00',
 	      		width: 2
 	    	}),
 	    	image: new ol.style.Circle({
 	      		radius: 7,
 	      		fill: new ol.style.Fill({
-	        		color: '#ff851b'
+	        		color: '#CCFF00'
 	      		})
 	    	})
 	  	})
