@@ -45,11 +45,33 @@ viewer.core = {
 		
     initialize: function(conf) {
     	this.conf = conf;
+    	this._authenticate();
     	this._createMap();
     	this._initToolbar();
     	this._loadLayers();
     	this._createWidgets();    	    	
     	this._loadTools();
+    },
+    
+    _authenticate: function() {
+    	var self = this;
+    	$.ajax({
+			url: self.conf.geoserver_base_url + '/wms',
+			params: {
+				'SERVICE': 'WMS',
+				'VERSION': '1.1.1',
+				'REQUEST': 'GetCapabilities'
+			},
+			async: false,	                
+			method: 'GET',
+			headers: {
+				"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
+			},
+			error: function(jqXHR, textStatus, errorThrown){},
+			success: function(){
+				console.log('Authenticated');
+			}
+		});
     },
     
     _createMap: function() {
@@ -180,6 +202,7 @@ viewer.core = {
 	
 	_loadOverlays: function() {
 		var self = this;
+		var ajaxRequests = new Array();
 		for (var i=0; i<this.conf.layerGroups.length; i++) {			
 			var group = this.conf.layerGroups[i];
 			for (var k=0; k<group.layers.length; k++) {
@@ -242,9 +265,11 @@ viewer.core = {
 				wmsLayer.order = layerConf.order;
 				wmsLayer.setZIndex(parseInt(layerConf.order));
 				
-				$.ajax({
+				this.map.addLayer(wmsLayer);
+				/*
+				var req = $.ajax({
 					url: wmsLayer.legend_no_auth,
-					async: false,	                
+					async: true,	                
 					method: 'GET',
 					headers: {
 						"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
@@ -254,9 +279,14 @@ viewer.core = {
 						self.map.addLayer(wmsLayer);
 					}
 				});
-				//this.map.addLayer(wmsLayer);
+				ajaxRequests.push(req);*/
 			}
 		}
+		/*
+		$.when(undefined, ajaxRequests).done(function() {
+			self._createWidgets();
+			self._loadTools();
+		});*/
 	},
 	
 	_loadLayerGroups: function() {
