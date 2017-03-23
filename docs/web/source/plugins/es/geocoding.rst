@@ -16,6 +16,13 @@ Tendremos que seleccionar uno de estos candidatos y a continuación el mapa se c
 
 .. image:: ../_static/images/geocoding_find.png
    :align: center
+   
+   
+También existe la posibilidad de hacer una geocodificación inversa (averiguar la dirección marcando una posición en el mapa). Dependiendo los proveedores que tengamos disponibles, saldrán más o menos opciones:
+
+.. image:: ../_static/images/geocoding_reverse.png
+   :align: center
+
 
 
 Conociendo el geocodificador
