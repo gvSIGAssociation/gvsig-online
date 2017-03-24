@@ -38,7 +38,7 @@ msgstr "Tabla a indexar"
 
 #: forms_services.py:42 forms_services.py:62 templates/provider_list.html:22
 msgid "Id"
-msgstr "Campo identificativo del elemento"
+msgstr "ID"
 
 #: forms_services.py:43 forms_services.py:63
 msgid "Text"
