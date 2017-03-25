@@ -170,7 +170,8 @@ ChangeToWWControl.prototype.initWW = function() {
 	var coordsdisplay = new WorldWind.CoordinatesDisplayLayer(this.wwd);
 	this.wwd.addLayer(coordsdisplay);
 	var controls = new WorldWind.ViewControlsLayer(this.wwd);
-	controls.placement = new WorldWind.Offset(WorldWind.OFFSET_FRACTION, 0.5, WorldWind.OFFSET_FRACTION, 0.1);
+	//controls.placement = new WorldWind.Offset(WorldWind.OFFSET_FRACTION, 0.5, WorldWind.OFFSET_FRACTION, 0.1);
+	controls.placement = new WorldWind.Offset(WorldWind.OFFSET_FRACTION, 0.5, WorldWind.OFFSET_FRACTION, 1);
 	controls.alignment = new WorldWind.Offset(WorldWind.OFFSET_FRACTION, 0.5, WorldWind.OFFSET_FRACTION, 1);
 
 	this.wwd.addLayer(controls);
@@ -281,7 +282,8 @@ ChangeToWWControl.prototype.loadBaseLayer = function() {
 	if (this.provider.baseLayerType == 'Bing'){
 		this.wwd.addLayer(new WorldWind.BingAerialWithLabelsLayer());
 	}else{
-		this.wwd.addLayer(new WorldWind.OpenStreetMapImageLayer());
+		//this.wwd.addLayer(new WorldWind.OpenStreetMapImageLayer());
+		this.wwd.addLayer(new WorldWind.BingAerialWithLabelsLayer());
 	}
 	//this.wwd.addLayer(new WorldWind.BMNGOneImageLayer());
 	//this.wwd.addLayer(new WorldWind.BMNGLandsatLayer());	
