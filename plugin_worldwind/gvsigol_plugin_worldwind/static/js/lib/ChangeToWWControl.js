@@ -171,8 +171,8 @@ ChangeToWWControl.prototype.initWW = function() {
 	this.wwd.addLayer(coordsdisplay);
 	var controls = new WorldWind.ViewControlsLayer(this.wwd);
 	//controls.placement = new WorldWind.Offset(WorldWind.OFFSET_FRACTION, 0.5, WorldWind.OFFSET_FRACTION, 0.1);
-	controls.placement = new WorldWind.Offset(WorldWind.OFFSET_FRACTION, 0.5, WorldWind.OFFSET_FRACTION, 1);
-	controls.alignment = new WorldWind.Offset(WorldWind.OFFSET_FRACTION, 0.5, WorldWind.OFFSET_FRACTION, 1);
+	controls.placement = new WorldWind.Offset(WorldWind.OFFSET_FRACTION, 1, WorldWind.OFFSET_FRACTION, 0.1);
+	controls.alignment = new WorldWind.Offset(WorldWind.OFFSET_FRACTION, 1, WorldWind.OFFSET_FRACTION, 1);
 
 	this.wwd.addLayer(controls);
 	//Start the view pointing to a longitude within the current time zone
