@@ -234,7 +234,7 @@ msgstr "Nombre"
 
 #: templates/project_add.html:29 templates/project_update.html.py:29
 msgid "Project name"
-msgstr "Nobre del proyecto"
+msgstr "Nombre del proyecto"
 
 #: templates/project_add.html:35 templates/project_list.html.py:23
 #: templates/project_update.html:35
