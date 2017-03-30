@@ -25,8 +25,11 @@ from models import LayerReadGroup, LayerWriteGroup
 from gvsigol_auth.models import UserGroup
 from gvsigol_services.models import Datastore, LayerResource
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
+from time import gmtime, strftime
+from datetime import date
 from gvsigol import settings
 import psycopg2
+import json
 import os
 
 def get_all_user_groups_checked_by_layer(layer):
@@ -136,6 +139,55 @@ def get_connection(host, port, database, user, password):
         return []
     
     return conn;
+
+def get_distinct_query(host, port, schema, database, user, password, layer, field):
+    values = []
+    conn = get_connection(host, port, database, user, password)
+    cursor = conn.cursor()
+    
+    try:
+        sql = 'SELECT DISTINCT("' + field + '") FROM ' + schema + '.' + layer + ' ORDER BY "' + field + '" ASC;'
+        
+        cursor.execute(sql);
+        rows = cursor.fetchall()
+        for row in rows:
+            if row[0] is not None:
+                val = row[0]
+                if isinstance(val, date):
+                    val = str(val)
+                values.append(val)
+
+    except StandardError, e:
+        print "Query error!", e
+        return []
+    
+    close_connection(cursor, conn)
+    return values 
+
+def get_minmax_query(host, port, schema, database, user, password, layer, field):
+    conn = get_connection(host, port, database, user, password)
+    cursor = conn.cursor()
+    
+    try:
+        sql = 'SELECT MIN("' + field + '") AS MinValue, MAX("' + field + '") AS MaxValue FROM ' + schema + '.' + layer + ' WHERE "' + field + '" IS NOT NULL;'
+        
+        cursor.execute(sql);
+        rows = cursor.fetchall()
+
+    except StandardError, e:
+        print "Fallo en el getMIN y getMAX", e
+        return {}
+    
+    close_connection(cursor, conn)
+    
+    if len(rows) > 0:
+        minmax = rows[0]
+        if len(minmax) == 2:
+            min = minmax[0]
+            max = minmax[1]
+            return json.dumps({'min': float(min), 'max': float(max)})
+    
+    return {}
 
 #TODO: llevar al paquete del core
 def close_connection(cursor, conn):
