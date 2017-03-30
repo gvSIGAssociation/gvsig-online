@@ -275,7 +275,9 @@ attributeTable.prototype.createFiltersUI = function(featureType) {
 	ui += 								'<select id="filter-field-select" class="form-control">';
 	ui += 									'<option value="" selected disabled>--</option>';
 	for (var i=0; i<featureType.length; i++) {
+		if (featureType[i].type.indexOf('gml:') == -1) {
 			ui += '<option value="' + featureType[i].type + '">' + featureType[i].name + '</option>';
+		}
 	}
 	ui += 								'</select>';
 	ui += 							'</div>';
