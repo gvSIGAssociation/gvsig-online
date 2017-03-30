@@ -293,3 +293,74 @@ html, body {
 	background-color: #ffffff;
 	box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
 }
+
+/* Using box shadows to create 3D effects */
+#calculator {
+	width: 100%;
+	height: auto;
+	
+	margin: 0px 0px 10px 0px;
+	padding: 20px 20px 9px;
+	float: right;
+	
+	/*background: #9dd2ea;
+	background: linear-gradient(#9dd2ea, #8bceec);
+	border-radius: 3px;
+	box-shadow: 0px 4px #009de4, 0px 10px 15px rgba(0, 0, 0, 0.2);*/
+	
+	background: #ddd;
+	background: linear-gradient(#ddd, #ccc);
+    border-radius: 3px;
+    box-shadow: 0px 4px #999, 0px 10px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Clear floats */
+.keys, .bottom-selects {overflow: hidden;}
+
+/* Applying same to the keys */
+.keys span, .bottom-selects span.clear {
+	float: left;
+	position: relative;
+	top: 0;
+	
+	cursor: pointer;
+	
+	width: 15%;
+	height: 40px;
+	
+	background: white;
+	border-radius: 3px;
+	box-shadow: 0px 4px rgba(0, 0, 0, 0.2);
+	
+	margin: 0 12px 12px 0;
+	
+	color: #888;
+	line-height: 36px;
+	text-align: center;
+	
+	/* prevent selection of text inside keys */
+	user-select: none;
+	
+	/* Smoothing out hover and active states using css3 transitions */
+	transition: all 0.2s ease;
+}
+
+/* Remove right margins from operator keys */
+/* style different type of keys (operators/evaluate/clear) differently */
+.keys span.weight {
+	width: 23%;
+	margin-right: 14px;
+}
+
+/* Some hover effects */
+.keys span:hover {
+	background: #ccc;
+    box-shadow: 0px 4px #777;
+	color: white;
+}
+
+/* Simulating "pressed" effect on active state of the keys by removing the box-shadow and moving the keys down a bit */
+.keys span:active {
+	box-shadow: 0px 0px #6b54d3;
+	top: 4px;
+}

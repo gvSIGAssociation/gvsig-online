@@ -50,6 +50,7 @@ import signals
 import urllib
 import utils
 import json
+import ast
 import re
 import os
 logger = logging.getLogger(__name__)
@@ -649,11 +650,12 @@ def layer_permissions_update(request, layer_id):
                 pass
         
         LayerWriteGroup.objects.filter(layer=layer).delete()
-        lwag = LayerWriteGroup()
-        lwag.layer = layer
-        lwag.group = agroup
-        lwag.save()
-        write_groups.append(agroup)
+        if not layer.type.startswith('c_'):
+            lwag = LayerWriteGroup()
+            lwag.layer = layer
+            lwag.group = agroup
+            lwag.save()
+            write_groups.append(agroup)
         for group in assigned_write_groups:
             try:
                 group = UserGroup.objects.get(id=group)
@@ -1212,6 +1214,29 @@ def get_feature_info(request):
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 @csrf_exempt
+def get_unique_values(request):
+    if request.method == 'POST':
+        layer_name = request.POST.get('layer_name')
+        layer_ws = request.POST.get('layer_ws')
+        field = request.POST.get('field')
+        
+        workspace = Workspace.objects.get(name__exact=layer_ws)
+        layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace.name)
+        
+        connection = ast.literal_eval(layer.datastore.connection_params)
+        
+        host = connection.get('host')
+        port = connection.get('port')
+        schema = connection.get('schema')
+        database = connection.get('database')
+        user = connection.get('user')
+        password = connection.get('passwd')
+        
+        unique_fields = utils.get_distinct_query(host, port, schema, database, user, password, layer.name, field)
+    
+        return HttpResponse(json.dumps({'values': unique_fields}, indent=4), content_type='application/json')
+
+@csrf_exempt
 def get_datatable_data(request):
     if request.method == 'POST':      
         layer_name = request.POST.get('layer_name')
@@ -1225,6 +1250,7 @@ def get_datatable_data(request):
         max_features = request.POST.get('length')
         draw = request.POST.get('draw')
         search_value = request.POST.get('search[value]')
+        cql_filter = request.POST.get('cql_filter')
         
         values = None
         recordsTotal = 0
@@ -1232,82 +1258,98 @@ def get_datatable_data(request):
         
         encoded_property_name = property_name.encode('utf-8')
         
-        if search_value == '':
-            values = {
-                'SERVICE': 'WFS',
-                'VERSION': '1.1.0',
-                'REQUEST': 'GetFeature',
-                'TYPENAME': layer_name,
-                'OUTPUTFORMAT': 'application/json',
-                'MAXFEATURES': max_features,
-                'STARTINDEX': start_index,
-                'PROPERTYNAME': encoded_property_name
-            }
-            recordsTotal = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, None)
-            recordsFiltered = recordsTotal
-            
-        else:
-            properties = properties_with_type.split(',')
-            encoded_value = search_value.encode('ascii', 'replace')
-            
-            filter = '<Filter>'
-            filter += '<Or>'
-            for p in properties:
-                if p.split('|')[1] == 'xsd:string':
-                    filter += '<PropertyIsLike matchCase="false" wildCard="*" singleChar="." escape="!">'
-                    filter += '<PropertyName>' + p.split('|')[0] + '</PropertyName>'
-                    filter += '<Literal>*' + encoded_value.replace('?', '.') + '*' + '</Literal>'
-                    filter += '</PropertyIsLike>'
-                elif p.split('|')[1] == 'xsd:double' or p.split('|')[1] == 'xsd:decimal' or p.split('|')[1] == 'xsd:integer' or p.split('|')[1] == 'xsd:int' or p.split('|')[1] == 'xsd:long':
-                    if search_value.isdigit():
-                        filter += '<PropertyIsEqualTo>'
-                        filter += '<PropertyName>' + p.split('|')[0] + '</PropertyName>'
-                        filter += '<Literal>' + search_value + '</Literal>'
-                        filter += '</PropertyIsEqualTo>'
-            filter += '</Or>'
-            filter += '</Filter>'
-            
-            values = {
-                'SERVICE': 'WFS',
-                'VERSION': '1.1.0',
-                'REQUEST': 'GetFeature',
-                'TYPENAME': layer_name,
-                'OUTPUTFORMAT': 'application/json',
-                'MAXFEATURES': max_features,
-                'STARTINDEX': start_index,
-                'PROPERTYNAME': encoded_property_name,
-                'filter': filter
-            }
-            recordsTotal = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, None)
-            recordsFiltered = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, filter)
-
-        params = urllib.urlencode(values)
-        req = requests.Session()
-        if 'username' in request.session and 'password' in request.session:
-            if request.session['username'] is not None and request.session['password'] is not None:
-                req.auth = (request.session['username'], request.session['password'])
-                #req.auth = ('admin', 'geoserver')
+        try:
+            if search_value == '':
+                values = {
+                    'SERVICE': 'WFS',
+                    'VERSION': '1.1.0',
+                    'REQUEST': 'GetFeature',
+                    'TYPENAME': layer_name,
+                    'OUTPUTFORMAT': 'application/json',
+                    'MAXFEATURES': max_features,
+                    'STARTINDEX': start_index,
+                    'PROPERTYNAME': encoded_property_name,
+                }
+                if cql_filter != '':
+                    values['cql_filter'] = cql_filter
+                    
+                recordsTotal = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, None)
+                recordsFiltered = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, cql_filter)
+                #recordsFiltered = recordsTotal
                 
-        print wfs_url + "?" + params
-        response = req.post(wfs_url, data=values, verify=False)
-        jsonString = response.text
-        geojson = json.loads(jsonString)
+            else:
+                properties = properties_with_type.split(',')
+                encoded_value = search_value.encode('ascii', 'replace')
+                
+                raw_search_cql = '('
+                for p in properties:
+                    if p.split('|')[1] == 'xsd:string':
+                        raw_search_cql += p.split('|')[0] + " ILIKE '%" + encoded_value.replace('?', '_') +"%'"
+                        raw_search_cql += ' OR '
+                        
+                    elif p.split('|')[1] == 'xsd:double' or p.split('|')[1] == 'xsd:decimal' or p.split('|')[1] == 'xsd:integer' or p.split('|')[1] == 'xsd:int' or p.split('|')[1] == 'xsd:long':
+                        if search_value.isdigit():
+                            raw_search_cql += p.split('|')[0] + ' = ' + search_value
+                            raw_search_cql += ' OR '
+                            
+                if raw_search_cql.endswith(' OR '):
+                    raw_search_cql = raw_search_cql[:-4]
+                    
+                raw_search_cql += ')'
+                
+                values = {
+                    'SERVICE': 'WFS',
+                    'VERSION': '1.1.0',
+                    'REQUEST': 'GetFeature',
+                    'TYPENAME': layer_name,
+                    'OUTPUTFORMAT': 'application/json',
+                    'MAXFEATURES': max_features,
+                    'STARTINDEX': start_index,
+                    'PROPERTYNAME': encoded_property_name
+                }
+                if cql_filter == '':
+                    values['cql_filter'] = raw_search_cql
+                else:
+                    values['cql_filter'] = cql_filter + ' AND ' + raw_search_cql
+                recordsTotal = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, None)
+                recordsFiltered = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, cql_filter)
+    
+            params = urllib.urlencode(values)
+            req = requests.Session()
+            if 'username' in request.session and 'password' in request.session:
+                if request.session['username'] is not None and request.session['password'] is not None:
+                    #req.auth = (request.session['username'], request.session['password'])
+                    req.auth = ('admin', 'geoserver')
+                    
+            print wfs_url + "?" + params
+            response = req.post(wfs_url, data=values, verify=False)
+            jsonString = response.text
+            geojson = json.loads(jsonString)
+            
+            data = []
+            for f in geojson['features']:
+                row = {}
+                for p in f['properties']:
+                    row[p] = f['properties'][p]
+                row['featureid'] = f['id']
+                data.append(row)
+                    
+            response = {
+                'draw': int(draw),
+                'recordsTotal': recordsTotal,
+                'recordsFiltered': recordsFiltered,
+                'data': data
+            }
         
-        data = []
-        for f in geojson['features']:
-            row = {}
-            for p in f['properties']:
-                row[p] = f['properties'][p]
-            row['featureid'] = f['id']
-            data.append(row)
-                
-        response = {
-            'draw': int(draw),
-            'recordsTotal': recordsTotal,
-            'recordsFiltered': recordsFiltered,
-            'data': data
-        }
-
+        except Exception as e:
+            response = {
+                'draw': 0,
+                'recordsTotal': 0,
+                'recordsFiltered': 0,
+                'data': []
+            }
+            pass
+        
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 

@@ -41,6 +41,7 @@ urlpatterns = [
     url(r'^get_feature_info/$', 'gvsigol_services.views.get_feature_info', name='get_feature_info'),
     url(r'^get_feature_resources/$', 'gvsigol_services.views.get_feature_resources', name='get_feature_resources'),
     url(r'^get_datatable_data/$', 'gvsigol_services.views.get_datatable_data', name='get_datatable_data'),
+    url(r'^get_unique_values/$', 'gvsigol_services.views.get_unique_values', name='get_unique_values'),
     url(r'^upload_resources/$', 'gvsigol_services.views.upload_resources', name='upload_resources'),
     url(r'^delete_resource/$', 'gvsigol_services.views.delete_resource', name='delete_resource'),
     url(r'^delete_resources/$', 'gvsigol_services.views.delete_resources', name='delete_resources'),

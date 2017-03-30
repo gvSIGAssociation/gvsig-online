@@ -203,6 +203,7 @@ layerTree.prototype.createTree = function() {
 		}, this);
 		var dataTable = new attributeTable(selectedLayer, self.map);
 		dataTable.show();
+		dataTable.registerEvents();
 	});
 	
 	

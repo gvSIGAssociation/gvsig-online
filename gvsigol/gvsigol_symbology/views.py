@@ -25,10 +25,11 @@
 from django.shortcuts import render_to_response, RequestContext, redirect, HttpResponse
 from gvsigol_services.backend_mapservice import backend as mapservice
 from gvsigol_services.models import Workspace, Datastore, Layer
+from gvsigol_services import utils as service_utils
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from models import Style, StyleLayer, Rule, Library, LibraryRule, Symbolizer, ColorMap, ColorMapEntry, RasterSymbolizer
-from gvsigol_auth.utils import superuser_required, staff_required
+from gvsigol_auth.utils import staff_required
 from gvsigol import settings
 from gvsigol_symbology import services, services_library, services_unique_symbol,\
     services_unique_values, services_intervals, services_expressions, services_color_table
@@ -264,7 +265,14 @@ def get_unique_values(request):
         layer = Layer.objects.get(id=layer_id)
         connection = ast.literal_eval(layer.datastore.connection_params)
         
-        unique_fields = utils.get_distinct_query(connection, layer.name, field)
+        host = connection.get('host')
+        port = connection.get('port')
+        schema = connection.get('schema')
+        database = connection.get('database')
+        user = connection.get('user')
+        password = connection.get('passwd')
+        
+        unique_fields = service_utils.get_distinct_query(host, port, schema, database, user, password, layer.name, field)
     
         return HttpResponse(json.dumps({'values': unique_fields}, indent=4), content_type='application/json')
     
@@ -342,7 +350,14 @@ def get_minmax_values(request):
     lyr = Layer.objects.get(id=layer_id)
     connection = ast.literal_eval(lyr.datastore.connection_params)
     
-    response = utils.get_minmax_query(connection, lyr.name, field)
+    host = connection.get('host')
+    port = connection.get('port')
+    schema = connection.get('schema')
+    database = connection.get('database')
+    user = connection.get('user')
+    password = connection.get('passwd')
+    
+    response = service_utils.get_minmax_query(host, port, schema, database, user, password, lyr.name, field)
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     
 
