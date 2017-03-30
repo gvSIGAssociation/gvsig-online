@@ -1328,9 +1328,10 @@ class Geoserver():
                 'REQUEST': 'GetFeature',
                 'TYPENAME': layer_name,
                 'OUTPUTFORMAT': 'text/xml; subtype=gml/3.1.1',
-                'RESULTTYPE': 'hits',
-                'FILTER': f.encode('utf-8')
+                'RESULTTYPE': 'hits'
             }
+            if f != '':
+                values['CQL_FILTER'] = f.encode('utf-8')
             
         req = requests.Session()
         req.auth = (self.user, self.password)
