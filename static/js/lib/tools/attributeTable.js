@@ -163,7 +163,10 @@ attributeTable.prototype.createTableUI = function(featureType) {
 	            sortDescending: ": " + gettext("Sort descending")
 	        }
 	    },
-	    select: 'single',
+	    select: {
+            style: 'multi'
+        },
+        stateSave: true,
         "processing": true,
         "searching": this.showSearch,
         "serverSide": true,
@@ -190,8 +193,7 @@ attributeTable.prototype.createTableUI = function(featureType) {
         "columns": columns,
         dom: 'Bfrtp<"bottom"l>',
         "bSort" : false,
-	    //"bLengthChange": true,
-	    "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+	    "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
 	    buttons: [
 	        {
 	        	 extend: 'csv',
@@ -213,8 +215,8 @@ attributeTable.prototype.createTableUI = function(featureType) {
 	        	text: '<i class="fa fa-search-plus margin-r-5"></i> ' + gettext('Zoom to selection'),
 	            action: function ( e, dt, node, config ) {
 	            	var t = $('#table-' + self.layer.get("id")).DataTable();
-	            	var selected = t.row('.selected').data();
-	            	self.zoomToFeature(selected.featureid);
+	            	var selectedRows = t.rows('.selected').data();
+	            	self.zoomToSelection(selectedRows);
 	            }
 	        },{
 	            text: '<i class="fa fa-eraser margin-r-5"></i> ' + gettext('Clear selection'),
@@ -224,7 +226,6 @@ attributeTable.prototype.createTableUI = function(featureType) {
 	        }
 	    ]
     });
-	dt.select.info( false );
 };
 
 /**
@@ -409,9 +410,14 @@ attributeTable.prototype.loadUniqueValues = function(field) {
 /**
  * TODO
  */
-attributeTable.prototype.zoomToFeature = function(fid) {
+attributeTable.prototype.zoomToSelection = function(rows) {
 	var self = this;
-	var typename = fid.split('.')[0];
+	var typename = rows[0].featureid.split('.')[0];
+	
+	var fids = new Array();
+	for (var i=0; i<rows.length; i++) {
+		fids.push(rows[i].featureid);
+	}
 	
 	$.ajax({
 		type: 'POST',
@@ -424,40 +430,35 @@ attributeTable.prototype.zoomToFeature = function(fid) {
 			'typename': this.layer.workspace + ':' + typename, 
 			//'srsname': 'EPSG:4326',
 			'outputFormat': 'application/json',
-			'featureId': fid
+			'featureId': fids.toString()
 	  	},
 	  	success	:function(response){
-	  		var newFeature = new ol.Feature();
 	  		var sourceCRS = 'EPSG:' + response.crs.properties.name.split('::')[1];
 	  		var projection = new ol.proj.Projection({
 	    		code: sourceCRS,
 	    	});
 	    	ol.proj.addProjection(projection);
-	    	if (response.features[0].geometry.type == 'Point') {
-	    		newFeature.setGeometry(new ol.geom.Point(response.features[0].geometry.coordinates));				
-	    	} else if (response.features[0].geometry.type == 'MultiPoint') {
-	    		newFeature.setGeometry(new ol.geom.Point(response.features[0].geometry.coordinates[0]));				
-	    	} else if (response.features[0].geometry.type == 'LineString' || response.features[0].geometry.type == 'MultiLineString') {
-	    		newFeature.setGeometry(new ol.geom.MultiLineString([response.features[0].geometry.coordinates[0]]));
-	    	} else if (response.features[0].geometry.type == 'Polygon' || response.features[0].geometry.type == 'MultiPolygon') {
-	    		newFeature.setGeometry(new ol.geom.MultiPolygon(response.features[0].geometry.coordinates));
+	    	self.source.clear();
+	    	
+	    	for (var i=0; i<response.features.length; i++) {
+	    		var newFeature = new ol.Feature();
+		    	if (response.features[i].geometry.type == 'Point') {
+		    		newFeature.setGeometry(new ol.geom.Point(response.features[i].geometry.coordinates));				
+		    	} else if (response.features[i].geometry.type == 'MultiPoint') {
+		    		newFeature.setGeometry(new ol.geom.Point(response.features[i].geometry.coordinates[0]));				
+		    	} else if (response.features[i].geometry.type == 'LineString' || response.features[i].geometry.type == 'MultiLineString') {
+		    		newFeature.setGeometry(new ol.geom.MultiLineString([response.features[i].geometry.coordinates[0]]));
+		    	} else if (response.features[i].geometry.type == 'Polygon' || response.features[i].geometry.type == 'MultiPolygon') {
+		    		newFeature.setGeometry(new ol.geom.MultiPolygon(response.features[i].geometry.coordinates));
+		    	}
+		    	newFeature.setProperties(response.features[i].properties);
+				newFeature.setId(response.features[i].id);
+				newFeature.getGeometry().transform(projection, 'EPSG:3857');
+				self.source.addFeature(newFeature);
 	    	}
-	    	newFeature.setProperties(response.features[0].properties);
-			newFeature.setId(response.features[0].id);
-			
-			
-			newFeature.getGeometry().transform(projection, 'EPSG:3857');
-			
-			self.source.clear();
-			self.source.addFeature(newFeature);
-			
-			var view = self.map.getView();			
-			if (response.features[0].geometry.type == 'Point' || response.features[0].geometry.type == 'MultiPoint') {
-				view.setCenter(newFeature.getGeometry().getFirstCoordinate());
-				view.setZoom(14);
-			} else {
-				view.fit(newFeature.getGeometry().getExtent(), self.map.getSize());
-			}
+	    	
+	    	var extent = self.source.getExtent();
+	    	self.map.getView().fit(extent, map.getSize());
 	  	},
 	  	error: function(){}
 	});
