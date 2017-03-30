@@ -153,9 +153,11 @@ def get_distinct_query(host, port, schema, database, user, password, layer, fiel
         for row in rows:
             if row[0] is not None:
                 val = row[0]
-                if isinstance(val, date):
+                if isinstance(val, basestring):
+                    values.append(val)
+                else:
                     val = str(val)
-                values.append(val)
+                    values.append(val)
 
     except StandardError, e:
         print "Query error!", e
