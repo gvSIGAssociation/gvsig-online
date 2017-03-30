@@ -27,7 +27,9 @@ var attributeTable = function(layer, map) {
 	this.id = "data-table";
 	this.map = map;
 	this.layer = layer;	
-	this.source = new ol.source.Vector();				
+	this.source = new ol.source.Vector();	
+	this.filterCode = null;
+	this.selectedType = null;
 	this.resultLayer = new ol.layer.Vector({
 		source: this.source,
 	  	style: new ol.style.Style({
@@ -72,13 +74,13 @@ attributeTable.prototype.createUI = function() {
 	ui += 		'<div class="nav-tabs-custom">';
 	ui += 			'<ul class="nav nav-tabs">';
 	ui += 				'<li class="active"><a href="#tab_data" data-toggle="tab"><i class="fa fa-table"></i></a></li>';
-	//ui += 				'<li><a href="#tab_filter" data-toggle="tab"><i class="fa fa-filter"></i></a></li>';
+	ui += 				'<li><a href="#tab_filter" data-toggle="tab"><i class="fa fa-filter"></i></a></li>';
 	ui += 			'</ul>';
 	ui += 			'<div class="tab-content">';
 	ui += 				'<div class="tab-pane active" id="tab_data">';
 	ui += 				'</div>';
-	//ui += 				'<div class="tab-pane" id="tab_filter">';
-	//ui += 				'</div>';
+	ui += 				'<div class="tab-pane" id="tab_filter">';
+	ui += 				'</div>';
 	ui += 			'</div>';
 	ui += 		'</div>';
 	ui += 	'</div>';
@@ -87,46 +89,9 @@ attributeTable.prototype.createUI = function() {
 	$('.panel-content').empty();
 	$('.panel-content').append(ui);
 	
-	this.createTableUI(this.describeFeatureType());
-};
-
-/**
- * TODO
- */
-attributeTable.prototype.describeFeatureType = function() {
-	
-	var featureType = new Array();
-	$.ajax({
-		type: 'POST',
-		async: false,
-	  	url: this.layer.wfs_url,
-	  	data: {
-	  		'service': 'WFS',
-			'version': '1.1.0',
-			'request': 'describeFeatureType',
-			'typeName': this.layer.workspace + ":" + this.layer.layer_name, 
-			'outputFormat': 'text/xml; subtype=gml/3.1.1'
-		},
-	  	success	:function(response){
-	  		var elements = null;
-			try {
-				elements = response.getElementsByTagName('sequence')[0].children;
-		    } catch(err) {
-		    	elements = response.getElementsByTagName('xsd:sequence')[0].children;
-		    }
-			
-			for (var i=0; i<elements.length; i++) {
-				var element = {
-					'name': elements[i].attributes[2].nodeValue,
-					'type': elements[i].attributes[4].nodeValue
-				};
-				featureType.push(element);
-			}
-		},
-	  	error: function(){}
-	});
-	
-	return featureType;
+	var featureType = this.describeFeatureType();
+	this.createTableUI(featureType);
+	this.createFiltersUI(featureType);
 };
 
 /**
@@ -204,6 +169,8 @@ attributeTable.prototype.createTableUI = function(featureType) {
         "serverSide": true,
         "sCharSet": "utf-8",
         "scrollX": true,
+        scrollY: '50vh',
+        scrollCollapse: true,
         "ajax": {
             "url": "/gvsigonline/services/get_datatable_data/",
             "type": "POST",
@@ -213,35 +180,230 @@ attributeTable.prototype.createTableUI = function(featureType) {
                 d.workspace = self.layer.workspace;
                 d.property_name = properties.toString();
                 d.properties_with_type = propertiesWithType.toString();
+                var cql_filter = '';
+                if (self.filterCode != null) {
+                	cql_filter = self.filterCode.getValue();
+                }
+                d.cql_filter = cql_filter;
             }
         },
         "columns": columns,
-        "dom": '<"table-toolbar">frtip',
+        dom: 'Bfrtp<"bottom"l>',
         "bSort" : false,
-	    "bLengthChange": false
+	    //"bLengthChange": true,
+	    "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+	    buttons: [
+	        {
+	        	 extend: 'csv',
+	        	 text: '<i class="fa fa-file-text-o margin-r-5"></i> CSV'
+	        },
+	        {
+	        	 extend: 'excel',
+	        	 text: '<i class="fa fa-file-excel-o margin-r-5"></i> Excel'
+	        },
+	        {
+	        	 extend: 'pdf',
+	        	 text: '<i class="fa fa-file-pdf-o margin-r-5"></i> Pdf'
+	        },
+	        {
+	        	 extend: 'print',
+	        	 text: '<i class="fa fa-print margin-r-5"></i> ' + gettext('Print')
+	        },
+	        {
+	        	text: '<i class="fa fa-search-plus margin-r-5"></i> ' + gettext('Zoom to selection'),
+	            action: function ( e, dt, node, config ) {
+	            	var t = $('#table-' + self.layer.get("id")).DataTable();
+	            	var selected = t.row('.selected').data();
+	            	self.zoomToFeature(selected.featureid);
+	            }
+	        },{
+	            text: '<i class="fa fa-eraser margin-r-5"></i> ' + gettext('Clear selection'),
+	            action: function ( e, dt, node, config ) {
+	            	self.source.clear();
+	            }
+	        }
+	    ]
     });
 	dt.select.info( false );
-	
-	var htmlButtons = '';
-	htmlButtons += 	'<div>';
-	htmlButtons += 		'<a href="#" id="zoom-to-selection-button" style="margin-right: 20px;" class="btn btn-default">' + gettext('Zoom to selection');
-	htmlButtons += 		'<a href="#" id="clear-selection-button" class="btn btn-default">' + gettext('Clear selection');
-	htmlButtons += 	'</div>';
-	$("div.table-toolbar").html(htmlButtons);
-	$("#zoom-to-selection-button").click(function(){
-    	var t = $('#table-' + self.layer.get("id")).DataTable();
-    	var selected = t.row('.selected').data();
-    	self.zoomToFeature(selected.featureid);
-	});
-	
-	$("#clear-selection-button").click(function(){
-    	self.source.clear();
-	});
-	
-	$("#td-close-button").click(function(){
-    	self.source.clear();
-	});
+};
 
+/**
+ * TODO
+ */
+attributeTable.prototype.createFiltersUI = function(featureType) {
+	var self = this;
+	
+	var ui = '';
+	ui += '<div style="background: #f6f6f6;" class="row">';
+	ui += 	'<div class="col-md-12">';
+	ui += 		'<div class="box box-default">';
+	ui += 			'<div class="box-header with-border">';
+	ui += 				'<h3 class="box-title">' + gettext('Advanced filter') + '</h3>';
+	ui += 			'</div>';
+	ui += 			'<div class="box-body">';
+	ui += 				'<div class="row">';
+	ui += 					'<div class="col-md-7">';
+	ui += 						'<textarea id="cql_filter">';
+	ui += 						'</textarea>';
+	ui += 						'<table>';
+	ui +=							'<tr>';
+	ui += 								'<td style="font-weight: bold; padding: 5px; width: 40%;">Expression = | <> | < | <= | > | >= Expression</td>';
+	ui += 								'<td>Comparison operations</td>';
+	ui +=							'</tr>';
+	ui +=							'<tr>';
+	ui += 								'<td style="font-weight: bold; padding: 5px; width: 40%;">Expression [ NOT ] BETWEEN Expression AND Expression</td>';
+	ui += 								'<td>Tests whether a value lies in or outside a range (inclusive)</td>';
+	ui +=							'</tr>';
+	ui +=							'<tr>';
+	ui += 								'<td style="font-weight: bold; padding: 5px; width: 40%;">Expression [ NOT ] LIKE | ILIKE like-pattern</td>';
+	ui += 								'<td>Simple pattern matching. like-pattern uses the % character as a wild-card for any number of characters. ILIKE does case-insensitive matching.</td>';
+	ui +=							'</tr>';
+	ui +=							'<tr>';
+	ui += 								'<td style="font-weight: bold; padding: 5px; width: 40%;">Expression [ NOT ] IN ( Expression { ,Expression } )</td>';
+	ui += 								'<td>Tests whether an expression value is (not) in a set of values</td>';
+	ui +=							'</tr>';
+	ui +=							'<tr>';
+	ui += 								'<td colspan="2" style="font-weight: bold; padding: 5px;">An expression specifies a attribute, literal, or computed value. The type of the value is determined by the nature of the expression.</td>';
+	ui +=							'</tr>';
+	ui += 						'</table>';
+	ui += 					'</div>';
+	ui += 					'<div class="col-md-5">';
+	ui += 						'<div id="calculator">';
+	ui += 							'<div class="form-group">';	
+	ui += 								'<label>' + gettext('Select field') + '</label>';
+	ui += 								'<select id="filter-field-select" class="form-control">';
+	ui += 									'<option value="" selected disabled>--</option>';
+	for (var i=0; i<featureType.length; i++) {
+			ui += '<option value="' + featureType[i].type + '">' + featureType[i].name + '</option>';
+	}
+	ui += 								'</select>';
+	ui += 							'</div>';
+	ui += 							'<div class="form-group">';	
+	ui += 								'<label>' + gettext('Select value') + '</label>';
+	ui += 								'<select id="filter-value-select" class="form-control">';
+	ui += 									'<option value="" selected disabled>--</option>';
+	ui += 								'</select>';
+	ui += 							'</div>';
+	ui += 							'<div class="keys">';
+	ui += 								'<span>=</span>';
+	ui += 								'<span><></span>';
+	ui += 								'<span><</span>';
+	ui += 								'<span><=</span>';
+	ui += 								'<span>></span>';
+	ui += 								'<span>>=</span>';
+	ui += 								'<span class="weight">AND</span>';
+	ui += 								'<span class="weight">OR</span>';
+	ui += 								'<span class="weight">NOT</span>';
+	ui += 								'<span class="weight">IN</span>';
+	ui += 								'<span>(</span>';
+	ui += 								'<span>)</span>';
+	ui += 								'<span>[</span>';
+	ui += 								'<span>]</span>';
+	ui += 								'<span>{</span>';
+	ui += 								'<span>}</span>';
+	ui += 							'</div>';
+	ui += 							'<div class="bottom-selects">';
+	ui += 							'</div>';
+	ui += 						'</div>';
+	ui += 					'</div>';
+	ui += 				'</div>';
+	ui += 			'</div>';
+	ui += 			'<div class="box-footer clearfix">';
+	ui += 				'<a id="apply-filter" href="javascript:void(0)" class="btn btn-default btn-flat pull-right"><i class="fa fa-check margin-r-5"></i>' + gettext('Apply filter') + '</a>';
+	ui += 				'<a id="clear-filter" href="javascript:void(0)" class="btn btn-default btn-flat pull-right margin-r-5"><i class="fa fa-times margin-r-5"></i>' + gettext('Clear filter') + '</a>';
+	ui += 			'</div>';
+	ui += 		'</div>';
+	ui += 	'</div>';
+	ui += '</div>';
+	
+	$('#tab_filter').empty();
+	$('#tab_filter').append(ui);
+	
+	var filterElement = document.getElementById('cql_filter');
+	this.filterCode = CodeMirror.fromTextArea(filterElement, {
+		value: "",
+		mode:  "javascript",
+		theme: "xq-dark",
+		lineNumbers: true,
+		lineWrapping: true
+	});
+	
+	// Add onclick event to all the keys and perform operations
+	var keys = document.querySelectorAll('#calculator span');
+	for(var i = 0; i < keys.length; i++) {
+		keys[i].onclick = function(e) {
+			var btnVal = this.innerText;
+			var currentFilter = self.filterCode.getValue();
+			currentFilter += btnVal + ' ';
+			self.filterCode.setValue(currentFilter);		
+		} 
+	}
+	
+};
+
+/**
+ * TODO
+ */
+attributeTable.prototype.describeFeatureType = function() {
+	
+	var featureType = new Array();
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: this.layer.wfs_url,
+	  	data: {
+	  		'service': 'WFS',
+			'version': '1.1.0',
+			'request': 'describeFeatureType',
+			'typeName': this.layer.workspace + ":" + this.layer.layer_name, 
+			'outputFormat': 'text/xml; subtype=gml/3.1.1'
+		},
+	  	success	:function(response){
+	  		var elements = null;
+			try {
+				elements = response.getElementsByTagName('sequence')[0].children;
+		    } catch(err) {
+		    	elements = response.getElementsByTagName('xsd:sequence')[0].children;
+		    }
+			
+			for (var i=0; i<elements.length; i++) {
+				var element = {
+					'name': elements[i].attributes[2].nodeValue,
+					'type': elements[i].attributes[4].nodeValue
+				};
+				featureType.push(element);
+			}
+		},
+	  	error: function(){}
+	});
+	
+	return featureType;
+};
+
+/**
+ * TODO
+ */
+attributeTable.prototype.loadUniqueValues = function(field) {
+	var self = this;
+	
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: '/gvsigonline/services/get_unique_values/',
+	  	data: {
+	  		'layer_name': self.layer.layer_name,
+			'layer_ws': self.layer.workspace,
+			'field': field
+		},
+	  	success	:function(response){
+	  		$("#filter-value-select").empty();
+	  		$.each(response.values, function(index, option) {
+	  			$option = $("<option></option>").attr("value", option).text(option);
+	  			$("#filter-value-select").append($option);
+	  	    });
+		},
+	  	error: function(){}
+	});
 };
 
 /**
@@ -307,4 +469,55 @@ attributeTable.prototype.zoomToFeature = function(fid) {
  */
 attributeTable.prototype.show = function() {
 	bottomPanel.showPanel();
+};
+
+/**
+ * TODO
+ */
+attributeTable.prototype.registerEvents = function() {
+	var self = this;
+	$("a[href='#tab_filter']").on('shown.bs.tab', function(e) {
+		self.filterCode.refresh();
+	 });
+	
+	$("#filter-field-select").on('click', function(){
+		self.selectedType = $('option:selected', $(this)).val();
+		var value = $('option:selected', $(this)).text();
+    	var currentFilter = self.filterCode.getValue();
+		currentFilter += value + ' ';
+		self.filterCode.setValue(currentFilter);
+		self.loadUniqueValues(value);
+	});
+	
+	$("#filter-value-select").on('click', function(){
+		var currentFilter = self.filterCode.getValue();
+		if (self.selectedType == 'xsd:string') {
+			currentFilter += "'" + this.value + "' ";
+			
+		} else if (self.selectedType == 'xsd:date') {
+			currentFilter += this.value + " ";
+			
+		}  else if (self.selectedType == 'xsd:boolean') {
+			currentFilter += "'" + this.value + "' ";
+			
+		} else {
+			currentFilter += this.value + ' ';
+		}
+		self.filterCode.setValue(currentFilter);
+	});
+	
+	$("#apply-filter").on('click', function(){
+		var t = $('#table-' + self.layer.get("id")).DataTable();
+		$('.nav-tabs a[href="#tab_data"]').tab('show');
+		t.ajax.reload();
+	});
+	
+	$("#clear-filter").on('click', function(){
+		self.filterCode.setValue('');
+		var t = $('#table-' + self.layer.get("id")).DataTable();
+		$('.nav-tabs a[href="#tab_data"]').tab('show');
+		t.ajax.reload();
+	});
+	
+	
 };
