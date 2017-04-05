@@ -20,12 +20,12 @@
  * @author: Javier Rodrigo <jrodrigo@scolab.es>
  */
 
-var publicViewer = publicViewer || {};
+var viewer = viewer || {};
 
 /**
  * TODO
  */
-publicViewer.core = {
+viewer.core = {
 		
 	map: null,
 	
@@ -297,6 +297,16 @@ publicViewer.core = {
     loadTool: function(tool) {
     	this.tools.push(tool);
     	this.map.tools.push(tool);
+    },
+    
+    getTool: function(id) {
+    	var tool = null;
+    	for (var i=0; i<this.tools.length; i++) {
+    		if (this.tools[i].id == id) {
+    			tool = this.tools[i];
+    		}
+    	}
+    	return tool;
     },
     
     getMap: function(){

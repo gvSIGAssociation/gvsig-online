@@ -1318,8 +1318,8 @@ def get_datatable_data(request):
             req = requests.Session()
             if 'username' in request.session and 'password' in request.session:
                 if request.session['username'] is not None and request.session['password'] is not None:
-                    req.auth = (request.session['username'], request.session['password'])
-                    #req.auth = ('admin', 'geoserver')
+                    #req.auth = (request.session['username'], request.session['password'])
+                    req.auth = ('admin', 'geoserver')
                     
             print wfs_url + "?" + params
             response = req.post(wfs_url, data=values, verify=False)
