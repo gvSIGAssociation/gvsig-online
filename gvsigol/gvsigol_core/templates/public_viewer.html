@@ -280,7 +280,7 @@
 				for (var key in response.supported_crs) {
 					proj4.defs(response.supported_crs[key].code, response.supported_crs[key].definition);	
 				}
-				publicViewer.core.initialize(response);
+				viewer.core.initialize(response);
 			},
 			error : function() {
 			}

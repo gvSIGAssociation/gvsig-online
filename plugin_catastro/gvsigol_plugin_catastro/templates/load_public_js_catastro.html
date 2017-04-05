@@ -9,9 +9,9 @@
 			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},
 		success : function(response) {
-			var map = publicViewer.core.getMap();
+			var map = viewer.core.getMap();
 			
-			var id = publicViewer.core._nextLayerId();
+			var id = viewer.core._nextLayerId();
 			
 			var layers = map.getLayers();
 			var zindex = 0;

@@ -5,8 +5,8 @@
 <script type="text/javascript" src="{% static "js/lib/tools/print.js" %}"></script>
 <script type="text/javascript">
 	
-	var map = publicViewer.core.getMap();
-	var conf = publicViewer.core.getConf();
+	var map = viewer.core.getMap();
+	var conf = viewer.core.getConf();
 	
 	$.ajax({
 		type : 'POST',
@@ -22,7 +22,7 @@
 			$('#toolbar-buttons').append(button);
 		
 			var tool = new print(printProvider, conf, map);
-			publicViewer.core.loadTool(tool);
+			viewer.core.loadTool(tool);
 			
 		},
 		error : function() {
