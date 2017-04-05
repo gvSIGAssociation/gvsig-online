@@ -2312,6 +2312,10 @@ a:focus {
 .alert-success {
   border-color: #008d4c;
 }
+.alert-notice {
+  border-color: #eeeeee;
+  background-color: #ededed;
+}
 .alert-danger,
 .alert-error {
   border-color: #d73925;
@@ -4148,6 +4152,9 @@ table.text-center th {
 .modal-danger .modal-header,
 .modal-danger .modal-footer {
   color: #fff !important;
+}
+.alert-notice {
+	color: #1a1a1a !important;
 }
 .bg-gray {
   color: #000;

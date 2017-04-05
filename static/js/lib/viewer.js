@@ -350,6 +350,16 @@ viewer.core = {
     	this.map.tools.push(tool);
     },
     
+    getTool: function(id) {
+    	var tool = null;
+    	for (var i=0; i<this.tools.length; i++) {
+    		if (this.tools[i].id == id) {
+    			tool = this.tools[i];
+    		}
+    	}
+    	return tool;
+    },
+    
     getMap: function(){
     	return this.map;
     },
