@@ -915,7 +915,7 @@ class Geoserver():
                     layer_name = table_def['name']
                     layer_title = table_def['title']
                     
-                    if table_def.has_key('srs'):
+                    if table_def.has_key('srs') and table_def['srs']:
                         srs = table_def['srs']
                     
                     if table_def.has_key('conf') and table_def['conf']:
@@ -941,15 +941,17 @@ class Geoserver():
                     print "ERROR en shp2postgis ... Algunos shapefiles puede que no hayan subido "
                     continue 
                 
+                layer_exists = False
                 try:
                     layer = Layer.objects.get(name=layer_name, datastore=datastore)
+                    layer_exists = True
                 except:
                     # may me missing when creating a layer or when
                     # appending / overwriting a layer created outside gvsig online
                     layer = Layer()                
                     # TODO: si estamos en create mode es porque ha aparecido otro shape. Deberiamos borrar el proyecto y volverlo a crear  
                             
-                if creation_mode==forms_geoserver.MODE_CREATE:
+                if creation_mode==forms_geoserver.MODE_CREATE or (creation_mode==forms_geoserver.MODE_OVERWRITE and not layer_exists):
                     
                     try:
                         self.createFeaturetype(datastore.workspace, datastore, layer_name, layer_title)
@@ -999,7 +1001,7 @@ class Geoserver():
                         symbology_services.clone_style(self, layer, original_style_name, final_style_name)                        
                 else:
                     print "DEBUG: NO has_style or style_from_library " + original_style_name
-                    if creation_mode == 'CR':
+                    if creation_mode == 'CR' or (not has_style and creation_mode == 'OW'):
                         self.createDefaultStyle(layer, final_style_name)
                         self.setLayerStyle(layer, final_style_name)
                         
