@@ -144,6 +144,14 @@ class Geoserver():
             print str(e)
             return False
         
+    def getWorkspace(self, name):
+        try:
+            self.getGsconfig().get_workspace(name)
+            return True
+        except Exception as e:
+            print str(e)
+            return False
+        
     def deleteWorkspace(self, workspace):
         """
         Deletes a workspace and all its associated resources
@@ -900,10 +908,20 @@ class Geoserver():
             
             for f in files:
                 has_style = False
+                has_conf = False
+                conf = None
                 if f in table_definition:
                     table_def = table_definition[f]
                     layer_name = table_def['name']
                     layer_title = table_def['title']
+                    
+                    if table_def.has_key('srs'):
+                        srs = table_def['srs']
+                    
+                    if table_def.has_key('conf') and table_def['conf']:
+                        has_conf = True
+                        conf = table_def['conf']
+                        
                     try:
                         original_style_name = table_def['style']
                         has_style = True
@@ -950,6 +968,8 @@ class Geoserver():
                     layer.title = layer_title
                     layer.type = datastore.type
                     layer.created_by = request.user.username
+                    if has_conf:
+                        layer.conf = conf
                     layer.save()
     
                     self.setDataRules()                                        
@@ -982,7 +1002,8 @@ class Geoserver():
                     if creation_mode == 'CR':
                         self.createDefaultStyle(layer, final_style_name)
                         self.setLayerStyle(layer, final_style_name)
-                
+                        
+                srs = defaults['srs']
                             
         except rest_geoserver.RequestError as ex:
             print "Error Request: " + str(ex)
