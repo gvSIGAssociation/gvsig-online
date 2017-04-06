@@ -13,6 +13,5 @@ Plugins
    alfresco
    geocoding
    catalog
-   shapefolder
    worldwind
    shps_folder
