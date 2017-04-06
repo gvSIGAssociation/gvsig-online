@@ -8,3 +8,4 @@ Plugins
    geocoding
    alfresco
    catalog
+   shps_folder
