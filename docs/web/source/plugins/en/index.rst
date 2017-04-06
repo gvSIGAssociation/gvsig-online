@@ -15,3 +15,4 @@ Plugins
    catalog
    shapefolder
    worldwind
+   shps_folder
