@@ -132,7 +132,7 @@ def get_connection(host, port, database, user, password):
     try:
         conn = psycopg2.connect("host=" + host +" port=" + port +" dbname=" + database +" user=" + user +" password="+ password);
         conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-        print "Connect to host=" + host +" port=" + port +" dbname=" + database +" user=" + user +" password="+ password +" ... "
+        print "Connect ... "
         
     except StandardError, e:
         print "Failed to connect!", e
