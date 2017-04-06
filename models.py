@@ -89,6 +89,7 @@ class MarkSymbolizer(Symbolizer):
     stroke = models.CharField(max_length=100)
     stroke_width = models.IntegerField(default=1)
     stroke_opacity = models.FloatField(default=1.0)
+    stroke_dash_array = models.CharField(max_length=100)
     
 class ExternalGraphicSymbolizer(Symbolizer):
     opacity = models.IntegerField(default=1)
@@ -101,6 +102,7 @@ class LineSymbolizer(Symbolizer):
     stroke = models.CharField(max_length=100)
     stroke_width = models.IntegerField(default=1)
     stroke_opacity = models.FloatField(default=1.0)
+    stroke_dash_array = models.CharField(max_length=100)
     
 class PolygonSymbolizer(Symbolizer):
     fill = models.CharField(max_length=100)
@@ -108,6 +110,7 @@ class PolygonSymbolizer(Symbolizer):
     stroke = models.CharField(max_length=100)
     stroke_width = models.IntegerField(default=1)
     stroke_opacity = models.FloatField(default=1.0)
+    stroke_dash_array = models.CharField(max_length=100)
     
 class TextSymbolizer(Symbolizer):
     label = models.CharField(max_length=100)
