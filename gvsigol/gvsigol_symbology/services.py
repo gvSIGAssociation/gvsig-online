@@ -85,7 +85,8 @@ def create_default_style(layer_id, style_name, style_type, geom_type):
             fill_opacity = 0.6,
             stroke = '#000000',
             stroke_width = 1,
-            stroke_opacity = 1.0                   
+            stroke_opacity = 1.0 ,
+            stroke_dash_array = 'none'                  
         )
         symbolizer.save()
     
@@ -95,7 +96,8 @@ def create_default_style(layer_id, style_name, style_type, geom_type):
             order = 0,
             stroke = '#000000',
             stroke_width = 1,
-            stroke_opacity = 1.0                  
+            stroke_opacity = 1.0,
+            stroke_dash_array = 'none'                 
         )
         symbolizer.save()      
         
@@ -111,7 +113,8 @@ def create_default_style(layer_id, style_name, style_type, geom_type):
             fill_opacity = 0.6,
             stroke = '#000000',
             stroke_width = 1,
-            stroke_opacity = 1.0                  
+            stroke_opacity = 1.0,
+            stroke_dash_array = 'none'                 
         )
         symbolizer.save()  
         
@@ -200,6 +203,7 @@ def sld_import(name, is_default, layer_id, file, mapservice):
                     stroke = '#ffffff'
                     stroke_width = 1
                     stroke_opacity = 0.0
+                    stroke_dash_array = 'none'
                     if len(mark.Stroke.CssParameter) > 0:
                         for css_parameter in mark.Stroke.CssParameter:
                             if css_parameter.name == 'stroke':
@@ -208,6 +212,8 @@ def sld_import(name, is_default, layer_id, file, mapservice):
                                 stroke_width =  css_parameter.valueOf_
                             if css_parameter.name == 'stroke-opacity':
                                 stroke_opacity =  css_parameter.valueOf_
+                            if css_parameter.name == 'stroke-dasharray':
+                                stroke_dash_array =  css_parameter.valueOf_
                         
                     symbolizer = MarkSymbolizer(
                         rule = rule,
@@ -220,7 +226,8 @@ def sld_import(name, is_default, layer_id, file, mapservice):
                         fill_opacity = fill_opacity,
                         stroke = stroke,
                         stroke_width = stroke_width,
-                        stroke_opacity = stroke_opacity                 
+                        stroke_opacity = stroke_opacity,
+                        stroke_dash_array = stroke_dash_array                
                     )
                     symbolizer.save()
                     
@@ -231,6 +238,7 @@ def sld_import(name, is_default, layer_id, file, mapservice):
                 stroke = '#ffffff'
                 stroke_width = 1
                 stroke_opacity = 0.0
+                stroke_dash_array = 'none'
                 if len(s.Stroke.CssParameter) > 0:
                     for css_parameter in s.Stroke.CssParameter:
                         if css_parameter.name == 'stroke':
@@ -239,13 +247,16 @@ def sld_import(name, is_default, layer_id, file, mapservice):
                             stroke_width =  css_parameter.valueOf_
                         if css_parameter.name == 'stroke-opacity':
                             stroke_opacity =  css_parameter.valueOf_
+                        if css_parameter.name == 'stroke-dasharray':
+                            stroke_dash_array =  css_parameter.valueOf_
                                 
                 symbolizer = LineSymbolizer(
                     rule = rule,
                     order = scount,
                     stroke = stroke,
                     stroke_width = stroke_width,
-                    stroke_opacity = stroke_opacity                 
+                    stroke_opacity = stroke_opacity,
+                    stroke_dash_array = stroke_dash_array              
                 )
                 symbolizer.save()
                     
@@ -263,6 +274,7 @@ def sld_import(name, is_default, layer_id, file, mapservice):
                 stroke = '#ffffff'
                 stroke_width = 1
                 stroke_opacity = 0.0
+                stroke_dash_array = 'none'
                 if len(s.Stroke.CssParameter) > 0:
                     for css_parameter in s.Stroke.CssParameter:
                         if css_parameter.name == 'stroke':
@@ -271,6 +283,8 @@ def sld_import(name, is_default, layer_id, file, mapservice):
                             stroke_width =  css_parameter.valueOf_
                         if css_parameter.name == 'stroke-opacity':
                             stroke_opacity =  css_parameter.valueOf_
+                        if css_parameter.name == 'stroke-dasharray':
+                            stroke_dash_array =  css_parameter.valueOf_
                             
                 symbolizer = PolygonSymbolizer(
                     rule = rule,
@@ -279,7 +293,8 @@ def sld_import(name, is_default, layer_id, file, mapservice):
                     fill_opacity = fill_opacity,
                     stroke = stroke,
                     stroke_width = stroke_width,
-                    stroke_opacity = stroke_opacity                  
+                    stroke_opacity = stroke_opacity,
+                    stroke_dash_array = stroke_dash_array                 
                 )
                 symbolizer.save()
                 
@@ -370,7 +385,8 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
                     fill_opacity = original_symbolizer.polygonsymbolizer.fill_opacity,
                     stroke = original_symbolizer.polygonsymbolizer.stroke,
                     stroke_width = original_symbolizer.polygonsymbolizer.stroke_width,
-                    stroke_opacity = original_symbolizer.polygonsymbolizer.stroke_opacity                  
+                    stroke_opacity = original_symbolizer.polygonsymbolizer.stroke_opacity,
+                    stroke_dash_array = original_symbolizer.polygonsymbolizer.stroke_dash_array                  
                 )
                 symbolizer.save()
             
@@ -380,7 +396,8 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
                     order = original_symbolizer.linesymbolizer.order,
                     stroke = original_symbolizer.linesymbolizer.stroke,
                     stroke_width = original_symbolizer.linesymbolizer.stroke_width,
-                    stroke_opacity = original_symbolizer.linesymbolizer.stroke_opacity                
+                    stroke_opacity = original_symbolizer.linesymbolizer.stroke_opacity,
+                    stroke_dash_array = original_symbolizer.linesymbolizer.stroke_dash_array                
                 )
                 symbolizer.save()      
                 
@@ -396,7 +413,8 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
                     fill_opacity = original_symbolizer.marksymbolizer.fill_opacity,
                     stroke = original_symbolizer.marksymbolizer.stroke,
                     stroke_width = original_symbolizer.marksymbolizer.stroke_width,
-                    stroke_opacity = original_symbolizer.marksymbolizer.stroke_opacity                
+                    stroke_opacity = original_symbolizer.marksymbolizer.stroke_opacity,
+                    stroke_dash_array = original_symbolizer.marksymbolizer.stroke_dash_array               
                 )
                 symbolizer.save() 
                 

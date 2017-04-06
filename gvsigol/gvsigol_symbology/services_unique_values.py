@@ -86,7 +86,8 @@ def create_style(request, json_data, layer_id):
                     fill_opacity = json_sym.get('fill_opacity'),
                     stroke = json_sym.get('stroke'),
                     stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity')                   
+                    stroke_opacity = json_sym.get('stroke_opacity'),
+                    stroke_dash_array = json_sym.get('stroke_dash_array')                   
                 )
                 symbolizer.save()
             
@@ -97,7 +98,8 @@ def create_style(request, json_data, layer_id):
                     order = int(sym.get('order')),
                     stroke = json_sym.get('stroke'),
                     stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity')                   
+                    stroke_opacity = json_sym.get('stroke_opacity'),
+                    stroke_dash_array = json_sym.get('stroke_dash_array')                   
                 )
                 symbolizer.save()      
                 
@@ -114,7 +116,8 @@ def create_style(request, json_data, layer_id):
                     fill_opacity = json_sym.get('fill_opacity'),
                     stroke = json_sym.get('stroke'),
                     stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity')                  
+                    stroke_opacity = json_sym.get('stroke_opacity'),
+                    stroke_dash_array = json_sym.get('stroke_dash_array')                 
                 )
                 symbolizer.save()  
                 
@@ -207,7 +210,8 @@ def update_style(request, json_data, layer_id, style_id):
                     fill_opacity = json_sym.get('fill_opacity'),
                     stroke = json_sym.get('stroke'),
                     stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity')                   
+                    stroke_opacity = json_sym.get('stroke_opacity'),
+                    stroke_dash_array = json_sym.get('stroke_dash_array')                   
                 )
                 symbolizer.save()
             
@@ -218,7 +222,8 @@ def update_style(request, json_data, layer_id, style_id):
                     order = int(sym.get('order')),
                     stroke = json_sym.get('stroke'),
                     stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity')                   
+                    stroke_opacity = json_sym.get('stroke_opacity'),
+                    stroke_dash_array = json_sym.get('stroke_dash_array')                   
                 )
                 symbolizer.save()      
                 
@@ -235,7 +240,8 @@ def update_style(request, json_data, layer_id, style_id):
                     fill_opacity = json_sym.get('fill_opacity'),
                     stroke = json_sym.get('stroke'),
                     stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity')                  
+                    stroke_opacity = json_sym.get('stroke_opacity'),
+                    stroke_dash_array = json_sym.get('stroke_dash_array')                  
                 )
                 symbolizer.save()  
                 

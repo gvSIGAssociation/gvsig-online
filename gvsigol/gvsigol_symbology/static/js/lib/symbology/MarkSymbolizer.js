@@ -30,6 +30,7 @@ var MarkSymbolizer = function(rule, options, utils) {
 	this.stroke = "#000000";
 	this.stroke_width = 1;
 	this.stroke_opacity = 1;
+	this.stroke_dash_array = 'none';
 	this.rotation = 0;
 	this.order = 0;
 	this.size = 10;
@@ -138,6 +139,20 @@ MarkSymbolizer.prototype.getStrokeTabUI = function() {
 	ui += 				'<div id="stroke-opacity-slider"></div>';
 	ui += 			'</div>';					 
 	ui += 		'</div>';
+	ui += 	'<div class="row">';
+	ui += 		'<div class="col-md-12 form-group">';
+	ui += 			'<label>' + gettext('Select pattern') + '</label>';
+	ui += 			'<select id="line-dash-array" class="form-control">';
+	for (var i=0; i < this.utils.linePatterns.length; i++) {
+		if (this.utils.linePatterns[i].value == this.stroke_dash_array) {
+			ui += '<option value="' + this.utils.linePatterns[i].value + '" data-imagesrc="' + this.utils.linePatterns[i].imgsrc + '" selected></option>';
+		} else {
+			ui += '<option value="' + this.utils.linePatterns[i].value + '" data-imagesrc="' + this.utils.linePatterns[i].imgsrc + '"></option>';
+		}
+	}
+	ui += 			'</select>';
+	ui += 		'</div>';
+	ui += 	'</div>';
 	ui += '</div>';
 	
 	return ui;
@@ -214,6 +229,15 @@ MarkSymbolizer.prototype.registerEvents = function() {
 		self.updatePreview();	
 		self.rule.preview();
 	});
+	
+	$('#line-dash-array').ddslick({
+	    onSelected: function(selectedData){
+	    	self.stroke_dash_array = selectedData.selectedData.value;
+	    	self.updatePreview();	
+			self.rule.preview();
+	    }   
+	});
+	
 	$( "#rotation-slider" ).slider({
 	    min: 0,
 	    max: 360,
@@ -249,6 +273,9 @@ MarkSymbolizer.prototype.toXML = function(){
 	xml += 				'<CssParameter name="stroke">' + this.stroke + '</CssParameter>';
 	xml += 				'<CssParameter name="stroke-width">' + this.stroke_width + '</CssParameter>';
 	xml += 				'<CssParameter name="stroke-opacity">' + this.stroke_opacity + '</CssParameter>';
+	if (this.stroke_dash_array != 'none') {
+		xml += '<CssParameter name="stroke-dasharray">' + this.stroke_dash_array + '</CssParameter>;'
+	}
 	xml += 			'</Stroke>';
 	xml += 		'</Mark>';
 	xml += 		'<Opacity>1</Opacity>';
@@ -287,6 +314,9 @@ MarkSymbolizer.prototype.toSLDBody = function(){
 	sld += 									'<CssParameter name="stroke">' + this.stroke + '</CssParameter>';
 	sld += 									'<CssParameter name="stroke-width">' + this.stroke_width + '</CssParameter>';
 	sld += 									'<CssParameter name="stroke-opacity">' + this.stroke_opacity + '</CssParameter>';
+	if (this.stroke_dash_array != 'none') {
+		sld += '<CssParameter name="stroke-dasharray">' + this.stroke_dash_array + '</CssParameter>;'
+	}
 	sld += 								'</Stroke>';
 	sld += 							'</Mark>';
 	sld += 							'<Opacity>1</Opacity>';
@@ -314,6 +344,7 @@ MarkSymbolizer.prototype.toJSON = function(){
 		stroke: this.stroke,
 		stroke_width: this.stroke_width,
 		stroke_opacity: this.stroke_opacity,
+		stroke_dash_array: this.stroke_dash_array,
 		rotation: this.rotation,
 		order: this.order,
 		size: this.size,

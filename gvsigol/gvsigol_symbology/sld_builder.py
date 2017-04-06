@@ -219,6 +219,12 @@ def get_stroke(s):
     stroke_opacity.set_valueOf_(str(s.stroke_opacity))
     stroke.add_CssParameter(stroke_opacity)
     
+    if s.stroke_dash_array != 'none':
+        stroke_dash_array = sld.CssParameter()
+        stroke_dash_array.set_name('stroke-dasharray')
+        stroke_dash_array.set_valueOf_(str(s.stroke_dash_array))
+        stroke.add_CssParameter(stroke_dash_array)
+    
     return stroke
 
 def get_label(s):
