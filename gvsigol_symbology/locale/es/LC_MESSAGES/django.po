@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-08 09:45+0200\n"
+"POT-Creation-Date: 2017-04-06 17:51+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -62,44 +62,38 @@ msgstr "Tabla de color"
 msgid "Graphics"
 msgstr "Gráficas"
 
-#: services.py:39
+#: services.py:41
 msgid "Default style for: "
 msgstr "Estilo por defecto para: "
 
-#: services_library.py:63
+#: services_library.py:64
 #, python-brace-format
 msgid "Invalid name: '{value}'. Name should not contain any special characters"
 msgstr ""
 "Nombre inválido: '{value}'. El nombre no debe contener ningún caracter "
 "especial"
 
-#: services_library.py:66 services_library.py:169
-#, python-brace-format
-msgid ""
-"Invalid title: '{value}'. Title should not contain any special characters"
-msgstr ""
-"Título inválido: '{value}'. El título no debe contener ningún caracter "
-"especial"
-
-#: templates/base_symbology.html:74 templates/base_symbology_compress.html:74
+#: templates/base_symbology.html:99 templates/base_symbology_compress.html:99
 msgid "Sign out"
 msgstr "Cerrar sesión"
 
-#: templates/base_symbology.html:92 templates/base_symbology_compress.html:92
+#: templates/base_symbology.html:118
+#: templates/base_symbology_compress.html:117
 msgid "Dashboard"
 msgstr "Panel de control"
 
-#: templates/base_symbology.html:98 templates/base_symbology_compress.html:98
+#: templates/base_symbology.html:124
+#: templates/base_symbology_compress.html:123
 msgid "Home"
 msgstr "Inicio"
 
-#: templates/base_symbology.html:132
-#: templates/base_symbology_compress.html:132
+#: templates/base_symbology.html:161
+#: templates/base_symbology_compress.html:160
 msgid "Version"
 msgstr "Versión"
 
-#: templates/base_symbology.html:136
-#: templates/base_symbology_compress.html:136
+#: templates/base_symbology.html:165
+#: templates/base_symbology_compress.html:164
 msgid "All rights reserved"
 msgstr "Todos los derechos reservados"
 
@@ -233,13 +227,13 @@ msgid "Edit color map entry"
 msgstr "Editar entrada de color del mapa"
 
 #: templates/color_table_add.html:165 templates/color_table_update.html:167
-#: templates/expressions_add.html:233 templates/expressions_update.html:239
+#: templates/expressions_add.html:247 templates/expressions_update.html:253
 #: templates/external_graphic_add.html:147
-#: templates/external_graphic_add.html:151 templates/intervals_add.html:238
-#: templates/intervals_update.html.py:249 templates/symbol_add.html:110
+#: templates/external_graphic_add.html:151 templates/intervals_add.html:252
+#: templates/intervals_update.html.py:263 templates/symbol_add.html:110
 #: templates/symbol_update.html.py:119 templates/unique_symbol_add.html:212
-#: templates/unique_values_add.html:231
-#: templates/unique_values_update.html:241
+#: templates/unique_values_add.html:245
+#: templates/unique_values_update.html:255
 msgid "Field name is required"
 msgstr "El campo nombre es obligatorio"
 
@@ -374,7 +368,7 @@ msgid "The file format is not supported"
 msgstr "El formato del archivo no está soportado"
 
 #: templates/external_graphic_add.html:148
-#: templates/external_graphic_add.html:154 views.py:502 views.py:608
+#: templates/external_graphic_add.html:154 views.py:517 views.py:623
 msgid "You must select a file"
 msgstr "Debe seleccionar un archivo"
 
@@ -601,25 +595,31 @@ msgstr "Eliminar estilo"
 msgid "Select field to generate unique values"
 msgstr "Seleccionar campo para generar valores únicos"
 
-#: views.py:96
+#: views.py:97
 msgid "The layer must contain at least one style"
 msgstr "La capa debe contener al menos un estilo"
 
-#: views.py:99
+#: views.py:100
 msgid "Can not delete a default style"
 msgstr "No puede eliminar un estilo por defecto"
 
-#: views.py:495
+#: views.py:510
 msgid "Error importing SLD"
 msgstr "Error al importar SLD"
 
-#: views.py:542 views.py:605
+#: views.py:557 views.py:620
 msgid "You must enter a name for the library"
 msgstr "Debe introducir un nombre para la biblioteca"
 
-#: views.py:611
+#: views.py:626
 msgid "You must enter a name for the library and select a file"
 msgstr "Debe introducir un nombre para la biblioteca y seleccionar un archivo"
+
+#~ msgid ""
+#~ "Invalid title: '{value}'. Title should not contain any special characters"
+#~ msgstr ""
+#~ "Título inválido: '{value}'. El título no debe contener ningún caracter "
+#~ "especial"
 
 #~ msgid "is public?"
 #~ msgstr "es pública?"
