@@ -5,11 +5,13 @@ Introducción
 ------------
 
 En ocasiones, puede existir la necesidad de generar numerosos proyectos que tengan una cartografía base en común con unas características determinadas de simbología, orden de capas y grupos idéntica en todos los casos. 
+
+
 El objetivo de este plugin es dar soporte para poder definir unas plantillas que establezcan esa configuración de las capas que compondrán los futuros proyectos, permitiendo ahorrar esos pasos repetitivos en cada uno de ellos.
 A través de esta funcionalidad, se pueden definir los grupos de capas que existirán, así como los shapes que contendrán. También se podrá indicar el nombre, el título, la simbología o la traducción de los nombres de sus campos, entre otras opciones.
 
 
-Para acceder a esta funcionalidad, se dispone de una entrada en el menú lateral _Carpetas SHPS_. Desde ella, se divide la sección de _Proyectos_ o _Plantillas_
+Para acceder a esta funcionalidad, se dispone de una entrada en el menú lateral *Carpetas SHPS*. Desde ella, se divide la sección de *Proyectos* o *Plantillas*
 
 .. image:: ../_static/images/shps_folder_index.png
    :align: center
@@ -19,7 +21,9 @@ Para acceder a esta funcionalidad, se dispone de una entrada en el menú lateral
 Las plantillas de configuración
 -------------------------------
 
-Se pueden encontrar un listado de las plantillas creadas en la sección _Plantillas_ del menú lateral.
+Se pueden encontrar un listado de las plantillas creadas en la sección *Plantillas* del menú lateral.
+
+
 Si no se ha definido nada en ellas, la información que contiene es muy básica, ya que únicamente requiere un nombre para identificarla y el sistema de coordenadas por defecto que se le asignará a los shapes (si no se indica lo contrario)
 
 .. image:: ../_static/images/shps_folder_template_add.png
@@ -59,9 +63,11 @@ A continuación se describen las operaciones más frecuentes:
 
   Se trata de un formulario sencillo, requiere el nombre interno que tendrá el grupo y el título que se mostrará en el TOC del mapa.
 
+
 * *Editar un grupo* 
 
   Además de los valores indicados en la creación, se pueden añadir, modificar, ordenar o borrar las definiciones de capas que contiene dicho grupo
+
 
 * *Borrar un grupo*
 
@@ -85,9 +91,11 @@ A continuación se describen las operaciones más frecuentes:
   * Símbolo: se permite asignarle una simbología de alguna biblioteca cargada en el sistema
   * Traducción de los campos: Permite establecer etiquetas de los campos para los distintos idiomas soportados por la aplicación
     
+    
 * *Edita una capa*
 
   Permite modificar cualquiera de los valores anteriormente definidos
+
 
 * *Borra una capa* 
 
@@ -109,7 +117,7 @@ Una vez definidas las plantillas, se pueden crear tantos proyectos como se requi
 .. image:: ../_static/images/shps_folder_project_list.png
    :align: center
 
-Para ello, en la sección _Proyectos_ se dará de alta uno nuevo, indicando los parámetros necesarios. 
+Para ello, en la sección *Proyectos* se dará de alta uno nuevo, indicando los parámetros necesarios. 
 
 .. image:: ../_static/images/shps_folder_project_add.png
    :align: center
@@ -117,12 +125,15 @@ Para ello, en la sección _Proyectos_ se dará de alta uno nuevo, indicando los 
 A diferencia del formulario original de creación de proyectos, se definirá el proyecto original (con su nombre, descripción, icono, encuadre original del mapa, ...) además de indicar la plantilla que se utilizará, y si se desea programar cuándo se realizará una actualización de esa definición base e incluso indicarle que se repita cada cierto tiempo (esta funcionalidad es útil, por si se modificará la definición de las plantillas y se quisiera que se reflejase en los proyectos que hacen uso de ellas sin tener que editarlos uno a uno a mano o tener que rehacerlos).
 
 Una vez creado el nuevo proyecto, se puede realizar una actualización de la información a través del botón indicado, o esperar a que se haga de forma automática (si se ha especificado) en el momento indicado.
-También se pueden actualizar varios proyectos a la vez y eliminar la selección a través de los botones _Actualizar selección_ o _Borrar selección_
+
+También se pueden actualizar varios proyectos a la vez y eliminar la selección a través de los botones *Actualizar selección* o *Borrar selección*
 
 
 .. image:: ../_static/images/shps_folder_project_load.png
    :align: center
 
 Una vez actualizada la información, se habrán generado, de forma automática, las capas y grupos de capas de la forma que se estableció en la plantilla, y se habrán creado las vinculaciones necearias para que aparezcan en el proyecto.
+
+
 *NOTA:* Los proyectos aquí generados, así como las capas, grupos, simbología, etc. también son visibles desde los accesos convencionales de la aplicación y se comportan como tales si se accede  desde sus entradas correspondientes
 
