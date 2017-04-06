@@ -49,6 +49,16 @@ SymbologyUtils.prototype.shapes = [
 	{value: 'x', title: 'X'}
 ];
 
+SymbologyUtils.prototype.linePatterns = [
+	{value: 'none', imgsrc: IMG_PATH + 'default.png'},
+	{value: '5 10', imgsrc: IMG_PATH + '5_10.png'},
+	{value: '10 5', imgsrc: IMG_PATH + '10_5.png'},
+	{value: '5 1', imgsrc: IMG_PATH + '5_1.png'},
+	{value: '1 5', imgsrc: IMG_PATH + '1_5.png'},
+	{value: '15 10 5 10', imgsrc: IMG_PATH + '15_10_5_10.png'},
+	{value: '5 5 1 5', imgsrc: IMG_PATH + '5_5_1_5.png'},
+];
+
 SymbologyUtils.prototype.external_graphic_formats = [
 	{value: 'image/png', title: 'image/png'},
 	{value: 'image/jpeg', title: 'image/jpeg'},

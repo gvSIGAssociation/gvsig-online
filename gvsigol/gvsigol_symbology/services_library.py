@@ -122,7 +122,8 @@ def add_symbol(request, json_rule, library_id, symbol_type):
                 fill_opacity = json_sym.get('fill_opacity'),
                 stroke = json_sym.get('stroke'),
                 stroke_width = json_sym.get('stroke_width'),
-                stroke_opacity = json_sym.get('stroke_opacity')                  
+                stroke_opacity = json_sym.get('stroke_opacity'),
+                stroke_dash_array = json_sym.get('stroke_dash_array')              
             )
             symbolizer.save()
         
@@ -132,7 +133,8 @@ def add_symbol(request, json_rule, library_id, symbol_type):
                 order = 0,
                 stroke = json_sym.get('stroke'),
                 stroke_width = json_sym.get('stroke_width'),
-                stroke_opacity = json_sym.get('stroke_opacity')                 
+                stroke_opacity = json_sym.get('stroke_opacity'),
+                stroke_dash_array = json_sym.get('stroke_dash_array')                 
             )
             symbolizer.save()      
             
@@ -148,7 +150,8 @@ def add_symbol(request, json_rule, library_id, symbol_type):
                 fill_opacity = json_sym.get('fill_opacity'),
                 stroke = json_sym.get('stroke'),
                 stroke_width = json_sym.get('stroke_width'),
-                stroke_opacity = json_sym.get('stroke_opacity')                  
+                stroke_opacity = json_sym.get('stroke_opacity'),
+                stroke_dash_array = json_sym.get('stroke_dash_array')                  
             )
             symbolizer.save()  
             
@@ -215,7 +218,8 @@ def update_symbol(request, json_rule, rule, library_rule):
                     fill_opacity = json_sym.get('fill_opacity'),
                     stroke = json_sym.get('stroke'),
                     stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity')                  
+                    stroke_opacity = json_sym.get('stroke_opacity'),
+                    stroke_dash_array = json_sym.get('stroke_dash_array')                  
                 )
                 symbolizer.save()
             
@@ -225,7 +229,8 @@ def update_symbol(request, json_rule, rule, library_rule):
                     order = json_sym.get('order'),
                     stroke = json_sym.get('stroke'),
                     stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity')                 
+                    stroke_opacity = json_sym.get('stroke_opacity'),
+                    stroke_dash_array = json_sym.get('stroke_dash_array')                 
                 )
                 symbolizer.save()      
                 
@@ -241,7 +246,8 @@ def update_symbol(request, json_rule, rule, library_rule):
                     fill_opacity = json_sym.get('fill_opacity'),
                     stroke = json_sym.get('stroke'),
                     stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity')                  
+                    stroke_opacity = json_sym.get('stroke_opacity'),
+                    stroke_dash_array = json_sym.get('stroke_dash_array')                  
                 )
                 symbolizer.save()
     
@@ -433,7 +439,8 @@ def upload_library(name, description, file):
                             fill_opacity = mark.Fill.CssParameter[1].valueOf_,
                             stroke = mark.Stroke.CssParameter[0].valueOf_,
                             stroke_width = mark.Stroke.CssParameter[1].valueOf_,
-                            stroke_opacity = mark.Stroke.CssParameter[2].valueOf_                 
+                            stroke_opacity = mark.Stroke.CssParameter[2].valueOf_,
+                            stroke_dash_array = mark.Stroke.CssParameter[3].valueOf_
                         )
                         symbolizer.save()
                         
@@ -458,7 +465,8 @@ def upload_library(name, description, file):
                         order = scount,
                         stroke = s.Stroke.CssParameter[0].valueOf_,
                         stroke_width = s.Stroke.CssParameter[1].valueOf_,
-                        stroke_opacity = s.Stroke.CssParameter[2].valueOf_                  
+                        stroke_opacity = s.Stroke.CssParameter[2].valueOf_,
+                        stroke_dash_array = s.Stroke.CssParameter[3].valueOf_                 
                     )
                     symbolizer.save()
                         
@@ -470,7 +478,8 @@ def upload_library(name, description, file):
                         fill_opacity = s.Fill.CssParameter[1].valueOf_,
                         stroke = s.Stroke.CssParameter[0].valueOf_,
                         stroke_width = s.Stroke.CssParameter[1].valueOf_,
-                        stroke_opacity = s.Stroke.CssParameter[2].valueOf_                  
+                        stroke_opacity = s.Stroke.CssParameter[2].valueOf_,
+                        stroke_dash_array = s.Stroke.CssParameter[3].valueOf_                 
                     )
                     symbolizer.save()
                     
