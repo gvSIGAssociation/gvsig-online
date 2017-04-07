@@ -14,8 +14,37 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-msgid "Print message"
-msgstr "La información y cartografía disponible en este geoportal es propiedad de xxxxxxxx. La información está carente de fe pública, no se ofrece garantía"
+msgid "legalwarning"
+msgstr ""
+"Todos los contenidos cartográficos de este web y de los servicios que proporciona son propiedad de esta institución." 
+"La institución no es responsable de la información que se puede obtener a través de enlaces a sistemas externos."
+
+msgid "Print params"
+msgstr "Parametros de impresión"
+
+msgid "Select print template"
+msgstr "Seleccionar plantilla de impresión"
+
+msgid "Select template"
+msgstr "Seleccionar plantilla"
+
+msgid "Title"
+msgstr "Título"
+
+msgid "Legal warning"
+msgstr "Aviso legal"
+
+msgid "Rotation"
+msgstr "Rotación"
+
+msgid "Print"
+msgstr "Imprimir"
+
+msgid "Cancel"
+msgstr "Cancelar"
 
 msgid "You must select a template"
-msgstr "Debe seleccionar una plantilla"
+msgstr "Ha de seleccionar una plantilla"
+
+msgid "Error loading print plugin"
+msgstr "Error cargando plugin de impresión"
