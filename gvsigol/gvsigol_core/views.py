@@ -473,6 +473,7 @@ def project_get_conf(request):
                 layer['wms_url'] = core_utils.get_wms_url(request, workspace)
                 layer['wms_url_no_auth'] = workspace.wms_endpoint
                 layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
+                layer['wfs_url_no_auth'] = workspace.wfs_endpoint
                 layer['namespace'] = workspace.uri
                 layer['workspace'] = workspace.name   
                 layer['metadata'] = core_utils.get_catalog_url(request, l)             
