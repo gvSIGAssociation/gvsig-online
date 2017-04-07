@@ -114,9 +114,6 @@ Los proyectos basados en plantillas
 Una vez definidas las plantillas, se pueden crear tantos proyectos como se requiera, que usen esa definición como base y carguen ya ese contenido de la forma que se ha especificado.
 
 
-.. image:: ../_static/images/shps_folder_project_list.png
-   :align: center
-
 Para ello, en la sección *Proyectos* se dará de alta uno nuevo, indicando los parámetros necesarios. 
 
 .. image:: ../_static/images/shps_folder_project_add.png
@@ -124,7 +121,12 @@ Para ello, en la sección *Proyectos* se dará de alta uno nuevo, indicando los 
 
 A diferencia del formulario original de creación de proyectos, se definirá el proyecto original (con su nombre, descripción, icono, encuadre original del mapa, ...) además de indicar la plantilla que se utilizará, y si se desea programar cuándo se realizará una actualización de esa definición base e incluso indicarle que se repita cada cierto tiempo (esta funcionalidad es útil, por si se modificará la definición de las plantillas y se quisiera que se reflejase en los proyectos que hacen uso de ellas sin tener que editarlos uno a uno a mano o tener que rehacerlos).
 
-Una vez creado el nuevo proyecto, se puede realizar una actualización de la información a través del botón indicado, o esperar a que se haga de forma automática (si se ha especificado) en el momento indicado.
+Una vez creado el nuevo proyecto, se puede realizar una actualización de la información a través del botón *Actualizar* (amarillo) del proyecto, o esperar a que se haga de forma automática (si se ha especificado).
+
+
+.. image:: ../_static/images/shps_folder_project_list.png
+   :align: center
+
 
 También se pueden actualizar varios proyectos a la vez y eliminar la selección a través de los botones *Actualizar selección* o *Borrar selección*
 
