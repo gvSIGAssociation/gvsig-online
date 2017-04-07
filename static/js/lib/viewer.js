@@ -250,6 +250,7 @@ viewer.core = {
 				wmsLayer.wms_url = layerConf.wms_url;
 				wmsLayer.wms_url_no_auth = layerConf.wms_url_no_auth;
 				wmsLayer.wfs_url = layerConf.wfs_url;
+				wmsLayer.wfs_url_no_auth = layerConf.wfs_url_no_auth;
 				wmsLayer.cache_url = layerConf.cache_url;
 				wmsLayer.title = layerConf.title;
 				wmsLayer.abstract = layerConf.abstract;
