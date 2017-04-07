@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-21 10:01+0100\n"
+"POT-Creation-Date: 2017-04-07 09:43+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,12 +42,12 @@ msgstr ""
 "Estamos trabajando en la resolución del problema. Mientras tanto, puede"
 
 #: templates/base.html:95 templates/base_compress.html.py:95
-#: templates/viewer.html:116 templates/viewer_compress.html.py:115
+#: templates/viewer.html:119 templates/viewer_compress.html.py:117
 msgid "Sign out"
 msgstr "Cerrar sesión"
 
 #: templates/base.html:113 templates/base_compress.html.py:113
-#: templates/viewer.html:113 templates/viewer_compress.html.py:112
+#: templates/viewer.html:116 templates/viewer_compress.html.py:114
 msgid "Dashboard"
 msgstr "Panel de control"
 
@@ -136,11 +136,11 @@ msgstr ""
 "Aprenda a administrar la información geográfica desde un dispositivo móvil o "
 "una tableta"
 
-#: templates/home.html:18 utils.py:403
+#: templates/home.html:18 utils.py:415
 msgid "Username"
 msgstr "Nombre de usuario"
 
-#: templates/home.html:20 utils.py:406
+#: templates/home.html:20 utils.py:418
 msgid "Email"
 msgstr "Correo electrónico"
 
@@ -164,7 +164,7 @@ msgstr "Ha iniciado sesión como usuario con permisos restringidos"
 msgid "Last login"
 msgstr "Último acceso"
 
-#: templates/home.html:32 utils.py:407 utils.py:419
+#: templates/home.html:32 utils.py:419 utils.py:431
 msgid "Password"
 msgstr "Contraseña"
 
@@ -180,7 +180,7 @@ msgstr "para actualizar su contraseña"
 msgid "Passwords doesn't match"
 msgstr "Las contraseñas no coinciden"
 
-#: templates/home.html:42 templates/home.html.py:43 utils.py:415
+#: templates/home.html:42 templates/home.html.py:43 utils.py:427
 msgid "New password"
 msgstr "Nueva contraseña"
 
@@ -280,15 +280,15 @@ msgstr "Eliminar proyecto"
 msgid "The project will be removed, Do you want continue?"
 msgstr "El proyecto será eliminado, ¿Desea continuar?"
 
-#: templates/project_list.html:64 templates/public_viewer.html.py:171
-#: templates/public_viewer_compress.html:171 templates/viewer.html.py:194
-#: templates/viewer_compress.html:193
+#: templates/project_list.html:64 templates/public_viewer.html.py:181
+#: templates/public_viewer_compress.html:181 templates/viewer.html.py:206
+#: templates/viewer_compress.html:204
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: templates/project_list.html:65 templates/public_viewer.html.py:172
-#: templates/public_viewer_compress.html:172 templates/viewer.html.py:195
-#: templates/viewer_compress.html:194
+#: templates/project_list.html:65 templates/public_viewer.html.py:182
+#: templates/public_viewer_compress.html:182 templates/viewer.html.py:207
+#: templates/viewer_compress.html:205
 msgid "Accept"
 msgstr "Aceptar"
 
@@ -362,20 +362,35 @@ msgstr "Orden del TOC"
 msgid "Update project"
 msgstr "Actualizar proyecto"
 
-#: templates/public_viewer.html:83 templates/public_viewer_compress.html:83
+#: templates/public_viewer.html:84 templates/public_viewer_compress.html:84
 msgid "Anonymous"
 msgstr "Anónimo"
 
-#: templates/public_viewer.html:89 templates/public_viewer_compress.html:89
+#: templates/public_viewer.html:90 templates/public_viewer_compress.html:90
 msgid "Anonymous user"
 msgstr "Usuario anónimo"
 
-#: templates/public_viewer.html:94 templates/public_viewer_compress.html:94
+#: templates/public_viewer.html:95 templates/public_viewer_compress.html:95
 msgid "Exit"
 msgstr "Salir"
 
-#: templates/public_viewer.html:295 templates/public_viewer_compress.html:279
-#: templates/viewer.html.py:321 templates/viewer_compress.html:299
+#: templates/public_viewer.html:116 templates/public_viewer_compress.html:116
+#: templates/viewer.html.py:141 templates/viewer_compress.html:139
+msgid "Layer tree"
+msgstr "Árbol de capas"
+
+#: templates/public_viewer.html:117 templates/public_viewer_compress.html:117
+#: templates/viewer.html.py:142 templates/viewer_compress.html:140
+msgid "Legend"
+msgstr "Leyenda"
+
+#: templates/public_viewer.html:118 templates/public_viewer_compress.html:118
+#: templates/viewer.html.py:143 templates/viewer_compress.html:141
+msgid "Details"
+msgstr "Detalles"
+
+#: templates/public_viewer.html:323 templates/public_viewer_compress.html:307
+#: templates/viewer.html.py:356 templates/viewer_compress.html:329
 msgid "Close"
 msgstr "Cerrar"
 
@@ -383,23 +398,23 @@ msgstr "Cerrar"
 msgid "Update TOC"
 msgstr "Actualizar TOC"
 
-#: utils.py:386
+#: utils.py:398
 msgid "New user account"
 msgstr "Nueva cuenta de usuario"
 
-#: utils.py:402
+#: utils.py:414
 msgid "Account data"
 msgstr "Datos de la cuenta"
 
-#: utils.py:404
+#: utils.py:416
 msgid "First name"
 msgstr "Nombre"
 
-#: utils.py:405
+#: utils.py:417
 msgid "Last name"
 msgstr "Apellidos"
 
-#: utils.py:417
+#: utils.py:429
 msgid "This is your new temporary password"
 msgstr "Esta es su contraseña temporal"
 

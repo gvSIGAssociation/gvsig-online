@@ -83,6 +83,27 @@ msgstr "Zoom a la selección"
 msgid "Clear selection"
 msgstr "Limpiar selección"
 
+msgid "You must select at least one row"
+msgstr "Debe seleccionar al menos una fila"
+
+msgid "Print selection"
+msgstr "Imprimir selección"
+
+msgid "Advanced filter"
+msgstr "Filtro avanzado"
+
+msgid "Select field"
+msgstr "Seleccionar campo"
+
+msgid "Select value"
+msgstr "Seleccionar valor"
+
+msgid "Apply filter"
+msgstr "Aplicar filtro"
+
+msgid "Clear filter"
+msgstr "Limpiar filtro"
+
 # editionBar.js
 msgid "Add point"
 msgstr "Añadir punto"
@@ -101,6 +122,21 @@ msgstr "Eliminar elemento"
 
 msgid "Stop edition"
 msgstr "Terminar edición"
+
+msgid "Error starting edition"
+msgstr "Error comenzando edición"
+
+msgid "Feature properties"
+msgstr "Propiedades"
+
+msgid "Feature resources"
+msgstr "Recursos"
+
+msgid "remove"
+msgstr "eliminar"
+
+msgid "Failed to remove layer lock"
+msgstr "Fallo al eliminar el bloqueo de la capa"
 
 msgid "New feature"
 msgstr "Nuevo elemento"
@@ -136,8 +172,17 @@ msgstr "No hay capas disponibles"
 msgid "More info"
 msgstr "Más información"
 
-msgid "Open"
-msgstr "Abrir"
+msgid "Coordinates"
+msgstr "Coordenadas"
+
+msgid "View resources"
+msgstr "Ver recursos"
+
+msgid "Feature info"
+msgstr "Información del elemento"
+
+msgid "Multimedia resources"
+msgstr "Recursos multimedia"
 
 # measureArea.js
 msgid "Measure area"
@@ -177,6 +222,9 @@ msgid "Warning"
 msgstr "Aviso"
 
 # layerTree.js
+msgid "The layer you are trying to edit is locked"
+msgstr "La capa que está intentando editar está bloqueada"
+
 msgid "Base layers"
 msgstr "Capas base"
 
@@ -269,12 +317,6 @@ msgstr "BoundingBox"
 
 msgid "GeographicBoundingBox"
 msgstr "BoundingBox geográfica"
-
-msgid "Feature info"
-msgstr "Información del elemento"
-
-msgid "Multimedia resources"
-msgstr "Recursos multimedia"
 
 #cleanMap.js
 msgid "Clean map"
