@@ -83,6 +83,27 @@ msgstr ""
 msgid "Clear selection"
 msgstr ""
 
+msgid "Print selection"
+msgstr ""
+
+msgid "You must select at least one row"
+msgstr ""
+
+msgid "Advanced filter"
+msgstr ""
+
+msgid "Select field"
+msgstr ""
+
+msgid "Select value"
+msgstr ""
+
+msgid "Apply filter"
+msgstr ""
+
+msgid "Clear filter"
+msgstr ""
+
 # editionBar.js
 msgid "Add point"
 msgstr ""
@@ -100,6 +121,21 @@ msgid "Remove feature"
 msgstr ""
 
 msgid "Stop edition"
+msgstr ""
+
+msgid "Error starting edition"
+msgstr ""
+
+msgid "Feature properties"
+msgstr ""
+
+msgid "Feature resources"
+msgstr ""
+
+msgid "remove"
+msgstr ""
+
+msgid "Failed to remove layer lock"
 msgstr ""
 
 msgid "New feature"
@@ -136,7 +172,16 @@ msgstr ""
 msgid "More info"
 msgstr ""
 
-msgid "Open"
+msgid "Coordinates"
+msgstr ""
+
+msgid "View resources"
+msgstr ""
+
+msgid "Feature info"
+msgstr ""
+
+msgid "Multimedia resources"
 msgstr ""
 
 # measureArea.js
@@ -177,6 +222,9 @@ msgid "Warning"
 msgstr ""
 
 # layerTree.js
+msgid "The layer you are trying to edit is locked"
+msgstr ""
+
 msgid "Base layers"
 msgstr ""
 
