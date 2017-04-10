@@ -912,7 +912,7 @@ class Geoserver():
                 conf = None
                 if f in table_definition:
                     table_def = table_definition[f]
-                    layer_name = table_def['name']
+                    layer_name = table_def['name'].lower()
                     layer_title = table_def['title']
                     
                     if table_def.has_key('srs') and table_def['srs']:
@@ -931,7 +931,7 @@ class Geoserver():
                         print e
                     #layer_group = table_def['group'] + '_' + application.name.lower()
                 else:
-                    layer_name = os.path.splitext(os.path.basename(f))[0]
+                    layer_name = os.path.splitext(os.path.basename(f))[0].lower()
                     layer_title = os.path.splitext(os.path.basename(f))[0]
                     original_style_name = layer_name
                 shp_abs = os.path.join(dir_path, f)
