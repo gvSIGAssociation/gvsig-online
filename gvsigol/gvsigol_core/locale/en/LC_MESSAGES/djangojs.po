@@ -80,6 +80,9 @@ msgstr ""
 msgid "Zoom to selection"
 msgstr ""
 
+msgid "Select all"
+msgstr ""
+
 msgid "Clear selection"
 msgstr ""
 

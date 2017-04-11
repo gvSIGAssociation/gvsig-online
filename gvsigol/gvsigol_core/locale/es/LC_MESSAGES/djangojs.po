@@ -80,6 +80,9 @@ msgstr "Orden descendente"
 msgid "Zoom to selection"
 msgstr "Zoom a la selección"
 
+msgid "Select all"
+msgstr "Seleccionar todo"
+
 msgid "Clear selection"
 msgstr "Limpiar selección"
 

@@ -187,10 +187,15 @@ attributeTable.prototype.createTableUI = function(featureType) {
         }
     });
 	tableButtons.push({
-        text: '<i class="fa fa-eraser margin-r-5"></i> ' + gettext('Clear selection'),
+   	 	extend: 'selectAll',
+		text: '<i class="fa fa-list margin-r-5"></i> ' + gettext('Select all')
+	});
+	tableButtons.push({
+		extend: 'selectNone',
+        text: '<i class="fa fa-eraser margin-r-5"></i> ' + gettext('Clear selection')/*,
         action: function ( e, dt, node, config ) {
         	self.source.clear();
-        }
+        }*/
     });
 	
 	var dt = $('#table-' + this.layer.get("id")).DataTable({
@@ -246,7 +251,7 @@ attributeTable.prototype.createTableUI = function(featureType) {
         "columns": columns,
         dom: 'Bfrtp<"bottom"l>',
         "bSort" : false,
-	    "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
+	    "lengthMenu": [[10, 25, 50, 100, 500, 1000], [10, 25, 50, 100, 500, 1000]],
 	    buttons: tableButtons
     });
 };
@@ -567,8 +572,8 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 	}
 	
 	var printLayers = new Array();
-	//var url = "http://localhost/gs-local/ws_jrodrigo/wfs" + "?service=WFS&version=1.1.0&request=GetFeature&typeName=" + this.layer.workspace + ':' + typename + "&outputFormat=application/json&featureId=" + fids.toString();
-	var url = this.layer.wfs_url_no_auth + "?service=WFS&version=1.1.0&request=GetFeature&typeName=" + this.layer.workspace + ':' + typename + "&outputFormat=application%2Fjson&featureId=" + fids.toString();
+	var url = "http://localhost/gs-local/ws_jrodrigo/wfs" + "?service=WFS&version=1.1.0&request=GetFeature&typeName=" + this.layer.workspace + ':' + typename + "&outputFormat=application/json&featureId=" + fids.toString();
+	//var url = this.layer.wfs_url_no_auth + "?service=WFS&version=1.1.0&request=GetFeature&typeName=" + this.layer.workspace + ':' + typename + "&outputFormat=application%2Fjson&featureId=" + fids.toString();
 	printLayers.push({
 		"type": "geojson",
 		"geoJson": url,
@@ -599,8 +604,8 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
   	});
 	
 	printLayers.push({
-		//"baseURL": "http://localhost/gs-local/ws_jrodrigo/wms",
-		"baseURL": this.layer.wms_url_no_auth,
+		"baseURL": "http://localhost/gs-local/ws_jrodrigo/wms",
+		//"baseURL": this.layer.wms_url_no_auth,
 	  	"opacity": 1,
 	  	"type": "WMS",
 	  	"layers": [this.layer.workspace + ':' + this.layer.layer_name],
@@ -681,8 +686,8 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 	
 	var legend = {
 		"name": this.layer.title,
-        "icons": [this.layer.legend_no_auth]
-		//"icons": ["http://localhost:8080/geoserver/ws_jrodrigo/wms?SERVICE=WMS&VERSION=1.1.1&layer=espacios_naturales&REQUEST=getlegendgraphic&FORMAT=image/png"]
+        //"icons": [this.layer.legend_no_auth]
+		"icons": ["http://localhost:8080/geoserver/ws_jrodrigo/wms?SERVICE=WMS&VERSION=1.1.1&layer=espacios_naturales&REQUEST=getlegendgraphic&FORMAT=image/png"]
     };
 	
 	var columns = new Array();
