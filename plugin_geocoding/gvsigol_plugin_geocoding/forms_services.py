@@ -57,12 +57,12 @@ class ProviderUpdateForm(forms.ModelForm):
        
     workspace = forms.CharField(label=_(u'Workspace'), disabled=True, required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))  
     datastore = forms.CharField(label=_(u'Datastore'), disabled=True, required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))  
-    resource = forms.CharField(label=_(u'Resource'), disabled=True, required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'})) 
-    
-    id_field = forms.CharField(label=_(u'Id'), disabled=True, required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))  
-    text_field = forms.CharField(label=_(u'Text'), disabled=True, required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))  
-    geom_field = forms.CharField(label=_(u'Geom'), disabled=True, required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'})) 
-    
+    resource = forms.ModelChoiceField(label=_(u'Resource'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control'}))
+
+    id_field = forms.ModelChoiceField(label=_(u'Id'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control'}))
+    text_field = forms.ModelChoiceField(label=_(u'Text'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control'}))
+    geom_field = forms.ModelChoiceField(label=_(u'Geom'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control'}))
+ 
     category = forms.CharField(label=_(u'Category'),  required=True, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     
     params = forms.CharField(label=_(u'Parameters'), required=True, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))

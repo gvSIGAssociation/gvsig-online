@@ -191,15 +191,59 @@ def isValidCartociudadDB(datastore):
 @staff_required
 def provider_update(request, provider_id):
     provider = Provider.objects.get(id=provider_id)
+    workspace_id = ''
+    workspace = ''
+    datastore = ''
+    resource = ''
+    
     if provider==None:
         return HttpResponseNotFound(_('Provider not found'))
 
     if request.method == 'POST':
         form = ProviderUpdateForm(request.POST)
+        
+        type = request.POST.get('provider-type')
         provider.category = request.POST['category']
         if request.FILES.get('image'):
             provider.image = request.FILES.get('image')  
+            
+        params = request.POST.get('params')
+        has_errors = False
         
+        if type=='cartociudad' or type=='user':
+            workspace = request.POST.get('provider-workspace')
+            datastore = request.POST.get('provider-datastore')
+
+            ws = Workspace.objects.filter(name=workspace).first()
+            ds = Datastore.objects.filter(workspace=ws, name=datastore).first()
+
+            if type=='user':
+                resource = request.POST.get('provider-resource')
+                id_field = request.POST.get('provider-id_field')
+                text_field = request.POST.get('provider-text_field')
+                geom_field = request.POST.get('provider-geom_field')
+
+                params = {
+                    'datastore_id': ds.id,
+                    'resource': str(resource),
+                    'id_field': str(id_field),
+                    'text_field': str(text_field),
+                    'geom_field': str(geom_field)
+                }
+            
+            if type=='cartociudad':
+                resources_needed = isValidCartociudadDB(ds)
+
+                if resources_needed.__len__() > 0:
+                    form.add_error(None, _("Error: DataStore has not a valid CartoCiudad schema (Needed " + ', '.join(resources_needed) + ")"))
+                    has_errors = True
+                params = {
+                    'datastore_id': ds.id,
+                } 
+                
+        if not has_errors and not (type=='cartociudad' or type=='user'):       
+            provider.params = json.dumps(params)
+                
         provider.save()
         set_providers_to_geocoder()
         return redirect('provider_list')
@@ -220,6 +264,14 @@ def provider_update(request, provider_id):
                 form.fields['text_field'].initial = params["text_field"]
                 form.fields['geom_field'].initial = params["geom_field"]
             
+            if params and params.has_key('datastore_id'):
+                ds = Datastore.objects.get(id=params['datastore_id'])
+                workspace_id = ds.workspace.id
+                workspace = ds.workspace.name
+                datastore = ds.name
+            if params and params.has_key('resource'):
+                resource = params['resource']
+            
         form.fields['params'].initial = provider.params
     
     image_url = settings.STATIC_URL + 'img/geocoding/toponimo.png'
@@ -227,8 +279,22 @@ def provider_update(request, provider_id):
         image_url = provider.image.url
         # HACK HTTPS
         image_url = image_url.replace("https", "http")
+    
+    
         
-    return render(request, 'provider_update.html', {'form': form, 'params': provider.params, 'type': provider.type, 'provider_id': provider_id, 'image_photo_url': image_url})
+    context = {
+        'form': form, 
+        'params': provider.params, 
+        'type': provider.type, 
+        'provider_id': provider_id, 
+        'image_photo_url': image_url,
+        'workspace_id' : workspace_id,
+        'workspace_name' : workspace,
+        'datastore' : datastore,
+        'resource' : resource
+    }
+        
+    return render(request, 'provider_update.html', context)
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
