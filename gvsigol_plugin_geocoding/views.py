@@ -218,10 +218,10 @@ def provider_update(request, provider_id):
             ds = Datastore.objects.filter(workspace=ws, name=datastore).first()
 
             if type=='user':
-                resource = request.POST.get('provider-resource')
-                id_field = request.POST.get('provider-id_field')
-                text_field = request.POST.get('provider-text_field')
-                geom_field = request.POST.get('provider-geom_field')
+                resource = request.POST.get('resource')
+                id_field = request.POST.get('id_field')
+                text_field = request.POST.get('text_field')
+                geom_field = request.POST.get('geom_field')
 
                 params = {
                     'datastore_id': ds.id,
@@ -241,7 +241,7 @@ def provider_update(request, provider_id):
                     'datastore_id': ds.id,
                 } 
                 
-        if not has_errors and not (type=='cartociudad' or type=='user'):       
+        if not has_errors:       
             provider.params = json.dumps(params)
                 
         provider.save()
