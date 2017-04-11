@@ -51,7 +51,7 @@ msgstr "Campo con la geometría"
 #: forms_services.py:46 forms_services.py:66 templates/provider_add.html.py:92
 #: templates/provider_list.html:24 templates/provider_update.html.py:91
 msgid "Category"
-msgstr "Categoría de los datos"
+msgstr "Nombre de la categoría"
 
 #: forms_services.py:48 forms_services.py:68
 msgid "Parameters"
