@@ -156,8 +156,8 @@ def isValidCartociudadDB(datastore):
     resources = mapservice_backend.getResources(datastore.workspace.name, datastore.name, datastore.type, "all")
     resources_needed = []
     
-    if not geocoding_setting.CARTOCIUDAD_DB_CODIGO_POSTAL in resources:
-        resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_CODIGO_POSTAL)
+    #if not geocoding_setting.CARTOCIUDAD_DB_CODIGO_POSTAL in resources:
+    #    resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_CODIGO_POSTAL)
         
     if not geocoding_setting.CARTOCIUDAD_DB_TRAMO_VIAL in resources:
         resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_TRAMO_VIAL)
