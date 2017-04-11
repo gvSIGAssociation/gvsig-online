@@ -30,8 +30,6 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	this.map = map;
 	this.layerTree = layerTree;
 	this.selectedLayer = selectedLayer;
-	this.selectedFeatures = new ol.Collection();
-	this.removedFeatures = new ol.Collection();
 	this.resourceManager = null;
 	if (layerTree.conf.resource_manager == 'gvsigol') {
 		this.resourceManager = new GvsigolResourceManager(this.selectedLayer);
@@ -288,16 +286,6 @@ editionBar.prototype.selectInteraction = null;
  */
 editionBar.prototype.removeInteraction = null;
 
-/**
- * TODO
- */
-editionBar.prototype.selecDragBox = null;
-
-/**
- * TODO
- */
-editionBar.prototype.removeDragBox = null;
-
 
 
 /**
@@ -441,43 +429,21 @@ editionBar.prototype.addModifyInteraction = function() {
 	var self = this;
 	
 	this.selectInteraction = new ol.interaction.Select({
-		wrapX: false
+		wrapX: false,
+		hitTolerance: 20
 	});
 	
-    this.selecDragBox = new ol.interaction.DragBox({
-    	condition: ol.events.condition.mouseOnly,
-    	style: new ol.style.Style({
-    		stroke: new ol.style.Stroke({
-    			color: [0, 0, 255, 1]
-    		})
-    	})
-    });
-	
 	this.modifyInteraction = new ol.interaction.Modify({
-		features: this.getFeaturesForModify()
+		features: this.selectInteraction.getFeatures()
 	});
 	
 	this.map.addInteraction(this.selectInteraction);
 	this.map.addInteraction(this.modifyInteraction);
-	this.map.addInteraction(this.selecDragBox);
 	
-	this.selecDragBox.on('boxend', function(evt) {
-        var info = [];
-        var extent = self.selecDragBox.getGeometry().getExtent();
-        self.source.forEachFeatureIntersectingExtent(extent, function(feature) {
-          self.selectedFeatures.push(feature);
-        });
-        self.editFeatureForm(self.selectedFeatures.getArray()[0]);
-      });
-	
-	this.selecDragBox.on('boxstart', function() {
-        self.selectedFeatures.clear();
-      });
-	
-	/*this.selectInteraction.on('select',
+	this.selectInteraction.on('select',
 		function(evt) {
 			self.editFeatureForm(evt.selected[0]);
-		}, this);*/
+		}, this);
 	
 	this.modifyInteraction.on('modifystart',
 		function(evt) {
@@ -488,15 +454,6 @@ editionBar.prototype.addModifyInteraction = function() {
 		function(evt) {
 			self.editFeatureForm(evt.features.getArray()[0]);
 		}, this);
-};
-
-/**
- * TODO
- */
-editionBar.prototype.getFeaturesForModify = function() {
-	return this.selectedFeatures;
-	
-	
 };
 
 
@@ -511,30 +468,12 @@ editionBar.prototype.addRemoveInteraction = function() {
 		wrapX: false
 	});
 	
-	this.removeDragBox = new ol.interaction.DragBox({
-    	condition: ol.events.condition.mouseOnly
-    });
-	
 	this.map.addInteraction(this.removeInteraction);
-	this.map.addInteraction(this.removeDragBox);
 	
-	/*this.removeInteraction.on('select',
+	this.removeInteraction.on('select',
 	    function(evt) {
 			self.removeFeatureForm(evt, evt.selected[0]);
-	   	}, this);*/
-	
-	this.removeDragBox.on('boxend', function(evt) {
-        var info = [];
-        var extent = self.removeDragBox.getGeometry().getExtent();
-        self.source.forEachFeatureIntersectingExtent(extent, function(feature) {
-          self.removedFeatures.push(feature);
-        });
-        self.removeFeatureForm(self.removedFeatures.getArray()[0]);
-      });
-	
-	this.removeDragBox.on('boxstart', function() {
-        self.removedFeatures.clear();
-      });
+	   	}, this);
 };
 
 
@@ -581,18 +520,6 @@ editionBar.prototype.deactivateControls = function() {
 	if (this.removeInteraction != null) {
 		this.map.removeInteraction(this.removeInteraction);
 		this.removeInteraction = null;
-	}
-	
-	if (this.selecDragBox != null) {
-		this.map.removeInteraction(this.selecDragBox);
-		this.selecDragBox = null;
-		this.selectedFeatures.clear();
-	}
-	
-	if (this.removeDragBox != null) {
-		this.map.removeInteraction(this.removeDragBox);
-		this.removeDragBox = null;
-		this.removedFeatures.clear();
 	}
 
 };
@@ -891,7 +818,7 @@ editionBar.prototype.editFeatureForm = function(feature) {
 /**
  * @param {Event} e Browser event.
  */
-editionBar.prototype.removeFeatureForm = function(feature) {	
+editionBar.prototype.removeFeatureForm = function(evt, feature) {	
 	
 	this.showDetailsTab();
 	
