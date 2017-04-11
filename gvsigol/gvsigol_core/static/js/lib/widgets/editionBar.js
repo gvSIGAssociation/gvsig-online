@@ -820,67 +820,70 @@ editionBar.prototype.editFeatureForm = function(feature) {
  */
 editionBar.prototype.removeFeatureForm = function(evt, feature) {	
 	
-	this.showDetailsTab();
-	
-	this.detailsTab.empty();	
-	var self = this;
-	
-	var ui = '';
-	ui += '<div class="box">';
-	ui += 		'<div class="box-header with-border">';
-	ui += 			'<h3 class="box-title">' + gettext('Remove feature') + '</h3>';
-	ui += 			'<div class="box-tools pull-right">';
-	//ui += 				'<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>';
-	ui += 			'</div>';
-	ui += 		'</div>';
-	ui += 		'<div class="box-body no-padding">';
-	for (var i=0; i<this.featureType.length; i++) {
-		if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
-			ui += '<div class="col-md-12 form-group" style="background-color: #fff;">';
-			ui += 	'<label style="color: #444;">' + this.featureType[i].name + '</label>';
-			if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
-				ui += '<input disabled id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
-				
-			} else if (this.featureType[i].type == 'xsd:date') {
-				var dbDate = feature.getProperties()[this.featureType[i].name];
-				if (dbDate.charAt(dbDate.length - 1) == 'Z') {
-					dbDate = dbDate.slice(0,-1);
+	if (feature) {
+		this.showDetailsTab();
+		
+		this.detailsTab.empty();	
+		var self = this;
+		
+		var ui = '';
+		ui += '<div class="box">';
+		ui += 		'<div class="box-header with-border">';
+		ui += 			'<h3 class="box-title">' + gettext('Remove feature') + '</h3>';
+		ui += 			'<div class="box-tools pull-right">';
+		//ui += 				'<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>';
+		ui += 			'</div>';
+		ui += 		'</div>';
+		ui += 		'<div class="box-body no-padding">';
+		for (var i=0; i<this.featureType.length; i++) {
+			if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
+				ui += '<div class="col-md-12 form-group" style="background-color: #fff;">';
+				ui += 	'<label style="color: #444;">' + this.featureType[i].name + '</label>';
+				if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
+					ui += '<input disabled id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+					
+				} else if (this.featureType[i].type == 'xsd:date') {
+					var dbDate = feature.getProperties()[this.featureType[i].name];
+					if (dbDate.charAt(dbDate.length - 1) == 'Z') {
+						dbDate = dbDate.slice(0,-1);
+					}
+					ui += '<input disabled id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + dbDate + '">';
+					
+				} else if (this.featureType[i].type == 'xsd:string') {
+					ui += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
 				}
-				ui += '<input disabled id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + dbDate + '">';
-				
-			} else if (this.featureType[i].type == 'xsd:string') {
-				ui += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+				ui += '</div>';
 			}
-			ui += '</div>';
 		}
+		ui += 		'</div>';
+		ui += 		'<div class="box-footer text-right">';
+		ui += 			'<button id="remove-feature" class="btn btn-default margin-r-5">' + gettext('remove') + '</button>';
+		ui += 			'<button id="save-feature-cancel" class="btn btn-default">' + gettext('Cancel') + '</button>';
+		ui += 		'</div>';
+		ui += '</div>';
+		
+		this.detailsTab.append(ui);
+		$.gvsigOL.controlSidebar.open();
+		
+		$('#remove-feature').on('click', function () {
+			var transaction = self.transactWFS('delete', feature);
+			if (transaction.success) {
+				var deleted = self.resourceManager.deleteResources(feature);
+				if (deleted) {
+					self.wfsLayer.getSource().removeFeature(feature);
+					self.removeInteraction.getFeatures().clear();
+					self.selectedLayer.getSource().updateParams({"time": Date.now()});
+					self.showLayersTab();
+				}
+			}		
+		});
+		
+		$('#save-feature-cancel').on('click', function () {
+			self.removeInteraction.getFeatures().clear();
+			self.showLayersTab();
+		});
+	
 	}
-	ui += 		'</div>';
-	ui += 		'<div class="box-footer text-right">';
-	ui += 			'<button id="remove-feature" class="btn btn-default margin-r-5">' + gettext('remove') + '</button>';
-	ui += 			'<button id="save-feature-cancel" class="btn btn-default">' + gettext('Cancel') + '</button>';
-	ui += 		'</div>';
-	ui += '</div>';
-	
-	this.detailsTab.append(ui);
-	$.gvsigOL.controlSidebar.open();
-	
-	$('#remove-feature').on('click', function () {
-		var transaction = self.transactWFS('delete', feature);
-		if (transaction.success) {
-			var deleted = self.resourceManager.deleteResources(feature);
-			if (deleted) {
-				self.wfsLayer.getSource().removeFeature(feature);
-				self.removeInteraction.getFeatures().clear();
-				self.selectedLayer.getSource().updateParams({"time": Date.now()});
-				self.showLayersTab();
-			}
-		}		
-	});
-	
-	$('#save-feature-cancel').on('click', function () {
-		self.removeInteraction.getFeatures().clear();
-		self.showLayersTab();
-	});
 
 };
 
