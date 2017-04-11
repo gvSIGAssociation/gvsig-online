@@ -219,6 +219,7 @@ search.prototype.locate = function(address, fromCombo) {
 			}
 		}
 		this.map.getView().setCenter(coordinate);
+		this.map.getView().setZoom(14);
 	}
 };
 
