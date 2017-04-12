@@ -805,8 +805,11 @@
 
         processResponse: function (result, originalQuery, cacheKey) {
             var that = this,
-                options = that.options;
+            options = that.options;
 
+            if(!result.suggestions){
+            	result["suggestion"] = [];
+            }
             result.suggestions = that.verifySuggestionsFormat(result.suggestions);
 
             // Cache results if cache is not disabled:
