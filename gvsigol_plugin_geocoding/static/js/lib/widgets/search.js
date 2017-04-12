@@ -181,7 +181,7 @@ search.prototype.initUI = function() {
 				},
 				success	:function(response){
 					if(response.address){
-						self.locate(response.address, true);
+						self.locate(response.address, 'EPSG:4258', true);
 					}
 				},
 				error: function(){}
@@ -194,10 +194,10 @@ search.prototype.initUI = function() {
 /**
  * TODO.
  */
-search.prototype.locate = function(address, fromCombo) {	
+search.prototype.locate = function(address, origin_srs, fromCombo) {	
 	var self = this;	
 	if(address != null){
-		var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], 'EPSG:4326', 'EPSG:3857');	
+		var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], origin_srs, 'EPSG:3857');	
 		if(fromCombo){
 			this.popup.show(coordinate, '<div><p>' + $("#autocomplete").val() + '</p></div>');
 		}else{
