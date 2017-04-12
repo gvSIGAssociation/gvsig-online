@@ -57,7 +57,7 @@ search.prototype.initUI = function() {
 						text: 'Dirección de Nominatim',
 						classname: 'some-style-class', // add some CSS rules
 						callback: function (obj) {
-							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
+							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4258');	
 							$.ajax({
 								type: 'POST',
 								async: false,
@@ -70,7 +70,7 @@ search.prototype.initUI = function() {
 									'type': 'nominatim'
 								},
 								success	:function(response){
-									self.locate(response, false);
+									self.locate(response, 'EPSG:4258', false);
 								},
 								error: function(){}
 							});
@@ -83,7 +83,7 @@ search.prototype.initUI = function() {
 						text: 'Dirección de CartoCiudad',
 						classname: 'some-style-class', // add some CSS rules
 						callback: function (obj) {
-							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
+							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4258');	
 							$.ajax({
 								type: 'POST',
 								async: false,
@@ -96,7 +96,7 @@ search.prototype.initUI = function() {
 									'type': 'cartociudad'
 								},
 								success	:function(response){
-									self.locate(response, false);
+									self.locate(response, 'EPSG:4258', false);
 								},
 								error: function(){}
 							});
@@ -109,7 +109,7 @@ search.prototype.initUI = function() {
 						text: 'Dirección de Google Maps',
 						classname: 'some-style-class', // add some CSS rules
 						callback: function (obj) {
-							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
+							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4258');	
 							$.ajax({
 								type: 'POST',
 								async: false,
@@ -122,7 +122,7 @@ search.prototype.initUI = function() {
 									'type': 'googlemaps'
 								},
 								success	:function(response){
-									self.locate(response, false);
+									self.locate(response, 'EPSG:4258', false);
 								},
 								error: function(){}
 							});
@@ -219,7 +219,9 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 			}
 		}
 		this.map.getView().setCenter(coordinate);
-		this.map.getView().setZoom(14);
+		if(fromCombo){
+			this.map.getView().setZoom(14);
+		}
 	}
 };
 
