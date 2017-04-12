@@ -699,8 +699,12 @@ editionBar.prototype.editFeatureForm = function(feature) {
 					
 				} else if (this.featureType[i].type == 'xsd:date') {
 					var dbDate = feature.getProperties()[this.featureType[i].name];
-					if (dbDate.charAt(dbDate.length - 1) == 'Z') {
-						dbDate = dbDate.slice(0,-1);
+					if (dbDate != null) {
+						if (dbDate.charAt(dbDate.length - 1) == 'Z') {
+							dbDate = dbDate.slice(0,-1);
+						}
+					} else {
+						dbDate = null;
 					}
 					featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + dbDate + '">';
 					
@@ -844,10 +848,14 @@ editionBar.prototype.removeFeatureForm = function(evt, feature) {
 					
 				} else if (this.featureType[i].type == 'xsd:date') {
 					var dbDate = feature.getProperties()[this.featureType[i].name];
-					if (dbDate.charAt(dbDate.length - 1) == 'Z') {
-						dbDate = dbDate.slice(0,-1);
+					if (dbDate != null) {
+						if (dbDate.charAt(dbDate.length - 1) == 'Z') {
+							dbDate = dbDate.slice(0,-1);
+						}
+					} else {
+						ui += '<input disabled id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + dbDate + '">';
 					}
-					ui += '<input disabled id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + dbDate + '">';
+					
 					
 				} else if (this.featureType[i].type == 'xsd:string') {
 					ui += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
