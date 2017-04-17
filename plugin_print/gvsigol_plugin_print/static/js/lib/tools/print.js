@@ -162,7 +162,8 @@ print.prototype.handler = function(e) {
 		});
 		
 		$('#cancel-print').on('click', function () {
-			self.map.getView().unByKey(eventKey);
+			//self.map.getView().unByKey(eventKey);
+			ol.Observable.unByKey(eventKey);
 			self.removeExtentLayer();
 			self.showLayersTab();
 			self.capabilities = null;
