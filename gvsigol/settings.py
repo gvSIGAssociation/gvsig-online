@@ -2,7 +2,7 @@
 
 '''
     gvSIG Online.
-    Copyright (C) 2007-2015 gvSIG Association.
+    Copyright (C) 2010-2017 SCOLAB.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -237,9 +237,9 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_services/static'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
-    #os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
+    os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
     #os.path.join(BASE_DIR, 'gvsigol_app_pobla/static'),
-    os.path.join(BASE_DIR, 'gvsigol_app_benicarlo/static'),
+    #os.path.join(BASE_DIR, 'gvsigol_app_benicarlo/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_geocoding/static'),
