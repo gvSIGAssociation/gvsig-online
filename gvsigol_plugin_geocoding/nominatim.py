@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
     gvSIG Online.
-    Copyright (C) 2007-2015 gvSIG Association.
+    Copyright (C) 2010-2017 SCOLAB.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
