@@ -857,7 +857,7 @@ class Geoserver():
 
         raise rest_geoserver.RequestError(-1, _("Error uploading the layer. Review the file format."))
     
-    def __do_shpdir2postgis(self, request, datastore, application, dir_path, layergroup, table_definition, creation_mode, defaults):
+    def __do_shpdir2postgis(self, username, datastore, application, dir_path, layergroup, table_definition, creation_mode, defaults):
         try: 
             # get & sanitize parameters
             if 'srs' in defaults.keys():    
@@ -969,7 +969,7 @@ class Geoserver():
                     layer.layer_group = layergroup
                     layer.title = layer_title
                     layer.type = datastore.type
-                    layer.created_by = request.user.username
+                    layer.created_by = username
                     if has_conf:
                         layer.conf = conf
                     layer.save()
