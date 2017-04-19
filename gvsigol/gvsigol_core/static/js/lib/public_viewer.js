@@ -237,6 +237,9 @@ viewer.core = {
 				wmsLayer.workspace = layerConf.workspace
 				wmsLayer.order = layerConf.order;
 				wmsLayer.setZIndex(parseInt(layerConf.order));
+				wmsLayer.conf = JSON.parse(layerConf.conf);
+				wmsLayer.parentGroup = group;
+				
 				this.map.addLayer(wmsLayer);
 			}
 		}

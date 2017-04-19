@@ -33,7 +33,7 @@ from gvsigol_auth.utils import superuser_required, staff_required
 from gvsigol_core.models import ProjectLayerGroup
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-from gvsigol.settings import FILEMANAGER_DIRECTORY
+from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES
 from django.utils.translation import ugettext as _
 from gvsigol_services.models import LayerResource
 from gvsigol.settings import GVSIGOL_SERVICES
@@ -515,7 +515,8 @@ def layer_config(request, layer_id):
         for i in range(1, counter+1):
             field = {}
             field['name'] = request.POST.get('field-name-' + str(i))
-            field['title'] = request.POST.get('field-title-' + str(i))
+            for id, language in LANGUAGES:
+                field['title-'+id] = request.POST.get('field-title-'+id+'-' + str(i))
             field['visible'] = False
             if 'field-visible-' + str(i) in request.POST:
                 field['visible'] = True
@@ -531,13 +532,17 @@ def layer_config(request, layer_id):
     else:
         layer = Layer.objects.get(id=int(layer_id))
         fields = []
+        available_languages = []
+        for id, language in LANGUAGES:
+            available_languages.append(id)
         
         try:
-            conf = json.loads(layer.conf)
+            conf = ast.literal_eval(layer.conf)
             for f in conf['fields']:
                 field = {}
                 field['name'] = f['name']
-                field['title'] = f['title']
+                for id, language in LANGUAGES:
+                    field['title-'+id] = f['title-'+id]
                 field['visible'] = f['visible']
                 fields.append(field)
                 
@@ -549,11 +554,12 @@ def layer_config(request, layer_id):
             for f in resource_fields:
                 field = {}
                 field['name'] = f['name']
-                field['title'] = f['name']
+                for id, language in LANGUAGES:
+                    field['title-'+id] = f['name']
                 field['visible'] = True
                 fields.append(field)
     
-        return render(request, 'layer_config.html', {'layer': layer, 'layer_id': layer.id, 'fields': fields})
+        return render(request, 'layer_config.html', {'layer': layer, 'layer_id': layer.id, 'fields': fields, 'fields_json': json.dumps(fields), 'available_languages': LANGUAGES, 'available_languages_array': available_languages})
     
 
 @require_POST
@@ -1133,6 +1139,7 @@ def get_feature_info(request):
         ws = request.POST.get('workspace')
 
         req = requests.Session()
+        lang = request.LANGUAGE_CODE
         if 'username' in request.session and 'password' in request.session:
             if request.session['username'] is not None and request.session['password'] is not None:
                 req.auth = (request.session['username'], request.session['password'])
@@ -1176,7 +1183,10 @@ def get_feature_info(request):
                         for f in fields:
                             if f.get('name') == p:
                                 if f.get('visible'):
-                                    formated_properties[f.get('title')] = geojson['features'][i].get('properties')[p]
+                                    if f.has('title-'+lang):
+                                        formated_properties[f.get('title-'+lang)] = geojson['features'][i].get('properties')[p]
+                                    else:
+                                        formated_properties[f.get('title')] = geojson['features'][i].get('properties')[p]
                     geojson['features'][i]['properties'] = formated_properties
                     
                 features = geojson['features']
