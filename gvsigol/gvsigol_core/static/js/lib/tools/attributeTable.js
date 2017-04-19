@@ -109,6 +109,8 @@ attributeTable.prototype.createTableUI = function(featureType) {
 	var table = $("<table>", {id: 'table-' + this.layer.get("id"), class: 'stripe nowrap cell-border hover', style: "width: 100%;"});
 	var thead = $("<thead>", {style: "width: 100%;"});
 	var trow = $("<tr>");
+	var fields_trans = this.layer.conf;
+	var language = $("#select-language").val();
 	for (var i=0; i<featureType.length; i++) {
 		if (featureType[i].type.indexOf('gml:') == -1) {
 			if (!featureType[i].name.startsWith(this.prefix)) {
@@ -124,7 +126,20 @@ attributeTable.prototype.createTableUI = function(featureType) {
 						return value;
 					 }
 				});
-				var th = $("<th>", {text: featureType[i].name});
+				var feat_name = featureType[i].name;
+				if(fields_trans["fields"]){
+					var fields = fields_trans["fields"];
+					for(var ix=0; ix<fields.length; ix++){
+						if(fields[ix].name.toLowerCase() == feat_name){
+							var feat_name_trans = fields[ix]["title-"+language];
+							if(feat_name_trans){
+								feat_name = feat_name_trans + "<br /><span class=\"subname\">(" + feat_name + ")</span>";
+							}
+						}
+					}
+				}
+				
+				var th = $("<th>", {html: feat_name});
 				trow.append(th);
 			}
 		}

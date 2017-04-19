@@ -265,6 +265,8 @@ viewer.core = {
 				wmsLayer.crs = layerConf.crs;
 				wmsLayer.order = layerConf.order;
 				wmsLayer.setZIndex(parseInt(layerConf.order));
+				wmsLayer.conf = JSON.parse(layerConf.conf);
+				wmsLayer.parentGroup = group.groupName;
 				
 				this.map.addLayer(wmsLayer);
 				/*
