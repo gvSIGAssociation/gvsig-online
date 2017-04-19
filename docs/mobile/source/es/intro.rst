@@ -10,7 +10,7 @@ La pantalla principal contiene diversas secciones. Las más relevantes para trab
 .. image:: ../images/gmobile_01.png
    :align: center
    
-*  1. Administrador de capa base: Se podrá configurar la capa de fondo que tendrá el mapa por defecto. Al pinchar se podrá buscar con el boton naranja (+) ubicado de la esquina inferior derecha las capas disponibles.
+*  1. Administrador de capa base: Se podrá configurar la capa de fondo que tendrá el mapa por defecto. Al pinchar, se podrá buscar las capas disponibles con el "+" (botón de color naranja ubicado de la esquina inferior derecha) 
      Estas capas tienen la extención (.mapurl). Por ejemplo, seleccionar la capa base del PNOA.
      
 .. image:: ../images/gmobile_02.png
@@ -22,6 +22,6 @@ La pantalla principal contiene diversas secciones. Las más relevantes para trab
 
 *  10. Importar data: Para descargar y añadir la(s) capa(s) a editar desde la nube al mapa.
 
-*  11. Exportar data: Para subir cambios y exportar la(s) capa(s) a editas en el mapa a la nube.
+*  11. Exportar data: Para subir cambios y exportar la(s) capa(s) editadas desde el mapa a la nube.
 
 
