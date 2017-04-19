@@ -4722,3 +4722,7 @@ table.text-center th {
 .background-grey {
 	background-color: #fafafa;
 }
+
+table.dataTable thead th span.subname, table.dataTable tfoot th span.subname{
+    font-weight: normal; 
+}

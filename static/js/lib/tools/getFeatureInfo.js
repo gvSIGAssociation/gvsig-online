@@ -192,7 +192,18 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 		for (var i=0; i<layers.length; i++) {
 			if (!layers[i].baselayer) {
 				if (layers[i].wms_url && layers[i].getVisible()) {
-					queryLayers.push(layers[i]);
+					if( layers[i].isLayerGroup){
+						var parent = layers[i];
+						for (var j=0; j<layers.length; j++) {
+							if (!layers[j].baselayer) {
+								if (layers[j].wms_url && layers[j].parentGroup &&  layers[j].parentGroup == parent.layer_name) {
+									queryLayers.push(layers[j]);
+								}
+							}
+						}
+					}else{
+						queryLayers.push(layers[i]);
+					}
 				}						
 			}
 		}
@@ -225,7 +236,8 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 							features.push({
 			  					type: 'catastro',
 			  					text: tempDiv.childNodes[4].childNodes[0].textContent,
-			  					href: tempDiv.childNodes[4].childNodes[0].href
+			  					href: tempDiv.childNodes[4].childNodes[0].href,
+			  					layer: qLayer
 			  				});
 						}
 				  	},
@@ -248,7 +260,8 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 				  				features.push({
 				  					type: 'feature',
 				  					crs: response.crs,
-				  					feature: response.features[i]
+				  					feature: response.features[i],
+				  					layer: qLayer
 				  				});
 				  			}
 				  		}
@@ -340,10 +353,12 @@ getFeatureInfo.prototype.showInfo = function(features){
  */
 getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 	var selectedFeature = null;
+	var selectedLayer = null;
 	for (var i in features) {
 		if (features[i].type == 'feature') {
 			if (fid == features[i].feature.id) {
 				selectedFeature = features[i].feature; 
+				selectedLayer = features[i].layer;
 			}
 		}
 	}
@@ -358,12 +373,31 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 			infoContent += 	'</div>';
 			infoContent += 	'<div class="box-body" style="padding: 20px;">';
 			infoContent += 		'<ul class="products-list product-list-in-box">';
+			
+			var language = $("#select-language").val();
 			for (var key in selectedFeature.properties) {
 				var value = selectedFeature.properties[key];
 				if (value == "null" || value == null) {
 					value = "";
 				}
 				if (!key.startsWith(this.prefix)) {	
+					if (selectedLayer != null) {
+						if (selectedLayer.conf != null) {
+							var fields_trans = selectedLayer.conf;
+							if(fields_trans["fields"]){
+								var fields = fields_trans["fields"];
+								for(var ix=0; ix<fields.length; ix++){
+									if(fields[ix].name.toLowerCase() == key){
+										var feat_name_trans = fields[ix]["title-"+language];
+										if(feat_name_trans){
+											key = feat_name_trans;
+										}
+									}
+								}
+							}
+						}
+					}	
+					
 					infoContent += '<li class="item">';
 					infoContent += 	'<div class="feature-info">';
 					if (!value.toString().startsWith('http')) {
