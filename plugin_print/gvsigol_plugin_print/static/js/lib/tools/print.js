@@ -97,7 +97,7 @@ print.prototype.handler = function(e) {
 		ui += 				'<select id="print-template" class="form-control">';
 		ui += 					'<option disabled selected value="empty"> -- ' + gettext('Select template') + ' -- </option>';
 		for (var i=0; i<templates.length; i++) {
-			if (templates[i] != 'default') {
+			if (templates[i] != 'default' && templates[i] != 'a4_landscape_att') {
 				if (templates[i] == 'a4_landscape') {
 					ui += 	'<option value="' + templates[i] + '" selected>' + templates[i] + '</option>';
 				} else {
@@ -162,7 +162,6 @@ print.prototype.handler = function(e) {
 		});
 		
 		$('#cancel-print').on('click', function () {
-			//self.map.getView().unByKey(eventKey);
 			ol.Observable.unByKey(eventKey);
 			self.removeExtentLayer();
 			self.showLayersTab();
@@ -194,7 +193,6 @@ print.prototype.createPrintJob = function(template) {
 					"baseURL": mapLayers[i].wms_url_no_auth,
 			  	    "opacity": 1,
 			  	    "type": "WMS",
-		  			//"layers": [mapLayers[i].workspace + ':' + mapLayers[i].layer_name],
 		  			"imageFormat": "image/png",
 		  			"customParams": {
 		  				"TRANSPARENT": "true"
@@ -254,7 +252,6 @@ print.prototype.createPrintJob = function(template) {
 				            "matrixSize": matrixSize,
 				            "scaleDenominator": scale,
 				            "tileSize": [tileGrid.getTileSize(), tileGrid.getTileSize()],
-				            //"topLeftCorner": tileGrid.getOrigin()
 				            "topLeftCorner": [-2.003750834E7, 2.0037508E7]
 						});
 					}
@@ -284,6 +281,12 @@ print.prototype.createPrintJob = function(template) {
 				        }
 					});
 					
+				} else if (baseLayers[i].getSource() instanceof ol.source.XYZ) {
+					printLayers.push({
+						"baseURL": baseLayers[i].getSource().getUrls()[0],
+					    "type": "OSM",
+					    "imageExtension": "jpg"
+					});
 				}
 			}
 		}
@@ -309,6 +312,8 @@ print.prototype.createPrintJob = function(template) {
 		  			"scale": self.getCurrentScale(),
 		  			"layers": printLayers
 		  	    },
+		  	    "logo_url": self.conf.project_image,
+		  	    //"logo_url": "https://demo.gvsigonline.com/media/images/igvsb.jpg",
 		  	    "legend": {
 		  	    	"name": "",
 		            "classes": legends
