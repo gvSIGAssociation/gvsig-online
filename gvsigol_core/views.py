@@ -40,6 +40,7 @@ import urllib
 import random
 import string
 import json
+import ast
 
 def not_found_view(request):
     response = render_to_response('404.html', {}, context_instance=RequestContext(request))
@@ -435,6 +436,8 @@ def project_get_conf(request):
                 read_roles = services_utils.get_read_roles(l)
                 write_roles = services_utils.get_write_roles(l)
                 
+                json_conf2 = ast.literal_eval(l.conf)
+                
                 layer = {}                
                 layer['name'] = l.name
                 layer['title'] = l.title
@@ -442,6 +445,7 @@ def project_get_conf(request):
                 layer['visible'] = l.visible 
                 layer['queryable'] = l.queryable 
                 layer['cached'] = l.cached
+                layer['conf'] = json.dumps(json_conf2)
                 layer['order'] = toc.get(group.name).get('layers').get(l.name).get('order')
                 layer['single_image'] = l.single_image
                 layer['read_roles'] = read_roles
@@ -654,6 +658,7 @@ def public_viewer_get_conf(request):
                     layer['single_image'] = l.single_image
                     layer['read_roles'] = read_roles
                     layer['write_roles'] = write_roles
+                    layer['conf'] = l.conf
                     
                     datastore = Datastore.objects.get(id=l.datastore_id)
                     workspace = Workspace.objects.get(id=datastore.workspace_id)

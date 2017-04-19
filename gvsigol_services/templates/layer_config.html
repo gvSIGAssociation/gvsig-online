@@ -45,7 +45,9 @@
 											<thead>
 												<tr>
 													<th>{% trans "Field name" %}</th>
-													<th>{% trans "Field title" %}</th>
+													{% for id, language in available_languages %}
+													<th>{% trans "Field title" %}&nbsp;({{ language }})</th>
+													{% endfor %}
 													<th>{% trans "Is visible?" %}</th>
 												</tr>
 											</thead>
@@ -55,7 +57,9 @@
 														{% if forloop.last %}
 															<tr>
 																<td><input readonly name="field-name-{{counter}}" type="text" class="form-control" value="{{f.name}}"></td>
-																<td><input name="field-title-{{counter}}" type="text" class="form-control" value="{{f.title}}"></td>
+																{% for id, language in available_languages %}
+																<td><input name="field-title-{{id}}-{{counter}}" type="text" class="form-control" placeHolder="{{f.name}}" value=""></td>
+																{% endfor %}
 																{% if f.visible %}
 																<td><input type="checkbox" name="field-visible-{{counter}}" checked/></td>
 																{% else %}
@@ -66,7 +70,9 @@
 												    	{% else %}
 															<tr>
 																<td><input readonly name="field-name-{{counter}}" type="text" class="form-control" value="{{f.name}}"></td>
-																<td><input name="field-title-{{counter}}" type="text" class="form-control" value="{{f.title}}"></td>
+																{% for id, language in available_languages %}
+																<td><input name="field-title-{{id}}-{{counter}}" type="text" class="form-control" placeHolder="{{f.name}}" value=""></td>
+																{% endfor %}
 																{% if f.visible %}
 																<td><input type="checkbox" name="field-visible-{{counter}}" checked/></td>
 																{% else %}
@@ -101,6 +107,17 @@
 		$('.save-button').click( function() {
 			$("body").overlay();
 		});
+		
+		var fields = {{ fields_json|safe }};
+		var available_languages = {{ available_languages_array|safe }};
+		
+		for(var i=0; i<fields.length; i++){
+			var field = fields[i];
+			for(var j=0; j<available_languages.length; j++){
+				var lang = available_languages[j];
+				$("input[name=field-title-"+lang+"-"+(i+1)+"]").val(field["title-"+lang]);
+			}
+		}
 	});
 </script>
 {% endblock %}
