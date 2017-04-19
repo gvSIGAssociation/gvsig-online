@@ -364,3 +364,46 @@ html, body {
 	box-shadow: 0px 0px #6b54d3;
 	top: 4px;
 }
+
+.project-info-div {
+    position: relative;
+    background-color: #ffffff;
+    width: 100%;
+    padding: 10px;
+    overflow: hidden;
+    border-bottom: 3px #d2d6de solid;
+}
+.project-info-div:before,
+.project-info-div:after {
+  content: " ";
+  display: table;
+}
+.project-info-div:after {
+  clear: both;
+}
+.project-info-div > .image > img {
+  width: 100%;
+  max-width: 50px;
+  height: auto;
+}
+.project-info-div > .info {
+  padding: 5px 5px 5px 15px;
+  line-height: 1;
+  position: absolute;
+  left: 55px;
+}
+.project-info-div > .info > p {
+  font-weight: 600;
+  margin-top: 3px;
+}
+.project-info-div > .info > a {
+  text-decoration: none;
+  padding-right: 5px;
+  margin-top: 3px;
+  font-size: 11px;
+}
+.project-info-div > .info > a > .fa,
+.project-info-div > .info > a > .ion,
+.project-info-div > .info > a > .glyphicon {
+  margin-right: 3px;
+}
