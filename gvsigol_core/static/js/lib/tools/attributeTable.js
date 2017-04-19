@@ -23,9 +23,10 @@
 /**
  * TODO
  */
-var attributeTable = function(layer, map) {	
+var attributeTable = function(layer, map, conf) {	
 	this.id = "data-table";
 	this.map = map;
+	this.conf = conf;
 	this.layer = layer;	
 	this.source = new ol.source.Vector();	
 	this.filterCode = null;
@@ -167,7 +168,8 @@ attributeTable.prototype.createTableUI = function(featureType) {
 	});
 	tableButtons.push({
    	 	extend: 'print',
-		text: '<i class="fa fa-file-pdf-o margin-r-5"></i> Pdf'
+		text: '<i class="fa fa-file-pdf-o margin-r-5"></i> Pdf',
+		title: self.conf.project_name
 	});
 	tableButtons.push({
     	text: '<i class="fa fa-search-plus margin-r-5"></i> ' + gettext('Zoom to selection'),
