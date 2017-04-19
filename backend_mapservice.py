@@ -961,24 +961,24 @@ class Geoserver():
                     
                         
                     layer.datastore = datastore
-                    layer.name = layer_name
-                    layer.visible = False
-                    layer.queryable = True
-                    layer.cached = True
-                    layer.single_image = False
-                    layer.layer_group = layergroup
-                    layer.title = layer_title
-                    layer.type = datastore.type
-                    layer.created_by = username
-                    if has_conf:
-                        layer.conf = conf
-                    layer.save()
-    
-                    self.setDataRules()                                        
-                        
-                        
-                    if layer.layer_group.name != "__default__":
-                        self.createOrUpdateGeoserverLayerGroup(layer.layer_group)
+                layer.name = layer_name
+                layer.visible = False
+                layer.queryable = True
+                layer.cached = True
+                layer.single_image = False
+                layer.layer_group = layergroup
+                layer.title = layer_title
+                layer.type = datastore.type
+                layer.created_by = username
+                if has_conf:
+                    layer.conf = conf
+                layer.save()
+
+                self.setDataRules()                                        
+                    
+                    
+                if layer.layer_group.name != "__default__":
+                    self.createOrUpdateGeoserverLayerGroup(layer.layer_group)
                 
                 # estilos: se ejecuta en modo create o update
                 # si esta definido en la conf y existe, se clona con el nombre del ws
