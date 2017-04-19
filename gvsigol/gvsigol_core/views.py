@@ -404,7 +404,8 @@ def project_delete(request, pid):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def project_load(request, pid):
     if core_utils.is_valid_project(request.user, pid):
-        return render_to_response('viewer.html', {'supported_crs': gvsigol.settings.SUPPORTED_CRS, 'pid': pid}, context_instance=RequestContext(request))
+        project = Project.objects.get(id=int(pid))
+        return render_to_response('viewer.html', {'supported_crs': gvsigol.settings.SUPPORTED_CRS, 'project': project, 'pid': pid}, context_instance=RequestContext(request))
     else:
         return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
 
@@ -509,6 +510,7 @@ def project_get_conf(request):
         conf = {
             'pid': pid,
             'project_name': project.name,
+            'project_image': project.image.url,
             'user': {
                 'id': request.user.id,
                 'username': request.user.first_name + ' ' + request.user.last_name,
@@ -609,7 +611,8 @@ def select_public_project(request):
     
 def public_project_load(request, pid):
     if core_utils.is_valid_public_project(pid):
-        return render_to_response('public_viewer.html', {'supported_crs': gvsigol.settings.SUPPORTED_CRS, 'pid': pid}, context_instance=RequestContext(request))
+        project = Project.objects.get(id=int(pid))
+        return render_to_response('public_viewer.html', {'supported_crs': gvsigol.settings.SUPPORTED_CRS, 'project': project, 'pid': pid}, context_instance=RequestContext(request))
     else:
         return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
             
@@ -711,6 +714,8 @@ def public_viewer_get_conf(request):
             
         conf = {
             'pid': pid,
+            'project_name': project.name,
+            'project_image': project.image.url,
             "view": {
                 "center_lat": project.center_lat,
                 "center_lon": project.center_lon, 

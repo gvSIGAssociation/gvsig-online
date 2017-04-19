@@ -135,7 +135,18 @@
 	</header>
 	
 	<div id="container">
+		
 		<aside class="control-sidebar control-sidebar-light" style="position: fixed; height: 100%;">
+
+			<div class="project-info-div">
+				<div class="pull-left image">
+					<img src="{{project.image}}" class="" alt="User Image">
+				</div>
+				<div class="pull-left info">
+					<p>{{project.name}}</p>
+<!-- 					<a href="#"><i class="fa fa-circle text-success"></i> Online</a> -->
+				</div>
+			</div>
 
 			<ul class="nav nav-tabs nav-justified control-sidebar-tabs">
 				<li class="active" title="{% trans "Layer tree" %}"><a href="#layer-tree-tab" data-toggle="tab"><i class="icon-layers"></i></a></li>
