@@ -523,7 +523,7 @@ def layer_config(request, layer_id):
             fields.append(field)
         conf['fields'] = fields
         
-        json_conf = json.dumps(conf)
+        json_conf = conf
         layer.conf = json_conf
         layer.save()
         
