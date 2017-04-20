@@ -15,7 +15,7 @@ La pantalla principal contiene diversas secciones. Las más relevantes para trab
 *  1. Administrador de capa base: Se podrá configurar la capa de fondo que tendrá el mapa por defecto. Al pinchar en |capa_base|, se podrá buscar las capas disponibles con el |plus| (ubicado de la esquina inferior derecha). 
      Estas capas estan incluidas en el almacenamiento de la app y tienen la extención (.mapurl). Por ejemplo, seleccionar la capa base del PNOA.
 
-.. |capa_base| image:: ../images/boton_01.png
+.. |capa_base| image:: boton_01.png
      
 .. |plus| image:: ../images/boton_02.png  
      
