@@ -115,23 +115,15 @@ attributeTable.prototype.createTableUI = function(featureType) {
 	for (var i=0; i<featureType.length; i++) {
 		if (featureType[i].type.indexOf('gml:') == -1) {
 			if (!featureType[i].name.startsWith(this.prefix)) {
-				properties.push(featureType[i].name);
-				propertiesWithType.push(featureType[i].name + '|' + featureType[i].type);
-				columns.push({
-					"data": featureType[i].name,
-					"render": function ( data, type, full, meta ) {
-						var value = data;
-						if (data == "null" || data == null) {
-							value = "";
-						}
-						return value;
-					 }
-				});
+				var column_shown = true;
 				var feat_name = featureType[i].name;
 				if(fields_trans["fields"]){
 					var fields = fields_trans["fields"];
 					for(var ix=0; ix<fields.length; ix++){
 						if(fields[ix].name.toLowerCase() == feat_name){
+							if("visible" in fields[ix]){
+								column_shown = fields[ix].visible;
+							}
 							var feat_name_trans = fields[ix]["title-"+language];
 							if(feat_name_trans){
 								feat_name = feat_name_trans + "<br /><span class=\"subname\">(" + feat_name + ")</span>";
@@ -140,8 +132,23 @@ attributeTable.prototype.createTableUI = function(featureType) {
 					}
 				}
 				
-				var th = $("<th>", {html: feat_name});
-				trow.append(th);
+				if(column_shown){
+					properties.push(featureType[i].name);
+					propertiesWithType.push(featureType[i].name + '|' + featureType[i].type);
+					columns.push({
+						"data": featureType[i].name,
+						"render": function ( data, type, full, meta ) {
+							var value = data;
+							if (data == "null" || data == null) {
+								value = "";
+							}
+							return value;
+						 }
+					});
+					
+					var th = $("<th>", {html: feat_name});
+					trow.append(th);
+				}
 			}
 		}
 	}
