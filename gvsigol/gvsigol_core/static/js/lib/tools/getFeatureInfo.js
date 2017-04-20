@@ -381,6 +381,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 					value = "";
 				}
 				if (!key.startsWith(this.prefix)) {	
+					var item_shown = true;
 					if (selectedLayer != null) {
 						if (selectedLayer.conf != null) {
 							var fields_trans = selectedLayer.conf;
@@ -388,6 +389,9 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 								var fields = fields_trans["fields"];
 								for(var ix=0; ix<fields.length; ix++){
 									if(fields[ix].name.toLowerCase() == key){
+										if(fields[ix]["title-"+language]){
+											item_shown = fields[ix]["visible"];
+										}
 										var feat_name_trans = fields[ix]["title-"+language];
 										if(feat_name_trans){
 											key = feat_name_trans;
@@ -397,19 +401,20 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 							}
 						}
 					}	
-					
-					infoContent += '<li class="item">';
-					infoContent += 	'<div class="feature-info">';
-					if (!value.toString().startsWith('http')) {
-						infoContent += 		'<a href="javascript:void(0)" class="product-title">' + key + '</a>';
-						infoContent += 		'<span class="product-description">' + value + '</span>';
-						
-					} else {
-						infoContent += 		'<a href="javascript:void(0)" class="product-title">' + key + '</a>';
-						infoContent += 		'<a href="' + value + '" style="color: #00c0ef !important;" target="_blank" class="product-description">' + value + '</a>';
+					if(item_shown){
+						infoContent += '<li class="item">';
+						infoContent += 	'<div class="feature-info">';
+						if (!value.toString().startsWith('http')) {
+							infoContent += 		'<a href="javascript:void(0)" class="product-title">' + key + '</a>';
+							infoContent += 		'<span class="product-description">' + value + '</span>';
+							
+						} else {
+							infoContent += 		'<a href="javascript:void(0)" class="product-title">' + key + '</a>';
+							infoContent += 		'<a href="' + value + '" style="color: #00c0ef !important;" target="_blank" class="product-description">' + value + '</a>';
+						}
+						infoContent += 	'</div>';
+						infoContent += '</li>';
 					}
-					infoContent += 	'</div>';
-					infoContent += '</li>';
 				}
 			}
 			infoContent += 		'</ul>';
