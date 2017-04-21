@@ -435,9 +435,7 @@ def project_get_conf(request):
             for l in layers_in_group:
                 read_roles = services_utils.get_read_roles(l)
                 write_roles = services_utils.get_write_roles(l)
-                
-                json_conf2 = ast.literal_eval(l.conf)
-                
+                               
                 layer = {}                
                 layer['name'] = l.name
                 layer['title'] = l.title
@@ -445,11 +443,15 @@ def project_get_conf(request):
                 layer['visible'] = l.visible 
                 layer['queryable'] = l.queryable 
                 layer['cached'] = l.cached
-                layer['conf'] = json.dumps(json_conf2)
+                
                 layer['order'] = toc.get(group.name).get('layers').get(l.name).get('order')
                 layer['single_image'] = l.single_image
                 layer['read_roles'] = read_roles
                 layer['write_roles'] = write_roles
+                
+                if l.conf:
+                    json_conf2 = ast.literal_eval(l.conf)
+                    layer['conf'] = json.dumps(json_conf2)
                 
                 datastore = Datastore.objects.get(id=l.datastore_id)
                 workspace = Workspace.objects.get(id=datastore.workspace_id)
