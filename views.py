@@ -449,7 +449,8 @@ def project_get_conf(request):
                 layer['read_roles'] = read_roles
                 layer['write_roles'] = write_roles
                 
-                layer['conf'] = json.dumps(l.conf)
+                json_conf = ast.literal_eval(l.conf)
+                layer['conf'] = json.dumps(json_conf)
                 
                 datastore = Datastore.objects.get(id=l.datastore_id)
                 workspace = Workspace.objects.get(id=datastore.workspace_id)
