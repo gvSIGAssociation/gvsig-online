@@ -581,7 +581,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 					featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd">';
 					
 				} else if (this.featureType[i].type == 'xsd:string') {
-					if (this.featureType[i].name.startsWith("@enm")) {
+					if (this.featureType[i].name.startsWith("enm_")) {
 						var enumeration = this.getEnumeration(this.featureType[i].name);
 						featureProperties += 	'<select id="' + this.featureType[i].name + '" class="form-control">';
 						for (var j=0; j<enumeration.items.length; j++) {
@@ -709,7 +709,7 @@ editionBar.prototype.editFeatureForm = function(feature) {
 					featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + dbDate + '">';
 					
 				} else if (this.featureType[i].type == 'xsd:string') {				
-					if (this.featureType[i].name.startsWith("@enm")) {
+					if (this.featureType[i].name.startsWith("enm_")) {
 						var enumeration = this.getEnumeration(this.featureType[i].name);
 						featureProperties += 	'<select id="' + this.featureType[i].name + '" class="form-control">';
 						for (var j=0; j<enumeration.items.length; j++) {
