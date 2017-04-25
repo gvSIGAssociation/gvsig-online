@@ -85,6 +85,7 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+CRONTAB_ACTIVE = False
 ROOT_URLCONF = 'gvsigol.urls'
 
 TEMPLATES = [
