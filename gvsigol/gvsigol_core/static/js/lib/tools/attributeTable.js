@@ -277,27 +277,27 @@ attributeTable.prototype.createFiltersUI = function(featureType) {
 	ui += 					'<div class="col-md-7">';
 	ui += 						'<textarea id="cql_filter">';
 	ui += 						'</textarea>';
-	ui += 						'<table>';
-	ui +=							'<tr>';
-	ui += 								'<td style="font-weight: bold; padding: 5px; width: 40%;">Expression = | <> | < | <= | > | >= Expression</td>';
-	ui += 								'<td>Comparison operations</td>';
-	ui +=							'</tr>';
-	ui +=							'<tr>';
-	ui += 								'<td style="font-weight: bold; padding: 5px; width: 40%;">Expression [ NOT ] BETWEEN Expression AND Expression</td>';
-	ui += 								'<td>Tests whether a value lies in or outside a range (inclusive)</td>';
-	ui +=							'</tr>';
-	ui +=							'<tr>';
-	ui += 								'<td style="font-weight: bold; padding: 5px; width: 40%;">Expression [ NOT ] LIKE | ILIKE like-pattern</td>';
-	ui += 								'<td>Simple pattern matching. like-pattern uses the % character as a wild-card for any number of characters. ILIKE does case-insensitive matching.</td>';
-	ui +=							'</tr>';
-	ui +=							'<tr>';
-	ui += 								'<td style="font-weight: bold; padding: 5px; width: 40%;">Expression [ NOT ] IN ( Expression { ,Expression } )</td>';
-	ui += 								'<td>Tests whether an expression value is (not) in a set of values</td>';
-	ui +=							'</tr>';
-	ui +=							'<tr>';
-	ui += 								'<td colspan="2" style="font-weight: bold; padding: 5px;">An expression specifies a attribute, literal, or computed value. The type of the value is determined by the nature of the expression.</td>';
-	ui +=							'</tr>';
-	ui += 						'</table>';
+//	ui += 						'<table>';
+//	ui +=							'<tr>';
+//	ui += 								'<td style="font-weight: bold; padding: 5px; width: 40%;">Expression = | <> | < | <= | > | >= Expression</td>';
+//	ui += 								'<td>Comparison operations</td>';
+//	ui +=							'</tr>';
+//	ui +=							'<tr>';
+//	ui += 								'<td style="font-weight: bold; padding: 5px; width: 40%;">Expression [ NOT ] BETWEEN Expression AND Expression</td>';
+//	ui += 								'<td>Tests whether a value lies in or outside a range (inclusive)</td>';
+//	ui +=							'</tr>';
+//	ui +=							'<tr>';
+//	ui += 								'<td style="font-weight: bold; padding: 5px; width: 40%;">Expression [ NOT ] LIKE | ILIKE like-pattern</td>';
+//	ui += 								'<td>Simple pattern matching. like-pattern uses the % character as a wild-card for any number of characters. ILIKE does case-insensitive matching.</td>';
+//	ui +=							'</tr>';
+//	ui +=							'<tr>';
+//	ui += 								'<td style="font-weight: bold; padding: 5px; width: 40%;">Expression [ NOT ] IN ( Expression { ,Expression } )</td>';
+//	ui += 								'<td>Tests whether an expression value is (not) in a set of values</td>';
+//	ui +=							'</tr>';
+//	ui +=							'<tr>';
+//	ui += 								'<td colspan="2" style="font-weight: bold; padding: 5px;">An expression specifies a attribute, literal, or computed value. The type of the value is determined by the nature of the expression.</td>';
+//	ui +=							'</tr>';
+//	ui += 						'</table>';
 	ui += 					'</div>';
 	ui += 					'<div class="col-md-5">';
 	ui += 						'<div id="calculator">';
@@ -307,7 +307,7 @@ attributeTable.prototype.createFiltersUI = function(featureType) {
 	ui += 									'<option value="" selected disabled>--</option>';
 	for (var i=0; i<featureType.length; i++) {
 		if (featureType[i].type.indexOf('gml:') == -1) {
-			ui += '<option value="' + featureType[i].type + '">' + featureType[i].name + '</option>';
+			ui += '<option class="filter-field-option" value="' + featureType[i].type + '">' + featureType[i].name + '</option>';
 		}
 	}
 	ui += 								'</select>';
@@ -431,6 +431,8 @@ attributeTable.prototype.loadUniqueValues = function(field) {
 		},
 	  	success	:function(response){
 	  		$("#filter-value-select").empty();
+	  		$emptyOpt = $("<option></option>").attr("value", "").attr("selected", true).attr("disabled", true).text("---");
+	  		$("#filter-value-select").append($emptyOpt);
 	  		$.each(response.values, function(index, option) {
 	  			$option = $("<option></option>").attr("value", option).text(option);
 	  			$("#filter-value-select").append($option);
@@ -515,7 +517,7 @@ attributeTable.prototype.registerEvents = function() {
 		self.filterCode.refresh();
 	 });
 	
-	$("#filter-field-select").on('click', function(){
+	$("#filter-field-select").on('change', function(){
 		self.selectedType = $('option:selected', $(this)).val();
 		var value = $('option:selected', $(this)).text();
     	var currentFilter = self.filterCode.getValue();
@@ -528,7 +530,7 @@ attributeTable.prototype.registerEvents = function() {
 		bottomPanel.hidePanel();
 	});
 	
-	$("#filter-value-select").on('click', function(){
+	$("#filter-value-select").on('change', function(){
 		var currentFilter = self.filterCode.getValue();
 		if (self.selectedType == 'xsd:string') {
 			currentFilter += "'" + this.value + "' ";
@@ -543,6 +545,7 @@ attributeTable.prototype.registerEvents = function() {
 			currentFilter += this.value + ' ';
 		}
 		self.filterCode.setValue(currentFilter);
+		$("#filter-field-select").prop('selectedIndex', 0);
 	});
 	
 	$("#apply-filter").on('click', function(){
