@@ -7,7 +7,7 @@
 		<div class="col-md-12">
 			<div class="box">
 
-				<form id="project-form" role="form" method="post" action="/gvsigonline/core/project_update/{{pid}}/">
+				<form id="project-form" enctype="multipart/form-data" role="form" method="post" action="/gvsigonline/core/project_update/{{pid}}/">
 					<div class="box-header with-border">
 						<h3 class="box-title">{% trans "Update project" %}</h3>
 						<div class="box-tools pull-right">
@@ -56,6 +56,18 @@
 						<input type="hidden" name="center-lon" id="center-lon">
 						<input type="hidden" name="extent" id="extent">
 						<input type="hidden" name="zoom" id="zoom">		
+						
+						<div class="row">
+							<div class="col-md-12" style="margin-bottom: 20px;">
+								<div class="provider-img">
+									<img id="image-preview" src="{{project.image.url}}" alt="">
+								</div>
+								<div class="provider-img-change">
+									<label>{% trans "Change image?" %}</label>
+									<input id="project-image" name="project-image" type="file" class="file" data-show-preview="true">						
+								</div>
+							</div>	
+						</div>	
 						
 						<div class="box">
 							<div class="box-header with-border">
@@ -129,6 +141,26 @@
 {% block extra-scripts %}
 <script type="text/javascript">
 	$('#menu-manage-projects').addClass("active");
+	
+	
+	 function readURL(input) {
+	        if (input.files && input.files[0]) {
+	            var reader = new FileReader();
+	            
+	            reader.onload = function (e) {
+	                $('#image-preview').attr('src', e.target.result);
+	            }
+	            
+	            reader.readAsDataURL(input.files[0]);
+	        }
+	    }
+	
+	
+	$("#project-image").change(function(){
+	  readURL(this);
+	});
+	
+	
 	$().ready(function() {
 		/**
 		  * Create the map.
