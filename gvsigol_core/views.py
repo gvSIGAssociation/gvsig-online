@@ -270,6 +270,10 @@ def project_update(request, pid):
             if 'usergroup-' in key:
                 assigned_usergroups.append(int(key.split('-')[1]))
                 
+        has_image = False
+        if 'project-image' in request.FILES:
+            has_image = True
+                
         project = Project.objects.get(id=int(pid))
         
         old_layer_groups = []
@@ -299,6 +303,10 @@ def project_update(request, pid):
             project.zoom = int(zoom)
             project.extent = extent
             project.is_public = is_public
+            
+            if has_image:
+                project.image = request.FILES['project-image']
+                
             project.save()
             
             for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
@@ -341,6 +349,10 @@ def project_update(request, pid):
                 project.zoom = int(zoom)
                 project.extent = extent
                 project.is_public = is_public
+                
+                if has_image:
+                    project.image = request.FILES['project-image']
+                
                 project.save()
                 
                 for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
