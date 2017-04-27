@@ -959,8 +959,9 @@ class Geoserver():
                         print "ERROR en createFeaturetype"
                         raise
                     
-                        
                     layer.datastore = datastore
+
+                
                 layer.name = layer_name
                 layer.visible = False
                 layer.queryable = True
@@ -973,6 +974,11 @@ class Geoserver():
                 if has_conf:
                     layer.conf = conf
                 layer.save()
+                
+                # Limpiar cache de la capa
+                datastore = Datastore.objects.get(id=layer.datastore.id)
+                workspace = Workspace.objects.get(id=datastore.workspace_id)
+                self.clearCache(workspace.name, layer)
 
                 self.setDataRules()                                        
                     
