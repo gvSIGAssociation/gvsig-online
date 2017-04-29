@@ -14,13 +14,15 @@ def do_include_if_exists(parser, token):
     try:
         silent_node = do_include(parser, token)
     except template.TemplateDoesNotExist:
-        return CommentNode()
+        #return CommentNode()
+        continue
 
     _orig_render = silent_node.render
     def wrapped_render(*args, **kwargs):
         try:
             return _orig_render(*args, **kwargs)
         except template.TemplateDoesNotExist:
-            return CommentNode()
+            #return CommentNode()
+            continue
     silent_node.render = wrapped_render
     return silent_node
