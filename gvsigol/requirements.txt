@@ -46,3 +46,5 @@ wsgiref==0.1.2
 cmislib==0.5.1
 lxml===3.7.2
 
+# Cron para aguas de valencia
+schedule==0.4.2
