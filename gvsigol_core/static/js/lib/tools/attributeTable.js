@@ -206,7 +206,7 @@ attributeTable.prototype.createTableUI = function(featureType) {
     		processing		: gettext("Processing request") + "...",
 	        search			: gettext("Search") + "&nbsp;:",
 	        lengthMenu		: gettext("Showing") + " _MENU_ " + gettext("registers"),
-	        info			: gettext("Showing from") + " _START_ " + gettext("to") + " _END_",// + gettext("de") + " _TOTAL_ " + gettext("registros"),
+	        info			: gettext("Showing from") + " _START_ " + gettext("to") + " _END_" + gettext(" of") + " _TOTAL_ " + gettext("registers"),
 	        infoEmpty		: gettext("Showing from") + " 0 " + gettext("to") + " 0, " + gettext("of") + " 0 " + gettext("registers"),
 	        infoFiltered	: "(" + gettext("Filtering") + " _MAX_ " + gettext("registers") + ")",
 	        infoPostFix		: "",
@@ -252,7 +252,7 @@ attributeTable.prototype.createTableUI = function(featureType) {
             }
         },
         "columns": columns,
-        dom: 'Bfrtp<"bottom"l>',
+        dom: 'Bfrtp<"top"l><"bottom"i>',
         "bSort" : false,
 	    "lengthMenu": [[10, 25, 50, 100, 500, 1000], [10, 25, 50, 100, 500, 1000]],
 	    buttons: tableButtons
