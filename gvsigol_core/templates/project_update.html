@@ -60,11 +60,11 @@
 						<div class="row">
 							<div class="col-md-12" style="margin-bottom: 20px;">
 								<div class="provider-img">
-									<img id="image-preview" src="{{project.image.url}}" alt="">
+									<img style="height: 50px; width: 50px;" id="image-preview" src="{{project.image.url}}" alt="">
 								</div>
 								<div class="provider-img-change">
-									<label>{% trans "Change image?" %}</label>
-									<input id="project-image" name="project-image" type="file" class="file" data-show-preview="true">						
+									<label>{% trans "Change image?" %}</label>({% trans "Supported formats" %}: .jpg, .jpeg, .png)
+									<input id="project-image" name="project-image" accept=".jpg, .jpeg, .png" type="file" class="file" data-show-preview="true">						
 								</div>
 							</div>	
 						</div>	
