@@ -188,19 +188,13 @@ measureArea.prototype.pointerMoveHandler = function(evt) {
   	}
   	/** @type {string} */
   	var helpMsg = gettext('Click to start measuring');
-  	/** @type {ol.Coordinate|undefined} */
-  	var tooltipCoord = evt.coordinate;
 
   	if (this.sketch) {
     	var output;
     	var geom = (this.sketch.getGeometry());
     	if (geom instanceof ol.geom.Polygon) {
-    		output = this.formatArea(/** @type {ol.geom.Polygon} */ (geom));
     	    helpMsg = this.continuePolygonMsg;
-    	    tooltipCoord = geom.getInteriorPoint().getCoordinates();
     	}
-    	this.measureTooltipElement.innerHTML = output;
-    	this.measureTooltip.setPosition(tooltipCoord);
   	}
 
   	this.helpTooltipElement.innerHTML = helpMsg;
@@ -208,6 +202,7 @@ measureArea.prototype.pointerMoveHandler = function(evt) {
 };
 
 measureArea.prototype.addInteraction = function() {
+	var self = this;
 	
 	this.draw = new ol.interaction.Draw({
 		source: this.source,
@@ -218,9 +213,9 @@ measureArea.prototype.addInteraction = function() {
 	this.createMeasureTooltip();
 	this.createHelpTooltip();
 
+	var listener;
 	this.draw.on('drawstart',
 		function(evt) {
-	    	// set sketch
 	        this.sketch = evt.feature;
 	    	if (this.lastMeasureTooltip){
 	    		this.map.removeOverlay(this.lastMeasureTooltip);
@@ -228,6 +223,21 @@ measureArea.prototype.addInteraction = function() {
 	    	if (this.lastSketch) {
 	    		this.source.removeFeature(this.lastSketch);
 	    	}
+	    	
+	    	/** @type {ol.Coordinate|undefined} */
+            var tooltipCoord = evt.coordinate;
+
+            listener = this.sketch.getGeometry().on('change', function(evt) {
+              var geom = evt.target;
+              var output;
+              if (geom instanceof ol.geom.Polygon) {
+                output = self.formatArea(geom);
+                tooltipCoord = geom.getLastCoordinate();
+              }
+              self.measureTooltipElement.innerHTML = output;
+              self.measureTooltip.setPosition(tooltipCoord);
+            });
+            
 	    }, this);
 
 	this.draw.on('drawend',
@@ -235,12 +245,11 @@ measureArea.prototype.addInteraction = function() {
 	    	this.measureTooltipElement.className = 'tooltip tooltip-static';
 	        this.measureTooltip.setOffset([0, -7]);
 	        this.lastSketch = this.sketch;
-	        // unset sketch
 	        this.sketch = null;
-	        // unset tooltip so that a new one can be created
 	        this.lastMeasureTooltip = this.measureTooltip;
 	        this.measureTooltipElement = null;			        
 	        this.createMeasureTooltip();
+	        ol.Observable.unByKey(listener);
 	      }, this);
 };
 
@@ -284,17 +293,6 @@ measureArea.prototype.createMeasureTooltip = function() {
  * @param {ol.geom.Polygon} polygon
  * @return {string}
  */
-/*measureArea.prototype.formatArea = function(polygon) {
-	var area = polygon.getArea();
-  	var output;
-  	if (area > 10000) {
-    	output = (Math.round(area / 1000000 * 100) / 100) + ' ' + 'km<sup>2</sup>';
-  	} else {
-    	output = (Math.round(area * 100) / 100) + ' ' + 'm<sup>2</sup>';
-  	}
-  	return output;
-};*/
-
 measureArea.prototype.formatArea = function(polygon) {
 	
 	var wgs84Sphere = new ol.Sphere(6378137);
@@ -304,11 +302,7 @@ measureArea.prototype.formatArea = function(polygon) {
 	var area = Math.abs(wgs84Sphere.geodesicArea(coordinates));
 
 	var output;
-	/*if (area > 10000) {
-		output = (Math.round(area / 1000000 * 100) / 100) + ' ' + 'km<sup>2</sup>';
-	} else {*/
-	    output = (Math.round(area * 100) / 100) + ' ' + 'm<sup>2</sup>';
-	//}
+	output = (Math.round(area * 100) / 100) + ' ' + 'm<sup>2</sup>';
 	return output;
 };
 

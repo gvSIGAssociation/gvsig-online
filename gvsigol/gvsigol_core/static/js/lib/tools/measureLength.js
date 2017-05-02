@@ -186,19 +186,13 @@ measureLength.prototype.pointerMoveHandler = function(evt) {
   	}
   	/** @type {string} */
   	var helpMsg = gettext('Click to start measuring');
-  	/** @type {ol.Coordinate|undefined} */
-  	var tooltipCoord = evt.coordinate;
 
   	if (this.sketch) {
     	var output;
     	var geom = (this.sketch.getGeometry());
     	if (geom instanceof ol.geom.LineString) {
-      		output = this.formatLength( /** @type {ol.geom.LineString} */ (geom));
       		helpMsg = this.continueLineMsg;
-      		tooltipCoord = geom.getLastCoordinate();
     	}
-    	this.measureTooltipElement.innerHTML = output;
-    	this.measureTooltip.setPosition(tooltipCoord);
   	}
 
   	this.helpTooltipElement.innerHTML = helpMsg;
@@ -206,6 +200,7 @@ measureLength.prototype.pointerMoveHandler = function(evt) {
 };
 
 measureLength.prototype.addInteraction = function() {
+	var self = this;
 	
 	this.draw = new ol.interaction.Draw({
 		source: this.source,
@@ -216,16 +211,31 @@ measureLength.prototype.addInteraction = function() {
 	this.createMeasureTooltip();
 	this.createHelpTooltip();
 
+	var listener;
 	this.draw.on('drawstart',
 		function(evt) {
-	    	// set sketch
-	        this.sketch = evt.feature;
-	    	if (this.lastMeasureTooltip){
-	    		this.map.removeOverlay(this.lastMeasureTooltip);
-	    	}
-	    	if (this.lastSketch) {
-	    		this.source.removeFeature(this.lastSketch);
-	    	}
+           this.sketch = evt.feature;
+           if (this.lastMeasureTooltip){
+        	   this.map.removeOverlay(this.lastMeasureTooltip);
+           }
+           if (this.lastSketch) {
+        	   this.source.removeFeature(this.lastSketch);
+           }
+	    	
+            /** @type {ol.Coordinate|undefined} */
+            var tooltipCoord = evt.coordinate;
+
+            listener = this.sketch.getGeometry().on('change', function(evt) {
+              var geom = evt.target;
+              var output;
+              if (geom instanceof ol.geom.LineString) {
+                output = self.formatLength(geom);
+                tooltipCoord = geom.getLastCoordinate();
+              }
+              self.measureTooltipElement.innerHTML = output;
+              self.measureTooltip.setPosition(tooltipCoord);
+            });
+            
 	    }, this);
 
 	this.draw.on('drawend',
@@ -233,12 +243,11 @@ measureLength.prototype.addInteraction = function() {
 	    	this.measureTooltipElement.className = 'tooltip tooltip-static';
 	        this.measureTooltip.setOffset([0, -7]);
 	        this.lastSketch = this.sketch;
-	        // unset sketch
 	        this.sketch = null;
-	        // unset tooltip so that a new one can be created
 	        this.lastMeasureTooltip = this.measureTooltip;
 	        this.measureTooltipElement = null;			        
 	        this.createMeasureTooltip();
+	        ol.Observable.unByKey(listener);
 	      }, this);
 };
 
@@ -250,7 +259,7 @@ measureLength.prototype.createHelpTooltip = function() {
     	this.helpTooltipElement.parentNode.removeChild(this.helpTooltipElement);
   	}
 	this.helpTooltipElement = document.createElement('div');
-	this.helpTooltipElement.className = 'tooltip';
+	this.helpTooltipElement.className = 'tooltip hidden';
 	this.helpTooltip = new ol.Overlay({
     	element: this.helpTooltipElement,
     	offset: [15, 0],
@@ -276,22 +285,6 @@ measureLength.prototype.createMeasureTooltip = function() {
   	});
   	this.map.addOverlay(this.measureTooltip);
 };
-
-/**
- * format length output
- * @param {ol.geom.LineString} line
- * @return {string}
- */
-/*measureLength.prototype.formatLength = function(line) {
-  	var length = Math.round(line.getLength() * 100) / 100;
-  	var output;
-  	if (length > 100) {
-    	output = (Math.round(length / 1000 * 100) / 100) + ' ' + 'km';
-  	} else {
-    	output = (Math.round(length * 100) / 100) + ' ' + 'm';
-  	}
-  	return output;
-};*/
 
 measureLength.prototype.formatLength = function(line) {
 	var length = 0;
