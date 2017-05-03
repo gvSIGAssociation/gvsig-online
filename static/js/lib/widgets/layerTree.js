@@ -508,13 +508,14 @@ layerTree.prototype.reorder = function(event,ui) {
 	var mapLayers = this.map.getLayers();
 	
 	var zindex = parseInt(groupNumber);
+	var mapLayers_length = mapLayers.getLength();
 	
 	for (var i=0; i<groupLayers.length; i++) {
 		var layerid = groupLayers[i].dataset.layerid;
 		mapLayers.forEach(function(layer){
 			if (layer.get('id') == layerid) {
-				layer.setZIndex(parseInt(zindex));
-				zindex++;
+				layer.setZIndex(parseInt(zindex) + mapLayers_length);
+				mapLayers_length--;
 			}
 		}, this);
 	}
