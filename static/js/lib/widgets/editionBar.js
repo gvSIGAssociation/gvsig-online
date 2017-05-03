@@ -580,7 +580,7 @@ editionBar.prototype.deactivateControls = function() {
 			}
 		}
 	});
-	
+	$("#center-cursor").hide();
 	
 	this.showLayersTab();
 	
