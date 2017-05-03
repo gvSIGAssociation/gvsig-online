@@ -413,7 +413,6 @@ editionBar.prototype.removeHandler = function(e) {
 		this.deactivateControls();
 	} else {
 		this.deactivateControls();
-		$("#center-cursor").hide();
 		this.$removeControl.addClass('button-active');
 		this.$removeControl.trigger('control-active', [this]);
 		this.addRemoveInteraction();
@@ -427,6 +426,7 @@ editionBar.prototype.stopEditionHandler = function(e) {
 	if (e!=null) {
 		e.preventDefault();
 	}
+	$("#center-cursor").hide();
 	this.deactivateControls();
 	this.removeVectorLayer();
 	$('#editionbar').remove();
@@ -489,7 +489,7 @@ editionBar.prototype.addDrawInCenterInteraction = function() {
 
 	this.drawInCenterInteraction.on('drawstart',
 		function(evt) {
-		    console.log('Draw point start');
+		    console.log('Draw centered point start');
 		}, this);
 
 	this.drawInCenterInteraction.on('drawend',
@@ -564,6 +564,7 @@ editionBar.prototype.addRemoveInteraction = function() {
 editionBar.prototype.deactivateControls = function() {
 	var self = this;
 	
+	this.$drawInCenterControl.removeClass('button-active');
 	this.$drawControl.removeClass('button-active');
 	this.$modifyControl.removeClass('button-active');
 	this.$removeControl.removeClass('button-active');
@@ -579,7 +580,7 @@ editionBar.prototype.deactivateControls = function() {
 			}
 		}
 	});
-	$("#center-cursor").hide();
+
 	
 	this.showLayersTab();
 	
