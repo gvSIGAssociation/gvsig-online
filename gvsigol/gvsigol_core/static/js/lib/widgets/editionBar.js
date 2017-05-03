@@ -498,6 +498,7 @@ editionBar.prototype.addDrawInCenterInteraction = function() {
 			var pos = self.map.getView().getCenter();
 			var geoms = feature.getGeometry();
 			feature.getGeometry().setCoordinates(pos);
+			var geoms2 = feature.getGeometry();
 			self.createFeatureForm(evt.feature);
 		}, this);
 	
