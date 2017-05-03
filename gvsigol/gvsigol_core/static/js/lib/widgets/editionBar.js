@@ -96,6 +96,22 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 		
 	}
 	
+	
+	var drawInCenterControl = document.createElement('button');
+	drawInCenterControl.setAttribute("id", "draw-in-center-control");
+	drawInCenterControl.setAttribute("class", "toolbar-button");
+	
+	var icon2 = document.createElement('i');
+	var drawHandler2 = null;
+	if (this.geometryType == 'Point' || this.geometryType == 'MultiPoint') {
+		drawInCenterControl.setAttribute("title", gettext('Add point to center'));
+		icon2.setAttribute("class", "fa fa-crosshairs");
+		drawInCenterControl.appendChild(icon2);
+		drawHandler2 = function(e) {
+			this_.drawPointInCenterHandler(e);
+		};
+	}
+	
 	var modifyControl = document.createElement('button');
 	modifyControl.setAttribute("id", "modify-control");
 	modifyControl.setAttribute("class", "toolbar-button");
@@ -129,15 +145,20 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 		this_.stopEditionHandler(e);
 	};
 	
+	this.$drawInCenterControl = $(drawInCenterControl);
 	this.$drawControl = $(drawControl);
 	this.$modifyControl = $(modifyControl);
 	this.$removeControl = $(removeControl);
 	this.$stopEdition = $(stopEdition);
 	
+	$('#editionbar').append(drawInCenterControl);
 	$('#editionbar').append(drawControl);
 	$('#editionbar').append(modifyControl);
 	$('#editionbar').append(removeControl);
 	$('#editionbar').append(stopEdition);
+	
+	drawInCenterControl.addEventListener('click', drawHandler2, false);
+	drawInCenterControl.addEventListener('touchstart', drawHandler2, false);
 	
 	drawControl.addEventListener('click', drawHandler, false);
 	drawControl.addEventListener('touchstart', drawHandler, false);
@@ -269,6 +290,11 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 /**
  * TODO
  */
+editionBar.prototype.drawInCenterInteraction = null;
+
+/**
+ * TODO
+ */
 editionBar.prototype.drawInteraction = null;
 
 /**
@@ -294,6 +320,27 @@ editionBar.prototype.removeInteraction = null;
 editionBar.prototype.getSelectedLayer = function(e) {
 	return this.selectedLayer;
 };
+
+/**
+ * @param {Event} e Browser event.
+ */
+editionBar.prototype.drawPointInCenterHandler = function(e) {
+	e.preventDefault();
+	if (this.$drawInCenterControl.hasClass('button-active')) {
+		this.deactivateControls();
+		$("#center-cursor").hide();
+	} else {
+		this.deactivateControls();
+		$("#center-cursor").show();
+		this.$drawInCenterControl.addClass('button-active');
+		this.$drawInCenterControl.trigger('control-active', [this]);
+		
+		this.addDrawInCenterInteraction();
+	}
+	
+
+};
+
 
 /**
  * @param {Event} e Browser event.
@@ -366,6 +413,7 @@ editionBar.prototype.removeHandler = function(e) {
 		this.deactivateControls();
 	} else {
 		this.deactivateControls();
+		$("#center-cursor").hide();
 		this.$removeControl.addClass('button-active');
 		this.$removeControl.trigger('control-active', [this]);
 		this.addRemoveInteraction();
@@ -416,6 +464,39 @@ editionBar.prototype.addDrawInteraction = function() {
 
 	this.drawInteraction.on('drawend',
 		function(evt) {
+			self.createFeatureForm(evt.feature);
+		}, this);
+	
+};
+
+editionBar.prototype.addDrawInCenterInteraction = function() {
+	
+	var self = this;
+	
+	var geometryName = '';
+	for (var i=0; i<this.featureType.length; i++) {
+		if (this.featureType[i].type.indexOf('gml:') > -1) {
+			geometryName = this.featureType[i].name;
+		}
+	}
+	
+	this.drawInCenterInteraction = new ol.interaction.Draw({
+		source: this.source,
+		type: (this.geometryType),
+		geometryName: geometryName
+	});
+	this.map.addInteraction(this.drawInCenterInteraction);
+
+	this.drawInCenterInteraction.on('drawstart',
+		function(evt) {
+		    console.log('Draw point start');
+		}, this);
+
+	this.drawInCenterInteraction.on('drawend',
+		function(evt) {
+			var feature = evt.feature;
+			var pos = self.map.getView().getCenter();
+			feature.getGeometry().setCoordinates(pos);
 			self.createFeatureForm(evt.feature);
 		}, this);
 	
@@ -498,8 +579,14 @@ editionBar.prototype.deactivateControls = function() {
 			}
 		}
 	});
+	$("#center-cursor").hide();
 	
 	this.showLayersTab();
+	
+	if (this.drawInCenterInteraction != null) {
+		this.map.removeInteraction(this.drawInCenterInteraction);
+		this.drawInCenterInteraction = null;
+	}
 	
 	if (this.drawInteraction != null) {
 		this.map.removeInteraction(this.drawInteraction);
