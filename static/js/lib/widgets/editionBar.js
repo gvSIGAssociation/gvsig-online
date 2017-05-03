@@ -792,10 +792,23 @@ editionBar.prototype.editFeatureForm = function(feature) {
 		var featureProperties = '';
 		featureProperties += '<div class="box">';
 		featureProperties += 	'<div class="box-body no-padding">';
+		
+		var fields = this.selectedLayer.conf.fields;
 		for (var i=0; i<this.featureType.length; i++) {
 			if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
+				var name = this.featureType[i].name;
+				if(fields){
+					for(var ix =0; ix<fields.length; ix++){
+						if(fields[ix].name == name){
+							var lang = $("#select-language").val();
+							if(fields[ix]["title-"+lang] && fields[ix]["title-"+lang] != ""){
+								name = fields[ix]["title-"+lang] + '<br /><span style="font-weight: normal;">('+name+')</span>';
+							}
+						}
+					}
+				}
 				featureProperties += '<div class="col-md-12 form-group" style="background-color: #fff;">';
-				featureProperties += 	'<label style="color: #444;">' + this.featureType[i].name + '</label>';
+				featureProperties += 	'<label style="color: #444;">' + name + '</label>';
 				if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
 					featureProperties += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
 					
