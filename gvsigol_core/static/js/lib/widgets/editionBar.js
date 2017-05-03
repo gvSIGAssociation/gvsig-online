@@ -667,7 +667,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 				if(fields){
 					for(var ix =0; ix<fields.length; ix++){
 						if(fields[ix].name == name){
-							var lang = "es";
+							var lang = $("#select-language").val();
 							if(fields[ix]["title-"+lang] && fields[ix]["title-"+lang] != ""){
 								name = fields[ix]["title-"+lang] + '<br /><span style="font-weight: normal;">('+name+')</span>';
 							}
