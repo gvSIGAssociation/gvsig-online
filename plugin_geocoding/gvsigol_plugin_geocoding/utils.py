@@ -140,8 +140,8 @@ def create_XML_config(provider, has_soundex):
         query_str="select "
         if has_soundex:
             query_str = query_str + "soundexesp2("+params["text_field"]+") as soundexesp, "
-        query_str= query_str + params["id_field"]+" as obj_id, "+params["text_field"]+" as text, '" + resource + "-'||id as calculated_id, '" + resource + "' as resource, now() as last_modification, '" + params["resource"] +"' as table_name, '" + provider.category +"' as category, ST_X(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as longitud, ST_Y(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as latitud, 'user' as source  from " + datastore_params["schema"] + "." + params["resource"]
-        delta_import_str= query_str + " where id='${dataimporter.delta.id}'"
+        query_str= query_str + params["id_field"]+" as obj_id, "+params["text_field"]+" as text, '" + resource + "-'||" + params["id_field"]+" as calculated_id, '" + resource + "' as resource, now() as last_modification, '" + params["resource"] +"' as table_name, '" + provider.category +"' as category, ST_X(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as longitud, ST_Y(ST_Transform(ST_Centroid("+params["geom_field"]+"), 4258)) as latitud, 'user' as source  from " + datastore_params["schema"] + "." + params["resource"]
+        delta_import_str= query_str + " where " + params["id_field"]+"='${dataimporter.delta.id}'"
         delta_str= query_str + " where "+ geocoding_settings.LAST_MODIFIED_FIELD_NAME +" > '${dataimporter.last_index_time}'"
         
         document = ET.SubElement(root, "document")
