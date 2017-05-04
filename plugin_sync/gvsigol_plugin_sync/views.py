@@ -55,6 +55,15 @@ from gvsigol_services.backend_mapservice import backend as mapservice_backend
 
 DEFAULT_BUFFER_SIZE = 1048576
 
+## 2xx: upload errors
+SYNCERROR_UPLOAD="ERROR_GOL_200-Error on sync ulpoad"
+SYNCERROR_LAYER_NOT_LOCKED="ERROR_GOL_201-Layer is not locked: {0}"
+SYNCERROR_FILEPARAM_MISSING="ERROR_GOL_202-'fileupload' param missing or incorrect"
+SYNCERROR_FILE_MISSING='ERROR_GOL_203-No valid file was provided'
+SYNCERROR_INCONSISTENT_LAYER_STATUS="ERROR_GOL_204-Inconsistent status for layer: {0}"
+SYNCERROR_INVALID_DB="ERROR_GOL_205-The file is not a valid Sqlite3 db"
+SYNCERROR_UNREADABLE_LAYER="ERROR_GOL_206-The layer can't be read: {0}"
+
 logger = logging.getLogger(__name__)
 
 
@@ -228,13 +237,13 @@ def sync_upload(request, release_locks=True):
             zipcontents = request.POST.get('fileupload')
             tmpfile = handle_uploaded_file_base64(zipcontents)
         except:
-            #syncLogger.exception("'zipfile' param missing or incorrect")
-            return HttpResponseBadRequest("'fileupload' param missing or incorrect")
+            logger.exception(SYNCERROR_FILEPARAM_MISSING)
+            return HttpResponseBadRequest(SYNCERROR_FILEPARAM_MISSING)
     elif request.method == 'POST':
         tmpfile = handle_uploaded_file_raw(request)
     else:
-        #syncLogger.error("'zipfile' param missing or incorrect")
-        return HttpResponseBadRequest("'fileupload' param missing or incorrect")
+        logger.error(SYNCERROR_FILE_MISSING)
+        return HttpResponseBadRequest(SYNCERROR_FILE_MISSING)
     if tmpfile:
         # 1 - check if the file is a spatialite database
         # 2 - check if the included tables are locked and writable by the user
@@ -260,7 +269,7 @@ def sync_upload(request, release_locks=True):
                         ogr.set_input(tmpfile, table_name=qualified_layer_name, srs=srs)
                         conn = _get_layer_conn(lock.layer)
                         if not conn:
-                            raise HttpResponseBadRequest("Bad request")
+                            raise HttpResponseBadRequest(SYNCERROR_INCONSISTENT_LAYER_STATUS)
                         if conn.schema:
                             tbl_name = conn.schema + "." + lock.layer.name
                         else:
@@ -270,7 +279,7 @@ def sync_upload(request, release_locks=True):
                         ogr.execute()
                         mapservice_backend.updateBoundingBoxFromData(lock.layer)
                     else:
-                        raise HttpResponseBadRequest("The layer can't be read: {0}".format(lock.layer.get_qualified_name())) 
+                        raise HttpResponseBadRequest(SYNCERROR_UNREADABLE_LAYER.format(lock.layer.get_qualified_name())) 
             finally:
                 db.close()
             
@@ -296,11 +305,14 @@ def sync_upload(request, release_locks=True):
                     # everything was fine, release the locks now
                     lock.delete()
         except sq_introspect.InvalidSqlite3Database:
-            return HttpResponseBadRequest("The file is not a valid Sqlite3 db")
+            logger.exception(SYNCERROR_INVALID_DB)
+            return HttpResponseBadRequest(SYNCERROR_INVALID_DB)
         except LayerNotLocked as e:
-            return HttpResponseBadRequest("Layer is not locked: {0}".format(e.layer))
+            logger.exception(SYNCERROR_LAYER_NOT_LOCKED.format(e.layer))
+            return HttpResponseBadRequest(SYNCERROR_LAYER_NOT_LOCKED.format(e.layer))
         except:
-            raise
+            logger.exception(SYNCERROR_UPLOAD)
+            return HttpResponseBadRequest(SYNCERROR_UPLOAD)
         finally:
             os.remove(tmpfile)
     return JsonResponse({'response': 'OK'})
@@ -463,7 +475,10 @@ class ResourceReplacer():
         considered a deletion
         - if the ids are present in both sides, we consider this to be a
         replacement (deletion + insert) if the path field differs. Otherwise we
-        consider to be the same resource and we ignore it 
+        consider to be the same resource and we ignore it. Note that it is not
+        possible to have a collision with the ids caused by a new server side
+        image, because the layer is locked by the tablet so it is not possible
+        to add new resources on the server in the meantime.
         """
         try:
             sqlite_resources = self._get_sqlite_iterator()
