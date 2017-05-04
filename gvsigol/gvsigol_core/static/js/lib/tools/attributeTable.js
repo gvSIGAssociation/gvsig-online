@@ -117,7 +117,7 @@ attributeTable.prototype.createTableUI = function(featureType) {
 			if (!featureType[i].name.startsWith(this.prefix)) {
 				var column_shown = true;
 				var feat_name = featureType[i].name;
-				if(fields_trans["fields"]){
+				if(fields_trans["fields"] != undefined){
 					var fields = fields_trans["fields"];
 					for(var ix=0; ix<fields.length; ix++){
 						if(fields[ix].name.toLowerCase() == feat_name){
