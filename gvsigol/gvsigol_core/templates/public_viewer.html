@@ -13,6 +13,7 @@
 	
 	<link rel="stylesheet" href="{% static "js/vendors/jQueryUI/jquery-ui.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.6/css/bootstrap.min.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-datepicker-1.6.4-dist/css/bootstrap-datepicker.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-lightbox/ekko-lightbox.min.css" %}">
 	<link rel="stylesheet" href="{% static "css/font-awesome-4.4.0/css/font-awesome.min.css" %}">
 	<link rel="stylesheet" href="{% static "css/fontcustom/fontcustom.css" %}">
@@ -21,9 +22,12 @@
 	<link rel="stylesheet" href="{% static "js/vendors/Buttons-1.2.4/css/buttons.dataTables.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/ol-4.0.1/ol.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/ol-4.0.1/ol3-popup.css" %}">	
+	<link rel="stylesheet" href="{% static "css/uploadfile.css" %}">
 	<link rel="stylesheet" href="{% static "css/gvsigOL.css" %}">
 	<link rel="stylesheet" href="{% static "css/viewer.css" %}">	
 	<link rel="stylesheet" href="{% static "css/skins/_all-skins.min.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/codemirror/lib/codemirror.css" %}" />
+	<link rel="stylesheet" href="{% static "js/vendors/codemirror/theme/xq-dark.css" %}" />
 	<link rel="stylesheet" href="{% static "css/toc.css" %}">
 
 	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -59,10 +63,10 @@
 			
 			<!-- Sidebar toggle button-->
           	<a href="#" class="sidebar-toggle" data-toggle="control-sidebar" role="button"></a>
-
+			
 			<div class="navbar-custom-menu">
 				<ul class="nav navbar-nav">
-					
+				
 					<li>
 						<form id="select-language-form" action="{% url 'set_language' %}" method="post">{% csrf_token %}
 						    <select id="select-language" name="language" class="form-control" style="margin-top: 10px;">
@@ -103,6 +107,7 @@
 			<div class="navbar-custom-menu">
 				<ul id="toolbar-buttons" class="nav navbar-nav">
 					<li><a href="/gvsigonline/core/documentation/" target="_blank" id="help" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-question-circle"></i></a></li>
+					<li><a href="#" id="export-to-pdf" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-file-pdf-o"></i></a></li>
 				</ul>
 			</div>
 
@@ -110,8 +115,9 @@
 	</header>
 	
 	<div id="container">
-		<aside class="control-sidebar control-sidebar-light" style="position: fixed; height: 100%;">
 		
+		<aside class="control-sidebar control-sidebar-light" style="position: fixed; height: 100%;">
+
 			<div class="project-info-div">
 				<div class="pull-left image">
 					<img src="{{project.image.url}}" class="" alt="User Image">
@@ -146,11 +152,11 @@
 		</aside>
 		
 		<div class="panel-wrapper">
-			<div class="panel-controller">
-				<div class="tab-controller">
-					<i class="fa fa-bars"></i>
-				</div>
-			</div>
+<!-- 			<div class="panel-controller"> -->
+<!-- 				<div class="tab-controller"> -->
+<!-- 					<i class="fa fa-bars"></i> -->
+<!-- 				</div> -->
+<!-- 			</div> -->
 			<div class="panel-content"></div>
 		</div>
 
@@ -218,6 +224,7 @@
 		$("body").overlay();
 	</script>
 	<script type="text/javascript" src="{% static "js/vendors/bootstrap-3.3.6/js/bootstrap.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/bootstrap-datepicker-1.6.4-dist/js/bootstrap-datepicker.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/DataTables-1.10.11/media/js/jquery.dataTables.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/DataTables-1.10.11/extensions/Select/js/dataTables.select.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/Buttons-1.2.4/js/dataTables.buttons.js" %}"></script>
@@ -225,6 +232,7 @@
 	<script type="text/javascript" src="{% static "js/vendors/Buttons-1.2.4/js/buttons.html5.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/Buttons-1.2.4/js/buttons.print.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/bootstrap-lightbox/ekko-lightbox.min.js" %}"></script>
+	<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
 	<script type="text/javascript" src="{% static "js/vendors/proj4js/proj4.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/ol-4.0.1/ol.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/ol-4.0.1/ol3-popup.js" %}"></script>
@@ -234,6 +242,7 @@
 		var messageBox = new messageBox();
 	</script>
 	<script type="text/javascript" src="{% static "js/lib/widgets/bottomPanel.js" %}"></script>
+		
 	<script type="text/javascript" src="{% static "js/lib/tools/getFeatureInfo.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/tools/attributeTable.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/tools/measureLength.js" %}"></script>
@@ -244,7 +253,7 @@
 	<script type="text/javascript" src="{% static "js/lib/tools/searchByCoordinate.js" %}"></script>
 	
 	<script type="text/javascript" src="{% static "js/lib/widgets/gvsigolResourceManager.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/lib/widgets/editionBar.js" %}"></script>		
+	<script type="text/javascript" src="{% static "js/lib/widgets/editionBar.js" %}"></script>	
 	<script type="text/javascript" src="{% static "js/lib/widgets/layerTree.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/widgets/legend.js" %}"></script>
 	
@@ -262,8 +271,8 @@
 	
 		var bottomPanel = new bottomPanel();
 		$(document).on('click', '.tab-controller', function() {
-	    	bottomPanel.togglePanel();
-	    });
+        	bottomPanel.togglePanel();
+        });
 	
 		$("#modal-table-dialog").draggable({
 		    handle: ".modal-header",
@@ -312,7 +321,6 @@
 			{% endwith %}
 		{% endif %}		    					
 	{% endfor %}
-
 	<script>
 	$(document).ready(function() {
 		
