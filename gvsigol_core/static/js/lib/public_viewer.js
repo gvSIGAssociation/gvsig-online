@@ -290,7 +290,7 @@ viewer.core = {
     	this.tools.push(new getFeatureInfo(this.map, this.conf.tools.get_feature_info_control.private_fields_prefix));
     	this.tools.push(new measureLength(this.map));
     	this.tools.push(new measureArea(this.map));
-    	//this.tools.push(new exportToPDF(this.conf, this.map));
+    	this.tools.push(new exportToPDF(this.conf, this.map));
     	this.tools.push(new searchByCoordinate(this.conf, this.map));
     	this.tools.push(new geolocation(this.map));
     	this.tools.push(new cleanMap(this.map));
