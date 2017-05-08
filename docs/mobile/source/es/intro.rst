@@ -4,7 +4,7 @@ Introducción
 
 La aplicación gvSIG Mobile2 permite gestionar información geográfica desde un dispositivo móvil o tablet, realizando trabajos de campo para capturar o actualizar la información. Funciona sobre dispositivos con sistema operativo Android.
 
---------------
+
 Visión general
 --------------
 La pantalla principal contiene diversas secciones. Las más relevantes para trabajar con las capas de gvsig online (web)son:
@@ -12,7 +12,7 @@ La pantalla principal contiene diversas secciones. Las más relevantes para trab
 .. image:: ../images/gmobile_01.png
    :align: center
    
-*  1. Administrador de capa base: Se podrá configurar la capa de fondo que tendrá el mapa por defecto. Al pinchar en |capa_base|, se podrá buscar las capas disponibles con el |plus| (ubicado de la esquina inferior derecha). 
+*  **1. Administrador de capa base**: Se podrá configurar la capa de fondo que tendrá el mapa por defecto. Al pinchar en |capa_base|, se podrá buscar las capas disponibles con el |plus| (ubicado de la esquina inferior derecha). 
      Estas capas estan incluidas en el almacenamiento de la app y tienen la extención (.mapurl). Por ejemplo, seleccionar la capa base del PNOA.
 
 .. |capa_base| image:: ../images/boton_01.png
