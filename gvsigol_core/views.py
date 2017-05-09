@@ -17,6 +17,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from gvsigol_core.utils import get_supported_crs
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
@@ -418,7 +419,7 @@ def project_delete(request, pid):
 def project_load(request, pid):
     if core_utils.is_valid_project(request.user, pid):
         project = Project.objects.get(id=int(pid))
-        return render_to_response('viewer.html', {'supported_crs': gvsigol.settings.SUPPORTED_CRS, 'project': project, 'pid': pid}, context_instance=RequestContext(request))
+        return render_to_response('viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': pid}, context_instance=RequestContext(request))
     else:
         return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
 
@@ -485,8 +486,8 @@ def project_get_conf(request):
                     (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
                     defaultCrs = layer_info[ds_type]['srs']
                     
-                if defaultCrs.split(':')[1] in gvsigol.settings.SUPPORTED_CRS:
-                    epsg = gvsigol.settings.SUPPORTED_CRS[defaultCrs.split(':')[1]]
+                if defaultCrs.split(':')[1] in core_utils.get_supported_crs():
+                    epsg = core_utils.get_supported_crs()[defaultCrs.split(':')[1]]
                     layer['crs'] = {
                         'crs': defaultCrs,
                         'units': epsg['units']
@@ -551,7 +552,7 @@ def project_get_conf(request):
                 "center_lon": project.center_lon, 
                 "zoom": project.zoom 
             }, 
-            'supported_crs': gvsigol.settings.SUPPORTED_CRS,
+            'supported_crs': core_utils.get_supported_crs(),
             'workspaces': workspaces,
             'layerGroups': ordered_layer_groups,
             'tools': gvsigol.settings.GVSIGOL_TOOLS,
@@ -633,7 +634,7 @@ def select_public_project(request):
 def public_project_load(request, pid):
     if core_utils.is_valid_public_project(pid):
         project = Project.objects.get(id=int(pid))
-        return render_to_response('public_viewer.html', {'supported_crs': gvsigol.settings.SUPPORTED_CRS, 'project': project, 'pid': pid}, context_instance=RequestContext(request))
+        return render_to_response('public_viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': pid}, context_instance=RequestContext(request))
     else:
         return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
             
@@ -694,8 +695,8 @@ def public_viewer_get_conf(request):
                         (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
                         defaultCrs = layer_info[ds_type]['srs']
                         
-                    if defaultCrs.split(':')[1] in gvsigol.settings.SUPPORTED_CRS:
-                        epsg = gvsigol.settings.SUPPORTED_CRS[defaultCrs.split(':')[1]]
+                    if defaultCrs.split(':')[1] in core_utils.get_supported_crs():
+                        epsg = core_utils.get_supported_crs()[defaultCrs.split(':')[1]]
                         layer['crs'] = {
                             'crs': defaultCrs,
                             'units': epsg['units']
@@ -743,7 +744,7 @@ def public_viewer_get_conf(request):
                 "center_lon": project.center_lon, 
                 "zoom": project.zoom 
             }, 
-            'supported_crs': gvsigol.settings.SUPPORTED_CRS,
+            'supported_crs': core_utils.get_supported_crs(),
             'workspaces': workspaces,
             'layerGroups': ordered_layer_groups,
             'tools': gvsigol.settings.GVSIGOL_TOOLS,

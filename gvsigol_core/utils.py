@@ -28,6 +28,7 @@ from gvsigol_services.models import LayerGroup, Layer
 from gvsigol_auth.models import UserGroup, UserGroupUser
 from gvsigol import settings
 import json
+import psycopg2
 
 def is_valid_project(user, pid):
     valid = False
@@ -433,3 +434,68 @@ def send_reset_password_email(email, temp_pass):
     toAddress = [email]           
     fromAddress = settings.EMAIL_HOST_USER
     send_mail(subject, body, fromAddress, toAddress, fail_silently=False)
+    
+
+supported_crs = {}
+def get_supported_crs():   
+    global supported_crs
+    if not supported_crs:
+        
+        if settings.USE_DEFAULT_SUPPORTED_CRS:
+            return settings.SUPPORTED_CRS
+        
+        supported_crs = {}
+        
+        db = settings.DATABASES['default']
+        
+        dbhost = settings.DATABASES['default']['HOST']
+        dbport = settings.DATABASES['default']['PORT']
+        dbname = settings.DATABASES['default']['NAME']
+        dbuser = settings.DATABASES['default']['USER']
+        dbpassword = settings.DATABASES['default']['PASSWORD']
+        
+        #connection = get_connection(dbhost, dbport, dbname, dbuser, dbpassword)
+        try:
+            connection = psycopg2.connect("host=" + dbhost +" port=" + dbport +" dbname=" + dbname +" user=" + dbuser +" password="+ dbpassword);
+            connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+            print "Connect ... "
+        
+        except StandardError, e:
+            print "Failed to connect!", e
+            return []
+        cursor = connection.cursor()
+        
+        try:        
+            create_schema = "SELECT * FROM public.spatial_ref_sys ORDER BY srid;"       
+            cursor.execute(create_schema)
+            rows = cursor.fetchall()
+    
+        except StandardError, e:
+            print "SQL Error", e
+            if not e.pgcode == '42710':
+                return supported_crs   
+            cursor.close();
+            connection.close();
+            
+        for row in rows:
+            s = row[3]
+            data = s[s.find('[')+1:s.find(',')]
+            data = data.replace('"', '')
+            
+            unit_idx = s.find('UNIT[')+5
+            unit = s[unit_idx :s.find(',', unit_idx)]
+            unit = unit.replace('"', '')
+            if unit == 'metre':
+                unit = 'meter'
+                
+            crs = {
+                'code': row[1] + ':' + str(row[2]),
+                'title': data,
+                'definition': row[4],
+                'units': unit+'s'
+            }
+            supported_crs[row[0]] = crs
+
+    return supported_crs    
+    
+     
