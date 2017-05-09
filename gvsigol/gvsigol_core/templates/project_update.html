@@ -69,19 +69,19 @@
 							</div>	
 						</div>	
 						
-						<div class="box">
+						<div id="user-list-box" class="box searchable-list-box" style="margin-top: 20px;">
 							<div class="box-header with-border">
-								<h3 class="box-title">{% trans "Assign user groups" %}</h3>
+								<h3 class="box-title col-md-6">{% trans "Assign user groups" %}</h3> <div class="col-md-6"><input type="text" class="search form-control" placeHolder="{% trans 'Buscar grupo de usuarios...' %}" /></div>
 							</div>
 							<div class="box-body">
-								<ul class="products-list product-list-in-box">
+								<ul class="products-list product-list-in-box list">
 									{% for group in groups %}
 									<li class="item">
 										<div class="product-img">
 											<img src="{% static "img/users.png" %}" alt="Users Image">
 										</div>
 										<div class="product-info">
-											<a href="javascript:void(0)" class="product-title">{{group.name}}
+											<a href="javascript:void(0)" class="product-title"><span class="searchable-user">{{group.name}}</span>
 												<div class="checkbox pull-right">													
 													<label>
 														{% if group.checked %}
@@ -97,22 +97,23 @@
 									</li> 
 									{% endfor %}
 								</ul>
+								<ul class="pagination"></ul>
 							</div>
 						</div>
-						
-						<div class="box">
+
+						<div id="layer-list-box" class="box searchable-list-box" style="margin-top: 20px;">
 							<div class="box-header with-border">
-								<h3 class="box-title">{% trans "Assign layer groups" %}</h3>
+								<h3 class="box-title col-md-6">{% trans "Assign layer groups" %}</h3> <div class="col-md-6"><input type="text" class="search2 form-control" placeHolder="{% trans 'Buscar grupo de capas...' %}" /></div>
 							</div>
 							<div class="box-body">
-								<ul class="products-list product-list-in-box">
+								<ul class="products-list product-list-in-box list2">
 									{% for layergroup in layergroups %}
 									<li class="item">
 										<div class="product-img">
 											<img src="{% static "img/layers.png" %}" alt="Layers Image">
 										</div>
 										<div class="product-info">
-											<a href="javascript:void(0)" class="product-title">{{layergroup.name}}
+											<a href="javascript:void(0)" class="product-title"><span class="searchable-layer">{{layergroup.name}}</span>
 												<div class="checkbox pull-right">													
 													<label>
 														{% if layergroup.checked %}
@@ -123,11 +124,12 @@
 													</label>
 												</div>
 											</a> 
-											<span class="product-description">{{layergroup.description}}</span>
+											<span class="product-description"><span class="searchable-layer">{{layergroup.description}}</span></span>
 										</div>
 									</li> 
 									{% endfor %}
 								</ul>
+								<ul class="pagination"></ul>
 							</div>
 						</div>
 													

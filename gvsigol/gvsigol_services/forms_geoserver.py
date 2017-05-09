@@ -25,12 +25,13 @@
 from django import forms
 from django.utils.translation import ugettext as _
 from models import Workspace, Datastore, LayerGroup
-from gvsigol.settings import SUPPORTED_ENCODINGS, SUPPORTED_CRS
+from gvsigol.settings import SUPPORTED_ENCODINGS
+from gvsigol_core import utils as core_utils
 import json
 
 supported_encodings = tuple((x,x) for x in SUPPORTED_ENCODINGS)
 supported_encodings = supported_encodings + (('autodetect', _('autodetect')),)
-supported_srs = tuple((SUPPORTED_CRS[x]['code'],SUPPORTED_CRS[x]['title']) for x in SUPPORTED_CRS)
+supported_srs = tuple((core_utils.get_supported_crs()[x]['code'],core_utils.get_supported_crs()[x]['title']) for x in core_utils.get_supported_crs())
 supported_srs_and_blank = (('', '---------'),) + supported_srs
 
 MODE_CREATE="CR"
@@ -135,7 +136,7 @@ class CreateFeatureTypeForm(forms.Form):
     datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=True, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class':'form-control'}))
     name = forms.CharField(label=_(u'Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     geom_type = forms.ChoiceField(label=_(u'Geometry type'), required=True, choices=geometry_types, widget=forms.Select(attrs={'class' : 'form-control'}))
-    srs = forms.ChoiceField(label=_(u'SRS'), required=True, choices=supported_srs, widget=forms.Select(attrs={'class' : 'form-control'}))
+    srs = forms.ChoiceField(label=_(u'SRS'), required=True, choices=supported_srs, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
     title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, initial="__default__", queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class' : 'form-control'}))
     visible = forms.BooleanField(label=_(u'Visible'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
