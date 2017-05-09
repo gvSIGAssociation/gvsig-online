@@ -21,6 +21,7 @@
 	<link rel="stylesheet" href="{% static "css/skins/_all-skins.min.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror/lib/codemirror.css" %}" />
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror/theme/xq-dark.css" %}" />
+	<link rel="stylesheet" href="{% static "js/vendors/search-in-components/select2.min.css" %}" />
 	<link rel="stylesheet" href="{% static "css/uploadfile.css" %}">
 	
     {% for app in INSTALLED_APPS %}												  
@@ -181,6 +182,8 @@
 	<script type="text/javascript" src="{% static "js/vendors/codemirror/mode/xml/xml.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/gvsigOL.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/widgets/messageBox.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/search-in-components/select2.full.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/search-in-components/list.js" %}"></script>
 	<script>
 		var messageBox = new messageBox();
 	</script>
@@ -190,6 +193,24 @@
 	    	$("#select-language").change(function() {
 	    		$("#select-language-form").submit();
 			});
+	    	
+	    	$(".js-example-basic-single").select2();
+	    	
+	    	var searcheableList = new List('user-list-box', {
+	    		  valueNames: ['searchable-user'],
+	    		  listClass:'list',
+	    		  searchClass: 'search',
+	    		  page: 6,
+	    		  pagination: true
+	    		});
+	    	
+	    	var searcheableList2 = new List('layer-list-box', {
+	    		  valueNames: ['searchable-layer'],
+	    		  listClass:'list2',
+	    		  searchClass: 'search2',
+	    		  page: 6,
+	    		  pagination: true
+	    		});
 	    });
 	</script>
 
