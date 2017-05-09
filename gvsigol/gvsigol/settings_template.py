@@ -264,6 +264,7 @@ GVSIGOL_SERVICES = {
 
 # Must be a valid iconv encoding name. Use iconv --list on Linux to see valid names 
 SUPPORTED_ENCODINGS = [ "LATIN1", "UTF-8", "ISO-8859-15", "WINDOWS-1252"]
+USE_DEFAULT_SUPPORTED_CRS = True
 SUPPORTED_CRS = {
     '3857': {
         'code': 'EPSG:3857',
