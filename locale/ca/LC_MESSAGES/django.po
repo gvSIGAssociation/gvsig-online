@@ -54,7 +54,7 @@ msgstr "Grup per a usuaris administradors"
 
 #: templates/dashboard_auth_menu.html:4
 msgid "Users and groups"
-msgstr "Usuaris y grups"
+msgstr "Usuaris i grups"
 
 #: templates/dashboard_auth_menu.html:6
 msgid "Users"
@@ -91,7 +91,7 @@ msgstr "Eliminar grup"
 
 #: templates/group_list.html:55
 msgid "The group will be removed, Do you want continue?"
-msgstr "El grup serà eliminat , voleu continuar?"
+msgstr "El grup serà eliminat, voleu continuar?"
 
 #: templates/group_list.html:58 templates/user_list.html.py:70
 msgid "Cancel"
@@ -174,7 +174,7 @@ msgstr "Alguna cosa va sortir malament"
 
 #: templates/illegal_operation.html:13
 msgid "You don't have administrative permissions. Meanwhile, you may"
-msgstr "Vostè no té permisos d'administració. Voste pot"
+msgstr "Vostè no té permisos d'administració. Mentrestant pot"
 
 #: templates/illegal_operation.html:14
 msgid "return to dashboard"
@@ -194,11 +194,11 @@ msgstr "He oblidat la contrasenya"
 
 #: templates/password_reset.html:38
 msgid "Enter your username to retrieve your password"
-msgstr "Introduiu el vostre nom d'usuari per recuperar la contrasenya"
+msgstr "Introduïu el vostre nom d'usuari per recuperar la contrasenya"
 
 #: templates/password_reset.html:45
 msgid "Insert your username"
-msgstr "Introduiu el vostre nom d'usuari"
+msgstr "Introduïu el vostre nom d'usuari"
 
 #: templates/password_reset.html:50
 msgid "Send"
@@ -302,14 +302,14 @@ msgstr "Grup d'usuaris per"
 
 #: views.py:286
 msgid "The username already exists"
-msgstr "El nom d'usuari ya existeix"
+msgstr "El nom d'usuari ja existeix"
 
 #: views.py:431
 msgid "Admin is a reserved group"
 msgstr "Admin és un grup reservat"
 
 #~ msgid "Is admin"
-#~ msgstr "Es administrador"
+#~ msgstr "És administrador"
 
 #~ msgid "Is admin?"
-#~ msgstr "Es administrador?"
+#~ msgstr "És administrador?"
