@@ -35,7 +35,7 @@ msgstr "Iniciar sessió"
 
 #: templates/index.html:137
 msgid "Welcome to gvSIG Online"
-msgstr ""
+msgstr "Benvingut a gvSIG Online"
 
 #: templates/index.html:146
 msgid "Public viewer"
@@ -79,15 +79,15 @@ msgstr "Accedir al catàleg de metadades"
 
 #: templates/index.html:188
 msgid "Download app"
-msgstr ""
+msgstr "Descarregar app"
 
 #: templates/index.html:190
 msgid "Download"
-msgstr ""
+msgstr "Descarregar"
 
 #: templates/index.html:190
 msgid "mobile application"
-msgstr ""
+msgstr "aplicació mòbil"
 
 #~ msgid ""
 #~ "Welcome to the Geographic Information Service of La Pobla de Vallbona"
