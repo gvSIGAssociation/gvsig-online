@@ -29,7 +29,10 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.files.storage import FileSystemStorage
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if '__file__' in globals():
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+else:
+    BASE_DIR = os.path.join(os.path.abspath(os.getcwd()), "gvsigol")
 
 
 # Quick-start development settings - unsuitable for production
@@ -310,13 +313,13 @@ SUPPORTED_CRS = {
     '4326': {
         'code': 'EPSG:4326',
         'title': 'WGS84',
-        'definition': '+proj=longlat +datum=WGS84 +no_defs',
+        'definition': '+proj=longlat +datum=WGS84 +no_defs +axis=neu',
         'units': 'degrees'
     },
     '4258': {
         'code': 'EPSG:4258',
         'title': 'ETRS89',
-        'definition': '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs',
+        'definition': '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs +axis=neu',
         'units': 'degrees'
     },
     '25830': {
