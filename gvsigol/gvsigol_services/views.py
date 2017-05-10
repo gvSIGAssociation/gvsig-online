@@ -1093,7 +1093,7 @@ def get_enumeration(request):
     if request.method == 'POST':
         enum_name = request.POST.get('enum_name')
         enum = Enumeration.objects.get(name__exact=enum_name)
-        enum_items = EnumerationItem.objects.filter(enumeration_id=enum.id)
+        enum_items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('name')
         
         items = []
         for i in enum_items:
