@@ -664,41 +664,47 @@ editionBar.prototype.createFeatureForm = function(feature) {
 		for (var i=0; i<this.featureType.length; i++) {
 			if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
 				var name = this.featureType[i].name;
+				var visible = true;
 				if(fields){
 					for(var ix =0; ix<fields.length; ix++){
-						if(fields[ix].name == name){
+						if(fields[ix].name.toLowerCase() == name){
 							var lang = $("#select-language").val();
 							if(fields[ix]["title-"+lang] && fields[ix]["title-"+lang] != ""){
 								name = fields[ix]["title-"+lang] + '<br /><span style="font-weight: normal;">('+name+')</span>';
 							}
+							if(fields[ix].editable != undefined){
+								visible = fields[ix].editable;
+							}
 						}
 					}
 				}
-				featureProperties += '<div class="col-md-12 form-group" style="background-color: #fff;">';
-				featureProperties += 	'<label style="color: #444;">' + name + '</label>';
-				if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
-					featureProperties += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control">';
-					
-				} else if (this.featureType[i].type == 'xsd:date') {
-					featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd">';
-					
-				} else if (this.featureType[i].type == 'xsd:string') {
-					if (this.featureType[i].name.startsWith("enm_")) {
-						var enumeration = this.getEnumeration(this.featureType[i].name);
-						featureProperties += 	'<select id="' + this.featureType[i].name + '" class="form-control">';
-						for (var j=0; j<enumeration.items.length; j++) {
-							featureProperties += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+				if(visible){
+					featureProperties += '<div class="col-md-12 form-group" style="background-color: #fff;">';
+					featureProperties += 	'<label style="color: #444;">' + name + '</label>';
+					if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
+						featureProperties += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control">';
+						
+					} else if (this.featureType[i].type == 'xsd:date') {
+						featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd">';
+						
+					} else if (this.featureType[i].type == 'xsd:string') {
+						if (this.featureType[i].name.startsWith("enm_")) {
+							var enumeration = this.getEnumeration(this.featureType[i].name);
+							featureProperties += 	'<select id="' + this.featureType[i].name + '" class="form-control">';
+							for (var j=0; j<enumeration.items.length; j++) {
+								featureProperties += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+							}
+							featureProperties += 	'</select>';
+							featureProperties += '</div>';
+						} else {
+							featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control">';
 						}
-						featureProperties += 	'</select>';
-						featureProperties += '</div>';
-					} else {
-						featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control">';
+						
+					}  else if (this.featureType[i].type == 'xsd:boolean') {
+						featureProperties += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';			
 					}
-					
-				}  else if (this.featureType[i].type == 'xsd:boolean') {
-					featureProperties += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';			
+					featureProperties += '</div>';
 				}
-				featureProperties += '</div>';
 			}
 		}
 		featureProperties +=       '<div class="col-md-12 form-group" id="edition-error">';
@@ -797,58 +803,64 @@ editionBar.prototype.editFeatureForm = function(feature) {
 		for (var i=0; i<this.featureType.length; i++) {
 			if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
 				var name = this.featureType[i].name;
+				var visible = true;
 				if(fields){
 					for(var ix =0; ix<fields.length; ix++){
-						if(fields[ix].name == name){
+						if(fields[ix].name.toLowerCase() == name){
 							var lang = $("#select-language").val();
 							if(fields[ix]["title-"+lang] && fields[ix]["title-"+lang] != ""){
 								name = fields[ix]["title-"+lang] + '<br /><span style="font-weight: normal;">('+name+')</span>';
 							}
-						}
-					}
-				}
-				featureProperties += '<div class="col-md-12 form-group" style="background-color: #fff;">';
-				featureProperties += 	'<label style="color: #444;">' + name + '</label>';
-				if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
-					featureProperties += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
-					
-				} else if (this.featureType[i].type == 'xsd:date') {
-					var dbDate = feature.getProperties()[this.featureType[i].name];
-					if (dbDate != null) {
-						if (dbDate.charAt(dbDate.length - 1) == 'Z') {
-							dbDate = dbDate.slice(0,-1);
-						}
-					} else {
-						dbDate = null;
-					}
-					featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + dbDate + '">';
-					
-				} else if (this.featureType[i].type == 'xsd:string') {				
-					if (this.featureType[i].name.startsWith("enm_")) {
-						var enumeration = this.getEnumeration(this.featureType[i].name);
-						featureProperties += 	'<select id="' + this.featureType[i].name + '" class="form-control">';
-						for (var j=0; j<enumeration.items.length; j++) {
-							if (enumeration.items[j].name == feature.getProperties()[this.featureType[i].name]) {
-								featureProperties += '<option selected value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
-							} else {
-								featureProperties += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+							if(fields[ix].editable != undefined){
+								visible = fields[ix].editable;
 							}
 						}
-						featureProperties += 	'</select>';
-						featureProperties += '</div>';
-					} else {
-						featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
 					}
-					
-				}  else if (this.featureType[i].type == 'xsd:boolean') {
-					var checked = feature.getProperties()[this.featureType[i].name];
-					if (checked) {
-						featureProperties += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox" checked>';
-					} else {
-						featureProperties += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';
-					}				
 				}
-				featureProperties += '</div>';
+				if(visible){
+					featureProperties += '<div class="col-md-12 form-group" style="background-color: #fff;">';
+					featureProperties += 	'<label style="color: #444;">' + name + '</label>';
+					if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
+						featureProperties += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+						
+					} else if (this.featureType[i].type == 'xsd:date') {
+						var dbDate = feature.getProperties()[this.featureType[i].name];
+						if (dbDate != null) {
+							if (dbDate.charAt(dbDate.length - 1) == 'Z') {
+								dbDate = dbDate.slice(0,-1);
+							}
+						} else {
+							dbDate = null;
+						}
+						featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + dbDate + '">';
+						
+					} else if (this.featureType[i].type == 'xsd:string') {				
+						if (this.featureType[i].name.startsWith("enm_")) {
+							var enumeration = this.getEnumeration(this.featureType[i].name);
+							featureProperties += 	'<select id="' + this.featureType[i].name + '" class="form-control">';
+							for (var j=0; j<enumeration.items.length; j++) {
+								if (enumeration.items[j].name == feature.getProperties()[this.featureType[i].name]) {
+									featureProperties += '<option selected value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+								} else {
+									featureProperties += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+								}
+							}
+							featureProperties += 	'</select>';
+							featureProperties += '</div>';
+						} else {
+							featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+						}
+						
+					}  else if (this.featureType[i].type == 'xsd:boolean') {
+						var checked = feature.getProperties()[this.featureType[i].name];
+						if (checked) {
+							featureProperties += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox" checked>';
+						} else {
+							featureProperties += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';
+						}				
+					}
+					featureProperties += '</div>';
+				}
 			}
 		}
 		featureProperties +=		'<div class="col-md-12 form-group" id="edition-error">';
