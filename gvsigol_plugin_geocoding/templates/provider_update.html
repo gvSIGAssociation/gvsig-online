@@ -75,6 +75,7 @@
 								<label for="id_id_field">{% trans "ID Field" %}</label>
 								{{ form.id_field }}						
 							</div>
+							<input type="hidden" id="provider-id_field" name="provider-id_field" value="{{ form.id_field.value|default_if_none:"" }}"/>
 						</div>	
 						
 						<div class="row user-param hidden">
@@ -82,6 +83,7 @@
 								<label for="id_text_field">{% trans "Text Field" %}</label>
 								{{ form.text_field }}						
 							</div>
+							<input type="hidden" id="provider-text_field" name="provider-text_field" value="{{  form.text_field.value|default_if_none:"" }}"/>
 						</div>	
 						
 						<div class="row user-param hidden">
@@ -89,6 +91,7 @@
 								<label for="id_geom_field">{% trans "Geom Field" %}</label>
 								{{ form.geom_field }}						
 							</div>
+							<input type="hidden" id="provider-geom_field"" name="provider-geom_field"" value="{{ form.geom_field.value|default_if_none:"" }}"/>
 						</div>	
 						
 						<div class="row">
