@@ -44,17 +44,25 @@ def login_user(request):
     errors = []
     if request.method == "POST":
         username = request.POST.get('username')
-        password = request.POST.get('password')
-        request.session['username'] = username
-        request.session['password'] = password
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                login(request, user)
-                return redirect('home')
-            
+        try:
+            findUser = User.objects.get(username=username)
+        except User.DoesNotExist:
+            findUser = None
+        if findUser is not None:
+            password = request.POST.get('password')
+            request.session['username'] = username
+            request.session['password'] = password
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    return redirect('home')
+                
+                else:
+                    errors.append({'message': _("Your account has been disabled")})
+                    return render_to_response('login.html', {'errors': errors}, RequestContext(request))
             else:
-                errors.append({'message': _("Your account has been disabled")})
+                errors.append({'message': _("The username and password you have entered do not match our records")})
                 return render_to_response('login.html', {'errors': errors}, RequestContext(request))
         else:
             errors.append({'message': _("The username and password you have entered do not match our records")})
