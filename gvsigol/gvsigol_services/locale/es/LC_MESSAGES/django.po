@@ -337,7 +337,7 @@ msgstr "SRS"
 
 #: forms_geoserver.py:104
 msgid "SQL Statement"
-msgstr "Estamento SQL"
+msgstr "Sentencia SQL"
 
 #: forms_geoserver.py:105 templates/geoserver/create_layer_sql_view.html.py:64
 msgid "Primary key column"
@@ -345,7 +345,7 @@ msgstr "Columna de clave primaria"
 
 #: forms_geoserver.py:106 templates/geoserver/create_layer_sql_view.html.py:68
 msgid "Geometry column"
-msgstr "Comuna de geometría"
+msgstr "Columna de geometría"
 
 #: forms_geoserver.py:107 forms_geoserver.py:119
 #: templates/geoserver/create_layer_feature_type.html:57
@@ -788,7 +788,7 @@ msgstr "Creando la capa. Por favor espere..."
 
 #: templates/geoserver/create_layer_sql_view.html:55
 msgid "SQL statement"
-msgstr "Estamento SQL"
+msgstr "Sentencia SQL"
 
 #: templates/geoserver/create_layer_sql_view.html:58
 msgid "Autocomplete"

@@ -24,7 +24,7 @@ msgstr "Pàgina no trobada"
 
 #: templates/404.html:13
 msgid "We could not find the page you were looking for. Meanwhile, you may"
-msgstr "La pàgina que ha sol·licitat no existeix, Mentre pot"
+msgstr "La pàgina que ha sol·licitat no existeix, Mentrestant, pot"
 
 #: templates/404.html:14 templates/500.html.py:14
 msgid "return to dashboard"
@@ -36,7 +36,7 @@ msgstr "Alguna cosa ha sortit malament"
 
 #: templates/500.html:13
 msgid "We will work on fixing that right away. Meanwhile, you may"
-msgstr "Estem treballant per solucionar el problema. Mentre pot"
+msgstr "Estem treballant per solucionar el problema. Mentrestant, pot"
 
 #: templates/base.html:95 templates/base_compress.html.py:95
 #: templates/viewer.html:119 templates/viewer_compress.html.py:117
@@ -80,7 +80,7 @@ msgid ""
 "that are part of the environment."
 msgstr ""
 "Característiques de la plataforma i llicència. Definició d'objectes i "
-"entitatsque són part de l'entorn."
+"entitats que són part de l'entorn."
 
 #: templates/documentation.html:66
 msgid "Administration Guide"
@@ -92,9 +92,9 @@ msgid ""
 "carry out the management of users and groups, services, symbology, "
 "projects ... "
 msgstr ""
-"Aquesta guia està destinada per als usuaris administradors de la plataforma. "
+"Aquesta guia està destinada als usuaris administradors de la plataforma. "
 "Mostra els passos per portar a terme la gestió d'usuaris i grups, serveis, "
-"simbologia,projectes ..."
+"simbologia, projectes ..."
 
 #: templates/documentation.html:75
 msgid "Map viewer user manual"
@@ -106,7 +106,7 @@ msgid ""
 "viewer"
 msgstr ""
 "Aquest manual proporciona una revisió de cadascuna de les característiques "
-"ofertes per el visor de mapes"
+"ofertes pel visor de mapes"
 
 #: templates/documentation.html:84
 msgid "Plugins"
@@ -143,7 +143,7 @@ msgstr "Correu electrònic"
 
 #: templates/home.html:22
 msgid "Is admin?"
-msgstr "Es administrador?"
+msgstr "És administrador?"
 
 #: templates/home.html:24
 msgid "You are logged in as root"
@@ -295,7 +295,7 @@ msgstr "Acceptar"
 
 #: templates/project_list.html:81
 msgid "Processing request..."
-msgstr "Procesant petició"
+msgstr "Processant petició"
 
 #: templates/project_list.html:82
 #, python-format
@@ -429,10 +429,10 @@ msgstr "Ha d'introduir un nom de projecte"
 
 #: views.py:227 views.py:390
 msgid "Project name already exists"
-msgstr "El nom del projecte ya existeix"
+msgstr "El nom del projecte ja existeix"
 
 #~ msgid "Search"
 #~ msgstr "Cercar"
 
 #~ msgid "You are logged in as an non-administrator user"
-#~ msgstr "Ha iniciat sessió com a usuari no administrador"
+#~ msgstr "Ha iniciat sessió com usuari no administrador"

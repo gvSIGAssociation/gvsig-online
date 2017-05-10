@@ -79,7 +79,7 @@ msgid ""
 "underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr ""
 "Nom de la capa no vàlid: '{value}'. Els identificadors han de començar amb "
-"una lletra o un guió baix (_). Els següents caràcters poden serlletres, "
+"una lletra o un guió baix (_). Els següents caràcters poden ser lletres, "
 "guions o nombres"
 
 #: backend_mapservice.py:749 backend_mapservice.py:800
@@ -138,7 +138,7 @@ msgstr "Nom del camp duplicat: {0}"
 #: backend_mapservice.py:1007
 #, python-brace-format
 msgid "Invalid field name. '{0}' is a reserved word"
-msgstr "Nom del camp no vàlid. '{0}' es una paraula reservada"
+msgstr "Nom del camp no vàlid. '{0}' és una paraula reservada"
 
 #: backend_mapservice.py:1022
 #, python-brace-format
@@ -174,7 +174,7 @@ msgstr "Crear"
 
 #: forms_geoserver.py:39
 msgid "Append"
-msgstr "Anyadir"
+msgstr "Afegir"
 
 #: forms_geoserver.py:39
 msgid "Overwrite"
@@ -302,7 +302,7 @@ msgstr "Consultable"
 #: templates/layer_add.html:78 templates/layer_create.html.py:119
 #: templates/layer_update.html:107
 msgid "Cached"
-msgstr "Cacheada"
+msgstr "Cachejada"
 
 #: forms_geoserver.py:55 forms_geoserver.py:70 forms_geoserver.py:82
 #: forms_geoserver.py:114 forms_geoserver.py:126
@@ -452,7 +452,7 @@ msgstr "Bloquejos"
 
 #: templates/datastore_add.html:12 templates/datastore_list.html.py:13
 msgid "Add datastore"
-msgstr "Anyadir magatzem"
+msgstr "Afegir magatzem"
 
 #: templates/datastore_add.html:14 templates/datastore_update.html.py:14
 #: templates/enumeration_add.html:14 templates/enumeration_update.html:14
@@ -612,7 +612,7 @@ msgstr "Actualitzar magatzem"
 
 #: templates/enumeration_add.html:12 templates/enumeration_list.html.py:13
 msgid "Add enumeration"
-msgstr "Anyadir enumeració"
+msgstr "Afegir enumeració"
 
 #: templates/enumeration_add.html:58 templates/enumeration_update.html:58
 msgid "Enumeration items"
@@ -620,7 +620,7 @@ msgstr "Elements de l'enumeració"
 
 #: templates/enumeration_add.html:64 templates/enumeration_update.html:76
 msgid "Add item"
-msgstr "Anyadir element"
+msgstr "Afegir element"
 
 #: templates/enumeration_list.html:11
 msgid "Enumeration list"
@@ -632,7 +632,7 @@ msgstr "Eliminar enumeració"
 
 #: templates/enumeration_list.html:57
 msgid "The enumeration will be removed, Do you want continue?"
-msgstr "La enueració serà eliminada, desitja continuar?"
+msgstr "L'enumeració serà eliminada, desitja continuar?"
 
 #: templates/enumeration_list.html:106 templates/enumeration_update.html:12
 msgid "Update enumeration"
@@ -669,7 +669,7 @@ msgstr "Sistema de referència de coordenades"
 
 #: templates/geoserver/create_layer_feature_type.html:85
 msgid "Add Field"
-msgstr "Anyadir camp"
+msgstr "Afegir camp"
 
 #: templates/geoserver/create_layer_feature_type.html:99
 #: templates/geoserver/create_layer_sql_view.html:89
@@ -710,7 +710,7 @@ msgstr "Alguna descripció de la capa"
 #: templates/geoserver/layer_upload_vector.html:126
 #: templates/layer_add.html:97 templates/layer_create.html.py:138
 msgid "Metadata: Abstract"
-msgstr "Metadades: Abstract"
+msgstr "Metadades: Resum"
 
 #: templates/geoserver/create_layer_feature_type.html:143
 #: templates/layer_create.html:156
@@ -779,7 +779,7 @@ msgstr "Nom del camp no vàlid"
 #: templates/layer_add.html:194 templates/layer_create.html.py:429
 #: templates/layer_update.html:152 templates/layergroup_list.html.py:35
 msgid "Default"
-msgstr "Pre defecte"
+msgstr "Per defecte"
 
 #: templates/geoserver/create_layer_feature_type.html:282
 #: templates/geoserver/create_layer_sql_view.html:234
@@ -788,7 +788,7 @@ msgstr "Creant capa. Per favor espere"
 
 #: templates/geoserver/create_layer_sql_view.html:55
 msgid "SQL statement"
-msgstr "Estament SQL"
+msgstr "Sentència SQL"
 
 #: templates/geoserver/create_layer_sql_view.html:58
 msgid "Autocomplete"
@@ -856,7 +856,7 @@ msgid ""
 "Regular expression for elevation (empty to disable). Example: "
 "%(sample_regex_pattern)s"
 msgstr ""
-"Expressió regular per a la elevació (buida per desactivar). Exemple: "
+"Expressió regular per a l'elevació (buida per desactivar). Exemple: "
 "%(sample_regex_pattern)s"
 
 #: templates/geoserver/layer_upload_postgis.html:13
@@ -888,7 +888,7 @@ msgstr "Pujant capa. Per favor espere..."
 
 #: templates/layer_add.html:12
 msgid "Import layer from database"
-msgstr "Importar capa desde la base de dades"
+msgstr "Importar capa des de la base de dades"
 
 #: templates/layer_add.html:40 templates/layer_create.html.py:40
 #: templates/layer_update.html:44
@@ -942,7 +942,7 @@ msgstr "Llistat de camps"
 
 #: templates/layer_create.html:92
 msgid "Add field"
-msgstr "Anyadir camp"
+msgstr "Afegir camp"
 
 #: templates/layer_list.html:11
 #| msgid "Layers"
@@ -979,7 +979,7 @@ msgstr "Capa"
 
 #: templates/layer_permissions_add.html:47
 msgid "Warning: Layer will be public if no read group is assigned"
-msgstr "Avís: La capa serà pública si no se li assigna un grup de lectura"
+msgstr "Avís: La capa serà pública si no se l'assigna un grup de lectura"
 
 #: templates/layer_permissions_add.html:53
 msgid "Make layer readable only for the following groups"
@@ -1019,7 +1019,7 @@ msgstr ""
 
 #: templates/layergroup_add.html:12 templates/layergroup_list.html.py:13
 msgid "Add layer group"
-msgstr "Anyadir grup de capes"
+msgstr "Afegir grup de capes"
 
 #: templates/layergroup_add.html:41 templates/layergroup_update.html.py:41
 msgid "Layer group name"
@@ -1078,7 +1078,7 @@ msgstr "Desbloquejar capa"
 
 #: templates/workspace_add.html:12 templates/workspace_list.html.py:13
 msgid "Add workspace"
-msgstr "Anyadir espai de treball"
+msgstr "Afegir espai de treball"
 
 #: templates/workspace_list.html:11
 msgid "Workspaces list"
@@ -1156,7 +1156,7 @@ msgstr "Ha d'introduir un nom per al grup de capes"
 
 #: views.py:982
 msgid "You must enter a title for enumeration"
-msgstr "Ha d'introduir un títol pe l'enumeració"
+msgstr "Ha d'introduir un títol per l'enumeració"
 
 #~ msgid "Groups list"
 #~ msgstr "Llistat de grups"
