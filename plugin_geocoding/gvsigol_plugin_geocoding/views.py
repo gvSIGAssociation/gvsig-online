@@ -54,6 +54,14 @@ def provider_list(request):
     if request.user.is_superuser:
         providers = Provider.objects.order_by('order')
     
+    for provider in providers:
+        if provider.type == 'cartociudad' or provider.type == 'user':
+            params = json.loads(provider.params)
+            if params['datastore_id']:
+                datastore = Datastore.objects.get(id=params['datastore_id'])
+                if not datastore:
+                    provider_delete(request, provider.id)
+    
     response = {
         'providers': providers
     }
@@ -218,10 +226,10 @@ def provider_update(request, provider_id):
             ds = Datastore.objects.filter(workspace=ws, name=datastore).first()
 
             if type=='user':
-                resource = request.POST.get('resource')
-                id_field = request.POST.get('id_field')
-                text_field = request.POST.get('text_field')
-                geom_field = request.POST.get('geom_field')
+                resource = request.POST.get('provider-resource')
+                id_field = request.POST.get('provider-id_field')
+                text_field = request.POST.get('provider-text_field')
+                geom_field = request.POST.get('provider-geom_field')
 
                 params = {
                     'datastore_id': ds.id,
