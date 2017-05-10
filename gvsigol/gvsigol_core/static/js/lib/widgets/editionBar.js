@@ -151,7 +151,9 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	this.$removeControl = $(removeControl);
 	this.$stopEdition = $(stopEdition);
 	
-	$('#editionbar').append(drawInCenterControl);
+	if (this.geometryType == 'Point' || this.geometryType == 'MultiPoint') {
+		$('#editionbar').append(drawInCenterControl);
+	}
 	$('#editionbar').append(drawControl);
 	$('#editionbar').append(modifyControl);
 	$('#editionbar').append(removeControl);
