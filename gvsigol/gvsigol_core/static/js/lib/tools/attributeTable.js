@@ -463,16 +463,11 @@ attributeTable.prototype.zoomToSelection = function(rows) {
 			'version': '1.1.0',
 			'request': 'GetFeature',
 			'typename': this.layer.workspace + ':' + typename, 
-			//'srsname': 'EPSG:4326',
+			'srsname': 'EPSG:3857',
 			'outputFormat': 'application/json',
 			'featureId': fids.toString()
 	  	},
 	  	success	:function(response){
-	  		var sourceCRS = 'EPSG:' + response.crs.properties.name.split('::')[1];
-	  		var projection = new ol.proj.Projection({
-	    		code: sourceCRS,
-	    	});
-	    	ol.proj.addProjection(projection);
 	    	self.source.clear();
 	    	
 	    	for (var i=0; i<response.features.length; i++) {
@@ -488,7 +483,6 @@ attributeTable.prototype.zoomToSelection = function(rows) {
 		    	}
 		    	newFeature.setProperties(response.features[i].properties);
 				newFeature.setId(response.features[i].id);
-				newFeature.getGeometry().transform(projection, 'EPSG:3857');
 				self.source.addFeature(newFeature);
 	    	}
 	    	
