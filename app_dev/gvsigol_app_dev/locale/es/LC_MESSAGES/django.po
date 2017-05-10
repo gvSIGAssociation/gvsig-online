@@ -80,15 +80,15 @@ msgstr "Acceder al catálogo de metadatos"
 
 #: templates/index.html:188
 msgid "Download app"
-msgstr ""
+msgstr "Descargar app"
 
 #: templates/index.html:190
 msgid "Download"
-msgstr ""
+msgstr "Descargar"
 
 #: templates/index.html:190
 msgid "mobile application"
-msgstr ""
+msgstr "aplicación móvil"
 
 #~ msgid "Documentation"
 #~ msgstr "Documentación"
