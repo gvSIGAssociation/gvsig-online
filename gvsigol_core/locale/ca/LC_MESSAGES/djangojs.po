@@ -30,10 +30,10 @@ msgstr "OpenStreetMap"
 
 # attributeTable.js
 msgid "Processing request"
-msgstr "Procesant petició"
+msgstr "Processant petició"
 
 msgid "Search"
-msgstr "Recerca"
+msgstr "Cerca"
 
 msgid "Showing"
 msgstr "Mostrant"
@@ -90,7 +90,7 @@ msgid "Print selection"
 msgstr "Imprimir selecció"
 
 msgid "You must select at least one row"
-msgstr "Heu de selccionar al menys una fila"
+msgstr "Heu de seleccionar al menys una fila"
 
 msgid "Advanced filter"
 msgstr "Filtre avançat"
@@ -182,7 +182,7 @@ msgid "View resources"
 msgstr "Veure recursos"
 
 msgid "Feature info"
-msgstr "Informació del element"
+msgstr "Informació de l'element"
 
 msgid "Multimedia resources"
 msgstr "Recursos multimèdia"
@@ -262,64 +262,64 @@ msgid "Show in geonetwork"
 msgstr "Mostrar a geonetwork"
 
 msgid "Version"
-msgstr "Versión"
+msgstr "Versió"
 
 msgid "Summary"
-msgstr "Resumen"
+msgstr "Resum"
 
 msgid "Requests"
-msgstr "Peticiones"
+msgstr "Peticions"
 
 msgid "Supported CRS"
-msgstr "CRS soportados"
+msgstr "CRS suportats"
 
 msgid "Layers"
-msgstr "Capas"
+msgstr "Capes"
 
 msgid "Organization"
-msgstr "Organización"
+msgstr "Organització"
 
 msgid "Contact person"
-msgstr "Persona de contacto"
+msgstr "Persona de contacte"
 
 msgid "Address"
-msgstr "Dirección"
+msgstr "Direcció"
 
 msgid "City"
-msgstr "Ciudad"
+msgstr "Ciutat"
 
 msgid "Country"
 msgstr "País"
 
 msgid "Email"
-msgstr "Correo electrónico"
+msgstr "Correu electrònic"
 
 msgid "Name"
-msgstr "Nombre"
+msgstr "Nom"
 
 msgid "Title"
-msgstr "Título"
+msgstr "Títol"
 
 msgid "Abstract"
-msgstr "Abstract"
+msgstr "Resum"
 
 msgid "Queryable"
 msgstr "Consultable"
 
 msgid "MaxScaleDenominator"
-msgstr "Escala máxima"
+msgstr "Escala màxima"
 
 msgid "MinScaleDenominator"
 msgstr "Escala mínima"
 
 msgid "Default CRS"
-msgstr "CRS por defecto"
+msgstr "CRS per defecte"
 
 msgid "BoundingBox"
 msgstr "BoundingBox"
 
 msgid "GeographicBoundingBox"
-msgstr "BoundingBox geográfica"
+msgstr "BoundingBox geogràfica"
 
 
 #cleanMap.js
