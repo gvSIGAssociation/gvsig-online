@@ -11,7 +11,7 @@
 					<div class="box-header with-border">
 						<h3 class="box-title">{% trans "Add project" %}</h3>
 						<div class="box-tools pull-right">
-							<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+							<button id="save_button" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
 						</div>
 					</div>
 				
@@ -144,6 +144,37 @@
 				zoom : 2
 			})
 		});
+		
+		var searcheableList = new List('user-list-box', {
+	  		  valueNames: ['searchable-user'],
+	  		  listClass:'list',
+	  		  searchClass: 'search',
+	  		  page: 6,
+	  		  pagination: false
+	  		});
+		
+		var searcheableList2 = new List('layer-list-box', {
+  		  valueNames: ['searchable-layer'],
+  		  listClass:'list2',
+  		  searchClass: 'search2',
+  		  page: 6,
+  		  pagination: false
+  		});
+
+    	$("#save_button").click(function(e){
+    		e.preventDefault(); // prevents default
+    		for(var i=0; i<searcheableList.items.length; i++){
+    			var item = searcheableList.items[i];
+    			item.show();
+    		}
+    		for(var i=0; i<searcheableList2.items.length; i++){
+    			var item = searcheableList2.items[i];
+    			item.show();
+    		}
+    		$("#project-form").submit();
+    	    return false; 
+
+    	})
 		
 		$('#project-form').submit(function() {
 			$("body").overlay();
