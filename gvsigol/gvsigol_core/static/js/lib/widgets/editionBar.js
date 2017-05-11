@@ -39,25 +39,27 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	this.featureType = featureType;
 	this.detailsTab = $('#details-tab');
 	this.geometryType = null;
+	this.geometryName = null;
 	for (var i=0; i<featureType.length; i++) {
 		if (featureType[i].type.indexOf('gml:') > -1) {
 			if (featureType[i].type == "gml:SurfacePropertyType") {
 				this.geometryType = 'Polygon';
-				
+				this.geometryName = featureType[i].name;
 			} else if (featureType[i].type == "gml:MultiSurfacePropertyType") {
 				this.geometryType = 'MultiPolygon';
-				
+				this.geometryName = featureType[i].name;
 			} else if (featureType[i].type == "gml:LineStringPropertyType") {
 				this.geometryType = 'LineString';
-				
+				this.geometryName = featureType[i].name;
 			} else if (featureType[i].type == "gml:MultiLineStringPropertyType") {
 				this.geometryType = 'MultiLineString';
-				
+				this.geometryName = featureType[i].name;
 			} else if (featureType[i].type == "gml:PointPropertyType") {
 				this.geometryType = 'Point';
-				
+				this.geometryName = featureType[i].name;
 			} else if (featureType[i].type == "gml:MultiPointPropertyType") {
 				this.geometryType = 'MultiPoint';
+				this.geometryName = featureType[i].name;
 			}
 		}
 	}
@@ -179,9 +181,10 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	
 	var uri = this.selectedLayer.namespace.split('/');
 	var ws = uri[uri.length - 1];
+	this.formatGeoJSON = new ol.format.GeoJSON({geometryName: this.geometryName});
 	
 	this.source = new ol.source.Vector({
-		format: new ol.format.GeoJSON(),
+		format: this.formatGeoJSON,
 		loader: function(extent, resolution, projection) {
 			var url = this_.selectedLayer.wfs_url + '?service=WFS&' +
 		        'version=1.1.0&request=GetFeature&typename=' + ws + ':' + this_.selectedLayer.layer_name +
@@ -231,8 +234,7 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 		    			srsName: proj.getCode()
 		    		});
 			    	
-		    		var format = new ol.format.GeoJSON();
-		    		var features = format.readFeatures(response);
+		    		var features = this_.formatGeoJSON.readFeatures(response);
 		    		for (var i=0; i<features.length; i++) {
 		    			if (features[i].getGeometry()) {
 		    				features[i].getGeometry().transform(proj, 'EPSG:3857');
@@ -748,18 +750,22 @@ editionBar.prototype.createFeatureForm = function(feature) {
 			uploader = this.resourceManager.createUploader();
 		}
 		
+		$('#save-feature').off('click');
 		$('#save-feature').on('click', function () {
 			var properties = {};
 			for (var i=0; i<self.featureType.length; i++) {
-				if ((self.featureType[i].type.indexOf('gml:') == -1) && self.featureType[i].name != 'id') {
+				if (self.featureType[i].type.indexOf('gml:') == -1 && self.featureType[i].name != 'id') {
 					var field = $('#' + self.featureType[i].name)[0];
 					if (self.featureType[i].type == 'xsd:boolean') {
 						properties[field.id] = field.checked;
-					} else {
-						if (field.value != '' && field.value != null && field.value != 'null') {
+					}
+					else if (self.featureType[i].type == 'xsd:string') {
+						if (field.value != null) {
+							properties[field.id] = field.value;	
+						}
+					} else if (field.value != '' && field.value != null && field.value != 'null') {
 							properties[field.id] = field.value;
-						}						
-					}				
+					}
 				}
 			}
 			feature.setProperties(properties);
@@ -909,19 +915,21 @@ editionBar.prototype.editFeatureForm = function(feature) {
 			uploader = this.resourceManager.createUploader();
 		}
 		
+		$('#edit-feature').off('click');
 		$('#edit-feature').on('click', function () {
 			var properties = {};
 			for (var i=0; i<self.featureType.length; i++) {
-				if (self.featureType[i].type.indexOf('gml:') == -1) {
-					if (self.featureType[i].name != 'id') {
-						var field = $('#' + self.featureType[i].name)[0];
-						if (self.featureType[i].type == 'xsd:boolean') {
-							properties[field.id] = field.checked;
-						} else {
-							if (field.value != '' && field.value != null && field.value != 'null') {
-								properties[field.id] = field.value;
-							}	
+				if (self.featureType[i].type.indexOf('gml:') == -1 && self.featureType[i].name != 'id') {
+					var field = $('#' + self.featureType[i].name)[0];
+					if (self.featureType[i].type == 'xsd:boolean') {
+						properties[field.id] = field.checked;
+					}
+					else if (self.featureType[i].type == 'xsd:string') {
+						if (field.value != null) {
+							properties[field.id] = field.value;	
 						}
+					} else if (field.value != '' && field.value != null && field.value != 'null') {
+							properties[field.id] = field.value;
 					}
 				}
 			}
@@ -1034,7 +1042,6 @@ editionBar.prototype.removeFeatureForm = function(evt, feature) {
 };
 
 
-
 /**
  * @param {Event} e Browser event.
  */
@@ -1043,7 +1050,7 @@ editionBar.prototype.transactWFS = function(p,f) {
 	var success = false;
 	var fid = null;
 	var node;
-
+	
 	var cloned = f.clone();
 	cloned.getGeometry().transform('EPSG:3857', this.selectedLayer.crs.olcrs);
 	cloned.setId(f.getId());
