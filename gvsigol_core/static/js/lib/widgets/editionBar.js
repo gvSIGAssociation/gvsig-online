@@ -182,66 +182,28 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	var uri = this.selectedLayer.namespace.split('/');
 	var ws = uri[uri.length - 1];
 	this.formatGeoJSON = new ol.format.GeoJSON({geometryName: this.geometryName});
+	this.mapSRS = 'EPSG:3857';
 	
 	this.source = new ol.source.Vector({
 		format: this.formatGeoJSON,
 		loader: function(extent, resolution, projection) {
 			var url = this_.selectedLayer.wfs_url + '?service=WFS&' +
 		        'version=1.1.0&request=GetFeature&typename=' + ws + ':' + this_.selectedLayer.layer_name +
-		        '&outputFormat=json';
+		        '&outputFormat=json&srsName='+this_.mapSRS;
 		    $.ajax({
 		    	url: url,
 		    	editionBar: this_,
 		    	success: function(response) {
-		    		var proj = null;
-		    		var serverCode, code;
-		    		if (response.crs && response.crs.properties && response.crs.properties.name) {
-		    			serverCode = response.crs.properties.name;
-	    				if (serverCode.startsWith("urn:ogc:def:crs:EPSG:")) {
-		    				// convert to EPSG:xxxx format
-		    				code = "EPSG" + serverCode.substring(serverCode.lastIndexOf(":"));
-		    			}
-	    				else if (serverCode.startsWith("http://www.opengis.net/gml/srs/epsg.xml#")) {
-		    				// convert to EPSG:xxxx format
-		    				code = "EPSG:" + serverCode.substring(serverCode.lastIndexOf("#")+1);
-	    				}
-		    		}
-		    		else { // response.crs is always null for empty layers created from GOL
-		    			code = this_.selectedLayer.crs.crs;
-		    			serverCode = "urn:ogc:def:crs:EPSG:" + code.substring(code.lastIndexOf(":"));
-		    		}
-	    			proj = ol.proj.get(serverCode);
-	    			if (proj==null && ol.proj.get(code)!=null) {
-    					// define the urn:ogc... projection as an alias of the EPSG:xxxx one
-    					var defs = proj4.defs(code);
-    					proj4.defs(serverCode, defs);
-    					
-    					// register in OL
-    					var projConf = {
-	    						code: serverCode
-	    					};
-    					if (defs.axis) {
-    						projConf.axisOrientation = defs.axis;
-    					}
-    					proj = new ol.proj.Projection(projConf);
-    					ol.proj.addProjection(proj);
-	    			}
 		    		
-		    		this_.selectedLayer.crs.olcrs = proj;
-		    		// NOTE: format.GML will automatically invert the coordinates order when required
+		    		// WARNING: format.GML will automatically invert the coordinates order when required
 		    		// if the axisOrientation is defined in the CRS definitions in OL
 		    		this_.formatGML = new ol.format.GML({
 		    			featureNS: this_.selectedLayer.namespace,
 		    			featureType: this_.selectedLayer.layer_name,
-		    			srsName: proj.getCode()
+		    			srsName: this_.mapSRS
 		    		});
 			    	
 		    		var features = this_.formatGeoJSON.readFeatures(response);
-		    		for (var i=0; i<features.length; i++) {
-		    			if (features[i].getGeometry()) {
-		    				features[i].getGeometry().transform(proj, 'EPSG:3857');
-		    			}
-		    		}
 		    		try{
 		    			this_.source.addFeatures(features);
 		    		} catch (e) {
@@ -1052,20 +1014,16 @@ editionBar.prototype.transactWFS = function(p,f) {
 	var success = false;
 	var fid = null;
 	var node;
-	
-	var cloned = f.clone();
-	cloned.getGeometry().transform('EPSG:3857', this.selectedLayer.crs.olcrs);
-	cloned.setId(f.getId());
 
 	switch(p) {
 		case 'delete':
-			node = this.formatWFS.writeTransaction(null,null,[cloned],this.formatGML);
+			node = this.formatWFS.writeTransaction(null,null,[f],this.formatGML);
 			break;
 		case 'insert':
-			node = this.formatWFS.writeTransaction([cloned],null,null,this.formatGML);
+			node = this.formatWFS.writeTransaction([f],null,null,this.formatGML);
 			break;
 		case 'update':
-			node = this.formatWFS.writeTransaction(null,[cloned],null,this.formatGML);
+			node = this.formatWFS.writeTransaction(null,[f],null,this.formatGML);
 			break;
 	}
 	s = new XMLSerializer();
