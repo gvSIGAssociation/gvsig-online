@@ -190,40 +190,46 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 		    	url: url,
 		    	editionBar: this_,
 		    	success: function(response) {
-		    		
+		    		var proj = null;
+		    		var serverCode;
+		    		if (response.crs && response.crs.properties && response.crs.properties.name) {
+		    			serverCode = response.crs.properties.name;
+		    			proj = ol.proj.get(serverCode);
+		    			if (proj==null) {
+		    				// try to register the serverCode as an alias of an already registered EPSG:xxxx code
+		    				if (serverCode.startsWith("urn:ogc:def:crs:EPSG:")) {
+			    				// convert to EPSG:xxxx format
+			    				var code = "EPSG" + serverCode.substring(serverCode.lastIndexOf(":"));
+			    			}
+		    				else if (serverCode.startsWith("http://www.opengis.net/gml/srs/epsg.xml#")) {
+			    				// convert to EPSG:xxxx format
+			    				var code = "EPSG:" + serverCode.substring(serverCode.lastIndexOf("#")+1);
+		    				}
+		    				if (ol.proj.get(code)!=null) {
+		    					// define the urn:ogc... projection as an alias of the EPSG:xxxx one
+		    					var defs = proj4.defs(code);
+		    					proj4.defs(serverCode, defs);
+		    					
+		    					// register in OL
+		    					var projConf = {
+			    						code: serverCode
+			    					};
+		    					if (defs.axis) {
+		    						projConf.axisOrientation = defs.axis;
+		    					}
+		    					proj = new ol.proj.Projection(projConf);
+		    					ol.proj.addProjection(proj);
+		    				}
+		    			}
+		    		}
+		    		this_.selectedLayer.crs.olcrs = proj;
+		    		// NOTE: format.GML will automatically invert the coordinates order when required
+		    		// if the axisOrientation is defined in the CRS definitions in OL
 		    		this_.formatGML = new ol.format.GML({
 		    			featureNS: this_.selectedLayer.namespace,
 		    			featureType: this_.selectedLayer.layer_name,
-		    			srsName: this_.selectedLayer.crs.crs
+		    			srsName: proj.getCode()
 		    		});
-		    		
-		    		// This should directly work for 4326 && 3857 according to OL3 docs.
-		    		// It will also work for other CRSs if properly registered
-		    		var proj = null;
-		    		if (response.crs && response.crs.properties && response.crs.properties.name) {
-		    			proj = ol.proj.get(response.crs.properties.name);
-		    		}
-		    		if (proj==null) { // the CRS was not registered
-		    			
-			    		// Support some common CRSs using 'neu' axis order.
-		    			// This should better be done by including the right
-		    			// proj4js definitions for the configured CRSs.
-		    			if (this_.selectedLayer.crs.crs=="EPSG:4258" ||
-		    					this_.selectedLayer.crs.crs=="EPSG:3034" ||
-		    					this_.selectedLayer.crs.crs=="EPSG:3035")
-		    				proj = new ol.proj.Projection({
-					    		code: this_.selectedLayer.crs.crs,
-					    		axisOrientation: 'neu'
-					    	});
-		    			else {
-		    				// In general, assume 'enu' axis order
-		    				proj = new ol.proj.Projection({
-		    					code: this_.selectedLayer.crs.crs
-		    				});
-		    			}
-		    			ol.proj.addProjection(proj);
-		    		}
-		    		this_.selectedLayer.crs.olcrs = proj;
 			    	
 		    		var format = new ol.format.GeoJSON();
 		    		var features = format.readFeatures(response);
@@ -231,7 +237,6 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 		    			if (features[i].getGeometry()) {
 		    				features[i].getGeometry().transform(proj, 'EPSG:3857');
 		    			}
-		    			
 		    		}
 		    		try{
 		    			this_.source.addFeatures(features);
@@ -820,28 +825,30 @@ editionBar.prototype.editFeatureForm = function(feature) {
 					}
 				}
 				if(visible){
+					var value = feature.getProperties()[this.featureType[i].name];
 					featureProperties += '<div class="col-md-12 form-group" style="background-color: #fff;">';
 					featureProperties += 	'<label style="color: #444;">' + name + '</label>';
 					if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
-						featureProperties += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
-						
+						if (value==null) {
+							value = "";
+						}
+						featureProperties += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + value + '">';
 					} else if (this.featureType[i].type == 'xsd:date') {
-						var dbDate = feature.getProperties()[this.featureType[i].name];
-						if (dbDate != null) {
-							if (dbDate.charAt(dbDate.length - 1) == 'Z') {
-								dbDate = dbDate.slice(0,-1);
+						if (value != null) {
+							if (value.charAt(value.length - 1) == 'Z') {
+								value = value.slice(0,-1);
 							}
 						} else {
-							dbDate = null;
+							value = "";
 						}
-						featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + dbDate + '">';
+						featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + value + '">';
 						
 					} else if (this.featureType[i].type == 'xsd:string') {				
 						if (this.featureType[i].name.startsWith("enm_")) {
 							var enumeration = this.getEnumeration(this.featureType[i].name);
 							featureProperties += 	'<select id="' + this.featureType[i].name + '" class="form-control">';
 							for (var j=0; j<enumeration.items.length; j++) {
-								if (enumeration.items[j].name == feature.getProperties()[this.featureType[i].name]) {
+								if (enumeration.items[j].name == value) {
 									featureProperties += '<option selected value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
 								} else {
 									featureProperties += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
@@ -850,12 +857,14 @@ editionBar.prototype.editFeatureForm = function(feature) {
 							featureProperties += 	'</select>';
 							featureProperties += '</div>';
 						} else {
-							featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+							if (value==null) {
+								value = "";
+							}
+							featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + value + '">';
 						}
 						
 					}  else if (this.featureType[i].type == 'xsd:boolean') {
-						var checked = feature.getProperties()[this.featureType[i].name];
-						if (checked) {
+						if (value) {
 							featureProperties += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox" checked>';
 						} else {
 							featureProperties += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';
@@ -1033,76 +1042,21 @@ editionBar.prototype.transactWFS = function(p,f) {
 	var self = this;
 	var success = false;
 	var fid = null;
+	var node;
 
-	var cloned = f.clone();	
-	var prop = cloned.getGeometry().getProperties();
+	var cloned = f.clone();
 	cloned.getGeometry().transform('EPSG:3857', this.selectedLayer.crs.olcrs);
 	cloned.setId(f.getId());
-	
+
 	switch(p) {
-		case 'insert':			
+		case 'delete':
+			node = this.formatWFS.writeTransaction(null,null,[cloned],this.formatGML);
+			break;
+		case 'insert':
 			node = this.formatWFS.writeTransaction([cloned],null,null,this.formatGML);
 			break;
 		case 'update':
-			var geometryName = '';
-			for (var i=0; i<this.featureType.length; i++) {
-				if (this.featureType[i].type.indexOf('gml:') > -1) {
-					geometryName = this.featureType[i].name;
-				}
-			}
-			var properties = cloned.getProperties();
-			if (geometryName != 'geometry') {
-				properties[geometryName] = cloned.getGeometry();
-			}
-			if (this.selectedLayer.crs.olcrs.axisOrientation_=='neu') {
-				var coordinates = cloned.getGeometry().getCoordinates();
-				if (this.geometryType == 'Point' || this.geometryType == 'MultiPoint') {
-					if (coordinates.length == 1 && coordinates[0].length == 2) {
-						coordinates[0].reverse();
-					} else if (coordinates.length == 2) {
-						coordinates.reverse();
-					}
-					
-					
-				} else if (this.geometryType == 'LineString' || this.geometryType == 'MultiLineString'){
-					for (var j=0; j<coordinates[0].length; j++) {
-						coordinates[0][j].reverse();
-					}
-					
-				} else if (this.geometryType == 'Polygon' || this.geometryType == 'MultiPolygon'){
-					for (var j=0; j<coordinates[0].length; j++) {
-						for (var k=0; k<coordinates[0][j].length; k++) {
-							coordinates[0][j][k].reverse();
-						}
-					}
-				}
-				
-				cloned.getGeometry().setCoordinates(coordinates);
-			}
-			cloned.setGeometryName(geometryName);
-			
-			if (geometryName != 'geometry') {
-				properties['geometry'] = null;
-				delete properties['geometry'];
-			}
-			
-			var feature = new ol.Feature();
-			feature.setGeometry(cloned.getGeometry());	
-			feature.setGeometryName(geometryName);
-			feature.setProperties(properties);
-			feature.setId(f.getId());
-			
-			if (geometryName != 'geometry') {
-				if (feature.values_['geometry']) {
-					feature.values_['geometry'] = null;
-					delete feature.values_['geometry'];
-				}
-			}
-			
-			node = this.formatWFS.writeTransaction(null,[feature],null,this.formatGML);
-			break;
-		case 'delete':
-			node = this.formatWFS.writeTransaction(null,null,[cloned],this.formatGML);
+			node = this.formatWFS.writeTransaction(null,[cloned],null,this.formatGML);
 			break;
 	}
 	s = new XMLSerializer();
