@@ -194,37 +194,39 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 		    	editionBar: this_,
 		    	success: function(response) {
 		    		var proj = null;
-		    		var serverCode;
+		    		var serverCode, code;
 		    		if (response.crs && response.crs.properties && response.crs.properties.name) {
 		    			serverCode = response.crs.properties.name;
-		    			proj = ol.proj.get(serverCode);
-		    			if (proj==null) {
-		    				// try to register the serverCode as an alias of an already registered EPSG:xxxx code
-		    				if (serverCode.startsWith("urn:ogc:def:crs:EPSG:")) {
-			    				// convert to EPSG:xxxx format
-			    				var code = "EPSG" + serverCode.substring(serverCode.lastIndexOf(":"));
-			    			}
-		    				else if (serverCode.startsWith("http://www.opengis.net/gml/srs/epsg.xml#")) {
-			    				// convert to EPSG:xxxx format
-			    				var code = "EPSG:" + serverCode.substring(serverCode.lastIndexOf("#")+1);
-		    				}
-		    				if (ol.proj.get(code)!=null) {
-		    					// define the urn:ogc... projection as an alias of the EPSG:xxxx one
-		    					var defs = proj4.defs(code);
-		    					proj4.defs(serverCode, defs);
-		    					
-		    					// register in OL
-		    					var projConf = {
-			    						code: serverCode
-			    					};
-		    					if (defs.axis) {
-		    						projConf.axisOrientation = defs.axis;
-		    					}
-		    					proj = new ol.proj.Projection(projConf);
-		    					ol.proj.addProjection(proj);
-		    				}
+	    				if (serverCode.startsWith("urn:ogc:def:crs:EPSG:")) {
+		    				// convert to EPSG:xxxx format
+		    				code = "EPSG" + serverCode.substring(serverCode.lastIndexOf(":"));
 		    			}
+	    				else if (serverCode.startsWith("http://www.opengis.net/gml/srs/epsg.xml#")) {
+		    				// convert to EPSG:xxxx format
+		    				code = "EPSG:" + serverCode.substring(serverCode.lastIndexOf("#")+1);
+	    				}
 		    		}
+		    		else { // response.crs is always null for empty layers created from GOL
+		    			code = this_.selectedLayer.crs.crs;
+		    			serverCode = "urn:ogc:def:crs:EPSG:" + code.substring(code.lastIndexOf(":"));
+		    		}
+	    			proj = ol.proj.get(serverCode);
+	    			if (proj==null && ol.proj.get(code)!=null) {
+    					// define the urn:ogc... projection as an alias of the EPSG:xxxx one
+    					var defs = proj4.defs(code);
+    					proj4.defs(serverCode, defs);
+    					
+    					// register in OL
+    					var projConf = {
+	    						code: serverCode
+	    					};
+    					if (defs.axis) {
+    						projConf.axisOrientation = defs.axis;
+    					}
+    					proj = new ol.proj.Projection(projConf);
+    					ol.proj.addProjection(proj);
+	    			}
+		    		
 		    		this_.selectedLayer.crs.olcrs = proj;
 		    		// NOTE: format.GML will automatically invert the coordinates order when required
 		    		// if the axisOrientation is defined in the CRS definitions in OL
