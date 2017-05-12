@@ -26,6 +26,8 @@
 	<link rel="stylesheet" href="{% static "css/gvsigOL.css" %}">
 	<link rel="stylesheet" href="{% static "css/viewer.css" %}">	
 	<link rel="stylesheet" href="{% static "css/skins/_all-skins.min.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/codemirror/lib/codemirror.css" %}" />
+	<link rel="stylesheet" href="{% static "js/vendors/codemirror/theme/xq-dark.css" %}" />
 	<link rel="stylesheet" href="{% static "css/toc.css" %}">
 
 	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -169,11 +171,11 @@
 		</aside>
 		
 		<div class="panel-wrapper">
-			<div class="panel-controller">
-				<div class="tab-controller">
-					<i class="fa fa-bars"></i>
-				</div>
-			</div>
+<!-- 			<div class="panel-controller"> -->
+<!-- 				<div class="tab-controller"> -->
+<!-- 					<i class="fa fa-bars"></i> -->
+<!-- 				</div> -->
+<!-- 			</div> -->
 			<div class="panel-content"></div>
 		</div>
 
@@ -254,6 +256,9 @@
 	<script type="text/javascript" src="{% static "js/vendors/ol-4.0.1/ol-debug.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/ol-4.0.1/ol3-popup.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/jquery.uploadfile.js" %} "></script>
+	<script type="text/javascript" src="{% static "js/vendors/codemirror/lib/codemirror.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/codemirror/mode/javascript/javascript.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/codemirror/mode/xml/xml.js" %}"></script>
 	
 	<script type="text/javascript" src="{% static "js/dist/gvsigol-compress.js" %}"></script>
 	<script>
