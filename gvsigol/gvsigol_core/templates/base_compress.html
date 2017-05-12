@@ -21,6 +21,7 @@
 	<link rel="stylesheet" href="{% static "css/skins/_all-skins.min.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror/lib/codemirror.css" %}" />
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror/theme/xq-dark.css" %}" />
+	<link rel="stylesheet" href="{% static "js/vendors/search-in-components/select2.min.css" %}" />
 	<link rel="stylesheet" href="{% static "css/uploadfile.css" %}">
 	
     {% for app in INSTALLED_APPS %}												  
@@ -177,11 +178,14 @@
 	<script type="text/javascript" src="{% static "js/vendors/fastclick/fastclick.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/DataTables-1.10.11/media/js/jquery.dataTables.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/DataTables-1.10.11/media/js/dataTables.bootstrap.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.autocomplete.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/proj4js/proj4.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/ol-4.0.1/ol.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/codemirror/lib/codemirror.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/codemirror/mode/javascript/javascript.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/codemirror/mode/xml/xml.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/search-in-components/select2.full.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/search-in-components/list.js" %}"></script>
 	
 	<script type="text/javascript" src="{% static "js/dist/gvsigol-compress.js" %}"></script>
 	<script>
@@ -193,6 +197,9 @@
 	    	$("#select-language").change(function() {
 	    		$("#select-language-form").submit();
 			});
+			
+	    	$(".js-example-basic-single").select2();
+	    	
 	    });
 	</script>
 
