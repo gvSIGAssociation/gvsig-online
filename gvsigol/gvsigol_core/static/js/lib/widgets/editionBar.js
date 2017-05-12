@@ -727,7 +727,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 						if (field.value != null) {
 							properties[field.id] = field.value;	
 						}
-					} else if (field.value != '' && field.value != null && field.value != 'null') {
+					} else if (field && field.value != '' && field.value != null && field.value != 'null') {
 							properties[field.id] = field.value;
 					}
 				}
