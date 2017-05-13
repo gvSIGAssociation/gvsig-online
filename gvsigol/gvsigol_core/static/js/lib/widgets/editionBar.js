@@ -40,6 +40,8 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	this.detailsTab = $('#details-tab');
 	this.geometryType = null;
 	this.geometryName = null;
+	this.lastAddedFeature = null;
+	this.lastEditedFeature = null;
 	for (var i=0; i<featureType.length; i++) {
 		if (featureType[i].type.indexOf('gml:') > -1) {
 			if (featureType[i].type == "gml:SurfacePropertyType") {
@@ -188,40 +190,42 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 		format: this.formatGeoJSON,
 		loader: function(extent, resolution, projection) {
 			var url = this_.selectedLayer.wfs_url + '?service=WFS&' +
-		        'version=1.1.0&request=GetFeature&typename=' + ws + ':' + this_.selectedLayer.layer_name +
-		        '&outputFormat=json&srsName='+this_.mapSRS;
-		    $.ajax({
-		    	url: url,
-		    	editionBar: this_,
-		    	success: function(response) {
-		    		
-		    		// WARNING: format.GML will automatically invert the coordinates order when required
-		    		// if the axisOrientation is defined in the CRS definitions in OL
-		    		this_.formatGML = new ol.format.GML({
-		    			featureNS: this_.selectedLayer.namespace,
-		    			featureType: this_.selectedLayer.layer_name,
-		    			srsName: this_.mapSRS
-		    		});
-			    	
-		    		var features = this_.formatGeoJSON.readFeatures(response);
-		    		try{
-		    			this_.source.addFeatures(features);
-		    		} catch (e) {
-		    			console.log(e);
-		    		}
-		    	},
-		    	error: function(jqXHR, textStatus) {
-		    		this.editionBar.stopEditionHandler();
-		    		$.overlayout();
-		    		messageBox.show('error', gettext('Error starting edition'));
-		    		console.log(textStatus);
-		    	}
-		    });
+				'version=1.1.0&request=GetFeature&typename=' + ws + ':' + this_.selectedLayer.layer_name +
+				'&outputFormat=json&srsName='+this_.mapSRS;
+			$.ajax({
+				url: url,
+				editionBar: this_,
+				success: function(response) {
+					try{
+						// WARNING: format.GML will automatically invert the coordinates order when required
+						// if the axisOrientation is defined in the CRS definitions in OL
+						this_.formatGML = new ol.format.GML({
+							featureNS: this_.selectedLayer.namespace,
+							featureType: this_.selectedLayer.layer_name,
+							srsName: this_.mapSRS
+						});
+						
+						var features = this_.formatGeoJSON.readFeatures(response);
+						this_.source.addFeatures(features);
+					} catch (e) {
+						console.log(e);
+						this.editionBar.stopEditionHandler();
+						$.overlayout();
+						messageBox.show('error', gettext('Error starting edition'));
+					}
+				},
+				error: function(jqXHR, textStatus) {
+					this.editionBar.stopEditionHandler();
+					$.overlayout();
+					messageBox.show('error', gettext('Error starting edition'));
+					console.log(textStatus);
+				}
+			});
 		},
 		strategy: function() {
 			var extent = this_.map.getView().calculateExtent(this_.map.getSize()); 
-	        return [extent];
-	    }
+			return [extent];
+		}
 	});
 	
 	var style = null;
@@ -256,7 +260,7 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	
 	this.source.on('change', function() {
 		$.overlayout();
-    });
+	});
 
 };
 
@@ -415,28 +419,26 @@ editionBar.prototype.stopEditionHandler = function(e) {
 editionBar.prototype.addDrawInteraction = function() {
 	
 	var self = this;
-	
-	var geometryName = '';
-	for (var i=0; i<this.featureType.length; i++) {
-		if (this.featureType[i].type.indexOf('gml:') > -1) {
-			geometryName = this.featureType[i].name;
-		}
-	}
-	
+
 	this.drawInteraction = new ol.interaction.Draw({
 		source: this.source,
 		type: (this.geometryType),
-		geometryName: geometryName
+		geometryName: this.geometryName
 	});
 	this.map.addInteraction(this.drawInteraction);
 
 	this.drawInteraction.on('drawstart',
 		function(evt) {
-		    console.log('Draw point start');
+			if (self.lastAddedFeature != null) {
+				self.source.removeFeature(self.lastAddedFeature);
+				self.lastAddedFeature = null;
+			}
+			console.log('Draw point start');
 		}, this);
 
 	this.drawInteraction.on('drawend',
 		function(evt) {
+			self.lastAddedFeature = evt.feature;
 			self.createFeatureForm(evt.feature);
 		}, this);
 	
@@ -445,28 +447,27 @@ editionBar.prototype.addDrawInteraction = function() {
 editionBar.prototype.addDrawInCenterInteraction = function() {
 	
 	var self = this;
-	
-	var geometryName = '';
-	for (var i=0; i<this.featureType.length; i++) {
-		if (this.featureType[i].type.indexOf('gml:') > -1) {
-			geometryName = this.featureType[i].name;
-		}
-	}
-	
+
 	this.drawInCenterInteraction = new ol.interaction.Draw({
 		source: this.source,
 		type: (this.geometryType),
-		geometryName: geometryName
+		geometryName: this.geometryName
 	});
 	this.map.addInteraction(this.drawInCenterInteraction);
 
 	this.drawInCenterInteraction.on('drawstart',
 		function(evt) {
-		    console.log('Draw centered point start');
+			if (self.lastAddedFeature != null) {
+				self.source.removeFeature(self.lastAddedFeature);
+				self.lastAddedFeature = null;
+			}
+			console.log('Draw centered point start');
 		}, this);
 
 	this.drawInCenterInteraction.on('drawend',
 		function(evt) {
+			self.lastAddedFeature = evt.feature;
+			
 			var feature = evt.feature;
 			var pos = self.map.getView().getCenter();
 			var geoms = feature.getGeometry();
@@ -497,6 +498,9 @@ editionBar.prototype.addModifyInteraction = function() {
 	
 	this.selectInteraction.on('select',
 		function(evt) {
+			if (self.lastEditedFeature != null) {
+				self.revertEditedFeature();
+			}
 			self.editFeatureForm(evt.selected[0]);
 		}, this);
 	
@@ -537,6 +541,11 @@ editionBar.prototype.addRemoveInteraction = function() {
  */
 editionBar.prototype.deactivateControls = function() {
 	var self = this;
+	if (self.lastAddedFeature != null) {
+		self.source.removeFeature(self.lastAddedFeature);
+		self.lastAddedFeature = null;
+	}
+	this.revertEditedFeature();
 	
 	this.$drawInCenterControl.removeClass('button-active');
 	this.$drawControl.removeClass('button-active');
@@ -566,7 +575,6 @@ editionBar.prototype.deactivateControls = function() {
 	if (this.drawInteraction != null) {
 		this.map.removeInteraction(this.drawInteraction);
 		this.drawInteraction = null;
-		//this.source.clear();
 	}
 	
 	if (this.modifyInteraction != null) {
@@ -714,7 +722,17 @@ editionBar.prototype.createFeatureForm = function(feature) {
 			uploader = this.resourceManager.createUploader();
 		}
 		
-		$('#save-feature').off('click');
+		$('#edit_feature_properties .form-control').on('blur', function (evt) {
+			var props = feature.getProperties();
+			props[evt.currentTarget.id] = evt.currentTarget.value;
+			feature.setProperties(props);
+		});
+		$('#edit_feature_properties .checkbox').on('blur', function (evt) {
+			var props = feature.getProperties();
+			props[evt.currentTarget.id] = evt.currentTarget.checked;
+			feature.setProperties(props);
+		});
+		
 		$('#save-feature').on('click', function () {
 			var properties = {};
 			for (var i=0; i<self.featureType.length; i++) {
@@ -735,6 +753,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 			feature.setProperties(properties);
 			var transaction = self.transactWFS('insert', feature);
 			if (transaction.success) {
+				self.lastAddedFeature = null;
 				if (self.resourceManager.getEngine() == 'gvsigol') {
 					if (uploader.getFileCount() >= 1) {
 						$("body").overlay();
@@ -756,6 +775,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 		
 		$('#save-feature-cancel').on('click', function () {
 			self.source.removeFeature(feature);
+			self.lastAddedFeature = null;
 			self.showLayersTab();
 		});
 	}
@@ -768,6 +788,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
  */
 editionBar.prototype.editFeatureForm = function(feature) {	
 	if (feature) {
+		this.backupFeature(feature);
 		this.showDetailsTab();
 		this.detailsTab.empty();	
 		var self = this;
@@ -879,7 +900,17 @@ editionBar.prototype.editFeatureForm = function(feature) {
 			uploader = this.resourceManager.createUploader();
 		}
 		
-		$('#edit-feature').off('click');
+		$('#edit_feature_properties .form-control').on('blur', function (evt) {
+			var props = feature.getProperties();
+			props[evt.currentTarget.id] = evt.currentTarget.value;
+			feature.setProperties(props);
+		});
+		$('#edit_feature_properties .checkbox').on('blur', function (evt) {
+			var props = feature.getProperties();
+			props[evt.currentTarget.id] = evt.currentTarget.checked;
+			feature.setProperties(props);
+		});
+		
 		$('#edit-feature').on('click', function () {
 			var properties = {};
 			for (var i=0; i<self.featureType.length; i++) {
@@ -915,18 +946,56 @@ editionBar.prototype.editFeatureForm = function(feature) {
 					self.resourceManager.updateResource(transaction.fid);
 				}
 				self.selectedLayer.getSource().updateParams({"time": Date.now()});
+				self.clearFeatureBackup();
 				self.selectInteraction.getFeatures().clear();
 				self.showLayersTab();
 			}		
 		});
 		
 		$('#edit-feature-cancel').on('click', function () {
+			self.revertEditedFeature();
 			self.selectInteraction.getFeatures().clear();
 			self.showLayersTab();
 		});
 	}
 
 };
+
+editionBar.prototype.backupFeature = function(feature) {
+	this.lastEditedFeature = feature;
+	if (!feature.gol_values_orig_) {
+		feature.gol_values_orig_ = feature.getProperties();
+	}
+	if (!feature.gol_geom_orig_) {
+		feature.gol_geom_orig_ = feature.getGeometry().clone();
+	}
+}
+
+editionBar.prototype.clearFeatureBackup = function() {
+	if (this.lastEditedFeature!=null) {
+		if (this.lastEditedFeature.gol_values_orig_) {
+			delete this.lastEditedFeature.gol_values_orig_;
+		}
+		if (this.lastEditedFeature.gol_geom_orig_) {
+			delete this.lastEditedFeature.gol_geom_orig_;
+		}
+		this.lastEditedFeature = null;
+	}
+}
+
+editionBar.prototype.revertEditedFeature = function() {
+	if (this.lastEditedFeature!=null) {
+		if (this.lastEditedFeature.gol_values_orig_) {
+			this.lastEditedFeature.setProperties(this.lastEditedFeature.gol_values_orig_);
+			delete this.lastEditedFeature.gol_values_orig_;
+		}
+		if (this.lastEditedFeature.gol_geom_orig_) {
+			this.lastEditedFeature.setGeometry(this.lastEditedFeature.gol_geom_orig_);
+			delete this.lastEditedFeature.gol_geom_orig_;
+		}
+		this.lastEditedFeature = null;
+	}
+}
 
 
 /**
@@ -963,7 +1032,7 @@ editionBar.prototype.removeFeatureForm = function(evt, feature) {
 							dbDate = dbDate.slice(0,-1);
 						}
 					} else {
-						ui += '<input disabled id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + dbDate + '">';
+						ui += '<input disabled id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="">';
 					}
 					
 					
@@ -1056,7 +1125,10 @@ editionBar.prototype.transactWFS = function(p,f) {
 				 */
 				try {
 					self.updateServiceBoundingBox(self.selectedLayer.workspace, self.selectedLayer.layer_name);
-				} catch (e) {} // ignore errors
+				} catch (e) {
+					// ignore errors
+					console.error(e);
+				}
 			}
 			
 		} catch (err) {
