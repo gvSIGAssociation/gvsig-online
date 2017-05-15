@@ -738,15 +738,17 @@ editionBar.prototype.createFeatureForm = function(feature) {
 			for (var i=0; i<self.featureType.length; i++) {
 				if (self.featureType[i].type.indexOf('gml:') == -1 && self.featureType[i].name != 'id') {
 					var field = $('#' + self.featureType[i].name)[0];
-					if (self.featureType[i].type == 'xsd:boolean') {
-						properties[field.id] = field.checked;
-					}
-					else if (self.featureType[i].type == 'xsd:string') {
-						if (field.value != null) {
-							properties[field.id] = field.value;	
+					if(field != null && field.id != null){
+						if (self.featureType[i].type == 'xsd:boolean') {
+							properties[field.id] = field.checked;
 						}
-					} else if (field && field.value != '' && field.value != null && field.value != 'null') {
-							properties[field.id] = field.value;
+						else if (self.featureType[i].type == 'xsd:string') {
+							if (field.value != null) {
+								properties[field.id] = field.value;	
+							}
+						} else if (field && field.value != '' && field.value != null && field.value != 'null') {
+								properties[field.id] = field.value;
+						}
 					}
 				}
 			}
@@ -916,15 +918,17 @@ editionBar.prototype.editFeatureForm = function(feature) {
 			for (var i=0; i<self.featureType.length; i++) {
 				if (self.featureType[i].type.indexOf('gml:') == -1 && self.featureType[i].name != 'id') {
 					var field = $('#' + self.featureType[i].name)[0];
-					if (self.featureType[i].type == 'xsd:boolean') {
-						properties[field.id] = field.checked;
-					}
-					else if (self.featureType[i].type == 'xsd:string') {
-						if (field.value != null) {
-							properties[field.id] = field.value;	
+					if(field != null && field.id != null){
+						if (self.featureType[i].type == 'xsd:boolean') {
+							properties[field.id] = field.checked;
 						}
-					} else if (field && field.value != '' && field.value != null && field.value != 'null') {
-							properties[field.id] = field.value;
+						else if (self.featureType[i].type == 'xsd:string') {
+							if (field.value != null) {
+								properties[field.id] = field.value;	
+							}
+						} else if (field && field.value != '' && field.value != null && field.value != 'null') {
+								properties[field.id] = field.value;
+						}
 					}
 				}
 			}
