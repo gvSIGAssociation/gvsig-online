@@ -1166,55 +1166,23 @@ def get_feature_info(request):
             response = req.get(url, verify=False)
             geojson = json.loads(response.text)
                 
-            if layer.conf is not None:
-                layer_conf = json.loads(layer.conf)
-                fields = layer_conf.get('fields')
-                for i in range(0, len(geojson['features'])):
-                    fid = geojson['features'][i].get('id').split('.')[1]
-                    layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
-                   
-                    resources = []
-                    for lr in layer_resources:
-                        (type, url) = utils.get_resource_type(lr)
-                        resource = {
-                            'type': type,
-                            'url': url,
-                            'name': lr.path.split('/')[-1]
-                        }
-                        resources.append(resource)
-                    geojson['features'][i]['resources'] = resources
-                        
-                    #formated_properties = {}
-                    #for p in geojson['features'][i].get('properties'):
-                    #    for f in fields:
-                    #        if f.get('name') == p:
-                    #            if f.get('visible'):
-                    #                if f.has('title-'+lang):
-                    #                    formated_properties[f.get('title-'+lang)] = geojson['features'][i].get('properties')[p]
-                    #                else:
-                    #                    formated_properties[f.get('title')] = geojson['features'][i].get('properties')[p]
-                    
-                    #geojson['features'][i]['properties'] = formated_properties
-                    geojson['features'][i]['all_correct'] = response.text
-                    geojson['features'][i]['feature'] = fid
             
-            else:
-                for i in range(0, len(geojson['features'])):
-                    fid = geojson['features'][i].get('id').split('.')[1]
-                    layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
-                    resources = []
-                    for lr in layer_resources:
-                        (type, url) = utils.get_resource_type(lr)
-                        resource = {
-                            'type': type,
-                            'url': url,
-                            'name': lr.path.split('/')[-1]
-                        }
-                        resources.append(resource)
-                    geojson['features'][i]['resources'] = resources
-                    geojson['features'][i]['all_correct'] = response.text
-                    geojson['features'][i]['feature'] = fid
-                    
+            for i in range(0, len(geojson['features'])):
+                fid = geojson['features'][i].get('id').split('.')[1]
+                layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
+                resources = []
+                for lr in layer_resources:
+                    (type, url) = utils.get_resource_type(lr)
+                    resource = {
+                        'type': type,
+                        'url': url,
+                        'name': lr.path.split('/')[-1]
+                    }
+                    resources.append(resource)
+                geojson['features'][i]['resources'] = resources
+                geojson['features'][i]['all_correct'] = response.text
+                geojson['features'][i]['feature'] = fid
+                
             features = geojson['features']
             
         except Exception as e:
