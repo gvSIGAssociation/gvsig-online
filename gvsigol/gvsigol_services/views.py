@@ -1172,6 +1172,7 @@ def get_feature_info(request):
                 for i in range(0, len(geojson['features'])):
                     fid = geojson['features'][i].get('id').split('.')[1]
                     layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
+                   
                     resources = []
                     for lr in layer_resources:
                         (type, url) = utils.get_resource_type(lr)
@@ -1195,6 +1196,8 @@ def get_feature_info(request):
                     
                     geojson['features'][i]['properties'] = formated_properties
                     geojson['features'][i]['all_correct'] = 'True'
+                    geojson['features'][i]['feature'] = fid
+                    geojson['features'][i]['layer_resources'] = layer_resources.length
             
             else:
                 for i in range(0, len(geojson['features'])):
@@ -1211,6 +1214,8 @@ def get_feature_info(request):
                         resources.append(resource)
                     geojson['features'][i]['resources'] = resources
                     geojson['features'][i]['all_correct'] = 'True'
+                    geojson['features'][i]['feature'] = fid
+                    geojson['features'][i]['layer_resources'] = layer_resources.length
                     
             features = geojson['features']
             
