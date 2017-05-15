@@ -1217,8 +1217,8 @@ def get_feature_info(request):
             logger.exception("get_feature_info")
             response = req.get(url, verify=False)
             geojson = json.loads(response.text)
-           # for i in range(0, len(geojson['features'])):
-                #geojson['features'][i]['resources'] = []
+            for i in range(0, len(geojson['features'])):
+                geojson['features'][i]['resources'] = []
             features = geojson['features']
                 
         response = {
