@@ -1147,8 +1147,8 @@ def get_feature_info(request):
         lang = request.LANGUAGE_CODE
         if 'username' in request.session and 'password' in request.session:
             if request.session['username'] is not None and request.session['password'] is not None:
-                #req.auth = (request.session['username'], request.session['password'])
-                req.auth = ('admin', 'geoserver')
+                req.auth = (request.session['username'], request.session['password'])
+                #req.auth = ('admin', 'geoserver')
                 
         features = None           
         try:
@@ -1217,8 +1217,8 @@ def get_feature_info(request):
             logger.exception("get_feature_info")
             response = req.get(url, verify=False)
             geojson = json.loads(response.text)
-            for i in range(0, len(geojson['features'])):
-                geojson['features'][i]['resources'] = []
+            #for i in range(0, len(geojson['features'])):
+            #    geojson['features'][i]['resources'] = []
             features = geojson['features']
                 
         response = {
@@ -1332,8 +1332,8 @@ def get_datatable_data(request):
             req = requests.Session()
             if 'username' in request.session and 'password' in request.session:
                 if request.session['username'] is not None and request.session['password'] is not None:
-                    #req.auth = (request.session['username'], request.session['password'])
-                    req.auth = ('admin', 'geoserver')
+                    req.auth = (request.session['username'], request.session['password'])
+                    #req.auth = ('admin', 'geoserver')
                     
             print wfs_url + "?" + params
             response = req.post(wfs_url, data=values, verify=False)
