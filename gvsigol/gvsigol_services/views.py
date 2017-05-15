@@ -1184,18 +1184,18 @@ def get_feature_info(request):
                         resources.append(resource)
                     geojson['features'][i]['resources'] = resources
                         
-                    formated_properties = {}
-                    for p in geojson['features'][i].get('properties'):
-                        for f in fields:
-                            if f.get('name') == p:
-                                if f.get('visible'):
-                                    if f.has('title-'+lang):
-                                        formated_properties[f.get('title-'+lang)] = geojson['features'][i].get('properties')[p]
-                                    else:
-                                        formated_properties[f.get('title')] = geojson['features'][i].get('properties')[p]
+                    #formated_properties = {}
+                    #for p in geojson['features'][i].get('properties'):
+                    #    for f in fields:
+                    #        if f.get('name') == p:
+                    #            if f.get('visible'):
+                    #                if f.has('title-'+lang):
+                    #                    formated_properties[f.get('title-'+lang)] = geojson['features'][i].get('properties')[p]
+                    #                else:
+                    #                    formated_properties[f.get('title')] = geojson['features'][i].get('properties')[p]
                     
-                    geojson['features'][i]['properties'] = formated_properties
-                    geojson['features'][i]['all_correct'] = 'True'
+                    #geojson['features'][i]['properties'] = formated_properties
+                    geojson['features'][i]['all_correct'] = response.text
                     geojson['features'][i]['feature'] = fid
             
             else:
@@ -1212,7 +1212,7 @@ def get_feature_info(request):
                         }
                         resources.append(resource)
                     geojson['features'][i]['resources'] = resources
-                    geojson['features'][i]['all_correct'] = 'True'
+                    geojson['features'][i]['all_correct'] = response.text
                     geojson['features'][i]['feature'] = fid
                     
             features = geojson['features']
