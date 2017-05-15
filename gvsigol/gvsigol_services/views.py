@@ -1147,8 +1147,8 @@ def get_feature_info(request):
         lang = request.LANGUAGE_CODE
         if 'username' in request.session and 'password' in request.session:
             if request.session['username'] is not None and request.session['password'] is not None:
-                req.auth = (request.session['username'], request.session['password'])
-                #req.auth = ('admin', 'geoserver')
+                #req.auth = (request.session['username'], request.session['password'])
+                req.auth = ('admin', 'geoserver')
                 
         features = None           
         try:
@@ -1194,18 +1194,6 @@ def get_feature_info(request):
                                         formated_properties[f.get('title')] = geojson['features'][i].get('properties')[p]
                     
                     geojson['features'][i]['properties'] = formated_properties
-                    
-                    layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
-                    resources = []
-                    for lr in layer_resources:
-                        (type, url) = utils.get_resource_type(lr)
-                        resource = {
-                            'type': type,
-                            'url': url,
-                            'name': lr.path.split('/')[-1]
-                        }
-                        resources.append(resource)
-                    geojson['features'][i]['resources'] = resources
             
             else:
                 for i in range(0, len(geojson['features'])):
@@ -1229,8 +1217,8 @@ def get_feature_info(request):
             logger.exception("get_feature_info")
             response = req.get(url, verify=False)
             geojson = json.loads(response.text)
-            for i in range(0, len(geojson['features'])):
-                geojson['features'][i]['resources'] = []
+           # for i in range(0, len(geojson['features'])):
+                #geojson['features'][i]['resources'] = []
             features = geojson['features']
                 
         response = {
@@ -1344,8 +1332,8 @@ def get_datatable_data(request):
             req = requests.Session()
             if 'username' in request.session and 'password' in request.session:
                 if request.session['username'] is not None and request.session['password'] is not None:
-                    req.auth = (request.session['username'], request.session['password'])
-                    #req.auth = ('admin', 'geoserver')
+                    #req.auth = (request.session['username'], request.session['password'])
+                    req.auth = ('admin', 'geoserver')
                     
             print wfs_url + "?" + params
             response = req.post(wfs_url, data=values, verify=False)
