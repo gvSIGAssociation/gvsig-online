@@ -1197,7 +1197,6 @@ def get_feature_info(request):
                     geojson['features'][i]['properties'] = formated_properties
                     geojson['features'][i]['all_correct'] = 'True'
                     geojson['features'][i]['feature'] = fid
-                    geojson['features'][i]['layer_resources'] = layer_resources.length
             
             else:
                 for i in range(0, len(geojson['features'])):
@@ -1215,7 +1214,6 @@ def get_feature_info(request):
                     geojson['features'][i]['resources'] = resources
                     geojson['features'][i]['all_correct'] = 'True'
                     geojson['features'][i]['feature'] = fid
-                    geojson['features'][i]['layer_resources'] = layer_resources.length
                     
             features = geojson['features']
             
