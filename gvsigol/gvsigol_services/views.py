@@ -1194,6 +1194,7 @@ def get_feature_info(request):
                                         formated_properties[f.get('title')] = geojson['features'][i].get('properties')[p]
                     
                     geojson['features'][i]['properties'] = formated_properties
+                    geojson['features'][i]['all_correct'] = 'True'
             
             else:
                 for i in range(0, len(geojson['features'])):
@@ -1209,6 +1210,7 @@ def get_feature_info(request):
                         }
                         resources.append(resource)
                     geojson['features'][i]['resources'] = resources
+                    geojson['features'][i]['all_correct'] = 'True'
                     
             features = geojson['features']
             
@@ -1217,8 +1219,8 @@ def get_feature_info(request):
             logger.exception("get_feature_info")
             response = req.get(url, verify=False)
             geojson = json.loads(response.text)
-            #for i in range(0, len(geojson['features'])):
-            #    geojson['features'][i]['resources'] = []
+            for i in range(0, len(geojson['features'])):
+                geojson['features'][i]['resources'] = []
             features = geojson['features']
                 
         response = {
