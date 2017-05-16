@@ -65,14 +65,12 @@ class Geonetwork():
         
         r = self.session.post(url, data=xml.encode('utf-8'), headers=headers)
         if r.status_code==200:
-            print "test 4"
             response = ET.fromstring(r.text)
             
             for child in response:
                 if child.tag == 'uuid':
-                    print "test 5"
                     return child.text
-            print "test 6"        
+                       
         raise FailedRequestError(r.status_code, r.content)
     
     def add_thumbnail(self, uuid, thumbnail_url):      
@@ -80,10 +78,12 @@ class Geonetwork():
         url = self.service_url + op + "?uuid=" + uuid + "&process=thumbnail-add&thumbnail_url=" + thumbnail_url        
         r = self.session.get(url)
         if r.status_code==200:
+            print "test 1"
             op = "md.edit"       
             url = self.service_url + op + "?uuid=" + uuid + "&process=thumbnail-add&thumbnail_url=" + thumbnail_url         
             r = self.session.get(url)
             if r.status_code==200:
+                print "test 2"
                 return True
                     
         raise FailedRequestError(r.status_code, r.content)

@@ -38,16 +38,12 @@ class Geonetwork():
         try:
             self.xmlapi.gn_auth(self.user, self.password)
             uuid = self.xmlapi.gn_insert_metadata(layer, abstract, ws, layer_info, ds_type)
-            print "test uuid: " + uuid
             self.xmlapi.add_thumbnail(uuid, layer.thumbnail.url)
-            print "test add_thumb"
             self.xmlapi.set_metadata_privileges(uuid)
-            print "test set privileges"
             self.xmlapi.gn_unauth()
             return uuid
         
         except Exception as e:
-            print "test 2"
             print e
         
     def metadata_delete(self, lm):
@@ -64,12 +60,8 @@ class Geonetwork():
     def layer_created_handler(self, sender, **kwargs):
         layer = kwargs['layer']
         try:
-            print "layer_created_handler: llega aqui"
             (ds_type, layer_info) = mapservice.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
-            print "test 1"
             muuid = self.metadata_insert(layer, layer.abstract, layer.datastore.workspace, layer_info, ds_type)
-            print "test 3"
-            print "muuid: " + muuid
             lm = LayerMetadata(layer=layer, metadata_uuid=muuid)
             lm.save()
             
@@ -80,7 +72,6 @@ class Geonetwork():
     def layer_updated_handler(self, sender, **kwargs):
         layer = kwargs['layer']
         try:
-            print "layer_updated_handler: llega aqui"
             lm = LayerMetadata.objects.get(layer=layer)            
             self.metadata_delete(lm)
             (ds_type, layer_info) = mapservice.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
@@ -95,7 +86,6 @@ class Geonetwork():
     def layer_deleted_handler(self, sender, **kwargs):
         layer = kwargs['layer']
         try:
-            print "layer_deleted_handler: llega aqui"
             lm = LayerMetadata.objects.get(layer=layer)            
             self.metadata_delete(lm)
             lm.delete()
