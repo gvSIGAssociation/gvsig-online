@@ -38,8 +38,11 @@ class Geonetwork():
         try:
             self.xmlapi.gn_auth(self.user, self.password)
             uuid = self.xmlapi.gn_insert_metadata(layer, abstract, ws, layer_info, ds_type)
+            print "test uuid: " + uuid
             self.xmlapi.add_thumbnail(uuid, layer.thumbnail.url)
+            print "test add_thumb"
             self.xmlapi.set_metadata_privileges(uuid)
+            print "test set privileges"
             self.xmlapi.gn_unauth()
             return uuid
         
