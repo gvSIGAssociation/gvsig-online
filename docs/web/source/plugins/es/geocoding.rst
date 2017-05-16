@@ -74,14 +74,14 @@ Servicios de CartoCiudad
 
 CartoCiudad ofrece la posibilidad de descargar la cartografía por regiones y poder añadirla como proveedor de datos. Para ello, se tiene que ir a la página oficial del Centro Nacional de Información Geográfica (CNIG) e ingresar a su Centro de Descargas_.
 
- .. _Centro de Descragas: http://centrodedescargas.cnig.es/CentroDescargas/buscadorCatalogo.do?codFamilia=02122
+ .. _Descargas: http://centrodedescargas.cnig.es/CentroDescargas/buscadorCatalogo.do?codFamilia=02122
 
-- Marcar el producto 'CartoCiudad' y la división administrativa 'Provincias'. Marcar la que se requiera y descargar el ZIP.
+- Marcar en *seleccione producto* 'CartoCiudad' y en *División administrativa*, 'Provincias'. Marcar la que se requiera y descargar el ZIP.
 
 .. image:: ../_static/images/centro_descargas_1.png
    :align: center
 
-- Una vez descagado y descomprimido, se cargará en gvsigOnline a través del 'Administrador de archivos' los recursos con sus extensiones (.shp; .dbf y .shx):
+- Una vez descagado y descomprimido, se cargará en gvsigOnline a través del *Administrador de archivos* los recursos con sus extensiones (.shp; .dbf y .shx):
   
   - tramo_vial; 
   - portal_pk
@@ -90,10 +90,8 @@ CartoCiudad ofrece la posibilidad de descargar la cartografía por regiones y po
 
   
   
-- Luego se llevarán a una BD desde el 'administrador de archivos' a través de la opción 'Exportar a base de datos' de cada archivo con extensión (.shp), en el que se marcará como nombre el mismo del fichero (sin la extensión) **en minúsculas**. La *Codificación de caracteres* será: 'autodetectar' y el *sistema de coordenadas*: 'ETRS89 LatLon'
+- Luego se llevarán a una BD desde el *administrador de archivos* a través de la opción 'Exportar a base de datos' de cada archivo con extensión (.shp), en el que se marcará como nombre el mismo del fichero (sin la extensión) **en minúsculas**. La *Codificación de caracteres* será: 'autodetectar' y el *sistema de coordenadas*: 'ETRS89 LatLon'
 
-.. note:: 
-   El sistema de referencia seleccionado será el que traiga por defecto las capas descargadas del CNIG en su archivo con extensión *.prj*.
 
 .. image:: ../_static/images/centro_descargas_4.png
    :align: center
@@ -101,6 +99,9 @@ CartoCiudad ofrece la posibilidad de descargar la cartografía por regiones y po
 
 .. image:: ../_static/images/centro_descargas_5.png
    :align: center
+
+.. note:: 
+   El sistema de referencia seleccionado será el que traiga por defecto las capas descargadas del CNIG en su archivo con extensión *.prj*.
 
 
 Una vez realizada esta tarea, será necesario cargar la cartografía de regiones de España y los límites provinciales, por lo que habrá que repetir el proceso con los siguientes pasos:
