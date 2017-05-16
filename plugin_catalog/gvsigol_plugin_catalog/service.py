@@ -56,6 +56,7 @@ class Geonetwork():
     def layer_created_handler(self, sender, **kwargs):
         layer = kwargs['layer']
         try:
+            print "layer_created_handler: llega aqui"
             (ds_type, layer_info) = mapservice.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
             muuid = self.metadata_insert(layer, layer.abstract, layer.datastore.workspace, layer_info, ds_type)
             lm = LayerMetadata(layer=layer, metadata_uuid=muuid)
@@ -68,6 +69,7 @@ class Geonetwork():
     def layer_updated_handler(self, sender, **kwargs):
         layer = kwargs['layer']
         try:
+            print "layer_updated_handler: llega aqui"
             lm = LayerMetadata.objects.get(layer=layer)            
             self.metadata_delete(lm)
             (ds_type, layer_info) = mapservice.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
@@ -82,6 +84,7 @@ class Geonetwork():
     def layer_deleted_handler(self, sender, **kwargs):
         layer = kwargs['layer']
         try:
+            print "layer_deleted_handler: llega aqui"
             lm = LayerMetadata.objects.get(layer=layer)            
             self.metadata_delete(lm)
             lm.delete()
