@@ -43,7 +43,7 @@ En todos ellos se les puede indicar una categoría (para englobar los resultados
 
 
 
-Servicios de Nominatim 
+Servicios de Nominatim
 ----------------------
 
 Nominatim es el motor de búsqueda para datos de OpenStreetMap. 
@@ -72,24 +72,28 @@ También requiere indicar una key de Google que dé entrada a los servicios de G
 Servicios de CartoCiudad
 ------------------------
 
-CartoCiudad ofrece la posibilidad de descargar la cartografía por regiones y poder añadirla como proveedor de datos:
-- Para ello, se tiene que ir a su 'Centro de descargas':http://centrodedescargas.cnig.es/CentroDescargas/buscadorCatalogo.do?codFamilia=02122
+CartoCiudad ofrece la posibilidad de descargar la cartografía por regiones y poder añadirla como proveedor de datos. Para ello, se tiene que ir a la página oficial del Centro Nacional de Información Geográfica (CNIG) e ingresar a su Centro de Descargas_.
+
+ .. _Centro de Descragas: http://centrodedescargas.cnig.es/CentroDescargas/buscadorCatalogo.do?codFamilia=02122
 
 - Marcar el producto 'CartoCiudad' y la división administrativa 'Provincias'. Marcar la que se requiera y descargar el ZIP.
 
 .. image:: ../_static/images/centro_descargas_1.png
    :align: center
 
-- Una vez descagado y descomprimido, se cargará en la gvsigOnline a través del 'Administrador de archivos' los recursos:
+- Una vez descagado y descomprimido, se cargará en gvsigOnline a través del 'Administrador de archivos' los recursos con sus extensiones (.shp; .dbf y .shx):
   
-  - tramo_vial.shp
-  - portal_pk.shp
-  - municipio_vial.dbf
-  - toponimo.shp
-  - codigo_postal.shp
+  - tramo_vial; 
+  - portal_pk
+  - municipio_vial.dbf (No tiene .shp)
+  - toponimo
+
   
   
-- Luego se exportarán a una base de datos a través del menú 'Exportar', en el que se marcará como nombre el mismo del fichero (sin la extensión) EN MINÚSCULAS. El encodding será 'autodetectar' y el sistema de coordenadas será 'ETRS89 / UTM zone 30N'
+- Luego se llevarán a una BD desde el 'administrador de archivos' a través de la opción 'Exportar a base de datos' de cada archivo con extensión (.shp), en el que se marcará como nombre el mismo del fichero (sin la extensión) **en minúsculas**. La *Codificación de caracteres* será: 'autodetectar' y el *sistema de coordenadas*: 'ETRS89 LatLon'
+
+.. note:: 
+   El sistema de referencia seleccionado será el que traiga por defecto las capas descargadas del CNIG en su archivo con extensión *.prj*.
 
 .. image:: ../_static/images/centro_descargas_4.png
    :align: center
@@ -101,7 +105,7 @@ CartoCiudad ofrece la posibilidad de descargar la cartografía por regiones y po
 
 Una vez realizada esta tarea, será necesario cargar la cartografía de regiones de España y los límites provinciales, por lo que habrá que repetir el proceso con los siguientes pasos:
 
-- En el centro de descarga, buscar la pestaña 'Equipamiento Geografico de Referencia Nacional'
+- En el Centro de Descargas_., seleccionar en productos *Información geográfica de referencia*: 'Lineas límite municipales' y buscamos cualquier *división dministrativa* que se quiera (Siempre serán los mismos ficheros para todos, ya que contienen toda la información de Península y Baleares de toda España)
 
 .. image:: ../_static/images/centro_descargas_2.png
    :align: center
@@ -111,27 +115,41 @@ Una vez realizada esta tarea, será necesario cargar la cartografía de regiones
 .. image:: ../_static/images/centro_descargas_3.png
    :align: center
 
-- Cargar en el 'Administrador de archivos' y exportar las capas:
+- El fichero comprimido desacargado contiene diversas carpetas, de las cuales solo usaremos las dos siguientes:
+
+  - recintos_municipales_inspire_peninbal_etr89 
+  - recintos_provinciales_inspire_peninbal_etr89
+
+- Cargar en el 'Administrador de archivos' la capa que contiene cada carpeta con sus extensiones correspondientes (.shp; .dbf y .shx).
   
-  - Dentro de 'recintos_municipales_inspire_peninbal_etr89' la capa que existe, a la que exportaremos con el nombre 'municipio', encoding 'autodetectar' y sistema de coordenadas será 'ETRS89 / UTM zone 30N'
-  - Dentro de 'recintos_provinciales_inspire_peninbal_etr89', exportar con el nombre 'provincia', encoding 'autodetectar' y sistema de coordenadas será 'ETRS89 / UTM zone 30N'
+- De la carpeta **recintos_municipales_inspire_peninbal_etr89** exportaremos a la BD el fichero (.shp) con el nombre '**municipio**', *Codificación de caracteres*: 'autodetectar' y *sistema de coordenadas*: 'ETRS89 LatLon'
+- y de la carpeta **recintos_provinciales_inspire_peninbal_etr89**, exportaremos a la BD el otro fichero (.shp) con el nombre '**provincia**', *Codificación de caracteres*: 'autodetectar' y *sistema de coordenadas*: 'ETRS89 LatLon'
   
-Por último, para dar de alta el proveedor, será necesario indicar el almacén de datos en el que se han exportado todas las capas indicadas. (NOTA: en esta opción no se ofrece la posibilidad de seleccionar icono, ya que disponen de los suyos propios para identificar las calles, toponimos, municipios y demás entidades que se indexan a través de este servicio.)
+.. note::
+   Tanto las capas anteriores como éstas de 'líneas límites municipales' deben exportarse en el mismo almacén de la base de datos y *No es necesario hacer públicas éstas capas en el visor de mapas*.  
+  
+- Por último, para dar de alta el proveedor, se ingresa con la entrada **Geocoding** del menú y se elige el *tipo de proveedor*: 'Cartografía de CartoCiudad', será necesario indicar el almacén de datos en el que se han exportado todas las capas indicadas.
+
+.. note::
+   Cuando se ñade este proveedor de Cartociudad *no* se ofrece la posibilidad de seleccionar icono, ya que disponen de los suyos propios para identificar las calles, toponimos, municipios y demás entidades que se indexan a través de este servicio.
 
 
+- Una vez se ha dado de alta correctamente el proveedor, se redirige a la página que permite cargar los datos en el sistema. Existen dos opciones:
 
-Una vez se ha dado de alta correctamente el proveedor, se redirige a la página que permite cargar los datos en el sistema. Existen dos opciones:
-
-- Carga total: borra los datos anteriores de ese proveedor (si los hubiera), y los sube de nuevo
-- Carga parcial: Sube sólo las entidades actualizadas desde la última vez que se cargaron datos (las entidades borradas no se eliminarán, sólo las actualizadas).
+  - **Carga total**: borra los datos anteriores de ese proveedor (si los hubiera), y los sube de nuevo.
+  - **Carga parcial**: Sube sólo las entidades actualizadas desde la última vez que se cargaron datos (las entidades borradas no se eliminarán, sólo las actualizadas).
  
 
   
 Otros servicios del usuario
 ---------------------------
 
-Por otro lado, se pueden incluir en el geocodificador otros resultados procedentes de capas propias (se requiere que la capa haya sido publicada en el geoportal)
-Se precisará:
+Por otro lado, se pueden incluir en el geocodificador otros resultados procedentes de capas propias.
+
+.. note::
+   Se requiere que la capa haya sido publicada en algún proyecto - geoportal.
+   
+Se precisará:   
 
   - El espacio de trabajo
   - El almacén de datos
@@ -140,5 +158,5 @@ Se precisará:
   - El campo que contiene el texto que se buscará por el geocodificador
   - El nombre del campo que contiene la geometría
     
-Igual que ocurría con los servicios de Cartociudad, una vez definido el proveedor, habrá que hacer una carga total de los datos para que el geocodificador empiece a incluirlos en los resultados de las búsquedas
+Igual que ocurría con los servicios de Cartociudad, una vez definido el proveedor, habrá que hacer una carga total de los datos para que el geocodificador empiece a incluirlos en los resultados de las búsquedas.
   
