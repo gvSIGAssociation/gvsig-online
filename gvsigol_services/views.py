@@ -1033,7 +1033,7 @@ def enumeration_add(request):
                         enumeration = enum,
                         name = request.POST.get(key),
                         selected = False,
-                        order = 0
+                        order = len(EnumerationItem.objects.filter(enumeration=enum))
                     )
                     item.save()
             
@@ -1074,7 +1074,7 @@ def enumeration_update(request, eid):
                     enumeration = enum,
                     name = request.POST.get(key),
                     selected = False,
-                    order = 0
+                    order = len(EnumerationItem.objects.filter(enumeration=enum))
                 )
                 item.save()
         
@@ -1082,7 +1082,7 @@ def enumeration_update(request, eid):
             
     else:
         enum = Enumeration.objects.get(id=int(eid))
-        items = EnumerationItem.objects.filter(enumeration_id=enum.id)
+        items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('order')
         
         return render_to_response('enumeration_update.html', {'eid': eid, 'enumeration': enum, 'items': items, 'count': len(items) + 1}, context_instance=RequestContext(request))
    
@@ -1093,7 +1093,7 @@ def get_enumeration(request):
     if request.method == 'POST':
         enum_name = request.POST.get('enum_name')
         enum = Enumeration.objects.get(name__exact=enum_name)
-        enum_items = EnumerationItem.objects.filter(enumeration_id=enum.id)
+        enum_items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('order')
         
         items = []
         for i in enum_items:
@@ -1147,8 +1147,8 @@ def get_feature_info(request):
         lang = request.LANGUAGE_CODE
         if 'username' in request.session and 'password' in request.session:
             if request.session['username'] is not None and request.session['password'] is not None:
-                req.auth = (request.session['username'], request.session['password'])
-                #req.auth = ('admin', 'geoserver')
+                #req.auth = (request.session['username'], request.session['password'])
+                req.auth = ('admin', 'geoserver')
                 
         features = None           
         try:
@@ -1305,8 +1305,8 @@ def get_datatable_data(request):
             req = requests.Session()
             if 'username' in request.session and 'password' in request.session:
                 if request.session['username'] is not None and request.session['password'] is not None:
-                    req.auth = (request.session['username'], request.session['password'])
-                    #req.auth = ('admin', 'geoserver')
+                    #req.auth = (request.session['username'], request.session['password'])
+                    req.auth = ('admin', 'geoserver')
                     
             print wfs_url + "?" + params
             response = req.post(wfs_url, data=values, verify=False)
