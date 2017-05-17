@@ -34,6 +34,10 @@ if '__file__' in globals():
 else:
     BASE_DIR = os.path.join(os.path.abspath(os.getcwd()), "gvsigol")
 
+# Eliminando warnings molestos  
+import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
