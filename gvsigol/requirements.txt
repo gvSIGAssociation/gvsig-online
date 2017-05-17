@@ -50,4 +50,4 @@ lxml===3.7.2
 schedule==0.4.2
 
 # Lectura de DBFs
-dbfread=2.0.7
+dbfread==2.0.7
