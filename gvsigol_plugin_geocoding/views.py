@@ -58,9 +58,10 @@ def provider_list(request):
         if provider.type == 'cartociudad' or provider.type == 'user':
             params = json.loads(provider.params)
             if params['datastore_id']:
-                datastore = Datastore.objects.get(id=params['datastore_id'])
+                datastore = Datastore.objects.filter(id=params['datastore_id'])
                 if not datastore:
                     provider_delete(request, provider.id)
+                    providers = Provider.objects.order_by('order')
     
     response = {
         'providers': providers
