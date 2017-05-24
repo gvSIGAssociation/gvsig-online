@@ -59,7 +59,7 @@ viewer.core = {
     		label: gettext('Blank'),
           	visible: false,
     	    source: new ol.source.XYZ({
-    	       url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWNgYGD4DwABBAEAHnOcQAAAAABJRU5ErkJggg=="
+    	       url: "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs="
     	    })
     	});
     	blank.baselayer = true;
