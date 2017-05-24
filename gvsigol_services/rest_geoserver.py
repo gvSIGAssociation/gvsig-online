@@ -215,7 +215,7 @@ class Geoserver():
                 if json['featureTypes'] and json['featureTypes']['featureType']:
                     resources = json['featureTypes']['featureType']
                     return [resource['name'] for resource in resources]
-                return []
+            return []
             
         return json
 
