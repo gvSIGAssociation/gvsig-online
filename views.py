@@ -1270,14 +1270,15 @@ def get_datatable_data(request):
                 
                 raw_search_cql = '('
                 for p in properties:
-                    if p.split('|')[1] == 'xsd:string':
-                        raw_search_cql += p.split('|')[0] + " ILIKE '%" + encoded_value.replace('?', '_') +"%'"
-                        raw_search_cql += ' OR '
-                        
-                    elif p.split('|')[1] == 'xsd:double' or p.split('|')[1] == 'xsd:decimal' or p.split('|')[1] == 'xsd:integer' or p.split('|')[1] == 'xsd:int' or p.split('|')[1] == 'xsd:long':
-                        if search_value.isdigit():
-                            raw_search_cql += p.split('|')[0] + ' = ' + search_value
+                    if p.split('|')[0] != 'id':
+                        if p.split('|')[1] == 'xsd:string':
+                            raw_search_cql += p.split('|')[0] + " ILIKE '%" + encoded_value.replace('?', '_') +"%'"
                             raw_search_cql += ' OR '
+                            
+                        elif p.split('|')[1] == 'xsd:double' or p.split('|')[1] == 'xsd:decimal' or p.split('|')[1] == 'xsd:integer' or p.split('|')[1] == 'xsd:int' or p.split('|')[1] == 'xsd:long':
+                            if search_value.isdigit():
+                                raw_search_cql += p.split('|')[0] + ' = ' + search_value
+                                raw_search_cql += ' OR '
                             
                 if raw_search_cql.endswith(' OR '):
                     raw_search_cql = raw_search_cql[:-4]
