@@ -1302,6 +1302,7 @@ def get_datatable_data(request):
                 recordsFiltered = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, cql_filter)
     
             params = urllib.urlencode(values)
+            params = params.replace('%25','%')
             req = requests.Session()
             if 'username' in request.session and 'password' in request.session:
                 if request.session['username'] is not None and request.session['password'] is not None:
