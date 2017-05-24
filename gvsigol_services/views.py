@@ -1329,7 +1329,6 @@ def get_datatable_data(request):
             }
         
         except Exception as e:
-            print (e)
             response = {
                 'draw': 0,
                 'recordsTotal': 0,
