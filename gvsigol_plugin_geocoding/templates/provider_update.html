@@ -324,6 +324,7 @@
 		if (id_workspace && id_datastore && id_resource) {
 			$("body").overlay();
 			$.getJSON("{% url 'backend_fields_list' %}", {name_resource: id_resource, name_datastore: id_datastore, id_workspace: id_workspace}, function(data){
+				var language = $("#select-language").val();
 				var placeholderSelected = true;
 				var name_select = $("#"+field);
 				if (data==null || data.length==0) {
@@ -335,10 +336,10 @@
 				var options = [];
 				for (var i=0; i<data.length; i++) {
 					var attribs = {
-						value: data[i],
-						text: data[i]
-					};
-					if (prev_value == data[i]) {
+							value: data[i]["name"],
+							text: data[i]["title-" + language]
+						};
+					if (prev_value == data[i]["name"]) {
 						attribs['selected']='true';
 						placeholderSelected = false;
 					}
