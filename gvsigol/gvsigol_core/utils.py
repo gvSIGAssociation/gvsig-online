@@ -437,9 +437,9 @@ def send_reset_password_email(email, temp_pass):
     
 
 supported_crs = {}
-def get_supported_crs():   
+def get_supported_crs(used_crs=None):   
     global supported_crs
-    if not supported_crs:
+    if not supported_crs or used_crs:
         
         if settings.USE_DEFAULT_SUPPORTED_CRS:
             return settings.SUPPORTED_CRS
@@ -494,7 +494,12 @@ def get_supported_crs():
                 'definition': row[4],
                 'units': unit+'s'
             }
-            supported_crs[row[0]] = crs
+            
+            if not used_crs:
+                supported_crs[row[0]] = crs
+            else:
+                if row[2] in used_crs:
+                    supported_crs[row[0]] = crs
 
     return supported_crs    
     
