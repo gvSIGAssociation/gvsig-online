@@ -441,6 +441,8 @@ def project_get_conf(request):
         project = Project.objects.get(id=int(pid))
         toc = json.loads(project.toc_order)
             
+        used_crs = []
+        
         project_layers_groups = ProjectLayerGroup.objects.filter(project_id=project.id)
         layer_groups = []
         workspaces = []
@@ -502,6 +504,7 @@ def project_get_conf(request):
                         'crs': defaultCrs,
                         'units': epsg['units']
                     }
+                    used_crs.append(epsg)
                     
                 layer['wms_url'] = core_utils.get_wms_url(request, workspace)
                 layer['wms_url_no_auth'] = workspace.wms_endpoint
@@ -532,7 +535,9 @@ def project_get_conf(request):
                 ordered_layers = sorted(layers, key=itemgetter('order'), reverse=True)
                 conf_group['layers'] = ordered_layers
                 layer_groups.append(conf_group)
-            
+        
+        core_utils.get_supported_crs(used_crs)
+           
         ordered_layer_groups = sorted(layer_groups, key=itemgetter('groupOrder'), reverse=True)
         
         resource_manager = 'gvsigol'
