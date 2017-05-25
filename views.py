@@ -134,6 +134,11 @@ def project_list(request):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def project_add(request):
+    
+    has_geocoding_plugin = False
+    if 'gvsigol_plugin_geocoding' in settings.INSTALLED_APPS:
+         has_geocoding_plugin = True
+        
     if request.method == 'POST':
         name = request.POST.get('project-name')
         description = request.POST.get('project-description')
@@ -170,7 +175,7 @@ def project_add(request):
         groups = core_utils.get_all_groups()
         if name == '':
             message = _(u'You must enter an project name')
-            return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'groups': groups}, context_instance=RequestContext(request))
+            return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
                 
         if not exists:
             project = None
@@ -226,7 +231,7 @@ def project_add(request):
             
         else:
             message = _(u'Project name already exists')
-            return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'groups': groups}, context_instance=RequestContext(request))
+            return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
         
         return redirect('project_list')
     
@@ -243,12 +248,17 @@ def project_add(request):
         else:
             groups = core_utils.get_user_groups(request.user.username)
             
-        return render_to_response('project_add.html', {'layergroups': layergroups, 'groups': groups}, context_instance=RequestContext(request))
+        return render_to_response('project_add.html', {'layergroups': layergroups, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def project_update(request, pid):
+    
+    has_geocoding_plugin = False
+    if 'gvsigol_plugin_geocoding' in settings.INSTALLED_APPS:
+         has_geocoding_plugin = True
+    
     if request.method == 'POST':
         name = request.POST.get('project-name')
         description = request.POST.get('project-description')
@@ -392,7 +402,7 @@ def project_update(request, pid):
                 project = Project.objects.get(id=int(pid))    
                 groups = core_utils.get_all_groups_checked_by_project(request, project)
                 layer_groups = core_utils.get_all_layer_groups_checked_by_project(request, project)  
-                return render_to_response('project_update.html', {'message': message, 'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups}, context_instance=RequestContext(request))
+                return render_to_response('project_update.html', {'message': message, 'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
                 
         
         
@@ -400,7 +410,7 @@ def project_update(request, pid):
         project = Project.objects.get(id=int(pid))    
         groups = core_utils.get_all_groups_checked_by_project(request, project)
         layer_groups = core_utils.get_all_layer_groups_checked_by_project(request, project) 
-        return render_to_response('project_update.html', {'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups}, context_instance=RequestContext(request))
+        return render_to_response('project_update.html', {'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
