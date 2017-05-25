@@ -368,7 +368,29 @@ def backend_fields_list(request):
         ds = Datastore.objects.get(name=ds_name, workspace=ws)
         if ds:
             resources = mapservice_backend.getResource(ds.workspace.name, ds.name, name)
-            return HttpResponse(json.dumps(resources))
+            result_resources = []
+            layer = Layer.objects.filter(datastore=ds, name=name).first()
+            conf = None
+            if layer and layer.conf:
+                conf = ast.literal_eval(layer.conf)
+            for resource in resources:
+                if conf:
+                    for f in conf['fields']:
+                        if f['name'] == resource:
+                            field = {}
+                            field['name'] = f['name']
+                            for id, language in LANGUAGES:
+                                field['title-'+id] = f['title-'+id]
+                            result_resources.append(field)
+                else:
+                    field = {}
+                    field['name'] = resource
+                    for id, language in LANGUAGES:
+                        field['title-'+id] = resource
+                    result_resources.append(field)
+                    
+            
+            return HttpResponse(json.dumps(result_resources))
     
     return HttpResponseBadRequest()    
 
@@ -1147,8 +1169,8 @@ def get_feature_info(request):
         lang = request.LANGUAGE_CODE
         if 'username' in request.session and 'password' in request.session:
             if request.session['username'] is not None and request.session['password'] is not None:
-                req.auth = (request.session['username'], request.session['password'])
-                #req.auth = ('admin', 'geoserver')
+                #req.auth = (request.session['username'], request.session['password'])
+                req.auth = ('admin', 'geoserver')
                 
         features = None           
         try:
@@ -1306,8 +1328,8 @@ def get_datatable_data(request):
             req = requests.Session()
             if 'username' in request.session and 'password' in request.session:
                 if request.session['username'] is not None and request.session['password'] is not None:
-                    req.auth = (request.session['username'], request.session['password'])
-                    #req.auth = ('admin', 'geoserver')
+                    #req.auth = (request.session['username'], request.session['password'])
+                    req.auth = ('admin', 'geoserver')
                     
             print wfs_url + "?" + params
             response = req.post(wfs_url, data=values, verify=False)
