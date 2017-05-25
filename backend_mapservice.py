@@ -951,14 +951,15 @@ class Geoserver():
                     layer = Layer()                
                     # TODO: si estamos en create mode es porque ha aparecido otro shape. Deberiamos borrar el proyecto y volverlo a crear  
                             
-                if creation_mode==forms_geoserver.MODE_CREATE or (creation_mode==forms_geoserver.MODE_OVERWRITE and not layer_exists):
+                if not layer_exists: #or (creation_mode==forms_geoserver.MODE_OVERWRITE and not layer_exists):
                     
                     try:
                         self.createFeaturetype(datastore.workspace, datastore, layer_name, layer_title)
                     except:
                         print "ERROR en createFeaturetype"
                         raise
-                    
+                
+                if creation_mode==forms_geoserver.MODE_CREATE or (creation_mode==forms_geoserver.MODE_OVERWRITE and not layer_exists): 
                     layer.datastore = datastore
 
                 
