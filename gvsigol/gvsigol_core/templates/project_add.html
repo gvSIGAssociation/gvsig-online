@@ -45,7 +45,16 @@
 						</div>	
 						
 						<div class="row">
-							<div id="project-map" class="mini-map"></div>
+								{% if has_geocoding_plugin %}	
+									<div id="project-map" class="mini-map shps-folder-project-map">
+										<div class="col-md-3 form-group float-search-tool">
+											<input placeholder="{% trans 'Locate place...' %}" name="location-autocomplete" id="location-autocomplete" type="text" class="form-control">
+										</div>
+									</div>
+								{% else %}
+									<div id="project-map" class="mini-map"></div>
+								{% endif %}		    					
+	
 						</div>
 						
 						<input type="hidden" name="center-lat" id="center-lat">
@@ -188,6 +197,60 @@
 			$("#extent").val(extent);
 			$("#zoom").val(zoom);
 		});
+    	
+    	{% if has_geocoding_plugin %}	
+    	$(".ol-zoom").css("margin-top","50px")
+		
+		$('#location-autocomplete').autocomplete({
+    		serviceUrl: '/gvsigonline/geocoding/search_candidates/',
+    		paramName: 'q',
+    		params: {
+    			limit: 10,
+    			countrycodes: 'es'
+    		},
+    		groupBy: 'category',
+    		transformResult: function(response) {
+    			jsonResponse = JSON.parse(response);
+    			if (jsonResponse.suggestions.length > 0) {
+    				return {
+    					suggestions: $.map(jsonResponse.suggestions, function(item) {
+    						return { 
+    							value: item.address,
+    							type: item.type,
+    							data: item 
+    						};
+    					})
+    				};
+    			}
+
+    		},
+    		onSelect: function (suggestion) {
+    			$.ajax({
+    				type: 'POST',
+    				async: false,
+    				url: '/gvsigonline/geocoding/find_candidate/',
+    				beforeSend:function(xhr){
+    					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+    				},
+    				data: {
+    					'address': suggestion.data
+    				},
+    				success	:function(response){
+    					if(response.address){
+    						var address = response.address;
+    						if(address != null){
+    							var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], 'EPSG:4326', 'EPSG:3857');	
+    							map.getView().setCenter(coordinate);
+    							map.getView().setZoom(14);
+    						}
+    					}
+    				},
+    				error: function(){}
+    			});
+    		}
+
+    	});
+    	{% endif %}
 	});
 </script>
 {% endblock %}
