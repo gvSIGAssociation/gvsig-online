@@ -265,6 +265,9 @@ attributeTable.prototype.createTableUI = function(featureType) {
 attributeTable.prototype.createFiltersUI = function(featureType) {
 	var self = this;
 	
+	var fields_trans = this.layer.conf;
+	var language = $("#select-language").val();
+	
 	var ui = '';
 	ui += '<div style="background: #f6f6f6;" class="row">';
 	ui += 	'<div class="col-md-12">';
@@ -307,7 +310,25 @@ attributeTable.prototype.createFiltersUI = function(featureType) {
 	ui += 									'<option value="" selected disabled>--</option>';
 	for (var i=0; i<featureType.length; i++) {
 		if (featureType[i].type.indexOf('gml:') == -1) {
-			ui += '<option class="filter-field-option" value="' + featureType[i].type + '">' + featureType[i].name + '</option>';
+			var feat_name = featureType[i].name;
+			if(fields_trans != null && fields_trans["fields"] != undefined){
+				var fields = fields_trans["fields"];
+				for(var ix=0; ix<fields.length; ix++){
+					if(fields[ix].name.toLowerCase() == feat_name){
+						if("visible" in fields[ix]){
+							column_shown = fields[ix].visible;
+						}
+						var feat_name_trans = fields[ix]["title-"+language];
+						if(feat_name_trans){
+							feat_name = feat_name_trans + " (" + feat_name + ")";
+						}
+					}
+				}
+			}
+			
+			
+			
+			ui += '<option class="filter-field-option" data-orig="' + featureType[i].name + '" value="' + featureType[i].type + '">' + feat_name + '</option>';
 		}
 	}
 	ui += 								'</select>';
@@ -513,7 +534,7 @@ attributeTable.prototype.registerEvents = function() {
 	
 	$("#filter-field-select").on('change', function(){
 		self.selectedType = $('option:selected', $(this)).val();
-		var value = $('option:selected', $(this)).text();
+		var value = $('option:selected', $(this)).attr("data-orig");
     	var currentFilter = self.filterCode.getValue();
 		currentFilter += value + ' ';
 		self.filterCode.setValue(currentFilter);
