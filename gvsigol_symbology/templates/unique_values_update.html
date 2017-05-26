@@ -67,13 +67,6 @@
 						<label>{% trans "Select field to generate unique values" %}</label>
 						<select id="select-unique-values-field" class="form-control">
 							<option disabled selected value> -- {% trans "Select field" %} -- </option>
-							{% for field in fields %}
-								{% if field.name == property_name %}
-									<option selected value="{{field.name}}">{{field.name}}</option>
-								{% else %}
-									<option value="{{field.name}}">{{field.name}}</option>
-								{% endif %}
-							{% endfor %}
 						</select>
 					</div>
 				</div>
@@ -171,7 +164,7 @@
 </script>
 <script>
 $(document).ready(function() {
-	
+	var language = $("#select-language").val();
 	var layerId = "{{layer_id}}";
 	var layerUrl = "{{layer_url}}";
 	var wfsUrl = "{{layer_wfs_url}}";
@@ -183,6 +176,8 @@ $(document).ready(function() {
 	var rules = {{ rules|safe }};
 	var previewUrl = "{{preview_url}}";
 	var supported_crs = {{supported_crs|safe}};
+	
+	var property_name = "{{ property_name }}";
 	
 	for (var crs in supported_crs) {
 		proj4.defs(supported_crs[crs].code, supported_crs[crs].definition);	
@@ -261,6 +256,20 @@ $(document).ready(function() {
 	$("#refresh-preview").on('click', function(e){
 		uniqueValues.refreshMap();
 	});
+	
+	
+	for(var idx in jsonAlphanumericFields){
+		var field_name = jsonAlphanumericFields[idx]["name"];
+		var field_name_trans = jsonAlphanumericFields[idx]["title-"+language];
+		if(!field_name_trans){
+			field_name_trans = field_name;
+		}
+		if(field_name == property_name){
+			$("#select-unique-values-field").append('<option selected value="' + field_name + '">' + field_name_trans + '</option>');
+		}else{
+			$("#select-unique-values-field").append('<option value="' + field_name + '">' + field_name_trans + '</option>');
+		}
+	}
 	
 	$("#select-unique-values-field").on('change', function(e) {
 		$(".users-list").empty();

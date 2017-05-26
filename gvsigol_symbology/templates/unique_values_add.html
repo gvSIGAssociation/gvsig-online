@@ -64,9 +64,6 @@
 						<label>{% trans "Select field to generate unique values" %}</label>
 						<select id="select-unique-values-field" class="form-control">
 							<option disabled selected value> -- {% trans "Select field" %} -- </option>
-							{% for field in fields %}
-							<option value="{{field.name}}">{{field.name}}</option>
-							{% endfor %}
 						</select>
 					</div>
 				</div>
@@ -164,7 +161,7 @@
 </script>
 <script>
 $(document).ready(function() {
-	
+	var language = $("#select-language").val();
 	var layerId = "{{layer_id}}";
 	var layerUrl = "{{layer_url}}";
 	var wfsUrl = "{{layer_wfs_url}}";
@@ -251,6 +248,15 @@ $(document).ready(function() {
 	$("#refresh-preview").on('click', function(e){
 		uniqueValues.refreshMap();
 	});
+	
+	for(var idx in jsonAlphanumericFields){
+		var field_name = jsonAlphanumericFields[idx]["name"];
+		var field_name_trans = jsonAlphanumericFields[idx]["title-"+language];
+		if(!field_name_trans){
+			field_name_trans = field_name;
+		}
+		$("#select-unique-values-field").append('<option value="' + field_name + '">' + field_name_trans + '</option>');
+	}
 	
 	$("#select-unique-values-field").on('change', function(e) {
 		$(".users-list").empty();
