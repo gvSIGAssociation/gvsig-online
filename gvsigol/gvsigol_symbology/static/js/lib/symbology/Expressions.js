@@ -94,7 +94,7 @@ Expressions.prototype.addNewRule = function() {
 
 Expressions.prototype.getFilterFormUI = function(ruleid) {
 	var self = this;
-	
+	var language = $("#select-language").val();
 	$('#modal-expression-content').empty();
 	
 	var operations = this.utils.getFilterOperations();
@@ -129,11 +129,16 @@ Expressions.prototype.getFilterFormUI = function(ruleid) {
 	ui += 							'<select id="expression-field" class="form-control">';
 	ui += 								'<option disabled selected value> -- ' + gettext('Select field') + ' -- </option>';
 	for (var i in fields) {
+		var field_name = fields[i].name;
+		var field_name_trans = fields[i]["title-"+language];
+		if(!field_name_trans){
+			field_name_trans = field_name;
+		}
 		if (rule.filter.property_name && rule.filter.property_name == fields[i].name) {
-			ui += 						'<option selected data-type="' + fields[i].binding + '" value="' + fields[i].name + '">' + fields[i].name + '</option>';
+			ui += 						'<option selected data-type="' + fields[i].binding + '" value="' + field_name + '">' + field_name_trans + '</option>';
 			dataType = fields[i].binding;
 		} else {
-			ui += 						'<option data-type="' + fields[i].binding + '" value="' + fields[i].name + '">' + fields[i].name + '</option>';
+			ui += 						'<option data-type="' + fields[i].binding + '" value="' + field_name + '">' + field_name_trans + '</option>';
 		}
 		
 	}	

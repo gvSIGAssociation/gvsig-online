@@ -64,9 +64,6 @@
 						<label>{% trans "Select numeric field" %}</label>
 						<select id="select-numeric-field" class="form-control">
 							<option disabled selected value> -- {% trans "Select field" %} -- </option>
-							{% for field in numeric_fields %}
-							<option value="{{field.name}}">{{field.name}}</option>
-							{% endfor %}
 						</select>
 					</div>
 					<div class="col-md-6 form-group">
@@ -168,7 +165,7 @@
 </script>
 <script>
 $(document).ready(function() {
-	
+	var language = $("#select-language").val();
 	var layerId = "{{layer_id}}";
 	var layerUrl = "{{layer_url}}";
 	var wfsUrl = "{{layer_wfs_url}}";
@@ -176,6 +173,7 @@ $(document).ready(function() {
 	var styleId = "{{style.id}}";
 	var featureType = "{{featureType}}";
 	var jsonAlphanumericFields = {{json_alphanumeric_fields|safe}};
+	var jsonNumericFields = {{json_numeric_fields|safe}};
 	var fonts = {{ fonts|safe }};
 	var rule_opts = "";
 	var previewUrl = "{{preview_url}}";
@@ -258,6 +256,15 @@ $(document).ready(function() {
 	$("#refresh-preview").on('click', function(e){
 		intervals.refreshMap();
 	});
+	
+	for(var idx in jsonNumericFields){
+		var field_name = jsonNumericFields[idx]["name"];
+		var field_name_trans = jsonNumericFields[idx]["title-"+language];
+		if(!field_name_trans){
+			field_name_trans = field_name;
+		}
+		$("#select-numeric-field").append('<option value="' + field_name + '">' + field_name_trans + '</option>');
+	}
 	
 	$("#select-numeric-field").on('change', function(e) {
 		$(".users-list").empty();
