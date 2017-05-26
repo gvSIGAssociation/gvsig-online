@@ -292,16 +292,17 @@ getFeatureInfo.prototype.showInfo = function(features){
 	var wgs84 = ol.proj.transform(self.mapCoordinates, 'EPSG:3857', 'EPSG:4326')
 	html += '<li class="item">';
 	html += 	'<div class="feature-info">';
-	html += 		'<span style="font-weight: bold; font-size: 12px;">' + gettext('Coordinates') + ':</span>' + ' <span>' + wgs84 + '</span>';	
+	html += 		'<span style="font-weight: bold; font-size: 12px;">' + gettext('Coordinates') + ':</span>' + ' <span> ' + wgs84[0].toFixed(5).replace(/0{0,2}$/, "")+ ', '+ wgs84[1].toFixed(5).replace(/0{0,2}$/, "") + '</span>';	
 	html += 	'</div>';
 	html += '</li>';
 	
 	for (var i in features) {
 		if (features[i].type == 'feature') {
 			var fid = features[i].feature.id;
+			var feature_id = features[i].layer.title +"."+features[i].feature.feature;
 			html += '<li class="item">';
 			html += 	'<div class="feature-info">';
-			html += 		'<a href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;">' + fid;
+			html += 		'<a href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;">' + feature_id;
 			html += 		'<span class="label label-info pull-right">' + gettext('More info') + '</span></a>';
 			html += 	'</div>';
 			html += '</li>';
@@ -363,13 +364,13 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 		}
 	}
 	
-	if (selectedFeature != null) {
+	if (selectedFeature != null && selectedLayer != null) {
 		if (selectedFeature.type.toLowerCase() == 'feature') {
 			var detailsTab = $('#details-tab');
 			var infoContent = '';
 			infoContent += '<div class="box box-default">';
 			infoContent += 	'<div class="box-header with-border">';
-			infoContent += 		'<span class="text">' + selectedFeature.id + '</span>';
+			infoContent += 		'<span class="text">' + selectedLayer.title + '</span>';
 			infoContent += 	'</div>';
 			infoContent += 	'<div class="box-body" style="padding: 20px;">';
 			infoContent += 		'<ul class="products-list product-list-in-box">';
@@ -405,11 +406,11 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 						infoContent += '<li class="item">';
 						infoContent += 	'<div class="feature-info">';
 						if (!value.toString().startsWith('http')) {
-							infoContent += 		'<a href="javascript:void(0)" class="product-title">' + key + '</a>';
-							infoContent += 		'<span class="product-description">' + value + '</span>';
+							infoContent += 		'<span class="product-description">' + key + '</span>';
+							infoContent += 		'<a href="javascript:void(0)" class="product-title">' + value + '</a>';
 							
 						} else {
-							infoContent += 		'<a href="javascript:void(0)" class="product-title">' + key + '</a>';
+							infoContent += 		'<span class="product-description">' + key + '</span>';
 							infoContent += 		'<a href="' + value + '" style="color: #00c0ef !important;" target="_blank" class="product-description">' + value + '</a>';
 						}
 						infoContent += 	'</div>';
