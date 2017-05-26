@@ -69,6 +69,7 @@ TextSymbolizer.prototype.getTabMenu = function() {
 
 TextSymbolizer.prototype.getFontTabUI = function() {
 	
+	var language = $("#select-language").val();
 	var fields = this.utils.getAlphanumericFields();
 	var fonts = this.utils.getFonts();
 	var fontWeights = this.utils.getFontWeights();
@@ -82,13 +83,18 @@ TextSymbolizer.prototype.getFontTabUI = function() {
 	ui += 			'<select id="label-label" class="form-control">';
 	for (var i=0; i < fields.length; i++) {
 		if (this.label == '') {
-			this.label = fields[0].name;
+			this.label = fields[i].name;
+		}
+		var field_name = fields[i].name;
+		var field_name_trans = fields[i]["title-"+language];
+		if(!field_name_trans){
+			field_name_trans = field_name;
+		}
+		
+		if (fields[i].name == this.label) {
+			ui += '<option value="' + field_name + '" selected>' + field_name_trans + '</option>';
 		} else {
-			if (fields[i].name == this.label) {
-				ui += '<option value="' + fields[i].name + '" selected>' + fields[i].name + '</option>';
-			} else {
-				ui += '<option value="' + fields[i].name + '">' + fields[i].name + '</option>';
-			}
+			ui += '<option value="' + field_name + '">' + field_name_trans + '</option>';
 		}		
 	}	
 	ui += 			'</select>';

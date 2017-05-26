@@ -35,6 +35,7 @@ import StringIO
 import utils
 import json
 import re
+import ast
 
 def create_style(request, json_data, layer_id):
 
@@ -291,6 +292,23 @@ def get_conf(request, layer_id):
     
     (ds_type, resource) = mapservice.getResourceInfo(workspace.name, datastore, layer.name, "json")
     fields = utils.get_fields(resource)
+    if layer.conf:
+        new_fields = []
+        conf = None
+        if layer and layer.conf:
+            conf = ast.literal_eval(layer.conf)
+        for field in fields:
+            if conf:
+                for f in conf['fields']:
+                    if f['name'] == field['name']:
+                        for id, language in settings.LANGUAGES:
+                            field['title-'+id] = f['title-'+id]
+            else:
+                for id, language in settings.LANGUAGES:
+                    field['title-'+id] = field['name']
+            new_fields.append(field)
+        fields = new_fields
+        
     feature_type = utils.get_feature_type(fields)
     alphanumeric_fields = utils.get_alphanumeric_fields(fields)
        
