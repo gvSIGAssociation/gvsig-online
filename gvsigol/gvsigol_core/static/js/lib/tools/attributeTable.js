@@ -247,6 +247,7 @@ attributeTable.prototype.createTableUI = function(featureType) {
                 var cql_filter = '';
                 if (self.filterCode != null) {
                 	cql_filter = self.filterCode.getValue();
+                	cql_filter = self.change_alias_from_cql_filter(cql_filter);
                 }
                 d.cql_filter = cql_filter;
             }
@@ -257,6 +258,26 @@ attributeTable.prototype.createTableUI = function(featureType) {
 	    "lengthMenu": [[10, 25, 50, 100, 500, 1000], [10, 25, 50, 100, 500, 1000]],
 	    buttons: tableButtons
     });
+};
+
+attributeTable.prototype.change_alias_from_cql_filter = function(cql_filter) {
+	var fields_trans = this.layer.conf;
+	var language = $("#select-language").val();
+	
+	if(fields_trans != null && fields_trans["fields"] != undefined){
+		var fields = fields_trans["fields"];
+		for(var ix=0; ix<fields.length; ix++){
+			var feat_name = fields[ix]["name"];
+			var feat_name_trans = fields[ix]["title-"+language];
+			if(feat_name_trans && feat_name){
+				var filter_string =  new RegExp("("+feat_name_trans+")([^\\w'\"]+)","g");
+				cql_filter = cql_filter.replace(filter_string, feat_name+"$2")
+			}
+			
+		}
+	}
+	
+	return cql_filter;
 };
 
 /**
@@ -320,7 +341,7 @@ attributeTable.prototype.createFiltersUI = function(featureType) {
 						}
 						var feat_name_trans = fields[ix]["title-"+language];
 						if(feat_name_trans){
-							feat_name = feat_name_trans + " (" + feat_name + ")";
+							feat_name = feat_name_trans;
 						}
 					}
 				}
@@ -534,7 +555,7 @@ attributeTable.prototype.registerEvents = function() {
 	
 	$("#filter-field-select").on('change', function(){
 		self.selectedType = $('option:selected', $(this)).val();
-		var value = $('option:selected', $(this)).attr("data-orig");
+		var value = $('option:selected', $(this)).text();
     	var currentFilter = self.filterCode.getValue();
 		currentFilter += value + ' ';
 		self.filterCode.setValue(currentFilter);
