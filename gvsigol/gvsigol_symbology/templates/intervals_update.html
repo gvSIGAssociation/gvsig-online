@@ -67,13 +67,6 @@
 						<label>{% trans "Select numeric field" %}</label>
 						<select id="select-numeric-field" class="form-control">
 							<option disabled selected value> -- {% trans "Select field" %} -- </option>
-							{% for field in numeric_fields %}
-								{% if field.name == property_name %}
-									<option selected value="{{field.name}}">{{field.name}}</option>
-								{% else %}
-									<option value="{{field.name}}">{{field.name}}</option>
-								{% endif %}
-							{% endfor %}
 						</select>
 					</div>
 					<div class="col-md-6 form-group">
@@ -175,7 +168,7 @@
 </script>
 <script>
 $(document).ready(function() {
-	
+	var language = $("#select-language").val();
 	var layerId = "{{layer_id}}";
 	var layerUrl = "{{layer_url}}";
 	var wfsUrl = "{{layer_wfs_url}}";
@@ -183,10 +176,13 @@ $(document).ready(function() {
 	var styleId = "{{style.id}}";
 	var featureType = "{{featureType}}";
 	var jsonAlphanumericFields = {{json_alphanumeric_fields|safe}};
+	var jsonNumericFields = {{json_numeric_fields|safe}};
 	var fonts = {{ fonts|safe }};
 	var rules = {{ rules|safe }};
 	var previewUrl = "{{preview_url}}";
 	var supported_crs = {{supported_crs|safe}};
+	
+	var property_name = "{{ property_name }}";
 	
 	for (var crs in supported_crs) {
 		proj4.defs(supported_crs[crs].code, supported_crs[crs].definition);	
@@ -269,6 +265,20 @@ $(document).ready(function() {
 	$("#refresh-preview").on('click', function(e){
 		intervals.refreshMap();
 	});
+	
+	for(var idx in jsonNumericFields){
+		var field_name = jsonNumericFields[idx]["name"];
+		var field_name_trans = jsonNumericFields[idx]["title-"+language];
+		if(!field_name_trans){
+			field_name_trans = field_name;
+		}
+		if(field_name == property_name){
+			$("#select-numeric-field").append('<option selected value="' + field_name + '">' + field_name_trans + '</option>');
+		}else{
+			$("#select-numeric-field").append('<option value="' + field_name + '">' + field_name_trans + '</option>');
+		}
+	}
+	
 	
 	$("#select-numeric-field").on('change', function(e) {
 		$(".users-list").empty();
