@@ -42,7 +42,7 @@ var projectZoom = function(map, conf) {
 	
 	this.$button = $(button);
 	
-	$('#toolbar').append(button);
+	$('.ol-zoom').append(button);
 
 	var this_ = this;
   
