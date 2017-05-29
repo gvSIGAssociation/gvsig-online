@@ -87,7 +87,8 @@ def create_style(request, json_data, layer_id):
         opacity = 1.0           
     )
     symbolizer.save()
-        
+    
+    color_map_entry_list = []
     for entry in json_data.get('entries'): 
         json_entry = json.loads(entry.get('json'))
         color_map_entry = ColorMapEntry(
@@ -98,8 +99,15 @@ def create_style(request, json_data, layer_id):
             label = json_entry.get('label'),
             opacity = json_entry.get('opacity')                
         )
-        color_map_entry.save()
-            
+        color_map_entry_list.append(color_map_entry)
+    
+    order = 0
+    color_map_entry_list = sorted(color_map_entry_list, key=lambda color_map_entry: float(color_map_entry.quantity))
+    for cme in color_map_entry_list:
+        cme.order = order
+        cme.save()
+        order = order + 1
+         
     sld_body = sld_builder.build_sld(layer, style)
     if mapservice.createStyle(style.name, sld_body): 
         if style.is_default:
@@ -152,7 +160,8 @@ def update_style(request, json_data, layer_id, style_id):
         opacity = 1.0           
     )
     symbolizer.save()
-        
+    
+    color_map_entry_list = []
     for entry in json_data.get('entries'): 
         json_entry = json.loads(entry.get('json'))
         color_map_entry = ColorMapEntry(
@@ -163,7 +172,15 @@ def update_style(request, json_data, layer_id, style_id):
             label = json_entry.get('label'),
             opacity = json_entry.get('opacity')                
         )
-        color_map_entry.save()
+        
+        color_map_entry_list.append(color_map_entry)
+    
+    order = 0
+    color_map_entry_list = sorted(color_map_entry_list, key=lambda color_map_entry: float(color_map_entry.quantity))
+    for cme in color_map_entry_list:
+        cme.order = order
+        cme.save()
+        order = order + 1
     
     sld_body = sld_builder.build_sld(layer, style)
     if mapservice.updateStyle(layer, style.name, sld_body): 
