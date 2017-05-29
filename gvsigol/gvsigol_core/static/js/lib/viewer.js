@@ -338,6 +338,7 @@ viewer.core = {
 	},
 	
 	_loadTools: function() {
+		this.tools.push(new projectZoom(this.map, this.conf));
     	this.tools.push(new getFeatureInfo(this.map, this.conf.tools.get_feature_info_control.private_fields_prefix));
     	this.tools.push(new measureLength(this.map));
     	this.tools.push(new measureArea(this.map));
