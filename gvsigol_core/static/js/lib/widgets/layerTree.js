@@ -240,6 +240,20 @@ layerTree.prototype.createTree = function() {
 		self.showMetadata(selectedLayer);
 	});
 	
+	$(".zoom-to-layer").on('click', function(e) {
+		var layers = self.map.getLayers();
+		var selectedLayer = null;
+		var id = this.id.split("zoom-to-layer-")[1];
+		layers.forEach(function(layer){
+			if (layer.baselayer == false) {
+				if (id===layer.get("id")) {
+					selectedLayer = layer;
+				}
+			}						
+		}, this);
+		self.zoomToLayer(selectedLayer);
+	});
+	
 };
 
 /**
@@ -357,6 +371,10 @@ layerTree.prototype.createOverlayUI = function(layer) {
 	    	}
 	    }
 	}
+	ui += '	<a id="zoom-to-layer-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool zoom-to-layer">';
+	ui += '		<i class="fa fa-search" aria-hidden="true"></i> ' + gettext('Zoom to layer');
+	ui += '	</a>';
+	
 	ui += '			<label style="display: block; margin-top: 8px; width: 95%;">' + gettext('Opacity') + '<span id="layer-opacity-output-' + layer.id + '" class="margin-l-15 gol-slider-output">%</span></label>';
 	ui += '			<div id="layer-opacity-slider" data-layerid="' + layer.id + '" class="layer-opacity-slider"></div>';
 	ui += '		</div>';
@@ -452,6 +470,29 @@ layerTree.prototype.userCanWrite = function(layer) {
 	}
 	return canWrite;
 };
+
+
+layerTree.prototype.zoomToLayer = function(layer) {
+	var self = this;
+	var layer_name = layer.layer_name;
+	var layer_crs = layer.crs.crs;
+	var url = layer.wms_url+'?request=GetCapabilities&service=WMS&version=1.1.1';
+	var parser = new ol.format.WMSCapabilities();
+	$.ajax(url).then(function(response) {
+		   var result = parser.read(response);
+		   var Layers = result.Capability.Layer.Layer; 
+		   var extent;
+		   for (var i=0, len = Layers.length; i<len; i++) {
+		     var layerobj = Layers[i];
+		     if (layerobj.Name == layer_name) {
+		         extent = layerobj.BoundingBox[0].extent;
+		         break;
+		     }
+		   }
+		   var ext = ol.proj.transformExtent(extent, ol.proj.get(layer_crs), ol.proj.get('EPSG:3857'));
+		   self.map.getView().fit(ext, self.map.getSize());
+		});
+}
 
 
 /**
