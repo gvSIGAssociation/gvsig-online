@@ -33,6 +33,8 @@ viewer.core = {
 	
 	toolbar: null,
 	
+	zoombar: null,
+	
 	tools: new Array(),
 	
 	legend: null,
@@ -103,12 +105,14 @@ viewer.core = {
 	        undefinedHTML: '----------, ----------'
 	    });
 		
+		this.zoombar = new ol.control.Zoom();
+		
 		this.map = new ol.Map({
 			interactions: ol.interaction.defaults().extend([
 			    new ol.interaction.DragRotateAndZoom()
 			]),
       		controls: [
-				new ol.control.Zoom(),
+      			this.zoombar,
 				new ol.control.ScaleLine(),					
       			new ol.control.OverviewMap({collapsed: false}),
       			mousePositionControl
