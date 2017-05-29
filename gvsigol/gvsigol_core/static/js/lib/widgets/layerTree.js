@@ -169,10 +169,14 @@ layerTree.prototype.createTree = function() {
 						mapLayer.setVisible(false);
 						layerCheckbox.checked = true;
 						layerCheckbox.disabled = true;
+						
+						$(".layer-opacity-slider[data-layerid='"+layer.id+"']").slider( "option", "disabled", true );
 					} else {
 						mapLayer.setVisible(false);
 						layerCheckbox.checked = false;
 						layerCheckbox.disabled = false;
+						
+						$(".layer-opacity-slider[data-layerid='"+layer.id+"']").slider( "option", "disabled", false );
 					}
 				}
 			}			
