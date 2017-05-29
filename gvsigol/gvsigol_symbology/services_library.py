@@ -428,6 +428,23 @@ def upload_library(name, description, file):
                     size = s.Graphic.Size.valueOf_
                     if len(s.Graphic.Mark) >= 1:
                         mark = s.Graphic.Mark[0]
+                        
+                        stroke = '#000000'
+                        if mark.Stroke.CssParameter.__len__() > 0:
+                            stroke = mark.Stroke.CssParameter[0].valueOf_
+                            
+                        stroke_width = 1
+                        if mark.Stroke.CssParameter.__len__() > 1:
+                            stroke_width = mark.Stroke.CssParameter[1].valueOf_
+                            
+                        stroke_opacity = 1
+                        if mark.Stroke.CssParameter.__len__() > 2:
+                            stroke_opacity = mark.Stroke.CssParameter[2].valueOf_
+                            
+                        stroke_dash_array = 'none'
+                        if mark.Stroke.CssParameter.__len__() > 3:
+                            stroke_dash_array = mark.Stroke.CssParameter[3].valueOf_
+                            
                         symbolizer = MarkSymbolizer(
                             rule = rule,
                             order = scount,
@@ -437,10 +454,10 @@ def upload_library(name, description, file):
                             well_known_name = mark.WellKnownName,
                             fill = mark.Fill.CssParameter[0].valueOf_,
                             fill_opacity = mark.Fill.CssParameter[1].valueOf_,
-                            stroke = mark.Stroke.CssParameter[0].valueOf_,
-                            stroke_width = mark.Stroke.CssParameter[1].valueOf_,
-                            stroke_opacity = mark.Stroke.CssParameter[2].valueOf_,
-                            stroke_dash_array = mark.Stroke.CssParameter[3].valueOf_
+                            stroke = stroke,
+                            stroke_width = stroke_width,
+                            stroke_opacity = stroke_opacity,
+                            stroke_dash_array = stroke_dash_array 
                         )
                         symbolizer.save()
                         
@@ -460,26 +477,59 @@ def upload_library(name, description, file):
                         symbolizer.save()
                         
                 elif s.original_tagname_ == 'LineSymbolizer':
+                    stroke = '#000000'
+                    if s.Stroke.CssParameter.__len__() > 0:
+                        stroke = s.Stroke.CssParameter[0].valueOf_
+                        
+                    stroke_width = 1
+                    if s.Stroke.CssParameter.__len__() > 1:
+                        stroke_width = s.Stroke.CssParameter[1].valueOf_
+                        
+                    stroke_opacity = 1
+                    if s.Stroke.CssParameter.__len__() > 2:
+                        stroke_opacity = s.Stroke.CssParameter[2].valueOf_
+                        
+                    stroke_dash_array = 'none'
+                    if s.Stroke.CssParameter.__len__() > 3:
+                        stroke_dash_array = s.Stroke.CssParameter[3].valueOf_
+                        
                     symbolizer = LineSymbolizer(
                         rule = rule,
                         order = scount,
-                        stroke = s.Stroke.CssParameter[0].valueOf_,
-                        stroke_width = s.Stroke.CssParameter[1].valueOf_,
-                        stroke_opacity = s.Stroke.CssParameter[2].valueOf_,
-                        stroke_dash_array = s.Stroke.CssParameter[3].valueOf_                 
+                        stroke = stroke,
+                        stroke_width = stroke_width,
+                        stroke_opacity = stroke_opacity,
+                        stroke_dash_array =stroke_dash_array                 
                     )
                     symbolizer.save()
                         
                 elif s.original_tagname_ == 'PolygonSymbolizer':
+                    stroke = '#000000'
+                    if s.Stroke.CssParameter.__len__() > 0:
+                        stroke = s.Stroke.CssParameter[0].valueOf_
+                        
+                    stroke_width = 1
+                    if s.Stroke.CssParameter.__len__() > 1:
+                        stroke_width = s.Stroke.CssParameter[1].valueOf_
+                        
+                    stroke_opacity = 1
+                    if s.Stroke.CssParameter.__len__() > 2:
+                        stroke_opacity = s.Stroke.CssParameter[2].valueOf_
+                        
+                    stroke_dash_array = 'none'
+                    if s.Stroke.CssParameter.__len__() > 3:
+                        stroke_dash_array = s.Stroke.CssParameter[3].valueOf_
+                    
+                    
                     symbolizer = PolygonSymbolizer(
                         rule = rule,
                         order = scount,
                         fill = s.Fill.CssParameter[0].valueOf_,
                         fill_opacity = s.Fill.CssParameter[1].valueOf_,
-                        stroke = s.Stroke.CssParameter[0].valueOf_,
-                        stroke_width = s.Stroke.CssParameter[1].valueOf_,
-                        stroke_opacity = s.Stroke.CssParameter[2].valueOf_,
-                        stroke_dash_array = s.Stroke.CssParameter[3].valueOf_                 
+                        stroke = stroke,
+                        stroke_width = stroke_width,
+                        stroke_opacity = stroke_opacity,
+                        stroke_dash_array =stroke_dash_array                
                     )
                     symbolizer.save()
                     
