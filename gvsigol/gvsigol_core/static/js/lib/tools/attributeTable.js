@@ -559,7 +559,8 @@ attributeTable.prototype.registerEvents = function() {
     	var currentFilter = self.filterCode.getValue();
 		currentFilter += value + ' ';
 		self.filterCode.setValue(currentFilter);
-		self.loadUniqueValues(value);
+		var value_orig = $('option:selected', $(this)).attr("data-orig");
+		self.loadUniqueValues(value_orig);
 	});
 	
 	$("#close-table").on('click', function(){
