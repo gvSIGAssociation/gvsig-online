@@ -479,7 +479,7 @@ layerTree.prototype.userCanWrite = function(layer) {
 layerTree.prototype.zoomToLayer = function(layer) {
 	var self = this;
 	var layer_name = layer.layer_name;
-	var layer_crs = layer.crs.crs;
+	var layer_crs = layer;
 	var url = layer.wms_url+'?request=GetCapabilities&service=WMS&version=1.1.1';
 	var parser = new ol.format.WMSCapabilities();
 	$.ajax(url).then(function(response) {
@@ -493,7 +493,7 @@ layerTree.prototype.zoomToLayer = function(layer) {
 		         break;
 		     }
 		   }
-		   var ext = ol.proj.transformExtent(extent, ol.proj.get(layer_crs), ol.proj.get('EPSG:3857'));
+		   var ext = ol.proj.transformExtent(extent, ol.proj.get(layer_crs.crs.crs), ol.proj.get('EPSG:3857'));
 		   self.map.getView().fit(ext, self.map.getSize());
 		});
 }
