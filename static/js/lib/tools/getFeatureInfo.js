@@ -393,8 +393,8 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 								var fields = fields_trans["fields"];
 								for(var ix=0; ix<fields.length; ix++){
 									if(fields[ix].name.toLowerCase() == key){
-										if(fields[ix]["visible"] != null){
-											item_shown = fields[ix]["visible"];
+										if(fields[ix]["infovisible"] != null){
+											item_shown = fields[ix]["infovisible"];
 										}
 										var feat_name_trans = fields[ix]["title-"+language];
 										if(feat_name_trans){
