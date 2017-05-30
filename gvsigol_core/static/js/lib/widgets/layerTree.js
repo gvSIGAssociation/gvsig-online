@@ -479,7 +479,17 @@ layerTree.prototype.userCanWrite = function(layer) {
 layerTree.prototype.zoomToLayer = function(layer) {
 	var self = this;
 	var layer_name = layer.layer_name;
-	var layer_crs = layer['crs']['crs'];
+	var layer_crs = null;
+	if(layer.crs &&  layer.crs.crs){
+		layer_crs = layer.crs.crs;
+	}
+	if(layer.parentGroup && layer.parentGroup.layers){
+		for(var lyr in layers){
+			if(lyr.name == layer_name){
+				layer_crs = lyr.crs.crs;
+			}
+		}
+	}
 	var url = layer.wms_url+'?request=GetCapabilities&service=WMS&version=1.1.1';
 	var parser = new ol.format.WMSCapabilities();
 	$.ajax(url).then(function(response) {
@@ -493,8 +503,11 @@ layerTree.prototype.zoomToLayer = function(layer) {
 		         break;
 		     }
 		   }
-		   var ext = ol.proj.transformExtent(extent, ol.proj.get(layer_crs), ol.proj.get('EPSG:3857'));
-		   self.map.getView().fit(ext, self.map.getSize());
+		   
+		   if(layer_crs != null){
+			   var ext = ol.proj.transformExtent(extent, ol.proj.get(layer_crs), ol.proj.get('EPSG:3857'));
+			   self.map.getView().fit(ext, self.map.getSize());
+		   }
 		});
 }
 
