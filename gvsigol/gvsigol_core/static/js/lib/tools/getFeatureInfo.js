@@ -292,7 +292,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 	var wgs84 = ol.proj.transform(self.mapCoordinates, 'EPSG:3857', 'EPSG:4326')
 	html += '<li class="item">';
 	html += 	'<div class="feature-info">';
-	html += 		'<span style="font-weight: bold; font-size: 12px;">' + gettext('Coordinates') + ':</span>' + ' <span> ' + wgs84[0].toFixed(5).replace(/0{0,2}$/, "")+ ', '+ wgs84[1].toFixed(5).replace(/0{0,2}$/, "") + '</span>';	
+	html += 		'<span style="font-weight: bold; font-size: 12px;">' + gettext('Coordinates') + ':</span>' + '<br /><span> ' + wgs84[0].toFixed(5).replace(/0{0,2}$/, "")+ ', '+ wgs84[1].toFixed(5).replace(/0{0,2}$/, "") + '</span>';	
 	html += 	'</div>';
 	html += '</li>';
 	
