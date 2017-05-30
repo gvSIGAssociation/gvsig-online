@@ -25,6 +25,7 @@
 from models import Style, Library, Rule, LibraryRule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer
 from gvsigol_services.backend_mapservice import backend as mapservice
 from gvsigol_core import utils as core_utils
+from gvsigol import settings
 from django.utils.translation import ugettext as _
 from django.http import HttpResponse
 import utils, sld_utils, sld_builder
@@ -465,13 +466,14 @@ def upload_library(name, description, file):
                         external_graphic = s.Graphic.ExternalGraphic[0]
                         online_resource = external_graphic.OnlineResource.href.split('/')
                         online_resource[-2] = library.name
+                        new_online_resource = settings.MEDIA_URL + online_resource[-3]+'/'+ library.name + '/' + online_resource[-1]
                         symbolizer = ExternalGraphicSymbolizer(
                             rule = rule,
                             order = scount,
                             opacity = opacity,
                             size = size,
                             rotation = rotation,
-                            online_resource = "/".join(online_resource),
+                            online_resource = new_online_resource,
                             format = external_graphic.Format
                         )
                         symbolizer.save()
