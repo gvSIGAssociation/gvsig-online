@@ -484,6 +484,7 @@ layerTree.prototype.zoomToLayer = function(layer) {
 		layer_crs = layer.crs.crs;
 	}
 	if(layer.parentGroup && layer.parentGroup.layers){
+		var layers = layer.parentGroup.layers;
 		for(var lyr in layers){
 			if(lyr.name == layer_name){
 				layer_crs = lyr.crs.crs;
