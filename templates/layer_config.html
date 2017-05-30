@@ -50,12 +50,12 @@
 													{% endfor %}
 													<th>{% trans "Is visible?" %}</th>
 													<th>{% trans "Is editable?" %}</th>
+													<th>{% trans "Is shown in getFeatureInfo?" %}</th>
 												</tr>
 											</thead>
 											<tbody id="field-list-table-body">
 												{% for f in fields %}
 													{% with counter=forloop.counter %}
-														{% if forloop.last %}
 															<tr>
 																<td><input readonly name="field-name-{{counter}}" type="text" class="form-control" value="{{f.name}}"></td>
 																{% for id, language in available_languages %}
@@ -71,28 +71,19 @@
 																{% else %}
 																<td><input type="checkbox" name="field-editable-{{counter}}"/></td>
 																{% endif %}
-															</tr>
-												    		<input type="hidden" name="counter" value="{{counter}}" />
-												    	{% else %}
-															<tr>
-																<td><input readonly name="field-name-{{counter}}" type="text" class="form-control" value="{{f.name}}"></td>
-																{% for id, language in available_languages %}
-																<td><input name="field-title-{{id}}-{{counter}}" type="text" class="form-control" placeHolder="{{f.name}}" value=""></td>
-																{% endfor %}
-																{% if f.visible %}
-																<td><input type="checkbox" name="field-visible-{{counter}}" checked/></td>
+																{% if f.infovisible %}
+																<td><input type="checkbox" name="field-infovisible-{{counter}}" checked/></td>
 																{% else %}
-																<td><input type="checkbox" name="field-visible-{{counter}}"/></td>
-																{% endif %}
-																{% if f.editable %}
-																<td><input type="checkbox" name="field-editable-{{counter}}" checked/></td>
-																{% else %}
-																<td><input type="checkbox" name="field-editable-{{counter}}"/></td>
+																<td><input type="checkbox" name="field-infovisible-{{counter}}"/></td>
 																{% endif %}
 															</tr>
-														{% endif %}
+															{% if forloop.last %}
+															<input type="hidden" name="counter" value="{{counter}}" />
+												    	{% endif %}
+															
 													{% endwith %}
 												{% endfor %}
+												
 											</tbody>
 										</table>
 									</div>
