@@ -77,6 +77,12 @@ def copyrecursively(source_folder, destination_folder):
                 if os.stat(src_path).st_mtime > os.stat(dst_path).st_mtime:
                     shutil.copyfile(src_path, dst_path)
             else:
+                if not os.path.exists(os.path.dirname(dst_path)):
+                    try:
+                        os.makedirs(os.path.dirname(dst_path))
+                    except OSError as exc: # Guard against race condition
+                        if exc.errno != errno.EEXIST:
+                            raise
                 shutil.copyfile(src_path, dst_path)
         for item in dirs:
             src_path = os.path.join(root, item)
