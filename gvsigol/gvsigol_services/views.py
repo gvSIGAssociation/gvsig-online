@@ -542,6 +542,9 @@ def layer_config(request, layer_id):
             field['visible'] = False
             if 'field-visible-' + str(i) in request.POST:
                 field['visible'] = True
+            field['infovisible'] = False
+            if 'field-infovisible-' + str(i) in request.POST:
+                field['infovisible'] = True
             field['editable'] = False
             if 'field-editable-' + str(i) in request.POST:
                 field['editable'] = True
@@ -570,6 +573,7 @@ def layer_config(request, layer_id):
                     field['title-'+id] = f['title-'+id]
                 field['visible'] = f['visible']
                 field['editable'] = f['editable']
+                field['infovisible'] = f['infovisible']
                 fields.append(field)
                 
         except: 
@@ -584,6 +588,7 @@ def layer_config(request, layer_id):
                     field['title-'+id] = f['name']
                 field['visible'] = True
                 field['editable'] = True
+                field['infovisible'] = True
                 fields.append(field)
     
         return render(request, 'layer_config.html', {'layer': layer, 'layer_id': layer.id, 'fields': fields, 'fields_json': json.dumps(fields), 'available_languages': LANGUAGES, 'available_languages_array': available_languages})
