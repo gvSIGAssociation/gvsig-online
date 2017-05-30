@@ -376,7 +376,10 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 			infoContent += 		'<ul class="products-list product-list-in-box">';
 			
 			var language = $("#select-language").val();
-			for (var key in selectedFeature.properties) {
+			var featureType = this.describeFeatureType(selectedLayer);
+			for (var i=0; i<featureType.length; i++) {
+				if (featureType[i].type.indexOf('gml:') == -1) {
+				var key = featureType[i].name;
 				var value = selectedFeature.properties[key];
 				if (value == "null" || value == null) {
 					value = "";
@@ -416,6 +419,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 						infoContent += 	'</div>';
 						infoContent += '</li>';
 					}
+				}
 				}
 			}
 			infoContent += 		'</ul>';
@@ -526,6 +530,43 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 			});
 		}
 	}
+};
+
+
+getFeatureInfo.prototype.describeFeatureType = function(layer) {
+	
+	var featureType = new Array();
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: layer.wfs_url,
+	  	data: {
+	  		'service': 'WFS',
+			'version': '1.1.0',
+			'request': 'describeFeatureType',
+			'typeName': layer.workspace + ":" + layer.layer_name, 
+			'outputFormat': 'text/xml; subtype=gml/3.1.1'
+		},
+	  	success	:function(response){
+	  		var elements = null;
+			try {
+				elements = response.getElementsByTagName('sequence')[0].children;
+		    } catch(err) {
+		    	elements = response.getElementsByTagName('xsd:sequence')[0].children;
+		    }
+			
+			for (var i=0; i<elements.length; i++) {
+				var element = {
+					'name': elements[i].attributes[2].nodeValue,
+					'type': elements[i].attributes[4].nodeValue
+				};
+				featureType.push(element);
+			}
+		},
+	  	error: function(){}
+	});
+	
+	return featureType;
 };
 
 
