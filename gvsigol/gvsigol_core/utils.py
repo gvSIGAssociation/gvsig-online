@@ -498,8 +498,10 @@ def get_supported_crs(used_crs=None):
             if not used_crs:
                 supported_crs[row[0]] = crs
             else:
-                if row[2] in used_crs:
-                    supported_crs[row[0]] = crs
+                for crs in used_crs:
+                    current_crs = row[1]+':'+str(row[2])
+                    if current_crs == crs['code']:
+                        supported_crs[str(row[0])] = crs
 
     return supported_crs    
     
