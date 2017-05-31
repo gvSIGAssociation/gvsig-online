@@ -114,7 +114,7 @@ Intervals.prototype.load = function(response, selectedField, numberOfIntervals) 
 		var fieldName = min + "-" + max;
 		
 		var ruleName = min + "-" + max;
-		var ruleTitle = min + "-" + max;
+		var ruleTitle = min.toFixed(5).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/,'$1').replace(/([0-9]+(\.[1-9]+)?)(0+$)/,'$1') + "-" + max.toFixed(5).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/,'$1').replace(/([0-9]+(\.[1-9]+)?)(0+$)/,'$1') ;
 		var rule = new Rule(i, ruleName, ruleTitle, null, this.utils);
 		
 		var filter = {
