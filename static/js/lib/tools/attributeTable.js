@@ -543,7 +543,7 @@ attributeTable.prototype.zoomToSelection = function(rows) {
 	    	}
 	    	
 	    	var extent = self.source.getExtent();
-	    	self.map.getView().fit(extent, map.getSize());
+	    	self.map.getView().fit(extent, self.map.getSize());
 	  	},
 	  	error: function(){}
 	});
