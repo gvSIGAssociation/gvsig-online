@@ -1594,6 +1594,9 @@ def describeFeatureType(request):
                     if layer_def['name'] == geom_def[2]:
                         layer_def['type'] = geom_def[5]
                         layer_def['length'] = geom_def[4]
+            for layer_def in layer_defs:
+                if layer_def['name'] == 'ogc_fid':            
+                    layer_defs.remove(layer_def)
             
             response = {'fields': layer_defs}
 
