@@ -29,6 +29,8 @@ from gvsigol_auth.models import UserGroup, UserGroupUser
 from gvsigol import settings
 import json
 import psycopg2
+import os
+from numpy import genfromtxt
 
 def is_valid_project(user, pid):
     valid = False
@@ -446,6 +448,8 @@ def get_supported_crs(used_crs=None):
         
         supported_crs = {}
         
+        file_crs = genfromtxt(os.path.join(settings.BASE_DIR, 'gvsigol_core/static/crs_axis_order/mapaxisorder.csv'), skip_header=1)
+        
         db = settings.DATABASES['default']
         
         dbhost = settings.DATABASES['default']['HOST']
@@ -476,7 +480,7 @@ def get_supported_crs(used_crs=None):
                 return supported_crs   
             cursor.close();
             connection.close();
-            
+                
         for row in rows:
             s = row[3]
             data = s[s.find('[')+1:s.find(',')]
@@ -487,11 +491,15 @@ def get_supported_crs(used_crs=None):
             unit = unit.replace('"', '')
             if unit == 'metre':
                 unit = 'meter'
-                
+            
+            axis_order = ''
+            if row[2] in file_crs:
+                axis_order = ' +axis=neu'
+            
             crs = {
                 'code': row[1] + ':' + str(row[2]),
                 'title': data,
-                'definition': row[4],
+                'definition': row[4] + axis_order,
                 'units': unit+'s'
             }
             
