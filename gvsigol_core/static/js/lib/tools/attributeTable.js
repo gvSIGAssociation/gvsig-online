@@ -420,14 +420,14 @@ attributeTable.prototype.createFiltersUI = function(featureType) {
 /**
  * TODO
  */
-attributeTable.prototype.describeFeatureType = function(layer) {
+attributeTable.prototype.describeFeatureType = function() {
 	var featureType = new Array();
 	$.ajax({
 		type: 'POST',
 		async: false,
 	  	url: '/gvsigonline/services/describeFeatureType/',
 	  	data: {
-	  		'layer': layer.layer_name,
+	  		'layer': this.layer.layer_name,
 			'workspace': layer.workspace
 		},
 	  	success	:function(response){
