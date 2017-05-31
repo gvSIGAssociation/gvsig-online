@@ -428,7 +428,7 @@ attributeTable.prototype.describeFeatureType = function() {
 	  	url: '/gvsigonline/services/describeFeatureType/',
 	  	data: {
 	  		'layer': this.layer.layer_name,
-			'workspace': layer.workspace
+			'workspace': this.layer.workspace
 		},
 	  	success	:function(response){
 	  		if("fields" in response){
