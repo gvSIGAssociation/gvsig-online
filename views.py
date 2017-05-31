@@ -17,6 +17,8 @@
 '''
 from gvsigol_services.rest_geoserver import FailedRequestError
 from geoserver import workspace
+from PIL._util import isStringType
+from operator import isNumberType
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
@@ -28,6 +30,7 @@ from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpRespon
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
 from django.shortcuts import render_to_response, redirect, RequestContext
 from backend_mapservice import backend as mapservice_backend
+from backend_postgis import Introspect
 from gvsigol_services.backend_resources import resource_manager
 from gvsigol_auth.utils import superuser_required, staff_required
 from gvsigol_core.models import ProjectLayerGroup
@@ -1250,6 +1253,18 @@ def get_unique_values(request):
     
         return HttpResponse(json.dumps({'values': unique_fields}, indent=4), content_type='application/json')
 
+
+def is_numeric_type(type):
+    if type == 'smallint' or type == 'integer' or type == 'bigint' or type == 'decimal' or type == 'numeric' or type == 'real' or type == 'double precision' or type == 'smallserial' or type == 'serial' or type == 'bigserial':
+        return True;
+    return False;
+
+
+def is_string_type(type):
+    if type == 'character varying' or type == 'varchar' or type == 'character' or type == 'char' or type == 'text':
+        return True;
+    return False;
+
 @csrf_exempt
 def get_datatable_data(request):
     if request.method == 'POST':      
@@ -1298,11 +1313,11 @@ def get_datatable_data(request):
                 raw_search_cql = '('
                 for p in properties:
                     if p.split('|')[0] != 'id':
-                        if p.split('|')[1] == 'xsd:string':
+                        if is_string_type(p.split('|')[1]):
                             raw_search_cql += p.split('|')[0] + " ILIKE '%" + encoded_value.replace('?', '_') +"%'"
                             raw_search_cql += ' OR '
                             
-                        elif p.split('|')[1] == 'xsd:double' or p.split('|')[1] == 'xsd:decimal' or p.split('|')[1] == 'xsd:integer' or p.split('|')[1] == 'xsd:int' or p.split('|')[1] == 'xsd:long':
+                        elif is_numeric_type(p.split('|')[1]):
                             if search_value.isdigit():
                                 raw_search_cql += p.split('|')[0] + ' = ' + search_value
                                 raw_search_cql += ' OR '
@@ -1551,6 +1566,41 @@ def delete_resources(request):
         except Exception as e:
             print e.message
             response = {'deleted': False}
+            pass
+
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+    
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@csrf_exempt
+def describeFeatureType(request):
+    if request.method == 'POST':      
+        lyr = request.POST.get('layer')
+        workspace = request.POST.get('workspace')
+        try:
+            layer = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
+            params = json.loads(layer.datastore.connection_params)
+            host = params['host']
+            port = params['port']
+            dbname = params['database']
+            user = params['user']
+            passwd = params['passwd']
+            schema = params.get('schema', 'public')
+            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+            layer_defs = i.get_fields_info(layer.name, schema)
+            geom_defs = i.get_geometry_columns_info(layer.name, schema)
+            for layer_def in layer_defs:
+                for geom_def in geom_defs:
+                    if layer_def['name'] == geom_def[2]:
+                        layer_def['type'] = geom_def[5]
+                        layer_def['length'] = geom_def[4]
+            
+            response = {'fields': layer_defs}
+
+    
+        except Exception as e:
+            print e.message
+            response = {'fields': []}
             pass
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
