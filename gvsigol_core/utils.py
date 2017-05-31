@@ -493,15 +493,16 @@ def get_supported_crs(used_crs=None):
                 unit = 'meter'
             
             axis_order = ''
-            if row[2] in file_crs:
+            if row[2] in file_crs and row[4]:
                 axis_order = ' +axis=neu'
             
-            crs = {
-                'code': row[1] + ':' + str(row[2]),
-                'title': data,
-                'definition': row[4] + axis_order,
-                'units': unit+'s'
-            }
+            if row[4]:
+                crs = {
+                    'code': row[1] + ':' + str(row[2]),
+                    'title': data,
+                    'definition': row[4] + axis_order,
+                    'units': unit+'s'
+                }
             
             if not used_crs:
                 supported_crs[row[0]] = crs
