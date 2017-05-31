@@ -209,7 +209,7 @@ def get_conf(request, layer_id):
         'layer_name': workspace.name + ':' + layer.name,
         'style_name': workspace.name + '_' + layer.name + '_' + str(index),
         'libraries': Library.objects.all(),
-        'supported_crs': core_utils.get_supported_crs(),
+        'supported_crs': json.dumps(core_utils.get_supported_crs()),
         'extent': json.dumps(resource.get('coverage').get('nativeBoundingBox')),
         'extent_epsg': resource.get('coverage').get('grid').get('crs'),
         'preview_url': preview_url
