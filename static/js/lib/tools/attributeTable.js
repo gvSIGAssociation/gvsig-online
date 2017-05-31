@@ -113,7 +113,7 @@ attributeTable.prototype.createTableUI = function(featureType) {
 	var fields_trans = this.layer.conf;
 	var language = $("#select-language").val();
 	for (var i=0; i<featureType.length; i++) {
-		if (featureType[i].type.indexOf('gml:') == -1) {
+		if (!this.isGeomType(featureType[i].type)) {
 			if (!featureType[i].name.startsWith(this.prefix)) {
 				var column_shown = true;
 				var feat_name = featureType[i].name;
@@ -330,7 +330,7 @@ attributeTable.prototype.createFiltersUI = function(featureType) {
 	ui += 								'<select id="filter-field-select" class="form-control">';
 	ui += 									'<option value="" selected disabled>--</option>';
 	for (var i=0; i<featureType.length; i++) {
-		if (featureType[i].type.indexOf('gml:') == -1) {
+		if (!this.isGeomType(featureType[i].type)) {
 			var feat_name = featureType[i].name;
 			if(fields_trans != null && fields_trans["fields"] != undefined){
 				var fields = fields_trans["fields"];
@@ -420,41 +420,55 @@ attributeTable.prototype.createFiltersUI = function(featureType) {
 /**
  * TODO
  */
-attributeTable.prototype.describeFeatureType = function() {
-	
+attributeTable.prototype.describeFeatureType = function(layer) {
 	var featureType = new Array();
 	$.ajax({
 		type: 'POST',
 		async: false,
-	  	url: this.layer.wfs_url,
+	  	url: '/gvsigonline/services/describeFeatureType/',
 	  	data: {
-	  		'service': 'WFS',
-			'version': '1.1.0',
-			'request': 'describeFeatureType',
-			'typeName': this.layer.workspace + ":" + this.layer.layer_name, 
-			'outputFormat': 'text/xml; subtype=gml/3.1.1'
+	  		'layer': layer.layer_name,
+			'workspace': layer.workspace
 		},
 	  	success	:function(response){
-	  		var elements = null;
-			try {
-				elements = response.getElementsByTagName('sequence')[0].children;
-		    } catch(err) {
-		    	elements = response.getElementsByTagName('xsd:sequence')[0].children;
-		    }
-			
-			for (var i=0; i<elements.length; i++) {
-				var element = {
-					'name': elements[i].attributes[2].nodeValue,
-					'type': elements[i].attributes[4].nodeValue
-				};
-				featureType.push(element);
-			}
+	  		if("fields" in response){
+	  			featureType = response['fields'];
+	  		}
 		},
 	  	error: function(){}
 	});
 	
 	return featureType;
 };
+
+attributeTable.prototype.isGeomType = function(type){
+	if(type == 'POLYGON' || type == 'MULTIPOLYGON' || type == 'LINESTRING' || type == 'MULTILINESTRING' || type == 'POINT' || type == 'MULTIPOINT'){
+		return true;
+	}
+	return false;
+}
+
+attributeTable.prototype.isNumericType = function(type){
+	if(type == 'smallint' || type == 'integer' || type == 'bigint' || type == 'decimal' || type == 'numeric' ||
+			type == 'real' || type == 'double precision' || type == 'smallserial' || type == 'serial' || type == 'bigserial' ){
+		return true;
+	}
+	return false;
+}
+
+attributeTable.prototype.isStringType = function(type){
+	if(type == 'character varying' || type == 'varchar' || type == 'character' || type == 'char' || type == 'text' ){
+		return true;
+	}
+	return false;
+}
+
+attributeTable.prototype.isDateType = function(type){
+	if(type == 'date' || type == 'timestamp' || type == 'time' || type == 'interval'){
+		return true;
+	}
+	return false;
+}
 
 /**
  * TODO
@@ -569,10 +583,10 @@ attributeTable.prototype.registerEvents = function() {
 	
 	$("#filter-value-select").on('change', function(){
 		var currentFilter = self.filterCode.getValue();
-		if (self.selectedType == 'xsd:string') {
+		if (self.isStringType(self.selectedType)) {
 			currentFilter += "'" + this.value + "' ";
 			
-		} else if (self.selectedType == 'xsd:date') {
+		} else if (self.isDateType(self.selectedType)) {
 			currentFilter += this.value + " ";
 			
 		}  else if (self.selectedType == 'xsd:boolean') {

@@ -378,7 +378,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 			var language = $("#select-language").val();
 			var featureType = this.describeFeatureType(selectedLayer);
 			for (var i=0; i<featureType.length; i++) {
-				if (featureType[i].type.indexOf('gml:') == -1) {
+				if (!this.isGeomType(featureType[i].type)) {
 				var key = featureType[i].name;
 				var value = selectedFeature.properties[key];
 				if (value == "null" || value == null) {
@@ -532,36 +532,29 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 	}
 };
 
+getFeatureInfo.prototype.isGeomType = function(type){
+	if(type == 'POLYGON' || type == 'MULTIPOLYGON' || type == 'LINESTRING' || type == 'MULTILINESTRING' || type == 'POINT' || type == 'MULTIPOINT'){
+		return true;
+	}
+	return false;
+}
 
 getFeatureInfo.prototype.describeFeatureType = function(layer) {
 	
 	var featureType = new Array();
+	
 	$.ajax({
 		type: 'POST',
 		async: false,
-	  	url: layer.wfs_url,
+	  	url: '/gvsigonline/services/describeFeatureType/',
 	  	data: {
-	  		'service': 'WFS',
-			'version': '1.1.0',
-			'request': 'describeFeatureType',
-			'typeName': layer.workspace + ":" + layer.layer_name, 
-			'outputFormat': 'text/xml; subtype=gml/3.1.1'
+	  		'layer': layer.layer_name,
+			'workspace': layer.workspace
 		},
 	  	success	:function(response){
-	  		var elements = null;
-			try {
-				elements = response.getElementsByTagName('sequence')[0].children;
-		    } catch(err) {
-		    	elements = response.getElementsByTagName('xsd:sequence')[0].children;
-		    }
-			
-			for (var i=0; i<elements.length; i++) {
-				var element = {
-					'name': elements[i].attributes[2].nodeValue,
-					'type': elements[i].attributes[4].nodeValue
-				};
-				featureType.push(element);
-			}
+	  		if("fields" in response){
+	  			featureType = response['fields'];
+	  		}
 		},
 	  	error: function(){}
 	});
