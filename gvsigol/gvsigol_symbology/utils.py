@@ -225,7 +225,14 @@ def get_alphanumeric_fields(fields):
 def get_numeric_fields(fields):
     numeric_fields = []
     for field in fields:
-        if field.get('binding').startswith('java.math'):
+        if (field.get('binding').startswith('java.math') or 
+        field.get('binding') == ('java.lang.Number') or
+        field.get('binding') == ('java.lang.Byte') or
+        field.get('binding') == ('java.lang.Float') or
+        field.get('binding') == ('java.lang.Integer') or
+        field.get('binding') == ('java.lang.Long') or
+        field.get('binding') == ('java.lang.Short') or
+        field.get('binding') == ('java.lang.Double')):
             numeric_fields.append(field)
             
     return numeric_fields
