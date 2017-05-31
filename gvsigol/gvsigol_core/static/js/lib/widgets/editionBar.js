@@ -43,23 +43,23 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	this.lastAddedFeature = null;
 	this.lastEditedFeature = null;
 	for (var i=0; i<featureType.length; i++) {
-		if (featureType[i].type.indexOf('gml:') > -1) {
-			if (featureType[i].type == "gml:SurfacePropertyType") {
+		if (this.isGeomType(this.featureType[i].type)) {
+			if (featureType[i].type == "POLYGON") {
 				this.geometryType = 'Polygon';
 				this.geometryName = featureType[i].name;
-			} else if (featureType[i].type == "gml:MultiSurfacePropertyType") {
+			} else if (featureType[i].type == "MULTIPOLYGON") {
 				this.geometryType = 'MultiPolygon';
 				this.geometryName = featureType[i].name;
-			} else if (featureType[i].type == "gml:LineStringPropertyType") {
+			} else if (featureType[i].type == "LINESTRING") {
 				this.geometryType = 'LineString';
 				this.geometryName = featureType[i].name;
-			} else if (featureType[i].type == "gml:MultiLineStringPropertyType") {
+			} else if (featureType[i].type == "MULTILINESTRING") {
 				this.geometryType = 'MultiLineString';
 				this.geometryName = featureType[i].name;
-			} else if (featureType[i].type == "gml:PointPropertyType") {
+			} else if (featureType[i].type == "POINT") {
 				this.geometryType = 'Point';
 				this.geometryName = featureType[i].name;
-			} else if (featureType[i].type == "gml:MultiPointPropertyType") {
+			} else if (featureType[i].type == "MULTIPOINT") {
 				this.geometryType = 'MultiPoint';
 				this.geometryName = featureType[i].name;
 			}
@@ -628,6 +628,37 @@ editionBar.prototype.getEnumeration = function(enumName) {
 };
 
 
+editionBar.prototype.isNumericType = function(type){
+	if(type == 'smallint' || type == 'integer' || type == 'bigint' || type == 'decimal' || type == 'numeric' ||
+			type == 'real' || type == 'double precision' || type == 'smallserial' || type == 'serial' || type == 'bigserial' ){
+		return true;
+	}
+	return false;
+}
+
+editionBar.prototype.isStringType = function(type){
+	if(type == 'character varying' || type == 'varchar' || type == 'character' || type == 'char' || type == 'text' ){
+		return true;
+	}
+	return false;
+}
+
+editionBar.prototype.isDateType = function(type){
+	if(type == 'date' || type == 'timestamp' || type == 'time' || type == 'interval'){
+		return true;
+	}
+	return false;
+}
+
+editionBar.prototype.isGeomType = function(type){
+	if(type == 'POLYGON' || type == 'MULTIPOLYGON' || type == 'LINESTRING' || type == 'MULTILINESTRING' || type == 'POINT' || type == 'MULTIPOINT'){
+		return true;
+	}
+	return false;
+}
+
+
+
 /**
  * @param {Event} e Browser event.
  */
@@ -643,7 +674,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 		
 		var fields = this.selectedLayer.conf.fields;
 		for (var i=0; i<this.featureType.length; i++) {
-			if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
+			if (!this.isGeomType(this.featureType[i].type) && this.featureType[i].name != 'id') {
 				var name = this.featureType[i].name;
 				var visible = true;
 				if(fields){
@@ -662,13 +693,13 @@ editionBar.prototype.createFeatureForm = function(feature) {
 				if(visible){
 					featureProperties += '<div class="col-md-12 form-group" style="background-color: #fff;">';
 					featureProperties += 	'<label style="color: #444;">' + name + '</label>';
-					if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
+					if (this.isNumericType(this.featureType[i].type)) {
 						featureProperties += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control">';
 						
-					} else if (this.featureType[i].type == 'xsd:date') {
+					} else if (this.isDateType(this.featureType[i].type)) {
 						featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd">';
 						
-					} else if (this.featureType[i].type == 'xsd:string') {
+					} else if (this.isStringType(this.featureType[i].type)) {
 						if (this.featureType[i].name.startsWith("enm_")) {
 							var enumeration = this.getEnumeration(this.featureType[i].name);
 							featureProperties += 	'<select id="' + this.featureType[i].name + '" class="form-control">';
@@ -678,10 +709,14 @@ editionBar.prototype.createFeatureForm = function(feature) {
 							featureProperties += 	'</select>';
 							featureProperties += '</div>';
 						} else {
-							featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control">';
+							if("length" in this.featureType[i] && this.featureType[i].length>0){
+								featureProperties += '<input id="' + this.featureType[i].name + '" type="text" maxlength="'+this.featureType[i].length+'" class="form-control">';
+							}else{
+								featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control">';
+							}
 						}
 						
-					}  else if (this.featureType[i].type == 'xsd:boolean') {
+					}  else if (this.featureType[i].type == 'boolean') {
 						featureProperties += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';			
 					}
 					featureProperties += '</div>';
@@ -736,13 +771,13 @@ editionBar.prototype.createFeatureForm = function(feature) {
 		$('#save-feature').on('click', function () {
 			var properties = {};
 			for (var i=0; i<self.featureType.length; i++) {
-				if (self.featureType[i].type.indexOf('gml:') == -1 && self.featureType[i].name != 'id') {
+				if (!self.isGeomType(self.featureType[i].type) && self.featureType[i].name != 'id') {
 					var field = $('#' + self.featureType[i].name)[0];
 					if(field != null && field.id != null){
-						if (self.featureType[i].type == 'xsd:boolean') {
+						if (self.featureType[i].type == 'boolean') {
 							properties[field.id] = field.checked;
 						}
-						else if (self.featureType[i].type == 'xsd:string') {
+						else if (self.isStringType(self.featureType[i].type)) {
 							if (field.value != null) {
 								properties[field.id] = field.value;	
 							}
@@ -801,7 +836,7 @@ editionBar.prototype.editFeatureForm = function(feature) {
 		
 		var fields = this.selectedLayer.conf.fields;
 		for (var i=0; i<this.featureType.length; i++) {
-			if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
+			if (!this.isGeomType(this.featureType[i].type) && this.featureType[i].name != 'id') {
 				var name = this.featureType[i].name;
 				var visible = true;
 				if(fields){
@@ -821,12 +856,12 @@ editionBar.prototype.editFeatureForm = function(feature) {
 					var value = feature.getProperties()[this.featureType[i].name];
 					featureProperties += '<div class="col-md-12 form-group" style="background-color: #fff;">';
 					featureProperties += 	'<label style="color: #444;">' + name + '</label>';
-					if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
+					if (this.isNumericType(this.featureType[i].type)) {
 						if (value==null) {
 							value = "";
 						}
 						featureProperties += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + value + '">';
-					} else if (this.featureType[i].type == 'xsd:date') {
+					} else if (this.isDateType(this.featureType[i].type)) {
 						if (value != null) {
 							if (value.charAt(value.length - 1) == 'Z') {
 								value = value.slice(0,-1);
@@ -836,7 +871,7 @@ editionBar.prototype.editFeatureForm = function(feature) {
 						}
 						featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + value + '">';
 						
-					} else if (this.featureType[i].type == 'xsd:string') {				
+					} else if (this.isStringType(this.featureType[i].type)) {				
 						if (this.featureType[i].name.startsWith("enm_")) {
 							var enumeration = this.getEnumeration(this.featureType[i].name);
 							featureProperties += 	'<select id="' + this.featureType[i].name + '" class="form-control">';
@@ -853,7 +888,11 @@ editionBar.prototype.editFeatureForm = function(feature) {
 							if (value==null) {
 								value = "";
 							}
-							featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + value + '">';
+							if("length" in this.featureType[i] && this.featureType[i].length>0){
+								featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" maxlength="'+this.featureType[i].length+'" value="' + value + '">'; 
+							}else{
+								featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + value + '">';
+							}
 						}
 						
 					}  else if (this.featureType[i].type == 'xsd:boolean') {
@@ -916,13 +955,13 @@ editionBar.prototype.editFeatureForm = function(feature) {
 		$('#edit-feature').on('click', function () {
 			var properties = {};
 			for (var i=0; i<self.featureType.length; i++) {
-				if (self.featureType[i].type.indexOf('gml:') == -1 && self.featureType[i].name != 'id') {
+				if (!self.isGeomType(self.featureType[i].type) && self.featureType[i].name != 'id') {
 					var field = $('#' + self.featureType[i].name)[0];
 					if(field != null && field.id != null){
-						if (self.featureType[i].type == 'xsd:boolean') {
+						if (self.featureType[i].type == 'boolean') {
 							properties[field.id] = field.checked;
 						}
-						else if (self.featureType[i].type == 'xsd:string') {
+						else if (self.isStringType(self.featureType[i].type)) {
 							if (field.value != null) {
 								properties[field.id] = field.value;	
 							}
@@ -1023,13 +1062,13 @@ editionBar.prototype.removeFeatureForm = function(evt, feature) {
 		ui += 		'</div>';
 		ui += 		'<div class="box-body no-padding">';
 		for (var i=0; i<this.featureType.length; i++) {
-			if ((this.featureType[i].type.indexOf('gml:') == -1) && this.featureType[i].name != 'id') {
+			if (!this.isGeomType(this.featureType[i].type) && this.featureType[i].name != 'id') {
 				ui += '<div class="col-md-12 form-group" style="background-color: #fff;">';
 				ui += 	'<label style="color: #444;">' + this.featureType[i].name + '</label>';
-				if (this.featureType[i].type == 'xsd:double' || this.featureType[i].type == 'xsd:decimal' || this.featureType[i].type == 'xsd:integer' || this.featureType[i].type == 'xsd:int' || this.featureType[i].type == 'xsd:long') {
+				if (this.isNumericType(this.featureType[i].type)) {
 					ui += '<input disabled id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
 					
-				} else if (this.featureType[i].type == 'xsd:date') {
+				} else if (this.isDateType(this.featureType[i].type)) {
 					var dbDate = feature.getProperties()[this.featureType[i].name];
 					if (dbDate != null) {
 						if (dbDate.charAt(dbDate.length - 1) == 'Z') {
@@ -1040,7 +1079,7 @@ editionBar.prototype.removeFeatureForm = function(evt, feature) {
 					}
 					
 					
-				} else if (this.featureType[i].type == 'xsd:string') {
+				} else if (this.isStringType(this.featureType[i].type)) {
 					ui += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
 				}
 				ui += '</div>';

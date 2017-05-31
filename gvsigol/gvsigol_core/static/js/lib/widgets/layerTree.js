@@ -399,6 +399,23 @@ layerTree.prototype.describeFeatureType = function(layer) {
 	$.ajax({
 		type: 'POST',
 		async: false,
+	  	url: '/gvsigonline/services/describeFeatureType/',
+	  	data: {
+	  		'layer': layer.layer_name,
+			'workspace': layer.workspace
+		},
+	  	success	:function(response){
+	  		if("fields" in response){
+	  			featureType = response['fields'];
+	  		}
+		},
+	  	error: function(){}
+	});
+	
+	/*
+	$.ajax({
+		type: 'POST',
+		async: false,
 	  	url: layer.wfs_url,
 	  	data: {
 	  		'service': 'WFS',
@@ -425,6 +442,7 @@ layerTree.prototype.describeFeatureType = function(layer) {
 		},
 	  	error: function(){}
 	});
+	*/
 	
 	return featureType;
 };
