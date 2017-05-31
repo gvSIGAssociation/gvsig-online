@@ -498,7 +498,7 @@ def project_get_conf(request):
                     (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
                     defaultCrs = layer_info[ds_type]['srs']
                 
-                crs_code = defaultCrs.split(':')[1]
+                crs_code = int(defaultCrs.split(':')[1])
                 if crs_code in core_utils.get_supported_crs():
                     epsg = core_utils.get_supported_crs()[crs_code]
                     layer['crs'] = {
