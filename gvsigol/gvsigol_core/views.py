@@ -497,9 +497,10 @@ def project_get_conf(request):
                 else:
                     (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
                     defaultCrs = layer_info[ds_type]['srs']
-                    
-                if defaultCrs.split(':')[1] in core_utils.get_supported_crs():
-                    epsg = core_utils.get_supported_crs()[defaultCrs.split(':')[1]]
+                
+                crs_code = defaultCrs.split(':')[1]
+                if crs_code in core_utils.get_supported_crs():
+                    epsg = core_utils.get_supported_crs()[crs_code]
                     layer['crs'] = {
                         'crs': defaultCrs,
                         'units': epsg['units']
@@ -536,7 +537,7 @@ def project_get_conf(request):
                 conf_group['layers'] = ordered_layers
                 layer_groups.append(conf_group)
         
-        core_utils.get_supported_crs(used_crs)
+        supported_crs = core_utils.get_supported_crs(used_crs)
            
         ordered_layer_groups = sorted(layer_groups, key=itemgetter('groupOrder'), reverse=True)
         
@@ -567,7 +568,7 @@ def project_get_conf(request):
                 "center_lon": project.center_lon, 
                 "zoom": project.zoom 
             }, 
-            'supported_crs': core_utils.get_supported_crs(),
+            'supported_crs': supported_crs,
             'workspaces': workspaces,
             'layerGroups': ordered_layer_groups,
             'tools': gvsigol.settings.GVSIGOL_TOOLS,
