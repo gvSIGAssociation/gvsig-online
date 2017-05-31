@@ -442,6 +442,10 @@ def project_get_conf(request):
         toc = json.loads(project.toc_order)
             
         used_crs = []
+        crs_code = int('EPSG:4326'.split(':')[1])
+        if crs_code in core_utils.get_supported_crs():
+            epsg = core_utils.get_supported_crs()[crs_code]
+            used_crs.append(epsg)
         
         project_layers_groups = ProjectLayerGroup.objects.filter(project_id=project.id)
         layer_groups = []
