@@ -446,6 +446,14 @@ def project_get_conf(request):
         if crs_code in core_utils.get_supported_crs():
             epsg = core_utils.get_supported_crs()[crs_code]
             used_crs.append(epsg)
+        crs_code = int('EPSG:3857'.split(':')[1])
+        if crs_code in core_utils.get_supported_crs():
+            epsg = core_utils.get_supported_crs()[crs_code]
+            used_crs.append(epsg)
+        crs_code = int('EPSG:4258'.split(':')[1])
+        if crs_code in core_utils.get_supported_crs():
+            epsg = core_utils.get_supported_crs()[crs_code]
+            used_crs.append(epsg)
         
         project_layers_groups = ProjectLayerGroup.objects.filter(project_id=project.id)
         layer_groups = []
