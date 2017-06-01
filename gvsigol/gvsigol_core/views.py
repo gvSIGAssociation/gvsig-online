@@ -686,8 +686,12 @@ def public_viewer_get_conf(request):
                     layer['single_image'] = l.single_image
                     layer['read_roles'] = read_roles
                     layer['write_roles'] = write_roles
-                    layer['conf'] = l.conf
-                    
+                    try:
+                        json_conf = ast.literal_eval(l.conf)
+                        layer['conf'] = json.dumps(json_conf)
+                    except:
+                        layer['conf'] = "{\"fields\":[]}"
+                        pass
                     datastore = Datastore.objects.get(id=l.datastore_id)
                     workspace = Workspace.objects.get(id=datastore.workspace_id)
                     
