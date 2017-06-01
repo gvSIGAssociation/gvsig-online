@@ -73,3 +73,4 @@ tr.ui-state-default.ui-sortable-handle{ height:50px}
 .provider-img{float:left; border: 1px solid #ccc; padding: 10px; min-width: 72px; height: 72px; margin-bottom:20px}
 .provider-img img{height: 50px;}
 
+.float-search-tool{float:left; padding:15px 10px; position:absolute; z-index:1000;}
