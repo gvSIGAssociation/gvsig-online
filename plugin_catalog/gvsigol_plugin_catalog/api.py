@@ -75,17 +75,13 @@ class Geonetwork():
     
     def add_thumbnail(self, uuid, thumbnail_url):      
         op = "md.processing"        
-        url = self.service_url + op + "?uuid=" + uuid + "&process=thumbnail-add&thumbnail_url=" + thumbnail_url   
-        print "url: " + url     
+        url = self.service_url + op + "?uuid=" + uuid + "&process=thumbnail-add&thumbnail_url=" + thumbnail_url       
         r = self.session.get(url)
-        print "reason: " + r.reason
         if r.status_code==200:
-            print "test 1"
             op = "md.edit"       
             url = self.service_url + op + "?uuid=" + uuid + "&process=thumbnail-add&thumbnail_url=" + thumbnail_url         
             r = self.session.get(url)
             if r.status_code==200:
-                print "test 2"
                 return True
                     
         raise FailedRequestError(r.status_code, r.content)
