@@ -31,7 +31,7 @@ import json
 
 supported_encodings = tuple((x,x) for x in SUPPORTED_ENCODINGS)
 supported_encodings = supported_encodings + (('autodetect', _('autodetect')),)
-supported_srs = tuple((core_utils.get_supported_crs()[x]['code'],core_utils.get_supported_crs()[x]['title']) for x in core_utils.get_supported_crs())
+supported_srs = tuple((x['code'],x['code']+' - '+x['title']) for x in core_utils.get_supported_crs_array())
 supported_srs_and_blank = (('', '---------'),) + supported_srs
 
 MODE_CREATE="CR"
@@ -93,7 +93,7 @@ class PostgisLayerUploadForm(forms.Form):
     #style = forms.CharField(label=_(u'Name'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     #layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class' : 'form-control'}))
     encoding = forms.ChoiceField(label=_(u'Encoding'), required=True, choices=supported_encodings, widget=forms.Select(attrs={'class':'form-control'}))
-    srs = forms.ChoiceField(label=_(u'SRS'), required=True, choices=supported_srs_and_blank, widget=forms.Select(attrs={'class':'form-control'}))
+    srs = forms.ChoiceField(label=_(u'SRS'), required=True, choices=supported_srs_and_blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     #visible = forms.BooleanField(label=_(u'Visible'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
     #queryable = forms.BooleanField(label=_(u'Queryable'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
     #cached = forms.BooleanField(label=_(u'Cached'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
