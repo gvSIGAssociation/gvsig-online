@@ -509,7 +509,7 @@ layerTree.prototype.zoomToLayer = function(layer) {
 			}
 		}
 	}
-	var url = layer.wms_url+'?request=GetCapabilities&service=WMS&version=1.1.1';
+	var url = layer.wms_url+'?request=GetCapabilities&service=WMS';
 	var parser = new ol.format.WMSCapabilities();
 	$.ajax(url).then(function(response) {
 		   var result = parser.read(response);
@@ -518,15 +518,13 @@ layerTree.prototype.zoomToLayer = function(layer) {
 		   for (var i=0, len = Layers.length; i<len; i++) {
 		     var layerobj = Layers[i];
 		     if (layerobj.Name == layer_name) {
-		         extent = layerobj.BoundingBox[0].extent;
+		         extent = layerobj.EX_GeographicBoundingBox;
 		         break;
 		     }
 		   }
 		   
-		   if(layer_crs != null){
-			   var ext = ol.proj.transformExtent(extent, ol.proj.get(layer_crs), ol.proj.get('EPSG:3857'));
-			   self.map.getView().fit(ext, self.map.getSize());
-		   }
+		   var ext = ol.proj.transformExtent(extent, ol.proj.get('EPSG:4326'), ol.proj.get('EPSG:3857'));
+		   self.map.getView().fit(ext, self.map.getSize());
 		});
 }
 
