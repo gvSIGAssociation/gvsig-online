@@ -439,11 +439,16 @@ def send_reset_password_email(email, temp_pass):
     
 
 supported_crs = {}
+supported_crs_array = []
 def get_supported_crs(used_crs=None):   
     global supported_crs
+    global supported_crs_array
     if not supported_crs or used_crs:
         
         if settings.USE_DEFAULT_SUPPORTED_CRS:
+            for item in settings.SUPPORTED_CRS.items():
+                supported_crs_array.append(item[1])
+            supported_crs = settings.SUPPORTED_CRS
             return settings.SUPPORTED_CRS
         
         supported_crs = {}
@@ -506,12 +511,19 @@ def get_supported_crs(used_crs=None):
             
             if not used_crs:
                 supported_crs[row[0]] = crs
+                supported_crs_array.append(crs)
             else:
                 for crs in used_crs:
                     current_crs = row[1]+':'+str(row[2])
                     if current_crs == crs['code']:
                         supported_crs[str(row[0])] = crs
+                        supported_crs_array.append(crs)
 
     return supported_crs    
-    
+   
+def get_supported_crs_array(used_crs=None):  
+    global supported_crs_array
+    if not supported_crs_array or used_crs:   
+        get_supported_crs(used_crs)
+    return supported_crs_array
      
