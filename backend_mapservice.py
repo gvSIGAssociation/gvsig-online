@@ -902,6 +902,9 @@ class Geoserver():
                     if (char in under_score): copy_f = copy_f.replace(char,'_')
                 if (f != copy_f):
                     os.rename(os.path.join(dir_path, f),os.path.join(dir_path, copy_f))
+                    if f in table_definition:
+                        table_definition[copy_f] = table_definition[f]
+                        del table_definition[f]
             
             # load SHP       
             files = [f for f in os.listdir(dir_path) if f.lower()[-4:]==".shp"]
