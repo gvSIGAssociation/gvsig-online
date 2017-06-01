@@ -895,7 +895,7 @@ editionBar.prototype.editFeatureForm = function(feature) {
 							}
 						}
 						
-					}  else if (this.featureType[i].type == 'xsd:boolean') {
+					}  else if (this.featureType[i].type == 'boolean') {
 						if (value) {
 							featureProperties += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox" checked>';
 						} else {
