@@ -1589,14 +1589,17 @@ def describeFeatureType(request):
             i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
             layer_defs = i.get_fields_info(layer.name, schema)
             geom_defs = i.get_geometry_columns_info(layer.name, schema)
+            pk_defs = i.get_pk_columns(layer.name, schema)
+            
             for layer_def in layer_defs:
                 for geom_def in geom_defs:
                     if layer_def['name'] == geom_def[2]:
                         layer_def['type'] = geom_def[5]
                         layer_def['length'] = geom_def[4]
             for layer_def in layer_defs:
-                if layer_def['name'] == 'ogc_fid':            
-                    layer_defs.remove(layer_def)
+                for pk_def in pk_defs:
+                    if layer_def['name'] == pk_def:            
+                        layer_defs.remove(layer_def)
             
             response = {'fields': layer_defs}
 
