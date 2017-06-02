@@ -34,7 +34,8 @@ class WorkspaceForm(forms.Form):
     wfs_endpoint = forms.CharField(label=_(u'WFS URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '5'}))
     wcs_endpoint = forms.CharField(label=_(u'WCS URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '6'}))
     cache_endpoint = forms.CharField(label=_(u'Cache URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '7'}))
-
+    is_public = forms.BooleanField(label=_(u'Is public?'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'style' : 'margin-left: 10px'}))
+    
 class DatastoreForm(forms.Form):
     workspace = forms.ModelChoiceField(label=_(u'Workspace'), required=True, queryset=Workspace.objects.all(), widget=forms.Select(attrs={'class':'form-control'}))
     type = forms.ChoiceField(label=_(u'Type'), choices=backend.getSupportedTypes(), required=True, widget=forms.Select(attrs={'class':'form-control'}))
