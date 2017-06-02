@@ -30,6 +30,6 @@ def get_conf(request):
     if request.method == 'POST': 
         response = {
             'url': settings.PRINT_PROVIDER['url'],
-            'legal_warning': settings.PRINT_PROVIDER['legal_warning']
+            'legal_advice': settings.PRINT_PROVIDER['legal_advice']
         }       
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')           
