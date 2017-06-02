@@ -46,6 +46,12 @@ Usaremos la opción de Importación de datos, seleccionando la opción '**GVSIG 
 A continuación nos aparecerá un diálogo en el que seleccionaremos las capas a descargar de una lista de capas disponibles. Sólo aparecerán las capas sobre las que el usuario tenga permisos de escritura y que no estén bloqueadas por otro usuario. 
 Las capas se descargarán en forma de base de datos Spatialite, que se almacenan en un único fichero, usando la extensión *".sqlite"*.
 
+.. note::
+   - Las capas que serán editadas a través de mobile NO DEBEN CONTENER campos de tipo: *'boolean'*
+   - También está limitado para guardar archivos de formato (.svg) en los recursos multimedia de cada registro.
+   En ambos casos, la app se hace sensible y no reconoce estas peticiones provenientes del online.
+
+
 .. image:: ../images/mobile15.png
    :align: center
    
