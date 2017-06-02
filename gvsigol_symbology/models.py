@@ -113,6 +113,7 @@ class PolygonSymbolizer(Symbolizer):
     stroke_dash_array = models.CharField(max_length=100)
     
 class TextSymbolizer(Symbolizer):
+    is_actived = models.BooleanField(default=False)
     label = models.CharField(max_length=100)
     font_family = models.CharField(max_length=100)
     font_size = models.IntegerField(default=12)

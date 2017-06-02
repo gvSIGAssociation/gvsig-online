@@ -61,10 +61,11 @@ Expressions.prototype.updateLabelForm = function() {
 	$('#tab-content').empty();	
 	
 	$('#tab-menu').append(this.label.getTabMenu());
-
+	
+	$('#tab-content').append(this.label.getGeneralTabUI());
 	$('#tab-content').append(this.label.getFontTabUI());
 	$('#tab-content').append(this.label.getHaloTabUI());
-	$('.nav-tabs a[href="#label-font-tab"]').tab('show');
+	$('.nav-tabs a[href="#label-general-tab"]').tab('show');
 	this.label.registerEvents();
 	
 };
@@ -491,6 +492,7 @@ Expressions.prototype.loadRules = function(rules) {
 			options['order'] = order;
 			
 			if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer') {
+				options['is_actived'] = true;
 				this.loadLabel(options);
 				
 			} else if (symbolizer[0].model == 'gvsigol_symbology.externalgraphicsymbolizer') {
@@ -543,7 +545,7 @@ Expressions.prototype.save = function(layerId) {
 			symbolizers.push(symbolizer);
 		}
 		
-		if (this.label != null) {
+		if (this.label != null && this.label.is_activated()) {
 			var l = {
 				type: this.label.type,
 				json: this.label.toJSON(),
@@ -607,7 +609,7 @@ Expressions.prototype.update = function(layerId, styleId) {
 			symbolizers.push(symbolizer);
 		}
 		
-		if (this.label != null) {
+		if (this.label != null && this.label.is_activated()) {
 			var l = {
 				type: this.label.type,
 				json: this.label.toJSON(),
