@@ -627,7 +627,7 @@ def export(request, pid):
     return render_to_response('app_print_template.html', {'print_logo_url': urllib.unquote(image)}, context_instance=RequestContext(request))
     
 def ogc_services(request):
-    workspaces = Workspace.objects.all()           
+    workspaces = Workspace.objects.filter(is_public=True)         
     return render_to_response('ogc_services.html', {'workspaces': workspaces}, RequestContext(request))
 
 def select_public_project(request):  
