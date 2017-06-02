@@ -88,10 +88,15 @@ def workspace_add(request):
                     form.cleaned_data['wfs_endpoint'],
                     form.cleaned_data['wcs_endpoint'],
                     form.cleaned_data['cache_endpoint']):
+                    
+                    isPublic = False
+                    if form.cleaned_data['is_public']:
+                        isPublic = True
                         
                     # save it on DB if successfully created
                     newWs = Workspace(**form.cleaned_data)
                     newWs.created_by = request.user.username
+                    newWs.is_public = isPublic
                     newWs.save()
                     mapservice_backend.reload_nodes()
                     return HttpResponseRedirect(reverse('workspace_list'))
@@ -152,6 +157,27 @@ def workspace_delete(request, wsid):
             return HttpResponseBadRequest()
     except:
         return HttpResponseNotFound('<h1>Workspace not found{0}</h1>'.format(ws.name)) 
+    
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@superuser_required
+def workspace_update(request, wid):
+    if request.method == 'POST':
+        description = request.POST.get('workspace-description')
+        isPublic = False
+        if 'is_public' in request.POST:
+            isPublic = True
+        
+        workspace = Workspace.objects.get(id=int(wid))
+        
+        workspace.description = description
+        workspace.is_public = isPublic
+        workspace.save()   
+        return redirect('workspace_list')
+
+    else:
+        workspace = Workspace.objects.get(id=int(wid))
+        return render_to_response('workspace_update.html', {'wid': wid, 'workspace': workspace}, context_instance=RequestContext(request))
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
