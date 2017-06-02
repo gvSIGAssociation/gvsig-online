@@ -24,8 +24,6 @@ from __future__ import unicode_literals
 from django.db import models
 from gvsigol_auth.models import UserGroup
 from gvsigol import settings
-from django.dispatch import receiver
-import os
 
 class Workspace(models.Model):
     name = models.CharField(max_length=250, unique=True)
@@ -36,6 +34,7 @@ class Workspace(models.Model):
     wcs_endpoint = models.CharField(max_length=500, null=True, blank=True)
     cache_endpoint = models.CharField(max_length=500, null=True, blank=True)
     created_by = models.CharField(max_length=100)
+    is_public = models.BooleanField(default=False)
     
     def __unicode__(self):
         return self.name
