@@ -176,8 +176,26 @@ attributeTable.prototype.createTableUI = function(featureType) {
 	tableButtons.push({
    	 	extend: 'print',
 		text: '<i class="fa fa-file-pdf-o margin-r-5"></i> Pdf',
-		title: self.conf.project_name
+		title: self.layer.title
 	});
+	var print = viewer.core.getTool('print');
+	if (print != null) {
+		this.printProvider = print.printProvider;
+		tableButtons.push({
+        	text: '<i class="fa fa-print margin-r-5"></i> ' + gettext('Print selection'),
+            action: function ( e, dt, node, config ) {
+            	var t = $('#table-' + self.layer.get("id")).DataTable();
+            	var selectedRows = t.rows('.selected').data();
+            	if (selectedRows.length > 0){	
+            		self.zoomToSelection(selectedRows);
+                	self.createPrintJob(featureType, selectedRows);
+                	
+    	    	} else {
+    	    		messageBox.show('warning', gettext('You must select at least one row'));
+    	    	}
+            }
+        });
+	}
 	tableButtons.push({
     	text: '<i class="fa fa-search-plus margin-r-5"></i> ' + gettext('Zoom to selection'),
         action: function ( e, dt, node, config ) {
@@ -613,4 +631,223 @@ attributeTable.prototype.registerEvents = function() {
 	});
 	
 	
+};
+
+/**
+ * TODO
+ */
+attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
+	var self = this;
+	
+	$("body").overlay();
+	var mapLayers = this.map.getLayers().getArray();
+	var printLayers = new Array();
+	var legends = new Array();
+	for (var i=0; i<mapLayers.length; i++) {
+		if (!mapLayers[i].baselayer && mapLayers[i].layer_name != 'plg_catastro' && !(mapLayers[i] instanceof ol.layer.Vector)) {
+			if (mapLayers[i].getVisible()) {
+				var layer = {
+					//"baseURL": "http://localhost/gs-local/ws_jrodrigo/wms",
+					"baseURL": mapLayers[i].wms_url_no_auth,
+			  	    "opacity": 1,
+			  	    "type": "WMS",
+		  			"imageFormat": "image/png",
+		  			"customParams": {
+		  				"TRANSPARENT": "true"
+		  			}
+		  	    };
+				if (mapLayers[i].isLayerGroup) {
+					layer['layers'] = [mapLayers[i].layer_name];
+				} else {
+					layer['layers'] = [mapLayers[i].workspace + ':' + mapLayers[i].layer_name];
+				}
+				printLayers.push(layer);
+				
+				var legend = {
+					"name": mapLayers[i].title,
+		            "icons": [mapLayers[i].legend_no_auth]
+		        };
+				/*var legend = {
+					"name": mapLayers[i].title,
+			        "icons": ["http://localhost:8080/geoserver/ws_jrodrigo/wms?SERVICE=WMS&VERSION=1.1.1&layer=parcelas_no_urb&REQUEST=getlegendgraphic&FORMAT=image/png"]
+			    };*/
+				legends.push(legend);
+			}									
+		}
+	}
+	
+	var baseLayers = this.map.getLayers().getArray();
+	for (var i=0; i<baseLayers.length; i++) {
+		if (baseLayers[i].baselayer) {
+			if (baseLayers[i].getVisible()) {
+				console.log(baseLayers[i]);
+				if (baseLayers[i].getSource() instanceof ol.source.OSM) {
+					printLayers.push({
+						"baseURL": "http://a.tile.openstreetmap.org",
+				  	    "type": "OSM",
+				  	    "imageExtension": "png"
+					});
+					
+				} else if (baseLayers[i].getSource() instanceof ol.source.WMTS) {
+					var initialScale = 559082263.950892933;
+					var scale = 0;
+					var matrices = new Array();
+					var tileGrid = baseLayers[i].getSource().getTileGrid(); 
+					for (var z = 0; z < 18; ++z) {
+						var matrixSize = new Array();
+						if (z == 0) {
+							matrixSize.push(1);
+							matrixSize.push(1);
+							scale = initialScale;
+							
+						} else if (z >= 1) {
+							matrixSize.push(z*2);
+							matrixSize.push(z*2);
+							scale = scale / 2;
+						}
+						matrices.push({
+				            "identifier": z,
+				            "matrixSize": matrixSize,
+				            "scaleDenominator": scale,
+				            "tileSize": [tileGrid.getTileSize(), tileGrid.getTileSize()],
+				            "topLeftCorner": [-2.003750834E7, 2.0037508E7]
+						});
+					}
+					printLayers.push({
+						"type": "WMTS",
+				        "baseURL": baseLayers[i].getSource().getUrls()[0],
+				        "opacity": 1.0,
+				        "layer": baseLayers[i].getSource().getLayer(),
+				        "version": "1.0.0",
+				        "requestEncoding": "KVP",
+				        "dimensions": null,
+				        "dimensionParams": {},
+				        "matrixSet": baseLayers[i].getSource().getMatrixSet(),
+				        "matrices": matrices,
+				        "imageFormat": "image/png"
+					});
+					
+				} else if (baseLayers[i].getSource() instanceof ol.source.TileWMS) {
+					printLayers.push({
+						"type": "WMS",
+				        "layers": [baseLayers[i].getSource().getParams()['LAYERS']],
+				        "baseURL": baseLayers[i].getSource().getUrls()[0],
+				        "imageFormat": baseLayers[i].getSource().getParams()['FORMAT'],
+				        "version": baseLayers[i].getSource().getParams()['VERSION'],
+				        "customParams": {
+				        	"TRANSPARENT": "true"
+				        }
+					});
+					
+				} else if (baseLayers[i].getSource() instanceof ol.source.XYZ) {
+					printLayers.push({
+						"baseURL": baseLayers[i].getSource().getUrls()[0],
+					    "type": "OSM",
+					    "imageExtension": "jpg"
+					});
+				}
+			}
+		}
+	}
+	
+	var columns = new Array();
+	for (var i=0; i<featureType.length; i++) {
+		if (featureType[i].type.indexOf('gml:') == -1) {
+			if (!featureType[i].name.startsWith(this.prefix)) {
+				columns.push(featureType[i].name);
+			}
+		}
+	}
+	
+	var data = new Array();
+	for (var i=0; i<selectedRows.length; i++) {
+		var row = new Array();
+		for (var key in selectedRows[i]) {
+			if (key != 'featureid') {
+				row.push(selectedRows[i][key]);
+			}
+		}
+		data.push(row);
+	}
+	
+	$.ajax({
+		type: 'POST',
+		async: true,
+	  	url: self.printProvider.url + '/print/a4_landscape_att/report.pdf',
+	  	processData: false,
+	    contentType: 'application/json',
+	  	data: JSON.stringify({
+	  		"layout": "A4 landscape att",
+		  	"outputFormat": "pdf",
+		  	"attributes": {
+		  		"title": self.layer.title,
+		  		"legalWarning": self.printProvider.legal_advice,
+		  		"map": {
+		  			"projection": "EPSG:3857",
+		  			"dpi": 254,
+		  			"rotation": 0,
+		  			"center": self.map.getView().getCenter(),
+		  			"scale": self.getCurrentScale(),
+		  			"layers": printLayers
+		  	    },
+		  	    "datasource": [{
+		  	    	"title": self.layer.title,
+			        "table": {
+			        	"columns": columns,
+			        	"data": data
+			        }
+			    }],
+		  	    "legend": {
+		  	    	"name": "",
+		            "classes": [legend]
+		        },
+		        "crs": "EPSG:3857",
+		  	}
+		}),
+	  	success	:function(response){
+	  		self.getReport(response);
+	  	},
+	  	error: function(){}
+	});
+
+	
+};
+
+attributeTable.prototype.getCurrentScale = function () {
+    var view = this.map.getView();
+    var resolution = view.getResolution();
+    var units = this.map.getView().getProjection().getUnits();
+    var dpi = 25.4 / 0.28;
+    var mpu = ol.proj.METERS_PER_UNIT[units];
+    var scale = resolution * mpu * 39.37 * dpi;
+    return scale;
+};
+
+attributeTable.prototype.getScaleFromResolution = function (resolution) {
+    var units = this.map.getView().getProjection().getUnits();
+    var dpi = 25.4 / 0.28;
+    var mpu = ol.proj.METERS_PER_UNIT[units];
+    var scale = resolution * mpu * 39.37 * dpi;
+    return scale;
+};
+
+/**
+ * TODO
+ */
+attributeTable.prototype.getReport = function(reportInfo) {
+	var self = this;
+	$.ajax({
+		type: 'GET',
+		async: true,
+	  	url: self.printProvider.url + reportInfo.statusURL,
+	  	success	:function(response){
+	  		if (response.done) {
+	  			$.overlayout();
+	  			window.open(reportInfo.downloadURL);
+	  		} else {
+	  			self.getReport(reportInfo);
+	  		}
+	  	},
+	  	error: function(){}
+	});
 };

@@ -5,6 +5,7 @@ urlpatterns = [
     url(r'^workspace_add/$', 'gvsigol_services.views.workspace_add', name='workspace_add'),
     url(r'^workspace_import/$', 'gvsigol_services.views.workspace_import', name='workspace_import'),
     url(r'^workspace_delete/(?P<wsid>\d+)/$', 'gvsigol_services.views.workspace_delete', name='workspace_delete'),
+    url(r'^workspace_update/(?P<wid>[0-9]+)/$', 'gvsigol_services.views.workspace_update', name='workspace_update'),
     url(r'^datastore_list/$', 'gvsigol_services.views.datastore_list', name='datastore_list'),
     url(r'^datastore_add/$', 'gvsigol_services.views.datastore_add', name='datastore_add'),
     url(r'^datastore_update/(?P<datastore_id>[0-9]+)/$', 'gvsigol_services.views.datastore_update', name='datastore_update'),

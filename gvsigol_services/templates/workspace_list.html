@@ -22,6 +22,7 @@
 							<th>{% trans "Name" %}</th>
 							<th>{% trans "Description" %}</th>
 							<th>{% trans "URI" %}</th>
+							<th>{% trans "Is public?" %}</th>
 							<th></th>
 							<th></th>
 						</tr>
@@ -33,6 +34,7 @@
 							<td>{{ ws.name }}</td>
 							<td>{{ ws.description }}</td>
 							<td>{{ ws.uri }}</td>
+							<td>{{ ws.is_public }}</td>
 							<td></td>
 							<td></td>
 						</tr>
@@ -102,6 +104,10 @@ $(document).ready(function() {
 	        "targets": -1,
 	        "data": null,
 	        "defaultContent": '<button type="button" name="button-delete-workspace" data-toggle="modal" data-target="#modal-delete-workspace" data-placement="bottom" title="' + '{% trans "Delete workspace" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+	    },{
+	        "targets": -2,
+	        "data": null,
+	        "defaultContent": '<button type="button" name="button-update-workspace" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update workspace" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
 	    }],
 	    "dom": 'T<"clear">lfrtip',
 		"bLengthChange": false
@@ -112,12 +118,20 @@ $(document).ready(function() {
 	    var data = row.data();     
 	    if (this.name == "button-delete-workspace"){
 	        deleteWorkspace(data, row);   
+	        
+	    } else if (this.name == "button-update-workspace") {
+	    	updateWorkspace(data);
+	    	
 	    }
 	});
 	
 	$('#button-add-workspace').click( function() {
 		location.href = '/gvsigonline/services/workspace_add/';
 	});
+	
+	function updateWorkspace(data){			
+		location.href = '/gvsigonline/services/workspace_update/' + data[0] + '/';
+	}
 
 	function deleteWorkspace(data, row){
 		$('#button-delete-workspace-accept').click( function() {
