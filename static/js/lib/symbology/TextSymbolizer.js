@@ -23,6 +23,7 @@
 var TextSymbolizer = function(rule, options, utils) {
 	this.id = 'textsymbolizer' + utils.generateUUID();
 	this.type = 'TextSymbolizer';
+	this.is_actived = false;
 	this.label = '';
 	this.font_family = 'Arial';
 	this.font_size= 12;
@@ -36,6 +37,8 @@ var TextSymbolizer = function(rule, options, utils) {
 	this.order = 0;
 	this.utils = utils;
 	this.rule = rule;
+	this.minscale = -1;
+	this.maxscale = -1;
 	
 	if (options) {
 		$.extend(this, options);
@@ -61,11 +64,31 @@ TextSymbolizer.prototype.getTableUI = function() {
 
 TextSymbolizer.prototype.getTabMenu = function() {
 	var ui = '';
-	ui += '<li class="active"><a href="#label-font-tab" data-toggle="tab">' + gettext('Font') + '</a></li>';
-	ui += '<li><a href="#label-halo-tab" data-toggle="tab">' + gettext('Halo') + '</a></li>';
+	ui += '<li id="general-tab" class="active"><a href="#label-general-tab" data-toggle="tab">' + gettext('General') + '</a></li>';
+	ui += '<li id="font-tab"><a href="#label-font-tab" data-toggle="tab">' + gettext('Font') + '</a></li>';
+	ui += '<li id="halo-tab"><a href="#label-halo-tab" data-toggle="tab">' + gettext('Halo') + '</a></li>';
 	
 	return ui;	
 };
+
+
+TextSymbolizer.prototype.getGeneralTabUI = function() {
+	var ui = '';
+	ui += '<div class="tab-pane active" id="label-general-tab">';
+	ui += 	'<div class="row">';
+	ui += 		'<div class="col-md-12 form-group">';
+	if(this.is_actived){
+		ui += 			'<input id="label-has-label" type="checkbox" class="has-label" checked>   ' + gettext('Has label') + '</input>';
+	}else{
+		ui += 			'<input id="label-has-label" type="checkbox" class="has-label">   ' + gettext('Has label') + '</input>';
+	}
+	ui += 		'</div>';
+	ui += 	'</div>';
+	ui += '</div>';
+	
+	return ui;
+};
+
 
 TextSymbolizer.prototype.getFontTabUI = function() {
 	
@@ -76,7 +99,7 @@ TextSymbolizer.prototype.getFontTabUI = function() {
 	var fontStyles = this.utils.getFontStyles();
 	
 	var ui = '';
-	ui += '<div class="tab-pane active" id="label-font-tab">';
+	ui += '<div class="tab-pane" id="label-font-tab">';
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
 	ui += 			'<label>' + gettext('Label field') + '</label>';
@@ -187,6 +210,12 @@ TextSymbolizer.prototype.getHaloTabUI = function() {
 
 TextSymbolizer.prototype.registerEvents = function() {
 	var self = this;
+
+	
+	$('#label-has-label').on('change', function() {
+		self.is_actived = $(this).is(':checked');
+		self.initializeForm();
+	});
 	
 	$('#label-label').on('change', function() {
 		self.label = this.value;
@@ -238,6 +267,14 @@ TextSymbolizer.prototype.registerEvents = function() {
 		//self.updatePreview();
 	});
 	
+	$("#text-minscale").on('change', function(e){
+		self.minscale = this.value;
+	});
+	
+	$("#text-maxscale").on('change', function(e){
+		self.maxscale = this.value;
+	});
+	
 	$( "#halo-fill-opacity-slider" ).slider({
 	    min: 0,
 	    max: 100,
@@ -251,7 +288,28 @@ TextSymbolizer.prototype.registerEvents = function() {
 	    	$("#halo-fill-opacity-output").text(ui.value + '%');
 	    }
 	});
+	
+	
+	self.initializeForm();
 };
+
+TextSymbolizer.prototype.initializeForm = function() {
+	if(!this.is_actived) {
+	    $("#font-tab a").removeAttr("data-toggle");
+	    $("#halo-tab a").removeAttr("data-toggle");
+	    $("#text-minscale").prop("disabled",true);
+	    $("#text-maxscale").prop("disabled",true);
+	} else {
+		$("#font-tab a").attr("data-toggle", "tab");
+		$("#halo-tab a").attr("data-toggle", "tab");
+	    $("#text-minscale").prop("disabled",false);
+	    $("#text-maxscale").prop("disabled",false);
+	}
+};
+
+TextSymbolizer.prototype.is_activated = function() {
+	return this.is_actived;
+}
 
 /*TextSymbolizer.prototype.updatePreview = function() {
 	var preview = null;
@@ -275,37 +333,38 @@ TextSymbolizer.prototype.registerEvents = function() {
 TextSymbolizer.prototype.toXML = function(){
 	
 	var xml = '';
-	xml += '<TextSymbolizer>';
-	xml += 	'<Label>';
-	xml += 		'<ogc:PropertyName>' + this.label + '</ogc:PropertyName>';
-	xml +=  '</Label>';
-	xml += 	'<Font>';
-	xml += 		'<CssParameter name="font-family">' + this.font_family + '</CssParameter>';
-	xml += 		'<CssParameter name="font-size">' + this.font_size + '</CssParameter>';
-	xml += 		'<CssParameter name="font-style">' + this.font_style + '</CssParameter>';
-	xml += 		'<CssParameter name="font-weight">' + this.font_weight + '</CssParameter>';
-	xml += 	'</Font>';
-	xml += 	'<LabelPlacement>';
-	xml += 		'<PointPlacement>';
-	xml += 			'<AnchorPoint>';
-	xml += 				'<AnchorPointX>0.5</AnchorPointX>';
-	xml += 				'<AnchorPointY>0.0</AnchorPointY>';
-	xml += 			'</AnchorPoint>';
-	xml += 		'</PointPlacement>';
-	xml += 	'</LabelPlacement>';
-	xml += 	'<Fill>';
-	xml += 		'<CssParameter name="fill">' + this.fill + '</CssParameter>';
-	xml += 		'<CssParameter name="fill-opacity">' + this.fill_opacity + '</CssParameter>';
-	xml += 	'</Fill>';
-	xml += 	'<Halo>';
-	xml += 		'<Radius>' + this.halo_radius + '</Radius>';
-	xml += 		'<Fill>';
-	xml += 			'<CssParameter name="fill">' + this.halo_fill + '</CssParameter>';
-	xml += 			'<CssParameter name="fill-opacity">' + this.halo_fill_opacity + '</CssParameter>';
-	xml += 		'</Fill>';
-	xml += 	'</Halo>';
-	xml += '</TextSymbolizer>';
-	
+	if(this.is_actived){
+		xml += '<TextSymbolizer>';
+		xml += 	'<Label>';
+		xml += 		'<ogc:PropertyName>' + this.label + '</ogc:PropertyName>';
+		xml +=  '</Label>';
+		xml += 	'<Font>';
+		xml += 		'<CssParameter name="font-family">' + this.font_family + '</CssParameter>';
+		xml += 		'<CssParameter name="font-size">' + this.font_size + '</CssParameter>';
+		xml += 		'<CssParameter name="font-style">' + this.font_style + '</CssParameter>';
+		xml += 		'<CssParameter name="font-weight">' + this.font_weight + '</CssParameter>';
+		xml += 	'</Font>';
+		xml += 	'<LabelPlacement>';
+		xml += 		'<PointPlacement>';
+		xml += 			'<AnchorPoint>';
+		xml += 				'<AnchorPointX>0.5</AnchorPointX>';
+		xml += 				'<AnchorPointY>0.0</AnchorPointY>';
+		xml += 			'</AnchorPoint>';
+		xml += 		'</PointPlacement>';
+		xml += 	'</LabelPlacement>';
+		xml += 	'<Fill>';
+		xml += 		'<CssParameter name="fill">' + this.fill + '</CssParameter>';
+		xml += 		'<CssParameter name="fill-opacity">' + this.fill_opacity + '</CssParameter>';
+		xml += 	'</Fill>';
+		xml += 	'<Halo>';
+		xml += 		'<Radius>' + this.halo_radius + '</Radius>';
+		xml += 		'<Fill>';
+		xml += 			'<CssParameter name="fill">' + this.halo_fill + '</CssParameter>';
+		xml += 			'<CssParameter name="fill-opacity">' + this.halo_fill_opacity + '</CssParameter>';
+		xml += 		'</Fill>';
+		xml += 	'</Halo>';
+		xml += '</TextSymbolizer>';
+	}
 	return xml;
 };
 
@@ -314,6 +373,7 @@ TextSymbolizer.prototype.toJSON = function(){
 	var object = {
 		id: this.id,
 		type: this.type,
+		is_actived: this.is_actived,
 		label: this.label,
 		font_family: this.font_family,
 		font_size: this.font_size,
@@ -324,6 +384,8 @@ TextSymbolizer.prototype.toJSON = function(){
 		halo_fill: this.halo_fill,
 		halo_fill_opacity: this.halo_fill_opacity,
 		halo_radius: this.halo_radius,
+		minscale: this.minscale,
+		maxscale: this.maxscale,
 		order: this.order
 	};
 	
