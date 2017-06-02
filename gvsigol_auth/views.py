@@ -274,7 +274,8 @@ def user_add(request):
                                 wfs_endpoint = url + ws_name + '/wfs',
                                 wcs_endpoint = url + ws_name + '/wcs',
                                 cache_endpoint = url + 'gwc/service/wms',
-                                created_by = user.username
+                                created_by = user.username,
+                                is_public = False
                             )
                             newWs.save()
                             
