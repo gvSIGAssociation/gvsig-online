@@ -20,7 +20,7 @@
 		<link>
 			<name>gvsigol_app_dev</name>
 			<type>2</type>
-			<location>/home/cesar/projects/scolab/gvsig-online/wsgol2/app_dev/gvsigol_app_dev</location>
+			<locationURI>PARENT-1-PROJECT_LOC/app_dev/gvsigol_app_dev</locationURI>
 		</link>
 		<link>
 			<name>locale</name>
