@@ -22,16 +22,16 @@ class Project(models.Model):
     
     
 class ProjectUserGroup(models.Model):
-    project = models.ForeignKey(Project)
-    user_group = models.ForeignKey(UserGroup)
+    project = models.ForeignKey(Project, default=None)
+    user_group = models.ForeignKey(UserGroup, default=None)
     
     def __unicode__(self):
         return self.project.name + ' - ' + self.user_group.name  
  
     
 class ProjectLayerGroup(models.Model):
-    project = models.ForeignKey(Project)
-    layer_group = models.ForeignKey(LayerGroup)
+    project = models.ForeignKey(Project, default=None)
+    layer_group = models.ForeignKey(LayerGroup, default=None)
     
     def __unicode__(self):
         return self.project.name + ' - ' + self.layer_group.name
