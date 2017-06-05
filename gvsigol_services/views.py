@@ -1597,7 +1597,6 @@ def delete_resources(request):
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
 @csrf_exempt
 def describeFeatureType(request):
     if request.method == 'POST':      
