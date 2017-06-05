@@ -497,18 +497,7 @@ layerTree.prototype.userCanWrite = function(layer) {
 layerTree.prototype.zoomToLayer = function(layer) {
 	var self = this;
 	var layer_name = layer.layer_name;
-	var layer_crs = null;
-	if(layer.crs &&  layer.crs.crs){
-		layer_crs = layer.crs.crs;
-	}
-	if(layer.parentGroup && layer.parentGroup.layers){
-		var layers = layer.parentGroup.layers;
-		for(var idx in layers){
-			if(layers[idx].name == layer_name){
-				layer_crs = layers[idx].crs.crs;
-			}
-		}
-	}
+
 	var url = layer.wms_url+'?request=GetCapabilities&service=WMS';
 	var parser = new ol.format.WMSCapabilities();
 	$.ajax(url).then(function(response) {
