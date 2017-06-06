@@ -37,11 +37,17 @@ var TextSymbolizer = function(rule, options, utils) {
 	this.order = 0;
 	this.utils = utils;
 	this.rule = rule;
-	this.minscale = -1;
-	this.maxscale = -1;
+	this.minscale = "";
+	this.maxscale = "";
 	
 	if (options) {
 		$.extend(this, options);
+		if(this.minscale<0){
+			this.minscale = "";
+		}
+		if(this.maxscale<0){
+			this.maxscale = "";
+		}
 	}
 };
 
@@ -84,6 +90,17 @@ TextSymbolizer.prototype.getGeneralTabUI = function() {
 	}
 	ui += 		'</div>';
 	ui += 	'</div>';
+	ui += 	'<div class="row">';
+	ui += 		'<div class="col-md-12 form-group">';
+	ui += 			'<label>' + gettext( 'Minimum scale denominator') + '</label>';
+	ui += 			'<input placeholder="' + gettext('No limit') + '" name="text-minscale" id="text-minscale" type="number" step="any" value="'+this.minscale+'" class="form-control">';					
+	ui += 		'</div>';
+	ui += 	'</div>';
+	ui += 	'<div class="row">';
+	ui += 		'<div class="col-md-12 form-group">';
+	ui += 			'<label>' + gettext( 'Maximum scale denominator') + '</label>';
+	ui += 			'<input placeholder="' + gettext('No limit') + '" name="text-maxscale" id="text-maxscale" type="number" step="any" value="'+this.maxscale+'" class="form-control">';					
+	ui += 		'</div>';
 	ui += '</div>';
 	
 	return ui;
@@ -369,6 +386,16 @@ TextSymbolizer.prototype.toXML = function(){
 };
 
 TextSymbolizer.prototype.toJSON = function(){
+	var minscale = -1;
+	if(this.minscale != "" && this.minscale >= 0){
+		minscale = this.minscale;
+	}
+	
+	var maxscale = -1;
+	if(this.maxscale != "" && this.maxscale >= 0){
+		maxscale = this.maxscale;
+	}
+	
 	
 	var object = {
 		id: this.id,
@@ -384,8 +411,8 @@ TextSymbolizer.prototype.toJSON = function(){
 		halo_fill: this.halo_fill,
 		halo_fill_opacity: this.halo_fill_opacity,
 		halo_radius: this.halo_radius,
-		minscale: this.minscale,
-		maxscale: this.maxscale,
+		minscale: minscale,
+		maxscale: maxscale,
 		order: this.order
 	};
 	

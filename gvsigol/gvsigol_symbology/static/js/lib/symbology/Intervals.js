@@ -19,8 +19,8 @@
 /**
  * @author: Javier Rodrigo <jrodrigo@scolab.es>
  */
- 
- 
+
+
 var Intervals = function(featureType, layerName, utils, previewUrl) {
 	this.selected = null;
 	this.featureType = featureType;
@@ -35,7 +35,7 @@ Intervals.prototype.showLabel = function() {
 	if (this.label) {
 		this.updateLabelForm();
 		$('#modal-symbolizer').modal('show');
-		
+
 	} else {
 		this.label = new TextSymbolizer(this.rule, null, this.utils);
 		this.updateLabelForm();
@@ -48,7 +48,7 @@ Intervals.prototype.loadLabel = function(options) {
 		this.label = null;
 		this.label = new TextSymbolizer(this.rule, options, this.utils);
 		this.updateLabelForm();
-		
+
 	} else {
 		this.label = new TextSymbolizer(this.rule, options, this.utils);
 		this.updateLabelForm();
@@ -58,15 +58,15 @@ Intervals.prototype.loadLabel = function(options) {
 Intervals.prototype.updateLabelForm = function() {
 	$('#tab-menu').empty();
 	$('#tab-content').empty();	
-	
+
 	$('#tab-menu').append(this.label.getTabMenu());
-	
+
 	$('#tab-content').append(this.label.getGeneralTabUI());
 	$('#tab-content').append(this.label.getFontTabUI());
 	$('#tab-content').append(this.label.getHaloTabUI());
 	$('.nav-tabs a[href="#label-general-tab"]').tab('show');
 	this.label.registerEvents();
-	
+
 };
 
 Intervals.prototype.getRules = function() {
@@ -102,30 +102,41 @@ Intervals.prototype.deleteRule = function(id) {
 Intervals.prototype.load = function(response, selectedField, numberOfIntervals) {
 	$('#rules').empty();
 	this.rules.splice(0, this.rules.length);
-	
+
 	var minMax = JSON.parse(response);
 	var colors = this.utils.createColorRange('intervals', numberOfIntervals);
-	
+
 	for (var i=0; i<numberOfIntervals; i++) {
-		
 		var min = this.getMinValueForInterval(minMax.min, minMax.max, i, numberOfIntervals);
 		var max = this.getMaxValueForInterval(minMax.min, minMax.max, i, numberOfIntervals);
-		
+
 		var fieldFilter = min + "<=" + selectedField + "<=" + max;
 		var fieldName = min + "-" + max;
-		
+
 		var ruleName = min + "-" + max;
 		var ruleTitle = min.toFixed(5).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/,'$1').replace(/([0-9]+(\.[1-9]+)?)(0+$)/,'$1') + "-" + max.toFixed(5).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/,'$1').replace(/([0-9]+(\.[1-9]+)?)(0+$)/,'$1') ;
-		var rule = new Rule(i, ruleName, ruleTitle, null, this.utils);
-		
+		var minscale = $('#symbol-minscale').val();
+		var maxscale = $('#symbol-maxscale').val();
+
+		var options = {
+				"id" : this.rules.length,
+				"name" : ruleName,
+				"title" : ruleTitle,
+				"abstract" : "",
+				"filter" : "",
+				"minscale" : minscale,
+				"maxscale" : maxscale,
+				"order" :  i
+		}
+
+		var rule = new Rule(i, ruleName, ruleTitle, options, this.utils);
 		var filter = {
-			type: 'is_between',
-			property_name: selectedField,
-			value1: min,		
-			value2: max
+				type: 'is_between',
+				property_name: selectedField,
+				value1: min,		
+				value2: max
 		};
 		rule.setFilter(filter);
-		
 		$('#rules').append(rule.getTableUI(true, 'intervals'));
 		rule.addSymbolizer({fill: colors[i]});
 		rule.registerEvents();
@@ -140,7 +151,7 @@ Intervals.prototype.getMinValueForInterval = function(min, max, it, numberOfInte
 	}
 	var gap = (max-min)/numberOfIntervals;
 	var value = min + (gap*it);
-	
+
 	return value;
 }
 
@@ -150,7 +161,7 @@ Intervals.prototype.getMaxValueForInterval = function(min, max, it, numberOfInte
 	}
 	var gap = (max-min)/numberOfIntervals;
 	var value = min + (gap*(it+1));
-	
+
 	return value;
 }
 
@@ -158,37 +169,54 @@ Intervals.prototype.loadRules = function(rules) {
 	$('#rules').empty();
 	this.rules.splice(0, this.rules.length);
 	for (var i=0; i<rules.length; i++) {
-		var rule = new Rule(rules[i].id, rules[i].name, rules[i].title, null, this.utils);
-		var filter = JSON.parse(rules[i].filter);
-		rule.setFilter(filter);
-			
+		var options = {
+				"id" : rules[i].id,
+				"name" : rules[i].name,
+				"title" : rules[i].title,
+				"abstract" : "",
+				"filter" : "",
+				"minscale" : rules[i].minscale,
+				"maxscale" : rules[i].maxscale,
+				"order" : rules[i].order
+		}
+
+		var rule = new Rule(rules[i].id, rules[i].name, rules[i].title, options, this.utils);
+		if(rules[i].filter != ""){
+			var filter = JSON.parse(rules[i].filter);
+			rule.setFilter(filter);
+		}
 		rule.removeAllSymbolizers();
 		rule.removeLabel();
-		$('#rules').append(rule.getTableUI(true, 'intervals'));
-		
+
+		if(!rules[i].name.endsWith("_text")){
+			$('#rules').append(rule.getTableUI(true, 'intervals'));
+		}
+
 		for (var j=0; j<rules[i].symbolizers.length; j++) {
-			
 			var symbolizer = JSON.parse(rules[i].symbolizers[j].json);
 			var order = rules[i].symbolizers[j].order;
 			var options = symbolizer[0].fields;
 			options['order'] = order;
-			
+
 			if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer') {
 				options['is_actived'] = true;
+				options['minscale'] = rules[i].minscale;
+				options['maxscale'] = rules[i].maxscale;
 				this.loadLabel(options);
-				
+
 			} else if (symbolizer[0].model == 'gvsigol_symbology.externalgraphicsymbolizer') {
 				rule.addExternalGraphicSymbolizer(options);
-				
+
 			} else {
 				rule.addSymbolizer(options);
 			}	
-			
+
 		}
-		
+
 		rule.registerEvents();
 		rule.preview();
 		this.addRule(rule);
+
 	}
 };
 
@@ -197,47 +225,80 @@ Intervals.prototype.refreshMap = function() {
 };
 
 Intervals.prototype.save = function(layerId) {
-	
+
 	$("body").overlay();
-	
+
+	var minscale = $('#symbol-minscale').val();
+	if(minscale == "" || minscale < 0){
+		minscale = -1;
+	}
+
+	var maxscale = $('#symbol-maxscale').val();
+	if(maxscale == "" || maxscale < 0){
+		maxscale = -1;
+	}
+
+
 	var style = {
-		name: $('#style-name').val(),
-		title: $('#style-title').val(),
-		is_default: $('#style-is-default').is(":checked"),
-		rules: new Array()
+			name: $('#style-name').val(),
+			title: $('#style-title').val(),
+			minscale: minscale,
+			maxscale: maxscale,
+			is_default: $('#style-is-default').is(":checked"),
+			rules: new Array()
 	};
-	
+
 	for (var i=0; i<this.rules.length; i++) {
-		var symbolizers = new Array();
-		for (var j=0; j < this.rules[i].getSymbolizers().length; j++) {
-			var symbolizer = {
-				type: this.rules[i].getSymbolizers()[j].type,
-				json: this.rules[i].getSymbolizers()[j].toJSON(),
-				order: this.rules[i].getSymbolizers()[j].order
+		if(!this.rules[i].name.endsWith("_text")){
+			var symbolizers = new Array();
+			for (var j=0; j < this.rules[i].getSymbolizers().length; j++) {
+				var symbolizer = {
+						type: this.rules[i].getSymbolizers()[j].type,
+						json: this.rules[i].getSymbolizers()[j].toJSON(),
+						order: this.rules[i].getSymbolizers()[j].order
+				};
+				symbolizers.push(symbolizer);
+			}
+
+			symbolizers.sort(function(a, b){
+				return parseInt(b.order) - parseInt(a.order);
+			});
+
+			var rule = {
+					rule: this.rules[i].getObject(),
+					symbolizers: symbolizers
 			};
-			symbolizers.push(symbolizer);
+			style.rules.push(rule);
 		}
-		
-		if (this.label != null && this.label.is_activated()) {
-			var l = {
+	}
+
+	if (this.label != null && this.label.is_activated()) {
+		var ruleName = "rule_" + this.rules.length +"_text";
+		var ruleTitle = "rule_" + this.rules.length +"_text";
+		var l = {
 				type: this.label.type,
 				json: this.label.toJSON(),
 				order: this.label.order
-			};
-			symbolizers.push(l);
+		};
+
+		var options = {
+				"id" : this.rules.length,
+				"name" : ruleName,
+				"title" : ruleTitle,
+				"abstract" : "",
+				"filter" : "",
+				"minscale" : this.label.minscale,
+				"maxscale" :  this.label.maxscale,
+				"order" :  this.label.order
 		}
-		
-		symbolizers.sort(function(a, b){
-			return parseInt(b.order) - parseInt(a.order);
-		});
-		
+		var rl = new Rule(i, ruleName, ruleTitle, options, this.utils);
 		var rule = {
-			rule: this.rules[i].getObject(),
-			symbolizers: symbolizers
+				rule: rl.getObject(),
+				symbolizers: [l]
 		};
 		style.rules.push(rule);
 	}
-	
+
 	$.ajax({
 		type: "POST",
 		async: false,
@@ -254,58 +315,93 @@ Intervals.prototype.save = function(layerId) {
 			} else {
 				alert('Error');
 			}
-			
+
 		},
-	    error: function(){}
+		error: function(){}
 	});
 };
 
 Intervals.prototype.update = function(layerId, styleId) {
-	
+
 	$("body").overlay();
-	
+
+	var minscale = $('#symbol-minscale').val();
+	if(minscale == "" || minscale < 0){
+		minscale = -1;
+	}
+
+	var maxscale = $('#symbol-maxscale').val();
+	if(maxscale == "" || maxscale < 0){
+		maxscale = -1;
+	}
+
+
 	var style = {
-		name: $('#style-name').val(),
-		title: $('#style-title').val(),
-		is_default: $('#style-is-default').is(":checked"),
-		rules: new Array()
+			name: $('#style-name').val(),
+			title: $('#style-title').val(),
+			minscale: minscale,
+			maxscale: maxscale,
+			is_default: $('#style-is-default').is(":checked"),
+			rules: new Array()
 	};
-	
+
 	for (var i=0; i<this.rules.length; i++) {
-		var symbolizers = new Array();
-		for (var j=0; j < this.rules[i].getSymbolizers().length; j++) {
-			var symbolizer = {
-				type: this.rules[i].getSymbolizers()[j].type,
-				json: this.rules[i].getSymbolizers()[j].toJSON(),
-				order: this.rules[i].getSymbolizers()[j].order
+		if(!this.rules[i].name.endsWith("_text")){
+			var symbolizers = new Array();
+			for (var j=0; j < this.rules[i].getSymbolizers().length; j++) {
+				var symbolizer = {
+						type: this.rules[i].getSymbolizers()[j].type,
+						json: this.rules[i].getSymbolizers()[j].toJSON(),
+						order: this.rules[i].getSymbolizers()[j].order
+				};
+				symbolizers.push(symbolizer);
+			}
+
+			symbolizers.sort(function(a, b){
+				return parseInt(b.order) - parseInt(a.order);
+			});
+
+			var rule = {
+					rule: this.rules[i].getObject(),
+					symbolizers: symbolizers
 			};
-			symbolizers.push(symbolizer);
+			style.rules.push(rule);
 		}
-		
-		if (this.label != null && this.label.is_activated()) {
-			var l = {
+	}
+
+
+	if (this.label != null && this.label.is_activated()) {
+		var ruleName = "rule_" + this.rules.length +"_text";
+		var ruleTitle = "rule_" + this.rules.length +"_text";
+		var l = {
 				type: this.label.type,
 				json: this.label.toJSON(),
 				order: this.label.order
-			};
-			symbolizers.push(l);
+		};
+
+		var options = {
+				"id" : this.rules.length,
+				"name" : ruleName,
+				"title" : ruleTitle,
+				"abstract" : "",
+				"filter" : "",
+				"minscale" : this.label.minscale,
+				"maxscale" :  this.label.maxscale,
+				"order" :  this.label.order
 		}
-		
-		symbolizers.sort(function(a, b){
-			return parseInt(b.order) - parseInt(a.order);
-		});
-		
+		var rl = new Rule(i, ruleName, ruleTitle, options, this.utils);
 		var rule = {
-			rule: this.rules[i].getObject(),
-			symbolizers: symbolizers
+				rule: rl.getObject(),
+				symbolizers: [l]
 		};
 		style.rules.push(rule);
 	}
-	
+
+
 	$.ajax({
 		type: "POST",
 		async: false,
-		url: "/gvsigonline/symbology/unique_values_update/" + layerId + "/" + styleId + "/",
+		url: "/gvsigonline/symbology/intervals_update/" + layerId + "/" + styleId + "/",
 		beforeSend:function(xhr){
 			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},
@@ -318,8 +414,8 @@ Intervals.prototype.update = function(layerId, styleId) {
 			} else {
 				alert('Error');
 			}
-			
+
 		},
-	    error: function(){}
+		error: function(){}
 	});
 };

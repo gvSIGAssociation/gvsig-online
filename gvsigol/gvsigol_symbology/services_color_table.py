@@ -37,6 +37,7 @@ import json
 import re
 
 def create_style(request, json_data, layer_id):
+
     layer = Layer.objects.get(id=int(layer_id))
     datastore = layer.datastore
     workspace = datastore.workspace
@@ -62,12 +63,17 @@ def create_style(request, json_data, layer_id):
     style_layer.save()
     
     json_rule = json_data.get('rule')
+    
+    filter_text = ""
+    if json_rule.get('filter').__len__() != 0:
+        filter_text = str(json.dumps(json_rule.get('filter')))
+        
     rule = Rule(
         style = style,
         name = json_rule.get('name'),
         title = json_rule.get('title'),
         abstract = "",
-        filter = str(""),
+        filter = filter_text,
         minscale = json_rule.get('minscale'),
         maxscale = json_rule.get('maxscale'),
         order = json_rule.get('order')
@@ -132,15 +138,42 @@ def update_style(request, json_data, layer_id, style_id):
         mapservice.setLayerStyle(layer, style.name)
     
     style.title = json_data.get('title')
+    if json_data.get('minscale') != '':
+        style.minscale = json_data.get('minscale')
+    else:
+        style.minscale = -1
+    if json_data.get('maxscale') != '':
+        style.maxscale = json_data.get('maxscale')
+    else:
+        style.maxscale = -1
     style.is_default = json_data.get('is_default')
     style.save()
     
     json_rule = json_data.get('rule')
-    rule = Rule.objects.get(style=style)
-    minscale = json_rule.get('minscale')
-    maxscale = json_rule.get('maxscale')
-    rule.minscale = minscale
-    rule.maxscale = maxscale
+        
+    filter_text = ""
+    if json_rule.get('filter').__len__() != 0:
+        filter_text = str(json.dumps(json_rule.get('filter')))
+        
+    if json_data.get('minscale') != '':
+        minscale = json_rule.get('minscale')
+    else:
+        minscale = -1
+    if json_data.get('maxscale') != '':
+        maxscale = json_rule.get('maxscale')
+    else:
+        maxscale = -1
+        
+    rule = Rule(
+        style = style,
+        name = json_rule.get('name'),
+        title = json_rule.get('title'),
+        abstract = '',
+        filter = filter_text,
+        minscale = minscale,
+        maxscale = maxscale,
+        order = json_rule.get('order')
+    )
     rule.save()
     
     for s in Symbolizer.objects.filter(rule=rule):
