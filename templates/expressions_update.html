@@ -35,11 +35,11 @@
 						<div class="row">
 							<div class="col-md-6 form-group">
 								<label>{% trans "Min. scale" %}</label>
-					    		<input placeholder="{% trans 'Minimum scale denominator' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="{{minscale}}" class="form-control">
+					    		<input placeholder="{% trans 'No limit' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="{{minscale}}" class="form-control">
 							</div>
 							<div class="col-md-6 form-group">
 								<label>{% trans "Max. scale" %}</label>
-					    		<input placeholder="{% trans 'Maximum scale denominator' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="{{maxscale}}" class="form-control">
+					    		<input placeholder="{% trans 'No limit' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="{{maxscale}}" class="form-control">
 							</div>
 							<div class="col-md-12 form-group">
 								<p class="text-muted">* {% trans "Specifies the minimum and maximum scale denominator (inclusive) for the scale range in which this rule applies" %}.</p>
@@ -227,20 +227,33 @@ $(document).ready(function() {
 	});
 	utils.centerMap(layerName, wfsUrl);
 	
-	$("#symbol-minscale").on('change', function(e){
-		var rules = expressions.getRules();
-		for (var i=0; i<rules.length; i++) {
-			rules[i].minscale = this.value;
-		}
-	});
+	var previous_minscale = $("#symbol-minscale").val();
+	var previous_maxscale = $("#symbol-maxscale").val();
 	
-	$("#symbol-maxscale").on('change', function(e){
-		var rules = expressions.getRules();
+    $("#symbol-minscale").focus(function () {
+        previous_minscale = this.value;
+    }).change(function() {
+        var rules = expressions.getRules();
 		for (var i=0; i<rules.length; i++) {
-			rules[i].maxscale = this.value;
+			if(rules[i].minscale == previous_minscale && rules[i].maxscale == previous_maxscale){
+				rules[i].minscale = this.value;
+			}
 		}
-	});
-	
+		previous_minscale = this.value;
+    });
+
+    $("#symbol-maxscale").focus(function () {
+        previous_maxscale = this.value;
+    }).change(function() {
+        var rules = expressions.getRules();
+		for (var i=0; i<rules.length; i++) {
+			if(rules[i].minscale == previous_minscale && rules[i].maxscale == previous_maxscale){
+				rules[i].maxscale = this.value;
+			}
+		}
+		previous_maxscale = this.value;
+    });
+    
 	$("#show-label").on('click', function(e){
 		expressions.showLabel();
 	});

@@ -18,7 +18,7 @@
 
 			<div class="box-body">
 			
-				<div class="row">					
+				<div class="row">
 					<div class="col-md-6">
 						<div id="form-error" style="color:#ff0000;"></div>
 						<div class="row">
@@ -36,11 +36,11 @@
 						<div class="row">
 							<div class="col-md-6 form-group">
 								<label>{% trans "Min. scale" %}</label>
-					    		<input placeholder="{% trans 'Minimum scale denominator' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="-1" class="form-control">
+					    		<input placeholder="{% trans 'No limit' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="" class="form-control">
 							</div>
 							<div class="col-md-6 form-group">
 								<label>{% trans "Max. scale" %}</label>
-					    		<input placeholder="{% trans 'Maximum scale denominator' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="-1" class="form-control">
+					    		<input placeholder="{% trans 'No limit' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="" class="form-control">
 							</div>
 							<div class="col-md-12 form-group">
 								<p class="text-muted">* {% trans "Specifies the minimum and maximum scale denominator (inclusive) for the scale range in which this rule applies" %}.</p>
@@ -208,27 +208,39 @@ $(document).ready(function() {
 	
 	utils.centerMap(layerName, wfsUrl);
 	
-	$("#symbol-minscale").on('change', function(e){
-		var rules = uniqueValues.getRules();
-		for (var i=0; i<rules.length; i++) {
-			rules[i].minscale = this.value;
-		}
-	});
+	var previous_minscale = $("#symbol-minscale").val();
+	var previous_maxscale = $("#symbol-maxscale").val();
 	
-	$("#symbol-maxscale").on('change', function(e){
-		var rules = uniqueValues.getRules();
+    $("#symbol-minscale").focus(function () {
+        previous_minscale = this.value;
+    }).change(function() {
+        var rules = uniqueValues.getRules();
 		for (var i=0; i<rules.length; i++) {
-			rules[i].maxscale = this.value;
+			if(rules[i].minscale == previous_minscale && rules[i].maxscale == previous_maxscale){
+				rules[i].minscale = this.value;
+			}
 		}
-	});
-	
+		previous_minscale = this.value;
+    });
+
+    $("#symbol-maxscale").focus(function () {
+        previous_maxscale = this.value;
+    }).change(function() {
+        var rules = uniqueValues.getRules();
+		for (var i=0; i<rules.length; i++) {
+			if(rules[i].minscale == previous_minscale && rules[i].maxscale == previous_maxscale){
+				rules[i].maxscale = this.value;
+			}
+		}
+		previous_maxscale = this.value;
+    });
+    
 	$("#show-label").on('click', function(e){
 		uniqueValues.showLabel();
 	});
 	
 	$("#save-legend").on('click', function(e){
 		if ($("#style-name").val() != '') {
-
 			var selectedField = $('#select-unique-values-field').val();
 			
 			if (selectedField == null) {

@@ -19,8 +19,8 @@
 /**
  * @author: Javier Rodrigo <jrodrigo@scolab.es>
  */
- 
- 
+
+
 var UniqueValues = function(featureType, layerName, utils, previewUrl) {
 	this.selected = null;
 	this.featureType = featureType;
@@ -35,7 +35,7 @@ UniqueValues.prototype.showLabel = function() {
 	if (this.label) {
 		this.updateLabelForm();
 		$('#modal-symbolizer').modal('show');
-		
+
 	} else {
 		this.label = new TextSymbolizer(this.rule, null, this.utils);
 		this.updateLabelForm();
@@ -48,7 +48,7 @@ UniqueValues.prototype.loadLabel = function(options) {
 		this.label = null;
 		this.label = new TextSymbolizer(this.rule, options, this.utils);
 		this.updateLabelForm();
-		
+
 	} else {
 		this.label = new TextSymbolizer(this.rule, options, this.utils);
 		this.updateLabelForm();
@@ -58,15 +58,15 @@ UniqueValues.prototype.loadLabel = function(options) {
 UniqueValues.prototype.updateLabelForm = function() {
 	$('#tab-menu').empty();
 	$('#tab-content').empty();	
-	
+
 	$('#tab-menu').append(this.label.getTabMenu());
-	
+
 	$('#tab-content').append(this.label.getGeneralTabUI());
 	$('#tab-content').append(this.label.getFontTabUI());
 	$('#tab-content').append(this.label.getHaloTabUI());
 	$('.nav-tabs a[href="#label-general-tab"]').tab('show');
 	this.label.registerEvents();
-	
+
 };
 
 UniqueValues.prototype.getRules = function() {
@@ -105,11 +105,25 @@ UniqueValues.prototype.load = function(selectedField, values) {
 	for (var i=0; i<values.length; i++) {
 		var ruleName = "rule_" + i;
 		var ruleTitle = values[i];
-		var rule = new Rule(i, ruleName, ruleTitle, null, this.utils);
+		var minscale = $('#symbol-minscale').val();
+		var maxscale = $('#symbol-maxscale').val();
+
+		var options = {
+				"id" : this.rules.length,
+				"name" : ruleName,
+				"title" : ruleTitle,
+				"abstract" : "",
+				"filter" : "",
+				"minscale" : minscale,
+				"maxscale" : maxscale,
+				"order" :  i
+		}
+
+		var rule = new Rule(i, ruleName, ruleTitle, options, this.utils);
 		var filter = {
-			type: 'is_equal_to',
-			property_name: selectedField,
-			value1: values[i]
+				type: 'is_equal_to',
+				property_name: selectedField,
+				value1: values[i]
 		};
 		rule.setFilter(filter);
 		$('#rules').append(rule.getTableUI(true, 'unique_values'));
@@ -125,37 +139,54 @@ UniqueValues.prototype.loadRules = function(rules) {
 	$('#rules').empty();
 	this.rules.splice(0, this.rules.length);
 	for (var i=0; i<rules.length; i++) {
-		var rule = new Rule(rules[i].id, rules[i].name, rules[i].title, null, this.utils);
-		var filter = JSON.parse(rules[i].filter);
-		rule.setFilter(filter);
-			
+		var options = {
+				"id" : rules[i].id,
+				"name" : rules[i].name,
+				"title" : rules[i].title,
+				"abstract" : "",
+				"filter" : "",
+				"minscale" : rules[i].minscale,
+				"maxscale" : rules[i].maxscale,
+				"order" : rules[i].order
+		}
+
+		var rule = new Rule(rules[i].id, rules[i].name, rules[i].title, options, this.utils);
+		if(rules[i].filter != ""){
+			var filter = JSON.parse(rules[i].filter);
+			rule.setFilter(filter);
+		}
 		rule.removeAllSymbolizers();
 		rule.removeLabel();
-		$('#rules').append(rule.getTableUI(true, 'unique_values'));
-		
+
+		if(!rules[i].name.endsWith("_text")){
+			$('#rules').append(rule.getTableUI(true, 'unique_values'));
+		}
+
 		for (var j=0; j<rules[i].symbolizers.length; j++) {
-			
 			var symbolizer = JSON.parse(rules[i].symbolizers[j].json);
 			var order = rules[i].symbolizers[j].order;
 			var options = symbolizer[0].fields;
 			options['order'] = order;
-			
+
 			if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer') {
 				options['is_actived'] = true;
+				options['minscale'] = rules[i].minscale;
+				options['maxscale'] = rules[i].maxscale;
 				this.loadLabel(options);
-				
+
 			} else if (symbolizer[0].model == 'gvsigol_symbology.externalgraphicsymbolizer') {
 				rule.addExternalGraphicSymbolizer(options);
-				
+
 			} else {
 				rule.addSymbolizer(options);
 			}	
-			
+
 		}
-		
+
 		rule.registerEvents();
 		rule.preview();
 		this.addRule(rule);
+
 	}
 };
 
@@ -164,47 +195,80 @@ UniqueValues.prototype.refreshMap = function() {
 };
 
 UniqueValues.prototype.save = function(layerId) {
-	
+
 	$("body").overlay();
-	
+
+	var minscale = $('#symbol-minscale').val();
+	if(minscale == "" || minscale < 0){
+		minscale = -1;
+	}
+
+	var maxscale = $('#symbol-maxscale').val();
+	if(maxscale == "" || maxscale < 0){
+		maxscale = -1;
+	}
+
+
 	var style = {
-		name: $('#style-name').val(),
-		title: $('#style-title').val(),
-		is_default: $('#style-is-default').is(":checked"),
-		rules: new Array()
+			name: $('#style-name').val(),
+			title: $('#style-title').val(),
+			minscale: minscale,
+			maxscale: maxscale,
+			is_default: $('#style-is-default').is(":checked"),
+			rules: new Array()
 	};
-	
+
 	for (var i=0; i<this.rules.length; i++) {
-		var symbolizers = new Array();
-		for (var j=0; j < this.rules[i].getSymbolizers().length; j++) {
-			var symbolizer = {
-				type: this.rules[i].getSymbolizers()[j].type,
-				json: this.rules[i].getSymbolizers()[j].toJSON(),
-				order: this.rules[i].getSymbolizers()[j].order
+		if(!this.rules[i].name.endsWith("_text")){
+			var symbolizers = new Array();
+			for (var j=0; j < this.rules[i].getSymbolizers().length; j++) {
+				var symbolizer = {
+						type: this.rules[i].getSymbolizers()[j].type,
+						json: this.rules[i].getSymbolizers()[j].toJSON(),
+						order: this.rules[i].getSymbolizers()[j].order
+				};
+				symbolizers.push(symbolizer);
+			}
+
+			symbolizers.sort(function(a, b){
+				return parseInt(b.order) - parseInt(a.order);
+			});
+
+			var rule = {
+					rule: this.rules[i].getObject(),
+					symbolizers: symbolizers
 			};
-			symbolizers.push(symbolizer);
+			style.rules.push(rule);
 		}
-		
-		if (this.label != null && this.label.is_activated()) {
-			var l = {
+	}
+
+	if (this.label != null && this.label.is_activated()) {
+		var ruleName = "rule_" + this.rules.length +"_text";
+		var ruleTitle = "rule_" + this.rules.length +"_text";
+		var l = {
 				type: this.label.type,
 				json: this.label.toJSON(),
 				order: this.label.order
-			};
-			symbolizers.push(l);
+		};
+
+		var options = {
+				"id" : this.rules.length,
+				"name" : ruleName,
+				"title" : ruleTitle,
+				"abstract" : "",
+				"filter" : "",
+				"minscale" : this.label.minscale,
+				"maxscale" :  this.label.maxscale,
+				"order" :  this.label.order
 		}
-		
-		symbolizers.sort(function(a, b){
-			return parseInt(b.order) - parseInt(a.order);
-		});
-		
+		var rl = new Rule(i, ruleName, ruleTitle, options, this.utils);
 		var rule = {
-			rule: this.rules[i].getObject(),
-			symbolizers: symbolizers
+				rule: rl.getObject(),
+				symbolizers: [l]
 		};
 		style.rules.push(rule);
 	}
-	
+
 	$.ajax({
 		type: "POST",
 		async: false,
@@ -221,54 +285,89 @@ UniqueValues.prototype.save = function(layerId) {
 			} else {
 				alert('Error');
 			}
-			
+
 		},
-	    error: function(){}
+		error: function(){}
 	});
 };
 
 UniqueValues.prototype.update = function(layerId, styleId) {
-	
+
 	$("body").overlay();
-	
+
+	var minscale = $('#symbol-minscale').val();
+	if(minscale == "" || minscale < 0){
+		minscale = -1;
+	}
+
+	var maxscale = $('#symbol-maxscale').val();
+	if(maxscale == "" || maxscale < 0){
+		maxscale = -1;
+	}
+
+
 	var style = {
-		name: $('#style-name').val(),
-		title: $('#style-title').val(),
-		is_default: $('#style-is-default').is(":checked"),
-		rules: new Array()
+			name: $('#style-name').val(),
+			title: $('#style-title').val(),
+			minscale: minscale,
+			maxscale: maxscale,
+			is_default: $('#style-is-default').is(":checked"),
+			rules: new Array()
 	};
-	
+
 	for (var i=0; i<this.rules.length; i++) {
-		var symbolizers = new Array();
-		for (var j=0; j < this.rules[i].getSymbolizers().length; j++) {
-			var symbolizer = {
-				type: this.rules[i].getSymbolizers()[j].type,
-				json: this.rules[i].getSymbolizers()[j].toJSON(),
-				order: this.rules[i].getSymbolizers()[j].order
+		if(!this.rules[i].name.endsWith("_text")){
+			var symbolizers = new Array();
+			for (var j=0; j < this.rules[i].getSymbolizers().length; j++) {
+				var symbolizer = {
+						type: this.rules[i].getSymbolizers()[j].type,
+						json: this.rules[i].getSymbolizers()[j].toJSON(),
+						order: this.rules[i].getSymbolizers()[j].order
+				};
+				symbolizers.push(symbolizer);
+			}
+
+			symbolizers.sort(function(a, b){
+				return parseInt(b.order) - parseInt(a.order);
+			});
+
+			var rule = {
+					rule: this.rules[i].getObject(),
+					symbolizers: symbolizers
 			};
-			symbolizers.push(symbolizer);
+			style.rules.push(rule);
 		}
-		
-		if (this.label != null && this.label.is_activated()) {
-			var l = {
+	}
+
+
+	if (this.label != null && this.label.is_activated()) {
+		var ruleName = "rule_" + this.rules.length +"_text";
+		var ruleTitle = "rule_" + this.rules.length +"_text";
+		var l = {
 				type: this.label.type,
 				json: this.label.toJSON(),
 				order: this.label.order
-			};
-			symbolizers.push(l);
+		};
+
+		var options = {
+				"id" : this.rules.length,
+				"name" : ruleName,
+				"title" : ruleTitle,
+				"abstract" : "",
+				"filter" : "",
+				"minscale" : this.label.minscale,
+				"maxscale" :  this.label.maxscale,
+				"order" :  this.label.order
 		}
-		
-		symbolizers.sort(function(a, b){
-			return parseInt(b.order) - parseInt(a.order);
-		});
-		
+		var rl = new Rule(i, ruleName, ruleTitle, options, this.utils);
 		var rule = {
-			rule: this.rules[i].getObject(),
-			symbolizers: symbolizers
+				rule: rl.getObject(),
+				symbolizers: [l]
 		};
 		style.rules.push(rule);
 	}
-	
+
+
 	$.ajax({
 		type: "POST",
 		async: false,
@@ -285,8 +384,8 @@ UniqueValues.prototype.update = function(layerId, styleId) {
 			} else {
 				alert('Error');
 			}
-			
+
 		},
-	    error: function(){}
+		error: function(){}
 	});
 };

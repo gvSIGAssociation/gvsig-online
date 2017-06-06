@@ -19,8 +19,8 @@
 /**
  * @author: Javier Rodrigo <jrodrigo@scolab.es>
  */
- 
- 
+
+
 var Expressions = function(featureType, layerName, utils, previewUrl) {
 	this.selected = null;
 	this.featureType = featureType;
@@ -36,7 +36,7 @@ Expressions.prototype.showLabel = function() {
 	if (this.label) {
 		this.updateLabelForm();
 		$('#modal-symbolizer').modal('show');
-		
+
 	} else {
 		this.label = new TextSymbolizer(this.rule, null, this.utils);
 		this.updateLabelForm();
@@ -49,7 +49,7 @@ Expressions.prototype.loadLabel = function(options) {
 		this.label = null;
 		this.label = new TextSymbolizer(this.rule, options, this.utils);
 		this.updateLabelForm();
-		
+
 	} else {
 		this.label = new TextSymbolizer(this.rule, options, this.utils);
 		this.updateLabelForm();
@@ -59,36 +59,50 @@ Expressions.prototype.loadLabel = function(options) {
 Expressions.prototype.updateLabelForm = function() {
 	$('#tab-menu').empty();
 	$('#tab-content').empty();	
-	
+
 	$('#tab-menu').append(this.label.getTabMenu());
-	
+
 	$('#tab-content').append(this.label.getGeneralTabUI());
 	$('#tab-content').append(this.label.getFontTabUI());
 	$('#tab-content').append(this.label.getHaloTabUI());
 	$('.nav-tabs a[href="#label-general-tab"]').tab('show');
 	this.label.registerEvents();
-	
+
 };
 
 Expressions.prototype.addNewRule = function() {
 	var self = this;
-	
+
 	var id = this.rules.length;
 	var name = gettext('rule') + '_' + id;
 	var title = gettext('Rule') + ' ' + id;
-	var rule = new Rule(id, name, title, null, this.utils);
+	var minscale = $('#symbol-minscale').val();
+	var maxscale = $('#symbol-maxscale').val();
+	
+	var options = {
+			"id" : id,
+			"name" : name,
+			"title" : title,
+			"abstract" : "",
+			"filter" : "",
+			"minscale" : minscale,
+			"maxscale" : maxscale,
+			"order" :  id
+	}
+
+	var rule = new Rule(id, name, title, options, this.utils);
 	$('#rules').append(rule.getTableUI(true, 'expressions'));
 	rule.registerEvents();
 	rule.addSymbolizer();
 	rule.preview();
 	this.addRule(rule);
-	
+
 	$(".create-expression").on('click', function(e){
 		e.preventDefault();
 		self.getFilterFormUI(this.dataset.ruleid);
 		$('#modal-expression').modal('show');
 		$('.CodeMirror').each(function(i, el){
-		    el.CodeMirror.refresh();
+			el.CodeMirror.refresh();
 		});
 	});
 };
@@ -97,13 +111,13 @@ Expressions.prototype.getFilterFormUI = function(ruleid) {
 	var self = this;
 	var language = $("#select-language").val();
 	$('#modal-expression-content').empty();
-	
+
 	var operations = this.utils.getFilterOperations();
 	var fields = this.utils.getAlphanumericFields();
-	
+
 	var rule = this.getRuleById(ruleid);
 	var dataType = '';
-	
+
 	var ui = '';
 	ui += '<div class="box">';
 	ui += 	'<div class="box-header with-border">';
@@ -141,7 +155,7 @@ Expressions.prototype.getFilterFormUI = function(ruleid) {
 		} else {
 			ui += 						'<option data-type="' + fields[i].binding + '" value="' + field_name + '">' + field_name_trans + '</option>';
 		}
-		
+
 	}	
 	ui += 							'</select>';
 	ui += 						'</div>';
@@ -172,9 +186,9 @@ Expressions.prototype.getFilterFormUI = function(ruleid) {
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += '</div>';
-	
+
 	$('#modal-expression-content').append(ui);
-	
+
 	var filterOutput = document.getElementById('filter-output');
 	this.codemirror = CodeMirror.fromTextArea(filterOutput, {
 		value: "",
@@ -182,7 +196,7 @@ Expressions.prototype.getFilterFormUI = function(ruleid) {
 		theme: "xq-dark",
 		lineNumbers: true
 	});
-	
+
 	if (rule.filter.type) {
 		var filterOutputContentcode = '';
 		if (rule.filter.type == 'is_between') {
@@ -191,31 +205,31 @@ Expressions.prototype.getFilterFormUI = function(ruleid) {
 			$('#expression-values').append(inputs);
 			$('#expresion-value-1').val(rule.filter.value1);
 			$('#expresion-value-2').val(rule.filter.value2);
-			
+
 			this.codemirror.setValue('');
 			filterOutputContentcode = this.getFilterOutput(rule.filter.property_name, rule.filter.type, rule.filter.value1, rule.filter.value2);
 			this.codemirror.setValue(filterOutputContentcode);
-			
+
 		} else {
 			var inputs = self.getFilterInputs(dataType, false);
 			$('#expression-values').empty();
 			$('#expression-values').append(inputs);
 			$('#expresion-value-1').val(rule.filter.value1);
-			
+
 			this.codemirror.setValue('');
 			filterOutputContentcode = this.getFilterOutput(rule.filter.property_name, rule.filter.type, rule.filter.value1, rule.filter.value2);
 			this.codemirror.setValue(filterOutputContentcode);
-			
+
 		}
 	}
-	
+
 	this.registerFilterEvents();
-	
+
 };
 
 Expressions.prototype.getFilterInputs = function(type, twoValues) {
 	var inputs = '';
-	
+
 	if (type.indexOf('java.math') > -1 || type.indexOf('java.lang.Double') > -1){
 		if (twoValues) {
 			inputs += '<div id="expression-values" class="col-md-6 form-group">';
@@ -226,14 +240,14 @@ Expressions.prototype.getFilterInputs = function(type, twoValues) {
 			inputs += 	'<label>' + gettext('Value 2') + '</label>';
 			inputs += 	'<input name="expresion-value-2" id="expresion-value-2" type="number" step="any" value="0" class="form-control">';
 			inputs += '</div>';
-			
+
 		} else {
 			inputs += '<div id="expression-values" class="col-md-12 form-group">';
 			inputs += 	'<label>' + gettext('Value') + '</label>';
 			inputs += 	'<input name="expresion-value-1" id="expresion-value-1" type="number" step="any" value="0" class="form-control">';
 			inputs += '</div>';
 		}
-		
+
 	} else if (type == 'java.lang.String'){
 		if (twoValues) {
 			inputs += '<div id="expression-values" class="col-md-6 form-group">';
@@ -244,16 +258,16 @@ Expressions.prototype.getFilterInputs = function(type, twoValues) {
 			inputs += 	'<label>' + gettext('Value 2') + '</label>';
 			inputs += 	'<input name="expresion-value-2" id="expresion-value-2" type="text" class="form-control">';
 			inputs += '</div>';
-			
+
 		} else {
-			
+
 			inputs += '<div id="expression-values" class="col-md-12 form-group">';
 			inputs += 	'<label>' + gettext('Value') + '</label>';
 			inputs += 	'<input name="expresion-value-1" id="expresion-value-1" type="text" class="form-control">';
 			inputs += '</div>';
 		}
 	}
-	
+
 	return inputs;
 };
 
@@ -261,157 +275,157 @@ Expressions.prototype.getFilterOutput = function(field, operation, value1, value
 	var filterOutputContentcode = '';
 	if (operation == 'is_equal_to') {
 		filterOutputContentcode = '\t' + field + ' = ' + value1;
-		
+
 	} else if (operation == 'is_null') {
 		filterOutputContentcode = '\t' + field + ' = null';
-		
+
 	} else if (operation == 'is_like') {
 		filterOutputContentcode = '\t' + field + ' ' + gettext('contains') + ' ' + value1;
-		
+
 	} else if (operation == 'is_not_equal') {
 		filterOutputContentcode = '\t' + field + ' <> ' + value1;
-		
+
 	} else if (operation == 'is_greater_than') {
 		filterOutputContentcode = '\t' + field + ' > ' + value1;
-		
+
 	} else if (operation == 'is_greater_than_or_equal_to') {
 		filterOutputContentcode = '\t' + field + ' >= ' + value1;
-		
+
 	} else if (operation == 'is_less_than') {
 		filterOutputContentcode = '\t' + field + ' < ' + value1;
-		
+
 	} else if (operation == 'is_less_than_or_equal_to') {
 		filterOutputContentcode = '\t' + field + ' <= ' + value1;
-		
+
 	} else if (operation == 'is_between') {
 		filterOutputContentcode = '\t' + value1 + ' <= ' + field + ' <= ' + value2;
-		
+
 	}
 	return filterOutputContentcode;
 };
 
 Expressions.prototype.registerFilterEvents = function() {
-	
+
 	var self = this;
-	
+
 	$('#expresion-value-1').on('change paste keyup', function(){
 		var value1 = $('#expresion-value-1').val();
 		var value2 = $('#expresion-value-2').val();
 		var field = $('#expression-field').val();
 		var operation = $('#expression-operation').val();
-		
+
 		self.codemirror.setValue('');
 		var filterOutputContentcode = self.getFilterOutput(field, operation, value1, value2);
 		self.codemirror.setValue(filterOutputContentcode);
 	});
-	
+
 	$('#expresion-value-2').on('change paste keyup', function(){
 		var value1 = $('#expresion-value-1').val();
 		var value2 = $('#expresion-value-2').val();
 		var field = $('#expression-field').val();
 		var operation = $('#expression-operation').val();
-		
+
 		self.codemirror.setValue('');
 		var filterOutputContentcode = self.getFilterOutput(field, operation, value1, value2);
 		self.codemirror.setValue(filterOutputContentcode);
 	});
-	
+
 	$('#expression-field').on('change', function(e) {
-		
+
 		var twoValues = false;
 		if ( $('#expression-operation').val() == 'is_between' ) {
 			twoValues = true;
 		}
 		var type = this.selectedOptions[0].dataset.type;
-		
+
 		var inputs = self.getFilterInputs(type, twoValues);
 
 		$('#expression-values').empty();
 		$('#expression-values').append(inputs);
-		
+
 		$('#expresion-value-1').on('change paste keyup', function(){
 			var value1 = $('#expresion-value-1').val();
 			var value2 = $('#expresion-value-2').val();
 			var field = $('#expression-field').val();
 			var operation = $('#expression-operation').val();
-			
+
 			self.codemirror.setValue('');
 			var filterOutputContentcode = self.getFilterOutput(field, operation, value1, value2);
 			self.codemirror.setValue(filterOutputContentcode);
 		});
-		
+
 		$('#expresion-value-2').on('change paste keyup', function(){
 			var value1 = $('#expresion-value-1').val();
 			var value2 = $('#expresion-value-2').val();
 			var field = $('#expression-field').val();
 			var operation = $('#expression-operation').val();
-			
+
 			self.codemirror.setValue('');
 			var filterOutputContentcode = self.getFilterOutput(field, operation, value1, value2);
 			self.codemirror.setValue(filterOutputContentcode);
 		});
-		
+
 	});
-	
+
 	$('#expression-operation').on('change', function(e) {
-		
+
 		var twoValues = false;
 		if ( this.value == 'is_between' ) {
 			twoValues = true;
 		}
 		var type = $('#expression-field')[0].selectedOptions[0].dataset.type;
-		
+
 		var inputs = self.getFilterInputs(type, twoValues);
-		
+
 		$('#expression-values').empty();
 		$('#expression-values').append(inputs);
-		
+
 		$('#expresion-value-1').on('change paste keyup', function(){
 			var value1 = $('#expresion-value-1').val();
 			var value2 = $('#expresion-value-2').val();
 			var field = $('#expression-field').val();
 			var operation = $('#expression-operation').val();
-		 	
+
 			self.codemirror.setValue('');
 			var filterOutputContentcode = self.getFilterOutput(field, operation, value1, value2);
 			self.codemirror.setValue(filterOutputContentcode);
 		});
-		
+
 		$('#expresion-value-2').on('change paste keyup', function(){
 			var value1 = $('#expresion-value-1').val();
 			var value2 = $('#expresion-value-2').val();
 			var field = $('#expression-field').val();
 			var operation = $('#expression-operation').val();
-			
+
 			self.codemirror.setValue('');
 			var filterOutputContentcode = self.getFilterOutput(field, operation, value1, value2);
 			self.codemirror.setValue(filterOutputContentcode);
 		});
-		
+
 	});
-	
+
 	$('.save-filter').on('click', function(){
 		var ruleid = this.dataset.ruleid;
 		var rule = self.getRuleById(ruleid);
-		
+
 		var value1 = $('#expresion-value-1').val();
 		var value2 = $('#expresion-value-2').val();
 		var field = $('#expression-field').val();
 		var operation = $('#expression-operation').val();
-		
+
 		var filterOutputContentcode = self.getFilterOutput(field, operation, value1, value2);
-		
+
 		var filter = {
-			type: operation,
-			property_name: field,
-			value1: value1
+				type: operation,
+				property_name: field,
+				value1: value1
 		};
 		if (operation == 'is_between') {
 			filter['value2'] = value2;
 		}
 		rule.setFilter(filter);
 		rule.title = filterOutputContentcode.replace('\t', '');
-		
+
 		$('#rule-title-' + ruleid).text(filterOutputContentcode);
 		$('#modal-expression').modal('hide');
 	});
@@ -453,11 +467,25 @@ Expressions.prototype.load = function(selectedField, values) {
 	for (var i=0; i<values.length; i++) {
 		var ruleName = "rule_" + i;
 		var ruleTitle = values[i];
-		var rule = new Rule(i, ruleName, ruleTitle, null, this.utils);
+		var minscale = $('#symbol-minscale').val();
+		var maxscale = $('#symbol-maxscale').val();
+
+		var options = {
+				"id" : this.rules.length,
+				"name" : ruleName,
+				"title" : ruleTitle,
+				"abstract" : "",
+				"filter" : "",
+				"minscale" : minscale,
+				"maxscale" : maxscale,
+				"order" :  i
+		}
+
+		var rule = new Rule(i, ruleName, ruleTitle, options, this.utils);
 		var filter = {
-			type: 'is_equal',
-			property_name: selectedField,
-			value1: values[i]
+				type: 'is_equal',
+				property_name: selectedField,
+				value1: values[i]
 		};
 		rule.setFilter(filter);
 		$('#rules').append(rule.getTableUI(true, 'expressions'));
@@ -474,46 +502,60 @@ Expressions.prototype.loadRules = function(rules) {
 	$('#rules').empty();
 	this.rules.splice(0, this.rules.length);
 	for (var i=0; i<rules.length; i++) {
-		var rule = new Rule(rules[i].id, rules[i].name, rules[i].title, null, this.utils);
+		var options = {
+				"id" : rules[i].id,
+				"name" : rules[i].name,
+				"title" : rules[i].title,
+				"abstract" : "",
+				"filter" : "",
+				"minscale" : rules[i].minscale,
+				"maxscale" : rules[i].maxscale,
+				"order" : rules[i].order
+		}
+
+		var rule = new Rule(rules[i].id, rules[i].name, rules[i].title, options, this.utils);
 		if (rules[i].filter != '') {
 			var filter = JSON.parse(rules[i].filter);
 			rule.setFilter(filter);
 		}
-			
 		rule.removeAllSymbolizers();
 		rule.removeLabel();
-		$('#rules').append(rule.getTableUI(true, 'expressions'));
-		
+
+		if(!rules[i].name.endsWith("_text")){
+			$('#rules').append(rule.getTableUI(true, 'expressions'));
+		}
+
 		for (var j=0; j<rules[i].symbolizers.length; j++) {
-			
 			var symbolizer = JSON.parse(rules[i].symbolizers[j].json);
 			var order = rules[i].symbolizers[j].order;
 			var options = symbolizer[0].fields;
 			options['order'] = order;
-			
+
 			if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer') {
 				options['is_actived'] = true;
+				options['minscale'] = rules[i].minscale;
+				options['maxscale'] = rules[i].maxscale;
 				this.loadLabel(options);
-				
+
 			} else if (symbolizer[0].model == 'gvsigol_symbology.externalgraphicsymbolizer') {
 				rule.addExternalGraphicSymbolizer(options);
-				
+
 			} else {
 				rule.addSymbolizer(options);
 			}	
-			
+
 		}
-		
+
 		rule.registerEvents();
 		rule.preview();
 		this.addRule(rule);
-		
+
 		$(".create-expression").on('click', function(e){
 			e.preventDefault();
 			self.getFilterFormUI(this.dataset.ruleid);
 			$('#modal-expression').modal('show');
 			$('.CodeMirror').each(function(i, el){
-			    el.CodeMirror.refresh();
+				el.CodeMirror.refresh();
 			});
 		});
 	}
@@ -524,47 +566,80 @@ Expressions.prototype.refreshMap = function() {
 };
 
 Expressions.prototype.save = function(layerId) {
-	
+
 	$("body").overlay();
-	
+
+	var minscale = $('#symbol-minscale').val();
+	if(minscale == "" || minscale < 0){
+		minscale = -1;
+	}
+
+	var maxscale = $('#symbol-maxscale').val();
+	if(maxscale == "" || maxscale < 0){
+		maxscale = -1;
+	}
+
+
 	var style = {
-		name: $('#style-name').val(),
-		title: $('#style-title').val(),
-		is_default: $('#style-is-default').is(":checked"),
-		rules: new Array()
+			name: $('#style-name').val(),
+			title: $('#style-title').val(),
+			minscale: minscale,
+			maxscale: maxscale,
+			is_default: $('#style-is-default').is(":checked"),
+			rules: new Array()
 	};
-	
+
 	for (var i=0; i<this.rules.length; i++) {
-		var symbolizers = new Array();
-		for (var j=0; j < this.rules[i].getSymbolizers().length; j++) {
-			var symbolizer = {
-				type: this.rules[i].getSymbolizers()[j].type,
-				json: this.rules[i].getSymbolizers()[j].toJSON(),
-				order: this.rules[i].getSymbolizers()[j].order
+		if(!this.rules[i].name.endsWith("_text")){
+			var symbolizers = new Array();
+			for (var j=0; j < this.rules[i].getSymbolizers().length; j++) {
+				var symbolizer = {
+						type: this.rules[i].getSymbolizers()[j].type,
+						json: this.rules[i].getSymbolizers()[j].toJSON(),
+						order: this.rules[i].getSymbolizers()[j].order
+				};
+				symbolizers.push(symbolizer);
+			}
+
+			symbolizers.sort(function(a, b){
+				return parseInt(b.order) - parseInt(a.order);
+			});
+
+			var rule = {
+					rule: this.rules[i].getObject(),
+					symbolizers: symbolizers
 			};
-			symbolizers.push(symbolizer);
+			style.rules.push(rule);
 		}
-		
-		if (this.label != null && this.label.is_activated()) {
-			var l = {
+	}
+
+	if (this.label != null && this.label.is_activated()) {
+		var ruleName = "rule_" + this.rules.length +"_text";
+		var ruleTitle = "rule_" + this.rules.length +"_text";
+		var l = {
 				type: this.label.type,
 				json: this.label.toJSON(),
 				order: this.label.order
-			};
-			symbolizers.push(l);
+		};
+
+		var options = {
+				"id" : this.rules.length,
+				"name" : ruleName,
+				"title" : ruleTitle,
+				"abstract" : "",
+				"filter" : "",
+				"minscale" : this.label.minscale,
+				"maxscale" :  this.label.maxscale,
+				"order" :  this.label.order
 		}
-		
-		symbolizers.sort(function(a, b){
-			return parseInt(b.order) - parseInt(a.order);
-		});
-		
+		var rl = new Rule(i, ruleName, ruleTitle, options, this.utils);
 		var rule = {
-			rule: this.rules[i].getObject(),
-			symbolizers: symbolizers
+				rule: rl.getObject(),
+				symbolizers: [l]
 		};
 		style.rules.push(rule);
 	}
-	
+
 	$.ajax({
 		type: "POST",
 		async: false,
@@ -581,54 +656,89 @@ Expressions.prototype.save = function(layerId) {
 			} else {
 				alert('Error');
 			}
-			
+
 		},
-	    error: function(){}
+		error: function(){}
 	});
 };
 
 Expressions.prototype.update = function(layerId, styleId) {
-	
+
 	$("body").overlay();
-	
+
+	var minscale = $('#symbol-minscale').val();
+	if(minscale == "" || minscale < 0){
+		minscale = -1;
+	}
+
+	var maxscale = $('#symbol-maxscale').val();
+	if(maxscale == "" || maxscale < 0){
+		maxscale = -1;
+	}
+
+
 	var style = {
-		name: $('#style-name').val(),
-		title: $('#style-title').val(),
-		is_default: $('#style-is-default').is(":checked"),
-		rules: new Array()
+			name: $('#style-name').val(),
+			title: $('#style-title').val(),
+			minscale: minscale,
+			maxscale: maxscale,
+			is_default: $('#style-is-default').is(":checked"),
+			rules: new Array()
 	};
-	
+
 	for (var i=0; i<this.rules.length; i++) {
-		var symbolizers = new Array();
-		for (var j=0; j < this.rules[i].getSymbolizers().length; j++) {
-			var symbolizer = {
-				type: this.rules[i].getSymbolizers()[j].type,
-				json: this.rules[i].getSymbolizers()[j].toJSON(),
-				order: this.rules[i].getSymbolizers()[j].order
+		if(!this.rules[i].name.endsWith("_text")){
+			var symbolizers = new Array();
+			for (var j=0; j < this.rules[i].getSymbolizers().length; j++) {
+				var symbolizer = {
+						type: this.rules[i].getSymbolizers()[j].type,
+						json: this.rules[i].getSymbolizers()[j].toJSON(),
+						order: this.rules[i].getSymbolizers()[j].order
+				};
+				symbolizers.push(symbolizer);
+			}
+
+			symbolizers.sort(function(a, b){
+				return parseInt(b.order) - parseInt(a.order);
+			});
+
+			var rule = {
+					rule: this.rules[i].getObject(),
+					symbolizers: symbolizers
 			};
-			symbolizers.push(symbolizer);
+			style.rules.push(rule);
 		}
-		
-		if (this.label != null && this.label.is_activated()) {
-			var l = {
+	}
+
+
+	if (this.label != null && this.label.is_activated()) {
+		var ruleName = "rule_" + this.rules.length +"_text";
+		var ruleTitle = "rule_" + this.rules.length +"_text";
+		var l = {
 				type: this.label.type,
 				json: this.label.toJSON(),
 				order: this.label.order
-			};
-			symbolizers.push(l);
+		};
+
+		var options = {
+				"id" : this.rules.length,
+				"name" : ruleName,
+				"title" : ruleTitle,
+				"abstract" : "",
+				"filter" : "",
+				"minscale" : this.label.minscale,
+				"maxscale" :  this.label.maxscale,
+				"order" :  this.label.order
 		}
-		
-		symbolizers.sort(function(a, b){
-			return parseInt(b.order) - parseInt(a.order);
-		});
-		
+		var rl = new Rule(i, ruleName, ruleTitle, options, this.utils);
 		var rule = {
-			rule: this.rules[i].getObject(),
-			symbolizers: symbolizers
+				rule: rl.getObject(),
+				symbolizers: [l]
 		};
 		style.rules.push(rule);
 	}
-	
+
+
 	$.ajax({
 		type: "POST",
 		async: false,
@@ -645,8 +755,8 @@ Expressions.prototype.update = function(layerId, styleId) {
 			} else {
 				alert('Error');
 			}
-			
+
 		},
-	    error: function(){}
+		error: function(){}
 	});
 };
