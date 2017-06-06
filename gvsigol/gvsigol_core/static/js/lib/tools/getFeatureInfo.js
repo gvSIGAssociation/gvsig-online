@@ -196,8 +196,11 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 						var parent = layers[i];
 						for (var j=0; j<layers.length; j++) {
 							if (!layers[j].baselayer) {
-								if (layers[j].wms_url && layers[j].parentGroup &&  layers[j].parentGroup.groupName == parent.layer_name) {
-									queryLayers.push(layers[j]);
+								if (layers[j].wms_url) {
+									if ((typeof layers[j].parentGroup === 'string' && layers[j].parentGroup == parent.layer_name) || 
+											(layers[j].parentGroup != undefined && layers[j].parentGroup.groupName == parent.layer_name)){
+										queryLayers.push(layers[j]);
+									}
 								}
 							}
 						}
