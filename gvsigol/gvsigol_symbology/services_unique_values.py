@@ -65,12 +65,17 @@ def create_style(request, json_data, layer_id):
             
     for r in json_data.get('rules'):
         json_rule = r.get('rule')
+        
+        filter_text = ""
+        if json_rule.get('filter').__len__() != 0:
+            filter_text = str(json.dumps(json_rule.get('filter')))
+            
         rule = Rule(
             style = style,
             name = json_rule.get('name'),
             title = json_rule.get('title'),
             abstract = '',
-            filter = str(json.dumps(json_rule.get('filter'))),
+            filter = filter_text,
             minscale = json_rule.get('minscale'),
             maxscale = json_rule.get('maxscale'),
             order = json_rule.get('order')
@@ -88,7 +93,7 @@ def create_style(request, json_data, layer_id):
                     stroke = json_sym.get('stroke'),
                     stroke_width = json_sym.get('stroke_width'),
                     stroke_opacity = json_sym.get('stroke_opacity'),
-                    stroke_dash_array = json_sym.get('stroke_dash_array')                   
+                    stroke_dash_array = json_sym.get('stroke_dash_array')
                 )
                 symbolizer.save()
             
@@ -100,7 +105,7 @@ def create_style(request, json_data, layer_id):
                     stroke = json_sym.get('stroke'),
                     stroke_width = json_sym.get('stroke_width'),
                     stroke_opacity = json_sym.get('stroke_opacity'),
-                    stroke_dash_array = json_sym.get('stroke_dash_array')                   
+                    stroke_dash_array = json_sym.get('stroke_dash_array')
                 )
                 symbolizer.save()      
                 
@@ -118,7 +123,7 @@ def create_style(request, json_data, layer_id):
                     stroke = json_sym.get('stroke'),
                     stroke_width = json_sym.get('stroke_width'),
                     stroke_opacity = json_sym.get('stroke_opacity'),
-                    stroke_dash_array = json_sym.get('stroke_dash_array')                 
+                    stroke_dash_array = json_sym.get('stroke_dash_array')
                 )
                 symbolizer.save()  
                 
@@ -177,6 +182,14 @@ def update_style(request, json_data, layer_id, style_id):
         mapservice.setLayerStyle(layer, style.name)
     
     style.title = json_data.get('title')
+    if json_data.get('minscale') != '':
+        style.minscale = json_data.get('minscale')
+    else:
+        style.minscale = -1
+    if json_data.get('maxscale') != '':
+        style.maxscale = json_data.get('maxscale')
+    else:
+        style.maxscale = -1
     style.is_default = json_data.get('is_default')
     style.save()
     
@@ -189,14 +202,28 @@ def update_style(request, json_data, layer_id, style_id):
     
     for r in json_data.get('rules'):           
         json_rule = r.get('rule')
+        
+        filter_text = ""
+        if json_rule.get('filter').__len__() != 0:
+            filter_text = str(json.dumps(json_rule.get('filter')))
+        
+        if json_data.get('minscale') != '':
+            minscale = json_rule.get('minscale')
+        else:
+            minscale = -1
+        if json_data.get('maxscale') != '':
+            maxscale = json_rule.get('maxscale')
+        else:
+            maxscale = -1
+        
         rule = Rule(
             style = style,
             name = json_rule.get('name'),
             title = json_rule.get('title'),
             abstract = '',
-            filter = str(json.dumps(json_rule.get('filter'))),
-            minscale = json_rule.get('minscale'),
-            maxscale = json_rule.get('maxscale'),
+            filter = filter_text,
+            minscale = minscale,
+            maxscale = maxscale,
             order = json_rule.get('order')
         )
         rule.save()
@@ -212,7 +239,7 @@ def update_style(request, json_data, layer_id, style_id):
                     stroke = json_sym.get('stroke'),
                     stroke_width = json_sym.get('stroke_width'),
                     stroke_opacity = json_sym.get('stroke_opacity'),
-                    stroke_dash_array = json_sym.get('stroke_dash_array')                   
+                    stroke_dash_array = json_sym.get('stroke_dash_array')
                 )
                 symbolizer.save()
             
@@ -224,7 +251,7 @@ def update_style(request, json_data, layer_id, style_id):
                     stroke = json_sym.get('stroke'),
                     stroke_width = json_sym.get('stroke_width'),
                     stroke_opacity = json_sym.get('stroke_opacity'),
-                    stroke_dash_array = json_sym.get('stroke_dash_array')                   
+                    stroke_dash_array = json_sym.get('stroke_dash_array')
                 )
                 symbolizer.save()      
                 
@@ -242,7 +269,7 @@ def update_style(request, json_data, layer_id, style_id):
                     stroke = json_sym.get('stroke'),
                     stroke_width = json_sym.get('stroke_width'),
                     stroke_opacity = json_sym.get('stroke_opacity'),
-                    stroke_dash_array = json_sym.get('stroke_dash_array')                  
+                    stroke_dash_array = json_sym.get('stroke_dash_array')
                 )
                 symbolizer.save()  
                 

@@ -27,8 +27,8 @@ var Rule = function(id, name, title, options, utils) {
 	this.title = title;
 	this.abstract = "";
 	this.filter = "";
-	this.minscale = -1;
-	this.maxscale = -1;
+	this.minscale = "";
+	this.maxscale = "";
 	this.order = 0;
 	this.symbolizers = new Array();
 	this.entries = new Array();
@@ -43,8 +43,12 @@ var Rule = function(id, name, title, options, utils) {
 		this.title = options.title;
 		this.abstract = "";
 		this.filter = "";
-		this.minscale = parseInt(options.minscale);
-		this.maxscale = parseInt(options.maxscale);
+		if(options.minscale && parseInt(options.minscale) >=0){
+			this.minscale = parseInt(options.minscale);
+		}
+		if(options.maxscale && parseInt(options.maxscale) >=0){
+			this.maxscale = parseInt(options.maxscale);
+		}
 		this.order = parseInt(options.order);
 	}
 	
@@ -64,11 +68,14 @@ Rule.prototype.getTableUI = function(allowImport, type) {
 	ui += 		'<div class="box-header with-border">';
 	ui += 			'<div class="rule-preview" id="rule-preview-' + this.id + '"></div>';
 	ui += 				'<h3 id="rule-title-' + this.id + '" class="box-title">' + this.title + '</h3>';
-	if(type != 'unique') {
+
 		ui += 			'<div class="box-tools pull-right">';
+	
+	if(type != 'unique') {
 		ui += 				'<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
 		ui += 					'<i class="fa fa-plus"></i>';
 		ui += 				'</button>';
+	}
 		ui += 				'<div class="btn-group">';
 		ui += 					'<button style="color:#3c8dbc;" data-toggle="dropdown" class="btn btn-box-tool btn-box-tool-custom dropdown-toggle">';
 		ui += 						'<i class="fa fa-wrench"></i>';
@@ -81,11 +88,13 @@ Rule.prototype.getTableUI = function(allowImport, type) {
 		}
 		ui += 					'</ul>';
 		ui += 				'</div>';
+	if(type != 'unique') {
 		ui += 				'<button data-ruleid="' + this.id + '" style="color:#f56954;" class="btn btn-box-tool btn-box-tool-custom delete-rule">';
 		ui += 					'<i class="fa fa-times"></i>';
 		ui += 				'</button>';
-		ui += 			'</div>';
 	}
+		ui += 			'</div>';
+	
 	ui += 			'</div>';
 	ui += 			'<div class="box-body">';
 	ui += 				'<div class="table-responsive">';
@@ -157,7 +166,7 @@ Rule.prototype.getColorMapEntryUI = function() {
 	return ui;
 };
 
-Rule.prototype.registerEvents = function() {
+Rule.prototype.registerEvents = function(type) {
 	var self = this;
 	
 	$("#edit-rule-" + this.id).on('click', function(e){
@@ -174,11 +183,31 @@ Rule.prototype.registerEvents = function() {
 		ui += 				'<input id="r-title-' + self.id + '" type="text" value="' + self.title + '" class="form-control">';
 		ui += 			'</div>';
 		ui += 		'</div>';
+		
+		if(type == undefined || type != "unique"){
+		ui += 	'<div class="row">';
+		ui += 		'<div class="col-md-12 form-group">';
+		ui += 			'<input id="has-custom-scale-denominator" type="checkbox" class="has-custom-scale-denominator" data-orig="'+self.id+'">   ' + gettext('Define custom scale denominators?') + '</input>';
+		ui += 		'</div>';
 		ui += 	'</div>';
+		ui += 	'<div class="row">';
+		ui += 		'<div class="col-md-12 form-group">';
+		ui += 			'<label>' + gettext( 'Minimum scale denominator') + '</label>';
+		ui += 			'<input placeholder="' + gettext('No limit') + '" name="r-minscale" id="r-minscale-' + self.id + '" type="number" step="any" value="'+self.minscale+'" class="form-control">';					
+		ui += 		'</div>';
+		ui += 	'</div>';
+		ui += 	'<div class="row">';
+		ui += 		'<div class="col-md-12 form-group">';
+		ui += 			'<label>' + gettext( 'Maximum scale denominator') + '</label>';
+		ui += 			'<input placeholder="' + gettext('No limit') + '" name="r-maxscale" id="r-maxscale-' + self.id + '" type="number" step="any" value="'+self.maxscale+'" class="form-control">';					
+		ui += 		'</div>';
+		}
 		ui += 	'<div class="box-footer clearfix">';
 		ui += 		'<button id="save-rule-metadata-' + self.id + '" class="btn btn-sm btn-success btn-flat pull-right margin-r-5">';
 		ui += 			'<i class="fa fa-floppy-o margin-r-5"></i>' + gettext('Save');
 		ui += 		'</button>';
+		ui += 	'</div>';
+		
 		ui += 	'</div>';
 		ui += '</div>';
 		
@@ -188,8 +217,12 @@ Rule.prototype.registerEvents = function() {
 		$("#save-rule-metadata-" + self.id).on('click', function(e){
 			var name = $("#r-name-" + self.id).val();
 			var title = $("#r-title-" + self.id).val();
+			var minscale = $("#r-minscale-" + self.id).val();
+			var maxscale = $("#r-maxscale-" + self.id).val();
 			self.name = name;
 			self.title = title;
+			self.minscale = minscale;
+			self.maxscale = maxscale;
 			
 			$('#rule-title-' + self.id).text(title);
 			
@@ -197,6 +230,28 @@ Rule.prototype.registerEvents = function() {
 		});
 		
 		$('#modal-edit-rule').modal('show');
+		
+		var style_minscale = $("#symbol-minscale").val();
+		var style_maxscale = $("#symbol-maxscale").val();
+		if((self.minscale+"") != style_minscale || (self.maxscale+"") != style_maxscale){
+			var id = self.id;
+			$(".has-custom-scale-denominator[data-orig="+id+"]").prop('checked', true);
+		}else{
+			var id = self.id;
+			$("#r-minscale-"+id).prop("disabled",true);
+		    $("#r-maxscale-"+id).prop("disabled",true);
+		}
+		
+		$(".has-custom-scale-denominator").on('click', function(e){	
+			var id = $(this).attr("data-orig");
+			var ckeck =  $(this).is(':checked');
+			if(!ckeck){
+				$("#r-minscale-"+id).val($("#symbol-minscale").val());
+				$("#r-maxscale-"+id).val($("#symbol-maxscale").val());
+			}
+			$("#r-minscale-"+id).prop("disabled",!ckeck);
+		    $("#r-maxscale-"+id).prop("disabled",!ckeck);
+		});
 	});
 	
 	$("#append-symbol-button-" + this.id).on('click', function(e){
@@ -222,7 +277,6 @@ Rule.prototype.registerEvents = function() {
 			self.getSymbolsFromLibrary(this.value);
 		});
 	});
-	
 	
 };
 
@@ -621,14 +675,24 @@ Rule.prototype.removeLabel = function() {
 };
 
 Rule.prototype.getObject = function() {
+	var minscale = -1;
+	if(this.minscale != "" && this.minscale >= 0){
+		minscale = this.minscale;
+	}
+	
+	var maxscale = -1;
+	if(this.maxscale != "" && this.maxscale >= 0){
+		maxscale = this.maxscale;
+	}
+	
 	var object = {
 		id: this.id,
 		name: this.name,
 		title: this.title,
 		abstract: '',
 		filter: this.filter,
-		minscale: this.minscale,
-		maxscale: this.maxscale,
+		minscale: minscale,
+		maxscale: maxscale,
 		order: this.order
 	};
 	return object;
