@@ -18,22 +18,46 @@
 
 /**
  * @author: Javier Rodrigo <jrodrigo@scolab.es>
+ *//**
+ * gvSIG Online.
+ * Copyright (C) 2010-2017 SCOLAB.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
- 
-var UniqueSymbol = function(layerName, utils, rule_opts) {
+
+/**
+ * @author: Javier Rodrigo <jrodrigo@scolab.es>
+ */
+
+
+var UniqueSymbol = function(featureType, layerName, utils, rule_opts) {
+	this.selected = null;
+	this.featureType = featureType;
 	this.layerName = layerName;
 	this.utils = utils;
+	this.rules = new Array();
 	this.rule = null;
 	this.label = null;
+	this.type = 'unique';
 	
 	if (rule_opts != null) {
 		if (rule_opts.symbolizers != "") {
 			this.rule = new Rule(0, $("#style-name").val(), $("#style-name").val(), rule_opts, this.utils);
 			$('#rules').append(this.rule.getTableUI(true, 'unique'));
-			this.rule.registerEvents();
+			this.rule.registerEvents('unique');
 			this.rule.preview();
-			this.loadRule(rule_opts.symbolizers);
+			this.loadRules(rule_opts);
 		}
 	}	
 };
@@ -41,9 +65,10 @@ var UniqueSymbol = function(layerName, utils, rule_opts) {
 UniqueSymbol.prototype.addDefault = function() {
 	this.rule = new Rule(0, $("#style-name").val(), $("#style-name").val(), null, this.utils);
 	$('#rules').append(this.rule.getTableUI(true, 'unique'));
-	this.rule.registerEvents();
-	this.rule.addSymbolizer();
+	this.rule.registerEvents('unique');
+	this.rule.addSymbolizer(this.utils);
 	this.rule.preview();
+	this.addRule(this.rule);
 };
 
 UniqueSymbol.prototype.getRule = function() {
@@ -54,40 +79,12 @@ UniqueSymbol.prototype.showLabel = function() {
 	if (this.label) {
 		this.updateLabelForm();
 		$('#modal-symbolizer').modal('show');
-		
+
 	} else {
 		this.label = new TextSymbolizer(this.rule, null, this.utils);
 		this.updateLabelForm();
 		$('#modal-symbolizer').modal('show');
 	}
-};
-
-UniqueSymbol.prototype.loadRule = function(symbolizers) {
-	
-	$("#table-symbolizers-body-" + this.rule.id).empty();
-	this.rule.removeAllSymbolizers();
-	this.rule.removeLabel();
-	
-	for (var i=0; i<symbolizers.length; i++) {
-		
-		var symbolizer = JSON.parse(symbolizers[i].json);
-		var order = symbolizers[i].order;
-		var options = symbolizer[0].fields;
-		options['order'] = order;
-		
-		if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer') {
-			options['is_actived'] = true;
-			this.loadLabel(options);
-			
-		} else if (symbolizer[0].model == 'gvsigol_symbology.externalgraphicsymbolizer') {
-			this.rule.addExternalGraphicSymbolizer(options);
-			
-		} else {
-			this.rule.addSymbolizer(options);
-		}	
-		
-	}
-	this.rule.preview();
 };
 
 UniqueSymbol.prototype.loadLabel = function(options) {
@@ -102,59 +99,214 @@ UniqueSymbol.prototype.loadLabel = function(options) {
 	}
 };
 
-UniqueSymbol.prototype.refreshMap = function() {
-	this.utils.updateMap(this, this.layerName);
-};
-
 UniqueSymbol.prototype.updateLabelForm = function() {
 	$('#tab-menu').empty();
 	$('#tab-content').empty();	
-	
+
 	$('#tab-menu').append(this.label.getTabMenu());
-	
+
 	$('#tab-content').append(this.label.getGeneralTabUI());
 	$('#tab-content').append(this.label.getFontTabUI());
 	$('#tab-content').append(this.label.getHaloTabUI());
 	$('.nav-tabs a[href="#label-general-tab"]').tab('show');
 	this.label.registerEvents();
-	
+
+};
+
+UniqueSymbol.prototype.getRules = function() {
+	return this.rules;
+};
+
+UniqueSymbol.prototype.getRuleById = function(id) {
+	for (var i=0; i < this.rules.length; i++) {
+		if (this.rules[i].id == id) {
+			return this.rules[i];
+		}
+	}
+};
+
+UniqueSymbol.prototype.addRule = function(rule) {
+	return this.rules.push(rule);
+};
+
+UniqueSymbol.prototype.deleteRule = function(id) {
+	for (var i=0; i < this.rules.length; i++) {
+		if (this.rules[i].id == id) {
+			this.rules.splice(i, 1);
+		}
+	}
+	var htmlRules = document.getElementById("rules");
+	for (var i=0; i<htmlRules.children.length; i++) {
+		if(htmlRules.children[i].dataset.ruleid == id) {
+			htmlRules.removeChild(htmlRules.children[i]);
+		}
+	}
+};
+
+UniqueSymbol.prototype.load = function(selectedField, values) {
+	$('#rules').empty();
+	this.rules.splice(0, this.rules.length);
+	for (var i=0; i<values.length; i++) {
+		var ruleName = "rule_" + i;
+		var ruleTitle = values[i];
+		var minscale = $('#symbol-minscale').val();
+		var maxscale = $('#symbol-maxscale').val();
+
+		var options = {
+				"id" : this.rules.length,
+				"name" : ruleName,
+				"title" : ruleTitle,
+				"abstract" : "",
+				"filter" : "",
+				"minscale" : minscale,
+				"maxscale" : maxscale,
+				"order" :  i
+		}
+
+		var rule = new Rule(i, ruleName, ruleTitle, options, this.utils);
+		$('#rules').append(rule.getTableUI(true, 'unique'));
+		rule.registerEvents();
+		var colors = this.utils.createColorRange('random', values.length);
+		rule.addSymbolizer({fill: colors[i], stroke: colors[i]});
+		rule.preview();
+		this.addRule(rule);
+	}
+};
+
+UniqueSymbol.prototype.loadRules = function(rules) {
+	$('#rules').empty();
+	this.rules.splice(0, this.rules.length);
+	for (var i=0; i<rules.length; i++) {
+		var options = {
+				"id" : rules[i].id,
+				"name" : rules[i].name,
+				"title" : rules[i].title,
+				"abstract" : "",
+				"filter" : "",
+				"minscale" : rules[i].minscale,
+				"maxscale" : rules[i].maxscale,
+				"order" : rules[i].order
+		}
+
+		var rule = new Rule(rules[i].id, rules[i].name, rules[i].title, options, this.utils);
+		if(rules[i].filter != ""){
+			var filter = JSON.parse(rules[i].filter);
+			rule.setFilter(filter);
+		}
+		rule.removeAllSymbolizers();
+		rule.removeLabel();
+
+		if(!rules[i].name.endsWith("_text")){
+			$('#rules').append(rule.getTableUI(true, 'unique'));
+		}
+
+		for (var j=0; j<rules[i].symbolizers.length; j++) {
+			var symbolizer = JSON.parse(rules[i].symbolizers[j].json);
+			var order = rules[i].symbolizers[j].order;
+			var options = symbolizer[0].fields;
+			options['order'] = order;
+
+			if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer') {
+				options['is_actived'] = true;
+				options['minscale'] = rules[i].minscale;
+				options['maxscale'] = rules[i].maxscale;
+				this.loadLabel(options);
+
+			} else if (symbolizer[0].model == 'gvsigol_symbology.externalgraphicsymbolizer') {
+				rule.addExternalGraphicSymbolizer(options);
+
+			} else {
+				rule.addSymbolizer(options);
+			}	
+
+		}
+
+		rule.registerEvents('unique');
+		rule.preview();
+		this.addRule(rule);
+
+	}
+};
+
+UniqueSymbol.prototype.refreshMap = function() {
+	this.utils.updateMap(this, this.layerName);
 };
 
 UniqueSymbol.prototype.save = function(layerId) {
-	
+
 	$("body").overlay();
-	
-	var symbolizers = new Array();
-	for (var i=0; i < this.rule.getSymbolizers().length; i++) {
-		var symbolizer = {
-			type: this.rule.getSymbolizers()[i].type,
-			json: this.rule.getSymbolizers()[i].toJSON(),
-			order: this.rule.getSymbolizers()[i].order
-		};
-		symbolizers.push(symbolizer);
+
+	var minscale = $('#symbol-minscale').val();
+	if(minscale == "" || minscale < 0){
+		minscale = -1;
 	}
-	
-	if (this.label != null && this.label.is_activated()) {
-		var l = {
-			type: this.label.type,
-			json: this.label.toJSON(),
-			order: this.label.order
-		};
-		symbolizers.push(l);
+
+	var maxscale = $('#symbol-maxscale').val();
+	if(maxscale == "" || maxscale < 0){
+		maxscale = -1;
 	}
-	
-	symbolizers.sort(function(a, b){
-		return parseInt(b.order) - parseInt(a.order);
-	});
-	
+
+
 	var style = {
-		name: $('#style-name').val(),
-		title: $('#style-title').val(),
-		is_default: $('#style-is-default').is(":checked"),
-		rule: this.rule.getObject(),
-		symbolizers: symbolizers
+			name: $('#style-name').val(),
+			title: $('#style-title').val(),
+			minscale: minscale,
+			maxscale: maxscale,
+			is_default: $('#style-is-default').is(":checked"),
+			rules: new Array()
+	};
+
+	for (var i=0; i<this.rules.length; i++) {
+		if(!this.rules[i].name.endsWith("_text")){
+			var symbolizers = new Array();
+			for (var j=0; j < this.rules[i].getSymbolizers().length; j++) {
+				var symbolizer = {
+						type: this.rules[i].getSymbolizers()[j].type,
+						json: this.rules[i].getSymbolizers()[j].toJSON(),
+						order: this.rules[i].getSymbolizers()[j].order
+				};
+				symbolizers.push(symbolizer);
+			}
+
+			symbolizers.sort(function(a, b){
+				return parseInt(b.order) - parseInt(a.order);
+			});
+
+			var rule = {
+					rule: this.rules[i].getObject(),
+					symbolizers: symbolizers
+			};
+			style.rules.push(rule);
+		}
 	}
-	
+
+	if (this.label != null && this.label.is_activated()) {
+		var ruleName = "rule_" + this.rules.length +"_text";
+		var ruleTitle = "rule_" + this.rules.length +"_text";
+		var l = {
+				type: this.label.type,
+				json: this.label.toJSON(),
+				order: this.label.order
+		};
+
+		var options = {
+				"id" : this.rules.length,
+				"name" : ruleName,
+				"title" : ruleTitle,
+				"abstract" : "",
+				"filter" : "",
+				"minscale" : this.label.minscale,
+				"maxscale" :  this.label.maxscale,
+				"order" :  this.label.order
+		}
+		var rl = new Rule(i, ruleName, ruleTitle, options, this.utils);
+		var rule = {
+				rule: rl.getObject(),
+				symbolizers: [l]
+		};
+		style.rules.push(rule);
+	}
+
 	$.ajax({
 		type: "POST",
 		async: false,
@@ -171,43 +323,89 @@ UniqueSymbol.prototype.save = function(layerId) {
 			} else {
 				alert('Error');
 			}
-			
+
 		},
-	    error: function(){}
+		error: function(){}
 	});
 };
 
 UniqueSymbol.prototype.update = function(layerId, styleId) {
-	
+
 	$("body").overlay();
-	
-	var symbolizers = new Array();
-	for (var i=0; i < this.rule.getSymbolizers().length; i++) {
-		var symbolizer = {
-			type: this.rule.getSymbolizers()[i].type,
-			json: this.rule.getSymbolizers()[i].toJSON(),
-			order: this.rule.getSymbolizers()[i].order
-		};
-		symbolizers.push(symbolizer);
+
+	var minscale = $('#symbol-minscale').val();
+	if(minscale == "" || minscale < 0){
+		minscale = -1;
 	}
-	
-	if (this.label != null && this.label.is_activated()) {
-		var l = {
-			type: this.label.type,
-			json: this.label.toJSON(),
-			order: this.label.order
-		};
-		symbolizers.push(l);
+
+	var maxscale = $('#symbol-maxscale').val();
+	if(maxscale == "" || maxscale < 0){
+		maxscale = -1;
 	}
-	
+
+
 	var style = {
-		name: $('#style-name').val(),
-		title: $('#style-title').val(),
-		is_default: $('#style-is-default').is(":checked"),
-		rule: this.rule.getObject(),
-		symbolizers: symbolizers
+			name: $('#style-name').val(),
+			title: $('#style-title').val(),
+			minscale: minscale,
+			maxscale: maxscale,
+			is_default: $('#style-is-default').is(":checked"),
+			rules: new Array()
+	};
+
+	for (var i=0; i<this.rules.length; i++) {
+		if(!this.rules[i].name.endsWith("_text")){
+			var symbolizers = new Array();
+			for (var j=0; j < this.rules[i].getSymbolizers().length; j++) {
+				var symbolizer = {
+						type: this.rules[i].getSymbolizers()[j].type,
+						json: this.rules[i].getSymbolizers()[j].toJSON(),
+						order: this.rules[i].getSymbolizers()[j].order
+				};
+				symbolizers.push(symbolizer);
+			}
+
+			symbolizers.sort(function(a, b){
+				return parseInt(b.order) - parseInt(a.order);
+			});
+
+			var rule = {
+					rule: this.rules[i].getObject(),
+					symbolizers: symbolizers
+			};
+			style.rules.push(rule);
+		}
 	}
-	
+
+
+	if (this.label != null && this.label.is_activated()) {
+		var ruleName = "rule_" + this.rules.length +"_text";
+		var ruleTitle = "rule_" + this.rules.length +"_text";
+		var l = {
+				type: this.label.type,
+				json: this.label.toJSON(),
+				order: this.label.order
+		};
+
+		var options = {
+				"id" : this.rules.length,
+				"name" : ruleName,
+				"title" : ruleTitle,
+				"abstract" : "",
+				"filter" : "",
+				"minscale" : this.label.minscale,
+				"maxscale" :  this.label.maxscale,
+				"order" :  this.label.order
+		}
+		var rl = new Rule(i, ruleName, ruleTitle, options, this.utils);
+		var rule = {
+				rule: rl.getObject(),
+				symbolizers: [l]
+		};
+		style.rules.push(rule);
+	}
+
+
 	$.ajax({
 		type: "POST",
 		async: false,
@@ -224,8 +422,8 @@ UniqueSymbol.prototype.update = function(layerId, styleId) {
 			} else {
 				alert('Error');
 			}
-			
+
 		},
-	    error: function(){}
+		error: function(){}
 	});
 };

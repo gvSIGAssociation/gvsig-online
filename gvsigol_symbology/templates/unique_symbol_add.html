@@ -18,7 +18,7 @@
 
 			<div class="box-body">
 			
-				<div class="row">					
+				<div class="row">
 					<div class="col-md-6">
 						<div id="form-error" style="color:#ff0000;"></div>
 						<div class="row">
@@ -36,11 +36,11 @@
 						<div class="row">
 							<div class="col-md-6 form-group">
 								<label>{% trans "Min. scale" %}</label>
-					    		<input placeholder="{% trans 'Minimum scale denominator' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="-1" class="form-control">
+					    		<input placeholder="{% trans 'No limit' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="" class="form-control">
 							</div>
 							<div class="col-md-6 form-group">
 								<label>{% trans "Max. scale" %}</label>
-					    		<input placeholder="{% trans 'Maximum scale denominator' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="-1" class="form-control">
+					    		<input placeholder="{% trans 'No limit' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="" class="form-control">
 							</div>
 							<div class="col-md-12 form-group">
 								<p class="text-muted">* {% trans "Specifies the minimum and maximum scale denominator (inclusive) for the scale range in which this rule applies" %}.</p>
@@ -61,7 +61,22 @@
 				
 				<div id="rules" class="row">
 				</div>
+				
+			</div>
+		</div>
+	</div>
+</div>
 
+<!-- Modal -->
+<div class="modal fade" id="modal-edit-rule" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div id="modal-edit-rule-content" class="modal-body">
 			</div>
 		</div>
 	</div>
@@ -180,7 +195,7 @@ $(document).ready(function() {
 	map.addLayer(wmsLayer);
 	
 	var utils = new SymbologyUtils(map, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
-	var uniqueSymbol = new UniqueSymbol(layerName, utils, null);
+	var uniqueSymbol = new UniqueSymbol(featureType, layerName, utils, null);
 	uniqueSymbol.addDefault();
 	
 	utils.centerMap(layerName, wfsUrl);

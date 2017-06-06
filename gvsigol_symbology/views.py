@@ -165,29 +165,37 @@ def unique_symbol_update(request, layer_id, style_id):
     else:
         style = Style.objects.get(id=int(style_id))
         
-        r = Rule.objects.get(style=style)
-        symbolizers = []
-        for s in Symbolizer.objects.filter(rule=r).order_by('order'):
-            symbolizers.append(utils.symbolizer_to_json(s))
-            
-        rule = {
-            'id': r.id,
-            'name': r.name,
-            'title': r.title,
-            'abstract': '',
-            'filter': '',
-            'minscale': r.minscale,
-            'maxscale': r.maxscale,
-            'order': r.order,
-            'symbolizers': symbolizers
-        }
+        style_rules = Rule.objects.filter(style=style)
+        rules = []
+        for r in style_rules:
+            symbolizers = []
+            for s in Symbolizer.objects.filter(rule=r).order_by('order'):
+                symbolizers.append(utils.symbolizer_to_json(s))
+                
+            rule = {
+                'id': r.id,
+                'name': r.name,
+                'title': r.title,
+                'abstract': '',
+                'filter': r.filter,
+                'minscale': r.minscale,
+                'maxscale': r.maxscale,
+                'order': r.order,
+                'symbolizers': symbolizers
+            }
+            rules.append(rule)
                          
         response = services_unique_symbol.get_conf(request, layer_id)
         
         response['style'] = style
-        response['minscale'] = int(r.minscale)
-        response['maxscale'] = int(r.maxscale)
-        response['rule'] = json.dumps(rule)        
+        if style.minscale and int(style.minscale) >=0:
+            response['minscale'] = int(style.minscale)
+        if style.maxscale and int(style.maxscale) >=0:
+            response['maxscale'] = int(style.maxscale)
+        response['rules'] = json.dumps(rules)   
+        if rule['filter']:
+            response['property_name'] = json.loads(rule['filter']).get('property_name')    
+         
         
         return render_to_response('unique_symbol_update.html', response, context_instance=RequestContext(request))
     
@@ -248,10 +256,13 @@ def unique_values_update(request, layer_id, style_id):
         response = services_unique_values.get_conf(request, layer_id)
         
         response['style'] = style
-        response['minscale'] = int(r.minscale)
-        response['maxscale'] = int(r.maxscale)
-        response['rules'] = json.dumps(rules)    
-        response['property_name'] = json.loads(rule['filter']).get('property_name')    
+        if style.minscale and int(style.minscale) >=0:
+            response['minscale'] = int(style.minscale)
+        if style.maxscale and int(style.maxscale) >=0:
+            response['maxscale'] = int(style.maxscale)
+        response['rules'] = json.dumps(rules)   
+        if rule['filter']:
+            response['property_name'] = json.loads(rule['filter']).get('property_name')    
         
         return render_to_response('unique_values_update.html', response, context_instance=RequestContext(request))
     
@@ -333,11 +344,14 @@ def intervals_update(request, layer_id, style_id):
         response = services_intervals.get_conf(request, layer_id)
         
         response['style'] = style
-        response['minscale'] = int(r.minscale)
-        response['maxscale'] = int(r.maxscale)
-        response['rules'] = json.dumps(rules) 
+        if style.minscale and int(style.minscale) >=0:
+            response['minscale'] = int(style.minscale)
+        if style.maxscale and int(style.maxscale) >=0:
+            response['maxscale'] = int(style.maxscale)
+        response['rules'] = json.dumps(rules)
+        if rule['filter']:
+            response['property_name'] = json.loads(rule['filter']).get('property_name')    
         response['intervals'] = len(rules)
-        response['property_name'] = json.loads(rule['filter']).get('property_name')
         
         return render_to_response('intervals_update.html', response, context_instance=RequestContext(request))
     
@@ -417,8 +431,10 @@ def expressions_update(request, layer_id, style_id):
         response = services_expressions.get_conf(request, layer_id)
         
         response['style'] = style
-        response['minscale'] = int(r.minscale)
-        response['maxscale'] = int(r.maxscale)
+        if style.minscale and int(style.minscale) >=0:
+            response['minscale'] = int(style.minscale)
+        if style.maxscale and int(style.maxscale) >=0:
+            response['maxscale'] = int(style.maxscale)
         response['rules'] = json.dumps(rules)        
         
         return render_to_response('expressions_update.html', response, context_instance=RequestContext(request))
@@ -479,8 +495,10 @@ def color_table_update(request, layer_id, style_id):
         response = services_color_table.get_conf(request, layer_id)
         
         response['style'] = style
-        response['minscale'] = int(r.minscale)
-        response['maxscale'] = int(r.maxscale)
+        if style.minscale and int(style.minscale) >=0:
+            response['minscale'] = int(style.minscale)
+        if style.maxscale and int(style.maxscale) >=0:
+            response['maxscale'] = int(style.maxscale)
         response['rule'] = json.dumps(rule)        
         
         return render_to_response('color_table_update.html', response, context_instance=RequestContext(request))

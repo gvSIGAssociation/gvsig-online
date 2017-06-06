@@ -53,6 +53,8 @@ class Style(models.Model):
     title = models.CharField(max_length=100, blank=True, null=True)   
     is_default = models.BooleanField(default=False)
     type = models.CharField(max_length=2, choices=LEGEND_TYPES, default=UNIQUE_SYMBOL)
+    minscale = models.FloatField(null=True, blank=True, default=-1)
+    maxscale = models.FloatField(null=True, blank=True, default=-1)
     order = models.IntegerField(null=False, default=0)
     
     def __unicode__(self):
