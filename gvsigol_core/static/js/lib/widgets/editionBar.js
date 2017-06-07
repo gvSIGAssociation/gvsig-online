@@ -636,6 +636,191 @@ editionBar.prototype.isNumericType = function(type){
 	return false;
 }
 
+
+editionBar.prototype.getNumericProperties = function(featureType){
+	var type = featureType.type;
+	
+	if(type == 'smallint'){
+		return "min=-32768 max=32767 step=1"
+	} 
+	
+	if(type == 'integer'){
+		return "min=-2147483648 max=2147483648 step=1"
+	} 
+	
+	if(type == 'bigint'){
+		return "min=-9223372036854775808 max=9223372036854775808 step=1"
+	} 
+	
+	
+	if(type == 'smallserial'){
+		return "min=1 max=32767 step=1"
+	} 
+	
+	if(type == 'serial'){
+		return "min=1 max=2147483647 step=1"
+	} 
+	
+	if(type == 'bigserial'){
+		return "min=1 max=9223372036854775808 step=1"
+	} 
+	
+	if(type == 'real'){
+		return "step=1"
+	} 
+	
+	
+	if(type == 'double precision'){
+		return "step=1"
+	} 
+	
+	if(type == 'decimal' || type == 'numeric' ){
+		var min_string="0";
+		for(var i=0; i<featureType.precision; i++){
+			if(i==0){
+				min_string = "9";
+			}else{
+				min_string += "9";
+			}
+		}
+		//min_string += ".";
+		var scale = "0."
+		for(var i=0; i<featureType.scale; i++){
+			//min_string += "9";
+			if(i!=0){
+				scale += "0";
+			}
+		}
+		scale += "1";
+		return "min=-"+min_string+" max="+ min_string +" step=1";
+		//return "min=-999999999999999 max=999999999999999 step=0,000000000000000000001";
+	} 
+	
+
+	return "";
+}
+
+
+editionBar.prototype.getFeatureTypeDefinition = function(name){
+	var type = "";
+	var featureType = null;
+	for(var i=0; i<this.featureTypes.length; i++){
+		if(this.featureTypes[i].name == name){
+			featureType = this.featureTypes[i];
+			type = featureType.type;
+		}
+	}
+	
+	if(type == 'smallint'){
+		return {
+			type: 'smallint',
+			min: -32768,
+			max: 32767,
+			step: 1
+		}
+	} 
+	
+	if(type == 'integer'){
+		return {
+			type: 'integer',
+			min: -2147483648,
+			max: 2147483647,
+			step: 1
+		}
+	} 
+	
+	if(type == 'bigint'){
+		return {
+			type: 'bigint',
+			min: -9223372036854775808,
+			max: 9223372036854775808,
+			step: 1
+		}
+	} 
+	
+	
+	if(type == 'smallserial'){
+		return {
+			type: 'smallserial',
+			min: 1,
+			max: 32767,
+			step: 1
+		}
+	} 
+	
+	if(type == 'serial'){
+		return {
+			type: 'serial',
+			min: 1,
+			max: 2147483647,
+			step: 1
+		}
+	} 
+	
+	if(type == 'bigserial'){
+		return {
+			type: 'bigserial',
+			min: 1,
+			max: 9223372036854775808,
+			step: 1
+		}
+	} 
+	
+	if(type == 'real'){
+		return {
+			type: 'real',
+			min: null,
+			max: null,
+			step: 0.000001
+		}
+	} 
+	
+	
+	if(type == 'double precision'){
+		return {
+			type: 'double precision',
+			min: null,
+			max: null,
+			step: 0.000000000000001
+		}
+	} 
+	
+	if(type == 'decimal' || type == 'numeric' ){
+		var min_string="0";
+		for(var i=0; i<featureType.precision; i++){
+			if(i!=0){
+				min_string = "9";
+			}else{
+				min_string += "9";
+			}
+		}
+		min_string += ".";
+		var scale = "0."
+		for(var i=0; i<featureType.scale; i++){
+			min_string += "9";
+			if(i!=0){
+				scale += "0";
+			}
+		}
+		scale += "1";
+		return {
+			type: type,
+			min: -parseInt(min_string),
+			max: parseInt(min_string),
+			step: parseInt(scale)
+		}
+	} 
+	
+
+	return {
+		type: null,
+		min: null,
+		max: null,
+		step: null
+	};
+}
+
+
 editionBar.prototype.isStringType = function(type){
 	if(type == 'character varying' || type == 'varchar' || type == 'character' || type == 'char' || type == 'text' ){
 		return true;
@@ -694,7 +879,8 @@ editionBar.prototype.createFeatureForm = function(feature) {
 					featureProperties += '<div class="col-md-12 form-group" style="background-color: #fff;">';
 					featureProperties += 	'<label style="color: #444;">' + name + '</label>';
 					if (this.isNumericType(this.featureType[i].type)) {
-						featureProperties += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control">';
+						var numeric_conf = this.getNumericProperties(this.featureType[i]);
+						featureProperties += '<input id="' + this.featureType[i].name + '" type="number" '+ numeric_conf+' class="form-control">';
 						
 					} else if (this.isDateType(this.featureType[i].type)) {
 						featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd">';
@@ -860,7 +1046,8 @@ editionBar.prototype.editFeatureForm = function(feature) {
 						if (value==null) {
 							value = "";
 						}
-						featureProperties += '<input id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + value + '">';
+						var numeric_conf = this.getNumericProperties(this.featureType[i]);
+						featureProperties += '<input id="' + this.featureType[i].name + '" type="number" '+ numeric_conf +' class="form-control" value="' + value + '">';
 					} else if (this.isDateType(this.featureType[i].type)) {
 						if (value != null) {
 							if (value.charAt(value.length - 1) == 'Z') {
@@ -1066,7 +1253,8 @@ editionBar.prototype.removeFeatureForm = function(evt, feature) {
 				ui += '<div class="col-md-12 form-group" style="background-color: #fff;">';
 				ui += 	'<label style="color: #444;">' + this.featureType[i].name + '</label>';
 				if (this.isNumericType(this.featureType[i].type)) {
-					ui += '<input disabled id="' + this.featureType[i].name + '" type="number" step="any" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+					var numeric_conf = this.getNumericProperties(this.featureType[i]);
+					ui += '<input disabled id="' + this.featureType[i].name + '" type="number" '+ numeric_conf+' class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
 					
 				} else if (this.isDateType(this.featureType[i].type)) {
 					var dbDate = feature.getProperties()[this.featureType[i].name];
