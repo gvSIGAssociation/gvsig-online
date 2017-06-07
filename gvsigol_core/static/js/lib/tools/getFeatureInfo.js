@@ -333,7 +333,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 				}
 			}	
 			
-			html += '<li class="item" style="min-width:200px;">';
+			html += '<li class="item" style="min-width:240px;">';
 			html += 	'<div class="feature-info">';
 			html += 		'<a href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;">' + feature_id;
 			html += 		'<span class="label label-info pull-right">' + gettext('More info') + '</span></a>';
