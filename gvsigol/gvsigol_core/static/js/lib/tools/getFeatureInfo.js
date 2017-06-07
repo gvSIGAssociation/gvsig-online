@@ -303,6 +303,36 @@ getFeatureInfo.prototype.showInfo = function(features){
 		if (features[i].type == 'feature') {
 			var fid = features[i].feature.id;
 			var feature_id = features[i].layer.title +"."+features[i].feature.feature;
+			var is_first_configured = true;
+			var item_shown = false;
+			var selectedLayer = features[i].layer;
+			var language = $("#select-language").val();
+			if (selectedLayer != null) {
+				if (selectedLayer.conf != null) {
+					var fields_trans = selectedLayer.conf;
+					if(fields_trans["fields"]){
+						var fields = fields_trans["fields"];
+						for(var ix=0; ix<fields.length; ix++){
+							
+								if(fields[ix]["infovisible"] != null){
+									item_shown = fields[ix]["infovisible"];
+								}
+								var key = fields[ix]["name"];
+								var key_trans = fields[ix]["title-"+language];
+								if(item_shown && key && features[i].feature.properties && features[i].feature.properties[key]){
+									if(is_first_configured){
+										feature_id = "<span style=\"font-weight:normal\">"+selectedLayer.title + "</span><br />";
+										is_first_configured = false;
+									}
+									feature_id += "<span style=\"font-weight:normal\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+key_trans + ": </span><span class=\"pull-right\">" + features[i].feature.properties[key] + "</span><br />";
+									
+								}
+							
+						}
+					}
+				}
+			}	
+			
 			html += '<li class="item">';
 			html += 	'<div class="feature-info">';
 			html += 		'<a href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;">' + feature_id;
@@ -396,9 +426,9 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 								var fields = fields_trans["fields"];
 								for(var ix=0; ix<fields.length; ix++){
 									if(fields[ix].name.toLowerCase() == key){
-										if(fields[ix]["infovisible"] != null){
-											item_shown = fields[ix]["infovisible"];
-										}
+//										if(fields[ix]["infovisible"] != null){
+//											item_shown = fields[ix]["infovisible"];
+//										}
 										var feat_name_trans = fields[ix]["title-"+language];
 										if(feat_name_trans){
 											key = feat_name_trans;
