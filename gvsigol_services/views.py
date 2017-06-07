@@ -617,7 +617,7 @@ def layer_config(request, layer_id):
                     field['title-'+id] = f['name']
                 field['visible'] = True
                 field['editable'] = True
-                field['infovisible'] = True
+                field['infovisible'] = False
                 fields.append(field)
     
         return render(request, 'layer_config.html', {'layer': layer, 'layer_id': layer.id, 'fields': fields, 'fields_json': json.dumps(fields), 'available_languages': LANGUAGES, 'available_languages_array': available_languages})
