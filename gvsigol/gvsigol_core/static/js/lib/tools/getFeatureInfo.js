@@ -324,7 +324,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 										feature_id = "<span style=\"font-weight:normal\">"+selectedLayer.title + "</span><br />";
 										is_first_configured = false;
 									}
-									feature_id += "<span style=\"font-weight:normal\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+key_trans + ": </span><span class=\"pull-right\">" + features[i].feature.properties[key] + "</span><br />";
+									feature_id += "<span class=\"pull-right\">" + features[i].feature.properties[key] + "</span><br />";
 									
 								}
 							
