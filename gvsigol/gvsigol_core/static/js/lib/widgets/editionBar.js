@@ -978,6 +978,12 @@ editionBar.prototype.createFeatureForm = function(feature) {
 					}
 				}
 			}
+			if('modified_by' in properties){
+				properties['modified_by'] = self.layerTree.conf.user.credentials.username;
+			}
+			if('last_modification' in properties){
+				properties['last_modification'] = Date.now();
+			}
 			feature.setProperties(properties);
 			var transaction = self.transactWFS('insert', feature);
 			if (transaction.success) {
@@ -1218,6 +1224,12 @@ editionBar.prototype.editFeatureForm = function(feature) {
 						}
 					}
 				}
+			}
+			if('modified_by' in properties){
+				properties['modified_by'] = self.layerTree.conf.user.credentials.username;
+			}
+			if('last_modification' in properties){
+				properties['last_modification'] = Date.now();
 			}
 			feature.setProperties(properties);
 			var transaction = self.transactWFS('update', feature);
