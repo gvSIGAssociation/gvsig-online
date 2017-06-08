@@ -855,19 +855,19 @@ editionBar.prototype.createFeatureForm = function(feature) {
 		
 		var featureProperties = '';
 		featureProperties += '<div class="box">';
-		featureProperties += 	'<div class="box-body no-padding">';
+		featureProperties += 	'<div class="feature-div box-body no-padding">';
 		
 		var fields = this.selectedLayer.conf.fields;
 		for (var i=0; i<this.featureType.length; i++) {
 			if (!this.isGeomType(this.featureType[i].type) && this.featureType[i].name != 'id') {
-				var name = this.featureType[i].name;
+				var name = '<span class="edit-feature-field">' + this.featureType[i].name + '</span>';
 				var visible = true;
 				if(fields){
 					for(var ix =0; ix<fields.length; ix++){
-						if(fields[ix].name.toLowerCase() == name){
+						if(fields[ix].name.toLowerCase() == this.featureType[i].name){
 							var lang = $("#select-language").val();
 							if(fields[ix]["title-"+lang] && fields[ix]["title-"+lang] != ""){
-								name = fields[ix]["title-"+lang] + '<br /><span style="font-weight: normal;">('+name+')</span>';
+								name = '<span class="edit-feature-field">' + fields[ix]["title-"+lang] + '</span><br /><span style="font-weight: normal;">('+name+')</span>';
 							}
 							if(fields[ix].editable != undefined){
 								visible = fields[ix].editable;
@@ -954,7 +954,12 @@ editionBar.prototype.createFeatureForm = function(feature) {
 			feature.setProperties(props);
 		});
 		
+
+		$(".feature-div").each(self.createAllErrors);
+	
+		
 		$('#save-feature').on('click', function () {
+			if(self.showAllErrorMessages()){
 			var properties = {};
 			for (var i=0; i<self.featureType.length; i++) {
 				if (!self.isGeomType(self.featureType[i].type) && self.featureType[i].name != 'id') {
@@ -994,6 +999,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 				self.selectedLayer.getSource().updateParams({"time": Date.now()});
 				self.showLayersTab();
 			}		
+			}
 		});
 		
 		$('#save-feature-cancel').on('click', function () {
@@ -1005,6 +1011,53 @@ editionBar.prototype.createFeatureForm = function(feature) {
 
 };
 
+
+
+editionBar.prototype.showAllErrorMessages = function() {
+	var self = this;
+	var form = $(".feature-div");
+
+	$('#edition-error').empty();
+	var ui = '';
+	ui += '<div class="alert alert-danger alert-dismissible">';
+	ui += 	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
+	ui +=   '<h4><i class="icon fa fa-ban"></i> Error!</h4>';
+	ui +=   gettext('Failed to save the new record. Please check values');
+	
+	var invalidFields = form.find( ":invalid" ).each( function( index, node ) {
+		var label = $( "#" + node.id).parent().find("span.edit-feature-field").first(),
+		// Opera incorrectly does not fill the validationMessage property.
+		message = node.validationMessage || 'Invalid value.';
+		ui +=    "<li><span>" + label.html() + "</span> - " + message + "</li>" ;
+	});
+	
+	ui += '</div>';
+	$('#edition-error').append(ui);
+	
+	return (!invalidFields || invalidFields.length <= 0);
+};
+
+
+editionBar.prototype.createAllErrors = function() {
+	var self = this;
+	var form = $(".feature-div");
+	var errorList = $("ul.errorMessages", form );
+
+//	// Support Safari
+//	form.on( "submit", function( event ) {
+//		if ( this.checkValidity && !this.checkValidity() ) {
+//			$( this ).find( ":invalid" ).first().focus();
+//			event.preventDefault();
+//		}
+//	});
+//	$( "#edit-feature", form ).on( "click", showAllErrorMessages);
+	$( "input", form ).on( "keypress", function( event ) {
+		var type = $( this ).attr( "type" );
+		if ( /date|email|month|number|search|tel|text|time|url|week/.test ( type ) && event.keyCode == 13 ) {
+			self.showAllErrorMessages();
+		}
+	});
+};
 
 /**
  * @param {Event} e Browser event.
@@ -1018,19 +1071,19 @@ editionBar.prototype.editFeatureForm = function(feature) {
 		
 		var featureProperties = '';
 		featureProperties += '<div class="box">';
-		featureProperties += 	'<div class="box-body no-padding">';
+		featureProperties += 	'<div class="feature-div box-body no-padding">';
 		
 		var fields = this.selectedLayer.conf.fields;
 		for (var i=0; i<this.featureType.length; i++) {
 			if (!this.isGeomType(this.featureType[i].type) && this.featureType[i].name != 'id') {
-				var name = this.featureType[i].name;
+				var name = '<span class="edit-feature-field">' + this.featureType[i].name+'</span>';
 				var visible = true;
 				if(fields){
 					for(var ix =0; ix<fields.length; ix++){
-						if(fields[ix].name.toLowerCase() == name){
+						if(fields[ix].name.toLowerCase() == this.featureType[i].name){
 							var lang = $("#select-language").val();
 							if(fields[ix]["title-"+lang] && fields[ix]["title-"+lang] != ""){
-								name = fields[ix]["title-"+lang] + '<br /><span style="font-weight: normal;">('+name+')</span>';
+								name = '<span class="edit-feature-field">' + fields[ix]["title-"+lang] + '</span><br /><span style="font-weight: normal;">('+name+')</span>';
 							}
 							if(fields[ix].editable != undefined){
 								visible = fields[ix].editable;
@@ -1094,6 +1147,7 @@ editionBar.prototype.editFeatureForm = function(feature) {
 			}
 		}
 		featureProperties +=		'<div class="col-md-12 form-group" id="edition-error">';
+		
 		featureProperties +=      '</div>';
 		featureProperties += 	'</div>';
 		featureProperties += 	'<div class="box-footer text-right">';
@@ -1139,7 +1193,14 @@ editionBar.prototype.editFeatureForm = function(feature) {
 			feature.setProperties(props);
 		});
 		
+		
+
+
+		$(".feature-div").each(self.createAllErrors);
+	
+		
 		$('#edit-feature').on('click', function () {
+			if(self.showAllErrorMessages()){
 			var properties = {};
 			for (var i=0; i<self.featureType.length; i++) {
 				if (!self.isGeomType(self.featureType[i].type) && self.featureType[i].name != 'id') {
@@ -1180,6 +1241,7 @@ editionBar.prototype.editFeatureForm = function(feature) {
 				self.selectInteraction.getFeatures().clear();
 				self.showLayersTab();
 			}		
+			}
 		});
 		
 		$('#edit-feature-cancel').on('click', function () {
