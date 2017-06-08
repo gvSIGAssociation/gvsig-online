@@ -982,7 +982,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 				properties['modified_by'] = self.layerTree.conf.user.credentials.username;
 			}
 			if('last_modification' in properties){
-				properties['last_modification'] = Date.now();
+				properties['last_modification'] = Date.now().format('YYYY-MM-DD');
 			}
 			feature.setProperties(properties);
 			var transaction = self.transactWFS('insert', feature);
