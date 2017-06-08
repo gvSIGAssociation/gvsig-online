@@ -977,13 +977,25 @@ editionBar.prototype.createFeatureForm = function(feature) {
 						}
 					}
 				}
+				if(self.featureType[i].name == 'modified_by'){
+					properties['modified_by'] = self.layerTree.conf.user.credentials.username;
+				}
+				if(self.featureType[i].name == 'last_modification'){
+					var today = new Date();
+					var dd = today.getDate();
+					var mm = today.getMonth()+1; //January is 0!
+
+					var yyyy = today.getFullYear();
+					if(dd<10){
+					    dd='0'+dd;
+					} 
+					if(mm<10){
+					    mm='0'+mm;
+					} 
+					properties['last_modification'] = yyyy+'-'+mm+'-'+dd;
+				}
 			}
-			if('modified_by' in properties){
-				properties['modified_by'] = self.layerTree.conf.user.credentials.username;
-			}
-			if('last_modification' in properties){
-				properties['last_modification'] = Date.now().format('YYYY-MM-DD');
-			}
+
 			feature.setProperties(properties);
 			var transaction = self.transactWFS('insert', feature);
 			if (transaction.success) {
@@ -1224,13 +1236,25 @@ editionBar.prototype.editFeatureForm = function(feature) {
 						}
 					}
 				}
+				if(self.featureType[i].name == 'modified_by'){
+					properties['modified_by'] = self.layerTree.conf.user.credentials.username;
+				}
+				if(self.featureType[i].name == 'last_modification'){
+					var today = new Date();
+					var dd = today.getDate();
+					var mm = today.getMonth()+1; //January is 0!
+
+					var yyyy = today.getFullYear();
+					if(dd<10){
+					    dd='0'+dd;
+					} 
+					if(mm<10){
+					    mm='0'+mm;
+					} 
+					properties['last_modification'] = yyyy+'-'+mm+'-'+dd;
+				}
 			}
-			if('modified_by' in properties){
-				properties['modified_by'] = self.layerTree.conf.user.credentials.username;
-			}
-			if('last_modification' in properties){
-				properties['last_modification'] = Date.now();
-			}
+
 			feature.setProperties(properties);
 			var transaction = self.transactWFS('update', feature);
 			if (transaction.success) {
