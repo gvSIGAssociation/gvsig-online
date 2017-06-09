@@ -302,10 +302,15 @@ getFeatureInfo.prototype.showInfo = function(features){
 	for (var i in features) {
 		if (features[i].type == 'feature') {
 			var fid = features[i].feature.id;
-			var feature_id = features[i].layer.title +"."+features[i].feature.feature;
 			var is_first_configured = true;
 			var item_shown = false;
 			var selectedLayer = features[i].layer;
+			
+			var feature_id = "<span style=\"font-weight:normal; margin-right:45px;\">"+features[i].layer.title +"."+features[i].feature.feature + "</span>";
+			feature_id += 		'<span class="label feature-info-button feature-info-label-resource pull-right"><i class="fa fa-picture-o" aria-hidden="true"></i></span>';
+			feature_id += 		'<span class="label feature-info-button feature-info-label-info pull-right"><i class="fa fa-list-ul" aria-hidden="true"></i></span><br />';
+			feature_id += "<br />";
+			
 			var language = $("#select-language").val();
 			if (selectedLayer != null) {
 				if (selectedLayer.conf != null) {
