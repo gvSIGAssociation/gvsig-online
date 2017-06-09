@@ -4736,3 +4736,15 @@ table.dataTable thead th span.subname, table.dataTable tfoot th span.subname{
 
 .searchable-list-box .pagination {float:right}
 .searchable-list-box .col-md-6{margin:0px;padding:0px}
+
+
+.feature-info-button {
+  	position: absolute;
+    color: #444;
+    font-size: 16px;
+    right: 5px;
+}
+
+.feature-info-button.feature-info-label-info {
+    right: 40px;
+}
