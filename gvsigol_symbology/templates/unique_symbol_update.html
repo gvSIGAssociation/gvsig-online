@@ -208,19 +208,24 @@ $(document).ready(function() {
 	});
 	
 	$("#style-title").on('change', function(e){
-		var rule = uniqueSymbol.getRule();
-		rule.title = this.value;
-		$("#rule-title").text(this.value);
+		var rules = uniqueSymbol.getRules();
+		for (var i=0; i<rules.length; i++) {
+			rules[i].title = this.value;
+		}
 	});
 	
 	$("#symbol-minscale").on('change', function(e){
-		var rule = uniqueSymbol.getRule();
-		rule.minscale = this.value;
+		var rules = uniqueSymbol.getRules();
+		for (var i=0; i<rules.length; i++) {
+			rules[i].minscale = this.value;
+		}
 	});
 	
 	$("#symbol-maxscale").on('change', function(e){
-		var rule = uniqueSymbol.getRule();
-		rule.maxscale = this.value;
+		var rules = uniqueSymbol.getRules();
+		for (var i=0; i<rules.length; i++) {
+			rules[i].maxscale = this.value;
+		}
 	});
 
 	$("#save-legend").on('click', function(e){
