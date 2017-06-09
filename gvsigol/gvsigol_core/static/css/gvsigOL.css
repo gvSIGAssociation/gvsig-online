@@ -4737,14 +4737,26 @@ table.dataTable thead th span.subname, table.dataTable tfoot th span.subname{
 .searchable-list-box .pagination {float:right}
 .searchable-list-box .col-md-6{margin:0px;padding:0px}
 
+.feature-buttons{
+	float:right;
+}
 
 .feature-info-button {
-  	position: absolute;
     color: #444;
     font-size: 16px;
-    right: 5px;
 }
 
 .feature-info-button.feature-info-label-info {
-    right: 40px;
+}
+
+.products-list > .item.feature-item:hover{
+	background: #eee; 
+}
+
+.product-list-in-box > .item.feature-item{
+	border-bottom: 1px solid #ddd; 
+}
+
+#float-modal .popup-wrapper {
+    padding: 10px 0px 10px 10px;
 }
