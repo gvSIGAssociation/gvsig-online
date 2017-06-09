@@ -35,6 +35,10 @@ var LineSymbolizer = function(rule, options, utils) {
 	if (options) {
 		$.extend(this, options);
 	}
+	
+	if(rule.symbolizers){
+		this.order = rule.symbolizers.length;
+	}
 };
 
 LineSymbolizer.prototype.getTableUI = function() {
