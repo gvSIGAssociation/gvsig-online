@@ -306,9 +306,9 @@ getFeatureInfo.prototype.showInfo = function(features){
 			var item_shown = false;
 			var selectedLayer = features[i].layer;
 			
-			var feature_id = "<span style=\"font-weight:normal; margin-right:45px;\">"+features[i].layer.title +"."+features[i].feature.feature + "</span>";
-			feature_id += 		'<span class="label feature-info-button feature-info-label-resource pull-right"><i class="fa fa-picture-o" aria-hidden="true"></i></span>';
-			feature_id += 		'<span class="label feature-info-button feature-info-label-info pull-right"><i class="fa fa-list-ul" aria-hidden="true"></i></span><br />';
+			var feature_id = "<span style=\"font-weight:normal; margin-right:5px;\">"+features[i].layer.title +"."+features[i].feature.feature + "</span>";
+			feature_id += 		'<div class="feature-buttons"><span class="label feature-info-button feature-info-label-info "><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
+			feature_id += 		'<span class="label feature-info-button feature-info-label-resource"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><br />';
 			feature_id += "<br />";
 			
 			var language = $("#select-language").val();
@@ -326,9 +326,9 @@ getFeatureInfo.prototype.showInfo = function(features){
 								var key_trans = fields[ix]["title-"+language];
 								if(item_shown && key && features[i].feature.properties && features[i].feature.properties[key]){
 									if(is_first_configured){
-										feature_id = "<span style=\"font-weight:normal; margin-right:45px;\">"+selectedLayer.title + "</span>";
-										feature_id += 		'<span class="label feature-info-button feature-info-label-resource pull-right"><i class="fa fa-picture-o" aria-hidden="true"></i></span>';
-										feature_id += 		'<span class="label feature-info-button feature-info-label-info pull-right"><i class="fa fa-list-ul" aria-hidden="true"></i></span><br />';
+										feature_id = "<span style=\"font-weight:normal; margin-right:5px;\">"+selectedLayer.title + "</span>";
+										feature_id += 		'<div class="feature-buttons"><span class="label feature-info-button feature-info-label-info "><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
+										feature_id += 		'<span class="label feature-info-button feature-info-label-resource"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><br />';
 
 										is_first_configured = false;
 									}
@@ -341,7 +341,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 				}
 			}	
 			
-			html += '<li class="item" style="min-width:300px;">';
+			html += '<li class="item feature-item" style="min-width:300px;">';
 			html += 	'<div class="feature-info">';
 			html += 		'<a href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;">' + feature_id + '</a>';
 			html += 	'</div>';
@@ -382,11 +382,11 @@ getFeatureInfo.prototype.showInfo = function(features){
 	this.popup.show(self.mapCoordinates, '<div class="popup-wrapper">' + html + '</div>');	
 	self.map.getView().setCenter(self.mapCoordinates);
 	$('.item-fid .feature-info-label-info').click(function(){
-		self.showMoreInfo(this.parentNode.dataset.fid, features, 'features');
+		self.showMoreInfo(this.parentNode.parentNode.dataset.fid, features, 'features');
 	});
 	
 	$('.item-fid .feature-info-label-resource').click(function(){
-		self.showMoreInfo(this.parentNode.dataset.fid, features, 'resources');
+		self.showMoreInfo(this.parentNode.parentNode.dataset.fid, features, 'resources');
 	});
 
 	$.overlayout();
