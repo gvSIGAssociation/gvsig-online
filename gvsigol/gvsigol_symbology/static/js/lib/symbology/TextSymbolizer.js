@@ -39,6 +39,7 @@ var TextSymbolizer = function(rule, options, utils) {
 	this.rule = rule;
 	this.minscale = "";
 	this.maxscale = "";
+	this.title = null;
 	
 	if (options) {
 		$.extend(this, options);
@@ -47,6 +48,18 @@ var TextSymbolizer = function(rule, options, utils) {
 		}
 		if(this.maxscale<0){
 			this.maxscale = "";
+		}
+	}
+	
+	if(this.title == null && this.utils){
+		var language = $("#select-language").val();
+		var fields = this.utils.getAlphanumericFields();
+		if(fields.length>0){
+			if (fields[0]["title-"+language]) {
+				this.title = fields[0]["title-"+language];
+			}else{
+				this.title = fields[0].name;
+			}
 		}
 	}
 };
@@ -88,6 +101,12 @@ TextSymbolizer.prototype.getGeneralTabUI = function() {
 	}else{
 		ui += 			'<input id="label-has-label" type="checkbox" class="has-label">   ' + gettext('Has label') + '</input>';
 	}
+	ui += 		'</div>';
+	ui += 	'</div>';
+	ui += 	'<div class="row">';
+	ui += 		'<div class="col-md-12 form-group">';
+	ui += 			'<label>' + gettext( 'Rule title') + '</label>';
+	ui += 			'<input placeholder="' + gettext('Rules title') + '" name="text-title" id="text-title" type="text" value="'+this.title+'" class="form-control">';					
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += 	'<div class="row">';
@@ -292,6 +311,10 @@ TextSymbolizer.prototype.registerEvents = function() {
 		self.maxscale = this.value;
 	});
 	
+	$("#text-title").on('change', function(e){
+		self.title = this.value;
+	});
+	
 	$( "#halo-fill-opacity-slider" ).slider({
 	    min: 0,
 	    max: 100,
@@ -314,11 +337,13 @@ TextSymbolizer.prototype.initializeForm = function() {
 	if(!this.is_actived) {
 	    $("#font-tab a").removeAttr("data-toggle");
 	    $("#halo-tab a").removeAttr("data-toggle");
+	    $("#text-title").prop("disabled",true);
 	    $("#text-minscale").prop("disabled",true);
 	    $("#text-maxscale").prop("disabled",true);
 	} else {
 		$("#font-tab a").attr("data-toggle", "tab");
 		$("#halo-tab a").attr("data-toggle", "tab");
+		$("#text-title").prop("disabled",false);
 	    $("#text-minscale").prop("disabled",false);
 	    $("#text-maxscale").prop("disabled",false);
 	}
@@ -402,6 +427,7 @@ TextSymbolizer.prototype.toJSON = function(){
 		type: this.type,
 		is_actived: this.is_actived,
 		label: this.label,
+		title: this.title,
 		font_family: this.font_family,
 		font_size: this.font_size,
 		font_weight: this.font_weight,
