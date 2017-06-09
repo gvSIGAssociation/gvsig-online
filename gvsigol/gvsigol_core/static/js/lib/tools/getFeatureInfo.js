@@ -545,7 +545,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 			ui += '<ul class="nav nav-tabs">';
 			ui += 		'<li class="active"><a href="#tab_info_content" data-toggle="tab" aria-expanded="true" style="font-weight: bold;">' + gettext('Feature info') + '</a></li>';
 			if (selectedFeature.resources && (selectedFeature.resources.length > 0)) {
-				ui += 	'<li class=""><a href="#tab_resources_content" data-toggle="tab" aria-expanded="false" style="font-weight: bold;">' + gettext('Multimedia resources') + '</a></li>';
+				ui += 	'<li id="resources-tab" class=""><a href="#tab_resources_content" data-toggle="tab" aria-expanded="false" style="font-weight: bold;">' + gettext('Multimedia resources') + '</a></li>';
 			}
 			ui += '</ul>';
 			ui += '<div class="tab-content">';
@@ -576,7 +576,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 	}
 	
 	if(tab_opened=='resources'){
-		$('#view-resources').trigger( "click" );
+		$('#resources-tab').trigger( "click" );
 	}
 };
 
