@@ -576,7 +576,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 	}
 	
 	if(tab_opened=='resources'){
-		$('#resources-tab').trigger( "click" );
+		$('.nav-tabs a[href="#tab_resources_content"]').tab('show');
 	}
 };
 
