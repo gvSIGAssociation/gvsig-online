@@ -53,10 +53,10 @@ var UniqueSymbol = function(featureType, layerName, utils, rule_opts) {
 	
 	if (rule_opts != null) {
 		if (rule_opts.symbolizers != "") {
-			this.rule = new Rule(0, $("#style-name").val(), $("#style-name").val(), rule_opts, this.utils);
-			$('#rules').append(this.rule.getTableUI(true, 'unique'));
-			this.rule.registerEvents('unique');
-			this.rule.preview();
+			var rule = new Rule(0, $("#style-name").val(), $("#style-name").val(), rule_opts, this.utils);
+			$('#rules').append(rule.getTableUI(true, 'unique'));
+			rule.registerEvents('unique');
+			rule.preview();
 			this.loadRules(rule_opts);
 		}
 	}	
@@ -64,7 +64,7 @@ var UniqueSymbol = function(featureType, layerName, utils, rule_opts) {
 
 UniqueSymbol.prototype.addDefault = function() {
 	var rule = new Rule(0, $("#style-name").val(), $("#style-name").val(), null, this.utils);
-	$('#rules').append(this.rule.getTableUI(true, 'unique'));
+	$('#rules').append(rule.getTableUI(true, 'unique'));
 	rule.registerEvents('unique');
 	rule.addSymbolizer(this.utils);
 	rule.preview();
@@ -160,7 +160,7 @@ UniqueSymbol.prototype.load = function(selectedField, values) {
 		}
 
 		var rule = new Rule(i, ruleName, ruleTitle, options, this.utils);
-		$('#rules').append(this.rule.getTableUI(true, 'unique'));
+		$('#rules').append(rule.getTableUI(true, 'unique'));
 		rule.registerEvents();
 		var colors = this.utils.createColorRange('random', values.length);
 		rule.addSymbolizer({fill: colors[i], stroke: colors[i]});
@@ -204,6 +204,7 @@ UniqueSymbol.prototype.loadRules = function(rules) {
 
 			if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer') {
 				options['is_actived'] = true;
+				options['title'] = rules[i].title;
 				options['minscale'] = rules[i].minscale;
 				options['maxscale'] = rules[i].maxscale;
 				this.loadLabel(options);
@@ -278,7 +279,7 @@ UniqueSymbol.prototype.save = function(layerId) {
 
 	if (this.label != null && this.label.is_activated()) {
 		var ruleName = "rule_" + this.rules.length +"_text";
-		var ruleTitle = "rule_" + this.rules.length +"_text";
+		var ruleTitle = this.label.title;
 		var l = {
 				type: this.label.type,
 				json: this.label.toJSON(),
@@ -376,7 +377,7 @@ UniqueSymbol.prototype.update = function(layerId, styleId) {
 
 	if (this.label != null && this.label.is_activated()) {
 		var ruleName = "rule_" + this.rules.length +"_text";
-		var ruleTitle = "rule_" + this.rules.length +"_text";
+		var ruleTitle = this.label.title;
 		var l = {
 				type: this.label.type,
 				json: this.label.toJSON(),
