@@ -63,16 +63,12 @@ var UniqueSymbol = function(featureType, layerName, utils, rule_opts) {
 };
 
 UniqueSymbol.prototype.addDefault = function() {
-	this.rule = new Rule(0, $("#style-name").val(), $("#style-name").val(), null, this.utils);
+	var rule = new Rule(0, $("#style-name").val(), $("#style-name").val(), null, this.utils);
 	$('#rules').append(this.rule.getTableUI(true, 'unique'));
-	this.rule.registerEvents('unique');
-	this.rule.addSymbolizer(this.utils);
-	this.rule.preview();
-	this.addRule(this.rule);
-};
-
-UniqueSymbol.prototype.getRule = function() {
-	return this.rule;
+	rule.registerEvents('unique');
+	rule.addSymbolizer(this.utils);
+	rule.preview();
+	this.addRule(rule);
 };
 
 UniqueSymbol.prototype.showLabel = function() {
@@ -164,7 +160,7 @@ UniqueSymbol.prototype.load = function(selectedField, values) {
 		}
 
 		var rule = new Rule(i, ruleName, ruleTitle, options, this.utils);
-		$('#rules').append(rule.getTableUI(true, 'unique'));
+		$('#rules').append(this.rule.getTableUI(true, 'unique'));
 		rule.registerEvents();
 		var colors = this.utils.createColorRange('random', values.length);
 		rule.addSymbolizer({fill: colors[i], stroke: colors[i]});

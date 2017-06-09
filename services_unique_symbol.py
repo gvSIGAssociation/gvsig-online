@@ -53,6 +53,8 @@ def create_style(request, json_data, layer_id):
     style = Style(
         name = json_data.get('name'),
         title = json_data.get('title'),
+        minscale = json_data.get('minscale'),
+        maxscale = json_data.get('maxscale'),
         is_default = json_data.get('is_default'),
         type = 'US'
     )
