@@ -262,7 +262,7 @@ Intervals.prototype.save = function(layerId) {
 			}
 
 			symbolizers.sort(function(a, b){
-				return parseInt(b.order) - parseInt(a.order);
+				return parseInt(a.order) - parseInt(b.order);
 			});
 
 			var rule = {
@@ -359,7 +359,7 @@ Intervals.prototype.update = function(layerId, styleId) {
 			}
 
 			symbolizers.sort(function(a, b){
-				return parseInt(b.order) - parseInt(a.order);
+				return parseInt(a.order) - parseInt(b.order);
 			});
 
 			var rule = {

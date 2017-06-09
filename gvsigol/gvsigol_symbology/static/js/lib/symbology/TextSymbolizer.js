@@ -62,6 +62,10 @@ var TextSymbolizer = function(rule, options, utils) {
 			}
 		}
 	}
+	
+	if(rule.symbolizers){
+		this.order = rule.symbolizers.length;
+	}
 };
 
 TextSymbolizer.prototype.getTableUI = function() {
