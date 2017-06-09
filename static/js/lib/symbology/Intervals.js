@@ -200,6 +200,7 @@ Intervals.prototype.loadRules = function(rules) {
 
 			if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer') {
 				options['is_actived'] = true;
+				options['title'] = rules[i].title;
 				options['minscale'] = rules[i].minscale;
 				options['maxscale'] = rules[i].maxscale;
 				this.loadLabel(options);
@@ -274,7 +275,7 @@ Intervals.prototype.save = function(layerId) {
 
 	if (this.label != null && this.label.is_activated()) {
 		var ruleName = "rule_" + this.rules.length +"_text";
-		var ruleTitle = "rule_" + this.rules.length +"_text";
+		var ruleTitle = this.label.title;
 		var l = {
 				type: this.label.type,
 				json: this.label.toJSON(),
@@ -372,7 +373,7 @@ Intervals.prototype.update = function(layerId, styleId) {
 
 	if (this.label != null && this.label.is_activated()) {
 		var ruleName = "rule_" + this.rules.length +"_text";
-		var ruleTitle = "rule_" + this.rules.length +"_text";
+		var ruleTitle = this.label.title;
 		var l = {
 				type: this.label.type,
 				json: this.label.toJSON(),
