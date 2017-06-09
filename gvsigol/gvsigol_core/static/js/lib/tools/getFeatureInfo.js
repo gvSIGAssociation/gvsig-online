@@ -295,7 +295,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 	var wgs84 = ol.proj.transform(self.mapCoordinates, 'EPSG:3857', 'EPSG:4326')
 	html += '<li class="item">';
 	html += 	'<div class="feature-info">';
-	html += 		'<span style="font-weight: bold; font-size: 12px;">' + gettext('Coordinates') + ':</span>' + '<br /><span> ' + wgs84[0].toFixed(5).replace(/0{0,2}$/, "")+ ', '+ wgs84[1].toFixed(5).replace(/0{0,2}$/, "") + '</span>';	
+	html += 		'<span style="font-size: 12px;">' + gettext('Coordinates') + ':</span>' + '<br /><span style="font-weight: bold; font-size: 12px;"> ' + wgs84[0].toFixed(5).replace(/0{0,2}$/, "")+ ', '+ wgs84[1].toFixed(5).replace(/0{0,2}$/, "") + '</span>';	
 	html += 	'</div>';
 	html += '</li>';
 	
@@ -321,10 +321,13 @@ getFeatureInfo.prototype.showInfo = function(features){
 								var key_trans = fields[ix]["title-"+language];
 								if(item_shown && key && features[i].feature.properties && features[i].feature.properties[key]){
 									if(is_first_configured){
-										feature_id = "<span style=\"font-weight:normal\">"+selectedLayer.title + "</span><br />";
+										feature_id = "<span style=\"font-weight:normal; margin-right:45px;\">"+selectedLayer.title + "</span>";
+										feature_id += 		'<span class="label feature-info-button feature-info-label-resource pull-right"><i class="fa fa-picture-o" aria-hidden="true"></i></span>';
+										feature_id += 		'<span class="label feature-info-button feature-info-label-info pull-right"><i class="fa fa-list-ul" aria-hidden="true"></i></span><br />';
+
 										is_first_configured = false;
 									}
-									feature_id += "<span class=\"pull-right\">" + features[i].feature.properties[key] + "</span><br />";
+									feature_id += "<span>" + features[i].feature.properties[key] + "</span><br />";
 									
 								}
 							
@@ -333,10 +336,9 @@ getFeatureInfo.prototype.showInfo = function(features){
 				}
 			}	
 			
-			html += '<li class="item" style="min-width:240px;">';
+			html += '<li class="item" style="min-width:300px;">';
 			html += 	'<div class="feature-info">';
-			html += 		'<a href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;">' + feature_id;
-			html += 		'<span class="label label-info pull-right">' + gettext('More info') + '</span></a>';
+			html += 		'<a href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;">' + feature_id + '</a>';
 			html += 	'</div>';
 			html += '</li>';
 			
@@ -374,8 +376,12 @@ getFeatureInfo.prototype.showInfo = function(features){
 	html += '</ul>';
 	this.popup.show(self.mapCoordinates, '<div class="popup-wrapper">' + html + '</div>');	
 	self.map.getView().setCenter(self.mapCoordinates);
-	$('.item-fid').click(function(){
-		self.showMoreInfo(this.dataset.fid, features);
+	$('.item-fid .feature-info-label-info').click(function(){
+		self.showMoreInfo(this.parentNode.dataset.fid, features, 'features');
+	});
+	
+	$('.item-fid .feature-info-label-resource').click(function(){
+		self.showMoreInfo(this.parentNode.dataset.fid, features, 'resources');
 	});
 
 	$.overlayout();
@@ -385,7 +391,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 /**
  * TODO
  */
-getFeatureInfo.prototype.showMoreInfo = function(fid, features){
+getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 	var selectedFeature = null;
 	var selectedLayer = null;
 	for (var i in features) {
@@ -562,6 +568,10 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features){
 				}
 			});
 		}
+	}
+	
+	if(tab_opened=='resources'){
+		$('#view-resources').trigger( "click" );
 	}
 };
 
