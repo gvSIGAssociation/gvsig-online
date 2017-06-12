@@ -43,6 +43,9 @@ var Rule = function(id, name, title, options, utils) {
 		this.title = options.title;
 		this.abstract = "";
 		this.filter = "";
+		if(options.filter){
+			this.filter = options.filter;
+		}
 		if(options.minscale && parseInt(options.minscale) >=0){
 			this.minscale = parseInt(options.minscale);
 		}
@@ -587,7 +590,9 @@ Rule.prototype.updateForm = function() {
 		
 	} else if (this.selected.type == 'TextSymbolizer') {
 		$('#tab-content').append(this.selected.getFontTabUI());
-		$('#tab-content').append(this.selected.getHaloTabUI());
+		$('#tab-content').append(this.selected.getHaloTabUI());	
+		$('#tab-content').append(this.label.getFilterTabUI());
+		
 		$('.nav-tabs a[href="#label-font-tab"]').tab('show');
 		this.selected.registerEvents();
 	}
