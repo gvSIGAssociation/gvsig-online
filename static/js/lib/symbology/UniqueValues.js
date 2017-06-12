@@ -37,7 +37,7 @@ UniqueValues.prototype.showLabel = function() {
 		$('#modal-symbolizer').modal('show');
 
 	} else {
-		this.label = new TextSymbolizer(this.rule, null, this.utils);
+		this.label = new TextSymbolizer(this.rule, this.layerName, null, this.utils);
 		this.updateLabelForm();
 		$('#modal-symbolizer').modal('show');
 	}
@@ -46,11 +46,11 @@ UniqueValues.prototype.showLabel = function() {
 UniqueValues.prototype.loadLabel = function(options) {
 	if (this.label) {
 		this.label = null;
-		this.label = new TextSymbolizer(this.rule, options, this.utils);
+		this.label = new TextSymbolizer(this.rule, this.layerName, options, this.utils);
 		this.updateLabelForm();
 
 	} else {
-		this.label = new TextSymbolizer(this.rule, options, this.utils);
+		this.label = new TextSymbolizer(this.rule, this.layerName, options, this.utils);
 		this.updateLabelForm();
 	}
 };
@@ -64,6 +64,7 @@ UniqueValues.prototype.updateLabelForm = function() {
 	$('#tab-content').append(this.label.getGeneralTabUI());
 	$('#tab-content').append(this.label.getFontTabUI());
 	$('#tab-content').append(this.label.getHaloTabUI());
+	$('#tab-content').append(this.label.getFilterTabUI());
 	$('.nav-tabs a[href="#label-general-tab"]').tab('show');
 	this.label.registerEvents();
 
@@ -139,12 +140,16 @@ UniqueValues.prototype.loadRules = function(rules) {
 	$('#rules').empty();
 	this.rules.splice(0, this.rules.length);
 	for (var i=0; i<rules.length; i++) {
+		var filter = "";
+		if(rules[i].filter != ""){
+			filter = JSON.parse(rules[i].filter);
+		}
 		var options = {
 				"id" : rules[i].id,
 				"name" : rules[i].name,
 				"title" : rules[i].title,
 				"abstract" : "",
-				"filter" : "",
+				"filter" : filter,
 				"minscale" : rules[i].minscale,
 				"maxscale" : rules[i].maxscale,
 				"order" : rules[i].order
@@ -173,6 +178,10 @@ UniqueValues.prototype.loadRules = function(rules) {
 				options['title'] = rules[i].title;
 				options['minscale'] = rules[i].minscale;
 				options['maxscale'] = rules[i].maxscale;
+				options['filter'] = "";
+				if(rules[i].filter && rules[i].filter.length>0){
+					options['filter'] = JSON.parse(rules[i].filter);
+				}
 				this.loadLabel(options);
 
 			} else if (symbolizer[0].model == 'gvsigol_symbology.externalgraphicsymbolizer') {
@@ -257,7 +266,7 @@ UniqueValues.prototype.save = function(layerId) {
 				"name" : ruleName,
 				"title" : ruleTitle,
 				"abstract" : "",
-				"filter" : "",
+				"filter" : this.label.filterCode,
 				"minscale" : this.label.minscale,
 				"maxscale" :  this.label.maxscale,
 				"order" :  this.label.order
@@ -355,7 +364,7 @@ UniqueValues.prototype.update = function(layerId, styleId) {
 				"name" : ruleName,
 				"title" : ruleTitle,
 				"abstract" : "",
-				"filter" : "",
+				"filter" : this.label.filterCode,
 				"minscale" : this.label.minscale,
 				"maxscale" :  this.label.maxscale,
 				"order" :  this.label.order
