@@ -39,7 +39,7 @@ from django.views.decorators.csrf import csrf_exempt
 from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES
 from django.utils.translation import ugettext as _
 from gvsigol_services.models import LayerResource
-from gvsigol.settings import GVSIGOL_SERVICES
+from gvsigol.settings import GVSIGOL_SERVICES, CONTROL_FIELDS
 from django.core.urlresolvers import reverse
 from gvsigol_core import utils as core_utils
 from gvsigol_auth.models import UserGroup
@@ -553,6 +553,41 @@ def layer_update(request, layer_id):
         return render(request, 'layer_update.html', {'layer': layer, 'workspace': workspace, 'form': form, 'layer_id': layer_id})
     
     
+def layer_autoconfig(layer_id):
+    layer = Layer.objects.get(id=int(layer_id))
+    fields = []
+    conf = {}
+    available_languages = []
+    for id, language in LANGUAGES:
+        available_languages.append(id)
+    
+    datastore = Datastore.objects.get(id=layer.datastore_id)
+    workspace = Workspace.objects.get(id=datastore.workspace_id)
+    (ds_type, resource) = mapservice_backend.getResourceInfo(workspace.name, datastore, layer.name, "json")
+    resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
+    for f in resource_fields:
+        field = {}
+        field['name'] = f['name']
+        for id, language in LANGUAGES:
+            field['title-'+id] = f['name']
+        field['visible'] = True
+        field['editableactive'] = True
+        field['editable'] = True
+        for control_field in settings.CONTROL_FIELDS:
+            if field['name'] == control_field['name']:
+                field['editableactive'] = False
+                field['editable'] = False
+        field['infovisible'] = False
+        fields.append(field)
+        
+    conf['fields'] = fields
+        
+    json_conf = conf
+    layer.conf = json_conf
+    layer.save()
+    
+    
+ 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
@@ -576,7 +611,12 @@ def layer_config(request, layer_id):
                 field['infovisible'] = True
             field['editable'] = False
             if 'field-editable-' + str(i) in request.POST:
+                field['editableactive'] = True
                 field['editable'] = True
+                for control_field in settings.CONTROL_FIELDS:
+                    if field['name'] == control_field['name']:
+                        field['editableactive'] = False
+                        field['editable'] = False
             fields.append(field)
         conf['fields'] = fields
         
@@ -602,6 +642,11 @@ def layer_config(request, layer_id):
                     field['title-'+id] = f['title-'+id]
                 field['visible'] = f['visible']
                 field['editable'] = f['editable']
+                field['editableactive'] = True
+                for control_field in settings.CONTROL_FIELDS:
+                    if field['name'] == control_field['name']:
+                        field['editableactive'] = False
+                        field['editable'] = False
                 field['infovisible'] = f['infovisible']
                 fields.append(field)
                 
@@ -616,7 +661,12 @@ def layer_config(request, layer_id):
                 for id, language in LANGUAGES:
                     field['title-'+id] = f['name']
                 field['visible'] = True
+                field['editableactive'] = True
                 field['editable'] = True
+                for control_field in settings.CONTROL_FIELDS:
+                    if field['name'] == control_field['name']:
+                        field['editableactive'] = False
+                        field['editable'] = False
                 field['infovisible'] = False
                 fields.append(field)
     
@@ -1003,6 +1053,9 @@ def layer_create(request):
                 core_utils.toc_add_layer(newRecord)
                 mapservice_backend.createOrUpdateGeoserverLayerGroup(newRecord.layer_group)
                 mapservice_backend.reload_nodes()
+                
+                layer_autoconfig(newRecord.id)
+                
                 return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
             
             except Exception as e:
