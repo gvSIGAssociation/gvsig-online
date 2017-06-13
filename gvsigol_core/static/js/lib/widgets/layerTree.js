@@ -511,7 +511,8 @@ layerTree.prototype.zoomToLayer = function(layer) {
 		         break;
 		     }
 		   }
-		   if(extent[0]==0 && extent[1]==0 && extent[2]==-1 && extent[3]==-1 ){
+		   if((extent[0]==0 && extent[1]==0 && extent[2]==-1 && extent[3]==-1 )||
+			   (extent[0]==-1 && extent[1]==-1 && extent[2]==0 && extent[3]==0 )){
 			   return;
 		   }
 		   var ext = ol.proj.transformExtent(extent, ol.proj.get('EPSG:4326'), ol.proj.get('EPSG:3857'));
