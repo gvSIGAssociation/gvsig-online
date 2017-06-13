@@ -893,7 +893,6 @@ editionBar.prototype.createFeatureForm = function(feature) {
 								featureProperties += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
 							}
 							featureProperties += 	'</select>';
-							featureProperties += '</div>';
 						} else {
 							if("length" in this.featureType[i] && this.featureType[i].length>0){
 								featureProperties += '<input id="' + this.featureType[i].name + '" type="text" maxlength="'+this.featureType[i].length+'" class="form-control">';
