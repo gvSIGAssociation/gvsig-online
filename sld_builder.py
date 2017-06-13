@@ -98,7 +98,7 @@ def get_feature_type_style():
 def get_rule(r, symbolizers):
     rule = sld.Rule()
     rule.set_Name(r.name)
-    rule.set_Title(r.title.encode('ascii', 'ignore'))
+    rule.set_Title(r.title) #.encode('ascii', 'ignore'))
     rule.set_Abstract(r.abstract)
     if r.filter == "":
         rule.set_Filter(None)
