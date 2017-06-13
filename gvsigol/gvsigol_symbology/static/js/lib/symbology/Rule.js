@@ -484,6 +484,7 @@ Rule.prototype.addExternalGraphicSymbolizer = function(options) {
 	var self = this;
 	
 	var symbolizer = new ExternalGraphicSymbolizer(options.name, options.format, options.size, options.online_resource);
+	symbolizer.id = this.id;
 	
 	$('#rule-' + this.id + '-symbolizers tbody').append(symbolizer.getTableUI());	
 	$('#rule-' + this.id + '-symbolizers tbody').sortable({
