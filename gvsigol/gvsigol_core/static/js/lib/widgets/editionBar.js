@@ -683,16 +683,16 @@ editionBar.prototype.getNumericProperties = function(featureType){
 				min_string += "9";
 			}
 		}
-		//min_string += ".";
+		min_string += ".";
 		var scale = "0."
 		for(var i=0; i<featureType.scale; i++){
-			//min_string += "9";
+			min_string += "9";
 			if(i!=0){
 				scale += "0";
 			}
 		}
 		scale += "1";
-		return "min=-"+min_string+" max="+ min_string +" step=1";
+		return "min=-"+min_string+" max="+ min_string +" step="+scale;
 		//return "min=-999999999999999 max=999999999999999 step=0,000000000000000000001";
 	} 
 	
