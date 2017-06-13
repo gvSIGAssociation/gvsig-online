@@ -683,9 +683,14 @@ editionBar.prototype.getNumericProperties = function(featureType){
 				min_string += "9";
 			}
 		}
-		min_string += ".";
-		var scale = "0."
+		var has_decimals = true;
+		var scale = ""
 		for(var i=0; i<featureType.scale; i++){
+			if(has_decimals){
+				min_string += ".";
+				scale = "0.";
+				has_decimals = false;
+			}
 			min_string += "9";
 			if(i!=0){
 				scale += "0";
