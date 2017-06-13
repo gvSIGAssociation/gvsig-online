@@ -408,17 +408,28 @@ TextSymbolizer.prototype.getFilterInputs = function(type, twoValues) {
 		if (twoValues) {
 			inputs += '<div id="expression-values" class="col-md-6 form-group">';
 			inputs += 	'<label>' + gettext('Value 1') + '</label>';
-			inputs += 	'<input name="expresion-value-1" id="expresion-value-1" type="number" step="any" value="0" class="form-control">';
+			
+
+			inputs += 	'<input name="expresion-value-1" list="expresion-value-1-select" id="expresion-value-1" type="text" class="form-control"/>';
+			inputs += 	'<datalist id="expresion-value-1-select">';
+			inputs += 		'<option value="" selected disabled>--</option>';
+			inputs += 	'</datalist>';
 			inputs += '</div>';
 			inputs += '<div id="expression-values" class="col-md-6 form-group">';
 			inputs += 	'<label>' + gettext('Value 2') + '</label>';
-			inputs += 	'<input name="expresion-value-2" id="expresion-value-2" type="number" step="any" value="0" class="form-control">';
+			inputs += 	'<input name="expresion-value-2" list="expresion-value-2-select" id="expresion-value-2" type="text" class="form-control"/>';
+			inputs += 	'<datalist id="expresion-value-2-select">';
+			inputs += 		'<option value="" selected disabled>--</option>';
+			inputs += 	'</datalist>';
 			inputs += '</div>';
 
 		} else {
 			inputs += '<div id="expression-values" class="col-md-12 form-group">';
 			inputs += 	'<label>' + gettext('Value') + '</label>';
-			inputs += 	'<input name="expresion-value-1" id="expresion-value-1" type="number" step="any" value="0" class="form-control">';
+			inputs += 	'<input name="expresion-value-1" list="expresion-value-1-select" id="expresion-value-1" type="text" class="form-control"/>';
+			inputs += 	'<datalist id="expresion-value-1-select">';
+			inputs += 		'<option value="" selected disabled>--</option>';
+			inputs += 	'</datalist>';
 			inputs += '</div>';
 		}
 
@@ -426,18 +437,27 @@ TextSymbolizer.prototype.getFilterInputs = function(type, twoValues) {
 		if (twoValues) {
 			inputs += '<div id="expression-values" class="col-md-6 form-group">';
 			inputs += 	'<label>' + gettext('Value 1') + '</label>';
-			inputs += 	'<input name="expresion-value-1" id="expresion-value-1" type="text" class="form-control">';
+			inputs += 	'<input name="expresion-value-1" list="expresion-value-1-select" id="expresion-value-1" type="text" class="form-control"/>';
+			inputs += 	'<datalist id="expresion-value-1-select">';
+			inputs += 		'<option value="" selected disabled>--</option>';
+			inputs += 	'</datalist>';
 			inputs += '</div>';
 			inputs += '<div id="expression-values" class="col-md-6 form-group">';
 			inputs += 	'<label>' + gettext('Value 2') + '</label>';
-			inputs += 	'<input name="expresion-value-2" id="expresion-value-2" type="text" class="form-control">';
+			inputs += 	'<input name="expresion-value-2" list="expresion-value-2-select" id="expresion-value-2" type="text" class="form-control"/>';
+			inputs += 	'<datalist id="expresion-value-2-select">';
+			inputs += 		'<option value="" selected disabled>--</option>';
+			inputs += 	'</datalist>';
 			inputs += '</div>';
 
 		} else {
 
 			inputs += '<div id="expression-values" class="col-md-12 form-group">';
 			inputs += 	'<label>' + gettext('Value') + '</label>';
-			inputs += 	'<input name="expresion-value-1" id="expresion-value-1" type="text" class="form-control">';
+			inputs += 	'<input name="expresion-value-1" list="expresion-value-1-select" id="expresion-value-1" type="text" class="form-control"/>';
+			inputs += 	'<datalist id="expresion-value-1-select">';
+			inputs += 		'<option value="" selected disabled>--</option>';
+			inputs += 	'</datalist>';
 			inputs += '</div>';
 		}
 	}
@@ -554,12 +574,17 @@ TextSymbolizer.prototype.loadUniqueValues = function(field) {
 					'field': field
 				},
 			  	success	:function(response){
-			  		$("#filter-value-select").empty();
+			  		$("#expresion-value-1-select").empty();
+			  		$("#expresion-value-2-select").empty();
 			  		$emptyOpt = $("<option></option>").attr("value", "").attr("selected", true).attr("disabled", true).text("---");
-			  		$("#filter-value-select").append($emptyOpt);
+			  		$emptyOpt2 = $("<option></option>").attr("value", "").attr("selected", true).attr("disabled", true).text("---");
+			  		$("#expresion-value-1-select").append($emptyOpt);
+			  		$("#expresion-value-2-select").append($emptyOpt2);
 			  		$.each(response.values, function(index, option) {
 			  			$option = $("<option></option>").attr("value", option).text(option);
-			  			$("#filter-value-select").append($option);
+			  			$option2 = $("<option></option>").attr("value", option).text(option);
+			  			$("#expresion-value-1-select").append($option);
+			  			$("#expresion-value-2-select").append($option2);
 			  	    });
 				},
 			  	error: function(){}
@@ -665,12 +690,14 @@ TextSymbolizer.prototype.registerEvents = function() {
 	if (this.filterCode && this.filterCode.type) {
 		var filterOutputContentcode = '';
 		var dataType = $('#expression-field option:selected').attr("data-type");
+		var field = $('#expression-field option:selected').val();
 		if (this.filterCode.type == 'is_between') {
 			var inputs = self.getFilterInputs(dataType, true);
 			$('#expression-values').empty();
 			$('#expression-values').append(inputs);
 			$('#expresion-value-1').val(this.filterCode.value1);
 			$('#expresion-value-2').val(this.filterCode.value2);
+			this.loadUniqueValues(field);
 
 			this.codemirror.setValue('');
 			filterOutputContentcode = this.getFilterOutput(this.filterCode.property_name, this.filterCode.type, this.filterCode.value1, this.filterCode.value2);
@@ -681,6 +708,8 @@ TextSymbolizer.prototype.registerEvents = function() {
 			$('#expression-values').empty();
 			$('#expression-values').append(inputs);
 			$('#expresion-value-1').val(this.filterCode.value1);
+			this.loadUniqueValues(field);
+			
 
 			this.codemirror.setValue('');
 			filterOutputContentcode = this.getFilterOutput(this.filterCode.property_name, this.filterCode.type, this.filterCode.value1, this.filterCode.value2);
@@ -689,7 +718,7 @@ TextSymbolizer.prototype.registerEvents = function() {
 		}
 	}
 	
-	$('#expresion-value-1').on('change paste keyup', function(){
+	$('#expresion-value-1').on('change paste keyup input select', function(){
 		var value1 = $('#expresion-value-1').val();
 		var value2 = $('#expresion-value-2').val();
 		var field = $('#expression-field').val();
@@ -699,8 +728,8 @@ TextSymbolizer.prototype.registerEvents = function() {
 		var filterOutputContentcode = self.getFilterOutput(field, operation, value1, value2);
 		self.codemirror.setValue(filterOutputContentcode);
 	});
-
-	$('#expresion-value-2').on('change paste keyup', function(){
+	
+	$('#expresion-value-2').on('change paste keyup input select', function(){
 		var value1 = $('#expresion-value-1').val();
 		var value2 = $('#expresion-value-2').val();
 		var field = $('#expression-field').val();
@@ -724,7 +753,7 @@ TextSymbolizer.prototype.registerEvents = function() {
 		$('#expression-values').empty();
 		$('#expression-values').append(inputs);
 
-		$('#expresion-value-1').on('change paste keyup', function(){
+		$('#expresion-value-1').on('change paste keyup input select', function(){
 			var value1 = $('#expresion-value-1').val();
 			var value2 = $('#expresion-value-2').val();
 			var field = $('#expression-field').val();
@@ -735,7 +764,7 @@ TextSymbolizer.prototype.registerEvents = function() {
 			self.codemirror.setValue(filterOutputContentcode);
 		});
 
-		$('#expresion-value-2').on('change paste keyup', function(){
+		$('#expresion-value-2').on('change paste keyup input select', function(){
 			var value1 = $('#expresion-value-1').val();
 			var value2 = $('#expresion-value-2').val();
 			var field = $('#expression-field').val();
@@ -745,6 +774,9 @@ TextSymbolizer.prototype.registerEvents = function() {
 			var filterOutputContentcode = self.getFilterOutput(field, operation, value1, value2);
 			self.codemirror.setValue(filterOutputContentcode);
 		});
+		
+		var value_orig = $('option:selected', $('#expression-field')).val();
+		self.loadUniqueValues(value_orig);
 
 	});
 
@@ -761,13 +793,16 @@ TextSymbolizer.prototype.registerEvents = function() {
 		$('#expression-values').empty();
 		$('#expression-values').append(inputs);
 
-		$('#expresion-value-1').on('change paste keyup', function(){
+		$('#expresion-value-1').on('change paste keyup input select', function(){
 			self.saveFilter();
 		});
 
-		$('#expresion-value-2').on('change paste keyup', function(){
+		$('#expresion-value-2').on('change paste keyup input select', function(){
 			self.saveFilter();
 		});
+		
+		var value_orig = $('option:selected', $('#expression-field')).val();
+		self.loadUniqueValues(value_orig);
 
 	});
 

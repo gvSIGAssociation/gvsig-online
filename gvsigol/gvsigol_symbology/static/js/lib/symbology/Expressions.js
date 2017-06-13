@@ -200,12 +200,14 @@ Expressions.prototype.getFilterFormUI = function(ruleid) {
 
 	if (rule.filter.type) {
 		var filterOutputContentcode = '';
+		var field = $('#expression-field option:selected').val();
 		if (rule.filter.type == 'is_between') {
 			var inputs = self.getFilterInputs(dataType, true);
 			$('#expression-values').empty();
 			$('#expression-values').append(inputs);
 			$('#expresion-value-1').val(rule.filter.value1);
 			$('#expresion-value-2').val(rule.filter.value2);
+			this.loadUniqueValues(field);
 
 			this.codemirror.setValue('');
 			filterOutputContentcode = this.getFilterOutput(rule.filter.property_name, rule.filter.type, rule.filter.value1, rule.filter.value2);
@@ -216,6 +218,7 @@ Expressions.prototype.getFilterFormUI = function(ruleid) {
 			$('#expression-values').empty();
 			$('#expression-values').append(inputs);
 			$('#expresion-value-1').val(rule.filter.value1);
+			this.loadUniqueValues(field);
 
 			this.codemirror.setValue('');
 			filterOutputContentcode = this.getFilterOutput(rule.filter.property_name, rule.filter.type, rule.filter.value1, rule.filter.value2);
@@ -235,17 +238,26 @@ Expressions.prototype.getFilterInputs = function(type, twoValues) {
 		if (twoValues) {
 			inputs += '<div id="expression-values" class="col-md-6 form-group">';
 			inputs += 	'<label>' + gettext('Value 1') + '</label>';
-			inputs += 	'<input name="expresion-value-1" id="expresion-value-1" type="number" step="any" value="0" class="form-control">';
+			inputs += 	'<input name="expresion-value-1" list="expresion-value-1-select" id="expresion-value-1" type="text" class="form-control"/>';
+			inputs += 	'<datalist id="expresion-value-1-select">';
+			inputs += 		'<option value="" selected disabled>--</option>';
+			inputs += 	'</datalist>';
 			inputs += '</div>';
 			inputs += '<div id="expression-values" class="col-md-6 form-group">';
 			inputs += 	'<label>' + gettext('Value 2') + '</label>';
-			inputs += 	'<input name="expresion-value-2" id="expresion-value-2" type="number" step="any" value="0" class="form-control">';
+			inputs += 	'<input name="expresion-value-2" list="expresion-value-2-select" id="expresion-value-2" type="text" class="form-control"/>';
+			inputs += 	'<datalist id="expresion-value-2-select">';
+			inputs += 		'<option value="" selected disabled>--</option>';
+			inputs += 	'</datalist>';
 			inputs += '</div>';
 
 		} else {
 			inputs += '<div id="expression-values" class="col-md-12 form-group">';
 			inputs += 	'<label>' + gettext('Value') + '</label>';
-			inputs += 	'<input name="expresion-value-1" id="expresion-value-1" type="number" step="any" value="0" class="form-control">';
+			inputs += 	'<input name="expresion-value-1" list="expresion-value-1-select" id="expresion-value-1" type="text" class="form-control"/>';
+			inputs += 	'<datalist id="expresion-value-1-select">';
+			inputs += 		'<option value="" selected disabled>--</option>';
+			inputs += 	'</datalist>';
 			inputs += '</div>';
 		}
 
@@ -253,18 +265,27 @@ Expressions.prototype.getFilterInputs = function(type, twoValues) {
 		if (twoValues) {
 			inputs += '<div id="expression-values" class="col-md-6 form-group">';
 			inputs += 	'<label>' + gettext('Value 1') + '</label>';
-			inputs += 	'<input name="expresion-value-1" id="expresion-value-1" type="text" class="form-control">';
+			inputs += 	'<input name="expresion-value-1" list="expresion-value-1-select" id="expresion-value-1" type="text" class="form-control"/>';
+			inputs += 	'<datalist id="expresion-value-1-select">';
+			inputs += 		'<option value="" selected disabled>--</option>';
+			inputs += 	'</datalist>';
 			inputs += '</div>';
 			inputs += '<div id="expression-values" class="col-md-6 form-group">';
 			inputs += 	'<label>' + gettext('Value 2') + '</label>';
-			inputs += 	'<input name="expresion-value-2" id="expresion-value-2" type="text" class="form-control">';
+			inputs += 	'<input name="expresion-value-2" list="expresion-value-2-select" id="expresion-value-2" type="text" class="form-control"/>';
+			inputs += 	'<datalist id="expresion-value-2-select">';
+			inputs += 		'<option value="" selected disabled>--</option>';
+			inputs += 	'</datalist>';
 			inputs += '</div>';
 
 		} else {
 
 			inputs += '<div id="expression-values" class="col-md-12 form-group">';
 			inputs += 	'<label>' + gettext('Value') + '</label>';
-			inputs += 	'<input name="expresion-value-1" id="expresion-value-1" type="text" class="form-control">';
+			inputs += 	'<input name="expresion-value-1" list="expresion-value-1-select" id="expresion-value-1" type="text" class="form-control"/>';
+			inputs += 	'<datalist id="expresion-value-1-select">';
+			inputs += 		'<option value="" selected disabled>--</option>';
+			inputs += 	'</datalist>';
 			inputs += '</div>';
 		}
 	}
@@ -305,11 +326,46 @@ Expressions.prototype.getFilterOutput = function(field, operation, value1, value
 	return filterOutputContentcode;
 };
 
+Expressions.prototype.loadUniqueValues = function(field) {
+	var self = this;
+	if(this.layerName){
+		var layer_conf = this.layerName.split(":");
+		if(layer_conf.length > 1){
+			$.ajax({
+				type: 'POST',
+				async: false,
+			  	url: '/gvsigonline/services/get_unique_values/',
+			  	data: {
+			  		'layer_name': layer_conf[1],
+					'layer_ws': layer_conf[0],
+					'field': field
+				},
+			  	success	:function(response){
+			  		$("#expresion-value-1-select").empty();
+			  		$("#expresion-value-2-select").empty();
+			  		$emptyOpt = $("<option></option>").attr("value", "").attr("selected", true).attr("disabled", true).text("---");
+			  		$emptyOpt2 = $("<option></option>").attr("value", "").attr("selected", true).attr("disabled", true).text("---");
+			  		$("#expresion-value-1-select").append($emptyOpt);
+			  		$("#expresion-value-2-select").append($emptyOpt2);
+			  		$.each(response.values, function(index, option) {
+			  			$option = $("<option></option>").attr("value", option).text(option);
+			  			$option2 = $("<option></option>").attr("value", option).text(option);
+			  			$("#expresion-value-1-select").append($option);
+			  			$("#expresion-value-2-select").append($option2);
+			  	    });
+				},
+			  	error: function(){}
+			});
+		}
+	}
+};
+
+
 Expressions.prototype.registerFilterEvents = function() {
 
 	var self = this;
 
-	$('#expresion-value-1').on('change paste keyup', function(){
+	$('#expresion-value-1').on('change paste keyup input select', function(){
 		var value1 = $('#expresion-value-1').val();
 		var value2 = $('#expresion-value-2').val();
 		var field = $('#expression-field').val();
@@ -320,7 +376,7 @@ Expressions.prototype.registerFilterEvents = function() {
 		self.codemirror.setValue(filterOutputContentcode);
 	});
 
-	$('#expresion-value-2').on('change paste keyup', function(){
+	$('#expresion-value-2').on('change paste keyup input select', function(){
 		var value1 = $('#expresion-value-1').val();
 		var value2 = $('#expresion-value-2').val();
 		var field = $('#expression-field').val();
@@ -344,7 +400,7 @@ Expressions.prototype.registerFilterEvents = function() {
 		$('#expression-values').empty();
 		$('#expression-values').append(inputs);
 
-		$('#expresion-value-1').on('change paste keyup', function(){
+		$('#expresion-value-1').on('change paste keyup input select', function(){
 			var value1 = $('#expresion-value-1').val();
 			var value2 = $('#expresion-value-2').val();
 			var field = $('#expression-field').val();
@@ -355,7 +411,7 @@ Expressions.prototype.registerFilterEvents = function() {
 			self.codemirror.setValue(filterOutputContentcode);
 		});
 
-		$('#expresion-value-2').on('change paste keyup', function(){
+		$('#expresion-value-2').on('change paste keyup input select', function(){
 			var value1 = $('#expresion-value-1').val();
 			var value2 = $('#expresion-value-2').val();
 			var field = $('#expression-field').val();
@@ -366,6 +422,8 @@ Expressions.prototype.registerFilterEvents = function() {
 			self.codemirror.setValue(filterOutputContentcode);
 		});
 
+		var value_orig = $('option:selected', $('#expression-field')).val();
+		self.loadUniqueValues(value_orig);
 	});
 
 	$('#expression-operation').on('change', function(e) {
@@ -381,7 +439,7 @@ Expressions.prototype.registerFilterEvents = function() {
 		$('#expression-values').empty();
 		$('#expression-values').append(inputs);
 
-		$('#expresion-value-1').on('change paste keyup', function(){
+		$('#expresion-value-1').on('change paste keyup input select', function(){
 			var value1 = $('#expresion-value-1').val();
 			var value2 = $('#expresion-value-2').val();
 			var field = $('#expression-field').val();
@@ -392,7 +450,7 @@ Expressions.prototype.registerFilterEvents = function() {
 			self.codemirror.setValue(filterOutputContentcode);
 		});
 
-		$('#expresion-value-2').on('change paste keyup', function(){
+		$('#expresion-value-2').on('change paste keyup input select', function(){
 			var value1 = $('#expresion-value-1').val();
 			var value2 = $('#expresion-value-2').val();
 			var field = $('#expression-field').val();
@@ -403,6 +461,8 @@ Expressions.prototype.registerFilterEvents = function() {
 			self.codemirror.setValue(filterOutputContentcode);
 		});
 
+		var value_orig = $('option:selected', $('#expression-field')).val();
+		self.loadUniqueValues(value_orig);
 	});
 
 	$('.save-filter').on('click', function(){
