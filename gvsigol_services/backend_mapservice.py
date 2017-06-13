@@ -1159,25 +1159,17 @@ class Geoserver():
         geom_type = form.get('geom_type')
         srs = form.get('srs').split(':')[1]
         fields = form.get('fields')
-        has_modified_by = False
-        has_last_modification = False
-        for field in fields:
-            if field['name'] == 'modified_by':
-                has_modified_by = True
-            if field['name'] == 'last_modification':
-                has_last_modification = True
-                
-        if not has_modified_by:
-            fields.append({
-                'name': 'modified_by',
-                'type': 'character_varying'
-                })
+        
+        for control_field in settings.CONTROL_FIELDS:
+            has_control_field = False
             
-        if not has_last_modification:
-            fields.append({
-                'name': 'last_modification',
-                'type': 'date'
-                })
+            for field in fields:
+                if field['name'] == control_field['name']:
+                    has_control_field = True
+                
+            if not has_control_field:
+                fields.append(control_field)
+                
         
         try:
             params = json.loads(datastore.connection_params)

@@ -69,7 +69,11 @@
 																{% if f.editable %}
 																<td><input type="checkbox" name="field-editable-{{counter}}" checked/></td>
 																{% else %}
-																<td><input type="checkbox" name="field-editable-{{counter}}"/></td>
+																	{% if f.editableactive %}
+																	<td><input type="checkbox" name="field-editable-{{counter}}"/></td>
+																	{% else %}
+																	<td><input type="checkbox" disabled name="field-editable-{{counter}}"/></td>
+																	{% endif %}
 																{% endif %}
 																{% if f.infovisible %}
 																<td><input type="checkbox" name="field-infovisible-{{counter}}" checked/></td>
