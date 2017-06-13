@@ -1050,7 +1050,9 @@ editionBar.prototype.showAllErrorMessages = function() {
 	});
 	
 	ui += '</div>';
-	$('#edition-error').append(ui);
+	if(!(!invalidFields || invalidFields.length <= 0)){
+		$('#edition-error').append(ui);
+	}
 	
 	return (!invalidFields || invalidFields.length <= 0);
 };
