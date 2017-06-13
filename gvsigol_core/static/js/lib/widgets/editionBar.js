@@ -1143,7 +1143,6 @@ editionBar.prototype.editFeatureForm = function(feature) {
 								}
 							}
 							featureProperties += 	'</select>';
-							featureProperties += '</div>';
 						} else {
 							if (value==null) {
 								value = "";
