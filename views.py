@@ -1082,10 +1082,16 @@ def layer_create(request):
         
     else:
         form = CreateFeatureTypeForm(user=request.user)
+        enumeration_list = None
+        if request.user.is_superuser:
+            enumeration_list = Enumeration.objects.all()
+        else:
+            enumeration_list = Enumeration.objects.filter(created_by__exact=request.user.username)
+            enumeration_list += Enumeration.objects.filter(created_by__exact='admin')
         data = {
             'form': form,
             'layer_type': layer_type,
-            'enumerations': Enumeration.objects.all()
+            'enumerations': enumeration_list
         }
         return render(request, "layer_create.html", data)
         
@@ -1256,8 +1262,8 @@ def get_feature_info(request):
         lang = request.LANGUAGE_CODE
         if 'username' in request.session and 'password' in request.session:
             if request.session['username'] is not None and request.session['password'] is not None:
-                req.auth = (request.session['username'], request.session['password'])
-                #req.auth = ('admin', 'geoserver')
+                #req.auth = (request.session['username'], request.session['password'])
+                req.auth = ('admin', 'geoserver')
                 
         features = None           
         try:
@@ -1427,8 +1433,8 @@ def get_datatable_data(request):
             req = requests.Session()
             if 'username' in request.session and 'password' in request.session:
                 if request.session['username'] is not None and request.session['password'] is not None:
-                    req.auth = (request.session['username'], request.session['password'])
-                    #req.auth = ('admin', 'geoserver')
+                    #req.auth = (request.session['username'], request.session['password'])
+                    req.auth = ('admin', 'geoserver')
                     
             print wfs_url + "?" + params
             response = req.post(wfs_url, data=values, verify=False)
