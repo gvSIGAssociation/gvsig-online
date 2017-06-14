@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-04-06 17:51+0200\n"
+"POT-Creation-Date: 2017-06-14 13:04+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,7 +66,7 @@ msgstr "Gráficas"
 msgid "Default style for: "
 msgstr "Estilo por defecto para: "
 
-#: services_library.py:64
+#: services_library.py:65
 #, python-brace-format
 msgid "Invalid name: '{value}'. Name should not contain any special characters"
 msgstr ""
@@ -77,23 +77,19 @@ msgstr ""
 msgid "Sign out"
 msgstr "Cerrar sesión"
 
-#: templates/base_symbology.html:118
-#: templates/base_symbology_compress.html:117
+#: templates/base_symbology.html:118 templates/base_symbology_compress.html:117
 msgid "Dashboard"
 msgstr "Panel de control"
 
-#: templates/base_symbology.html:124
-#: templates/base_symbology_compress.html:123
+#: templates/base_symbology.html:124 templates/base_symbology_compress.html:123
 msgid "Home"
 msgstr "Inicio"
 
-#: templates/base_symbology.html:161
-#: templates/base_symbology_compress.html:160
+#: templates/base_symbology.html:161 templates/base_symbology_compress.html:160
 msgid "Version"
 msgstr "Versión"
 
-#: templates/base_symbology.html:165
-#: templates/base_symbology_compress.html:164
+#: templates/base_symbology.html:165 templates/base_symbology_compress.html:164
 msgid "All rights reserved"
 msgstr "Todos los derechos reservados"
 
@@ -101,16 +97,16 @@ msgstr "Todos los derechos reservados"
 msgid "Add new color table"
 msgstr "Añadir nueva tabla de color"
 
-#: templates/color_table_add.html:13 templates/color_table_update.html:13
-#: templates/expressions_add.html:13 templates/expressions_update.html:13
-#: templates/intervals_add.html.py:13 templates/intervals_update.html:13
+#: templates/color_table_add.html:13 templates/color_table_update.html.py:13
+#: templates/expressions_add.html:13 templates/expressions_update.html.py:13
+#: templates/intervals_add.html:13 templates/intervals_update.html.py:13
 #: templates/unique_symbol_add.html:13 templates/unique_symbol_update.html:13
 #: templates/unique_values_add.html:13 templates/unique_values_update.html:13
 msgid "Update preview"
 msgstr "Actualizar previsualización"
 
-#: templates/color_table_add.html:14 templates/color_table_update.html:14
-#: templates/expressions_add.html:15 templates/expressions_update.html:15
+#: templates/color_table_add.html:14 templates/color_table_update.html.py:14
+#: templates/expressions_add.html:15 templates/expressions_update.html.py:15
 #: templates/external_graphic_add.html:14
 #: templates/external_graphic_update.html:15 templates/intervals_add.html:15
 #: templates/intervals_update.html.py:15 templates/library_add.html:14
@@ -122,8 +118,8 @@ msgstr "Actualizar previsualización"
 msgid "Save"
 msgstr "Guardar"
 
-#: templates/color_table_add.html:25 templates/color_table_update.html:24
-#: templates/expressions_add.html:26 templates/expressions_update.html:25
+#: templates/color_table_add.html:25 templates/color_table_update.html.py:24
+#: templates/expressions_add.html:26 templates/expressions_update.html.py:25
 #: templates/external_graphic_add.html:29
 #: templates/external_graphic_update.html:30 templates/intervals_add.html:26
 #: templates/intervals_update.html.py:25 templates/library_add.html:40
@@ -137,17 +133,17 @@ msgstr "Guardar"
 msgid "Name"
 msgstr "Nombre"
 
-#: templates/color_table_add.html:26 templates/color_table_update.html:25
-#: templates/expressions_add.html:27 templates/expressions_update.html:26
-#: templates/intervals_add.html.py:27 templates/intervals_update.html:26
+#: templates/color_table_add.html:26 templates/color_table_update.html.py:25
+#: templates/expressions_add.html:27 templates/expressions_update.html.py:26
+#: templates/intervals_add.html:27 templates/intervals_update.html.py:26
 #: templates/select_legend_type.html:17 templates/unique_symbol_add.html:27
 #: templates/unique_symbol_update.html:26 templates/unique_values_add.html:27
 #: templates/unique_values_update.html:26
 msgid "Style name"
 msgstr "Nombre del estilo"
 
-#: templates/color_table_add.html:31 templates/color_table_update.html:30
-#: templates/expressions_add.html:32 templates/expressions_update.html:31
+#: templates/color_table_add.html:31 templates/color_table_update.html.py:30
+#: templates/expressions_add.html:32 templates/expressions_update.html.py:31
 #: templates/external_graphic_add.html:33
 #: templates/external_graphic_update.html:34 templates/intervals_add.html:32
 #: templates/intervals_update.html.py:31 templates/symbol_add.html:27
@@ -157,49 +153,47 @@ msgstr "Nombre del estilo"
 msgid "Title"
 msgstr "Título"
 
-#: templates/color_table_add.html:32 templates/color_table_update.html:31
-#: templates/expressions_add.html:33 templates/expressions_update.html:32
-#: templates/intervals_add.html.py:33 templates/intervals_update.html:32
+#: templates/color_table_add.html:32 templates/color_table_update.html.py:31
+#: templates/expressions_add.html:33 templates/expressions_update.html.py:32
+#: templates/intervals_add.html:33 templates/intervals_update.html.py:32
 #: templates/unique_symbol_add.html:33 templates/unique_symbol_update.html:32
 #: templates/unique_values_add.html:33 templates/unique_values_update.html:32
 msgid "Style title"
 msgstr "Título del estilo"
 
-#: templates/color_table_add.html:37 templates/color_table_update.html:36
-#: templates/expressions_add.html:38 templates/expressions_update.html:37
-#: templates/intervals_add.html.py:38 templates/intervals_update.html:37
+#: templates/color_table_add.html:37 templates/color_table_update.html.py:36
+#: templates/expressions_add.html:38 templates/expressions_update.html.py:37
+#: templates/intervals_add.html:38 templates/intervals_update.html.py:37
 #: templates/unique_symbol_add.html:38 templates/unique_symbol_update.html:37
 #: templates/unique_values_add.html:38 templates/unique_values_update.html:37
 msgid "Min. scale"
 msgstr "Escala min."
 
-#: templates/color_table_add.html:38 templates/color_table_update.html:37
-#: templates/expressions_add.html:39 templates/expressions_update.html:38
-#: templates/intervals_add.html.py:39 templates/intervals_update.html:38
-#: templates/unique_symbol_add.html:39 templates/unique_symbol_update.html:38
-#: templates/unique_values_add.html:39 templates/unique_values_update.html:38
-msgid "Minimum scale denominator"
-msgstr "Denominador mínimo de la escala"
+#: templates/color_table_add.html:38 templates/color_table_add.html.py:42
+#: templates/color_table_update.html:37 templates/color_table_update.html:41
+#: templates/expressions_add.html.py:39 templates/expressions_add.html:43
+#: templates/expressions_update.html.py:38 templates/expressions_update.html:42
+#: templates/intervals_add.html.py:39 templates/intervals_add.html:43
+#: templates/intervals_update.html.py:38 templates/intervals_update.html:42
+#: templates/unique_symbol_add.html.py:39 templates/unique_symbol_add.html:43
+#: templates/unique_symbol_update.html:38
+#: templates/unique_symbol_update.html:42 templates/unique_values_add.html:39
+#: templates/unique_values_add.html:43 templates/unique_values_update.html:38
+#: templates/unique_values_update.html:42
+msgid "No limit"
+msgstr "Sin límite"
 
-#: templates/color_table_add.html:41 templates/color_table_update.html:40
-#: templates/expressions_add.html:42 templates/expressions_update.html:41
-#: templates/intervals_add.html.py:42 templates/intervals_update.html:41
+#: templates/color_table_add.html:41 templates/color_table_update.html.py:40
+#: templates/expressions_add.html:42 templates/expressions_update.html.py:41
+#: templates/intervals_add.html:42 templates/intervals_update.html.py:41
 #: templates/unique_symbol_add.html:42 templates/unique_symbol_update.html:41
 #: templates/unique_values_add.html:42 templates/unique_values_update.html:41
 msgid "Max. scale"
 msgstr "Escala max."
 
-#: templates/color_table_add.html:42 templates/color_table_update.html:41
-#: templates/expressions_add.html:43 templates/expressions_update.html:42
-#: templates/intervals_add.html.py:43 templates/intervals_update.html:42
-#: templates/unique_symbol_add.html:43 templates/unique_symbol_update.html:42
-#: templates/unique_values_add.html:43 templates/unique_values_update.html:42
-msgid "Maximum scale denominator"
-msgstr "Denominador máximo de la escala"
-
-#: templates/color_table_add.html:45 templates/color_table_update.html:44
-#: templates/expressions_add.html:46 templates/expressions_update.html:45
-#: templates/intervals_add.html.py:46 templates/intervals_update.html:45
+#: templates/color_table_add.html:45 templates/color_table_update.html.py:44
+#: templates/expressions_add.html:46 templates/expressions_update.html.py:45
+#: templates/intervals_add.html:46 templates/intervals_update.html.py:45
 #: templates/unique_symbol_add.html:46 templates/unique_symbol_update.html:45
 #: templates/unique_values_add.html:46 templates/unique_values_update.html:45
 msgid ""
@@ -209,8 +203,8 @@ msgstr ""
 "Especifíca el mínimo y máximo denominador de la escala (inclusivos) para el "
 "rango de esclas en el cual la regla se aplica"
 
-#: templates/color_table_add.html:51 templates/color_table_update.html:51
-#: templates/color_table_update.html:53 templates/expressions_add.html:52
+#: templates/color_table_add.html:51 templates/color_table_update.html.py:51
+#: templates/color_table_update.html:53 templates/expressions_add.html.py:52
 #: templates/expressions_update.html:52 templates/expressions_update.html:54
 #: templates/intervals_add.html.py:52 templates/intervals_update.html:52
 #: templates/intervals_update.html.py:54 templates/sld_import.html:55
@@ -222,18 +216,17 @@ msgstr ""
 msgid "Set as default style"
 msgstr "Fijar como estilo por defecto"
 
-#: templates/color_table_add.html:77 templates/color_table_update.html:80
+#: templates/color_table_add.html:77 templates/color_table_update.html.py:80
 msgid "Edit color map entry"
 msgstr "Editar entrada de color del mapa"
 
 #: templates/color_table_add.html:165 templates/color_table_update.html:167
-#: templates/expressions_add.html:247 templates/expressions_update.html:253
+#: templates/expressions_add.html:260 templates/expressions_update.html:266
 #: templates/external_graphic_add.html:147
-#: templates/external_graphic_add.html:151 templates/intervals_add.html:252
-#: templates/intervals_update.html.py:263 templates/symbol_add.html:110
-#: templates/symbol_update.html.py:119 templates/unique_symbol_add.html:212
-#: templates/unique_values_add.html:245
-#: templates/unique_values_update.html:255
+#: templates/external_graphic_add.html:151 templates/intervals_add.html:263
+#: templates/intervals_update.html.py:272 templates/symbol_add.html:110
+#: templates/symbol_update.html.py:119 templates/unique_symbol_add.html:233
+#: templates/unique_values_add.html:254 templates/unique_values_update.html:263
 msgid "Field name is required"
 msgstr "El campo nombre es obligatorio"
 
@@ -261,80 +254,75 @@ msgstr "Bibliotecas de símbolos"
 msgid "Add new style"
 msgstr "Añadir nuevo estilo"
 
-#: templates/expressions_add.html:14 templates/expressions_update.html:14
-#: templates/intervals_add.html.py:14 templates/intervals_update.html:14
+#: templates/expressions_add.html:14 templates/expressions_update.html.py:14
+#: templates/intervals_add.html:14 templates/intervals_update.html.py:14
 #: templates/unique_symbol_add.html:14 templates/unique_symbol_update.html:14
 #: templates/unique_values_add.html:14 templates/unique_values_update.html:14
 msgid "Labeling"
 msgstr "Etiquetado"
 
-#: templates/expressions_add.html:64 templates/expressions_update.html:67
+#: templates/expressions_add.html:64 templates/expressions_update.html.py:67
 msgid "Add new rule"
 msgstr "Añadir nueva regla"
 
-#: templates/expressions_add.html:65 templates/expressions_update.html:68
+#: templates/expressions_add.html:65 templates/expressions_update.html.py:68
 msgid "Creates a new rule based on an expression"
 msgstr "Crea una nueva regla basada en una expresión"
 
-#: templates/expressions_add.html:85 templates/expressions_update.html:88
-#: templates/intervals_add.html.py:94 templates/intervals_update.html:101
-#: templates/unique_symbol_add.html:78 templates/unique_symbol_update.html:81
-#: templates/unique_values_add.html:90 templates/unique_values_update.html:97
+#: templates/expressions_add.html:85 templates/expressions_update.html.py:88
+#: templates/intervals_add.html:91 templates/intervals_update.html.py:94
+#: templates/unique_symbol_add.html:93 templates/unique_symbol_update.html:96
+#: templates/unique_values_add.html:87 templates/unique_values_update.html:90
 msgid "Import symbol"
 msgstr "Importar símbolo"
 
-#: templates/expressions_add.html:90 templates/expressions_update.html:93
-#: templates/intervals_add.html.py:99 templates/intervals_update.html:106
-#: templates/unique_symbol_add.html:83 templates/unique_symbol_update.html:86
-#: templates/unique_values_add.html:95 templates/unique_values_update.html:102
+#: templates/expressions_add.html:90 templates/expressions_update.html.py:93
+#: templates/intervals_add.html:96 templates/intervals_update.html.py:99
+#: templates/unique_symbol_add.html:98 templates/unique_symbol_update.html:101
+#: templates/unique_values_add.html:92 templates/unique_values_update.html:95
 msgid "Select library"
 msgstr "Seleccionar biblioteca"
 
-#: templates/expressions_add.html:92 templates/expressions_update.html:95
-#: templates/intervals_add.html.py:101 templates/intervals_update.html:108
-#: templates/unique_symbol_add.html:85 templates/unique_symbol_update.html:88
-#: templates/unique_values_add.html:97 templates/unique_values_update.html:104
+#: templates/expressions_add.html:92 templates/expressions_update.html.py:95
+#: templates/intervals_add.html:98 templates/intervals_update.html.py:101
+#: templates/unique_symbol_add.html:100 templates/unique_symbol_update.html:103
+#: templates/unique_values_add.html:94 templates/unique_values_update.html:97
 msgid "Select symbol library"
 msgstr "Seleccionar biblioteca de símbolos"
 
 #: templates/expressions_add.html:111 templates/expressions_update.html:114
-#: templates/intervals_add.html:120 templates/intervals_update.html.py:127
-#: templates/unique_symbol_add.html:104
-#: templates/unique_symbol_update.html:107
-#: templates/unique_values_add.html:116
-#: templates/unique_values_update.html:123
+#: templates/intervals_add.html.py:117 templates/intervals_update.html:120
+#: templates/unique_symbol_add.html:119 templates/unique_symbol_update.html:122
+#: templates/unique_values_add.html:113 templates/unique_values_update.html:116
 msgid "Close"
 msgstr "Cerrar"
 
 #: templates/expressions_add.html:125 templates/expressions_update.html:128
-#: templates/intervals_add.html:134 templates/intervals_update.html.py:141
-#: templates/symbol_add.html:54 templates/symbol_update.html.py:54
-#: templates/unique_symbol_add.html:118
-#: templates/unique_symbol_update.html:121
-#: templates/unique_values_add.html:130
-#: templates/unique_values_update.html:137
-msgid "Edit symbolizer"
-msgstr "Editar simbolizador"
+#: templates/intervals_add.html.py:131 templates/intervals_update.html:134
+#: templates/unique_symbol_add.html:133 templates/unique_symbol_update.html:136
+#: templates/unique_values_add.html:127 templates/unique_values_update.html:130
+msgid "Labelling configuration"
+msgstr "Configuración del etiquetado"
 
 #: templates/external_graphic_add.html:12 templates/symbol_add.html.py:11
 msgid "Create new symbol"
 msgstr "Crear nuevo símbolo"
 
 #: templates/external_graphic_add.html:30
-#: templates/external_graphic_update.html:31 templates/symbol_add.html:24
-#: templates/symbol_update.html.py:25
+#: templates/external_graphic_update.html:31 templates/symbol_add.html.py:24
+#: templates/symbol_update.html:25
 msgid "Symbol name"
 msgstr "Nombre del símbolo"
 
 #: templates/external_graphic_add.html:34
-#: templates/external_graphic_update.html:35 templates/symbol_add.html:28
-#: templates/symbol_update.html.py:29
+#: templates/external_graphic_update.html:35 templates/symbol_add.html.py:28
+#: templates/symbol_update.html:29
 msgid "Symbol title"
 msgstr "Título del símbolo"
 
 #: templates/external_graphic_add.html:37
-#: templates/external_graphic_update.html:38 templates/symbol_add.html:31
-#: templates/symbol_update.html.py:32
+#: templates/external_graphic_update.html:38 templates/symbol_add.html.py:31
+#: templates/symbol_update.html:32
 msgid ""
 "Specifies a title for the rule. The title is used in display lists and "
 "legends"
@@ -368,7 +356,7 @@ msgid "The file format is not supported"
 msgstr "El formato del archivo no está soportado"
 
 #: templates/external_graphic_add.html:148
-#: templates/external_graphic_add.html:154 views.py:517 views.py:623
+#: templates/external_graphic_add.html:154 views.py:535 views.py:641
 msgid "You must select a file"
 msgstr "Debe seleccionar un archivo"
 
@@ -389,7 +377,7 @@ msgstr "Seleccionar un campo numérico"
 msgid "Select field"
 msgstr "Seleccionar un campo"
 
-#: templates/intervals_add.html:73 templates/intervals_update.html.py:80
+#: templates/intervals_add.html:70 templates/intervals_update.html.py:73
 msgid "Select number of intervals"
 msgstr "Seleccionar número de intervalos"
 
@@ -553,7 +541,7 @@ msgstr "Importar desde SLD"
 
 #: templates/select_legend_type.html:70
 msgid "SLD legend description"
-msgstr ""
+msgstr "Descriptor leyenda SLD"
 
 #: templates/select_legend_type.html:81
 msgid "Creates a legend for a raster layer defined by a color table"
@@ -591,6 +579,10 @@ msgstr "Añadir estilo"
 msgid "Delete style"
 msgstr "Eliminar estilo"
 
+#: templates/symbol_add.html:54 templates/symbol_update.html.py:54
+msgid "Edit symbolizer"
+msgstr "Editar simbolizador"
+
 #: templates/unique_values_add.html:64 templates/unique_values_update.html:67
 msgid "Select field to generate unique values"
 msgstr "Seleccionar campo para generar valores únicos"
@@ -603,17 +595,23 @@ msgstr "La capa debe contener al menos un estilo"
 msgid "Can not delete a default style"
 msgstr "No puede eliminar un estilo por defecto"
 
-#: views.py:510
+#: views.py:528
 msgid "Error importing SLD"
 msgstr "Error al importar SLD"
 
-#: views.py:557 views.py:620
+#: views.py:575 views.py:638
 msgid "You must enter a name for the library"
 msgstr "Debe introducir un nombre para la biblioteca"
 
-#: views.py:626
+#: views.py:644
 msgid "You must enter a name for the library and select a file"
 msgstr "Debe introducir un nombre para la biblioteca y seleccionar un archivo"
+
+#~ msgid "Minimum scale denominator"
+#~ msgstr "Denominador mínimo de la escala"
+
+#~ msgid "Maximum scale denominator"
+#~ msgstr "Denominador máximo de la escala"
 
 #~ msgid ""
 #~ "Invalid title: '{value}'. Title should not contain any special characters"
