@@ -666,12 +666,12 @@ editionBar.prototype.getNumericProperties = function(featureType){
 	} 
 	
 	if(type == 'real'){
-		return ""
+		return "step=any"
 	} 
 	
 	
 	if(type == 'double precision'){
-		return ""
+		return "step=any"
 	} 
 	
 	if(type == 'decimal' || type == 'numeric' ){
