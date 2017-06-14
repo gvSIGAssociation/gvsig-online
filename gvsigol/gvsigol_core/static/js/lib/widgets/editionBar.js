@@ -1371,7 +1371,7 @@ editionBar.prototype.removeFeatureForm = function(evt, feature) {
 				} else if (this.isStringType(this.featureType[i].type)) {
 					ui += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
 				} else if (this.featureType[i].type == 'boolean') {
-					if (value) {
+					if (feature.getProperties()[this.featureType[i].name]) {
 						featureProperties += '<input disabled id="' + this.featureType[i].name + '" type="checkbox" class="checkbox" checked>';
 					} else {
 						featureProperties += '<input disabled id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';
