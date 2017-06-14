@@ -320,6 +320,17 @@ class Geoserver():
         except Exception as e:
             return False
     
+    def get_feature_type(self, workspace, datastore, name, title):
+        """
+        """
+        try:           
+            result = self.rest_catalog.get_feature_type(workspace, datastore, name, user=self.user, password=self.password)
+            return result
+        
+        except Exception as e:
+            logging.error("Error retrieving geometry info")
+            return None
+    
     def get_geometry_info(self, layer, as_srid=True):
         """
         Returns an object containing the geometry the_type and the SRS of the layer.
@@ -467,6 +478,9 @@ class Geoserver():
             return self.createWMSLayer(workspace, store, name, title)
         else:
             return self.createCoverage(workspace, store, name, title)   
+
+    def getFeaturetype(self, workspace, datastore, name, title):
+        return self.rest_catalog.get_feature_type(workspace.name, datastore.name, name, user=self.user, password=self.password)
 
     def createFeaturetype(self, workspace, datastore, name, title):
         try:
@@ -957,8 +971,10 @@ class Geoserver():
                 if not layer_exists: #or (creation_mode==forms_geoserver.MODE_OVERWRITE and not layer_exists):
                     
                     try:
-                        self.createFeaturetype(datastore.workspace, datastore, layer_name, layer_title)
-                    except:
+                        result = self.getFeaturetype(datastore.workspace, datastore, layer_name, layer_title)
+                        if not result:
+                            self.createFeaturetype(datastore.workspace, datastore, layer_name, layer_title)
+                    except e:
                         print "ERROR en createFeaturetype"
                         raise
                 
