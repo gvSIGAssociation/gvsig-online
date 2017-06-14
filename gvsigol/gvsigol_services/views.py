@@ -22,6 +22,7 @@ from operator import isNumberType
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
+
 from models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, Enumeration, EnumerationItem,\
     LayerLock
 from forms_services import WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm
@@ -33,6 +34,7 @@ from backend_mapservice import backend as mapservice_backend
 from backend_postgis import Introspect
 from gvsigol_services.backend_resources import resource_manager
 from gvsigol_auth.utils import superuser_required, staff_required
+from django.contrib.auth.models import User 
 from gvsigol_core.models import ProjectLayerGroup
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
@@ -1087,7 +1089,7 @@ def layer_create(request):
             enumeration_list = Enumeration.objects.all()
         else:
             enumeration_list = Enumeration.objects.filter(created_by__exact=request.user.username)
-            users = User.objects..all()
+            users = User.objects.all()
             for user in users:
                 if user.is_superuser:
                     enumeration_list2 = Enumeration.objects.filter(created_by__exact=user.username)
