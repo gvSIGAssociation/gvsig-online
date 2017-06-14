@@ -1044,13 +1044,11 @@ editionBar.prototype.showAllErrorMessages = function() {
 	ui +=   '<h4><i class="icon fa fa-ban"></i> Error!</h4>';
 	ui +=   gettext('Failed to save the new record. Please check values');
 	
-	var invalidFields = form.find("input").each(function(index, node) {
-		if ($(this).is(":invalid")) {
-			var label = $( "#" + node.id).parent().find("span.edit-feature-field").first(),
-			// Opera incorrectly does not fill the validationMessage property.
-			message = node.validationMessage || 'Invalid value.';
-			ui +=    "<li><span>" + label.html() + "</span> - " + message + "</li>" ;
-		}
+	var invalidFields = form.find(":invalid").each(function(index, node) {
+		var label = $( "#" + node.id).parent().find("span.edit-feature-field").first(),
+		// Opera incorrectly does not fill the validationMessage property.
+		message = node.validationMessage || 'Invalid value.';
+		ui +=    "<li><span>" + label.html() + "</span> - " + message + "</li>" ;
 	});
 	
 	ui += '</div>';
