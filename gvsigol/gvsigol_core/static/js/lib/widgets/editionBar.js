@@ -676,7 +676,7 @@ editionBar.prototype.getNumericProperties = function(featureType){
 	
 	if(type == 'decimal' || type == 'numeric' ){
 		var min_string="0";
-		for(var i=0; i<featureType.precision; i++){
+		for(var i=0; i<featureType.precision-featureType.scale; i++){
 			if(i==0){
 				min_string = "9";
 			}else{
