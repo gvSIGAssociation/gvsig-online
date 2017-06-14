@@ -7,11 +7,11 @@
 	<div class="col-md-12">
 		<div class="box">
 
-			<form role="form" method="post" action="/gvsigonline/services/layer_permissions/{{ layer_id }}/">
+			<form id="project-form" role="form" method="post" action="/gvsigonline/services/layer_permissions/{{ layer_id }}/">
 				<div class="box-header with-border">
 					<h3 class="box-title">{% trans "Layer permissions" %}</h3>
 					<div class="box-tools pull-right">
-						<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+						<button id="save_button" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
 					</div>
 				</div>		
 			
@@ -48,12 +48,13 @@
 						</div>
 					</div>
 					
-					<div class="box">
+					<div id="read-list-box" class="box searchable-list-box" style="margin-top: 20px;">
 						<div class="box-header with-border">
-							<h3 class="box-title">{% trans "Make layer readable only for the following groups" %}</h3>
+							<h3 class="box-title col-md-6">{% trans "Make layer readable only for the following groups" %}</h3>
+							<div class="col-md-6"><input type="text" class="search form-control" placeHolder="{% trans 'Buscar grupo de usuarios...' %}" /></div>
 						</div>
 						<div class="box-body">
-							<ul class="products-list product-list-in-box">
+							<ul class="products-list product-list-in-box list">
 								{% for group in groups %}
 								<li class="item">
 									<div class="product-img">
@@ -76,15 +77,17 @@
 								</li> 
 								{% endfor %}
 							</ul>
+							<ul class="pagination"></ul>
 						</div>
 					</div>
 					
-					<div class="box">
+					<div id="write-list-box" class="box searchable-list-box" style="margin-top: 20px;">
 						<div class="box-header with-border">
-							<h3 class="box-title">{% trans "Make layer writeable only for the following groups" %}</h3>
+							<h3 class="box-title col-md-6">{% trans "Make layer writeable only for the following groups" %}</h3>
+							<div class="col-md-6"><input type="text" class="search form-control" placeHolder="{% trans 'Buscar grupo de usuarios...' %}" /></div>
 						</div>
 						<div class="box-body">
-							<ul class="products-list product-list-in-box">
+							<ul class="products-list product-list-in-box list">
 								{% for group in groups %}
 								<li class="item">
 									<div class="product-img">
@@ -107,6 +110,7 @@
 								</li> 
 								{% endfor %}
 							</ul>
+								<ul class="pagination"></ul>
 						</div>
 					</div>
 				</div>
@@ -115,4 +119,40 @@
 		</div>
 	</div>
 </div>
+{% endblock %}
+{% block extra-scripts %}
+<script type="text/javascript">
+	$().ready(function() {
+		var searcheableList = new List('read-list-box', {
+  		  valueNames: ['product-title'],
+  		  listClass:'list',
+  		  searchClass: 'search',
+  		  page: 5,
+  		  pagination: false
+  		});
+		var searcheableList2 = new List('write-list-box', {
+	  		  valueNames: ['product-title'],
+	  		  listClass:'list',
+	  		  searchClass: 'search',
+	  		  page: 5,
+	  		  pagination: false
+	  		});
+		
+		$("#save_button").click(function(e){
+    		e.preventDefault(); // prevents default
+    		for(var i=0; i<searcheableList.items.length; i++){
+    			var item = searcheableList.items[i];
+    			item.show();
+    		}
+    		for(var i=0; i<searcheableList2.items.length; i++){
+    			var item = searcheableList2.items[i];
+    			item.show();
+    		}
+    		$("#project-form").submit();
+    	    return false; 
+
+    	})
+	});
+	
+</script>
 {% endblock %}

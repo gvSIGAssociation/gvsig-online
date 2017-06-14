@@ -61,17 +61,18 @@
 	</div>
 
 	<div class="col-md-8">
-		<div class="box">
+		<div id="project-list-box" class="box searchable-list-box" style="margin-top: 20px;">
 			<div class="box-header with-border">
-				<h3 class="box-title">{% trans "Projects list" %}</h3>
-				<div class="box-tools pull-right">
+				<h3 class="box-title col-md-6">{% trans "Projects list" %}</h3>
+				<div class="col-md-6">
 					{% if user.is_staff %}
-					<button id="button-add-project" class="btn btn-box-tool"><i class="fa fa-plus margin-r-5"></i> {% trans "Add project" %}</button>
+					<button id="button-add-project" class="btn btn-box-tool" title='{% trans "Add project" %}' style="float:right;position:relative;z-index:10;"><i class="fa fa-plus margin-r-5"></i></button>
 					{% endif %}
+					<input type="text" class="search form-control" style="padding-right: 30px;position: absolute;" placeHolder="{% trans 'Buscar proyectos...' %}" />
 				</div>
 			</div>
 			<div class="box-body">
-				<ul class="products-list product-list-in-box">
+				<ul class="products-list product-list-in-box list">
 					{% for project in projects %}
 					<li class="item">
 						<div class="product-img">
@@ -84,7 +85,9 @@
 					</li>
 					{% endfor %}
 				</ul>
+				<ul class="pagination"></ul>
 			</div>
+			
 		</div>
 		<!-- /.box -->
 	</div>
@@ -138,6 +141,16 @@
 			},
 			error: function(){}
 		});
+	});
+	
+	$().ready(function() {
+		var searcheableList = new List('project-list-box', {
+  		  valueNames: ['product-title'],
+  		  listClass:'list',
+  		  searchClass: 'search',
+  		  page: 5,
+  		  pagination: false
+  		});
 	});
 </script>
 {% endblock %}
