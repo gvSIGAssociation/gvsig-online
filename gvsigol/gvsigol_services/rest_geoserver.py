@@ -259,6 +259,8 @@ class Geoserver():
         else:
             auth = self.session.auth
         r = self.session.get(url, auth=auth)
+        if r.status_code==404:
+            return None
         return r.json()
     
     def update_coverage(self, workspace, coveragestore, coverage, json_data, user=None, password=None):
