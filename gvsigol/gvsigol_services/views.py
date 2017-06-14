@@ -1088,7 +1088,7 @@ def layer_create(request):
         else:
             enumeration_list = Enumeration.objects.filter(created_by__exact=request.user.username)
             enumeration_list2 = Enumeration.objects.filter(created_by__exact='admin')
-            #enumeration_list = enumeration_list + enumeration_list2
+            enumeration_list = enumeration_list | enumeration_list2
         data = {
             'form': form,
             'layer_type': layer_type,
