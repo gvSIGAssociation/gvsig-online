@@ -974,7 +974,7 @@ class Geoserver():
                         result = self.getFeaturetype(datastore.workspace, datastore, layer_name, layer_title)
                         if not result:
                             self.createFeaturetype(datastore.workspace, datastore, layer_name, layer_title)
-                    except e:
+                    except:
                         print "ERROR en createFeaturetype"
                         raise
                 
