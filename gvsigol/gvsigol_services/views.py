@@ -637,9 +637,11 @@ def layer_config(request, layer_id):
         
         try:
             conf = ast.literal_eval(layer.conf)
+            fields_used = []
             for f in conf['fields']:
                 field = {}
                 field['name'] = f['name']
+                fields_used.append(f['name'])
                 for id, language in LANGUAGES:
                     field['title-'+id] = f['title-'+id]
                 field['visible'] = f['visible']
@@ -651,6 +653,28 @@ def layer_config(request, layer_id):
                         field['editable'] = False
                 field['infovisible'] = f['infovisible']
                 fields.append(field)
+                
+            datastore = Datastore.objects.get(id=layer.datastore_id)
+            workspace = Workspace.objects.get(id=datastore.workspace_id)
+            (ds_type, resource) = mapservice_backend.getResourceInfo(workspace.name, datastore, layer.name, "json")
+            resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
+            for f in resource_fields:
+                field = {}
+                field['name'] = f['name']
+                if not f['name'] in fields_used:
+                    for id, language in LANGUAGES:
+                        field['title-'+id] = f['name']
+                    field['visible'] = True
+                    field['editableactive'] = True
+                    field['editable'] = True
+                    for control_field in settings.CONTROL_FIELDS:
+                        if field['name'] == control_field['name']:
+                            field['editableactive'] = False
+                            field['editable'] = False
+                    field['infovisible'] = False
+                    fields.append(field)
+    
+                
                 
         except: 
             datastore = Datastore.objects.get(id=layer.datastore_id)
