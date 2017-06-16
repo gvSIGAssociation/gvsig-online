@@ -1188,8 +1188,8 @@ msgstr "Debe introducir un título para la enumeración"
 #~ msgid "Style for: "
 #~ msgstr "Estilo para: "
 
-#~ msgid "Default symbol"
-#~ msgstr "Símbolo por defecto"
+msgid "Default symbol"
+msgstr "Símbolo por defecto"
 
 #~ msgid "JPG, Tiff and PNG + world file"
 #~ msgstr "JPG, Tiff y PNG"
