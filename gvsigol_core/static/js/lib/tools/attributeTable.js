@@ -182,7 +182,7 @@ attributeTable.prototype.createTableUI = function(featureType) {
 	if (print != null) {
 		this.printProvider = print.printProvider;
 		tableButtons.push({
-        	text: '<i class="fa fa-print margin-r-5" tooltip="'+gettext('Print selection')+'" ></i> ' + gettext('Print selection'),
+        	text: '<i class="fa fa-print margin-r-5" title="'+gettext('Print selection')+'" ></i> ' + gettext('Print selection'),
             action: function ( e, dt, node, config ) {
             	var t = $('#table-' + self.layer.get("id")).DataTable();
             	var selectedRows = t.rows('.selected').data();
