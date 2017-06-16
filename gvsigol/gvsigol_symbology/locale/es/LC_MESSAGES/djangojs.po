@@ -241,3 +241,6 @@ msgstr "Filtro"
 
 msgid "Define custom scale denominators?"
 msgstr "Visible por escala"
+
+msgid "No limit"
+msgstr "Sin límite"
