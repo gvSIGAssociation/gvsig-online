@@ -103,9 +103,9 @@ class PostgisLayerUploadForm(forms.Form):
         user = kwargs.pop('user', None)  
         super(PostgisLayerUploadForm, self).__init__(*args, **kwargs)
         if user.is_superuser:
-            qs = Datastore.objects.all()
+            qs = Datastore.objects.all().order_by('name')
         else:
-            qs = Datastore.objects.filter(type="v_PostGIS").filter(created_by__exact=user.username)
+            qs = Datastore.objects.filter(type="v_PostGIS").filter(created_by__exact=user.username).order_by('name')
             
         self.fields["datastore"] = forms.ModelChoiceField(
             label=_(u'Datastore'), required=True,
@@ -138,7 +138,7 @@ class CreateFeatureTypeForm(forms.Form):
     geom_type = forms.ChoiceField(label=_(u'Geometry type'), required=True, choices=geometry_types, widget=forms.Select(attrs={'class' : 'form-control'}))
     srs = forms.ChoiceField(label=_(u'SRS'), required=True, choices=supported_srs, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
     title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
-    layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, initial="__default__", queryset=LayerGroup.objects.all(), widget=forms.Select(attrs={'class' : 'form-control'}))
+    layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, initial=1, queryset=LayerGroup.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control'}))
     visible = forms.BooleanField(label=_(u'Visible'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
     queryable = forms.BooleanField(label=_(u'Queryable'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
     cached = forms.BooleanField(label=_(u'Cached'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
@@ -149,9 +149,9 @@ class CreateFeatureTypeForm(forms.Form):
         user = kwargs.pop('user', None)  
         super(CreateFeatureTypeForm, self).__init__(*args, **kwargs)
         if user.is_superuser:
-            qs = Datastore.objects.all()
+            qs = Datastore.objects.all().order_by('name')
         else:
-            qs = Datastore.objects.filter(type="v_PostGIS").filter(created_by__exact=user.username)
+            qs = Datastore.objects.filter(type="v_PostGIS").filter(created_by__exact=user.username).order_by('name')
             
         self.fields["datastore"] = forms.ModelChoiceField(
             label=_(u'Datastore'), required=True,
