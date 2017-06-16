@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-12-21 12:37+0100\n"
+"POT-Creation-Date: 2017-06-16 08:57+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -280,26 +280,26 @@ msgstr ""
 msgid "This is your new temporary password"
 msgstr ""
 
-#: views.py:57
+#: views.py:62
 msgid "Your account has been disabled"
 msgstr ""
 
-#: views.py:60
+#: views.py:65 views.py:68
 msgid "The username and password you have entered do not match our records"
 msgstr ""
 
-#: views.py:125
+#: views.py:133
 msgid "User account does not exist"
 msgstr ""
 
-#: views.py:234
+#: views.py:242
 msgid "User group for"
 msgstr ""
 
-#: views.py:286
+#: views.py:295
 msgid "The username already exists"
 msgstr ""
 
-#: views.py:431
+#: views.py:440
 msgid "Admin is a reserved group"
 msgstr ""
