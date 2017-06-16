@@ -68,7 +68,7 @@ def create_default_style(layer_id, style_name, style_type, geom_type):
     rule = Rule(
         style = style,
         name = 'Default symbol',
-        title = 'Default symbol',
+        title = _('Default symbol'),
         abstract = '',
         filter = str(""),
         minscale = -1,
@@ -351,7 +351,7 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
         rule = Rule(
             style = style,
             name = 'Default symbol',
-            title = 'Default symbol',
+            title = _('Default symbol'),
             abstract = '',
             filter = str(""),
             minscale = -1,
