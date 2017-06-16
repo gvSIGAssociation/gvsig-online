@@ -236,7 +236,7 @@ msgstr "Denominador mínimo de la escala"
 msgid "Maximum scale denominator"
 msgstr "Denominador máximo de la escala"
 
-msgid "filter"
+msgid "Filter"
 msgstr "Filtro"
 
 msgid "Define custom scale denominators?"
