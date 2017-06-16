@@ -153,9 +153,9 @@ def provider_add(request):
         if request.user.is_superuser:
             providers = Provider.objects.all()
             if request.user.is_superuser:
-                form.fields['workspace'].queryset = Workspace.objects.all()
+                form.fields['workspace'].queryset = Workspace.objects.all().order_by('name')
             else:
-                form.fields['workspace'].queryset = Workspace.objects.filter(created_by__exact=request.user.username)
+                form.fields['workspace'].queryset = Workspace.objects.filter(created_by__exact=request.user.username).order_by('name')
             
             
     return render(request,'provider_add.html',{'form': form, 'settings': json.dumps(geocoding_setting.GEOCODING_PROVIDER) })
