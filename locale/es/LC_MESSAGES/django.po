@@ -407,7 +407,7 @@ msgstr "Salir"
 #: templates/public_viewer.html:110 templates/public_viewer_compress.html:108
 #: templates/viewer.html.py:130 templates/viewer_compress.html:130
 msgid "exportar pdf"
-msgstr "Exportar a PDF"
+msgstr "Capturar pantalla en PDF"
 
 #: templates/public_viewer.html:132 templates/public_viewer_compress.html:129
 #: templates/viewer.html.py:152 templates/viewer_compress.html:151
