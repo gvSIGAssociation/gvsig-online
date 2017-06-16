@@ -136,7 +136,7 @@ class CreateFeatureTypeForm(forms.Form):
     datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=True, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class':'form-control'}))
     name = forms.CharField(label=_(u'Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     geom_type = forms.ChoiceField(label=_(u'Geometry type'), required=True, choices=geometry_types, widget=forms.Select(attrs={'class' : 'form-control'}))
-    srs = forms.ChoiceField(label=_(u'SRS'), required=True, choices=supported_srs, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    srs = forms.ChoiceField(label=_(u'SRS'), required=True, choices=supported_srs_and_blank, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
     title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, initial=1, queryset=LayerGroup.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control'}))
     visible = forms.BooleanField(label=_(u'Visible'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
