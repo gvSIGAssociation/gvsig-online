@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-12-22 10:22+0100\n"
+"POT-Creation-Date: 2017-06-16 09:00+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,10 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#: backend_mapservice.py:85 backend_mapservice.py:111
-msgid "Shapefile folder"
-msgstr "Carpeta de shapefiles"
 
 #: backend_mapservice.py:86 backend_mapservice.py:110
 msgid "PostGIS vector"
@@ -42,37 +38,37 @@ msgstr "Capa vectorial"
 msgid "SQL View"
 msgstr "Vista SQL"
 
-#: backend_mapservice.py:468 backend_mapservice.py:477
-#: backend_mapservice.py:488
+#: backend_mapservice.py:490 backend_mapservice.py:499
+#: backend_mapservice.py:510
 #, python-brace-format
 msgid "Error publishing the layer. Backend error: {msg}"
 msgstr "Error publicando la capa. Error: {msg}"
 
-#: backend_mapservice.py:471 backend_mapservice.py:479
-#: backend_mapservice.py:490 views.py:388 views.py:894
+#: backend_mapservice.py:493 backend_mapservice.py:501
+#: backend_mapservice.py:512 views.py:490 views.py:1091
 msgid "Error: layer could not be published"
 msgstr "Error: la capa no puede ser publicada"
 
-#: backend_mapservice.py:500 backend_mapservice.py:508
-#: backend_mapservice.py:516
+#: backend_mapservice.py:522 backend_mapservice.py:530
+#: backend_mapservice.py:538
 #, python-brace-format
 msgid "Error publishing the layer group. Backend error: {msg}"
 msgstr "Error publicando el grupo de capas. Error: {msg}"
 
-#: backend_mapservice.py:502 backend_mapservice.py:510
-#: backend_mapservice.py:518
+#: backend_mapservice.py:524 backend_mapservice.py:532
+#: backend_mapservice.py:540
 msgid "Error: layer group could not be published"
 msgstr "Error: el grupo de capas no puede ser publicado"
 
-#: backend_mapservice.py:703
+#: backend_mapservice.py:759
 msgid ""
 "Bad file format. The provided zip file must not contain any subdirectory."
 msgstr ""
 "Formato de archivo incorrecto. El archivo zip proporcionada no debe contener "
 "ningún subdirectorio."
 
-#: backend_mapservice.py:747 backend_mapservice.py:798
-#: backend_mapservice.py:970 backend_mapservice.py:1036
+#: backend_mapservice.py:803 backend_mapservice.py:854
+#: backend_mapservice.py:1052 backend_mapservice.py:1118
 #, python-brace-format
 msgid ""
 "Invalid layer name: '{value}'. Identifiers must begin with a letter or an "
@@ -82,8 +78,8 @@ msgstr ""
 "con una letra o un guion bajo (_). Los siguientes caracteres pueden ser "
 "letras, guiones o números"
 
-#: backend_mapservice.py:749 backend_mapservice.py:800
-#: backend_mapservice.py:848
+#: backend_mapservice.py:805 backend_mapservice.py:856
+#: backend_mapservice.py:904
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid database name: {value}. "
@@ -94,8 +90,8 @@ msgstr ""
 "{value}. Identificadores deben comenzar con una letra o un guión bajo "
 "( _ ) . Los siguientes caracteres pueden ser letras, guiones o números"
 
-#: backend_mapservice.py:751 backend_mapservice.py:802
-#: backend_mapservice.py:850
+#: backend_mapservice.py:807 backend_mapservice.py:858
+#: backend_mapservice.py:906
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid user name: {value}. Identifiers "
@@ -106,8 +102,8 @@ msgstr ""
 "{value}. Identificadores deben comenzar con una letra o un guión bajo "
 "( _ ) . Los siguientes caracteres pueden ser letras, guiones o números"
 
-#: backend_mapservice.py:753 backend_mapservice.py:804
-#: backend_mapservice.py:852
+#: backend_mapservice.py:809 backend_mapservice.py:860
+#: backend_mapservice.py:908
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid schema: {value}. Identifiers "
@@ -118,93 +114,93 @@ msgstr ""
 "Identificadores deben comenzar con una letra o un guión bajo ( _ ) . Los "
 "siguientes caracteres pueden ser letras, guiones o números"
 
-#: backend_mapservice.py:775 backend_mapservice.py:816
+#: backend_mapservice.py:831 backend_mapservice.py:872
 msgid "Error uploading the layer. Review the file format."
 msgstr "Error publicando la capa. Revisar el formato del fichero"
 
-#: backend_mapservice.py:962
+#: backend_mapservice.py:1044
 msgid "Error creating the layer. Review the file format."
 msgstr "Error creando la capa. Revisar el formato del fichero"
 
-#: backend_mapservice.py:1001
+#: backend_mapservice.py:1083
 msgid "Invalid geometry type"
 msgstr "Tipo de geometría no válido"
 
-#: backend_mapservice.py:1005
+#: backend_mapservice.py:1087
 #, python-brace-format
 msgid "Duplicated field name: {0}"
 msgstr "Nombre de campo duplicado: {0}"
 
-#: backend_mapservice.py:1007
+#: backend_mapservice.py:1089
 #, python-brace-format
 msgid "Invalid field name. '{0}' is a reserved word"
 msgstr "Nombre de campo inválido. '{0}' es una palabra reservada"
 
-#: backend_mapservice.py:1022
+#: backend_mapservice.py:1104
 #, python-brace-format
 msgid "Unsupported field type: {0}"
 msgstr "Tipo de campo no soportado: {0}"
 
-#: backend_mapservice.py:1027
+#: backend_mapservice.py:1109
 #: templates/geoserver/create_layer_feature_type.html:299
-#: templates/layer_create.html:443
+#: templates/layer_create.html:446
 msgid "At least one field must be defined"
 msgstr "Debe definir por lo menos un campo"
 
-#: backend_mapservice.py:1030
+#: backend_mapservice.py:1112
 msgid "Invalid field definition"
 msgstr "Definición de campo no válida"
 
-#: backend_mapservice.py:1042
+#: backend_mapservice.py:1124
 #, python-brace-format
 msgid "A layer already exists with this name: '{value}'"
 msgstr "Ya existe una capa con este nombre: '{value}'"
 
-#: backend_mapservice.py:1062 backend_mapservice.py:1071
+#: backend_mapservice.py:1144 backend_mapservice.py:1153
 msgid "Error occurred building the view. Review the SQL sentence"
 msgstr "Ha ocurrido un error construyendo la vista. Revisar la sentencia SQL"
 
-#: forms_geoserver.py:32
+#: forms_geoserver.py:33
 msgid "autodetect"
 msgstr "autodetectar"
 
-#: forms_geoserver.py:39
+#: forms_geoserver.py:40
 msgid "Create"
 msgstr "Crear"
 
-#: forms_geoserver.py:39
+#: forms_geoserver.py:40
 msgid "Append"
 msgstr "Añadir"
 
-#: forms_geoserver.py:39
+#: forms_geoserver.py:40
 msgid "Overwrite"
 msgstr "Sobreescribir"
 
-#: forms_geoserver.py:40
+#: forms_geoserver.py:41
 msgid "Point"
 msgstr "Punto"
 
-#: forms_geoserver.py:40
+#: forms_geoserver.py:41
 msgid "Multipoint"
 msgstr "Multipunto"
 
-#: forms_geoserver.py:41
+#: forms_geoserver.py:42
 msgid "Line"
 msgstr "Línea"
 
-#: forms_geoserver.py:41
+#: forms_geoserver.py:42
 msgid "Multiline"
 msgstr "Multilínea"
 
-#: forms_geoserver.py:42
+#: forms_geoserver.py:43
 msgid "Polygon"
 msgstr "Polígono"
 
-#: forms_geoserver.py:42
+#: forms_geoserver.py:43
 msgid "Multipolygon"
 msgstr "Multipolígono"
 
-#: forms_geoserver.py:45 forms_geoserver.py:60 forms_services.py:39
+#: forms_geoserver.py:46 forms_geoserver.py:61 forms_services.py:40
 #: templates/datastore_add.html:36 templates/datastore_update.html.py:19
 #: templates/geoserver/layer_upload_imagemosaic.html:52
 #: templates/geoserver/layer_upload_raster.html:52
@@ -212,34 +208,33 @@ msgstr "Multipolígono"
 msgid "Workspace"
 msgstr "Espacio de trabajo"
 
-#: forms_geoserver.py:47 forms_geoserver.py:62 forms_geoserver.py:74
-#: forms_geoserver.py:88 forms_services.py:41
+#: forms_geoserver.py:48 forms_geoserver.py:63 forms_geoserver.py:75
+#: forms_geoserver.py:89 forms_services.py:42
 #: templates/geoserver/layer_upload_postgis.html:43
 #: templates/geoserver/layer_upload_vector.html:35
 #: templates/geoserver/layer_upload_vector.html:41
 msgid "File"
 msgstr "Archivo"
 
-#: forms_geoserver.py:48 forms_geoserver.py:63 forms_geoserver.py:75
-#: forms_geoserver.py:90 forms_geoserver.py:103 forms_geoserver.py:118
-#: forms_services.py:30 forms_services.py:42 forms_services.py:71
-#: forms_services.py:92 forms_services.py:103 templates/datastore_add.html:59
+#: forms_geoserver.py:49 forms_geoserver.py:64 forms_geoserver.py:76
+#: forms_geoserver.py:91 forms_geoserver.py:122 forms_geoserver.py:137
+#: forms_services.py:30 forms_services.py:43 forms_services.py:72
+#: forms_services.py:93 forms_services.py:104 templates/datastore_add.html:59
 #: templates/datastore_list.html.py:22 templates/enumeration_add.html:40
 #: templates/enumeration_list.html.py:22 templates/enumeration_update.html:40
 #: templates/geoserver/create_layer_feature_type.html:76
 #: templates/geoserver/create_layer_feature_type.html:147
 #: templates/geoserver/layer_upload_imagemosaic.html:59
 #: templates/geoserver/layer_upload_postgis.html:64
-#: templates/geoserver/layer_upload_raster.html:59
-#: templates/layer_list.html:24 templates/layergroup_add.html.py:40
-#: templates/layergroup_list.html:22 templates/layergroup_update.html.py:40
-#: templates/workspace_list.html:22
+#: templates/geoserver/layer_upload_raster.html:59 templates/layer_list.html:24
+#: templates/layergroup_add.html.py:40 templates/layergroup_list.html:22
+#: templates/layergroup_update.html.py:40 templates/workspace_list.html:22
 msgid "Name"
 msgstr "Nombre"
 
-#: forms_geoserver.py:49 forms_geoserver.py:64 forms_geoserver.py:76
-#: forms_geoserver.py:109 forms_geoserver.py:121 forms_services.py:93
-#: forms_services.py:104 templates/enumeration_add.html.py:47
+#: forms_geoserver.py:50 forms_geoserver.py:65 forms_geoserver.py:77
+#: forms_geoserver.py:128 forms_geoserver.py:140 forms_services.py:94
+#: forms_services.py:105 templates/enumeration_add.html.py:47
 #: templates/enumeration_list.html:23 templates/enumeration_update.html:47
 #: templates/geoserver/create_layer_feature_type.html:51
 #: templates/geoserver/create_layer_sql_view.html:49
@@ -248,125 +243,122 @@ msgstr "Nombre"
 #: templates/geoserver/layer_upload_raster.html:67
 #: templates/geoserver/layer_upload_vector.html:72 templates/layer_add.html:54
 #: templates/layer_create.html.py:54 templates/layer_list.html:25
-#: templates/layer_update.html.py:77 templates/layergroup_add.html:47
+#: templates/layer_update.html.py:58 templates/layergroup_add.html:47
 #: templates/layergroup_list.html.py:23 templates/layergroup_update.html:46
 msgid "Title"
 msgstr "Título"
 
-#: forms_geoserver.py:51 forms_geoserver.py:66 forms_geoserver.py:78
-#: forms_geoserver.py:110 forms_geoserver.py:122 forms_services.py:94
-#: forms_services.py:105 templates/geoserver/create_layer_feature_type.html:94
+#: forms_geoserver.py:52 forms_geoserver.py:67 forms_geoserver.py:79
+#: forms_geoserver.py:129 forms_geoserver.py:141 forms_services.py:95
+#: forms_services.py:106 templates/geoserver/create_layer_feature_type.html:94
 #: templates/geoserver/create_layer_sql_view.html:84
 #: templates/geoserver/layer_upload_imagemosaic.html:74
 #: templates/geoserver/layer_upload_postgis.html:79
 #: templates/geoserver/layer_upload_raster.html:74
 #: templates/geoserver/layer_upload_vector.html:89 templates/layer_add.html:61
 #: templates/layer_create.html.py:102 templates/layer_list.html:27
-#: templates/layer_update.html.py:84
+#: templates/layer_update.html.py:65
 msgid "Layer group"
 msgstr "Grupo de capas"
 
-#: forms_geoserver.py:52 forms_geoserver.py:67 forms_geoserver.py:79
-#: forms_geoserver.py:111 forms_geoserver.py:123
+#: forms_geoserver.py:53 forms_geoserver.py:68 forms_geoserver.py:80
+#: forms_geoserver.py:130 forms_geoserver.py:142
 #: templates/geoserver/create_layer_feature_type.html:106
 #: templates/geoserver/create_layer_sql_view.html:96
 #: templates/geoserver/layer_upload_imagemosaic.html:106
 #: templates/geoserver/layer_upload_postgis.html:104
 #: templates/geoserver/layer_upload_raster.html:88
 #: templates/geoserver/layer_upload_vector.html:99 templates/layer_add.html:74
-#: templates/layer_create.html.py:115 templates/layer_update.html:99
+#: templates/layer_create.html.py:115 templates/layer_update.html:80
 msgid "Visible"
 msgstr "Visible"
 
-#: forms_geoserver.py:53 forms_geoserver.py:68 forms_geoserver.py:80
-#: forms_geoserver.py:112 forms_geoserver.py:124
+#: forms_geoserver.py:54 forms_geoserver.py:69 forms_geoserver.py:81
+#: forms_geoserver.py:131 forms_geoserver.py:143
 #: templates/geoserver/create_layer_feature_type.html:116
 #: templates/geoserver/create_layer_sql_view.html:106
 #: templates/geoserver/layer_upload_imagemosaic.html:114
 #: templates/geoserver/layer_upload_postgis.html:112
 #: templates/geoserver/layer_upload_raster.html:96
-#: templates/geoserver/layer_upload_vector.html:109
-#: templates/layer_add.html:82 templates/layer_create.html.py:123
-#: templates/layer_update.html:115
+#: templates/geoserver/layer_upload_vector.html:109 templates/layer_add.html:82
+#: templates/layer_create.html.py:123 templates/layer_update.html:96
 msgid "Queryable"
 msgstr "Consultable"
 
-#: forms_geoserver.py:54 forms_geoserver.py:69 forms_geoserver.py:81
-#: forms_geoserver.py:113 forms_geoserver.py:125
+#: forms_geoserver.py:55 forms_geoserver.py:70 forms_geoserver.py:82
+#: forms_geoserver.py:132 forms_geoserver.py:144
 #: templates/geoserver/create_layer_feature_type.html:111
 #: templates/geoserver/create_layer_sql_view.html:101
 #: templates/geoserver/layer_upload_imagemosaic.html:110
 #: templates/geoserver/layer_upload_postgis.html:108
 #: templates/geoserver/layer_upload_raster.html:92
-#: templates/geoserver/layer_upload_vector.html:104
-#: templates/layer_add.html:78 templates/layer_create.html.py:119
-#: templates/layer_update.html:107
+#: templates/geoserver/layer_upload_vector.html:104 templates/layer_add.html:78
+#: templates/layer_create.html.py:119 templates/layer_update.html:88
 msgid "Cached"
 msgstr "Cacheada"
 
-#: forms_geoserver.py:55 forms_geoserver.py:70 forms_geoserver.py:82
-#: forms_geoserver.py:114 forms_geoserver.py:126
+#: forms_geoserver.py:56 forms_geoserver.py:71 forms_geoserver.py:83
+#: forms_geoserver.py:133 forms_geoserver.py:145
 msgid "Single image"
 msgstr "Imagen simple (sin tiles)"
 
-#: forms_geoserver.py:56
+#: forms_geoserver.py:57
 msgid "Date regex"
 msgstr "Expresión regular de fecha"
 
-#: forms_geoserver.py:57
+#: forms_geoserver.py:58
 msgid "Elevation regex"
 msgstr "Expresión regular de elevación"
 
-#: forms_geoserver.py:73 forms_geoserver.py:86 forms_geoserver.py:102
-#: forms_geoserver.py:117 forms_services.py:91 forms_services.py:102
-#: templates/layer_list.html:26
+#: forms_geoserver.py:74 forms_geoserver.py:87 forms_geoserver.py:111
+#: forms_geoserver.py:121 forms_geoserver.py:136 forms_geoserver.py:157
+#: forms_services.py:92 forms_services.py:103 templates/layer_list.html.py:26
 msgid "Datastore"
 msgstr "Almacén de datos"
 
-#: forms_geoserver.py:89
+#: forms_geoserver.py:90
 msgid "Mode"
 msgstr "Modo"
 
-#: forms_geoserver.py:94
+#: forms_geoserver.py:95
 msgid "Encoding"
 msgstr "Codificación"
 
-#: forms_geoserver.py:95 forms_geoserver.py:108 forms_geoserver.py:120
+#: forms_geoserver.py:96 forms_geoserver.py:127 forms_geoserver.py:139
 msgid "SRS"
 msgstr "SRS"
 
-#: forms_geoserver.py:104
+#: forms_geoserver.py:123
 msgid "SQL Statement"
 msgstr "Sentencia SQL"
 
-#: forms_geoserver.py:105 templates/geoserver/create_layer_sql_view.html.py:64
+#: forms_geoserver.py:124 templates/geoserver/create_layer_sql_view.html.py:64
 msgid "Primary key column"
 msgstr "Columna de clave primaria"
 
-#: forms_geoserver.py:106 templates/geoserver/create_layer_sql_view.html.py:68
+#: forms_geoserver.py:125 templates/geoserver/create_layer_sql_view.html.py:68
 msgid "Geometry column"
 msgstr "Columna de geometría"
 
-#: forms_geoserver.py:107 forms_geoserver.py:119
+#: forms_geoserver.py:126 forms_geoserver.py:138
 #: templates/geoserver/create_layer_feature_type.html:57
 #: templates/geoserver/create_layer_sql_view.html:74
 #: templates/layer_create.html:61
 msgid "Geometry type"
 msgstr "Tipo de geometría"
 
-#: forms_geoserver.py:127
-#: templates/geoserver/create_layer_feature_type.html:68
+#: forms_geoserver.py:146 templates/geoserver/create_layer_feature_type.html:68
 #: templates/geoserver/create_layer_sql_view.html:143
 msgid "Fields"
 msgstr "Campos"
 
-#: forms_geoserver.py:138
+#: forms_geoserver.py:170
 msgid "Error: Invalid field definition"
 msgstr "Error: Definición de campo no válida"
 
-#: forms_services.py:31 forms_services.py:43 forms_services.py:72
+#: forms_services.py:31 forms_services.py:44 forms_services.py:73
 #: templates/datastore_add.html:66 templates/datastore_list.html.py:23
-#: templates/workspace_list.html:23
+#: templates/workspace_list.html:23 templates/workspace_update.html.py:29
 msgid "Description"
 msgstr "Descripción"
 
@@ -386,23 +378,28 @@ msgstr ""
 msgid "Cache URL"
 msgstr "Caché URL"
 
-#: forms_services.py:40 forms_services.py:70 templates/datastore_add.html:43
-#: templates/datastore_list.html.py:24
+#: forms_services.py:37 templates/workspace_list.html.py:25
+#: templates/workspace_update.html:36
+msgid "Is public?"
+msgstr ""
+
+#: forms_services.py:41 forms_services.py:71 templates/datastore_add.html.py:43
+#: templates/datastore_list.html:24
 #: templates/geoserver/create_layer_feature_type.html:77
 #: templates/lock_list.html:22
 msgid "Type"
 msgstr "Tipo"
 
-#: forms_services.py:44 forms_services.py:73 templates/datastore_add.html:73
-#: templates/datastore_list.html.py:25
+#: forms_services.py:45 forms_services.py:74 templates/datastore_add.html.py:73
+#: templates/datastore_list.html:25
 msgid "Connection params"
 msgstr "Parámetros de conexión"
 
-#: forms_services.py:57
+#: forms_services.py:58
 msgid "Datastore already exists"
 msgstr "El almacén de datos ya existe"
 
-#: forms_services.py:63 forms_services.py:83
+#: forms_services.py:64 forms_services.py:84
 msgid "Error: Invalid JSON format"
 msgstr "Error: Formato JSON no válido"
 
@@ -455,10 +452,10 @@ msgid "Add datastore"
 msgstr "Añadir almacén de datos"
 
 #: templates/datastore_add.html:14 templates/datastore_update.html.py:14
-#: templates/enumeration_add.html:14 templates/enumeration_update.html:14
-#: templates/layer_config.html.py:15 templates/layer_permissions_add.html:14
+#: templates/enumeration_add.html:14 templates/enumeration_update.html.py:14
+#: templates/layer_config.html:15 templates/layer_permissions_add.html.py:14
 #: templates/layergroup_add.html:14 templates/layergroup_update.html.py:14
-#: templates/workspace_add.html:14
+#: templates/workspace_add.html:14 templates/workspace_update.html.py:14
 msgid "Save"
 msgstr "Guardar"
 
@@ -482,27 +479,27 @@ msgstr "El almacén de datos y los recursos asociados a él serán eliminados"
 
 #: templates/datastore_list.html:64 templates/enumeration_list.html.py:60
 #: templates/layer_list.html:71 templates/layergroup_list.html.py:68
-#: templates/workspace_list.html:62
+#: templates/workspace_list.html:64
 msgid "Cancel"
 msgstr "Cancelar"
 
 #: templates/datastore_list.html:65 templates/enumeration_list.html.py:61
 #: templates/layer_list.html:72 templates/layergroup_list.html.py:69
-#: templates/workspace_list.html:63
+#: templates/workspace_list.html:65
 msgid "Accept"
 msgstr "Aceptar"
 
 #: templates/datastore_list.html:82 templates/enumeration_list.html.py:78
 #: templates/geoserver/create_layer_sql_view.html:249
 #: templates/layer_list.html:89 templates/layergroup_list.html.py:86
-#: templates/lock_list.html:59 templates/workspace_list.html.py:80
+#: templates/lock_list.html:59 templates/workspace_list.html.py:82
 msgid "Processing request..."
 msgstr "Procesando petición..."
 
 #: templates/datastore_list.html:83 templates/enumeration_list.html.py:79
 #: templates/geoserver/create_layer_sql_view.html:250
 #: templates/layer_list.html:90 templates/layergroup_list.html.py:87
-#: templates/lock_list.html:60 templates/workspace_list.html.py:81
+#: templates/lock_list.html:60 templates/workspace_list.html.py:83
 #, python-format
 msgid "Search%(sep)s"
 msgstr "Buscar%(sep)s"
@@ -510,7 +507,7 @@ msgstr "Buscar%(sep)s"
 #: templates/datastore_list.html:84 templates/enumeration_list.html.py:80
 #: templates/geoserver/create_layer_sql_view.html:251
 #: templates/layer_list.html:91 templates/layergroup_list.html.py:88
-#: templates/lock_list.html:61 templates/workspace_list.html.py:82
+#: templates/lock_list.html:61 templates/workspace_list.html.py:84
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr "Mostrando %(numrecords)s registros"
@@ -518,7 +515,7 @@ msgstr "Mostrando %(numrecords)s registros"
 #: templates/datastore_list.html:85 templates/enumeration_list.html.py:81
 #: templates/geoserver/create_layer_sql_view.html:252
 #: templates/layer_list.html:92 templates/layergroup_list.html.py:89
-#: templates/lock_list.html:62 templates/workspace_list.html.py:83
+#: templates/lock_list.html:62 templates/workspace_list.html.py:85
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr "Mostrando desde %(start)s a %(end)s de %(numrecords)s registros"
@@ -526,14 +523,14 @@ msgstr "Mostrando desde %(start)s a %(end)s de %(numrecords)s registros"
 #: templates/datastore_list.html:86 templates/enumeration_list.html.py:82
 #: templates/geoserver/create_layer_sql_view.html:253
 #: templates/layer_list.html:93 templates/layergroup_list.html.py:90
-#: templates/lock_list.html:63 templates/workspace_list.html.py:84
+#: templates/lock_list.html:63 templates/workspace_list.html.py:86
 msgid "Showing from 0 to 0 of 0 records"
 msgstr "Mostrando desde 0 a 0 de 0 registros"
 
 #: templates/datastore_list.html:87 templates/enumeration_list.html.py:83
 #: templates/geoserver/create_layer_sql_view.html:254
 #: templates/layer_list.html:94 templates/layergroup_list.html.py:91
-#: templates/lock_list.html:64 templates/workspace_list.html.py:85
+#: templates/lock_list.html:64 templates/workspace_list.html.py:87
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr "Filtrando %(max)s registros"
@@ -541,7 +538,7 @@ msgstr "Filtrando %(max)s registros"
 #: templates/datastore_list.html:89 templates/enumeration_list.html.py:85
 #: templates/geoserver/create_layer_sql_view.html:256
 #: templates/layer_list.html:96 templates/layergroup_list.html.py:93
-#: templates/lock_list.html:66 templates/workspace_list.html.py:87
+#: templates/lock_list.html:66 templates/workspace_list.html.py:89
 msgid "Loading..."
 msgstr "Cargando..."
 
@@ -552,44 +549,44 @@ msgstr "Cargando..."
 #: templates/layer_list.html:97 templates/layer_list.html.py:98
 #: templates/layergroup_list.html:94 templates/layergroup_list.html.py:95
 #: templates/lock_list.html:67 templates/lock_list.html.py:68
-#: templates/workspace_list.html:88 templates/workspace_list.html.py:89
+#: templates/workspace_list.html:90 templates/workspace_list.html.py:91
 msgid "No records available"
 msgstr "No hay registros disponibles"
 
 #: templates/datastore_list.html:93 templates/enumeration_list.html.py:89
 #: templates/geoserver/create_layer_sql_view.html:260
 #: templates/layer_list.html:100 templates/layergroup_list.html.py:97
-#: templates/lock_list.html:70 templates/workspace_list.html.py:91
+#: templates/lock_list.html:70 templates/workspace_list.html.py:93
 msgid "First"
 msgstr "Primero"
 
 #: templates/datastore_list.html:94 templates/enumeration_list.html.py:90
 #: templates/geoserver/create_layer_sql_view.html:261
 #: templates/layer_list.html:101 templates/layergroup_list.html.py:98
-#: templates/lock_list.html:71 templates/workspace_list.html.py:92
+#: templates/lock_list.html:71 templates/workspace_list.html.py:94
 msgid "Previous"
 msgstr "Anterior"
 
 #: templates/datastore_list.html:95 templates/enumeration_list.html.py:91
 #: templates/geoserver/create_layer_sql_view.html:262
 #: templates/layer_add.html:14 templates/layer_create.html.py:14
-#: templates/layer_list.html:102 templates/layer_update.html.py:131
+#: templates/layer_list.html:102 templates/layer_update.html.py:112
 #: templates/layergroup_list.html:99 templates/lock_list.html.py:72
-#: templates/workspace_list.html:93
+#: templates/workspace_list.html:95
 msgid "Next"
 msgstr "Siguiente"
 
 #: templates/datastore_list.html:96 templates/enumeration_list.html.py:92
 #: templates/geoserver/create_layer_sql_view.html:263
 #: templates/layer_list.html:103 templates/layergroup_list.html.py:100
-#: templates/lock_list.html:73 templates/workspace_list.html.py:94
+#: templates/lock_list.html:73 templates/workspace_list.html.py:96
 msgid "Last"
 msgstr "Último"
 
 #: templates/datastore_list.html:99 templates/enumeration_list.html.py:95
 #: templates/geoserver/create_layer_sql_view.html:266
 #: templates/layer_list.html:106 templates/layergroup_list.html.py:103
-#: templates/lock_list.html:76 templates/workspace_list.html.py:97
+#: templates/lock_list.html:76 templates/workspace_list.html.py:99
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr "%(sep)sOrden ascendente"
@@ -597,7 +594,7 @@ msgstr "%(sep)sOrden ascendente"
 #: templates/datastore_list.html:100 templates/enumeration_list.html.py:96
 #: templates/geoserver/create_layer_sql_view.html:267
 #: templates/layer_list.html:107 templates/layergroup_list.html.py:104
-#: templates/lock_list.html:77 templates/workspace_list.html.py:98
+#: templates/lock_list.html:77 templates/workspace_list.html.py:100
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr "%(sep)sOrden descendente"
@@ -614,11 +611,11 @@ msgstr "Actualizar almacén de datos"
 msgid "Add enumeration"
 msgstr "Añadir enumeración"
 
-#: templates/enumeration_add.html:58 templates/enumeration_update.html:58
+#: templates/enumeration_add.html:58 templates/enumeration_update.html.py:58
 msgid "Enumeration items"
 msgstr "Elementos de la enumeración"
 
-#: templates/enumeration_add.html:64 templates/enumeration_update.html:76
+#: templates/enumeration_add.html:64 templates/enumeration_update.html.py:76
 msgid "Add item"
 msgstr "Añadir elemento"
 
@@ -626,7 +623,7 @@ msgstr "Añadir elemento"
 msgid "Enumeration list"
 msgstr "Lista de enumeraciones"
 
-#: templates/enumeration_list.html:54 templates/enumeration_list.html:102
+#: templates/enumeration_list.html:54 templates/enumeration_list.html.py:102
 msgid "Delete enumeration"
 msgstr "Eliminar enumeración"
 
@@ -677,7 +674,7 @@ msgstr "Añadir campo"
 #: templates/geoserver/layer_upload_postgis.html:97
 #: templates/geoserver/layer_upload_raster.html:81
 #: templates/geoserver/layer_upload_vector.html:94 templates/layer_add.html:68
-#: templates/layer_create.html.py:109 templates/layer_update.html:91
+#: templates/layer_create.html.py:109 templates/layer_update.html:72
 msgid "Layer properties in the viewer"
 msgstr "Propiedades de la capa en el visor"
 
@@ -686,9 +683,8 @@ msgstr "Propiedades de la capa en el visor"
 #: templates/geoserver/layer_upload_imagemosaic.html:121
 #: templates/geoserver/layer_upload_postgis.html:119
 #: templates/geoserver/layer_upload_raster.html:103
-#: templates/geoserver/layer_upload_vector.html:115
-#: templates/layer_add.html:89 templates/layer_create.html.py:130
-#: templates/layer_update.html:125
+#: templates/geoserver/layer_upload_vector.html:115 templates/layer_add.html:89
+#: templates/layer_create.html.py:130 templates/layer_update.html:106
 msgid "Single image (No tiles)"
 msgstr "Imagen simple (sin tiles)"
 
@@ -697,8 +693,8 @@ msgstr "Imagen simple (sin tiles)"
 #: templates/geoserver/layer_upload_imagemosaic.html:130
 #: templates/geoserver/layer_upload_postgis.html:128
 #: templates/geoserver/layer_upload_raster.html:112
-#: templates/geoserver/layer_upload_vector.html:125
-#: templates/layer_add.html:98 templates/layer_create.html.py:139
+#: templates/geoserver/layer_upload_vector.html:125 templates/layer_add.html:98
+#: templates/layer_create.html.py:139
 msgid "Some description of the layer"
 msgstr "Alguna descripción de la capa"
 
@@ -707,8 +703,8 @@ msgstr "Alguna descripción de la capa"
 #: templates/geoserver/layer_upload_imagemosaic.html:129
 #: templates/geoserver/layer_upload_postgis.html:127
 #: templates/geoserver/layer_upload_raster.html:111
-#: templates/geoserver/layer_upload_vector.html:126
-#: templates/layer_add.html:97 templates/layer_create.html.py:138
+#: templates/geoserver/layer_upload_vector.html:126 templates/layer_add.html:97
+#: templates/layer_create.html.py:138
 msgid "Metadata: Abstract"
 msgstr "Metadatos: Abstract"
 
@@ -776,8 +772,8 @@ msgstr "Nombre de campo inválido: \\"
 #: templates/geoserver/layer_upload_postgis.html:150
 #: templates/geoserver/layer_upload_raster.html:134
 #: templates/geoserver/layer_upload_vector.html:144
-#: templates/layer_add.html:194 templates/layer_create.html.py:429
-#: templates/layer_update.html:152 templates/layergroup_list.html.py:35
+#: templates/layer_add.html:194 templates/layer_create.html.py:432
+#: templates/layer_update.html:133 templates/layergroup_list.html.py:35
 msgid "Default"
 msgstr "Por defecto"
 
@@ -831,8 +827,7 @@ msgid "Select row"
 msgstr "Seleccionar fila"
 
 #: templates/geoserver/layer_upload_imagemosaic.html:13
-#: templates/geoserver/layer_upload_raster.html:13
-#: templates/layer_list.html:14
+#: templates/geoserver/layer_upload_raster.html:13 templates/layer_list.html:14
 msgid "Publish layer"
 msgstr "Publicar capa"
 
@@ -924,13 +919,23 @@ msgstr "Configurar capa"
 msgid "Field name"
 msgstr "Nombre del campo"
 
-#: templates/layer_config.html:48
+#: templates/layer_config.html:49
 msgid "Field title"
 msgstr "Título del campo"
 
-#: templates/layer_config.html:49
+#: templates/layer_config.html:51
 msgid "Is visible?"
 msgstr "Visible"
+
+#: templates/layer_config.html:52
+#, fuzzy
+#| msgid "Is visible?"
+msgid "Is editable?"
+msgstr "Editable"
+
+#: templates/layer_config.html:53
+msgid "Is shown in getFeatureInfo?"
+msgstr "Visible en info"
 
 #: templates/layer_create.html:12 templates/layer_list.html.py:13
 msgid "Create empty layer"
@@ -945,7 +950,6 @@ msgid "Add field"
 msgstr "Añadir campo"
 
 #: templates/layer_list.html:11
-#| msgid "Layers"
 msgid "Layer list"
 msgstr "Lista de capas"
 
@@ -985,37 +989,21 @@ msgstr "Aviso: La capa será pública si no se le asigna ningún grupo de lectur
 msgid "Make layer readable only for the following groups"
 msgstr "Permitir la lectura de la capa solo para los siguientes grupos"
 
-#: templates/layer_permissions_add.html:67
-#: templates/layer_permissions_add.html:69
-#: templates/layer_permissions_add.html:98
-#: templates/layer_permissions_add.html:100
+#: templates/layer_permissions_add.html:54
+#: templates/layer_permissions_add.html:87
+msgid "Buscar grupo de usuarios..."
+msgstr ""
+
+#: templates/layer_permissions_add.html:68
+#: templates/layer_permissions_add.html:70
+#: templates/layer_permissions_add.html:101
+#: templates/layer_permissions_add.html:103
 msgid "Assign user group"
 msgstr "Asignar grupo de usuarios"
 
-#: templates/layer_permissions_add.html:84
+#: templates/layer_permissions_add.html:86
 msgid "Make layer writeable only for the following groups"
 msgstr "Permitir la escritura de la capa solo para los siguientes grupos"
-
-#: templates/layer_update.html:59
-msgid "Metadata UUID"
-msgstr "UUID"
-
-#: templates/layer_update.html:64
-msgid ""
-"The layer has been correctly created, but\n"
-"\t\t\t\t\t\t\t\tmetadata creation failed. You can directly create the\n"
-"\t\t\t\t\t\t\t\tmetadata on the Catalog and copy the metadata UUID\n"
-"\t\t\t\t\t\t\t\tto this form.\n"
-"\t\t\t\t\t\t\t\tPlease contact the system administrator if metadata\n"
-"\t\t\t\t\t\t\t\tcreation persistently fails"
-msgstr ""
-"La capa se ha creado correctamente, pero\n"
-"\t\t\t\t\t\t\t\tla creación del metadato ha fallado. Puede crear "
-"directamente el\n"
-"\t\t\t\t\t\t\t\tmetadato en el catálogo y copiar el UUID\n"
-"\t\t\t\t\t\t\t\ta este formulario.\n"
-"\t\t\t\t\t\t\t\tPor favor contacte con el administrador del sistema si\n"
-"\t\t\t\t\t\t\t\tla creación del metadatlo continua fallando"
 
 #: templates/layergroup_add.html:12 templates/layergroup_list.html.py:13
 msgid "Add layer group"
@@ -1050,7 +1038,7 @@ msgstr "Eliminar grupo de capas"
 msgid "The layer group will be removed, Do you want continue?"
 msgstr "El grupo de capas será eliminado, ¿Desea continuar?"
 
-#: templates/layergroup_list.html:118 templates/layergroup_update.html:12
+#: templates/layergroup_list.html:118 templates/layergroup_update.html.py:12
 msgid "Update layer group"
 msgstr "Actualizar grupo de capas"
 
@@ -1059,7 +1047,6 @@ msgid "Date"
 msgstr "Fecha"
 
 #: templates/lock_list.html:21
-#| msgid "Create"
 msgid "Created by"
 msgstr "Creado por"
 
@@ -1072,7 +1059,6 @@ msgid "MOBILE"
 msgstr "MÓVIL"
 
 #: templates/lock_list.html:83
-#| msgid "Upload layer"
 msgid "Unlock layer"
 msgstr "Desbloquear capa"
 
@@ -1088,17 +1074,29 @@ msgstr "Lista de espacios de trabajo"
 msgid "URI"
 msgstr "URI"
 
-#: templates/workspace_list.html:56 templates/workspace_list.html.py:104
+#: templates/workspace_list.html:58 templates/workspace_list.html.py:106
 msgid "Delete workspace"
 msgstr "Eliminar espacio de trabajo"
 
-#: templates/workspace_list.html:59
+#: templates/workspace_list.html:61
 msgid ""
 "The workspace and its registered data stores and resources will be deleted"
 msgstr ""
 "El espacio de trabajo y los recursos asignados al mismo serán eliminados"
 
-#: views.py:75
+#: templates/workspace_list.html:110 templates/workspace_update.html.py:12
+#, fuzzy
+#| msgid "Add workspace"
+msgid "Update workspace"
+msgstr "Añadir espacio de trabajo"
+
+#: templates/workspace_update.html:30
+#, fuzzy
+#| msgid "Description"
+msgid "Project description"
+msgstr "Descripción"
+
+#: views.py:83
 #, python-brace-format
 msgid ""
 "Invalid workspace name: '{value}'. Identifiers must begin with a letter or "
@@ -1109,11 +1107,11 @@ msgstr ""
 "comenzar con una letra o un guion bajo (_). Los siguientes caracteres pueden "
 "ser letras, guiones o números"
 
-#: views.py:94
+#: views.py:107
 msgid "Error: workspace could not be created"
 msgstr "Error: el workspace no puede ser creado"
 
-#: views.py:181
+#: views.py:215
 #, python-brace-format
 msgid ""
 "Invalid datastore name: '{value}'. Identifiers must begin with a letter or "
@@ -1124,19 +1122,19 @@ msgstr ""
 "con una letra o un guion bajo (_). Los siguientes caracteres pueden ser "
 "letras, guiones o números"
 
-#: views.py:203
+#: views.py:237
 msgid "Error: Data store could not be created"
 msgstr "Error: El almacén de datos no puede ser creado"
 
-#: views.py:217
+#: views.py:251
 msgid "Datastore not found"
 msgstr "Almacén de datos no encontrado"
 
-#: views.py:235
+#: views.py:269
 msgid "Error updating datastore"
 msgstr "Error actualizndo el almacén de datos"
 
-#: views.py:690 views.py:761
+#: views.py:901 views.py:972
 #, python-brace-format
 msgid ""
 "Invalid layer group name: '{value}'. Identifiers must begin with a letter or "
@@ -1147,17 +1145,39 @@ msgstr ""
 "comenzar con una letra o un guión bajo (_). Los siguientes caracteres pueden "
 "ser letras, guiones, o números"
 
-#: views.py:709 views.py:774
+#: views.py:920 views.py:985
 msgid "Layer group name already exists"
 msgstr "El nombre del grupo de capas ya exsite"
 
-#: views.py:713
+#: views.py:924
 msgid "You must enter a name for layer group"
 msgstr "Debe introducir un nombre para el grupo de capas"
 
-#: views.py:982
+#: views.py:1188
 msgid "You must enter a title for enumeration"
 msgstr "Debe introducir un título para la enumeración"
+
+#~ msgid "Shapefile folder"
+#~ msgstr "Carpeta de shapefiles"
+
+#~ msgid "Metadata UUID"
+#~ msgstr "UUID"
+
+#~ msgid ""
+#~ "The layer has been correctly created, but\n"
+#~ "\t\t\t\t\t\t\t\tmetadata creation failed. You can directly create the\n"
+#~ "\t\t\t\t\t\t\t\tmetadata on the Catalog and copy the metadata UUID\n"
+#~ "\t\t\t\t\t\t\t\tto this form.\n"
+#~ "\t\t\t\t\t\t\t\tPlease contact the system administrator if metadata\n"
+#~ "\t\t\t\t\t\t\t\tcreation persistently fails"
+#~ msgstr ""
+#~ "La capa se ha creado correctamente, pero\n"
+#~ "\t\t\t\t\t\t\t\tla creación del metadato ha fallado. Puede crear "
+#~ "directamente el\n"
+#~ "\t\t\t\t\t\t\t\tmetadato en el catálogo y copiar el UUID\n"
+#~ "\t\t\t\t\t\t\t\ta este formulario.\n"
+#~ "\t\t\t\t\t\t\t\tPor favor contacte con el administrador del sistema si\n"
+#~ "\t\t\t\t\t\t\t\tla creación del metadatlo continua fallando"
 
 #~ msgid "Groups list"
 #~ msgstr "List ade grupos"
