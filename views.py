@@ -239,7 +239,7 @@ def datastore_add(request):
     else:
         form = DatastoreForm()
         if not request.user.is_superuser:
-            form.fields['workspace'].queryset = Workspace.objects.filter(created_by__exact=request.user.username)
+            form.fields['workspace'].queryset = Workspace.objects.filter(created_by__exact=request.user.username).order_by('name')
     return render(request, 'datastore_add.html', {'fm_directory': FILEMANAGER_DIRECTORY + "/", 'form': form})
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -341,7 +341,8 @@ def backend_datastore_list(request):
         ws = Workspace.objects.get(id=id_ws)
         if ws:
             datastores = mapservice_backend.getDataStores(ws)
-            return HttpResponse(json.dumps(datastores))
+            datastores_sorted = sorted(datastores) 
+            return HttpResponse(json.dumps(datastores_sorted))
     return HttpResponseBadRequest()
 
 
@@ -358,7 +359,8 @@ def backend_resource_list_available(request):
         ds = Datastore.objects.get(id=id_ds)
         if ds:
             resources = mapservice_backend.getResources(ds.workspace.name, ds.name, ds.type, 'available')
-            return HttpResponse(json.dumps(resources))
+            resources_sorted = sorted(resources) 
+            return HttpResponse(json.dumps(resources_sorted))
     return HttpResponseBadRequest()
 
 
@@ -378,7 +380,8 @@ def backend_resource_list(request):
         ds = Datastore.objects.get(id=id_ds)
         if ds:
             resources = mapservice_backend.getResources(ds.workspace.name, ds.name, ds.type, type)
-            return HttpResponse(json.dumps(resources))
+            resources_sorted = sorted(resources) 
+            return HttpResponse(json.dumps(resources_sorted))
     return HttpResponseBadRequest()
 
 
@@ -420,8 +423,8 @@ def backend_fields_list(request):
                         field['title-'+id] = resource
                     result_resources.append(field)
                     
-            
-            return HttpResponse(json.dumps(result_resources))
+            result_resources_sorted = sorted(result_resources) 
+            return HttpResponse(json.dumps(result_resources_sorted))
     
     return HttpResponseBadRequest()    
 
