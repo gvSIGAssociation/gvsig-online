@@ -306,7 +306,7 @@ msgstr "Cerrar"
 #: templates/unique_symbol_add.html:133 templates/unique_symbol_update.html:136
 #: templates/unique_values_add.html:127 templates/unique_values_update.html:130
 msgid "Labelling configuration"
-msgstr "Configuración del etiquetado"
+msgstr "Configuración del simbolizador"
 
 #: templates/external_graphic_add.html:12 templates/symbol_add.html.py:11
 msgid "Create new symbol"
