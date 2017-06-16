@@ -321,6 +321,12 @@ msgstr "BoundingBox"
 msgid "GeographicBoundingBox"
 msgstr "BoundingBox geográfica"
 
+msgid "Zoom to layer"
+msgstr "Zoom a la capa"
+
+msgid "Project zoom"
+msgstr "Zoom al proyecto"
+
 #cleanMap.js
 msgid "Clean map"
 msgstr "Limpiar mapa"
