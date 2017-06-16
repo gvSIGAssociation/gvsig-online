@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-21 10:03+0100\n"
+"POT-Creation-Date: 2017-06-16 08:57+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -83,28 +83,28 @@ msgstr "Fecha"
 msgid "Actions"
 msgstr "Acciones"
 
-#: templates/browser/filemanager_list.html:50
+#: templates/browser/filemanager_list.html:52
 msgid "Delete directory"
 msgstr "Eliminar directorio"
 
-#: templates/browser/filemanager_list.html:53
+#: templates/browser/filemanager_list.html:55
 msgid "Export to database"
 msgstr "Exportar a base de datos"
 
-#: templates/browser/filemanager_list.html:56
+#: templates/browser/filemanager_list.html:58
 msgid "Delete file"
 msgstr "Eliminar archivo"
 
-#: templates/browser/filemanager_list.html:67
+#: templates/browser/filemanager_list.html:69
 msgid "Nothing to see here."
 msgstr "No hay archivos para mostrar"
 
-#: templates/browser/filemanager_list.html:76
+#: templates/browser/filemanager_list.html:78
 #: templates/filemanager_create_directory.html:13
 msgid "Create directory"
 msgstr "Crear directorio"
 
-#: templates/browser/filemanager_list.html:77
+#: templates/browser/filemanager_list.html:79
 #: templates/filemanager_upload.html:14
 msgid "Upload"
 msgstr "Subir"

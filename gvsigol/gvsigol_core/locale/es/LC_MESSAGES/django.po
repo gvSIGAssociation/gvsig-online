@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-01 11:34+0200\n"
+"POT-Creation-Date: 2017-06-16 08:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -41,27 +41,33 @@ msgid "We will work on fixing that right away. Meanwhile, you may"
 msgstr ""
 "Estamos trabajando en la resolución del problema. Mientras tanto, puede"
 
-#: templates/base.html:95 templates/base_compress.html.py:95
-#: templates/viewer.html:119 templates/viewer_compress.html.py:117
+#: templates/base.html:66 templates/base_compress.html.py:66
+#: templates/public_viewer.html:109 templates/public_viewer_compress.html:107
+#: templates/viewer.html.py:129 templates/viewer_compress.html:129
+msgid "manual gvsigonline"
+msgstr "Manual de gvsigonline"
+
+#: templates/base.html:96 templates/base_compress.html.py:96
+#: templates/viewer.html:119 templates/viewer_compress.html.py:119
 msgid "Sign out"
 msgstr "Cerrar sesión"
 
-#: templates/base.html:113 templates/base_compress.html.py:113
-#: templates/viewer.html:116 templates/viewer_compress.html.py:114
+#: templates/base.html:114 templates/base_compress.html.py:114
+#: templates/viewer.html:116 templates/viewer_compress.html.py:116
 msgid "Dashboard"
 msgstr "Panel de control"
 
-#: templates/base.html:119 templates/base_compress.html.py:119
+#: templates/base.html:120 templates/base_compress.html.py:120
 msgid "Home"
 msgstr "Inicio"
 
-#: templates/base.html:155 templates/base_compress.html.py:155
+#: templates/base.html:156 templates/base_compress.html.py:156
 #: templates/documentation.html:116 templates/ogc_services.html.py:84
 #: templates/select_public_project.html:77
 msgid "Version"
 msgstr "Versión"
 
-#: templates/base_compress.html:159 templates/ogc_services.html.py:88
+#: templates/base_compress.html:160 templates/ogc_services.html.py:88
 msgid "All rights reserved"
 msgstr "Todos los derechos reservados"
 
@@ -136,11 +142,11 @@ msgstr ""
 "Aprenda a administrar la información geográfica desde un dispositivo móvil o "
 "una tableta"
 
-#: templates/home.html:18 utils.py:415
+#: templates/home.html:18 utils.py:418
 msgid "Username"
 msgstr "Nombre de usuario"
 
-#: templates/home.html:20 utils.py:418
+#: templates/home.html:20 utils.py:421
 msgid "Email"
 msgstr "Correo electrónico"
 
@@ -164,7 +170,7 @@ msgstr "Ha iniciado sesión como usuario con permisos restringidos"
 msgid "Last login"
 msgstr "Último acceso"
 
-#: templates/home.html:32 utils.py:419 utils.py:431
+#: templates/home.html:32 utils.py:422 utils.py:434
 msgid "Password"
 msgstr "Contraseña"
 
@@ -180,7 +186,7 @@ msgstr "para actualizar su contraseña"
 msgid "Passwords doesn't match"
 msgstr "Las contraseñas no coinciden"
 
-#: templates/home.html:42 templates/home.html.py:43 utils.py:427
+#: templates/home.html:42 templates/home.html.py:43 utils.py:430
 msgid "New password"
 msgstr "Nueva contraseña"
 
@@ -198,11 +204,15 @@ msgid "Projects list"
 msgstr "Lista de proyectos"
 
 #: templates/home.html:69 templates/project_add.html.py:12
-#: templates/project_list.html:13 templates/select_public_project.html:51
+#: templates/project_list.html:13 templates/select_public_project.html.py:51
 msgid "Add project"
 msgstr "Añadir proyecto"
 
-#: templates/home.html:81 templates/select_public_project.html.py:63
+#: templates/home.html:71
+msgid "Buscar proyectos..."
+msgstr ""
+
+#: templates/home.html:82 templates/select_public_project.html.py:63
 msgid "Load project"
 msgstr "Cargar proyecto"
 
@@ -250,29 +260,41 @@ msgstr "Descripción del proyecto"
 msgid "Is public?"
 msgstr "¿Es público?"
 
-#: templates/project_add.html:58
+#: templates/project_add.html:51 templates/project_update.html.py:55
+msgid "Locate place..."
+msgstr ""
+
+#: templates/project_add.html:67
 msgid "Select image"
 msgstr "Seleccionar imagen"
 
-#: templates/project_add.html:58 templates/project_update.html.py:66
+#: templates/project_add.html:67 templates/project_update.html.py:74
 msgid "Supported formats"
 msgstr "Formatos soportados"
 
-#: templates/project_add.html:65 templates/project_update.html.py:74
+#: templates/project_add.html:74 templates/project_update.html.py:82
 msgid "Assign user groups"
 msgstr "Asignar grupos de usuarios"
 
-#: templates/project_add.html:79 templates/project_add.html.py:81
-#: templates/project_update.html:88 templates/project_update.html.py:90
+#: templates/project_add.html:74 templates/project_update.html.py:82
+msgid "Buscar grupo de usuarios..."
+msgstr ""
+
+#: templates/project_add.html:88 templates/project_add.html.py:90
+#: templates/project_update.html:96 templates/project_update.html.py:98
 msgid "Assign user group"
 msgstr "Asignar grupo de usuarios"
 
-#: templates/project_add.html:96 templates/project_update.html.py:105
+#: templates/project_add.html:106 templates/project_update.html.py:114
 msgid "Assign layer groups"
 msgstr "Asignar grupos de capas"
 
-#: templates/project_add.html:109 templates/project_update.html.py:119
-#: templates/project_update.html:121
+#: templates/project_add.html:106 templates/project_update.html.py:114
+msgid "Buscar grupo de capas..."
+msgstr ""
+
+#: templates/project_add.html:119 templates/project_update.html.py:128
+#: templates/project_update.html:130
 msgid "Assign layer group"
 msgstr "Asignar grupo de capas"
 
@@ -284,15 +306,15 @@ msgstr "Eliminar proyecto"
 msgid "The project will be removed, Do you want continue?"
 msgstr "El proyecto será eliminado, ¿Desea continuar?"
 
-#: templates/project_list.html:64 templates/public_viewer.html.py:191
-#: templates/public_viewer_compress.html:191 templates/viewer.html.py:217
-#: templates/viewer_compress.html:214
+#: templates/project_list.html:64 templates/public_viewer.html.py:197
+#: templates/public_viewer_compress.html:194 templates/viewer.html.py:219
+#: templates/viewer_compress.html:218
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: templates/project_list.html:65 templates/public_viewer.html.py:192
-#: templates/public_viewer_compress.html:192 templates/viewer.html.py:218
-#: templates/viewer_compress.html:215
+#: templates/project_list.html:65 templates/public_viewer.html.py:198
+#: templates/public_viewer_compress.html:195 templates/viewer.html.py:220
+#: templates/viewer_compress.html:219
 msgid "Accept"
 msgstr "Aceptar"
 
@@ -366,39 +388,39 @@ msgstr "Orden del TOC"
 msgid "Update project"
 msgstr "Actualizar proyecto"
 
-#: templates/project_update.html:66
+#: templates/project_update.html:74
 msgid "Change image?"
 msgstr "¿Cambiar imagen?"
 
-#: templates/public_viewer.html:84 templates/public_viewer_compress.html:84
+#: templates/public_viewer.html:88 templates/public_viewer_compress.html:86
 msgid "Anonymous"
 msgstr "Anónimo"
 
-#: templates/public_viewer.html:90 templates/public_viewer_compress.html:90
+#: templates/public_viewer.html:94 templates/public_viewer_compress.html:92
 msgid "Anonymous user"
 msgstr "Usuario anónimo"
 
-#: templates/public_viewer.html:95 templates/public_viewer_compress.html:95
+#: templates/public_viewer.html:99 templates/public_viewer_compress.html:97
 msgid "Exit"
 msgstr "Salir"
 
-#: templates/public_viewer.html:126 templates/public_viewer_compress.html:126
-#: templates/viewer.html.py:152 templates/viewer_compress.html:149
+#: templates/public_viewer.html:132 templates/public_viewer_compress.html:129
+#: templates/viewer.html.py:152 templates/viewer_compress.html:151
 msgid "Layer tree"
 msgstr "Árbol de capas"
 
-#: templates/public_viewer.html:127 templates/public_viewer_compress.html:127
-#: templates/viewer.html.py:153 templates/viewer_compress.html:150
+#: templates/public_viewer.html:133 templates/public_viewer_compress.html:130
+#: templates/viewer.html.py:153 templates/viewer_compress.html:152
 msgid "Legend"
 msgstr "Leyenda"
 
-#: templates/public_viewer.html:128 templates/public_viewer_compress.html:128
-#: templates/viewer.html.py:154 templates/viewer_compress.html:151
+#: templates/public_viewer.html:134 templates/public_viewer_compress.html:131
+#: templates/viewer.html.py:154 templates/viewer_compress.html:153
 msgid "Details"
 msgstr "Detalles"
 
-#: templates/public_viewer.html:333 templates/public_viewer_compress.html:317
-#: templates/viewer.html.py:367 templates/viewer_compress.html:339
+#: templates/public_viewer.html:349 templates/public_viewer_compress.html:324
+#: templates/viewer.html.py:372 templates/viewer_compress.html:347
 msgid "Close"
 msgstr "Cerrar"
 
@@ -406,31 +428,31 @@ msgstr "Cerrar"
 msgid "Update TOC"
 msgstr "Actualizar TOC"
 
-#: utils.py:398
+#: utils.py:401
 msgid "New user account"
 msgstr "Nueva cuenta de usuario"
 
-#: utils.py:414
+#: utils.py:417
 msgid "Account data"
 msgstr "Datos de la cuenta"
 
-#: utils.py:416
+#: utils.py:419
 msgid "First name"
 msgstr "Nombre"
 
-#: utils.py:417
+#: utils.py:420
 msgid "Last name"
 msgstr "Apellidos"
 
-#: utils.py:429
+#: utils.py:432
 msgid "This is your new temporary password"
 msgstr "Esta es su contraseña temporal"
 
-#: views.py:171
+#: views.py:177
 msgid "You must enter an project name"
 msgstr "Debe introducir un nombre de proyecto"
 
-#: views.py:227 views.py:390
+#: views.py:233 views.py:401
 msgid "Project name already exists"
 msgstr "El nombre del proyecto ya existe"
 
