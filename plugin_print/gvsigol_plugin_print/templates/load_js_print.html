@@ -17,7 +17,7 @@
 		success : function(response) {
 			var printProvider = response;
 			
-			var button = '<li title="{% trans "Print" "%}"><a href="#" id="print" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-print"></i></a></li>';
+			var button = '<li title="'+gettext("Print")+'"><a href="#" id="print" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-print"></i></a></li>';
 			$('#toolbar-buttons').append(button);
 		
 			var tool = new print(printProvider, conf, map);
