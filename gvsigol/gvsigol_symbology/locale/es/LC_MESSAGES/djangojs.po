@@ -216,7 +216,7 @@ msgid "Halo opacity"
 msgstr "Opacidad de halo"
 
 msgid "Halo radius"
-msgstr "Rádio de halo"
+msgstr "Radio de halo"
 
 msgid "You must select a field"
 msgstr "Debe seleccionar un campo"
