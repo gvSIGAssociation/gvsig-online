@@ -40,6 +40,9 @@ msgstr "Rotación"
 msgid "Print"
 msgstr "Imprimir"
 
+msgid "Print map"
+msgstr "Imprimir mapa"
+
 msgid "Cancel"
 msgstr "Cancelar"
 
