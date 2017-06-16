@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-16 08:41+0200\n"
+"POT-Creation-Date: 2017-06-16 09:32+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -45,7 +45,7 @@ msgstr ""
 #: templates/public_viewer.html:109 templates/public_viewer_compress.html:107
 #: templates/viewer.html.py:129 templates/viewer_compress.html:129
 msgid "manual gvsigonline"
-msgstr "Manual de gvsigonline"
+msgstr "Manual gvsigOnline"
 
 #: templates/base.html:96 templates/base_compress.html.py:96
 #: templates/viewer.html:119 templates/viewer_compress.html.py:119
@@ -403,6 +403,11 @@ msgstr "Usuario anónimo"
 #: templates/public_viewer.html:99 templates/public_viewer_compress.html:97
 msgid "Exit"
 msgstr "Salir"
+
+#: templates/public_viewer.html:110 templates/public_viewer_compress.html:108
+#: templates/viewer.html.py:130 templates/viewer_compress.html:130
+msgid "exportar pdf"
+msgstr "Exportar a PDF"
 
 #: templates/public_viewer.html:132 templates/public_viewer_compress.html:129
 #: templates/viewer.html.py:152 templates/viewer_compress.html:151
