@@ -223,3 +223,21 @@ msgstr "Debe seleccionar un campo"
 
 msgid "The number of intervals must be greater than 0"
 msgstr "El número de intervalos debe ser mayor que 0"
+
+msgid "Has label"
+msgstr "Activar etiquetado"
+
+msgid "Size"
+msgstr "Tamaño"
+
+msgid "Minimum scale denominator"
+msgstr "Denominador mínimo de la escala"
+
+msgid "Maximum scale denominator"
+msgstr "Denominador máximo de la escala"
+
+msgid "filter"
+msgstr "Filtro"
+
+msgid "Define custom scale denominators?"
+msgstr "Visible por escala"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-14 13:06+0200\n"
+"POT-Creation-Date: 2017-06-16 09:00+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -71,6 +71,10 @@ msgstr "Estil per defecte per: "
 msgid "Invalid name: '{value}'. Name should not contain any special characters"
 msgstr ""
 "Nom no vàlid: '{value}'. El nom no ha de contenir cap caràcter especial"
+
+#: templates/base_symbology.html:69 templates/base_symbology_compress.html:69
+msgid "help"
+msgstr ""
 
 #: templates/base_symbology.html:99 templates/base_symbology_compress.html:99
 msgid "Sign out"
