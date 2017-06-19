@@ -58,6 +58,7 @@ import json
 import ast
 import re
 import os
+import unicodedata
 logger = logging.getLogger(__name__)
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
@@ -1019,6 +1020,10 @@ def layergroup_delete(request, lgid):
         }     
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
+
+def prepare_string(s):
+    return ''.join((c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')).replace (" ", "_").replace ("-", "_").lower()
+
 @require_http_methods(["GET", "POST", "HEAD"])
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -1046,6 +1051,7 @@ def layer_create(request):
         form = CreateFeatureTypeForm(request.POST, user=request.user)
         if form.is_valid():
             try:
+                form.cleaned_data['name'] = prepare_string(form.cleaned_data['name'])
                 mapservice_backend.createTable(form.cleaned_data)
 
                 # first create the resource on the backend
