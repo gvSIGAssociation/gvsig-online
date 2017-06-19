@@ -330,3 +330,6 @@ msgstr "Zoom al proyecto"
 #cleanMap.js
 msgid "Clean map"
 msgstr "Limpiar mapa"
+
+msgid "More element info"
+msgstr "Más información del elemento"
