@@ -307,8 +307,8 @@ getFeatureInfo.prototype.showInfo = function(features){
 			var selectedLayer = features[i].layer;
 			
 			var feature_id = "<span style=\"font-weight:normal; margin-right:5px;\">"+features[i].layer.title +"."+features[i].feature.feature + "</span>";
-			feature_id += 		'<div class="feature-buttons"><span class="label feature-info-button feature-info-label-info "><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
-			feature_id += 		'<span class="label feature-info-button feature-info-label-resource"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><br />';
+			feature_id += 		'<div class="feature-buttons"><span class="label feature-info-button feature-info-label-info " title="'+gettext('More element info')+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
+			feature_id += 		'<span class="label feature-info-button feature-info-label-resource" title="'+gettext('Multimedia resources')+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><br />';
 			feature_id += "<br />";
 			
 			var language = $("#select-language").val();
