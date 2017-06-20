@@ -891,9 +891,19 @@ editionBar.prototype.createFeatureForm = function(feature) {
 						featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd">';
 						
 					} else if (this.isStringType(this.featureType[i].type)) {
-						if (this.featureType[i].name.startsWith("enm_")) {
-							var enumeration = this.getEnumeration(this.featureType[i].name);
-							featureProperties += 	'<select id="' + this.featureType[i].name + '" class="form-control">';
+						if (this.featureType[i].name.startsWith("enm_") || this.featureType[i].name.startsWith("enmm_")) {
+							var name = this.featureType[i].name;
+							if(this.featureType[i].name.startsWith("enmm_")){
+								var has_multiple = this.featureType[i].name.startsWith("enmm_");
+								name = name.replace("enmm_", "enm_");
+							}
+							var enumeration = this.getEnumeration(name);
+							if(!has_multiple){
+								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control">';
+							}else{
+								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control multipleSelect" multiple>';
+							}
+							
 							for (var j=0; j<enumeration.items.length; j++) {
 								featureProperties += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
 							}
@@ -1029,6 +1039,8 @@ editionBar.prototype.createFeatureForm = function(feature) {
 			self.lastAddedFeature = null;
 			self.showLayersTab();
 		});
+		
+		$('.multipleSelect').fastselect();
 	}
 
 };
@@ -1134,9 +1146,18 @@ editionBar.prototype.editFeatureForm = function(feature) {
 						featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + value + '">';
 						
 					} else if (this.isStringType(this.featureType[i].type)) {				
-						if (this.featureType[i].name.startsWith("enm_")) {
-							var enumeration = this.getEnumeration(this.featureType[i].name);
-							featureProperties += 	'<select id="' + this.featureType[i].name + '" class="form-control">';
+						if (this.featureType[i].name.startsWith("enm_") || this.featureType[i].name.startsWith("enmm_")) {
+							var name = this.featureType[i].name;
+							if(this.featureType[i].name.startsWith("enmm_")){
+								var has_multiple = this.featureType[i].name.startsWith("enmm_");
+								name = name.replace("enmm_", "enm_");
+							}
+							var enumeration = this.getEnumeration(name);
+							if(!has_multiple){
+								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control">';
+							}else{
+								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control multipleSelect" multiple>';
+							}
 							for (var j=0; j<enumeration.items.length; j++) {
 								if (enumeration.items[j].name == value) {
 									featureProperties += '<option selected value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
@@ -1288,6 +1309,8 @@ editionBar.prototype.editFeatureForm = function(feature) {
 			self.selectInteraction.getFeatures().clear();
 			self.showLayersTab();
 		});
+		
+		$('.multipleSelect').fastselect();
 	}
 
 };
