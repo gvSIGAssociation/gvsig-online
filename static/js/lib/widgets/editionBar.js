@@ -1173,7 +1173,7 @@ editionBar.prototype.editFeatureForm = function(feature) {
 							value = ";" + value + ";";
 							for (var j=0; j<enumeration.items.length; j++) {
 								var enum_item_name = ";"+enumeration.items[j].name+";";
-								if (enum_item_name.indexOf(value) !== -1) {
+								if (value.indexOf(enum_item_name) !== -1) {
 									featureProperties += '<option selected value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
 								} else {
 									featureProperties += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
