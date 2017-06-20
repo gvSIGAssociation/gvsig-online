@@ -992,7 +992,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 									}
 									value = value + option.value;
 								}
-								properties[field.id] = field.value;	
+								properties[field.id] = value;	
 							}else{
 								if (field.value != null) {
 									properties[field.id] = field.value;	
@@ -1274,7 +1274,7 @@ editionBar.prototype.editFeatureForm = function(feature) {
 									}
 									value = value + option.value;
 								}
-								properties[field.id] = field.value;	
+								properties[field.id] = value;	
 							}else{
 								if (field.value != null) {
 									properties[field.id] = field.value;	
