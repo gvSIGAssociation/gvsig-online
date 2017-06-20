@@ -1104,38 +1104,47 @@ def layer_create(request):
                 data = {
                     'form': form,
                     'message': msg,
-                    'layer_type': layer_type
+                    'layer_type': layer_type,
+                    'enumerations': get_currentuser_enumerations(request)
+
                 }
                 return render(request, "layer_create.html", data)
                 
         else:
+            
+            
             data = {
                 'form': form,
-                'layer_type': layer_type
+                'layer_type': layer_type,
+                'enumerations': get_currentuser_enumerations(request)
             }
             return render(request, "layer_create.html", data)
         
     else:
         form = CreateFeatureTypeForm(user=request.user)
-        enumeration_list = None
-        if request.user.is_superuser:
-            enumeration_list = Enumeration.objects.all()
-        else:
-            enumeration_list = Enumeration.objects.filter(created_by__exact=request.user.username)
-            users = User.objects.all()
-            for user in users:
-                if user.is_superuser:
-                    enumeration_list2 = Enumeration.objects.filter(created_by__exact=user.username)
-                    enumeration_list = enumeration_list | enumeration_list2
+        
         data = {
             'form': form,
             'layer_type': layer_type,
-            'enumerations': enumeration_list
+            'enumerations': get_currentuser_enumerations(request)
         }
         return render(request, "layer_create.html", data)
         
     return HttpResponseBadRequest()
 
+
+def get_currentuser_enumerations(request):
+    enumeration_list = None
+    if request.user.is_superuser:
+        enumeration_list = Enumeration.objects.all()
+    else:
+        enumeration_list = Enumeration.objects.filter(created_by__exact=request.user.username)
+        users = User.objects.all()
+        for user in users:
+            if user.is_superuser:
+                enumeration_list2 = Enumeration.objects.filter(created_by__exact=user.username)
+                enumeration_list = enumeration_list | enumeration_list2
+    return enumeration_list
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
