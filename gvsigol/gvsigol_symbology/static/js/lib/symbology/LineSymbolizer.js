@@ -36,7 +36,7 @@ var LineSymbolizer = function(rule, options, utils) {
 		$.extend(this, options);
 	}
 	
-	if(rule.symbolizers){
+	if(rule && rule.symbolizers){
 		this.order = rule.symbolizers.length;
 	}
 };
