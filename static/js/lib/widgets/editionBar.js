@@ -901,7 +901,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 							if(!has_multiple){
 								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control">';
 							}else{
-								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control multipleSelect" multiple>';
+								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control multipleSelect" multiple="multiple">';
 							}
 							
 							for (var j=0; j<enumeration.items.length; j++) {
@@ -1156,10 +1156,11 @@ editionBar.prototype.editFeatureForm = function(feature) {
 							if(!has_multiple){
 								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control">';
 							}else{
-								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control multipleSelect" multiple>';
+								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control multipleSelect" multiple="multiple">';
 							}
+							value = ";" + value + ";";
 							for (var j=0; j<enumeration.items.length; j++) {
-								if (enumeration.items[j].name == value) {
+								if (enumeration.items[j].name.indexOf(value) !== -1) {
 									featureProperties += '<option selected value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
 								} else {
 									featureProperties += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
