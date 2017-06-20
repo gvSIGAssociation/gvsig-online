@@ -88,7 +88,7 @@
 			
 			ui += '<div id="item-' + itemCount + '" class="row" style="margin-bottom: 15px;">';
 			ui += 	'<div class="col-md-10">';
-			ui += 		'<input placeholder="' + gettext('Insert item name') + '" name="item-content-' + itemCount + '" id="item-content-' + itemCount + '" type="text" class="form-control">';								
+			ui += 		'<input pattern="^[^;]+$" title="'+gettext("Enumeration cannot contain point-colon")+'" placeholder="' + gettext('Insert item name') + '" name="item-content-' + itemCount + '" id="item-content-' + itemCount + '" type="text" class="form-control">';								
 			ui += 	'</div>';
 			ui += 	'<div class="col-md-2">';
 			ui += 		'<button type="button" data-itemid="' + itemCount + '" id="delete-item-' + itemCount + '" class="delete-item btn btn-danger btn-sm"><i class="fa fa-times margin-r-5"></i> ' + gettext('Delete') + '</button>';								
@@ -100,10 +100,11 @@
 			$(".delete-item").on('click', function(e){
 				$('#item-' + this.dataset.itemid).remove();
 			});
-			
-			itemCount++;
+						
+			itemCount++;		
 			
 		});
+		
 			
 	});
 </script>
