@@ -58,6 +58,7 @@ import json
 import ast
 import re
 import os
+import unicodedata
 logger = logging.getLogger(__name__)
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
@@ -1019,6 +1020,10 @@ def layergroup_delete(request, lgid):
         }     
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
+
+def prepare_string(s):
+    return ''.join((c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')).replace (" ", "_").replace ("-", "_").lower()
+
 @require_http_methods(["GET", "POST", "HEAD"])
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -1046,6 +1051,7 @@ def layer_create(request):
         form = CreateFeatureTypeForm(request.POST, user=request.user)
         if form.is_valid():
             try:
+                form.cleaned_data['name'] = prepare_string(form.cleaned_data['name'])
                 mapservice_backend.createTable(form.cleaned_data)
 
                 # first create the resource on the backend
@@ -1098,38 +1104,47 @@ def layer_create(request):
                 data = {
                     'form': form,
                     'message': msg,
-                    'layer_type': layer_type
+                    'layer_type': layer_type,
+                    'enumerations': get_currentuser_enumerations(request)
+
                 }
                 return render(request, "layer_create.html", data)
                 
         else:
+            
+            
             data = {
                 'form': form,
-                'layer_type': layer_type
+                'layer_type': layer_type,
+                'enumerations': get_currentuser_enumerations(request)
             }
             return render(request, "layer_create.html", data)
         
     else:
         form = CreateFeatureTypeForm(user=request.user)
-        enumeration_list = None
-        if request.user.is_superuser:
-            enumeration_list = Enumeration.objects.all()
-        else:
-            enumeration_list = Enumeration.objects.filter(created_by__exact=request.user.username)
-            users = User.objects.all()
-            for user in users:
-                if user.is_superuser:
-                    enumeration_list2 = Enumeration.objects.filter(created_by__exact=user.username)
-                    enumeration_list = enumeration_list | enumeration_list2
+        
         data = {
             'form': form,
             'layer_type': layer_type,
-            'enumerations': enumeration_list
+            'enumerations': get_currentuser_enumerations(request)
         }
         return render(request, "layer_create.html", data)
         
     return HttpResponseBadRequest()
 
+
+def get_currentuser_enumerations(request):
+    enumeration_list = None
+    if request.user.is_superuser:
+        enumeration_list = Enumeration.objects.all()
+    else:
+        enumeration_list = Enumeration.objects.filter(created_by__exact=request.user.username)
+        users = User.objects.all()
+        for user in users:
+            if user.is_superuser:
+                enumeration_list2 = Enumeration.objects.filter(created_by__exact=user.username)
+                enumeration_list = enumeration_list | enumeration_list2
+    return enumeration_list
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required

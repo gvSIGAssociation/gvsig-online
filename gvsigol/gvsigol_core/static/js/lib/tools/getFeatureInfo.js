@@ -307,8 +307,8 @@ getFeatureInfo.prototype.showInfo = function(features){
 			var selectedLayer = features[i].layer;
 			
 			var feature_id = "<span style=\"font-weight:normal; margin-right:5px;\">"+features[i].layer.title +"."+features[i].feature.feature + "</span>";
-			feature_id += 		'<div class="feature-buttons"><span class="label feature-info-button feature-info-label-info "><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
-			feature_id += 		'<span class="label feature-info-button feature-info-label-resource"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><br />';
+			feature_id += 		'<div class="feature-buttons"><span class="label feature-info-button feature-info-label-info " title="'+gettext('More element info')+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
+			feature_id += 		'<span class="label feature-info-button feature-info-label-resource" title="'+gettext('Multimedia resources')+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><br />';
 			feature_id += "<br />";
 			
 			var language = $("#select-language").val();
@@ -317,26 +317,39 @@ getFeatureInfo.prototype.showInfo = function(features){
 					var fields_trans = selectedLayer.conf;
 					if(fields_trans["fields"]){
 						var fields = fields_trans["fields"];
-						for(var ix=0; ix<fields.length; ix++){
-							
-								if(fields[ix]["infovisible"] != null){
-									item_shown = fields[ix]["infovisible"];
-								}
-								var key = fields[ix]["name"];
-								var key_trans = fields[ix]["title-"+language];
-								if(item_shown && key && features[i].feature.properties && features[i].feature.properties[key]){
-									if(is_first_configured){
-										feature_id = "<span style=\"font-weight:normal; margin-right:5px;\">"+selectedLayer.title + "</span>";
-										feature_id += 		'<div class="feature-buttons"><span class="label feature-info-button feature-info-label-info "><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
-										feature_id += 		'<span class="label feature-info-button feature-info-label-resource"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><br />';
+						var feature_id2 = "<span style=\"font-weight:normal; margin-right:5px;\">"+selectedLayer.title + "</span>";
+						feature_id2 += 		'<div class="feature-buttons"><span class="label feature-info-button feature-info-label-info "><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
+						feature_id2 += 		'<span class="label feature-info-button feature-info-label-resource"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><div style=\"clear:both\"></div>';
 
-										is_first_configured = false;
-									}
-									feature_id += "<span>" + features[i].feature.properties[key] + "</span><br />";
-									
+						var feature_added = 0;
+						
+						var feature_fields = "";
+						var feature_fields2 = "";
+						for(var ix=0; ix<fields.length; ix++){
+							if(fields[ix]["infovisible"] != null){
+								item_shown = fields[ix]["infovisible"];
+								if(item_shown){
+									feature_added ++;
 								}
-							
+							}
+							var key = fields[ix]["name"];
+							var key_trans = fields[ix]["title-"+language];
+							if(item_shown && key && features[i].feature.properties && features[i].feature.properties[key]){
+								feature_fields += "<span>" + features[i].feature.properties[key] + "</span><br />";
+								feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\">"+ features[i].feature.properties[key] + "</span><br />";
+							}
 						}
+						
+						if(feature_added > 0){
+							if(feature_added > 1){
+								feature_id2 += feature_fields2;
+							}
+							else{
+								feature_id2 += feature_fields;
+							}
+							feature_id = feature_id2;
+						}
+						
 					}
 				}
 			}	
