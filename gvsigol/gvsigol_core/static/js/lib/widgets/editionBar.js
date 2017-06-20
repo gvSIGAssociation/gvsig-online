@@ -983,8 +983,20 @@ editionBar.prototype.createFeatureForm = function(feature) {
 							properties[field.id] = field.checked;
 						}
 						else if (self.isStringType(self.featureType[i].type)) {
-							if (field.value != null) {
+							if(self.featureType[i].name.startsWith("enmm_")){
+								value = "";
+								for(var ix=0; ix<field.selectedOptions; ix++){
+									var option = field.selectedOptions[ix];
+									if(ix != 0){
+										value = value + ";";
+									}
+									value = value + option.value;
+								}
 								properties[field.id] = field.value;	
+							}else{
+								if (field.value != null) {
+									properties[field.id] = field.value;	
+								}
 							}
 						} else if (field && field.value != '' && field.value != null && field.value != 'null') {
 								properties[field.id] = field.value;
@@ -1253,8 +1265,20 @@ editionBar.prototype.editFeatureForm = function(feature) {
 							properties[field.id] = field.checked;
 						}
 						else if (self.isStringType(self.featureType[i].type)) {
-							if (field.value != null) {
+							if(self.featureType[i].name.startsWith("enmm_")){
+								value = "";
+								for(var ix=0; ix<field.selectedOptions; ix++){
+									var option = field.selectedOptions[ix];
+									if(ix != 0){
+										value = value + ";";
+									}
+									value = value + option.value;
+								}
 								properties[field.id] = field.value;	
+							}else{
+								if (field.value != null) {
+									properties[field.id] = field.value;	
+								}
 							}
 						} else if (field && field.value != '' && field.value != null && field.value != 'null') {
 								properties[field.id] = field.value;
