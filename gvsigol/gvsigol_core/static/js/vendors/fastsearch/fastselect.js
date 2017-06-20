@@ -708,7 +708,7 @@
         elementClass: 'fstElement',
         singleModeClass: 'fstSingleMode',
         noneSelectedClass: 'fstNoneSelected',
-        multipleModeClass: 'fstMultipleMode',
+        multipleModeClass: 'fstMultipleMode form-control',
         queryInputClass: 'fstQueryInput',
         queryInputExpandedClass: 'fstQueryInputExpanded',
         fakeInputClass: 'fstFakeInput',
