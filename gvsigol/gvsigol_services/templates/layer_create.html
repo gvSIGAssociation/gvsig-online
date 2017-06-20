@@ -196,6 +196,11 @@
 		key: 'enumeration',
 		value: 'Enumeration'
 	});
+	
+	fieldTypes.push({
+		key: 'multiple_enumeration',
+		value: 'Multiple enumeration '
+	});
 	"{% endif %}"
 	
 	function addField(field) {
@@ -318,7 +323,20 @@
 				ui += 	'</select>';
 				ui += '</div>';
 				
-			} else {
+			} else if ( field.type == 'multiple_enumeration') {
+					ui += '<div class="col-md-12 form-group">';
+					ui += 	'<label>' + gettext('Select multiple enumeration') + '</label>';
+					ui += 	'<select id="field-default-value-'+id+'" class="form-control">';
+							'{% for enum in enumerations %}'
+								if ( '{{enum.name}}' == field.defaultValue) {
+									ui += '<option selected value="{{enum.name}}">{{enum.title}}</option>';
+								} else {
+									ui += '<option value="{{enum.name}}">{{enum.title}}</option>';
+								}
+							'{% endfor%}'
+					ui += 	'</select>';
+					ui += '</div>';
+			} else{
 				ui += '<div class="row">';
 				ui += 	'<div class="col-md-12 form-group">';
 				ui += 		'<label>' + gettext('Field name') + '</label>';
@@ -355,6 +373,16 @@
 			if ( $('#field-db-type').val() == 'enumeration') {
 				dv += '<div class="col-md-12 form-group">';
 				dv += 	'<label>' + gettext('Select enumeration') + '</label>';
+				dv += 	'<select id="field-name-'+id+'" class="form-control">';
+						'{% for enum in enumerations %}'
+				dv += 	'<option value="{{enum.name}}">{{enum.title}}</option>';
+						'{% endfor%}'
+				dv += 	'</select>';
+				dv += '</div>';
+				
+			} else if ( $('#field-db-type').val() == 'multiple_enumeration') {
+				dv += '<div class="col-md-12 form-group">';
+				dv += 	'<label>' + gettext('Select multiple enumeration') + '</label>';
 				dv += 	'<select id="field-name-'+id+'" class="form-control">';
 						'{% for enum in enumerations %}'
 				dv += 	'<option value="{{enum.name}}">{{enum.title}}</option>';

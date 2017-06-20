@@ -222,6 +222,10 @@ class Introspect:
             elif field.get('type') == 'enumeration':
                 query += field.get('name').lower() + " character varying,"
             
+            elif field.get('type') == 'multiple_enumeration':
+                name = field.get('name').lower().replace('enm_', 'enmm_')
+                query += name + " character varying,"
+            
         query += "    CONSTRAINT " + table_name + "_pkey PRIMARY KEY (gid)"
         query += ");"
         
