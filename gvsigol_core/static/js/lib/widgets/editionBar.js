@@ -985,7 +985,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 						else if (self.isStringType(self.featureType[i].type)) {
 							if(self.featureType[i].name.startsWith("enmm_")){
 								value = "";
-								for(var ix=0; ix<field.selectedOptions; ix++){
+								for(var ix=0; ix<field.selectedOptions.length; ix++){
 									var option = field.selectedOptions[ix];
 									if(ix != 0){
 										value = value + ";";
@@ -1267,7 +1267,7 @@ editionBar.prototype.editFeatureForm = function(feature) {
 						else if (self.isStringType(self.featureType[i].type)) {
 							if(self.featureType[i].name.startsWith("enmm_")){
 								value = "";
-								for(var ix=0; ix<field.selectedOptions; ix++){
+								for(var ix=0; ix<field.selectedOptions.length; ix++){
 									var option = field.selectedOptions[ix];
 									if(ix != 0){
 										value = value + ";";
