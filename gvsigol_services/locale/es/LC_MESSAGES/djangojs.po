@@ -37,3 +37,6 @@ msgstr "Editar campo"
 
 msgid "Invalid name: Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr "Nombre no válido: Los identificadores deben empezar con una letra o guión bajo (_). Los siguientes caracteres pueden ser letras, guión bajo o números"
+
+msgid "Enumeration cannot contain point-colon"
+msgstr "los valores no pueden contener valores (;)"

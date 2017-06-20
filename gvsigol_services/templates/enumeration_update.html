@@ -62,7 +62,7 @@
 											{% with counter=forloop.counter %} 
 											<div id="item-{{counter}}" class="row" style="margin-bottom: 15px;">
 												<div class="col-md-10">
-													<input name="item-content-{{counter}}" id="item-content-{{counter}}" type="text" class="form-control" value="{{item.name}}">								
+													<input pattern="^[^;]+$" title="{% trans "Enumeration cannot contain point-colon" %}" name="item-content-{{counter}}" id="item-content-{{counter}}" type="text" class="form-control" value="{{item.name}}">								
 												</div>
 												<div class="col-md-2">
 													<button type="button" data-itemid="{{counter}}" id="delete-item-{{counter}}" class="delete-item btn btn-danger btn-sm"><i class="fa fa-times margin-r-5"></i> {% trans "Delete" %}</button>							
@@ -104,7 +104,7 @@ $(document).ready(function() {
 		
 		ui += '<div id="item-' + itemCount + '" class="row" style="margin-bottom: 15px;">';
 		ui += 	'<div class="col-md-10">';
-		ui += 		'<input placeholder="' + gettext('Insert item name') + '" name="item-content-' + itemCount + '" id="item-content-' + itemCount + '" type="text" class="form-control">';								
+		ui += 		'<input  pattern="^[^;]+$" title="'+gettext("Enumeration cannot contain point-colon")+'" placeholder="' + gettext('Insert item name') + '" name="item-content-' + itemCount + '" id="item-content-' + itemCount + '" type="text" class="form-control">';								
 		ui += 	'</div>';
 		ui += 	'<div class="col-md-2">';
 		ui += 		'<button type="button" data-itemid="' + itemCount + '" id="delete-item-' + itemCount + '" class="delete-item btn btn-danger btn-sm"><i class="fa fa-times margin-r-5"></i> ' + gettext('Delete') + '</button>';								
