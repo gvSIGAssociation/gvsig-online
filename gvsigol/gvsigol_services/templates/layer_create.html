@@ -452,14 +452,31 @@
 	
 	$(document).ready(function() {
 		// translate default layer group
+		var opts = $("#id_layer_group > option");
+		for(var i=0; i<opts.length; i++){
+			if(opts[i].text =="__default__") {
+				opts[i].text ='{% trans "Default" %}';
+			}
+		}
+		
+		$('#id_layer_group').select2();
+		
+		
 		var lgs = $("#id_layer_group");
-		var lg_options = $("#id_layer_group option");
+		var lg_options = $(".select2-results__option");
 		for (var i=0; i<lg_options.length; i++) {
 			text = $(lg_options[i]).text();
 			if (text=="__default__") {
-				$(lg_options[i]).html('{% trans "Default" %}');
+				$(lg_options[i]).text('{% trans "Default" %}');
 			}
 		}
+		
+		$("#select2-id_layer_group-container").on('change',function() {
+			var text = $(this).text();
+			if (text=="__default__") {
+				$(this).text('{% trans "Default" %}');
+			}
+		});
 		
 		$("#add-field-button").on('click', function(e){
 			createModalContent(null, 'create');

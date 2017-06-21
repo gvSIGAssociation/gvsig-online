@@ -125,7 +125,7 @@ $(document).ready(function() {
 				var externalGraphic = json_symbolizers[0].fields;
 				symbol += '<li>';
 				symbol += 	'<img style="height: ' + externalGraphic.size + 'px; width: auto;" src="' + externalGraphic.online_resource + '" class="preview-eg"></img>';
-				symbol += 	'<a class="users-list-name" href="/gvsigonline/symbology/symbol_update/{{rule.id}}/">{{rule.name}}</a>';
+				symbol += 	'<a class="users-list-name" href="/gvsigonline/symbology/symbol_update/{{rule.id}}/">{{rule.title}}</a>';
 				symbol += '</li>';
 				$(".users-list").append(symbol);
 				var r = new Rule("{{rule.id}}", "{{rule.name}}", "{{rule.title}}", rule_opts, symbologyUtils);

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-16 09:00+0200\n"
+"POT-Creation-Date: 2017-06-20 14:08+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -45,7 +45,7 @@ msgid "Error publishing the layer. Backend error: {msg}"
 msgstr "Error publicando la capa. Error: {msg}"
 
 #: backend_mapservice.py:493 backend_mapservice.py:501
-#: backend_mapservice.py:512 views.py:490 views.py:1091
+#: backend_mapservice.py:512 views.py:494 views.py:1100
 msgid "Error: layer could not be published"
 msgstr "Error: la capa no puede ser publicada"
 
@@ -143,7 +143,7 @@ msgstr "Tipo de campo no soportado: {0}"
 
 #: backend_mapservice.py:1109
 #: templates/geoserver/create_layer_feature_type.html:299
-#: templates/layer_create.html:446
+#: templates/layer_create.html:474
 msgid "At least one field must be defined"
 msgstr "Debe definir por lo menos un campo"
 
@@ -635,6 +635,10 @@ msgstr "La enumeración será eliminada, ¿Desea continuar?"
 msgid "Update enumeration"
 msgstr "Actualizar enumeración"
 
+#: templates/enumeration_update.html:65
+msgid "Enumeration cannot contain point-colon"
+msgstr "los valores no pueden contener valores (;)"
+
 #: templates/enumeration_update.html:68
 msgid "Delete"
 msgstr "Eliminar"
@@ -772,7 +776,7 @@ msgstr "Nombre de campo inválido: \\"
 #: templates/geoserver/layer_upload_postgis.html:150
 #: templates/geoserver/layer_upload_raster.html:134
 #: templates/geoserver/layer_upload_vector.html:144
-#: templates/layer_add.html:194 templates/layer_create.html.py:432
+#: templates/layer_add.html:194 templates/layer_create.html.py:460
 #: templates/layer_update.html:133 templates/layergroup_list.html.py:35
 msgid "Default"
 msgstr "Por defecto"
@@ -1096,7 +1100,7 @@ msgstr "Añadir espacio de trabajo"
 msgid "Project description"
 msgstr "Descripción"
 
-#: views.py:83
+#: views.py:84
 #, python-brace-format
 msgid ""
 "Invalid workspace name: '{value}'. Identifiers must begin with a letter or "
@@ -1107,11 +1111,11 @@ msgstr ""
 "comenzar con una letra o un guion bajo (_). Los siguientes caracteres pueden "
 "ser letras, guiones o números"
 
-#: views.py:107
+#: views.py:108
 msgid "Error: workspace could not be created"
 msgstr "Error: el workspace no puede ser creado"
 
-#: views.py:215
+#: views.py:216
 #, python-brace-format
 msgid ""
 "Invalid datastore name: '{value}'. Identifiers must begin with a letter or "
@@ -1122,19 +1126,19 @@ msgstr ""
 "con una letra o un guion bajo (_). Los siguientes caracteres pueden ser "
 "letras, guiones o números"
 
-#: views.py:237
+#: views.py:238
 msgid "Error: Data store could not be created"
 msgstr "Error: El almacén de datos no puede ser creado"
 
-#: views.py:251
+#: views.py:252
 msgid "Datastore not found"
 msgstr "Almacén de datos no encontrado"
 
-#: views.py:269
+#: views.py:270
 msgid "Error updating datastore"
 msgstr "Error actualizndo el almacén de datos"
 
-#: views.py:901 views.py:972
+#: views.py:905 views.py:976
 #, python-brace-format
 msgid ""
 "Invalid layer group name: '{value}'. Identifiers must begin with a letter or "
@@ -1145,15 +1149,15 @@ msgstr ""
 "comenzar con una letra o un guión bajo (_). Los siguientes caracteres pueden "
 "ser letras, guiones, o números"
 
-#: views.py:920 views.py:985
+#: views.py:924 views.py:989
 msgid "Layer group name already exists"
 msgstr "El nombre del grupo de capas ya exsite"
 
-#: views.py:924
+#: views.py:928
 msgid "You must enter a name for layer group"
 msgstr "Debe introducir un nombre para el grupo de capas"
 
-#: views.py:1188
+#: views.py:1206
 msgid "You must enter a title for enumeration"
 msgstr "Debe introducir un título para la enumeración"
 
@@ -1188,8 +1192,8 @@ msgstr "Debe introducir un título para la enumeración"
 #~ msgid "Style for: "
 #~ msgstr "Estilo para: "
 
-msgid "Default symbol"
-msgstr "Símbolo por defecto"
+#~ msgid "Default symbol"
+#~ msgstr "Símbolo por defecto"
 
 #~ msgid "JPG, Tiff and PNG + world file"
 #~ msgstr "JPG, Tiff y PNG"

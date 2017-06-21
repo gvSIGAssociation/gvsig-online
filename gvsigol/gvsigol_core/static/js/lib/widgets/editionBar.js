@@ -901,7 +901,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 							if(!has_multiple){
 								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control">';
 							}else{
-								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control multipleSelect" multiple>';
+								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control multipleSelect" multiple="multiple">';
 							}
 							
 							for (var j=0; j<enumeration.items.length; j++) {
@@ -983,8 +983,20 @@ editionBar.prototype.createFeatureForm = function(feature) {
 							properties[field.id] = field.checked;
 						}
 						else if (self.isStringType(self.featureType[i].type)) {
-							if (field.value != null) {
-								properties[field.id] = field.value;	
+							if(self.featureType[i].name.startsWith("enmm_")){
+								value = "";
+								for(var ix=0; ix<field.selectedOptions.length; ix++){
+									var option = field.selectedOptions[ix];
+									if(ix != 0){
+										value = value + ";";
+									}
+									value = value + option.value;
+								}
+								properties[field.id] = value;	
+							}else{
+								if (field.value != null) {
+									properties[field.id] = field.value;	
+								}
 							}
 						} else if (field && field.value != '' && field.value != null && field.value != 'null') {
 								properties[field.id] = field.value;
@@ -1156,10 +1168,12 @@ editionBar.prototype.editFeatureForm = function(feature) {
 							if(!has_multiple){
 								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control">';
 							}else{
-								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control multipleSelect" multiple>';
+								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control multipleSelect" multiple="multiple">';
 							}
+							value = ";" + value + ";";
 							for (var j=0; j<enumeration.items.length; j++) {
-								if (enumeration.items[j].name == value) {
+								var enum_item_name = ";"+enumeration.items[j].name+";";
+								if (value.indexOf(enum_item_name) !== -1) {
 									featureProperties += '<option selected value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
 								} else {
 									featureProperties += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
@@ -1252,8 +1266,20 @@ editionBar.prototype.editFeatureForm = function(feature) {
 							properties[field.id] = field.checked;
 						}
 						else if (self.isStringType(self.featureType[i].type)) {
-							if (field.value != null) {
-								properties[field.id] = field.value;	
+							if(self.featureType[i].name.startsWith("enmm_")){
+								value = "";
+								for(var ix=0; ix<field.selectedOptions.length; ix++){
+									var option = field.selectedOptions[ix];
+									if(ix != 0){
+										value = value + ";";
+									}
+									value = value + option.value;
+								}
+								properties[field.id] = value;	
+							}else{
+								if (field.value != null) {
+									properties[field.id] = field.value;	
+								}
 							}
 						} else if (field && field.value != '' && field.value != null && field.value != 'null') {
 								properties[field.id] = field.value;
