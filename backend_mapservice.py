@@ -931,8 +931,9 @@ class Geoserver():
                 has_style = False
                 has_conf = False
                 conf = None
-                if f in table_definition:
-                    table_def = table_definition[f]
+                newf = self.prepare_string(f)
+                if newf in table_definition:
+                    table_def = table_definition[newf]
                     layer_name = self.prepare_string(table_def['name'].lower())
                     layer_title = table_def['title']
                     
