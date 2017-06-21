@@ -44,6 +44,7 @@ import random
 import string
 import json
 import re
+import unicodedata
 
 class UnsupportedRequestError(Exception):
     pass
@@ -871,6 +872,9 @@ class Geoserver():
 
         raise rest_geoserver.RequestError(-1, _("Error uploading the layer. Review the file format."))
     
+    def prepare_string(self, s):
+        return ''.join((c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')).replace (" ", "_").replace ("-", "_").lower()
+
     def __do_shpdir2postgis(self, username, datastore, application, dir_path, layergroup, table_definition, creation_mode, defaults):
         try: 
             # get & sanitize parameters
@@ -929,7 +933,7 @@ class Geoserver():
                 conf = None
                 if f in table_definition:
                     table_def = table_definition[f]
-                    layer_name = table_def['name'].lower()
+                    layer_name = self.prepare_string(table_def['name'].lower())
                     layer_title = table_def['title']
                     
                     if table_def.has_key('srs') and table_def['srs']:
@@ -944,11 +948,11 @@ class Geoserver():
                         has_style = True
                         
                     except Exception as e:
-                        original_style_name = layer_name
+                        original_style_name = self.prepare_string(layer_name)
                         print e
                     #layer_group = table_def['group'] + '_' + application.name.lower()
                 else:
-                    layer_name = os.path.splitext(os.path.basename(f))[0].lower()
+                    layer_name = self.prepare_string(os.path.splitext(os.path.basename(f))[0].lower())
                     layer_title = os.path.splitext(os.path.basename(f))[0]
                     original_style_name = layer_name
                 shp_abs = os.path.join(dir_path, f)
