@@ -150,12 +150,21 @@ class CreateFeatureTypeForm(forms.Form):
         super(CreateFeatureTypeForm, self).__init__(*args, **kwargs)
         if user.is_superuser:
             qs = Datastore.objects.all().order_by('name')
+            qs_lg = LayerGroup.objects.all().order_by('name')
+            
         else:
             qs = Datastore.objects.filter(type="v_PostGIS").filter(created_by__exact=user.username).order_by('name')
+            qs_lg = LayerGroup.objects.filter(created_by__exact=user.username).order_by('name')
             
         self.fields["datastore"] = forms.ModelChoiceField(
             label=_(u'Datastore'), required=True,
             queryset=qs,
+            widget=forms.Select(attrs={'class':'form-control js-example-basic-single'})
+        )
+        
+        self.fields["layer_group"] = forms.ModelChoiceField(
+            label=_(u'Layer group'), required=True,
+            queryset=qs_lg,
             widget=forms.Select(attrs={'class':'form-control js-example-basic-single'})
         )
 
