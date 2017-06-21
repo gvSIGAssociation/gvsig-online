@@ -797,6 +797,7 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 			        	"data": data
 			        }
 			    }],
+			    "logo_url": self.conf.project_image,
 		  	    "legend": {
 		  	    	"name": "",
 		            "classes": [legend]
