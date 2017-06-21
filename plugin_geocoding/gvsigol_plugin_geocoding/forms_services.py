@@ -35,13 +35,13 @@ class ProviderForm(forms.ModelForm):
     
     type = forms.ChoiceField(label=_(u'Type'), choices=settings.GEOCODING_SUPPORTED_TYPES, required=True, widget=forms.Select(attrs={'class' : 'form-control'}))
    
-    workspace = forms.ModelChoiceField(label=_(u'Workspace'), required=False, queryset=Workspace.objects.all(), widget=forms.Select(attrs={'class' : 'form-control'}))
-    datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control'}))
-    resource = forms.ModelChoiceField(label=_(u'Resource'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control'}))
+    workspace = forms.ModelChoiceField(label=_(u'Workspace'), required=False, queryset=Workspace.objects.all(), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    resource = forms.ModelChoiceField(label=_(u'Resource'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
 
-    id_field = forms.ModelChoiceField(label=_(u'Id'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control'}))
-    text_field = forms.ModelChoiceField(label=_(u'Text'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control'}))
-    geom_field = forms.ModelChoiceField(label=_(u'Geom'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control'}))
+    id_field = forms.ModelChoiceField(label=_(u'Id'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    text_field = forms.ModelChoiceField(label=_(u'Text'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    geom_field = forms.ModelChoiceField(label=_(u'Geom'), required=False, queryset=Datastore.objects.none(), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
 
     category = forms.CharField(label=_(u'Category'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     
