@@ -433,7 +433,7 @@ class Geoserver():
             catalog = self.getGsconfig()
             style = catalog.get_style(name, workspace=None)
             catalog.delete(style, purge=True, recurse=False)
-        
+            return True        
         except Exception as e:
             print e.message
             pass
