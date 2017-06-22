@@ -35,7 +35,7 @@
 						{% for layer in layers %}
 						<tr>
 							<td>{{ layer.id }}</td>
-							<td><img src="{{ layer.thumbnail.url }}" height="60" width="84"></td>
+							<td><img data-origin="{{ layer.type }}" src="{{ layer.thumbnail.url }}" height="60" width="84"></td>
 							<td>{{ layer.name }}</td>
 							<td>{{ layer.title }}</td>
 							<td>{{ layer.datastore.name }}</td>
@@ -70,6 +70,21 @@
 			<div class="modal-footer">
 				<button id="button-delete-layer-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
 				<button id="button-delete-layer-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-edit-layer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			
+			<div class="modal-body">
+				<h4>{% trans "Raster layers are not configurable" %}</h4>
+			</div>
+			<div class="modal-footer">
+				<button id="button-delete-layer-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Accept" %}</button>
 			</div>
 		</div>
 	</div>
@@ -114,7 +129,7 @@ $(document).ready(function() {
 	    },{
 	      	"targets": -2,
 	       	"data": null,
-	        "defaultContent": '<button type="button" name="button-clear-cache" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Clear cache" %}' + '" class="btn btn-warning"><i class="fa fa-refresh"></i></button>'
+	        "defaultContent": '<button type="button" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="' + '{% trans "Clear cache" %}' + '" class="btn btn-warning"><i class="fa fa-refresh"></i></button>'
 	  	},{
 	      	"targets": -3,
 	       	"data": null,
@@ -135,7 +150,21 @@ $(document).ready(function() {
 	        updateLayer(data);
 	        
 	    } else if (this.name == "button-config-layer"){
-			configLayer(data, row);
+	    	var start_index = data[1].indexOf('data-origin=');
+	    	var type = "v_PostGIS";
+	    	if(start_index != -1){
+		    	start_index = start_index + 'data-origin='.length + 1;
+		    	var type_aux = data[1].substring(start_index);
+		    	var end_index = type_aux.indexOf('\"');
+		    	if(end_index != -1){
+		    		type = type_aux.substring(0,end_index);
+		    	}
+	   		}
+		    if(type == "v_PostGIS"){	
+				configLayer(data, row);
+		    }else{
+		    	$('#modal-edit-layer').modal('show');
+		    }
 			
 		} else if (this.name == "button-clear-cache"){
 			clearCache(data, row);

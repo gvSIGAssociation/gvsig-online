@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-20 14:08+0200\n"
+"POT-Creation-Date: 2017-06-22 11:25+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,57 +18,57 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend_mapservice.py:86 backend_mapservice.py:110
+#: backend_mapservice.py:87 backend_mapservice.py:111
 msgid "PostGIS vector"
 msgstr "PostGIS vectorial"
 
-#: backend_mapservice.py:87
+#: backend_mapservice.py:88
 msgid "GeoTiff"
 msgstr "GeoTiff"
 
-#: backend_mapservice.py:88
+#: backend_mapservice.py:89
 msgid "Cascading WMS"
 msgstr "WMS en cascada"
 
-#: backend_mapservice.py:98
+#: backend_mapservice.py:99
 msgid "Vector layer"
 msgstr "Capa vectorial"
 
-#: backend_mapservice.py:99
+#: backend_mapservice.py:100
 msgid "SQL View"
 msgstr "Vista SQL"
 
-#: backend_mapservice.py:490 backend_mapservice.py:499
-#: backend_mapservice.py:510
+#: backend_mapservice.py:491 backend_mapservice.py:500
+#: backend_mapservice.py:511
 #, python-brace-format
 msgid "Error publishing the layer. Backend error: {msg}"
 msgstr "Error publicando la capa. Error: {msg}"
 
-#: backend_mapservice.py:493 backend_mapservice.py:501
-#: backend_mapservice.py:512 views.py:494 views.py:1100
+#: backend_mapservice.py:494 backend_mapservice.py:502
+#: backend_mapservice.py:513 views.py:494 views.py:1100
 msgid "Error: layer could not be published"
 msgstr "Error: la capa no puede ser publicada"
 
-#: backend_mapservice.py:522 backend_mapservice.py:530
-#: backend_mapservice.py:538
+#: backend_mapservice.py:523 backend_mapservice.py:531
+#: backend_mapservice.py:539
 #, python-brace-format
 msgid "Error publishing the layer group. Backend error: {msg}"
 msgstr "Error publicando el grupo de capas. Error: {msg}"
 
-#: backend_mapservice.py:524 backend_mapservice.py:532
-#: backend_mapservice.py:540
+#: backend_mapservice.py:525 backend_mapservice.py:533
+#: backend_mapservice.py:541
 msgid "Error: layer group could not be published"
 msgstr "Error: el grupo de capas no puede ser publicado"
 
-#: backend_mapservice.py:759
+#: backend_mapservice.py:760
 msgid ""
 "Bad file format. The provided zip file must not contain any subdirectory."
 msgstr ""
 "Formato de archivo incorrecto. El archivo zip proporcionada no debe contener "
 "ningún subdirectorio."
 
-#: backend_mapservice.py:803 backend_mapservice.py:854
-#: backend_mapservice.py:1052 backend_mapservice.py:1118
+#: backend_mapservice.py:804 backend_mapservice.py:855
+#: backend_mapservice.py:1067 backend_mapservice.py:1133
 #, python-brace-format
 msgid ""
 "Invalid layer name: '{value}'. Identifiers must begin with a letter or an "
@@ -78,8 +78,8 @@ msgstr ""
 "con una letra o un guion bajo (_). Los siguientes caracteres pueden ser "
 "letras, guiones o números"
 
-#: backend_mapservice.py:805 backend_mapservice.py:856
-#: backend_mapservice.py:904
+#: backend_mapservice.py:806 backend_mapservice.py:857
+#: backend_mapservice.py:918
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid database name: {value}. "
@@ -90,8 +90,8 @@ msgstr ""
 "{value}. Identificadores deben comenzar con una letra o un guión bajo "
 "( _ ) . Los siguientes caracteres pueden ser letras, guiones o números"
 
-#: backend_mapservice.py:807 backend_mapservice.py:858
-#: backend_mapservice.py:906
+#: backend_mapservice.py:808 backend_mapservice.py:859
+#: backend_mapservice.py:920
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid user name: {value}. Identifiers "
@@ -102,8 +102,8 @@ msgstr ""
 "{value}. Identificadores deben comenzar con una letra o un guión bajo "
 "( _ ) . Los siguientes caracteres pueden ser letras, guiones o números"
 
-#: backend_mapservice.py:809 backend_mapservice.py:860
-#: backend_mapservice.py:908
+#: backend_mapservice.py:810 backend_mapservice.py:861
+#: backend_mapservice.py:922
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid schema: {value}. Identifiers "
@@ -114,49 +114,49 @@ msgstr ""
 "Identificadores deben comenzar con una letra o un guión bajo ( _ ) . Los "
 "siguientes caracteres pueden ser letras, guiones o números"
 
-#: backend_mapservice.py:831 backend_mapservice.py:872
+#: backend_mapservice.py:832 backend_mapservice.py:883
 msgid "Error uploading the layer. Review the file format."
 msgstr "Error publicando la capa. Revisar el formato del fichero"
 
-#: backend_mapservice.py:1044
+#: backend_mapservice.py:1059
 msgid "Error creating the layer. Review the file format."
 msgstr "Error creando la capa. Revisar el formato del fichero"
 
-#: backend_mapservice.py:1083
+#: backend_mapservice.py:1098
 msgid "Invalid geometry type"
 msgstr "Tipo de geometría no válido"
 
-#: backend_mapservice.py:1087
+#: backend_mapservice.py:1102
 #, python-brace-format
 msgid "Duplicated field name: {0}"
 msgstr "Nombre de campo duplicado: {0}"
 
-#: backend_mapservice.py:1089
+#: backend_mapservice.py:1104
 #, python-brace-format
 msgid "Invalid field name. '{0}' is a reserved word"
 msgstr "Nombre de campo inválido. '{0}' es una palabra reservada"
 
-#: backend_mapservice.py:1104
+#: backend_mapservice.py:1119
 #, python-brace-format
 msgid "Unsupported field type: {0}"
 msgstr "Tipo de campo no soportado: {0}"
 
-#: backend_mapservice.py:1109
+#: backend_mapservice.py:1124
 #: templates/geoserver/create_layer_feature_type.html:299
-#: templates/layer_create.html:474
+#: templates/layer_create.html:491
 msgid "At least one field must be defined"
 msgstr "Debe definir por lo menos un campo"
 
-#: backend_mapservice.py:1112
+#: backend_mapservice.py:1127
 msgid "Invalid field definition"
 msgstr "Definición de campo no válida"
 
-#: backend_mapservice.py:1124
+#: backend_mapservice.py:1139
 #, python-brace-format
 msgid "A layer already exists with this name: '{value}'"
 msgstr "Ya existe una capa con este nombre: '{value}'"
 
-#: backend_mapservice.py:1144 backend_mapservice.py:1153
+#: backend_mapservice.py:1159 backend_mapservice.py:1168
 msgid "Error occurred building the view. Review the SQL sentence"
 msgstr "Ha ocurrido un error construyendo la vista. Revisar la sentencia SQL"
 
@@ -249,8 +249,9 @@ msgid "Title"
 msgstr "Título"
 
 #: forms_geoserver.py:52 forms_geoserver.py:67 forms_geoserver.py:79
-#: forms_geoserver.py:129 forms_geoserver.py:141 forms_services.py:95
-#: forms_services.py:106 templates/geoserver/create_layer_feature_type.html:94
+#: forms_geoserver.py:129 forms_geoserver.py:141 forms_geoserver.py:166
+#: forms_services.py:95 forms_services.py:106
+#: templates/geoserver/create_layer_feature_type.html:94
 #: templates/geoserver/create_layer_sql_view.html:84
 #: templates/geoserver/layer_upload_imagemosaic.html:74
 #: templates/geoserver/layer_upload_postgis.html:79
@@ -311,7 +312,7 @@ msgid "Elevation regex"
 msgstr "Expresión regular de elevación"
 
 #: forms_geoserver.py:74 forms_geoserver.py:87 forms_geoserver.py:111
-#: forms_geoserver.py:121 forms_geoserver.py:136 forms_geoserver.py:157
+#: forms_geoserver.py:121 forms_geoserver.py:136 forms_geoserver.py:160
 #: forms_services.py:92 forms_services.py:103 templates/layer_list.html.py:26
 msgid "Datastore"
 msgstr "Almacén de datos"
@@ -352,7 +353,7 @@ msgstr "Tipo de geometría"
 msgid "Fields"
 msgstr "Campos"
 
-#: forms_geoserver.py:170
+#: forms_geoserver.py:179
 msgid "Error: Invalid field definition"
 msgstr "Error: Definición de campo no válida"
 
@@ -484,21 +485,21 @@ msgid "Cancel"
 msgstr "Cancelar"
 
 #: templates/datastore_list.html:65 templates/enumeration_list.html.py:61
-#: templates/layer_list.html:72 templates/layergroup_list.html.py:69
-#: templates/workspace_list.html:65
+#: templates/layer_list.html:72 templates/layer_list.html.py:87
+#: templates/layergroup_list.html:69 templates/workspace_list.html.py:65
 msgid "Accept"
 msgstr "Aceptar"
 
 #: templates/datastore_list.html:82 templates/enumeration_list.html.py:78
 #: templates/geoserver/create_layer_sql_view.html:249
-#: templates/layer_list.html:89 templates/layergroup_list.html.py:86
+#: templates/layer_list.html:104 templates/layergroup_list.html.py:86
 #: templates/lock_list.html:59 templates/workspace_list.html.py:82
 msgid "Processing request..."
 msgstr "Procesando petición..."
 
 #: templates/datastore_list.html:83 templates/enumeration_list.html.py:79
 #: templates/geoserver/create_layer_sql_view.html:250
-#: templates/layer_list.html:90 templates/layergroup_list.html.py:87
+#: templates/layer_list.html:105 templates/layergroup_list.html.py:87
 #: templates/lock_list.html:60 templates/workspace_list.html.py:83
 #, python-format
 msgid "Search%(sep)s"
@@ -506,7 +507,7 @@ msgstr "Buscar%(sep)s"
 
 #: templates/datastore_list.html:84 templates/enumeration_list.html.py:80
 #: templates/geoserver/create_layer_sql_view.html:251
-#: templates/layer_list.html:91 templates/layergroup_list.html.py:88
+#: templates/layer_list.html:106 templates/layergroup_list.html.py:88
 #: templates/lock_list.html:61 templates/workspace_list.html.py:84
 #, python-format
 msgid "Showing %(numrecords)s records"
@@ -514,7 +515,7 @@ msgstr "Mostrando %(numrecords)s registros"
 
 #: templates/datastore_list.html:85 templates/enumeration_list.html.py:81
 #: templates/geoserver/create_layer_sql_view.html:252
-#: templates/layer_list.html:92 templates/layergroup_list.html.py:89
+#: templates/layer_list.html:107 templates/layergroup_list.html.py:89
 #: templates/lock_list.html:62 templates/workspace_list.html.py:85
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
@@ -522,14 +523,14 @@ msgstr "Mostrando desde %(start)s a %(end)s de %(numrecords)s registros"
 
 #: templates/datastore_list.html:86 templates/enumeration_list.html.py:82
 #: templates/geoserver/create_layer_sql_view.html:253
-#: templates/layer_list.html:93 templates/layergroup_list.html.py:90
+#: templates/layer_list.html:108 templates/layergroup_list.html.py:90
 #: templates/lock_list.html:63 templates/workspace_list.html.py:86
 msgid "Showing from 0 to 0 of 0 records"
 msgstr "Mostrando desde 0 a 0 de 0 registros"
 
 #: templates/datastore_list.html:87 templates/enumeration_list.html.py:83
 #: templates/geoserver/create_layer_sql_view.html:254
-#: templates/layer_list.html:94 templates/layergroup_list.html.py:91
+#: templates/layer_list.html:109 templates/layergroup_list.html.py:91
 #: templates/lock_list.html:64 templates/workspace_list.html.py:87
 #, python-format
 msgid "Filtering %(max)s records"
@@ -537,7 +538,7 @@ msgstr "Filtrando %(max)s registros"
 
 #: templates/datastore_list.html:89 templates/enumeration_list.html.py:85
 #: templates/geoserver/create_layer_sql_view.html:256
-#: templates/layer_list.html:96 templates/layergroup_list.html.py:93
+#: templates/layer_list.html:111 templates/layergroup_list.html.py:93
 #: templates/lock_list.html:66 templates/workspace_list.html.py:89
 msgid "Loading..."
 msgstr "Cargando..."
@@ -546,7 +547,7 @@ msgstr "Cargando..."
 #: templates/enumeration_list.html:86 templates/enumeration_list.html.py:87
 #: templates/geoserver/create_layer_sql_view.html:257
 #: templates/geoserver/create_layer_sql_view.html:258
-#: templates/layer_list.html:97 templates/layer_list.html.py:98
+#: templates/layer_list.html:112 templates/layer_list.html.py:113
 #: templates/layergroup_list.html:94 templates/layergroup_list.html.py:95
 #: templates/lock_list.html:67 templates/lock_list.html.py:68
 #: templates/workspace_list.html:90 templates/workspace_list.html.py:91
@@ -555,14 +556,14 @@ msgstr "No hay registros disponibles"
 
 #: templates/datastore_list.html:93 templates/enumeration_list.html.py:89
 #: templates/geoserver/create_layer_sql_view.html:260
-#: templates/layer_list.html:100 templates/layergroup_list.html.py:97
+#: templates/layer_list.html:115 templates/layergroup_list.html.py:97
 #: templates/lock_list.html:70 templates/workspace_list.html.py:93
 msgid "First"
 msgstr "Primero"
 
 #: templates/datastore_list.html:94 templates/enumeration_list.html.py:90
 #: templates/geoserver/create_layer_sql_view.html:261
-#: templates/layer_list.html:101 templates/layergroup_list.html.py:98
+#: templates/layer_list.html:116 templates/layergroup_list.html.py:98
 #: templates/lock_list.html:71 templates/workspace_list.html.py:94
 msgid "Previous"
 msgstr "Anterior"
@@ -570,7 +571,7 @@ msgstr "Anterior"
 #: templates/datastore_list.html:95 templates/enumeration_list.html.py:91
 #: templates/geoserver/create_layer_sql_view.html:262
 #: templates/layer_add.html:14 templates/layer_create.html.py:14
-#: templates/layer_list.html:102 templates/layer_update.html.py:112
+#: templates/layer_list.html:117 templates/layer_update.html.py:112
 #: templates/layergroup_list.html:99 templates/lock_list.html.py:72
 #: templates/workspace_list.html:95
 msgid "Next"
@@ -578,14 +579,14 @@ msgstr "Siguiente"
 
 #: templates/datastore_list.html:96 templates/enumeration_list.html.py:92
 #: templates/geoserver/create_layer_sql_view.html:263
-#: templates/layer_list.html:103 templates/layergroup_list.html.py:100
+#: templates/layer_list.html:118 templates/layergroup_list.html.py:100
 #: templates/lock_list.html:73 templates/workspace_list.html.py:96
 msgid "Last"
 msgstr "Último"
 
 #: templates/datastore_list.html:99 templates/enumeration_list.html.py:95
 #: templates/geoserver/create_layer_sql_view.html:266
-#: templates/layer_list.html:106 templates/layergroup_list.html.py:103
+#: templates/layer_list.html:121 templates/layergroup_list.html.py:103
 #: templates/lock_list.html:76 templates/workspace_list.html.py:99
 #, python-format
 msgid "%(sep)sSort ascending"
@@ -593,7 +594,7 @@ msgstr "%(sep)sOrden ascendente"
 
 #: templates/datastore_list.html:100 templates/enumeration_list.html.py:96
 #: templates/geoserver/create_layer_sql_view.html:267
-#: templates/layer_list.html:107 templates/layergroup_list.html.py:104
+#: templates/layer_list.html:122 templates/layergroup_list.html.py:104
 #: templates/lock_list.html:77 templates/workspace_list.html.py:100
 #, python-format
 msgid "%(sep)sSort descending"
@@ -776,7 +777,8 @@ msgstr "Nombre de campo inválido: \\"
 #: templates/geoserver/layer_upload_postgis.html:150
 #: templates/geoserver/layer_upload_raster.html:134
 #: templates/geoserver/layer_upload_vector.html:144
-#: templates/layer_add.html:194 templates/layer_create.html.py:460
+#: templates/layer_add.html:194 templates/layer_create.html.py:458
+#: templates/layer_create.html:470 templates/layer_create.html.py:477
 #: templates/layer_update.html:133 templates/layergroup_list.html.py:35
 msgid "Default"
 msgstr "Por defecto"
@@ -915,7 +917,7 @@ msgstr "Servicio no disponible"
 msgid "No valid data store selected"
 msgstr "No ha seleccionado un almacén de datos válido"
 
-#: templates/layer_config.html:13 templates/layer_list.html.py:121
+#: templates/layer_config.html:13 templates/layer_list.html.py:136
 msgid "Configure layer"
 msgstr "Configurar capa"
 
@@ -961,7 +963,7 @@ msgstr "Lista de capas"
 msgid "Preview"
 msgstr "Previsualización"
 
-#: templates/layer_list.html:65 templates/layer_list.html.py:113
+#: templates/layer_list.html:65 templates/layer_list.html.py:128
 msgid "Delete layer"
 msgstr "Eliminar capa"
 
@@ -969,11 +971,15 @@ msgstr "Eliminar capa"
 msgid "The layer will be removed, Do you want continue?"
 msgstr "La capa será eliminada, ¿Desea continuar?"
 
-#: templates/layer_list.html:117 templates/layergroup_list.html.py:114
+#: templates/layer_list.html:84
+msgid "Raster layers are not configurable"
+msgstr "Las capas ráster no son configurables"
+
+#: templates/layer_list.html:132 templates/layergroup_list.html.py:114
 msgid "Clear cache"
 msgstr "Limpiar caché"
 
-#: templates/layer_list.html:125 templates/layer_update.html.py:11
+#: templates/layer_list.html:140 templates/layer_update.html.py:11
 msgid "Update layer"
 msgstr "Actualizar capa"
 
