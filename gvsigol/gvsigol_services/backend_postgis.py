@@ -231,6 +231,11 @@ class Introspect:
         
         self.cursor.execute(query)
         
+    def delete_table(self, schema, table_name):
+        query = "DROP TABLE IF EXISTS " + schema + "." + table_name + ";"
+        
+        self.cursor.execute(query)
+        
     def close(self):
         """
         Closes the connection. The Introspect object can't be used afterwards
