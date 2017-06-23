@@ -163,7 +163,10 @@ def update_style(request, json_data, layer_id, style_id):
         maxscale = json_rule.get('maxscale')
     else:
         maxscale = -1
-        
+    
+    rule_old = Rule.objects.get(style=style)
+    rule_old.delete()
+    
     rule = Rule(
         style = style,
         name = json_rule.get('name'),
