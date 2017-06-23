@@ -866,6 +866,16 @@ class Geoserver():
         except (rest_geoserver.RequestError):
             raise 
         except gdal_tools.GdalError as e:
+            if e.code == 1:
+                params = json.loads(datastore.connection_params)
+                host = params['host']
+                port = params['port']
+                dbname = params['database']
+                user = params['user']
+                passwd = params['passwd']
+                schema = params.get('schema', 'public')
+                i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+                i.delete_table(schema, name)
             raise rest_geoserver.RequestError(e.code, e.message)
         except Exception as e:
             logging.exception(e)

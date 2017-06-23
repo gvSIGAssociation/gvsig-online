@@ -104,6 +104,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.core.context_processors.i18n',
                 'django.template.context_processors.media',
+                ##CONTEXT_PROCESSORS##
             ],
         },
     },
@@ -229,7 +230,7 @@ STATICFILES_FINDERS = (
     #'compressor.finders.CompressorFinder',
 )
 
-GVSIGOL_VERSION = '2.1.10'
+GVSIGOL_VERSION = '2.2.0'
 
 GVSIGOL_USERS_CARTODB = {
     'dbhost': '##DATABASE_HOST##',
