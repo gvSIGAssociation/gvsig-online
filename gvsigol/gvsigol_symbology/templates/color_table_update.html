@@ -19,6 +19,7 @@
 			
 				<div class="row">
 					<div class="col-md-6">
+					<div id="form-error" style="color:#ff0000;"></div>
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<label>{% trans "Name" %}</label>
@@ -161,8 +162,13 @@ $(document).ready(function() {
 
 	$("#save-legend").on('click', function(e){
 		if ($("#style-name").val() != '') {
-			colorTable.update(layerId, styleId);
-			
+			var color_tabs = $("#rules tbody").find("tr");
+			if(color_tabs.length==1){
+				$("#form-error").append('<p>*{% trans "Two or more color definitions are required" %}</p>');
+			}
+			else{
+				colorTable.update(layerId, styleId);
+			}
 		} else {
 			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
 			

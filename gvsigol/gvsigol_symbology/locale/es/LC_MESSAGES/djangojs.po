@@ -244,3 +244,6 @@ msgstr "Visible por escala"
 
 msgid "No limit"
 msgstr "Sin límite"
+
+msgid "Two or more color definitions are required"
+msgstr "En caso de necesitar alguna, se requieren al menos dos definiciones en la tabla de color"
