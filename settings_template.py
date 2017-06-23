@@ -104,6 +104,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.core.context_processors.i18n',
                 'django.template.context_processors.media',
+                ##CONTEXT_PROCESSORS##
             ],
         },
     },
