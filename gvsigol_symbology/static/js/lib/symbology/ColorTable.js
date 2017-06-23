@@ -39,7 +39,7 @@ var ColorTable = function(layerName, utils, rule_opts) {
 			$('#rules').append(this.rule.getColorMapEntryUI());
 			this.rule.registerCMEEvents();
 			this.rule.previewRaster();
-			this.rule.addColorMapEntry();
+			//this.rule.addColorMapEntry();
 		}
 	}	
 };
@@ -48,7 +48,7 @@ ColorTable.prototype.addDefaultEntries = function() {
 	this.rule = new Rule(0, $("#style-name").val(), $("#style-name").val(), null, this.utils);
 	$('#rules').append(this.rule.getColorMapEntryUI());
 	this.rule.registerCMEEvents();
-	this.rule.addColorMapEntry();
+//	this.rule.addColorMapEntry();
 	this.rule.previewRaster();
 };
 
