@@ -485,7 +485,10 @@ def layer_add(request):
                 core_utils.toc_add_layer(newRecord)
                 mapservice_backend.createOrUpdateGeoserverLayerGroup(newRecord.layer_group)
                 mapservice_backend.reload_nodes()
-                return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
+                if newRecord.type == 'v_PostGIS':
+                    return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
+                else:
+                    return redirect('layer_list')
             
             except Exception as e:
                 try:
@@ -499,7 +502,15 @@ def layer_add(request):
         if not request.user.is_superuser:
             form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
             form.fields['layer_group'].queryset = LayerGroup.objects.filter(created_by__exact=request.user.username)
-    return render(request, 'layer_add.html', {'form': form})
+        
+    datastore_types = {}
+    types = {}
+    for datastore in Datastore.objects.filter(created_by__exact=request.user.username):
+        types[datastore.id] = datastore.type
+    
+    datastore_types['types'] = types
+        
+    return render(request, 'layer_add.html', {'form': form, 'datastore_types': json.dumps(datastore_types)})
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -549,8 +560,12 @@ def layer_update(request, layer_id):
                 mapservice_backend.createOrUpdateGeoserverLayerGroup(new_layer_group)
                                 
             mapservice_backend.reload_nodes()   
-            return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer_id}))
             
+            if layer.type != 'v_PostGIS':
+                return redirect('layer_list')
+            else:
+                return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer_id}))
+        
     else:
         layer = Layer.objects.get(id=int(layer_id))
         datastore = Datastore.objects.get(id=layer.datastore.id)
