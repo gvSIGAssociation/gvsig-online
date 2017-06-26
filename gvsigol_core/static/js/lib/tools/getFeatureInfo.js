@@ -300,7 +300,23 @@ getFeatureInfo.prototype.showInfo = function(features){
 	html += '</li>';
 	
 	for (var i in features) {
-		if (features[i].type == 'feature') {
+		if (features[i].feature.type == 'raster') {
+			var feature_id = "<span style=\"font-weight:normal; margin-right:5px;\">"+features[i].layer.title+ "</span>";
+			feature_id += "<br />";
+			
+			for(key in features[i].feature.properties){
+				feature_id += "<span  style=\"font-weight:normal;\">" + key + "</span><span class=\"pull-right\">"+ features[i].feature.properties[key] + "</span><br />";
+			}
+			
+			html += '<li class="item feature-item" style="min-width:300px;">';
+			html += 	'<div class="feature-info">';
+			html += 		'<a href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;">' + feature_id + '</a>';
+			html += 	'</div>';
+			html += '</li>';
+		}
+		else{ 
+			if (features[i].type == 'feature') {
+		
 			var fid = features[i].feature.id;
 			var is_first_configured = true;
 			var item_shown = false;
@@ -389,7 +405,8 @@ getFeatureInfo.prototype.showInfo = function(features){
 			html += 		'Ref. Catastral: <a target="_blank" href="' + features[i].href + '" class="product-title item-fid" style="color: #00c0ef;">' + features[i].text;	
 			html += 	'</div>';
 			html += '</li>';
-		}		
+		}	
+		}
 	}	
 	html += '</ul>';
 	this.popup.show(self.mapCoordinates, '<div class="popup-wrapper">' + html + '</div>');	
