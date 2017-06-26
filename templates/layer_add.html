@@ -107,6 +107,8 @@
 
 {% block extra-scripts %}
 <script type="text/javascript">
+	var datastore_types = {{ datastore_types|safe }};
+	
 	$('#menu-manage-services').addClass("active");
 	$('#submenu-layers').addClass("active");
 	
@@ -135,6 +137,12 @@
 
 	function updateResourceList(id_datastore) {
 		if (id_datastore) {
+			if(datastore_types && "types" in datastore_types && id_datastore in datastore_types["types"] && datastore_types["types"][id_datastore] != "v_PostGIS"){
+				$(".save-button").html('<i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}');
+			}else{
+				$(".save-button").html('{% trans "Next" %} <i class="fa fa-angle-right margin-l-5"></i>');
+			}
+			
 			$("body").overlay();
 			$.getJSON("{% url 'backend_resource_list_available' %}", {id_datastore: id_datastore}, function(data){
 				var name_select = $("#id_name");
