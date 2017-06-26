@@ -350,6 +350,9 @@ getFeatureInfo.prototype.showInfo = function(features){
 							}
 							var key = fields[ix]["name"];
 							var key_trans = fields[ix]["title-"+language];
+							if(key_trans.length == 0){
+								key_trans = key;
+							}
 							if(item_shown && key && features[i].feature.properties && features[i].feature.properties[key]){
 								feature_fields += "<span>" + features[i].feature.properties[key] + "</span><br />";
 								feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\">"+ features[i].feature.properties[key] + "</span><br />";
