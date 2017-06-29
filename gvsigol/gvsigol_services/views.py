@@ -402,14 +402,25 @@ def backend_fields_list(request):
         ws = Workspace.objects.get(id=id_ws)
         ds = Datastore.objects.get(name=ds_name, workspace=ws)
         if ds:
-            resources = mapservice_backend.getResource(ds.workspace.name, ds.name, name)
-            result_resources = []
             layer = Layer.objects.filter(datastore=ds, name=name).first()
+            
+            params = json.loads(ds.connection_params)
+            host = params['host']
+            port = params['port']
+            dbname = params['database']
+            user = params['user']
+            passwd = params['passwd']
+            schema = params.get('schema', 'public')
+            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+            layer_defs = i.get_fields_info(layer.name, schema)
+            result_resources = []
             conf = None
             if layer and layer.conf:
                 conf = ast.literal_eval(layer.conf)
-            for resource in resources:
+            for resource_def in layer_defs:
+                resource = resource_def['name']
                 if conf:
+                    founded = False
                     for f in conf['fields']:
                         if f['name'] == resource:
                             field = {}
@@ -417,6 +428,13 @@ def backend_fields_list(request):
                             for id, language in LANGUAGES:
                                 field['title-'+id] = f['title-'+id]
                             result_resources.append(field)
+                            founded = True
+                    if not founded:
+                        field = {}
+                        field['name'] = resource
+                        for id, language in LANGUAGES:
+                            field['title-'+id] = resource
+                        result_resources.append(field)
                 else:
                     field = {}
                     field['name'] = resource
@@ -428,6 +446,7 @@ def backend_fields_list(request):
             return HttpResponse(json.dumps(result_resources_sorted))
     
     return HttpResponseBadRequest()    
+ 
 
 
 
