@@ -102,5 +102,7 @@ CARTOCIUDAD_DB_MUNICIPIO="municipio"
 CARTOCIUDAD_SHP_PROVINCIA="recintos_provinciales_inspire_peninbal_etrs89.shp"
 CARTOCIUDAD_DB_PROVINCIA="provincia"
 
+CARTOCIUDAD_INE_MUN_FILTER="46005,46250"
+
 SQL_SOUNDEXESP_FILE_NAME="soundexesp2.sql"
    
