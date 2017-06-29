@@ -71,7 +71,8 @@ class Cartociudad():
             'autocancel': self.urls['autocancel'],
             'limit': self.urls['max_results'],
             'countrycodes':self.urls['country_codes'],
-            'priority': json.dumps(self.get_provider_priority())
+            'priority': json.dumps(self.get_provider_priority()),
+            'filter_ine_mun': settings.CARTOCIUDAD_INE_MUN_FILTER
         }
 
         #url = "?".join((self.urls['candidates_url'], urlencode(params)))
@@ -100,7 +101,8 @@ class Cartociudad():
             'source': address['address[source]'],
             'type': address['address[type]'],
             'tip_via': address['address[tip_via]'],
-            'portal': address['address[portalNumber]']
+            'portal': address['address[portalNumber]'],
+            'filter_ine_mun': settings.CARTOCIUDAD_INE_MUN_FILTER
         }
 
         #url = "?".join((self.urls['candidates_url'], urlencode(params)))
