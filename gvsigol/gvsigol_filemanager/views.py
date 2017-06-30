@@ -89,7 +89,7 @@ class ExportToDatabaseView(FilemanagerMixin, TemplateView):
                 
             except rest_geoserver.RequestError as e:
                 message = e.server_message
-                request.session['message'] = message
+                request.session['message'] = str(message)
                 if e.status_code == -1:
                     name = form.data['name']
                     datastore_id = form.data['datastore']
