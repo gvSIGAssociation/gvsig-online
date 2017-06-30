@@ -1206,10 +1206,6 @@ editionBar.prototype.editFeatureForm = function(feature) {
 		
 		featureProperties +=      '</div>';
 		featureProperties += 	'</div>';
-		featureProperties += 	'<div class="box-footer text-right">';
-		featureProperties += 		'<button id="edit-feature" class="btn btn-default margin-r-5">' + gettext('Save') + '</button>';
-		featureProperties += 		'<button id="edit-feature-cancel" class="btn btn-default">' + gettext('Cancel') + '</button>';
-		featureProperties += 	'</div>';
 		featureProperties += '</div>';	
 		
 		var ui = '';
@@ -1224,6 +1220,10 @@ editionBar.prototype.editFeatureForm = function(feature) {
 		ui += 		'</div>';
 		ui += 		'<div class="tab-pane" id="edit_feature_resources">';
 		ui += 			this.resourceManager.getUI(feature);
+		ui += 		'</div>';
+		ui += 		'<div class="box-footer text-right">';
+		ui += 			'<button id="edit-feature" class="btn btn-default margin-r-5">' + gettext('Save') + '</button>';
+		ui += 			'<button id="edit-feature-cancel" class="btn btn-default">' + gettext('Cancel') + '</button>';
 		ui += 		'</div>';
 		ui += 	'</div>';
 		ui += '</div>';
