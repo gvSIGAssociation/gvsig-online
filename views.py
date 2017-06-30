@@ -186,7 +186,7 @@ def project_add(request):
                     image = request.FILES['project-image'],
                     center_lat = latitude,
                     center_lon = longitude,
-                    zoom = int(zoom),
+                    zoom = int(float(zoom)),
                     extent = extent,
                     toc_order = core_utils.get_json_toc(assigned_layergroups),
                     created_by = request.user.username,
@@ -198,7 +198,7 @@ def project_add(request):
                     description = description,
                     center_lat = latitude,
                     center_lon = longitude,
-                    zoom = int(zoom),
+                    zoom = int(float(zoom)),
                     extent = extent,
                     toc_order = core_utils.get_json_toc(assigned_layergroups),
                     created_by = request.user.username,
@@ -311,7 +311,7 @@ def project_update(request, pid):
             project.description = description
             project.center_lat = latitude
             project.center_lon = longitude
-            project.zoom = int(zoom)
+            project.zoom = int(float(zoom))
             project.extent = extent
             project.is_public = is_public
             
@@ -357,7 +357,7 @@ def project_update(request, pid):
                 project.description = description
                 project.center_lat = latitude
                 project.center_lon = longitude
-                project.zoom = int(zoom)
+                project.zoom = int(float(zoom))
                 project.extent = extent
                 project.is_public = is_public
                 
