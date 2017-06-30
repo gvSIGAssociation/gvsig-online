@@ -1,4 +1,6 @@
+from gvsigol_services.models import Datastore
 from gvsigol_services.backend_mapservice import backend as mapservice
+from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.forms_geoserver import PostgisLayerUploadForm
 from django.views.generic import TemplateView, FormView
 from django.shortcuts import HttpResponse, redirect
@@ -88,6 +90,19 @@ class ExportToDatabaseView(FilemanagerMixin, TemplateView):
             except rest_geoserver.RequestError as e:
                 message = e.server_message
                 request.session['message'] = message
+                if e.status_code == -1:
+                    name = form.data['name']
+                    datastore_id = form.data['datastore']
+                    datastore = Datastore.objects.get(id=datastore_id)
+                    params = json.loads(datastore.connection_params)
+                    host = params['host']
+                    port = params['port']
+                    dbname = params['database']
+                    user = params['user']
+                    passwd = params['passwd']
+                    schema = params.get('schema', 'public')
+                    i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+                    i.delete_table(schema, name)
                 return redirect("/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path'))
                 
             except Exception as exc:
