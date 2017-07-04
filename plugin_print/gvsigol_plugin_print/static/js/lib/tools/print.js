@@ -301,7 +301,6 @@ print.prototype.createPrintJob = function(template) {
 			}
 		}
 	}
-	
 	$.ajax({
 		type: 'POST',
 		async: true,
