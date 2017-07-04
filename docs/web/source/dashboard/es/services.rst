@@ -31,13 +31,13 @@ el nombre (sin caracteres especiales) y los parámetros de conexión.
 
 El formulario incluye diversos ejemplos de parámetros de conexión para cada tipo de almacén. Se pueden crear tres tipos de almacenes, pueden ser:
 
-- 1. PostGIS vectorial: Se tendrá que indicar los parámetros de conexión a la BD, esto permitirá crear el nuevo almacén, tambien llamado *esquema de BD*. 
+**1- PostGIS vectorial**: Se tendrá que indicar los parámetros de conexión a la BD, esto permitirá crear el nuevo almacén, tambien llamado *esquema de BD*. 
 
 
 .. image:: ../images/ds2.png
    :align: center
 
-- 2. GeoTiff:  En caso de que el almacén de datos sea de tipo raster el formulario cambiará y nos permitirá seleccionar el fichero que compondrá el almacén.
+**2- GeoTiff**:  En caso de que el almacén de datos sea de tipo raster el formulario cambiará y nos permitirá seleccionar el fichero que compondrá el almacén.
 
 .. image:: ../images/ds3.png
    :align: center
@@ -47,7 +47,7 @@ Al abrir el dialogo de seleccionar archivo, este nos mostrará un ventana con el
 .. image:: ../images/ds4.png
    :align: center
 
-- 3. WMS en cascada: este permite guradar un almacén de Web Map Service (WMS), donde se guarda la dirección del servicio que se quiera consultar y publicar en el proyecto.
+**3- WMS en cascada**: este permite guradar un almacén de Web Map Service (WMS), donde se guarda la dirección del servicio que se quiera consultar y publicar en el proyecto.
 
 .. image:: ../images/ds5.png
    :align: center
@@ -57,7 +57,49 @@ Al abrir el dialogo de seleccionar archivo, este nos mostrará un ventana con el
    	
 	Por contra, no se eliminará la fuente de datos asociada (la base de datos espacial o el fichero ráster correspondiente).
 
-2.3 Publicar, crear, modificar y eliminar capas
+
+2.3 Crear, modificar y eliminar Grupos de capas
+-----------------------------------------------
+Desde el listado de grupo de capas podemos añadir nuevo (**1**), actualizar (**2**), limpiar caché (**3**) y eliminar grupos de capas.
+
+.. image:: ../images/layer_group.png
+   :align: center
+   
+2.3.1 Añadir nuevo grupo de capas
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Para crearlo seleccionamos el botón *'añadir nuevo grupo de capas'*, se desplegará un formulario donde hay que asignarle:
+
+- Nombre: en minúsculas, sin espacios en blanco y caracteres especiales
+- Título: Se puede escribir sin ninguna restricción y será el nombre que se muestra en el visor de mapas.
+- Caché de grupo: Esto activará automaticamente el caché de todas las capas que pertenezcan a ese grupo.
+ 
+.. image:: ../images/layer_group_new.png
+   :align: center
+
+2.3.2  Actualizar grupo de capas
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Esta opción solo permitirá editar el título del grupo y activar o desactivar el Cacheo de grupo.
+
+
+2.3.2 Eliminar grupo de capas
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Cuando se da la opcion de eliminar grupo de capas y tenía asociadas una o mas capas, estás últimas se designan a un grupo de capas 'por defecto' que tiene el sistema. 
+
+
+2.4 Crear, modificar y eliminar enumeraciones
+---------------------------------------------
+Puede añadir(**1**), actualizar(**2**) y eliminar(**3**) enumeraciones seleccionando la vista con el listado de enumeraciones desde el menú principal, en la entrada de *servicos* - *'enumeraciones'*.
+
+.. image:: ../images/enum1.png
+   :align: center
+
+Desde el formulario de enumeraciones podremos añadir o eliminar los items que forman parte de la enumeración.
+
+.. image:: ../images/enum2.png
+   :align: center
+
+
+2.5 Publicar, crear, modificar y eliminar capas
 -----------------------------------------------
 Desde el listado de capas podemos acceder a la gestión de las mismas. Podemos publicar capas existentes en almacenes de datos(**1**), o crear capas vacías(**2**) definiendo de forma manual los campos.
 
@@ -70,9 +112,10 @@ Sobre cada una de las capas podemos realizar las siguientes operaciones:
 
 *   **Configurar capa (4):** Aqui se puede configurar los títulos de los nombres de campos y dar permisos de visualización y edición para cada uno de ellos.
 
-      - Podemos definir alias a los nombres de los campos para cada idioma del sistema seleccionado (por ejemplo, los alias definidos en 'titulo de campo Español' seran visibles cuando el idioma del sistema esté en 'Español').
+      - Podemos definir alias a los nombres de los campos para cada idioma del sistema seleccionado (por ejemplo, los alias definidos en 'título del campo Español' seran visibles cuando el idioma del sistema esté en 'Español').
       - definir que campos serán visibles para las herramientas del visor (herramienta de información, tabla de atributos, etc …). 
-      - definir cuales son los campos que pueden ser editados y finalmente seleccionar los campos que serán visibles en la herramienta info (i) del visor.
+      - Activar cuales son los campos que pueden ser editados por el usuario con privilegio de escritura. y
+      - Finalmente seleccionar los campos que serán visibles en la herramienta info (i) del visor.
 
 .. image:: ../images/layer2_2.png
    :align: center
@@ -81,7 +124,8 @@ Sobre cada una de las capas podemos realizar las siguientes operaciones:
 
 *   **Eliminar capa (6):** Elimina la capa y estilos asociados.
 
-2.3.1 Publicar capa
+
+2.5.1 Publicar capa
 ~~~~~~~~~~~~~~~~~~~
 Para publicar una capa existente en un almacén de datos, seleccionaremos el botón *"Publicar capa"*, una vez accedamos a la vista de publicación aparecerá el siguiente formulario.
 
@@ -94,9 +138,9 @@ Los pasos para publicar una capa son los siguientes:
 
 *	A continuación seleccionamos en el desplegable el recurso, se puede teclear y se autocompleta (Solo aparecen los recursos que aún no han sido publicados).
 
-*	Introducimos un titulo para la capa.
+*	Introducimos un titulo para la capa (será el nombre visible en el visor de mapas).
 
-*	Seleccionamos el grupo de capas al cual queremos asignar la capa (debe existir previamente).
+*	Seleccionamos el grupo de capas al cual queremos asignar la capa (debe existir previamente, *ver punto 2.3*).
 
 *	Seleccionamos las propiedades de la capa en el visor (visible, cacheada, imagen simple, consultable).
 
@@ -112,7 +156,7 @@ Por último aplicaremos los permisos de lectura y escritura a la capa.
 .. note::
    	Por defecto todas las capas pueden ser leídas por cualquier usuario, pero solo pueden ser escritas por los usuarios con rol de **superusuario**.
    	
-2.3.2 Crear capa vacía
+2.5.2 Crear capa vacía
 ~~~~~~~~~~~~~~~~~~~~~~
 Para crear una capa vacía, seleccionaremos el botón *"Crear capa vacía"*, una vez accedamos a la vista aparecerá el siguiente formulario.
 
@@ -137,7 +181,7 @@ Los pasos para crear una capa vacía son los siguientes:
    :align: center
    
 .. note::
-   Los tipos de campo soportados son: Boolean, Texto, Entero, Doble, Fecha, Enumeración y Multiple enumeración (estos dos últimos se han de definir previamente, ver punto 2.5)
+   Los tipos de campo soportados son: Boolean, Texto, Entero, Doble, Fecha, Enumeración y Multiple enumeración (para añadir alguno de estos dos últimos, se deben crear las enumeraciones, *ver punto 2.4*)
 
 *	Seleccionamos las propiedades de la capa en el visor (visible, cacheada, imagen simple, consultable).
 
@@ -155,21 +199,10 @@ Los pasos para crear una capa vacía son los siguientes:
    	Por defecto todas las capas pueden ser leídas por cualquier usuario, pero solo pueden ser escritas por los usuarios con rol de **superusuario**.
 
 
-2.4 Gestión de bloqueos
+2.6 Gestión de bloqueos
 -----------------------
-Podemos consultar los bloqueos activos desde el listado de bloqueos, así como desbloquear capas bloqueadas.
+Podeos consultar los bloqueos activos desde el listado de bloqueos, así como desbloquear capas bloqueadas.
 
 .. image:: ../images/block1.png
    :align: center
 
-2.5 Crear, modificar y eliminar enumeraciones
----------------------------------------------
-Puede añadir(**1**), actualizar(**2**) y eliminar(**3**) enumeraciones seleccionando la vista con el listado de enumeraciones desde el menú principal, en la entrada de *servicos* - *'enumeraciones'*.
-
-.. image:: ../images/enum1.png
-   :align: center
-
-Desde el formulario de enumeraciones podremos añadir o eliminar los items que forman parte de la enumeración.
-
-.. image:: ../images/enum2.png
-   :align: center
