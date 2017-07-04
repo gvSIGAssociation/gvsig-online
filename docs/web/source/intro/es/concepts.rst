@@ -1,5 +1,5 @@
 2. Conceptos
-===================
+============
 
 
 2.1 Panel de control
@@ -29,7 +29,7 @@ Al acceder al panel de control por defecto se muestra la vista de *“Inicio”*
 ------------------
 El visor de mapas es la interfaz de visualización de la plataforma que permite la visualización de los proyectos configurados desde el panel de control.  
 
-.. image:: ../images/viewer1.png
+.. image:: ../images/viewer1_2.png
    :align: center
 
 La plataforma ofrece dos tipos de visores de mapas:
@@ -125,7 +125,7 @@ definen una matriz de valores y se utilizan frecuentemente para representar fen�
 Dentro de cada uno de estos tipos principales podemos encontrar diferentes tipos más especializados.
 
 2.4.4 Grupos de capas
-~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 Los grupos de capas como su nombre indica se utilizan para agrupar capas por una temática específica. Los grupos de capas nos permiten agilizar la asginación de capas a un proyectos.
 Además desde el visor de mapas podremos visualizar el grupo de capas como una única capa, mejorando los tiempos de respuesta en la visualización.
 
@@ -142,6 +142,11 @@ Existen dos tipos de bloqueos:
 2.4.6 Enumeraciones
 ~~~~~~~~~~~~~~~~~~~
 Las enumeraciones son un tipo especial de entidades que definen domios de valores. Es posible utilizarlas en la creación de nuevas capas cuando deseemos crear un tipo de campo que contenga un listado de elementos.
+
+
+2.4.7  Multiple enumeración
+---------------------------
+Similar a las enumeraciones, pero este campo permite seleccionar varios elementos de un conjunto de dominios disponibles que se han creado en el campo 'enumeración', esta opción se hace disponible cuando se crea una capa vacía en el sistema.
 
 
 2.5 Administrador de archivos
@@ -206,7 +211,7 @@ Los tipos de leyenda para las capas vectoriales son:
 
 *	*"Leyenda de expresiones"*
 
-Para las capas de tipo ráster existe un tipo de leyenda que es el *"Mapa de color"*.
+Para las capas de tipo ráster existe un tipo de leyenda que es el *"Tabla de color"*.
 
 2.7.2 Bibliotecas de símbolos
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
