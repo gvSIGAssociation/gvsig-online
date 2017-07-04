@@ -145,7 +145,7 @@ Las enumeraciones son un tipo especial de entidades que definen domios de valore
 
 
 2.4.7  Multiple enumeración
----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Similar a las enumeraciones, pero este campo permite seleccionar varios elementos de un conjunto de dominios disponibles que se han creado en el campo 'enumeración', esta opción se hace disponible cuando se crea una capa vacía en el sistema.
 
 
