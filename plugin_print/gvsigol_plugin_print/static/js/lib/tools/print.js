@@ -112,13 +112,22 @@ print.prototype.handler = function(e) {
 		ui += 				'<input id="print-title" type="text" class="form-control" value="' + this.conf.project_name + '">';
 		ui += 			'</div>';
 		ui += 			'<div class="col-md-12 form-group">';
-		ui += 				'<label>' + gettext('Legal warning') + '</label>';
-		ui += 				'<textarea class="form-control" name="print-legal" id="print-legal" rows="5">' + gettext('legalwarning') + '</textarea>';
+		ui += 				'<label>' + gettext('Resolution') + '</label>';
+		ui += 				'<select id="print-dpi" class="form-control">';
+		ui += 					'<option value="180">180 dpi</option>';
+		ui += 					'<option selected value="240">240 dpi</option>';
+		ui += 					'<option value="320">320 dpi</option>';
+		ui += 					'<option value="400">400 dpi</option>';
+		ui += 				'</select>';
 		ui += 			'</div>';
 		ui += 			'<div class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Rotation') + '</label>';
 		ui += 				'<input id="print-rotation" type="number" step="any" class="form-control" value="0">';
 		ui += 			'</div>';
+		ui += 			'<div class="col-md-12 form-group">';
+		ui += 				'<label>' + gettext('Legal warning') + '</label>';
+		ui += 				'<textarea class="form-control" name="print-legal" id="print-legal" rows="5">' + gettext('legalwarning') + '</textarea>';
+		ui += 			'</div>';		
 		ui += 		'</div>';
 		ui += 	'</div>';
 		ui += 	'<div class="box-footer clearfix">';
@@ -181,6 +190,7 @@ print.prototype.createPrintJob = function(template) {
 	var title = $('#print-title').val();
 	var legalWarning = $('#print-legal').val();
 	var rotation = $('#print-rotation').val();
+	var dpi = $('#print-dpi').val();
 	
 	var mapLayers = this.map.getLayers().getArray();
 	var printLayers = new Array();
@@ -306,7 +316,7 @@ print.prototype.createPrintJob = function(template) {
 		  		"legalWarning": legalWarning,
 		  		"map": {
 		  			"projection": "EPSG:3857",
-		  			"dpi": 254,
+		  			"dpi": parseInt(dpi),
 		  			"rotation": rotation,
 		  			"center": self.map.getView().getCenter(),
 		  			"scale": self.getCurrentScale(),
