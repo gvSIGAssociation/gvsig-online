@@ -10,9 +10,9 @@ La gestión de usuarios y grupos se lleva a cabo desde la entrada *"Usuarios y g
 
 Desde la vista de usuarios podemos ver el listado de usuarios disponibles, así como:
 
-- Crear(**1**), 
-- Actualizar(**2**) ó
-- Eliminar usuarios(**3**).
+   - Crear(**1**), 
+   - Actualizar(**2**) ó
+   - Eliminar usuarios(**3**).
 
 Los campos que aparecen en el formulario de usuarios son los siguientes:
 
