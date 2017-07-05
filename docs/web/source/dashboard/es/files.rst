@@ -1,4 +1,4 @@
-3. Administardor de archivos
+3. Administrador de archivos
 ============================
 
 3.1 Crear directorios
@@ -44,6 +44,7 @@ Para que se exporte de forma correcta a la BD, basta con subir los tres primeros
 - Hacer click sobre el botón *'subir'*
 - En la nueva ventana pinchamos sobre el botón 'seleccionar', desde allí se podrá navegar por nuestros directorios locales del ordenador y seleccionar los tres ficheros shapefile (shp, dbf, shx) o el fichero (tif). También está la opción de arrastrar los archivos.
 - Los archivos se pueden subir seleccionando uno a uno o comprimidos en formato zip.
+- Pinchamos nuevamente sobre el botón 'subir' y en la ventana se muestra el progreso de la carga de archivos.
 
 .. image:: ../images/dirs3_2.png
    :align: center
@@ -59,7 +60,7 @@ Para que se exporte de forma correcta a la BD, basta con subir los tres primeros
 ------------------------------------------
 Entre las operaciones que podremos realizar sobre los archivos de tipo shapefile, se encuentra la de *“Exportar a base de datos”* y *“eliminar archivo”*, éste último borrará en el servidor tanto el fichero 'shp' como el resto de archivos asociados (.shx, .dbf, .shx, …).
 
-Para la opción exportar seleccionamos la operación en el menú de operaciones del archivo **"shp"**.
+Para la **opción exportar** seleccionamos la operación en el menú de operaciones del archivo **"shp"**.
 
 .. image:: ../images/dirs5_2.png
    :align: center
@@ -71,7 +72,7 @@ A continuación se mostrará el formulario con los parámetros necesarios para r
 
 Debemos elegir:
 
-- **El modo de creación**, es decir, si es crear una nueva tabla (exportar nueva), añadir registros o sobreescribir una tabla existente. Las dos últimos opciones deben utilizarse con cuidado, ya que borrarán o modificarán datos existentes.
+- **El modo de creación**, es decir, si es crear una nueva tabla (exportar nueva), añadir registros o sobreescribir una tabla existente. Las dos últimas opciones deben utilizarse con cuidado, ya que borrarán o modificarán datos existentes.
 - **el almacén de datos de destino** (de tipo base de datos PostGIS) 
 - **nombre** de la capa en minúsculas, ni espacios vacíos.
 - **especificar el sistema de referencia de coordenadas** (CRS) y 
@@ -88,7 +89,7 @@ Los GeoTIFF es un estandar de metadatos de domino público que permite que infor
 
 - Para subirlos al directorio procederemos de la misma forma que con los archivos shapefile, solo que en este caso será un único archivo.
 
-- Para **'Exportarlos'**, en este caso *NO procede igual que los shapefile*, en este caso **se debe ir al almacén de datos y crear un nuevo almacén de 'tipo GeoTiff'**
+- Para **'Exportarlos'**, *NO procede igual que los shapefile*, en este caso **se debe ir al almacén de datos y crear un nuevo almacén de 'tipo GeoTiff'**.
 
-- Una vez definido su almacén de datos, se podrá disponer de la capa para ser publicada igualmente que el shapefile desde la entrada de *'servicios'* - *'capa'*
+- Una vez definido su almacén de datos, se podrá disponer de la capa para ser publicada igualmente que el shapefile desde la entrada de *'servicios'* - *'capa'*.
 

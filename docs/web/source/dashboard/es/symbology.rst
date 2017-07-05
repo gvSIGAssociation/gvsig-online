@@ -1,13 +1,15 @@
 5. Simbología
-=======================
+=============
 Para crear o modificar la leyenda de una capa seleccionaremos la entrada *"Estilos de capa"* en el menú de simbología.
 
-.. image:: ../images/sym1.png
+.. image:: ../images/sym1_2.png
    :align: center
 
-Aparecerá un listado con las capas disponibles. Cada capa del listado dispone de un selector donde se muestran las leyendas o estilos disponibles para la capa. 
-Estas leyendas se podrán seleccionar para ser modificadas(2).
-También podremos añadir una nueva leyenda a la capa seleccionando el botón añadir(1).
+- Aparecerá un listado con las capas disponibles. 
+- Cada capa del listado dispone de un selector donde se muestran las leyendas o estilos disponibles para la capa. 
+- Para cada estilo de capa se le podrá añadir un *'nuevo estilo'* (**1**) y tantos como se deseen teer en el recuadro de selector de estilos que dispone cada capa. 
+- Los estilos definidos se podrán seleccionar para ser modificadas(2).
+- El estilo que no se esté usando como leyenda de la capa, es decir, que no esté fijada por defecto, se puede eliminar seleccionando el estilo en el selector y luego botón (**3**) *'Eliminar estilo'*.
 
 Si seleccionamos el botón el botón añadir se nos mostrará una vista para que seleccionemos el tipo de leyenda que deseamos crear.
 En caso de que la capa sea de tipo vectorial el menú que se nos mostrará será el siguiente:
@@ -24,39 +26,40 @@ Y si es de tipo raster de esta forma:
 ----------------------------
 La leyenda de símbolo único es la más simple de todas y nos permite definir un estilo que será aplicado a todos los elementos de una capa de la misma forma, sin hacer ningún tipo de distinción.
 
-.. image:: ../images/sym4.png
+.. image:: ../images/sym4_2.png
    :align: center
 
 
 La vista para crear una leyenda de símbolo único está divida en tres áreas:
 
-El área de metadatos(recuadro rojo) contiene los siguientes campos:
+   - 1- El área de metadatos(recuadro rojo) contiene los siguientes campos:
 
 *   **Nombre**: El nombre del estilo se genera por defecto por tanto no es necesario definirlo.
 
 *   **Título**: Título que aparecerá en la leyenda que se muestra en el visor.
 
-*   **Escala mínima**: Escala mínima a partir de la cual será mostrada la leyenda (Si el valor es -1 no se tendrá en cuenta).
+*   **Escala mínima**: Escala mínima a partir de la cual será mostrada la leyenda (por defecto está 'sin límites').
 
-*   **Escala máxima**: Escala máxima hasta la cual será mostrada la leyenda (Si el valor es -1 no se tendrá en cuenta).
+*   **Escala máxima**: Escala máxima hasta la cual será mostrada la leyenda (por defecto está 'sin límites').
 
-*   **Por defecto**: Si seleccionamos este campo el estilo será el que se muestre por defecto en el visor.
+*   **Por defecto**: Si seleccionamos este check, el estilo será el que se muestre por defecto en el visor.
 
-El área de pre-visualización (recuadro morado) contiene el mapa donde podremos observar el estilo de la leyenda. 
+   - 2- El área de pre-visualización (recuadro morado) contiene el mapa donde podremos observar el estilo de la leyenda y la entrada para añadir 'etiqueta'
 Para actualizar la pre-visualización lo haremos a través del botón *"Actualizar previsualización"* situado en la parte superior derecha.
 
-El área de simbolizadores (recuadro verde) Desde aquí iremos añadiendo los distintos simbolizadores que conformarán finalmente el símbolo.
 
-Tenemos 3 opciones:
+   - 3- El área de simbolizadores (recuadro verde) Desde aquí iremos añadiendo los distintos simbolizadores que conformarán finalmente el símbolo.
 
-*   **Importar un símbolo desde una biblioteca:** Se nos mostrará un dialogo con desplegable donde seleccionaremos la biblioteca de símbolos. A continuación seleccionaremos el símbolo.
+Tenemos dos opciones para agregar simbolizadores:
 
-.. image:: ../images/sym5.png
+*   **Importar un símbolo desde una libreria:** Se nos mostrará un dialogo con desplegable donde seleccionaremos la biblioteca de símbolos. A continuación seleccionaremos el símbolo.
+
+.. image:: ../images/sym5_2.png
    :align: center
 
 *   **Añadir uno o varios simbolizadores:** Como hemos comentado anteriormente un símbolo puede estar formado por uno o más simbolizadores.
 
-.. image:: ../images/sym6.png
+.. image:: ../images/sym6_2.png
    :align: center
 
 Podremos editar o eliminar un simbolizador desde los botones que se encuentran en la parte derecha.
@@ -64,7 +67,7 @@ Podremos editar o eliminar un simbolizador desde los botones que se encuentran e
 .. image:: ../images/sym7.png
    :align: center
 
-Al seleccionar el botón de edición se abrirá un dialogo donde podremos configurar los valores de las propiedades del simbolizador en función de us tipo.
+Al seleccionar el botón de edición se abrirá un dialogo donde podremos configurar los valores de las propiedades del simbolizador en función de su tipo.
 
 .. image:: ../images/sym8.png
    :align: center
@@ -74,18 +77,39 @@ En caso de tener varios simbolizadores podemos definir el orden de visualizació
 .. image:: ../images/sym9.png
    :align: center
 
-*   **Añadir una etiqueta:**Las etiquetas son tipo especial de simbolizadores de tipo texto. Para añadir una nueva etiqueta seleccionaremos el botón *"Añadir etiqueta"*.
-    Solo podremos añadir una etiqueta por símbolo por tanto una vez añadida una etiqueta el botón desaparecerá, y solo volverá a aparecer si esta es eliminada.
 
-.. image:: ../images/sym10.png
+5.2 Añadir etiqueta
+-------------------
+Las etiquetas son un tipo especial de simbolizadores de tipo texto. Para añadir una nueva etiqueta seleccionaremos el botón *"Añadir etiqueta"* que se ubica en la esquina superior derecha de cada ventana de configuración de estilo.
+
+
+.. image:: ../images/sym10_2.png
    :align: center
 
-Como cualquier otro simbolizador una vez añadida podremos editar sus propiedades.
+- La ventana de configuración de etiquetado consta de cuatro (4) pestañas, general, fuente, halo y filtro.
 
-.. image:: ../images/sym11.png
+- Cuando se activa la ventana de etiquetado se muestra por defecto la primera pestaña '*General'*, desde esta opción se puede:
+
+            - activar el 'check' para poder habilitar las demás pestañas de configuración de etiquetado,
+            - Se añade un título, este se verá reflejado en la leyenda del mapa. Por defecto estará el nombre del campo que el sistema detecta para etiquetar. 
+            - se puede definir una escala mínima y máxima en la que se mostrará el etiquetado sobre el mapa del proyecto.
+
+.. image:: ../images/sym11_2.png
    :align: center
 
-5.2 Leyenda de valores únicos
+- En la pestaña *'fuente'* como cualquier otro simbolizador una vez activado el check anterior, podremos editar sus propiedades.
+
+.. image:: ../images/sym11_3.png
+   :align: center
+
+- La pestaña *'halo'* sirve para definir el color de sombreado sobre la fuente. Esto es opcional para el usuario.
+
+- La pestaña *'filtro'*, como su nombre lo indica se puede realizar un expresión básica para que ejecute un filtro sobre las etiquetas que se quieran mostrar.
+
+.. image:: ../images/sym11_4.png
+   :align: center
+
+5.3 Leyenda de valores únicos
 -----------------------------
 La leyenda de valores únicos genera una clasificación de símbolos en función de un campo de la capa.
 
@@ -96,7 +120,7 @@ Seleccionaremos el campo por el que deseamos realizar la clasificación (1), y a
 
 Cada una de las clases creadas puede ser modificada de la misma forma que si se tratara de un símbolo único.
 
-5.3 Leyenda de intervalos
+5.4 Leyenda de intervalos
 -------------------------
 El tipo de leyenda más habitual para representar datos numéricos quizá sea la de intervalos, que permite clasificar los valores disponibles en los distintos elementos en una serie de rangos.
 Para generar la leyenda de intervalos en primer lugar seleccionaremos el campo por el que deseamos realizar la clasificación (1) (solo aparecerán los campos numéricos),
@@ -107,7 +131,7 @@ y a continuación seleccionaremos el número de intervalos (2).
 
 Cada una de las clases creadas puede ser modificada de la misma forma que si se tratara de un símbolo único.
 
-5.4 Leyenda de expresiones
+5.5 Leyenda de expresiones
 --------------------------
 Mediante esta leyenda podremos asignar un tipo de símbolo a los elementos que cumplan con una determinada condición o expresión. Y, por supuesto, podemos tener en una misma leyenda tantas condiciones como deseemos.
 
@@ -125,7 +149,7 @@ A continuación se nos mostrará un diálogo, desde donde podremos definir el fi
 .. image:: ../images/sym15.png
    :align: center
 
-5.5 Mapa de color (ráster)
+5.6 Mapa de color (ráster)
 --------------------------
 Mediante esta leyenda podremos asignar una tabla de colores a una capa de tipo ráster. Las rampas de color se utilizan, por ejemplo, para aplicaciones específicas, como mostrar la elevación o precipitación.
 
@@ -151,7 +175,7 @@ A continuación se nos mostrará un dialogo para que configuremos los valores.
 
 
 
-5.6 Bibliotecas de símbolos
+5.7 Bibliotecas de símbolos
 ---------------------------
 Las bibliotecas de símbolos nos permiten crear y agrupar símbolos genéricos que posteriormente podremos importar desde las leyendas de capa.
 
