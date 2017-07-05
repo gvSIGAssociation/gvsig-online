@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     #'gvsigol_plugin_worldwind',
     #'gvsigol_plugin_shps_folder',
     #'gvsigol_plugin_geocoding',
+    #'gvsigol_plugin_etl',
     #'gvsigol_plugin_sync',
     #'gvsigol_plugin_catastro',
     #'gvsigol_plugin_alfresco',
@@ -218,6 +219,7 @@ LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_geocoding/locale'),
+    os.path.join(BASE_DIR, 'gvsigol_plugin_etl/locale'),
 )
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -251,6 +253,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_geocoding/static'),
+    os.path.join(BASE_DIR, 'gvsigol_plugin_etl/static'),
 )
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
