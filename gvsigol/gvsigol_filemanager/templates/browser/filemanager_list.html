@@ -37,7 +37,7 @@
 	      			{% elif file.extension == "tif" or file.extension == "tiff" or file.extension == "geotiff" %}
 	      				<td><img width="32" src="{% static "img/tiff.png" %}" style="margin-right: 5px;">{{file.filename}}</td>
 	      			{% elif file.extension == "xlsx" or file.extension == "xls" or file.extension == "csv" %}
-	      				<td><img width="32" src="{% static "img/default.png" %}" style="margin-right: 5px;">{{file.filename}}</td>
+	      				<td><img width="32" src="{% static "img/excel.png" %}" style="margin-right: 5px;">{{file.filename}}</td>
 	      			{% endif %}
 	      		{% endif %}
 	      		<td>{{file.filesize}}</td>
