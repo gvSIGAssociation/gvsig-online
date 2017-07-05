@@ -236,6 +236,11 @@ class Introspect:
         
         self.cursor.execute(query)
         
+    def insert_sql(self, schema, table_name, sql):
+        query = "INSERT INTO " + schema + "." + table_name + " " + sql + ";"
+        
+        self.cursor.execute(query)
+        
     def close(self):
         """
         Closes the connection. The Introspect object can't be used afterwards
