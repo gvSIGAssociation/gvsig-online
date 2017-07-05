@@ -60,7 +60,7 @@ Al abrir el dialogo de seleccionar archivo, este nos mostrará un ventana con el
 
 2.3 Crear, modificar y eliminar Grupos de capas
 -----------------------------------------------
-Desde el listado de grupo de capas podemos añadir nuevo (**1**), actualizar (**2**), limpiar caché (**3**) y eliminar grupos de capas.
+Desde el listado de grupo de capas podemos añadir nuevo (**1**), actualizar (**2**), limpiar caché (**3**) y eliminar grupos de capas (**4**).
 
 .. image:: ../images/layer_group.png
    :align: center
@@ -69,21 +69,21 @@ Desde el listado de grupo de capas podemos añadir nuevo (**1**), actualizar (**
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Para crearlo seleccionamos el botón *'añadir nuevo grupo de capas'*, se desplegará un formulario donde hay que asignarle:
 
-- Nombre: en minúsculas, sin espacios en blanco y caracteres especiales
-- Título: Se puede escribir sin ninguna restricción y será el nombre que se muestra en el visor de mapas.
-- Caché de grupo: Esto activará automaticamente el caché de todas las capas que pertenezcan a ese grupo.
+- **Nombre**: en minúsculas, sin espacios en blanco y caracteres especiales
+- **Título**: Se puede escribir sin ninguna restricción y será el nombre que se muestra en el visor de mapas.
+- **Caché de grupo**: Esto activará automaticamente el caché de todas las capas que pertenezcan a ese grupo.
  
 .. image:: ../images/layer_group_new.png
    :align: center
 
 2.3.2  Actualizar grupo de capas
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Esta opción solo permitirá editar el título del grupo y activar o desactivar el Cacheo de grupo.
+Esta opción solo permitirá editar el título del grupo y activar o desactivar el caché del grupo.
 
 
 2.3.2 Eliminar grupo de capas
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Cuando se da la opcion de eliminar grupo de capas y tenía asociadas una o mas capas, estás últimas se designan a un grupo de capas 'por defecto' que tiene el sistema. 
+Cuando se da la opción de eliminar grupo de capas y tenía asociadas una o mas capas, estás últimas se designan a un grupo de capas 'por defecto' que tiene el sistema. 
 
 
 2.4 Crear, modificar y eliminar enumeraciones
