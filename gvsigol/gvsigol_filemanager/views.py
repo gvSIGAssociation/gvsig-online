@@ -5,7 +5,7 @@ from gvsigol_services.forms_geoserver import PostgisLayerUploadForm
 from django.views.generic import TemplateView, FormView
 from django.shortcuts import HttpResponse, redirect
 from django.utils.translation import ugettext as _
-from gvsigol.settings import FILEMANAGER_DIRECTORY
+from gvsigol.settings import FILEMANAGER_DIRECTORY, INSTALLED_APPS
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseBadRequest
 from gvsigol_services import rest_geoserver
@@ -60,7 +60,8 @@ class BrowserView(FilemanagerMixin, TemplateView):
         else:
             context['extends_template'] = 'filemanager_base.html'
         context['files'] = self.fm.directory_list(self.request, context['first_level'])
-
+        context['is_etl_plugin_installed'] = 'gvsigol_plugin_etl' in INSTALLED_APPS
+        
         return context
 
 

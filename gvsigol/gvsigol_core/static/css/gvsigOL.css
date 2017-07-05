@@ -4760,3 +4760,16 @@ table.dataTable thead th span.subname, table.dataTable tfoot th span.subname{
 #float-modal .popup-wrapper {
     padding: 10px 0px 10px 10px;
 }
+
+.custom-form{
+	background-color: #eee;
+}
+
+.nav-tabs-custom > .nav-tabs > li.active.excel-tab > a, 
+.nav-tabs-custom > .nav-tabs > li.active.excel-tab:hover > a,
+.nav-tabs-custom > .nav-tabs > li.active.csv-tab > a, 
+.nav-tabs-custom > .nav-tabs > li.active.csv-tab:hover > a  {
+    background-color: #eee;
+}
+
+

@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 
 import signals
-from gvsigol.settings import FILEMANAGER_DIRECTORY, FILEMANAGER_STORAGE
+from gvsigol.settings import FILEMANAGER_DIRECTORY, FILEMANAGER_STORAGE, INSTALLED_APPS
 from utils import sizeof_fmt
 from gvsigol_core import utils as core_utils
 import zipfile
@@ -70,7 +70,11 @@ class Filemanager(object):
 
     def directory_list(self, request, first_level):
         listing = []
+        
         visible_extensions = ['shp', 'dbf', 'geotif', 'geotiff', 'tif', 'tiff']
+        
+        if 'gvsigol_plugin_etl' in INSTALLED_APPS:
+            visible_extensions = visible_extensions + ['xlsx', 'xls', 'csv']
         
         directories, files = FILEMANAGER_STORAGE.listdir(self.location)
 
