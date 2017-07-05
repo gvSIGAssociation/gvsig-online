@@ -32,7 +32,7 @@ La leyenda de símbolo único es la más simple de todas y nos permite definir u
 
 La vista para crear una leyenda de símbolo único está divida en tres áreas:
 
-   - 1- El área de metadatos(recuadro rojo) contiene los siguientes campos:
+**1** - El área de metadatos(recuadro rojo) contiene los siguientes campos:
 
 *   **Nombre**: El nombre del estilo se genera por defecto por tanto no es necesario definirlo.
 
@@ -44,11 +44,11 @@ La vista para crear una leyenda de símbolo único está divida en tres áreas:
 
 *   **Por defecto**: Si seleccionamos este check, el estilo será el que se muestre por defecto en el visor.
 
-   - 2- El área de pre-visualización (recuadro morado) contiene el mapa donde podremos observar el estilo de la leyenda y la entrada para añadir 'etiqueta'
+**2** - El área de pre-visualización (recuadro morado) contiene el mapa donde podremos observar el estilo de la leyenda y la entrada para añadir 'etiqueta'
 Para actualizar la pre-visualización lo haremos a través del botón *"Actualizar previsualización"* situado en la parte superior derecha.
 
 
-   - 3- El área de simbolizadores (recuadro verde) Desde aquí iremos añadiendo los distintos simbolizadores que conformarán finalmente el símbolo.
+**3** - El área de simbolizadores (recuadro verde) Desde aquí iremos añadiendo los distintos simbolizadores que conformarán finalmente el símbolo.
 
 Tenemos dos opciones para agregar simbolizadores:
 
@@ -78,8 +78,8 @@ En caso de tener varios simbolizadores podemos definir el orden de visualizació
    :align: center
 
 
-5.2 Añadir etiqueta
--------------------
+5.2 Añadir etiquetado
+---------------------
 Las etiquetas son un tipo especial de simbolizadores de tipo texto. Para añadir una nueva etiqueta seleccionaremos el botón *"Añadir etiqueta"* que se ubica en la esquina superior derecha de cada ventana de configuración de estilo.
 
 
@@ -104,7 +104,7 @@ Las etiquetas son un tipo especial de simbolizadores de tipo texto. Para añadir
 
 - La pestaña *'halo'* sirve para definir el color de sombreado sobre la fuente. Esto es opcional para el usuario.
 
-- La pestaña *'filtro'*, como su nombre lo indica se puede realizar un expresión básica para que ejecute un filtro sobre las etiquetas que se quieran mostrar.
+- La pestaña *'filtro'*, como su nombre lo indica se puede realizar una expresión básica para que ejecute un filtro sobre las etiquetas que se quieran mostrar.
 
 .. image:: ../images/sym11_4.png
    :align: center
@@ -119,6 +119,8 @@ La leyenda de valores únicos genera una clasificación de símbolos en función
 Seleccionaremos el campo por el que deseamos realizar la clasificación (1), y a continuación se crearán de forma automática las clases correspondientes.
 
 Cada una de las clases creadas puede ser modificada de la misma forma que si se tratara de un símbolo único.
+
+
 
 5.4 Leyenda de intervalos
 -------------------------
