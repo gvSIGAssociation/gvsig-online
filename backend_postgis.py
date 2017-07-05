@@ -17,6 +17,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from django.contrib.gis.db.models import sql
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
@@ -238,6 +239,14 @@ class Introspect:
         
     def insert_sql(self, schema, table_name, sql):
         query = "INSERT INTO " + schema + "." + table_name + " " + sql + ";"
+        
+        self.cursor.execute(query)
+        
+    def remove_data(self, schema, table_name, sql=None):
+        query = "DELETE FROM " + schema + "." + table_name
+        if sql:
+            query = query + ' WHERE ' + sql
+        query = query + ';'
         
         self.cursor.execute(query)
         
