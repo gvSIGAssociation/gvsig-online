@@ -143,8 +143,6 @@ $(document).ready(function() {
 	var utils = new SymbologyUtils(map, wmsLayer, 'RasterSymbolizer', previewUrl, [], []);
 	var colorTable = new ColorTable(layerName, utils, rule_opts);
 	
-	utils.centerMapToExtent(extent, extentEpsg);
-	
 	$("#style-title").on('change', function(e){
 		var rule = colorTable.getRule();
 		rule.title = this.value;
@@ -179,6 +177,8 @@ $(document).ready(function() {
 	$("#refresh-preview").on('click', function(e){
 		colorTable.refreshMap();
 	});
+	
+	utils.centerMapToExtent(extent, extentEpsg);
 
 });
 </script>
