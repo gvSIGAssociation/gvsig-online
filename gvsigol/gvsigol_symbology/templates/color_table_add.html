@@ -140,8 +140,6 @@ $(document).ready(function() {
 	var colorTable = new ColorTable(layerName, utils, null);
 	colorTable.addDefaultEntries();
 	
-	utils.centerMapToExtent(extent, extentEpsg);
-	
 	$("#style-title").on('change', function(e){
 		var rule = colorTable.getRule();
 		rule.title = this.value;
@@ -177,7 +175,7 @@ $(document).ready(function() {
 		colorTable.refreshMap();
 	});
 	
-	
+	utils.centerMapToExtent(extent, extentEpsg);
 
 });
 </script>
