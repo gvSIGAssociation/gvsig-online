@@ -9,15 +9,26 @@ Puede crear(**1**), actualizar (**2**) y eliminar(**3**) espacios de trabajo des
    :align: center
 
 Para crear un nuevo espacio de trabajo (**1**) se debe llenar el siguiente formulario:
+
 - proporcionar un nombre, no puede contener espacios, signos de puntuación ni caracteres especiales como la *"ñ"*.
 - una descripción, este se reflejerá en la página donde se sirven los servicios.
-- También está la opción de activar el check *'¿es público?'*, esta opción permitirá publicar los servicios en la págia principal de los servicios.
+- También está la opción de activar el check *'¿es público?'*, esta opción permitirá publicar en la págia principal donde de disponen los servicios.
 - Habitualmente no es necesario modificar la URL de los servicios (estos son generados automáticamente cuando se añade el nombre).
 
 .. image:: ../images/ws1_3.png
    :align: center
 
-Desde el botón actualizar (**2**) solo se podrá actualizar la *'descripción'* y activar o desactivar la opción de *'público'*
+Desde el botón actualizar (**2**) solo se podrá modificar la *'descripción'* y activar o desactivar la opción de *'público'*
+
+Para poder obtener los links de los servicios WMS y WFS, se debe ir a la página principal (inicio) de Gvsig Online y se elige la entrada *"Servicios de Mapas"*
+
+.. image:: ../images/ws1_4.png
+   :align: center
+
+Se mostrará una página con todos los servicios de cada espacio de trabajo creado y que se haya elegido público.
+
+.. image:: ../images/ws1_5.png
+   :align: center
 
 
 2.2 Crear, modificar y eliminar almacenes de datos
