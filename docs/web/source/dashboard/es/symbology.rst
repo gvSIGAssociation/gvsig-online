@@ -113,13 +113,24 @@ Las etiquetas son un tipo especial de simbolizadores de tipo texto. Para añadir
 -----------------------------
 La leyenda de valores únicos genera una clasificación de símbolos en función de un campo de la capa.
 
-.. image:: ../images/sym12.png
+.. image:: ../images/sym12_2.png
    :align: center
 
-Seleccionaremos el campo por el que deseamos realizar la clasificación (1), y a continuación se crearán de forma automática las clases correspondientes.
+- Seleccionaremos el campo por el que deseamos realizar la clasificación (**1**), y a continuación se crearán de forma automática las clases correspondientes (**2**).
 
-Cada una de las clases creadas puede ser modificada de la misma forma que si se tratara de un símbolo único.
+- Cada una de las clases creadas puede ser modificada de la misma forma que si se tratara de un símbolo único.
 
+- Se puede asignar una escala mínima y máxima de visualización (**3**) que se aplicará por defecto para todas las clases.
+
+- Para cada clase por separado también se puede asignar escala mínima y máxima, esto se hace desde la herramienta que se ubica a la derecha de la clase *'editar regla'* (**4**), se debe activar el check de 'visible por escala'
+
+.. image:: ../images/sym12_3.png
+   :align: center
+
+- En la ventana de 'editar regla' también se puede añadir o cambiar el título de la clase y este será el que se muestre en la leyenda del visor de mapa.
+
+.. note::
+   Si no se quiere editar la escala a cada una de las clases, éstas tedrán por defecto la escala aplicada en la capa general.
 
 
 5.4 Leyenda de intervalos
@@ -131,19 +142,23 @@ y a continuación seleccionaremos el número de intervalos (2).
 .. image:: ../images/sym13.png
    :align: center
 
-Cada una de las clases creadas puede ser modificada de la misma forma que si se tratara de un símbolo único.
+- Cada una de las clases creadas puede ser modificada de la misma forma que si se tratara de un símbolo único.
+
+- También se puede personalizar la escala a cada clase como en el caso de Valores únicos.
 
 5.5 Leyenda de expresiones
 --------------------------
 Mediante esta leyenda podremos asignar un tipo de símbolo a los elementos que cumplan con una determinada condición o expresión. Y, por supuesto, podemos tener en una misma leyenda tantas condiciones como deseemos.
 
-Para crear un un símbolo seleccionaremos el botón *"Añadir nueva regla"* (1), lo que nos creará un nuevo símbolo con los valores por defecto.
+- Para crear un un símbolo seleccionaremos el botón *"Añadir nueva regla"* (1), lo que nos creará un nuevo símbolo con los valores por defecto.
 
-Cada una de las clases creadas puede ser modificada de la misma forma que si se tratara de un símbolo único.
+- Cada una de las clases creadas puede ser modificada de la misma forma que si se tratara de un símbolo único
 
-Para definir la condición de filtrado seleccionaremos en el menú de herramientas la opción *"Editar filtro"* (2).
+- Asignarle escala y cambiar el título a cada una de las reglas por medio de la herramienta *'editar regla'* (**2**)
 
-.. image:: ../images/sym14.png
+- Para definir la condición de filtrado seleccionaremos en el menú de herramientas la opción *"Editar filtro"* (**2**).
+
+.. image:: ../images/sym14_2.png
    :align: center
 
 A continuación se nos mostrará un diálogo, desde donde podremos definir el filtro con la condición deseada.
