@@ -9,3 +9,4 @@ Plugins
    alfresco
    catalog
    shps_folder
+   etl
