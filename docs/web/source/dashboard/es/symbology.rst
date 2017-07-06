@@ -208,8 +208,7 @@ Podremos también importar bibliotecas que hayan sido creadas previamente en la 
 Para añadir símbolos a una biblioteca seleccionaremos la opción actualizar biblioteca en el listado (botón verde).
 
 Podremos añadir 4 tipos de símbolos: Gráficos externos (imágenes), puntos, líneas y polígonos.
-
-El interfaz para añadir puntos líneas y polígonos es similar al descrito en el punto 6.2.1.
+ 
 En caso de que el símbolo que deseemos añadir sea de tipo imagen el interfaz nos permitirá seleccionar la imagen desde nuestro sistema de ficheros local.
 
 .. image:: ../images/sym19.png

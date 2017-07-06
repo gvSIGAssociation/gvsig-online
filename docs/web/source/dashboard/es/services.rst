@@ -3,13 +3,21 @@
 
 2.1 Crear y eliminar espacios de trabajo
 ----------------------------------------
-Puede crear(**1**) y eliminar(**2**) espacios de trabajo desde el listado de espacios de trabajo. Si elimina un espacio de trabajo, se eliminarán de gvSIG Online todos los almacenes de datos y capas asociadas.
+Puede crear(**1**), actualizar (**2**) y eliminar(**3**) espacios de trabajo desde el listado de espacios de trabajo. Si elimina un espacio de trabajo, se eliminarán de gvSIG Online todos los almacenes de datos y capas asociadas.
 
-.. image:: ../images/ws1.png
+.. image:: ../images/ws1_2.png
    :align: center
 
-Para crear un espacio de trabajo, proporcione un nombre y una descripción. El nombre del espacio de trabajo no puede contener espacios, signos de puntuación ni caracteres especiales como la *"ñ"*. 
-Habitualmente no es necesario modificar la URL de los servicios (generada automáticamente).
+Para crear un nuevo espacio de trabajo (**1**) se debe llenar el siguiente formulario:
+- proporcionar un nombre, no puede contener espacios, signos de puntuación ni caracteres especiales como la *"ñ"*.
+- una descripción, este se reflejerá en la página donde se sirven los servicios.
+- También está la opción de activar el check *'¿es público?'*, esta opción permitirá publicar los servicios en la págia principal de los servicios.
+- Habitualmente no es necesario modificar la URL de los servicios (estos son generados automáticamente cuando se añade el nombre).
+
+.. image:: ../images/ws1_3.png
+   :align: center
+
+Desde el botón actualizar (**2**) solo se podrá actualizar la *'descripción'* y activar o desactivar la opción de *'público'*
 
 
 2.2 Crear, modificar y eliminar almacenes de datos
