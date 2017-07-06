@@ -4,71 +4,138 @@ Cargador de carpetas Shape
 Introducción
 ------------
 
-*ETL* (acrónimo de los términos en inglés *Extract, Transform and Load*) es una herramienta que permite exportar la información contenida en un fichero plano de  datos (Excel o CSV) a una tabla en la base de datos para luego poder operar con ella.
-
-Para acceder a esta funcionalidad, se dispone de una entrada en el menú lateral *Servicios*, subsección *Transformaciones*
+En ocasiones, puede existir la necesidad de generar numerosos proyectos que tengan una cartografía base en común con unas características determinadas de simbología, orden de capas y grupos idéntica en todos los casos. 
 
 
-
-Las plantillas de transformaciones
-----------------------------------
-
-A través de las transformaciones se definirán cómo rellenar cada uno de los campos de la base de datos destino utilizando la información extraída de cada una de las filas del fichero origen (xlsx o csv)
-
-Las transformaciones aparecen listadas, pudiéndose añadir más, editar las existentes o borrarlas.
+El objetivo de este plugin es dar soporte para poder definir unas plantillas que establezcan esa configuración de las capas que compondrán los futuros proyectos, permitiendo ahorrar esos pasos repetitivos en cada uno de ellos.
+A través de esta funcionalidad, se pueden definir los grupos de capas que existirán, así como los shapes que contendrán. También se podrá indicar el nombre, el título, la simbología o la traducción de los nombres de sus campos, entre otras opciones.
 
 
-*Crear una transformación*: Sólo requiere del nombre de la transformación para su genereación. Luego se pueden definir todos los pasos a seguir para exportar los datos desde la pantalla de edición.
+Para acceder a esta funcionalidad, se dispone de una entrada en el menú lateral *Carpetas SHPS*. Desde ella, se divide la sección de *Proyectos* o *Plantillas*
 
-*Borrar transformación*: Elimina la transformación, así como todas sus reglas (pasos a seguir) para rellenar los campos de la base de datos.
-
-*Actualizar transformación*: Permite definir la secuencia de pasos a seguir. En él se definen las reglas (pasos), de la siguiente manera:
-
-- Primero da la opción de indicar un ejemplo de base de datos de destino. Aunque es opcional, si se pone rellenará parte del formulario facilitando la faena posterior (por ejemplo, aparecerá el listado de campos dispoibles, evitando los errores ocasionados al tecleaarlos a mano)
-
-- Luego se define el origen de datos, escogiendo la pestaña correspondiente (Excel o CSV)
-
-- Según la opción especificada, se elegirán los parámetros necesarios para configurarla:
-
-  - Excel:
-    
-    - Se eligen las hojas del excel sobre las que se hará la transformación. Puede escogerse la opción de 'todas', 'desde...hasta...', 'con el nombre...' o 'que cumplan esta condición...' (expresión regular)
-    
-    - Luego se define la fila a partir de la cual empezar a tomar los datos (por si hay cabeceras o filas a ignorar)
+.. image:: ../_static/images/shps_folder_index.png
+   :align: center
    
-  - CSV:
-    
-    - Se define el caracter que actúa de separador de campos (aparecen algunos, pero se puede definir uno propio)
-    
-    - Se especifica la codificación del fichero
-    
-    - Luego se define la fila a partir de la cual empezar a tomar los datos (por si hay cabeceras o filas a ignorar)
-     
-- Por último, se establecerán las reglas de transformación. Estas reglas requieren del campo de la tabla de la base de datos donde se va almacenar la información (campo destino), y de cómo se va a rellenar, pudiéndose elegir entre estas opciones:
-  
-  - Con un *texto fijo* (valores constantes)
-  
-  - Con el *valor de una columna*. a partir de la fila indicada anteriormente, rellenara con el valor de esa columna. Se ha de indicar el número de columna (empezando por 0 para la primera)
-  
-  - *Valor calculado*, permite meter código python directamente para definir el valor del campo de forma compleja. Ejemplos existen todos los que se puedan ocurrir, pero por ejemplo marcamos dos:
-  
-    - self.createGeometry('Multipoint',4326,6,7) -> Función propia que rellena el campo con una geometría (en este caso multipunto), con un SRID (4326), y la longitud/latitud que están en las columnas 6 y 7 respectivamente (en este caso).
-    
-    - self.getValueOfColumn(0)+'-'+self.getValueOfColumn(1) -> Introduce en el campo destino los valores de la primera y segunda columna separados por un guión. self.getValueOfColumn(X) es una función propia que devuelve el valor para la columna X de la fila actual
-    
-    - now() -> Función general ed python que devuelve la fecha y hora actual
-    
-    - Y todas las que se puedan ocurrir....
-      
 
 
-Realizar transformaciones
--------------------------
+Las plantillas de configuración
+-------------------------------
 
-Una vez definida la transformación, se va al directorio de ficheros a buscar el origen de los datos (Ficheros excel o CSV). Y sobre el botón de herramientas se elige la opción *Transformas*
-
-Luego bastará con elegir la transformación a aplicar, la tabla de la BD destino y si se quiere que el resultado se añada al contenido que ya hay en la tabla, o que se borre y se rellene sólo con los datos del fichero.
+Se pueden encontrar un listado de las plantillas creadas en la sección *Plantillas* del menú lateral.
 
 
-    
+Si no se ha definido nada en ellas, la información que contiene es muy básica, ya que únicamente requiere un nombre para identificarla y el sistema de coordenadas por defecto que se le asignará a los shapes (si no se indica lo contrario)
+
+.. image:: ../_static/images/shps_folder_template_add.png
+   :align: center
+
+Las operaciones a realizar sobre plantillas son las básicas: crear una nueva, modificar o borrar.
+
+.. image:: ../_static/images/shps_folder_template_list.png
+   :align: center
    
+Una vez generada, se procederá a definir la estructura que tendrán las futuras capas de los proyectos que se creen. Para ello, se tienen dos métodos: creación manual o vincular a un directorio.
+
+* *Vincular a un directorio*: este caso generará la definición de los grupos de capas y capas basándose en una estructura de directorios, donde las carpetas definirán los grupos, y los ficheros SHP que contienen se asignarán como plantillas de capas.
+
+* *Creación a mano*: también se pueden establecer definiciones de grupos y capas de forma manual, a través de los botones de crear en cada caso.
+
+
+.. image:: ../_static/images/shps_folder_template_add_buttons.png
+   :align: center
+
+
+Se pueden crear, editar y borrar tanto la definición de grupos de capas como las capas que contienen. Además, se puede establecer el orden en el que aparecerán en el TOC del mapa del proyecto ordenándolos.
+
+
+.. image:: ../_static/images/shps_folder_template_order.png
+   :align: center
+
+
+A continuación se describen las operaciones más frecuentes:
+
+
+.. image:: ../_static/images/shps_folder_template_group_list.png
+   :align: center
+
+
+* *Crear un grupo*
+
+  Se trata de un formulario sencillo, requiere el nombre interno que tendrá el grupo y el título que se mostrará en el TOC del mapa.
+
+
+* *Editar un grupo* 
+
+  Además de los valores indicados en la creación, se pueden añadir, modificar, ordenar o borrar las definiciones de capas que contiene dicho grupo
+
+
+* *Borrar un grupo*
+
+  Elimina un grupo y las definiciones de capa que contiene
+
+  
+.. image:: ../_static/images/shps_folder_template_group_new.png
+   :align: center
+
+
+* *Crear una definición de capa*
+
+  Se requiere:
+  
+  * Fichero del shape: de él se extraerá el nombre del fichero y los nombres de los campos para las traducciones
+  * Nombre de la capa: nombre interno
+  * Título de la capa: nombre que se mostrará en el TOC del mapa del proyecto
+  * Descripción: información sobre el contenido de la capa
+  * ¿Es visible?: indica si se cargará de primeras en el proyecto o aparecerá desactivado en el TOC
+  * Sistema de coordenadas: si no se indica, cogerá el del grupo.
+  * Símbolo: se permite asignarle una simbología de alguna biblioteca cargada en el sistema
+  * Traducción de los campos: Permite establecer etiquetas de los campos para los distintos idiomas soportados por la aplicación
+    
+    
+* *Edita una capa*
+
+  Permite modificar cualquiera de los valores anteriormente definidos
+
+
+* *Borra una capa* 
+
+  Elimina la definición de la capa
+
+
+  
+.. image:: ../_static/images/shps_folder_template_layer_update.png
+   :align: center
+
+
+
+Los proyectos basados en plantillas
+-----------------------------------
+
+Una vez definidas las plantillas, se pueden crear tantos proyectos como se requiera, que usen esa definición como base y carguen ya ese contenido de la forma que se ha especificado.
+
+
+Para ello, en la sección *Proyectos* se dará de alta uno nuevo, indicando los parámetros necesarios. 
+
+.. image:: ../_static/images/shps_folder_project_add.png
+   :align: center
+
+A diferencia del formulario original de creación de proyectos, se definirá el proyecto original (con su nombre, descripción, icono, encuadre original del mapa, ...) además de indicar la plantilla que se utilizará, y si se desea programar cuándo se realizará una actualización de esa definición base e incluso indicarle que se repita cada cierto tiempo (esta funcionalidad es útil, por si se modificará la definición de las plantillas y se quisiera que se reflejase en los proyectos que hacen uso de ellas sin tener que editarlos uno a uno a mano o tener que rehacerlos).
+
+Una vez creado el nuevo proyecto, se puede realizar una actualización de la información a través del botón *Actualizar* (amarillo) del proyecto, o esperar a que se haga de forma automática (si se ha especificado).
+
+
+.. image:: ../_static/images/shps_folder_project_list.png
+   :align: center
+
+
+También se pueden actualizar varios proyectos a la vez y eliminar la selección a través de los botones *Actualizar selección* o *Borrar selección*
+
+
+.. image:: ../_static/images/shps_folder_project_load.png
+   :align: center
+
+Una vez actualizada la información, se habrán generado, de forma automática, las capas y grupos de capas de la forma que se estableció en la plantilla, y se habrán creado las vinculaciones necearias para que aparezcan en el proyecto.
+
+
+*NOTA:* Los proyectos aquí generados, así como las capas, grupos, simbología, etc. también son visibles desde los accesos convencionales de la aplicación y se comportan como tales si se accede  desde sus entradas correspondientes
+
