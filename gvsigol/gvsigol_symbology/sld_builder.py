@@ -149,7 +149,7 @@ def create_rule(r, symbolizers, feature_type_style):
     
     f = json.loads(r.filter)
     if len(f) == 1:
-        rule.create_filter(f.get('field'), get_operation_symbol(f.get('operation')), f.get('value'))
+        rule.create_filter(f[0].get('field'), get_operation_symbol(f[0].get('operation')), f[0].get('value'))
         
     elif len(f) >= 3:
         rule.Filter = build_complex_filter(f, rule)
