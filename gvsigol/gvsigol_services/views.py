@@ -519,10 +519,7 @@ def layer_add(request):
                 core_utils.toc_add_layer(newRecord)
                 mapservice_backend.createOrUpdateGeoserverLayerGroup(newRecord.layer_group)
                 mapservice_backend.reload_nodes()
-                if newRecord.type == 'v_PostGIS':
-                    return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
-                else:
-                    return redirect('layer_list')
+                return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
             
             except Exception as e:
                 try:
@@ -595,10 +592,7 @@ def layer_update(request, layer_id):
                                 
             mapservice_backend.reload_nodes()   
             
-            if layer.type != 'v_PostGIS':
-                return redirect('layer_list')
-            else:
-                return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer_id}))
+            return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer_id}))
         
     else:
         layer = Layer.objects.get(id=int(layer_id))
@@ -871,7 +865,7 @@ def layer_permissions_update(request, layer_id):
         try:
             layer = Layer.objects.get(pk=layer_id)
             groups = utils.get_all_user_groups_checked_by_layer(layer)   
-            return render_to_response('layer_permissions_add.html', {'layer_id': layer.id, 'name': layer.name, 'groups': groups}, context_instance=RequestContext(request))
+            return render_to_response('layer_permissions_add.html', {'layer_id': layer.id, 'name': layer.name, 'type': layer.type, 'groups': groups}, context_instance=RequestContext(request))
         except Exception as e:
             return HttpResponseNotFound('<h1>Layer not found: {0}</h1>'.format(layer_id))
    
