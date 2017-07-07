@@ -29,6 +29,8 @@ var Expressions = function(featureType, layerName, utils, previewUrl) {
 	this.utils = utils;
 	this.rules = new Array();
 	this.label = null;
+	this.rules = new Array();
+	this.expressions = new Array();
 	this.expressions_counter = 0;
 };
 
@@ -102,232 +104,311 @@ Expressions.prototype.addNewRule = function() {
 		e.preventDefault();
 		self.getFilterFormUI(this.dataset.ruleid);
 		$('#modal-expression').modal('show');
-		$('.CodeMirror').each(function(i, el){
-			el.CodeMirror.refresh();
-		});
 	});
 };
 
 Expressions.prototype.getFilterFormUI = function(ruleid) {
 	var self = this;
-	var language = $("#select-language").val();
+
 	$('#modal-expression-content').empty();
-
-	var operations = this.utils.getFilterOperations();
-	var fields = this.utils.getAlphanumericFields();
-
-	var rule = this.getRuleById(ruleid);
-	var dataType = '';
-
+	this.expressions = [];
+	this.expressions_counter = 0;
+	
 	var ui = '';
 	ui += '<div class="box">';
 	ui += 	'<div class="box-header with-border">';
 	ui += 		'<h3 class="box-title">' + gettext('Expressions') + '</h3>';
 	ui += 		'<div class="box-tools pull-right">';
-	//ui += 			'<button id="add-new-expression" class="btn btn-sm btn-success margin-r-5"><i class="fa fa-plus margin-r-5"></i> ' + gettext('Add expression') + '</button>';
+	ui += 			'<div class="btn-group">';
+	ui += 				'<button type="button" class="btn btn-sm btn-success"><i class="fa fa-plus margin-r-5"></i></button>';
+	ui += 				'<button type="button" class="btn btn-sm btn-success margin-r-5 dropdown-toggle" data-toggle="dropdown" aria-expanded="false">';
+	ui += 					'<span class="caret"></span>';
+	ui += 					'<span class="sr-only">Toggle Dropdown</span>';
+	ui += 				'</button>';
+	ui += 				'<ul class="dropdown-menu" role="menu">';
+	ui += 					'<li><a id="add-new-expression" data-ruleid="' + ruleid + '" href="#">Expression</a></li>';
+	ui += 					'<li><a id="add-and" data-ruleid="' + ruleid + '" href="#">AND</a></li>';
+	ui += 					'<li><a id="add-or" data-ruleid="' + ruleid + '" href="#">OR</a></li>';
+	ui += 				'</ul>';
+	ui += 			'</div>';
 	ui += 			'<button id="save-filter" data-ruleid="' + ruleid + '" class="btn btn-sm btn-default save-filter"><i class="fa fa-floppy-o margin-r-5"></i> ' + gettext('Save filter') + '</button>';
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += 	'<div class="box-body">';
 	ui += 		'<div id="expressions-list" class="expressions-list">';
-	ui += 			'<div class="box">';
-	ui += 				'<div class="box-header">';
-	ui += 					'<div class="box-tools pull-right">';
-	ui += 						'<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
-	ui += 							'<i class="fa fa-minus"></i>';
-	ui += 						'</button>';
-	ui += 					'</div>';
-	ui += 				'</div>';
-	ui += 				'<div class="box-body">';
-	ui += 					'<div class="row">';
-	ui += 						'<div class="col-md-6 form-group">';
-	ui += 							'<label>' + gettext('Select field') + '</label>';
-	ui += 							'<select id="expression-field" class="form-control">';
-	ui += 								'<option disabled selected value> -- ' + gettext('Select field') + ' -- </option>';
+	ui += 		'</div>';
+	ui += 	'</div>';
+	ui += '</div>';
+
+	$('#modal-expression-content').append(ui);
+	
+	var r = this.getRuleById(ruleid);
+	if (r.filter && r.filter.length > 0){
+		for (var i=0; i<r.filter.length; i++) {
+			if (r.filter[i].type == 'expression') {
+				var expression = {
+					id: self.expressions_counter,
+					type: 'expression',
+					field: r.filter[i].field,
+					operation: r.filter[i].operation,
+					value: r.filter[i].value
+				};
+				self.expressions.push(expression);
+				$('#expressions-list').append(self.addExpression(expression));
+				var inputs = '';
+				inputs += '<div class="col-md-12 form-group">';
+				inputs += 	'<label>' + gettext('Value') + '</label>';
+				inputs += 	'<select id="expression-value-select'+expression.id+'" class="form-control">';
+				inputs += 		'<option disabled selected value>--</option>';
+				inputs += 	'</select>';
+				inputs += '</div>';
+				
+				$('#expression-value'+expression.id).empty();
+				$('#expression-value'+expression.id).append(inputs);
+				self.loadUniqueValues(expression.field, expression.id);
+				$('#remove-expression' + self.expressions_counter).on('click', function(e){
+					e.preventDefault();
+					self.deleteExpression(this.dataset.expressionid);
+					this.parentNode.parentNode.parentNode.remove();
+					self.expressions_counter = self.expressions_counter - 1;
+				});
+				self.registerFilterEvents(self.expressions_counter);
+				self.expressions_counter = self.expressions_counter + 1;
+				
+			} else if (r.filter[i].type == 'and') {
+				var andOperator = {
+					id: self.expressions_counter,
+					type: 'and'
+				};
+				self.expressions.push(andOperator);
+				$('#expressions-list').append(self.addAndOperator(r));	
+				$('#remove-and' + self.expressions_counter).on('click', function(e){
+					e.preventDefault();
+					self.deleteExpression(this.dataset.expressionid);
+					this.parentNode.parentNode.parentNode.remove();
+					self.expressions_counter = self.expressions_counter - 1;
+				});
+				self.registerFilterEvents(self.expressions_counter);
+				self.expressions_counter = self.expressions_counter + 1;
+				
+			} else if (r.filter[i].type == 'or') {
+				var orOperator = {
+					id: self.expressions_counter,
+					type: 'or'
+				};
+				self.expressions.push(orOperator);
+				$('#expressions-list').append(self.addOrOperator(r));
+				$('#remove-or' + self.expressions_counter).on('click', function(e){
+					e.preventDefault();
+					self.deleteExpression(this.dataset.expressionid);
+					this.parentNode.parentNode.parentNode.remove();
+					self.expressions_counter = self.expressions_counter - 1;
+				});
+				self.registerFilterEvents(self.expressions_counter);
+				self.expressions_counter = self.expressions_counter + 1;
+			}
+		}
+	}
+	
+	$('#save-filter').on('click', function(){
+		var ruleid = this.dataset.ruleid;
+		var rule = self.getRuleById(ruleid);
+
+		var value = $('#expresion-value').val();
+		var field = $('#expression-field').val();
+		var operation = $('#expression-operation').val();
+
+		rule.setFilter(self.expressions);
+		$('#modal-expression').modal('hide');
+	});
+	
+	$('#add-new-expression').on('click', function(){
+		var rule = self.getRuleById(this.dataset.ruleid);
+		var expression = {
+			id: self.expressions_counter,
+			type: 'expression',
+			field: '',
+			operation: '',
+			value: ''
+		};
+		self.expressions.push(expression);
+		$('#expressions-list').append(self.addExpression(expression));
+		$('#remove-expression' + self.expressions_counter).on('click', function(e){
+			e.preventDefault();
+			self.deleteExpression(this.dataset.expressionid);
+			this.parentNode.parentNode.parentNode.remove();
+			self.expressions_counter = self.expressions_counter - 1;
+		});
+		self.registerFilterEvents(self.expressions_counter);
+		self.expressions_counter = self.expressions_counter + 1;
+	});
+	
+	$('#add-and').on('click', function(){
+		var rule = self.getRuleById(this.dataset.ruleid);
+		var andOperator = {
+			id: self.expressions_counter,
+			type: 'and'
+		};
+		self.expressions.push(andOperator);
+		$('#expressions-list').append(self.addAndOperator(rule));	
+		$('#remove-and' + self.expressions_counter).on('click', function(e){
+			e.preventDefault();
+			self.deleteExpression(this.dataset.expressionid);
+			this.parentNode.parentNode.parentNode.remove();
+			self.expressions_counter = self.expressions_counter - 1;
+		});
+		self.registerFilterEvents(self.expressions_counter);
+		self.expressions_counter = self.expressions_counter + 1;
+	});
+	
+	$('#add-or').on('click', function(){
+		var rule = self.getRuleById(this.dataset.ruleid);
+		var orOperator = {
+			id: self.expressions_counter,
+			type: 'or'
+		};
+		self.expressions.push(orOperator);
+		$('#expressions-list').append(self.addOrOperator(rule));
+		$('#remove-or' + self.expressions_counter).on('click', function(e){
+			e.preventDefault();
+			self.deleteExpression(this.dataset.expressionid);
+			this.parentNode.parentNode.parentNode.remove();
+			self.expressions_counter = self.expressions_counter - 1;
+		});
+		self.registerFilterEvents(self.expressions_counter);
+		self.expressions_counter = self.expressions_counter + 1;
+	});
+
+};
+
+Expressions.prototype.getExpressionById = function(id) {
+	for (var i=0; i < this.expressions.length; i++) {
+		if (this.expressions[i].id == id) {
+			return this.expressions[i];
+		}
+	}
+};
+
+Expressions.prototype.updateExpression = function(id, field, operation, value) {
+	for (var i=0; i < this.expressions.length; i++) {
+		if (this.expressions[i].id == id) {
+			this.expressions[i].field = field;
+			this.expressions[i].operation = operation;
+			this.expressions[i].value = value;
+		}
+	}
+};
+
+Expressions.prototype.deleteExpression = function(id) {
+	for (var i=0; i < this.expressions.length; i++) {
+		if (this.expressions[i].id == id) {
+			this.expressions.splice(i, 1);
+		}
+	}
+};
+
+Expressions.prototype.addExpression = function(expression) {
+	var self = this;
+	var count = this.expressions_counter;
+	var language = $("#select-language").val();
+	var operations = this.utils.getFilterOperations();
+	var fields = this.utils.getAlphanumericFields();
+	var dataType = '';
+	
+	var ui = '';
+	ui += '<div class="box">';
+	ui += 	'<div class="box-header" style="padding: 18px;">';
+	ui += 		'<div class="box-tools pull-right">';
+	ui += 			'<button data-expressionid="'+count+'" id="remove-expression'+count+'" class="btn btn-box-tool" style="color:red;" data-widget="collapse">';
+	ui += 				'<i class="fa fa-times"></i>';
+	ui += 			'</button>';
+	ui += 		'</div>';
+	ui += 	'</div>';
+	ui += 	'<div class="box-body">';
+	ui += 		'<div class="row">';
+	ui += 			'<div class="col-md-6 form-group">';
+	ui += 				'<label>' + gettext('Select field') + '</label>';
+	ui += 				'<select data-expressionid="'+count+'" id="expression-field'+count+'" class="form-control expression-field">';
+	ui += 					'<option disabled selected value> -- ' + gettext('Select field') + ' -- </option>';
 	for (var i in fields) {
 		var field_name = fields[i].name;
 		var field_name_trans = fields[i]["title-"+language];
 		if(!field_name_trans){
 			field_name_trans = field_name;
 		}
-		if (rule.filter.property_name && rule.filter.property_name == fields[i].name) {
-			ui += 						'<option selected data-type="' + fields[i].binding + '" value="' + field_name + '">' + field_name_trans + '</option>';
+		if (expression.field == fields[i].name) {
+			ui += 			'<option selected data-type="' + fields[i].binding + '" value="' + field_name + '">' + field_name_trans + '</option>';
 			dataType = fields[i].binding;
 		} else {
-			ui += 						'<option data-type="' + fields[i].binding + '" value="' + field_name + '">' + field_name_trans + '</option>';
+			ui += 			'<option data-type="' + fields[i].binding + '" value="' + field_name + '">' + field_name_trans + '</option>';
 		}
 
 	}	
-	ui += 							'</select>';
-	ui += 						'</div>';
-	ui += 						'<div class="col-md-6 form-group">';
-	ui += 							'<label>' + gettext('Select operation') + '</label>';
-	ui += 							'<select id="expression-operation" class="form-control">';
-	ui += 								'<option disabled selected value> -- ' + gettext('Select operation') + ' -- </option>';
+	ui += 				'</select>';
+	ui += 			'</div>';
+	ui += 			'<div class="col-md-6 form-group">';
+	ui += 				'<label>' + gettext('Select operation') + '</label>';
+	ui += 				'<select data-expressionid="'+count+'" id="expression-operation'+count+'" class="form-control expression-operation">';
+	ui += 					'<option disabled selected value> -- ' + gettext('Select operation') + ' -- </option>';
 	for (var i in operations) {
-		if (rule.filter.type && rule.filter.type == operations[i].value) {
-			ui += 						'<option selected value="' + operations[i].value + '">' + operations[i].title + '</option>';
-		} else {
-			ui += 						'<option value="' + operations[i].value + '">' + operations[i].title + '</option>';
-		}
+		if (operations[i].value != 'is_between' && operations[i].value != 'is_null') {
+			if (expression.operation == operations[i].value) {
+				ui += 			'<option selected value="' + operations[i].value + '">' + operations[i].title + '</option>';
+			} else {
+				ui += 			'<option value="' + operations[i].value + '">' + operations[i].title + '</option>';
+			}
+		}	
 	}	
-	ui += 							'</select>';
-	ui += 						'</div>';
-	ui += 					'</div>';
-	ui += 					'<div id="expression-values" class="row">';
-	ui += 					'</div>';
-	ui += 				'</div>';
+	ui += 				'</select>';
 	ui += 			'</div>';
 	ui += 		'</div>';
-	ui += 		'<div class="row">';
-	ui += 			'<div class="col-md-12 form-group">';
-	ui += 				'<label>' + gettext('Filter preview') + '</label>';
-	ui += 				'<textarea id="filter-output" name="code">	';					
-	ui += 			'</div>';
+	ui += 		'<div data-expressionid="'+count+'" id="expression-value'+count+'" class="row">';
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += '</div>';
-
-	$('#modal-expression-content').append(ui);
-
-	var filterOutput = document.getElementById('filter-output');
-	this.codemirror = CodeMirror.fromTextArea(filterOutput, {
-		value: "",
-		mode:  "javascript",
-		theme: "xq-dark",
-		lineNumbers: true
-	});
-
-	if (rule.filter.type) {
-		var filterOutputContentcode = '';
-		var field = $('#expression-field option:selected').val();
-		if (rule.filter.type == 'is_between') {
-			var inputs = self.getFilterInputs(dataType, true);
-			$('#expression-values').empty();
-			$('#expression-values').append(inputs);
-			$('#expresion-value-1').val(rule.filter.value1);
-			$('#expresion-value-2').val(rule.filter.value2);
-			this.loadUniqueValues(field);
-
-			this.codemirror.setValue('');
-			filterOutputContentcode = this.getFilterOutput(rule.filter.property_name, rule.filter.type, rule.filter.value1, rule.filter.value2);
-			this.codemirror.setValue(filterOutputContentcode);
-
-		} else {
-			var inputs = self.getFilterInputs(dataType, false);
-			$('#expression-values').empty();
-			$('#expression-values').append(inputs);
-			$('#expresion-value-1').val(rule.filter.value1);
-			this.loadUniqueValues(field);
-
-			this.codemirror.setValue('');
-			filterOutputContentcode = this.getFilterOutput(rule.filter.property_name, rule.filter.type, rule.filter.value1, rule.filter.value2);
-			this.codemirror.setValue(filterOutputContentcode);
-
-		}
-	}
-
-	this.registerFilterEvents();
-
+	
+	return ui;
 };
 
-Expressions.prototype.getFilterInputs = function(type, twoValues) {
-	var inputs = '';
-
-	if (type.indexOf('java.math') > -1 || type.indexOf('java.lang.Double') > -1){
-		if (twoValues) {
-			inputs += '<div id="expression-values" class="col-md-6 form-group">';
-			inputs += 	'<label>' + gettext('Value 1') + '</label>';
-			inputs += 	'<input name="expresion-value-1" list="expresion-value-1-select" id="expresion-value-1" type="text" class="form-control"/>';
-			inputs += 	'<datalist id="expresion-value-1-select">';
-			inputs += 		'<option value="" selected disabled>--</option>';
-			inputs += 	'</datalist>';
-			inputs += '</div>';
-			inputs += '<div id="expression-values" class="col-md-6 form-group">';
-			inputs += 	'<label>' + gettext('Value 2') + '</label>';
-			inputs += 	'<input name="expresion-value-2" list="expresion-value-2-select" id="expresion-value-2" type="text" class="form-control"/>';
-			inputs += 	'<datalist id="expresion-value-2-select">';
-			inputs += 		'<option value="" selected disabled>--</option>';
-			inputs += 	'</datalist>';
-			inputs += '</div>';
-
-		} else {
-			inputs += '<div id="expression-values" class="col-md-12 form-group">';
-			inputs += 	'<label>' + gettext('Value') + '</label>';
-			inputs += 	'<input name="expresion-value-1" list="expresion-value-1-select" id="expresion-value-1" type="text" class="form-control"/>';
-			inputs += 	'<datalist id="expresion-value-1-select">';
-			inputs += 		'<option value="" selected disabled>--</option>';
-			inputs += 	'</datalist>';
-			inputs += '</div>';
-		}
-
-	} else if (type == 'java.lang.String'){
-		if (twoValues) {
-			inputs += '<div id="expression-values" class="col-md-6 form-group">';
-			inputs += 	'<label>' + gettext('Value 1') + '</label>';
-			inputs += 	'<input name="expresion-value-1" list="expresion-value-1-select" id="expresion-value-1" type="text" class="form-control"/>';
-			inputs += 	'<datalist id="expresion-value-1-select">';
-			inputs += 		'<option value="" selected disabled>--</option>';
-			inputs += 	'</datalist>';
-			inputs += '</div>';
-			inputs += '<div id="expression-values" class="col-md-6 form-group">';
-			inputs += 	'<label>' + gettext('Value 2') + '</label>';
-			inputs += 	'<input name="expresion-value-2" list="expresion-value-2-select" id="expresion-value-2" type="text" class="form-control"/>';
-			inputs += 	'<datalist id="expresion-value-2-select">';
-			inputs += 		'<option value="" selected disabled>--</option>';
-			inputs += 	'</datalist>';
-			inputs += '</div>';
-
-		} else {
-
-			inputs += '<div id="expression-values" class="col-md-12 form-group">';
-			inputs += 	'<label>' + gettext('Value') + '</label>';
-			inputs += 	'<input name="expresion-value-1" list="expresion-value-1-select" id="expresion-value-1" type="text" class="form-control"/>';
-			inputs += 	'<datalist id="expresion-value-1-select">';
-			inputs += 		'<option value="" selected disabled>--</option>';
-			inputs += 	'</datalist>';
-			inputs += '</div>';
-		}
-	}
-
-	return inputs;
+Expressions.prototype.addAndOperator = function(rule) {
+	var count = this.expressions_counter;
+	
+	var andOperator = '';
+	andOperator += '<div class="box">';
+	andOperator += 	'<div class="box-header" style="text-align: center; padding: 18px;">';
+	andOperator += 		'AND';
+	andOperator += 		'<div class="box-tools pull-right">';
+	andOperator += 			'<button data-expressionid="'+count+'" id="remove-and'+count+'" class="btn btn-box-tool" style="color:red;" data-widget="collapse">';
+	andOperator += 				'<i class="fa fa-times"></i>';
+	andOperator += 			'</button>';
+	andOperator += 		'</div>';
+	andOperator += 	'</div>';
+	andOperator += '</div>';
+	
+	return andOperator;
 };
 
-Expressions.prototype.getFilterOutput = function(field, operation, value1, value2) {
-	var filterOutputContentcode = '';
-	if (operation == 'is_equal_to') {
-		filterOutputContentcode = '\t' + field + ' = ' + value1;
-
-	} else if (operation == 'is_null') {
-		filterOutputContentcode = '\t' + field + ' = null';
-
-	} else if (operation == 'is_like') {
-		filterOutputContentcode = '\t' + field + ' ' + gettext('contains') + ' ' + value1;
-
-	} else if (operation == 'is_not_equal') {
-		filterOutputContentcode = '\t' + field + ' <> ' + value1;
-
-	} else if (operation == 'is_greater_than') {
-		filterOutputContentcode = '\t' + field + ' > ' + value1;
-
-	} else if (operation == 'is_greater_than_or_equal_to') {
-		filterOutputContentcode = '\t' + field + ' >= ' + value1;
-
-	} else if (operation == 'is_less_than') {
-		filterOutputContentcode = '\t' + field + ' < ' + value1;
-
-	} else if (operation == 'is_less_than_or_equal_to') {
-		filterOutputContentcode = '\t' + field + ' <= ' + value1;
-
-	} else if (operation == 'is_between') {
-		filterOutputContentcode = '\t' + value1 + ' <= ' + field + ' <= ' + value2;
-
-	}
-	return filterOutputContentcode;
+Expressions.prototype.addOrOperator = function(rule) {
+	var count = this.expressions_counter;
+	
+	var orOperator = '';
+	orOperator += '<div class="box">';
+	orOperator += 	'<div class="box-header" style="text-align: center; padding: 18px;">';
+	orOperator += 		'OR';
+	orOperator += 		'<div class="box-tools pull-right">';
+	orOperator += 			'<button data-expressionid="'+count+'" id="remove-or'+count+'" class="btn btn-box-tool" style="color:red;" data-widget="collapse">';
+	orOperator += 				'<i class="fa fa-times"></i>';
+	orOperator += 			'</button>';
+	orOperator += 		'</div>';
+	orOperator += 	'</div>';
+	orOperator += '</div>';
+	
+	return orOperator;
 };
 
-Expressions.prototype.loadUniqueValues = function(field) {
+Expressions.prototype.loadUniqueValues = function(field, expressionId) {
 	var self = this;
+	var expression = self.getExpressionById(expressionId);
 	if(this.layerName){
 		var layer_conf = this.layerName.split(":");
 		if(layer_conf.length > 1){
@@ -341,18 +422,26 @@ Expressions.prototype.loadUniqueValues = function(field) {
 					'field': field
 				},
 			  	success	:function(response){
-			  		$("#expresion-value-1-select").empty();
-			  		$("#expresion-value-2-select").empty();
+			  		$("#expression-value-select"+expressionId).empty();
 			  		$emptyOpt = $("<option></option>").attr("value", "").attr("selected", true).attr("disabled", true).text("---");
-			  		$emptyOpt2 = $("<option></option>").attr("value", "").attr("selected", true).attr("disabled", true).text("---");
-			  		$("#expresion-value-1-select").append($emptyOpt);
-			  		$("#expresion-value-2-select").append($emptyOpt2);
+			  		$("#expression-value-select"+expressionId).append($emptyOpt);
 			  		$.each(response.values, function(index, option) {
-			  			$option = $("<option></option>").attr("value", option).text(option);
-			  			$option2 = $("<option></option>").attr("value", option).text(option);
-			  			$("#expresion-value-1-select").append($option);
-			  			$("#expresion-value-2-select").append($option2);
+			  			if (expression.value == option) {
+			  				$option = $("<option selected></option>").attr("value", option).text(option);
+				  			$("#expression-value-select"+expressionId).append($option);
+			  			} else {
+			  				$option = $("<option></option>").attr("value", option).text(option);
+				  			$("#expression-value-select"+expressionId).append($option);
+			  			}
+			  			
 			  	    });
+			  		
+			  		$('#expression-value-select'+expressionId).on('change', function(){
+			  			var value = $('option:selected', $('#expression-value-select'+expressionId)).val();
+			  			var field = $('#expression-field'+expressionId).val();
+			  			var operation = $('#expression-operation'+expressionId).val();
+			  			self.updateExpression(expressionId, field, operation, value);
+			  		});
 				},
 			  	error: function(){}
 			});
@@ -361,135 +450,52 @@ Expressions.prototype.loadUniqueValues = function(field) {
 };
 
 
-Expressions.prototype.registerFilterEvents = function() {
+Expressions.prototype.registerFilterEvents = function(expressionId) {
 
 	var self = this;
 
-	$('#expresion-value-1').on('change paste keyup input select', function(){
-		var value1 = $('#expresion-value-1').val();
-		var value2 = $('#expresion-value-2').val();
-		var field = $('#expression-field').val();
-		var operation = $('#expression-operation').val();
+	$('#expression-field'+expressionId).on('change', function(e) {
+		var inputs = '';
+		inputs += '<div class="col-md-12 form-group">';
+		inputs += 	'<label>' + gettext('Value') + '</label>';
+		inputs += 	'<select id="expression-value-select'+expressionId+'" class="form-control">';
+		inputs += 		'<option disabled selected value>--</option>';
+		inputs += 	'</select>';
+		inputs += '</div>';
+		
+		$('#expression-value'+expressionId).empty();
+		$('#expression-value'+expressionId).append(inputs);
 
-		self.codemirror.setValue('');
-		var filterOutputContentcode = self.getFilterOutput(field, operation, value1, value2);
-		self.codemirror.setValue(filterOutputContentcode);
+		var value = $('option:selected', $('#expression-value-select'+expressionId)).val();
+		var field = $('#expression-field'+expressionId).val();
+		var operation = $('#expression-operation'+expressionId).val();
+		self.updateExpression(expressionId, field, operation, value);
+
+		var value_orig = $('option:selected', $('#expression-field'+expressionId)).val();
+		self.loadUniqueValues(value_orig, expressionId);
 	});
 
-	$('#expresion-value-2').on('change paste keyup input select', function(){
-		var value1 = $('#expresion-value-1').val();
-		var value2 = $('#expresion-value-2').val();
-		var field = $('#expression-field').val();
-		var operation = $('#expression-operation').val();
+	$('#expression-operation'+expressionId).on('change', function(e) {
+		var inputs = '';
+		inputs += '<div class="col-md-12 form-group">';
+		inputs += 	'<label>' + gettext('Value') + '</label>';
+		inputs += 	'<select id="expression-value-select'+expressionId+'" class="form-control">';
+		inputs += 		'<option disabled selected value>--</option>';
+		inputs += 	'</select>';
+		inputs += '</div>';
+		
+		$('#expression-value'+expressionId).empty();
+		$('#expression-value'+expressionId).append(inputs);
 
-		self.codemirror.setValue('');
-		var filterOutputContentcode = self.getFilterOutput(field, operation, value1, value2);
-		self.codemirror.setValue(filterOutputContentcode);
+		var value = $('option:selected', $('#expression-value-select'+expressionId)).val();
+		var field = $('#expression-field'+expressionId).val();
+		var operation = $('#expression-operation'+expressionId).val();
+		self.updateExpression(expressionId, field, operation, value);
+
+		var value_orig = $('option:selected', $('#expression-field'+expressionId)).val();
+		self.loadUniqueValues(value_orig, expressionId);
 	});
 
-	$('#expression-field').on('change', function(e) {
-
-		var twoValues = false;
-		if ( $('#expression-operation').val() == 'is_between' ) {
-			twoValues = true;
-		}
-		var type = this.selectedOptions[0].dataset.type;
-
-		var inputs = self.getFilterInputs(type, twoValues);
-
-		$('#expression-values').empty();
-		$('#expression-values').append(inputs);
-
-		$('#expresion-value-1').on('change paste keyup input select', function(){
-			var value1 = $('#expresion-value-1').val();
-			var value2 = $('#expresion-value-2').val();
-			var field = $('#expression-field').val();
-			var operation = $('#expression-operation').val();
-
-			self.codemirror.setValue('');
-			var filterOutputContentcode = self.getFilterOutput(field, operation, value1, value2);
-			self.codemirror.setValue(filterOutputContentcode);
-		});
-
-		$('#expresion-value-2').on('change paste keyup input select', function(){
-			var value1 = $('#expresion-value-1').val();
-			var value2 = $('#expresion-value-2').val();
-			var field = $('#expression-field').val();
-			var operation = $('#expression-operation').val();
-
-			self.codemirror.setValue('');
-			var filterOutputContentcode = self.getFilterOutput(field, operation, value1, value2);
-			self.codemirror.setValue(filterOutputContentcode);
-		});
-
-		var value_orig = $('option:selected', $('#expression-field')).val();
-		self.loadUniqueValues(value_orig);
-	});
-
-	$('#expression-operation').on('change', function(e) {
-
-		var twoValues = false;
-		if ( this.value == 'is_between' ) {
-			twoValues = true;
-		}
-		var type = $('#expression-field')[0].selectedOptions[0].dataset.type;
-
-		var inputs = self.getFilterInputs(type, twoValues);
-
-		$('#expression-values').empty();
-		$('#expression-values').append(inputs);
-
-		$('#expresion-value-1').on('change paste keyup input select', function(){
-			var value1 = $('#expresion-value-1').val();
-			var value2 = $('#expresion-value-2').val();
-			var field = $('#expression-field').val();
-			var operation = $('#expression-operation').val();
-
-			self.codemirror.setValue('');
-			var filterOutputContentcode = self.getFilterOutput(field, operation, value1, value2);
-			self.codemirror.setValue(filterOutputContentcode);
-		});
-
-		$('#expresion-value-2').on('change paste keyup input select', function(){
-			var value1 = $('#expresion-value-1').val();
-			var value2 = $('#expresion-value-2').val();
-			var field = $('#expression-field').val();
-			var operation = $('#expression-operation').val();
-
-			self.codemirror.setValue('');
-			var filterOutputContentcode = self.getFilterOutput(field, operation, value1, value2);
-			self.codemirror.setValue(filterOutputContentcode);
-		});
-
-		var value_orig = $('option:selected', $('#expression-field')).val();
-		self.loadUniqueValues(value_orig);
-	});
-
-	$('.save-filter').on('click', function(){
-		var ruleid = this.dataset.ruleid;
-		var rule = self.getRuleById(ruleid);
-
-		var value1 = $('#expresion-value-1').val();
-		var value2 = $('#expresion-value-2').val();
-		var field = $('#expression-field').val();
-		var operation = $('#expression-operation').val();
-
-		var filterOutputContentcode = self.getFilterOutput(field, operation, value1, value2);
-
-		var filter = {
-				type: operation,
-				property_name: field,
-				value1: value1
-		};
-		if (operation == 'is_between') {
-			filter['value2'] = value2;
-		}
-		rule.setFilter(filter);
-		rule.title = filterOutputContentcode.replace('\t', '');
-
-		$('#rule-title-' + ruleid).text(filterOutputContentcode);
-		$('#modal-expression').modal('hide');
-	});
 };
 
 Expressions.prototype.getRules = function() {
@@ -624,9 +630,6 @@ Expressions.prototype.loadRules = function(rules) {
 			e.preventDefault();
 			self.getFilterFormUI(this.dataset.ruleid);
 			$('#modal-expression').modal('show');
-			$('.CodeMirror').each(function(i, el){
-				el.CodeMirror.refresh();
-			});
 		});
 	}
 };

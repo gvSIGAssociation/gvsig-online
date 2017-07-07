@@ -22,10 +22,9 @@
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
-from models import Rule, Symbolizer, ColorMapEntry
-from gvsigol_symbology import sld
-from lxml import etree
-import StringIO
+from models import Rule as ModelRule, Symbolizer as ModelSymbolizer, ColorMapEntry as ModelColorMapEntry
+from gvsigol_symbology.sld import StyledLayerDescriptor, PointSymbolizer, LineSymbolizer, PolygonSymbolizer, TextSymbolizer, \
+    Graphic, Mark, Fill, Stroke, Label, Font, Halo, RasterSymbolizer, ColorMap, ExternalGraphic, Filter, PropertyCriterion
 import json
 import sys
 import re
@@ -39,330 +38,197 @@ else:
     BaseStrType_ = str
     
 def parse_sld(file):
-    sld_object = sld.parse(file)
+    sld_object = StyledLayerDescriptor(file)
     return sld_object
 
 def build_sld(layer, style):
-    style_layer_descriptor = sld.StyledLayerDescriptor()
-    style_layer_descriptor.set_version('1.0.0')
+    style_layer_descriptor = StyledLayerDescriptor()
+    named_layer = style_layer_descriptor.create_namedlayer(layer.name)
+    user_style = named_layer.create_userstyle()
+    feature_type_style = user_style.create_featuretypestyle()
     
-    feature_type_style = get_feature_type_style()
-    rules = Rule.objects.filter(style=style)
+    rules = ModelRule.objects.filter(style=style)
     for r in rules:
-        symbolizers = Symbolizer.objects.filter(rule=r)
-        rule = get_rule(r, symbolizers)
-        feature_type_style.add_Rule(rule)
-    user_style = get_user_style(style.name, style.title, style.is_default, feature_type_style) 
-    named_layer = get_named_layer(layer.name, user_style)
+        symbolizers = ModelSymbolizer.objects.filter(rule=r)
+        create_rule(r, symbolizers, feature_type_style)
     
-    sld_body = get_sld_body(style_layer_descriptor, named_layer)
+    sld_body = style_layer_descriptor.as_sld(True)
     
     return sld_body
 
 def build_library_symbol(rule):
-    style_layer_descriptor = sld.StyledLayerDescriptor()
-    style_layer_descriptor.set_version('1.0.0')
-    
-    feature_type_style = get_feature_type_style()
+    style_layer_descriptor = StyledLayerDescriptor()
+    named_layer = style_layer_descriptor.create_namedlayer(rule.name)
+    user_style = named_layer.create_userstyle()
+    feature_type_style = user_style.create_featuretypestyle()
 
-    symbolizers = Symbolizer.objects.filter(rule=rule)
-    r = get_rule(rule, symbolizers)
-    feature_type_style.add_Rule(r)
-        
-    user_style = get_user_style(rule.name, rule.title, True, feature_type_style) 
-    named_layer = get_named_layer(rule.name, user_style)
+    symbolizers = ModelSymbolizer.objects.filter(rule=rule)
+    create_rule(rule, symbolizers, feature_type_style)
     
-    sld_body = get_sld_body(style_layer_descriptor, named_layer)
+    sld_body = style_layer_descriptor.as_sld(True)
     
     return sld_body
 
-def get_named_layer(layer_name, user_style):
-    named_layer = sld.NamedLayer(Name=layer_name)
-    named_layer.add_UserStyle(user_style)
+def get_operation_symbol(op):
+    operation = None
+    if op == 'is_equal_to':
+        operation = '=='
+    elif op == 'is_less_than_or_equal_to':
+        operation = '<='
+    elif op == 'is_less_than':
+        operation = '>'
+    elif op == 'is_greater_than_or_equal_to':
+        operation = '>='
+    elif op == 'is_greater_than':
+        operation = '>'
+    elif op == 'is_not_equal':
+        operation = '!='
+    elif op == 'is_like':
+        operation = '%'
     
-    return named_layer
+    return operation
 
-def get_user_style(name, title, is_default, feature_type_style):
-    user_style = sld.UserStyle()
-    user_style.set_Name(name)
-    user_style.set_Title(name)
-    user_style.set_IsDefault(is_default)
-    user_style.add_FeatureTypeStyle(feature_type_style)
-
-    return user_style
-
-def get_feature_type_style():
-    feature_type_style = sld.FeatureTypeStyle()
-    return feature_type_style
-
-def get_rule(r, symbolizers):
-    rule = sld.Rule()
-    rule.set_Name(r.name)
-    rule.set_Title(r.title) #.encode('ascii', 'ignore'))
-    rule.set_Abstract(r.abstract)
-    if r.filter == "":
-        rule.set_Filter(None)
-    else:
-        filter = getFilter(r.filter)
-        rule.set_Filter(filter)
-        
-    if r.minscale >= 0:
-        rule.set_MinScaleDenominator(r.minscale)
-    if r.maxscale >= 0:
-        rule.set_MaxScaleDenominator(r.maxscale)
-    for s in symbolizers:
-        rule.add_Symbolizer(get_symbolizer(s))
-    return rule
-
-def get_sld_body(style_layer_descriptor, named_layer):
-    style_layer_descriptor.add_NamedLayer(named_layer)
-    output = StringIO.StringIO()
-    style_layer_descriptor.export(output, 0)
-    #style_layer_descriptor.export(sys.stdout, 0)
-    sld_body = output.getvalue()
-    output.close()
+def get_operation_name(op):
+    operation = None
+    if op == 'is_equal_to':
+        operation = 'PropertyIsEqualTo'
+    elif op == 'is_less_than_or_equal_to':
+        operation = 'PropertyIsLessThanOrEqualTo'
+    elif op == 'is_less_than':
+        operation = 'PropertyIsLessThan'
+    elif op == 'is_greater_than_or_equal_to':
+        operation = 'PropertyIsGreaterThanOrEqualTo'
+    elif op == 'is_greater_than':
+        operation = 'PropertyIsGreaterThan'
+    elif op == 'is_not_equal':
+        operation = 'PropertyIsNotEqualTo'
+    elif op == 'is_like':
+        operation = 'PropertyIsLike'
     
-    return sld_body               
+    return operation
 
-def get_symbolizer(s):
-    symbolizer = None
-    if hasattr(s, 'polygonsymbolizer'):
-        symbolizer = sld.PolygonSymbolizer()
-        symbolizer.set_Fill(get_fill(s.polygonsymbolizer))
-        symbolizer.set_Stroke(get_stroke(s.polygonsymbolizer))
-        
-    elif hasattr(s, 'linesymbolizer'):
-        symbolizer = sld.LineSymbolizer()
-        symbolizer.set_Stroke(get_stroke(s.linesymbolizer))
-        
-    elif hasattr(s, 'marksymbolizer'):
-        symbolizer = sld.PointSymbolizer()
-        graphic = sld.Graphic()
-        mark = sld.Mark()
-        mark.set_WellKnownName(s.marksymbolizer.well_known_name)
-        mark.set_Fill(get_fill(s.marksymbolizer))
-        mark.set_Stroke(get_stroke(s.marksymbolizer))
-        graphic.add_Mark(mark)
-        graphic.set_Opacity(str(s.marksymbolizer.opacity))
-        graphic.set_Size(str(s.marksymbolizer.size))
-        graphic.set_Rotation(str(s.marksymbolizer.rotation))
-        symbolizer.set_Graphic(graphic)
-        
-    elif hasattr(s, 'externalgraphicsymbolizer'):
-        symbolizer = sld.PointSymbolizer()
-        graphic = sld.Graphic()
-        externalgraphic = sld.ExternalGraphic()
-        o_resource = sld.OnlineResource()
-        o_resource.set_href(s.externalgraphicsymbolizer.online_resource)
-        externalgraphic.set_OnlineResource(o_resource)
-        externalgraphic.set_Format(s.externalgraphicsymbolizer.format)
-        graphic.add_ExternalGraphic(externalgraphic)
-        graphic.set_Opacity(str(s.externalgraphicsymbolizer.opacity))
-        graphic.set_Size(str(s.externalgraphicsymbolizer.size))
-        graphic.set_Rotation(str(s.externalgraphicsymbolizer.rotation))
-        symbolizer.set_Graphic(graphic)
-        
-    elif hasattr(s, 'textsymbolizer'):
-        symbolizer = sld.TextSymbolizer()
-        symbolizer.set_Label(get_label(s.textsymbolizer))
-        symbolizer.set_Font(get_font(s.textsymbolizer))
-        symbolizer.set_Fill(get_fill(s.textsymbolizer))
-        symbolizer.set_Halo(get_halo(s.textsymbolizer))
-        
-    elif hasattr(s, 'rastersymbolizer'):
-        symbolizer = sld.RasterSymbolizer()
-        color_map = sld.ColorMap()
-        
-        entries = ColorMapEntry.objects.filter(color_map=s.rastersymbolizer.color_map)
-        for e in entries:
-            entry = sld.ColorMapEntry()
-            entry.set_color(e.color)
-            entry.set_quantity(e.quantity)
-            entry.set_label(e.label)
-            entry.set_opacity(e.opacity)
-            color_map.add_ColorMapEntry(entry)
+def build_complex_filter(filters, rule):
+    complex_filter = None
+    operator = None
+    for item in filters:
+        if item.get('type') == 'expression':
+            f = Filter(rule)
+            f.PropertyIsEqualTo = PropertyCriterion(f, get_operation_name(item.get('operation')))
+            f.PropertyIsEqualTo.PropertyName = item.get('field')
+            f.PropertyIsEqualTo.Literal = item.get('value')
             
-        symbolizer.set_ColorMap(color_map)
+            if complex_filter == None:
+                complex_filter = f
+            else:
+                if operator == 'and':
+                    complex_filter = complex_filter + f
+                elif operator == 'and':
+                    complex_filter = complex_filter | f
         
-    return symbolizer
+        elif item.get('type') == 'and':
+            operator = 'and'
+        elif item.get('type') == 'or':
+            operator = 'or'
+                
+    return complex_filter
         
-def get_fill(s):
-    fill = sld.Fill()
-    
-    fill_color = sld.CssParameter() 
-    fill_color.set_name('fill')
-    fill_color.set_valueOf_(s.fill)
-    fill.add_CssParameter(fill_color)
-    
-    fill_opacity = sld.CssParameter()
-    fill_opacity.set_name('fill-opacity')
-    fill_opacity.set_valueOf_(str(s.fill_opacity))
-    fill.add_CssParameter(fill_opacity)
-    
-    return fill
-    
-def get_stroke(s):
-    stroke = sld.Stroke()
-    
-    stroke_color = sld.CssParameter()
-    stroke_color.set_name('stroke')
-    stroke_color.set_valueOf_(str(s.stroke))
-    stroke.add_CssParameter(stroke_color)
-    
-    stroke_width = sld.CssParameter()
-    stroke_width.set_name('stroke-width')
-    stroke_width.set_valueOf_(str(s.stroke_width))
-    stroke.add_CssParameter(stroke_width)
-    
-    stroke_opacity = sld.CssParameter()
-    stroke_opacity.set_name('stroke-opacity')
-    stroke_opacity.set_valueOf_(str(s.stroke_opacity))
-    stroke.add_CssParameter(stroke_opacity)
-    
-    if s.stroke_dash_array != 'none':
-        stroke_dash_array = sld.CssParameter()
-        stroke_dash_array.set_name('stroke-dasharray')
-        stroke_dash_array.set_valueOf_(str(s.stroke_dash_array))
-        stroke.add_CssParameter(stroke_dash_array)
-    
-    return stroke
 
-def get_label(s):
-    label = sld.ParameterValueType()
-    node = etree.Element('root')
-    node.text = ('<%s%s>%s</%s%s>%s' % ('ogc:', 'PropertyName', label.gds_encode(label.gds_format_string(quote_xml(s.label), input_name='PropertyName')),'ogc:', 'PropertyName', '\n'))
-    
-    return label.build(node)
-
-def getFilter(f):
-    filt = sld.FilterType()
-    
-    json_filter = json.loads(f)
-    
-    if json_filter.get('type') == 'is_equal_to':
-        operation = sld.PropertyIsEqualTo()
-        operation.set_PropertyName(json_filter.get('property_name'))
-        operation.set_Literal(json_filter.get('value1'))
-        filt.set_comparisonOps(operation)
+def create_rule(r, symbolizers, feature_type_style):
+    min_scale_denominator = None
+    max_scale_denominator = None
+    if r.minscale >= 0:
+        min_scale_denominator = r.minscale
+    if r.maxscale >= 0:
+        max_scale_denominator = r.maxscale
         
-    elif json_filter.get('type') == 'is_null':
-        operation = sld.PropertyIsNullType()
-        operation.set_PropertyName(json_filter.get('property_name'))
-        filt.set_comparisonOps(operation)
+    rule = feature_type_style.create_rule(
+        r.title,
+        MinScaleDenominator=min_scale_denominator, 
+        MaxScaleDenominator=max_scale_denominator
+    )
+    
+    f = json.loads(r.filter)
+    if len(f) == 1:
+        rule.create_filter(f.get('field'), get_operation_symbol(f.get('operation')), f.get('value'))
         
+    elif len(f) >= 3:
+        rule.Filter = build_complex_filter(f, rule)
+    
+    for s in symbolizers:
+        if hasattr(s, 'marksymbolizer'):
+            symbolizer = PointSymbolizer(rule)
+            gph = Graphic(symbolizer)
+            mrk = Mark(gph)
+            mrk.WellKnownName = s.marksymbolizer.well_known_name
+            fill = Fill(mrk)
+            fill.create_cssparameter('fill', s.marksymbolizer.fill)
+            fill.create_cssparameter('fill-opacity', str(s.marksymbolizer.fill_opacity))
+            stroke = Stroke(mrk)
+            stroke.create_cssparameter('stroke', s.marksymbolizer.stroke)
+            stroke.create_cssparameter('stroke-width', str(s.marksymbolizer.stroke_width))
+            stroke.create_cssparameter('stroke-opacity', str(s.marksymbolizer.stroke_opacity))
+            if s.marksymbolizer.stroke_dash_array != 'none':
+                stroke.create_cssparameter('stroke-dasharray', s.marksymbolizer.stroke_dash_array)
         
-    elif json_filter.get('type') == 'is_like':
-        operation = sld.PropertyIsLikeType()
-        operation.set_wildCard('*')
-        operation.set_singleChar('.')
-        operation.set_escape('!')
-        operation.set_PropertyName(json_filter.get('property_name'))
-        operation.set_Literal(json_filter.get('value1'))
-        filt.set_comparisonOps(operation)
-        
-    elif json_filter.get('type') == 'is_not_equal_to':
-        operation = sld.PropertyIsNotEqualTo()
-        operation.set_PropertyName(json_filter.get('property_name'))
-        operation.set_Literal(json_filter.get('value1'))
-        filt.set_comparisonOps(operation)
-        
-    elif json_filter.get('type') == 'is_greater_than':
-        operation = sld.PropertyIsGreaterThan()
-        operation.set_PropertyName(json_filter.get('property_name'))
-        operation.set_Literal(json_filter.get('value1'))
-        filt.set_comparisonOps(operation)
-        
-    elif json_filter.get('type') == 'is_greater_than_or_equal_to':
-        operation = sld.PropertyIsGreaterThanOrEqualTo()
-        operation.set_PropertyName(json_filter.get('property_name'))
-        operation.set_Literal(json_filter.get('value1'))
-        filt.set_comparisonOps(operation)
-        
-    elif json_filter.get('type') == 'is_less_than':
-        operation = sld.PropertyIsLessThan()
-        operation.set_PropertyName(json_filter.get('property_name'))
-        operation.set_Literal(json_filter.get('value1'))
-        filt.set_comparisonOps(operation)
-        
-    elif json_filter.get('type') == 'is_less_than_or_equal_to':
-        operation = sld.PropertyIsLessThanOrEqualTo()
-        operation.set_PropertyName(json_filter.get('property_name'))
-        operation.set_Literal(json_filter.get('value1'))
-        filt.set_comparisonOps(operation)
-        
-    elif json_filter.get('type') == 'is_between':
-        operation = sld.PropertyIsBetweenType()
-        operation.set_PropertyName(json_filter.get('property_name'))
-        operation.set_LowerBoundary(json_filter.get('value1'))
-        operation.set_UpperBoundary(json_filter.get('value2'))
-        filt.set_comparisonOps(operation)
-    
-    return filt
-
-def get_font(s):
-    font = sld.Font()
-    
-    font_family = sld.CssParameter()
-    font_family.set_name('font-family')
-    font_family.set_valueOf_(str(s.font_family))
-    font.add_CssParameter(font_family)
-    
-    font_size = sld.CssParameter()
-    font_size.set_name('font-size')
-    font_size.set_valueOf_(str(s.font_size))
-    font.add_CssParameter(font_size)
-    
-    font_style = sld.CssParameter()
-    font_style.set_name('font-style')
-    font_style.set_valueOf_(str(s.font_style))
-    font.add_CssParameter(font_style)
-    
-    font_weight = sld.CssParameter()
-    font_weight.set_name('font-weight')
-    font_weight.set_valueOf_(str(s.font_weight))
-    font.add_CssParameter(font_weight)
-    
-    return font
-
-def get_halo(s):
-    halo = sld.Halo()
-    
-    halo.set_Radius(str(s.halo_radius))
-    
-    halo_fill = sld.Fill()
-    
-    halo_fill_color = sld.CssParameter() 
-    halo_fill_color.set_name('fill')
-    halo_fill_color.set_valueOf_(s.halo_fill)
-    halo_fill.add_CssParameter(halo_fill_color)
-    
-    halo_fill_opacity = sld.CssParameter()
-    halo_fill_opacity.set_name('fill-opacity')
-    halo_fill_opacity.set_valueOf_(str(s.halo_fill_opacity))
-    halo_fill.add_CssParameter(halo_fill_opacity)
-    
-    halo.set_Fill(halo_fill)
-    return halo
-
-def quote_xml(inStr):
-    "Escape markup chars, but do not modify CDATA sections."
-    if not inStr:
-        return ''
-    s1 = (isinstance(inStr, BaseStrType_) and inStr or '%s' % inStr)
-    s2 = ''
-    pos = 0
-    matchobjects = CDATA_pattern_.finditer(s1)
-    for mo in matchobjects:
-        s3 = s1[pos:mo.start()]
-        s2 += quote_xml_aux(s3)
-        s2 += s1[mo.start():mo.end()]
-        pos = mo.end()
-    s3 = s1[pos:]
-    s2 += quote_xml_aux(s3)
-    return s2
-
-def quote_xml_aux(inStr):
-    s1 = inStr.replace('&', '&amp;')
-    s1 = s1.replace('<', '&lt;')
-    s1 = s1.replace('>', '&gt;')
-    return s1
+        elif hasattr(s, 'linesymbolizer'):
+            symbolizer = LineSymbolizer(rule)
+            stroke = Stroke(symbolizer)
+            stroke.create_cssparameter('stroke', s.linesymbolizer.stroke)
+            stroke.create_cssparameter('stroke-width', str(s.linesymbolizer.stroke_width))
+            stroke.create_cssparameter('stroke-opacity', str(s.linesymbolizer.stroke_opacity))
+            if s.linesymbolizer.stroke_dash_array != 'none':
+                stroke.create_cssparameter('stroke-dasharray', s.linesymbolizer.stroke_dash_array)
+            
+        elif hasattr(s, 'polygonsymbolizer'):
+            symbolizer = PolygonSymbolizer(rule)
+            fill = Fill(symbolizer)
+            fill.create_cssparameter('fill', s.polygonsymbolizer.fill)
+            fill.create_cssparameter('fill-opacity', str(s.polygonsymbolizer.fill_opacity))
+            stroke = Stroke(symbolizer)
+            stroke.create_cssparameter('stroke', s.polygonsymbolizer.stroke)
+            stroke.create_cssparameter('stroke-width', str(s.polygonsymbolizer.stroke_width))
+            stroke.create_cssparameter('stroke-opacity', str(s.polygonsymbolizer.stroke_opacity))
+            if s.polygonsymbolizer.stroke_dash_array != 'none':
+                stroke.create_cssparameter('stroke-dasharray', s.polygonsymbolizer.stroke_dash_array)
+            
+        elif hasattr(s, 'externalgraphicsymbolizer'):
+            symbolizer = PointSymbolizer(rule)
+            gph = Graphic(symbolizer)
+            gph.Size = str(s.externalgraphicsymbolizer.size)
+            gph.Rotation = str(s.externalgraphicsymbolizer.rotation)
+            gph.Opacity = str(s.externalgraphicsymbolizer.opacity)
+            egph = ExternalGraphic(gph)
+            egph.Format = s.externalgraphicsymbolizer.format
+            egph.create_onlineresource(s.externalgraphicsymbolizer.online_resource)
+            
+        elif hasattr(s, 'textsymbolizer'):
+            symbolizer = TextSymbolizer(rule)
+            label = Label(symbolizer)
+            label.PropertyName = s.textsymbolizer.label
+            font = Font(symbolizer)
+            font.create_cssparameter('font-family', s.textsymbolizer.font_family)
+            font.create_cssparameter('font-size', str(s.textsymbolizer.font_size))
+            font.create_cssparameter('font-style', s.textsymbolizer.font_style)
+            font.create_cssparameter('font-weight', str(s.textsymbolizer.font_weight))
+            fill = Fill(symbolizer)
+            fill.create_cssparameter('fill', s.textsymbolizer.fill)
+            fill.create_cssparameter('fill-opacity', str(s.textsymbolizer.fill_opacity))
+            halo = Halo(symbolizer)
+            halo.Radius = str(s.textsymbolizer.halo_radius)
+            halo_fill = Fill(halo)
+            halo_fill.create_cssparameter('fill', s.textsymbolizer.halo_fill)
+            halo_fill.create_cssparameter('fill-opacity', str(s.textsymbolizer.halo_fill_opacity))
+            symbolizer.create_vendoroption('conflictResolution', 'true')
+            symbolizer.create_vendoroption('autoWrap', '100')
+            symbolizer.create_vendoroption('spaceAround', '0')
+            symbolizer.create_vendoroption('polygonAlign', 'mbr')
+            symbolizer.create_vendoroption('followLine', 'true')            
+            
+        elif hasattr(s, 'rastersymbolizer'):
+            symbolizer = RasterSymbolizer(rule)
+            color_map = ColorMap(symbolizer)
+            
+            entries = ModelColorMapEntry.objects.filter(color_map=s.rastersymbolizer.color_map)
+            if entries is not None:
+                for e in entries:
+                    color_map.create_colormapentry(e.color, str(e.quantity), e.label, str(e.opacity))
