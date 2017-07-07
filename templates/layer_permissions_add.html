@@ -81,6 +81,7 @@
 						</div>
 					</div>
 					
+					{% if type == 'v_PostGIS' %}
 					<div id="write-list-box" class="box searchable-list-box" style="margin-top: 20px;">
 						<div class="box-header with-border">
 							<h3 class="box-title col-md-6">{% trans "Make layer writeable only for the following groups" %}</h3>
@@ -113,6 +114,7 @@
 								<ul class="pagination"></ul>
 						</div>
 					</div>
+					{% endif %}
 				</div>
 			</form>	
 					
