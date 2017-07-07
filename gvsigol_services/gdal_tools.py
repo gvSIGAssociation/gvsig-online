@@ -124,6 +124,9 @@ def shp2postgis(shp_path, table_name, srs, host, port, dbname, schema, user, pas
     if rc>0:
         msg = _("Error when loading the layer to PostGIS. Ogr2ogr error: {msg}").format(msg=err)
         logging.error(msg)
+        message_already_exists = "FAILED: Layer "+str(schema)+"."+str(table_name)+" already exists, and -append not specified"
+        if err.startswith(message_already_exists):
+            rc=2
         raise GdalError(rc, msg)
     return args
 
