@@ -878,8 +878,9 @@ class Geoserver():
                 i.delete_table(schema, name)
             raise rest_geoserver.RequestError(e.code, e.message)
         except Exception as e:
-            logging.exception(e)
-
+            #logging.exception(e)
+            message =  _("Error uploading the layer. Review the file format. Cause: ") + str(e)
+            raise rest_geoserver.RequestError(-1, message)
         raise rest_geoserver.RequestError(-1, _("Error uploading the layer. Review the file format."))
     
     def prepare_string(self, s):
