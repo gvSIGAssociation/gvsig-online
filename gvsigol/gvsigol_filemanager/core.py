@@ -112,7 +112,7 @@ class Filemanager(object):
 
         for filename in files:
             extension = filename.split('.')[1]
-            if extension in visible_extensions:
+            if extension.lower() in visible_extensions:
                 listing.append(_helper(filename, 'File', extension))
 
         return listing
