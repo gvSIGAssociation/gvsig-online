@@ -193,7 +193,12 @@ def datastore_list(request):
         datastore_list = Datastore.objects.all()
     else:
         datastore_list = Datastore.objects.filter(created_by__exact=request.user.username)
-        
+    
+    for datastore in datastore_list:
+        params = json.loads(datastore.connection_params)
+        params['passwd'] = '****'
+        datastore.connection_params = json.dumps(params)
+
     response = {
         'datastores': datastore_list
     }
@@ -256,6 +261,13 @@ def datastore_update(request, datastore_id):
                 dstype = datastore.type
                 description = form.cleaned_data.get('description')
                 connection_params = form.cleaned_data.get('connection_params')
+                
+                got_params = json.loads(connection_params)
+                if got_params['passwd'] == '****':
+                    params = json.loads(datastore.connection_params)
+                    got_params['passwd'] = params['passwd'] 
+                    connection_params = json.dumps(got_params)
+
                 if mapservice_backend.updateDatastore(datastore.workspace.name, datastore.name,
                                                       description, dstype, connection_params):
                     # REST API does not allow to can't change the workspace or name of a datastore 
@@ -269,6 +281,9 @@ def datastore_update(request, datastore_id):
                 else:
                     form.add_error(None, _("Error updating datastore"))
     else:
+        params = json.loads(datastore.connection_params)
+        params['passwd'] = '****'
+        datastore.connection_params = json.dumps(params)
         form = DatastoreUpdateForm(instance=datastore)
     return render(request, 'datastore_update.html', {'form': form, 'datastore_id': datastore_id, 'workspace_name': datastore.workspace.name})
 
