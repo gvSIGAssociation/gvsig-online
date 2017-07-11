@@ -473,15 +473,15 @@ TextSymbolizer.prototype.registerFilterEvents = function(expressionId) {
 		var inputs = '';
 		inputs += '<div class="col-md-12 form-group">';
 		inputs += 	'<label>' + gettext('Value') + '</label>';
-		inputs += 	'<select id="label-value-select'+expressionId+'" class="form-control filter-component">';
-		inputs += 		'<option disabled selected value>--</option>';
-		inputs += 	'</select>';
+		inputs += 	'<input type="text" id="label-value-select'+expressionId+'" class="form-control filter-component" list="label-value-list'+expressionId+'">';
+		inputs += 	'<datalist id="label-value-list'+expressionId+'">';
+		inputs += 	'</datalist>';
 		inputs += '</div>';
 		
 		$('#label-value'+expressionId).empty();
 		$('#label-value'+expressionId).append(inputs);
 
-		var value = $('option:selected', $('#label-value-select'+expressionId)).val();
+		var value = $('#label-value-select'+expressionId).val();
 		var field = $('#label-field'+expressionId).val();
 		var operation = $('#label-operation'+expressionId).val();
 		self.updateExpression(expressionId, field, operation, value);
@@ -494,15 +494,15 @@ TextSymbolizer.prototype.registerFilterEvents = function(expressionId) {
 		var inputs = '';
 		inputs += '<div class="col-md-12 form-group">';
 		inputs += 	'<label>' + gettext('Value') + '</label>';
-		inputs += 	'<select id="label-value-select'+expressionId+'" class="form-control">';
-		inputs += 		'<option disabled selected value>--</option>';
-		inputs += 	'</select>';
+		inputs += 	'<input type="text" id="label-value-select'+expressionId+'" class="form-control filter-component" list="label-value-list'+expressionId+'">';
+		inputs += 	'<datalist id="label-value-list'+expressionId+'">';
+		inputs += 	'</datalist>';
 		inputs += '</div>';
 		
 		$('#label-value'+expressionId).empty();
 		$('#label-value'+expressionId).append(inputs);
 
-		var value = $('option:selected', $('#label-value-select'+expressionId)).val();
+		var value = $('#label-value-select'+expressionId).val();
 		var field = $('#label-field'+expressionId).val();
 		var operation = $('#label-operation'+expressionId).val();
 		self.updateExpression(expressionId, field, operation, value);
@@ -635,22 +635,21 @@ TextSymbolizer.prototype.loadUniqueValues = function(field, expressionId) {
 					'field': field
 				},
 			  	success	:function(response){
-			  		$("#label-value-select"+expressionId).empty();
-			  		$emptyOpt = $("<option></option>").attr("value", "").attr("selected", true).attr("disabled", true).text("---");
-			  		$("#label-value-select"+expressionId).append($emptyOpt);
+			  		$("#label-value-list"+expressionId).empty();
+			  		$("#label-value-select"+expressionId).val(expression.value);
 			  		$.each(response.values, function(index, option) {
 			  			if (expression.value == option) {
 			  				$option = $("<option selected></option>").attr("value", option).text(option);
-				  			$("#label-value-select"+expressionId).append($option);
+				  			$("#label-value-list"+expressionId).append($option);
 			  			} else {
 			  				$option = $("<option></option>").attr("value", option).text(option);
-				  			$("#label-value-select"+expressionId).append($option);
+				  			$("#label-value-list"+expressionId).append($option);
 			  			}
 			  			
 			  	    });
 			  		
 			  		$('#label-value-select'+expressionId).on('change', function(){
-			  			var value = $('option:selected', $('#label-value-select'+expressionId)).val();
+			  			var value =  $('#label-value-select'+expressionId).val();
 			  			var field = $('#label-field'+expressionId).val();
 			  			var operation = $('#label-operation'+expressionId).val();
 			  			self.updateExpression(expressionId, field, operation, value);
@@ -769,9 +768,9 @@ TextSymbolizer.prototype.registerEvents = function() {
 				var inputs = '';
 				inputs += '<div class="col-md-12 form-group">';
 				inputs += 	'<label>' + gettext('Value') + '</label>';
-				inputs += 	'<select id="label-value-select'+expression.id+'" class="form-control filter-component">';
-				inputs += 		'<option disabled selected value>--</option>';
-				inputs += 	'</select>';
+				inputs += 	'<input type="text" id="label-value-select'+expression.id+'" class="form-control filter-component" list="label-value-list'+expression.id+'">';
+				inputs += 	'<datalist id="label-value-list'+expression.id+'">';
+				inputs += 	'</datalist>';
 				inputs += '</div>';
 				
 				$('#label-value'+expression.id).empty();

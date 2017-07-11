@@ -157,9 +157,9 @@ Expressions.prototype.getFilterFormUI = function(ruleid) {
 				var inputs = '';
 				inputs += '<div class="col-md-12 form-group">';
 				inputs += 	'<label>' + gettext('Value') + '</label>';
-				inputs += 	'<select id="expression-value-select'+expression.id+'" class="form-control">';
-				inputs += 		'<option disabled selected value>--</option>';
-				inputs += 	'</select>';
+				inputs += 	'<input type="text" id="expression-value-select'+expression.id+'" class="form-control filter-component" list="expression-value-list'+expression.id+'">';
+				inputs += 	'<datalist id="expression-value-list'+expression.id+'">';
+				inputs += 	'</datalist>';
 				inputs += '</div>';
 				
 				$('#expression-value'+expression.id).empty();
@@ -462,22 +462,21 @@ Expressions.prototype.loadUniqueValues = function(field, expressionId) {
 					'field': field
 				},
 			  	success	:function(response){
-			  		$("#expression-value-select"+expressionId).empty();
-			  		$emptyOpt = $("<option></option>").attr("value", "").attr("selected", true).attr("disabled", true).text("---");
-			  		$("#expression-value-select"+expressionId).append($emptyOpt);
+			  		$("#expression-value-list"+expressionId).empty();
+			  		$("#expression-value-select"+expressionId).val(expression.value);
 			  		$.each(response.values, function(index, option) {
 			  			if (expression.value == option) {
 			  				$option = $("<option selected></option>").attr("value", option).text(option);
-				  			$("#expression-value-select"+expressionId).append($option);
+				  			$("#expression-value-list"+expressionId).append($option);
 			  			} else {
 			  				$option = $("<option></option>").attr("value", option).text(option);
-				  			$("#expression-value-select"+expressionId).append($option);
+				  			$("#expression-value-list"+expressionId).append($option);
 			  			}
 			  			
 			  	    });
 			  		
 			  		$('#expression-value-select'+expressionId).on('change', function(){
-			  			var value = $('option:selected', $('#expression-value-select'+expressionId)).val();
+			  			var value = $('#expression-value-select'+expressionId).val();
 			  			var field = $('#expression-field'+expressionId).val();
 			  			var operation = $('#expression-operation'+expressionId).val();
 			  			self.updateExpression(expressionId, field, operation, value);
@@ -498,20 +497,20 @@ Expressions.prototype.registerFilterEvents = function(expressionId) {
 		var inputs = '';
 		inputs += '<div class="col-md-12 form-group">';
 		inputs += 	'<label>' + gettext('Value') + '</label>';
-		inputs += 	'<select id="expression-value-select'+expressionId+'" class="form-control">';
-		inputs += 		'<option disabled selected value>--</option>';
-		inputs += 	'</select>';
+		inputs += 	'<input type="text" id="expression-value-select'+expressionId+'" class="form-control filter-component" list="expression-value-list'+expressionId+'">';
+		inputs += 	'<datalist id="expression-value-list'+expressionId+'">';
+		inputs += 	'</datalist>';
 		inputs += '</div>';
 		
 		$('#expression-value'+expressionId).empty();
 		$('#expression-value'+expressionId).append(inputs);
 
-		var value = $('option:selected', $('#expression-value-select'+expressionId)).val();
+		var value = $('#expression-value-select'+expressionId).val();
 		var field = $('#expression-field'+expressionId).val();
 		var operation = $('#expression-operation'+expressionId).val();
 		self.updateExpression(expressionId, field, operation, value);
 
-		var value_orig = $('option:selected', $('#expression-field'+expressionId)).val();
+		var value_orig = $('#expression-field'+expressionId).val();
 		self.loadUniqueValues(value_orig, expressionId);
 	});
 
@@ -519,20 +518,20 @@ Expressions.prototype.registerFilterEvents = function(expressionId) {
 		var inputs = '';
 		inputs += '<div class="col-md-12 form-group">';
 		inputs += 	'<label>' + gettext('Value') + '</label>';
-		inputs += 	'<select id="expression-value-select'+expressionId+'" class="form-control">';
-		inputs += 		'<option disabled selected value>--</option>';
-		inputs += 	'</select>';
+		inputs += 	'<input type="text" id="expression-value-select'+expressionId+'" class="form-control filter-component" list="expression-value-list'+expressionId+'">';
+		inputs += 	'<datalist id="expression-value-list'+expressionId+'">';
+		inputs += 	'</datalist>';
 		inputs += '</div>';
 		
 		$('#expression-value'+expressionId).empty();
 		$('#expression-value'+expressionId).append(inputs);
 
-		var value = $('option:selected', $('#expression-value-select'+expressionId)).val();
+		var value = $('#expression-value-select'+expressionId).val();
 		var field = $('#expression-field'+expressionId).val();
 		var operation = $('#expression-operation'+expressionId).val();
 		self.updateExpression(expressionId, field, operation, value);
 
-		var value_orig = $('option:selected', $('#expression-field'+expressionId)).val();
+		var value_orig = $('#expression-field'+expressionId).val();
 		self.loadUniqueValues(value_orig, expressionId);
 	});
 
