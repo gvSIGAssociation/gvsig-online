@@ -122,7 +122,7 @@ def build_complex_filter(filters, rule):
             else:
                 if operator == 'and':
                     complex_filter = complex_filter + f
-                elif operator == 'and':
+                elif operator == 'or':
                     complex_filter = complex_filter | f
         
         elif item.get('type') == 'and':

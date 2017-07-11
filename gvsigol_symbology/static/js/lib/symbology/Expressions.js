@@ -120,15 +120,14 @@ Expressions.prototype.getFilterFormUI = function(ruleid) {
 	ui += 		'<h3 class="box-title">' + gettext('Expressions') + '</h3>';
 	ui += 		'<div class="box-tools pull-right">';
 	ui += 			'<div class="btn-group">';
-	ui += 				'<button type="button" class="btn btn-sm btn-success"><i class="fa fa-plus margin-r-5"></i></button>';
+	ui += 				'<button type="button" class="btn btn-sm btn-success">'+gettext("Add")+'</button>';
 	ui += 				'<button type="button" class="btn btn-sm btn-success margin-r-5 dropdown-toggle" data-toggle="dropdown" aria-expanded="false">';
 	ui += 					'<span class="caret"></span>';
 	ui += 					'<span class="sr-only">Toggle Dropdown</span>';
 	ui += 				'</button>';
 	ui += 				'<ul class="dropdown-menu" role="menu">';
-	ui += 					'<li><a id="add-new-expression" data-ruleid="' + ruleid + '" href="#">Expression</a></li>';
-	ui += 					'<li><a id="add-and" data-ruleid="' + ruleid + '" href="#">AND</a></li>';
-	ui += 					'<li><a id="add-or" data-ruleid="' + ruleid + '" href="#">OR</a></li>';
+	ui += 					'<li><a id="add-and" data-ruleid="' + ruleid + '" href="#">'+gettext("AND expression")+'</a></li>';
+	ui += 					'<li><a id="add-or" data-ruleid="' + ruleid + '" href="#">'+gettext("OR expression")+'</a></li>';
 	ui += 				'</ul>';
 	ui += 			'</div>';
 	ui += 			'<button id="save-filter" data-ruleid="' + ruleid + '" class="btn btn-sm btn-default save-filter"><i class="fa fa-floppy-o margin-r-5"></i> ' + gettext('Save filter') + '</button>';
@@ -184,9 +183,7 @@ Expressions.prototype.getFilterFormUI = function(ruleid) {
 				$('#expressions-list').append(self.addAndOperator(r));	
 				$('#remove-and' + self.expressions_counter).on('click', function(e){
 					e.preventDefault();
-					self.deleteExpression(this.dataset.expressionid);
-					this.parentNode.parentNode.parentNode.remove();
-					self.expressions_counter = self.expressions_counter - 1;
+					self.removeOperatorExpression(this.dataset.expressionid, $(this));
 				});
 				self.registerFilterEvents(self.expressions_counter);
 				self.expressions_counter = self.expressions_counter + 1;
@@ -200,85 +197,128 @@ Expressions.prototype.getFilterFormUI = function(ruleid) {
 				$('#expressions-list').append(self.addOrOperator(r));
 				$('#remove-or' + self.expressions_counter).on('click', function(e){
 					e.preventDefault();
-					self.deleteExpression(this.dataset.expressionid);
-					this.parentNode.parentNode.parentNode.remove();
-					self.expressions_counter = self.expressions_counter - 1;
+					self.removeOperatorExpression(this.dataset.expressionid, $(this));
 				});
 				self.registerFilterEvents(self.expressions_counter);
 				self.expressions_counter = self.expressions_counter + 1;
 			}
 		}
+	}else{
+		self.addNewExpression(ruleid);
 	}
 	
+	for(var ix = 0; ix< self.expressions.length; ix++){
+		if(self.expressions[ix].type == "expression"){
+			$('#remove-expression' + self.expressions[ix].id).css("display", "none");
+		}
+	}
 	$('#save-filter').on('click', function(){
 		var ruleid = this.dataset.ruleid;
 		var rule = self.getRuleById(ruleid);
 
-		var value = $('#expresion-value').val();
-		var field = $('#expression-field').val();
-		var operation = $('#expression-operation').val();
-
-		rule.setFilter(self.expressions);
+		if(self.expressions.length > 1 || 
+				(self.expressions.length >0 && self.expressions[0].field != "" && self.expressions[0].operation != "" )){
+			rule.setFilter(self.expressions);
+		}
 		$('#modal-expression').modal('hide');
 	});
 	
 	$('#add-new-expression').on('click', function(){
-		var rule = self.getRuleById(this.dataset.ruleid);
-		var expression = {
-			id: self.expressions_counter,
-			type: 'expression',
-			field: '',
-			operation: '',
-			value: ''
-		};
-		self.expressions.push(expression);
-		$('#expressions-list').append(self.addExpression(expression));
-		$('#remove-expression' + self.expressions_counter).on('click', function(e){
-			e.preventDefault();
-			self.deleteExpression(this.dataset.expressionid);
-			this.parentNode.parentNode.parentNode.remove();
-			self.expressions_counter = self.expressions_counter - 1;
-		});
-		self.registerFilterEvents(self.expressions_counter);
-		self.expressions_counter = self.expressions_counter + 1;
+		self.addNewExpression(this.dataset.ruleid);
 	});
 	
 	$('#add-and').on('click', function(){
-		var rule = self.getRuleById(this.dataset.ruleid);
-		var andOperator = {
-			id: self.expressions_counter,
-			type: 'and'
-		};
-		self.expressions.push(andOperator);
-		$('#expressions-list').append(self.addAndOperator(rule));	
-		$('#remove-and' + self.expressions_counter).on('click', function(e){
-			e.preventDefault();
-			self.deleteExpression(this.dataset.expressionid);
-			this.parentNode.parentNode.parentNode.remove();
-			self.expressions_counter = self.expressions_counter - 1;
-		});
-		self.registerFilterEvents(self.expressions_counter);
-		self.expressions_counter = self.expressions_counter + 1;
+		self.addANDExpression(this.dataset.ruleid);
+		self.addNewExpression(this.dataset.ruleid);
 	});
 	
 	$('#add-or').on('click', function(){
-		var rule = self.getRuleById(this.dataset.ruleid);
-		var orOperator = {
-			id: self.expressions_counter,
-			type: 'or'
-		};
-		self.expressions.push(orOperator);
-		$('#expressions-list').append(self.addOrOperator(rule));
-		$('#remove-or' + self.expressions_counter).on('click', function(e){
-			e.preventDefault();
-			self.deleteExpression(this.dataset.expressionid);
-			this.parentNode.parentNode.parentNode.remove();
-			self.expressions_counter = self.expressions_counter - 1;
-		});
-		self.registerFilterEvents(self.expressions_counter);
-		self.expressions_counter = self.expressions_counter + 1;
+		self.addORExpression(this.dataset.ruleid);
+		self.addNewExpression(this.dataset.ruleid);
 	});
 
+};
+
+Expressions.prototype.addNewExpression = function(ruleid) {
+	var self = this;
+	
+	var rule = self.getRuleById(ruleid);
+	var expression = {
+		id: self.expressions_counter,
+		type: 'expression',
+		field: '',
+		operation: '',
+		value: ''
+	};
+	self.expressions.push(expression);
+	$('#expressions-list').append(self.addExpression(expression));
+	$('#remove-expression' + self.expressions_counter).css("display", "none");
+	$('#remove-expression' + self.expressions_counter).on('click', function(e){
+		e.preventDefault();
+		self.deleteExpression(this.dataset.expressionid);
+		this.parentNode.parentNode.parentNode.remove();
+		self.expressions_counter = self.expressions_counter - 1;
+	});
+	self.registerFilterEvents(self.expressions_counter);
+	self.expressions_counter = self.expressions_counter + 1;
+};
+
+
+
+Expressions.prototype.addANDExpression = function(ruleid) {
+	var self = this;
+	
+	var rule = self.getRuleById(ruleid);
+	var andOperator = {
+		id: self.expressions_counter,
+		type: 'and'
+	};
+	self.expressions.push(andOperator);
+	$('#expressions-list').append(self.addAndOperator(rule));	
+	$('#remove-and' + self.expressions_counter).on('click', function(e){
+		e.preventDefault();
+		self.removeOperatorExpression(this.dataset.expressionid, $(this));
+	});
+	self.registerFilterEvents(self.expressions_counter);
+	self.expressions_counter = self.expressions_counter + 1;
+};
+
+
+Expressions.prototype.addORExpression = function(ruleid) {
+	var self = this;
+	
+	var rule = self.getRuleById(ruleid);
+	var orOperator = {
+		id: self.expressions_counter,
+		type: 'or'
+	};
+	self.expressions.push(orOperator);
+	$('#expressions-list').append(self.addOrOperator(rule));
+	$('#remove-or' + self.expressions_counter).on('click', function(e){
+		e.preventDefault();
+		self.removeOperatorExpression(this.dataset.expressionid, $(this));
+	});
+	self.registerFilterEvents(self.expressions_counter);
+	self.expressions_counter = self.expressions_counter + 1;
+};
+
+Expressions.prototype.removeOperatorExpression = function(expressionid, component) {
+	var self = this;
+	
+	var parent = component.parent().parent().parent();
+	var next = parent.next();
+	var nextbutton = next.find("button.btn-box-tool").first();
+	nextxpressionid = nextbutton.attr("data-expressionid");
+	self.removeExpression(expressionid, $(component));
+	self.removeExpression(nextxpressionid, nextbutton);
+};
+
+Expressions.prototype.removeExpression = function(expressionid, component) {
+	var self = this;
+	
+	self.deleteExpression(expressionid);
+	component.parent().parent().parent().remove();
+	self.expressions_counter = self.expressions_counter - 1;
 };
 
 Expressions.prototype.getExpressionById = function(id) {
@@ -602,7 +642,7 @@ Expressions.prototype.loadRules = function(rules) {
 			var options = symbolizer[0].fields;
 			options['order'] = order;
 
-			if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer') {
+			if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer' && rules[i].name.endsWith("_text")) {
 				options['is_actived'] = true;
 				options['title'] = rules[i].title;
 				options['minscale'] = rules[i].minscale;
@@ -617,7 +657,12 @@ Expressions.prototype.loadRules = function(rules) {
 				rule.addExternalGraphicSymbolizer(options);
 
 			} else {
-				rule.addSymbolizer(options);
+				if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer') {
+					rule.addTextSymbolizer(options);
+
+				}else{
+					rule.addSymbolizer(options);
+				}
 			}	
 
 		}
