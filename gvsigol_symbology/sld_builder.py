@@ -107,15 +107,34 @@ def get_operation_name(op):
     
     return operation
 
+def get_filter_section(f, op):
+    if op == 'is_equal_to':
+        return f.PropertyIsEqualTo
+    elif op == 'is_less_than_or_equal_to':
+        return f.PropertyIsLessThanOrEqualTo
+    elif op == 'is_less_than':
+        return f.PropertyIsLessThan
+    elif op == 'is_greater_than_or_equal_to':
+        return f.PropertyIsGreaterThanOrEqualTo
+    elif op == 'is_greater_than':
+        return f.PropertyIsGreaterThan
+    elif op == 'is_not_equal':
+        return f.PropertyIsNotEqualTo
+    elif op == 'is_like':
+        return f.PropertyIsLike
+    
+    return f
+
 def build_complex_filter(filters, rule):
     complex_filter = None
     operator = None
     for item in filters:
         if item.get('type') == 'expression':
             f = Filter(rule)
-            f.PropertyIsEqualTo = PropertyCriterion(f, get_operation_name(item.get('operation')))
-            f.PropertyIsEqualTo.PropertyName = item.get('field')
-            f.PropertyIsEqualTo.Literal = item.get('value')
+            filter_op = get_filter_section(f, item.get('operation'))
+            filter_op = PropertyCriterion(f, get_operation_name(item.get('operation')))
+            filter_op.PropertyName = item.get('field')
+            filter_op.Literal = item.get('value')
             
             if complex_filter == None:
                 complex_filter = f
