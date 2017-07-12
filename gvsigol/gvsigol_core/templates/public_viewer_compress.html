@@ -66,21 +66,6 @@
 			<div class="navbar-custom-menu">
 				<ul class="nav navbar-nav">
 					
-					<li>
-						<form id="select-language-form" action="{% url 'set_language' %}" method="post">{% csrf_token %}
-						    <select id="select-language" name="language" class="form-control" style="margin-top: 10px;">
-						        {% get_current_language as LANGUAGE_CODE %}
-						        {% get_available_languages as LANGUAGES %}
-						        {% get_language_info_list for LANGUAGES as languages %}
-						        {% for language in languages %}
-						            <option style="" value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected="selected"{% endif %}>
-						                {% trans language.name_translated %}
-						            </option>
-						        {% endfor %}								      
-						    </select>		
-					    </form>							 
-				    </li>
-					
 					<li class="dropdown user user-menu">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown"> 
 							<img src="{% static "img/user.png" %}" class="user-image" alt="User Image"> 
@@ -93,6 +78,20 @@
 									<small>{% trans "Anonymous user" %}</small>
 								</p>
 							</li>
+							<li class="user-header">
+								<form id="select-language-form" action="{% url 'set_language' %}" method="post">{% csrf_token %}
+								    <select id="select-language" name="language" class="form-control" style="margin-top: 10px;">
+								        {% get_current_language as LANGUAGE_CODE %}
+								        {% get_available_languages as LANGUAGES %}
+								        {% get_language_info_list for LANGUAGES as languages %}
+								        {% for language in languages %}
+								            <option style="" value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected="selected"{% endif %}>
+								                {% trans language.name_translated %}
+								            </option>
+								        {% endfor %}								      
+								    </select>		
+							    </form>							 
+						    </li>
 							<li class="user-footer">
 								<div class="pull-right">
 									<a href="/gvsigonline/" class="btn btn-default btn-flat">{% trans "Exit" %}</a>
