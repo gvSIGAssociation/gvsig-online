@@ -381,25 +381,26 @@ Rule.prototype.getSymbolsFromLibrary = function(libraryId) {
 						$(".users-list").append(symbolView);
 						self.libraryPreview(symbol.id, symbolizers);
 					}
+				
+					$(".users-list-name").on('click', function(e){
+						e.preventDefault();
+						for (var j=0; j<symbols.length; j++) {
+							if (symbols[j].id == this.dataset.rid) {
+								if (symbols[j].symbolizers[0].type == self.utils.getFeatureType() || 
+									(symbols[j].symbolizers[0].type == 'ExternalGraphicSymbolizer' && self.utils.getFeatureType() == 'PointSymbolizer') || 
+										(symbols[j].symbolizers[0].type == 'MarkSymbolizer' && self.utils.getFeatureType() == 'PointSymbolizer')) {
+									
+									self.loadLibrarySymbol(symbols[j].symbolizers);
+									
+								} else {
+									messageBox.show('warning', gettext('Selected symbol is not compatible with the layer'));
+									
+								}						
+							}
+						}	
+						$('#modal-import-symbol').modal('hide');
+					});
 				}
-				$(".users-list-name").on('click', function(e){
-					e.preventDefault();
-					for (var j=0; j<symbols.length; j++) {
-						if (symbols[j].id == this.dataset.rid) {
-							if (symbols[j].symbolizers[0].type == self.utils.getFeatureType() || 
-								(symbols[j].symbolizers[0].type == 'ExternalGraphicSymbolizer' && self.utils.getFeatureType() == 'PointSymbolizer') || 
-									(symbols[j].symbolizers[0].type == 'MarkSymbolizer' && self.utils.getFeatureType() == 'PointSymbolizer')) {
-								
-								self.loadLibrarySymbol(symbols[j].symbolizers);
-								
-							} else {
-								messageBox.show('warning', gettext('Selected symbol is not compatible with the layer'));
-								
-							}						
-						}
-					}	
-					$('#modal-import-symbol').modal('hide');
-				});
 			}
 		},
 	    error: function(){}
