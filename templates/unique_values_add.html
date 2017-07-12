@@ -255,7 +255,7 @@ $(document).ready(function() {
 	});
 	
 	$("#refresh-preview").on('click', function(e){
-		uniqueValues.refreshMap();
+		utils.sld(layerId, 'UV', uniqueValues);
 	});
 	
 	for(var idx in jsonAlphanumericFields){

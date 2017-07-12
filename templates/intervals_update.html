@@ -273,7 +273,7 @@ $(document).ready(function() {
 	});
 	
 	$("#refresh-preview").on('click', function(e){
-		intervals.refreshMap();
+		utils.sld(layerId, 'IN', intervals);
 	});
 	
 	for(var idx in jsonNumericFields){

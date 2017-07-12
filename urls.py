@@ -20,6 +20,11 @@ urlpatterns = [
     
     url(r'^expressions_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.expressions_add', name='expressions_add'),
     url(r'^expressions_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.expressions_update', name='expressions_update'),
+   
+    url(r'^create_sld/$', 'gvsigol_symbology.views.create_sld', name='create_sld'),
+    
+    #url(r'^clustered_points_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.clustered_points_add', name='clustered_points_add'),
+    #url(r'^clustered_points_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.clustered_points_update', name='clustered_points_update'),
     
     url(r'^color_table_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.color_table_add', name='color_table_add'),
     url(r'^color_table_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.color_table_update', name='color_table_update'),
