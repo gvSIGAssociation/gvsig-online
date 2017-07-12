@@ -422,4 +422,66 @@ html, body {
     linear-gradient(to right, transparent 49%, #333 49%, #333 51%, transparent 51%);
 
 }
+
+
+@media only screen and (max-width: 750px) {
+
+.ol-toolbar {
+    left: auto;
+    right: 6px;
+    top: 124px;
+    z-index: 1000;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+}
+
+.editionbar {
+    left: auto;
+    right: 6px;
+    top: 350px;
+    z-index: 1000;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+}
+
+.ol-control button {
+    background-color: #fff;
+    /* border-bottom: 1px solid #ccc; */
+    width: 35px;
+    height: 35px;
+    line-height: 35px;
+    font-size: 25px;
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: #666;
+}
+
+
+.control-sidebar.control-sidebar-light.control-sidebar-open {
+    width: 275px;
+}
+
+.custom-mouse-position-projection {
+    font-size: 12px;
+    background-color: #fff;
+    color: #777;
+    width: 100px;
+}
+
+.ol-overviewmap:not(.ol-collapsed) {
+    background: rgba(255,255,255,.8);
+    display: none;
+}
+
+}
+
+@media only screen and (max-height: 500px ) {
+	.editionbar {
+	    left: auto;
+	    right: 56px;
+	    top: 6px;
+	    z-index: 1000;
+	    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+	}
+	
+	
 }
