@@ -261,7 +261,7 @@ $(document).ready(function() {
 	});
 	
 	$("#refresh-preview").on('click', function(e){
-		expressions.refreshMap();
+		utils.sld(layerId, 'EX', expressions);
 	});
 	
 	$("#add-expression").on('click', function(e) {
