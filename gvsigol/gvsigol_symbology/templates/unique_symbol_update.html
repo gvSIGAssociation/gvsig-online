@@ -230,7 +230,7 @@ $(document).ready(function() {
 	});
 	
 	$("#refresh-preview").on('click', function(e){
-		uniqueSymbol.refreshMap();
+		utils.sld(layerId, 'US', uniqueSymbol);
 	});
 
 });

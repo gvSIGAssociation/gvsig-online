@@ -22,7 +22,8 @@
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
-from models import Style, Library, Rule, LibraryRule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer
+from models import Style, Library, Rule, LibraryRule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, TextSymbolizer, ExternalGraphicSymbolizer
+from gvsigol_services.models import Layer
 from gvsigol_services.backend_mapservice import backend as mapservice
 from gvsigol_core import utils as core_utils
 from gvsigol import settings
@@ -549,3 +550,115 @@ def upload_library(name, description, file):
 def upload_sld(file):
     rules = []             
     return rules
+
+
+def get_sld(request, type, json_data, layer_id):
+
+    layer = Layer.objects.get(id=layer_id)
+    layer.name = layer.datastore.workspace.name+':'+layer.name
+    style = Style(
+        name = json_data.get('name'),
+        title = json_data.get('title'),
+        is_default = json_data.get('is_default'),
+        type = type
+    )
+    style.save()
+            
+    for r in json_data.get('rules'):
+        json_rule = r.get('rule') 
+        
+        filter_text = ""
+        if json_rule.get('filter').__len__() != 0:
+            filter_text = str(json.dumps(json_rule.get('filter')))
+            
+        rule = Rule(
+            style = style,
+            name = json_rule.get('name'),
+            title = json_rule.get('title'),
+            abstract = '',
+            filter = filter_text,
+            minscale = json_rule.get('minscale'),
+            maxscale = json_rule.get('maxscale'),
+            order = json_rule.get('order')
+        )
+        rule.save()
+        
+        for sym in r.get('symbolizers'): 
+            if sym.get('type') == 'PolygonSymbolizer':
+                json_sym = json.loads(sym.get('json'))
+                symbolizer = PolygonSymbolizer(
+                    rule = rule,
+                    order = int(sym.get('order')),
+                    fill = json_sym.get('fill'),
+                    fill_opacity = json_sym.get('fill_opacity'),
+                    stroke = json_sym.get('stroke'),
+                    stroke_width = json_sym.get('stroke_width'),
+                    stroke_opacity = json_sym.get('stroke_opacity'),
+                    stroke_dash_array = json_sym.get('stroke_dash_array')
+                )
+                symbolizer.save()
+            
+            elif sym.get('type') == 'LineSymbolizer':
+                json_sym = json.loads(sym.get('json'))
+                symbolizer = LineSymbolizer(
+                    rule = rule,
+                    order = int(sym.get('order')),
+                    stroke = json_sym.get('stroke'),
+                    stroke_width = json_sym.get('stroke_width'),
+                    stroke_opacity = json_sym.get('stroke_opacity'),
+                    stroke_dash_array = json_sym.get('stroke_dash_array')
+                )
+                symbolizer.save()
+                
+            elif sym.get('type') == 'MarkSymbolizer':
+                json_sym = json.loads(sym.get('json'))
+                symbolizer = MarkSymbolizer(
+                    rule = rule,
+                    order = int(sym.get('order')),
+                    opacity = json_sym.get('opacity'),
+                    size = json_sym.get('size'),
+                    rotation = json_sym.get('rotation'),
+                    well_known_name = json_sym.get('well_known_name'),
+                    fill = json_sym.get('fill'),
+                    fill_opacity = json_sym.get('fill_opacity'),
+                    stroke = json_sym.get('stroke'),
+                    stroke_width = json_sym.get('stroke_width'),
+                    stroke_opacity = json_sym.get('stroke_opacity'),
+                    stroke_dash_array = json_sym.get('stroke_dash_array')
+                )
+                symbolizer.save()
+                
+            elif sym.get('type') == 'ExternalGraphicSymbolizer':
+                json_sym = json.loads(sym.get('json'))
+                symbolizer = ExternalGraphicSymbolizer(
+                    rule = rule,
+                    order = int(sym.get('order')),
+                    opacity = json_sym.get('opacity'),
+                    size = json_sym.get('size'),
+                    rotation = json_sym.get('rotation'),
+                    online_resource = json_sym.get('online_resource'),
+                    format = json_sym.get('format')                 
+                )
+                symbolizer.save()
+                
+            elif sym.get('type') == 'TextSymbolizer':
+                json_sym = json.loads(sym.get('json'))
+                symbolizer = TextSymbolizer(
+                    rule = rule,
+                    order = int(sym.get('order')),
+                    label = json_sym.get('label'),
+                    font_family = json_sym.get('font_family'),
+                    font_size = json_sym.get('font_size'),
+                    font_weight = json_sym.get('font_weight'),
+                    font_style = json_sym.get('font_style'),
+                    fill = json_sym.get('fill'),
+                    fill_opacity = json_sym.get('fill_opacity'),
+                    halo_fill = json_sym.get('halo_fill'),
+                    halo_fill_opacity = json_sym.get('halo_fill_opacity'),     
+                    halo_radius = json_sym.get('halo_radius'),
+                )
+                symbolizer.save()
+    
+    sld_body = sld_builder.build_sld(layer, style)
+    style.delete()
+    return sld_body

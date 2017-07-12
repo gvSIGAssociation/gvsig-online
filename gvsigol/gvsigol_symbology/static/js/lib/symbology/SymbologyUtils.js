@@ -418,3 +418,103 @@ SymbologyUtils.prototype.getRandomColor = function() {
     }
     return color;
 };
+
+
+SymbologyUtils.prototype.sld = function(layerId, type, symbology) {
+	var self = this;
+	var rules = symbology.rules;
+	var label = symbology.label;
+	
+	var minscale = $('#symbol-minscale').val();
+	if(minscale == "" || minscale < 0){
+		minscale = -1;
+	}
+
+	var maxscale = $('#symbol-maxscale').val();
+	if(maxscale == "" || maxscale < 0){
+		maxscale = -1;
+	}
+
+	var style = {
+			name: $('#style-name').val(),
+			title: $('#style-title').val(),
+			minscale: minscale,
+			maxscale: maxscale,
+			is_default: $('#style-is-default').is(":checked"),
+			rules: new Array()
+	};
+
+	for (var i=0; i<rules.length; i++) {
+		if(!rules[i].name.endsWith("_text")){
+			var symbolizers = new Array();
+			for (var j=0; j < rules[i].getSymbolizers().length; j++) {
+				var symbolizer = {
+						type: rules[i].getSymbolizers()[j].type,
+						json: rules[i].getSymbolizers()[j].toJSON(),
+						order: rules[i].getSymbolizers()[j].order
+				};
+				symbolizers.push(symbolizer);
+			}
+
+			symbolizers.sort(function(a, b){
+				return parseInt(a.order) - parseInt(b.order);
+			});
+
+			var rule = {
+					rule: rules[i].getObject(),
+					symbolizers: symbolizers
+			};
+			style.rules.push(rule);
+		}
+	}
+
+	if (label != null && label.is_activated()) {
+		var ruleName = "rule_" + rules.length +"_text";
+		var ruleTitle = label.title;
+		var l = {
+				type: label.type,
+				json: label.toJSON(),
+				order: label.order
+		};
+
+		var options = {
+				"id" : rules.length,
+				"name" : ruleName,
+				"title" : ruleTitle,
+				"abstract" : "",
+				"filter" : label.filterCode,
+				"minscale" : label.minscale,
+				"maxscale" :  label.maxscale,
+				"order" :  label.order
+		}
+		var rl = new Rule(i, ruleName, ruleTitle, options, this.utils);
+		var rule = {
+				rule: rl.getObject(),
+				symbolizers: [l]
+		};
+		style.rules.push(rule);
+	}
+
+	$.ajax({
+		type: "POST",
+		async: false,
+		url: "/gvsigonline/symbology/create_sld/",
+		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		data: {
+			type: 'EX',
+			layer_id: layerId,
+			style_data: JSON.stringify(style)
+		},
+		success: function(response){
+			if (response.success) {
+				self.reloadLayerPreview(response.sld);
+			} else {
+				alert('Error');
+			}
+
+		},
+		error: function(){}
+	});
+};
