@@ -260,7 +260,7 @@ SymbologyUtils.prototype.getFilter = function(json_filter) {
 		
 		filter += 	'<ogc:' + operator + '>';
 		filter += 		'<ogc:PropertyName>' + json_filter.property_name + '</ogc:PropertyName>';
-		filter += 		'<ogc:Literal>' + json_filter.value1 + '</ogc:Literal>';
+		filter += 		'<ogc:Literal>' + json_filter.value + '</ogc:Literal>';
 		filter += 	'</ogc:' + operator + '>';
 		
 	} else {

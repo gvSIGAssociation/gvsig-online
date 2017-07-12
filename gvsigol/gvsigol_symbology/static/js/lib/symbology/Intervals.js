@@ -132,8 +132,8 @@ Intervals.prototype.load = function(response, selectedField, numberOfIntervals) 
 
 		var rule = new Rule(i, ruleName, ruleTitle, options, this.utils);
 		var filter = {
-				type: 'is_between',
-				property_name: selectedField,
+				operation: 'is_between',
+				field: selectedField,
 				value1: min,		
 				value2: max
 		};
