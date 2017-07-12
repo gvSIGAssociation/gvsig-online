@@ -19,6 +19,7 @@
 '''
 @author: Jose Badia <jbadia@scolab.es>
 '''
+from django.utils.translation import ugettext as _
 from geopy.compat import urlencode
 from geopy.util import logger
 from geopy.geocoders import Nominatim as Nominatim_geocoder
@@ -99,14 +100,23 @@ class Nominatim():
         suggestion = {}
         for geolocator in self.geolocators:
             l = geolocator['geocoder'].reverse(coordinate2,exactly_one=True,language='es')
-            suggestion = {}
-            suggestion['source'] = 'nominatim'
-            suggestion['type'] = 'nominatim'
-            suggestion['address'] = l.address
-            suggestion['id'] = l.address
-            suggestion['lat'] = l._raw['lat']
-            suggestion['lng'] = l._raw['lon'] 
+            if l.address:
+                suggestion = {}
+                suggestion['source'] = 'nominatim'
+                suggestion['type'] = 'nominatim'
+                suggestion['address'] = l.address
+                suggestion['id'] = l.address
+                suggestion['lat'] = l._raw['lat']
+                suggestion['lng'] = l._raw['lon'] 
+            
+                return suggestion
         
-            return suggestion
+        suggestion = {}
+        suggestion['source'] = 'nominatim'
+        suggestion['type'] = 'nominatim'
+        suggestion['address'] = _('Not founded')
+        suggestion['lat'] = coordinate[1]
+        suggestion['lng'] = coordinate[0]
+        
         return suggestion
         

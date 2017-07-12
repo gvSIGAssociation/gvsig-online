@@ -19,6 +19,7 @@
 '''
 @author: Jose Badia <jbadia@scolab.es>
 '''
+from django.utils.translation import ugettext as _
 from geopy.compat import urlencode
 from geopy.util import logger
 from geopy.geocoders import Nominatim as Nominatim_geocoder
@@ -119,7 +120,12 @@ class GoogleMaps():
                     'lng': result['geometry']['location']['lng']
                 }
                 return parse_result
-        return {}
+        parse_result = {
+                    'address': _('Not founded'),
+                    'lat': coordinate[1], 
+                    'lng': coordinate[0]
+                }
+        return parse_result
       
     
     
