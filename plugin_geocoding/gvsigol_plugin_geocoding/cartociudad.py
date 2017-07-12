@@ -32,7 +32,7 @@ class Cartociudad():
     def __init__(self, provider, type):
         self.urls = settings.GEOCODING_PROVIDER['cartociudad']
         self.providers=[]
-        self.append(provider)
+        self.providers.append(provider)
         
         
         
