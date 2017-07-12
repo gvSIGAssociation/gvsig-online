@@ -350,7 +350,8 @@ def intervals_update(request, layer_id, style_id):
             response['maxscale'] = int(style.maxscale)
         response['rules'] = json.dumps(rules)
         if rule['filter']:
-            response['property_name'] = json.loads(rule['filter']).get('property_name')    
+            filter_json = json.loads(rule['filter'])
+            response['property_name'] = filter_json.get('field')    
         response['intervals'] = len(rules)
         
         return render_to_response('intervals_update.html', response, context_instance=RequestContext(request))
