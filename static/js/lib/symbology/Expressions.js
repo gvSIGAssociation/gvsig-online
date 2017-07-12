@@ -589,9 +589,9 @@ Expressions.prototype.load = function(selectedField, values) {
 
 		var rule = new Rule(i, ruleName, ruleTitle, options, this.utils);
 		var filter = {
-				type: 'is_equal',
-				property_name: selectedField,
-				value1: values[i]
+				operation: 'is_equal',
+				field: selectedField,
+				value: values[i]
 		};
 		rule.setFilter(filter);
 		$('#rules').append(rule.getTableUI(true, 'expressions'));
