@@ -364,7 +364,7 @@ Rule.prototype.getSymbolsFromLibrary = function(libraryId) {
 				var symbolizers = symbol.symbolizers;
 				
 				var symbolView = '';				
-				if (symbolizers[0].type == 'ExternalGraphicSymbolizer') {
+				if (symbolizers && symbolizers.length > 0 && symbolizers[0].type == 'ExternalGraphicSymbolizer') {
 					var graphic = JSON.parse(symbolizers[0].json);
 					symbolView += '<li>';
 					symbolView += 	'<img style="height: ' + graphic[0].fields.size + 'px; width: auto;" src="' + graphic[0].fields.online_resource + '" class="preview-eg"></img>';
