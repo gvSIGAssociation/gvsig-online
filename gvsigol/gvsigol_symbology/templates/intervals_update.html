@@ -169,7 +169,6 @@ function imagePostFunction(image, src) {
 	var img = image.getImage();
 	if (typeof window.btoa === 'function') {
 	  var xhr = new XMLHttpRequest();
-// 	  console.log("src",src);
 	  //GET ALL THE PARAMETERS OUT OF THE SOURCE URL**
 	  var dataEntries = src.split("&");
 	  var url;
@@ -183,13 +182,11 @@ function imagePostFunction(image, src) {
 	      params = params + "&"+dataEntries[i];
 	      }
 	  }
-// 	  console.log("params",params);
 	  xhr.open('POST', url, true);
 
 	  xhr.responseType = 'arraybuffer';
 	  xhr.onload = function(e) {
 	    if (this.status === 200) {
-// 	      console.log("this.response",this.response);
 	      var uInt8Array = new Uint8Array(this.response);
 	      var i = uInt8Array.length;
 	      var binaryString = new Array(i);
@@ -205,8 +202,6 @@ function imagePostFunction(image, src) {
 	  };
 	  //SET THE PROPER HEADERS AND FINALLY SEND THE PARAMETERS 
 	  xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-// 	  xhr.setRequestHeader("Content-length", params.length);
-// 	  xhr.setRequestHeader("Connection", "close");
 	  xhr.send(params);
 	} else {
 	  img.src = src;
