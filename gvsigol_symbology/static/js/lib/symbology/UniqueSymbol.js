@@ -162,9 +162,9 @@ UniqueSymbol.prototype.load = function(selectedField, values) {
 
 		var rule = new Rule(i, ruleName, ruleTitle, options, this.utils);
 		var filter = {
-				type: 'is_equal_to',
-				property_name: selectedField,
-				value1: values[i]
+				operation: 'is_equal_to',
+				field: selectedField,
+				value: values[i]
 		};
 		rule.setFilter(filter);
 		$('#rules').append(rule.getTableUI(true, 'unique'));
