@@ -364,21 +364,23 @@ Rule.prototype.getSymbolsFromLibrary = function(libraryId) {
 				var symbolizers = symbol.symbolizers;
 				
 				var symbolView = '';				
-				if (symbolizers && symbolizers.length > 0 && symbolizers[0].type == 'ExternalGraphicSymbolizer') {
-					var graphic = JSON.parse(symbolizers[0].json);
-					symbolView += '<li>';
-					symbolView += 	'<img style="height: ' + graphic[0].fields.size + 'px; width: auto;" src="' + graphic[0].fields.online_resource + '" class="preview-eg"></img>';
-					symbolView += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
-					symbolView += '</li>';
-					$(".users-list").append(symbolView);
-					
-				} else {
-					symbolView += '<li>';
-					symbolView += 	'<div id="library-symbol-preview-div-' + response.rules[i].id + '"></div>';
-					symbolView += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
-					symbolView += '</li>';
-					$(".users-list").append(symbolView);
-					self.libraryPreview(symbol.id, symbolizers);
+				if (symbolizers && symbolizers.length > 0){
+					if(symbolizers[0].type == 'ExternalGraphicSymbolizer') {
+						var graphic = JSON.parse(symbolizers[0].json);
+						symbolView += '<li>';
+						symbolView += 	'<img style="height: ' + graphic[0].fields.size + 'px; width: auto;" src="' + graphic[0].fields.online_resource + '" class="preview-eg"></img>';
+						symbolView += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
+						symbolView += '</li>';
+						$(".users-list").append(symbolView);
+						
+					} else {
+						symbolView += '<li>';
+						symbolView += 	'<div id="library-symbol-preview-div-' + response.rules[i].id + '"></div>';
+						symbolView += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].name + '</a>';
+						symbolView += '</li>';
+						$(".users-list").append(symbolView);
+						self.libraryPreview(symbol.id, symbolizers);
+					}
 				}
 				$(".users-list-name").on('click', function(e){
 					e.preventDefault();
