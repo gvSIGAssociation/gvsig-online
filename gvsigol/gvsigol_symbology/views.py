@@ -394,6 +394,21 @@ def expressions_add(request, layer_id):
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
+def create_sld(request):  
+    if request.method == 'POST':
+        type = request.POST['type']
+        style_data = request.POST['style_data']
+        layer_id = request.POST['layer_id']
+        json_data = json.loads(style_data)
+        
+        sld = services_library.get_sld(request, type, json_data, layer_id)           
+        return HttpResponse(json.dumps({'success': True, 'sld': sld}, indent=4), content_type='application/json')
+            
+    return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+        
+  
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
 def expressions_update(request, layer_id, style_id):  
     if request.method == 'POST':
         style_data = request.POST['style_data']
