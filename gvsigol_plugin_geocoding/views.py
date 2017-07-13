@@ -189,8 +189,8 @@ def isValidCartociudadDB(datastore):
     if not geocoding_setting.CARTOCIUDAD_DB_PROVINCIA in resources:
         resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_PROVINCIA)
         
-    if not geocoding_setting.CARTOCIUDAD_DB_TOPONIMO in resources:
-        resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_TOPONIMO)
+    #if not geocoding_setting.CARTOCIUDAD_DB_TOPONIMO in resources:
+    #    resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_TOPONIMO)
 
     return resources_needed
 
