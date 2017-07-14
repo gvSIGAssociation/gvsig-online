@@ -541,7 +541,7 @@ def create_cartociudad_config(provider, has_soundex):
         '''
         
         
-        
+        '''
         
         query_str4= "SELECT "
         query_str4= query_str4 + "tv.id_topo as obj_id, "
@@ -606,6 +606,8 @@ def create_cartociudad_config(provider, has_soundex):
         ET.SubElement(entity4, "field", column="subtipo", name="subtipo") 
         ET.SubElement(entity4, "field", column="category", name="category")  
         #ET.SubElement(entity4, "field", column="geom", name="geom") 
+        '''
+        
         
         tree = ET.ElementTree(root)
         tree.write(fname)
