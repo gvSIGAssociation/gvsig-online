@@ -131,7 +131,6 @@ class Migration(migrations.Migration):
                 ('wcs_endpoint', models.CharField(blank=True, max_length=500, null=True)),
                 ('cache_endpoint', models.CharField(blank=True, max_length=500, null=True)),
                 ('created_by', models.CharField(max_length=100)),
-                ('is_public', models.BooleanField(default=False)),
             ],
         ),
         migrations.AddField(
