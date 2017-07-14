@@ -38,7 +38,10 @@ Puede añadir(**1**), actualizar(**2**) y eliminar(**3**) almacenes de datos des
 .. image:: ../images/ds1.png
    :align: center
 
-Es importante entender que para poder añadir un almacén de datos, debemos partir de una fuente de datos que exista previamente. 
+.. note::
+      Es importante entender que para poder añadir un almacén de datos, debemos partir de una fuente de datos que exista previamente, es decir, que la BD y esquema que se indica en los parámetros de conexión existan.
+
+
 Por ejemplo, para poder añadir un almacén de datos de tipo PostGIS vectorial, la base de datos espacial debe existir previamente. 
 De esta forma, los que estamos haciendo es registrar en gvSIG Online (y en Geoserver) los parámetros de conexión a dicha base de datos. 
 De la misma forma, para añadir un almacén de datos de tipo ráster, el fichero ráster debe existir previamente en el servidor

@@ -86,7 +86,7 @@ CartoCiudad ofrece la posibilidad de descargar la cartografía por regiones y po
   - tramo_vial; 
   - portal_pk
   - municipio_vial.dbf (No tiene .shp)
-  - toponimo
+  - toponimo (**esta capa es opcional de usarla, depende de las carpetas descargadas por provincia puede contener o NO este fichero**)
 
   
   
@@ -106,7 +106,7 @@ CartoCiudad ofrece la posibilidad de descargar la cartografía por regiones y po
 
 Una vez realizada esta tarea, será necesario cargar la cartografía de regiones de España y los límites provinciales, por lo que habrá que repetir el proceso con los siguientes pasos:
 
-- En el Centro de Descargas_., seleccionar en productos *Información geográfica de referencia*: 'Lineas límite municipales' y buscamos cualquier *división dministrativa* que se quiera (Siempre serán los mismos ficheros para todos, ya que contienen toda la información de Península y Baleares de toda España)
+- En el Centro de Descargas_., seleccionar en productos *Información geográfica de referencia*: 'Lineas límite municipales' y buscamos en *división dministrativa*  la provincia, municipio o comunidad que se quiera.
 
 .. image:: ../_static/images/centro_descargas_2.png
    :align: center
@@ -118,8 +118,8 @@ Una vez realizada esta tarea, será necesario cargar la cartografía de regiones
 
 - El fichero comprimido desacargado contiene diversas carpetas, de las cuales solo usaremos las dos siguientes:
 
-  - recintos_municipales_inspire_peninbal_etr89 
-  - recintos_provinciales_inspire_peninbal_etr89
+  - **recintos_municipales_inspire_peninbal_etr89**
+  - **recintos_provinciales_inspire_peninbal_etr89**
 
 - Cargar en el 'Administrador de archivos' la capa que contiene cada carpeta con sus extensiones correspondientes (.shp; .dbf y .shx).
   
