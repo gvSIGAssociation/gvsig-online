@@ -108,6 +108,12 @@ Las etiquetas son un tipo especial de simbolizadores de tipo texto. Para añadir
 
 .. image:: ../images/sym11_4.png
    :align: center
+   
+También se puede construir filtros con **'OR expression'** o **'AND expression'**, para esta opción se configura la expresión del primer filtro *(recuadro azul)* y luego se debe pinchar sobre el botón *'add'* y seleccionar la expresión, a continuación se añade un 'AND u OR' y otra ventana de filtro para configurar la siguiente expresión *(recuadro amarillo)*.
+
+.. image:: ../images/sym11_5.png
+   :align: center
+   
 
 5.3 Leyenda de valores únicos
 -----------------------------
@@ -161,10 +167,16 @@ Mediante esta leyenda podremos asignar un tipo de símbolo a los elementos que c
 .. image:: ../images/sym14_2.png
    :align: center
 
-A continuación se nos mostrará un diálogo, desde donde podremos definir el filtro con la condición deseada.
+A continuación se nos mostrará un diálogo, desde donde podremos definir el primer filtro simple.
 
 .. image:: ../images/sym15.png
    :align: center
+
+De igual manera que los filtros del etiquetado, se podrá realizar un estilo componiendo un filtro con las expresiones **'AND'** y **'OR'**.
+
+.. image:: ../images/sym15_2.png
+   :align: center
+
 
 5.6 Mapa de color (ráster)
 --------------------------
