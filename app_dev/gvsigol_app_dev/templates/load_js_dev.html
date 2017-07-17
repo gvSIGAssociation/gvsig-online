@@ -1,3 +1,140 @@
 {% load staticfiles %}
-<script type="text/javascript">		
+<script type="text/javascript">	
+	var map = viewer.core.getMap();
+	var layers = map.getLayers();
+	
+	var projection = ol.proj.get('EPSG:3857');
+	var matrixSet = 'EPSG:3857';
+		
+	var projectionExtent = projection.getExtent();
+	var size = ol.extent.getWidth(projectionExtent) / 256;
+	var resolutions = new Array(18);
+	var matrixIds = new Array(18);
+	for (var z = 0; z < 18; ++z) {
+		resolutions[z] = size / Math.pow(2, z);
+		matrixIds[z] = z;
+	}
+	
+	var ignId = '88';
+	var ignSource = new ol.source.WMTS({
+	    attributions: '',
+	    url: 'https://www.ign.es/wmts/ign-base',
+	    layer: 'IGNBaseTodo',
+	    matrixSet: matrixSet,
+	    format: 'image/png',
+	    projection: projection,
+	    tileGrid: new ol.tilegrid.WMTS({
+	      origin: ol.extent.getTopLeft(projectionExtent),
+	      resolutions: resolutions,
+	      matrixIds: matrixIds
+	    }),
+	    style: 'default',
+	    wrapX: true
+	  });
+	var ignLayer = new ol.layer.Tile({
+		id: ignId,
+		source: ignSource,
+		visible: false
+	});
+	ignLayer.baselayer = true;
+	layers.insertAt(0, ignLayer);	    
+	
+	var ignui = '';
+	ignui += '<div style="margin-left:20px;">';
+	ignui += 	'<input type="radio" id="' + ignId + '" name="baselayers-group">';
+	ignui += 	'<span class="text">' + 'IGN base' + '</span>';
+	ignui += '</div>';
+	$('#baselayers-group').append(ignui);
+	
+	
+	var ignId2 = '89';
+	var ignSource2 = new ol.source.WMTS({
+	    attributions: '',
+	    url: 'https://www.ign.es/wmts/mapa-raster',
+	    layer: 'MTN',
+	    matrixSet: matrixSet,
+	    format: 'image/png',
+	    projection: projection,
+	    tileGrid: new ol.tilegrid.WMTS({
+	      origin: ol.extent.getTopLeft(projectionExtent),
+	      resolutions: resolutions,
+	      matrixIds: matrixIds
+	    }),
+	    style: 'default',
+	    wrapX: true
+	  });
+	var ignLayer2 = new ol.layer.Tile({
+		id: ignId2,
+		source: ignSource2,
+		visible: false
+	});
+	ignLayer2.baselayer = true;
+	layers.insertAt(0, ignLayer2);	    
+	
+	var ignui2 = '';
+	ignui2 += '<div style="margin-left:20px;">';
+	ignui2 += 	'<input type="radio" id="' + ignId2 + '" name="baselayers-group">';
+	ignui2 += 	'<span class="text">' + 'IGN ráster' + '</span>';
+	ignui2 += '</div>';
+	$('#baselayers-group').append(ignui2);
+	
+	
+	var ignId3 = '90';
+	var ignSource3 = new ol.source.WMTS({
+	    attributions: '',
+	    url: 'https://www.ign.es/wmts/pnoa-ma',
+	    layer: 'OI.OrthoimageCoverage',
+	    matrixSet: matrixSet,
+	    format: 'image/png',
+	    projection: projection,
+	    tileGrid: new ol.tilegrid.WMTS({
+	      origin: ol.extent.getTopLeft(projectionExtent),
+	      resolutions: resolutions,
+	      matrixIds: matrixIds
+	    }),
+	    style: 'default',
+	    wrapX: true
+	  });
+	var ignLayer3 = new ol.layer.Tile({
+		id: ignId3,
+		source: ignSource3,
+		visible: false
+	});
+	ignLayer3.baselayer = true;
+	layers.insertAt(0, ignLayer3);	    
+	
+	var ignui3 = '';
+	ignui3 += '<div style="margin-left:20px;">';
+	ignui3 += 	'<input type="radio" id="' + ignId3 + '" name="baselayers-group">';
+	ignui3 += 	'<span class="text">' + 'Ortofotos PNOA' + '</span>';
+	ignui3 += '</div>';
+	$('#baselayers-group').append(ignui3);
+	
+	
+	$("input[name=baselayers-group]:radio").change(function (e) {
+		var baseLayers = map.getLayers();
+		baseLayers.forEach(function(layer){
+			if (layer.baselayer) {
+				if (layer.getVisible() == true) {
+					layer.setVisible(false);
+				}
+				if (layer.get('id') == this.id) {
+					layer.setVisible(true);
+				}
+			}						
+		}, this);
+	});
+	
+	$("#88[name=baselayers-group]").prop("checked", true);
+	var baseLayers = map.getLayers();
+	baseLayers.forEach(function(layer){
+		if (layer.baselayer) {
+			if (layer.getVisible() == true) {
+				layer.setVisible(false);
+			}
+			if (layer.get('id') == "88") {
+				layer.setVisible(true);
+			}
+		}						
+	}, this);
 </script>
