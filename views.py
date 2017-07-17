@@ -196,7 +196,8 @@ def datastore_list(request):
         
     for datastore in datastore_list:
         params = json.loads(datastore.connection_params)
-        params['passwd'] = '****'
+        if 'password' in params:
+            params['passwd'] = '****'
         datastore.connection_params = json.dumps(params)
         
     response = {
@@ -263,7 +264,7 @@ def datastore_update(request, datastore_id):
                 connection_params = form.cleaned_data.get('connection_params')
                 
                 got_params = json.loads(connection_params)
-                if got_params['passwd'] == '****':
+                if 'passwd' in got_params and got_params['passwd'] == '****':
                     params = json.loads(datastore.connection_params)
                     got_params['passwd'] = params['passwd'] 
                     connection_params = json.dumps(got_params)
@@ -282,7 +283,8 @@ def datastore_update(request, datastore_id):
                     form.add_error(None, _("Error updating datastore"))
     else:
         params = json.loads(datastore.connection_params)
-        params['passwd'] = '****'
+        if 'password' in params:
+            params['passwd'] = '****'
         datastore.connection_params = json.dumps(params)
         form = DatastoreUpdateForm(instance=datastore)
     return render(request, 'datastore_update.html', {'form': form, 'datastore_id': datastore_id, 'workspace_name': datastore.workspace.name})
