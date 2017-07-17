@@ -245,7 +245,8 @@ print.prototype.createPrintJob = function(template) {
 					var scale = 0;
 					var matrices = new Array();
 					var tileGrid = baseLayers[i].getSource().getTileGrid(); 
-					for (var z = 0; z < 18; ++z) {
+					var lastSize = 1;
+					for (var z = 0; z < 18; ++z) {						
 						var matrixSize = new Array();
 						if (z == 0) {
 							matrixSize.push(1);
@@ -253,8 +254,9 @@ print.prototype.createPrintJob = function(template) {
 							scale = initialScale;
 							
 						} else if (z >= 1) {
-							matrixSize.push(z*2);
-							matrixSize.push(z*2);
+							lastSize = lastSize*2;
+							matrixSize.push(lastSize*2);
+							matrixSize.push(lastSize*2);
 							scale = scale / 2;
 						}
 						matrices.push({
