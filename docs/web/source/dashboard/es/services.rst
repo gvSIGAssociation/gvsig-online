@@ -69,7 +69,7 @@ Al abrir el dialogo de seleccionar archivo, este nos mostrará un ventana con el
 .. image:: ../images/ds4.png
    :align: center
 
-**3- WMS en cascada**: este permite guradar un almacén de Web Map Service (WMS), donde se guarda la dirección del servicio que se quiera consultar y publicar en el proyecto.
+**3- WMS en cascada**: este permite guardar un almacén de Web Map Service (WMS), donde se guarda la dirección del servicio que se quiera consultar y publicar en el proyecto.
 
 .. image:: ../images/ds5.png
    :align: center
@@ -78,6 +78,9 @@ Al abrir el dialogo de seleccionar archivo, este nos mostrará un ventana con el
    	La eliminación de un almacén de datos elimina todas las capas asociadas al almacén. 
    	
 	Por contra, no se eliminará la fuente de datos asociada (la base de datos espacial o el fichero ráster correspondiente).
+
+
+Es importante recordar que al crear un almacén de datos SIEMPRE SERÁ UN PASO PREVIO a la publicación de las capas que éstas contengan. Los servicios y capas de los almacenes WMS y Geotiff se deben publicar de la misma manera que una capa vectorial pero seleccionando su respectivo repositorio.   
 
 
 2.3 Crear, modificar y eliminar Grupos de capas
@@ -149,14 +152,14 @@ Sobre cada una de las capas podemos realizar las siguientes operaciones:
 
 2.5.1 Publicar capa
 ~~~~~~~~~~~~~~~~~~~
-Para publicar una capa existente en un almacén de datos, seleccionaremos el botón *"Publicar capa"*, una vez accedamos a la vista de publicación aparecerá el siguiente formulario.
+Para publicar una *'capa existente en un almacén de datos'*, seleccionaremos el botón *"Publicar capa"*, una vez accedamos a la vista de publicación aparecerá el siguiente formulario.
 
 .. image:: ../images/publish1.png
    :align: center
    
 Los pasos para publicar una capa son los siguientes:
 
-*	Seleccionamos el almacén de datos donde se encuentra la capa que desamos publicar.
+*	Seleccionamos el almacén de datos donde se encuentra la capa que deseamos publicar, es decir, el almacén postgis de la capa vectorial, el almacén geotiff de la capa raster o el almacén del WMS.
 
 *	A continuación seleccionamos en el desplegable el recurso, se puede teclear y se autocompleta (Solo aparecen los recursos que aún no han sido publicados).
 
@@ -177,6 +180,7 @@ Por último aplicaremos los permisos de lectura y escritura a la capa.
    
 .. note::
    	Por defecto todas las capas pueden ser leídas por cualquier usuario, pero solo pueden ser escritas por los usuarios con rol de **superusuario**.
+      Para las capas tipo ráster o wms, se mostrará solo permisos de letura.
    	
 2.5.2 Crear capa vacía
 ~~~~~~~~~~~~~~~~~~~~~~
