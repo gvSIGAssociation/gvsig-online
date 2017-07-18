@@ -78,7 +78,11 @@ class Geocoder():
     def find_candidate(self, address):
         location = {}
         address_json = json.loads(address)
-        type = address_json["address[source]"]
+        type = ''
+        if "address[source]" in address_json:
+            type = address_json["address[source]"]
+        if "source" in address_json:
+            type = address_json["source"]
         if type == 'user':
             type = 'cartociudad'
                 
