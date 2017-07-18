@@ -251,8 +251,6 @@ def unique_values_update(request, layer_id, style_id):
                 'order': r.order,
                 'symbolizers': symbolizers
             }
-            style.minscale = r.minscale
-            style.maxscale = r.maxscale
             rules.append(rule)
                          
         response = services_unique_values.get_conf(request, layer_id)
@@ -341,8 +339,6 @@ def intervals_update(request, layer_id, style_id):
                 'order': r.order,
                 'symbolizers': symbolizers
             }
-            style.minscale = r.minscale
-            style.maxscale = r.maxscale
             rules.append(rule)
                          
         response = services_intervals.get_conf(request, layer_id)
