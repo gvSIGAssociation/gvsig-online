@@ -109,7 +109,7 @@ ChangeToWWControl.prototype.hideControls = function() {
 	$('.ol-overviewmap').css("display","none");
 	$('.ol-viewport').css("display","none");
 	$('#base-layers').css("display","none");
-
+	$('#toolbar').css("top", "6px");
 };
 
 /**
@@ -126,7 +126,7 @@ ChangeToWWControl.prototype.resetControls = function() {
 	$('.ol-overviewmap').css("display","");
 	$('.ol-viewport').css("display","block");
 	$('#base-layers').css("display","block");
-
+	$('#toolbar').css("top", "");
 };
 
 /**
