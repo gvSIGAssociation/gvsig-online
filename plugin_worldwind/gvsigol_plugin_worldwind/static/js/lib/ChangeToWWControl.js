@@ -123,7 +123,7 @@ ChangeToWWControl.prototype.resetControls = function() {
 	$('#measure-length').css("display","block");
 	$('#mouse-position').css("display","block");
 	//$('#intersect-by-radio-control').css("display","block");
-	$('.ol-overviewmap').css("display","block");
+	$('.ol-overviewmap').css("display","");
 	$('.ol-viewport').css("display","block");
 	$('#base-layers').css("display","block");
 
