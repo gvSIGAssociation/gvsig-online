@@ -898,16 +898,24 @@ editionBar.prototype.createFeatureForm = function(feature) {
 								name = name.replace("enmm_", "enm_");
 							}
 							var enumeration = this.getEnumeration(name);
-							if(!has_multiple){
-								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control">';
+							if(enumeration && enumeration.items){
+								if(!has_multiple){
+									featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control">';
+								}else{
+									featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control multipleSelect" multiple="multiple">';
+								}
+								
+								for (var j=0; j<enumeration.items.length; j++) {
+									featureProperties += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+								}
+								featureProperties += 	'</select>';
 							}else{
-								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control multipleSelect" multiple="multiple">';
+								if("length" in this.featureType[i] && this.featureType[i].length>0){
+									featureProperties += '<input id="' + this.featureType[i].name + '" type="text" maxlength="'+this.featureType[i].length+'" class="form-control">';
+								}else{
+									featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control">';
+								}
 							}
-							
-							for (var j=0; j<enumeration.items.length; j++) {
-								featureProperties += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
-							}
-							featureProperties += 	'</select>';
 						} else {
 							if("length" in this.featureType[i] && this.featureType[i].length>0){
 								featureProperties += '<input id="' + this.featureType[i].name + '" type="text" maxlength="'+this.featureType[i].length+'" class="form-control">';
@@ -1165,21 +1173,29 @@ editionBar.prototype.editFeatureForm = function(feature) {
 								name = name.replace("enmm_", "enm_");
 							}
 							var enumeration = this.getEnumeration(name);
-							if(!has_multiple){
-								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control">';
-							}else{
-								featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control multipleSelect" multiple="multiple">';
-							}
-							value = ";" + value + ";";
-							for (var j=0; j<enumeration.items.length; j++) {
-								var enum_item_name = ";"+enumeration.items[j].name+";";
-								if (value.indexOf(enum_item_name) !== -1) {
-									featureProperties += '<option selected value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
-								} else {
-									featureProperties += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+							if(enumeration && enumeration.items){
+								if(!has_multiple){
+									featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control">';
+								}else{
+									featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control multipleSelect" multiple="multiple">';
 								}
-							}
-							featureProperties += 	'</select>';
+								value = ";" + value + ";";
+								for (var j=0; j<enumeration.items.length; j++) {
+									var enum_item_name = ";"+enumeration.items[j].name+";";
+									if (value.indexOf(enum_item_name) !== -1) {
+										featureProperties += '<option selected value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+									} else {
+										featureProperties += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+									}
+								}
+								featureProperties += 	'</select>';
+							}else{
+								if("length" in this.featureType[i] && this.featureType[i].length>0){
+									featureProperties += '<input id="' + this.featureType[i].name + '" type="text" maxlength="'+this.featureType[i].length+'" class="form-control">';
+								}else{
+									featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control">';
+								}
+							}	
 						} else {
 							if (value==null) {
 								value = "";
