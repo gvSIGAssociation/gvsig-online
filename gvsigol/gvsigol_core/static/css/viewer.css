@@ -472,6 +472,10 @@ html, body {
     display: none;
 }
 
+	#print-div{
+		display: none;
+	}
+
 }
 
 @media only screen and (max-height: 500px ) {
@@ -482,6 +486,5 @@ html, body {
 	    z-index: 1000;
 	    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
 	}
-	
 	
 }
