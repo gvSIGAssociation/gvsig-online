@@ -251,6 +251,8 @@ def unique_values_update(request, layer_id, style_id):
                 'order': r.order,
                 'symbolizers': symbolizers
             }
+            style.minscale = r.minscale
+            style.maxscale = r.maxscale
             rules.append(rule)
                          
         response = services_unique_values.get_conf(request, layer_id)
@@ -262,7 +264,7 @@ def unique_values_update(request, layer_id, style_id):
             response['maxscale'] = int(style.maxscale)
         response['rules'] = json.dumps(rules)   
         if rule['filter']:
-            response['property_name'] = json.loads(rule['filter']).get('property_name')    
+            response['property_name'] = json.loads(rule['filter']).get('field')    
         
         return render_to_response('unique_values_update.html', response, context_instance=RequestContext(request))
     
@@ -339,6 +341,8 @@ def intervals_update(request, layer_id, style_id):
                 'order': r.order,
                 'symbolizers': symbolizers
             }
+            style.minscale = r.minscale
+            style.maxscale = r.maxscale
             rules.append(rule)
                          
         response = services_intervals.get_conf(request, layer_id)
