@@ -44,7 +44,7 @@ El panel de contenidos se encuentra en la parte izquierda del visor y está form
  
 - (**1**) el árbol de capas, 
 - (**2**) la leyenda y 
-- (**3**) el panel de resultados.
+- (**3**) panel de resultados o 'detalles'
 
 El árbol de capas contiene la jerarquía de capas que ha sido definida desde la interfaz de administración para la aplicación que se está ejecutando.
 
