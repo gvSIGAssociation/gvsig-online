@@ -56,6 +56,14 @@ def create_style(request, json_data, layer_id):
         is_default = json_data.get('is_default'),
         type = 'UV'
     )
+    if json_data.get('minscale') != '':
+        style.minscale = json_data.get('minscale')
+    else:
+        style.minscale = -1
+    if json_data.get('maxscale') != '':
+        style.maxscale = json_data.get('maxscale')
+    else:
+        style.maxscale = -1
     style.save()
     style_layer = StyleLayer(
         style = style,
