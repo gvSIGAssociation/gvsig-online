@@ -18,7 +18,7 @@ Desde el visor de proyectos se permite generar mapas de referencia de tamaño *'
 
 - Hay cuatro opciones para indicar la resolución en '*DPI*', son: 180, 240, 320 y 400.
 
-- Se puede añadir un valor de rotación del mapa, esto se verá reflejado en la orintación del mismo, pero NO aplica para la etiquetas.
+- Se puede añadir un valor de rotación del mapa, esto se verá reflejado en la orintación del mismo, pero NO aplica para las etiquetas.
 
 - En el aviso legal se puede añadir uno por defecto para todo el sistema, pero también se puede editar y personalizar por el usuario.
 
