@@ -166,6 +166,29 @@ class Geoserver():
         if r.status_code==201:
             return True
         raise UploadError(r.status_code, r.content)
+    
+    def set_queryable(self, workspace, datastore, name, queryable, user=None, password=None):
+        url = self.service_url + '/layers/' + name + '.json'
+        
+        data = {
+            'name': name,
+            'opaque': queryable,
+            'type': 'VECTOR',
+            'resource':{
+                '@class': 'featureType',
+                'name': name,   
+            }
+        }
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+            
+        r = self.session.put(url, json=data, auth=auth)
+        if r.status_code==200:
+            return True
+        
+        raise FailedRequestError(r.status_code, r.content)
             
     def raw_request(self, url, params, user=None, password=None):
         try:

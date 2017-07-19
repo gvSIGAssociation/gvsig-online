@@ -22,6 +22,7 @@
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 from lxml.etree import parse, Element, XMLSchema, tostring
+from lxml import objectify
 try:
     from urllib2 import urlopen
 except ImportError:
@@ -752,6 +753,9 @@ class LineSymbolizer(Symbolizer):
         @param descendant: A flag indicating if this is a descendant node of the parent.
         """
         super(LineSymbolizer, self).__init__(parent, 'Line*', descendant)
+    
+        self._node = self._parent.makeelement('{%s}LineSymbolizer' % SLDNode._nsmap['sld'], nsmap=SLDNode._nsmap)
+        self._parent.append(self._node)
 
 
 class TextSymbolizer(Symbolizer):
@@ -985,15 +989,78 @@ class PointSymbolizer(SLDNode):
         @param descendant: A flag indicating if this is a descendant node of the parent.
         """
         super(PointSymbolizer, self).__init__(parent, descendant=descendant)
-        xpath = self._parent.xpath('sld:PointSymbolizer', namespaces=SLDNode._nsmap)
+        '''
+        xpath = self._parent.xpath('sld:PointSymbolizer', namespaces=SLDNode._nsmap)     
         if len(xpath) < 1:
             self._node = self._parent.makeelement('{%s}PointSymbolizer' % SLDNode._nsmap['sld'], nsmap=SLDNode._nsmap)
             self._parent.append(self._node)
         else:
             self._node = xpath[0]
+        '''    
+        self._node = self._parent.makeelement('{%s}PointSymbolizer' % SLDNode._nsmap['sld'], nsmap=SLDNode._nsmap)
+        self._parent.append(self._node)
 
         setattr(self.__class__, 'Graphic', SLDNode.makeproperty('sld', cls=Graphic,
                 docstring="The graphic settings for this point geometry."))
+        
+class PointSymbolizers(SLDNode):
+    """
+    A collection of L{PointSymbolizer} nodes. This is a pythonic helper (list of
+    nodes) that does not correspond to a true element in the SLD spec.
+    """
+    def __init__(self, parent):
+        """
+        Create a new list of PointSymbolizer from the specified parent node.
+
+        @type  parent: L{StyleItem}
+        @param parent: The parent class item.
+        """
+        super(PointSymbolizers, self).__init__(parent)
+        self._node = None
+        self._nodes = self._parent.xpath('sld:PointSymbolizer', namespaces=SLDNode._nsmap)
+
+    def __len__(self):
+        """
+        Get the number of L{PointSymbolizer} nodes in this list.
+
+        @rtype: integer
+        @return: The number of L{PointSymbolizer} nodes.
+        """
+        return len(self._nodes)
+
+    def __getitem__(self, key):
+        """
+        Get one of the L{PointSymbolizer} nodes in the list.
+
+        @type  key: integer
+        @param key: The index of the child node.
+        @rtype: L{VendorOption}
+        @return: The specific L{PointSymbolizer} node.
+        """
+        return PointSymbolizer(self, key, descendant=False)
+
+    def __setitem__(self, key, value):
+        """
+        Set one of the L{PointSymbolizer} nodes in the list with a new value.
+
+        @type    key: integer
+        @param   key: The index of the child node.
+        @type  value: L{PointSymbolizer}, etree.Element
+        @param value: The new value of the specific child node.
+        """
+        if isinstance(value, PointSymbolizer):
+            self._nodes.replace(self._nodes[key], value._node)
+        elif isinstance(value, Element):
+            self._nodes.replace(self._nodes[key], value)
+
+    def __delitem__(self, key):
+        """
+        Delete one of the L{PointSymbolizer} nodes from the list.
+
+        @type  key: integer
+        @param key: The index of the child node.
+        """
+        self._nodes.remove(self._nodes[key])
         
 class ColorMapEntry(StyleItem):
     """
@@ -1429,6 +1496,7 @@ class Rule(SLDNode):
                 docstring="The title of the Rule."))
         setattr(self.__class__, 'Filter', SLDNode.makeproperty('ogc', cls=Filter,
                 docstring="The optional filter object, with property comparitors."))
+        '''
         setattr(self.__class__, 'PolygonSymbolizer', SLDNode.makeproperty('sld', cls=PolygonSymbolizer,
                 docstring="The optional polygon symbolizer for this rule."))
         setattr(self.__class__, 'LineSymbolizer', SLDNode.makeproperty('sld', cls=LineSymbolizer,
@@ -1437,6 +1505,7 @@ class Rule(SLDNode):
                 docstring="The optional text symbolizer for this rule."))
         setattr(self.__class__, 'PointSymbolizer', SLDNode.makeproperty('sld', cls=PointSymbolizer,
                 docstring="The optional point symbolizer for this rule."))
+        '''
         setattr(self.__class__, 'MinScaleDenominator', SLDNode.makeproperty('sld', name='MinScaleDenominator',
                 docstring="The minimum scale denominator for this rule."))
         setattr(self.__class__, 'MaxScaleDenominator', SLDNode.makeproperty('sld', name='MaxScaleDenominator',
@@ -1519,6 +1588,15 @@ class Rule(SLDNode):
             return None
 
         return self.create_element('sld', stype + 'Symbolizer')
+        
+    def create_pointsymbolizer(self):
+        """
+        Create a new L{PointSymbolizer} node as a child of this element, and attach it to the DOM.
+
+        @rtype: L{PointSymbolizer}
+        @return: A new style parameter, set to the name and value.
+        """
+        symbolizer = PointSymbolizer(self)
 
 
 class Rules(SLDNode):

@@ -195,6 +195,8 @@ def create_rule(r, symbolizers, feature_type_style):
         if hasattr(s, 'marksymbolizer'):
             symbolizer = PointSymbolizer(rule)
             gph = Graphic(symbolizer)
+            gph.Size = str(s.marksymbolizer.size)
+            gph.Opacity = str(s.marksymbolizer.opacity)
             mrk = Mark(gph)
             mrk.WellKnownName = s.marksymbolizer.well_known_name
             fill = Fill(mrk)
@@ -204,7 +206,7 @@ def create_rule(r, symbolizers, feature_type_style):
             stroke.create_cssparameter('stroke', s.marksymbolizer.stroke)
             stroke.create_cssparameter('stroke-width', str(s.marksymbolizer.stroke_width))
             stroke.create_cssparameter('stroke-opacity', str(s.marksymbolizer.stroke_opacity))
-            if s.marksymbolizer.stroke_dash_array != 'none':
+            if str(s.marksymbolizer.stroke_dash_array) != 'none':
                 stroke.create_cssparameter('stroke-dasharray', s.marksymbolizer.stroke_dash_array)
         
         elif hasattr(s, 'linesymbolizer'):
@@ -213,7 +215,7 @@ def create_rule(r, symbolizers, feature_type_style):
             stroke.create_cssparameter('stroke', s.linesymbolizer.stroke)
             stroke.create_cssparameter('stroke-width', str(s.linesymbolizer.stroke_width))
             stroke.create_cssparameter('stroke-opacity', str(s.linesymbolizer.stroke_opacity))
-            if s.linesymbolizer.stroke_dash_array != 'none':
+            if str(s.linesymbolizer.stroke_dash_array) != 'none':
                 stroke.create_cssparameter('stroke-dasharray', s.linesymbolizer.stroke_dash_array)
             
         elif hasattr(s, 'polygonsymbolizer'):
@@ -225,7 +227,7 @@ def create_rule(r, symbolizers, feature_type_style):
             stroke.create_cssparameter('stroke', s.polygonsymbolizer.stroke)
             stroke.create_cssparameter('stroke-width', str(s.polygonsymbolizer.stroke_width))
             stroke.create_cssparameter('stroke-opacity', str(s.polygonsymbolizer.stroke_opacity))
-            if s.polygonsymbolizer.stroke_dash_array != 'none':
+            if str(s.polygonsymbolizer.stroke_dash_array) != 'none':
                 stroke.create_cssparameter('stroke-dasharray', s.polygonsymbolizer.stroke_dash_array)
             
         elif hasattr(s, 'externalgraphicsymbolizer'):
@@ -259,7 +261,9 @@ def create_rule(r, symbolizers, feature_type_style):
             symbolizer.create_vendoroption('autoWrap', '100')
             symbolizer.create_vendoroption('spaceAround', '0')
             symbolizer.create_vendoroption('polygonAlign', 'mbr')
-            symbolizer.create_vendoroption('followLine', 'true')            
+            symbolizer.create_vendoroption('followLine', 'true')
+            symbolizer.create_vendoroption('graphic-resize', 'stretch')   
+            symbolizer.create_vendoroption('goodnessOfFit', '0')       
             
         elif hasattr(s, 'rastersymbolizer'):
             symbolizer = RasterSymbolizer(rule)
