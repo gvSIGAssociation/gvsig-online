@@ -59,7 +59,7 @@
 						</div>	
 					</div>
 					
-					<div class="row layers-control xyz-control wms-control wmts-control">		
+					<div class="row layers-control xyz-control wms-control wmts-control osm-control">		
 						<div class="col-md-12 form-group">
 							<label for="id_url">{% trans "Url" %}</label>
 							{{ form.url }}
@@ -124,8 +124,15 @@ $().ready(function(){
 	});
 	
 	function getLayersFromCapabilities(url){
+		var type = $("#id_type").val();
+
 		var capabilities_layer_name = "Identifier";
 		var capabilities_layer_title = "Title";
+		
+		if(type == "WMS"){
+			capabilities_layer_name = "Name";
+			capabilities_layer_title = "Name";
+		}		
 		
 		$("#id_format").empty();
 // 		$("#id_format").attr("disabled",true);
@@ -165,7 +172,7 @@ $().ready(function(){
 		 				for(var i=0; i<formats.length; i++){
 		 					if(formats[i]){
 		 						var format = formats[i].textContent;
-		 						var formats_added = $("#id_format option");
+		 						var formats_added = $("#id_format_list option");
 		 						var is_repeated = false;
 		 						for(var j=0; j<formats_added.length; j++){
 		 							if(formats_added[j].textContent == format){
