@@ -25,7 +25,7 @@ from operator import isNumberType
 
 from models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, Enumeration, EnumerationItem,\
     LayerLock
-from forms_services import WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm
+from forms_services import WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, BaseLayerForm
 from forms_geoserver import CreateFeatureTypeForm
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
@@ -35,7 +35,7 @@ from backend_postgis import Introspect
 from gvsigol_services.backend_resources import resource_manager
 from gvsigol_auth.utils import superuser_required, staff_required
 from django.contrib.auth.models import User 
-from gvsigol_core.models import ProjectLayerGroup
+from gvsigol_core.models import ProjectLayerGroup, BaseLayer, BaseLayerProject
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES
@@ -1791,3 +1791,135 @@ def describeFeatureType(request):
             pass
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+    
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_safe
+@staff_required
+def base_layer_list(request):
+    baselayer_list = BaseLayer.objects.all()
+    
+    response = {
+        'baselayer': baselayer_list
+    }
+    return render_to_response('base_layer_list.html', response, context_instance=RequestContext(request))
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_http_methods(["GET", "POST", "HEAD"])
+@staff_required
+def base_layer_add(request):
+    if request.method == 'POST':
+        form = BaseLayerForm(request.POST)
+        has_errors = False
+        try:
+            newBaseLayer = BaseLayer()
+            newBaseLayer.name = request.POST.get('name')
+            newBaseLayer.title = request.POST.get('title')
+            newBaseLayer.type = request.POST.get('type')
+            params = {}
+            
+            if newBaseLayer.type == 'WMTS' or newBaseLayer.type == 'WMS':
+                params['version'] = request.POST.get('version')
+                params['url'] = request.POST.get('url')
+                params['layers'] = request.POST.get('layers')
+                params['format'] = request.POST.get('format')
+                
+            if newBaseLayer.type == 'Bing':
+                params['key'] = request.POST.get('key')
+                params['layers'] = request.POST.get('layers')
+                
+            if newBaseLayer.type == 'XYZ':
+                params['url'] = request.POST.get('url')
+            
+            
+            newBaseLayer.type_params = json.dumps(params)
+            
+            newBaseLayer.save()
+            return redirect('base_layer_list')
+            
+            #msg = _("Error: fill all the BaseLayer fields")
+            #form.add_error(None, msg)
+            
+        except Exception as e:
+            try:
+                msg = e.get_message()
+            except:
+                msg = _("Error: BaseLayer could not be published")
+            form.add_error(None, msg)
+
+    else:
+        form = BaseLayerForm()
+        
+    return render(request, 'base_layer_add.html', {'form': form})
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_http_methods(["GET", "POST", "HEAD"])
+@staff_required
+def base_layer_update(request, base_layer_id):
+    baselayer = BaseLayer.objects.get(id=base_layer_id)
+    if request.method == 'POST':
+        form = BaseLayerForm(request.POST)
+        try:
+            baselayer.name = request.POST.get('name')
+            baselayer.title = request.POST.get('title')
+            baselayer.type = request.POST.get('type')
+            params = {}
+            
+            if baselayer.type == 'WMTS' or baselayer.type == 'WMS':
+                params['version'] = request.POST.get('version')
+                params['url'] = request.POST.get('url')
+                params['layers'] = request.POST.get('layers')
+                params['format'] = request.POST.get('format')
+            
+            if baselayer.type == 'Bing':
+                params['key'] = request.POST.get('key')
+                params['layers'] = request.POST.get('layers')
+                
+            if baselayer.type == 'XYZ':
+                params['url'] = request.POST.get('url')
+            
+            
+            baselayer.type_params = json.dumps(params)
+            baselayer.save()
+            return redirect('base_layer_list')
+        
+            
+        except Exception as e:
+            try:
+                msg = e.get_message()
+            except:
+                msg = _("Error: baselayer could not be published")
+            form.add_error(None, msg)
+                
+    else:
+        form = BaseLayerForm(instance=baselayer)
+        
+        if baselayer.type_params:
+            params = json.loads(baselayer.type_params)
+            for key in params:
+                form.initial[key] = params[key]
+            
+        
+        response= {
+            'form': form, 
+            'baselayer': baselayer
+        }
+        
+    return render(request, 'base_layer_update.html', response)
+
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_POST
+@staff_required
+def base_layer_delete(request, base_layer_id):
+    try:
+        tr = BaseLayer.objects.get(id=base_layer_id)
+        tr.delete()
+    except Exception as e:
+        return HttpResponse('Error deleting baselayer: ' + str(e), status=500)
+
+    return redirect('base_layer_list')

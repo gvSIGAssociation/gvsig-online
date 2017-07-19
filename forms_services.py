@@ -21,10 +21,18 @@
 @author: César Martinez <cmartinez@scolab.es>
 '''
 from models import Workspace, Datastore, Layer, LayerGroup
+from gvsigol_core.models import BaseLayer
 from django.utils.translation import ugettext as _
 from backend_mapservice import backend
 from django import forms
 import json
+from gvsigol.settings import BASELAYER_SUPPORTED_TYPES
+
+
+supported_types = tuple((x,x) for x in BASELAYER_SUPPORTED_TYPES)
+layers = (('---', _('No se han podido obtener las capas')), ('1.3.0', 'version 1.3.0'))
+version = (('1.1.1', _('version 1.1.1')), ('1.3.0', _('version 1.3.0')))
+blank = (('', '---------'),)
 
 class WorkspaceForm(forms.Form):   
     name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1'}))
@@ -113,3 +121,21 @@ class LayerUploadTypeForm(forms.ModelForm):
         model = Datastore
         fields = ['type']
     type = forms.ModelChoiceField(required=True, queryset=Workspace.objects.all())
+
+class BaseLayerForm(forms.ModelForm):
+    class Meta:
+        model = BaseLayer
+        fields = ['name', 'title', 'type', 'version', 'url', 'layers', 'format', 'key']
+        
+    name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
+    title = forms.CharField(label=_(u'Title'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
+    
+    type = forms.ChoiceField(label=_(u'Type'), choices=supported_types, required=True, widget=forms.Select(attrs={'class' : 'form-control'}))
+    version = forms.ChoiceField(label=_(u'Version'), required=False, choices=version, widget=forms.Select(attrs={'class':'form-control'}))
+   
+    url = forms.CharField(label=_(u'URL'), required=False, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
+    layers = forms.CharField(label=_(u'Layers'), required=False, disabled=False,  max_length=250, widget=forms.TextInput(attrs={'class':'form-control', 'list':'id_layer_list'}))
+
+    format = forms.CharField(label=_(u'Format'), required=False, disabled=False, max_length=250, widget=forms.TextInput(attrs={'class':'form-control', 'list':'id_format_list'}))
+    key = forms.CharField(label=_(u'Apikey'), required=False, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
+    
