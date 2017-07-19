@@ -4771,4 +4771,7 @@ table.dataTable thead th span.subname, table.dataTable tfoot th span.subname{
     background-color: #eee;
 }
 
-
+.checkbox.pull-right {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
