@@ -343,3 +343,5 @@ CONTROL_FIELDS = [{
                 'name': 'last_modification',
                 'type': 'date'
                 }]
+
+BASELAYER_SUPPORTED_TYPES = ['WMS', 'WMTS', 'XYZ', 'Bing', 'OSM']

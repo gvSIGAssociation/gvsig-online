@@ -88,15 +88,18 @@ viewer.core = {
     	    })
     	});
     	blank.baselayer = true;
+    	var default_layers = [blank]
     	
-    	var osm = new ol.layer.Tile({
-    		id: this._nextLayerId(),
-        	label: gettext('OpenStreetMap'),
-          	visible: true,
-          	source: new ol.source.OSM()
-        });
-		osm.baselayer = true;
-		
+//    	var osm = new ol.layer.Tile({
+//    		id: this._nextLayerId(),
+//        	label: gettext('OpenStreetMap'),
+//          	visible: true,
+//          	source: new ol.source.OSM()
+//        });
+//		osm.baselayer = true;
+//    	default_layers.push(osm);
+    	
+    	
 		var mousePositionControl = new ol.control.MousePosition({
 	        coordinateFormat: ol.coordinate.createStringXY(4),
 	        projection: 'EPSG:4326',
@@ -119,7 +122,7 @@ viewer.core = {
       		],
       		renderer: 'canvas',
       		target: 'map',
-      		layers: [blank, osm],
+      		layers: default_layers,
 			view: new ol.View({
         		center: ol.proj.transform([parseFloat(self.conf.view.center_lon), parseFloat(self.conf.view.center_lat)], 'EPSG:4326', 'EPSG:3857'),
         		minZoom: 0,
@@ -179,28 +182,102 @@ viewer.core = {
     },
     
     _loadBaseLayers: function() {		
-		//BING LAYERS
-    	if (this.conf.base_layers.bing.active) {
-    		var bingTypes = [
-    		    'Road',
-    		    'Aerial',
-    		    'AerialWithLabels'
-    		];
-    		var i, ii;
-    		for (i = 0, ii = bingTypes.length; i < ii; ++i) {
-    			var bingLayer = new ol.layer.Tile({
-    				id: this._nextLayerId(),
-    				visible: false,
-    				label: bingTypes[i],
-    				preload: Infinity,
-    				source: new ol.source.BingMaps({
-    					key: this.conf.base_layers.bing.key,
-    					imagerySet: bingTypes[i]
-    				})
-    			});
-    			bingLayer.baselayer = true;
-    			this.map.addLayer(bingLayer);
-    		}
+	    	
+    	var base_layers = this.conf.base_layers;
+    	
+    	var layers = this.map.getLayers();
+     	var projection = ol.proj.get('EPSG:3857');
+     	var matrixSet = 'EPSG:3857';
+    		
+     	var projectionExtent = projection.getExtent();
+     	var size = ol.extent.getWidth(projectionExtent) / 256;
+     	var resolutions = new Array(18);
+     	var matrixIds = new Array(18);
+     	for (var z = 0; z < 18; ++z) {
+     		resolutions[z] = size / Math.pow(2, z);
+     		matrixIds[z] = z;
+     	}
+    	
+    	for(var i=0; i<base_layers.length; i++){
+    		var base_layer = base_layers[i];
+	    	if (base_layer['type'] == 'WMS') {
+				var wmsSource = new ol.source.TileWMS({
+					url: base_layer['url'],
+					params: {'LAYERS': base_layer['layers'], 'FORMAT': base_layer['format'], 'VERSION': base_layer['version']}
+				});
+				var wmsLayer = new ol.layer.Tile({
+					id: this._nextLayerId(),
+					source: wmsSource,
+					visible: base_layer['active']
+				});
+				wmsLayer.baselayer = true;
+				this.map.addLayer(wmsLayer);
+				
+			} 
+	    	if (base_layer['type'] == 'WMTS') {				
+				var ignSource3 = new ol.source.WMTS({
+			         attributions: '',
+			         url: base_layer['url'],
+			         layer: base_layer['layers'],
+			         matrixSet: matrixSet,
+			         format: base_layer['format'],
+			         projection: projection,
+			         tileGrid: new ol.tilegrid.WMTS({
+			           origin: ol.extent.getTopLeft(projectionExtent),
+			           resolutions: resolutions,
+			           matrixIds: matrixIds
+			         }),
+			         style: 'default',
+			         wrapX: true
+			       });
+			 	var ignLayer3 = new ol.layer.Tile({
+			 		id: this._nextLayerId(),
+			 		source: ignSource3,
+			 		visible: base_layer['active']
+			 	});
+			 	ignLayer3.baselayer = true;
+			 	this.map.addLayer(ignLayer3);
+			}
+	    	
+	    	if (base_layer['type'] == 'Bing') {
+	    		var bingLayer = new ol.layer.Tile({
+					id: this._nextLayerId(),
+					visible: base_layer['active'],
+					label: base_layer['layers'],
+					preload: Infinity,
+					source: new ol.source.BingMaps({
+						key: base_layer['key'],
+						imagerySet: base_layer['layers']
+					})
+				});
+				bingLayer.baselayer = true;
+				this.map.addLayer(bingLayer);
+	    	}
+	    	
+	    	if (base_layer['type'] == 'OSM') {
+	    		var osm = new ol.layer.Tile({
+	        		id: this._nextLayerId(),
+	            	label: base_layer['title'],
+	              	visible: base_layer['active'],
+	              	source: new ol.source.OSM()
+	            });
+	    		osm.baselayer = true;
+				this.map.addLayer(osm);
+			}
+	    	
+	    	if (base_layer['type'] == 'XYZ') {
+	    		var xyz = new ol.layer.Tile({
+	    			id: this._nextLayerId(),
+	    			label: base_layer['title'],
+	    		  	visible: base_layer['active'],
+	    		  	source: new ol.source.XYZ({
+	    		  		url: base_layer['url']	
+	    		    })
+	    		});
+	    		xyz.baselayer = true;
+				this.map.addLayer(xyz);
+			}
+	    	
     	}
 	},
 	
