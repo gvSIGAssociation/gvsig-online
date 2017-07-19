@@ -66,12 +66,17 @@ layerTree.prototype.createTree = function() {
 	tree += '				</div>';
 	tree += '				<div id="baselayers-group" class="box-body" style="display: block; font-size: 12px;">';
 	tree += 					self.createBaseLayerUI(gettext('None'), false);
-	tree += 					self.createBaseLayerUI('OpenStreetMap', true);
-	if (this.conf.base_layers.bing.active) {
-		tree += 				self.createBaseLayerUI(gettext("Bing roads"), false);
-		tree += 				self.createBaseLayerUI(gettext("Bing aerial"), false);
-		tree += 				self.createBaseLayerUI(gettext("Bing aerial with labels"), false);
-    }
+//	tree += 					self.createBaseLayerUI('OpenStreetMap', true);
+//	if (this.conf.base_layers.bing && this.conf.base_layers.bing.active) {
+//		tree += 				self.createBaseLayerUI(gettext("Bing roads"), false);
+//		tree += 				self.createBaseLayerUI(gettext("Bing aerial"), false);
+//		tree += 				self.createBaseLayerUI(gettext("Bing aerial with labels"), false);
+//    }
+	for (var i=0; i<this.conf.base_layers.length; i++) {
+		var base_layer = this.conf.base_layers[i];
+		tree += 				self.createBaseLayerUI(gettext(base_layer['title']), base_layer['active']);
+	}
+	
 	tree += '				</div>';
 	tree += '			</li>';
 	if (this.conf.layerGroups) {
