@@ -291,7 +291,11 @@ def project_update(request, pid):
         is_public = False
         if 'is_public' in request.POST:
             is_public = True
-                
+        
+        default_baselayer = None
+        if 'default_base_layer_selected' in request.POST:
+            default_baselayer = request.POST.get('default_base_layer_selected')
+              
         assigned_baselayers = []
         assigned_layergroups = []
         assigned_usergroups = []
@@ -306,10 +310,6 @@ def project_update(request, pid):
         has_image = False
         if 'project-image' in request.FILES:
             has_image = True
-        
-        default_baselayer = None
-        if 'default_base_layer_selected' in request.POST:
-            default_baselayer = request.POST.get('default_base_layer_selected')
         
         project = Project.objects.get(id=int(pid))
         
@@ -518,6 +518,8 @@ def project_get_conf(request):
         pid = request.POST.get('pid')
         
         project = Project.objects.get(id=int(pid))
+        if not project.toc_order:
+            project.toc_order = "{}"
         toc = json.loads(project.toc_order)
             
         used_crs = []
