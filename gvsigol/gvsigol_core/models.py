@@ -35,3 +35,22 @@ class ProjectLayerGroup(models.Model):
     
     def __unicode__(self):
         return self.project.name + ' - ' + self.layer_group.name
+    
+    
+class BaseLayer(models.Model):
+    name = models.CharField(max_length=150) 
+    title = models.CharField(max_length=150) 
+    type = models.CharField(max_length=50, null=True, blank=True)
+    type_params = models.TextField(null=True, blank=True)
+    
+    def __unicode__(self):
+        return self.name
+    
+class BaseLayerProject(models.Model):
+    baselayer = models.ForeignKey(BaseLayer)
+    project = models.ForeignKey(Project)
+    order = models.IntegerField(null=False, default=0)
+    is_default = models.BooleanField(default=False)
+    
+    def __unicode__(self):
+        return self.baselayer.name +"-"+self.project.id

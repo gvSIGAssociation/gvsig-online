@@ -23,7 +23,7 @@ from gvsigol_core.utils import get_supported_crs
 '''
 
 from django.shortcuts import render_to_response, RequestContext, HttpResponse, redirect
-from models import Project, ProjectUserGroup, ProjectLayerGroup
+from models import Project, ProjectUserGroup, ProjectLayerGroup, BaseLayer, BaseLayerProject
 from gvsigol_services.models import Workspace, Datastore, Layer, LayerGroup
 from gvsigol_auth.models import UserGroup, UserGroupUser
 from django.contrib.auth.decorators import login_required
@@ -137,7 +137,7 @@ def project_add(request):
     
     has_geocoding_plugin = False
     if 'gvsigol_plugin_geocoding' in settings.INSTALLED_APPS:
-         has_geocoding_plugin = True
+        has_geocoding_plugin = True
         
     if request.method == 'POST':
         name = request.POST.get('project-name')
@@ -154,14 +154,19 @@ def project_add(request):
         has_image = False
         if 'project-image' in request.FILES:
             has_image = True
-                
+        
+        default_baselayer = None
+        if 'default_base_layer_selected' in request.POST:
+            default_baselayer = request.POST.get('default_base_layer_selected')
+            
+        assigned_baselayers = []
         assigned_layergroups = []
-        for key in request.POST:
-            if 'layergroup-' in key:
-                assigned_layergroups.append(int(key.split('-')[1]))
-                
         assigned_usergroups = []
         for key in request.POST:
+            if 'baselayer-' in key:
+                assigned_baselayers.append(int(key.split('-')[1]))
+            if 'layergroup-' in key:
+                assigned_layergroups.append(int(key.split('-')[1]))
             if 'usergroup-' in key:
                 assigned_usergroups.append(int(key.split('-')[1]))
                 
@@ -206,6 +211,18 @@ def project_add(request):
                 )
             project.save()
             
+            for bly in assigned_baselayers:
+                baselayer = BaseLayer.objects.get(id=bly)
+                is_default = False
+                if default_baselayer and int(default_baselayer) == baselayer.id:
+                    is_default = True
+                project_baselayer = BaseLayerProject(
+                    project = project,
+                    baselayer = baselayer,
+                    is_default = is_default
+                )
+                project_baselayer.save()
+            
             for alg in assigned_layergroups:
                 layergroup = LayerGroup.objects.get(id=alg)
                 project_layergroup = ProjectLayerGroup(
@@ -231,7 +248,9 @@ def project_add(request):
             
         else:
             message = _(u'Project name already exists')
-            return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+            
+            base_layers = BaseLayer.objects.all()
+            return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'base_layers': base_layers, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
         
         return redirect('project_list')
     
@@ -248,7 +267,9 @@ def project_add(request):
         else:
             groups = core_utils.get_user_groups(request.user.username)
             
-        return render_to_response('project_add.html', {'layergroups': layergroups, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+        base_layers = BaseLayer.objects.all()
+        
+        return render_to_response('project_add.html', {'layergroups': layergroups, 'groups': groups, 'base_layers': base_layers, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -257,7 +278,7 @@ def project_update(request, pid):
     
     has_geocoding_plugin = False
     if 'gvsigol_plugin_geocoding' in settings.INSTALLED_APPS:
-         has_geocoding_plugin = True
+        has_geocoding_plugin = True
     
     if request.method == 'POST':
         name = request.POST.get('project-name')
@@ -271,20 +292,25 @@ def project_update(request, pid):
         if 'is_public' in request.POST:
             is_public = True
                 
+        assigned_baselayers = []
         assigned_layergroups = []
-        for key in request.POST:
-            if 'layergroup-' in key:
-                assigned_layergroups.append(int(key.split('-')[1]))
-                
         assigned_usergroups = []
         for key in request.POST:
+            if 'baselayer-' in key:
+                assigned_baselayers.append(int(key.split('-')[1]))
+            if 'layergroup-' in key:
+                assigned_layergroups.append(int(key.split('-')[1]))
             if 'usergroup-' in key:
                 assigned_usergroups.append(int(key.split('-')[1]))
                 
         has_image = False
         if 'project-image' in request.FILES:
             has_image = True
-                
+        
+        default_baselayer = None
+        if 'default_base_layer_selected' in request.POST:
+            default_baselayer = request.POST.get('default_base_layer_selected')
+        
         project = Project.objects.get(id=int(pid))
         
         old_layer_groups = []
@@ -320,11 +346,27 @@ def project_update(request, pid):
                 
             project.save()
             
+            for bl in BaseLayerProject.objects.filter(project_id=project.id):
+                bl.delete()
+            
             for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
                 lg.delete()
                     
             for ug in ProjectUserGroup.objects.filter(project_id=project.id):
                 ug.delete()
+                
+            
+            for bly in assigned_baselayers:
+                baselayer = BaseLayer.objects.get(id=bly)
+                is_default = False
+                if default_baselayer and int(default_baselayer) == baselayer.id:
+                    is_default = True
+                project_baselayer = BaseLayerProject(
+                    project = project,
+                    baselayer = baselayer,
+                    is_default = is_default
+                )
+                project_baselayer.save()
                 
             for alg in assigned_layergroups:
                 layergroup = LayerGroup.objects.get(id=alg)
@@ -363,14 +405,33 @@ def project_update(request, pid):
                 
                 if has_image:
                     project.image = request.FILES['project-image']
+                    
+                default_baselayer = None
+                if 'default_base_layer_selected' in request.POST:
+                    default_baselayer = request.POST.get('default_base_layer_selected')
                 
                 project.save()
+                
+                for bl in BaseLayerProject.objects.filter(project_id=project.id):
+                    bl.delete()
                 
                 for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
                     lg.delete()
                     
                 for ug in ProjectUserGroup.objects.filter(project_id=project.id):
                     ug.delete()
+                
+                for bly in assigned_baselayers:
+                    baselayer = BaseLayer.objects.get(id=bly)
+                    is_default = False
+                    if default_baselayer and int(default_baselayer) == baselayer.id:
+                        is_default = True
+                    project_baselayer = BaseLayerProject(
+                        project = project,
+                        baselayer = baselayer,
+                        is_default = is_default
+                    )
+                    project_baselayer.save()
                 
                 for alg in assigned_layergroups:
                     layergroup = LayerGroup.objects.get(id=alg)
@@ -402,7 +463,16 @@ def project_update(request, pid):
                 project = Project.objects.get(id=int(pid))    
                 groups = core_utils.get_all_groups_checked_by_project(request, project)
                 layer_groups = core_utils.get_all_layer_groups_checked_by_project(request, project)  
-                return render_to_response('project_update.html', {'message': message, 'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+                base_layers = BaseLayer.objects.all()
+                base_layers_project = BaseLayerProject.objects.filter(project=project)
+                selected_base_layers=[]
+                selected_base_layer=-1
+                
+                for base_layer_project in base_layers_project:
+                    selected_base_layers.append(base_layer_project.baselayer.id)
+                    if base_layer_project.is_default:
+                        selected_base_layer = base_layer_project.baselayer.id
+                return render_to_response('project_update.html', {'message': message, 'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'base_layers': base_layers, 'selected_base_layers': selected_base_layers, 'selected_base_layer': selected_base_layer,  'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
                 
         
         
@@ -410,7 +480,16 @@ def project_update(request, pid):
         project = Project.objects.get(id=int(pid))    
         groups = core_utils.get_all_groups_checked_by_project(request, project)
         layer_groups = core_utils.get_all_layer_groups_checked_by_project(request, project) 
-        return render_to_response('project_update.html', {'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+        base_layers = BaseLayer.objects.all()
+        base_layers_project = BaseLayerProject.objects.filter(project=project)
+        selected_base_layers=[]
+        
+        selected_base_layer=-1
+        for base_layer_project in base_layers_project:
+            selected_base_layers.append(base_layer_project.baselayer.id)
+            if base_layer_project.is_default:
+                selected_base_layer = base_layer_project.baselayer.id
+        return render_to_response('project_update.html', {'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'base_layers': base_layers, 'selected_base_layers': selected_base_layers,'selected_base_layer': selected_base_layer, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -556,6 +635,27 @@ def project_get_conf(request):
         resource_manager = 'gvsigol'
         if 'gvsigol_plugin_alfresco' in gvsigol.settings.INSTALLED_APPS:
             resource_manager = 'alfresco'
+        
+        base_layers = gvsigol.settings.GVSIGOL_BASE_LAYERS
+
+        bsly_projs = BaseLayerProject.objects.filter(project=project).order_by('order')
+        
+        base_layers = []
+        for bsly_proj in bsly_projs:
+            bsly = bsly_proj.baselayer
+            
+            base_layer = {}
+            if bsly.type_params:
+                bsly_params = json.loads(bsly.type_params)
+                base_layer.update(bsly_params)
+            
+            base_layer['name'] = bsly.name
+            base_layer['title'] = bsly.title
+            base_layer['type'] = bsly.type
+            base_layer['active'] = bsly_proj.is_default
+            
+            base_layers.append(base_layer)
+            
             
         conf = {
             'pid': pid,
@@ -584,7 +684,7 @@ def project_get_conf(request):
             'workspaces': workspaces,
             'layerGroups': ordered_layer_groups,
             'tools': gvsigol.settings.GVSIGOL_TOOLS,
-            'base_layers': gvsigol.settings.GVSIGOL_BASE_LAYERS,
+            'base_layers': base_layers,
             'is_public_project': False,
             'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL']),
             'geoserver_base_url_no_auth': gvsigol.settings.GVSIGOL_SERVICES['URL'],
