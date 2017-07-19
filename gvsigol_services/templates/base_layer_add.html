@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="box padding-20">
+			<form role="form" method="post" action="/gvsigonline/services/base_layer/base_layer_add/">
+				{% csrf_token %}
+				<div class="box-header with-border">
+					<h3 class="box-title">{% trans "Add base layer" %}</h3>
+					<div class="box-tools pull-right">
+						<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+					</div>
+				</div>					
+				<div class="box-body">
+				
+					{% if form.errors %}
+					<div id="form-error" style="color:#ff0000;">
+						<ul>
+						{% for field in form %}
+							{% if field.errors %}
+								<li>{{field.label}}. {{ field.errors|striptags }}</li>
+							{% endif %}	
+						{% endfor %}
+						{% for field, msg in form.errors.iteritems %}
+							<li>{{ msg|striptags }}</li>
+						{% endfor %}
+						</ul>
+					</div>
+					{% endif %}
+					
+					<div class="row">		
+						<div class="col-md-12 form-group">
+							<label for="id_name">{% trans "Name" %}</label>
+							{{ form.name }}
+						</div>	
+					</div>
+					
+					<div class="row">		
+						<div class="col-md-12 form-group">
+							<label for="id_title">{% trans "Title" %}</label>
+							{{ form.title }}
+						</div>	
+					</div>
+					
+					<div class="row">		
+						<div class="col-md-12 form-group">
+							<label for="id_type">{% trans "Type" %}</label>
+							{{ form.type }}
+						</div>	
+					</div>
+					
+					<div class="row layers-control wms-control wmts-control">		
+						<div class="col-md-12 form-group">
+							<label for="id_version">{% trans "Version" %}</label>
+							{{ form.version }}
+						</div>	
+					</div>
+					
+					<div class="row layers-control xyz-control wms-control wmts-control">		
+						<div class="col-md-12 form-group">
+							<label for="id_url">{% trans "Url" %}</label>
+							{{ form.url }}
+						</div>	
+					</div>
+										
+					<div class="row layers-control bing-control wms-control wmts-control">		
+						<div class="col-md-12 form-group">
+							<label for="id_layers">{% trans "Layers" %}</label>
+							{{ form.layers }}
+							<datalist id="id_layer_list">
+							</datalist>
+						</div>	
+					</div>
+					
+					<div class="row layers-control wms-control wmts-control">		
+						<div class="col-md-12 form-group">
+							<label for="id_format">{% trans "Format" %}</label>
+							{{ form.format }}
+							<datalist id="id_format_list">
+							</datalist>
+						</div>	
+					</div>
+					
+					<div class="row layers-control bing-control">		
+						<div class="col-md-12 form-group">
+							<label for="id_apikey">{% trans "Api-key" %}</label>
+							{{ form.key }}
+						</div>	
+					</div>
+																	
+				</div>									
+			</form>	
+		</div>
+	</div>				
+</div>
+
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-baselayers').addClass("active");
+</script>
+<script type="text/javascript">
+$().ready(function(){ 
+	
+	function updateFormfields(){
+		var type = $("#id_type option:selected").val();
+		$(".layers-control").css("display","none");
+		$("."+type.toLowerCase()+"-control").css("display","block");
+	};
+	
+	$("#id_type").change(function(){
+		updateFormfields();
+	})
+	
+	updateFormfields();
+	
+	$("#id_url").keyup(function() {
+		getLayersFromCapabilities(this.value);
+	});
+	
+	function getLayersFromCapabilities(url){
+		var capabilities_layer_name = "Identifier";
+		var capabilities_layer_title = "Title";
+		
+		$("#id_format").empty();
+// 		$("#id_format").attr("disabled",true);
+		
+		$("#id_layer_list").empty();
+// 		$("#id_layers").attr("disabled",true);
+		
+		
+		$.ajax({
+		        type: "GET",
+				url: url+"?request=GetCapabilities",
+				async: false,
+				dataType: "xml",
+				success: function(xml) {
+					
+					var formats = [];
+		 			$(xml).find('Layer').each(function(){
+		 				var children = $(this).children();
+		 				var name = null;
+		 				var title = null;
+		 				for(var i=0; i<children.length; i++){
+		 					var child = children[i];
+		 					if(child){
+			 					if(child.localName == capabilities_layer_name){
+			 						name = child.textContent;
+			 					}
+			 					if(child.localName == capabilities_layer_title){
+			 						title = child.textContent;
+			 					}
+		 					}
+		 				}
+		 				if(name && title){
+		 					$("#id_layer_list").append('<option value="' + name + '">' + name + '</option>');
+// 		 					$("#id_layers").attr("disabled",false);
+						}
+		 				var formats = $(this).children("format");
+		 				for(var i=0; i<formats.length; i++){
+		 					if(formats[i]){
+		 						var format = formats[i].textContent;
+		 						var formats_added = $("#id_format option");
+		 						var is_repeated = false;
+		 						for(var j=0; j<formats_added.length; j++){
+		 							if(formats_added[j].textContent == format){
+		 								is_repeated = true;
+		 							}
+		 						}
+		 						if(!is_repeated){
+		 							$("#id_format_list").append('<option value="' + format + '">' + format + '</option>');
+		 						}
+		 					}
+		 				}
+// 		 				if(formats.length > 0 ){
+// 		 					$("#id_format").attr("disabled",false);
+// 		 				}
+					});
+		 			
+		 			for(var i = 0; i<formats.length; i++){
+		 				var repeated = false;	
+		 				for(var j=0; j< i; j++){
+		 					if(formats[i] == formats[j] && i != j){
+		 						repeated = true;
+		 					}
+		 				}
+		 				if(!repeated){
+		 					$("#id_format_list").append('<option value="' + formats[i] + '">' + formats[i] + '</option>');
+		 				}
+		 			}
+				}
+			});
+	}
+
+});
+</script>
+{% endblock %}

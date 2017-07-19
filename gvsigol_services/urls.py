@@ -47,4 +47,8 @@ urlpatterns = [
     url(r'^delete_resource/$', 'gvsigol_services.views.delete_resource', name='delete_resource'),
     url(r'^delete_resources/$', 'gvsigol_services.views.delete_resources', name='delete_resources'),
     url(r'^describeFeatureType/$', 'gvsigol_services.views.describeFeatureType', name='describeFeatureType'),
+    url(r'^base_layer/base_layer_list/$', 'gvsigol_services.views.base_layer_list', name='base_layer_list'),
+    url(r'^base_layer/base_layer_add/$', 'gvsigol_services.views.base_layer_add', name='base_layer_add'),
+    url(r'^base_layer/base_layer_update/(?P<base_layer_id>[0-9]+)/$', 'gvsigol_services.views.base_layer_update', name='base_layer_update'),
+    url(r'^base_layer/base_layer_delete/(?P<base_layer_id>[0-9]+)/$', 'gvsigol_services.views.base_layer_delete', name='base_layer_delete'),
 ]
