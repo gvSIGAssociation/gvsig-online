@@ -29,6 +29,8 @@ Además de estos campos en la parte inferior aparecerán dos listados:
 
 .. image:: ../images/project3.png
    :align: center
+   
+*   **Capas base**: Permite asignar las capas base del proyecto, así como la que estará cargada por defecto.
 
 *   **Grupos de usuario**: Grupos de usuario(roles) para los que el proyecto estará disponible. Los usuarios administradores tendrán acceso a todos los proyectos.
 
