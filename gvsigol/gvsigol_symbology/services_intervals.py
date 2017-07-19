@@ -159,11 +159,12 @@ def create_style(request, json_data, layer_id):
                     font_size = json_sym.get('font_size'),
                     font_weight = json_sym.get('font_weight'),
                     font_style = json_sym.get('font_style'),
-                    fill = json_sym.get('fill'),
-                    fill_opacity = json_sym.get('fill_opacity'),
                     halo_fill = json_sym.get('halo_fill'),
                     halo_fill_opacity = json_sym.get('halo_fill_opacity'),     
                     halo_radius = json_sym.get('halo_radius'),
+                    fill = json_sym.get('fill'),
+                    fill_opacity = json_sym.get('fill_opacity'),
+                    
                 )
                 symbolizer.save()
             
@@ -305,11 +306,12 @@ def update_style(request, json_data, layer_id, style_id):
                     font_size = json_sym.get('font_size'),
                     font_weight = json_sym.get('font_weight'),
                     font_style = json_sym.get('font_style'),
-                    fill = json_sym.get('fill'),
-                    fill_opacity = json_sym.get('fill_opacity'),
                     halo_fill = json_sym.get('halo_fill'),
                     halo_fill_opacity = json_sym.get('halo_fill_opacity'),     
                     halo_radius = json_sym.get('halo_radius'),
+                    fill = json_sym.get('fill'),
+                    fill_opacity = json_sym.get('fill_opacity'),
+                    
                 )
                 symbolizer.save()
     
