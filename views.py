@@ -1830,7 +1830,7 @@ def base_layer_add(request):
                 params['key'] = request.POST.get('key')
                 params['layers'] = request.POST.get('layers')
                 
-            if newBaseLayer.type == 'XYZ':
+            if newBaseLayer.type == 'XYZ' or newBaseLayer.type == 'OSM':
                 params['url'] = request.POST.get('url')
             
             
