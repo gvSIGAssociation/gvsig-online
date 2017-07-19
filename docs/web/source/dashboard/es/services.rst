@@ -227,8 +227,17 @@ Los pasos para crear una capa vacía son los siguientes:
 
 2.6 Gestión de bloqueos
 -----------------------
-Podeos consultar los bloqueos activos desde el listado de bloqueos, así como desbloquear capas bloqueadas.
+Podemos consultar los bloqueos activos desde el listado de bloqueos, así como desbloquear capas bloqueadas.
 
 .. image:: ../images/block1.png
    :align: center
+
+2.7 Gestión de capas base
+-----------------------
+Los usuarios administradores podrán configurar el juego de capas base que estarán disponibles para añadir a cualquiera de los proyectos.
+Para acceder a esta funcionalidad, aparecerá la entrada correspondiente dentro del menú
+
+En ella se pueden realizar las operaciones básicas: crear nueva capa de tipo WMS, WMTS, OpenStreetMap, Bing o TileXYZ, actualizar o borrar.
+
+Luego en la definición de los proyectos, se podrán declarar cuáles se quieren incorporar, así como indicar cuál estará amrcada por defecto al cargar el proyecto.
 
