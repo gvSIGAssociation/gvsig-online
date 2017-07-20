@@ -264,7 +264,7 @@ def create_rule(r, symbolizers, feature_type_style):
             symbolizer.create_vendoroption('labelAllGroup', 'false')
             symbolizer.create_vendoroption('spaceAround', '0')
             symbolizer.create_vendoroption('polygonAlign', 'mbr')
-            #symbolizer.create_vendoroption('followLine', 'true')
+            symbolizer.create_vendoroption('followLine', 'true')
             symbolizer.create_vendoroption('graphic-resize', 'stretch')   
             symbolizer.create_vendoroption('goodnessOfFit', '0')       
             
