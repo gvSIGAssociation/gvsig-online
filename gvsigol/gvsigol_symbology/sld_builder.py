@@ -258,7 +258,7 @@ def create_rule(r, symbolizers, feature_type_style):
             halo_fill.create_cssparameter('fill', s.textsymbolizer.halo_fill)
             halo_fill.create_cssparameter('fill-opacity', str(s.textsymbolizer.halo_fill_opacity))
             symbolizer.create_vendoroption('conflictResolution', 'true')
-            symbolizer.create_vendoroption('autoWrap', '160')
+            symbolizer.create_vendoroption('autoWrap', '100')
             symbolizer.create_vendoroption('repeat', '0')
             symbolizer.create_vendoroption('group', 'true')
             symbolizer.create_vendoroption('labelAllGroup', 'false')
