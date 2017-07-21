@@ -142,6 +142,12 @@ attributeTable.prototype.createTableUI = function(featureType) {
 							if (data == "null" || data == null) {
 								value = "";
 							}
+							if(data == true){
+								value = gettext("true");
+							}
+							if(data == false){
+								value = gettext("false");
+							}
 							return value;
 						 }
 					});
