@@ -22,6 +22,7 @@
 '''
 
 from models import  StyleLayer, Symbolizer
+from gvsigol_services.backend_postgis import Introspect
 from django.core import serializers
 from gvsigol import settings
 import tempfile, zipfile
@@ -337,3 +338,25 @@ def filter_to_json(filter):
         json_filter = None
         
     return json_filter
+
+    
+def get_geometry_field(layer):
+    if layer.type == 'v_PostGIS':
+        params = json.loads(layer.datastore.connection_params)
+        host = params['host']
+        port = params['port']
+        dbname = params['database']
+        user = params['user']
+        passwd = params['passwd']
+        schema = params.get('schema', 'public')
+        i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+        
+        layer_name_split = layer.name.split(':')
+        layer_name = layer.name
+        if layer_name_split.__len__() > 1: 
+            layer_name = layer_name_split[1]
+        if layer_name:
+            geom_fields = i.get_geometry_columns(layer_name, schema)
+            if geom_fields.__len__() > 0: 
+                return geom_fields[0] 
+    return ''
