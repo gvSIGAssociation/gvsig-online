@@ -461,6 +461,9 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 				if (value == "null" || value == null) {
 					value = "";
 				}
+				if(featureType[i].type == "boolean"){
+					value = gettext(value);
+				}
 				if (!key.startsWith(this.prefix)) {	
 					var item_shown = true;
 					if (selectedLayer != null) {
