@@ -229,11 +229,19 @@ viewer.core = {
 	    	}
 	    	
 	    	if (base_layer['type'] == 'OSM') {
+	    		var osm_source = null;
+	    		if('url' in base_layer && base_layer['url'].length > 0){
+	    			osm_source = new ol.source.OSM({
+	    				url: base_layer['url']
+	    			})
+	    		}else{
+	    			osm_source = new ol.source.OSM();
+	    		}
 	    		var osm = new ol.layer.Tile({
 	        		id: this._nextLayerId(),
 	            	label: base_layer['title'],
 	              	visible: base_layer['active'],
-	              	source: new ol.source.OSM()
+	              	source: osm_source
 	            });
 	    		osm.baselayer = true;
 				this.map.addLayer(osm);
