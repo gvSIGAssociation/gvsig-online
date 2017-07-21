@@ -545,6 +545,97 @@ class Font(StyleItem):
         """
         super(Font, self).__init__(parent, 'Font', descendant=descendant)
         
+
+class Geometry(StyleItem):
+    """
+    @prop: PropertyName
+
+        I{Type}: string
+        
+    This class is a property of any L{Symbolizer}.
+    """
+    def __init__(self, parent, descendant=True):
+        """
+        Create a new Font node from the specified parent.
+
+        @type  parent: L{Symbolizer}
+        @param parent: The parent class object.
+        @type  descendant: boolean
+        @param descendant: A flag indicating if this is a descendant node of the parent.
+        """
+        super(Geometry, self).__init__(parent, 'Geometry', descendant=descendant)
+
+
+class Function(StyleItem):
+    """
+    @prop: PropertyName
+
+        I{Type}: string
+        
+    This class is a property of any L{Symbolizer}.
+    """
+    def __init__(self, parent, descendant=True):
+        """
+        Create a new Font node from the specified parent.
+
+        @type  parent: L{Symbolizer}
+        @param parent: The parent class object.
+        @type  descendant: boolean
+        @param descendant: A flag indicating if this is a descendant node of the parent.
+        """
+        super(Function, self).__init__(parent, 'Function', descendant=descendant)
+        setattr(self.__class__, 'PropertyName', SLDNode.makeproperty('ogc', name='PropertyName',
+                docstring="The name of the property."))
+    
+    def create_functionname(self, name=None, value=None):
+        """
+        Create a new L{VendorOption} node as a child of this element, and attach it to the DOM.
+        Optionally set the name and value of the parameter, if they are both provided.
+
+        @type   name: string
+        @param  name: Optional. The name of the L{Function}
+        @type  value: string
+        @param value: Optional. The value of the L{Function}
+        @rtype: L{Function}
+        @return: A new style parameter, set to the name and value.
+        """
+        elem = self._node.makeelement('{%s}Function' % SLDNode._nsmap['sld'], nsmap=SLDNode._nsmap)
+        self._node.append(elem)
+
+        if not (name is None or value is None):
+            elem.attrib['name'] = name
+            elem.text = value
+
+        return Function(self, len(self._node) - 1)
+
+       
+    def get_name(self):
+        """
+        Get the name attribute.
+
+        @rtype: string
+        @return: The value of the 'name' attribute.
+        """
+        return self._node.attrib['name']
+
+    def set_name(self, value):
+        """
+        Set the name attribute.
+
+        @type  value: string
+        @param value: The value of the 'name' attribute.
+        """
+        self._node.attrib['name'] = value
+
+    def del_name(self):
+        """
+        Delete the name attribute.
+        """
+        del self._node.attrib['name']
+
+    Name = property(get_name, set_name, del_name, "The value of the 'name' attribute.")
+   
+
 class Label(StyleItem):
     """
     @prop: PropertyName
@@ -811,7 +902,7 @@ class TextSymbolizer(Symbolizer):
             elem.text = value
 
         return VendorOption(self, len(self._node) - 1)
-
+    
 class OnlineResource(StyleItem):
     def __init__(self, parent, descendant=True):
         """

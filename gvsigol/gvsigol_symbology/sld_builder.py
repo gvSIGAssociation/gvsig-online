@@ -24,7 +24,9 @@
 
 from models import Rule as ModelRule, Symbolizer as ModelSymbolizer, ColorMapEntry as ModelColorMapEntry
 from gvsigol_symbology.sld import StyledLayerDescriptor, PointSymbolizer, LineSymbolizer, PolygonSymbolizer, TextSymbolizer, \
-    Graphic, Mark, Fill, Stroke, Label, Font, Halo, RasterSymbolizer, ColorMap, ExternalGraphic, Filter, PropertyCriterion
+    Graphic, Mark, Fill, Stroke, Label, Font, Halo, RasterSymbolizer, ColorMap, ExternalGraphic, Filter, PropertyCriterion, \
+    Geometry, Function
+import utils
 import json
 import sys
 import re
@@ -42,6 +44,7 @@ def parse_sld(file):
     return sld_object
 
 def build_sld(layer, style):
+    field_geom = 'wkb_geometry' #get_layer_geom_field(layer)
     style_layer_descriptor = StyledLayerDescriptor()
     named_layer = style_layer_descriptor.create_namedlayer(layer.name)
     user_style = named_layer.create_userstyle()
@@ -50,7 +53,8 @@ def build_sld(layer, style):
     rules = ModelRule.objects.filter(style=style)
     for r in rules:
         symbolizers = ModelSymbolizer.objects.filter(rule=r)
-        create_rule(r, symbolizers, feature_type_style)
+        field_geom = utils.get_geometry_field(layer)
+        create_rule(r, symbolizers, feature_type_style, field_geom)
     
     sld_body = style_layer_descriptor.as_sld(True)
     
@@ -152,7 +156,7 @@ def build_complex_filter(filters, rule):
     return complex_filter
         
 
-def create_rule(r, symbolizers, feature_type_style):
+def create_rule(r, symbolizers, feature_type_style, geom_field=None):
     min_scale_denominator = None
     max_scale_denominator = None
     if r.minscale >= 0:
@@ -242,6 +246,11 @@ def create_rule(r, symbolizers, feature_type_style):
             
         elif hasattr(s, 'textsymbolizer'):
             symbolizer = TextSymbolizer(rule)
+            if geom_field and geom_field != '':
+                geometry = Geometry(symbolizer)
+                function = Function(geometry)
+                function.set_name('centroid')
+                function.PropertyName = geom_field
             label = Label(symbolizer)
             label.PropertyName = s.textsymbolizer.label
             font = Font(symbolizer)
