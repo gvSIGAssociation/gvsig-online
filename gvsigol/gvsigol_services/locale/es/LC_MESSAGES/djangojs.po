@@ -35,6 +35,18 @@ msgstr "Guardar campo"
 msgid "Edit field"
 msgstr "Editar campo"
 
+msgid "true"
+msgstr "Verdadero"
+
+msgid "false"
+msgstr "Falso"
+
+msgid "True"
+msgstr "Verdadero"
+
+msgid "False"
+msgstr "Falso"
+
 msgid "Invalid name: Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr "Nombre no válido: Los identificadores deben empezar con una letra o guión bajo (_). Los siguientes caracteres pueden ser letras, guión bajo o números"
 
