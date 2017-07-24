@@ -51,4 +51,6 @@ urlpatterns = [
     url(r'^base_layer/base_layer_add/$', 'gvsigol_services.views.base_layer_add', name='base_layer_add'),
     url(r'^base_layer/base_layer_update/(?P<base_layer_id>[0-9]+)/$', 'gvsigol_services.views.base_layer_update', name='base_layer_update'),
     url(r'^base_layer/base_layer_delete/(?P<base_layer_id>[0-9]+)/$', 'gvsigol_services.views.base_layer_delete', name='base_layer_delete'),
+    url(r'^base_layer/get_capabilities_from_url/$', 'gvsigol_services.views.get_capabilities_from_url', name='base_layer_delete'),
+
 ]

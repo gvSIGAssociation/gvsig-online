@@ -59,6 +59,9 @@ import ast
 import re
 import os
 import unicodedata
+from owslib.wms import WebMapService
+from owslib.wmts import WebMapTileService
+
 logger = logging.getLogger(__name__)
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
@@ -1923,3 +1926,50 @@ def base_layer_delete(request, base_layer_id):
         return HttpResponse('Error deleting baselayer: ' + str(e), status=500)
 
     return redirect('base_layer_list')
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_POST
+@staff_required
+def get_capabilities_from_url(request):
+    url = request.POST.get('url')
+    service = request.POST.get('type')
+    version = request.POST.get('version')
+    
+    values={
+    }
+    
+    layers = []
+    formats = []
+    
+    if service == 'WMS':
+        wms = WebMapService(url, version=version)
+        
+        print wms.identification.type
+        print wms.identification.title
+        
+        layers = list(wms.contents)
+        formats = wms.getOperationByName('GetMap').formatOptions
+    
+    if service == 'WMTS':
+        wmts = WebMapTileService(url, version=version)
+        print wmts.identification.type
+        print wmts.identification.title
+        
+        layers = list(wmts.contents)
+        for layer in wmts.contents:
+            for format in wmts.contents.get(layer).formats:
+                if not format in formats:
+                    formats.append(format)
+        
+    
+    data = {
+        'response': '200',
+        'version': version,
+        'layers': layers,
+        'formats': formats
+    }
+       
+    return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
+
+
