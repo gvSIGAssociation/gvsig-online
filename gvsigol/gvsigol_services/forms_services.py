@@ -31,7 +31,7 @@ from gvsigol.settings import BASELAYER_SUPPORTED_TYPES
 
 supported_types = tuple((x,x) for x in BASELAYER_SUPPORTED_TYPES)
 layers = (('---', _('No se han podido obtener las capas')), ('1.3.0', 'version 1.3.0'))
-version = (('1.1.1', _('version 1.1.1')), ('1.3.0', _('version 1.3.0')))
+version = (('1.1.1', _('version 1.1.1')), ('1.3.0', _('version 1.3.0')), ('1.0.0', _('version 1.0.0')))
 blank = (('', '---------'),)
 
 class WorkspaceForm(forms.Form):   
