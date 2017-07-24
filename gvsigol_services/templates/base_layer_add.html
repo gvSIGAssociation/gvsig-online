@@ -120,90 +120,49 @@ $().ready(function(){
 	updateFormfields();
 	
 	$("#id_url").keyup(function() {
-		getLayersFromCapabilities(this.value);
+		//getLayersFromCapabilities(this.value);
+		url = this.value;
+		type = $("#id_type option:selected").val()
+		version = $("#id_version option:selected").val()
+		
+		getNewLayersFromCapabilities(url, type, version);
 	});
 	
-	function getLayersFromCapabilities(url){
-		var type = $("#id_type").val();
-
-		var capabilities_layer_name = "Identifier";
-		var capabilities_layer_title = "Title";
-		
-		if(type == "WMS"){
-			capabilities_layer_name = "Name";
-			capabilities_layer_title = "Name";
-		}		
-		
-		$("#id_format").empty();
-// 		$("#id_format").attr("disabled",true);
-		
-		$("#id_layer_list").empty();
-// 		$("#id_layers").attr("disabled",true);
-		
-		
+	function getNewLayersFromCapabilities(url, type, version){
 		$.ajax({
-		        type: "GET",
-				url: url+"?request=GetCapabilities",
-				async: false,
-				dataType: "xml",
-				success: function(xml) {
-					
-					var formats = [];
-		 			$(xml).find('Layer').each(function(){
-		 				var children = $(this).children();
-		 				var name = null;
-		 				var title = null;
-		 				for(var i=0; i<children.length; i++){
-		 					var child = children[i];
-		 					if(child){
-			 					if(child.localName == capabilities_layer_name){
-			 						name = child.textContent;
-			 					}
-			 					if(child.localName == capabilities_layer_title){
-			 						title = child.textContent;
-			 					}
-		 					}
-		 				}
-		 				if(name && title){
-		 					$("#id_layer_list").append('<option value="' + name + '">' + name + '</option>');
-// 		 					$("#id_layers").attr("disabled",false);
-						}
-		 				var formats = $(this).children("format");
-		 				for(var i=0; i<formats.length; i++){
-		 					if(formats[i]){
-		 						var format = formats[i].textContent;
-		 						var formats_added = $("#id_format_list option");
-		 						var is_repeated = false;
-		 						for(var j=0; j<formats_added.length; j++){
-		 							if(formats_added[j].textContent == format){
-		 								is_repeated = true;
-		 							}
-		 						}
-		 						if(!is_repeated){
-		 							$("#id_format_list").append('<option value="' + format + '">' + format + '</option>');
-		 						}
-		 					}
-		 				}
-// 		 				if(formats.length > 0 ){
-// 		 					$("#id_format").attr("disabled",false);
-// 		 				}
-					});
-		 			
-		 			for(var i = 0; i<formats.length; i++){
-		 				var repeated = false;	
-		 				for(var j=0; j< i; j++){
-		 					if(formats[i] == formats[j] && i != j){
-		 						repeated = true;
-		 					}
-		 				}
-		 				if(!repeated){
-		 					$("#id_format_list").append('<option value="' + formats[i] + '">' + formats[i] + '</option>');
-		 				}
-		 			}
+	        type: "POST",
+			url: "/gvsigonline/services/base_layer/get_capabilities_from_url/",
+			async: false,
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			data:{
+				'url': url,
+				'type': type,
+				'version': version
+			},
+			success: function(data) {
+				
+				 if('layers' in data){
+					$("#id_layer_list").empty();
+					var layers = data['layers'];
+					for(var i=0;i<layers.length; i++){
+	 					$("#id_layer_list").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
+					}
 				}
-			});
+				 
+				 if('formats' in data){
+					 $("#id_format_list").empty();
+						var layers = data['formats'];
+						for(var i=0;i<layers.length; i++){
+		 					$("#id_format_list").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
+						}
+					}
+			}
+		});
+		
 	}
-
+	
 });
 </script>
 {% endblock %}
