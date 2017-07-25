@@ -1487,15 +1487,17 @@ editionBar.prototype.transactWFS = function(p,f) {
 	var fid = null;
 	var node;
 
+	var feat = this.verifyGeometryField(f);
+	
 	switch(p) {
 		case 'delete':
-			node = this.formatWFS.writeTransaction(null,null,[f],this.formatGML);
+			node = this.formatWFS.writeTransaction(null,null,[feat],this.formatGML);
 			break;
 		case 'insert':
-			node = this.formatWFS.writeTransaction([f],null,null,this.formatGML);
+			node = this.formatWFS.writeTransaction([feat],null,null,this.formatGML);
 			break;
 		case 'update':
-			node = this.formatWFS.writeTransaction(null,[f],null,this.formatGML);
+			node = this.formatWFS.writeTransaction(null,[feat],null,this.formatGML);
 			break;
 	}
 	s = new XMLSerializer();
@@ -1511,9 +1513,9 @@ editionBar.prototype.transactWFS = function(p,f) {
 		try {
 			var resp = self.formatWFS.readTransactionResponse(response);
 			if (resp.insertIds[0] == 'none') {
-				fid = f.getId().split('.')[1];
+				fid = feat.getId().split('.')[1];
 			} else {
-				f.setId(resp.insertIds[0]);
+				feat.setId(resp.insertIds[0]);
 				fid = resp.insertIds[0].split('.')[1];
 			}
 			success = true;
@@ -1609,4 +1611,31 @@ editionBar.prototype.showDetailsTab = function(p,f) {
 editionBar.prototype.showLayersTab = function(p,f) {
 	this.detailsTab.empty();
 	$('.nav-tabs a[href="#layer-tree-tab"]').tab('show');
+};
+
+/**
+ * TODO
+ */
+editionBar.prototype.verifyGeometryField = function(feature) {
+	var featureTypeGeometryName = 'wkt_geometry';
+	for (var i = 0; i < this.featureType.length; i++) {
+		if (this.isGeomType(this.featureType[i].type)) {
+			featureTypeGeometryName = this.featureType[i].name;
+		}
+			
+	}
+	
+	if (feature.getGeometryName() == featureTypeGeometryName) {
+		return feature;
+		
+	} else {
+		var props = feature.getProperties();
+		props[featureTypeGeometryName] = props[feature.getGeometryName()];
+    	delete props[feature.getGeometryName()];
+    	delete feature.values_[feature.getGeometryName()];
+    	feature.setProperties(props);
+	}
+	feature.setGeometryName(featureTypeGeometryName);
+	
+	return feature;
 };
