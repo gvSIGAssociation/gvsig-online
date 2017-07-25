@@ -686,7 +686,7 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 	for (var i=0; i<baseLayers.length; i++) {
 		if (baseLayers[i].baselayer) {
 			if (baseLayers[i].getSource().urls) {
-				if(baseLayers[i].getSource().getUrls()[0].indexOf('data:image/gif;base64') == -1)) {
+				if(baseLayers[i].getSource().getUrls()[0].indexOf('data:image/gif;base64') == -1) {
 					if (baseLayers[i].getVisible()) {
 						console.log(baseLayers[i]);
 						if (baseLayers[i].getSource() instanceof ol.source.OSM) {
