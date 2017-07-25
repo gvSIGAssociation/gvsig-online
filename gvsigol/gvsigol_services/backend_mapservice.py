@@ -242,6 +242,12 @@ class Geoserver():
                 ds.url = params_dict.get('url')
             elif format_nature == "e": # cascading wms
                 ds.capabilitiesURL = params_dict.get('url')
+                keys_to_delete = []
+                for key in ds.metadata:
+                    if ds.metadata.get(key) == None:
+                        keys_to_delete.append(key)
+                for key in keys_to_delete:
+                    del ds.metadata[key]
             catalog.save(ds)
             return True
         except Exception as exc:
