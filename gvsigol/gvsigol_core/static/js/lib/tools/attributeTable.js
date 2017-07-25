@@ -685,73 +685,75 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 	var baseLayers = this.map.getLayers().getArray();
 	for (var i=0; i<baseLayers.length; i++) {
 		if (baseLayers[i].baselayer) {
-			if (!(baseLayers[i].getSource() instanceof ol.source.Vector) && (baseLayers[i].getSource().getUrls()[0].indexOf('data:image/gif;base64') == -1)) {
-				if (baseLayers[i].getVisible()) {
-					console.log(baseLayers[i]);
-					if (baseLayers[i].getSource() instanceof ol.source.OSM) {
-						printLayers.push({
-							"baseURL": "http://a.tile.openstreetmap.org",
-					  	    "type": "OSM",
-					  	    "imageExtension": "png"
-						});
-						
-					} else if (baseLayers[i].getSource() instanceof ol.source.WMTS) {
-						var initialScale = 559082263.950892933;
-						var scale = 0;
-						var matrices = new Array();
-						var tileGrid = baseLayers[i].getSource().getTileGrid(); 
-						for (var z = 0; z < 18; ++z) {
-							var matrixSize = new Array();
-							if (z == 0) {
-								matrixSize.push(1);
-								matrixSize.push(1);
-								scale = initialScale;
-								
-							} else if (z >= 1) {
-								matrixSize.push(z*2);
-								matrixSize.push(z*2);
-								scale = scale / 2;
+			if (baseLayers[i].getSource().urls) {
+				if(baseLayers[i].getSource().getUrls()[0].indexOf('data:image/gif;base64') == -1)) {
+					if (baseLayers[i].getVisible()) {
+						console.log(baseLayers[i]);
+						if (baseLayers[i].getSource() instanceof ol.source.OSM) {
+							printLayers.push({
+								"baseURL": "http://a.tile.openstreetmap.org",
+						  	    "type": "OSM",
+						  	    "imageExtension": "png"
+							});
+							
+						} else if (baseLayers[i].getSource() instanceof ol.source.WMTS) {
+							var initialScale = 559082263.950892933;
+							var scale = 0;
+							var matrices = new Array();
+							var tileGrid = baseLayers[i].getSource().getTileGrid(); 
+							for (var z = 0; z < 18; ++z) {
+								var matrixSize = new Array();
+								if (z == 0) {
+									matrixSize.push(1);
+									matrixSize.push(1);
+									scale = initialScale;
+									
+								} else if (z >= 1) {
+									matrixSize.push(z*2);
+									matrixSize.push(z*2);
+									scale = scale / 2;
+								}
+								matrices.push({
+						            "identifier": z,
+						            "matrixSize": matrixSize,
+						            "scaleDenominator": scale,
+						            "tileSize": [tileGrid.getTileSize(), tileGrid.getTileSize()],
+						            "topLeftCorner": [-2.003750834E7, 2.0037508E7]
+								});
 							}
-							matrices.push({
-					            "identifier": z,
-					            "matrixSize": matrixSize,
-					            "scaleDenominator": scale,
-					            "tileSize": [tileGrid.getTileSize(), tileGrid.getTileSize()],
-					            "topLeftCorner": [-2.003750834E7, 2.0037508E7]
+							printLayers.push({
+								"type": "WMTS",
+						        "baseURL": baseLayers[i].getSource().getUrls()[0],
+						        "opacity": 1.0,
+						        "layer": baseLayers[i].getSource().getLayer(),
+						        "version": "1.0.0",
+						        "requestEncoding": "KVP",
+						        "dimensions": null,
+						        "dimensionParams": {},
+						        "matrixSet": baseLayers[i].getSource().getMatrixSet(),
+						        "matrices": matrices,
+						        "imageFormat": "image/png"
+							});
+							
+						} else if (baseLayers[i].getSource() instanceof ol.source.TileWMS) {
+							printLayers.push({
+								"type": "WMS",
+						        "layers": [baseLayers[i].getSource().getParams()['LAYERS']],
+						        "baseURL": baseLayers[i].getSource().getUrls()[0],
+						        "imageFormat": baseLayers[i].getSource().getParams()['FORMAT'],
+						        "version": baseLayers[i].getSource().getParams()['VERSION'],
+						        "customParams": {
+						        	"TRANSPARENT": "true"
+						        }
+							});
+							
+						} else if (baseLayers[i].getSource() instanceof ol.source.XYZ) {
+							printLayers.push({
+								"baseURL": baseLayers[i].getSource().getUrls()[0],
+							    "type": "OSM",
+							    "imageExtension": "jpg"
 							});
 						}
-						printLayers.push({
-							"type": "WMTS",
-					        "baseURL": baseLayers[i].getSource().getUrls()[0],
-					        "opacity": 1.0,
-					        "layer": baseLayers[i].getSource().getLayer(),
-					        "version": "1.0.0",
-					        "requestEncoding": "KVP",
-					        "dimensions": null,
-					        "dimensionParams": {},
-					        "matrixSet": baseLayers[i].getSource().getMatrixSet(),
-					        "matrices": matrices,
-					        "imageFormat": "image/png"
-						});
-						
-					} else if (baseLayers[i].getSource() instanceof ol.source.TileWMS) {
-						printLayers.push({
-							"type": "WMS",
-					        "layers": [baseLayers[i].getSource().getParams()['LAYERS']],
-					        "baseURL": baseLayers[i].getSource().getUrls()[0],
-					        "imageFormat": baseLayers[i].getSource().getParams()['FORMAT'],
-					        "version": baseLayers[i].getSource().getParams()['VERSION'],
-					        "customParams": {
-					        	"TRANSPARENT": "true"
-					        }
-						});
-						
-					} else if (baseLayers[i].getSource() instanceof ol.source.XYZ) {
-						printLayers.push({
-							"baseURL": baseLayers[i].getSource().getUrls()[0],
-						    "type": "OSM",
-						    "imageExtension": "jpg"
-						});
 					}
 				}
 			}
