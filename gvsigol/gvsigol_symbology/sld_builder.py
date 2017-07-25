@@ -247,7 +247,7 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
         elif hasattr(s, 'textsymbolizer'):
             symbolizer = TextSymbolizer(rule)
             if geom_field:
-                if geom_field['field_type'] != 'MULTILINESTRING' and geom_field['field_type'] != 'LINESTRING' and geom_field['field_name'] != '':
+                if geom_field['field_type'] != 'MULTILINESTRING' and geom_field['field_type'] != 'LINESTRING' and geom_field['field_type'] != 'MULTIPOINT' and geom_field['field_type'] != 'POINT' and geom_field['field_name'] != '':
                     geometry = Geometry(symbolizer)
                     function = Function(geometry)
                     function.set_name('centroid')
