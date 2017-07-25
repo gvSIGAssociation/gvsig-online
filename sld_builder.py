@@ -265,7 +265,7 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
             if geom_field['field_type'] == 'MULTILINESTRING' or geom_field['field_type'] == 'LINESTRING':
                 labelplacement = LabelPlacement(symbolizer)
                 lineplacement = LinePlacement(labelplacement)
-                lineplacement.PerpendicularOffset = str(20)
+                lineplacement.PerpendicularOffset = str(15)
             else:
                 labelplacement = LabelPlacement(symbolizer)
                 pointplacement = PointPlacement(labelplacement)
@@ -279,7 +279,7 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
             halo_fill.create_cssparameter('fill', s.textsymbolizer.halo_fill)
             halo_fill.create_cssparameter('fill-opacity', str(s.textsymbolizer.halo_fill_opacity))
             symbolizer.create_vendoroption('conflictResolution', 'true')
-            symbolizer.create_vendoroption('autoWrap', '50')
+            symbolizer.create_vendoroption('autoWrap', '120')
             symbolizer.create_vendoroption('spaceAround', '0')
             symbolizer.create_vendoroption('polygonAlign', 'mbr')
             
