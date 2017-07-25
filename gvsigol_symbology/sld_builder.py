@@ -25,7 +25,7 @@
 from models import Rule as ModelRule, Symbolizer as ModelSymbolizer, ColorMapEntry as ModelColorMapEntry
 from gvsigol_symbology.sld import StyledLayerDescriptor, PointSymbolizer, LineSymbolizer, PolygonSymbolizer, TextSymbolizer, \
     Graphic, Mark, Fill, Stroke, Label, Font, Halo, RasterSymbolizer, ColorMap, ExternalGraphic, Filter, PropertyCriterion, \
-    Geometry, Function
+    Geometry, Function, LabelPlacement, LinePlacement, PointPlacement, AnchorPoint
 import utils
 import json
 import sys
@@ -246,11 +246,12 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
             
         elif hasattr(s, 'textsymbolizer'):
             symbolizer = TextSymbolizer(rule)
-            if geom_field and geom_field != '':
-                geometry = Geometry(symbolizer)
-                function = Function(geometry)
-                function.set_name('centroid')
-                function.PropertyName = geom_field
+            if geom_field:
+                if geom_field['field_type'] != 'MULTILINESTRING' and geom_field['field_type'] != 'LINESTRING' and geom_field['field_name'] != '':
+                    geometry = Geometry(symbolizer)
+                    function = Function(geometry)
+                    function.set_name('centroid')
+                    function.PropertyName = geom_field['field_name']
             label = Label(symbolizer)
             label.PropertyName = s.textsymbolizer.label
             font = Font(symbolizer)
@@ -261,22 +262,32 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
             fill = Fill(symbolizer)
             fill.create_cssparameter('fill', s.textsymbolizer.fill)
             fill.create_cssparameter('fill-opacity', str(s.textsymbolizer.fill_opacity))
+            if geom_field['field_type'] == 'MULTILINESTRING' or geom_field['field_type'] == 'LINESTRING':
+                labelplacement = LabelPlacement(symbolizer)
+                lineplacement = LinePlacement(labelplacement)
+                lineplacement.PerpendicularOffset = str(20)
+            else:
+                labelplacement = LabelPlacement(symbolizer)
+                pointplacement = PointPlacement(labelplacement)
+                anchorpoint = AnchorPoint(pointplacement)
+                anchorpoint.AnchorPointX = str(0.5)
+                anchorpoint.AnchorPointY = str(0.5)
+            
             halo = Halo(symbolizer)
             halo.Radius = str(s.textsymbolizer.halo_radius)
             halo_fill = Fill(halo)
             halo_fill.create_cssparameter('fill', s.textsymbolizer.halo_fill)
             halo_fill.create_cssparameter('fill-opacity', str(s.textsymbolizer.halo_fill_opacity))
             symbolizer.create_vendoroption('conflictResolution', 'true')
-            symbolizer.create_vendoroption('autoWrap', '100')
-            symbolizer.create_vendoroption('repeat', '0')
-            symbolizer.create_vendoroption('group', 'true')
-            symbolizer.create_vendoroption('labelAllGroup', 'false')
+            symbolizer.create_vendoroption('autoWrap', '50')
             symbolizer.create_vendoroption('spaceAround', '0')
             symbolizer.create_vendoroption('polygonAlign', 'mbr')
-            symbolizer.create_vendoroption('followLine', 'true')
-            symbolizer.create_vendoroption('graphic-resize', 'stretch')   
-            symbolizer.create_vendoroption('goodnessOfFit', '0')       
             
+            if geom_field['field_type'] == 'MULTILINESTRING' or geom_field['field_type'] == 'LINESTRING':
+                symbolizer.create_vendoroption('group', 'yes')
+                symbolizer.create_vendoroption('partials', 'true')
+                symbolizer.create_vendoroption('forceLeftToRight', 'true')
+                
         elif hasattr(s, 'rastersymbolizer'):
             symbolizer = RasterSymbolizer(rule)
             color_map = ColorMap(symbolizer)
