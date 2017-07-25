@@ -179,11 +179,11 @@ attributeTable.prototype.createTableUI = function(featureType) {
    	 	extend: 'excel',
    	 	text: '<i class="fa fa-file-excel-o margin-r-5"></i> Excel'
 	});
-	tableButtons.push({
+	/*tableButtons.push({
    	 	extend: 'print',
 		text: '<i class="fa fa-file-pdf-o margin-r-5"></i> Pdf',
 		title: self.layer.title
-	});
+	});*/
 	var print = viewer.core.getTool('print');
 	if (print != null) {
 		this.printProvider = print.printProvider;
@@ -685,96 +685,89 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 	var baseLayers = this.map.getLayers().getArray();
 	for (var i=0; i<baseLayers.length; i++) {
 		if (baseLayers[i].baselayer) {
-			if (baseLayers[i].getVisible()) {
-				console.log(baseLayers[i]);
-				if (baseLayers[i].getSource() instanceof ol.source.OSM) {
-					printLayers.push({
-						"baseURL": "http://a.tile.openstreetmap.org",
-				  	    "type": "OSM",
-				  	    "imageExtension": "png"
-					});
-					
-				} else if (baseLayers[i].getSource() instanceof ol.source.WMTS) {
-					var initialScale = 559082263.950892933;
-					var scale = 0;
-					var matrices = new Array();
-					var tileGrid = baseLayers[i].getSource().getTileGrid(); 
-					for (var z = 0; z < 18; ++z) {
-						var matrixSize = new Array();
-						if (z == 0) {
-							matrixSize.push(1);
-							matrixSize.push(1);
-							scale = initialScale;
-							
-						} else if (z >= 1) {
-							matrixSize.push(z*2);
-							matrixSize.push(z*2);
-							scale = scale / 2;
+			if (!(baseLayers[i].getSource() instanceof ol.source.Vector) && (baseLayers[i].getSource().getUrls()[0].indexOf('data:image/gif;base64') == -1)) {
+				if (baseLayers[i].getVisible()) {
+					console.log(baseLayers[i]);
+					if (baseLayers[i].getSource() instanceof ol.source.OSM) {
+						printLayers.push({
+							"baseURL": "http://a.tile.openstreetmap.org",
+					  	    "type": "OSM",
+					  	    "imageExtension": "png"
+						});
+						
+					} else if (baseLayers[i].getSource() instanceof ol.source.WMTS) {
+						var initialScale = 559082263.950892933;
+						var scale = 0;
+						var matrices = new Array();
+						var tileGrid = baseLayers[i].getSource().getTileGrid(); 
+						for (var z = 0; z < 18; ++z) {
+							var matrixSize = new Array();
+							if (z == 0) {
+								matrixSize.push(1);
+								matrixSize.push(1);
+								scale = initialScale;
+								
+							} else if (z >= 1) {
+								matrixSize.push(z*2);
+								matrixSize.push(z*2);
+								scale = scale / 2;
+							}
+							matrices.push({
+					            "identifier": z,
+					            "matrixSize": matrixSize,
+					            "scaleDenominator": scale,
+					            "tileSize": [tileGrid.getTileSize(), tileGrid.getTileSize()],
+					            "topLeftCorner": [-2.003750834E7, 2.0037508E7]
+							});
 						}
-						matrices.push({
-				            "identifier": z,
-				            "matrixSize": matrixSize,
-				            "scaleDenominator": scale,
-				            "tileSize": [tileGrid.getTileSize(), tileGrid.getTileSize()],
-				            "topLeftCorner": [-2.003750834E7, 2.0037508E7]
+						printLayers.push({
+							"type": "WMTS",
+					        "baseURL": baseLayers[i].getSource().getUrls()[0],
+					        "opacity": 1.0,
+					        "layer": baseLayers[i].getSource().getLayer(),
+					        "version": "1.0.0",
+					        "requestEncoding": "KVP",
+					        "dimensions": null,
+					        "dimensionParams": {},
+					        "matrixSet": baseLayers[i].getSource().getMatrixSet(),
+					        "matrices": matrices,
+					        "imageFormat": "image/png"
+						});
+						
+					} else if (baseLayers[i].getSource() instanceof ol.source.TileWMS) {
+						printLayers.push({
+							"type": "WMS",
+					        "layers": [baseLayers[i].getSource().getParams()['LAYERS']],
+					        "baseURL": baseLayers[i].getSource().getUrls()[0],
+					        "imageFormat": baseLayers[i].getSource().getParams()['FORMAT'],
+					        "version": baseLayers[i].getSource().getParams()['VERSION'],
+					        "customParams": {
+					        	"TRANSPARENT": "true"
+					        }
+						});
+						
+					} else if (baseLayers[i].getSource() instanceof ol.source.XYZ) {
+						printLayers.push({
+							"baseURL": baseLayers[i].getSource().getUrls()[0],
+						    "type": "OSM",
+						    "imageExtension": "jpg"
 						});
 					}
-					printLayers.push({
-						"type": "WMTS",
-				        "baseURL": baseLayers[i].getSource().getUrls()[0],
-				        "opacity": 1.0,
-				        "layer": baseLayers[i].getSource().getLayer(),
-				        "version": "1.0.0",
-				        "requestEncoding": "KVP",
-				        "dimensions": null,
-				        "dimensionParams": {},
-				        "matrixSet": baseLayers[i].getSource().getMatrixSet(),
-				        "matrices": matrices,
-				        "imageFormat": "image/png"
-					});
-					
-				} else if (baseLayers[i].getSource() instanceof ol.source.TileWMS) {
-					printLayers.push({
-						"type": "WMS",
-				        "layers": [baseLayers[i].getSource().getParams()['LAYERS']],
-				        "baseURL": baseLayers[i].getSource().getUrls()[0],
-				        "imageFormat": baseLayers[i].getSource().getParams()['FORMAT'],
-				        "version": baseLayers[i].getSource().getParams()['VERSION'],
-				        "customParams": {
-				        	"TRANSPARENT": "true"
-				        }
-					});
-					
-				} else if (baseLayers[i].getSource() instanceof ol.source.XYZ) {
-					printLayers.push({
-						"baseURL": baseLayers[i].getSource().getUrls()[0],
-					    "type": "OSM",
-					    "imageExtension": "jpg"
-					});
 				}
 			}
 		}
 	}
 	
-	var columns = new Array();
 	for (var i=0; i<featureType.length; i++) {
-		if (featureType[i].type.indexOf('gml:') == -1) {
-			if (!featureType[i].name.startsWith(this.prefix)) {
-				columns.push(featureType[i].name);
-			}
+		if (self.isGeomType(featureType[i].type)) {
+			featureType.splice(i, 1);
+		}
+		if (featureType[i].name.startsWith(this.prefix)) {
+			featureType.splice(i, 1);
 		}
 	}
-	
-	var data = new Array();
-	for (var i=0; i<selectedRows.length; i++) {
-		var row = new Array();
-		for (var key in selectedRows[i]) {
-			if (key != 'featureid') {
-				row.push(selectedRows[i][key]);
-			}
-		}
-		data.push(row);
-	}
+	var clonedFeatureType = featureType.slice(0);
+	var datasource = self.getDataSource(clonedFeatureType, selectedRows);
 	
 	$.ajax({
 		type: 'POST',
@@ -796,14 +789,9 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 		  			"scale": self.getCurrentScale(),
 		  			"layers": printLayers
 		  	    },
-		  	    "datasource": [{
-		  	    	"title": self.layer.title,
-			        "table": {
-			        	"columns": columns,
-			        	"data": data
-			        }
-			    }],
+		  	    "datasource": datasource,
 			    "logo_url": self.conf.project_image,
+			    //"logo_url": "https://demo.gvsigonline.com/media/images/igvsb.jpg",
 		  	    "legend": {
 		  	    	"name": "",
 		            "classes": [legend]
@@ -838,6 +826,56 @@ attributeTable.prototype.getScaleFromResolution = function (resolution) {
     return scale;
 };
 
+attributeTable.prototype.getDataSource = function (featureType, selectedRows) {
+	
+	var datasource = new Array();
+	var columnsPerRow = 7
+
+	var groupsOfColumns = new Array();
+	
+	while (featureType.length > 7) {
+		groupsOfColumns.push(featureType.splice(0, columnsPerRow))
+	}
+	if (featureType.length > 0) {
+		groupsOfColumns.push(featureType)
+	}
+	
+	for (var i=0; i < selectedRows.length; i++) {
+		for (var j=0; j<groupsOfColumns.length; j++) {
+			var d = {};
+			var itemCount = i + 1;
+			if (j == 0) {
+				d['title'] = gettext('Item') + ' ' + itemCount;
+			} else {
+				d['title'] = '';
+			}
+			d['table'] = {};
+			
+			var columns = new Array();		
+			for (var k=0; k < groupsOfColumns[j].length; k++) {
+				columns.push(groupsOfColumns[j][k].name);
+			}
+			
+			var data = new Array();
+			for (l=0; l<columns.length; l++) {
+				for (var key in selectedRows[i]) {
+					if (key == columns[l] && key != 'featureid') {
+						data.push(selectedRows[i][key]);
+					}
+				}
+			}
+			
+			
+			d.table['columns'] = columns;
+			d.table['data'] = [data];
+	
+			datasource.push(d);
+		}
+	}
+	
+	return datasource;
+};
+
 /**
  * TODO
  */
@@ -852,7 +890,7 @@ attributeTable.prototype.getReport = function(reportInfo) {
 	  			$.overlayout();
 	  			window.open(reportInfo.downloadURL);
 	  		} else {
-	  			self.getReport(reportInfo);
+	  			window.setTimeout(self.getReport(reportInfo), 3000);
 	  		}
 	  	},
 	  	error: function(){}
