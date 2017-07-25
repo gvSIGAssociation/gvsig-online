@@ -238,6 +238,13 @@ Los usuarios administradores podrán configurar el juego de capas base que estar
 Para acceder a esta funcionalidad, aparecerá la entrada correspondiente dentro del menú
 
 En ella se pueden realizar las operaciones básicas: crear nueva capa de tipo WMS, WMTS, OpenStreetMap, Bing o TileXYZ, actualizar o borrar.
+Dependiendo del tipo de capa, se requerirán diferentes parámetros para definirse:
+
+* *WMS/WMTS*: requieren de la versión y url del servicio. Una vez indicadas, se marca la capa y el formato
+
+* *OSM y XYZ*: indican la URL del servicio (en el caso de OSM, es opcional, si no se indica, se pondrá el servicio por defecto, de lo contrario, el que se especifique, por ejemplo, http://tile2.opencyclemap.org/transport/{z}/{x}/{y}.png)
+
+* *Bing*: necesita el nombre de la capa a visaulizar y un API-KEY para poder utilizar los servicios de Microsoft. 
 
 Luego en la definición de los proyectos, se podrán declarar cuáles se quieren incorporar, así como indicar cuál estará amrcada por defecto al cargar el proyecto.
 
