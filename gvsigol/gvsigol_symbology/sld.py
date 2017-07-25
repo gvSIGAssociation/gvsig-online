@@ -544,7 +544,92 @@ class Font(StyleItem):
         @param descendant: A flag indicating if this is a descendant node of the parent.
         """
         super(Font, self).__init__(parent, 'Font', descendant=descendant)
+
+
+class LabelPlacement(StyleItem):
+    """
+    @prop: PropertyName
+
+        I{Type}: string
         
+    This class is a property of any L{Symbolizer}.
+    """
+    def __init__(self, parent, descendant=True):
+        """
+        Create a new Font node from the specified parent.
+
+        @type  parent: L{Symbolizer}
+        @param parent: The parent class object.
+        @type  descendant: boolean
+        @param descendant: A flag indicating if this is a descendant node of the parent.
+        """
+        super(LabelPlacement, self).__init__(parent, 'LabelPlacement', descendant=descendant)
+
+
+class PointPlacement(StyleItem):
+    """
+    @prop: PropertyName
+
+        I{Type}: string
+        
+    This class is a property of any L{Symbolizer}.
+    """
+    def __init__(self, parent, descendant=True):
+        """
+        Create a new Font node from the specified parent.
+
+        @type  parent: L{Symbolizer}
+        @param parent: The parent class object.
+        @type  descendant: boolean
+        @param descendant: A flag indicating if this is a descendant node of the parent.
+        """
+        super(PointPlacement, self).__init__(parent, 'PointPlacement', descendant=descendant)
+        
+        
+class AnchorPoint(StyleItem):
+    """
+    @prop: PropertyName
+
+        I{Type}: string
+        
+    This class is a property of any L{Symbolizer}.
+    """
+    def __init__(self, parent, descendant=True):
+        """
+        Create a new Font node from the specified parent.
+
+        @type  parent: L{Symbolizer}
+        @param parent: The parent class object.
+        @type  descendant: boolean
+        @param descendant: A flag indicating if this is a descendant node of the parent.
+        """
+        super(AnchorPoint, self).__init__(parent, 'AnchorPoint', descendant=descendant)
+        setattr(self.__class__, 'AnchorPointX', SLDNode.makeproperty('sld', name='AnchorPointX',
+                docstring="The anchor point x, in pixels."))
+        setattr(self.__class__, 'AnchorPointY', SLDNode.makeproperty('sld', name='AnchorPointY',
+                docstring="The anchor point y, in pixels."))
+        
+        
+class LinePlacement(StyleItem):
+    """
+    @prop: PropertyName
+
+        I{Type}: string
+        
+    This class is a property of any L{Symbolizer}.
+    """
+    def __init__(self, parent, descendant=True):
+        """
+        Create a new Font node from the specified parent.
+
+        @type  parent: L{Symbolizer}
+        @param parent: The parent class object.
+        @type  descendant: boolean
+        @param descendant: A flag indicating if this is a descendant node of the parent.
+        """
+        super(LinePlacement, self).__init__(parent, 'LinePlacement', descendant=descendant)        
+        setattr(self.__class__, 'PerpendicularOffset', SLDNode.makeproperty('sld', name='PerpendicularOffset',
+                docstring="Line offset, in pixels."))
 
 class Geometry(StyleItem):
     """
