@@ -91,7 +91,25 @@ def _create_mapfile(mapfile, project_id):
                AUTO
             END
         END
-        
+        LAYER
+            NAME "grid"
+            METADATA
+                "DESCRIPTION" "Grid"
+            END
+            TYPE LINE
+            STATUS ON
+            CLASS
+                NAME "Graticule"
+                COLOR 0 0 0
+            END
+            PROJECTION
+                "init=epsg:4326"
+            END
+            GRID
+                LABELFORMAT "DD"
+            END
+        END
+
         END"""
     text = text.replace('@@@', str(project_id))
     f.write(text)
