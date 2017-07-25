@@ -18,7 +18,7 @@ A través de las transformaciones se definirán cómo rellenar cada uno de los c
 Las transformaciones aparecen listadas, pudiéndose añadir más, editar las existentes o borrarlas.
 
 
-*Crear una transformación*: Sólo requiere del nombre de la transformación para su genereación. Luego se pueden definir todos los pasos a seguir para exportar los datos desde la pantalla de edición.
+**Crear una transformación**: Sólo requiere del nombre de la transformación para su genereación. Luego se pueden definir todos los pasos a seguir para exportar los datos desde la pantalla de edición.
 
 *Borrar transformación*: Elimina la transformación, así como todas sus reglas (pasos a seguir) para rellenar los campos de la base de datos.
 
