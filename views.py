@@ -496,10 +496,20 @@ def layer_add(request):
         if form.is_valid():
             try:
                 # first create the resource on the backend
-                mapservice_backend.createResource(form.cleaned_data['datastore'].workspace,
-                                      form.cleaned_data['datastore'],
-                                      form.cleaned_data['name'],
-                                      form.cleaned_data['title'])
+                mapservice_backend.createResource(
+                    form.cleaned_data['datastore'].workspace,
+                    form.cleaned_data['datastore'],
+                    form.cleaned_data['name'],
+                    form.cleaned_data['title']
+                )
+                '''
+                mapservice_backend.setQueryable(
+                    form.cleaned_data['datastore'].workspace,
+                    form.cleaned_data['datastore'],
+                    form.cleaned_data['name'],
+                    is_queryable
+                )
+                '''
                 # save it on DB if successfully created
                 newRecord = Layer(**form.cleaned_data)
                 newRecord.created_by = request.user.username
@@ -587,6 +597,8 @@ def layer_update(request, layer_id):
             layer.single_image = single_image 
             layer.layer_group_id = layer_group_id
             layer.save()
+            
+            # mapservice_backend.setQueryable(workspace, datastore, name, is_queryable)
             
             new_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
             
@@ -1103,10 +1115,20 @@ def layer_create(request):
                 mapservice_backend.createTable(form.cleaned_data)
 
                 # first create the resource on the backend
-                mapservice_backend.createResource(form.cleaned_data['datastore'].workspace,
-                                      form.cleaned_data['datastore'],
-                                      form.cleaned_data['name'],
-                                      form.cleaned_data['title'])
+                mapservice_backend.createResource(
+                    form.cleaned_data['datastore'].workspace,
+                    form.cleaned_data['datastore'],
+                    form.cleaned_data['name'],
+                    form.cleaned_data['title']
+                )
+                '''
+                mapservice_backend.setQueryable(
+                    form.cleaned_data['datastore'].workspace, 
+                    form.cleaned_data['datastore'], 
+                    form.cleaned_data['name'], 
+                    is_queryable
+                )
+                '''
                 # save it on DB if successfully created
                 newRecord = Layer(
                     datastore = form.cleaned_data['datastore'],
@@ -1472,6 +1494,17 @@ def get_datatable_data(request):
         
         encoded_property_name = property_name.encode('utf-8')
         
+        layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
+        params = json.loads(layer.datastore.connection_params)
+        i = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
+        pk_defs = i.get_pk_columns(layer.name, params.get('schema', 'public'))
+        
+        sortby_field = encoded_property_name.split(',')[0]
+        '''
+        if len(pk_defs) >= 1:
+            sortby_field = str(pk_defs[0])
+        '''
+        
         try:
             if search_value == '':
                 values = {
@@ -1483,6 +1516,7 @@ def get_datatable_data(request):
                     'MAXFEATURES': max_features,
                     'STARTINDEX': start_index,
                     'PROPERTYNAME': encoded_property_name,
+                    'SORTBY': sortby_field
                 }
                 if cql_filter != '':
                     values['cql_filter'] = cql_filter
@@ -1520,7 +1554,8 @@ def get_datatable_data(request):
                     'OUTPUTFORMAT': 'application/json',
                     'MAXFEATURES': max_features,
                     'STARTINDEX': start_index,
-                    'PROPERTYNAME': encoded_property_name
+                    'PROPERTYNAME': encoded_property_name,
+                    'SORTBY': sortby_field
                 }
                 if cql_filter == '':
                     values['cql_filter'] = raw_search_cql
