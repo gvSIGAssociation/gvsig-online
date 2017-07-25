@@ -364,7 +364,7 @@ print.prototype.getReport = function(reportInfo) {
 	  			$.overlayout();
 	  			window.open(reportInfo.downloadURL);
 	  		} else {
-	  			self.getReport(reportInfo);
+	  			window.setTimeout(self.getReport(reportInfo), 3000);
 	  		}
 	  	},
 	  	error: function(){}
