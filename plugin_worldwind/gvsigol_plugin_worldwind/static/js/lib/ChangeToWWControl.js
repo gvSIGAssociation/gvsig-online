@@ -203,7 +203,8 @@ ChangeToWWControl.prototype.initWW = function() {
     //new WorldWind.GestureRecognizer(this.wwd, this.onWWGesture);
         
 	// Añadimos capas
-	this.loadBaseLayer();
+	//this.loadBaseLayer();
+	this.loadGrid();
     this.loadLayers(this.map);
 	
 	// Añadimos eventos de movimiento de mapa de OL3
@@ -287,6 +288,33 @@ ChangeToWWControl.prototype.loadBaseLayer = function() {
 	//this.wwd.addLayer(new WorldWind.BMNGLandsatLayer());	
 	//this.wwd.addLayer(new WorldWind.CompassLayer());
 };
+
+/**
+ * Load WMS grid Layer
+ */
+ChangeToWWControl.prototype.loadGrid = function(map) {
+		config = {service: "/cgi-bin/mapserv?map=/var/www/media/data/ug_jvhigon/mdt_valencia/5.map", 
+		            layerNames: "grid",
+		            sector: new WorldWind.Sector(-90,90,-180,180),
+		            //levelZeroDelta: new WorldWind.Location(0,43),
+		            levelZeroDelta: new WorldWind.Location(36,36),
+		            format: 'image/png',
+		            numLevels: 20,
+		            size: 256,
+		            coordinateSystem: 'EPSG:4326',
+		            title: "grid",
+		            version: '1.1.1'
+		           	 };
+			lyr = new WorldWind.WmsLayer(config,null );
+			//if (l.getVisible()){
+				lyr.enabled = true;
+			//}else{
+			//	lyr.enabled = false;
+			//}			
+			this.wwd.addLayer(lyr);
+			this.wwd.redraw();
+			
+}
 
 /**
  * Load all layers in OL map
