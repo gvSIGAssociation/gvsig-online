@@ -1916,7 +1916,7 @@ def base_layer_update(request, base_layer_id):
                 params['key'] = request.POST.get('key')
                 params['layers'] = request.POST.get('layers')
                 
-            if baselayer.type == 'XYZ':
+            if baselayer.type == 'XYZ' or baselayer.type == 'OSM':
                 params['url'] = request.POST.get('url')
             
             
