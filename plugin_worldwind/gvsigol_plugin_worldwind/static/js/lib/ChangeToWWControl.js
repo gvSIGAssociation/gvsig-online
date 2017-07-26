@@ -108,7 +108,7 @@ ChangeToWWControl.prototype.hideControls = function() {
 	//$('#intersect-by-radio-control').css("display","none");
 	$('.ol-overviewmap').css("display","none");
 	$('.ol-viewport').css("display","none");
-	$('#base-layers').css("display","none");
+	//$('#base-layers').css("display","none");
 	$('#toolbar').css("top", "6px");
 };
 
@@ -203,8 +203,8 @@ ChangeToWWControl.prototype.initWW = function() {
     //new WorldWind.GestureRecognizer(this.wwd, this.onWWGesture);
         
 	// Añadimos capas
-	//this.loadBaseLayer();
-	this.loadGrid();
+	this.loadBaseLayer(this.map);
+	//this.loadGrid();
     this.loadLayers(this.map);
 	
 	// Añadimos eventos de movimiento de mapa de OL3
@@ -278,22 +278,90 @@ ChangeToWWControl.prototype.onOLRotation = function(evt) {
 /**
  * 
  */
-ChangeToWWControl.prototype.loadBaseLayer = function() {
-	if (this.provider.baseLayerType == 'Bing'){
-		this.wwd.addLayer(new WorldWind.BingAerialWithLabelsLayer());
-	}else{
-		this.wwd.addLayer(new WorldWind.OpenStreetMapImageLayer());
-	}
+ChangeToWWControl.prototype.loadBaseLayer = function(map) {
+	//if (this.provider.baseLayerType == 'Bing'){
+	//	this.wwd.addLayer(new WorldWind.BingAerialWithLabelsLayer());
+	//}else{
+	//	this.wwd.addLayer(new WorldWind.OpenStreetMapImageLayer());
+	//}
 	//this.wwd.addLayer(new WorldWind.BMNGOneImageLayer());
 	//this.wwd.addLayer(new WorldWind.BMNGLandsatLayer());	
 	//this.wwd.addLayer(new WorldWind.CompassLayer());
+	
+	
+	//layer.getSource() instanceof ol.source.TileWMS
+	var layers = map.getLayers();
+	for (var i = 0; i < layers.getLength(); i++) {
+		l = layers.item(i);
+		if (l.baselayer){			
+			var p = l.getProperties();
+			var lyr;
+			var config;
+			if (p.label == 'Vacía'){
+				config = {service: this.provider.provider_url, 
+		            layerNames: "grid",
+		            sector: new WorldWind.Sector(-90,90,-180,180),
+		            //levelZeroDelta: new WorldWind.Location(0,43),
+		            levelZeroDelta: new WorldWind.Location(36,36),
+		            format: 'image/png',
+		            numLevels: 20,
+		            size: 256,
+		            coordinateSystem: 'EPSG:4326',
+		            title: "grid",
+		            version: '1.1.1'
+		         };
+				lyr = new WorldWind.WmsLayer(config,null );
+			} else 	if (l.getSource() instanceof ol.source.XYZ){
+				if (l.getSource() instanceof ol.source.OSM){
+					alert ("OSM");
+					lyr = new WorldWind.OpenStreetMapImageLayer();
+				} else{
+					continue;
+				}
+			} else 	if (l.getSource() instanceof ol.source.WMTS){
+				continue;
+			} else 	if (l.getSource() instanceof ol.source.TileWMS){
+				config = {service: l.getSource().urls[0], 
+		            layerNames: l.getSource().params_.LAYERS,
+		            sector: new WorldWind.Sector(-90,90,-180,180),
+		            //levelZeroDelta: new WorldWind.Location(0,43),
+		            levelZeroDelta: new WorldWind.Location(36,36),
+		            format: l.getSource().params_.FORMAT,
+		            numLevels: 20,
+		            size: 256,
+		            coordinateSystem: 'EPSG:4326',
+		            title: "Base WMS",
+		            version:  l.getSource().params_.VERSION
+		        };
+		        lyr = new WorldWind.WmsLayer(config,null );
+			} else {
+				continue;
+			}		
+			
+			// add layer
+			if (l.getVisible()){
+				lyr.enabled = true;
+			}else{
+				lyr.enabled = false;
+			}			
+			this.wwd.addLayer(lyr);
+			this.wwd.redraw();	
+			
+			// Create listener
+			l.on('propertychange', function (evt) {
+			    if (evt.key === 'visible') {
+			    	this.enabled = !evt.oldValue;
+			    }
+			},lyr);
+		}	
+	}
 };
 
 /**
  * Load WMS grid Layer
  */
 ChangeToWWControl.prototype.loadGrid = function(map) {
-		config = {service: "/cgi-bin/mapserv?map=/var/www/media/data/ug_jvhigon/mdt_valencia/5.map", 
+		config = {service: this.provider.provider_url, 
 		            layerNames: "grid",
 		            sector: new WorldWind.Sector(-90,90,-180,180),
 		            //levelZeroDelta: new WorldWind.Location(0,43),
