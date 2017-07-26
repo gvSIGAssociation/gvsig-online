@@ -565,7 +565,6 @@ def project_get_conf(request):
                             if ur == rr:
                                 readable = True
                 
-                readable = True
                 if readable:             
                     layer = {}                
                     layer['name'] = l.name
