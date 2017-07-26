@@ -325,3 +325,6 @@ msgstr "BoundingBox geográfica"
 #cleanMap.js
 msgid "Clean map"
 msgstr "Netejar mapa"
+
+msgid "Invalid identifier. Unable to get requested geometry"
+msgstr "Identificador no vàlid. No es pot obtenir la geometria sol·licitada"
