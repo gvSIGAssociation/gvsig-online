@@ -313,7 +313,6 @@ ChangeToWWControl.prototype.loadBaseLayer = function(map) {
 				lyr = new WorldWind.WmsLayer(config,null );
 			} else 	if (l.getSource() instanceof ol.source.XYZ){
 				if (l.getSource() instanceof ol.source.OSM){
-					alert ("OSM");
 					lyr = new WorldWind.OpenStreetMapImageLayer();
 				} else{
 					continue;
@@ -334,6 +333,15 @@ ChangeToWWControl.prototype.loadBaseLayer = function(map) {
 		            version:  l.getSource().params_.VERSION
 		        };
 		        lyr = new WorldWind.WmsLayer(config,null );
+			} else 	if (l.getSource() instanceof ol.source.BingMaps){
+				var apikey = l.getSource().apiKey_;
+				if (p.label == 'Road'){
+					//lyr = new WorldWind.BingRoadsLayer(apikey);
+					lyr = new WorldWind.BingRoadsLayer();
+				} else {					
+					//lyr = new WorldWind.BingAerialWithLabelsLayer(apikey);
+					lyr = new WorldWind.BingAerialWithLabelsLayer();
+				}
 			} else {
 				continue;
 			}		
