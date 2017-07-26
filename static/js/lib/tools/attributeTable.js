@@ -142,10 +142,10 @@ attributeTable.prototype.createTableUI = function(featureType) {
 							if (data == "null" || data == null) {
 								value = "";
 							}
-							if(data == true){
+							if(typeof data == 'boolean' && data == true){
 								value = gettext("true");
 							}
-							if(data == false){
+							if(typeof data == 'boolean' && data == false){
 								value = gettext("false");
 							}
 							return value;
