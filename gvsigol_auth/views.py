@@ -224,7 +224,7 @@ def user_add(request):
                         
                     else:
                         core_services.ldap_add_user(user, form.data['password1'], False)
-                        core_services.ldap_add_group_member(user, admin_group)
+                        #core_services.ldap_add_group_member(user, admin_group)
                         
                     for ag in assigned_groups:
                         user_group = UserGroup.objects.get(id=ag)

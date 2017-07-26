@@ -550,80 +550,92 @@ def project_get_conf(request):
             conf_group['cached'] = group.cached
             layers_in_group = Layer.objects.filter(layer_group_id=group.id)
             layers = []
+            user_roles = core_utils.get_group_names_by_user(request.user)
+            
             for l in layers_in_group:
                 read_roles = services_utils.get_read_roles(l)
                 write_roles = services_utils.get_write_roles(l)
-                               
-                layer = {}                
-                layer['name'] = l.name
-                layer['title'] = l.title
-                layer['abstract'] = l.abstract
-                layer['visible'] = l.visible 
-                layer['queryable'] = l.queryable 
-                layer['cached'] = l.cached
                 
-                layer['order'] = toc.get(group.name).get('layers').get(l.name).get('order')
-                layer['single_image'] = l.single_image
-                layer['read_roles'] = read_roles
-                layer['write_roles'] = write_roles
-                
-                try:
-                    json_conf = ast.literal_eval(l.conf)
-                    layer['conf'] = json.dumps(json_conf)
-                except:
-                    layer['conf'] = "{\"fields\":[]}"
-                    pass
-                
-                datastore = Datastore.objects.get(id=l.datastore_id)
-                workspace = Workspace.objects.get(id=datastore.workspace_id)
-                
-                if datastore.type == 'v_SHP' or datastore.type == 'v_PostGIS': 
-                    layer['is_vector'] = True
+                readable = False
+                if len(read_roles) == 0:
+                    readable = True
                 else:
-                    layer['is_vector'] = False
+                    for ur in user_roles:
+                        for rr in read_roles:
+                            if ur == rr:
+                                readable = True
                 
-                layer_info = None
-                defaultCrs = None
-                if datastore.type == 'e_WMS':
-                    (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
-                    defaultCrs = 'EPSG:4326'
-                else:
-                    (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
-                    defaultCrs = layer_info[ds_type]['srs']
-                
-                crs_code = int(defaultCrs.split(':')[1])
-                if crs_code in core_utils.get_supported_crs():
-                    epsg = core_utils.get_supported_crs()[crs_code]
-                    layer['crs'] = {
-                        'crs': defaultCrs,
-                        'units': epsg['units']
-                    }
-                    used_crs.append(epsg)
+                if readable:             
+                    layer = {}                
+                    layer['name'] = l.name
+                    layer['title'] = l.title
+                    layer['abstract'] = l.abstract
+                    layer['visible'] = l.visible 
+                    layer['queryable'] = l.queryable 
+                    layer['cached'] = l.cached
                     
-                layer['wms_url'] = core_utils.get_wms_url(request, workspace)
-                layer['wms_url_no_auth'] = workspace.wms_endpoint
-                layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
-                layer['wfs_url_no_auth'] = workspace.wfs_endpoint
-                layer['namespace'] = workspace.uri
-                layer['workspace'] = workspace.name   
-                layer['metadata'] = core_utils.get_catalog_url(request, l)             
-                if l.cached:  
-                    layer['cache_url'] = core_utils.get_cache_url(request, workspace)
-                else:
-                    layer['cache_url'] = core_utils.get_wms_url(request, workspace)
-                
-                if datastore.type == 'e_WMS':
-                    layer['legend'] = ""
-                else: 
-                    layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                    layer['legend_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
+                    layer['order'] = toc.get(group.name).get('layers').get(l.name).get('order')
+                    layer['single_image'] = l.single_image
+                    layer['read_roles'] = read_roles
+                    layer['write_roles'] = write_roles
                     
-                layers.append(layer)
-                
-                w = {}
-                w['name'] = workspace.name
-                w['wms_url'] = workspace.wms_endpoint
-                workspaces.append(w)
+                    try:
+                        json_conf = ast.literal_eval(l.conf)
+                        layer['conf'] = json.dumps(json_conf)
+                    except:
+                        layer['conf'] = "{\"fields\":[]}"
+                        pass
+                    
+                    datastore = Datastore.objects.get(id=l.datastore_id)
+                    workspace = Workspace.objects.get(id=datastore.workspace_id)
+                    
+                    if datastore.type == 'v_SHP' or datastore.type == 'v_PostGIS': 
+                        layer['is_vector'] = True
+                    else:
+                        layer['is_vector'] = False
+                    
+                    layer_info = None
+                    defaultCrs = None
+                    if datastore.type == 'e_WMS':
+                        (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
+                        defaultCrs = 'EPSG:4326'
+                    else:
+                        (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
+                        defaultCrs = layer_info[ds_type]['srs']
+                    
+                    crs_code = int(defaultCrs.split(':')[1])
+                    if crs_code in core_utils.get_supported_crs():
+                        epsg = core_utils.get_supported_crs()[crs_code]
+                        layer['crs'] = {
+                            'crs': defaultCrs,
+                            'units': epsg['units']
+                        }
+                        used_crs.append(epsg)
+                        
+                    layer['wms_url'] = core_utils.get_wms_url(request, workspace)
+                    layer['wms_url_no_auth'] = workspace.wms_endpoint
+                    layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
+                    layer['wfs_url_no_auth'] = workspace.wfs_endpoint
+                    layer['namespace'] = workspace.uri
+                    layer['workspace'] = workspace.name   
+                    layer['metadata'] = core_utils.get_catalog_url(request, l)             
+                    if l.cached:  
+                        layer['cache_url'] = core_utils.get_cache_url(request, workspace)
+                    else:
+                        layer['cache_url'] = core_utils.get_wms_url(request, workspace)
+                    
+                    if datastore.type == 'e_WMS':
+                        layer['legend'] = ""
+                    else: 
+                        layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
+                        layer['legend_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
+                        
+                    layers.append(layer)
+                    
+                    w = {}
+                    w['name'] = workspace.name
+                    w['wms_url'] = workspace.wms_endpoint
+                    workspaces.append(w)
             
             if len(layers) > 0:   
                 ordered_layers = sorted(layers, key=itemgetter('order'), reverse=True)
