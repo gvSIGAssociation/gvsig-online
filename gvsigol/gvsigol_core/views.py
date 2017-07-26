@@ -556,6 +556,7 @@ def project_get_conf(request):
                 read_roles = services_utils.get_read_roles(l)
                 write_roles = services_utils.get_write_roles(l)
                 
+                '''
                 readable = False
                 if len(read_roles) == 0:
                     readable = True
@@ -564,7 +565,9 @@ def project_get_conf(request):
                         for rr in read_roles:
                             if ur == rr:
                                 readable = True
+                '''
                 
+                readable = True
                 if readable:             
                     layer = {}                
                     layer['name'] = l.name
