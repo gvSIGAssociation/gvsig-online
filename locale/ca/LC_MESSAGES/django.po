@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-14 13:00+0200\n"
+"POT-Creation-Date: 2017-07-26 10:20+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,13 +38,19 @@ msgstr "Alguna cosa ha sortit malament"
 msgid "We will work on fixing that right away. Meanwhile, you may"
 msgstr "Estem treballant per solucionar el problema. Mentrestant, pot"
 
+#: templates/base.html:66 templates/base_compress.html.py:66
+#: templates/public_viewer.html:109 templates/public_viewer_compress.html:107
+#: templates/viewer.html.py:131 templates/viewer_compress.html:129
+msgid "manual gvsigonline"
+msgstr ""
+
 #: templates/base.html:96 templates/base_compress.html.py:96
-#: templates/viewer.html:119 templates/viewer_compress.html.py:119
+#: templates/viewer.html:121 templates/viewer_compress.html.py:119
 msgid "Sign out"
 msgstr "Tancar sessió"
 
 #: templates/base.html:114 templates/base_compress.html.py:114
-#: templates/viewer.html:116 templates/viewer_compress.html.py:116
+#: templates/viewer.html:118 templates/viewer_compress.html.py:116
 msgid "Dashboard"
 msgstr "Panell de control"
 
@@ -195,7 +201,7 @@ msgid "Projects list"
 msgstr "Llistat de projectes"
 
 #: templates/home.html:69 templates/project_add.html.py:12
-#: templates/project_list.html:13 templates/select_public_project.html.py:51
+#: templates/project_list.html:13 templates/select_public_project.html:51
 msgid "Add project"
 msgstr "Afegir projecte"
 
@@ -251,7 +257,7 @@ msgstr "Descripció del projecte"
 msgid "Is public?"
 msgstr "És públic"
 
-#: templates/project_add.html:51 templates/project_update.html.py:55
+#: templates/project_add.html:51 templates/project_update.html.py:56
 msgid "Locate place..."
 msgstr ""
 
@@ -259,35 +265,82 @@ msgstr ""
 msgid "Select image"
 msgstr "Seleccionar imatge"
 
-#: templates/project_add.html:67 templates/project_update.html.py:74
+#: templates/project_add.html:67 templates/project_update.html.py:75
 msgid "Supported formats"
 msgstr "Formats suportats"
 
-#: templates/project_add.html:74 templates/project_update.html.py:82
+#: templates/project_add.html:75 templates/project_add.html.py:95
+#: templates/project_update.html:83 templates/project_update.html.py:104
+#: templates/project_update.html:106
+#, fuzzy
+#| msgid "Assign layer groups"
+msgid "Assign base layers"
+msgstr "Asignar grups de capes"
+
+#: templates/project_add.html:77 templates/project_update.html.py:85
+msgid "Buscar capas base..."
+msgstr ""
+
+#: templates/project_add.html:97 templates/project_update.html.py:110
+#: templates/project_update.html:112
+msgid "Mark as default"
+msgstr ""
+
+#: templates/project_add.html:115 templates/project_update.html.py:131
 msgid "Assign user groups"
 msgstr "Asignar grups d'usuaris"
 
-#: templates/project_add.html:74 templates/project_update.html.py:82
+#: templates/project_add.html:115 templates/project_update.html.py:131
 msgid "Buscar grupo de usuarios..."
 msgstr ""
 
-#: templates/project_add.html:88 templates/project_add.html.py:90
-#: templates/project_update.html:96 templates/project_update.html.py:98
+#: templates/project_add.html:129 templates/project_add.html.py:131
+#: templates/project_update.html:145 templates/project_update.html.py:147
 msgid "Assign user group"
 msgstr "Asignar grup d'usuari"
 
-#: templates/project_add.html:106 templates/project_update.html.py:114
+#: templates/project_add.html:147 templates/project_update.html.py:163
 msgid "Assign layer groups"
 msgstr "Asignar grups de capes"
 
-#: templates/project_add.html:106 templates/project_update.html.py:114
+#: templates/project_add.html:149
+#, fuzzy
+#| msgid "Assign layer group"
+msgid "Add layer group"
+msgstr "Asignar grup de capes"
+
+#: templates/project_add.html:150 templates/project_update.html.py:163
 msgid "Buscar grupo de capas..."
 msgstr ""
 
-#: templates/project_add.html:119 templates/project_update.html.py:128
-#: templates/project_update.html:130
+#: templates/project_add.html:164 templates/project_update.html.py:177
+#: templates/project_update.html:179
 msgid "Assign layer group"
 msgstr "Asignar grup de capes"
+
+#: templates/project_add.html:192
+#, fuzzy
+#| msgid "Assign layer group"
+msgid "Create new layer group"
+msgstr "Asignar grup de capes"
+
+#: templates/project_add.html:195
+#, fuzzy
+#| msgid "The project will be removed, Do you want continue?"
+msgid "Is needed to save this project first, Do you want continue?"
+msgstr "El projecte serà eliminat, Voleu continuar?"
+
+#: templates/project_add.html:198 templates/project_list.html.py:64
+#: templates/public_viewer.html:199 templates/public_viewer_compress.html:196
+#: templates/viewer.html.py:223 templates/viewer_compress.html:220
+msgid "Cancel"
+msgstr "Cancel·lar"
+
+#: templates/project_add.html:199 templates/project_list.html.py:65
+#: templates/public_viewer.html:200 templates/public_viewer_compress.html:197
+#: templates/viewer.html.py:224 templates/viewer_compress.html:221
+msgid "Accept"
+msgstr "Acceptar"
 
 #: templates/project_list.html:58 templates/project_list.html.py:105
 msgid "Delete project"
@@ -296,18 +349,6 @@ msgstr "Eliminar projecte"
 #: templates/project_list.html:61
 msgid "The project will be removed, Do you want continue?"
 msgstr "El projecte serà eliminat, Voleu continuar?"
-
-#: templates/project_list.html:64 templates/public_viewer.html.py:197
-#: templates/public_viewer_compress.html:194 templates/viewer.html.py:219
-#: templates/viewer_compress.html:218
-msgid "Cancel"
-msgstr "Cancel·lar"
-
-#: templates/project_list.html:65 templates/public_viewer.html.py:198
-#: templates/public_viewer_compress.html:195 templates/viewer.html.py:220
-#: templates/viewer_compress.html:219
-msgid "Accept"
-msgstr "Acceptar"
 
 #: templates/project_list.html:81
 msgid "Processing request..."
@@ -379,15 +420,15 @@ msgstr "Ordre del TOC"
 msgid "Update project"
 msgstr "Actualitzar projecte"
 
-#: templates/project_update.html:74
+#: templates/project_update.html:75
 msgid "Change image?"
 msgstr "Canviar imatge?"
 
-#: templates/public_viewer.html:88 templates/public_viewer_compress.html:86
+#: templates/public_viewer.html:74 templates/public_viewer_compress.html:72
 msgid "Anonymous"
 msgstr "Anònim"
 
-#: templates/public_viewer.html:94 templates/public_viewer_compress.html:92
+#: templates/public_viewer.html:80 templates/public_viewer_compress.html:78
 msgid "Anonymous user"
 msgstr "Usuari anònim"
 
@@ -395,23 +436,28 @@ msgstr "Usuari anònim"
 msgid "Exit"
 msgstr "Sortir"
 
-#: templates/public_viewer.html:132 templates/public_viewer_compress.html:129
-#: templates/viewer.html.py:152 templates/viewer_compress.html:151
+#: templates/public_viewer.html:111 templates/public_viewer_compress.html:109
+#: templates/viewer.html.py:133 templates/viewer_compress.html:131
+msgid "exportar pdf"
+msgstr ""
+
+#: templates/public_viewer.html:134 templates/public_viewer_compress.html:131
+#: templates/viewer.html.py:156 templates/viewer_compress.html:153
 msgid "Layer tree"
 msgstr "Arbre de capes"
 
-#: templates/public_viewer.html:133 templates/public_viewer_compress.html:130
-#: templates/viewer.html.py:153 templates/viewer_compress.html:152
+#: templates/public_viewer.html:135 templates/public_viewer_compress.html:132
+#: templates/viewer.html.py:157 templates/viewer_compress.html:154
 msgid "Legend"
 msgstr "Llegenda"
 
-#: templates/public_viewer.html:134 templates/public_viewer_compress.html:131
-#: templates/viewer.html.py:154 templates/viewer_compress.html:153
+#: templates/public_viewer.html:136 templates/public_viewer_compress.html:133
+#: templates/viewer.html.py:158 templates/viewer_compress.html:155
 msgid "Details"
 msgstr "Detalls"
 
-#: templates/public_viewer.html:349 templates/public_viewer_compress.html:324
-#: templates/viewer.html.py:372 templates/viewer_compress.html:347
+#: templates/public_viewer.html:353 templates/public_viewer_compress.html:328
+#: templates/viewer.html.py:379 templates/viewer_compress.html:351
 msgid "Close"
 msgstr "Tancar"
 
@@ -439,11 +485,11 @@ msgstr "Cognom"
 msgid "This is your new temporary password"
 msgstr "Aquesta és la contrasenya provisionalment"
 
-#: views.py:177
+#: views.py:182
 msgid "You must enter an project name"
 msgstr "Ha d'introduir un nom de projecte"
 
-#: views.py:233 views.py:401
+#: views.py:250 views.py:462
 msgid "Project name already exists"
 msgstr "El nom del projecte ja existeix"
 

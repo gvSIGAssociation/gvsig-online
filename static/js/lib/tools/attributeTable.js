@@ -550,24 +550,30 @@ attributeTable.prototype.zoomToSelection = function(rows) {
 	  	success	:function(response){
 	    	self.source.clear();
 	    	
-	    	for (var i=0; i<response.features.length; i++) {
-	    		var newFeature = new ol.Feature();
-		    	if (response.features[i].geometry.type == 'Point') {
-		    		newFeature.setGeometry(new ol.geom.Point(response.features[i].geometry.coordinates));				
-		    	} else if (response.features[i].geometry.type == 'MultiPoint') {
-		    		newFeature.setGeometry(new ol.geom.Point(response.features[i].geometry.coordinates[0]));				
-		    	} else if (response.features[i].geometry.type == 'LineString' || response.features[i].geometry.type == 'MultiLineString') {
-		    		newFeature.setGeometry(new ol.geom.MultiLineString([response.features[i].geometry.coordinates[0]]));
-		    	} else if (response.features[i].geometry.type == 'Polygon' || response.features[i].geometry.type == 'MultiPolygon') {
-		    		newFeature.setGeometry(new ol.geom.MultiPolygon(response.features[i].geometry.coordinates));
+	    	if (response.features.length > 0 ) {
+	    		for (var i=0; i<response.features.length; i++) {
+		    		var newFeature = new ol.Feature();
+			    	if (response.features[i].geometry.type == 'Point') {
+			    		newFeature.setGeometry(new ol.geom.Point(response.features[i].geometry.coordinates));				
+			    	} else if (response.features[i].geometry.type == 'MultiPoint') {
+			    		newFeature.setGeometry(new ol.geom.Point(response.features[i].geometry.coordinates[0]));				
+			    	} else if (response.features[i].geometry.type == 'LineString' || response.features[i].geometry.type == 'MultiLineString') {
+			    		newFeature.setGeometry(new ol.geom.MultiLineString([response.features[i].geometry.coordinates[0]]));
+			    	} else if (response.features[i].geometry.type == 'Polygon' || response.features[i].geometry.type == 'MultiPolygon') {
+			    		newFeature.setGeometry(new ol.geom.MultiPolygon(response.features[i].geometry.coordinates));
+			    	}
+			    	newFeature.setProperties(response.features[i].properties);
+					newFeature.setId(response.features[i].id);
+					self.source.addFeature(newFeature);
 		    	}
-		    	newFeature.setProperties(response.features[i].properties);
-				newFeature.setId(response.features[i].id);
-				self.source.addFeature(newFeature);
+		    	
+		    	var extent = self.source.getExtent();
+		    	self.map.getView().fit(extent, self.map.getSize());
+		    	
+	    	} else {
+	    		messageBox.show('warning', gettext('Invalid identifier. Unable to get requested geometry'));
 	    	}
 	    	
-	    	var extent = self.source.getExtent();
-	    	self.map.getView().fit(extent, self.map.getSize());
 	  	},
 	  	error: function(){}
 	});
