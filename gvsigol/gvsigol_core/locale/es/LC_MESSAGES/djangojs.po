@@ -333,3 +333,6 @@ msgstr "Limpiar mapa"
 
 msgid "More element info"
 msgstr "Más información del elemento"
+
+msgid "Invalid identifier. Unable to get requested geometry"
+msgstr "Identificador no válido. No se puede obtener la geometría solicitada"
