@@ -502,14 +502,14 @@ def layer_add(request):
                     form.cleaned_data['name'],
                     form.cleaned_data['title']
                 )
-                '''
+
                 mapservice_backend.setQueryable(
                     form.cleaned_data['datastore'].workspace,
                     form.cleaned_data['datastore'],
                     form.cleaned_data['name'],
                     is_queryable
                 )
-                '''
+                
                 # save it on DB if successfully created
                 newRecord = Layer(**form.cleaned_data)
                 newRecord.created_by = request.user.username
@@ -598,7 +598,7 @@ def layer_update(request, layer_id):
             layer.layer_group_id = layer_group_id
             layer.save()
             
-            # mapservice_backend.setQueryable(workspace, datastore, name, is_queryable)
+            mapservice_backend.setQueryable(workspace, datastore, name, is_queryable)
             
             new_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
             
@@ -1121,14 +1121,14 @@ def layer_create(request):
                     form.cleaned_data['name'],
                     form.cleaned_data['title']
                 )
-                '''
+
                 mapservice_backend.setQueryable(
                     form.cleaned_data['datastore'].workspace, 
                     form.cleaned_data['datastore'], 
                     form.cleaned_data['name'], 
                     is_queryable
                 )
-                '''
+
                 # save it on DB if successfully created
                 newRecord = Layer(
                     datastore = form.cleaned_data['datastore'],
