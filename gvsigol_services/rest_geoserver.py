@@ -171,13 +171,23 @@ class Geoserver():
         url = self.service_url + '/layers/' + name + '.json'
         
         data = {
-            'name': name,
-            'opaque': queryable,
-            'type': 'VECTOR',
-            'resource':{
-                '@class': 'featureType',
-                'name': name,   
+            'layer': {
+                'name': name,
+                'type': 'VECTOR',
+                'resource':{
+                    '@class': 'featureType',
+                    'name': name, 
+                    "href":self.service_url + '/rest/workspaces/' + workspace + '/datastores/' + datastore + '/featuretypes/' + name + '.json' 
+                },
+                'queryable': queryable,
+                'opaque': False,
+                "attribution":{
+                    "logoWidth":0,
+                    "logoHeight":0
+                }
+                
             }
+            
         }
         if user and password:
             auth = (user, password)
