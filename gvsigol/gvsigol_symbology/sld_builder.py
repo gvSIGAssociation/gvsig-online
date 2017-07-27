@@ -271,7 +271,7 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
                 pointplacement = PointPlacement(labelplacement)
                 anchorpoint = AnchorPoint(pointplacement)
                 anchorpoint.AnchorPointX = str(0.5)
-                anchorpoint.AnchorPointY = str(-2)
+                anchorpoint.AnchorPointY = str(-1.5)
             
             halo = Halo(symbolizer)
             halo.Radius = str(s.textsymbolizer.halo_radius)
