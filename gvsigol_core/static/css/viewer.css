@@ -475,6 +475,10 @@ html, body {
 	#print-div{
 		display: none;
 	}
+	
+	#export-pdf-div{
+		display: none;
+	}
 
 }
 
