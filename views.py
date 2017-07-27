@@ -504,8 +504,8 @@ def layer_add(request):
                 )
 
                 mapservice_backend.setQueryable(
-                    form.cleaned_data['datastore'].workspace,
-                    form.cleaned_data['datastore'],
+                    form.cleaned_data['datastore'].workspace.name,
+                    form.cleaned_data['datastore'].name,
                     form.cleaned_data['name'],
                     is_queryable
                 )
@@ -1123,8 +1123,8 @@ def layer_create(request):
                 )
 
                 mapservice_backend.setQueryable(
-                    form.cleaned_data['datastore'].workspace, 
-                    form.cleaned_data['datastore'], 
+                    form.cleaned_data['datastore'].workspace.name, 
+                    form.cleaned_data['datastore'].name, 
                     form.cleaned_data['name'], 
                     is_queryable
                 )
