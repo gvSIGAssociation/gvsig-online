@@ -150,8 +150,10 @@ ChangeToWWControl.prototype.deactivate = function() {
 	var zoom = 20 - Math.floor(Math.log(alt));	
 	this.map.getView().setZoom(zoom);
 	//set correct rotation
-	var rot_radians = rot * (Math.PI/180);
-	this.map.getView().setRotation(rot_radians * -1);
+	//var rot_radians = rot * (Math.PI/180);
+	//this.map.getView().setRotation(rot_radians * -1);
+	this.map.getView().setRotation(0);
+	
 	//console.log(this.wwd.navigator.range);
 	//console.log(this.wwd.navigator.lookAtLocation.latitude);
 	//console.log(this.wwd.navigator.lookAtLocation.longitude);
