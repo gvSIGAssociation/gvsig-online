@@ -36,6 +36,22 @@
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     
+    {% for app in INSTALLED_APPS %}												  
+		{% if 'gvsigol_app_' in app %}	
+			{% with "load_public_css_"|add:app|cut:"gvsigol_app_"|add:".html" as aux %}	   			 	
+				{% include_if_exists aux %}
+			{% endwith %}
+		{% endif %}		    					
+	{% endfor %}
+	
+	{% for plugin in INSTALLED_APPS %}												  
+		{% if 'gvsigol_plugin_' in plugin %}	
+			{% with "load_public_css_"|add:plugin|cut:"gvsigol_plugin_"|add:".html" as aux %}	   			 	
+				{% include_if_exists aux %}
+			{% endwith %}
+		{% endif %}		    					
+	{% endfor %}
+    
 </head>
 
 <body class="{{GVSIGOL_SKIN}}">
