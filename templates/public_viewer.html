@@ -124,7 +124,7 @@
 				<ul id="toolbar-buttons" class="nav navbar-nav">
 					<li title="{% trans 'manual gvsigonline' %}"><a href="/gvsigonline/core/documentation/" target="_blank" id="help" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-question-circle"></i></a></li>
 					{% if not 'gvsigol_plugin_print' in INSTALLED_APPS %}		
-					<li title="{% trans 'exportar pdf' %}"><a href="#" id="export-to-pdf" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-file-pdf-o"></i></a></li>
+					<li id="export-pdf-div" title="{% trans 'exportar pdf' %}"><a href="#" id="export-to-pdf" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-file-pdf-o"></i></a></li>
 					{% endif %}		
 				</ul>
 			</div>
