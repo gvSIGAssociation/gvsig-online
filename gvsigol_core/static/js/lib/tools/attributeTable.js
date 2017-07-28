@@ -769,6 +769,7 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 	for (var i=0; i<featureType.length; i++) {
 		if (self.isGeomType(featureType[i].type)) {
 			featureType.splice(i, 1);
+			continue;
 		}
 		if (featureType[i].name.startsWith(this.prefix)) {
 			featureType.splice(i, 1);
