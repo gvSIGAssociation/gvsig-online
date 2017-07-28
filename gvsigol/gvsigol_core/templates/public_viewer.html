@@ -37,6 +37,22 @@
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+    
+     {% for app in INSTALLED_APPS %}												  
+		{% if 'gvsigol_app_' in app %}	
+			{% with "load_public_css_"|add:app|cut:"gvsigol_app_"|add:".html" as aux %}	   			 	
+				{% include_if_exists aux %}
+			{% endwith %}
+		{% endif %}		    					
+	{% endfor %}
+	
+	{% for plugin in INSTALLED_APPS %}												  
+		{% if 'gvsigol_plugin_' in plugin %}	
+			{% with "load_public_css_"|add:plugin|cut:"gvsigol_plugin_"|add:".html" as aux %}	   			 	
+				{% include_if_exists aux %}
+			{% endwith %}
+		{% endif %}		    					
+	{% endfor %}
 
 </head>
 
@@ -108,7 +124,7 @@
 				<ul id="toolbar-buttons" class="nav navbar-nav">
 					<li title="{% trans 'manual gvsigonline' %}"><a href="/gvsigonline/core/documentation/" target="_blank" id="help" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-question-circle"></i></a></li>
 					{% if not 'gvsigol_plugin_print' in INSTALLED_APPS %}		
-					<li title="{% trans 'exportar pdf' %}"><a href="#" id="export-to-pdf" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-file-pdf-o"></i></a></li>
+					<li id="export-pdf-div" title="{% trans 'exportar pdf' %}"><a href="#" id="export-to-pdf" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-file-pdf-o"></i></a></li>
 					{% endif %}		
 				</ul>
 			</div>

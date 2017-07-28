@@ -199,7 +199,7 @@ def datastore_list(request):
         
     for datastore in datastore_list:
         params = json.loads(datastore.connection_params)
-        if 'password' in params:
+        if 'passwd' in params:
             params['passwd'] = '****'
         datastore.connection_params = json.dumps(params)
         
@@ -504,8 +504,9 @@ def layer_add(request):
                 )
 
                 mapservice_backend.setQueryable(
-                    form.cleaned_data['datastore'].workspace,
-                    form.cleaned_data['datastore'],
+                    form.cleaned_data['datastore'].workspace.name,
+                    form.cleaned_data['datastore'].name,
+                    form.cleaned_data['datastore'].type,
                     form.cleaned_data['name'],
                     is_queryable
                 )
@@ -589,6 +590,7 @@ def layer_update(request, layer_id):
                 
         old_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
         
+        ds = Datastore.objects.get(id=layer.datastore.id)
         if mapservice_backend.updateResource(workspace, datastore, name, title):
             layer.title = title
             layer.cached = cached
@@ -598,7 +600,7 @@ def layer_update(request, layer_id):
             layer.layer_group_id = layer_group_id
             layer.save()
             
-            mapservice_backend.setQueryable(workspace, datastore, name, is_queryable)
+            mapservice_backend.setQueryable(workspace, ds.name, ds.type, name, is_queryable)
             
             new_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
             
@@ -1123,8 +1125,9 @@ def layer_create(request):
                 )
 
                 mapservice_backend.setQueryable(
-                    form.cleaned_data['datastore'].workspace, 
-                    form.cleaned_data['datastore'], 
+                    form.cleaned_data['datastore'].workspace.name, 
+                    form.cleaned_data['datastore'].name, 
+                    form.cleaned_data['datastore'].type, 
                     form.cleaned_data['name'], 
                     is_queryable
                 )
