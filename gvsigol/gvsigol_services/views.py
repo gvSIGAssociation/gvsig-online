@@ -199,7 +199,7 @@ def datastore_list(request):
         
     for datastore in datastore_list:
         params = json.loads(datastore.connection_params)
-        if 'password' in params:
+        if 'passwd' in params:
             params['passwd'] = '****'
         datastore.connection_params = json.dumps(params)
         
