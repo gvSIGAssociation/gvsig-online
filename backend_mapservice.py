@@ -577,9 +577,9 @@ class Geoserver():
             print exc
             return False
         
-    def setQueryable(self, workspace, datastore, name, queryable):
+    def setQueryable(self, workspace, ds_name, ds_type, name, queryable):
         try:
-            return self.rest_catalog.set_queryable(workspace, datastore, name, queryable, user=self.user, password=self.password)
+            return self.rest_catalog.set_queryable(workspace, ds_name, ds_type, name, queryable, user=self.user, password=self.password)
         except rest_geoserver.FailedRequestError as e:
             print ("ERROR setQueryable failedrequest exception: " + e.get_message())
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error changing property. Backend error: {msg}").format(msg=e.get_message()))

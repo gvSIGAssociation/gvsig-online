@@ -167,17 +167,23 @@ class Geoserver():
             return True
         raise UploadError(r.status_code, r.content)
     
-    def set_queryable(self, workspace, datastore, name, queryable, user=None, password=None):
+    def set_queryable(self, workspace, ds_name, ds_type, name, queryable, user=None, password=None):
         url = self.service_url + '/layers/' + name + '.json'
+        
+        type = 'VECTOR'
+        href = self.service_url + '/rest/workspaces/' + workspace + '/datastores/' + ds_name + '/featuretypes/' + name + '.json' 
+        if 'c_GeoTIFF' in ds_type:
+            type = 'RASTER'
+            href = self.service_url + '/rest/workspaces/' + workspace + '/coveragestores/' + ds_name + '/coverages/' + name + '.json' 
         
         data = {
             'layer': {
                 'name': name,
-                'type': 'VECTOR',
+                'type': type,
                 'resource':{
                     '@class': 'featureType',
                     'name': name, 
-                    "href":self.service_url + '/rest/workspaces/' + workspace + '/datastores/' + datastore + '/featuretypes/' + name + '.json' 
+                    "href": href 
                 },
                 'queryable': queryable,
                 'opaque': False,
