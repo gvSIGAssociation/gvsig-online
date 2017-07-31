@@ -353,9 +353,18 @@ getFeatureInfo.prototype.showInfo = function(features){
 							if(key_trans.length == 0){
 								key_trans = key;
 							}
-							if(item_shown && key && features[i].feature.properties && features[i].feature.properties[key]){
-								feature_fields += "<span>" + features[i].feature.properties[key] + "</span><br />";
-								feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\">"+ features[i].feature.properties[key] + "</span><br />";
+							if(item_shown && key && features[i].feature.properties && (typeof features[i].feature.properties[key] == 'boolean' || features[i].feature.properties[key])){
+								var text = features[i].feature.properties[key];
+								
+								if(typeof features[i].feature.properties[key] == 'boolean' && text == true){
+									text = "<input type='checkbox' checked onclick=\"return false;\">";
+								}else{
+									if(typeof features[i].feature.properties[key] == 'boolean' && text == false){
+										text = "<input type='checkbox' onclick=\"return false;\">";
+									}
+								}
+								feature_fields += "<span>" + text + "</span><br />";
+								feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\">"+ text + "</span><br />";
 							}
 						}
 						
