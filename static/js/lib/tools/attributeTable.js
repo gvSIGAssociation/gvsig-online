@@ -294,6 +294,7 @@ attributeTable.prototype.change_alias_from_cql_filter = function(cql_filter) {
 			var feat_name = fields[ix]["name"];
 			var feat_name_trans = fields[ix]["title-"+language];
 			if(feat_name_trans && feat_name){
+				feat_name_trans = feat_name_trans.replace("?", "\\\?").replace("¿", "\\\¿");
 				var filter_string =  new RegExp("("+feat_name_trans+")([^\\w'\"]+)","g");
 				cql_filter = cql_filter.replace(filter_string, feat_name+"$2")
 			}
