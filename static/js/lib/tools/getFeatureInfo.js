@@ -462,7 +462,11 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 					value = "";
 				}
 				if(featureType[i].type == "boolean"){
-					value = gettext(value);
+					if(value == true){
+						value = "<input type='checkbox' checked onclick=\"return false;\">";
+					}else {
+						value = "<input type='checkbox' onclick=\"return false;\">";
+					}
 				}
 				if (!key.startsWith(this.prefix)) {	
 					var item_shown = true;
