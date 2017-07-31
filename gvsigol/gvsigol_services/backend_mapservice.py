@@ -508,11 +508,12 @@ class Geoserver():
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
     
     def createWMSLayer(self, workspace, store, name, title):
-        try:
+        try:   
             catalog = self.getGsconfig()
             ws = catalog.get_workspace(workspace.name)
             dst = catalog.get_store(store.name, ws)
             return catalog.create_wmslayer(ws, dst, name, name)
+
         except rest_geoserver.FailedRequestError as e:
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
@@ -674,7 +675,7 @@ class Geoserver():
             url = self.rest_catalog.service_url + "/workspaces/" + workspace + "/datastores/" + store.name + "/featuretypes/" + featureType +"."+type
             ds_type = 'featureType'
         elif store.type == 'e_WMS':
-            url = self.rest_catalog.service_url + "/workspaces/" + workspace + "/wmsstores/" + store.name + "/featuretypes/" + featureType +"."+type
+            url = self.rest_catalog.service_url + "/workspaces/" + workspace + "/wmsstores/" + store.name + "/wmslayers/" + featureType +"."+type
             ds_type = 'wms'
         elif store.type == 'c_GeoTIFF':
             url = self.rest_catalog.service_url + "/workspaces/" + workspace + "/coveragestores/" + store.name + "/coverages/" + featureType +"."+type
