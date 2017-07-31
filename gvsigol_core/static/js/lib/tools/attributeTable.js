@@ -143,10 +143,10 @@ attributeTable.prototype.createTableUI = function(featureType) {
 								value = "";
 							}
 							if(typeof data == 'boolean' && data == true){
-								value = gettext("true");
+								value = "<input type='checkbox' checked onclick=\"return false;\">";
 							}
 							if(typeof data == 'boolean' && data == false){
-								value = gettext("false");
+								value = "<input type='checkbox' onclick=\"return false;\">";
 							}
 							return value;
 						 }
