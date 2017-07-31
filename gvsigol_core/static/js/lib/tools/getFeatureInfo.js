@@ -300,7 +300,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 	html += '</li>';
 	
 	for (var i in features) {
-		if (features[i].feature.type == 'raster') {
+		if (features[i].type == 'raster') {
 			var feature_id = "<span style=\"font-weight:normal; margin-right:5px;\">"+features[i].layer.title+ "</span>";
 			feature_id += "<br />";
 			
