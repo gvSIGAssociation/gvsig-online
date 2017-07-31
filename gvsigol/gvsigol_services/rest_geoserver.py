@@ -121,9 +121,18 @@ class Geoserver():
         if r.status_code==201:
             return True
         raise FailedRequestError(r.status_code, r.content)
-    
-    def create_wms_layer(self, name, title, store, workspace, srs="EPSG:4326", content_type=None, user=None, password=None):
-        print 'create wms'
+        
+    def create_wmslayer(self, workspace, store, name, nativeName=None, user=None, password=None):           
+        url = self.service_url + "/workspaces/" + workspace.name + "/wmsstores/" + store.name + "/wmslayers"
+        data = {"wmsLayer": {'enabled': True, "name": name, "nativeName": nativeName}}
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+        r = self.session.post(url, json=data, auth=auth)
+        if r.status_code==201:
+            return True
+        raise FailedRequestError(r.status_code, r.content)
     
     def create_coveragestore(self, workspace, store, filetype, file, user=None, password=None):
         url = self.service_url + "/workspaces/" + workspace + "/coveragestores.json"
@@ -177,9 +186,6 @@ class Geoserver():
             type = 'RASTER'
             resource_class = 'coverage'
             href = self.service_url + '/rest/workspaces/' + workspace + '/coveragestores/' + ds_name + '/coverages/' + name + '.json' 
-        if 'e_WMS' in ds_type:
-            resource_class = 'wmsLayer'
-            href = self.service_url + '/rest/workspaces/' + workspace + '/wmsstores/' + ds_name + '/wmslayers/' + name + '.json' 
             
         data = {
             'layer': {
