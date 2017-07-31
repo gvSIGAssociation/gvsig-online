@@ -557,7 +557,7 @@ attributeTable.prototype.zoomToSelection = function(rows) {
 			    	if (response.features[i].geometry.type == 'Point') {
 			    		newFeature.setGeometry(new ol.geom.Point(response.features[i].geometry.coordinates));				
 			    	} else if (response.features[i].geometry.type == 'MultiPoint') {
-			    		newFeature.setGeometry(new ol.geom.Point(response.features[i].geometry.coordinates[0]));				
+			    		newFeature.setGeometry(new ol.geom.MultiPoint(response.features[i].geometry.coordinates));	
 			    	} else if (response.features[i].geometry.type == 'LineString' || response.features[i].geometry.type == 'MultiLineString') {
 			    		newFeature.setGeometry(new ol.geom.MultiLineString([response.features[i].geometry.coordinates[0]]));
 			    	} else if (response.features[i].geometry.type == 'Polygon' || response.features[i].geometry.type == 'MultiPolygon') {
