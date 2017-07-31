@@ -171,17 +171,22 @@ class Geoserver():
         url = self.service_url + '/layers/' + name + '.json'
         
         type = 'VECTOR'
+        resource_class = 'featureType'
         href = self.service_url + '/rest/workspaces/' + workspace + '/datastores/' + ds_name + '/featuretypes/' + name + '.json' 
         if 'c_GeoTIFF' in ds_type:
             type = 'RASTER'
+            resource_class = 'coverage'
             href = self.service_url + '/rest/workspaces/' + workspace + '/coveragestores/' + ds_name + '/coverages/' + name + '.json' 
-        
+        if 'e_WMS' in ds_type:
+            resource_class = 'wmsLayer'
+            href = self.service_url + '/rest/workspaces/' + workspace + '/wmsstores/' + ds_name + '/wmslayers/' + name + '.json' 
+            
         data = {
             'layer': {
                 'name': name,
                 'type': type,
                 'resource':{
-                    '@class': 'featureType',
+                    '@class': resource_class,
                     'name': name, 
                     "href": href 
                 },
