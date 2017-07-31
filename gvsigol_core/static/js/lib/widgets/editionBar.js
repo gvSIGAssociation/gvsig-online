@@ -428,16 +428,16 @@ editionBar.prototype.stopEditionHandler = function(e) {
 				is_in_edition = true;
 				$('#modal-end-edition').modal('show');
 				
-				$('#button-end-edition-cancel').unbind("click").click(function() {
+				$('#button-end-edition-accept').unbind("click").click(function() {
 					$('#modal-end-edition').modal('hide');
 					self.stopEdition();
 				});
-				$('#button-end-edition-accept').unbind("click").click(function() {
+				$('#button-end-edition-cancel').unbind("click").click(function() {
 					$('#modal-end-edition').modal('hide');
-					alert("Guardo");
-					$('save-feature').trigger('click');
-					$('edit-feature').trigger('click');
-					self.stopEdition();
+//					alert("Guardo");
+//					$('save-feature').trigger('click');
+//					$('edit-feature').trigger('click');
+//					self.stopEdition();
 				});
 			}
 		}
