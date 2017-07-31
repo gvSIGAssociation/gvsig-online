@@ -399,10 +399,8 @@ editionBar.prototype.removeHandler = function(e) {
 /**
  * @param {Event} e Browser event.
  */
-editionBar.prototype.stopEditionHandler = function(e) {
-	if (e!=null) {
-		e.preventDefault();
-	}
+
+editionBar.prototype.stopEdition = function() {
 	$("#center-cursor").hide();
 	this.deactivateControls();
 	this.removeVectorLayer();
@@ -411,6 +409,42 @@ editionBar.prototype.stopEditionHandler = function(e) {
 	this.layerTree.editionBar = null;
 	delete this.layerTree.editionBar;
 	this.showLayersTab();
+	
+}
+
+editionBar.prototype.stopEditionHandler = function(e) {
+	var self = this;
+	var is_in_edition= false;
+	if (e!=null) {
+		e.preventDefault();
+	}
+	
+	var selectedTab = $(".nav-tabs li.active").children("a");
+	if(selectedTab){
+		var href = selectedTab.prop("href");
+		var href_parts = href.split("#");
+		if(href_parts.length > 1){
+			if(href_parts[1] == 'details-tab'){
+				is_in_edition = true;
+				$('#modal-end-edition').modal('show');
+				
+				$('#button-end-edition-cancel').unbind("click").click(function() {
+					$('#modal-end-edition').modal('hide');
+					self.stopEdition();
+				});
+				$('#button-end-edition-accept').unbind("click").click(function() {
+					$('#modal-end-edition').modal('hide');
+					alert("Guardo");
+					$('save-feature').trigger('click');
+					$('edit-feature').trigger('click');
+					self.stopEdition();
+				});
+			}
+		}
+	}
+	if(!is_in_edition){
+		self.stopEdition();
+	}
 };
 
 /**
