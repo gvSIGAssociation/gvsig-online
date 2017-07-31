@@ -503,13 +503,14 @@ def layer_add(request):
                     form.cleaned_data['title']
                 )
 
-                mapservice_backend.setQueryable(
-                    form.cleaned_data['datastore'].workspace.name,
-                    form.cleaned_data['datastore'].name,
-                    form.cleaned_data['datastore'].type,
-                    form.cleaned_data['name'],
-                    is_queryable
-                )
+                if form.cleaned_data['datastore'].type != 'e_WMS':
+                    mapservice_backend.setQueryable(
+                        form.cleaned_data['datastore'].workspace.name,
+                        form.cleaned_data['datastore'].name,
+                        form.cleaned_data['datastore'].type,
+                        form.cleaned_data['name'],
+                        is_queryable
+                    )
                 
                 # save it on DB if successfully created
                 newRecord = Layer(**form.cleaned_data)
@@ -600,7 +601,8 @@ def layer_update(request, layer_id):
             layer.layer_group_id = layer_group_id
             layer.save()
             
-            mapservice_backend.setQueryable(workspace, ds.name, ds.type, name, is_queryable)
+            if ds.type != 'e_WMS':
+                mapservice_backend.setQueryable(workspace, ds.name, ds.type, name, is_queryable)
             
             new_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
             
@@ -1124,13 +1126,14 @@ def layer_create(request):
                     form.cleaned_data['title']
                 )
 
-                mapservice_backend.setQueryable(
-                    form.cleaned_data['datastore'].workspace.name, 
-                    form.cleaned_data['datastore'].name, 
-                    form.cleaned_data['datastore'].type, 
-                    form.cleaned_data['name'], 
-                    is_queryable
-                )
+                if form.cleaned_data['datastore'].type != 'e_WMS':
+                    mapservice_backend.setQueryable(
+                        form.cleaned_data['datastore'].workspace.name, 
+                        form.cleaned_data['datastore'].name, 
+                        form.cleaned_data['datastore'].type, 
+                        form.cleaned_data['name'], 
+                        is_queryable
+                    )
 
                 # save it on DB if successfully created
                 newRecord = Layer(
