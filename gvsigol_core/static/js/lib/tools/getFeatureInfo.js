@@ -226,40 +226,27 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 				{'INFO_FORMAT': 'application/json', 'FEATURE_COUNT': '100'}
 			);
 			
-			var req = null;
-			if (qLayer.layer_name == 'plg_catastro') {
-				req = $.ajax({
-					type: 'POST',
-					async: false,
-				  	url: url,
-				  	success	:function(response){
-				  		var tempDiv = document.createElement('div');
-						tempDiv.innerHTML = response;
-						if (tempDiv.childNodes[4]) {
-							features.push({
+			var req = $.ajax({
+				type: 'POST',
+				async: false,
+			  	url: '/gvsigonline/services/get_feature_info/',
+			  	data: {
+			  		url: url,
+			  		query_layer: qLayer.layer_name,
+			  		workspace: qLayer.workspace
+			  	},
+			  	success	:function(response){
+			  		if (response.features) {
+			  			if (response.features[0].type == 'catastro') {
+			  				features.push({
 			  					type: 'catastro',
-			  					text: tempDiv.childNodes[4].childNodes[0].textContent,
-			  					href: tempDiv.childNodes[4].childNodes[0].href,
+			  					text: response.features[0].text,
+			  					href: response.features[0].href,
 			  					layer: qLayer
 			  				});
-						}
-				  	},
-				  	error: function(){}
-				});
-				
-			} else {
-				req = $.ajax({
-					type: 'POST',
-					async: false,
-				  	url: '/gvsigonline/services/get_feature_info/',
-				  	data: {
-				  		url: url,
-				  		query_layer: qLayer.layer_name,
-				  		workspace: qLayer.workspace
-				  	},
-				  	success	:function(response){
-				  		if (response.features) {
-				  			for (var i in response.features) {
+			  				
+			  			} else {
+			  				for (var i in response.features) {
 				  				features.push({
 				  					type: 'feature',
 				  					crs: response.crs,
@@ -267,11 +254,11 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 				  					layer: qLayer
 				  				});
 				  			}
-				  		}
-				  	},
-				  	error: function(){}
-				});
-			}
+			  			}	  			
+			  		}
+			  	},
+			  	error: function(){}
+			});
 				
 			ajaxRequests.push(req);
 		}
