@@ -1203,8 +1203,9 @@ editionBar.prototype.editFeatureForm = function(feature) {
 					} else if (this.isStringType(this.featureType[i].type)) {				
 						if (this.featureType[i].name.startsWith("enm_") || this.featureType[i].name.startsWith("enmm_")) {
 							var name = this.featureType[i].name;
+							var has_multiple = false;
 							if(this.featureType[i].name.startsWith("enmm_")){
-								var has_multiple = this.featureType[i].name.startsWith("enmm_");
+								has_multiple = this.featureType[i].name.startsWith("enmm_");
 								name = name.replace("enmm_", "enm_");
 							}
 							var enumeration = this.getEnumeration(name);
