@@ -15,16 +15,14 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from gvsigol_services.rest_geoserver import FailedRequestError
-from geoserver import workspace
-from PIL._util import isStringType
-from operator import isNumberType
+
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
 
 from models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, Enumeration, EnumerationItem,\
     LayerLock
+from geoserver import workspace
 from forms_services import WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, BaseLayerForm
 from forms_geoserver import CreateFeatureTypeForm
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
@@ -35,13 +33,13 @@ from backend_postgis import Introspect
 from gvsigol_services.backend_resources import resource_manager
 from gvsigol_auth.utils import superuser_required, staff_required
 from django.contrib.auth.models import User 
-from gvsigol_core.models import ProjectLayerGroup, BaseLayer, BaseLayerProject
+from gvsigol_core.models import ProjectLayerGroup, BaseLayer
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES
 from django.utils.translation import ugettext as _
 from gvsigol_services.models import LayerResource
-from gvsigol.settings import GVSIGOL_SERVICES, CONTROL_FIELDS
+from gvsigol.settings import GVSIGOL_SERVICES
 from django.core.urlresolvers import reverse
 from gvsigol_core import utils as core_utils
 from gvsigol_auth.models import UserGroup
@@ -61,6 +59,7 @@ import os
 import unicodedata
 from owslib.wms import WebMapService
 from owslib.wmts import WebMapTileService
+from lxml import html
 
 logger = logging.getLogger(__name__)
 
@@ -1381,61 +1380,66 @@ def get_feature_info(request):
         url = request.POST.get('url')
         query_layer = request.POST.get('query_layer')
         ws = request.POST.get('workspace')
-
+        
         req = requests.Session()
-        lang = request.LANGUAGE_CODE
-        if 'username' in request.session and 'password' in request.session:
-            if request.session['username'] is not None and request.session['password'] is not None:
-                req.auth = (request.session['username'], request.session['password'])
-                #req.auth = ('admin', 'geoserver')
-                
-        features = None           
-        try:
-            w = Workspace.objects.get(name__exact=ws)
-            #ds = Datastore.objects.filter(workspace=w)
-            #layers = Layer.objects.filter(name__exact=query_layer)
+        
+        features = None
+        if query_layer == 'plg_catastro':
+            response = req.get(url, verify=False)
+            html_content = html.document_fromstring(response.text.decode('utf-8').encode('ascii'))
+            for el in html_content.xpath('//body//a'):
+                feat = {}
+                feat['type'] = 'catastro'
+                feat['text'] = el.text
+                feat['href'] = el.xpath('@href')[0]
+                features = []
+                features.append(feat)
             
-            #layer = None
-            #for l in layers:
-            #    if l.datastore.id == ds.id:
-            #        layer = l
+        else:
+            if 'username' in request.session and 'password' in request.session:
+                if request.session['username'] is not None and request.session['password'] is not None:
+                    req.auth = (request.session['username'], request.session['password'])
+                    #req.auth = ('admin', 'geoserver')
+                                          
+            try:
+                w = Workspace.objects.get(name__exact=ws)
+                        
+                layer = Layer.objects.get(name=query_layer, datastore__workspace__name=w.name)
+    
+                response = req.get(url, verify=False)
+                geojson = json.loads(response.text)
                     
-            layer = Layer.objects.get(name=query_layer, datastore__workspace__name=w.name)
-
-            response = req.get(url, verify=False)
-            geojson = json.loads(response.text)
                 
-            
-            for i in range(0, len(geojson['features'])):
-                fid = geojson['features'][i].get('id')
-                resources = []
-                if fid.__len__() > 0:
-                    fid = geojson['features'][i].get('id').split('.')[1]
-                    layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
-                    for lr in layer_resources:
-                        (type, url) = utils.get_resource_type(lr)
-                        resource = {
-                            'type': type,
-                            'url': url,
-                            'name': lr.path.split('/')[-1]
-                        }
-                        resources.append(resource)
-                else:
-                    geojson['features'][i]['type']= 'raster'
-                geojson['features'][i]['resources'] = resources
-                geojson['features'][i]['all_correct'] = response.text
-                geojson['features'][i]['feature'] = fid
+                for i in range(0, len(geojson['features'])):
+                    fid = geojson['features'][i].get('id')
+                    resources = []
+                    if fid.__len__() > 0:
+                        fid = geojson['features'][i].get('id').split('.')[1]
+                        layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
+                        for lr in layer_resources:
+                            (type, url) = utils.get_resource_type(lr)
+                            resource = {
+                                'type': type,
+                                'url': url,
+                                'name': lr.path.split('/')[-1]
+                            }
+                            resources.append(resource)
+                    else:
+                        geojson['features'][i]['type']= 'raster'
+                    geojson['features'][i]['resources'] = resources
+                    geojson['features'][i]['all_correct'] = response.text
+                    geojson['features'][i]['feature'] = fid
+                    
+                features = geojson['features']
                 
-            features = geojson['features']
-            
-        except Exception as e:
-            print e.message
-            logger.exception("get_feature_info")
-            response = req.get(url, verify=False)
-            geojson = json.loads(response.text)
-            for i in range(0, len(geojson['features'])):
-                geojson['features'][i]['resources'] = []
-            features = geojson['features']
+            except Exception as e:
+                print e.message
+                logger.exception("get_feature_info")
+                response = req.get(url, verify=False)
+                geojson = json.loads(response.text)
+                for i in range(0, len(geojson['features'])):
+                    geojson['features'][i]['resources'] = []
+                features = geojson['features']
                 
         response = {
             'features': features
