@@ -236,7 +236,7 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 			  		workspace: qLayer.workspace
 			  	},
 			  	success	:function(response){
-			  		if (response.features) {
+			  		if (response.features && response.features.length > 0) {
 			  			if (response.features[0].type == 'catastro') {
 			  				features.push({
 			  					type: 'catastro',
