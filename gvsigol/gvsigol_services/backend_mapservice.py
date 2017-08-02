@@ -240,7 +240,7 @@ class Geoserver():
             elif format_nature == "c": # coverage (raster)
                 ds.url = params_dict.get('url')
             elif format_nature == "e": # cascading wms
-                '''
+                
                 wmsuser = None
                 wmspassword = None
                 if params_dict.get('username') != 'wmsuser':
@@ -257,7 +257,7 @@ class Geoserver():
                         keys_to_delete.append(key)
                 for key in keys_to_delete:
                     del ds.metadata[key]
-            
+                '''
             catalog.save(ds)
             return True
         except Exception as exc:

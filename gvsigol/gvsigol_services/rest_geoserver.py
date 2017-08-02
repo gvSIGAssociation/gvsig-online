@@ -173,33 +173,18 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth
-            
-        ws_href = self.service_url + "/workspaces/" + wsname + ".xml"
-        layers_href = self.service_url + "/workspaces/" + wsname + "/wmsstores/" + dsname + "/wmslayers.xml"
         
         data = ''
         data += '<wmsStore>'
         data +=     '<name>' + dsname + '</name>'
-        data +=     '<type>WMS</type>'
         data +=     '<enabled>true</enabled>'
-        data +=     '<workspace>'
-        data +=         '<name>' + wsname + '</name>'   
-        data +=         '<atom:link xmlns:atom="http://www.w3.org/2005/Atom" rel="alternate" href="' + ws_href + '" type="application/xml"/>'  
-        data +=     '</workspace>'
-        data +=     '<__default>false</__default>'
         data +=     '<capabilitiesURL>' + capabilitiesURL + '</capabilitiesURL>'
         data +=     '<user>' + wmsuser + '</user>'
         data +=     '<password>' + wmspassword + '</password>'
-        data +=     '<maxConnections>6</maxConnections>'
-        data +=     '<readTimeout>60</readTimeout>'
-        data +=     '<connectTimeout>30</connectTimeout>'
-        data +=     '<wmsLayers>'  
-        data +=         '<atom:link xmlns:atom="http://www.w3.org/2005/Atom" rel="alternate" href="' + layers_href + '" type="application/xml"/>'  
-        data +=     '</wmsLayers>'
+        data +=     '<metadata />'
         data += '</wmsStore>'
         
         r = self.session.put(url, data=data, headers=headers, auth=auth)
-        self.session.put
         if r.status_code==200:
             return True
         raise UploadError(r.status_code, r.content)
