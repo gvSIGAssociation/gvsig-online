@@ -648,9 +648,7 @@ def project_get_conf(request):
         
         resource_manager = 'gvsigol'
         if 'gvsigol_plugin_alfresco' in gvsigol.settings.INSTALLED_APPS:
-            resource_manager = 'alfresco'
-        
-        base_layers = gvsigol.settings.GVSIGOL_BASE_LAYERS
+            resource_manager = 'alfresco'                
 
         bsly_projs = BaseLayerProject.objects.filter(project=project).order_by('order')
         
@@ -894,8 +892,7 @@ def public_viewer_get_conf(request):
             'supported_crs': core_utils.get_supported_crs(),
             'workspaces': workspaces,
             'layerGroups': ordered_layer_groups,
-            'tools': gvsigol.settings.GVSIGOL_TOOLS,
-            'base_layers': gvsigol.settings.GVSIGOL_BASE_LAYERS,
+            'tools': gvsigol.settings.GVSIGOL_TOOLS,            
             'is_public_project': True,
             'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL']),
             'resource_manager': resource_manager
