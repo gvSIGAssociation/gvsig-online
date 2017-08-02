@@ -201,7 +201,10 @@ def datastore_list(request):
         if 'passwd' in params:
             params['passwd'] = '****'
         if 'password' in params:
-            params['password'] = '****'
+            if params['password'] == '':
+                params['password'] = ''
+            else:
+                params['password'] = '****'
         datastore.connection_params = json.dumps(params)
         
     response = {
@@ -295,7 +298,10 @@ def datastore_update(request, datastore_id):
         if 'passwd' in params:
             params['passwd'] = '****'
         if 'password' in params:
-            params['password'] = '****'
+            if params['password'] == '':
+                params['password'] = ''
+            else:
+                params['password'] = '****'
         datastore.connection_params = json.dumps(params)
         form = DatastoreUpdateForm(instance=datastore)
     return render(request, 'datastore_update.html', {'form': form, 'datastore_id': datastore_id, 'workspace_name': datastore.workspace.name})
