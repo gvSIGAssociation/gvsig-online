@@ -162,7 +162,7 @@ def provider_add(request):
 
 
 def isValidCartociudadDB(datastore):
-    resources = mapservice_backend.getResources(datastore.workspace.name, datastore.name, datastore.type, "all")
+    resources = mapservice_backend.getResources(datastore.workspace, datastore, "all")
     resources_needed = []
     
     #if not geocoding_setting.CARTOCIUDAD_DB_CODIGO_POSTAL in resources:
