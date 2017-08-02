@@ -192,9 +192,9 @@ class Geoserver():
             elif format_nature == "e": # cascading wms
                 wmsuser = None
                 wmspassword = None
-                if params_dict.get('username') != 'wmsuser':
+                if params_dict.get('username') != '':
                     wmsuser = params_dict.get('username')
-                if params_dict.get('password') != 'wmspassword':
+                if params_dict.get('password') != '':
                     wmspassword = params_dict.get('password')  
                 self.rest_catalog.create_wmsstore(workspace, name, params_dict.get('url'), wmsuser, wmspassword, self.user, self.password)
                 return True
@@ -237,27 +237,20 @@ class Geoserver():
                 params = ds.connection_parameters
                 params.update(params_dict)
                 ds.connection_parameters = params
+                
             elif format_nature == "c": # coverage (raster)
                 ds.url = params_dict.get('url')
-            elif format_nature == "e": # cascading wms
                 
+            elif format_nature == "e": # cascading wms              
                 wmsuser = None
                 wmspassword = None
-                if params_dict.get('username') != 'wmsuser':
+                if params_dict.get('username') != '':
                     wmsuser = params_dict.get('username')
-                if params_dict.get('password') != 'wmspassword':
+                if params_dict.get('password') != '':
                     wmspassword = params_dict.get('password') 
                 self.rest_catalog.update_wmsstore(wsname, dsname, params_dict.get('url'), wmsuser, wmspassword, self.user, self.password)
                 return True
-                '''
-                ds.capabilitiesURL = params_dict.get('url')
-                keys_to_delete = []
-                for key in ds.metadata:
-                    if ds.metadata.get(key) == None:
-                        keys_to_delete.append(key)
-                for key in keys_to_delete:
-                    del ds.metadata[key]
-                '''
+            
             catalog.save(ds)
             return True
         except Exception as exc:
@@ -639,9 +632,9 @@ class Geoserver():
                 params = json.loads(datastore.connection_params)
                 username = None
                 password = None
-                if params['username'] != 'wmsuser':
+                if params['username'] != '':
                     username = params['username']
-                if params['password'] != 'wmspassword':
+                if params['password'] != '':
                     password = params['password']
                 return self.rest_catalog.get_wmsresources(workspace.name, datastore.name, self.user, self.password)
                 #return store.get_resources(available=available)
