@@ -190,16 +190,15 @@ class Geoserver():
                 ds = catalog.create_coveragestore2(name, workspace.name)
                 ds.url = params_dict.get('url')
             elif format_nature == "e": # cascading wms
-                #user = None
-                #password = None
-                #if params_dict.get('user') != 'wmsuser':
-                #    user = params_dict.get('user')
-                #if params_dict.get('password') != 'wmspassword':
-                #    password = params_dict.get('password')  
-                ws = catalog.get_workspace(workspace.name)
-                ds = catalog.create_wmsstore(name, ws, user=None, password=None)
-                ds.capabilitiesURL = params_dict.get('url')
-                
+                wmsuser = None
+                wmspassword = None
+                if params_dict.get('username') != 'wmsuser':
+                    wmsuser = params_dict.get('username')
+                if params_dict.get('password') != 'wmspassword':
+                    wmspassword = params_dict.get('password')  
+                self.rest_catalog.create_wmsstore(workspace, name, params_dict.get('url'), wmsuser, wmspassword, self.user, self.password)
+                return True
+            
             else:
                 # unsupported
                 return False
@@ -227,11 +226,11 @@ class Geoserver():
             pass
         return False
 
-    def updateDatastore(self, workspace, dsname, description, dstype, conn_params):
+    def updateDatastore(self, wsname, dsname, description, dstype, conn_params):
         try:
             format_nature=dstype[:1]
             catalog = self.getGsconfig()
-            ds = catalog.get_store(dsname, workspace)
+            ds = catalog.get_store(dsname, wsname)
             params_dict = json.loads(conn_params)
             if format_nature == "v": # vector
                 # directly updating connection_parameters won't work, we need to set the dict again
@@ -241,6 +240,16 @@ class Geoserver():
             elif format_nature == "c": # coverage (raster)
                 ds.url = params_dict.get('url')
             elif format_nature == "e": # cascading wms
+                '''
+                wmsuser = None
+                wmspassword = None
+                if params_dict.get('username') != 'wmsuser':
+                    wmsuser = params_dict.get('username')
+                if params_dict.get('password') != 'wmspassword':
+                    wmspassword = params_dict.get('password') 
+                self.rest_catalog.update_wmsstore(wsname, dsname, params_dict.get('url'), wmsuser, wmspassword, self.user, self.password)
+                return True
+                '''
                 ds.capabilitiesURL = params_dict.get('url')
                 keys_to_delete = []
                 for key in ds.metadata:
@@ -248,6 +257,7 @@ class Geoserver():
                         keys_to_delete.append(key)
                 for key in keys_to_delete:
                     del ds.metadata[key]
+            
             catalog.save(ds)
             return True
         except Exception as exc:
@@ -601,46 +611,21 @@ class Geoserver():
         stores = self.getGsconfig().get_stores(ws)
         resources = []
         for store in stores:
-             resources.append(store.name)
+            resources.append(store.name)
         return resources
-    
-    '''
-    def getResources(self, workspace, datastore, dstype, available=False):
-        try:
-            store = self.getGsconfig().get_store(datastore, workspace)
-            format_nature=dstype[0]
-            if (format_nature=='v'):
-                return store.get_resources(available=available)
-            elif (format_nature=='c'):
-                driver=dstype[2:]
-                resources_obj = store.get_resources()
-                # The API doesn't allow to retrieve the available coverages nor their names,
-                # but these drivers allow a single coverage to be published on the coverage store
-                if len(resources_obj) > 0:
-                    # there is no available coverages if they is already one published coverage
-                    return []
-                else:
-                    # we can't get the name of the coverage, so we just offer a sensible, non existing name
-                    return [self._get_unique_resource_name(datastore, workspace)]
-            elif (format_nature=='e'):
-                return store.get_resources(available=available)
-            
-        except:
-            e = sys.exc_info()[0]
-            pass
-    '''    
-    def getResources(self, workspace, datastore, dstype, type):
+
+    def getResources(self, workspace, datastore, type):
         try:
             available = False
             if type == 'available' or type == 'available_with_geom':
                 available = True
-            store = self.getGsconfig().get_store(datastore, workspace)
-            format_nature=dstype[0]
+            store = self.getGsconfig().get_store(datastore.name, workspace.name)
+            format_nature=datastore.type[0]
             if (format_nature=='v'):
-                return self.rest_catalog.get_resources(workspace, datastore, type, self.user, self.password)
+                return self.rest_catalog.get_resources(workspace.name, datastore.name, type, self.user, self.password)
                 #return store.get_resources(available=available)
             elif (format_nature=='c'):
-                driver=dstype[2:]
+                driver=datastore.type[2:]
                 resources_obj = store.get_resources()
                 # The API doesn't allow to retrieve the available coverages nor their names,
                 # but these drivers allow a single coverage to be published on the coverage store
@@ -649,9 +634,17 @@ class Geoserver():
                     return []
                 else:
                     # we can't get the name of the coverage, so we just offer a sensible, non existing name
-                    return [self._get_unique_resource_name(datastore, workspace)]
+                    return [self._get_unique_resource_name(datastore.name, workspace.name)]
             elif (format_nature=='e'):
-                return store.get_resources(available=available)
+                params = json.loads(datastore.connection_params)
+                username = None
+                password = None
+                if params['username'] != 'wmsuser':
+                    username = params['username']
+                if params['password'] != 'wmspassword':
+                    password = params['password']
+                return self.rest_catalog.get_wmsresources(workspace.name, datastore.name, self.user, self.password)
+                #return store.get_resources(available=available)
             
         except:
             e = sys.exc_info()[0]

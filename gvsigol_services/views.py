@@ -200,6 +200,8 @@ def datastore_list(request):
         params = json.loads(datastore.connection_params)
         if 'passwd' in params:
             params['passwd'] = '****'
+        if 'password' in params:
+            params['password'] = '****'
         datastore.connection_params = json.dumps(params)
         
     response = {
@@ -270,6 +272,11 @@ def datastore_update(request, datastore_id):
                     params = json.loads(datastore.connection_params)
                     got_params['passwd'] = params['passwd'] 
                     connection_params = json.dumps(got_params)
+                    
+                if 'password' in got_params and got_params['password'] == '****':
+                    params = json.loads(datastore.connection_params)
+                    got_params['password'] = params['password'] 
+                    connection_params = json.dumps(got_params)
                 
                 if mapservice_backend.updateDatastore(datastore.workspace.name, datastore.name,
                                                       description, dstype, connection_params):
@@ -285,8 +292,10 @@ def datastore_update(request, datastore_id):
                     form.add_error(None, _("Error updating datastore"))
     else:
         params = json.loads(datastore.connection_params)
-        if 'password' in params:
+        if 'passwd' in params:
             params['passwd'] = '****'
+        if 'password' in params:
+            params['password'] = '****'
         datastore.connection_params = json.dumps(params)
         form = DatastoreUpdateForm(instance=datastore)
     return render(request, 'datastore_update.html', {'form': form, 'datastore_id': datastore_id, 'workspace_name': datastore.workspace.name})
@@ -378,7 +387,7 @@ def backend_resource_list_available(request):
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
         if ds:
-            resources = mapservice_backend.getResources(ds.workspace.name, ds.name, ds.type, 'available')
+            resources = mapservice_backend.getResources(ds.workspace, ds, 'available')
             resources_sorted = sorted(resources) 
             return HttpResponse(json.dumps(resources_sorted))
     return HttpResponseBadRequest()
@@ -399,7 +408,7 @@ def backend_resource_list(request):
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
         if ds:
-            resources = mapservice_backend.getResources(ds.workspace.name, ds.name, ds.type, type)
+            resources = mapservice_backend.getResources(ds.workspace, ds, type)
             resources_sorted = sorted(resources) 
             return HttpResponse(json.dumps(resources_sorted))
     return HttpResponseBadRequest()
