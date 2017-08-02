@@ -153,8 +153,9 @@ class Geoserver():
         data +=     "</workspace>"
         data +=     "<__default>false</__default>"
         data +=     "<capabilitiesURL>" + capabilitiesURL + "</capabilitiesURL>"
-        data +=     "<user>" + wmsuser + "</user>"
-        data +=     "<password>" + wmspassword + "</password>"
+        if wmsuser and wmspassword:
+            data +=     "<user>" + wmsuser + "</user>"
+            data +=     "<password>" + wmspassword + "</password>"
         data += "</wmsStore>"
         
         r = self.session.post(url, data=data, headers=headers, auth=auth)
@@ -179,8 +180,9 @@ class Geoserver():
         data +=     '<name>' + dsname + '</name>'
         data +=     '<enabled>true</enabled>'
         data +=     '<capabilitiesURL>' + capabilitiesURL + '</capabilitiesURL>'
-        data +=     '<user>' + wmsuser + '</user>'
-        data +=     '<password>' + wmspassword + '</password>'
+        if wmsuser and wmspassword:
+            data +=     '<user>' + wmsuser + '</user>'
+            data +=     '<password>' + wmspassword + '</password>'
         data +=     '<metadata />'
         data += '</wmsStore>'
         
