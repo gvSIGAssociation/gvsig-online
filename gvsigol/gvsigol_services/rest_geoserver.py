@@ -134,6 +134,76 @@ class Geoserver():
             return True
         raise FailedRequestError(r.status_code, r.content)
     
+    def create_wmsstore(self, workspace, store, capabilitiesURL, wmsuser=None, wmspassword=None, user=None, password=None):
+        url = self.service_url + "/workspaces/" + workspace.name + "/wmsstores"
+        headers = {'content-type': "text/xml"}
+        
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+            
+        data = ""
+        data += "<wmsStore>"
+        data +=     "<name>" + store + "</name>"
+        data +=     "<type>WMS</type>"
+        data +=     "<enabled>true</enabled>"
+        data +=     "<workspace>"
+        data +=         "<name>" + workspace.name + "</name>"      
+        data +=     "</workspace>"
+        data +=     "<__default>false</__default>"
+        data +=     "<capabilitiesURL>" + capabilitiesURL + "</capabilitiesURL>"
+        data +=     "<user>" + wmsuser + "</user>"
+        data +=     "<password>" + wmspassword + "</password>"
+        data += "</wmsStore>"
+        
+        r = self.session.post(url, data=data, headers=headers, auth=auth)
+        if r.status_code==201:
+            return True
+        raise UploadError(r.status_code, r.content)
+    
+    def update_wmsstore(self, wsname, dsname, capabilitiesURL, wmsuser=None, wmspassword=None, user=None, password=None):
+        url = self.service_url + "/workspaces/" + wsname + "/wmsstores/" + dsname + ".xml"
+        headers = {
+            "Content-type": "application/xml",
+            "Accept": "application/xml"
+        }
+        
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+            
+        ws_href = self.service_url + "/workspaces/" + wsname + ".xml"
+        layers_href = self.service_url + "/workspaces/" + wsname + "/wmsstores/" + dsname + "/wmslayers.xml"
+        
+        data = ''
+        data += '<wmsStore>'
+        data +=     '<name>' + dsname + '</name>'
+        data +=     '<type>WMS</type>'
+        data +=     '<enabled>true</enabled>'
+        data +=     '<workspace>'
+        data +=         '<name>' + wsname + '</name>'   
+        data +=         '<atom:link xmlns:atom="http://www.w3.org/2005/Atom" rel="alternate" href="' + ws_href + '" type="application/xml"/>'  
+        data +=     '</workspace>'
+        data +=     '<__default>false</__default>'
+        data +=     '<capabilitiesURL>' + capabilitiesURL + '</capabilitiesURL>'
+        data +=     '<user>' + wmsuser + '</user>'
+        data +=     '<password>' + wmspassword + '</password>'
+        data +=     '<maxConnections>6</maxConnections>'
+        data +=     '<readTimeout>60</readTimeout>'
+        data +=     '<connectTimeout>30</connectTimeout>'
+        data +=     '<wmsLayers>'  
+        data +=         '<atom:link xmlns:atom="http://www.w3.org/2005/Atom" rel="alternate" href="' + layers_href + '" type="application/xml"/>'  
+        data +=     '</wmsLayers>'
+        data += '</wmsStore>'
+        
+        r = self.session.put(url, data=data, headers=headers, auth=auth)
+        self.session.put
+        if r.status_code==200:
+            return True
+        raise UploadError(r.status_code, r.content)
+    
     def create_coveragestore(self, workspace, store, filetype, file, user=None, password=None):
         url = self.service_url + "/workspaces/" + workspace + "/coveragestores.json"
         headers = {'content-type': "text/xml"}
@@ -266,6 +336,22 @@ class Geoserver():
                     resources = json['featureTypes']['featureType']
                     return [resource['name'] for resource in resources]
             return []
+            
+        return json
+    
+    def get_wmsresources(self, workspace, wmsstore, user=None, password=None):
+        json = []
+        url = self.service_url + "/workspaces/" + workspace + "/wmsstores/" + wmsstore + "/wmslayers.json?list=available"
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+        r = self.session.get(url, auth=auth)
+        json = r.json()
+        
+        if json['list'] and json['list']['string']:
+            resources = json['list']['string']
+            return [resource for resource in resources]
             
         return json
 
