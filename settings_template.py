@@ -209,6 +209,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 LOGOUT_PAGE_URL = '##LOGOUT_PAGE_URL##'
 
 # Email settings
+EMAIL_BACKEND_ACTIVE = ##EMAIL_BACKEND_ACTIVE##
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'

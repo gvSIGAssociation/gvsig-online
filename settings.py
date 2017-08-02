@@ -66,7 +66,7 @@ INSTALLED_APPS = [
     'gvsigol_filemanager',
     'gvsigol_core',
     'gvsigol_app_dev',
-    #'gvsigol_app_aguas'
+    #'gvsigol_app_aguas',
     #'gvsigol_app_pobla',
     #'gvsigol_app_benicarlo',
     #'gvsigol_plugin_worldwind',
@@ -74,10 +74,10 @@ INSTALLED_APPS = [
     #'gvsigol_plugin_geocoding',
     #'gvsigol_plugin_etl',
     #'gvsigol_plugin_sync',
-    #'gvsigol_plugin_catastro',
+    'gvsigol_plugin_catastro',
     #'gvsigol_plugin_alfresco',
-    #'gvsigol_plugin_print',
-    #'gvsigol_plugin_catalog',
+    'gvsigol_plugin_print',
+    'gvsigol_plugin_catalog',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -226,6 +226,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 LOGOUT_PAGE_URL = '/gvsigonline/'
 
 # Email settings
+EMAIL_BACKEND_ACTIVE = False
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
@@ -247,6 +248,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_services/static'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
+    #os.path.join(BASE_DIR, 'gvsigol_app_aguas/static'),
     os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
     #os.path.join(BASE_DIR, 'gvsigol_app_pobla/static'),
     #os.path.join(BASE_DIR, 'gvsigol_app_benicarlo/static'),
@@ -388,3 +390,5 @@ CONTROL_FIELDS = [{
                 'name': 'last_modification',
                 'type': 'date'
                 }]
+
+BASELAYER_SUPPORTED_TYPES = ['WMS', 'WMTS', 'XYZ', 'Bing', 'OSM']
