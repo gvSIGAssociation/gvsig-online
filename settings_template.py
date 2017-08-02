@@ -309,12 +309,12 @@ GVSIGOL_TOOLS = {
                      
 GVSIGOL_ENABLE_ENUMERATIONS = ##GVSIGOL_ENABLE_ENUMERATIONS##
 
-GVSIGOL_BASE_LAYERS = {
-    'bing': {
-        'active': ##BING_IS_ACTIVE##,
-        'key': '##BING_API_KEY##'
-    }
-}
+#GVSIGOL_BASE_LAYERS = {
+#    'bing': {
+#        'active': ##BING_IS_ACTIVE##,
+#        'key': '##BING_API_KEY##'
+#    }
+#}
                      
 #skin-blue
 #skin-blue-light
