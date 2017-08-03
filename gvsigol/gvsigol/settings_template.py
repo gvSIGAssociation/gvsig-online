@@ -189,11 +189,7 @@ EXTRA_LANG_INFO = {
 LANG_INFO = dict(django.conf.locale.LANG_INFO.items() + EXTRA_LANG_INFO.items())
 django.conf.locale.LANG_INFO = LANG_INFO
 
-LANGUAGES = (
-    ('es', _('Spanish')),
-    ('va', _('Valencian')),
-    ('ca', _('Catalan')), 
-    ('en', _('English')),      
+LANGUAGES = ( ##LANGUAGES## 
 )
 
 LOCALE_PATHS = (
