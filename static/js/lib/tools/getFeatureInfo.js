@@ -287,7 +287,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 	html += '</li>';
 	
 	for (var i in features) {
-		if (features[i].feature.type == 'raster') {
+		if (features[i].type == 'feature' && features[i].feature.type == 'raster') {
 			var feature_id = "<span style=\"font-weight:normal; margin-right:5px;\">"+features[i].layer.title+ "</span>";
 			feature_id += "<br />";
 			
@@ -302,7 +302,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 			html += '</li>';
 		}
 		else{ 
-			if (features[i].feature.type == 'Feature') {
+			if (features[i].type == 'feature') {
 		
 			var fid = features[i].feature.id;
 			var is_first_configured = true;
@@ -398,7 +398,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 				this.source.addFeature(newFeature);
 			}
 			
-		} else if (features[i].feature.type == 'catastro') {
+		} else if (features[i].type == 'catastro') {
 			html += '<li class="item">';
 			html += 	'<div class="feature-info">';
 			html += 		'Ref. Catastral: <a target="_blank" href="' + features[i].href + '" class="product-title item-fid" style="color: #00c0ef;">' + features[i].text;	
