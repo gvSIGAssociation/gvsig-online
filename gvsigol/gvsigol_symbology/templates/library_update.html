@@ -102,6 +102,10 @@ $(document).ready(function() {
 		};
 		
 		var symbolizers = {{rule.symbolizers|safe}};
+		symbolizers.sort(function(a, b) {
+		    return a.order - b.order;
+		});
+		symbolizers.reverse();
 		if (symbolizers.length > 0) {
 			var symbol = '';	
 			var json_symbolizers = JSON.parse(symbolizers[0].json);
@@ -134,7 +138,7 @@ $(document).ready(function() {
 			} else {
 				symbol += '<li>';
 				symbol += 	'<div id="library-symbol-preview-div-{{rule.id}}"></div>';
-				symbol += 	'<a class="users-list-name" href="/gvsigonline/symbology/symbol_update/{{rule.id}}/">{{rule.name}}</a>';
+				symbol += 	'<a class="users-list-name" href="/gvsigonline/symbology/symbol_update/{{rule.id}}/">{{rule.title}}</a>';
 				symbol += '</li>';
 				$(".users-list").append(symbol);
 				var r = new Rule("{{rule.id}}", "{{rule.name}}", "{{rule.title}}", rule_opts, symbologyUtils);
