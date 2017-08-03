@@ -597,7 +597,7 @@ def project_get_conf(request):
                     layer_info = None
                     defaultCrs = None
                     if datastore.type == 'e_WMS':
-                        (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
+                        #(ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
                         defaultCrs = 'EPSG:4326'
                     else:
                         (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
