@@ -506,6 +506,7 @@ def layer_add(request):
         single_image = False
         if 'single_image' in request.POST:
             single_image = True
+            cached = False
         
         if form.is_valid():
             try:
@@ -602,6 +603,7 @@ def layer_update(request, layer_id):
         single_image = False
         if 'single_image' in request.POST:
             single_image = True
+            cached = False
                 
         old_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
         
@@ -1125,6 +1127,7 @@ def layer_create(request):
         single_image = False
         if 'single_image' in request.POST:
             single_image = True
+            cached = False
             
         form = CreateFeatureTypeForm(request.POST, user=request.user)
         if form.is_valid():
