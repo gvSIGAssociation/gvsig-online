@@ -418,6 +418,9 @@ Rule.prototype.loadLibrarySymbol = function(symbolizers) {
 	this.removeAllSymbolizers();
 	this.removeLabel();
 	
+	symbolizers.sort(function(a, b) {
+	    return a.order - b.order;
+	});
 	for (var i=0; i<symbolizers.length; i++) {
 		
 		var symbolizer = JSON.parse(symbolizers[i].json);
