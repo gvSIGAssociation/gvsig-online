@@ -688,7 +688,7 @@ def layer_config(request, layer_id):
             field = {}
             field['name'] = request.POST.get('field-name-' + str(i))
             for id, language in LANGUAGES:
-                field['title-'+id] = request.POST.get('field-title-'+id+'-' + str(i))
+                field['title-'+id] = request.POST.get('field-title-'+id+'-' + str(i)).strip()
             field['visible'] = False
             if 'field-visible-' + str(i) in request.POST:
                 field['visible'] = True
