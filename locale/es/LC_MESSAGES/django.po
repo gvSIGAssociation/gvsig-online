@@ -278,7 +278,7 @@ msgstr "Formatos soportados"
 #, fuzzy
 #| msgid "Assign layer groups"
 msgid "Assign base layers"
-msgstr "Asignar grupos de capas"
+msgstr "Asignar capas base"
 
 #: templates/project_add.html:77 templates/project_update.html.py:85
 msgid "Buscar capas base..."
