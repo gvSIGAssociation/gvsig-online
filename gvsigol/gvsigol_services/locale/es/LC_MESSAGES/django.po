@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-07 09:12+0200\n"
+"POT-Creation-Date: 2017-08-07 09:35+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -513,13 +513,13 @@ msgstr "API-key"
 #, fuzzy
 #| msgid "Layer list"
 msgid "Base layer list"
-msgstr "Lista de capas"
+msgstr "Lista de capas base"
 
 #: templates/base_layer_list.html:58
 #, fuzzy
 #| msgid "Delete layer"
 msgid "Delete base layer"
-msgstr "Eliminar capa"
+msgstr "Eliminar capa base"
 
 #: templates/base_layer_list.html:61
 msgid "Base layer will be deleted"
@@ -666,13 +666,13 @@ msgstr "%(sep)sOrden descendente"
 #, fuzzy
 #| msgid "Remove datastore"
 msgid "Remove baselayer"
-msgstr "Eliminar almacén de datos"
+msgstr "Eliminar capa base"
 
 #: templates/base_layer_list.html:110
 #, fuzzy
 #| msgid "Update layer"
 msgid "Update baselayer"
-msgstr "Actualizar capa"
+msgstr "Actualizar capa base"
 
 #: templates/base_layer_update.html:10
 #, fuzzy
