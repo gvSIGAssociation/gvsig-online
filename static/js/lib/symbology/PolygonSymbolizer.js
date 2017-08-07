@@ -36,10 +36,10 @@ var PolygonSymbolizer = function(rule, options, utils) {
 	
 	if (options) {
 		$.extend(this, options);
-	}
-	
-	if(rule && rule.symbolizers){
-		this.order = rule.symbolizers.length;
+	} else {
+		if(rule && rule.symbolizers){
+			this.order = rule.symbolizers.length;
+		}
 	}
 };
 
