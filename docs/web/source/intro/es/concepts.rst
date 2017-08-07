@@ -139,17 +139,33 @@ Existen dos tipos de bloqueos:
 
 *   Bloqueos de la aplicación móvil
 
-2.4.6 Enumeraciones
+ 
+
+2.5 tipo de datos
+-----------------
+Desde gvsig online, se ofrece la opción de generar datos de tipo dominio (listado de enumeraciones y multiple enumeración) y también permite tener campos de control interno en la edición de capas.
+
+
+2.5.1 Enumeraciones
 ~~~~~~~~~~~~~~~~~~~
-Las enumeraciones son un tipo especial de entidades que definen domios de valores. Es posible utilizarlas en la creación de nuevas capas cuando deseemos crear un tipo de campo que contenga un listado de elementos.
+Las enumeraciones son un tipo especial de entidades que definen dominios de valores. Es posible utilizarlas en la creación de nuevas capas cuando deseemos crear un tipo de campo que contenga un listado de elementos.
 
 
-2.4.7  Multiple enumeración
+2.5.2  Multiple enumeración
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Similar a las enumeraciones, pero este campo permite seleccionar varios elementos de un conjunto de dominios disponibles que se han creado en el campo 'enumeración', esta opción se hace disponible cuando se crea una capa vacía en el sistema.
+Este campo permite seleccionar varios elementos de un conjunto de dominios disponibles en un campo 'enumeración', esta opción se hace disponible cuando se crea una capa vacía en el sistema.
 
 
-2.5 Administrador de archivos
+2.5.3 Campos de control interno
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Estos campos son generados automáticamente cuando se crea una capa vacía desde el sistema, los campos son:
+
+ *  **modified_by**: Es un campo que no permite su edición dentro de la tabla. Cuando se edita y guarda un elemento de la capa (atributos o geometría), este campo '*Modified by*' se rellena automáticamente con el nombre del usuario que estaba autenticado en el sistema. 
+
+ *  **last_modification:** Es otro campo que no permite su edición en la tabla. Cuando se edita y guarda un elemento de la capa (atributos o geometría), este campo '*last_modification*' se rellena automáticamente con la fecha que registra el ordenador o móvil.
+
+
+2.6 Administrador de archivos
 -----------------------------
 El administrador de archivos nos permite subir archivos a la plataforma de gvSIG Online, para posteriormente realizar operaciones sobre ellos.
 
@@ -157,7 +173,7 @@ El administrador de archivos gestiona directorios en función de los grupos de u
 Por tanto a la hora de explorar los directorios, únicamente podremos visualizar aquellos directorios que tengamos asignados por pertenencia al grupo.
 
 
-2.6 Proyectos
+2.7 Proyectos
 -------------
 Podemos definir un proyecto como una unidad de agregación de objetos que mediante una configuración dada, permiten una visualización gráfica.
 
@@ -178,10 +194,10 @@ Existen 2 tipos de proyectos:
 *   **Proyectos de acceso restringido**: Los datos poseen restricciones de acceso y uso para determinados grupos de usuarios. Solo pueden ser accedidos por usuarios que estén dados de alta en la plataforma.
 
 
-2.7 Simbología
+2.8 Simbología
 --------------
 
-2.7.1 Leyendas
+2.8.1 Leyendas
 ~~~~~~~~~~~~~~
 Otra de las funcionalidades que ofrece gvSIG Online es la posibilidad de modificar la simbología de las capas y aplicarles distintos tipos de leyenda.
 
@@ -213,7 +229,7 @@ Los tipos de leyenda para las capas vectoriales son:
 
 Para las capas de tipo ráster existe un tipo de leyenda que es el *"Tabla de color"*.
 
-2.7.2 Bibliotecas de símbolos
+2.8.2 Bibliotecas de símbolos
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Las bibliotecas de símbolos nos permiten crear y agrupar símbolos genéricos que posteriormente podremos *"importar"* desde las leyendas de capa.
 Además podremos *"exportar"* las librerías de símbolos para poder compartir o hacer copias de las mismas. 
