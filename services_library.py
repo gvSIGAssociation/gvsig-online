@@ -96,7 +96,8 @@ def add_symbol(request, json_rule, library_id, symbol_type):
     )
     library_rule.save()
     
-    for sym in json_rule.get('symbolizers'):
+    symbs = json_rule.get('symbolizers')
+    for sym in symbs:
         json_sym = json.loads(sym.get('json'))
         if symbol_type == 'ExternalGraphicSymbolizer':
             library_path = utils.check_library_path(library)
