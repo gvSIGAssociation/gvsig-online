@@ -226,7 +226,8 @@
 {% endblock %} {% block extra-scripts %}
 <script type="text/javascript">
 	var params = JSON.parse('{{ params | escapejs }}');
-	$('#menu-app-geocoding').addClass("active");
+	$('#menu-manage-plugins').addClass("active");
+	$('#submenu-geocoding').addClass("active");
 	
 	$('.save-button').click( function() {
 		$("body").overlay();
