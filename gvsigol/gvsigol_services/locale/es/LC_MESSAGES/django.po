@@ -490,7 +490,7 @@ msgstr ""
 #, fuzzy
 #| msgid "Update layer"
 msgid "Add base layer"
-msgstr "Actualizar capa"
+msgstr "Añadir capa base"
 
 #: templates/base_layer_add.html:14 templates/base_layer_update.html.py:13
 #: templates/datastore_add.html:14 templates/datastore_update.html.py:14
@@ -710,7 +710,7 @@ msgstr "Bloqueos"
 #, fuzzy
 #| msgid "Datastores"
 msgid "Datatypes"
-msgstr "Almacenes de datos"
+msgstr "Tipos de datos"
 
 #: templates/dashboard_services_menu.html:20
 msgid "Enumerations"
