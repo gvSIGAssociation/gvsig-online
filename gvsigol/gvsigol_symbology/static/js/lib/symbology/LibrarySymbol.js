@@ -107,6 +107,9 @@ LibrarySymbol.prototype.libraryPreview = function(featureType, rule, json_symbol
 LibrarySymbol.prototype.save = function(libraryid, name, title, filter) {
 	
 	var symbolizers = new Array();
+	this.rules[0].getSymbolizers().sort(function(a, b) {
+	    return a.order - b.order;
+	});
 	for (var i=0; i < this.rules[0].getSymbolizers().length; i++) {
 		var symbolizer = {
 			type: this.rules[0].getSymbolizers()[i].type,
@@ -153,6 +156,9 @@ LibrarySymbol.prototype.save = function(libraryid, name, title, filter) {
 LibrarySymbol.prototype.update = function(id, name, title, filter) {
 	
 	var symbolizers = new Array();
+	this.rules[0].getSymbolizers().sort(function(a, b) {
+	    return a.order - b.order;
+	});
 	for (var i=0; i < this.rules[0].getSymbolizers().length; i++) {
 		var symbolizer = {
 			type: this.rules[0].getSymbolizers()[i].type,
