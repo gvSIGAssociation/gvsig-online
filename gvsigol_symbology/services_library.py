@@ -120,7 +120,7 @@ def add_symbol(request, json_rule, library_id, symbol_type):
         if symbol_type == 'PolygonSymbolizer':
             symbolizer = PolygonSymbolizer(
                 rule = rule,
-                order = 0,
+                order = json_sym.get('order'),
                 fill = json_sym.get('fill'),
                 fill_opacity = json_sym.get('fill_opacity'),
                 stroke = json_sym.get('stroke'),
@@ -133,7 +133,7 @@ def add_symbol(request, json_rule, library_id, symbol_type):
         elif symbol_type == 'LineSymbolizer':
             symbolizer = LineSymbolizer(
                 rule = rule,
-                order = 0,
+                order = json_sym.get('order'),
                 stroke = json_sym.get('stroke'),
                 stroke_width = json_sym.get('stroke_width'),
                 stroke_opacity = json_sym.get('stroke_opacity'),
@@ -144,7 +144,7 @@ def add_symbol(request, json_rule, library_id, symbol_type):
         elif symbol_type == 'MarkSymbolizer' or symbol_type == 'PointSymbolizer':
             symbolizer = MarkSymbolizer(
                 rule = rule,
-                order = json_rule.get('order'),
+                order = json_sym.get('order'),
                 opacity = json_sym.get('opacity'),
                 size = json_sym.get('size'),
                 rotation = json_sym.get('rotation'),
