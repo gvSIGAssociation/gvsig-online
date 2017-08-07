@@ -131,6 +131,9 @@
 
 {% block extra-scripts %}
 <script type="text/javascript">
+	$('#menu-manage-plugins').addClass("active");
+	$('#submenu-geocoding').addClass("active");
+
 
 	var save_label = gettext("Save");
 	var continue_label = gettext("Continue");
@@ -160,8 +163,6 @@
 		codemirror.setValue(code);
 	
 	}
-
-	$('#menu-app-geocoding').addClass("active");
 	
 	$('.save-button').click( function() {
 		$("body").overlay();
