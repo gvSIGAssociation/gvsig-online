@@ -21,7 +21,7 @@ import settings
 handler404 = 'gvsigol_core.views.not_found_view'
 
 js_info_dict = {
-    'packages': ('gvsigol_auth','gvsigol_core','gvsigol_services','gvsigol_symbology','gvsigol_plugin_print'),
+    'packages': ('gvsigol_auth','gvsigol_core','gvsigol_services','gvsigol_symbology','gvsigol_plugin_print','gvsigol_plugin_etl'),
 }
 
 urlpatterns = [
