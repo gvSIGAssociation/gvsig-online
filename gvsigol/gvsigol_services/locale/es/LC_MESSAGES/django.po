@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-07 09:35+0200\n"
+"POT-Creation-Date: 2017-08-07 09:40+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -450,10 +450,8 @@ msgid "Version"
 msgstr "Versión"
 
 #: forms_services.py:136
-#, fuzzy
-#| msgid "URI"
 msgid "URL"
-msgstr "URI"
+msgstr "URL"
 
 #: forms_services.py:137 templates/base_layer_add.html.py:71
 #: templates/base_layer_update.html:71
@@ -487,8 +485,6 @@ msgstr ""
 "Error exportando la capa de PostGIS a Spatialite. Error de Ogr2ogr: {msg}"
 
 #: templates/base_layer_add.html:12 templates/base_layer_list.html.py:13
-#, fuzzy
-#| msgid "Update layer"
 msgid "Add base layer"
 msgstr "Añadir capa base"
 
@@ -510,14 +506,10 @@ msgid "Api-key"
 msgstr "API-key"
 
 #: templates/base_layer_list.html:11
-#, fuzzy
-#| msgid "Layer list"
 msgid "Base layer list"
 msgstr "Lista de capas base"
 
 #: templates/base_layer_list.html:58
-#, fuzzy
-#| msgid "Delete layer"
 msgid "Delete base layer"
 msgstr "Eliminar capa base"
 
@@ -663,20 +655,14 @@ msgid "%(sep)sSort descending"
 msgstr "%(sep)sOrden descendente"
 
 #: templates/base_layer_list.html:106
-#, fuzzy
-#| msgid "Remove datastore"
 msgid "Remove baselayer"
 msgstr "Eliminar capa base"
 
 #: templates/base_layer_list.html:110
-#, fuzzy
-#| msgid "Update layer"
 msgid "Update baselayer"
 msgstr "Actualizar capa base"
 
 #: templates/base_layer_update.html:10
-#, fuzzy
-#| msgid "Add enumeration"
 msgid "Add transformation"
 msgstr "Añadir enumeración"
 
@@ -697,18 +683,14 @@ msgid "Layer groups"
 msgstr "Grupos de capas"
 
 #: templates/dashboard_services_menu.html:12
-#, fuzzy
-#| msgid "Update layer"
 msgid "Base layers"
-msgstr "Actualizar capa"
+msgstr "Capas base"
 
 #: templates/dashboard_services_menu.html:13 templates/lock_list.html.py:11
 msgid "Locks"
 msgstr "Bloqueos"
 
 #: templates/dashboard_services_menu.html:18
-#, fuzzy
-#| msgid "Datastores"
 msgid "Datatypes"
 msgstr "Tipos de datos"
 
@@ -1072,8 +1054,6 @@ msgid "Is visible?"
 msgstr "Visible"
 
 #: templates/layer_config.html:52
-#, fuzzy
-#| msgid "Is visible?"
 msgid "Is editable?"
 msgstr "Editable"
 
@@ -1233,14 +1213,10 @@ msgstr ""
 "El espacio de trabajo y los recursos asignados al mismo serán eliminados"
 
 #: templates/workspace_list.html:110 templates/workspace_update.html.py:12
-#, fuzzy
-#| msgid "Add workspace"
 msgid "Update workspace"
-msgstr "Añadir espacio de trabajo"
+msgstr "Actualizar espacio de trabajo"
 
 #: templates/workspace_update.html:30
-#, fuzzy
-#| msgid "Description"
 msgid "Project description"
 msgstr "Descripción"
 
@@ -1306,14 +1282,10 @@ msgid "You must enter a title for enumeration"
 msgstr "Debe introducir un título para la enumeración"
 
 #: views.py:1934
-#, fuzzy
-#| msgid "Error: layer could not be published"
 msgid "Error: BaseLayer could not be published"
-msgstr "Error: la capa no puede ser publicada"
+msgstr "Error: la capa base no puede ser publicada"
 
 #: views.py:1979
-#, fuzzy
-#| msgid "Error: layer could not be published"
 msgid "Error: baselayer could not be published"
 msgstr "Error: la capa no puede ser publicada"
 
