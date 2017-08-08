@@ -444,8 +444,7 @@ def get_geocoder():
     
     return geocoder
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
-@staff_required
+
 def get_providers_activated(request):
     providers = Provider.objects.all()
     types = []
