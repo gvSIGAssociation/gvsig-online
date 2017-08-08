@@ -880,6 +880,24 @@ def public_viewer_get_conf(request):
         if 'gvsigol_plugin_alfresco' in gvsigol.settings.INSTALLED_APPS:
             resource_manager = 'alfresco'
             
+        bsly_projs = BaseLayerProject.objects.filter(project=project).order_by('order')
+        
+        base_layers = []
+        for bsly_proj in bsly_projs:
+            bsly = bsly_proj.baselayer
+            
+            base_layer = {}
+            if bsly.type_params:
+                bsly_params = json.loads(bsly.type_params)
+                base_layer.update(bsly_params)
+            
+            base_layer['name'] = bsly.name
+            base_layer['title'] = bsly.title
+            base_layer['type'] = bsly.type
+            base_layer['active'] = bsly_proj.is_default
+            
+            base_layers.append(base_layer)
+        
         conf = {
             'pid': pid,
             'project_name': project.name,
@@ -890,6 +908,7 @@ def public_viewer_get_conf(request):
                 "zoom": project.zoom 
             }, 
             'supported_crs': core_utils.get_supported_crs(),
+            'base_layers': base_layers,
             'workspaces': workspaces,
             'layerGroups': ordered_layer_groups,
             'tools': gvsigol.settings.GVSIGOL_TOOLS,            
