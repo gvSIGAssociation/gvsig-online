@@ -262,7 +262,13 @@ def unique_values_update(request, layer_id, style_id):
             response['maxscale'] = int(style.maxscale)
         response['rules'] = json.dumps(rules)   
         if rule['filter']:
-            response['property_name'] = json.loads(rule['filter']).get('field')    
+            rule_filter = json.loads(rule['filter'])
+            if 'field' in rule_filter:
+                response['property_name'] = rule_filter.get('field')    
+                
+            # Adaptación para garantizar compatibilidad con la versión anterior
+            if 'property_name' in rule_filter:
+                response['property_name'] = rule_filter.get('property_name')    
         
         return render_to_response('unique_values_update.html', response, context_instance=RequestContext(request))
     
