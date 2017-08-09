@@ -201,6 +201,7 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
             gph = Graphic(symbolizer)
             gph.Size = str(s.marksymbolizer.size)
             gph.Opacity = str(s.marksymbolizer.opacity)
+            gph.Rotation = str(s.marksymbolizer.rotation)
             mrk = Mark(gph)
             mrk.WellKnownName = s.marksymbolizer.well_known_name
             fill = Fill(mrk)
