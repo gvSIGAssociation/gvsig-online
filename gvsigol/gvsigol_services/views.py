@@ -552,29 +552,30 @@ def layer_add(request):
                 mapservice_backend.createOrUpdateGeoserverLayerGroup(newRecord.layer_group)
                 mapservice_backend.reload_nodes()
                 
-                fields=[]
-                (ds_type, resource) = mapservice_backend.getResourceInfo(workspace.name, datastore, newRecord.name, "json")
-                resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
-                for f in resource_fields:
-                    field = {}
-                    field['name'] = f['name']
-                    for id, language in LANGUAGES:
-                        field['title-'+id] = f['name']
-                    field['visible'] = True
-                    field['editableactive'] = True
-                    field['editable'] = True
-                    for control_field in settings.CONTROL_FIELDS:
-                        if field['name'] == control_field['name']:
-                            field['editableactive'] = False
-                            field['editable'] = False
-                    field['infovisible'] = False
-                    fields.append(field)
-                    
-                layer_conf = {
-                    'fields': fields
-                    }
-                newRecord.conf = layer_conf
-                newRecord.save()
+                if form.cleaned_data['datastore'].type == 'v_PostGIS': 
+                    fields=[]
+                    (ds_type, resource) = mapservice_backend.getResourceInfo(workspace.name, datastore, newRecord.name, "json")
+                    resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
+                    for f in resource_fields:
+                        field = {}
+                        field['name'] = f['name']
+                        for id, language in LANGUAGES:
+                            field['title-'+id] = f['name']
+                        field['visible'] = True
+                        field['editableactive'] = True
+                        field['editable'] = True
+                        for control_field in settings.CONTROL_FIELDS:
+                            if field['name'] == control_field['name']:
+                                field['editableactive'] = False
+                                field['editable'] = False
+                        field['infovisible'] = False
+                        fields.append(field)
+                        
+                    layer_conf = {
+                        'fields': fields
+                        }
+                    newRecord.conf = layer_conf
+                    newRecord.save()
                 
                 return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
             
