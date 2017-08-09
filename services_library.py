@@ -29,7 +29,7 @@ from gvsigol_core import utils as core_utils
 from gvsigol import settings
 from django.utils.translation import ugettext as _
 from django.http import HttpResponse
-import utils, sld_utils, sld_builder
+import utils, sld_utils, sld_builder, sld_reader
 import tempfile, zipfile
 import StringIO
 import json
@@ -391,10 +391,10 @@ def upload_library(name, description, file):
     for file in file_list:
         if not os.path.isdir(file_path+"/"+file):
             f = open(file_path+"/"+file, 'r')
-            sld = sld_builder.parse_sld(f)
+            sld = sld_reader.parse(f)
             
-            style_name = sld.NamedLayer[0].UserStyle[0].Name
-            style_title = sld.NamedLayer[0].UserStyle[0].Title
+            style_name = sld.NamedLayer[0].Name
+            style_title = sld.NamedLayer[0].UserStyle[0].FeatureTypeStyle[0].Rule[0].Title
             r = sld.NamedLayer[0].UserStyle[0].FeatureTypeStyle[0].Rule[0]
             
             style = Style(
@@ -407,8 +407,8 @@ def upload_library(name, description, file):
             
             rule = Rule(
                 style = style,
-                name = r.Name,
-                title = r.Title,
+                name = style_name,
+                title = style_title,
                 abstract = '',
                 filter = str(""),
                 minscale = -1 if r.MinScaleDenominator is None else r.MinScaleDenominator,
@@ -482,30 +482,31 @@ def upload_library(name, description, file):
                         
                 elif s.original_tagname_ == 'LineSymbolizer':
                     stroke = '#000000'
-                    if s.Stroke.CssParameter.__len__() > 0:
-                        stroke = s.Stroke.CssParameter[0].valueOf_
-                        
-                    stroke_width = 1
-                    if s.Stroke.CssParameter.__len__() > 1:
-                        stroke_width = s.Stroke.CssParameter[1].valueOf_
-                        
-                    stroke_opacity = 1
-                    if s.Stroke.CssParameter.__len__() > 2:
-                        stroke_opacity = s.Stroke.CssParameter[2].valueOf_
-                        
-                    stroke_dash_array = 'none'
-                    if s.Stroke.CssParameter.__len__() > 3:
-                        stroke_dash_array = s.Stroke.CssParameter[3].valueOf_
-                        
-                    symbolizer = LineSymbolizer(
-                        rule = rule,
-                        order = scount,
-                        stroke = stroke,
-                        stroke_width = stroke_width,
-                        stroke_opacity = stroke_opacity,
-                        stroke_dash_array =stroke_dash_array                 
-                    )
-                    symbolizer.save()
+                    if s.Stroke:
+                        if s.Stroke.CssParameter.__len__() > 0:
+                            stroke = s.Stroke.CssParameter[0].valueOf_
+                            
+                        stroke_width = 1
+                        if s.Stroke.CssParameter.__len__() > 1:
+                            stroke_width = s.Stroke.CssParameter[1].valueOf_
+                            
+                        stroke_opacity = 1
+                        if s.Stroke.CssParameter.__len__() > 2:
+                            stroke_opacity = s.Stroke.CssParameter[2].valueOf_
+                            
+                        stroke_dash_array = 'none'
+                        if s.Stroke.CssParameter.__len__() > 3:
+                            stroke_dash_array = s.Stroke.CssParameter[3].valueOf_
+                            
+                        symbolizer = LineSymbolizer(
+                            rule = rule,
+                            order = scount,
+                            stroke = stroke,
+                            stroke_width = stroke_width,
+                            stroke_opacity = stroke_opacity,
+                            stroke_dash_array =stroke_dash_array                 
+                        )
+                        symbolizer.save()
                         
                 elif s.original_tagname_ == 'PolygonSymbolizer':
                     stroke = '#000000'

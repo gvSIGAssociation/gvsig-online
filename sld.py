@@ -2054,8 +2054,18 @@ class StyledLayerDescriptor(SLDNode):
 
             localschema_backup_path = './StyledLayerDescriptor-backup.xsd'
             try:
-                logging.debug('Cache hit for backup schema document.')
+                #logging.debug('Cache hit for backup schema document.')
+                #localschema_backup = open(localschema_backup_path, 'rb')
+                logging.debug('Cache miss for backup schema document.')
+                localschema_backup = open(localschema_backup_path, 'wb')
+
+                schema_url = 'http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd'
+                resp = urlopen(schema_url)
+                localschema_backup.write(resp.read())
+                resp.close()
+                localschema_backup.close()
                 localschema_backup = open(localschema_backup_path, 'rb')
+                
             except IOError:
                 logging.debug('Cache miss for backup schema document.')
                 localschema_backup = open(localschema_backup_path, 'wb')
