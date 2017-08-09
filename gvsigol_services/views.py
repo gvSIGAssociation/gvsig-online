@@ -573,7 +573,7 @@ def layer_add(request):
                 layer_conf = {
                     'fields': fields
                     }
-                newRecord.conf = json.dumps(layer_conf)
+                newRecord.conf = layer_conf
                 newRecord.save()
                 
                 return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
