@@ -239,6 +239,6 @@ Además podremos *"exportar"* las librerías de símbolos para poder compartir o
 -----------
 Los plugins se consideran componentes o aplicaciones desarrolladas de forma independientes al sistemas básico. Por lo tanto, son complementos extras que pueden añadirse al sistema. Cada plugin es desarrolado para abarcar funcionalidades específicas según las necesidades de cada cliente.
 
-Esta entrada será visible en el panel de control si se disponen de aplicaciones, por ejmemplo: el Geocoding (apliación para la búsqueda por direcciones), Worldwind (configurador de MDT para 3D), transformaciones, entre otros.
+Esta entrada será visible en el panel de control si se disponen de aplicaciones, por ejemplo: el Geocoding (aplicación para la búsqueda por direcciones), Worldwind (configurador de MDT para 3D), transformaciones, entre otros.
 
 
