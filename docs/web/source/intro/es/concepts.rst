@@ -233,3 +233,12 @@ Para las capas de tipo ráster existe un tipo de leyenda que es el *"Tabla de co
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Las bibliotecas de símbolos nos permiten crear y agrupar símbolos genéricos que posteriormente podremos *"importar"* desde las leyendas de capa.
 Además podremos *"exportar"* las librerías de símbolos para poder compartir o hacer copias de las mismas. 
+
+
+2.9 Plugins
+-----------
+Los plugins se consideran componentes o aplicaciones desarrolladas de forma independientes al sistemas básico. Por lo tanto, son complementos extras que pueden añadirse al sistema. Cada plugin es desarrolado para abarcar funcionalidades específicas según las necesidades de cada cliente.
+
+Esta entrada será visible en el panel de control si se disponen de aplicaciones, por ejmemplo: el Geocoding (apliación para la búsqueda por direcciones), Worldwind (configurador de MDT para 3D), transformaciones, entre otros.
+
+
