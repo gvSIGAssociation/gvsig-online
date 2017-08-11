@@ -10,26 +10,34 @@ Puede crear(**1**), actualizar (**2**) y eliminar(**3**) espacios de trabajo des
 
 Para crear un nuevo espacio de trabajo (**1**) se debe llenar el siguiente formulario:
 
-- proporcionar un nombre, no puede contener espacios, signos de puntuación ni caracteres especiales como la *"ñ"*.
-- una descripción, este se reflejerá en la página donde se sirven los servicios.
-- También está la opción de activar el check *'¿es público?'*, esta opción permitirá publicar en la págia principal donde de disponen los servicios.
-- Habitualmente no es necesario modificar la URL de los servicios (estos son generados automáticamente cuando se añade el nombre).
+- **Nombre**, no puede contener espacios, signos de puntuación ni caracteres especiales como la *"ñ"*.
+- **Descripción**, este se reflejerá en la página donde se sirven los servicios.
+- **Activar el check '¿es público?'**, esta opción permitirá que los servicios sean públicos en la página principal de gvsigOnlie.
+
+- Habitualmente no es necesario modificar las URL de los servicios (estos son generados automáticamente cuando se añade el nombre del nuevo espacio de trabajo).
 
 .. image:: ../images/ws1_3.png
    :align: center
 
-Desde el botón actualizar (**2**) solo se podrá modificar la *'descripción'* y activar o desactivar la opción de *'público'*
+Hacer público los servicios WMS y WFS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Gvsigonline genera los Web Map Service (WMS) y los Web Feature Service (WFS). Los servicios se crean desde el nivel de 'espacios de trabajo', es decir, todas las capas publicadas en un espacio de trabajo serán las contenidas en sus respectivos WMS y WFS.
+
+Desde el botón actualizar (**2**) se podrá modificar la *'descripción'* y activar o desactivar la opción de *'público'*, con esta última opción los links de los servicios estarán disponibles con acceso libre.
 
 Para poder obtener los links de los servicios WMS y WFS, se debe ir a la página principal (inicio) de Gvsig Online y se elige la entrada *"Servicios de Mapas"*
 
 .. image:: ../images/ws1_4.png
    :align: center
 
-Se mostrará una página con todos los servicios de cada espacio de trabajo creado y que se haya elegido público.
+Se mostrará una página con todos los servicios de cada espacio de trabajo público.
 
 .. image:: ../images/ws1_5.png
    :align: center
 
+
+.. note::
+   Para poder visualizar correctamente los servicios WMS y WFS se deben usar los links y realizar las conexiones respectivas en los distintos SIG de escritorio o sistemas que los soporten.
 
 2.2 Crear, modificar y eliminar almacenes de datos
 --------------------------------------------------
