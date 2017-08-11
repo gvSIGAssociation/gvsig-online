@@ -1440,6 +1440,8 @@ editionBar.prototype.editFeatureForm = function(feature) {
 				self.clearFeatureBackup();
 				self.selectInteraction.getFeatures().clear();
 				self.showLayersTab();
+			}else{
+				
 			}		
 			}
 		});
@@ -1678,7 +1680,11 @@ editionBar.prototype.transactWFS = function(p,f) {
 			ui += '<div class="alert alert-danger alert-dismissible">';
 			ui += 	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
 			ui +=   '<h4><i class="icon fa fa-ban"></i> Error!</h4>';
-			ui +=   gettext('Failed to save the new record. Please check values');
+			if(message in err){
+				ui +=   gettext(err.message);
+			}else{
+				ui +=   gettext('Failed to save the new record. Please check values');
+			}
 			ui += '</div>';
 			$('#edition-error').append(ui);
 			success = false;
