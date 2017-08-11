@@ -1269,8 +1269,8 @@ editionBar.prototype.editFeatureForm = function(feature) {
 								}
 							}	
 						} else if (this.featureType[i].name.startsWith("form_")) {
-							featureProperties += '<br/><a target="_blank" class="form-link form-link-open form-control" href="" data-orig="'+ this.featureType[i].name +'" data-value=""><i class="fa fa-check-square-o" aria-hidden="true"></i>&nbsp;&nbsp;' + gettext("Show form") + '</a>';
-							featureProperties += '<input id="' + this.featureType[i].name + '" type="hidden" value="">';
+							featureProperties += '<br/><a target="_blank" class="form-link form-link-open form-control" href="" data-orig="'+ this.featureType[i].name +'" data-value="' + value + '"><i class="fa fa-check-square-o" aria-hidden="true"></i>&nbsp;&nbsp;' + gettext("Show form") + '</a>';
+							featureProperties += '<input id="' + this.featureType[i].name + '" type="hidden" value="' + value + '">';
 						} else {
 							if (value==null) {
 								value = "";
