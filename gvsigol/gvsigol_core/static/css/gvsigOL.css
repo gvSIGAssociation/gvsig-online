@@ -4775,3 +4775,22 @@ table.dataTable thead th span.subname, table.dataTable tfoot th span.subname{
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
+
+.form-link.form-control{
+    text-align: center;
+    background-color: #eee;
+}
+
+.box-body.time_enabled-check{
+	display:none;
+}
+
+.time_enabled-check{
+	background-color: #eee;
+    margin-bottom: 0px;
+    padding-bottom: 15px;
+    margin-right: 0px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
