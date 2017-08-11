@@ -191,7 +191,7 @@
 		value: 'Date'
 	}];
 	
-	"{% if GVSIGOL_ENABLE_ENUMERATIONS %}"
+	{% if GVSIGOL_ENABLE_ENUMERATIONS %}
 	fieldTypes.push({
 		key: 'enumeration',
 		value: 'Enumeration'
@@ -201,7 +201,14 @@
 		key: 'multiple_enumeration',
 		value: 'Multiple enumeration '
 	});
-	"{% endif %}"
+	{% endif %}
+	
+	{% if 'gvsigol_plugin_form' in INSTALLED_APPS %}
+	fieldTypes.push({
+		key: 'form',
+		value: 'Form'
+	});
+	{% endif %}
 	
 	function addField(field) {
 		
@@ -324,18 +331,31 @@
 				ui += '</div>';
 				
 			} else if ( field.type == 'multiple_enumeration') {
-					ui += '<div class="col-md-12 form-group">';
-					ui += 	'<label>' + gettext('Select multiple enumeration') + '</label>';
-					ui += 	'<select id="field-default-value-'+id+'" class="form-control">';
-							'{% for enum in enumerations %}'
-								if ( '{{enum.name}}' == field.defaultValue) {
-									ui += '<option selected value="{{enum.name}}">{{enum.title}}</option>';
-								} else {
-									ui += '<option value="{{enum.name}}">{{enum.title}}</option>';
-								}
-							'{% endfor%}'
-					ui += 	'</select>';
-					ui += '</div>';
+				ui += '<div class="col-md-12 form-group">';
+				ui += 	'<label>' + gettext('Select multiple enumeration') + '</label>';
+				ui += 	'<select id="field-default-value-'+id+'" class="form-control">';
+						'{% for enum in enumerations %}'
+							if ( '{{enum.name}}' == field.defaultValue) {
+								ui += '<option selected value="{{enum.name}}">{{enum.title}}</option>';
+							} else {
+								ui += '<option value="{{enum.name}}">{{enum.title}}</option>';
+							}
+						'{% endfor%}'
+				ui += 	'</select>';
+				ui += '</div>';
+			}else if ( field.type == 'form') {
+				ui += '<div class="col-md-12 form-group">';
+				ui += 	'<label>' + gettext('Select form') + '</label>';
+				ui += 	'<select id="field-default-value-'+id+'" class="form-control">';
+						'{% for frm in forms %}'
+							if ( '{{frm.name}}' == field.defaultValue) {
+								ui += '<option selected value="{{frm.name}}">{{frm.name}}</option>';
+							} else {
+								ui += '<option value="{{frm.name}}">{{frm.name}}</option>';
+							}
+						'{% endfor%}'
+				ui += 	'</select>';
+				ui += '</div>';
 			} else{
 				ui += '<div class="row">';
 				ui += 	'<div class="col-md-12 form-group">';
@@ -386,6 +406,16 @@
 				dv += 	'<select id="field-name-'+id+'" class="form-control">';
 						'{% for enum in enumerations %}'
 				dv += 	'<option value="{{enum.name}}">{{enum.title}}</option>';
+						'{% endfor%}'
+				dv += 	'</select>';
+				dv += '</div>';
+				
+			} else if ( $('#field-db-type').val() == 'form') {
+				dv += '<div class="col-md-12 form-group">';
+				dv += 	'<label>' + gettext('Select form') + '</label>';
+				dv += 	'<select id="field-name-'+id+'" class="form-control">';
+						'{% for frm in forms %}'
+				dv += 	'<option value="{{frm.name}}">{{frm.name}}</option>';
 						'{% endfor%}'
 				dv += 	'</select>';
 				dv += '</div>';
