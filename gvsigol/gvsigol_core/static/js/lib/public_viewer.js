@@ -66,14 +66,14 @@ viewer.core = {
     	});
     	blank.baselayer = true;
     	
-    	var osm = new ol.layer.Tile({
-    		id: this._nextLayerId(),
-        	label: gettext('OpenStreetMap'),
-          	visible: true,
-          	source: new ol.source.OSM()
-        });
-		osm.baselayer = true;
-		
+//    	var osm = new ol.layer.Tile({
+//    		id: this._nextLayerId(),
+//        	label: gettext('OpenStreetMap'),
+//          	visible: true,
+//          	source: new ol.source.OSM()
+//        });
+//		osm.baselayer = true;
+//		
 		var mousePositionControl = new ol.control.MousePosition({
 	        coordinateFormat: ol.coordinate.createStringXY(4),
 	        projection: 'EPSG:4326',
@@ -96,7 +96,7 @@ viewer.core = {
       		],
       		renderer: 'canvas',
       		target: 'map',
-      		layers: [blank, osm],
+      		layers: [blank],
 			view: new ol.View({
         		center: ol.proj.transform([parseFloat(self.conf.view.center_lon), parseFloat(self.conf.view.center_lat)], 'EPSG:4326', 'EPSG:3857'),
         		minZoom: 0,
