@@ -1682,7 +1682,7 @@ editionBar.prototype.transactWFS = function(p,f) {
 			ui +=   '<h4><i class="icon fa fa-ban"></i> Error!</h4>';
 			if('responseXML' in request){
 			  var xmlDoc = $.parseXML(request.responseXML);
-			  var xml = $(xmlDoc)
+			  var xml = $(xmlDoc);
 			  var error = xml.find("title").find("ows:ExceptionText").text();
 			  if(error != null || error != ""){
 				  ui +=   gettext(error);
