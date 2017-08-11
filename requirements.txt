@@ -61,3 +61,5 @@ greenlet==0.4.12
 
 # Parseo del getCapabilities (baseLayers)
 OWSLib==0.14.0
+
+limesurveyrc2api==1.0.0
