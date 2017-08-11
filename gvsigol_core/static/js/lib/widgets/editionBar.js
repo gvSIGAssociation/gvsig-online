@@ -1681,14 +1681,18 @@ editionBar.prototype.transactWFS = function(p,f) {
 			ui += 	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
 			ui +=   '<h4><i class="icon fa fa-ban"></i> Error!</h4>';
 			if('responseXML' in request){
-			  var xmlDoc = $.parseXML(request.responseXML);
-			  var xml = $(xmlDoc);
-			  var error = xml.find("title").find("ows:ExceptionText").text();
-			  if(error != null || error != ""){
-				  ui +=   gettext(error);
-			  }else{
+				var errors = $(request.responseXML).find("ExceptionText");
+				var get_error = false;
+				if(errors.length > 0){
+					var error = errors[0].textContent;
+					if(error != null || error != ""){
+						ui +=   gettext(error);
+						get_error = true;
+					}
+				}
+				if(!get_error){
 					ui +=   gettext('Failed to save the new record. Please check values');
-			  }
+				}
 			}else{
 				ui +=   gettext('Failed to save the new record. Please check values');
 			}
