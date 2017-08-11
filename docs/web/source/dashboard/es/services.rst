@@ -19,8 +19,8 @@ Para crear un nuevo espacio de trabajo (**1**) se debe llenar el siguiente formu
 .. image:: ../images/ws1_3.png
    :align: center
 
-Hacer público los servicios WMS y WFS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2.1.1 Hacer público los servicios WMS y WFS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Gvsigonline genera los Web Map Service (WMS) y los Web Feature Service (WFS). Los servicios se crean desde el nivel de 'espacios de trabajo', es decir, todas las capas publicadas en un espacio de trabajo serán las contenidas en sus respectivos WMS y WFS.
 
 Desde el botón actualizar (**2**) se podrá modificar la *'descripción'* y activar o desactivar la opción de *'público'*, con esta última opción los links de los servicios estarán disponibles con acceso libre.
