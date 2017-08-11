@@ -36,7 +36,7 @@ from django.contrib.auth.models import User
 from gvsigol_core.models import ProjectLayerGroup, BaseLayer
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES
+from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES, INSTALLED_APPS
 from django.utils.translation import ugettext as _
 from gvsigol_services.models import LayerResource
 from gvsigol.settings import GVSIGOL_SERVICES
@@ -1230,10 +1230,15 @@ def layer_create(request):
                 return render(request, "layer_create.html", data)
                 
         else:
+            forms = []
+            if 'gvsigol_plugin_form' in INSTALLED_APPS:
+                from gvsigol_plugin_form.models import Form
+                forms = Form.objects.all()
             
             
             data = {
                 'form': form,
+                'forms': forms,
                 'layer_type': layer_type,
                 'enumerations': get_currentuser_enumerations(request)
             }
@@ -1241,9 +1246,15 @@ def layer_create(request):
         
     else:
         form = CreateFeatureTypeForm(user=request.user)
+        forms = []
+        
+        if 'gvsigol_plugin_form' in INSTALLED_APPS:
+            from gvsigol_plugin_form.models import Form
+            forms = Form.objects.all()
         
         data = {
             'form': form,
+            'forms': forms,
             'layer_type': layer_type,
             'enumerations': get_currentuser_enumerations(request)
         }
