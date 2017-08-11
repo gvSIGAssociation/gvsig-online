@@ -1532,10 +1532,11 @@ editionBar.prototype.removeFeatureForm = function(evt, feature) {
 					
 					
 				} else if (this.isStringType(this.featureType[i].type)) {
+					var value = feature.getProperties()[this.featureType[i].name];
 					if (this.featureType[i].name.startsWith("form_")) {
-						ui += '<br/><a target="_blank" class="form-link form-link-open form-control" href="" data-orig="'+ this.featureType[i].name +'" data-value=""><i class="fa fa-check-square-o" aria-hidden="true"></i>&nbsp;&nbsp;' + gettext("Show form") + '</a>';
+						ui += '<br/><a target="_blank" class="form-link form-link-open form-control" href="" data-orig="'+ this.featureType[i].name +'" data-value="'+value+'"><i class="fa fa-check-square-o" aria-hidden="true"></i>&nbsp;&nbsp;' + gettext("Show form") + '</a>';
 					} else{
-						ui += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+						ui += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + value + '">';
 					}
 				} else if (this.featureType[i].type == 'boolean') {
 					if (feature.getProperties()[this.featureType[i].name]) {
