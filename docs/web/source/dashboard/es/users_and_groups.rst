@@ -36,13 +36,13 @@ Los campos que aparecen en el formulario de 'crear usuarios' (**1**) son los sig
 
 *   **Puede gestionar proyectos**: Indicamos si el usuario implementa el rol de gestión
 
-.. note::
-   Si no se activa ninguno de los roles: 'superusuario' o de 'gestión', el rol que tendrá el usuario será: 'básico' y solo tendrá acceso a los proyectos que otro usuario con mayor privilegio le haya asignado dentro de un grupo de usuarios. Con este privilegio 'básico' tampoco se genera ninguno de los cuatro espacios en el sistema antes mencionados. 
-
 .. image:: ../images/user_group2.png
    :align: center
 
 * En la parte inferior del formulario de usuarios, aparece un listado con los grupos disponibles. Si asignamos el usuario a algún grupo, este podrá acceder a las entidades definidas en el grupo (proyectos, capas, ...).
+
+.. note::
+   Si no se activa ninguno de los roles: 'superusuario' o de 'gestión', el rol que tendrá el usuario será: 'básico', y solo tendrá acceso a los proyectos que otro usuario con mayor privilegio le haya asignado dentro de un grupo de usuarios. Con este privilegio 'básico', tampoco se genera ninguno de los cuatro espacios en el sistema antes mencionados.
 
 En la opción de 'actualizar' (**2**) se podrá editar los privilegios y asignar o cambiar de grupos de usuarios a los que pertenece un usuario.
 
