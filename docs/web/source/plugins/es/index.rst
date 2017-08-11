@@ -10,3 +10,4 @@ Plugins
    catalog
    shps_folder
    etl
+   form
