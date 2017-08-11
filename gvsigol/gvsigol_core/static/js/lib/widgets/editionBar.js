@@ -1680,8 +1680,15 @@ editionBar.prototype.transactWFS = function(p,f) {
 			ui += '<div class="alert alert-danger alert-dismissible">';
 			ui += 	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
 			ui +=   '<h4><i class="icon fa fa-ban"></i> Error!</h4>';
-			if('message' in err){
-				ui +=   gettext(err.message);
+			if('responseXML' in request){
+			  var xmlDoc = $.parseXML(request.responseXML);
+			  var xml = $(xmlDoc)
+			  var error = xml.find("title").find("ows:ExceptionText").text();
+			  if(error != null || error != ""){
+				  ui +=   gettext(error);
+			  }else{
+					ui +=   gettext('Failed to save the new record. Please check values');
+			  }
 			}else{
 				ui +=   gettext('Failed to save the new record. Please check values');
 			}
