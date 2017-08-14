@@ -349,9 +349,9 @@
 				ui += 	'<select id="field-default-value-'+id+'" class="form-control">';
 						'{% for frm in forms %}'
 							if ( '{{frm.name}}' == field.defaultValue) {
-								ui += '<option selected value="{{frm.name}}">{{frm.name}}</option>';
+								ui += '<option selected value="{{frm.name}}">{{frm.title}}</option>';
 							} else {
-								ui += '<option value="{{frm.name}}">{{frm.name}}</option>';
+								ui += '<option value="{{frm.name}}">{{frm.title}}</option>';
 							}
 						'{% endfor%}'
 				ui += 	'</select>';
@@ -415,7 +415,7 @@
 				dv += 	'<label>' + gettext('Select form') + '</label>';
 				dv += 	'<select id="field-name-'+id+'" class="form-control">';
 						'{% for frm in forms %}'
-				dv += 	'<option value="{{frm.name}}">{{frm.name}}</option>';
+				dv += 	'<option value="{{frm.name}}">{{frm.title}}</option>';
 						'{% endfor%}'
 				dv += 	'</select>';
 				dv += '</div>';
