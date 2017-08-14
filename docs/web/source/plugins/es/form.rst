@@ -10,6 +10,20 @@ De esta forma, se puede ligar la encuesta a un punto en el mapa para posteriores
 *NOTA:* Antes de continuar, es necesario tener al menos una encuesta definida en el servidor LimeSurvey. Si se desconoce su funcionamiento, se recomienda remitirse a su manual para comenzar a definirla
 (https://manual.limesurvey.org/). Posteriormente, a través de su interfaz, se pueden ir definiendo los bloques, preguntas, pasos entre ellas, etc.
 
+   * Configuración antes publicar
+     * Opciones generales -> Pregunta a pregunta
+     * Presentación y navegación -> Mostrar bienvenida: Sí
+     * Presentación y navegación -> Permitir hacia atrás: Sí
+     * Administración de la notificación y de los datos -> Permitir modo evaluación: Sí
+     * Administración de la notificación y de los datos -> Permitir guardar y continuar: Sí
+     * Encuestados/as -> Activar persistencia de la respuesta para la misma contraseña: Sí
+     * Encuestados/as -> Permitir múltiples respuestas o actualizar la existente para la misma contraseña: Sí
+
+   * Configuración al publicar
+     * Usuarios anónimos: No
+     * Resto opciones: Sí
+
+
 
 
 Dar de alta la encuesta en gvSIG Online
