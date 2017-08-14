@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-07 09:08+0200\n"
+"POT-Creation-Date: 2017-08-14 10:54+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -275,8 +275,6 @@ msgstr "Formatos soportados"
 #: templates/project_add.html:75 templates/project_add.html.py:95
 #: templates/project_update.html:83 templates/project_update.html.py:104
 #: templates/project_update.html:106
-#, fuzzy
-#| msgid "Assign layer groups"
 msgid "Assign base layers"
 msgstr "Asignar capas base"
 
@@ -462,7 +460,7 @@ msgid "Details"
 msgstr "Detalles"
 
 #: templates/public_viewer.html:369 templates/public_viewer_compress.html:344
-#: templates/viewer.html.py:400 templates/viewer_compress.html:374
+#: templates/viewer.html.py:401 templates/viewer_compress.html:374
 msgid "Close"
 msgstr "Cerrar"
 
