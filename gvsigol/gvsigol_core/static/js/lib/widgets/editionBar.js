@@ -1194,8 +1194,9 @@ editionBar.prototype.showAllErrorMessages = function() {
 	}
 	
 	ui += '</div>';
-	if((!(!invalidFields || invalidFields.length <= 0 || nullable_error)) || nullable_error){
+	if(!(!invalidFields || invalidFields.length <= 0) || nullable_error){
 		$('#edition-error').append(ui);
+		return false;
 	}
 	
 	return (!invalidFields || invalidFields.length <= 0);
