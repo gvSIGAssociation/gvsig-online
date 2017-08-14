@@ -1154,8 +1154,47 @@ editionBar.prototype.showAllErrorMessages = function() {
 		ui +=    "<li><span>" + label.html() + "</span> - " + message + "</li>" ;
 	});
 	
+	var self = this;
+	var nullable_error = false;
+	for (var i=0; i<self.featureType.length; i++) {
+		if (!self.isGeomType(self.featureType[i].type) && self.featureType[i].name != 'id') {
+			var field = $('#' + self.featureType[i].name)[0];
+			if(field != null && field.id != null){
+				var value = null;
+				if (self.featureType[i].type == 'boolean') {
+					value = field.checked;
+				}
+				else if (self.isStringType(self.featureType[i].type)) {
+					if(self.featureType[i].name.startsWith("enmm_")){
+						value = "";
+						for(var ix=0; ix<field.selectedOptions.length; ix++){
+							var option = field.selectedOptions[ix];
+							if(ix != 0){
+								value = value + ";";
+							}
+							value = value + option.value;
+						}
+						
+					}else if(self.featureType[i].name.startsWith("form_")){
+						value = field.value;	
+					}else{
+						if (field.value != null) {
+							value = field.value;	
+						}
+					}
+				} else if (field && field.value != '' && field.value != null && field.value != 'null') {
+						value = field.value;
+				}
+				if(self.featureType[i].nullable == 'NO' && (value == null || value == "")){
+					nullable_error = true;
+					ui  +=    "<li><span>" + self.featureType[i].name + "</span> - " + gettext("can't be null") + "</li>" ;
+				} 
+			}
+		}
+	}
+	
 	ui += '</div>';
-	if(!(!invalidFields || invalidFields.length <= 0)){
+	if((!(!invalidFields || invalidFields.length <= 0 || nullable_error)) || nullable_error){
 		$('#edition-error').append(ui);
 	}
 	
