@@ -108,6 +108,15 @@ msgid "Clear filter"
 msgstr "Limpiar filtro"
 
 # editionBar.js
+msgid "Add point to center"
+msgstr "Añadir punto en el centro del mapa"
+
+msgid "can't be empty"
+msgstr "no puede estar en blanco"
+
+msgid "can't be null"
+msgstr "no puede estar en blanco"
+
 msgid "Add point"
 msgstr "Añadir punto"
 
