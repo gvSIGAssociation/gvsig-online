@@ -1199,7 +1199,7 @@ editionBar.prototype.showAllErrorMessages = function() {
 		return false;
 	}
 	
-	return (!invalidFields || invalidFields.length <= 0);
+	return true;
 };
 
 
