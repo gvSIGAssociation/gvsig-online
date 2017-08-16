@@ -81,6 +81,10 @@
 			
 			<!-- Sidebar toggle button-->
           	<a href="#" class="sidebar-toggle" data-toggle="control-sidebar" role="button"></a>
+          	
+          	<div class="navbar-header">
+      				<img src="{% static "img/logo_principal.png"%}" height=50 onError="this.style='display:none'">
+			</div>
 			
 			<div class="navbar-custom-menu">
 				<ul class="nav navbar-nav">
@@ -156,6 +160,7 @@
 				<li class="active" title="{% trans "Layer tree" %}"><a href="#layer-tree-tab" data-toggle="tab"><i class="icon-layers"></i></a></li>
 				<li title="{% trans "Legend" %}"><a href="#legend-tab" data-toggle="tab"><i class="fa fa-tags"></i></a></li>
 				<li title="{% trans "Details" %}"><a href="#details-tab" data-toggle="tab"><i class="fa fa-list-alt"></i></a></li>
+				<li title="{% trans "Temporary" %}" class="temporary-tab"><a href="#temporary-tab" data-toggle="tab"><i class="fa fa-clock-o" aria-hidden="true"></i></a></li>
 			</ul>
 
 			<div class="tab-content" style="height: 88%;">
@@ -172,6 +177,10 @@
 				<div class="tab-pane" id="details-tab" style="overflow-y: auto; height: 100%;">
 				</div>
 				
+				<!-- Temporary -->
+				<div class="tab-pane" id="temporary-tab" style="overflow-y: auto; height: 100%;">
+				</div>
+				
 			</div>			
 		</aside>
 		
@@ -183,7 +192,6 @@
 <!-- 			</div> -->
 			<div class="panel-content"></div>
 		</div>
-
 		<div id="map">
 		
 			<div id="center-cursor"></div>
@@ -251,6 +259,7 @@
 			</div>
 		</div>
 	</div>
+
 
 	<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
 	
@@ -440,7 +449,15 @@
 
 		}
 
-
+		$('.panel-wrapper').resizable({
+	    	handles: 'n',
+	    	resize: function(event, ui){
+	    		console.log("Hola mundo");
+	    		var oSettings = oTable.fnSettings();
+	    		oSettings.oScroll.sY = ui.size.height; 
+	    		oTable.fnDraw();
+	    	}
+	      });
 
 	});
 	</script>
