@@ -9,3 +9,4 @@ Guía de administración
    files
    projects
    symbology
+   tipos_de_datos
