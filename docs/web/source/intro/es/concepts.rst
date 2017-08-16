@@ -141,19 +141,33 @@ Existen dos tipos de bloqueos:
 
  
 
-2.5 tipo de datos
------------------
+2.5 Tipos de datos
+------------------
 Desde gvsig online, se ofrece la opción de generar datos de tipo dominio (listado de enumeraciones y multiple enumeración) y también permite tener campos de control interno en la edición de capas.
 
 
 2.5.1 Enumeraciones
 ~~~~~~~~~~~~~~~~~~~
-Las enumeraciones son un tipo especial de entidades que definen dominios de valores. Es posible utilizarlas en la creación de nuevas capas cuando deseemos crear un tipo de campo que contenga un listado de elementos.
+Las enumeraciones son un tipo especial de entidades que definen dominios de valores. Es posible utilizarlas en la creación de nuevas capas cuando deseemos crear un tipo de campo que contenga un listado de elementos y poder seleccionar un único item de dicho listado.
+
+La nomenclatura usada en la BD para ser reconocida como campo de dominio es: **enm_#_acti**
+
+Donde: 
+* *enm* = tipo de dato enumeración
+* *#* = número que asigna el sistema por defecto cuando se crean nuevas listas de enumeraciones.
+* *acti* = Las primeras cuatro letras del título de la lista de enumeraciones. Para este ejemplo, el título es: 'Actividad'
 
 
-2.5.2  Multiple enumeración
+2.5.2  Múltiple enumeración
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Este campo permite seleccionar varios elementos de un conjunto de dominios disponibles en un campo 'enumeración', esta opción se hace disponible cuando se crea una capa vacía en el sistema.
+A diferencia del tipo enumeración, este campo permite seleccionar varios elementos de un conjunto de dominios disponibles en un 'listado de enumeración', esta opción se hace disponible cuando se crea una capa vacía en el sistema, seleccionando éste tipo de dato y posteriormente escogiendo algunos de los listados disponibles en las enumeraciones.
+
+Nomenclatura: **enmm_#_acti**
+
+Donde: 
+* *enmm* = tipo de dato múltiple enumeración.
+* *#* = número que asigna el sistema por defecto cuando se crean nuevas listas de enumeraciones.
+* *acti* = Las primeras cuatro letras del título de la lista de enumeraciones. Para este ejemplo, el título es: 'Actividad'
 
 
 2.5.3 Campos de control interno
@@ -164,10 +178,12 @@ Estos campos son generados automáticamente cuando se crea una capa vacía desde
 
  *  **last_modification:** Es otro campo que no permite su edición en la tabla. Cuando se edita y guarda un elemento de la capa (atributos o geometría), este campo '*last_modification*' se rellena automáticamente con la fecha que registra el ordenador o móvil.
 
+.. NOTE::
+   Estos tipos de datos también pueden ser añadidos manualmente a la tabla de atributos de la capa por medio de la BD antes de que la capa sea publicada en el sistema.
 
 2.6 Administrador de archivos
 -----------------------------
-El administrador de archivos nos permite subir archivos a la plataforma de gvSIG Online, para posteriormente realizar operaciones sobre ellos.
+El administrador de archivos nos permite subir ficheros a la plataforma de gvSIG Online, para posteriormente realizar operaciones sobre ellos.
 
 El administrador de archivos gestiona directorios en función de los grupos de usuarios. Por cada grupo de usuarios creado existirá un directorio en el servidor. 
 Por tanto a la hora de explorar los directorios, únicamente podremos visualizar aquellos directorios que tengamos asignados por pertenencia al grupo.
