@@ -184,11 +184,11 @@ class Introspect:
     
     def get_fields_info(self, table, schema='public'):
         self.cursor.execute("""
-        SELECT ordinal_position, column_name, data_type, character_maximum_length, numeric_precision, numeric_scale FROM information_schema.columns
+        SELECT ordinal_position, column_name, data_type, character_maximum_length, numeric_precision, numeric_scale, is_nullable FROM information_schema.columns
         WHERE table_schema = %s AND table_name = %s 
         """, [schema, table])
         
-        return [{'order':r[0], 'name': r[1], 'type': r[2], 'length': r[3], 'precision': r[4], 'scale': r[5]} for r in self.cursor.fetchall()]
+        return [{'order':r[0], 'name': r[1], 'type': r[2], 'length': r[3], 'precision': r[4], 'scale': r[5], 'nullable': r[6]} for r in self.cursor.fetchall()]
     
     def create_table(self, schema, table_name, geom_type, srs, fields):
         query = ""
