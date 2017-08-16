@@ -1118,12 +1118,49 @@ editionBar.prototype.showAllErrorMessages = function() {
 		ui +=    "<li><span>" + label.html() + "</span> - " + message + "</li>" ;
 	});
 	
-	ui += '</div>';
-	if(!(!invalidFields || invalidFields.length <= 0)){
-		$('#edition-error').append(ui);
+	var self = this;
+	var nullable_error = false;
+	for (var i=0; i<self.featureType.length; i++) {
+		if (!self.isGeomType(self.featureType[i].type) && self.featureType[i].name != 'id') {
+			var field = $('#' + self.featureType[i].name)[0];
+			if(field != null && field.id != null){
+				var value = null;
+				if (self.featureType[i].type == 'boolean') {
+					value = field.checked;
+				}
+				else if (self.isStringType(self.featureType[i].type)) {
+					if(self.featureType[i].name.startsWith("enmm_")){
+						value = "";
+						for(var ix=0; ix<field.selectedOptions.length; ix++){
+							var option = field.selectedOptions[ix];
+							if(ix != 0){
+								value = value + ";";
+							}
+							value = value + option.value;
+						}	
+					}else{
+						if (field.value != null) {
+							value = field.value;	
+						}
+					}
+				} else if (field && field.value != '' && field.value != null && field.value != 'null') {
+						value = field.value;
+				}
+				if(self.featureType[i].nullable == 'NO' && (value == null || value == "")){
+					nullable_error = true;
+					ui  +=    "<li><span>" + self.featureType[i].name + "</span> - " + gettext("can't be null") + "</li>" ;
+				} 
+			}
+		}
 	}
 	
-	return (!invalidFields || invalidFields.length <= 0);
+	ui += '</div>';
+	if(!(!invalidFields || invalidFields.length <= 0) || nullable_error){
+		$('#edition-error').append(ui);
+		return false;
+	}
+	
+	return true;
 };
 
 
@@ -1470,7 +1507,8 @@ editionBar.prototype.removeFeatureForm = function(evt, feature) {
 					
 					
 				} else if (this.isStringType(this.featureType[i].type)) {
-					ui += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+					var value = feature.getProperties()[this.featureType[i].name];
+					ui += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + value + '">';
 				} else if (this.featureType[i].type == 'boolean') {
 					if (feature.getProperties()[this.featureType[i].name]) {
 						ui += '<input disabled id="' + this.featureType[i].name + '" type="checkbox" class="checkbox" checked>';
@@ -1578,7 +1616,22 @@ editionBar.prototype.transactWFS = function(p,f) {
 			ui += '<div class="alert alert-danger alert-dismissible">';
 			ui += 	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
 			ui +=   '<h4><i class="icon fa fa-ban"></i> Error!</h4>';
-			ui +=   gettext('Failed to save the new record. Please check values');
+			if('responseXML' in request){
+				var errors = $(request.responseXML).find("ExceptionText");
+				var get_error = false;
+				if(errors.length > 0){
+					var error = errors[0].textContent;
+					if(error != null || error != ""){
+						ui +=   gettext(error);
+						get_error = true;
+					}
+				}
+				if(!get_error){
+					ui +=   gettext('Failed to save the new record. Please check values');
+				}
+			}else{
+				ui +=   gettext('Failed to save the new record. Please check values');
+			}
 			ui += '</div>';
 			$('#edition-error').append(ui);
 			success = false;
