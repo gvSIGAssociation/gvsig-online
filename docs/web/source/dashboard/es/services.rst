@@ -226,7 +226,7 @@ Los pasos para crear una capa vacía son los siguientes:
    :align: center
    
 .. note::
-   	Por defecto todas las capas pueden ser leídas por cualquier usuario, pero solo pueden ser escritas por los usuarios con rol de **superusuario**.
+   	Para las capas creadas desde el sistema, automáticamente tendrán los campos de control intero en la tabla de atributos.
 
 
 2.5 Gestión de bloqueos
