@@ -1,7 +1,7 @@
-4. Proyectos
+6. Proyectos
 ============
 
-4.1 Crear, modificar y eliminar proyectos
+6.1 Crear, modificar y eliminar proyectos
 -----------------------------------------
 Para crear un nuevo proyecto seleccionaremos desde panel de control, menú de la izquierda la opción *"Proyectos"*, lo que nos llevará a la vista listado de proyectos.
 
@@ -42,7 +42,7 @@ Para modificar un proyecto existente seleccionaremos el botón (**2**) *"Actuali
 Para eliminar un proyecto existente seleccionaremos el botón (**4**) *"Eliminar proyecto"*, que se encuentra en la parte derecha en cada fila del listado de proyectos.
 
 
-4.2 Configurar el orden del TOC
+6.2 Configurar el orden del TOC
 -------------------------------
 Para cada uno de los proyectos es posible definir un orden particular de las capas y grupos de capas. Para ello en el listado de proyectos seleccionaremos el botón (**3**) *"Ordenar TOC"*.
 

@@ -1,7 +1,7 @@
-3. Administrador de archivos
+4. Administrador de archivos
 ============================
 
-3.1 Crear directorios
+4.1 Crear directorios
 ---------------------
 
 Podremos crear directorios para organizar nuestros archivos dentro de un directorio raíz. 
@@ -19,7 +19,7 @@ Con esto se habrá creado un nuevo subdirectorio dentro del directorio raíz.
 - Actualmente los formatos soportados por el administrador de archivos son *"Shapefile y GeoTIFF"*.
 
 
-3.2 Subir ficheros shapefile o GeoTiff
+4.2 Subir ficheros shapefile o GeoTiff
 --------------------------------------
 Esta opción nos permite cargar los ficheros (archivos) tiff o shape en un directorio, éste último para posteriormente ser exportado a algún almacén de la BD.
 
@@ -56,7 +56,7 @@ Para que se exporte de forma correcta a la BD, basta con subir los tres primeros
    :align: center
 
 
-3.3 Exportar shapefile al almacén de datos
+4.3 Exportar shapefile al almacén de datos
 ------------------------------------------
 Entre las operaciones que podremos realizar sobre los archivos de tipo shapefile, se encuentra la de *“Exportar a base de datos”* y *“eliminar archivo”*, éste último borrará en el servidor tanto el fichero 'shp' como el resto de archivos asociados (.shx, .dbf, .shx, …).
 
@@ -79,7 +79,7 @@ Debemos elegir:
 - **la codificación de caracteres** de la capa a subir.
 - damos a **'exportar'** y la capa ya estará disponible para ser publicada desde la entrada de *'servicios'* - *'capa'*
 
-3.4. Exportar GeoTIFF
+4.4. Exportar GeoTIFF
 ---------------------
 Los GeoTIFF es un estandar de metadatos de domino público que permite que información georreferenciada sea encajada en un archivo de imagen de formato TIFF.
 
