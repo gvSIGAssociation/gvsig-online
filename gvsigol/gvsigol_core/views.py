@@ -572,6 +572,22 @@ def project_get_conf(request):
                     layer['abstract'] = l.abstract
                     layer['visible'] = l.visible 
                     layer['queryable'] = l.queryable 
+                    layer['time_enabled'] = l.time_enabled
+                    if layer['time_enabled']:
+                        layer['ref'] = l.id
+                        layer['time_enabled_field'] = l.time_enabled_field
+                        layer['time_enabled_endfield'] = l.time_enabled_endfield
+                        layer['time_presentation'] = l.time_presentation
+                        layer['time_resolution_year'] = l.time_resolution_year
+                        layer['time_resolution_month'] = l.time_resolution_month
+                        layer['time_resolution_week'] = l.time_resolution_week
+                        layer['time_resolution_day'] = l.time_resolution_day
+                        layer['time_resolution_hour'] = l.time_resolution_hour
+                        layer['time_resolution_minute'] = l.time_resolution_minute
+                        layer['time_resolution_second'] = l.time_resolution_second
+                        layer['time_default_value_mode'] = l.time_default_value_mode
+                        layer['time_default_value'] = l.time_default_value
+                    
                     layer['cached'] = l.cached
                     
                     layer['order'] = toc.get(group.name).get('layers').get(l.name).get('order')
@@ -811,6 +827,20 @@ def public_viewer_get_conf(request):
                     layer['abstract'] = l.abstract
                     layer['visible'] = l.visible 
                     layer['queryable'] = l.queryable 
+                    layer['time_enabled'] = l.time_enabled 
+                    if layer['time_enabled']:
+                        layer['time_enabled_field'] = l.time_enabled_field
+                        layer['time_enabled_endfield'] = l.time_enabled_endfield
+                        layer['time_presentation'] = l.time_presentation
+                        layer['time_resolution_year'] = l.time_resolution_year
+                        layer['time_resolution_month'] = l.time_resolution_month
+                        layer['time_resolution_week'] = l.time_resolution_week
+                        layer['time_resolution_day'] = l.time_resolution_day
+                        layer['time_resolution_hour'] = l.time_resolution_hour
+                        layer['time_resolution_minute'] = l.time_resolution_minute
+                        layer['time_resolution_second'] = l.time_resolution_second
+                        layer['time_default_value_mode'] = l.time_default_value_mode
+                        layer['time_default_value'] = l.time_default_value
                     layer['cached'] = l.cached
                     layer['order'] = toc.get(group.name).get('layers').get(l.name).get('order')
                     layer['single_image'] = l.single_image
