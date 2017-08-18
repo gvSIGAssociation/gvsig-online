@@ -57,6 +57,7 @@ import ast
 import re
 import os
 import unicodedata
+from datetime import datetime
 from owslib.wms import WebMapService
 from owslib.wmts import WebMapTileService
 from lxml import html
@@ -630,6 +631,35 @@ def layer_update(request, layer_id):
         if 'single_image' in request.POST:
             single_image = True
             cached = False
+            
+        time_enabled = False
+        time_field=''
+        time_endfield=''
+        time_presentation = ''
+        time_resolution_year = 0
+        time_resolution_month = 0
+        time_resolution_week = 0
+        time_resolution_day = 0
+        time_resolution_hour = 0
+        time_resolution_minute = 0
+        time_resolution_second = 0
+        time_default_value_mode = ''
+        time_default_value = ''
+ 
+        if 'time_enabled' in request.POST:
+            time_enabled = True
+            time_field = request.POST.get('time_enabled_field')
+            time_endfield = request.POST.get('time_enabled_endfield')
+            time_presentation = request.POST.get('time_presentation')
+            time_resolution_year = request.POST.get('time_resolution_year')
+            time_resolution_month = request.POST.get('time_resolution_month')
+            time_resolution_week = request.POST.get('time_resolution_week')
+            time_resolution_day = request.POST.get('time_resolution_day')
+            time_resolution_hour = request.POST.get('time_resolution_hour')
+            time_resolution_minute = request.POST.get('time_resolution_minute')
+            time_resolution_second = request.POST.get('time_resolution_second')
+            time_default_value_mode = request.POST.get('time_default_value_mode')
+            time_default_value = request.POST.get('time_default_value')
                 
         old_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
         
@@ -641,10 +671,44 @@ def layer_update(request, layer_id):
             layer.queryable = is_queryable 
             layer.single_image = single_image 
             layer.layer_group_id = layer_group_id
+            layer.time_enabled = time_enabled
+            layer.time_enabled_field = time_field
+            layer.time_enabled_endfield = time_endfield
+            layer.time_presentation = time_presentation
+            layer.time_resolution_year = time_resolution_year
+            layer.time_resolution_month = time_resolution_month
+            layer.time_resolution_week = time_resolution_week
+            layer.time_resolution_day = time_resolution_day
+            layer.time_resolution_hour = time_resolution_hour
+            layer.time_resolution_minute = time_resolution_minute
+            layer.time_resolution_second = time_resolution_second
+            layer.time_default_value_mode = time_default_value_mode
+            layer.time_default_value = time_default_value
             layer.save()
             
             if ds.type != 'e_WMS':
                 mapservice_backend.setQueryable(workspace, ds.name, ds.type, name, is_queryable)
+                time_resolution = 0
+                if (time_resolution_year != None and time_resolution_year > 0) or (time_resolution_month != None and time_resolution_month > 0) or (time_resolution_week != None and time_resolution_week > 0) or (time_resolution_day != None and time_resolution_day > 0):
+                    #time_resolution = 'P'
+                    if (time_resolution_year != None and time_resolution_year > 0):
+                        time_resolution = time_resolution + (int(time_resolution_year) * 3600 * 24 * 365)
+                    if (time_resolution_month != None and time_resolution_month > 0):
+                        time_resolution = time_resolution + (int(time_resolution_month) * 3600 * 24 * 31)
+                    if (time_resolution_week != None and time_resolution_week > 0):
+                        time_resolution = time_resolution + (int(time_resolution_week) * 3600 * 24 * 7)
+                    if (time_resolution_day != None and time_resolution_day > 0):
+                        time_resolution = time_resolution + (int(time_resolution_day) * 3600 * 24 * 1)
+                if (time_resolution_hour != None and time_resolution_hour > 0) or (time_resolution_minute != None and time_resolution_minute > 0) or (time_resolution_second != None and time_resolution_second > 0):
+                    #time_resolution = time_resolution + 'T'
+                    if (time_resolution_hour != None and time_resolution_hour > 0):
+                        time_resolution = time_resolution + (int(time_resolution_hour) * 3600)
+                    if (time_resolution_minute != None and time_resolution_minute > 0):
+                        time_resolution = time_resolution + (int(time_resolution_minute) * 60)
+                    if (time_resolution_second != None and time_resolution_second > 0):
+                        time_resolution = time_resolution + (int(time_resolution_second))
+                   
+                mapservice_backend.setTimeEnabled(workspace, ds.name, ds.type, name, time_enabled, time_field, time_endfield, time_presentation, time_resolution, time_default_value_mode, time_default_value)
             
             new_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
             
@@ -662,8 +726,34 @@ def layer_update(request, layer_id):
         datastore = Datastore.objects.get(id=layer.datastore.id)
         workspace = Workspace.objects.get(id=datastore.workspace_id)
         form = LayerUpdateForm(instance=layer)
-        return render(request, 'layer_update.html', {'layer': layer, 'workspace': workspace, 'form': form, 'layer_id': layer_id})
+        
+        date_fields = []
+        if layer.type == 'v_PostGIS':
+            aux_fields = get_date_fields(layer.id)
+            conf = ast.literal_eval(layer.conf)
+            if 'fields' in conf:
+                for field in conf['fields']:
+                    for data_field in aux_fields:
+                        if field['name'] == data_field:
+                            date_fields.append(field)
+            
+        
+        return render(request, 'layer_update.html', {'layer': layer, 'workspace': workspace, 'form': form, 'layer_id': layer_id, 'date_fields': json.dumps(date_fields)})
+
+
+def get_date_fields(layer_id):
+    date_fields = []
     
+    layer = Layer.objects.get(id=int(layer_id))
+    datastore = Datastore.objects.get(id=layer.datastore_id)
+    workspace = Workspace.objects.get(id=datastore.workspace_id)
+    (ds_type, resource) = mapservice_backend.getResourceInfo(workspace.name, datastore, layer.name, "json")
+    resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
+    for f in resource_fields:
+        if f['binding'] == 'java.sql.Date':
+            date_fields.append(f['name'])
+    
+    return date_fields
     
 def layer_autoconfig(layer_id):
     layer = Layer.objects.get(id=int(layer_id))
@@ -808,6 +898,51 @@ def layer_config(request, layer_id):
     
         return render(request, 'layer_config.html', {'layer': layer, 'layer_id': layer.id, 'fields': fields, 'fields_json': json.dumps(fields), 'available_languages': LANGUAGES, 'available_languages_array': available_languages})
     
+
+@require_POST
+@staff_required
+def layers_get_temporal_properties(request):
+    try:
+        #layer = Layer.objects.get(pk=layer_id)
+        layers = []
+        if 'layers' in request.POST:
+            layers = json.loads(request.POST['layers'])
+        methodx = ''
+        if 'methodx' in request.POST:
+            methodx = request.POST['methodx']
+
+        min_value = ''
+        max_value = ''
+        list_values = []
+        for layer_id in layers:
+            layer = Layer.objects.get(id=layer_id)
+            params = json.loads(layer.datastore.connection_params)
+            host = params['host']
+            port = params['port']
+            dbname = params['database']
+            user = params['user']
+            passwd = params['passwd']
+            schema = params.get('schema', 'public')
+            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+            temporal_defs = i.get_temporal_info(layer.name, schema, layer.time_enabled_field, layer.time_enabled_endfield, layer.time_default_value_mode, layer.time_default_value)
+            
+            if temporal_defs.__len__() > 0:
+                aux_min_value = datetime.strptime(temporal_defs[0]['min_value'], '%Y-%m-%d %H:%M:%S')
+                if min_value == '' or datetime.strptime(min_value, '%Y-%m-%d %H:%M:%S') > aux_min_value:
+                    min_value = temporal_defs[0]['min_value']
+                aux_max_value = datetime.strptime(temporal_defs[0]['max_value'], '%Y-%m-%d %H:%M:%S')
+                if max_value == '' or datetime.strptime(max_value, '%Y-%m-%d %H:%M:%S') < aux_max_value:
+                    max_value = temporal_defs[0]['max_value']
+                #list_values = list_values + temporal_defs['list_values']
+                
+        
+        
+        return HttpResponse('{"response": "ok", "min_value": "'+str(min_value)+'", "max_value": "'+str(max_value)+'", "list_values": "'+str(list_values)+'"}', content_type='application/json')
+    
+    except Exception as e:
+        return HttpResponseNotFound('<h1>Temporal properties not found </h1>')
+
+
 
 @require_POST
 @staff_required
@@ -1453,8 +1588,8 @@ def get_feature_info(request):
         else:
             if 'username' in request.session and 'password' in request.session:
                 if request.session['username'] is not None and request.session['password'] is not None:
-                    req.auth = (request.session['username'], request.session['password'])
-                    #req.auth = ('admin', 'geoserver')
+                    #req.auth = (request.session['username'], request.session['password'])
+                    req.auth = ('admin', 'geoserver')
                                           
             try:
                 w = Workspace.objects.get(name__exact=ws)
@@ -1633,8 +1768,8 @@ def get_datatable_data(request):
             req = requests.Session()
             if 'username' in request.session and 'password' in request.session:
                 if request.session['username'] is not None and request.session['password'] is not None:
-                    req.auth = (request.session['username'], request.session['password'])
-                    #req.auth = ('admin', 'geoserver')
+                    #req.auth = (request.session['username'], request.session['password'])
+                    req.auth = ('admin', 'geoserver')
                     
             print wfs_url + "?" + params
             response = req.post(wfs_url, data=values, verify=False)
