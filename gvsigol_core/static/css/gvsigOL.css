@@ -4794,3 +4794,19 @@ table.dataTable thead th span.subname, table.dataTable tfoot th span.subname{
     padding-left: 15px;
     padding-right: 15px;
 }
+
+.temporary-layers-slider{
+	margin-top: 20px;
+	margin-bottom: 20px;
+	margin.right: 20px;
+}
+
+.temporary_text{
+	font-weight: bold;
+	margin-left: 15px;
+}
+
+.time_resolution_field{
+	width: 62px;
+    float: left;
+}

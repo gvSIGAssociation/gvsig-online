@@ -273,6 +273,48 @@ class Geoserver():
             return True
         
         raise FailedRequestError(r.status_code, r.content)
+    
+    def set_time_dimension(self, workspace, ds_name, ds_type, name, time_enabled, time_field, time_endfield=None, presentation='CONTINUOUS_INTERVAL', resolution=0, default_value_mode='MAXIMUM', default_value=None, user=None, password=None):
+        #from geoserver.support import DimensionInfo
+        
+        url =  self.service_url + '/workspaces/'+workspace+'/datastores/'+ds_name+'/featuretypes/'+name+'.xml'
+        headers = {'Content-Type': 'text/xml'}
+       
+        data = ''
+        data += '<featureType>'
+        data += '    <name>'+name+'</name>'
+        data += '    <metadata>'
+        data += '        <entry key="time">'
+        data += '            <dimensionInfo>'
+        data += '                <enabled>'+str(time_enabled).lower()+'</enabled>'
+        if time_enabled:
+            data += '                <attribute>'+time_field+'</attribute>'
+            if time_endfield != None and time_endfield != '':
+                data += '                <endAttribute>'+time_endfield+'</endAttribute>'
+            data += '                <presentation>'+presentation+'</presentation>'
+            if resolution != 0 and presentation == 'DISCRETE_INTERVAL':
+                data += '                <resolution>'+str(resolution*1000)+'</resolution>'
+            data += '                <units>ISO8601</units>'
+            data += '                <defaultValue>'
+            data += '                    <strategy>'+default_value_mode+'</strategy>'
+            if default_value != None and default_value_mode != 'MINIMUM' and default_value_mode != 'MAXIMUM':
+                data += '                    <referenceValue>'+default_value+'</referenceValue>'
+            data += '                </defaultValue>'
+        data += '            </dimensionInfo>'
+        data += '        </entry>'
+        data += '    </metadata>'
+        data += '</featureType>'
+        
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+            
+        r = self.session.put(url, headers=headers, auth=auth, data=data)
+        if r.status_code==200:
+            return True
+        
+        raise FailedRequestError(r.status_code, r.content)
             
     def raw_request(self, url, params, user=None, password=None):
         try:
