@@ -492,7 +492,9 @@ def layer_add(request):
     if request.method == 'POST':
         form = LayerForm(request.POST)
         abstract = request.POST.get('md-abstract')
+        highlight_scale = None
         is_visible = False
+        
         if 'visible' in request.POST:
             is_visible = True
         
@@ -508,6 +510,13 @@ def layer_add(request):
         if 'single_image' in request.POST:
             single_image = True
             cached = False
+            
+        highlight = False
+        if 'highlight' in request.POST:
+            highlight = True
+            highlight_scale = request.POST.get('highlight_scale')
+        else:
+            highlight_scale = -1
         
         if form.is_valid():
             try:
@@ -536,6 +545,8 @@ def layer_add(request):
                 newRecord.queryable = is_queryable
                 newRecord.cached = cached
                 newRecord.single_image = single_image
+                newRecord.highlight = highlight
+                newRecord.highlight_scale = float(highlight_scale)
                 newRecord.abstract = abstract
                 newRecord.save()
                 
@@ -615,6 +626,8 @@ def layer_update(request, layer_id):
         title = request.POST.get('title')
         #style = request.POST.get('style')
         layer_group_id = request.POST.get('layer_group')
+        highlight_scale = None
+        
         is_visible = False
         if 'visible' in request.POST:
             is_visible = True
@@ -645,7 +658,7 @@ def layer_update(request, layer_id):
         time_resolution_second = 0
         time_default_value_mode = ''
         time_default_value = ''
- 
+        
         if 'time_enabled' in request.POST:
             time_enabled = True
             time_field = request.POST.get('time_enabled_field')
@@ -660,6 +673,15 @@ def layer_update(request, layer_id):
             time_resolution_second = request.POST.get('time_resolution_second')
             time_default_value_mode = request.POST.get('time_default_value_mode')
             time_default_value = request.POST.get('time_default_value')
+            
+        highlight = False
+        if 'highlight' in request.POST:
+            highlight = True
+            highlight_scale = request.POST.get('highlight_scale')
+        else:
+            highlight_scale = -1
+            
+        
                 
         old_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
         
@@ -670,6 +692,8 @@ def layer_update(request, layer_id):
             layer.visible = is_visible
             layer.queryable = is_queryable 
             layer.single_image = single_image 
+            layer.highlight = highlight
+            layer.highlight_scale = float(highlight_scale)
             layer.layer_group_id = layer_group_id
             layer.time_enabled = time_enabled
             layer.time_enabled_field = time_field
@@ -736,11 +760,17 @@ def layer_update(request, layer_id):
                     for data_field in aux_fields:
                         if field['name'] == data_field:
                             date_fields.append(field)
+                            
+        if layer.highlight_scale is not None: 
+            if int(layer.highlight_scale) >=0:
+                highlight_scale = int(layer.highlight_scale)
+            else:
+                highlight_scale = -1
+        else:
+            highlight_scale = -1
             
-        
-        return render(request, 'layer_update.html', {'layer': layer, 'workspace': workspace, 'form': form, 'layer_id': layer_id, 'date_fields': json.dumps(date_fields)})
-
-
+        return render(request, 'layer_update.html', {'layer': layer, 'highlight_scale': highlight_scale, 'workspace': workspace, 'form': form, 'layer_id': layer_id, 'date_fields': json.dumps(date_fields)})
+    
 def get_date_fields(layer_id):
     date_fields = []
     
