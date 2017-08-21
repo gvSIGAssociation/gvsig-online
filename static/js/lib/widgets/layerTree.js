@@ -26,7 +26,6 @@
 var layerTree = function(conf, map, isPublic) {
 	this.map = map;	
 	this.conf = conf;
-	this.isPublic= isPublic;
 	this.editionBar = null;
 	this.$container = $('#layer-tree-tab');
 	this.$temporary_container = $('#temporary-tab');
@@ -67,12 +66,6 @@ layerTree.prototype.createTree = function() {
 	tree += '				</div>';
 	tree += '				<div id="baselayers-group" class="box-body" style="display: block; font-size: 12px;">';
 	tree += 					self.createBaseLayerUI(gettext('None'), false);
-//	tree += 					self.createBaseLayerUI('OpenStreetMap', true);
-//	if (this.conf.base_layers.bing && this.conf.base_layers.bing.active) {
-//		tree += 				self.createBaseLayerUI(gettext("Bing roads"), false);
-//		tree += 				self.createBaseLayerUI(gettext("Bing aerial"), false);
-//		tree += 				self.createBaseLayerUI(gettext("Bing aerial with labels"), false);
-//    }
 	for (var i=0; i<this.conf.base_layers.length; i++) {
 		var base_layer = this.conf.base_layers[i];
 		tree += 				self.createBaseLayerUI(gettext(base_layer['title']), base_layer['active']);
@@ -214,26 +207,6 @@ layerTree.prototype.createTree = function() {
 		var dataTable = new attributeTable(selectedLayer, self.map, self.conf);
 		dataTable.show();
 		dataTable.registerEvents();
-	});
-	
-	
-	$(".start-edition-link").on('click', function(e) {
-		if (self.editionBar == null) {
-			var selectedLayer = null;
-			var id = this.id.split("start-edition-")[1];
-			var layers = self.map.getLayers();
-			layers.forEach(function(layer){
-				if (layer.baselayer == false) {
-					if (id==layer.get('id')) {
-						selectedLayer = layer;
-					}
-				}						
-			}, this);
-
-			self.startEdition(selectedLayer, self);
-		} else {
-			messageBox.show('warning', gettext('You are editing the layer') + ': ' + self.editionBar.getSelectedLayer().title);
-		}
 	});
 	
 	$(".show-metadata-link").on('click', function(e) {
@@ -578,18 +551,7 @@ layerTree.prototype.getLayerFromMap = function(tocLayer) {
 		if (layer.baselayer == false) {
 			if (layer.get('id')==tocLayer.id) {
 				mapLayer = layer;
-			}/* else {
-				if (layer.getSource().params_) {
-					if (layer.getSource().getParams().LAYERS.indexOf(tocLayer.name) > -1) {
-						mapLayer = layer;
-					}
-					
-				} else {
-					if (tocLayer.name == layer.layer_name) {
-						mapLayer = layer;
-					}
-				}
-			}*/
+			}
 			
 		}
 	}, this);
@@ -606,17 +568,7 @@ layerTree.prototype.getGroupLayerFromMap = function(tocLayer) {
 		if (layer.baselayer == false) {
 			if (layer.get('id')==tocLayer) {
 				mapLayer = layer;
-			}/*
-			if (layer.getSource().params_) {
-				if (layer.getSource().getParams().LAYERS.indexOf(tocLayer.name) > -1) {
-					mapLayer = layer;
-				}
-				
-			} else {
-				if (tocLayer.name == layer.layer_name) {
-					mapLayer = layer;
-				}
-			}*/
+			}
 		}
 	}, this);
 	return mapLayer;
@@ -707,17 +659,6 @@ layerTree.prototype.createOverlayUI = function(layer) {
 		ui += '		<i class="fa fa-table"></i> ' + gettext('Attribute table');
 		ui += '	</a>';
     }	
-	if (!this.isPublic){
-		if (mapLayer.is_vector) {
-	    	if (mapLayer.write_roles.length >= 1) {
-	    		if (this.userCanWrite(mapLayer)) {
-	    			ui += '	<a id="start-edition-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool start-edition-link">';
-	    			ui += '		<i class="fa fa-edit"></i> ' + gettext('Edit layer');
-	    			ui += '	</a>';
-	    		}
-	    	}
-	    }
-	}
 	if (layer.time_enabled && layer.is_vector) {	    
 	    ui += '	<a id="time-enabled-' + id + '" data-id="' + id + '" class="btn btn-block btn-social btn-custom-tool time-enabled-link">';
 		ui += '		<i class="fa fa-clock-o" aria-hidden="true"></i> ' + gettext('Temporary');
@@ -736,111 +677,6 @@ layerTree.prototype.createOverlayUI = function(layer) {
 	
 	return ui;
 };
-
-/**
- * TODO
- */
-layerTree.prototype.describeFeatureType = function(layer) {
-	
-	var featureType = new Array();
-	
-	$.ajax({
-		type: 'POST',
-		async: false,
-	  	url: '/gvsigonline/services/describeFeatureType/',
-	  	data: {
-	  		'layer': layer.layer_name,
-			'workspace': layer.workspace
-		},
-	  	success	:function(response){
-	  		if("fields" in response){
-	  			featureType = response['fields'];
-	  		}
-		},
-	  	error: function(){}
-	});
-	
-	/*
-	$.ajax({
-		type: 'POST',
-		async: false,
-	  	url: layer.wfs_url,
-	  	data: {
-	  		'service': 'WFS',
-			'version': '1.1.0',
-			'request': 'describeFeatureType',
-			'typeName': layer.getSource().getParams().LAYERS, 
-			'outputFormat': 'text/xml; subtype=gml/3.1.1'
-		},
-	  	success	:function(response){
-	  		var elements = null;
-			try {
-				elements = response.getElementsByTagName('sequence')[0].children;
-		    } catch (error) {
-		    	elements = response.getElementsByTagName('xsd:sequence')[0].children;
-		    }
-			
-			for (var i=0; i<elements.length; i++) {
-				var element = {
-					'name': elements[i].attributes[2].nodeValue,
-					'type': elements[i].attributes[4].nodeValue
-				};
-				featureType.push(element);
-			}
-		},
-	  	error: function(){}
-	});
-	*/
-	
-	return featureType;
-};
-
-/**
- * Tries to add a layer lock and starts edition on success
- */
-layerTree.prototype.startEdition = function(layer, layerTree) {
-	$.ajax({
-		type: 'POST',
-		async: true,
-	  	url: '/gvsigonline/services/add_layer_lock/',
-	  	data: {
-		  	workspace: layer.workspace,
-		  	layer: layer.layer_name
-		},
-		origdata: {
-			layer: layer,
-			layertree: layerTree
-		},
-	  	beforeSend:function(xhr){
-	    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-	  	},
-	  	success	:function(response){
-	  		var self = this.origdata.layertree;
-	  		var selectedLayer = this.origdata.layer;
-	  		var featureType = self.describeFeatureType(selectedLayer);
-	  		self.editionBar = new editionBar(self, self.map, featureType, selectedLayer);
-	  	},
-	  	error: function(){
-	  		messageBox.show('error', gettext('The layer you are trying to edit is locked'));
-	  	}
-	});
-};
-
-/**
- * TODO
- */
-layerTree.prototype.userCanWrite = function(layer) {
-	var canWrite = false;
-	for (var i=0; i<layer.write_roles.length; i++) {
-		for (var k=0; k<this.conf.user.permissions.roles.length; k++) {
-			if (layer.write_roles[i] == this.conf.user.permissions.roles[k]) {
-				canWrite = true;
-			}
-		}
-	}
-	return canWrite;
-};
-
 
 layerTree.prototype.zoomToLayer = function(layer) {
 	var self = this;
@@ -874,6 +710,13 @@ layerTree.prototype.zoomToLayer = function(layer) {
  */
 layerTree.prototype.getEditionBar = function(layer) {
 	return this.editionBar;
+};
+
+/**
+ * TODO
+ */
+layerTree.prototype.setEditionBar = function(editionbar) {
+	this.editionBar = editionbar;
 };
 
 /**
