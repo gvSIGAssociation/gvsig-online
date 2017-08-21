@@ -39,6 +39,8 @@ urlpatterns = [
     url(r'^symbol_update/(?P<symbol_id>[0-9]+)/$', 'gvsigol_symbology.views.symbol_update', name='symbol_update'),
     url(r'^symbol_delete/$', 'gvsigol_symbology.views.symbol_delete', name='symbol_delete'),
     url(r'^get_symbols_from_library/$', 'gvsigol_symbology.views.get_symbols_from_library', name='get_symbols_from_library'),
+    
+    url(r'^get_wfs_style/$', 'gvsigol_symbology.views.get_wfs_style', name='get_wfs_style'),
 
     #url(r'^style_label_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.style_label_update', name='style_label_update'),
     #url(r'^create_style/$', 'gvsigol_symbology.views.create_style', name='create_style'),
