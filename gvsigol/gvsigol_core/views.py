@@ -572,6 +572,10 @@ def project_get_conf(request):
                     layer['abstract'] = l.abstract
                     layer['visible'] = l.visible 
                     layer['queryable'] = l.queryable 
+                    layer['highlight'] = l.highlight
+                    if l.highlight:
+                        layer['highlight_scale'] = int(l.highlight_scale)
+                        
                     layer['time_enabled'] = l.time_enabled
                     if layer['time_enabled']:
                         layer['ref'] = l.id
