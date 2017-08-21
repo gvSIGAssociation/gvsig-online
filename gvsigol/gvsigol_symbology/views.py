@@ -33,6 +33,7 @@ from gvsigol_auth.utils import staff_required
 from gvsigol import settings
 from gvsigol_symbology import services, services_library, services_unique_symbol,\
     services_unique_values, services_intervals, services_expressions, services_color_table
+from django.views.decorators.csrf import csrf_exempt
 import utils
 import json
 import ast
@@ -827,6 +828,27 @@ def symbol_delete(request):
             services_library.delete_symbol(rule, library_rule)
             return HttpResponse(json.dumps({'library_id': library_id, 'success': True}, indent=4), content_type='application/json')
         
+        except Exception as e:
+            message = e.message
+            return HttpResponse(json.dumps({'message':message, 'success': False}, indent=4), content_type='application/json')
+        
+@csrf_exempt
+def get_wfs_style(request):
+    if request.method == 'POST':
+        layer_name = request.POST['layer_name']
+        layer_query_set = Layer.objects.filter(name=layer_name)
+        layer = layer_query_set[0]
+             
+        try:
+            layerStyles = StyleLayer.objects.filter(layer=layer)
+            for layerStyle in layerStyles:
+                if layerStyle.style.is_default:
+                    style_rules = Rule.objects.filter(style=layerStyle.style)
+                    rule = style_rules[0]
+                    symbolizers = Symbolizer.objects.filter(rule=rule).order_by('order')
+                    sym = utils.symbolizer_to_json(symbolizers[0])
+                    return HttpResponse(json.dumps({'style':sym, 'success': True}, indent=4), content_type='application/json')
+                    
         except Exception as e:
             message = e.message
             return HttpResponse(json.dumps({'message':message, 'success': False}, indent=4), content_type='application/json')

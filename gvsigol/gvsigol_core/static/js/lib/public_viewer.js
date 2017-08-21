@@ -151,7 +151,7 @@ viewer.core = {
     },
     
     _createWidgets: function() {   
-    	this.layerTree = new layerTree(this.conf, this.map, true);
+    	this.layerTree = new layerTree(this.conf, this.map);
     	this.legend = new legend(this.conf, this.map);
     },
     
