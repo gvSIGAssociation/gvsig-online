@@ -676,7 +676,7 @@ class Geoserver():
         elif store.type == 'c_GeoTIFF':
             url = self.rest_catalog.service_url + "/workspaces/" + workspace + "/coveragestores/" + store.name + "/coverages/" + featureType +"."+type
             ds_type = 'coverage'
-            
+        
         r = self.rest_catalog.session.get(url, auth=(self.user, self.password))
         if r.status_code==200:
             content = r.content
