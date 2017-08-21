@@ -66,18 +66,17 @@ INSTALLED_APPS = [
     'gvsigol_filemanager',
     'gvsigol_core',
     'gvsigol_app_dev',
-    #'gvsigol_app_aguas',
-    #'gvsigol_app_pobla',
-    #'gvsigol_app_benicarlo',
+    'gvsigol_plugin_edition',
+    'gvsigol_plugin_graphiccapture'
     #'gvsigol_plugin_worldwind',
     #'gvsigol_plugin_shps_folder',
     #'gvsigol_plugin_geocoding',
     #'gvsigol_plugin_etl',
     #'gvsigol_plugin_sync',
-    'gvsigol_plugin_catastro',
+    #'gvsigol_plugin_catastro',
     #'gvsigol_plugin_alfresco',
-    'gvsigol_plugin_print',
-    'gvsigol_plugin_catalog',
+    #'gvsigol_plugin_print',
+    #'gvsigol_plugin_catalog',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -214,12 +213,12 @@ LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol_symbology/locale'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/locale'),
     os.path.join(BASE_DIR, 'gvsigol_app_dev/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_app_pobla/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_app_benicarlo/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_geocoding/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_etl/locale'),
+    os.path.join(BASE_DIR, 'gvsigol_plugin_edition/locale'),
+    os.path.join(BASE_DIR, 'gvsigol_plugin_graphiccapture/locale')
 )
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -248,14 +247,13 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_services/static'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
-    #os.path.join(BASE_DIR, 'gvsigol_app_aguas/static'),
     os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
-    #os.path.join(BASE_DIR, 'gvsigol_app_pobla/static'),
-    #os.path.join(BASE_DIR, 'gvsigol_app_benicarlo/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_geocoding/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_etl/static'),
+    os.path.join(BASE_DIR, 'gvsigol_plugin_edition/static'),
+    os.path.join(BASE_DIR, 'gvsigol_plugin_graphiccapture/static')
 )
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
