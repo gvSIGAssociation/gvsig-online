@@ -1,0 +1,53 @@
+#    gvSIG Online.
+#    Copyright (C) 2010-2017 SCOLAB.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+msgid "legalwarning"
+msgstr ""
+"Todos los contenidos cartográficos de este web y de los servicios que proporciona son propiedad de esta institución." 
+"La institución no es responsable de la información que se puede obtener a través de enlaces a sistemas externos."
+
+msgid "Print params"
+msgstr "Parametros de impresión"
+
+msgid "Select print template"
+msgstr "Seleccionar plantilla de impresión"
+
+msgid "Select template"
+msgstr "Seleccionar plantilla"
+
+msgid "Title"
+msgstr "Título"
+
+msgid "Legal warning"
+msgstr "Aviso legal"
+
+msgid "Rotation"
+msgstr "Rotación"
+
+msgid "Print"
+msgstr "Imprimir"
+
+msgid "Print map"
+msgstr "Imprimir mapa"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "You must select a template"
+msgstr "Ha de seleccionar una plantilla"
+
+msgid "Error loading print plugin"
+msgstr "Error cargando plugin de impresión"

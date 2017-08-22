@@ -1,0 +1,42 @@
+{% load staticfiles %}
+
+<!-- WW DIV -->
+<div id="divWW" style="position: absolute; top: 0px; left: 0px; height:100%; width:100%; ">
+    <!-- Create a canvas for Web World Wind. -->
+    <canvas id="canvasWW" style="width: 100%; height: 100%; display:none;">
+        Your browser does not support HTML5 Canvas.
+    </canvas>
+</div>
+
+<!-- WW DIV must be inside OLMap DIV -->
+<script>$("#divWW").detach().prependTo("#map");</script>
+
+<!-- WW library	-->
+<script type="text/javascript" src="{% static "js/vendors/worldwind/worldwindlib.js" %}"></script> 	
+ 
+<!-- WW control -->
+<script type="text/javascript" src="{% static "js/lib/ChangeToWWControl.js" %}"></script>
+
+<!-- Get configuration from a project  -->	
+<script type="text/javascript">
+	
+	$.ajax({
+		type : 'POST',
+		async : false,
+		url : '/gvsigonline/ww_provider_conf/{{pid}}/',
+		beforeSend : function(xhr) {
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		success : function(response) {
+			var map = viewer.core.getMap();
+			var tool = new ChangeToWWControl(map, response);
+			viewer.core.loadTool(tool);			
+			//Al añadir una nueva entrada en la barra de herramientas debemos
+			//desplazar la barra de edición para evitar solapes
+			$('.editionbar').css("top","230");
+		},
+		error : function() {
+			alert("Error loading WorldWind");
+		}
+	});
+</script>

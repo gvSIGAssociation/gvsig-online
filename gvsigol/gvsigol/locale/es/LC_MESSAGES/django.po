@@ -1,0 +1,47 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-07-21 11:57+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: gvsigol/settings.py:211 gvsigol/settings_template.py:193
+msgid "Spanish"
+msgstr "Español"
+
+#: gvsigol/settings.py:212 gvsigol/settings_template.py:194
+msgid "Valencian"
+msgstr "Valenciano"
+
+#: gvsigol/settings.py:213 gvsigol/settings_template.py:195
+msgid "Catalan"
+msgstr "Catalan"
+
+#: gvsigol/settings.py:214 gvsigol/settings_template.py:196
+msgid "English"
+msgstr "Inglés"
+
+#: gvsigol/settings.py:298 gvsigol/settings_template.py:252
+msgid "PostGIS vector"
+msgstr ""
+
+#: gvsigol/settings.py:300 gvsigol/settings_template.py:254
+msgid "GeoTiff"
+msgstr ""
+
+#: gvsigol/settings.py:301 gvsigol/settings_template.py:255
+msgid "Cascading WMS"
+msgstr "WMS en cascada"

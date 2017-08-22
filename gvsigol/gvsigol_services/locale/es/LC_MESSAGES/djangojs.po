@@ -1,0 +1,54 @@
+#    gvSIG Online.
+#    Copyright (C) 2010-2017 SCOLAB.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+msgid "You can not update a data store type GeoTIFF. Delete it and create it again"
+msgstr "No puede actualizar un almacén de tipo GeoTIFF. Borrelo y creelo de nuevo."
+
+msgid "Select type"
+msgstr "Seleccionar tipo"
+
+msgid "Select enumeration"
+msgstr "Seleccionar enumeración"
+
+msgid "Field name"
+msgstr "Nombre del campo"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Save field"
+msgstr "Guardar campo"
+
+msgid "Edit field"
+msgstr "Editar campo"
+
+msgid "true"
+msgstr "Verdadero"
+
+msgid "false"
+msgstr "Falso"
+
+msgid "True"
+msgstr "Verdadero"
+
+msgid "False"
+msgstr "Falso"
+
+msgid "Invalid name: Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers"
+msgstr "Nombre no válido: Los identificadores deben empezar con una letra o guión bajo (_). Los siguientes caracteres pueden ser letras, guión bajo o números"
+
+msgid "Enumeration cannot contain point-colon"
+msgstr "los valores no pueden contener valores (;)"

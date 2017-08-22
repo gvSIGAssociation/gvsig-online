@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="box">
+
+				<form id="project-form" enctype="multipart/form-data" role="form" method="post" action="/gvsigonline/core/project_update/{{pid}}/">
+					<div class="box-header with-border">
+						<h3 class="box-title">{% trans "Update project" %}</h3>
+						<div class="box-tools pull-right">
+							<button id="save_button" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+						</div>
+					</div>
+					
+					<div class="box-body">
+						{% csrf_token %}													
+						{% if message %}
+						<div id="form-error" style="color:#ff0000;">
+							<p>* {{ message }}</p>
+						</div>
+						{% endif %}
+										
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="project-name">{% trans "Name" %}</label>
+								<input placeholder="{% trans 'Project name' %}" name="project-name" id="project-name" type="text" class="form-control" value="{{project.name}}">						
+							</div>
+						</div>
+										
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="project-description">{% trans "Description" %}</label>
+								<input placeholder="{% trans 'Project description' %}" name="project-description" id="project-description" type="text" class="form-control" value="{{project.description}}">						
+							</div>
+						</div>	
+						
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="is_public">{% trans "Is public?" %}</label>&nbsp;&nbsp;
+								{% if project.is_public %}
+								<input type="checkbox" name="is_public"  id="is_public" checked/>
+								{% else %}
+								<input type="checkbox" name="is_public"  id="is_public"/>
+								{% endif %}								
+							</div>
+						</div>	
+						
+						
+						<div class="row">
+							{% if has_geocoding_plugin %}	
+									<div id="project-map" class="mini-map shps-folder-project-map">
+										<div class="col-md-3 form-group float-search-tool">
+											<input placeholder="{% trans 'Locate place...' %}" name="location-autocomplete" id="location-autocomplete" type="text" class="form-control">
+										</div>
+									</div>
+								{% else %}
+									<div id="project-map" class="mini-map"></div>
+								{% endif %}	
+						</div>
+						
+						<input type="hidden" name="center-lat" id="center-lat">
+						<input type="hidden" name="center-lon" id="center-lon">
+						<input type="hidden" name="extent" id="extent">
+						<input type="hidden" name="zoom" id="zoom">		
+						
+						<div class="row">
+							<div class="col-md-12" style="margin-bottom: 20px;">
+								<div class="provider-img">
+									<img style="height: 50px; width: 50px;" id="image-preview" src="{{project.image.url}}" alt="">
+								</div>
+								<div class="provider-img-change">
+									<label>{% trans "Change image?" %}</label>({% trans "Supported formats" %}: .jpg, .jpeg, .png)
+									<input id="project-image" name="project-image" accept=".jpg, .jpeg, .png" type="file" class="file" data-show-preview="true">						
+								</div>
+							</div>	
+						</div>	
+						
+						<div id="base-layer-box" class="box searchable-list-box" style="margin-top: 20px;">
+							<div class="box-header with-border">
+								<h3 class="box-title col-md-6">{% trans "Assign base layers" %}</h3> 
+								<div class="col-md-6">
+									<input type="text" class="search3 form-control" placeHolder="{% trans 'Buscar capas base...' %}"/>
+								</div>
+							</div>
+							<div class="box-body">
+								<ul class="products-list product-list-in-box list3">
+									{% for base_layer in base_layers %}
+									<li class="item">
+										<div class="product-img">
+											<img src="{% static "img/layers.png" %}" alt="Layers Image">
+										</div>
+										<div class="product-info">
+											<a href="javascript:void(0)" class="product-title">
+												<div class="checkbox pull-left">	
+													<span class="searchable-base-layer">{{base_layer.title}}</span><br />
+													<span class="searchable-base-layer" style="font-weight: normal">{{base_layer.name}}</span>
+												</div>
+												<div class="checkbox pull-right">													
+													<label>
+														{% if base_layer.id in selected_base_layers %}
+														<input type="checkbox" name="baselayer-{{base_layer.id}}" id="baselayer-{{base_layer.id}}" checked/><span style="width:150px;">{% trans "Assign base layers" %}</span>
+														{% else %}
+														<input type="checkbox" name="baselayer-{{base_layer.id}}" id="baselayer-{{base_layer.id}}"/><span style="width:150px;">{% trans "Assign base layers" %}</span>
+														{% endif %}
+														<br />
+														{% if base_layer.id in selected_base_layer %}
+															<input type="radio" name="baselayers-default" id="baselayer-{{base_layer.id}}-default" selected /><span style="width:150px;">{% trans "Mark as default" %}</span>
+														{% else %}
+															<input type="radio" name="baselayers-default" id="baselayer-{{base_layer.id}}-default"/><span style="width:150px;">{% trans "Mark as default" %}</span>
+														{% endif %}
+													</label>
+												</div>
+											</a> 
+											<span class="product-description"><span class="searchable-layer">{{base_layers.type}}</span></span>
+										</div>
+									</li> 
+									{% endfor %}
+								</ul>
+								<ul class="pagination"></ul>
+							</div>
+						</div>
+						
+						<input type="hidden" id="default_base_layer_selected" name="default_base_layer_selected" value="{{ selected_base_layer }}"/>
+						
+						
+						<div id="user-list-box" class="box searchable-list-box" style="margin-top: 20px;">
+							<div class="box-header with-border">
+								<h3 class="box-title col-md-6">{% trans "Assign user groups" %}</h3> <div class="col-md-6"><input type="text" class="search form-control" placeHolder="{% trans 'Buscar grupo de usuarios...' %}" /></div>
+							</div>
+							<div class="box-body">
+								<ul class="products-list product-list-in-box list">
+									{% for group in groups %}
+									<li class="item">
+										<div class="product-img">
+											<img src="{% static "img/users.png" %}" alt="Users Image">
+										</div>
+										<div class="product-info">
+											<a href="javascript:void(0)" class="product-title"><span class="searchable-user">{{group.name}}</span>
+												<div class="checkbox pull-right">													
+													<label>
+														{% if group.checked %}
+															<input type="checkbox" name="usergroup-{{group.id}}" id="usergroup-{{group.id}}" checked/>{% trans "Assign user group" %}
+														{% else %}
+															<input type="checkbox" name="usergroup-{{group.id}}" id="usergroup-{{group.id}}"/>{% trans "Assign user group" %}
+														{% endif %}
+													</label>
+												</div>
+											</a> 
+											<span class="product-description">{{group.description}}</span>
+										</div>
+									</li> 
+									{% endfor %}
+								</ul>
+								<ul class="pagination"></ul>
+							</div>
+						</div>
+
+						<div id="layer-list-box" class="box searchable-list-box" style="margin-top: 20px;">
+							<div class="box-header with-border">
+								<h3 class="box-title col-md-6">{% trans "Assign layer groups" %}</h3> <div class="col-md-6"><input type="text" class="search2 form-control" placeHolder="{% trans 'Buscar grupo de capas...' %}" /></div>
+							</div>
+							<div class="box-body">
+								<ul class="products-list product-list-in-box list2">
+									{% for layergroup in layergroups %}
+									<li class="item">
+										<div class="product-img">
+											<img src="{% static "img/layers.png" %}" alt="Layers Image">
+										</div>
+										<div class="product-info">
+											<a href="javascript:void(0)" class="product-title"><span class="searchable-layer">{{layergroup.name}}</span>
+												<div class="checkbox pull-right">													
+													<label>
+														{% if layergroup.checked %}
+															<input type="checkbox" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}" checked/>{% trans "Assign layer group" %}
+														{% else %}
+															<input type="checkbox" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}"/>{% trans "Assign layer group" %}
+														{% endif %}
+													</label>
+												</div>
+											</a> 
+											<span class="product-description"><span class="searchable-layer">{{layergroup.description}}</span></span>
+										</div>
+									</li> 
+									{% endfor %}
+								</ul>
+								<ul class="pagination"></ul>
+							</div>
+						</div>
+													
+					</div>
+				</form>		
+			</div>
+		</div>				
+	</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script type="text/javascript">
+	$('#menu-manage-projects').addClass("active");
+	
+	
+	 function readURL(input) {
+	        if (input.files && input.files[0]) {
+	            var reader = new FileReader();
+	            
+	            reader.onload = function (e) {
+	                $('#image-preview').attr('src', e.target.result);
+	            }
+	            
+	            reader.readAsDataURL(input.files[0]);
+	        }
+	    }
+	
+	
+	$("#project-image").change(function(){
+	  readURL(this);
+	});
+	
+	
+	$().ready(function() {
+		/**
+		  * Create the map.
+		  */
+		var map = new ol.Map({
+			layers : [ new ol.layer.Tile({
+				source : new ol.source.OSM()
+			})],
+			target : 'project-map',
+			view : new ol.View({
+				center: ol.proj.transform([parseFloat('{{project.center_lon}}'), parseFloat('{{project.center_lat}}')], 'EPSG:4326', 'EPSG:3857'),
+			    zoom: '{{project.zoom}}'
+			})
+		});
+		
+		var searcheableList = new List('user-list-box', {
+	  		  valueNames: ['searchable-user'],
+	  		  listClass:'list',
+	  		  searchClass: 'search',
+	  		  page: 6,
+	  		  pagination: false
+	  		});
+		
+		var searcheableList2 = new List('layer-list-box', {
+		  valueNames: ['searchable-layer'],
+		  listClass:'list2',
+		  searchClass: 'search2',
+		  page: 6,
+		  pagination: false
+		});
+
+		var searcheableList3 = new List('base-layer-box', {
+	  		  valueNames: ['searchable-base-layer'],
+	  		  listClass:'list3',
+	  		  searchClass: 'search3',
+	  		  page: 3,
+	  		  pagination: false
+	  		});
+		
+		searcheableList3.on('updated', function(list) {
+			updateDefaultBaseLayer();
+		});
+		
+		function updateDefaultBaseLayer(){
+			var selected_item = $("#default_base_layer_selected").val();
+			$("input[name=baselayers-default]").prop("checked", false);
+			$("#baselayer-"+selected_item+"-default").prop("checked", true);
+			
+			$("input[name=baselayers-default]").unbind("change").on("change", function(){
+				var split = this.id.split("-");
+				if(split.length==3){
+					var base_layer_id = split[1];
+					$("#baselayer-"+base_layer_id+"").prop("checked", true);
+					$("#default_base_layer_selected").val(base_layer_id);
+				}
+				
+			})
+		}
+		
+		updateDefaultBaseLayer();
+		
+	  	$("#save_button").click(function(e){
+	  		e.preventDefault(); // prevents default
+	  		for(var i=0; i<searcheableList.items.length; i++){
+	  			var item = searcheableList.items[i];
+	  			item.show();
+	  		}
+	  		for(var i=0; i<searcheableList2.items.length; i++){
+	  			var item = searcheableList2.items[i];
+	  			item.show();
+	  		}
+	  		for(var i=0; i<searcheableList3.items.length; i++){
+	  			var item = searcheableList3.items[i];
+	  			item.show();
+	  		}
+	  		$("#project-form").submit();
+	  	    return false; 
+	
+	  	})
+		
+		$('#project-form').submit(function() {
+			$("body").overlay();
+			var coordinate = map.getView().getCenter();
+			var transformedCoordinate = ol.proj.transform(coordinate, 'EPSG:3857', 'EPSG:4326');
+			var extent = map.getView().calculateExtent(map.getSize()); 
+			var zoom = map.getView().getZoom();
+
+			$("#center-lat").val(transformedCoordinate[1]);
+			$("#center-lon").val(transformedCoordinate[0]);
+			$("#extent").val(extent);
+			$("#zoom").val(zoom);
+		});
+	  	
+	  	{% if has_geocoding_plugin %}	
+	  	$(".ol-zoom").css("margin-top","50px")
+	  	
+	  	$('#location-autocomplete').autocomplete({
+    		serviceUrl: '/gvsigonline/geocoding/search_candidates/',
+    		paramName: 'q',
+    		params: {
+    			limit: 10,
+    			countrycodes: 'es'
+    		},
+    		groupBy: 'category',
+    		transformResult: function(response) {
+    			jsonResponse = JSON.parse(response);
+    			if (jsonResponse.suggestions.length > 0) {
+    				return {
+    					suggestions: $.map(jsonResponse.suggestions, function(item) {
+    						return { 
+    							value: item.address,
+    							type: item.type,
+    							data: item 
+    						};
+    					})
+    				};
+    			}
+
+    		},
+    		onSelect: function (suggestion) {
+    			$.ajax({
+    				type: 'POST',
+    				async: false,
+    				url: '/gvsigonline/geocoding/find_candidate/',
+    				beforeSend:function(xhr){
+    					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+    				},
+    				data: {
+    					'address': suggestion.data
+    				},
+    				success	:function(response){
+    					if(response.address){
+    						var address = response.address;
+    						if(address != null){
+    							var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], 'EPSG:4326', 'EPSG:3857');	
+    							map.getView().setCenter(coordinate);
+    							map.getView().setZoom(14);
+    						}
+    					}
+    				},
+    				error: function(){}
+    			});
+    		}
+
+    	});
+	  	{% endif %}
+	});
+</script>
+{% endblock %}

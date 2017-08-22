@@ -1,0 +1,65 @@
+## django
+# *NOTE:* Django v1.9.11 is available
+django==1.9.5
+djangoajax==2.3.5
+httplib2==0.9.2
+geopy==1.11.0
+gisdata==0.5.4
+
+## auth
+python-ldap==2.4.25
+django-auth-ldap==1.2.7
+
+## django rest framework
+#djangorestframework
+#markdown
+#django-filter
+#django-rest-auth
+#django-formtools
+
+##Instalamos el driver de PostgreSQL para python:
+psycopg2==2.6.1
+# *NOTE:* Es necesario instalar previamente la libreria _libpq-dev_
+
+##Instalamos Pillow para que django soporte la gestion de images;
+Pillow==3.2.0
+# *NOTE:* Es necesario instalar previamente la libreria _libjpeg-dev_
+
+## gsconfig
+gsconfig==1.0.3
+requests==2.7.0
+
+## Scolab tools
+spatialiteintrospect==1.2
+pygdaltools==1.1
+# *NOTE:* It requires having gdal tools installed in the system (gdal-bin package)
+
+## Other
+xmltodict
+six==1.10.0
+pytz==2016.3
+python-dateutil==2.5.2
+
+argparse==1.2.1
+wsgiref==0.1.2
+
+cmislib==0.5.1
+lxml==3.7.2
+
+# Cron para aguas de valencia
+schedule==0.4.2
+
+# Lectura de DBFs
+dbfread==2.0.7
+django-excel==0.0.6
+pyexcel-xls==0.4.0
+pyexcel-xlsx==0.4.0
+pyexcel-ods==0.4.0
+
+
+greenlet==0.4.12
+
+# Parseo del getCapabilities (baseLayers)
+OWSLib==0.14.0
+
+limesurveyrc2api==1.0.0
