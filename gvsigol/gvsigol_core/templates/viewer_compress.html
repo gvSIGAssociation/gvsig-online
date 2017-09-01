@@ -130,10 +130,7 @@
 			
 			<div class="navbar-custom-menu">
 				<ul id="toolbar-buttons" class="nav navbar-nav">	
-					<li title="{% trans 'manual gvsigonline' %}"><a href="/gvsigonline/core/documentation/" target="_blank" id="help" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-question-circle"></i></a></li>				
-					{% if not 'gvsigol_plugin_print' in INSTALLED_APPS %}		
-					<li id="export-pdf-div" title="{% trans 'exportar pdf' %}"><a href="#" id="export-to-pdf" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-file-pdf-o"></i></a></li>
-					{% endif %}		
+					<li title="{% trans 'manual gvsigonline' %}"><a href="/gvsigonline/core/documentation/" target="_blank" id="help" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-question-circle"></i></a></li>					
 				</ul>
 			</div>
 
@@ -157,7 +154,6 @@
 				<li class="active" title="{% trans "Layer tree" %}"><a href="#layer-tree-tab" data-toggle="tab"><i class="icon-layers"></i></a></li>
 				<li title="{% trans "Legend" %}"><a href="#legend-tab" data-toggle="tab"><i class="fa fa-tags"></i></a></li>
 				<li title="{% trans "Details" %}"><a href="#details-tab" data-toggle="tab"><i class="fa fa-list-alt"></i></a></li>
-				<li title="{% trans "Temporary" %}" class="temporary-tab"><a href="#temporary-tab" data-toggle="tab"><i class="fa fa-clock-o" aria-hidden="true"></i></a></li>
 			</ul>
 
 			<div class="tab-content" style="height: 88%;">
@@ -172,10 +168,6 @@
 				
 				<!-- Details -->
 				<div class="tab-pane" id="details-tab" style="overflow-y: auto; height: 100%;">
-				</div>
-				
-				<!-- Temporary -->
-				<div class="tab-pane" id="temporary-tab" style="overflow-y: auto; height: 100%;">
 				</div>
 			</div>			
 		</aside>

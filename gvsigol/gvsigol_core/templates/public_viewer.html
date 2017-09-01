@@ -128,10 +128,7 @@
 			
 			<div class="navbar-custom-menu">
 				<ul id="toolbar-buttons" class="nav navbar-nav">
-					<li title="{% trans 'manual gvsigonline' %}"><a href="/gvsigonline/core/documentation/" target="_blank" id="help" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-question-circle"></i></a></li>
-					{% if not 'gvsigol_plugin_print' in INSTALLED_APPS %}		
-					<li id="export-pdf-div" title="{% trans 'exportar pdf' %}"><a href="#" id="export-to-pdf" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-file-pdf-o"></i></a></li>
-					{% endif %}		
+					<li title="{% trans 'manual gvsigonline' %}"><a href="/gvsigonline/core/documentation/" target="_blank" id="help" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-question-circle"></i></a></li>	
 				</ul>
 			</div>
 
@@ -281,7 +278,6 @@
 	<script type="text/javascript" src="{% static "js/lib/tools/attributeTable.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/tools/measureLength.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/tools/measureArea.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/lib/tools/exportToPDF.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/tools/geolocation.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/tools/cleanMap.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/tools/searchByCoordinate.js" %}"></script>

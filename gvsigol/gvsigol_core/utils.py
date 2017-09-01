@@ -32,13 +32,13 @@ import psycopg2
 import os
 from numpy import genfromtxt
 
-def is_valid_project(user, pid):
+def is_valid_project(user, project_name):
     valid = False
     try:
         if user.is_superuser:
             valid = True
         else:
-            project = Project.objects.get(id=int(pid))   
+            project = Project.objects.get(name__exact=project_name)   
             groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
             
             projects_by_user = []

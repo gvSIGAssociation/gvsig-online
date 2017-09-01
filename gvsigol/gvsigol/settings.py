@@ -66,17 +66,9 @@ INSTALLED_APPS = [
     'gvsigol_filemanager',
     'gvsigol_core',
     'gvsigol_app_dev',
-    'gvsigol_plugin_edition',
     'gvsigol_plugin_graphiccapture'
-    #'gvsigol_plugin_worldwind',
-    #'gvsigol_plugin_shps_folder',
     #'gvsigol_plugin_geocoding',
-    #'gvsigol_plugin_etl',
-    #'gvsigol_plugin_sync',
-    #'gvsigol_plugin_catastro',
-    #'gvsigol_plugin_alfresco',
-    #'gvsigol_plugin_print',
-    #'gvsigol_plugin_catalog',
+    #'gvsigol_plugin_print'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -129,7 +121,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         #'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'gvsigonline_v2',
+        'NAME': 'libra',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
         'HOST': 'localhost',
@@ -213,11 +205,7 @@ LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol_symbology/locale'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/locale'),
     os.path.join(BASE_DIR, 'gvsigol_app_dev/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_geocoding/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_etl/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_edition/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_graphiccapture/locale')
 )
 
@@ -248,11 +236,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
     os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/static'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_geocoding/static'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_etl/static'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_edition/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_graphiccapture/static')
 )
 STATICFILES_FINDERS = (
@@ -261,7 +245,7 @@ STATICFILES_FINDERS = (
     #'compressor.finders.CompressorFinder',
 )
 
-GVSIGOL_VERSION = '2.1.8'
+GVSIGOL_VERSION = '2.3.0'
 
 GVSIGOL_USERS_CARTODB = {
     'dbhost': 'localhost',

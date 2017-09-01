@@ -42,6 +42,9 @@ import random
 import string
 import json
 import ast
+import re
+
+_valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 def not_found_view(request):
     response = render_to_response('404.html', {}, context_instance=RequestContext(request))
@@ -135,6 +138,8 @@ def project_list(request):
 @staff_required
 def project_add(request):
     
+    base_layers = BaseLayer.objects.all()
+    
     has_geocoding_plugin = False
     if 'gvsigol_plugin_geocoding' in settings.INSTALLED_APPS:
         has_geocoding_plugin = True
@@ -180,7 +185,11 @@ def project_add(request):
         groups = core_utils.get_all_groups()
         if name == '':
             message = _(u'You must enter an project name')
-            return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+            return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'groups': groups, 'base_layers': base_layers, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+                
+        if _valid_name_regex.search(name) == None:
+            message = _("Invalid project name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
+            return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'groups': groups, 'base_layers': base_layers, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
                 
         if not exists:
             project = None
@@ -249,7 +258,6 @@ def project_add(request):
         else:
             message = _(u'Project name already exists')
             
-            base_layers = BaseLayer.objects.all()
             return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'base_layers': base_layers, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
         
         return redirect('project_list')
@@ -266,8 +274,6 @@ def project_add(request):
             groups = core_utils.get_all_groups()
         else:
             groups = core_utils.get_user_groups(request.user.username)
-            
-        base_layers = BaseLayer.objects.all()
         
         return render_to_response('project_add.html', {'layergroups': layergroups, 'groups': groups, 'base_layers': base_layers, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
     
@@ -331,6 +337,23 @@ def project_update(request, pid):
         sameName = False
         if project.name == name:
             sameName = True
+            
+        project = Project.objects.get(id=int(pid))    
+        groups = core_utils.get_all_groups_checked_by_project(request, project)
+        layer_groups = core_utils.get_all_layer_groups_checked_by_project(request, project)  
+        base_layers = BaseLayer.objects.all()
+        base_layers_project = BaseLayerProject.objects.filter(project=project)
+        selected_base_layers=[]
+        selected_base_layer=-1
+        
+        for base_layer_project in base_layers_project:
+            selected_base_layers.append(base_layer_project.baselayer.id)
+            if base_layer_project.is_default:
+                selected_base_layer = base_layer_project.baselayer.id
+            
+        if _valid_name_regex.search(name) == None:
+            message = _("Invalid project name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
+            return render_to_response('project_update.html', {'message': message, 'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'base_layers': base_layers, 'selected_base_layers': selected_base_layers, 'selected_base_layer': selected_base_layer,  'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
             
             
         if sameName:
@@ -460,18 +483,7 @@ def project_update(request, pid):
                     
             else:
                 message = _(u'Project name already exists')
-                project = Project.objects.get(id=int(pid))    
-                groups = core_utils.get_all_groups_checked_by_project(request, project)
-                layer_groups = core_utils.get_all_layer_groups_checked_by_project(request, project)  
-                base_layers = BaseLayer.objects.all()
-                base_layers_project = BaseLayerProject.objects.filter(project=project)
-                selected_base_layers=[]
-                selected_base_layer=-1
                 
-                for base_layer_project in base_layers_project:
-                    selected_base_layers.append(base_layer_project.baselayer.id)
-                    if base_layer_project.is_default:
-                        selected_base_layer = base_layer_project.baselayer.id
                 return render_to_response('project_update.html', {'message': message, 'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'base_layers': base_layers, 'selected_base_layers': selected_base_layers, 'selected_base_layer': selected_base_layer,  'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
                 
         
@@ -505,10 +517,10 @@ def project_delete(request, pid):
         return HttpResponse(json.dumps(response, indent=4), content_type='project/json')
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-def project_load(request, pid):
-    if core_utils.is_valid_project(request.user, pid):
-        project = Project.objects.get(id=int(pid))
-        return render_to_response('viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': pid}, context_instance=RequestContext(request))
+def project_load(request, project_name):
+    if core_utils.is_valid_project(request.user, project_name):
+        project = Project.objects.get(name__exact=project_name)
+        return render_to_response('viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id, 'extra_params': json.dumps(request.GET)}, context_instance=RequestContext(request))
     else:
         return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
 
@@ -572,28 +584,7 @@ def project_get_conf(request):
                     layer['abstract'] = l.abstract
                     layer['visible'] = l.visible 
                     layer['queryable'] = l.queryable 
-                    layer['highlight'] = l.highlight
-                    if l.highlight:
-                        layer['highlight_scale'] = int(l.highlight_scale)
-                        
-                    layer['time_enabled'] = l.time_enabled
-                    if layer['time_enabled']:
-                        layer['ref'] = l.id
-                        layer['time_enabled_field'] = l.time_enabled_field
-                        layer['time_enabled_endfield'] = l.time_enabled_endfield
-                        layer['time_presentation'] = l.time_presentation
-                        layer['time_resolution_year'] = l.time_resolution_year
-                        layer['time_resolution_month'] = l.time_resolution_month
-                        layer['time_resolution_week'] = l.time_resolution_week
-                        layer['time_resolution_day'] = l.time_resolution_day
-                        layer['time_resolution_hour'] = l.time_resolution_hour
-                        layer['time_resolution_minute'] = l.time_resolution_minute
-                        layer['time_resolution_second'] = l.time_resolution_second
-                        layer['time_default_value_mode'] = l.time_default_value_mode
-                        layer['time_default_value'] = l.time_default_value
-                    
                     layer['cached'] = l.cached
-                    
                     layer['order'] = toc.get(group.name).get('layers').get(l.name).get('order')
                     layer['single_image'] = l.single_image
                     layer['read_roles'] = read_roles
@@ -748,16 +739,6 @@ def toc_update(request, pid):
         ordered_toc = sorted(toc.iteritems(), key=lambda (x, y): y['order'], reverse=True)
         return render_to_response('toc_update.html', {'toc': ordered_toc, 'pid': pid}, context_instance=RequestContext(request))
     
-def export(request, pid):   
-    p = Project.objects.get(id=pid)
-    image = ''
-    if "no_project.png" in p.image.url:
-        image = p.image.url.replace(settings.MEDIA_URL, '')
-    else:
-        image = p.image.url
-
-    return render_to_response('app_print_template.html', {'print_logo_url': urllib.unquote(image)}, context_instance=RequestContext(request))
-    
 def ogc_services(request):
     workspaces = Workspace.objects.filter(is_public=True)         
     return render_to_response('ogc_services.html', {'workspaces': workspaces}, RequestContext(request))
@@ -831,20 +812,6 @@ def public_viewer_get_conf(request):
                     layer['abstract'] = l.abstract
                     layer['visible'] = l.visible 
                     layer['queryable'] = l.queryable 
-                    layer['time_enabled'] = l.time_enabled 
-                    if layer['time_enabled']:
-                        layer['time_enabled_field'] = l.time_enabled_field
-                        layer['time_enabled_endfield'] = l.time_enabled_endfield
-                        layer['time_presentation'] = l.time_presentation
-                        layer['time_resolution_year'] = l.time_resolution_year
-                        layer['time_resolution_month'] = l.time_resolution_month
-                        layer['time_resolution_week'] = l.time_resolution_week
-                        layer['time_resolution_day'] = l.time_resolution_day
-                        layer['time_resolution_hour'] = l.time_resolution_hour
-                        layer['time_resolution_minute'] = l.time_resolution_minute
-                        layer['time_resolution_second'] = l.time_resolution_second
-                        layer['time_default_value_mode'] = l.time_default_value_mode
-                        layer['time_default_value'] = l.time_default_value
                     layer['cached'] = l.cached
                     layer['order'] = toc.get(group.name).get('layers').get(l.name).get('order')
                     layer['single_image'] = l.single_image

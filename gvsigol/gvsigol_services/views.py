@@ -492,7 +492,6 @@ def layer_add(request):
     if request.method == 'POST':
         form = LayerForm(request.POST)
         abstract = request.POST.get('md-abstract')
-        highlight_scale = None
         is_visible = False
         
         if 'visible' in request.POST:
@@ -510,42 +509,6 @@ def layer_add(request):
         if 'single_image' in request.POST:
             single_image = True
             cached = False
-            
-        time_enabled = False
-        time_field=''
-        time_endfield=''
-        time_presentation = ''
-        time_resolution_year = 0
-        time_resolution_month = 0
-        time_resolution_week = 0
-        time_resolution_day = 0
-        time_resolution_hour = 0
-        time_resolution_minute = 0
-        time_resolution_second = 0
-        time_default_value_mode = ''
-        time_default_value = ''
-        
-        if 'time_enabled' in request.POST:
-            time_enabled = True
-            time_field = request.POST.get('time_enabled_field')
-            time_endfield = request.POST.get('time_enabled_endfield')
-            time_presentation = request.POST.get('time_presentation')
-            time_resolution_year = request.POST.get('time_resolution_year')
-            time_resolution_month = request.POST.get('time_resolution_month')
-            time_resolution_week = request.POST.get('time_resolution_week')
-            time_resolution_day = request.POST.get('time_resolution_day')
-            time_resolution_hour = request.POST.get('time_resolution_hour')
-            time_resolution_minute = request.POST.get('time_resolution_minute')
-            time_resolution_second = request.POST.get('time_resolution_second')
-            time_default_value_mode = request.POST.get('time_default_value_mode')
-            time_default_value = request.POST.get('time_default_value')
-            
-        highlight = False
-        if 'highlight' in request.POST:
-            highlight = True
-            highlight_scale = request.POST.get('highlight_scale')
-        else:
-            highlight_scale = -1
         
         if form.is_valid():
             try:
@@ -565,22 +528,7 @@ def layer_add(request):
                 newRecord.queryable = is_queryable
                 newRecord.cached = cached
                 newRecord.single_image = single_image
-                newRecord.highlight = highlight
-                newRecord.highlight_scale = float(highlight_scale)
                 newRecord.abstract = abstract
-                newRecord.time_enabled = time_enabled
-                newRecord.time_enabled_field = time_field
-                newRecord.time_enabled_endfield = time_endfield
-                newRecord.time_presentation = time_presentation
-                newRecord.time_resolution_year = time_resolution_year
-                newRecord.time_resolution_month = time_resolution_month
-                newRecord.time_resolution_week = time_resolution_week
-                newRecord.time_resolution_day = time_resolution_day
-                newRecord.time_resolution_hour = time_resolution_hour
-                newRecord.time_resolution_minute = time_resolution_minute
-                newRecord.time_resolution_second = time_resolution_second
-                newRecord.time_default_value_mode = time_default_value_mode
-                newRecord.time_default_value = time_default_value
                 newRecord.save()
                 
                 if form.cleaned_data['datastore'].type != 'e_WMS':
@@ -591,27 +539,6 @@ def layer_add(request):
                         form.cleaned_data['name'],
                         is_queryable
                     )
-                    time_resolution = 0
-                    if (time_resolution_year != None and time_resolution_year > 0) or (time_resolution_month != None and time_resolution_month > 0) or (time_resolution_week != None and time_resolution_week > 0) or (time_resolution_day != None and time_resolution_day > 0):
-                        #time_resolution = 'P'
-                        if (time_resolution_year != None and time_resolution_year > 0):
-                            time_resolution = time_resolution + (int(time_resolution_year) * 3600 * 24 * 365)
-                        if (time_resolution_month != None and time_resolution_month > 0):
-                            time_resolution = time_resolution + (int(time_resolution_month) * 3600 * 24 * 31)
-                        if (time_resolution_week != None and time_resolution_week > 0):
-                            time_resolution = time_resolution + (int(time_resolution_week) * 3600 * 24 * 7)
-                        if (time_resolution_day != None and time_resolution_day > 0):
-                            time_resolution = time_resolution + (int(time_resolution_day) * 3600 * 24 * 1)
-                    if (time_resolution_hour != None and time_resolution_hour > 0) or (time_resolution_minute != None and time_resolution_minute > 0) or (time_resolution_second != None and time_resolution_second > 0):
-                        #time_resolution = time_resolution + 'T'
-                        if (time_resolution_hour != None and time_resolution_hour > 0):
-                            time_resolution = time_resolution + (int(time_resolution_hour) * 3600)
-                        if (time_resolution_minute != None and time_resolution_minute > 0):
-                            time_resolution = time_resolution + (int(time_resolution_minute) * 60)
-                        if (time_resolution_second != None and time_resolution_second > 0):
-                            time_resolution = time_resolution + (int(time_resolution_second))
-                       
-                    mapservice_backend.setTimeEnabled(form.cleaned_data['datastore'].workspace.name, form.cleaned_data['datastore'].name, form.cleaned_data['datastore'].type, form.cleaned_data['name'], time_enabled, time_field, time_endfield, time_presentation, time_resolution, time_default_value_mode, time_default_value)
                 
                     datastore = Datastore.objects.get(id=newRecord.datastore.id)
                     workspace = Workspace.objects.get(id=datastore.workspace_id)
@@ -688,7 +615,6 @@ def layer_update(request, layer_id):
         title = request.POST.get('title')
         #style = request.POST.get('style')
         layer_group_id = request.POST.get('layer_group')
-        highlight_scale = None
         
         is_visible = False
         if 'visible' in request.POST:
@@ -705,45 +631,7 @@ def layer_update(request, layer_id):
         single_image = False
         if 'single_image' in request.POST:
             single_image = True
-            cached = False
-            
-        time_enabled = False
-        time_field=''
-        time_endfield=''
-        time_presentation = ''
-        time_resolution_year = 0
-        time_resolution_month = 0
-        time_resolution_week = 0
-        time_resolution_day = 0
-        time_resolution_hour = 0
-        time_resolution_minute = 0
-        time_resolution_second = 0
-        time_default_value_mode = ''
-        time_default_value = ''
-        
-        if 'time_enabled' in request.POST:
-            time_enabled = True
-            time_field = request.POST.get('time_enabled_field')
-            time_endfield = request.POST.get('time_enabled_endfield')
-            time_presentation = request.POST.get('time_presentation')
-            time_resolution_year = request.POST.get('time_resolution_year')
-            time_resolution_month = request.POST.get('time_resolution_month')
-            time_resolution_week = request.POST.get('time_resolution_week')
-            time_resolution_day = request.POST.get('time_resolution_day')
-            time_resolution_hour = request.POST.get('time_resolution_hour')
-            time_resolution_minute = request.POST.get('time_resolution_minute')
-            time_resolution_second = request.POST.get('time_resolution_second')
-            time_default_value_mode = request.POST.get('time_default_value_mode')
-            time_default_value = request.POST.get('time_default_value')
-            
-        highlight = False
-        if 'highlight' in request.POST:
-            highlight = True
-            highlight_scale = request.POST.get('highlight_scale')
-        else:
-            highlight_scale = -1
-            
-        
+            cached = False     
                 
         old_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
         
@@ -754,47 +642,11 @@ def layer_update(request, layer_id):
             layer.visible = is_visible
             layer.queryable = is_queryable 
             layer.single_image = single_image 
-            layer.highlight = highlight
-            layer.highlight_scale = float(highlight_scale)
             layer.layer_group_id = layer_group_id
-            layer.time_enabled = time_enabled
-            layer.time_enabled_field = time_field
-            layer.time_enabled_endfield = time_endfield
-            layer.time_presentation = time_presentation
-            layer.time_resolution_year = time_resolution_year
-            layer.time_resolution_month = time_resolution_month
-            layer.time_resolution_week = time_resolution_week
-            layer.time_resolution_day = time_resolution_day
-            layer.time_resolution_hour = time_resolution_hour
-            layer.time_resolution_minute = time_resolution_minute
-            layer.time_resolution_second = time_resolution_second
-            layer.time_default_value_mode = time_default_value_mode
-            layer.time_default_value = time_default_value
             layer.save()
             
             if ds.type != 'e_WMS':
                 mapservice_backend.setQueryable(workspace, ds.name, ds.type, name, is_queryable)
-                time_resolution = 0
-                if (time_resolution_year != None and time_resolution_year > 0) or (time_resolution_month != None and time_resolution_month > 0) or (time_resolution_week != None and time_resolution_week > 0) or (time_resolution_day != None and time_resolution_day > 0):
-                    #time_resolution = 'P'
-                    if (time_resolution_year != None and time_resolution_year > 0):
-                        time_resolution = time_resolution + (int(time_resolution_year) * 3600 * 24 * 365)
-                    if (time_resolution_month != None and time_resolution_month > 0):
-                        time_resolution = time_resolution + (int(time_resolution_month) * 3600 * 24 * 31)
-                    if (time_resolution_week != None and time_resolution_week > 0):
-                        time_resolution = time_resolution + (int(time_resolution_week) * 3600 * 24 * 7)
-                    if (time_resolution_day != None and time_resolution_day > 0):
-                        time_resolution = time_resolution + (int(time_resolution_day) * 3600 * 24 * 1)
-                if (time_resolution_hour != None and time_resolution_hour > 0) or (time_resolution_minute != None and time_resolution_minute > 0) or (time_resolution_second != None and time_resolution_second > 0):
-                    #time_resolution = time_resolution + 'T'
-                    if (time_resolution_hour != None and time_resolution_hour > 0):
-                        time_resolution = time_resolution + (int(time_resolution_hour) * 3600)
-                    if (time_resolution_minute != None and time_resolution_minute > 0):
-                        time_resolution = time_resolution + (int(time_resolution_minute) * 60)
-                    if (time_resolution_second != None and time_resolution_second > 0):
-                        time_resolution = time_resolution + (int(time_resolution_second))
-                   
-                mapservice_backend.setTimeEnabled(workspace, ds.name, ds.type, name, time_enabled, time_field, time_endfield, time_presentation, time_resolution, time_default_value_mode, time_default_value)
             
             new_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
             
@@ -812,40 +664,8 @@ def layer_update(request, layer_id):
         datastore = Datastore.objects.get(id=layer.datastore.id)
         workspace = Workspace.objects.get(id=datastore.workspace_id)
         form = LayerUpdateForm(instance=layer)
-        
-        date_fields = []
-        if layer.type == 'v_PostGIS':
-            aux_fields = get_date_fields(layer.id)
-            conf = ast.literal_eval(layer.conf)
-            if 'fields' in conf:
-                for field in conf['fields']:
-                    for data_field in aux_fields:
-                        if field['name'] == data_field:
-                            date_fields.append(field)
-                            
-        if layer.highlight_scale is not None: 
-            if int(layer.highlight_scale) >=0:
-                highlight_scale = int(layer.highlight_scale)
-            else:
-                highlight_scale = -1
-        else:
-            highlight_scale = -1
             
-        return render(request, 'layer_update.html', {'layer': layer, 'highlight_scale': highlight_scale, 'workspace': workspace, 'form': form, 'layer_id': layer_id, 'date_fields': json.dumps(date_fields)})
-    
-def get_date_fields(layer_id):
-    date_fields = []
-    
-    layer = Layer.objects.get(id=int(layer_id))
-    datastore = Datastore.objects.get(id=layer.datastore_id)
-    workspace = Workspace.objects.get(id=datastore.workspace_id)
-    (ds_type, resource) = mapservice_backend.getResourceInfo(workspace.name, datastore, layer.name, "json")
-    resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
-    for f in resource_fields:
-        if f['binding'] == 'java.sql.Date':
-            date_fields.append(f['name'])
-    
-    return date_fields
+        return render(request, 'layer_update.html', {'layer': layer, 'workspace': workspace, 'form': form, 'layer_id': layer_id})
     
 def layer_autoconfig(layer_id):
     layer = Layer.objects.get(id=int(layer_id))
@@ -989,52 +809,6 @@ def layer_config(request, layer_id):
                 fields.append(field)
     
         return render(request, 'layer_config.html', {'layer': layer, 'layer_id': layer.id, 'fields': fields, 'fields_json': json.dumps(fields), 'available_languages': LANGUAGES, 'available_languages_array': available_languages})
-    
-
-@require_POST
-@staff_required
-def layers_get_temporal_properties(request):
-    try:
-        #layer = Layer.objects.get(pk=layer_id)
-        layers = []
-        if 'layers' in request.POST:
-            layers = json.loads(request.POST['layers'])
-        methodx = ''
-        if 'methodx' in request.POST:
-            methodx = request.POST['methodx']
-
-        min_value = ''
-        max_value = ''
-        list_values = []
-        for layer_id in layers:
-            layer = Layer.objects.get(id=layer_id)
-            params = json.loads(layer.datastore.connection_params)
-            host = params['host']
-            port = params['port']
-            dbname = params['database']
-            user = params['user']
-            passwd = params['passwd']
-            schema = params.get('schema', 'public')
-            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-            temporal_defs = i.get_temporal_info(layer.name, schema, layer.time_enabled_field, layer.time_enabled_endfield, layer.time_default_value_mode, layer.time_default_value)
-            
-            if temporal_defs.__len__() > 0:
-                aux_min_value = datetime.strptime(temporal_defs[0]['min_value'], '%Y-%m-%d %H:%M:%S')
-                if min_value == '' or datetime.strptime(min_value, '%Y-%m-%d %H:%M:%S') > aux_min_value:
-                    min_value = temporal_defs[0]['min_value']
-                aux_max_value = datetime.strptime(temporal_defs[0]['max_value'], '%Y-%m-%d %H:%M:%S')
-                if max_value == '' or datetime.strptime(max_value, '%Y-%m-%d %H:%M:%S') < aux_max_value:
-                    max_value = temporal_defs[0]['max_value']
-                #list_values = list_values + temporal_defs['list_values']
-                
-        
-        
-        return HttpResponse('{"response": "ok", "min_value": "'+str(min_value)+'", "max_value": "'+str(max_value)+'", "list_values": "'+str(list_values)+'"}', content_type='application/json')
-    
-    except Exception as e:
-        return HttpResponseNotFound('<h1>Temporal properties not found </h1>')
-
-
 
 @require_POST
 @staff_required
@@ -1457,15 +1231,8 @@ def layer_create(request):
                 return render(request, "layer_create.html", data)
                 
         else:
-            forms = []
-            if 'gvsigol_plugin_form' in INSTALLED_APPS:
-                from gvsigol_plugin_form.models import Form
-                forms = Form.objects.all()
-            
-            
             data = {
                 'form': form,
-                'forms': forms,
                 'layer_type': layer_type,
                 'enumerations': get_currentuser_enumerations(request)
             }
@@ -1473,15 +1240,9 @@ def layer_create(request):
         
     else:
         form = CreateFeatureTypeForm(user=request.user)
-        forms = []
-        
-        if 'gvsigol_plugin_form' in INSTALLED_APPS:
-            from gvsigol_plugin_form.models import Form
-            forms = Form.objects.all()
         
         data = {
             'form': form,
-            'forms': forms,
             'layer_type': layer_type,
             'enumerations': get_currentuser_enumerations(request)
         }

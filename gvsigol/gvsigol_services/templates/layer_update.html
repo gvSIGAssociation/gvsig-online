@@ -104,85 +104,6 @@
 							<label for="visible">{% trans "Single image (No tiles)" %}</label>
 						</div>
 					</div>
-					
-					<div class="row">
-						<div class="col-md-4 form-group">
-							{% if layer.time_enabled %}
-							<input type="checkbox" name="time_enabled"  id="time_enabled" checked/>
-							{% else %}
-							<input type="checkbox" name="time_enabled"  id="time_enabled"/>
-							{% endif %}
-							<label for="visible">{% trans "time_enabled" %}</label>
-						</div>
-					</div>
-					
-					<div class="box-body time_enabled-check">
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label class="active" for="id_time_enabled_field">{% trans "time_enabled field" %}</label>
-								{{ form.time_enabled_field }}
-							</div>
-						</div>
-					
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label class="active" for="id_time_enabled_endfield">{% trans "End time_enabled field" %}</label>
-								{{ form.time_enabled_endfield }}
-							</div>
-						</div>
-					
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label class="active" for="id_time_presentation">{% trans "Time presentation" %}</label>
-								{{ form.time_presentation }}
-							</div>
-						</div>
-					
-						<div class="row time_presentation">
-							<div class="col-md-12 form-group">
-								<label class="active" for="id_time_resolution">{% trans "Time resolution (years, months, weeks, days, hours, minutes and seconds)" %}</label><br />
-								
-								{{ form.time_resolution_year }}
-								{{ form.time_resolution_month }}
-								{{ form.time_resolution_week }}
-								{{ form.time_resolution_day }}
-								{{ form.time_resolution_hour }}
-								{{ form.time_resolution_minute }}
-								{{ form.time_resolution_second }}
-								
-								<div style="clear:both"></div>
-							</div>
-						</div>
-					
-					
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label class="active" for="id_time_default_value_mode">{% trans "Default value mode" %}</label>
-								{{ form.time_default_value_mode }}
-							</div>
-						</div>
-					
-						<div class="row time_default_value">
-							<div class="col-md-12 form-group">
-								<label class="active" for="id_time_default_value">{% trans "Default value" %}</label>
-								{{ form.time_default_value }}
-							</div>
-						</div>
-					</div>
-					
-					<div class="row">
-						<div class="col-md-4 form-group">
-							{% if layer.highlight %}
-							<input type="checkbox" name="highlight" id="highlight" checked/>	
-							<label for="highlight">{% trans "Enable highlight" %}</label>	
-							<input name="highlight_scale" id="highlight_scale" type="number" step="any" class="form-control" value="{{highlight_scale}}">	
-							{% else %}
-							<input type="checkbox" name="highlight" id="highlight" />	
-							<label for="highlight">{% trans "Enable highlight" %}</label>	
-							<input name="highlight_scale" id="highlight_scale" type="number" step="any" class="form-control">	
-							{% endif %}
-						</div>
-					</div>
 				</div>
 				
 				<div class="box-footer">
@@ -215,81 +136,8 @@
 			}
 		}
 	}
-	
-	function make_temporal_form(){
-		$(".time_presentation").css("display", "none");
-		$(".time_default_value").css("display", "none");
-		
-		var tm_pr = $("#id_time_presentation option:selected").text();
-		if(tm_pr == "interval and resolution"){
-			$(".time_presentation").css("display", "block");
-		}
-		
-		var tm_dv = $("#id_time_default_value_mode option:selected").text();
-		if(tm_dv == "nearest to the reference value" || tm_dv == "reference value"){
-			$(".time_default_value").css("display", "block");
-		}
-		
-	}
-	
-	function create_date_select(field, data, previousValue){
-		var language = $("#select-language").val();
-		var name_select = $("#"+field);
-		var placeholderSelected = true;
-		
-		if (data==null || data.length==0) {
-			var text = "{% trans 'Resource contains no fields' %}";
-			rebuildSelect(name_select, text, true);
-			$.overlayout();
-			return;
-		}
-		var options = [];
-		options.push($('<option>'));
-		for (var i=0; i<data.length; i++) {
-			var attribs = {
-				value: data[i]["name"],
-				text: data[i]["title-" + language]
-			};
-			if (previousValue == data[i]["name"]) {
-				attribs['selected']='true';
-				placeholderSelected = false;
-			}
-			options.push($('<option>', attribs));
-		}
-		var text = '{% trans "Choose field" %}';
-		rebuildSelect(name_select, text, placeholderSelected, options);
-	}
-
-	
-	function temporary_field(field){
-		if(field.prop("checked")){
-			field.parent().addClass("time_enabled-check");
-			$(".box-body.time_enabled-check").css("display", "block");
-			$("#select2-id_layer_group-container").parent().each(function(){
-				//field.css("width", "100%");
-			});
-		}else{
-			field.parent().removeClass("time_enabled-check");
-			$(".box-body.time_enabled-check").css("display", "none");
-		}
-	}
 
 	$(document).ready(function() {
-		
-		var date_fields = {{ date_fields|safe }};
-		var time_enabled_field = "{{ layer.time_enabled_field }}";
-		var time_enabled_endfield = "{{ layer.time_enabled_endfield }}";
-		
-		create_date_select("id_time_enabled_field", date_fields, time_enabled_field);
-		create_date_select("id_time_enabled_endfield", date_fields, time_enabled_endfield);
-		
-		$('#id_time_resolution_year').val({{ layer.time_resolution_year }});
-		$('#id_time_resolution_month').val({{ layer.time_resolution_month }});
-		$('#id_time_resolution_week').val({{ layer.time_resolution_week }});
-		$('#id_time_resolution_day').val({{ layer.time_resolution_day }});
-		$('#id_time_resolution_hour').val({{ layer.time_resolution_hour }});
-		$('#id_time_resolution_minute').val({{ layer.time_resolution_minute }});
-		$('#id_time_resolution_second').val({{ layer.time_resolution_second }});
 		
 		$('#select-style option[value="{{layer.style}}"]').attr('selected','selected');
 		
@@ -309,23 +157,6 @@
 		$('#dash-submit-button').click( function() {
 			$("body").overlay();
 		});
-		
-		$('#time_enabled').click(function(){
-			temporary_field($(this));
-		});
-		
-		temporary_field($('#time_enabled'));
-
-		$("#id_time_presentation").change(function(){
-			make_temporal_form();
-		});
-		
-		$("#id_time_default_value_mode").change(function(){
-			make_temporal_form();
-		})
-		
-		
-		make_temporal_form();
 	});
 </script>
 {% endblock %}

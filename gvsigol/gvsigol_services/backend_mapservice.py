@@ -590,16 +590,6 @@ class Geoserver():
         except Exception as e:
             print ("ERROR failedrequest unknown exception: " + e.get_message())
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be updated"))
-            
-    def setTimeEnabled(self, workspace, ds_name, ds_type, name, time_enabled, time_field, time_endfield, presentation, resolution, default_value_mode, default_value):
-        try:
-            return self.rest_catalog.set_time_dimension(workspace, ds_name, ds_type, name, time_enabled, time_field, time_endfield, presentation, resolution, default_value_mode, default_value, user=self.user, password=self.password)
-        except rest_geoserver.FailedRequestError as e:
-            print ("ERROR setQueryable failedrequest exception: " + e.get_message())
-            raise rest_geoserver.FailedRequestError(e.status_code, _("Error changing property. Backend error: {msg}").format(msg=e.get_message()))
-        except Exception as e:
-            print ("ERROR failedrequest unknown exception: " + e.get_message())
-            raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be updated"))
 
     def _get_unique_resource_name(self, datastore, workspace):
         name = datastore

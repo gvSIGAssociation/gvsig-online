@@ -53,6 +53,4 @@ urlpatterns = [
     url(r'^base_layer/base_layer_delete/(?P<base_layer_id>[0-9]+)/$', 'gvsigol_services.views.base_layer_delete', name='base_layer_delete'),
     url(r'^base_layer/get_capabilities_from_url/$', 'gvsigol_services.views.get_capabilities_from_url', name='base_layer_delete'),
 
-    url(r'^layers_get_temporal_properties/$', 'gvsigol_services.views.layers_get_temporal_properties', name='layers_get_temporal_properties'),
-
 ]
