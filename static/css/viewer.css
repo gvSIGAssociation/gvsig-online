@@ -428,6 +428,12 @@ html, body {
     background-color: #eee;
 }
 
+.ui-slider-step{
+    width: 70px;
+    margin-right: 10px;
+    text-align: right;
+}
+
 
 @media only screen and (max-width: 950px) {
 
