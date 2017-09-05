@@ -193,14 +193,15 @@ class Introspect:
     def get_temporal_info(self, table, schema='public', field1=None, field2=None, default_mode=None, default_value=None):
         if field2 == None or field2 =='':
             field2 = field1
-        self.cursor.execute("""
+        query = """
         SELECT COALESCE(to_char(MIN(x.a), 'YYYY-MM-DD HH24:MI:SS'), ''),COALESCE(to_char(MAX(x.a), 'YYYY-MM-DD HH24:MI:SS'), '') FROM
         (
         SELECT """+field1+""" a FROM """+schema+"""."""+table+"""
         UNION
         SELECT """+field2+""" a FROM """+schema+"""."""+table+"""
         ) x
-        """, [])
+        """
+        self.cursor.execute(query, [])
         
         return [{'min_value':r[0], 'max_value': r[1]} for r in self.cursor.fetchall()]
     

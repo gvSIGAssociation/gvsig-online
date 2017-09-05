@@ -42,6 +42,10 @@ geometry_types = (('Point', _('Point')), ('MultiPoint', _('Multipoint')),
                   ('LineString', _('Line')), ('MultiLineString', _('Multiline')),
                   ('Polygon', _('Polygon')), ('MultiPolygon', _('Multipolygon')))
 
+time_presentation_op = (('LIST', _('list')), ('DISCRETE_INTERVAL', _('interval and resolution')), ('CONTINUOUS_INTERVAL', _('continuous interval')))
+#time_default_value_mode_op = (('MINIMUM', _('smallest domain value')), ('MAXIMUM', _('biggest domain value')), ('nearest to the reference value', _('nearest to the reference value')), ('reference value', _('reference value')))
+time_default_value_mode_op = (('MINIMUM', _('smallest domain value')), ('MAXIMUM', _('biggest domain value')))
+
 class ImageMosaicUploadForm(forms.Form): 
     workspace = forms.ModelChoiceField(label=_(u'Workspace'), required=True, queryset=Workspace.objects.all(), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
     #file = forms.FileField(label=_(u'File'), required=True, widget=forms.FileInput(attrs={'accept': 'application/zip'}))
@@ -144,6 +148,18 @@ class CreateFeatureTypeForm(forms.Form):
     cached = forms.BooleanField(label=_(u'Cached'), required=False, initial=True, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
     single_image = forms.BooleanField(label=_(u'Single image'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
     fields = forms.CharField(label=_(u'Fields'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    time_enabled_field = forms.CharField(label=_(u'Field'), required=False, widget=forms.Select(attrs={'class' : 'form-control'}))
+    time_enabled_endfield = forms.CharField(label=_(u'End field'), required=False, widget=forms.Select(attrs={'class' : 'form-control'}))
+    time_presentation = forms.ChoiceField(label=_(u'Presentation'), required=False, choices=time_presentation_op, widget=forms.Select(attrs={'class' : 'form-control'}))
+    time_resolution_year = forms.IntegerField(label=_(u'Resolution year'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_month = forms.IntegerField(label=_(u'Resolution month'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_week = forms.IntegerField(label=_(u'Resolution week'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_day = forms.IntegerField(label=_(u'Resolution day'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_hour = forms.IntegerField(label=_(u'Resolution hour'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_minute = forms.IntegerField(label=_(u'Resolution minute'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_resolution_second = forms.IntegerField(label=_(u'Resolution second'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
+    time_default_value_mode = forms.ChoiceField(label=_(u'Default mode'), required=False, choices=time_default_value_mode_op, widget=forms.Select(attrs={'class' : 'form-control'}))
+    time_default_value = forms.CharField(label=_(u'Default value'), required=False, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)  

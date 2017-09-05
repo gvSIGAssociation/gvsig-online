@@ -524,29 +524,30 @@ def layer_add(request):
         time_resolution_second = 0
         time_default_value_mode = ''
         time_default_value = ''
-        
+ 
         if 'time_enabled' in request.POST:
             time_enabled = True
             time_field = request.POST.get('time_enabled_field')
             time_endfield = request.POST.get('time_enabled_endfield')
             time_presentation = request.POST.get('time_presentation')
-            time_resolution_year = request.POST.get('time_resolution_year')
-            time_resolution_month = request.POST.get('time_resolution_month')
-            time_resolution_week = request.POST.get('time_resolution_week')
-            time_resolution_day = request.POST.get('time_resolution_day')
-            time_resolution_hour = request.POST.get('time_resolution_hour')
-            time_resolution_minute = request.POST.get('time_resolution_minute')
-            time_resolution_second = request.POST.get('time_resolution_second')
+            #time_resolution_year = request.POST.get('time_resolution_year')
+            #time_resolution_month = request.POST.get('time_resolution_month')
+            #time_resolution_week = request.POST.get('time_resolution_week')
+            #time_resolution_day = request.POST.get('time_resolution_day')
+            #time_resolution_hour = request.POST.get('time_resolution_hour')
+            #time_resolution_minute = request.POST.get('time_resolution_minute')
+            #time_resolution_second = request.POST.get('time_resolution_second')
             time_default_value_mode = request.POST.get('time_default_value_mode')
             time_default_value = request.POST.get('time_default_value')
-            
+                    
         highlight = False
         if 'highlight' in request.POST:
             highlight = True
             highlight_scale = request.POST.get('highlight_scale')
         else:
             highlight_scale = -1
-        
+
+            
         if form.is_valid():
             try:
                 # first create the resource on the backend
@@ -620,6 +621,27 @@ def layer_add(request):
                     mapservice_backend.createDefaultStyle(newRecord, style_name)
                     mapservice_backend.setLayerStyle(newRecord, style_name)
                     newRecord = mapservice_backend.updateThumbnail(newRecord, 'create')
+                    time_resolution = 0
+                    if (time_resolution_year != None and time_resolution_year > 0) or (time_resolution_month != None and time_resolution_month > 0) or (time_resolution_week != None and time_resolution_week > 0) or (time_resolution_day != None and time_resolution_day > 0):
+                        #time_resolution = 'P'
+                        if (time_resolution_year != None and time_resolution_year > 0):
+                            time_resolution = time_resolution + (int(time_resolution_year) * 3600 * 24 * 365)
+                        if (time_resolution_month != None and time_resolution_month > 0):
+                            time_resolution = time_resolution + (int(time_resolution_month) * 3600 * 24 * 31)
+                        if (time_resolution_week != None and time_resolution_week > 0):
+                            time_resolution = time_resolution + (int(time_resolution_week) * 3600 * 24 * 7)
+                        if (time_resolution_day != None and time_resolution_day > 0):
+                            time_resolution = time_resolution + (int(time_resolution_day) * 3600 * 24 * 1)
+                    if (time_resolution_hour != None and time_resolution_hour > 0) or (time_resolution_minute != None and time_resolution_minute > 0) or (time_resolution_second != None and time_resolution_second > 0):
+                        #time_resolution = time_resolution + 'T'
+                        if (time_resolution_hour != None and time_resolution_hour > 0):
+                            time_resolution = time_resolution + (int(time_resolution_hour) * 3600)
+                        if (time_resolution_minute != None and time_resolution_minute > 0):
+                            time_resolution = time_resolution + (int(time_resolution_minute) * 60)
+                        if (time_resolution_second != None and time_resolution_second > 0):
+                            time_resolution = time_resolution + (int(time_resolution_second))
+                    mapservice_backend.setTimeEnabled(workspace.name, datastore.name, datastore.type, newRecord.name, time_enabled, time_field, time_endfield, time_presentation, time_resolution, time_default_value_mode, time_default_value)
+            
                     newRecord.save()
                     
                 core_utils.toc_add_layer(newRecord)
@@ -832,7 +854,7 @@ def layer_update(request, layer_id):
             highlight_scale = -1
             
         return render(request, 'layer_update.html', {'layer': layer, 'highlight_scale': highlight_scale, 'workspace': workspace, 'form': form, 'layer_id': layer_id, 'date_fields': json.dumps(date_fields)})
-    
+
 def get_date_fields(layer_id):
     date_fields = []
     
@@ -846,6 +868,36 @@ def get_date_fields(layer_id):
             date_fields.append(f['name'])
     
     return date_fields
+
+    
+@csrf_exempt
+def get_date_fields_from_resource(request):
+    if request.method == 'POST':
+        resource_name = request.POST.get('name')
+        datastore_id = request.POST.get('datastore')
+        
+        date_fields = []
+        ds = Datastore.objects.get(id=int(datastore_id))
+        params = json.loads(ds.connection_params)
+        host = params['host']
+        port = params['port']
+        dbname = params['database']
+        user = params['user']
+        passwd = params['passwd']
+        schema = params.get('schema', 'public')
+        i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+        layer_defs = i.get_fields_info(resource_name, schema)
+        
+        for layer_def in layer_defs:
+            if layer_def['type'] == 'date':
+                date_fields.append(layer_def['name'])
+        
+        response = {
+            'date_fields': date_fields
+        }
+    
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+
     
 def layer_autoconfig(layer_id):
     layer = Layer.objects.get(id=int(layer_id))
@@ -1381,7 +1433,36 @@ def layer_create(request):
         if 'single_image' in request.POST:
             single_image = True
             cached = False
-            
+        
+        time_enabled = False
+        time_field=''
+        time_endfield=''
+        time_presentation = ''
+        time_resolution_year = 0
+        time_resolution_month = 0
+        time_resolution_week = 0
+        time_resolution_day = 0
+        time_resolution_hour = 0
+        time_resolution_minute = 0
+        time_resolution_second = 0
+        time_default_value_mode = ''
+        time_default_value = ''
+ 
+        if 'time_enabled' in request.POST:
+            time_enabled = True
+            time_field = request.POST.get('time_enabled_field')
+            time_endfield = request.POST.get('time_enabled_endfield')
+            time_presentation = request.POST.get('time_presentation')
+            #time_resolution_year = request.POST.get('time_resolution_year')
+            #time_resolution_month = request.POST.get('time_resolution_month')
+            #time_resolution_week = request.POST.get('time_resolution_week')
+            #time_resolution_day = request.POST.get('time_resolution_day')
+            #time_resolution_hour = request.POST.get('time_resolution_hour')
+            #time_resolution_minute = request.POST.get('time_resolution_minute')
+            #time_resolution_second = request.POST.get('time_resolution_second')
+            time_default_value_mode = request.POST.get('time_default_value_mode')
+            time_default_value = request.POST.get('time_default_value')
+          
         form = CreateFeatureTypeForm(request.POST, user=request.user)
         if form.is_valid():
             try:
@@ -1419,6 +1500,19 @@ def layer_create(request):
                     cached = cached,
                     single_image = single_image   
                 )
+                newRecord.time_enabled = time_enabled
+                newRecord.time_enabled_field = time_field
+                newRecord.time_enabled_endfield = time_endfield
+                newRecord.time_presentation = time_presentation
+                newRecord.time_resolution_year = time_resolution_year
+                newRecord.time_resolution_month = time_resolution_month
+                newRecord.time_resolution_week = time_resolution_week
+                newRecord.time_resolution_day = time_resolution_day
+                newRecord.time_resolution_hour = time_resolution_hour
+                newRecord.time_resolution_minute = time_resolution_minute
+                newRecord.time_resolution_second = time_resolution_second
+                newRecord.time_default_value_mode = time_default_value_mode
+                newRecord.time_default_value = time_default_value
                 newRecord.save()
                 
                 if form.cleaned_data['datastore'].type != 'e_WMS':
@@ -1429,6 +1523,28 @@ def layer_create(request):
                     mapservice_backend.createDefaultStyle(newRecord, style_name)
                     mapservice_backend.setLayerStyle(newRecord, style_name)
                     mapservice_backend.updateThumbnail(newRecord, 'create')
+                    
+                    time_resolution = 0
+                    if (time_resolution_year != None and time_resolution_year > 0) or (time_resolution_month != None and time_resolution_month > 0) or (time_resolution_week != None and time_resolution_week > 0) or (time_resolution_day != None and time_resolution_day > 0):
+                        #time_resolution = 'P'
+                        if (time_resolution_year != None and time_resolution_year > 0):
+                            time_resolution = time_resolution + (int(time_resolution_year) * 3600 * 24 * 365)
+                        if (time_resolution_month != None and time_resolution_month > 0):
+                            time_resolution = time_resolution + (int(time_resolution_month) * 3600 * 24 * 31)
+                        if (time_resolution_week != None and time_resolution_week > 0):
+                            time_resolution = time_resolution + (int(time_resolution_week) * 3600 * 24 * 7)
+                        if (time_resolution_day != None and time_resolution_day > 0):
+                            time_resolution = time_resolution + (int(time_resolution_day) * 3600 * 24 * 1)
+                    if (time_resolution_hour != None and time_resolution_hour > 0) or (time_resolution_minute != None and time_resolution_minute > 0) or (time_resolution_second != None and time_resolution_second > 0):
+                        #time_resolution = time_resolution + 'T'
+                        if (time_resolution_hour != None and time_resolution_hour > 0):
+                            time_resolution = time_resolution + (int(time_resolution_hour) * 3600)
+                        if (time_resolution_minute != None and time_resolution_minute > 0):
+                            time_resolution = time_resolution + (int(time_resolution_minute) * 60)
+                        if (time_resolution_second != None and time_resolution_second > 0):
+                            time_resolution = time_resolution + (int(time_resolution_second))
+                    mapservice_backend.setTimeEnabled(workspace.name, datastore.name, datastore.type, newRecord.name, time_enabled, time_field, time_endfield, time_presentation, time_resolution, time_default_value_mode, time_default_value)
+            
                     newRecord.save()
                     
                 core_utils.toc_add_layer(newRecord)

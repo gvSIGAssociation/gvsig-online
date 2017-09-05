@@ -252,6 +252,7 @@ layerTree.prototype.createTree = function() {
 //	temporary_tree += '			<label style="display: block; margin-top: 8px; width: 95%;">' + gettext('Temporary range') + '</label>';
 	temporary_tree += '			<div id="from_label_div"><span class="text" style="font-weight:bold;margin-left:3px;">' + gettext('From') + '</span><div class="pull-right"><span id="temporary-from">---</span></div><div style="clear:both"></div></div>';
 	temporary_tree += '			<div id="to_label_div"><span class="text" style="font-weight:bold;margin-left:3px;" >' + gettext('To') + '</span><div class="pull-right"><span id="temporary-to">---</span></div><div style="clear:both"></div></div>';
+	temporary_tree += '			<div id="step_label_div"><span class="text" style="font-weight:bold;margin-left:3px;" >' + gettext('Step') + '</span><div class="pull-right"><input id="temporary-step-value" type="number" class="ui-slider-step" min=1 value="1"/><select id="temporary-step-unit"><option value="second">' + gettext('second(s)') + '</option><option value="minute">' + gettext('minute(s)') + '</option><option value="hour">' + gettext('hour(s)') + '</option><option value="day" selected>' + gettext('day(s)') + '</option><option value="month">' + gettext('month(s)') + '</option><option value="year">' + gettext('year(s)') + '</option></select></div><div style="clear:both"></div></div>';
 	temporary_tree += '			<div id="temporary-layers-slider" class="temporary-layers-slider"></div>';
 
 	temporary_tree += '<div style="margin-left:10px;">';
@@ -330,7 +331,10 @@ layerTree.prototype.createTree = function() {
 	var self = this;
 	
 	$(".temporary-layer").change(function(){
-		self.refreshTemporalInfo();		
+		self.refreshTemporalInfo();	
+		if(!$(this).prop("checked")){
+			self.updateTemporalLayers();
+		}
 	});
 	
 	$("input[name=temporary-group]").change(function (e) {
@@ -364,14 +368,47 @@ layerTree.prototype.createTree = function() {
 		self.refreshTemporalInfo();
 	});
 	
+	$("#temporary-step-value").change(function () {
+		self.refreshTemporalStep();
+	});
+	
+	$("#temporary-step-unit").change(function () {
+		self.refreshTemporalStep();
+	});
 	
 	if(!has_temporary_layers_global){
 		$(".temporary-tab").css("display","none");
 	}
 	
+	self.refreshTemporalStep();
 	self.refreshTemporalInfo();	
 };
 
+layerTree.prototype.refreshTemporalStep = function() {
+	var value = $("#temporary-step-value").val();
+	var unit = $("#temporary-step-unit option:selected").val();
+	
+	if(unit=="second"){
+		this.step_val = value;
+	}
+	if(unit=="minute"){
+		this.step_val = value*60;
+	}
+	if(unit=="hour"){
+		this.step_val = value*60*60;
+	}
+	if(unit=="day"){
+		this.step_val = value*60*60*24;
+	}
+	if(unit=="month"){
+		this.step_val = value*60*60*24*30;
+	}
+	if(unit=="year"){
+		this.step_val = value*60*60*365;
+	}
+	
+	this.refreshTemporalSlider();
+}
 
 layerTree.prototype.refreshTemporalInfo = function() {
 	var layers = [];
@@ -417,7 +454,7 @@ layerTree.prototype.refreshTemporalInfo = function() {
 	});
 };
 
-layerTree.prototype.updateTemporalLayers = function(startDate) {
+layerTree.prototype.updateTemporalLayers = function(startDate, endDate) {
 	var layers = [];
 	$(".temporary-layer").each(function(){
 		if($(this).prop("checked")){
@@ -429,10 +466,19 @@ layerTree.prototype.updateTemporalLayers = function(startDate) {
 	for(var i=0; i<maplayers.array_.length; i++){
 		var maplayer = maplayers.array_[i];
 		if(maplayer.values_ != null && (jQuery.inArray(maplayer.values_.id, layers)>-1)){
-			maplayer.getSource().updateParams({'TIME': startDate.toISOString()});
+			if(startDate){
+				var start = startDate.toISOString();
+				var end = '';
+				if (endDate){
+					end = endDate.toISOString();
+					start = start + "/" + end;
+				}
+				maplayer.getSource().updateParams({'TIME': start});
+			}
 		}else{
 			if(maplayer.getSource() != null && typeof maplayer.getSource().updateParams === 'function'){
-				maplayer.getSource().updateParams({'TIME': ''});
+				var params = maplayer.getSource().getParams();
+				delete params['TIME']; 
 			}
 		}
 	}
@@ -444,14 +490,14 @@ layerTree.prototype.refreshTemporalSlider = function() {
 	var input = $("input[name=temporary-group]:checked");
 		if(input.attr("data-value") == "single"){
 			$("#to_label_div").css("display","none");
-			if($(".temporary-layers-slider").data("slider")){
+			if($(".temporary-layers-slider").hasClass("ui-slider")){
 				$(".temporary-layers-slider").slider( "destroy" );
 			}
 			$(".temporary-layers-slider").slider({
 			    min: this.min_val,
 			    max: this.max_val,
 			    value: this.min_val,
-			    step: 86400,
+			    step: this.step_val,
 			    range: false,
 			    slide: function(event, ui) {
 			    	var dt_cur_from = new Date(ui.value*1000); //.format("yyyy-mm-dd hh:ii:ss");
@@ -463,14 +509,14 @@ layerTree.prototype.refreshTemporalSlider = function() {
 		
 		if(input.attr("data-value") == "range"){
 			$("#to_label_div").css("display","block");
-			if($(".temporary-layers-slider").data("slider")){
+			if($(".temporary-layers-slider").hasClass("ui-slider")){
 				$(".temporary-layers-slider").slider( "destroy" );
 			}
 			$(".temporary-layers-slider").slider({
 				min: this.min_val,
 			    max: this.max_val,
 			    value: this.min_val,
-		        step: 86400,
+		        step: this.step_val,
 			    range: true,
 			    slide: function( event, ui ) {
 			    	var dt_cur_from = new Date(ui.values[0]*1000); //.format("yyyy-mm-dd hh:ii:ss");
@@ -478,6 +524,8 @@ layerTree.prototype.refreshTemporalSlider = function() {
 
 			        var dt_cur_to = new Date(ui.values[1]*1000); //.format("yyyy-mm-dd hh:ii:ss");                
 			        $("#temporary-to").text(self.formatDT(dt_cur_to));
+			        
+			        self.updateTemporalLayers(dt_cur_from, dt_cur_to);
 			    }
 			});
 		}
@@ -659,11 +707,7 @@ layerTree.prototype.createOverlayUI = function(layer) {
 		ui += '		<i class="fa fa-table"></i> ' + gettext('Attribute table');
 		ui += '	</a>';
     }	
-	if (layer.time_enabled && layer.is_vector) {	    
-	    ui += '	<a id="time-enabled-' + id + '" data-id="' + id + '" class="btn btn-block btn-social btn-custom-tool time-enabled-link">';
-		ui += '		<i class="fa fa-clock-o" aria-hidden="true"></i> ' + gettext('Temporary');
-		ui += '	</a>';
-    }	
+
 	ui += '	<a id="zoom-to-layer-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool zoom-to-layer">';
 	ui += '		<i class="fa fa-search" aria-hidden="true"></i> ' + gettext('Zoom to layer');
 	ui += '	</a>';
