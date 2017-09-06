@@ -382,6 +382,8 @@ layerTree.prototype.createTree = function() {
 	
 	self.refreshTemporalStep();
 	self.refreshTemporalInfo();	
+	
+	self.updateTemporalLayers();
 };
 
 layerTree.prototype.refreshTemporalStep = function() {
@@ -478,7 +480,8 @@ layerTree.prototype.updateTemporalLayers = function(startDate, endDate) {
 		}else{
 			if(maplayer.getSource() != null && typeof maplayer.getSource().updateParams === 'function'){
 				var params = maplayer.getSource().getParams();
-				delete params['TIME']; 
+				maplayer.getSource().updateParams({'TIME': ""});
+				delete params['TIME'];
 			}
 		}
 	}
