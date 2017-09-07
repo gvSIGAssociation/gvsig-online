@@ -47,7 +47,7 @@ from gvsigol import settings
 from gvsigol_core import geom
 from gvsigol_services import utils
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
-from gvsigol_services.backend_postgis import Introspect
+from gvsigol_services.backend_postgis import Introspect as pg_introspect
 from gvsigol_services.models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, LayerLock, \
     LayerResource
 from gvsigol_services.locks_utils import *
@@ -277,6 +277,13 @@ def sync_upload(request, release_locks=True):
                         ogr.set_output(conn, table_name=tbl_name)
                         ogr.set_output_mode(ogr.MODE_LAYER_OVERWRITE, ogr.MODE_DS_UPDATE)
                         ogr.execute()
+
+                        # workaround ogr2ogr behaviour which does not update the associated pk serial sequence
+                        pgdb = pg_introspect.Introspect(conn.dbname, conn.host, conn.port, conn.user, conn.password)
+                        schema = conn.schema if conn.schema else 'public'
+                        pgdb.update_pk_sequences(lock.layer.name, schema)
+                        pgdb.close()
+
                         mapservice_backend.updateBoundingBoxFromData(lock.layer)
                     else:
                         raise HttpResponseBadRequest(SYNCERROR_UNREADABLE_LAYER.format(lock.layer.get_qualified_name())) 
