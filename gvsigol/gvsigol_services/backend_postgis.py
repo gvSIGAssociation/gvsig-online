@@ -180,7 +180,42 @@ class Introspect:
         """, [schema, table])
         
         return [r[0] for r in self.cursor.fetchall()]
-    
+
+    def get_sequences(self, table, schema='public'):
+        self.cursor.execute("""
+        SELECT column_name, column_default FROM information_schema.columns
+        WHERE table_schema = %s AND table_name = %s
+        AND column_default LIKE %s
+        """, [schema, table, 'nextval%'])
+
+        result = []
+        for (col, col_default) in self.cursor.fetchall():
+            try:
+              s = col_default[9:]
+              seq = s[:s.find("'")]
+              result.append((col, seq))
+            except:
+              pass
+
+        return result
+
+    def get_pk_sequences(self, table, schema='public'):
+        seqs = self.get_sequences(table, schema)
+        pks = self.get_pk_columns(table, schema)
+        result = []
+        for (col, seq) in seqs:
+            if col in pks:
+              result.append((col, seq))
+        return result
+
+    def update_pk_sequences(self, table, schema='public'):
+        """
+        Ensures the sequence start value is higher than any existing value for the column.
+        """
+        seqs = self.get_pk_sequences(table, schema)
+        for (col, seq) in seqs:
+            sql = "SELECT setval('" + seq + "', max(" + col + ")) FROM " + schema + "." + table + " ;"
+            self.cursor.execute(sql)
     
     def get_fields_info(self, table, schema='public'):
         self.cursor.execute("""
@@ -274,4 +309,4 @@ class Introspect:
         Closes the connection. The Introspect object can't be used afterwards
         """
         self.conn.close()
-            
+
