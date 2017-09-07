@@ -248,13 +248,16 @@ layerTree.prototype.createTree = function() {
 	temporary_tree += '<div style="background-color:#f9fafc">';
 	temporary_tree += '	<div class="box-body">';
 	
-	
+	var input_from = '<div class="input-group date col-md-9" id="datetimepicker-from"><input id="temporary-from" class="form-control"/><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span></div>';
+	var input_to = '<div class="input-group date col-md-9" id="datetimepicker-to"><input id="temporary-to" class="form-control"/><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span></div>';
+
 //	temporary_tree += '			<label style="display: block; margin-top: 8px; width: 95%;">' + gettext('Temporary range') + '</label>';
-	temporary_tree += '			<div id="from_label_div"><span class="text" style="font-weight:bold;margin-left:3px;">' + gettext('From') + '</span><div class="pull-right"><span id="temporary-from">---</span></div><div style="clear:both"></div></div>';
-	temporary_tree += '			<div id="to_label_div"><span class="text" style="font-weight:bold;margin-left:3px;" >' + gettext('To') + '</span><div class="pull-right"><span id="temporary-to">---</span></div><div style="clear:both"></div></div>';
+	temporary_tree += '			<div id="from_label_div" class="temporary_field"><div class="col-md-3" style="padding:0px"><span class="text" style="font-weight:bold;margin-left:3px;">' + gettext('From') + '</span></div>'+input_from+'<div style="clear:both"></div></div>';
+	temporary_tree += '			<div id="to_label_div" class="temporary_field"><div class="col-md-3" style="padding:0px"><span class="text" style="font-weight:bold;margin-left:3px;" >' + gettext('To') + '</span></div>'+input_to+'<div style="clear:both"></div></div>';
 	temporary_tree += '			<div id="step_label_div"><span class="text" style="font-weight:bold;margin-left:3px;" >' + gettext('Step') + '</span><div class="pull-right"><input id="temporary-step-value" type="number" class="ui-slider-step" min=1 value="1"/><select id="temporary-step-unit"><option value="second">' + gettext('second(s)') + '</option><option value="minute">' + gettext('minute(s)') + '</option><option value="hour">' + gettext('hour(s)') + '</option><option value="day" selected>' + gettext('day(s)') + '</option><option value="month">' + gettext('month(s)') + '</option><option value="year">' + gettext('year(s)') + '</option></select></div><div style="clear:both"></div></div>';
 	temporary_tree += '			<div id="temporary-layers-slider" class="temporary-layers-slider"></div>';
-
+	
+	
 	temporary_tree += '<div style="margin-left:10px;">';
 	temporary_tree += 	'<input type="radio" id="temporary-single" data-value="single" name="temporary-group" checked>';
 	temporary_tree += 	'<span class="text"> Single </span>';
@@ -279,7 +282,7 @@ layerTree.prototype.createTree = function() {
 	
 	temporary_tree += '	</div>';
 	temporary_tree += '</div>';
-	temporary_tree += '<div class="box">';
+	temporary_tree += '<div class="box" style="border-top:45px solid #e8ecf4;">';
 	temporary_tree += ' <h4 class="temporary_text">' + gettext('Temporary layers') + '</h4>';
 	temporary_tree += '	<div class="box-body">';
 	temporary_tree += '		<ul class="layer-tree">';
@@ -380,10 +383,46 @@ layerTree.prototype.createTree = function() {
 		$(".temporary-tab").css("display","none");
 	}
 	
+	$('#datetimepicker-from').datetimepicker({
+		format: 'DD-MM-YYYY HH:mm:ss',
+		showClose: true
+	});
+	
+	$('#datetimepicker-to').datetimepicker({
+		format: 'DD-MM-YYYY HH:mm:ss',
+		showClose: true
+	});
+	
+	
 	self.refreshTemporalStep();
 	self.refreshTemporalInfo();	
 	
 	self.updateTemporalLayers();
+	
+;
+	
+	$('#datetimepicker-from').on('dp.change', function(e){ 
+	    var formatedValue = e.date.format(e.date._f);
+	    var value_from = moment(formatedValue, "DD-MM-YYYY HH:mm:ss")/1000;
+	    if($('input[name=temporary-group]:checked').attr("data-value") == "single"){
+	    	$(".temporary-layers-slider").slider('value',value_from);
+	    	self.updateTemporalLayers(new Date(value_from*1000));
+	    }else{
+	    	var value_to = moment($("#temporary-to").val(), "DD-MM-YYYY HH:mm:ss")/1000;
+	    	$(".temporary-layers-slider").slider('values', 0, value_from);
+	    	self.updateTemporalLayers(new Date(value_from*1000), new Date(value_to*1000));
+	    }
+	    
+	});
+	
+	$('#datetimepicker-to').on('dp.change', function(e){ 
+		var formatedValue = e.date.format(e.date._f);
+		var value_from = moment($("#temporary-from").val(), "DD-MM-YYYY HH:mm:ss")/1000;
+	    var value_to = moment(formatedValue, "DD-MM-YYYY HH:mm:ss")/1000;
+	    $(".temporary-layers-slider").slider('values', 1, value_to);
+	    self.updateTemporalLayers(new Date(value_from*1000), new Date(value_to*1000));
+	})
+	
 };
 
 layerTree.prototype.refreshTemporalStep = function() {
@@ -504,7 +543,8 @@ layerTree.prototype.refreshTemporalSlider = function() {
 			    range: false,
 			    slide: function(event, ui) {
 			    	var dt_cur_from = new Date(ui.value*1000); //.format("yyyy-mm-dd hh:ii:ss");
-			    	$("#temporary-from").text(self.formatDT(dt_cur_from));
+			    	var formatted = self.formatDate(dt_cur_from);
+			    	$("#temporary-from").val(formatted);
 			    	self.updateTemporalLayers(dt_cur_from);
 			    }
 			});
@@ -523,10 +563,12 @@ layerTree.prototype.refreshTemporalSlider = function() {
 			    range: true,
 			    slide: function( event, ui ) {
 			    	var dt_cur_from = new Date(ui.values[0]*1000); //.format("yyyy-mm-dd hh:ii:ss");
-			    	$("#temporary-from").text(self.formatDT(dt_cur_from));
+			    	var formatted = self.formatDate(dt_cur_from);
+			    	$("#temporary-from").val(formatted);
 
 			        var dt_cur_to = new Date(ui.values[1]*1000); //.format("yyyy-mm-dd hh:ii:ss");                
-			        $("#temporary-to").text(self.formatDT(dt_cur_to));
+			        var formatted = self.formatDate(dt_cur_to);
+			    	$("#temporary-to").val(formatted);
 			        
 			        self.updateTemporalLayers(dt_cur_from, dt_cur_to);
 			    }
@@ -547,7 +589,8 @@ layerTree.prototype.refreshTemporalSlider = function() {
 		         step: 1,
 		         slide: function(event, ui) {
 		          var dt_cur_to = new Date(valMap[ui.value]*1000)
-		           $("#temporary-from").text(self.formatDT(dt_cur_to));
+		          var formatted = self.formatDate(dt_cur_from);
+		          $("#temporary-from").val(formatted);
 		         }
 		     });
 		}
@@ -566,14 +609,31 @@ layerTree.prototype.refreshTemporalSlider = function() {
 		         range: true,
 		         slide: function(event, ui) {
 		        	 var dt_cur_from = new Date(valMap[ui.values[0]]*1000)
-		           $("#temporary-from").text(self.formatDT(dt_cur_from));
+		        	 var formatted = self.formatDate(dt_cur_from);
+				     $("#temporary-from").val(formatted);
 		        	 var dt_cur_to = new Date(valMap[ui.values[1]]*1000)
-		           $("#temporary-to").text(self.formatDT(dt_cur_to));
+		        	 var formatted = self.formatDate(dt_cur_to);
+				    $("#temporary-to").val(formatted);
 		         }
 		     });
 		}
 	
 }
+
+layerTree.prototype.formatDate = function(date) {
+	  var hours = date.getHours();
+	  var minutes = date.getMinutes();
+	  var seconds = date.getSeconds();
+	  minutes = minutes < 10 ? '0'+minutes : minutes;
+	  seconds = seconds < 10 ? '0'+seconds : seconds;
+	  var days = date.getDate();
+	  var month = date.getMonth()+1;
+	  days = days < 10 ? '0'+days : days;
+	  month = month < 10 ? '0'+month : month;
+	  var strTime = hours + ':' + minutes + ':' + seconds;
+	  return days + "-" + month + "-" + date.getFullYear() + "  " + strTime;
+	}
+
 
 layerTree.prototype.zeroPad = function(num, places) {
 	  var zero = places - num.toString().length + 1;

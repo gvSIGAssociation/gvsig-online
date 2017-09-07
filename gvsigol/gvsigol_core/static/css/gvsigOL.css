@@ -4810,3 +4810,7 @@ table.dataTable thead th span.subname, table.dataTable tfoot th span.subname{
 	width: 62px;
     float: left;
 }
+
+.temporary_field{
+    padding-bottom: 5px;
+}

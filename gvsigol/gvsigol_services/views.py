@@ -1070,7 +1070,7 @@ def layers_get_temporal_properties(request):
             i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
             temporal_defs = i.get_temporal_info(layer.name, schema, layer.time_enabled_field, layer.time_enabled_endfield, layer.time_default_value_mode, layer.time_default_value)
             
-            if temporal_defs.__len__() > 0:
+            if temporal_defs.__len__() > 0 and temporal_defs[0]['min_value'] != '' and temporal_defs[0]['max_value'] != '':
                 aux_min_value = datetime.strptime(temporal_defs[0]['min_value'], '%Y-%m-%d %H:%M:%S')
                 if min_value == '' or datetime.strptime(min_value, '%Y-%m-%d %H:%M:%S') > aux_min_value:
                     min_value = temporal_defs[0]['min_value']
@@ -1119,13 +1119,16 @@ def layer_boundingbox_from_data(request):
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def cache_clear(request, layer_id):
-    if request.method == 'GET':
+    if request.method == 'GET' or request.method == 'POST':
         layer = Layer.objects.get(id=int(layer_id)) 
         datastore = Datastore.objects.get(id=layer.datastore.id)
         workspace = Workspace.objects.get(id=datastore.workspace_id)
         mapservice_backend.clearCache(workspace.name, layer)
         mapservice_backend.reload_nodes()
+    if request.method == 'GET':
         return redirect('layer_list')
+    else:
+        return HttpResponse('{"response": "ok"}', content_type='application/json')
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
