@@ -47,7 +47,7 @@ from gvsigol import settings
 from gvsigol_core import geom
 from gvsigol_services import utils
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
-from gvsigol_services.backend_postgis import Introspect as pg_introspect
+from gvsigol_services import backend_postgis as pg_introspect
 from gvsigol_services.models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, LayerLock, \
     LayerResource
 from gvsigol_services.locks_utils import *
