@@ -838,12 +838,13 @@ def layer_update(request, layer_id):
         date_fields = []
         if layer.type == 'v_PostGIS':
             aux_fields = get_date_fields(layer.id)
-            conf = ast.literal_eval(layer.conf)
-            if 'fields' in conf:
-                for field in conf['fields']:
-                    for data_field in aux_fields:
-                        if field['name'] == data_field:
-                            date_fields.append(field)
+            if layer.conf and layer.conf != '':
+                conf = ast.literal_eval(layer.conf)
+                if 'fields' in conf:
+                    for field in conf['fields']:
+                        for data_field in aux_fields:
+                            if field['name'] == data_field:
+                                date_fields.append(field)
                             
         if layer.highlight_scale is not None: 
             if int(layer.highlight_scale) >=0:
