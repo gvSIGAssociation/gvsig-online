@@ -162,7 +162,7 @@ html, body {
 .button-active {
 	text-decoration: none;
 	color: #000 !important;
-  	background-color: rgba(240, 240, 240, 1) !important;
+  	background-color: rgba(200, 200, 200, 1) !important;
 }
 
 .tooltip {
