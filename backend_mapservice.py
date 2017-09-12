@@ -1126,6 +1126,10 @@ class Geoserver():
                     field['binding'] = "java.lang.String"
                 elif sql_type == "date":
                     field['binding'] = "java.sql.Date"
+                elif sql_type == "time":
+                    field['binding'] = "java.sql.Time"
+                elif sql_type == "timestamp":
+                    field['binding'] = "java.sql.Timestamp"
                 elif sql_type == "boolean":
                     field['binding'] = "java.lang.Boolean"
                 else:
