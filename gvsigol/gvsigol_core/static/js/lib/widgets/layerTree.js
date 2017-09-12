@@ -504,27 +504,28 @@ layerTree.prototype.updateTemporalLayers = function(startDate, endDate) {
 	});
 	
 	var maplayers = this.map.getLayers();
-	for(var i=0; i<maplayers.array_.length; i++){
-		var maplayer = maplayers.array_[i];
-		if(maplayer.values_ != null && (jQuery.inArray(maplayer.values_.id, layers)>-1)){
-			if(startDate){
-				var start = startDate.toISOString();
-				var end = '';
-				if (endDate){
-					end = endDate.toISOString();
-					start = start + "/" + end;
+	if(maplayers.array_ != null){
+		for(var i=0; i<maplayers.array_.length; i++){
+			var maplayer = maplayers.array_[i];
+			if(maplayer.values_ != null && (jQuery.inArray(maplayer.values_.id, layers)>-1)){
+				if(startDate){
+					var start = startDate.toISOString();
+					var end = '';
+					if (endDate){
+						end = endDate.toISOString();
+						start = start + "/" + end;
+					}
+					maplayer.getSource().updateParams({'TIME': start});
 				}
-				maplayer.getSource().updateParams({'TIME': start});
-			}
-		}else{
-			if(maplayer.getSource() != null && typeof maplayer.getSource().updateParams === 'function'){
-				var params = maplayer.getSource().getParams();
-				maplayer.getSource().updateParams({'TIME': ""});
-				delete params['TIME'];
+			}else{
+				if(maplayer.getSource() != null && typeof maplayer.getSource().updateParams === 'function'){
+					var params = maplayer.getSource().getParams();
+					maplayer.getSource().updateParams({'TIME': ""});
+					delete params['TIME'];
+				}
 			}
 		}
 	}
-	
 }
 
 layerTree.prototype.refreshTemporalSlider = function() {
