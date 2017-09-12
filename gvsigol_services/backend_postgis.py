@@ -271,6 +271,12 @@ class Introspect:
             elif field.get('type') == 'date':
                 query += field.get('name').lower() + " date,"
                 
+            elif field.get('type') == 'time':
+                query += field.get('name').lower() + " time,"
+                
+            elif field.get('type') == 'timestamp':
+                query += field.get('name').lower() + " timestamp,"
+                
             elif field.get('type') == 'enumeration':
                 query += field.get('name').lower() + " character varying,"
             
@@ -293,9 +299,20 @@ class Introspect:
         
     def insert_sql(self, schema, table_name, sql):
         query = "INSERT INTO " + schema + "." + table_name + " " + sql + ";"
-        
+        self.cursor.execute(query)
+           
+    def set_transaction(self, schema, table_name):
+        query = "BEGIN;"
+        self.cursor.execute(query)
+    
+    def end_transaction_commit(self, schema, table_name):
+        query = "COMMIT;"
         self.cursor.execute(query)
         
+    def end_transaction_rollback(self, schema, table_name):
+        query = "ROLLBACK;"
+        self.cursor.execute(query)
+    
     def remove_data(self, schema, table_name, sql=None):
         query = "DELETE FROM " + schema + "." + table_name
         if sql:
