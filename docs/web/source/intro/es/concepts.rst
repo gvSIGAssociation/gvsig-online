@@ -140,7 +140,7 @@ Existen dos tipos de bloqueos:
 
 2.4.6 Capas Bases
 ~~~~~~~~~~~~~~~~~
-Son aquellas capas que se usan como cartografía de referencia para anclar o usar (como bien su nombre indica) de base en los proyectos.
+Son aquellas capas que se usan como cartografía de referencia para anclar o usar (como bien su nombre indica) de base en los proyectos. Se puede hacer uso de distintos tipos de proveedores como OSM, BING (con su API-key), teselas XYZ, servicios WMS y WMTS.
 
 Éstas capas se pueden gestionar previamente por un usuario administrador, una vez definidas se podrán asignar y fijar por defecto a cada uno de los proyectos de forma independiente.
  
