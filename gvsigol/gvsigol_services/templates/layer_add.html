@@ -69,33 +69,34 @@
 						</div>
 					</div>
 					<div class="row">
-						<div class="col-md-3 form-group">
+						<div class="col-md-4 form-group">
 							<input type="checkbox" name="visible" id="visible"/>
 							<label for="visible">{% trans "Visible" %}</label>														
 						</div>
-						<div class="col-md-3 form-group">
+						<div class="col-md-4 form-group">
 							<input type="checkbox" name="cached" id="cached" checked/>
 							<label for="cached">{% trans "Cached" %}</label>	
 						</div>
-						<div class="col-md-3 form-group">
+						<div class="col-md-4 form-group">
 							<input type="checkbox" name="queryable" id="queryable" checked/>
 							<label for="queryable">{% trans "Queryable" %}</label>
 						</div>
-						<div class="col-md-3 form-group">
-							<input type="checkbox" name="single_image" id="single_image" />	
-							<label for="single_image">{% trans "Single image (No tiles)" %}</label>											
-						</div>
+						
 					</div>
 					
 					<div class="row">
 						<div class="col-md-4 form-group">
-							<input type="checkbox" name="highlight" id="highlight" />	
-							<label for="highlight">{% trans "Enable highlight" %}</label>	
-							<input name="highlight_scale" id="highlight_scale" type="number" class="form-control">										
+							<input type="checkbox" name="single_image" id="single_image" />	
+							<label for="single_image">{% trans "Single image (No tiles)" %}</label>											
 						</div>
 						<div class="col-md-4 form-group">
 							<input type="checkbox" name="time_enabled"  id="time_enabled"/>
 							<label for="visible">{% trans "time_enabled" %}</label>
+						</div>
+						<div class="col-md-4 form-group">
+							<input type="checkbox" name="highlight" id="highlight" />	
+							<label for="highlight">{% trans "Enable highlight" %}</label>	
+							<input name="highlight_scale" id="highlight_scale" type="number" class="form-control">										
 						</div>
 					</div>
 					
