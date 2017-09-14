@@ -42,9 +42,9 @@ geometry_types = (('Point', _('Point')), ('MultiPoint', _('Multipoint')),
                   ('LineString', _('Line')), ('MultiLineString', _('Multiline')),
                   ('Polygon', _('Polygon')), ('MultiPolygon', _('Multipolygon')))
 
-time_presentation_op = (('LIST', _('list')), ('DISCRETE_INTERVAL', _('interval and resolution')), ('CONTINUOUS_INTERVAL', _('continuous interval')))
-#time_default_value_mode_op = (('MINIMUM', _('smallest domain value')), ('MAXIMUM', _('biggest domain value')), ('nearest to the reference value', _('nearest to the reference value')), ('reference value', _('reference value')))
-time_default_value_mode_op = (('MINIMUM', _('smallest domain value')), ('MAXIMUM', _('biggest domain value')))
+time_presentation_op = (('CONTINUOUS_INTERVAL', _('continuous interval')), ('DISCRETE_INTERVAL', _('interval and resolution')), ('LIST', _('list')))
+time_default_value_mode_op = (('MINIMUM', _('smallest domain value')), ('MAXIMUM', _('biggest domain value')), ('NEAREST', _('nearest to the reference value')), ('FIXED', _('reference value')))
+#time_default_value_mode_op = (('MINIMUM', _('smallest domain value')), ('MAXIMUM', _('biggest domain value')))
 
 class ImageMosaicUploadForm(forms.Form): 
     workspace = forms.ModelChoiceField(label=_(u'Workspace'), required=True, queryset=Workspace.objects.all(), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))

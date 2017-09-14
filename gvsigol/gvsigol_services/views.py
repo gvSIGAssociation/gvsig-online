@@ -802,7 +802,7 @@ def layer_update(request, layer_id):
                     if (time_resolution_year != None and time_resolution_year > 0):
                         time_resolution = time_resolution + (int(time_resolution_year) * 3600 * 24 * 365)
                     if (time_resolution_month != None and time_resolution_month > 0):
-                        time_resolution = time_resolution + (int(time_resolution_month) * 3600 * 24 * 31)
+                        time_resolution = time_resolution + (int(time_resolution_month) * 3600 * 24 * 31) - (int(time_resolution_month) * 3600 * 14)
                     if (time_resolution_week != None and time_resolution_week > 0):
                         time_resolution = time_resolution + (int(time_resolution_week) * 3600 * 24 * 7)
                     if (time_resolution_day != None and time_resolution_day > 0):
