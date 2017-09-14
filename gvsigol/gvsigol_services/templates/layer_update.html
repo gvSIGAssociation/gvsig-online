@@ -71,7 +71,7 @@
 						<div class="col-md-12 form-group">
 							<span>{% trans "Layer properties in the viewer" %}.</span>
 						</div>
-						<div class="col-md-3 form-group">
+						<div class="col-md-4 form-group">
 							{% if layer.visible %}
 							<input type="checkbox" name="visible"  id="visible" checked/>
 							{% else %}
@@ -79,7 +79,7 @@
 							{% endif %}
 							<label for="visible">{% trans "Visible" %}</label>
 						</div>
-						<div class="col-md-3 form-group">
+						<div class="col-md-4 form-group">
 							{% if layer.cached %}
 							<input type="checkbox" name="cached"  id="cached" checked/>
 							{% else %}
@@ -87,7 +87,7 @@
 							{% endif %}
 							<label for="cached">{% trans "Cached" %}</label>
 						</div>
-						<div class="col-md-3 form-group">
+						<div class="col-md-4 form-group">
 							{% if layer.queryable %}
 							<input type="checkbox" name="queryable"  id="queryable" checked/>
 							{% else %}
@@ -95,7 +95,10 @@
 							{% endif %}
 							<label for="queryable">{% trans "Queryable" %}</label>
 						</div>
-						<div class="col-md-3 form-group">
+					</div>
+					
+					<div class="row">
+						<div class="col-md-4 form-group">
 							{% if layer.single_image %}
 							<input type="checkbox" name="single_image"  id="single_image" checked/>
 							{% else %}
@@ -103,9 +106,6 @@
 							{% endif %}
 							<label for="visible">{% trans "Single image (No tiles)" %}</label>
 						</div>
-					</div>
-					
-					<div class="row">
 						<div class="col-md-4 form-group">
 							{% if layer.time_enabled %}
 							<input type="checkbox" name="time_enabled"  id="time_enabled" checked/>
@@ -113,6 +113,17 @@
 							<input type="checkbox" name="time_enabled"  id="time_enabled"/>
 							{% endif %}
 							<label for="visible">{% trans "time_enabled" %}</label>
+						</div>
+						<div class="col-md-4 form-group">
+							{% if layer.highlight %}
+							<input type="checkbox" name="highlight" id="highlight" checked/>	
+							<label for="highlight">{% trans "Enable highlight" %}</label>	
+							<input name="highlight_scale" id="highlight_scale" type="number" step="any" class="form-control" value="{{highlight_scale}}">	
+							{% else %}
+							<input type="checkbox" name="highlight" id="highlight" />	
+							<label for="highlight">{% trans "Enable highlight" %}</label>	
+							<input name="highlight_scale" id="highlight_scale" type="number" step="any" class="form-control">	
+							{% endif %}
 						</div>
 					</div>
 					
@@ -170,19 +181,6 @@
 						</div>
 					</div>
 					
-					<div class="row">
-						<div class="col-md-4 form-group">
-							{% if layer.highlight %}
-							<input type="checkbox" name="highlight" id="highlight" checked/>	
-							<label for="highlight">{% trans "Enable highlight" %}</label>	
-							<input name="highlight_scale" id="highlight_scale" type="number" step="any" class="form-control" value="{{highlight_scale}}">	
-							{% else %}
-							<input type="checkbox" name="highlight" id="highlight" />	
-							<label for="highlight">{% trans "Enable highlight" %}</label>	
-							<input name="highlight_scale" id="highlight_scale" type="number" step="any" class="form-control">	
-							{% endif %}
-						</div>
-					</div>
 				</div>
 				
 				<div class="box-footer">
@@ -197,6 +195,9 @@
 
 {% block extra-scripts %}
 <script type="text/javascript">
+$('#menu-manage-services').addClass("active");
+$('#submenu-layers').addClass("active");
+
 	function rebuildSelect(selectObj, placeholderOptionText, placeholderSelected, extraOptions) {
 		selectObj.empty().html(' ');
 		var attribs = {
