@@ -270,7 +270,7 @@ En el caso de OSM genérico, es opcional el añadir la URL, ya que el sistema in
 .. image:: ../images/base_layers_osm.png
    :align: center
 
-Si son capas tiles XYZ, se debe especificar su URL y asegurarse que contenga el formato al final: "**/{z}/{x}/{y}.png**", por ejemplo, un servicio openlayers disponible de este tipo es http://{a-c}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png
+Si son capas tiles XYZ, se debe especificar su URL y asegurarse que contenga el formato al final: "**/{z}/{x}/{y}.png**", por ejemplo, un servicio openlayers disponible de este tipo es "http://{a-c}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
 
 .. image:: ../images/base_layers_xyz.png
    :align: center
