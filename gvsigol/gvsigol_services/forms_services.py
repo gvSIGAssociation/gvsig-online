@@ -34,9 +34,9 @@ layers = (('---', _('No se han podido obtener las capas')), ('1.3.0', 'version 1
 version = (('1.1.1', _('version 1.1.1')), ('1.3.0', _('version 1.3.0')), ('1.0.0', _('version 1.0.0')))
 blank = (('', '---------'),)
 
-time_presentation_op = (('LIST', _('list')), ('DISCRETE_INTERVAL', _('interval and resolution')), ('CONTINUOUS_INTERVAL', _('continuous interval')))
-#time_default_value_mode_op = (('MINIMUM', _('smallest domain value')), ('MAXIMUM', _('biggest domain value')), ('nearest to the reference value', _('nearest to the reference value')), ('reference value', _('reference value')))
-time_default_value_mode_op = (('MINIMUM', _('smallest domain value')), ('MAXIMUM', _('biggest domain value')))
+time_presentation_op = (('CONTINUOUS_INTERVAL', _('continuous interval')), ('DISCRETE_INTERVAL', _('interval and resolution')), ('LIST', _('list')))
+time_default_value_mode_op = (('MINIMUM', _('smallest domain value')), ('MAXIMUM', _('biggest domain value')), ('NEAREST', _('nearest to the reference value')), ('FIXED', _('reference value')))
+#time_default_value_mode_op = (('MINIMUM', _('smallest domain value')), ('MAXIMUM', _('biggest domain value')))
 
 class WorkspaceForm(forms.Form):   
     name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1'}))
@@ -118,7 +118,7 @@ class LayerForm(forms.ModelForm):
     time_resolution_minute = forms.IntegerField(label=_(u'Resolution minute'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
     time_resolution_second = forms.IntegerField(label=_(u'Resolution second'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
     time_default_value_mode = forms.ChoiceField(label=_(u'Default mode'), required=False, choices=time_default_value_mode_op, widget=forms.Select(attrs={'class' : 'form-control'}))
-    time_default_value = forms.CharField(label=_(u'Default value'), required=False, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    time_default_value = forms.DateTimeField(label=_(u'Default date value'), required=False, widget=forms.DateTimeInput(attrs={'class': 'form-control datetime-input'}))
     
 class LayerUpdateForm(forms.ModelForm):
     class Meta:
@@ -142,8 +142,8 @@ class LayerUpdateForm(forms.ModelForm):
     time_resolution_minute = forms.CharField(label=_(u'Resolution minute'), required=False, max_length=2, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
     time_resolution_second = forms.CharField(label=_(u'Resolution second'), required=False, max_length=2, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
     time_default_value_mode = forms.ChoiceField(label=_(u'Default mode'), required=False, choices=time_default_value_mode_op, widget=forms.Select(attrs={'class' : 'form-control'}))
-    time_default_value = forms.CharField(label=_(u'Default value'), required=False, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
- 
+    time_default_value = forms.DateTimeField(label=_(u'Default date value'), required=False, widget=forms.DateTimeInput(attrs={'class': 'form-control datetime-input'}))
+    
 class LayerUploadTypeForm(forms.ModelForm):
     class Meta:
         model = Datastore
