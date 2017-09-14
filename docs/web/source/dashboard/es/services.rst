@@ -239,16 +239,63 @@ desde ésta entrada podemos consultar los bloqueos activos que tengan algunas ca
 2.6 Gestión de capas base
 -------------------------
 Los usuarios administradores podrán configurar el juego de capas base que estarán disponibles para añadir a cualquiera de los proyectos.
+
 Para acceder a esta funcionalidad, aparecerá la entrada correspondiente dentro del menú de 'servicios' del panel de control.
 
-En ella se pueden realizar las operaciones básicas: crear nueva capa de tipo WMS, WMTS, OpenStreetMap, Bing o TileXYZ, actualizar o borrar.
-Dependiendo del tipo de capa, se requerirán diferentes parámetros para definirse:
+En la entrda de '*capas base*' se pueden realizar operaciones básicas: añadir nueva capa base(**1**), actualizar (**2**) o eliminar (**3**).
 
-* **WMS/WMTS**: requieren de la versión y url del servicio. Una vez indicadas, se marca la capa y el formato
+.. image:: ../images/base_layers.png
+   :align: center
 
-* **OSM y XYZ**: indican la URL del servicio. En el caso de OSM, es opcional, si no se indica, se pondrá el servicio por defecto, de lo contrario, el que se especifique (por ejemplo, http://tile2.opencyclemap.org/transport/{z}/{x}/{y}.png). Más ejemplos en http://blog.programster.org/openlayers-3-using-different-osm-tiles/
+para añadir una nueva capa base (**1**) se podran definir diferentes tipos de proveedores y para cada uno de ellos sus respectivos parámetros de conexión.
 
-* **Bing**: necesita el nombre de la capa a visualizar y un API-KEY para poder utilizar los servicios de Microsoft. 
+* **WMS/WMTS**: Se indica un nombre y el título (como se verá en el proyecto). La url del servicio es imprescindible, asi como conocer la versión del mismo. Una vez indicadas, se marca la capa y el formato.
 
-Luego en la definición de los proyectos, se podrán declarar cuáles se quieren incorporar, así como indicar cuál estará anclada por defecto al cargar el proyecto.
+.. image:: ../images/base_layers_wms_wmts.png
+   :align: center
 
+Cuando se abrá el proyecto se mostrará en el mapa la capa base que se fijó por defeto, pero siempre se dispondrán en el panel de contenidos el listado de las añadidas al proyecto, pudiendo cambiarlas y fijar de base la que se quiera.
+
+.. image:: ../images/base_layers_wms_1.png
+   :align: center
+
+* **OSM y XYZ**: En el caso de las OSM y tiles XYZ basta con indicar el nombre, título y la URL del servicio.
+
+En el caso de OSM, es opcional el añadir la URL, ya que el sistema internamemte reconoce este servicio solo con seleccionar el tipo '*OSM*', entonces, si no se añade la url, se pondrá el servicio por defecto. 
+
+.. image:: ../images/base_layers_osm.png
+   :align: center
+
+Si son capas tiles XYZ, se debe especificar su URL y asegurarse que contenga el formato al final: "**/{z}/{x}/{y}.png**", por ejemplo, http://{a-c}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png. 
+
+.. image:: ../images/base_layers_xyz.png
+   :align: center
+
+Más ejemplos en OpenlayersTiles_.
+
+ .. _OpenlayersTiles: http://blog.programster.org/openlayers-3-using-different-osm-tiles/
+
+En el proyecto se visualizan:
+
+.. image:: ../images/base_layers_osm_xyz_mapa.png
+   :align: center
+
+* **Bing**: al seleccionar el tipo '*bing*', necesitará el nombre de la capa a visualizar y un API-KEY para poder utilizar los servicios de Microsoft. 
+
+.. image:: ../images/base_layers_bing.png
+   :align: center
+   
+En el proyecto se visualizan:
+
+.. image:: ../images/base_layers_bing1.png
+   :align: center
+
+Para mayor información con respecto al uso de las tipo '*bing*', sus capas disponibles y obteción de las API-key, consultar en la página BingMaps_.
+
+ .. _BingMaps: http://openlayers.org/en/latest/examples/bing-maps.html
+
+
+Finalmente gestionadas las capas base, se podrá ir a la definición de los proyectos, declarar cuáles se quieren incorporar, así como indicar cuál estará anclada por defecto al cargar el proyecto.
+
+.. image:: ../images/base_layers_proyecto.png
+   :align: center
