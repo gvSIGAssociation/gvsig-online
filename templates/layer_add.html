@@ -145,11 +145,17 @@
 								{{ form.time_default_value_mode }}
 							</div>
 					</div>
-					
+										
 					<div class="row time_default_value">
 							<div class="col-md-12 form-group">
 								<label class="active" for="id_time_default_value">{% trans "Default value" %}</label>
-								{{ form.time_default_value }}
+								<div class="input-group date col-md-12" id="datetimepicker">
+									{{ form.time_default_value }}
+									<!--  <input id="id_time_default_value" name="time_default_value" class="form-control"/>-->
+									<span class="input-group-addon">
+										<span class="glyphicon glyphicon-calendar"></span>
+									</span>
+								</div>
 							</div>
 					</div>
 					</div>
@@ -211,6 +217,10 @@
 		var tm_dv = $("#id_time_default_value_mode option:selected").text();
 		if(tm_dv == "nearest to the reference value" || tm_dv == "reference value"){
 			$(".time_default_value").css("display", "block");
+			$('#datetimepicker').datetimepicker({
+				format: 'DD-MM-YYYY HH:mm:ss',
+				showClose: true
+			});
 		}
 		
 	}
