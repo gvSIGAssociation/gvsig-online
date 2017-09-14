@@ -105,9 +105,7 @@ Existen diferentes tipos de almacenes de datos en gvSIG Online:
 
 *   **GeoTiff**: Capa ráster en formato GeoTiff, que almacena la geo-referenciación de la capa dentro de los metadatos Tiff
 
-*   **Carpeta de shapefiles**
-
-*   **WMS en cascada**
+*   **WMS en cascada**: Almacena la dirección de un servicio WMS para posteriormente ser publicada las capas que tenga disponibles.
 
 Es importante entender que para poder añadir un almacén de datos, debemos partir de una fuente de datos que exista previamente. 
 Por ejemplo, para poder añadir un almacén de datos de tipo PostGIS vectorial, la base de datos espacial debe existir previamente. 
@@ -135,10 +133,16 @@ Cuando una capa está en modo edición automáticamente se bloquea para evitar e
 
 Existen dos tipos de bloqueos:
 
-*   Bloqueos del geoportal
+*   **Bloqueos del geoportal**: cuando 
 
-*   Bloqueos de la aplicación móvil
+*   **Bloqueos de la aplicación móvil**:
 
+
+2.4.6 Capas Bases
+~~~~~~~~~~~~~~~~~
+Son aquellas capas que se usan como cartografía de referencia para anclar o usar (como bien su nombre indica) de base en los proyectos.
+
+Éstas capas se pueden gestionar previamente por un usuario administrador, una vez definidas se podrán asignar y fijar por defecto a cada uno de los proyectos de forma independiente.
  
 
 2.5 Tipos de datos
@@ -153,8 +157,11 @@ Las enumeraciones son un tipo especial de entidades que definen dominios de valo
 La nomenclatura usada en la BD para ser reconocida como campo de dominio es: **enm_#_acti**
 
 Donde: 
-* *enm* = tipo de dato enumeración
+
+* *enm* = tipo de dato enumeración.
+
 * *#* = número que asigna el sistema por defecto cuando se crean nuevas listas de enumeraciones.
+
 * *acti* = Las primeras cuatro letras del título de la lista de enumeraciones. Para este ejemplo, el título es: 'Actividad'
 
 
@@ -165,8 +172,11 @@ A diferencia del tipo enumeración, este campo permite seleccionar varios elemen
 Nomenclatura: **enmm_#_acti**
 
 Donde: 
+
 * *enmm* = tipo de dato múltiple enumeración.
+
 * *#* = número que asigna el sistema por defecto cuando se crean nuevas listas de enumeraciones.
+
 * *acti* = Las primeras cuatro letras del título de la lista de enumeraciones. Para este ejemplo, el título es: 'Actividad'
 
 
@@ -179,7 +189,7 @@ Estos campos son generados automáticamente cuando se crea una capa vacía desde
  *  **last_modification:** Es otro campo que no permite su edición en la tabla. Cuando se edita y guarda un elemento de la capa (atributos o geometría), este campo '*last_modification*' se rellena automáticamente con la fecha que registra el ordenador o móvil.
 
 .. NOTE::
-   Estos tipos de datos también pueden ser añadidos manualmente a la tabla de atributos de la capa por medio de la BD antes de que la capa sea publicada en el sistema.
+   Estos tipos de datos también pueden ser añadidos manualmente a la tabla de atributos de cualquier capa por medio de la BD antes de que la capa sea publicada en el sistema.
 
 2.6 Administrador de archivos
 -----------------------------
@@ -199,9 +209,11 @@ Un proyecto está formado por los siguientes elementos:
 
 *   Una vista de mapa (centro y extensión)
 
-*   Grupos de capas
+*   Capas bases
 
 *   Grupos de usuarios
+
+*   Grupos de capas
 
 Existen 2 tipos de proyectos:
 
@@ -235,15 +247,16 @@ Existen diversos tipos de leyenda en función de si el tipo de capa es vectorial
 
 Los tipos de leyenda para las capas vectoriales son:
 
-*	*"Leyenda de símbolo único"*
+*	*Leyenda de símbolo único*
 
-*	*"Leyenda de valores únicos"*
+*	*Leyenda de valores únicos*
 
-*	*"Leyenda de intervalos"*
+*	*Leyenda de intervalos*
 
-*	*"Leyenda de expresiones"*
+*	*Leyenda de expresiones*
 
-Para las capas de tipo ráster existe un tipo de leyenda que es el *"Tabla de color"*.
+Para las capas de tipo ráster existe un tipo de leyenda que es el *Tabla de color*.
+
 
 2.8.2 Bibliotecas de símbolos
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
