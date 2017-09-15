@@ -466,7 +466,8 @@ editionBar.prototype.addDrawInteraction = function() {
 			var s = new ol.style.Style({
 		        fill: new ol.style.Fill({
 		            color: 'rgba(255,255,0,0.7)'
-		        })
+		        }),
+		        radius: 10
 		    });
 			evt.feature.setStyle(s);
 			
@@ -547,6 +548,13 @@ editionBar.prototype.addModifyInteraction = function() {
 	
 	this.modifyInteraction.on('modifystart',
 		function(evt) {
+		
+			var s = new ol.style.Style({
+		        fill: new ol.style.Fill({
+		            color: 'rgba(255,255,0,0.7)'
+		        })
+		    });
+			evt.feature.setStyle(s);
 			console.log('Modify feature start');
 		}, this);
 		
