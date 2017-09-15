@@ -463,6 +463,13 @@ editionBar.prototype.addDrawInteraction = function() {
 
 	this.drawInteraction.on('drawstart',
 		function(evt) {
+			var s = new ol.style.Style({
+		        fill: new ol.style.Fill({
+		            color: 'rgba(255,255,0,0.7)'
+		        })
+		    });
+			evt.feature.setStyle(s);
+			
 			if (self.lastAddedFeature != null) {
 				self.source.removeFeature(self.lastAddedFeature);
 				self.lastAddedFeature = null;
