@@ -277,8 +277,9 @@ Si son capas tiles XYZ, se debe especificar su URL y asegurarse que contenga el 
 
 Para obtener más ejemplos de otras openlayers tiles de OSM, se puede revisar las siguientes páginas: 
 
- BlogOpenlayeres_.
- OpenLayers.org_.
+*  BlogOpenlayeres_.
+ 
+*  OpenLayers.org_.
  
  .. _BlogOpenlayeres: http://blog.programster.org/openlayers-3-using-different-osm-tiles/
 
@@ -301,7 +302,9 @@ Las capas base de Bing, en el proyecto se visualizan:
 .. image:: ../images/base_layers_bing1.png
    :align: center
 
-Para mayor información con respecto al uso de las capas base tipo '*bing*', sus capas disponibles y obtención de las API-key, consultar en su página oficial: BingMaps_.
+Para mayor información con respecto al uso de las capas base tipo '*bing*', sus capas disponibles y obtención de las API-key, consultar en su página oficial: 
+
+* BingMaps_.
 
  .. _BingMaps: http://openlayers.org/en/latest/examples/bing-maps.html
 
