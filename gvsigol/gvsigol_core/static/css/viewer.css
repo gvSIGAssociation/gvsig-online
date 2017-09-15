@@ -429,8 +429,8 @@ html, body {
 }
 
 
-@media only screen and (max-width: 950px) {
-
+@media only screen and (max-width: 1300px) {
+	
 	.ol-toolbar {
 	    left: auto;
 	    right: 6px;
@@ -461,17 +461,22 @@ html, body {
 	}
 	
 	
-	.control-sidebar.control-sidebar-light.control-sidebar-open {
-	    width: 275px;
-	}
-	
 	.custom-mouse-position-projection {
 	    font-size: 12px;
 	    background-color: #fff;
 	    color: #777;
 	    width: 100px;
 	}
+
+}
+
+
+@media only screen and (max-width: 950px) {
 	
+	.control-sidebar.control-sidebar-light.control-sidebar-open {
+	    width: 275px;
+	}
+
 	.ol-overviewmap:not(.ol-collapsed) {
 	    background: rgba(255,255,255,.8);
 	    display: none;

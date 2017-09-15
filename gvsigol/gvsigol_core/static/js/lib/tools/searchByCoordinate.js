@@ -97,12 +97,12 @@ searchByCoordinate.prototype.handler = function(e) {
 	body += '</div>';
 	body += '<div class="row">';
 	body += 	'<div class="col-md-6 form-group">';
-	body += 		'<label for="latitude">' + gettext('Latitude') + ' (X)</label>';
-	body += 		'<input placeholder="" name="latitude" id="latitude" type="text" class="form-control">';					
+	body += 		'<label for="longitude">' + gettext('Longitude') + ' (X)</label>';
+	body += 		'<input placeholder="" name="longitude" id="longitude" type="text" class="form-control">';					
 	body += 	'</div>';
 	body += 	'<div class="col-md-6 form-group">';
-	body += 		'<label for="longitude">' + gettext('Longitude') + ' (Y)</label>';
-	body += 		'<input placeholder="" name="longitude" id="longitude" type="text" class="form-control">';					
+	body += 		'<label for="latitude">' + gettext('Latitude') + ' (Y)</label>';
+	body += 		'<input placeholder="" name="latitude" id="latitude" type="text" class="form-control">';					
 	body += 	'</div>';
 	body += '</div>';
 	

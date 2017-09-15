@@ -86,7 +86,7 @@ viewer.core = {
 		
 		this.map = new ol.Map({
 			interactions: ol.interaction.defaults().extend([
-			    new ol.interaction.DragRotateAndZoom()
+			    new ol.interaction.DragZoom()
 			]),
       		controls: [
 				this.zoombar,
