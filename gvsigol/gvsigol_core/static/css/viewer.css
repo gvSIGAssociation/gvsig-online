@@ -431,9 +431,8 @@ html, body {
 
 
 #editionbar .button-active {
-   background-color: #FDF709;	
+   background-color: #FDF709 !important;	
 }
-
 
 @media only screen and (max-width: 1300px) {
 	
