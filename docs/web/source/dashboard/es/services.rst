@@ -275,9 +275,14 @@ Si son capas tiles XYZ, se debe especificar su URL y asegurarse que contenga el 
 .. image:: ../images/base_layers_xyz.png
    :align: center
 
-Para obtener más ejemplos de otras openlayers tiles de OSM, se puede revisar la siguiente página: OpenlayersTiles_.
+Para obtener más ejemplos de otras openlayers tiles de OSM, se puede revisar las siguientes páginas: 
 
- .. _OpenlayersTiles: http://blog.programster.org/openlayers-3-using-different-osm-tiles/
+ BlogOpenlayeres_.
+ OpenLayers.org_.
+ 
+ .. _BlogOpenlayeres: http://blog.programster.org/openlayers-3-using-different-osm-tiles/
+
+ .. _Openlayers.org: https://openlayers.org/en/latest/examples/localized-openstreetmap.html
 
 Las capas base de OSM por defecto y otra de tipo tile XYZ, en el proyecto se visualizan:
 

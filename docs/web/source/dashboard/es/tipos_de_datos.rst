@@ -28,7 +28,7 @@ Por ejemplo, un listado de enumeración que represente los distintos riesgos que
 - Al dar guardar, el nombre final del listado sera: *enm_1_ries*
 
 .. NOTE::
-   Este listado puede ser usado tanto para el tipo de dato 'enumeración' como 'multiple enumeración'. 
+   Este listado puede ser usado tanto para el tipo de dato 'enumeración' como 'múltiple enumeración'. 
    En caso de que se elija el tipo de dato 'múltiple enumeración' la base de datos convierte automáticamente la nomenclatura del campo por: *enmm_1_ries*
    
    
@@ -80,7 +80,7 @@ Esta opción es válida para los diferentes tipos de datos, enumeraciones y de c
 * múltiple Enumeración - añadir nuevo campo con el *nombre de la lista enumercaión mas un "m" adicional: "enmm_#_name" y tipo de dato: texto, varchar, chararter
 * Datos de contro interno:
 
-   - añadir nuevo campo con el nombre excato: "modified_by" y de tipo texto
-   - Añadir nuevo campo con el nombre excato: "last_modification" y tipo texto
+   - añadir nuevo campo con el nombre exacto: "modified_by" y de tipo texto
+   - Añadir nuevo campo con el nombre exacto: "last_modification" y tipo texto
 
 Realizado cualquiera de estos pasos, ya se podrá publicar la capa en el sistema y estos campos funcionarán de la mimsa manera que cuando se crean desde capas vacías.
