@@ -429,6 +429,12 @@ html, body {
 }
 
 
+
+#editionbar .button-active {
+   background-color: #FDF709;	
+}
+
+
 @media only screen and (max-width: 1300px) {
 	
 	.ol-toolbar {
