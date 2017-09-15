@@ -50,25 +50,28 @@ Los almacenes se crean dentro de un espacio de trabajo. Por lo tanto, al crear u
 
 .. note::
       Es importante entender que para poder añadir un almacén de datos tipo PostGis, debemos partir de una fuente de datos que exista previamente, es decir, que la BD y esquema que se indica en los parámetros de conexión existan.
-
-Por ejemplo, para poder añadir un almacén de datos de tipo PostGIS vectorial, la base de datos espacial debe existir previamente. 
-De esta forma, lo que estamos haciendo es registrar en gvSIG Online (y en Geoserver) los parámetros de conexión a dicha base de datos. 
-
-Para añadir un almacén de datos tipo ráster, el fichero ráster debe existir previamente en el servidor, es decir, subido al 'administrador de archivos'. En este caso estamos registrando en gvSIG Online la ruta a dicho fichero ráster.
-
-
-En el formulario de creación de almacén de datos deberemos seleccionar el espacio de trabajo al que pertenecerá, el tipo de almacén, 
+ 
+En el formulario de creación de almacén de datos debemos seleccionar el espacio de trabajo al que pertenecerá, el tipo de almacén, 
 el nombre (sin caracteres especiales) y los parámetros de conexión.
 
 El formulario incluye diversos ejemplos de parámetros de conexión para cada tipo de almacén. Se pueden crear tres tipos de almacenes, pueden ser:
 
-**1- PostGIS vectorial**: Se tendrá que indicar los parámetros de conexión a la BD, esto permitirá crear el nuevo almacén que hará referencia a un esquema existente en la Base de Datos.
+2.2.2 PostGIS vectorial:
+~~~~~~~~~~~~~~~~~~~~~~~~
+Para poder añadir un almacén de datos de tipo PostGIS vectorial, la base de datos espacial debe existir previamente. 
+De esta forma, lo que estamos haciendo es registrar en gvSIG Online (y en Geoserver) los parámetros de conexión a dicha base de datos.
+
+Se tendrá que indicar los parámetros de conexión a la BD, esto permitirá crear el nuevo almacén que hará referencia a un esquema existente en la Base de Datos.
 
 
 .. image:: ../images/ds2.png
    :align: center
 
-**2- GeoTiff**:  En caso de que el almacén de datos sea de tipo raster el formulario cambiará y nos permitirá seleccionar el fichero que compondrá el almacén.
+2.2.2 GeoTiff
+~~~~~~~~~~~~~
+Para añadir un almacén de datos tipo ráster, el fichero tif debe existir previamente en el servidor, es decir, subido al 'administrador de archivos'. En este caso estamos registrando en gvSIG Online la ruta a dicho fichero ráster.
+
+Para el almacén de datos tipo raster el formulario cambiará y nos permitirá seleccionar el fichero que compondrá el almacén.
 
 
 .. image:: ../images/ds3.png
@@ -79,7 +82,9 @@ Al abrir el dialogo de seleccionar archivo, este nos mostrará un ventana con el
 .. image:: ../images/ds4.png
    :align: center
 
-**3- WMS en cascada**: este permite guardar un almacén de tipo Web Map Service (WMS), donde se guarda la dirección del servicio que se quiera consultar y publicar en el proyecto.
+2.2.3 WMS en cascada:
+~~~~~~~~~~~~~~~~~~~~~
+este permite guardar un almacén de tipo Web Map Service (WMS), donde se guarda la dirección del servicio que se quiera consultar y publicar en el proyecto.
 
 .. image:: ../images/ds5.png
    :align: center
@@ -157,16 +162,18 @@ Sobre cada una de las capas podemos realizar las siguientes operaciones:
 *   **Eliminar capa (6):** Elimina la capa y estilos asociados.
 
 
-2.4.1 Publicar capa
-~~~~~~~~~~~~~~~~~~~
-Para publicar una *'capa existente en un almacén de datos'*, seleccionaremos el botón *"Publicar capa"*, una vez accedamos a la vista de publicación aparecerá el siguiente formulario.
+2.4.1 Publicar capa vectorial, raster o wms
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Desde esta opción se podrá publicar las capas tipo vectorial, raster o wms que se hayan asignado previamente en un almacén de datos.
+
+Para publicar seleccionaremos el botón *"Publicar capa"*, una vez accedamos a la vista de publicación aparecerá el siguiente formulario.
 
 .. image:: ../images/publish1.png
    :align: center
    
 Los pasos para publicar una capa son los siguientes:
 
-*	Seleccionamos el almacén de datos donde se encuentra la capa que deseamos publicar, es decir, el almacén postgis de la capa vectorial, el almacén geotiff de la capa raster o el almacén del WMS.
+*	**Seleccionamos el almacén de datos donde se encuentra la capa que deseamos publicar, es decir, el almacén postgis de la capa vectorial, el almacén geotiff de la capa raster o el almacén del WMS**.
 
 *	A continuación seleccionamos en el desplegable el recurso, se puede teclear y se autocompleta (Solo aparecen los recursos que aún no han sido publicados).
 
@@ -174,7 +181,7 @@ Los pasos para publicar una capa son los siguientes:
 
 *	Seleccionamos el grupo de capas al cual queremos asignar la capa.
 
-*	Seleccionamos las propiedades de la capa en el visor (visible, cacheada, imagen simple, consultable).
+*	Seleccionamos las propiedades de la capa: visible, cacheada (recomendado para raster), imagen simple (recomendado para wms), consultable.
 
 *	Si lo deseamos podemos introducir una descripción de la capa.
 
@@ -213,7 +220,7 @@ Los pasos para crear una capa vacía son los siguientes:
 .. note::
    Los tipos de campo soportados son: Boolean, Texto, Entero, Doble, Fecha, Enumeración y Multiple enumeración (para añadir alguno de estos dos últimos, se debe tener algún listado de enumeraciones)
 
-*	Seleccionamos las propiedades de la capa en el visor (visible, cacheada, imagen simple, consultable).
+*	Seleccionamos las propiedades de la capa: visible, cacheada (recomendado para raster), imagen simple (recomendado para wms), consultable.
 
 *	Si lo deseamos podemos introducir una descripción de la capa.
 
