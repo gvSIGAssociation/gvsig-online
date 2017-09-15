@@ -232,8 +232,8 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	if (this.geometryType == 'Point' || this.geometryType == 'MultiPoint') {
 		style = new ol.style.Style({
 			image: new ol.style.Circle({
-				radius: 15,
-				fill: new ol.style.Fill({color: 'rgba(253,247,9, 0.5)'}),
+				radius: 10,
+				fill: new ol.style.Fill({color: 'rgba(0,0,255, 0.5)'}),
 				stroke: new ol.style.Stroke({color: 'rgba(0,0,255, 1.0)', width: 2})
 			})
 		});
@@ -549,12 +549,30 @@ editionBar.prototype.addModifyInteraction = function() {
 	this.modifyInteraction.on('modifystart',
 		function(evt) {
 		
-			var s = new ol.style.Style({
-		        fill: new ol.style.Fill({
-		            color: 'rgba(255,255,0,0.7)'
-		        })
-		    });
-			evt.feature.setStyle(s);
+			var style = null;
+			if (this.geometryType == 'Point' || this.geometryType == 'MultiPoint') {
+				style = new ol.style.Style({
+					image: new ol.style.Circle({
+						radius: 10,
+						fill: new ol.style.Fill({color: 'rgba(0,0,255, 0.5)'}),
+						stroke: new ol.style.Stroke({color: 'rgba(0,0,255, 1.0)', width: 2})
+					})
+				});
+				
+			} else if (this.geometryType == 'LineString' || this.geometryType == 'MultiLineString') {
+				style = new ol.style.Style({
+					fill: new ol.style.Fill({color: 'rgba(0,0,255, 0.5)'}),
+					stroke: new ol.style.Stroke({color: 'rgba(0,0,255, 1.0)', width: 3, lineDash: [4,4]})
+				});
+				
+			} else if (this.geometryType == 'Polygon' || this.geometryType == 'MultiPolygon') {
+				style = new ol.style.Style({
+					fill: new ol.style.Fill({color: 'rgba(0,0,255, 0.5)'}),
+					stroke: new ol.style.Stroke({color: 'rgba(0,0,255, 1.0)', width: 3, lineDash: [4,4]})
+				});
+			}
+
+			evt.feature.setStyle(style);
 			console.log('Modify feature start');
 		}, this);
 		
