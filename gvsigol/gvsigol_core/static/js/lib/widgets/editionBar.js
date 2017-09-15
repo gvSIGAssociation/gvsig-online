@@ -232,8 +232,8 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	if (this.geometryType == 'Point' || this.geometryType == 'MultiPoint') {
 		style = new ol.style.Style({
 			image: new ol.style.Circle({
-				radius: 10,
-				fill: new ol.style.Fill({color: 'rgba(0,0,255, 0.5)'}),
+				radius: 15,
+				fill: new ol.style.Fill({color: 'rgba(253,247,9, 0.5)'}),
 				stroke: new ol.style.Stroke({color: 'rgba(0,0,255, 1.0)', width: 2})
 			})
 		});
