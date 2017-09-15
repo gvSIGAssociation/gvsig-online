@@ -171,9 +171,12 @@ getFeatureInfo.prototype.hasLayers = function() {
  * Handle pointer click.
  * @param {ol.MapBrowserEvent} evt
  */
+
 getFeatureInfo.prototype.clickHandler = function(evt) {
-	
+
 	$("body").overlay();
+	$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
+	
 	
 	this.source.clear();
 	
@@ -408,7 +411,14 @@ getFeatureInfo.prototype.showInfo = function(features){
 		}
 	}	
 	html += '</ul>';
-	this.popup.show(self.mapCoordinates, '<div class="popup-wrapper">' + html + '</div>');	
+	this.popup.show(self.mapCoordinates, '<div class="popup-wrapper getfeatureinfo-popup">' + html + '</div>');	
+	$(".getfeatureinfo-popup").parent().parent().children(".ol-popup-closer").unbind("click").click(function() {
+		var detailsTab = $('#details-tab');
+	 	detailsTab.empty();
+	 	$('.nav-tabs a[href="#layer-tree-tab"]').tab('show');
+	 	return false;
+	});
+
 	self.map.getView().setCenter(self.mapCoordinates);
 	$('.item-fid .feature-info-label-info').click(function(){
 		self.showMoreInfo(this.parentNode.parentNode.dataset.fid, features, 'features');

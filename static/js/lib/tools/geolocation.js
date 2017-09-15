@@ -86,7 +86,7 @@ geolocation.prototype.handler = function(e) {
 				var crd = pos.coords;
 				var transformedCoordinate = ol.proj.transform([parseFloat(crd.longitude), parseFloat(crd.latitude)], 'EPSG:4326', 'EPSG:3857');
 				self.map.getView().setCenter(transformedCoordinate);
-				self.map.getView().setZoom(16);
+				self.map.getView().setZoom(18);
 				
 			}, 
 			function(err) {
