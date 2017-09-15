@@ -84,10 +84,9 @@ viewer.core = {
 		
 		this.zoombar = new ol.control.Zoom();
 		
+		var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false});
 		this.map = new ol.Map({
-			interactions: ol.interaction.defaults().extend([
-			    new ol.interaction.DragZoom()
-			]),
+			interactions: interactions,
       		controls: [
 				this.zoombar,
 				new ol.control.ScaleLine(),					
