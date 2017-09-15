@@ -571,8 +571,10 @@ editionBar.prototype.addModifyInteraction = function() {
 					stroke: new ol.style.Stroke({color: 'rgba(0,0,255, 1.0)', width: 3, lineDash: [4,4]})
 				});
 			}
-
-			evt.feature.setStyle(style);
+			
+			for(var i=0; i<evt.features.length; i++){
+				evt.features[i].setStyle(style);
+			}
 			console.log('Modify feature start');
 		}, this);
 		
