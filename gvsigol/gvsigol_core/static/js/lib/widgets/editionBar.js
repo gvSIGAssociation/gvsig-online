@@ -424,6 +424,9 @@ editionBar.prototype.stopEdition = function() {
 	this.removeLayerLock();
 	this.layerTree.editionBar = null;
 	delete this.layerTree.editionBar;
+	if(this.contextmenu){
+		this.map.remove
+	}
 	this.showLayersTab();
 	
 }
@@ -496,14 +499,6 @@ editionBar.prototype.addDrawInteraction = function() {
 
 	this.drawInteraction.on('drawstart',
 		function(evt) {
-			var s = new ol.style.Style({
-		        fill: new ol.style.Fill({
-		            color: 'rgba(255,255,0,0.7)'
-		        }),
-		        radius: 10
-		    });
-			evt.feature.setStyle(s);
-			
 			if (self.lastAddedFeature != null) {
 				self.source.removeFeature(self.lastAddedFeature);
 				self.lastAddedFeature = null;
