@@ -457,7 +457,24 @@ editionBar.prototype.addDrawInteraction = function() {
 	this.drawInteraction = new ol.interaction.Draw({
 		source: this.source,
 		type: (this.geometryType),
-		geometryName: this.geometryName
+		geometryName: this.geometryName,
+		style: new ol.style.Style({
+	        image: 
+		        new ol.style.Circle({
+		            fill: new ol.style.Fill({
+		                color: '#0099ff'
+		            }),
+		            stroke: new ol.style.Stroke({
+			            color: 'white',
+			            width: 2
+			        }),
+		            radius: 10,
+		        }),
+		        stroke: new ol.style.Stroke({
+		            color: '#0099ff',
+		            width: 5
+		        })
+		    })
 	});
 	this.map.addInteraction(this.drawInteraction);
 
@@ -548,33 +565,6 @@ editionBar.prototype.addModifyInteraction = function() {
 	
 	this.modifyInteraction.on('modifystart',
 		function(evt) {
-		
-			var style = null;
-			if (this.geometryType == 'Point' || this.geometryType == 'MultiPoint') {
-				style = new ol.style.Style({
-					image: new ol.style.Circle({
-						radius: 10,
-						fill: new ol.style.Fill({color: 'rgba(0,0,255, 0.5)'}),
-						stroke: new ol.style.Stroke({color: 'rgba(0,0,255, 1.0)', width: 2})
-					})
-				});
-				
-			} else if (this.geometryType == 'LineString' || this.geometryType == 'MultiLineString') {
-				style = new ol.style.Style({
-					fill: new ol.style.Fill({color: 'rgba(0,0,255, 0.5)'}),
-					stroke: new ol.style.Stroke({color: 'rgba(0,0,255, 1.0)', width: 3, lineDash: [4,4]})
-				});
-				
-			} else if (this.geometryType == 'Polygon' || this.geometryType == 'MultiPolygon') {
-				style = new ol.style.Style({
-					fill: new ol.style.Fill({color: 'rgba(0,0,255, 0.5)'}),
-					stroke: new ol.style.Stroke({color: 'rgba(0,0,255, 1.0)', width: 3, lineDash: [4,4]})
-				});
-			}
-			
-			for(var i=0; i<evt.features.length; i++){
-				evt.features[i].setStyle(style);
-			}
 			console.log('Modify feature start');
 		}, this);
 		
