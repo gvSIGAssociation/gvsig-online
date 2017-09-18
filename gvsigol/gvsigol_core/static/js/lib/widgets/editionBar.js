@@ -590,7 +590,7 @@ editionBar.prototype.addModifyInteraction = function() {
 	        image: 
 		        new ol.style.Circle({
 		            fill: new ol.style.Fill({
-		                color: '#0099ff'
+		                color: '#FDF709'
 		            }),
 		            stroke: new ol.style.Stroke({
 			            color: 'white',
