@@ -30,8 +30,26 @@ var search = function(map, conf) {
 	this.popup = null;
 	this.popupCloser = null;
 	this.popupContent = null;
+	this.contextmenu = null;
 	this.initUI();
+	this.activeContextMenu();
 };
+
+search.prototype.activeContextMenu = function(){
+	if(this.contextmenu == null){
+		return;
+	}
+	
+	this.map.addControl(this.contextmenu);
+}
+
+search.prototype.removeContextMenu = function(){
+	if(this.contextmenu == null){
+		return;
+	}
+	
+	this.map.removeControl(this.contextmenu);
+}
 
 /**
  * TODO.
@@ -132,18 +150,15 @@ search.prototype.initUI = function() {
 			}
 
 			if(menus.length > 0){
-				var contextmenu = new ContextMenu({
+				self.contextmenu = new ContextMenu({
 					width: 170,
 					defaultItems: false, // defaultItems are (for now) Zoom In/Zoom Out
 					items: menus
 				});
-				self.map.addControl(contextmenu);
 			}
 		},
 		error: function(){}
 	});
-
-
 
 	$('#autocomplete').autocomplete({
 		serviceUrl: '/gvsigonline/geocoding/search_candidates/',
