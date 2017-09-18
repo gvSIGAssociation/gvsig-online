@@ -259,6 +259,7 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	this.map.addLayer(this.wfsLayer);
 	
 	this.source.on('change', function() {
+		$("#modify-control").trigger('click');
 		$.overlayout();
 	});
 
@@ -569,7 +570,7 @@ editionBar.prototype.addModifyInteraction = function() {
 	        image: 
 		        new ol.style.Circle({
 		            fill: new ol.style.Fill({
-		                color: '#0099ff'
+		                color: '#FDF709'
 		            }),
 		            stroke: new ol.style.Stroke({
 			            color: 'white',
@@ -578,7 +579,7 @@ editionBar.prototype.addModifyInteraction = function() {
 		            radius: 10,
 		        }),
 		        stroke: new ol.style.Stroke({
-		            color: '#0099ff',
+		            color: '#FDF709',
 		            width: 5
 		        })
 		    })
@@ -641,7 +642,7 @@ editionBar.prototype.addRemoveInteraction = function() {
 	        image: 
 		        new ol.style.Circle({
 		            fill: new ol.style.Fill({
-		                color: '#0099ff'
+		                color: '#FDF709'
 		            }),
 		            stroke: new ol.style.Stroke({
 			            color: 'white',
@@ -650,7 +651,7 @@ editionBar.prototype.addRemoveInteraction = function() {
 		            radius: 10,
 		        }),
 		        stroke: new ol.style.Stroke({
-		            color: '#0099ff',
+		            color: '#FDF709',
 		            width: 5
 		        })
 		    })
