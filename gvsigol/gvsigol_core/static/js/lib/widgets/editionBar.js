@@ -27,9 +27,7 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	$("body").overlay();
 	
 	var this_ = this;
-	
 	this.map = map;
-	this.contextmenu = null;
 	this.layerTree = layerTree;
 	this.selectedLayer = selectedLayer;
 	this.resourceManager = null;
@@ -264,7 +262,6 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 		$.overlayout();
 	});
 	
-	
 	var controls = this.map.getControls();
 	for(var i=0; i<controls.array_.length; i++){
 		var control = controls.array_[i];
@@ -273,7 +270,6 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 				var eventType = control.options['eventType'];
 				//var id = control.options['id'];
 				if(/*id == 'geocoding-contextmenu' && */eventType == "contextmenu"){
-					//$(".geocoding-contextmenu").remove();
 					this.map.removeControl(this.contextmenu);
 				}
 			}
@@ -427,10 +423,6 @@ editionBar.prototype.stopEdition = function() {
 	this.removeLayerLock();
 	this.layerTree.editionBar = null;
 	delete this.layerTree.editionBar;
-	if(this.contextmenu){
-		this.contextmenu.clear();
-		this.map.addControl(this.contextmenu);
-	}
 	this.showLayersTab();
 	
 }
