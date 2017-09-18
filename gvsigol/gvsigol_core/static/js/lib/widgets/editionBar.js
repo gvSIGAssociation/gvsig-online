@@ -265,7 +265,7 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	});
 	
 	
-	var controls = self.map.getControls();
+	var controls = this.map.getControls();
 	for(var i=0; i<controls.array_.length; i++){
 		var control = controls.array_[i];
 		if('options' in control){
@@ -274,7 +274,7 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 				//var id = control.options['id'];
 				if(/*id == 'geocoding-contextmenu' && */eventType == "contextmenu"){
 					this.contextmenu = control;
-					this.map.removeControl(control);
+					this.map.removeControl(this.contextmenu);
 				}
 			}
 		}
