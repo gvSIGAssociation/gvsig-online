@@ -259,9 +259,10 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	this.map.addLayer(this.wfsLayer);
 	
 	this.source.on('change', function() {
+		this_.modifyHandler(e);
 		$.overlayout();
 	});
-	$("#modify-control").trigger('click');
+
 };
 
 /**
@@ -370,7 +371,7 @@ editionBar.prototype.drawPolygonHandler = function(e) {
  * @param {Event} e Browser event.
  */
 editionBar.prototype.modifyHandler = function(e) {
-	if(e != undefined){
+	if(e){
 		e.preventDefault();
 	}
 	if (this.$modifyControl.hasClass('button-active')) {
@@ -569,7 +570,7 @@ editionBar.prototype.addModifyInteraction = function() {
 	        image: 
 		        new ol.style.Circle({
 		            fill: new ol.style.Fill({
-		                color: '#FDF709'
+		                color: '#0099ff'
 		            }),
 		            stroke: new ol.style.Stroke({
 			            color: 'white',
@@ -578,7 +579,7 @@ editionBar.prototype.addModifyInteraction = function() {
 		            radius: 10,
 		        }),
 		        stroke: new ol.style.Stroke({
-		            color: '#FDF709',
+		            color: '#0099ff',
 		            width: 5
 		        })
 		    })
@@ -590,7 +591,7 @@ editionBar.prototype.addModifyInteraction = function() {
 	        image: 
 		        new ol.style.Circle({
 		            fill: new ol.style.Fill({
-		                color: '#FDF709'
+		                color: '#0099ff'
 		            }),
 		            stroke: new ol.style.Stroke({
 			            color: 'white',
@@ -641,7 +642,7 @@ editionBar.prototype.addRemoveInteraction = function() {
 	        image: 
 		        new ol.style.Circle({
 		            fill: new ol.style.Fill({
-		                color: '#FDF709'
+		                color: '#0099ff'
 		            }),
 		            stroke: new ol.style.Stroke({
 			            color: 'white',
@@ -650,7 +651,7 @@ editionBar.prototype.addRemoveInteraction = function() {
 		            radius: 10,
 		        }),
 		        stroke: new ol.style.Stroke({
-		            color: '#FDF709',
+		            color: '#0099ff',
 		            width: 5
 		        })
 		    })
