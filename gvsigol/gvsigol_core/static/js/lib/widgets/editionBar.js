@@ -270,7 +270,7 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 				var eventType = control.options['eventType'];
 				//var id = control.options['id'];
 				if(/*id == 'geocoding-contextmenu' && */eventType == "contextmenu"){
-					$(".ol-ctx-menu-container > .geocoding.contexmenu").remove();
+					$(".ol-ctx-menu-container > ul > .geocoding-contextmenu").remove();
 					this.contextmenu = control;
 					this.map.removeControl(this.contextmenu);
 				}
