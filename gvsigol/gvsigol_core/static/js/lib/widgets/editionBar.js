@@ -482,7 +482,7 @@ editionBar.prototype.addDrawInteraction = function() {
 	        image: 
 		        new ol.style.Circle({
 		            fill: new ol.style.Fill({
-		                color: '#0099ff'
+		                color: '#FDF709'
 		            }),
 		            stroke: new ol.style.Stroke({
 			            color: 'white',
@@ -491,7 +491,7 @@ editionBar.prototype.addDrawInteraction = function() {
 		            radius: 10,
 		        }),
 		        stroke: new ol.style.Stroke({
-		            color: '#0099ff',
+		            color: '#FDF709',
 		            width: 5
 		        })
 		    })
@@ -527,7 +527,7 @@ editionBar.prototype.addDrawInCenterInteraction = function() {
 	        image: 
 		        new ol.style.Circle({
 		            fill: new ol.style.Fill({
-		                color: '#0099ff'
+		                color: '#FDF709'
 		            }),
 		            stroke: new ol.style.Stroke({
 			            color: 'white',
@@ -536,7 +536,7 @@ editionBar.prototype.addDrawInCenterInteraction = function() {
 		            radius: 10,
 		        }),
 		        stroke: new ol.style.Stroke({
-		            color: '#0099ff',
+		            color: '#FDF709',
 		            width: 5
 		        })
 		    })
