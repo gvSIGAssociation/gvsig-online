@@ -273,7 +273,7 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 				var eventType = control.options['eventType'];
 				//var id = control.options['id'];
 				if(/*id == 'geocoding-contextmenu' && */eventType == "contextmenu"){
-					this.contextmenu = control;
+					$(".geocoding-contextmenu").remove();
 					this.map.removeControl(this.contextmenu);
 				}
 			}

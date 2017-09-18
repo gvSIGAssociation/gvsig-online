@@ -73,7 +73,7 @@ search.prototype.initUI = function() {
 				if(response.types[i] == "nominatim"){
 					menus.push({
 						text: 'Dirección de Nominatim',
-						classname: 'some-style-class', // add some CSS rules
+						classname: 'geocoding-contextmenu', // add some CSS rules
 						callback: function (obj) {
 							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4258');	
 							$.ajax({
@@ -99,7 +99,7 @@ search.prototype.initUI = function() {
 				if(response.types[i] == "cartociudad"){
 					menus.push({
 						text: 'Dirección de CartoCiudad',
-						classname: 'some-style-class', // add some CSS rules
+						classname: 'geocoding-contextmenu', // add some CSS rules
 						callback: function (obj) {
 							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4258');	
 							$.ajax({
@@ -125,7 +125,7 @@ search.prototype.initUI = function() {
 				if(response.types[i] == "googlemaps"){
 					menus.push({
 						text: 'Dirección de Google Maps',
-						classname: 'some-style-class', // add some CSS rules
+						classname: 'geocoding-contextmenu', // add some CSS rules
 						callback: function (obj) {
 							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4258');	
 							$.ajax({
