@@ -496,28 +496,6 @@ editionBar.prototype.addDrawInteraction = function() {
 		        })
 		    })
 	});
-	this.selectInteraction = new ol.interaction.Select({
-		wrapX: false,
-		hitTolerance: 20,
-		style: new ol.style.Style({
-	        image: 
-		        new ol.style.Circle({
-		            fill: new ol.style.Fill({
-		                color: '#FDF709'
-		            }),
-		            stroke: new ol.style.Stroke({
-			            color: 'white',
-			            width: 2
-			        }),
-		            radius: 10,
-		        }),
-		        stroke: new ol.style.Stroke({
-		            color: '#FDF709',
-		            width: 5
-		        })
-		    })
-	});
-	this.map.addInteraction(this.selectInteraction);
 	this.map.addInteraction(this.drawInteraction);
 
 	this.drawInteraction.on('drawstart',
@@ -563,29 +541,6 @@ editionBar.prototype.addDrawInCenterInteraction = function() {
 		        })
 		    })
 	});
-	
-	this.selectInteraction = new ol.interaction.Select({
-		wrapX: false,
-		hitTolerance: 20,
-		style: new ol.style.Style({
-	        image: 
-		        new ol.style.Circle({
-		            fill: new ol.style.Fill({
-		                color: '#FDF709'
-		            }),
-		            stroke: new ol.style.Stroke({
-			            color: 'white',
-			            width: 2
-			        }),
-		            radius: 10,
-		        }),
-		        stroke: new ol.style.Stroke({
-		            color: '#FDF709',
-		            width: 5
-		        })
-		    })
-	});
-	this.map.addInteraction(this.selectInteraction);
 	this.map.addInteraction(this.drawInCenterInteraction);
 
 	this.drawInCenterInteraction.on('drawstart',
