@@ -583,7 +583,24 @@ editionBar.prototype.addModifyInteraction = function() {
 	});
 	
 	this.modifyInteraction = new ol.interaction.Modify({
-		features: this.selectInteraction.getFeatures()
+		features: this.selectInteraction.getFeatures(),
+		style: new ol.style.Style({
+	        image: 
+		        new ol.style.Circle({
+		            fill: new ol.style.Fill({
+		                color: '#0099ff'
+		            }),
+		            stroke: new ol.style.Stroke({
+			            color: 'white',
+			            width: 2
+			        }),
+		            radius: 10,
+		        }),
+		        stroke: new ol.style.Stroke({
+		            color: '#0099ff',
+		            width: 5
+		        })
+		    })
 	});
 	
 	this.map.addInteraction(this.selectInteraction);
@@ -617,7 +634,24 @@ editionBar.prototype.addRemoveInteraction = function() {
 	var self = this;
 	
 	this.removeInteraction = new ol.interaction.Select({
-		wrapX: false
+		wrapX: false,
+		style: new ol.style.Style({
+	        image: 
+		        new ol.style.Circle({
+		            fill: new ol.style.Fill({
+		                color: '#0099ff'
+		            }),
+		            stroke: new ol.style.Stroke({
+			            color: 'white',
+			            width: 2
+			        }),
+		            radius: 10,
+		        }),
+		        stroke: new ol.style.Stroke({
+		            color: '#0099ff',
+		            width: 5
+		        })
+		    })
 	});
 	
 	this.map.addInteraction(this.removeInteraction);
