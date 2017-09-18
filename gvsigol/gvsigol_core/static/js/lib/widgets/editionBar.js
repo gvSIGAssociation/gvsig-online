@@ -517,8 +517,8 @@ editionBar.prototype.addDrawInteraction = function() {
 		        })
 		    })
 	});
-	this.map.addInteraction(this.drawInteraction);
 	this.map.addInteraction(this.selectInteraction);
+	this.map.addInteraction(this.drawInteraction);
 
 	this.drawInteraction.on('drawstart',
 		function(evt) {
@@ -585,8 +585,8 @@ editionBar.prototype.addDrawInCenterInteraction = function() {
 		        })
 		    })
 	});
-	this.map.addInteraction(this.drawInCenterInteraction);
 	this.map.addInteraction(this.selectInteraction);
+	this.map.addInteraction(this.drawInCenterInteraction);
 
 	this.drawInCenterInteraction.on('drawstart',
 		function(evt) {
