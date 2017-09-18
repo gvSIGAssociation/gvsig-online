@@ -425,7 +425,7 @@ editionBar.prototype.stopEdition = function() {
 	this.layerTree.editionBar = null;
 	delete this.layerTree.editionBar;
 	if(this.contextmenu){
-		this.map.remove
+		this.map.addControl(this.contextmenu);
 	}
 	this.showLayersTab();
 	
