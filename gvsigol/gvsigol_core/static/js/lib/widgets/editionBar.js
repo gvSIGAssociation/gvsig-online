@@ -259,10 +259,9 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	this.map.addLayer(this.wfsLayer);
 	
 	this.source.on('change', function() {
-		$("#modify-control").trigger('click');
 		$.overlayout();
 	});
-
+	$("#modify-control").trigger('click');
 };
 
 /**
