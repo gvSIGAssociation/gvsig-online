@@ -510,7 +510,24 @@ editionBar.prototype.addDrawInCenterInteraction = function() {
 	this.drawInCenterInteraction = new ol.interaction.Draw({
 		source: this.source,
 		type: (this.geometryType),
-		geometryName: this.geometryName
+		geometryName: this.geometryName,
+		style: new ol.style.Style({
+	        image: 
+		        new ol.style.Circle({
+		            fill: new ol.style.Fill({
+		                color: '#0099ff'
+		            }),
+		            stroke: new ol.style.Stroke({
+			            color: 'white',
+			            width: 2
+			        }),
+		            radius: 10,
+		        }),
+		        stroke: new ol.style.Stroke({
+		            color: '#0099ff',
+		            width: 5
+		        })
+		    })
 	});
 	this.map.addInteraction(this.drawInCenterInteraction);
 
@@ -545,7 +562,24 @@ editionBar.prototype.addModifyInteraction = function() {
 	
 	this.selectInteraction = new ol.interaction.Select({
 		wrapX: false,
-		hitTolerance: 20
+		hitTolerance: 20,
+		style: new ol.style.Style({
+	        image: 
+		        new ol.style.Circle({
+		            fill: new ol.style.Fill({
+		                color: '#0099ff'
+		            }),
+		            stroke: new ol.style.Stroke({
+			            color: 'white',
+			            width: 2
+			        }),
+		            radius: 10,
+		        }),
+		        stroke: new ol.style.Stroke({
+		            color: '#0099ff',
+		            width: 5
+		        })
+		    })
 	});
 	
 	this.modifyInteraction = new ol.interaction.Modify({
