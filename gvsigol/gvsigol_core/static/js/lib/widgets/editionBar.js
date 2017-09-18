@@ -269,10 +269,10 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	for(var i=0; i<controls.array_.length; i++){
 		var control = controls.array_[i];
 		if('options' in control){
-			if('eventType' in control.options && 'id' in control.options){
+			if('eventType' in control.options /*&& 'id' in control.options*/){
 				var eventType = control.options['eventType'];
-				var id = control.options['id'];
-				if(id == 'geocoding-contextmenu' && eventType == "contextmenu"){
+				//var id = control.options['id'];
+				if(/*id == 'geocoding-contextmenu' && */eventType == "contextmenu"){
 					this.contextmenu = control;
 					this.map.removeControl(control);
 				}
