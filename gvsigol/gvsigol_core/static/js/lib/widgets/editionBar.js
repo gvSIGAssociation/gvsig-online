@@ -261,7 +261,7 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	this.source.on('change', function() {
 		$.overlayout();
 	});
-	//$("#modify-control").trigger('click');
+	$("#modify-control").trigger('click');
 };
 
 /**
