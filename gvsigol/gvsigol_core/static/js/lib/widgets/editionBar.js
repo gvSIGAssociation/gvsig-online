@@ -259,7 +259,7 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	this.map.addLayer(this.wfsLayer);
 	
 	this.source.on('change', function() {
-		this_.modifyHandler(e);
+		this_.modifyHandler();
 		$.overlayout();
 	});
 
@@ -371,7 +371,7 @@ editionBar.prototype.drawPolygonHandler = function(e) {
  * @param {Event} e Browser event.
  */
 editionBar.prototype.modifyHandler = function(e) {
-	if(e){
+	if(e != undefined){
 		e.preventDefault();
 	}
 	if (this.$modifyControl.hasClass('button-active')) {
