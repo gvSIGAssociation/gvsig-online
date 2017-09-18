@@ -846,6 +846,16 @@ def cache_clear(request, layer_id):
         workspace = Workspace.objects.get(id=datastore.workspace_id)
         mapservice_backend.clearCache(workspace.name, layer)
         mapservice_backend.reload_nodes()
+        
+        mapservice_backend.updateBoundingBoxFromData(layer)  
+        mapservice_backend.clearCache(workspace.name, layer)
+        mapservice_backend.updateThumbnail(layer, 'update')
+        
+        layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
+        mapservice_backend.createOrUpdateGeoserverLayerGroup(layer_group)
+        mapservice_backend.clearLayerGroupCache(layer_group.name)
+        mapservice_backend.reload_nodes()
+        
         return redirect('layer_list')
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
