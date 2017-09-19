@@ -46,6 +46,8 @@ var getFeatureInfo = function(map, prefix) {
 	var this_ = this;
   
 	var handler = function(e) {
+		$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
+		$("#jqueryEasyOverlayDiv").css("display", "block");
 		this_.handler(e);
 	};
 
@@ -174,8 +176,6 @@ getFeatureInfo.prototype.hasLayers = function() {
 getFeatureInfo.prototype.clickHandler = function(evt) {
 	
 	$("body").overlay();
-	$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
-	$("#jqueryEasyOverlayDiv").css("display", "block");
 	
 	this.source.clear();
 	
