@@ -175,7 +175,7 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 	
 	$("body").overlay();
 	$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
-	$("#jqueryEasyOverlayDiv").css("display", "none");
+	$("#jqueryEasyOverlayDiv").css("display", "block");
 	
 	this.source.clear();
 	
