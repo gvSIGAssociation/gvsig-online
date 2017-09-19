@@ -101,9 +101,6 @@ getFeatureInfo.prototype.handler = function(e) {
 	} else {
 		
 		if (this.hasLayers()) {
-			$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
-			$("#jqueryEasyOverlayDiv").css("display", "block");
-			
 			this.popup = new ol.Overlay.Popup();
 			this.map.addOverlay(this.popup);
         	
@@ -176,7 +173,8 @@ getFeatureInfo.prototype.hasLayers = function() {
 getFeatureInfo.prototype.clickHandler = function(evt) {
 	
 	$("body").overlay();
-	
+	$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
+	$("#jqueryEasyOverlayDiv").css("display", "block");
 	this.source.clear();
 	
 	var self = this;
