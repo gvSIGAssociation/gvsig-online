@@ -101,7 +101,6 @@ getFeatureInfo.prototype.handler = function(e) {
 	} else {
 		
 		if (this.hasLayers()) {
-			
 			this.popup = new ol.Overlay.Popup();
 			this.map.addOverlay(this.popup);
         	
@@ -176,7 +175,7 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 
 	$("body").overlay();
 	$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
-	
+	$("#jqueryEasyOverlayDiv").css("display", "block");
 	
 	this.source.clear();
 	
@@ -279,6 +278,9 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 getFeatureInfo.prototype.showInfo = function(features){
 	
 	var self = this;
+	var detailsTab = $('#details-tab');
+	detailsTab.empty();
+	$('.nav-tabs a[href="#layer-tree-tab"]').tab('show');
 
 	var html = '<ul class="products-list product-list-in-box">';
 	
@@ -429,7 +431,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 	});
 
 	$.overlayout();
-			
+	$("#jqueryEasyOverlayDiv").css("display", "none");
 };
 
 /**
