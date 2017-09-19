@@ -114,17 +114,17 @@
 							{% endif %}
 							<label for="visible">{% trans "time_enabled" %}</label>
 						</div>
-						<div class="col-md-4 form-group">
-							{% if layer.highlight %}
-							<input type="checkbox" name="highlight" id="highlight" checked/>	
-							<label for="highlight">{% trans "Enable highlight" %}</label>	
-							<input name="highlight_scale" id="highlight_scale" type="number" step="any" class="form-control" value="{{highlight_scale}}">	
-							{% else %}
-							<input type="checkbox" name="highlight" id="highlight" />	
-							<label for="highlight">{% trans "Enable highlight" %}</label>	
-							<input name="highlight_scale" id="highlight_scale" type="number" step="any" class="form-control">	
-							{% endif %}
-						</div>
+<!-- 						<div class="col-md-4 form-group"> -->
+<!-- 							{% if layer.highlight %} -->
+<!-- 							<input type="checkbox" name="highlight" id="highlight" checked/>	 -->
+<!-- 							<label for="highlight">{% trans "Enable highlight" %}</label>	 -->
+<!-- 							<input name="highlight_scale" id="highlight_scale" type="number" step="any" class="form-control" value="{{highlight_scale}}">	 -->
+<!-- 							{% else %} -->
+<!-- 							<input type="checkbox" name="highlight" id="highlight" />	 -->
+<!-- 							<label for="highlight">{% trans "Enable highlight" %}</label>	 -->
+<!-- 							<input name="highlight_scale" id="highlight_scale" type="number" step="any" class="form-control">	 -->
+<!-- 							{% endif %} -->
+<!-- 						</div> -->
 					</div>
 					
 					<div class="box-body time_enabled-check">
