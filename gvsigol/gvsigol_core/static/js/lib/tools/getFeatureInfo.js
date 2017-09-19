@@ -46,8 +46,6 @@ var getFeatureInfo = function(map, prefix) {
 	var this_ = this;
   
 	var handler = function(e) {
-		$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
-		$("#jqueryEasyOverlayDiv").css("display", "block");
 		this_.handler(e);
 	};
 
@@ -103,6 +101,8 @@ getFeatureInfo.prototype.handler = function(e) {
 	} else {
 		
 		if (this.hasLayers()) {
+			$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
+			$("#jqueryEasyOverlayDiv").css("display", "block");
 			
 			this.popup = new ol.Overlay.Popup();
 			this.map.addOverlay(this.popup);
