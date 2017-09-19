@@ -120,7 +120,7 @@ viewer.core = {
         	})
 		});
 		
-		var highlight = new ol.interaction.Select({
+		/*var highlight = new ol.interaction.Select({
 	        condition: ol.events.condition.pointerMove,
 	        style: function(feature, resolution){
 	            var layer_name = feature.getId().split('.')[0];
@@ -137,7 +137,7 @@ viewer.core = {
 	        }
 	    });
 		
-		this.map.addInteraction(highlight);
+		this.map.addInteraction(highlight);*/
 		
 		this.extentLayer = new ol.layer.Vector({
 			source: new ol.source.Vector()
@@ -159,15 +159,15 @@ viewer.core = {
 			$('.custom-mouse-position').css('left', '180px');
 		});
 		
-		this.wfsLayers = new Array();
+		/*this.wfsLayers = new Array();
 		this.map.getView().once('change:resolution', function(evt) {
 			self.map.once('moveend', function(evt) {
 				self._handleWfsLayers(evt);
 			});
-		});
+		});*/
     },
     
-    _wfsLayerExists: function (lname) {
+    /*_wfsLayerExists: function (lname) {
     	var exists = false;
     	for (var k=0; k<this.wfsLayers.length; k++) {
     		if (this.wfsLayers[k] == lname) {
@@ -175,9 +175,9 @@ viewer.core = {
     		}
     	}
     	return exists;
-    },
+    },*/
     
-    _getWfsLayer: function(lname) {
+    /*_getWfsLayer: function(lname) {
     	var layers = this.map.getLayers().getArray();
     	for (var i=0; i<layers.length; i++) {
     		if (layers[i].getSource() instanceof ol.source.Vector) {
@@ -186,9 +186,9 @@ viewer.core = {
     			}
     		}
     	}
-    },
+    },*/
     
-    _getCurrentScale: function () {
+    /*_getCurrentScale: function () {
         var view = this.map.getView();
         var resolution = view.getResolution();
         var units = this.map.getView().getProjection().getUnits();
@@ -196,9 +196,9 @@ viewer.core = {
         var mpu = ol.proj.METERS_PER_UNIT[units];
         var scale = resolution * mpu * 39.37 * dpi;
         return scale;
-    },
+    },*/
     
-    _handleWfsLayers: function(evt){
+    /*_handleWfsLayers: function(evt){
     	var self = this;	
     	this._refreshWfsLayers();   	
     	var layers = this.map.getLayers().getArray();
@@ -232,9 +232,9 @@ viewer.core = {
     	evt.map.once('moveend', function(evt) {
     		self._handleWfsLayers(evt);
     	});
-    },
+    },*/
     
-    _addWfsLayer: function(layer) {
+    /*_addWfsLayer: function(layer) {
     	var vectorSource = new ol.source.Vector({
 	        format: new ol.format.GeoJSON(),
 	        url: function(extent) {
@@ -270,13 +270,13 @@ viewer.core = {
 		
 		this.map.addLayer(wfsLayer);
 		this.wfsLayers.push(layer.layer_name);
-    },
+    },*/
     
-    _removeWfsLayer: function(layer) {
+    /*_removeWfsLayer: function(layer) {
     	this.map.removeLayer(layer);
-    },
+    },*/
     
-    _refreshWfsLayers: function() {
+    /*_refreshWfsLayers: function() {
     	var layers = this.map.getLayers().getArray();
     	for (var i=0; i<layers.length; i++) {
     		if (layers[i].getSource() instanceof ol.source.Vector) {
@@ -286,9 +286,9 @@ viewer.core = {
     			}
     		}
     	}
-    },
+    },*/
     
-    _hexToRGB: function(hex, alpha) {
+    /*_hexToRGB: function(hex, alpha) {
         var r = parseInt(hex.slice(1, 3), 16),
             g = parseInt(hex.slice(3, 5), 16),
             b = parseInt(hex.slice(5, 7), 16);
@@ -298,9 +298,9 @@ viewer.core = {
         } else {
             return "rgb(" + r + ", " + g + ", " + b + ")";
         }
-    },
+    },*/
     
-    _getWfsStyle: function(layer_name) {
+    /*_getWfsStyle: function(layer_name) {
     	var self = this;
     	var style = null;
     	$.ajax({
@@ -333,7 +333,7 @@ viewer.core = {
     	});
     	
     	return style;
-    },
+    },*/
     
     _initToolbar: function() {
     	var self = this;
