@@ -187,6 +187,21 @@ Rule.prototype.registerEvents = function(type) {
 		ui += 			'</div>';
 		ui += 		'</div>';
 		
+		if(type == "intervals"){
+			ui += 	'<div class="row">';
+			ui += 		'<div class="col-md-12 form-group">';
+			ui += 			'<label>' + gettext( 'Minimum interval') + '</label>';
+			ui += 			'<input placeholder="' + gettext('Minimum interval') + '" name="minvalue" id="minvalue-' + self.id + '" type="number" step="any" value="'+self.filter['value1']+'" class="form-control">';					
+			ui += 		'</div>';
+			ui += 	'</div>';
+			ui += 	'<div class="row">';
+			ui += 		'<div class="col-md-12 form-group">';
+			ui += 			'<label>' + gettext( 'Maximum interval') + '</label>';
+			ui += 			'<input placeholder="' + gettext('Maximum interval') + '" name="r-maxscale" id="maxvalue-' + self.id + '" type="number" step="any" value="'+self.filter['value2']+'" class="form-control">';					
+			ui += 		'</div>';
+			ui += 	'</div>';
+		}
+		
 		if(type == undefined || type != "unique"){
 		ui += 	'<div class="row">';
 		ui += 		'<div class="col-md-12 form-group">';
@@ -222,6 +237,14 @@ Rule.prototype.registerEvents = function(type) {
 			var title = $("#r-title-" + self.id).val();
 			var minscale = $("#r-minscale-" + self.id).val();
 			var maxscale = $("#r-maxscale-" + self.id).val();
+			
+			if(type == "intervals"){
+				var minvalue = $("#minvalue-" + self.id).val();
+				var maxvalue = $("#maxvalue-" + self.id).val();
+				self.filter['value1'] = minvalue;
+				self.filter['value2'] = maxvalue;
+			}
+			
 			self.name = name;
 			self.title = title;
 			self.minscale = minscale;
