@@ -175,6 +175,7 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 	
 	$("body").overlay();
 	$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
+	$("#jqueryEasyOverlayDiv").css("display", "none");
 	
 	this.source.clear();
 	
@@ -426,7 +427,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 	});
 
 	$.overlayout();
-			
+	$("#jqueryEasyOverlayDiv").css("display", "none");
 };
 
 /**
