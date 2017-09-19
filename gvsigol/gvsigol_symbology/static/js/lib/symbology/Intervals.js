@@ -223,7 +223,7 @@ Intervals.prototype.loadRules = function(rules) {
 
 		}
 
-		rule.registerEvents();
+		rule.registerEvents("intervals");
 		rule.preview();
 		this.addRule(rule);
 
