@@ -42,6 +42,7 @@ from gvsigol_services.models import LayerResource
 from gvsigol.settings import GVSIGOL_SERVICES
 from django.core.urlresolvers import reverse
 from gvsigol_core import utils as core_utils
+from gvsigol_core.models import Project
 from gvsigol_auth.models import UserGroup
 from django.shortcuts import render
 from django.utils import timezone
@@ -879,19 +880,20 @@ def get_date_fields_from_resource(request):
         
         date_fields = []
         ds = Datastore.objects.get(id=int(datastore_id))
-        params = json.loads(ds.connection_params)
-        host = params['host']
-        port = params['port']
-        dbname = params['database']
-        user = params['user']
-        passwd = params['passwd']
-        schema = params.get('schema', 'public')
-        i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-        layer_defs = i.get_fields_info(resource_name, schema)
-        
-        for layer_def in layer_defs:
-            if layer_def['type'] == 'date':
-                date_fields.append(layer_def['name'])
+        if ds.type == 'v_PostGIS':
+            params = json.loads(ds.connection_params)
+            host = params['host']
+            port = params['port']
+            dbname = params['database']
+            user = params['user']
+            passwd = params['passwd']
+            schema = params.get('schema', 'public')
+            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+            layer_defs = i.get_fields_info(resource_name, schema)
+            
+            for layer_def in layer_defs:
+                if layer_def['type'] == 'date':
+                    date_fields.append(layer_def['name'])
         
         response = {
             'date_fields': date_fields
@@ -1126,6 +1128,15 @@ def cache_clear(request, layer_id):
         workspace = Workspace.objects.get(id=datastore.workspace_id)
         mapservice_backend.clearCache(workspace.name, layer)
         mapservice_backend.reload_nodes()
+                
+        mapservice_backend.updateBoundingBoxFromData(layer)  
+        mapservice_backend.clearCache(workspace.name, layer)
+        mapservice_backend.updateThumbnail(layer, 'update')
+        
+        layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
+        mapservice_backend.createOrUpdateGeoserverLayerGroup(layer_group)
+        mapservice_backend.clearLayerGroupCache(layer_group.name)
+        mapservice_backend.reload_nodes()
     if request.method == 'GET':
         return redirect('layer_list')
     else:
@@ -1278,9 +1289,16 @@ def layergroup_list(request):
     return render_to_response('layergroup_list.html', response, context_instance=RequestContext(request))
 
 
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def layergroup_add(request):
+    return layergroup_add_with_project(request, None)
+   
+ 
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def layergroup_add_with_project(request, project_id):
     if request.method == 'POST':
         name = request.POST.get('layergroup_name') + '_' + request.user.username
         title = request.POST.get('layergroup_title')
@@ -1308,20 +1326,29 @@ def layergroup_add(request):
                     created_by = request.user.username
                 )
                 layergroup.save()
-            
+                
+                project_id = request.POST.get('layergroup_project_id')
+                if project_id and project_id != '':
+                    project = Project.objects.get(id=int(project_id))
+                    project_layergroup = ProjectLayerGroup(
+                        project = project,
+                        layer_group = layergroup
+                    )
+                    project_layergroup.save()
+                
             else:
                 message = _(u'Layer group name already exists')
-                return render_to_response('layergroup_add.html', {'message': message}, context_instance=RequestContext(request))
+                return render_to_response('layergroup_add.html', {'message': message, 'project_id': project_id}, context_instance=RequestContext(request))
             
         else:
             message = _(u'You must enter a name for layer group')
-            return render_to_response('layergroup_add.html', {'message': message}, context_instance=RequestContext(request))
+            return render_to_response('layergroup_add.html', {'message': message, 'project_id': project_id}, context_instance=RequestContext(request))
             
         mapservice_backend.reload_nodes()
         return redirect('layergroup_list')
     
     else:
-        return render_to_response('layergroup_add.html', {}, context_instance=RequestContext(request))
+        return render_to_response('layergroup_add.html', {'project_id': project_id}, context_instance=RequestContext(request))
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
