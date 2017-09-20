@@ -146,7 +146,7 @@
 							<div class="box-header with-border">
 								<h3 class="box-title col-md-6">{% trans "Assign layer groups" %}</h3> 
 								<div class="col-md-6">
-									<button id="add-layer-group-button" class="btn btn-box-tool" title='{% trans "Add layer group" %}' style="float:right;position:relative;z-index:10;"><i class="fa fa-plus margin-r-5"></i></button>
+									<div id="add-layer-group-button" class="btn btn-box-tool" title='{% trans "Add layer group" %}' style="float:right;position:relative;z-index:10;" data-toggle="modal" data-target="#modal-add-layer-group"><i class="fa fa-plus margin-r-5"></i></div>
 									<input type="text" class="search2 form-control" placeHolder="{% trans 'Buscar grupo de capas...' %}" style="padding-right: 30px;position: absolute;"  />
 								</div>
 							</div>
@@ -181,7 +181,7 @@
 	</div>
 	
 	<!-- Modal -->
-<div class="modal fade" id="modal-add-template" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal fade" id="modal-add-layer-group" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
