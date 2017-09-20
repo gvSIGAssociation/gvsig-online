@@ -336,6 +336,7 @@
 					if (data==null || data.length==0) {
 						var text = "{% trans '-----------' %}";
 						rebuildSelect(name_select, text, true);
+						rebuildSelect(name_select2, text, true);
 						$.overlayout();
 						return;
 					}
@@ -362,6 +363,7 @@
 					var name_select = $("#id_time_enabled_field");
 					var text = "{% trans '-----------' %}";
 					rebuildSelect(name_select, text, true);
+					rebuildSelect(name_select2, text, true);
 					$.overlayout();
 				}
 			});
@@ -371,6 +373,7 @@
 			var name_select = $("#id_name");
 			var text = "{% trans 'No valid data store selected' %}";
 			rebuildSelect(name_select, text, true);
+			rebuildSelect(name_select2, text, true);
 		}
 	};
 	
