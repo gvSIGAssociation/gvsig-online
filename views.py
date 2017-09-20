@@ -849,6 +849,8 @@ def get_date_fields(layer_id):
     for f in resource_fields:
         if f['binding'] == 'java.sql.Date':
             date_fields.append(f['name'])
+        if f['binding'] == 'java.sql.Timestamp':
+            date_fields.append(f['name'])
     
     return date_fields
 
@@ -874,6 +876,8 @@ def get_date_fields_from_resource(request):
             
             for layer_def in layer_defs:
                 if layer_def['type'] == 'date':
+                    date_fields.append(layer_def['name'])
+                if layer_def['type'].startswith('timestamp'):
                     date_fields.append(layer_def['name'])
         
         response = {

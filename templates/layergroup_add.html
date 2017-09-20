@@ -49,6 +49,11 @@
 							</div>
 						</div>
 						
+						{% if project_id %}
+							<input type="hidden" name="layergroup_project_id" id="layergroup_project_id" value="{{project_id}}"/>
+						{% else %}
+							<input type="hidden" name="layergroup_project_id" id="layergroup_project_id" value=""/>
+						{% endif %}
 						<br>
 						
 						<div class="row">

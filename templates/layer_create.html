@@ -323,6 +323,9 @@
 			if($("#field-type-"+id).text() == "date"){
 				self.date_fields.push($("#field-name-"+id).text());
 			}
+			if($("#field-type-"+id).text() == "timestamp"){
+				self.date_fields.push($("#field-name-"+id).text());
+			}
 		});
 		
 		return self.date_fields;
@@ -630,7 +633,7 @@
 			return;
 		}
 		var options = [];
-		options.push($('<option>'));
+		//options.push($('<option>'));
 		for (var i=0; i<data.length; i++) {
 			var attribs = {
 				value: data[i],
