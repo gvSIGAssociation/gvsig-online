@@ -483,7 +483,7 @@ class Geoserver():
     def updateFeatureTypeFromData(self, layer):
         store = layer.datastore
         if store.type[0]=="v":
-            self.rest_catalog.update_ft_bounding_box(layer.datastore.workspace.name, layer.datastore.name, layer.name, user=self.user, password=self.password)
+            self.rest_catalog.update_feature_type(layer.datastore.workspace.name, layer.datastore.name, layer.name, user=self.user, password=self.password)
         # not available/necessary for coverages
 
     def createResource(self, workspace, store, name, title):
