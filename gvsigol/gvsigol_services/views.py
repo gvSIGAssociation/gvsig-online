@@ -1114,7 +1114,7 @@ def cache_clear(request, layer_id):
         mapservice_backend.clearCache(workspace.name, layer)
         mapservice_backend.updateThumbnail(layer, 'update')
         
-        mapservice_backend.updateResource(workspace, datastore, layer.name, layer.title)
+        mapservice_backend.updateFeatureTypeFromData(layer)
         
         layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
         mapservice_backend.createOrUpdateGeoserverLayerGroup(layer_group)
