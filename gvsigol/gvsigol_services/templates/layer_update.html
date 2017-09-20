@@ -255,12 +255,18 @@ $('#submenu-layers').addClass("active");
 			return;
 		}
 		var options = [];
-		options.push($('<option>'));
+		//options.push($('<option>'));
 		for (var i=0; i<data.length; i++) {
 			var attribs = {
-				value: data[i]["name"],
-				text: data[i]["title-" + language]
-			};
+					value: data[i]["name"],
+					text: data[i]["name"]
+				};
+			if(data[i]["title-" + language] != ""){
+				attribs = {
+					value: data[i]["name"],
+					text: data[i]["title-" + language]
+				};
+			}
 			if (previousValue == data[i]["name"]) {
 				attribs['selected']='true';
 				placeholderSelected = false;
