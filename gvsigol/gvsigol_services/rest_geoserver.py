@@ -26,6 +26,7 @@ from gvsigol.settings import GVSIGOL_SERVICES
 from models import Layer, LayerGroup, Workspace, Datastore
 import requests
 import json
+from datetime import datetime
 
 PURGE_NONE="none"
 PURGE_METADATA="metadata"
@@ -298,7 +299,10 @@ class Geoserver():
             data += '                <defaultValue>'
             data += '                    <strategy>'+default_value_mode+'</strategy>'
             if default_value != None and default_value_mode != 'MINIMUM' and default_value_mode != 'MAXIMUM':
-                data += '                    <referenceValue>'+default_value+'</referenceValue>'
+                date_format = datetime.strptime(default_value, '%d-%m-%Y %H:%M:%S')
+                # 2001-12-12T18:00:00.0Z
+                final_value = date_format.strftime('%Y-%m-%dT%H:%M:%S.0Z')
+                data += '                    <referenceValue>'+final_value+'</referenceValue>'
             data += '                </defaultValue>'
         data += '            </dimensionInfo>'
         data += '        </entry>'
