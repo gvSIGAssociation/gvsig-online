@@ -232,7 +232,7 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 	if (this.geometryType == 'Point' || this.geometryType == 'MultiPoint') {
 		style = new ol.style.Style({
 			image: new ol.style.Circle({
-				radius: 5,
+				radius: 10,
 				fill: new ol.style.Fill({color: 'rgba(0,0,255, 0.5)'}),
 				stroke: new ol.style.Stroke({color: 'rgba(0,0,255, 1.0)', width: 2})
 			})
@@ -261,7 +261,23 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 	this.source.on('change', function() {
 		$.overlayout();
 	});
-
+	
+	var controls = this.map.getControls();
+	for(var i=0; i<controls.array_.length; i++){
+		var control = controls.array_[i];
+		if('options' in control){
+			if('eventType' in control.options /*&& 'id' in control.options*/){
+				var eventType = control.options['eventType'];
+				//var id = control.options['id'];
+				if(/*id == 'geocoding-contextmenu' && */eventType == "contextmenu"){
+					$(".ol-ctx-menu-container > ul > .geocoding-contextmenu").remove();
+					this.contextmenu = control;
+					this.map.removeControl(this.contextmenu);
+				}
+			}
+		}
+	}
+	$("#modify-control").trigger('click');
 };
 
 /**
@@ -408,6 +424,9 @@ EditionBar.prototype.stopEdition = function() {
 	this.removeLayerLock();
 	this.layerTree.editionBar = null;
 	delete this.layerTree.editionBar;
+	if(this.contextmenu){
+		this.map.addControl(this.contextmenu);
+	}
 	this.showLayersTab();
 	
 }
@@ -457,7 +476,24 @@ EditionBar.prototype.addDrawInteraction = function() {
 	this.drawInteraction = new ol.interaction.Draw({
 		source: this.source,
 		type: (this.geometryType),
-		geometryName: this.geometryName
+		geometryName: this.geometryName,
+		style: new ol.style.Style({
+	        image: 
+		        new ol.style.Circle({
+		            fill: new ol.style.Fill({
+		                color: '#0099ff'
+		            }),
+		            stroke: new ol.style.Stroke({
+			            color: 'white',
+			            width: 2
+			        }),
+		            radius: 10,
+		        }),
+		        stroke: new ol.style.Stroke({
+		            color: '#0099ff',
+		            width: 5
+		        })
+		    })
 	});
 	this.map.addInteraction(this.drawInteraction);
 
@@ -485,7 +521,24 @@ EditionBar.prototype.addDrawInCenterInteraction = function() {
 	this.drawInCenterInteraction = new ol.interaction.Draw({
 		source: this.source,
 		type: (this.geometryType),
-		geometryName: this.geometryName
+		geometryName: this.geometryName,
+		style: new ol.style.Style({
+	        image: 
+		        new ol.style.Circle({
+		            fill: new ol.style.Fill({
+		                color: '#0099ff'
+		            }),
+		            stroke: new ol.style.Stroke({
+			            color: 'white',
+			            width: 2
+			        }),
+		            radius: 10,
+		        }),
+		        stroke: new ol.style.Stroke({
+		            color: '#0099ff',
+		            width: 5
+		        })
+		    })
 	});
 	this.map.addInteraction(this.drawInCenterInteraction);
 
@@ -520,11 +573,45 @@ EditionBar.prototype.addModifyInteraction = function() {
 	
 	this.selectInteraction = new ol.interaction.Select({
 		wrapX: false,
-		hitTolerance: 20
+		hitTolerance: 20,
+		style: new ol.style.Style({
+	        image: 
+		        new ol.style.Circle({
+		            fill: new ol.style.Fill({
+		                color: '#FDF709'
+		            }),
+		            stroke: new ol.style.Stroke({
+			            color: 'white',
+			            width: 2
+			        }),
+		            radius: 10,
+		        }),
+		        stroke: new ol.style.Stroke({
+		            color: '#FDF709',
+		            width: 5
+		        })
+		    })
 	});
 	
 	this.modifyInteraction = new ol.interaction.Modify({
-		features: this.selectInteraction.getFeatures()
+		features: this.selectInteraction.getFeatures(),
+		style: new ol.style.Style({
+	        image: 
+		        new ol.style.Circle({
+		            fill: new ol.style.Fill({
+		                color: '#FDF709'
+		            }),
+		            stroke: new ol.style.Stroke({
+			            color: 'white',
+			            width: 2
+			        }),
+		            radius: 10,
+		        }),
+		        stroke: new ol.style.Stroke({
+		            color: '#0099ff',
+		            width: 5
+		        })
+		    })
 	});
 	
 	this.map.addInteraction(this.selectInteraction);
@@ -558,7 +645,24 @@ EditionBar.prototype.addRemoveInteraction = function() {
 	var self = this;
 	
 	this.removeInteraction = new ol.interaction.Select({
-		wrapX: false
+		wrapX: false,
+		style: new ol.style.Style({
+	        image: 
+		        new ol.style.Circle({
+		            fill: new ol.style.Fill({
+		                color: '#FDF709'
+		            }),
+		            stroke: new ol.style.Stroke({
+			            color: 'white',
+			            width: 2
+			        }),
+		            radius: 10,
+		        }),
+		        stroke: new ol.style.Stroke({
+		            color: '#FDF709',
+		            width: 5
+		        })
+		    })
 	});
 	
 	this.map.addInteraction(this.removeInteraction);
@@ -1118,12 +1222,49 @@ EditionBar.prototype.showAllErrorMessages = function() {
 		ui +=    "<li><span>" + label.html() + "</span> - " + message + "</li>" ;
 	});
 	
-	ui += '</div>';
-	if(!(!invalidFields || invalidFields.length <= 0)){
-		$('#edition-error').append(ui);
+	var self = this;
+	var nullable_error = false;
+	for (var i=0; i<self.featureType.length; i++) {
+		if (!self.isGeomType(self.featureType[i].type) && self.featureType[i].name != 'id') {
+			var field = $('#' + self.featureType[i].name)[0];
+			if(field != null && field.id != null){
+				var value = null;
+				if (self.featureType[i].type == 'boolean') {
+					value = field.checked;
+				}
+				else if (self.isStringType(self.featureType[i].type)) {
+					if(self.featureType[i].name.startsWith("enmm_")){
+						value = "";
+						for(var ix=0; ix<field.selectedOptions.length; ix++){
+							var option = field.selectedOptions[ix];
+							if(ix != 0){
+								value = value + ";";
+							}
+							value = value + option.value;
+						}	
+					}else{
+						if (field.value != null) {
+							value = field.value;	
+						}
+					}
+				} else if (field && field.value != '' && field.value != null && field.value != 'null') {
+						value = field.value;
+				}
+				if(self.featureType[i].nullable == 'NO' && (value == null || value == "")){
+					nullable_error = true;
+					ui  +=    "<li><span>" + self.featureType[i].name + "</span> - " + gettext("can't be null") + "</li>" ;
+				} 
+			}
+		}
 	}
 	
-	return (!invalidFields || invalidFields.length <= 0);
+	ui += '</div>';
+	if(!(!invalidFields || invalidFields.length <= 0) || nullable_error){
+		$('#edition-error').append(ui);
+		return false;
+	}
+	
+	return true;
 };
 
 
@@ -1470,7 +1611,8 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 					
 					
 				} else if (this.isStringType(this.featureType[i].type)) {
-					ui += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
+					var value = feature.getProperties()[this.featureType[i].name];
+					ui += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + value + '">';
 				} else if (this.featureType[i].type == 'boolean') {
 					if (feature.getProperties()[this.featureType[i].name]) {
 						ui += '<input disabled id="' + this.featureType[i].name + '" type="checkbox" class="checkbox" checked>';
@@ -1578,7 +1720,22 @@ EditionBar.prototype.transactWFS = function(p,f) {
 			ui += '<div class="alert alert-danger alert-dismissible">';
 			ui += 	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
 			ui +=   '<h4><i class="icon fa fa-ban"></i> Error!</h4>';
-			ui +=   gettext('Failed to save the new record. Please check values');
+			if('responseXML' in request){
+				var errors = $(request.responseXML).find("ExceptionText");
+				var get_error = false;
+				if(errors.length > 0){
+					var error = errors[0].textContent;
+					if(error != null || error != ""){
+						ui +=   gettext(error);
+						get_error = true;
+					}
+				}
+				if(!get_error){
+					ui +=   gettext('Failed to save the new record. Please check values');
+				}
+			}else{
+				ui +=   gettext('Failed to save the new record. Please check values');
+			}
 			ui += '</div>';
 			$('#edition-error').append(ui);
 			success = false;
