@@ -27,6 +27,7 @@ urlpatterns = [
     url(r'^get_geom_tables/(?P<datastore_id>[0-9]+)/$', 'gvsigol_services.views.get_geom_tables', name='geom_tables'),
     url(r'^layergroup_list/$', 'gvsigol_services.views.layergroup_list', name='layergroup_list'),
     url(r'^layergroup_add/$', 'gvsigol_services.views.layergroup_add', name='layergroup_add'),
+    url(r'^layergroup_add/(?P<project_id>[0-9]+)/$', 'gvsigol_services.views.layergroup_add_with_project', name='layergroup_add_with_project'),
     url(r'^layergroup_delete/(?P<lgid>[0-9]+)/$', 'gvsigol_services.views.layergroup_delete', name='layergroup_delete'),
     url(r'^layergroup_update/(?P<lgid>[0-9]+)/$', 'gvsigol_services.views.layergroup_update', name='layergroup_update'),
     url(r'^enumeration_list/$', 'gvsigol_services.views.enumeration_list', name='enumeration_list'),
