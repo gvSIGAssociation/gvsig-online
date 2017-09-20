@@ -152,10 +152,10 @@ Desde el botón verde 'actualizar capa' (**3**) se puede modificar el título de
 
 2.4.2 Configuración de capa
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-En la opción de 'configurar capa' - botón (**4**), Aqui se puede configurar los títulos de los nombres de campos y dar permisos de visualización y edición para cada uno de ellos.
+En la opción de 'configurar capa' - botón morado (**4**), Aqui se puede configurar los títulos de los nombres de campos y dar permisos de visualización y edición para cada uno de ellos.
 
       - Podemos definir alias a los nombres de los campos para cada idioma del sistema seleccionado, por ejemplo, los alias definidos en 'título del campo Español' seran visibles cuando el idioma del sistema esté en 'Español'.
-      - definir qué campos serán visibles para las herramientas del visor (herramienta de información, tabla de atributos, etc …). 
+      - Definir qué campos serán visibles para las herramientas del visor (herramienta de información, tabla de atributos, etc …). 
       - Activar cuales son los campos que pueden ser editados por el usuario con privilegio de escritura.
       - Finalmente seleccionar los campos que serán visibles en la herramienta info (i) rápida del visor.
 
@@ -165,12 +165,13 @@ En la opción de 'configurar capa' - botón (**4**), Aqui se puede configurar lo
 2.4.3 Limpiar caché
 ~~~~~~~~~~~~~~~~~~~
  Esta opción, como su nombre lo indica, limpia la caché de la capa en el servidor de mapas. Muy útil cuando realizamos cambios en la simbología de la capa. 
- Este botón de limpiar caché (**5**), también actualiza los cambios de nuevos registros y atributos editados desde un sig de escritorio a través de la conexión de la Base de Datos.
+ 
+ Este botón amarillo de 'limpiar caché' (**5**), también actualiza los cambios de nuevos registros y atributos editados desde un sig de escritorio a través de la conexión de la Base de Datos.
 
 
 2.4.4 Eliminar capa
 ~~~~~~~~~~~~~~~~~~~
-Por último, también está el botón de 'Eliminar capa' (**6**), ésta opción borra la capa publicada en el sistema y sus estilos asociados, pero continúa existiendo en la BD, por tanto podría publicarse nuevamente.
+Por último, también está el botón rojo de 'Eliminar capa' (**6**), ésta opción borra la capa publicada en el sistema y sus estilos asociados, pero continúa existiendo en la BD, por tanto podría publicarse nuevamente.
 
 
 2.4.5 Publicar capa vectorial, raster o wms
@@ -194,7 +195,7 @@ Los pasos para publicar una capa son los siguientes:
 
 *	Seleccionamos las propiedades de la capa: visible, cacheada (recomendado para raster), imagen simple (recomendado para wms), consultable.
 
-*	Si lo deseamos podemos introducir una descripción de la capa.
+*	Se puede introducir una descripción de la capa, si se tiene activado la opción de metadatos (Geonetwork), será el abstract del mismo.
 
 *	A continuación seleccionamos el botón *"Siguiente"*, lo que nos llevará a la vista de permisos. Aplicaremos los permisos de lectura y escritura a la capa. Si en la sección de lectura NO se le asigna ningún grupo de usuarios, la capa será vista o leida por cualquier usuario, es decir, será un capa pública. Para la escritura de la capa es imprescindible establecer los permisos.
 
