@@ -140,7 +140,7 @@ Intervals.prototype.load = function(response, selectedField, numberOfIntervals) 
 		rule.setFilter(filter);
 		$('#rules').append(rule.getTableUI(true, 'intervals'));
 		rule.addSymbolizer({fill: colors[i]});
-		rule.registerEvents();
+		rule.registerEvents("intervals");
 		rule.preview();
 		this.addRule(rule);
 	}
