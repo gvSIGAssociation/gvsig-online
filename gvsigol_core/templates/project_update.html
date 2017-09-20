@@ -160,7 +160,11 @@
 
 						<div id="layer-list-box" class="box searchable-list-box" style="margin-top: 20px;">
 							<div class="box-header with-border">
-								<h3 class="box-title col-md-6">{% trans "Assign layer groups" %}</h3> <div class="col-md-6"><input type="text" class="search2 form-control" placeHolder="{% trans 'Buscar grupo de capas...' %}" /></div>
+								<h3 class="box-title col-md-6">{% trans "Assign layer groups" %}</h3> 
+								<div class="col-md-6">
+									<div id="add-layer-group-button" class="btn btn-box-tool" title='{% trans "Add layer group" %}' style="float:right;position:relative;z-index:10;" data-toggle="modal" data-target="#modal-add-layer-group"><i class="fa fa-plus margin-r-5"></i></div>
+									<input type="text" class="search2 form-control" placeHolder="{% trans 'Buscar grupo de capas...' %}" style="padding-right: 30px;position: absolute;"  />
+								</div>
 							</div>
 							<div class="box-body">
 								<ul class="products-list product-list-in-box list2">
@@ -195,6 +199,28 @@
 			</div>
 		</div>				
 	</div>
+	
+	<!-- Modal -->
+<div class="modal fade" id="modal-add-layer-group" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Create new layer group" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "Is needed to save this project first, Do you want continue?" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-add-layer-group-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-add-layer-group-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
 {% endblock %}
 
 {% block extra-scripts %}
@@ -299,6 +325,25 @@
 	  	    return false; 
 	
 	  	})
+	  	
+	  	$('#add-layer-group-button').click(function() {
+			$('#button-add-layer-group-accept').click( function() {
+				for(var i=0; i<searcheableList.items.length; i++){
+	    			var item = searcheableList.items[i];
+	    			item.show();
+	    		}
+	    		for(var i=0; i<searcheableList2.items.length; i++){
+	    			var item = searcheableList2.items[i];
+	    			item.show();
+	    		}
+	    		for(var i=0; i<searcheableList3.items.length; i++){
+		  			var item = searcheableList3.items[i];
+		  			item.show();
+		  		}
+				$('#project-form').attr('action', '/gvsigonline/core/project_update/{{pid}}/?redirect=new-layer-group');
+				$('#save_button').trigger('click');
+			});
+		});
 		
 		$('#project-form').submit(function() {
 			$("body").overlay();

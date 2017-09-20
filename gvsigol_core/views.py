@@ -246,11 +246,19 @@ def project_add(request):
             )
             project_usergroup.save()
             
+            if 'redirect' in request.GET:
+                redirect_var = request.GET.get('redirect')
+                if redirect_var == 'new-layer-group':
+                    return redirect('layergroup_add_with_project', project_id=str(project.id))
+            
+            
         else:
             message = _(u'Project name already exists')
             
             base_layers = BaseLayer.objects.all()
             return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'base_layers': base_layers, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+        
+       
         
         return redirect('project_list')
     
@@ -390,6 +398,12 @@ def project_update(request, pid):
                 user_group = admin_group
             )
             project_usergroup.save()
+            
+            if 'redirect' in request.GET:
+                redirect_var = request.GET.get('redirect')
+                if redirect_var == 'new-layer-group':
+                    return redirect('layergroup_add_with_project', project_id=str(project.id))
+            
                 
             return redirect('project_list')
             
@@ -455,6 +469,12 @@ def project_update(request, pid):
                     user_group = admin_group
                 )
                 project_usergroup.save()
+                
+                if 'redirect' in request.GET:
+                    redirect_var = request.GET.get('redirect')
+                    if redirect_var == 'new-layer-group':
+                        return redirect('layergroup_add_with_project', project_id=str(project.id))
+            
                     
                 return redirect('project_list')
                     
