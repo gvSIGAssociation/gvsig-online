@@ -442,6 +442,23 @@ class Geoserver():
             return
         raise UploadError(r.status_code, r.content)
     
+    def update_feature_type(self, workspace, datastore, feature_type, user=None, password=None):
+        """
+        Updates the native & lat/lon bounding box of the feature type using
+        the bounding box computed from data
+        """
+        url = self.service_url + "/workspaces/" + workspace + "/datastores/" + datastore + "/featuretypes/" + feature_type + ".json?recalculate="
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+        
+        data = {"featureType": {"name": feature_type, "enabled": "true"}}
+        r = self.session.put(url, json=data, auth=auth)
+        if r.status_code==200:
+            return
+        raise UploadError(r.status_code, r.content)
+    
     def update_ft_bounding_box(self, workspace, datastore, feature_type, user=None, password=None):
         """
         Updates the native & lat/lon bounding box of the feature type using
