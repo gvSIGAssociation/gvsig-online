@@ -137,32 +137,43 @@ Desde el listado de capas podemos acceder a la gestión de las mismas. Podemos p
 
 Sobre cada una de las capas podemos realizar las siguientes operaciones:
 
-*   **Actualizar capa (3):** Desde donde se puede modificar el título, grupo al que pertenece la capa, permisos de lectura-escritura y otras propiedades del visor como:
+2.4.1 Actualizar capa - Opciones de capa
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Desde el botón verde 'actualizar capa' (**3**) se puede modificar el título de la capa, grupo al que pertenece la capa, permisos de lectura-escritura y otras propiedades del visor como:
  
-      - *Visible*: Si activamos esta opción cada que vez que se abra el proyecto la capa siempre estará visble en el mapa.
-      - *Cacheada*: El cacheado de capas es recomendado para capas raster. Para las capas vectoriales será conveniente activarlo una vez se haya configurado su estilo y no tenga posteriores cambios, de lo contrario se deberá ir siempre a 'limpiar el caché' de la capa para que reconozca los nuevos cambios.
-      - *Consultable*: Perimite visualizar o consultar la información alfanumérica de la tabla de atributos, es decir, en caso de que no esté activado, solo será visible las geometrías sobre el mapa. Pero si un usuario tiene permisos de escritura sobre esta capa, al ponerla en edición, SÍ que podrá ver y editar los atributos de algún elemento del mapa.
-      - *Imagen simple (sin tiles)*: Con esta opción activa NO se piden varias teselas para componer la imagen, sino que se pide una única imagen. Tiene sentido para capas externas que tienen un texto incrustado en el mapa (por ejemplo catastro) o capas WMS. 
+     - **Visible**: Si activamos esta opción, cada que vez que se abra el proyecto la capa siempre estará visble en el mapa.
+     - **Cacheada**: El cacheado de capas es recomendado para capas raster. Para las capas vectoriales será conveniente activarlo una vez se haya configurado su estilo y no tenga posteriores cambios, de lo contrario se deberá ir siempre al botón (**5**) *limpiar el caché* de la capa para que reconozca los nuevos cambios.
+     - **Consultable**: Perimite visualizar o consultar la información alfanumérica de la tabla de atributos, es decir, en caso de que no esté activado, solo será visible las geometrías sobre el mapa, pero si un usuario tiene permisos de escritura sobre esta capa, al ponerla en edición, SÍ que podrá ver y editar los atributos de algún elemento del mapa.
+     - **Imagen simple (sin tiles)**: Con esta opción activa NO se piden varias teselas para componer la imagen, sino que se pide una única imagen. Tiene sentido para capas externas que tienen un texto incrustado en el mapa (por ejemplo catastro) o capas WMS. 
+     - **time_enabled**: Es una propiedad que se hará disponible para usar el plugin de parámetro temporal.
 
-.. image:: ../images/layer2_1.png
+.. image:: ../images/layeer2_1.png
    :align: center
 
-*   **Configurar capa (4):** Aqui se puede configurar los títulos de los nombres de campos y dar permisos de visualización y edición para cada uno de ellos.
+2.4.2 Configuración de capa
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+En la opción de 'configurar capa' - botón (**4**), Aqui se puede configurar los títulos de los nombres de campos y dar permisos de visualización y edición para cada uno de ellos.
 
       - Podemos definir alias a los nombres de los campos para cada idioma del sistema seleccionado, por ejemplo, los alias definidos en 'título del campo Español' seran visibles cuando el idioma del sistema esté en 'Español'.
-      - definir que campos serán visibles para las herramientas del visor (herramienta de información, tabla de atributos, etc …). 
+      - definir qué campos serán visibles para las herramientas del visor (herramienta de información, tabla de atributos, etc …). 
       - Activar cuales son los campos que pueden ser editados por el usuario con privilegio de escritura.
       - Finalmente seleccionar los campos que serán visibles en la herramienta info (i) rápida del visor.
 
 .. image:: ../images/layer2_2.png
    :align: center
 
-*   **Limpiar caché (5):** Limpia la caché de la capa en el servidor de mapas. Muy útil cuando realizamos cambios en la simbología de la capa.
+2.4.3 Limpiar caché
+~~~~~~~~~~~~~~~~~~~
+ Esta opción, como su nombre lo indica, limpia la caché de la capa en el servidor de mapas. Muy útil cuando realizamos cambios en la simbología de la capa. 
+ Este botón de limpiar caché (**5**), también actualiza los cambios de nuevos registros y atributos editados desde un sig de escritorio a través de la conexión de la Base de Datos.
 
-*   **Eliminar capa (6):** Elimina la capa y estilos asociados.
+
+2.4.4 Eliminar capa
+~~~~~~~~~~~~~~~~~~~
+Por último, también está el botón de 'Eliminar capa' (**6**), ésta opción borra la capa publicada en el sistema y sus estilos asociados, pero continúa existiendo en la BD, por tanto podría publicarse nuevamente.
 
 
-2.4.1 Publicar capa vectorial, raster o wms
+2.4.5 Publicar capa vectorial, raster o wms
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Desde esta opción se podrá publicar las capas tipo vectorial, raster o wms que se hayan asignado previamente en un almacén de datos.
 
@@ -193,7 +204,7 @@ Los pasos para publicar una capa son los siguientes:
 .. note::
       Para las capas tipo ráster o wms, se mostrará solo permisos de letura.
    	
-2.4.2 Crear capa vacía
+2.4.6 Crear capa vacía
 ~~~~~~~~~~~~~~~~~~~~~~
 Para crear una capa vacía, seleccionaremos el botón *"Crear capa vacía"*, una vez accedamos a la vista aparecerá el siguiente formulario.
 
@@ -214,11 +225,11 @@ Los pasos para crear una capa vacía son los siguientes:
 
 *	Añadimos uno o más campos para la capa, para ello seleccionamos el botón *"Añadir campo"* y se nos mostrará un diálogo donde podremos seleccionar el tipo de campo y un nombre para el mismo.
 
-.. image:: ../images/select_field2.png
+.. image:: ../images/select_field2_2.png
    :align: center
    
 .. note::
-   Los tipos de campo soportados son: Boolean, Texto, Entero, Doble, Fecha, Enumeración y Multiple enumeración (para añadir alguno de estos dos últimos, se debe tener algún listado de enumeraciones)
+   Los tipos de datos soportados son: Boolean, Texto, Entero, Doble, Fecha, Hora, Fecha_hora, Form (usado para el plugin de encuestas online), Enumeración y Multiple enumeración (para añadir alguno de estos dos últimos, se debe tener algún listado de enumeraciones)
 
 *	Seleccionamos las propiedades de la capa: visible, cacheada (recomendado para raster), imagen simple (recomendado para wms), consultable.
 
