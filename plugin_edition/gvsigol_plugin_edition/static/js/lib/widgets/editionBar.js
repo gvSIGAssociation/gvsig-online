@@ -1161,7 +1161,9 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 						}
 						else {
 							if(self.isDateType(self.featureType[i].type)){
-								properties[field.id] = self.getDateTime(field.value);
+								if(field.value != ""){
+									properties[field.id] = self.getDateTime(field.value);
+								}
 							}else{ 
 								if (self.isStringType(self.featureType[i].type)) {
 									if(self.featureType[i].name.startsWith("enmm_")){
@@ -1329,6 +1331,9 @@ EditionBar.prototype.createAllErrors = function() {
  * @param {Event} e Browser event.
  */
 EditionBar.prototype.getDateTime = function(time) {	
+	if(time == ""){
+		return null;
+	}
 	time_array = time.split(" ");
 	time_date_array = time_array[0].split("-");
 	if(time_date_array.length == 3){
@@ -1343,6 +1348,9 @@ EditionBar.prototype.getDateTime = function(time) {
 }
 
 EditionBar.prototype.modifyDateTime = function(time) {	
+	if(time == ""){
+		return null;
+	}
 	time = time.replace("Z", "");
 	time = time.replace("T", " ");
 	
@@ -1537,7 +1545,9 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 							properties[field.id] = field.checked;
 						}else{ 
 							if(self.isDateType(self.featureType[i].type)){
-								properties[field.id] = self.getDateTime(field.value);
+								if(field.value != ""){
+									properties[field.id] = self.getDateTime(field.value);
+								}
 							}else{ 
 								if (self.isStringType(self.featureType[i].type)) {
 									if(self.featureType[i].name.startsWith("enmm_")){
