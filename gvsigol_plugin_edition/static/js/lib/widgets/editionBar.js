@@ -619,12 +619,13 @@ EditionBar.prototype.addModifyInteraction = function() {
 	
 	this.selectInteraction.on('select',
 		function(evt) {
-			$("body").overlay();
+			$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
+			$("#jqueryEasyOverlayDiv").css("display", "block");
 			if (self.lastEditedFeature != null) {
 				self.revertEditedFeature();
 			}
 			self.editFeatureForm(evt.selected[0]);
-			$.overlayout();
+			$("#jqueryEasyOverlayDiv").css("display", "none");
 		}, this);
 	
 	this.modifyInteraction.on('modifystart',
