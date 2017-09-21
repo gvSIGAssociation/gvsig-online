@@ -573,7 +573,7 @@ EditionBar.prototype.addModifyInteraction = function() {
 	
 	this.selectInteraction = new ol.interaction.Select({
 		wrapX: false,
-		hitTolerance: 40,
+		hitTolerance: 30,
 		style: new ol.style.Style({
 	        image: 
 		        new ol.style.Circle({
@@ -619,10 +619,12 @@ EditionBar.prototype.addModifyInteraction = function() {
 	
 	this.selectInteraction.on('select',
 		function(evt) {
+			$("body").overlay();
 			if (self.lastEditedFeature != null) {
 				self.revertEditedFeature();
 			}
 			self.editFeatureForm(evt.selected[0]);
+			$.overlayout();
 		}, this);
 	
 	this.modifyInteraction.on('modifystart',
