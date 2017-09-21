@@ -778,27 +778,28 @@ def layer_update(request, layer_id):
             
             if ds.type != 'e_WMS':
                 mapservice_backend.setQueryable(workspace, ds.name, ds.type, name, is_queryable)
-                time_resolution = 0
-                if (time_resolution_year != None and time_resolution_year > 0) or (time_resolution_month != None and time_resolution_month > 0) or (time_resolution_week != None and time_resolution_week > 0) or (time_resolution_day != None and time_resolution_day > 0):
-                    #time_resolution = 'P'
-                    if (time_resolution_year != None and time_resolution_year > 0):
-                        time_resolution = time_resolution + (int(time_resolution_year) * 3600 * 24 * 365)
-                    if (time_resolution_month != None and time_resolution_month > 0):
-                        time_resolution = time_resolution + (int(time_resolution_month) * 3600 * 24 * 31) - (int(time_resolution_month) * 3600 * 14)
-                    if (time_resolution_week != None and time_resolution_week > 0):
-                        time_resolution = time_resolution + (int(time_resolution_week) * 3600 * 24 * 7)
-                    if (time_resolution_day != None and time_resolution_day > 0):
-                        time_resolution = time_resolution + (int(time_resolution_day) * 3600 * 24 * 1)
-                if (time_resolution_hour != None and time_resolution_hour > 0) or (time_resolution_minute != None and time_resolution_minute > 0) or (time_resolution_second != None and time_resolution_second > 0):
-                    #time_resolution = time_resolution + 'T'
-                    if (time_resolution_hour != None and time_resolution_hour > 0):
-                        time_resolution = time_resolution + (int(time_resolution_hour) * 3600)
-                    if (time_resolution_minute != None and time_resolution_minute > 0):
-                        time_resolution = time_resolution + (int(time_resolution_minute) * 60)
-                    if (time_resolution_second != None and time_resolution_second > 0):
-                        time_resolution = time_resolution + (int(time_resolution_second))
-                   
-                mapservice_backend.setTimeEnabled(workspace, ds.name, ds.type, name, time_enabled, time_field, time_endfield, time_presentation, time_resolution, time_default_value_mode, time_default_value)
+                if ds.type == 'v_PostGIS':
+                    time_resolution = 0
+                    if (time_resolution_year != None and time_resolution_year > 0) or (time_resolution_month != None and time_resolution_month > 0) or (time_resolution_week != None and time_resolution_week > 0) or (time_resolution_day != None and time_resolution_day > 0):
+                        #time_resolution = 'P'
+                        if (time_resolution_year != None and time_resolution_year > 0):
+                            time_resolution = time_resolution + (int(time_resolution_year) * 3600 * 24 * 365)
+                        if (time_resolution_month != None and time_resolution_month > 0):
+                            time_resolution = time_resolution + (int(time_resolution_month) * 3600 * 24 * 31) - (int(time_resolution_month) * 3600 * 14)
+                        if (time_resolution_week != None and time_resolution_week > 0):
+                            time_resolution = time_resolution + (int(time_resolution_week) * 3600 * 24 * 7)
+                        if (time_resolution_day != None and time_resolution_day > 0):
+                            time_resolution = time_resolution + (int(time_resolution_day) * 3600 * 24 * 1)
+                    if (time_resolution_hour != None and time_resolution_hour > 0) or (time_resolution_minute != None and time_resolution_minute > 0) or (time_resolution_second != None and time_resolution_second > 0):
+                        #time_resolution = time_resolution + 'T'
+                        if (time_resolution_hour != None and time_resolution_hour > 0):
+                            time_resolution = time_resolution + (int(time_resolution_hour) * 3600)
+                        if (time_resolution_minute != None and time_resolution_minute > 0):
+                            time_resolution = time_resolution + (int(time_resolution_minute) * 60)
+                        if (time_resolution_second != None and time_resolution_second > 0):
+                            time_resolution = time_resolution + (int(time_resolution_second))
+                       
+                    mapservice_backend.setTimeEnabled(workspace, ds.name, ds.type, name, time_enabled, time_field, time_endfield, time_presentation, time_resolution, time_default_value_mode, time_default_value)
             
             new_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
             
