@@ -573,7 +573,7 @@ EditionBar.prototype.addModifyInteraction = function() {
 	
 	this.selectInteraction = new ol.interaction.Select({
 		wrapX: false,
-		hitTolerance: 20,
+		hitTolerance: 40,
 		style: new ol.style.Style({
 	        image: 
 		        new ol.style.Circle({
@@ -978,6 +978,23 @@ EditionBar.prototype.isDateType = function(type){
 	return false;
 }
 
+
+EditionBar.prototype.getDateProperties = function(featureType){
+	var type = featureType.type;
+	
+	if(type == 'date'){
+		return "yyyy-MM-dd"
+	} 
+	
+	if(type == 'timestamp'){
+		return "yyyy-MM-dd HH:mm:ss"
+	} 
+	
+	if(type == 'time'){
+		return "HH:mm:ss"
+	} 
+}
+
 EditionBar.prototype.isGeomType = function(type){
 	if(type == 'POLYGON' || type == 'MULTIPOLYGON' || type == 'LINESTRING' || type == 'MULTILINESTRING' || type == 'POINT' || type == 'MULTIPOINT'){
 		return true;
@@ -1026,7 +1043,8 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 						featureProperties += '<input id="' + this.featureType[i].name + '" type="number" '+ numeric_conf+' class="form-control">';
 						
 					} else if (this.isDateType(this.featureType[i].type)) {
-						featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd">';
+						var dateformat = this.getDateProperties(this.featureType[i]);
+						featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="'+dateformat+'">';
 						
 					} else if (this.isStringType(this.featureType[i].type)) {
 						if (this.featureType[i].name.startsWith("enm_") || this.featureType[i].name.startsWith("enmm_")) {
@@ -1339,7 +1357,8 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 						} else {
 							value = "";
 						}
-						featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + value + '">';
+						var dateformat = this.getDateProperties(this.featureType[i]);
+						featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="'+dateformat+'" value="' + value + '">';
 						
 					} else if (this.isStringType(this.featureType[i].type)) {				
 						if (this.featureType[i].name.startsWith("enm_") || this.featureType[i].name.startsWith("enmm_")) {
@@ -1606,7 +1625,8 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 							dbDate = dbDate.slice(0,-1);
 						}
 					} else {
-						ui += '<input disabled id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="">';
+						var dateformat = this.getDateProperties(this.featureType[i]);
+						ui += '<input disabled id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="'+dateformat+'" value="">';
 					}
 					
 					
