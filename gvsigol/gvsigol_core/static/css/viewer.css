@@ -434,6 +434,11 @@ html, body {
     text-align: right;
 }
 
+
+#editionbar .button-active {
+   background-color: #FDF709 !important;	
+}
+
 @media only screen and (max-width: 1300px) {
 	
 	.ol-toolbar {
@@ -444,7 +449,7 @@ html, body {
 	    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
 	}
 	
-	.editionbar {
+	#editionbar {
 	    left: auto;
 	    right: 6px;
 	    top: 386px;
