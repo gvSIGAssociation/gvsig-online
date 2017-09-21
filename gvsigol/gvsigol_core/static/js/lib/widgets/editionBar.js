@@ -574,7 +574,7 @@ editionBar.prototype.addModifyInteraction = function() {
 	
 	this.selectInteraction = new ol.interaction.Select({
 		wrapX: false,
-		hitTolerance: 20,
+		hitTolerance: 40,
 		style: new ol.style.Style({
 	        image: 
 		        new ol.style.Circle({
