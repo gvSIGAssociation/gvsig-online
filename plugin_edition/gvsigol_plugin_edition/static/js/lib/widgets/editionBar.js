@@ -1159,24 +1159,30 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 						if (self.featureType[i].type == 'boolean') {
 							properties[field.id] = field.checked;
 						}
-						else if (self.isStringType(self.featureType[i].type)) {
-							if(self.featureType[i].name.startsWith("enmm_")){
-								value = "";
-								for(var ix=0; ix<field.selectedOptions.length; ix++){
-									var option = field.selectedOptions[ix];
-									if(ix != 0){
-										value = value + ";";
+						else {
+							if(self.isDateType(self.featureType[i].type)){
+								properties[field.id] = self.getDateTime(field.value);
+							}else{ 
+								if (self.isStringType(self.featureType[i].type)) {
+									if(self.featureType[i].name.startsWith("enmm_")){
+										value = "";
+										for(var ix=0; ix<field.selectedOptions.length; ix++){
+											var option = field.selectedOptions[ix];
+											if(ix != 0){
+												value = value + ";";
+											}
+											value = value + option.value;
+										}
+										properties[field.id] = value;	
+									}else{
+										if (field.value != null) {
+											properties[field.id] = field.value;	
+										}
 									}
-									value = value + option.value;
-								}
-								properties[field.id] = value;	
-							}else{
-								if (field.value != null) {
-									properties[field.id] = field.value;	
+								} else if (field && field.value != '' && field.value != null && field.value != 'null') {
+										properties[field.id] = field.value;
 								}
 							}
-						} else if (field && field.value != '' && field.value != null && field.value != 'null') {
-								properties[field.id] = field.value;
 						}
 					}
 				}
@@ -1322,6 +1328,20 @@ EditionBar.prototype.createAllErrors = function() {
 /**
  * @param {Event} e Browser event.
  */
+EditionBar.prototype.getDateTime = function(time) {	
+	time_array = time.split(" ");
+	time_date_array = time_array[0].split("-");
+	if(time_date_array.length == 3){
+		time = time_date_array[2]+'-'+ time_date_array[1] +'-' +time_date_array[0];
+	}
+	if(time_array.length > 1){
+		time = time + 'T' + time_array[1];
+	}
+	time=time+'Z';
+	
+	return time
+}
+
 EditionBar.prototype.modifyDateTime = function(time) {	
 	time = time.replace("Z", "");
 	time = time.replace("T", " ");
@@ -1515,25 +1535,30 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 					if(field != null && field.id != null){
 						if (self.featureType[i].type == 'boolean') {
 							properties[field.id] = field.checked;
-						}
-						else if (self.isStringType(self.featureType[i].type)) {
-							if(self.featureType[i].name.startsWith("enmm_")){
-								value = "";
-								for(var ix=0; ix<field.selectedOptions.length; ix++){
-									var option = field.selectedOptions[ix];
-									if(ix != 0){
-										value = value + ";";
+						}else{ 
+							if(self.isDateType(self.featureType[i].type)){
+								properties[field.id] = self.getDateTime(field.value);
+							}else{ 
+								if (self.isStringType(self.featureType[i].type)) {
+									if(self.featureType[i].name.startsWith("enmm_")){
+										value = "";
+										for(var ix=0; ix<field.selectedOptions.length; ix++){
+											var option = field.selectedOptions[ix];
+											if(ix != 0){
+												value = value + ";";
+											}
+											value = value + option.value;
+										}
+										properties[field.id] = value;	
+									}else{
+										if (field.value != null) {
+											properties[field.id] = field.value;	
+										}
 									}
-									value = value + option.value;
-								}
-								properties[field.id] = value;	
-							}else{
-								if (field.value != null) {
-									properties[field.id] = field.value;	
+								} else if (field && field.value != '' && field.value != null && field.value != 'null') {
+										properties[field.id] = field.value;
 								}
 							}
-						} else if (field && field.value != '' && field.value != null && field.value != 'null') {
-								properties[field.id] = field.value;
 						}
 					}
 				}
