@@ -1312,6 +1312,7 @@ def layergroup_add_with_project(request, project_id):
                     created_by = request.user.username
                 )
                 layergroup.save()
+                mapservice_backend.reload_nodes()
                 
                 project_id = request.POST.get('layergroup_project_id')
                 if project_id and project_id != '':
@@ -1321,6 +1322,15 @@ def layergroup_add_with_project(request, project_id):
                         layer_group = layergroup
                     )
                     project_layergroup.save()
+                    
+                    assigned_layergroups = []
+                    prj_lyrgroups = ProjectLayerGroup.objects.filter(project_id=project.id)
+                    for prj_lyrgroup in prj_lyrgroups:
+                        assigned_layergroups.append(prj_lyrgroup.layer_group.id)
+                    
+                    toc_structure = core_utils.get_json_toc(assigned_layergroups)
+                    project.toc_order = toc_structure
+                    project.save()
                 
             else:
                 message = _(u'Layer group name already exists')
@@ -1330,7 +1340,6 @@ def layergroup_add_with_project(request, project_id):
             message = _(u'You must enter a name for layer group')
             return render_to_response('layergroup_add.html', {'message': message, 'project_id': project_id}, context_instance=RequestContext(request))
             
-        mapservice_backend.reload_nodes()
         return redirect('layergroup_list')
     
     else:
