@@ -581,7 +581,7 @@ EditionBar.prototype.addModifyInteraction = function() {
 	
 	var self = this;
 	
-	this.map.un('click', this.click_callback);
+	//this.map.un('click', this.click_callback);
 	this.map.on('click', this.click_callback);
 	
 	this.selectInteraction = new ol.interaction.Select({
