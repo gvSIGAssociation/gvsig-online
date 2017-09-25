@@ -31,12 +31,12 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 	this.click_callback = function(evt) {
 		$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
 		$("#jqueryEasyOverlayDiv").css("display", "block");
-		var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-	        return feature;
-	    });
-	    if(!feature){
+		//var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+	    //    return feature;
+	    //});
+	    //if(!feature){
 	    	this_.selectInteraction.changed();
-	    }
+	    //}
 	};
 	this.map = map;
 	this.layerTree = layerTree;
