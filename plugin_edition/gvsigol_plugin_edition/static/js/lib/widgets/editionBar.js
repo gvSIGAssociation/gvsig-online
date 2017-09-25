@@ -24,7 +24,8 @@
  * TODO
  */
 var EditionBar = function(layerTree, map, featureType, selectedLayer) {
-	$("body").overlay();
+	$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
+	$("#jqueryEasyOverlayDiv").css("display", "block");
 	
 	var this_ = this;
 	this.click_callback = function(evt) {
@@ -220,13 +221,13 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 					} catch (e) {
 						console.log(e);
 						this.EditionBar.stopEditionHandler();
-						$.overlayout();
+						$("#jqueryEasyOverlayDiv").css("display", "none");
 						messageBox.show('error', gettext('Error starting edition'));
 					}
 				},
 				error: function(jqXHR, textStatus) {
 					this.EditionBar.stopEditionHandler();
-					$.overlayout();
+					$("#jqueryEasyOverlayDiv").css("display", "none");
 					messageBox.show('error', gettext('Error starting edition'));
 					console.log(textStatus);
 				}
@@ -269,7 +270,7 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 	this.map.addLayer(this.wfsLayer);
 	
 	this.source.on('change', function() {
-		$.overlayout();
+		$("#jqueryEasyOverlayDiv").css("display", "none");
 	});
 	
 	var controls = this.map.getControls();
@@ -1234,7 +1235,8 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 				self.lastAddedFeature = null;
 				if (self.resourceManager.getEngine() == 'gvsigol') {
 					if (uploader.getFileCount() >= 1) {
-						$("body").overlay();
+						$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
+						$("#jqueryEasyOverlayDiv").css("display", "block");
 						uploader.appendExtraParams({
 							layer_name: self.selectedLayer.layer_name,
 							workspace: self.selectedLayer.workspace,
@@ -1617,7 +1619,8 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 			if (transaction.success) {
 				if (self.resourceManager.getEngine() == 'gvsigol') {
 					if (uploader.getFileCount() >= 1) {
-						$("body").overlay();
+						$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
+						$("#jqueryEasyOverlayDiv").css("display", "block");
 						uploader.appendExtraParams({
 							layer_name: self.selectedLayer.layer_name,
 							workspace: self.selectedLayer.workspace,
