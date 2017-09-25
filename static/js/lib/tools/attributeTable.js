@@ -618,7 +618,7 @@ attributeTable.prototype.registerEvents = function() {
 			currentFilter += "'" + this.value + "' ";
 			
 		} else if (self.isDateType(self.selectedType)) {
-			currentFilter += this.value + " ";
+			currentFilter += "'" + this.value + "' ";
 			
 		}  else if (self.selectedType == 'xsd:boolean') {
 			currentFilter += "'" + this.value + "' ";
