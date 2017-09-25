@@ -27,6 +27,16 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 	$("body").overlay();
 	
 	var this_ = this;
+	this.click_callback = function(evt) {
+		$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
+		$("#jqueryEasyOverlayDiv").css("display", "block");
+		var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+	        return feature;
+	    });
+	    if(!feature){
+	    	this_.selectInteraction.changed();
+	    }
+	};
 	this.map = map;
 	this.layerTree = layerTree;
 	this.selectedLayer = selectedLayer;
@@ -571,9 +581,13 @@ EditionBar.prototype.addModifyInteraction = function() {
 	
 	var self = this;
 	
+	this.map.un('click', this.click_callback);
+	this.map.on('click', this.click_callback);
+	
 	this.selectInteraction = new ol.interaction.Select({
 		wrapX: false,
 		hitTolerance: 20,
+		condition: ol.events.condition.click,
 		style: new ol.style.Style({
 	        image: 
 		        new ol.style.Circle({
@@ -618,16 +632,19 @@ EditionBar.prototype.addModifyInteraction = function() {
 	this.map.addInteraction(this.modifyInteraction);
 	
 	this.selectInteraction.on('select',
-		function(evt) {
-			$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
-			$("#jqueryEasyOverlayDiv").css("display", "block");
-			if (self.lastEditedFeature != null) {
-				self.revertEditedFeature();
-			}
-			self.editFeatureForm(evt.selected[0]);
-			$("#jqueryEasyOverlayDiv").css("display", "none");
-		}, this);
-	
+			function(evt) {
+				if (self.lastEditedFeature != null) {
+					self.revertEditedFeature();
+				}
+				self.editFeatureForm(evt.selected[0]);
+				$("#jqueryEasyOverlayDiv").css("display", "none");
+			}, this);
+			
+	this.selectInteraction.on('change',
+			function(evt) {
+				$("#jqueryEasyOverlayDiv").css("display", "none");
+			}, this);
+			
 	this.modifyInteraction.on('modifystart',
 		function(evt) {
 			console.log('Modify feature start');
@@ -721,6 +738,7 @@ EditionBar.prototype.deactivateControls = function() {
 	if (this.modifyInteraction != null) {
 		this.map.removeInteraction(this.modifyInteraction);
 		this.modifyInteraction = null;
+		this.map.un('click', this.click_callback);
 	}
 	
 	if (this.selectInteraction != null) {
