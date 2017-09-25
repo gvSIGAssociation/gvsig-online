@@ -489,7 +489,7 @@ attributeTable.prototype.isStringType = function(type){
 }
 
 attributeTable.prototype.isDateType = function(type){
-	if(type == 'date' || type == 'timestamp' || type == 'time' || type == 'interval'){
+	if(type == 'date' || type.startsWith('timestamp') || type.startsWith('time') || type == 'interval'){
 		return true;
 	}
 	return false;
