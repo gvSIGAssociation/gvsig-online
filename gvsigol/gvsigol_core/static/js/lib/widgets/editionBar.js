@@ -24,9 +24,20 @@
  * TODO
  */
 var editionBar = function(layerTree, map, featureType, selectedLayer) {
-	$("body").overlay();
+	$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
+	$("#jqueryEasyOverlayDiv").css("display", "block");
 	
 	var this_ = this;
+	this.click_callback = function(evt) {
+		$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
+		$("#jqueryEasyOverlayDiv").css("display", "block");
+		//var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+	    //    return feature;
+	    //});
+	    //if(!feature){
+	    	this_.selectInteraction.changed();
+	    //}
+	};
 	this.map = map;
 	this.layerTree = layerTree;
 	this.selectedLayer = selectedLayer;
@@ -210,13 +221,13 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 					} catch (e) {
 						console.log(e);
 						this.editionBar.stopEditionHandler();
-						$.overlayout();
+						$("#jqueryEasyOverlayDiv").css("display", "none");
 						messageBox.show('error', gettext('Error starting edition'));
 					}
 				},
 				error: function(jqXHR, textStatus) {
 					this.editionBar.stopEditionHandler();
-					$.overlayout();
+					$("#jqueryEasyOverlayDiv").css("display", "none");
 					messageBox.show('error', gettext('Error starting edition'));
 					console.log(textStatus);
 				}
@@ -259,7 +270,7 @@ var editionBar = function(layerTree, map, featureType, selectedLayer) {
 	this.map.addLayer(this.wfsLayer);
 	
 	this.source.on('change', function() {
-		$.overlayout();
+		$("#jqueryEasyOverlayDiv").css("display", "none");
 	});
 	
 	var controls = this.map.getControls();
@@ -572,9 +583,13 @@ editionBar.prototype.addModifyInteraction = function() {
 	
 	var self = this;
 	
+	//this.map.un('click', this.click_callback);
+	this.map.on('click', this.click_callback);
+	
 	this.selectInteraction = new ol.interaction.Select({
 		wrapX: false,
 		hitTolerance: 20,
+		condition: ol.events.condition.click,
 		style: new ol.style.Style({
 	        image: 
 		        new ol.style.Circle({
@@ -619,13 +634,19 @@ editionBar.prototype.addModifyInteraction = function() {
 	this.map.addInteraction(this.modifyInteraction);
 	
 	this.selectInteraction.on('select',
-		function(evt) {
-			if (self.lastEditedFeature != null) {
-				self.revertEditedFeature();
-			}
-			self.editFeatureForm(evt.selected[0]);
-		}, this);
-	
+			function(evt) {
+				if (self.lastEditedFeature != null) {
+					self.revertEditedFeature();
+				}
+				self.editFeatureForm(evt.selected[0]);
+				$("#jqueryEasyOverlayDiv").css("display", "none");
+			}, this);
+			
+	this.selectInteraction.on('change',
+			function(evt) {
+				$("#jqueryEasyOverlayDiv").css("display", "none");
+			}, this);
+			
 	this.modifyInteraction.on('modifystart',
 		function(evt) {
 			console.log('Modify feature start');
@@ -719,6 +740,7 @@ editionBar.prototype.deactivateControls = function() {
 	if (this.modifyInteraction != null) {
 		this.map.removeInteraction(this.modifyInteraction);
 		this.modifyInteraction = null;
+		this.map.un('click', this.click_callback);
 	}
 	
 	if (this.selectInteraction != null) {
@@ -973,10 +995,27 @@ editionBar.prototype.isStringType = function(type){
 }
 
 editionBar.prototype.isDateType = function(type){
-	if(type == 'date' || type == 'timestamp' || type == 'time' || type == 'interval'){
+	if(type == 'date' || type.startsWith('timestamp ') || type.startsWith('time ') || type == 'interval'){
 		return true;
 	}
 	return false;
+}
+
+
+editionBar.prototype.getDateProperties = function(featureType){
+	var type = featureType.type;
+	
+	if(type == 'date'){
+		return 'DD-MM-YYYY';
+	} 
+	
+	if(type.startsWith('timestamp ')){
+		return 'DD-MM-YYYY HH:mm:ss';
+	} 
+	
+	if(type.startsWith('time ')){
+		return 'HH:mm:ss';
+	} 
 }
 
 editionBar.prototype.isGeomType = function(type){
@@ -996,6 +1035,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 		this.showDetailsTab();
 		this.detailsTab.empty();	
 		var self = this;
+		var datetimearray = []
 		
 		var featureProperties = '';
 		featureProperties += '<div class="box">';
@@ -1027,8 +1067,13 @@ editionBar.prototype.createFeatureForm = function(feature) {
 						featureProperties += '<input id="' + this.featureType[i].name + '" type="number" '+ numeric_conf+' class="form-control">';
 						
 					} else if (this.isDateType(this.featureType[i].type)) {
-						featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd">';
-						
+						var dateformat = this.getDateProperties(this.featureType[i]);
+						datetimearray.push({
+							'name': this.featureType[i].name,
+							'format': dateformat
+						});
+						featureProperties += '<div id="datetimepicker-' + this.featureType[i].name + '"><input id="' + this.featureType[i].name + '" class="form-control"/></div>';
+						//featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="'+dateformat+'">';
 					} else if (this.isStringType(this.featureType[i].type)) {
 						if (this.featureType[i].name.startsWith("enm_") || this.featureType[i].name.startsWith("enmm_")) {
 							var name = this.featureType[i].name;
@@ -1105,6 +1150,13 @@ editionBar.prototype.createFeatureForm = function(feature) {
 			uploader = this.resourceManager.createUploader();
 		}
 		
+		for(var ixx=0; ixx < datetimearray.length; ixx++){
+			$('#'+datetimearray[ixx].name).datetimepicker({
+				format: datetimearray[ixx].format, //'DD-MM-YYYY HH:mm:ss',
+				showClose: true
+			});
+		}
+		
 		$('#edit_feature_properties .form-control').on('blur', function (evt) {
 			var props = feature.getProperties();
 			props[evt.currentTarget.id] = evt.currentTarget.value;
@@ -1130,24 +1182,32 @@ editionBar.prototype.createFeatureForm = function(feature) {
 						if (self.featureType[i].type == 'boolean') {
 							properties[field.id] = field.checked;
 						}
-						else if (self.isStringType(self.featureType[i].type)) {
-							if(self.featureType[i].name.startsWith("enmm_")){
-								value = "";
-								for(var ix=0; ix<field.selectedOptions.length; ix++){
-									var option = field.selectedOptions[ix];
-									if(ix != 0){
-										value = value + ";";
-									}
-									value = value + option.value;
+						else {
+							if(self.isDateType(self.featureType[i].type)){
+								if(field.value != ""){
+									properties[field.id] = self.getDateTime(field.value);
 								}
-								properties[field.id] = value;	
-							}else{
-								if (field.value != null) {
-									properties[field.id] = field.value;	
+							}else{ 
+								if (self.isStringType(self.featureType[i].type)) {
+									if(self.featureType[i].name.startsWith("enmm_")){
+										value = "";
+										for(var ix=0; ix<field.selectedOptions.length; ix++){
+											var option = field.selectedOptions[ix];
+											if(ix != 0){
+												value = value + ";";
+											}
+											value = value + option.value;
+										}
+										properties[field.id] = value;	
+									}else{
+										if (field.value != null) {
+											properties[field.id] = field.value;	
+										}
+									}
+								} else if (field && field.value != '' && field.value != null && field.value != 'null') {
+										properties[field.id] = field.value;
 								}
 							}
-						} else if (field && field.value != '' && field.value != null && field.value != 'null') {
-								properties[field.id] = field.value;
 						}
 					}
 				}
@@ -1176,7 +1236,8 @@ editionBar.prototype.createFeatureForm = function(feature) {
 				self.lastAddedFeature = null;
 				if (self.resourceManager.getEngine() == 'gvsigol') {
 					if (uploader.getFileCount() >= 1) {
-						$("body").overlay();
+						$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
+						$("#jqueryEasyOverlayDiv").css("display", "block");
 						uploader.appendExtraParams({
 							layer_name: self.selectedLayer.layer_name,
 							workspace: self.selectedLayer.workspace,
@@ -1293,12 +1354,50 @@ editionBar.prototype.createAllErrors = function() {
 /**
  * @param {Event} e Browser event.
  */
+editionBar.prototype.getDateTime = function(time) {	
+	if(time == ""){
+		return null;
+	}
+	time_array = time.split(" ");
+	time_date_array = time_array[0].split("-");
+	if(time_date_array.length == 3){
+		time = time_date_array[2]+'-'+ time_date_array[1] +'-' +time_date_array[0];
+	}
+	if(time_array.length > 1){
+		time = time + 'T' + time_array[1];
+	}
+	time=time+'Z';
+	
+	return time
+}
+
+editionBar.prototype.modifyDateTime = function(time) {	
+	if(time == ""){
+		return null;
+	}
+	time = time.replace("Z", "");
+	time = time.replace("T", " ");
+	
+	time_array = time.split(" ");
+	time_date_array = time_array[0].split("-");
+	if(time_date_array.length == 3){
+		time = time_date_array[2]+'-'+ time_date_array[1] +'-' +time_date_array[0];
+	}
+	if(time_array.length > 1){
+		time = time + ' ' + time_array[1];
+	}
+	
+	return time
+}
+
+
 editionBar.prototype.editFeatureForm = function(feature) {	
 	if (feature) {
 		this.backupFeature(feature);
 		this.showDetailsTab();
 		this.detailsTab.empty();	
 		var self = this;
+		var datetimearray = [];
 		
 		var featureProperties = '';
 		featureProperties += '<div class="box">';
@@ -1334,13 +1433,17 @@ editionBar.prototype.editFeatureForm = function(feature) {
 						featureProperties += '<input id="' + this.featureType[i].name + '" type="number" '+ numeric_conf +' class="form-control" value="' + value + '">';
 					} else if (this.isDateType(this.featureType[i].type)) {
 						if (value != null) {
-							if (value.charAt(value.length - 1) == 'Z') {
-								value = value.slice(0,-1);
-							}
+							value = this.modifyDateTime(value);
 						} else {
 							value = "";
 						}
-						featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="' + value + '">';
+						var dateformat = this.getDateProperties(this.featureType[i]);
+						datetimearray.push({
+							'name': this.featureType[i].name,
+							'format': dateformat
+						});
+						featureProperties += '<div id="datetimepicker-' + this.featureType[i].name + '"><input id="' + this.featureType[i].name + '" class="form-control"  value="' + value + '"/></div>';
+						//featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="'+dateformat+'" value="' + value + '">';
 						
 					} else if (this.isStringType(this.featureType[i].type)) {				
 						if (this.featureType[i].name.startsWith("enm_") || this.featureType[i].name.startsWith("enmm_")) {
@@ -1443,6 +1546,12 @@ editionBar.prototype.editFeatureForm = function(feature) {
 			feature.setProperties(props);
 		});
 		
+		for(var ixx=0; ixx < datetimearray.length; ixx++){
+			$('#'+datetimearray[ixx].name).datetimepicker({
+				format: datetimearray[ixx].format, //'DD-MM-YYYY HH:mm:ss',
+				showClose: true
+			});
+		}
 		
 
 
@@ -1458,25 +1567,32 @@ editionBar.prototype.editFeatureForm = function(feature) {
 					if(field != null && field.id != null){
 						if (self.featureType[i].type == 'boolean') {
 							properties[field.id] = field.checked;
-						}
-						else if (self.isStringType(self.featureType[i].type)) {
-							if(self.featureType[i].name.startsWith("enmm_")){
-								value = "";
-								for(var ix=0; ix<field.selectedOptions.length; ix++){
-									var option = field.selectedOptions[ix];
-									if(ix != 0){
-										value = value + ";";
-									}
-									value = value + option.value;
+						}else{ 
+							if(self.isDateType(self.featureType[i].type)){
+								if(field.value != ""){
+									properties[field.id] = self.getDateTime(field.value);
 								}
-								properties[field.id] = value;	
-							}else{
-								if (field.value != null) {
-									properties[field.id] = field.value;	
+							}else{ 
+								if (self.isStringType(self.featureType[i].type)) {
+									if(self.featureType[i].name.startsWith("enmm_")){
+										value = "";
+										for(var ix=0; ix<field.selectedOptions.length; ix++){
+											var option = field.selectedOptions[ix];
+											if(ix != 0){
+												value = value + ";";
+											}
+											value = value + option.value;
+										}
+										properties[field.id] = value;	
+									}else{
+										if (field.value != null) {
+											properties[field.id] = field.value;	
+										}
+									}
+								} else if (field && field.value != '' && field.value != null && field.value != 'null') {
+										properties[field.id] = field.value;
 								}
 							}
-						} else if (field && field.value != '' && field.value != null && field.value != 'null') {
-								properties[field.id] = field.value;
 						}
 					}
 				}
@@ -1504,7 +1620,8 @@ editionBar.prototype.editFeatureForm = function(feature) {
 			if (transaction.success) {
 				if (self.resourceManager.getEngine() == 'gvsigol') {
 					if (uploader.getFileCount() >= 1) {
-						$("body").overlay();
+						$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
+						$("#jqueryEasyOverlayDiv").css("display", "block");
 						uploader.appendExtraParams({
 							layer_name: self.selectedLayer.layer_name,
 							workspace: self.selectedLayer.workspace,
@@ -1607,7 +1724,8 @@ editionBar.prototype.removeFeatureForm = function(evt, feature) {
 							dbDate = dbDate.slice(0,-1);
 						}
 					} else {
-						ui += '<input disabled id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="">';
+						var dateformat = this.getDateProperties(this.featureType[i]);
+						ui += '<input disabled id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="'+dateformat+'" value="">';
 					}
 					
 					
