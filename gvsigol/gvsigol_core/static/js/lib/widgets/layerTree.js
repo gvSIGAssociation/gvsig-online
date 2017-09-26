@@ -712,7 +712,7 @@ layerTree.prototype.createTemporaryOverlayUI = function(layer) {
 	
 	var ui = '';
 	if (layer.time_enabled && layer.is_vector) {	
-		ui += '<div id="layer-box-' + id + '" data-layerid="' + id + '" data-zindex="' + mapLayer.getZIndex() + '" class="box layer-box thin-border box-default collapsed-box">';
+		ui += '<div id="layer-' + id + '" data-layerid="' + id + '" data-zindex="' + mapLayer.getZIndex() + '" class="box layer-box thin-border box-default collapsed-box">';
 		ui += '		<div class="box-header with-border">';
 	
 		ui += '		<input type="checkbox" class="temporary-layer temp-'+id+'" id="' + id + '" data-id="'+layer.ref+'">';
