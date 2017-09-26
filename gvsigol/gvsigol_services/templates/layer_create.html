@@ -723,6 +723,11 @@
 		})
 		
 		make_temporal_form();
+		
+		var layergroup_id = "{{layergroup_id}}";
+		if(layergroup_id != "None"){
+			$("#id_layer_group").val(layergroup_id).trigger('change');
+		}
 	});
 </script>
 {% endblock %}
