@@ -484,12 +484,17 @@ def backend_fields_list(request):
     return HttpResponseBadRequest()    
  
 
-
-
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def layer_add(request):
+    return layer_add_with_group(request, None)
+   
+ 
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_http_methods(["GET", "POST", "HEAD"])
+@staff_required
+def layer_add_with_group(request, layergroup_id):
     if request.method == 'POST':
         form = LayerForm(request.POST)
         abstract = request.POST.get('md-abstract')
@@ -677,7 +682,10 @@ def layer_add(request):
     
     datastore_types['types'] = types
         
-    return render(request, 'layer_add.html', {'form': form, 'datastore_types': json.dumps(datastore_types)})
+    return render(request, 'layer_add.html', {
+            'form': form, 
+            'datastore_types': json.dumps(datastore_types),
+            'layergroup_id': layergroup_id})
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -1332,6 +1340,14 @@ def layergroup_add_with_project(request, project_id):
                     project.toc_order = toc_structure
                     project.save()
                 
+                if 'redirect' in request.GET:
+                    redirect_var = request.GET.get('redirect')
+                    if redirect_var == 'create-layer':
+                        return redirect('layer_create_with_group', layergroup_id=str(layergroup.id))
+                    if redirect_var == 'import-layer':
+                        return redirect('layer_add_with_group', layergroup_id=str(layergroup.id))
+                    
+                
             else:
                 message = _(u'Layer group name already exists')
                 return render_to_response('layergroup_add.html', {'message': message, 'project_id': project_id}, context_instance=RequestContext(request))
@@ -1379,6 +1395,13 @@ def layergroup_update(request, lgid):
             core_utils.toc_update_layer_group(layergroup, old_name, name)
             mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
             mapservice_backend.reload_nodes()
+            if 'redirect' in request.GET:
+                redirect_var = request.GET.get('redirect')
+                if redirect_var == 'create-layer':
+                    return redirect('layer_create_with_group', layergroup_id=str(layergroup.id))
+                if redirect_var == 'import-layer':
+                    return redirect('layer_add_with_group', layergroup_id=str(layergroup.id))
+                  
             return redirect('layergroup_list')
              
         else:      
@@ -1394,6 +1417,14 @@ def layergroup_update(request, lgid):
                 core_utils.toc_update_layer_group(layergroup, old_name, name)
                 mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
                 mapservice_backend.reload_nodes()
+                
+                if 'redirect' in request.GET:
+                    redirect_var = request.GET.get('redirect')
+                    if redirect_var == 'create-layer':
+                        return redirect('layer_create_with_group', layergroup_id=str(layergroup.id))
+                    if redirect_var == 'import-layer':
+                        return redirect('layer_add_with_group', layergroup_id=str(layergroup.id))
+                  
                 return redirect('layergroup_list')
                 
             else:
@@ -1402,8 +1433,9 @@ def layergroup_update(request, lgid):
 
     else:
         layergroup = LayerGroup.objects.get(id=int(lgid))
+        layers = Layer.objects.filter(layer_group_id=layergroup.id)
         
-        return render_to_response('layergroup_update.html', {'lgid': lgid, 'layergroup': layergroup}, context_instance=RequestContext(request))
+        return render_to_response('layergroup_update.html', {'lgid': lgid, 'layergroup': layergroup, 'layers': layers}, context_instance=RequestContext(request))
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -1435,10 +1467,18 @@ def layergroup_delete(request, lgid):
 def prepare_string(s):
     return ''.join((c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')).replace (" ", "_").replace ("-", "_").lower()
 
-@require_http_methods(["GET", "POST", "HEAD"])
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def layer_create(request):
+    return layer_create_with_group(request, None)
+   
+ 
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_http_methods(["GET", "POST", "HEAD"])
+@staff_required
+def layer_create_with_group(request, layergroup_id):
     layer_type = "gs_vector_layer"
     if request.method == 'POST':
         
@@ -1625,7 +1665,8 @@ def layer_create(request):
             'form': form,
             'forms': forms,
             'layer_type': layer_type,
-            'enumerations': get_currentuser_enumerations(request)
+            'enumerations': get_currentuser_enumerations(request),
+            'layergroup_id': layergroup_id
         }
         return render(request, "layer_create.html", data)
         
