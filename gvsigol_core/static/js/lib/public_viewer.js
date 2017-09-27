@@ -290,16 +290,19 @@ viewer.core = {
 					});
 					
 				} else {
+					var wmsParams = {
+						'LAYERS': layerConf.workspace + ':' + layerConf.name, 
+						'FORMAT': 'image/png', 
+						'VERSION': '1.1.1'
+					};
+					if (layerConf.cached) {
+						wmsParams['WIDTH'] = self.conf.tile_size;
+						wmsParams['HEIGHT'] = self.conf.tile_size;
+					}
 					var wmsSource = new ol.source.TileWMS({
 						url: url,
 						visible: layerConf.visible,
-						params: {
-							'LAYERS': layerConf.workspace + ':' + layerConf.name, 
-							'FORMAT': 'image/png', 
-							'VERSION': '1.1.1',
-							'WIDTH': self.conf.tile_size,
-							'HEIGHT': self.conf.tile_size
-						},
+						params: wmsParams,
 						serverType: 'geoserver'
 					});
 					wmsLayer = new ol.layer.Tile({
