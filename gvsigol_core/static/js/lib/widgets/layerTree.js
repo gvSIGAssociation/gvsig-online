@@ -746,6 +746,17 @@ layerTree.prototype.createTemporaryOverlayUI = function(layer) {
 	
 	var ui = '';
 	if (layer.time_enabled && layer.is_vector) {	
+		var language = $("#select-language").val();
+	
+		var conf = JSON.parse(layer.conf);
+		var fields = conf.fields;
+		var time_field = layer.time_enabled_field;
+		for(var i=0; i<fields.length; i++){
+			if(fields[i].name == time_field && fields[i]["title-"+language] != ""){
+				time_field = fields[i]["title-"+language];
+			}
+		}
+		
 		ui += '<div id="layer-' + id + '" data-layerid="' + id + '" data-zindex="' + mapLayer.getZIndex() + '" class="box layer-box thin-border box-default collapsed-box">';
 		ui += '		<div class="box-header with-border">';
 	
@@ -759,10 +770,18 @@ layerTree.prototype.createTemporaryOverlayUI = function(layer) {
 		ui += '			</div>';
 		ui += '		</div>';
 		ui += '		<div class="box-body" style="display: none;">';
-		ui +=  			gettext('temporary_field') + '<span class="pull-right" style="font-weight:bold;">'+layer.time_enabled_field+'</span><div style="clear:both"></div>';
+		ui +=  			gettext('temporary_field') + '<span class="pull-right" style="font-weight:bold;">'+time_field+'</span><div style="clear:both"></div>';
+		
 		if(layer.time_enabled_endfield != null && layer.time_enabled_endfield != ""){
-			ui +=  			gettext('temporary_endfield') + '<span class="pull-right" style="font-weight:bold;">'+layer.time_enabled_endfield+'</span><div style="clear:both"></div>';
+			var time_endfield = layer.time_enabled_endfield;
+			for(var i=0; i<fields.length; i++){
+				if(fields[i].name == time_endfield && fields[i]["title-"+language] != ""){
+					time_endfield = fields[i]["title-"+language];
+				}
+			}
+			ui +=  			gettext('temporary_endfield') + '<span class="pull-right" style="font-weight:bold;">'+time_endfield+'</span><div style="clear:both"></div>';
 		}
+		
 		ui += '		</div>';
 		ui += '</div>';
 	}
