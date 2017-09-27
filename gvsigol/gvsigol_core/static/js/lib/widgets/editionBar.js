@@ -1110,10 +1110,10 @@ editionBar.prototype.createFeatureForm = function(feature) {
 							var has_multiple = false;
 							if(this.featureType[i].name.startsWith("enmm_")){
 								has_multiple = this.featureType[i].name.startsWith("enmm_");
-								name = name.replace("enmm_", "enm_");
+								//name = name.replace("enmm_", "enm_");
 								//var enumeration = this.getEnumeration(name);
-								enumeration_names.push(name);
-								featureProperties += '<div id="div-' + name + '" data-type="multiple"></div>';
+								enumeration_names.push(this.featureType[i].name);
+								featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="multiple"></div>';
 							}else{
 								//var enumeration = this.getEnumeration(name);
 								enumeration_names.push(this.featureType[i].name);
