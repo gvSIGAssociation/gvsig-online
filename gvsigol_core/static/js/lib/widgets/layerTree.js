@@ -495,6 +495,39 @@ layerTree.prototype.refreshTemporalInfo = function() {
 	});
 };
 
+layerTree.prototype.adaptToStep = function(date) {
+	var hours = date.getHours();
+	var minutes = date.getMinutes();
+	var seconds = date.getSeconds();
+	hours = hours < 10 ? '0'+hours : hours;
+	minutes = minutes < 10 ? '0'+minutes : minutes;
+	seconds = seconds < 10 ? '0'+seconds : seconds;
+	var days = date.getDate();
+	var month = date.getMonth()+1;
+	days = days < 10 ? '0'+days : days;
+	month = month < 10 ? '0'+month : month;
+	
+	var date_string = date.getFullYear();
+	var step = $("#temporary-step-unit").val();
+	if(step=="month"){
+		date_string = date.getFullYear()+"-"+month;
+	}
+	if(step=="day"){
+		date_string = date.getFullYear()+"-"+month+"-"+days;
+	}
+	if(step=="hour"){
+		date_string = date.getFullYear()+"-"+month+"-"+days+"T"+hours+"Z";
+	}
+	if(step=="minute"){
+		date_string = date.getFullYear()+"-"+month+"-"+days+"T"+hours+":"+minutes+"Z";
+	}
+	if(step=="second"){
+		date_string = date.toISOString();
+	}
+	
+	return date_string;
+}
+
 layerTree.prototype.updateTemporalLayers = function(startDate, endDate) {
 	var layers = [];
 	$(".temporary-layer").each(function(){
@@ -510,9 +543,10 @@ layerTree.prototype.updateTemporalLayers = function(startDate, endDate) {
 			if(maplayer.values_ != null && (jQuery.inArray(maplayer.values_.id, layers)>-1)){
 				if(startDate){
 					var start = startDate.toISOString();
+					start = this.adaptToStep(startDate);
 					var end = '';
 					if (endDate){
-						end = endDate.toISOString();
+						end = this.adaptToStep(endDate);
 						start = start + "/" + end;
 					}
 					maplayer.getSource().updateParams({'TIME': start});
