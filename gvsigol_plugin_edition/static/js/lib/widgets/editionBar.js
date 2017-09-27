@@ -1107,10 +1107,14 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 							if(this.featureType[i].name.startsWith("enmm_")){
 								has_multiple = this.featureType[i].name.startsWith("enmm_");
 								name = name.replace("enmm_", "enm_");
+								//var enumeration = this.getEnumeration(name);
+								enumeration_names.push(name);
+								featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="multiple"></div>';
+							}else{
+								//var enumeration = this.getEnumeration(name);
+								enumeration_names.push(this.featureType[i].name);
+								featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="single"></div>';
 							}
-							//var enumeration = this.getEnumeration(name);
-							enumeration_names.push(this.featureType[i].name);
-							featureProperties += '<div id="div-' + this.featureType[i].name + '"></div>';
 						} else {
 							if("length" in this.featureType[i] && this.featureType[i].length>0){
 								featureProperties += '<input id="' + this.featureType[i].name + '" type="text" maxlength="'+this.featureType[i].length+'" class="form-control">';
@@ -1160,7 +1164,8 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 			var enum_html = '';
 			
 			if(enumeration && enumeration.items){
-				if(!has_multiple){
+				var has_multiple = $("#div-"+enumeration.name).attr("data-type");
+				if(has_multiple!="multiple"){
 					enum_html += '<select id="' + enumeration.name + '" class="form-control">';
 				}else{
 					enum_html += '<select id="' + enumeration.name + '" class="form-control multipleSelect" multiple="multiple">';
@@ -1489,10 +1494,14 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 							if(this.featureType[i].name.startsWith("enmm_")){
 								has_multiple = this.featureType[i].name.startsWith("enmm_");
 								name = name.replace("enmm_", "enm_");
+								//var enumeration = this.getEnumeration(name);
+								enumeration_names.push(name);
+								featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="multiple"></div>';
+							}else{
+								//var enumeration = this.getEnumeration(name);
+								enumeration_names.push(this.featureType[i].name);
+								featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="single"></div>';
 							}
-							//var enumeration = this.getEnumeration(name);
-							enumeration_names.push(this.featureType[i].name);
-							featureProperties += '<div id="div-' + this.featureType[i].name + '"></div>';
 						} else {
 							if (value==null) {
 								value = "";
@@ -1550,7 +1559,8 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 			var enum_html = '';
 			
 			if(enumeration && enumeration.items){
-				if(!has_multiple){
+				var has_multiple = $("#div-"+enumeration.name).attr("data-type");
+				if(has_multiple!="multiple"){
 					enum_html += '<select id="' + enumeration.name + '" class="form-control">';
 				}else{
 					enum_html += '<select id="' + enumeration.name + '" class="form-control multipleSelect" multiple="multiple">';
