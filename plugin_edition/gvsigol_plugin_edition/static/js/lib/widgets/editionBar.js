@@ -787,6 +787,32 @@ EditionBar.prototype.getEnumeration = function(enumName) {
 	return enumeration;
 };
 
+EditionBar.prototype.getEnumerations = function(enumNames) {	
+	var enumerations = [];
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: "/gvsigonline/services/get_enumeration/",
+	  	data: {
+	  		'enum_names': enumNames.toString()
+		},
+	  	success	:function(response){
+	  		var enms = response.enumerations;
+	  		for(var i=0; i<enms.length; i++){
+	  			var enm = enms[i];
+		  		var enumeration = {};
+		  		enumeration.title = enm.title;
+		  		enumeration.name = enm.name;
+		  		enumeration.items = enm.items;
+		  		enumerations.push(enumeration);
+	  		}
+		},
+	  	error: function(){}
+	});
+	
+	return enumerations;
+};
+
 
 EditionBar.prototype.isNumericType = function(type){
 	if(type == 'smallint' || type == 'integer' || type == 'bigint' || type == 'decimal' || type == 'numeric' ||
@@ -1034,7 +1060,8 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 		this.showDetailsTab();
 		this.detailsTab.empty();	
 		var self = this;
-		var datetimearray = []
+		var datetimearray = [];
+		var enumeration_names = [];
 		
 		var featureProperties = '';
 		featureProperties += '<div class="box">';
@@ -1081,25 +1108,9 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 								has_multiple = this.featureType[i].name.startsWith("enmm_");
 								name = name.replace("enmm_", "enm_");
 							}
-							var enumeration = this.getEnumeration(name);
-							if(enumeration && enumeration.items){
-								if(!has_multiple){
-									featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control">';
-								}else{
-									featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control multipleSelect" multiple="multiple">';
-								}
-								
-								for (var j=0; j<enumeration.items.length; j++) {
-									featureProperties += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
-								}
-								featureProperties += 	'</select>';
-							}else{
-								if("length" in this.featureType[i] && this.featureType[i].length>0){
-									featureProperties += '<input id="' + this.featureType[i].name + '" type="text" maxlength="'+this.featureType[i].length+'" class="form-control">';
-								}else{
-									featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control">';
-								}
-							}
+							//var enumeration = this.getEnumeration(name);
+							enumeration_names.push(this.featureType[i].name);
+							featureProperties += '<div id="div-' + this.featureType[i].name + '"></div>';
 						} else {
 							if("length" in this.featureType[i] && this.featureType[i].length>0){
 								featureProperties += '<input id="' + this.featureType[i].name + '" type="text" maxlength="'+this.featureType[i].length+'" class="form-control">';
@@ -1141,6 +1152,32 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 		ui += '</div>';
 		
 		this.detailsTab.append(ui);
+		
+		var enums = this.getEnumerations(enumeration_names);
+		for(var i=0; i<enums.length; i++){
+			var enumeration = enums[i];
+			
+			var enum_html = '';
+			
+			if(enumeration && enumeration.items){
+				if(!has_multiple){
+					enum_html += '<select id="' + enumeration.name + '" class="form-control">';
+				}else{
+					enum_html += '<select id="' + enumeration.name + '" class="form-control multipleSelect" multiple="multiple">';
+				}
+				
+				for (var j=0; j<enumeration.items.length; j++) {
+					enum_html += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+				}
+				enum_html += 	'</select>';
+			}else{
+				enum_html += '<input id="' + enumeration.name + '" type="text" class="form-control">';
+			}
+			
+			$("#div-"+enumeration.name).html(enum_html);
+		}
+		
+		
 		$.gvsigOL.controlSidebar.open();
 		this.resourceManager.registerEvents();
 		
@@ -1397,6 +1434,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 		this.detailsTab.empty();	
 		var self = this;
 		var datetimearray = [];
+		var enumeration_names = [];
 		
 		var featureProperties = '';
 		featureProperties += '<div class="box">';
@@ -1452,30 +1490,9 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 								has_multiple = this.featureType[i].name.startsWith("enmm_");
 								name = name.replace("enmm_", "enm_");
 							}
-							var enumeration = this.getEnumeration(name);
-							if(enumeration && enumeration.items){
-								if(!has_multiple){
-									featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control">';
-								}else{
-									featureProperties += '<select id="' + this.featureType[i].name + '" class="form-control multipleSelect" multiple="multiple">';
-								}
-								value = ";" + value + ";";
-								for (var j=0; j<enumeration.items.length; j++) {
-									var enum_item_name = ";"+enumeration.items[j].name+";";
-									if (value.indexOf(enum_item_name) !== -1) {
-										featureProperties += '<option selected value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
-									} else {
-										featureProperties += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
-									}
-								}
-								featureProperties += 	'</select>';
-							}else{
-								if("length" in this.featureType[i] && this.featureType[i].length>0){
-									featureProperties += '<input id="' + this.featureType[i].name + '" type="text" maxlength="'+this.featureType[i].length+'" class="form-control">';
-								}else{
-									featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control">';
-								}
-							}	
+							//var enumeration = this.getEnumeration(name);
+							enumeration_names.push(this.featureType[i].name);
+							featureProperties += '<div id="div-' + this.featureType[i].name + '"></div>';
 						} else {
 							if (value==null) {
 								value = "";
@@ -1525,6 +1542,35 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 		ui += '</div>';
 		
 		this.detailsTab.append(ui);
+		
+		var enums = this.getEnumerations(enumeration_names);
+		for(var i=0; i<enums.length; i++){
+			var enumeration = enums[i];
+			
+			var enum_html = '';
+			
+			if(enumeration && enumeration.items){
+				if(!has_multiple){
+					enum_html += '<select id="' + enumeration.name + '" class="form-control">';
+				}else{
+					enum_html += '<select id="' + enumeration.name + '" class="form-control multipleSelect" multiple="multiple">';
+				}
+				value = ";" + value + ";";
+				for (var j=0; j<enumeration.items.length; j++) {
+					var enum_item_name = ";"+enumeration.items[j].name+";";
+					if (value.indexOf(enum_item_name) !== -1) {
+						enum_html += '<option selected value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+					} else {
+						enum_html += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+					}
+				}
+				enum_html += 	'</select>';
+			}else{
+				enum_html += '<input id="' + enumeration.name + '" type="text" class="form-control">';
+			}	
+			$("#div-"+enumeration.name).html(enum_html);
+		}
+		
 		$.gvsigOL.controlSidebar.open();
 		this.resourceManager.registerEvents();
 
