@@ -67,11 +67,11 @@ INSTALLED_APPS = [
     'gvsigol_core',
     'gvsigol_app_dev',
     'gvsigol_plugin_edition',
-    'gvsigol_plugin_graphiccapture'
     #'gvsigol_plugin_worldwind',
     #'gvsigol_plugin_shps_folder',
     #'gvsigol_plugin_geocoding',
     #'gvsigol_plugin_etl',
+     #'gvsigol_plugin_form',
     #'gvsigol_plugin_sync',
     #'gvsigol_plugin_catastro',
     #'gvsigol_plugin_alfresco',
@@ -300,6 +300,8 @@ GVSIGOL_SERVICES = {
     'OGR2OGR_PATH': '/usr/bin/ogr2ogr',
     'GDALTOOLS_BASEPATH': '/usr/bin'
 }
+
+TILE_SIZE = 256
 
 # Must be a valid iconv encoding name. Use iconv --list on Linux to see valid names 
 SUPPORTED_ENCODINGS = [ "LATIN1", "UTF-8", "ISO-8859-15", "WINDOWS-1252"]
