@@ -266,6 +266,8 @@ GVSIGOL_SERVICES = {
     'OGR2OGR_PATH': '##OGR2OGR_PATH##',
     'GDALTOOLS_BASEPATH': '##GDALTOOLS_BASEPATH##'
 }
+                     
+TILE_SIZE = 256
 
 # Must be a valid iconv encoding name. Use iconv --list on Linux to see valid names 
 SUPPORTED_ENCODINGS = [ "LATIN1", "UTF-8", "ISO-8859-15", "WINDOWS-1252"]
