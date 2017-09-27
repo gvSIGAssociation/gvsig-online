@@ -1113,7 +1113,7 @@ editionBar.prototype.createFeatureForm = function(feature) {
 								name = name.replace("enmm_", "enm_");
 								//var enumeration = this.getEnumeration(name);
 								enumeration_names.push(name);
-								featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="multiple"></div>';
+								featureProperties += '<div id="div-' + name + '" data-type="multiple"></div>';
 							}else{
 								//var enumeration = this.getEnumeration(name);
 								enumeration_names.push(this.featureType[i].name);
@@ -1501,7 +1501,7 @@ editionBar.prototype.editFeatureForm = function(feature) {
 								name = name.replace("enmm_", "enm_");
 								//var enumeration = this.getEnumeration(name);
 								enumeration_names.push(name);
-								featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="multiple" data-value="'+value+'"></div>';
+								featureProperties += '<div id="div-' + name + '" data-type="multiple" data-value="'+value+'"></div>';
 							}else{
 								//var enumeration = this.getEnumeration(name);
 								enumeration_names.push(this.featureType[i].name);
