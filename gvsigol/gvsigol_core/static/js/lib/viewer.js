@@ -320,7 +320,13 @@ viewer.core = {
 					var wmsSource = new ol.source.TileWMS({
 						url: url,
 						visible: layerConf.visible,
-						params: {'LAYERS': layerConf.workspace + ':' + layerConf.name, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
+						params: {
+							'LAYERS': layerConf.workspace + ':' + layerConf.name, 
+							'FORMAT': 'image/png', 
+							'VERSION': '1.1.1',
+							'WIDTH': self.conf.tile_size,
+							'HEIGHT': self.conf.tile_size
+						},
 						serverType: 'geoserver'
 					});
 					wmsLayer = new ol.layer.Tile({

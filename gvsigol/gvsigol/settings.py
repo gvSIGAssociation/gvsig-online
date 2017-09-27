@@ -303,6 +303,8 @@ GVSIGOL_SERVICES = {
     'GDALTOOLS_BASEPATH': '/usr/bin'
 }
 
+TILE_SIZE = 256
+
 # Must be a valid iconv encoding name. Use iconv --list on Linux to see valid names 
 SUPPORTED_ENCODINGS = [ "LATIN1", "UTF-8", "ISO-8859-15", "WINDOWS-1252"]
 USE_DEFAULT_SUPPORTED_CRS = True
