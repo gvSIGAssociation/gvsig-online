@@ -1501,11 +1501,11 @@ editionBar.prototype.editFeatureForm = function(feature) {
 								name = name.replace("enmm_", "enm_");
 								//var enumeration = this.getEnumeration(name);
 								enumeration_names.push(name);
-								featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="multiple"></div>';
+								featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="multiple" data-value="'+value+'"></div>';
 							}else{
 								//var enumeration = this.getEnumeration(name);
 								enumeration_names.push(this.featureType[i].name);
-								featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="single"></div>';
+								featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="single" data-value="'+value+'"></div>';
 							}
 						} else {
 							if (value==null) {
@@ -1565,15 +1565,16 @@ editionBar.prototype.editFeatureForm = function(feature) {
 			
 			if(enumeration && enumeration.items){
 				var has_multiple = $("#div-"+enumeration.name).attr("data-type");
+				var enum_value = $("#div-"+enumeration.name).attr("data-value");
 				if(has_multiple!="multiple"){
 					enum_html += '<select id="' + enumeration.name + '" class="form-control">';
 				}else{
 					enum_html += '<select id="' + enumeration.name + '" class="form-control multipleSelect" multiple="multiple">';
 				}
-				value = ";" + value + ";";
+				enum_value = ";" + enum_value + ";";
 				for (var j=0; j<enumeration.items.length; j++) {
 					var enum_item_name = ";"+enumeration.items[j].name+";";
-					if (value.indexOf(enum_item_name) !== -1) {
+					if (enum_value.indexOf(enum_item_name) !== -1) {
 						enum_html += '<option selected value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
 					} else {
 						enum_html += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
