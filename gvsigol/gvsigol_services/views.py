@@ -1387,7 +1387,8 @@ def get_enumeration(request):
         enum_names = request.POST.get('enum_names')
         enum_names_array = enum_names.split(',')
         for enum_name in enum_names_array:
-            enum = Enumeration.objects.get(name__exact=enum_name)
+            enum_name2 = enum_name.replace('enmm_', 'enm_')
+            enum = Enumeration.objects.get(name__exact=enum_name2)
             enum_items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('order')
         
             items = []
