@@ -1383,24 +1383,34 @@ def enumeration_update(request, eid):
 @csrf_exempt
 def get_enumeration(request):
     if request.method == 'POST':
-        enum_name = request.POST.get('enum_name')
-        enum = Enumeration.objects.get(name__exact=enum_name)
-        enum_items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('order')
+        enumerations = []
+        enum_names = request.POST.get('enum_names')
+        enum_names_array = enum_names.split(',')
+        for enum_name in enum_names_array:
+            enum = Enumeration.objects.get(name__exact=enum_name)
+            enum_items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('order')
         
-        items = []
-        for i in enum_items:
-            item = {}
-            item['name'] = i.name
-            item['selected'] = i.selected
-            items.append(item)
+            items = []
+            for i in enum_items:
+                item = {}
+                item['name'] = i.name
+                item['selected'] = i.selected
+                items.append(item)
+            
+            enumeration = {
+                'title': enum.title,
+                'items': items, 
+                'name': enum_name
+            }
+            
+            enumerations.append(enumeration)
             
         response = {
-            'title': enum.title,
-            'items': items
+            'enumerations': enumerations
         }
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
-    
+      
       
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
