@@ -736,6 +736,7 @@ def project_get_conf(request):
             'workspaces': workspaces,
             'layerGroups': ordered_layer_groups,
             'tools': gvsigol.settings.GVSIGOL_TOOLS,
+            'tile_size': gvsigol.settings.TILE_SIZE,
             'base_layers': base_layers,
             'is_public_project': False,
             'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL']),
@@ -965,7 +966,8 @@ def public_viewer_get_conf(request):
             'base_layers': base_layers,
             'workspaces': workspaces,
             'layerGroups': ordered_layer_groups,
-            'tools': gvsigol.settings.GVSIGOL_TOOLS,            
+            'tools': gvsigol.settings.GVSIGOL_TOOLS,  
+            'tile_size': gvsigol.settings.TILE_SIZE,          
             'is_public_project': True,
             'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL']),
             'resource_manager': resource_manager
