@@ -305,13 +305,13 @@
 			deleteField(field.id);
 			
 			var data = get_date_fields();
-			create_date_select("id_time_enabled_field", data, $("#id_time_enabled_field option:selected").val());
-			create_date_select("id_time_enabled_endfield", data, $("#id_time_enabled_endfield option:selected").val());
+			create_date_select("id_time_enabled_field", data, $("#id_time_enabled_field option:selected").val(), false);
+			create_date_select("id_time_enabled_endfield", data, $("#id_time_enabled_endfield option:selected").val(), true);
 		});
 		
 		var data = get_date_fields();
-		create_date_select("id_time_enabled_field", data, $("#id_time_enabled_field option:selected").val());
-		create_date_select("id_time_enabled_endfield", data, $("#id_time_enabled_endfield option:selected").val());
+		create_date_select("id_time_enabled_field", data, $("#id_time_enabled_field option:selected").val(), false);
+		create_date_select("id_time_enabled_endfield", data, $("#id_time_enabled_endfield option:selected").val(), true);
 		
 	};
 	
@@ -344,8 +344,8 @@
 		
 
 		var data = get_date_fields();
-		create_date_select("id_time_enabled_field", data, $("#id_time_enabled_field option:selected").val());
-		create_date_select("id_time_enabled_endfield", data, $("#id_time_enabled_endfield option:selected").val());
+		create_date_select("id_time_enabled_field", data, $("#id_time_enabled_field option:selected").val(), false);
+		create_date_select("id_time_enabled_endfield", data, $("#id_time_enabled_endfield option:selected").val(), true);
 	};
 	
 	function deleteField(id) {
@@ -621,7 +621,7 @@
 		}
 	}
 	
-	function create_date_select(field, data, previousValue){
+	function create_date_select(field, data, previousValue, allow_blank){
 		var language = $("#select-language").val();
 		var name_select = $("#"+field);
 		var placeholderSelected = true;
@@ -633,7 +633,9 @@
 			return;
 		}
 		var options = [];
-		//options.push($('<option>'));
+		if(allow_blank){
+			options.push($('<option>'));
+		}
 		for (var i=0; i<data.length; i++) {
 			var attribs = {
 				value: data[i],
