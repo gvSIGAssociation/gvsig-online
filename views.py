@@ -180,7 +180,8 @@ def project_add(request):
         groups = core_utils.get_all_groups()
         if name == '':
             message = _(u'You must enter an project name')
-            return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+            base_layers = BaseLayer.objects.all()
+            return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'groups': groups, 'base_layers': base_layers, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
                 
         if not exists:
             project = None
