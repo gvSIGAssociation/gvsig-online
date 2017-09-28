@@ -268,6 +268,14 @@ class Introspect:
         
         self.cursor.execute(query)
         
+    def get_count(self, schema, layer_name):
+        query = "SELECT COUNT(*) FROM " + schema + "." + layer_name;
+        self.cursor.execute(query)
+        rows = self.cursor.fetchall()
+        count = rows[0]
+        
+        return count
+        
     def close(self):
         """
         Closes the connection. The Introspect object can't be used afterwards
