@@ -243,7 +243,7 @@ $('#submenu-layers').addClass("active");
 		
 	}
 	
-	function create_date_select(field, data, previousValue){
+	function create_date_select(field, data, previousValue, allow_blank){
 		var language = $("#select-language").val();
 		var name_select = $("#"+field);
 		var placeholderSelected = true;
@@ -255,7 +255,9 @@ $('#submenu-layers').addClass("active");
 			return;
 		}
 		var options = [];
-		//options.push($('<option>'));
+		if(allow_blank){
+			options.push($('<option>'));
+		}
 		for (var i=0; i<data.length; i++) {
 			var attribs = {
 					value: data[i]["name"],
@@ -297,8 +299,8 @@ $('#submenu-layers').addClass("active");
 		var time_enabled_field = "{{ layer.time_enabled_field }}";
 		var time_enabled_endfield = "{{ layer.time_enabled_endfield }}";
 		
-		create_date_select("id_time_enabled_field", date_fields, time_enabled_field);
-		create_date_select("id_time_enabled_endfield", date_fields, time_enabled_endfield);
+		create_date_select("id_time_enabled_field", date_fields, time_enabled_field, false);
+		create_date_select("id_time_enabled_endfield", date_fields, time_enabled_endfield, true);
 		
 		$('#id_time_resolution_year').val({{ layer.time_resolution_year }});
 		$('#id_time_resolution_month').val({{ layer.time_resolution_month }});
