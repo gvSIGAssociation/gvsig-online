@@ -219,6 +219,8 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 		var ajaxRequests = new Array();
 		var features = new Array();
 		
+		var layers_info = [];
+		
 		for (var i=0; i<queryLayers.length; i++) {
 			qLayer = queryLayers[i];
 			url = qLayer.getSource().getGetFeatureInfoUrl(
@@ -228,33 +230,55 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 				{'INFO_FORMAT': 'application/json', 'FEATURE_COUNT': '100'}
 			);
 			
+			var queryLayer = {
+		  		url: url,
+		  		query_layer: qLayer.layer_name,
+		  		workspace: qLayer.workspace
+			};
+			layers_info.push(queryLayer);
+		}
+		
+		if(layers_info.length > 0){
 			var req = $.ajax({
 				type: 'POST',
 				async: false,
 			  	url: '/gvsigonline/services/get_feature_info/',
 			  	data: {
-			  		url: url,
-			  		query_layer: qLayer.layer_name,
-			  		workspace: qLayer.workspace
+			  		layers_json: JSON.stringify(layers_info)
 			  	},
 			  	success	:function(response){
 			  		if (response.features && response.features.length > 0) {
 			  			if (response.features[0].type == 'catastro') {
-			  				features.push({
-			  					type: 'catastro',
-			  					text: response.features[0].text,
-			  					href: response.features[0].href,
-			  					layer: qLayer
-			  				});
-			  				
-			  			} else {
-			  				for (var i in response.features) {
+			  				var qLayer = null;
+			  				for (var i=0; i<queryLayers.length; i++) {
+			  					if(response.features[0].layer_name == queryLayers[i].layer_name){
+			  						qLayer =  queryLayers[i]
+			  					} 
+			  				}
+			  				if(qLayer != null){
 				  				features.push({
-				  					type: 'feature',
-				  					crs: response.crs,
-				  					feature: response.features[i],
+				  					type: 'catastro',
+				  					text: response.features[0].text,
+				  					href: response.features[0].href,
 				  					layer: qLayer
 				  				});
+			  				}
+			  			} else {
+			  				for (var i in response.features) {
+			  					var qLayer = null;
+				  				for (var j=0; j<queryLayers.length; j++) {
+				  					if(response.features[i].layer_name == queryLayers[j].layer_name){
+				  						qLayer =  queryLayers[j]
+				  					} 
+				  				}
+				  				if(qLayer != null){
+					  				features.push({
+					  					type: 'feature',
+					  					crs: response.crs,
+					  					feature: response.features[i],
+					  					layer:  qLayer
+					  				});
+				  				}
 				  			}
 			  			}	  			
 			  		}

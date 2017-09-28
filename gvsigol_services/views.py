@@ -1853,72 +1853,82 @@ def get_geom_tables(request, datastore_id):
 @csrf_exempt
 def get_feature_info(request):
     if request.method == 'POST':      
-        url = request.POST.get('url')
-        query_layer = request.POST.get('query_layer')
-        ws = request.POST.get('workspace')
+        layers_str = request.POST.get('layers_json')
+        layers_json = json.loads(layers_str)
         
-        req = requests.Session()
+        layers_array = layers_json
+        full_features = []
+        for layer_array in layers_array:
         
-        features = None
-        if query_layer == 'plg_catastro':
-            response = req.get(url, verify=False)
-            html_content = html.document_fromstring(response.text.decode('utf-8').encode('ascii'))
-            for el in html_content.xpath('//body//a'):
-                feat = {}
-                feat['type'] = 'catastro'
-                feat['text'] = el.text
-                feat['href'] = el.xpath('@href')[0]
-                features = []
-                features.append(feat)
+            url = layer_array['url']
+            query_layer = layer_array['query_layer']
+            ws = layer_array['workspace']
             
-        else:
-            if 'username' in request.session and 'password' in request.session:
-                if request.session['username'] is not None and request.session['password'] is not None:
-                    req.auth = (request.session['username'], request.session['password'])
-                    #req.auth = ('admin', 'geoserver')
-                                          
-            try:
-                w = Workspace.objects.get(name__exact=ws)
+            req = requests.Session()
+            
+            features = None
+            if query_layer == 'plg_catastro':
+                response = req.get(url, verify=False)
+                html_content = html.document_fromstring(response.text.decode('utf-8').encode('ascii'))
+                for el in html_content.xpath('//body//a'):
+                    feat = {}
+                    feat['type'] = 'catastro'
+                    feat['text'] = el.text
+                    feat['href'] = el.xpath('@href')[0]
+                    feat['query_layer'] = query_layer
+                    features = []
+                    features.append(feat)
+                
+            else:
+                if 'username' in request.session and 'password' in request.session:
+                    if request.session['username'] is not None and request.session['password'] is not None:
+                        req.auth = (request.session['username'], request.session['password'])
+                        #req.auth = ('admin', 'geoserver')
+                                              
+                try:
+                    w = Workspace.objects.get(name__exact=ws)
+                            
+                    layer = Layer.objects.get(name=query_layer, datastore__workspace__name=w.name)
+        
+                    response = req.get(url, verify=False)
+                    geojson = json.loads(response.text)
                         
-                layer = Layer.objects.get(name=query_layer, datastore__workspace__name=w.name)
-    
-                response = req.get(url, verify=False)
-                geojson = json.loads(response.text)
                     
-                
-                for i in range(0, len(geojson['features'])):
-                    fid = geojson['features'][i].get('id')
-                    resources = []
-                    if fid.__len__() > 0:
-                        fid = geojson['features'][i].get('id').split('.')[1]
-                        layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
-                        for lr in layer_resources:
-                            (type, url) = utils.get_resource_type(lr)
-                            resource = {
-                                'type': type,
-                                'url': url,
-                                'name': lr.path.split('/')[-1]
-                            }
-                            resources.append(resource)
-                    else:
-                        geojson['features'][i]['type']= 'raster'
-                    geojson['features'][i]['resources'] = resources
-                    geojson['features'][i]['all_correct'] = response.text
-                    geojson['features'][i]['feature'] = fid
+                    for i in range(0, len(geojson['features'])):
+                        fid = geojson['features'][i].get('id')
+                        resources = []
+                        if fid.__len__() > 0:
+                            fid = geojson['features'][i].get('id').split('.')[1]
+                            layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
+                            for lr in layer_resources:
+                                (type, url) = utils.get_resource_type(lr)
+                                resource = {
+                                    'type': type,
+                                    'url': url,
+                                    'name': lr.path.split('/')[-1]
+                                }
+                                resources.append(resource)
+                        else:
+                            geojson['features'][i]['type']= 'raster'
+                        geojson['features'][i]['resources'] = resources
+                        geojson['features'][i]['all_correct'] = response.text
+                        geojson['features'][i]['feature'] = fid
+                        geojson['features'][i]['layer_name'] = query_layer
+                        
+                    features = geojson['features']
                     
-                features = geojson['features']
-                
-            except Exception as e:
-                print e.message
-                logger.exception("get_feature_info")
-                response = req.get(url, verify=False)
-                geojson = json.loads(response.text)
-                for i in range(0, len(geojson['features'])):
-                    geojson['features'][i]['resources'] = []
-                features = geojson['features']
+                except Exception as e:
+                    print e.message
+                    logger.exception("get_feature_info")
+                    response = req.get(url, verify=False)
+                    geojson = json.loads(response.text)
+                    for i in range(0, len(geojson['features'])):
+                        geojson['features'][i]['resources'] = []
+                    features = geojson['features']
+            full_features = full_features + features
                 
         response = {
-            'features': features
+            'features': full_features
         }
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
