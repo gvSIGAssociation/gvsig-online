@@ -6,8 +6,11 @@
 <div class="row">
 	<div class="col-md-12">
 		<div class="box">
-
+			{% if redirect_to_layergroup %}
+			<form role="form" method="post" action="/gvsigonline/services/layer_config/{{layer_id}}/?redirect=layergroup-redirect">
+			{% else %}
 			<form role="form" method="post" action="/gvsigonline/services/layer_config/{{layer_id}}/">
+			{% endif %}
 			
 				<div class="box-header with-border">
 					<h3 class="box-title">{% trans "Configure layer" %}</h3>
