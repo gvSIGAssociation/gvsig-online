@@ -173,15 +173,15 @@
 	
 	
 	function updateLayer(data){			
-		location.href = '/gvsigonline/services/layer_update/' + data + '/';
+		location.href = '/gvsigonline/services/layer_update/' + data + '/?redirect=layergroup-redirect';
 	}
 	
 	function configLayer(data){			
-		location.href = '/gvsigonline/services/layer_config/' + data + '/';
+		location.href = '/gvsigonline/services/layer_config/' + data + '/?redirect=layergroup-redirect';
 	}
 	
 	function clearCache(data){			
-		location.href = '/gvsigonline/services/cache_clear/' + data + '/';
+		location.href = '/gvsigonline/services/cache_clear/' + data + '/?redirect=layergroup-redirect';
 	}
 	
 	function deleteLayer(data){

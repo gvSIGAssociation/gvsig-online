@@ -10,8 +10,11 @@
 			<div class="box-header with-border">
 				<h3 class="box-title">{% trans "Update layer" %}</h3>
 			</div>
-
+			{% if redirect_to_layergroup %}
+			<form role="form" method="post" action="/gvsigonline/services/layer_update/{{layer_id}}/?redirect=layergroup-redirect">
+			{% else %}
 			<form role="form" method="post" action="/gvsigonline/services/layer_update/{{layer_id}}/">
+			{% endif %}
 				{% csrf_token %}
 				<div class="box-body">										
 					{% if form.errors %}

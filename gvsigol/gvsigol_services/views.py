@@ -496,6 +496,8 @@ def layer_add(request):
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def layer_add_with_group(request, layergroup_id):
+    redirect_to_layergroup = request.GET.get('redirect')
+    
     if request.method == 'POST':
         form = LayerForm(request.POST)
         abstract = request.POST.get('md-abstract')
@@ -660,9 +662,11 @@ def layer_add_with_group(request, layergroup_id):
                         }
                     newRecord.conf = layer_conf
                     newRecord.save()
-                
-                return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
-            
+                if redirect_to_layergroup:
+                    return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id})+"?redirect=grouplayer-redirect")
+                else:
+                    return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
+       
             except Exception as e:
                 try:
                     msg = e.get_message()
@@ -686,13 +690,16 @@ def layer_add_with_group(request, layergroup_id):
     return render(request, 'layer_add.html', {
             'form': form, 
             'datastore_types': json.dumps(datastore_types),
-            'layergroup_id': layergroup_id})
+            'layergroup_id': layergroup_id,
+            'redirect_to_layergroup': redirect_to_layergroup})
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def layer_update(request, layer_id):
+    redirect_to_layergroup = request.GET.get('redirect')
+    
     if request.method == 'POST':
         layer = Layer.objects.get(id=int(layer_id))
         workspace = request.POST.get('workspace')
@@ -819,9 +826,12 @@ def layer_update(request, layer_id):
                                 
             mapservice_backend.reload_nodes()   
             
-            return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer_id}))
-        
+            if redirect_to_layergroup:
+                return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer_id})+"?redirect=grouplayer-redirect")
+            else:
+                return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer_id}))
     else:
+        
         layer = Layer.objects.get(id=int(layer_id))
         datastore = Datastore.objects.get(id=layer.datastore.id)
         workspace = Workspace.objects.get(id=datastore.workspace_id)
@@ -846,7 +856,7 @@ def layer_update(request, layer_id):
         else:
             highlight_scale = -1
             
-        return render(request, 'layer_update.html', {'layer': layer, 'highlight_scale': highlight_scale, 'workspace': workspace, 'form': form, 'layer_id': layer_id, 'date_fields': json.dumps(date_fields)})
+        return render(request, 'layer_update.html', {'layer': layer, 'highlight_scale': highlight_scale, 'workspace': workspace, 'form': form, 'layer_id': layer_id, 'date_fields': json.dumps(date_fields), 'redirect_to_layergroup': redirect_to_layergroup})
 
 def get_date_fields(layer_id):
     date_fields = []
@@ -936,6 +946,8 @@ def layer_autoconfig(layer_id):
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def layer_config(request, layer_id):
+    redirect_to_layergroup = request.GET.get('redirect')
+   
     if request.method == 'POST':
         layer = Layer.objects.get(id=int(layer_id))
         
@@ -968,8 +980,12 @@ def layer_config(request, layer_id):
         layer.conf = json_conf
         layer.save()
         
-        return redirect('layer_list')
-            
+        if redirect_to_layergroup:
+            layergroup_id = layer.layer_group.id
+            return HttpResponseRedirect(reverse('layergroup_update', kwargs={'lgid': layergroup_id}))
+        else:
+            return redirect('layer_list')
+        
     else:
         layer = Layer.objects.get(id=int(layer_id))
         fields = []
@@ -1038,7 +1054,7 @@ def layer_config(request, layer_id):
                 field['infovisible'] = False
                 fields.append(field)
     
-        return render(request, 'layer_config.html', {'layer': layer, 'layer_id': layer.id, 'fields': fields, 'fields_json': json.dumps(fields), 'available_languages': LANGUAGES, 'available_languages_array': available_languages})
+        return render(request, 'layer_config.html', {'layer': layer, 'layer_id': layer.id, 'fields': fields, 'fields_json': json.dumps(fields), 'available_languages': LANGUAGES, 'available_languages_array': available_languages, 'redirect_to_layergroup': redirect_to_layergroup})
     
 
 @require_POST
@@ -1113,27 +1129,40 @@ def layer_boundingbox_from_data(request):
     except Exception as e:
         return HttpResponseNotFound('<h1>Layer not found: {0}</h1>'.format(layer.id))
 
+
+def layer_cache_clear(layer_id):
+    layer = Layer.objects.get(id=int(layer_id)) 
+    datastore = Datastore.objects.get(id=layer.datastore.id)
+    workspace = Workspace.objects.get(id=datastore.workspace_id)
+    mapservice_backend.clearCache(workspace.name, layer)
+    mapservice_backend.reload_nodes()
+            
+    mapservice_backend.updateBoundingBoxFromData(layer)  
+    mapservice_backend.clearCache(workspace.name, layer)
+    mapservice_backend.updateThumbnail(layer, 'update')
+    
+    layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
+    mapservice_backend.createOrUpdateGeoserverLayerGroup(layer_group)
+    mapservice_backend.clearLayerGroupCache(layer_group.name)
+    
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def cache_clear(request, layer_id):
+    redirect_to_layergroup = request.GET.get('redirect')
+   
     if request.method == 'GET' or request.method == 'POST':
-        layer = Layer.objects.get(id=int(layer_id)) 
-        datastore = Datastore.objects.get(id=layer.datastore.id)
-        workspace = Workspace.objects.get(id=datastore.workspace_id)
-        mapservice_backend.clearCache(workspace.name, layer)
-        mapservice_backend.reload_nodes()
-                
-        mapservice_backend.updateBoundingBoxFromData(layer)  
-        mapservice_backend.clearCache(workspace.name, layer)
-        mapservice_backend.updateThumbnail(layer, 'update')
-        
-        layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
-        mapservice_backend.createOrUpdateGeoserverLayerGroup(layer_group)
-        mapservice_backend.clearLayerGroupCache(layer_group.name)
+        layer_cache_clear(layer_id)
         mapservice_backend.reload_nodes()
     if request.method == 'GET':
-        return redirect('layer_list')
+        if redirect_to_layergroup:
+            layer = Layer.objects.get(id=int(layer_id))
+            layergroup_id = layer.layer_group.id
+            return HttpResponseRedirect(reverse('layergroup_update', kwargs={'lgid': layergroup_id}))
+        else:
+            return redirect('layer_list')
+        
     else:
         return HttpResponse('{"response": "ok"}', content_type='application/json')
     
@@ -1143,14 +1172,22 @@ def cache_clear(request, layer_id):
 def layergroup_cache_clear(request, layergroup_id):
     if request.method == 'GET':
         layergroup = LayerGroup.objects.get(id=int(layergroup_id)) 
+        
+        layers = Layer.objects.filter(layer_group_id=int(layergroup_id))
+        for layer in layers:
+            layer_cache_clear(layer.id)
+            
         mapservice_backend.clearLayerGroupCache(layergroup.name)
         mapservice_backend.reload_nodes()
+        
         return redirect('layergroup_list')
     
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def layer_permissions_update(request, layer_id):
+    redirect_to_layergroup = request.GET.get('redirect')
+   
     if request.method == 'POST':
         assigned_read_roups = []
         for key in request.POST:
@@ -1212,12 +1249,17 @@ def layer_permissions_update(request, layer_id):
                 
         mapservice_backend.setLayerDataRules(layer, read_groups, write_groups)
         mapservice_backend.reload_nodes()
-        return redirect('layer_list')
+        
+        if redirect_to_layergroup:
+            layergroup_id = layer.layer_group.id
+            return HttpResponseRedirect(reverse('layergroup_update', kwargs={'lgid': layergroup_id}))
+        else:
+            return redirect('layer_list')
     else:
         try:
             layer = Layer.objects.get(pk=layer_id)
             groups = utils.get_all_user_groups_checked_by_layer(layer)   
-            return render_to_response('layer_permissions_add.html', {'layer_id': layer.id, 'name': layer.name, 'type': layer.type, 'groups': groups}, context_instance=RequestContext(request))
+            return render_to_response('layer_permissions_add.html', {'layer_id': layer.id, 'name': layer.name, 'type': layer.type, 'groups': groups, 'redirect_to_layergroup': redirect_to_layergroup}, context_instance=RequestContext(request))
         except Exception as e:
             return HttpResponseNotFound('<h1>Layer not found: {0}</h1>'.format(layer_id))
    
@@ -1344,10 +1386,12 @@ def layergroup_add_with_project(request, project_id):
                 if 'redirect' in request.GET:
                     redirect_var = request.GET.get('redirect')
                     if redirect_var == 'create-layer':
-                        return redirect('layer_create_with_group', layergroup_id=str(layergroup.id))
+                        return HttpResponseRedirect(reverse('layer_create_with_group', kwargs={'layergroup_id': layergroup.id})+"?redirect=grouplayer-redirect")
                     if redirect_var == 'import-layer':
-                        return redirect('layer_add_with_group', layergroup_id=str(layergroup.id))
-                    
+                        return HttpResponseRedirect(reverse('layer_add_with_group', kwargs={'layergroup_id': layergroup.id})+"?redirect=grouplayer-redirect")
+                
+                return redirect('layergroup_list')
+                   
                 
             else:
                 message = _(u'Layer group name already exists')
@@ -1399,9 +1443,9 @@ def layergroup_update(request, lgid):
             if 'redirect' in request.GET:
                 redirect_var = request.GET.get('redirect')
                 if redirect_var == 'create-layer':
-                    return redirect('layer_create_with_group', layergroup_id=str(layergroup.id))
+                    return HttpResponseRedirect(reverse('layer_create_with_group', kwargs={'layergroup_id': layergroup.id})+"?redirect=grouplayer-redirect")
                 if redirect_var == 'import-layer':
-                    return redirect('layer_add_with_group', layergroup_id=str(layergroup.id))
+                    return HttpResponseRedirect(reverse('layer_add_with_group', kwargs={'layergroup_id': layergroup.id})+"?redirect=grouplayer-redirect")
                   
             return redirect('layergroup_list')
              
@@ -1422,10 +1466,9 @@ def layergroup_update(request, lgid):
                 if 'redirect' in request.GET:
                     redirect_var = request.GET.get('redirect')
                     if redirect_var == 'create-layer':
-                        return redirect('layer_create_with_group', layergroup_id=str(layergroup.id))
+                        return HttpResponseRedirect(reverse('layer_create_with_group', kwargs={'layergroup_id': layergroup.id})+"?redirect=grouplayer-redirect")
                     if redirect_var == 'import-layer':
-                        return redirect('layer_add_with_group', layergroup_id=str(layergroup.id))
-                  
+                        return HttpResponseRedirect(reverse('layer_add_with_group', kwargs={'layergroup_id': layergroup.id})+"?redirect=grouplayer-redirect")
                 return redirect('layergroup_list')
                 
             else:
@@ -1480,6 +1523,8 @@ def layer_create(request):
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def layer_create_with_group(request, layergroup_id):
+    redirect_to_layergroup = request.GET.get('redirect') 
+   
     layer_type = "gs_vector_layer"
     if request.method == 'POST':
         
@@ -1620,8 +1665,12 @@ def layer_create_with_group(request, layergroup_id):
                 
                 layer_autoconfig(newRecord.id)
                 
-                return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
-            
+                if redirect_to_layergroup:
+                    return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id})+"?redirect=grouplayer-redirect")
+                else:
+                    return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
+
+                
             except Exception as e:
                 try:
                     msg = e.get_message()
@@ -1667,7 +1716,8 @@ def layer_create_with_group(request, layergroup_id):
             'forms': forms,
             'layer_type': layer_type,
             'enumerations': get_currentuser_enumerations(request),
-            'layergroup_id': layergroup_id
+            'layergroup_id': layergroup_id,
+            'redirect_to_layergroup': redirect_to_layergroup
         }
         return render(request, "layer_create.html", data)
         
