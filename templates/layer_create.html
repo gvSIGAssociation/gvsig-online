@@ -6,8 +6,11 @@
 <div class="row">
 	<div class="col-md-12">
 		<div class="box">
-
+			{% if redirect_to_layergroup %}
+			<form role="form" method="post" action="/gvsigonline/services/layer_create/?redirect=layergroup-redirect">
+			{% else %}
 			<form role="form" method="post" action="/gvsigonline/services/layer_create/">
+			{% endif %}
 				<div class="box-header with-border">
 					<h3 class="box-title">{% trans "Create empty layer" %}</h3>
 					<div class="box-tools pull-right">
