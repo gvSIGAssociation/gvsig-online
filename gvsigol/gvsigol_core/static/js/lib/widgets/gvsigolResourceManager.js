@@ -200,7 +200,7 @@ GvsigolResourceManager.prototype.deleteResources = function(feature) {
  * TODO.
  */
 GvsigolResourceManager.prototype.getFeatureResources = function(feature) {
-	var resources = null;
+	var resources = [];
 	if(feature.getId() != null){
 		$.ajax({
 			type: 'POST',
