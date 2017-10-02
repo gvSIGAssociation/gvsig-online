@@ -201,20 +201,22 @@ GvsigolResourceManager.prototype.deleteResources = function(feature) {
  */
 GvsigolResourceManager.prototype.getFeatureResources = function(feature) {
 	var resources = null;
-	$.ajax({
-		type: 'POST',
-		async: false,
-	  	url: '/gvsigonline/services/get_feature_resources/',
-	  	data: {
-	  		query_layer: this.selectedLayer.layer_name,
-	  		workspace: this.selectedLayer.workspace,
-	  		fid: feature.getId().split('.')[1]
-	  	},
-	  	success	:function(response){
-	  		resources = response.resources;
-	  	},
-	  	error: function(){}
-	});
+	if(feature.getId() != null){
+		$.ajax({
+			type: 'POST',
+			async: false,
+		  	url: '/gvsigonline/services/get_feature_resources/',
+		  	data: {
+		  		query_layer: this.selectedLayer.layer_name,
+		  		workspace: this.selectedLayer.workspace,
+		  		fid: feature.getId().split('.')[1]
+		  	},
+		  	success	:function(response){
+		  		resources = response.resources;
+		  	},
+		  	error: function(){}
+		});
+	}
 	
 	return resources;
 };
