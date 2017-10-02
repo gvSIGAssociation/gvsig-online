@@ -1441,8 +1441,8 @@ def get_feature_info(request):
         else:
             if 'username' in request.session and 'password' in request.session:
                 if request.session['username'] is not None and request.session['password'] is not None:
-                    #req.auth = (request.session['username'], request.session['password'])
-                    req.auth = ('admin', 'geoserver')
+                    req.auth = (request.session['username'], request.session['password'])
+                    #req.auth = ('admin', 'geoserver')
                                           
             try:
                 w = Workspace.objects.get(name__exact=ws)
