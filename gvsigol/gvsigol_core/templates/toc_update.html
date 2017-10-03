@@ -31,12 +31,15 @@
 									<i class="fa fa-ellipsis-v"></i>
 								</span>
 								<span class="text">{{g.1.title}}</span>
+								<!-- 
 								<div class="box-tools pull-right">
 									<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">
 										<i class="fa fa-plus"></i>
 									</button>
 								</div>
+								-->
 							</div>
+							<!-- 
 							<div class="box-body">
 								{% for layer in g.1.layers %}
 								<div data-name="{{layer.1.name}}" data-title="{{layer.1.title}}" data-order="{{layer.1.order}}" class="box box-default layer-item" style="border-top: none;">
@@ -54,6 +57,7 @@
 								</div>
 								{% endfor %}
 							</div>
+							-->
 						</div>
 		        	{% endfor %}
 		        	</div>
@@ -98,19 +102,20 @@
 				var groupTitle = g.dataset.title;
 				
 				var layers = {};
-				var layerList = g.children[1].children;
-				for (var j=0; j<layerList.length; j++) {
-					var l = layerList[j];
-					var layerOrder = groupOrder + (layerList.length - j);
-					var layerName = l.dataset.name;
-					var layerTitle = l.dataset.title;
-					var layer = {
-						'name': layerName,
-						'title': layerTitle,
-						'order': layerOrder
-					}
-					layers[layerName] = layer;
-				}
+				
+// 				var layerList = g.children[1].children;
+// 				for (var j=0; j<layerList.length; j++) {
+// 					var l = layerList[j];
+// 					var layerOrder = groupOrder + (layerList.length - j);
+// 					var layerName = l.dataset.name;
+// 					var layerTitle = l.dataset.title;
+// 					var layer = {
+// 						'name': layerName,
+// 						'title': layerTitle,
+// 						'order': layerOrder
+// 					}
+// 					layers[layerName] = layer;
+// 				}
 				
 				var group = {
 					'name': groupName,

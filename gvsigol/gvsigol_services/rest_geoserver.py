@@ -578,21 +578,21 @@ class Geoserver():
                 r = self.session.delete(self.service_url + "/layergroups/" + toc[toc_group].get('name') + ".json", params={}, auth=auth)
             
             group = LayerGroup.objects.get(name__exact=toc[toc_group].get('name'))
-            layers_in_group = Layer.objects.filter(layer_group_id=group.id)
-            layers_in_toc = sorted(toc[toc_group].get('layers').iteritems(), key=lambda (x, y): y['order'], reverse=True)
+            layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('order')
+            #layers_in_toc = sorted(toc[toc_group].get('layers').iteritems(), key=lambda (x, y): y['order'], reverse=True)
         
             if len(layers_in_group) > 0:   
                 layers = []
-                for tl in layers_in_toc:
-                    for l in layers_in_group:
-                        if l.name == tl[1]['name']:
-                            datastore = Datastore.objects.get(id=l.datastore.id)
-                            workspace = Workspace.objects.get(id=datastore.workspace_id)
-                            layer = {}
-                            layer["@type"] = "layer"
-                            layer["name"] = workspace.name + ":"+ l.name
-                            layer["href"] = GVSIGOL_SERVICES['URL'] + '/layers/' + l.name + '.json'
-                            layers.append(layer)
+                #for tl in layers_in_toc:
+                for l in layers_in_group:
+                #       if l.name == tl[1]['name']:
+                    datastore = Datastore.objects.get(id=l.datastore.id)
+                    workspace = Workspace.objects.get(id=datastore.workspace_id)
+                    layer = {}
+                    layer["@type"] = "layer"
+                    layer["name"] = workspace.name + ":"+ l.name
+                    layer["href"] = GVSIGOL_SERVICES['URL'] + '/layers/' + l.name + '.json'
+                    layers.append(layer)
 
                 data = {
                     "layerGroup": {

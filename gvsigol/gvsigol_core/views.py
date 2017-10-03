@@ -569,7 +569,7 @@ def project_get_conf(request):
             conf_group['groupOrder'] = toc.get(group.name).get('order')
             conf_group['groupName'] = group.name
             conf_group['cached'] = group.cached
-            layers_in_group = Layer.objects.filter(layer_group_id=group.id)
+            layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('order')
             layers = []
             user_roles = core_utils.get_group_names_by_user(request.user)
             
@@ -615,7 +615,7 @@ def project_get_conf(request):
                     
                     layer['cached'] = l.cached
                     
-                    layer['order'] = toc.get(group.name).get('layers').get(l.name).get('order')
+                    layer['order'] = int(conf_group['groupOrder']) + l.order
                     layer['single_image'] = l.single_image
                     layer['read_roles'] = read_roles
                     layer['write_roles'] = write_roles
@@ -679,7 +679,7 @@ def project_get_conf(request):
                     workspaces.append(w)
             
             if len(layers) > 0:   
-                ordered_layers = sorted(layers, key=itemgetter('order'), reverse=True)
+                ordered_layers = sorted(layers, key=itemgetter('order'), reverse=False)
                 conf_group['layers'] = ordered_layers
                 layer_groups.append(conf_group)
         
