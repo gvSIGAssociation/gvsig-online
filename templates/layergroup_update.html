@@ -11,7 +11,7 @@
 					<div class="box-header with-border">
 						<h3 class="box-title">{% trans "Update layer group" %}</h3>
 						<div class="box-tools pull-right">
-							<button id="save_button" type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+							<div id="save_button" type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</div>					
 						</div>
 					</div>
 
@@ -61,7 +61,7 @@
 								</label>
 							</div>
 						</div>
-
+						<input type="hidden" name="toc" id="toc" value="">
 					</div>	
 				</form>		
 			</div>
@@ -84,9 +84,21 @@
 				<div class="box-body">					
 					<div id="toc" class="toc">
 						{% for layer in layers %}
-						<div data-name="{{layer.1.name}}" data-title="{{layer.title}}" data-order="{{layer.order}}" class="box box-default layer-item" style="border-top: none;">
+						<div data-name="{{layer.name}}" data-title="{{layer.title}}" data-order="{{layer.order}}" class="box box-default collapsed-box toc-layergroup layer-item" style="border-top: none;">
 							<div class="box-header">
-								<span class="text">{{layer.title}}</span>
+								<div class="handle">
+									<span class="" style="margin-right: 20px;"> 
+										<i class="fa fa-ellipsis-v"></i>
+										<i class="fa fa-ellipsis-v"></i>
+									</span>
+									<span class="text">{{g.1.title}}</span>
+									<div class="box-tools pull-right">
+										<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">
+											<i class="fa fa-plus"></i>
+										</button>
+									</div>
+									<span class="text">{{layer.title}}</span>
+								</div>
 								<div class="box-tools box-tools-buttons pull-right">
 									<button type="button" data-id="{{layer.id}}" name="button-update-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success"><i class="fa fa-edit"></i></button>
 									{% if layer.type == 'v_PostGIS' %}
@@ -171,6 +183,21 @@
 		});
 	});
 	
+	$('#save_button').click(function() {
+		$('#toc').val("");
+		var isFirst = true;
+		$(".layer-item").each(function(){
+			var value = $(this).attr("data-name");
+			if(!isFirst){
+				$('#toc').val($('#toc').val()+',');
+			}
+			$('#toc').val($('#toc').val()+value);
+			
+			isFirst = false;
+		});
+		$('#layer-group-form').submit();
+	});
+	
 	
 	function updateLayer(data){			
 		location.href = '/gvsigonline/services/layer_update/' + data + '/?redirect=layergroup-redirect';
@@ -220,6 +247,13 @@
 			} else if (this.name == "button-delete-layer"){
 		        deleteLayer(data);   
 		    }
+		});
+		
+		$(".toc").sortable({
+			placeholder: "sort-highlight",
+			handle: ".handle",
+			forcePlaceholderSize: true,
+			zIndex: 999999
 		});
 	});
 	

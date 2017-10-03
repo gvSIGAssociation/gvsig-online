@@ -1406,13 +1406,48 @@ def layergroup_add_with_project(request, project_id):
     else:
         return render_to_response('layergroup_add.html', {'project_id': project_id}, context_instance=RequestContext(request))
     
+
+def layergroup_mapserver_toc(group, toc_string):
+    if toc_string != None or toc_string != '':
+        toc_array = toc_string.split(',')
+        layers_array = {}
+        i=0
+        
+        for toc_entry in toc_array:
+            layers = Layer.objects.filter(name=toc_entry,layer_group_id=group.id)
+            for layer in layers:
+                layer_json = {
+                        'name': layer.name,
+                        'title': layer.title,
+                        'order': 1000+i
+                    }
+                layer.order = i
+                layer.save()
+                i = i + 1
+                layers_array[layer.name] = layer_json
+            
+        toc_object = {
+            'name': group.name,
+            'title': group.title,
+            'order': 1000,
+            'layers': layers_array
+            
+        }
+        
+        toc={}
+        toc[group.name] = toc_object
+            
+        mapservice_backend.createOrUpdateSortedGeoserverLayerGroup(toc)
+        mapservice_backend.reload_nodes()
     
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def layergroup_update(request, lgid):
     if request.method == 'POST':
         name = request.POST.get('layergroup_name')
         title = request.POST.get('layergroup_title')
+        toc = request.POST.get('toc')
         
         cached = False
         if 'cached' in request.POST:
@@ -1440,6 +1475,8 @@ def layergroup_update(request, lgid):
             core_utils.toc_update_layer_group(layergroup, old_name, name)
             mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
             mapservice_backend.reload_nodes()
+            
+            layergroup_mapserver_toc(layergroup, toc)
             if 'redirect' in request.GET:
                 redirect_var = request.GET.get('redirect')
                 if redirect_var == 'create-layer':
@@ -1463,6 +1500,7 @@ def layergroup_update(request, lgid):
                 mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
                 mapservice_backend.reload_nodes()
                 
+                layergroup_mapserver_toc(layergroup, toc)
                 if 'redirect' in request.GET:
                     redirect_var = request.GET.get('redirect')
                     if redirect_var == 'create-layer':
@@ -1477,7 +1515,7 @@ def layergroup_update(request, lgid):
 
     else:
         layergroup = LayerGroup.objects.get(id=int(lgid))
-        layers = Layer.objects.filter(layer_group_id=layergroup.id)
+        layers = Layer.objects.filter(layer_group_id=layergroup.id).order_by('order')
         
         return render_to_response('layergroup_update.html', {'lgid': lgid, 'layergroup': layergroup, 'layers': layers}, context_instance=RequestContext(request))
     
@@ -1926,7 +1964,7 @@ def get_feature_info(request):
                         auth2 = (request.session['username'], request.session['password'])
                         #auth2 = ('admin', 'geoserver')
                         
-            rs.append( grequests.get(url, auth=auth2))
+            rs.append(grequests.get(url, auth=auth2, verify=False))
         aux_rs = grequests.map(rs)
         
         results = []

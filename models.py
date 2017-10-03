@@ -88,6 +88,7 @@ class Layer(models.Model):
     time_default_value = models.CharField(max_length=150, null=True, blank=True)
     highlight = models.BooleanField(default=False)
     highlight_scale = models.FloatField(null=True, blank=True)
+    order = models.IntegerField(default=100)
     created_by = models.CharField(max_length=100)
     thumbnail = models.ImageField(upload_to='thumbnails', default=settings.STATIC_URL + 'img/no_thumbnail.jpg', null=True, blank=True)
     conf = models.TextField(null=True, blank=True)
