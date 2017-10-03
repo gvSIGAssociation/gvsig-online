@@ -837,27 +837,42 @@ def layer_boundingbox_from_data(request):
     except Exception as e:
         return HttpResponseNotFound('<h1>Layer not found: {0}</h1>'.format(layer.id))
 
+
+def layer_cache_clear(layer_id):
+    layer = Layer.objects.get(id=int(layer_id)) 
+    datastore = Datastore.objects.get(id=layer.datastore.id)
+    workspace = Workspace.objects.get(id=datastore.workspace_id)
+    mapservice_backend.clearCache(workspace.name, layer)
+    mapservice_backend.reload_nodes()
+            
+    mapservice_backend.updateBoundingBoxFromData(layer)  
+    mapservice_backend.clearCache(workspace.name, layer)
+    mapservice_backend.updateThumbnail(layer, 'update')
+    
+    layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
+    mapservice_backend.createOrUpdateGeoserverLayerGroup(layer_group)
+    mapservice_backend.clearLayerGroupCache(layer_group.name)
+    
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def cache_clear(request, layer_id):
+    redirect_to_layergroup = request.GET.get('redirect')
+   
+    if request.method == 'GET' or request.method == 'POST':
+        layer_cache_clear(layer_id)
+        mapservice_backend.reload_nodes()
     if request.method == 'GET':
-        layer = Layer.objects.get(id=int(layer_id)) 
-        datastore = Datastore.objects.get(id=layer.datastore.id)
-        workspace = Workspace.objects.get(id=datastore.workspace_id)
-        mapservice_backend.clearCache(workspace.name, layer)
-        mapservice_backend.reload_nodes()
+        if redirect_to_layergroup:
+            layer = Layer.objects.get(id=int(layer_id))
+            layergroup_id = layer.layer_group.id
+            return HttpResponseRedirect(reverse('layergroup_update', kwargs={'lgid': layergroup_id}))
+        else:
+            return redirect('layer_list')
         
-        mapservice_backend.updateBoundingBoxFromData(layer)  
-        mapservice_backend.clearCache(workspace.name, layer)
-        mapservice_backend.updateThumbnail(layer, 'update')
-        
-        layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
-        mapservice_backend.createOrUpdateGeoserverLayerGroup(layer_group)
-        mapservice_backend.clearLayerGroupCache(layer_group.name)
-        mapservice_backend.reload_nodes()
-        
-        return redirect('layer_list')
+    else:
+        return HttpResponse('{"response": "ok"}', content_type='application/json')
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
@@ -865,10 +880,16 @@ def cache_clear(request, layer_id):
 def layergroup_cache_clear(request, layergroup_id):
     if request.method == 'GET':
         layergroup = LayerGroup.objects.get(id=int(layergroup_id)) 
+        
+        layers = Layer.objects.filter(layer_group_id=int(layergroup_id))
+        for layer in layers:
+            layer_cache_clear(layer.id)
+            
         mapservice_backend.clearLayerGroupCache(layergroup.name)
         mapservice_backend.reload_nodes()
+        
         return redirect('layergroup_list')
-    
+   
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
