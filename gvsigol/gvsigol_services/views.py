@@ -1466,7 +1466,7 @@ def get_feature_info(request):
                         auth2 = (request.session['username'], request.session['password'])
                         #auth2 = ('admin', 'geoserver')
                         
-            rs.append(grequests.get(url, auth=auth2))
+            rs.append(grequests.get(url, auth=auth2, verify=False))
         aux_rs = grequests.map(rs)
         
         results = []
