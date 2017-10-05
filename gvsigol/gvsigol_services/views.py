@@ -2019,10 +2019,10 @@ def get_feature_info(request):
                                 fid = geojson['features'][i].get('id').split('.')[1]
                                 layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
                                 for lr in layer_resources:
-                                    (type, url) = utils.get_resource_type(lr)
+                                    (type, rsurl) = utils.get_resource_type(lr)
                                     resource = {
                                         'type': type,
-                                        'url': resultset['url'],
+                                        'url': rsurl,
                                         'name': lr.path.split('/')[-1]
                                     }
                                     resources.append(resource)
