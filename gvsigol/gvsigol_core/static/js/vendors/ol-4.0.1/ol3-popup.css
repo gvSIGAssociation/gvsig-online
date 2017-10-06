@@ -35,7 +35,7 @@
 .ol-popup-content {
     min-width: 170px;
     max-height: 200px;
-    overflow-x: auto;
+    overflow-x: hidden;
 }
 
 .ol-popup-closer {
