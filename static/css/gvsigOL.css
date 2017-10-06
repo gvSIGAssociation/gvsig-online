@@ -4820,3 +4820,8 @@ table.dataTable thead th span.subname, table.dataTable tfoot th span.subname{
 	width: 33%;
     padding: 2px;
 }
+
+
+table.table.dataTable tbody tr td{
+    word-break: break-word;
+}
