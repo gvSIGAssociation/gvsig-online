@@ -4775,3 +4775,8 @@ table.dataTable thead th span.subname, table.dataTable tfoot th span.subname{
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
+
+table.table.dataTable tbody tr td{
+    word-break: break-word;
+}
