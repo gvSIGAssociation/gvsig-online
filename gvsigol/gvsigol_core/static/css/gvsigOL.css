@@ -4778,5 +4778,5 @@ table.dataTable thead th span.subname, table.dataTable tfoot th span.subname{
 
 
 table.table.dataTable tbody tr td{
-    word-break: break-word;
+    word-break: break-all;
 }
