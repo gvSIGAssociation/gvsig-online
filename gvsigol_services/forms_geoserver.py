@@ -170,7 +170,7 @@ class CreateFeatureTypeForm(forms.Form):
             
         else:
             qs = Datastore.objects.filter(type="v_PostGIS").filter(created_by__exact=user.username).order_by('name')
-            qs_lg = LayerGroup.objects.filter(created_by__exact=user.username).order_by('name')
+            qs_lg = (LayerGroup.objects.filter(created_by__exact=user.username) | LayerGroup.objects.filter(name='__default__')).order_by('name')
             
         self.fields["datastore"] = forms.ModelChoiceField(
             label=_(u'Datastore'), required=True,
