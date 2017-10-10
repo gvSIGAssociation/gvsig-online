@@ -678,7 +678,8 @@ def layer_add_with_group(request, layergroup_id):
         form = LayerForm()
         if not request.user.is_superuser:
             form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
-            form.fields['layer_group'].queryset = LayerGroup.objects.filter(created_by__exact=request.user.username)
+            form.fields['layer_group'].queryset =(LayerGroup.objects.filter(created_by__exact=request.user.username) | LayerGroup.objects.filter(name='__default__')).order_by('name')
+            
         
     datastore_types = {}
     types = {}
