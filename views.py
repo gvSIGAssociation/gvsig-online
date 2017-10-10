@@ -146,6 +146,7 @@ def project_add(request):
         longitude = request.POST.get('center-lon')
         extent = request.POST.get('extent')
         zoom = request.POST.get('zoom')
+        toc = request.POST.get('toc_value')
         
         is_public = False
         if 'is_public' in request.POST:
@@ -194,7 +195,7 @@ def project_add(request):
                     center_lon = longitude,
                     zoom = int(float(zoom)),
                     extent = extent,
-                    toc_order = core_utils.get_json_toc(assigned_layergroups),
+                    toc_order = toc,
                     created_by = request.user.username,
                     is_public = is_public
                 )
@@ -206,7 +207,7 @@ def project_add(request):
                     center_lon = longitude,
                     zoom = int(float(zoom)),
                     extent = extent,
-                    toc_order = core_utils.get_json_toc(assigned_layergroups),
+                    toc_order = toc,
                     created_by = request.user.username,
                     is_public = is_public
                 )
@@ -296,6 +297,7 @@ def project_update(request, pid):
         longitude = request.POST.get('center-lon')
         extent = request.POST.get('extent')
         zoom = request.POST.get('zoom')
+        toc = request.POST.get('toc_value')
         
         is_public = False
         if 'is_public' in request.POST:
@@ -349,6 +351,7 @@ def project_update(request, pid):
             project.zoom = int(float(zoom))
             project.extent = extent
             project.is_public = is_public
+            project.toc_order = toc
             
             if has_image:
                 project.image = request.FILES['project-image']
@@ -417,6 +420,7 @@ def project_update(request, pid):
                 project.zoom = int(float(zoom))
                 project.extent = extent
                 project.is_public = is_public
+                project.toc_order = toc
                 
                 if has_image:
                     project.image = request.FILES['project-image']
@@ -493,7 +497,15 @@ def project_update(request, pid):
                     selected_base_layers.append(base_layer_project.baselayer.id)
                     if base_layer_project.is_default:
                         selected_base_layer = base_layer_project.baselayer.id
-                return render_to_response('project_update.html', {'message': message, 'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'base_layers': base_layers, 'selected_base_layers': selected_base_layers, 'selected_base_layer': selected_base_layer,  'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+                        
+                toc = json.loads(project.toc_order)
+                for g in toc:
+                    group = toc.get(g)
+                    ordered_layers = sorted(group.get('layers').iteritems(), key=lambda (x, y): y['order'], reverse=True)
+                    group['layers'] = ordered_layers
+                ordered_toc = sorted(toc.iteritems(), key=lambda (x, y): y['order'], reverse=True)
+        
+                return render_to_response('project_update.html', {'message': message, 'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'base_layers': base_layers, 'selected_base_layers': selected_base_layers, 'selected_base_layer': selected_base_layer,  'has_geocoding_plugin': has_geocoding_plugin, 'toc': ordered_toc}, context_instance=RequestContext(request))
                 
         
         
@@ -510,7 +522,15 @@ def project_update(request, pid):
             selected_base_layers.append(base_layer_project.baselayer.id)
             if base_layer_project.is_default:
                 selected_base_layer = base_layer_project.baselayer.id
-        return render_to_response('project_update.html', {'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'base_layers': base_layers, 'selected_base_layers': selected_base_layers,'selected_base_layer': selected_base_layer, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+                
+        toc = json.loads(project.toc_order)
+        for g in toc:
+            group = toc.get(g)
+            ordered_layers = sorted(group.get('layers').iteritems(), key=lambda (x, y): y['order'], reverse=True)
+            group['layers'] = ordered_layers
+        ordered_toc = sorted(toc.iteritems(), key=lambda (x, y): y['order'], reverse=True)
+        
+        return render_to_response('project_update.html', {'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'base_layers': base_layers, 'selected_base_layers': selected_base_layers,'selected_base_layer': selected_base_layer, 'has_geocoding_plugin': has_geocoding_plugin, 'toc': ordered_toc}, context_instance=RequestContext(request))
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
