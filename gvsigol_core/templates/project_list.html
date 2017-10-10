@@ -23,7 +23,7 @@
 							<th>{% trans "Description" %}</th>
 							<th>{% trans "Is public?" %}</th>
 							<th></th>
-							<th></th>
+							<!-- <th></th> -->
 							<th></th>
 						</tr>
 					</thead>
@@ -35,7 +35,7 @@
 							<td>{{ project.description }}</td>
 							<td>{{ project.is_public }}</td>
 							<td></td>
-							<td></td>
+							<!--<td></td>-->
 							<td></td>
 						</tr>
 						{% endfor %}
@@ -103,12 +103,12 @@ $(document).ready(function() {
 	        "targets": -1,
 	        "data": null,
 	        "defaultContent": '<button type="button" name="button-delete-project" data-toggle="modal" data-target="#modal-delete-project" data-placement="bottom" title="' + '{% trans "Delete project" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+// 	    },{
+// 	        "targets": -2,
+// 	        "data": null,
+// 	        "defaultContent": '<button type="button" name="button-update-toc" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "TOC order" %}' + '" class="btn btn-warning"><i class="fa fa-sort-numeric-asc"></i></button>'
 	    },{
 	        "targets": -2,
-	        "data": null,
-	        "defaultContent": '<button type="button" name="button-update-toc" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "TOC order" %}' + '" class="btn btn-warning"><i class="fa fa-sort-numeric-asc"></i></button>'
-	    },{
-	        "targets": -3,
 	        "data": null,
 	        "defaultContent": '<button type="button" name="button-update-project" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update project" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
 	    }],
