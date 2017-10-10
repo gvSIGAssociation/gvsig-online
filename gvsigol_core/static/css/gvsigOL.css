@@ -4825,3 +4825,9 @@ table.dataTable thead th span.subname, table.dataTable tfoot th span.subname{
 table.table.dataTable tbody tr td{
     word-break: break-all;
 }
+
+.box-body.toc-layer-update{
+    height: 530px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
