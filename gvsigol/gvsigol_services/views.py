@@ -1958,7 +1958,7 @@ def get_feature_info(request):
             
             print url
             
-            auth = None
+            auth2 = None
             if query_layer != 'plg_catastro':
                 if 'username' in request.session and 'password' in request.session:
                     if request.session['username'] is not None and request.session['password'] is not None:
