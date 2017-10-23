@@ -43,6 +43,14 @@ var TextSymbolizer = function(rule, layerName, options, utils) {
 	this.filterCode = null;
 	this.layer = null;
 	this.layerName = layerName;
+	this.AnchorPointX = 0.5;
+	if(options.anchor_point_x != null && options.anchor_point_x != ""){
+		this.AnchorPointX = options.anchor_point_x;
+	}
+	this.AnchorPointY = -1.5;
+	if(options.anchor_point_y != null && options.anchor_point_y != ""){
+		this.AnchorPointY = options.anchor_point_y;
+	}
 	this.codemirror = null;
 	
 	this.expressions = new Array();
@@ -92,35 +100,46 @@ TextSymbolizer.prototype.getTableUI = function() {
 	ui += 		'</span>';
 	ui += 	'</td>';
 	ui += 	'<td id="label-preview"><svg id="label-preview-' + this.id + '" class="label-preview-svg"></svg></td>';	
-	ui += 	'<td><a class="edit-label-link" data-labelid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
-	ui += 	'<td><a class="delete-label-link" data-labelid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
+	ui += 	'<td><a class="edit-label-link-' + this.id + '" data-labelid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
+	ui += 	'<td><a class="delete-label-link-' + this.id + '" data-labelid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
 	ui += '</tr>';	
 	
 	return ui;
 };
 
-TextSymbolizer.prototype.getTabMenu = function() {
+TextSymbolizer.prototype.getTabMenu = function(alwaysAllowed) {
 	var ui = '';
-	ui += '<li id="general-tab" class="active"><a href="#label-general-tab" data-toggle="tab">' + gettext('General') + '</a></li>';
+	if(alwaysAllowed){
+		this.is_actived = true;
+	}
+	if(!alwaysAllowed){
+		ui += '<li id="general-tab" class="active"><a href="#label-general-tab" data-toggle="tab">' + gettext('General') + '</a></li>';
+	}
 	ui += '<li id="font-tab"><a href="#label-font-tab" data-toggle="tab">' + gettext('Font') + '</a></li>';
 	ui += '<li id="halo-tab"><a href="#label-halo-tab" data-toggle="tab">' + gettext('Halo') + '</a></li>';
-	ui += '<li id="filter-tab"><a href="#label-filter-tab" data-toggle="tab">' + gettext('Filter') + '</a></li>';
+	if(!alwaysAllowed){
+		ui += '<li id="filter-tab"><a href="#label-filter-tab" data-toggle="tab">' + gettext('Filter') + '</a></li>';
+	}
 	return ui;	
 };
 
 
-TextSymbolizer.prototype.getGeneralTabUI = function() {
+TextSymbolizer.prototype.getGeneralTabUI = function(alwaysAllowed) {
 	var ui = '';
 	ui += '<div class="tab-pane active" id="label-general-tab">';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	if(this.is_actived){
-		ui += 			'<input id="label-has-label" type="checkbox" class="has-label" checked>   ' + gettext('Has label') + '</input>';
+	if(!alwaysAllowed){
+		ui += 	'<div class="row">';
+		ui += 		'<div class="col-md-12 form-group">';
+		if(this.is_actived){
+			ui += 			'<input id="label-has-label" type="checkbox" class="has-label" checked>   ' + gettext('Has label') + '</input>';
+		}else{
+			ui += 			'<input id="label-has-label" type="checkbox" class="has-label">   ' + gettext('Has label') + '</input>';
+		}
+		ui += 		'</div>';
+		ui += 	'</div>';
 	}else{
-		ui += 			'<input id="label-has-label" type="checkbox" class="has-label">   ' + gettext('Has label') + '</input>';
+		this.is_actived = true;
 	}
-	ui += 		'</div>';
-	ui += 	'</div>';
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
 	ui += 			'<label>' + gettext( 'Rule title') + '</label>';
@@ -144,7 +163,7 @@ TextSymbolizer.prototype.getGeneralTabUI = function() {
 };
 
 
-TextSymbolizer.prototype.getFontTabUI = function() {
+TextSymbolizer.prototype.getFontTabUI = function(isClusteredPoint) {
 	
 	var language = $("#select-language").val();
 	var fields = this.utils.getAlphanumericFields();
@@ -158,25 +177,30 @@ TextSymbolizer.prototype.getFontTabUI = function() {
 	ui += 		'<div class="col-md-12 form-group">';
 	ui += 			'<label>' + gettext('Label field') + '</label>';
 	ui += 			'<select id="label-label" class="form-control">';
-	for (var i=0; i < fields.length; i++) {
-		if (this.label == '') {
-			this.label = fields[i].name;
-		}
-		var field_name = fields[i].name;
-		var field_name_trans = fields[i]["title-"+language];
-		if(!field_name_trans){
-			field_name_trans = field_name;
-		}
-		
-		if (fields[i].name == this.label) {
-			ui += '<option value="' + field_name + '" selected>' + field_name_trans + '</option>';
-		} else {
-			ui += '<option value="' + field_name + '">' + field_name_trans + '</option>';
-		}		
-	}	
+	if(!isClusteredPoint){
+		for (var i=0; i < fields.length; i++) {
+			if (this.label == '') {
+				this.label = fields[i].name;
+			}
+			var field_name = fields[i].name;
+			var field_name_trans = fields[i]["title-"+language];
+			if(!field_name_trans){
+				field_name_trans = field_name;
+			}
+			
+			if (fields[i].name == this.label) {
+				ui += '<option value="' + field_name + '" selected>' + field_name_trans + '</option>';
+			} else {
+				ui += '<option value="' + field_name + '">' + field_name_trans + '</option>';
+			}		
+		}	
+	}else{
+		ui += '<option value="count" selected>' + gettext('Count features') + '</option>';
+	}
 	ui += 			'</select>';
 	ui += 		'</div>';
 	ui += 	'</div>';
+	
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
 	ui += 			'<label>' + gettext('Font family') + '</label>';
@@ -761,7 +785,7 @@ TextSymbolizer.prototype.registerEvents = function() {
 					type: 'expression',
 					field: filter.field,
 					operation: filter.operation,
-					value: filter.value
+					value: ""+filter.value
 				};
 				self.expressions.push(expression);
 				$('#label-list').append(self.addExpression(expression));
@@ -994,6 +1018,8 @@ TextSymbolizer.prototype.toJSON = function(){
 		halo_radius: this.halo_radius,
 		minscale: minscale,
 		maxscale: maxscale,
+		anchor_point_x: this.AnchorPointX,
+		anchor_point_y: this.AnchorPointY,
 		filter : filter_cql,
 		order: this.order
 	};

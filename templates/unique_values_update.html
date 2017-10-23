@@ -252,7 +252,7 @@ $(document).ready(function() {
 	});
 	map.addLayer(wmsLayer);
 	
-	var utils = new SymbologyUtils(map, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
+	var utils = new SymbologyUtils(map, layerId, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
 	var uniqueValues = new UniqueValues(featureType, layerName, utils, previewUrl);
 	uniqueValues.loadRules(rules);
 	$(".delete-rule").on('click', function(e){

@@ -49,6 +49,8 @@ def build_sld(layer, style):
     named_layer = style_layer_descriptor.create_namedlayer(layer.name)
     user_style = named_layer.create_userstyle()
     feature_type_style = user_style.create_featuretypestyle()
+    #if style.type == 'CP':
+    #    tr = feature_type_style.create_transformation()
     
     rules = ModelRule.objects.filter(style=style)
     for r in rules:
@@ -57,6 +59,39 @@ def build_sld(layer, style):
         create_rule(r, symbolizers, feature_type_style, field_geom)
     
     sld_body = style_layer_descriptor.as_sld(True)
+    if style.type == 'CP':
+        transform = ''\
+        '                <sld:Transformation>'\
+        '                    <ogc:Function name="gs:PointStacker">'\
+        '                        <ogc:Function name="parameter">'\
+        '                            <ogc:Literal>data</ogc:Literal>'\
+        '                        </ogc:Function>'\
+        '                        <ogc:Function name="parameter">'\
+        '                            <ogc:Literal>cellSize</ogc:Literal>'\
+        '                            <ogc:Literal>30</ogc:Literal>'\
+        '                        </ogc:Function>'\
+        '                        <ogc:Function name="parameter">'\
+        '                            <ogc:Literal>outputBBOX</ogc:Literal>'\
+        '                            <ogc:Function name="env">'\
+        '                                <ogc:Literal>wms_bbox</ogc:Literal>'\
+        '                            </ogc:Function>'\
+        '                        </ogc:Function>'\
+        '                        <ogc:Function name="parameter">'\
+        '                            <ogc:Literal>outputWidth</ogc:Literal>'\
+        '                            <ogc:Function name="env">'\
+        '                                <ogc:Literal>wms_width</ogc:Literal>'\
+        '                            </ogc:Function>'\
+        '                        </ogc:Function>'\
+        '                        <ogc:Function name="parameter">'\
+        '                            <ogc:Literal>outputHeight</ogc:Literal>'\
+        '                            <ogc:Function name="env">'\
+        '                               <ogc:Literal>wms_height</ogc:Literal>'\
+        '                            </ogc:Function>'\
+        '                        </ogc:Function>'\
+        '                    </ogc:Function>'\
+        '               </sld:Transformation>'
+        sld_body = sld_body.replace('<sld:FeatureTypeStyle>', '<sld:FeatureTypeStyle>'+transform)
+    
     
     return sld_body
 
@@ -174,7 +209,7 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
         f = json.loads(r.filter)
         if isinstance(f, list):
             if len(f) == 1:
-                rule.create_filter(f[0].get('field'), get_operation_symbol(f[0].get('operation')), f[0].get('value'))
+                rule.create_filter(f[0].get('field'), get_operation_symbol(f[0].get('operation')), str(f[0].get('value')))
                 
             elif len(f) >= 3:
                 rule.Filter = build_complex_filter(f, rule)
@@ -199,9 +234,6 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
         if hasattr(s, 'marksymbolizer'):
             symbolizer = PointSymbolizer(rule)
             gph = Graphic(symbolizer)
-            gph.Size = str(s.marksymbolizer.size)
-            gph.Opacity = str(s.marksymbolizer.opacity)
-            gph.Rotation = str(s.marksymbolizer.rotation)
             mrk = Mark(gph)
             mrk.WellKnownName = s.marksymbolizer.well_known_name
             fill = Fill(mrk)
@@ -213,6 +245,9 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
             stroke.create_cssparameter('stroke-opacity', str(s.marksymbolizer.stroke_opacity))
             if str(s.marksymbolizer.stroke_dash_array) != 'none':
                 stroke.create_cssparameter('stroke-dasharray', s.marksymbolizer.stroke_dash_array)
+            gph.Opacity = str(s.marksymbolizer.opacity)
+            gph.Size = str(s.marksymbolizer.size)
+            gph.Rotation = str(s.marksymbolizer.rotation)
         
         elif hasattr(s, 'linesymbolizer'):
             symbolizer = LineSymbolizer(rule)
@@ -260,9 +295,7 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
             font.create_cssparameter('font-size', str(s.textsymbolizer.font_size))
             font.create_cssparameter('font-style', s.textsymbolizer.font_style)
             font.create_cssparameter('font-weight', str(s.textsymbolizer.font_weight))
-            fill = Fill(symbolizer)
-            fill.create_cssparameter('fill', s.textsymbolizer.fill)
-            fill.create_cssparameter('fill-opacity', str(s.textsymbolizer.fill_opacity))
+
             if geom_field['field_type'] == 'MULTILINESTRING' or geom_field['field_type'] == 'LINESTRING':
                 labelplacement = LabelPlacement(symbolizer)
                 lineplacement = LinePlacement(labelplacement)
@@ -271,14 +304,17 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
                 labelplacement = LabelPlacement(symbolizer)
                 pointplacement = PointPlacement(labelplacement)
                 anchorpoint = AnchorPoint(pointplacement)
-                anchorpoint.AnchorPointX = str(0.5)
-                anchorpoint.AnchorPointY = str(-1.5)
-            
+                anchorpoint.AnchorPointX = str(s.textsymbolizer.anchor_point_x)
+                anchorpoint.AnchorPointY = str(s.textsymbolizer.anchor_point_y)
             halo = Halo(symbolizer)
             halo.Radius = str(s.textsymbolizer.halo_radius)
             halo_fill = Fill(halo)
             halo_fill.create_cssparameter('fill', s.textsymbolizer.halo_fill)
             halo_fill.create_cssparameter('fill-opacity', str(s.textsymbolizer.halo_fill_opacity))
+            fill = Fill(symbolizer)
+            fill.create_cssparameter('fill', s.textsymbolizer.fill)
+            fill.create_cssparameter('fill-opacity', str(s.textsymbolizer.fill_opacity))
+
             symbolizer.create_vendoroption('conflictResolution', 'true')
             symbolizer.create_vendoroption('autoWrap', '120')
             symbolizer.create_vendoroption('spaceAround', '0')

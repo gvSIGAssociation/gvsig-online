@@ -185,12 +185,73 @@ PolygonSymbolizer.prototype.registerEvents = function() {
 };
 
 PolygonSymbolizer.prototype.updatePreview = function() {	
-	var sldBody = this.toSLDBody();
-	var url = this.utils.getPreviewUrl() + '&SLD_BODY=' + encodeURIComponent(sldBody);
-	var ui = '<img id="symbolizer-preview-' + this.id + '" src="' + url + '" class="symbolizer-preview-' + this.id + '"></img>';
-	$("#symbolizer-preview-div-" + this.id).empty();
-	$("#symbolizer-preview-div-" + this.id).append(ui);
+	var sldBody = this.sld();
+	if(sldBody != null){
+		var url = this.utils.getPreviewUrl() + '&SLD_BODY=' + encodeURIComponent(sldBody);
+		var ui = '<img id="symbolizer-preview-' + this.id + '" src="' + url + '" class="symbolizer-preview-' + this.id + '"></img>';
+		$("#symbolizer-preview-div-" + this.id).empty();
+		$("#symbolizer-preview-div-" + this.id).append(ui);
+	}
 };
+
+PolygonSymbolizer.prototype.sld = function() {
+	var rules = new Array();
+	
+	var style = {
+			name: 'polygon',
+			title: 'polygon',
+			rules: rules
+	};
+	
+	var l = {
+			type: this.type,
+			json: this.toJSON(),
+			order: 1
+	};
+	var options = {
+			"id" : 1,
+			"name" : 'polygon',
+			"title" : 'polygon',
+			"abstract" : "",
+			"order" :  1
+	}
+	var auxrule = new Rule(1, 'polygon', 'polygon', options, this.utils);
+	var rule = {
+			rule: auxrule.getObject(),
+			symbolizers: [l]
+	};
+	style.rules.push(rule);
+	
+	var layerId = this.utils.getLayerId();
+	
+	$.ajax({
+		type: "POST",
+		async: false,
+		url: "/gvsigonline/symbology/create_sld/",
+		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		data: {
+			type: 'EX',
+			layer_id: layerId,
+			style_data: JSON.stringify(style)
+		},
+		success: function(response){
+			if (response.success) {
+				return response.sld;
+			} else {
+				alert('Error');
+				return null;
+			}
+
+		},
+		error: function(){
+			return null;
+		}
+	});
+	return null;
+};
+
 
 PolygonSymbolizer.prototype.toSLDBody = function(){
 	

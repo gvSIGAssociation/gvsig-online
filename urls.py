@@ -23,8 +23,8 @@ urlpatterns = [
    
     url(r'^create_sld/$', 'gvsigol_symbology.views.create_sld', name='create_sld'),
     
-    #url(r'^clustered_points_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.clustered_points_add', name='clustered_points_add'),
-    #url(r'^clustered_points_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.clustered_points_update', name='clustered_points_update'),
+    url(r'^clustered_points_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.clustered_points_add', name='clustered_points_add'),
+    url(r'^clustered_points_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.clustered_points_update', name='clustered_points_update'),
     
     url(r'^color_table_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.color_table_add', name='color_table_add'),
     url(r'^color_table_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.color_table_update', name='color_table_update'),
@@ -63,5 +63,8 @@ urlpatterns = [
     #url(r'^style_layer_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.style_layer_update', name='style_layer_update'),
     #url(r'^symbol_upload/$', 'gvsigol_symbology.views.symbol_upload', name='symbol_upload'),
     #url(r'^load_rmf/$', 'gvsigol_symbology.views.load_rmf', name='load_rmf'),
+    
+    url(r'^get_raster_statistics/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.get_raster_statistics', name='get_raster_statistics'),
+    
     
 ]

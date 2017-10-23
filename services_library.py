@@ -658,9 +658,44 @@ def get_sld(request, type, json_data, layer_id):
                     halo_radius = json_sym.get('halo_radius'),
                     fill = json_sym.get('fill'),
                     fill_opacity = json_sym.get('fill_opacity'),
+                    anchor_point_x = json_sym.get('anchor_point_x'),
+                    anchor_point_y = json_sym.get('anchor_point_y'),
                 )
                 symbolizer.save()
     
     sld_body = sld_builder.build_sld(layer, style)
+    if style.type == 'CP':
+        transform = ''\
+        '                <sld:Transformation>'\
+        '                    <ogc:Function name="gs:PointStacker">'\
+        '                        <ogc:Function name="parameter">'\
+        '                            <ogc:Literal>data</ogc:Literal>'\
+        '                        </ogc:Function>'\
+        '                        <ogc:Function name="parameter">'\
+        '                            <ogc:Literal>cellSize</ogc:Literal>'\
+        '                            <ogc:Literal>30</ogc:Literal>'\
+        '                        </ogc:Function>'\
+        '                        <ogc:Function name="parameter">'\
+        '                            <ogc:Literal>outputBBOX</ogc:Literal>'\
+        '                            <ogc:Function name="env">'\
+        '                                <ogc:Literal>wms_bbox</ogc:Literal>'\
+        '                            </ogc:Function>'\
+        '                        </ogc:Function>'\
+        '                        <ogc:Function name="parameter">'\
+        '                            <ogc:Literal>outputWidth</ogc:Literal>'\
+        '                            <ogc:Function name="env">'\
+        '                                <ogc:Literal>wms_width</ogc:Literal>'\
+        '                            </ogc:Function>'\
+        '                        </ogc:Function>'\
+        '                        <ogc:Function name="parameter">'\
+        '                            <ogc:Literal>outputHeight</ogc:Literal>'\
+        '                            <ogc:Function name="env">'\
+        '                               <ogc:Literal>wms_height</ogc:Literal>'\
+        '                            </ogc:Function>'\
+        '                        </ogc:Function>'\
+        '                    </ogc:Function>'\
+        '               </sld:Transformation>'
+        sld_body = sld_body.replace('<sld:FeatureTypeStyle>', '<sld:FeatureTypeStyle>'+transform)
+
     style.delete()
     return sld_body

@@ -8,10 +8,10 @@
 		<div class="box">
 		
 			<div class="box-header with-border step-2">
-				<h3 class="box-title">{% trans "Update style" %}</h3>
+				<h3 class="box-title">{% trans "Add new style" %}</h3>
 				<div class="box-tools pull-right">
 					<button id="refresh-preview" class="btn btn-sm btn-default refresh-preview"><i class="fa fa-refresh margin-r-5"></i> {% trans "Update preview" %}</button>
-					<button id="show-label" class="btn btn-sm btn-default refresh-preview"><i class="fa fa-tags margin-r-5"></i> {% trans "Labeling" %}</button>
+					<!-- <button id="show-label" class="btn btn-sm btn-default refresh-preview"><i class="fa fa-tags margin-r-5"></i> {% trans "Labeling" %}</button> -->
 					<button id="save-legend" class="btn btn-sm btn-default save-legend"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
 				</div>
 			</div>
@@ -20,26 +20,27 @@
 			
 				<div class="row">
 					<div class="col-md-6">
+						<div id="form-error" style="color:#ff0000;"></div>
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<label>{% trans "Name" %}</label>
-								<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" type="text" value="{{style.name}}" class="form-control">	
+								<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" value="{{style_name}}" type="text" class="form-control">	
 							</div>
 						</div>
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<label>{% trans "Title" %}</label>
-								<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" type="text" value="{{style.title}}" class="form-control">	
+								<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" type="text" class="form-control">	
 							</div>
 						</div>
 						<div class="row">
 							<div class="col-md-6 form-group">
 								<label>{% trans "Min. scale" %}</label>
-					    		<input placeholder="{% trans 'No limit' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="{{minscale}}" class="form-control">
+					    		<input placeholder="{% trans 'No limit' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="" class="form-control">
 							</div>
 							<div class="col-md-6 form-group">
 								<label>{% trans "Max. scale" %}</label>
-					    		<input placeholder="{% trans 'No limit' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="{{maxscale}}" class="form-control">
+					    		<input placeholder="{% trans 'No limit' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="" class="form-control">
 							</div>
 							<div class="col-md-12 form-group">
 								<p class="text-muted">* {% trans "Specifies the minimum and maximum scale denominator (inclusive) for the scale range in which this rule applies" %}.</p>
@@ -48,11 +49,7 @@
 						<div class="row">
 							<div class="checkbox col-md-12">								
 								<label>
-									{% if style.is_default %}
-									<input type="checkbox" name="style-is-default" id="style-is-default" checked/>{% trans "Set as default style" %}
-									{% else %}
 									<input type="checkbox" name="style-is-default" id="style-is-default"/>{% trans "Set as default style" %}
-									{% endif %}
 								</label>
 							</div>
 						</div>
@@ -65,13 +62,13 @@
 				<div class="row">
 					<div class="col-md-12 form-group">
 						<button id="add-expression" class="btn btn-sm btn-default refresh-preview"><i class="fa fa-plus margin-r-5"></i> {% trans "Add new rule" %}</button>
-						<span class="text-muted">{% trans "Creates a new rule based on an expression" %}</span>
+						<span class="text-muted">{% trans "Creates a new rule for clustered points" %}</span>
 					</div>
 				</div>
 				
 				<div id="rules" class="row">
 				</div>
-	
+				
 			</div>
 		</div>
 	</div>
@@ -227,7 +224,7 @@ $(document).ready(function() {
 	var featureType = "{{featureType}}";
 	var jsonAlphanumericFields = {{json_alphanumeric_fields|safe}};
 	var fonts = {{ fonts|safe }};
-	var rules = {{ rules|safe }};
+	var rule_opts = "";
 	var previewUrl = "{{preview_url}}";
 	var supported_crs = {{supported_crs|safe}};
 	
@@ -264,11 +261,9 @@ $(document).ready(function() {
 	map.addLayer(wmsLayer);
 	
 	var utils = new SymbologyUtils(map, layerId, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
-	var expressions = new Expressions(featureType, layerName, utils, previewUrl);
-	expressions.loadRules(rules);
-	$(".delete-rule").on('click', function(e){
-		expressions.deleteRule(this.dataset.ruleid);
-	});
+	utils.setType("CP");
+	var clustered_points = new ClusteredPoints(featureType, layerName, utils, previewUrl);
+	
 	utils.centerMap(layerName, wfsUrl);
 	
 	var previous_minscale = $("#symbol-minscale").val();
@@ -277,7 +272,7 @@ $(document).ready(function() {
     $("#symbol-minscale").focus(function () {
         previous_minscale = this.value;
     }).change(function() {
-        var rules = expressions.getRules();
+        var rules = clustered_points.getRules();
 		for (var i=0; i<rules.length; i++) {
 			if(rules[i].minscale == previous_minscale && rules[i].maxscale == previous_maxscale){
 				rules[i].minscale = this.value;
@@ -289,7 +284,7 @@ $(document).ready(function() {
     $("#symbol-maxscale").focus(function () {
         previous_maxscale = this.value;
     }).change(function() {
-        var rules = expressions.getRules();
+        var rules = clustered_points.getRules();
 		for (var i=0; i<rules.length; i++) {
 			if(rules[i].minscale == previous_minscale && rules[i].maxscale == previous_maxscale){
 				rules[i].maxscale = this.value;
@@ -299,12 +294,12 @@ $(document).ready(function() {
     });
     
 	$("#show-label").on('click', function(e){
-		expressions.showLabel();
+		clustered_points.showLabel();
 	});
 	
 	$("#save-legend").on('click', function(e){
 		if ($("#style-name").val() != '') {
-			expressions.update(layerId, styleId);
+			clustered_points.save(layerId);
 			
 		} else {
 			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
@@ -314,14 +309,20 @@ $(document).ready(function() {
 	});
 	
 	$("#refresh-preview").on('click', function(e){
-		utils.sld(layerId, 'EX', expressions);
+		utils.sld(layerId, 'CP', clustered_points);
 	});
 	
 	$("#add-expression").on('click', function(e) {
-		expressions.addNewRule();
+		clustered_points.addNewRule();
 		$(".delete-rule").on('click', function(e){
-			expressions.deleteRule(this.dataset.ruleid);
+			clustered_points.deleteRule(this.dataset.ruleid);
 		});
+	});
+	
+	clustered_points.addNewRule(1,2);
+	clustered_points.addNewRule(2);
+	$(".delete-rule").on('click', function(e){
+		clustered_points.deleteRule(this.dataset.ruleid);
 	});
 
 });

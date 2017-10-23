@@ -38,12 +38,14 @@ UNIQUE_VALUES = 'UV'
 INTERVALS = 'IN'
 EXPRESSIONS = 'EX'
 COLOR_TABLES = 'CT'
+CLUSTERED_POINTS = 'CP'
 CHARTS = 'CH'
 LEGEND_TYPES = (
     (UNIQUE_SYMBOL, _('Unique symbol')),
     (UNIQUE_VALUES, _('Unique values')),
     (INTERVALS, _('Intervals')),
     (EXPRESSIONS, _('Expressions')),
+    (CLUSTERED_POINTS, _('Clustered Points')),
     (COLOR_TABLES, _('Color table')),
     (CHARTS, _('Graphics')),
 )
@@ -126,6 +128,8 @@ class TextSymbolizer(Symbolizer):
     halo_radius = models.IntegerField(default=12)
     halo_fill = models.CharField(max_length=100)
     halo_fill_opacity = models.FloatField(default=1.0)
+    anchor_point_x = models.FloatField(default=0.5)
+    anchor_point_y = models.FloatField(default=-1.5)
 
 class ColorMap(models.Model):
     type = models.CharField(max_length=100)
