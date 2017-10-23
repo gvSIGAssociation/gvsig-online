@@ -652,7 +652,7 @@ Rule.prototype.updateForm = function() {
 	$('#tab-menu').empty();
 	$('#tab-content').empty();	
 	
-	if (this.selected.type == 'MarkSymbolizer') {
+	if (this.selected.type == 'MarkSymbolizer' || this.selected.featureType == 'PointSymbolizer') {
 		$('#tab-menu').append(this.selected.getTabMenu());
 		$('#tab-content').append(this.selected.getGraphicTabUI());
 		$('#tab-content').append(this.selected.getFillTabUI());
@@ -661,24 +661,24 @@ Rule.prototype.updateForm = function() {
 		$('.nav-tabs a[href="#graphic-tab"]').tab('show');
 		this.selected.registerEvents();
 		
-	} else if (this.selected.type == 'ExternalGraphicSymbolizer') {
+	} else if (this.selected.type == 'ExternalGraphicSymbolizer' || this.selected.featureType == 'ExternalGraphicSymbolizer') {
 		$('#tab-menu').append(this.selected.getTabMenu());
 		this.selected.registerEvents();
 		
-	} else if (this.selected.type == 'LineSymbolizer') {
+	} else if (this.selected.type == 'LineSymbolizer' || this.selected.featureType == 'LineSymbolizer') {
 		$('#tab-menu').append(this.selected.getTabMenu());
 		$('#tab-content').append(this.selected.getStrokeTabUI());
 		$('.nav-tabs a[href="#stroke-tab"]').tab('show');
 		this.selected.registerEvents();
 		
-	} else if (this.selected.type == 'PolygonSymbolizer') {
+	} else if (this.selected.type == 'PolygonSymbolizer' || this.selected.featureType == 'PolygonSymbolizer') {
 		$('#tab-menu').append(this.selected.getTabMenu());
 		$('#tab-content').append(this.selected.getFillTabUI());
 		$('#tab-content').append(this.selected.getStrokeTabUI());
 		$('.nav-tabs a[href="#fill-tab"]').tab('show');
 		this.selected.registerEvents();
 		
-	} else if (this.selected.type == 'TextSymbolizer') {
+	} else if (this.selected.type == 'TextSymbolizer' || this.selected.featureType == 'TextSymbolizer') {
 		$('#tab-menu').append(this.selected.getTabMenu(this.type=="clusteredpoints"));
 		//$('#tab-content').append(this.selected.getGeneralTabUI(true));	
 		$('#tab-content').append(this.selected.getFontTabUI(this.type=="clusteredpoints"));
