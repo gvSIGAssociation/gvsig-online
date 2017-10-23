@@ -255,12 +255,75 @@ MarkSymbolizer.prototype.registerEvents = function() {
 };
 
 MarkSymbolizer.prototype.updatePreview = function() {	
-	var sldBody = this.toSLDBody();
-	var url = this.utils.getPreviewUrl() + '&SLD_BODY=' + encodeURIComponent(sldBody);
-	var ui = '<img id="symbolizer-preview-' + this.id + '" src="' + url + '" class="symbolizer-preview-' + this.id + '"></img>';
-	$("#symbolizer-preview-div-" + this.id).empty();
-	$("#symbolizer-preview-div-" + this.id).append(ui);
+	var sldBody = this.sld2();
+	if(sldBody != null){
+		var url = this.utils.getPreviewUrl() + '&SLD_BODY=' + encodeURIComponent(sldBody);
+		var ui = '<img id="symbolizer-preview-' + this.id + '" src="' + url + '" class="symbolizer-preview-' + this.id + '"></img>';
+		$("#symbolizer-preview-div-" + this.id).empty();
+		$("#symbolizer-preview-div-" + this.id).append(ui);
+	}
 };
+
+MarkSymbolizer.prototype.sld2 = function() {
+	var rules = new Array();
+	
+	var style = {
+			name: 'point',
+			title: 'point',
+			is_default:true,
+			rules: rules
+	};
+	
+	var l = {
+			type: this.type,
+			json: this.toJSON(),
+			order: 1
+	};
+	var options = {
+			"id" : 1,
+			"name" : 'point',
+			"title" : 'point',
+			"abstract" : "",
+			"is_default": true,
+			"order" :  1
+	}
+	var auxrule = new Rule(1, 'point', 'point', options, this.utils);
+	var rule = {
+			rule: auxrule.getObject(),
+			symbolizers: [l]
+	};
+	style.rules.push(rule);
+	
+	var layerId = this.utils.getLayerId();
+	
+	$.ajax({
+		type: "POST",
+		async: false,
+		url: "/gvsigonline/symbology/create_sld/",
+		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		data: {
+			type: this.utils.type,
+			layer_id: layerId,
+			style_data: JSON.stringify(style)
+		},
+		success: function(response){
+			if (response.success) {
+				return response.sld;
+			} else {
+				alert('Error');
+				return null;
+			}
+
+		},
+		error: function(){
+			return null;
+		}
+	});
+	return null;
+};
+
 
 MarkSymbolizer.prototype.toXML = function(){
 	

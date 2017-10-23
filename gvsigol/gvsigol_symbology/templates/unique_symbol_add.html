@@ -238,7 +238,7 @@ $(document).ready(function() {
 	});
 	map.addLayer(wmsLayer);
 	
-	var utils = new SymbologyUtils(map, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
+	var utils = new SymbologyUtils(map, layerId, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
 	var uniqueSymbol = new UniqueSymbol(featureType, layerName, utils, null);
 	uniqueSymbol.addDefault();
 	
