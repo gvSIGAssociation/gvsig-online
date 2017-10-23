@@ -695,7 +695,8 @@ def get_sld(request, type, json_data, layer_id):
         '                        </ogc:Function>'\
         '                    </ogc:Function>'\
         '               </sld:Transformation>'
-        sld_body = sld_body.replace('<sld:FeatureTypeStyle>', '<sld:FeatureTypeStyle>'+transform, 1)
+        sld_body = sld_body.replace('<sld:FeatureTypeStyle>', '@@@'+transform, 1)
+        sld_body = sld_body.replace('@@@', '<sld:FeatureTypeStyle>', 1)
 
     style.delete()
     return sld_body
