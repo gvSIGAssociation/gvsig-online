@@ -23,7 +23,6 @@
  
 var PolygonSymbolizer = function(rule, options, utils) {
 	this.id = 'polygonsymbolizer' + utils.generateUUID();
-	this.type = 'PolygonSymbolizer';
 	this.fill = "#000000";
 	this.fill_opacity = 0.5;
 	this.stroke = "#000000";
@@ -41,6 +40,7 @@ var PolygonSymbolizer = function(rule, options, utils) {
 			this.order = rule.symbolizers.length;
 		}
 	}
+	this.type = 'PolygonSymbolizer';
 };
 
 PolygonSymbolizer.prototype.getTableUI = function() {
