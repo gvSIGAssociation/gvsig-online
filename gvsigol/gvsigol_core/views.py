@@ -177,7 +177,11 @@ def project_add(request):
                 exists = True
                 
         layergroups = LayerGroup.objects.exclude(name='__default__')
-        groups = core_utils.get_all_groups()
+        groups = None
+        if request.user.is_superuser:
+            groups = core_utils.get_all_groups()
+        else:
+            groups = core_utils.get_user_groups(request.user.username)
         if name == '':
             message = _(u'You must enter an project name')
             return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
