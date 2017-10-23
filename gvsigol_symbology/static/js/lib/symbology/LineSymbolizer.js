@@ -23,7 +23,6 @@
  
 var LineSymbolizer = function(rule, options, utils) {
 	this.id = 'linesymbolizer' + utils.generateUUID();
-	this.type = 'LineSymbolizer';
 	this.stroke = "#000000";
 	this.stroke_width = 1;
 	this.stroke_dash_array = 'none';
@@ -39,8 +38,7 @@ var LineSymbolizer = function(rule, options, utils) {
 			this.order = rule.symbolizers.length;
 		}
 	}
-	
-	
+	this.type = 'LineSymbolizer';
 };
 
 LineSymbolizer.prototype.getTableUI = function() {

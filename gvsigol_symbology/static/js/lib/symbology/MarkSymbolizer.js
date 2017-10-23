@@ -23,7 +23,6 @@
  
 var MarkSymbolizer = function(rule, options, utils) {
 	this.id = 'marksymbolizer' + utils.generateUUID();
-	this.type = 'MarkSymbolizer';
 	this.well_known_name = 'circle';
 	this.fill = "#000000";
 	this.fill_opacity = 0.5;
@@ -45,6 +44,7 @@ var MarkSymbolizer = function(rule, options, utils) {
 			this.order = rule.symbolizers.length;
 		}
 	}
+	this.type = 'MarkSymbolizer';
 };
 
 MarkSymbolizer.prototype.getTableUI = function() {
