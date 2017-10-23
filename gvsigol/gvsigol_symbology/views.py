@@ -32,11 +32,25 @@ from models import Style, StyleLayer, Rule, Library, LibraryRule, Symbolizer, Co
 from gvsigol_auth.utils import staff_required
 from gvsigol import settings
 from gvsigol_symbology import services, services_library, services_unique_symbol,\
-    services_unique_values, services_intervals, services_expressions, services_color_table
+    services_unique_values, services_intervals, services_expressions, services_color_table, services_clustered_points
 from django.views.decorators.csrf import csrf_exempt
 import utils
 import json
 import ast
+from gvsigol_services.gdal_tools import get_raster_stats
+import sys
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def get_raster_statistics(request, layer_id):
+    layer = Layer.objects.get(id=int(layer_id))
+    datastore = Datastore.objects.get(id=layer.datastore_id)
+    params = json.loads(datastore.connection_params)
+    if 'url' in params:
+        result = get_raster_stats(params['url'])
+        print result
+    
   
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -77,6 +91,9 @@ def style_layer_update(request, layer_id, style_id):
     
     elif (style.type == 'EX'):
         return redirect('expressions_update', layer_id=layer_id, style_id=style_id)
+    
+    elif (style.type == 'CP'):
+        return redirect('clustered_points_update', layer_id=layer_id, style_id=style_id)
     
     elif (style.type == 'CT'):
         return redirect('color_table_update', layer_id=layer_id, style_id=style_id)
@@ -267,7 +284,7 @@ def unique_values_update(request, layer_id, style_id):
             if 'field' in rule_filter:
                 response['property_name'] = rule_filter.get('field')    
                 
-            # Adaptación para garantizar compatibilidad con la versión anterior
+            # Adaptación para garantizar compatibilidad con versiones anteriores
             if 'property_name' in rule_filter:
                 response['property_name'] = rule_filter.get('property_name')    
         
@@ -381,6 +398,71 @@ def get_minmax_values(request):
     
     response = service_utils.get_minmax_query(host, port, schema, database, user, password, lyr.name, field)
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+    
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def clustered_points_add(request, layer_id):
+    if request.method == 'POST':
+        style_data = request.POST['style_data']
+        json_data = json.loads(style_data)
+        
+        if services_clustered_points.create_style(request, json_data, layer_id):            
+            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            
+        else:
+            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+        
+    else:                 
+        response = services_expressions.get_conf(request, layer_id) 
+        return render_to_response('clustered_points_add.html', response, context_instance=RequestContext(request))
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def clustered_points_update(request, layer_id, style_id):  
+    if request.method == 'POST':
+        style_data = request.POST['style_data']
+        json_data = json.loads(style_data)
+        
+        if services_clustered_points.update_style(request, json_data, layer_id, style_id):            
+            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            
+        else:
+            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+        
+    else:                
+        style = Style.objects.get(id=int(style_id))
+        
+        style_rules = Rule.objects.filter(style=style)
+        rules = []
+        for r in style_rules:
+            symbolizers = []
+            for s in Symbolizer.objects.filter(rule=r).order_by('order'):
+                symbolizers.append(utils.symbolizer_to_json(s))
+                
+            rule = {
+                'id': r.id,
+                'name': r.name,
+                'title': r.title,
+                'abstract': '',
+                'filter': r.filter,
+                'minscale': r.minscale,
+                'maxscale': r.maxscale,
+                'order': r.order,
+                'symbolizers': symbolizers
+            }
+            rules.append(rule)
+                         
+        response = services_expressions.get_conf(request, layer_id)
+        
+        response['style'] = style
+        if style.minscale and int(style.minscale) >=0:
+            response['minscale'] = int(style.minscale)
+        if style.maxscale and int(style.maxscale) >=0:
+            response['maxscale'] = int(style.maxscale)
+        response['rules'] = json.dumps(rules)        
+        
+        return render_to_response('clustered_points_update.html', response, context_instance=RequestContext(request))
     
 
 @login_required(login_url='/gvsigonline/auth/login_user/')

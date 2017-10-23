@@ -88,7 +88,7 @@ $(document).ready(function() {
 	var previewLineUrl = "{{preview_line_url}}";
 	var previewPolygonUrl = "{{preview_polygon_url}}";
 	
-	var symbologyUtils = new SymbologyUtils(null, null, null, null, [],[]);
+	var symbologyUtils = new SymbologyUtils(null, null, null, null, null, [],[]);
 	var librarySymbol = new LibrarySymbol(previewPointUrl, previewLineUrl, previewPolygonUrl, symbologyUtils);
 	
 	"{% for rule in rules %}"
