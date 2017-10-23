@@ -177,7 +177,12 @@ def project_add(request):
             if name == p.name:
                 exists = True
                 
-        layergroups = LayerGroup.objects.exclude(name='__default__')
+        layergroups = None
+        if request.user.is_superuser:
+            layergroups = LayerGroup.objects.exclude(name='__default__')
+        else:
+            layergroups = LayerGroup.objects.exclude(name='__default__').filter(created_by__exact=request.user.username)
+        
         groups = None
         if request.user.is_superuser:
             groups = core_utils.get_all_groups()
