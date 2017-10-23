@@ -20,13 +20,15 @@
  * @author: Javi Rodrigo <jrodrigo@scolab.es>
  */
 
-var SymbologyUtils = function(map, layer, featureType, previewUrl, fonts, alphanumericFields) {
+var SymbologyUtils = function(map, layer_id, layer, featureType, previewUrl, fonts, alphanumericFields) {
 	this.map = map;
 	this.layer = layer;
+	this.layer_id = layer_id;
 	this.fonts = fonts;
 	this.alphanumericFields = alphanumericFields;
 	this.previewUrl = previewUrl;
 	this.featureType = featureType;
+	this.type = 'EX';
 };
 
 SymbologyUtils.prototype.fontStyles = [
@@ -77,6 +79,10 @@ SymbologyUtils.prototype.filter_operations = [
  	{value: 'is_between', title: gettext('Is between') + ' ...'},
 ];
 
+SymbologyUtils.prototype.getLayerId = function(){
+	return this.layer_id;
+};
+
 SymbologyUtils.prototype.getFilterOperations = function(element){
 	return this.filter_operations;
 };
@@ -122,29 +128,31 @@ SymbologyUtils.prototype.centerMap = function(layerName, wfsUrl) {
 		  		var projection = new ol.proj.Projection({
 		    		code: sourceCRS,
 		    	});
-		    		
-		    	if (response.features[0].geometry.type == 'Point') {
-		    		newFeature.setGeometry(new ol.geom.Point(response.features[0].geometry.coordinates));				
-		    	} else if (response.features[0].geometry.type == 'MultiPoint') {
-		    		newFeature.setGeometry(new ol.geom.Point(response.features[0].geometry.coordinates[0]));				
-		    	} else if (response.features[0].geometry.type == 'LineString' || response.features[0].geometry.type == 'MultiLineString') {
-		    		newFeature.setGeometry(new ol.geom.MultiLineString([response.features[0].geometry.coordinates[0]]));
-		    	} else if (response.features[0].geometry.type == 'Polygon' || response.features[0].geometry.type == 'MultiPolygon') {
-		    		newFeature.setGeometry(new ol.geom.MultiPolygon(response.features[0].geometry.coordinates));
-		    	}
-		    	newFeature.setProperties(response.features[0].properties);
-				newFeature.setId(response.features[0].id);
-		    	var geom1 = newFeature.getGeometry().getFirstCoordinate();
-		    	var geom2 = ol.proj.transform(geom1, sourceCRS, 'EPSG:3857');
-							
-		  		var view = self.map.getView();			
-				if (response.features[0].geometry.type == 'Point' || response.features[0].geometry.type == 'MultiPoint') {
-					view.setCenter(geom2);
-					view.setZoom(7);
-				} else {
-					view.setCenter(geom2);
-					view.setZoom(7);
-				}
+		    	
+		  		if(response.features[0].geometry != null){
+			    	if (response.features[0].geometry.type == 'Point') {
+			    		newFeature.setGeometry(new ol.geom.Point(response.features[0].geometry.coordinates));				
+			    	} else if (response.features[0].geometry.type == 'MultiPoint') {
+			    		newFeature.setGeometry(new ol.geom.Point(response.features[0].geometry.coordinates[0]));				
+			    	} else if (response.features[0].geometry.type == 'LineString' || response.features[0].geometry.type == 'MultiLineString') {
+			    		newFeature.setGeometry(new ol.geom.MultiLineString([response.features[0].geometry.coordinates[0]]));
+			    	} else if (response.features[0].geometry.type == 'Polygon' || response.features[0].geometry.type == 'MultiPolygon') {
+			    		newFeature.setGeometry(new ol.geom.MultiPolygon(response.features[0].geometry.coordinates));
+			    	}
+			    	newFeature.setProperties(response.features[0].properties);
+					newFeature.setId(response.features[0].id);
+			    	var geom1 = newFeature.getGeometry().getFirstCoordinate();
+			    	var geom2 = ol.proj.transform(geom1, sourceCRS, 'EPSG:3857');
+								
+			  		var view = self.map.getView();			
+					if (response.features[0].geometry.type == 'Point' || response.features[0].geometry.type == 'MultiPoint') {
+						view.setCenter(geom2);
+						view.setZoom(7);
+					} else {
+						view.setCenter(geom2);
+						view.setZoom(7);
+					}
+		  		}
 				
 			} else {
 				console.log("ERROR no features to center map preview");
@@ -224,6 +232,11 @@ SymbologyUtils.prototype.updateMap = function(style, name) {
 	this.reloadLayerPreview(sld);
 	
 };
+
+
+SymbologyUtils.prototype.setType = function(type) {
+	this.type = type;
+}
 	
 SymbologyUtils.prototype.getFilter = function(json_filter) {
 	
@@ -503,7 +516,7 @@ SymbologyUtils.prototype.sld = function(layerId, type, symbology) {
 			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},
 		data: {
-			type: 'EX',
+			type: self.type,
 			layer_id: layerId,
 			style_data: JSON.stringify(style)
 		},
