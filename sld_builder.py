@@ -90,7 +90,7 @@ def build_sld(layer, style):
         '                        </ogc:Function>'\
         '                    </ogc:Function>'\
         '               </sld:Transformation>'
-        sld_body = sld_body.replace('<sld:FeatureTypeStyle>', '<sld:FeatureTypeStyle>'+transform)
+        sld_body = sld_body.replace('<sld:FeatureTypeStyle>', '<sld:FeatureTypeStyle>'+transform, 1)
     
     
     return sld_body
