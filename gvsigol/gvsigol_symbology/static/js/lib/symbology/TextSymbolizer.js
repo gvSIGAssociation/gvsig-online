@@ -22,7 +22,6 @@
  
 var TextSymbolizer = function(rule, layerName, options, utils) {
 	this.id = 'textsymbolizer' + utils.generateUUID();
-	this.type = 'TextSymbolizer';
 	this.is_actived = false;
 	this.label = '';
 	this.font_family = 'Arial';
@@ -88,6 +87,7 @@ var TextSymbolizer = function(rule, layerName, options, utils) {
 	if(rule != null && rule.symbolizers){
 		this.order = rule.symbolizers.length;
 	}
+	this.type = 'TextSymbolizer';
 };
 
 TextSymbolizer.prototype.getTableUI = function() {
