@@ -1954,7 +1954,9 @@ def get_feature_info(request):
         for layer_array in layers_array:
             url = layer_array['url']
             query_layer = layer_array['query_layer']
-            ws = layer_array['workspace']
+            ws= None
+            if 'workspace' in layer_array:
+                ws = layer_array['workspace']
             
             print url
             
