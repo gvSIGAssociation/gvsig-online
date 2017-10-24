@@ -248,26 +248,26 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 			  	},
 			  	success	:function(response){
 			  		if (response.features && response.features.length > 0) {
-			  			for (var i in response.features) {
-				  			if (response.features[i].type == 'catastro') {
+			  			for (var k in response.features) {
+				  			if (response.features[k].type == 'catastro') {
 				  				var qLayer = null;
 				  				for (var i=0; i<queryLayers.length; i++) {
-				  					if(response.features[i].query_layer == queryLayers[i].layer_name){
+				  					if(response.features[k].query_layer == queryLayers[i].layer_name){
 				  						qLayer =  queryLayers[i]
 				  					} 
 				  				}
 				  				if(qLayer != null){
 					  				features.push({
 					  					type: 'catastro',
-					  					text: response.features[i].text,
-					  					href: response.features[i].href,
+					  					text: response.features[k].text,
+					  					href: response.features[k].href,
 					  					layer: qLayer
 					  				});
 				  				}
 				  			} else {
 			  					var qLayer = null;
 				  				for (var j=0; j<queryLayers.length; j++) {
-				  					if(response.features[i].layer_name == queryLayers[j].layer_name){
+				  					if(response.features[k].layer_name == queryLayers[j].layer_name){
 				  						qLayer =  queryLayers[j]
 				  					} 
 				  				}
@@ -275,7 +275,7 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 					  				features.push({
 					  					type: 'feature',
 					  					crs: response.crs,
-					  					feature: response.features[i],
+					  					feature: response.features[k],
 					  					layer:  qLayer
 					  				});
 				  				}
