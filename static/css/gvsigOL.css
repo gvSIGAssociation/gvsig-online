@@ -4831,3 +4831,7 @@ table.table.dataTable tbody tr td{
     overflow-x: hidden;
     overflow-y: auto;
 }
+
+.feature-item a.product-title span.pull-right{
+	margin-right: 10px
+}
