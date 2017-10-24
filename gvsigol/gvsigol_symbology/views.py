@@ -39,6 +39,7 @@ import json
 import ast
 from gvsigol_services.gdal_tools import get_raster_stats
 import sys
+from gvsigol_services.backend_postgis import Introspect
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -134,8 +135,26 @@ def select_legend_type(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     
     is_vectorial = False
+    is_points = False
     if layer.type == 'v_PostGIS':
         is_vectorial = True
+        try:
+            params = json.loads(layer.datastore.connection_params)
+            host = params['host']
+            port = params['port']
+            dbname = params['database']
+            user = params['user']
+            passwd = params['passwd']
+            schema = params.get('schema', 'public')
+            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+            rows = i.get_geometry_columns_info(schema=schema)
+            result = []
+            for r in rows:
+                if r[5] == 'MULTIPOINT' or r[5] == 'POINT':
+                    is_points = True
+        except Exception as e:
+            print str(e)
+            raise
         
     is_view = False
     if layer.type == 'v_PostGIS_View':
@@ -144,7 +163,8 @@ def select_legend_type(request, layer_id):
     response = {
         'layer': layer,
         'is_vectorial': is_vectorial,
-        'is_view': is_view
+        'is_view': is_view,
+        'is_points': is_points
     }
         
     return render_to_response('select_legend_type.html', response, context_instance=RequestContext(request))
