@@ -248,23 +248,23 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 			  	},
 			  	success	:function(response){
 			  		if (response.features && response.features.length > 0) {
-			  			if (response.features[0].type == 'catastro') {
-			  				var qLayer = null;
-			  				for (var i=0; i<queryLayers.length; i++) {
-			  					if(response.features[0].query_layer == queryLayers[i].layer_name){
-			  						qLayer =  queryLayers[i]
-			  					} 
-			  				}
-			  				if(qLayer != null){
-				  				features.push({
-				  					type: 'catastro',
-				  					text: response.features[0].text,
-				  					href: response.features[0].href,
-				  					layer: qLayer
-				  				});
-			  				}
-			  			} else {
-			  				for (var i in response.features) {
+			  			for (var i in response.features) {
+				  			if (response.features[i].type == 'catastro') {
+				  				var qLayer = null;
+				  				for (var i=0; i<queryLayers.length; i++) {
+				  					if(response.features[i].query_layer == queryLayers[i].layer_name){
+				  						qLayer =  queryLayers[i]
+				  					} 
+				  				}
+				  				if(qLayer != null){
+					  				features.push({
+					  					type: 'catastro',
+					  					text: response.features[i].text,
+					  					href: response.features[i].href,
+					  					layer: qLayer
+					  				});
+				  				}
+				  			} else {
 			  					var qLayer = null;
 				  				for (var j=0; j<queryLayers.length; j++) {
 				  					if(response.features[i].layer_name == queryLayers[j].layer_name){
