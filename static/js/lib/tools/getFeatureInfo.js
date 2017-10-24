@@ -267,7 +267,7 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 			  				for (var i in response.features) {
 			  					var qLayer = null;
 				  				for (var j=0; j<queryLayers.length; j++) {
-				  					if(response.features[i].layer_name == queryLayers[j].layer_name){
+				  					if(response.features[i].query_layer == queryLayers[j].layer_name){
 				  						qLayer =  queryLayers[j]
 				  					} 
 				  				}
