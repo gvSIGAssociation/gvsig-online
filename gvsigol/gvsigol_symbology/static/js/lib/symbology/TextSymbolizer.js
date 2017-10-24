@@ -43,11 +43,11 @@ var TextSymbolizer = function(rule, layerName, options, utils) {
 	this.layer = null;
 	this.layerName = layerName;
 	this.AnchorPointX = 0.5;
-	if(options.anchor_point_x != null && options.anchor_point_x != ""){
+	if(options && options.anchor_point_x != null && options.anchor_point_x != ""){
 		this.AnchorPointX = options.anchor_point_x;
 	}
 	this.AnchorPointY = -1.5;
-	if(options.anchor_point_y != null && options.anchor_point_y != ""){
+	if(options && options.anchor_point_y != null && options.anchor_point_y != ""){
 		this.AnchorPointY = options.anchor_point_y;
 	}
 	this.codemirror = null;
