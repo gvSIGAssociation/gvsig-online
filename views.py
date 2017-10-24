@@ -1975,7 +1975,9 @@ def get_feature_info(request):
         for layer_array in layers_array:
             url = layer_array['url']
             query_layer = layer_array['query_layer']
-            ws = layer_array['workspace']
+            ws= None
+            if 'workspace' in layer_array:
+                ws = layer_array['workspace']
             
             results.append({
                 'url': url,
@@ -2006,37 +2008,38 @@ def get_feature_info(request):
                 
             else:
                 try:
-                    w = Workspace.objects.get(name__exact=ws)
+                    if ws:
+                        w = Workspace.objects.get(name__exact=ws)
+                                
+                        layer = Layer.objects.get(name=query_layer, datastore__workspace__name=w.name)
+            
+                        response = resultset['response']
+                        if response:
+                            geojson = json.loads(response)
+                                
                             
-                    layer = Layer.objects.get(name=query_layer, datastore__workspace__name=w.name)
-        
-                    response = resultset['response']
-                    if response:
-                        geojson = json.loads(response)
-                            
-                        
-                        for i in range(0, len(geojson['features'])):
-                            fid = geojson['features'][i].get('id')
-                            resources = []
-                            if fid.__len__() > 0:
-                                fid = geojson['features'][i].get('id').split('.')[1]
-                                layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
-                                for lr in layer_resources:
-                                    (type, rsurl) = utils.get_resource_type(lr)
-                                    resource = {
-                                        'type': type,
-                                        'url': rsurl,
-                                        'name': lr.path.split('/')[-1]
-                                    }
-                                    resources.append(resource)
-                            else:
-                                geojson['features'][i]['type']= 'raster'
-                            geojson['features'][i]['resources'] = resources
-                            geojson['features'][i]['all_correct'] = resultset['response']
-                            geojson['features'][i]['feature'] = fid
-                            geojson['features'][i]['layer_name'] = resultset['query_layer']
-                            
-                        features = geojson['features']
+                            for i in range(0, len(geojson['features'])):
+                                fid = geojson['features'][i].get('id')
+                                resources = []
+                                if fid.__len__() > 0:
+                                    fid = geojson['features'][i].get('id').split('.')[1]
+                                    layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
+                                    for lr in layer_resources:
+                                        (type, rsurl) = utils.get_resource_type(lr)
+                                        resource = {
+                                            'type': type,
+                                            'url': rsurl,
+                                            'name': lr.path.split('/')[-1]
+                                        }
+                                        resources.append(resource)
+                                else:
+                                    geojson['features'][i]['type']= 'raster'
+                                geojson['features'][i]['resources'] = resources
+                                geojson['features'][i]['all_correct'] = resultset['response']
+                                geojson['features'][i]['feature'] = fid
+                                geojson['features'][i]['layer_name'] = resultset['query_layer']
+                                
+                            features = geojson['features']
                     
                 except Exception as e:
                     print e.message
