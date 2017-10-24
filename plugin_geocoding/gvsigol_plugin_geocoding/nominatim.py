@@ -44,7 +44,7 @@ class Nominatim():
     
     
     def append(self, provider):
-        params = json.loads(ast.literal_eval(provider.params))
+        params = json.loads(provider.params)
         url = params['url']
         country_code = params['country_codes']
         url_params = urlparse(url)

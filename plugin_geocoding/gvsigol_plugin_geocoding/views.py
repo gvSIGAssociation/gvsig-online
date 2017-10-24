@@ -36,6 +36,7 @@ from gvsigol_plugin_geocoding import settings as geocoding_setting
 from gvsigol import settings
 from gvsigol_plugin_geocoding.utils import *
 import json
+import ast
 from gvsigol_services.models import Workspace, Datastore
 from gvsigol_services.views import backend_resource_list_available,\
     backend_resource_list
@@ -83,7 +84,9 @@ def provider_add(request):
             newProvider.type = type
             newProvider.category = request.POST.get('category')
             
-            params = request.POST.get('params')
+            params = {}
+            if 'params' in request.POST:
+                params = ast.literal_eval(request.POST.get('params'))
 
             if type=='cartociudad' or type=='user':
                 workspace = request.POST.get('workspace')
@@ -215,8 +218,10 @@ def provider_update(request, provider_id):
         provider.category = request.POST['category']
         if request.FILES.get('image'):
             provider.image = request.FILES.get('image')  
-            
-        params = request.POST.get('params')
+        
+        params = {}
+        if 'params' in request.POST:
+            params = ast.literal_eval(request.POST.get('params'))
         has_errors = False
         
         if type=='cartociudad' or type=='user':

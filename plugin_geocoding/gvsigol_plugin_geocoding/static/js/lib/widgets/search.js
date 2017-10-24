@@ -30,8 +30,27 @@ var search = function(map, conf) {
 	this.popup = null;
 	this.popupCloser = null;
 	this.popupContent = null;
+	this.contextmenu = null;
 	this.initUI();
+	this.activeContextMenu();
 };
+
+search.prototype.activeContextMenu = function(){
+	if(this.contextmenu == null){
+		return;
+	}
+	var self = this;
+	
+	this.map.addControl(this.contextmenu);
+}
+
+search.prototype.removeContextMenu = function(){
+	if(this.contextmenu == null){
+		return;
+	}
+	
+	this.map.removeControl(this.contextmenu);
+}
 
 /**
  * TODO.
@@ -55,7 +74,7 @@ search.prototype.initUI = function() {
 				if(response.types[i] == "nominatim"){
 					menus.push({
 						text: 'Dirección de Nominatim',
-						classname: 'some-style-class', // add some CSS rules
+						classname: 'geocoding-contextmenu', // add some CSS rules
 						callback: function (obj) {
 							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4258');	
 							$.ajax({
@@ -81,7 +100,7 @@ search.prototype.initUI = function() {
 				if(response.types[i] == "cartociudad"){
 					menus.push({
 						text: 'Dirección de CartoCiudad',
-						classname: 'some-style-class', // add some CSS rules
+						classname: 'geocoding-contextmenu', // add some CSS rules
 						callback: function (obj) {
 							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4258');	
 							$.ajax({
@@ -107,7 +126,7 @@ search.prototype.initUI = function() {
 				if(response.types[i] == "googlemaps"){
 					menus.push({
 						text: 'Dirección de Google Maps',
-						classname: 'some-style-class', // add some CSS rules
+						classname: 'geocoding-contextmenu', // add some CSS rules
 						callback: function (obj) {
 							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4258');	
 							$.ajax({
@@ -132,18 +151,15 @@ search.prototype.initUI = function() {
 			}
 
 			if(menus.length > 0){
-				var contextmenu = new ContextMenu({
+				self.contextmenu = new ContextMenu({
 					width: 170,
 					defaultItems: false, // defaultItems are (for now) Zoom In/Zoom Out
-					items: menus
+					items: menus,
 				});
-				self.map.addControl(contextmenu);
 			}
 		},
 		error: function(){}
 	});
-
-
 
 	$('#autocomplete').autocomplete({
 		serviceUrl: '/gvsigonline/geocoding/search_candidates/',
