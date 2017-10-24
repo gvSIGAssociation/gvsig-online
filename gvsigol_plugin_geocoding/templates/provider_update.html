@@ -255,7 +255,7 @@
 		var code = params;
 		$('#select-file-row').css('display', 'none');
 		$('#connection-params-row').css('display', 'block');
-		codemirror.setValue(code);
+		codemirror.setValue(JSON.stringify(code));
 	
 	}
 	
