@@ -159,6 +159,11 @@ ClusteredPoints.prototype.addNewRule = function(filter_value, filter_value2) {
 	mainpoint = rule.addSymbolizer();
 	rule.preview();
 	this.addRule(rule);
+	
+	for(var i = 0; i< rule.symbolizers.length; i++){
+		var sym = rule.symbolizers[i];
+		sym.updatePreview();
+	}
 
 	$(".create-expression").on('click', function(e){
 		e.preventDefault();
@@ -739,6 +744,11 @@ ClusteredPoints.prototype.loadRules = function(rules) {
 		rule.registerEvents();
 		rule.preview();
 		this.addRule(rule);
+		
+		for(var i = 0; i< rule.symbolizers.length; i++){
+			var sym = rule.symbolizers[i];
+			sym.updatePreview();
+		}
 
 		$(".create-expression").on('click', function(e){
 			e.preventDefault();
