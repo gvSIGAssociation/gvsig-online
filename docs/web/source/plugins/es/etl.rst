@@ -11,23 +11,29 @@ La ventaja de esta herramienta es que permite georrefenciar los registros de cad
 
 2. Requisitos para realizar las transformaciones
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-2.1. Tener disponible los datos en un fichero plano, en formatos de hoja de cálculo (**.xlsx**) o texto (**.csv**)
+2.1. Tener disponible los datos en un fichero plano, en formatos de hoja de cálculo (**.xlsx**) o texto (**.csv**).
+
 2.2. Crear una **capa vacía** en el sistema con los campos a donde se volcará la información de los ficheros planos.
-2.3. Crear la plantilla de transformación
+
+2.3. Crear la plantilla de transformación.
+
 2.4. Aplicar la transformación sobre el fichero plano.
 
 
 3. Requisitos básicos en la estructura de los ficheros planos
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Algunos requisitos mínimos se deben cumplir para que el proceso de transformación se realice de forma correcta. Los formatos deben ser los citados anteriormente y por otro lado asegurarse que las coordendas contenidas en los ficheros sean estándar y uniforme. De esta manera se garantiza que la transformación sea exitosa al momento de posicionar cada elemento.
+Algunos requisitos mínimos se deben cumplir para que el proceso de transformación se realice de forma correcta. Los formatos deben ser los citados anteriormente y por otro lado asegurarse que las coordenadas contenidas en los ficheros sean estándar y uniforme, de esta manera se garantiza que la transformación sea exitosa al momento de posicionar cada elemento.
 
 3.1. **Transformación con dirección**: El campo que contenga la dirección del elemento, preferiblemente que sea lo mas similiar posible a la dirección que ofrece la cartografía base del OSM.
+
 3.2. **Transformación con coordenadas para formato (.xlxs)**: las coordenadas comunmente están en celdas separadas, deberán estar expresadas en grados decimales, donde la parte entera se separa de los minutos y segundos por (,), por ejemplo: (-31,4459068688) (-64,233981896). 
 
 .. note::
-   El sistema no soporta comillas simples, ni dobles al final de la coordenadas, ejemplo: (-31,4354382939') (-64,2393822877'), tampoco será válido coordenadas no bien definidas como ésto: (-313.937.747)  (-6.417.356.619.999.990).
+   - El sistema no soporta comillas simples, ni dobles al final de la coordenadas, ejemplo: (-31,4354382939') (-64,2393822877').
    
-3.3. **Transformación con coordenadas para formato (.csv)**: las cordenadas normalmente estarán en una misma celda, por lo tanto, igual estarán expresadas en grados decimales, pero esta vez la parte entera se separa de los minutos y segundos por (.) ya que la (,) es usada para separar entre latitud y longitud o viceversa. También se acepta que estén o no dentro de paréntesis. Ejemplo: (-31.4315574, -64.18822169999998) 
+   - Tampoco será válido coordenadas no bien definidas como los siguientes ejemplos: (-313.937.747)  (-6.417.356.619.999.990).
+   
+3.3. **Transformación con coordenadas para formato (.csv)**: las coordenadas normalmente estarán en una misma celda, por lo tanto, igual estarán expresadas en grados decimales, pero esta vez la parte entera se separa de los minutos y segundos por un (.) ya que la (,) es usada para separar entre latitud y longitud o viceversa. También se acepta que estén o no dentro de paréntesis. Ejemplo: (-31.4315574, -64.18822169999998) 
 
 
 4.Pasos para transformar
@@ -35,11 +41,11 @@ Algunos requisitos mínimos se deben cumplir para que el proceso de transformaci
 4.1. **Crear capa vacía**: Se crea la capa vacía en el sistema y se añaden tantos campos como tenga el fichero plano o los que se quiera volcar información.
 
 .. note::
-   - Cuando se crea una capa vacía en el sistema se añaden por defecto los campos: 'gid' y 'wkb_geometry', el primero es interno para hacer un identificador único en la tabla de Base de Datos (BD) no será usado en la transformación, el segundo es el campo donde se registrará la geometría de cada elemento y será el que se use para volcar las coordenadas.
+   - Cuando se crea una capa vacía en el sistema se añaden por defecto los campos: 'gid' y 'wkb_geometry', el primero es interno para hacer un identificador único en la tabla de Base de Datos (BD), éste no será usado en la transformación, el segundo es el campo donde se registrará la geometría de cada elemento y será el que se use para volcar las coordenadas.
    
    - También se añaden los campos 'last_modification' y 'by_modified', tampoco se usarán en la transformación. Son campos usados como control en la edición de la capa online desde el geoportal.
 
-Una vez se haya publicado la cpa vacía sin registros, se procede a crear la plantilla de transformación para fijar la configuración entre la capa vacía y el fichero plano.
+Una vez se haya publicado la capa vacía sin registros, se procede a crear la plantilla de transformación para fijar la configuración entre la capa vacía y el fichero plano.
 
 4.2. **Crear plantilla de transformación (formato .xlsx)** Para acceder a esta funcionalidad se debe ingresar en el panel de control:
 
