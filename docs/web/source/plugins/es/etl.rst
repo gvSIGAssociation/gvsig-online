@@ -44,7 +44,7 @@ Una vez se haya publicado la cpa vacía sin registros, se procede a crear la pla
 4.2. **Crear plantilla de transformación (formato .xlsx)** Para acceder a esta funcionalidad se debe ingresar en el panel de control:
 
 
-.. image:: ../images/etl1.png
+.. image:: ../_static/images/etl1.png
    :align: center
 
 
