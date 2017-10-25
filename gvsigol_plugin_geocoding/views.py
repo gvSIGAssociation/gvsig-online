@@ -85,10 +85,10 @@ def provider_add(request):
             newProvider.category = request.POST.get('category')
             
             params = {}
-            if 'params' in request.POST:
-                params = ast.literal_eval(request.POST.get('params'))
-
+            
             if type=='cartociudad' or type=='user':
+                if 'params' in request.POST:
+                    params = json.loads(request.POST.get('params'))
                 workspace = request.POST.get('workspace')
                 datastore = request.POST.get('datastore')
 
@@ -118,7 +118,10 @@ def provider_add(request):
                     params = {
                         'datastore_id': ds.id,
                     } 
-            
+            else: 
+                if 'params' in request.POST:
+                    params = ast.literal_eval(request.POST.get('params'))
+                            
             if type != 'user':
                 prov = Provider.objects.filter(type=type)
                 if prov and prov.__len__() > 0:
@@ -170,11 +173,11 @@ def isValidCartociudadDB(datastore):
     
     #if not geocoding_setting.CARTOCIUDAD_DB_CODIGO_POSTAL in resources:
     #    resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_CODIGO_POSTAL)
-        
-    if not geocoding_setting.CARTOCIUDAD_DB_TRAMO_VIAL in resources:
+    
+    if not resources or not geocoding_setting.CARTOCIUDAD_DB_TRAMO_VIAL in resources:
         resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_TRAMO_VIAL)
         
-    if not geocoding_setting.CARTOCIUDAD_DB_PORTAL_PK in resources:
+    if not resources or not geocoding_setting.CARTOCIUDAD_DB_PORTAL_PK in resources:
         resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_PORTAL_PK)
         
     #if not geocoding_setting.CARTOCIUDAD_DB_MANZANA in resources:
@@ -183,13 +186,13 @@ def isValidCartociudadDB(datastore):
     #if not geocoding_setting.CARTOCIUDAD_DB_LINEA_AUXILIAR in resources:
     #    resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_LINEA_AUXILIAR)
         
-    if not geocoding_setting.CARTOCIUDAD_DB_MUNICIPIO_VIAL in resources:
+    if not resources or  not geocoding_setting.CARTOCIUDAD_DB_MUNICIPIO_VIAL in resources:
         resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_MUNICIPIO_VIAL)
         
-    if not geocoding_setting.CARTOCIUDAD_DB_MUNICIPIO in resources:
+    if not resources or  not geocoding_setting.CARTOCIUDAD_DB_MUNICIPIO in resources:
         resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_MUNICIPIO)
         
-    if not geocoding_setting.CARTOCIUDAD_DB_PROVINCIA in resources:
+    if not resources or  not geocoding_setting.CARTOCIUDAD_DB_PROVINCIA in resources:
         resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_PROVINCIA)
         
     #if not geocoding_setting.CARTOCIUDAD_DB_TOPONIMO in resources:
