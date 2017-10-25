@@ -289,7 +289,11 @@ Rule.prototype.registerEvents = function(type) {
 	});
 	
 	$("#append-textsymbol-button-" + this.id).on('click', function(e){
-		self.addTextSymbolizer();
+		var textsymbolizer = self.addTextSymbolizer();
+		textsymbolizer.fill = "#ffffff";
+		textsymbolizer.label = "count";
+		textsymbolizer.AnchorPointX = 0.5;
+		textsymbolizer.AnchorPointY = 0.8;
 	});
 	
 	$("#append-color-entry-button-" + this.id).on('click', function(e){

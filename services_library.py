@@ -554,7 +554,7 @@ def upload_sld(file):
     return rules
 
 
-def get_sld(request, type, json_data, layer_id):
+def get_sld(request, type, json_data, layer_id, single_symbol=False):
 
     layer = Layer.objects.get(id=layer_id)
     layer.name = layer.datastore.workspace.name+':'+layer.name
@@ -663,40 +663,7 @@ def get_sld(request, type, json_data, layer_id):
                 )
                 symbolizer.save()
     
-    sld_body = sld_builder.build_sld(layer, style)
-    if style.type == 'CP':
-        transform = ''\
-        '                <sld:Transformation>'\
-        '                    <ogc:Function name="gs:PointStacker">'\
-        '                        <ogc:Function name="parameter">'\
-        '                            <ogc:Literal>data</ogc:Literal>'\
-        '                        </ogc:Function>'\
-        '                        <ogc:Function name="parameter">'\
-        '                            <ogc:Literal>cellSize</ogc:Literal>'\
-        '                            <ogc:Literal>30</ogc:Literal>'\
-        '                        </ogc:Function>'\
-        '                        <ogc:Function name="parameter">'\
-        '                            <ogc:Literal>outputBBOX</ogc:Literal>'\
-        '                            <ogc:Function name="env">'\
-        '                                <ogc:Literal>wms_bbox</ogc:Literal>'\
-        '                            </ogc:Function>'\
-        '                        </ogc:Function>'\
-        '                        <ogc:Function name="parameter">'\
-        '                            <ogc:Literal>outputWidth</ogc:Literal>'\
-        '                            <ogc:Function name="env">'\
-        '                                <ogc:Literal>wms_width</ogc:Literal>'\
-        '                            </ogc:Function>'\
-        '                        </ogc:Function>'\
-        '                        <ogc:Function name="parameter">'\
-        '                            <ogc:Literal>outputHeight</ogc:Literal>'\
-        '                            <ogc:Function name="env">'\
-        '                               <ogc:Literal>wms_height</ogc:Literal>'\
-        '                            </ogc:Function>'\
-        '                        </ogc:Function>'\
-        '                    </ogc:Function>'\
-        '               </sld:Transformation>'
-        sld_body = sld_body.replace('<sld:FeatureTypeStyle>', '@@@'+transform, 1)
-        sld_body = sld_body.replace('@@@', '<sld:FeatureTypeStyle>', 1)
-
+    sld_body = sld_builder.build_sld(layer, style, single_symbol)
+    
     style.delete()
     return sld_body
