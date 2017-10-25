@@ -732,7 +732,11 @@ ClusteredPoints.prototype.loadRules = function(rules) {
 
 			} else {
 				if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer') {
-					rule.addTextSymbolizer(options);
+					textsymbolizer = rule.addTextSymbolizer(options);
+//					textsymbolizer.fill = "#ffffff";
+//					textsymbolizer.label = "count";
+//					textsymbolizer.AnchorPointX = 0.5;
+//					textsymbolizer.AnchorPointY = 0.8;
 
 				}else{
 					rule.addSymbolizer(options);
@@ -745,8 +749,8 @@ ClusteredPoints.prototype.loadRules = function(rules) {
 		rule.preview();
 		this.addRule(rule);
 		
-		for(var i = 0; i< rule.symbolizers.length; i++){
-			var sym = rule.symbolizers[i];
+		for(var k = 0; k< rule.symbolizers.length; k++){
+			var sym = rule.symbolizers[k];
 			sym.updatePreview();
 		}
 
