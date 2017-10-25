@@ -43,7 +43,7 @@ def parse_sld(file):
     sld_object = StyledLayerDescriptor(file)
     return sld_object
 
-def build_sld(layer, style):
+def build_sld(layer, style, single_symbol = False):
     field_geom = 'wkb_geometry' #get_layer_geom_field(layer)
     style_layer_descriptor = StyledLayerDescriptor()
     named_layer = style_layer_descriptor.create_namedlayer(layer.name)
@@ -59,7 +59,7 @@ def build_sld(layer, style):
         create_rule(r, symbolizers, feature_type_style, field_geom)
     
     sld_body = style_layer_descriptor.as_sld(True)
-    if style.type == 'CP':
+    if style.type == 'CP' and not single_symbol:
         transform = ''\
         '                <sld:Transformation>'\
         '                    <ogc:Function name="gs:PointStacker">'\
@@ -92,7 +92,7 @@ def build_sld(layer, style):
         '               </sld:Transformation>'
         sld_body = sld_body.replace('<sld:FeatureTypeStyle>', '@@@'+transform, 1)
         sld_body = sld_body.replace('@@@', '<sld:FeatureTypeStyle>', 1)
-    
+
     return sld_body
 
 def build_library_symbol(rule):
