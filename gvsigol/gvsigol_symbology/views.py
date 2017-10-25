@@ -511,7 +511,11 @@ def create_sld(request):
         layer_id = request.POST['layer_id']
         json_data = json.loads(style_data)
         
-        sld = services_library.get_sld(request, type, json_data, layer_id)           
+        single_symbol=False
+        if 'single_symbol' in request.POST:
+            single_symbol = request.POST['single_symbol']
+        
+        sld = services_library.get_sld(request, type, json_data, layer_id, single_symbol=='true')           
         return HttpResponse(json.dumps({'success': True, 'sld': sld}, indent=4), content_type='application/json')
             
     return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
