@@ -127,6 +127,10 @@ def provider_add(request):
                 if prov and prov.__len__() > 0:
                     form.add_error(None, _("Error: this type of provider is already added to the project"))
                     has_errors = True
+                if type == 'googlemaps':
+                    if not 'key' in params or params['key'] == '':
+                        form.add_error(None, _("Error: API-Key is needed"))
+                        has_errors = True
             
             if not has_errors:       
                 newProvider.params = json.dumps(params)
@@ -256,14 +260,19 @@ def provider_update(request, provider_id):
                     has_errors = True
                 params = {
                     'datastore_id': ds.id,
-                } 
+                }
+            
+        if type == 'googlemaps':
+            if not 'key' in params or params['key'] == '':
+                form.add_error(None, _("Error: API-Key is needed"))
+                has_errors = True 
                 
         if not has_errors:       
             provider.params = json.dumps(params)
                 
-        provider.save()
-        set_providers_to_geocoder()
-        return redirect('provider_list')
+            provider.save()
+            set_providers_to_geocoder()
+            return redirect('provider_list')
     else:
         form = ProviderUpdateForm(instance=provider)
         params = json.loads(provider.params)
