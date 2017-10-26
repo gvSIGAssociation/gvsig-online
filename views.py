@@ -644,7 +644,7 @@ def project_get_conf(request):
                     
                     layer['cached'] = l.cached
                     
-                    layer['order'] = int(conf_group['groupOrder']) + l.order
+                    layer['order'] = int(conf_group['groupOrder']) + layers_in_group.length - l.order
                     layer['single_image'] = l.single_image
                     layer['read_roles'] = read_roles
                     layer['write_roles'] = write_roles
