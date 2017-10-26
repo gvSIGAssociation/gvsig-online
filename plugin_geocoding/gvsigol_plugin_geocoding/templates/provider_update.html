@@ -574,6 +574,10 @@
  			updateFieldsList(ws_id, ds_name, resource, "id_geom_field", params["geom_field"]);
 		}
 		
+		if(type=="user" || type=="cartociudad"){
+			$("#id_category").prop("disabled", "disabled");
+		}
+		
 		$("#id_resource").change(function() {
 			var ws_id = $("#provider-workspace-id").val();
 			var ds_name = $("#provider-datastore").val();
