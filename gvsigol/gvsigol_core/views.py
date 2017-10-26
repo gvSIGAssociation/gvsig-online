@@ -602,6 +602,7 @@ def project_get_conf(request):
             layers = []
             user_roles = core_utils.get_group_names_by_user(request.user)
             
+            idx = 0
             for l in layers_in_group:
                 read_roles = services_utils.get_read_roles(l)
                 write_roles = services_utils.get_write_roles(l)
@@ -644,7 +645,7 @@ def project_get_conf(request):
                     
                     layer['cached'] = l.cached
                     
-                    layer['order'] = int(conf_group['groupOrder']) + layers_in_group.__len__() - l.order
+                    layer['order'] = int(conf_group['groupOrder']) + layers_in_group.__len__() - idx
                     layer['single_image'] = l.single_image
                     layer['read_roles'] = read_roles
                     layer['write_roles'] = write_roles
@@ -706,7 +707,8 @@ def project_get_conf(request):
                     w['name'] = workspace.name
                     w['wms_url'] = workspace.wms_endpoint
                     workspaces.append(w)
-            
+                idx = idx + 1
+                
             if len(layers) > 0:   
                 ordered_layers = sorted(layers, key=itemgetter('order'), reverse=True)
                 conf_group['layers'] = ordered_layers
