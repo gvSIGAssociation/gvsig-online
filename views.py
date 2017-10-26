@@ -708,7 +708,7 @@ def project_get_conf(request):
                     workspaces.append(w)
             
             if len(layers) > 0:   
-                ordered_layers = sorted(layers, key=itemgetter('order'), reverse=False)
+                ordered_layers = sorted(layers, key=itemgetter('order'), reverse=True)
                 conf_group['layers'] = ordered_layers
                 layer_groups.append(conf_group)
         
