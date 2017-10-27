@@ -1173,18 +1173,21 @@ def cache_clear(request, layer_id):
 def layergroup_cache_clear(request, layergroup_id):
     if request.method == 'GET':
         layergroup = LayerGroup.objects.get(id=int(layergroup_id)) 
-        
-        mapservice_backend.deleteGeoserverLayerGroup(layergroup)
-        layers = Layer.objects.filter(layer_group_id=int(layergroup_id))
-        for layer in layers:
-            layer_cache_clear(layer.id)
-            
-        mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
-        mapservice_backend.clearLayerGroupCache(layergroup.name)
-        mapservice_backend.reload_nodes()
+        layer_group_cache_clear(layergroup)
         
         return redirect('layergroup_list')
     
+
+def layer_group_cache_clear(layergroup):
+    mapservice_backend.deleteGeoserverLayerGroup(layergroup)
+    layers = Layer.objects.filter(layer_group_id=int(layergroup.id))
+    for layer in layers:
+        layer_cache_clear(layer.id)
+        
+    mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
+    mapservice_backend.clearLayerGroupCache(layergroup.name)
+    mapservice_backend.reload_nodes()
+        
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -1457,7 +1460,6 @@ def layergroup_update(request, lgid):
             cached = True
         
         layergroup = LayerGroup.objects.get(id=int(lgid))
-        mapservice_backend.deleteGeoserverLayerGroup(layergroup)
         
         sameName = False
         if layergroup.name == name:
@@ -1477,14 +1479,7 @@ def layergroup_update(request, lgid):
             layergroup.save()   
             core_utils.toc_update_layer_group(layergroup, old_name, name)
             
-            layers = Layer.objects.filter(layer_group_id=int(layergroup.id))
-            for layer in layers:
-                layer_cache_clear(layer.id)
-                              
-            mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
-            mapservice_backend.clearLayerGroupCache(layergroup.name)
-            mapservice_backend.reload_nodes()
-            
+            layer_group_cache_clear(layergroup)
             layergroup_mapserver_toc(layergroup, toc)
             if 'redirect' in request.GET:
                 redirect_var = request.GET.get('redirect')
@@ -1506,15 +1501,8 @@ def layergroup_update(request, lgid):
                 layergroup.cached = cached
                 layergroup.save()
                 core_utils.toc_update_layer_group(layergroup, old_name, name)
-                
-                layers = Layer.objects.filter(layer_group_id=int(layergroup.id))
-                for layer in layers:
-                    layer_cache_clear(layer.id)
-                
-                mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
-                mapservice_backend.clearLayerGroupCache(layergroup.name)
-                mapservice_backend.reload_nodes()
-                
+
+                layer_group_cache_clear(layergroup)
                 layergroup_mapserver_toc(layergroup, toc)
                 if 'redirect' in request.GET:
                     redirect_var = request.GET.get('redirect')
