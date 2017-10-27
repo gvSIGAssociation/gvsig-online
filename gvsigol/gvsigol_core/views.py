@@ -710,7 +710,7 @@ def project_get_conf(request):
                 idx = idx + 1
                 
             if len(layers) > 0:   
-                ordered_layers = sorted(layers, key=itemgetter('order'), reverse=True)
+                ordered_layers = sorted(layers, key=itemgetter('order'), reverse=False)
                 conf_group['layers'] = ordered_layers
                 layer_groups.append(conf_group)
         
