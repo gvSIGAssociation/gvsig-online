@@ -598,7 +598,7 @@ def project_get_conf(request):
             conf_group['groupOrder'] = toc.get(group.name).get('order')
             conf_group['groupName'] = group.name
             conf_group['cached'] = group.cached
-            layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('-order')
+            layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('order')
             layers = []
             user_roles = core_utils.get_group_names_by_user(request.user)
             
