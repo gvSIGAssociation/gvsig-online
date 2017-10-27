@@ -1174,10 +1174,12 @@ def layergroup_cache_clear(request, layergroup_id):
     if request.method == 'GET':
         layergroup = LayerGroup.objects.get(id=int(layergroup_id)) 
         
+        mapservice_backend.deleteGeoserverLayerGroup(layergroup)
         layers = Layer.objects.filter(layer_group_id=int(layergroup_id))
         for layer in layers:
             layer_cache_clear(layer.id)
             
+        mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
         mapservice_backend.clearLayerGroupCache(layergroup.name)
         mapservice_backend.reload_nodes()
         
