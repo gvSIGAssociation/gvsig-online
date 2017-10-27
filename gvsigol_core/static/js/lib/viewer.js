@@ -552,6 +552,7 @@ viewer.core = {
 				wmsLayer.workspace = layerConf.workspace
 				wmsLayer.crs = layerConf.crs;
 				wmsLayer.order = layerConf.order;
+				wmsLayer.styles = layerConf.styles;
 				wmsLayer.setZIndex(parseInt(layerConf.order));
 				wmsLayer.conf = JSON.parse(layerConf.conf);
 				wmsLayer.parentGroup = group.groupName;

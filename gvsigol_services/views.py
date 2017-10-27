@@ -1940,6 +1940,32 @@ def get_geom_tables(request, datastore_id):
             pass
     return HttpResponseBadRequest()
 
+def is_grouped_symbology_request(request, url, aux_response, styles):
+    response = grequests.map([aux_response])
+    if response.__len__() > 0:
+        rsp = response[0]
+        try:
+            geojson = json.loads(rsp.text)
+            
+            for i in range(0, len(geojson['features'])):
+                properties = geojson['features'][i].get('properties')
+                if 'count' in properties and properties.get('count') == 1:
+                    style_default = None
+                    for style in styles:
+                        if style['name'].endswith('_default'):
+                            style_default = style['name']
+                    
+                    if style_default:
+                        url = url.replace('STYLES=', 'STYLES='+style_default)
+                        if 'username' in request.session and 'password' in request.session:
+                            if request.session['username'] is not None and request.session['password'] is not None:
+                                #auth2 = (request.session['username'], request.session['password'])
+                                auth2 = ('admin', 'geoserver')
+                                aux_response = grequests.get(url, auth=auth2, verify=False) 
+        except:
+            return aux_response
+    return aux_response
+
 @csrf_exempt
 def get_feature_info(request):
     if request.method == 'POST':      
@@ -1952,6 +1978,7 @@ def get_feature_info(request):
         
         rs = []
         for layer_array in layers_array:
+            styles = layer_array['styles']
             url = layer_array['url']
             query_layer = layer_array['query_layer']
             ws= None
@@ -1966,8 +1993,8 @@ def get_feature_info(request):
                     if request.session['username'] is not None and request.session['password'] is not None:
                         auth2 = (request.session['username'], request.session['password'])
                         #auth2 = ('admin', 'geoserver')
-                        
-            rs.append(grequests.get(url, auth=auth2, verify=False))
+            aux_response = grequests.get(url, auth=auth2, verify=False) 
+            rs.append(is_grouped_symbology_request(request, url, aux_response, styles))
         aux_rs = grequests.map(rs)
         
         results = []
