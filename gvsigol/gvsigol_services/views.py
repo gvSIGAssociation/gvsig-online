@@ -1477,6 +1477,7 @@ def layergroup_update(request, lgid):
             layergroup.save()   
             core_utils.toc_update_layer_group(layergroup, old_name, name)
             mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
+            mapservice_backend.clearLayerGroupCache(layergroup.name)
             mapservice_backend.reload_nodes()
             
             layergroup_mapserver_toc(layergroup, toc)
