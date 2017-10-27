@@ -222,7 +222,8 @@ def provider_update(request, provider_id):
         form = ProviderUpdateForm(request.POST)
         
         type = request.POST.get('provider-type')
-        provider.category = request.POST['category']
+        if type!='cartociudad' and type!='user':
+            provider.category = request.POST['category']
         if request.FILES.get('image'):
             provider.image = request.FILES.get('image')  
         
