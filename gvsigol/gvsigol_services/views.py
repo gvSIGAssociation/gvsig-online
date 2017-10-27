@@ -1476,6 +1476,11 @@ def layergroup_update(request, lgid):
             layergroup.cached = cached
             layergroup.save()   
             core_utils.toc_update_layer_group(layergroup, old_name, name)
+            
+            layers = Layer.objects.filter(layer_group_id=int(layergroup.id))
+            for layer in layers:
+                layer_cache_clear(layer.id)
+                              
             mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
             mapservice_backend.clearLayerGroupCache(layergroup.name)
             mapservice_backend.reload_nodes()
@@ -1501,6 +1506,10 @@ def layergroup_update(request, lgid):
                 layergroup.cached = cached
                 layergroup.save()
                 core_utils.toc_update_layer_group(layergroup, old_name, name)
+                
+                layers = Layer.objects.filter(layer_group_id=int(layergroup.id))
+                for layer in layers:
+                    layer_cache_clear(layer.id)
                 
                 mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
                 mapservice_backend.clearLayerGroupCache(layergroup.name)
