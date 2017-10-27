@@ -18,6 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from gvsigol_core.utils import get_supported_crs
+from gvsigol_symbology.models import StyleLayer
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
@@ -562,6 +563,21 @@ def project_load(request, pid):
     else:
         return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
 
+
+def get_layer_styles(layer):
+    styles = []
+    stllyrs = StyleLayer.objects.filter(layer_id = layer.id)
+    for stllyr in stllyrs:
+        stl=stllyr.style
+        style={
+            'name' : stl.name,
+            'title' : stl.title,
+            'is_default': stl.is_default
+            }
+        styles.append(style)
+    return styles
+    
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def project_get_conf(request):
     if request.method == 'POST':
@@ -649,6 +665,7 @@ def project_get_conf(request):
                     layer['single_image'] = l.single_image
                     layer['read_roles'] = read_roles
                     layer['write_roles'] = write_roles
+                    layer['styles'] = get_layer_styles(l)
                     
                     try:
                         json_conf = ast.literal_eval(l.conf)

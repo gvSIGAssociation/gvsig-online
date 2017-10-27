@@ -230,10 +230,16 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 				{'INFO_FORMAT': 'application/json', 'FEATURE_COUNT': '100'}
 			);
 			
+			
+			var stls = []
+			if(qLayer.hasOwnProperty('styles')){
+				stls = qLayer.styles;
+			}
 			var queryLayer = {
 		  		url: url,
 		  		query_layer: qLayer.layer_name,
-		  		workspace: qLayer.workspace
+		  		workspace: qLayer.workspace,
+		  		styles: stls
 			};
 			layers_info.push(queryLayer);
 		}
