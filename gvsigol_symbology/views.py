@@ -147,8 +147,7 @@ def select_legend_type(request, layer_id):
             passwd = params['passwd']
             schema = params.get('schema', 'public')
             i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-            rows = i.get_geometry_columns_info(schema=schema)
-            result = []
+            rows = i.get_geometry_columns_info(layer.name, schema)
             for r in rows:
                 if r[5] == 'MULTIPOINT' or r[5] == 'POINT':
                     is_points = True
