@@ -1420,7 +1420,7 @@ def layergroup_mapserver_toc(group, toc_string):
         i=0
         
         for toc_entry in toc_array:
-            layers = Layer.objects.filter(name=toc_entry,layer_group_id=group.id)
+            layers = Layer.objects.filter(name=toc_entry,layer_group_id=group.id).order_by('order')
             for layer in layers:
                 layer_json = {
                         'name': layer.name,
@@ -1479,8 +1479,8 @@ def layergroup_update(request, lgid):
             layergroup.save()   
             core_utils.toc_update_layer_group(layergroup, old_name, name)
             
-            layer_group_cache_clear(layergroup)
             layergroup_mapserver_toc(layergroup, toc)
+            layer_group_cache_clear(layergroup)
             if 'redirect' in request.GET:
                 redirect_var = request.GET.get('redirect')
                 if redirect_var == 'create-layer':
@@ -1502,8 +1502,8 @@ def layergroup_update(request, lgid):
                 layergroup.save()
                 core_utils.toc_update_layer_group(layergroup, old_name, name)
 
-                layer_group_cache_clear(layergroup)
                 layergroup_mapserver_toc(layergroup, toc)
+                layer_group_cache_clear(layergroup)
                 if 'redirect' in request.GET:
                     redirect_var = request.GET.get('redirect')
                     if redirect_var == 'create-layer':
