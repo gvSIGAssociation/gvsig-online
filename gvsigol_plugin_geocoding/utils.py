@@ -71,7 +71,7 @@ http://localhost:8983/solr/<core_name>/update?stream.body=<delete><query>table_n
 def remove_solr_data(provider):
     #resource = provider.type+"-"+str(provider.pk)
     resource = str(provider.pk)
-    url = geocoding_settings.URL_SOLR+'/'+geocoding_settings.SOLR_CORE_NAME+"/update?stream.body=<delete><query>resource:"+resource+"</query></delete>&commit=true"
+    url = geocoding_settings.URL_SOLR+'/'+geocoding_settings.SOLR_CORE_NAME+"/update?stream.body=<delete><query>resource:*"+resource+"</query></delete>&commit=true"
     req = urllib2.urlopen(url)
     if req.code != 200:
         return False
