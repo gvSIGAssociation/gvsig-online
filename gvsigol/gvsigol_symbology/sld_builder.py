@@ -52,7 +52,7 @@ def build_sld(layer, style):
     
     rules = ModelRule.objects.filter(style=style)
     for r in rules:
-        symbolizers = ModelSymbolizer.objects.filter(rule=r)
+        symbolizers = ModelSymbolizer.objects.filter(rule=r).order_by('-order')
         field_geom = utils.get_geometry_field(layer)
         create_rule(r, symbolizers, feature_type_style, field_geom)
     
