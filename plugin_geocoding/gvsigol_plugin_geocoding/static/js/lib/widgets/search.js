@@ -39,6 +39,7 @@ search.prototype.activeContextMenu = function(){
 	if(this.contextmenu == null){
 		return;
 	}
+	var self = this;
 	
 	this.map.addControl(this.contextmenu);
 }
@@ -153,7 +154,7 @@ search.prototype.initUI = function() {
 				self.contextmenu = new ContextMenu({
 					width: 170,
 					defaultItems: false, // defaultItems are (for now) Zoom In/Zoom Out
-					items: menus
+					items: menus,
 				});
 			}
 		},
