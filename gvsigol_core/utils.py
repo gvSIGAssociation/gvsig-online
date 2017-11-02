@@ -303,7 +303,7 @@ def toc_move_layer(layer, old_layer_group):
     for p in projects_by_layergroup:
         json_toc = p.project.toc_order
         toc = json.loads(json_toc)
-        if toc.has_key(old_layer_group.name):
+        if toc.has_key(old_layer_group.name) and layer.name in toc.get(old_layer_group.name).get('layers'):
             del toc.get(old_layer_group.name).get('layers')[layer.name]
         p.project.toc_order = json.dumps(toc)
         p.project.save()
