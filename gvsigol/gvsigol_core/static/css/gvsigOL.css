@@ -4784,3 +4784,7 @@ table.table.dataTable tbody tr td{
 .feature-item a.product-title span.pull-right{
 	margin-right: 10px
 }
+
+.feature-item a.product-title span.pull-right input{
+	margin-right: 10px
+}
