@@ -4780,3 +4780,7 @@ table.dataTable thead th span.subname, table.dataTable tfoot th span.subname{
 table.table.dataTable tbody tr td{
     word-break: break-all;
 }
+
+.feature-item a.product-title span.pull-right{
+	margin-right: 10px
+}
