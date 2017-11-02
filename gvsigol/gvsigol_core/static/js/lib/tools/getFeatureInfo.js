@@ -375,8 +375,8 @@ getFeatureInfo.prototype.showInfo = function(features){
 										text = "<input type='checkbox' onclick=\"return false;\">";
 									}
 								}
-								feature_fields += "<span>" + text + "</span><br />";
-								feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\">"+ text + "</span><br />";
+								feature_fields += "<span>" + text + "</span><div style:\"clear:both\"></div>";
+								feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\">"+ text + "</span><div style:\"clear:both\"></div>";
 							}
 						}
 						
