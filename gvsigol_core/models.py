@@ -38,7 +38,7 @@ class ProjectLayerGroup(models.Model):
     
     
 class BaseLayer(models.Model):
-    name = models.CharField(max_length=150) 
+    name = models.CharField(max_length=150, null=True, blank=True) 
     title = models.CharField(max_length=150) 
     type = models.CharField(max_length=50, null=True, blank=True)
     type_params = models.TextField(null=True, blank=True)
