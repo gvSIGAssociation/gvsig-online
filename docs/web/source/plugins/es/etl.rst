@@ -54,7 +54,7 @@ Una vez se haya publicado la capa vacía sin registros, se procede a crear la pl
    :align: center
 
 
-.. list-table:: Crear transformación
+.. list-table:: Crear plantilla de transformación
    :widths: 2 30 100
    :header-rows: 1
 
@@ -65,11 +65,100 @@ Una vez se haya publicado la capa vacía sin registros, se procede a crear la pl
      - En Panel de control, entrada: Geocoding 
      - Muestra todos los plugins disponibles
    * - 2
-     - seleccionar el plugin 'transformación'
-     - Mostrará la ventana de listado de traasformaciones
+     - Seleccionar el plugin 'transformaciones'
+     - Mostrará la ventana del listado de transformaciones
    * - 3
-     - Clic sobre 'añadir transformación'
+     - Clic sobre 'añadir'
      - Saldrá una nueva vista para configurar la plantilla de transformación
+
+4.3 **Configuración de plantilla de transformación (formato xlsx)**: EL primer paso es añadir un nombre a la transformación y seleccionar cuál será la capa en el BD donde se volcarań los datos. 
+
+.. image:: ../_static/images/etl2.png
+   :align: center
+
+.. list-table:: Nombre de transformación y seleccionar capa 
+   :widths: 2 30 100
+   :header-rows: 1
+
+   * - Pasos
+     - Selección
+     - Acción
+   * - 1
+     - Añadir un nombre a la plantilla de transformación (sin caracteres especiales, ni espacios en blanco)
+     - Será el nombre que identifique a la plantilla 
+   * - 2
+     - Seleccionar el Espacio de trabajo
+     - Es el espacio donde se encuentra el almacén de datos a usar.
+   * - 3
+     - Seleccionar el almacén de datos
+     - En éste almacén de datos se ubica la capa vacía
+   * - 4
+     - Buscar la capa y seleccionarla
+     - Es la capa vacía que se ha creado previemente y donde se volcarán los datos del fichero plano.
+   * - 5
+     - Clic en continuar
+     - Me lleva a una siguiente vista para configurar y corresponder cada una de las hojas, campos y celdas de la transformación a un registro de la tabla en la bd.  
+
+
+.. image:: ../_static/images/etl3.png
+   :align: center
+
+.. list-table:: Configuración para ficheros planos (formato xlxs) 
+   :widths: 2 30 100
+   :header-rows: 1
+
+   * - Pasos
+     - Selección
+     - Acción
+   * - 1
+     - Pasos previos
+     - Ya debe estar seleccionada la capa y el nombre de la transformación
+   * - 2
+     - Escoger la opción 'excel'
+     - Se muestra sus propias opciones de hojas 
+   * - 3
+     - Recuadro de 'seleccionar hoja' 
+     - Al pinchar sobre los tres puntos se abrirá una nueva ventana de configuración de hojas
+   * - 3.1
+     - todas las hojas
+     - Volcará en la tabla vacia todos los datos que existan en todas las hojas del fichero excel
+   * - 3.2
+     - Solo la hoja
+     - Escribir el nombre de la hoja que se desea usar, permite solo una hoja.
+   * - 3.3
+     - Opción desde y hasta
+     - Si existen muchas hojas en el fichero plano, se puede indicar un rango de hojas, considera la primera hoja como la número (1) y así sucesivamente. Ejemplo, si hay diez hojas y se quiere usar desde la segunda a la quinta, se indicaría: desde 2 hasta 5.
+   * - 3.4
+     - opción 'que cumpla'
+     - Añade expresiones regulares que cumplan ciertas condiciones. Ejemplo, si existen varias hojas llamadas desde hoja_1 a hoja_8,y otras con nombres diferentes pero se quiere solo las llamadas hojas, la expresión será: hoja_*
+   * - 4
+     - Seleccionar desde la fila y desde la columna
+     - El sistema tomará los datos desde el número de fila y columna indicado del fichero plano. No siempre los datos comienzan en la fila y columna 1, ya que siempre hay encanezados y entre otros.
+   * - 5
+     - Área para defiir las reglas
+     - Desde el botón 'añadir nueva regla', saldrá un nuevo recuadro para ir configurando los campos de la tabla con respecto a las columnas del fichero plano. 
+   * - 5.1
+     - Campo de la BD a rellenar
+     - apareceran todos los campos disponibles de la capa a los cuales se van a volcar los datos del fichero plano.
+   * - 5.1.a
+     - Campos de la capa en la BD
+     - Al hacer clic sobre la casilla se debe mostrar todos los campos incluyendo el 'gid' y el 'wkb_geometry', se selecciona uno de ellos.
+   * - 5.2 
+     - Rellenar con
+     - Ésta opción muestra las distintas formas en que se puede volcar los datos desde el fichero plano al campo de la BD seleccionado.
+   * - 5.2.a
+     - opciones para rellenar
+     - entre las distintas formas que hay, las más usadas son 'valor de columna' y 'campos de geometrías desde campo lat/lon'. Se explicará a detalle en el siguiente item.
+   * - 5.3
+     - opciones diferentes
+     - Dependiendo de la opción seleccionada en el 5.2.a, se muestra distintas opciones. Por ejemplo, si se elije 'valor fijo', saldrá otra casilla 'Valor fijo' y se añade un valor escrito por el usuario. Ésta opción rellenará el campo seleccionado con este valor para todos sus registros, como su nombre lo indica es un 'Valor que está fijado'
+   * - 6
+     - aceptar
+     - Se guarda la regla y se pueden definir tantas reglas como campos disponibles hayan en la capa de BD. Para continuar añadiendo reglas se repite todo el proceso del paso (5).
+   * - 7
+     - Guardar
+     - Se guarda los cambios cuando se finalice de añadir todas las reglas. 
+     
 
 
 
