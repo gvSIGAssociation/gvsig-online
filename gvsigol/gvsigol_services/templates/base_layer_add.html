@@ -31,24 +31,40 @@
 					</div>
 					{% endif %}
 					
+					<!-- 
 					<div class="row">		
 						<div class="col-md-12 form-group">
 							<label for="id_name">{% trans "Name" %}</label>
 							{{ form.name }}
 						</div>	
 					</div>
-					
-					<div class="row">		
-						<div class="col-md-12 form-group">
-							<label for="id_title">{% trans "Title" %}</label>
-							{{ form.title }}
-						</div>	
-					</div>
+					-->
 					
 					<div class="row">		
 						<div class="col-md-12 form-group">
 							<label for="id_type">{% trans "Type" %}</label>
 							{{ form.type }}
+						</div>	
+					</div>
+					
+					
+					<div class="row layers-control xyz-control wms-control wmts-control osm-control">		
+						<div class="col-md-12 form-group">
+							<label for="id_url">{% trans "Url" %}</label>
+							{{ form.url }}
+						</div>	
+					</div>
+					
+					<div class="row layers-control wms-control wmts-control">
+						<div class="col-md-12 form-group">
+							<div id="connect-button" class="btn btn-default btn-sm pull-right"><i class="fa fa-plug" aria-hidden="true"></i> {% trans "Connect" %}</div>					
+						</div>
+					</div>
+					
+					<div class="row">		
+						<div class="col-md-12 form-group">
+							<label for="id_title">{% trans "Title" %}</label>
+							{{ form.title }}
 						</div>	
 					</div>
 					
@@ -59,13 +75,6 @@
 						</div>	
 					</div>
 					
-					<div class="row layers-control xyz-control wms-control wmts-control osm-control">		
-						<div class="col-md-12 form-group">
-							<label for="id_url">{% trans "Url" %}</label>
-							{{ form.url }}
-						</div>	
-					</div>
-										
 					<div class="row layers-control bing-control wms-control wmts-control">		
 						<div class="col-md-12 form-group">
 							<label for="id_layers">{% trans "Layers" %}</label>
@@ -84,7 +93,7 @@
 						</div>	
 					</div>
 					
-					<div class="row layers-control bing-control">		
+					<div class="row layers-control bing-control xyz-control osm-control">		
 						<div class="col-md-12 form-group">
 							<label for="id_apikey">{% trans "Api-key" %}</label>
 							{{ form.key }}
@@ -105,12 +114,23 @@
 	$('#submenu-baselayers').addClass("active");
 </script>
 <script type="text/javascript">
+	
+
 $().ready(function(){ 
+	
+	var bing_layers = {{bing_layers|safe}};
 	
 	function updateFormfields(){
 		var type = $("#id_type option:selected").val();
 		$(".layers-control").css("display","none");
 		$("."+type.toLowerCase()+"-control").css("display","block");
+		
+		if(type == "Bing"){
+			$("#id_layers").empty();
+			for(index in bing_layers){
+				$("#id_layers").append("<option value=\""+bing_layers[index]+"\" selected>"+bing_layers[index]+"</option>")
+			}
+		}
 	};
 	
 	$("#id_type").change(function(){
@@ -119,16 +139,16 @@ $().ready(function(){
 	
 	updateFormfields();
 	
-	$("#id_url").keyup(function() {
+	$("#connect-button").click(function() {
 		//getLayersFromCapabilities(this.value);
-		url = this.value;
-		type = $("#id_type option:selected").val()
-		version = $("#id_version option:selected").val()
+		url = $("#id_url").val();
+		type = $("#id_type option:selected").val();
+		version = "";
 		
-		getNewLayersFromCapabilities(url, type, version);
+		getNewLayersFromCapabilities(url, type, version, true);
 	});
 	
-	function getNewLayersFromCapabilities(url, type, version){
+	function getNewLayersFromCapabilities(url, type, version, edit_version){
 		$.ajax({
 	        type: "POST",
 			url: "/gvsigonline/services/base_layer/get_capabilities_from_url/",
@@ -143,21 +163,58 @@ $().ready(function(){
 			},
 			success: function(data) {
 				
+				if('title' in data){
+					if($("#id_title").val() == ""){
+						$("#id_title").val(data['title']);
+					}
+				}
+				
 				 if('layers' in data){
-					$("#id_layer_list").empty();
+					$("#id_layers").empty();
 					var layers = data['layers'];
 					for(var i=0;i<layers.length; i++){
-	 					$("#id_layer_list").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
+	 					$("#id_layers").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
 					}
 				}
 				 
 				 if('formats' in data){
-					 $("#id_format_list").empty();
+					 $("#id_format").empty();
 						var layers = data['formats'];
 						for(var i=0;i<layers.length; i++){
-		 					$("#id_format_list").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
+		 					$("#id_format").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
 						}
 					}
+				 
+				 if(edit_version && 'version' in data){
+					 var version = data['version'];
+					 $("#id_version").empty();
+					 if(version == '1.0.0'){
+						 $("#id_version").append("<option value=\"1.0.0\" selected>1.0.0</option>")
+					 }
+					 
+					 if(version == '1.1.1'){
+						 $("#id_version").append("<option value=\"1.1.1\" selected>1.1.1</option>")
+					 }else{
+						 if(version != '1.0.0'){
+						 	$("#id_version").append("<option value=\"1.1.1\">1.1.1</option>")
+						 }
+					 }
+					 
+					 if(version == '1.3.0'){
+						 $("#id_version").append("<option value=\"1.3.0\" selected>1.3.0</option>")
+					 }
+					 
+					 $("#id_version").unbind("change").change(function() {
+							url = $("#id_url").val();
+							type = $("#id_type option:selected").val();
+							version = $("#id_version option:selected").val();
+							
+							getNewLayersFromCapabilities(url, type, version, false);
+						});
+				 }
+			},
+			error: function(){
+				alert(gettext("Error intentando conectar"));
 			}
 		});
 		
