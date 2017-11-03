@@ -36,7 +36,7 @@ from django.contrib.auth.models import User
 from gvsigol_core.models import ProjectLayerGroup, BaseLayer
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES, INSTALLED_APPS
+from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES, INSTALLED_APPS, WMS_MAX_VERSION, WMTS_MAX_VERSION, BING_LAYERS
 from django.utils.translation import ugettext as _
 from gvsigol_services.models import LayerResource
 from gvsigol.settings import GVSIGOL_SERVICES
@@ -2503,7 +2503,6 @@ def base_layer_add(request):
         has_errors = False
         try:
             newBaseLayer = BaseLayer()
-            newBaseLayer.name = request.POST.get('name')
             newBaseLayer.title = request.POST.get('title')
             newBaseLayer.type = request.POST.get('type')
             params = {}
@@ -2520,11 +2519,15 @@ def base_layer_add(request):
                 
             if newBaseLayer.type == 'XYZ' or newBaseLayer.type == 'OSM':
                 params['url'] = request.POST.get('url')
-            
+                params['key'] = request.POST.get('key')
             
             newBaseLayer.type_params = json.dumps(params)
             
             newBaseLayer.save()
+            
+            newBaseLayer.name = 'baselayer_' + str(newBaseLayer.id)
+            newBaseLayer.save()
+            
             return redirect('base_layer_list')
             
             #msg = _("Error: fill all the BaseLayer fields")
@@ -2540,7 +2543,7 @@ def base_layer_add(request):
     else:
         form = BaseLayerForm()
         
-    return render(request, 'base_layer_add.html', {'form': form})
+    return render(request, 'base_layer_add.html', {'form': form, 'bing_layers': BING_LAYERS})
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -2551,7 +2554,6 @@ def base_layer_update(request, base_layer_id):
     if request.method == 'POST':
         form = BaseLayerForm(request.POST)
         try:
-            baselayer.name = request.POST.get('name')
             baselayer.title = request.POST.get('title')
             baselayer.type = request.POST.get('type')
             params = {}
@@ -2568,6 +2570,7 @@ def base_layer_update(request, base_layer_id):
                 
             if baselayer.type == 'XYZ' or baselayer.type == 'OSM':
                 params['url'] = request.POST.get('url')
+                params['key'] = request.POST.get('key')
             
             
             baselayer.type_params = json.dumps(params)
@@ -2593,7 +2596,8 @@ def base_layer_update(request, base_layer_id):
         
         response= {
             'form': form, 
-            'baselayer': baselayer
+            'baselayer': baselayer,
+            'bing_layers': BING_LAYERS
         }
         
     return render(request, 'base_layer_update.html', response)
@@ -2626,20 +2630,25 @@ def get_capabilities_from_url(request):
     
     layers = []
     formats = []
+    title = ''
     
     if service == 'WMS':
+        if not version:
+            version = WMS_MAX_VERSION
         wms = WebMapService(url, version=version)
         
         print wms.identification.type
-        print wms.identification.title
+        title = wms.identification.title
         
         layers = list(wms.contents)
         formats = wms.getOperationByName('GetMap').formatOptions
     
     if service == 'WMTS':
+        if not version:
+            version = WMTS_MAX_VERSION
         wmts = WebMapTileService(url, version=version)
         print wmts.identification.type
-        print wmts.identification.title
+        title = wmts.identification.title
         
         layers = list(wmts.contents)
         for layer in wmts.contents:
@@ -2652,7 +2661,8 @@ def get_capabilities_from_url(request):
         'response': '200',
         'version': version,
         'layers': layers,
-        'formats': formats
+        'formats': formats, 
+        'title': title
     }
        
     return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
