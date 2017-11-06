@@ -38,7 +38,7 @@ Algunos requisitos mínimos se deben cumplir para que el proceso de transformaci
 
 4.Pasos para transformar
 ~~~~~~~~~~~~~~~~~~~~~~~~
-4.1. **Crear capa vacía**: Se crea la capa vacía en el sistema y se añaden tantos campos como tenga el fichero plano o los que se quiera volcar información.
+**4.1. Crear capa vacía**: Se crea la capa vacía en el sistema y se añaden tantos campos como tenga el fichero plano o los que se quiera volcar información.
 
 .. note::
    - Cuando se crea una capa vacía en el sistema se añaden por defecto los campos: 'gid' y 'wkb_geometry', el primero es interno para hacer un identificador único en la tabla de Base de Datos (BD), éste no será usado en la transformación, el segundo es el campo donde se registrará la geometría de cada elemento y será el que se use para volcar las coordenadas.
@@ -47,7 +47,7 @@ Algunos requisitos mínimos se deben cumplir para que el proceso de transformaci
 
 Una vez se haya publicado la capa vacía sin registros, se procede a crear la plantilla de transformación para fijar la configuración entre la capa vacía y el fichero plano.
 
-4.2. **Crear plantilla de transformación (formato .xlsx)** Para acceder a esta funcionalidad se debe ingresar en el panel de control:
+**4.2. Crear plantilla de transformación (formato .xlsx)** Para acceder a esta funcionalidad se debe ingresar en el panel de control:
 
 
 .. image:: ../_static/images/etl1.png
@@ -70,8 +70,15 @@ Una vez se haya publicado la capa vacía sin registros, se procede a crear la pl
    * - 3
      - Clic sobre 'añadir'
      - Saldrá una nueva vista para configurar la plantilla de transformación
+   * - 4
+     - Botón color verde 'actualizar transformación'
+     - Permite editar y actualizar nuevos cambios en la transformación definida previamente.
+   * - 5
+     - Botón color rojo 'borrar transformación'
+     - Elimina la transformación de la lista
+     
 
-4.3 **Configuración de plantilla de transformación (formato xlsx)**: EL primer paso es añadir un nombre a la transformación y seleccionar cuál será la capa en el BD donde se volcarań los datos. 
+**4.3 Configuración de plantilla de transformación (formato xlsx)**: EL primer paso es añadir un nombre a la transformación y seleccionar cuál será la capa en el BD donde se volcarań los datos. 
 
 .. image:: ../_static/images/etl2.png
    :align: center
@@ -104,8 +111,9 @@ Una vez se haya publicado la capa vacía sin registros, se procede a crear la pl
    :align: center
 
 .. list-table:: Configuración para ficheros planos (formato xlxs) 
-   :widths: 2 10 20
+   :widths: 2 5 10
    :header-rows: 1
+   :align: left
 
    * - Pasos
      - Selección
@@ -159,8 +167,29 @@ Una vez se haya publicado la capa vacía sin registros, se procede a crear la pl
      - Guardar
      - Se guarda los cambios cuando se finalice de añadir todas las reglas. 
      
-     
-     
+ **4.3.1 Opciones para rellenar (sección 5.2.a)**: Estas son las distintas formas que pueden elegirse para aplicar el volcado de los datos. A continuación se detalla cada una de las opciones disponibles para generar las reglas.
+
+.. image:: ../_static/images/etl3_1.png
+   :align: center
+
+
+.. list-table:: Opción: Valor fijo 
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - selección
+     - Acción
+   * - 1
+     - Es el campo de la tabla vacía que se rellenará
+   * - 2
+     - Opción: 'Valor fijo'
+   * - 3
+     - Escribir manualmente el valor que será fijado en todos los registros del campo seleccionado (1)
+   * - 4
+     - 'cancelar' para volver atrás ó 'aceptar' para guardar la regla        
+    
+
 
 
 
