@@ -104,7 +104,7 @@ Una vez se haya publicado la capa vacía sin registros, se procede a crear la pl
    :align: center
 
 .. list-table:: Configuración para ficheros planos (formato xlxs) 
-   :widths: 2 20 50
+   :widths: 2 10 20
    :header-rows: 1
 
    * - Pasos
@@ -151,13 +151,16 @@ Una vez se haya publicado la capa vacía sin registros, se procede a crear la pl
      - entre las distintas formas que hay, las más usadas son 'valor de columna' y 'campos de geometrías desde campo lat/lon'. Se explicará a detalle en el siguiente item.
    * - 5.3
      - distintas opciones a elegir
-     - Dependiendo de la opción seleccionada en el 5.2.a, se muestra diferetes opciones. Por ejemplo, si se elije 'valor fijo', saldrá otra casilla 'Valor fijo' y se añade un valor escrito por el usuario. Ésta opción rellenará el campo seleccionado con este valor para todos sus registros, como su nombre lo indica es un 'Valor que está fijado'
+     - Dependiendo de la opción seleccionada en el 5.2.a, se muestra diferetes opciones. Por ejemplo, si se elije 'valor fijo', saldrá otra casilla 'Valor fijo' y se añade un valor escrito por el usuario. 
+     Ésta opción rellenará el campo seleccionado con este valor para todos sus registros, como su nombre lo indica es un 'Valor que está fijado'
    * - 6
      - aceptar
      - Se guarda la regla y se pueden definir tantas reglas como campos disponibles hayan en la capa de BD. Para continuar añadiendo reglas se repite todo el proceso del paso (5).
    * - 7
      - Guardar
      - Se guarda los cambios cuando se finalice de añadir todas las reglas. 
+     
+     
      
 
 
