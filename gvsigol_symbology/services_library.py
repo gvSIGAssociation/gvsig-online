@@ -558,10 +558,13 @@ def get_sld(request, type, json_data, layer_id, single_symbol=False):
 
     layer = Layer.objects.get(id=layer_id)
     layer.name = layer.datastore.workspace.name+':'+layer.name
+    is_default = False
+    if json_data.get('is_default'):
+        is_default = json_data.get('is_default')
     style = Style(
         name = json_data.get('name'),
         title = json_data.get('title'),
-        is_default = json_data.get('is_default'),
+        is_default = is_default,
         type = type
     )
     style.save()
