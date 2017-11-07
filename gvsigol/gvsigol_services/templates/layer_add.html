@@ -24,6 +24,8 @@
 					{% if form.errors %}
 					<div id="form-error" style="color:#ff0000;">
 						<ul>
+						{{ form.non_field_errors }}
+						
 						{% for field in form %}
 							{% if field.errors %}
 								<li>{{field.label}}. {{ field.errors|striptags }}</li>

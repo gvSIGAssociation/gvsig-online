@@ -559,6 +559,23 @@ def layer_add_with_group(request, layergroup_id):
             
         if form.is_valid():
             try:
+                if form.cleaned_data['datastore'].type == 'v_PostGIS': 
+                    dts = form.cleaned_data['datastore']
+                    params = json.loads(dts.connection_params)
+                    host = params['host']
+                    port = params['port']
+                    dbname = params['database']
+                    user = params['user']
+                    passwd = params['passwd']
+                    schema = params.get('schema', 'public')
+                    i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+                    fields = i.get_fields(form.cleaned_data['name'], schema)
+                    
+                    for field in fields:
+                        if ' ' in field:
+                            raise ValueError(_("Invalid layer fields: '{value}'. Layer can't have fields with whitespaces").format(value=field))
+        
+                
                 # first create the resource on the backend
                 mapservice_backend.createResource(
                     form.cleaned_data['datastore'].workspace,
@@ -669,7 +686,7 @@ def layer_add_with_group(request, layergroup_id):
        
             except Exception as e:
                 try:
-                    msg = e.get_message()
+                    msg = e.message
                 except:
                     msg = _("Error: layer could not be published")
                 # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
@@ -1961,8 +1978,8 @@ def is_grouped_symbology_request(request, url, aux_response, styles):
                         url = url.replace('STYLES=', 'STYLES='+style_default)
                         if 'username' in request.session and 'password' in request.session:
                             if request.session['username'] is not None and request.session['password'] is not None:
-                                #auth2 = (request.session['username'], request.session['password'])
-                                auth2 = ('admin', 'geoserver')
+                                auth2 = (request.session['username'], request.session['password'])
+                                #auth2 = ('admin', 'geoserver')
                                 aux_response = grequests.get(url, auth=auth2, verify=False) 
         except:
             return aux_response
