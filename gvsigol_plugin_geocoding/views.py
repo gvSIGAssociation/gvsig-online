@@ -41,6 +41,7 @@ from gvsigol_services.models import Workspace, Datastore
 from gvsigol_services.views import backend_resource_list_available,\
     backend_resource_list
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
+from gvsigol_services.backend_postgis import Introspect
 
 
 providers_order = []
@@ -172,7 +173,18 @@ def provider_add(request):
 
 
 def isValidCartociudadDB(datastore):
-    resources = mapservice_backend.getResources(datastore.workspace, datastore, "all")
+    params = json.loads(datastore.connection_params)
+    host = params['host']
+    port = params['port']
+    dbname = params['database']
+    user = params['user']
+    passwd = params['passwd']
+    schema = params.get('schema', 'public')
+    i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+    resources = i.get_tables(schema)
+    
+    
+    #resources = mapservice_backend.getResources(datastore.workspace, datastore, "all")
     resources_needed = []
     
     #if not geocoding_setting.CARTOCIUDAD_DB_CODIGO_POSTAL in resources:
