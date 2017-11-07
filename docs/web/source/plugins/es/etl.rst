@@ -4,41 +4,44 @@ ETL - Plugin de transformación de datos
 1. Introducción
 ---------------
 
-*ETL* (acrónimo de los términos en inglés *Extract, Transform and Load*) es una herramienta que permite exportar la información contenida en un fichero plano de  datos (Excel o CSV) a una tabla en la base de datos para luego poder operar con ella.
+*ETL* (acrónimo de los términos en inglés *Extract, Transform and Load*) es una herramienta que permite exportar la información contenida en un fichero plano de datos (Excel o CSV) a una tabla en la base de datos para luego poder operar con ella.
 
 La ventaja de esta herramienta es que permite georrefenciar los registros de cada tabla, siempre y cuando exista un campo con el valor de las coordenadas o bien la dirección para poder posicionarlo mediante el geocodificador inverso, es decir, por medio del buscador de direcciones, que en este caso se usará la fuente de datos del servidor de OpenStreetMap (OSM).
 
 
-2. Requisitos para realizar las transformaciones
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-2.1. Tener disponible los datos en un fichero plano, en formatos de hoja de cálculo (**.xlsx**) o texto (**.csv**).
+2. Requisitos básicos en la estructura de los ficheros planos
+-------------------------------------------------------------
 
-2.2. Crear una **capa vacía** en el sistema con los campos a donde se volcará la información de los ficheros planos.
+Algunos requisitos mínimos se deben cumplir para que el proceso de transformación se realice de forma correcta. Los formatos deben ser (Excel o CSV) y por otro lado asegurarse que las coordenadas contenidas en los ficheros sean estándar y uniforme, de esta manera se garantiza que la transformación sea exitosa al momento de posicionar cada elemento.
 
-2.3. Crear la plantilla de transformación.
+* **Transformación con dirección**: El campo que contenga la dirección del elemento, preferiblemente que sea lo mas similiar posible a la dirección que ofrece la cartografía base del OSM.
 
-2.4. Aplicar la transformación sobre el fichero plano.
-
-
-3. Requisitos básicos en la estructura de los ficheros planos
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Algunos requisitos mínimos se deben cumplir para que el proceso de transformación se realice de forma correcta. Los formatos deben ser los citados anteriormente y por otro lado asegurarse que las coordenadas contenidas en los ficheros sean estándar y uniforme, de esta manera se garantiza que la transformación sea exitosa al momento de posicionar cada elemento.
-
-3.1. **Transformación con dirección**: El campo que contenga la dirección del elemento, preferiblemente que sea lo mas similiar posible a la dirección que ofrece la cartografía base del OSM.
-
-3.2. **Transformación con coordenadas para formato (.xlxs)**: las coordenadas comunmente están en celdas separadas, deberán estar expresadas en grados decimales, donde la parte entera se separa de los minutos y segundos por (,), por ejemplo: (-31,4459068688) (-64,233981896). 
+* **Transformación con coordenadas para formato (.xlxs)**: las coordenadas comunmente están en celdas separadas, deberán estar expresadas en grados decimales, donde la parte entera se separa de los minutos y segundos por (,), por ejemplo: (-31,4459068688) (-64,233981896). 
 
 .. note::
    - El sistema no soporta comillas simples, ni dobles al final de la coordenadas, ejemplo: (-31,4354382939') (-64,2393822877').
    
    - Tampoco será válido coordenadas no bien definidas como los siguientes ejemplos: (-313.937.747)  (-6.417.356.619.999.990).
    
-3.3. **Transformación con coordenadas para formato (.csv)**: las coordenadas normalmente estarán en una misma celda, por lo tanto, igual estarán expresadas en grados decimales, pero esta vez la parte entera se separa de los minutos y segundos por un (.) ya que la (,) es usada para separar entre latitud y longitud o viceversa. También se acepta que estén o no dentro de paréntesis. Ejemplo: (-31.4315574, -64.18822169999998) 
+* **Transformación con coordenadas para formato (.csv)**: las coordenadas normalmente estarán en una misma celda, por lo tanto, igual estarán expresadas en grados decimales, pero esta vez la parte entera se separa de los minutos y segundos por un (.) ya que la (,) es usada para separar entre latitud y longitud o viceversa. También se acepta que estén o no dentro de paréntesis. Ejemplo: (-31.4315574, -64.18822169999998) 
 
 
-4.Pasos para transformar
-~~~~~~~~~~~~~~~~~~~~~~~~
-**4.1. Crear capa vacía**: Se crea la capa vacía en el sistema y se añaden tantos campos como tenga el fichero plano o los que se quiera volcar información.
+
+3. Requisitos para realizar las transformaciones
+------------------------------------------------
+
+* 3.1 Crear una **capa vacía** en el sistema con los campos a donde se volcará la información de los ficheros planos.
+
+* 3.2 Crear la plantilla de transformación.
+
+* 3.3 Disponer en el 'administrador de archivos' el fichero plano, en formatos de hoja de cálculo (**.xlsx**) o texto (**.csv**).
+
+* 3.4  Aplicar la transformación sobre el fichero plano.
+
+
+3.1. Crear capa vacía
+~~~~~~~~~~~~~~~~~~~~~
+Se crea la capa vacía en el sistema y se añaden tantos campos como tenga el fichero plano o los que se quiera volcar información.
 
 .. note::
    - Cuando se crea una capa vacía en el sistema se añaden por defecto los campos: 'gid' y 'wkb_geometry', el primero es interno para hacer un identificador único en la tabla de Base de Datos (BD), éste no será usado en la transformación, el segundo es el campo donde se registrará la geometría de cada elemento y será el que se use para volcar las coordenadas.
@@ -47,7 +50,10 @@ Algunos requisitos mínimos se deben cumplir para que el proceso de transformaci
 
 Una vez se haya publicado la capa vacía sin registros, se procede a crear la plantilla de transformación para fijar la configuración entre la capa vacía y el fichero plano.
 
-**4.2. Crear plantilla de transformación (formato .xlsx)** Para acceder a esta funcionalidad se debe ingresar en el panel de control:
+
+3.2. Crear plantilla de transformación
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Para acceder a esta funcionalidad se debe ingresar en el panel de control:
 
 
 .. image:: ../_static/images/etl1.png
@@ -78,7 +84,9 @@ Una vez se haya publicado la capa vacía sin registros, se procede a crear la pl
      - Elimina la transformación de la lista
      
 
-**4.3 Configuración de plantilla de transformación (formato xlsx)**: EL primer paso es añadir un nombre a la transformación y seleccionar cuál será la capa en el BD donde se volcarań los datos. 
+3.2.1 Configuración de plantilla de transformación:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+EL primer paso es añadir un nombre a la transformación y seleccionar cuál será la capa en el BD donde se volcarań los datos. 
 
 .. image:: ../_static/images/etl2.png
    :align: center
@@ -106,6 +114,9 @@ Una vez se haya publicado la capa vacía sin registros, se procede a crear la pl
      - Clic en continuar
      - Me lleva a una siguiente vista para configurar y corresponder cada una de las hojas, campos y celdas de la transformación a un registro de la tabla en la bd.  
 
+3.2.2 Configurar ficheros planos de Formato .xlxs:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Continuando con la configuración, se decriben los detalles para el **formato xlxs** 
 
 .. image:: ../_static/images/etl3.png
    :align: center
@@ -166,9 +177,10 @@ Una vez se haya publicado la capa vacía sin registros, se procede a crear la pl
    * - 7
      - Guardar
      - Se guarda los cambios cuando se finalice de añadir todas las reglas. 
-
      
-**4.3.1 Opciones para rellenar (sección 5.2.a)**: Estas son las distintas formas que pueden elegirse para aplicar el volcado de los datos. A continuación se detalla cada una de las opciones disponibles para generar las reglas.
+3.2.2 configurar 'opciones para rellenar' en ambos formatos :
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Estas son las distintas formas que pueden elegirse para aplicar el volcado de los datos. A continuación se detalla cada una de las opciones disponibles para generar las reglas.
 
 * **Opción 1: valor fijo:**
 
