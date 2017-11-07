@@ -240,6 +240,9 @@ Una vez se haya publicado la capa vacía sin registros, se procede a crear la pl
         
 * **Opción 4: Geometría desde dos campos (lon/lat)**
 
+.. image:: ../_static/images/etl3_4.png
+   :align: center
+
 .. list-table:: Opción 4: Geometría desde dos campos
    :widths: 2 10 
    :header-rows: 1
@@ -379,7 +382,7 @@ Una vez se haya publicado la capa vacía sin registros, se procede a crear la pl
      - Seleccionar el tipo de lenguaje usado en la trasformación.  
 
 .. note::
-   La opción 'Definición de fecha' puede ser combinada las opciones de cada casilla según el caso que se amerite.
+   En 'Definición de fecha' pueden usarse distintas combinaciones entre las opciones de cada casilla, según lo amerite el caso.
 
 
 * **Opción 9: Fecha desde celda**
@@ -438,7 +441,12 @@ Una vez se haya publicado la capa vacía sin registros, se procede a crear la pl
 * **Opción 11: Nombre de fichero**
 
 .. image:: ../_static/images/etl3_11.png
-   :align: center  
+   :align: center
+ 
+.. list-table:: Opción 11: Nombre de fichero
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
   
    * - Selección
      - Acción
@@ -449,17 +457,22 @@ Una vez se haya publicado la capa vacía sin registros, se procede a crear la pl
    * - 3
      - 'cancelar' para volver atrás ó 'aceptar' para guardar la regla.
   
-* **Opción 12: Nombre de la hoja**
+* **Opción 12: Nombre de hoja**
 
 .. image:: ../_static/images/etl3_12.png
    :align: center  
+
+.. list-table:: Opción 12: Nombre de hoja
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
   
    * - Selección
      - Acción
    * - 1
      - Es el campo de la tabla vacía que se rellenará.
    * - 2  
-     - Opción: 'nombre de la hoja', se usa para rellenar los registros del campo seleccionado con el nombre de cada hoja del fichero plano. Es útil cuando existen muchos registros en distintas hojas y se quiere identificar a cuál pertenecen. No hace falta indicar ningun parámetro.
+     - Opción: 'nombre de hoja', se usa para rellenar los registros del campo seleccionado con el nombre de cada hoja del fichero plano. Es útil cuando existen muchos registros en distintas hojas y se quiere identificar a cuál pertenecen. No hace falta indicar ningun parámetro.
    * - 3
      - 'cancelar' para volver atrás ó 'aceptar' para guardar la regla.
      
