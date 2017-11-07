@@ -45,6 +45,7 @@ import string
 import json
 import re
 import unicodedata
+from dbfread import DBF
 
 class UnsupportedRequestError(Exception):
     pass
@@ -1075,11 +1076,28 @@ class Geoserver():
         except Exception as e:
             logging.exception(e)
             raise rest_geoserver.RequestError(-1, _("Error creating the layer. Review the file format."))
-            
+    
+    
+    def get_fields_from_shape(self, shp_path):
+        fields = {}
+        fields['fields'] = {}
+        
+        dbf_file = shp_path.replace('.shp', '.dbf')
+        table = DBF(dbf_file)                
+        return table.fields  
+        
+        
     def exportShpToPostgis(self, form_data):
         name = form_data['name']
         ds = form_data['datastore']
         shp_path = form_data['file'] 
+        
+        
+        fields = self.get_fields_from_shape(shp_path)
+        for field in fields:
+            if ' ' in field.name:
+                raise InvalidValue(-1, _("Invalid layer fields: '{value}'. Layer can't have fields with whitespaces").format(value=field.name))
+            
         
         if _valid_sql_name_regex.search(name) == None:
             raise InvalidValue(-1, _("Invalid layer name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name))
