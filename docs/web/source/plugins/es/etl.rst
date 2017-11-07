@@ -166,14 +166,17 @@ Una vez se haya publicado la capa vacía sin registros, se procede a crear la pl
    * - 7
      - Guardar
      - Se guarda los cambios cuando se finalice de añadir todas las reglas. 
+
      
- **4.3.1 Opciones para rellenar (sección 5.2.a)**: Estas son las distintas formas que pueden elegirse para aplicar el volcado de los datos. A continuación se detalla cada una de las opciones disponibles para generar las reglas.
+**4.3.1 Opciones para rellenar (sección 5.2.a)**: Estas son las distintas formas que pueden elegirse para aplicar el volcado de los datos. A continuación se detalla cada una de las opciones disponibles para generar las reglas.
+
+* **Opción 1: valor fijo:**
 
 .. image:: ../_static/images/etl3_1.png
    :align: center
 
 
-.. list-table:: Opción: Valor fijo 
+.. list-table:: Opción 1: Valor fijo 
    :widths: 2 10 
    :header-rows: 1
    :align: left
@@ -188,7 +191,285 @@ Una vez se haya publicado la capa vacía sin registros, se procede a crear la pl
      - Escribir manualmente el valor que será fijado en todos los registros del campo seleccionado (1)
    * - 4
      - 'cancelar' para volver atrás ó 'aceptar' para guardar la regla        
+  
     
+* **Opción 2: Valor de celda:**
+
+.. image:: ../_static/images/etl3_2.png
+   :align: center
+
+.. list-table:: Opción 2: Valor de celda 
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Selección
+     - Acción
+   * - 1
+     - Es el campo de la tabla vacía que se rellenará
+   * - 2
+     - Opción: 'Valor de celda', Rellena todos los registros del campo con el valor de una celda del fichero plano. 
+   * - 3
+     - Indicar el número de la columna del fichero plano donde se ubica el valor.
+   * - 4
+     - Indcar el número de la fila del fichero plano donde se ubica el valor. 
+   * - 5 
+     - 'cancelar' para volver atrás ó 'aceptar' para guardar la regla.
+
+* **Opción 3: Valores de columna**
+
+.. image:: ../_static/images/etl3_3.png
+   :align: center
+
+.. list-table:: Opción 3: Valores de columna 
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Selección
+     - Acción
+   * - 1
+     - Es el campo de la tabla vacía que se rellenará.
+   * - 2
+     - Opción: 'Valores de columna', todos los valores que existan en la columna indicada del fichero plano se volcarán en el campo seleccionado (es la opción mas usual)
+   * - 3
+     - Indicar el número de la columna del fichero plano
+   * - 4 
+     - 'cancelar' para volver atrás ó 'aceptar' para guardar la regla.     
+  
+        
+* **Opción 4: Geometría desde dos campos (lon/lat)**
+
+.. list-table:: Opción 4: Geometría desde dos campos
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Selección
+     - Acción
+   * - 1
+     - El campo 'wkb_geometry' siempre se usará para las opciones de 'geometrías', es donde se crea y almacena la geometría del elemento en la base de datos geoespacial.
+   * - 2
+     - Opción: 'Geometría desde dos campos (lon/lat)', esta opción generá la geometría de puntos a partir de las coordenadas latitud y longitud ó Este y Norte que se ubican en distintas columnas del fichero plano.
+   * - 3
+     - Seleccionar el tipo de geometría que se creará. La más usada es MultiPoint.
+   * - 4
+     - Seleccionar el sistema de referencia, están ordenados por el número EPSG.
+   * - 5
+     - Indicar el número de la columna donde se ubica la coordenada que corresponde a la Longitud.
+   * - 6
+     - Indicar el número de la columna donde se ubica la coordenada que corresponde a la Latitud.
+   * - 7 
+     - 'cancelar' para volver atrás ó 'aceptar' para guardar la regla.
+
+
+* **Opción 5: Geometría desde un campo (lon/lat)**
+
+.. image:: ../_static/images/etl3_5.png
+   :align: center
+
+.. list-table:: Opción 5: Geometría desde un campo (lon/lat) 
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Selección
+     - Acción
+   * - 1
+     - El campo 'wkb_geometry' siempre se usará para las opciones de 'geometrías', es donde se crea y almacena la geometría del elemento en la base de datos geoespacial.
+   * - 2
+     - Opción: 'Geometría desde un campo (lon/lat)', permite generar la geometría desde *un solo campo* donde existan las coordenadas separadas por coma (,) y en el orden (lon,lat) ó (x,y).
+   * - 3
+     - Seleccionar el tipo de geometría que se creará. La más usada es MultiPoint.
+   * - 4
+     - Seleccionar el sistema de referencia, están ordenados por el número EPSG.
+   * - 5
+     - Indicar el número de la columna del fichero plano donde se ubican las coordenadas.
+   * - 6
+     - 'cancelar' para volver atrás ó 'aceptar' para guardar la regla.
+
+
+* **Opción 6: Geometría desde un campo (lat/lon)**
+
+.. image:: ../_static/images/etl3_6.png
+   :align: center
+
+.. list-table:: Opción 6: Geometría desde un campo (lat/lon) 
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Selección
+     - Acción
+   * - 1
+     - El campo 'wkb_geometry' siempre se usará para las opciones de 'geometrías', es donde se crea y almacena la geometría del elemento en la base de datos geoespacial.
+   * - 2
+     - Opción: 'Geometría desde un campo (lat/lon)', permite generar la geometría desde *un solo campo* donde existan las coordenadas separadas por coma (,) y en el orden (lat,lon) ó (y,x).
+   * - 3
+     - Seleccionar el tipo de geometría que se creará. La más usada es MultiPoint.
+   * - 4
+     - Seleccionar el sistema de referencia, están ordenados por el número EPSG.
+   * - 5
+     - Indicar el número de la columna del fichero plano donde se ubican las coordenadas.
+   * - 6
+     - 'cancelar' para volver atrás ó 'aceptar' para guardar la regla.
+
+
+* **Opción 7: Geometría desde campo dirección**
+
+.. image:: ../_static/images/etl3_7.png
+   :align: center
+
+.. list-table:: Opción 7: Geometría desde campo dirección 
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Selección
+     - Acción
+   * - 1
+     - El campo 'wkb_geometry' siempre se usará para las opciones de 'geometrías', es donde se crea y almacena la geometría del elemento en la base de datos geoespacial.
+   * - 2
+     - Opción: 'Geometría desde campo dirección', permite generar geometrías puntuales desde un campo texto con la dirección. La generación y ubicación de la geometría dependerá de la descripción con que que se detalle la dirección, puesto que debe ser detectada en la BD de OpenStreetMap (OSM), en este caso es necesario tener disponible el geocodificador de OSM. Para una mayor discriminación de datos por área, se podrá filtrar por *'código de país o dominio de nivel superior geográfico'*, ejemplo: 'es' para España, 'ar' para Argentina. (Esto se debe configurar en el plugin de geocoding, añadir el proveedor 'nominatim' y parámetros avanzados).
+   * - 3
+     - Indicar el número de la columna del fichero plano donde se ubica la dirección.
+   * - 4
+     - 'cancelar' para volver atrás ó 'aceptar' para guardar la regla.
+
+
+* **Opción 8: Definición de fecha**
+
+.. image:: ../_static/images/etl3_8.png
+   :align: center
+   
+.. list-table:: Opción 8: Definición de fecha 
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Selección
+     - Acción
+   * - 1
+     - Es el campo de la tabla vacía que se rellenará. Este campo deberá ser de tipo de dato: 'date' en la BD.
+   * - 2  
+     - Opción: 'Definición de fecha', esta opción es usada cuando en el fichero plano los valores del día, mes y año de una fecha están en distintas columnas y/o celdas fijas.    
+   * - 3
+     - Se disponen de tres casillas 'año, 'mes' y 'día'. En cada casilla hay tres formas para introducir el valor según sea el caso, estas son: valor fijo, valor desde columna o valor desde celda. 
+   * - 3.1
+     - Casilla 'año' con la opción 'Fijar valor de año'
+   * - 3.1.a
+     - Escribir manualmente el número del año, introducir los cuatro dígitos.
+   * - 3.1.b
+     - para el 'año' solo se podrá seleccionar el formato de cuatro dígitos. Ejemplo, el año 2017 siempre será: '2017' y no '17'. 
+   * - 3.2
+     - Casilla 'mes' con la opción 'fijar la columna del mes'
+   * - 3.2.a
+     - indicar el número de la columna del fichero plano donde se ubican los meses
+   * - 3.2.b
+     - Para el 'mes' se podrá elegir entre el formato de número (1 al 12) o por nombre (Enero,..Diciembre)     
+   * - 3.3 
+     - Casilla 'día' con la opción 'Fijar la celda del día'
+   * - 3.3.a
+     - indicar el número de la columna del fichero plano donde se ubica la celda con el valor del día. 
+   * - 3.3.b
+     - indicar el número de la fila del fichero plano donde se ubica la celda con el valor del día.
+   * - 3.3.c
+     - Para el 'día' solo tedrá el formato númerico de uno a dos dígitos (1 al 31).
+   * - 4
+     - Seleccionar el tipo de lenguaje usado en la trasformación.  
+
+.. note::
+   La opción 'Definición de fecha' puede ser combinada las opciones de cada casilla según el caso que se amerite.
+
+
+* **Opción 9: Fecha desde celda**
+
+.. image:: ../_static/images/etl3_9.png
+   :align: center
+
+.. list-table:: Opción 9: Fecha desde celda 
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Selección
+     - Acción
+   * - 1
+     - Es el campo de la tabla vacía que se rellenará. Este campo deberá ser de tipo de dato: 'date' en la BD.
+   * - 2  
+     - Opción: 'fecha desde celda', será usada cuando en el fichero plano haya una única fecha común para todos los registros y esté fijada en una celda.
+   * - 3
+     - indicar el número de la columna del fichero plano donde se ubica la celda con el valor de la fecha.
+   * - 4
+     - indicar el número de la fila del fichero plano donde se ubica la celda con el valor de la fecha.
+   * - 5
+     - Formato como se representará la fecha. Pude definirse por el usuario.
+   * - 6
+     - seleccionar el tipo de lenguaje usado en la trasformación.  
+   * - 7
+     - 'cancelar' para volver atrás ó 'aceptar' para guardar la regla. 
+
+* **Opción 10: Fecha desde columna**
+
+.. image:: ../_static/images/etl3_10.png
+   :align: center
+
+.. list-table:: Opción 10: Fecha desde columna
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Selección
+     - Acción
+   * - 1
+     - Es el campo de la tabla vacía que se rellenará. Este campo deberá ser de tipo de dato: 'date' en la BD.
+   * - 2  
+     - Opción: 'Fecha desde columna', usada para volcar las fechas que hay en una columna del fichero plano a un campo de la capa vacía, haciendo la correspondencia de uno a uno e indicando el formato.
+   * - 3 
+     - indicar el número de la columna del fichero plano donde están las fechas.
+   * - 4
+     - Formato como se representará la fecha. Pude definirse por el usuario.
+   * - 5
+     - seleccionar el tipo de lenguaje usado en la trasformación. 
+   * - 6
+     - 'cancelar' para volver atrás ó 'aceptar' para guardar la regla.
+ 
+  
+* **Opción 11: Nombre de fichero**
+
+.. image:: ../_static/images/etl3_11.png
+   :align: center  
+  
+   * - Selección
+     - Acción
+   * - 1
+     - Es el campo de la tabla vacía que se rellenará.
+   * - 2  
+     - Opción: 'nombre de fichero', se usa para rellenar los registros del campo seleccionado con el nombre del fichero plano. No hace falta indicar ningun parámetro.
+   * - 3
+     - 'cancelar' para volver atrás ó 'aceptar' para guardar la regla.
+  
+* **Opción 12: Nombre de la hoja**
+
+.. image:: ../_static/images/etl3_12.png
+   :align: center  
+  
+   * - Selección
+     - Acción
+   * - 1
+     - Es el campo de la tabla vacía que se rellenará.
+   * - 2  
+     - Opción: 'nombre de la hoja', se usa para rellenar los registros del campo seleccionado con el nombre de cada hoja del fichero plano. Es útil cuando existen muchos registros en distintas hojas y se quiere identificar a cuál pertenecen. No hace falta indicar ningun parámetro.
+   * - 3
+     - 'cancelar' para volver atrás ó 'aceptar' para guardar la regla.
+     
+       
+
+
+
+
+
+
 
 
 
