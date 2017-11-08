@@ -93,6 +93,13 @@
 						</div>	
 					</div>
 					
+					<div class="row layers-control wmts-control">		
+						<div class="col-md-12 form-group">
+							<label for="id_format">{% trans "MatrixSet" %}</label>
+							{{ form.matrixset }}
+						</div>	
+					</div>
+					
 					<div class="row layers-control bing-control xyz-control osm-control">		
 						<div class="col-md-12 form-group">
 							<label for="id_apikey">{% trans "Api-key" %}</label>
@@ -117,7 +124,11 @@
 	
 
 $().ready(function(){ 
-	
+	var url = "";
+	var format_or = "";
+	var matrixset = "";
+	var version = "";
+	var layer = "";
 	var bing_layers = {{bing_layers|safe}};
 	
 	function updateFormfields(){
@@ -145,10 +156,10 @@ $().ready(function(){
 		type = $("#id_type option:selected").val();
 		version = "";
 		
-		getNewLayersFromCapabilities(url, type, version, true);
+		getNewLayersFromCapabilities(url, type, version, "", true);
 	});
 	
-	function getNewLayersFromCapabilities(url, type, version, edit_version){
+	function getNewLayersFromCapabilities(url, type, version, layer, edit_version){
 		$.ajax({
 	        type: "POST",
 			url: "/gvsigonline/services/base_layer/get_capabilities_from_url/",
@@ -159,7 +170,8 @@ $().ready(function(){
 			data:{
 				'url': url,
 				'type': type,
-				'version': version
+				'version': version,
+				'layer': layer
 			},
 			success: function(data) {
 				
@@ -173,7 +185,11 @@ $().ready(function(){
 					$("#id_layers").empty();
 					var layers = data['layers'];
 					for(var i=0;i<layers.length; i++){
-	 					$("#id_layers").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
+	 					if(layers[i] == layer){
+							$("#id_layers").append('<option value="' + layers[i] + '" select>' + layers[i] + '</option>');
+						}else{
+	 						$("#id_layers").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
+						}
 					}
 				}
 				 
@@ -181,7 +197,23 @@ $().ready(function(){
 					 $("#id_format").empty();
 						var layers = data['formats'];
 						for(var i=0;i<layers.length; i++){
-		 					$("#id_format").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
+		 					if(layers[i] == format_or){
+								$("#id_format").append('<option value="' + layers[i] + '" select>' + layers[i] + '</option>');
+							}else{
+		 						$("#id_format").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
+							}
+						}
+					}
+				 
+				 if(type == "WMTS" && 'matrixsets' in data){
+					 $("#id_matrixset").empty();
+						var layers = data['matrixsets'];
+						for(var i=0;i<layers.length; i++){
+		 					if(layers[i] == matrixset){
+								$("#id_matrixset").append('<option value="' + layers[i] + '" select>' + layers[i] + '</option>');
+							}else{
+		 						$("#id_matrixset").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
+							}
 						}
 					}
 				 
@@ -208,10 +240,28 @@ $().ready(function(){
 							url = $("#id_url").val();
 							type = $("#id_type option:selected").val();
 							version = $("#id_version option:selected").val();
+							layer = $("#id_layers option:selected").val();
+							matrixset = $("#id_matrixset option:selected").val();
+							format_or = $("#id_format option:selected").val();
 							
-							getNewLayersFromCapabilities(url, type, version, false);
+							getNewLayersFromCapabilities(url, type, version, layer, false);
+							$('#id_version option[value="'+version+'"]').prop('selected', true);
+						});
+						
+					$("#id_layers").unbind("change").change(function() {
+							url = $("#id_url").val();
+							type = $("#id_type option:selected").val();
+							version = $("#id_version option:selected").val();
+							layer = $( this ).val();
+							matrixset = $("#id_matrixset option:selected").val();
+							format_or = $("#id_format option:selected").val();
+							
+							getNewLayersFromCapabilities(url, type, version, layer, false);
+							$('#id_layers option[value="'+layer+'"]').prop('selected', true);
 						});
 				 }
+				 
+				 
 			},
 			error: function(){
 				alert(gettext("Error intentando conectar"));
