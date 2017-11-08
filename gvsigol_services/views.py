@@ -2529,6 +2529,8 @@ def base_layer_add(request):
                 params['url'] = request.POST.get('url')
                 params['layers'] = request.POST.get('layers')
                 params['format'] = request.POST.get('format')
+            if newBaseLayer.type == 'WMTS':
+                params['matrixset'] = request.POST.get('matrixset')
                 
             if newBaseLayer.type == 'Bing':
                 params['key'] = request.POST.get('key')
@@ -2580,6 +2582,8 @@ def base_layer_update(request, base_layer_id):
                 params['url'] = request.POST.get('url')
                 params['layers'] = request.POST.get('layers')
                 params['format'] = request.POST.get('format')
+            if baselayer.type == 'WMTS':
+                params['matrixset'] = request.POST.get('matrixset')
             
             if baselayer.type == 'Bing':
                 params['key'] = request.POST.get('key')
@@ -2641,12 +2645,14 @@ def get_capabilities_from_url(request):
     url = request.POST.get('url')
     service = request.POST.get('type')
     version = request.POST.get('version')
+    layer = request.POST.get('layer')
     
     values={
     }
     
     layers = []
     formats = []
+    matrixsets = []
     title = ''
     
     if service == 'WMS':
@@ -2656,7 +2662,7 @@ def get_capabilities_from_url(request):
         
         print wms.identification.type
         title = wms.identification.title
-        
+        matrixsets = []
         layers = list(wms.contents)
         formats = wms.getOperationByName('GetMap').formatOptions
     
@@ -2664,22 +2670,26 @@ def get_capabilities_from_url(request):
         if not version:
             version = WMTS_MAX_VERSION
         wmts = WebMapTileService(url, version=version)
-        print wmts.identification.type
         title = wmts.identification.title
         
         layers = list(wmts.contents)
-        for layer in wmts.contents:
+        if (not layer or layer == '') and layers.__len__() > 0:
+            layer = layers[0]
+        if layer and layer != '':
             for format in wmts.contents.get(layer).formats:
                 if not format in formats:
                     formats.append(format)
-        
+            for matrixset in wmts.contents.get(layer).tilematrixsets:
+                if not matrixset in matrixsets:
+                    matrixsets.append(matrixset)
     
     data = {
         'response': '200',
         'version': version,
         'layers': layers,
         'formats': formats, 
-        'title': title
+        'title': title,
+        'matrixsets': matrixsets
     }
        
     return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
