@@ -136,7 +136,7 @@ $(document).ready(function() {
 	});
 	map.addLayer(wmsLayer);
 	
-	var utils = new SymbologyUtils(map, wmsLayer, 'RasterSymbolizer', previewUrl, [], []);
+	var utils = new SymbologyUtils(map, layerId, wmsLayer, 'RasterSymbolizer', previewUrl, [], []);
 	var colorTable = new ColorTable(layerName, utils, null);
 	colorTable.addDefaultEntries();
 	
