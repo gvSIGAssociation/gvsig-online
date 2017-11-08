@@ -44,6 +44,8 @@ viewer.core = {
 	layerTree: null,
 	
 	layerCount: 0,
+	
+	overviewmap: null,
 		
     initialize: function(conf) {
     	this.conf = conf;
@@ -101,12 +103,13 @@ viewer.core = {
 		this.zoombar = new ol.control.Zoom();
 		
 		var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false});
+		this.overviewmap = new ol.control.OverviewMap({collapsed: false});
 		this.map = new ol.Map({
 			interactions: interactions,
       		controls: [
       			this.zoombar,
 				new ol.control.ScaleLine(),					
-      			new ol.control.OverviewMap({collapsed: false}),
+      			this.overviewmap,
       			mousePositionControl
       		],
       		renderer: 'canvas',
@@ -370,21 +373,10 @@ viewer.core = {
     },
     
     _loadBaseLayers: function() {		
-	    	
+	    var self = this;
     	var base_layers = this.conf.base_layers;
     	
     	var layers = this.map.getLayers();
-     	var projection = ol.proj.get('EPSG:3857');
-     	var matrixSet = 'EPSG:3857';
-    		
-     	var projectionExtent = projection.getExtent();
-     	var size = ol.extent.getWidth(projectionExtent) / 256;
-     	var resolutions = new Array(18);
-     	var matrixIds = new Array(18);
-     	for (var z = 0; z < 18; ++z) {
-     		resolutions[z] = size / Math.pow(2, z);
-     		matrixIds[z] = z;
-     	}
     	
     	for(var i=0; i<base_layers.length; i++){
     		var base_layer = base_layers[i];
@@ -402,29 +394,63 @@ viewer.core = {
 				this.map.addLayer(wmsLayer);
 				
 			} 
-	    	if (base_layer['type'] == 'WMTS') {				
-				var ignSource3 = new ol.source.WMTS({
-			         attributions: '',
-			         url: base_layer['url'],
-			         layer: base_layer['layers'],
-			         matrixSet: matrixSet,
-			         format: base_layer['format'],
-			         projection: projection,
-			         tileGrid: new ol.tilegrid.WMTS({
-			           origin: ol.extent.getTopLeft(projectionExtent),
-			           resolutions: resolutions,
-			           matrixIds: matrixIds
-			         }),
-			         style: 'default',
-			         wrapX: true
-			       });
-			 	var ignLayer3 = new ol.layer.Tile({
-			 		id: this._nextLayerId(),
-			 		source: ignSource3,
-			 		visible: base_layer['active']
-			 	});
-			 	ignLayer3.baselayer = true;
-			 	this.map.addLayer(ignLayer3);
+	    	if (base_layer['type'] == 'WMTS') {		
+//	    		var projection = ol.proj.get(base_layer['srs']);
+//	         	var matrixSet = base_layer['srs'];
+//	        		
+//	         	var projectionExtent = projection.getExtent();
+//	         	var size = ol.extent.getWidth(projectionExtent) / 256;
+//	         	var resolutions = new Array(18);
+//	         	var matrixIds = new Array(18);
+//	         	for (var z = 0; z < 18; ++z) {
+//	         		resolutions[z] = size / Math.pow(2, z);
+//	         		matrixIds[z] = z;
+//	         	}
+//	         	
+//				var ignSource3 = new ol.source.WMTS({
+//			         attributions: '',
+//			         url: base_layer['url'],
+//			         layer: base_layer['layers'],
+//			         matrixSet: matrixSet,
+//			         format: base_layer['format'],
+//			         projection: projection,
+//			         tileGrid: new ol.tilegrid.WMTS({
+//			           origin: ol.extent.getTopLeft(projectionExtent),
+//			           resolutions: resolutions,
+//			           matrixIds: matrixIds
+//			         }),
+//			         style: 'default',
+//			         wrapX: true
+//			       });
+//			 	var ignLayer3 = new ol.layer.Tile({
+//			 		id: this._nextLayerId(),
+//			 		source: ignSource3,
+//			 		visible: base_layer['active']
+//			 	});
+//			 	ignLayer3.baselayer = true;
+//			 	this.map.addLayer(ignLayer3);
+			 	
+	    		var parser = new ol.format.WMTSCapabilities();
+	    		var capabilities_url = base_layer['url'] + '?request=GetCapabilities' + '&version=' + base_layer['version'];
+	    	      fetch(capabilities_url).then(function(response) {
+	    	        return response.text();
+	    	      }).then(function(text) {
+	    	        var result = parser.read(text);
+
+	    	        var options = ol.source.WMTS.optionsFromCapabilities(result, {
+	  		          matrixSet: base_layer['matrixset'],
+	  		          layer: base_layer['layers']
+	  		        });
+
+	    	        var ignSource3 = new ol.source.WMTS((options));
+			        var ignLayer3 = new ol.layer.Tile({
+				 		id: self._nextLayerId(),
+				 		source: ignSource3,
+				 		visible: base_layer['active']
+				 	});
+				 	ignLayer3.baselayer = true;
+				 	self.map.addLayer(ignLayer3);
+	    	      });
 			}
 	    	
 	    	if (base_layer['type'] == 'Bing') {
