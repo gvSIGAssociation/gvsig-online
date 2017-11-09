@@ -1082,7 +1082,9 @@ class Geoserver():
         fields = {}
         fields['fields'] = {}
         
-        dbf_file = shp_path.replace('.shp', '.dbf')
+        dbf_file = shp_path.replace('.shp', '.dbf').replace('.SHP', '.dbf')
+        if not os.path.isfile(dbf_file):
+            dbf_file = dbf_file.replace('.dbf', '.DBF')
         table = DBF(dbf_file)                
         return table.fields  
         
