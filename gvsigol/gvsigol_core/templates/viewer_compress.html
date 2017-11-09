@@ -352,6 +352,7 @@
 		    $(this).ekkoLightbox();
 		});
 		
+		var extraParams = {{extra_params|safe}};
 		$.ajax({
 			type : 'POST',
 			async : false,
@@ -366,7 +367,7 @@
 				for (var key in response.supported_crs) {
 					proj4.defs(response.supported_crs[key].code, response.supported_crs[key].definition);	
 				}
-				viewer.core.initialize(response);
+				viewer.core.initialize(response, extraParams);
 			},
 			error : function() {
 			}
