@@ -890,6 +890,8 @@ def public_viewer_get_conf(request):
             conf_group['cached'] = group.cached
             layers_in_group = Layer.objects.filter(layer_group_id=group.id)
             layers = []
+            
+            idx = 0
             for l in layers_in_group:
                 read_roles = services_utils.get_read_roles(l)
                 write_roles = services_utils.get_write_roles(l)
@@ -916,7 +918,7 @@ def public_viewer_get_conf(request):
                         layer['time_default_value_mode'] = l.time_default_value_mode
                         layer['time_default_value'] = l.time_default_value
                     layer['cached'] = l.cached
-                    layer['order'] = toc.get(group.name).get('layers').get(l.name).get('order')
+                    layer['order'] = int(conf_group['groupOrder']) + layers_in_group.__len__() - idx
                     layer['single_image'] = l.single_image
                     layer['read_roles'] = read_roles
                     layer['write_roles'] = write_roles
@@ -972,6 +974,7 @@ def public_viewer_get_conf(request):
                     w['name'] = workspace.name
                     w['wms_url'] = workspace.wms_endpoint
                     workspaces.append(w)
+                idx = idx + 1
             
             if len(layers) > 0:   
                 ordered_layers = sorted(layers, key=itemgetter('order'), reverse=True)
