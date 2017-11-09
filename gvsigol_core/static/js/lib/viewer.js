@@ -47,9 +47,10 @@ viewer.core = {
 	
 	overviewmap: null,
 		
-    initialize: function(conf) {
+    initialize: function(conf, extraParams) {
     	this.conf = conf;
     	this._authenticate();
+    	this.extraParams = extraParams;
     	this._createMap();
     	this._initToolbar();
     	this._loadLayers();
@@ -654,6 +655,10 @@ viewer.core = {
     
     getMap: function(){
     	return this.map;
+    },
+    
+    getExtraParams: function(){
+    	return this.extraParams;
     },
     
     getConf: function(){

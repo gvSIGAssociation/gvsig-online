@@ -157,14 +157,14 @@
 				</div>
 			</div>
 
-			<ul class="nav nav-tabs nav-justified control-sidebar-tabs">
+			<ul id="gvsigol-toc-tabs" class="nav nav-tabs nav-justified control-sidebar-tabs">
 				<li class="active" title="{% trans "Layer tree" %}"><a href="#layer-tree-tab" data-toggle="tab"><i class="icon-layers"></i></a></li>
 				<li title="{% trans "Legend" %}"><a href="#legend-tab" data-toggle="tab"><i class="fa fa-tags"></i></a></li>
 				<li title="{% trans "Details" %}"><a href="#details-tab" data-toggle="tab"><i class="fa fa-list-alt"></i></a></li>
 				<li title="{% trans "Temporary" %}" class="temporary-tab"><a href="#temporary-tab" data-toggle="tab"><i class="fa fa-clock-o" aria-hidden="true"></i></a></li>
 			</ul>
 
-			<div class="tab-content" style="height: 88%;">
+			<div id="gvsigol-toc-tabs-content" class="tab-content" style="height: 88%;">
 			
 				<!-- Layer tree -->
 				<div class="tab-pane active" id="layer-tree-tab" style="overflow-y: auto; height: 100%;">
@@ -379,6 +379,7 @@
 		    $(this).ekkoLightbox();
 		});
 	
+		var extraParams = {{extra_params|safe}};
 		$.ajax({
 			type : 'POST',
 			async : false,
@@ -393,7 +394,7 @@
 				for (var key in response.supported_crs) {
 					proj4.defs(response.supported_crs[key].code, response.supported_crs[key].definition);	
 				}
-				viewer.core.initialize(response);
+				viewer.core.initialize(response, extraParams);
 			},
 			error : function() {
 			}
