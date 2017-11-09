@@ -556,10 +556,10 @@ def project_delete(request, pid):
         return HttpResponse(json.dumps(response, indent=4), content_type='project/json')
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-def project_load(request, pid):
-    if core_utils.is_valid_project(request.user, pid):
-        project = Project.objects.get(id=int(pid))
-        return render_to_response('viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': pid}, context_instance=RequestContext(request))
+def project_load(request, project_name):
+    if core_utils.is_valid_project(request.user, project_name):
+        project = Project.objects.get(name__exact=project_name)
+        return render_to_response('viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id, 'extra_params': json.dumps(request.GET)}, context_instance=RequestContext(request))
     else:
         return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
 
