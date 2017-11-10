@@ -77,7 +77,7 @@ INSTALLED_APPS = [
     #'gvsigol_plugin_sync',
     #'gvsigol_plugin_catastro',
     #'gvsigol_plugin_alfresco',
-    #'gvsigol_plugin_print',
+    'gvsigol_plugin_print',
     #'gvsigol_plugin_catalog',
 ]
 
