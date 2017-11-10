@@ -128,6 +128,7 @@ $().ready(function(){
 	var params = {{baselayer.type_params|safe}};
 	var version = params['version'];
 	var layer = params['layers'];
+	var wmts_success = true;
 	
 	function updateFormfields(){
 		var type = $("#id_type option:selected").val();
@@ -261,6 +262,7 @@ $().ready(function(){
 			},
 			error: function(){
 				alert(gettext("Error intentando conectar"));
+				wmts_success = false;
 			}
 		});
 		
@@ -280,11 +282,12 @@ $().ready(function(){
 		}
 	}
 	
-	$('#id_layers option[value="'+layer+'"]').prop('selected', true);
-	$('#id_version option[value="'+version+'"]').prop('selected', true);
-	$('#id_matrixset option[value="'+matrixset+'"]').prop('selected', true);
-	$('#id_format option[value="'+format_or+'"]').prop('selected', true);
-	
+	if(wmts_success){
+		$('#id_layers option[value="'+layer+'"]').prop('selected', true);
+		$('#id_version option[value="'+version+'"]').prop('selected', true);
+		$('#id_matrixset option[value="'+matrixset+'"]').prop('selected', true);
+		$('#id_format option[value="'+format_or+'"]').prop('selected', true);
+	}
 	
 });
 </script>
