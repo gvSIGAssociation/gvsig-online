@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-16 08:57+0200\n"
+"POT-Creation-Date: 2017-11-10 10:17+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -44,7 +44,7 @@ msgid "Data store"
 msgstr ""
 
 #: templates/browser/export_to_database.html:70
-#: templates/browser/filemanager_list.html:14
+#: templates/browser/filemanager_list.html:22
 msgid "Name"
 msgstr ""
 
@@ -64,44 +64,48 @@ msgstr ""
 msgid "Default"
 msgstr ""
 
-#: templates/browser/filemanager_list.html:12
+#: templates/browser/filemanager_list.html:20
 msgid "Select"
 msgstr ""
 
-#: templates/browser/filemanager_list.html:15
+#: templates/browser/filemanager_list.html:23
 msgid "Size"
 msgstr ""
 
-#: templates/browser/filemanager_list.html:16
+#: templates/browser/filemanager_list.html:24
 msgid "Date"
 msgstr ""
 
-#: templates/browser/filemanager_list.html:19
+#: templates/browser/filemanager_list.html:27
 msgid "Actions"
 msgstr ""
 
-#: templates/browser/filemanager_list.html:52
+#: templates/browser/filemanager_list.html:62
 msgid "Delete directory"
 msgstr ""
 
-#: templates/browser/filemanager_list.html:55
+#: templates/browser/filemanager_list.html:65
 msgid "Export to database"
 msgstr ""
 
-#: templates/browser/filemanager_list.html:58
+#: templates/browser/filemanager_list.html:70
+msgid "Transform to database"
+msgstr ""
+
+#: templates/browser/filemanager_list.html:74
 msgid "Delete file"
 msgstr ""
 
-#: templates/browser/filemanager_list.html:69
+#: templates/browser/filemanager_list.html:85
 msgid "Nothing to see here."
 msgstr ""
 
-#: templates/browser/filemanager_list.html:78
+#: templates/browser/filemanager_list.html:94
 #: templates/filemanager_create_directory.html:13
 msgid "Create directory"
 msgstr ""
 
-#: templates/browser/filemanager_list.html:79
+#: templates/browser/filemanager_list.html:95
 #: templates/filemanager_upload.html:14
 msgid "Upload"
 msgstr ""
@@ -111,9 +115,13 @@ msgid "File manager"
 msgstr ""
 
 #: views.py:94
+msgid "Export process done successfully"
+msgstr ""
+
+#: views.py:116
 msgid "Server error"
 msgstr ""
 
-#: views.py:97
+#: views.py:119
 msgid "You must fill in all fields"
 msgstr ""
