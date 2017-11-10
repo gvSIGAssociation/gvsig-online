@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-14 10:54+0200\n"
+"POT-Creation-Date: 2017-11-10 11:59+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -41,33 +41,33 @@ msgid "We will work on fixing that right away. Meanwhile, you may"
 msgstr ""
 "Estamos trabajando en la resolución del problema. Mientras tanto, puede"
 
-#: templates/base.html:66 templates/base_compress.html.py:66
-#: templates/public_viewer.html:125 templates/public_viewer_compress.html:123
-#: templates/viewer.html.py:131 templates/viewer_compress.html:129
+#: templates/base.html:67 templates/base_compress.html.py:67
+#: templates/public_viewer.html:132 templates/public_viewer_compress.html:128
+#: templates/viewer.html.py:136 templates/viewer_compress.html:134
 msgid "manual gvsigonline"
 msgstr "Manual gvsigOnline"
 
-#: templates/base.html:96 templates/base_compress.html.py:96
-#: templates/viewer.html:121 templates/viewer_compress.html.py:119
+#: templates/base.html:97 templates/base_compress.html.py:97
+#: templates/viewer.html:126 templates/viewer_compress.html.py:124
 msgid "Sign out"
 msgstr "Cerrar sesión"
 
-#: templates/base.html:114 templates/base_compress.html.py:114
-#: templates/viewer.html:118 templates/viewer_compress.html.py:116
+#: templates/base.html:115 templates/base_compress.html.py:115
+#: templates/viewer.html:123 templates/viewer_compress.html.py:121
 msgid "Dashboard"
 msgstr "Panel de control"
 
-#: templates/base.html:120 templates/base_compress.html.py:120
+#: templates/base.html:121 templates/base_compress.html.py:121
 msgid "Home"
 msgstr "Inicio"
 
-#: templates/base.html:156 templates/base_compress.html.py:156
+#: templates/base.html:157 templates/base_compress.html.py:157
 #: templates/documentation.html:116 templates/ogc_services.html.py:84
 #: templates/select_public_project.html:77
 msgid "Version"
 msgstr "Versión"
 
-#: templates/base_compress.html:160 templates/ogc_services.html.py:88
+#: templates/base_compress.html:161 templates/ogc_services.html.py:88
 msgid "All rights reserved"
 msgstr "Todos los derechos reservados"
 
@@ -232,7 +232,8 @@ msgstr "Servicio WFS"
 msgid "Service capabilities"
 msgstr "Características del servicio"
 
-#: templates/project_add.html:14 templates/project_update.html.py:14
+#: templates/project_add.html:14 templates/project_add.html.py:208
+#: templates/project_update.html:14 templates/project_update.html.py:225
 #: templates/toc_update.html:13
 msgid "Save"
 msgstr "Guardar"
@@ -260,88 +261,94 @@ msgstr "Descripción del proyecto"
 msgid "Is public?"
 msgstr "¿Es público?"
 
-#: templates/project_add.html:51 templates/project_update.html.py:56
+#: templates/project_add.html:51 templates/project_update.html.py:55
 msgid "Locate place..."
 msgstr "Buscar lugar..."
 
-#: templates/project_add.html:67
+#: templates/project_add.html:66
 msgid "Select image"
 msgstr "Seleccionar imagen"
 
-#: templates/project_add.html:67 templates/project_update.html.py:75
+#: templates/project_add.html:66 templates/project_update.html.py:74
 msgid "Supported formats"
 msgstr "Formatos soportados"
 
-#: templates/project_add.html:75 templates/project_add.html.py:95
-#: templates/project_update.html:83 templates/project_update.html.py:104
-#: templates/project_update.html:106
+#: templates/project_add.html:73 templates/project_add.html.py:93
+#: templates/project_update.html:82 templates/project_update.html.py:103
+#: templates/project_update.html:105
 msgid "Assign base layers"
 msgstr "Asignar capas base"
 
-#: templates/project_add.html:77 templates/project_update.html.py:85
+#: templates/project_add.html:75 templates/project_update.html.py:84
 msgid "Buscar capas base..."
 msgstr ""
 
-#: templates/project_add.html:97 templates/project_update.html.py:110
-#: templates/project_update.html:112
+#: templates/project_add.html:95 templates/project_update.html.py:109
+#: templates/project_update.html:111
 msgid "Mark as default"
 msgstr "Marcar por defecto"
 
-#: templates/project_add.html:115 templates/project_update.html.py:131
+#: templates/project_add.html:112 templates/project_update.html.py:129
 msgid "Assign user groups"
 msgstr "Asignar grupos de usuarios"
 
-#: templates/project_add.html:115 templates/project_update.html.py:131
+#: templates/project_add.html:112 templates/project_update.html.py:129
 msgid "Buscar grupo de usuarios..."
 msgstr ""
 
-#: templates/project_add.html:129 templates/project_add.html.py:131
-#: templates/project_update.html:145 templates/project_update.html.py:147
+#: templates/project_add.html:126 templates/project_add.html.py:128
+#: templates/project_update.html:143 templates/project_update.html.py:145
 msgid "Assign user group"
 msgstr "Asignar grupo de usuarios"
 
-#: templates/project_add.html:147 templates/project_update.html.py:163
+#: templates/project_add.html:147 templates/project_update.html.py:164
 msgid "Assign layer groups"
 msgstr "Asignar grupos de capas"
 
-#: templates/project_add.html:149
+#: templates/project_add.html:149 templates/project_update.html.py:166
 #, fuzzy
 #| msgid "Assign layer group"
 msgid "Add layer group"
 msgstr "Asignar grupo de capas"
 
-#: templates/project_add.html:150 templates/project_update.html.py:163
+#: templates/project_add.html:150 templates/project_update.html.py:167
 msgid "Buscar grupo de capas..."
 msgstr ""
 
-#: templates/project_add.html:164 templates/project_update.html.py:177
-#: templates/project_update.html:179
+#: templates/project_add.html:165 templates/project_add.html.py:167
+#: templates/project_update.html:182 templates/project_update.html.py:184
 msgid "Assign layer group"
 msgstr "Asignar grupo de capas"
 
-#: templates/project_add.html:192
+#: templates/project_add.html:184 templates/project_update.html.py:201
+msgid "Define Toc Order"
+msgstr "Definir orden del TOC"
+
+#: templates/project_add.html:226 templates/project_update.html.py:243
 #, fuzzy
 #| msgid "Assign layer group"
 msgid "Create new layer group"
 msgstr "Asignar grupo de capas"
 
-#: templates/project_add.html:195
+#: templates/project_add.html:229 templates/project_update.html.py:246
 #, fuzzy
 #| msgid "The project will be removed, Do you want continue?"
 msgid "Is needed to save this project first, Do you want continue?"
 msgstr "El proyecto será eliminado, ¿Desea continuar?"
 
-#: templates/project_add.html:198 templates/project_list.html.py:64
-#: templates/public_viewer.html:215 templates/public_viewer_compress.html:212
-#: templates/viewer.html.py:222 templates/viewer.html:247
-#: templates/viewer_compress.html.py:220 templates/viewer_compress.html:246
+#: templates/project_add.html:232 templates/project_list.html.py:64
+#: templates/project_update.html:249 templates/public_viewer.html.py:222
+#: templates/public_viewer_compress.html:217 templates/viewer.html.py:232
+#: templates/viewer.html:257 templates/viewer_compress.html.py:229
+#: templates/viewer_compress.html:255
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: templates/project_add.html:199 templates/project_list.html.py:65
-#: templates/public_viewer.html:216 templates/public_viewer_compress.html:213
-#: templates/viewer.html.py:223 templates/viewer.html:248
-#: templates/viewer_compress.html.py:221 templates/viewer_compress.html:247
+#: templates/project_add.html:233 templates/project_list.html.py:65
+#: templates/project_update.html:250 templates/public_viewer.html.py:223
+#: templates/public_viewer_compress.html:218 templates/viewer.html.py:233
+#: templates/viewer.html:258 templates/viewer_compress.html.py:230
+#: templates/viewer_compress.html:256
 msgid "Accept"
 msgstr "Aceptar"
 
@@ -423,44 +430,44 @@ msgstr "Orden del TOC"
 msgid "Update project"
 msgstr "Actualizar proyecto"
 
-#: templates/project_update.html:75
+#: templates/project_update.html:74
 msgid "Change image?"
 msgstr "¿Cambiar imagen?"
 
-#: templates/public_viewer.html:90 templates/public_viewer_compress.html:88
+#: templates/public_viewer.html:97 templates/public_viewer_compress.html:93
 msgid "Anonymous"
 msgstr "Anónimo"
 
-#: templates/public_viewer.html:96 templates/public_viewer_compress.html:94
+#: templates/public_viewer.html:103 templates/public_viewer_compress.html:99
 msgid "Anonymous user"
 msgstr "Usuario anónimo"
 
-#: templates/public_viewer.html:115 templates/public_viewer_compress.html:113
+#: templates/public_viewer.html:122 templates/public_viewer_compress.html:118
 msgid "Exit"
 msgstr "Salir"
 
-#: templates/public_viewer.html:127 templates/public_viewer_compress.html:125
-#: templates/viewer.html.py:133 templates/viewer_compress.html:131
+#: templates/public_viewer.html:134 templates/public_viewer_compress.html:130
+#: templates/viewer.html.py:138 templates/viewer_compress.html:136
 msgid "exportar pdf"
 msgstr "Capturar pantalla en PDF"
 
-#: templates/public_viewer.html:150 templates/public_viewer_compress.html:147
-#: templates/viewer.html.py:156 templates/viewer_compress.html:153
+#: templates/public_viewer.html:157 templates/public_viewer_compress.html:152
+#: templates/viewer.html.py:161 templates/viewer_compress.html:158
 msgid "Layer tree"
 msgstr "Árbol de capas"
 
-#: templates/public_viewer.html:151 templates/public_viewer_compress.html:148
-#: templates/viewer.html.py:157 templates/viewer_compress.html:154
+#: templates/public_viewer.html:158 templates/public_viewer_compress.html:153
+#: templates/viewer.html.py:162 templates/viewer_compress.html:159
 msgid "Legend"
 msgstr "Leyenda"
 
-#: templates/public_viewer.html:152 templates/public_viewer_compress.html:149
-#: templates/viewer.html.py:158 templates/viewer_compress.html:155
+#: templates/public_viewer.html:159 templates/public_viewer_compress.html:154
+#: templates/viewer.html.py:163 templates/viewer_compress.html:160
 msgid "Details"
 msgstr "Detalles"
 
-#: templates/public_viewer.html:369 templates/public_viewer_compress.html:344
-#: templates/viewer.html.py:401 templates/viewer_compress.html:374
+#: templates/public_viewer.html:401 templates/public_viewer_compress.html:374
+#: templates/viewer.html.py:437 templates/viewer_compress.html:409
 msgid "Close"
 msgstr "Cerrar"
 
@@ -468,11 +475,15 @@ msgstr "Cerrar"
 msgid "Update TOC"
 msgstr "Actualizar TOC"
 
-#: templates/viewer.html:241 templates/viewer_compress.html.py:240
+#: templates/viewer.html:164 templates/viewer_compress.html.py:161
+msgid "Temporary"
+msgstr ""
+
+#: templates/viewer.html:251 templates/viewer_compress.html.py:249
 msgid "End edition"
 msgstr "Finalizar edición"
 
-#: templates/viewer.html:244 templates/viewer_compress.html.py:243
+#: templates/viewer.html:254 templates/viewer_compress.html.py:252
 msgid "Changes don't saved will be missed. Continue?"
 msgstr "Los cambios que no se hayan salvado se perdarán. ¿Continuar?"
 
@@ -496,11 +507,11 @@ msgstr "Apellidos"
 msgid "This is your new temporary password"
 msgstr "Esta es su contraseña temporal"
 
-#: views.py:182
+#: views.py:193
 msgid "You must enter an project name"
 msgstr "Debe introducir un nombre de proyecto"
 
-#: views.py:250 views.py:462
+#: views.py:268 views.py:497
 msgid "Project name already exists"
 msgstr "El nombre del proyecto ya existe"
 
