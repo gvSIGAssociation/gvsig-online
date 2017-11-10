@@ -137,7 +137,7 @@ $().ready(function(){
 		if(type == "Bing"){
 			$("#id_layers").empty();
 			for(index in bing_layers){
-				$("#id_layers").append("<option value=\""+bing_layers[index]+"\" selected>"+bing_layers[index]+"</option>")
+				$("#id_layers").append("<option value=\""+bing_layers[index]+"\">"+bing_layers[index]+"</option>")
 			}
 		}
 	};
@@ -269,12 +269,23 @@ $().ready(function(){
 	var url = $("#id_url").val();
 	var type = $("#id_type option:selected").val()
 	
-	getNewLayersFromCapabilities(url, type, version, layer, true);
+	if(type == 'WMS' || type == 'WMTS'){
+		getNewLayersFromCapabilities(url, type, version, layer, true);
+	}
+	
+	if(type == "Bing"){
+		$("#id_layers").empty();
+		for(index in bing_layers){
+			$("#id_layers").append("<option value=\""+bing_layers[index]+"\">"+bing_layers[index]+"</option>")
+		}
+	}
 	
 	$('#id_layers option[value="'+layer+'"]').prop('selected', true);
 	$('#id_version option[value="'+version+'"]').prop('selected', true);
 	$('#id_matrixset option[value="'+matrixset+'"]').prop('selected', true);
 	$('#id_format option[value="'+format_or+'"]').prop('selected', true);
+	
+	
 });
 </script>
 {% endblock %}
