@@ -177,7 +177,7 @@ viewer.core = {
 				base_layer['id'] = this.layerCount; 
 				this._nextLayerId();
 			} 
-	    	if (base_layer['type'] == 'WMTS') {		
+    		if (base_layer['type'] == 'WMTS') {		
 	    		var parser = new ol.format.WMTSCapabilities();
 	    		var capabilities_url = base_layer['url'] + '?request=GetCapabilities' + '&version=' + base_layer['version'];
 	    	      fetch(capabilities_url).then(function(response) {
@@ -192,6 +192,11 @@ viewer.core = {
 	    		  		          matrixSet: base_layer2['matrixset'],
 	    		  		          layer: base_layer2['layers']
 	    		  		        });
+	    		    		 if(options && options.urls && options.urls.length > 0){
+	    		    			 if(!base_layer2['url'].endsWith('?')){
+	    		    				 options.urls[0] = base_layer2['url'] + '?';
+	    		    			 }
+	    		    		 }
 	    		    		 var is_baselayer = false;
 	    		    		 for(var k=0; k<options.urls.length; k++){
 	    		    			 if(base_layer2['url'].replace("https://", "http://")+'?' == options.urls[k].replace("https://", "http://")){
@@ -209,7 +214,7 @@ viewer.core = {
 							 	self.map.addLayer(ignLayer3);
 	    		    		 }
 	    		    		}catch(err){
-	    		    			console.log("error")
+	    		    			console.log("error loading wmts '" + base_layer2['url']+"':" + err)
 	    		    		}
 	    		    	}
 	    	        }
