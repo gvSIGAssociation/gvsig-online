@@ -126,7 +126,7 @@ print.prototype.handler = function(e) {
 		ui += 			'</div>';
 		ui += 			'<div class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Legal warning') + '</label>';
-		ui += 				'<textarea class="form-control" name="print-legal" id="print-legal" rows="5">' + gettext('legalwarning') + '</textarea>';
+		ui += 				'<textarea class="form-control" name="print-legal" id="print-legal" rows="5">' + this.printProvider.legal_advice + '</textarea>';
 		ui += 			'</div>';		
 		ui += 		'</div>';
 		ui += 	'</div>';
