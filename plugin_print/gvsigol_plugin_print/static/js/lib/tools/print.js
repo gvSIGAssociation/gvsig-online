@@ -109,7 +109,7 @@ print.prototype.handler = function(e) {
 		ui += 			'</div>';
 		ui += 			'<div class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Title') + '</label>';
-		ui += 				'<input id="print-title" type="text" class="form-control" value="' + this.conf.project_name + '">';
+		ui += 				'<input id="print-title" type="text" class="form-control" value="' + this.conf.project_title + '">';
 		ui += 			'</div>';
 		ui += 			'<div class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Resolution') + '</label>';
