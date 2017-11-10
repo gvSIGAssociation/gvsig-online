@@ -460,10 +460,8 @@ msgstr "Símbolo por defecto"
 
 #: forms_geoserver.py:162 templates/layer_add.html.py:157
 #: templates/layer_create.html:189 templates/layer_update.html.py:181
-#, fuzzy
-#| msgid "Default"
 msgid "Default value"
-msgstr "Por defecto"
+msgstr "Valor por defecto"
 
 #: forms_geoserver.py:195
 msgid "Error: Invalid field definition"
