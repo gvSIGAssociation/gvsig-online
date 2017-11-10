@@ -43,6 +43,9 @@ import random
 import string
 import json
 import ast
+import re
+
+_valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 def not_found_view(request):
     response = render_to_response('404.html', {}, context_instance=RequestContext(request))
@@ -83,9 +86,11 @@ def home(request):
             project = {}
             project['id'] = p.id
             project['name'] = p.name
+            project['title'] = p.title
             project['description'] = p.description
             project['image'] = urllib.unquote(image)
             projects.append(project)
+            
     else:
         if len (projects_by_user) > 0:
             for ua in projects_by_user:
@@ -99,6 +104,7 @@ def home(request):
                 project = {}
                 project['id'] = p.id
                 project['name'] = p.name
+                project['title'] = p.title
                 project['description'] = p.description
                 project['image'] = urllib.unquote(image)
                 projects.append(project)
@@ -123,6 +129,7 @@ def project_list(request):
         project = {}
         project['id'] = p.id
         project['name'] = p.name
+        project['title'] = p.title
         project['description'] = p.description
         project['is_public'] = p.is_public
         projects.append(project)
@@ -137,11 +144,13 @@ def project_list(request):
 def project_add(request):
     
     has_geocoding_plugin = False
+    base_layers = BaseLayer.objects.all()
     if 'gvsigol_plugin_geocoding' in settings.INSTALLED_APPS:
         has_geocoding_plugin = True
         
     if request.method == 'POST':
         name = request.POST.get('project-name')
+        title = request.POST.get('project-title')
         description = request.POST.get('project-description')
         latitude = request.POST.get('center-lat')
         longitude = request.POST.get('center-lon')
@@ -189,16 +198,21 @@ def project_add(request):
             groups = core_utils.get_all_groups()
         else:
             groups = core_utils.get_user_groups(request.user.username)
+        
         if name == '':
             message = _(u'You must enter an project name')
-            base_layers = BaseLayer.objects.all()
             return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'groups': groups, 'base_layers': base_layers, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
-                
+        
+        if _valid_name_regex.search(name) == None:
+            message = _(u"Invalid project name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
+            return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'groups': groups, 'base_layers': base_layers, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+          
         if not exists:
             project = None
             if has_image:
                 project = Project(
                     name = name,
+                    title = title,
                     description = description,
                     image = request.FILES['project-image'],
                     center_lat = latitude,
@@ -212,6 +226,7 @@ def project_add(request):
             else:
                 project = Project(
                     name = name,
+                    title = title,
                     description = description,
                     center_lat = latitude,
                     center_lon = longitude,
@@ -266,8 +281,6 @@ def project_add(request):
             
         else:
             message = _(u'Project name already exists')
-            
-            base_layers = BaseLayer.objects.all()
             return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'base_layers': base_layers, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
         
        
@@ -302,6 +315,7 @@ def project_update(request, pid):
     
     if request.method == 'POST':
         name = request.POST.get('project-name')
+        title = request.POST.get('project-title')
         description = request.POST.get('project-description')
         latitude = request.POST.get('center-lat')
         longitude = request.POST.get('center-lon')
@@ -343,182 +357,77 @@ def project_update(request, pid):
             toc_structure = core_utils.get_json_toc(assigned_layergroups)
             project.toc_order = toc_structure
                
-        exists = False
-        projects = Project.objects.all()
-        for p in projects:
-            if name == p.name:
-                exists = True
+        name = re.sub(r'[^a-zA-Z0-9 ]',r'',name) #for remove all characters
+        name = re.sub(' ','',name)
+
+        project.name = name
+        project.title = title
+        project.description = description
+        project.center_lat = latitude
+        project.center_lon = longitude
+        project.zoom = int(float(zoom))
+        project.extent = extent
+        project.is_public = is_public
+        project.toc_order = toc
+        
+        if has_image:
+            project.image = request.FILES['project-image']
+            
+        project.save()
+        
+        for bl in BaseLayerProject.objects.filter(project_id=project.id):
+            bl.delete()
+        
+        for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
+            lg.delete()
                 
-        sameName = False
-        if project.name == name:
-            sameName = True
+        for ug in ProjectUserGroup.objects.filter(project_id=project.id):
+            ug.delete()
             
+        
+        for bly in assigned_baselayers:
+            baselayer = BaseLayer.objects.get(id=bly)
+            is_default = False
+            if default_baselayer and int(default_baselayer) == baselayer.id:
+                is_default = True
+            project_baselayer = BaseLayerProject(
+                project = project,
+                baselayer = baselayer,
+                is_default = is_default
+            )
+            project_baselayer.save()
             
-        if sameName:
-            project.description = description
-            project.center_lat = latitude
-            project.center_lon = longitude
-            project.zoom = int(float(zoom))
-            project.extent = extent
-            project.is_public = is_public
-            project.toc_order = toc
-            
-            if has_image:
-                project.image = request.FILES['project-image']
+        for alg in assigned_layergroups:
+            layergroup = LayerGroup.objects.get(id=alg)
+            project_layergroup = ProjectLayerGroup(
+                project = project,
+                layer_group = layergroup
+            )
+            project_layergroup.save()
                 
-            project.save()
-            
-            for bl in BaseLayerProject.objects.filter(project_id=project.id):
-                bl.delete()
-            
-            for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
-                lg.delete()
-                    
-            for ug in ProjectUserGroup.objects.filter(project_id=project.id):
-                ug.delete()
-                
-            
-            for bly in assigned_baselayers:
-                baselayer = BaseLayer.objects.get(id=bly)
-                is_default = False
-                if default_baselayer and int(default_baselayer) == baselayer.id:
-                    is_default = True
-                project_baselayer = BaseLayerProject(
-                    project = project,
-                    baselayer = baselayer,
-                    is_default = is_default
-                )
-                project_baselayer.save()
-                
-            for alg in assigned_layergroups:
-                layergroup = LayerGroup.objects.get(id=alg)
-                project_layergroup = ProjectLayerGroup(
-                    project = project,
-                    layer_group = layergroup
-                )
-                project_layergroup.save()
-                    
-            for aug in assigned_usergroups:
-                usergroup = UserGroup.objects.get(id=aug)
-                project_usergroup = ProjectUserGroup(
-                    project = project,
-                    user_group = usergroup
-                )
-                project_usergroup.save()
-                
-            admin_group = UserGroup.objects.get(name__exact='admin')
+        for aug in assigned_usergroups:
+            usergroup = UserGroup.objects.get(id=aug)
             project_usergroup = ProjectUserGroup(
                 project = project,
-                user_group = admin_group
+                user_group = usergroup
             )
             project_usergroup.save()
             
-            if 'redirect' in request.GET:
-                redirect_var = request.GET.get('redirect')
-                if redirect_var == 'new-layer-group':
-                    return redirect('layergroup_add_with_project', project_id=str(project.id))
-            
-                
-            return redirect('project_list')
-            
-        else:
-            if not exists:
-                project.name = name
-                project.description = description
-                project.center_lat = latitude
-                project.center_lon = longitude
-                project.zoom = int(float(zoom))
-                project.extent = extent
-                project.is_public = is_public
-                project.toc_order = toc
-                
-                if has_image:
-                    project.image = request.FILES['project-image']
-                    
-                default_baselayer = None
-                if 'default_base_layer_selected' in request.POST:
-                    default_baselayer = request.POST.get('default_base_layer_selected')
-                
-                project.save()
-                
-                for bl in BaseLayerProject.objects.filter(project_id=project.id):
-                    bl.delete()
-                
-                for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
-                    lg.delete()
-                    
-                for ug in ProjectUserGroup.objects.filter(project_id=project.id):
-                    ug.delete()
-                
-                for bly in assigned_baselayers:
-                    baselayer = BaseLayer.objects.get(id=bly)
-                    is_default = False
-                    if default_baselayer and int(default_baselayer) == baselayer.id:
-                        is_default = True
-                    project_baselayer = BaseLayerProject(
-                        project = project,
-                        baselayer = baselayer,
-                        is_default = is_default
-                    )
-                    project_baselayer.save()
-                
-                for alg in assigned_layergroups:
-                    layergroup = LayerGroup.objects.get(id=alg)
-                    project_layergroup = ProjectLayerGroup(
-                        project = project,
-                        layer_group = layergroup
-                    )
-                    project_layergroup.save()
-                    
-                for aug in assigned_usergroups:
-                    usergroup = UserGroup.objects.get(id=aug)
-                    project_usergroup = ProjectUserGroup(
-                        project = project,
-                        user_group = usergroup
-                    )
-                    project_usergroup.save()
-                    
-                admin_group = UserGroup.objects.get(name__exact='admin')
-                project_usergroup = ProjectUserGroup(
-                    project = project,
-                    user_group = admin_group
-                )
-                project_usergroup.save()
-                
-                if 'redirect' in request.GET:
-                    redirect_var = request.GET.get('redirect')
-                    if redirect_var == 'new-layer-group':
-                        return redirect('layergroup_add_with_project', project_id=str(project.id))
-            
-                    
-                return redirect('project_list')
-                    
-            else:
-                message = _(u'Project name already exists')
-                project = Project.objects.get(id=int(pid))    
-                groups = core_utils.get_all_groups_checked_by_project(request, project)
-                layer_groups = core_utils.get_all_layer_groups_checked_by_project(request, project)  
-                base_layers = BaseLayer.objects.all()
-                base_layers_project = BaseLayerProject.objects.filter(project=project)
-                selected_base_layers=[]
-                selected_base_layer=-1
-                
-                for base_layer_project in base_layers_project:
-                    selected_base_layers.append(base_layer_project.baselayer.id)
-                    if base_layer_project.is_default:
-                        selected_base_layer = base_layer_project.baselayer.id
-                        
-                toc = json.loads(project.toc_order)
-                for g in toc:
-                    group = toc.get(g)
-                    ordered_layers = sorted(group.get('layers').iteritems(), key=lambda (x, y): y['order'], reverse=True)
-                    group['layers'] = ordered_layers
-                ordered_toc = sorted(toc.iteritems(), key=lambda (x, y): y['order'], reverse=True)
+        admin_group = UserGroup.objects.get(name__exact='admin')
+        project_usergroup = ProjectUserGroup(
+            project = project,
+            user_group = admin_group
+        )
+        project_usergroup.save()
         
-                return render_to_response('project_update.html', {'message': message, 'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'base_layers': base_layers, 'selected_base_layers': selected_base_layers, 'selected_base_layer': selected_base_layer,  'has_geocoding_plugin': has_geocoding_plugin, 'toc': ordered_toc}, context_instance=RequestContext(request))
-                
+        if 'redirect' in request.GET:
+            redirect_var = request.GET.get('redirect')
+            if redirect_var == 'new-layer-group':
+                return redirect('layergroup_add_with_project', project_id=str(project.id))
         
-        
+            
+        return redirect('project_list')
+
     else:
         project = Project.objects.get(id=int(pid))    
         groups = core_utils.get_all_groups_checked_by_project(request, project)
@@ -761,6 +670,7 @@ def project_get_conf(request):
         conf = {
             'pid': pid,
             'project_name': project.name,
+            'project_title': project.title,
             'project_image': project.image.url,
             'user': {
                 'id': request.user.id,
@@ -841,7 +751,7 @@ def select_public_project(request):
         return render_to_response('select_public_project.html', {'projects': projects}, RequestContext(request))
     
     elif len (public_projects) == 1:
-        return redirect('public_project_load', pid=public_projects[0].id)
+        return redirect('public_project_load', project_name=public_projects[0].name)
     
     elif len (public_projects) > 1:
         for pp in public_projects:
@@ -861,10 +771,10 @@ def select_public_project(request):
             
         return render_to_response('select_public_project.html', {'projects': projects}, RequestContext(request))
     
-def public_project_load(request, pid):
-    if core_utils.is_valid_public_project(pid):
-        project = Project.objects.get(id=int(pid))
-        return render_to_response('public_viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': pid}, context_instance=RequestContext(request))
+def public_project_load(request, project_name):
+    if core_utils.is_valid_public_project(project_name):
+        project = Project.objects.get(name__exact=project_name)
+        return render_to_response('public_viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id}, context_instance=RequestContext(request))
     else:
         return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
             
@@ -1008,6 +918,7 @@ def public_viewer_get_conf(request):
         conf = {
             'pid': pid,
             'project_name': project.name,
+            'project_title': project.title,
             'project_image': project.image.url,
             "view": {
                 "center_lat": project.center_lat,
