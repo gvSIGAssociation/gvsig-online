@@ -411,6 +411,11 @@ viewer.core = {
 	    		  		          matrixSet: base_layer2['matrixset'],
 	    		  		          layer: base_layer2['layers']
 	    		  		        });
+	    		    		 if(options && options.urls && options.urls.length > 0){
+	    		    			 if(!base_layer2['url'].endsWith('?')){
+	    		    				 options.urls[0] = base_layer2['url'] + '?';
+	    		    			 }
+	    		    		 }
 	    		    		 var is_baselayer = false;
 	    		    		 for(var k=0; k<options.urls.length; k++){
 	    		    			 if(base_layer2['url'].replace("https://", "http://")+'?' == options.urls[k].replace("https://", "http://")){
