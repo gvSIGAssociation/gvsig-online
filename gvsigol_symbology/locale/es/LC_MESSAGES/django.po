@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-23 17:17+0200\n"
+"POT-Creation-Date: 2017-11-10 13:04+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,27 +38,31 @@ msgstr "Estrella"
 msgid "Cross"
 msgstr "Cruz"
 
-#: models.py:43 templates/select_legend_type.html.py:32
+#: models.py:44 templates/select_legend_type.html.py:32
 msgid "Unique symbol"
 msgstr "Símbolo único"
 
-#: models.py:44 templates/select_legend_type.html.py:41
+#: models.py:45 templates/select_legend_type.html.py:41
 msgid "Unique values"
 msgstr "Valores únicos"
 
-#: models.py:45 templates/select_legend_type.html.py:50
+#: models.py:46 templates/select_legend_type.html.py:50
 msgid "Intervals"
 msgstr "Intervalos"
 
-#: models.py:46 templates/select_legend_type.html.py:59
+#: models.py:47 templates/select_legend_type.html.py:59
 msgid "Expressions"
 msgstr "Expresiones"
 
-#: models.py:47 templates/select_legend_type.html.py:89
+#: models.py:48 templates/select_legend_type.html.py:93
+msgid "Clustered Points"
+msgstr ""
+
+#: models.py:49 templates/select_legend_type.html.py:81
 msgid "Color table"
 msgstr "Tabla de color"
 
-#: models.py:48
+#: models.py:50
 msgid "Graphics"
 msgstr "Gráficas"
 
@@ -66,13 +70,11 @@ msgstr "Gráficas"
 msgid "Default style for: "
 msgstr "Estilo por defecto para: "
 
-#: services.py:71 services.py:354
-#, fuzzy
-#| msgid "Default style for: "
+#: services.py:77 services.py:360
 msgid "Default symbol"
-msgstr "Estilo por defecto para: "
+msgstr "Símbolo por defecto"
 
-#: services_library.py:65
+#: services_library.py:66
 #, python-brace-format
 msgid "Invalid name: '{value}'. Name should not contain any special characters"
 msgstr ""
@@ -81,7 +83,7 @@ msgstr ""
 
 #: templates/base_symbology.html:69 templates/base_symbology_compress.html:69
 msgid "manual gvsigonline"
-msgstr ""
+msgstr "Manual gvSIG Online"
 
 #: templates/base_symbology.html:99 templates/base_symbology_compress.html:99
 msgid "Sign out"
@@ -109,7 +111,8 @@ msgstr "Todos los derechos reservados"
 msgid "Add new style"
 msgstr "Añadir nuevo estilo"
 
-#: templates/clustered_points_add.html:13 templates/color_table_add.html:13
+#: templates/clustered_points_add.html:13
+#: templates/clustered_points_update.html:13 templates/color_table_add.html:13
 #: templates/color_table_update.html.py:13 templates/expressions_add.html:13
 #: templates/expressions_update.html.py:13 templates/intervals_add.html:13
 #: templates/intervals_update.html.py:13 templates/unique_symbol_add.html:13
@@ -118,7 +121,8 @@ msgstr "Añadir nuevo estilo"
 msgid "Update preview"
 msgstr "Actualizar previsualización"
 
-#: templates/clustered_points_add.html:14 templates/expressions_add.html:14
+#: templates/clustered_points_add.html:14
+#: templates/clustered_points_update.html:14 templates/expressions_add.html:14
 #: templates/expressions_update.html.py:14 templates/intervals_add.html:14
 #: templates/intervals_update.html.py:14 templates/unique_symbol_add.html:14
 #: templates/unique_symbol_update.html:14 templates/unique_values_add.html:14
@@ -126,7 +130,8 @@ msgstr "Actualizar previsualización"
 msgid "Labeling"
 msgstr "Etiquetado"
 
-#: templates/clustered_points_add.html:15 templates/color_table_add.html:14
+#: templates/clustered_points_add.html:15
+#: templates/clustered_points_update.html:15 templates/color_table_add.html:14
 #: templates/color_table_update.html.py:14 templates/expressions_add.html:15
 #: templates/expressions_update.html.py:15
 #: templates/external_graphic_add.html:14
@@ -140,7 +145,8 @@ msgstr "Etiquetado"
 msgid "Save"
 msgstr "Guardar"
 
-#: templates/clustered_points_add.html:26 templates/color_table_add.html:25
+#: templates/clustered_points_add.html:26
+#: templates/clustered_points_update.html:25 templates/color_table_add.html:25
 #: templates/color_table_update.html.py:25 templates/expressions_add.html:26
 #: templates/expressions_update.html.py:25
 #: templates/external_graphic_add.html:29
@@ -156,7 +162,8 @@ msgstr "Guardar"
 msgid "Name"
 msgstr "Nombre"
 
-#: templates/clustered_points_add.html:27 templates/color_table_add.html:26
+#: templates/clustered_points_add.html:27
+#: templates/clustered_points_update.html:26 templates/color_table_add.html:26
 #: templates/color_table_update.html.py:26 templates/expressions_add.html:27
 #: templates/expressions_update.html.py:26 templates/intervals_add.html:27
 #: templates/intervals_update.html.py:26 templates/select_legend_type.html:17
@@ -165,7 +172,8 @@ msgstr "Nombre"
 msgid "Style name"
 msgstr "Nombre del estilo"
 
-#: templates/clustered_points_add.html:32 templates/color_table_add.html:31
+#: templates/clustered_points_add.html:32
+#: templates/clustered_points_update.html:31 templates/color_table_add.html:31
 #: templates/color_table_update.html.py:31 templates/expressions_add.html:32
 #: templates/expressions_update.html.py:31
 #: templates/external_graphic_add.html:33
@@ -177,7 +185,8 @@ msgstr "Nombre del estilo"
 msgid "Title"
 msgstr "Título"
 
-#: templates/clustered_points_add.html:33 templates/color_table_add.html:32
+#: templates/clustered_points_add.html:33
+#: templates/clustered_points_update.html:32 templates/color_table_add.html:32
 #: templates/color_table_update.html.py:32 templates/expressions_add.html:33
 #: templates/expressions_update.html.py:32 templates/intervals_add.html:33
 #: templates/intervals_update.html.py:32 templates/unique_symbol_add.html:33
@@ -187,13 +196,7 @@ msgid "Style title"
 msgstr "Título del estilo"
 
 #: templates/clustered_points_add.html:38
-#: templates/clustered_points_add.html:39
-#, fuzzy
-#| msgid "Size"
-msgid "Cell Size"
-msgstr "Tamaño"
-
-#: templates/clustered_points_add.html:44 templates/color_table_add.html:37
+#: templates/clustered_points_update.html:37 templates/color_table_add.html:37
 #: templates/color_table_update.html.py:37 templates/expressions_add.html:38
 #: templates/expressions_update.html.py:37 templates/intervals_add.html:38
 #: templates/intervals_update.html.py:37 templates/unique_symbol_add.html:38
@@ -202,8 +205,10 @@ msgstr "Tamaño"
 msgid "Min. scale"
 msgstr "Escala min."
 
-#: templates/clustered_points_add.html:45
-#: templates/clustered_points_add.html:49 templates/color_table_add.html:38
+#: templates/clustered_points_add.html:39
+#: templates/clustered_points_add.html:43
+#: templates/clustered_points_update.html:38
+#: templates/clustered_points_update.html:42 templates/color_table_add.html:38
 #: templates/color_table_add.html.py:42 templates/color_table_update.html:38
 #: templates/color_table_update.html:42 templates/expressions_add.html.py:39
 #: templates/expressions_add.html:43 templates/expressions_update.html.py:38
@@ -217,7 +222,8 @@ msgstr "Escala min."
 msgid "No limit"
 msgstr "Sin límite"
 
-#: templates/clustered_points_add.html:48 templates/color_table_add.html:41
+#: templates/clustered_points_add.html:42
+#: templates/clustered_points_update.html:41 templates/color_table_add.html:41
 #: templates/color_table_update.html.py:41 templates/expressions_add.html:42
 #: templates/expressions_update.html.py:41 templates/intervals_add.html:42
 #: templates/intervals_update.html.py:41 templates/unique_symbol_add.html:42
@@ -226,7 +232,8 @@ msgstr "Sin límite"
 msgid "Max. scale"
 msgstr "Escala max."
 
-#: templates/clustered_points_add.html:52 templates/color_table_add.html:45
+#: templates/clustered_points_add.html:46
+#: templates/clustered_points_update.html:45 templates/color_table_add.html:45
 #: templates/color_table_update.html.py:45 templates/expressions_add.html:46
 #: templates/expressions_update.html.py:45 templates/intervals_add.html:46
 #: templates/intervals_update.html.py:45 templates/unique_symbol_add.html:46
@@ -239,7 +246,9 @@ msgstr ""
 "Especifíca el mínimo y máximo denominador de la escala (inclusivos) para el "
 "rango de esclas en el cual la regla se aplica"
 
-#: templates/clustered_points_add.html:58 templates/color_table_add.html:51
+#: templates/clustered_points_add.html:52
+#: templates/clustered_points_update.html:52
+#: templates/clustered_points_update.html:54 templates/color_table_add.html:51
 #: templates/color_table_update.html.py:52 templates/color_table_update.html:54
 #: templates/expressions_add.html.py:52 templates/expressions_update.html:52
 #: templates/expressions_update.html:54 templates/intervals_add.html.py:52
@@ -252,17 +261,18 @@ msgstr ""
 msgid "Set as default style"
 msgstr "Fijar como estilo por defecto"
 
-#: templates/clustered_points_add.html:70 templates/expressions_add.html:64
+#: templates/clustered_points_add.html:64
+#: templates/clustered_points_update.html:67 templates/expressions_add.html:64
 #: templates/expressions_update.html.py:67
 msgid "Add new rule"
 msgstr "Añadir nueva regla"
 
-#: templates/clustered_points_add.html:71 templates/expressions_add.html:65
-#: templates/expressions_update.html.py:68
-msgid "Creates a new rule based on an expression"
-msgstr "Crea una nueva regla basada en una expresión"
+#: templates/clustered_points_add.html:65
+msgid "Creates a new rule for clustered points"
+msgstr "Crea una leyenda definida por expresiones"
 
-#: templates/clustered_points_add.html:91 templates/expressions_add.html:85
+#: templates/clustered_points_add.html:85
+#: templates/clustered_points_update.html:88 templates/expressions_add.html:85
 #: templates/expressions_update.html.py:88 templates/intervals_add.html:91
 #: templates/intervals_update.html.py:94 templates/unique_symbol_add.html:93
 #: templates/unique_symbol_update.html:96 templates/unique_values_add.html:87
@@ -270,7 +280,8 @@ msgstr "Crea una nueva regla basada en una expresión"
 msgid "Import symbol"
 msgstr "Importar símbolo"
 
-#: templates/clustered_points_add.html:96 templates/expressions_add.html:90
+#: templates/clustered_points_add.html:90
+#: templates/clustered_points_update.html:93 templates/expressions_add.html:90
 #: templates/expressions_update.html.py:93 templates/intervals_add.html:96
 #: templates/intervals_update.html.py:99 templates/unique_symbol_add.html:98
 #: templates/unique_symbol_update.html:101 templates/unique_values_add.html:92
@@ -278,7 +289,8 @@ msgstr "Importar símbolo"
 msgid "Select library"
 msgstr "Seleccionar biblioteca"
 
-#: templates/clustered_points_add.html:98 templates/expressions_add.html:92
+#: templates/clustered_points_add.html:92
+#: templates/clustered_points_update.html:95 templates/expressions_add.html:92
 #: templates/expressions_update.html.py:95 templates/intervals_add.html:98
 #: templates/intervals_update.html.py:101 templates/unique_symbol_add.html:100
 #: templates/unique_symbol_update.html:103 templates/unique_values_add.html:94
@@ -286,28 +298,39 @@ msgstr "Seleccionar biblioteca"
 msgid "Select symbol library"
 msgstr "Seleccionar biblioteca de símbolos"
 
-#: templates/clustered_points_add.html:117 templates/expressions_add.html:111
-#: templates/expressions_update.html:114 templates/intervals_add.html.py:117
-#: templates/intervals_update.html:120 templates/unique_symbol_add.html:119
-#: templates/unique_symbol_update.html:122 templates/unique_values_add.html:113
-#: templates/unique_values_update.html:116
+#: templates/clustered_points_add.html:111
+#: templates/clustered_points_update.html:114
+#: templates/expressions_add.html:111 templates/expressions_update.html:114
+#: templates/intervals_add.html.py:117 templates/intervals_update.html:120
+#: templates/unique_symbol_add.html:119 templates/unique_symbol_update.html:122
+#: templates/unique_values_add.html:113 templates/unique_values_update.html:116
 msgid "Close"
 msgstr "Cerrar"
 
-#: templates/clustered_points_add.html:131
-msgid "Labelling configuration"
-msgstr "Configuración del simbolizador"
-
-#: templates/clustered_points_add.html:266 templates/color_table_add.html:170
-#: templates/color_table_update.html:173 templates/expressions_add.html:257
-#: templates/expressions_update.html:263
+#: templates/clustered_points_add.html:305
+#: templates/clustered_points_update.html:311
+#: templates/color_table_add.html:168 templates/color_table_update.html:171
+#: templates/expressions_add.html:304 templates/expressions_update.html:310
 #: templates/external_graphic_add.html:147
-#: templates/external_graphic_add.html:151 templates/intervals_add.html:260
-#: templates/intervals_update.html.py:269 templates/symbol_add.html:110
-#: templates/symbol_update.html.py:119 templates/unique_symbol_add.html:230
-#: templates/unique_values_add.html:251 templates/unique_values_update.html:260
+#: templates/external_graphic_add.html:151 templates/intervals_add.html:307
+#: templates/intervals_update.html.py:316 templates/symbol_add.html:110
+#: templates/symbol_update.html.py:119 templates/unique_symbol_add.html:277
+#: templates/unique_values_add.html:298 templates/unique_values_update.html:307
 msgid "Field name is required"
 msgstr "El campo nombre es obligatorio"
+
+#: templates/clustered_points_update.html:11
+#: templates/color_table_update.html:11 templates/expressions_update.html:11
+#: templates/intervals_update.html:11 templates/style_layer_list.html.py:95
+#: templates/unique_symbol_update.html:11
+#: templates/unique_values_update.html:11
+msgid "Update style"
+msgstr "Actualizar estilo"
+
+#: templates/clustered_points_update.html:68 templates/expressions_add.html:65
+#: templates/expressions_update.html.py:68
+msgid "Creates a new rule based on an expression"
+msgstr "Crea una nueva regla basada en una expresión"
 
 #: templates/color_table_add.html:11
 msgid "Add new color table"
@@ -317,16 +340,11 @@ msgstr "Añadir nueva tabla de color"
 msgid "Edit color map entry"
 msgstr "Editar entrada de color del mapa"
 
-#: templates/color_table_add.html:164 templates/color_table_update.html:167
+#: templates/color_table_add.html:162 templates/color_table_update.html:165
 msgid "Two or more color definitions are required"
-msgstr "En caso de necesitar alguna, se requieren al menos dos definiciones en la tabla de color"
-
-#: templates/color_table_update.html:11 templates/expressions_update.html:11
-#: templates/intervals_update.html:11 templates/style_layer_list.html.py:95
-#: templates/unique_symbol_update.html:11
-#: templates/unique_values_update.html:11
-msgid "Update style"
-msgstr "Actualizar estilo"
+msgstr ""
+"En caso de necesitar alguna, se requieren al menos dos definiciones en la "
+"tabla de color"
 
 #: templates/dashboard_symbology_menu.html:4
 msgid "Symbology"
@@ -392,7 +410,7 @@ msgid "The file format is not supported"
 msgstr "El formato del archivo no está soportado"
 
 #: templates/external_graphic_add.html:148
-#: templates/external_graphic_add.html:154 views.py:600 views.py:706
+#: templates/external_graphic_add.html:154 views.py:663 views.py:769
 msgid "You must select a file"
 msgstr "Debe seleccionar un archivo"
 
@@ -571,27 +589,21 @@ msgstr "Crea una leyenda definida por intervalos"
 msgid "Creates a legend defined by expressions"
 msgstr "Crea una leyenda definida por expresiones"
 
-#: templates/select_legend_type.html:68
-msgid "Clustered Points"
-msgstr ""
-
 #: templates/select_legend_type.html:69
-#, fuzzy
-#| msgid "Creates a legend defined by expressions"
-msgid "Creates a legend for clustered points defined by expressions"
-msgstr "Crea una leyenda definida por expresiones"
-
-#: templates/select_legend_type.html:77
 msgid "Import from SLD"
 msgstr "Importar desde SLD"
 
-#: templates/select_legend_type.html:79
+#: templates/select_legend_type.html:71
 msgid "SLD legend description"
 msgstr "Descriptor leyenda SLD"
 
-#: templates/select_legend_type.html:90
+#: templates/select_legend_type.html:82
 msgid "Creates a legend for a raster layer defined by a color table"
 msgstr "Crea una leyenda para una capa raster deifinida por una tabla de color"
+
+#: templates/select_legend_type.html:94
+msgid "Creates a legend for clustered points defined by expressions"
+msgstr "Crea una leyenda definida por expresiones"
 
 #: templates/sld_import.html:12
 msgid "Import SLD"
@@ -633,25 +645,33 @@ msgstr "Editar simbolizador"
 msgid "Select field to generate unique values"
 msgstr "Seleccionar campo para generar valores únicos"
 
-#: views.py:97
+#: views.py:116
 msgid "The layer must contain at least one style"
 msgstr "La capa debe contener al menos un estilo"
 
-#: views.py:100
+#: views.py:119
 msgid "Can not delete a default style"
 msgstr "No puede eliminar un estilo por defecto"
 
-#: views.py:593
+#: views.py:656
 msgid "Error importing SLD"
 msgstr "Error al importar SLD"
 
-#: views.py:640 views.py:703
+#: views.py:703 views.py:766
 msgid "You must enter a name for the library"
 msgstr "Debe introducir un nombre para la biblioteca"
 
-#: views.py:709
+#: views.py:772
 msgid "You must enter a name for the library and select a file"
 msgstr "Debe introducir un nombre para la biblioteca y seleccionar un archivo"
+
+#, fuzzy
+#~| msgid "Size"
+#~ msgid "Cell Size"
+#~ msgstr "Tamaño"
+
+#~ msgid "Labelling configuration"
+#~ msgstr "Configuración del simbolizador"
 
 #~ msgid "Minimum scale denominator"
 #~ msgstr "Denominador mínimo de la escala"

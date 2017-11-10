@@ -247,3 +247,24 @@ msgstr "Sin límite"
 
 msgid "Two or more color definitions are required"
 msgstr "En caso de necesitar alguna, se requieren al menos dos definiciones en la tabla de color"
+
+msgid "Label filter expressions"
+msgstr "Etiqueta filtrada por expresión"
+
+msgid "Minimum interval"
+msgstr "Intervalo mínimo"
+
+msgid "Maximum interval"
+msgstr "Intervalo máximo"
+
+msgid "Append textsymbolizer"
+msgstr "Añadir simbolizador de texto"
+
+msgid "Single feature"
+msgstr "Feature simple"
+
+msgid "Default group"
+msgstr "Grupo por defecto"
+
+msgid "features"
+msgstr "features"
