@@ -137,7 +137,7 @@ ClusteredPoints.prototype.addNewRule = function(filter_value, filter_value2) {
 					value: ""+filter_value
 			};
 			
-			title = gettext('Default group (>= ' + filter_value + ' features)');
+			title = gettext('Default group')+' (>= ' + filter_value + ' '+ gettext('features')+')';
 			is_single = false;
 		}
 	}
