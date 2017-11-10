@@ -226,31 +226,31 @@ msgstr "Multipolígono"
 
 #: forms_geoserver.py:45 forms_services.py:37
 msgid "continuous interval"
-msgstr ""
+msgstr "Intervalo continuo"
 
 #: forms_geoserver.py:45 forms_services.py:37
 msgid "interval and resolution"
-msgstr ""
+msgstr "Intervalo con resolución"
 
 #: forms_geoserver.py:45 forms_services.py:37
 msgid "list"
-msgstr ""
+msgstr "Lista de valores"
 
 #: forms_geoserver.py:46 forms_services.py:38
 msgid "smallest domain value"
-msgstr ""
+msgstr "Menor valor del dominio"
 
 #: forms_geoserver.py:46 forms_services.py:38
 msgid "biggest domain value"
-msgstr ""
+msgstr "Mayor valor del dominio"
 
 #: forms_geoserver.py:46 forms_services.py:38
 msgid "nearest to the reference value"
-msgstr ""
+msgstr "Valor más cercano al valor referencia"
 
 #: forms_geoserver.py:46 forms_services.py:38
 msgid "reference value"
-msgstr ""
+msgstr "Valor de referencia"
 
 #: forms_geoserver.py:50 forms_geoserver.py:65 forms_services.py:52
 #: templates/datastore_add.html:36 templates/datastore_update.html.py:19
