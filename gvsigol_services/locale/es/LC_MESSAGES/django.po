@@ -1134,56 +1134,48 @@ msgstr "Nombre del recurso"
 #: templates/layer_add.html:100 templates/layer_create.html.py:137
 #: templates/layer_update.html:118
 msgid "time_enabled"
-msgstr ""
+msgstr "Parámetro temporal"
 
 #: templates/layer_add.html:104 templates/layer_update.html.py:123
 #: templates/layer_update.html:127
 msgid "Enable highlight"
-msgstr ""
+msgstr "Habilitar resaltado"
 
 #: templates/layer_add.html:112 templates/layer_create.html.py:144
 #: templates/layer_update.html:136
-#, fuzzy
-#| msgid "Delete field"
 msgid "time_enabled field"
-msgstr "Eliminar campo"
+msgstr "Campo temporal"
 
 #: templates/layer_add.html:119 templates/layer_create.html.py:151
 #: templates/layer_update.html:143
 msgid "End time_enabled field"
-msgstr ""
+msgstr "Campo temporal (fin intervalo)"
 
 #: templates/layer_add.html:126 templates/layer_create.html.py:158
 #: templates/layer_update.html:150
 msgid "Time presentation"
-msgstr ""
+msgstr "Presentación temporal"
 
 #: templates/layer_add.html:133 templates/layer_create.html.py:165
 #: templates/layer_update.html:157
 msgid ""
 "Time resolution (years, months, weeks, days, hours, minutes and seconds)"
-msgstr ""
+msgstr "Resolución temporal (años, meses, semanas, días, horas, minutos y segundos)"
 
 #: templates/layer_add.html:150 templates/layer_create.html.py:182
 #: templates/layer_update.html:174
-#, fuzzy
-#| msgid "Default symbol"
 msgid "Default value mode"
-msgstr "Símbolo por defecto"
+msgstr "Modo para asignar valores por defecto"
 
 #: templates/layer_add.html:240 templates/layer_create.html.py:633
 #: templates/layer_update.html:255
-#, fuzzy
-#| msgid "Resource name"
 msgid "Resource contains no fields"
-msgstr "Nombre del recurso"
+msgstr "El recurso no contiene campos"
 
 #: templates/layer_add.html:258 templates/layer_create.html.py:653
 #: templates/layer_update.html:281
-#, fuzzy
-#| msgid "New field"
 msgid "Choose field"
-msgstr "Nuevo campo"
+msgstr "Elige campo"
 
 #: templates/layer_add.html:285
 msgid "Data store contains no resources to publish"
@@ -1203,13 +1195,11 @@ msgstr "No ha seleccionado un almacén de datos válido"
 
 #: templates/layer_add.html:343 templates/layer_add.html.py:371
 msgid "-----------"
-msgstr ""
+msgstr "-----------"
 
 #: templates/layer_add.html:364
-#, fuzzy
-#| msgid "Delete field"
 msgid "Choose date field"
-msgstr "Eliminar campo"
+msgstr "Elige campo fecha"
 
 #: templates/layer_config.html:16 templates/layer_list.html.py:136
 #: templates/layergroup_update.html:105 templates/layergroup_update.html:107
