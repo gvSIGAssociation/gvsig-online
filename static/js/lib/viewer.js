@@ -428,7 +428,7 @@ viewer.core = {
 							 	self.map.addLayer(ignLayer3);
 	    		    		 }
 	    		    		}catch(err){
-	    		    			console.log("error")
+	    		    			console.log("error loading wmts '" + base_layer2['url']+"':" + err)
 	    		    		}
 	    		    	}
 	    	        }
