@@ -2668,8 +2668,10 @@ def get_capabilities_from_url(request):
             formats = wms.getOperationByName('GetMap').formatOptions
             
         except Exception as e:
-            print e.get_message()
-        
+            data = {'response': '500',
+             'message':  str(e.message)}
+            
+            return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
     
     if service == 'WMTS':
         if not version:
