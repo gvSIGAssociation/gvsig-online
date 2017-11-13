@@ -765,6 +765,7 @@ def select_public_project(request):
             project = {}
             project['id'] = p.id
             project['name'] = p.name
+            project['title'] = p.title
             project['description'] = p.description
             project['image'] = urllib.unquote(image)
             projects.append(project)
