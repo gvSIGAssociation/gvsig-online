@@ -534,17 +534,17 @@ Similar al otro formato xlxs, pero desde otra pestaña y no se podrá elegir ent
 
 
 3.3 Subir el fichero plano al sistema
--------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 El fichero plano (xlsx y/o csv) debe estar guardado dentro de un directorio del adminitrador de archivo.
 
 
 3.4 Aplicar transformación
---------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Cuando se haya creado una tabla vacia y publicado en el sistema, definido la plantilla de transformación y subido el fichero al administrador de archivos, se procede finalmente a aplicar la transformación respectiva.
 
-Las transformaciones se ejectan directamnete sobre el fichero plano que contiene los datos que se desean almacenar en una capa de la BD. 
+Las transformaciones se ejecutan directamnete sobre el fichero plano que contiene los datos que se desean almacenar en una capa de la BD. 
 
 Para mejor comprensión del paso final se detalla a continuación:
 
