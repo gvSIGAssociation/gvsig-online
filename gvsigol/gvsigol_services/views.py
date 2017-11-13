@@ -2658,13 +2658,18 @@ def get_capabilities_from_url(request):
     if service == 'WMS':
         if not version:
             version = WMS_MAX_VERSION
-        wms = WebMapService(url, version=version)
+        try:
+            wms = WebMapService(url, version=version)
         
-        print wms.identification.type
-        title = wms.identification.title
-        matrixsets = []
-        layers = list(wms.contents)
-        formats = wms.getOperationByName('GetMap').formatOptions
+            print wms.identification.type
+            title = wms.identification.title
+            matrixsets = []
+            layers = list(wms.contents)
+            formats = wms.getOperationByName('GetMap').formatOptions
+            
+        except Exception as e:
+            print e.get_message()
+        
     
     if service == 'WMTS':
         if not version:
