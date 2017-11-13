@@ -310,7 +310,10 @@ getFeatureInfo.prototype.showInfo = function(features){
 	var self = this;
 	var detailsTab = $('#details-tab');
 	detailsTab.empty();
-	$('.nav-tabs a[href="#layer-tree-tab"]').tab('show');
+	var tab_id = $("ul.nav-tabs li.active").index();
+	if(tab_id==2){
+		$('.nav-tabs a[href="#layer-tree-tab"]').tab('show');
+	}
 
 	var html = '<ul class="products-list product-list-in-box">';
 	
@@ -447,7 +450,10 @@ getFeatureInfo.prototype.showInfo = function(features){
 	$(".getfeatureinfo-popup").parent().parent().children(".ol-popup-closer").unbind("click").click(function() {
 		var detailsTab = $('#details-tab');
 	 	detailsTab.empty();
-	 	$('.nav-tabs a[href="#layer-tree-tab"]').tab('show');
+	 	var tab_id = $("ul.nav-tabs li.active").index();
+		if(tab_id==2){
+			$('.nav-tabs a[href="#layer-tree-tab"]').tab('show');
+		}
 	 	return false;
 	});
 
