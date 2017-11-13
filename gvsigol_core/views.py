@@ -816,6 +816,7 @@ def public_viewer_get_conf(request):
                     layer['queryable'] = l.queryable 
                     layer['time_enabled'] = l.time_enabled 
                     if layer['time_enabled']:
+                        layer['ref'] = l.id
                         layer['time_enabled_field'] = l.time_enabled_field
                         layer['time_enabled_endfield'] = l.time_enabled_endfield
                         layer['time_presentation'] = l.time_presentation
