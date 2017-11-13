@@ -576,9 +576,16 @@ layerTree.prototype.refreshTemporalSlider = function() {
 			if($(".temporary-layers-slider").hasClass("ui-slider")){
 				$(".temporary-layers-slider").slider( "destroy" );
 			}
+			var new_max = this.max_val;
+			if(this.step_val > 1){
+				if((this.max_val - this.min_val)%this.step_val!=0){
+					var number_steps = Math.floor((this.max_val - this.min_val)/this.step_val) + 1;
+					new_max = this.min_val + (this.step_val * number_steps);
+				}
+			}
 			$(".temporary-layers-slider").slider({
 			    min: this.min_val,
-			    max: this.max_val,
+			    max: new_max,
 			    value: this.min_val,
 			    step: this.step_val,
 			    range: false,
@@ -596,9 +603,16 @@ layerTree.prototype.refreshTemporalSlider = function() {
 			if($(".temporary-layers-slider").hasClass("ui-slider")){
 				$(".temporary-layers-slider").slider( "destroy" );
 			}
+			var new_max = this.max_val;
+			if(this.step_val > 1){
+				if((this.max_val - this.min_val)%this.step_val!=0){
+					var number_steps = Math.floor((this.max_val - this.min_val)/this.step_val) + 1;
+					new_max = this.min_val + (this.step_val * number_steps);
+				}
+			}
 			$(".temporary-layers-slider").slider({
 				min: this.min_val,
-			    max: this.max_val,
+			    max: new_max,
 			    value: this.min_val,
 		        step: this.step_val,
 			    range: true,
