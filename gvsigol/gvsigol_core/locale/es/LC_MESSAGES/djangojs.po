@@ -345,3 +345,46 @@ msgstr "Más información del elemento"
 
 msgid "Invalid identifier. Unable to get requested geometry"
 msgstr "Identificador no válido. No se puede obtener la geometría solicitada"
+
+msgid "Temporary layers"
+msgstr "Capas con temporalidad"
+
+msgid "From"
+msgstr "Desde"
+
+msgid "To"
+msgstr "Hasta"
+
+msgid "Step"
+msgstr "Divisiones"
+
+msgid "Single"
+msgstr "Marca simple"
+
+msgid "Range"
+msgstr "Doble marca (rango)"
+
+msgid "temporary_field"
+msgstr "Campo temporal"
+
+msgid "temporary_endfield"
+msgstr "Campo temporal (fin de rango)"
+
+msgid "second(s)"
+msgstr "segundo(s)"
+
+msgid "minute(s)"
+msgstr "minuto(s)"
+
+msgid "hour(s)"
+msgstr "hora(s)"
+
+msgid "day(s)"
+msgstr "día(s)"
+
+msgid "month(s)"
+msgstr "mes(es)"
+
+msgid "year(s)"
+msgstr "año(s)"
+

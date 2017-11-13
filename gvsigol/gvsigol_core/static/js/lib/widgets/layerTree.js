@@ -260,12 +260,12 @@ layerTree.prototype.createTree = function() {
 	
 	temporary_tree += '<div style="margin-left:10px;">';
 	temporary_tree += 	'<input type="radio" id="temporary-single" data-value="single" name="temporary-group" checked>';
-	temporary_tree += 	'<span class="text"> Single </span>';
+	temporary_tree += 	'<span class="text">'+gettext('Single')+'</span>';
 	temporary_tree += '</div>';
 	
 	temporary_tree += '<div style="margin-left:10px;">';
 	temporary_tree += 	'<input type="radio" id="temporary-range" data-value="range" name="temporary-group">';
-	temporary_tree += 	'<span class="text"> Range </span>';
+	temporary_tree += 	'<span class="text">'+gettext('Range')+'</span>';
 	temporary_tree += '</div>';
 	
 	

@@ -144,7 +144,7 @@ msgstr "Error creando la capa. Revisar el formato del fichero"
 #, python-brace-format
 msgid ""
 "Invalid layer fields: '{value}'. Layer can't have fields with whitespaces"
-msgstr ""
+msgstr "Campos inválidos: '{value}'. La capa no puede tener campos con espacios en blanco"
 
 #: backend_mapservice.py:1146
 msgid "Invalid geometry type"
