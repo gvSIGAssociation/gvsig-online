@@ -140,8 +140,18 @@ layerTree.prototype.createTree = function() {
 				if (layer.get("id") === this.id) {
 					if (layer.getVisible() == true) {
 						layer.setVisible(false);
+						if($("#layer-"+layer.get("id")).length){
+							$("#layer-"+layer.get("id")).css("display", "none");
+							self.refreshTemporalInfo();	
+							self.updateTemporalLayers();
+						}
 					} else {
 						layer.setVisible(true);
+						if($("#layer-"+layer.get("id")).length){
+							$("#layer-"+layer.get("id")).css("display", "block");
+							self.refreshTemporalInfo();	
+							self.updateTemporalLayers();
+						}
 					}
 				}
 			};
@@ -293,17 +303,17 @@ layerTree.prototype.createTree = function() {
 			var has_temporary_layers = false;
 			var layerGroup = this.conf.layerGroups[i];
 			var temporary_tree_aux = '';
-			temporary_tree_aux += '			<li class="box box-default collapsed-box" id="' + layerGroup.groupId + '">';
-			temporary_tree_aux += '				<div class="box-header with-border">';
-			temporary_tree_aux += '					<input type="checkbox" class="templayer-group" id="layergroup-' + layerGroup.groupId + '">';
-			temporary_tree_aux += '					<span class="text">' + layerGroup.groupTitle + '</span>';
-			temporary_tree_aux += '					<div class="box-tools pull-right">';
-			temporary_tree_aux += '						<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
-			temporary_tree_aux += '							<i class="fa fa-plus"></i>';
-			temporary_tree_aux += '						</button>';
-			temporary_tree_aux += '					</div>';
-			temporary_tree_aux += '				</div>';
-			temporary_tree_aux += '				<div data-groupnumber="' + (groupCount++) * 100 + '" class="box-body layer-tree-groups" style="display: none;">';
+//			temporary_tree_aux += '			<li class="box box-default collapsed-box" id="' + layerGroup.groupId + '">';
+//			temporary_tree_aux += '				<div class="box-header with-border">';
+//			temporary_tree_aux += '					<input type="checkbox" class="templayer-group" id="layergroup-' + layerGroup.groupId + '">';
+//			temporary_tree_aux += '					<span class="text">' + layerGroup.groupTitle + '</span>';
+//			temporary_tree_aux += '					<div class="box-tools pull-right">';
+//			temporary_tree_aux += '						<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
+//			temporary_tree_aux += '							<i class="fa fa-plus"></i>';
+//			temporary_tree_aux += '						</button>';
+//			temporary_tree_aux += '					</div>';
+//			temporary_tree_aux += '				</div>';
+//			temporary_tree_aux += '				<div data-groupnumber="' + (groupCount++) * 100 + '" class="box-body layer-tree-groups" style="display: block;">';
 			for (var j=0; j<layerGroup.layers.length; j++) {	
 				var layer = layerGroup.layers[j];				
 				var temporary_tree_aux_layer = self.createTemporaryOverlayUI(layer);
@@ -313,8 +323,8 @@ layerTree.prototype.createTree = function() {
 					has_temporary_layers_global = true;
 				}
 			}
-			temporary_tree_aux += '				</div>';
-			temporary_tree_aux += '			</li>';
+//			temporary_tree_aux += '				</div>';
+//			temporary_tree_aux += '			</li>';
 			if(has_temporary_layers){
 				temporary_tree += temporary_tree_aux;
 			}
@@ -333,43 +343,40 @@ layerTree.prototype.createTree = function() {
 	
 	var self = this;
 	
-	$(".temporary-layer").change(function(){
-		self.refreshTemporalInfo();	
-		if(!$(this).prop("checked")){
-			self.updateTemporalLayers();
-		}
-	});
+//	$(".temporary-layer").change(function(){
+//		
+//	});
 	
-	$("input[name=temporary-group]").change(function (e) {
-		self.refreshTemporalSlider();
-	});
+//	$("input[name=temporary-group]").change(function (e) {
+//		self.refreshTemporalSlider();
+//	});
 	
-	$(".templayer-group").change(function (e) {
-		var groupId = this.id.split('-')[1]; 
-		var checked = this.checked;
-		for (var i=0; i<self.conf.layerGroups.length; i++) {			
-			var group = self.conf.layerGroups[i];
-			if (group.groupId == groupId) {
-				for (var j=0; j<group.layers.length; j++) {
-					var layer = group.layers[j];
-					var layerCheckboxes = $(".temp-"+layer.id);
-					if(layerCheckboxes.length > 0){
-						var layerCheckbox = layerCheckboxes[0];
-						if (checked) {
-							layerCheckbox.checked = true;
-							layerCheckbox.disabled = true;
-							
-						} else {
-							layerCheckbox.checked = false;
-							layerCheckbox.disabled = false;
-						}
-						
-					}
-				}
-			}			
-		}
-		self.refreshTemporalInfo();
-	});
+//	$(".templayer-group").change(function (e) {
+//		var groupId = this.id.split('-')[1]; 
+//		var checked = this.checked;
+//		for (var i=0; i<self.conf.layerGroups.length; i++) {			
+//			var group = self.conf.layerGroups[i];
+//			if (group.groupId == groupId) {
+//				for (var j=0; j<group.layers.length; j++) {
+//					var layer = group.layers[j];
+//					var layerCheckboxes = $(".temp-"+layer.id);
+//					if(layerCheckboxes.length > 0){
+//						var layerCheckbox = layerCheckboxes[0];
+//						if (checked) {
+//							layerCheckbox.checked = true;
+//							layerCheckbox.disabled = true;
+//							
+//						} else {
+//							layerCheckbox.checked = false;
+//							layerCheckbox.disabled = false;
+//						}
+//						
+//					}
+//				}
+//			}			
+//		}
+//		self.refreshTemporalInfo();
+//	});
 	
 	$("#temporary-step-value").change(function () {
 		self.refreshTemporalStep();
@@ -453,7 +460,7 @@ layerTree.prototype.refreshTemporalStep = function() {
 layerTree.prototype.refreshTemporalInfo = function() {
 	var layers = [];
 	$(".temporary-layer").each(function(){
-		if($(this).prop("checked")){
+		if($(this).css("display") == "block"){
 			layers.push($(this).attr("data-id"));
 		}
 	});
@@ -530,8 +537,8 @@ layerTree.prototype.adaptToStep = function(date) {
 layerTree.prototype.updateTemporalLayers = function(startDate, endDate) {
 	var layers = [];
 	$(".temporary-layer").each(function(){
-		if($(this).prop("checked")){
-			layers.push($(this).attr("id"));
+		if($(this).css("display") == "block"){
+			layers.push($(this).attr("data-layerid"));
 		}
 	});
 	
@@ -756,10 +763,15 @@ layerTree.prototype.createTemporaryOverlayUI = function(layer) {
 			}
 		}
 		
-		ui += '<div id="layer-' + id + '" data-layerid="' + id + '" data-zindex="' + mapLayer.getZIndex() + '" class="box layer-box thin-border box-default collapsed-box">';
+		var visibility = 'style="display: none;"';
+		if(layer.visible){
+			visibility = 'style="display: block;"';
+		}
+		
+		ui += '<div id="layer-' + id + '" data-layerid="' + id + '" data-id="'+layer.ref+'" data-zindex="' + mapLayer.getZIndex() + '" class="temporary-layer box thin-border box-default collapsed-box" '+visibility+'>';
 		ui += '		<div class="box-header with-border">';
 	
-		ui += '		<input type="checkbox" class="temporary-layer temp-'+id+'" id="' + id + '" data-id="'+layer.ref+'">';
+//		ui += '		<input type="checkbox" class="temporary-layer temp-'+id+'" id="' + id + '" data-id="'+layer.ref+'">';
 	
 		ui += '			<span class="text">' + layer.title + '</span>';
 		ui += '			<div class="box-tools pull-right">';
