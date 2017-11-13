@@ -56,7 +56,7 @@ msgstr "Expresiones"
 
 #: models.py:48 templates/select_legend_type.html.py:93
 msgid "Clustered Points"
-msgstr ""
+msgstr "Agrupación de puntos"
 
 #: models.py:49 templates/select_legend_type.html.py:81
 msgid "Color table"
