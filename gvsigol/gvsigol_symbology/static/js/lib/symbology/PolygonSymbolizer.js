@@ -185,7 +185,7 @@ PolygonSymbolizer.prototype.registerEvents = function() {
 };
 
 PolygonSymbolizer.prototype.updatePreview = function() {	
-	var sldBody = this.sld();
+	var sldBody = this.toSLDBody();
 	if(sldBody != null){
 		var url = this.utils.getPreviewUrl() + '&SLD_BODY=' + encodeURIComponent(sldBody);
 		var ui = '<img id="symbolizer-preview-' + this.id + '" src="' + url + '" class="symbolizer-preview-' + this.id + '"></img>';
