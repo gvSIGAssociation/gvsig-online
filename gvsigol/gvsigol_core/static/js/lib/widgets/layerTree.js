@@ -399,7 +399,6 @@ layerTree.prototype.createTree = function() {
 	
 	self.updateTemporalLayers();
 	
-;
 	
 	$('#datetimepicker-from').on('dp.change', function(e){ 
 	    var formatedValue = e.date.format(e.date._f);
@@ -537,10 +536,10 @@ layerTree.prototype.updateTemporalLayers = function(startDate, endDate) {
 	});
 	
 	var maplayers = this.map.getLayers();
-	if(maplayers.array_ != null){
-		for(var i=0; i<maplayers.array_.length; i++){
-			var maplayer = maplayers.array_[i];
-			if(maplayer.values_ != null && (jQuery.inArray(maplayer.values_.id, layers)>-1)){
+	if(maplayers.getArray() != null){
+		for(var i=0; i<maplayers.getArray().length; i++){
+			var maplayer = maplayers.getArray()[i];
+			if((jQuery.inArray(maplayer.get("id"), layers)>-1)){
 				if(startDate){
 					var start = startDate.toISOString();
 					start = this.adaptToStep(startDate);
