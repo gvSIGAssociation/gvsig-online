@@ -16,9 +16,10 @@
 				</div>					
 				<div class="box-body">
 				
-					{% if form.errors %}
+					
 					<div id="form-error" style="color:#ff0000;">
 						<ul>
+						{% if form.errors %}
 						{% for field in form %}
 							{% if field.errors %}
 								<li>{{field.label}}. {{ field.errors|striptags }}</li>
@@ -27,9 +28,10 @@
 						{% for field, msg in form.errors.iteritems %}
 							<li>{{ msg|striptags }}</li>
 						{% endfor %}
+						{% endif %}
 						</ul>
 					</div>
-					{% endif %}
+					
 					
 					<!-- 
 					<div class="row">		
@@ -174,7 +176,9 @@ $().ready(function(){
 				'layer': layer
 			},
 			success: function(data) {
-				
+				if('response' in data && data['response'] == '500'){
+					$("#form-error ul").empty().append("<li>"+gettext('Error in GetCapabilities')+': '+data['message']+'</li>')
+				}else{		
 				if('title' in data){
 					if($("#id_title").val() == ""){
 						$("#id_title").val(data['title']);
@@ -261,9 +265,9 @@ $().ready(function(){
 						});
 				 }
 				 
-				 
+			  }
 			},
-			error: function(){
+			error: function(err){
 				alert(gettext("Error intentando conectar"));
 			}
 		});
