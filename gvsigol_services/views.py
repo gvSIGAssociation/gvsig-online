@@ -1075,8 +1075,8 @@ def layer_config(request, layer_id):
         return render(request, 'layer_config.html', {'layer': layer, 'layer_id': layer.id, 'fields': fields, 'fields_json': json.dumps(fields), 'available_languages': LANGUAGES, 'available_languages_array': available_languages, 'redirect_to_layergroup': redirect_to_layergroup})
     
 
-@require_POST
-@staff_required
+@require_http_methods(["POST"])
+@csrf_exempt
 def layers_get_temporal_properties(request):
     try:
         #layer = Layer.objects.get(pk=layer_id)
