@@ -33,7 +33,7 @@ import tempfile
 import json
 import os
 
-def create_default_style(layer_id, style_name, style_type, geom_type):
+def create_default_style(layer_id, style_name, style_type, geom_type, count):
     layer = Layer.objects.get(id=int(layer_id))
     
     style = Style(
@@ -64,6 +64,12 @@ def create_default_style(layer_id, style_name, style_type, geom_type):
         symbol_type = 'PolygonSymbolizer'
     elif geom.isRaster(geom_type):
         symbol_type = 'RasterSymbolizer'
+        
+    minscaledenominator = -1
+    maxscaledenominator = -1
+    if count and count > 200000:
+        minscaledenominator = 0
+        maxscaledenominator = 50000
     
     rule = Rule(
         style = style,
@@ -71,8 +77,8 @@ def create_default_style(layer_id, style_name, style_type, geom_type):
         title = _('Default symbol'),
         abstract = '',
         filter = str(""),
-        minscale = -1,
-        maxscale = -1,
+        minscale = minscaledenominator,
+        maxscale = maxscaledenominator,
         order = 0
     )
     rule.save()

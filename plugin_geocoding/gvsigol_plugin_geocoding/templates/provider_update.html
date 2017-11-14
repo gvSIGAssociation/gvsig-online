@@ -255,7 +255,7 @@
 		var code = params;
 		$('#select-file-row').css('display', 'none');
 		$('#connection-params-row').css('display', 'block');
-		codemirror.setValue(code);
+		codemirror.setValue(JSON.stringify(code));
 	
 	}
 	
@@ -572,6 +572,10 @@
  			updateFieldsList(ws_id, ds_name, resource, "id_id_field", params["id_field"]);
  			updateFieldsList(ws_id, ds_name, resource, "id_text_field", params["text_field"]);
  			updateFieldsList(ws_id, ds_name, resource, "id_geom_field", params["geom_field"]);
+		}
+		
+		if(type=="user" || type=="cartociudad"){
+			$("#id_category").prop("disabled", "disabled");
 		}
 		
 		$("#id_resource").change(function() {

@@ -155,66 +155,76 @@ viewer.core = {
     },
     
     _loadBaseLayers: function() {		
-    	
+	    var self = this;
     	var base_layers = this.conf.base_layers;
     	
     	var layers = this.map.getLayers();
-     	var projection = ol.proj.get('EPSG:3857');
-     	var matrixSet = 'EPSG:3857';
-    		
-     	var projectionExtent = projection.getExtent();
-     	var size = ol.extent.getWidth(projectionExtent) / 256;
-     	var resolutions = new Array(18);
-     	var matrixIds = new Array(18);
-     	for (var z = 0; z < 18; ++z) {
-     		resolutions[z] = size / Math.pow(2, z);
-     		matrixIds[z] = z;
-     	}
-    	
+     	
     	for(var i=0; i<base_layers.length; i++){
     		var base_layer = base_layers[i];
-	    	if (base_layer['type'] == 'WMS') {
+    		if (base_layer['type'] == 'WMS') {
 				var wmsSource = new ol.source.TileWMS({
 					url: base_layer['url'],
 					params: {'LAYERS': base_layer['layers'], 'FORMAT': base_layer['format'], 'VERSION': base_layer['version']}
 				});
 				var wmsLayer = new ol.layer.Tile({
-					id: this._nextLayerId(),
+					id: "gol-layer-" + (i+1),
 					source: wmsSource,
 					visible: base_layer['active']
 				});
 				wmsLayer.baselayer = true;
 				this.map.addLayer(wmsLayer);
-				
+				base_layer['id'] = this.layerCount; 
+				this._nextLayerId();
 			} 
-	    	if (base_layer['type'] == 'WMTS') {				
-				var ignSource3 = new ol.source.WMTS({
-			         attributions: '',
-			         url: base_layer['url'],
-			         layer: base_layer['layers'],
-			         matrixSet: matrixSet,
-			         format: base_layer['format'],
-			         projection: projection,
-			         tileGrid: new ol.tilegrid.WMTS({
-			           origin: ol.extent.getTopLeft(projectionExtent),
-			           resolutions: resolutions,
-			           matrixIds: matrixIds
-			         }),
-			         style: 'default',
-			         wrapX: true
-			       });
-			 	var ignLayer3 = new ol.layer.Tile({
-			 		id: this._nextLayerId(),
-			 		source: ignSource3,
-			 		visible: base_layer['active']
-			 	});
-			 	ignLayer3.baselayer = true;
-			 	this.map.addLayer(ignLayer3);
+    		if (base_layer['type'] == 'WMTS') {		
+	    		var parser = new ol.format.WMTSCapabilities();
+	    		var capabilities_url = base_layer['url'] + '?request=GetCapabilities' + '&version=' + base_layer['version'];
+	    	      fetch(capabilities_url).then(function(response) {
+	    	    	  return response.text();
+	    	      }).then(function(text) {
+	    	        var result = parser.read(text);
+	    	        for(var j=0; j<base_layers.length; j++){
+	    	    		var base_layer2 = base_layers[j];
+	    		    	if (base_layer2['type'] == 'WMTS') {
+	    		    		try{
+	    		    		 var options = ol.source.WMTS.optionsFromCapabilities(result, {
+	    		  		          matrixSet: base_layer2['matrixset'],
+	    		  		          layer: base_layer2['layers']
+	    		  		        });
+	    		    		 if(options && options.urls && options.urls.length > 0){
+	    		    			 if(!base_layer2['url'].endsWith('?')){
+	    		    				 options.urls[0] = base_layer2['url'] + '?';
+	    		    			 }
+	    		    		 }
+	    		    		 var is_baselayer = false;
+	    		    		 for(var k=0; k<options.urls.length; k++){
+	    		    			 if(base_layer2['url'].replace("https://", "http://")+'?' == options.urls[k].replace("https://", "http://")){
+	    		    				 is_baselayer = true;
+	    		    			 }
+	    		    		 }
+	    		    		 if(is_baselayer){
+				    	        var ignSource3 = new ol.source.WMTS((options));
+						        var ignLayer3 = new ol.layer.Tile({
+							 		id: "gol-layer-" + (j+1),
+							 		source: ignSource3,
+							 		visible: base_layer2['active']
+							 	});
+							 	ignLayer3.baselayer = true;
+							 	self.map.addLayer(ignLayer3);
+	    		    		 }
+	    		    		}catch(err){
+	    		    			//console.log("error loading wmts '" + base_layer2['url']+"':" + err)
+	    		    		}
+	    		    	}
+	    	        }
+	    	      });
+	    	      this._nextLayerId();
 			}
 	    	
 	    	if (base_layer['type'] == 'Bing') {
 	    		var bingLayer = new ol.layer.Tile({
-					id: this._nextLayerId(),
+					id: "gol-layer-" + (i+1),
 					visible: base_layer['active'],
 					label: base_layer['layers'],
 					preload: Infinity,
@@ -225,6 +235,8 @@ viewer.core = {
 				});
 				bingLayer.baselayer = true;
 				this.map.addLayer(bingLayer);
+				base_layer['id'] = this.layerCount; 
+				this._nextLayerId();
 	    	}
 	    	
 	    	if (base_layer['type'] == 'OSM') {
@@ -237,18 +249,20 @@ viewer.core = {
 	    			osm_source = new ol.source.OSM();
 	    		}
 	    		var osm = new ol.layer.Tile({
-	        		id: this._nextLayerId(),
+	        		id: "gol-layer-" + (i+1),
 	            	label: base_layer['title'],
 	              	visible: base_layer['active'],
 	              	source: osm_source
 	            });
 	    		osm.baselayer = true;
 				this.map.addLayer(osm);
+				base_layer['id'] = this.layerCount; 
+				this._nextLayerId();
 			}
 	    	
 	    	if (base_layer['type'] == 'XYZ') {
 	    		var xyz = new ol.layer.Tile({
-	    			id: this._nextLayerId(),
+	    			id: "gol-layer-" + (i+1),
 	    			label: base_layer['title'],
 	    		  	visible: base_layer['active'],
 	    		  	source: new ol.source.XYZ({
@@ -257,6 +271,8 @@ viewer.core = {
 	    		});
 	    		xyz.baselayer = true;
 				this.map.addLayer(xyz);
+				base_layer['id'] = this.layerCount; 
+				this._nextLayerId();
 			}
 	    	
     	}
@@ -330,6 +346,7 @@ viewer.core = {
 				wmsLayer.namespace = layerConf.namespace;
 				wmsLayer.workspace = layerConf.workspace
 				wmsLayer.order = layerConf.order;
+				wmsLayer.styles = layerConf.styles;
 				wmsLayer.setZIndex(parseInt(layerConf.order));
 				wmsLayer.conf = JSON.parse(layerConf.conf);
 				wmsLayer.parentGroup = group;

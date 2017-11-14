@@ -36,6 +36,7 @@ var Rule = function(id, name, title, options, utils) {
 	this.utils = utils;
 	this.selected = null;
 	this.selectedCME = null;
+	this.type = null;
 	
 	if (options) {
 		this.id = options.id;
@@ -59,8 +60,8 @@ var Rule = function(id, name, title, options, utils) {
 
 Rule.prototype.getTableUI = function(allowImport, type) {
 	var self = this;
-	
 	var ui = '';
+	this.type = type;
 	
 	ui += '<div data-ruleid="' + this.id + '" class="col-md-12">';
 	if(type == 'unique') {
@@ -85,7 +86,7 @@ Rule.prototype.getTableUI = function(allowImport, type) {
 		ui += 					'</button>';
 		ui += 					'<ul class="dropdown-menu" role="menu">';
 		ui += 						'<li><a href="#" id="edit-rule-' + this.id + '" data-ruleid="' + this.id + '"><i class="fa fa-edit m-r-5"></i> ' + gettext('Edit rule') + '</a></li>';
-		if(type == 'expressions') {
+		if(type == 'expressions' || type == 'clusteredpoints') {
 			ui += 					'<li><a href="#" class="create-expression" id="create-expression-' + this.id + '" data-ruleid="' + this.id + '"><i class="fa fa-filter m-r-5"></i> ' + gettext('Edit filter') + '</a></li>';
 			
 		}
@@ -115,6 +116,9 @@ Rule.prototype.getTableUI = function(allowImport, type) {
 	ui += 			'</div>';
 	ui += 			'<div class="box-footer clearfix">';
 	ui += 				'<a id="append-symbol-button-' + this.id + '" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-star-o margin-r-5"></i>' + gettext('Append symbolizer') + '</a>';
+	if(type == 'clusteredpoints') {
+		ui += 				'<a id="append-textsymbol-button-' + this.id + '" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-font margin-r-5"></i>' + gettext('Append textsymbolizer') + '</a>';
+	}
 	if (allowImport){
 		ui += 			'<a id="import-symbol-button-' + this.id + '" href="" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-download margin-r-5"></i>' + gettext('Import from library') + '</a>';
 	}
@@ -282,6 +286,14 @@ Rule.prototype.registerEvents = function(type) {
 	
 	$("#append-symbol-button-" + this.id).on('click', function(e){
 		self.addSymbolizer();
+	});
+	
+	$("#append-textsymbol-button-" + this.id).on('click', function(e){
+		var textsymbolizer = self.addTextSymbolizer();
+		textsymbolizer.fill = "#ffffff";
+		textsymbolizer.label = "count";
+		textsymbolizer.AnchorPointX = 0.5;
+		textsymbolizer.AnchorPointY = 0.8;
 	});
 	
 	$("#append-color-entry-button-" + this.id).on('click', function(e){
@@ -511,6 +523,51 @@ Rule.prototype.addSymbolizer = function(options) {
 	this.symbolizers.push(symbolizer);
 	symbolizer.updatePreview();
 	this.preview();
+	
+	return symbolizer;
+};
+
+Rule.prototype.addTextSymbolizer = function(options) {
+	var self = this;
+	var symbolizer = new TextSymbolizer(this, "",  options, this.utils);
+		
+	$('#rule-' + this.id + '-symbolizers tbody').append(symbolizer.getTableUI());
+	
+	$('#rule-' + this.id + '-symbolizers tbody').sortable({
+		placeholder: "sort-highlight",
+		handle: ".handle",
+		forcePlaceholderSize: true,
+		zIndex: 999999
+	});
+	
+	$('#rule-' + symbolizer.id + '-symbolizers tbody').on("sortupdate", function(event, ui){			
+		var rows = ui.item[0].parentNode.children;
+		for(var i=0; i < rows.length; i++) {
+			var symbol = self.getSymbolizerById(rows[i].dataset.rowid);
+			if (symbol) {
+				symbol.order = i;
+			}
+		}
+		self.preview();
+	});
+	
+	$(".edit-label-link-" + symbolizer.id).on('click', function(e){	
+		e.preventDefault();
+		self.setSelected(self.getSymbolizerById($(this).attr("data-labelid")));
+		self.updateForm();
+		$('#modal-symbolizer').modal('show');
+	});
+	
+	$(".delete-label-link-" + symbolizer.id).on('click', function(e){	
+		e.preventDefault();
+		self.removeSymbolizer($(this).attr("data-labelid"));
+	});
+	
+	this.symbolizers.push(symbolizer);
+	symbolizer.updatePreview();
+	this.preview();
+	
+	return symbolizer;
 };
 
 Rule.prototype.addExternalGraphicSymbolizer = function(options) {
@@ -599,8 +656,8 @@ Rule.prototype.updateForm = function() {
 	$('#tab-menu').empty();
 	$('#tab-content').empty();	
 	
-	$('#tab-menu').append(this.selected.getTabMenu());
 	if (this.selected.type == 'MarkSymbolizer') {
+		$('#tab-menu').append(this.selected.getTabMenu());
 		$('#tab-content').append(this.selected.getGraphicTabUI());
 		$('#tab-content').append(this.selected.getFillTabUI());
 		$('#tab-content').append(this.selected.getStrokeTabUI());
@@ -609,23 +666,28 @@ Rule.prototype.updateForm = function() {
 		this.selected.registerEvents();
 		
 	} else if (this.selected.type == 'ExternalGraphicSymbolizer') {
+		$('#tab-menu').append(this.selected.getTabMenu());
 		this.selected.registerEvents();
 		
 	} else if (this.selected.type == 'LineSymbolizer') {
+		$('#tab-menu').append(this.selected.getTabMenu());
 		$('#tab-content').append(this.selected.getStrokeTabUI());
 		$('.nav-tabs a[href="#stroke-tab"]').tab('show');
 		this.selected.registerEvents();
 		
 	} else if (this.selected.type == 'PolygonSymbolizer') {
+		$('#tab-menu').append(this.selected.getTabMenu());
 		$('#tab-content').append(this.selected.getFillTabUI());
 		$('#tab-content').append(this.selected.getStrokeTabUI());
 		$('.nav-tabs a[href="#fill-tab"]').tab('show');
 		this.selected.registerEvents();
 		
 	} else if (this.selected.type == 'TextSymbolizer') {
-		$('#tab-content').append(this.selected.getFontTabUI());
+		$('#tab-menu').append(this.selected.getTabMenu(this.type=="clusteredpoints"));
+		//$('#tab-content').append(this.selected.getGeneralTabUI(true));	
+		$('#tab-content').append(this.selected.getFontTabUI(this.type=="clusteredpoints"));
 		$('#tab-content').append(this.selected.getHaloTabUI());	
-		$('#tab-content').append(this.label.getFilterTabUI());
+		//$('#tab-content').append(this.selected.getFilterTabUI());
 		
 		$('.nav-tabs a[href="#label-font-tab"]').tab('show');
 		this.selected.registerEvents();

@@ -3,6 +3,14 @@
 
 {% block content %}
 
+	{% if self.message|length > 0 %}
+		<div id="form-error" style="color:#00ff00;border: 1px solid #00ff00;margin-bottom:5px">
+			<ul>
+				<li style="list-style: none;padding-top: 10px;">{{ self.message }}</li>
+			</ul>
+		</div>
+	{% endif %}		
+
 	{% include "filemanager_breadcrumbs.html" %}
 	
 	<table class="table">

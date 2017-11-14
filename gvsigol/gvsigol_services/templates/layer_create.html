@@ -590,12 +590,12 @@
 		$(".time_default_value").css("display", "none");
 		
 		var tm_pr = $("#id_time_presentation option:selected").text();
-		if(tm_pr == "interval and resolution"){
+		if(tm_pr == "DISCRETE_INTERVAL"){
 			$(".time_presentation").css("display", "block");
 		}
 		
 		var tm_dv = $("#id_time_default_value_mode option:selected").text();
-		if(tm_dv == "nearest to the reference value" || tm_dv == "reference value"){
+		if(tm_dv == "NEAREST" || tm_dv == "FIXED"){
 			$(".time_default_value").css("display", "block");
 			$('#datetimepicker').datetimepicker({
 				format: 'DD-MM-YYYY HH:mm:ss',

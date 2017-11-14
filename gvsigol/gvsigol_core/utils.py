@@ -65,9 +65,9 @@ def is_valid_project(user, pid):
         print e
         return valid
     
-def is_valid_public_project(pid):
+def is_valid_public_project(pname):
     valid = False
-    project = Project.objects.get(id=int(pid))
+    project = Project.objects.get(name__exact=pname)
     if project.is_public:
         valid = True
                         
@@ -303,7 +303,7 @@ def toc_move_layer(layer, old_layer_group):
     for p in projects_by_layergroup:
         json_toc = p.project.toc_order
         toc = json.loads(json_toc)
-        if toc.has_key(old_layer_group.name):
+        if toc.has_key(old_layer_group.name) and layer.name in toc.get(old_layer_group.name).get('layers'):
             del toc.get(old_layer_group.name).get('layers')[layer.name]
         p.project.toc_order = json.dumps(toc)
         p.project.save()

@@ -149,7 +149,7 @@
 					<img src="{{project.image.url}}" class="" alt="User Image">
 				</div>
 				<div class="pull-left info">
-					<p>{{project.name}}</p>
+					<p>{{project.title}}</p>
 <!-- 					<a href="#"><i class="fa fa-circle text-success"></i> Online</a> -->
 				</div>
 			</div>
@@ -352,6 +352,7 @@
 		    $(this).ekkoLightbox();
 		});
 		
+		var extraParams = {{extra_params|safe}};
 		$.ajax({
 			type : 'POST',
 			async : false,
@@ -366,7 +367,7 @@
 				for (var key in response.supported_crs) {
 					proj4.defs(response.supported_crs[key].code, response.supported_crs[key].definition);	
 				}
-				viewer.core.initialize(response);
+				viewer.core.initialize(response, extraParams);
 			},
 			error : function() {
 			}

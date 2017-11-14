@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-26 10:20+0200\n"
+"POT-Creation-Date: 2017-11-10 15:59+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,33 +37,33 @@ msgstr ""
 msgid "We will work on fixing that right away. Meanwhile, you may"
 msgstr ""
 
-#: templates/base.html:66 templates/base_compress.html.py:66
-#: templates/public_viewer.html:109 templates/public_viewer_compress.html:107
-#: templates/viewer.html.py:131 templates/viewer_compress.html:129
+#: templates/base.html:67 templates/base_compress.html.py:67
+#: templates/public_viewer.html:132 templates/public_viewer_compress.html:128
+#: templates/viewer.html.py:136 templates/viewer_compress.html:134
 msgid "manual gvsigonline"
 msgstr ""
 
-#: templates/base.html:96 templates/base_compress.html.py:96
-#: templates/viewer.html:121 templates/viewer_compress.html.py:119
+#: templates/base.html:97 templates/base_compress.html.py:97
+#: templates/viewer.html:126 templates/viewer_compress.html.py:124
 msgid "Sign out"
 msgstr ""
 
-#: templates/base.html:114 templates/base_compress.html.py:114
-#: templates/viewer.html:118 templates/viewer_compress.html.py:116
+#: templates/base.html:115 templates/base_compress.html.py:115
+#: templates/viewer.html:123 templates/viewer_compress.html.py:121
 msgid "Dashboard"
 msgstr ""
 
-#: templates/base.html:120 templates/base_compress.html.py:120
+#: templates/base.html:121 templates/base_compress.html.py:121
 msgid "Home"
 msgstr ""
 
-#: templates/base.html:156 templates/base_compress.html.py:156
+#: templates/base.html:157 templates/base_compress.html.py:157
 #: templates/documentation.html:116 templates/ogc_services.html.py:84
 #: templates/select_public_project.html:77
 msgid "Version"
 msgstr ""
 
-#: templates/base_compress.html:160 templates/ogc_services.html.py:88
+#: templates/base_compress.html:161 templates/ogc_services.html.py:88
 msgid "All rights reserved"
 msgstr ""
 
@@ -217,232 +217,261 @@ msgstr ""
 msgid "Service capabilities"
 msgstr ""
 
-#: templates/project_add.html:14 templates/project_update.html.py:14
+#: templates/project_add.html:14 templates/project_add.html.py:215
+#: templates/project_update.html:14 templates/project_update.html.py:227
 #: templates/toc_update.html:13
 msgid "Save"
 msgstr ""
 
 #: templates/project_add.html:28 templates/project_list.html.py:22
-#: templates/project_update.html:28
 msgid "Name"
 msgstr ""
 
-#: templates/project_add.html:29 templates/project_update.html.py:29
+#: templates/project_add.html:29
 msgid "Project name"
 msgstr ""
 
 #: templates/project_add.html:35 templates/project_list.html.py:23
-#: templates/project_update.html:35
-msgid "Description"
+#: templates/project_update.html:30
+msgid "Title"
 msgstr ""
 
-#: templates/project_add.html:36 templates/project_update.html.py:36
-msgid "Project description"
+#: templates/project_add.html:36 templates/project_update.html.py:31
+msgid "Project title"
 msgstr ""
 
 #: templates/project_add.html:42 templates/project_list.html.py:24
-#: templates/project_update.html:42
+#: templates/project_update.html:37
+msgid "Description"
+msgstr ""
+
+#: templates/project_add.html:43 templates/project_update.html.py:38
+msgid "Project description"
+msgstr ""
+
+#: templates/project_add.html:49 templates/project_list.html.py:25
+#: templates/project_update.html:44
 msgid "Is public?"
 msgstr ""
 
-#: templates/project_add.html:51 templates/project_update.html.py:56
+#: templates/project_add.html:58 templates/project_update.html.py:57
 msgid "Locate place..."
 msgstr ""
 
-#: templates/project_add.html:67
+#: templates/project_add.html:73
 msgid "Select image"
 msgstr ""
 
-#: templates/project_add.html:67 templates/project_update.html.py:75
+#: templates/project_add.html:73 templates/project_update.html.py:76
 msgid "Supported formats"
 msgstr ""
 
-#: templates/project_add.html:75 templates/project_add.html.py:95
-#: templates/project_update.html:83 templates/project_update.html.py:104
-#: templates/project_update.html:106
+#: templates/project_add.html:80 templates/project_add.html.py:100
+#: templates/project_update.html:84 templates/project_update.html.py:105
+#: templates/project_update.html:107
 msgid "Assign base layers"
 msgstr ""
 
-#: templates/project_add.html:77 templates/project_update.html.py:85
+#: templates/project_add.html:82 templates/project_update.html.py:86
 msgid "Buscar capas base..."
-msgstr ""
+msgstr "Search base layers..."
 
-#: templates/project_add.html:97 templates/project_update.html.py:110
-#: templates/project_update.html:112
+#: templates/project_add.html:102 templates/project_update.html.py:111
+#: templates/project_update.html:113
 msgid "Mark as default"
 msgstr ""
 
-#: templates/project_add.html:115 templates/project_update.html.py:131
+#: templates/project_add.html:119 templates/project_update.html.py:131
 msgid "Assign user groups"
 msgstr ""
 
-#: templates/project_add.html:115 templates/project_update.html.py:131
+#: templates/project_add.html:119 templates/project_update.html.py:131
 msgid "Buscar grupo de usuarios..."
-msgstr ""
+msgstr "Search user groups..."
 
-#: templates/project_add.html:129 templates/project_add.html.py:131
+#: templates/project_add.html:133 templates/project_add.html.py:135
 #: templates/project_update.html:145 templates/project_update.html.py:147
 msgid "Assign user group"
 msgstr ""
 
-#: templates/project_add.html:147 templates/project_update.html.py:163
+#: templates/project_add.html:154 templates/project_update.html.py:166
 msgid "Assign layer groups"
 msgstr ""
 
-#: templates/project_add.html:149
+#: templates/project_add.html:156 templates/project_update.html.py:168
 msgid "Add layer group"
 msgstr ""
 
-#: templates/project_add.html:150 templates/project_update.html.py:163
+#: templates/project_add.html:157 templates/project_update.html.py:169
 msgid "Buscar grupo de capas..."
-msgstr ""
+msgstr "Search user group..."
 
-#: templates/project_add.html:164 templates/project_update.html.py:177
-#: templates/project_update.html:179
+#: templates/project_add.html:172 templates/project_add.html.py:174
+#: templates/project_update.html:184 templates/project_update.html.py:186
 msgid "Assign layer group"
 msgstr ""
 
-#: templates/project_add.html:192
+#: templates/project_add.html:191 templates/project_update.html.py:203
+msgid "Define Toc Order"
+msgstr ""
+
+#: templates/project_add.html:233 templates/project_update.html.py:245
 msgid "Create new layer group"
 msgstr ""
 
-#: templates/project_add.html:195
+#: templates/project_add.html:236 templates/project_update.html.py:248
 msgid "Is needed to save this project first, Do you want continue?"
 msgstr ""
 
-#: templates/project_add.html:198 templates/project_list.html.py:64
-#: templates/public_viewer.html:199 templates/public_viewer_compress.html:196
-#: templates/viewer.html.py:223 templates/viewer_compress.html:220
+#: templates/project_add.html:239 templates/project_list.html.py:66
+#: templates/project_update.html:251 templates/public_viewer.html.py:222
+#: templates/public_viewer_compress.html:217 templates/viewer.html.py:232
+#: templates/viewer.html:257 templates/viewer_compress.html.py:229
+#: templates/viewer_compress.html:255
 msgid "Cancel"
 msgstr ""
 
-#: templates/project_add.html:199 templates/project_list.html.py:65
-#: templates/public_viewer.html:200 templates/public_viewer_compress.html:197
-#: templates/viewer.html.py:224 templates/viewer_compress.html:221
+#: templates/project_add.html:240 templates/project_list.html.py:67
+#: templates/project_update.html:252 templates/public_viewer.html.py:223
+#: templates/public_viewer_compress.html:218 templates/viewer.html.py:233
+#: templates/viewer.html:258 templates/viewer_compress.html.py:230
+#: templates/viewer_compress.html:256
 msgid "Accept"
 msgstr ""
 
-#: templates/project_list.html:58 templates/project_list.html.py:105
+#: templates/project_list.html:60 templates/project_list.html.py:107
 msgid "Delete project"
 msgstr ""
 
-#: templates/project_list.html:61
+#: templates/project_list.html:63
 msgid "The project will be removed, Do you want continue?"
 msgstr ""
 
-#: templates/project_list.html:81
-msgid "Processing request..."
-msgstr ""
-
-#: templates/project_list.html:82
-#, python-format
-msgid "Search%(sep)s"
-msgstr ""
-
 #: templates/project_list.html:83
-#, python-format
-msgid "Showing %(numrecords)s records"
+msgid "Processing request..."
 msgstr ""
 
 #: templates/project_list.html:84
 #, python-format
-msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
+msgid "Search%(sep)s"
 msgstr ""
 
 #: templates/project_list.html:85
-msgid "Showing from 0 to 0 of 0 records"
+#, python-format
+msgid "Showing %(numrecords)s records"
 msgstr ""
 
 #: templates/project_list.html:86
 #, python-format
-msgid "Filtering %(max)s records"
+msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
+msgstr ""
+
+#: templates/project_list.html:87
+msgid "Showing from 0 to 0 of 0 records"
 msgstr ""
 
 #: templates/project_list.html:88
+#, python-format
+msgid "Filtering %(max)s records"
+msgstr ""
+
+#: templates/project_list.html:90
 msgid "Loading..."
 msgstr ""
 
-#: templates/project_list.html:89 templates/project_list.html.py:90
+#: templates/project_list.html:91 templates/project_list.html.py:92
 msgid "No records available"
 msgstr ""
 
-#: templates/project_list.html:92
+#: templates/project_list.html:94
 msgid "First"
 msgstr ""
 
-#: templates/project_list.html:93
+#: templates/project_list.html:95
 msgid "Previous"
 msgstr ""
 
-#: templates/project_list.html:94
+#: templates/project_list.html:96
 msgid "Next"
 msgstr ""
 
-#: templates/project_list.html:95
+#: templates/project_list.html:97
 msgid "Last"
 msgstr ""
 
-#: templates/project_list.html:98
+#: templates/project_list.html:100
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr ""
 
-#: templates/project_list.html:99
+#: templates/project_list.html:101
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr ""
 
-#: templates/project_list.html:109
+#: templates/project_list.html:111
 msgid "TOC order"
 msgstr ""
 
-#: templates/project_list.html:113 templates/project_update.html.py:12
+#: templates/project_list.html:115 templates/project_update.html.py:12
 msgid "Update project"
 msgstr ""
 
-#: templates/project_update.html:75
+#: templates/project_update.html:76
 msgid "Change image?"
 msgstr ""
 
-#: templates/public_viewer.html:74 templates/public_viewer_compress.html:72
+#: templates/public_viewer.html:97 templates/public_viewer_compress.html:93
 msgid "Anonymous"
 msgstr ""
 
-#: templates/public_viewer.html:80 templates/public_viewer_compress.html:78
+#: templates/public_viewer.html:103 templates/public_viewer_compress.html:99
 msgid "Anonymous user"
 msgstr ""
 
-#: templates/public_viewer.html:99 templates/public_viewer_compress.html:97
+#: templates/public_viewer.html:122 templates/public_viewer_compress.html:118
 msgid "Exit"
 msgstr ""
 
-#: templates/public_viewer.html:111 templates/public_viewer_compress.html:109
-#: templates/viewer.html.py:133 templates/viewer_compress.html:131
+#: templates/public_viewer.html:134 templates/public_viewer_compress.html:130
+#: templates/viewer.html.py:138 templates/viewer_compress.html:136
 msgid "exportar pdf"
 msgstr ""
 
-#: templates/public_viewer.html:134 templates/public_viewer_compress.html:131
-#: templates/viewer.html.py:156 templates/viewer_compress.html:153
+#: templates/public_viewer.html:157 templates/public_viewer_compress.html:152
+#: templates/viewer.html.py:161 templates/viewer_compress.html:158
 msgid "Layer tree"
 msgstr ""
 
-#: templates/public_viewer.html:135 templates/public_viewer_compress.html:132
-#: templates/viewer.html.py:157 templates/viewer_compress.html:154
+#: templates/public_viewer.html:158 templates/public_viewer_compress.html:153
+#: templates/viewer.html.py:162 templates/viewer_compress.html:159
 msgid "Legend"
 msgstr ""
 
-#: templates/public_viewer.html:136 templates/public_viewer_compress.html:133
-#: templates/viewer.html.py:158 templates/viewer_compress.html:155
+#: templates/public_viewer.html:159 templates/public_viewer_compress.html:154
+#: templates/viewer.html.py:163 templates/viewer_compress.html:160
 msgid "Details"
 msgstr ""
 
-#: templates/public_viewer.html:353 templates/public_viewer_compress.html:328
-#: templates/viewer.html.py:379 templates/viewer_compress.html:351
+#: templates/public_viewer.html:401 templates/public_viewer_compress.html:374
+#: templates/viewer.html.py:437 templates/viewer_compress.html:409
 msgid "Close"
 msgstr ""
 
 #: templates/toc_update.html:11
 msgid "Update TOC"
+msgstr ""
+
+#: templates/viewer.html:164 templates/viewer_compress.html.py:161
+msgid "Temporary"
+msgstr ""
+
+#: templates/viewer.html:251 templates/viewer_compress.html.py:249
+msgid "End edition"
+msgstr ""
+
+#: templates/viewer.html:254 templates/viewer_compress.html.py:252
+msgid "Changes don't saved will be missed. Continue?"
 msgstr ""
 
 #: utils.py:401
@@ -465,10 +494,17 @@ msgstr ""
 msgid "This is your new temporary password"
 msgstr ""
 
-#: views.py:182
+#: views.py:203
 msgid "You must enter an project name"
 msgstr ""
 
-#: views.py:250 views.py:462
+#: views.py:207
+#, python-brace-format
+msgid ""
+"Invalid project name: '{value}'. Identifiers must begin with a letter or an "
+"underscore (_). Subsequent characters can be letters, underscores or numbers"
+msgstr ""
+
+#: views.py:283
 msgid "Project name already exists"
 msgstr ""

@@ -554,14 +554,17 @@ def upload_sld(file):
     return rules
 
 
-def get_sld(request, type, json_data, layer_id):
+def get_sld(request, type, json_data, layer_id, single_symbol=False):
 
     layer = Layer.objects.get(id=layer_id)
     layer.name = layer.datastore.workspace.name+':'+layer.name
+    is_default = False
+    if json_data.get('is_default'):
+        is_default = json_data.get('is_default')
     style = Style(
         name = json_data.get('name'),
         title = json_data.get('title'),
-        is_default = json_data.get('is_default'),
+        is_default = is_default,
         type = type
     )
     style.save()
@@ -658,9 +661,12 @@ def get_sld(request, type, json_data, layer_id):
                     halo_radius = json_sym.get('halo_radius'),
                     fill = json_sym.get('fill'),
                     fill_opacity = json_sym.get('fill_opacity'),
+                    anchor_point_x = json_sym.get('anchor_point_x'),
+                    anchor_point_y = json_sym.get('anchor_point_y'),
                 )
                 symbolizer.save()
     
-    sld_body = sld_builder.build_sld(layer, style)
+    sld_body = sld_builder.build_sld(layer, style, single_symbol)
+    
     style.delete()
     return sld_body

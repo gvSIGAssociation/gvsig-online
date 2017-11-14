@@ -7,6 +7,7 @@ from gvsigol_services.models import LayerGroup
 
 class Project(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    title = models.CharField(max_length=100, null=True, blank=True)
     description = models.CharField(max_length=250, null=True, blank=True)
     image = models.ImageField(upload_to='images', default=settings.STATIC_URL + 'img/no_project.png', null=True, blank=True)
     center_lat = models.CharField(max_length=100)
@@ -31,14 +32,14 @@ class ProjectUserGroup(models.Model):
     
 class ProjectLayerGroup(models.Model):
     project = models.ForeignKey(Project, default=None)
-    layer_group = models.ForeignKey(LayerGroup, default=None)
+    layer_group = models.ForeignKey(LayerGroup, null=True, default=None)
     
     def __unicode__(self):
         return self.project.name + ' - ' + self.layer_group.name
     
     
 class BaseLayer(models.Model):
-    name = models.CharField(max_length=150) 
+    name = models.CharField(max_length=150, null=True, blank=True) 
     title = models.CharField(max_length=150) 
     type = models.CharField(max_length=50, null=True, blank=True)
     type_params = models.TextField(null=True, blank=True)

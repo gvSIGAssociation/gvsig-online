@@ -60,13 +60,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.gis',
     'gvsigol_auth',
     'gvsigol_services',
     'gvsigol_symbology',
     'gvsigol_filemanager',
     'gvsigol_core',
     'gvsigol_app_dev',
-    'gvsigol_plugin_edition',
+    'gvsigol_plugin_graphiccapture',
+    #'gvsigol_plugin_edition',
     #'gvsigol_plugin_worldwind',
     #'gvsigol_plugin_shps_folder',
     #'gvsigol_plugin_geocoding',
@@ -75,7 +77,7 @@ INSTALLED_APPS = [
     #'gvsigol_plugin_sync',
     #'gvsigol_plugin_catastro',
     #'gvsigol_plugin_alfresco',
-    #'gvsigol_plugin_print',
+    'gvsigol_plugin_print',
     #'gvsigol_plugin_catalog',
 ]
 
@@ -392,3 +394,7 @@ CONTROL_FIELDS = [{
                 }]
 
 BASELAYER_SUPPORTED_TYPES = ['WMS', 'WMTS', 'XYZ', 'Bing', 'OSM']
+
+WMTS_MAX_VERSION = '1.0.0'
+WMS_MAX_VERSION = '1.3.0'
+BING_LAYERS = ['Road','Aerial','AerialWithLabels']

@@ -24,7 +24,12 @@ class FilemanagerMixin(object):
             self.fm.update_path(params['path'][0])
         if 'popup' in params:
             self.popup = params['popup']
-
+        
+        self.message = ''
+        if request.session and 'message' in request.session:
+            self.message = request.session['message']
+            request.session['message'] = ''
+        
         return super(FilemanagerMixin, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, *args, **kwargs):
@@ -73,10 +78,10 @@ class ExportToDatabaseView(FilemanagerMixin, TemplateView):
         
         form = mapservice.getUploadForm('v_PostGIS', self.request.user)
         context['form'] = form
-        if 'message' in self.request.session:
-            if self.request.session['message'] != '':
-                context['message'] = self.request.session['message']
-                self.request.session['message'] = ''
+        if self.message:
+            if self.message != '':
+                context['message'] = self.message
+                self.message = ''
         context['file'] = self.fm.file_details()
         
         return context
@@ -86,6 +91,7 @@ class ExportToDatabaseView(FilemanagerMixin, TemplateView):
         if form.is_valid():
             try:
                 if mapservice.exportShpToPostgis(form.cleaned_data):
+                    request.session.message = _('Export process done successfully')
                     return redirect("/gvsigonline/filemanager/?path=" + request.POST.get('directory_path'))
                 
             except rest_geoserver.RequestError as e:

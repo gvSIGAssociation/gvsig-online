@@ -36,7 +36,7 @@ from django.contrib.auth.models import User
 from gvsigol_core.models import ProjectLayerGroup, BaseLayer
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES, INSTALLED_APPS
+from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES, INSTALLED_APPS, WMS_MAX_VERSION, WMTS_MAX_VERSION, BING_LAYERS
 from django.utils.translation import ugettext as _
 from gvsigol_services.models import LayerResource
 from gvsigol.settings import GVSIGOL_SERVICES
@@ -559,6 +559,23 @@ def layer_add_with_group(request, layergroup_id):
             
         if form.is_valid():
             try:
+                if form.cleaned_data['datastore'].type == 'v_PostGIS': 
+                    dts = form.cleaned_data['datastore']
+                    params = json.loads(dts.connection_params)
+                    host = params['host']
+                    port = params['port']
+                    dbname = params['database']
+                    user = params['user']
+                    passwd = params['passwd']
+                    schema = params.get('schema', 'public')
+                    i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+                    fields = i.get_fields(form.cleaned_data['name'], schema)
+                    
+                    for field in fields:
+                        if ' ' in field:
+                            raise ValueError(_("Invalid layer fields: '{value}'. Layer can't have fields with whitespaces").format(value=field))
+        
+                
                 # first create the resource on the backend
                 mapservice_backend.createResource(
                     form.cleaned_data['datastore'].workspace,
@@ -669,7 +686,7 @@ def layer_add_with_group(request, layergroup_id):
        
             except Exception as e:
                 try:
-                    msg = e.get_message()
+                    msg = e.message
                 except:
                     msg = _("Error: layer could not be published")
                 # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
@@ -1058,8 +1075,8 @@ def layer_config(request, layer_id):
         return render(request, 'layer_config.html', {'layer': layer, 'layer_id': layer.id, 'fields': fields, 'fields_json': json.dumps(fields), 'available_languages': LANGUAGES, 'available_languages_array': available_languages, 'redirect_to_layergroup': redirect_to_layergroup})
     
 
-@require_POST
-@staff_required
+@require_http_methods(["POST"])
+@csrf_exempt
 def layers_get_temporal_properties(request):
     try:
         #layer = Layer.objects.get(pk=layer_id)
@@ -1173,16 +1190,21 @@ def cache_clear(request, layer_id):
 def layergroup_cache_clear(request, layergroup_id):
     if request.method == 'GET':
         layergroup = LayerGroup.objects.get(id=int(layergroup_id)) 
-        
-        layers = Layer.objects.filter(layer_group_id=int(layergroup_id))
-        for layer in layers:
-            layer_cache_clear(layer.id)
-            
-        mapservice_backend.clearLayerGroupCache(layergroup.name)
-        mapservice_backend.reload_nodes()
+        layer_group_cache_clear(layergroup)
         
         return redirect('layergroup_list')
     
+
+def layer_group_cache_clear(layergroup):
+    mapservice_backend.deleteGeoserverLayerGroup(layergroup)
+    layers = Layer.objects.filter(layer_group_id=int(layergroup.id))
+    for layer in layers:
+        layer_cache_clear(layer.id)
+        
+    mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
+    mapservice_backend.clearLayerGroupCache(layergroup.name)
+    mapservice_backend.reload_nodes()
+        
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -1415,7 +1437,7 @@ def layergroup_mapserver_toc(group, toc_string):
         i=0
         
         for toc_entry in toc_array:
-            layers = Layer.objects.filter(name=toc_entry,layer_group_id=group.id)
+            layers = Layer.objects.filter(name=toc_entry,layer_group_id=group.id).order_by('order')
             for layer in layers:
                 layer_json = {
                         'name': layer.name,
@@ -1455,7 +1477,6 @@ def layergroup_update(request, lgid):
             cached = True
         
         layergroup = LayerGroup.objects.get(id=int(lgid))
-        mapservice_backend.deleteGeoserverLayerGroup(layergroup)
         
         sameName = False
         if layergroup.name == name:
@@ -1474,10 +1495,9 @@ def layergroup_update(request, lgid):
             layergroup.cached = cached
             layergroup.save()   
             core_utils.toc_update_layer_group(layergroup, old_name, name)
-            mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
-            mapservice_backend.reload_nodes()
             
             layergroup_mapserver_toc(layergroup, toc)
+            layer_group_cache_clear(layergroup)
             if 'redirect' in request.GET:
                 redirect_var = request.GET.get('redirect')
                 if redirect_var == 'create-layer':
@@ -1498,10 +1518,9 @@ def layergroup_update(request, lgid):
                 layergroup.cached = cached
                 layergroup.save()
                 core_utils.toc_update_layer_group(layergroup, old_name, name)
-                mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
-                mapservice_backend.reload_nodes()
-                
+
                 layergroup_mapserver_toc(layergroup, toc)
+                layer_group_cache_clear(layergroup)
                 if 'redirect' in request.GET:
                     redirect_var = request.GET.get('redirect')
                     if redirect_var == 'create-layer':
@@ -1940,6 +1959,32 @@ def get_geom_tables(request, datastore_id):
             pass
     return HttpResponseBadRequest()
 
+def is_grouped_symbology_request(request, url, aux_response, styles):
+    response = grequests.map([aux_response])
+    if response.__len__() > 0:
+        rsp = response[0]
+        try:
+            geojson = json.loads(rsp.text)
+            
+            for i in range(0, len(geojson['features'])):
+                properties = geojson['features'][i].get('properties')
+                if 'count' in properties and properties.get('count') == 1:
+                    style_default = None
+                    for style in styles:
+                        if style['name'].endswith('_default'):
+                            style_default = style['name']
+                    
+                    if style_default:
+                        url = url.replace('STYLES=', 'STYLES='+style_default)
+                        if 'username' in request.session and 'password' in request.session:
+                            if request.session['username'] is not None and request.session['password'] is not None:
+                                auth2 = (request.session['username'], request.session['password'])
+                                #auth2 = ('admin', 'geoserver')
+                                aux_response = grequests.get(url, auth=auth2, verify=False) 
+        except:
+            return aux_response
+    return aux_response
+
 @csrf_exempt
 def get_feature_info(request):
     if request.method == 'POST':      
@@ -1952,20 +1997,25 @@ def get_feature_info(request):
         
         rs = []
         for layer_array in layers_array:
+            styles = []
+            if 'styles' in layer_array:
+                styles = layer_array['styles']
             url = layer_array['url']
             query_layer = layer_array['query_layer']
-            ws = layer_array['workspace']
+            ws= None
+            if 'workspace' in layer_array:
+                ws = layer_array['workspace']
             
             print url
             
-            auth = None
+            auth2 = None
             if query_layer != 'plg_catastro':
                 if 'username' in request.session and 'password' in request.session:
                     if request.session['username'] is not None and request.session['password'] is not None:
                         auth2 = (request.session['username'], request.session['password'])
                         #auth2 = ('admin', 'geoserver')
-                        
-            rs.append(grequests.get(url, auth=auth2, verify=False))
+            aux_response = grequests.get(url, auth=auth2, verify=False) 
+            rs.append(is_grouped_symbology_request(request, url, aux_response, styles))
         aux_rs = grequests.map(rs)
         
         results = []
@@ -1973,7 +2023,9 @@ def get_feature_info(request):
         for layer_array in layers_array:
             url = layer_array['url']
             query_layer = layer_array['query_layer']
-            ws = layer_array['workspace']
+            ws= None
+            if 'workspace' in layer_array:
+                ws = layer_array['workspace']
             
             results.append({
                 'url': url,
@@ -2004,37 +2056,38 @@ def get_feature_info(request):
                 
             else:
                 try:
-                    w = Workspace.objects.get(name__exact=ws)
+                    if ws:
+                        w = Workspace.objects.get(name__exact=ws)
+                                
+                        layer = Layer.objects.get(name=query_layer, datastore__workspace__name=w.name)
+            
+                        response = resultset['response']
+                        if response:
+                            geojson = json.loads(response)
+                                
                             
-                    layer = Layer.objects.get(name=query_layer, datastore__workspace__name=w.name)
-        
-                    response = resultset['response']
-                    if response:
-                        geojson = json.loads(response)
-                            
-                        
-                        for i in range(0, len(geojson['features'])):
-                            fid = geojson['features'][i].get('id')
-                            resources = []
-                            if fid.__len__() > 0:
-                                fid = geojson['features'][i].get('id').split('.')[1]
-                                layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
-                                for lr in layer_resources:
-                                    (type, rsurl) = utils.get_resource_type(lr)
-                                    resource = {
-                                        'type': type,
-                                        'url': rsurl,
-                                        'name': lr.path.split('/')[-1]
-                                    }
-                                    resources.append(resource)
-                            else:
-                                geojson['features'][i]['type']= 'raster'
-                            geojson['features'][i]['resources'] = resources
-                            geojson['features'][i]['all_correct'] = resultset['response']
-                            geojson['features'][i]['feature'] = fid
-                            geojson['features'][i]['layer_name'] = resultset['query_layer']
-                            
-                        features = geojson['features']
+                            for i in range(0, len(geojson['features'])):
+                                fid = geojson['features'][i].get('id')
+                                resources = []
+                                if fid.__len__() > 0:
+                                    fid = geojson['features'][i].get('id').split('.')[1]
+                                    layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
+                                    for lr in layer_resources:
+                                        (type, rsurl) = utils.get_resource_type(lr)
+                                        resource = {
+                                            'type': type,
+                                            'url': rsurl,
+                                            'name': lr.path.split('/')[-1]
+                                        }
+                                        resources.append(resource)
+                                else:
+                                    geojson['features'][i]['type']= 'raster'
+                                geojson['features'][i]['resources'] = resources
+                                geojson['features'][i]['all_correct'] = resultset['response']
+                                geojson['features'][i]['feature'] = fid
+                                geojson['features'][i]['layer_name'] = resultset['query_layer']
+                                
+                            features = geojson['features']
                     
                 except Exception as e:
                     print e.message
@@ -2469,7 +2522,6 @@ def base_layer_add(request):
         has_errors = False
         try:
             newBaseLayer = BaseLayer()
-            newBaseLayer.name = request.POST.get('name')
             newBaseLayer.title = request.POST.get('title')
             newBaseLayer.type = request.POST.get('type')
             params = {}
@@ -2479,6 +2531,8 @@ def base_layer_add(request):
                 params['url'] = request.POST.get('url')
                 params['layers'] = request.POST.get('layers')
                 params['format'] = request.POST.get('format')
+            if newBaseLayer.type == 'WMTS':
+                params['matrixset'] = request.POST.get('matrixset')
                 
             if newBaseLayer.type == 'Bing':
                 params['key'] = request.POST.get('key')
@@ -2486,11 +2540,15 @@ def base_layer_add(request):
                 
             if newBaseLayer.type == 'XYZ' or newBaseLayer.type == 'OSM':
                 params['url'] = request.POST.get('url')
-            
+                params['key'] = request.POST.get('key')
             
             newBaseLayer.type_params = json.dumps(params)
             
             newBaseLayer.save()
+            
+            newBaseLayer.name = 'baselayer_' + str(newBaseLayer.id)
+            newBaseLayer.save()
+            
             return redirect('base_layer_list')
             
             #msg = _("Error: fill all the BaseLayer fields")
@@ -2506,7 +2564,7 @@ def base_layer_add(request):
     else:
         form = BaseLayerForm()
         
-    return render(request, 'base_layer_add.html', {'form': form})
+    return render(request, 'base_layer_add.html', {'form': form, 'bing_layers': BING_LAYERS})
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -2517,7 +2575,6 @@ def base_layer_update(request, base_layer_id):
     if request.method == 'POST':
         form = BaseLayerForm(request.POST)
         try:
-            baselayer.name = request.POST.get('name')
             baselayer.title = request.POST.get('title')
             baselayer.type = request.POST.get('type')
             params = {}
@@ -2527,6 +2584,8 @@ def base_layer_update(request, base_layer_id):
                 params['url'] = request.POST.get('url')
                 params['layers'] = request.POST.get('layers')
                 params['format'] = request.POST.get('format')
+            if baselayer.type == 'WMTS':
+                params['matrixset'] = request.POST.get('matrixset')
             
             if baselayer.type == 'Bing':
                 params['key'] = request.POST.get('key')
@@ -2534,6 +2593,7 @@ def base_layer_update(request, base_layer_id):
                 
             if baselayer.type == 'XYZ' or baselayer.type == 'OSM':
                 params['url'] = request.POST.get('url')
+                params['key'] = request.POST.get('key')
             
             
             baselayer.type_params = json.dumps(params)
@@ -2559,7 +2619,8 @@ def base_layer_update(request, base_layer_id):
         
         response= {
             'form': form, 
-            'baselayer': baselayer
+            'baselayer': baselayer,
+            'bing_layers': BING_LAYERS
         }
         
     return render(request, 'base_layer_update.html', response)
@@ -2586,39 +2647,58 @@ def get_capabilities_from_url(request):
     url = request.POST.get('url')
     service = request.POST.get('type')
     version = request.POST.get('version')
+    layer = request.POST.get('layer')
     
     values={
     }
     
     layers = []
     formats = []
+    matrixsets = []
+    title = ''
     
     if service == 'WMS':
-        wms = WebMapService(url, version=version)
+        if not version:
+            version = WMS_MAX_VERSION
+        try:
+            wms = WebMapService(url, version=version)
         
-        print wms.identification.type
-        print wms.identification.title
-        
-        layers = list(wms.contents)
-        formats = wms.getOperationByName('GetMap').formatOptions
+            print wms.identification.type
+            title = wms.identification.title
+            matrixsets = []
+            layers = list(wms.contents)
+            formats = wms.getOperationByName('GetMap').formatOptions
+            
+        except Exception as e:
+            data = {'response': '500',
+             'message':  str(e.message)}
+            
+            return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
     
     if service == 'WMTS':
+        if not version:
+            version = WMTS_MAX_VERSION
         wmts = WebMapTileService(url, version=version)
-        print wmts.identification.type
-        print wmts.identification.title
+        title = wmts.identification.title
         
         layers = list(wmts.contents)
-        for layer in wmts.contents:
+        if (not layer or layer == '') and layers.__len__() > 0:
+            layer = layers[0]
+        if layer and layer != '':
             for format in wmts.contents.get(layer).formats:
                 if not format in formats:
                     formats.append(format)
-        
+            for matrixset in wmts.contents.get(layer).tilematrixsets:
+                if not matrixset in matrixsets:
+                    matrixsets.append(matrixset)
     
     data = {
         'response': '200',
         'version': version,
         'layers': layers,
-        'formats': formats
+        'formats': formats, 
+        'title': title,
+        'matrixsets': matrixsets
     }
        
     return HttpResponse(json.dumps(data, indent=4), content_type='application/json')

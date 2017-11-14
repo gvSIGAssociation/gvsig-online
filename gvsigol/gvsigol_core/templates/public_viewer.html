@@ -148,7 +148,7 @@
 					<img src="{{project.image.url}}" class="" alt="User Image">
 				</div>
 				<div class="pull-left info">
-					<p>{{project.name}}</p>
+					<p>{{project.title}}</p>
 <!-- 					<a href="#"><i class="fa fa-circle text-success"></i> Online</a> -->
 				</div>
 			</div>
@@ -157,6 +157,7 @@
 				<li class="active" title="{% trans "Layer tree" %}"><a href="#layer-tree-tab" data-toggle="tab"><i class="icon-layers"></i></a></li>
 				<li title="{% trans "Legend" %}"><a href="#legend-tab" data-toggle="tab"><i class="fa fa-tags"></i></a></li>
 				<li title="{% trans "Details" %}"><a href="#details-tab" data-toggle="tab"><i class="fa fa-list-alt"></i></a></li>
+				<li title="{% trans "Temporary" %}" class="temporary-tab"><a href="#temporary-tab" data-toggle="tab"><i class="fa fa-clock-o" aria-hidden="true"></i></a></li>
 			</ul>
 
 			<div class="tab-content" style="height: 88%;">
@@ -171,6 +172,10 @@
 				
 				<!-- Details -->
 				<div class="tab-pane" id="details-tab" style="overflow-y: auto; height: 100%;">
+				</div>
+				
+				<!-- Temporary -->
+				<div class="tab-pane" id="temporary-tab" style="overflow-y: auto; height: 100%;">
 				</div>
 				
 			</div>			

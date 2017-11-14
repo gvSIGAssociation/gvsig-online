@@ -230,10 +230,16 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 				{'INFO_FORMAT': 'application/json', 'FEATURE_COUNT': '100'}
 			);
 			
+			
+			var stls = []
+			if(qLayer.hasOwnProperty('styles')){
+				stls = qLayer.styles;
+			}
 			var queryLayer = {
 		  		url: url,
 		  		query_layer: qLayer.layer_name,
-		  		workspace: qLayer.workspace
+		  		workspace: qLayer.workspace,
+		  		styles: stls
 			};
 			layers_info.push(queryLayer);
 		}
@@ -248,26 +254,26 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 			  	},
 			  	success	:function(response){
 			  		if (response.features && response.features.length > 0) {
-			  			if (response.features[0].type == 'catastro') {
-			  				var qLayer = null;
-			  				for (var i=0; i<queryLayers.length; i++) {
-			  					if(response.features[0].layer_name == queryLayers[i].layer_name){
-			  						qLayer =  queryLayers[i]
-			  					} 
-			  				}
-			  				if(qLayer != null){
-				  				features.push({
-				  					type: 'catastro',
-				  					text: response.features[0].text,
-				  					href: response.features[0].href,
-				  					layer: qLayer
-				  				});
-			  				}
-			  			} else {
-			  				for (var i in response.features) {
+			  			for (var k in response.features) {
+				  			if (response.features[k].type == 'catastro') {
+				  				var qLayer = null;
+				  				for (var i=0; i<queryLayers.length; i++) {
+				  					if(response.features[k].query_layer == queryLayers[i].layer_name){
+				  						qLayer =  queryLayers[i]
+				  					} 
+				  				}
+				  				if(qLayer != null){
+					  				features.push({
+					  					type: 'catastro',
+					  					text: response.features[k].text,
+					  					href: response.features[k].href,
+					  					layer: qLayer
+					  				});
+				  				}
+				  			} else {
 			  					var qLayer = null;
 				  				for (var j=0; j<queryLayers.length; j++) {
-				  					if(response.features[i].layer_name == queryLayers[j].layer_name){
+				  					if(response.features[k].layer_name == queryLayers[j].layer_name){
 				  						qLayer =  queryLayers[j]
 				  					} 
 				  				}
@@ -275,7 +281,7 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 					  				features.push({
 					  					type: 'feature',
 					  					crs: response.crs,
-					  					feature: response.features[i],
+					  					feature: response.features[k],
 					  					layer:  qLayer
 					  				});
 				  				}
@@ -304,7 +310,10 @@ getFeatureInfo.prototype.showInfo = function(features){
 	var self = this;
 	var detailsTab = $('#details-tab');
 	detailsTab.empty();
-	$('.nav-tabs a[href="#layer-tree-tab"]').tab('show');
+	var tab_id = $("ul.nav-tabs li.active").index();
+	if(tab_id==2){
+		$('.nav-tabs a[href="#layer-tree-tab"]').tab('show');
+	}
 
 	var html = '<ul class="products-list product-list-in-box">';
 	
@@ -379,8 +388,8 @@ getFeatureInfo.prototype.showInfo = function(features){
 										text = "<input type='checkbox' onclick=\"return false;\">";
 									}
 								}
-								feature_fields += "<span>" + text + "</span><br />";
-								feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\">"+ text + "</span><br />";
+								feature_fields += "<span>" + text + "</span><div style:\"clear:both\"></div>";
+								feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\">"+ text + "</span><div style:\"clear:both\"></div>";
 							}
 						}
 						
@@ -441,7 +450,10 @@ getFeatureInfo.prototype.showInfo = function(features){
 	$(".getfeatureinfo-popup").parent().parent().children(".ol-popup-closer").unbind("click").click(function() {
 		var detailsTab = $('#details-tab');
 	 	detailsTab.empty();
-	 	$('.nav-tabs a[href="#layer-tree-tab"]').tab('show');
+	 	var tab_id = $("ul.nav-tabs li.active").index();
+		if(tab_id==2){
+			$('.nav-tabs a[href="#layer-tree-tab"]').tab('show');
+		}
 	 	return false;
 	});
 

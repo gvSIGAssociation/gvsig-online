@@ -45,6 +45,7 @@ import string
 import json
 import re
 import unicodedata
+from dbfread import DBF
 
 class UnsupportedRequestError(Exception):
     pass
@@ -376,10 +377,23 @@ class Geoserver():
     def createDefaultStyle(self, layer, style_name):
         geom_type = self.get_geometry_type(layer)
         style_type = 'US'
+        
+        aux = None
         if geom_type == RASTER:
             style_type = 'CT'
-            
-        sld_body = symbology_services.create_default_style(layer.id, style_name, style_type, geom_type)
+        else:  
+            params = json.loads(layer.datastore.connection_params)
+            host = params['host']
+            port = params['port']
+            dbname = params['database']
+            user = params['user']
+            passwd = params['passwd']
+            schema = params.get('schema', 'public')
+            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+            count = i.get_count(schema, layer.name)
+            aux = count[0]
+                
+        sld_body = symbology_services.create_default_style(layer.id, style_name, style_type, geom_type, aux)
      
         try:
             catalog = self.getGsconfig()
@@ -1075,11 +1089,30 @@ class Geoserver():
         except Exception as e:
             logging.exception(e)
             raise rest_geoserver.RequestError(-1, _("Error creating the layer. Review the file format."))
-            
+    
+    
+    def get_fields_from_shape(self, shp_path):
+        fields = {}
+        fields['fields'] = {}
+        
+        dbf_file = shp_path.replace('.shp', '.dbf').replace('.SHP', '.dbf')
+        if not os.path.isfile(dbf_file):
+            dbf_file = dbf_file.replace('.dbf', '.DBF')
+        table = DBF(dbf_file)                
+        return table.fields  
+        
+        
     def exportShpToPostgis(self, form_data):
         name = form_data['name']
         ds = form_data['datastore']
         shp_path = form_data['file'] 
+        
+        
+        fields = self.get_fields_from_shape(shp_path)
+        for field in fields:
+            if ' ' in field.name:
+                raise InvalidValue(-1, _("Invalid layer fields: '{value}'. Layer can't have fields with whitespaces").format(value=field.name))
+            
         
         if _valid_sql_name_regex.search(name) == None:
             raise InvalidValue(-1, _("Invalid layer name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name))

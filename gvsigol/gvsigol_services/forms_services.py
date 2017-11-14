@@ -31,7 +31,7 @@ from gvsigol.settings import BASELAYER_SUPPORTED_TYPES
 
 supported_types = tuple((x,x) for x in BASELAYER_SUPPORTED_TYPES)
 layers = (('---', _('No se han podido obtener las capas')), ('1.3.0', 'version 1.3.0'))
-version = (('1.1.1', _('version 1.1.1')), ('1.3.0', _('version 1.3.0')), ('1.0.0', _('version 1.0.0')))
+version = (('1.1.1', _('1.1.1')), ('1.3.0', _('1.3.0')), ('1.0.0', _('1.0.0')))
 blank = (('', '---------'),)
 
 time_presentation_op = (('CONTINUOUS_INTERVAL', _('continuous interval')), ('DISCRETE_INTERVAL', _('interval and resolution')), ('LIST', _('list')))
@@ -153,17 +153,18 @@ class LayerUploadTypeForm(forms.ModelForm):
 class BaseLayerForm(forms.ModelForm):
     class Meta:
         model = BaseLayer
-        fields = ['name', 'title', 'type', 'version', 'url', 'layers', 'format', 'key']
+        fields = ['title', 'type', 'version', 'url', 'layers', 'format', 'key']
         
-    name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
+    #name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     title = forms.CharField(label=_(u'Title'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     
     type = forms.ChoiceField(label=_(u'Type'), choices=supported_types, required=True, widget=forms.Select(attrs={'class' : 'form-control'}))
-    version = forms.ChoiceField(label=_(u'Version'), required=False, choices=version, widget=forms.Select(attrs={'class':'form-control'}))
+    version = forms.ChoiceField(label=_(u'Version'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control'}))
    
     url = forms.CharField(label=_(u'URL'), required=False, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
-    layers = forms.CharField(label=_(u'Layers'), required=False, disabled=False,  max_length=250, widget=forms.TextInput(attrs={'class':'form-control', 'list':'id_layer_list'}))
+    layers = forms.ChoiceField(label=_(u'Layers'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
 
-    format = forms.CharField(label=_(u'Format'), required=False, disabled=False, max_length=250, widget=forms.TextInput(attrs={'class':'form-control', 'list':'id_format_list'}))
+    format = forms.ChoiceField(label=_(u'Format'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
+    matrixset = forms.ChoiceField(label=_(u'Matrixset'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     key = forms.CharField(label=_(u'Apikey'), required=False, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     

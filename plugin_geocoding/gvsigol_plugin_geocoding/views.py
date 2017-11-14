@@ -36,10 +36,12 @@ from gvsigol_plugin_geocoding import settings as geocoding_setting
 from gvsigol import settings
 from gvsigol_plugin_geocoding.utils import *
 import json
+import ast
 from gvsigol_services.models import Workspace, Datastore
 from gvsigol_services.views import backend_resource_list_available,\
     backend_resource_list
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
+from gvsigol_services.backend_postgis import Introspect
 
 
 providers_order = []
@@ -83,9 +85,11 @@ def provider_add(request):
             newProvider.type = type
             newProvider.category = request.POST.get('category')
             
-            params = request.POST.get('params')
-
+            params = {}
+            
             if type=='cartociudad' or type=='user':
+                if 'params' in request.POST:
+                    params = json.loads(request.POST.get('params'))
                 workspace = request.POST.get('workspace')
                 datastore = request.POST.get('datastore')
 
@@ -115,12 +119,19 @@ def provider_add(request):
                     params = {
                         'datastore_id': ds.id,
                     } 
-            
+            else: 
+                if 'params' in request.POST:
+                    params = ast.literal_eval(request.POST.get('params'))
+                            
             if type != 'user':
                 prov = Provider.objects.filter(type=type)
                 if prov and prov.__len__() > 0:
                     form.add_error(None, _("Error: this type of provider is already added to the project"))
                     has_errors = True
+                if type == 'googlemaps':
+                    if not 'key' in params or params['key'] == '':
+                        form.add_error(None, _("Error: API-Key is needed"))
+                        has_errors = True
             
             if not has_errors:       
                 newProvider.params = json.dumps(params)
@@ -162,16 +173,27 @@ def provider_add(request):
 
 
 def isValidCartociudadDB(datastore):
-    resources = mapservice_backend.getResources(datastore.workspace, datastore, "all")
+    params = json.loads(datastore.connection_params)
+    host = params['host']
+    port = params['port']
+    dbname = params['database']
+    user = params['user']
+    passwd = params['passwd']
+    schema = params.get('schema', 'public')
+    i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+    resources = i.get_tables(schema)
+    
+    
+    #resources = mapservice_backend.getResources(datastore.workspace, datastore, "all")
     resources_needed = []
     
     #if not geocoding_setting.CARTOCIUDAD_DB_CODIGO_POSTAL in resources:
     #    resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_CODIGO_POSTAL)
-        
-    if not geocoding_setting.CARTOCIUDAD_DB_TRAMO_VIAL in resources:
+    
+    if not resources or not geocoding_setting.CARTOCIUDAD_DB_TRAMO_VIAL in resources:
         resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_TRAMO_VIAL)
         
-    if not geocoding_setting.CARTOCIUDAD_DB_PORTAL_PK in resources:
+    if not resources or not geocoding_setting.CARTOCIUDAD_DB_PORTAL_PK in resources:
         resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_PORTAL_PK)
         
     #if not geocoding_setting.CARTOCIUDAD_DB_MANZANA in resources:
@@ -180,13 +202,13 @@ def isValidCartociudadDB(datastore):
     #if not geocoding_setting.CARTOCIUDAD_DB_LINEA_AUXILIAR in resources:
     #    resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_LINEA_AUXILIAR)
         
-    if not geocoding_setting.CARTOCIUDAD_DB_MUNICIPIO_VIAL in resources:
+    if not resources or  not geocoding_setting.CARTOCIUDAD_DB_MUNICIPIO_VIAL in resources:
         resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_MUNICIPIO_VIAL)
         
-    if not geocoding_setting.CARTOCIUDAD_DB_MUNICIPIO in resources:
+    if not resources or  not geocoding_setting.CARTOCIUDAD_DB_MUNICIPIO in resources:
         resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_MUNICIPIO)
         
-    if not geocoding_setting.CARTOCIUDAD_DB_PROVINCIA in resources:
+    if not resources or  not geocoding_setting.CARTOCIUDAD_DB_PROVINCIA in resources:
         resources_needed.append(geocoding_setting.CARTOCIUDAD_DB_PROVINCIA)
         
     #if not geocoding_setting.CARTOCIUDAD_DB_TOPONIMO in resources:
@@ -212,11 +234,14 @@ def provider_update(request, provider_id):
         form = ProviderUpdateForm(request.POST)
         
         type = request.POST.get('provider-type')
-        provider.category = request.POST['category']
+        if type!='cartociudad' and type!='user':
+            provider.category = request.POST['category']
         if request.FILES.get('image'):
             provider.image = request.FILES.get('image')  
-            
-        params = request.POST.get('params')
+        
+        params = {}
+        if 'params' in request.POST:
+            params = ast.literal_eval(request.POST.get('params'))
         has_errors = False
         
         if type=='cartociudad' or type=='user':
@@ -248,14 +273,19 @@ def provider_update(request, provider_id):
                     has_errors = True
                 params = {
                     'datastore_id': ds.id,
-                } 
+                }
+            
+        if type == 'googlemaps':
+            if not 'key' in params or params['key'] == '':
+                form.add_error(None, _("Error: API-Key is needed"))
+                has_errors = True 
                 
         if not has_errors:       
             provider.params = json.dumps(params)
                 
-        provider.save()
-        set_providers_to_geocoder()
-        return redirect('provider_list')
+            provider.save()
+            set_providers_to_geocoder()
+            return redirect('provider_list')
     else:
         form = ProviderUpdateForm(instance=provider)
         params = json.loads(provider.params)

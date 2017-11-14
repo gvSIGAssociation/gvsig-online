@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.gis',
     'gvsigol_auth',
     'gvsigol_services',
     'gvsigol_symbology',
@@ -344,3 +345,7 @@ CONTROL_FIELDS = [{
                 }]
 
 BASELAYER_SUPPORTED_TYPES = ['WMS', 'WMTS', 'XYZ', 'Bing', 'OSM']
+
+WMTS_MAX_VERSION = '1.0.0'
+WMS_MAX_VERSION = '1.3.0'
+BING_LAYERS = ['Road','Aerial','AerialWithLabels']

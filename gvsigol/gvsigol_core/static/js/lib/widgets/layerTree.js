@@ -140,8 +140,18 @@ layerTree.prototype.createTree = function() {
 				if (layer.get("id") === this.id) {
 					if (layer.getVisible() == true) {
 						layer.setVisible(false);
+						if($("#layer-"+layer.get("id")).length){
+							$("#layer-"+layer.get("id")).css("display", "none");
+							self.refreshTemporalInfo();	
+							self.updateTemporalLayers();
+						}
 					} else {
 						layer.setVisible(true);
+						if($("#layer-"+layer.get("id")).length){
+							$("#layer-"+layer.get("id")).css("display", "block");
+							self.refreshTemporalInfo();	
+							self.updateTemporalLayers();
+						}
 					}
 				}
 			};
@@ -260,12 +270,12 @@ layerTree.prototype.createTree = function() {
 	
 	temporary_tree += '<div style="margin-left:10px;">';
 	temporary_tree += 	'<input type="radio" id="temporary-single" data-value="single" name="temporary-group" checked>';
-	temporary_tree += 	'<span class="text"> Single </span>';
+	temporary_tree += 	'<span class="text">'+gettext('Single')+'</span>';
 	temporary_tree += '</div>';
 	
 	temporary_tree += '<div style="margin-left:10px;">';
 	temporary_tree += 	'<input type="radio" id="temporary-range" data-value="range" name="temporary-group">';
-	temporary_tree += 	'<span class="text"> Range </span>';
+	temporary_tree += 	'<span class="text">'+gettext('Range')+'</span>';
 	temporary_tree += '</div>';
 	
 	
@@ -293,17 +303,17 @@ layerTree.prototype.createTree = function() {
 			var has_temporary_layers = false;
 			var layerGroup = this.conf.layerGroups[i];
 			var temporary_tree_aux = '';
-			temporary_tree_aux += '			<li class="box box-default collapsed-box" id="' + layerGroup.groupId + '">';
-			temporary_tree_aux += '				<div class="box-header with-border">';
-			temporary_tree_aux += '					<input type="checkbox" class="templayer-group" id="layergroup-' + layerGroup.groupId + '">';
-			temporary_tree_aux += '					<span class="text">' + layerGroup.groupTitle + '</span>';
-			temporary_tree_aux += '					<div class="box-tools pull-right">';
-			temporary_tree_aux += '						<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
-			temporary_tree_aux += '							<i class="fa fa-plus"></i>';
-			temporary_tree_aux += '						</button>';
-			temporary_tree_aux += '					</div>';
-			temporary_tree_aux += '				</div>';
-			temporary_tree_aux += '				<div data-groupnumber="' + (groupCount++) * 100 + '" class="box-body layer-tree-groups" style="display: none;">';
+//			temporary_tree_aux += '			<li class="box box-default collapsed-box" id="' + layerGroup.groupId + '">';
+//			temporary_tree_aux += '				<div class="box-header with-border">';
+//			temporary_tree_aux += '					<input type="checkbox" class="templayer-group" id="layergroup-' + layerGroup.groupId + '">';
+//			temporary_tree_aux += '					<span class="text">' + layerGroup.groupTitle + '</span>';
+//			temporary_tree_aux += '					<div class="box-tools pull-right">';
+//			temporary_tree_aux += '						<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
+//			temporary_tree_aux += '							<i class="fa fa-plus"></i>';
+//			temporary_tree_aux += '						</button>';
+//			temporary_tree_aux += '					</div>';
+//			temporary_tree_aux += '				</div>';
+//			temporary_tree_aux += '				<div data-groupnumber="' + (groupCount++) * 100 + '" class="box-body layer-tree-groups" style="display: block;">';
 			for (var j=0; j<layerGroup.layers.length; j++) {	
 				var layer = layerGroup.layers[j];				
 				var temporary_tree_aux_layer = self.createTemporaryOverlayUI(layer);
@@ -313,8 +323,8 @@ layerTree.prototype.createTree = function() {
 					has_temporary_layers_global = true;
 				}
 			}
-			temporary_tree_aux += '				</div>';
-			temporary_tree_aux += '			</li>';
+//			temporary_tree_aux += '				</div>';
+//			temporary_tree_aux += '			</li>';
 			if(has_temporary_layers){
 				temporary_tree += temporary_tree_aux;
 			}
@@ -333,43 +343,40 @@ layerTree.prototype.createTree = function() {
 	
 	var self = this;
 	
-	$(".temporary-layer").change(function(){
-		self.refreshTemporalInfo();	
-		if(!$(this).prop("checked")){
-			self.updateTemporalLayers();
-		}
-	});
+//	$(".temporary-layer").change(function(){
+//		
+//	});
 	
 	$("input[name=temporary-group]").change(function (e) {
 		self.refreshTemporalSlider();
 	});
 	
-	$(".templayer-group").change(function (e) {
-		var groupId = this.id.split('-')[1]; 
-		var checked = this.checked;
-		for (var i=0; i<self.conf.layerGroups.length; i++) {			
-			var group = self.conf.layerGroups[i];
-			if (group.groupId == groupId) {
-				for (var j=0; j<group.layers.length; j++) {
-					var layer = group.layers[j];
-					var layerCheckboxes = $(".temp-"+layer.id);
-					if(layerCheckboxes.length > 0){
-						var layerCheckbox = layerCheckboxes[0];
-						if (checked) {
-							layerCheckbox.checked = true;
-							layerCheckbox.disabled = true;
-							
-						} else {
-							layerCheckbox.checked = false;
-							layerCheckbox.disabled = false;
-						}
-						
-					}
-				}
-			}			
-		}
-		self.refreshTemporalInfo();
-	});
+//	$(".templayer-group").change(function (e) {
+//		var groupId = this.id.split('-')[1]; 
+//		var checked = this.checked;
+//		for (var i=0; i<self.conf.layerGroups.length; i++) {			
+//			var group = self.conf.layerGroups[i];
+//			if (group.groupId == groupId) {
+//				for (var j=0; j<group.layers.length; j++) {
+//					var layer = group.layers[j];
+//					var layerCheckboxes = $(".temp-"+layer.id);
+//					if(layerCheckboxes.length > 0){
+//						var layerCheckbox = layerCheckboxes[0];
+//						if (checked) {
+//							layerCheckbox.checked = true;
+//							layerCheckbox.disabled = true;
+//							
+//						} else {
+//							layerCheckbox.checked = false;
+//							layerCheckbox.disabled = false;
+//						}
+//						
+//					}
+//				}
+//			}			
+//		}
+//		self.refreshTemporalInfo();
+//	});
 	
 	$("#temporary-step-value").change(function () {
 		self.refreshTemporalStep();
@@ -393,13 +400,11 @@ layerTree.prototype.createTree = function() {
 		showClose: true
 	});
 	
-	
+	self.refreshTemporalInfo()
 	self.refreshTemporalStep();
-	self.refreshTemporalInfo();	
 	
 	self.updateTemporalLayers();
 	
-;
 	
 	$('#datetimepicker-from').on('dp.change', function(e){ 
 	    var formatedValue = e.date.format(e.date._f);
@@ -421,8 +426,16 @@ layerTree.prototype.createTree = function() {
 	    var value_to = moment(formatedValue, "DD-MM-YYYY HH:mm:ss")/1000;
 	    $(".temporary-layers-slider").slider('values', 1, value_to);
 	    self.updateTemporalLayers(new Date(value_from*1000), new Date(value_to*1000));
-	})
+	});
 	
+	self.refreshTemporalSlider();
+	
+	if(self.min_val){
+		var dt_cur_from = new Date(self.min_val*1000); //.format("yyyy-mm-dd hh:ii:ss");
+		var formatted = self.formatDate(dt_cur_from);
+		$("#temporary-from").val(formatted);
+		self.updateTemporalLayers(dt_cur_from);
+	}
 };
 
 layerTree.prototype.refreshTemporalStep = function() {
@@ -454,7 +467,7 @@ layerTree.prototype.refreshTemporalStep = function() {
 layerTree.prototype.refreshTemporalInfo = function() {
 	var layers = [];
 	$(".temporary-layer").each(function(){
-		if($(this).prop("checked")){
+		if($(this).css("display") == "block"){
 			layers.push($(this).attr("data-id"));
 		}
 	});
@@ -464,15 +477,12 @@ layerTree.prototype.refreshTemporalInfo = function() {
 	
 	$.ajax({
 		type: 'POST',
-		async: true,
+		async: false,
 	  	url: '/gvsigonline/services/layers_get_temporal_properties/',
 	  	data: {
 	  		'layers': JSON.stringify(layers),
 			'methodx': methodx
 		},
-		beforeSend:function(xhr){
-	    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-	  	},
 	  	success	:function(response){
 	  		var dt_from = response['min_value'];
 	  		if(dt_from == ""){
@@ -522,7 +532,7 @@ layerTree.prototype.adaptToStep = function(date) {
 		date_string = date.getFullYear()+"-"+month+"-"+days+"T"+hours+":"+minutes+"Z";
 	}
 	if(step=="second"){
-		date_string = date.toISOString();
+		date_string = date.getFullYear()+"-"+month+"-"+days+"T"+hours+":"+minutes+":"+seconds+"Z";
 	}
 	
 	return date_string;
@@ -531,16 +541,16 @@ layerTree.prototype.adaptToStep = function(date) {
 layerTree.prototype.updateTemporalLayers = function(startDate, endDate) {
 	var layers = [];
 	$(".temporary-layer").each(function(){
-		if($(this).prop("checked")){
-			layers.push($(this).attr("id"));
+		if($(this).css("display") == "block"){
+			layers.push($(this).attr("data-layerid"));
 		}
 	});
 	
 	var maplayers = this.map.getLayers();
-	if(maplayers.array_ != null){
-		for(var i=0; i<maplayers.array_.length; i++){
-			var maplayer = maplayers.array_[i];
-			if(maplayer.values_ != null && (jQuery.inArray(maplayer.values_.id, layers)>-1)){
+	if(maplayers.getArray() != null){
+		for(var i=0; i<maplayers.getArray().length; i++){
+			var maplayer = maplayers.getArray()[i];
+			if((jQuery.inArray(maplayer.get("id"), layers)>-1)){
 				if(startDate){
 					var start = startDate.toISOString();
 					start = this.adaptToStep(startDate);
@@ -570,9 +580,16 @@ layerTree.prototype.refreshTemporalSlider = function() {
 			if($(".temporary-layers-slider").hasClass("ui-slider")){
 				$(".temporary-layers-slider").slider( "destroy" );
 			}
+			var new_max = this.max_val;
+			if(this.step_val > 1){
+				if((this.max_val - this.min_val)%this.step_val!=0){
+					var number_steps = Math.floor((this.max_val - this.min_val)/this.step_val) + 1;
+					new_max = this.min_val + (this.step_val * number_steps);
+				}
+			}
 			$(".temporary-layers-slider").slider({
 			    min: this.min_val,
-			    max: this.max_val,
+			    max: new_max,
 			    value: this.min_val,
 			    step: this.step_val,
 			    range: false,
@@ -590,9 +607,16 @@ layerTree.prototype.refreshTemporalSlider = function() {
 			if($(".temporary-layers-slider").hasClass("ui-slider")){
 				$(".temporary-layers-slider").slider( "destroy" );
 			}
+			var new_max = this.max_val;
+			if(this.step_val > 1){
+				if((this.max_val - this.min_val)%this.step_val!=0){
+					var number_steps = Math.floor((this.max_val - this.min_val)/this.step_val) + 1;
+					new_max = this.min_val + (this.step_val * number_steps);
+				}
+			}
 			$(".temporary-layers-slider").slider({
 				min: this.min_val,
-			    max: this.max_val,
+			    max: new_max,
 			    value: this.min_val,
 		        step: this.step_val,
 			    range: true,
@@ -651,6 +675,13 @@ layerTree.prototype.refreshTemporalSlider = function() {
 				    $("#temporary-to").val(formatted);
 		         }
 		     });
+		}
+		
+		if(self.min_val){
+			var dt_cur_from = new Date(self.min_val*1000); //.format("yyyy-mm-dd hh:ii:ss");
+			var formatted = self.formatDate(dt_cur_from);
+			$("#temporary-from").val(formatted);
+			self.updateTemporalLayers(dt_cur_from);
 		}
 	
 }
@@ -757,10 +788,15 @@ layerTree.prototype.createTemporaryOverlayUI = function(layer) {
 			}
 		}
 		
-		ui += '<div id="layer-' + id + '" data-layerid="' + id + '" data-zindex="' + mapLayer.getZIndex() + '" class="box layer-box thin-border box-default collapsed-box">';
+		var visibility = 'style="display: none;"';
+		if(layer.visible){
+			visibility = 'style="display: block;"';
+		}
+		
+		ui += '<div id="layer-' + id + '" data-layerid="' + id + '" data-id="'+layer.ref+'" data-zindex="' + mapLayer.getZIndex() + '" class="temporary-layer box thin-border box-default collapsed-box" '+visibility+'>';
 		ui += '		<div class="box-header with-border">';
 	
-		ui += '		<input type="checkbox" class="temporary-layer temp-'+id+'" id="' + id + '" data-id="'+layer.ref+'">';
+//		ui += '		<input type="checkbox" class="temporary-layer temp-'+id+'" id="' + id + '" data-id="'+layer.ref+'">';
 	
 		ui += '			<span class="text">' + layer.title + '</span>';
 		ui += '			<div class="box-tools pull-right">';

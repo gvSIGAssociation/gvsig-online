@@ -1847,10 +1847,45 @@ class Rules(SLDNode):
         self._nodes.remove(self._nodes[key])
 
 
+class Transformation(SLDNode):
+    """
+    @prop: PropertyName
+
+        I{Type}: string
+        
+    This class is a property of any L{Symbolizer}.
+    """
+    def __init__(self, parent, descendant=False):
+        """
+        Create a new Font node from the specified parent.
+
+        @type  parent: L{FeatureTypeStyle}
+        @param parent: The parent class object.
+        @type  descendant: boolean
+        @param descendant: A flag indicating if this is a descendant node of the parent.
+        """
+        super(Transformation, self).__init__(parent, 'Transformation', descendant=descendant)
+        
+        setattr(self.__class__, 'Function', SLDNode.makeproperty('ogc', name='Function',
+                docstring="The Function of the property."))
+
+
 class FeatureTypeStyle(SLDNode):
     """
     A FeatureTypeStyle node contains all L{Rule} objects applicable to a
     specific layer. A FeatureTypeStyle is a child of a L{UserStyle} element.
+    @prop: Transformation
+
+        The name of the Transformation.
+
+        I{Type}: string
+
+    @prop: Rules
+
+        The custom styling for this named layer.
+
+        I{Type}: L{UserStyle}
+    
     """
     def __init__(self, parent, descendant=True):
         """
@@ -1863,14 +1898,31 @@ class FeatureTypeStyle(SLDNode):
         """
         super(FeatureTypeStyle, self).__init__(parent, descendant=descendant)
         self._node = self._parent.xpath('sld:FeatureTypeStyle', namespaces=SLDNode._nsmap)[0]
+        
+        setattr(self.__class__, 'Transformation', SLDNode.makeproperty('sld', cls=Transformation,
+                docstring="The transformation of the FeatureTypeStyle."))
+
+    
 
     def normalize(self):
         """
         Normalize this element and all child L{Rule}s. The SLD model is
         modified in place.
         """
+        if not self.Transformation is None:
+            self.Transformation.normalize()
         if not self.Rules is None:
             self.Rules.normalize()
+          
+            
+    def create_transformation(self):
+        """
+        Create a L{Transformation} for this named layer.
+
+        @rtype: L{Transformation}
+        @return: A newly created user style, attached to this node.
+        """
+        return self.get_or_create_element('sld', 'Transformation')
 
     @property
     def Rules(self):
@@ -1915,6 +1967,12 @@ class UserStyle(SLDNode):
     """
     A UserStyle object. A UserStyle is a child of a L{StyledLayerDescriptor}.
 
+    @prop: Name
+
+        The name of the UserStyle.
+
+        I{Type}: string
+        
     @prop: Title
 
         The title of the UserStyle.
@@ -1945,6 +2003,8 @@ class UserStyle(SLDNode):
         super(UserStyle, self).__init__(parent, descendant=descendant)
         self._node = self._parent.xpath('sld:UserStyle', namespaces=SLDNode._nsmap)[0]
 
+        setattr(self.__class__, 'Name', SLDNode.makeproperty('sld', name='Name',
+                docstring="The name of the UserStyle."))
         setattr(self.__class__, 'Title', SLDNode.makeproperty('sld', name='Title',
                 docstring="The title of the UserStyle."))
         setattr(self.__class__, 'Abstract', SLDNode.makeproperty('sld', name='Abstract',
@@ -1975,12 +2035,13 @@ class NamedLayer(SLDNode):
     A named layer contains a name and a user style. A NamedLayer is a child of
     a L{StyledLayerDescriptor}.
 
+   
     @prop: Name
 
         The name of the UserStyle.
 
         I{Type}: string
-
+        
     @prop: UserStyle
 
         The custom styling for this named layer.
@@ -2012,16 +2073,24 @@ class NamedLayer(SLDNode):
         if not self.UserStyle is None:
             self.UserStyle.normalize()
 
-    def create_userstyle(self):
+    def create_userstyle(self, name, title):
         """
         Create a L{UserStyle} for this named layer.
 
+        @type  name: string
+        @param name: The name of the user style.
+        @type  title: string
+        @param title: The title of the user style.
         @rtype: L{UserStyle}
         @return: A newly created user style, attached to this node.
         """
-        return self.get_or_create_element('sld', 'UserStyle')
-
-
+        userstyle =  self.get_or_create_element('sld', 'UserStyle')
+        userstyle.Name = name
+        if not title or title == '':
+            title = name
+        userstyle.Title = title
+        return userstyle
+    
 class StyledLayerDescriptor(SLDNode):
     """
     An object representation of an SLD document.
