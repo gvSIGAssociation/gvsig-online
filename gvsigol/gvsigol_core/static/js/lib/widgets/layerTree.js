@@ -532,7 +532,7 @@ layerTree.prototype.adaptToStep = function(date) {
 		date_string = date.getFullYear()+"-"+month+"-"+days+"T"+hours+":"+minutes+"Z";
 	}
 	if(step=="second"){
-		date_string = date.toISOString();
+		date_string = date.getFullYear()+"-"+month+"-"+days+"T"+hours+":"+minutes+":"+seconds+"Z";
 	}
 	
 	return date_string;
