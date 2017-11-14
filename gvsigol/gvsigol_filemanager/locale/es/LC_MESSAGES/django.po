@@ -93,7 +93,7 @@ msgstr "Exportar a base de datos"
 
 #: templates/browser/filemanager_list.html:70
 msgid "Transform to database"
-msgstr "Exportar a base de datos"
+msgstr "Aplicar transformación"
 
 #: templates/browser/filemanager_list.html:74
 msgid "Delete file"
