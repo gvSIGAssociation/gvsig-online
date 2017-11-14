@@ -60,13 +60,10 @@ def login_user(request):
                 
                 else:
                     errors.append({'message': _("Your account has been disabled")})
-                    return render_to_response('login.html', {'errors': errors}, RequestContext(request))
             else:
                 errors.append({'message': _("The username and password you have entered do not match our records")})
-                return render_to_response('login.html', {'errors': errors}, RequestContext(request))
         else:
             errors.append({'message': _("The username and password you have entered do not match our records")})
-            return render_to_response('login.html', {'errors': errors}, RequestContext(request))
         
     else:
         if AUTH_WITH_REMOTE_USER:
@@ -90,7 +87,10 @@ def login_user(request):
                     login(request, user)
                     return redirect('home')
             '''
-            return render_to_response('login.html', {'errors': errors}, RequestContext(request))
+    external_ldap_mode = True
+    if 'AD' in GVSIGOL_LDAP and GVSIGOL_LDAP['AD'].__len__() > 0:
+        external_ldap_mode = False
+    return render_to_response('login.html', {'errors': errors, 'external_ldap_mode': external_ldap_mode}, RequestContext(request))
 
 def logout_user(request):
     logout(request)
@@ -134,6 +134,8 @@ def password_reset(request):
             return render_to_response('password_reset.html', {'errors': errors}, RequestContext(request))
             
     else:
+        if 'AD' in GVSIGOL_LDAP and GVSIGOL_LDAP['AD'].__len__() > 0:
+            return redirect('login_user')
         return render_to_response('password_reset.html', {}, RequestContext(request))
         
 
