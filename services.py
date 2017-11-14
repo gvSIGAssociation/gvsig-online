@@ -67,7 +67,7 @@ def create_default_style(layer_id, style_name, style_type, geom_type, count):
         
     minscaledenominator = -1
     maxscaledenominator = -1
-    if count > 200000:
+    if count and count > 200000:
         minscaledenominator = 0
         maxscaledenominator = 50000
     
