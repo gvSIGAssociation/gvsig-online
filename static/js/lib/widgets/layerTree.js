@@ -347,9 +347,9 @@ layerTree.prototype.createTree = function() {
 //		
 //	});
 	
-//	$("input[name=temporary-group]").change(function (e) {
-//		self.refreshTemporalSlider();
-//	});
+	$("input[name=temporary-group]").change(function (e) {
+		self.refreshTemporalSlider();
+	});
 	
 //	$(".templayer-group").change(function (e) {
 //		var groupId = this.id.split('-')[1]; 
@@ -400,9 +400,8 @@ layerTree.prototype.createTree = function() {
 		showClose: true
 	});
 	
-	
+	self.refreshTemporalInfo()
 	self.refreshTemporalStep();
-	self.refreshTemporalInfo();	
 	
 	self.updateTemporalLayers();
 	
@@ -427,8 +426,16 @@ layerTree.prototype.createTree = function() {
 	    var value_to = moment(formatedValue, "DD-MM-YYYY HH:mm:ss")/1000;
 	    $(".temporary-layers-slider").slider('values', 1, value_to);
 	    self.updateTemporalLayers(new Date(value_from*1000), new Date(value_to*1000));
-	})
+	});
 	
+	self.refreshTemporalSlider();
+	
+	if(self.min_val){
+		var dt_cur_from = new Date(self.min_val*1000); //.format("yyyy-mm-dd hh:ii:ss");
+		var formatted = self.formatDate(dt_cur_from);
+		$("#temporary-from").val(formatted);
+		self.updateTemporalLayers(dt_cur_from);
+	}
 };
 
 layerTree.prototype.refreshTemporalStep = function() {
@@ -470,15 +477,12 @@ layerTree.prototype.refreshTemporalInfo = function() {
 	
 	$.ajax({
 		type: 'POST',
-		async: true,
+		async: false,
 	  	url: '/gvsigonline/services/layers_get_temporal_properties/',
 	  	data: {
 	  		'layers': JSON.stringify(layers),
 			'methodx': methodx
 		},
-		beforeSend:function(xhr){
-	    	xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-	  	},
 	  	success	:function(response){
 	  		var dt_from = response['min_value'];
 	  		if(dt_from == ""){
