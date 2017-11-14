@@ -55,7 +55,9 @@
 		            	</div><!-- /.col -->
 		          	</div>
 		        </form>
+		        {% if external_ldap_mode %}
         		<a class="login-submit-text" href="/gvsigonline/auth/password_reset/">{% trans "I forgot my password" %}</a><br>
+        		{% endif %}
       		</div><!-- /.login-box-body -->
     	</div><!-- /.login-box -->
 
