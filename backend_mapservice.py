@@ -377,20 +377,23 @@ class Geoserver():
     def createDefaultStyle(self, layer, style_name):
         geom_type = self.get_geometry_type(layer)
         style_type = 'US'
+        
+        aux = None
         if geom_type == RASTER:
             style_type = 'CT'
-            
-        params = json.loads(layer.datastore.connection_params)
-        host = params['host']
-        port = params['port']
-        dbname = params['database']
-        user = params['user']
-        passwd = params['passwd']
-        schema = params.get('schema', 'public')
-        i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-        count = i.get_count(schema, layer.name)
-            
-        sld_body = symbology_services.create_default_style(layer.id, style_name, style_type, geom_type, count[0])
+        else:  
+            params = json.loads(layer.datastore.connection_params)
+            host = params['host']
+            port = params['port']
+            dbname = params['database']
+            user = params['user']
+            passwd = params['passwd']
+            schema = params.get('schema', 'public')
+            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+            count = i.get_count(schema, layer.name)
+            aux = count[0]
+                
+        sld_body = symbology_services.create_default_style(layer.id, style_name, style_type, geom_type, aux)
      
         try:
             catalog = self.getGsconfig()
