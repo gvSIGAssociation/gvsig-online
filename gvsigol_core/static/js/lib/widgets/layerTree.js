@@ -676,6 +676,13 @@ layerTree.prototype.refreshTemporalSlider = function() {
 		         }
 		     });
 		}
+		
+		if(self.min_val){
+			var dt_cur_from = new Date(self.min_val*1000); //.format("yyyy-mm-dd hh:ii:ss");
+			var formatted = self.formatDate(dt_cur_from);
+			$("#temporary-from").val(formatted);
+			self.updateTemporalLayers(dt_cur_from);
+		}
 	
 }
 
