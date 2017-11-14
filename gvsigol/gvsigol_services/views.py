@@ -1997,7 +1997,9 @@ def get_feature_info(request):
         
         rs = []
         for layer_array in layers_array:
-            styles = layer_array['styles']
+            styles = []
+            if 'styles' in layer_array:
+                styles = layer_array['styles']
             url = layer_array['url']
             query_layer = layer_array['query_layer']
             ws= None
