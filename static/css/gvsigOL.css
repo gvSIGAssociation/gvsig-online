@@ -4756,6 +4756,12 @@ table.dataTable thead th span.subname, table.dataTable tfoot th span.subname{
 	border-bottom: 1px solid #ddd; 
 }
 
+.product-list-in-box > .item.feature-item.show_info{
+	min-width: 300px;
+    border: 1px solid rgba(68, 68, 68, 0.26);
+    padding: 0px 0px;
+}
+
 #float-modal .popup-wrapper {
     padding: 10px 0px 10px 10px;
 }
