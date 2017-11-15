@@ -32,7 +32,7 @@ class ProjectUserGroup(models.Model):
     
 class ProjectLayerGroup(models.Model):
     project = models.ForeignKey(Project, default=None)
-    layer_group = models.ForeignKey(LayerGroup, null=True, default=None)
+    layer_group = models.ForeignKey(LayerGroup, default=None)
     
     def __unicode__(self):
         return self.project.name + ' - ' + self.layer_group.name
