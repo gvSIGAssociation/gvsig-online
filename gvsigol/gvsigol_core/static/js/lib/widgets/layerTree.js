@@ -81,7 +81,7 @@ layerTree.prototype.createTree = function() {
 			tree += '					<input type="checkbox" class="layer-group" id="layergroup-' + layerGroup.groupId + '">';
 			tree += '					<span class="text">' + layerGroup.groupTitle + '</span>';
 			tree += '					<div class="box-tools pull-right">';
-			tree += '						<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
+			tree += '						<button class="btn btn-box-tool btn-box-tool-custom group-collapsed-button" data-widget="collapse">';
 			tree += '							<i class="fa fa-plus"></i>';
 			tree += '						</button>';
 			tree += '					</div>';

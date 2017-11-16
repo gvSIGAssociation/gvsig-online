@@ -45,9 +45,18 @@
 						</div>	
 						
 						<div class="row">
-							<div class="col-md-12 form-group">
+							<div class="col-md-6 form-group">
 								<label for="is_public">{% trans "Is public?" %}</label>&nbsp;&nbsp;
 								<input type="checkbox" name="is_public" id="is_public"/>														
+							</div>
+							
+							<div class="col-md-6 form-group">
+								<label for="is_public">{% trans "Toc panel presentation" %}</label>
+								<select class="form-control" id="id_toc_mode" name="toc_mode" tabindex="-1" aria-hidden="true">
+									<option value="toc_hidden">{% trans "Toc hidden" %}</option>
+									<option value="toc_groups">{% trans "Show toc and groups" %}</option>
+									<option value="toc_layers">{% trans "Show toc, groups and layers" %}</option>
+								</select>
 							</div>
 						</div>	
 					

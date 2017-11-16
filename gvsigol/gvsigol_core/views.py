@@ -157,6 +157,7 @@ def project_add(request):
         extent = request.POST.get('extent')
         zoom = request.POST.get('zoom')
         toc = request.POST.get('toc_value')
+        toc_mode = request.POST.get('toc_mode')
         
         is_public = False
         if 'is_public' in request.POST:
@@ -220,6 +221,7 @@ def project_add(request):
                     zoom = int(float(zoom)),
                     extent = extent,
                     toc_order = toc,
+                    toc_mode = toc_mode,
                     created_by = request.user.username,
                     is_public = is_public
                 )
@@ -233,6 +235,7 @@ def project_add(request):
                     zoom = int(float(zoom)),
                     extent = extent,
                     toc_order = toc,
+                    toc_mode = toc_mode,
                     created_by = request.user.username,
                     is_public = is_public
                 )
@@ -322,6 +325,7 @@ def project_update(request, pid):
         extent = request.POST.get('extent')
         zoom = request.POST.get('zoom')
         toc = request.POST.get('toc_value')
+        toc_mode = request.POST.get('toc_mode')
         
         is_public = False
         if 'is_public' in request.POST:
@@ -369,6 +373,7 @@ def project_update(request, pid):
         project.extent = extent
         project.is_public = is_public
         project.toc_order = toc
+        project.toc_mode = toc_mode
         
         if has_image:
             project.image = request.FILES['project-image']
