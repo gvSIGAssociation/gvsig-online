@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-11-10 15:59+0100\n"
+"POT-Creation-Date: 2017-11-16 08:59+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -204,7 +204,7 @@ msgid "Projects list"
 msgstr "Lista de proyectos"
 
 #: templates/home.html:69 templates/project_add.html.py:12
-#: templates/project_list.html:13 templates/select_public_project.html:51
+#: templates/project_list.html:13 templates/select_public_project.html.py:51
 msgid "Add project"
 msgstr "Añadir proyecto"
 
@@ -232,8 +232,8 @@ msgstr "Servicio WFS"
 msgid "Service capabilities"
 msgstr "Características del servicio"
 
-#: templates/project_add.html:14 templates/project_add.html.py:215
-#: templates/project_update.html:14 templates/project_update.html.py:227
+#: templates/project_add.html:14 templates/project_add.html.py:224
+#: templates/project_update.html:14 templates/project_update.html.py:248
 #: templates/toc_update.html:13
 msgid "Save"
 msgstr "Guardar"
@@ -252,7 +252,6 @@ msgid "Title"
 msgstr "Título"
 
 #: templates/project_add.html:36 templates/project_update.html.py:31
-#| msgid "Projects list"
 msgid "Project title"
 msgstr "Título del proyecto"
 
@@ -270,89 +269,105 @@ msgstr "Descripción del proyecto"
 msgid "Is public?"
 msgstr "¿Es público?"
 
-#: templates/project_add.html:58 templates/project_update.html.py:57
+#: templates/project_add.html:54 templates/project_update.html.py:53
+msgid "Toc panel presentation"
+msgstr ""
+
+#: templates/project_add.html:56 templates/project_update.html.py:56
+#: templates/project_update.html:58
+msgid "Toc hidden"
+msgstr "No mostrar TOC al inicio"
+
+#: templates/project_add.html:57 templates/project_update.html.py:61
+#: templates/project_update.html:63
+msgid "Show toc and groups"
+msgstr "Mostrar TOC"
+
+#: templates/project_add.html:58 templates/project_update.html.py:66
+#: templates/project_update.html:68
+msgid "Show toc, groups and layers"
+msgstr "Mostrar TOC y capas"
+
+#: templates/project_add.html:67 templates/project_update.html.py:78
 msgid "Locate place..."
 msgstr "Buscar lugar..."
 
-#: templates/project_add.html:73
+#: templates/project_add.html:82
 msgid "Select image"
 msgstr "Seleccionar imagen"
 
-#: templates/project_add.html:73 templates/project_update.html.py:76
+#: templates/project_add.html:82 templates/project_update.html.py:97
 msgid "Supported formats"
 msgstr "Formatos soportados"
 
-#: templates/project_add.html:80 templates/project_add.html.py:100
-#: templates/project_update.html:84 templates/project_update.html.py:105
-#: templates/project_update.html:107
+#: templates/project_add.html:89 templates/project_add.html.py:109
+#: templates/project_update.html:105 templates/project_update.html.py:126
+#: templates/project_update.html:128
 msgid "Assign base layers"
 msgstr "Asignar capas base"
 
-#: templates/project_add.html:82 templates/project_update.html.py:86
+#: templates/project_add.html:91 templates/project_update.html.py:107
 msgid "Buscar capas base..."
 msgstr "Buscar capas base..."
 
-#: templates/project_add.html:102 templates/project_update.html.py:111
-#: templates/project_update.html:113
+#: templates/project_add.html:111 templates/project_update.html.py:132
+#: templates/project_update.html:134
 msgid "Mark as default"
 msgstr "Marcar por defecto"
 
-#: templates/project_add.html:119 templates/project_update.html.py:131
+#: templates/project_add.html:128 templates/project_update.html.py:152
 msgid "Assign user groups"
 msgstr "Asignar grupos de usuarios"
 
-#: templates/project_add.html:119 templates/project_update.html.py:131
+#: templates/project_add.html:128 templates/project_update.html.py:152
 msgid "Buscar grupo de usuarios..."
 msgstr "Buscar grupo de usuarios..."
 
-#: templates/project_add.html:133 templates/project_add.html.py:135
-#: templates/project_update.html:145 templates/project_update.html.py:147
+#: templates/project_add.html:142 templates/project_add.html.py:144
+#: templates/project_update.html:166 templates/project_update.html.py:168
 msgid "Assign user group"
 msgstr "Asignar grupo de usuarios"
 
-#: templates/project_add.html:154 templates/project_update.html.py:166
+#: templates/project_add.html:163 templates/project_update.html.py:187
 msgid "Assign layer groups"
 msgstr "Asignar grupos de capas"
 
-#: templates/project_add.html:156 templates/project_update.html.py:168
-#| msgid "Assign layer group"
+#: templates/project_add.html:165 templates/project_update.html.py:189
 msgid "Add layer group"
 msgstr "Asignar grupo de capas"
 
-#: templates/project_add.html:157 templates/project_update.html.py:169
+#: templates/project_add.html:166 templates/project_update.html.py:190
 msgid "Buscar grupo de capas..."
 msgstr "Buscar grupo de capas..."
 
-#: templates/project_add.html:172 templates/project_add.html.py:174
-#: templates/project_update.html:184 templates/project_update.html.py:186
+#: templates/project_add.html:181 templates/project_add.html.py:183
+#: templates/project_update.html:205 templates/project_update.html.py:207
 msgid "Assign layer group"
 msgstr "Asignar grupo de capas"
 
-#: templates/project_add.html:191 templates/project_update.html.py:203
+#: templates/project_add.html:200 templates/project_update.html.py:224
 msgid "Define Toc Order"
 msgstr "Definir orden del TOC"
 
-#: templates/project_add.html:233 templates/project_update.html.py:245
-#| msgid "Assign layer group"
+#: templates/project_add.html:242 templates/project_update.html.py:266
 msgid "Create new layer group"
 msgstr "Crear nuevo grupo de capas"
 
-#: templates/project_add.html:236 templates/project_update.html.py:248
-#| msgid "The project will be removed, Do you want continue?"
+#: templates/project_add.html:245 templates/project_update.html.py:269
 msgid "Is needed to save this project first, Do you want continue?"
 msgstr "Es necesario guardar el proyecto primero, ¿Desea continuar?"
 
-#: templates/project_add.html:239 templates/project_list.html.py:66
-#: templates/project_update.html:251 templates/public_viewer.html.py:222
-#: templates/public_viewer_compress.html:217 templates/viewer.html.py:232
+#: templates/project_add.html:248 templates/project_list.html.py:66
+#: templates/project_update.html:272 templates/public_viewer.html.py:227
+#: templates/public_viewer_compress.html:222 templates/viewer.html.py:232
 #: templates/viewer.html:257 templates/viewer_compress.html.py:229
 #: templates/viewer_compress.html:255
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: templates/project_add.html:240 templates/project_list.html.py:67
-#: templates/project_update.html:252 templates/public_viewer.html.py:223
-#: templates/public_viewer_compress.html:218 templates/viewer.html.py:233
+#: templates/project_add.html:249 templates/project_list.html.py:67
+#: templates/project_update.html:273 templates/public_viewer.html.py:228
+#: templates/public_viewer_compress.html:223 templates/viewer.html.py:233
 #: templates/viewer.html:258 templates/viewer_compress.html.py:230
 #: templates/viewer_compress.html:256
 msgid "Accept"
@@ -436,7 +451,7 @@ msgstr "Orden del TOC"
 msgid "Update project"
 msgstr "Actualizar proyecto"
 
-#: templates/project_update.html:76
+#: templates/project_update.html:97
 msgid "Change image?"
 msgstr "¿Cambiar imagen?"
 
@@ -472,7 +487,12 @@ msgstr "Leyenda"
 msgid "Details"
 msgstr "Detalles"
 
-#: templates/public_viewer.html:401 templates/public_viewer_compress.html:374
+#: templates/public_viewer.html:160 templates/public_viewer_compress.html:155
+#: templates/viewer.html.py:164 templates/viewer_compress.html:161
+msgid "Temporary"
+msgstr "Temporal"
+
+#: templates/public_viewer.html:406 templates/public_viewer_compress.html:379
 #: templates/viewer.html.py:437 templates/viewer_compress.html:409
 msgid "Close"
 msgstr "Cerrar"
@@ -480,10 +500,6 @@ msgstr "Cerrar"
 #: templates/toc_update.html:11
 msgid "Update TOC"
 msgstr "Actualizar TOC"
-
-#: templates/viewer.html:164 templates/viewer_compress.html.py:161
-msgid "Temporary"
-msgstr "Temporal"
 
 #: templates/viewer.html:251 templates/viewer_compress.html.py:249
 msgid "End edition"
@@ -513,20 +529,21 @@ msgstr "Apellidos"
 msgid "This is your new temporary password"
 msgstr "Esta es su contraseña temporal"
 
-#: views.py:203
+#: views.py:204
 msgid "You must enter an project name"
 msgstr "Debe introducir un nombre de proyecto"
 
-#: views.py:207
+#: views.py:208
 #, python-brace-format
 msgid ""
 "Invalid project name: '{value}'. Identifiers must begin with a letter or an "
 "underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr ""
-"Nombre de proyecto inválido: '{value}'. Los identificadores deben comenzar con una letra o"
-"guión bajo (_). Los siguientes caracteres pueden ser letras, guión bajo o números"
+"Nombre de proyecto inválido: '{value}'. Los identificadores deben comenzar "
+"con una letra oguión bajo (_). Los siguientes caracteres pueden ser letras, "
+"guión bajo o números"
 
-#: views.py:283
+#: views.py:286
 msgid "Project name already exists"
 msgstr "El nombre del proyecto ya existe"
 
