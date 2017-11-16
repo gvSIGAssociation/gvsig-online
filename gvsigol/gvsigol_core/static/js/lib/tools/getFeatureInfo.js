@@ -389,8 +389,8 @@ getFeatureInfo.prototype.showInfo = function(features){
 									}
 								}
 								var aux_text = text;
-								if(text.length > 65){
-									aux_text = text.substring(0,65) + "...";
+								if(text.length > 45){
+									aux_text = text.substring(0,45) + "...";
 								}
 								if (!text.toString().startsWith('http')) {
 									feature_fields += "<span>" + aux_text + "</span><div style=\"clear:both\"></div>";
