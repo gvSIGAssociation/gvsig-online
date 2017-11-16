@@ -46,7 +46,7 @@ def parse_sld(file):
 def build_sld(layer, style, single_symbol = False):
     field_geom = 'wkb_geometry' #get_layer_geom_field(layer)
     style_layer_descriptor = StyledLayerDescriptor()
-    named_layer = style_layer_descriptor.create_namedlayer(style.name)
+    named_layer = style_layer_descriptor.create_namedlayer(layer.name)
     user_style = named_layer.create_userstyle(style.name, style.title)
     feature_type_style = user_style.create_featuretypestyle()
     #if style.type == 'CP':
