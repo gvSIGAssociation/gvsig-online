@@ -326,7 +326,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 	
 	for (var i in features) {
 		if (features[i].type == 'feature' && features[i].feature.type == 'raster') {
-			var feature_id = "<img src=\"/gvsigonline/static/img/map-icon.png\" height=16 /><span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+features[i].layer.title+ "</span>";
+			var feature_id = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+features[i].layer.title+ "</span>";
 			feature_id += "<br />";
 			
 			for(key in features[i].feature.properties){
@@ -347,7 +347,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 			var item_shown = false;
 			var selectedLayer = features[i].layer;
 			
-			var feature_id = "<img src=\"/gvsigonline/static/img/map-icon.png\" height=16 /><span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+features[i].layer.title +"."+features[i].feature.feature + "</span>";
+			var feature_id = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+features[i].layer.title +"."+features[i].feature.feature + "</span>";
 			feature_id += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext('More element info')+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
 			feature_id += 		'<span class="label feature-info-button feature-info-label-resource" title="'+gettext('Multimedia resources')+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><br />';
 			feature_id += "<br />";
@@ -358,9 +358,9 @@ getFeatureInfo.prototype.showInfo = function(features){
 					var fields_trans = selectedLayer.conf;
 					if(fields_trans["fields"]){
 						var fields = fields_trans["fields"];
-						var feature_id2 = "<img src=\"/gvsigonline/static/img/map-icon.png\" height=16 /><span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+selectedLayer.title + "</span>";
-						feature_id2 += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info "><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
-						feature_id2 += 		'<span class="label feature-info-button feature-info-label-resource"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><div style=\"clear:both; margin-bottom:10px;\"></div>';
+						var feature_id2 = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+selectedLayer.title + "</span>";
+						feature_id2 += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext("Detalles de atributos")+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
+						feature_id2 += 		'<span class="label feature-info-button feature-info-label-resource" title="'+gettext("Mostrar recursos")+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><div style=\"clear:both; margin-bottom:10px;\"></div>';
 
 						var feature_added = 0;
 						
@@ -388,12 +388,16 @@ getFeatureInfo.prototype.showInfo = function(features){
 										text = "<input type='checkbox' onclick=\"return false;\">";
 									}
 								}
+								var aux_text = text;
+								if(text.length > 65){
+									aux_text = text.substring(0,65) + "...";
+								}
 								if (!text.toString().startsWith('http')) {
-									feature_fields += "<span>" + text + "</span><div style=\"clear:both\"></div>";
-									feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\">"+ text + "</span><div style=\"clear:both\"></div>";
+									feature_fields += "<span>" + aux_text + "</span><div style=\"clear:both\"></div>";
+									feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
 								} else {
-									feature_fields += "<span><a href=\"" + text + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">" + text + "</a></span><div style=\"clear:both\"></div>";
-									feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\"><a href=\"" + text + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ text + "</a></span><div style=\"clear:both\"></div>";
+									feature_fields += "<span><a href=\"" + text + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">" + aux_text + "</a></span><div style=\"clear:both\"></div>";
+									feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\"><a href=\"" + text + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
 								}
 								
 							}
