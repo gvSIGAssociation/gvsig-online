@@ -4762,6 +4762,11 @@ table.dataTable thead th span.subname, table.dataTable tfoot th span.subname{
     padding: 0px 0px;
 }
 
+.feature-buttons .feature-info-label-info:hover,
+.feature-buttons .feature-info-label-resource:hover{
+	background-color: #BBB;
+}
+
 #float-modal .popup-wrapper {
     padding: 10px 0px 10px 10px;
 }
