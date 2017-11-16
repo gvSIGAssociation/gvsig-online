@@ -490,7 +490,7 @@ msgstr "Detalles"
 #: templates/public_viewer.html:160 templates/public_viewer_compress.html:155
 #: templates/viewer.html.py:164 templates/viewer_compress.html:161
 msgid "Temporary"
-msgstr "Temporal"
+msgstr "Visualizar datos históricos"
 
 #: templates/public_viewer.html:406 templates/public_viewer_compress.html:379
 #: templates/viewer.html.py:437 templates/viewer_compress.html:409
