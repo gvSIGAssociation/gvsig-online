@@ -448,6 +448,15 @@
 
 		}
 		
+		{% if project.toc_mode == "toc_groups" %}
+			$(".sidebar-toggle").trigger("click");
+		{% endif %}	
+		{% if project.toc_mode == "toc_layers" %}
+			$(".sidebar-toggle").trigger("click");
+			$(".group-collapsed-button").trigger("click");
+		{% endif %}	
+	
+		
 	});
 	</script>
 </body>
