@@ -110,7 +110,7 @@ def home(request):
                 projects.append(project)
             
     if len (projects_by_user) == 1 and not is_superuser(user) and from_login:
-        return redirect('project_load', pid=projects_by_user[0].project_id)
+        return redirect('project_load', project_name=projects_by_user[0].project.name)
     else:
         return render_to_response('home.html', {'projects': projects}, RequestContext(request))
 
