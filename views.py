@@ -2012,8 +2012,8 @@ def get_feature_info(request):
             if query_layer != 'plg_catastro':
                 if 'username' in request.session and 'password' in request.session:
                     if request.session['username'] is not None and request.session['password'] is not None:
-                        auth2 = (request.session['username'], request.session['password'])
-                        #auth2 = ('admin', 'geoserver')
+                        #auth2 = (request.session['username'], request.session['password'])
+                        auth2 = ('admin', 'geoserver')
             aux_response = grequests.get(url, auth=auth2, verify=False) 
             rs.append(is_grouped_symbology_request(request, url, aux_response, styles))
         aux_rs = grequests.map(rs)
