@@ -260,6 +260,21 @@
 			</div>
 		</div>
 	</div>
+	
+<!-- 	<div id="floating-modal" class="modal fade"> -->
+<!-- 	    <div class="modal-dialog" style="width:850px;"> -->
+<!-- 	        <div class="modal-content"> -->
+<!-- 	            <div class="modal-header"> -->
+<!-- 	                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button> -->
+<!-- 	            </div> -->
+<!-- 	            <div class="modal-body"> -->
+<!-- 	            </div> -->
+<!-- 	        </div> -->
+<!-- 	    </div> -->
+<!-- 	</div> -->
+	
+	<div id="floating-modal">
+	</div>
 
 
 	<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
@@ -486,6 +501,14 @@
 	    	}
 	      });
 
+		{% if project.toc_mode == "toc_groups" %}
+			$(".sidebar-toggle").trigger("click");
+		{% endif %}	
+		{% if project.toc_mode == "toc_layers" %}
+			$(".sidebar-toggle").trigger("click");
+			$(".group-collapsed-button").trigger("click");
+		{% endif %}	
+		
 	});
 	</script>
 </body>

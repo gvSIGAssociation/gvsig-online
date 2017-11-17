@@ -14,6 +14,7 @@ class Project(models.Model):
     center_lon = models.CharField(max_length=100)
     zoom = models.IntegerField(null=False, default=10)
     extent = models.CharField(max_length=250)
+    toc_mode = models.TextField(max_length=50, default='toc_hidden')
     toc_order = models.TextField(null=True, blank=True)
     created_by = models.CharField(max_length=100)
     is_public = models.BooleanField(default=False)
@@ -32,7 +33,7 @@ class ProjectUserGroup(models.Model):
     
 class ProjectLayerGroup(models.Model):
     project = models.ForeignKey(Project, default=None)
-    layer_group = models.ForeignKey(LayerGroup, null=True, default=None)
+    layer_group = models.ForeignKey(LayerGroup, default=None)
     
     def __unicode__(self):
         return self.project.name + ' - ' + self.layer_group.name

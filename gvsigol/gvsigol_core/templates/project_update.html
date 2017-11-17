@@ -40,13 +40,34 @@
 						</div>	
 						
 						<div class="row">
-							<div class="col-md-12 form-group">
+							<div class="col-md-6 form-group">
 								<label for="is_public">{% trans "Is public?" %}</label>&nbsp;&nbsp;
 								{% if project.is_public %}
 								<input type="checkbox" name="is_public"  id="is_public" checked/>
 								{% else %}
 								<input type="checkbox" name="is_public"  id="is_public"/>
 								{% endif %}								
+							</div>
+							
+							<div class="col-md-6 form-group">
+								<label for="is_public">{% trans "Toc panel presentation" %}</label>
+								<select class="form-control" id="id_toc_mode" name="toc_mode" tabindex="-1" aria-hidden="true">
+									{% if project.toc_mode == "toc_hidden" %}
+										<option value="toc_hidden" selected>{% trans "Toc hidden" %}</option>
+									{% else %}
+										<option value="toc_hidden">{% trans "Toc hidden" %}</option>
+									{% endif %}	
+									{% if project.toc_mode == "toc_groups" %}
+										<option value="toc_groups" selected>{% trans "Show toc and groups" %}</option>
+									{% else %}
+										<option value="toc_groups">{% trans "Show toc and groups" %}</option>
+									{% endif %}	
+									{% if project.toc_mode == "toc_layers" %}
+										<option value="toc_layers" selected>{% trans "Show toc, groups and layers" %}</option>
+									{% else %}
+										<option value="toc_layers">{% trans "Show toc, groups and layers" %}</option>
+									{% endif %}	
+								</select>
 							</div>
 						</div>	
 					
