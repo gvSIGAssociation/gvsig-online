@@ -98,7 +98,7 @@ def build_sld(layer, style, single_symbol = False):
 def build_library_symbol(rule):
     style_layer_descriptor = StyledLayerDescriptor()
     named_layer = style_layer_descriptor.create_namedlayer(rule.name)
-    user_style = named_layer.create_userstyle()
+    user_style = named_layer.create_userstyle(rule.name, rule.name)
     feature_type_style = user_style.create_featuretypestyle()
 
     symbolizers = ModelSymbolizer.objects.filter(rule=rule)
