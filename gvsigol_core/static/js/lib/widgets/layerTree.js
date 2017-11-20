@@ -258,8 +258,10 @@ layerTree.prototype.createTree = function() {
 	temporary_tree += '<div style="background-color:#f9fafc">';
 	temporary_tree += '	<div class="box-body">';
 	
-	var input_from = '<div class="input-group date col-md-9" id="datetimepicker-from"><input id="temporary-from" class="form-control"/><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span></div>';
-	var input_to = '<div class="input-group date col-md-9" id="datetimepicker-to"><input id="temporary-to" class="form-control"/><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span></div>';
+	var input_from = '<div class="input-group date col-md-9" id="datetimepicker-from"><input id="temporary-from" class="form-control"/><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>'+
+	'<span class="input-group-addon temporal-buttons-empty-gap"></span><span class="temporal-buttons temporal-buttons-left temporal-buttons-left-from"><i class="fa fa-minus" aria-hidden="true"></i></span><span class="temporal-buttons temporal-buttons-right temporal-buttons-right-from"><i class="fa fa-plus" aria-hidden="true"></i></span></div>';
+	var input_to = '<div class="input-group date col-md-9" id="datetimepicker-to"><input id="temporary-to" class="form-control"/><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>'+
+	'<span class="input-group-addon temporal-buttons-empty-gap"></span><span class="temporal-buttons temporal-buttons-left temporal-buttons-left-to"><i class="fa fa-minus" aria-hidden="true"></i></span><span class="temporal-buttons temporal-buttons-right temporal-buttons-right-to"><i class="fa fa-plus" aria-hidden="true"></i></span></div>';
 
 //	temporary_tree += '			<label style="display: block; margin-top: 8px; width: 95%;">' + gettext('Temporary range') + '</label>';
 	temporary_tree += '			<div id="from_label_div" class="temporary_field"><div class="col-md-3" style="padding:0px"><span class="text" style="font-weight:bold;margin-left:3px;">' + gettext('From') + '</span></div>'+input_from+'<div style="clear:both"></div></div>';
@@ -340,6 +342,112 @@ layerTree.prototype.createTree = function() {
 	this.$temporary_container.append(temporary_tree);
 	
 
+	$(".temporal-buttons-left-from").click(function(){
+		var prev_value = null;
+		var input = $("input[name=temporary-group]:checked");
+		try{
+			if(input.attr("data-value") == "range"){
+				prev_value = $('.temporary-layers-slider').slider("values")[0];
+			}
+			if(input.attr("data-value") == "single"){
+				prev_value = $('.temporary-layers-slider').slider("value");
+			}
+		}catch(err){
+			
+		}
+		
+		var aux_min = self.min_val;
+		if(prev_value && (prev_value - self.step_val) > self.min_val){
+			aux_min = (prev_value - self.step_val);
+		}
+		if(input.attr("data-value") == "single"){
+			$(".temporary-layers-slider").slider('value',aux_min);
+		}
+		if(input.attr("data-value") == "range"){
+			$(".temporary-layers-slider").slider('values',0,aux_min);
+		}
+		var dt_cur_from = new Date(aux_min*1000);
+		var formatted = self.formatDate(dt_cur_from);
+    	$("#temporary-from").val(formatted);
+    	self.updateTemporalLayers(dt_cur_from);
+
+//		self.refreshTemporalSlider();
+	});
+	
+	$(".temporal-buttons-right-from").click(function(){
+		var prev_value = null;
+		var input = $("input[name=temporary-group]:checked");
+		try{
+			if(input.attr("data-value") == "range"){
+				prev_value = $('.temporary-layers-slider').slider("values")[0];
+				
+			}
+			if(input.attr("data-value") == "single"){
+				prev_value = $('.temporary-layers-slider').slider("value");
+			}
+		}catch(err){
+			
+		}
+		
+		var aux_max = self.max_val;
+		if(prev_value && (prev_value + self.step_val) < self.max_val){
+			aux_max = (prev_value + self.step_val);
+		}
+		if(input.attr("data-value") == "single"){
+			$(".temporary-layers-slider").slider('value',aux_max);
+		}
+		if(input.attr("data-value") == "range"){
+			$(".temporary-layers-slider").slider('values',0,aux_max);
+		}
+		var dt_cur_from = new Date(aux_max*1000);
+		var formatted = self.formatDate(dt_cur_from);
+    	$("#temporary-from").val(formatted);
+    	self.updateTemporalLayers(dt_cur_from);
+//		self.refreshTemporalSlider();
+	});
+	
+	$(".temporal-buttons-left-to").click(function(){
+		var prev_value = null;
+		try{
+			prev_value_from = $('.temporary-layers-slider').slider("values")[0];
+			prev_value = $('.temporary-layers-slider').slider("values")[1];
+		}catch(err){
+			
+		}
+		
+		var aux_min = self.min_val;
+		if(prev_value && (prev_value - self.step_val) > self.min_val){
+			aux_min = (prev_value - self.step_val);
+		}
+		var dt_cur_from = new Date(prev_value_from*1000);
+		var dt_cur_to = new Date(aux_min*1000);
+		var formatted = self.formatDate(dt_cur_to);
+    	$("#temporary-to").val(formatted);
+		
+    	$(".temporary-layers-slider").slider('values',1,aux_min);
+    	 self.updateTemporalLayers(dt_cur_from, dt_cur_to);
+	});
+	
+	$(".temporal-buttons-right-to").click(function(){
+		var prev_value = null;
+		try{
+			prev_value_from = $('.temporary-layers-slider').slider("values")[0];
+			prev_value = $('.temporary-layers-slider').slider("values")[1];
+		}catch(err){
+			
+		}
+		var aux_max = self.max_val;
+		if(prev_value && (prev_value + self.step_val) < self.max_val){
+			aux_max = (prev_value + self.step_val);
+		}
+		var dt_cur_from = new Date(prev_value_from*1000);
+		var dt_cur_to = new Date(aux_max*1000);
+		var formatted = self.formatDate(dt_cur_to);
+    	$("#temporary-to").val(formatted);
+		
+    	$(".temporary-layers-slider").slider('values',1,aux_max);
+    	 self.updateTemporalLayers(dt_cur_from, dt_cur_to);
+	});
 	
 	var self = this;
 	
@@ -443,7 +551,7 @@ layerTree.prototype.refreshTemporalStep = function() {
 	var unit = $("#temporary-step-unit option:selected").val();
 	
 	if(unit=="second"){
-		this.step_val = value;
+		this.step_val = value*1;
 	}
 	if(unit=="minute"){
 		this.step_val = value*60;
@@ -574,8 +682,18 @@ layerTree.prototype.updateTemporalLayers = function(startDate, endDate) {
 
 layerTree.prototype.refreshTemporalSlider = function() {
 	var self = this;
+	var update_min = true;
 	var input = $("input[name=temporary-group]:checked");
 		if(input.attr("data-value") == "single"){
+			var prev_value = null;
+			try{
+				prev_value = $('.temporary-layers-slider').slider("values")[0];
+				if(!prev_value){
+					prev_value = $('.temporary-layers-slider').slider("value");
+				}
+			}catch(err){
+				
+			}
 			$("#to_label_div").css("display","none");
 			if($(".temporary-layers-slider").hasClass("ui-slider")){
 				$(".temporary-layers-slider").slider( "destroy" );
@@ -595,14 +713,28 @@ layerTree.prototype.refreshTemporalSlider = function() {
 			    range: false,
 			    slide: function(event, ui) {
 			    	var dt_cur_from = new Date(ui.value*1000); //.format("yyyy-mm-dd hh:ii:ss");
+			    	var values = $(".temporary-layers-slider").slider('values')
+			    	if(values && values.length > 0){
+			    		$(".temporary-layers-slider").slider('values', 0, dt_cur_from);
+			    	}
 			    	var formatted = self.formatDate(dt_cur_from);
 			    	$("#temporary-from").val(formatted);
 			    	self.updateTemporalLayers(dt_cur_from);
 			    }
 			});
+			
+			if(prev_value){
+				var dt_cur_from = new Date(prev_value*1000);
+				var formatted = self.formatDate(dt_cur_from);
+		    	$("#temporary-from").val(formatted);
+		    	$(".temporary-layers-slider").slider('value',prev_value);
+		    	self.updateTemporalLayers(dt_cur_from);
+		    	update_min = false;
+			}
 		}
 		
 		if(input.attr("data-value") == "range"){
+			var prev_value = $('.temporary-layers-slider').slider("value");
 			$("#to_label_div").css("display","block");
 			if($(".temporary-layers-slider").hasClass("ui-slider")){
 				$(".temporary-layers-slider").slider( "destroy" );
@@ -622,6 +754,7 @@ layerTree.prototype.refreshTemporalSlider = function() {
 			    range: true,
 			    slide: function( event, ui ) {
 			    	var dt_cur_from = new Date(ui.values[0]*1000); //.format("yyyy-mm-dd hh:ii:ss");
+			    	$(".temporary-layers-slider").slider('value', dt_cur_from);
 			    	var formatted = self.formatDate(dt_cur_from);
 			    	$("#temporary-from").val(formatted);
 
@@ -632,6 +765,20 @@ layerTree.prototype.refreshTemporalSlider = function() {
 			        self.updateTemporalLayers(dt_cur_from, dt_cur_to);
 			    }
 			});
+			
+	    	var dt_cur_to = new Date(new_max*1000);
+			var formatted = self.formatDate(dt_cur_to);
+	    	$("#temporary-to").val(formatted);
+	    	
+			var dt_cur_from = new Date(prev_value*1000);
+			var formatted = self.formatDate(dt_cur_from);
+	    	$("#temporary-from").val(formatted);
+			
+	    	$(".temporary-layers-slider").slider('values',1,new_max); // sets first handle (index 0) to 50
+	    	$(".temporary-layers-slider").slider('values',0,prev_value);
+	    	
+	    	self.updateTemporalLayers(dt_cur_from, dt_cur_to);
+	    	update_min = false;
 		}
 		
 		if(input.attr("data-value") == "list"){
@@ -677,7 +824,7 @@ layerTree.prototype.refreshTemporalSlider = function() {
 		     });
 		}
 		
-		if(self.min_val){
+		if(update_min && self.min_val){
 			var dt_cur_from = new Date(self.min_val*1000); //.format("yyyy-mm-dd hh:ii:ss");
 			var formatted = self.formatDate(dt_cur_from);
 			$("#temporary-from").val(formatted);
@@ -864,6 +1011,24 @@ layerTree.prototype.createOverlayUI = function(layer) {
 	ui += '	<a id="zoom-to-layer-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool zoom-to-layer">';
 	ui += '		<i class="fa fa-search" aria-hidden="true"></i> ' + gettext('Zoom to layer');
 	ui += '	</a>';
+	
+	for(var i=0; i<layer.styles.length; i++){
+		
+	}
+	ui += '		<div class="btn btn-block btn-social btn-select btn-custom-tool"><i class="fa fa-map-marker" aria-hidden="true"></i><select id="symbol-to-layer-' + id + '" class="symbol-to-layer btn btn-block btn-custom-tool">';
+	for(var i=0; i<layer.styles.length; i++){
+		var ttitle = layer.styles[i].title;
+		if(!ttitle || ttitle.length == 0){
+			ttitle = layer.styles[i].name;
+		}
+		
+		if(layer.styles[i].is_default){
+			ui += '		<option value="'+layer.styles[i].name+'" selected><i class="fa fa-search" aria-hidden="true"></i>'+ ttitle +'</option>';
+		}else{
+			ui += '		<option value="'+layer.styles[i].name+'"><i class="fa fa-search" aria-hidden="true"></i>'+ ttitle +'</option>';
+		}
+	}
+	ui += '	</select></div>';
 	
 	ui += '			<label style="display: block; margin-top: 8px; width: 95%;">' + gettext('Opacity') + '<span id="layer-opacity-output-' + layer.id + '" class="margin-l-15 gol-slider-output">%</span></label>';
 	ui += '			<div id="layer-opacity-slider" data-layerid="' + layer.id + '" class="layer-opacity-slider"></div>';
