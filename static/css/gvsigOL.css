@@ -3251,6 +3251,16 @@ table.text-center th {
  *
  * https://github.com/lipis/bootstrap-social
  */
+ .btn-social.btn-select{
+    padding:0px;
+}
+
+ .btn-social.btn-select select.symbol-to-layer{
+    border-color: rgba(0,0,0,0);
+    padding-left: 40px;
+}
+
+ 
 .btn-social {
   position: relative;
   padding-left: 44px;
@@ -4845,4 +4855,44 @@ table.table.dataTable tbody tr td{
 
 .feature-item a.product-title span.pull-right{
 	margin-right: 10px
+}
+
+.temporal-buttons {
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1;
+    color: #555;
+    text-align: center;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    border-color: #d2d6de;
+    background-color: #fff;
+    width: 1%;
+    white-space: nowrap;
+    vertical-align: middle;
+    display: table-cell;
+}
+
+.input-group-addon:hover,
+.temporal-buttons:hover{
+	background-color:#ddd;
+}
+
+.input-group-addon.temporal-buttons-empty-gap{
+	border-color: rgba(0,0,0,0);
+	padding: 0px 4px;
+}
+
+.input-group-addon.temporal-buttons-empty-gap:hover{
+	background-color:rgba(0,0,0,0);
+}
+
+.temporal-buttons-left {
+	border-radius: 4px 0px 0px 4px;
+}
+
+.temporal-buttons-right {
+	border-radius: 0px 4px 4px 0px;
 }
