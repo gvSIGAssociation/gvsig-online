@@ -4896,3 +4896,11 @@ table.table.dataTable tbody tr td{
 .temporal-buttons-right {
 	border-radius: 0px 4px 4px 0px;
 }
+
+input.temporary-check[type=checkbox]{
+	margin: 20px 10px 20px 20px;	
+}	
+
+.temporary-body{
+	display:none;
+}
