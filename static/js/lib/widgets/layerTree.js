@@ -344,6 +344,32 @@ layerTree.prototype.createTree = function() {
 	
 	this.$temporary_container.append(temporary_tree);
 	
+	$(".temporary-check").click(function(){
+		if ( $(this).is(':checked') ) {
+//			if(self.is_first_time){
+				self.refreshTemporalInfo()
+				self.refreshTemporalStep();
+				
+				self.updateTemporalLayers();
+				
+				self.refreshTemporalSlider();
+				
+				if(self.max_val){
+					var dt_cur_from = new Date(self.max_val*1000); //.format("yyyy-mm-dd hh:ii:ss");
+					var formatted = self.formatDate(dt_cur_from);
+					$("#temporary-from").val(formatted);
+					self.updateTemporalLayers(dt_cur_from);
+					$(".temporary-layers-slider").slider('value',self.max_val);
+				}
+//				self.is_first_time = false;
+//			}
+	        $('.temporary-body').show();
+	    } 
+	    else {
+	        $('.temporary-body').hide();
+	        self.updateTemporalLayers();
+	    }
+	});
 
 	$(".temporal-buttons-left-from").click(function(){
 		var prev_value = null;
@@ -406,35 +432,8 @@ layerTree.prototype.createTree = function() {
 		var formatted = self.formatDate(dt_cur_from);
     	$("#temporary-from").val(formatted);
     	self.updateTemporalLayers(dt_cur_from);
-//		self.refreshTemporalSlider();
 	});
 	
-	$(".temporary-check").click(function(){
-		if ( $(this).is(':checked') ) {
-//			if(self.is_first_time){
-				self.refreshTemporalInfo()
-				self.refreshTemporalStep();
-				
-				self.updateTemporalLayers();
-				
-				self.refreshTemporalSlider();
-				
-				if(self.max_val){
-					var dt_cur_from = new Date(self.max_val*1000); //.format("yyyy-mm-dd hh:ii:ss");
-					var formatted = self.formatDate(dt_cur_from);
-					$("#temporary-from").val(formatted);
-					self.updateTemporalLayers(dt_cur_from);
-					$(".temporary-layers-slider").slider('value',self.max_val);
-				}
-//				self.is_first_time = false;
-//			}
-	        $('.temporary-body').show();
-	    } 
-	    else {
-	        $('.temporary-body').hide();
-	        self.updateTemporalLayers();
-	    }
-	});
 	
 	$(".temporal-buttons-left-to").click(function(){
 		var prev_value = null;
@@ -595,7 +594,7 @@ layerTree.prototype.refreshTemporalStep = function() {
 //		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'MM-YYYY');
 	}
 	if(unit=="year"){
-		this.step_val = value*60*60*365;
+		this.step_val = value*60*60*24*365;
 //		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'YYYY');
 //		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'YYYY');
 	}
