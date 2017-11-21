@@ -8,9 +8,10 @@
 			<ul>
 				<li style="list-style: none;padding-top: 10px;">{{ self.message }}</li>
 			</ul>
+			</div>
+	{% endif %}	
+		<div id="delete-error" style="color: #ff0000;margin-bottom:15px;padding:15px;background-color:rgba(255,0,0,0.2);display:none">
 		</div>
-	{% endif %}		
-
 	{% include "filemanager_breadcrumbs.html" %}
 	
 	<table class="table">
@@ -121,7 +122,13 @@
 				},
 				success	:function(response){
 					$.overlayout();
-					location.reload();
+					nrsp = JSON.parse(response)
+					if('success' in nrsp && nrsp['success'] == false){
+						$("#delete-error").html(nrsp['message']);
+						$("#delete-error").css("display", "block");
+					}else{
+						location.reload();
+					}
 				},
 				error: function(){}
 			});
