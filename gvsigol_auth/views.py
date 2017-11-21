@@ -36,7 +36,10 @@ import random, string
 from utils import superuser_required, staff_required
 import utils as auth_utils
 import json
+import re
 from gvsigol.settings import GVSIGOL_LDAP, LOGOUT_PAGE_URL, AUTH_WITH_REMOTE_USER
+
+_valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 def login_user(request):
     if request.user.is_authenticated():
@@ -201,7 +204,10 @@ def user_add(request):
                 if 'group-' in key:
                     assigned_groups.append(int(key.split('-')[1]))
             
-            try:            
+            try:         
+                if form.data['name'] == 'admin':
+                    raise Exception
+                
                 if form.data['password1'] == form.data['password2']:
                     user = User(
                         username = form.data['username'].lower(),
@@ -294,7 +300,7 @@ def user_add(request):
             except Exception as e:
                 print str(e)
                 errors = []
-                errors.append({'message': _("The username already exists")})
+                #errors.append({'message': _("The username already exists")})
                 groups = auth_utils.get_all_groups()
                 return render_to_response('user_add.html', {'form': form, 'groups': groups, 'errors': errors,'show_pass_form':show_pass_form}, context_instance=RequestContext(request))
 
@@ -421,11 +427,17 @@ def group_list(request):
 def group_add(request):        
     if request.method == 'POST':
         form = UserGroupForm(request.POST)
+        message = None
         if form.is_valid():
             try:
                 if form.data['name'] == 'admin':
+                    message = _("Admin is a reserved group")
                     raise Exception
                 
+                if _valid_name_regex.search(form.data['name']) == None:
+                    message = _("Invalid user group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=form.data['name'])
+                    raise Exception
+            
                 group = UserGroup(
                     name = form.data['name'],
                     description = form.data['description']
@@ -439,7 +451,6 @@ def group_add(request):
             
             except Exception as e:
                 print str(e)
-                message = _("Admin is a reserved group")
                 return render_to_response('group_add.html', {'form': form, 'message': message}, context_instance=RequestContext(request))
                 
         else:
