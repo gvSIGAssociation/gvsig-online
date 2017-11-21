@@ -843,8 +843,40 @@ layerTree.prototype.formatDate = function(date) {
 	  var month = date.getMonth()+1;
 	  days = days < 10 ? '0'+days : days;
 	  month = month < 10 ? '0'+month : month;
+
 	  var strTime = hours + ':' + minutes + ':' + seconds;
-	  return days + "-" + month + "-" + date.getFullYear() + "  " + strTime;
+	  var result = days + "-" + month + "-" + date.getFullYear() + "  " + strTime;
+
+	  var unit = $("#temporary-step-unit option:selected").val();
+	  if(unit=="second"){
+		  strTime = hours + ':' + minutes + ':' + seconds;
+		  result = days + "-" + month + "-" + date.getFullYear() + "  " + strTime;
+		  return result;
+	  }
+	  if(unit=="minute"){
+		  strTime = hours + ':' + minutes;
+		  result = days + "-" + month + "-" + date.getFullYear() + "  " + strTime;
+		  return result;
+	  }
+	  if(unit=="hour"){
+		  strTime = hours + 'h';
+		  result = days + "-" + month + "-" + date.getFullYear() + "  " + strTime;
+		  return result;
+	  }
+	  if(unit=="day"){
+		  result = days + "-" + month + "-" + date.getFullYear();
+		  return result;
+	  }
+	  if(unit=="month"){
+		  result = month + "-" + date.getFullYear();
+		  return result;
+	  }
+	  if(unit=="year"){
+		  result = date.getFullYear();
+		  return result;
+	  }
+
+	  return result;
 	}
 
 
