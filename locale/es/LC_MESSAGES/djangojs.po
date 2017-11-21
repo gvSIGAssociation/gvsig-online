@@ -347,7 +347,7 @@ msgid "Invalid identifier. Unable to get requested geometry"
 msgstr "Identificador no válido. No se puede obtener la geometría solicitada"
 
 msgid "Temporary layers"
-msgstr "Capas con temporalidad"
+msgstr "Capas con parámetro temporal"
 
 msgid "From"
 msgstr "Desde"
@@ -359,10 +359,10 @@ msgid "Step"
 msgstr "Divisiones"
 
 msgid "Single"
-msgstr "Marca simple"
+msgstr "Instante"
 
 msgid "Range"
-msgstr "Doble marca (rango)"
+msgstr "Rango temporal"
 
 msgid "temporary_field"
 msgstr "Campo temporal"
