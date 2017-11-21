@@ -529,12 +529,12 @@ layerTree.prototype.createTree = function() {
 	
 	$('#datetimepicker-from').datetimepicker({
 		format: 'DD-MM-YYYY HH:mm:ss',
-		showClose: true
+		showClose: false
 	});
 	
 	$('#datetimepicker-to').datetimepicker({
 		format: 'DD-MM-YYYY HH:mm:ss',
-		showClose: true
+		showClose: false
 	});
 	
 
@@ -1082,20 +1082,19 @@ layerTree.prototype.createOverlayUI = function(layer) {
 	ui += '		<i class="fa fa-search" aria-hidden="true"></i> ' + gettext('Zoom to layer');
 	ui += '	</a>';
 	
-	for(var i=0; i<layer.styles.length; i++){
-		
-	}
 	ui += '		<div class="btn btn-block btn-social btn-select btn-custom-tool"><i class="fa fa-map-marker" aria-hidden="true"></i><select id="symbol-to-layer-' + id + '" class="symbol-to-layer btn btn-block btn-custom-tool">';
-	for(var i=0; i<layer.styles.length; i++){
-		var ttitle = layer.styles[i].title;
-		if(!ttitle || ttitle.length == 0){
-			ttitle = layer.styles[i].name;
-		}
-		
-		if(layer.styles[i].is_default){
-			ui += '		<option value="'+layer.styles[i].name+'" selected><i class="fa fa-search" aria-hidden="true"></i>'+ ttitle +'</option>';
-		}else{
-			ui += '		<option value="'+layer.styles[i].name+'"><i class="fa fa-search" aria-hidden="true"></i>'+ ttitle +'</option>';
+	if(layer.styles){
+		for(var i=0; i<layer.styles.length; i++){
+			var ttitle = layer.styles[i].title;
+			if(!ttitle || ttitle.length == 0){
+				ttitle = layer.styles[i].name;
+			}
+			
+			if(layer.styles[i].is_default){
+				ui += '		<option value="'+layer.styles[i].name+'" selected><i class="fa fa-search" aria-hidden="true"></i>'+ ttitle +'</option>';
+			}else{
+				ui += '		<option value="'+layer.styles[i].name+'"><i class="fa fa-search" aria-hidden="true"></i>'+ ttitle +'</option>';
+			}
 		}
 	}
 	ui += '	</select></div>';
