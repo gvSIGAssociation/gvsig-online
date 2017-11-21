@@ -27,6 +27,7 @@ var layerTree = function(conf, map, isPublic) {
 	this.map = map;	
 	this.conf = conf;
 	this.editionBar = null;
+	this.is_first_time = true;
 	this.$container = $('#layer-tree-tab');
 	this.$temporary_container = $('#temporary-tab');
 	this.createTree();
@@ -256,7 +257,8 @@ layerTree.prototype.createTree = function() {
 	
 	var temporary_tree = '';
 	temporary_tree += '<div style="background-color:#f9fafc">';
-	temporary_tree += '	<div class="box-body">';
+	temporary_tree += '<input type="checkbox" id="enable-temporary" class="temporary-check">'+ gettext("Habilitar características temporales")+'</input> <div id="temporary-panel">';
+	temporary_tree += '	<div class="box-body temporary-body">';
 	
 	var input_from = '<div class="input-group date col-md-9" id="datetimepicker-from"><input id="temporary-from" class="form-control"/><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>'+
 	'<span class="input-group-addon temporal-buttons-empty-gap"></span><span class="temporal-buttons temporal-buttons-left temporal-buttons-left-from"><i class="fa fa-minus" aria-hidden="true"></i></span><span class="temporal-buttons temporal-buttons-right temporal-buttons-right-from"><i class="fa fa-plus" aria-hidden="true"></i></span></div>';
@@ -294,7 +296,7 @@ layerTree.prototype.createTree = function() {
 	
 	temporary_tree += '	</div>';
 	temporary_tree += '</div>';
-	temporary_tree += '<div class="box" style="border-top:45px solid #e8ecf4;">';
+	temporary_tree += '<div class="box temporary-body" style="border-top:45px solid #e8ecf4;">';
 	temporary_tree += ' <h4 class="temporary_text">' + gettext('Temporary layers') + '</h4>';
 	temporary_tree += '	<div class="box-body">';
 	temporary_tree += '		<ul class="layer-tree">';
@@ -335,6 +337,7 @@ layerTree.prototype.createTree = function() {
 	
 	
 	temporary_tree += '	</div>';
+	temporary_tree += '</div>';
 	temporary_tree += '</div>';
 	
 	
@@ -406,6 +409,33 @@ layerTree.prototype.createTree = function() {
 //		self.refreshTemporalSlider();
 	});
 	
+	$(".temporary-check").click(function(){
+		if ( $(this).is(':checked') ) {
+//			if(self.is_first_time){
+				self.refreshTemporalInfo()
+				self.refreshTemporalStep();
+				
+				self.updateTemporalLayers();
+				
+				self.refreshTemporalSlider();
+				
+				if(self.max_val){
+					var dt_cur_from = new Date(self.max_val*1000); //.format("yyyy-mm-dd hh:ii:ss");
+					var formatted = self.formatDate(dt_cur_from);
+					$("#temporary-from").val(formatted);
+					self.updateTemporalLayers(dt_cur_from);
+					$(".temporary-layers-slider").slider('value',self.max_val);
+				}
+//				self.is_first_time = false;
+//			}
+	        $('.temporary-body').show();
+	    } 
+	    else {
+	        $('.temporary-body').hide();
+	        self.updateTemporalLayers();
+	    }
+	});
+	
 	$(".temporal-buttons-left-to").click(function(){
 		var prev_value = null;
 		try{
@@ -449,7 +479,7 @@ layerTree.prototype.createTree = function() {
     	 self.updateTemporalLayers(dt_cur_from, dt_cur_to);
 	});
 	
-	var self = this;
+
 	
 //	$(".temporary-layer").change(function(){
 //		
@@ -508,10 +538,7 @@ layerTree.prototype.createTree = function() {
 		showClose: true
 	});
 	
-	self.refreshTemporalInfo()
-	self.refreshTemporalStep();
-	
-	self.updateTemporalLayers();
+
 	
 	
 	$('#datetimepicker-from').on('dp.change', function(e){ 
@@ -536,14 +563,6 @@ layerTree.prototype.createTree = function() {
 	    self.updateTemporalLayers(new Date(value_from*1000), new Date(value_to*1000));
 	});
 	
-	self.refreshTemporalSlider();
-	
-	if(self.min_val){
-		var dt_cur_from = new Date(self.min_val*1000); //.format("yyyy-mm-dd hh:ii:ss");
-		var formatted = self.formatDate(dt_cur_from);
-		$("#temporary-from").val(formatted);
-		self.updateTemporalLayers(dt_cur_from);
-	}
 };
 
 layerTree.prototype.refreshTemporalStep = function() {
@@ -552,21 +571,33 @@ layerTree.prototype.refreshTemporalStep = function() {
 	
 	if(unit=="second"){
 		this.step_val = value*1;
+		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'DD-MM-YYYY HH:mm:ss');
+		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'DD-MM-YYYY HH:mm:ss');
 	}
 	if(unit=="minute"){
 		this.step_val = value*60;
+		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'DD-MM-YYYY HH:mm');
+		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'DD-MM-YYYY HH:mm');
 	}
 	if(unit=="hour"){
 		this.step_val = value*60*60;
+		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'DD-MM-YYYY HHh');
+		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'DD-MM-YYYY HHh');
 	}
 	if(unit=="day"){
 		this.step_val = value*60*60*24;
+		//$('#datetimepicker-from').datepicker( "option", "dateFormat", 'DD-MM-YYYY');
+		//$('#datetimepicker-to').datepicker( "option", "dateFormat", 'DD-MM-YYYY');
 	}
 	if(unit=="month"){
 		this.step_val = value*60*60*24*30;
+		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'MM-YYYY');
+		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'MM-YYYY');
 	}
 	if(unit=="year"){
 		this.step_val = value*60*60*365;
+		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'YYYY');
+		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'YYYY');
 	}
 	
 	this.refreshTemporalSlider();
@@ -653,21 +684,29 @@ layerTree.prototype.updateTemporalLayers = function(startDate, endDate) {
 			layers.push($(this).attr("data-layerid"));
 		}
 	});
-	
+
 	var maplayers = this.map.getLayers();
 	if(maplayers.getArray() != null){
 		for(var i=0; i<maplayers.getArray().length; i++){
 			var maplayer = maplayers.getArray()[i];
 			if((jQuery.inArray(maplayer.get("id"), layers)>-1)){
-				if(startDate){
-					var start = startDate.toISOString();
-					start = this.adaptToStep(startDate);
-					var end = '';
-					if (endDate){
-						end = this.adaptToStep(endDate);
-						start = start + "/" + end;
+				if($(".temporary-check").is(':checked')){
+					if(startDate){
+						var start = startDate.toISOString();
+						start = this.adaptToStep(startDate);
+						var end = '';
+						if (endDate){
+							end = this.adaptToStep(endDate);
+							start = start + "/" + end;
+						}
+						maplayer.getSource().updateParams({'TIME': start});
 					}
-					maplayer.getSource().updateParams({'TIME': start});
+				}else{
+					if(maplayer.getSource() != null && typeof maplayer.getSource().updateParams === 'function'){
+						var params = maplayer.getSource().getParams();
+						maplayer.getSource().updateParams({'TIME': ""});
+						delete params['TIME'];
+					}
 				}
 			}else{
 				if(maplayer.getSource() != null && typeof maplayer.getSource().updateParams === 'function'){
@@ -708,7 +747,7 @@ layerTree.prototype.refreshTemporalSlider = function() {
 			$(".temporary-layers-slider").slider({
 			    min: this.min_val,
 			    max: new_max,
-			    value: this.min_val,
+			    value: this.max_val,
 			    step: this.step_val,
 			    range: false,
 			    slide: function(event, ui) {
@@ -749,7 +788,7 @@ layerTree.prototype.refreshTemporalSlider = function() {
 			$(".temporary-layers-slider").slider({
 				min: this.min_val,
 			    max: new_max,
-			    value: this.min_val,
+			    value: this.max_val,
 		        step: this.step_val,
 			    range: true,
 			    slide: function( event, ui ) {
@@ -781,48 +820,48 @@ layerTree.prototype.refreshTemporalSlider = function() {
 	    	update_min = false;
 		}
 		
-		if(input.attr("data-value") == "list"){
-			var valMap = [min_val,max_val,min_val,max_val,min_val,max_val];
-			$("#to_label_div").css("display","none");
-			if($(".temporary-layers-slider").data("slider")){
-				$(".temporary-layers-slider").slider( "destroy" );
-			}
-			$(".temporary-layers-slider").slider({
-		         min: 0,
-		         max: valMap.length - 1,
-		         value: min_val,
-		         range: false,
-		         step: 1,
-		         slide: function(event, ui) {
-		          var dt_cur_to = new Date(valMap[ui.value]*1000)
-		          var formatted = self.formatDate(dt_cur_from);
-		          $("#temporary-from").val(formatted);
-		         }
-		     });
-		}
-		
-		if(input.attr("data-value") == "list_range"){
-			var valMap = [min_val,max_val,min_val,max_val,min_val,max_val];
-			$("#to_label_div").css("display","block");
-			if($(".temporary-layers-slider").data("slider")){
-				$(".temporary-layers-slider").slider( "destroy" );
-			}
-			$(".temporary-layers-slider").slider({
-		         min: 0,
-		         max: valMap.length - 1,
-		         value: min_val,
-		         step: 1,
-		         range: true,
-		         slide: function(event, ui) {
-		        	 var dt_cur_from = new Date(valMap[ui.values[0]]*1000)
-		        	 var formatted = self.formatDate(dt_cur_from);
-				     $("#temporary-from").val(formatted);
-		        	 var dt_cur_to = new Date(valMap[ui.values[1]]*1000)
-		        	 var formatted = self.formatDate(dt_cur_to);
-				    $("#temporary-to").val(formatted);
-		         }
-		     });
-		}
+//		if(input.attr("data-value") == "list"){
+//			var valMap = [min_val,max_val,min_val,max_val,min_val,max_val];
+//			$("#to_label_div").css("display","none");
+//			if($(".temporary-layers-slider").data("slider")){
+//				$(".temporary-layers-slider").slider( "destroy" );
+//			}
+//			$(".temporary-layers-slider").slider({
+//		         min: 0,
+//		         max: valMap.length - 1,
+//		         value: min_val,
+//		         range: false,
+//		         step: 1,
+//		         slide: function(event, ui) {
+//		          var dt_cur_to = new Date(valMap[ui.value]*1000)
+//		          var formatted = self.formatDate(dt_cur_from);
+//		          $("#temporary-from").val(formatted);
+//		         }
+//		     });
+//		}
+//		
+//		if(input.attr("data-value") == "list_range"){
+//			var valMap = [min_val,max_val,min_val,max_val,min_val,max_val];
+//			$("#to_label_div").css("display","block");
+//			if($(".temporary-layers-slider").data("slider")){
+//				$(".temporary-layers-slider").slider( "destroy" );
+//			}
+//			$(".temporary-layers-slider").slider({
+//		         min: 0,
+//		         max: valMap.length - 1,
+//		         value: min_val,
+//		         step: 1,
+//		         range: true,
+//		         slide: function(event, ui) {
+//		        	 var dt_cur_from = new Date(valMap[ui.values[0]]*1000)
+//		        	 var formatted = self.formatDate(dt_cur_from);
+//				     $("#temporary-from").val(formatted);
+//		        	 var dt_cur_to = new Date(valMap[ui.values[1]]*1000)
+//		        	 var formatted = self.formatDate(dt_cur_to);
+//				    $("#temporary-to").val(formatted);
+//		         }
+//		     });
+//		}
 		
 		if(update_min && self.min_val){
 			var dt_cur_from = new Date(self.min_val*1000); //.format("yyyy-mm-dd hh:ii:ss");
