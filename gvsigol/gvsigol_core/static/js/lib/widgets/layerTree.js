@@ -1082,22 +1082,22 @@ layerTree.prototype.createOverlayUI = function(layer) {
 	ui += '		<i class="fa fa-search" aria-hidden="true"></i> ' + gettext('Zoom to layer');
 	ui += '	</a>';
 	
-	ui += '		<div class="btn btn-block btn-social btn-select btn-custom-tool"><i class="fa fa-map-marker" aria-hidden="true"></i><select id="symbol-to-layer-' + id + '" class="symbol-to-layer btn btn-block btn-custom-tool">';
-	if(layer.styles){
-		for(var i=0; i<layer.styles.length; i++){
-			var ttitle = layer.styles[i].title;
-			if(!ttitle || ttitle.length == 0){
-				ttitle = layer.styles[i].name;
-			}
-			
-			if(layer.styles[i].is_default){
-				ui += '		<option value="'+layer.styles[i].name+'" selected><i class="fa fa-search" aria-hidden="true"></i>'+ ttitle +'</option>';
-			}else{
-				ui += '		<option value="'+layer.styles[i].name+'"><i class="fa fa-search" aria-hidden="true"></i>'+ ttitle +'</option>';
-			}
-		}
-	}
-	ui += '	</select></div>';
+//	ui += '		<div class="btn btn-block btn-social btn-select btn-custom-tool"><i class="fa fa-map-marker" aria-hidden="true"></i><select id="symbol-to-layer-' + id + '" class="symbol-to-layer btn btn-block btn-custom-tool">';
+//	if(layer.styles){
+//		for(var i=0; i<layer.styles.length; i++){
+//			var ttitle = layer.styles[i].title;
+//			if(!ttitle || ttitle.length == 0){
+//				ttitle = layer.styles[i].name;
+//			}
+//			
+//			if(layer.styles[i].is_default){
+//				ui += '		<option value="'+layer.styles[i].name+'" selected><i class="fa fa-search" aria-hidden="true"></i>'+ ttitle +'</option>';
+//			}else{
+//				ui += '		<option value="'+layer.styles[i].name+'"><i class="fa fa-search" aria-hidden="true"></i>'+ ttitle +'</option>';
+//			}
+//		}
+//	}
+//	ui += '	</select></div>';
 	
 	ui += '			<label style="display: block; margin-top: 8px; width: 95%;">' + gettext('Opacity') + '<span id="layer-opacity-output-' + layer.id + '" class="margin-l-15 gol-slider-output">%</span></label>';
 	ui += '			<div id="layer-opacity-slider" data-layerid="' + layer.id + '" class="layer-opacity-slider"></div>';
