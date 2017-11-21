@@ -571,33 +571,33 @@ layerTree.prototype.refreshTemporalStep = function() {
 	
 	if(unit=="second"){
 		this.step_val = value*1;
-		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'DD-MM-YYYY HH:mm:ss');
-		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'DD-MM-YYYY HH:mm:ss');
+//		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'DD-MM-YYYY HH:mm:ss');
+//		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'DD-MM-YYYY HH:mm:ss');
 	}
 	if(unit=="minute"){
 		this.step_val = value*60;
-		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'DD-MM-YYYY HH:mm');
-		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'DD-MM-YYYY HH:mm');
+//		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'DD-MM-YYYY HH:mm');
+//		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'DD-MM-YYYY HH:mm');
 	}
 	if(unit=="hour"){
 		this.step_val = value*60*60;
-		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'DD-MM-YYYY HHh');
-		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'DD-MM-YYYY HHh');
+//		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'DD-MM-YYYY HHh');
+//		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'DD-MM-YYYY HHh');
 	}
 	if(unit=="day"){
 		this.step_val = value*60*60*24;
-		//$('#datetimepicker-from').datepicker( "option", "dateFormat", 'DD-MM-YYYY');
-		//$('#datetimepicker-to').datepicker( "option", "dateFormat", 'DD-MM-YYYY');
+//		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'DD-MM-YYYY');
+//		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'DD-MM-YYYY');
 	}
 	if(unit=="month"){
 		this.step_val = value*60*60*24*30;
-		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'MM-YYYY');
-		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'MM-YYYY');
+//		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'MM-YYYY');
+//		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'MM-YYYY');
 	}
 	if(unit=="year"){
 		this.step_val = value*60*60*365;
-		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'YYYY');
-		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'YYYY');
+//		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'YYYY');
+//		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'YYYY');
 	}
 	
 	this.refreshTemporalSlider();
