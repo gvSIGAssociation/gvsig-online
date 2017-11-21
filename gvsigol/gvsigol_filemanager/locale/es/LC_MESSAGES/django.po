@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-11-10 10:17+0100\n"
+"POT-Creation-Date: 2017-11-21 10:02+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -47,7 +47,7 @@ msgid "Data store"
 msgstr "Almacén de datos"
 
 #: templates/browser/export_to_database.html:70
-#: templates/browser/filemanager_list.html:22
+#: templates/browser/filemanager_list.html:23
 msgid "Name"
 msgstr "Nombre"
 
@@ -67,48 +67,48 @@ msgstr "Sistema de coordenadas"
 msgid "Default"
 msgstr "Por defecto"
 
-#: templates/browser/filemanager_list.html:20
+#: templates/browser/filemanager_list.html:21
 msgid "Select"
 msgstr "Seleccionar"
 
-#: templates/browser/filemanager_list.html:23
+#: templates/browser/filemanager_list.html:24
 msgid "Size"
 msgstr "Tamaño"
 
-#: templates/browser/filemanager_list.html:24
+#: templates/browser/filemanager_list.html:25
 msgid "Date"
 msgstr "Fecha"
 
-#: templates/browser/filemanager_list.html:27
+#: templates/browser/filemanager_list.html:28
 msgid "Actions"
 msgstr "Acciones"
 
-#: templates/browser/filemanager_list.html:62
+#: templates/browser/filemanager_list.html:63
 msgid "Delete directory"
 msgstr "Eliminar directorio"
 
-#: templates/browser/filemanager_list.html:65
+#: templates/browser/filemanager_list.html:66
 msgid "Export to database"
 msgstr "Exportar a base de datos"
 
-#: templates/browser/filemanager_list.html:70
+#: templates/browser/filemanager_list.html:71
 msgid "Transform to database"
 msgstr "Aplicar transformación"
 
-#: templates/browser/filemanager_list.html:74
+#: templates/browser/filemanager_list.html:75
 msgid "Delete file"
 msgstr "Eliminar archivo"
 
-#: templates/browser/filemanager_list.html:85
+#: templates/browser/filemanager_list.html:86
 msgid "Nothing to see here."
 msgstr "No hay archivos para mostrar"
 
-#: templates/browser/filemanager_list.html:94
+#: templates/browser/filemanager_list.html:95
 #: templates/filemanager_create_directory.html:13
 msgid "Create directory"
 msgstr "Crear directorio"
 
-#: templates/browser/filemanager_list.html:95
+#: templates/browser/filemanager_list.html:96
 #: templates/filemanager_upload.html:14
 msgid "Upload"
 msgstr "Subir"
@@ -128,3 +128,11 @@ msgstr "Error del servidor"
 #: views.py:119
 msgid "You must fill in all fields"
 msgstr "Debe rellenar todos los campos"
+
+#: views.py:160
+msgid "Error deleting resource"
+msgstr "Error borrando el recurso"
+
+#: views.py:160
+msgid "exists in datastore"
+msgstr "ya que se utiliza en el almacén de datos"
