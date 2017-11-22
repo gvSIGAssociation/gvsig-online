@@ -320,13 +320,6 @@ measureLength.prototype.deactivate = function() {
 	this.$button.removeClass('button-active');
 	this.active = false;
 	this.map.un('pointermove', this.pointerMoveHandler, this);
-	
-	var layers = this.map.getLayers().getArray();
-	for (var i=0; i<layers.length; i++) {
-		if (layers[i] instanceof ol.layer.Vector) {		
-			layers[i].getSource().clear();
-		}
-	}
 };
 
 /**
