@@ -1905,26 +1905,27 @@ def get_enumeration(request):
     if request.method == 'POST':
         enumerations = []
         enum_names = request.POST.get('enum_names')
-        enum_names_array = enum_names.split(',')
-        for enum_name in enum_names_array:
-            enum_name2 = enum_name.replace('enmm_', 'enm_')
-            enum = Enumeration.objects.get(name__exact=enum_name2)
-            enum_items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('order')
-        
-            items = []
-            for i in enum_items:
-                item = {}
-                item['name'] = i.name
-                item['selected'] = i.selected
-                items.append(item)
+        if enum_names.__len__() > 0:
+            enum_names_array = enum_names.split(',')
+            for enum_name in enum_names_array:
+                enum_name2 = enum_name.replace('enmm_', 'enm_')
+                enum = Enumeration.objects.get(name__exact=enum_name2)
+                enum_items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('order')
             
-            enumeration = {
-                'title': enum.title,
-                'items': items, 
-                'name': enum_name
-            }
-            
-            enumerations.append(enumeration)
+                items = []
+                for i in enum_items:
+                    item = {}
+                    item['name'] = i.name
+                    item['selected'] = i.selected
+                    items.append(item)
+                
+                enumeration = {
+                    'title': enum.title,
+                    'items': items, 
+                    'name': enum_name
+                }
+                
+                enumerations.append(enumeration)
             
         response = {
             'enumerations': enumerations
