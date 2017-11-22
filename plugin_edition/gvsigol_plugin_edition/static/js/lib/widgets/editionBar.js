@@ -1115,6 +1115,10 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 								enumeration_names.push(this.featureType[i].name);
 								featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="single"></div>';
 							}
+						} else if (this.featureType[i].name.startsWith("form_")) {
+							featureProperties += '<br/><a target="_blank" class="form-link form-link-open form-control" href="" data-orig="'+ this.featureType[i].name +'" data-value=""><i class="fa fa-check-square-o" aria-hidden="true"></i>&nbsp;&nbsp;' + gettext("Show form") + '</a>';
+							featureProperties += '<input id="' + this.featureType[i].name + '" type="hidden" value="">';
+					
 						} else {
 							if("length" in this.featureType[i] && this.featureType[i].length>0){
 								featureProperties += '<input id="' + this.featureType[i].name + '" type="text" maxlength="'+this.featureType[i].length+'" class="form-control">';
@@ -1211,7 +1215,28 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 		
 
 		$(".feature-div").each(self.createAllErrors);
-	
+
+		$('.form-link-open').each(function () {
+			var field_name = $(this).attr("data-orig");
+			var feature_id = $(this).attr("data-value");
+			var self = $(this);
+			$.getJSON("/gvsigonline/forms/get_form_link/", 
+					{
+					'field_name': field_name,
+					'feature_id': feature_id
+					}, function(data){
+						if("token" in data && data["token"].length > 0){
+							$("#"+field_name).val(data["token"]);
+							self.attr("data-value", data["token"]);
+							
+						}
+						if("url" in data && data["url"].length > 0){
+							self.attr("href", data["url"]);
+						}
+				
+			}).fail(function() {
+			});
+		});
 		
 		$('#save-feature').on('click', function () {
 			if(self.showAllErrorMessages()){
@@ -1240,7 +1265,9 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 											value = value + option.value;
 										}
 										properties[field.id] = value;	
-									}else{
+									}else if(self.featureType[i].name.startsWith("form_")){
+										properties[field.id] = field.value;	
+									s}else{
 										if (field.value != null) {
 											properties[field.id] = field.value;	
 										}
@@ -1297,6 +1324,16 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 		});
 		
 		$('#save-feature-cancel').on('click', function () {
+			$('.form-link-open').each(function () {
+				$.getJSON("/gvsigonline/forms/delete_form_link/", 
+						{
+						'field_name': $(this).attr("data-orig"),
+						'feature_id': $(this).attr("data-value")
+						}, function(data){
+
+				}).fail(function() {
+				});
+			});
 			self.source.removeFeature(feature);
 			self.lastAddedFeature = null;
 			self.showLayersTab();
@@ -1345,6 +1382,8 @@ EditionBar.prototype.showAllErrorMessages = function() {
 							}
 							value = value + option.value;
 						}	
+					}else if(self.featureType[i].name.startsWith("form_")){
+						value = field.value;	
 					}else{
 						if (field.value != null) {
 							value = field.value;	
@@ -1502,6 +1541,9 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 								enumeration_names.push(this.featureType[i].name);
 								featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="single" data-value="'+value+'"></div>';
 							}
+						} else if (this.featureType[i].name.startsWith("form_")) {
+							featureProperties += '<br/><a target="_blank" class="form-link form-link-open form-control" href="" data-orig="'+ this.featureType[i].name +'" data-value="' + value + '"><i class="fa fa-check-square-o" aria-hidden="true"></i>&nbsp;&nbsp;' + gettext("Show form") + '</a>';
+							featureProperties += '<input id="' + this.featureType[i].name + '" type="hidden" value="' + value + '">';
 						} else {
 							if (value==null) {
 								value = "";
@@ -1612,6 +1654,28 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 
 
 		$(".feature-div").each(self.createAllErrors);
+		
+		$('.form-link-open').each(function () {
+			var field_name = $(this).attr("data-orig");
+			var feature_id = $(this).attr("data-value");
+			var self = $(this);
+			$.getJSON("/gvsigonline/forms/get_form_link/", 
+					{
+					'field_name': field_name,
+					'feature_id': feature_id
+					}, function(data){
+						if("token" in data && data["token"].length > 0){
+							$("#"+field_name).val(data["token"]);
+							self.attr("data-value", data["token"]);
+							
+						}
+						if("url" in data && data["url"].length > 0){
+							self.attr("href", data["url"]);
+						}
+				
+			}).fail(function() {
+			});
+		});
 	
 		
 		$('#edit-feature').on('click', function () {
@@ -1640,6 +1704,8 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 											value = value + option.value;
 										}
 										properties[field.id] = value;	
+									}else if(self.featureType[i].name.startsWith("form_")){
+										properties[field.id] = field.value;	
 									}else{
 										if (field.value != null) {
 											properties[field.id] = field.value;	
@@ -1788,7 +1854,11 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 					
 				} else if (this.isStringType(this.featureType[i].type)) {
 					var value = feature.getProperties()[this.featureType[i].name];
-					ui += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + value + '">';
+					if (this.featureType[i].name.startsWith("form_")) {
+						ui += '<br/><a target="_blank" class="form-link form-link-open form-control" href="" data-orig="'+ this.featureType[i].name +'" data-value="'+value+'"><i class="fa fa-check-square-o" aria-hidden="true"></i>&nbsp;&nbsp;' + gettext("Show form") + '</a>';
+					} else{
+						ui += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + value + '">';
+					}
 				} else if (this.featureType[i].type == 'boolean') {
 					if (feature.getProperties()[this.featureType[i].name]) {
 						ui += '<input disabled id="' + this.featureType[i].name + '" type="checkbox" class="checkbox" checked>';
@@ -1809,11 +1879,43 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 		this.detailsTab.append(ui);
 		$.gvsigOL.controlSidebar.open();
 		
+		$('.form-link-open').each(function () {
+			var field_name = $(this).attr("data-orig");
+			var feature_id = $(this).attr("data-value");
+			var self = $(this);
+			$.getJSON("/gvsigonline/forms/get_form_link/", 
+					{
+					'field_name': field_name,
+					'feature_id': feature_id
+					}, function(data){
+						if("token" in data && data["token"].length > 0){
+							$("#"+field_name).val(data["token"]);
+							self.attr("data-value", data["token"]);
+							
+						}
+						if("url" in data && data["url"].length > 0){
+							self.attr("href", data["url"]);
+						}
+				
+			}).fail(function() {
+			});
+		});
+		
 		$('#remove-feature').on('click', function () {
 			var transaction = self.transactWFS('delete', feature);
 			if (transaction.success) {
 				var deleted = self.resourceManager.deleteResources(feature);
 				if (deleted) {
+					$('.form-link-open').each(function () {
+						$.getJSON("/gvsigonline/forms/delete_form_link/", 
+								{
+								'field_name': $(this).attr("data-orig"),
+								'feature_id': $(this).attr("data-value")
+								}, function(data){
+
+						}).fail(function() {
+						});
+					});
 					self.wfsLayer.getSource().removeFeature(feature);
 					self.removeInteraction.getFeatures().clear();
 					self.selectedLayer.getSource().updateParams({"time": Date.now()});
