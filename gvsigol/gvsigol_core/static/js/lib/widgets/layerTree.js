@@ -541,28 +541,48 @@ layerTree.prototype.createTree = function() {
 	
 	
 	$('#datetimepicker-from').on('dp.change', function(e){ 
-	    var formatedValue = e.date.format(e.date._f);
-	    var value_from = moment(formatedValue, "DD-MM-YYYY HH:mm:ss")/1000;
-	    if($('input[name=temporary-group]:checked').attr("data-value") == "single"){
-	    	$(".temporary-layers-slider").slider('value',value_from);
-	    	self.updateTemporalLayers(new Date(value_from*1000));
-	    }else{
-	    	var value_to = moment($("#temporary-to").val(), "DD-MM-YYYY HH:mm:ss")/1000;
-	    	$(".temporary-layers-slider").slider('values', 0, value_from);
-	    	self.updateTemporalLayers(new Date(value_from*1000), new Date(value_to*1000));
-	    }
-	    
+		if(e){
+		    var formatedValue = e.date.format(e.date._f);
+		    var value_from = moment(formatedValue, e.date._f)/1000;
+		    if($('input[name=temporary-group]:checked').attr("data-value") == "single"){
+		    	var date_from = new Date(value_from*1000);
+		    	self.updateTemporalLayers(date_from);
+		    	value_from = date_from.getTime()/1000;
+		    	self.updateFromSlider(value_from);
+		    }else{
+		    	var date_from = new Date(value_from*1000);
+		    	var value_to = moment($("#temporary-to").val(), e.date._f)/1000;
+		    	self.updateTemporalLayers(date_from, new Date(value_to*1000));
+		    	value_from = date_from.getTime()/1000;
+		    	self.updateFromSlider(value_from);
+		    }
+		}
 	});
 	
 	$('#datetimepicker-to').on('dp.change', function(e){ 
-		var formatedValue = e.date.format(e.date._f);
-		var value_from = moment($("#temporary-from").val(), "DD-MM-YYYY HH:mm:ss")/1000;
-	    var value_to = moment(formatedValue, "DD-MM-YYYY HH:mm:ss")/1000;
-	    $(".temporary-layers-slider").slider('values', 1, value_to);
-	    self.updateTemporalLayers(new Date(value_from*1000), new Date(value_to*1000));
+		if(e){
+			var formatedValue = e.date.format(e.date._f);
+			var value_from = moment($("#temporary-from").val(), e.date._f)/1000;
+		    var value_to = moment(formatedValue, e.date._f)/1000;
+		    self.updateTemporalLayers(new Date(value_from*1000), new Date(value_to*1000));
+		    self.updateToSlider(value_to);
+		}
 	});
 	
 };
+
+layerTree.prototype.updateFromSlider = function(value_from) {
+	if($('input[name=temporary-group]:checked').attr("data-value") == "single"){
+		$(".temporary-layers-slider").slider('value',value_from);
+	}else{
+		$(".temporary-layers-slider").slider('values', 0, value_from);
+	}
+}
+
+layerTree.prototype.updateToSlider = function(value_to) {
+	$(".temporary-layers-slider").slider('values', 1, value_to);
+}
+
 
 layerTree.prototype.refreshTemporalStep = function() {
 	var value = $("#temporary-step-value").val();
@@ -570,33 +590,33 @@ layerTree.prototype.refreshTemporalStep = function() {
 	
 	if(unit=="second"){
 		this.step_val = value*1;
-//		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'DD-MM-YYYY HH:mm:ss');
-//		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'DD-MM-YYYY HH:mm:ss');
+		$('#datetimepicker-from').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY HH:mm:ss');
+		$('#datetimepicker-to').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY HH:mm:ss');
 	}
 	if(unit=="minute"){
 		this.step_val = value*60;
-//		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'DD-MM-YYYY HH:mm');
-//		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'DD-MM-YYYY HH:mm');
+		$('#datetimepicker-from').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY HH:mm');
+		$('#datetimepicker-to').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY HH:mm');
 	}
 	if(unit=="hour"){
 		this.step_val = value*60*60;
-//		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'DD-MM-YYYY HHh');
-//		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'DD-MM-YYYY HHh');
+		$('#datetimepicker-from').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY HHh');
+		$('#datetimepicker-to').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY HHh');
 	}
 	if(unit=="day"){
 		this.step_val = value*60*60*24;
-//		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'DD-MM-YYYY');
-//		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'DD-MM-YYYY');
+		$('#datetimepicker-from').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY');
+		$('#datetimepicker-to').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY');
 	}
 	if(unit=="month"){
 		this.step_val = value*60*60*24*30;
-//		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'MM-YYYY');
-//		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'MM-YYYY');
+		$('#datetimepicker-from').datetimepicker().data('DateTimePicker').format('MM-YYYY');
+		$('#datetimepicker-to').datetimepicker().data('DateTimePicker').format('MM-YYYY');
 	}
 	if(unit=="year"){
 		this.step_val = value*60*60*24*365;
-//		$('#datetimepicker-from').datepicker( "option", "dateFormat", 'YYYY');
-//		$('#datetimepicker-to').datepicker( "option", "dateFormat", 'YYYY');
+		$('#datetimepicker-from').datetimepicker().data('DateTimePicker').format('YYYY');
+		$('#datetimepicker-to').datetimepicker().data('DateTimePicker').format('YYYY');
 	}
 	
 	this.refreshTemporalSlider();
