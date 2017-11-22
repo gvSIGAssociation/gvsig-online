@@ -211,7 +211,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'gvsigonline@scolab.es'
-EMAIL_HOST_PASSWORD = 'Ohp2leej'
+EMAIL_HOST_PASSWORD = '****'
 EMAIL_PORT = 587
 SITE_ID=1
 
