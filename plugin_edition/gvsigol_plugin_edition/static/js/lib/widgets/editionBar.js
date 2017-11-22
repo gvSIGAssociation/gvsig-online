@@ -788,17 +788,13 @@ EditionBar.prototype.getEnumeration = function(enumName) {
 };
 
 EditionBar.prototype.getEnumerations = function(enumNames) {	
-	var names = "[]";
-	if(enumNames.length > 0){
-		names = enumNames.toString();
-	}
 	var enumerations = [];
 	$.ajax({
 		type: 'POST',
 		async: false,
 	  	url: "/gvsigonline/services/get_enumeration/",
 	  	data: {
-	  		'enum_names': names
+	  		'enum_names': enumNames.toString()
 		},
 	  	success	:function(response){
 	  		var enms = response.enumerations;
