@@ -789,7 +789,7 @@ EditionBar.prototype.getEnumeration = function(enumName) {
 
 EditionBar.prototype.getEnumerations = function(enumNames) {	
 	var names = "[]";
-	if(enumNames.length == 0){
+	if(enumNames.length > 0){
 		names = enumNames.toString();
 	}
 	var enumerations = [];
