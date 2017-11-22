@@ -59,3 +59,14 @@ Cuando la capa se publique, se podrán insertar features, modificar y borrar tal
 
 
 
+Configuración de LimeSurvey
+---------------------------
+
+* Si se para la encuesta, SIEMPRE hay que elegir la opción 'desactivar' si se va a querer gastar posteriormente (si no, aunque se active, no tendrá vigencia y no se podrá recuperar las respeustas).
+
+* Cuando se activa una encuesta:
+
+  * En el primer panel, poner respuestas anónimas a 'NO', el resto opcional.
+  * Pinchar sobre el botón 'Cambiar encuesta a modo restringido'
+  * Pinchar sobre el botón 'Iniciar tabla de participantes'
+
