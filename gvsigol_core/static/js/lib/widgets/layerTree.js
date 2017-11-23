@@ -705,7 +705,7 @@ layerTree.prototype.refreshTemporalStep = function() {
 		this.step_val_array = [];
 		while(current_min_date <= current_max_date){
 			this.step_val_array.push(current_min_date.getTime()/1000);
-			current_min_date.setMonth(current_min_date.getMonth()+1);
+			current_min_date.setMonth(current_min_date.getMonth()+parseInt(value));
 		}
 	}
 	if(unit=="year"){
@@ -719,7 +719,7 @@ layerTree.prototype.refreshTemporalStep = function() {
 		this.step_val_array = [];
 		while(current_min_date.getFullYear() <= current_max_date.getFullYear()){
 			this.step_val_array.push(current_min_date.getTime()/1000);
-			current_min_date.setFullYear(current_min_date.getFullYear()+1);
+			current_min_date.setFullYear(current_min_date.getFullYear()+parseInt(value));
 		}
 	}
 	
