@@ -1267,7 +1267,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 										properties[field.id] = value;	
 									}else if(self.featureType[i].name.startsWith("form_")){
 										properties[field.id] = field.value;	
-									s}else{
+									}else{
 										if (field.value != null) {
 											properties[field.id] = field.value;	
 										}
