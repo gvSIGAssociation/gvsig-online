@@ -382,6 +382,7 @@ layerTree.prototype.createTree = function() {
 		try{
 			if(input.attr("data-value") == "range"){
 				prev_value = $('.temporary-layers-slider').slider("values")[0];
+				prev_value_to = $('.temporary-layers-slider').slider("values")[1];
 			}
 			if(input.attr("data-value") == "single"){
 				prev_value = $('.temporary-layers-slider').slider("value");
@@ -412,7 +413,15 @@ layerTree.prototype.createTree = function() {
 		var dt_cur_from = new Date(aux_min*1000);
 		var formatted = self.formatDate(dt_cur_from);
     	$("#temporary-from").val(formatted);
-    	self.updateTemporalLayers(dt_cur_from);
+    	
+    	
+    	if(input.attr("data-value") == "single"){
+    		self.updateTemporalLayers(dt_cur_from);
+		}
+		if(input.attr("data-value") == "range"){
+			var dt_cur_to = new Date(prev_value_to*1000);
+			self.updateTemporalLayers(dt_cur_from, dt_cur_to);
+		}
 
 //		self.refreshTemporalSlider();
 	});
@@ -423,6 +432,7 @@ layerTree.prototype.createTree = function() {
 		try{
 			if(input.attr("data-value") == "range"){
 				prev_value = $('.temporary-layers-slider').slider("values")[0];
+				prev_value_to = $('.temporary-layers-slider').slider("values")[1];
 				
 			}
 			if(input.attr("data-value") == "single"){
@@ -454,7 +464,14 @@ layerTree.prototype.createTree = function() {
 		var dt_cur_from = new Date(aux_max*1000);
 		var formatted = self.formatDate(dt_cur_from);
     	$("#temporary-from").val(formatted);
-    	self.updateTemporalLayers(dt_cur_from);
+
+    	if(input.attr("data-value") == "single"){
+    		self.updateTemporalLayers(dt_cur_from);
+		}
+		if(input.attr("data-value") == "range"){
+			var dt_cur_to = new Date(prev_value_to*1000);
+			self.updateTemporalLayers(dt_cur_from, dt_cur_to);
+		}
 	});
 	
 	
