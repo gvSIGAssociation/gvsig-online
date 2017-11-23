@@ -573,9 +573,9 @@ layerTree.prototype.createTree = function() {
 //		self.refreshTemporalInfo();
 //	});
 	
-	$("#temporary-step-value").change(function () {
-		self.refreshTemporalStep();
-	});
+//	$("#temporary-step-value").change(function () {
+//		self.refreshTemporalStep();
+//	});
 	
 	$("#temporary-step-unit").change(function () {
 		self.refreshTemporalStep();
