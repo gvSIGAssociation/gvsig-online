@@ -41,6 +41,11 @@ var layerTree = function(conf, map, isPublic) {
 	$(".layer-tree-groups").on("sortupdate", function(event, ui){
 		self.reorder(event, ui);
 	});
+	
+	this.step_val_array = [];
+	this.step_val = 1;
+	this.min_val = 0;
+	this.max_val = 1;
 };
 
 /**
@@ -385,9 +390,18 @@ layerTree.prototype.createTree = function() {
 			
 		}
 		
-		var aux_min = self.min_val;
-		if(prev_value && (prev_value - self.step_val) > self.min_val){
-			aux_min = (prev_value - self.step_val);
+		var aux_min = self.current_min_val;
+		if(self.step_val_array && self.step_val_array.length > 0){
+			var index = self.step_val_array.indexOf(self.findNearest(prev_value));
+			if(index > 0){
+				aux_min = self.step_val_array[index-1];
+			}else{
+				aux_min = self.step_val_array[0];
+			}
+		}else{
+			if(prev_value && (prev_value - self.step_val) > self.current_min_val){
+				aux_min = (prev_value - self.step_val);
+			}
 		}
 		if(input.attr("data-value") == "single"){
 			$(".temporary-layers-slider").slider('value',aux_min);
@@ -418,9 +432,18 @@ layerTree.prototype.createTree = function() {
 			
 		}
 		
-		var aux_max = self.max_val;
-		if(prev_value && (prev_value + self.step_val) < self.max_val){
-			aux_max = (prev_value + self.step_val);
+		var aux_max = self.current_max_val;
+		if(self.step_val_array && self.step_val_array.length > 0){
+			var index = self.step_val_array.indexOf(self.findNearest(prev_value));
+			if(index < self.step_val_array.length-1 && index != -1){
+				aux_max = self.step_val_array[index+1];
+			}else{
+				aux_max = self.step_val_array[self.step_val_array.length-1];
+			}
+		}else{
+			if(prev_value && (prev_value + self.step_val) < self.max_val){
+				aux_max = (prev_value + self.step_val);
+			}
 		}
 		if(input.attr("data-value") == "single"){
 			$(".temporary-layers-slider").slider('value',aux_max);
@@ -444,9 +467,18 @@ layerTree.prototype.createTree = function() {
 			
 		}
 		
-		var aux_min = self.min_val;
-		if(prev_value && (prev_value - self.step_val) > self.min_val){
-			aux_min = (prev_value - self.step_val);
+		var aux_min = self.current_min_val;
+		if(self.step_val_array && self.step_val_array.length > 0){
+			var index = self.step_val_array.indexOf(self.findNearest(prev_value));
+			if(index > 0){
+				aux_min = self.step_val_array[index-1];
+			}else{
+				aux_min = self.step_val_array[0];
+			}
+		}else{
+			if(prev_value && (prev_value - self.step_val) > self.min_val){
+				aux_min = (prev_value - self.step_val);
+			}
 		}
 		var dt_cur_from = new Date(prev_value_from*1000);
 		var dt_cur_to = new Date(aux_min*1000);
@@ -465,9 +497,18 @@ layerTree.prototype.createTree = function() {
 		}catch(err){
 			
 		}
-		var aux_max = self.max_val;
-		if(prev_value && (prev_value + self.step_val) < self.max_val){
-			aux_max = (prev_value + self.step_val);
+		var aux_max = self.current_max_val;
+		if(self.step_val_array && self.step_val_array.length > 0){
+			var index = self.step_val_array.indexOf(self.findNearest(prev_value));
+			if(index < self.step_val_array.length-1 && index != -1){
+				aux_max = self.step_val_array[index+1];
+			}else{
+				aux_max = self.step_val_array[self.step_val_array.length-1];
+			}
+		}else{
+			if(prev_value && (prev_value + self.step_val) < self.max_val){
+				aux_max = (prev_value + self.step_val);
+			}
 		}
 		var dt_cur_from = new Date(prev_value_from*1000);
 		var dt_cur_to = new Date(aux_max*1000);
@@ -543,16 +584,20 @@ layerTree.prototype.createTree = function() {
 	$('#datetimepicker-from').on('dp.change', function(e){ 
 		if(e){
 		    var formatedValue = e.date.format(e.date._f);
-		    var value_from = moment(formatedValue, e.date._f)/1000;
+		    var value_from = moment(formatedValue, e.date._f);
 		    if($('input[name=temporary-group]:checked').attr("data-value") == "single"){
-		    	var date_from = new Date(value_from*1000);
+		    	var date_from = new Date(value_from);
 		    	self.updateTemporalLayers(date_from);
+		    	var userTimezoneOffset = date_from.getTimezoneOffset() * 60000;
+		    	date_from = new Date(date_from.getTime() - userTimezoneOffset);
 		    	value_from = date_from.getTime()/1000;
 		    	self.updateFromSlider(value_from);
 		    }else{
-		    	var date_from = new Date(value_from*1000);
-		    	var value_to = moment($("#temporary-to").val(), e.date._f)/1000;
-		    	self.updateTemporalLayers(date_from, new Date(value_to*1000));
+		    	var date_from = new Date(value_from);
+		    	var value_to = moment($("#temporary-to").val(), e.date._f);
+		    	self.updateTemporalLayers(date_from, new Date(value_to));
+		    	var userTimezoneOffset = date_from.getTimezoneOffset() * 60000;
+		    	date_from = new Date(date_from.getTime() - userTimezoneOffset);
 		    	value_from = date_from.getTime()/1000;
 		    	self.updateFromSlider(value_from);
 		    }
@@ -562,11 +607,23 @@ layerTree.prototype.createTree = function() {
 	$('#datetimepicker-to').on('dp.change', function(e){ 
 		if(e){
 			var formatedValue = e.date.format(e.date._f);
-			var value_from = moment($("#temporary-from").val(), e.date._f)/1000;
-		    var value_to = moment(formatedValue, e.date._f)/1000;
-		    self.updateTemporalLayers(new Date(value_from*1000), new Date(value_to*1000));
+			var value_from = moment($("#temporary-from").val(), e.date._f);
+		    var value_to = moment(formatedValue, e.date._f);
+		    var date_to = new Date(value_to);
+		    self.updateTemporalLayers(new Date(value_from), new Date(value_to));
+		    var userTimezoneOffset = date_to.getTimezoneOffset() * 60000;
+		    date_to = new Date(date_to.getTime() - userTimezoneOffset);
+	    	value_to = date_to.getTime()/1000;
 		    self.updateToSlider(value_to);
 		}
+	});
+	
+	document.getElementById('temporary-from').addEventListener('keyup',function(e){
+	    if (e.which == 13) this.blur();
+	});
+	
+	document.getElementById('temporary-to').addEventListener('keyup',function(e){
+	    if (e.which == 13) this.blur();
 	});
 	
 };
@@ -592,34 +649,86 @@ layerTree.prototype.refreshTemporalStep = function() {
 		this.step_val = value*1;
 		$('#datetimepicker-from').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY HH:mm:ss');
 		$('#datetimepicker-to').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY HH:mm:ss');
+		this.current_min_val = this.getNewLimit(this.min_val,'DD-MM-YYYY HH:mm:ss');
+		this.current_max_val = this.getNewLimit(this.max_val,'DD-MM-YYYY HH:mm:ss');
+		this.step_val_array = [];
 	}
 	if(unit=="minute"){
 		this.step_val = value*60;
 		$('#datetimepicker-from').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY HH:mm');
 		$('#datetimepicker-to').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY HH:mm');
+		this.current_min_val = this.getNewLimit(this.min_val,'DD-MM-YYYY HH:mm');
+		this.current_max_val = this.getNewLimit(this.max_val,'DD-MM-YYYY HH:mm');
+		this.step_val_array = [];
 	}
 	if(unit=="hour"){
 		this.step_val = value*60*60;
-		$('#datetimepicker-from').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY HHh');
-		$('#datetimepicker-to').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY HHh');
+		$('#datetimepicker-from').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY HH:00');
+		$('#datetimepicker-to').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY HH:00');
+		this.current_min_val = this.getNewLimit(this.min_val,'YYYY-MM-DDTHH:00:00Z');
+		this.current_max_val = this.getNewLimit(this.max_val,'YYYY-MM-DDTHH:00:00Z');
+		this.step_val_array = [];
 	}
 	if(unit=="day"){
 		this.step_val = value*60*60*24;
 		$('#datetimepicker-from').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY');
 		$('#datetimepicker-to').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY');
+		this.current_min_val = this.getNewLimit(this.min_val,'YYYY-MM-DD');
+		this.current_max_val = this.getNewLimit(this.max_val,'YYYY-MM-DD');
+		this.step_val_array = [];
 	}
 	if(unit=="month"){
-		this.step_val = value*60*60*24*30;
+		this.step_val = 1;
 		$('#datetimepicker-from').datetimepicker().data('DateTimePicker').format('MM-YYYY');
 		$('#datetimepicker-to').datetimepicker().data('DateTimePicker').format('MM-YYYY');
+		this.current_min_val = this.getNewLimit(this.min_val,'YYYY-MM');
+		this.current_max_val = this.getNewLimit(this.max_val,'YYYY-MM');
+		var current_min_date = new Date(this.current_min_val*1000);
+		var current_max_date = new Date(this.current_max_val*1000);
+		this.step_val_array = [];
+		while(current_min_date <= current_max_date){
+			this.step_val_array.push(current_min_date.getTime()/1000);
+			current_min_date.setMonth(current_min_date.getMonth()+1);
+		}
 	}
 	if(unit=="year"){
-		this.step_val = value*60*60*24*365;
+		this.step_val = 1;
 		$('#datetimepicker-from').datetimepicker().data('DateTimePicker').format('YYYY');
 		$('#datetimepicker-to').datetimepicker().data('DateTimePicker').format('YYYY');
+		this.current_min_val = this.getNewLimit(this.min_val,'YYYY');
+		this.current_max_val = this.getNewLimit(this.max_val,'YYYY');
+		var current_min_date = new Date(this.current_min_val*1000);
+		var current_max_date = new Date(this.current_max_val*1000);
+		this.step_val_array = [];
+		while(current_min_date.getFullYear() <= current_max_date.getFullYear()){
+			this.step_val_array.push(current_min_date.getTime()/1000);
+			current_min_date.setFullYear(current_min_date.getFullYear()+1);
+		}
 	}
 	
 	this.refreshTemporalSlider();
+}
+ 
+layerTree.prototype.findNearest = function(value) {
+	var nearest = null;
+	var diff = null;
+	for (var i = 0; i < this.step_val_array.length; i++) {
+		var newDiff = Math.abs(value - this.step_val_array[i]);
+		if (diff == null || newDiff < diff) {
+			nearest = this.step_val_array[i];
+			diff = newDiff;
+		}
+	}
+	return nearest;
+}
+
+layerTree.prototype.getNewLimit = function(value, format){
+	var date = new Date(value*1000);
+	var formatedValue = moment(date).format(format);
+    var date_from = new Date(formatedValue);
+    var userTimezoneOffset = date_from.getTimezoneOffset() * 60000;
+    date_from = new Date(date_from.getTime() + userTimezoneOffset);
+    return date_from.getTime()/1000;
 }
 
 layerTree.prototype.refreshTemporalInfo = function() {
@@ -756,29 +865,44 @@ layerTree.prototype.refreshTemporalSlider = function() {
 			if($(".temporary-layers-slider").hasClass("ui-slider")){
 				$(".temporary-layers-slider").slider( "destroy" );
 			}
-			var new_max = this.max_val;
-			if(this.step_val > 1){
-				if((this.max_val - this.min_val)%this.step_val!=0){
-					var number_steps = Math.floor((this.max_val - this.min_val)/this.step_val) + 1;
-					new_max = this.min_val + (this.step_val * number_steps);
-				}
-			}
+//			var new_max = this.max_val;
+//			if(this.step_val > 1){
+//				if((this.max_val - this.min_val)%this.step_val!=0){
+//					var number_steps = Math.floor((this.max_val - this.min_val)/this.step_val) + 1;
+//					new_max = this.min_val + (this.step_val * number_steps);
+//				}
+//			}
 			$(".temporary-layers-slider").slider({
-			    min: this.min_val,
-			    max: new_max,
-			    value: this.max_val,
+			    min: this.current_min_val,
+			    max: this.current_max_val,
+			    value: this.current_max_val,
 			    step: this.step_val,
 			    range: false,
 			    slide: function(event, ui) {
-			    	var dt_cur_from = new Date(ui.value*1000); //.format("yyyy-mm-dd hh:ii:ss");
+			    	var calculated_value = ui.value;
+			    	if(self.step_val_array && self.step_val_array.length > 0){
+			    		calculated_value = self.findNearest(ui.value);
+			    	}
+			    	ui.value = calculated_value;
+			    	var dt_cur_from = new Date(calculated_value*1000); //.format("yyyy-mm-dd hh:ii:ss");
 			    	var values = $(".temporary-layers-slider").slider('values')
 			    	if(values && values.length > 0){
-			    		$(".temporary-layers-slider").slider('values', 0, dt_cur_from);
+			    		$(".temporary-layers-slider").slider('values', 0, calculated_value);
 			    	}
 			    	var formatted = self.formatDate(dt_cur_from);
 			    	$("#temporary-from").val(formatted);
 			    	self.updateTemporalLayers(dt_cur_from);
-			    }
+			    	self.updateFromSlider(calculated_value);
+//			    	console.log('selectedTime: ' + calculated_value +', current Time: '+ ui.value + ", date: "+ formatted);
+			    },
+				stop: function( event, ui ) {
+//					console.log("Acabó en "+ui.value);
+					var calculated_value = ui.value;
+			    	if(self.step_val_array && self.step_val_array.length > 0){
+			    		calculated_value = self.findNearest(ui.value);
+			    	}
+			    	self.updateFromSlider(calculated_value);
+				}
 			});
 			
 			if(prev_value){
@@ -797,20 +921,26 @@ layerTree.prototype.refreshTemporalSlider = function() {
 			if($(".temporary-layers-slider").hasClass("ui-slider")){
 				$(".temporary-layers-slider").slider( "destroy" );
 			}
-			var new_max = this.max_val;
-			if(this.step_val > 1){
-				if((this.max_val - this.min_val)%this.step_val!=0){
-					var number_steps = Math.floor((this.max_val - this.min_val)/this.step_val) + 1;
-					new_max = this.min_val + (this.step_val * number_steps);
-				}
-			}
+//			var new_max = this.max_val;
+//			if(this.step_val > 1){
+//				if((this.max_val - this.min_val)%this.step_val!=0){
+//					var number_steps = Math.floor((this.max_val - this.min_val)/this.step_val) + 1;
+//					new_max = this.min_val + (this.step_val * number_steps);
+//				}
+//			}
 			$(".temporary-layers-slider").slider({
-				min: this.min_val,
-			    max: new_max,
-			    value: this.max_val,
+				min: this.current_min_val,
+			    max: this.current_max_val,
+			    value: this.current_max_val,
 		        step: this.step_val,
 			    range: true,
 			    slide: function( event, ui ) {
+			    	var calculated_values = ui.values;
+			    	if(self.step_val_array && self.step_val_array.length > 0){
+			    		calculated_values[0] = self.findNearest(ui.values[0]);
+			    		calculated_values[1] = self.findNearest(ui.values[1]);
+			    	}
+			    	ui.values = calculated_values;
 			    	var dt_cur_from = new Date(ui.values[0]*1000); //.format("yyyy-mm-dd hh:ii:ss");
 			    	$(".temporary-layers-slider").slider('value', dt_cur_from);
 			    	var formatted = self.formatDate(dt_cur_from);
@@ -821,10 +951,22 @@ layerTree.prototype.refreshTemporalSlider = function() {
 			    	$("#temporary-to").val(formatted);
 			        
 			        self.updateTemporalLayers(dt_cur_from, dt_cur_to);
-			    }
+			        self.updateFromSlider(calculated_values[0]);
+			        self.updateToSlider(calculated_values[1]);
+			    },
+				stop: function( event, ui ) {
+//					console.log("Acabó en "+ui.value);
+					var calculated_values = ui.values;
+			    	if(self.step_val_array && self.step_val_array.length > 0){
+			    		calculated_values[0] = self.findNearest(ui.values[0]);
+			    		calculated_values[1] = self.findNearest(ui.values[1]);
+			    	}
+			    	self.updateFromSlider(calculated_values[0]);
+				    self.updateToSlider(calculated_values[1]);
+				}
 			});
 			
-	    	var dt_cur_to = new Date(new_max*1000);
+	    	var dt_cur_to = new Date(this.current_max_val*1000);
 			var formatted = self.formatDate(dt_cur_to);
 	    	$("#temporary-to").val(formatted);
 	    	
@@ -832,7 +974,7 @@ layerTree.prototype.refreshTemporalSlider = function() {
 			var formatted = self.formatDate(dt_cur_from);
 	    	$("#temporary-from").val(formatted);
 			
-	    	$(".temporary-layers-slider").slider('values',1,new_max); // sets first handle (index 0) to 50
+	    	$(".temporary-layers-slider").slider('values',1,this.current_max_val); // sets first handle (index 0) to 50
 	    	$(".temporary-layers-slider").slider('values',0,prev_value);
 	    	
 	    	self.updateTemporalLayers(dt_cur_from, dt_cur_to);
@@ -917,7 +1059,7 @@ layerTree.prototype.formatDate = function(date) {
 		  return result;
 	  }
 	  if(unit=="hour"){
-		  strTime = hours + 'h';
+		  strTime = hours + ':00';
 		  result = days + "-" + month + "-" + date.getFullYear() + "  " + strTime;
 		  return result;
 	  }
