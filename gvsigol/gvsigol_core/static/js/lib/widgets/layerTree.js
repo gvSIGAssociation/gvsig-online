@@ -376,7 +376,7 @@ layerTree.prototype.createTree = function() {
 	    }
 	});
 
-	$(".temporal-buttons-left-from").click(function(){
+	$(".temporal-buttons-left-from").unbind("click").click(function(){
 		var prev_value = null;
 		var input = $("input[name=temporary-group]:checked");
 		try{
@@ -426,7 +426,7 @@ layerTree.prototype.createTree = function() {
 //		self.refreshTemporalSlider();
 	});
 	
-	$(".temporal-buttons-right-from").click(function(){
+	$(".temporal-buttons-right-from").unbind("click").click(function(){
 		var prev_value = null;
 		var input = $("input[name=temporary-group]:checked");
 		try{
@@ -475,7 +475,7 @@ layerTree.prototype.createTree = function() {
 	});
 	
 	
-	$(".temporal-buttons-left-to").click(function(){
+	$(".temporal-buttons-left-to").unbind("click").click(function(){
 		var prev_value = null;
 		try{
 			prev_value_from = $('.temporary-layers-slider').slider("values")[0];
@@ -506,7 +506,7 @@ layerTree.prototype.createTree = function() {
     	 self.updateTemporalLayers(dt_cur_from, dt_cur_to);
 	});
 	
-	$(".temporal-buttons-right-to").click(function(){
+	$(".temporal-buttons-right-to").unbind("click").click(function(){
 		var prev_value = null;
 		try{
 			prev_value_from = $('.temporary-layers-slider').slider("values")[0];
