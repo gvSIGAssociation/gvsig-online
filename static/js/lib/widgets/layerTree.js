@@ -605,16 +605,16 @@ layerTree.prototype.createTree = function() {
 		    if($('input[name=temporary-group]:checked').attr("data-value") == "single"){
 		    	var date_from = new Date(value_from);
 		    	self.updateTemporalLayers(date_from);
-		    	var userTimezoneOffset = date_from.getTimezoneOffset() * 60000;
-		    	date_from = new Date(date_from.getTime() - userTimezoneOffset);
+//		    	var userTimezoneOffset = date_from.getTimezoneOffset() * 60000;
+//		    	date_from = new Date(date_from.getTime() - userTimezoneOffset);
 		    	value_from = date_from.getTime()/1000;
 		    	self.updateFromSlider(value_from);
 		    }else{
 		    	var date_from = new Date(value_from);
 		    	var value_to = moment($("#temporary-to").val(), e.date._f);
 		    	self.updateTemporalLayers(date_from, new Date(value_to));
-		    	var userTimezoneOffset = date_from.getTimezoneOffset() * 60000;
-		    	date_from = new Date(date_from.getTime() - userTimezoneOffset);
+//		    	var userTimezoneOffset = date_from.getTimezoneOffset() * 60000;
+//		    	date_from = new Date(date_from.getTime() - userTimezoneOffset);
 		    	value_from = date_from.getTime()/1000;
 		    	self.updateFromSlider(value_from);
 		    }
@@ -628,8 +628,8 @@ layerTree.prototype.createTree = function() {
 		    var value_to = moment(formatedValue, e.date._f);
 		    var date_to = new Date(value_to);
 		    self.updateTemporalLayers(new Date(value_from), new Date(value_to));
-		    var userTimezoneOffset = date_to.getTimezoneOffset() * 60000;
-		    date_to = new Date(date_to.getTime() - userTimezoneOffset);
+//		    var userTimezoneOffset = date_to.getTimezoneOffset() * 60000;
+//		    date_to = new Date(date_to.getTime() - userTimezoneOffset);
 	    	value_to = date_to.getTime()/1000;
 		    self.updateToSlider(value_to);
 		}
