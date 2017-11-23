@@ -666,16 +666,16 @@ layerTree.prototype.refreshTemporalStep = function() {
 		this.step_val = value*1;
 		$('#datetimepicker-from').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY HH:mm:ss');
 		$('#datetimepicker-to').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY HH:mm:ss');
-		this.current_min_val = this.getNewLimit(this.min_val,'DD-MM-YYYY HH:mm:ss');
-		this.current_max_val = this.getNewLimit(this.max_val,'DD-MM-YYYY HH:mm:ss');
+		this.current_min_val = this.getNewLimit(this.min_val,'YYYY-MM-DDTHH:mm:ssZ');
+		this.current_max_val = this.getNewLimit(this.max_val,'YYYY-MM-DDTHH:mm:ssZ');
 		this.step_val_array = [];
 	}
 	if(unit=="minute"){
 		this.step_val = value*60;
 		$('#datetimepicker-from').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY HH:mm');
 		$('#datetimepicker-to').datetimepicker().data('DateTimePicker').format('DD-MM-YYYY HH:mm');
-		this.current_min_val = this.getNewLimit(this.min_val,'DD-MM-YYYY HH:mm');
-		this.current_max_val = this.getNewLimit(this.max_val,'DD-MM-YYYY HH:mm');
+		this.current_min_val = this.getNewLimit(this.min_val,'YYYY-MM-DDTHH:mm:00Z');
+		this.current_max_val = this.getNewLimit(this.max_val,'YYYY-MM-DDTHH:mm:00Z');
 		this.step_val_array = [];
 	}
 	if(unit=="hour"){
