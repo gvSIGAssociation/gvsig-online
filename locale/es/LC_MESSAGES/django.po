@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-11-10 13:04+0100\n"
+"POT-Creation-Date: 2017-11-23 10:51+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -657,7 +657,13 @@ msgstr "No puede eliminar un estilo por defecto"
 msgid "Error importing SLD"
 msgstr "Error al importar SLD"
 
-#: views.py:703 views.py:766
+#: views.py:703
+msgid ""
+"You must enter a correct name for the library (without uppercases, "
+"whitespaces or other special characters)"
+msgstr "Debes introducir un nombre correcto para la librería (sin mayúsculas, espacios en blanco o caracteres especiales)"
+
+#: views.py:766
 msgid "You must enter a name for the library"
 msgstr "Debe introducir un nombre para la biblioteca"
 

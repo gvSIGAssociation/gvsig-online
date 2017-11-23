@@ -40,7 +40,7 @@ import ast
 from gvsigol_services.gdal_tools import get_raster_stats
 import sys
 from gvsigol_services.backend_postgis import Introspect
-
+import re
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -691,7 +691,7 @@ def library_add(request, library_id):
         name = request.POST.get('library-name')
         description = request.POST.get('library-description')        
 
-        if name != '':
+        if name != '' and re.match("^[a-z0-9_]*$", name):
             library = Library(
                 name = name,
                 description = description
@@ -700,7 +700,7 @@ def library_add(request, library_id):
             return redirect('library_list')
         
         else:
-            message = _('You must enter a name for the library')
+            message = _('You must enter a correct name for the library (without uppercases, whitespaces or other special characters)')
             return render_to_response('library_add.html', {'message': message}, context_instance=RequestContext(request))
     
     else:   
@@ -857,7 +857,11 @@ def symbol_add(request, library_id, symbol_type):
         data = request.POST['rule']
         json_rule = json.loads(data)     
     
-        try:            
+        try:    
+            if not 'name' in json_rule or json_rule['name'] == '' or not re.match("^[a-z0-9_]*$", json_rule['name']):
+                message = _('You must enter a correct name for the library (without uppercases, whitespaces or other special characters)')
+                return HttpResponse(json.dumps({'message':message, 'success': False}, indent=4), content_type='application/json')
+                
             if services_library.add_symbol(request, json_rule, library_id, symbol_type):
                 return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             else:
