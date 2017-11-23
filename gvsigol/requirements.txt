@@ -65,4 +65,4 @@ OWSLib==0.15.0
 
 limesurveyrc2api==1.0.0
 
-suds
+suds==0.4
