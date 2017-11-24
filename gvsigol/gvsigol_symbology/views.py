@@ -653,7 +653,10 @@ def library_import(request):
         message = ''
         
         try:            
-            if name != '' and 'library-file' in request.FILES: 
+            if name != '' and not re.match("^[a-z0-9_]*$", name):
+                message = _('You must enter a correct name for the library (without uppercases, whitespaces or other special characters)')
+            
+            elif name != '' and 'library-file' in request.FILES: 
                 services_library.upload_library(name, description, request.FILES['library-file'])                
                 return redirect('library_list')
             
