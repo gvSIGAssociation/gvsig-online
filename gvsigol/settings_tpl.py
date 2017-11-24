@@ -119,7 +119,7 @@ WSGI_APPLICATION = 'gvsigol.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'gvsigonline',
+        'NAME': '##DB_NAME##',
         'USER': '##DB_USER##',
         'PASSWORD': '##DB_PASSWD##',
         'HOST': '##DB_HOST##',
@@ -155,7 +155,7 @@ GVSIGOL_LDAP = {
     'PORT': '##LDAP_PORT##',
     'DOMAIN': '##LDAP_ROOT_DN##',
     'USERNAME': '##LDAP_BIND_USER##',
-    'PASSWORD': '##LDAP_BIND_PASSWORD##',
+    'PASSWORD': '##LDAP_BIND_PASSWD##',
     'AD': '##LDAP_AD_SUFFIX##'
 }
 
@@ -233,7 +233,7 @@ GVSIGOL_VERSION = '2.3.1'
 GVSIGOL_USERS_CARTODB = {
     'dbhost': '##DB_HOST##',
     'dbport': '##DB_PORT##',
-    'dbname': 'gvsigonline',
+    'dbname': '##DB_NAME##',
     'dbuser': '##DB_USER##',
     'dbpassword': '##DB_PASSWD##'
 }
@@ -256,7 +256,7 @@ GVSIGOL_SERVICES = {
     'MOSAIC_DB': {
                   'host': '##DB_HOST##',
                   'port': '##DB_PORT##',
-                  'database': 'gvsigonline',
+                  'database': '##DB_NAME##',
                   'schema': 'mosaic',
                   'user': '##DB_USER##',
                   'passwd': '##DB_PASSWD##'
@@ -308,13 +308,7 @@ GVSIGOL_TOOLS = {
                      
 GVSIGOL_ENABLE_ENUMERATIONS = ##GVSIGOL_ENABLE_ENUMERATIONS##
 
-#GVSIGOL_BASE_LAYERS = {
-#    'bing': {
-#        'active': ##BING_IS_ACTIVE##,
-#        'key': '##BING_API_KEY##'
-#    }
-#}
-                     
+                   
 #skin-blue
 #skin-blue-light
 #skin-red
