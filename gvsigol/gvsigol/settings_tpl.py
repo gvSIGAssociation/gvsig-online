@@ -194,12 +194,12 @@ LANGUAGES = ( ##LANGUAGES##
 )
 
 LOCALE_PATHS = (
-    '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol/locale',
-    '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol_core/locale',
-    '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol_services/locale',
-    '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol_symbology/locale',
-    '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol_auth/locale',
-    '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol_filemanager/locale',
+    '##GVSIGOL_HOME##/gvsigol/gvsigol/locale',
+    '##GVSIGOL_HOME##/gvsigol/gvsigol_core/locale',
+    '##GVSIGOL_HOME##/gvsigol/gvsigol_services/locale',
+    '##GVSIGOL_HOME##/gvsigol/gvsigol_symbology/locale',
+    '##GVSIGOL_HOME##/gvsigol/gvsigol_auth/locale',
+    '##GVSIGOL_HOME##/gvsigol/gvsigol_filemanager/locale',
 )
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -221,7 +221,7 @@ BASE_URL = '##BASE_URL##'
 MEDIA_ROOT = '/var/www/media/'
 MEDIA_URL = '##BASE_URL##/media/'
 STATIC_URL = '/static/'
-STATIC_ROOT = '##GVSIG_ONLINE_HOME##/gvsigol/assets'
+STATIC_ROOT = '##GVSIGOL_HOME##/gvsigol/assets'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
@@ -244,7 +244,7 @@ GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
     'URL': '##GEOSERVER_BASE_URL##',
     'USER': 'root',
-    'PASSWORD': '##GEOSERVER_ADMIN_PASS##',
+    'PASSWORD': '##GEOSERVER_PASSWD##',
     'CLUSTER_NODES':[##GEOSERVER_CLUSTER_NODES##],
     'SUPPORTED_TYPES': (
                         ('v_PostGIS', _('PostGIS vector')),
