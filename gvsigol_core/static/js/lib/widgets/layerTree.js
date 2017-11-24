@@ -273,7 +273,7 @@ layerTree.prototype.createTree = function() {
 //	temporary_tree += '			<label style="display: block; margin-top: 8px; width: 95%;">' + gettext('Temporary range') + '</label>';
 	temporary_tree += '			<div id="from_label_div" class="temporary_field"><div class="col-md-3" style="padding:0px"><span class="text" style="font-weight:bold;margin-left:3px;">' + gettext('From') + '</span></div>'+input_from+'<div style="clear:both"></div></div>';
 	temporary_tree += '			<div id="to_label_div" class="temporary_field"><div class="col-md-3" style="padding:0px"><span class="text" style="font-weight:bold;margin-left:3px;" >' + gettext('To') + '</span></div>'+input_to+'<div style="clear:both"></div></div>';
-	temporary_tree += '			<div id="step_label_div"><span class="text" style="font-weight:bold;margin-left:3px;" >' + gettext('Step') + '</span><div class="pull-right"><input id="temporary-step-value" type="number" class="ui-slider-step" min=1 value="1" disabled/><select id="temporary-step-unit"><option value="second">' + gettext('second(s)') + '</option><option value="minute">' + gettext('minute(s)') + '</option><option value="hour">' + gettext('hour(s)') + '</option><option value="day" selected>' + gettext('day(s)') + '</option><option value="month">' + gettext('month(s)') + '</option><option value="year">' + gettext('year(s)') + '</option></select></div><div style="clear:both"></div></div>';
+	temporary_tree += '			<div id="step_label_div"><span class="text" style="font-weight:bold;margin-left:3px;" >' + gettext('Step') + '</span>'+/*'<div class="pull-right"><input id="temporary-step-value" type="number" class="ui-slider-step" min=1 value="1" disabled/>'+*/'<select id="temporary-step-unit"><option value="second">' + gettext('second(s)') + '</option><option value="minute">' + gettext('minute(s)') + '</option><option value="hour">' + gettext('hour(s)') + '</option><option value="day" selected>' + gettext('day(s)') + '</option><option value="month">' + gettext('month(s)') + '</option><option value="year">' + gettext('year(s)') + '</option></select></div><div style="clear:both"></div></div>';
 	temporary_tree += '			<div id="temporary-layers-slider" class="temporary-layers-slider"></div>';
 	
 	
@@ -743,8 +743,8 @@ layerTree.prototype.getNewLimit = function(value, format){
 	var date = new Date(value*1000);
 	var formatedValue = moment(date).format(format);
     var date_from = new Date(formatedValue);
-    var userTimezoneOffset = date_from.getTimezoneOffset() * 60000;
-    date_from = new Date(date_from.getTime() + userTimezoneOffset);
+//    var userTimezoneOffset = date_from.getTimezoneOffset() * 60000;
+//    date_from = new Date(date_from.getTime() + userTimezoneOffset);
     return date_from.getTime()/1000;
 }
 
