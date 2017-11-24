@@ -121,7 +121,7 @@ DATABASES = {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'gvsigonline',
         'USER': '##DB_USER##',
-        'PASSWORD': '##DB_PASSWORD##',
+        'PASSWORD': '##DB_PASSWD##',
         'HOST': '##DB_HOST##',
         'PORT': '##DB_PORT##',
     }
