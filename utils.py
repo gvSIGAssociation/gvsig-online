@@ -30,6 +30,7 @@ import os, shutil, errno
 import sld_utils
 import psycopg2
 import json
+import re
 
 def __get_uncompressed_file_upload_path(f):
     dir_path = tempfile.mkdtemp(suffix='', prefix='tmp-library-')
@@ -68,12 +69,32 @@ def __compress_folder(file_path):
                         zip.write(filename, arcname)
 
         return zip
+
+def remove_accents(string):
+    if type(string) is not unicode:
+        string = unicode(string, encoding='utf-8')
+
+    string = string.lower()
+
+    string = re.sub(u"[àáâãäå]", 'a', string)
+    string = re.sub(u"[èéêë]", 'e', string)
+    string = re.sub(u"[ìíîï]", 'i', string)
+    string = re.sub(u"[òóôõö]", 'o', string)
+    string = re.sub(u"[ùúûü]", 'u', string)
+    string = re.sub(u"[ýÿ]", 'y', string)
     
+    string = re.sub('[^a-z0-9 \_\.]', '', string)
+    string = string.replace(' ','_')
+
+    return string
+   
 def copyrecursively(source_folder, destination_folder):
     for root, dirs, files in os.walk(source_folder):
         for item in files:
+            item2 = remove_accents(item)
             src_path = os.path.join(root, item)
-            dst_path = os.path.join(destination_folder, src_path.replace(source_folder, ""))
+            src_path2 = os.path.join(root, item2)
+            dst_path = os.path.join(destination_folder, src_path2.replace(source_folder, ""))
             if os.path.exists(dst_path):
                 if os.stat(src_path).st_mtime > os.stat(dst_path).st_mtime:
                     shutil.copyfile(src_path, dst_path)
