@@ -35,6 +35,7 @@ import StringIO
 import json
 import re
 import os
+import unicodedata
 
 _valid_name_regex=re.compile("^[a-zA-Z_\s][a-zA-Z0-9_\s]*$")
 _valid_title_regex=re.compile("^[a-zA-Z_\s][a-zA-Z0-9_\s]*$")
@@ -375,6 +376,24 @@ def export_library(library, library_rules):
     return response
 
 
+def remove_accents(string):
+    if type(string) is not unicode:
+        string = unicode(string, encoding='utf-8')
+
+    string = string.lower()
+
+    string = re.sub(u"[àáâãäå]", 'a', string)
+    string = re.sub(u"[èéêë]", 'e', string)
+    string = re.sub(u"[ìíîï]", 'i', string)
+    string = re.sub(u"[òóôõö]", 'o', string)
+    string = re.sub(u"[ùúûü]", 'u', string)
+    string = re.sub(u"[ýÿ]", 'y', string)
+    
+    string = re.sub('[^a-z0-9 \_\.]', '', string)
+    string = string.replace(' ','_')
+
+    return string
+
 def upload_library(name, description, file):
     
     library = Library(
@@ -393,7 +412,8 @@ def upload_library(name, description, file):
             f = open(file_path+"/"+file, 'r')
             sld = sld_reader.parse(f)
             
-            style_name = sld.NamedLayer[0].Name
+            style_name = remove_accents(sld.NamedLayer[0].Name)
+            sld.NamedLayer[0].Name = style_name
             style_title = sld.NamedLayer[0].UserStyle[0].FeatureTypeStyle[0].Rule[0].Title
             r = sld.NamedLayer[0].UserStyle[0].FeatureTypeStyle[0].Rule[0]
             
@@ -468,7 +488,7 @@ def upload_library(name, description, file):
                         external_graphic = s.Graphic.ExternalGraphic[0]
                         online_resource = external_graphic.OnlineResource.href.split('/')
                         online_resource[-2] = library.name
-                        new_online_resource = settings.MEDIA_URL + online_resource[-3]+'/'+ library.name + '/' + online_resource[-1]
+                        new_online_resource = settings.MEDIA_URL + online_resource[-3]+'/'+ library.name + '/' + remove_accents(online_resource[-1])
                         symbolizer = ExternalGraphicSymbolizer(
                             rule = rule,
                             order = scount,
