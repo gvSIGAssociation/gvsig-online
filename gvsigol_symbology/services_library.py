@@ -443,7 +443,7 @@ def upload_library(name, description, file):
             )
             library_rule.save()
             
-            scount = 0
+            scount = r.Symbolizer.__len__()-1
             for s in r.Symbolizer:
                 if s.original_tagname_ == 'PointSymbolizer':
                     opacity = s.Graphic.Opacity.valueOf_
@@ -558,7 +558,7 @@ def upload_library(name, description, file):
                     )
                     symbolizer.save()
                     
-                scount+= 1
+                scount-= 1
                 
             output = StringIO.StringIO()
             sld.export(output, 0)
