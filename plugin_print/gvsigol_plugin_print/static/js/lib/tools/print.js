@@ -351,7 +351,7 @@ print.prototype.getCurrentScale = function (dpi) {
     //var dpi = 25.4 / 0.28;
     var mpu = ol.proj.METERS_PER_UNIT[units];
     var scale = resolution * mpu * 39.37 * dpi;
-    return scale;
+    return Math.round(scale);
 };
 
 /**
