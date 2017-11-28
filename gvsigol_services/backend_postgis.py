@@ -277,6 +277,9 @@ class Introspect:
             elif field.get('type') == 'timestamp':
                 query += field.get('name').lower() + " timestamp,"
                 
+            elif field.get('type') == 'cd_json':
+                query += 'cd_json_' + field.get('name').lower() + " character varying,"
+                
             elif field.get('type') == 'enumeration':
                 query += field.get('name').lower() + " character varying,"
             
