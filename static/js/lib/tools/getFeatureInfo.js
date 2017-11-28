@@ -397,16 +397,42 @@ getFeatureInfo.prototype.showInfo = function(features){
 										text = "<input type='checkbox' onclick=\"return false;\">";
 									}
 								}
-								var aux_text = text;
-								if(text.length > 45){
-									aux_text = text.substring(0,45) + "...";
+								
+								var complex_data = false;
+								if(key.startsWith("cd_json_")){
+									try{
+										complex_data = true;
+										var data_json = JSON.parse(text);
+										for(nkey in data_json){
+											var aux_text = data_json[nkey];
+											if(aux_text.length > 45){
+												aux_text = aux_text.substring(0,45) + "...";
+											}
+											if (!aux_text.toString().startsWith('http')) {
+												feature_fields += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
+												feature_fields2 += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
+											} else {
+												feature_fields += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\"><a href=\"" + data_json[nkey] + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
+												feature_fields2 += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\"><a href=\"" + data_json[nkey] + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
+											}
+										}
+									}catch(err){
+										complex_data = false;
+									}
 								}
-								if (!text.toString().startsWith('http')) {
-									feature_fields += "<span>" + aux_text + "</span><div style=\"clear:both\"></div>";
-									feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
-								} else {
-									feature_fields += "<span><a href=\"" + text + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">" + aux_text + "</a></span><div style=\"clear:both\"></div>";
-									feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\"><a href=\"" + text + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
+
+								if(!complex_data){
+									var aux_text = text;
+									if(text.length > 45){
+										aux_text = text.substring(0,45) + "...";
+									}
+									if (!text.toString().startsWith('http')) {
+										feature_fields += "<span>" + aux_text + "</span><div style=\"clear:both\"></div>";
+										feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
+									} else {
+										feature_fields += "<span><a href=\"" + text + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">" + aux_text + "</a></span><div style=\"clear:both\"></div>";
+										feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\"><a href=\"" + text + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
+									}
 								}
 								
 							}
@@ -531,8 +557,10 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 						value = "<input type='checkbox' onclick=\"return false;\">";
 					}
 				}
+				
 				if (!key.startsWith(this.prefix)) {	
 					var item_shown = true;
+					var key_original = key;
 					if (selectedLayer != null) {
 						if (selectedLayer.conf != null) {
 							var fields_trans = selectedLayer.conf;
@@ -552,19 +580,46 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 							}
 						}
 					}	
-					if(item_shown){
-						infoContent += '<li class="item">';
-						infoContent += 	'<div class="feature-info">';
-						if (!value.toString().startsWith('http')) {
-							infoContent += 		'<span class="product-description">' + key + '</span>';
-							infoContent += 		'<a href="javascript:void(0)" class="product-title">' + value + '</a>';
-							
-						} else {
-							infoContent += 		'<span class="product-description">' + key + '</span>';
-							infoContent += 		'<a href="' + value + '" style="color: #00c0ef !important;" target="_blank" class="product-description">' + value + '</a>';
+					
+					var complex_data = false;
+					if(key_original.startsWith("cd_json_")){
+						try{
+							complex_data = true;
+							var data_json = JSON.parse(value);
+							for(nkey in data_json){
+								infoContent += '<li class="item">';
+								infoContent += 	'<div class="feature-info">';
+								var aux_text = data_json[nkey];
+								if (!value.toString().startsWith('http')) {
+									infoContent += 		'<span class="product-description">' + nkey + '</span>';
+									infoContent += 		'<a href="javascript:void(0)" class="product-title">' + data_json[nkey] + '</a>';
+									
+								} else {
+									infoContent += 		'<span class="product-description">' + nkey + '</span>';
+									infoContent += 		'<a href="' + data_json[nkey] + '" style="color: #00c0ef !important;" target="_blank" class="product-description">' + data_json[nkey] + '</a>';
+								}
+								infoContent += 	'</div>';
+								infoContent += '</li>';
+							}
+						}catch(err){
+							complex_data = false;
 						}
-						infoContent += 	'</div>';
-						infoContent += '</li>';
+					}
+					if(!complex_data){
+						if(item_shown){
+							infoContent += '<li class="item">';
+							infoContent += 	'<div class="feature-info">';
+							if (!value.toString().startsWith('http')) {
+								infoContent += 		'<span class="product-description">' + key + '</span>';
+								infoContent += 		'<a href="javascript:void(0)" class="product-title">' + value + '</a>';
+								
+							} else {
+								infoContent += 		'<span class="product-description">' + key + '</span>';
+								infoContent += 		'<a href="' + value + '" style="color: #00c0ef !important;" target="_blank" class="product-description">' + value + '</a>';
+							}
+							infoContent += 	'</div>';
+							infoContent += '</li>';
+						}
 					}
 				}
 				}
