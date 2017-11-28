@@ -324,7 +324,7 @@ print.prototype.createPrintJob = function(template) {
 		  			"dpi": parseInt(dpi),
 		  			"rotation": rotation,
 		  			"center": self.map.getView().getCenter(),
-		  			"scale": self.getCurrentScale(),
+		  			"scale": self.getCurrentScale(parseInt(dpi)),
 		  			"layers": printLayers
 		  	    },
 		  	    "logo_url": self.conf.project_image,
@@ -344,11 +344,11 @@ print.prototype.createPrintJob = function(template) {
 	
 };
 
-print.prototype.getCurrentScale = function () {
+print.prototype.getCurrentScale = function (dpi) {
     var view = this.map.getView();
     var resolution = view.getResolution();
     var units = this.map.getView().getProjection().getUnits();
-    var dpi = 25.4 / 0.28;
+    //var dpi = 25.4 / 0.28;
     var mpu = ol.proj.METERS_PER_UNIT[units];
     var scale = resolution * mpu * 39.37 * dpi;
     return scale;
