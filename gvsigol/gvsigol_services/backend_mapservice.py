@@ -1162,6 +1162,9 @@ class Geoserver():
                     field['binding'] = "java.lang.Double"
                 elif sql_type == "text":
                     field['binding'] = "java.lang.String"
+                elif sql_type == "cd_json":
+                    field['binding'] = "java.lang.String"
+                    field['name'] = 'cd_json_' + field['name']
                 elif sql_type == "date":
                     field['binding'] = "java.sql.Date"
                 elif sql_type == "time":
