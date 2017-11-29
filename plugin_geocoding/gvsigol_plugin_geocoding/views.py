@@ -409,7 +409,10 @@ def provider_delta_import(request, provider_id):
 
 def get_conf(request):
     if request.method == 'POST': 
+        provider = Provider.objects.all()
+        has_providers = provider.__len__() > 0
         response = {
+            'has_providers': has_providers, 
             'candidates_url': geocoding_setting.GEOCODING_PROVIDER['cartociudad']['candidates_url'],
             'find_url': geocoding_setting.GEOCODING_PROVIDER['cartociudad']['find_url'],
             'reverse_url': geocoding_setting.GEOCODING_PROVIDER['cartociudad']['reverse_url']

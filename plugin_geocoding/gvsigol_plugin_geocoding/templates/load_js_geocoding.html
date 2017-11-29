@@ -19,25 +19,18 @@
 			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},
 		success : function(response) {
-			var map = viewer.core.getMap();
-		    
-			var ui = '';
-			ui += '<div class="viewer-search-form">';
-			ui += 	'<div class="input-group">';
-			ui += 		'<input type="text" name="search-widget-input" id="autocomplete" class="form-control" placeholder="' + gettext("Search") + '...">';
-			/*
-			ui += 		'<span class="input-group-btn">';
-			ui += 			'<button type="submit" name="search" id="search-btn" class="btn btn-flat">';
-			ui += 				'<i class="fa fa-search"></i>';
-			ui += 			'</button>';
-			ui += 		'</span>';
-			*/
-			ui += 	'</div>';
-			ui += '</div>';
-			
-			$('#viewer-navbar').append(ui);
-			
-			new search(map, response);
+			if(response['has_providers']){
+				var map = viewer.core.getMap();
+				var ui = '';
+				ui += '<div class="viewer-search-form">';
+				ui += 	'<div class="input-group">';
+				ui += 		'<input type="text" name="search-widget-input" id="autocomplete" class="form-control" placeholder="' + gettext("Search") + '...">';
+				ui += 	'</div>';
+				ui += '</div>';
+				
+				$('#viewer-navbar').append(ui);
+				new search(map, response);
+			}
 		},
 		error : function() {
 			alert("Error loading geocoder");
