@@ -839,6 +839,8 @@ def public_viewer_get_conf(request):
                     layer['single_image'] = l.single_image
                     layer['read_roles'] = read_roles
                     layer['write_roles'] = write_roles
+                    layer['styles'] = get_layer_styles(l)
+                    
                     try:
                         json_conf = ast.literal_eval(l.conf)
                         layer['conf'] = json.dumps(json_conf)
