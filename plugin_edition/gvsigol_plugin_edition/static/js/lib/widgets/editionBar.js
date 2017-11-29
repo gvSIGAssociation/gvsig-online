@@ -1118,7 +1118,8 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 						} else if (this.featureType[i].name.startsWith("form_")) {
 							featureProperties += '<br/><a target="_blank" class="form-link form-link-open form-control" href="" data-orig="'+ this.featureType[i].name +'" data-value=""><i class="fa fa-check-square-o" aria-hidden="true"></i>&nbsp;&nbsp;' + gettext("Show form") + '</a>';
 							featureProperties += '<input id="' + this.featureType[i].name + '" type="hidden" value="">';
-					
+						} else if (this.featureType[i].name.startsWith("cd_json_")) {
+							featureProperties += '<textarea id="' + this.featureType[i].name + '" rows="4" class="form-control"></textarea>';
 						} else {
 							if("length" in this.featureType[i] && this.featureType[i].length>0){
 								featureProperties += '<input id="' + this.featureType[i].name + '" type="text" maxlength="'+this.featureType[i].length+'" class="form-control">';
@@ -1544,6 +1545,8 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 						} else if (this.featureType[i].name.startsWith("form_")) {
 							featureProperties += '<br/><a target="_blank" class="form-link form-link-open form-control" href="" data-orig="'+ this.featureType[i].name +'" data-value="' + value + '"><i class="fa fa-check-square-o" aria-hidden="true"></i>&nbsp;&nbsp;' + gettext("Show form") + '</a>';
 							featureProperties += '<input id="' + this.featureType[i].name + '" type="hidden" value="' + value + '">';
+						} else if (this.featureType[i].name.startsWith("cd_json_")) {
+							featureProperties += '<textarea id="' + this.featureType[i].name + '" rows="4" class="form-control">' + value + '</textarea>';
 						} else {
 							if (value==null) {
 								value = "";
