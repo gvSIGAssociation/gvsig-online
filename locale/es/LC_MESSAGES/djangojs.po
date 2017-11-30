@@ -95,6 +95,9 @@ msgstr "Imprimir selección"
 msgid "Advanced filter"
 msgstr "Filtro avanzado"
 
+msgid "A visible layer with temporal properties is needed"
+msgstr "Se necesita tener visible, al menos, una capa temporal"
+
 msgid "Select field"
 msgstr "Seleccionar campo"
 
