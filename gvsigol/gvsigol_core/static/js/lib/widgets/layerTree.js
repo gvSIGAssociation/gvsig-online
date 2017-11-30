@@ -148,8 +148,13 @@ layerTree.prototype.createTree = function() {
 						layer.setVisible(false);
 						if($("#layer-"+layer.get("id")).length){
 							$("#layer-"+layer.get("id")).css("display", "none");
-							self.refreshTemporalInfo();	
-							self.updateTemporalLayers();
+							if(self.hasTemporaryLayersActive()){
+								self.refreshTemporalInfo();	
+								self.updateTemporalLayers();
+							}else{
+								$("#enable-temporary").prop('checked', false);
+								self.showHideTemporalPanel();
+							}
 						}
 					} else {
 						layer.setVisible(true);
@@ -263,6 +268,7 @@ layerTree.prototype.createTree = function() {
 	var temporary_tree = '';
 	temporary_tree += '<div style="background-color:#f9fafc">';
 	temporary_tree += '<input type="checkbox" id="enable-temporary" class="temporary-check">'+ gettext("Habilitar características temporales")+'</input> <div id="temporary-panel">';
+	temporary_tree += '	<div id="enable-temporary-error"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;&nbsp;' + gettext("A visible layer with temporal properties is needed") + '</div>';
 	temporary_tree += '	<div class="box-body temporary-body">';
 	
 	var input_from = '<div class="input-group date col-md-9" id="datetimepicker-from"><input id="temporary-from" class="form-control"/><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>'+
@@ -350,33 +356,11 @@ layerTree.prototype.createTree = function() {
 	this.$temporary_container.append(temporary_tree);
 	
 	$(".temporary-check").click(function(){
-		if ( $(this).is(':checked') ) {
-//			if(self.is_first_time){
-				self.refreshTemporalInfo()
-				self.refreshTemporalStep();
-				
-				self.updateTemporalLayers();
-				
-				self.refreshTemporalSlider();
-				
-				if(self.max_val){
-					var dt_cur_from = new Date(self.max_val*1000); //.format("yyyy-mm-dd hh:ii:ss");
-					var formatted = self.formatDate(dt_cur_from);
-					$("#temporary-from").val(formatted);
-					self.updateTemporalLayers(dt_cur_from);
-					$(".temporary-layers-slider").slider('value',self.max_val);
-				}
-//				self.is_first_time = false;
-//			}
-	        $('.temporary-body').show();
-	    } 
-	    else {
-	        $('.temporary-body').hide();
-	        self.updateTemporalLayers();
-	    }
+		self.showHideTemporalPanel();
 	});
 
 	$(".temporal-buttons-left-from").unbind("click").click(function(){
+		if(self.hasTemporaryLayersActive()){
 		var prev_value = null;
 		var input = $("input[name=temporary-group]:checked");
 		try{
@@ -424,9 +408,11 @@ layerTree.prototype.createTree = function() {
 		}
 
 //		self.refreshTemporalSlider();
+		}
 	});
 	
 	$(".temporal-buttons-right-from").unbind("click").click(function(){
+		if(self.hasTemporaryLayersActive()){
 		var prev_value = null;
 		var input = $("input[name=temporary-group]:checked");
 		try{
@@ -472,10 +458,12 @@ layerTree.prototype.createTree = function() {
 			var dt_cur_to = new Date(prev_value_to*1000);
 			self.updateTemporalLayers(dt_cur_from, dt_cur_to);
 		}
+		}
 	});
 	
 	
 	$(".temporal-buttons-left-to").unbind("click").click(function(){
+		if(self.hasTemporaryLayersActive()){
 		var prev_value = null;
 		try{
 			prev_value_from = $('.temporary-layers-slider').slider("values")[0];
@@ -504,9 +492,11 @@ layerTree.prototype.createTree = function() {
 		
     	$(".temporary-layers-slider").slider('values',1,aux_min);
     	 self.updateTemporalLayers(dt_cur_from, dt_cur_to);
+		}
 	});
 	
 	$(".temporal-buttons-right-to").unbind("click").click(function(){
+		if(self.hasTemporaryLayersActive()){
 		var prev_value = null;
 		try{
 			prev_value_from = $('.temporary-layers-slider').slider("values")[0];
@@ -534,6 +524,7 @@ layerTree.prototype.createTree = function() {
 		
     	$(".temporary-layers-slider").slider('values',1,aux_max);
     	 self.updateTemporalLayers(dt_cur_from, dt_cur_to);
+		}
 	});
 	
 
@@ -644,6 +635,49 @@ layerTree.prototype.createTree = function() {
 	});
 	
 };
+
+
+layerTree.prototype.showHideTemporalPanel = function() {
+	var self = this;
+	if ( $("#enable-temporary").is(':checked') ) {
+		$('.temporary-body').show();
+		if(self.hasTemporaryLayersActive()){
+			self.refreshTemporalInfo()
+			self.refreshTemporalStep();
+			
+			self.updateTemporalLayers();
+			
+			self.refreshTemporalSlider();
+			
+			if(self.max_val){
+				var dt_cur_from = new Date(self.max_val*1000); //.format("yyyy-mm-dd hh:ii:ss");
+				var formatted = self.formatDate(dt_cur_from);
+				$("#temporary-from").val(formatted);
+				self.updateTemporalLayers(dt_cur_from);
+				$(".temporary-layers-slider").slider('value',self.max_val);
+			}
+	//		self.is_first_time = false;
+	//	}
+	    
+		}else{
+			$("#enable-temporary").prop('checked', false);
+			$('.temporary-body').hide();
+			
+			$("#enable-temporary-error").show();
+		    setTimeout(function() {
+		    	$("#enable-temporary-error").hide();
+		    }, 7000);
+		}
+	} 
+	else {
+	    $('.temporary-body').hide();
+	    self.updateTemporalLayers();
+	}
+}
+
+layerTree.prototype.hasTemporaryLayersActive = function() {
+	return $(".temporary-body .box-body ul.layer-tree div.temporary-layer:visible").length > 0;
+}
 
 layerTree.prototype.updateFromSlider = function(value_from) {
 	if($('input[name=temporary-group]:checked').attr("data-value") == "single"){

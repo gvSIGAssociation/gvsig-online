@@ -4904,3 +4904,11 @@ input.temporary-check[type=checkbox]{
 .temporary-body{
 	display:none;
 }
+
+#enable-temporary-error{
+	display:none;
+	color:red;
+	border: 1px solid red;
+	padding: 10px;
+	margin: 0px 18px;
+}
