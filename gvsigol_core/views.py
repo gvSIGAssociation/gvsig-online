@@ -146,7 +146,9 @@ def project_add(request):
     has_geocoding_plugin = False
     base_layers = BaseLayer.objects.all()
     if 'gvsigol_plugin_geocoding' in settings.INSTALLED_APPS:
-        has_geocoding_plugin = True
+        from gvsigol_plugin_geocoding.models import Provider 
+        providers = Provider.objects.all()
+        has_geocoding_plugin = providers.__len__() > 0
         
     if request.method == 'POST':
         name = request.POST.get('project-name')
@@ -314,7 +316,9 @@ def project_update(request, pid):
     
     has_geocoding_plugin = False
     if 'gvsigol_plugin_geocoding' in settings.INSTALLED_APPS:
-        has_geocoding_plugin = True
+        from gvsigol_plugin_geocoding.models import Provider 
+        providers = Provider.objects.all()
+        has_geocoding_plugin = providers.__len__() > 0
     
     if request.method == 'POST':
         name = request.POST.get('project-name')
