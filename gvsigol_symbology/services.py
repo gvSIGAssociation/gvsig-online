@@ -36,11 +36,19 @@ import os
 def create_default_style(layer_id, style_name, style_type, geom_type, count):
     layer = Layer.objects.get(id=int(layer_id))
     
+    minscaledenominator = -1
+    maxscaledenominator = -1
+    if count and count > 200000:
+        minscaledenominator = 0
+        maxscaledenominator = 50000
+        
     style = Style(
         name = style_name,
         title = _('Default style for: ') + layer.title,
         is_default = True,
-        type = style_type
+        type = style_type,
+        minscale = minscaledenominator,
+        maxscale = maxscaledenominator
     )
     style.save()
     style_layer = StyleLayer(
@@ -64,12 +72,6 @@ def create_default_style(layer_id, style_name, style_type, geom_type, count):
         symbol_type = 'PolygonSymbolizer'
     elif geom.isRaster(geom_type):
         symbol_type = 'RasterSymbolizer'
-        
-    minscaledenominator = -1
-    maxscaledenominator = -1
-    if count and count > 200000:
-        minscaledenominator = 0
-        maxscaledenominator = 50000
     
     rule = Rule(
         style = style,
