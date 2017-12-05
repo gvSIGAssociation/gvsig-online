@@ -172,7 +172,8 @@ measureArea.prototype.addVectorLayerToMap = function() {
 	      		fill: new ol.style.Fill({
 	        		color: '#0099ff'
 	      		})
-	    	})
+	    	}),
+	    	zIndex: 2000000
 	  	})
 	});
 	this.map.addLayer(this.drawLayer);
@@ -320,12 +321,12 @@ measureArea.prototype.deactivate = function() {
 	this.active = false;
 	this.map.un('pointermove', this.pointerMoveHandler, this);
 	
-	var layers = this.map.getLayers().getArray();
+	/*var layers = this.map.getLayers().getArray();
 	for (var i=0; i<layers.length; i++) {
 		if (layers[i] instanceof ol.layer.Vector) {		
 			layers[i].getSource().clear();
 		}
-	}
+	}*/
 };
 
 /**
