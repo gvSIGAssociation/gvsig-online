@@ -170,7 +170,8 @@ measureLength.prototype.addVectorLayerToMap = function() {
 	      		fill: new ol.style.Fill({
 	        		color: '#0099ff'
 	      		})
-	    	})
+	    	}),
+	    	zIndex: 2000000
 	  	})
 	});
 	this.map.addLayer(this.drawLayer);
