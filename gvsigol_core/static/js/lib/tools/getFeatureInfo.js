@@ -796,12 +796,12 @@ getFeatureInfo.prototype.getLayerTitle = function(feature){
  */
 getFeatureInfo.prototype.deactivate = function() {			
 	this.$button.removeClass('button-active');
-	this.source.clear();
-	this.map.removeLayer(this.resultLayer);
+	if (this.source) this.source.clear();
+	if (this.resultLayer) this.map.removeLayer(this.resultLayer);
 	this.map.un('click', this.clickHandler, this);
 	this.active = false;
 	this.hideResultTab();
-	this.popup.hide();
+	if (this.popup) this.popup.hide();
 };
 
 /**
