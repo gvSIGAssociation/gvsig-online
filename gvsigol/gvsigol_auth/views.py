@@ -37,6 +37,8 @@ from utils import superuser_required, staff_required
 import utils as auth_utils
 import json
 import re
+import base64
+
 from gvsigol.settings import GVSIGOL_LDAP, LOGOUT_PAGE_URL, AUTH_WITH_REMOTE_USER
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
@@ -79,7 +81,17 @@ def login_user(request):
                     if user.is_active:
                         login(request, user)
                         return redirect('home')
-            
+            elif 'HTTP_AUTHORIZATION' in request.META:
+                auth = request.META['HTTP_AUTHORIZATION'].split()
+                if len(auth) == 2:
+                    if auth[0].lower() == "basic":
+                        uname, passwd = base64.b64decode(auth[1]).split(':')
+                        user = authenticate(username=uname, password=passwd)
+                        if user is not None:
+                            if user.is_active:
+                                login(request, user)
+                                request.user = user
+                                return redirect('home')
         else:
             '''
             user = authenticate(remote_user="root")
