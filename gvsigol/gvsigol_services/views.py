@@ -656,7 +656,7 @@ def layer_update(request, layer_id):
                                 
             mapservice_backend.reload_nodes()   
             
-            return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer_id}))
+        return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer_id}))
         
     else:
         layer = Layer.objects.get(id=int(layer_id))
