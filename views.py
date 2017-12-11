@@ -844,10 +844,10 @@ def layer_update(request, layer_id):
                                 
             mapservice_backend.reload_nodes()   
             
-            if redirect_to_layergroup:
-                return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer_id})+"?redirect=grouplayer-redirect")
-            else:
-                return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer_id}))
+        if redirect_to_layergroup:
+            return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer_id})+"?redirect=grouplayer-redirect")
+        else:
+            return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer_id}))
     else:
         
         layer = Layer.objects.get(id=int(layer_id))
@@ -1979,8 +1979,8 @@ def is_grouped_symbology_request(request, url, aux_response, styles):
                         url = url.replace('STYLES=', 'STYLES='+style_default)
                         if 'username' in request.session and 'password' in request.session:
                             if request.session['username'] is not None and request.session['password'] is not None:
-                                auth2 = (request.session['username'], request.session['password'])
-                                #auth2 = ('admin', 'geoserver')
+                                #auth2 = (request.session['username'], request.session['password'])
+                                auth2 = ('admin', 'geoserver')
                                 aux_response = grequests.get(url, auth=auth2, verify=False) 
         except:
             return aux_response
@@ -2013,8 +2013,8 @@ def get_feature_info(request):
             if query_layer != 'plg_catastro':
                 if 'username' in request.session and 'password' in request.session:
                     if request.session['username'] is not None and request.session['password'] is not None:
-                        auth2 = (request.session['username'], request.session['password'])
-                        #auth2 = ('admin', 'geoserver')
+                        #auth2 = (request.session['username'], request.session['password'])
+                        auth2 = ('admin', 'geoserver')
             aux_response = grequests.get(url, auth=auth2, verify=False) 
             rs.append(is_grouped_symbology_request(request, url, aux_response, styles))
         aux_rs = grequests.map(rs)
@@ -2238,8 +2238,8 @@ def get_datatable_data(request):
             req = requests.Session()
             if 'username' in request.session and 'password' in request.session:
                 if request.session['username'] is not None and request.session['password'] is not None:
-                    req.auth = (request.session['username'], request.session['password'])
-                    #req.auth = ('admin', 'geoserver')
+                    #req.auth = (request.session['username'], request.session['password'])
+                    req.auth = ('admin', 'geoserver')
                     
             print wfs_url + "?" + params
             response = req.post(wfs_url, data=values, verify=False)
