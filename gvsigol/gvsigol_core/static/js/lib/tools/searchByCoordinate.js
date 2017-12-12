@@ -97,11 +97,11 @@ searchByCoordinate.prototype.handler = function(e) {
 	body += '</div>';
 	body += '<div class="row">';
 	body += 	'<div class="col-md-6 form-group">';
-	body += 		'<label for="longitude">' + gettext('Longitude') + ' (X)</label>';
+	body += 		'<label for="longitude">' + gettext('Longitude') + ' - X</label>';
 	body += 		'<input placeholder="" name="longitude" id="longitude" type="text" class="form-control">';					
 	body += 	'</div>';
 	body += 	'<div class="col-md-6 form-group">';
-	body += 		'<label for="latitude">' + gettext('Latitude') + ' (Y)</label>';
+	body += 		'<label for="latitude">' + gettext('Latitude') + ' - Y</label>';
 	body += 		'<input placeholder="" name="latitude" id="latitude" type="text" class="form-control">';					
 	body += 	'</div>';
 	body += '</div>';
@@ -131,7 +131,7 @@ searchByCoordinate.prototype.handler = function(e) {
 		
 		var popupContent = '';
 		popupContent += '<p>' + projection + '</p>';
-		popupContent += '<code>' + gettext('Latitude') + ': ' + latitude + ', ' + gettext('Longitude') + ': ' + longitude + '</code>';
+		popupContent += '<code>' + gettext('Longitude') + ' - X: ' + longitude + ', ' + gettext('Latitude') + ' - Y: ' + latitude + '</code>';
 		
 		popup.show(coordinate, '<div class="popup-wrapper">' + popupContent + '</div>');
 		
