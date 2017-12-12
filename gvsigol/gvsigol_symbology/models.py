@@ -41,13 +41,13 @@ COLOR_TABLES = 'CT'
 CLUSTERED_POINTS = 'CP'
 CHARTS = 'CH'
 LEGEND_TYPES = (
-    (UNIQUE_SYMBOL, _('Unique symbol')),
-    (UNIQUE_VALUES, _('Unique values')),
-    (INTERVALS, _('Intervals')),
-    (EXPRESSIONS, _('Expressions')),
-    (CLUSTERED_POINTS, _('Clustered Points')),
-    (COLOR_TABLES, _('Color table')),
-    (CHARTS, _('Graphics')),
+    (UNIQUE_SYMBOL, 'Unique symbol'),
+    (UNIQUE_VALUES, 'Unique values'),
+    (INTERVALS, 'Intervals'),
+    (EXPRESSIONS, 'Expressions'),
+    (CLUSTERED_POINTS, 'Clustered Points'),
+    (COLOR_TABLES, 'Color table'),
+    (CHARTS, 'Graphics'),
 )
 
 class Style(models.Model):   
@@ -160,3 +160,26 @@ class LibraryRule(models.Model):
     
     def __unicode__(self):
         return self.library.name + ' - ' + self.rule.name
+
+class ColorRampLibrary(models.Model):
+    name = models.CharField(max_length=100, blank=False, null=False)
+    description = models.CharField(max_length=500, blank=True, null=True)
+    
+    def __unicode__(self):
+        return self.name
+    
+class ColorRampFolder(models.Model):
+    name = models.CharField(max_length=100, blank=False, null=False)
+    description = models.CharField(max_length=500, blank=True, null=True)
+    color_ramp_library = models.ForeignKey(ColorRampLibrary)
+    
+    def __unicode__(self):
+        return self.name
+   
+class ColorRamp(models.Model):
+    name = models.CharField(max_length=100, blank=False, null=False)
+    definition = models.TextField()
+    color_ramp_folder = models.ForeignKey(ColorRampFolder)
+    
+    def __unicode__(self):
+        return self.name
