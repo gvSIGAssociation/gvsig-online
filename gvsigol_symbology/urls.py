@@ -29,6 +29,21 @@ urlpatterns = [
     url(r'^color_table_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.color_table_add', name='color_table_add'),
     url(r'^color_table_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.color_table_update', name='color_table_update'),
     
+    url(r'^color_ramp_list/((?P<color_ramp_folder_id>[0-9]+)/)?$', 'gvsigol_symbology.views.color_ramp_list', name='color_ramp_list'),
+    url(r'^color_ramp_add/((?P<color_ramp_folder_id>[0-9]+)/)?$', 'gvsigol_symbology.views.color_ramp_add', name='color_ramp_add'),
+    url(r'^color_ramp_update/(?P<color_ramp_id>[0-9]+)/$', 'gvsigol_symbology.views.color_ramp_update', name='color_ramp_update'),
+    url(r'^color_ramp_delete/(?P<color_ramp_id>[0-9]+)/$', 'gvsigol_symbology.views.color_ramp_delete', name='color_ramp_delete'),
+    url(r'^color_ramp_library_list/$', 'gvsigol_symbology.views.color_ramp_library_list', name='color_ramp_library_list'),
+    url(r'^color_ramp_library_add/$', 'gvsigol_symbology.views.color_ramp_library_add', name='color_ramp_library_add'),
+    url(r'^color_ramp_library_update/((?P<color_ramp_library_id>[0-9]+)/)?$', 'gvsigol_symbology.views.color_ramp_library_update', name='color_ramp_library_update'),
+    url(r'^color_ramp_library_import/$', 'gvsigol_symbology.views.color_ramp_library_import', name='color_ramp_library_import'),
+    url(r'^color_ramp_library_export/((?P<color_ramp_library_id>[0-9]+)/)?$', 'gvsigol_symbology.views.color_ramp_library_export', name='color_ramp_library_export'),
+    url(r'^color_ramp_library_delete/((?P<color_ramp_library_id>[0-9]+)/)?$', 'gvsigol_symbology.views.color_ramp_library_delete', name='color_ramp_library_delete'),   
+    url(r'^color_ramp_folder_add/((?P<color_ramp_library_id>[0-9]+)/)?$', 'gvsigol_symbology.views.color_ramp_folder_add', name='color_ramp_folder_add'),
+    url(r'^color_ramp_folder_update/((?P<color_ramp_folder_id>[0-9]+)/)?$', 'gvsigol_symbology.views.color_ramp_folder_update', name='color_ramp_folder_update'),
+    url(r'^color_ramp_folder_delete/((?P<color_ramp_folder_id>[0-9]+)/)?$', 'gvsigol_symbology.views.color_ramp_folder_delete', name='color_ramp_folder_delete'),   
+    
+    
     url(r'^library_list/$', 'gvsigol_symbology.views.library_list', name='library_list'),
     url(r'^library_add/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views.library_add', name='library_add'),
     url(r'^library_update/((?P<library_id>[0-9]+)/)?$', 'gvsigol_symbology.views.library_update', name='library_update'),
@@ -39,6 +54,8 @@ urlpatterns = [
     url(r'^symbol_update/(?P<symbol_id>[0-9]+)/$', 'gvsigol_symbology.views.symbol_update', name='symbol_update'),
     url(r'^symbol_delete/$', 'gvsigol_symbology.views.symbol_delete', name='symbol_delete'),
     url(r'^get_symbols_from_library/$', 'gvsigol_symbology.views.get_symbols_from_library', name='get_symbols_from_library'),
+    url(r'^get_folders_from_library/$', 'gvsigol_symbology.views.get_folders_from_library', name='get_folders_from_library'),
+    url(r'^get_ramps_from_folder/$', 'gvsigol_symbology.views.get_ramps_from_folder', name='get_ramps_from_folder'),
     
     url(r'^get_wfs_style/$', 'gvsigol_symbology.views.get_wfs_style', name='get_wfs_style'),
 
