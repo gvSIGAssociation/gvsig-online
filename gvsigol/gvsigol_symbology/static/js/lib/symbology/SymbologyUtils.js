@@ -390,6 +390,16 @@ SymbologyUtils.prototype.rgb2hex = function(rgb){
 	  ("0" + parseInt(rgb[3],10).toString(16)).slice(-2) : '';
 };
 
+SymbologyUtils.prototype.rgba2hex = function(rgba){
+	 var parts = rgba.substring(rgba.indexOf("(")).split(","),
+     r = parseInt(parts[0].substring(1).trim(), 10),
+     g = parseInt(parts[1].trim(), 10),
+     b = parseInt(parts[2].trim(), 10),
+     a = parseFloat((parts[3].substring(0, parts[3].length - 1)).trim());
+
+	 return  {"color": '#' + ("0"+r.toString(16)).slice(-2) + ("0"+g.toString(16)).slice(-2) + ("0"+b.toString(16)).slice(-2), "alpha": a};
+};
+
 SymbologyUtils.prototype.convertHex = function(hex){
     hex = hex.replace('#','');
     r = parseInt(hex.substring(0,2), 16);
@@ -430,6 +440,38 @@ SymbologyUtils.prototype.getRandomColor = function() {
         color += letters[Math.floor(Math.random() * 16)];
     }
     return color;
+};
+
+SymbologyUtils.prototype.getColorFromRamp = function(json_data, min, max, crr) {
+	var current = (parseFloat(crr) - parseFloat(min))*100/(parseFloat(max) - parseFloat(min))
+	var color_ini = null;
+	var color_fin = null;
+	for(var i = 0; i < json_data["definition"].length; i++){
+		var def = json_data["definition"][i];
+		if((!color_ini && (current - def["quantity"]) >= 0 ) || ((current - def["quantity"]) >= 0 && (current - color_ini["quantity"]) > (current - def["quantity"]))){
+			color_ini = def;
+		}
+		if((!color_fin && (def["quantity"] - current) >= 0 ) || ((def["quantity"] - current) >= 0 && (color_fin["quantity"] - current) > (def["quantity"] - current))){
+			color_fin = def;
+		}		
+	}
+	if(color_ini && color_fin){
+		if(color_ini["quantity"] == color_fin["quantity"]){
+			var rgb_ini = this.convertHex(color_ini["color"]);
+			return "rgba("+Math.round(rgb_ini.red)+","+Math.round(rgb_ini.green)+","+Math.round(rgb_ini.blue)+","+color_ini["alpha"]+")";
+		}else{
+			var porc_color = (current - color_ini["quantity"])/ (color_fin["quantity"] - color_ini["quantity"]);
+			var rgb_ini = this.convertHex(color_ini["color"]);
+		    var rgb_fin = this.convertHex(color_fin["color"]);
+		    var red = ((rgb_fin.red - rgb_ini.red)*porc_color)+rgb_ini.red;
+		    var green = ((rgb_fin.green - rgb_ini.green)*porc_color)+rgb_ini.green;
+		    var blue = ((rgb_fin.blue - rgb_ini.blue)*porc_color)+rgb_ini.blue;
+		    var alpha = ((parseFloat(color_fin["alpha"]) - parseFloat(color_ini["alpha"]))*porc_color)+parseFloat(color_ini["alpha"]);
+		    return "rgba("+Math.round(red)+","+Math.round(green)+","+Math.round(blue)+","+alpha+")";
+		}
+	}
+	
+	return "rgba(0,0,0,0)";
 };
 
 
