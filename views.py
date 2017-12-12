@@ -28,7 +28,7 @@ from gvsigol_services.models import Workspace, Datastore, Layer
 from gvsigol_services import utils as service_utils
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
-from models import Style, StyleLayer, Rule, Library, LibraryRule, Symbolizer, ColorMap, ColorMapEntry, RasterSymbolizer
+from models import Style, StyleLayer, Rule, Library, LibraryRule, Symbolizer, ColorMap, ColorMapEntry, RasterSymbolizer, ColorRamp, ColorRampFolder, ColorRampLibrary
 from gvsigol_auth.utils import staff_required
 from gvsigol import settings
 from gvsigol_symbology import services, services_library, services_unique_symbol,\
@@ -250,8 +250,11 @@ def unique_values_add(request, layer_id):
         else:
             return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
         
-    else:                 
+    else:             
         response = services_unique_values.get_conf(request, layer_id) 
+        color_ramps = ColorRampLibrary.objects.all()        
+        response["ramp_libraries"] = color_ramps
+        
         return render_to_response('unique_values_add.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -307,6 +310,9 @@ def unique_values_update(request, layer_id, style_id):
             if 'property_name' in rule_filter:
                 response['property_name'] = rule_filter.get('property_name')    
         
+        color_ramps = ColorRampLibrary.objects.all()        
+        response["ramp_libraries"] = color_ramps
+        
         return render_to_response('unique_values_update.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -344,8 +350,11 @@ def intervals_add(request, layer_id):
         else:
             return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
         
-    else:                 
+    else:         
+        color_ramps = ColorRampLibrary.objects.all()        
         response = services_intervals.get_conf(request, layer_id) 
+        response["ramp_libraries"] = color_ramps
+        
         return render_to_response('intervals_add.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -396,6 +405,9 @@ def intervals_update(request, layer_id, style_id):
             filter_json = json.loads(rule['filter'])
             response['property_name'] = filter_json.get('field')    
         response['intervals'] = len(rules)
+        
+        color_ramps = ColorRampLibrary.objects.all()        
+        response["ramp_libraries"] = color_ramps
         
         return render_to_response('intervals_update.html', response, context_instance=RequestContext(request))
     
@@ -675,14 +687,274 @@ def sld_import(request, layer_id):
         }
         
         return render_to_response('sld_import.html', response, context_instance=RequestContext(request))
+
+
+@staff_required
+def color_ramp_list(request):
+    response = {
+        'color_ramps': ColorRamp.objects.all()
+    }
+    return render_to_response('color_ramp_list.html', response, context_instance=RequestContext(request))
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def color_ramp_add(request, color_ramp_folder_id):
+    folder = ColorRampFolder.objects.get(id=int(color_ramp_folder_id))
+    if request.method == 'POST': 
+        name = request.POST.get('colorramp-name')
+        definition = request.POST.get('colorramp-definition')  
+        colorrampfolder = ColorRampFolder.objects.get(id=int(color_ramp_folder_id))      
+
+        if name != '' and re.match("^[a-z0-9_]*$", name):
+            colorramp = ColorRamp(
+                name = name,
+                definition = json.dumps(definition),
+                color_ramp_folder_id = colorrampfolder.id
+            )
+            colorramp.save()         
+            response = {
+                'library': folder.color_ramp_library,
+                'folder': folder,
+                'color_ramps': ColorRamp.objects.filter(color_ramp_folder_id=folder.id)
+            }
+            return redirect('/gvsigonline/symbology/color_ramp_folder_update/'+str(colorrampfolder.id)+'/')
+        
+        else:
+            
+            response = {
+                'folder': folder,
+                'message': _('You must enter a correct name for the color ramp (without uppercases, whitespaces or other special characters)')
+            
+            }
+            return render_to_response('color_ramp_add.html', response, context_instance=RequestContext(request))
     
+    else:   
+        response = {
+            'folder': folder
+        }
+        return render_to_response('color_ramp_add.html', response, context_instance=RequestContext(request))
+  
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def color_ramp_update(request, color_ramp_id):      
+    cramp = ColorRamp.objects.get(id=int(color_ramp_id))
+    if request.method == 'POST': 
+        name = request.POST.get('colorramp-name')
+        lib_description = request.POST.get('colorramp-definition')
+
+        if name != '' and re.match("^[a-z0-9_]*$", name):
+            cramp.name = name
+            cramp.definition = json.dumps(lib_description)
+            cramp.save()
+        else:
+            message = _('You must enter a correct name for the color ramp (without uppercases, whitespaces or other special characters)')
+            response = {
+                'message': message,
+                'color_ramp': cramp,
+            }
+            
+            return render_to_response('color_ramp_update.html', response, context_instance=RequestContext(request))
+     
+        return redirect('/gvsigonline/symbology/color_ramp_folder_update/'+str(cramp.color_ramp_folder_id)+'/')
+    
+    else:   
+        response = {
+            'color_ramp': cramp,
+        }
+        return render_to_response('color_ramp_update.html', response, context_instance=RequestContext(request))
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def color_ramp_library_export(request, color_ramp_library_id):
+    library = Library.objects.get(id=color_ramp_library_id)
+    library_rules = LibraryRule.objects.filter(library_id=library.id)
+    
+    try:
+        response = services_library.export_library(library, library_rules)
+        return response
+        
+    except Exception as e:
+        message = e.message
+        return HttpResponse(json.dumps({'message':message}, indent=4), content_type='application/json')
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def color_ramp_delete(request, color_ramp_id):
+    colorramp = ColorRamp.objects.get(id=int(color_ramp_id))
+    folder_id = colorramp.color_ramp_folder.id
+    folder = ColorRampFolder.objects.get(id=int(folder_id))
+    colorramp.delete()
+    
+    response = {
+        'library': folder.color_ramp_library,
+        'folder': folder,
+        'color_ramps': ColorRamp.objects.filter(color_ramp_folder_id=folder.id)
+    }
+    return redirect('/gvsigonline/symbology/color_ramp_folder_update/'+str(folder.id)+'/')
+
+
+@staff_required
+def color_ramp_library_list(request):
+    response = {
+        'libraries': ColorRampLibrary.objects.all()
+    }
+    return render_to_response('color_ramp_library_list.html', response, context_instance=RequestContext(request))
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def color_ramp_library_add(request):
+    if request.method == 'POST': 
+        name = request.POST.get('library-name')
+        description = request.POST.get('library-description')        
+
+        if name != '' and re.match("^[a-z0-9_]*$", name):
+            library = ColorRampLibrary(
+                name = name,
+                description = description
+            )
+            library.save()         
+            return redirect('color_ramp_library_list')
+        
+        else:
+            message = _('You must enter a correct name for the library (without uppercases, whitespaces or other special characters)')
+            return render_to_response('color_ramp_library_add.html', {'message': message}, context_instance=RequestContext(request))
+    
+    else:   
+        return render_to_response('color_ramp_library_add.html', {}, context_instance=RequestContext(request))
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def color_ramp_library_update(request, color_ramp_library_id):      
+    if request.method == 'POST': 
+        lib_description = request.POST.get('library-description')
+
+        library = ColorRampLibrary.objects.get(id=int(color_ramp_library_id))
+        library.description = lib_description
+        library.save()
+        
+        return redirect('color_ramp_library_list')
+    
+    else:   
+        library = ColorRampLibrary.objects.get(id=int(color_ramp_library_id))
+            
+        response = {
+            'library': library,
+            'folders': ColorRampFolder.objects.filter(color_ramp_library_id=library.id)
+        }
+        return render_to_response('color_ramp_library_update.html', response, context_instance=RequestContext(request))
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def color_ramp_library_delete(request, color_ramp_library_id):
+    lib = ColorRampLibrary.objects.get(id=int(color_ramp_library_id))
+    lib.delete()
+    return redirect('color_ramp_library_list')
+
+
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def color_ramp_library_import(request):
+    if request.method == 'POST': 
+        name = request.POST.get('library-name')
+        description = request.POST.get('library-description')
+        message = ''
+        
+        return render_to_response('library_import.html', {'message': message}, context_instance=RequestContext(request))
+    
+    else:   
+        return render_to_response('library_import.html', {}, context_instance=RequestContext(request))
+    
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def color_ramp_folder_add(request, color_ramp_library_id):
+    if request.method == 'POST': 
+        name = request.POST.get('library-name')
+        description = request.POST.get('library-description')        
+        library = ColorRampLibrary.objects.get(id=int(color_ramp_library_id))
+        
+        if name != '' and re.match("^[a-z0-9_]*$", name):
+            folder = ColorRampFolder(
+                name = name,
+                description = description,
+                color_ramp_library_id = library.id
+            )
+            folder.save()         
+            response = {
+                'folder': folder
+            }
+            return redirect('/gvsigonline/symbology/color_ramp_folder_update/'+str(folder.id)+'/')
+        
+        else:
+            response = {
+                'library': library,
+                'message': _('You must enter a correct name for the library (without uppercases, whitespaces or other special characters)')
+            }
+            return render_to_response('color_ramp_folder_add.html', response, context_instance=RequestContext(request))
+    
+    else:   
+        library = ColorRampLibrary.objects.get(id=int(color_ramp_library_id))
+        response = {
+            'library': library
+        }
+        return render_to_response('color_ramp_folder_add.html', response, context_instance=RequestContext(request))
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def color_ramp_folder_update(request, color_ramp_folder_id):      
+    if request.method == 'POST': 
+        lib_description = request.POST.get('folder-description')
+
+        folder = ColorRampFolder.objects.get(id=int(color_ramp_folder_id))
+        folder.description = lib_description
+        folder.save()
+        
+        response = {
+            'library': folder.color_ramp_library,
+            'folders': ColorRampFolder.objects.filter(color_ramp_library_id=folder.color_ramp_library.id)
+        }
+        return render_to_response('color_ramp_library_update.html', response, context_instance=RequestContext(request))
+
+    
+    else:   
+        folder = ColorRampFolder.objects.get(id=int(color_ramp_folder_id))
+        color_ramps = ColorRamp.objects.filter(color_ramp_folder_id=folder.id).order_by('id')
+            
+        response = {
+            'library': folder.color_ramp_library,
+            'folder': folder,
+            'color_ramps': color_ramps
+        }
+        return render_to_response('color_ramp_folder_update.html', response, context_instance=RequestContext(request))
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def color_ramp_folder_delete(request, color_ramp_folder_id):
+    folder = ColorRampFolder.objects.get(id=int(color_ramp_folder_id))
+    library_id = folder.color_ramp_library.id
+    library = ColorRampLibrary.objects.get(id=int(library_id))
+    folder.delete()
+    response = {
+        'library': library
+    }
+    return render_to_response('color_ramp_library_update.html', response, context_instance=RequestContext(request))
+
+
+  
 @staff_required
 def library_list(request):
     response = {
         'libraries': Library.objects.all()
     }
     return render_to_response('library_list.html', response, context_instance=RequestContext(request))
-
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -799,7 +1071,42 @@ def library_export(request, library_id):
         return HttpResponse(json.dumps({'message':message}, indent=4), content_type='application/json')
     
     
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def get_ramps_from_folder(request):      
+    if request.method == 'POST':  
+        folder_id = request.POST.get('folder_id')
+        colorramps = ColorRamp.objects.filter(color_ramp_folder_id=int(folder_id))
+        
+        lib_folds = []
+        for colorramp in colorramps:
+            lib_folds.append({
+                "id": colorramp.id, 
+                "name": colorramp.name, 
+                'definition': json.loads(colorramp.definition)
+            })
+        
+        response = {
+            'color_ramps': lib_folds
+        }
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def get_folders_from_library(request):      
+    if request.method == 'POST':  
+        library_id = request.POST.get('library_id')
+        library_folders = ColorRampFolder.objects.filter(color_ramp_library_id=int(library_id))
+        
+        lib_folds = []
+        for library_folder in library_folders:
+            lib_folds.append({"id": library_folder.id, "name": library_folder.name})
+        
+        response = {
+            'library_folders': lib_folds
+        }
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
