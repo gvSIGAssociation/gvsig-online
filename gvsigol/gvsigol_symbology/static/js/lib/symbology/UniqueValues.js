@@ -82,6 +82,26 @@ UniqueValues.prototype.getRuleById = function(id) {
 	}
 };
 
+UniqueValues.prototype.applyRampColor = function(json_data) {
+	var min = 0;
+	var max = this.rules.length;
+	
+	for(var i=0; i<this.rules.length; i++){
+		var rule = this.rules[i];
+		for(var j=0; j<rule.symbolizers.length; j++){
+			var symbolizer = rule.symbolizers[j];
+			var current = i;
+			var colr = this.utils.getColorFromRamp(json_data, min, max, current);
+			var colr_aux = this.utils.rgba2hex(colr);
+			symbolizer["fill"] = colr_aux["color"];
+			symbolizer["fill_opacity"] = colr_aux["alpha"];
+			symbolizer["stroke"] = colr_aux["color"];
+			symbolizer["stroke_opacity"] = colr_aux["alpha"];
+		}
+	}
+	
+};
+
 UniqueValues.prototype.addRule = function(rule) {
 	return this.rules.push(rule);
 };

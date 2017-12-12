@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-11-23 10:51+0100\n"
+"POT-Creation-Date: 2017-12-04 10:00+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -74,7 +74,7 @@ msgstr "Estilo por defecto para: "
 msgid "Default symbol"
 msgstr "Símbolo por defecto"
 
-#: services_library.py:66
+#: services_library.py:67
 #, python-brace-format
 msgid "Invalid name: '{value}'. Name should not contain any special characters"
 msgstr ""
@@ -131,7 +131,8 @@ msgid "Labeling"
 msgstr "Etiquetado"
 
 #: templates/clustered_points_add.html:15
-#: templates/clustered_points_update.html:15 templates/color_table_add.html:14
+#: templates/clustered_points_update.html:15 templates/color_ramp_add.html:13
+#: templates/color_ramp_update.html.py:13 templates/color_table_add.html:14
 #: templates/color_table_update.html.py:14 templates/expressions_add.html:15
 #: templates/expressions_update.html.py:15
 #: templates/external_graphic_add.html:14
@@ -146,7 +147,8 @@ msgid "Save"
 msgstr "Guardar"
 
 #: templates/clustered_points_add.html:26
-#: templates/clustered_points_update.html:25 templates/color_table_add.html:25
+#: templates/clustered_points_update.html:25 templates/color_ramp_add.html:24
+#: templates/color_ramp_update.html.py:24 templates/color_table_add.html:25
 #: templates/color_table_update.html.py:25 templates/expressions_add.html:26
 #: templates/expressions_update.html.py:25
 #: templates/external_graphic_add.html:29
@@ -163,7 +165,8 @@ msgid "Name"
 msgstr "Nombre"
 
 #: templates/clustered_points_add.html:27
-#: templates/clustered_points_update.html:26 templates/color_table_add.html:26
+#: templates/clustered_points_update.html:26 templates/color_ramp_add.html:25
+#: templates/color_ramp_update.html.py:25 templates/color_table_add.html:26
 #: templates/color_table_update.html.py:26 templates/expressions_add.html:27
 #: templates/expressions_update.html.py:26 templates/intervals_add.html:27
 #: templates/intervals_update.html.py:26 templates/select_legend_type.html:17
@@ -273,7 +276,7 @@ msgstr "Crea una leyenda definida por expresiones"
 
 #: templates/clustered_points_add.html:85
 #: templates/clustered_points_update.html:88 templates/expressions_add.html:85
-#: templates/expressions_update.html.py:88 templates/intervals_add.html:91
+#: templates/expressions_update.html.py:88 templates/intervals_add.html:101
 #: templates/intervals_update.html.py:94 templates/unique_symbol_add.html:93
 #: templates/unique_symbol_update.html:96 templates/unique_values_add.html:87
 #: templates/unique_values_update.html:90
@@ -282,7 +285,7 @@ msgstr "Importar símbolo"
 
 #: templates/clustered_points_add.html:90
 #: templates/clustered_points_update.html:93 templates/expressions_add.html:90
-#: templates/expressions_update.html.py:93 templates/intervals_add.html:96
+#: templates/expressions_update.html.py:93 templates/intervals_add.html:106
 #: templates/intervals_update.html.py:99 templates/unique_symbol_add.html:98
 #: templates/unique_symbol_update.html:101 templates/unique_values_add.html:92
 #: templates/unique_values_update.html:95
@@ -291,7 +294,7 @@ msgstr "Seleccionar biblioteca"
 
 #: templates/clustered_points_add.html:92
 #: templates/clustered_points_update.html:95 templates/expressions_add.html:92
-#: templates/expressions_update.html.py:95 templates/intervals_add.html:98
+#: templates/expressions_update.html.py:95 templates/intervals_add.html:108
 #: templates/intervals_update.html.py:101 templates/unique_symbol_add.html:100
 #: templates/unique_symbol_update.html:103 templates/unique_values_add.html:94
 #: templates/unique_values_update.html:97
@@ -301,18 +304,19 @@ msgstr "Seleccionar biblioteca de símbolos"
 #: templates/clustered_points_add.html:111
 #: templates/clustered_points_update.html:114
 #: templates/expressions_add.html:111 templates/expressions_update.html:114
-#: templates/intervals_add.html.py:117 templates/intervals_update.html:120
+#: templates/intervals_add.html.py:127 templates/intervals_update.html:120
 #: templates/unique_symbol_add.html:119 templates/unique_symbol_update.html:122
 #: templates/unique_values_add.html:113 templates/unique_values_update.html:116
 msgid "Close"
 msgstr "Cerrar"
 
 #: templates/clustered_points_add.html:305
-#: templates/clustered_points_update.html:311
-#: templates/color_table_add.html:168 templates/color_table_update.html:171
-#: templates/expressions_add.html:304 templates/expressions_update.html:310
+#: templates/clustered_points_update.html:311 templates/color_ramp_add.html:127
+#: templates/color_ramp_update.html.py:132 templates/color_table_add.html:168
+#: templates/color_table_update.html:171 templates/expressions_add.html:304
+#: templates/expressions_update.html:310
 #: templates/external_graphic_add.html:147
-#: templates/external_graphic_add.html:151 templates/intervals_add.html:307
+#: templates/external_graphic_add.html:151 templates/intervals_add.html:317
 #: templates/intervals_update.html.py:316 templates/symbol_add.html:110
 #: templates/symbol_update.html.py:119 templates/unique_symbol_add.html:277
 #: templates/unique_values_add.html:298 templates/unique_values_update.html:307
@@ -320,9 +324,9 @@ msgid "Field name is required"
 msgstr "El campo nombre es obligatorio"
 
 #: templates/clustered_points_update.html:11
-#: templates/color_table_update.html:11 templates/expressions_update.html:11
-#: templates/intervals_update.html:11 templates/style_layer_list.html.py:95
-#: templates/unique_symbol_update.html:11
+#: templates/color_ramp_update.html:11 templates/color_table_update.html:11
+#: templates/expressions_update.html:11 templates/intervals_update.html:11
+#: templates/style_layer_list.html.py:95 templates/unique_symbol_update.html:11
 #: templates/unique_values_update.html:11
 msgid "Update style"
 msgstr "Actualizar estilo"
@@ -332,6 +336,63 @@ msgstr "Actualizar estilo"
 msgid "Creates a new rule based on an expression"
 msgstr "Crea una nueva regla basada en una expresión"
 
+#: templates/color_ramp_add.html:11
+#, fuzzy
+#| msgid "Add new color table"
+msgid "Add new color ramp"
+msgstr "Añadir nueva tabla de color"
+
+#: templates/color_ramp_add.html:40 templates/color_ramp_update.html.py:40
+msgid "Steps"
+msgstr ""
+
+#: templates/color_ramp_add.html:41 templates/color_ramp_update.html.py:41
+#, fuzzy
+#| msgid "Add style"
+msgid "Add step"
+msgstr "Añadir estilo"
+
+#: templates/color_ramp_add.html:63 templates/color_ramp_update.html.py:62
+#, fuzzy
+#| msgid "Edit color map entry"
+msgid "Edit color ramp entry"
+msgstr "Editar entrada de color del mapa"
+
+#: templates/color_ramp_add.html:103 templates/color_ramp_update.html.py:108
+#: templates/color_table_add.html:162 templates/color_table_update.html:165
+msgid "Two or more color definitions are required"
+msgstr ""
+"En caso de necesitar alguna, se requieren al menos dos definiciones en la "
+"tabla de color"
+
+#: templates/color_ramp_list.html:11
+msgid "Symbol Ramp Colors"
+msgstr "Rampas de color"
+
+#: templates/color_ramp_list.html:13
+msgid "Add color ramp"
+msgstr "Añadir nueva rampa de color"
+
+#: templates/color_ramp_list.html:14
+msgid "Import color ramp"
+msgstr "Importar rampa de color"
+
+#: templates/color_ramp_list.html:46
+msgid "Delete color ramp"
+msgstr "Eliminar rampa de color"
+
+#: templates/color_ramp_list.html:49
+msgid "Color ramp will be removed, Do you want continue?"
+msgstr "La rampa de color será eliminada, ¿Desea continuar?"
+
+#: templates/color_ramp_list.html:52 templates/library_list.html.py:63
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: templates/color_ramp_list.html:53 templates/library_list.html.py:64
+msgid "Accept"
+msgstr "Aceptar"
+
 #: templates/color_table_add.html:11
 msgid "Add new color table"
 msgstr "Añadir nueva tabla de color"
@@ -339,12 +400,6 @@ msgstr "Añadir nueva tabla de color"
 #: templates/color_table_add.html:77 templates/color_table_update.html.py:81
 msgid "Edit color map entry"
 msgstr "Editar entrada de color del mapa"
-
-#: templates/color_table_add.html:162 templates/color_table_update.html:165
-msgid "Two or more color definitions are required"
-msgstr ""
-"En caso de necesitar alguna, se requieren al menos dos definiciones en la "
-"tabla de color"
 
 #: templates/dashboard_symbology_menu.html:4
 msgid "Symbology"
@@ -357,6 +412,12 @@ msgstr "Estilos de capa"
 #: templates/dashboard_symbology_menu.html:8 templates/library_list.html:11
 msgid "Symbol libraries"
 msgstr "Bibliotecas de símbolos"
+
+#: templates/dashboard_symbology_menu.html:10
+#, fuzzy
+#| msgid "Color table"
+msgid "Color ramps"
+msgstr "Tabla de color"
 
 #: templates/external_graphic_add.html:12 templates/symbol_add.html.py:11
 msgid "Create new symbol"
@@ -410,7 +471,7 @@ msgid "The file format is not supported"
 msgstr "El formato del archivo no está soportado"
 
 #: templates/external_graphic_add.html:148
-#: templates/external_graphic_add.html:154 views.py:663 views.py:769
+#: templates/external_graphic_add.html:154 views.py:663 views.py:841
 msgid "You must select a file"
 msgstr "Debe seleccionar un archivo"
 
@@ -433,7 +494,15 @@ msgstr "Seleccionar un campo"
 
 #: templates/intervals_add.html:70 templates/intervals_update.html.py:73
 msgid "Select number of intervals"
-msgstr "Seleccionar número de intervalos"
+msgstr "Nº intervalos"
+
+#: templates/intervals_add.html:75
+msgid "Select ramp color"
+msgstr "Seleccionar rampa de color"
+
+#: templates/intervals_add.html:77
+msgid "No ramp color to apply"
+msgstr "Sin rampa de color"
 
 #: templates/library_add.html:12 templates/library_list.html.py:13
 msgid "Add library"
@@ -465,14 +534,6 @@ msgstr "Eliminar biblioteca"
 #: templates/library_list.html:60
 msgid "Library will be removed, Do you want continue?"
 msgstr "La biblioteca será eliminada, ¿Desea continuar?"
-
-#: templates/library_list.html:63
-msgid "Cancel"
-msgstr "Cancelar"
-
-#: templates/library_list.html:64
-msgid "Accept"
-msgstr "Aceptar"
 
 #: templates/library_list.html:81 templates/style_layer_list.html.py:67
 msgid "Processing request..."
@@ -657,17 +718,31 @@ msgstr "No puede eliminar un estilo por defecto"
 msgid "Error importing SLD"
 msgstr "Error al importar SLD"
 
-#: views.py:703
+#: views.py:704 views.py:724
+#, fuzzy
+#| msgid ""
+#| "You must enter a correct name for the library (without uppercases, "
+#| "whitespaces or other special characters)"
+msgid ""
+"You must enter a correct name for the color ramp (without uppercases, "
+"whitespaces or other special characters)"
+msgstr ""
+"Debes introducir un nombre correcto para la librería (sin mayúsculas, "
+"espacios en blanco o caracteres especiales)"
+
+#: views.py:772 views.py:831 views.py:934
 msgid ""
 "You must enter a correct name for the library (without uppercases, "
 "whitespaces or other special characters)"
-msgstr "Debes introducir un nombre correcto para la librería (sin mayúsculas, espacios en blanco o caracteres especiales)"
+msgstr ""
+"Debes introducir un nombre correcto para la librería (sin mayúsculas, "
+"espacios en blanco o caracteres especiales)"
 
-#: views.py:766
+#: views.py:838
 msgid "You must enter a name for the library"
 msgstr "Debe introducir un nombre para la biblioteca"
 
-#: views.py:772
+#: views.py:844
 msgid "You must enter a name for the library and select a file"
 msgstr "Debe introducir un nombre para la biblioteca y seleccionar un archivo"
 

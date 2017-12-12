@@ -81,3 +81,30 @@
   border: 1px solid #eee;
   height: auto;
 }
+
+.preview-ramp-color{
+	height: 80px;
+	border: 1px solid #d2d6de;
+	margin-bottom: 10px;
+}
+
+.color-ramp-item{
+	padding: 10px;
+	border: 1px solid rgba(0,0,0,0.2);	
+}
+
+.color-ramp-item:hover{
+	background-color: rgba(0,0,0,0.1);	
+}
+
+.color-ramp-button{
+	padding: 4px 10px;
+}
+
+.color-ramp-name{
+	padding: 4px 0px;
+}
+
+.color-ramp-button:hover{
+	background-color: rgba(0,0,0,0.2);	
+}

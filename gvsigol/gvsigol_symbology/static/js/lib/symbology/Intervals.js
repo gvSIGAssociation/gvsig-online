@@ -100,6 +100,40 @@ Intervals.prototype.deleteRule = function(id) {
 	}
 };
 
+Intervals.prototype.applyRampColor = function(json_data) {
+	var min = null;
+	var max = null;
+	for(var i=0; i<this.rules.length; i++){
+		var rule = this.rules[i];
+		if(rule.filter){
+			if(!min || min > rule.filter["value1"]){
+				min = rule.filter["value1"]
+			}
+			if(!max || max < rule.filter["value2"]){
+				max = rule.filter["value2"]
+			}
+		}
+	}
+	
+	if(min != null && max != null){
+		for(var i=0; i<this.rules.length; i++){
+			var rule = this.rules[i];
+			for(var j=0; j<rule.symbolizers.length; j++){
+				var symbolizer = rule.symbolizers[j];
+				if(rule.filter){
+					var current = rule.filter["value1"]
+					var colr = this.utils.getColorFromRamp(json_data, min, max, current);
+					var colr_aux = this.utils.rgba2hex(colr);
+					symbolizer["fill"] = colr_aux["color"];
+					symbolizer["fill_opacity"] = colr_aux["alpha"];
+					symbolizer["stroke"] = colr_aux["color"];
+					symbolizer["stroke_opacity"] = colr_aux["alpha"];
+				}
+			}
+		}
+	}
+};
+
 Intervals.prototype.load = function(response, selectedField, numberOfIntervals) {
 	$('#rules').empty();
 	this.rules.splice(0, this.rules.length);
