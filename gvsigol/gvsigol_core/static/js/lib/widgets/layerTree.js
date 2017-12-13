@@ -686,7 +686,7 @@ layerTree.prototype.showHideTemporalPanel = function() {
 			$("#enable-temporary-error").show();
 		    setTimeout(function() {
 		    	$("#enable-temporary-error").hide();
-		    }, 10000);
+		    }, 7000);
 		}
 	} 
 	else {
