@@ -87,6 +87,8 @@ def login_user(request):
                     if auth[0].lower() == "basic":
                         uname, passwd = base64.b64decode(auth[1]).split(':')
                         user = authenticate(username=uname, password=passwd)
+                        request.session['username'] = uname
+                        request.session['password'] = passwd
                         if user is not None:
                             if user.is_active:
                                 login(request, user)
