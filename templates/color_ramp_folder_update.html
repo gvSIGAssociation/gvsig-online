@@ -172,7 +172,7 @@ $(document).ready(function() {
 	}
 	
 	{% for color_ramp in color_ramps %}
-		var aux_json = JSON.parse({{color_ramp.definition | safe}});
+		var aux_json = {{color_ramp.definition | safe}};
 		colorramp.refreshComponentPreview("color-ramp-preview-{{color_ramp.id}}", aux_json, "style");
 	{% endfor %}
 });
