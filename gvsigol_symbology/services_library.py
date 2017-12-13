@@ -17,12 +17,13 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from __builtin__ import file
 
 '''
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
-from models import Style, Library, Rule, LibraryRule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, TextSymbolizer, ExternalGraphicSymbolizer
+from models import Style, Library, Rule, LibraryRule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, TextSymbolizer, ExternalGraphicSymbolizer, ColorRamp, ColorRampFolder, ColorRampLibrary
 from gvsigol_services.models import Layer
 from gvsigol_services.backend_mapservice import backend as mapservice
 from gvsigol_core import utils as core_utils
@@ -36,6 +37,8 @@ import json
 import re
 import os
 import unicodedata
+from xml.dom import minidom
+import ast
 
 _valid_name_regex=re.compile("^[a-zA-Z_\s][a-zA-Z0-9_\s]*$")
 _valid_title_regex=re.compile("^[a-zA-Z_\s][a-zA-Z0-9_\s]*$")
@@ -374,6 +377,147 @@ def export_library(library, library_rules):
     utils.__delete_temporaries(dir_path)
     
     return response
+
+
+def upload_color_ramp_library(name, description, file):
+    
+    library = ColorRampLibrary(
+        name = name,
+        description = description
+    )
+    library.save()
+            
+    file_path2 = utils.__get_uncompressed_file_upload_path(file)
+    
+    file_list2 = os.listdir(file_path2)
+    for file2 in file_list2:
+        if os.path.isdir(file_path2+"/"+file2):
+            folder = ColorRampFolder(
+                name = file2,
+                description = file2,
+                color_ramp_library_id = library.id
+            )
+            folder.save()
+            
+            file_path = file_path2+"/"+file2
+            file_list = os.listdir(file_path)
+            
+            
+            for file in file_list: 
+                print('start file: ' + file)
+                file_name = file
+                m = re.search('color_ramp-(.+?)-[0-9]+', file)
+                if m:
+                    file_name = m.group(1)
+                    
+                xmldoc = minidom.parse(file_path+"/"+file)
+                itemcolor = xmldoc.getElementsByTagName('Color')
+                itemalpha = xmldoc.getElementsByTagName('Alpha')
+                aux_items = {}
+
+                for s in itemcolor:
+                    key = str(s.attributes['value'].value)
+                    if not key in aux_items:
+                        aux_items[key] = {}
+                    aux = aux_items[key]
+                    color_split = s.attributes['rgb'].value.split(',')
+                    aux_color = "#{:02x}{:02x}{:02x}".format(int(color_split[0]),int(color_split[1]),int(color_split[2]))
+                    aux["color"] = aux_color
+                
+                for s in itemalpha:
+                    key = str(s.attributes['value'].value)
+                    if not key in aux_items:
+                        aux_items[key] = {}
+                    aux = aux_items[key]
+                    aux["alpha"] = s.attributes['alpha'].value
+                    
+                json_items = {}
+                json_items["definition"] = []
+                for key_item in aux_items:
+                    aux = {
+                        'quantity': key_item,
+                        'color': aux_items[key_item]["color"],
+                        'alpha': aux_items[key_item]["alpha"]
+                    }
+                    json_items["definition"].append(aux)
+                    
+                color_ramp = ColorRamp(
+                    name = file_name,
+                    definition = json.dumps(json_items),
+                    color_ramp_folder_id = folder.id
+                )
+                color_ramp.save()
+                    
+                print('end file: ' + file)
+
+    utils.__delete_temporaries(file_path)
+
+
+def build_library_color_ramp(name, color_ramp_definition):
+    result = ''
+    result += '<?xml version="1.0" encoding="ISO-8859-15"?>'
+    result += '<RasterMetaFile version="1.0">'
+    result += '<ColorTable name="'+name+'" interpolated="1" version="1.1">'
+    
+    aux_alpha = ''
+    
+    color_ramp_json = ast.literal_eval(color_ramp_definition)
+    for definition in color_ramp_json["definition"]:
+        h = definition["color"].lstrip('#')
+        color = tuple(int(h[i:i+2], 16) for i in (0, 2 ,4))
+        result += '    <Color value="'+definition["quantity"]+'" name="" rgb="'+str(color[0])+','+str(color[1])+','+str(color[2])+'" interpolated="50.0"/>'
+        aux_alpha += '    <Alpha value="'+definition["quantity"]+'" alpha="'+definition["alpha"]+'" interpolated="50.0"/>'
+    
+    result += aux_alpha
+    result += '</ColorTable>'
+    result += '</RasterMetaFile>'
+    
+    return result
+    
+    
+
+def export_ramp_color_library(library, library_rules):
+    dir_path = tempfile.mkdtemp(suffix='', prefix='tmp-library-')
+    
+    
+    for library_rule in library_rules:
+        try:
+            resource_path = dir_path+"/"+library_rule+"/"
+            os.makedirs(resource_path)
+            i=0
+            for color_ramp in library_rules[library_rule]:
+                file = open(resource_path+"/color_ramp-"+color_ramp.name+"-"+str(i)+".rmf",'w+')
+                file.write(build_library_color_ramp(color_ramp.name, color_ramp.definition))
+                file.close()
+                i=i+1
+            
+        except Exception as e:
+            raise e
+        
+   
+    
+    buffer = StringIO.StringIO()
+    z = zipfile.ZipFile(buffer, "w")
+    relroot = dir_path
+    for root, dirs, files in os.walk(dir_path):
+            rel_path = os.path.relpath(root, relroot)
+            if rel_path != ".":
+                z.write(root, os.path.relpath(root, relroot))
+            for file in files:
+                filename = os.path.join(root, file)
+                if os.path.isfile(filename): 
+                    arcname = os.path.join(os.path.relpath(root, relroot), file)
+                    z.write(filename, arcname)
+    z.close()
+    buffer.seek(0)
+    response = HttpResponse(content_type='application/zip; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename='+library.name+'.zip'
+    response.write(buffer.read())
+    
+    utils.__delete_temporaries(dir_path)
+    
+    return response
+
 
 
 def remove_accents(string):
