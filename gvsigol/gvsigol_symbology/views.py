@@ -709,7 +709,7 @@ def color_ramp_add(request, color_ramp_folder_id):
         if name != '' and re.match("^[a-z0-9_]*$", name):
             colorramp = ColorRamp(
                 name = name,
-                definition = json.dumps(definition),
+                definition = definition,
                 color_ramp_folder_id = colorrampfolder.id
             )
             colorramp.save()         
@@ -746,7 +746,7 @@ def color_ramp_update(request, color_ramp_id):
 
         if name != '' and re.match("^[a-z0-9_]*$", name):
             cramp.name = name
-            cramp.definition = json.dumps(lib_description)
+            cramp.definition = lib_description
             cramp.save()
         else:
             message = _('You must enter a correct name for the color ramp (without uppercases, whitespaces or other special characters)')
@@ -768,11 +768,15 @@ def color_ramp_update(request, color_ramp_id):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def color_ramp_library_export(request, color_ramp_library_id):
-    library = Library.objects.get(id=color_ramp_library_id)
-    library_rules = LibraryRule.objects.filter(library_id=library.id)
+    library = ColorRampLibrary.objects.get(id=int(color_ramp_library_id))
+    folders = ColorRampFolder.objects.filter(color_ramp_library_id=library.id)
+    
+    folders_json = {}
+    for folder in folders:
+        folders_json[folder.name] = ColorRamp.objects.filter(color_ramp_folder_id=folder.id)
     
     try:
-        response = services_library.export_library(library, library_rules)
+        response = services_library.export_ramp_color_library(library, folders_json)
         return response
         
     except Exception as e:
@@ -856,8 +860,7 @@ def color_ramp_library_delete(request, color_ramp_library_id):
     lib.delete()
     return redirect('color_ramp_library_list')
 
-
-    
+ 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def color_ramp_library_import(request):
@@ -866,10 +869,31 @@ def color_ramp_library_import(request):
         description = request.POST.get('library-description')
         message = ''
         
-        return render_to_response('library_import.html', {'message': message}, context_instance=RequestContext(request))
+        try:            
+            if name != '' and not re.match("^[a-z0-9_]*$", name):
+                message = _('You must enter a correct name for the library (without uppercases, whitespaces or other special characters)')
+            
+            elif name != '' and 'library-file' in request.FILES: 
+                services_library.upload_color_ramp_library(name, description, request.FILES['library-file'])                
+                return redirect('color_ramp_library_list')
+            
+            elif name == '' and 'library-file' in request.FILES:
+                message = _('You must enter a name for the library')
+                
+            elif name != '' and not 'library-file' in request.FILES:
+                message = _('You must select a file')
+                
+            elif name == '' and not 'library-file' in request.FILES:
+                message = _('You must enter a name for the library and select a file')
+                
+            return render_to_response('color_ramp_library_import.html', {'message': message}, context_instance=RequestContext(request))
+        
+        except Exception as e:
+            message = e.message
+            return render_to_response('color_ramp_library_import.html', {'message': message}, context_instance=RequestContext(request))
     
     else:   
-        return render_to_response('library_import.html', {}, context_instance=RequestContext(request))
+        return render_to_response('color_ramp_library_import.html', {}, context_instance=RequestContext(request))
     
 
 @login_required(login_url='/gvsigonline/auth/login_user/')

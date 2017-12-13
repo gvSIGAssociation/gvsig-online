@@ -85,7 +85,7 @@ $(document).ready(function() {
 	this.colorRamp = new ColorRamp("", null);
 	
 	$("#steps-body").append(this.colorRamp.getColorRampTableUI());
-	var json_data = JSON.parse({{color_ramp.definition | safe}});
+	var json_data = {{color_ramp.definition | safe}};
 	if('definition' in json_data){
 		for(var i = 0; i<json_data['definition'].length; i++){
 			var quatity = json_data['definition'][i]['quantity'];
