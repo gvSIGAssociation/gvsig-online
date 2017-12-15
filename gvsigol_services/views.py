@@ -1494,7 +1494,7 @@ def layergroup_update(request, lgid):
             layergroup.title = title
             layergroup.cached = cached
             layergroup.save()   
-            core_utils.toc_update_layer_group(layergroup, old_name, name)
+            core_utils.toc_update_layer_group(layergroup, old_name, name, title)
             
             layergroup_mapserver_toc(layergroup, toc)
             layer_group_cache_clear(layergroup)
@@ -1517,7 +1517,7 @@ def layergroup_update(request, lgid):
                 layergroup.title = title
                 layergroup.cached = cached
                 layergroup.save()
-                core_utils.toc_update_layer_group(layergroup, old_name, name)
+                core_utils.toc_update_layer_group(layergroup, old_name, name, title)
 
                 layergroup_mapserver_toc(layergroup, toc)
                 layer_group_cache_clear(layergroup)
