@@ -1103,7 +1103,7 @@ def layergroup_update(request, lgid):
             layergroup.title = title
             layergroup.cached = cached
             layergroup.save()   
-            core_utils.toc_update_layer_group(layergroup, old_name, name)
+            core_utils.toc_update_layer_group(layergroup, old_name, name, title)
             mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
             mapservice_backend.reload_nodes()
             return redirect('layergroup_list')
@@ -1118,7 +1118,7 @@ def layergroup_update(request, lgid):
                 layergroup.title = title
                 layergroup.cached = cached
                 layergroup.save()
-                core_utils.toc_update_layer_group(layergroup, old_name, name)
+                core_utils.toc_update_layer_group(layergroup, old_name, name, title)
                 mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
                 mapservice_backend.reload_nodes()
                 return redirect('layergroup_list')
