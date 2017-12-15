@@ -254,12 +254,13 @@ def toc_add_layergroups(toc_structure, layer_groups):
         
     return json.dumps(json_toc)
 
-def toc_update_layer_group(old_layergroup, old_name, new_name): 
+def toc_update_layer_group(old_layergroup, old_name, new_name, title): 
     projects_by_layergroup = ProjectLayerGroup.objects.filter(layer_group=old_layergroup)
     for p in projects_by_layergroup:
         json_toc = p.project.toc_order
         toc = json.loads(json_toc)
         toc[old_name]['name'] = new_name
+        toc[old_name]['title'] = title
         toc[new_name] = toc.pop(old_name)
         p.project.toc_order = json.dumps(toc)
         p.project.save()
