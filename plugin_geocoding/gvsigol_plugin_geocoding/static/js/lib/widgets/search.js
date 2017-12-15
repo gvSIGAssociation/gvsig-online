@@ -212,6 +212,9 @@ search.prototype.initUI = function() {
  */
 search.prototype.locate = function(address, origin_srs, fromCombo) {	
 	var self = this;	
+	this.map.removeOverlay(this.popup);
+	this.popup = new ol.Overlay.Popup();
+	this.map.addOverlay(this.popup);
 	if(address != null){
 		var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], origin_srs, 'EPSG:3857');	
 		if(fromCombo){
