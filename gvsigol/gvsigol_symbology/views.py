@@ -48,9 +48,17 @@ def get_raster_statistics(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     datastore = Datastore.objects.get(id=layer.datastore_id)
     params = json.loads(datastore.connection_params)
+    result = None
     if 'url' in params:
         result = get_raster_stats(params['url'])
-        print result
+    if result:
+        response = {
+            'result': result
+            }
+    else:
+        response = {}
+        
+    return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     
   
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -351,8 +359,8 @@ def intervals_add(request, layer_id):
             return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
         
     else:         
-        color_ramps = ColorRampLibrary.objects.all()        
         response = services_intervals.get_conf(request, layer_id) 
+        color_ramps = ColorRampLibrary.objects.all()        
         response["ramp_libraries"] = color_ramps
         
         return render_to_response('intervals_add.html', response, context_instance=RequestContext(request))
@@ -594,7 +602,9 @@ def color_table_add(request, layer_id):
             return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
         
     else:                 
-        response = services_color_table.get_conf(request, layer_id)     
+        response = services_color_table.get_conf(request, layer_id)    
+        color_ramps = ColorRampLibrary.objects.all()        
+        response["ramp_libraries"] = color_ramps 
         return render_to_response('color_table_add.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -640,6 +650,9 @@ def color_table_update(request, layer_id, style_id):
         if style.maxscale and int(style.maxscale) >=0:
             response['maxscale'] = int(style.maxscale)
         response['rule'] = json.dumps(rule)        
+        
+        color_ramps = ColorRampLibrary.objects.all()        
+        response["ramp_libraries"] = color_ramps
         
         return render_to_response('color_table_update.html', response, context_instance=RequestContext(request))
     

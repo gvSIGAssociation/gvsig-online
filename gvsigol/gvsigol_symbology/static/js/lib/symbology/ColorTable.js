@@ -57,17 +57,13 @@ ColorTable.prototype.getRule = function() {
 };
 
 ColorTable.prototype.loadRule = function(entries) {
-	
 	$("#table-entries-body-" + this.rule.id).empty();
 	this.rule.removeAllEntries();
 	
 	for (var i=0; i<entries.length; i++) {
-		
 		var entry = JSON.parse(entries[i]);
 		var options = entry[0].fields;
-		
 		this.rule.addColorMapEntry(options);	
-		
 	}
 };
 
@@ -75,8 +71,28 @@ ColorTable.prototype.refreshMap = function() {
 	this.utils.updateMap(this, this.layerName);
 };
 
+ColorTable.prototype.applyRampColor = function(json_data, min, max) {
+	for(var j=0; j<this.rule.entries.length; j++){
+		var entry = this.rule.entries[j];
+		var current = entry["quantity"]
+		var colr = this.utils.getColorFromRamp(json_data, min, max, current);
+		var colr_aux = this.utils.rgba2hex(colr);
+		entry["color"] = colr_aux["color"];
+		entry["opacity"] = colr_aux["alpha"];
+	}
+};
+
+ColorTable.prototype.getMinValueForInterval = function(min, max, it, numberOfIntervals){
+	if(it == 0){
+		return min;
+	}
+	var gap = (max-min)/numberOfIntervals;
+	var value = min + (gap*it);
+
+	return value;
+}
+
 ColorTable.prototype.save = function(layerId) {
-	
 	$("body").overlay();
 	
 	var entries = new Array();
@@ -116,6 +132,17 @@ ColorTable.prototype.save = function(layerId) {
 		},
 	    error: function(){}
 	});
+};
+
+ColorTable.prototype.load = function(min_raster, max_raster, numberOfIntervals) {
+	$("#table-entries-body-" + this.rule.id).empty();
+	this.rule.removeAllEntries();
+	var colors = this.utils.createColorRange('intervals', numberOfIntervals);
+
+	for (var i=0; i<numberOfIntervals; i++) {
+		var min = this.getMinValueForInterval(min_raster, max_raster, i, numberOfIntervals);
+		this.rule.addColorMapEntry({quantity: min, color: colors[i]});
+	}
 };
 
 ColorTable.prototype.update = function(layerId, styleId) {
