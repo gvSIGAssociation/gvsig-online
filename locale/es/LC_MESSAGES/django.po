@@ -332,20 +332,16 @@ msgid "Creates a new rule based on an expression"
 msgstr "Crea una nueva regla basada en una expresión"
 
 #: templates/color_ramp_add.html:11
-#, fuzzy
-#| msgid "Add new color table"
 msgid "Add new color ramp"
-msgstr "Añadir nueva tabla de color"
+msgstr "Añadir nueva rampa de color"
 
 #: templates/color_ramp_add.html:40 templates/color_ramp_update.html.py:40
 msgid "Steps"
 msgstr ""
 
 #: templates/color_ramp_add.html:41 templates/color_ramp_update.html.py:41
-#, fuzzy
-#| msgid "Add style"
 msgid "Add step"
-msgstr "Añadir estilo"
+msgstr "Añadir regla"
 
 #: templates/color_ramp_add.html:63 templates/color_ramp_update.html.py:62
 #, fuzzy
@@ -362,7 +358,7 @@ msgstr ""
 
 #: templates/color_ramp_folder_add.html:12
 msgid "Add Ramp category"
-msgstr ""
+msgstr "Añadir categoría de rampas"
 
 #: templates/color_ramp_folder_add.html:47
 #: templates/color_ramp_folder_add.html:48
@@ -384,10 +380,8 @@ msgstr "Descripción"
 
 #: templates/color_ramp_folder_update.html:13
 #: templates/color_ramp_library_update.html:13
-#, fuzzy
-#| msgid "Update library"
 msgid "Update ramp color library"
-msgstr "Actualizar biblioteca"
+msgstr "Actualizar biblioteca de rampas de color"
 
 #: templates/color_ramp_folder_update.html:41
 #, fuzzy
@@ -407,10 +401,8 @@ msgid "Color ramps"
 msgstr "Rampas de color"
 
 #: templates/color_ramp_folder_update.html:65
-#, fuzzy
-#| msgid "Select ramp color"
 msgid "Add ramp color"
-msgstr "Seleccionar rampa de color"
+msgstr "Añadir nueva rampa de color"
 
 #: templates/color_ramp_folder_update.html:99 templates/color_ramp_list.html:46
 msgid "Delete color ramp"
@@ -454,7 +446,7 @@ msgstr "Seleccionar un archivo"
 
 #: templates/color_ramp_library_list.html:11
 msgid "Color ramp libraries"
-msgstr "Librería de rampa de color"
+msgstr "Bibliotecas de rampa de color"
 
 #: templates/color_ramp_library_list.html:23 templates/library_list.html:23
 msgid "Library"
@@ -584,17 +576,15 @@ msgstr "Actualizar biblioteca"
 
 #: templates/color_ramp_library_update.html:56
 msgid "Categories"
-msgstr ""
+msgstr "Categorías"
 
 #: templates/color_ramp_library_update.html:58
-#, fuzzy
-#| msgid "Add library"
 msgid "Add category"
-msgstr "Añadir biblioteca"
+msgstr "Añadir categoría"
 
 #: templates/color_ramp_library_update.html:67
 msgid "Category"
-msgstr ""
+msgstr "Categoría"
 
 #: templates/color_ramp_library_update.html:101
 msgid "Delete folder"
