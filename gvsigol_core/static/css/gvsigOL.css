@@ -4912,3 +4912,20 @@ input.temporary-check[type=checkbox]{
 	padding: 10px;
 	margin: 0px 18px;
 }
+
+.modal-raster-info-body{
+    padding: 20px;
+}
+
+.band-title{
+    font-weight: bold;
+}
+
+.band-info-ul{
+    list-style: none;
+}
+
+.band-info-item{
+	font-weight: bold;
+	padding-right: 10px;
+}
