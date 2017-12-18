@@ -465,7 +465,7 @@ $(document).ready(function() {
 				var options = "";
 				for(var i=0; i<ramps.length; i++){
 					var ramp = ramps[i];
-					var aux_json = JSON.parse(ramp.definition);
+					var aux_json = ramp.definition;
 					
 					if($("#invert-ramp").is(':checked')){
 						for(ramp_entry in aux_json["definition"]){
