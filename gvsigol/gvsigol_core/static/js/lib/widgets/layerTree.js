@@ -761,8 +761,11 @@ layerTree.prototype.refreshTemporalStep = function() {
 		var current_min_date = new Date(this.current_min_val*1000);
 		var current_max_date = new Date(this.current_max_val*1000);
 		this.step_val_array = [];
-		while(current_min_date <= current_max_date){
+		while((current_min_date.getFullYear() < current_max_date.getFullYear()) || 
+				(current_min_date.getFullYear() == current_max_date.getFullYear() && 
+				current_min_date.getMonth() <= current_max_date.getMonth())){
 			this.step_val_array.push(current_min_date.getTime()/1000);
+			
 			current_min_date.setMonth(current_min_date.getMonth()+parseInt(value));
 		}
 	}
@@ -1319,8 +1322,8 @@ layerTree.prototype.createOverlayUI = function(layer) {
 	ui += '		<i class="fa fa-search" aria-hidden="true"></i> ' + gettext('Zoom to layer');
 	ui += '	</a>';
 	
-	ui += '		<div class="btn btn-block btn-social btn-select btn-custom-tool"><i class="fa fa-map-marker" aria-hidden="true"></i><select id="symbol-to-layer-' + id + '" class="symbol-to-layer btn btn-block btn-custom-tool">';
 	if(layer.styles){
+		ui += '		<div class="btn btn-block btn-social btn-select btn-custom-tool"><i class="fa fa-map-marker" aria-hidden="true"></i><select id="symbol-to-layer-' + id + '" class="symbol-to-layer btn btn-block btn-custom-tool">';
 		for(var i=0; i<layer.styles.length; i++){
 			var ttitle = layer.styles[i].title;
 			if(!ttitle || ttitle.length == 0){
