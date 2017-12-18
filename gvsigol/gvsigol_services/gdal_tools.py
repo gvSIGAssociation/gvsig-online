@@ -56,7 +56,7 @@ def get_raster_stats(raster_path):
     (band0_ min, band0_max, band0_mean, band0_stdev) = stats[0]
     (band1_ min, band1_max, band1_mean, band1_stdev) = stats[1]
     """
-    stats_str = gdalinfo(raster_path)
+    stats_str = gdalinfo(raster_path.replace("file://", ""))
     buf = io.StringIO(stats_str)
     result = []
     band_results = __process_band(buf)
