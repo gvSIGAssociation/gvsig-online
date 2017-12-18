@@ -23,6 +23,12 @@ msgstr "Entrada de color"
 msgid "Color"
 msgstr "Color"
 
+msgid "Percentaje"
+msgstr "Porcentaje"
+
+msgid "Delete"
+msgstr "Borrar"
+
 msgid "Quantity"
 msgstr "Cantidad"
 
