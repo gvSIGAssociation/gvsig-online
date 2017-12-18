@@ -737,7 +737,9 @@ layerTree.prototype.refreshTemporalStep = function() {
 		var current_min_date = new Date(this.current_min_val*1000);
 		var current_max_date = new Date(this.current_max_val*1000);
 		this.step_val_array = [];
-		while(current_min_date <= current_max_date){
+		while((current_min_date.getFullYear() < current_max_date.getFullYear()) || 
+				(current_min_date.getFullYear() == current_max_date.getFullYear() && 
+				current_min_date.getMonth() <= current_max_date.getMonth())){
 			this.step_val_array.push(current_min_date.getTime()/1000);
 			current_min_date.setMonth(current_min_date.getMonth()+parseInt(value));
 		}
