@@ -855,6 +855,11 @@ def layer_update(request, layer_id):
         workspace = Workspace.objects.get(id=datastore.workspace_id)
         form = LayerUpdateForm(instance=layer)
         
+        if not request.user.is_superuser:
+            form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
+            form.fields['layer_group'].queryset =(LayerGroup.objects.filter(created_by__exact=request.user.username) | LayerGroup.objects.filter(name='__default__')).order_by('name')
+        
+        
         date_fields = []
         if layer.type == 'v_PostGIS':
             aux_fields = get_date_fields(layer.id)
@@ -1830,31 +1835,43 @@ def enumeration_add(request):
         aux_title = aux_title.lower()
         
         name = name + '_' + re.sub("[!@#$%^&*()[]{};:,./<>?\|`~-=_+ ]", "", aux_title)
+        
+        name_exists = False
+        enums = Enumeration.objects.all()
+        for enum in enums:
+            if name == enum.name:
+                name_exists = True
+        
+        if not name_exists:      
+            if title != '':
+                enum = Enumeration(
+                    name = name,
+                    title = title,
+                    created_by = request.user.username
+                )
+                enum.save()
                 
-        if title != '':
-            enum = Enumeration(
-                name = name,
-                title = title,
-                created_by = request.user.username
-            )
-            enum.save()
-            
-            for key in request.POST:
-                if 'item-content' in key:
-                    item = EnumerationItem(
-                        enumeration = enum,
-                        name = request.POST.get(key),
-                        selected = False,
-                        order = len(EnumerationItem.objects.filter(enumeration=enum))
-                    )
-                    item.save()
-            
+                for key in request.POST:
+                    if 'item-content' in key:
+                        item = EnumerationItem(
+                            enumeration = enum,
+                            name = request.POST.get(key),
+                            selected = False,
+                            order = len(EnumerationItem.objects.filter(enumeration=enum))
+                        )
+                        item.save()
+                
+            else:
+                index = len(Enumeration.objects.all())
+                enum_name = 'enm_' + str(index)
+                message = _(u'You must enter a title for enumeration')
+                return render_to_response('enumeration_add.html', {'message': message, 'enum_name': enum_name}, context_instance=RequestContext(request))
         else:
             index = len(Enumeration.objects.all())
             enum_name = 'enm_' + str(index)
-            message = _(u'You must enter a title for enumeration')
+            message = _(u'Name already taken')
             return render_to_response('enumeration_add.html', {'message': message, 'enum_name': enum_name}, context_instance=RequestContext(request))
-
+      
         return redirect('enumeration_list')
     
     else:
