@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-18 09:25+0100\n"
+"POT-Creation-Date: 2017-12-18 09:36+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -461,8 +461,7 @@ msgid "Esta funcionalidad aún no está disponible"
 msgstr ""
 
 #: templates/color_ramp_library_list.html:79
-#: templates/color_ramp_library_list.html:127
-#: templates/color_ramp_library_update.html:151 templates/library_list.html:57
+#: templates/color_ramp_library_list.html:127 templates/library_list.html:57
 #: templates/library_list.html.py:105
 msgid "Delete library"
 msgstr "Eliminar biblioteca"
@@ -568,8 +567,7 @@ msgstr "%(sep)sOrden descendente"
 msgid "Export library"
 msgstr "Exportar biblioteca"
 
-#: templates/color_ramp_library_list.html:135
-#: templates/color_ramp_library_update.html:155 templates/library_list.html:113
+#: templates/color_ramp_library_list.html:135 templates/library_list.html:113
 #: templates/library_update.html.py:13
 msgid "Update library"
 msgstr "Actualizar biblioteca"
@@ -593,6 +591,14 @@ msgstr "Eliminar directorio"
 #: templates/color_ramp_library_update.html:104
 msgid "Folder will be removed, Do you want continue?"
 msgstr "El directorio será eliminado, ¿Desea continuar?"
+
+#: templates/color_ramp_library_update.html:151
+msgid "Delete category"
+msgstr "Borrar categoría"
+
+#: templates/color_ramp_library_update.html:155
+msgid "Update category"
+msgstr "Actualizar categoría"
 
 #: templates/color_ramp_list.html:11
 msgid "Symbol Ramp Colors"
