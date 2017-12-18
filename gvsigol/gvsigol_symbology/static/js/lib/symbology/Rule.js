@@ -163,9 +163,9 @@ Rule.prototype.getColorMapEntryUI = function() {
 	ui += 					'</table>';
 	ui += 				'</div>';
 	ui += 			'</div>';
-	ui += 			'<div class="box-footer clearfix">';
-	ui += 				'<a id="append-color-entry-button-' + this.id + '" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-tint margin-r-5"></i>' + gettext('Append color map entry') + '</a>';
-	ui += 			'</div>';
+//	ui += 			'<div class="box-footer clearfix">';
+//	ui += 				'<a id="append-color-entry-button-' + this.id + '" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-tint margin-r-5"></i>' + gettext('Append color map entry') + '</a>';
+//	ui += 			'</div>';
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += '</div>';

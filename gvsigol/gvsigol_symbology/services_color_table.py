@@ -223,7 +223,7 @@ def update_style(request, json_data, layer_id, style_id):
         return True
     else:
         return False
-
+   
 
 def get_conf(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
