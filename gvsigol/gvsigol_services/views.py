@@ -2523,125 +2523,132 @@ def describeFeatureType(request):
 @require_safe
 @staff_required
 def base_layer_list(request):
-    baselayer_list = BaseLayer.objects.all()
-    
-    response = {
-        'baselayer': baselayer_list
-    }
-    return render_to_response('base_layer_list.html', response, context_instance=RequestContext(request))
-
+    if request.user.is_superuser:
+        baselayer_list = BaseLayer.objects.all()
+        
+        response = {
+            'baselayer': baselayer_list
+        }
+        return render_to_response('base_layer_list.html', response, context_instance=RequestContext(request))
+    else:
+        return redirect('home')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def base_layer_add(request):
-    if request.method == 'POST':
-        form = BaseLayerForm(request.POST)
-        has_errors = False
-        try:
-            newBaseLayer = BaseLayer()
-            newBaseLayer.title = request.POST.get('title')
-            newBaseLayer.type = request.POST.get('type')
-            params = {}
-            
-            if newBaseLayer.type == 'WMTS' or newBaseLayer.type == 'WMS':
-                params['version'] = request.POST.get('version')
-                params['url'] = request.POST.get('url')
-                params['layers'] = request.POST.get('layers')
-                params['format'] = request.POST.get('format')
-            if newBaseLayer.type == 'WMTS':
-                params['matrixset'] = request.POST.get('matrixset')
-                
-            if newBaseLayer.type == 'Bing':
-                params['key'] = request.POST.get('key')
-                params['layers'] = request.POST.get('layers')
-                
-            if newBaseLayer.type == 'XYZ' or newBaseLayer.type == 'OSM':
-                params['url'] = request.POST.get('url')
-                params['key'] = request.POST.get('key')
-            
-            newBaseLayer.type_params = json.dumps(params)
-            
-            newBaseLayer.save()
-            
-            newBaseLayer.name = 'baselayer_' + str(newBaseLayer.id)
-            newBaseLayer.save()
-            
-            return redirect('base_layer_list')
-            
-            #msg = _("Error: fill all the BaseLayer fields")
-            #form.add_error(None, msg)
-            
-        except Exception as e:
+    if request.user.is_superuser:
+        if request.method == 'POST':
+            form = BaseLayerForm(request.POST)
+            has_errors = False
             try:
-                msg = e.get_message()
-            except:
-                msg = _("Error: BaseLayer could not be published")
-            form.add_error(None, msg)
-
+                newBaseLayer = BaseLayer()
+                newBaseLayer.title = request.POST.get('title')
+                newBaseLayer.type = request.POST.get('type')
+                params = {}
+                
+                if newBaseLayer.type == 'WMTS' or newBaseLayer.type == 'WMS':
+                    params['version'] = request.POST.get('version')
+                    params['url'] = request.POST.get('url')
+                    params['layers'] = request.POST.get('layers')
+                    params['format'] = request.POST.get('format')
+                if newBaseLayer.type == 'WMTS':
+                    params['matrixset'] = request.POST.get('matrixset')
+                    
+                if newBaseLayer.type == 'Bing':
+                    params['key'] = request.POST.get('key')
+                    params['layers'] = request.POST.get('layers')
+                    
+                if newBaseLayer.type == 'XYZ' or newBaseLayer.type == 'OSM':
+                    params['url'] = request.POST.get('url')
+                    params['key'] = request.POST.get('key')
+                
+                newBaseLayer.type_params = json.dumps(params)
+                
+                newBaseLayer.save()
+                
+                newBaseLayer.name = 'baselayer_' + str(newBaseLayer.id)
+                newBaseLayer.save()
+                
+                return redirect('base_layer_list')
+                
+                #msg = _("Error: fill all the BaseLayer fields")
+                #form.add_error(None, msg)
+                
+            except Exception as e:
+                try:
+                    msg = e.get_message()
+                except:
+                    msg = _("Error: BaseLayer could not be published")
+                form.add_error(None, msg)
+    
+        else:
+            form = BaseLayerForm()
+            
+        return render(request, 'base_layer_add.html', {'form': form, 'bing_layers': BING_LAYERS})
     else:
-        form = BaseLayerForm()
-        
-    return render(request, 'base_layer_add.html', {'form': form, 'bing_layers': BING_LAYERS})
-
+        return redirect('home')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def base_layer_update(request, base_layer_id):
-    baselayer = BaseLayer.objects.get(id=base_layer_id)
-    if request.method == 'POST':
-        form = BaseLayerForm(request.POST)
-        try:
-            baselayer.title = request.POST.get('title')
-            baselayer.type = request.POST.get('type')
-            params = {}
-            
-            if baselayer.type == 'WMTS' or baselayer.type == 'WMS':
-                params['version'] = request.POST.get('version')
-                params['url'] = request.POST.get('url')
-                params['layers'] = request.POST.get('layers')
-                params['format'] = request.POST.get('format')
-            if baselayer.type == 'WMTS':
-                params['matrixset'] = request.POST.get('matrixset')
-            
-            if baselayer.type == 'Bing':
-                params['key'] = request.POST.get('key')
-                params['layers'] = request.POST.get('layers')
-                
-            if baselayer.type == 'XYZ' or baselayer.type == 'OSM':
-                params['url'] = request.POST.get('url')
-                params['key'] = request.POST.get('key')
-            
-            
-            baselayer.type_params = json.dumps(params)
-            baselayer.save()
-            return redirect('base_layer_list')
-        
-            
-        except Exception as e:
+    if request.user.is_superuser:
+        baselayer = BaseLayer.objects.get(id=base_layer_id)
+        if request.method == 'POST':
+            form = BaseLayerForm(request.POST)
             try:
-                msg = e.get_message()
-            except:
-                msg = _("Error: baselayer could not be published")
-            form.add_error(None, msg)
+                baselayer.title = request.POST.get('title')
+                baselayer.type = request.POST.get('type')
+                params = {}
                 
-    else:
-        form = BaseLayerForm(instance=baselayer)
-        
-        if baselayer.type_params:
-            params = json.loads(baselayer.type_params)
-            for key in params:
-                form.initial[key] = params[key]
+                if baselayer.type == 'WMTS' or baselayer.type == 'WMS':
+                    params['version'] = request.POST.get('version')
+                    params['url'] = request.POST.get('url')
+                    params['layers'] = request.POST.get('layers')
+                    params['format'] = request.POST.get('format')
+                if baselayer.type == 'WMTS':
+                    params['matrixset'] = request.POST.get('matrixset')
+                
+                if baselayer.type == 'Bing':
+                    params['key'] = request.POST.get('key')
+                    params['layers'] = request.POST.get('layers')
+                    
+                if baselayer.type == 'XYZ' or baselayer.type == 'OSM':
+                    params['url'] = request.POST.get('url')
+                    params['key'] = request.POST.get('key')
+                
+                
+                baselayer.type_params = json.dumps(params)
+                baselayer.save()
+                return redirect('base_layer_list')
             
-        
-        response= {
-            'form': form, 
-            'baselayer': baselayer,
-            'bing_layers': BING_LAYERS
-        }
-        
-    return render(request, 'base_layer_update.html', response)
+                
+            except Exception as e:
+                try:
+                    msg = e.get_message()
+                except:
+                    msg = _("Error: baselayer could not be published")
+                form.add_error(None, msg)
+                    
+        else:
+            form = BaseLayerForm(instance=baselayer)
+            
+            if baselayer.type_params:
+                params = json.loads(baselayer.type_params)
+                for key in params:
+                    form.initial[key] = params[key]
+                
+            
+            response= {
+                'form': form, 
+                'baselayer': baselayer,
+                'bing_layers': BING_LAYERS
+            }
+            
+        return render(request, 'base_layer_update.html', response)
+    else:
+        return redirect('home')
 
 
 
@@ -2649,13 +2656,16 @@ def base_layer_update(request, base_layer_id):
 @require_POST
 @staff_required
 def base_layer_delete(request, base_layer_id):
-    try:
-        tr = BaseLayer.objects.get(id=base_layer_id)
-        tr.delete()
-    except Exception as e:
-        return HttpResponse('Error deleting baselayer: ' + str(e), status=500)
-
-    return redirect('base_layer_list')
+    if request.user.is_superuser:
+        try:
+            tr = BaseLayer.objects.get(id=base_layer_id)
+            tr.delete()
+        except Exception as e:
+            return HttpResponse('Error deleting baselayer: ' + str(e), status=500)
+    
+        return redirect('base_layer_list')
+    else:
+        return redirect('home')
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
