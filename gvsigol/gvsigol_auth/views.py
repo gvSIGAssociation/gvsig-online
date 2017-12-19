@@ -205,8 +205,6 @@ def user_add(request):
                     assigned_groups.append(int(key.split('-')[1]))
             
             try:
-                if form.data['name'] == 'admin':
-                    raise Exception
                             
                 if form.data['password1'] == form.data['password2']:
                     user = User(
