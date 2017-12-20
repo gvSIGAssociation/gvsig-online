@@ -20,9 +20,4 @@ class Migration(migrations.Migration):
                 ('definition', models.TextField()),
             ],
         ),
-        migrations.AlterField(
-            model_name='style',
-            name='type',
-            field=models.CharField(choices=[('US', 'S\xedmbolo \xfanico'), ('UV', 'Valores \xfanicos'), ('IN', 'Intervalos'), ('EX', 'Expresiones'), ('CP', 'Agrupaci\xf3n de puntos'), ('CT', 'Tabla de color'), ('CH', 'Gr\xe1ficas')], default='US', max_length=2),
-        ),
     ]
