@@ -29,6 +29,7 @@ var UniqueValues = function(featureType, layerName, utils, previewUrl) {
 	this.utils = utils;
 	this.rules = new Array();
 	this.label = null;
+	this.json_data = null;
 };
 
 UniqueValues.prototype.showLabel = function() {
@@ -83,6 +84,7 @@ UniqueValues.prototype.getRuleById = function(id) {
 };
 
 UniqueValues.prototype.applyRampColor = function(json_data) {
+	this.json_data = json_data;
 	var min = 0;
 	var max = this.rules.length;
 	
@@ -155,6 +157,10 @@ UniqueValues.prototype.load = function(selectedField, values) {
 		rule.addSymbolizer({fill: colors[i], stroke: colors[i]});
 		rule.preview();
 		this.addRule(rule);
+	}
+	
+	if(this.json_data != null){
+		this.applyRampColor(this.json_data);
 	}
 };
 
