@@ -29,6 +29,7 @@ var Intervals = function(featureType, layerName, utils, previewUrl) {
 	this.utils = utils;
 	this.rules = new Array();
 	this.label = null;
+	this.json_data = null;
 };
 
 Intervals.prototype.showLabel = function() {
@@ -101,6 +102,7 @@ Intervals.prototype.deleteRule = function(id) {
 };
 
 Intervals.prototype.applyRampColor = function(json_data) {
+	this.json_data = json_data;
 	var min = null;
 	var max = null;
 	for(var i=0; i<this.rules.length; i++){
@@ -179,6 +181,10 @@ Intervals.prototype.load = function(response, selectedField, numberOfIntervals) 
 		rule.registerEvents("intervals");
 		rule.preview();
 		this.addRule(rule);
+	}
+	
+	if(this.json_data != null){
+		this.applyRampColor(this.json_data);
 	}
 };
 
