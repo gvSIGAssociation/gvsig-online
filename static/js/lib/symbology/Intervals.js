@@ -128,7 +128,9 @@ Intervals.prototype.applyRampColor = function(json_data) {
 					symbolizer["fill_opacity"] = colr_aux["alpha"];
 					symbolizer["stroke"] = colr_aux["color"];
 					symbolizer["stroke_opacity"] = colr_aux["alpha"];
+					symbolizer.updatePreview();
 				}
+				rule.preview();
 			}
 		}
 	}
