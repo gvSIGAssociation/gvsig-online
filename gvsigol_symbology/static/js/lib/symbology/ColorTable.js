@@ -79,6 +79,7 @@ ColorTable.prototype.applyRampColor = function(json_data, min, max) {
 		var colr_aux = this.utils.rgba2hex(colr);
 		entry["color"] = colr_aux["color"];
 		entry["opacity"] = colr_aux["alpha"];
+		entry.updatePreview();
 	}
 };
 
