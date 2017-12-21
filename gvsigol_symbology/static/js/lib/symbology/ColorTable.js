@@ -25,6 +25,7 @@ var ColorTable = function(layerName, utils, rule_opts) {
 	this.layerName = layerName;
 	this.utils = utils;
 	this.rule = null;
+	this.json_data = null;
 	
 	if (rule_opts != null) {
 		if (rule_opts.entries.length > 0) {
@@ -72,6 +73,7 @@ ColorTable.prototype.refreshMap = function() {
 };
 
 ColorTable.prototype.applyRampColor = function(json_data, min, max) {
+	this.json_data = json_data;
 	for(var j=0; j<this.rule.entries.length; j++){
 		var entry = this.rule.entries[j];
 		var current = entry["quantity"]
@@ -143,6 +145,9 @@ ColorTable.prototype.load = function(min_raster, max_raster, numberOfIntervals) 
 	for (var i=0; i<numberOfIntervals; i++) {
 		var min = this.getMinValueForInterval(min_raster, max_raster, i, numberOfIntervals);
 		this.rule.addColorMapEntry({quantity: min, color: colors[i]});
+	}
+	if(this.json_data != null){
+		this.applyRampColor(this.json_data, min_raster, max_raster);
 	}
 };
 
