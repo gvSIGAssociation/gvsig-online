@@ -59,9 +59,9 @@ ColorRamp.prototype.getColorRampTableUI = function() {
 	ui += 	'</th>';
 	ui += 	'<th>ID</th>';
 	ui += 	'<th>'+gettext('Percentaje')+'</th>';
-	ui += 	'<th>>'+gettext('Color')+'</th>';
-	ui += 	'<th>>'+gettext('Transparencia')+'</th>';
-	ui += 	'<th>>'+gettext('Delete')+'</th>';
+	ui += 	'<th>'+gettext('Color')+'</th>';
+	ui += 	'<th>'+gettext('Transparencia')+'</th>';
+	ui += 	'<th>'+gettext('Delete')+'</th>';
 	ui += '</tr></table>';	
 	
 	return ui;
