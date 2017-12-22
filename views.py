@@ -48,8 +48,6 @@ from django.shortcuts import render
 from django.utils import timezone
 from gvsigol import settings
 import locks_utils
-import requests
-import grequests
 import logging
 import signals
 import urllib
@@ -63,10 +61,15 @@ from datetime import datetime
 from owslib.wms import WebMapService
 from owslib.wmts import WebMapTileService
 from lxml import html
+from requests_futures.sessions import FuturesSession
+import requests
 
 logger = logging.getLogger(__name__)
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
+
+CONNECT_TIMEOUT = 3.05
+READ_TIMEOUT = 30
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_safe
@@ -1977,12 +1980,11 @@ def get_geom_tables(request, datastore_id):
             pass
     return HttpResponseBadRequest()
 
-def is_grouped_symbology_request(request, url, aux_response, styles):
-    response = grequests.map([aux_response])
-    if response.__len__() > 0:
-        rsp = response[0]
+def is_grouped_symbology_request(request, url, aux_response, styles, future_session):
+    result = aux_response.result()
+    if result.status_code == 200:
         try:
-            geojson = json.loads(rsp.text)
+            geojson = json.loads(result.text)
             
             for i in range(0, len(geojson['features'])):
                 properties = geojson['features'][i].get('properties')
@@ -1997,8 +1999,7 @@ def is_grouped_symbology_request(request, url, aux_response, styles):
                         if 'username' in request.session and 'password' in request.session:
                             if request.session['username'] is not None and request.session['password'] is not None:
                                 auth2 = (request.session['username'], request.session['password'])
-                                #auth2 = ('admin', 'geoserver')
-                                aux_response = grequests.get(url, auth=auth2, verify=False) 
+                                aux_response = future_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT)) 
         except:
             return aux_response
     return aux_response
@@ -2014,6 +2015,7 @@ def get_feature_info(request):
         
         
         rs = []
+        fut_session = FuturesSession()
         for layer_array in layers_array:
             styles = []
             if 'styles' in layer_array:
@@ -2031,10 +2033,8 @@ def get_feature_info(request):
                 if 'username' in request.session and 'password' in request.session:
                     if request.session['username'] is not None and request.session['password'] is not None:
                         auth2 = (request.session['username'], request.session['password'])
-                        #auth2 = ('admin', 'geoserver')
-            aux_response = grequests.get(url, auth=auth2, verify=False) 
-            rs.append(is_grouped_symbology_request(request, url, aux_response, styles))
-        aux_rs = grequests.map(rs)
+            aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+            rs.append(is_grouped_symbology_request(request, url, aux_response, styles, fut_session))
         
         results = []
         i=0
@@ -2045,12 +2045,14 @@ def get_feature_info(request):
             if 'workspace' in layer_array:
                 ws = layer_array['workspace']
             
-            results.append({
-                'url': url,
-                'query_layer': query_layer,
-                'ws': ws,
-                'response': aux_rs[i].text
-                })
+            res = rs[i].result()
+            if res.status_code == 200:
+                results.append({
+                    'url': url,
+                    'query_layer': query_layer,
+                    'ws': ws,
+                    'response': res.text
+                    })
             i = i + 1
         
         for resultset in results:
