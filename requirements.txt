@@ -28,7 +28,10 @@ Pillow==3.2.0
 ## gsconfig
 gsconfig==1.0.3
 requests==2.7.0
-grequests==0.3.0
+
+# async requests
+requests-futures
+futures # only needed for Python 2.x
 
 ## Scolab tools
 spatialiteintrospect==1.2
