@@ -31,7 +31,7 @@ requests==2.7.0
 
 # async requests
 requests-futures==0.9.7
-futures=3.2.0 # only needed for Python 2.x
+futures==3.2.0 # only needed for Python 2.x
 
 ## Scolab tools
 spatialiteintrospect==1.2
