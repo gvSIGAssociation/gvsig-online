@@ -1242,7 +1242,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 		 $('.form-link-open').on('click', function () {
 			 if($(this).attr("data-value") == null || $(this).attr("href") == null || 
 		    		 $(this).attr("data-value") == "" || $(this).attr("href") == ""){
-				 messageBox.show('warning', gettext('The number of intervals must be greater than 0'));
+				 messageBox.show('warning', gettext('No hay ninguna encuesta activa para ser rellenada. Para responder encuesta, por favor activarla en Limesurvey'));
 		    	 return false;
 		     }
 		 });
@@ -1691,7 +1691,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 		$('.form-link-open').on('click', function () {
 		     if($(this).attr("data-value") == null || $(this).attr("href") == null || 
 		    		 $(this).attr("data-value") == "" || $(this).attr("href") == ""){
-		    	 messageBox.show('warning', gettext('The number of intervals must be greater than 0'));
+		    	 messageBox.show('warning', gettext('No hay ninguna encuesta activa para ser rellenada. Para responder encuesta, por favor activarla en Limesurvey'));
 		    	 return false;
 		     }
 		 });
