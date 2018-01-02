@@ -1243,6 +1243,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 			 if($(this).attr("data-value") == null || $(this).attr("href") == null || 
 		    		 $(this).attr("data-value") == "" || $(this).attr("href") == ""){
 		    	 alert("Error");
+		    	 return false;
 		     }
 		 });
 		
@@ -1691,6 +1692,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 		     if($(this).attr("data-value") == null || $(this).attr("href") == null || 
 		    		 $(this).attr("data-value") == "" || $(this).attr("href") == ""){
 		    	 alert("Error");
+		    	 return false;
 		     }
 		 });
 	
