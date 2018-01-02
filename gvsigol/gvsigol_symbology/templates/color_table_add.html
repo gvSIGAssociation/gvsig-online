@@ -340,7 +340,11 @@ $(document).ready(function() {
 		colorTable.refreshMap();
 	});
 	
-	utils.centerMapToExtent(extent, extentEpsg);
+	try{
+		utils.centerMapToExtent(extent, extentEpsg);
+	}catch(error){
+		console.log("Error: centerMapToExtent ->" + error);
+	}
 	
 	$('#number-of-intervals').on('change', function(e) {
 		
