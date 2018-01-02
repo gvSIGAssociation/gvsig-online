@@ -143,7 +143,7 @@ ColorTable.prototype.load = function(min_raster, max_raster, numberOfIntervals) 
 	var colors = this.utils.createColorRange('intervals', numberOfIntervals);
 
 	for (var i=0; i<numberOfIntervals; i++) {
-		var min = this.getMinValueForInterval(min_raster, max_raster, i, numberOfIntervals);
+		var min = this.getMinValueForInterval(min_raster, max_raster, i, numberOfIntervals-1);
 		this.rule.addColorMapEntry({quantity: min, color: colors[i]});
 	}
 	if(this.json_data != null){
