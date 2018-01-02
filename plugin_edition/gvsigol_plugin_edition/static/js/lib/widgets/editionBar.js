@@ -1239,6 +1239,12 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 			});
 		});
 		
+		 $('.form-link-open').on('click', function () {
+		     if($(this).attr("data-value") == null || $(this).attr("href") == null){
+		    	 alert("Error");
+		     }
+		 });
+		
 		$('#save-feature').on('click', function () {
 			if(self.showAllErrorMessages()){
 			var properties = {};
@@ -1679,6 +1685,12 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 			}).fail(function() {
 			});
 		});
+		
+		$('.form-link-open').on('click', function () {
+		     if($(this).attr("data-value") == null || $(this).attr("href") == null){
+		    	 alert("Error");
+		     }
+		 });
 	
 		
 		$('#edit-feature').on('click', function () {
