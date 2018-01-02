@@ -1242,7 +1242,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 		 $('.form-link-open').on('click', function () {
 			 if($(this).attr("data-value") == null || $(this).attr("href") == null || 
 		    		 $(this).attr("data-value") == "" || $(this).attr("href") == ""){
-		    	 alert("Error");
+				 messageBox.show('warning', gettext('The number of intervals must be greater than 0'));
 		    	 return false;
 		     }
 		 });
@@ -1691,7 +1691,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 		$('.form-link-open').on('click', function () {
 		     if($(this).attr("data-value") == null || $(this).attr("href") == null || 
 		    		 $(this).attr("data-value") == "" || $(this).attr("href") == ""){
-		    	 alert("Error");
+		    	 messageBox.show('warning', gettext('The number of intervals must be greater than 0'));
 		    	 return false;
 		     }
 		 });
