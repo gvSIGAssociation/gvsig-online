@@ -95,15 +95,32 @@ def login_user(request):
                                 request.user = user
                                 return redirect('home')
         else:
-            '''
-            user = authenticate(remote_user="root")
-            request.session['username'] = None
-            request.session['password'] = None
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    return redirect('home')
-            '''
+            username = request.GET.get('usu')
+            try:
+                findUser = User.objects.get(username=username)
+            except User.DoesNotExist:
+                findUser = None
+            if findUser is not None:
+                password = request.GET.get('pass')
+                request.session['username'] = username
+                request.session['password'] = password
+                user = authenticate(username=username, password=password)
+                if user is not None:
+                    if user.is_active:
+                        login(request, user)
+                        id_solicitud = request.GET.get('id_solicitud')
+                        token = request.GET.get('token')
+                        response = redirect(request.GET.get('next'))
+                        response['Location'] += '?id_solicitud=' + id_solicitud + '&token=' + token
+                        return response
+                    
+                    else:
+                        errors.append({'message': _("Your account has been disabled")})
+                else:
+                    errors.append({'message': _("The username and password you have entered do not match our records")})
+            else:
+                errors.append({'message': _("The username and password you have entered do not match our records")})
+                
     external_ldap_mode = True
     if 'AD' in GVSIGOL_LDAP and GVSIGOL_LDAP['AD'].__len__() > 0:
         external_ldap_mode = False
