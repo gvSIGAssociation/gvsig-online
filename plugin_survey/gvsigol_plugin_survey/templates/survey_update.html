@@ -1,0 +1,64 @@
+{% extends "base.html" %} {% load staticfiles %} {% load i18n %} 
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="box padding-20">
+			<form role="form" method="post"
+				action="/gvsigonline/survey/survey_update/{{ survey.id }}/">
+				{% csrf_token %}
+				<div class="box-header with-border">
+					<h3 class="box-title">{% trans "Update survey" %}</h3>
+					<div class="box-tools pull-right">
+						<button type="submit" class="btn btn-default btn-sm">
+							<i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}
+						</button>
+					</div>
+				</div>
+				<div class="box-body">
+
+					{% if form.errors %}
+					<div id="form-error" style="color: #ff0000;">
+						<ul>
+							{% for field in form %} 
+							{% if field.errors %}
+							<li>{{field.label}}. {{ field.errors|striptags }}</li> 
+							{% endif %} 
+							{% endfor %} 
+							{% for field, msg in form.errors.iteritems %}
+							<li>{{ msg|striptags }}</li> 
+							{% endfor %}
+						</ul>
+					</div>
+					{% endif %}
+
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="id_name">{% trans "Name" %}</label> {{ form.name }}
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="id_name">{% trans "Title" %}</label> {{ form.title }}
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+
+
+{% endblock %} {% block extra-scripts %}
+<script type="text/javascript" src="{% static "js/lib/transformation/dynamic-forms.js" %}"></script>
+<script>
+	$('#menu-manage-plugins').addClass("active");
+	$('#submenu-survey').addClass("active");
+</script>
+<script type="text/javascript">
+$().ready(function(){ 
+	
+});
+</script>
+{% endblock %}
