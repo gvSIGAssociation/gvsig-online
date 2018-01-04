@@ -131,7 +131,7 @@ searchByCoordinate.prototype.handler = function(e) {
 		
 		var popupContent = '';
 		popupContent += '<p>' + projection + '</p>';
-		popupContent += '<code>' + gettext('Longitude') + ' - X: ' + longitude + ', ' + gettext('Latitude') + ' - Y: ' + latitude + '</code>';
+		popupContent += '<code>' + gettext('Longitude') + ' - X: ' + longitude + '<br />' + gettext('Latitude') + ' - Y: ' + latitude + '</code>';
 		
 		popup.show(coordinate, '<div class="popup-wrapper">' + popupContent + '</div>');
 		
