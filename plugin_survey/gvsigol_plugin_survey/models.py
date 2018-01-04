@@ -42,6 +42,7 @@ class SurveySection(models.Model):
     name = models.CharField(max_length=200) 
     title = models.CharField(max_length=200) 
     srs = models.CharField(max_length=100, null=True, blank=True) 
+    definition = models.TextField(null=True, blank=True)
     layer = models.ForeignKey(Layer, null=True)
     
     order = models.IntegerField(null=False, default=0)

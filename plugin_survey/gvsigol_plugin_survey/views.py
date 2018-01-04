@@ -118,9 +118,12 @@ def survey_update(request, survey_id):
     else:
         form = SurveyForm(instance=survey)
         
+        sections = SurveySection.objects.filter(survey_id=survey.id).order_by('order')
+        
         response= {
             'form': form,
-            'survey': survey
+            'survey': survey,
+            'sections': sections
         }
         
     return render(request, 'survey_update.html', response)
@@ -143,29 +146,31 @@ def survey_delete(request, survey_id):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
-def survey_section_add(request):
-    newTransformationRule = None
+def survey_section_add(request, survey_id):
+    newSurveySection = None
+    survey = Survey.objects.get(id=survey_id)
+    
     if request.method == 'POST':
         try:
-            transformation_id = request.POST.get('transformation_id')
-            transformation = Transformation.objects.get(id=transformation_id)
+            form = SurveySectionForm(request.POST)
+            newSurveySection = SurveySection()
+            field_name = request.POST.get('name')
+            newSurveySection.name = field_name
             
-            newTransformationRule = TransformationRule()
-            field_name = request.POST.get('field_name')
-            newTransformationRule.field_name = field_name
+            title = request.POST.get('title')
+            newSurveySection.title = title
             
-            field_params = request.POST.get('field_params')
-            newTransformationRule.field_params = field_params
+            srs = request.POST.get('srs')
+            newSurveySection.srs = srs
             
-            newTransformationRule.transformation = transformation
-            newTransformationRule.save()
+            definition = request.POST.get('definition')
+            newSurveySection.definition = definition
             
-            response = {
-                'rule' : {
-                    'id': newTransformationRule.id,
-                    'field_name': newTransformationRule.field_name
-                     }
-            }
+            newSurveySection.survey = survey
+            newSurveySection.save()
+            
+            return redirect('survey_section_update', survey_section_id=newSurveySection.id)
+            
         except Exception as e:
             try:
                 msg = e.get_message()
@@ -173,27 +178,35 @@ def survey_section_add(request):
                 msg = _("Error: transformation could not be published")
 
 
-    if newTransformationRule == None:
-        response = {
-        }
+    form = SurveySectionForm()
         
-    return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+    return render(request, 'survey_section_add.html', {'form': form, 'survey': survey})
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def survey_section_update(request, survey_section_id):
-    transformation_rule = TransformationRule.objects.get(id=transformation_rule_id)
+    newSurveySection = SurveySection.objects.get(id=survey_section_id)
     if request.method == 'POST':
         try:
-            field_name = request.POST.get('field_name')
-            transformation_rule.field_name = field_name
+            form = SurveySectionForm(request.POST)
+            newSurveySection = SurveySection()
+            field_name = request.POST.get('name')
+            newSurveySection.name = field_name
             
-            field_params = request.POST.get('field_params')
-            transformation_rule.field_params = field_params
+            title = request.POST.get('title')
+            newSurveySection.title = title
             
-            transformation_rule.save()
+            srs = request.POST.get('srs')
+            newSurveySection.srs = srs
+            
+            definition = request.POST.get('definition')
+            newSurveySection.definition = definition
+            
+            newSurveySection.save()
+            
+            return redirect('survey_update', survey_id=newSurveySection.survey.id)
             
         except Exception as e:
             try:
@@ -201,15 +214,12 @@ def survey_section_update(request, survey_section_id):
             except:
                 msg = _("Error: transformation could not be published")
 
-    response = {
-                'rule' : {
-                    'id': transformation_rule.id,
-                    'field_name': transformation_rule.field_name,
-                    'field_params': transformation_rule.field_params
-                     }
-            }
+
+    form = SurveySectionForm(instance=newSurveySection)
         
-    return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+    return render(request, 'survey_section_update.html', {'form': form, 'survey': newSurveySection.survey})
+
+
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -219,12 +229,12 @@ def survey_section_delete(request, survey_section_id):
     tr_removed = False
     if request.method == 'POST':
         try:
-            transformation_rule = TransformationRule.objects.get(id=transformation_rule_id)
-            transformation_rule.delete()
+            survey_section = SurveySection.objects.get(id=survey_section_id)
+            survey_section.delete()
             
             response = {
                 'rule' : {
-                    'id': transformation_rule_id
+                    'id': survey_section.id
                      }
             }
             

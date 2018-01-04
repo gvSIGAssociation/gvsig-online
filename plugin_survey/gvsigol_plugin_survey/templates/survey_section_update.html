@@ -43,39 +43,23 @@
 						</div>
 					</div>
 					
-					<div class="box-body">
-						<span class="box-title" style="font-size:18px;">{% trans "Feature types (layers)" %}
-						<div class="box-tools pull-right">
-							<div class="btn btn-add-feature btn-default btn-sm">
-								<i class="fa fa-plus margin-r-5"></i> {% trans "new feature type" %}
-							</div>
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="id_srs">{% trans "SRS" %}</label> {{ form.srs }}
 						</div>
-						</span>
-						<table class="table" id="transformation-table">
-							<thead>
-								<tr>
-									<th></th>
-									<th>ID</th>
-									<th>{% trans "Name" %}</th>
-									<th>{% trans "Title" %}</th>
-									<th></th>
-									<th></th>
-								</tr>
-							</thead>
-							<tbody>
-								{% for tr in sections %}
-								<tr>
-									<td></td>
-									<td>{{ tr.id }}</td>
-									<td>{{ tr.name }}</td>
-									<td>{{ tr.title }}</td>
-									<td><div name="button-update-section-survey" data-value="{{ tr.id }}" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update section survey" %}" class="btn btn-success btn-update-feature"><i class="fa fa-edit"></i></div></td>
-									<td><div name="button-delete-survey" data-value="{{ tr.id }}" data-toggle="modal" data-target="#modal-delete-survey" data-placement="bottom" title="{% trans "Remove section survey" %}" class="btn btn-danger btn-delete-feature"><i class="fa fa-times"></i></div></td>
-								</tr>
-								{% endfor %}
-							</tbody>
-						</table>
 					</div>
+					
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<span for="id_definition" style="font-weight:bold">{% trans "Definition" %}<div class="box-tools pull-right">
+							<div class="btn btn-add-feature btn-default btn-sm">
+								<i class="fa fa-plus margin-r-5"></i> {% trans "add form" %}
+							</div>
+						</div></span> {{ form.definition }}
+						</div>
+					</div>
+					
+					
 				</div>
 			</form>
 		</div>
