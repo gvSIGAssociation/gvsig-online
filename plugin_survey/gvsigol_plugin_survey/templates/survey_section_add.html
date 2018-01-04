@@ -6,10 +6,10 @@
 <div class="row">
 	<div class="col-md-12">
 		<div class="box padding-20">
-			<form role="form" method="post" action="/gvsigonline/survey/survey_add/">
+			<form role="form" method="post" action="/gvsigonline/survey/survey_section_add/{{ survey.id }}/">
 				{% csrf_token %}
 				<div class="box-header with-border">
-					<h3 class="box-title">{% trans "Add survey section" %}</h3>
+					<h3 class="box-title">{% trans "Add survey" %}</h3>
 					<div class="box-tools pull-right">
 						<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-chevron-right margin-r-5" aria-hidden="true"></i> {% trans "Save" %}</button>					
 					</div>
@@ -44,6 +44,21 @@
 							{{ form.title }}									
 						</div>
 					</div>
+					
+					<div class="row">
+						<div class="col-md-12 form-group">	
+							<label for="id_srs">{% trans "SRS" %}</label>
+							{{ form.srs }}									
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="col-md-12 form-group">	
+							<label for="id_title">{% trans "Definition" %}</label>
+							{{ form.definition }}									
+						</div>
+					</div>
+					
 				</div>									
 			</form>	
 		</div>

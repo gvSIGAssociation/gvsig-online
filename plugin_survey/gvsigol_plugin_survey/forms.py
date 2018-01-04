@@ -22,5 +22,6 @@ class SurveySectionForm(forms.ModelForm):
     name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     title = forms.CharField(label=_(u'Title'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     srs = forms.ChoiceField(label=_(u'SRS'), required=False, choices=supported_srs_and_blank, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    definition = forms.CharField(label=_(u'Definition'), required=False, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))
 
 
