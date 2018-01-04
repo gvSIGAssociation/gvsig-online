@@ -463,7 +463,37 @@ $(document).ready(function() {
 				 	var id = $(this).attr("id").replace("color-ramp-","");
 					if(self.color_ramp_data[id]){
 				 		var json_data = self.color_ramp_data[id]["data"];
-			 			self.colorTable.applyRampColor(json_data, document.min, document.max);
+				 		if(document.min == null || document.max == null){
+							$.ajax({
+								type: 'POST',
+								async: false,
+								url: '/gvsigonline/symbology/get_raster_statistics/{{layer_id}}/',
+								beforeSend:function(xhr){
+									xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+								},
+								success	:function(response){
+									if(response.result){
+										for(var i = 0; i < response.result.length; i++){
+											var min = response.result[i][0];
+											if(document.min == null || min < document.min){
+												document.min = min;
+											}
+											var max = response.result[i][1];
+											if(document.max == null || max < document.max){
+												document.max = max;
+											}
+											
+											if(document.min != null && document.max != null){
+												self.colorTable.applyRampColor(json_data, document.min, document.max);
+											}
+										}
+									}
+								},
+								error: function(){}
+							});
+						}else{
+			 				self.colorTable.applyRampColor(json_data, document.min, document.max);
+						}
 					}
 					$('#modal-select-ramp').modal('hide');
 				});
