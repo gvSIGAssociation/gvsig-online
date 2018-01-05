@@ -44,10 +44,10 @@ from gvsigol.settings import GVSIGOL_LDAP, LOGOUT_PAGE_URL, AUTH_WITH_REMOTE_USE
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 def login_user(request):
-    if request.user.is_authenticated():
-        logout_user(request)
     errors = []
     if request.method == "POST":
+        if request.user.is_authenticated():
+            logout_user(request)
         username = request.POST.get('username')
         try:
             findUser = User.objects.get(username=username)
