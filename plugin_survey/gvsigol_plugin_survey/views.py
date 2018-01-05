@@ -106,6 +106,17 @@ def survey_update(request, survey_id):
             survey.title = title
            
             survey.save()
+            
+            ordered = request.POST.get('order')
+    
+            ids = ordered.split(',')
+            count = 0
+            for id in ids:
+                section = SurveySection.objects.get(id=id)
+                section.order = count
+                section.save()
+                count = count + 1
+            
             return redirect('survey_list')
         
         except Exception as e:
@@ -166,6 +177,8 @@ def survey_section_add(request, survey_id):
             definition = request.POST.get('definition')
             newSurveySection.definition = definition
             
+            newSurveySection.order = SurveySection.objects.filter(survey_id=survey.id).count()
+            
             newSurveySection.survey = survey
             newSurveySection.save()
             
@@ -191,7 +204,6 @@ def survey_section_update(request, survey_section_id):
     if request.method == 'POST':
         try:
             form = SurveySectionForm(request.POST)
-            newSurveySection = SurveySection()
             field_name = request.POST.get('name')
             newSurveySection.name = field_name
             
@@ -217,7 +229,7 @@ def survey_section_update(request, survey_section_id):
 
     form = SurveySectionForm(instance=newSurveySection)
         
-    return render(request, 'survey_section_update.html', {'form': form, 'survey': newSurveySection.survey})
+    return render(request, 'survey_section_update.html', {'form': form, 'section': newSurveySection, 'survey': newSurveySection.survey})
 
 
 
