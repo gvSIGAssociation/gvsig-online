@@ -32,7 +32,7 @@ function createDynamicForm(form_definition, component_chooser, div_destination){
 }
 
 function createFormComponent(div_destination, method, index, field){
-	var id = method + "-" + index;
+	var id = method + "-" + field["id"];
 	var html = ''; 
 	if(field["type"] == 'string'){
 		html = '<div style="clear:both"></div><label for="'+id+'">'+field["key"]+'</label><br />'; 
@@ -86,6 +86,52 @@ function createFormComponent(div_destination, method, index, field){
 		html +='<input id="'+id+'" name="'+id+'" type="number" class="form-control" '+value+' style="width: 100%"><br />';
 	}
 	
+	if(field["type"] == 'double'){
+		html = '<div style="clear:both"></div><label for="'+id+'">'+field["key"]+'</label><br />'; 
+		var value = "";
+		if(field["value"] != undefined){
+			value += 'value="'+field["value"]+'" ';
+		}
+		if(field["min"] != undefined){
+			value += 'min='+field["min"]+' ';
+		}
+		if(field["max"] != undefined){
+			value += 'max='+field["max"]+' ';
+		}
+		value += 'step=0.01 ';
+		html +='<input id="'+id+'" name="'+id+'" type="number" class="form-control" '+value+' style="width: 100%"><br />';
+	}
+	
+	if(field["type"] == 'boolean'){
+		html = '<div style="clear:both"></div><label for="'+id+'">'+field["key"]+'</label><br />'; 
+		var value = "";
+		if(field["value"] != undefined && field["value"] == "true"){
+			value += 'checked ';
+		}
+		
+		html +='<input id="'+id+'" name="'+id+'" type="checkbox" '+value+'><br />';
+	}
+	
+	if(field["type"] == 'date'){
+		html = '<div style="clear:both"></div><label for="'+id+'">'+field["key"]+'</label><br />'; 
+		var value = "";
+		if(field["value"] != undefined){
+			value += 'value="'+field["value"]+'" ';
+		}
+		
+		html +='<input id="'+id+'" name="'+id+'" type="date" class="form-control" '+value+' style="width: 100%"><br />';
+	}
+	
+	if(field["type"] == 'time'){
+		html = '<div style="clear:both"></div><label for="'+id+'">'+field["key"]+'</label><br />'; 
+		var value = "";
+		if(field["value"] != undefined){
+			value += 'value="'+field["value"]+'" ';
+		}
+		
+		html +='<input id="'+id+'" name="'+id+'" type="time" class="form-control" '+value+' style="width: 100%"><br />';
+	}
+	
 	$("#"+div_destination).append(html);
 	
 	if(field["type"] == 'form'){
@@ -112,9 +158,18 @@ function getParamsFromDynamicForm(form_definition, component_chooser, div_destin
 			var fields = form["fields"];
 			for(var j=0; j<fields.length; j++){
 				var field = fields[j];
-				var id = key + "-" + j;
+				var id = key + "-" + field["id"];
 				if(field["type"]=="combostring"){
-					field["current-value"] = $("#"+div_destination+" #"+id+" option:selected").val();
+					var vx = $("#"+div_destination+" #"+id+" option:selected").val();
+					if(vx == "true" || vx == "false"){
+						if(vx == "true"){
+							field["current-value"] = true;
+						}else{
+							field["current-value"] = false;
+						}
+					}else{
+						field["current-value"] = vx;
+					}
 				}else{
 					field["current-value"] = $("#"+div_destination+" #"+id).val();
 				}
@@ -139,7 +194,7 @@ function setParamsFromDynamicForm(field_definition, component_chooser, div_desti
 	var fields = field_definition["fields"];
 	for(var i=0; i<fields.length; i++){
 		var field = fields[i];
-		var id = field_definition["method_name"] + "-" + i;
+		var id = field_definition["method_name"] + "-" + field["id"];
 		if(field['type'] == 'form'){
 			setParamsFromDynamicForm(field['value'], id+'-select', id+'-div');
 		}else{
