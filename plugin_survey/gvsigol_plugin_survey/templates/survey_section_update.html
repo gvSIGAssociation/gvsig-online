@@ -153,6 +153,31 @@
 						<input id="formitem-title" class="form-control" value="">
 					</div>
 				</div>
+				
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Type" %}</label>
+						<select id="transformation-operation-select" name="type" class="form-control">
+							<option value="">---</option>
+						</select>
+						<br />
+						<div id="transformation-operation-div">
+							<input type="text" id="fixed_value_text" name="fixed_value_text"
+							class="form-control fill-with-control" value="" disabled>
+						</div>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Mandatory" %}</label>
+						<select id="mandatory" name="mandatory" class="form-control undefined" style="width: 100%">
+							<option value="yes">{% trans "Yes" %}</option>
+							<option value="no" selected="">{% trans "No" %}</option>
+						</select>
+					</div>
+				</div>
+				
 			</div>
 			<div class="modal-footer">
 				<button id="modal-formitem-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
@@ -198,6 +223,7 @@
 $().ready(function(){ 
 	this.count = 0;
 	this.result = {};
+	var field_definitions = {{ field_definitions|safe }};
 	var self = this;
 	var json = JSON.parse('{{section.definition|safe}}');
 	
@@ -214,13 +240,15 @@ $().ready(function(){
 			var name = items[item]["key"];
 			var title = items[item]["title"];
 			var type = items[item]["type"];
-			create_formitem(name, title, type, comp);
+			var values = items[item]["values"];
+			create_formitem(name, title, type, values, comp);
 		}
 	}
 	
 	
 	function action_buttonsi(){
 		var self = this;
+		createDynamicForm(field_definitions, "transformation-operation-select", "transformation-operation-div");
 		
 		$(".btn-edit-formitem").unbind("click").click(function(){
 			var comp = $(this).parent().parent().parent();
@@ -230,23 +258,42 @@ $().ready(function(){
 			var name = document.result[order]["name"];
 			var title = document.result[order]["title"];
 			var type = document.result[order]["itemtype"];
+			var values = document.result[order]["values"];
 			
 			$("#formitem-name").val(name);
 			$("#formitem-title").val(title);	
+			$("#transformation-operation-select").val(type);
+			$("#transformation-operation-select").trigger("change");
+			for(var key in values){
+				var vbl = values[key];
+				if(typeof(vbl) === "boolean"){
+					vbl = "" + vbl;
+				}
+				$("#"+type+"-"+key).val(vbl);
+			}
+			
 			$('#modal-formitem').modal('show');
 			
 			$('#modal-formitem-accept').unbind("click").click(function() {
 				$("#"+id).attr("data-name", $("#formitem-name").val());
 				$("#"+id).attr("data-title", $("#formitem-title").val());
-				$("#"+id + " .box-header .text").text($("#formitem-title").val() + ' (' + type + ')');
+				var typex =  $("#transformation-operation-select").val();
+				$("#"+id + " .box-header .text").text($("#formitem-title").val() + ' (' + typex + ')');
 				$("#"+id).attr("id", "lg_" + $("#formitem-name").val());
 				
+				var rule_field_params = getParamsFromDynamicForm(field_definitions, "transformation-operation-select", "transformation-operation-div")
+				var values = {}
+				for(var i in rule_field_params["fields"]){
+					var value = rule_field_params["fields"][i];
+					values[value["id"]] = value["current-value"];
+					
+				}
 				document.result[order] = {
 						'name': $("#formitem-name").val(),
 						'title': $("#formitem-title").val(),
 						'type': 'formitem',
-						'itemtype': 'combostring',
-						'values': {}
+						'itemtype': typex,
+						'values': values
 				}
 				
 				$('#modal-formitem').modal('hide');
@@ -266,14 +313,21 @@ $().ready(function(){
 			$("#formitem-name").val("");
 			$("#formitem-title").val("");	
 			var formid = $(this).parent().parent().parent();
+			$("#transformation-operation-select").trigger("change");
 			$('#modal-formitem').modal('show');
 			
 			$('#modal-formitem-accept').unbind("click").click(function() {
 				var name = $("#formitem-name").val();
 				var title = $("#formitem-title").val();
-				var type = "combostring";
-				
-				create_formitem(name, title, type, formid);
+				var typex =  $("#transformation-operation-select").val();
+				var rule_field_params = getParamsFromDynamicForm(field_definitions, "transformation-operation-select", "transformation-operation-div")
+				var values = {}
+				for(var i in rule_field_params["fields"]){
+					var value = rule_field_params["fields"][i];
+					values[value["id"]] = value["current-value"];
+					
+				}
+				create_formitem(name, title, typex, values, formid);
 				
 				$('#modal-formitem').modal('hide');
 			});
@@ -372,7 +426,7 @@ $().ready(function(){
 		self.count ++;
 	}
 	
-	function create_formitem(name, title, type, comp){
+	function create_formitem(name, title, type, values, comp){
 		var html = '<div id="lgi_'+name+'" data-name="'+name+'" data-title="'+title+'" data-order="'+document.count+'" class="box-default collapsed-box section-formitem toc-layergroup">'+
 		'<div class="box-header with-border">'+
 		'	<span class="handlei" style="margin-right: 20px;">'+ 
@@ -399,7 +453,7 @@ $().ready(function(){
 				'title': title,
 				'type': 'formitem',
 				'itemtype': type,
-				'values': {}
+				'values': values
 		}
 		document.count ++;
 	}
@@ -456,7 +510,8 @@ $().ready(function(){
 				var aux_formitem = {
 						'key': document.result[order2]["name"], 
 						'title': document.result[order2]["title"], 
-						'type': document.result[order2]["itemtype"]
+						'type': document.result[order2]["itemtype"],
+						'values': document.result[order2]["values"]
 				};
 				
 				aux_form['formitems'].push(aux_formitem);

@@ -37,6 +37,7 @@ import json
 from django.utils.translation import ugettext as _
 from django.db import IntegrityError
 from django.shortcuts import render
+from settings import SURVEY_FUNCTIONS
 
 import re
 import os
@@ -228,8 +229,15 @@ def survey_section_update(request, survey_section_id):
 
 
     form = SurveySectionForm(instance=newSurveySection)
+    field_definitions = SURVEY_FUNCTIONS
+    params =  {
+        'form': form, 
+        'section': newSurveySection, 
+        'survey': newSurveySection.survey, 
+        'field_definitions': json.dumps(field_definitions)
+    }
         
-    return render(request, 'survey_section_update.html', {'form': form, 'section': newSurveySection, 'survey': newSurveySection.survey})
+    return render(request, 'survey_section_update.html',  params)
 
 
 
