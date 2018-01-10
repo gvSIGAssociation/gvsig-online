@@ -156,6 +156,46 @@ def survey_delete(request, survey_id):
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@require_POST
+@staff_required
+def survey_update_project(request, survey_id):
+
+    return redirect('survey_list')
+
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_POST
+@staff_required
+def survey_definition(request, survey_id):
+    result = []
+    try:
+        survey = Survey.objects.get(id=survey_id)
+        sections = SurveySection.objects.filter(survey_id=survey.id).order_by('order')
+        
+        for section in sections:
+            aux_section = {}
+            aux_section["sectionname"] = section.name
+            aux_section["sectiontitle"] = section.title
+            aux_section["sectiondescription"] = section.title
+            definition = '[]'
+            if section.definition:
+                definition = section.definition
+            aux_section["forms"] = json.loads(definition)
+            result.append(aux_section)
+        
+    except Exception as e:
+        return HttpResponse('Error getting definition of survey: ' + str(e), status=500)
+    
+    response = {
+            'json': result
+        }
+    
+    return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def survey_section_add(request, survey_id):

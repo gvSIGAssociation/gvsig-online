@@ -24,6 +24,8 @@
 							<th>{% trans "Title" %}</th>
 							<th></th>
 							<th></th>
+							<th></th>
+							<th></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -33,6 +35,8 @@
 							<td>{{ tr.id }}</td>
 							<td>{{ tr.name }}</td>
 							<td>{{ tr.title }}</td>
+							<td></td>
+							<td></td>
 							<td></td>
 							<td></td>
 						</tr>
@@ -105,6 +109,14 @@ $(document).ready(function() {
         },{
 	      	"targets": -2,
 	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-update-project" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update project" %}' + '" class="btn btn-warning"><i class="fa fa-refresh"></i></button>'
+	  	},{
+	      	"targets": -3,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-definition-survey" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Get survey definition" %}' + '" class="btn bg-purple"><i class="fa fa-cogs"></i></button>'
+	  	},{
+	      	"targets": -4,
+	       	"data": null,
 	        "defaultContent": '<button type="button" name="button-update-survey" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update survey" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
 	  	}],
 	    "dom": 'T<"clear">lfrtip',
@@ -118,12 +130,35 @@ $(document).ready(function() {
 	    	updateSurvey(data);
 		} else if (this.name == "button-delete-survey"){
         	deleteSurvey(data, row);   
+        }else if (this.name == "button-definition-survey"){
+        	getDefinitionSurvey(data, row);   
+        }else if (this.name == "button-update-project"){
+        	updateProject(data, row);   
         }
 	});
 	
 	$('#button-add-survey').click( function() {
 		location.href = '/gvsigonline/survey/survey_add/';
 	});
+	
+	function getDefinitionSurvey(data, row){
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/survey/survey_definition/' + data[1] + '/',
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			success	:function(response){
+				console.log(response.json);
+			},
+			error: function(){}
+		});
+	}
+	
+	function updateProject(data){			
+		alert("Under construction");
+	}
 	
 	function updateSurvey(data){			
 		location.href = '/gvsigonline/survey/survey_update/' + data[1] + '/';

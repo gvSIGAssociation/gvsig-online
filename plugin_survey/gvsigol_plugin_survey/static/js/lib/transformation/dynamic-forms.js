@@ -26,9 +26,50 @@ function createDynamicForm(form_definition, component_chooser, div_destination){
 				}
 			}
 		}
+		load_functions();
 	});
 	
 	$("#"+component_chooser).change();
+}
+
+function create_stringcombo_item(id, name){
+	var html = "";
+	html +='<div id="'+id+'" class="stringcombo-item">';
+	html +='<input type="text" name="'+id+'_item" class="form-control stringcombo-item-name" value="'+name+'"><br/>';
+	html +='<input type="text" name="'+id+'" class="form-control combo-entry" style="width:80%;float:left" value="" placeholder="'+gettext("Escribe el item a añadir...")+'"><div class="add_li"><i class="fa fa-plus" aria-hidden="true"></i></div><div class="remove_li"><i class="fa fa-minus" aria-hidden="true"></i></div>';
+	html +='<div style="clear:both"></div>';
+	html +='<ul></ul>';
+	html +='</div>';
+	$("#"+id+"_div").append(html);
+	
+	load_functions();
+}
+
+function load_functions(){
+	$(".add_li").unbind("click").click(function(){
+		var parent = $(this).parent();
+		var item = parent.children(".combo-entry").val();
+		var li = '<li class="">'+item+'</li>';
+		parent.children("ul").append(li);
+	});
+	$(".remove_li").unbind("click").click(function(){
+		var parent = $(this).parent();
+		parent.find("ul li:last-child").remove();
+	});
+	
+	$(".stringcombo_item_add_button").unbind("click").click(function(){
+		var id = $(this).attr("name");
+		var count = $("#"+id+"_div").find(".stringcombo-item").length;
+		var name = 'items-'+count;
+		create_stringcombo_item(id, name);
+	});
+	
+	$(".stringcombo_item_remove_button").unbind("click").click(function(){
+		var id = $(this).attr("name");
+		$("#"+id+"_div .stringcombo-item:last-child").remove();
+		
+		load_functions();
+	});
 }
 
 function createFormComponent(div_destination, method, index, field){
@@ -131,6 +172,22 @@ function createFormComponent(div_destination, method, index, field){
 		
 		html +='<input id="'+id+'" name="'+id+'" type="time" class="form-control" '+value+' style="width: 100%"><br />';
 	}
+
+	if(field["type"] == 'stringcombo' || field["type"] == 'multistringcombo'){
+		html +='<div id="'+id+'_div" class="stringcombo-item">';
+		html +='<input type="text" name="'+id+'_item" class="stringcombo-item-name form-control" value="items" disabled><br/>';
+		html +='<input type="text" name="'+id+'" class="form-control combo-entry" style="width:80%;float:left" value="" placeholder="'+gettext("Escribe el item a añadir...")+'"><div class="add_li"><i class="fa fa-plus" aria-hidden="true"></i></div><div class="remove_li"><i class="fa fa-minus" aria-hidden="true"></i></div>';
+		html +='<div style="clear:both"></div>';
+		html +='<ul></ul>';
+		html +='</div>';
+	}
+	
+	if(field["type"] == 'connectedstringcombo'){
+		html +='<div id="'+id+'_remove_button" name="'+id+'"  class="btn btn-default pull-right stringcombo_item_remove_button" style="margin: 5px;"><i class="fa fa-minus margin-r-5" aria-hidden="true"></i>'+gettext("Remove item")+'</div>';
+		html +='<div id="'+id+'_add_button"  name="'+id+'" class="btn btn-default pull-right stringcombo_item_add_button" style="margin: 5px;"><i class="fa fa-plus margin-r-5" aria-hidden="true"></i>'+gettext("Add item")+'</div>';
+		html +='<div id="'+id+'_div"></div>'
+	}
+
 	
 	$("#"+div_destination).append(html);
 	
@@ -171,7 +228,24 @@ function getParamsFromDynamicForm(form_definition, component_chooser, div_destin
 						field["current-value"] = vx;
 					}
 				}else{
-					field["current-value"] = $("#"+div_destination+" #"+id).val();
+					if(field["type"]=="connectedstringcombo" || field["type"]=="stringcombo" || field["type"]=="multistringcombo"){
+						var values_item = {};
+						$(".stringcombo-item").each(function(){
+							var item = $(this).children(".stringcombo-item-name")[0].value;
+							var value_items = [];
+							var li = $(this).find("ul li").each(function(){
+								var aux = {}
+								var text = $(this).text();
+								aux["item"] = text;
+								value_items.push(aux);
+							});
+							values_item[item] = value_items;
+						})
+						field["current-value"] = values_item;
+						field["values"] = values_item;
+					}else{
+						field["current-value"] = $("#"+div_destination+" #"+id).val();
+					}
 				}
 				if(field["type"]=="form"){
 					var keyl = $("#"+key+'-'+j+"-select option:selected").val();
