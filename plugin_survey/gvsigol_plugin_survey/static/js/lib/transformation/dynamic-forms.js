@@ -1,4 +1,4 @@
-function createDynamicForm(form_definition, component_chooser, div_destination){
+function createDynamicSurveyForm(form_definition, component_chooser, div_destination){
 	var html_div = "";
 	$("#"+component_chooser).empty();
 	for(var i=0; i<form_definition.length; i++){
@@ -21,7 +21,7 @@ function createDynamicForm(form_definition, component_chooser, div_destination){
 					var fields = form_definition[i][this.value]["fields"];
 					for(var j=0; j<fields.length; j++){
 						var field = fields[j];
-						createFormComponent(div_destination, this.value, j, field);
+						createSurveyFormComponent(div_destination, this.value, j, field);
 					}
 				}
 			}
@@ -72,7 +72,7 @@ function load_functions(){
 	});
 }
 
-function createFormComponent(div_destination, method, index, field){
+function createSurveyFormComponent(div_destination, method, index, field){
 	var id = method + "-" + field["id"];
 	var html = ''; 
 	if(field["type"] == 'string'){
@@ -199,13 +199,13 @@ function createFormComponent(div_destination, method, index, field){
 		$("#"+div_destination).append('<div class="'+classes+'"><label for="'+id+'">'+field["key"]+'</label><br /><select id="'+id+'-select" class="form-control" style="width: 100%"></select>'+
 				'<div id="'+id+'-div" class="col-md-12 form-group" style="padding-top:10px;background-color:#eee"></div>'+
 				'</div>');
-		createDynamicForm(field["value"], id+"-select", id+"-div")
+		createDynamicSurveyForm(field["value"], id+"-select", id+"-div")
 	}
 }
 
 
 
-function getParamsFromDynamicForm(form_definition, component_chooser, div_destination){
+function getParamsFromDynamicSurveyForm(form_definition, component_chooser, div_destination){
 	var key = $("#"+component_chooser+" option:selected").val();
 	var form = null;
 	for (var i=0;i<form_definition.length; i++){
@@ -251,7 +251,7 @@ function getParamsFromDynamicForm(form_definition, component_chooser, div_destin
 					var keyl = $("#"+key+'-'+j+"-select option:selected").val();
 					for (var l=0;l<field["value"].length; l++){
 						if(keyl in field["value"][l]){
-					       field["value"] = getParamsFromDynamicForm(field["value"], key+'-'+j+'-select',key+'-'+j+'-div');
+					       field["value"] = getParamsFromDynamicSurveyForm(field["value"], key+'-'+j+'-select',key+'-'+j+'-div');
 						}
 					}
 				}
@@ -262,7 +262,7 @@ function getParamsFromDynamicForm(form_definition, component_chooser, div_destin
 	return form;
 }
 
-function setParamsFromDynamicForm(field_definition, component_chooser, div_destination){
+function setParamsFromDynamicSurveyForm(field_definition, component_chooser, div_destination){
 	$("#"+component_chooser+" option[value="+field_definition["method_name"]+"]").attr('selected',true).change();
 	
 	var fields = field_definition["fields"];
@@ -270,7 +270,7 @@ function setParamsFromDynamicForm(field_definition, component_chooser, div_desti
 		var field = fields[i];
 		var id = field_definition["method_name"] + "-" + field["id"];
 		if(field['type'] == 'form'){
-			setParamsFromDynamicForm(field['value'], id+'-select', id+'-div');
+			setParamsFromDynamicSurveyForm(field['value'], id+'-select', id+'-div');
 		}else{
 			if(field["current-value"] != undefined){
 				$("#"+div_destination+" #"+id).val(field["current-value"]);

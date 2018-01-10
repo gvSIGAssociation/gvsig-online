@@ -246,7 +246,7 @@ $().ready(function(){
 		}
 	}
 	
-	createDynamicForm(field_definitions, "transformation-operation-select", "transformation-operation-div");
+	createDynamicSurveyForm(field_definitions, "transformation-operation-select", "transformation-operation-div");
 	
 	function create_stringcombo_item(type, id, name, values){
 		var html = "";
@@ -272,7 +272,7 @@ $().ready(function(){
 	
 	function action_buttonsi(){
 		var self = this;
-		createDynamicForm(field_definitions, "transformation-operation-select", "transformation-operation-div");
+		createDynamicSurveyForm(field_definitions, "transformation-operation-select", "transformation-operation-div");
 		
 		$(".btn-edit-formitem").unbind("click").click(function(){
 			var comp = $(this).parent().parent().parent();
@@ -313,7 +313,7 @@ $().ready(function(){
 				$("#"+id + " .box-header .text").text($("#formitem-title").val() + ' (' + typex + ')');
 				$("#"+id).attr("id", "lg_" + $("#formitem-name").val());
 				
-				var rule_field_params = getParamsFromDynamicForm(field_definitions, "transformation-operation-select", "transformation-operation-div")
+				var rule_field_params = getParamsFromDynamicSurveyForm(field_definitions, "transformation-operation-select", "transformation-operation-div")
 				var values = {}
 				for(var i in rule_field_params["fields"]){
 					var value = rule_field_params["fields"][i];
@@ -356,7 +356,7 @@ $().ready(function(){
 				var name = $("#formitem-name").val();
 				var title = $("#formitem-title").val();
 				var typex =  $("#transformation-operation-select").val();
-				var rule_field_params = getParamsFromDynamicForm(field_definitions, "transformation-operation-select", "transformation-operation-div")
+				var rule_field_params = getParamsFromDynamicSurveyForm(field_definitions, "transformation-operation-select", "transformation-operation-div")
 				var values = {}
 				for(var i in rule_field_params["fields"]){
 					var value = rule_field_params["fields"][i];
