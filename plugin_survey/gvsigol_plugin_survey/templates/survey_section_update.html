@@ -226,8 +226,10 @@ $().ready(function(){
 	this.result = {};
 	var field_definitions = {{ field_definitions|safe }};
 	var self = this;
-	var json = JSON.parse('{{section.definition|safe}}');
-	
+	var json = {}
+	if('{{section.definition|safe}}'.length > 0){
+		json = JSON.parse('{{section.definition|safe}}');
+	}
 	for(var section in json){
 		var name = json[section]["formname"];
 		var title = json[section]["formtitle"];
