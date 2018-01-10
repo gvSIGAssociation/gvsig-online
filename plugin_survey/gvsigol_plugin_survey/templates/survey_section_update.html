@@ -227,7 +227,8 @@ $().ready(function(){
 	var field_definitions = {{ field_definitions|safe }};
 	var self = this;
 	var json = {}
-	if('{{section.definition|safe}}'.length > 0){
+	var aux_json = '{{section.definition|safe}}';
+	if(!(aux_json == 'None' || aux_json.length == 0)){
 		json = JSON.parse('{{section.definition|safe}}');
 	}
 	for(var section in json){
