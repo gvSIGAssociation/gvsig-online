@@ -152,14 +152,14 @@ SURVEY_FUNCTIONS = [{
                 }]
             }
         },{
-        'combostring' : {
+        'stringcombo' : {
             'method_name': 'stringcombo',
             'description': _('Stringcombo'),
             'fields' : [{ 
-                'key': _('Value'),
-                'id': 'value',
-                'type': 'label',
-                'value': 'under construction'
+                'key': _('Item'),
+                'id': 'item',
+                'type': 'stringcombo',
+                'value': ''
                 }]
             }
         },{
@@ -167,10 +167,10 @@ SURVEY_FUNCTIONS = [{
             'method_name': 'multistringcombo',
             'description': _('Multistringcombo'),
             'fields' : [{ 
-                'key': _('Value'),
-                'id': 'value',
-                'type': 'label',
-                'value': 'under construction'
+                'key': _('Item'),
+                'id': 'item',
+                'type': 'multistringcombo',
+                'value': ''
                 }]
             }
         },{
@@ -178,10 +178,43 @@ SURVEY_FUNCTIONS = [{
             'method_name': 'connectedstringcombo',
             'description': _('Connected Stringcombo'),
             'fields' : [{ 
+                'key': _('Item'),
+                'id': 'item',
+                'type': 'connectedstringcombo',
+                'value': ''
+                }]
+            }
+        },{
+        'pictures' : {
+            'method_name': 'pictures',
+            'description': _('Pictures'),
+            'fields' : [{ 
                 'key': _('Value'),
                 'id': 'value',
-                'type': 'label',
-                'value': 'under construction'
+                'type': 'pictures',
+                'value': ''
+                }]
+            }
+        },{
+        'sketch' : {
+            'method_name': 'sketch',
+            'description': _('Sketch'),
+            'fields' : [{ 
+                'key': _('Value'),
+                'id': 'value',
+                'type': 'sketch',
+                'value': ''
+                }]
+            }
+        },{
+        'map' : {
+            'method_name': 'map',
+            'description': _('Map'),
+            'fields' : [{ 
+                'key': _('Value'),
+                'id': 'value',
+                'type': 'map',
+                'value': ''
                 }]
             }
         },{

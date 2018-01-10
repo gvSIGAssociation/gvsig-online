@@ -8,4 +8,7 @@ urlpatterns = [
     url(r'^survey/survey_section_add/(?P<survey_id>[0-9]+)/$', 'gvsigol_plugin_survey.views.survey_section_add', name='survey_section_add'),
     url(r'^survey/survey_section_update/(?P<survey_section_id>[0-9]+)/$', 'gvsigol_plugin_survey.views.survey_section_update', name='survey_section_update'),
     url(r'^survey/survey_section_delete/(?P<survey_section_id>[0-9]+)/$', 'gvsigol_plugin_survey.views.survey_section_delete', name='survey_section_delete'),
+    
+    url(r'^survey/survey_definition/(?P<survey_id>[0-9]+)/$', 'gvsigol_plugin_survey.views.survey_definition', name='survey_definition'),
+    url(r'^survey/survey_update_project/(?P<survey_id>[0-9]+)/$', 'gvsigol_plugin_survey.views.survey_update_project', name='survey_update_project'),
 ]
