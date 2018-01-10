@@ -4929,3 +4929,40 @@ input.temporary-check[type=checkbox]{
 	font-weight: bold;
 	padding-right: 10px;
 }
+
+.btn-right-with-margin{
+	padding: 0px 10px;
+	float: right;
+}
+
+.btn-right-with-margin:hover{
+	background-color: #eee;
+}
+
+.section-backpanel{
+	background-color: #eee;
+	width: 100%;
+	display:none;
+}
+
+.stringcombo-item{
+	padding: 10px;
+	background-color: rgba(0,0,0,0.03);
+}
+
+.add_li{
+	color: green;
+    float: left;
+    background-color: #eee;
+    padding: 7px;
+    text-align: center;
+    width: 10%;
+}
+.remove_li{
+	color: red;
+    float: left;
+    background-color: #eee;
+    padding: 7px;
+    text-align: center;
+    width: 10%;
+}
