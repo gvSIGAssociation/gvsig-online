@@ -21,7 +21,8 @@
 
 @author: jbadia <jbadia@scolab.es>
 '''
-from models import Survey, SurveySection
+from models import Survey, SurveySection, SurveyUserGroup
+from gvsigol_auth.models import UserGroup
 from gvsigol_services.models import Layer
 from forms import SurveyForm, SurveySectionForm
 from gvsigol import settings
@@ -38,6 +39,7 @@ from django.utils.translation import ugettext as _
 from django.db import IntegrityError
 from django.shortcuts import render
 from settings import SURVEY_FUNCTIONS
+from django.core.urlresolvers import reverse
 
 import re
 import os
@@ -118,7 +120,7 @@ def survey_update(request, survey_id):
                 section.save()
                 count = count + 1
             
-            return redirect('survey_list')
+            return HttpResponseRedirect(reverse('survey_permissions', kwargs={'survey_id': survey_id}))
         
         except Exception as e:
             try:
@@ -312,5 +314,65 @@ def survey_section_delete(request, survey_section_id):
         
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def survey_permissions(request, survey_id):
+    if request.method == 'POST':
+        assigned_read_roups = []
+        for key in request.POST:
+            if 'read-usergroup-' in key:
+                assigned_read_roups.append(int(key.split('-')[2]))
+                
+        try:     
+            survey = Survey.objects.get(id=int(survey_id))
+        except Exception as e:
+            return HttpResponseNotFound('<h1>Survey not found{0}</h1>'.format(survey.name))
+        
+        agroup = UserGroup.objects.get(name__exact='admin')
+        
+        read_groups = []
+        
+        # clean existing groups and assign them again if necessary
+        SurveyUserGroup.objects.filter(survey=survey).delete()
+        for group in assigned_read_roups:
+            try:
+                group = UserGroup.objects.get(id=group)
+                lrg = SurveyUserGroup()
+                lrg.survey = survey
+                lrg.user_group = group
+                lrg.save()
+                #read_groups.append(group)
+            except Exception as e:
+                pass
+                        
+        return redirect('survey_list')
+    else:
+        try:
+            survey = Survey.objects.get(pk=survey_id)
+            groups = get_all_user_groups_checked_by_survey(survey)   
+            return render_to_response('survey_permissions_add.html', {'survey_id': survey.id, 'name': survey.name,  'groups': groups}, context_instance=RequestContext(request))
+        except Exception as e:
+            return HttpResponseNotFound('<h1>Survey not found: {0}</h1>'.format(survey_id))
+
+
+def get_all_user_groups_checked_by_survey(survey):
+    groups_list = UserGroup.objects.all()
+    read_groups = SurveyUserGroup.objects.filter(survey=survey)
+    
+    groups = []
+    for g in groups_list:
+        if g.name != 'admin' and g.name != 'public':
+            group = {}
+            for lrg in read_groups:
+                if lrg.user_group_id == g.id:
+                    group['read_checked'] = True
+            
+            group['id'] = g.id
+            group['name'] = g.name
+            group['description'] = g.description
+            groups.append(group)
+    
+    return groups  
 
 
