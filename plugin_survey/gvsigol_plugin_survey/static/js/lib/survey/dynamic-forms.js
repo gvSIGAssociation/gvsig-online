@@ -34,12 +34,26 @@ function createDynamicSurveyForm(form_definition, component_chooser, div_destina
 
 function create_stringcombo_item(id, name){
 	var html = "";
+//	html +='<div id="'+id+'" class="stringcombo-item">';
+//	html +='<input type="text" name="'+id+'_item" class="form-control stringcombo-item-name" value="'+name+'" placeholder="'+gettext("Item group name")+'"><br/>';
+//	html +='<input type="text" name="'+id+'" class="form-control combo-entry" style="width:80%;float:left" value="" placeholder="'+gettext("Escribe el item a añadir...")+'"><div class="add_li"><i class="fa fa-plus" aria-hidden="true"></i></div><div class="remove_li"><i class="fa fa-minus" aria-hidden="true"></i></div>';
+//	html +='<div style="clear:both"></div>';
+//	html +='<ul></ul>';
+//	html +='</div>';
+//	$("#"+id+"_div").append(html);
+//	
 	html +='<div id="'+id+'" class="stringcombo-item">';
-	html +='<input type="text" name="'+id+'_item" class="form-control stringcombo-item-name" value="'+name+'"><br/>';
-	html +='<input type="text" name="'+id+'" class="form-control combo-entry" style="width:80%;float:left" value="" placeholder="'+gettext("Escribe el item a añadir...")+'"><div class="add_li"><i class="fa fa-plus" aria-hidden="true"></i></div><div class="remove_li"><i class="fa fa-minus" aria-hidden="true"></i></div>';
+	html +='<div class="col-md-12 form-group item-group-div">';
+	html +='<label class="item-label">'+gettext("Item group")+'</label>';
+	html +='<div class="pull-right stringcombo_item_remove_button item-close"><i class="fa fa-times margin-r-5" aria-hidden="true"></i></div>';
+	html +='<input type="text" name="'+id+'_item" class="form-control stringcombo-item-name" value="'+name+'" placeholder="'+gettext("Item group name")+'"><br/>';
+	html +='<div class="btn btn-default pull-right add_li" style="margin: 5px;"><i class="fa fa-plus margin-r-5" aria-hidden="true"></i>'+gettext("Add item")+'</div>';
 	html +='<div style="clear:both"></div>';
-	html +='<ul></ul>';
+	html +='<ul class="ul-item">';
+	html +='</ul>';
 	html +='</div>';
+	html +='</div>';
+	
 	$("#"+id+"_div").append(html);
 	
 	load_functions();
@@ -48,13 +62,18 @@ function create_stringcombo_item(id, name){
 function load_functions(){
 	$(".add_li").unbind("click").click(function(){
 		var parent = $(this).parent();
-		var item = parent.children(".combo-entry").val();
-		var li = '<li class="">'+item+'</li>';
+		var item = "";
+		var li ='<li class="li-item"><span class="item-title">'+gettext("Item")+'</span><input type="text" class="form-control item-value" style="width:80%" value="" placeholder="'+gettext("Escribe el item a añadir...")+'"></span><div class="remove_li"><i class="fa fa-minus" aria-hidden="true"></i></div><div style="clear:both"></div></li>';
+
 		parent.children("ul").append(li);
+		parent.children(".combo-entry").val("");
+		
+		load_functions();
 	});
+	
 	$(".remove_li").unbind("click").click(function(){
 		var parent = $(this).parent();
-		parent.find("ul li:last-child").remove();
+		parent.remove();
 	});
 	
 	$(".stringcombo_item_add_button").unbind("click").click(function(){
@@ -65,8 +84,8 @@ function load_functions(){
 	});
 	
 	$(".stringcombo_item_remove_button").unbind("click").click(function(){
-		var id = $(this).attr("name");
-		$("#"+id+"_div .stringcombo-item:last-child").remove();
+		var parent = $(this).parent();
+		parent.remove();
 		
 		load_functions();
 	});
@@ -174,18 +193,24 @@ function createSurveyFormComponent(div_destination, method, index, field){
 	}
 
 	if(field["type"] == 'stringcombo' || field["type"] == 'multistringcombo'){
-		html +='<div id="'+id+'_div" class="stringcombo-item">';
-		html +='<input type="text" name="'+id+'_item" class="stringcombo-item-name form-control" value="items" disabled><br/>';
-		html +='<input type="text" name="'+id+'" class="form-control combo-entry" style="width:80%;float:left" value="" placeholder="'+gettext("Escribe el item a añadir...")+'"><div class="add_li"><i class="fa fa-plus" aria-hidden="true"></i></div><div class="remove_li"><i class="fa fa-minus" aria-hidden="true"></i></div>';
+		html +='<div id="'+id+'_div">';
+		html +='<div id="'+id+'" class="stringcombo-item">';
+		html +='<div class="col-md-12 form-group item-group-div">';
+		html +='<label class="item-label">'+gettext("Item group")+'</label>';
+		html +='<div class="pull-right stringcombo_item_remove_button item-close"><i class="fa fa-times margin-r-5" aria-hidden="true"></i></div>';
+		html +='<input type="text" name="'+id+'_item" class="form-control stringcombo-item-name" value="items" disabled placeholder="'+gettext("Item group name")+'"><br/>';
+		html +='<div class="btn btn-default pull-right add_li" style="margin: 5px;"><i class="fa fa-plus margin-r-5" aria-hidden="true"></i>'+gettext("Add item")+'</div>';
 		html +='<div style="clear:both"></div>';
-		html +='<ul></ul>';
+		html +='<ul class="ul-item">';
+		html +='</ul>';
+		html +='</div>';
+		html +='</div>';
 		html +='</div>';
 	}
 	
 	if(field["type"] == 'connectedstringcombo'){
-		html +='<div id="'+id+'_remove_button" name="'+id+'"  class="btn btn-default pull-right stringcombo_item_remove_button" style="margin: 5px;"><i class="fa fa-minus margin-r-5" aria-hidden="true"></i>'+gettext("Remove item")+'</div>';
-		html +='<div id="'+id+'_add_button"  name="'+id+'" class="btn btn-default pull-right stringcombo_item_add_button" style="margin: 5px;"><i class="fa fa-plus margin-r-5" aria-hidden="true"></i>'+gettext("Add item")+'</div>';
-		html +='<div id="'+id+'_div"></div>'
+		html +='<div id="'+id+'_add_button"  name="'+id+'" class="btn btn-default pull-right stringcombo_item_add_button" style="margin: 5px;"><i class="fa fa-plus margin-r-5" aria-hidden="true"></i>'+gettext("Add item group")+'</div>';
+		html +='<div id="'+id+'_div"></div>';
 	}
 
 	
@@ -231,11 +256,11 @@ function getParamsFromDynamicSurveyForm(form_definition, component_chooser, div_
 					if(field["type"]=="connectedstringcombo" || field["type"]=="stringcombo" || field["type"]=="multistringcombo"){
 						var values_item = {};
 						$(".stringcombo-item").each(function(){
-							var item = $(this).children(".stringcombo-item-name")[0].value;
+							var item = $(this).find(".stringcombo-item-name")[0].value;
 							var value_items = [];
-							var li = $(this).find("ul li").each(function(){
+							var li = $(this).find("ul li input").each(function(){
 								var aux = {}
-								var text = $(this).text();
+								var text = $(this).val();
 								aux["item"] = text;
 								value_items.push(aux);
 							});

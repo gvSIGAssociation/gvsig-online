@@ -258,15 +258,21 @@ $().ready(function(){
 		if(type =="stringcombo" || type == "multistringcombo"){
 			disabled = " disabled";
 		}
-		html +='<input type="text" name="'+id+'_item" class="form-control stringcombo-item-name" value="'+name+'"'+disabled+'><br/>';
-		html +='<input type="text" name="'+id+'" class="form-control combo-entry" style="width:80%;float:left" value="" placeholder="'+gettext("Escribe el item a añadir...")+'"><div class="add_li"><i class="fa fa-plus" aria-hidden="true"></i></div><div class="remove_li"><i class="fa fa-minus" aria-hidden="true"></i></div>';
+ 		html +='<div class="col-md-12 form-group item-group-div">';
+ 		html +='<label class="item-label">'+gettext("Item group")+'</label>';
+ 		if(!(type =="stringcombo" || type == "multistringcombo")){
+ 			html +='<div class="pull-right stringcombo_item_remove_button item-close"><i class="fa fa-times margin-r-5" aria-hidden="true"></i></div>';
+ 		}
+ 		html +='<input type="text" name="'+id+'_item" class="form-control stringcombo-item-name" value="'+name+'"'+disabled+' placeholder="'+gettext("Item group name")+'"><br/>';
+ 		html +='<div class="btn btn-default pull-right add_li" style="margin: 5px;"><i class="fa fa-plus margin-r-5" aria-hidden="true"></i>'+gettext("Add item")+'</div>';
 		html +='<div style="clear:both"></div>';
-		html +='<ul>';
+		html +='<ul class="ul-item">';
 		for(var idx in values){
-			html +='<li>'+ values[idx]["item"]+'</li>';
+			html +='<li class="li-item"><span class="item-title">'+gettext("Item")+'</span><input type="text" class="form-control item-value" style="width:80%" value="'+ values[idx]["item"]+'" placeholder="'+gettext("Escribe el item a añadir...")+'"></span><div class="remove_li"><i class="fa fa-minus" aria-hidden="true"></i></div><div style="clear:both"></div></li>';
 		}
 		html +='</ul>';
 		html +='</div>';
+ 		html +='</div>';
 		$("#"+type+"-item_div").append(html);
 		
 		load_functions();
@@ -566,6 +572,9 @@ $().ready(function(){
 		$("#definition").val(JSON.stringify(forms));
 		$("#section-form").submit();
 	});
+	
+	
+	$(".btn-collapse-form").trigger("click");
 });
 </script>
 {% endblock %}
