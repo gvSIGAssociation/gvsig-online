@@ -28,6 +28,7 @@ from __future__ import unicode_literals
 from django.db import models
 from gvsigol_core.models import Project
 from gvsigol_services.models import Layer
+from gvsigol_auth.models import UserGroup
 
 class Survey(models.Model):
     name = models.CharField(max_length=150) 
@@ -49,3 +50,9 @@ class SurveySection(models.Model):
     
     def __unicode__(self):
         return self.survey+'-'+self.name
+    
+class SurveyUserGroup(models.Model):
+    survey = models.ForeignKey(Survey, default=None)
+    user_group = models.ForeignKey(UserGroup, default=None)
+    def unicode(self):
+        return self.survey.name + ' - ' + self.user_group.name
