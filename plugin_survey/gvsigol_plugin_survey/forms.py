@@ -1,6 +1,7 @@
 from django import forms
 from django.utils.translation import ugettext as _
 from gvsigol_core.models import Project
+from gvsigol_services.models import Datastore
 from models import Survey, SurveySection
 from gvsigol_core import utils as core_utils
 
@@ -13,6 +14,7 @@ class SurveyForm(forms.ModelForm):
         fields = ['name', 'title']
     name = forms.CharField(label=_(u'Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=True, queryset=Datastore.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
     
 class SurveySectionForm(forms.ModelForm):
     class Meta:

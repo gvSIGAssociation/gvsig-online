@@ -23,7 +23,7 @@
 '''
 from models import Survey, SurveySection, SurveyUserGroup
 from gvsigol_auth.models import UserGroup
-from gvsigol_services.models import Layer
+from gvsigol_services.models import Layer, Datastore
 from forms import SurveyForm, SurveySectionForm
 from gvsigol import settings
 
@@ -73,6 +73,9 @@ def survey_add(request):
             
             title = request.POST.get('title')
             newSurvey.title = title
+            
+            datastore = request.POST.get('datastore')
+            newSurvey.datastore_id = datastore
                         
             newSurvey.save()
             return redirect('survey_update', survey_id=newSurvey.id)
@@ -108,17 +111,21 @@ def survey_update(request, survey_id):
             title = request.POST.get('title')
             survey.title = title
            
+            datastore = request.POST.get('datastore')
+            survey.datastore_id = datastore
+           
             survey.save()
             
             ordered = request.POST.get('order')
-    
-            ids = ordered.split(',')
-            count = 0
-            for id in ids:
-                section = SurveySection.objects.get(id=id)
-                section.order = count
-                section.save()
-                count = count + 1
+            
+            if ordered.__len__() > 0:
+                ids = ordered.split(',')
+                count = 0
+                for id in ids:
+                    section = SurveySection.objects.get(id=id)
+                    section.order = count
+                    section.save()
+                    count = count + 1
             
             return HttpResponseRedirect(reverse('survey_permissions', kwargs={'survey_id': survey_id}))
         
@@ -131,15 +138,19 @@ def survey_update(request, survey_id):
                 
     else:
         form = SurveyForm(instance=survey)
-        
-        sections = SurveySection.objects.filter(survey_id=survey.id).order_by('order')
-        
-        response= {
-            'form': form,
-            'survey': survey,
-            'media_url': settings.MEDIA_URL,
-            'sections': sections
-        }
+    
+    if not request.user.is_superuser:
+        form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
+    
+    
+    sections = SurveySection.objects.filter(survey_id=survey.id).order_by('order')
+    
+    response= {
+        'form': form,
+        'survey': survey,
+        'media_url': settings.MEDIA_URL,
+        'sections': sections
+    }
         
     return render(request, 'survey_update.html', response)
 

@@ -27,13 +27,14 @@ from __future__ import unicode_literals
 
 from django.db import models
 from gvsigol_core.models import Project
-from gvsigol_services.models import Layer
+from gvsigol_services.models import Layer, Datastore
 from gvsigol_auth.models import UserGroup
 
 class Survey(models.Model):
     name = models.CharField(max_length=150) 
     title = models.CharField(max_length=150) 
     project = models.ForeignKey(Project, null=True, blank=True)
+    datastore = models.ForeignKey(Datastore)
     
     def __unicode__(self):
         return self.name
