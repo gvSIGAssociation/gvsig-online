@@ -32,20 +32,54 @@
 					{% endif %}
 
 					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="id_name">{% trans "Name" %}</label> {{ form.name }}
+						<div class="col-md-9">
+							<div class="row">
+								<div class="col-md-12 form-group">
+									<label for="id_name">{% trans "Name" %}</label> {{ form.name }}
+								</div>
+							</div>
+							
+							<div class="row">
+								<div class="col-md-12 form-group">
+									<label for="id_name">{% trans "Title" %}</label> {{ form.title }}
+								</div>
+							</div>
+							
+							<div class="row">
+								<div class="col-md-12 form-group">
+									<label for="id_srs">{% trans "SRS" %}</label> {{ form.srs }}
+								</div>
+							</div>
 						</div>
-					</div>
-					
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="id_name">{% trans "Title" %}</label> {{ form.title }}
-						</div>
-					</div>
-					
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="id_srs">{% trans "SRS" %}</label> {{ form.srs }}
+						
+						<div class="col-md-3">
+							<div class="project_linked">
+								<div class="col-md-12 form-group">
+									<label for="id_name">{% trans "Layer linked" %}</label>
+									{% if section.layer_id != None %}
+									<a href="/gvsigonline/services/layer_update/{{section.layer.id}}/" class="product-title">
+										<div class="product-case">
+											<div class="product-img2">
+												<img data-origin="{{ section.layer.type }}" src="{{ section.layer.thumbnail.url }}" height="75" width="90">
+											</div>
+											<div class="product-info">
+												{{section.layer.title}} 
+											</div>
+										</div>
+									</a>
+									{% else %}
+									<div class="product-case no-link">
+										<div class="product-img">
+											<i class="fa fa-chain-broken" aria-hidden="true"></i>
+										</div>
+										<div class="product-info">
+											<span class="product-title">{% trans "Not linked"%}</span> 
+										</div>
+									</div>
+									{% endif %}
+									
+								</div>
+							</div>
 						</div>
 					</div>
 					
@@ -98,6 +132,29 @@
 	</div>
 </div>
 
+
+
+<!-- Modal -->
+<div class="modal fade" id="modal-link-survey" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Link survey feature type (layer)" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "This survey hasn't got a layer created using the survey's specifications." %}</p>
+				<p>{% trans "To create it, go to the survey's main page and click on 'update project' (yellow button)" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-link-survey-accept" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
 
 <div class="modal fade" id="modal-form" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 	<div class="modal-dialog" role="document">
@@ -250,6 +307,10 @@ $().ready(function(){
 	}
 	
 	createDynamicSurveyForm(field_definitions, "transformation-operation-select", "transformation-operation-div");
+	
+	$(".product-case.no-link").click(function(){
+		$('#modal-link-survey').modal('show');
+	});
 	
 	function create_stringcombo_item(type, id, name, values){
 		var html = "";

@@ -31,7 +31,7 @@
 					</div>
 					{% endif %}
 					<div class="row">
-					<div style="float:left; width:80%">
+					<div class="col-md-9">
 					<div class="row">
 						<div class="col-md-12 form-group">
 							<label for="id_name">{% trans "Name" %}</label> {{ form.name }}
@@ -45,7 +45,7 @@
 					</div>
 					</div>
 					
-					<div style="float:right; width:20%">
+					<div class="col-md-3">
 					<div class="project_linked">
 						<div class="col-md-12 form-group">
 							<label for="id_name">{% trans "Project linked" %}</label>
@@ -75,6 +75,13 @@
 					</div>
 					</div>
 					
+					</div>
+					
+					<div class="row">
+						<div class="col-md-12 form-group">	
+							<label for="id_datastore">{% trans "Datastore" %}</label>
+							{{ form.datastore }}									
+						</div>
 					</div>
 					
 					<div class="box-body">
@@ -238,7 +245,12 @@ $().ready(function(){
 	$(".btn-save-form").click(function(){
 		order_tr();
 		$("#survey-form").submit();
-	})
+	});
+	
+	var datastore_id = "{{survey.datastore_id}}";
+	$("#id_datastore").val(datastore_id).trigger('change');
+	//$('#id_datastore option[value="'+datastore_id+'"]').prop('selected', true);
+	
 });
 </script>
 {% endblock %}
