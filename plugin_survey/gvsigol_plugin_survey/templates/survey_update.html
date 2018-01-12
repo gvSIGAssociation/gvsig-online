@@ -30,7 +30,8 @@
 						</ul>
 					</div>
 					{% endif %}
-
+					<div class="row">
+					<div style="float:left; width:80%">
 					<div class="row">
 						<div class="col-md-12 form-group">
 							<label for="id_name">{% trans "Name" %}</label> {{ form.name }}
@@ -41,6 +42,39 @@
 						<div class="col-md-12 form-group">
 							<label for="id_name">{% trans "Title" %}</label> {{ form.title }}
 						</div>
+					</div>
+					</div>
+					
+					<div style="float:right; width:20%">
+					<div class="project_linked">
+						<div class="col-md-12 form-group">
+							<label for="id_name">{% trans "Project linked" %}</label>
+							{% if survey.project_id != None %}
+							<a href="/gvsigonline/core/project_update/{{survey.project.id}}/" class="product-title">
+								<div class="product-case">
+									<div class="product-img2">
+										<img src="{{media_url}}{{survey.project.image}}" height="75" alt="Project Image">
+									</div>
+									<div class="product-info">
+										{{survey.project.title}} 
+									</div>
+								</div>
+							</a>
+							{% else %}
+							<div class="product-case no-link">
+								<div class="product-img">
+									<i class="fa fa-chain-broken" aria-hidden="true"></i>
+								</div>
+								<div class="product-info">
+									<span class="product-title">{% trans "Not linked"%}</span> 
+								</div>
+							</div>
+							{% endif %}
+							
+						</div>
+					</div>
+					</div>
+					
 					</div>
 					
 					<div class="box-body">
@@ -86,6 +120,28 @@
 	</div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="modal-link-survey" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Link survey" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "This survey hasn't got a project created using the survey's specifications." %}</p>
+				<p>{% trans "To create it, go to the survey's main page and click on 'update project' (yellow button)" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-link-survey-accept" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
 
 <!-- Modal -->
 <div class="modal fade" id="modal-delete-survey" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -118,6 +174,12 @@
 </script>
 <script type="text/javascript">
 $().ready(function(){ 
+	
+	$(".product-case.no-link").click(function(){
+		$('#modal-link-survey').modal('show');
+	});
+	
+	
 	$(".btn-add-feature").click(function(){
 		location.href = '/gvsigonline/survey/survey_section_add/{{ survey.id }}/';
 	});
