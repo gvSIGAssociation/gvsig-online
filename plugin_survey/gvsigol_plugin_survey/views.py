@@ -23,6 +23,7 @@
 '''
 from models import Survey, SurveySection, SurveyUserGroup
 from gvsigol_auth.models import UserGroup
+from gvsigol_core.models import Project
 from gvsigol_services.models import Layer, Datastore
 from forms import SurveyForm, SurveySectionForm
 from gvsigol import settings
@@ -44,7 +45,7 @@ from django.core.urlresolvers import reverse
 import re
 import os
 
-
+_valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_safe
@@ -76,10 +77,29 @@ def survey_add(request):
             
             datastore = request.POST.get('datastore')
             newSurvey.datastore_id = datastore
-                        
-            newSurvey.save()
-            return redirect('survey_update', survey_id=newSurvey.id)
             
+            exists = False
+            projects = Project.objects.all()
+            for p in projects:
+                if name == p.name:
+                    exists = True
+            
+            if name == '':
+                message = _(u'You must enter an survey name')
+                return render_to_response('survey_add.html', {'message': message, 'form': form}, context_instance=RequestContext(request))
+            
+            if _valid_name_regex.search(name) == None:
+                message = _(u"Invalid survey name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
+                return render_to_response('survey_add.html', {'message': message, 'form': form}, context_instance=RequestContext(request))
+              
+            if not exists:     
+                newSurvey.save()
+                return redirect('survey_update', survey_id=newSurvey.id)
+            else:
+                message = _(u'Exists a project with the same name')
+                return render_to_response('survey_add.html', {'message': message, 'form': form}, context_instance=RequestContext(request))
+        
+       
             #msg = _("Error: fill all the survey fields")
             #form.add_error(None, msg)
             
@@ -105,9 +125,6 @@ def survey_update(request, survey_id):
     if request.method == 'POST':
         form = SurveyForm(request.POST)
         try:
-            name = request.POST.get('name')
-            survey.name = name
-            
             title = request.POST.get('title')
             survey.title = title
            
@@ -173,8 +190,15 @@ def survey_delete(request, survey_id):
 @require_POST
 @staff_required
 def survey_update_project(request, survey_id):
-
-    return redirect('survey_list')
+    survey = Survey.objects.get(id=survey_id)
+    sections = SurveySection.objects.filter(survey=survey).order_by('order')
+    permissions = SurveyUserGroup.objects.filter(survey=survey)
+    
+    response = {
+            'result': 'OK'
+        }
+    
+    return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 
 
