@@ -137,6 +137,7 @@ def survey_update(request, survey_id):
         response= {
             'form': form,
             'survey': survey,
+            'media_url': settings.MEDIA_URL,
             'sections': sections
         }
         
