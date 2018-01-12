@@ -8,6 +8,12 @@
 		<div class="box padding-20">
 			<form role="form" method="post" action="/gvsigonline/survey/survey_add/">
 				{% csrf_token %}
+				{% if message %}
+					<div id="form-error" style="color:#ff0000;">
+						<p>* {{ message }}</p>
+					</div>
+				{% endif %}
+						
 				<div class="box-header with-border">
 					<h3 class="box-title">{% trans "Add survey section" %}</h3>
 					<div class="box-tools pull-right">

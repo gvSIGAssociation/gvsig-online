@@ -6,6 +6,11 @@
 			<form id="survey-form" role="form" method="post"
 				action="/gvsigonline/survey/survey_update/{{ survey.id }}/">
 				{% csrf_token %}
+				{% if message %}
+					<div id="form-error" style="color:#ff0000;">
+						<p>* {{ message }}</p>
+					</div>
+				{% endif %}
 				<div class="box-header with-border">
 					<h3 class="box-title">{% trans "Update survey" %}</h3>
 					<div class="box-tools pull-right">
@@ -181,6 +186,9 @@
 </script>
 <script type="text/javascript">
 $().ready(function(){ 
+	
+	$("#id_name").prop('disabled', true);
+	
 	
 	$(".product-case.no-link").click(function(){
 		$('#modal-link-survey').modal('show');

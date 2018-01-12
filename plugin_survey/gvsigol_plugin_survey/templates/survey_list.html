@@ -157,7 +157,18 @@ $(document).ready(function() {
 	}
 	
 	function updateProject(data){			
-		alert("Under construction");
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/survey/survey_update_project/' + data[1] + '/',
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			success	:function(response){
+				alert(response.result);
+			},
+			error: function(){}
+		});
 	}
 	
 	function updateSurvey(data){			
