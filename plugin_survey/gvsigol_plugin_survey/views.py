@@ -25,7 +25,7 @@ from geoserver.layergroup import LayerGroup
 from models import Survey, SurveySection, SurveyUserGroup
 from gvsigol_auth.models import UserGroup
 from gvsigol_core.models import Project, ProjectUserGroup, ProjectLayerGroup
-from gvsigol_services.models import Workspace, Datastore, Layer, LayerGroup
+from gvsigol_services.models import Workspace, Datastore, Layer, LayerGroup, LayerReadGroup, LayerWriteGroup
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
 from gvsigol_services.views import layer_delete_operation
 from forms import SurveyForm, SurveySectionForm
@@ -487,7 +487,6 @@ def survey_update_project(request, survey_id):
         project_usergroup.save()
         
         
-        
     '''
     Create the layers
     '''
@@ -636,6 +635,28 @@ def survey_section_update_project_operation(request, survey, section, lyorder):
     mapservice_backend.reload_nodes()
 
 
+    permissions = SurveyUserGroup.objects.filter(survey=survey)
+    for permission in permissions:
+        
+        groups = []
+        groups.append(permission.user_group)
+        
+        try:
+            lwr = LayerReadGroup()
+            lwr.layer = section.layer
+            lwr.group = permission.user_group
+            lwr.save()
+            
+            lwg = LayerWriteGroup()
+            lwg.layer = section.layer
+            lwg.group = permission.user_group
+            lwg.save()
+        except:
+            pass
+                
+                
+        mapservice_backend.setLayerDataRules(layer, groups, groups)
+        mapservice_backend.reload_nodes()
 
 
 
