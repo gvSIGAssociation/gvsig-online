@@ -200,7 +200,7 @@ $(document).ready(function() {
 	}
 	
 	function updateProject(data){	
-		$('#button-update-survey-accept').click( function() {
+		$('#button-update-survey-accept').unbind("click").click( function() {
 			$.ajax({
 				type: 'POST',
 				async: false,
@@ -222,7 +222,7 @@ $(document).ready(function() {
 	}
 
 	function deleteSurvey(data, row){
-		$('#button-delete-survey-accept').click( function() {
+		$('#button-delete-survey-accept').unbind("click").click( function() {
 			$.ajax({
 				type: 'POST',
 				async: false,

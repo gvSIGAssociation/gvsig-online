@@ -428,64 +428,65 @@ def survey_update_project(request, survey_id):
     '''
     Create the project
     '''
-    if survey.project_id == None:
-        project = Project(
-                    name = survey.name,
-                    title = survey.title,
-                    description = survey.title,
-                    center_lat = 0,
-                    center_lon = 0,
-                    zoom = 2,
-                    extent = '-31602124.97422327,-7044436.526761844,31602124.97422327,7044436.526761844',
-                    toc_order = {},
-                    toc_mode = 'toc_hidden',
-                    created_by = request.user.username,
-                    is_public = False
-                )
-        project.save()
-        
-        survey.project_id = project.id
-        survey.save()
-        
-        lgname = str(project.id) + '_' + str(survey_id) + '_' + survey.name + '_' + request.user.username
-        layergroup = LayerGroup(
-            name = lgname,
-            title = survey.name,
-            cached = False,
-            created_by = request.user.username
-        )
-        layergroup.save()
-        
-        survey.layer_group_id = layergroup.id
-        survey.save()
-        
-        mapservice_backend.reload_nodes()
-        
-        project_layergroup = ProjectLayerGroup(
-            project = project,
-            layer_group = layergroup
-        )
-        project_layergroup.save()
-        assigned_layergroups = []
-        prj_lyrgroups = ProjectLayerGroup.objects.filter(project_id=project.id)
-        for prj_lyrgroup in prj_lyrgroups:
-            assigned_layergroups.append(prj_lyrgroup.layer_group.id)
-        
-        toc_structure = core_utils.get_json_toc(assigned_layergroups)
-        project.toc_order = toc_structure
-        project.save()
-        
-        for permission in permissions:
-            project_usergroup = ProjectUserGroup(
-                project = project,
-                user_group = permission.user_group
-            )
-            project_usergroup.save()
-        
-        
-    else:
+    if survey.project_id != None:
         project = Project.objects.get(id=survey.project_id)
+        project.delete()
     
+    
+    project = Project(
+                name = survey.name,
+                title = survey.title,
+                description = survey.title,
+                center_lat = 0,
+                center_lon = 0,
+                zoom = 2,
+                extent = '-31602124.97422327,-7044436.526761844,31602124.97422327,7044436.526761844',
+                toc_order = {},
+                toc_mode = 'toc_hidden',
+                created_by = request.user.username,
+                is_public = False
+            )
+    project.save()
+    
+    survey.project_id = project.id
+    survey.save()
+    
+    lgname = str(project.id) + '_' + str(survey_id) + '_' + survey.name + '_' + request.user.username
+    layergroup = LayerGroup(
+        name = lgname,
+        title = survey.name,
+        cached = False,
+        created_by = request.user.username
+    )
+    layergroup.save()
+    
+    survey.layer_group_id = layergroup.id
+    survey.save()
+    
+    mapservice_backend.reload_nodes()
+    
+    project_layergroup = ProjectLayerGroup(
+        project = project,
+        layer_group = layergroup
+    )
+    project_layergroup.save()
+    assigned_layergroups = []
+    prj_lyrgroups = ProjectLayerGroup.objects.filter(project_id=project.id)
+    for prj_lyrgroup in prj_lyrgroups:
+        assigned_layergroups.append(prj_lyrgroup.layer_group.id)
+    
+    toc_structure = core_utils.get_json_toc(assigned_layergroups)
+    project.toc_order = toc_structure
+    project.save()
+    
+    for permission in permissions:
+        project_usergroup = ProjectUserGroup(
+            project = project,
+            user_group = permission.user_group
+        )
+        project_usergroup.save()
+        
+        
         
     '''
     Create the layers
@@ -524,8 +525,6 @@ def survey_section_update_project(request, survey_id, section_id):
 
 
 def survey_section_update_project_operation(request, survey, section, lyorder):
-
-    
     if section.layer_id != None:
         layer_delete_operation(section.layer_id)
         
