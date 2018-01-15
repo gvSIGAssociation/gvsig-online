@@ -27,14 +27,15 @@ from __future__ import unicode_literals
 
 from django.db import models
 from gvsigol_core.models import Project
-from gvsigol_services.models import Layer, Datastore
+from gvsigol_services.models import Layer, LayerGroup, Datastore
 from gvsigol_auth.models import UserGroup
 
 class Survey(models.Model):
     name = models.CharField(max_length=150) 
     title = models.CharField(max_length=150) 
-    project = models.ForeignKey(Project, null=True, blank=True)
+    project = models.ForeignKey(Project, null=True, blank=True, on_delete = models.SET_NULL)
     datastore = models.ForeignKey(Datastore)
+    layer_group = models.ForeignKey(LayerGroup, null=True, blank=True)
     
     def __unicode__(self):
         return self.name
@@ -45,7 +46,7 @@ class SurveySection(models.Model):
     title = models.CharField(max_length=200) 
     srs = models.CharField(max_length=100, null=True, blank=True) 
     definition = models.TextField(null=True, blank=True)
-    layer = models.ForeignKey(Layer, null=True)
+    layer = models.ForeignKey(Layer, null=True, blank=True, on_delete = models.SET_NULL)
     
     order = models.IntegerField(null=False, default=0)
     

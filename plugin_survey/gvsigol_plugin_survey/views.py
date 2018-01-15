@@ -17,15 +17,20 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from geoserver.layergroup import LayerGroup
 '''
 
 @author: jbadia <jbadia@scolab.es>
 '''
 from models import Survey, SurveySection, SurveyUserGroup
 from gvsigol_auth.models import UserGroup
-from gvsigol_core.models import Project
-from gvsigol_services.models import Layer, Datastore
+from gvsigol_core.models import Project, ProjectUserGroup, ProjectLayerGroup
+from gvsigol_services.models import Workspace, Datastore, Layer, LayerGroup
+from gvsigol_services.backend_mapservice import backend as mapservice_backend
+from gvsigol_services.views import layer_delete_operation
 from forms import SurveyForm, SurveySectionForm
+from gvsigol_core import utils as core_utils
+from gvsigol_services import utils
 from gvsigol import settings
 
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
@@ -41,8 +46,10 @@ from django.db import IntegrityError
 from django.shortcuts import render
 from settings import SURVEY_FUNCTIONS
 from django.core.urlresolvers import reverse
+from gvsigol.settings import LANGUAGES
 
 import re
+import unicodedata
 import os
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
@@ -162,10 +169,18 @@ def survey_update(request, survey_id):
     
     sections = SurveySection.objects.filter(survey_id=survey.id).order_by('order')
     
+    image = ''
+    if survey.project_id:
+        p = survey.project
+        if "no_project.png" in p.image.url:
+            image = p.image.url.replace(settings.MEDIA_URL, '')
+        else:
+            image = p.image.url
+    
     response= {
         'form': form,
         'survey': survey,
-        'media_url': settings.MEDIA_URL,
+        'image': image,
         'sections': sections
     }
         
@@ -186,19 +201,6 @@ def survey_delete(request, survey_id):
     return redirect('survey_list')
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
-@require_POST
-@staff_required
-def survey_update_project(request, survey_id):
-    survey = Survey.objects.get(id=survey_id)
-    sections = SurveySection.objects.filter(survey=survey).order_by('order')
-    permissions = SurveyUserGroup.objects.filter(survey=survey)
-    
-    response = {
-            'result': 'OK'
-        }
-    
-    return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 
 
@@ -410,5 +412,232 @@ def get_all_user_groups_checked_by_survey(survey):
             groups.append(group)
     
     return groups  
+
+def prepare_string(s):
+    return ''.join((c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')).replace (" ", "_").replace ("-", "_").lower()
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_POST
+@staff_required
+def survey_update_project(request, survey_id):
+    survey = Survey.objects.get(id=survey_id)
+    sections = SurveySection.objects.filter(survey=survey).order_by('order')
+    permissions = SurveyUserGroup.objects.filter(survey=survey)
+    
+    '''
+    Create the project
+    '''
+    if survey.project_id == None:
+        project = Project(
+                    name = survey.name,
+                    title = survey.title,
+                    description = survey.title,
+                    center_lat = 0,
+                    center_lon = 0,
+                    zoom = 2,
+                    extent = '-31602124.97422327,-7044436.526761844,31602124.97422327,7044436.526761844',
+                    toc_order = {},
+                    toc_mode = 'toc_hidden',
+                    created_by = request.user.username,
+                    is_public = False
+                )
+        project.save()
+        
+        survey.project_id = project.id
+        survey.save()
+        
+        lgname = str(project.id) + '_' + str(survey_id) + '_' + survey.name + '_' + request.user.username
+        layergroup = LayerGroup(
+            name = lgname,
+            title = survey.name,
+            cached = False,
+            created_by = request.user.username
+        )
+        layergroup.save()
+        
+        survey.layer_group_id = layergroup.id
+        survey.save()
+        
+        mapservice_backend.reload_nodes()
+        
+        project_layergroup = ProjectLayerGroup(
+            project = project,
+            layer_group = layergroup
+        )
+        project_layergroup.save()
+        assigned_layergroups = []
+        prj_lyrgroups = ProjectLayerGroup.objects.filter(project_id=project.id)
+        for prj_lyrgroup in prj_lyrgroups:
+            assigned_layergroups.append(prj_lyrgroup.layer_group.id)
+        
+        toc_structure = core_utils.get_json_toc(assigned_layergroups)
+        project.toc_order = toc_structure
+        project.save()
+        
+        for permission in permissions:
+            project_usergroup = ProjectUserGroup(
+                project = project,
+                user_group = permission.user_group
+            )
+            project_usergroup.save()
+        
+        
+    else:
+        project = Project.objects.get(id=survey.project_id)
+    
+        
+    '''
+    Create the layers
+    '''
+    if project:
+        lyorder = 0
+        for section in sections:
+            survey_section_update_project_operation(request, survey, section, lyorder)
+            lyorder = lyorder + 1
+        
+    response = {
+            'result': 'OK'
+        }
+    
+    return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_POST
+@staff_required
+def survey_section_update_project(request, survey_id, section_id):
+    survey = Survey.objects.get(id=survey_id)
+    section = SurveySection.objects.get(id=section_id)
+    lyorder = 0
+    if section.layer_id != None:
+        lyorder = section.layer.order
+
+    survey_section_update_project_operation(request, survey, section, lyorder)
+    
+    response = {
+            'result': 'OK'
+        }
+    
+    return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+
+
+
+def survey_section_update_project_operation(request, survey, section, lyorder):
+
+    
+    if section.layer_id != None:
+        layer_delete_operation(section.layer_id)
+        
+    try:
+        mapservice_backend.deleteTable(survey.datastore, section.name)
+        mapservice_backend.deleteResource(
+            survey.datastore.workspace,
+            survey.datastore,
+            section.name)
+    except:
+        pass
+    
+    geom_type = 'Point'
+    fields = []
+    field_defs = []
+    field_definitions = SURVEY_FUNCTIONS
+    definitions = json.loads(section.definition)
+    for definition in definitions:
+        form_name = definition["formname"]
+        for item in definition['formitems']:
+            item_type = item['type']
+            for db_item in field_definitions:
+                for key in db_item:
+                    if key == item_type:
+                        db_type = db_item[key]['db_type']
+                        if db_type != None and db_type.__len__() > 0:
+                            aux = {
+                                'id': str(section.id)+'_'+form_name+'_'+item['key'],
+                                'name': form_name+'_'+item['key'],
+                                'type' : db_type
+                            }
+                            fields.append(aux)
+                            
+                            field_def = {}
+                            field_def['name'] = form_name+'_'+item['key']
+                            for id, language in LANGUAGES:
+                                field_def['title-'+id] = item['title']
+                            field_def['visible'] = True
+                            field_def['editableactive'] = True
+                            field_def['editable'] = True
+                            for control_field in settings.CONTROL_FIELDS:
+                                if field_def['name'] == control_field['name']:
+                                    field_def['editableactive'] = False
+                                    field_def['editable'] = False
+                            field_def['infovisible'] = False
+                            field_defs.append(field_def)
+                            
+    section.name = prepare_string(section.name)
+    mapservice_backend.createTableFromFields(survey.datastore, section.name, geom_type, section.srs, fields)
+    
+    # first create the resource on the backend
+    try:
+        mapservice_backend.createResource(
+            survey.datastore.workspace,
+            survey.datastore,
+            section.name,
+            section.title
+        )
+    except:
+        pass
+    
+    try:
+        mapservice_backend.setQueryable(
+            survey.datastore.workspace.name,
+            survey.datastore.name,
+            survey.datastore.type,
+            section.name,
+            True
+        )
+    except:
+        pass
+    
+        
+    layer = Layer(
+        datastore = survey.datastore,
+        layer_group = survey.layer_group,
+        name = section.name,
+        title = section.title,
+        abstract = section.title,
+        type = 'v_PostGIS',
+        visible = True,
+        queryable =True,
+        cached = False,
+        single_image = False,
+        time_enabled = False,
+        highlight = False,
+        order = lyorder,
+        created_by = request.user.username,
+    )
+    layer.save()
+   
+    style_name = survey.datastore.workspace.name + '_' + layer.name + '_default'
+    mapservice_backend.createDefaultStyle(layer, style_name)
+    mapservice_backend.setLayerStyle(layer, style_name, True)
+    layer = mapservice_backend.updateThumbnail(layer, 'create')
+    layer.save()
+    
+    section.layer_id = layer.id
+    section.save()
+    
+    layer_conf = {
+        'fields': field_defs
+        }
+    layer.conf = layer_conf
+    layer.save()
+    
+    core_utils.toc_add_layer(layer)
+    mapservice_backend.createOrUpdateGeoserverLayerGroup(survey.layer_group)
+    mapservice_backend.reload_nodes()
+
+
+
+
 
 

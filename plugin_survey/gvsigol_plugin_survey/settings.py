@@ -8,6 +8,7 @@ supported_srs_and_blank = (('', '---------'),) + supported_srs
 
 SURVEY_FUNCTIONS = [{
         'string' : {
+            'db_type': 'character_varying',
             'method_name': 'string',
             'description': _('String'),
             'fields' : [{ 
@@ -25,6 +26,7 @@ SURVEY_FUNCTIONS = [{
             }
         },{
         'dynamicstring' : {
+            'db_type': 'character_varying',
             'method_name': 'dynamicstring',
             'description': _('Multiple String'),
             'fields' : [{ 
@@ -36,6 +38,7 @@ SURVEY_FUNCTIONS = [{
             }
         },{
         'integer' : {
+            'db_type': 'integer',
             'method_name': 'integer',
             'description': _('Integer'),
             'fields' : [{ 
@@ -57,6 +60,7 @@ SURVEY_FUNCTIONS = [{
             }
         },{
         'double' : {
+            'db_type': 'double',
             'method_name': 'double',
             'description': _('Double'),
             'fields' : [{ 
@@ -78,6 +82,7 @@ SURVEY_FUNCTIONS = [{
             }
         },{
         'date' : {
+            'db_type': 'date',
             'method_name': 'date',
             'description': _('Date'),
             'fields' : [{ 
@@ -89,6 +94,7 @@ SURVEY_FUNCTIONS = [{
             }
         },{
         'time' : {
+            'db_type': 'timestamp',
             'method_name': 'time',
             'description': _('Time'),
             'fields' : [{ 
@@ -100,6 +106,7 @@ SURVEY_FUNCTIONS = [{
             }
         },{
         'label' : {
+            'db_type': 'character_varying',
             'method_name': 'label',
             'description': _('Label'),
             'fields' : [{ 
@@ -121,6 +128,7 @@ SURVEY_FUNCTIONS = [{
             }
         },{
         'labelwithline' : {
+            'db_type': 'character_varying',
             'method_name': 'labelwithline',
             'description': _('Label with line'),
             'fields' : [{ 
@@ -142,6 +150,7 @@ SURVEY_FUNCTIONS = [{
             }
         },{
         'boolean' : {
+            'db_type': 'boolean',
             'method_name': 'boolean',
             'description': _('Boolean'),
             'fields' : [{ 
@@ -153,6 +162,7 @@ SURVEY_FUNCTIONS = [{
             }
         },{
         'stringcombo' : {
+            'db_type': 'character_varying',
             'method_name': 'stringcombo',
             'description': _('Stringcombo'),
             'fields' : [{ 
@@ -164,6 +174,7 @@ SURVEY_FUNCTIONS = [{
             }
         },{
         'multistringcombo' : {
+            'db_type': 'character_varying',
             'method_name': 'multistringcombo',
             'description': _('Multistringcombo'),
             'fields' : [{ 
@@ -175,6 +186,7 @@ SURVEY_FUNCTIONS = [{
             }
         },{
         'connectedstringcombo' : {
+            'db_type': 'character_varying',
             'method_name': 'connectedstringcombo',
             'description': _('Connected Stringcombo'),
             'fields' : [{ 
@@ -186,6 +198,7 @@ SURVEY_FUNCTIONS = [{
             }
         },{
         'pictures' : {
+            'db_type': '',
             'method_name': 'pictures',
             'description': _('Pictures'),
             'fields' : [{ 
@@ -197,6 +210,7 @@ SURVEY_FUNCTIONS = [{
             }
         },{
         'sketch' : {
+            'db_type': '',
             'method_name': 'sketch',
             'description': _('Sketch'),
             'fields' : [{ 
@@ -208,6 +222,7 @@ SURVEY_FUNCTIONS = [{
             }
         },{
         'map' : {
+            'db_type': 'character_varying',
             'method_name': 'map',
             'description': _('Map'),
             'fields' : [{ 
@@ -219,6 +234,7 @@ SURVEY_FUNCTIONS = [{
             }
         },{
         'hidden' : {
+            'db_type': 'character_varying',
             'method_name': 'hidden',
             'description': _('Hidden'),
             'fields' : [{ 
@@ -230,6 +246,7 @@ SURVEY_FUNCTIONS = [{
             }
         },{
         'primary_key' : {
+            'db_type': 'character_varying',
             'method_name': 'primary_key',
             'description': _('Primary key'),
             'fields' : [{ 
