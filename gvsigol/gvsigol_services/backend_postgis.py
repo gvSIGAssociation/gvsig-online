@@ -226,19 +226,34 @@ class Introspect:
         return [{'order':r[0], 'name': r[1], 'type': r[2], 'length': r[3], 'precision': r[4], 'scale': r[5], 'nullable': r[6]} for r in self.cursor.fetchall()]
     
     def get_temporal_info(self, table, schema='public', field1=None, field2=None, default_mode=None, default_value=None):
-        if field2 == None or field2 =='':
-            field2 = field1
-        query = """
-        SELECT COALESCE(to_char(MIN(x.a), 'YYYY-MM-DD HH24:MI:SS'), ''),COALESCE(to_char(MAX(x.a), 'YYYY-MM-DD HH24:MI:SS'), '') FROM
-        (
-        SELECT """+field1+""" a FROM """+schema+"""."""+table+"""
-        UNION
-        SELECT """+field2+""" a FROM """+schema+"""."""+table+"""
-        ) x
-        """
+        query = "SELECT COALESCE(to_char(MIN(x.a), 'YYYY-MM-DD HH24:MI:SS'), '') FROM (SELECT "+field1+" a FROM "+schema+"."+table+") x"
         self.cursor.execute(query, [])
+        min = None
+        for r in self.cursor.fetchall():
+            min = r[0]
         
-        return [{'min_value':r[0], 'max_value': r[1]} for r in self.cursor.fetchall()]
+        if field2 == None or field2 =='' or field2 == field1:
+            query = """
+                    SELECT COALESCE(to_char(MAX(x.a), 'YYYY-MM-DD HH24:MI:SS'), '') FROM
+                    (
+                    SELECT """+field1+""" a FROM """+schema+"""."""+table+""" WHERE  """+field1+""" IS NOT NULL
+                    ) x
+                    """
+        else:
+            query = """
+                    SELECT COALESCE(to_char(MAX(x.a), 'YYYY-MM-DD HH24:MI:SS'), '') FROM
+                    (
+                    SELECT """+field1+""" a FROM """+schema+"""."""+table+""" WHERE  """+field2+""" IS NULL
+                    UNION
+                    SELECT """+field2+""" a FROM """+schema+"""."""+table+""" WHERE  """+field2+""" IS NOT NULL
+                    ) x
+                    """
+        self.cursor.execute(query, [])
+        max = None
+        for r in self.cursor.fetchall():
+            max = r[0]
+            
+        return [{'min_value':min, 'max_value':max}]
     
     
     def create_table(self, schema, table_name, geom_type, srs, fields):
