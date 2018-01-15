@@ -507,9 +507,9 @@ def survey_update_project(request, survey_id):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_POST
 @staff_required
-def survey_section_update_project(request, survey_id, section_id):
-    survey = Survey.objects.get(id=survey_id)
+def survey_section_update_project(request, section_id):
     section = SurveySection.objects.get(id=section_id)
+    survey = section.survey
     lyorder = 0
     if section.layer_id != None:
         lyorder = section.layer.order

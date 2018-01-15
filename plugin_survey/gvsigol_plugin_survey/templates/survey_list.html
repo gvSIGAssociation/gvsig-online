@@ -222,7 +222,7 @@ $(document).ready(function() {
 	}
 
 	function deleteSurvey(data, row){
-		$('#button-delete-survey-accept').unbind("click").click( function() {
+		$('#button-delete-survey-accept').click( function() {
 			$.ajax({
 				type: 'POST',
 				async: false,
