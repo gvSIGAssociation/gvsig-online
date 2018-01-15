@@ -106,6 +106,7 @@
 									<th>{% trans "Title" %}</th>
 									<th></th>
 									<th></th>
+									<th></th>
 								</tr>
 							</thead>
 							<tbody class="toc">
@@ -119,6 +120,7 @@
 									<td>{{ tr.name }}</td>
 									<td>{{ tr.title }}</td>
 									<td><div name="button-update-section-survey" data-value="{{ tr.id }}" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update section survey" %}" class="btn btn-success btn-update-feature"><i class="fa fa-edit"></i></div></td>
+									<td><div name="button-update-section" data-value="{{ tr.id }}" data-toggle="modal" data-target="#modal-update-survey" data-placement="bottom" title="{% trans "Update section definition" %}" class="btn btn-warning btn-update-layer"><i class="fa fa-refresh"></i></div></td>
 									<td><div name="button-delete-survey" data-value="{{ tr.id }}" data-toggle="modal" data-target="#modal-delete-survey" data-placement="bottom" title="{% trans "Remove section survey" %}" class="btn btn-danger btn-delete-feature"><i class="fa fa-times"></i></div></td>
 								</tr>
 								{% endfor %}
@@ -131,6 +133,50 @@
 		</div>
 	</div>
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-success-survey" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Feature Type (capa) actualizada correctamente" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "Feature Type (capa) se ha actualizada satisfactoriamente." %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-success-survey-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-update-survey" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Actualizar feature Type (capa)" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "ATENCIÓN: Actualizar el feature type (capa) BORRARÁ TODOS LOS DATOS para dar paso a la nueva configuración" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-update-survey-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-update-survey-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
 
 <!-- Modal -->
 <div class="modal fade" id="modal-link-survey" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -202,6 +248,26 @@ $().ready(function(){
 	$(".btn-update-feature").click(function(){
 		var section_id = $(this).attr("data-value");
 		location.href = '/gvsigonline/survey/survey_section_update/'+ section_id +'/';
+	});
+	
+	$(".btn-update-layer").click(function(){
+		var section_id = $(this).attr("data-value");
+		
+		$('#button-update-survey-accept').unbind("click").click( function() {
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/survey/survey_section_update_project/' + section_id + '/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				success	:function(response){
+					$('#modal-update-survey').modal('hide');
+					$('#modal-success-survey').modal('show');
+				},
+				error: function(){}
+			});
+		});
 	});
 	
 	$(".btn-delete-feature").click(function(){
