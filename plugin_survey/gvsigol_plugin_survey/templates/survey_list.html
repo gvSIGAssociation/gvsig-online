@@ -46,7 +46,50 @@
 			</div>
 		</div>
 	</div>
-</div>      
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-success-survey" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Proyecto actualizado correctamente" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "El proyecto se ha actualizado satisfactoriamente." %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-success-survey-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-update-survey" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Actualizar proyecto" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "ATENCIÓN: Actualizar el proyecto BORRARÁ TODAS LAS CAPAS (y su contenido) para dar paso a la nueva configuración" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-update-survey-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-update-survey-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
 
 <!-- Modal -->
 <div class="modal fade" id="modal-delete-survey" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -109,7 +152,7 @@ $(document).ready(function() {
         },{
 	      	"targets": -2,
 	       	"data": null,
-	        "defaultContent": '<button type="button" name="button-update-project" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update project" %}' + '" class="btn btn-warning"><i class="fa fa-refresh"></i></button>'
+	        "defaultContent": '<button type="button" name="button-update-project" data-toggle="modal" data-target="#modal-update-survey" data-placement="bottom" title="' + '{% trans "Update project" %}' + '" class="btn btn-warning"><i class="fa fa-refresh"></i></button>'
 	  	},{
 	      	"targets": -3,
 	       	"data": null,
@@ -156,18 +199,21 @@ $(document).ready(function() {
 		});
 	}
 	
-	function updateProject(data){			
-		$.ajax({
-			type: 'POST',
-			async: false,
-			url: '/gvsigonline/survey/survey_update_project/' + data[1] + '/',
-			beforeSend:function(xhr){
-			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-			},
-			success	:function(response){
-				alert(response.result);
-			},
-			error: function(){}
+	function updateProject(data){	
+		$('#button-update-survey-accept').click( function() {
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/survey/survey_update_project/' + data[1] + '/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				success	:function(response){
+					$('#modal-update-survey').modal('hide');
+					$('#modal-success-survey').modal('show');
+				},
+				error: function(){}
+			});
 		});
 	}
 	
