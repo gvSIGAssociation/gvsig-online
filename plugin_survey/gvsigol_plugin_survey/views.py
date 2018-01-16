@@ -83,6 +83,46 @@ def survey_list(request):
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
+@require_safe
+@staff_required
+def surveys(request):
+    survey_list = Survey.objects.all().order_by('id')
+    surveys = []
+    
+    admin_group = UserGroup.objects.get(name__exact='admin')
+    sug = UserGroupUser.objects.filter(user_group_id=admin_group.id,user_id=request.user.id).count()
+    if sug > 0:
+        # Es admin
+        for survey in survey_list:
+            aux = {
+                'name': survey.name,
+                'title': survey.title
+                }
+            
+            surveys.append(aux)
+    else:
+        ugus = UserGroupUser.objects.filter(user_id=request.user.id)
+        for ugu in ugus:
+            for survey in survey_list:
+                sug = SurveyUserGroup.objects.filter(user_group_id=ugu.user_group.id,survey_id=survey.id).count()
+                if sug > 0:
+                    aux = {
+                        'name': survey.name,
+                        'title': survey.title
+                        }
+                    
+                    surveys.append(aux)
+            
+            
+    response = {
+        'surveys': surveys
+    }
+    return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+
+
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def survey_add(request):
@@ -219,9 +259,18 @@ def survey_delete(request, survey_id):
 
 
 
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_safe
+@staff_required
+def survey_definition_by_name(request, survey_name):
+    survey = Survey.objects.filter(name=survey_name).first()
+    if not survey:
+        return HttpResponse('Error getting definition of survey: ' + survey_name, status=500)
+    return survey_definition(request, survey.id)
+
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@require_POST
+@require_safe
 @staff_required
 def survey_definition(request, survey_id):
     result = []
