@@ -23,7 +23,7 @@ from geoserver.layergroup import LayerGroup
 @author: jbadia <jbadia@scolab.es>
 '''
 from models import Survey, SurveySection, SurveyUserGroup
-from gvsigol_auth.models import UserGroup
+from gvsigol_auth.models import UserGroup, UserGroupUser
 from gvsigol_core.models import Project, ProjectUserGroup, ProjectLayerGroup
 from gvsigol_services.models import Workspace, Datastore, Layer, LayerGroup, LayerReadGroup, LayerWriteGroup
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
@@ -59,9 +59,25 @@ _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 @staff_required
 def survey_list(request):
     survey_list = Survey.objects.all().order_by('id')
+    surveys = []
     
+    admin_group = UserGroup.objects.get(name__exact='admin')
+    sug = UserGroupUser.objects.filter(user_group_id=admin_group.id,user_id=request.user.id).count()
+    if sug > 0:
+        # Es admin
+        for survey in survey_list:
+            surveys.append(survey)
+    else:
+        ugus = UserGroupUser.objects.filter(user_id=request.user.id)
+        for ugu in ugus:
+            for survey in survey_list:
+                sug = SurveyUserGroup.objects.filter(user_group_id=ugu.user_group.id,survey_id=survey.id).count()
+                if sug > 0:
+                    surveys.append(survey)
+            
+            
     response = {
-        'surveys': survey_list
+        'surveys': surveys
     }
     return render_to_response('survey_list.html', response, context_instance=RequestContext(request))
 
