@@ -14,4 +14,8 @@ urlpatterns = [
     
     url(r'^survey/survey_section_update_project/(?P<section_id>[0-9]+)/$', 'gvsigol_plugin_survey.views.survey_section_update_project', name='survey_section_update_project'),
     url(r'^survey/survey_permissions/(?P<survey_id>[0-9]+)/$', 'gvsigol_plugin_survey.views.survey_permissions', name='survey_permissions'),
+    
+    
+    url(r'^surveys/$', 'gvsigol_plugin_survey.views.surveys', name='surveys'),
+    url(r'^surveys/(?P<survey_name>[a-zA-Z0-9_]+)/$', 'gvsigol_plugin_survey.views.survey_definition_by_name', name='survey_definition_by_name'),
 ]
