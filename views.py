@@ -350,23 +350,29 @@ def layer_list(request):
 @staff_required
 def layer_delete(request, layer_id):
     try:
-        layer = Layer.objects.get(pk=layer_id)
-        mapservice_backend.deleteGeoserverLayerGroup(layer.layer_group)
-        mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer)
-        mapservice_backend.deleteLayerStyles(layer)
-        signals.layer_deleted.send(sender=None, layer=layer)
-        if not 'no_thumbnail.jpg' in layer.thumbnail.name:
-            if os.path.isfile(layer.thumbnail.path):
-                os.remove(layer.thumbnail.path)
-        Layer.objects.all().filter(pk=layer_id).delete()
-        mapservice_backend.setDataRules()
-        core_utils.toc_remove_layer(layer)
-        mapservice_backend.createOrUpdateGeoserverLayerGroup(layer.layer_group)
-        mapservice_backend.reload_nodes()
+        layer_delete_operation(layer_id)
         return HttpResponseRedirect(reverse('datastore_list'))
         
     except Exception as e:
         return HttpResponseNotFound('<h1>Error deleting layer: {0}</h1>'.format(layer_id)) 
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def layer_delete_operation(layer_id):
+    layer = Layer.objects.get(pk=layer_id)
+    mapservice_backend.deleteGeoserverLayerGroup(layer.layer_group)
+    mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer)
+    mapservice_backend.deleteLayerStyles(layer)
+    signals.layer_deleted.send(sender=None, layer=layer)
+    if not 'no_thumbnail.jpg' in layer.thumbnail.name:
+        if os.path.isfile(layer.thumbnail.path):
+            os.remove(layer.thumbnail.path)
+    Layer.objects.all().filter(pk=layer_id).delete()
+    mapservice_backend.setDataRules()
+    core_utils.toc_remove_layer(layer)
+    mapservice_backend.createOrUpdateGeoserverLayerGroup(layer.layer_group)
+    mapservice_backend.reload_nodes()
+
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
