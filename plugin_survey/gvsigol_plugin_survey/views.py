@@ -28,10 +28,11 @@ from gvsigol_core.models import Project, ProjectUserGroup, ProjectLayerGroup
 from gvsigol_services.models import Workspace, Datastore, Layer, LayerGroup, LayerReadGroup, LayerWriteGroup
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
 from gvsigol_services.views import layer_delete_operation
-from forms import SurveyForm, SurveySectionForm
+from forms import SurveyForm, SurveySectionForm, UploadFileForm
 from gvsigol_core import utils as core_utils
 from gvsigol_services import utils
 from gvsigol import settings
+from gvsigol_services.backend_postgis import Introspect
 
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
@@ -39,7 +40,7 @@ from django.contrib.auth.decorators import login_required
 from gvsigol_auth.utils import superuser_required, staff_required
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render_to_response, RequestContext, redirect
-from django.http import  HttpResponse
+from django.http import HttpResponse, JsonResponse
 import json
 from django.utils.translation import ugettext as _
 from django.db import IntegrityError
@@ -51,6 +52,23 @@ from gvsigol.settings import LANGUAGES
 import re
 import unicodedata
 import os
+import shutil
+import tempfile
+import logging
+import sqlite3
+
+DEFAULT_BUFFER_SIZE = 1048576
+## 2xx: upload errors
+SYNCERROR_UPLOAD="ERROR_GOL_200-Error on sync upload"
+SYNCERROR_LAYER_NOT_LOCKED="ERROR_GOL_201-Layer is not locked: {0}"
+SYNCERROR_FILEPARAM_MISSING="ERROR_GOL_202-'fileupload' param missing or incorrect"
+SYNCERROR_FILE_MISSING='ERROR_GOL_203-No valid file was provided'
+SYNCERROR_INCONSISTENT_LAYER_STATUS="ERROR_GOL_204-Inconsistent status for layer: {0}"
+SYNCERROR_INVALID_DB="ERROR_GOL_205-The file is not a valid Sqlite3 db"
+SYNCERROR_UNREADABLE_LAYER="ERROR_GOL_206-The layer can't be read: {0}"
+
+logger = logging.getLogger(__name__)
+
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
     
@@ -726,3 +744,162 @@ def survey_section_update_project_operation(request, survey, section, lyorder):
 
 
 
+def handle_uploaded_file(f):
+    (index, path) = tempfile.mkstemp(suffix='.sqlite', dir='/tmp')
+    with open(path, 'wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+        destination.close()
+    print path
+    return path
+            
+
+
+def handle_uploaded_file_base64(fileupload):
+    header="data:application/zip;base64,"
+    if fileupload[0:len(header)]==header:
+        fileupload = fileupload[len(header):].decode('base64')
+    (destination, path) = tempfile.mkstemp(suffix='.sqlite', dir='/tmp')
+    #destination = tempfile.TemporaryFile()
+    asBytes = bytearray(fileupload, "unicode_internal")
+    destination.write(asBytes)
+    destination.close()
+    print path
+    return path
+
+
+def handle_uploaded_file_raw(request):
+    (fd_dest, path) = tempfile.mkstemp(suffix='.gpap', dir='/tmp')
+    destination = os.fdopen(fd_dest, "w", DEFAULT_BUFFER_SIZE)
+    shutil.copyfileobj(request, destination, DEFAULT_BUFFER_SIZE)
+    destination.close()
+    print path
+    return path
+
+    
+
+
+def add_result_from_survey(request, db_name, id, lon, lat, altim, ts, description, text, form, style, isdirty):
+    feature_definitions = json.loads(form)
+    table_name = feature_definitions['sectionname']
+    fields = get_fields_from_definition(feature_definitions['forms'])
+    
+    survey  = Survey.objects.filter(name=db_name).first()
+    section = SurveySection.objects.filter(name=table_name,survey_id=survey.id).first()
+    
+    if survey and section:
+        sql=''
+        sql_fields='wkb_geometry,modified_by'
+        sql_values="ST_GeomFromEWKT('SRID="+str(section.srs)+";MULTIPOINT(("+str(lon)+" "+str(lat)+"))'),'" + request.user.username + "'"
+        for field in fields:
+            sql_fields = sql_fields + ',' + field['name']
+            value = field['value']
+            if field['type'] == 'character_varying':
+                value = "'" + field['value'] + "'"
+            sql_values = sql_values + ',' + value
+            
+        sql = '(' + sql_fields + ') VALUES (' + sql_values +')'
+        
+        params = json.loads(survey.datastore.connection_params)
+        host = params['host']
+        port = params['port']
+        dbname = params['database']
+        user = params['user']
+        passwd = params['passwd']
+        schema = params.get('schema', 'public')
+        
+        i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+        i.insert_sql(schema, table_name, sql)
+        #print sql
+        
+        
+    
+def get_fields_from_definition(definitions):
+    field_definitions = SURVEY_FUNCTIONS
+    fields = []
+    for definition in definitions:
+        form_name = definition["formname"]
+        for item in definition['formitems']:
+            item_type = item['type']
+            for db_item in field_definitions:
+                for key in db_item:
+                    if key == item_type:
+                        db_type = db_item[key]['db_type']
+                        if db_type != None and db_type.__len__() > 0:
+                            aux = {
+                                'id': form_name+'_'+item['key'],
+                                'name': form_name+'_'+item['key'],
+                                'type' : db_type,
+                                'value': item['value']
+                            }
+                            fields.append(aux)
+                            
+    return fields
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_http_methods(["GET", "POST", "HEAD"])
+@staff_required
+def survey_upload_db(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST, request.FILES)
+        #if form.is_valid():
+        path = handle_uploaded_file(request.FILES.get('fileupload'))
+        
+        survey_id = request.POST.get('name')
+        survey = Survey.objects.get(id=survey_id)
+
+        if path and survey:
+            conn = None
+            try:
+                conn = sqlite3.connect(path) #'/home/jose/Escritorio/geopaparazzi_20180115_185005.gpap')
+                db_name = survey.name
+                c = conn.cursor()
+                for row in c.execute('SELECT _id, lon, lat, altim, ts, description, text, form, style, isdirty FROM notes;'):
+                    print row
+                    add_result_from_survey(request, db_name, row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9])
+            except Exception as e:
+                logger.exception(SYNCERROR_UPLOAD)
+                return HttpResponseBadRequest(SYNCERROR_UPLOAD)
+            finally:
+                if conn != None:
+                    conn.close()
+                os.remove(path)
+                
+        return JsonResponse({'result': 'OK'})
+    
+    else:
+        form = UploadFileForm()
+        
+        survey_list = Survey.objects.all().order_by('id')
+        surveys = []
+        
+        admin_group = UserGroup.objects.get(name__exact='admin')
+        sug = UserGroupUser.objects.filter(user_group_id=admin_group.id,user_id=request.user.id).count()
+        if sug > 0:
+            # Es admin
+            for survey in survey_list:
+                surveys.append(survey)
+        else:
+            ugus = UserGroupUser.objects.filter(user_id=request.user.id)
+            for ugu in ugus:
+                for survey in survey_list:
+                    sug = SurveyUserGroup.objects.filter(user_group_id=ugu.user_group.id,survey_id=survey.id).count()
+                    if sug > 0:
+                        surveys.append(survey)
+                
+                
+        return render(request, 'survey_upload.html', {'form': form,  'surveys': surveys})
+    
+    
+
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_http_methods(["GET", "POST", "HEAD"])
+@staff_required
+def survey_upload(request):
+    
+    response = {'response': 'OK'}
+    return render(request, 'survey_upload.html', response)
+
+        

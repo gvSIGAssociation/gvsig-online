@@ -1,0 +1,90 @@
+{% extends "base.html" %} {% load staticfiles %} {% load i18n %} 
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="box padding-20">
+			<form id="survey-form" role="form" enctype="multipart/form-data" method="post"
+				action="/gvsigonline/surveys/upload/">
+				{% csrf_token %}
+				{% if message %}
+					<div id="form-error" style="color:#ff0000;">
+						<p>* {{ message }}</p>
+					</div>
+				{% endif %}
+				<div class="box-header with-border">
+					<h3 class="box-title">{% trans "Upload survey" %}</h3>
+					<div class="box-tools pull-right">
+						<div class="btn btn-upload-form btn-default btn-sm">
+							<i class="fa fa-chevron-up" aria-hidden="true"></i> {% trans "Update" %}
+						</div>
+					</div>
+				</div>
+				<div class="box-body">
+
+					{% if form.errors %}
+					<div id="form-error" style="color: #ff0000;">
+						<ul>
+							{% for field in form %} 
+							{% if field.errors %}
+							<li>{{field.label}}. {{ field.errors|striptags }}</li> 
+							{% endif %} 
+							{% endfor %} 
+							{% for field, msg in form.errors.iteritems %}
+							<li>{{ msg|striptags }}</li> 
+							{% endfor %}
+						</ul>
+					</div>
+					{% endif %}
+					
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="id_name">{% trans "Name" %}</label>
+							{{form.name}}
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="id_file">{% trans "File" %}</label>
+							{{form.fileupload}}
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+{% endblock %} {% block extra-scripts %}
+<script type="text/javascript" src="{% static "js/lib/survey/dynamic-forms.js" %}"></script>
+<script>
+	$('#menu-manage-plugins').addClass("active");
+	$('#submenu-survey').addClass("active");
+</script>
+<script type="text/javascript">
+$().ready(function(){ 
+	
+	$(".btn-upload-form").click(function(){
+		$("#survey-form").submit();
+// 		var name = $("#id_survey option:selected").text();	
+// 		$.ajax({
+// 			type: 'POST',
+// 			async: false,
+// 			cache: false,
+// 		    contentType: 'multipart/form-data',
+// 		    processData: false,
+// 			url: '/gvsigonline/surveys/upload_db/'+ name +'/',
+// 			data: $('#id_file').attr('files'),
+// 			beforeSend:function(xhr){
+// 			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+// 			},
+// 			success	:function(response){
+// 				alert("Hola");
+// 			},
+// 			error: function(){}
+// 		});
+	});
+	
+});
+</script>
+{% endblock %}
