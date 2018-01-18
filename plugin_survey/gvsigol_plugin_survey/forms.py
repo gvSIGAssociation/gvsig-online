@@ -27,3 +27,6 @@ class SurveySectionForm(forms.ModelForm):
     definition = forms.CharField(label=_(u'Definition'), required=False, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))
 
 
+class UploadFileForm(forms.Form):
+    name = forms.ModelChoiceField(label=_(u'Name'), required=True, queryset=Survey.objects.all().order_by('name'), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
+    fileupload = forms.FileField(label=_(u'File'), required=True, widget=forms.FileInput(attrs={'accept' : '.sqlite,.gpap'}))
