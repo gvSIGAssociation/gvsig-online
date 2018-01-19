@@ -486,15 +486,16 @@ def survey_permissions(request, survey_id):
     else:
         try:
             survey = Survey.objects.get(pk=survey_id)
-            groups = get_all_user_groups_checked_by_survey(survey)   
-            return render_to_response('survey_permissions_add.html', {'survey_id': survey.id, 'name': survey.name,  'groups': groups}, context_instance=RequestContext(request))
+            rgroups = get_all_read_user_groups_checked_by_survey(survey)   
+            wgroups = get_all_write_user_groups_checked_by_survey(survey)   
+            return render_to_response('survey_permissions_add.html', {'survey_id': survey.id, 'name': survey.name,  'read_groups': rgroups,  'write_groups': wgroups}, context_instance=RequestContext(request))
         except Exception as e:
             return HttpResponseNotFound('<h1>Survey not found: {0}</h1>'.format(survey_id))
 
 
-def get_all_user_groups_checked_by_survey(survey):
+def get_all_read_user_groups_checked_by_survey(survey):
     groups_list = UserGroup.objects.all()
-    read_groups = SurveyUserGroup.objects.filter(survey=survey)
+    read_groups = SurveyReadGroup.objects.filter(survey=survey)
     
     groups = []
     for g in groups_list:
@@ -503,6 +504,25 @@ def get_all_user_groups_checked_by_survey(survey):
             for lrg in read_groups:
                 if lrg.user_group_id == g.id:
                     group['read_checked'] = True
+            
+            group['id'] = g.id
+            group['name'] = g.name
+            group['description'] = g.description
+            groups.append(group)
+    
+    return groups  
+
+def get_all_write_user_groups_checked_by_survey(survey):
+    groups_list = UserGroup.objects.all()
+    read_groups = SurveyWriteGroup.objects.filter(survey=survey)
+    
+    groups = []
+    for g in groups_list:
+        if g.name != 'admin' and g.name != 'public':
+            group = {}
+            for lrg in read_groups:
+                if lrg.user_group_id == g.id:
+                    group['write_checked'] = True
             
             group['id'] = g.id
             group['name'] = g.name
@@ -522,7 +542,7 @@ def survey_update_project(request, survey_id):
     try:
         survey = Survey.objects.get(id=survey_id)
         sections = SurveySection.objects.filter(survey=survey).order_by('order')
-        permissions = SurveyUserGroup.objects.filter(survey=survey)
+        permissions = SurveyWriteGroup.objects.filter(survey=survey)
         
         '''
         Create the project
@@ -646,37 +666,38 @@ def survey_section_update_project_operation(request, survey, section, lyorder):
     fields = []
     field_defs = []
     field_definitions = SURVEY_FUNCTIONS
-    definitions = json.loads(section.definition)
-    for definition in definitions:
-        form_name = definition["formname"]
-        for item in definition['formitems']:
-            item_type = item['type']
-            for db_item in field_definitions:
-                for key in db_item:
-                    if key == item_type:
-                        db_type = db_item[key]['db_type']
-                        if db_type != None and db_type.__len__() > 0:
-                            aux = {
-                                'id': str(section.id)+'_'+form_name+'_'+item['key'],
-                                'name': form_name+'_'+item['key'],
-                                'type' : db_type
-                            }
-                            fields.append(aux)
-                            
-                            field_def = {}
-                            field_def['name'] = form_name+'_'+item['key']
-                            for id, language in LANGUAGES:
-                                field_def['title-'+id] = item['title']
-                            field_def['visible'] = True
-                            field_def['editableactive'] = True
-                            field_def['editable'] = True
-                            for control_field in settings.CONTROL_FIELDS:
-                                if field_def['name'] == control_field['name']:
-                                    field_def['editableactive'] = False
-                                    field_def['editable'] = False
-                            field_def['infovisible'] = False
-                            field_defs.append(field_def)
-                            
+    if section.definition:
+        definitions = json.loads(section.definition)
+        for definition in definitions:
+            form_name = definition["formname"]
+            for item in definition['formitems']:
+                item_type = item['type']
+                for db_item in field_definitions:
+                    for key in db_item:
+                        if key == item_type:
+                            db_type = db_item[key]['db_type']
+                            if db_type != None and db_type.__len__() > 0:
+                                aux = {
+                                    'id': str(section.id)+'_'+form_name+'_'+item['key'],
+                                    'name': form_name+'_'+item['key'],
+                                    'type' : db_type
+                                }
+                                fields.append(aux)
+                                
+                                field_def = {}
+                                field_def['name'] = form_name+'_'+item['key']
+                                for id, language in LANGUAGES:
+                                    field_def['title-'+id] = item['title']
+                                field_def['visible'] = True
+                                field_def['editableactive'] = True
+                                field_def['editable'] = True
+                                for control_field in settings.CONTROL_FIELDS:
+                                    if field_def['name'] == control_field['name']:
+                                        field_def['editableactive'] = False
+                                        field_def['editable'] = False
+                                field_def['infovisible'] = False
+                                field_defs.append(field_def)
+                                
     section.name = prepare_string(section.name)
     mapservice_backend.createTableFromFields(survey.datastore, section.name, geom_type, section.srs, fields)
     
