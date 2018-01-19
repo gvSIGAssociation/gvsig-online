@@ -2000,12 +2000,12 @@ def is_grouped_symbology_request(request, url, aux_response, styles, future_sess
                         if style['name'].endswith('_default'):
                             style_default = style['name']
                     
-                    if style_default:
-                        url = url.replace('STYLES=', 'STYLES='+style_default)
-                        if 'username' in request.session and 'password' in request.session:
-                            if request.session['username'] is not None and request.session['password'] is not None:
-                                auth2 = (request.session['username'], request.session['password'])
-                                aux_response = future_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT)) 
+                    #if style_default:
+                        #url = url.replace('STYLES=', 'STYLES='+style_default)
+                    if 'username' in request.session and 'password' in request.session:
+                        if request.session['username'] is not None and request.session['password'] is not None:
+                            auth2 = (request.session['username'], request.session['password'])
+                            aux_response = future_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT)) 
         except:
             return aux_response
     return aux_response
