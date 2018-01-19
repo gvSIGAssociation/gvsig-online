@@ -350,7 +350,7 @@ def layer_list(request):
 @staff_required
 def layer_delete(request, layer_id):
     try:
-        layer_delete_operation(layer_id)
+        layer_delete_operation(request, layer_id)
         return HttpResponseRedirect(reverse('datastore_list'))
         
     except Exception as e:
@@ -358,7 +358,7 @@ def layer_delete(request, layer_id):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
-def layer_delete_operation(layer_id):
+def layer_delete_operation(request, layer_id):
     layer = Layer.objects.get(pk=layer_id)
     mapservice_backend.deleteGeoserverLayerGroup(layer.layer_group)
     mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer)
