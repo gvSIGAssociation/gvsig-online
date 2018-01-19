@@ -22,7 +22,7 @@ from geoserver.layergroup import LayerGroup
 
 @author: jbadia <jbadia@scolab.es>
 '''
-from models import Survey, SurveySection, SurveyUserGroup
+from models import Survey, SurveySection, SurveyReadGroup, SurveyWriteGroup
 from gvsigol_auth.models import UserGroup, UserGroupUser
 from gvsigol_core.models import Project, ProjectUserGroup, ProjectLayerGroup
 from gvsigol_services.models import Workspace, Datastore, Layer, LayerGroup, LayerReadGroup, LayerWriteGroup
@@ -89,7 +89,7 @@ def survey_list(request):
         ugus = UserGroupUser.objects.filter(user_id=request.user.id)
         for ugu in ugus:
             for survey in survey_list:
-                sug = SurveyUserGroup.objects.filter(user_group_id=ugu.user_group.id,survey_id=survey.id).count()
+                sug = SurveyReadGroup.objects.filter(user_group_id=ugu.user_group.id,survey_id=survey.id).count()
                 if sug > 0:
                     surveys.append(survey)
             
@@ -122,7 +122,7 @@ def surveys(request):
         ugus = UserGroupUser.objects.filter(user_id=request.user.id)
         for ugu in ugus:
             for survey in survey_list:
-                sug = SurveyUserGroup.objects.filter(user_group_id=ugu.user_group.id,survey_id=survey.id).count()
+                sug = SurveyReadGroup.objects.filter(user_group_id=ugu.user_group.id,survey_id=survey.id).count()
                 if sug > 0:
                     aux = {
                         'name': survey.name,
@@ -441,9 +441,12 @@ def survey_section_delete(request, survey_section_id):
 def survey_permissions(request, survey_id):
     if request.method == 'POST':
         assigned_read_roups = []
+        assigned_write_roups = []
         for key in request.POST:
             if 'read-usergroup-' in key:
                 assigned_read_roups.append(int(key.split('-')[2]))
+            if 'write-usergroup-' in key:
+                assigned_write_roups.append(int(key.split('-')[2]))
                 
         try:     
             survey = Survey.objects.get(id=int(survey_id))
@@ -455,11 +458,23 @@ def survey_permissions(request, survey_id):
         read_groups = []
         
         # clean existing groups and assign them again if necessary
-        SurveyUserGroup.objects.filter(survey=survey).delete()
+        SurveyReadGroup.objects.filter(survey=survey).delete()
         for group in assigned_read_roups:
             try:
                 group = UserGroup.objects.get(id=group)
-                lrg = SurveyUserGroup()
+                lrg = SurveyReadGroup()
+                lrg.survey = survey
+                lrg.user_group = group
+                lrg.save()
+                #read_groups.append(group)
+            except Exception as e:
+                pass
+            
+        SurveyWriteGroup.objects.filter(survey=survey).delete()
+        for group in assigned_write_roups:
+            try:
+                group = UserGroup.objects.get(id=group)
+                lrg = SurveyWriteGroup()
                 lrg.survey = survey
                 lrg.user_group = group
                 lrg.save()
@@ -504,84 +519,92 @@ def prepare_string(s):
 @require_POST
 @staff_required
 def survey_update_project(request, survey_id):
-    survey = Survey.objects.get(id=survey_id)
-    sections = SurveySection.objects.filter(survey=survey).order_by('order')
-    permissions = SurveyUserGroup.objects.filter(survey=survey)
-    
-    '''
-    Create the project
-    '''
-    if survey.project_id != None:
-        project = Project.objects.get(id=survey.project_id)
-        project.delete()
-    
-    
-    project = Project(
-                name = survey.name,
-                title = survey.title,
-                description = survey.title,
-                center_lat = 0,
-                center_lon = 0,
-                zoom = 2,
-                extent = '-31602124.97422327,-7044436.526761844,31602124.97422327,7044436.526761844',
-                toc_order = {},
-                toc_mode = 'toc_hidden',
-                created_by = request.user.username,
-                is_public = False
-            )
-    project.save()
-    
-    survey.project_id = project.id
-    survey.save()
-    
-    lgname = str(project.id) + '_' + str(survey_id) + '_' + survey.name + '_' + request.user.username
-    layergroup = LayerGroup(
-        name = lgname,
-        title = survey.name,
-        cached = False,
-        created_by = request.user.username
-    )
-    layergroup.save()
-    
-    survey.layer_group_id = layergroup.id
-    survey.save()
-    
-    mapservice_backend.reload_nodes()
-    
-    project_layergroup = ProjectLayerGroup(
-        project = project,
-        layer_group = layergroup
-    )
-    project_layergroup.save()
-    assigned_layergroups = []
-    prj_lyrgroups = ProjectLayerGroup.objects.filter(project_id=project.id)
-    for prj_lyrgroup in prj_lyrgroups:
-        assigned_layergroups.append(prj_lyrgroup.layer_group.id)
-    
-    toc_structure = core_utils.get_json_toc(assigned_layergroups)
-    project.toc_order = toc_structure
-    project.save()
-    
-    for permission in permissions:
-        project_usergroup = ProjectUserGroup(
-            project = project,
-            user_group = permission.user_group
+    try:
+        survey = Survey.objects.get(id=survey_id)
+        sections = SurveySection.objects.filter(survey=survey).order_by('order')
+        permissions = SurveyUserGroup.objects.filter(survey=survey)
+        
+        '''
+        Create the project
+        '''
+        if survey.project_id != None:
+            project = Project.objects.get(id=survey.project_id)
+            project.delete()
+        
+        
+        project = Project(
+                    name = survey.name,
+                    title = survey.title,
+                    description = survey.title,
+                    center_lat = 0,
+                    center_lon = 0,
+                    zoom = 2,
+                    extent = '-31602124.97422327,-7044436.526761844,31602124.97422327,7044436.526761844',
+                    toc_order = {},
+                    toc_mode = 'toc_hidden',
+                    created_by = request.user.username,
+                    is_public = False
+                )
+        project.save()
+        
+        survey.project_id = project.id
+        survey.save()
+        
+        lgname = str(project.id) + '_' + str(survey_id) + '_' + survey.name + '_' + request.user.username
+        layergroup = LayerGroup(
+            name = lgname,
+            title = survey.name,
+            cached = False,
+            created_by = request.user.username
         )
-        project_usergroup.save()
+        layergroup.save()
         
+        survey.layer_group_id = layergroup.id
+        survey.save()
         
-    '''
-    Create the layers
-    '''
-    if project:
-        lyorder = 0
-        for section in sections:
-            survey_section_update_project_operation(request, survey, section, lyorder)
-            lyorder = lyorder + 1
+        mapservice_backend.reload_nodes()
         
-    response = {
-            'result': 'OK'
-        }
+        project_layergroup = ProjectLayerGroup(
+            project = project,
+            layer_group = layergroup
+        )
+        project_layergroup.save()
+        assigned_layergroups = []
+        prj_lyrgroups = ProjectLayerGroup.objects.filter(project_id=project.id)
+        for prj_lyrgroup in prj_lyrgroups:
+            assigned_layergroups.append(prj_lyrgroup.layer_group.id)
+        
+        toc_structure = core_utils.get_json_toc(assigned_layergroups)
+        project.toc_order = toc_structure
+        project.save()
+        
+        for permission in permissions:
+            project_usergroup = ProjectUserGroup(
+                project = project,
+                user_group = permission.user_group
+            )
+            project_usergroup.save()
+            
+            
+        '''
+        Create the layers
+        '''
+        if project:
+            lyorder = 0
+            for section in sections:
+                survey_section_update_project_operation(request, survey, section, lyorder)
+                lyorder = lyorder + 1
+            
+        response = {
+                'result': 'OK'
+            }
+    
+    except Exception as e:
+        response = {
+                'result': 'Error', 
+                'message': str(e)
+        
+            }
     
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
@@ -718,18 +741,25 @@ def survey_section_update_project_operation(request, survey, section, lyorder):
     mapservice_backend.reload_nodes()
 
 
-    permissions = SurveyUserGroup.objects.filter(survey=survey)
-    for permission in permissions:
-        
-        groups = []
-        groups.append(permission.user_group)
+    permissionsr = SurveyReadGroup.objects.filter(survey=survey)
+    permissionsw = SurveyWriteGroup.objects.filter(survey=survey)
+    groupsr = []
+    groupsw = []
+    for permission in permissionsr:
+        groupsr.append(permission.user_group)
         
         try:
             lwr = LayerReadGroup()
             lwr.layer = section.layer
             lwr.group = permission.user_group
             lwr.save()
-            
+        except:
+            pass
+        
+    for permission in permissionsw:
+        groupsw.append(permission.user_group)
+        
+        try:
             lwg = LayerWriteGroup()
             lwg.layer = section.layer
             lwg.group = permission.user_group
@@ -738,8 +768,8 @@ def survey_section_update_project_operation(request, survey, section, lyorder):
             pass
                 
                 
-        mapservice_backend.setLayerDataRules(layer, groups, groups)
-        mapservice_backend.reload_nodes()
+    mapservice_backend.setLayerDataRules(layer, groupsr, groupsw)
+    mapservice_backend.reload_nodes()
 
 
 

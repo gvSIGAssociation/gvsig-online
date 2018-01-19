@@ -279,6 +279,10 @@
 
 
 $().ready(function(){ 
+	
+
+	$("#id_srs").prop("disabled", true);
+
 	this.count = 0;
 	this.result = {};
 	var field_definitions = {{ field_definitions|safe }};

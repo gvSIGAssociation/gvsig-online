@@ -67,7 +67,8 @@
 </script>
 <script type="text/javascript">
 $().ready(function(){ 
-	
+	$('#id_srs').val('4326').trigger('change');
+	$("#id_srs").prop("disabled", true);
 });
 </script>
 {% endblock %}
