@@ -18,7 +18,7 @@ Las encuestas incluyen ramificación a partir de condiciones, plantillas y dise�
 ----------------------------------------------------------------
 * 2.1 Crear mínimo una encuesta en la plataforma Limesurvey
 
-* 2.2 Dar de alta la encuesta en gvsigonline
+* 2.2 Registrar encuesta en gvsigonline
 
 * 2.3 vincular la encuesta a una capa de gvsigonline
 
@@ -32,7 +32,8 @@ Para crear una encuesta se necesita:
 * 2.1.2 Dar de alta una encuesta (configuraciones básicas)
 * 2.1.3 Activar encuesta
 
-- **2.1.1 Acceder con usuario y clave a la paltaforma de Limesurvey**
+2.1.1 Acceder con usuario y clave a la paltaforma de Limesurvey
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Se ingresa a la plataforma limesurvey a través de la url del gvsigonline con la extensión a ésta plataforma. Las url dependen de la configuración de cada cliente.
 
@@ -62,7 +63,7 @@ Se ingresa a la plataforma limesurvey a través de la url del gvsigonline con la
      - Entrada que muestra enlistada las ecuestas que estan activas o no para poder usarse.       
 
 .. note::
-   En este maual no se hará detalles del manejo específico de la plataforma (limesurvey). Se indicará los items más relevantes y necesarios para que interactue con el gvsigonline. 
+   En este manual no se hará detalles del manejo específico de la plataforma (limesurvey). Se indicará los items más relevantes y necesarios para que interactue con el gvsigonline. 
 
 
 En esta interfaz se pueden añadir las encuestas(por bloques, preguntas, condiciones entre ellas, etc), exportarlas, guardar, editarlas, manejar la seguridad, entre otros. Se recomienda al usuario revisar el Manual_ propio de la interfaz Limesurvey.
@@ -70,20 +71,12 @@ En esta interfaz se pueden añadir las encuestas(por bloques, preguntas, condici
  .. _Manual: http://manual.limesurvey.org/
 
 
-- **2.1.2** Dar de alta una encuesta (configuraciones básicas)
+2.1.2 Dar de alta una encuesta (configuraciones básicas)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Se inicia describiendo la información relacionada a la encuesta
-
-  * Seleccionar el idioma
-  * El Título (nombre de la encuesta)
-  * La descripción 
-  * Algún mensaje de bievenida (opcional)
-  * Algún mensaje de despedida (opcional)
-
-  
 Es Importante tener presente que ciertas configuraciones se personalizan según los requerimientos o necesidades de cada cliente.  La configuración de algunos parámetros principales se describen a continuación.
-  
-    
+
+ 
 .. image:: ../_static/images/form2.png
    :align: center  
 
@@ -95,7 +88,7 @@ Es Importante tener presente que ciertas configuraciones se personalizan según 
    * - Vista
      - Opciones activadas
    * - 1
-     - Entrada principal donde se añade la información general de la encuesta:
+     - Entrada principal donde se describe la información relacionada a la encuesta:
      
        * Seleccionar el idioma
        * El Título (nombre de la encuesta)
@@ -151,15 +144,16 @@ Finalizado las configuraciones generales se van añadiendo las secciones de grup
 Para cada grupo se puede definir el orden de las preguntas y éstas últimas se pueden presentar de distintos formatos, añadir condiciones entre las distintas preguntas, configuraciones generales y avanzadas de forma independiente.
 
 
-- **2.1.3** Activar encuesta 
+2.1.3 Activar encuesta
+~~~~~~~~~~~~~~~~~~~~~~
 
  * Usuarios anónimos: No
      
  * Resto opciones: Sí
 
 
-2.2 Dar de alta la encuesta en gvSIG Online
--------------------------------------------
+2.2 Registrar encuesta en gvSIG Online
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Una vez se tiene completa la definición de la encuesta en el sistema LimeSurvey, se procederá a registrarla en gvSIGOnline. 
 
@@ -182,7 +176,7 @@ Una vez rellenos estos datos, a través del botón 'Recargar' se pueden obtener 
  
 
 2.3 vincular la encuesta a una capa de gvsigonline
---------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Al crear una capa vacía, aparecerá un nuevo tipo de campo (junto con el de enteros, texto, booleanos, enumeraciones, ...) que será el de formularios (Form)
 
