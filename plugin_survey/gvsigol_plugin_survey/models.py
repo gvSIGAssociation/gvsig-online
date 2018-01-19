@@ -53,7 +53,13 @@ class SurveySection(models.Model):
     def __unicode__(self):
         return self.survey+'-'+self.name
     
-class SurveyUserGroup(models.Model):
+class SurveyReadGroup(models.Model):
+    survey = models.ForeignKey(Survey, default=None)
+    user_group = models.ForeignKey(UserGroup, default=None)
+    def unicode(self):
+        return self.survey.name + ' - ' + self.user_group.name
+      
+class SurveyWriteGroup(models.Model):
     survey = models.ForeignKey(Survey, default=None)
     user_group = models.ForeignKey(UserGroup, default=None)
     def unicode(self):
