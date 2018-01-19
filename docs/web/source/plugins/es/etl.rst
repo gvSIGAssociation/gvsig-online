@@ -608,7 +608,7 @@ Para mejor comprensión del paso final se detalla a continuación:
      - Mensaje de información al usuario
      - cuando se están subiedo los datos muestra el progreso de la cantidad de registros añadidos y sus respectivas hojas.     
 
-.. nota::
+.. note::
    EL poder seleccionar las opciones 7, 8 y 9 nos permitir poder añadir o reemplazar los datos del fichero a distintas capas, siempre y cuando la plantilla cumpla con la correspondencia de sus reglas entre los campos de la capa seleccionada y las columnas de éste fichero.
 
 
