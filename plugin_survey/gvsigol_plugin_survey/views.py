@@ -830,6 +830,16 @@ def get_fields_from_definition(definitions):
                             
     return fields
 
+
+def handle_uploaded_file(f):
+    (index, path) = tempfile.mkstemp(suffix='.gpap', dir='/tmp')
+    with open(path, 'a') as itemfile:
+        for chunk in f.chunks():
+            itemfile.write(chunk)
+        itemfile.close()
+    return path
+    
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
@@ -877,7 +887,7 @@ def survey_upload_db(request):
             ugus = UserGroupUser.objects.filter(user_id=request.user.id)
             for ugu in ugus:
                 for survey in survey_list:
-                    sug = SurveyUserGroup.objects.filter(user_group_id=ugu.user_group.id,survey_id=survey.id).count()
+                    sug = SurveyWriteGroup.objects.filter(user_group_id=ugu.user_group.id,survey_id=survey.id).count()
                     if sug > 0:
                         surveys.append(survey)
                 
