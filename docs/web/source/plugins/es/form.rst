@@ -150,6 +150,8 @@ Para cada grupo se puede definir el orden de las preguntas y éstas últimas se 
  * Usuarios anónimos: No
      
  * Resto opciones: Sí
+ 
+ j
 
 
 2.2 Registrar encuesta en gvSIG Online
