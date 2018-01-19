@@ -542,7 +542,7 @@ def survey_update_project(request, survey_id):
     try:
         survey = Survey.objects.get(id=survey_id)
         sections = SurveySection.objects.filter(survey=survey).order_by('order')
-        permissions = SurveyWriteGroup.objects.filter(survey=survey)
+        permissions = SurveyReadGroup.objects.filter(survey=survey)
         
         '''
         Create the project
