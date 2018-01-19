@@ -608,7 +608,7 @@ def survey_section_update_project(request, section_id):
 
 def survey_section_update_project_operation(request, survey, section, lyorder):
     if section.layer_id != None:
-        layer_delete_operation(section.layer_id)
+        layer_delete_operation(request, section.layer_id)
         
     try:
         mapservice_backend.deleteTable(survey.datastore, section.name)
@@ -741,42 +741,6 @@ def survey_section_update_project_operation(request, survey, section, lyorder):
         mapservice_backend.setLayerDataRules(layer, groups, groups)
         mapservice_backend.reload_nodes()
 
-
-
-
-def handle_uploaded_file(f):
-    (index, path) = tempfile.mkstemp(suffix='.sqlite', dir='/tmp')
-    with open(path, 'wb+') as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
-        destination.close()
-    print path
-    return path
-            
-
-
-def handle_uploaded_file_base64(fileupload):
-    header="data:application/zip;base64,"
-    if fileupload[0:len(header)]==header:
-        fileupload = fileupload[len(header):].decode('base64')
-    (destination, path) = tempfile.mkstemp(suffix='.sqlite', dir='/tmp')
-    #destination = tempfile.TemporaryFile()
-    asBytes = bytearray(fileupload, "unicode_internal")
-    destination.write(asBytes)
-    destination.close()
-    print path
-    return path
-
-
-def handle_uploaded_file_raw(request):
-    (fd_dest, path) = tempfile.mkstemp(suffix='.gpap', dir='/tmp')
-    destination = os.fdopen(fd_dest, "w", DEFAULT_BUFFER_SIZE)
-    shutil.copyfileobj(request, destination, DEFAULT_BUFFER_SIZE)
-    destination.close()
-    print path
-    return path
-
-    
 
 
 def add_result_from_survey(request, db_name, id, lon, lat, altim, ts, description, text, form, style, isdirty):
