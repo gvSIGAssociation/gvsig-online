@@ -346,6 +346,19 @@ class Introspect:
         count = rows[0]
         
         return count
+    
+    def get_bbox_firstgeom(self, schema, layer_name, expand):
+        column_name = self.get_geometry_columns(layer_name,schema)
+        if expand is None:
+            ex = 0
+        else:
+            ex = str(expand)
+        query = "SELECT BOX2D(ST_EXPAND(ST_TRANSFORM(" + column_name[0] + ",4326),"  + ex + ")) FROM " + schema + "." + layer_name + " WHERE " + column_name[0] + " IS NOT NULL LIMIT 1"
+        self.cursor.execute(query)
+        rows = self.cursor.fetchone()
+        bb = rows[0]
+        bb = bb.replace("BOX(","").replace(")","").replace(" ", ",")        
+        return bb
         
     def close(self):
         """
