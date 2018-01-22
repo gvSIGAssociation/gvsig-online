@@ -2021,45 +2021,49 @@ def get_feature_info(request):
         
         
         rs = []
-        fut_session = FuturesSession()
-        for layer_array in layers_array:
-            styles = []
-            if 'styles' in layer_array:
-                styles = layer_array['styles']
-            url = layer_array['url']
-            query_layer = layer_array['query_layer']
-            ws= None
-            if 'workspace' in layer_array:
-                ws = layer_array['workspace']
+        try:
+            fut_session = FuturesSession()
+            for layer_array in layers_array:
+                styles = []
+                if 'styles' in layer_array:
+                    styles = layer_array['styles']
+                url = layer_array['url']
+                query_layer = layer_array['query_layer']
+                ws= None
+                if 'workspace' in layer_array:
+                    ws = layer_array['workspace']
+                
+                print url
+                
+                auth2 = None
+                if query_layer != 'plg_catastro':
+                    if 'username' in request.session and 'password' in request.session:
+                        if request.session['username'] is not None and request.session['password'] is not None:
+                            auth2 = (request.session['username'], request.session['password'])
+                aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+                rs.append(is_grouped_symbology_request(request, url, aux_response, styles, fut_session))
             
-            print url
-            
-            auth2 = None
-            if query_layer != 'plg_catastro':
-                if 'username' in request.session and 'password' in request.session:
-                    if request.session['username'] is not None and request.session['password'] is not None:
-                        auth2 = (request.session['username'], request.session['password'])
-            aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
-            rs.append(is_grouped_symbology_request(request, url, aux_response, styles, fut_session))
-        
-        results = []
-        i=0
-        for layer_array in layers_array:
-            url = layer_array['url']
-            query_layer = layer_array['query_layer']
-            ws= None
-            if 'workspace' in layer_array:
-                ws = layer_array['workspace']
-            
-            res = rs[i].result()
-            if res.status_code == 200:
-                results.append({
-                    'url': url,
-                    'query_layer': query_layer,
-                    'ws': ws,
-                    'response': res.text
-                    })
-            i = i + 1
+            results = []
+            i=0
+            for layer_array in layers_array:
+                url = layer_array['url']
+                query_layer = layer_array['query_layer']
+                ws= None
+                if 'workspace' in layer_array:
+                    ws = layer_array['workspace']
+                
+                res = rs[i].result()
+                if res.status_code == 200:
+                    results.append({
+                        'url': url,
+                        'query_layer': query_layer,
+                        'ws': ws,
+                        'response': res.text
+                        })
+                i = i + 1
+        except Exception as e:
+            print e.message    
+            continue
         
         for resultset in results:
         
