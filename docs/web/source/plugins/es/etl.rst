@@ -31,8 +31,9 @@ Algunos requisitos mínimos se deben cumplir para que el proceso de transformaci
 3. Requisitos para realizar las transformaciones
 ------------------------------------------------
 
-* 3.1 Crear una **capa vacía** en el sistema con los campos a donde se volcará la información de los ficheros planos, esto es necesario para aplicar la transformación por primera vez. EL crear capa vacía se descartaría sí solo quiere añadirse nuevos datos sobre una capa que ya ha sido definida anteriormente, es decir, basta definir la capa una sola vez para aplicarle varias transfromaciones en diferentes ficheros planos que serán volcados a esa misma capa.
-* 3.2 Crear la plantilla de transformación.
+* 3.1 Crear una **capa vacía** en el sistema con los campos a donde se volcará la información de los ficheros planos, esto es necesario para aplicar la transformación por primera vez. EL crear capa vacía se descartaría sí solo quiere añadirse nuevos datos sobre una capa que ya ha sido definida anteriormente, es decir, basta definir la capa una sola vez para aplicarle varias transformaciones en diferentes ficheros planos que serán volcados a esa misma capa.
+
+* 3.2 Crear plantilla de transformación.
 
 * 3.3 Disponer en el 'administrador de archivos' el fichero plano, en formatos de hoja de cálculo (**.xlsx**) o texto (**.csv**).
 
