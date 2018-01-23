@@ -2033,7 +2033,7 @@ def get_feature_info(request):
                 if 'workspace' in layer_array:
                     ws = layer_array['workspace']
                 
-                print 'getFeatureInfo - URL:' + url
+                print url
                 
                 auth2 = None
                 if query_layer != 'plg_catastro':
@@ -2042,10 +2042,8 @@ def get_feature_info(request):
                             auth2 = (request.session['username'], request.session['password'])
                             #auth2 = ('admin', 'geoserver')
                 
-                print 'getFeatureInfo - credentials:' + str(auth2)
                 aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
                 rs.append(is_grouped_symbology_request(request, url, aux_response, styles, fut_session))
-                print 'getFeatureInfo - rs:' + str(len(rs))
                 
             results = []
             i=0
@@ -2056,12 +2054,7 @@ def get_feature_info(request):
                 if 'workspace' in layer_array:
                     ws = layer_array['workspace']
                 
-                print 'getFeatureInfo - url:' + url
-                print 'getFeatureInfo - query_layer:' + query_layer
-                print 'getFeatureInfo - ws:' + ws
                 res = rs[i].result()
-                print 'getFeatureInfo - status:' +str(res.status_code)
-                
                 if res.status_code == 200:
                     results.append({
                         'url': url,
@@ -2073,7 +2066,6 @@ def get_feature_info(request):
         except Exception as e:
             print e.message    
             
-        print 'getFeatureInfo - results:' + str(len(results))
         for resultset in results:
         
             url = resultset['url']
@@ -2102,9 +2094,7 @@ def get_feature_info(request):
             
                         response = resultset['response']
                         if response:
-                            print 'getFeatureInfo - ' + layer.name +':' + str(response)
                             geojson = json.loads(response)
-                                
                             
                             for i in range(0, len(geojson['features'])):
                                 fid = geojson['features'][i].get('id')
