@@ -10,7 +10,8 @@
 			<div class="box-header with-border">
 				<h3 class="box-title">{% trans "Surveys list" %}</h3>
 				<div class="box-tools pull-right">
-					<button id="button-add-survey" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add survey" %}</button>
+					<div id="button-upload-survey" class="btn btn-default btn-sm"><i class="fa fa-upload margin-r-5"></i> {% trans "Upload survey" %}</div>
+					<div id="button-add-survey" class="btn btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add survey" %}</div>
 				</div>
 			</div>
 
@@ -25,7 +26,6 @@
 							<th></th>
 							<th></th>
 							<th></th>
-							<th></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -35,7 +35,6 @@
 							<td>{{ tr.id }}</td>
 							<td>{{ tr.name }}</td>
 							<td>{{ tr.title }}</td>
-							<td></td>
 							<td></td>
 							<td></td>
 							<td></td>
@@ -178,10 +177,6 @@ $(document).ready(function() {
 	  	},{
 	      	"targets": -3,
 	       	"data": null,
-	        "defaultContent": '<button type="button" name="button-definition-survey" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Get survey definition" %}' + '" class="btn bg-purple"><i class="fa fa-cogs"></i></button>'
-	  	},{
-	      	"targets": -4,
-	       	"data": null,
 	        "defaultContent": '<button type="button" name="button-update-survey" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update survey" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
 	  	}],
 	    "dom": 'T<"clear">lfrtip',
@@ -204,6 +199,10 @@ $(document).ready(function() {
 	
 	$('#button-add-survey').click( function() {
 		location.href = '/gvsigonline/survey/survey_add/';
+	});
+	
+	$('#button-upload-survey').click( function() {
+		location.href = '/gvsigonline/surveys/upload/';
 	});
 	
 	function getDefinitionSurvey(data, row){
