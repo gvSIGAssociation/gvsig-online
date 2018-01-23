@@ -24,7 +24,7 @@ Las encuestas incluyen ramificación a partir de condiciones, plantillas y dise�
 
 
 2.1 Crear una encuesta en la plataforma Limesurvey
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+__________________________________________________
 
 Para crear una encuesta se necesita:
 
@@ -151,11 +151,10 @@ Para cada grupo se puede definir el orden de las preguntas y éstas últimas se 
      
  * Resto opciones: Sí
  
- j
 
 
 2.2 Registrar encuesta en gvSIG Online
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+______________________________________
 
 Una vez se tiene completa la definición de la encuesta en el sistema LimeSurvey, se procederá a registrarla en gvSIGOnline. 
 
@@ -178,7 +177,7 @@ Una vez rellenos estos datos, a través del botón 'Recargar' se pueden obtener 
  
 
 2.3 vincular la encuesta a una capa de gvsigonline
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+__________________________________________________
 
 Al crear una capa vacía, aparecerá un nuevo tipo de campo (junto con el de enteros, texto, booleanos, enumeraciones, ...) que será el de formularios (Form)
 
