@@ -2033,16 +2033,19 @@ def get_feature_info(request):
                 if 'workspace' in layer_array:
                     ws = layer_array['workspace']
                 
-                print url
+                print 'getFeatureInfo - URL:' + url
                 
                 auth2 = None
                 if query_layer != 'plg_catastro':
                     if 'username' in request.session and 'password' in request.session:
                         if request.session['username'] is not None and request.session['password'] is not None:
                             auth2 = (request.session['username'], request.session['password'])
+                
+                print 'getFeatureInfo - credentials:' + str(auth2)
                 aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
                 rs.append(is_grouped_symbology_request(request, url, aux_response, styles, fut_session))
-            
+                print 'getFeatureInfo - rs:' + str(len(rs))
+                
             results = []
             i=0
             for layer_array in layers_array:
