@@ -407,7 +407,7 @@ def intervals_update(request, layer_id, style_id):
                 'symbolizers': symbolizers
             }
             rules.append(rule)
-            if not rule.name.endswith('_text'):
+            if not r.name.endswith('_text'):
                 num_rules = num_rules + 1 
                          
         response = services_intervals.get_conf(request, layer_id)
