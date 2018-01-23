@@ -389,6 +389,7 @@ def intervals_update(request, layer_id, style_id):
         
         style_rules = Rule.objects.filter(style=style)
         rules = []
+        num_rules = 0
         for r in style_rules:
             symbolizers = []
             for s in Symbolizer.objects.filter(rule=r).order_by('order'):
@@ -406,6 +407,8 @@ def intervals_update(request, layer_id, style_id):
                 'symbolizers': symbolizers
             }
             rules.append(rule)
+            if not rule.name.endswith('_text'):
+                num_rules = num_rules + 1 
                          
         response = services_intervals.get_conf(request, layer_id)
         
@@ -418,7 +421,8 @@ def intervals_update(request, layer_id, style_id):
         if rule['filter']:
             filter_json = json.loads(rule['filter'])
             response['property_name'] = filter_json.get('field')    
-        response['intervals'] = len(rules)
+            
+        response['intervals'] = num_rules
         
         color_ramps = ColorRampLibrary.objects.all()        
         response["ramp_libraries"] = color_ramps
