@@ -2040,6 +2040,7 @@ def get_feature_info(request):
                     if 'username' in request.session and 'password' in request.session:
                         if request.session['username'] is not None and request.session['password'] is not None:
                             auth2 = (request.session['username'], request.session['password'])
+                            #auth2 = ('admin', 'geoserver')
                 
                 print 'getFeatureInfo - credentials:' + str(auth2)
                 aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
@@ -2055,7 +2056,12 @@ def get_feature_info(request):
                 if 'workspace' in layer_array:
                     ws = layer_array['workspace']
                 
+                print 'getFeatureInfo - url:' + url
+                print 'getFeatureInfo - query_layer:' + query_layer
+                print 'getFeatureInfo - ws:' + ws
                 res = rs[i].result()
+                print 'getFeatureInfo - status:' +str(res.status_code)
+                
                 if res.status_code == 200:
                     results.append({
                         'url': url,
@@ -2067,7 +2073,7 @@ def get_feature_info(request):
         except Exception as e:
             print e.message    
             
-        
+        print 'getFeatureInfo - results:' + str(len(results))
         for resultset in results:
         
             url = resultset['url']
@@ -2096,6 +2102,7 @@ def get_feature_info(request):
             
                         response = resultset['response']
                         if response:
+                            print 'getFeatureInfo - ' + layer.name +':' + str(response)
                             geojson = json.loads(response)
                                 
                             
