@@ -384,6 +384,7 @@ viewer.core = {
 	    	if (base_layer['type'] == 'WMS') {
 				var wmsSource = new ol.source.TileWMS({
 					url: base_layer['url'],
+					crossOrigin: 'anonymous',
 					params: {'LAYERS': base_layer['layers'], 'FORMAT': base_layer['format'], 'VERSION': base_layer['version']}
 				});
 				var wmsLayer = new ol.layer.Tile({
@@ -422,6 +423,7 @@ viewer.core = {
 	    		    				 is_baselayer = true;
 	    		    			 }
 	    		    		 }
+	    		    		 options.crossOrigin = 'anonymous';
 	    		    		 if(is_baselayer){
 				    	        var ignSource3 = new ol.source.WMTS((options));
 						        var ignLayer3 = new ol.layer.Tile({
@@ -462,7 +464,8 @@ viewer.core = {
 	    		var osm_source = null;
 	    		if('url' in base_layer && base_layer['url'].length > 0){
 	    			osm_source = new ol.source.OSM({
-	    				url: base_layer['url']
+	    				url: base_layer['url'],
+	    				crossOrigin: 'anonymous'
 	    			})
 	    		}else{
 	    			osm_source = new ol.source.OSM();
@@ -485,7 +488,8 @@ viewer.core = {
 	    			label: base_layer['title'],
 	    		  	visible: base_layer['active'],
 	    		  	source: new ol.source.XYZ({
-	    		  		url: base_layer['url']	
+	    		  		url: base_layer['url'],
+	    		  		crossOrigin: 'anonymous'
 	    		    })
 	    		});
 	    		xyz.baselayer = true;
