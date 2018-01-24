@@ -6,8 +6,8 @@ Libra
 Libra es la interfaz gráfica que se conecta directamente con AGRORED para poder asignar mediante la captura gráfica los croquis o geometrías que corresponden a cada una de las Líneas de declaración gráfica que refieren a una solicitud del pago único. 
 
 
-1.1 Ojetivo
-___________
+1.1 Objetivo
+____________
 
 Este manual tiene como objetivo describir el manejo y funcionamiento de las herramientas para la captura gráfica de solicitudes definidas en AGRORED
 
@@ -245,7 +245,7 @@ La vista del mapa será el área de trabajo por defecto que se abrirá al usuari
        * Posición actual del usuario a través de la ubicación GPS del dispositivo (tablet, ordenador) 
      
    * - 1.2
-     - visualizador de referencia de un área mas grande sobre el que se está trabajando en la visual del mapa.
+     - visualizador de referencia de un área más grande sobre el que se está trabajando en la visual del mapa.
    * - 1.3
      - Muestra las coordenadas donde se ubica el cursor en el mapa y se puede seleccionar sistema de referencia geográfico mundial WGS-84 (4326) o el ETRS-89 geográfico para Europa (4258)
    * - 1.4
@@ -262,7 +262,7 @@ ______________________
 
 Se tienen distintos estilos cuando están seleccionadas, en edición, con solapes, propias y de otras solicitudes.
 
-3.1.1 LDGs propias
+3.1.1 LDGs Propias
 ~~~~~~~~~~~~~~~~~~
 
 .. image:: ../_static/images/estilo_ldg_propia.png
@@ -272,4 +272,57 @@ Se tienen distintos estilos cuando están seleccionadas, en edición, con solape
 - Relleno: marrón claro
 
 
-        
+3.1.2 LDGs - de otras solicitudes ya registradas
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. image:: ../_static/images/estilo_ldg_otra_solic_registrada.png
+   :align: center
+
+- Borde: azul rey
+- Relleno: azul rey con transparencia
+
+
+3.1.3 LDGs - Seleccionadas
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. image:: ../_static/images/estilo_ldg_seleccionada.png
+   :align: center
+
+- Borde: rosado claro
+- Relleno: rosado claro con transparencia
+
+3.1.4 LDGs - Solapes
+~~~~~~~~~~~~~~~~~~~~
+
+.. image:: ../_static/images/estilo_ldg_solape.png
+   :align: center
+   
+- Borde: rojo
+- Relleno: rojo transparente 
+
+
+3.2 Estilos para Recintos
+_________________________
+
+Los recintos pueden tener dos estilos, cuando pertenecen o no a la declaración gráfica activa.
+
+3.2.1 Recintos - Todos los visibles al abrir una solicitud
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. image:: ../_static/images/estilos_recintos_todos.png
+   :align: center
+
+-  Borde: Amarillo
+-  Relleno: sin  relleno
+
+
+3.2.2 Recintos - Los que pertenecen a una solicitud activa
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. image:: ../_static/images/estilo_recinto_activas.png
+   :align: center
+
+- Borde: Amarillo
+- Relleno: Amarillo claro con transparencia (al pasar el puntero encima de éste)  
+   
+
