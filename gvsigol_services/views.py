@@ -2101,15 +2101,19 @@ def get_feature_info(request):
                                 resources = []
                                 if fid.__len__() > 0:
                                     fid = geojson['features'][i].get('id').split('.')[1]
-                                    layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
-                                    for lr in layer_resources:
-                                        (type, rsurl) = utils.get_resource_type(lr)
-                                        resource = {
-                                            'type': type,
-                                            'url': rsurl,
-                                            'name': lr.path.split('/')[-1]
-                                        }
-                                        resources.append(resource)
+                                    try:
+                                        layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=fid)
+                                        for lr in layer_resources:
+                                            (type, rsurl) = utils.get_resource_type(lr)
+                                            resource = {
+                                                'type': type,
+                                                'url': rsurl,
+                                                'name': lr.path.split('/')[-1]
+                                            }
+                                            resources.append(resource)
+                                    except Exception as e:
+                                        print e.message
+                                        
                                 else:
                                     geojson['features'][i]['type']= 'raster'
                                 geojson['features'][i]['resources'] = resources
