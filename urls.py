@@ -16,11 +16,13 @@ urlpatterns = [
     
     url(r'^intervals_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.intervals_add', name='intervals_add'),
     url(r'^intervals_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.intervals_update', name='intervals_update'),
+    url(r'^update_preview/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.update_preview', name='update_preview'),
+    url(r'^remove_temporal_preview/$', 'gvsigol_symbology.views.remove_temporal_preview', name='remove_temporal_preview'),
     url(r'^get_minmax_values/$', 'gvsigol_symbology.views.get_minmax_values', name='get_minmax_values'),
     
     url(r'^expressions_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.expressions_add', name='expressions_add'),
     url(r'^expressions_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', 'gvsigol_symbology.views.expressions_update', name='expressions_update'),
-   
+    
     url(r'^create_sld/$', 'gvsigol_symbology.views.create_sld', name='create_sld'),
     
     url(r'^clustered_points_add/(?P<layer_id>[0-9]+)/$', 'gvsigol_symbology.views.clustered_points_add', name='clustered_points_add'),

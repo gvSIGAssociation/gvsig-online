@@ -59,7 +59,20 @@ def get_raster_statistics(request, layer_id):
         response = {}
         
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+
+
+def delete_preview_style(request, name):
+    styles = Style.objects.filter(name=name+'__tmp')
+    success = True
+    for style in styles:
+        try:
+            services.delete_style(style.id, mapservice)
+            style.delete()
+        except Exception as e:
+            success = False
+            pass
     
+    return success
   
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -76,7 +89,8 @@ def style_layer_list(request):
         layerStyles = StyleLayer.objects.filter(layer=lyr)
         styles = []
         for layerStyle in layerStyles:
-            styles.append(layerStyle.style)
+            if not layerStyle.style.name.endswith('__tmp'):
+                styles.append(layerStyle.style)
         ls.append({'layer': lyr, 'styles': styles})
     
     response = {
@@ -184,7 +198,8 @@ def unique_symbol_add(request, layer_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_unique_symbol.create_style(request, json_data, layer_id):            
+        if services_unique_symbol.create_style(request, json_data, layer_id):   
+            delete_preview_style(request, json_data.get('name'))            
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -201,7 +216,8 @@ def unique_symbol_update(request, layer_id, style_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_unique_symbol.update_style(request, json_data, layer_id, style_id):            
+        if services_unique_symbol.update_style(request, json_data, layer_id, style_id):  
+            delete_preview_style(request, json_data.get('name'))             
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -258,7 +274,8 @@ def unique_values_add(request, layer_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_unique_values.create_style(request, json_data, layer_id):            
+        if services_unique_values.create_style(request, json_data, layer_id):      
+            delete_preview_style(request, json_data.get('name'))         
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -278,7 +295,8 @@ def unique_values_update(request, layer_id, style_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_unique_values.update_style(request, json_data, layer_id, style_id):            
+        if services_unique_values.update_style(request, json_data, layer_id, style_id):  
+            delete_preview_style(request, json_data.get('name'))             
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -349,7 +367,16 @@ def get_unique_values(request):
         unique_fields = service_utils.get_distinct_query(host, port, schema, database, user, password, layer.name, field)
     
         return HttpResponse(json.dumps({'values': unique_fields}, indent=4), content_type='application/json')
-    
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def remove_temporal_preview(request):
+    if request.method == 'POST':
+        name = request.POST['name']
+        delete_preview_style(request, name)
+        
+    return HttpResponse(json.dumps({'success': 'OK'}, indent=4), content_type='application/json')
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -358,7 +385,8 @@ def intervals_add(request, layer_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_intervals.create_style(request, json_data, layer_id):            
+        if services_intervals.create_style(request, json_data, layer_id): 
+            delete_preview_style(request, json_data.get('name'))           
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -370,7 +398,51 @@ def intervals_add(request, layer_id):
         response["ramp_libraries"] = color_ramps
         
         return render_to_response('intervals_add.html', response, context_instance=RequestContext(request))
-    
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def update_preview(request, layer_id):  
+    if request.method == 'POST':
+        style_type = request.POST['style']
+        style_data = request.POST['style_data']
+        json_data = json.loads(style_data)
+        name = json_data.get('name')
+        services = None
+        
+        if style_type == 'UV':
+            services = services_unique_values
+        if style_type == 'US':
+            services = services_unique_symbol
+        if style_type == 'IN':
+            services = services_intervals
+        if style_type == 'EX':
+            services = services_expressions
+        if style_type == 'CT':
+            services = services_color_table
+        if style_type == 'CP':
+            services = services_clustered_points
+           
+        
+        if services:
+            layer = Layer.objects.get(id=layer_id)
+            layer_styles = StyleLayer.objects.filter(layer_id=layer.id)
+            style = None
+            for layer_style in layer_styles:
+                stl = Style.objects.get(id=layer_style.style_id)
+                if stl.name == name + '__tmp':
+                    style = stl
+            
+            if not style:
+                if services.create_style(request, json_data, layer_id, True):            
+                    return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            else:    
+                if services.update_style(request, json_data, layer_id, style.id):            
+                    return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            
+    return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+ 
+   
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def intervals_update(request, layer_id, style_id):  
@@ -378,7 +450,8 @@ def intervals_update(request, layer_id, style_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_intervals.update_style(request, json_data, layer_id, style_id):            
+        if services_intervals.update_style(request, json_data, layer_id, style_id):
+            delete_preview_style(request, json_data.get('name'))            
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -456,7 +529,8 @@ def clustered_points_add(request, layer_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_clustered_points.create_style(request, json_data, layer_id):            
+        if services_clustered_points.create_style(request, json_data, layer_id):     
+            delete_preview_style(request, json_data.get('name'))          
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -473,7 +547,8 @@ def clustered_points_update(request, layer_id, style_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_clustered_points.update_style(request, json_data, layer_id, style_id):            
+        if services_clustered_points.update_style(request, json_data, layer_id, style_id):     
+            delete_preview_style(request, json_data.get('name'))          
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -521,7 +596,8 @@ def expressions_add(request, layer_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_expressions.create_style(request, json_data, layer_id):            
+        if services_expressions.create_style(request, json_data, layer_id): 
+            delete_preview_style(request, json_data.get('name'))              
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -557,7 +633,8 @@ def expressions_update(request, layer_id, style_id):
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
         
-        if services_expressions.update_style(request, json_data, layer_id, style_id):            
+        if services_expressions.update_style(request, json_data, layer_id, style_id):  
+            delete_preview_style(request, json_data.get('name'))             
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
