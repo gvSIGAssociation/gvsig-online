@@ -700,7 +700,20 @@ layerTree.prototype.hasTemporaryLayersActive = function() {
 }
 
 layerTree.prototype.assignStyleToLayer = function(layer, style) {
-	layer.getSource().updateParams({"STYLES":style});;
+	layer.getSource().updateParams({"STYLES":style});
+	layer.legend = "http://localhost/gs-local/pruebaandorra61/wms?SERVICE=WMS&VERSION=1.1.1&layer=proteccion_civil&REQUEST=getlegendgraphic&STYLE=pruebaandorra61_proteccion_civil_19&FORMAT=image/png";
+	var url_split = layer.legend.split('&STYLE=');
+	if(url_split.length > 1){
+		var aux = ""
+		var index = url_split[1].indexOf('&');
+		if(index != -1){
+			layer.legend = url_split[0] +  url_split[1].substring(index);
+		}else{
+			layer.legend = url_split[0];
+		}
+	}
+	layer.legend = layer.legend + '&STYLE=' + style;
+	viewer.core.legend.reloadLegend();
 }
 
 layerTree.prototype.updateFromSlider = function(value_from) {
