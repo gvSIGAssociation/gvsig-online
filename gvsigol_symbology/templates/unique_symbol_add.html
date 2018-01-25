@@ -281,11 +281,29 @@ $(document).ready(function() {
 	});
 	
 	$("#refresh-preview").on('click', function(e){
-		utils.sld(layerId, 'US', uniqueSymbol);
+		uniqueSymbol.updatePreview(layerId);
 	});
 	
 	
-
+	$(window).unload(function(){
+		console.log("Trying to exit from this page");
+		$.ajax({
+			type: "POST",
+			async: false,
+			url: "/gvsigonline/symbology/remove_temporal_preview/",
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			data: {
+				name: "{{style.name}}"
+			},
+			success: function(response){
+				
+			},
+		    error: function(){}
+		});
+	});
+	
 });
 </script>
 {% endblock %}

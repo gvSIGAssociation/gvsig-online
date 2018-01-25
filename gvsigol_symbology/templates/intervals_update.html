@@ -410,8 +410,26 @@ $(document).ready(function() {
 	});
 	
 	$("#refresh-preview").on('click', function(e){
-		utils.sld(layerId, 'IN', intervals);
+		if ($("#style-name").val() != '') {
+			var selectedField = $('#select-numeric-field').val();
+			var numberOfIntervals = $('#number-of-intervals').val();
+			
+			if (selectedField == null) {
+				messageBox.show('warning', gettext('You must select a field'));
+				
+			} else if (parseInt(numberOfIntervals) <= 0 ) {
+				messageBox.show('warning', gettext('The number of intervals must be greater than 0'));
+				
+			} else {
+				intervals.updatePreview(layerId);
+			}
+			
+		} else {
+			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
+			
+		}
 	});
+	
 	
 	for(var idx in jsonNumericFields){
 		var field_name = jsonNumericFields[idx]["name"];
@@ -610,6 +628,25 @@ $(document).ready(function() {
 	$("#invert-ramp").click(function(){
 		var folder_id = $("#select-category").val()
 		getRampFromFolder(folder_id);
+	});
+	
+	$(window).unload(function(){
+		console.log("Trying to exit from this page");
+		$.ajax({
+			type: "POST",
+			async: false,
+			url: "/gvsigonline/symbology/remove_temporal_preview/",
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			data: {
+				name: "{{style.name}}"
+			},
+			success: function(response){
+				
+			},
+		    error: function(){}
+		});
 	});
 	
 });
