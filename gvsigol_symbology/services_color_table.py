@@ -141,7 +141,7 @@ def update_style(request, json_data, layer_id, style_id):
             s.save()
         datastore = layer.datastore
         workspace = datastore.workspace
-        mapservice.setLayerStyle(layer, style.name)
+        mapservice.setLayerStyle(layer, style.name, style.is_default)
     
     style.title = json_data.get('title')
     if json_data.get('minscale') != '':
