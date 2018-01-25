@@ -46,6 +46,7 @@ from gvsigol_core.models import Project
 from gvsigol_auth.models import UserGroup
 from django.shortcuts import render
 from django.utils import timezone
+from gdal_tools import gdalsrsinfo
 from gvsigol import settings
 import locks_utils
 import logging
@@ -225,11 +226,20 @@ def datastore_add(request):
     if request.method == 'POST':
         post_dict = request.POST.copy()
         type = request.POST.get('type')
+        has_errors = False
         if type == 'c_GeoTIFF':
             file = post_dict.get('file')
-            post_dict['connection_params'] = post_dict.get('connection_params').replace('url_replace', file)
+            try:
+                output = gdalsrsinfo(file.replace('file://', ''))
+                if output == None or output.__len__() <= 0:
+                    has_errors = True
+                else:
+                    post_dict['connection_params'] = post_dict.get('connection_params').replace('url_replace', file)
+            except:
+                has_errors = True
+                
         form = DatastoreForm(post_dict)
-        if form.is_valid():
+        if not has_errors and form.is_valid():
             name = form.cleaned_data['name']
             if _valid_name_regex.search(name) == None:
                 form.add_error(None, _("Invalid datastore name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name))
@@ -255,7 +265,10 @@ def datastore_add(request):
                 else:
                     # FIXME: the backend should raise an exception to identify the cause (e.g. datastore exists, backend is offline)
                     form.add_error(None, _('Error: Data store could not be created'))
-            
+        else:
+            if has_errors:
+                form.add_error(None, _('Error: GeoTIFF is not georreferenced'))
+          
     else:
         form = DatastoreForm()
         if not request.user.is_superuser:

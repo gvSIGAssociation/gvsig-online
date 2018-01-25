@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-15 12:20+0100\n"
+"POT-Creation-Date: 2018-01-25 13:29+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,49 +38,49 @@ msgstr "Capa vectorial"
 msgid "SQL View"
 msgstr "Vista SQL"
 
-#: backend_mapservice.py:519 backend_mapservice.py:528
-#: backend_mapservice.py:540
+#: backend_mapservice.py:534 backend_mapservice.py:543
+#: backend_mapservice.py:555
 #, python-brace-format
 msgid "Error publishing the layer. Backend error: {msg}"
 msgstr "Error publicando la capa. Error: {msg}"
 
-#: backend_mapservice.py:522 backend_mapservice.py:530
-#: backend_mapservice.py:542 views.py:691 views.py:1741
+#: backend_mapservice.py:537 backend_mapservice.py:545
+#: backend_mapservice.py:557 views.py:713 views.py:1763
 msgid "Error: layer could not be published"
 msgstr "Error: la capa no puede ser publicada"
 
-#: backend_mapservice.py:552 backend_mapservice.py:560
-#: backend_mapservice.py:568
+#: backend_mapservice.py:567 backend_mapservice.py:575
+#: backend_mapservice.py:583
 #, python-brace-format
 msgid "Error publishing the layer group. Backend error: {msg}"
 msgstr "Error publicando el grupo de capas. Error: {msg}"
 
-#: backend_mapservice.py:554 backend_mapservice.py:562
-#: backend_mapservice.py:570
+#: backend_mapservice.py:569 backend_mapservice.py:577
+#: backend_mapservice.py:585
 msgid "Error: layer group could not be published"
 msgstr "Error: el grupo de capas no puede ser publicado"
 
-#: backend_mapservice.py:608 backend_mapservice.py:618
+#: backend_mapservice.py:623 backend_mapservice.py:633
 #, fuzzy, python-brace-format
 #| msgid "Error publishing the layer. Backend error: {msg}"
 msgid "Error changing property. Backend error: {msg}"
 msgstr "Error publicando la capa. Error: {msg}"
 
-#: backend_mapservice.py:611 backend_mapservice.py:621
+#: backend_mapservice.py:626 backend_mapservice.py:636
 #, fuzzy
 #| msgid "Error: layer could not be published"
 msgid "Error: layer could not be updated"
 msgstr "Error: la capa no puede ser publicada"
 
-#: backend_mapservice.py:792
+#: backend_mapservice.py:807
 msgid ""
 "Bad file format. The provided zip file must not contain any subdirectory."
 msgstr ""
 "Formato de archivo incorrecto. El archivo zip proporcionada no debe contener "
 "ningún subdirectorio."
 
-#: backend_mapservice.py:836 backend_mapservice.py:887
-#: backend_mapservice.py:1118 backend_mapservice.py:1191
+#: backend_mapservice.py:851 backend_mapservice.py:902
+#: backend_mapservice.py:1133 backend_mapservice.py:1206
 #, python-brace-format
 msgid ""
 "Invalid layer name: '{value}'. Identifiers must begin with a letter or an "
@@ -90,8 +90,8 @@ msgstr ""
 "con una letra o un guion bajo (_). Los siguientes caracteres pueden ser "
 "letras, guiones o números"
 
-#: backend_mapservice.py:838 backend_mapservice.py:889
-#: backend_mapservice.py:951
+#: backend_mapservice.py:853 backend_mapservice.py:904
+#: backend_mapservice.py:966
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid database name: {value}. "
@@ -102,8 +102,8 @@ msgstr ""
 "{value}. Identificadores deben comenzar con una letra o un guión bajo "
 "( _ ) . Los siguientes caracteres pueden ser letras, guiones o números"
 
-#: backend_mapservice.py:840 backend_mapservice.py:891
-#: backend_mapservice.py:953
+#: backend_mapservice.py:855 backend_mapservice.py:906
+#: backend_mapservice.py:968
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid user name: {value}. Identifiers "
@@ -114,8 +114,8 @@ msgstr ""
 "{value}. Identificadores deben comenzar con una letra o un guión bajo "
 "( _ ) . Los siguientes caracteres pueden ser letras, guiones o números"
 
-#: backend_mapservice.py:842 backend_mapservice.py:893
-#: backend_mapservice.py:955
+#: backend_mapservice.py:857 backend_mapservice.py:908
+#: backend_mapservice.py:970
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid schema: {value}. Identifiers "
@@ -126,21 +126,21 @@ msgstr ""
 "Identificadores deben comenzar con una letra o un guión bajo ( _ ) . Los "
 "siguientes caracteres pueden ser letras, guiones o números"
 
-#: backend_mapservice.py:864 backend_mapservice.py:916
+#: backend_mapservice.py:879 backend_mapservice.py:931
 msgid "Error uploading the layer. Review the file format."
 msgstr "Error publicando la capa. Revisar el formato del fichero"
 
-#: backend_mapservice.py:914
+#: backend_mapservice.py:929
 #, fuzzy
 #| msgid "Error uploading the layer. Review the file format."
 msgid "Error uploading the layer. Review the file format. Cause: "
 msgstr "Error publicando la capa. Revisar el formato del fichero"
 
-#: backend_mapservice.py:1091
+#: backend_mapservice.py:1106
 msgid "Error creating the layer. Review the file format."
 msgstr "Error creando la capa. Revisar el formato del fichero"
 
-#: backend_mapservice.py:1114 views.py:576
+#: backend_mapservice.py:1129 views.py:598
 #, python-brace-format
 msgid ""
 "Invalid layer fields: '{value}'. Layer can't have fields with whitespaces"
@@ -148,41 +148,41 @@ msgstr ""
 "Campos inválidos: '{value}'. La capa no puede tener campos con espacios en "
 "blanco"
 
-#: backend_mapservice.py:1149
+#: backend_mapservice.py:1164
 msgid "Invalid geometry type"
 msgstr "Tipo de geometría no válido"
 
-#: backend_mapservice.py:1153
+#: backend_mapservice.py:1168
 #, python-brace-format
 msgid "Duplicated field name: {0}"
 msgstr "Nombre de campo duplicado: {0}"
 
-#: backend_mapservice.py:1155
+#: backend_mapservice.py:1170
 #, python-brace-format
 msgid "Invalid field name. '{0}' is a reserved word"
 msgstr "Nombre de campo inválido. '{0}' es una palabra reservada"
 
-#: backend_mapservice.py:1177
+#: backend_mapservice.py:1192
 #, python-brace-format
 msgid "Unsupported field type: {0}"
 msgstr "Tipo de campo no soportado: {0}"
 
-#: backend_mapservice.py:1182
+#: backend_mapservice.py:1197
 #: templates/geoserver/create_layer_feature_type.html:299
 #: templates/layer_create.html:713
 msgid "At least one field must be defined"
 msgstr "Debe definir por lo menos un campo"
 
-#: backend_mapservice.py:1185
+#: backend_mapservice.py:1200
 msgid "Invalid field definition"
 msgstr "Definición de campo no válida"
 
-#: backend_mapservice.py:1197
+#: backend_mapservice.py:1212
 #, python-brace-format
 msgid "A layer already exists with this name: '{value}'"
 msgstr "Ya existe una capa con este nombre: '{value}'"
 
-#: backend_mapservice.py:1217 backend_mapservice.py:1226
+#: backend_mapservice.py:1232 backend_mapservice.py:1241
 msgid "Error occurred building the view. Review the SQL sentence"
 msgstr "Ha ocurrido un error construyendo la vista. Revisar la sentencia SQL"
 
@@ -230,31 +230,23 @@ msgstr "Multipolígono"
 msgid "continuous interval"
 msgstr "Intervalo continuo"
 
-#: forms_geoserver.py:45
-msgid "interval and resolution"
-msgstr "Intervalo con resolución"
-
-#: forms_geoserver.py:45
-msgid "list"
-msgstr "Lista de valores"
-
-#: forms_geoserver.py:46 forms_services.py:39
+#: forms_geoserver.py:47 forms_services.py:39
 msgid "smallest domain value"
 msgstr "Menor valor del dominio"
 
-#: forms_geoserver.py:46 forms_services.py:39
+#: forms_geoserver.py:47 forms_services.py:39
 msgid "biggest domain value"
 msgstr "Mayor valor del dominio"
 
-#: forms_geoserver.py:46 forms_services.py:39
+#: forms_geoserver.py:47 forms_services.py:39
 msgid "nearest to the reference value"
 msgstr "Valor más cercano al valor referencia"
 
-#: forms_geoserver.py:46 forms_services.py:39
+#: forms_geoserver.py:47 forms_services.py:39
 msgid "reference value"
 msgstr "Valor de referencia"
 
-#: forms_geoserver.py:50 forms_geoserver.py:65 forms_services.py:53
+#: forms_geoserver.py:51 forms_geoserver.py:66 forms_services.py:53
 #: templates/datastore_add.html:36 templates/datastore_update.html.py:19
 #: templates/geoserver/layer_upload_imagemosaic.html:52
 #: templates/geoserver/layer_upload_raster.html:52
@@ -262,16 +254,16 @@ msgstr "Valor de referencia"
 msgid "Workspace"
 msgstr "Espacio de trabajo"
 
-#: forms_geoserver.py:52 forms_geoserver.py:67 forms_geoserver.py:79
-#: forms_geoserver.py:93 forms_services.py:55
+#: forms_geoserver.py:53 forms_geoserver.py:68 forms_geoserver.py:80
+#: forms_geoserver.py:94 forms_services.py:55
 #: templates/geoserver/layer_upload_postgis.html:43
 #: templates/geoserver/layer_upload_vector.html:35
 #: templates/geoserver/layer_upload_vector.html:41
 msgid "File"
 msgstr "Archivo"
 
-#: forms_geoserver.py:53 forms_geoserver.py:68 forms_geoserver.py:80
-#: forms_geoserver.py:95 forms_geoserver.py:126 forms_geoserver.py:141
+#: forms_geoserver.py:54 forms_geoserver.py:69 forms_geoserver.py:81
+#: forms_geoserver.py:96 forms_geoserver.py:127 forms_geoserver.py:142
 #: forms_services.py:43 forms_services.py:56 forms_services.py:85
 #: forms_services.py:106 forms_services.py:129 templates/base_layer_add.html:39
 #: templates/base_layer_update.html.py:39 templates/datastore_add.html:59
@@ -287,8 +279,8 @@ msgstr "Archivo"
 msgid "Name"
 msgstr "Nombre"
 
-#: forms_geoserver.py:54 forms_geoserver.py:69 forms_geoserver.py:81
-#: forms_geoserver.py:132 forms_geoserver.py:144 forms_services.py:107
+#: forms_geoserver.py:55 forms_geoserver.py:70 forms_geoserver.py:82
+#: forms_geoserver.py:133 forms_geoserver.py:145 forms_services.py:107
 #: forms_services.py:130 forms_services.py:160 templates/base_layer_add.html:68
 #: templates/base_layer_list.html.py:22 templates/base_layer_update.html:68
 #: templates/enumeration_add.html.py:47 templates/enumeration_list.html:23
@@ -305,8 +297,8 @@ msgstr "Nombre"
 msgid "Title"
 msgstr "Título"
 
-#: forms_geoserver.py:56 forms_geoserver.py:71 forms_geoserver.py:83
-#: forms_geoserver.py:133 forms_geoserver.py:145 forms_geoserver.py:182
+#: forms_geoserver.py:57 forms_geoserver.py:72 forms_geoserver.py:84
+#: forms_geoserver.py:134 forms_geoserver.py:146 forms_geoserver.py:183
 #: forms_services.py:108 forms_services.py:131
 #: templates/geoserver/create_layer_feature_type.html:94
 #: templates/geoserver/create_layer_sql_view.html:84
@@ -319,8 +311,8 @@ msgstr "Título"
 msgid "Layer group"
 msgstr "Grupo de capas"
 
-#: forms_geoserver.py:57 forms_geoserver.py:72 forms_geoserver.py:84
-#: forms_geoserver.py:134 forms_geoserver.py:146
+#: forms_geoserver.py:58 forms_geoserver.py:73 forms_geoserver.py:85
+#: forms_geoserver.py:135 forms_geoserver.py:147
 #: templates/geoserver/create_layer_feature_type.html:106
 #: templates/geoserver/create_layer_sql_view.html:96
 #: templates/geoserver/layer_upload_imagemosaic.html:106
@@ -331,8 +323,8 @@ msgstr "Grupo de capas"
 msgid "Visible"
 msgstr "Visible"
 
-#: forms_geoserver.py:58 forms_geoserver.py:73 forms_geoserver.py:85
-#: forms_geoserver.py:135 forms_geoserver.py:147
+#: forms_geoserver.py:59 forms_geoserver.py:74 forms_geoserver.py:86
+#: forms_geoserver.py:136 forms_geoserver.py:148
 #: templates/geoserver/create_layer_feature_type.html:116
 #: templates/geoserver/create_layer_sql_view.html:106
 #: templates/geoserver/layer_upload_imagemosaic.html:114
@@ -343,8 +335,8 @@ msgstr "Visible"
 msgid "Queryable"
 msgstr "Consultable"
 
-#: forms_geoserver.py:59 forms_geoserver.py:74 forms_geoserver.py:86
-#: forms_geoserver.py:136 forms_geoserver.py:148
+#: forms_geoserver.py:60 forms_geoserver.py:75 forms_geoserver.py:87
+#: forms_geoserver.py:137 forms_geoserver.py:149
 #: templates/geoserver/create_layer_feature_type.html:111
 #: templates/geoserver/create_layer_sql_view.html:101
 #: templates/geoserver/layer_upload_imagemosaic.html:110
@@ -355,117 +347,117 @@ msgstr "Consultable"
 msgid "Cached"
 msgstr "Cacheada"
 
-#: forms_geoserver.py:60 forms_geoserver.py:75 forms_geoserver.py:87
-#: forms_geoserver.py:137 forms_geoserver.py:149
+#: forms_geoserver.py:61 forms_geoserver.py:76 forms_geoserver.py:88
+#: forms_geoserver.py:138 forms_geoserver.py:150
 msgid "Single image"
 msgstr "Imagen simple (sin tiles)"
 
-#: forms_geoserver.py:61
+#: forms_geoserver.py:62
 msgid "Date regex"
 msgstr "Expresión regular de fecha"
 
-#: forms_geoserver.py:62
+#: forms_geoserver.py:63
 msgid "Elevation regex"
 msgstr "Expresión regular de elevación"
 
-#: forms_geoserver.py:78 forms_geoserver.py:91 forms_geoserver.py:115
-#: forms_geoserver.py:125 forms_geoserver.py:140 forms_geoserver.py:176
+#: forms_geoserver.py:79 forms_geoserver.py:92 forms_geoserver.py:116
+#: forms_geoserver.py:126 forms_geoserver.py:141 forms_geoserver.py:177
 #: forms_services.py:105 forms_services.py:128 templates/layer_list.html.py:26
 msgid "Datastore"
 msgstr "Almacén de datos"
 
-#: forms_geoserver.py:94
+#: forms_geoserver.py:95
 msgid "Mode"
 msgstr "Modo"
 
-#: forms_geoserver.py:99
+#: forms_geoserver.py:100
 msgid "Encoding"
 msgstr "Codificación"
 
-#: forms_geoserver.py:100 forms_geoserver.py:131 forms_geoserver.py:143
+#: forms_geoserver.py:101 forms_geoserver.py:132 forms_geoserver.py:144
 msgid "SRS"
 msgstr "SRS"
 
-#: forms_geoserver.py:127
+#: forms_geoserver.py:128
 msgid "SQL Statement"
 msgstr "Sentencia SQL"
 
-#: forms_geoserver.py:128 templates/geoserver/create_layer_sql_view.html.py:64
+#: forms_geoserver.py:129 templates/geoserver/create_layer_sql_view.html.py:64
 msgid "Primary key column"
 msgstr "Columna de clave primaria"
 
-#: forms_geoserver.py:129 templates/geoserver/create_layer_sql_view.html.py:68
+#: forms_geoserver.py:130 templates/geoserver/create_layer_sql_view.html.py:68
 msgid "Geometry column"
 msgstr "Columna de geometría"
 
-#: forms_geoserver.py:130 forms_geoserver.py:142
+#: forms_geoserver.py:131 forms_geoserver.py:143
 #: templates/geoserver/create_layer_feature_type.html:57
 #: templates/geoserver/create_layer_sql_view.html:74
 #: templates/layer_create.html:64
 msgid "Geometry type"
 msgstr "Tipo de geometría"
 
-#: forms_geoserver.py:150 templates/geoserver/create_layer_feature_type.html:68
+#: forms_geoserver.py:151 templates/geoserver/create_layer_feature_type.html:68
 #: templates/geoserver/create_layer_sql_view.html:143
 msgid "Fields"
 msgstr "Campos"
 
-#: forms_geoserver.py:151 forms_services.py:111 forms_services.py:135
+#: forms_geoserver.py:152 forms_services.py:111 forms_services.py:135
 #, fuzzy
 #| msgid "Fields"
 msgid "Field"
 msgstr "Campos"
 
-#: forms_geoserver.py:152 forms_services.py:112 forms_services.py:136
+#: forms_geoserver.py:153 forms_services.py:112 forms_services.py:136
 #, fuzzy
 #| msgid "Add field"
 msgid "End field"
 msgstr "Añadir campo"
 
-#: forms_geoserver.py:153 forms_services.py:113 forms_services.py:137
+#: forms_geoserver.py:154 forms_services.py:113 forms_services.py:137
 msgid "Presentation"
 msgstr ""
 
-#: forms_geoserver.py:154 forms_services.py:114 forms_services.py:138
+#: forms_geoserver.py:155 forms_services.py:114 forms_services.py:138
 msgid "Resolution year"
 msgstr ""
 
-#: forms_geoserver.py:155 forms_services.py:115 forms_services.py:139
+#: forms_geoserver.py:156 forms_services.py:115 forms_services.py:139
 msgid "Resolution month"
 msgstr ""
 
-#: forms_geoserver.py:156 forms_services.py:116 forms_services.py:140
+#: forms_geoserver.py:157 forms_services.py:116 forms_services.py:140
 msgid "Resolution week"
 msgstr ""
 
-#: forms_geoserver.py:157 forms_services.py:117 forms_services.py:141
+#: forms_geoserver.py:158 forms_services.py:117 forms_services.py:141
 msgid "Resolution day"
 msgstr ""
 
-#: forms_geoserver.py:158 forms_services.py:118 forms_services.py:142
+#: forms_geoserver.py:159 forms_services.py:118 forms_services.py:142
 msgid "Resolution hour"
 msgstr ""
 
-#: forms_geoserver.py:159 forms_services.py:119 forms_services.py:143
+#: forms_geoserver.py:160 forms_services.py:119 forms_services.py:143
 msgid "Resolution minute"
 msgstr ""
 
-#: forms_geoserver.py:160 forms_services.py:120 forms_services.py:144
+#: forms_geoserver.py:161 forms_services.py:120 forms_services.py:144
 msgid "Resolution second"
 msgstr ""
 
-#: forms_geoserver.py:161 forms_services.py:121 forms_services.py:145
+#: forms_geoserver.py:162 forms_services.py:121 forms_services.py:145
 #, fuzzy
 #| msgid "Default symbol"
 msgid "Default mode"
 msgstr "Símbolo por defecto"
 
-#: forms_geoserver.py:162 templates/layer_add.html.py:157
+#: forms_geoserver.py:163 templates/layer_add.html.py:157
 #: templates/layer_create.html:189 templates/layer_update.html.py:181
 msgid "Default value"
 msgstr "Valor por defecto"
 
-#: forms_geoserver.py:195
+#: forms_geoserver.py:196
 msgid "Error: Invalid field definition"
 msgstr "Error: Definición de campo no válida"
 
@@ -566,17 +558,17 @@ msgstr ""
 msgid "Apikey"
 msgstr "API-Key"
 
-#: gdal_tools.py:98
+#: gdal_tools.py:99 gdal_tools.py:115
 #, python-brace-format
 msgid "Error calculating raster stats. Gdalinfo error: {msg}"
 msgstr "Error calculando las estadísticas del raster. Error de Gdalinfo: {msg}"
 
-#: gdal_tools.py:125
+#: gdal_tools.py:142
 #, python-brace-format
 msgid "Error when loading the layer to PostGIS. Ogr2ogr error: {msg}"
 msgstr "Error cargando la capa en PostGIS. Error de Ogr2ogr: {msg}"
 
-#: gdal_tools.py:161 gdal_tools.py:222
+#: gdal_tools.py:178 gdal_tools.py:239
 #, python-brace-format
 msgid "Error exporting layer from PostGIS to Spatialite. Ogr2ogr error: {msg}"
 msgstr ""
@@ -1402,7 +1394,7 @@ msgstr "Actualizar espacio de trabajo"
 msgid "Project description"
 msgstr "Descripción"
 
-#: views.py:89
+#: views.py:93
 #, python-brace-format
 msgid ""
 "Invalid workspace name: '{value}'. Identifiers must begin with a letter or "
@@ -1413,11 +1405,11 @@ msgstr ""
 "comenzar con una letra o un guion bajo (_). Los siguientes caracteres pueden "
 "ser letras, guiones o números"
 
-#: views.py:113
+#: views.py:117
 msgid "Error: workspace could not be created"
 msgstr "Error: el workspace no puede ser creado"
 
-#: views.py:232
+#: views.py:245
 #, python-brace-format
 msgid ""
 "Invalid datastore name: '{value}'. Identifiers must begin with a letter or "
@@ -1428,19 +1420,23 @@ msgstr ""
 "con una letra o un guion bajo (_). Los siguientes caracteres pueden ser "
 "letras, guiones o números"
 
-#: views.py:254
+#: views.py:267
 msgid "Error: Data store could not be created"
 msgstr "Error: El almacén de datos no puede ser creado"
 
-#: views.py:268
+#: views.py:270
+msgid "Error: GeoTIFF is not georreferenced"
+msgstr "Error: El GeoTIFF especificado no está georreferenciado"
+
+#: views.py:284
 msgid "Datastore not found"
 msgstr "Almacén de datos no encontrado"
 
-#: views.py:298
+#: views.py:314
 msgid "Error updating datastore"
 msgstr "Error actualizndo el almacén de datos"
 
-#: views.py:1377 views.py:1518
+#: views.py:1399 views.py:1540
 #, python-brace-format
 msgid ""
 "Invalid layer group name: '{value}'. Identifiers must begin with a letter or "
@@ -1451,29 +1447,35 @@ msgstr ""
 "comenzar con una letra o un guión bajo (_). Los siguientes caracteres pueden "
 "ser letras, guiones, o números"
 
-#: views.py:1425 views.py:1538
+#: views.py:1447 views.py:1560
 msgid "Layer group name already exists"
 msgstr "El nombre del grupo de capas ya exsite"
 
-#: views.py:1429
+#: views.py:1451
 msgid "You must enter a name for layer group"
 msgstr "Debe introducir un nombre para el grupo de capas"
 
-#: views.py:1867
+#: views.py:1889
 msgid "You must enter a title for enumeration"
 msgstr "Debe introducir un título para la enumeración"
 
-#: views.py:1872
+#: views.py:1894
 msgid "Name already taken"
 msgstr "El nombre ya existe"
 
-#: views.py:2579
+#: views.py:2611
 msgid "Error: BaseLayer could not be published"
 msgstr "Error: la capa base no puede ser publicada"
 
-#: views.py:2626
+#: views.py:2660
 msgid "Error: baselayer could not be published"
 msgstr "Error: la capa no puede ser publicada"
+
+#~ msgid "interval and resolution"
+#~ msgstr "Intervalo con resolución"
+
+#~ msgid "list"
+#~ msgstr "Lista de valores"
 
 #~ msgid "version 1.1.1"
 #~ msgstr "versión 1.1.1"
