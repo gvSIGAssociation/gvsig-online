@@ -711,6 +711,34 @@ class Geoserver():
             return True
         raise FailedRequestError(r.status_code, r.content)
     
+    
+    def add_style(self, layer, style_name, user=None, password=None):
+        url = self.service_url + "/layers/" +  layer + "/styles"
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+            auth = ('admin', 'geoserver')
+        
+    
+        headers = {'content-type': 'application/json'}
+        '''
+        xml = "<styles>"
+        xml +=  "<style>"
+        xml +=  "<name>" + style_name + "</name>"
+        xml +=  "</style>"
+        xml +="</styles>"
+        '''
+        
+        xml = {"style":[{
+            'name': style_name #,
+            #'href': url+'/'+style_name+'.json' 
+        }]}
+        r = self.session.post(url, data=json.dumps(xml), headers=headers, auth=auth)
+        if r.status_code==200:
+            return True
+        raise UploadError(r.status_code, r.content)
+    
     def update_style(self, style_name, sld_body, user=None, password=None):
         url = self.service_url + "/styles/" + style_name + ".sld"
         if user and password:

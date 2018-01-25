@@ -633,7 +633,7 @@ def layer_add_with_group(request, layergroup_id):
                     
                     style_name = workspace.name + '_' + newRecord.name + '_default'
                     mapservice_backend.createDefaultStyle(newRecord, style_name)
-                    mapservice_backend.setLayerStyle(newRecord, style_name)
+                    mapservice_backend.setLayerStyle(newRecord, style_name, True)
                     newRecord = mapservice_backend.updateThumbnail(newRecord, 'create')
                     
                     if datastore.type == 'v_PostGIS':
@@ -1705,7 +1705,7 @@ def layer_create_with_group(request, layergroup_id):
                     
                     style_name = workspace.name + '_' + newRecord.name + '_default'
                     mapservice_backend.createDefaultStyle(newRecord, style_name)
-                    mapservice_backend.setLayerStyle(newRecord, style_name)
+                    mapservice_backend.setLayerStyle(newRecord, style_name, True)
                     mapservice_backend.updateThumbnail(newRecord, 'create')
                     
                     time_resolution = 0
