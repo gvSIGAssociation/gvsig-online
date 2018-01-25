@@ -298,7 +298,7 @@ class Geoserver():
             e = sys.exc_info()[0]
             pass
         
-    def setLayerStyle(self, layer, style):
+    def setLayerStyle(self, layer, style, is_default):
         """
         Set default style
         """
@@ -306,7 +306,11 @@ class Geoserver():
             layer_name = layer.datastore.workspace.name + ":" + layer.name
             catalog = self.getGsconfig()
             gs_layer = catalog.get_layer(layer_name)
-            gs_layer.default_style = style
+            #styles = gs_layer._get_alternate_styles()
+            #styles.append(style)
+            self.addStyle(layer_name, style)
+            if is_default:
+                gs_layer.default_style = style
             catalog.save(gs_layer)
             
             return True
@@ -411,6 +415,17 @@ class Geoserver():
         """
         try:
             self.getGsconfig().create_style(name, data.encode('utf-8'), overwrite=False, workspace=None, style_format="sld10", raw=False)
+            return True
+        
+        except Exception as e:
+            return False
+        
+    def addStyle(self, layer, name):
+        """
+        Add new style to layer
+        """
+        try:
+            self.rest_catalog.add_style(layer, name)
             return True
         
         except Exception as e:
@@ -1066,7 +1081,7 @@ class Geoserver():
                         if symbology_services.clone_style(self, layer, original_style_name, final_style_name) is False:
                             print "DEBUG: Creation mode CR. Clone style False. Creating default" 
                             self.createDefaultStyle(layer, final_style_name)
-                            self.setLayerStyle(layer, final_style_name)
+                            self.setLayerStyle(layer, final_style_name, True)
                         else:
                             print "DEBUG: Creation mode CR. Clone style True"
                     else:
@@ -1076,7 +1091,7 @@ class Geoserver():
                     print "DEBUG: NO has_style or style_from_library " + original_style_name
                     if creation_mode == 'CR' or (not has_style and creation_mode == 'OW'):
                         self.createDefaultStyle(layer, final_style_name)
-                        self.setLayerStyle(layer, final_style_name)
+                        self.setLayerStyle(layer, final_style_name, True)
                         
                 srs = defaults['srs']
                             
@@ -1249,6 +1264,10 @@ class Geoserver():
         srs = form.get('srs').split(':')[1]
         fields = form.get('fields')
         
+        return self.createTableFromFields(datastore, name, geom_type, srs, fields)
+        
+    def createTableFromFields(self, datastore, name, geom_type, srs, fields):
+        
         for control_field in settings.CONTROL_FIELDS:
             has_control_field = False
             
@@ -1270,6 +1289,25 @@ class Geoserver():
             schema = params.get('schema', 'public')
             i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
             i.create_table(schema, name, geom_type, srs, fields)
+            return True
+        
+        except Exception as e:
+            print str(e)
+            raise
+        
+        
+    
+    def deleteTable(self, datastore, name):
+        try:
+            params = json.loads(datastore.connection_params)
+            host = params['host']
+            port = params['port']
+            dbname = params['database']
+            user = params['user']
+            passwd = params['passwd']
+            schema = params.get('schema', 'public')
+            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+            i.delete_table(schema, name)
             return True
         
         except Exception as e:
