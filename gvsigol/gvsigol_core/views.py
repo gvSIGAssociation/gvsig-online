@@ -45,6 +45,8 @@ import json
 import ast
 import re
 
+from django.views.decorators.clickjacking import xframe_options_exempt
+
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 def not_found_view(request):
@@ -75,6 +77,7 @@ def home(request):
                 projects_by_user.append(project_group)
     
     projects = []
+    public_projects = []
     if request.user.is_superuser:
         for p in Project.objects.all():
             image = ''
@@ -89,7 +92,11 @@ def home(request):
             project['title'] = p.title
             project['description'] = p.description
             project['image'] = urllib.unquote(image)
-            projects.append(project)
+            
+            if p.is_public:
+                public_projects.append(project)
+            else:
+                projects.append(project)
             
     else:
         if len (projects_by_user) > 0:
@@ -107,12 +114,32 @@ def home(request):
                 project['title'] = p.title
                 project['description'] = p.description
                 project['image'] = urllib.unquote(image)
-                projects.append(project)
+                if not p.is_public:
+                    projects.append(project)
+                    
+                    
+        for p in Project.objects.all():
+            image = ''
+            if "no_project.png" in p.image.url:
+                image = p.image.url.replace(settings.MEDIA_URL, '')
+            else:
+                image = p.image.url
+                
+            project = {}
+            project['id'] = p.id
+            project['name'] = p.name
+            project['title'] = p.title
+            project['description'] = p.description
+            project['image'] = urllib.unquote(image)
+            
+            if p.is_public:
+                public_projects.append(project)
+                
             
     if len (projects_by_user) == 1 and not is_superuser(user) and from_login:
         return redirect('project_load', project_name=projects_by_user[0].project.name)
     else:
-        return render_to_response('home.html', {'projects': projects}, RequestContext(request))
+        return render_to_response('home.html', {'projects': projects, 'public_projects': public_projects}, RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -480,6 +507,21 @@ def project_load(request, project_name):
         return render_to_response('viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id, 'extra_params': json.dumps(request.GET)}, context_instance=RequestContext(request))
     else:
         return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
+
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@xframe_options_exempt    
+def portable_project_load(request, project_name):
+    if core_utils.is_valid_project(request.user, project_name):
+        project = Project.objects.get(name__exact=project_name)
+        return render_to_response('portable_viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id, 'extra_params': json.dumps(request.GET)}, context_instance=RequestContext(request))
+    else:
+        return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
+
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+def blank_page(request):
+    return render_to_response('blank_page.html', {}, context_instance=RequestContext(request))
 
 
 def get_layer_styles(layer):
