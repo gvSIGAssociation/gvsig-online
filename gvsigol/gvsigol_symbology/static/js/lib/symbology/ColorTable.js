@@ -97,23 +97,7 @@ ColorTable.prototype.getMinValueForInterval = function(min, max, it, numberOfInt
 
 ColorTable.prototype.save = function(layerId) {
 	$("body").overlay();
-	
-	var entries = new Array();
-	for (var i=0; i < this.rule.getEntries().length; i++) {
-		var entry = {
-			json: this.rule.getEntries()[i].toJSON(),
-			order: i
-		};
-		entries.push(entry);
-	}
-	
-	var style = {
-		name: $('#style-name').val(),
-		title: $('#style-title').val(),
-		is_default: $('#style-is-default').is(":checked"),
-		rule: this.rule.getObject(),
-		entries: entries
-	}
+	style = this.getStyleDef();
 	
 	$.ajax({
 		type: "POST",
@@ -151,10 +135,7 @@ ColorTable.prototype.load = function(min_raster, max_raster, numberOfIntervals) 
 	}
 };
 
-ColorTable.prototype.update = function(layerId, styleId) {
-	
-	$("body").overlay();
-	
+ColorTable.prototype.getStyleDef = function() {
 	var entries = new Array();
 	for (var i=0; i < this.rule.getEntries().length; i++) {
 		var entry = {
@@ -171,6 +152,14 @@ ColorTable.prototype.update = function(layerId, styleId) {
 		rule: this.rule.getObject(),
 		entries: entries
 	}
+	
+	return style;
+}
+
+
+ColorTable.prototype.update = function(layerId, styleId) {
+	$("body").overlay();
+	style = this.getStyleDef();
 	
 	$.ajax({
 		type: "POST",
@@ -191,5 +180,34 @@ ColorTable.prototype.update = function(layerId, styleId) {
 			
 		},
 	    error: function(){}
+	});
+};
+
+
+ColorTable.prototype.updatePreview = function(layerId) {
+	var self = this;
+	//$("body").overlay();
+	style = this.getStyleDef();
+
+	$.ajax({
+		type: "POST",
+		async: false,
+		url: "/gvsigonline/symbology/update_preview/" + layerId +  "/",
+		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		data: {
+			style_data: JSON.stringify(style),
+			style: 'CT'
+		},
+		success: function(response){
+			if (response.success) {
+				self.utils.reloadLayerPreview($('#style-name').val())
+			} else {
+				alert('Error');
+			}
+
+		},
+		error: function(){}
 	});
 };

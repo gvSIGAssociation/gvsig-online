@@ -37,7 +37,7 @@ import json
 import re
 import ast
 
-def create_style(request, json_data, layer_id):
+def create_style(request, json_data, layer_id, is_preview=False):
 
     layer = Layer.objects.get(id=int(layer_id))
     datastore = layer.datastore
@@ -50,10 +50,16 @@ def create_style(request, json_data, layer_id):
             s.is_default = False
             s.save()
     
+    name = json_data.get('name')
+    is_default = json_data.get('is_default')
+    if is_preview:
+        name = name + '__tmp'
+        is_default = False
+        
     style = Style(
-        name = json_data.get('name'),
+        name = name,
         title = json_data.get('title'),
-        is_default = json_data.get('is_default'),
+        is_default = is_default,
         type = 'IN'
     )
     if json_data.get('minscale') != '':
@@ -170,8 +176,8 @@ def create_style(request, json_data, layer_id):
             
     sld_body = sld_builder.build_sld(layer, style)
     if mapservice.createStyle(style.name, sld_body): 
-        if style.is_default:
-            mapservice.setLayerStyle(layer, style.name)
+        if not is_preview:
+            mapservice.setLayerStyle(layer, style.name, style.is_default)
         return True
         
     else:
@@ -189,7 +195,7 @@ def update_style(request, json_data, layer_id, style_id):
             s.save()
         datastore = layer.datastore
         workspace = datastore.workspace
-        mapservice.setLayerStyle(layer, style.name)
+        mapservice.setLayerStyle(layer, style.name, True)
     
     style.title = json_data.get('title')
     if json_data.get('minscale') != '':

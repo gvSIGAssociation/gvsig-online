@@ -767,79 +767,8 @@ ClusteredPoints.prototype.refreshMap = function() {
 };
 
 ClusteredPoints.prototype.save = function(layerId) {
-
 	$("body").overlay();
-
-	var minscale = $('#symbol-minscale').val();
-	if(minscale == "" || minscale < 0){
-		minscale = -1;
-	}
-
-	var maxscale = $('#symbol-maxscale').val();
-	if(maxscale == "" || maxscale < 0){
-		maxscale = -1;
-	}
-
-
-	var style = {
-			name: $('#style-name').val(),
-			title: $('#style-title').val(),
-			minscale: minscale,
-			maxscale: maxscale,
-			is_default: $('#style-is-default').is(":checked"),
-			rules: new Array()
-	};
-
-	for (var i=0; i<this.rules.length; i++) {
-		if(!this.rules[i].name.endsWith("_text")){
-			var symbolizers = new Array();
-			for (var j=0; j < this.rules[i].getSymbolizers().length; j++) {
-				var symbolizer = {
-						type: this.rules[i].getSymbolizers()[j].type,
-						json: this.rules[i].getSymbolizers()[j].toJSON(),
-						order: this.rules[i].getSymbolizers()[j].order
-				};
-				symbolizers.push(symbolizer);
-			}
-
-			symbolizers.sort(function(a, b){
-				return parseInt(a.order) - parseInt(b.order);
-			});
-
-			var rule = {
-					rule: this.rules[i].getObject(),
-					symbolizers: symbolizers
-			};
-			style.rules.push(rule);
-		}
-	}
-
-	if (this.label != null && this.label.is_activated()) {
-		var ruleName = "rule_" + this.rules.length +"_text";
-		var ruleTitle = this.label.title;
-		var l = {
-				type: this.label.type,
-				json: this.label.toJSON(),
-				order: this.label.order
-		};
-
-		var options = {
-				"id" : this.rules.length,
-				"name" : ruleName,
-				"title" : ruleTitle,
-				"abstract" : "",
-				"filter" : this.label.filterCode,
-				"minscale" : this.label.minscale,
-				"maxscale" :  this.label.maxscale,
-				"order" :  this.label.order
-		}
-		var rl = new Rule(i, ruleName, ruleTitle, options, this.utils);
-		var rule = {
-				rule: rl.getObject(),
-				symbolizers: [l]
-		};
-		style.rules.push(rule);
-	}
+	style = this.getStyleDef();
 
 	$.ajax({
 		type: "POST",
@@ -864,8 +793,34 @@ ClusteredPoints.prototype.save = function(layerId) {
 };
 
 ClusteredPoints.prototype.update = function(layerId, styleId) {
-
 	$("body").overlay();
+	style = this.getStyleDef();
+
+
+	$.ajax({
+		type: "POST",
+		async: false,
+		url: "/gvsigonline/symbology/clustered_points_update/" + layerId + "/" + styleId + "/",
+		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		data: {
+			style_data: JSON.stringify(style)
+		},
+		success: function(response){
+			if (response.success) {
+				location.href = "/gvsigonline/symbology/style_layer_list/";
+			} else {
+				alert('Error');
+			}
+
+		},
+		error: function(){}
+	});
+};
+
+
+ClusteredPoints.prototype.getStyleDef = function() {
 
 	var minscale = $('#symbol-minscale').val();
 	if(minscale == "" || minscale < 0){
@@ -938,21 +893,30 @@ ClusteredPoints.prototype.update = function(layerId, styleId) {
 		};
 		style.rules.push(rule);
 	}
+	return style;
+	
+}
 
+
+ClusteredPoints.prototype.updatePreview = function(layerId) {
+	var self = this;
+	//$("body").overlay();
+	style = this.getStyleDef();
 
 	$.ajax({
 		type: "POST",
 		async: false,
-		url: "/gvsigonline/symbology/clustered_points_update/" + layerId + "/" + styleId + "/",
+		url: "/gvsigonline/symbology/update_preview/" + layerId +  "/",
 		beforeSend:function(xhr){
 			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},
 		data: {
-			style_data: JSON.stringify(style)
+			style_data: JSON.stringify(style),
+			style: 'CP'
 		},
 		success: function(response){
 			if (response.success) {
-				location.href = "/gvsigonline/symbology/style_layer_list/";
+				self.utils.reloadLayerPreview($('#style-name').val())
 			} else {
 				alert('Error');
 			}
@@ -961,3 +925,4 @@ ClusteredPoints.prototype.update = function(layerId, styleId) {
 		error: function(){}
 	});
 };
+
