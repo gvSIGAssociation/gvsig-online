@@ -91,6 +91,35 @@
 		</div>
 		<!-- /.box -->
 	</div>
+	
+	<div class="col-md-8">
+		<div id="project-list-box2" class="box searchable-list-box" style="margin-top: 20px;">
+			<div class="box-header with-border">
+				<h3 class="box-title col-md-6">{% trans "Public projects list" %}</h3>
+				<div class="col-md-6">
+					<input type="text" class="search2 form-control" style="padding-right: 30px;position: absolute;" placeHolder="{% trans 'Buscar proyectos...' %}" />
+				</div>
+			</div>
+			<div class="box-body">
+				<ul class="products-list product-list-in-box list2">
+					{% for project in public_projects %}
+					<li class="item">
+						<div class="product-img">
+							<img src={{project.image}} alt="Project Image">
+						</div>
+						<div class="product-info">
+							<a href="/gvsigonline/core/project_load/{{project.name}}/" class="product-title">{{project.title}} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-cube margin-r-5"></i> {% trans "Load project" %}</span></a> 
+							<span class="product-description"> {{project.description}}</span>
+						</div>
+					</li>
+					{% endfor %}
+				</ul>
+				<ul class="pagination"></ul>
+			</div>
+			
+		</div>
+		<!-- /.box -->
+	</div>
 </div>
 {% endblock %}
 {% block extra-scripts %}
@@ -148,9 +177,17 @@
   		  valueNames: ['product-title'],
   		  listClass:'list',
   		  searchClass: 'search',
-  		  page: 5,
+  		  page: 4,
   		  pagination: false
   		});
+		
+		var searcheableList2 = new List('project-list-box2', {
+	  		  valueNames: ['product-title'],
+	  		  listClass:'list2',
+	  		  searchClass: 'search2',
+	  		  page: 4,
+	  		  pagination: false
+	  		});
 	});
 </script>
 {% endblock %}
