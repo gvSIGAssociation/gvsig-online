@@ -30,6 +30,7 @@ import os
 
 OGR2OGR_PATH = '/usr/bin/ogr2ogr'
 GDALINFO_PATH = '/usr/bin/gdalinfo'
+GDALSRSINFO_PATH = '/usr/bin/gdalsrsinfo'
 
 __BAND_PATTERN=re.compile("Band ([0-9]+).*")
 __BAND_STATS_PATTERN=re.compile("  Minimum=([-+]?\d*\.\d+|\d+), Maximum=([-+]?\d*\.\d+|\d+), Mean=([-+]?\d*\.\d+|\d+), StdDev=([-+]?\d*\.\d+|\d+).*")
@@ -90,6 +91,22 @@ def gdalinfo(raster_path):
     Returns the output of gdalinfo command on the provided raster.
     """
     args = [GDALINFO_PATH, "-stats", raster_path] 
+    print " ".join(args)
+    p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE, bufsize=-1)
+    output, err = p.communicate()
+    rc = p.returncode
+    if rc>0:
+        msg = _("Error calculating raster stats. Gdalinfo error: {msg}").format(msg=err)
+        logging.error(msg)
+        raise GdalError(rc, msg)
+    else:
+        return output
+
+def gdalsrsinfo(raster_path):
+    """
+    Returns the output of gdalinfo command on the provided raster.
+    """
+    args = [GDALSRSINFO_PATH, raster_path] 
     print " ".join(args)
     p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE, bufsize=-1)
     output, err = p.communicate()
