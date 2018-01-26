@@ -93,31 +93,15 @@ def home(request):
             project['description'] = p.description
             project['image'] = urllib.unquote(image)
             
-            if p.is_public:
-                public_projects.append(project)
-            else:
+            if p.created_by == request.user.username:
                 projects.append(project)
+            else:
+                if p.is_public:
+                    public_projects.append(project)
+                else:
+                    projects.append(project)
             
     else:
-        if len (projects_by_user) > 0:
-            for ua in projects_by_user:
-                p = Project.objects.get(id=ua.project_id)
-                image = ''
-                if "no_project.png" in p.image.url:
-                    image = p.image.url.replace(settings.MEDIA_URL, '')
-                else:
-                    image = p.image.url
-                    
-                project = {}
-                project['id'] = p.id
-                project['name'] = p.name
-                project['title'] = p.title
-                project['description'] = p.description
-                project['image'] = urllib.unquote(image)
-                if not p.is_public:
-                    projects.append(project)
-                    
-                    
         for p in Project.objects.all():
             image = ''
             if "no_project.png" in p.image.url:
@@ -132,9 +116,22 @@ def home(request):
             project['description'] = p.description
             project['image'] = urllib.unquote(image)
             
+            
+            if p.created_by == request.user.username:    
+                projects.append(project)
+            
             if p.is_public:
-                public_projects.append(project)
-                
+                if p.created_by != request.user.username:    
+                    public_projects.append(project)
+            else:
+                if p.created_by != request.user.username:
+                    exists = False    
+                    for ua in projects_by_user:
+                        if p.id == ua.project_id:
+                            exists = True
+                    if exists:
+                        projects.append(project)                    
+         
             
     if len (projects_by_user) == 1 and not is_superuser(user) and from_login:
         return redirect('project_load', project_name=projects_by_user[0].project.name)
