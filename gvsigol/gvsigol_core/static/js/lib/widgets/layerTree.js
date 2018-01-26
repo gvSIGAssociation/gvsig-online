@@ -701,7 +701,6 @@ layerTree.prototype.hasTemporaryLayersActive = function() {
 
 layerTree.prototype.assignStyleToLayer = function(layer, style) {
 	layer.getSource().updateParams({"STYLES":style});
-	//layer.legend = "http://localhost/gs-local/pruebaandorra61/wms?SERVICE=WMS&VERSION=1.1.1&layer=proteccion_civil&REQUEST=getlegendgraphic&STYLE=pruebaandorra61_proteccion_civil_19&FORMAT=image/png";
 	var url_split = layer.legend.split('&STYLE=');
 	if(url_split.length > 1){
 		var aux = ""
