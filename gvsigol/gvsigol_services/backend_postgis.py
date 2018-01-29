@@ -346,6 +346,14 @@ class Introspect:
         count = rows[0]
         
         return count
+    def get_estimated_count(self, schema, layer_name):
+        query = "SELECT reltuples::BIGINT AS estimate FROM pg_class WHERE relname='" + layer_name + "'";
+        self.cursor.execute(query)
+        rows = self.cursor.fetchall()
+        if self.cursor.rowcount == 1:
+            return rows[0]
+        else:
+            return self.get_count(schema,layer_name)
     
     def get_bbox_firstgeom(self, schema, layer_name, expand):
         column_name = self.get_geometry_columns(layer_name,schema)
