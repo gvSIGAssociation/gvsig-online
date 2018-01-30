@@ -380,25 +380,25 @@ Para añadir superficie se puede hacer uso de varias herramientas:
 
 
 .. list-table::  Añade trozo digitalizado a LDG seleccionada
-   :widths: 4 10 
+   :widths: 2 10 
    :header-rows: 1
    :align: left
 
    * - Selección
      - Acción
-   * - 1. Activar el botón 'Select' 
+   * - 1. Activar el botón 'Select' |herramienta1|
      - Al activar el botón, se pincha sobre la LDG que se quiere editar. Ésta cambiará a color rosado.
-   * - 2. Otra opción seleccionar- 'ver tabla' 
+   * - 2. Otra opción seleccionar- 'ver tabla' |herramienta2|
      - Se abre la tabla de registros, se ubica el que quiere editarse y se pincha sobre el mismo.
      
        Éste registro se cambiará a un fondo color rosa, igual que la LDG sobre el mapa
-   * - 3. Activar el botón 'Añade trozo digitalizado a LDG seleccionada'.
+   * - 3. Activar el botón 'Añade trozo digitalizado a LDG seleccionada'. |herramienta4|
      - Se digitaliza el área del recinto que se quiere añadir a la LDG seleccionada.
    * - 4. Cerrar/terminar el área digitalizada
      - Al finalizar el área digitalizada, resulta una nueva LDG, que es la suma de la LDG seleccionada más zona digitalizada. 
      
        Estará limitada por los lados digitalizados, los del recinto SIGPAC y las otras LDGs propias.
-   * - 5. pulsar 'Guardar cambios' 
+   * - 5. pulsar 'Guardar cambios' |herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. Cuando se guarden los cambios, 
      
        en la tabla de registros, el campo 'Superficie gráfica' se debe actualizar con el nuevo valor del área de la LDG resultante.
