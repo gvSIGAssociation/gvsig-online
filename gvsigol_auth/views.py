@@ -326,7 +326,7 @@ def user_add(request):
                     return redirect('user_list')
             
             except Exception as e:
-                print str(e)
+                print "ERROR: Problem creating user in LDAP " + str(e)
                 errors = []
                 #errors.append({'message': _("The username already exists")})
                 groups = auth_utils.get_all_groups()
