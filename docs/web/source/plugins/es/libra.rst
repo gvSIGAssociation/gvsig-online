@@ -342,14 +342,14 @@ ______________________
 Se puede presentar dos casos:
 
 
-4.2.1 Sup. Declarada = Sup recinto SIGPAC:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*  **Sup. Declarada = Sup recinto SIGPAC:**
+
 
 Si no existe croquis y la superficie declarada del cultivo es igual a la del recinto SIGPAC, se creará una geometría igual a la del recinto SIGPAC
 
 
-4.2.2 Sup declarada <> Sup recinto SIGPAC:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*  **Sup declarada <> Sup recinto SIGPAC:**
+
  
 Se creará una LDG sin geometría. Aparecerá la entrada de color amarillo en la tabla de registros.
 
@@ -376,9 +376,6 @@ Para añadir superficie se puede hacer uso de varias herramientas:
 .. |herramienta3| image:: ../_static/images/libra_guardar.png
 
 
-
-
-
 .. list-table::  Añade trozo digitalizado a LDG seleccionada
    :widths: 2 10 
    :header-rows: 1
@@ -386,19 +383,33 @@ Para añadir superficie se puede hacer uso de varias herramientas:
 
    * - Selección
      - Acción
-   * - 1. Activar el botón 'Select' |herramienta1|
+   * - 1.'Select'
+   
+       |herramienta1|
      - Al activar el botón, se pincha sobre la LDG que se quiere editar. Ésta cambiará a color rosado.
-   * - 2. Otra opción seleccionar- 'ver tabla' |herramienta2|
+   * - 2. Opcional
+   
+       'ver tabla' 
+       
+       |herramienta2|
      - Se abre la tabla de registros, se ubica el que quiere editarse y se pincha sobre el mismo.
      
        Éste registro se cambiará a un fondo color rosa, igual que la LDG sobre el mapa
-   * - 3. Activar el botón 'Añade trozo digitalizado a LDG seleccionada'. |herramienta4|
+   * - 3. 'Añade trozo digitalizado 
+   
+       a LDG seleccionada'. 
+       
+       |herramienta4|
      - Se digitaliza el área del recinto que se quiere añadir a la LDG seleccionada.
-   * - 4. Cerrar/terminar el área digitalizada
+   * - 4. Cerrar/terminar 
+     
+       el área digitalizada
      - Al finalizar el área digitalizada, resulta una nueva LDG, que es la suma de la LDG seleccionada más zona digitalizada. 
      
        Estará limitada por los lados digitalizados, los del recinto SIGPAC y las otras LDGs propias.
-   * - 5. pulsar 'Guardar cambios' |herramienta3|
+   * - 5.'Guardar cambios'
+   
+       |herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. Cuando se guarden los cambios, 
      
        en la tabla de registros, el campo 'Superficie gráfica' se debe actualizar con el nuevo valor del área de la LDG resultante.
