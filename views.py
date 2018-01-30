@@ -248,7 +248,13 @@ def user_add(request):
                     user.set_password(form.data['password1'])
                     user.save()
                     
-                    admin_group = UserGroup.objects.get(name__exact='admin')
+                    #admin_group = UserGroup.objects.get(name__exact='admin')
+                    aux = UserGroup.objects.filter(name="admin")
+                    if aux.count() > 1:
+                        print "WARNING: table gvsigol_auth_usergroup inconsistent !!!!!!!!!!!"
+                    
+                    admin_group = aux[0]
+                    
                     if user.is_superuser:
                         core_services.ldap_add_user(user, form.data['password1'], True)                        
                         core_services.ldap_add_group_member(user, admin_group)
@@ -326,7 +332,7 @@ def user_add(request):
                     return redirect('user_list')
             
             except Exception as e:
-                print "ERROR: Problem creating user in LDAP " + str(e)
+                print "ERROR: Problem creating user " + str(e)
                 errors = []
                 #errors.append({'message': _("The username already exists")})
                 groups = auth_utils.get_all_groups()
