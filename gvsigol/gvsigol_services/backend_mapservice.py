@@ -425,7 +425,7 @@ class Geoserver():
         Add new style to layer
         """
         try:
-            self.rest_catalog.add_style(layer, name)
+            self.rest_catalog.add_style(layer, name, user=self.user, password=self.password)
             return True
         
         except Exception as e:
