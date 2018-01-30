@@ -15,6 +15,8 @@ Este manual tiene como objetivo describir el manejo y funcionamiento de las herr
 1.2. Glosario de términos y acrónimos
 _____________________________________
 
+**Acrónimos:**
+
 * SIGPAC: Sistema de Información Geográfico de Parcelas Agrícolas
 
 * AGRORED: 
@@ -28,6 +30,7 @@ _____________________________________
 * LDG: Línea de Declaración Gráfica
 
 
+**Términos:**
 
 *  **AGRORED:** Aplicación de captura de solicitudes del pago único (PU) de la PAC.
 
@@ -386,22 +389,28 @@ Para añadir superficie se puede hacer uso de varias herramientas:
    * - 1.'Select'
        |herramienta1|
      - Al activar el botón, se pincha sobre la LDG que se quiere editar. Ésta cambiará a color rosado.
-   * - 2. Otra opción
-       'ver tabla' 
+   * - 2. Otra opción:
+   
+       'ver tabla'
+        
        |herramienta2|
      - Se abre la tabla de registros, se ubica el que quiere editarse y se pincha sobre el mismo.
      
        Éste registro se cambiará a un fondo color rosa, igual que la LDG sobre el mapa
-   * - 3. 'Añade trozo digitalizado 
-       a LDG seleccionada'. 
+   * - 3. 'Añade trozo digitalizado
+    
+       a LDG seleccionada'
+        
        |herramienta4|
      - Se digitaliza el área del recinto que se quiere añadir a la LDG seleccionada.
-   * - 4. Cerrar/terminar  
+   * - 4. Cerrar/terminar
+     
        el área digitalizada
      - Al finalizar el área digitalizada, resulta una nueva LDG, que es la suma de la LDG seleccionada más zona digitalizada. 
      
        Estará limitada por los lados digitalizados, los del recinto SIGPAC y las otras LDGs propias.
    * - 5. 'Guardar cambios'
+   
        |herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. Cuando se guarden los cambios, 
      
@@ -410,3 +419,18 @@ Para añadir superficie se puede hacer uso de varias herramientas:
        El campo 'superficie declarada' deberá ser actualizada por el usuario desde AGRORED.
 
 
+* Añadiendo trozo digitalizado (azul) sobre LDG seleccionada (rosado).
+
+.. image:: ../_static/images/libra_anyad_troz_dig_select1.png
+   :align: center
+
+* LDG resultante:
+
+.. image:: ../_static/images/libra_anyad_troz_dig_select2.png
+   :align: center
+   
+   
+   
+
+
+   
