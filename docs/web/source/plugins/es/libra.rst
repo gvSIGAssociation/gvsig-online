@@ -367,7 +367,7 @@ Para añadir superficie se puede hacer uso de varias herramientas:
 
 5.1.1 Con herramienta 'Añade trozo digitalizado a LDG seleccionada'  |herramienta4|
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. |herramienta4| image:: ../_static/images/libra_aña_traz_dig_ldg_selec.png
+.. |herramienta4| image:: ../_static/images/libra_anya_traz_dig_ldg_selec.png
 
 .. |herramienta1| image:: ../_static/images/libra_seleccionar.png
 
