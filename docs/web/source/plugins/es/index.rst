@@ -11,4 +11,3 @@ Plugins
    shps_folder
    etl
    form
-   libra
