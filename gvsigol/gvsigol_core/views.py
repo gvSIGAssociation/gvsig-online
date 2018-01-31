@@ -753,6 +753,7 @@ def project_get_conf(request):
             'base_layers': base_layers,
             'is_public_project': False,
             'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL']),
+            'geoserver_proxy_url': gvsigol.settings.GEOSERVER_PROXY,
             'geoserver_base_url_no_auth': gvsigol.settings.GVSIGOL_SERVICES['URL'],
             'resource_manager': resource_manager
         } 
