@@ -179,7 +179,7 @@ viewer.core = {
 			} 
     		if (base_layer['type'] == 'WMTS') {		
 	    		var parser = new ol.format.WMTSCapabilities();
-	    		var capabilities_url = base_layer['url'] + '?request=GetCapabilities' + '&version=' + base_layer['version'];
+	    		var capabilities_url = base_layer['url'] + '?request=GetCapabilities' + '&version=' + base_layer['version']  + '&service=' + base_layer['type'];
 	    	      fetch(capabilities_url).then(function(response) {
 	    	    	  return response.text();
 	    	      }).then(function(text) {
