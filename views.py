@@ -501,7 +501,13 @@ def project_delete(request, pid):
 def project_load(request, project_name):
     if core_utils.is_valid_project(request.user, project_name):
         project = Project.objects.get(name__exact=project_name)
-        return render_to_response('viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id, 'extra_params': json.dumps(request.GET)}, context_instance=RequestContext(request))
+        
+        has_image = True
+        if "no_project.png" in project.image.url:
+            has_image = False
+            
+        return render_to_response('viewer.html', {'has_image': has_image, 'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id, 'extra_params': json.dumps(request.GET)}, context_instance=RequestContext(request))
+    
     else:
         return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
 
