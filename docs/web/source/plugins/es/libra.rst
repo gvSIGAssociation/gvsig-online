@@ -386,7 +386,7 @@ Para añadir superficie se puede hacer uso de varias herramientas:
 
    * - Selección
      - Acción
-   * - 1-'Select'
+   * - 1-'Seleccionar'
        |herramienta1|
      - Al activar el botón, se pincha sobre la LDG que se quiere editar. Ésta cambiará a color rosado.
    * - 2-Otra opción:
@@ -443,7 +443,7 @@ Esta herramienta es usada para realizar pequeños ajustes en la superficie.
 
    * - Selección
      - Acción
-   * - 1-'Select'
+   * - 1-'Seleccionar'
    
        |herramienta1|
      - Al activar el botón, se pincha sobre la LDG que se quiere editar. Ésta cambiará a color rosado.
@@ -502,7 +502,7 @@ Esta herramienta es usada para añadir todo el espacio libre que dispone el reci
 
    * - Selección
      - Acción
-   * - 1-'Select'
+   * - 1-'Selecionar'
    
        |herramienta1|
      - Al activar el botón, se pincha sobre la LDG que se quiere editar. Ésta cambiará a color rosado.
@@ -541,4 +541,42 @@ Esta herramienta es usada para añadir todo el espacio libre que dispone el reci
 * Espacio libre añaido a LDG
 
 .. image:: ../_static/images/libra_anyad_spacio_libre2.png
-   :align: center       
+   :align: center  
+
+
+5.2 Quitar superficie
+_____________________
+
+Existen dos formas de quitar o disminuir el área de un cultivo:
+
+
+5.2.1 Con herramienta 'Quitar trozo digitalizado a cultivo'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. |herramienta6| image:: ../_static/images/7_quitar_trozo_dig.png
+
+.. list-table::  Añdir espacio libre a LDG seleccionada
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Selección
+     - Acción
+   * - 1-'Selecionar'
+   
+       |herramienta1|
+     - Al activar el botón, se pincha sobre la LDG que se quiere editar. Ésta cambiará a color rosado.
+   * - 2-Otra opción:
+   
+       'ver tabla'
+        
+       |herramienta2|
+     - Se abre la tabla de registros, se ubica el que quiere editarse y se pincha sobre el mismo.
+     
+
+     
+     
+5.2.2 `Con herramienta 'modificar cultivo' - Edición de vértices`_.
+ 
+Ya ha sido detallado anteriormente , ésta herramienta igualmente es usada para realizar pequeños ajustes sobre la superficie.
+     
