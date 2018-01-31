@@ -36,7 +36,7 @@ _____________________________________
 
 *  **Recinto SIGPAC**:  superficie contínua de terreno, dentro de una parcela, con un mismo uso agrícola estable (tierra arable, pastos, viñedos, olivar, etc.)
 
-*  **Cultivo:**   superficie continua de terreno, dentro de un recinto, por la que se solicita el pago único. 
+*  **Cultivo:**   superficie continua de terreno, dentro de un recinto, por la que se solicita el pago único. Es sinónimo de LDG.
 
 *  **Solicitud de AGRORED:** cada una de las solicitudes que realiza una persona física o jurídica a través de AGRORED. En una solicitud se definen varios recintos SIGPAC que a su vez contienen uno o varios cultivos.
 
@@ -370,13 +370,13 @@ Para añadir superficie se puede hacer uso de varias herramientas:
 
 5.1.1 Con herramienta 'Añade trozo digitalizado a LDG seleccionada'  |herramienta4|
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. |herramienta4| image:: ../_static/images/libra_anya_traz_dig_ldg_selec.png
+.. |herramienta4| image:: ../_static/images/6_anyad_troz_dig.png
 
-.. |herramienta1| image:: ../_static/images/libra_seleccionar.png
+.. |herramienta1| image:: ../_static/images/1_select.png
 
-.. |herramienta2| image:: ../_static/images/libra_tabla_regis.png
+.. |herramienta2| image:: ../_static/images/16_tabla_atributos.png
 
-.. |herramienta3| image:: ../_static/images/libra_guardar.png
+.. |herramienta3| image:: ../_static/images/14_guardar.png
 
 
 .. list-table::  Añade trozo digitalizado a LDG seleccionada
@@ -386,10 +386,10 @@ Para añadir superficie se puede hacer uso de varias herramientas:
 
    * - Selección
      - Acción
-   * - 1.'Select'
+   * - 1-'Select'
        |herramienta1|
      - Al activar el botón, se pincha sobre la LDG que se quiere editar. Ésta cambiará a color rosado.
-   * - 2. Otra opción:
+   * - 2-Otra opción:
    
        'ver tabla'
         
@@ -397,19 +397,19 @@ Para añadir superficie se puede hacer uso de varias herramientas:
      - Se abre la tabla de registros, se ubica el que quiere editarse y se pincha sobre el mismo.
      
        Éste registro se cambiará a un fondo color rosa, igual que la LDG sobre el mapa
-   * - 3. 'Añade trozo digitalizado
+   * - 3-'Añade trozo digitalizado
     
        a LDG seleccionada'
         
        |herramienta4|
      - Se digitaliza el área del recinto que se quiere añadir a la LDG seleccionada.
-   * - 4. Cerrar/terminar
+   * - 4-Cerrar/terminar
      
-       el área digitalizada
+       área digitalizada
      - Al finalizar el área digitalizada, resulta una nueva LDG, que es la suma de la LDG seleccionada más zona digitalizada. 
      
        Estará limitada por los lados digitalizados, los del recinto SIGPAC y las otras LDGs propias.
-   * - 5. 'Guardar cambios'
+   * - 5-'Guardar cambios'
    
        |herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. Cuando se guarden los cambios, 
@@ -430,7 +430,115 @@ Para añadir superficie se puede hacer uso de varias herramientas:
    :align: center
    
    
-   
+5.1.2 Con herramienta 'modificar cultivo' - Edición de vértices |herramienta5|
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Esta herramienta es usada para realizar pequeños ajustes en la superficie.
+ 
+.. |herramienta5| image:: ../_static/images/4_modificar_cultivo.png
 
+.. list-table::  Modificar Cultivo (edición de vértices)
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
 
+   * - Selección
+     - Acción
+   * - 1-'Select'
    
+       |herramienta1|
+     - Al activar el botón, se pincha sobre la LDG que se quiere editar. Ésta cambiará a color rosado.
+   * - 2-Otra opción:
+   
+       'ver tabla'
+        
+       |herramienta2|
+     - Se abre la tabla de registros, se ubica el que quiere editarse y se pincha sobre el mismo.
+     
+       Éste registro se cambiará a un fondo color rosa, igual que la LDG sobre el mapa.
+   * - 3-'Modificar cultivo' 
+   
+       |herramienta5|
+     - Cuando el botón esté activo se vuelve hacer clic sobre el cultivo que se seleccionó previamente. 
+     
+       Se deben activar todos los vértices y al pasar el cursor sobre los vértices, éstos cambiarán 
+       
+       a color azul. Se puede realizar:
+       
+       * **Mover los vértices**, haciendo clic sobre él (sin soltarlo) se mueve a la posición deseada.
+       * **Añadir vértices**: Ubicarse sobre el borde de la geometría donde se quiera añadir y hacer un clic.
+       * **Eliminar vértice**: Se ubica al vértice que se quiera quitar y se hace un solo clic y soltar.
+   * - 4-'Guardar cambios'
+   
+       |herramienta3|
+     - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. Cuando se guarden los cambios, 
+     
+       en la tabla de registros, el campo 'Superficie gráfica' del cultivo modificado, tomará el valor de la
+     
+       nueva superficie resultante. El campo 'superficie declarada' se deberá actualizar en la tabla 
+     
+       alfanumérica de Agrored  una vez se hayan guardado los cambios realizados en el editor gráfico.    
+
+* Activando la edición de vértices - Modificar cultivo.
+
+.. image:: ../_static/images/libra_modificar_cultivo1.png
+   :align: center
+           
+* Vértices editados (Superficie modificada)
+
+.. image:: ../_static/images/libra_modificar_cultivo2.png
+   :align: center
+ 
+5.1.3 Con herramienta 'añadir espacio libre a LDG seleccionada' |herramienta6|
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        
+.. |herramienta6| image:: ../_static/images/9_anyad_spcio_libr.png    
+
+Esta herramienta es usada para añadir todo el espacio libre que dispone el recinto a uno de sus cultivos que haya sido seleccionado.
+
+.. list-table::  Añdir espacio libre a LDG seleccionada
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Selección
+     - Acción
+   * - 1-'Select'
+   
+       |herramienta1|
+     - Al activar el botón, se pincha sobre la LDG que se quiere editar. Ésta cambiará a color rosado.
+   * - 2-Otra opción:
+   
+       'ver tabla'
+        
+       |herramienta2|
+     - Se abre la tabla de registros, se ubica el que quiere editarse y se pincha sobre el mismo.
+     
+       Éste registro se cambiará a un fondo color rosa, igual que la LDG sobre el mapa.
+   * - 3-Añadir espacio
+       
+       libre a LDG seleccionada
+       
+       |herramienta6|
+     - Tocar el área vacía que está disponible en el recinto
+   * - 4-Selección de
+       
+       área vacía
+     - Como resultado se genera un nuevo recinto, que será la suma de la LDG seleccionada más el 
+     
+       espacio libre disponible que se ha tocado del recinto SIGPAC.
+     
+   * - 5-Guardar
+     - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, 
+     
+       el campo 'Superficie gráfica' de la LDG modificada, tomará el valor de la nueva superficie resultante.
+
+           
+* Añadiendo espacio libre de recinto a uno cultivo selecconado   
+
+.. image:: ../_static/images/libra_anyad_spacio_libre1.png
+   :align: center   
+   
+* Espacio libre añaido a LDG
+
+.. image:: ../_static/images/libra_anyad_spacio_libre2.png
+   :align: center       
