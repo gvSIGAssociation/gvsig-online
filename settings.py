@@ -66,7 +66,7 @@ INSTALLED_APPS = [
     'gvsigol_symbology',
     'gvsigol_filemanager',
     'gvsigol_core',
-    'gvsigol_app_dev',
+    'gvsigol_app_libra',
     'gvsigol_plugin_graphiccapture',
     #'gvsigol_plugin_edition',
     #'gvsigol_plugin_worldwind',
@@ -77,7 +77,7 @@ INSTALLED_APPS = [
     #'gvsigol_plugin_sync',
     #'gvsigol_plugin_catastro',
     #'gvsigol_plugin_alfresco',
-    'gvsigol_plugin_print',
+    #'gvsigol_plugin_print',
     #'gvsigol_plugin_catalog',
 ]
 
@@ -274,6 +274,8 @@ GVSIGOL_USERS_CARTODB = {
 }
 
 PUBLIC_VIEWER = True
+
+GEOSERVER_PROXY = 'https://localhost/gs-local'
 
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
