@@ -61,7 +61,7 @@ viewer.core = {
     _authenticate: function() {
     	var self = this;
     	$.ajax({
-			url: self.conf.geoserver_base_url + '/wms',
+			url: self.conf.geoserver_proxy_url + '/wms',
 			params: {
 				'SERVICE': 'WMS',
 				'VERSION': '1.1.1',
