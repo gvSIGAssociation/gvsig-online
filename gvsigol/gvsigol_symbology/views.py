@@ -254,7 +254,7 @@ def unique_symbol_update(request, layer_id, style_id):
         if style.maxscale and int(style.maxscale) >=0:
             response['maxscale'] = int(style.maxscale)
         response['rules'] = json.dumps(rules)   
-        if rule['filter']:
+        if rule and rule['filter']:
             rule_filter = json.loads(rule['filter'])
             if 'field' in rule_filter:
                 response['property_name'] = rule_filter.get('field')    
@@ -333,7 +333,7 @@ def unique_values_update(request, layer_id, style_id):
         if style.maxscale and int(style.maxscale) >=0:
             response['maxscale'] = int(style.maxscale)
         response['rules'] = json.dumps(rules)   
-        if rule['filter']:
+        if rule and rule['filter']:
             rule_filter = json.loads(rule['filter'])
             if 'field' in rule_filter:
                 response['property_name'] = rule_filter.get('field')    
@@ -491,7 +491,7 @@ def intervals_update(request, layer_id, style_id):
         if style.maxscale and int(style.maxscale) >=0:
             response['maxscale'] = int(style.maxscale)
         response['rules'] = json.dumps(rules)
-        if rule['filter']:
+        if rule and rule['filter']:
             filter_json = json.loads(rule['filter'])
             response['property_name'] = filter_json.get('field')    
             
