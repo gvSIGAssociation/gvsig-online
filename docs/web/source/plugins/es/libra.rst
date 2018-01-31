@@ -549,6 +549,13 @@ _____________________
 
 Existen dos formas de quitar o disminuir el área de un cultivo:
 
+     
+5.2.2 Con herramienta 'modificar cultivo' - Edición de vértices
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 
+Ya ha sido detallado anteriormente , ésta herramienta igualmente es usada para realizar pequeños ajustes sobre la superficie.
+
+
 
 5.2.1 Con herramienta 'Quitar trozo digitalizado a cultivo'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -572,11 +579,4 @@ Existen dos formas de quitar o disminuir el área de un cultivo:
         
        |herramienta2|
      - Se abre la tabla de registros, se ubica el que quiere editarse y se pincha sobre el mismo.
-     
-
-     
-     
-5.2.2 `Con herramienta 'modificar cultivo' - Edición de vértices`_.
- 
-Ya ha sido detallado anteriormente , ésta herramienta igualmente es usada para realizar pequeños ajustes sobre la superficie.
      
