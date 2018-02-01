@@ -386,14 +386,11 @@ Para añadir superficie se puede hacer uso de varias herramientas:
 
    * - Selección
      - Acción
-   * - 1-'Seleccionar'
-       |herramienta1|
+   * - 1-'Seleccionar'|herramienta1|
      - Al activar el botón, se pincha sobre la LDG que se quiere editar. Ésta cambiará a color rosado.
    * - 2-Otra opción:
    
-       'ver tabla'
-        
-       |herramienta2|
+       'ver tabla'|herramienta2|  
      - Se abre la tabla de registros, se ubica el que quiere editarse y se pincha sobre el mismo.
      
        Éste registro se cambiará a un fondo color rosa, igual que la LDG sobre el mapa
@@ -409,9 +406,7 @@ Para añadir superficie se puede hacer uso de varias herramientas:
      - Al finalizar el área digitalizada, resulta una nueva LDG, que es la suma de la LDG seleccionada más zona digitalizada. 
      
        Estará limitada por los lados digitalizados, los del recinto SIGPAC y las otras LDGs propias.
-   * - 5-'Guardar cambios'
-   
-       |herramienta3|
+   * - 5-'Guardar cambios'|herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. Cuando se guarden los cambios, 
      
        en la tabla de registros, el campo 'Superficie gráfica' se debe actualizar con el nuevo valor del área de la LDG resultante.
@@ -443,15 +438,11 @@ Esta herramienta es usada para realizar pequeños ajustes en la superficie.
 
    * - Selección
      - Acción
-   * - 1-'Seleccionar'
-   
-       |herramienta1|
+   * - 1-'Seleccionar'|herramienta1| 
      - Al activar el botón, se pincha sobre la LDG que se quiere editar. Ésta cambiará a color rosado.
    * - 2-Otra opción:
    
-       'ver tabla'
-        
-       |herramienta2|
+       'ver tabla'|herramienta2| 
      - Se abre la tabla de registros, se ubica el que quiere editarse y se pincha sobre el mismo.
      
        Éste registro se cambiará a un fondo color rosa, igual que la LDG sobre el mapa.
@@ -467,9 +458,7 @@ Esta herramienta es usada para realizar pequeños ajustes en la superficie.
        * **Mover los vértices**, haciendo clic sobre él (sin soltarlo) se mueve a la posición deseada.
        * **Añadir vértices**: Ubicarse sobre el borde de la geometría donde se quiera añadir y hacer un clic.
        * **Eliminar vértice**: Se ubica al vértice que se quiera quitar y se hace un solo clic y soltar.
-   * - 4-'Guardar cambios'
-   
-       |herramienta3|
+   * - 4-'Guardar cambios'|herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. Cuando se guarden los cambios, 
      
        en la tabla de registros, el campo 'Superficie gráfica' del cultivo modificado, tomará el valor de la
@@ -502,21 +491,17 @@ Esta herramienta es usada para añadir todo el espacio libre que dispone el reci
 
    * - Selección
      - Acción
-   * - 1-'Selecionar'
-   
-       |herramienta1|
+   * - 1-'Selecionar'|herramienta1|
      - Al activar el botón, se pincha sobre la LDG que se quiere editar. Ésta cambiará a color rosado.
    * - 2-Otra opción:
    
-       'ver tabla'
-        
-       |herramienta2|
+       'ver tabla'|herramienta2|
      - Se abre la tabla de registros, se ubica el que quiere editarse y se pincha sobre el mismo.
      
        Éste registro se cambiará a un fondo color rosa, igual que la LDG sobre el mapa.
-   * - 3-Añadir espacio
+   * - 3-'Añadir espacio
        
-       libre a LDG seleccionada
+       libre a LDG seleccionada'
        
        |herramienta6|
      - Tocar el área vacía que está disponible en el recinto
@@ -527,9 +512,7 @@ Esta herramienta es usada para añadir todo el espacio libre que dispone el reci
      
        espacio libre disponible que se ha tocado del recinto SIGPAC.
      
-   * - 5-Guardar
-    
-       |herramienta3|    
+   * - 5-'Guardar cambios'|herramienta3|     
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, 
      
        el campo 'Superficie gráfica' de la LDG modificada, tomará el valor de la nueva superficie resultante.
@@ -571,29 +554,21 @@ Ya ha sido detallado anteriormente , ésta herramienta igualmente es usada para 
 
    * - Selección
      - Acción
-   * - 1-'Selecionar'
-   
-       |herramienta1|
+   * - 1-'Selecionar'|herramienta1|
      - Al activar el botón, se pincha sobre la LDG que se quiere editar. Ésta cambiará a color rosado.
    * - 2-Otra opción:
    
-       'ver tabla'
-        
-       |herramienta2|
+       'ver tabla'|herramienta2|  
      - Se abre la tabla de registros, se ubica el que quiere editarse y se pincha sobre el mismo.
-   * - 3-Quitar trozo
+   * - 3-'Quitar trozo
        
-       dig. a cultivo
-       
-       |herramienta7|
+       dig. a cultivo'|herramienta7|
      - Se dibuja el área que se quiere quitar sobre la LDG seleccionada. 
    * - 4-Cerrar/terminar
        
        área digitalizada
      - Al terminar de digitalizar el área a quitar se genera un cultivo de superficie más pequeña, como resultado de la diferencia entre LDG seleccionada menos área quitada.
-   * - 5- Guardar
-      
-       |herramienta3|
+   * - 5- 'Guardar cambios'|herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, 
      
        el campo 'Superficie gráfica' de la LDG modificada, tomará el valor de la nueva superficie resultante.  
