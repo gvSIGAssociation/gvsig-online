@@ -2733,22 +2733,28 @@ def get_capabilities_from_url(request):
             return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
     
     if service == 'WMTS':
-        if not version:
-            version = WMTS_MAX_VERSION
-        wmts = WebMapTileService(url, version=version)
-        title = wmts.identification.title
+        try:
+            if not version:
+                version = WMTS_MAX_VERSION
+            wmts = WebMapTileService(url, version=version)
+            title = wmts.identification.title
+            
+            layers = list(wmts.contents)
+            if (not layer or layer == '') and layers.__len__() > 0:
+                layer = layers[0]
+            if layer and layer != '':
+                for format in wmts.contents.get(layer).formats:
+                    if not format in formats:
+                        formats.append(format)
+                for matrixset in wmts.contents.get(layer).tilematrixsets:
+                    if not matrixset in matrixsets:
+                        matrixsets.append(matrixset)
+        except Exception as e:
+            data = {'response': '500',
+             'message':  str(e.message)}
+            
+            return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
         
-        layers = list(wmts.contents)
-        if (not layer or layer == '') and layers.__len__() > 0:
-            layer = layers[0]
-        if layer and layer != '':
-            for format in wmts.contents.get(layer).formats:
-                if not format in formats:
-                    formats.append(format)
-            for matrixset in wmts.contents.get(layer).tilematrixsets:
-                if not matrixset in matrixsets:
-                    matrixsets.append(matrixset)
-    
     data = {
         'response': '200',
         'version': version,
