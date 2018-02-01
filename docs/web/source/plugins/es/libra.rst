@@ -528,6 +528,8 @@ Esta herramienta es usada para añadir todo el espacio libre que dispone el reci
        espacio libre disponible que se ha tocado del recinto SIGPAC.
      
    * - 5-Guardar
+    
+       |herramienta3|    
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, 
      
        el campo 'Superficie gráfica' de la LDG modificada, tomará el valor de la nueva superficie resultante.
@@ -550,19 +552,19 @@ _____________________
 Existen dos formas de quitar o disminuir el área de un cultivo:
 
      
-5.2.2 Con herramienta 'modificar cultivo' - Edición de vértices
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+5.2.1 Con herramienta 'modificar cultivo' - Edición de vértices |herramienta5|
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  
 Ya ha sido detallado anteriormente , ésta herramienta igualmente es usada para realizar pequeños ajustes sobre la superficie.
 
 
 
-5.2.1 Con herramienta 'Quitar trozo digitalizado a cultivo'
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+5.2.2 Con herramienta 'Quitar trozo digitalizado a cultivo'  |herramienta7|
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. |herramienta6| image:: ../_static/images/7_quitar_trozo_dig.png
+.. |herramienta7| image:: ../_static/images/7_quitar_trozo_dig.png
 
-.. list-table::  Añdir espacio libre a LDG seleccionada
+.. list-table::  Quitar trozo digitalizado a cultivo
    :widths: 2 10 
    :header-rows: 1
    :align: left
@@ -579,4 +581,30 @@ Ya ha sido detallado anteriormente , ésta herramienta igualmente es usada para 
         
        |herramienta2|
      - Se abre la tabla de registros, se ubica el que quiere editarse y se pincha sobre el mismo.
+   * - 3-Quitar trozo
+       
+       dig. a cultivo
+       
+       |herramienta7|
+     - Se dibuja el área que se quiere quitar sobre la LDG seleccionada. 
+   * - 4-Cerrar/terminar
+       
+       área digitalizada
+     - Al terminar de digitalizar el área a quitar se genera un cultivo de superficie más pequeña, como resultado de la diferencia entre LDG seleccionada menos área quitada.
+   * - 5- Guardar
+      
+       |herramienta3|
+     - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, 
      
+       el campo 'Superficie gráfica' de la LDG modificada, tomará el valor de la nueva superficie resultante.  
+
+        
+* Quitando trozo digitalizado sobre cultivo seleccionad
+.. image:: ../_static/images/libra_quitar_trozo_ldg_seleccionada_1.png
+   :align: center
+
+
+* Nuevo cultivo generado al restarle/quitarle el área digitalizada
+.. image:: ../_static/images/libra_quitar_trozo_ldg_seleccionada_2.png
+   :align: center    
+         
