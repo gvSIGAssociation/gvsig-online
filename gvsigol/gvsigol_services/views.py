@@ -2736,13 +2736,7 @@ def get_capabilities_from_url(request):
         try:
             if not version:
                 version = WMTS_MAX_VERSION
-            wmts = WebMapTileService(url, version=version)
-            
-            data = {'response': '200',
-                    'message':  'Hola'}
-            
-            return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
-            
+            wmts = WebMapTileService(url, version=version)            
             title = wmts.identification.title
             
             layers = list(wmts.contents)
