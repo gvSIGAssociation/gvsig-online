@@ -11,6 +11,19 @@
     min-width: 175px;
 }
 
+.portable .viewer-search-form {
+    border-radius: 3px;
+    border: 1px solid #374850;
+    margin: 0px 50px;
+    margin-top: 5px;
+    overflow: hidden;
+    text-overflow: clip;
+    max-width: 338px;
+    display: inline-block;
+    width: 338px;
+    min-width: 175px;
+}
+
 .viewer-search-form .input-group{width:100%}
 
 .autocomplete-suggestions { border: 1px solid #999; background: #FFF; cursor: default; overflow: auto; -webkit-box-shadow: 1px 4px 3px rgba(50, 50, 50, 0.64); -moz-box-shadow: 1px 4px 3px rgba(50, 50, 50, 0.64); box-shadow: 1px 4px 3px rgba(50, 50, 50, 0.64); }
