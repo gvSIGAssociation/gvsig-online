@@ -5027,3 +5027,8 @@ input.temporary-check[type=checkbox]{
 	color:#999;
     text-align: center;
 }
+
+.param_div{
+	padding: 0px 15px 10px 15px;
+	background-color: #eee;
+}
