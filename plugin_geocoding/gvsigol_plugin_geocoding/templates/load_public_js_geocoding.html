@@ -10,7 +10,16 @@
 
 
 <script type="text/javascript">
-
+var is_enabled = true;
+if('widget_conf' in viewer.core){
+	if('Geocoding' in viewer.core['widget_conf']){
+		var geo_conf = viewer.core['widget_conf']['Geocoding'];
+		if('active' in geo_conf){
+			is_enabled = geo_conf["active"];
+		}
+	}
+}
+if(is_enabled){
 	$.ajax({
 		type : 'POST',
 		async : false,
@@ -35,8 +44,7 @@
 		error : function() {
 			alert("Error loading geocoder");
 		}
-	});
-	
-
+	});	
+}
 	
 </script>
