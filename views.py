@@ -165,12 +165,12 @@ def password_reset(request):
             
         except:            
             errors.append(_('User account does not exist'))
-            return render_to_response('password_reset.html', {'errors': errors}, RequestContext(request))
+            return render_to_response('password_reset2.html', {'errors': errors}, RequestContext(request))
             
     else:
         if 'AD' in GVSIGOL_LDAP and GVSIGOL_LDAP['AD'].__len__() > 0:
             return redirect('login_user')
-        return render_to_response('password_reset.html', {}, RequestContext(request))
+        return render_to_response('password_reset2.html', {}, RequestContext(request))
         
 
 def password_reset_success(request):
