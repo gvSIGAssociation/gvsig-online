@@ -10,33 +10,42 @@
 
 
 <script type="text/javascript">
-
-	$.ajax({
-		type : 'POST',
-		async : false,
-		url : '/gvsigonline/geocoding/get_conf/',
-		beforeSend : function(xhr) {
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-		},
-		success : function(response) {
-			if(response['has_providers']){
-				var map = viewer.core.getMap();
-				var ui = '';
-				ui += '<div class="viewer-search-form">';
-				ui += 	'<div class="input-group">';
-				ui += 		'<input type="text" name="search-widget-input" id="autocomplete" class="form-control" placeholder="' + gettext("Search") + '...">';
-				ui += 	'</div>';
-				ui += '</div>';
-				
-				$('#viewer-navbar').append(ui);
-				new search(map, response);
+	var is_enabled = true;
+	if('widget_conf' in viewer.core){
+		if('Geocoding' in viewer.core['widget_conf']){
+			var geo_conf = viewer.core['widget_conf']['Geocoding'];
+			if('active' in geo_conf){
+				is_enabled = geo_conf["active"];
 			}
-		},
-		error : function() {
-			alert("Error loading geocoder");
 		}
-	});
-	
+	}
+	if(is_enabled){
+		$.ajax({
+			type : 'POST',
+			async : false,
+			url : '/gvsigonline/geocoding/get_conf/',
+			beforeSend : function(xhr) {
+				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			success : function(response) {
+				if(response['has_providers']){
+					var map = viewer.core.getMap();
+					var ui = '';
+					ui += '<div class="viewer-search-form">';
+					ui += 	'<div class="input-group">';
+					ui += 		'<input type="text" name="search-widget-input" id="autocomplete" class="form-control" placeholder="' + gettext("Search") + '...">';
+					ui += 	'</div>';
+					ui += '</div>';
+					
+					$('#viewer-navbar').append(ui);
+					new search(map, response);
+				}
+			},
+			error : function() {
+				alert("Error loading geocoder");
+			}
+		});
+	}
 
 	
 </script>
