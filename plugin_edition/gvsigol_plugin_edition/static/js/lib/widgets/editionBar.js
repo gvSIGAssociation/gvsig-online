@@ -1328,7 +1328,10 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 				}
 				self.selectedLayer.getSource().updateParams({"time": Date.now()});
 				self.showLayersTab();
-			}		
+			}
+			var geojson_obj = new ol.format.GeoJSON();
+			var stringjson = geojson_obj.writeFeature(feature);
+			parent.$("body").trigger("feature-edition", stringjson);
 			}
 		});
 		
@@ -1779,6 +1782,10 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 				self.selectInteraction.getFeatures().clear();
 				self.showLayersTab();
 			}		
+			
+			var geojson_obj = new ol.format.GeoJSON();
+			var stringjson = geojson_obj.writeFeature(feature);
+			parent.$("body").trigger("feature-edition", stringjson);
 			}
 		});
 		
