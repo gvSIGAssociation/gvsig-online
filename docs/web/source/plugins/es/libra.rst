@@ -407,7 +407,7 @@ Para añadir superficie se puede hacer uso de varias herramientas:
      - Al finalizar el área digitalizada, resulta una nueva LDG, que es la suma de la LDG seleccionada más zona digitalizada. 
      
        Estará limitada por los lados digitalizados, los del recinto SIGPAC y las otras LDGs propias.
-   * - 5-'Guardar cambios'|herramienta3|
+   * - 5-Guardar cambios|herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. Cuando se guarden los cambios, 
      
        en la tabla de registros, el campo 'Superficie gráfica' se debe actualizar con el nuevo valor del área de la LDG resultante.
@@ -459,7 +459,7 @@ Esta herramienta es usada para realizar pequeños ajustes en la superficie.
        * **Mover los vértices**, haciendo clic sobre él (sin soltarlo) se mueve a la posición deseada.
        * **Añadir vértices**: Ubicarse sobre el borde de la geometría donde se quiera añadir y hacer un clic.
        * **Eliminar vértice**: Se ubica al vértice que se quiera quitar y se hace un solo clic y soltar.
-   * - 4-'Guardar cambios'|herramienta3|
+   * - 4-Guardar cambios|herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. Cuando se guarden los cambios, 
      
        en la tabla de registros, el campo 'Superficie gráfica' del cultivo modificado, tomará el valor de la
@@ -513,7 +513,7 @@ Esta herramienta es usada para añadir todo el espacio libre que dispone el reci
      
        espacio libre disponible que se ha tocado del recinto SIGPAC.
      
-   * - 5-'Guardar cambios'|herramienta3|     
+   * - 5-Guardar cambios|herramienta3|     
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, 
      
        el campo 'Superficie gráfica' de la LDG modificada, tomará el valor de la nueva superficie resultante.
@@ -561,6 +561,8 @@ Ya ha sido detallado anteriormente , ésta herramienta igualmente es usada para 
    
        'ver tabla'|herramienta2|  
      - Se abre la tabla de registros, se ubica el que quiere editarse y se pincha sobre el mismo.
+      
+       Éste registro se cambiará a un fondo color rosa, igual que la LDG sobre el mapa.
    * - 3-'Quitar trozo
        
        dig. a cultivo'|herramienta7|
@@ -571,7 +573,7 @@ Ya ha sido detallado anteriormente , ésta herramienta igualmente es usada para 
      - Al terminar de digitalizar el área a quitar se genera un cultivo de superficie más pequeña, 
 
        como resultado de la diferencia entre LDG seleccionada menos área quitada.
-   * - 5-'Guardar cambios'|herramienta3|
+   * - 5-Guardar cambios|herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, 
      
        el campo 'Superficie gráfica' de la LDG modificada, tomará el valor de la nueva superficie resultante.  
@@ -618,7 +620,7 @@ Con esta herramienta se permite juntar dos LDGs que pertenecen a un mismo recint
        en una sola geometría y tomará los atributos alfanuméricos de la primera LDG seleccionada y el campo superficie gráfica
        
        se actualizará con el nuevo valor del área generada. El registro del segundo cultivo quedará sin geometría asociada y sup. gráfica =0
-   * - 4-'Guardar cambios'|herramienta3|
+   * - 4-Guardar cambios|herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, el campo 'Superficie gráfica' 
      
        de la nueva LDG resultante, tomará el valor de la suma de las dos superficies unidas.
@@ -632,3 +634,50 @@ Con esta herramienta se permite juntar dos LDGs que pertenecen a un mismo recint
 .. image:: ../_static/images/libra_unir_cultivos_2.png
    :align: center
  
+5.4 Segregar LDG  |herramienta9|
+________________________________
+
+.. |herramienta9| image:: ../_static/images/11_segregar_ldg.png
+
+Con esta opción se permite separar/dividir un cultivo en dos y por tanto generar un registro más en el grid alfanumérico con la nueva LDG segregada.
+
+.. list-table::  Segregar cultivo
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Selección
+     - Acción
+   * - 1-'Selecionar'|herramienta1|
+     - Al activar el botón, se pincha sobre el mapa la LDG que se quiere editar. Ésta cambiará a color rosado.
+   * - 2-Otra opción:
+   
+       'ver tabla'|herramienta2|  
+     - Se abre la tabla de registros, se ubica el que quiere editarse y se pincha sobre el mismo.
+     
+       Éste registro se cambiará a un fondo color rosa, igual que la LDG sobre el mapa.
+   * - 3-'Segregar LDG'
+     - Teniendo elegido el cultivo, se pincha sobre el botón 'segregar LDG' y se procede a digitalizar sobre 
+     
+       la geometría seleccionada el área que se quiera segregar.      
+   * - 4-Cerrar/terminar
+       
+       área digitalizada
+     - Al terminar de digitalizar el área que se quiere desprender, la geometría del cultivo seleccionado se divide 
+     
+       en dos y su campo sup. Gráfica = al área completa menos el área digitalizada desprendida. 
+       
+       Al segregar la LDG seleccionada se genera en la tabla de registros otra fila con el nuevo cultivo asociado 
+       
+       a la geometría digitalizada, donde el campo 'Superficie SIGPAC' debe ser el mismo que la 'Sup. SIPAC' del 
+       
+       cultivo segregado, la 'Sup. gráfica' = a la superficie del área digitalizada. Los demás atributos estarán 
+       
+       vacíos para ser completados a través de la tabla alfanumérica de Agrored.
+   * - 5-Guardar cambios|herramienta3|
+     - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. Cuando se guarden los cambios, en la
+     
+       tabla de registros, el campo 'Superficie gráfica' de la nueva LDG tomará la superficie de la geometría generada. 
+     
+   
+     
