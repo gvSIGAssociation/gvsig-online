@@ -3,7 +3,8 @@ Libra
 
 1. Introducción
 ---------------
-Libra es la interfaz gráfica que se conecta directamente con AGRORED para poder asignar mediante la captura gráfica los croquis o geometrías que corresponden a cada una de las Líneas de declaración gráfica que refieren a una solicitud del pago único. 
+
+Libra es la interfaz gráfica que se conecta directamente con AGRORED para poder asignar mediante la captura gráfica los croquis o geometrías que corresponden a cada una de las Líneas de declaración gráfica que refieren a una petición del pago único solicitado por un agricultor o ganadero.
 
 
 1.1 Objetivo
@@ -23,11 +24,11 @@ _____________________________________
 
 * LIBRA:
 
-* PAC:
+* PAC: Parcelas Agricolas
 
 * PU: Pago Único
 
-* LDG: Línea de Declaración Gráfica
+* LDG: Línea de Declaración Gráfica, también se le conoce como 'cultivo'
 
 
 **Términos:**
@@ -567,14 +568,16 @@ Ya ha sido detallado anteriormente , ésta herramienta igualmente es usada para 
    * - 4-Cerrar/terminar
        
        área digitalizada
-     - Al terminar de digitalizar el área a quitar se genera un cultivo de superficie más pequeña, como resultado de la diferencia entre LDG seleccionada menos área quitada.
-   * - 5- 'Guardar cambios'|herramienta3|
+     - Al terminar de digitalizar el área a quitar se genera un cultivo de superficie más pequeña, 
+
+       como resultado de la diferencia entre LDG seleccionada menos área quitada.
+   * - 5-'Guardar cambios'|herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, 
      
        el campo 'Superficie gráfica' de la LDG modificada, tomará el valor de la nueva superficie resultante.  
 
         
-* Quitando trozo digitalizado sobre cultivo seleccionad
+* Quitando trozo digitalizado sobre cultivo seleccionado
 .. image:: ../_static/images/libra_quitar_trozo_ldg_seleccionada_1.png
    :align: center
 
@@ -582,4 +585,50 @@ Ya ha sido detallado anteriormente , ésta herramienta igualmente es usada para 
 * Nuevo cultivo generado al restarle/quitarle el área digitalizada
 .. image:: ../_static/images/libra_quitar_trozo_ldg_seleccionada_2.png
    :align: center    
-         
+ 
+   
+5.3 Unir dos cultivos  |herramienta8|
+_____________________________________
+
+.. |herramienta8| image:: ../_static/images/10_juntar_cultivos.png   
+ 
+Con esta herramienta se permite juntar dos LDGs que pertenecen a un mismo recinto en un solo registro del grid alfanumérico.
+
+
+.. list-table::  Unir dos cultivos
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Selección
+     - Acción
+   * - 1-'Selecionar'|herramienta1|
+     - Seleccionar un primer cultivo (pinchando la geometría sobre el mapa) y manteniendo pulsada la tecla 'mayúscula' 
+     
+       se selecciona el segundo cultivo (pinchando la geometría sobre el mapa). Ambas LDGs deben pertenecer a un mismo recinto.     
+   * - 2-Otra opción:
+   
+       'ver tabla'|herramienta2|  
+     - Se abre la tabla de registros, se ubica la primera LDG y manteniendo pulsada la tecla 'mayúscula' se selecciona
+     
+       el segundo cultivo. Ambas LDGs seleccionadas cambiaran de color rosado en el grid alfanumérico como en el mapa.
+   * - 3-'unir cultivos'|herramienta8|
+     - Teniendo seleccionados ambos cultivos, se pincha sobre el botón 'unir cultivos' automáticamente éstas se unirán 
+       
+       en una sola geometría y tomará los atributos alfanuméricos de la primera LDG seleccionada y el campo superficie gráfica
+       
+       se actualizará con el nuevo valor del área generada. El registro del segundo cultivo quedará sin geometría asociada y sup. gráfica =0
+   * - 4-'Guardar cambios'|herramienta3|
+     - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, el campo 'Superficie gráfica' 
+     
+       de la nueva LDG resultante, tomará el valor de la suma de las dos superficies unidas.
+ 
+ 
+* Seleccionar dos LDGs para aplicar la herramienta 'Unir cultivos' 
+.. image:: ../_static/images/libra_unir_cultivos_1.png
+   :align: center       
+
+* Cultivo resultante de la unión de dos LDGs
+.. image:: ../_static/images/libra_unir_cultivos_2.png
+   :align: center
+ 
