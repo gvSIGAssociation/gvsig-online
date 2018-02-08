@@ -679,5 +679,70 @@ Con esta opción se permite separar/dividir un cultivo en dos y por tanto genera
      
        tabla de registros, el campo 'Superficie gráfica' de la nueva LDG tomará la superficie de la geometría generada. 
      
-   
+* Seleccionar cultivo y con la opción 'segregar cultivo' digitalizar el área a separar:   
+.. image:: ../_static/images/libra_segregar_cultivo_1.png
+   :align: center
+
+
+* Cultivo dividido en dos, se origina una nuevo registro en la tabla alfanumérica.     
+.. image:: ../_static/images/libra_segregar_cultivo_2.png
+   :align: center
+
+6. Altas de nuevas geometrías en LDGs
+-------------------------------------
+Las herramientas de edición (añadir, quitar, juntar y dividir) se aplican para cultivos que ya tienen asociado una geometría. Las herramientas que se describen a continuación aplican para las LDGs que aún no tienen una geometría vinculada, es decir, se detallará cómo desde el editor gráfico se podrá crear y asignar una geometría a un cultivo que esté disponible dentro de la tabla de registros.
+
+
+6.1 Con herramienta 'Crear nuevo cultivo en el recinto'  |herramienta9|
+_______________________________________________________________________
+
+Esta herramienta se usa exclusivamente para los recintos que tienen disponibles un único cultivo.
+
+.. |herramienta9| image:: ../_static/images/3_crear_nvo_cultivo_recint.png
+
+
+.. list-table:: Crear nuevo cultivo en el recinto
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Selección
+     - Acción
+   * - 1-'ver tabla'|herramienta2|
+     - Al abrirse la tabla de atributos (grid alfanumérico) se mostraran las LDGs disponibles para añadirles la geometría. 
      
+       Estos registros aparecerán en la tabla de un color diferente a los que ya tienen gráfico asociado, serán de color
+       
+       marrón claro. Se debe hacer clic sobre uno de ellos y ya estará seleccionado para añadirle una nueva geometría.
+   * - 2-Selecionado
+   
+       LDG en tabla
+     - Al activar el registro cambiará a color de fondo rosa, aunque el recinto donde pertenece y se digitalizará la 
+     
+       geometría del cultivo, en el mapa continúa estando con borde amarillo y relleno amarillo claro transparente.    
+        
+   * - 3-'crear nueva
+       
+       LDG en recinto'|herramienta9|
+     - Teniendo seleccionado el recinto desde la tabla de registros, se activa el botón de 'crear nuevo cultivo en el
+       
+       recinto' y en el mapa se pincha sobre el área del recinto vacío. Automáticamente el sistema  genera una geometría
+       
+       al cultivo igual al recinto, es decir, Superficie del recinto = a la Superficie gráfica de la nueva LDG creada.
+   * - 4-Guardar cambios|herramienta3|
+     - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, el campo 
+      
+       'Superficie gráfica'  de la nueva LDG, tomará la superficie de la geometría generada que en este caso será 
+       
+       igual a la superficie SIGPAC.
+       
+* Seleccionar recinto vacío en tabla de registros para añadir gemoetría a la LDG
+
+.. image:: ../_static/images/libra_crear_nvo_cultivo_en_recinto_1.png
+   :align: center    
+
+* Geometría asignada a un cultivo vacío de un recinto
+.. image:: ../_static/images/libra_crear_nvo_cultivo_en_recinto_2.png
+   :align: center 
+   
+   
