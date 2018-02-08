@@ -66,7 +66,6 @@
 			jQuery.getScript("{% static 'js/lib/widgets/portable_search.js' %}")
 			.done(function() {
 				parent.$(parent.document).bind('set-geocoding', function(evt, coordinates){
-					alert("Hola, soy el geocoding!");
 					$.ajax({
 						type : 'POST',
 						async : false,
