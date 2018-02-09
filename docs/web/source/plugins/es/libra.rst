@@ -860,7 +860,7 @@ ____________________________________________________________________
 7. Borrar geometría de un cultivo |herramienta12|
 -------------------------------------------------
 
-.. |herramienta12| image:: ../_static/images/2_eliminar
+.. |herramienta12| image:: ../_static/images/2_eliminar.png
 
 .. list-table::  Borrar geometría 
    :widths: 2 10 
@@ -869,11 +869,11 @@ ____________________________________________________________________
 
    * - Selección
      - Acción
-   * - 1-'Seleccionar'|herramienta1|
+   * - 1-'Seleccionar' |herramienta1|
      - Al activar el botón, se pincha sobre el mapa la LDG que se quiere editar. Ésta cambiará a color rosado.
    * - 2-Otra opción:
    
-       'ver tabla'|herramienta2|  
+       'ver tabla' |herramienta2|  
      - Se abre la tabla de registros, se ubica el que quiere editarse y se pincha sobre el mismo.
      
        Éste registro se cambiará a un fondo color rosa, igual que la LDG sobre el mapa.
@@ -893,9 +893,67 @@ ____________________________________________________________________
 8. Solapes
 ----------
 
-Se pueden presentar dos casos:   
+Se puede presentar dos casos, solapes que no se permiten entre cultivos de un mismo recinto y solapes que sí son válidos para el sistema entre recintos de distintas solicitudes.  
 
 8.1 Solapes entre LDGs de un mismo recinto y misma solicitud
 ____________________________________________________________
   
+El sistema no permitirá solapes gráficos entre cultivos de una misma solicitud, en el caso de que se estén modificando los vértices con la herramienta ' Modificar LDG', cuando un vértice se intente mover a una posición de otro cultivo, el sistema enviará un mensaje al usuario advirtiendo que 'hay un error de topología', es decir, que dos LDGs de un mismo recinto y de una misma solicitud no se pueden solapar.         
+
+* No se permite solapes entre cultivos de una misam solicitud y recinto.
+.. image:: ../_static/images/libre_solape_1.png
+   :align: center
+   
+8.2 Solapes entre LDGs de otras solicitudes ya registradas
+__________________________________________________________
+
+El sistema si permite realizar solapes entre geometrías con LDGs de otras solicitudes gráficas registradas previamente por otros solicitantes. Esto suele presentarse cuando un recinto se encuentra en distintas solicitudes.   
+
+8.2.1 Mostrar |herramienta13| y eliminar solapes |herramienta14|
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Para eliminar los solapes se hace uso de dos herramientas: 'mostrar/ocultar solapes con cultivos de otras solicitudes' y ' Eliminar solapes seleccionados'.
+
+.. |herramienta13| image:: ../_static/images/13_ver_solapes.png
+.. |herramienta14| image:: ../_static/images/14_eliminar_solapes.png
+
+.. list-table::  Mostrar y eliminar solapes 
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Selección
+     - Acción
+   * - 1-'mostrar/ocultar solapes
+   
+       con cultivos de otras 
+       
+       solicitudes' |herramienta13|
+     - Solo basta activar este botón y el sistema detectará los solapes existentes, resaltando 
+     
+       dichos solapes de color rojo. Si se pincha de nuevo el botón los solapes se ocultan.
+   * - 2-'Eliminar solape 
+      
+       seleccionado' |herramienta14|
+     - Al activar este botón se pincha sobre algún solape que quiera borrarse y esta superficie 
+     
+       solapada será restada (eliminada) al área del cultivo de la solicitud que se encuentra activa. 
+   * - 3- Guardar cambios |herramienta3|
+     - Al guardar cambios en la solicitud activa, el campo 'superficie gráfica' del cultivo que solapaba, será la diferencia entre la superficie que tenía previamente menos la superficie de solape eliminada.       
          
+* Solapes con cultivos de otras solicitudes ya registradas
+.. image:: ../_static/images/libra_solape_2.png
+   :align: center
+
+
+* Mostrar/ocultar solapes
+.. image:: ../_static/images/libra_solape_3.png
+   :align: center
+
+* Eliminar solape seleccionado
+.. image:: ../_static/images/libra_solape_eliminar_4.png
+   :align: center
+
+
+     
+     
