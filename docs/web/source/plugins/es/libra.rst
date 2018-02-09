@@ -492,7 +492,7 @@ Esta herramienta es usada para añadir todo el espacio libre que dispone el reci
 
    * - Selección
      - Acción
-   * - 1-'Selecionar'|herramienta1|
+   * - 1-'Seleccionar'|herramienta1|
      - Al activar el botón, se pincha sobre la LDG que se quiere editar. Ésta cambiará a color rosado.
    * - 2-Otra opción:
    
@@ -555,7 +555,7 @@ Ya ha sido detallado anteriormente , ésta herramienta igualmente es usada para 
 
    * - Selección
      - Acción
-   * - 1-'Selecionar'|herramienta1|
+   * - 1-'Seleccionar'|herramienta1|
      - Al activar el botón, se pincha sobre la LDG que se quiere editar. Ésta cambiará a color rosado.
    * - 2-Otra opción:
    
@@ -573,7 +573,7 @@ Ya ha sido detallado anteriormente , ésta herramienta igualmente es usada para 
      - Al terminar de digitalizar el área a quitar se genera un cultivo de superficie más pequeña, 
 
        como resultado de la diferencia entre LDG seleccionada menos área quitada.
-   * - 5-Guardar cambios|herramienta3|
+   * - 5-Guardar cambios |herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, 
      
        el campo 'Superficie gráfica' de la LDG modificada, tomará el valor de la nueva superficie resultante.  
@@ -604,7 +604,7 @@ Con esta herramienta se permite juntar dos LDGs que pertenecen a un mismo recint
 
    * - Selección
      - Acción
-   * - 1-'Selecionar'|herramienta1|
+   * - 1-'Seleccionar'|herramienta1|
      - Seleccionar un primer cultivo (pinchando la geometría sobre el mapa) y manteniendo pulsada la tecla 'mayúscula' 
      
        se selecciona el segundo cultivo (pinchando la geometría sobre el mapa). Ambas LDGs deben pertenecer a un mismo recinto.     
@@ -620,7 +620,7 @@ Con esta herramienta se permite juntar dos LDGs que pertenecen a un mismo recint
        en una sola geometría y tomará los atributos alfanuméricos de la primera LDG seleccionada y el campo superficie gráfica
        
        se actualizará con el nuevo valor del área generada. El registro del segundo cultivo quedará sin geometría asociada y sup. gráfica =0
-   * - 4-Guardar cambios|herramienta3|
+   * - 4-Guardar cambios |herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, el campo 'Superficie gráfica' 
      
        de la nueva LDG resultante, tomará el valor de la suma de las dos superficies unidas.
@@ -648,7 +648,7 @@ Con esta opción se permite separar/dividir un cultivo en dos y por tanto genera
 
    * - Selección
      - Acción
-   * - 1-'Selecionar'|herramienta1|
+   * - 1-'Seleccionar'|herramienta1|
      - Al activar el botón, se pincha sobre el mapa la LDG que se quiere editar. Ésta cambiará a color rosado.
    * - 2-Otra opción:
    
@@ -674,7 +674,7 @@ Con esta opción se permite separar/dividir un cultivo en dos y por tanto genera
        cultivo segregado, la 'Sup. gráfica' = a la superficie del área digitalizada. Los demás atributos estarán 
        
        vacíos para ser completados a través de la tabla alfanumérica de Agrored.
-   * - 5-Guardar cambios|herramienta3|
+   * - 5-Guardar cambios |herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. Cuando se guarden los cambios, en la
      
        tabla de registros, el campo 'Superficie gráfica' de la nueva LDG tomará la superficie de la geometría generada. 
@@ -684,7 +684,7 @@ Con esta opción se permite separar/dividir un cultivo en dos y por tanto genera
    :align: center
 
 
-* Cultivo dividido en dos, se origina una nuevo registro en la tabla alfanumérica.     
+* Cultivo dividido en dos, se origina una nuevo registro en la tabla alfanumérica.    
 .. image:: ../_static/images/libra_segregar_cultivo_2.png
    :align: center
 
@@ -714,10 +714,10 @@ Esta herramienta se usa exclusivamente para los recintos que tienen disponibles 
        Estos registros aparecerán en la tabla de un color diferente a los que ya tienen gráfico asociado, serán de color
        
        marrón claro. Se debe hacer clic sobre uno de ellos y ya estará seleccionado para añadirle una nueva geometría.
-   * - 2-Selecionado
+   * - 2-Seleccionado
    
        LDG en tabla
-     - Al activar el registro cambiará a color de fondo rosa, aunque el recinto donde pertenece y se digitalizará la 
+     - Al activar el registro cambiará el fondo a color rosa, aunque el recinto donde pertenece y se digitalizará la 
      
        geometría del cultivo, en el mapa continúa estando con borde amarillo y relleno amarillo claro transparente.    
         
@@ -729,7 +729,7 @@ Esta herramienta se usa exclusivamente para los recintos que tienen disponibles 
        recinto' y en el mapa se pincha sobre el área del recinto vacío. Automáticamente el sistema  genera una geometría
        
        al cultivo igual al recinto, es decir, Superficie del recinto = a la Superficie gráfica de la nueva LDG creada.
-   * - 4-Guardar cambios|herramienta3|
+   * - 4-Guardar cambios |herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, el campo 
       
        'Superficie gráfica'  de la nueva LDG, tomará la superficie de la geometría generada que en este caso será 
@@ -742,7 +742,160 @@ Esta herramienta se usa exclusivamente para los recintos que tienen disponibles 
    :align: center    
 
 * Geometría asignada a un cultivo vacío de un recinto
+
 .. image:: ../_static/images/libra_crear_nvo_cultivo_en_recinto_2.png
    :align: center 
+
+
+6.2  Con herramienta 'Dibujar nueva LDG'  |herramienta10|
+_________________________________________________________
+
+Esta herramienta 'dibujar nueva LDG' a diferencia de la anterior 'crear nuevo cultivo' no está limitada a que el recinto contenga un único cultivo, es decir, esta herramienta aplica cuando se quieren generar nuevas geometrías dentro de un recinto que contiene varias LDGs.
+
+.. |herramienta10| image:: ../_static/images/5_dib_nvo_cultiv.png
+
+
+.. list-table:: Dibujar nueva LDG
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Selección
+     - Acción
+   * - 1-'ver tabla'|herramienta2|
+     - Al abrirse la tabla de atributos (grid alfanumérico) se mostraran las LDGs disponibles para añadirles la geometría. 
+     
+       Estos registros aparecerán en la tabla de un color diferente a los que ya tienen gráfico asociado, serán de color
+       
+       marrón claro. Se debe hacer clic sobre uno de ellos y ya estará seleccionado para añadirle una nueva geometría.
+   * - 2-Seleccionado
    
+       LDG en tabla
+     - Al activar el registro cambiará el fondo a color rosa, aunque el recinto donde pertenece y se digitalizará la 
+     
+       geometría del cultivo, en el mapa continúa estando con borde amarillo y relleno amarillo claro transparente.    
+        
+   * - 3-'dibujar
+       
+       nueva LDG'|herramienta10|
+     - Teniendo seleccionado uno de los cultivos del recinto en la tabla de registros, se activa el botón de 'Dibujar
+     
+       nueva LDG', como su nombre lo indica se podrá dibujar/digitalizar la nueva geometría. 
+   * - 4-Área digitalizada
+     - Se puede digitalizar sobre el área total o parcial que dispone el área del cultivo. Los límites de la nueva
+     
+       geometría dibujada serán los propios límites del recinto y de las otras LDGs que éste contenga. A medida que
+       
+       se va digitalizando, el sistema irá mostrando el valor del área en hectáreas (ha) en un recuadro de información 
+       
+       que se ubica a la izquierda de la pantalla.
+   * - 5-Guardar cambios |herramienta3|
+     - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, el campo 
+     
+       'Superficie gráfica' del cultivo seleccionado, tomará la superficie de la geometría dibujada.
+
+* Área de cultivo disponible dentro del recinto y geometría dibujada (azul)
+.. image:: ../_static/images/libra_dibujar_nueva_ldg_1.png
+   :align: center         
+       
+* Geometría asignada al cultivo, con herramienta 'Dibujar nueva LDG'       
+.. image:: ../_static/images/libra_dibujar_nueva_ldg_2.png
+   :align: center      
+
+6.3 Con herramienta 'Dibujar nuevo cultivo circular' |herramienta11|
+____________________________________________________________________
+
+.. |herramienta11| image:: ../_static/images/8_cultivo_circular.png
+
+
+.. list-table:: Dibujar nuevo cultivo circular
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Selección
+     - Acción
+   * - 1-'ver tabla'|herramienta2|
+     - Al abrirse la tabla de atributos (grid alfanumérico) se mostraran las LDGs disponibles para añadirles la geometría. 
+     
+       Estos registros aparecerán en la tabla de un color diferente a los que ya tienen gráfico asociado, serán de color
+       
+       marrón claro. Se debe hacer clic sobre uno de ellos y ya estará seleccionado para añadirle una nueva geometría.
+   * - 2-Seleccionado
    
+       LDG en tabla
+     - Al activar el registro cambiará el fondo a color rosa, aunque el recinto donde pertenece y se digitalizará la 
+     
+       geometría del cultivo, en el mapa continúa estando con borde amarillo y relleno amarillo claro transparente.    
+   * - 3-'Dibujar nueva
+     
+       LDG circular |herramienta11| 
+     - Seleccionada la Línea de declaración disponible en la tabla, se activa el botón 'Crear LDG circular',  se ubica
+     
+       el centro del circulo sobre el área disponible del recinto y con el cursor hacemos mas grande o mas pequeña la 
+       
+       LDG circular. En la parte izquierda saldrá un recuadro de información con el área de la superficie gráfica que se
+       
+       va dibujando, por lo tanto, se podrá ajustar visualmente el área de la superficie gráfica que se está dibujando.            
+   * - 4-Área digitalizada
+     - Definida la geometría de la LDG circular, se hace clic para poder fijar el circulo dibujado. Cuando éste es más 
+     
+       grande o sobresale del área disponible, el área dibujada será limitada por los propios límites del recinto y de 
+       
+       otros cultivos que pertenezcan al mismo cultivo.
+   * - 5-Guardar cambios |herramienta3|
+     - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, el campo 
+     
+       'Superficie gráfica'  de la nueva LDG tomará la superficie de la geometría dibujada.     
+
+* Dibujando nuevo cultivo circular
+.. image:: ../_static/images/libra_ldg_circular_1.png
+   :align: center   
+       
+* Geometría del cultivo circular definido
+.. image:: ../_static/images/libra_ldg_circular_2.png
+   :align: center
+
+
+7. Borrar geometría de un cultivo |herramienta12|
+-------------------------------------------------
+
+.. |herramienta12| image:: ../_static/images/2_eliminar
+
+.. list-table::  Borrar geometría 
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Selección
+     - Acción
+   * - 1-'Seleccionar'|herramienta1|
+     - Al activar el botón, se pincha sobre el mapa la LDG que se quiere editar. Ésta cambiará a color rosado.
+   * - 2-Otra opción:
+   
+       'ver tabla'|herramienta2|  
+     - Se abre la tabla de registros, se ubica el que quiere editarse y se pincha sobre el mismo.
+     
+       Éste registro se cambiará a un fondo color rosa, igual que la LDG sobre el mapa.
+   * - 3-'Eliminar la 
+       
+       geometría del 
+       
+       cultivo' |herramienta12|
+     - Activado este botón, se pincha en el mapa sobre el cultivo seleccionado anteriormente, ésta se 
+     
+       borrará y el campo de superficie gráfica se pondrá =0 ha.
+   * - 5-Guardar cambios |herramienta3|
+     - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito' y en la tabla de registros, 
+     
+       el campo 'Superficie gráfica' cambiará = 0
+       
+8. Solapes
+----------
+
+Se pueden presentar dos casos:   
+
+8.1 Solapes entre LDGs de un mismo recinto y misma solicitud
+____________________________________________________________
+  
+         
