@@ -330,32 +330,51 @@ Los recintos pueden tener dos estilos, cuando pertenecen o no a la declaración 
 - Relleno: Amarillo claro con transparencia (al pasar el puntero encima de éste)  
    
    
-4. Precarga automática de la LDG
---------------------------------
+4. Precarga automática desde LIBRA
+----------------------------------
 
-En el momento que se se invoque la herramienta de captura gráfica (LIBRA) desde AGRORED, el sistema realizará las siguientes comprobaciones para generar de forma automática las LDGs asociadas a la solicitud:
+4.1 Casos en la carga inicial de libra
+______________________________________
 
-4.1 Existe Croquis:
-___________________
+Cada vez que se carga una solicitud, LIBRA solicita a AGRORED el xml con las líneas de declaración de la solicitud. Este xml se procesa y comprueba para cada línea de declaración los siguientes casos:
+
+
+4.1.1 Existe Croquis:
+~~~~~~~~~~~~~~~~~~~~~
  
-En el caso de que exista un croquis asociado al cultivo, utilizará esta geometría en la LDG.
+Si la línea de declaración posee CROQUIS_WEB, el sistema la utilizará directamente para crear y asignarle la misma geometría al cultivo. 
 
-4.2 No existe croquis:
-______________________
+Es posible que el CROQUIS_WEB contenga un WKT en mal estado, en este caso se deja la geometría vacía y se le obliga al usuario a pintar la linea de declaración.
 
-Se puede presentar dos casos:
+4.1.2 No existe croquis:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Si el CROQUIS_WEB llega vacío se calcula la diferencia entre la superficie declarada y la superficie SIGPAC, aquí pueden darse dos casos:
 
 
 *  **Sup. Declarada = Sup recinto SIGPAC:**
 
-
-Si no existe croquis y la superficie declarada del cultivo es igual a la del recinto SIGPAC, se creará una geometría igual a la del recinto SIGPAC
+Si la diferencia en valor absoluto es **inferior** al límite de TOLERANCIA predefinido (actualmente 100m2), se supone el caso de que la superficie declarada =  superficie SIGPAC, y por tanto se crea la linea de declaración desde el recinto SIGPAC, es decir, se asigna una geometría igual a la del recinto SIGPAC.
 
 
 *  **Sup declarada <> Sup recinto SIGPAC:**
 
- 
-Se creará una LDG sin geometría. Aparecerá la entrada de color amarillo en la tabla de registros.
+Si la diferencia en valor absoluto es **superior** al límite de TOLERANCIA predefinido (actualmente 100m2), se supone el caso de que la superficie declarada <>  superficie SIGPAC, y por tanto se deja la geometría vacía y se le obliga al usuario a pintar la línea de declaración.
+
+.. note::
+   En todos los casos se comprueba en la caché SIGPAC que existe el recinto asociado a la línea de declaración, si este no existe (por reparcelamiento, …), la linea de declaración no se crea directamente mostrando un aviso al usuario en la consola de mensajes. 
+
+
+4.2 Casos con la selección de recintos
+______________________________________
+
+Desde AGRORED se pueden seleccionar uno o más recintos de la solicitud para poder mostrar las líneas de declaración que estos contienen en LIBRA. En función de los recintos seleccionados se dan los siguientes casos:
+
+* Si no se selecciona ningún recinto de la solicitud, o los recintos seleccionados no se encuentran disponibles en la caché SIGPAC, aparecerá un mensaje en LIBRA indicando al usuario que no hay ningún recinto seleccionado.
+
+* Si se selecciona recintos puntuales de la solicitud, en LIBRA las líneas de declaración contenidas en esos recintos se mostrarán en la tabla de declaraciones, y el resto de recintos no seleccionados se mostrarán en el mapa aunque no se pueda interactuar con ellos. Por tanto únicamente se podrá trabajar con los recintos seleccionados.
+
+* Si se seleccionan todos los recintos de la solicitud se cargarán todos ellos tanto en el mapa como en la tabla y se podrá trabajar con todos.
 
 
 
@@ -407,7 +426,9 @@ Para añadir superficie se puede hacer uso de varias herramientas:
      - Al finalizar el área digitalizada, resulta una nueva LDG, que es la suma de la LDG seleccionada más zona digitalizada. 
      
        Estará limitada por los lados digitalizados, los del recinto SIGPAC y las otras LDGs propias.
-   * - 5-Guardar cambios|herramienta3|
+   * - 5-Guardar cambios
+   
+       |herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. Cuando se guarden los cambios, 
      
        en la tabla de registros, el campo 'Superficie gráfica' se debe actualizar con el nuevo valor del área de la LDG resultante.
@@ -459,7 +480,9 @@ Esta herramienta es usada para realizar pequeños ajustes en la superficie.
        * **Mover los vértices**, haciendo clic sobre él (sin soltarlo) se mueve a la posición deseada.
        * **Añadir vértices**: Ubicarse sobre el borde de la geometría donde se quiera añadir y hacer un clic.
        * **Eliminar vértice**: Se ubica al vértice que se quiera quitar y se hace un solo clic y soltar.
-   * - 4-Guardar cambios|herramienta3|
+   * - 4-Guardar cambios
+   
+       |herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. Cuando se guarden los cambios, 
      
        en la tabla de registros, el campo 'Superficie gráfica' del cultivo modificado, tomará el valor de la
@@ -513,7 +536,9 @@ Esta herramienta es usada para añadir todo el espacio libre que dispone el reci
      
        espacio libre disponible que se ha tocado del recinto SIGPAC.
      
-   * - 5-Guardar cambios|herramienta3|     
+   * - 5-Guardar cambios
+   
+       |herramienta3|     
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, 
      
        el campo 'Superficie gráfica' de la LDG modificada, tomará el valor de la nueva superficie resultante.
@@ -573,7 +598,9 @@ Ya ha sido detallado anteriormente , ésta herramienta igualmente es usada para 
      - Al terminar de digitalizar el área a quitar se genera un cultivo de superficie más pequeña, 
 
        como resultado de la diferencia entre LDG seleccionada menos área quitada.
-   * - 5-Guardar cambios |herramienta3|
+   * - 5-Guardar cambios 
+   
+       |herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, 
      
        el campo 'Superficie gráfica' de la LDG modificada, tomará el valor de la nueva superficie resultante.  
@@ -620,7 +647,9 @@ Con esta herramienta se permite juntar dos LDGs que pertenecen a un mismo recint
        en una sola geometría y tomará los atributos alfanuméricos de la primera LDG seleccionada y el campo superficie gráfica
        
        se actualizará con el nuevo valor del área generada. El registro del segundo cultivo quedará sin geometría asociada y sup. gráfica =0
-   * - 4-Guardar cambios |herramienta3|
+   * - 4-Guardar cambios 
+   
+       |herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, el campo 'Superficie gráfica' 
      
        de la nueva LDG resultante, tomará el valor de la suma de las dos superficies unidas.
@@ -633,6 +662,7 @@ Con esta herramienta se permite juntar dos LDGs que pertenecen a un mismo recint
 * Cultivo resultante de la unión de dos LDGs
 .. image:: ../_static/images/libra_unir_cultivos_2.png
    :align: center
+
  
 5.4 Segregar LDG  |herramienta9|
 ________________________________
@@ -657,6 +687,8 @@ Con esta opción se permite separar/dividir un cultivo en dos y por tanto genera
      
        Éste registro se cambiará a un fondo color rosa, igual que la LDG sobre el mapa.
    * - 3-'Segregar LDG'
+   
+       |herramienta9| 
      - Teniendo elegido el cultivo, se pincha sobre el botón 'segregar LDG' y se procede a digitalizar sobre 
      
        la geometría seleccionada el área que se quiera segregar.      
@@ -674,7 +706,9 @@ Con esta opción se permite separar/dividir un cultivo en dos y por tanto genera
        cultivo segregado, la 'Sup. gráfica' = a la superficie del área digitalizada. Los demás atributos estarán 
        
        vacíos para ser completados a través de la tabla alfanumérica de Agrored.
-   * - 5-Guardar cambios |herramienta3|
+   * - 5-Guardar cambios 
+   
+       |herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. Cuando se guarden los cambios, en la
      
        tabla de registros, el campo 'Superficie gráfica' de la nueva LDG tomará la superficie de la geometría generada. 
@@ -688,17 +722,18 @@ Con esta opción se permite separar/dividir un cultivo en dos y por tanto genera
 .. image:: ../_static/images/libra_segregar_cultivo_2.png
    :align: center
 
+
 6. Altas de nuevas geometrías en LDGs
 -------------------------------------
 Las herramientas de edición (añadir, quitar, juntar y dividir) se aplican para cultivos que ya tienen asociado una geometría. Las herramientas que se describen a continuación aplican para las LDGs que aún no tienen una geometría vinculada, es decir, se detallará cómo desde el editor gráfico se podrá crear y asignar una geometría a un cultivo que esté disponible dentro de la tabla de registros.
 
 
-6.1 Con herramienta 'Crear nuevo cultivo en el recinto'  |herramienta9|
-_______________________________________________________________________
+6.1 Con herramienta 'Crear nuevo cultivo en el recinto'  |herramienta10|
+________________________________________________________________________
 
 Esta herramienta se usa exclusivamente para los recintos que tienen disponibles un único cultivo.
 
-.. |herramienta9| image:: ../_static/images/3_crear_nvo_cultivo_recint.png
+.. |herramienta10| image:: ../_static/images/3_crear_nvo_cultivo_recint.png
 
 
 .. list-table:: Crear nuevo cultivo en el recinto
@@ -723,13 +758,15 @@ Esta herramienta se usa exclusivamente para los recintos que tienen disponibles 
         
    * - 3-'crear nueva
        
-       LDG en recinto'|herramienta9|
+       LDG en recinto'|herramienta10|
      - Teniendo seleccionado el recinto desde la tabla de registros, se activa el botón de 'crear nuevo cultivo en el
        
        recinto' y en el mapa se pincha sobre el área del recinto vacío. Automáticamente el sistema  genera una geometría
        
        al cultivo igual al recinto, es decir, Superficie del recinto = a la Superficie gráfica de la nueva LDG creada.
-   * - 4-Guardar cambios |herramienta3|
+   * - 4-Guardar cambios 
+   
+       |herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, el campo 
       
        'Superficie gráfica'  de la nueva LDG, tomará la superficie de la geometría generada que en este caso será 
@@ -747,12 +784,12 @@ Esta herramienta se usa exclusivamente para los recintos que tienen disponibles 
    :align: center 
 
 
-6.2  Con herramienta 'Dibujar nueva LDG'  |herramienta10|
+6.2  Con herramienta 'Dibujar nueva LDG'  |herramienta11|
 _________________________________________________________
 
 Esta herramienta 'dibujar nueva LDG' a diferencia de la anterior 'crear nuevo cultivo' no está limitada a que el recinto contenga un único cultivo, es decir, esta herramienta aplica cuando se quieren generar nuevas geometrías dentro de un recinto que contiene varias LDGs.
 
-.. |herramienta10| image:: ../_static/images/5_dib_nvo_cultiv.png
+.. |herramienta11| image:: ../_static/images/5_dib_nvo_cultiv.png
 
 
 .. list-table:: Dibujar nueva LDG
@@ -777,7 +814,7 @@ Esta herramienta 'dibujar nueva LDG' a diferencia de la anterior 'crear nuevo cu
         
    * - 3-'dibujar
        
-       nueva LDG'|herramienta10|
+       nueva LDG'|herramienta11|
      - Teniendo seleccionado uno de los cultivos del recinto en la tabla de registros, se activa el botón de 'Dibujar
      
        nueva LDG', como su nombre lo indica se podrá dibujar/digitalizar la nueva geometría. 
@@ -789,7 +826,9 @@ Esta herramienta 'dibujar nueva LDG' a diferencia de la anterior 'crear nuevo cu
        se va digitalizando, el sistema irá mostrando el valor del área en hectáreas (ha) en un recuadro de información 
        
        que se ubica a la izquierda de la pantalla.
-   * - 5-Guardar cambios |herramienta3|
+   * - 5-Guardar cambios 
+   
+       |herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, el campo 
      
        'Superficie gráfica' del cultivo seleccionado, tomará la superficie de la geometría dibujada.
@@ -802,10 +841,10 @@ Esta herramienta 'dibujar nueva LDG' a diferencia de la anterior 'crear nuevo cu
 .. image:: ../_static/images/libra_dibujar_nueva_ldg_2.png
    :align: center      
 
-6.3 Con herramienta 'Dibujar nuevo cultivo circular' |herramienta11|
+6.3 Con herramienta 'Dibujar nuevo cultivo circular' |herramienta12|
 ____________________________________________________________________
 
-.. |herramienta11| image:: ../_static/images/8_cultivo_circular.png
+.. |herramienta12| image:: ../_static/images/8_cultivo_circular.png
 
 
 .. list-table:: Dibujar nuevo cultivo circular
@@ -829,7 +868,7 @@ ____________________________________________________________________
        geometría del cultivo, en el mapa continúa estando con borde amarillo y relleno amarillo claro transparente.    
    * - 3-'Dibujar nueva
      
-       LDG circular |herramienta11| 
+       LDG circular |herramienta12| 
      - Seleccionada la Línea de declaración disponible en la tabla, se activa el botón 'Crear LDG circular',  se ubica
      
        el centro del circulo sobre el área disponible del recinto y con el cursor hacemos mas grande o mas pequeña la 
@@ -843,7 +882,9 @@ ____________________________________________________________________
        grande o sobresale del área disponible, el área dibujada será limitada por los propios límites del recinto y de 
        
        otros cultivos que pertenezcan al mismo cultivo.
-   * - 5-Guardar cambios |herramienta3|
+   * - 5-Guardar cambios 
+   
+       |herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito'. En la tabla de registros, el campo 
      
        'Superficie gráfica'  de la nueva LDG tomará la superficie de la geometría dibujada.     
@@ -857,10 +898,10 @@ ____________________________________________________________________
    :align: center
 
 
-7. Borrar geometría de un cultivo |herramienta12|
+7. Borrar geometría de un cultivo |herramienta13|
 -------------------------------------------------
 
-.. |herramienta12| image:: ../_static/images/2_eliminar.png
+.. |herramienta13| image:: ../_static/images/2_eliminar.png
 
 .. list-table::  Borrar geometría 
    :widths: 2 10 
@@ -881,11 +922,13 @@ ____________________________________________________________________
        
        geometría del 
        
-       cultivo' |herramienta12|
+       cultivo' |herramienta13|
      - Activado este botón, se pincha en el mapa sobre el cultivo seleccionado anteriormente, ésta se 
      
        borrará y el campo de superficie gráfica se pondrá =0 ha.
-   * - 5-Guardar cambios |herramienta3|
+   * - 5-Guardar cambios 
+   
+       |herramienta3|
      - Saldrá un mensaje indicando: 'se han guardado los cambios con éxito' y en la tabla de registros, 
      
        el campo 'Superficie gráfica' cambiará = 0
@@ -909,13 +952,13 @@ __________________________________________________________
 
 El sistema si permite realizar solapes entre geometrías con LDGs de otras solicitudes gráficas registradas previamente por otros solicitantes. Esto suele presentarse cuando un recinto se encuentra en distintas solicitudes.   
 
-8.2.1 Mostrar |herramienta13| y eliminar solapes |herramienta14|
+8.2.1 Mostrar |herramienta14| y eliminar solapes |herramienta15|
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Para eliminar los solapes se hace uso de dos herramientas: 'mostrar/ocultar solapes con cultivos de otras solicitudes' y ' Eliminar solapes seleccionados'.
 
-.. |herramienta13| image:: ../_static/images/13_ver_solapes.png
-.. |herramienta14| image:: ../_static/images/14_eliminar_solapes.png
+.. |herramienta14| image:: ../_static/images/12_ver_solapes.png
+.. |herramienta15| image:: ../_static/images/13_eliminar_solapes.png
 
 .. list-table::  Mostrar y eliminar solapes 
    :widths: 2 10 
@@ -928,18 +971,24 @@ Para eliminar los solapes se hace uso de dos herramientas: 'mostrar/ocultar sola
    
        con cultivos de otras 
        
-       solicitudes' |herramienta13|
+       solicitudes' |herramienta14|
      - Solo basta activar este botón y el sistema detectará los solapes existentes, resaltando 
      
        dichos solapes de color rojo. Si se pincha de nuevo el botón los solapes se ocultan.
    * - 2-'Eliminar solape 
       
-       seleccionado' |herramienta14|
+       seleccionado' |herramienta15|
      - Al activar este botón se pincha sobre algún solape que quiera borrarse y esta superficie 
      
        solapada será restada (eliminada) al área del cultivo de la solicitud que se encuentra activa. 
-   * - 3- Guardar cambios |herramienta3|
-     - Al guardar cambios en la solicitud activa, el campo 'superficie gráfica' del cultivo que solapaba, será la diferencia entre la superficie que tenía previamente menos la superficie de solape eliminada.       
+   * - 3- Guardar cambios 
+   
+       |herramienta3|
+     - Al guardar cambios en la solicitud activa, el campo 'superficie gráfica' del cultivo que 
+     
+       solapaba, será la diferencia entre la superficie que tenía previamente menos la superficie de 
+       
+       solape eliminada.       
          
 * Solapes con cultivos de otras solicitudes ya registradas
 .. image:: ../_static/images/libra_solape_2.png
@@ -955,5 +1004,70 @@ Para eliminar los solapes se hace uso de dos herramientas: 'mostrar/ocultar sola
    :align: center
 
 
+9. Otras herramientas de uso común
+----------------------------------
+.. |herramienta16| image:: ../_static/images/15_imprimir.png
+.. |herramienta17| image:: ../_static/images/17_informacion.png
+.. |herramienta18| image:: ../_static/images/18_buscar_recinto.png
+.. |herramienta19| image:: ../_static/images/19_deshacer.png
+.. |herramienta20| image:: ../_static/images/20_rehacer.png
+
+
+
+.. list-table::  Herramientas 
+   :widths: 3 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Herramienta
+     - Botón
+     - Acción
+   * - Deshacer
+     - |herramienta19|
+     - Como su nombre lo indica sirve para eliminar una acción realizada gráficamente. 
+     
+       Eliminará la última acción o tantas atrás como veces sea indicado.
+   * - Rehacer
+     - |herramienta20|
+     - Permite volver a las acciones posteriores que se han deshecho gráficamente, 
+     
+       es decir, lo contrario de la herramienta deshacer.
+   * - Seleccionar
+     - |Herramienta1|
+     - Permite seleccionar las geometrías asociadas a una Línea de declaración. 
+     
+       Es la herramienta más común que se usa previamente para poder ejecutar las demás. 
+   * - Ver tabla
+     - |Herramienta2|
+     - Esta herramienta permite visualizar todas las Líneas de Declaración que han sido 
+     
+       seleccionadas desde Agrored y que se pueden editar desde LIBRA, igualmente en 
+       
+       cada cultivo se detallan sus atributos alfanuméricos correspondientes.  
+   * - Guardar cambios
+     - |Herramienta3|
+     - Esta es otra herramienta de bastante uso común, pues se ejecuta después de 
+      
+       realizar cualquier cambio en los cultivos. De esta manera quedan registrados 
+       
+       en Libra y automáticamente en Agrored.
+   * - Imprimir
+     - |herramienta16|
+     - Esta herramienta permite exportar en formato PDF un mapa con la zona del cultivo
+       
+       seleccionado y sus atributos alfanuméricos 
+   * - Informacion de
+   
+       elementos en mapa
+     - |herramienta17|
+     - Esta herramienta permite mostrar la información alfanumérica de forma rápida de 
+       
+       un elemento seleccionado en el mapa (recintos, solapes, cultivos de la solicitud 
+       
+       activa y de otras solicitudes ya registradas)
+   * - Buscar Recinto
+     - |herramienta18|
+     - Esta herramienta permite buscar sobre el mapa un recinto.              
+     
      
      
