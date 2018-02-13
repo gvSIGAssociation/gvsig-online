@@ -186,6 +186,31 @@ def check_library_path(library):
         print('Info: %s' % e)
         return library_path
     
+def check_custom_legend_path():
+    legend_path = settings.MEDIA_ROOT + "custom_legends/"
+    try:        
+        os.mkdir(legend_path)
+        return legend_path
+     
+    except OSError as e:
+        print('Info: %s' % e)
+        return legend_path
+    
+def save_custom_legend(legend_path, file, file_name):    
+    try: 
+        file_path = legend_path + file_name
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        with open(file_path, 'wb+') as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+        
+        legend_url = settings.MEDIA_URL + "custom_legends/" + file_name   
+        return legend_url
+     
+    except Exception as e:
+        return False
+    
             
 def save_external_graphic(library_path, file, file_name):    
     try: 

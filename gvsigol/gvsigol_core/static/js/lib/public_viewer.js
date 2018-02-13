@@ -340,6 +340,7 @@ viewer.core = {
 				wmsLayer.abstract = layerConf.abstract;
 				wmsLayer.metadata = layerConf.metadata;
 				wmsLayer.legend = layerConf.legend;
+				wmsLayer.legend_graphic = layerConf.legend_graphic;
 				wmsLayer.queryable = layerConf.queryable;
 				wmsLayer.is_vector = layerConf.is_vector;
 				wmsLayer.write_roles = layerConf.write_roles;
