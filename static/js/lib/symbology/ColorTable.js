@@ -26,6 +26,7 @@ var ColorTable = function(layerName, utils, rule_opts) {
 	this.utils = utils;
 	this.rule = null;
 	this.json_data = null;
+	this.legendFiles = null;
 	
 	if (rule_opts != null) {
 		if (rule_opts.entries.length > 0) {
@@ -55,6 +56,10 @@ ColorTable.prototype.addDefaultEntries = function() {
 
 ColorTable.prototype.getRule = function() {
 	return this.rule;
+};
+
+ColorTable.prototype.setLegendFiles = function(files) {
+	this.legendFiles = files;
 };
 
 ColorTable.prototype.loadRule = function(entries) {
@@ -99,26 +104,69 @@ ColorTable.prototype.save = function(layerId) {
 	$("body").overlay();
 	style = this.getStyleDef();
 	
-	$.ajax({
-		type: "POST",
-		async: false,
-		url: "/gvsigonline/symbology/color_table_add/" + layerId + "/",
-		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-		},
-		data: {
-			style_data: JSON.stringify(style)
-		},
-		success: function(response){
-			if (response.success) {
-				location.href = "/gvsigonline/symbology/style_layer_list/";
-			} else {
-				alert('Error');
-			}
+	
+	var formData = new FormData();
+	if(document.getElementById('has-custom-legend').checked) {
+		formData.append('has_custom_legend', true);
+		formData.append('style_data', JSON.stringify(style));
+		if ($("#legend-file")[0].files.length > 0) {
+			formData.append('file', $("#legend-file")[0].files[0]);
 			
-		},
-	    error: function(){}
-	});
+			$.ajax({
+				type: "POST",
+				async: false,
+				cache: false,
+		     	contentType: false,
+		     	enctype: 'multipart/form-data',
+		     	processData: false,	
+				url: "/gvsigonline/symbology/color_table_add/" + layerId + "/",
+				beforeSend:function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				data: formData,
+				success: function(response){
+					if (response.success) {
+						location.href = "/gvsigonline/symbology/style_layer_list/";
+					} else {
+						alert('Error');
+					}
+					
+				},
+			    error: function(){}
+			});
+			
+		} else {
+			messageBox.show('warning', gettext('You must select a image'));
+		}
+
+		
+	} else {
+		formData.append('has_custom_legend', false);
+		formData.append('style_data', JSON.stringify(style));
+		
+		$.ajax({
+			type: "POST",
+			async: false,
+			cache: false,
+	     	contentType: false,
+	     	enctype: 'multipart/form-data',
+	     	processData: false,	
+			url: "/gvsigonline/symbology/color_table_add/" + layerId + "/",
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			data: formData,
+			success: function(response){
+				if (response.success) {
+					location.href = "/gvsigonline/symbology/style_layer_list/";
+				} else {
+					alert('Error');
+				}
+				
+			},
+		    error: function(){}
+		});
+	}
 };
 
 ColorTable.prototype.load = function(min_raster, max_raster, numberOfIntervals) {
@@ -158,29 +206,70 @@ ColorTable.prototype.getStyleDef = function() {
 
 
 ColorTable.prototype.update = function(layerId, styleId) {
-	$("body").overlay();
 	style = this.getStyleDef();
 	
-	$.ajax({
-		type: "POST",
-		async: false,
-		url: "/gvsigonline/symbology/color_table_update/" + layerId + "/" + styleId + "/",
-		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-		},
-		data: {
-			style_data: JSON.stringify(style)
-		},
-		success: function(response){
-			if (response.success) {
-				location.href = "/gvsigonline/symbology/style_layer_list/";
-			} else {
-				alert('Error');
-			}
+	var formData = new FormData();
+	if(document.getElementById('has-custom-legend').checked) {
+		formData.append('has_custom_legend', true);
+		formData.append('style_data', JSON.stringify(style));
+		if ($("#legend-file")[0].files.length > 0) {
+			formData.append('file', $("#legend-file")[0].files[0]);
 			
-		},
-	    error: function(){}
-	});
+			$.ajax({
+				type: "POST",
+				async: false,
+				cache: false,
+		     	contentType: false,
+		     	enctype: 'multipart/form-data',
+		     	processData: false,	
+				url: "/gvsigonline/symbology/color_table_update/" + layerId + "/" + styleId + "/",
+				beforeSend:function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				data: formData,
+				success: function(response){
+					if (response.success) {
+						location.href = "/gvsigonline/symbology/style_layer_list/";
+					} else {
+						alert('Error');
+					}
+					
+				},
+			    error: function(){}
+			});
+			
+		} else {
+			messageBox.show('warning', gettext('You must select a image'));
+		}
+
+		
+	} else {
+		formData.append('has_custom_legend', false);
+		formData.append('style_data', JSON.stringify(style));
+		
+		$.ajax({
+			type: "POST",
+			async: false,
+			cache: false,
+	     	contentType: false,
+	     	enctype: 'multipart/form-data',
+	     	processData: false,	
+			url: "/gvsigonline/symbology/color_table_update/" + layerId + "/" + styleId + "/",
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			data: formData,
+			success: function(response){
+				if (response.success) {
+					location.href = "/gvsigonline/symbology/style_layer_list/";
+				} else {
+					alert('Error');
+				}
+				
+			},
+		    error: function(){}
+		});
+	}
 };
 
 
