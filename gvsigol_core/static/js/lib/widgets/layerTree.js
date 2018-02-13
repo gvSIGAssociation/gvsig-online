@@ -701,17 +701,31 @@ layerTree.prototype.hasTemporaryLayersActive = function() {
 
 layerTree.prototype.assignStyleToLayer = function(layer, style) {
 	layer.getSource().updateParams({"STYLES":style});
-	var url_split = layer.legend.split('&STYLE=');
-	if(url_split.length > 1){
-		var aux = ""
-		var index = url_split[1].indexOf('&');
-		if(index != -1){
-			layer.legend = url_split[0] +  url_split[1].substring(index);
-		}else{
-			layer.legend = url_split[0];
+	var selectedStyle = null;
+	for (var i=0; i<layer.styles.length; i++) {
+		if (layer.styles[i].name == style) {
+			selectedStyle = layer.styles[i];
 		}
 	}
-	layer.legend = layer.legend + '&STYLE=' + style;
+	if (selectedStyle.has_custom_legend) {
+		layer.legend = selectedStyle.custom_legend_url;
+		
+	} else {
+		var url_split = layer.legend_graphic.split('&STYLE=');
+		if(url_split.length > 1){
+			var aux = ""
+			var index = url_split[1].indexOf('&');
+			if(index != -1){
+				layer.legend = url_split[0] +  url_split[1].substring(index);
+			}else{
+				layer.legend = url_split[0];
+			}
+		} else {
+			layer.legend = layer.legend_graphic;
+		}
+		layer.legend = layer.legend + '&STYLE=' + style;
+	}
+	
 	viewer.core.legend.reloadLegend();
 }
 

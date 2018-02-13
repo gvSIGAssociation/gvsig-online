@@ -57,6 +57,38 @@
 								</label>
 							</div>
 						</div>
+						<div class="row">
+							<div class="checkbox col-md-4">								
+								<label>
+									{% if style.has_custom_legend %}
+									<input type="checkbox" name="has-custom-legend" id="has-custom-legend" checked/>{% trans "Has custom legend?" %}
+									{% else %}
+									<input type="checkbox" name="has-custom-legend" id="has-custom-legend"/>{% trans "Has custom legend?" %}
+									{% endif %}
+								</label>
+							</div>
+							{% if style.has_custom_legend %}
+							<div id="legend-file-div" class="col-md-8" style="display: block;">
+							{% else %}
+							<div id="legend-file-div" class="col-md-8" style="display: none;">
+							{% endif %}
+								<div class="form-group">
+									<label>{% trans "Select image" %}</label>
+									<input id="legend-file" name="legend-file" type="file" accept=".png" onchange="loadPreviewLegend(event)" class="file" data-show-preview="true">
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-6">
+								{% if style.has_custom_legend %}
+								<div id="output-legend-div" style="display: block;">
+								{% else %}
+								<div id="output-legend-div" style="display: none;">
+								{% endif %}
+									<img style="max-width: 300px;" id="output-legend" class="output-legend" src="{{style.custom_legend_url}}"/>
+								</div>
+							</div>
+						</div>
 					</div>
 					<div class="col-md-6">
 						<div id="map" class="preview-map"></div>
@@ -208,6 +240,30 @@
 <script>
 	$('#menu-manage-symbology').addClass("active");
 	$('#submenu-styles').addClass("active");
+	
+	$('#has-custom-legend').change(function() {
+        if(this.checked) {
+        	$('#legend-file-div').css('display', 'block');
+        	$('#output-legend-div').css('display', 'block');
+        } else {
+        	$('#legend-file-div').css('display', 'none');
+        	$('#output-legend-div').css('display', 'none');
+        }
+                
+    });
+	
+	var loadPreviewLegend = function(event) {
+		$("#form-error").empty();
+		if (event.target.files[0].type == 'image/png') {
+			var output = document.getElementById('output-legend');
+		   	output.src = URL.createObjectURL(event.target.files[0]);
+		   	
+		} else {
+			$("#legend-file").val("");
+			$("#form-error").append('<p>*{% trans "The file format is not supported" %}</p>');
+		}
+	   	
+	 };
 </script>
 <script>
 
@@ -276,6 +332,15 @@ $(document).ready(function() {
 		var rule = colorTable.getRule();
 		rule.maxscale = this.value;
 	});
+	
+	// Add events
+	 $('input[type=file]').on('change', prepareUpload);
+
+	 // Grab the files and set them to our variable
+	 function prepareUpload(event){
+	   var files = event.target.files;
+	   colorTable.setLegendFiles(files);
+	 };
 	
 	$("#raster-statistics").on('click', function(e){
 		$.ajax({

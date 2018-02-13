@@ -58,6 +58,8 @@ class Style(models.Model):
     minscale = models.FloatField(null=True, blank=True, default=-1)
     maxscale = models.FloatField(null=True, blank=True, default=-1)
     order = models.IntegerField(null=False, default=0)
+    has_custom_legend = models.BooleanField(default=False)
+    custom_legend_url = models.CharField(max_length=250, blank=True, null=True)
     
     def __unicode__(self):
         return self.name

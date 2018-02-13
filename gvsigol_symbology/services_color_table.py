@@ -32,11 +32,13 @@ import utils, sld_utils, sld_builder
 import tempfile, zipfile
 import os, shutil
 import StringIO
+import string
+import random
 import utils
 import json
 import re
 
-def create_style(request, json_data, layer_id, is_preview=False):
+def create_style(request, has_custom_legend, json_data, layer_id, is_preview=False):
 
     layer = Layer.objects.get(id=int(layer_id))
     datastore = layer.datastore
@@ -61,6 +63,16 @@ def create_style(request, json_data, layer_id, is_preview=False):
         is_default = is_default,
         type = 'CT'
     )
+    
+    if has_custom_legend == 'true':
+        style.has_custom_legend = True
+        legend_name = 'legend_' + ''.join(random.choice(string.ascii_uppercase) for i in range(6)) + '.png'
+        legend_path = utils.check_custom_legend_path()
+        style.custom_legend_url = utils.save_custom_legend(legend_path, request.FILES['file'], legend_name)
+        
+    else:
+        style.has_custom_legend = False
+        
     style.save()
     style_layer = StyleLayer(
         style = style,
@@ -129,7 +141,7 @@ def create_style(request, json_data, layer_id, is_preview=False):
     else:
         return False
     
-def update_style(request, json_data, layer_id, style_id):   
+def update_style(request, json_data, layer_id, style_id, has_custom_legend):   
     style = Style.objects.get(id=int(style_id))
     layer = Layer.objects.get(id=int(layer_id))
     
@@ -143,6 +155,15 @@ def update_style(request, json_data, layer_id, style_id):
         workspace = datastore.workspace
         mapservice.setLayerStyle(layer, style.name, style.is_default)
     
+    if has_custom_legend == 'true':
+        style.has_custom_legend = True
+        legend_name = 'legend_' + ''.join(random.choice(string.ascii_uppercase) for i in range(6)) + '.png'
+        legend_path = utils.check_custom_legend_path()
+        style.custom_legend_url = utils.save_custom_legend(legend_path, request.FILES['file'], legend_name)
+        
+    else:
+        style.has_custom_legend = False
+        
     style.title = json_data.get('title')
     if json_data.get('minscale') != '':
         style.minscale = json_data.get('minscale')
