@@ -1515,25 +1515,33 @@ class Geoserver():
     def getThumbnail(self, ws, ds, layer):
         (ds_type, layer_info) = self.getResourceInfo(ws.name, ds, layer.name, "json")
         
-        params = json.loads(layer.datastore.connection_params)
-        host = params['host']
-        port = params['port']
-        dbname = params['database']
-        user = params['user']
-        passwd = params['passwd']
-        schema = params.get('schema', 'public')
-        i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-        count = i.get_estimated_count(schema, layer.name)
-        aux = count[0]
-        
-        if aux < 10000:
+        if ds_type == 'featureType':
+            params = json.loads(layer.datastore.connection_params)
+            host = params['host']
+            port = params['port']
+            dbname = params['database']
+            user = params['user']
+            passwd = params['passwd']
+            schema = params.get('schema', 'public')
+            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+            count = i.get_estimated_count(schema, layer.name)
+            aux = count[0]
+            
+            if aux < 10000:
+                maxx = str(layer_info[ds_type]['latLonBoundingBox']['maxx'])
+                maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
+                minx = str(layer_info[ds_type]['latLonBoundingBox']['minx'])
+                miny = str(layer_info[ds_type]['latLonBoundingBox']['miny'])
+                bbox = minx + "," + miny + "," + maxx + "," + maxy 
+            else:
+                bbox = i.get_bbox_firstgeom(schema, layer.name, 0.01)  
+                
+        else:
             maxx = str(layer_info[ds_type]['latLonBoundingBox']['maxx'])
             maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
             minx = str(layer_info[ds_type]['latLonBoundingBox']['minx'])
             miny = str(layer_info[ds_type]['latLonBoundingBox']['miny'])
-            bbox = minx + "," + miny + "," + maxx + "," + maxy 
-        else:
-            bbox = i.get_bbox_firstgeom(schema, layer.name, 0.01)            
+            bbox = minx + "," + miny + "," + maxx + "," + maxy
             
         
         values = {
