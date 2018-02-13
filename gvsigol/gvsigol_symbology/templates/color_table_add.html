@@ -53,6 +53,26 @@
 								</label>
 							</div>
 						</div>
+						<div class="row">
+							<div class="checkbox col-md-4">								
+								<label>
+									<input type="checkbox" name="has-custom-legend" id="has-custom-legend"/>{% trans "Has custom legend?" %}
+								</label>
+							</div>
+							<div id="legend-file-div" class="col-md-8" style="display: none;">
+								<div class="form-group">
+									<label>{% trans "Select image" %}</label>
+									<input id="legend-file" name="legend-file" type="file" accept=".png" onchange="loadPreviewLegend(event)" class="file" data-show-preview="true">
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-6">
+								<div id="output-legend-div" style="display: none;">
+									<img style="max-width: 300px;" id="output-legend" class="output-legend"/>
+								</div>
+							</div>
+						</div>
 					</div>
 					<div class="col-md-6">
 						<div id="map" class="preview-map"></div>
@@ -204,6 +224,30 @@
 <script>
 	$('#menu-manage-symbology').addClass("active");
 	$('#submenu-styles').addClass("active");
+	
+	$('#has-custom-legend').change(function() {
+        if(this.checked) {
+        	$('#legend-file-div').css('display', 'block');
+        	$('#output-legend-div').css('display', 'block');
+        } else {
+        	$('#legend-file-div').css('display', 'none');
+        	$('#output-legend-div').css('display', 'none');
+        }
+                
+    });
+	
+	var loadPreviewLegend = function(event) {
+		$("#form-error").empty();
+		if (event.target.files[0].type == 'image/png') {
+			var output = document.getElementById('output-legend');
+		   	output.src = URL.createObjectURL(event.target.files[0]);
+		   	
+		} else {
+			$("#legend-file").val("");
+			$("#form-error").append('<p>*{% trans "The file format is not supported" %}</p>');
+		}
+	   	
+	 };
 </script>
 <script>
 
