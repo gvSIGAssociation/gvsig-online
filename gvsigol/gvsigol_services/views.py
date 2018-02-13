@@ -647,7 +647,7 @@ def layer_add_with_group(request, layergroup_id):
                     style_name = workspace.name + '_' + newRecord.name + '_default'
                     mapservice_backend.createDefaultStyle(newRecord, style_name)
                     mapservice_backend.setLayerStyle(newRecord, style_name, True)
-                    newRecord = mapservice_backend.updateThumbnail(newRecord, 'create')
+                    newRecord2 = mapservice_backend.updateThumbnail(newRecord, 'create')
                     
                     if datastore.type == 'v_PostGIS':
                         time_resolution = 0
@@ -670,8 +670,10 @@ def layer_add_with_group(request, layergroup_id):
                             if (time_resolution_second != None and time_resolution_second > 0):
                                 time_resolution = time_resolution + (int(time_resolution_second))
                         mapservice_backend.setTimeEnabled(workspace.name, datastore.name, datastore.type, newRecord.name, time_enabled, time_field, time_endfield, time_presentation, time_resolution, time_default_value_mode, time_default_value)
-            
-                    newRecord.save()
+                        
+                    if newRecord2:
+                        newRecord2.save()
+                        newRecord = newRecord2
                     
                 core_utils.toc_add_layer(newRecord)
                 mapservice_backend.createOrUpdateGeoserverLayerGroup(newRecord.layer_group)
