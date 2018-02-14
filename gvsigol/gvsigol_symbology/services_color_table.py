@@ -247,6 +247,7 @@ def update_style(request, json_data, layer_id, style_id, has_custom_legend):
     
     sld_body = sld_builder.build_sld(layer, style)
     if mapservice.updateStyle(layer, style.name, sld_body): 
+        mapservice.setLayerStyle(layer, style.name, style.is_default)
         return True
     else:
         return False
