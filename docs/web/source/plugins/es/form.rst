@@ -141,16 +141,84 @@ Es Importante tener presente que ciertas configuraciones se personalizan según 
 
 Finalizado las configuraciones generales se van añadiendo las secciones de grupos de preguntas y dentro de ellos cada una de las preguntas.
 
+.. image:: ../_static/images/survey_grupo_secciones.png
+   :align: center
+
+
 Para cada grupo se puede definir el orden de las preguntas y éstas últimas se pueden presentar de distintos formatos, añadir condiciones entre las distintas preguntas, configuraciones generales y avanzadas de forma independiente.
+
+.. image:: ../_static/images/survey_conf_gr_preguntas.png
+   :align: center
 
 
 2.1.3 Activar encuesta
 ~~~~~~~~~~~~~~~~~~~~~~
 
- * Usuarios anónimos: No
-     
- * Resto opciones: Sí
+Una vez configuradas las preguntas de la encuesta, se debe activar la encuesta para poder ser usada. 
+
+Dependiendo de las necesidades del cliente, se podrá activar la encuesta de forma anónima o no. En este caso se describe la opción de generar una lista de participantes, es decir, que no sea anónima. 
+
+Es importante prestar atención a las especificaciones de cómo funcionará las distintas opciones a escoger, Limesurvey lo irá mostrando de forma sencilla y bastatnte clara. Por ejemplo, cuando se procede activar la encuesta muestra los siguientes mensajes:
+
+"
+.. note::
+   Debe activar una encuesta sólo cuando esté absolutamente seguro(a) de que la configuración de la misma es correcta y que no habrá más cambios. 
  
+   Una vez activada la encuesta no se le permitirá:
+
+    * Agregar o eliminar secciones de la encuesta
+    
+    * Agregar o eliminar pregunta
+    
+    * Agregar o eliminar subpregunta, o cambiar sus códigos
+
+
+   ... Por favor, tenga en cuenta que, una vez que las respuestas de esta encuesta se han recogido, si quiere añadir o eliminar grupos/preguntas o cambiar uno de los ajustes anteriores, necesitará desactivar esta encuesta; esto provocará que todos los datos que fueron ya introducidos sean movidos a una tabla de diferente para su archivo.
+   
+"   
+
+.. image:: ../_static/images/encuesta_activar_1_.png
+   :align: center
+
+.. image:: ../_static/images/encuesta_activar_2_.png
+   :align: center
+
+.. list-table:: Activar encuesta 
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Opción
+     - Acción
+   * - 1
+     - Entrada 'Encuestas': muestra todo el listado de las encuestas que existen.
+   * - 2
+     - Estado de las encuestas, indican cuales son los activas o no. Se hace clic 
+       
+       sobre la que no está activa y nos lleva a otra ventana
+   * - 3
+     - Al hacer clic sobre 'activar encuesta' nos lleva a otras opciones a seleccionar    
+   * - 4
+     - Son las distitas opciones de la encuesta en general:
+     
+       * Previsualizar la encuesta, ver como la visualizan los usuarios
+       * Propiedades de la encuesta (configuaraciones)
+       * Herramienstas
+       * Mostrar/exportar 
+       * Participantes de la encuesta
+   * - 5
+     - Seleccionar, **Respuestas Anónimas : NO** las demás opciones pueden ser 'SI' u opcionales.     
+   * - 6
+     - Salvar y activar encuestas. Como no Son anónimas las respuestas se continúa configurando
+   * - 7
+     - Cambiar a encuesta de acceso restringido (leer las condiciones que se activan)
+   * - 8
+     - Inicializar tabla de participantes
+   * - 9
+     - Al dar a 'continuar', la encuesta estará activa para poder realizarla             
+      
+
+
 
 
 2.2 Registrar encuesta en gvSIG Online

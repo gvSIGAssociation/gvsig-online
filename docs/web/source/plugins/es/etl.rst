@@ -41,7 +41,7 @@ Algunos requisitos mínimos se deben cumplir para que el proceso de transformaci
 
 
 3.1. Crear capa vacía
-~~~~~~~~~~~~~~~~~~~~~
+_____________________
 Se crea o se dispone de la capa vacía en la BD (también deberá estar publicada en el sistema) teniendo los campos en donde se volcarán los datos correspondientes a las columnas del fichero plano.
 
 .. note::
@@ -53,7 +53,7 @@ Una vez se haya publicado la capa vacía sin registros, se procede a crear la pl
 
 
 3.2. Crear plantilla de transformación
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+______________________________________
 La plantilla de transformación sirve para ajustar y relacionar los campos de la capa en BD con las columnas del fichero plano, es decir, hacer las correspondencias entre cada una de ellas.
 
 Para acceder a esta funcionalidad se debe ingresar en el panel de control:
@@ -543,7 +543,7 @@ Similar al otro formato xlxs, pero desde otra pestaña y no se podrá elegir ent
 
 
 3.3 Subir el fichero plano al sistema
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+_____________________________________
 
 El fichero plano (xlsx y/o csv) debe estar guardado dentro de un directorio del adminitrador de archivos.
 
@@ -551,7 +551,7 @@ Se debe ir al panel de control - administrador de archivos- seleccionar o crear 
 
 
 3.4 Aplicar transformación
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+__________________________
 
 Cuando se haya creado una capa vacía o disponer de cualquier otra capa, se haya definido la plantilla de transformación y subido el fichero al administrador de archivos, se procede finalmente a aplicar la transformación respectiva.
 

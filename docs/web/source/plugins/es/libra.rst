@@ -978,7 +978,7 @@ Para eliminar los solapes se hace uso de dos herramientas: 'mostrar/ocultar sola
    * - 2-'Eliminar solape 
       
        seleccionado' |herramienta15|
-     - Al activar este botón se pincha sobre algún solape que quiera borrarse y esta superficie 
+     - Al activar este botón, se pincha sobre algún solape que quiera borrarse, y esta superficie 
      
        solapada será restada (eliminada) al área del cultivo de la solicitud que se encuentra activa. 
    * - 3- Guardar cambios 
