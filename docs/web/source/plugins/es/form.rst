@@ -158,9 +158,9 @@ Una vez configuradas las preguntas de la encuesta, se debe activar la encuesta p
 
 Dependiendo de las necesidades del cliente, se podrá activar la encuesta de forma anónima o no. En este caso se describe la opción de generar una lista de participantes, es decir, que no sea anónima. 
 
-Es importante prestar atención a las especificaciones de cómo funcionará las distintas opciones a escoger, Limesurvey lo irá mostrando de forma sencilla y bastatnte clara. Por ejemplo, cuando se procede activar la encuesta muestra los siguientes mensajes:
+Es importante prestar atención a las especificaciones de cómo funcionará las distintas opciones a escoger, Limesurvey lo irá mostrando de forma sencilla y bastatnte clara. Por ejemplo, cuando se procede a activar la encuesta, muestra los siguientes mensajes:
 
-"
+
 .. note::
    Debe activar una encuesta sólo cuando esté absolutamente seguro(a) de que la configuración de la misma es correcta y que no habrá más cambios. 
  
@@ -173,9 +173,8 @@ Es importante prestar atención a las especificaciones de cómo funcionará las 
     * Agregar o eliminar subpregunta, o cambiar sus códigos
 
 
-   ... Por favor, tenga en cuenta que, una vez que las respuestas de esta encuesta se han recogido, si quiere añadir o eliminar grupos/preguntas o cambiar uno de los ajustes anteriores, necesitará desactivar esta encuesta; esto provocará que todos los datos que fueron ya introducidos sean movidos a una tabla de diferente para su archivo.
-   
-"   
+   Por favor, tenga en cuenta que, una vez que las respuestas de esta encuesta se han recogido, si quiere añadir o eliminar grupos/preguntas o cambiar uno de los ajustes anteriores, necesitará desactivar esta encuesta; esto provocará que todos los datos que fueron ya introducidos sean movidos a una tabla de diferente para su archivo.
+ 
 
 .. image:: ../_static/images/encuesta_activar_1_.png
    :align: center
@@ -209,7 +208,7 @@ Es importante prestar atención a las especificaciones de cómo funcionará las 
    * - 5
      - Seleccionar, **Respuestas Anónimas : NO** las demás opciones pueden ser 'SI' u opcionales.     
    * - 6
-     - Salvar y activar encuestas. Como no Son anónimas las respuestas se continúa configurando
+     - Salvar y activar encuestas. Como no Son anónimas las respuestas, se continúa configurando
    * - 7
      - Cambiar a encuesta de acceso restringido (leer las condiciones que se activan)
    * - 8
@@ -226,23 +225,71 @@ ______________________________________
 
 Una vez se tiene completa la definición de la encuesta en el sistema LimeSurvey, se procederá a registrarla en gvSIGOnline. 
 
-En la entreda de menú correspondiente, dentro de *Tipo de datos*, encontramos el listado de formularios dados de alta en la plataforma. Como siempre, podemos añadir, editar y borrar.
-Para insertar uno nuevo se necesitan los siguientes parámetros:
+.. image:: ../_static/images/form3.png
+   :align: center
 
-* *Nombre:* generado automáticamente para luego hacer referencia a ella
+.. list-table:: Entrada de Encuestas en menú de gvSIG Online
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
 
-* *Descripción:* Comentarios sobre la encuesta
+   * - Opción
+     - Acción
+   * - 1
+     - Desde el panel de control, en la entrada de menú **Tipo de datos**, encontramos la opción de **"formularios"** 
+     
+       donde se muestran las encuestas dadas de alta en la plataforma.
+   * - 2
+     - desde esta opción se abre una vista para rellenar los parámetros de registro y así añadir la encuesta.
+   * - 3
+     - Como siempre, podemos añadir, editar y borrar.
 
-* *Url:* Dirección web al API-rest del servicio LimeSurvey (suele ser la dirección al servicio al que se añade '/admin/remotecontrol'). P.ej: https://<url_limesurvey>/limesurvey/index.php/admin/remotecontrol 
 
-* *Nombre de usuario:* usuario para acceder al LimeSurvey
+Para insertar o registrar una nueva encuesta se necesitan los siguientes parámetros:
 
-* *Contraseña:* password asociada a la cuenta de usuario
 
-Una vez rellenos estos datos, a través del botón 'Recargar' se pueden obtener las encuestas disponibles
+.. image:: ../_static/images/form4.png
+   :align: center
+   
 
-* *Identificador de la encuesta:* elegir la encuesta entre las disponibles
- 
+.. list-table:: Registrar encuesta en gvSIG Online
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Opción
+     - Acción
+   * - 1
+     - **Nombre**, generado automáticamente por el sistema y así evitar duplicidad
+   * - 2
+     - **Título**, Nombre con el cual se registra la encuesta y luego se hace referencia.
+   * - 3
+     - **Descripción**, Comentarios o breve resumen sobre la encuesta
+   * - 4
+     - **Url**, Dirección web al API-rest del servicio LimeSurvey (suele ser la 
+     
+       dirección al servicio al que se añade '/admin/remotecontrol'). 
+       
+       P.ej: https://<url_limesurvey>/limesurvey/index.php/admin/remotecontrol 
+   * - 5
+     - **Nombre de usuario**, usuario administrador que se accede al LimeSurvey
+   * - 6
+     - **Contraseña**, password asociada a la cuenta de usuario
+   * - 7
+     - **Identificador**, Casilla donde se despliega el listado de encuestas disponibles
+   * - 8
+     - **Recargar**, para poder visualizar las encuestas del *identificador* se debe pinchar
+     
+       sobre este botón de *recargar* y automáticamente mostrará las encuestas existentes 
+       
+       relacionadas a la URL indicada. Si la recarga no es correcta, favor rectificar los
+       
+       pasos **4**, **5** y **6**.
+   * - 9
+     - seleccionar la encuesta
+   * - 10
+     - Guardar cambios.  
+       
 
 2.3 vincular la encuesta a una capa de gvsigonline
 __________________________________________________
