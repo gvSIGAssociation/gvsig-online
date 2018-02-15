@@ -379,7 +379,10 @@ class GvSigOnlineServices():
       
             
     def add_data_directory(self, group):
-        path = settings.MEDIA_ROOT + "data/" + group.name
+        aux = settings.MEDIA_ROOT
+        if aux.endswith('/'):
+            aux = aux[:-1]
+        path = aux + "/data/" + group.name
         try: 
             os.makedirs(path, mode=0777)
             
