@@ -10,6 +10,6 @@ var Filemanager = {
   },
   select: function(url) {
     window.close();
-    window.opener.filemanagerCallback(url);
+    window.opener.filemanagerCallback(url, name);
   }
 };
