@@ -240,7 +240,7 @@ GVSIGOL_USERS_CARTODB = {
 
 PUBLIC_VIEWER = True
 
-GEOSERVER_PROXY = 'https://externo.gva.es/geoserver'
+GEOSERVER_PROXY = 'https://##FRONTEND_HOST##/geoserver'
 
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
