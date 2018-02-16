@@ -2720,6 +2720,7 @@ def get_capabilities_from_url(request):
         if not version:
             version = WMS_MAX_VERSION
         try:
+            print 'Add base layer: ' + url+ ', version: ' + version
             wms = WebMapService(url, version=version)
         
             print wms.identification.type
@@ -2767,5 +2768,7 @@ def get_capabilities_from_url(request):
     }
        
     return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
+
+
 
 
