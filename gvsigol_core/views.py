@@ -690,7 +690,7 @@ def project_get_conf(request):
                     else: 
                         ls = get_default_style(l)
                         if ls is None:
-                            print l.name
+                            print 'CAPA SIN ESTILO POR DEFECTO: ' + l.name
                             layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
                             layer['legend_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
                             layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
@@ -964,7 +964,7 @@ def public_viewer_get_conf(request):
                     else: 
                         ls = get_default_style(l)
                         if ls is None:
-                            print l.name
+                            print 'CAPA SIN ESTILO POR DEFECTO: ' + l.name
                             layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
                             layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
                                 
