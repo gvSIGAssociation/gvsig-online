@@ -43,15 +43,23 @@ def create_style(request, json_data, layer_id, is_preview=False):
     datastore = layer.datastore
     workspace = datastore.workspace
     
-    if json_data.get('is_default'):
-        layer_styles = StyleLayer.objects.filter(layer=layer)
+    layer_styles = StyleLayer.objects.filter(layer=layer)
+    is_default = json_data.get('is_default')
+    if is_default:
         for ls in layer_styles:
             s = Style.objects.get(id=ls.style.id)
             s.is_default = False
             s.save()
-    
+    else:
+        has_default_style = False
+        for ls in layer_styles:
+            s = Style.objects.get(id=ls.style.id)
+            if s.is_default:
+                has_default_style = True
+        if not has_default_style:
+            is_default = True
+        
     name = json_data.get('name')
-    is_default = json_data.get('is_default')
     if is_preview:
         name = name + '__tmp'
         is_default = False
@@ -180,8 +188,10 @@ def update_style(request, json_data, layer_id, style_id):
     style = Style.objects.get(id=int(style_id))
     layer = Layer.objects.get(id=int(layer_id))
     
-    if json_data.get('is_default'):
-        layer_styles = StyleLayer.objects.filter(layer=layer)
+    layer_styles = StyleLayer.objects.filter(layer=layer)
+    style_is_default = json_data.get('is_default')
+    
+    if style_is_default:
         for ls in layer_styles:
             s = Style.objects.get(id=ls.style.id)
             s.is_default = False
@@ -189,6 +199,18 @@ def update_style(request, json_data, layer_id, style_id):
         datastore = layer.datastore
         workspace = datastore.workspace
         mapservice.setLayerStyle(layer, style.name, style.is_default)
+    else:
+        has_default_style = False
+        for ls in layer_styles:
+            s = Style.objects.get(id=ls.style.id)
+            if s != style and s.is_default:
+                has_default_style = True
+        if not has_default_style:
+            datastore = layer.datastore
+            workspace = datastore.workspace
+            style_is_default = True
+            mapservice.setLayerStyle(layer, style.name, True)
+        
     
     style.title = json_data.get('title')
     if json_data.get('minscale') != '':
@@ -199,7 +221,7 @@ def update_style(request, json_data, layer_id, style_id):
         style.maxscale = json_data.get('maxscale')
     else:
         style.maxscale = -1
-    style.is_default = json_data.get('is_default')
+    style.is_default = style_is_default
     style.save()
     
     rules = Rule.objects.filter(style=style)
