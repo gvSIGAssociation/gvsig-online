@@ -423,6 +423,11 @@ getFeatureInfo.prototype.showInfo = function(features){
 
 								if(!complex_data){
 									var aux_text = text;
+									var date_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})Z$/i;
+									if(date_format.test(text)){
+										var match = date_format.exec(text);
+										aux_text = match[3]+"/"+match[2]+"/"+match[1]+" "+match[4]+":"+match[5]+":"+match[6];
+									}
 									if(text.length > 45){
 										aux_text = text.substring(0,45) + "...";
 									}
@@ -606,6 +611,11 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 						}
 					}
 					if(!complex_data){
+						var date_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})Z$/i;
+						if(date_format.test(value)){
+							var match = date_format.exec(value);
+							value = match[3]+"/"+match[2]+"/"+match[1]+" "+match[4]+":"+match[5]+":"+match[6];
+						}
 						if(item_shown){
 							infoContent += '<li class="item">';
 							infoContent += 	'<div class="feature-info">';
