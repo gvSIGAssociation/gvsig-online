@@ -463,46 +463,47 @@ def backend_fields_list(request):
         if ds:
             layer = Layer.objects.filter(datastore=ds, name=name).first()
             
-            params = json.loads(ds.connection_params)
-            host = params['host']
-            port = params['port']
-            dbname = params['database']
-            user = params['user']
-            passwd = params['passwd']
-            schema = params.get('schema', 'public')
-            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-            layer_defs = i.get_fields_info(layer.name, schema)
-            result_resources = []
-            conf = None
-            if layer and layer.conf:
-                conf = ast.literal_eval(layer.conf)
-            for resource_def in layer_defs:
-                resource = resource_def['name']
-                if conf:
-                    founded = False
-                    for f in conf['fields']:
-                        if f['name'] == resource:
+            if layer:
+                params = json.loads(ds.connection_params)
+                host = params['host']
+                port = params['port']
+                dbname = params['database']
+                user = params['user']
+                passwd = params['passwd']
+                schema = params.get('schema', 'public')
+                i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+                layer_defs = i.get_fields_info(layer.name, schema)
+                result_resources = []
+                conf = None
+                if layer and layer.conf:
+                    conf = ast.literal_eval(layer.conf)
+                for resource_def in layer_defs:
+                    resource = resource_def['name']
+                    if conf:
+                        founded = False
+                        for f in conf['fields']:
+                            if f['name'] == resource:
+                                field = {}
+                                field['name'] = f['name']
+                                for id, language in LANGUAGES:
+                                    field['title-'+id] = f['title-'+id]
+                                result_resources.append(field)
+                                founded = True
+                        if not founded:
                             field = {}
-                            field['name'] = f['name']
+                            field['name'] = resource
                             for id, language in LANGUAGES:
-                                field['title-'+id] = f['title-'+id]
+                                field['title-'+id] = resource
                             result_resources.append(field)
-                            founded = True
-                    if not founded:
+                    else:
                         field = {}
                         field['name'] = resource
                         for id, language in LANGUAGES:
                             field['title-'+id] = resource
                         result_resources.append(field)
-                else:
-                    field = {}
-                    field['name'] = resource
-                    for id, language in LANGUAGES:
-                        field['title-'+id] = resource
-                    result_resources.append(field)
-                    
-            result_resources_sorted = sorted(result_resources) 
-            return HttpResponse(json.dumps(result_resources_sorted))
+                        
+                result_resources_sorted = sorted(result_resources) 
+                return HttpResponse(json.dumps(result_resources_sorted))
     
     return HttpResponseBadRequest()    
  
@@ -2211,6 +2212,8 @@ def get_datatable_data(request):
         recordsFiltered = 0
         
         encoded_property_name = property_name.encode('utf-8')
+    
+        
         
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
         params = json.loads(layer.datastore.connection_params)
@@ -2223,6 +2226,9 @@ def get_datatable_data(request):
             sortby_field = str(pk_defs[0])
         '''
         
+        if wfs_url == None:
+            wfs_url = layer.datastore.workspace.wfs_endpoint
+            
         try:
             if search_value == '':
                 values = {
@@ -2286,8 +2292,8 @@ def get_datatable_data(request):
             req = requests.Session()
             if 'username' in request.session and 'password' in request.session:
                 if request.session['username'] is not None and request.session['password'] is not None:
-                    req.auth = (request.session['username'], request.session['password'])
-                    #req.auth = ('admin', 'geoserver')
+                    #req.auth = (request.session['username'], request.session['password'])
+                    req.auth = ('admin', 'geoserver')
                     
             print wfs_url + "?" + params
             response = req.post(wfs_url, data=values, verify=False)
@@ -2537,6 +2543,41 @@ def describeFeatureType(request):
                 for pk_def in pk_defs:
                     if layer_def['name'] == pk_def:            
                         layer_defs.remove(layer_def)
+            
+            response = {'fields': layer_defs}
+
+    
+        except Exception as e:
+            print e.message
+            response = {'fields': []}
+            pass
+
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+    
+@csrf_exempt
+def describeFeatureTypeWithPk(request):
+    if request.method == 'POST':      
+        lyr = request.POST.get('layer')
+        workspace = request.POST.get('workspace')
+        try:
+            layer = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
+            params = json.loads(layer.datastore.connection_params)
+            host = params['host']
+            port = params['port']
+            dbname = params['database']
+            user = params['user']
+            passwd = params['passwd']
+            schema = params.get('schema', 'public')
+            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+            layer_defs = i.get_fields_info(layer.name, schema)
+            geom_defs = i.get_geometry_columns_info(layer.name, schema)
+            pk_defs = i.get_pk_columns(layer.name, schema)
+            
+            for layer_def in layer_defs:
+                for geom_def in geom_defs:
+                    if layer_def['name'] == geom_def[2]:
+                        layer_def['type'] = geom_def[5]
+                        layer_def['length'] = geom_def[4]
             
             response = {'fields': layer_defs}
 
