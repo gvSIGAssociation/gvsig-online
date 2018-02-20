@@ -74,7 +74,7 @@ layerTree.prototype.createTree = function() {
 	tree += 					self.createBaseLayerUI(gettext('None'), false);
 	for (var i=0; i<this.conf.base_layers.length; i++) {
 		var base_layer = this.conf.base_layers[i];
-		tree += 				self.createBaseLayerUI(gettext(base_layer['title']), base_layer['active']);
+		tree += 				self.createBaseLayerUI(gettext(base_layer['title']), base_layer['name'], base_layer['active']);
 	}
 	
 	tree += '				</div>';
@@ -1233,16 +1233,16 @@ layerTree.prototype.getGroupLayerFromMap = function(tocLayer) {
 	return mapLayer;
 };
 
-layerTree.prototype.createBaseLayerUI = function(name, checked) {
+layerTree.prototype.createBaseLayerUI = function(name, name_id, checked) {
 	var count = this.layerCount++;
 	var id = "gol-layer-" + count;		    
     
 	var ui = '';
 	ui += '<div style="margin-left:20px;">';
 	if (checked) {
-		ui += 	'<input type="radio" id="' + id + '" name="baselayers-group" checked>';
+		ui += 	'<input type="radio" id="' + id + '" data-origin="'+name_id+'" name="baselayers-group" checked>';
 	} else {
-		ui += 	'<input type="radio" id="' + id + '" name="baselayers-group">';
+		ui += 	'<input type="radio" id="' + id + '" data-origin="'+name_id+'" name="baselayers-group">';
 	}
 	ui += 		'<span class="text">' + name + '</span>';
 	ui += '</div>';
