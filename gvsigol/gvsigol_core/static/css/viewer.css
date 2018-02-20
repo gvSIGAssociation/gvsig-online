@@ -241,6 +241,13 @@ html, body {
 	margin-left: 0px;
 }
 
+.baselayer-error{
+	color:red;
+	margin-left:15px;
+	float: right;
+    font-size: 18px;
+}
+
 .adjust-image {
 	max-width:100%;
 	max-height:100%;
