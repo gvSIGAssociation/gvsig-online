@@ -427,17 +427,18 @@ viewer.core = {
 			    		  		});
 			    		    	if(options && options.urls && options.urls.length > 0){
 			    		    		if(!base_layer2['url'].endsWith('?')){
-			    		    			options.urls[0] = base_layer2['url'] + '?';
+			    		    			options.url = base_layer2['url'] + '?';
+			    		    			options.urls[0] = '/gvsigonline/services/get_base_layer_tile/?url='+options.url;
 			    		    		}
 			    		    	}
-			    		    	var is_baselayer = false;
-			    		    	for(var k=0; k<options.urls.length; k++){
-			    		    		if(base_layer2['url'].replace("https://", "http://")+'?' == options.urls[k].replace("https://", "http://")){
-			    		    			is_baselayer = true;
-			    		    		}
-			    		    	}
+			    		    	var is_baselayer = true;
+//			    		    	for(var k=0; k<options.urls.length; k++){
+//			    		    		if(base_layer2['url'].replace("https://", "http://")+'?' == options.urls[k].replace("https://", "http://")){
+//			    		    			is_baselayer = true;
+//			    		    		}
+//			    		    	}
 			    		    	options.crossOrigin = 'anonymous';
-			    		    	if(is_baselayer){
+//			    		    	if(is_baselayer){
 						    		var ignSource3 = new ol.source.WMTS((options));
 								    var ignLayer3 = new ol.layer.Tile({
 									 		id: "gol-layer-" + (j+1),
@@ -446,7 +447,7 @@ viewer.core = {
 									 	});
 									 	ignLayer3.baselayer = true;
 									 	self.map.addLayer(ignLayer3);
-			    		    		 }
+//			    		    		 }
 			    		    		 
 			    		    		 base_layer2['loaded'] = true;
 			    		    		 $("input[data-origin="+base_layer2['name']+"]").parent().find(".baselayer-error").remove();
