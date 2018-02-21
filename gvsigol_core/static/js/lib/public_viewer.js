@@ -159,39 +159,27 @@ viewer.core = {
     	var base_layers = this.conf.base_layers;
     	
     	var layers = this.map.getLayers();
-    	
-    	for(var j=0; j<base_layers.length; j++){
-    		var base_layer2 = base_layers[j];
-    		base_layer2['loaded'] = false;
-        }
-    	   	
+     	
     	for(var i=0; i<base_layers.length; i++){
     		var base_layer = base_layers[i];
     		if (base_layer['type'] == 'WMS') {
-    			try{
-					var wmsSource = new ol.source.TileWMS({
-						url: '/gvsigonline/services/get_base_layer_tile/',
-						crossOrigin: 'anonymous',
-						params: {'url': base_layer['url'], 'LAYERS': base_layer['layers'], 'FORMAT': base_layer['format'], 'VERSION': base_layer['version']}
-					});
-					var wmsLayer = new ol.layer.Tile({
-						id: "gol-layer-" + (i+1),
-						source: wmsSource,
-						visible: base_layer['active']
-					});
-					wmsLayer.baselayer = true;
-					this.map.addLayer(wmsLayer);
-					base_layer['id'] = this.layerCount; 
-					this._nextLayerId();
-				}catch(err){
-	    			var error_str = 'Error loading WMS "' + base_layer2['url']+'": ' + err;
-	    			console.log(error_str);
-	    			$("input[data-origin="+base_layer2['name']+"]").attr("disabled", "disabled").parent().append("<span class='baselayer-error' title='"+error_str+"'><i class='fa fa-exclamation-circle'></i></span>");
-	    		}
+				var wmsSource = new ol.source.TileWMS({
+					url: base_layer['url'],
+					params: {'LAYERS': base_layer['layers'], 'FORMAT': base_layer['format'], 'VERSION': base_layer['version']}
+				});
+				var wmsLayer = new ol.layer.Tile({
+					id: "gol-layer-" + (i+1),
+					source: wmsSource,
+					visible: base_layer['active']
+				});
+				wmsLayer.baselayer = true;
+				this.map.addLayer(wmsLayer);
+				base_layer['id'] = this.layerCount; 
+				this._nextLayerId();
 			} 
     		if (base_layer['type'] == 'WMTS') {		
 	    		var parser = new ol.format.WMTSCapabilities();
-	    		var capabilities_url = '/gvsigonline/services/get_base_layer_tile/?request=GetCapabilities' + '&version=' + base_layer['version']  + '&service=' + base_layer['type'] + '&url=' + base_layer['url'];
+	    		var capabilities_url = base_layer['url'] + '?request=GetCapabilities' + '&version=' + base_layer['version']  + '&service=' + base_layer['type'];
 	    	      fetch(capabilities_url).then(function(response) {
 	    	    	  return response.text();
 	    	      }).then(function(text) {
@@ -215,7 +203,6 @@ viewer.core = {
 	    		    				 is_baselayer = true;
 	    		    			 }
 	    		    		 }
-	    		    		 options.crossOrigin = 'anonymous';
 	    		    		 if(is_baselayer){
 				    	        var ignSource3 = new ol.source.WMTS((options));
 						        var ignLayer3 = new ol.layer.Tile({
@@ -226,19 +213,8 @@ viewer.core = {
 							 	ignLayer3.baselayer = true;
 							 	self.map.addLayer(ignLayer3);
 	    		    		 }
-	    		    		 
-	    		    		base_layer2['loaded'] = true;
-			    		    $("input[data-origin="+base_layer2['name']+"]").parent().find(".baselayer-error").remove();
-			    		    $("input[data-origin="+base_layer2['name']+"]").attr("disabled", false);
 	    		    		}catch(err){
-	    		    			if(!base_layer2['loaded']){
-			    		    			var error_str = "Error loading WMTS '" + base_layer2['url']+"': " + err;
-			    		    			console.log(error_str);
-			    		    			var errors = $("input[data-origin="+base_layer2['name']+"]").parent().find(".baselayer-error");
-			    		    			if(errors.length == 0){
-			    		    				$("input[data-origin="+base_layer2['name']+"]").attr("disabled", "disabled").parent().append('<span class="baselayer-error" title="'+error_str+'"><i class="fa fa-exclamation-circle"></i></span><div style="clear:both"></div>');
-			    		    			}
-		    		    			}
+	    		    			//console.log("error loading wmts '" + base_layer2['url']+"':" + err)
 	    		    		}
 	    		    	}
 	    	        }
@@ -301,6 +277,8 @@ viewer.core = {
 	    	
     	}
 	},
+	
+
 	
 	_loadOverlays: function() {
 		var self = this;
