@@ -23,7 +23,6 @@
 
 import os
 import django.conf.locale
-from django_auth_ldap.config import LDAPSearch
 from django.utils.translation import ugettext_lazy as _
 from django.core.files.storage import FileSystemStorage
 
@@ -32,11 +31,6 @@ if '__file__' in globals():
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 else:
     BASE_DIR = os.path.join(os.path.abspath(os.getcwd()), "gvsigol")
-
-# Eliminando warnings molestos  
-import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
