@@ -22,7 +22,6 @@
 '''
 
 import os
-import ldap
 import django.conf.locale
 from django_auth_ldap.config import LDAPSearch
 from django.utils.translation import ugettext_lazy as _
@@ -187,9 +186,6 @@ AUTHENTICATION_BACKENDS = (
     #'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
-AUTH_LDAP_SERVER_URI = "ldap://devel.gvsigonline.com:389"
-AUTH_LDAP_ROOT_DN = "dc=test,dc=gvsigonline,dc=com"
-AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=test,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 
 
 # Internationalization
