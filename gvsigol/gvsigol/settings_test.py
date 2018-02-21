@@ -113,18 +113,25 @@ WSGI_APPLICATION = 'gvsigol.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+#        #'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#        'NAME': 'gvsigonline_v2',
+#        'USER': 'postgres',
+#        'PASSWORD': 'postgres',
+#        'HOST': 'localhost',
+#        'PORT': '5432',
+#    }
+#}
+POSTGIS_VERSION = (2, 1, 2)
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        #'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'gvsigonline_v2',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'mydatabase',
     }
 }
-POSTGIS_VERSION = (2, 1, 2)
 
 AUTH_WITH_REMOTE_USER = False
 
