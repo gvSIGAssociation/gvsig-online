@@ -2327,20 +2327,6 @@ def get_datatable_data(request):
         
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
-
-
-
-def get_base_layer_tile(request): 
-    url = request.GET.get('url')+'?'
-    for key in request.GET:
-        if key != 'url':
-            value = request.GET.get(key)
-            url= url + key+ '=' + value + "&"
-            
-    #url = 'https://www.ign.es/wmts/ign-base?layer=IGNBaseTodo&style=default&tilematrixset=GoogleMapsCompatible&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fjpeg&TileMatrix=6&TileCol=30&TileRow=25'   
-    response = requests.get(url)
-    return HttpResponse(response)
-    
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def add_layer_lock(request):
