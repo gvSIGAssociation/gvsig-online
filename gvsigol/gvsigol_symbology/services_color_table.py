@@ -65,11 +65,7 @@ def create_style(request, has_custom_legend, json_data, layer_id, is_preview=Fal
     name = json_data.get('name')
     if is_preview:
         name = name + '__tmp'
-        is_default = False
-        style_temps = Style.objects.filter(name=name)
-        for style_temp in style_temps:
-            style_temp.delete()
-        
+        is_default = False        
         
     style = Style(
         name = name,
@@ -148,14 +144,18 @@ def create_style(request, has_custom_legend, json_data, layer_id, is_preview=Fal
          
     sld_body = sld_builder.build_sld(layer, style)
     if is_preview:
-        mapservice.deleteStyle(style.name)
-    if mapservice.createStyle(style.name, sld_body): 
-        if not is_preview:
-            mapservice.setLayerStyle(layer, style.name, style.is_default)
-        return True
-        
+        if mapservice.createOverwrittenStyle(style.name, sld_body, True): 
+            return True
+        else:
+            return False
     else:
-        return False
+        if mapservice.createStyle(style.name, sld_body): 
+            if not is_preview:
+                mapservice.setLayerStyle(layer, style.name, style.is_default)
+            return True
+            
+        else:
+            return False
     
 def update_style(request, json_data, layer_id, style_id, has_custom_legend):   
     style = Style.objects.get(id=int(style_id))

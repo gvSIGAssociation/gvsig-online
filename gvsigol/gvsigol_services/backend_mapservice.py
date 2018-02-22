@@ -408,17 +408,20 @@ class Geoserver():
         
         except Exception as e:
             return False
-        
-    def createStyle(self, name, data):
+    
+    def createOverwrittenStyle(self, name, data, overwrite):
         """
         Create new style
         """
         try:
-            self.getGsconfig().create_style(name, data.encode('utf-8'), overwrite=False, workspace=None, style_format="sld10", raw=False)
+            self.getGsconfig().create_style(name, data.encode('utf-8'), overwrite=overwrite, workspace=None, style_format="sld10", raw=False)
             return True
         
         except Exception as e:
             return False
+    
+    def createStyle(self, name, data):
+        return self.createOverwrittenStyle(name, data, False)
         
     def addStyle(self, layer, name):
         """
