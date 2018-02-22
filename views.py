@@ -34,12 +34,14 @@ from django.contrib.auth.models import User
 from gvsigol_auth.utils import superuser_required, is_superuser, staff_required
 import utils as core_utils
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
+from django.views.decorators.cache import cache_control
 from gvsigol import settings
 import gvsigol_services.utils as services_utils
 from operator import itemgetter
 import gvsigol
 import urllib
 import random
+import datetime
 import string
 import json
 import ast
@@ -498,6 +500,8 @@ def project_delete(request, pid):
         return HttpResponse(json.dumps(response, indent=4), content_type='project/json')
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
+#Expira la caché cada día
+@cache_control(max_age=86400)
 def project_load(request, project_name):
     if core_utils.is_valid_project(request.user, project_name):
         project = Project.objects.get(name__exact=project_name)
@@ -506,18 +510,31 @@ def project_load(request, project_name):
         if "no_project.png" in project.image.url:
             has_image = False
             
-        return render_to_response('viewer.html', {'has_image': has_image, 'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id, 'extra_params': json.dumps(request.GET)}, context_instance=RequestContext(request))
+        response = render_to_response('viewer.html', {'has_image': has_image, 'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id, 'extra_params': json.dumps(request.GET)}, context_instance=RequestContext(request))
+        #Expira la caché cada día
+        tomorrow = datetime.datetime.now() + datetime.timedelta(days = 1)
+        tomorrow = datetime.datetime.replace(tomorrow, hour=0, minute=0, second=0)
+        expires = datetime.datetime.strftime(tomorrow, "%a, %d-%b-%Y %H:%M:%S GMT")     
+        response.set_cookie('key', expires = expires)
+        return response
     
     else:
         return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
 
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
-@xframe_options_exempt    
+@xframe_options_exempt
+@cache_control(max_age=86400)
 def portable_project_load(request, project_name):
     if core_utils.is_valid_project(request.user, project_name):
         project = Project.objects.get(name__exact=project_name)
-        return render_to_response('portable_viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id, 'extra_params': json.dumps(request.GET)}, context_instance=RequestContext(request))
+        response = render_to_response('portable_viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id, 'extra_params': json.dumps(request.GET)}, context_instance=RequestContext(request))
+        #Expira la caché cada día
+        tomorrow = datetime.datetime.now() + datetime.timedelta(days = 1)
+        tomorrow = datetime.datetime.replace(tomorrow, hour=0, minute=0, second=0)
+        expires = datetime.datetime.strftime(tomorrow, "%a, %d-%b-%Y %H:%M:%S GMT")     
+        response.set_cookie('key', expires = expires)
+        return response
     else:
         return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
 
@@ -853,11 +870,18 @@ def select_public_project(request):
             projects.append(project)
             
         return render_to_response('select_public_project.html', {'projects': projects}, RequestContext(request))
-    
+
+@cache_control(max_age=86400)  
 def public_project_load(request, project_name):
     if core_utils.is_valid_public_project(project_name):
         project = Project.objects.get(name__exact=project_name)
-        return render_to_response('public_viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id}, context_instance=RequestContext(request))
+        response = render_to_response('public_viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id}, context_instance=RequestContext(request))
+        #Expira la caché cada día
+        tomorrow = datetime.datetime.now() + datetime.timedelta(days = 1)
+        tomorrow = datetime.datetime.replace(tomorrow, hour=0, minute=0, second=0)
+        expires = datetime.datetime.strftime(tomorrow, "%a, %d-%b-%Y %H:%M:%S GMT")     
+        response.set_cookie('key', expires = expires)
+        return response
     else:
         return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
             
