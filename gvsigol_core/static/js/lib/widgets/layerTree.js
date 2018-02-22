@@ -724,6 +724,7 @@ layerTree.prototype.assignStyleToLayer = function(layer, style) {
 			layer.legend = layer.legend_graphic;
 		}
 		layer.legend = layer.legend + '&STYLE=' + style;
+		layer.legend_no_auth = layer.legend;
 	}
 	
 	viewer.core.legend.reloadLegend();
