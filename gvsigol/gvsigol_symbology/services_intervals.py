@@ -65,7 +65,9 @@ def create_style(request, json_data, layer_id, is_preview=False):
     if is_preview:
         name = name + '__tmp'
         is_default = False
-        mapservice.deleteStyle(name)
+        style_temps = Style.objects.filter(name=name)
+        for style_temp in style_temps:
+            style_temp.delete()
         
     style = Style(
         name = name,
