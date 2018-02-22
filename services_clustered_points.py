@@ -17,6 +17,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from geoserver import style
 
 '''
 @author: Javi Rodrigo <jrodrigo@scolab.es>
@@ -65,7 +66,9 @@ def create_style(request, json_data, layer_id, is_preview=False):
     if is_preview:
         name = name + '__tmp'
         is_default = False
-        mapservice.deleteStyle(name)
+        style_temps = Style.objects.filter(name=name)
+        for style_temp in style_temps:
+            style_temp.delete()
         
     style = Style(
         name = name,
