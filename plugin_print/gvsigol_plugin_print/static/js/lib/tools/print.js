@@ -208,6 +208,12 @@ print.prototype.createPrintJob = function(template) {
 		  				"TRANSPARENT": "true"
 		  			}
 		  	    };
+				if (mapLayers[i].getSource().getParams()['STYLES']) {
+					layer['customParams']['STYLES'] = mapLayers[i].getSource().getParams()['STYLES'];
+				}
+				if (mapLayers[i].getSource().getParams()['TIME']) {
+					layer['customParams']['TIME'] = mapLayers[i].getSource().getParams()['TIME'];
+				}
 				if (mapLayers[i].isLayerGroup) {
 					layer['layers'] = [mapLayers[i].layer_name];
 				} else {
@@ -345,10 +351,8 @@ print.prototype.createPrintJob = function(template) {
 };
 
 print.prototype.getCurrentScale = function (dpi) {
-    var view = this.map.getView();
-    var resolution = view.getResolution();
+    var resolution = this.map.getView().getResolution();
     var units = this.map.getView().getProjection().getUnits();
-    //var dpi = 25.4 / 0.28;
     var mpu = ol.proj.METERS_PER_UNIT[units];
     var scale = resolution * mpu * 39.37 * dpi;
     return Math.round(scale);
