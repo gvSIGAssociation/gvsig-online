@@ -209,10 +209,10 @@ print.prototype.createPrintJob = function(template) {
 		  			}
 		  	    };
 				if (mapLayers[i].getSource().getParams()['STYLES']) {
-					layer['customParams']['STYLES'] = mapLayers[i].getSource().getParams()['STYLES'];
+					layer['mergeableParams']['STYLES'] = mapLayers[i].getSource().getParams()['STYLES'];
 				}
 				if (mapLayers[i].getSource().getParams()['TIME']) {
-					layer['customParams']['TIME'] = mapLayers[i].getSource().getParams()['TIME'];
+					layer['mergeableParams']['TIME'] = mapLayers[i].getSource().getParams()['TIME'];
 				}
 				if (mapLayers[i].isLayerGroup) {
 					layer['layers'] = [mapLayers[i].layer_name];
