@@ -45,7 +45,9 @@ def create_style(request, has_custom_legend, json_data, layer_id, is_preview=Fal
     workspace = datastore.workspace
     
     layer_styles = StyleLayer.objects.filter(layer=layer)
-    is_default = json_data.get('is_default')
+    is_default = False
+    if not is_preview:
+        is_default = json_data.get('is_default')
     if is_default:
         for ls in layer_styles:
             s = Style.objects.get(id=ls.style.id)
@@ -141,6 +143,8 @@ def create_style(request, has_custom_legend, json_data, layer_id, is_preview=Fal
         order = order + 1
          
     sld_body = sld_builder.build_sld(layer, style)
+    if is_preview:
+        mapservice.deleteStyle(style.name)
     if mapservice.createStyle(style.name, sld_body): 
         if not is_preview:
             mapservice.setLayerStyle(layer, style.name, style.is_default)
