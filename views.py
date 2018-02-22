@@ -2765,13 +2765,14 @@ def get_capabilities_from_url(request):
             print 'Add base layer: ' + url+ ', version: ' + version
             wms = WebMapService(url, version=version)
         
-            print wms.identification.type
+            print 'Add base layer type ' + wms.identification.type
             title = wms.identification.title
             matrixsets = []
             layers = list(wms.contents)
             formats = wms.getOperationByName('GetMap').formatOptions
             
         except Exception as e:
+            print 'Add base layer ERROR: ' + str(e.message)
             data = {'response': '500',
              'message':  str(e.message)}
             
