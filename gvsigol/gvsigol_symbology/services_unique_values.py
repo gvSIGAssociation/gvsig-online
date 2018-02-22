@@ -44,6 +44,7 @@ def create_style(request, json_data, layer_id, is_preview=False):
     workspace = datastore.workspace
     
     layer_styles = StyleLayer.objects.filter(layer=layer)
+        
     is_default = False
     if not is_preview:
         is_default = json_data.get('is_default')
@@ -65,6 +66,7 @@ def create_style(request, json_data, layer_id, is_preview=False):
     if is_preview:
         name = name + '__tmp'
         is_default = False
+        mapservice.deleteStyle(name)
         
     style = Style(
         name = name,
