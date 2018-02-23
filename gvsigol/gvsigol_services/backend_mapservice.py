@@ -308,7 +308,7 @@ class Geoserver():
             gs_layer = catalog.get_layer(layer_name)
             #styles = gs_layer._get_alternate_styles()
             #styles.append(style)
-            self.addStyle(layer_name, style)
+            self.addStyle(layer, layer_name, style)
             if is_default:
                 gs_layer.default_style = style
             catalog.save(gs_layer)
@@ -423,12 +423,23 @@ class Geoserver():
     def createStyle(self, name, data):
         return self.createOverwrittenStyle(name, data, False)
         
-    def addStyle(self, layer, name):
+    def addStyle(self, layer, layer_name, name):
         """
         Add new style to layer
         """
         try:
-            self.rest_catalog.add_style(layer, name, user=self.user, password=self.password)
+            self.rest_catalog.add_style(layer_name, name, user=self.user, password=self.password)
+            if layer is not None:
+                style_list = []
+                default_style = ''
+                style_layers = StyleLayer.objects.filter(layer=layer)
+                for style_layer in style_layers:
+                    if not style_layer.style.name.endswith('_tmp'):
+                        style_list.append(style_layer.style.name)
+                    if style_layer.style.is_default:
+                        default_style = style_layer.style.name
+                                
+                self.rest_catalog.update_layer_styles_configuration(layer, name, default_style, style_list, user=self.user, password=self.password)
             return True
         
         except Exception as e:
@@ -442,6 +453,16 @@ class Geoserver():
         try:
             self.rest_catalog.update_style(style_name, sld_body, user=self.user, password=self.password)
             if layer is not None:
+                style_list = []
+                default_style = ''
+                style_layers = StyleLayer.objects.filter(layer=layer)
+                for style_layer in style_layers:
+                    if not style_layer.style.name.endswith('_tmp'):
+                        style_list.append(style_layer.style.name)
+                    if style_layer.style.is_default:
+                        default_style = style_layer.style.name
+                                
+                self.rest_catalog.update_layer_styles_configuration(layer, style_name, default_style, style_list, user=self.user, password=self.password)
                 self.updateThumbnail(layer, 'update')
             return True
         

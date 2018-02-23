@@ -730,6 +730,56 @@ class Geoserver():
             return True
         raise UploadError(r.status_code, r.content)
     
+    
+    def get_layer_styles_configuration(self, layer, user=None, password=None):
+        url = self.gwc_url + '/layers/'+layer.datastore.workspace.name +':'+layer.name+'.xml'
+        
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+        r = self.session.get(url, json={}, auth=auth)
+        if r.status_code==200:
+            return r._content
+        raise FailedRequestError(r.status_code, r.content)
+    
+    
+    def update_layer_styles_configuration(self, layer, style_name, default_style, styles_list, user=None, password=None):
+        xml = self.get_layer_styles_configuration(layer, user, password)
+        
+        
+        url = self.gwc_url + '/layers/'+layer.datastore.workspace.name +':'+layer.name+'.xml'
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+            #auth = ('admin', 'geoserver')
+        
+        headers = {'content-type': 'text/xml'}
+        
+        start_index = xml.find('<stringParameterFilter>')
+        end_index = xml.find('</stringParameterFilter>')
+        
+        start_xml = xml[:start_index+'<stringParameterFilter>'.__len__()]
+        end_xml = xml[end_index:]
+        
+        style_xml = ''
+        style_xml += '      <key>STYLES</key>'
+        style_xml += '      <defaultValue>'+default_style+'</defaultValue>'
+        style_xml += '      <normalize/>'
+        style_xml += '      <values>'
+        for style_list in styles_list: 
+            style_xml += '        <string>'+style_list+'</string>'
+        style_xml += '      </values>'
+        
+        aux_xml = start_xml + style_xml + end_xml
+        
+        r = self.session.post(url, data=aux_xml, headers=headers, auth=auth)
+        if r.status_code==200:
+            return True
+        raise UploadError(r.status_code, r.content)
+        
+    
     def update_style(self, style_name, sld_body, user=None, password=None):
         url = self.service_url + "/styles/" + style_name + ".sld"
         if user and password:
