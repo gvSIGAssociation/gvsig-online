@@ -210,7 +210,7 @@ print.prototype.createPrintJob = function(template) {
 					"mergeableParams": {},
 		  	    };
 				if (mapLayers[i].getSource().getParams()['STYLES']) {
-					layer['styles'] = mapLayers[i].getSource().getParams()['STYLES'];
+					layer['styles'] = [mapLayers[i].getSource().getParams()['STYLES']];
 				}
 				if (mapLayers[i].getSource().getParams()['TIME']) {
 					layer['customParams']['TIME'] = mapLayers[i].getSource().getParams()['TIME'];
