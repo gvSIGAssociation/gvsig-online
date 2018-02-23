@@ -206,10 +206,11 @@ print.prototype.createPrintJob = function(template) {
 		  			"imageFormat": "image/png",
 		  			"customParams": {
 		  				"TRANSPARENT": "true"
-		  			}
+		  			},
+					"mergeableParams": {}
 		  	    };
 				if (mapLayers[i].getSource().getParams()['STYLES']) {
-					layer['customParams']['STYLES'] = mapLayers[i].getSource().getParams()['STYLES'];
+					layer['mergeableParams']['STYLES'] = mapLayers[i].getSource().getParams()['STYLES'];
 				}
 				if (mapLayers[i].getSource().getParams()['TIME']) {
 					layer['customParams']['TIME'] = mapLayers[i].getSource().getParams()['TIME'];
