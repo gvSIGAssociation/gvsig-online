@@ -424,6 +424,23 @@ def backend_resource_list_available(request):
             return HttpResponse(json.dumps(resources_sorted))
     return HttpResponseBadRequest()
 
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def backend_resource_list_configurable(request):
+    """
+    Lists the resources existing on a data store, retrieving the information
+    directly from the backend (which may differ from resurces available on
+    Django DB). Useful to register new resources on Django DB. 
+    """
+    if 'id_datastore' in request.GET:
+        id_ds = request.GET['id_datastore']
+        ds = Datastore.objects.get(id=id_ds)
+        if ds:
+            resources = mapservice_backend.getResources(ds.workspace, ds, 'configurable')
+            resources_sorted = sorted(resources) 
+            return HttpResponse(json.dumps(resources_sorted))
+    return HttpResponseBadRequest()
+
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
