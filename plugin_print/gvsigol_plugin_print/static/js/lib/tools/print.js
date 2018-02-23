@@ -207,10 +207,10 @@ print.prototype.createPrintJob = function(template) {
 		  			"customParams": {
 		  				"TRANSPARENT": "true"
 		  			},
-					"mergeableParams": {}
+					"mergeableParams": {},
 		  	    };
 				if (mapLayers[i].getSource().getParams()['STYLES']) {
-					layer['styles'] = mapLayers[i].getSource().getParams()['STYLES'];
+					layer['style'] = mapLayers[i].getSource().getParams()['STYLES'];
 				}
 				if (mapLayers[i].getSource().getParams()['TIME']) {
 					layer['customParams']['TIME'] = mapLayers[i].getSource().getParams()['TIME'];
