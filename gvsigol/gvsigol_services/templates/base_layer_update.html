@@ -58,7 +58,10 @@
 					</div>
 					
 					<div class="row layers-control wms-control wmts-control">
-						<div class="col-md-12 form-group">
+						<div class="col-md-9 form-group">
+							<div id="connect-alert" class="alert-box-message"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "Alert: this url is not in the same domain. Several browsers could not load this base layer due to cross-domain policy." %}</div>					
+						</div>
+						<div class="col-md-3 form-group">
 							<div id="connect-button" class="btn btn-default btn-sm pull-right"><i class="fa fa-plug" aria-hidden="true"></i> {% trans "Connect" %}</div>					
 						</div>
 					</div>
@@ -149,11 +152,28 @@ $().ready(function(){
 		updateFormfields();
 	})
 	
+	function check_url(){
+		url = $("#id_url").val();
+		var hostname = $('<a>').prop('href', window.location.href).prop('hostname');
+		if(!url.includes(hostname+"/")){
+			$(".alert-box-message").css("display", "block");
+		}else{
+			$(".alert-box-message").css("display", "none");
+		}
+	}
+	
+	check_url();
 	updateFormfields();
 	
 	$("#connect-button").click(function() {
 		//getLayersFromCapabilities(this.value);
 		url = $("#id_url").val();
+		var hostname = $('<a>').prop('href', window.location.href).prop('hostname');
+		if(!url.includes(hostname+"/")){
+			$(".alert-box-message").css("display", "block");
+		}else{
+			$(".alert-box-message").css("display", "none");
+		}
 		type = $("#id_type option:selected").val();
 		version = "";
 		
