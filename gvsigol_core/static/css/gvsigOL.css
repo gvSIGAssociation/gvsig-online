@@ -5032,3 +5032,13 @@ input.temporary-check[type=checkbox]{
 	padding: 0px 15px 10px 15px;
 	background-color: #eee;
 }
+
+.alert-box-message{
+	display:none;
+    border: 1px solid rgb(0,0,255);
+    background-color: rgba(0,0,255,0.1);
+    color: rgb(0,0,255);
+    padding: 2px 20px;
+}
+
+
