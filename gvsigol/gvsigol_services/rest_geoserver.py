@@ -733,6 +733,7 @@ class Geoserver():
     
     def get_layer_styles_configuration(self, layer, user=None, password=None):
         url = self.gwc_url + '/layers/'+layer.datastore.workspace.name +':'+layer.name+'.xml'
+        print '########################### get_layer_styles_configuration: update_layer_styles_configuration' + url
         
         if user and password:
             auth = (user, password)
@@ -749,6 +750,7 @@ class Geoserver():
         
         
         url = self.gwc_url + '/layers/'+layer.datastore.workspace.name +':'+layer.name+'.xml'
+        print '########################### update_layer_styles_configuration: ' + url
         if user and password:
             auth = (user, password)
         else:
