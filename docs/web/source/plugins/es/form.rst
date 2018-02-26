@@ -327,8 +327,8 @@ Al seleccionarlo, habrá que indicar la encuesta registrada en el paso anterior 
        
        de publicar la capa, y de esta forma la encuesta estará vinculada a una capa del Online.
 
-2.3.2 Vincular encuesta a un shapefile (previo a subirlo) o una capa que ya está en almacenada en la BD
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2.3.2 Vincular encuesta a un shapefile (previo a subirlo) o una capa que ya está almacenada en la BD
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
    Si se quiere vincular una encuesta a una capa que no se crea vacía en el sistema de gvsig Online, entonces se procede de manera distinta antes de que la capa sea publicada en el sistema, es decir, se puede configurar el shapefile antes de exportarlo a la BD o directamente editar la tabla una vez exportada al almacén de BD.
    
@@ -347,7 +347,7 @@ Al seleccionarlo, habrá que indicar la encuesta registrada en el paso anterior 
 2.3.3 Comenzar a responder la encuesta
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Cuando la capa se publique, se podrán insertar features, modificar/editar y borrar como cualquier otar capa vectorial, solo con la diferencia que el campo definido como el tipo 'form' será un botón que nos abrirá una pestaña en el navegador con una nueva instancia de la encuesta y la asociará a esa feature de la capa.
+Cuando la capa se publique, se podrán insertar features, modificar/editar y borrar como cualquier otra capa vectorial, solo con la diferencia que el campo definido como el tipo 'form' será un botón que nos abrirá una pestaña en el navegador con una nueva instancia de la encuesta y la asociará a esa feature de la capa.
 
 
 .. note::
