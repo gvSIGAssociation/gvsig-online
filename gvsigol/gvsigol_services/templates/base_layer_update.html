@@ -155,8 +155,10 @@ $().ready(function(){
 	function check_url(){
 		url = $("#id_url").val();
 		var hostname = $('<a>').prop('href', window.location.href).prop('hostname');
-		if(!url.startsWith(hostname)){
+		if(!url.includes(hostname+"/")){
 			$(".alert-box-message").css("display", "block");
+		}else{
+			$(".alert-box-message").css("display", "none");
 		}
 	}
 	
@@ -167,8 +169,10 @@ $().ready(function(){
 		//getLayersFromCapabilities(this.value);
 		url = $("#id_url").val();
 		var hostname = $('<a>').prop('href', window.location.href).prop('hostname');
-		if(!url.startsWith(hostname)){
+		if(!url.includes(hostname+"/")){
 			$(".alert-box-message").css("display", "block");
+		}else{
+			$(".alert-box-message").css("display", "none");
 		}
 		type = $("#id_type option:selected").val();
 		version = "";
