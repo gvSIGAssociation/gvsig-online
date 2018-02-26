@@ -288,23 +288,113 @@ Para insertar o registrar una nueva encuesta se necesitan los siguientes paráme
    * - 9
      - seleccionar la encuesta
    * - 10
-     - Guardar cambios.  
+     - Guardar cambios.  muy
        
 
 2.3 vincular la encuesta a una capa de gvsigonline
 __________________________________________________
 
-Al crear una capa vacía, aparecerá un nuevo tipo de campo (junto con el de enteros, texto, booleanos, enumeraciones, ...) que será el de formularios (Form)
 
-Al seleccionarlo, habrá que indicar el formulario registrado en el paso anterior al que hacemos referencia y.... ¡listo!
-Cuando la capa se publique, se podrán insertar features, modificar y borrar tal y como se ha hecho hasta ahora, con la diferencia que uno de los campos será un botón que nos abrirá una pestaña en el navegador con una nueva instancia de la encuesta y la asociará a esa feature de la capa.
+2.3.1 Vincular encuesta a una capa creada desde el sistema
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Al crear una capa vacía, aparecerá un nuevo tipo de campo (junto con el de enteros, texto, booleanos, enumeraciones, ...) que será el de formularios/encuestas (Form)
+
+Al seleccionarlo, habrá que indicar la encuesta registrada en el paso anterior al que hacemos referencia.
+
+.. image:: ../_static/images/form5.png
+   :align: center
+
+.. list-table:: Añadir campo de encuesta/formulario a una capa vacía
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Opción
+     - Acción
+   * - 1
+     - Cuando se está creando una capa vacía, al 'añadir campo', se debe seleccionar el tipo de dato 'form'
+   * - 2
+     - Al seleccionar tipo de dato 'form', se activa otra casilla desplegable para que el usuario seleccione
+     
+       una de las encuestas que haya disponibles, en este caso, se muestra el 'título' de la encuesta 
+       
+       registrada en el gvSIG Online, por último, se guardan cambios.
+   * - 3
+     - Guardado el nuevo campo 'form', en el listado de todos los campos, éste se muestra con el nombre:
+     
+       **form_5**, que es el nombre que creó el sistema por defecto y no el título. Por último se termina
+       
+       de publicar la capa, y de esta forma la encuesta estará vinculada a una capa del Online.
+
+2.3.2 Vincular encuesta a un shapefile (previo a subirlo) o una capa que ya está en almacenada en la BD
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Si se quiere vincular una encuesta a una capa que no se crea vacía en el sistema de gvsig Online, entonces se procede de manera distinta antes de que la capa sea publicada en el sistema, es decir, se puede configurar el shapefile antes de exportarlo a la BD o directamente editar la tabla una vez exportada al almacén de BD.
+   
+     * una vez registrada la encuesta en el sistema, desde el Shapefile se puede añadir un campo con tipo de dato: 'chararter varying', y, el nombre sería exactamente igual al nombre por defecto que se genera a la encuesta, Ejemplo: 'form_6'. **Por último, se sube el shapefile al 'administrador de archivos', se exporta a la BD y se publica en el sistema.**
+   
+     * una vez registrada la encuesta en el sistema y exportado el shp a la BD, desde ahí se edita la tabla (directamente en el almacén de BD), se añade el campo: 'chararter varying' y el nombre por defecto de la encuesta. **Por último se publica la capa en el sistema.**
+   
+   En ambos casos, cuando se publica la capa, el sistema reconocerá el campo para hacer referencia a la encuesta.
+
+.. note::
+   Para poder editar una tabla desde el almacén de BD es necesario tener privilegios sobre la BD, que debe ser solicitado al administrador del sistema. 
+   
+   Lo mas sencillo y para evitar tocar la BD, es preparar el Shapefile antes de ser exportado a la BD. 
+
+
+2.3.3 Comenzar a responder la encuesta
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Cuando la capa se publique, se podrán insertar features, modificar/editar y borrar como cualquier otar capa vectorial, solo con la diferencia que el campo definido como el tipo 'form' será un botón que nos abrirá una pestaña en el navegador con una nueva instancia de la encuesta y la asociará a esa feature de la capa.
+
+
+.. note::
+   Para poder activar la encuesta y comenzar a responderla, es necesario poner en edición la capa, seleccionar el feature que se asocia a la encuesta y pinchar sobre el campo tipo 'form' que se muestra en el panel de contenido. Ver los pasos a continuación:
+
+.. image:: ../_static/images/form6.png
+   :align: center
+
+.. list-table:: Añadir campo de encuesta/formulario a una capa vacía
+   :widths: 2 10 
+   :header-rows: 1
+   :align: left
+
+   * - Opción
+     - Acción
+   * - 1
+     - Desde el proyecto donde está publicada la capa con la encuesta asociada, se activa la capa, se abre las
+     
+       opciones y se activa **'Editar capa'**, esto abrirá un recuadro con las herramientas de edicion y las
+       
+       features cambiaran a un sombreado de color azul.
+   * - 2
+     - Tenindo activa la herramienta de edición **'Editar Elemento'**, se pincha sobre la feature de interés y
+     
+       automáticamente ésta se seleccionará de color amarillo y se abrirá a la izquierda el panel de detalles 
+       
+       con los campos a editar del elemento
+   * - 3 
+     - Se hace clic sobre el recuadro **'show form'** (*Ver formulario*), que es el campo *tipo form* que 
+     
+       enlaza a la encuesta. Se abrirá automáticamente otra pestaña en el navegador donde se muestra la
+       
+       encuesta para ser respondida. Se podra finalizar o guardar y continuar con las respuestas posteriormente
+   * - 4
+     - Al terminar o pausar la encuesta para ser completada luego, se volverá de nuevo al proyecto y se hace 
+     
+       **clic en guardar los cambios**, de esta manera las respuestas asociadas al elemento del mapa serán 
+       
+       registradas correctamente.
+   * - 5
+     - Al terminar con las encuestas relacionadas a la capa, se finaliza, **terminando la edición de la capa**      
 
 
 3. Pausar o dar de baja una encuesta desde LimeSurvey
 -----------------------------------------------------
 
-* Si se para la encuesta, SIEMPRE hay que elegir la opción 'desactivar' si se va a querer gastar posteriormente (si no, aunque se active, no tendrá vigencia y no se podrá recuperar las respeustas).
+* Si se para la encuesta, SIEMPRE hay que elegir la opción 'desactivar' si se va a querer gastar posteriormente (si no, aunque se active, no tendrá vigencia y no se podrá recuperar las respuestas).
 
 * Cuando se activa una encuesta:
 
