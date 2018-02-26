@@ -20,9 +20,7 @@ _____________________________________
 
 * SIGPAC: Sistema de Información Geográfico de Parcelas Agrícolas
 
-* AGRORED: 
-
-* LIBRA:
+* LIBRA: Líneas Básicas de Recintos Agrícolas
 
 * PAC: Parcelas Agricolas
 
@@ -275,6 +273,13 @@ Se tienen distintos estilos cuando están seleccionadas, en edición, con solape
 - Bordes: verde claro (sin relleno de borde)
 - Relleno: marrón claro
 
+Al seleccionarse esta LDG con la opción: **seleccionar** se mostrará un panel de información rápida en el lateral izquierdo.
+
+
+.. image:: ../_static/images/libra_select_ldg_info_rapida.png
+   :align: center
+
+
 
 3.1.2 LDGs - de otras solicitudes ya registradas
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -284,6 +289,12 @@ Se tienen distintos estilos cuando están seleccionadas, en edición, con solape
 
 - Borde: azul rey
 - Relleno: azul rey con transparencia
+
+Al seleccionarse la LDG de otra solicitud (color azul) con la opción: **seleccionar** se mostrará un panel de información rápida en el lateral izquierdo.
+
+
+.. image:: ../_static/images/libra_select_ldg_otra_soli_regis_info_rapida.png
+   :align: center
 
 
 3.1.3 LDGs - Seleccionadas
@@ -304,6 +315,10 @@ Se tienen distintos estilos cuando están seleccionadas, en edición, con solape
 - Borde: rojo
 - Relleno: rojo transparente 
 
+En el caso de los solapes también se puede consultar de forma rápida información sobre el nombre, CIF/NIF y área solapada con otra solicitud. Se debe activar la opción 'Seleccionar',  pinchar sobre el área del solape y luego se mostrará el panel de información en el lateral izquierdo.
+
+.. image:: ../_static/images/libra_select_solape_info_rapida.png
+   :align: center
 
 3.2 Estilos para Recintos
 _________________________
@@ -1036,7 +1051,11 @@ Para eliminar los solapes se hace uso de dos herramientas: 'mostrar/ocultar sola
      - |Herramienta1|
      - Permite seleccionar las geometrías asociadas a una Línea de declaración. 
      
-       Es la herramienta más común que se usa previamente para poder ejecutar las demás. 
+       Es la herramienta más común que se usa previamente para poder ejecutar las demás herramietas. 
+       
+       Con esta herramienta también se puede seleccioar cualquier solape y LDG (propia de la solicitud 
+       activa, o de otra solictud ya resgistrada) y al pichar sobre los mismos, saldrá un recuadro con
+       la información rápida de los elemetos seleccionados.
    * - Ver tabla
      - |Herramienta2|
      - Esta herramienta permite visualizar todas las Líneas de Declaración que han sido 
@@ -1064,10 +1083,12 @@ Para eliminar los solapes se hace uso de dos herramientas: 'mostrar/ocultar sola
        
        un elemento seleccionado en el mapa (recintos, solapes, cultivos de la solicitud 
        
-       activa y de otras solicitudes ya registradas)
+       activa (títulos color verde) y de otras solicitudes ya registradas (títulos color azul)
    * - Buscar Recinto
      - |herramienta18|
-     - Esta herramienta permite buscar sobre el mapa un recinto.              
+     - Esta herramienta permite buscar sobre el mapa un recinto a partir de los datos de 
+       
+       la provincia, município, polígono, parcela y recinto.              
      
      
      
