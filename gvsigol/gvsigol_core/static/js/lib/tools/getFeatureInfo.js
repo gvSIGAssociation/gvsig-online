@@ -423,17 +423,20 @@ getFeatureInfo.prototype.showInfo = function(features){
 
 								if(!complex_data){
 									var aux_text = text;
-									var datetime_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})Z$/i;
+									var datetime_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(.[0-9]{3})?Z$/i;
 									if(datetime_format.test(text)){
 										var match = datetime_format.exec(text);
 										aux_text = match[3]+"/"+match[2]+"/"+match[1]+" "+match[4]+":"+match[5]+":"+match[6];
+										if(match.length > 7){
+											//aux_text += match[7];
+										}
 									}
 									var date_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})Z$/i;
 									if(date_format.test(text)){
 										var match = date_format.exec(text);
 										aux_text = match[3]+"/"+match[2]+"/"+match[1];
 									}
-									var time_format = /^([0-9]{2}):([0-9]{2}):([0-9]{2})Z$/i;
+									var time_format = /^([0-9]{2}):([0-9]{2}):([0-9]{2})(.[0-9]{3})?Z$/i;
 									if(time_format.test(text)){
 										var match = time_format.exec(text);
 										aux_text = match[3]+":"+match[2]+":"+match[1];

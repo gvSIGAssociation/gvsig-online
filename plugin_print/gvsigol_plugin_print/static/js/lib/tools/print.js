@@ -201,15 +201,16 @@ print.prototype.createPrintJob = function(template) {
 				var layer = {
 					//"baseURL": "http://localhost/gs-local/ws_jrodrigo/wms",
 					"baseURL": mapLayers[i].wms_url_no_auth,
-			  	    "opacity": 1,
+			  	    "opacity": mapLayers[i].getOpacity(),
 			  	    "type": "WMS",
 		  			"imageFormat": "image/png",
 		  			"customParams": {
 		  				"TRANSPARENT": "true"
-		  			}
+		  			},
+					"mergeableParams": {},
 		  	    };
 				if (mapLayers[i].getSource().getParams()['STYLES']) {
-					layer['customParams']['STYLES'] = mapLayers[i].getSource().getParams()['STYLES'];
+					layer['styles'] = [mapLayers[i].getSource().getParams()['STYLES']];
 				}
 				if (mapLayers[i].getSource().getParams()['TIME']) {
 					layer['customParams']['TIME'] = mapLayers[i].getSource().getParams()['TIME'];
