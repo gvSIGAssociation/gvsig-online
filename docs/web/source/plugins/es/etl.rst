@@ -565,9 +565,9 @@ Para mejor comprensión del paso final se detalla a continuación:
    :align: center
 
 .. list-table:: Aplicar transformación 
-   :widths: 2 5 10
+   :widths: 1 4 7
    :header-rows: 1
-   :align: left
+   :align: center
 
    * - Pasos
      - Selección

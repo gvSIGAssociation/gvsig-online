@@ -1041,7 +1041,7 @@ Para eliminar los solapes se hace uso de dos herramientas: 'mostrar/ocultar sola
 .. list-table::  Herramientas 
    :widths: 3 2 10 
    :header-rows: 1
-   :align: left
+  
 
    * - Herramienta
      - Botón
