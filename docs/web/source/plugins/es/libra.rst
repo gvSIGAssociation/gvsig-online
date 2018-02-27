@@ -1054,8 +1054,10 @@ Para eliminar los solapes se hace uso de dos herramientas: 'mostrar/ocultar sola
        Es la herramienta más común que se usa previamente para poder ejecutar las demás herramietas. 
        
        Con esta herramienta también se puede seleccioar cualquier solape y LDG (propia de la solicitud 
-       activa, o de otra solictud ya resgistrada) y al pichar sobre los mismos, saldrá un recuadro con
-       la información rápida de los elemetos seleccionados.
+       
+       activa, o de otra solictud ya resgistrada) y al pinchar sobre los mismos, saldrá un recuadro con
+       
+       la información rápida de los elementos seleccionados.
    * - Ver tabla
      - |Herramienta2|
      - Esta herramienta permite visualizar todas las Líneas de Declaración que han sido 
@@ -1081,7 +1083,7 @@ Para eliminar los solapes se hace uso de dos herramientas: 'mostrar/ocultar sola
      - |herramienta17|
      - Esta herramienta permite mostrar la información alfanumérica de forma rápida de 
        
-       un elemento seleccionado en el mapa (recintos, solapes, cultivos de la solicitud 
+       un elemento seleccionado en el mapa: recintos, solapes, cultivos de la solicitud 
        
        activa (títulos color verde) y de otras solicitudes ya registradas (títulos color azul)
    * - Buscar Recinto
