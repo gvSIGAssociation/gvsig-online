@@ -567,7 +567,7 @@ Para mejor comprensión del paso final se detalla a continuación:
 .. list-table:: Aplicar transformación 
    :widths: 1 2 5
    :header-rows: 1
-   :align: left
+   :align: center
 
    * - Pasos
      - Selección
@@ -603,13 +603,14 @@ Para mejor comprensión del paso final se detalla a continuación:
      - Método a aplicar
      - existen dos opciones, 'añadir' o 'reemplazar'. Si se quiere sustituir los datos de la capa seleccionada se elije 
      
-     'reemplazar', y si se quiere agregar o sumar nuevos datos a la tabla, se selecciona 'añadir'
+       'reemplazar', y si se quiere agregar o sumar nuevos datos a la tabla, se selecciona 'añadir'
    * - 11
      - Hacer clic para ejecutar la tranasformación
      - Saldrá un mensaje en el centro de la patalla donde muestra al usuario el progreso del volcado de los datos.
    * - 12
      - Mensaje de información al usuario
      - cuando se están subiedo los datos muestra el progreso de la cantidad de registros añadidos y sus respectivas hojas.     
+
 
 .. note::
    EL poder seleccionar las opciones 7, 8 y 9 nos permitir poder añadir o reemplazar los datos del fichero a distintas capas, siempre y cuando la plantilla cumpla con la correspondencia de sus reglas entre los campos de la capa seleccionada y las columnas de éste fichero.
