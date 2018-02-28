@@ -708,22 +708,22 @@ def project_get_conf(request):
                         ls = get_default_style(l)
                         if ls is None:
                             print 'CAPA SIN ESTILO POR DEFECTO: ' + l.name
-                            layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                            layer['legend_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                            layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                            layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
+                            layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                            layer['legend_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                            layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                            layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
                                 
                         else:
                             if not ls.has_custom_legend:
-                                layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                                layer['legend_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                                layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                                layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
+                                layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                layer['legend_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
                             else:
                                 layer['legend'] = ls.custom_legend_url
                                 layer['legend_no_auth'] = ls.custom_legend_url
-                                layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                                layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
+                                layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
                         
                     layers.append(layer)
                     
