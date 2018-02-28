@@ -273,12 +273,15 @@ Se tienen distintos estilos cuando están seleccionadas, en edición, con solape
 - Bordes: verde claro (sin relleno de borde)
 - Relleno: marrón claro
 
-Al seleccionarse esta LDG con la opción: **seleccionar** se mostrará un panel de información rápida en el lateral izquierdo.
+* **Ver información sobre el cultivo seleccionado**
+
+Se activa la herramienta: **'seleccionar'** y luego se pincha sobre el cultivo, se mostrará un panel de información rápida en el lateral izquierdo.
 
 
 .. image:: ../_static/images/libra_select_ldg_info_rapida.png
    :align: center
 
+También se puede consultar con la herramienta **'información'** o abriendo la tabla de registros alfanuméricos con la herramienta **'mostrar tabla'**.
 
 
 3.1.2 LDGs - de otras solicitudes ya registradas
@@ -290,11 +293,14 @@ Al seleccionarse esta LDG con la opción: **seleccionar** se mostrará un panel 
 - Borde: azul rey
 - Relleno: azul rey con transparencia
 
-Al seleccionarse la LDG de otra solicitud (color azul) con la opción: **seleccionar** se mostrará un panel de información rápida en el lateral izquierdo.
+* **Ver información  sobre las LDG de otras solicitudes ya registradas**
 
+Se activa la herramienta: **'seleccionar'** y luego se pincha sobre el cultivo ya registrado de otra solicitud (color azul) y se mostrará un panel de información rápida en el lateral izquierdo.
 
 .. image:: ../_static/images/libra_select_ldg_otra_soli_regis_info_rapida.png
    :align: center
+
+También se puede consultar con la herramienta **'información'**
 
 
 3.1.3 LDGs - Seleccionadas
@@ -314,6 +320,9 @@ Al seleccionarse la LDG de otra solicitud (color azul) con la opción: **selecci
    
 - Borde: rojo
 - Relleno: rojo transparente 
+
+
+* **Consultar información del área que solapa**
 
 En el caso de los solapes también se puede consultar de forma rápida información sobre el nombre, CIF/NIF y área solapada con otra solicitud. Se debe activar la opción 'Seleccionar',  pinchar sobre el área del solape y luego se mostrará el panel de información en el lateral izquierdo.
 
@@ -1026,13 +1035,13 @@ Para eliminar los solapes se hace uso de dos herramientas: 'mostrar/ocultar sola
 .. |herramienta18| image:: ../_static/images/18_buscar_recinto.png
 .. |herramienta19| image:: ../_static/images/19_deshacer.png
 .. |herramienta20| image:: ../_static/images/20_rehacer.png
-
+.. |herramienta21| image:: ../_static/images/21_incrementar_superficie.png
 
 
 .. list-table::  Herramientas 
    :widths: 3 2 10 
    :header-rows: 1
-   :align: left
+  
 
    * - Herramienta
      - Botón
@@ -1053,9 +1062,11 @@ Para eliminar los solapes se hace uso de dos herramientas: 'mostrar/ocultar sola
      
        Es la herramienta más común que se usa previamente para poder ejecutar las demás herramietas. 
        
-       Con esta herramienta también se puede seleccioar cualquier solape y LDG (propia de la solicitud 
-       activa, o de otra solictud ya resgistrada) y al pichar sobre los mismos, saldrá un recuadro con
-       la información rápida de los elemetos seleccionados.
+       Con esta herramienta también se puede seleccionar cualquier solape y LDG (propia de la solicitud 
+       
+       activa o de otra solictud ya resgistrada) y al pinchar sobre los mismos, saldrá un recuadro con
+       
+       la información rápida de los elementos seleccionados.
    * - Ver tabla
      - |Herramienta2|
      - Esta herramienta permite visualizar todas las Líneas de Declaración que han sido 
@@ -1081,14 +1092,21 @@ Para eliminar los solapes se hace uso de dos herramientas: 'mostrar/ocultar sola
      - |herramienta17|
      - Esta herramienta permite mostrar la información alfanumérica de forma rápida de 
        
-       un elemento seleccionado en el mapa (recintos, solapes, cultivos de la solicitud 
+       un elemento seleccionado en el mapa: recintos, solapes, cultivos de la solicitud 
        
        activa (títulos color verde) y de otras solicitudes ya registradas (títulos color azul)
    * - Buscar Recinto
      - |herramienta18|
      - Esta herramienta permite buscar sobre el mapa un recinto a partir de los datos de 
        
-       la provincia, município, polígono, parcela y recinto.              
+       la provincia, município, polígono, parcela y recinto.  
+   * - Incrementar superficie
+     - |herramienta21|
+     - Con esta herramienta se permite al usuario aumentar el área de 'superficie gráfica' de 
+     
+       cualquier cultivo seleccionado, siempre y cuando el área que se indique no sea mayor a 
+       
+       la 'Superficie Sigpac'        
      
      
      

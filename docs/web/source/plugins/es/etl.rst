@@ -565,9 +565,9 @@ Para mejor comprensión del paso final se detalla a continuación:
    :align: center
 
 .. list-table:: Aplicar transformación 
-   :widths: 2 5 10
+   :widths: 1 2 5
    :header-rows: 1
-   :align: left
+   :align: center
 
    * - Pasos
      - Selección
@@ -589,7 +589,7 @@ Para mejor comprensión del paso final se detalla a continuación:
      - Valor por defecto que muestra el directorio y fichero sobre el cual se aplica la transformación      
    * - 6 
      - Casilla 'transformación a realizar'
-     - Se despliegan las distintas plantillas que se han creado previamente y se escoge la que aplique a la capa a seleccionar..
+     - Se despliegan las distintas plantillas que se han creado previamente y se escoge la que aplique a la capa a seleccionar.
    * - 7 
      - Espacio de trabajo
      - Indicar el espacio de trabajo donde se ubica el almacén de BD
@@ -601,7 +601,9 @@ Para mejor comprensión del paso final se detalla a continuación:
      - seleccionar la capa donde se volcarán los datos del fichero plano
    * - 10
      - Método a aplicar
-     - existen dos opciones, 'añadir' o 'reemplazar'. Si se quiere sustituir los datos de la capa seleccionada se elije 'reemplazar', y si se quiere agregar o sumar nuevos datos a la tabla, se selecciona 'añadir'
+     - existen dos opciones, 'añadir' o 'reemplazar'. Si se quiere sustituir los datos de la capa seleccionada se elije 
+     
+     'reemplazar', y si se quiere agregar o sumar nuevos datos a la tabla, se selecciona 'añadir'
    * - 11
      - Hacer clic para ejecutar la tranasformación
      - Saldrá un mensaje en el centro de la patalla donde muestra al usuario el progreso del volcado de los datos.
