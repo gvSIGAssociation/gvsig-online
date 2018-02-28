@@ -57,5 +57,8 @@ msgstr "Guardar"
 msgid "Cancel"
 msgstr "Cancelar"
 
+msgid "Show form"
+msgstr "Abrir encuesta"
+
 msgid "Failed to save the new record. Please check values"
 msgstr "Error al guardar el nuevo elemento. Por favor revise los valores"
