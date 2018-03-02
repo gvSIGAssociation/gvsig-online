@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-01-25 13:29+0100\n"
+"POT-Creation-Date: 2018-02-28 14:07+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,49 +38,49 @@ msgstr "Capa vectorial"
 msgid "SQL View"
 msgstr "Vista SQL"
 
-#: backend_mapservice.py:534 backend_mapservice.py:543
-#: backend_mapservice.py:555
+#: backend_mapservice.py:558 backend_mapservice.py:567
+#: backend_mapservice.py:579
 #, python-brace-format
 msgid "Error publishing the layer. Backend error: {msg}"
 msgstr "Error publicando la capa. Error: {msg}"
 
-#: backend_mapservice.py:537 backend_mapservice.py:545
-#: backend_mapservice.py:557 views.py:713 views.py:1763
+#: backend_mapservice.py:561 backend_mapservice.py:569
+#: backend_mapservice.py:581 views.py:734 views.py:1784
 msgid "Error: layer could not be published"
 msgstr "Error: la capa no puede ser publicada"
 
-#: backend_mapservice.py:567 backend_mapservice.py:575
-#: backend_mapservice.py:583
+#: backend_mapservice.py:591 backend_mapservice.py:599
+#: backend_mapservice.py:607
 #, python-brace-format
 msgid "Error publishing the layer group. Backend error: {msg}"
 msgstr "Error publicando el grupo de capas. Error: {msg}"
 
-#: backend_mapservice.py:569 backend_mapservice.py:577
-#: backend_mapservice.py:585
+#: backend_mapservice.py:593 backend_mapservice.py:601
+#: backend_mapservice.py:609
 msgid "Error: layer group could not be published"
 msgstr "Error: el grupo de capas no puede ser publicado"
 
-#: backend_mapservice.py:623 backend_mapservice.py:633
+#: backend_mapservice.py:647 backend_mapservice.py:657
 #, fuzzy, python-brace-format
 #| msgid "Error publishing the layer. Backend error: {msg}"
 msgid "Error changing property. Backend error: {msg}"
 msgstr "Error publicando la capa. Error: {msg}"
 
-#: backend_mapservice.py:626 backend_mapservice.py:636
+#: backend_mapservice.py:650 backend_mapservice.py:660
 #, fuzzy
 #| msgid "Error: layer could not be published"
 msgid "Error: layer could not be updated"
 msgstr "Error: la capa no puede ser publicada"
 
-#: backend_mapservice.py:807
+#: backend_mapservice.py:831
 msgid ""
 "Bad file format. The provided zip file must not contain any subdirectory."
 msgstr ""
 "Formato de archivo incorrecto. El archivo zip proporcionada no debe contener "
 "ningún subdirectorio."
 
-#: backend_mapservice.py:851 backend_mapservice.py:902
-#: backend_mapservice.py:1133 backend_mapservice.py:1206
+#: backend_mapservice.py:875 backend_mapservice.py:926
+#: backend_mapservice.py:1157 backend_mapservice.py:1230
 #, python-brace-format
 msgid ""
 "Invalid layer name: '{value}'. Identifiers must begin with a letter or an "
@@ -90,8 +90,8 @@ msgstr ""
 "con una letra o un guion bajo (_). Los siguientes caracteres pueden ser "
 "letras, guiones o números"
 
-#: backend_mapservice.py:853 backend_mapservice.py:904
-#: backend_mapservice.py:966
+#: backend_mapservice.py:877 backend_mapservice.py:928
+#: backend_mapservice.py:990
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid database name: {value}. "
@@ -102,8 +102,8 @@ msgstr ""
 "{value}. Identificadores deben comenzar con una letra o un guión bajo "
 "( _ ) . Los siguientes caracteres pueden ser letras, guiones o números"
 
-#: backend_mapservice.py:855 backend_mapservice.py:906
-#: backend_mapservice.py:968
+#: backend_mapservice.py:879 backend_mapservice.py:930
+#: backend_mapservice.py:992
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid user name: {value}. Identifiers "
@@ -114,8 +114,8 @@ msgstr ""
 "{value}. Identificadores deben comenzar con una letra o un guión bajo "
 "( _ ) . Los siguientes caracteres pueden ser letras, guiones o números"
 
-#: backend_mapservice.py:857 backend_mapservice.py:908
-#: backend_mapservice.py:970
+#: backend_mapservice.py:881 backend_mapservice.py:932
+#: backend_mapservice.py:994
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid schema: {value}. Identifiers "
@@ -126,21 +126,21 @@ msgstr ""
 "Identificadores deben comenzar con una letra o un guión bajo ( _ ) . Los "
 "siguientes caracteres pueden ser letras, guiones o números"
 
-#: backend_mapservice.py:879 backend_mapservice.py:931
+#: backend_mapservice.py:903 backend_mapservice.py:955
 msgid "Error uploading the layer. Review the file format."
 msgstr "Error publicando la capa. Revisar el formato del fichero"
 
-#: backend_mapservice.py:929
+#: backend_mapservice.py:953
 #, fuzzy
 #| msgid "Error uploading the layer. Review the file format."
 msgid "Error uploading the layer. Review the file format. Cause: "
 msgstr "Error publicando la capa. Revisar el formato del fichero"
 
-#: backend_mapservice.py:1106
+#: backend_mapservice.py:1130
 msgid "Error creating the layer. Review the file format."
 msgstr "Error creando la capa. Revisar el formato del fichero"
 
-#: backend_mapservice.py:1129 views.py:598
+#: backend_mapservice.py:1153 views.py:617
 #, python-brace-format
 msgid ""
 "Invalid layer fields: '{value}'. Layer can't have fields with whitespaces"
@@ -148,41 +148,41 @@ msgstr ""
 "Campos inválidos: '{value}'. La capa no puede tener campos con espacios en "
 "blanco"
 
-#: backend_mapservice.py:1164
+#: backend_mapservice.py:1188
 msgid "Invalid geometry type"
 msgstr "Tipo de geometría no válido"
 
-#: backend_mapservice.py:1168
+#: backend_mapservice.py:1192
 #, python-brace-format
 msgid "Duplicated field name: {0}"
 msgstr "Nombre de campo duplicado: {0}"
 
-#: backend_mapservice.py:1170
+#: backend_mapservice.py:1194
 #, python-brace-format
 msgid "Invalid field name. '{0}' is a reserved word"
 msgstr "Nombre de campo inválido. '{0}' es una palabra reservada"
 
-#: backend_mapservice.py:1192
+#: backend_mapservice.py:1216
 #, python-brace-format
 msgid "Unsupported field type: {0}"
 msgstr "Tipo de campo no soportado: {0}"
 
-#: backend_mapservice.py:1197
+#: backend_mapservice.py:1221
 #: templates/geoserver/create_layer_feature_type.html:299
 #: templates/layer_create.html:713
 msgid "At least one field must be defined"
 msgstr "Debe definir por lo menos un campo"
 
-#: backend_mapservice.py:1200
+#: backend_mapservice.py:1224
 msgid "Invalid field definition"
 msgstr "Definición de campo no válida"
 
-#: backend_mapservice.py:1212
+#: backend_mapservice.py:1236
 #, python-brace-format
 msgid "A layer already exists with this name: '{value}'"
 msgstr "Ya existe una capa con este nombre: '{value}'"
 
-#: backend_mapservice.py:1232 backend_mapservice.py:1241
+#: backend_mapservice.py:1256 backend_mapservice.py:1265
 msgid "Error occurred building the view. Review the SQL sentence"
 msgstr "Ha ocurrido un error construyendo la vista. Revisar la sentencia SQL"
 
@@ -281,8 +281,8 @@ msgstr "Nombre"
 
 #: forms_geoserver.py:55 forms_geoserver.py:70 forms_geoserver.py:82
 #: forms_geoserver.py:133 forms_geoserver.py:145 forms_services.py:107
-#: forms_services.py:130 forms_services.py:160 templates/base_layer_add.html:68
-#: templates/base_layer_list.html.py:22 templates/base_layer_update.html:68
+#: forms_services.py:130 forms_services.py:160 templates/base_layer_add.html:71
+#: templates/base_layer_list.html.py:22 templates/base_layer_update.html:71
 #: templates/enumeration_add.html.py:47 templates/enumeration_list.html:23
 #: templates/enumeration_update.html:47
 #: templates/geoserver/create_layer_feature_type.html:51
@@ -530,8 +530,8 @@ msgstr "Error: Formato JSON no válido"
 msgid "Default date value"
 msgstr ""
 
-#: forms_services.py:163 templates/base_layer_add.html.py:75
-#: templates/base_layer_update.html:75
+#: forms_services.py:163 templates/base_layer_add.html.py:78
+#: templates/base_layer_update.html:78
 msgid "Version"
 msgstr "Versión"
 
@@ -539,14 +539,14 @@ msgstr "Versión"
 msgid "URL"
 msgstr "URL"
 
-#: forms_services.py:166 templates/base_layer_add.html.py:82
-#: templates/base_layer_update.html:82
+#: forms_services.py:166 templates/base_layer_add.html.py:85
+#: templates/base_layer_update.html:85
 #: templates/dashboard_services_menu.html:11
 msgid "Layers"
 msgstr "Capas"
 
-#: forms_services.py:168 templates/base_layer_add.html.py:91
-#: templates/base_layer_update.html:91
+#: forms_services.py:168 templates/base_layer_add.html.py:94
+#: templates/base_layer_update.html:94
 msgid "Format"
 msgstr "Formato"
 
@@ -592,14 +592,21 @@ msgid "Url"
 msgstr ""
 
 #: templates/base_layer_add.html:62 templates/base_layer_update.html.py:62
+msgid ""
+"Alert: this url is not in the same domain. Several browsers could not load "
+"this base layer due to cross-domain policy."
+msgstr "Aviso: esta dirección no está en el mismo dominio. Algunos navegadores "
+"podrían no cargarla debido a la política de seguridad de dominio cruzado"
+
+#: templates/base_layer_add.html:65 templates/base_layer_update.html.py:65
 msgid "Connect"
 msgstr ""
 
-#: templates/base_layer_add.html:100 templates/base_layer_update.html.py:100
+#: templates/base_layer_add.html:103 templates/base_layer_update.html.py:103
 msgid "MatrixSet"
 msgstr ""
 
-#: templates/base_layer_add.html:107 templates/base_layer_update.html.py:107
+#: templates/base_layer_add.html:110 templates/base_layer_update.html.py:110
 msgid "Api-key"
 msgstr "API-key"
 
@@ -1394,7 +1401,7 @@ msgstr "Actualizar espacio de trabajo"
 msgid "Project description"
 msgstr "Descripción"
 
-#: views.py:93
+#: views.py:94
 #, python-brace-format
 msgid ""
 "Invalid workspace name: '{value}'. Identifiers must begin with a letter or "
@@ -1405,11 +1412,11 @@ msgstr ""
 "comenzar con una letra o un guion bajo (_). Los siguientes caracteres pueden "
 "ser letras, guiones o números"
 
-#: views.py:117
+#: views.py:118
 msgid "Error: workspace could not be created"
 msgstr "Error: el workspace no puede ser creado"
 
-#: views.py:245
+#: views.py:246
 #, python-brace-format
 msgid ""
 "Invalid datastore name: '{value}'. Identifiers must begin with a letter or "
@@ -1420,23 +1427,23 @@ msgstr ""
 "con una letra o un guion bajo (_). Los siguientes caracteres pueden ser "
 "letras, guiones o números"
 
-#: views.py:267
+#: views.py:268
 msgid "Error: Data store could not be created"
 msgstr "Error: El almacén de datos no puede ser creado"
 
-#: views.py:270
+#: views.py:271
 msgid "Error: GeoTIFF is not georreferenced"
 msgstr "Error: El GeoTIFF especificado no está georreferenciado"
 
-#: views.py:284
+#: views.py:285
 msgid "Datastore not found"
 msgstr "Almacén de datos no encontrado"
 
-#: views.py:314
+#: views.py:315
 msgid "Error updating datastore"
 msgstr "Error actualizndo el almacén de datos"
 
-#: views.py:1399 views.py:1540
+#: views.py:1420 views.py:1561
 #, python-brace-format
 msgid ""
 "Invalid layer group name: '{value}'. Identifiers must begin with a letter or "
@@ -1447,27 +1454,27 @@ msgstr ""
 "comenzar con una letra o un guión bajo (_). Los siguientes caracteres pueden "
 "ser letras, guiones, o números"
 
-#: views.py:1447 views.py:1560
+#: views.py:1468 views.py:1581
 msgid "Layer group name already exists"
 msgstr "El nombre del grupo de capas ya exsite"
 
-#: views.py:1451
+#: views.py:1472
 msgid "You must enter a name for layer group"
 msgstr "Debe introducir un nombre para el grupo de capas"
 
-#: views.py:1889
+#: views.py:1910
 msgid "You must enter a title for enumeration"
 msgstr "Debe introducir un título para la enumeración"
 
-#: views.py:1894
+#: views.py:1915
 msgid "Name already taken"
 msgstr "El nombre ya existe"
 
-#: views.py:2611
+#: views.py:2672
 msgid "Error: BaseLayer could not be published"
 msgstr "Error: la capa base no puede ser publicada"
 
-#: views.py:2660
+#: views.py:2721
 msgid "Error: baselayer could not be published"
 msgstr "Error: la capa no puede ser publicada"
 

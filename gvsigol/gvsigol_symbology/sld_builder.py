@@ -329,7 +329,7 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
             symbolizer = RasterSymbolizer(rule)
             color_map = ColorMap(symbolizer)
             
-            entries = ModelColorMapEntry.objects.filter(color_map=s.rastersymbolizer.color_map)
+            entries = ModelColorMapEntry.objects.filter(color_map=s.rastersymbolizer.color_map).order_by('order')
             if entries is not None:
                 for e in entries:
                     color_map.create_colormapentry(e.color, str(e.quantity), e.label, str(e.opacity))
