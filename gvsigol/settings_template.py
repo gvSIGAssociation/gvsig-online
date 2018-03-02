@@ -36,8 +36,8 @@ else:
 
 # Eliminando warnings molestos  
 import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+#from requests.packages.urllib3.exceptions import InsecureRequestWarning
+#requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
@@ -61,6 +61,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
+    'django_jenkins',
+    #'gvsigol_auth',
+    #'gvsigol_services',
+    #'gvsigol_symbology',
+    #'gvsigol_filemanager',
+    #'gvsigol_core',
+]
+
+PROJECT_APPS = [
     'gvsigol_auth',
     'gvsigol_services',
     'gvsigol_symbology',
@@ -68,6 +77,7 @@ INSTALLED_APPS = [
     'gvsigol_core',
     ##GVSIG_ONLINE_APPS##
 ]
+INSTALLED_APPS += PROJECT_APPS
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
