@@ -683,7 +683,7 @@ def color_table_add(request, layer_id):
         has_custom_legend = request.POST['has_custom_legend']
         json_data = json.loads(style_data)
         
-        if services_color_table.create_style(request, has_custom_legend, json_data, layer_id):            
+        if services_color_table.create_style(request, json_data, layer_id, False, has_custom_legend):            
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:

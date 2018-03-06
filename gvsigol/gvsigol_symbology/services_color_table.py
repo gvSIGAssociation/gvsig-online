@@ -38,7 +38,7 @@ import utils
 import json
 import re
 
-def create_style(request, has_custom_legend, json_data, layer_id, is_preview=False):
+def create_style(request, json_data, layer_id, is_preview=False, has_custom_legend=None):
 
     layer = Layer.objects.get(id=int(layer_id))
     datastore = layer.datastore
