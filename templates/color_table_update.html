@@ -405,7 +405,7 @@ $(document).ready(function() {
 	});
 	
 	$("#refresh-preview").on('click', function(e){
-		colorTable.refreshMap();
+		colorTable.updatePreview("{{layer_id}}");
 	});
 	
 	try{
