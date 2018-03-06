@@ -76,7 +76,7 @@ SymbologyUtils.prototype.filter_operations = [
  	{value: 'is_greater_than_or_equal_to', title: gettext('Is greater than or equal to') + ' ...'},
  	{value: 'is_less_than', title: gettext('Is less than') + ' ...'},
  	{value: 'is_less_than_or_equal_to', title: gettext('Is less than or equal to') + ' ...'},
- 	{value: 'is_between', title: gettext('Is between') + ' ...'},
+ 	{value: 'is_between', title: gettext('Is between') + ' ...'}
 ];
 
 SymbologyUtils.prototype.getLayerId = function(){
@@ -273,7 +273,9 @@ SymbologyUtils.prototype.getFilter = function(json_filter) {
 		
 		filter += 	'<ogc:' + operator + '>';
 		filter += 		'<ogc:PropertyName>' + json_filter.property_name + '</ogc:PropertyName>';
-		filter += 		'<ogc:Literal>' + json_filter.value + '</ogc:Literal>';
+		if (json_filter.type != 'is_null') {
+			filter += 		'<ogc:Literal>' + json_filter.value + '</ogc:Literal>';
+		}
 		filter += 	'</ogc:' + operator + '>';
 		
 	} else {

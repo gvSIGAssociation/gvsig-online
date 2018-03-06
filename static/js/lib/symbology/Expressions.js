@@ -163,7 +163,9 @@ Expressions.prototype.getFilterFormUI = function(ruleid) {
 				inputs += '</div>';
 				
 				$('#expression-value'+expression.id).empty();
-				$('#expression-value'+expression.id).append(inputs);
+				if(expression.operation != 'is_null'){
+					$('#expression-value'+expression.id).append(inputs);
+				}
 				self.loadUniqueValues(expression.field, expression.id);
 				$('#remove-expression' + self.expressions_counter).on('click', function(e){
 					e.preventDefault();
@@ -218,6 +220,12 @@ Expressions.prototype.getFilterFormUI = function(ruleid) {
 
 		if(self.expressions.length > 1 || 
 				(self.expressions.length >0 && self.expressions[0].field != "" && self.expressions[0].operation != "" )){
+			for(var i=0; i<self.expressions.length; i++){
+				var expr = self.expressions[i];
+				if(expr.operation == "is_null"){
+					delete expr["value"];
+				}
+			}
 			rule.setFilter(self.expressions);
 		}
 		$('#modal-expression').modal('hide');
@@ -334,7 +342,11 @@ Expressions.prototype.updateExpression = function(id, field, operation, value) {
 		if (this.expressions[i].id == id) {
 			this.expressions[i].field = field;
 			this.expressions[i].operation = operation;
-			this.expressions[i].value = value;
+			if(operation == 'is_null'){
+				delete this.expressions[i].value;
+			}else{
+				this.expressions[i].value = value;
+			}
 		}
 	}
 };
@@ -391,7 +403,7 @@ Expressions.prototype.addExpression = function(expression) {
 	ui += 				'<select data-expressionid="'+count+'" id="expression-operation'+count+'" class="form-control expression-operation">';
 	ui += 					'<option disabled selected value> -- ' + gettext('Select operation') + ' -- </option>';
 	for (var i in operations) {
-		if (operations[i].value != 'is_between' && operations[i].value != 'is_null') {
+		if (operations[i].value != 'is_between') {
 			if (expression.operation == operations[i].value) {
 				ui += 			'<option selected value="' + operations[i].value + '">' + operations[i].title + '</option>';
 			} else {
@@ -515,24 +527,33 @@ Expressions.prototype.registerFilterEvents = function(expressionId) {
 	});
 
 	$('#expression-operation'+expressionId).on('change', function(e) {
-		var inputs = '';
-		inputs += '<div class="col-md-12 form-group">';
-		inputs += 	'<label>' + gettext('Value') + '</label>';
-		inputs += 	'<input type="text" id="expression-value-select'+expressionId+'" class="form-control filter-component" list="expression-value-list'+expressionId+'">';
-		inputs += 	'<datalist id="expression-value-list'+expressionId+'">';
-		inputs += 	'</datalist>';
-		inputs += '</div>';
-		
-		$('#expression-value'+expressionId).empty();
-		$('#expression-value'+expressionId).append(inputs);
-
-		var value = $('#expression-value-select'+expressionId).val();
-		var field = $('#expression-field'+expressionId).val();
-		var operation = $('#expression-operation'+expressionId).val();
-		self.updateExpression(expressionId, field, operation, value);
-
-		var value_orig = $('#expression-field'+expressionId).val();
-		self.loadUniqueValues(value_orig, expressionId);
+		var id = $(this).attr("id");
+		var value_selected = $("#"+id+" option:selected").val();
+		if(value_selected != "is_null"){
+			var inputs = '';
+			inputs += '<div class="col-md-12 form-group">';
+			inputs += 	'<label>' + gettext('Value') + '</label>';
+			inputs += 	'<input type="text" id="expression-value-select'+expressionId+'" class="form-control filter-component" list="expression-value-list'+expressionId+'">';
+			inputs += 	'<datalist id="expression-value-list'+expressionId+'">';
+			inputs += 	'</datalist>';
+			inputs += '</div>';
+			
+			$('#expression-value'+expressionId).empty();
+			$('#expression-value'+expressionId).append(inputs);
+	
+			var value = $('#expression-value-select'+expressionId).val();
+			var field = $('#expression-field'+expressionId).val();
+			var operation = $('#expression-operation'+expressionId).val();
+			self.updateExpression(expressionId, field, operation, value);
+	
+			var value_orig = $('#expression-field'+expressionId).val();
+			self.loadUniqueValues(value_orig, expressionId);
+		}else{
+			$('#expression-value'+expressionId).empty();
+			var field = $('#expression-field'+expressionId).val();
+			var operation = $('#expression-operation'+expressionId).val();
+			self.updateExpression(expressionId, field, operation, "");
+		}
 	});
 
 };

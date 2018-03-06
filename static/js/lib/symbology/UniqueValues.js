@@ -127,6 +127,7 @@ UniqueValues.prototype.deleteRule = function(id) {
 UniqueValues.prototype.load = function(selectedField, values) {
 	$('#rules').empty();
 	this.rules.splice(0, this.rules.length);
+	var colors = this.utils.createColorRange('random', values.length +1);
 	for (var i=0; i<values.length; i++) {
 		var ruleName = "rule_" + i;
 		var ruleTitle = values[i];
@@ -153,11 +154,39 @@ UniqueValues.prototype.load = function(selectedField, values) {
 		rule.setFilter(filter);
 		$('#rules').append(rule.getTableUI(true, 'unique_values'));
 		rule.registerEvents();
-		var colors = this.utils.createColorRange('random', values.length);
 		rule.addSymbolizer({fill: colors[i], stroke: colors[i]});
 		rule.preview();
 		this.addRule(rule);
 	}
+	
+	var ruleName = "rule_" + i;
+	var ruleTitle = gettext("null_value");
+	var minscale = $('#symbol-minscale').val();
+	var maxscale = $('#symbol-maxscale').val();
+
+	var options = {
+			"id" : this.rules.length,
+			"name" : ruleName,
+			"title" : ruleTitle,
+			"abstract" : "",
+			"filter" : "",
+			"minscale" : minscale,
+			"maxscale" : maxscale,
+			"order" :  i
+	}
+
+	var rule = new Rule(i, ruleName, ruleTitle, options, this.utils);
+	var filter = {
+			operation: 'is_null',
+			field: selectedField
+	};
+	rule.setFilter(filter);
+	$('#rules').append(rule.getTableUI(true, 'unique_values'));
+	rule.registerEvents();
+	rule.addSymbolizer({fill: colors[i], stroke: colors[i]});
+	rule.preview();
+	this.addRule(rule);
+	
 	
 	if(this.json_data != null){
 		this.applyRampColor(this.json_data);

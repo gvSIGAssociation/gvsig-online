@@ -274,3 +274,6 @@ msgstr "Grupo por defecto"
 
 msgid "features"
 msgstr "features"
+
+msgid "null_value"
+msgstr "Sin valor"
