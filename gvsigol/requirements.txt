@@ -70,3 +70,6 @@ OWSLib==0.15.0
 limesurveyrc2api==1.0.0
 
 suds==0.4
+
+django-jenkins==0.110.0
+
