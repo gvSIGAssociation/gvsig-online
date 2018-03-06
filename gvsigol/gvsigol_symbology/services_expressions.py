@@ -250,6 +250,7 @@ def update_style(request, json_data, layer_id, style_id):
         
         filter_text = ""
         if json_rule.get('filter').__len__() != 0:
+            
             filter_text = str(json.dumps(json_rule.get('filter')))
         
         if json_data.get('minscale') != '':
