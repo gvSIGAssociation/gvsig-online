@@ -124,6 +124,8 @@ def get_operation_symbol(op):
         operation = '!='
     elif op == 'is_like':
         operation = '%'
+    elif op == 'is_null':
+        operation = 'IS NULL'
     
     return operation
 
@@ -143,6 +145,8 @@ def get_operation_name(op):
         operation = 'PropertyIsNotEqualTo'
     elif op == 'is_like':
         operation = 'PropertyIsLike'
+    elif op == 'is_null':
+        operation = 'PropertyIsNull'
     
     return operation
 
@@ -161,6 +165,8 @@ def get_filter_section(f, op):
         return f.PropertyIsNotEqualTo
     elif op == 'is_like':
         return f.PropertyIsLike
+    elif op == 'is_null':
+        return f.PropertyIsNull
     
     return f
 
@@ -209,7 +215,15 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
         f = json.loads(r.filter)
         if isinstance(f, list):
             if len(f) == 1:
-                rule.create_filter(f[0].get('field'), get_operation_symbol(f[0].get('operation')), str(f[0].get('value')))
+                if f[0].get('operation') == 'is_null':
+                    f2 = Filter(rule)
+                    f2.PropertyIsNull = PropertyCriterion(f2, 'PropertyIsNull')
+                    f2.PropertyIsNull.PropertyName = f[0].get('field')
+                    
+                    rule.Filter = f2 
+                
+                else:
+                    rule.create_filter(f[0].get('field'), get_operation_symbol(f[0].get('operation')), str(f[0].get('value')))
                 
             elif len(f) >= 3:
                 rule.Filter = build_complex_filter(f, rule)
@@ -228,7 +242,15 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
                 rule.Filter = f1 + f2 
                 
             else:
-                rule.create_filter(f.get('field'), get_operation_symbol(f.get('operation')), f.get('value'))
+                if f.get('operation') == 'is_null':
+                    f2 = Filter(rule)
+                    f2.PropertyIsNull = PropertyCriterion(f2, 'PropertyIsNull')
+                    f2.PropertyIsNull.PropertyName = f.get('field')
+                    
+                    rule.Filter = f2 
+                
+                else:
+                    rule.create_filter(f.get('field'), get_operation_symbol(f.get('operation')), f.get('value'))
     
     for s in symbolizers:
         if hasattr(s, 'marksymbolizer'):
