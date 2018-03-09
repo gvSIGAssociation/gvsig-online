@@ -309,15 +309,18 @@ class Geoserver():
         data += '    </metadata>'
         data += '</featureType>'
         
+        bs_data = str.encode(str(data))
+        
         if user and password:
             auth = (user, password)
         else:
             auth = self.session.auth
-            
-        r = self.session.put(url, headers=headers, auth=auth, data=data)
+        
+        r = self.session.put(url, headers=headers, auth=auth, data=bs_data)
         if r.status_code==200:
             return True
         
+        print "ERROR " + str(r.status_code) + ":" + r.content
         raise FailedRequestError(r.status_code, r.content)
             
     def raw_request(self, url, params, user=None, password=None):
