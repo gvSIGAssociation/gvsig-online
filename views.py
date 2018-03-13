@@ -1970,7 +1970,7 @@ def get_enumeration(request):
             for enum_name in enum_names_array:
                 enum_name2 = enum_name.replace('enmm_', 'enm_')
                 enum = Enumeration.objects.get(name__exact=enum_name2)
-                enum_items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('order')
+                enum_items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('name')
             
                 items = []
                 for i in enum_items:
