@@ -683,7 +683,8 @@ def color_table_add(request, layer_id):
         has_custom_legend = request.POST['has_custom_legend']
         json_data = json.loads(style_data)
         
-        if services_color_table.create_style(request, json_data, layer_id, False, has_custom_legend):            
+        if services_color_table.create_style(request, json_data, layer_id, False, has_custom_legend):   
+            delete_preview_style(request, json_data.get('name'))           
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -703,7 +704,8 @@ def color_table_update(request, layer_id, style_id):
         has_custom_legend = request.POST['has_custom_legend']
         json_data = json.loads(style_data)
         
-        if services_color_table.update_style(request, json_data, layer_id, style_id, has_custom_legend):            
+        if services_color_table.update_style(request, json_data, layer_id, style_id, has_custom_legend):         
+            delete_preview_style(request, json_data.get('name'))     
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
