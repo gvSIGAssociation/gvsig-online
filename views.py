@@ -1954,7 +1954,7 @@ def enumeration_update(request, eid):
             
     else:
         enum = Enumeration.objects.get(id=int(eid))
-        items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('order')
+        items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('name')
         
         return render_to_response('enumeration_update.html', {'eid': eid, 'enumeration': enum, 'items': items, 'count': len(items) + 1}, context_instance=RequestContext(request))
    
