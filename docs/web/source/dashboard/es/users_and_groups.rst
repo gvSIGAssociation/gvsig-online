@@ -1,7 +1,25 @@
 1. Usuarios y grupos de usuario
 ===============================
 
-1.1 Crear, modificar y eliminar usuarios
+1.1 Roles de Usuarios
+---------------------
+Se manejan tres roles desde el sistema:
+
+1.1.1 Rol 'Es Superusuario':
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Este rol tendrá por defecto todos los privilegios del sistema, es decir, podrá dar de alta nuevos usuarios, nuevos espacios de trabajo, tener visible todos los proyectos y capas de cualquier usuario (así como poder gestionarlas,permisos de lectura y escitura)). Este rol también es el único que puede administrar las capas base, bibliotecas de símbolos y rampas de color. 
+
+1.1.2 Rol 'Puede gestionar proyectos':
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Este rol tiene privilegios para gestionar sus capas y proyectos dentro de su propio espacio de trabajo, solo le es visible su almacén de datos y su administardor de archivos. Aunque le den permisos para visualizar proyectos y permisos de lectura y escritura sobre capas de otros usuarios, solo son privilegios para visualización y edición de los datos pero no para gestionarlos (propiedades de capa/proyectos, simbología, toc, etc).
+
+
+1.1.3 Rol 'Usuario básico':
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Este rol solo tendrá privilegios de lectura y escritura sobre datos especificos que le hayan sido asignados por otros usuarios de mayor rol. Por tanto, el rol de este usuario no tendrá ningun espacio de trabajo para gestionar capas o proyectos, solo podrá acceder para visualizar proyectos y realizar edición de los datos sobre las capas que le hayan sido asignadas.
+
+
+1.2 Crear, modificar y eliminar usuarios
 ----------------------------------------
 La gestión de usuarios y grupos de usuarios podrán ser gestionados por un administrador del sistema o un usuario con rol de 'superusuario'. La entrada *"Usuarios y grupos"* se encuentra disponible en el menú del panel de control:
 
@@ -14,9 +32,10 @@ Desde la vista de usuarios podemos ver el listado de usuarios disponibles, así 
    - Actualizar(**2**) ó
    - Eliminar usuarios(**3**).
 
-Cuando se crean nuevos usuarios asignándole un privilegio de 'superusuario' o 'gestion', en el sistema se les genera automáticamente los siguientes espacios:
 
-* 1. su propio grupo de usuarios y pertenecerán a éste por defecto.
+**Cuando se crean nuevos usuarios asignándole un privilegio de 'superusuario' o 'gestión de proyectos', en el sistema se les genera automáticamente las siguientes entradas:**
+
+* 1. su propio grupo de usuarios y pertenecerá a éste por defecto.
 * 2. Su espacio de trabajo 
 * 3. Su almacén de base de datos
 * 4. y su directorio en administrador de archivos.
@@ -47,13 +66,13 @@ Los campos que aparecen en el formulario de 'crear usuarios' (**1**) son los sig
 En la opción de 'actualizar' (**2**) se podrá editar los privilegios y asignar o cambiar de grupos de usuarios a los que pertenece un usuario.
 
 
-1.2 Crear y modificar grupos de usuario
+1.3 Crear y modificar grupos de usuario
 ---------------------------------------
 Los permisos para gestionar el sistema, las capas o proyectos, siempre serán dados a nivel de grupos de usuarios y *NO por usuario individual*. Por lo tanto, **los usuarios siempre deberán pertenecer a un grupo de usuarios**. 
 
-Un grupo puede contener varios usuarios y éstos últimos heredarán todos los privilegios que el grupo tenga asignado a nivel de administración y gestión. 
+Un grupo puede contener varios usuarios y éstos últimos heredarán todos los privilegios que el grupo tenga asignado a nivel de administración, gestión o permisos.
 
-Un nuevo usuario con algún privilegio, por defecto tendrá su propio grupo y estará asignado en el mismo, pero los usuarios 'básicos' se les debe indicar a cual grupo pertenecerá.
+Un nuevo usuario con algún privilegio, por defecto tendrá su propio grupo y estará asignado en el mismo, pero los **usuarios con rol básico** se les debe indicar a cual grupo pertenecerá.
 
 Desde la vista de grupos podemos ver el listado de grupos disponibles, así como crear(**1**) o eliminar grupos(**2**).
 

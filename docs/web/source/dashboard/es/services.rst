@@ -23,9 +23,9 @@ Para crear un nuevo espacio de trabajo (**1**) se debe llenar el siguiente formu
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Gvsigonline genera los Web Map Service (WMS) y los Web Feature Service (WFS). Los servicios se crean desde el nivel de 'espacios de trabajo', es decir, todas las capas publicadas en un espacio de trabajo serán las contenidas en sus respectivos WMS y WFS.
 
-Desde el botón actualizar (**2**) se podrá modificar la *'descripción'* y activar o desactivar la opción de *'público'*, con esta última opción los links de los servicios estarán disponibles con acceso libre.
+Desde el botón actualizar (**2**) se podrá modificar la **'descripción'** y activar o desactivar la opción de **'público'**, con esta última opción los links de los servicios estarán disponibles con acceso libre. En el caso de que no sean públicos, el link del servicio puede compartirse y usarse pero se debe indicar un usuario y password que tenga permisos sobre éste. 
 
-Para poder obtener los links de los servicios WMS y WFS, se debe ir a la página principal (inicio) de Gvsig Online y se elige la entrada *"Servicios de Mapas"*
+Para poder obtener los links de los servicios WMS y WFS, se debe ir a la página principal (inicio) de Gvsig Online y se elige la entrada **"Servicios de Mapas"**
 
 .. image:: ../images/ws1_4.png
    :align: center
@@ -61,7 +61,7 @@ El formulario incluye diversos ejemplos de parámetros de conexión para cada ti
 Para poder añadir un almacén de datos de tipo PostGIS vectorial, la base de datos espacial debe existir previamente. 
 De esta forma, lo que estamos haciendo es registrar en gvSIG Online (y en Geoserver) los parámetros de conexión a dicha base de datos.
 
-Se tendrá que indicar los parámetros de conexión a la BD, esto permitirá crear el nuevo almacén que hará referencia a un esquema existente en la Base de Datos.
+Se tendrá que indicar los parámetros de conexión a la BD, esto permitirá crear el nuevo almacén en el sistema que hará referencia a un esquema existente en la Base de Datos, es decir, **es obligatorio que el esquema que se registra en los parámetros de conexión ya está creada dentro de la BD**.
 
 
 .. image:: ../images/ds2.png
@@ -69,7 +69,7 @@ Se tendrá que indicar los parámetros de conexión a la BD, esto permitirá cre
 
 2.2.2 GeoTiff
 ~~~~~~~~~~~~~
-Para añadir un almacén de datos tipo ráster, el fichero tif debe existir previamente en el servidor, es decir, subido al 'administrador de archivos'. En este caso estamos registrando en gvSIG Online la ruta a dicho fichero ráster.
+Para añadir un almacén de datos tipo ráster, el fichero tif debe existir previamente en el servidor, es decir, subido al **'administrador de archivos'**. En este caso estamos registrando en gvSIG Online la ruta a dicho fichero ráster.
 
 Para el almacén de datos tipo raster el formulario cambiará y nos permitirá seleccionar el fichero que compondrá el almacén.
 
@@ -77,20 +77,25 @@ Para el almacén de datos tipo raster el formulario cambiará y nos permitirá s
 .. image:: ../images/ds3.png
    :align: center
 
-Al abrir el dialogo de seleccionar archivo, este nos mostrará un ventana con el gestor de ficheros, desde donde podremos seleccionar el archivo raster que habremos subido previamente.
+Al abrir el dialogo de seleccionar archivo, este nos mostrará un ventana con el gestor de **'administrador de archivos'**, desde donde podremos seleccionar el fichero raster que habremos subido previamente.
 
 .. image:: ../images/ds4.png
    :align: center
 
+.. note:: 
+      - Para publicar en el sistema cualquier capa raster, es necesario crearle previamente su propio almacén de datos.
+    
+      - Una vez publicado el raster en el sistema, NO se podrá borrar el fichero del 'administrador de archivos', puesto que el almacén apunta a esa ruta configurada.
+
 2.2.3 WMS en cascada:
 ~~~~~~~~~~~~~~~~~~~~~
-este permite guardar un almacén de tipo Web Map Service (WMS), donde se guarda la dirección del servicio que se quiera consultar y publicar en el proyecto.
+Éste permite guardar un almacén de tipo Web Map Service (WMS), donde se guarda la dirección del servicio que se quiera consultar y publicar en el proyecto.
 
 .. image:: ../images/ds5.png
    :align: center
 
 .. note::
-   	La eliminación de un almacén de datos elimina todas las capas asociadas al almacén.
+   	La eliminación de un almacén de datos tipo postGIS vectorial o geotiff elimina del sistema todas las capas publicadas asociadas al almacén.
        
    	Por contra, no se eliminará la fuente de datos asociada (la base de datos espacial o el fichero ráster correspondiente).
 
@@ -109,23 +114,41 @@ Desde el listado de grupo de capas podemos añadir nuevo (**1**), actualizar (**
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Los grupos de capas serán asignados a los 'proyectos' a través de la configuración de éstos últimos. 
 
-Para crearlo seleccionamos el botón *'añadir nuevo grupo de capas'*, se desplegará un formulario donde hay que asignarle:
+Para crearlo seleccionamos el botón **'añadir nuevo grupo de capas'**, se desplegará un formulario donde hay que asignarle:
 
-- **Nombre**: en minúsculas, sin espacios en blanco y caracteres especiales
-- **Título**: Se puede escribir sin ninguna restricción y será el nombre que se muestra en el visor de mapas.
-- **Caché de grupo**: Esto activará automaticamente el caché de todas las capas que pertenezcan a ese grupo.
- 
 .. image:: ../images/layer_group_new.png
    :align: center
 
+
+- **1- Nombre**: en minúsculas, sin espacios en blanco y caracteres especiales
+
+- **2- Título**: Se puede escribir sin ninguna restricción y será el nombre que se muestra en el visor de mapas.
+
+- **3- Publicar capa**: primero se muestra una pregunta "Es necesario guardar el grupo de capas primero, ¿Desea continuar?", se indica **"aceptar"** y saldrá una ventana para configurar todos los parámetros de una capa que se añadirá al grupo y será publicada en el sistema.
+
+- **4- Crear capa vacía**: Similiar al de publicar capa, saldrá el mensaje y al "aceptar", se activa la ventana para añadir una capa sin registros en el sistema, automáticamente se almacenará en la BD y se publica. 
+
+- **5- Caché de grupo**: Esta opción permite que todas las capas del grupo se vean cacheadas como un solo servicio en el proyecto.
+
+- **6- Guardar**: Guardar los cambios del grupo.
+
+
 2.3.2  Actualizar grupo de capas
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Esta opción solo permitirá editar el título del grupo y activar o desactivar el caché del grupo.
+Esta opción permitirá:
+
+- editar el título del grupo
+
+- activar o desactivar el caché del grupo.
+
+- Gestionar sus capas (Añadir, actualizar, confifurar y eliminar)
+
+- establecer el orden del toc de las capas 
 
 
 2.3.2 Eliminar grupo de capas
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Cuando se da la opción de eliminar grupo de capas y tenía asociadas una o mas capas, estás últimas se designan a un grupo de capas 'por defecto' que tiene el sistema. 
+Cuando se da la opción de eliminar grupo de capas y tiene asociado una o más capas, éstas últimas no son borradas del sistema, sino que son asignadas a un grupo de capas llamado **'por defecto'**, por lo tanto continúan publicadas.
 
 
 2.4 Publicar, crear, modificar y eliminar capas
@@ -140,15 +163,24 @@ Sobre cada una de las capas podemos realizar las siguientes operaciones:
 2.4.1 Actualizar capa - Opciones de capa
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Desde el botón verde 'actualizar capa' (**3**) se puede modificar el título de la capa, grupo al que pertenece la capa, permisos de lectura-escritura y otras propiedades del visor como:
- 
-     - **Visible**: Si activamos esta opción, cada que vez que se abra el proyecto la capa siempre estará visble en el mapa.
-     - **Cacheada**: El cacheado de capas es recomendado para capas raster. Para las capas vectoriales será conveniente activarlo una vez se haya configurado su estilo y no tenga posteriores cambios, de lo contrario se deberá ir siempre al botón (**5**) *limpiar el caché* de la capa para que reconozca los nuevos cambios.
-     - **Consultable**: Perimite visualizar o consultar la información alfanumérica de la tabla de atributos, es decir, en caso de que no esté activado, solo será visible las geometrías sobre el mapa, pero si un usuario tiene permisos de escritura sobre esta capa, al ponerla en edición, SÍ que podrá ver y editar los atributos de algún elemento del mapa.
-     - **Imagen simple (sin tiles)**: Con esta opción activa NO se piden varias teselas para componer la imagen, sino que se pide una única imagen. Tiene sentido para capas externas que tienen un texto incrustado en el mapa (por ejemplo catastro) o capas WMS. 
-     - **time_enabled**: Es una propiedad que se hará disponible para usar el plugin de parámetro temporal.
 
-.. image:: ../images/layeer2_1.png
+.. image:: ../images/layer2_1.png
    :align: center
+ 
+     - **1- Visible**: Si activamos esta opción, cada que vez que se abra el proyecto la capa siempre estará visble en el mapa.
+   
+     - **2- Cacheada**: El cacheado de capas es recomendado para capas raster. Para las capas vectoriales (con muchos registros) será conveniente activarla una vez se haya configurado su estilo y no tenga posteriores cambios, de lo contrario se deberá ir siempre al botón (**5**) *limpiar el caché* de la capa para que reconozca los nuevos cambios.
+  
+     - **3- Consultable**: Perimite visualizar o consultar la información alfanumérica de la tabla de atributos, es decir, en caso de que no esté activado, solo será visible las geometrías sobre el mapa, pero si un usuario tiene permisos de escritura sobre esta capa, al ponerla en edición, SÍ que podrá ver y editar los atributos de algún elemento del mapa.
+  
+     - **4- Imagen simple (sin tiles)**: Con esta opción activa NO se piden varias teselas para componer la imagen, sino que se pide una única imagen. Tiene sentido para capas externas que tienen un texto incrustado en el mapa (por ejemplo catastro) o capas WMS. 
+  
+     - **5- Parámetro temporal**: Es una propiedad disponible en la capa para poder mostrar sobre el mapa las entidades o elementos en un instante o intervalo de tiempo definido por el usuario, para ello se debe tener como mínimo un campo con el tipo de dato: 'date' o 'timestamp'. Dicho de otra forma esta opción permite representar en el mapa las entidades en un momento dado.
+     
+            Al activarse esta propiedad se despliega otras opciones a configurar:
+        
+            * 5.1: 
+
 
 2.4.2 Configuración de capa
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
