@@ -457,7 +457,9 @@ Para añadir superficie se puede hacer uso de varias herramientas:
      
        en la tabla de registros, el campo 'Superficie gráfica' se debe actualizar con el nuevo valor del área de la LDG resultante.
        
-       El campo 'superficie declarada' deberá ser actualizada por el usuario desde AGRORED.
+       La 'superficie declarada' se deberá actualizar en el grid alfanumérico de Agrored  una vez se hayan guardado los cambios 
+       
+       realizados en el editor gráfico.
 
 
 * Añadiendo trozo digitalizado (azul) sobre LDG seleccionada (rosado).
@@ -469,6 +471,9 @@ Para añadir superficie se puede hacer uso de varias herramientas:
 
 .. image:: ../_static/images/libra_anyad_troz_dig_select2.png
    :align: center
+
+
+
    
    
 5.1.2 Con herramienta 'modificar cultivo' - Edición de vértices |herramienta5|
