@@ -1343,13 +1343,18 @@ def enumeration_add(request):
             
             for key in request.POST:
                 if 'item-content' in key:
-                    item = EnumerationItem(
-                        enumeration = enum,
-                        name = request.POST.get(key),
-                        selected = False,
-                        order = len(EnumerationItem.objects.filter(enumeration=enum))
-                    )
-                    item.save()
+                    aux_name = request.POST.get(key).strip()
+                    while '  ' in aux_name:
+                        aux_name = aux_name.replace('  ', ' ')
+                    
+                    if aux_name.__len__() > 0:
+                        item = EnumerationItem(
+                            enumeration = enum,
+                            name = aux_name,
+                            selected = False,
+                            order = len(EnumerationItem.objects.filter(enumeration=enum))
+                        )
+                        item.save()
             
         else:
             index = len(Enumeration.objects.all())
@@ -1384,13 +1389,18 @@ def enumeration_update(request, eid):
             
         for key in request.POST:
             if 'item-content' in key:
-                item = EnumerationItem(
-                    enumeration = enum,
-                    name = request.POST.get(key),
-                    selected = False,
-                    order = len(EnumerationItem.objects.filter(enumeration=enum))
-                )
-                item.save()
+                aux_name = request.POST.get(key).strip()
+                while '  ' in aux_name:
+                    aux_name = aux_name.replace('  ', ' ')
+                        
+                if aux_name.__len__() > 0:
+                    item = EnumerationItem(
+                        enumeration = enum,
+                        name = aux_name,
+                        selected = False,
+                        order = len(EnumerationItem.objects.filter(enumeration=enum))
+                    )
+                    item.save()
         
         return redirect('enumeration_list')
             
