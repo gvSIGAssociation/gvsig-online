@@ -138,7 +138,11 @@ def home(request):
     if len (projects_by_user) == 1 and not is_superuser(user) and from_login:
         return redirect('project_load', project_name=projects_by_user[0].project.name)
     else:
-        return render_to_response('home.html', {'projects': projects, 'public_projects': public_projects}, RequestContext(request))
+        external_ldap_mode = True
+        if 'AD' in settings.GVSIGOL_LDAP and settings.GVSIGOL_LDAP['AD'].__len__() > 0:
+            external_ldap_mode = False
+
+        return render_to_response('home.html', {'projects': projects, 'public_projects': public_projects, 'external_ldap_mode': external_ldap_mode}, RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required

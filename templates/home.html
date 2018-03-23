@@ -29,6 +29,8 @@
 				{% endif %}
 				<strong><i class="fa fa-clock-o margin-r-5"></i> {% trans "Last login" %}</strong>
 				<p class="text-muted">{{user.last_login}}</p><hr>
+				
+				{% if external_ldap_mode %}
 				<strong><i class="fa fa-lock margin-r-5"></i> {% trans "Password" %}</strong>
 				<p class="text-muted"><a href="" id="show-hide-pass-update-link">{% trans "Click here" %}</a> {% trans "to update your password" %}</p>
 
@@ -55,6 +57,7 @@
 						<button id="update-password-submit" class="btn btn-default">{%trans "Update password" %}</button>
 					</div>
 				</div>
+				{% endif %}
 
 			</div>
 		</div>
