@@ -1511,6 +1511,24 @@ def layergroup_mapserver_toc(group, toc_string):
         mapservice_backend.createOrUpdateSortedGeoserverLayerGroup(toc)
         mapservice_backend.reload_nodes()
     
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@csrf_exempt
+def get_geoserver_info(request):
+    info = mapservice_backend.getGsconfig()
+    info = None
+    try:
+        response = {
+                'response': 200,
+                'base_url': info.gs_base_url
+            }     
+    except:
+        response = {
+                'response': 500,
+                'base_url': None
+            } 
+    return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -1896,13 +1914,18 @@ def enumeration_add(request):
                 
                 for key in request.POST:
                     if 'item-content' in key:
-                        item = EnumerationItem(
-                            enumeration = enum,
-                            name = request.POST.get(key),
-                            selected = False,
-                            order = len(EnumerationItem.objects.filter(enumeration=enum))
-                        )
-                        item.save()
+                        aux_name = request.POST.get(key).strip()
+                        while '  ' in aux_name:
+                            aux_name = aux_name.replace('  ', ' ')
+                        
+                        if aux_name.__len__() > 0:
+                            item = EnumerationItem(
+                                enumeration = enum,
+                                name = aux_name,
+                                selected = False,
+                                order = len(EnumerationItem.objects.filter(enumeration=enum))
+                            )
+                            item.save()
                 
             else:
                 index = len(Enumeration.objects.all())
@@ -1942,13 +1965,18 @@ def enumeration_update(request, eid):
             
         for key in request.POST:
             if 'item-content' in key:
-                item = EnumerationItem(
-                    enumeration = enum,
-                    name = request.POST.get(key),
-                    selected = False,
-                    order = len(EnumerationItem.objects.filter(enumeration=enum))
-                )
-                item.save()
+                aux_name = request.POST.get(key).strip()
+                while '  ' in aux_name:
+                    aux_name = aux_name.replace('  ', ' ')
+                        
+                if aux_name.__len__() > 0:
+                    item = EnumerationItem(
+                        enumeration = enum,
+                        name = aux_name,
+                        selected = False,
+                        order = len(EnumerationItem.objects.filter(enumeration=enum))
+                    )
+                    item.save()
         
         return redirect('enumeration_list')
             
