@@ -60,5 +60,7 @@ urlpatterns = [
 
     url(r'^layers_get_temporal_properties/$', 'gvsigol_services.views.layers_get_temporal_properties', name='layers_get_temporal_properties'),
     url(r'^get_date_fields_from_resource/$', 'gvsigol_services.views.get_date_fields_from_resource', name='get_date_fields_from_resource'),
-
+    
+    url(r'^get_geoserver_info/$', 'gvsigol_services.views.get_geoserver_info', name='get_geoserver_info'),
+    
 ]

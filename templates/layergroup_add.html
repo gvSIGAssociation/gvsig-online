@@ -102,6 +102,7 @@
 	
 		
 	$('#button-create-layer').click(function() {
+		$("#myModalLabel").text(gettext("Create new layer"));
 		$('#button-add-layer-group-accept').click( function() {
 			$('#layer-group-form').attr('action', '/gvsigonline/services/layergroup_add/?redirect=create-layer');
 			$('#save_button').trigger('click');
@@ -109,6 +110,7 @@
 	});
 	
 	$('#button-import-layer').click(function() {
+		$("#myModalLabel").text(gettext("Publish layer"));
 		$('#button-add-layer-group-accept').click( function() {
 			$('#layer-group-form').attr('action', '/gvsigonline/services/layergroup_add/?redirect=import-layer');
 			$('#save_button').trigger('click');
