@@ -1204,8 +1204,13 @@ editionBar.prototype.createFeatureForm = function(feature) {
 		
 		$('#edit_feature_properties .form-control').on('blur', function (evt) {
 			var props = feature.getProperties();
-			props[evt.currentTarget.id] = evt.currentTarget.value;
-			feature.setProperties(props);
+			if(evt.currentTarget.type == "number" && evt.currentTarget.value == ""){
+				delete props[evt.currentTarget.id];
+				feature.setProperties(props);
+			}else{
+				props[evt.currentTarget.id] = evt.currentTarget.value;
+				feature.setProperties(props);
+			}
 		});
 		$('#edit_feature_properties .checkbox').on('blur', function (evt) {
 			var props = feature.getProperties();
