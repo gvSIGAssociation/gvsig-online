@@ -128,7 +128,7 @@
 					aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
-				<h4 class="modal-title" id="myModalLabel">{% trans "Create new layer" %}</h4>
+				<h4 class="modal-title" id="myModalLabel2">{% trans "Create new layer" %}</h4>
 			</div>
 			<div class="modal-body">
 				<p>{% trans "Is needed to save this layer group first, Do you want continue?" %}</p>
@@ -170,6 +170,7 @@
 	$('#submenu-layergroups').addClass("active");
 	
 	$('#button-create-layer').click(function() {
+		$("#myModalLabel2").text(gettext("Create new layer"));
 		$('#button-add-layer-group-accept').click( function() {
 			$('#layer-group-form').attr('action', '/gvsigonline/services/layergroup_update/{{lgid}}/?redirect=create-layer');
 			$('#save_button').trigger('click');
@@ -177,6 +178,7 @@
 	});
 	
 	$('#button-import-layer').click(function() {
+		$("#myModalLabel2").text(gettext("Publish layer"));
 		$('#button-add-layer-group-accept').click( function() {
 			$('#layer-group-form').attr('action', '/gvsigonline/services/layergroup_update/{{lgid}}/?redirect=import-layer');
 			$('#save_button').trigger('click');

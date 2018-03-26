@@ -52,3 +52,9 @@ msgstr "Nombre no válido: Los identificadores deben empezar con una letra o gui
 
 msgid "Enumeration cannot contain point-colon"
 msgstr "los valores no pueden contener valores (;)"
+
+msgid "Create new layer"
+msgstr "Crear capa vacía"
+
+msgid "Publish layer"
+msgstr "Publicar capa"
