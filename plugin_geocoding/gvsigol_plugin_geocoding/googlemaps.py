@@ -84,21 +84,27 @@ class GoogleMaps():
         https://maps.googleapis.com/maps/api/geocode/xml?address=Blasco Ibáñez, Valencia, Spain
         '''
         address_json = json.loads(address_str)
-        query = address_json['address[data][description]']
+        
+        query = ''
+        try:
+            query = address_json['address[data][description]']
+        except:
+            query = address_json['data']['description']
         
         params = {
             'address': query
         }
-
-        json_results = self.get_json_from_url(self.urls['find_url'], params)
-        if 'results' in json_results:
-            for result in json_results['results']:
-                parse_result = {
-                    'address': result['formatted_address'],
-                    'lat': result['geometry']['location']['lat'], 
-                    'lng': result['geometry']['location']['lng']
-                }
-                return parse_result
+        
+        if query != '':
+            json_results = self.get_json_from_url(self.urls['find_url'], params)
+            if 'results' in json_results:
+                for result in json_results['results']:
+                    parse_result = {
+                        'address': result['formatted_address'],
+                        'lat': result['geometry']['location']['lat'], 
+                        'lng': result['geometry']['location']['lng']
+                    }
+                    return parse_result
         return {}
         
         

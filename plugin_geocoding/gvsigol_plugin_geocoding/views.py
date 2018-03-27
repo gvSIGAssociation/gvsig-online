@@ -437,6 +437,19 @@ def upload_shp_cartociudad_status(request):
             
     return HttpResponse(json.dumps(status, indent=4), content_type='application/json')
     
+
+def find_first_candidate(request):
+    suggestion = {}
+    if request.method == 'GET':
+        query = request.GET.get('q')  
+        results = get_geocoder().search_candidates(query)
+        
+        if results['suggestions'].__len__() > 0:
+            address = json.dumps(results['suggestions'][0], indent=4)
+            suggestion = get_geocoder().find_candidate(address)
+            
+    return HttpResponse(json.dumps(suggestion, indent=4), content_type='application/json')
+
     
 def search_candidates(request):
     if request.method == 'GET':
@@ -490,7 +503,7 @@ def get_providers_activated(request):
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
-def get_resource_list_available(request):
+def get_geocoding_resource_list_available(request):
     """
     Lists the resources existing on a data store, retrieving the information
     directly from the backend (which may differ from resurces available on
