@@ -1205,7 +1205,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 		
 		$('#edit_feature_properties .form-control').on('blur', function (evt) {
 			var props = feature.getProperties();
-			if(evt.currentTarget.type == "number" && evt.currentTarget.value == ""){
+			if(evt.currentTarget.value == ""){
 				delete props[evt.currentTarget.id];
 				feature.setProperties(props);
 			}else{
