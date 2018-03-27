@@ -181,6 +181,10 @@ search.prototype.initUI = function() {
 						};
 					})
 				};
+			}else{
+				return {
+					suggestions: []
+				}
 			}
 
 		},

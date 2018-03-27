@@ -160,7 +160,7 @@ search.prototype.initUI = function() {
 		},
 		error: function(){}
 	});
-
+	
 	parent.$(parent.document).find('#autocomplete').autocomplete({
 		serviceUrl: '/gvsigonline/geocoding/search_candidates/',
 		paramName: 'q',
@@ -181,6 +181,10 @@ search.prototype.initUI = function() {
 						};
 					})
 				};
+			}else{
+				return {
+					suggestions: []
+				}
 			}
 
 		},

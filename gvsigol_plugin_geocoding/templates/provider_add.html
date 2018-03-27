@@ -260,7 +260,7 @@
 	function updateResourceList(id_workspace, id_datastore) {
 		if (id_workspace && id_datastore) {
 			$("body").overlay();
-			$.getJSON("{% url 'get_resource_list_available' %}", {name_datastore: id_datastore, id_workspace: id_workspace}, function(data2){
+			$.getJSON("{% url 'get_geocoding_resource_list_available' %}", {name_datastore: id_datastore, id_workspace: id_workspace}, function(data2){
 				if(data2){
 					var id_ds = data2["id_datastore"];
 					$.getJSON("{% url 'backend_resource_list' %}", {id_datastore: id_ds, type: "all"}, function(data){
