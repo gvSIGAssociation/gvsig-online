@@ -1207,6 +1207,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 			var props = feature.getProperties();
 			if(evt.currentTarget.value == ""){
 				delete props[evt.currentTarget.id];
+				feature.unset(props);
 				feature.setProperties(props);
 			}else{
 				props[evt.currentTarget.id] = evt.currentTarget.value;
