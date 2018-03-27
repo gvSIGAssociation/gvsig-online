@@ -4,6 +4,7 @@ urlpatterns = [
     url(r'^geocoding/get_conf/$', 'gvsigol_plugin_geocoding.views.get_conf', name='get_conf'),
     url(r'^geocoding/search_candidates/$', 'gvsigol_plugin_geocoding.views.search_candidates', name='search_candidates'),
     url(r'^geocoding/find_candidate/$', 'gvsigol_plugin_geocoding.views.find_candidate', name='find_candidate'),
+    url(r'^geocoding/find_first_candidate/$', 'gvsigol_plugin_geocoding.views.find_first_candidate', name='find_first_candidate'),
     url(r'^geocoding/get_location_address/$', 'gvsigol_plugin_geocoding.views.get_location_address', name='get_location_address'),
     url(r'^geocoding/provider_list/$', 'gvsigol_plugin_geocoding.views.provider_list', name='provider_list'),
     url(r'^geocoding/provider_add/$', 'gvsigol_plugin_geocoding.views.provider_add', name='provider_add'),
@@ -17,7 +18,7 @@ urlpatterns = [
     
     url(r'^geocoding/upload_shp_cartociudad/(?P<provider_id>[0-9]+)/$', 'gvsigol_plugin_geocoding.views.upload_shp_cartociudad', name='upload_shp_cartociudad'),
     
-    url(r'^geocoding/get_resource_list_available/$', 'gvsigol_plugin_geocoding.views.get_resource_list_available', name='get_resource_list_available'),
+    url(r'^geocoding/get_geocoding_resource_list_available/$', 'gvsigol_plugin_geocoding.views.get_geocoding_resource_list_available', name='get_geocoding_resource_list_available'),
     url(r'^geocoding/get_providers_activated/$', 'gvsigol_plugin_geocoding.views.get_providers_activated', name='get_providers_activated'),
 
 

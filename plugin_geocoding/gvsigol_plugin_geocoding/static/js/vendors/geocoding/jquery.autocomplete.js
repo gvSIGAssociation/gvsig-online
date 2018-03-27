@@ -807,6 +807,10 @@
             var that = this,
             options = that.options;
 
+            if(!result){
+            	return;
+            }
+            
             if(!result.suggestions){
             	result["suggestion"] = [];
             }
