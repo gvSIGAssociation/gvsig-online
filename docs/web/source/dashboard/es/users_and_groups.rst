@@ -7,7 +7,7 @@ Se manejan tres roles desde el sistema:
 
 1.1.1 Rol 'Es Superusuario':
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Este rol tendrá por defecto todos los privilegios del sistema, es decir, podrá dar de alta nuevos usuarios, nuevos espacios de trabajo, tener visible todos los proyectos y capas de cualquier usuario (así como poder gestionarlas,permisos de lectura y escitura)). Este rol también es el único que puede administrar las capas base, bibliotecas de símbolos y rampas de color. 
+Este rol tendrá por defecto todos los privilegios del sistema, es decir, podrá dar de alta nuevos usuarios, nuevos espacios de trabajo, tener visible todos los proyectos y capas de cualquier usuario (así como poder gestionarlas,permisos de lectura y escitura). Este rol también es el único que puede administrar las capas base, bibliotecas de símbolos y rampas de color. 
 
 1.1.2 Rol 'Puede gestionar proyectos':
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -33,7 +33,7 @@ Desde la vista de usuarios podemos ver el listado de usuarios disponibles, así 
    - Eliminar usuarios(**3**).
 
 
-**Cuando se crean nuevos usuarios asignándole un privilegio de 'superusuario' o 'gestión de proyectos', en el sistema se les genera automáticamente las siguientes entradas:**
+**Cuando se crean nuevos usuarios asignándoles un privilegio de 'es superusuario' o 'Puede gestionar proyectos', en el sistema se les genera automáticamente las siguientes entradas:**
 
 * 1. su propio grupo de usuarios y pertenecerá a éste por defecto.
 * 2. Su espacio de trabajo 
