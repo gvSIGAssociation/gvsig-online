@@ -12,7 +12,7 @@ Para crear un nuevo espacio de trabajo (**1**) se debe llenar el siguiente formu
 
 - **Nombre**, no puede contener espacios, signos de puntuación ni caracteres especiales como la *"ñ"*.
 - **Descripción**, este se reflejerá en la página donde se sirven los servicios.
-- **Activar el check '¿es público?'**, esta opción permitirá que los servicios sean públicos en la página principal de gvsigOnlie.
+- **Activar el check '¿es público?'**, esta opción permitirá que los servicios sean públicos en la página principal de gvsigOnlie. De lo contrario serán servicios privados que igualmente se puede compartir el link pero se debe suministrar el usuario y contraseña del dueño del servicio.
 
 - Habitualmente no es necesario modificar las URL de los servicios (estos son generados automáticamente cuando se añade el nombre del nuevo espacio de trabajo).
 
@@ -56,7 +56,7 @@ el nombre (sin caracteres especiales) y los parámetros de conexión.
 
 El formulario incluye diversos ejemplos de parámetros de conexión para cada tipo de almacén. Se pueden crear tres tipos de almacenes, pueden ser:
 
-2.2.2 PostGIS vectorial:
+2.2.1 PostGIS vectorial:
 ~~~~~~~~~~~~~~~~~~~~~~~~
 Para poder añadir un almacén de datos de tipo PostGIS vectorial, la base de datos espacial debe existir previamente. 
 De esta forma, lo que estamos haciendo es registrar en gvSIG Online (y en Geoserver) los parámetros de conexión a dicha base de datos.
@@ -69,7 +69,7 @@ Se tendrá que indicar los parámetros de conexión a la BD, esto permitirá cre
 
 2.2.2 GeoTiff
 ~~~~~~~~~~~~~
-Para añadir un almacén de datos tipo ráster, el fichero tif debe existir previamente en el servidor, es decir, subido al **'administrador de archivos'**. En este caso estamos registrando en gvSIG Online la ruta a dicho fichero ráster.
+Para añadir un almacén de datos tipo ráster, el fichero .tif (**georreferenciado**) debe existir previamente en el servidor, es decir, subido al **'administrador de archivos'**. En este caso estamos registrando en gvSIG Online la ruta a dicho fichero ráster.
 
 Para el almacén de datos tipo raster el formulario cambiará y nos permitirá seleccionar el fichero que compondrá el almacén.
 
@@ -83,7 +83,7 @@ Al abrir el dialogo de seleccionar archivo, este nos mostrará un ventana con el
    :align: center
 
 .. note:: 
-      - Para publicar en el sistema cualquier capa raster, es necesario crearle previamente su propio almacén de datos.
+      - Después de subir el fichero raster a un directorio del administrador de archivos, es necesario crearle su propio almacén de datos para posteriormente ser publicados en un proyecto (geoportal). 
     
       - Una vez publicado el raster en el sistema, NO se podrá borrar el fichero del 'administrador de archivos', puesto que el almacén apunta a esa ruta configurada.
 
@@ -128,7 +128,7 @@ Para crearlo seleccionamos el botón **'añadir nuevo grupo de capas'**, se desp
 
 - **4- Crear capa vacía**: Similiar al de publicar capa, saldrá el mensaje y al "aceptar", se activa la ventana para añadir una capa sin registros en el sistema, automáticamente se almacenará en la BD y se publica. 
 
-- **5- Caché de grupo**: Esta opción permite que todas las capas del grupo se vean cacheadas como un solo servicio en el proyecto.
+- **5- Caché de grupo**: Esta opción permite que todas las capas del grupo se vean cacheadas como un sola capa, es decir, realiza la petición para mostrar en el mapa todas las capas del grupo como un solo servcicio y no como como capas independientes.
 
 - **6- Guardar**: Guardar los cambios del grupo.
 
@@ -141,14 +141,18 @@ Esta opción permitirá:
 
 - activar o desactivar el caché del grupo.
 
-- Gestionar sus capas (Añadir, actualizar, confifurar y eliminar)
+- Gestionar sus capas (Añadir, actualizar, configurar y eliminar)
 
-- establecer el orden del toc de las capas 
+- **Establecer el orden del toc de las capas, como quiran mostrarse en el árbol de capas del geoportal**
 
 
-2.3.2 Eliminar grupo de capas
+2.3.3 Limpiar chaché
+~~~~~~~~~~~~~~~~~~~~
+Sirve para actualizar/limpiar el caché de todas las capas del grupo pero como si fuese una sola capa.
+
+2.3.4 Eliminar grupo de capas
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Cuando se da la opción de eliminar grupo de capas y tiene asociado una o más capas, éstas últimas no son borradas del sistema, sino que son asignadas a un grupo de capas llamado **'por defecto'**, por lo tanto continúan publicadas.
+Cuando se da la opción de **eliminar grupo de capas** y contiene una o más capas, éstas últimas no son borradas del sistema, sino que son asignadas a un grupo de capas llamado **'por defecto'**, por lo tanto continúan publicadas en el sistema, pero no asignadas a ningun proyecto.
 
 
 2.4 Publicar, crear, modificar y eliminar capas
@@ -166,6 +170,7 @@ Desde el botón verde 'actualizar capa' (**3**) se puede modificar el título de
 
 .. image:: ../images/layer2_1.png
    :align: center
+
  
      - **1- Visible**: Si activamos esta opción, cada que vez que se abra el proyecto la capa siempre estará visble en el mapa.
    
@@ -178,7 +183,10 @@ Desde el botón verde 'actualizar capa' (**3**) se puede modificar el título de
      - **5- Parámetro temporal**: Es una propiedad disponible en la capa para poder mostrar sobre el mapa las entidades o elementos en un instante o intervalo de tiempo definido por el usuario, para ello se debe tener como mínimo un campo con el tipo de dato: 'date' o 'timestamp'. Dicho de otra forma esta opción permite representar en el mapa las entidades en un momento dado.
      
             Al activarse esta propiedad se despliega otras opciones a configurar:
-        
+            
+.. image:: ../images/layer2_1_temporal.png
+   :align: center
+            
             * 5.1: 
 
 
