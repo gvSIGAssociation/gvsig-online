@@ -157,16 +157,34 @@ Cuando se da la opción de **eliminar grupo de capas** y contiene una o más cap
 
 2.4 Publicar, crear, modificar y eliminar capas
 -----------------------------------------------
-Desde el listado de capas podemos acceder a la gestión de las mismas. Podemos publicar capas existentes en almacenes de datos(**1**), o crear capas vacías(**2**) definiendo de forma manual los campos.
+Desde el listado de capas podemos acceder a la gestión de las mismas. Desde esta entrada se pueden publicar capas existentes en almacenes de datos(**6**), o crear capas vacías(**7**) donde se defime de forma manual los campos y automáticamente es guardada en un almacén de datos y publicada en el sistema.
 
 .. image:: ../images/layer1.png
    :align: center
 
-Sobre cada una de las capas podemos realizar las siguientes operaciones:
+Sobre cada una de las capas podemos ver y realizar las siguientes operaciones:
 
-2.4.1 Actualizar capa - Opciones de capa
+2.4.1 Información básica de la capa
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Cada capa vectorial, raster o servicio (WMS) que este publicado correctamente, estará enlistado en esta vista y se visualiza la siguiente información (**1**):
+
+- **ID**: Es el identificador único con el que se ha resgistrado la capa en el sistema, suele ser de uso interno.
+
+- **Previsualización**: Como su nombre lo indica, es una vista previa de las geometrías que contiene una capa, cuado se le es asignado una simbología también se puede apreciar su estilo. Cada vez que se añaden geometrías a la capa o se cambie de estilo se puede actualizar mediante la opción **limpiar caché** (**4**). En el caso de que este preview se vea como una imagen rota, es una señal que ha existido un fallo en le transcurso de la publicación o la capa es inconsistente para el sistema y debe revisarse con un GIS de escritorio. 
+
+- **Nombre**: es el nombre de la capa como se ha creado en el almacén de base de datos. Siempre será en minúsculas, sin espacios y sin caracteres especiales.
+
+- **Título**: Es el alías que es asigado a la capa y como se verá publicado en el proyecto. En este caso no tiene restricciones en caracteres especiales o espacios.
+
+- **Almacén de datos**: Es el nombre del repositorio de la Base de datos donde está almacenada la capa 
+
+- **Grupo de capas**: es el nombre del grupo de capas al cual pertenece. Una capa **siempre deberá pertenecer a un grupo de capas para ser publicada**
+
+- **Opciones de capa**: cada capa contará con cuatro botones de herramientas configurables, Acualizar (**2**), configurar (**3**), limpiar caché (**4**) y Eliminar capa (**5**)
+
+2.4.2 Actualizar capa - Opciones de capa
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Desde el botón verde 'actualizar capa' (**3**) se puede modificar el título de la capa, grupo al que pertenece la capa, permisos de lectura-escritura y otras propiedades del visor como:
+Desde el botón verde 'actualizar capa' (**2**) se puede modificar el título de la capa, grupo al que pertenece la capa, permisos de lectura-escritura y otras propiedades del visor como:
 
 .. image:: ../images/layer1_2_temporal.png
    :align: center
@@ -176,9 +194,9 @@ Desde el botón verde 'actualizar capa' (**3**) se puede modificar el título de
 
 **2- Cacheada**: El cacheado de capas es recomendado para capas raster. Para las capas vectoriales (con muchos registros) será conveniente activarla una vez se haya configurado su estilo y no tenga posteriores cambios, de lo contrario se deberá ir siempre al botón (**5**) *limpiar el caché* de la capa para que reconozca los nuevos cambios.
 
-**3- Consultable**: Perimite visualizar o consultar la información alfanumérica de la tabla de atributos, es decir, en caso de que no esté activado, solo será visible las geometrías sobre el mapa, pero si un usuario tiene permisos de escritura sobre esta capa, al ponerla en edición, SÍ que podrá ver y editar los atributos de algún elemento del mapa.
+**3- Consultable**: Perimite visualizar o consultar la información alfanumérica de la tabla de atributos, es decir, en caso de que no esté activado, solo será visible las geometrías sobre el mapa y NO sus atributos, pero si un usuario tiene permisos de escritura sobre esta capa, al ponerla en edición, SÍ que podrá ver y editar los atributos de algún elemento del mapa.
 
-**4- Imagen simple (sin tiles)**: Con esta opción activa NO se piden varias teselas para componer la imagen, sino que se pide una única imagen. Tiene sentido para capas externas que tienen un texto incrustado en el mapa (por ejemplo catastro) o capas WMS. 
+**4- Imagen simple (sin tiles)**: Con esta opción activa NO se piden varias teselas para componer la imagen, sino que se pide al servidor de mapas una única imagen. Tiene sentido para capas externas que tienen un texto incrustado en el mapa (por ejemplo catastro) o capas WMS. 
 
 **5- Parámetro temporal**: Es una propiedad disponible en la capa para poder mostrar sobre el mapa las entidades o elementos en un instante o intervalo de tiempo definido por el usuario, para ello se debe tener como mínimo un campo con el tipo de dato: 'date' o 'timestamp'. Dicho de otra forma esta opción permite representar en el mapa las entidades en un momento dado.
 
@@ -186,33 +204,40 @@ Desde el botón verde 'actualizar capa' (**3**) se puede modificar el título de
 Al activarse esta propiedad se despliega otras opciones a configurar:
             
 
+FALTAAAAAAAAAAAA---FALTAAAAAAAAAAAAAAAAAAAAAAA
 
 
-2.4.2 Configuración de capa
+2.4.3 Configuración de capa
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-En la opción de 'configurar capa' - botón morado (**4**), Aqui se puede configurar los títulos de los nombres de campos y dar permisos de visualización y edición para cada uno de ellos.
+En la opción de 'configurar capa' - botón morado (**3**), se puede configurar los títulos de los nombres de campos y dar permisos de visualización y edición para cada uno de ellos.
 
       - Podemos definir alias a los nombres de los campos para cada idioma del sistema seleccionado, por ejemplo, los alias definidos en 'título del campo Español' seran visibles cuando el idioma del sistema esté en 'Español'.
       - Definir qué campos serán visibles para las herramientas del visor (herramienta de información, tabla de atributos, etc …). 
       - Activar cuales son los campos que pueden ser editados por el usuario con privilegio de escritura.
       - Finalmente seleccionar los campos que serán visibles en la herramienta info (i) rápida del visor.
 
+
+FALTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
+**REALIZAR UN EJEMPLO DE ESTAS CONFIGURACIONES** 
+
+
 .. image:: ../images/layer2_2.png
    :align: center
 
-2.4.3 Limpiar caché
+2.4.4 Limpiar caché
 ~~~~~~~~~~~~~~~~~~~
  Esta opción, como su nombre lo indica, limpia la caché de la capa en el servidor de mapas. Muy útil cuando realizamos cambios en la simbología de la capa. 
  
- Este botón amarillo de 'limpiar caché' (**5**), también actualiza los cambios de nuevos registros y atributos editados desde un sig de escritorio a través de la conexión de la Base de Datos.
+ Este botón amarillo de 'limpiar caché' (**4**), también actualiza los cambios para registrar los nuevos registros y atributos que se han añadido/editado desde un sig de escritorio a través de la conexión de la Base de Datos.
 
 
-2.4.4 Eliminar capa
+2.4.5 Eliminar capa
 ~~~~~~~~~~~~~~~~~~~
-Por último, también está el botón rojo de 'Eliminar capa' (**6**), ésta opción borra la capa publicada en el sistema y sus estilos asociados, pero continúa existiendo en la BD, por tanto podría publicarse nuevamente.
+Por último, también está el botón rojo de 'Eliminar capa' (**5**), ésta opción borra la capa publicada en el sistema y sus estilos asociados, pero continúa existiendo (almacenada) en la BD, por tanto podría publicarse nuevamente aunque debe asignarse nuevamente el estilo.
 
 
-2.4.5 Publicar capa vectorial, raster o wms
+2.4.6 Publicar capa vectorial, raster o wms
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Desde esta opción se podrá publicar las capas tipo vectorial, raster o wms que se hayan asignado previamente en un almacén de datos.
 
@@ -243,7 +268,7 @@ Los pasos para publicar una capa son los siguientes:
 .. note::
       Para las capas tipo ráster o wms, se mostrará solo permisos de letura.
    	
-2.4.6 Crear capa vacía
+2.4.7 Crear capa vacía
 ~~~~~~~~~~~~~~~~~~~~~~
 Para crear una capa vacía, seleccionaremos el botón *"Crear capa vacía"*, una vez accedamos a la vista aparecerá el siguiente formulario.
 
