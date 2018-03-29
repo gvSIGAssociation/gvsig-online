@@ -168,26 +168,25 @@ Sobre cada una de las capas podemos realizar las siguientes operaciones:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Desde el botón verde 'actualizar capa' (**3**) se puede modificar el título de la capa, grupo al que pertenece la capa, permisos de lectura-escritura y otras propiedades del visor como:
 
-.. image:: ../images/layer2_1.png
+.. image:: ../images/layer1_2_temporal.png
    :align: center
 
  
-     - **1- Visible**: Si activamos esta opción, cada que vez que se abra el proyecto la capa siempre estará visble en el mapa.
+ - **1- Visible**: Si activamos esta opción, cada que vez que se abra el proyecto la capa siempre estará visble en el mapa.
    
-     - **2- Cacheada**: El cacheado de capas es recomendado para capas raster. Para las capas vectoriales (con muchos registros) será conveniente activarla una vez se haya configurado su estilo y no tenga posteriores cambios, de lo contrario se deberá ir siempre al botón (**5**) *limpiar el caché* de la capa para que reconozca los nuevos cambios.
+ - **2- Cacheada**: El cacheado de capas es recomendado para capas raster. Para las capas vectoriales (con muchos registros) será conveniente activarla una vez se haya configurado su estilo y no tenga posteriores cambios, de lo contrario se deberá ir siempre al botón (**5**) *limpiar el caché* de la capa para que reconozca los nuevos cambios.
   
-     - **3- Consultable**: Perimite visualizar o consultar la información alfanumérica de la tabla de atributos, es decir, en caso de que no esté activado, solo será visible las geometrías sobre el mapa, pero si un usuario tiene permisos de escritura sobre esta capa, al ponerla en edición, SÍ que podrá ver y editar los atributos de algún elemento del mapa.
+ - **3- Consultable**: Perimite visualizar o consultar la información alfanumérica de la tabla de atributos, es decir, en caso de que no esté activado, solo será visible las geometrías sobre el mapa, pero si un usuario tiene permisos de escritura sobre esta capa, al ponerla en edición, SÍ que podrá ver y editar los atributos de algún elemento del mapa.
   
-     - **4- Imagen simple (sin tiles)**: Con esta opción activa NO se piden varias teselas para componer la imagen, sino que se pide una única imagen. Tiene sentido para capas externas que tienen un texto incrustado en el mapa (por ejemplo catastro) o capas WMS. 
+ - **4- Imagen simple (sin tiles)**: Con esta opción activa NO se piden varias teselas para componer la imagen, sino que se pide una única imagen. Tiene sentido para capas externas que tienen un texto incrustado en el mapa (por ejemplo catastro) o capas WMS. 
   
-     - **5- Parámetro temporal**: Es una propiedad disponible en la capa para poder mostrar sobre el mapa las entidades o elementos en un instante o intervalo de tiempo definido por el usuario, para ello se debe tener como mínimo un campo con el tipo de dato: 'date' o 'timestamp'. Dicho de otra forma esta opción permite representar en el mapa las entidades en un momento dado.
+ - **5- Parámetro temporal**: Es una propiedad disponible en la capa para poder mostrar sobre el mapa las entidades o elementos en un instante o intervalo de tiempo definido por el usuario, para ello se debe tener como mínimo un campo con el tipo de dato: 'date' o 'timestamp'. Dicho de otra forma esta opción permite representar en el mapa las entidades en un momento dado.
+
      
-            Al activarse esta propiedad se despliega otras opciones a configurar:
+Al activarse esta propiedad se despliega otras opciones a configurar:
             
-.. image:: ../images/layer2_1_temporal.png
-   :align: center
-            
-            * 5.1: 
+           
+* 5.1: 
 
 
 2.4.2 Configuración de capa
