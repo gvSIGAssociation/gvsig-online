@@ -141,7 +141,7 @@ Esta opción permitirá:
 
 - activar o desactivar el caché del grupo.
 
-- Gestionar sus capas (Añadir, actualizar, configurar y eliminar)
+- Gestionar sus capas, tal como se muestra en la entrada de **capas** desde esta opcón de **actualizar grupo de capas** también se podrá: publicar capas, crear capa vacía y por tanto actualizarlas, configurarlas y eliminarlas)
 
 - **Establecer el orden del toc de las capas, como quiran mostrarse en el árbol de capas del geoportal**
 
@@ -180,10 +180,10 @@ Cada capa vectorial, raster o servicio (WMS) que este publicado correctamente, e
 
 - **Grupo de capas**: es el nombre del grupo de capas al cual pertenece. Una capa **siempre deberá pertenecer a un grupo de capas para ser publicada**
 
-- **Opciones de capa**: cada capa contará con cuatro botones de herramientas configurables, Acualizar (**2**), configurar (**3**), limpiar caché (**4**) y Eliminar capa (**5**)
+- **Herramientas**: cada capa contará con cuatro botones de herramientas configurables, Acualizar (**2**), configurar (**3**), limpiar caché (**4**) y Eliminar capa (**5**)
 
-2.4.2 Actualizar capa - Opciones de capa
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2.4.2 Actualizar capa - Opciones en visor - Parámetro temporal
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Desde el botón verde 'actualizar capa' (**2**) se puede modificar el título de la capa, grupo al que pertenece la capa, permisos de lectura-escritura y otras propiedades del visor como:
 
 .. image:: ../images/layer1_2_temporal.png
