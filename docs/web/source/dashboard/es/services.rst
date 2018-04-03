@@ -182,6 +182,7 @@ Cada capa vectorial, raster o servicio (WMS) que este publicado correctamente, e
 
 - **Herramientas**: cada capa contará con cuatro botones de herramientas configurables, Acualizar (**2**), configurar (**3**), limpiar caché (**4**) y Eliminar capa (**5**)
 
+
 2.4.2 Actualizar capa - Opciones en visor - Parámetro temporal
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Desde el botón verde 'actualizar capa' (**2**) se puede modificar el título de la capa, grupo al que pertenece la capa, permisos de lectura-escritura y otras propiedades del visor como:
@@ -201,10 +202,56 @@ Desde el botón verde 'actualizar capa' (**2**) se puede modificar el título de
 **5- Parámetro temporal**: Es una propiedad disponible en la capa para poder mostrar sobre el mapa las entidades o elementos en un instante o intervalo de tiempo definido por el usuario, para ello se debe tener como mínimo un campo con el tipo de dato: 'date' o 'timestamp'. Dicho de otra forma esta opción permite representar en el mapa las entidades en un momento dado.
 
 
-Al activarse esta propiedad se despliega otras opciones a configurar:
-            
+Al activarse esta propiedad se despliega las opciones del parámetro temporal:
 
-FALTAAAAAAAAAAAA---FALTAAAAAAAAAAAAAAAAAAAAAAA
+* 5.1- **Campo temporal:** En esta casilla solo se desplegarán los campos que sean de tipo fecha (date). Seleccionar uno de ellos y éste campo se usará para realizar la búsqueda de los elementos y mostrarlos en el mapa.
+
+* 5.2- **Campo temporal (fin intervalo):** Igual que el campo anterior, cumple la misma función, pero este campo puede ser opcional. Es útil cuando se quiere establecer un rango de 'Inicio - Fin entre' los campos 'date' seleccionados en la casilla anterior y éste. Considerando este último campo como la fecha final del intervalo.
+
+* 5.3- **Presentación temporal:** Por ahora solo esta implementado la opción 'intervalo continuo'. Es decir, que se muestren valores de forma líneal según el rango escogido.
+
+* 5.4- **Modo para asignar valores por defecto:** Esta opción sirve para fijar un elemento (feature) que siempre se mostrará en el mapa cuando se active la capa, es decir, en las capas con parámetro temporal activado, no se mostrarán todos sus features como una capa común, sino que se pintará por defecto uno solo elemento que sea indicado en esta opción.
+
+* 5.5- **Valor por defecto:** Depende de lo que se elija en la opción anterior (*5.4*), el sistema buscará en función del primer campo 'date' seleccionado (*5.1*), el elemento que tenga la fecha más baja, más alta, alguna concreta o la mas próxima a la indicada.
+
+
+2.4.3 Usando Opción- 'Parámetro temporal'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Una vez configurada la capa con las opciones de parámetro temporal,  vamos al proyecto y refrescamos, deberá aparecer en el panel de contenidos la nueva pestaña de 'visualizar datos históricos' .
+
+Nos ubicamos en la nueva pestaña 'visualizar datos históricos' y se activa el checkbox de la función, se despliegan las opciones emplear.
+
+.. note::
+       Para activar la función de parámetro temporal es obligado tener activa (visible) la capa en el árbol de capas.  En caso de que no lo esté, al activar el check de la función de 'parámetro temporal' saldrá el siguiente mensaje al usuario: *“Se necesita tener visible, al menos, una capa temporal”*
+      
+.. image:: ../images/parametro_temporal.png
+   :align: center
+   
+**1- Pestaña de párametro temporal**: Ingresar a la pestaña de 'datos históricos'
+
+**2- Habilitar características temporales**: activar el checkbox, sino se activan las capas en el árbol de capas, saldrá un mensaje advirtiendo que no se activará la herramienta hasta que se active la capa configurada. Cuando se activa la función en el mapa se pintará el(los)  elemento(s) con fecha mayor, es decir, los datos más recientes.
+
+**3- Desde**: Casilla para añadir la fecha de búsqueda concreta o inicial (rango). A la derecha los botones (+) y (-) que harán los saltos de uno en uno de acuerdo a la resolución seleccionada (5)
+
+**4- Hasta**: Igual que la casilla anterior pero solo se activa cuando se especifica 'rango temporal' (8), considerando esta fecha como fin del rango de búsqueda.
+
+**5- Divisiones**: Resolución en días, horas, minutos, segundos, mes y año
+
+**6- Barra de ubicación**: Los botones de esta barra se sitúa en función de las fechas y resolución indicadas. Cuando se activa por primera vez la función de temporal, los botones estarán al final de la barra, puesto que mostrará las features con la fecha más alta o más reciente.
+
+**7- Instante**: Ubicar una feature en un instante dado o preciso, basta con indicar una única fecha en la casilla (3)
+
+**8- Rango temporal**:Ubicar features en todo un rango de tiempo, se debe indicar una fecha de inicio (casilla 3) y fecha  fin (casilla 4).
+
+**9- Capas con parámetro temporal**: información de las capas activas y los campos tipo 'date' que usa según la configuración dada.
+
+
+Por ejemplo, en el mapa, activando el temporal con un rango de inicio y fin y resolución por minuto, se mostrará en el mapa lo siguiente:
+
+.. image:: ../images/temporal_mapa.png
+   :align: center
+
+Siempre se podrá ir usando los botones de la 'barra de ubicación' o el (+) y (-) de cada fecha para ir mostrando en el mapa los elementos del rango.
 
 
 2.4.3 Configuración de capa
@@ -215,11 +262,6 @@ En la opción de 'configurar capa' - botón morado (**3**), se puede configurar 
       - Definir qué campos serán visibles para las herramientas del visor (herramienta de información, tabla de atributos, etc …). 
       - Activar cuales son los campos que pueden ser editados por el usuario con privilegio de escritura.
       - Finalmente seleccionar los campos que serán visibles en la herramienta info (i) rápida del visor.
-
-
-FALTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-
-**REALIZAR UN EJEMPLO DE ESTAS CONFIGURACIONES** 
 
 
 .. image:: ../images/layer2_2.png
