@@ -12,3 +12,4 @@ Plugins
    etl
    form
    libra
+   splat
