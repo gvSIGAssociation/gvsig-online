@@ -19,7 +19,7 @@ Genera un mapa topográfico que ilustra la predicción de cobertura regional de 
 
 Hay que tener en cuenta que no es necesaria una leyenda porque únicamente muestra la línea visual de la antena (hasta donde podríamos ver si nos ubicamos en la posición de la antena)
 
-.. image:: ../images/splat1_map_linea_vista.png
+.. image:: ../_static/images/splat1_map_linea_vista.png
    :align: center
 
 2.2 Mapa de análisis de pérdida por trayectoria (Path loss analysis)
@@ -29,7 +29,11 @@ Genera un mapa multicolor que ilustra los niveles de señal esperados (pérdidas
 
 Es importante destacar que la pérdida por trayectoria (atenuación en la atmósfera) únicamente dependen de la frecuencia y la distancia al emisor, no de la potencia.
 
-.. image:: ../images/splat2_map_perdida_trayectoria.png
+.. image:: ../_static/images/splat2_map_perdida_trayectoria.png
    :align: center
+   
+2.3 Mapa de análisis de intensidad de campo (Field strength analysis)
+_____________________________________________________________________
+   
    
    
