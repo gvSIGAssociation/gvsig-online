@@ -6,12 +6,12 @@
 <div class="row">
 	<div class="col-md-12">
 		<div class="box padding-20">
-			<form role="form" method="post" action="/gvsigonline/services/datastore_add/">
+			<form id="main_form" role="form" method="post" action="/gvsigonline/services/datastore_add/">
 				{% csrf_token %}
 				<div class="box-header with-border">
 					<h3 class="box-title">{% trans "Add datastore" %}</h3>
 					<div class="box-tools pull-right">
-						<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+						<div id="save_button" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</div>					
 					</div>
 				</div>					
 				<div class="box-body">
@@ -74,6 +74,30 @@
 							{{ form.connection_params }}						
 						</div>
 					</div>
+					
+					<div class="row select-mosaic_dimension" style="display: none;">
+						<div class="col-md-12">
+							<input type="checkbox" id="time_dimension_input" name="time_dimension_input"/><label>{% trans "Temporal dimension" %}</label>
+						</div>
+						<div class="col-md-6">
+							 <input class="form-control" id="time_dimension_text" maxlength="500" name="time_dimension_text" type="text" placeHolder="(?<=_)[0-9]{8}" disabled>	
+						</div>
+						<div class="col-md-6">
+							 <input class="form-control" id="time_dimension_format" maxlength="500" name="time_dimension_format" type="text" placeHolder="yyyyMMdd" disabled>	
+						</div>
+					</div>	
+					
+					<div class="row select-mosaic_dimension" style="display: none;">
+						<div class="col-md-12">
+							<input type="checkbox" id="elevation_dimension_input" name="elevation_dimension_input"/><label>{% trans "Elevation dimension" %}</label>
+						</div>
+						<div class="col-md-6">
+							<input class="form-control" id="elevation_dimension_text" maxlength="500" name="elevation_dimension_text" type="text" placeHolder="(?<=_)[0-9]{3}.[0-9]{4}" disabled>	
+						</div>
+						<div class="col-md-6">
+							<input class="form-control" id="elevation_dimension_format" maxlength="500" name="elevation_dimension_format" type="text" placeHolder="" disabled>	
+						</div>
+					</div>	
 					
 				</div>									
 			</form>	
@@ -145,6 +169,19 @@ $().ready(function(){
 // 			code += '\t "user": "wmsuser", // * ' + gettext('Only required if service is authenticated') + ' \n';
 // 			code += '\t "password": "wmspassword", // * ' + gettext('Only required if service is authenticated') + ' \n';
 // 			code += '}';
+		
+		}  else if (type == 'c_ImageMosaic') {
+			$('#select-file-row').css('display', 'block');
+			$('.select-mosaic_dimension').css('display', 'block');
+			$('#connection-params-row').css('display', 'none');
+			code += '{ \n';
+			code += '\t "url": "url_replace", \n';
+			code += '\t "date_regex": "", \n';
+			code += '\t "date_format": "", \n';
+			code += '\t "ele_regex": "", \n';
+			code += '\t "ele_format": "" \n';
+			code += '}';
+			
 		}
 		
 		codemirror.setValue(code);
@@ -164,7 +201,61 @@ $().ready(function(){
 		GOL.DS_ADD.dstypeChanged(type);
 	});
 	
+	$("#time_dimension_input").change(function() {
+		$("#time_dimension_text").prop("disabled", !$("#time_dimension_input").prop('checked'));
+		$("#time_dimension_format").prop("disabled", !$("#time_dimension_input").prop('checked'));
+	});
+	
+	$("#elevation_dimension_input").change(function() {
+		$("#elevation_dimension_text").prop("disabled", !$("#elevation_dimension_input").prop('checked'));
+		$("#elevation_dimension_format").prop("disabled", !$("#elevation_dimension_input").prop('checked'));
+	});
+	
 	GOL.DS_ADD.dstypeChanged($("#id_type").val());
+	
+	$('#save_button').click(function (e) {
+		var type = $("#id_type").val();
+		if(type == 'c_ImageMosaic'){
+			var code = '{ \n';
+			code += '\t "url": "url_replace", \n';
+			if($("#time_dimension_input").prop('checked') == true){
+				if($("#time_dimension_text").val() == ""){
+					code += '\t "date_regex": "(?<=_)[0-9]{8}", \n';
+				}else{
+					code += '\t "date_regex": "'+$("#time_dimension_text").val()+'", \n';
+				}
+				if($("#time_dimension_format").val() == ""){
+					code += '\t "date_format": "yyyyMMdd", \n';
+				}else{
+					code += '\t "date_format": "'+$("#time_dimension_format").val()+'", \n';
+				}
+			}else{
+				code += '\t "date_regex": "", \n';
+				code += '\t "date_format": "", \n';
+			}
+			
+			if($("#elevation_dimension_input").prop('checked') == true){
+				if($("#elevation_dimension_text").val() == ""){
+					code += '\t "ele_regex": "(?<=_)[0-9]{4}.[0-9]{3}", \n';
+				}else{
+					code += '\t "ele_regex": "'+$("#elevation_dimension_text").val()+'", \n';
+				}
+				if($("#elevation_dimension_format").val() == ""){
+					code += '\t "ele_format": "" \n';
+				}else{
+					code += '\t "ele_format": "'+$("#elevation_dimension_format").val()+'" \n';
+				}
+			}else{
+				code += '\t "ele_regex": "", \n';
+				code += '\t "ele_format": "" \n';
+			}
+			code += '}';
+			
+			codemirror.setValue(code);
+		}
+		
+		$('#main_form').submit();
+	});
 });
 </script>
 {% endblock %}

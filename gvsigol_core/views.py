@@ -652,6 +652,8 @@ def project_get_conf(request):
                         layer['time_resolution_second'] = l.time_resolution_second
                         layer['time_default_value_mode'] = l.time_default_value_mode
                         layer['time_default_value'] = l.time_default_value
+                        
+                        layer['time_resolution'] = l.time_resolution
                     
                     layer['cached'] = l.cached
                     
@@ -683,6 +685,8 @@ def project_get_conf(request):
                         defaultCrs = 'EPSG:4326'
                     else:
                         (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
+                        if ds_type == 'imagemosaic':
+                            ds_type = 'coverage'
                         defaultCrs = layer_info[ds_type]['srs']
                     
                     crs_code = int(defaultCrs.split(':')[1])

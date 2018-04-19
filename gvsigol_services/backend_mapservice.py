@@ -28,6 +28,7 @@ from django.utils.translation import ugettext_lazy as _
 from backend_postgis import Introspect
 import xml.etree.ElementTree as ET
 import geoserver.catalog as gscat
+from geoserver.support import DimensionInfo
 from gvsigol_core import geom
 from gvsigol import settings
 from zipfile import ZipFile
@@ -88,6 +89,7 @@ class Geoserver():
                 ('v_PostGIS', _('PostGIS vector')),
                 ('c_GeoTIFF', _('GeoTiff')),
                 ('e_WMS', _('Cascading WMS')),
+                ('c_ImageMosaic', _('ImageMosaic')),
             )
 
         gdal_tools.OGR2OGR_PATH = settings.GVSIGOL_SERVICES.get('OGR2OGR_PATH', gdal_tools.OGR2OGR_PATH)
@@ -188,8 +190,18 @@ class Geoserver():
                 ds = catalog.create_datastore(name, workspace.name)
                 ds.connection_parameters.update(params_dict)
             elif format_nature == "c": # coverage (raster)
-                ds = catalog.create_coveragestore2(name, workspace.name)
-                ds.url = params_dict.get('url')
+                if driver == "GeoTIFF":
+                    ds = catalog.create_coveragestore2(name, workspace.name)
+                    ds.url = params_dict.get('url')
+                if driver == "ImageMosaic":
+                    ele_regex = params_dict.get('ele_regex', '')
+                    date_regex = params_dict.get('date_regex', '')
+                    ele_format = params_dict.get('ele_format', '')
+                    date_format = params_dict.get('date_format', '')
+                    file_path = params_dict.get('url')
+                    self.__process_image_mosaic_folder(file_path, date_regex, date_format, ele_regex, ele_format)
+                    ds = catalog.create_coveragestore2(name, workspace.name)
+                    ds.url = params_dict.get('url')
             elif format_nature == "e": # cascading wms
                 wmsuser = None
                 wmspassword = None
@@ -230,6 +242,7 @@ class Geoserver():
     def updateDatastore(self, wsname, dsname, description, dstype, conn_params):
         try:
             format_nature=dstype[:1]
+            driver=dstype[2:]
             catalog = self.getGsconfig()
             ds = catalog.get_store(dsname, wsname)
             params_dict = json.loads(conn_params)
@@ -240,7 +253,14 @@ class Geoserver():
                 ds.connection_parameters = params
                 
             elif format_nature == "c": # coverage (raster)
-                ds.url = params_dict.get('url')
+                if driver == "GeoTIFF":
+                    ds.url = params_dict.get('url')
+                if driver == "ImageMosaic":
+                    ele_regex = params_dict.get('ele_regex', '')
+                    date_regex = params_dict.get('date_regex', '')
+                    file_path = params_dict.get('url')
+                    self.__process_image_mosaic_folder(file_path, date_regex, ele_regex)
+                    ds.url = params_dict.get('url')
                 
             elif format_nature == "e": # cascading wms              
                 wmsuser = None
@@ -540,13 +560,19 @@ class Geoserver():
         # not available/necessary for coverages
 
     def createResource(self, workspace, store, name, title):
-        if store.type[0]=="v":
-            return self.createFeaturetype(workspace, store, name, title)
-        elif store.type[0]=="e":
-            return self.createWMSLayer(workspace, store, name, title)
-        else:
-            return self.createCoverage(workspace, store, name, title)   
-
+        try:
+            if store.type[0]=="v":
+                return self.createFeaturetype(workspace, store, name, title)
+            elif store.type[0]=="e":
+                return self.createWMSLayer(workspace, store, name, title)
+            else:
+                if store.type == 'c_ImageMosaic':
+                    return self.createImageMosaicLayer(workspace, store, name, title)
+                else:    
+                    return self.createCoverage(workspace, store, name, title)   
+        except Exception as e:
+            raise rest_geoserver.FailedRequestError(-1, str(e.server_message))
+        
     def getFeaturetype(self, workspace, datastore, name, title):
         return self.rest_catalog.get_feature_type(workspace.name, datastore.name, name, user=self.user, password=self.password)
 
@@ -560,6 +586,45 @@ class Geoserver():
             print ("ERROR createFeatureType unknown exception: " + e.get_message())
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
         
+    def createImageMosaic(self, workspace, store, name, title):
+        try:
+            params = json.loads(store.connection_params)
+            file = params['url']
+            return self.rest_catalog.create_coveragestore(workspace.name, store.name, 'ImageMosaic', file, user=self.user, password=self.password)
+            #return self.rest_catalog.create_coverage(name, title, coveragestore.name, workspace.name, user=self.user, password=self.password)                                           
+        except rest_geoserver.FailedRequestError as e:
+            raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
+        except Exception as e:
+            raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
+        
+    def createImageMosaicLayer(self, workspace, store, name, title):
+        try:
+            result = self.rest_catalog.create_coveragestore_layer(workspace.name, store.name, name, title, user=self.user, password=self.password)
+            return result
+            #return self.rest_catalog.create_coverage(name, title, coveragestore.name, workspace.name, user=self.user, password=self.password)                                           
+        except rest_geoserver.FailedRequestError as e:
+            raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
+        except Exception as e:
+            raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published") + ": Error " + str(e.status_code) + " - " + e.server_message)
+    
+    def updateImageMosaicTemporal(self, store, layer):
+        try:
+            self.createimagemosaic(store, layer)
+        except rest_geoserver.FailedRequestError as e:
+            raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
+        except Exception as e:
+            raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
+    
+    
+    def uploadImageMosaic(self, workspace, store):
+        try:
+            return self.rest_catalog.upload_coveragestore(workspace, store, user=self.user, password=self.password)
+            #return self.rest_catalog.create_coverage(name, title, coveragestore.name, workspace.name, user=self.user, password=self.password)                                           
+        except rest_geoserver.FailedRequestError as e:
+            raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
+        except Exception as e:
+            raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
+    
     def createCoverage(self, workspace, coveragestore, name, title):
         try:
             return self.rest_catalog.create_coverage(name, title, coveragestore.name, workspace.name, user=self.user, password=self.password)
@@ -734,6 +799,9 @@ class Geoserver():
         elif store.type == 'c_GeoTIFF':
             url = self.rest_catalog.service_url + "/workspaces/" + workspace + "/coveragestores/" + store.name + "/coverages/" + featureType +"."+type
             ds_type = 'coverage'
+        elif store.type == 'c_ImageMosaic':
+            url = self.rest_catalog.service_url + "/workspaces/" + workspace + "/coveragestores/" + store.name + "/coverages/" + featureType +"."+type
+            ds_type = 'imagemosaic'
         
         r = self.rest_catalog.session.get(url, auth=(self.user, self.password))
         if r.status_code==200:
@@ -757,29 +825,11 @@ class Geoserver():
         # ensure type is a supported data store type
         if datastore_type=="c_GeoTIFF":
             return forms_geoserver.RasterLayerUploadForm
-        
+        elif datastore_type=="c_ImageMosaic":
+            return forms_geoserver.ImageMosaicUploadForm
         elif datastore_type=="v_PostGIS":
             return forms_geoserver.PostgisLayerUploadForm(user=user)
-    
-    def __create_datastore_properties(self):
-        mosaic_db = settings.GVSIGOL_SERVICES.get('MOSAIC_DB')
-        if mosaic_db is not None:
-            (fd, abspath) = tempfile.mkstemp()
-            os.write(fd, "SPI=org.geotools.data.postgis.PostgisNGDataStoreFactory\n")
-            os.write(fd, "host={0}\n".format(mosaic_db.get('host')))
-            os.write(fd, "port={0}\n".format(mosaic_db.get('port')))
-            os.write(fd, "database={0}\n".format(mosaic_db.get('database')))
-            os.write(fd, "schema={0}\n".format(mosaic_db.get('schema')))
-            os.write(fd, "user={0}\n".format(mosaic_db.get('user')))
-            os.write(fd, "passwd={0}\n".format(mosaic_db.get('passwd')))
-            os.write(fd, "Loose\ bbox=true\n")
-            os.write(fd, "Estimated\ extends=false\n")
-            os.write(fd, "validate\ connections=true\n")
-            os.write(fd, "Connection\ timeout=10\n")
-            os.write(fd, "preparedStatements=true\n")
-            os.close(fd)
-            return abspath
-    
+        
     def __is_raster_file(self, f):
         ext = os.path.splitext(f)[1].lower()
         return (ext in self.raster_extensions)
@@ -822,15 +872,7 @@ class Geoserver():
             except gdal_tools.GdalError as e:
                 raise rest_geoserver.RequestError(e.code, e.message)    
 
-        
-    def __test_zip_structure(self, zip_path):
-        z = zipfile.ZipFile(zip_path, "r")
-        for n in z.namelist():
-            if n.endswith("/"):
-                z.close()
-                raise BadFormat(-1, _("Bad file format. The provided zip file must not contain any subdirectory."))
-        z.close()
-    
+
     def __update_raster_stats(self, workspace, coveragestore, coverage, old_conf, stats):
         try:
             dimensions = old_conf["coverage"]["dimensions"]["coverageDimension"]
@@ -1596,6 +1638,140 @@ class Geoserver():
                 f.write(block)
                 
         return os.path.join("thumbnails/", iname)        
+    
+    
+        #
+    # ImageMosaic methods
+    #
+    
+    
+    def createimagemosaic(self, store, layer):
+        params = json.loads(store.connection_params)
+        try:
+            ele_regex = params.get('ele_regex', '')
+            date_regex = params.get('date_regex', '')
+            has_dimensions = date_regex != '' or ele_regex != ''
+                
+            if store.type=="c_ImageMosaic":
+                # the coverage has been uploaded and created
+                # now let's enable the dimensions
+                if has_dimensions:
+                    logging.error("get_resource: "+layer.name+", "+store.name+", "+store.workspace.name)
+                    catalog = self.getGsconfig()
+                    coverage = catalog.get_resource(layer.name, store.name, store.workspace.name)
+                    md = dict(coverage.metadata)
+                    if date_regex != "":
+                        md['time'] = DimensionInfo(name='time',
+                                                  enabled=layer.time_enabled,
+                                                  presentation=layer.time_presentation,
+                                                  resolution=None,
+                                                  units="ISO8601",
+                                                  unitSymbol=None,
+                                                  strategy=layer.time_default_value_mode
+                                                  )
+                    if ele_regex!="":
+                        #FIXME: we could have units different than meters
+                        md['elevation'] = DimensionInfo(name='elevation',
+                                                  enabled=layer.time_enabled,
+                                                  presentation=layer.time_presentation,
+                                                  resolution=None,
+                                                  units="EPSG:5030",
+                                                  unitSymbol= "m",
+                                                  strategy=layer.time_default_value_mode
+                                                  )
+                    coverage.metadata = md
+                    catalog.save(coverage)
+        except Exception as e:
+            logging.exception(str(e))
+  
+    
+    def __process_image_mosaic_folder(self, zip_path, date_regex, date_format, ele_regex, ele_format):
+        has_dimensions = date_regex != '' or ele_regex != ''
+        if has_dimensions:
+            folder_path = zip_path.replace('file://','')
+            try: 
+                filenames = os.listdir(folder_path)
+                founded = False
+                for filename in filenames:
+                    if (date_regex != "" and re.search(date_regex, filename) != None) or (ele_regex != "" and re.search(ele_regex, filename) != None):
+                        founded = True
+                        break
+                        
+                if founded:
+                    self.__create_mosaic_indexer(folder_path, date_regex, ele_regex)
+                    #os.remove(indexer)
+                    if date_regex != "":
+                        self.__create_mosaic_time_regexp(folder_path, date_regex, date_format)
+                        #z.write(regexp_file, "timeregex.properties")
+                        #os.remove(regexp_file)
+                    if ele_regex != "":
+                        self.__create_mosaic_ele_regexp(folder_path, ele_regex, ele_format)
+                        #z.write(regexp_file, "elevationregex.properties")
+                        #os.remove(regexp_file)
+                    self.__create_im_datastore_properties(folder_path)
+                    
+            except (WrongTimePattern, WrongElevationPattern):
+                raise
+            except:
+                raise BadFormat()
+    
+        
+    def __test_zip_structure(self, zip_path):
+        z = zipfile.ZipFile(zip_path, "r")
+        for n in z.namelist():
+            if n.endswith("/"):
+                z.close()
+                raise BadFormat(-1, _("Bad file format. The provided zip file must not contain any subdirectory."))
+        z.close()
+    
+    
+    def __create_mosaic_indexer(self, folder_path, date_regex, ele_regex):
+        fd = open(folder_path + "/indexer.properties","w+")
+        schema = "Schema=*the_geom:Polygon,location:String"
+        if date_regex != '':
+            fd.write("TimeAttribute=date\n")
+            schema = schema + ",date:java.util.Date"
+            fd.write("PropertyCollectors=TimestampFileNameExtractorSPI[timeregex](date)\n") 
+        if ele_regex != '':
+            fd.write("ElevationAttribute=elevation\n")
+            schema = schema + ",elevation:Integer"
+        schema = schema + "\n"
+        fd.write(schema)
+        fd.close()
+    
+    def __create_mosaic_time_regexp(self, folder_path, pattern="(?<=_)[0-9]{8}", format=""):
+        fd = open(folder_path + "/timeregex.properties","w+")
+        reg_ex = "regex="+pattern
+        if format != "":
+            reg_ex = reg_ex + ",format="+format
+        fd.write(reg_ex +"\n")
+        fd.close()
+    
+    def __create_mosaic_ele_regexp(self, folder_path, pattern="(?<=_)(\\d{4}\\.\\d{3})", format=""):
+        fd = open(folder_path + "/elevationregex.properties","w+")
+        reg_ex = "regex="+pattern
+        if format != "":
+            reg_ex = reg_ex + ",format="+format
+        fd.write(reg_ex +"\n")
+        fd.close()
+    
+    def __create_im_datastore_properties(self, folder_path):
+        mosaic_db = settings.GVSIGOL_SERVICES.get('MOSAIC_DB')
+        if mosaic_db is not None:
+            fd = open(folder_path + "/datastore.properties","w+")
+            fd.write("SPI=org.geotools.data.postgis.PostgisNGDataStoreFactory\n")
+            fd.write("host={0}\n".format(mosaic_db.get('host')))
+            fd.write("port={0}\n".format(mosaic_db.get('port')))
+            fd.write("database={0}\n".format(mosaic_db.get('database')))
+            fd.write("schema={0}\n".format(mosaic_db.get('schema')))
+            fd.write("user={0}\n".format(mosaic_db.get('user')))
+            fd.write("passwd={0}\n".format(mosaic_db.get('passwd')))
+            fd.write("Loose\ bbox=true\n")
+            fd.write("Estimated\ extends=false\n")
+            fd.write("validate\ connections=true\n")
+            fd.write("Connection\ timeout=10\n")
+            fd.write("preparedStatements=true\n")
+            fd.close()
 
 def get_default_backend():
     try:

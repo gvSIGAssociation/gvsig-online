@@ -27,6 +27,8 @@ import subprocess
 import logging
 import re
 import os
+from os import listdir
+from os.path import isfile, join
 
 OGR2OGR_PATH = '/usr/bin/ogr2ogr'
 GDALINFO_PATH = '/usr/bin/gdalinfo'
@@ -57,14 +59,25 @@ def get_raster_stats(raster_path):
     (band0_ min, band0_max, band0_mean, band0_stdev) = stats[0]
     (band1_ min, band1_max, band1_mean, band1_stdev) = stats[1]
     """
-    stats_str = gdalinfo(raster_path.replace("file://", ""))
-    buf = io.StringIO(stats_str)
+    
+    files = []
+    main_path = raster_path.replace("file://", "")
     result = []
-    band_results = __process_band(buf)
-    while band_results != None:
-        result.append(band_results)
+    
+    if os.path.isdir(main_path):
+        files = [f for f in listdir(main_path) if isfile(join(main_path, f)) and str(f).endswith('.tif')]
+    else:
+        files.append(main_path)
+    
+    for file_path in files:
+        stats_str = gdalinfo(join(main_path, file_path))
+        buf = io.StringIO(stats_str)
+        
         band_results = __process_band(buf)
-    buf.close()
+        while band_results != None:
+            result.append(band_results)
+            band_results = __process_band(buf)
+        buf.close()
     return result
 
 def __process_band(buf):
