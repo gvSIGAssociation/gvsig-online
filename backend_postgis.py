@@ -225,6 +225,28 @@ class Introspect:
         
         return [{'order':r[0], 'name': r[1], 'type': r[2], 'length': r[3], 'precision': r[4], 'scale': r[5], 'nullable': r[6]} for r in self.cursor.fetchall()]
     
+    
+    def get_mosaic_temporal_info(self, table, schema='public',default_mode=None, default_value=None):
+        query = "SELECT COALESCE(to_char(MIN(date), 'YYYY-MM-DD HH24:MI:SS'), '') FROM "+schema+"."+table+""
+        self.cursor.execute(query, [])
+        min = None
+        for r in self.cursor.fetchall():
+            min = r[0]
+        
+        query = "SELECT COALESCE(to_char(MAX(date), 'YYYY-MM-DD HH24:MI:SS'), '') FROM "+schema+"."+table+""
+        self.cursor.execute(query, [])
+        max = None
+        for r in self.cursor.fetchall():
+            max = r[0]
+        
+        values=[]
+        query = "SELECT COALESCE(to_char(date, 'YYYY-MM-DD HH24:MI:SS'), '') FROM "+schema+"."+table+""
+        self.cursor.execute(query, [])
+        for r in self.cursor.fetchall():
+            values.append(r[0])
+        
+        return [{'min_value':min, 'max_value':max, 'values': values}]
+    
     def get_temporal_info(self, table, schema='public', field1=None, field2=None, default_mode=None, default_value=None):
         query = "SELECT COALESCE(to_char(MIN(x.a), 'YYYY-MM-DD HH24:MI:SS'), '') FROM (SELECT "+field1+" a FROM "+schema+"."+table+") x"
         self.cursor.execute(query, [])
