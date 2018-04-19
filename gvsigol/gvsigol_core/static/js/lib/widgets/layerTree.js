@@ -46,6 +46,7 @@ var layerTree = function(conf, map, isPublic) {
 	this.step_val = 1;
 	this.min_val = 0;
 	this.max_val = 1;
+	this.mosaic_values = {};
 };
 
 /**
@@ -867,6 +868,13 @@ layerTree.prototype.refreshTemporalInfo = function() {
 	  		}else{
 	  			self.max_val = Date.parse(dt_to)/1000;
 	  		}
+	  		
+	  		try{
+	  			self.mosaic_values = JSON.parse(response['mosaic_values'].replace(/'/g, "\""));
+	  		}catch (err){
+	  		
+	  		}
+	  		
 	  		self.refreshTemporalSlider();
 		},
 	  	error: function(e){
@@ -876,7 +884,65 @@ layerTree.prototype.refreshTemporalInfo = function() {
 	});
 };
 
-layerTree.prototype.adaptToStep = function(date) {
+layerTree.prototype.getStepMax = function(layer_step, combo_step) {
+	if(layer_step == null){
+		return combo_step;
+	}
+	
+	if(layer_step == "year"){
+		return layer_step
+	}
+	
+	if(layer_step == "month"){
+		if(combo_step == "year"){
+			return combo_step;
+		}
+		else{
+			return layer_step;
+		}
+	}
+	
+	if(layer_step == "day"){
+		if(combo_step == "year" || combo_step == "month"){
+			return combo_step;
+		}
+		else{
+			return layer_step;
+		}
+	}
+	
+	if(layer_step == "hour"){
+		if(combo_step == "year" || combo_step == "month" || combo_step == "day"){
+			return combo_step;
+		}
+		else{
+			return layer_step;
+		}
+	}
+	
+	if(layer_step == "minute"){
+		if(combo_step == "year" || combo_step == "month" || combo_step == "day" || combo_step == "hour"){
+			return combo_step;
+		}
+		else{
+			return layer_step;
+		}
+	}
+	
+	if(layer_step == "second"){
+		if(combo_step == "year" || combo_step == "month" || combo_step == "day" || combo_step == "hour" || combo_step == "minute"){
+			return combo_step;
+		}
+		else{
+			return layer_step;
+		}
+	}
+	
+	return combo_step;
+	
+}
+
+layerTree.prototype.adaptToStep = function(layer, date) {
 	var hours = date.getHours();
 	var minutes = date.getMinutes();
 	var seconds = date.getSeconds();
@@ -890,24 +956,36 @@ layerTree.prototype.adaptToStep = function(date) {
 	
 	var date_string = date.getFullYear();
 	var step = $("#temporary-step-unit").val();
-	if(step=="month"){
+	
+	var step_value = this.getStepMax(layer.time_resolution, step);
+	
+	if(step_value=="year"){
+		date_string = date.getFullYear();
+	}
+	if(step_value=="month"){
 		date_string = date.getFullYear()+"-"+month;
 	}
-	if(step=="day"){
+	if(step_value=="day"){
 		date_string = date.getFullYear()+"-"+month+"-"+days;
 	}
-	if(step=="hour"){
+	if(step_value=="hour"){
 		date_string = date.getFullYear()+"-"+month+"-"+days+"T"+hours+"Z";
 	}
-	if(step=="minute"){
+	if(step_value=="minute"){
 		date_string = date.getFullYear()+"-"+month+"-"+days+"T"+hours+":"+minutes+"Z";
 	}
-	if(step=="second"){
+	if(step_value=="second"){
 		date_string = date.getFullYear()+"-"+month+"-"+days+"T"+hours+":"+minutes+":"+seconds+"Z";
 	}
 	
 	return date_string;
 }
+
+
+layerTree.prototype.parseISOString = function(s) {
+	  var b = s.split(/\D+/);
+	  return new Date(Date.UTC(b[0], --b[1], b[2], b[3], b[4], b[5], b[6]));
+	}
 
 layerTree.prototype.updateTemporalLayers = function(startDate, endDate) {
 	var layers = [];
@@ -916,7 +994,7 @@ layerTree.prototype.updateTemporalLayers = function(startDate, endDate) {
 			layers.push($(this).attr("data-layerid"));
 		}
 	});
-
+	
 	var maplayers = this.map.getLayers();
 	if(maplayers.getArray() != null){
 		for(var i=0; i<maplayers.getArray().length; i++){
@@ -925,12 +1003,62 @@ layerTree.prototype.updateTemporalLayers = function(startDate, endDate) {
 				if($(".temporary-check").is(':checked')){
 					if(startDate){
 						var start = startDate.toISOString();
-						start = this.adaptToStep(startDate);
+						start = this.adaptToStep(maplayer, startDate);
 						var end = '';
-						if (endDate){
-							end = this.adaptToStep(endDate);
-							start = start + "/" + end;
-						}
+						
+						/*
+						var minCloseDate = null;
+						var maxCloseDate = null;
+						var realMinCloseDate = null;
+						if (maplayer.layer_name in this.mosaic_values){
+							var times = this.mosaic_values[maplayer.layer_name]
+							for(var i=0; i<times.length; i++){
+								var currentDate = new Date(Date.parse(times[i]));
+								if(minCloseDate == null){
+									if(startDate >= currentDate){
+										minCloseDate = currentDate;
+									}
+								}
+								if(maxCloseDate == null){
+									if(startDate <= currentDate){
+										maxCloseDate = currentDate;
+									}
+								}
+								
+								if(currentDate >= minCloseDate && currentDate <= startDate){
+									minCloseDate = currentDate;
+								}
+								if(currentDate <= maxCloseDate && currentDate >= startDate){
+									maxCloseDate = new Date(currentDate.getTime());
+									if(maxCloseDate > minCloseDate){
+										maxCloseDate.setSeconds(maxCloseDate.getSeconds() - 1);
+									}
+								}
+							}
+							realMinCloseDate = minCloseDate;
+							
+							if(minCloseDate == null){
+								minCloseDate = startDate;
+								realMinCloseDate = new Date(startDate.getTime());
+								minCloseDate.setSeconds(minCloseDate.getSeconds() - 1);
+							}
+							
+							if(maxCloseDate == null){
+								maxCloseDate = startDate;
+								maxCloseDate.setSeconds(maxCloseDate.getSeconds() + 1);
+							}
+							
+							start = minCloseDate.toISOString() + "/" + maxCloseDate.toISOString();
+							$("#layer-"+maplayer.get("id")+" .box-body .pull-right").text(gettext("Image Mosaic") + ": " + realMinCloseDate.toISOString());
+							
+						}else{
+						*/
+							if (endDate){
+								end = this.adaptToStep(maplayer, endDate);
+								start = start + "/" + end;
+							}
+						/*}*/
+						
 						maplayer.getSource().updateParams({'TIME': start});
 					}
 				}else{
@@ -1259,7 +1387,7 @@ layerTree.prototype.createTemporaryOverlayUI = function(layer) {
 	var id = layer.id;
 	
 	var ui = '';
-	if (layer.time_enabled && layer.is_vector) {	
+	if (layer.time_enabled) {	
 		var language = $("#select-language").val();
 	
 		var conf = JSON.parse(layer.conf);
@@ -1289,16 +1417,23 @@ layerTree.prototype.createTemporaryOverlayUI = function(layer) {
 		ui += '			</div>';
 		ui += '		</div>';
 		ui += '		<div class="box-body" style="display: none;">';
-		ui +=  			gettext('temporary_field') + '<span class="pull-right" style="font-weight:bold;">'+time_field+'</span><div style="clear:both"></div>';
 		
-		if(layer.time_enabled_endfield != null && layer.time_enabled_endfield != ""){
-			var time_endfield = layer.time_enabled_endfield;
-			for(var i=0; i<fields.length; i++){
-				if(fields[i].name == time_endfield && fields[i]["title-"+language] != ""){
-					time_endfield = fields[i]["title-"+language];
+		if(fields.length > 0){
+			ui +=  			gettext('temporary_field') + '<span class="pull-right" style="font-weight:bold;">'+time_field+'</span><div style="clear:both"></div>';
+			
+			if(layer.time_enabled_endfield != null && layer.time_enabled_endfield != ""){
+				var time_endfield = layer.time_enabled_endfield;
+				for(var i=0; i<fields.length; i++){
+					if(fields[i].name == time_endfield && fields[i]["title-"+language] != ""){
+						time_endfield = fields[i]["title-"+language];
+					}
 				}
+				ui +=  			gettext('temporary_endfield') + '<span class="pull-right" style="font-weight:bold;">'+time_endfield+'</span><div style="clear:both"></div>';
 			}
-			ui +=  			gettext('temporary_endfield') + '<span class="pull-right" style="font-weight:bold;">'+time_endfield+'</span><div style="clear:both"></div>';
+		
+		}else{
+			ui +=  			'<span class="pull-right" style="font-weight:bold;">'+gettext('Image Mosaic')+'</span><div style="clear:both"></div>';
+			
 		}
 		
 		ui += '		</div>';

@@ -238,6 +238,20 @@ def datastore_add(request):
                     post_dict['connection_params'] = post_dict.get('connection_params').replace('url_replace', file)
             except:
                 has_errors = True
+        
+        if type == 'c_ImageMosaic':
+            file = post_dict.get('file')
+            try:
+                output = file.replace('file://', '')
+                if output == None or output.__len__() <= 0:
+                    has_errors = True
+                else:
+                    post_dict['connection_params'] = post_dict.get('connection_params').replace('url_replace', file)
+            except:
+                has_errors = True
+            
+            #post_dict['connection_params']['date_regex'] = '(?<=_)[0-9]{8}'
+            #post_dict['connection_params']['ele_regex'] = ''
                 
         form = DatastoreForm(post_dict)
         if not has_errors and form.is_valid():
@@ -262,6 +276,15 @@ def datastore_add(request):
                     )
                     newRecord.save()
                     mapservice_backend.reload_nodes()
+                    
+                    '''
+                    if type == 'c_ImageMosaic':
+                        try:
+                            mapservice_backend.uploadImageMosaic(newRecord.workspace, newRecord)
+                            mapservice_backend.reload_nodes()
+                        except Exception as e:
+                            pass
+                    '''        
                     return HttpResponseRedirect(reverse('datastore_list'))
                 else:
                     # FIXME: the backend should raise an exception to identify the cause (e.g. datastore exists, backend is offline)
@@ -574,6 +597,8 @@ def layer_add_with_group(request, layergroup_id):
         time_resolution_second = 0
         time_default_value_mode = ''
         time_default_value = ''
+        
+        time_resolution = ''
  
         if 'time_enabled' in request.POST:
             time_enabled = True
@@ -589,6 +614,8 @@ def layer_add_with_group(request, layergroup_id):
             #time_resolution_second = request.POST.get('time_resolution_second')
             time_default_value_mode = request.POST.get('time_default_value_mode')
             time_default_value = request.POST.get('time_default_value')
+            
+            time_resolution = request.POST.get('time_resolution')
                     
         highlight = False
         if 'highlight' in request.POST:
@@ -616,7 +643,6 @@ def layer_add_with_group(request, layergroup_id):
                         if ' ' in field:
                             raise ValueError(_("Invalid layer fields: '{value}'. Layer can't have fields with whitespaces").format(value=field))
         
-                
                 # first create the resource on the backend
                 mapservice_backend.createResource(
                     form.cleaned_data['datastore'].workspace,
@@ -624,6 +650,10 @@ def layer_add_with_group(request, layergroup_id):
                     form.cleaned_data['name'],
                     form.cleaned_data['title']
                 )
+                
+                #if form.cleaned_data['datastore'].type == 'c_ImageMosaic': 
+                #    dts = form.cleaned_data['datastore']
+                #    mapservice_backend.createImageMosaic(dts.workspace, dts, form.cleaned_data['name'],  form.cleaned_data['title'])
                 
                 # save it on DB if successfully created
                 newRecord = Layer(**form.cleaned_data)
@@ -649,16 +679,21 @@ def layer_add_with_group(request, layergroup_id):
                 newRecord.time_resolution_second = time_resolution_second
                 newRecord.time_default_value_mode = time_default_value_mode
                 newRecord.time_default_value = time_default_value
+                newRecord.time_resolution = time_resolution
                 newRecord.save()
                 
+                if form.cleaned_data['datastore'].type == 'c_ImageMosaic':
+                    mapservice_backend.updateImageMosaicTemporal(form.cleaned_data['datastore'], newRecord)
+                
                 if form.cleaned_data['datastore'].type != 'e_WMS':
-                    mapservice_backend.setQueryable(
-                        form.cleaned_data['datastore'].workspace.name,
-                        form.cleaned_data['datastore'].name,
-                        form.cleaned_data['datastore'].type,
-                        form.cleaned_data['name'],
-                        is_queryable
-                    )
+                    if form.cleaned_data['datastore'].type != 'c_ImageMosaic':
+                        mapservice_backend.setQueryable(
+                            form.cleaned_data['datastore'].workspace.name,
+                            form.cleaned_data['datastore'].name,
+                            form.cleaned_data['datastore'].type,
+                            form.cleaned_data['name'],
+                            is_queryable
+                        )
                    
                     datastore = Datastore.objects.get(id=newRecord.datastore.id)
                     workspace = Workspace.objects.get(id=datastore.workspace_id)
@@ -729,7 +764,7 @@ def layer_add_with_group(request, layergroup_id):
        
             except Exception as e:
                 try:
-                    msg = e.message
+                    msg = e.server_message
                 except:
                     msg = _("Error: layer could not be published")
                 # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
@@ -745,8 +780,9 @@ def layer_add_with_group(request, layergroup_id):
     types = {}
     for datastore in Datastore.objects.filter(created_by__exact=request.user.username):
         types[datastore.id] = datastore.type
+        datastore_types[datastore.id] = datastore.type
     
-    datastore_types['types'] = types
+    #datastore_types['types'] = types
         
     return render(request, 'layer_add.html', {
             'form': form, 
@@ -802,6 +838,8 @@ def layer_update(request, layer_id):
         time_default_value_mode = ''
         time_default_value = ''
         
+        time_resolution = ''
+        
         if 'time_enabled' in request.POST:
             time_enabled = True
             time_field = request.POST.get('time_enabled_field')
@@ -816,6 +854,8 @@ def layer_update(request, layer_id):
             time_resolution_second = request.POST.get('time_resolution_second')
             time_default_value_mode = request.POST.get('time_default_value_mode')
             time_default_value = request.POST.get('time_default_value')
+            
+            time_resolution = request.POST.get('time_resolution')
             
         highlight = False
         if 'highlight' in request.POST:
@@ -851,7 +891,12 @@ def layer_update(request, layer_id):
             layer.time_resolution_second = time_resolution_second
             layer.time_default_value_mode = time_default_value_mode
             layer.time_default_value = time_default_value
+            layer.time_resolution = time_resolution
             layer.save()
+            
+            if layer.datastore.type == 'c_ImageMosaic':
+                mapservice_backend.updateImageMosaicTemporal(layer.datastore, layer)
+                
             
             if ds.type != 'e_WMS':
                 mapservice_backend.setQueryable(workspace, ds.name, ds.type, name, is_queryable)
@@ -1138,18 +1183,33 @@ def layers_get_temporal_properties(request):
         min_value = ''
         max_value = ''
         list_values = []
+        temporal_defs = []
+        mosaic_values = {}
         for layer_id in layers:
             layer = Layer.objects.get(id=layer_id)
             params = json.loads(layer.datastore.connection_params)
-            host = params['host']
-            port = params['port']
-            dbname = params['database']
-            user = params['user']
-            passwd = params['passwd']
-            schema = params.get('schema', 'public')
-            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-            temporal_defs = i.get_temporal_info(layer.name, schema, layer.time_enabled_field, layer.time_enabled_endfield, layer.time_default_value_mode, layer.time_default_value)
-            
+            if layer.datastore.type == 'c_ImageMosaic':
+                mosaic_params = GVSIGOL_SERVICES['MOSAIC_DB']
+                host = mosaic_params['host']
+                port = mosaic_params['port']
+                dbname = mosaic_params['database']
+                user = mosaic_params['user']
+                passwd = mosaic_params['passwd']
+                schema = 'imagemosaic'
+                i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+                temporal_defs = i.get_mosaic_temporal_info(layer.name, schema, layer.time_default_value_mode, layer.time_default_value)
+                
+                
+            else:
+                host = params['host']
+                port = params['port']
+                dbname = params['database']
+                user = params['user']
+                passwd = params['passwd']
+                schema = params.get('schema', 'public')
+                i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+                temporal_defs = i.get_temporal_info(layer.name, schema, layer.time_enabled_field, layer.time_enabled_endfield, layer.time_default_value_mode, layer.time_default_value)
+                
             if temporal_defs.__len__() > 0 and temporal_defs[0]['min_value'] != '' and temporal_defs[0]['max_value'] != '':
                 aux_min_value = datetime.strptime(temporal_defs[0]['min_value'], '%Y-%m-%d %H:%M:%S')
                 if min_value == '' or datetime.strptime(min_value, '%Y-%m-%d %H:%M:%S') > aux_min_value:
@@ -1158,10 +1218,13 @@ def layers_get_temporal_properties(request):
                 if max_value == '' or datetime.strptime(max_value, '%Y-%m-%d %H:%M:%S') < aux_max_value:
                     max_value = temporal_defs[0]['max_value']
                 #list_values = list_values + temporal_defs['list_values']
-                
+                if 'values' in temporal_defs[0] and temporal_defs[0]['values']:
+                    mosaic_values[layer.name] = temporal_defs[0]['values']
         
         
-        return HttpResponse('{"response": "ok", "min_value": "'+str(min_value)+'", "max_value": "'+str(max_value)+'", "list_values": "'+str(list_values)+'"}', content_type='application/json')
+        response = '{"response": "ok", "min_value": "'+str(min_value)+'", "max_value": "'+str(max_value)+'", "list_values": "'+str(list_values)+'", "mosaic_values": "'+json.dumps(mosaic_values).replace("\"", "'")+'"}'
+        return HttpResponse(response, content_type='application/json')
+    
     
     except Exception as e:
         return HttpResponseNotFound('<h1>Temporal properties not found </h1>')
@@ -1683,6 +1746,8 @@ def layer_create_with_group(request, layergroup_id):
         time_resolution_second = 0
         time_default_value_mode = ''
         time_default_value = ''
+        
+        time_resolution = ''
  
         if 'time_enabled' in request.POST:
             time_enabled = True
@@ -1698,7 +1763,10 @@ def layer_create_with_group(request, layergroup_id):
             #time_resolution_second = request.POST.get('time_resolution_second')
             time_default_value_mode = request.POST.get('time_default_value_mode')
             time_default_value = request.POST.get('time_default_value')
-          
+            
+            time_resolution = request.POST.get('time_resolution')
+            
+            
         form = CreateFeatureTypeForm(request.POST, user=request.user)
         if form.is_valid():
             try:
@@ -1749,6 +1817,7 @@ def layer_create_with_group(request, layergroup_id):
                 newRecord.time_resolution_second = time_resolution_second
                 newRecord.time_default_value_mode = time_default_value_mode
                 newRecord.time_default_value = time_default_value
+                newRecord.time_resolution = time_resolution
                 newRecord.save()
                 
                 if form.cleaned_data['datastore'].type != 'e_WMS':
@@ -2101,8 +2170,8 @@ def get_feature_info(request):
                 if query_layer != 'plg_catastro':
                     if 'username' in request.session and 'password' in request.session:
                         if request.session['username'] is not None and request.session['password'] is not None:
-                            auth2 = (request.session['username'], request.session['password'])
-                            #auth2 = ('admin', 'geoserver')
+                            #auth2 = (request.session['username'], request.session['password'])
+                            auth2 = ('admin', 'geoserver')
                 
                 aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
                 rs.append(is_grouped_symbology_request(request, url, aux_response, styles, fut_session))
@@ -2338,8 +2407,8 @@ def get_datatable_data(request):
             req = requests.Session()
             if 'username' in request.session and 'password' in request.session:
                 if request.session['username'] is not None and request.session['password'] is not None:
-                    req.auth = (request.session['username'], request.session['password'])
-                    #req.auth = ('admin', 'geoserver')
+                    #req.auth = (request.session['username'], request.session['password'])
+                    req.auth = ('admin', 'geoserver')
                     
             print wfs_url + "?" + params
             response = req.post(wfs_url, data=values, verify=False)

@@ -104,6 +104,7 @@ viewer.core = {
 		this.zoombar = new ol.control.Zoom();
 		
 		var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false});
+		//this.overviewmap = new ol.control.OverviewMap({collapsed: false, layers:default_layers});
 		this.overviewmap = new ol.control.OverviewMap({collapsed: false});
 		this.map = new ol.Map({
 			interactions: interactions,
@@ -582,6 +583,8 @@ viewer.core = {
 				wmsLayer.setZIndex(parseInt(layerConf.order));
 				wmsLayer.conf = JSON.parse(layerConf.conf);
 				wmsLayer.parentGroup = group.groupName;
+				
+				wmsLayer.time_resolution = layerConf.time_resolution;
 				
 				this.map.addLayer(wmsLayer);
 			}

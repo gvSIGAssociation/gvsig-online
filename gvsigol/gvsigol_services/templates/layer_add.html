@@ -107,6 +107,7 @@
 					</div>
 					
 					<div class="box-body time_enabled-check">
+					<div class="image_mosaic_tmp_fields">
 					<div class="row">
 							<div class="col-md-12 form-group">
 								<label class="active" for="id_time_enabled_field">{% trans "time_enabled field" %}</label>
@@ -120,7 +121,14 @@
 								{{ form.time_enabled_endfield }}
 							</div>
 					</div>
+					</div>
 					
+					<div class="row">
+							<div class="col-md-12 form-group">
+								<label class="active" for="id_time_resolution">{% trans "Time resolution" %}</label>
+								{{ form.time_resolution }}
+							</div>
+					</div>
 					<div class="row">
 							<div class="col-md-12 form-group">
 								<label class="active" for="id_time_presentation">{% trans "Time presentation" %}</label>
@@ -397,6 +405,17 @@
 		$("#id_datastore").change(function() {
 			var id_datastore = $('option:selected', $(this)).val();
 			updateResourceList(id_datastore);
+			
+			if(id_datastore in datastore_types){
+				if(datastore_types[id_datastore] == 'c_ImageMosaic'){
+					$(".image_mosaic_tmp_fields").css("display", "none");
+				}else{
+					$(".image_mosaic_tmp_fields").css("display", "block");
+				}
+			}else{
+				$(".image_mosaic_tmp_fields").css("display", "block");
+			}
+			
 		});
 		
 		$("#id_name").change(function() {
