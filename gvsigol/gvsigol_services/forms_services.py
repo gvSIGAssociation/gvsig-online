@@ -38,6 +38,8 @@ time_presentation_op = (('CONTINUOUS_INTERVAL', _('continuous interval')),)
 #time_presentation_op = (('CONTINUOUS_INTERVAL', _('continuous interval')), ('DISCRETE_INTERVAL', _('interval and resolution')), ('LIST', _('list')))
 time_default_value_mode_op = (('MINIMUM', _('smallest domain value')), ('MAXIMUM', _('biggest domain value')), ('NEAREST', _('nearest to the reference value')), ('FIXED', _('reference value')))
 #time_default_value_mode_op = (('MINIMUM', _('smallest domain value')), ('MAXIMUM', _('biggest domain value')))
+time_resolution = (('second', _('seconds')),('minute', _('minutes')),('hour', _('hours')),('day', _('days')),('month', _('months')),('year', _('years')),)
+
 
 class WorkspaceForm(forms.Form):   
     name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1'}))
@@ -84,7 +86,7 @@ class DatastoreUpdateForm(forms.ModelForm):
     type = forms.CharField(label=_(u'Type'), required=True, max_length=250, widget=forms.TextInput(attrs={'class':'form-control', 'readonly': 'true'}))
     name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class':'form-control', 'readonly': 'true'}))   
     description = forms.CharField(label=_(u'Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class':'form-control', 'tabindex': '1'}))
-    connection_params = forms.CharField(label=_(u'Connection params'), required=True, widget=forms.Textarea(attrs={'class':'form-control', 'tabindex': '2'}))
+    connection_params = forms.CharField(label=_(u'Connection params'), required=True, widget=forms.Textarea(attrs={'class':'form-control connection_params', 'tabindex': '2'}))
     
     def clean(self):
         cleaned_data = super(DatastoreUpdateForm, self).clean()
@@ -101,7 +103,7 @@ class DatastoreUpdateForm(forms.ModelForm):
 class LayerForm(forms.ModelForm):
     class Meta:
         model = Layer
-        fields = ['datastore', 'name', 'title', 'layer_group', 'visible', 'queryable', 'time_enabled', 'time_enabled_endfield', 'time_presentation', 'time_default_value_mode', 'time_default_value']
+        fields = ['datastore', 'name', 'title', 'layer_group', 'visible', 'queryable', 'time_enabled', 'time_enabled_endfield', 'time_resolution', 'time_presentation', 'time_default_value_mode', 'time_default_value']
     datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=True, queryset=Datastore.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
     name = forms.CharField(label=_(u'Name'), required=True, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
     title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
@@ -110,6 +112,9 @@ class LayerForm(forms.ModelForm):
     #queryable = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
     time_enabled_field = forms.CharField(label=_(u'Field'), required=False, widget=forms.Select(attrs={'class' : 'form-control'}))
     time_enabled_endfield = forms.CharField(label=_(u'End field'), required=False, widget=forms.Select(attrs={'class' : 'form-control'}))
+    
+    time_resolution = forms.ChoiceField(label=_(u'Resolution'), required=False, choices=time_resolution, widget=forms.Select(attrs={'class' : 'form-control'}))
+    
     time_presentation = forms.ChoiceField(label=_(u'Presentation'), required=False, choices=time_presentation_op, widget=forms.Select(attrs={'class' : 'form-control'}))
     time_resolution_year = forms.IntegerField(label=_(u'Resolution year'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
     time_resolution_month = forms.IntegerField(label=_(u'Resolution month'), required=False, widget=forms.NumberInput(attrs={'class' : 'form-control time_resolution_field', 'min': 0}))
@@ -124,7 +129,7 @@ class LayerForm(forms.ModelForm):
 class LayerUpdateForm(forms.ModelForm):
     class Meta:
         model = Layer
-        fields = ['datastore', 'name', 'title', 'layer_group', 'visible', 'queryable', 'time_enabled', 'time_enabled_endfield', 'time_presentation', 'time_default_value_mode', 'time_default_value']
+        fields = ['datastore', 'name', 'title', 'layer_group', 'visible', 'queryable', 'time_enabled', 'time_enabled_endfield', 'time_resolution', 'time_presentation', 'time_default_value_mode', 'time_default_value']
     datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=True, queryset=Datastore.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single', 'readonly': 'true'}))
     name = forms.CharField(label=_(u'Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control', 'readonly': 'true'}))
     title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
@@ -132,6 +137,9 @@ class LayerUpdateForm(forms.ModelForm):
     #visible = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
     #queryable = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
     #cached = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
+    
+    time_resolution = forms.ChoiceField(label=_(u'Resolution'), required=False, choices=time_resolution, widget=forms.Select(attrs={'class' : 'form-control'}))
+  
     time_enabled_field = forms.ChoiceField(label=_(u'Field'), required=False, choices=blank, widget=forms.Select(attrs={'class' : 'form-control'}))
     time_enabled_endfield = forms.ChoiceField(label=_(u'End field'), required=False, choices=blank, widget=forms.Select(attrs={'class' : 'form-control'}))
     time_presentation = forms.ChoiceField(label=_(u'Presentation'), required=False, choices=time_presentation_op, widget=forms.Select(attrs={'class' : 'form-control'}))

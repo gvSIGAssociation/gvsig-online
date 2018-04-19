@@ -86,6 +86,7 @@ class Layer(models.Model):
     time_resolution_second = models.IntegerField(null=True, default=0)
     time_default_value_mode = models.CharField(max_length=150, null=True, blank=True) 
     time_default_value = models.CharField(max_length=150, null=True, blank=True)
+    time_resolution = models.CharField(max_length=150, null=True, blank=True)
     highlight = models.BooleanField(default=False)
     highlight_scale = models.FloatField(null=True, blank=True)
     order = models.IntegerField(default=100)

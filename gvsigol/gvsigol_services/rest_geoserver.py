@@ -193,7 +193,7 @@ class Geoserver():
         raise UploadError(r.status_code, r.content)
     
     def create_coveragestore(self, workspace, store, filetype, file, user=None, password=None):
-        url = self.service_url + "/workspaces/" + workspace + "/coveragestores.json"
+        url = self.service_url + "/workspaces/" + workspace + "/coveragestores/"+store+"/file.imagemosaic"
         headers = {'content-type': "text/xml"}
         
         if user and password:
@@ -211,12 +211,50 @@ class Geoserver():
         data +=     "</workspace>"
         data +=     "<__default>false</__default>"
         data +=     "<url>" + file + "</url>"
+        data +=     "<configure>" + "all" + "</configure>"
+        data +=     "<coverageName>" + store + "</coverageName>"
         data += "</coverageStore>"
+        
+        r = self.session.post(url, data=data, headers=headers, auth=auth)
+        if r.status_code==202:
+            return True
+        raise UploadError(r.status_code, r.content)
+
+    def create_coveragestore_layer(self, workspace, store, name, title, user=None, password=None):
+        url = self.service_url + "/workspaces/" + workspace + "/coveragestores/"+store+"/coverages/"
+        headers = {'content-type': "text/xml"}
+        
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+            
+        data = ""
+        data += "<coverage>"
+        data +=     "<nativeCoverageName>" + store + "</nativeCoverageName>"
+        data +=     "<name>" + name + "</name>"
+        data +=     "<title>" + title + "</title>"
+        data += "</coverage>"
         
         r = self.session.post(url, data=data, headers=headers, auth=auth)
         if r.status_code==201:
             return True
         raise UploadError(r.status_code, r.content)
+
+
+    def upload_coveragestore(self, workspace, store, user=None, password=None):
+        url = self.service_url + "/workspaces/" + workspace.name + "/coveragestores/"+store.name+"/file.imagemosaic"
+        
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+        
+        r = self.session.post(url, auth=auth)
+        if r.status_code==202:
+            return True
+        raise UploadError(r.status_code, r.content)
+
 
     def upload_feature_type(self, workspace, store, name, filetype, file, user=None, password=None):
         url = self.service_url + "/workspaces/" + workspace + "/datastores/" + store + "/file."+filetype
@@ -244,6 +282,12 @@ class Geoserver():
             type = 'RASTER'
             resource_class = 'coverage'
             href = self.service_url + '/rest/workspaces/' + workspace + '/coveragestores/' + ds_name + '/coverages/' + name + '.json' 
+        
+        if 'c_ImageMosaic' in ds_type:
+            type = 'RASTER'
+            resource_class = 'coverage'
+            href = self.service_url + '/rest/workspaces/' + workspace + '/coveragestores/' + ds_name + '/coverages/' + name + '.json' 
+        
             
         data = {
             'layer': {
@@ -815,6 +859,7 @@ class Geoserver():
             else:
                 d[k] = u[k]
         return d
+    
 
 class RequestError(Exception):
     def __init__(self, status_code=-1, server_message=""):
