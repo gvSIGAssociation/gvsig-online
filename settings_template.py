@@ -269,7 +269,7 @@ GVSIGOL_SERVICES = {
     'MOSAIC_DB': {
                   'host': '##DATABASE_HOST##',
                   'port': '##DATABASE_PORT##',
-                  'database': 'gvsigonline_v2',
+                  'database': 'gvsigonline',
                   'schema': 'imagemosaic',
                   'user': '##DATABASE_USER##',
                   'passwd': '##DATABASE_PASSWORD##'
