@@ -46,6 +46,7 @@ import string
 import json
 import ast
 import re
+import os
 
 from django.views.decorators.clickjacking import xframe_options_exempt
 
@@ -805,7 +806,7 @@ def project_get_conf(request):
             'base_layers': base_layers,
             'is_public_project': False,
             'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL']),
-            'geoserver_proxy_url': gvsigol.settings.GEOSERVER_PROXY,
+            'geoserver_frontend_url': os.path.join(gvsigol.settings.FRONTEND_URL, gvsigol.settings.GEOSERVER_PATH),
             'geoserver_base_url_no_auth': gvsigol.settings.GVSIGOL_SERVICES['URL'],
             'resource_manager': resource_manager
         } 
