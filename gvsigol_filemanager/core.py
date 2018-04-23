@@ -71,7 +71,7 @@ class Filemanager(object):
     def directory_list(self, request, first_level):
         listing = []
         
-        visible_extensions = ['shp', 'dbf', 'geotif', 'geotiff', 'tif', 'tiff']
+        visible_extensions = ['shp', 'dbf', 'geotif', 'geotiff', 'tif', 'tiff', 'zip']
         
         if 'gvsigol_plugin_etl' in INSTALLED_APPS:
             visible_extensions = visible_extensions + ['xlsx', 'xls', 'csv']
