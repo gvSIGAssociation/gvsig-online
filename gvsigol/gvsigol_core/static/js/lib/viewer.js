@@ -61,7 +61,7 @@ viewer.core = {
     _authenticate: function() {
     	var self = this;
     	$.ajax({
-			url: self.conf.geoserver_proxy_url + '/wms',
+			url: self.conf.geoserver_frontend_url + '/wms',
 			params: {
 				'SERVICE': 'WMS',
 				'VERSION': '1.1.1',
@@ -584,7 +584,7 @@ viewer.core = {
 				wmsLayer.conf = JSON.parse(layerConf.conf);
 				wmsLayer.parentGroup = group.groupName;
 				
-				wmsLayer.time_resolution = layerConf.time_resolution;
+				//wmsLayer.time_resolution = layerConf.time_resolution;
 				
 				this.map.addLayer(wmsLayer);
 			}

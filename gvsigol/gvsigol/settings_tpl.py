@@ -240,7 +240,9 @@ GVSIGOL_USERS_CARTODB = {
 
 PUBLIC_VIEWER = True
 
-GEOSERVER_PROXY = 'https://##FRONTEND_HOST##/geoserver'
+GEOSERVER_PATH = '/geoserver'
+#FRONTEND_URL = '##FRONTEND_URL##'
+FRONTEND_URL = 'https://intranet-pre.gva.es'
 
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
