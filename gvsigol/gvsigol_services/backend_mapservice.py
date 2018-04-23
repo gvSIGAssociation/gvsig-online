@@ -89,7 +89,7 @@ class Geoserver():
                 ('v_PostGIS', _('PostGIS vector')),
                 ('c_GeoTIFF', _('GeoTiff')),
                 ('e_WMS', _('Cascading WMS')),
-                ('c_ImageMosaic', _('ImageMosaic')),
+                ('c_ImageMosaic', _('ImageMosaic')), 
             )
 
         gdal_tools.OGR2OGR_PATH = settings.GVSIGOL_SERVICES.get('OGR2OGR_PATH', gdal_tools.OGR2OGR_PATH)
