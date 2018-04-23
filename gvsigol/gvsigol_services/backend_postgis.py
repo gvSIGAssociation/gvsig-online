@@ -247,6 +247,14 @@ class Introspect:
         
         return [{'min_value':min, 'max_value':max, 'values': values}]
     
+    
+    def delete_mosaic(self, table, schema='public'):
+        query = "DROP TABLE IF EXISTS "+schema+"."+table+" CASCADE"
+        self.cursor.execute(query, [])
+                
+        return True
+    
+    
     def get_temporal_info(self, table, schema='public', field1=None, field2=None, default_mode=None, default_value=None):
         query = "SELECT COALESCE(to_char(MIN(x.a), 'YYYY-MM-DD HH24:MI:SS'), '') FROM (SELECT "+field1+" a FROM "+schema+"."+table+") x"
         self.cursor.execute(query, [])
