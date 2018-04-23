@@ -275,7 +275,8 @@ GVSIGOL_USERS_CARTODB = {
 
 PUBLIC_VIEWER = True
 
-GEOSERVER_PROXY = 'https://localhost/gs-local'
+GEOSERVER_PATH = '/gs-local'
+FRONTEND_URL = 'https://localhost/'
 
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
