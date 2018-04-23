@@ -355,10 +355,21 @@ def datastore_update(request, datastore_id):
 def datastore_delete(request, dsid):
     try:
         ds = Datastore.objects.get(id=dsid)
+        if ds.type == 'c_ImageMosaic':
+            mosaic_params = GVSIGOL_SERVICES['MOSAIC_DB']
+            host = mosaic_params['host']
+            port = mosaic_params['port']
+            dbname = mosaic_params['database']
+            user = mosaic_params['user']
+            passwd = mosaic_params['passwd']
+            schema = 'imagemosaic'
+            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+            i.delete_mosaic(ds.name, schema)
         if mapservice_backend.deleteDatastore(ds.workspace, ds):
             layers = Layer.objects.filter(datastore_id=ds.id)
             for l in layers:
                 mapservice_backend.deleteLayerStyles(l)
+                
             Datastore.objects.all().filter(name=ds.name).delete()
             mapservice_backend.reload_nodes()
             return HttpResponseRedirect(reverse('datastore_list'))
