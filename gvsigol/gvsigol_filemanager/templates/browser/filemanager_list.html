@@ -47,6 +47,8 @@
 	      				<td><img width="32" src="{% static "img/tiff.png" %}" style="margin-right: 5px;">{{file.filename}}</td>
 	      			{% elif file.extension|lower == "xlsx" or file.extension|lower == "xls" or file.extension|lower == "csv" %}
 	      				<td><img width="32" src="{% static "img/excel.png" %}" style="margin-right: 5px;">{{file.filename}}</td>
+	      			{% elif file.extension|lower == "zip" %}
+	      				<td><img width="32" src="{% static "img/zip.png" %}" style="margin-right: 5px;">{{file.filename}}</td>
 	      			{% endif %}
 	      		{% endif %}
 	      		<td>{{file.filesize}}</td>
