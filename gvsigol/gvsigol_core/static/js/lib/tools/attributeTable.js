@@ -173,11 +173,32 @@ attributeTable.prototype.createTableUI = function(featureType) {
 	var tableButtons = new Array();
 	tableButtons.push({
 		extend: 'csv',
-		text: '<i class="fa fa-file-text-o margin-r-5"></i> CSV'
+		text: '<i class="fa fa-file-text-o margin-r-5"></i> CSV',
+		exportOptions: {
+            format: {
+                body: function ( data, row, column, node ) {
+                	if(node.firstChild.type == "checkbox"){
+                		return node.firstChild.checked;
+                	}
+                    return node.textContent;
+                }
+            }
+        }
 	});
 	tableButtons.push({
    	 	extend: 'excel',
-   	 	text: '<i class="fa fa-file-excel-o margin-r-5"></i> Excel'
+   	 	text: '<i class="fa fa-file-excel-o margin-r-5"></i> Excel',
+		exportOptions: {
+            format: {
+                body: function ( data, row, column, node ) {
+                	if(node.firstChild.type == "checkbox"){
+                		return node.firstChild.checked;
+                	}
+                    return node.textContent;
+                }
+            }
+        }
+   	 	
 	});
 	/*tableButtons.push({
    	 	extend: 'print',
