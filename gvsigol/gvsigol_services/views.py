@@ -2181,8 +2181,8 @@ def get_feature_info(request):
                 if query_layer != 'plg_catastro':
                     if 'username' in request.session and 'password' in request.session:
                         if request.session['username'] is not None and request.session['password'] is not None:
-                            #auth2 = (request.session['username'], request.session['password'])
-                            auth2 = ('admin', 'geoserver')
+                            auth2 = (request.session['username'], request.session['password'])
+                            #auth2 = ('admin', 'geoserver')
                 
                 aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
                 rs.append(is_grouped_symbology_request(request, url, aux_response, styles, fut_session))
@@ -2418,8 +2418,8 @@ def get_datatable_data(request):
             req = requests.Session()
             if 'username' in request.session and 'password' in request.session:
                 if request.session['username'] is not None and request.session['password'] is not None:
-                    #req.auth = (request.session['username'], request.session['password'])
-                    req.auth = ('admin', 'geoserver')
+                    req.auth = (request.session['username'], request.session['password'])
+                    #req.auth = ('admin', 'geoserver')
                     
             print wfs_url + "?" + params
             response = req.post(wfs_url, data=values, verify=False)
