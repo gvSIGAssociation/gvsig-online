@@ -584,7 +584,7 @@ viewer.core = {
 				wmsLayer.conf = JSON.parse(layerConf.conf);
 				wmsLayer.parentGroup = group.groupName;
 				
-				//wmsLayer.time_resolution = layerConf.time_resolution;
+				wmsLayer.time_resolution = layerConf.time_resolution;
 				
 				this.map.addLayer(wmsLayer);
 			}
