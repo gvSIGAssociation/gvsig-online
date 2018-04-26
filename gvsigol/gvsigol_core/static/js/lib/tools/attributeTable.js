@@ -177,6 +177,9 @@ attributeTable.prototype.createTableUI = function(featureType) {
 		exportOptions: {
             format: {
                 body: function ( data, row, column, node ) {
+                	if(node == null || node.firstChild == null){
+                		return "";
+                	}
                 	if(node.firstChild.type == "checkbox"){
                 		return node.firstChild.checked;
                 	}
@@ -191,6 +194,9 @@ attributeTable.prototype.createTableUI = function(featureType) {
 		exportOptions: {
             format: {
                 body: function ( data, row, column, node ) {
+                	if(node == null || node.firstChild == null){
+                		return "";
+                	}
                 	if(node.firstChild.type == "checkbox"){
                 		return node.firstChild.checked;
                 	}
