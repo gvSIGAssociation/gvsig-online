@@ -172,7 +172,7 @@ attributeTable.prototype.createTableUI = function(featureType) {
 	
 	var tableButtons = new Array();
 	tableButtons.push({
-		extend: 'csv',
+		extend: 'csvHtml5',
 		text: '<i class="fa fa-file-text-o margin-r-5"></i> CSV',
 		exportOptions: {
             format: {
@@ -189,7 +189,7 @@ attributeTable.prototype.createTableUI = function(featureType) {
         }
 	});
 	tableButtons.push({
-   	 	extend: 'excel',
+   	 	extend: 'excelHtml5',
    	 	text: '<i class="fa fa-file-excel-o margin-r-5"></i> Excel',
 		exportOptions: {
             format: {
