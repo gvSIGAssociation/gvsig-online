@@ -241,8 +241,8 @@ GVSIGOL_USERS_CARTODB = {
 PUBLIC_VIEWER = True
 
 GEOSERVER_PATH = '/geoserver'
-#FRONTEND_URL = '##FRONTEND_URL##'
-FRONTEND_URL = 'https://intranet-pre.gva.es'
+FRONTEND_URL = '##FRONTEND_URL##'
+#FRONTEND_URL = 'https://intranet-pre.gva.es'
 
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
