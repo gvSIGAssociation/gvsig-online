@@ -363,6 +363,13 @@ def datastore_delete(request, dsid):
                 
             Datastore.objects.all().filter(name=ds.name).delete()
             if ds.type == 'c_ImageMosaic':
+                got_params = json.loads(ds.connection_params)
+                mosaic_url = got_params["url"].replace("file://", "")
+                if os.path.isfile(mosaic_url + "/" + ds.name + ".properties"):
+                    os.remove(mosaic_url + "/" + ds.name + ".properties")
+                if os.path.isfile(mosaic_url + "/sample_image.dat"):
+                    os.remove(mosaic_url + "/sample_image.dat")
+                
                 mosaic_params = GVSIGOL_SERVICES['MOSAIC_DB']
                 host = mosaic_params['host']
                 port = mosaic_params['port']
