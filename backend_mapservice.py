@@ -286,6 +286,10 @@ class Geoserver():
             catalog = self.getGsconfig()
             ds = catalog.get_store(datastore.name, workspace=workspace.name)
             if datastore.type=="c_ImageMosaic":
+                try:
+                    catalog.delete(ds, purge, recurse=True)
+                except Exception as e:
+                    pass
                 return True
             else:
                 catalog.delete(ds, purge, recurse=True)
