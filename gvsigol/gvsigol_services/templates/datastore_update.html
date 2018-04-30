@@ -187,7 +187,7 @@ $().ready(function(){
 		var type = $("#id_type").val();
 		if(type == 'c_ImageMosaic'){
 			var code = '{ \n';
-			code += '\t "url": "url_replace", \n';
+			code += '\t "url": "'+$("#id_file").val()+'", \n';
 			if($("#time_dimension_input").prop('checked') == true){
 				if($("#time_dimension_text").val() == ""){
 					code += '\t "date_regex": "(?<=_)[0-9]{8}", \n';
