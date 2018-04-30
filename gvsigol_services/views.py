@@ -413,6 +413,25 @@ def layer_delete_operation(request, layer_id):
     mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer)
     mapservice_backend.deleteLayerStyles(layer)
     signals.layer_deleted.send(sender=None, layer=layer)
+    
+    if layer.datastore.type == 'c_ImageMosaic': 
+        got_params = json.loads(layer.datastore.connection_params)
+        mosaic_url = got_params["url"].replace("file://", "")
+        if os.path.isfile(mosaic_url + "/" + layer.name + ".properties"):
+            os.remove(mosaic_url + "/" + layer.name + ".properties")
+        if os.path.isfile(mosaic_url + "/sample_image.dat"):
+            os.remove(mosaic_url + "/sample_image.dat")
+            
+        mosaic_params = GVSIGOL_SERVICES['MOSAIC_DB']
+        host = mosaic_params['host']
+        port = mosaic_params['port']
+        dbname = mosaic_params['database']
+        user = mosaic_params['user']
+        passwd = mosaic_params['passwd']
+        schema = 'imagemosaic'
+        i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+        i.delete_mosaic(layer.datastore.name, schema)
+        
     if not 'no_thumbnail.jpg' in layer.thumbnail.name:
         if os.path.isfile(layer.thumbnail.path):
             os.remove(layer.thumbnail.path)
