@@ -286,13 +286,7 @@ class Geoserver():
             catalog = self.getGsconfig()
             ds = catalog.get_store(datastore.name, workspace=workspace.name)
             if datastore.type=="c_ImageMosaic":
-                try:
-                    catalog.delete(ds, purge="metadata", recurse=True)
-                except:
-                    # we need to catch the delete because we'll usually get an error:
-                    # Database "xxxx" is being accessed by other users.
-                    # Geoserver is probably accessing the DB on other threads
-                    catalog.delete(ds, purge=None, recurse=True)
+                return True
             else:
                 catalog.delete(ds, purge, recurse=True)
             return True
@@ -1694,9 +1688,9 @@ class Geoserver():
                 filenames = os.listdir(folder_path)
                 founded = False
                 for filename in filenames:
+                    os.chmod(folder_path+"/"+filename, 0775)
                     if (date_regex != "" and re.search(date_regex, filename) != None) or (ele_regex != "" and re.search(ele_regex, filename) != None):
                         founded = True
-                        break
                         
                 if founded:
                     self.__create_mosaic_indexer(folder_path, date_regex, ele_regex)
