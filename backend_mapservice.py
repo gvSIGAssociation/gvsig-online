@@ -258,8 +258,10 @@ class Geoserver():
                 if driver == "ImageMosaic":
                     ele_regex = params_dict.get('ele_regex', '')
                     date_regex = params_dict.get('date_regex', '')
+                    ele_format = params_dict.get('ele_format', '')
+                    date_format = params_dict.get('date_format', '')
                     file_path = params_dict.get('url')
-                    self.__process_image_mosaic_folder(file_path, date_regex, ele_regex)
+                    self.__process_image_mosaic_folder(file_path, date_regex, date_format, ele_regex, ele_format)
                     ds.url = params_dict.get('url')
                 
             elif format_nature == "e": # cascading wms              

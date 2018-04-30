@@ -355,22 +355,23 @@ def datastore_update(request, datastore_id):
 def datastore_delete(request, dsid):
     try:
         ds = Datastore.objects.get(id=dsid)
-        if ds.type == 'c_ImageMosaic':
-            mosaic_params = GVSIGOL_SERVICES['MOSAIC_DB']
-            host = mosaic_params['host']
-            port = mosaic_params['port']
-            dbname = mosaic_params['database']
-            user = mosaic_params['user']
-            passwd = mosaic_params['passwd']
-            schema = 'imagemosaic'
-            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-            i.delete_mosaic(ds.name, schema)
-        if mapservice_backend.deleteDatastore(ds.workspace, ds):
+        
+        if mapservice_backend.deleteDatastore(ds.workspace, ds) or ds.type == 'c_ImageMosaic':
             layers = Layer.objects.filter(datastore_id=ds.id)
             for l in layers:
                 mapservice_backend.deleteLayerStyles(l)
                 
             Datastore.objects.all().filter(name=ds.name).delete()
+            if ds.type == 'c_ImageMosaic':
+                mosaic_params = GVSIGOL_SERVICES['MOSAIC_DB']
+                host = mosaic_params['host']
+                port = mosaic_params['port']
+                dbname = mosaic_params['database']
+                user = mosaic_params['user']
+                passwd = mosaic_params['passwd']
+                schema = 'imagemosaic'
+                i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+                i.delete_mosaic(ds.name, schema)
             mapservice_backend.reload_nodes()
             return HttpResponseRedirect(reverse('datastore_list'))
         else:
@@ -789,7 +790,7 @@ def layer_add_with_group(request, layergroup_id):
         
     datastore_types = {}
     types = {}
-    for datastore in Datastore.objects.filter(created_by__exact=request.user.username):
+    for datastore in Datastore.objects.filter():
         types[datastore.id] = datastore.type
         datastore_types[datastore.id] = datastore.type
     
