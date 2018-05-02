@@ -591,7 +591,9 @@ class Geoserver():
         try:
             params = json.loads(store.connection_params)
             file = params['url']
-            return self.rest_catalog.create_coveragestore(workspace.name, store.name, 'ImageMosaic', file, user=self.user, password=self.password)
+            split_mosaic_url = file.split("/")
+            mosaic_name = split_mosaic_url[split_mosaic_url.__len__()-1]
+            return self.rest_catalog.create_coveragestore(workspace.name, store.name, 'ImageMosaic', file, mosaic_name, user=self.user, password=self.password)
             #return self.rest_catalog.create_coverage(name, title, coveragestore.name, workspace.name, user=self.user, password=self.password)                                           
         except rest_geoserver.FailedRequestError as e:
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
