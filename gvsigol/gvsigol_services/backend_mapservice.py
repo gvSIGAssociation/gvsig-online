@@ -568,7 +568,12 @@ class Geoserver():
                 return self.createWMSLayer(workspace, store, name, title)
             else:
                 if store.type == 'c_ImageMosaic':
-                    return self.createImageMosaicLayer(workspace, store, name, title)
+                    got_params = json.loads(store.connection_params)
+                    mosaic_url = got_params["url"].replace("file://", "")
+                    split_mosaic_url = mosaic_url.split("/")
+                    
+                    coverage_name = split_mosaic_url[split_mosaic_url.__len__()-1]
+                    return self.createImageMosaicLayer(workspace, store, name, title, coverage_name)
                 else:    
                     return self.createCoverage(workspace, store, name, title)   
         except Exception as e:
@@ -600,9 +605,9 @@ class Geoserver():
         except Exception as e:
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
         
-    def createImageMosaicLayer(self, workspace, store, name, title):
+    def createImageMosaicLayer(self, workspace, store, name, title, coverage_name):
         try:
-            result = self.rest_catalog.create_coveragestore_layer(workspace.name, store.name, name, title, user=self.user, password=self.password)
+            result = self.rest_catalog.create_coveragestore_layer(workspace.name, store.name, name, title, coverage_name, user=self.user, password=self.password)
             return result
             #return self.rest_catalog.create_coverage(name, title, coveragestore.name, workspace.name, user=self.user, password=self.password)                                           
         except rest_geoserver.FailedRequestError as e:

@@ -220,7 +220,7 @@ class Geoserver():
             return True
         raise UploadError(r.status_code, r.content)
 
-    def create_coveragestore_layer(self, workspace, store, name, title, user=None, password=None):
+    def create_coveragestore_layer(self, workspace, store, name, title, coverage_name, user=None, password=None):
         url = self.service_url + "/workspaces/" + workspace + "/coveragestores/"+store+"/coverages/"
         headers = {'content-type': "text/xml"}
         
@@ -231,7 +231,7 @@ class Geoserver():
             
         data = ""
         data += "<coverage>"
-        data +=     "<nativeCoverageName>" + store + "</nativeCoverageName>"
+        data +=     "<nativeCoverageName>" + coverage_name + "</nativeCoverageName>"
         data +=     "<name>" + name + "</name>"
         data +=     "<title>" + title + "</title>"
         data += "</coverage>"
