@@ -241,9 +241,6 @@ class Geoserver():
         return False
 
     def updateDatastore(self, wsname, dsname, description, dstype, conn_params):
-        logging.basicConfig(level=logging.INFO)
-        logger = logging.getLogger(__name__)
-        logger.error('updateDatastore start')
         try:
             format_nature=dstype[:1]
             driver=dstype[2:]
@@ -265,9 +262,7 @@ class Geoserver():
                     ele_format = params_dict.get('ele_format', '')
                     date_format = params_dict.get('date_format', '')
                     file_path = params_dict.get('url')
-                    logger.error('ImageMosaic start')
                     self.__process_image_mosaic_folder(file_path, date_regex, date_format, ele_regex, ele_format)
-                    logger.error('ImageMosaic end')
                     ds.url = params_dict.get('url')
                 
             elif format_nature == "e": # cascading wms              
@@ -284,7 +279,6 @@ class Geoserver():
             return True
         except Exception as exc:
             print exc
-            logger.error(str(exc))
             return False
     
     def deleteDatastore(self, workspace, datastore, purge=None):
@@ -1693,9 +1687,6 @@ class Geoserver():
   
     
     def __process_image_mosaic_folder(self, zip_path, date_regex, date_format, ele_regex, ele_format):
-        logging.basicConfig(level=logging.INFO)
-        logger = logging.getLogger(__name__)
-        logger.error('__process_image_mosaic_folder start')
         has_dimensions = date_regex != '' or ele_regex != ''
         if has_dimensions:
             folder_path = zip_path.replace('file://','')
@@ -1712,11 +1703,9 @@ class Geoserver():
                         pass
                     
                 if founded:
-                    logger.error('__create_mosaic_indexer start')
                     self.__create_mosaic_indexer(folder_path, date_regex, ele_regex)
                     #os.remove(indexer)
                     if date_regex != "":
-                        logger.error('__create_mosaic_time_regexp start')
                         self.__create_mosaic_time_regexp(folder_path, date_regex, date_format)
                         #z.write(regexp_file, "timeregex.properties")
                         #os.remove(regexp_file)
@@ -1724,14 +1713,11 @@ class Geoserver():
                         self.__create_mosaic_ele_regexp(folder_path, ele_regex, ele_format)
                         #z.write(regexp_file, "elevationregex.properties")
                         #os.remove(regexp_file)
-                    logger.error('__create_im_datastore_properties start')
                     self.__create_im_datastore_properties(folder_path)
                     
             except (WrongTimePattern, WrongElevationPattern) as exc:
-                logger.error(str(exc))
                 raise
             except Exception as exc:
-                logger.error(str(exc))
                 raise BadFormat()
     
         
