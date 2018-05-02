@@ -243,6 +243,7 @@ class Geoserver():
     def updateDatastore(self, wsname, dsname, description, dstype, conn_params):
         logging.basicConfig(level=logging.INFO)
         logger = logging.getLogger(__name__)
+        logger.error('updateDatastore start')
         try:
             format_nature=dstype[:1]
             driver=dstype[2:]
@@ -264,9 +265,9 @@ class Geoserver():
                     ele_format = params_dict.get('ele_format', '')
                     date_format = params_dict.get('date_format', '')
                     file_path = params_dict.get('url')
-                    logger.debug('ImageMosaic start')
+                    logger.error('ImageMosaic start')
                     self.__process_image_mosaic_folder(file_path, date_regex, date_format, ele_regex, ele_format)
-                    logger.debug('ImageMosaic end')
+                    logger.error('ImageMosaic end')
                     ds.url = params_dict.get('url')
                 
             elif format_nature == "e": # cascading wms              
