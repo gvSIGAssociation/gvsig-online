@@ -167,7 +167,8 @@ class DeleteFileView(FilemanagerMixin, View):
             
         else:
             return HttpResponse(json.dumps({
-                'success': False
+                'success': False,
+                'message': _('Error deleting resource') + ' ' + path
             }))
 
 
