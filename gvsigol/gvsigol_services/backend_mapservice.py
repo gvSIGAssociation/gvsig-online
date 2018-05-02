@@ -1704,18 +1704,14 @@ class Geoserver():
                 filenames = os.listdir(folder_path)
                 founded = False
                 for filename in filenames:
-                    os.chmod(folder_path+"/"+filename, 0775)
-                    if (date_regex != "" and re.search(date_regex, filename) != None) or (ele_regex != "" and re.search(ele_regex, filename) != None):
-                        founded = True
-                        
-                if founded:
-                    split_mosaic_url = zip_path.split("/")
-                    mosaic_name = split_mosaic_url[split_mosaic_url.__len__()-1]
-                    if os.path.isfile(zip_path + "/" + mosaic_name + ".properties"):
-                        os.chmod(zip_path + "/" + mosaic_name + ".properties", 0775)
-                    if os.path.isfile(zip_path + "/sample_image.dat"):
-                        os.chmod(zip_path + "/sample_image.dat", 0775)
+                    try:
+                        os.chmod(folder_path+"/"+filename, 0775)
+                        if (date_regex != "" and re.search(date_regex, filename) != None) or (ele_regex != "" and re.search(ele_regex, filename) != None):
+                            founded = True
+                    except:
+                        pass
                     
+                if founded:
                     logger.error('__create_mosaic_indexer start')
                     self.__create_mosaic_indexer(folder_path, date_regex, ele_regex)
                     #os.remove(indexer)
