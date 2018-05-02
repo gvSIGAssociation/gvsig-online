@@ -1709,9 +1709,11 @@ class Geoserver():
                         founded = True
                         
                 if founded:
+                    logger.error('__create_mosaic_indexer start')
                     self.__create_mosaic_indexer(folder_path, date_regex, ele_regex)
                     #os.remove(indexer)
                     if date_regex != "":
+                        logger.error('__create_mosaic_time_regexp start')
                         self.__create_mosaic_time_regexp(folder_path, date_regex, date_format)
                         #z.write(regexp_file, "timeregex.properties")
                         #os.remove(regexp_file)
@@ -1719,6 +1721,7 @@ class Geoserver():
                         self.__create_mosaic_ele_regexp(folder_path, ele_regex, ele_format)
                         #z.write(regexp_file, "elevationregex.properties")
                         #os.remove(regexp_file)
+                    logger.error('__create_im_datastore_properties start')
                     self.__create_im_datastore_properties(folder_path)
                     
             except (WrongTimePattern, WrongElevationPattern) as exc:
