@@ -1693,6 +1693,9 @@ class Geoserver():
   
     
     def __process_image_mosaic_folder(self, zip_path, date_regex, date_format, ele_regex, ele_format):
+        logging.basicConfig(level=logging.INFO)
+        logger = logging.getLogger(__name__)
+        logger.error('__process_image_mosaic_folder start')
         has_dimensions = date_regex != '' or ele_regex != ''
         if has_dimensions:
             folder_path = zip_path.replace('file://','')
@@ -1718,9 +1721,11 @@ class Geoserver():
                         #os.remove(regexp_file)
                     self.__create_im_datastore_properties(folder_path)
                     
-            except (WrongTimePattern, WrongElevationPattern):
+            except (WrongTimePattern, WrongElevationPattern) as exc:
+                logger.error(str(exc))
                 raise
-            except:
+            except Exception as exc:
+                logger.error(str(exc))
                 raise BadFormat()
     
         
