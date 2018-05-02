@@ -46,6 +46,7 @@ import string
 import json
 import re
 import unicodedata
+import logging
 from dbfread import DBF
 
 class UnsupportedRequestError(Exception):
@@ -278,6 +279,9 @@ class Geoserver():
             return True
         except Exception as exc:
             print exc
+            logging.basicConfig(level=logging.INFO)
+            logger = logging.getLogger(__name__)
+            logger.error(str(exc))
             return False
     
     def deleteDatastore(self, workspace, datastore, purge=None):
