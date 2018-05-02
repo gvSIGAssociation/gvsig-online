@@ -365,8 +365,12 @@ def datastore_delete(request, dsid):
             if ds.type == 'c_ImageMosaic':
                 got_params = json.loads(ds.connection_params)
                 mosaic_url = got_params["url"].replace("file://", "")
-                if os.path.isfile(mosaic_url + "/" + ds.name + ".properties"):
-                    os.remove(mosaic_url + "/" + ds.name + ".properties")
+                split_mosaic_url = mosaic_url.split("/")
+                
+                mosaic_name = split_mosaic_url[split_mosaic_url.__len__()-1]
+                
+                if os.path.isfile(mosaic_url + "/" + mosaic_name + ".properties"):
+                    os.remove(mosaic_url + "/" + mosaic_name + ".properties")
                 if os.path.isfile(mosaic_url + "/sample_image.dat"):
                     os.remove(mosaic_url + "/sample_image.dat")
                 
@@ -424,8 +428,11 @@ def layer_delete_operation(request, layer_id):
     if layer.datastore.type == 'c_ImageMosaic': 
         got_params = json.loads(layer.datastore.connection_params)
         mosaic_url = got_params["url"].replace("file://", "")
-        if os.path.isfile(mosaic_url + "/" + layer.name + ".properties"):
-            os.remove(mosaic_url + "/" + layer.name + ".properties")
+        split_mosaic_url = mosaic_url.split("/")
+        mosaic_name = split_mosaic_url[split_mosaic_url.__len__()-1]
+        
+        if os.path.isfile(mosaic_url + "/" + mosaic_name + ".properties"):
+            os.remove(mosaic_url + "/" + mosaic_name + ".properties")
         if os.path.isfile(mosaic_url + "/sample_image.dat"):
             os.remove(mosaic_url + "/sample_image.dat")
             
