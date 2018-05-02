@@ -192,7 +192,7 @@ class Geoserver():
             return True
         raise UploadError(r.status_code, r.content)
     
-    def create_coveragestore(self, workspace, store, filetype, file, user=None, password=None):
+    def create_coveragestore(self, workspace, store, filetype, file, coverage_name, user=None, password=None):
         url = self.service_url + "/workspaces/" + workspace + "/coveragestores/"+store+"/file.imagemosaic"
         headers = {'content-type': "text/xml"}
         
@@ -212,7 +212,7 @@ class Geoserver():
         data +=     "<__default>false</__default>"
         data +=     "<url>" + file + "</url>"
         data +=     "<configure>" + "all" + "</configure>"
-        data +=     "<coverageName>" + store + "</coverageName>"
+        data +=     "<coverageName>" + coverage_name + "</coverageName>"
         data += "</coverageStore>"
         
         r = self.session.post(url, data=data, headers=headers, auth=auth)
