@@ -151,14 +151,15 @@ class UploadFileView(FilemanagerMixin, View):
 class DeleteFileView(FilemanagerMixin, View):
     def post(self, request, *args, **kwargs):
         path = 'file://' + FILEMANAGER_DIRECTORY +'/'+ request.POST.get('path')
-        geotiffs = Datastore.objects.filter(type='c_GeoTIFF')
+        geotiffs = Datastore.objects.filter(type__in=['c_GeoTIFF','c_ImageMosaic'])
         for geotiff in geotiffs:
             params = json.loads(geotiff.connection_params)
-            if 'url' in params and params['url'] == path:
+            if 'url' in params and params['url'].startswith(path) or (geotiff.type == 'c_ImageMosaic' and path.startswith(params['url'])) :
                 return HttpResponse(json.dumps({
                     'success': False,
                     'message': _('Error deleting resource') + ' ' + path + ' ' + _('exists in datastore') + ': ' + geotiff.name 
                 }))
+
         if self.fm.delete(path):
             return HttpResponse(json.dumps({
                 'success': True
