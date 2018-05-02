@@ -1709,6 +1709,13 @@ class Geoserver():
                         founded = True
                         
                 if founded:
+                    split_mosaic_url = zip_path.split("/")
+                    mosaic_name = split_mosaic_url[split_mosaic_url.__len__()-1]
+                    if os.path.isfile(zip_path + "/" + mosaic_name + ".properties"):
+                        os.chmod(zip_path + "/" + mosaic_name + ".properties", 0775)
+                    if os.path.isfile(zip_path + "/sample_image.dat"):
+                        os.chmod(zip_path + "/sample_image.dat", 0775)
+                    
                     logger.error('__create_mosaic_indexer start')
                     self.__create_mosaic_indexer(folder_path, date_regex, ele_regex)
                     #os.remove(indexer)
