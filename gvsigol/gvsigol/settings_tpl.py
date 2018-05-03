@@ -261,7 +261,7 @@ GVSIGOL_SERVICES = {
                   'host': '##DB_HOST##',
                   'port': '##DB_PORT##',
                   'database': '##DB_NAME##',
-                  'schema': 'mosaic',
+                  'schema': 'imagemosaic',
                   'user': '##DB_USER##',
                   'passwd': '##DB_PASSWD##'
     },
