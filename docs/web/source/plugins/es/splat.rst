@@ -31,9 +31,33 @@ Es importante destacar que la pérdida por trayectoria (atenuación en la atmós
 
 .. image:: ../_static/images/splat2_map_perdida_trayectoria.png
    :align: center
-   
+
+  
 2.3 Mapa de análisis de intensidad de campo (Field strength analysis)
 _____________________________________________________________________
-   
-   
+ 
+Si se especifica la potencia efectiva radiada (ERP) del transmisor en el archivo del transmisor .lrp, o se expresa en la línea de comandos usando la opción -erp, en lugar de las pérdidas por trayectoria, se graficarán los contornos de intensidad de campo referenciados a decibeles sobre un microvoltio por metro (dBuV/m).
+
+Se puede indicar un umbral (-db) para no mostrar todas las intensidades, en este caso la unidad es dBuV/m   
+  
+.. image:: ../_static/images/splat3_map_intensidad_campo.png
+   :align: center 
+ 
+.. note:: 
+   La unidad de potencia ERP son vatios. ERP es equivalente a PIRE (Potencia Isotrópica Radiada Equivalente)
+
+
+2.4 Mapa de análisis de potencia recibido (Received power level analysis)
+_________________________________________________________________________
+
+Mapa de contornos de nivel de potencia recibida, muestra decibeles sobre un milivatio (dBm).
+
+También podemos filtrar con -db (poniendo valor negativo y en la misma unidad dBm)
+
+.. image:: ../_static/images/splat4_map_potencia_recibida.png
+   :align: center
+ 
+.. note::   
+   El mapa de potencia recibido se indica con el parámetro -dbm    
+
    
