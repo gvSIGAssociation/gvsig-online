@@ -148,9 +148,24 @@ class Filemanager(object):
             
         except Exception as e:
             if e.errno == 21:
-                shutil.rmtree(e.filename)
+                path = name.replace('file://', '')
+                self.set_permission_to_dir(path, 775)
+                shutil.rmtree(path)
                 return True
             return False
+        
+        
+    
+    def set_permission_to_dir(self, directory_path, permission):
+        for root, dirs, files in os.walk(directory_path):  
+            for momo in dirs:  
+                self.set_permission_to_dir(os.path.join(root, momo), permission)
+            for momo in files:
+                os.chmod(os.path.join(root, momo), permission)
+        
+        
+        
+        
 
     def create_directory(self, name):
         name = FILEMANAGER_STORAGE.get_valid_name(name)
