@@ -567,7 +567,11 @@ class Geoserver():
         raise FailedRequestError(r.status_code, r.content)
     
     def create_or_update_gs_layer_group(self, lg_name, lg_title, content_type=None, user=None, password=None):  
+        import logging
+        logging.basicConfig(level=logging.INFO)
+        logger = logging.getLogger(__name__)
         
+        logger.error('[rest_geoserver] Start create_or_update_gs_layer_group')
         if user and password:
             auth = (user, password)
         else:
@@ -602,7 +606,9 @@ class Geoserver():
                     }
                 }
             }
+            logger.error('[rest_geoserver] Start create_or_update_gs_layer_group petition -> ' + json.dumps(data))
             r = self.session.post(self.service_url + "/layergroups/", json=data, auth=auth)
+            logger.error('[rest_geoserver] End create_or_update_gs_layer_group petition : ' + str(r.status_code) + ' ' + str(r.content))
             if r.status_code==201:
                 return True
             
