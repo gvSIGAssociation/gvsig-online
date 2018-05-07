@@ -444,7 +444,7 @@ def layer_delete_operation(request, layer_id):
         passwd = mosaic_params['passwd']
         schema = 'imagemosaic'
         i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-        i.delete_mosaic(layer.datastore.name, schema)
+        i.delete_mosaic(mosaic_name, schema)
         
     if not 'no_thumbnail.jpg' in layer.thumbnail.name:
         if os.path.isfile(layer.thumbnail.path):
@@ -2673,7 +2673,97 @@ def delete_resources(request):
             pass
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+
+
+@csrf_exempt
+def describeLayerConfig(request):
+    if request.method == 'POST':      
+        lyr = request.POST.get('layer')
+        workspace = request.POST.get('workspace')
+        try:
+            l = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
+            read_roles = utils.get_read_roles(l)
+            write_roles = utils.get_write_roles(l)
+            
+            if len(read_roles) <= 0:
+                layer = {}                
+                layer['name'] = l.name
+                layer['title'] = l.title
+                layer['abstract'] = l.abstract
+                layer['visible'] = l.visible 
+                layer['queryable'] = l.queryable 
+                layer['time_enabled'] = l.time_enabled 
+                if layer['time_enabled']:
+                    layer['ref'] = l.id
+                    layer['time_enabled_field'] = l.time_enabled_field
+                    layer['time_enabled_endfield'] = l.time_enabled_endfield
+                    layer['time_presentation'] = l.time_presentation
+                    layer['time_resolution_year'] = l.time_resolution_year
+                    layer['time_resolution_month'] = l.time_resolution_month
+                    layer['time_resolution_week'] = l.time_resolution_week
+                    layer['time_resolution_day'] = l.time_resolution_day
+                    layer['time_resolution_hour'] = l.time_resolution_hour
+                    layer['time_resolution_minute'] = l.time_resolution_minute
+                    layer['time_resolution_second'] = l.time_resolution_second
+                    layer['time_default_value_mode'] = l.time_default_value_mode
+                    layer['time_default_value'] = l.time_default_value
+                layer['cached'] = l.cached
+                layer['single_image'] = l.single_image
+                layer['read_roles'] = read_roles
+                layer['write_roles'] = write_roles
+                
+                try:
+                    json_conf = ast.literal_eval(l.conf)
+                    layer['conf'] = json.dumps(json_conf)
+                except:
+                    layer['conf'] = "{\"fields\":[]}"
+                    pass
+                
+                datastore = Datastore.objects.get(id=l.datastore_id)
+                workspace = Workspace.objects.get(id=datastore.workspace_id)
+                
+                if datastore.type == 'v_SHP' or datastore.type == 'v_PostGIS': 
+                    layer['is_vector'] = True
+                else:
+                    layer['is_vector'] = False
+                
+                layer_info = None
+                defaultCrs = None
+                if datastore.type == 'e_WMS':
+                    (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
+                    defaultCrs = 'EPSG:4326'
+                else:
+                    (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
+                    defaultCrs = layer_info[ds_type]['srs']
+                    
+                if defaultCrs.split(':')[1] in core_utils.get_supported_crs():
+                    epsg = core_utils.get_supported_crs()[defaultCrs.split(':')[1]]
+                    layer['crs'] = {
+                        'crs': defaultCrs,
+                        'units': epsg['units']
+                    }
+                    
+                layer['wms_url'] = core_utils.get_wms_url(request, workspace)
+                layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
+                layer['namespace'] = workspace.uri
+                layer['workspace'] = workspace.name  
+                layer['metadata'] = core_utils.get_catalog_url(request, l)             
+                if l.cached:  
+                    layer['cache_url'] = core_utils.get_cache_url(request, workspace)
+                else:
+                    layer['cache_url'] = core_utils.get_wms_url(request, workspace)
+                
+
+            
+            response = {'layer': layer}
+
     
+        except Exception as e:
+            print e.message
+            response = {'layer': {}}
+            pass
+
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')    
     
 @csrf_exempt
 def describeFeatureType(request):

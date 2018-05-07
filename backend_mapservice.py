@@ -693,7 +693,7 @@ class Geoserver():
                     # only fail if layer exists but deletion failed
                     print e.message
                     pass
-        except:
+        except Exception as e:
             # only fail if layer exists but deletion failed
             print e.message
             pass
