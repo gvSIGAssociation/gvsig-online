@@ -63,4 +63,6 @@ urlpatterns = [
     
     url(r'^get_geoserver_info/$', 'gvsigol_services.views.get_geoserver_info', name='get_geoserver_info'),
     
+    url(r'^describeLayerConfig/$', 'gvsigol_services.views.describeLayerConfig', name='describeLayerConfig'),
+    
 ]
