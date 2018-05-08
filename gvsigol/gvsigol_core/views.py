@@ -549,14 +549,15 @@ def get_layer_styles(layer):
     stllyrs = StyleLayer.objects.filter(layer_id = layer.id)
     for stllyr in stllyrs:
         stl=stllyr.style
-        style={
-            'name' : stl.name,
-            'title' : stl.title,
-            'is_default': stl.is_default,
-            'has_custom_legend': stl.has_custom_legend,
-            'custom_legend_url': stl.custom_legend_url
-            }
-        styles.append(style)
+        if not stl.name.endswith('__tmp'):
+            style={
+                'name' : stl.name,
+                'title' : stl.title,
+                'is_default': stl.is_default,
+                'has_custom_legend': stl.has_custom_legend,
+                'custom_legend_url': stl.custom_legend_url
+                }
+            styles.append(style)
     return styles
 
 def get_default_style(layer):
