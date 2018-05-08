@@ -358,6 +358,19 @@ def get_conf(request, layer_id):
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
     
+    index = len(StyleLayer.objects.filter(layer=layer))
+    styleLayers = StyleLayer.objects.filter(layer=layer)
+    for style_layer in styleLayers:
+        aux_name = style_layer.style.name
+        aux_name = aux_name.replace(workspace.name + '_' + layer.name + '_' , '')
+        
+        try:
+            aux_index = int(aux_name)
+            if index < aux_index+1:
+                index = aux_index + 1
+        except ValueError:
+            print "Error getting index"
+    
     (ds_type, resource) = mapservice.getResourceInfo(workspace.name, datastore, layer.name, "json")
     fields = utils.get_fields(resource)
     if layer.conf:
