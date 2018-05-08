@@ -149,7 +149,7 @@ def create_style(request, has_custom_legend, json_data, layer_id, is_preview=Fal
         else:
             return False
     else:
-        if mapservice.createStyle(style.name, sld_body): 
+        if mapservice.createOverwrittenStyle(style.name, sld_body, True):
             if not is_preview:
                 mapservice.setLayerStyle(layer, style.name, style.is_default)
             return True

@@ -437,7 +437,7 @@ def update_preview(request, layer_id):
                 if services.create_style(request, json_data, layer_id, True):            
                     return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             else:    
-                if services.update_style(request, json_data, layer_id, style.id):            
+                if services.update_style(request, json_data, layer_id, style.id, False):            
                     return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
     return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
