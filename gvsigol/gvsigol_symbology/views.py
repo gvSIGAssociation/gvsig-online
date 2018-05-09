@@ -437,7 +437,7 @@ def update_preview(request, layer_id):
                 if services.create_style(request, json_data, layer_id, True):            
                     return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             else:    
-                if services.update_style(request, json_data, layer_id, style.id, False):            
+                if services.update_style(request, json_data, layer_id, style.id, True):            
                     return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
     return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
@@ -703,7 +703,7 @@ def color_table_update(request, layer_id, style_id):
         has_custom_legend = request.POST['has_custom_legend']
         json_data = json.loads(style_data)
         
-        if services_color_table.update_style(request, json_data, layer_id, style_id, has_custom_legend):            
+        if services_color_table.update_style(request, json_data, layer_id, style_id, False, has_custom_legend):            
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:

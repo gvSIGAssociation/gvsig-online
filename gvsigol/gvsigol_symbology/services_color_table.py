@@ -157,12 +157,14 @@ def create_style(request, has_custom_legend, json_data, layer_id, is_preview=Fal
         else:
             return False
     
-def update_style(request, json_data, layer_id, style_id, has_custom_legend):   
+def update_style(request, json_data, layer_id, style_id, is_preview=False, has_custom_legend=None):   
     style = Style.objects.get(id=int(style_id))
     layer = Layer.objects.get(id=int(layer_id))
     
     layer_styles = StyleLayer.objects.filter(layer=layer)
-    style_is_default = json_data.get('is_default')
+    style_is_default = False
+    if not is_preview:
+        style_is_default = json_data.get('is_default')
     
     if style_is_default:
         for ls in layer_styles:
@@ -276,11 +278,17 @@ def update_style(request, json_data, layer_id, style_id, has_custom_legend):
         order = order + 1
     
     sld_body = sld_builder.build_sld(layer, style)
-    if mapservice.updateStyle(layer, style.name, sld_body): 
-        mapservice.setLayerStyle(layer, style.name, style.is_default)
-        return True
+    if is_preview:
+        if mapservice.createOverwrittenStyle(style.name, sld_body, True): 
+            return True
+        else:
+            return False
     else:
-        return False
+        if mapservice.updateStyle(layer, style.name, sld_body): 
+            mapservice.setLayerStyle(layer, style.name, style.is_default)
+            return True
+        else:
+            return False
    
 
 def get_conf(request, layer_id):
