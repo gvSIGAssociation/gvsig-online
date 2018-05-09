@@ -31,6 +31,7 @@ specific table, the available geometry columns, etc.
 """
 
 import psycopg2
+import json
 
 class Introspect:
     def __init__(self, database, host='localhost', port='5432', user='postgres', password='postgres'):
@@ -290,6 +291,16 @@ class Introspect:
             max = r[0]
             
         return [{'min_value':min, 'max_value':max}]
+    
+    
+    def get_widget_geometry_info(self, table, schema='public', field=None, value=None, default_geometry_field='wkb_geometry'):
+        query = "SELECT json_build_object('type','Feature', 'geometry', ST_AsGeoJSON("+ default_geometry_field +")::json, 'srs', ST_SRID("+ default_geometry_field +"), 'properties', to_json(row)) FROM (SELECT * FROM "+schema+"."+table+" WHERE " + field + " = '" + value +"' LIMIT 1) row;"
+        self.cursor.execute(query, [])
+        geom = None
+        for r in self.cursor.fetchall():
+            geom = r[0]
+        
+        return geom
     
     
     def create_table(self, schema, table_name, geom_type, srs, fields):
