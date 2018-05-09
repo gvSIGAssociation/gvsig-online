@@ -157,7 +157,7 @@ def create_style(request, json_data, layer_id, is_preview=False, has_custom_lege
         else:
             return False
     
-def update_style(request, json_data, layer_id, style_id, is_preview=False, has_custom_legend):   
+def update_style(request, json_data, layer_id, style_id, is_preview=False, has_custom_legend=None):   
     style = Style.objects.get(id=int(style_id))
     layer = Layer.objects.get(id=int(layer_id))
     
