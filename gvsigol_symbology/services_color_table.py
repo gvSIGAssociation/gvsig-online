@@ -191,7 +191,8 @@ def update_style(request, json_data, layer_id, style_id, is_preview=False, has_c
         style.has_custom_legend = True
         legend_name = 'legend_' + ''.join(random.choice(string.ascii_uppercase) for i in range(6)) + '.png'
         legend_path = utils.check_custom_legend_path()
-        style.custom_legend_url = utils.save_custom_legend(legend_path, request.FILES['file'], legend_name)
+        if 'file' in request.FILES:
+            style.custom_legend_url = utils.save_custom_legend(legend_path, request.FILES['file'], legend_name)
         
     else:
         style.has_custom_legend = False
