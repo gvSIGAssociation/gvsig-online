@@ -74,7 +74,12 @@
 							{% endif %}
 								<div class="form-group">
 									<label>{% trans "Select image" %}</label>
+									{% if style.has_custom_legend %}
+									<input id="legend-file" name="legend-file" type="file" accept=".png" onchange="loadPreviewLegend(event)" class="file" data-show-preview="true" value="{{style.custom_legend_url}}">
+									{% else %}
 									<input id="legend-file" name="legend-file" type="file" accept=".png" onchange="loadPreviewLegend(event)" class="file" data-show-preview="true">
+									{% endif %}
+									
 								</div>
 							</div>
 						</div>

@@ -213,9 +213,21 @@ ColorTable.prototype.update = function(layerId, styleId) {
 	if(document.getElementById('has-custom-legend').checked) {
 		formData.append('has_custom_legend', true);
 		formData.append('style_data', JSON.stringify(style));
+		
+		var file_to_upload = null;
+		var previous_image_loaded = false;
 		if ($("#legend-file")[0].files.length > 0) {
-			formData.append('file', $("#legend-file")[0].files[0]);
-			
+			file_to_upload = $("#legend-file")[0].files[0];
+		}else{
+			if ($("#legend-file").attr("value").length > 0) {
+				file_to_upload = $("#legend-file").attr("value");
+				previous_image_loaded = true;
+			}
+		}
+		if ((file_to_upload != null && file_to_upload.length > 0) || previous_image_loaded) {
+			if(!previous_image_loaded){			
+				formData.append('file', file_to_upload);
+			}
 			$.ajax({
 				type: "POST",
 				async: false,
