@@ -17,6 +17,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from gvsigol import settings
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
@@ -73,7 +74,8 @@ def login_user(request):
     else:
         if AUTH_WITH_REMOTE_USER:
             if "HTTP_REMOTE_USER" in request.META:
-                print request.META['HTTP_REMOTE_USER']
+                if settings.DEBUG == True:
+                    print "HTTP_REMOTE_USER: " + request.META['HTTP_REMOTE_USER']
                 request.session['username'] = None
                 request.session['password'] = None
                 user = authenticate(remote_user=request.META['HTTP_REMOTE_USER'])
