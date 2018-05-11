@@ -224,7 +224,7 @@ ColorTable.prototype.update = function(layerId, styleId) {
 				previous_image_loaded = true;
 			}
 		}
-		if ((file_to_upload != null && file_to_upload.length > 0) || previous_image_loaded) {
+		if (file_to_upload != null || previous_image_loaded) {
 			if(!previous_image_loaded){			
 				formData.append('file', file_to_upload);
 			}
