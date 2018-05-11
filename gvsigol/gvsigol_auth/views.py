@@ -96,6 +96,20 @@ def login_user(request):
                                 login(request, user)
                                 request.user = user
                                 return redirect('home')
+            elif 'HTTP_OIDC_CLAIM_SUB' in request.META:
+                if settings.DEBUG == True:
+                        print "HTTP_OIDC_CLAIM_SUB: " + request.META['HTTP_OIDC_CLAIM_SUB']
+                request.session['username'] = None
+                request.session['password'] = None
+                aux = request.META['HTTP_OIDC_CLAIM_SUB']
+                if "\\" in aux:
+                        aux = aux.split("\\")[1]
+                user = authenticate(remote_user=aux)
+                if user is not None:
+                    if user.is_active:
+                        login(request, user)
+                        return redirect('home')
+
         else:
             username = request.GET.get('usu')
             try:
