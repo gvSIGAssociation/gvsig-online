@@ -200,7 +200,7 @@ class Geoserver():
                     ele_format = params_dict.get('ele_format', '')
                     date_format = params_dict.get('date_format', '')
                     file_path = params_dict.get('url')
-                    self.__process_image_mosaic_folder(file_path, date_regex, date_format, ele_regex, ele_format)
+                    self.__process_image_mosaic_folder(name, file_path, date_regex, date_format, ele_regex, ele_format)
                     ds = catalog.create_coveragestore2(name, workspace.name)
                     ds.url = params_dict.get('url')
             elif format_nature == "e": # cascading wms
@@ -568,11 +568,11 @@ class Geoserver():
                 return self.createWMSLayer(workspace, store, name, title)
             else:
                 if store.type == 'c_ImageMosaic':
-                    got_params = json.loads(store.connection_params)
-                    mosaic_url = got_params["url"].replace("file://", "")
-                    split_mosaic_url = mosaic_url.split("/")
-                    
-                    coverage_name = split_mosaic_url[split_mosaic_url.__len__()-1]
+                    #got_params = json.loads(store.connection_params)
+                    #mosaic_url = got_params["url"].replace("file://", "")
+                    #split_mosaic_url = mosaic_url.split("/")
+                    #coverage_name = split_mosaic_url[split_mosaic_url.__len__()-1]
+                    coverage_name = store.name
                     return self.createImageMosaicLayer(workspace, store, name, title, coverage_name)
                 else:    
                     return self.createCoverage(workspace, store, name, title)   
@@ -1693,7 +1693,7 @@ class Geoserver():
             logging.exception(str(e))
   
     
-    def __process_image_mosaic_folder(self, zip_path, date_regex, date_format, ele_regex, ele_format):
+    def __process_image_mosaic_folder(self, name, zip_path, date_regex, date_format, ele_regex, ele_format):
         has_dimensions = date_regex != '' or ele_regex != ''
         if has_dimensions:
             folder_path = zip_path.replace('file://','')
@@ -1710,7 +1710,7 @@ class Geoserver():
                         pass
                     
                 if founded:
-                    self.__create_mosaic_indexer(folder_path, date_regex, ele_regex)
+                    self.__create_mosaic_indexer(name, folder_path, date_regex, ele_regex)
                     #os.remove(indexer)
                     if date_regex != "":
                         self.__create_mosaic_time_regexp(folder_path, date_regex, date_format)
@@ -1737,8 +1737,24 @@ class Geoserver():
         z.close()
     
     
-    def __create_mosaic_indexer(self, folder_path, date_regex, ele_regex):
+    def __create_mosaic_indexer(self, name, folder_path, date_regex, ele_regex):
+        '''
+        he above will be sufficient in case the image mosaic can create the index table and perform normal indexing, using the directory name as the table name. In case a specific table name needs to be used, add an "indexer.properties" specifying the TypeName property, e.g.:
+
+            TypeName=mymosaictype
+        
+        In case the index "table" already exists instead, then a "indexer.properties" file will be required, with the following contents:
+        
+            UseExistingSchema=true
+            TypeName=nameOfTheFeatureTypeContainingTheIndex
+            AbsolutePath=true
+        
+        The above assumes location attribute provides absolute paths to the mosaic granules, instead of ones relative to the mosaic configuration files directory.
+        '''
+        
         fd = open(folder_path + "/indexer.properties","w+")
+        #fd.write("UseExistingSchema=true\nTypeName=prueba_tif_mes\nAbsolutePath=true\n")
+        fd.write('Name='+name+'\n')
         schema = "Schema=*the_geom:Polygon,location:String"
         if date_regex != '':
             fd.write("TimeAttribute=date\n")
@@ -1772,6 +1788,10 @@ class Geoserver():
         if mosaic_db is not None:
             fd = open(folder_path + "/datastore.properties","w+")
             fd.write("SPI=org.geotools.data.postgis.PostgisNGDataStoreFactory\n")
+            '''
+            fd.write("StoreName=ws_mendezt:ds_mendezt\n")
+            
+            '''
             fd.write("host={0}\n".format(mosaic_db.get('host')))
             fd.write("port={0}\n".format(mosaic_db.get('port')))
             fd.write("database={0}\n".format(mosaic_db.get('database')))
@@ -1783,6 +1803,8 @@ class Geoserver():
             fd.write("validate\ connections=true\n")
             fd.write("Connection\ timeout=10\n")
             fd.write("preparedStatements=true\n")
+            
+            
             fd.close()
 
 def get_default_backend():
