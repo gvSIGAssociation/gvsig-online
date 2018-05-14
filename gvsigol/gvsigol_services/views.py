@@ -444,7 +444,7 @@ def layer_delete_operation(request, layer_id):
         passwd = mosaic_params['passwd']
         schema = 'imagemosaic'
         i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-        i.delete_mosaic(mosaic_name, schema)
+        i.delete_mosaic(layer.datastore.name, schema)
         
     if not 'no_thumbnail.jpg' in layer.thumbnail.name:
         if os.path.isfile(layer.thumbnail.path):
