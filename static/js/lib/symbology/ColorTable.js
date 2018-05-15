@@ -138,6 +138,7 @@ ColorTable.prototype.save = function(layerId) {
 			
 		} else {
 			messageBox.show('warning', gettext('You must select a image'));
+			$.overlayout();
 		}
 
 		
@@ -253,6 +254,7 @@ ColorTable.prototype.update = function(layerId, styleId) {
 			
 		} else {
 			messageBox.show('warning', gettext('You must select a image'));
+			$.overlayout();
 		}
 
 		
