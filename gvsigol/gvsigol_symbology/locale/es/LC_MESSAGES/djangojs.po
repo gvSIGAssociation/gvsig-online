@@ -277,3 +277,6 @@ msgstr "features"
 
 msgid "null_value"
 msgstr "Sin valor"
+
+msgid "You must select a image"
+msgstr "Selecciona una imagen"
