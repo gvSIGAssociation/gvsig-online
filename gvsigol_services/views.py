@@ -371,6 +371,8 @@ def datastore_delete(request, dsid):
                 
                 if os.path.isfile(mosaic_url + "/" + ds.name + ".properties"):
                     os.remove(mosaic_url + "/" + ds.name + ".properties")
+                if os.path.isfile(mosaic_url + "/" + mosaic_name + ".properties"):
+                    os.remove(mosaic_url + "/" + mosaic_name + ".properties")
                 if os.path.isfile(mosaic_url + "/sample_image.dat"):
                     os.remove(mosaic_url + "/sample_image.dat")
                 
