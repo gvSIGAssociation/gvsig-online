@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-05 12:17+0100\n"
+"POT-Creation-Date: 2018-05-15 11:45+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -270,7 +270,7 @@ msgstr "Importar símbolo"
 
 #: templates/clustered_points_add.html:90
 #: templates/clustered_points_update.html:93 templates/color_table_add.html:179
-#: templates/color_table_update.html:195 templates/expressions_add.html:90
+#: templates/color_table_update.html:200 templates/expressions_add.html:90
 #: templates/expressions_update.html.py:93 templates/intervals_add.html:101
 #: templates/intervals_add.html.py:197 templates/intervals_update.html:105
 #: templates/intervals_update.html:201 templates/unique_symbol_add.html:98
@@ -292,7 +292,7 @@ msgstr "Seleccionar biblioteca de símbolos"
 #: templates/clustered_points_add.html:111
 #: templates/clustered_points_update.html:114
 #: templates/color_table_add.html:158 templates/color_table_add.html.py:216
-#: templates/color_table_update.html:174 templates/color_table_update.html:232
+#: templates/color_table_update.html:179 templates/color_table_update.html:237
 #: templates/expressions_add.html:111 templates/expressions_update.html:114
 #: templates/intervals_add.html.py:122 templates/intervals_add.html:176
 #: templates/intervals_add.html.py:234 templates/intervals_update.html:126
@@ -308,7 +308,7 @@ msgstr "Cerrar"
 #: templates/clustered_points_add.html:305
 #: templates/clustered_points_update.html:311 templates/color_ramp_add.html:129
 #: templates/color_ramp_update.html.py:135 templates/color_table_add.html:377
-#: templates/color_table_update.html:401 templates/expressions_add.html:304
+#: templates/color_table_update.html:406 templates/expressions_add.html:304
 #: templates/expressions_update.html:310
 #: templates/external_graphic_add.html:147
 #: templates/external_graphic_add.html:151 templates/intervals_add.html:352
@@ -349,7 +349,7 @@ msgid "Edit color ramp entry"
 msgstr "Editar entrada de la rampa de color"
 
 #: templates/color_ramp_add.html:103 templates/color_ramp_update.html.py:109
-#: templates/color_table_add.html:371 templates/color_table_update.html:395
+#: templates/color_table_add.html:371 templates/color_table_update.html:400
 msgid "Two or more color definitions are required"
 msgstr ""
 "En caso de necesitar alguna, se requieren al menos dos definiciones en la "
@@ -626,47 +626,47 @@ msgstr "¿Tiene leyenda propia?"
 msgid "Select image"
 msgstr "Seleccionar una imagen"
 
-#: templates/color_table_add.html:87 templates/color_table_update.html:103
+#: templates/color_table_add.html:87 templates/color_table_update.html:108
 #: templates/intervals_add.html.py:70 templates/intervals_update.html:74
 msgid "Select number of intervals"
 msgstr "Nº intervalos"
 
-#: templates/color_table_add.html:92 templates/color_table_update.html:108
+#: templates/color_table_add.html:92 templates/color_table_update.html:113
 #: templates/intervals_add.html.py:75 templates/intervals_update.html:79
 #: templates/unique_values_add.html.py:72
 #: templates/unique_values_update.html:75
 msgid " "
 msgstr ""
 
-#: templates/color_table_add.html:93 templates/color_table_update.html:109
+#: templates/color_table_add.html:93 templates/color_table_update.html:114
 #: templates/intervals_add.html.py:76 templates/intervals_update.html:80
 #: templates/unique_values_add.html.py:73
 #: templates/unique_values_update.html:76
 msgid "Apply ramp color"
 msgstr "Aplicar rampa de color"
 
-#: templates/color_table_add.html:113 templates/color_table_update.html:129
+#: templates/color_table_add.html:113 templates/color_table_update.html:134
 msgid "Edit color map entry"
 msgstr "Editar entrada de color del mapa"
 
-#: templates/color_table_add.html:135 templates/color_table_update.html:151
+#: templates/color_table_add.html:135 templates/color_table_update.html:156
 msgid "Raster properties"
 msgstr ""
 
-#: templates/color_table_add.html:149 templates/color_table_update.html:165
+#: templates/color_table_add.html:149 templates/color_table_update.html:170
 #: templates/intervals_add.html.py:167 templates/intervals_update.html:171
 #: templates/unique_values_add.html:164 templates/unique_values_update.html:167
 msgid "Warning"
 msgstr ""
 
-#: templates/color_table_add.html:155 templates/color_table_update.html:171
+#: templates/color_table_add.html:155 templates/color_table_update.html:176
 #: templates/intervals_add.html.py:173 templates/intervals_update.html:177
 #: templates/unique_values_add.html:170 templates/unique_values_update.html:173
 msgid "Rules needed to apply a color ramp"
 msgstr ""
 
 #: templates/color_table_add.html:157 templates/color_table_add.html.py:215
-#: templates/color_table_update.html:173 templates/color_table_update.html:231
+#: templates/color_table_update.html:178 templates/color_table_update.html:236
 #: templates/intervals_add.html.py:175 templates/intervals_add.html:233
 #: templates/intervals_update.html.py:179 templates/intervals_update.html:237
 #: templates/unique_values_add.html:172 templates/unique_values_add.html:230
@@ -675,37 +675,37 @@ msgstr ""
 msgid "Apply"
 msgstr ""
 
-#: templates/color_table_add.html:174 templates/color_table_update.html:190
+#: templates/color_table_add.html:174 templates/color_table_update.html:195
 #: templates/intervals_add.html.py:192 templates/intervals_update.html:196
 #: templates/unique_values_add.html:189 templates/unique_values_update.html:192
 msgid "Select color ramp"
 msgstr "Seleccionar rampa de color"
 
-#: templates/color_table_add.html:181 templates/color_table_update.html:197
+#: templates/color_table_add.html:181 templates/color_table_update.html:202
 #: templates/intervals_add.html.py:199 templates/intervals_update.html:203
 #: templates/unique_values_add.html:196 templates/unique_values_update.html:199
 msgid "Select ramp library"
 msgstr "Seleccionar biblioteca de rampas de color"
 
-#: templates/color_table_add.html:190 templates/color_table_update.html:206
+#: templates/color_table_add.html:190 templates/color_table_update.html:211
 #: templates/intervals_add.html.py:208 templates/intervals_update.html:212
 #: templates/unique_values_add.html:205 templates/unique_values_update.html:208
 msgid "Select category"
 msgstr "Seleccionar categoría"
 
-#: templates/color_table_add.html:192 templates/color_table_update.html:208
+#: templates/color_table_add.html:192 templates/color_table_update.html:213
 #: templates/intervals_add.html.py:210 templates/intervals_update.html:214
 #: templates/unique_values_add.html:207 templates/unique_values_update.html:210
 msgid "Select ramp category"
 msgstr "Seleccionar categoría"
 
-#: templates/color_table_add.html:198 templates/color_table_update.html:214
+#: templates/color_table_add.html:198 templates/color_table_update.html:219
 #: templates/intervals_add.html.py:216 templates/intervals_update.html:220
 #: templates/unique_values_add.html:213 templates/unique_values_update.html:216
 msgid "Invert ramp color"
 msgstr "Invertir rampa de color"
 
-#: templates/color_table_add.html:247 templates/color_table_update.html:263
+#: templates/color_table_add.html:247 templates/color_table_update.html:268
 #: templates/external_graphic_add.html:75
 #: templates/external_graphic_update.html:76
 msgid "The file format is not supported"
@@ -765,8 +765,8 @@ msgid "Select format"
 msgstr "Seleccionar formato"
 
 #: templates/external_graphic_add.html:148
-#: templates/external_graphic_add.html:154 views.py:777 views.py:986
-#: views.py:1170
+#: templates/external_graphic_add.html:154 views.py:779 views.py:988
+#: views.py:1172
 msgid "You must select a file"
 msgstr "Debe seleccionar un archivo"
 
@@ -919,11 +919,11 @@ msgstr "La capa debe contener al menos un estilo"
 msgid "Can not delete a default style"
 msgstr "No puede eliminar un estilo por defecto"
 
-#: views.py:770
+#: views.py:772
 msgid "Error importing SLD"
 msgstr "Error al importar SLD"
 
-#: views.py:829 views.py:854
+#: views.py:831 views.py:856
 msgid ""
 "You must enter a correct name for the color ramp (without uppercases, "
 "whitespaces or other special characters)"
@@ -931,8 +931,8 @@ msgstr ""
 "Debes introducir un nombre correcto para la librería (sin mayúsculas, "
 "espacios en blanco o caracteres especiales)"
 
-#: views.py:929 views.py:976 views.py:1024 views.py:1101 views.py:1160
-#: views.py:1298
+#: views.py:931 views.py:978 views.py:1026 views.py:1103 views.py:1162
+#: views.py:1300
 msgid ""
 "You must enter a correct name for the library (without uppercases, "
 "whitespaces or other special characters)"
@@ -940,11 +940,11 @@ msgstr ""
 "Debes introducir un nombre correcto para la librería (sin mayúsculas, "
 "espacios en blanco o caracteres especiales)"
 
-#: views.py:983 views.py:1167
+#: views.py:985 views.py:1169
 msgid "You must enter a name for the library"
 msgstr "Debe introducir un nombre para la biblioteca"
 
-#: views.py:989 views.py:1173
+#: views.py:991 views.py:1175
 msgid "You must enter a name for the library and select a file"
 msgstr "Debe introducir un nombre para la biblioteca y seleccionar un archivo"
 
