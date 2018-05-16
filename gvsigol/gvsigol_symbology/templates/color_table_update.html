@@ -369,7 +369,7 @@ $(document).ready(function() {
 							self.min = min;
 						}
 						var max = response.result[i][1];
-						if(self.max == null || max < self.max){
+						if(self.max == null || max > self.max){
 							self.max = max;
 						}
 						var avg = response.result[i][2];
@@ -443,7 +443,7 @@ $(document).ready(function() {
 									self.min = min;
 								}
 								var max = response.result[i][1];
-								if(self.max == null || max < self.max){
+								if(self.max == null || max > self.max){
 									self.max = max;
 								}
 							}
