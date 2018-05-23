@@ -13,3 +13,4 @@ Plugins
    form
    libra
    splat
+   widgets
