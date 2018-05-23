@@ -368,7 +368,7 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
         rule.save()
         
 
-    original_rules = Rule.objects.filter(style=original_style)
+    original_rules = Rule.objects.filter(style=original_style).order_by('order')
     for original_rule in original_rules:
         original_symbolizers = Symbolizer.objects.filter(rule=original_rule)
         for original_symbolizer in original_symbolizers:
