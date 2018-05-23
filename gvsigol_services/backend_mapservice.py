@@ -1064,6 +1064,8 @@ class Geoserver():
                 has_conf = False
                 conf = None
                 newf = self.prepare_string(f)
+                visible = False
+
                 if newf in table_definition:
                     table_def = table_definition[newf]
                     layer_name = self.prepare_string(table_def['name'].lower())
@@ -1071,6 +1073,9 @@ class Geoserver():
                     
                     if table_def.has_key('srs') and table_def['srs']:
                         srs = table_def['srs']
+
+                    if table_def.has_key('visible') and table_def['visible']:
+                        visible = table_def['visible']
                     
                     if table_def.has_key('conf') and table_def['conf']:
                         has_conf = True
@@ -1120,13 +1125,14 @@ class Geoserver():
 
                 
                 layer.name = layer_name
-                layer.visible = False
+                layer.visible = visible
                 layer.cached = True
                 layer.single_image = False
                 layer.layer_group = layergroup
                 layer.title = layer_title
                 layer.type = datastore.type
                 layer.created_by = username
+
                 if has_conf:
                     layer.conf = conf
                 layer.save()
