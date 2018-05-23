@@ -101,7 +101,7 @@ def build_library_symbol(rule):
     user_style = named_layer.create_userstyle(rule.name, rule.name)
     feature_type_style = user_style.create_featuretypestyle()
 
-    symbolizers = ModelSymbolizer.objects.filter(rule=rule)
+    symbolizers = ModelSymbolizer.objects.filter(rule=rule).order_by('-order')
     create_rule(rule, symbolizers, feature_type_style)
     
     sld_body = style_layer_descriptor.as_sld(True)
