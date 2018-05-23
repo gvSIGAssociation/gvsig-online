@@ -601,13 +601,18 @@ def project_get_conf(request):
         project_layers_groups = ProjectLayerGroup.objects.filter(project_id=project.id)
         layer_groups = []
         workspaces = []
+        count = 0
         for project_group in project_layers_groups:            
             group = LayerGroup.objects.get(id=project_group.layer_group_id)
             
             conf_group = {}
             conf_group['groupTitle'] = group.title
             conf_group['groupId'] = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
-            conf_group['groupOrder'] = toc.get(group.name).get('order')
+            if toc.get(group.name):
+                conf_group['groupOrder'] = toc.get(group.name).get('order')
+            else:
+                conf_group['groupOrder'] = count
+            count = count + 1
             conf_group['groupName'] = group.name
             conf_group['cached'] = group.cached
             layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('order')
