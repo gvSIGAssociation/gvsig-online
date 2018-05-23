@@ -358,7 +358,7 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
         rule = Rule(
             style = style,
             name = 'Default symbol',
-            title = _('Default symbol'),
+            title = 'Default symbol',
             abstract = '',
             filter = str(""),
             minscale = -1,
