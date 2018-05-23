@@ -1704,7 +1704,10 @@ class Geoserver():
         if has_dimensions:
             folder_path = zip_path.replace('file://','')
             try: 
-                os.chmod(folder_path, 0775)
+                try:
+                    os.chmod(folder_path, 0775)
+                except Exception:
+                    pass
                 filenames = os.listdir(folder_path)
                 founded = False
                 for filename in filenames:
