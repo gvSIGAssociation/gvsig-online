@@ -638,7 +638,7 @@ def project_get_conf(request):
                     layer['name'] = l.name
                     layer['title'] = l.title
                     layer['abstract'] = l.abstract
-                    layer['visible'] = l.visible 
+                    layer['visible'] = l.visible  
                     layer['queryable'] = l.queryable 
                     layer['highlight'] = l.highlight
                     if l.highlight:
@@ -663,14 +663,15 @@ def project_get_conf(request):
                         layer['time_resolution'] = l.time_resolution
                     
                     layer['cached'] = l.cached
-                    
+
                     order = int(conf_group['groupOrder']) + layers_in_group.__len__() - idx
                     if toc.get(group.name) and 'layers' in toc.get(group.name): 
                         for layer_toc in toc.get(group.name).get('layers'):
                             lyr_toc = toc.get(group.name).get('layers').get(layer_toc)
                             if lyr_toc.get('name') == l.name:
-                                order = lyr_toc.get('order')
-                        
+                                if 'order' in lyr_toc:
+                                    order = lyr_toc.get('order')
+
                     layer['order'] = order 
                     layer['single_image'] = l.single_image
                     layer['read_roles'] = read_roles
