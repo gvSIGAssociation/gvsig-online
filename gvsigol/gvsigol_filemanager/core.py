@@ -161,8 +161,10 @@ class Filemanager(object):
             for momo in dirs:  
                 self.set_permission_to_dir(os.path.join(root, momo), permission)
             for momo in files:
-                os.chmod(os.path.join(root, momo), permission)
-        
+                try:
+                    os.chmod(os.path.join(root, momo), permission)
+                except Exception:
+                    pass
         
         
         
