@@ -664,6 +664,8 @@ def project_get_conf(request):
                     
                     layer['cached'] = l.cached
 
+                    order = l.order
+                    '''
                     order = int(conf_group['groupOrder']) + layers_in_group.__len__() - idx
                     if toc.get(group.name) and 'layers' in toc.get(group.name): 
                         for layer_toc in toc.get(group.name).get('layers'):
@@ -671,7 +673,7 @@ def project_get_conf(request):
                             if lyr_toc.get('name') == l.name:
                                 if 'order' in lyr_toc:
                                     order = lyr_toc.get('order')
-
+                    '''
                     layer['order'] = order 
                     layer['single_image'] = l.single_image
                     layer['read_roles'] = read_roles
@@ -960,13 +962,16 @@ def public_viewer_get_conf(request):
                         layer['time_default_value'] = l.time_default_value
                     layer['cached'] = l.cached
                     
+                    order = l.order
+                    '''
                     order = int(conf_group['groupOrder']) + layers_in_group.__len__() - idx
+                    
                     if toc.get(group.name) and 'layers' in toc.get(group.name): 
                         for layer_toc in toc.get(group.name).get('layers'):
                             lyr_toc = toc.get(group.name).get('layers').get(layer_toc)
                             if lyr_toc.get('name') == l.name:
                                 order = lyr_toc.get('order')
-                        
+                    '''   
                     layer['order'] = order 
                     layer['single_image'] = l.single_image
                     layer['read_roles'] = read_roles
