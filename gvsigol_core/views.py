@@ -1000,6 +1000,8 @@ def public_viewer_get_conf(request):
                         defaultCrs = 'EPSG:4326'
                     else:
                         (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
+                        if ds_type == 'imagemosaic':
+                            ds_type = 'coverage'
                         defaultCrs = layer_info[ds_type]['srs']
                         
                     if defaultCrs.split(':')[1] in core_utils.get_supported_crs():
