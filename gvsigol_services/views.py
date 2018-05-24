@@ -1524,7 +1524,11 @@ def layergroup_add_with_project(request, project_id):
         cached = False
         if 'cached' in request.POST:
             cached = True
-        
+
+        visible = False
+        if 'visible' in request.POST:
+            visible = True
+
         if name != '':
             if _valid_name_regex.search(name) == None:
                 message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
@@ -1541,6 +1545,7 @@ def layergroup_add_with_project(request, project_id):
                     name = name,
                     title = title,
                     cached = cached,
+                    visible = visible,
                     created_by = request.user.username
                 )
                 layergroup.save()
@@ -1651,6 +1656,10 @@ def layergroup_update(request, lgid):
         cached = False
         if 'cached' in request.POST:
             cached = True
+
+        visible = False
+        if 'visible' in request.POST:
+            visible = True
         
         layergroup = LayerGroup.objects.get(id=int(lgid))
         
@@ -1669,6 +1678,7 @@ def layergroup_update(request, lgid):
         if sameName:
             layergroup.title = title
             layergroup.cached = cached
+            layergroup.visible = visible
             layergroup.save()   
             core_utils.toc_update_layer_group(layergroup, old_name, name, title)
             
@@ -1692,6 +1702,7 @@ def layergroup_update(request, lgid):
                 layergroup.name = name
                 layergroup.title = title
                 layergroup.cached = cached
+                layergroup.visible = visible
                 layergroup.save()
                 core_utils.toc_update_layer_group(layergroup, old_name, name, title)
 
@@ -3062,7 +3073,5 @@ def get_capabilities_from_url(request):
     }
        
     return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
-
-
 
 
