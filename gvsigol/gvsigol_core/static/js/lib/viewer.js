@@ -49,7 +49,9 @@ viewer.core = {
 		
     initialize: function(conf, extraParams) {
     	this.conf = conf;
-    	this._authenticate();
+    	if (!conf.remote_auth) {
+    		this._authenticate();
+    	}
     	this.extraParams = extraParams;
     	this._createMap();
     	this._initToolbar();
