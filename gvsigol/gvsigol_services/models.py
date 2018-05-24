@@ -55,6 +55,7 @@ class Datastore(models.Model):
 class LayerGroup(models.Model):
     name = models.CharField(max_length=150) 
     title = models.CharField(max_length=500, null=True, blank=True) 
+    visible = models.BooleanField(default=False)
     cached = models.BooleanField(default=False)
     created_by = models.CharField(max_length=100)
     

@@ -517,8 +517,12 @@ viewer.core = {
 				if (layerConf.cached) {
 					url = layerConf.cache_url;
 				}
-				
 				var wmsLayer = null;
+				
+				var visible = layerConf.visible;
+				if(layerConf.visible){
+					visible = false;
+				}
 				if (layerConf.single_image) {
 					var wmsSource = new ol.source.ImageWMS({
 						url: url,
@@ -529,7 +533,7 @@ viewer.core = {
 					wmsLayer = new ol.layer.Image({
 						id: layerId,
 						source: wmsSource,
-						visible: layerConf.visible
+						visible: visible
 					});
 					
 				} else {
@@ -551,7 +555,7 @@ viewer.core = {
 					wmsLayer = new ol.layer.Tile({
 						id: layerId,
 						source: wmsSource,
-						visible: layerConf.visible
+						visible: visible
 					});
 				}
 				
@@ -617,7 +621,7 @@ viewer.core = {
 			var layerGroup = new ol.layer.Tile({			
 				id: group.groupName,
 				source: layerGroupSource,
-				visible: false
+				visible: group.visible
 			});
 				
 			layerGroup.on('change:visible', function(){
