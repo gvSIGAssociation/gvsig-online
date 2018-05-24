@@ -583,7 +583,7 @@ class Geoserver():
             r = self.session.delete(self.service_url + "/layergroups/" + lg_name + ".json", params={}, auth=auth)
             
         group = LayerGroup.objects.get(name__exact=lg_name)
-        layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('-order')
+        layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('order')
         
         if len(layers_in_group) > 0:   
             layers = []
