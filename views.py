@@ -1093,6 +1093,23 @@ def public_viewer_get_conf(request):
             'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL']),
             'resource_manager': resource_manager
         } 
+
+        if request.user and request.user.id:
+            conf['user'] = {
+                'id': request.user.id,
+                'username': request.user.first_name + ' ' + request.user.last_name,
+                'login': request.user.username,
+                'email': request.user.email,
+                'permissions': {
+                    'is_superuser': is_superuser(request.user),
+                    'roles': core_utils.get_group_names_by_user(request.user)
+                },
+                'credentials': {
+                    'username': request.session['username'],
+                    'password': request.session['password']
+                }
+            }
+        
         
         return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
     

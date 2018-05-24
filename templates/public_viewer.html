@@ -94,13 +94,22 @@
 					<li class="dropdown user user-menu">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown"> 
 							<img src="{% static "img/user.png" %}" class="user-image" alt="User Image"> 
-							<span class="hidden-xs">{% trans "Anonymous" %}</span>
+							{% if user and user.id %}
+								<span class="hidden-xs">{{user.username}}</span>
+							{% else %}
+								<span class="hidden-xs">{% trans "Anonymous" %}</span>
+							{% endif %}
 						</a>
+
 						<ul class="dropdown-menu">
 							<li class="user-header">
 								<img src="{% static "img/user.png" %}" class="img-circle" alt="User Image">
 								<p>
-									<small>{% trans "Anonymous user" %}</small>
+									{% if user and user.id %}
+										{{user.username}}<small>{{user.email}}</small>
+									{% else %}
+										<small>{% trans "Anonymous user" %}</small>
+									{% endif %}
 								</p>
 							</li>
 							<li class="user-header">
@@ -117,11 +126,24 @@
 								    </select>		
 							    </form>							 
 						    </li>
-							<li class="user-footer">
-								<div class="pull-right">
-									<a href="/gvsigonline/" class="btn btn-default btn-flat">{% trans "Exit" %}</a>
-								</div>
-							</li>
+
+
+							{% if user and user.id %}
+								<li class="user-footer">
+									<div class="pull-left">
+										<a href="/gvsigonline/core/" id="goto-dashboard" class="btn btn-default btn-flat">{% trans "Dashboard" %}</a>
+									</div>
+									<div class="pull-right">
+										<a href="/gvsigonline/auth/logout_user/" id="goto-logout" class="btn btn-default btn-flat">{% trans "Sign out" %}</a>
+									</div>
+								</li>
+							{% else %}
+								<li class="user-footer">
+									<div class="pull-right">
+										<a href="/gvsigonline/" class="btn btn-default btn-flat">{% trans "Exit" %}</a>
+									</div>
+								</li>
+							{% endif %}
 						</ul>
 					</li>
 				</ul>
