@@ -47,11 +47,35 @@ viewer.core = {
 		
     initialize: function(conf) {
     	this.conf = conf;
+    	this._authenticate();
     	this._createMap();
     	this._initToolbar();
     	this._loadLayers();
     	this._createWidgets();    	    	
     	this._loadTools();
+    },
+    
+    _authenticate: function() {
+		var self = this;
+		if('user' in self.conf){
+			$.ajax({
+				url: self.conf.geoserver_frontend_url + '/wms',
+				params: {
+					'SERVICE': 'WMS',
+					'VERSION': '1.1.1',
+					'REQUEST': 'GetCapabilities'
+				},
+				async: false,	                
+				method: 'GET',
+				headers: {
+					"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
+				},
+				error: function(jqXHR, textStatus, errorThrown){},
+				success: function(){
+					console.log('Authenticated');
+				}
+			});
+		}
     },
     
     _createMap: function() {
