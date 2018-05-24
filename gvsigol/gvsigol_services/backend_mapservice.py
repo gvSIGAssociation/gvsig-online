@@ -1162,16 +1162,28 @@ class Geoserver():
                             print "DEBUG: Creation mode CR. Clone style False. Creating default" 
                             self.createDefaultStyle(layer, final_style_name)
                             self.setLayerStyle(layer, final_style_name, True)
+                            newRecord2 = self.updateThumbnail(layer, 'create')
+                            if newRecord2:
+                                newRecord2.save()  
                         else:
                             print "DEBUG: Creation mode CR. Clone style True"
                     else:
                         print "DEBUG: Has style and style_from_library. Creation mode UPDATE"
-                        symbology_services.clone_style(self, layer, original_style_name, final_style_name)                        
+                        style_name = datastore.workspace.name + '_' + layer.name + '_default'
+                        symbology_services.clone_style(self, layer, original_style_name, style_name)  
+                        self.setLayerStyle(layer, style_name, True)
+                        newRecord2 = self.updateThumbnail(layer, 'create')
+                        if newRecord2:
+                            newRecord2.save()                      
                 else:
                     print "DEBUG: NO has_style or style_from_library " + original_style_name
-                    if creation_mode == 'CR' or (not has_style and creation_mode == 'OW'):
-                        self.createDefaultStyle(layer, final_style_name)
-                        self.setLayerStyle(layer, final_style_name, True)
+                    #if creation_mode == 'CR' or (not has_style and creation_mode == 'OW'):
+                    style_name = datastore.workspace.name + '_' + layer.name + '_default'
+                    self.createDefaultStyle(layer, style_name)
+                    self.setLayerStyle(layer, style_name, True)
+                    newRecord2 = self.updateThumbnail(layer, 'create')
+                    if newRecord2:
+                        newRecord2.save()
                         
                 srs = defaults['srs']
                             
