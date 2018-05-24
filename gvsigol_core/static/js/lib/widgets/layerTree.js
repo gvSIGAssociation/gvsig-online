@@ -85,7 +85,11 @@ layerTree.prototype.createTree = function() {
 			var layerGroup = this.conf.layerGroups[i];
 			tree += '			<li class="box box-default collapsed-box" id="' + layerGroup.groupId + '">';
 			tree += '				<div class="box-header with-border">';
-			tree += '					<input type="checkbox" class="layer-group" id="layergroup-' + layerGroup.groupId + '">';
+			if (layerGroup.visible) {
+				tree += '					<input type="checkbox" class="layer-group" id="layergroup-' + layerGroup.groupId + '" checked>';
+			} else {
+				tree += '					<input type="checkbox" class="layer-group" id="layergroup-' + layerGroup.groupId + '">';
+			}
 			tree += '					<span class="text">' + layerGroup.groupTitle + '</span>';
 			tree += '					<div class="box-tools pull-right">';
 			tree += '						<button class="btn btn-box-tool btn-box-tool-custom group-collapsed-button" data-widget="collapse">';
@@ -96,7 +100,7 @@ layerTree.prototype.createTree = function() {
 			tree += '				<div data-groupnumber="' + (groupCount++) * 100 + '" class="box-body layer-tree-groups" style="display: none;">';
 			for (var j=0; j<layerGroup.layers.length; j++) {	
 				var layer = layerGroup.layers[j];				
-				tree += self.createOverlayUI(layer);
+				tree += self.createOverlayUI(layer, layerGroup.visible);
 			}
 			tree += '				</div>';
 			tree += '			</li>';
@@ -655,6 +659,7 @@ layerTree.prototype.createTree = function() {
 	    if (e.which == 13) this.blur();
 	});
 	
+
 };
 
 
@@ -1445,7 +1450,7 @@ layerTree.prototype.createTemporaryOverlayUI = function(layer) {
 };
 
 
-layerTree.prototype.createOverlayUI = function(layer) {
+layerTree.prototype.createOverlayUI = function(layer, group_visible) {
 	
 	var mapLayer = this.getLayerFromMap(layer);
 	var id = layer.id;
@@ -1457,10 +1462,14 @@ layerTree.prototype.createOverlayUI = function(layer) {
 	ui += '				<i class="fa fa-ellipsis-v"></i>';
 	ui += '				<i class="fa fa-ellipsis-v"></i>';
 	ui += '			</span>';
-	if (layer.visible) {
-		ui += '		<input type="checkbox" id="' + id + '" checked>';
-	} else {
-		ui += '		<input type="checkbox" id="' + id + '">';
+	if (group_visible) {
+		ui += '		<input type="checkbox" id="' + id + '" disabled checked>';
+	}else{
+		if (layer.visible) {
+			ui += '		<input type="checkbox" id="' + id + '" checked>';
+		} else {
+			ui += '		<input type="checkbox" id="' + id + '">';
+		}
 	}
 	ui += '			<span class="text">' + layer.title + '</span>';
 	ui += '			<div class="box-tools pull-right">';
