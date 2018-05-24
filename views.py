@@ -824,7 +824,8 @@ def project_get_conf(request):
             'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL']),
             'geoserver_frontend_url': os.path.join(gvsigol.settings.FRONTEND_URL, gvsigol.settings.GEOSERVER_PATH),
             'geoserver_base_url_no_auth': gvsigol.settings.GVSIGOL_SERVICES['URL'],
-            'resource_manager': resource_manager
+            'resource_manager': resource_manager,
+            'remote_auth': settings.AUTH_WITH_REMOTE_USER
         } 
         
         return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
