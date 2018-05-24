@@ -60,6 +60,15 @@
 									{% endif %}
 								</label>
 							</div>
+							<div class="checkbox col-md-6">								
+								<label>
+									{% if layergroup.visible %}
+										<input type="checkbox" name="visible" id="visible" checked/>{% trans "Is visible" %}
+									{% else %}
+										<input type="checkbox" name="visible" id="visible" />{% trans "Is visible" %}
+									{% endif %}
+								</label>
+							</div>
 						</div>
 						<input type="hidden" name="toc" id="toc" value="">
 					</div>	
