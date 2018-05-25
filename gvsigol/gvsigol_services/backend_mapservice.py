@@ -401,6 +401,13 @@ class Geoserver():
     
     def createDefaultStyle(self, layer, style_name):
         geom_type = self.get_geometry_type(layer)
+        import logging
+        logging.basicConfig(level=logging.INFO)
+        logger = logging.getLogger(__name__)
+        
+        logger.error('[backend_mapserver] Creando el estilo por defecto para layer: ' + layer + ' (' + str(geom_type) + ')')
+        
+        
         style_type = 'US'
         
         aux = None
