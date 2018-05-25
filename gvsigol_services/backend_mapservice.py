@@ -1014,6 +1014,14 @@ class Geoserver():
     def prepare_string(self, s):
         return ''.join((c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')).replace (" ", "_").replace ("-", "_").lower()
 
+    def check_if_shape_is_empty(self, dir_path, shp_path):
+        shp = os.path.join(dir_path, shp_path)
+        dbf_file = shp.replace('.shp', '.dbf').replace('.SHP', '.dbf')
+        if not os.path.isfile(dbf_file):
+            dbf_file = dbf_file.replace('.dbf', '.DBF')
+        table = DBF(dbf_file)                
+        return table.__len__() == 0
+
     def __do_shpdir2postgis(self, username, datastore, application, dir_path, layergroup, table_definition, creation_mode, defaults):
         try: 
             # get & sanitize parameters
@@ -1067,132 +1075,133 @@ class Geoserver():
             files = [f for f in os.listdir(dir_path) if f.lower()[-4:]==".shp"]
             
             for f in files:
-                has_style = False
-                has_conf = False
-                conf = None
-                newf = self.prepare_string(f)
-                visible = False
-
-                if newf in table_definition:
-                    table_def = table_definition[newf]
-                    layer_name = self.prepare_string(table_def['name'].lower())
-                    layer_title = table_def['title']
-                    
-                    if table_def.has_key('srs') and table_def['srs']:
-                        srs = table_def['srs']
-
-                    if table_def.has_key('visible') and table_def['visible']:
-                        visible = table_def['visible']
-                    
-                    if table_def.has_key('conf') and table_def['conf']:
-                        has_conf = True
-                        conf = table_def['conf']
+                if not self.check_if_shape_is_empty(dir_path, f):
+                    has_style = False
+                    has_conf = False
+                    conf = None
+                    newf = self.prepare_string(f)
+                    visible = False
+    
+                    if newf in table_definition:
+                        table_def = table_definition[newf]
+                        layer_name = self.prepare_string(table_def['name'].lower())
+                        layer_title = table_def['title']
                         
-                    try:
-                        original_style_name = table_def['style']
-                        has_style = True
+                        if table_def.has_key('srs') and table_def['srs']:
+                            srs = table_def['srs']
+    
+                        if table_def.has_key('visible') and table_def['visible']:
+                            visible = table_def['visible']
                         
-                    except Exception as e:
-                        original_style_name = self.prepare_string(layer_name)
-                        print e
-                    #layer_group = table_def['group'] + '_' + application.name.lower()
-                else:
-                    layer_name = self.prepare_string(os.path.splitext(os.path.basename(f))[0].lower())
-                    layer_title = os.path.splitext(os.path.basename(f))[0]
-                    original_style_name = layer_name
-                shp_abs = os.path.join(dir_path, f)
-                try:
-                    gdal_tools.shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
-                except Exception as e:
-                    print "ERROR en shp2postgis ... Algunos shapefiles puede que no hayan subido "
-                    continue 
-                
-                layer_exists = False
-                try:
-                    layer = Layer.objects.get(name=layer_name, datastore=datastore)
-                    layer_exists = True
-                except:
-                    # may me missing when creating a layer or when
-                    # appending / overwriting a layer created outside gvsig online
-                    layer = Layer()                
-                    # TODO: si estamos en create mode es porque ha aparecido otro shape. Deberiamos borrar el proyecto y volverlo a crear  
+                        if table_def.has_key('conf') and table_def['conf']:
+                            has_conf = True
+                            conf = table_def['conf']
                             
-                if not layer_exists: #or (creation_mode==forms_geoserver.MODE_OVERWRITE and not layer_exists):
-                    
+                        try:
+                            original_style_name = table_def['style']
+                            has_style = True
+                            
+                        except Exception as e:
+                            original_style_name = self.prepare_string(layer_name)
+                            print e
+                        #layer_group = table_def['group'] + '_' + application.name.lower()
+                    else:
+                        layer_name = self.prepare_string(os.path.splitext(os.path.basename(f))[0].lower())
+                        layer_title = os.path.splitext(os.path.basename(f))[0]
+                        original_style_name = layer_name
+                    shp_abs = os.path.join(dir_path, f)
                     try:
-                        result = self.getFeaturetype(datastore.workspace, datastore, layer_name, layer_title)
-                        if not result:
-                            self.createFeaturetype(datastore.workspace, datastore, layer_name, layer_title)
+                        gdal_tools.shp2postgis(shp_abs, layer_name, srs, host, port, db, schema, user, password, creation_mode, encoding)
+                    except Exception as e:
+                        print "ERROR en shp2postgis ... Algunos shapefiles puede que no hayan subido "
+                        continue 
+                    
+                    layer_exists = False
+                    try:
+                        layer = Layer.objects.get(name=layer_name, datastore=datastore)
+                        layer_exists = True
                     except:
-                        print "ERROR en createFeaturetype"
-                        raise
-                
-                if creation_mode==forms_geoserver.MODE_CREATE or (creation_mode==forms_geoserver.MODE_OVERWRITE and not layer_exists): 
-                    layer.datastore = datastore
-
-                
-                layer.name = layer_name
-                layer.visible = visible
-                layer.cached = True
-                layer.single_image = False
-                layer.layer_group = layergroup
-                layer.title = layer_title
-                layer.type = datastore.type
-                layer.created_by = username
-
-                if has_conf:
-                    layer.conf = conf
-                layer.save()
-                
-                # Limpiar cache de la capa
-                datastore = Datastore.objects.get(id=layer.datastore.id)
-                workspace = Workspace.objects.get(id=datastore.workspace_id)
-                self.clearCache(workspace.name, layer)
-
-                self.setDataRules()                                        
+                        # may me missing when creating a layer or when
+                        # appending / overwriting a layer created outside gvsig online
+                        layer = Layer()                
+                        # TODO: si estamos en create mode es porque ha aparecido otro shape. Deberiamos borrar el proyecto y volverlo a crear  
+                                
+                    if not layer_exists: #or (creation_mode==forms_geoserver.MODE_OVERWRITE and not layer_exists):
+                        
+                        try:
+                            result = self.getFeaturetype(datastore.workspace, datastore, layer_name, layer_title)
+                            if not result:
+                                self.createFeaturetype(datastore.workspace, datastore, layer_name, layer_title)
+                        except:
+                            print "ERROR en createFeaturetype"
+                            raise
                     
+                    if creation_mode==forms_geoserver.MODE_CREATE or (creation_mode==forms_geoserver.MODE_OVERWRITE and not layer_exists): 
+                        layer.datastore = datastore
+    
                     
-                if layer.layer_group.name != "__default__":
-                    self.createOrUpdateGeoserverLayerGroup(layer.layer_group)
-                
-                # estilos: se ejecuta en modo create o update
-                # si esta definido en la conf y existe, se clona con el nombre del ws
-                # si no, se crea uno por defecto
-                # 
-                final_style_name = datastore.workspace.name + '_' + original_style_name                
-                style_from_library = self.getStyle(original_style_name)                
-
-                if has_style and style_from_library is not None :
-                    print "DEBUG: has_style AND style_from_library"       
-                    if creation_mode == 'CR':
-                        if symbology_services.clone_style(self, layer, original_style_name, final_style_name) is False:
-                            print "DEBUG: Creation mode CR. Clone style False. Creating default" 
-                            self.createDefaultStyle(layer, final_style_name)
-                            self.setLayerStyle(layer, final_style_name, True)
+                    layer.name = layer_name
+                    layer.visible = visible
+                    layer.cached = True
+                    layer.single_image = False
+                    layer.layer_group = layergroup
+                    layer.title = layer_title
+                    layer.type = datastore.type
+                    layer.created_by = username
+    
+                    if has_conf:
+                        layer.conf = conf
+                    layer.save()
+                    
+                    # Limpiar cache de la capa
+                    datastore = Datastore.objects.get(id=layer.datastore.id)
+                    workspace = Workspace.objects.get(id=datastore.workspace_id)
+                    self.clearCache(workspace.name, layer)
+    
+                    self.setDataRules()                                        
+                        
+                        
+                    if layer.layer_group.name != "__default__":
+                        self.createOrUpdateGeoserverLayerGroup(layer.layer_group)
+                    
+                    # estilos: se ejecuta en modo create o update
+                    # si esta definido en la conf y existe, se clona con el nombre del ws
+                    # si no, se crea uno por defecto
+                    # 
+                    final_style_name = datastore.workspace.name + '_' + original_style_name                
+                    style_from_library = self.getStyle(original_style_name)                
+    
+                    if has_style and style_from_library is not None :
+                        print "DEBUG: has_style AND style_from_library"       
+                        if creation_mode == 'CR':
+                            if symbology_services.clone_style(self, layer, original_style_name, final_style_name) is False:
+                                print "DEBUG: Creation mode CR. Clone style False. Creating default" 
+                                self.createDefaultStyle(layer, final_style_name)
+                                self.setLayerStyle(layer, final_style_name, True)
+                                newRecord2 = self.updateThumbnail(layer, 'create')
+                                if newRecord2:
+                                    newRecord2.save()  
+                            else:
+                                print "DEBUG: Creation mode CR. Clone style True"
+                        else:
+                            print "DEBUG: Has style and style_from_library. Creation mode UPDATE"
+                            style_name = datastore.workspace.name + '_' + layer.name + '_default'
+                            symbology_services.clone_style(self, layer, original_style_name, style_name)  
+                            self.setLayerStyle(layer, style_name, True)
                             newRecord2 = self.updateThumbnail(layer, 'create')
                             if newRecord2:
-                                newRecord2.save()  
-                        else:
-                            print "DEBUG: Creation mode CR. Clone style True"
+                                newRecord2.save()                      
                     else:
-                        print "DEBUG: Has style and style_from_library. Creation mode UPDATE"
+                        print "DEBUG: NO has_style or style_from_library " + original_style_name
+                        #if creation_mode == 'CR' or (not has_style and creation_mode == 'OW'):
                         style_name = datastore.workspace.name + '_' + layer.name + '_default'
-                        symbology_services.clone_style(self, layer, original_style_name, style_name)  
+                        self.createDefaultStyle(layer, style_name)
                         self.setLayerStyle(layer, style_name, True)
                         newRecord2 = self.updateThumbnail(layer, 'create')
                         if newRecord2:
-                            newRecord2.save()                      
-                else:
-                    print "DEBUG: NO has_style or style_from_library " + original_style_name
-                    #if creation_mode == 'CR' or (not has_style and creation_mode == 'OW'):
-                    style_name = datastore.workspace.name + '_' + layer.name + '_default'
-                    self.createDefaultStyle(layer, style_name)
-                    self.setLayerStyle(layer, style_name, True)
-                    newRecord2 = self.updateThumbnail(layer, 'create')
-                    if newRecord2:
-                        newRecord2.save()
-                        
-                srs = defaults['srs']
+                            newRecord2.save()
+                            
+                    srs = defaults['srs']
                             
         except rest_geoserver.RequestError as ex:
             print "Error Request: " + str(ex)
