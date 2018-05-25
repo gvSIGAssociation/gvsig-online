@@ -520,7 +520,7 @@ viewer.core = {
 				var wmsLayer = null;
 				
 				var visible = layerConf.visible;
-				if(layerConf.visible){
+				if(group.visible){
 					visible = false;
 				}
 				if (layerConf.single_image) {
