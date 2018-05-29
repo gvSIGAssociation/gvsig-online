@@ -343,7 +343,7 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
         print "DEBUG: Not existe cloned style .." + cloned_style_name         
         style = Style(
             name = cloned_style_name,
-            title = cloned_style_name,
+            title = original_style_name,
             is_default = True,
             type = 'US'
         )
@@ -358,7 +358,7 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
         rule = Rule(
             style = style,
             name = 'Default symbol',
-            title = 'Default symbol',
+            title = original_style_name,
             abstract = '',
             filter = str(""),
             minscale = -1,
