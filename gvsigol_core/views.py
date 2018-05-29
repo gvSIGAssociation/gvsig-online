@@ -665,7 +665,7 @@ def project_get_conf(request):
                     
                     layer['cached'] = l.cached
 
-                    order = l.order
+                    order = int(conf_group['groupOrder']) + l.order
                     '''
                     order = int(conf_group['groupOrder']) + layers_in_group.__len__() - idx
                     if toc.get(group.name) and 'layers' in toc.get(group.name): 
@@ -965,7 +965,7 @@ def public_viewer_get_conf(request):
                         layer['time_default_value'] = l.time_default_value
                     layer['cached'] = l.cached
                     
-                    order = l.order
+                    order = int(conf_group['groupOrder']) + l.order
                     '''
                     order = int(conf_group['groupOrder']) + layers_in_group.__len__() - idx
                     
