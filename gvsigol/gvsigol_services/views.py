@@ -1598,7 +1598,7 @@ def layergroup_mapserver_toc(group, toc_string):
         toc_array = toc_string.split(',')
         layers_array = {}
         i=0
-        
+        toc_array = toc_array[::-1]
         for toc_entry in toc_array:
             layers = Layer.objects.filter(name=toc_entry,layer_group_id=group.id).order_by('order')
             for layer in layers:
@@ -1722,7 +1722,7 @@ def layergroup_update(request, lgid):
 
     else:
         layergroup = LayerGroup.objects.get(id=int(lgid))
-        layers = Layer.objects.filter(layer_group_id=layergroup.id).order_by('order')
+        layers = Layer.objects.filter(layer_group_id=layergroup.id).order_by('-order')
         
         return render_to_response('layergroup_update.html', {'lgid': lgid, 'layergroup': layergroup, 'layers': layers}, context_instance=RequestContext(request))
     
