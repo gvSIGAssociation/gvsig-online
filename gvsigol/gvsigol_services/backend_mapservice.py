@@ -1193,13 +1193,13 @@ class Geoserver():
                                 newRecord2.save()                      
                     else:
                         print "DEBUG: NO has_style or style_from_library " + original_style_name
-                        #if creation_mode == 'CR' or (not has_style and creation_mode == 'OW'):
                         style_name = datastore.workspace.name + '_' + layer.name + '_default'
-                        self.createDefaultStyle(layer, style_name)
-                        self.setLayerStyle(layer, style_name, True)
-                        newRecord2 = self.updateThumbnail(layer, 'create')
-                        if newRecord2:
-                            newRecord2.save()
+                        if creation_mode == 'CR' or (not has_style and creation_mode == 'OW' and not self.getStyle(style_name)):
+                            self.createDefaultStyle(layer, style_name)
+                            self.setLayerStyle(layer, style_name, True)
+                            newRecord2 = self.updateThumbnail(layer, 'create')
+                            if newRecord2:
+                                newRecord2.save()
                             
                     srs = defaults['srs']
                             
