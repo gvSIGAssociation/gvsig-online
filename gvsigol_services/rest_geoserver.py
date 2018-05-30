@@ -593,6 +593,7 @@ class Geoserver():
                 layer = {}
                 layer["@type"] = "layer"
                 layer["name"] = workspace.name + ":"+ l.name
+                layer["title"] = l.title
                 layer["href"] = GVSIGOL_SERVICES['URL'] + '/layers/' + l.name + '.json'
                 layers.append(layer)
 
