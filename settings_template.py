@@ -43,7 +43,32 @@ import requests
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '##s#jx5ildpkavpi@tbtl0fvj#(np#hyckdg*q#1mu%ovr8$t_'
+SECRET_KEY = '##SECRET_KEY##'
+if len(SECRET_KEY) == 14:
+    # It has not been replaced by deployment scripts
+    # Generate a random one
+    SECRET_FILE = os.path.join(BASE_DIR, 'gvsigol', 'secret.txt')
+    try:
+        SECRET_KEY = open(SECRET_FILE).read().strip()
+    except IOError:
+        try:
+            try:
+                # available since Django 1.10.x
+                from django.core.management.utils import get_random_secret_key
+            except:
+                from django.utils.crypto import get_random_string
+                def get_random_secret_key():
+                    chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
+                    return get_random_string(50, chars) 
+            from django.core.management import utils
+            import os
+            SECRET_KEY = get_random_secret_key()
+            secret = file(SECRET_FILE, 'w')
+            secret.write(SECRET_KEY)
+            secret.close()
+            os.chmod(SECRET_FILE, 0o400)
+        except IOError:
+            Exception('Please create a %s file with random characters to generate your secret key!' % SECRET_FILE)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = ##DEBUG##
