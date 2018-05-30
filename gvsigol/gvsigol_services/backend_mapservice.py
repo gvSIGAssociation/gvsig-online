@@ -1207,18 +1207,23 @@ class Geoserver():
                     else:
                         print "DEBUG: NO has_style or style_from_library " + original_style_name
                         style_name = datastore.workspace.name + '_' + layer.name + '_default'
-                        if creation_mode == 'CR' or (not has_style and creation_mode == 'OW' and not self.getStyle(style_name)):
-                            stylelayers = StyleLayer.objects.filter(layer=layer)  
+                        stylelayers = StyleLayer.objects.filter(layer=layer)  
+                        
+                        if creation_mode == 'CR' or (creation_mode == 'OW' and ((not self.getStyle(style_name)) or stylelayers.__len__() == 0)):
                             for stylelayer in stylelayers:
                                 if stylelayer.style.name != style_name:
                                     stylelayer.style.is_default = False
                                     stylelayer.style.save()
+                            self.createDefaultStyle(layer, style_name)
                             self.setLayerStyle(layer, style_name, True)
                             newRecord2 = self.updateThumbnail(layer, 'create')
                             if newRecord2:
                                 newRecord2.save()
                             
                     srs = defaults['srs']
+                    
+                    if layer.layer_group.name != "__default__":
+                        self.createOrUpdateGeoserverLayerGroup(layer.layer_group)
                             
         except rest_geoserver.RequestError as ex:
             print "Error Request: " + str(ex)
