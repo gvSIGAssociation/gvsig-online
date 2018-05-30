@@ -1139,27 +1139,30 @@ class Geoserver():
                     if creation_mode==forms_geoserver.MODE_CREATE or (creation_mode==forms_geoserver.MODE_OVERWRITE and not layer_exists): 
                         layer.datastore = datastore
     
-                    
-                    layer.name = layer_name
-                    layer.visible = visible
-                    layer.cached = True
-                    layer.single_image = False
-                    layer.layer_group = layergroup
-                    layer.title = layer_title
-                    layer.type = datastore.type
-                    layer.created_by = username
     
-                    if has_conf:
-                        layer.conf = conf
-                    layer.save()
-                    
                     # Limpiar cache de la capa
                     datastore = Datastore.objects.get(id=layer.datastore.id)
                     workspace = Workspace.objects.get(id=datastore.workspace_id)
+                    
+                    if self.updateResource(workspace.name, datastore.name, layer_name, layer_title):
+                        layer.name = layer_name
+                        layer.visible = visible
+                        layer.cached = True
+                        layer.single_image = False
+                        layer.layer_group = layergroup
+                        layer.title = layer_title
+                        layer.type = datastore.type
+                        layer.created_by = username
+        
+                        if has_conf:
+                            layer.conf = conf
+                        layer.save()
+                    
+
                     self.clearCache(workspace.name, layer)
     
                     self.setDataRules()                                        
-                        
+                    
                         
                     if layer.layer_group.name != "__default__":
                         self.createOrUpdateGeoserverLayerGroup(layer.layer_group)
