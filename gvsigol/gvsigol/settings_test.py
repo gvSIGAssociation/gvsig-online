@@ -159,7 +159,7 @@ GVSIGOL_LDAP = {
     'PORT': '389',
     'DOMAIN': 'dc=test,dc=gvsigonline,dc=com',
     'USERNAME': 'cn=admin,dc=test,dc=gvsigonline,dc=com',
-    'PASSWORD': 'GE2wa8RE',
+    'PASSWORD': 'gvsigonline',
     'AD': ''
 }
 
@@ -220,9 +220,9 @@ LOGOUT_PAGE_URL = '/gvsigonline/'
 EMAIL_BACKEND_ACTIVE = False
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'devel@scolab.es'
-EMAIL_HOST_PASSWORD = 'ksiopa247'
+EMAIL_HOST = 'smtp.yourdomain.org'
+EMAIL_HOST_USER = 'gvsigonline@yourdomain.org'
+EMAIL_HOST_PASSWORD = 'yourpass'
 EMAIL_PORT = 587
 SITE_ID=1
 
@@ -282,12 +282,12 @@ GVSIGOL_SERVICES = {
     ),
     # if MOSAIC_DB entry is omitted, mosaic indexes will be stored as SHPs
     'MOSAIC_DB': {
-                  'host': 'test.scolab.eu',
-                  'port': '6433',
-                  'database': 'carto',
-                  'schema': 'public',
+                  'host': 'localhost',
+                  'port': '5432',
+                  'database': 'gvsigonline_v2',
+                  'schema': 'imagemosaic',
                   'user': 'postgres',
-                  'passwd': 'postgres82'
+                  'passwd': 'postgres'
     },
     # NOTE: we are migrating gdal_tools to the external library pygdaltools
     # OGR path is only necessary if different from the one defined on gdal_tools.OGR2OGR_PATH
