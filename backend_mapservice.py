@@ -1187,7 +1187,6 @@ class Geoserver():
                             print "DEBUG: Has style and style_from_library. Creation mode UPDATE"
                             style_name = datastore.workspace.name + '_' + layer.name + '_default'
                             symbology_services.clone_style(self, layer, original_style_name, final_style_name)  
-                            self.updateDefaultStyle(layer, final_style_name)
                             self.setLayerStyle(layer, final_style_name, True)
                             newRecord2 = self.updateThumbnail(layer, 'create')
                             if newRecord2:
