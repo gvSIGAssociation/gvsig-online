@@ -23,6 +23,7 @@ from gvsigol_plugin_geocoding.googlemaps import GoogleMaps
 from django.core.exceptions import ImproperlyConfigured
 from urlparse import urlparse
 import settings
+from cartociudad2 import CartoCiudad2
 from cartociudad import Cartociudad
 from nominatim import Nominatim 
 import json, ast
@@ -42,6 +43,11 @@ class Geocoder():
                 return
         
         geocoder = {}
+        
+        if provider.type == 'new_cartociudad':
+            geocoder[provider.type] = CartoCiudad2(provider)
+            self.geocoders.append(geocoder)
+           
         if provider.type == 'nominatim':
             geocoder[provider.type] = Nominatim(provider)
             self.geocoders.append(geocoder)
@@ -78,7 +84,7 @@ class Geocoder():
     def find_candidate(self, address):
         location = {}
         address_json = json.loads(address)
-        type = ''
+        type = 'new_cartociudad'
         if "address[source]" in address_json:
             type = address_json["address[source]"]
         if "source" in address_json:

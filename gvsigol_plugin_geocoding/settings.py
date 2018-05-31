@@ -31,6 +31,7 @@ GEOCODING_SUPPORTED_TYPES = (
                 ('googlemaps', _('Servicios de Google Maps')),
                 ('nominatim', _('Servicios de Nominatim')),
                 ('cartociudad', _('Cartografía de CartoCiudad')),
+                ('new_cartociudad', _('(Nuevo) Cartografía de CartoCiudad')),
                 ('user', _('Otras fuentes de datos')),
             )
 
@@ -43,6 +44,13 @@ GEOCODING_PROVIDER = {
         'country_codes': 'es',
         'autocancel': True,
         'max_results': 10
+    },
+    'new_cartociudad': {
+        'candidates_url': 'http://www.cartociudad.es/geocoder/api/geocoder/candidatesJsonp',
+        'find_url': 'http://www.cartociudad.es/geocoder/api/geocoder/findJsonp',
+        'reverse_url': 'http://www.cartociudad.es/geocoder/api/geocoder/reverseGeocode', 
+        'max_results': 10,
+        'cod_postal_filter': ''
     },
     'nominatim': {
         #'url': 'http://osm.gvsigonline.com/nominatim',

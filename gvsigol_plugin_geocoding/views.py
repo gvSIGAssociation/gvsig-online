@@ -146,7 +146,7 @@ def provider_add(request):
                 #set_providers_actives()
                 set_providers_to_geocoder()
 
-                if newProvider.type == 'nominatim' or newProvider.type == 'googlemaps':
+                if newProvider.type == 'nominatim' or newProvider.type == 'googlemaps' or newProvider.type == 'new_cartociudad':
                     return redirect('provider_list')
 
                 return redirect('provider_update', provider_id=newProvider.pk)
