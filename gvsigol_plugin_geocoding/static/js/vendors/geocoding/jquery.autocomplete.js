@@ -598,8 +598,10 @@
                     var result;
                     that.currentRequest = null;
                     result = options.transformResult(data, q);
-                    that.processResponse(result, q, cacheKey);
-                    options.onSearchComplete.call(that.element, q, result.suggestions);
+                    if('suggestions' in result && result.suggestions.length > 0){
+	                    that.processResponse(result, q, cacheKey);
+	                    options.onSearchComplete.call(that.element, q, result.suggestions);
+                    }
                 }).fail(function (jqXHR, textStatus, errorThrown) {
                     options.onSearchError.call(that.element, q, jqXHR, textStatus, errorThrown);
                 });
