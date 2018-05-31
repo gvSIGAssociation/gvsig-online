@@ -5,6 +5,8 @@
 </script>
 <link href="{% static "css/ol3-contextmenu.min.css" %}" rel="stylesheet">
 <script type="text/javascript" src="{% static "js/vendors/geocoding/jquery.autocomplete.js" %}"></script>
+<script type="text/javascript" src="{% static "js/vendors/geocoding/ol3-contextmenu.js" %}"></script>
+<script type="text/javascript" src="{% static "js/lib/widgets/search.js" %}"></script>
 
 <script type="text/javascript">
 	var is_portable = false;
@@ -25,9 +27,7 @@
 		}
 	}
 	if(!is_portable || (is_enabled && !is_external)){
-		jQuery.getScript("{% static 'js/vendors/geocoding/ol3-contextmenu.js' %}")
-		jQuery.getScript("{% static 'js/lib/widgets/search.js' %}")
-		.done(function() {
+
 			$.ajax({
 				type : 'POST',
 				async : false,
@@ -52,12 +52,7 @@
 				error : function() {
 					alert("Error loading geocoder");
 				}
-			});
-			})
-			.fail(function() {
-				alert("Error loading geocoding libraries")
-		});
-		
+			});	
 		
 	}
 
