@@ -125,7 +125,7 @@ def login_user(request):
                     if user.is_active:
                         login(request, user)
                         id_solicitud = request.GET.get('id_solicitud')
-                        dni = request.GET.get('id_solicitud')
+                        dni = request.GET.get('dni')
                         token = request.GET.get('token')
                         if id_solicitud is not None:                            
                             response = redirect(request.GET.get('next'))
