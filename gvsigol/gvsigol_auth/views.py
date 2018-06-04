@@ -125,10 +125,17 @@ def login_user(request):
                     if user.is_active:
                         login(request, user)
                         id_solicitud = request.GET.get('id_solicitud')
+                        dni = request.GET.get('id_solicitud')
                         token = request.GET.get('token')
-                        response = redirect(request.GET.get('next'))
-                        response['Location'] += '?id_solicitud=' + id_solicitud + '&token=' + token
-                        return response
+                        if id_solicitud is not None:                            
+                            response = redirect(request.GET.get('next'))
+                            response['Location'] += '?id_solicitud=' + id_solicitud + '&token=' + token
+                            return response
+                        
+                        else:
+                            response = redirect(request.GET.get('next'))
+                            response['Location'] += '?dni=' + dni + '&token=' + token
+                            return response
                     
                     else:
                         errors.append({'message': _("Your account has been disabled")})
