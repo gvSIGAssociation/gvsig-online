@@ -315,6 +315,7 @@ print.prototype.createPrintJob = function(template) {
 			}
 		}
 	}
+	var f = self.renderPrintExtent(self.capabilities.layouts[0].attributes[3].clientInfo);
 	$.ajax({
 		type: 'POST',
 		async: true,
@@ -331,9 +332,10 @@ print.prototype.createPrintJob = function(template) {
 		  			"projection": "EPSG:3857",
 		  			"dpi": parseInt(dpi),
 		  			"rotation": rotation,
-		  			"center": self.map.getView().getCenter(),
+		  			//"center": self.map.getView().getCenter(),
 		  			"scale": self.getCurrentScale(parseInt(dpi)),
-		  			"layers": printLayers
+		  			"layers": printLayers,
+		  			"bbox": f.getGeometry().getExtent()
 		  	    },
 		  	    "logo_url": self.conf.project_image,
 		  	    //"logo_url": "https://demo.gvsigonline.com/media/images/igvsb.jpg",
