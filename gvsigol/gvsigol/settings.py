@@ -21,6 +21,9 @@
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
+
 import os
 import ldap
 import django.conf.locale
@@ -38,9 +41,6 @@ else:
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '##SECRET_KEY##'
@@ -69,6 +69,33 @@ if len(SECRET_KEY) == 14:
             os.chmod(SECRET_FILE, 0o400)
         except IOError:
             Exception('Please create a %s file with random characters to generate your secret key!' % SECRET_FILE)
+
+try:
+    from gvsigol import settings_passwords
+except:
+    # Store your passwords for local development in 'settings_passwds.py'
+    # Do not write any password here!!!!
+    pw_file = file(os.path.join(BASE_DIR, 'gvsigol', 'settings_passwords.py'), 'w')
+    pw_file.write("BING_KEY_DEVEL='yourbingkey'\n")
+    pw_file.write("DB_USER_DEVEL='yourdbuser'\n")
+    pw_file.write("DB_PW_DEVEL='yourdbkey'\n")
+    pw_file.write("LDAP_USER_DEVEL='yourldapuser'\n")
+    pw_file.write("LDAP_PW_DEVEL='yourldapkey'\n")
+    pw_file.write("GEOSERVER_USER_DEVEL='admin'\n")
+    pw_file.write("GEOSERVER_PW_DEVEL='geoserver'\n")
+    pw_file.close()
+    from gvsigol import settings_passwords
+finally:
+    # Store your passwords for local development in 'settings_passwords.py'
+    # Do not write any password here!!!!
+    BING_KEY_DEVEL = settings_passwords.BING_KEY_DEVEL
+    DB_USER_DEVEL = settings_passwords.DB_USER_DEVEL
+    DB_PW_DEVEL = settings_passwords.DB_PW_DEVEL
+    LDAP_USER_DEVEL = settings_passwords.LDAP_USER_DEVEL
+    LDAP_PW_DEVEL = settings_passwords.LDAP_PW_DEVEL
+    GEOSERVER_USER_DEVEL = settings_passwords.GEOSERVER_USER_DEVEL
+    GEOSERVER_PW_DEVEL = settings_passwords.GEOSERVER_PW_DEVEL
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -157,8 +184,8 @@ DATABASES = {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         #'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'gvsigonline_v2',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
+        'USER': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
+        'PASSWORD': DB_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -190,8 +217,8 @@ GVSIGOL_LDAP = {
     'HOST':'devel.gvsigonline.com',
     'PORT': '389',
     'DOMAIN': 'dc=test,dc=gvsigonline,dc=com',
-    'USERNAME': 'cn=admin,dc=test,dc=gvsigonline,dc=com',
-    'PASSWORD': 'gvsigonline',
+    'USERNAME': LDAP_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
+    'PASSWORD': LDAP_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'AD': ''
 }
 
@@ -294,8 +321,8 @@ GVSIGOL_USERS_CARTODB = {
     'dbhost': 'localhost',
     'dbport': '5432',
     'dbname': 'gvsigonline_v2',
-    'dbuser': 'postgres',
-    'dbpassword': 'postgres'
+    'dbuser': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
+    'dbpassword': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 }
 
 PUBLIC_VIEWER = True
@@ -306,8 +333,8 @@ FRONTEND_URL = 'https://localhost/'
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
     'URL': 'https://localhost/gs-local',
-    'USER': 'admin',
-    'PASSWORD': 'geoserver',
+    'USER': GEOSERVER_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
+    'PASSWORD': GEOSERVER_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'CLUSTER_NODES':[],
     'SUPPORTED_TYPES': (
                         ('v_PostGIS', _('PostGIS vector')),
@@ -321,8 +348,8 @@ GVSIGOL_SERVICES = {
                   'port': '5432',
                   'database': 'gvsigonline_v2',
                   'schema': 'imagemosaic',
-                  'user': 'postgres',
-                  'passwd': 'postgres'
+                  'user': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
+                  'passwd': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     },
     # NOTE: we are migrating gdal_tools to the external library pygdaltools
     # OGR path is only necessary if different from the one defined on gdal_tools.OGR2OGR_PATH
@@ -390,7 +417,7 @@ GVSIGOL_ENABLE_ENUMERATIONS = True
 GVSIGOL_BASE_LAYERS = {
     'bing': {
         'active': False,
-        'key': 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3'
+        'key': BING_KEY_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     }
 }
 
