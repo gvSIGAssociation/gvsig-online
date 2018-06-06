@@ -1,11 +1,11 @@
 # gvsig-online
 
 gvSIG Online is a platform for the publication and management of geographic information, by providing 
-an integrated interface to publish new layers, defining symbology, creating new mapviewers and defining
+an integrated interface for publishing new layers, defining symbology, creating new mapviewers and defining
 permissions for each published resource. gvSIG Online is a web application written in Python using the
-Django framework. It integrates Geoserver and optionally also Geonetwork.
+Django framework. It integrates with Geoserver and optionally also with Geonetwork.
 
-gvSIG Online has been developed by [Scolab](http://www.scolab.es) and the [gvSIG Association](http://www.gvsig.com/) and it is available under the [AfferoGPL license](https://www.gnu.org/licenses/agpl.html).
+gvSIG Online has been developed by [Scolab](http://www.scolab.es) and the [gvSIG Association](http://www.gvsig.com/) and it is available under the [Affero GPL license](https://www.gnu.org/licenses/agpl.html).
 
 ## User documentation
 
@@ -116,6 +116,6 @@ The gvSIG Association provides gvSIG Online hosting and maintenance services:
 * In Situ: installation on client server(s)
 
 It also offers professional services for develoment of additional plugins and customizations. Please contact
-them at info@gvsig.com for additional information.
+us at info@gvsig.com for additional information.
 
 
