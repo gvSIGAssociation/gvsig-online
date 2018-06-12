@@ -221,7 +221,7 @@ class Geoserver():
             response = catalog.save(ds) # FIXME: we should check response.status to ensure the operation was correct
             return True
         except Exception as e:
-            print str(e)
+            print "Backend MapService - createDatastore Error", e
             return False
         
     def datastore_exists(self, workspace, name):
@@ -262,7 +262,7 @@ class Geoserver():
                     ele_format = params_dict.get('ele_format', '')
                     date_format = params_dict.get('date_format', '')
                     file_path = params_dict.get('url')
-                    self.__process_image_mosaic_folder(file_path, date_regex, date_format, ele_regex, ele_format)
+                    self.__process_image_mosaic_folder(dsname, file_path, date_regex, date_format, ele_regex, ele_format)
                     ds.url = params_dict.get('url')
                 
             elif format_nature == "e": # cascading wms              
