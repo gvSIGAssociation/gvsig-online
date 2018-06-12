@@ -606,10 +606,10 @@ viewer.core = {
 			var cached = group.cached;
 			
 			if (cached) {
-				url = this.conf.geoserver_base_url + '/gwc/service/wms';
+				url = this.conf.geoserver_frontend_url + '/gwc/service/wms';
 				params = {'LAYERS': group.groupName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'};
 			} else {
-				url = this.conf.geoserver_base_url + '/wms';
+				url = this.conf.geoserver_frontend_url + '/wms';
 				params = {'LAYERS': group.groupName, 'FORMAT': 'image/png', 'VERSION': '1.1.0'};
 			}
 			
@@ -629,12 +629,12 @@ viewer.core = {
 			});
 			layerGroup.baselayer = false;
 			layerGroup.layer_name = group.groupName;
-			layerGroup.wms_url = this.conf.geoserver_base_url + '/wms';
-			layerGroup.wms_url_no_auth = this.conf.geoserver_base_url_no_auth + '/wms';
-			layerGroup.wfs_url = this.conf.geoserver_base_url + '/wfs';
+			layerGroup.wms_url = this.conf.geoserver_frontend_url + '/wms';
+			layerGroup.wms_url_no_auth = this.conf.geoserver_frontend_url + '/wms';
+			layerGroup.wfs_url = this.conf.geoserver_frontend_url + '/wfs';
 			layerGroup.title = group.groupTitle;
-			layerGroup.legend = this.conf.geoserver_base_url + '/wms' + '?SERVICE=WMS&VERSION=1.1.1&layer=' + group.groupName + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on';
-			layerGroup.legend_no_auth = this.conf.geoserver_base_url_no_auth + '/wms' + '?SERVICE=WMS&VERSION=1.1.1&layer=' + group.groupName + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on';
+			layerGroup.legend = this.conf.geoserver_frontend_url + '/wms' + '?SERVICE=WMS&VERSION=1.1.1&layer=' + group.groupName + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on';
+			layerGroup.legend_no_auth = this.conf.geoserver_frontend_url + '/wms' + '?SERVICE=WMS&VERSION=1.1.1&layer=' + group.groupName + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on';
 			layerGroup.queryable = true;
 			layerGroup.isLayerGroup = true;
 			layerGroup.setZIndex(parseInt(group.groupOrder));
