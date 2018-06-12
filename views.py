@@ -1096,6 +1096,7 @@ def public_viewer_get_conf(request):
             'tile_size': gvsigol.settings.TILE_SIZE,          
             'is_public_project': True,
             'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL']),
+            'geoserver_frontend_url': os.path.join(gvsigol.settings.FRONTEND_URL, gvsigol.settings.GEOSERVER_PATH),
             'resource_manager': resource_manager
         } 
 
