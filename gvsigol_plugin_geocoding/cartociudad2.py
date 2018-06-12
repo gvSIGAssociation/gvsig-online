@@ -107,16 +107,17 @@ class CartoCiudad2():
         }
         
         json_result =  self.get_json_from_url(self.urls['reverse_url'], params)
-        if not json_result:
-            updated_data = False
-            for provider in self.providers:
-                if provider.type == 'new_cartociudad':
-                    updated_data = self.set_database_config(provider)    
-            if updated_data:
-                json_result = self.get_json_from_url(self.urls['reverse_url'], params)
+        if isinstance(json_result, dict):
+            json_result['source'] = self.get_type()
                 
-        return json_result
-      
+            return json_result
+        
+        parse_result = {
+                    'address': _('Not founded'),
+                    'lat': coordinate[1], 
+                    'lng': coordinate[0]
+                }
+        return parse_result
     
     
     @staticmethod   
