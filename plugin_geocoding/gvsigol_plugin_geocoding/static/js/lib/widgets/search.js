@@ -96,6 +96,32 @@ search.prototype.initUI = function() {
 						}
 					});
 				}
+				
+				if(response.types[i] == "new_cartociudad"){
+					menus.push({
+						text: 'Dirección de CartoCiudad (Nuevo)',
+						classname: 'geocoding-contextmenu', // add some CSS rules
+						callback: function (obj) {
+							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4258');	
+							$.ajax({
+								type: 'POST',
+								async: false,
+								url: '/gvsigonline/geocoding/get_location_address/',
+								beforeSend:function(xhr){
+									xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+								},
+								data: {
+									'coord': coordinate[0] + ","+ coordinate[1],
+									'type': 'new_cartociudad'
+								},
+								success	:function(response){
+									self.locate(response, 'EPSG:4258', false);
+								},
+								error: function(){}
+							});
+						}
+					});
+				}
 
 				if(response.types[i] == "cartociudad"){
 					menus.push({
@@ -219,12 +245,12 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 	this.map.removeOverlay(this.popup);
 	this.popup = new ol.Overlay.Popup();
 	this.map.addOverlay(this.popup);
-	if(address != null){
+	if(address != null && !(address instanceof Array && address.length == 0)){
 		var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], origin_srs, 'EPSG:3857');	
 		if(fromCombo){
 			this.popup.show(coordinate, '<div><p>' + $("#autocomplete").val() + '</p></div>');
 		}else{
-			if(address.source == "cartociudad"){
+			if(address.source == "cartociudad" || address.source == "new_cartociudad"){
 				var callejero = "";
 				if(address.tip_via && (address.tip_via.trim() != 0)){
 					callejero = address.tip_via + " ";
