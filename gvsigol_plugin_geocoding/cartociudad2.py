@@ -65,6 +65,7 @@ class CartoCiudad2():
             json_results = self.get_json_from_url(self.urls['candidates_url'], params)
             for json_result in json_results:
                 json_result['category'] = provider.category
+                json_result['image'] = str(provider.image)
             
         return json_results
     
