@@ -63,6 +63,8 @@ class CartoCiudad2():
         if self.providers.__len__() > 0 :
             provider = self.providers[0]
             json_results = self.get_json_from_url(self.urls['candidates_url'], params)
+            for json_result in json_results:
+                json_result['category'] = provider.category
             
         return json_results
     
