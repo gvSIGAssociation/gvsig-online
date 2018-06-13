@@ -126,15 +126,21 @@ def login_user(request):
                         login(request, user)
                         id_solicitud = request.GET.get('id_solicitud')
                         dni = request.GET.get('dni')
+                        expediente = request.GET.get('expediente')
                         token = request.GET.get('token')
                         if id_solicitud is not None:                            
                             response = redirect(request.GET.get('next'))
                             response['Location'] += '?id_solicitud=' + id_solicitud + '&token=' + token
                             return response
                         
-                        else:
+                        elif dni is not None:
                             response = redirect(request.GET.get('next'))
                             response['Location'] += '?dni=' + dni + '&token=' + token
+                            return response
+                        
+                        elif expediente is not None:
+                            response = redirect(request.GET.get('next'))
+                            response['Location'] += '?expediente=' + expediente + '&token=' + token
                             return response
                     
                     else:
