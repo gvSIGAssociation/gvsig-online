@@ -104,6 +104,7 @@ def login_user(request):
                 aux = request.META['HTTP_OIDC_CLAIM_SUB']
                 if "\\" in aux:
                         aux = aux.split("\\")[1]
+                aux = aux.lower()
                 user = authenticate(remote_user=aux)
                 if user is not None:
                     if user.is_active:
