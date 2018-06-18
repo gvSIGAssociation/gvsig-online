@@ -20,7 +20,7 @@
 			var button = '<li id="print-div" title="'+gettext("Print map")+'"><a href="#" id="print" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-print"></i></a></li>';
 			$('#toolbar-buttons').append(button);
 		
-			if( navigator.userAgent.toLowerCase().indexOf('firefox') > -1 ){
+			if( navigator.userAgent.toLowerCase().indexOf('firefox') > -1 ){ 
 				var tool = new print(printProvider, conf, map);
 				viewer.core.loadTool(tool);
 			}else{
