@@ -118,16 +118,16 @@ INSTALLED_APPS = [
     'gvsigol_symbology',
     'gvsigol_filemanager',
     'gvsigol_core',
-    'gvsigol_app_libra',
-    'gvsigol_plugin_graphiccapture',
-    #'gvsigol_plugin_edition',
+    'gvsigol_app_tdgov',
+    #'gvsigol_plugin_graphiccapture',
+    'gvsigol_plugin_edition',
     #'gvsigol_plugin_worldwind',
-    #'gvsigol_plugin_shps_folder',
-    #'gvsigol_plugin_geocoding',
-    #'gvsigol_plugin_etl',
-     #'gvsigol_plugin_form',
+    'gvsigol_plugin_shps_folder',
+    'gvsigol_plugin_geocoding',
+    'gvsigol_plugin_etl',
+    'gvsigol_plugin_form',
     #'gvsigol_plugin_sync',
-    #'gvsigol_plugin_catastro',
+    'gvsigol_plugin_catastro',
     #'gvsigol_plugin_alfresco',
     #'gvsigol_plugin_print',
     #'gvsigol_plugin_catalog',
@@ -290,11 +290,12 @@ SITE_ID=1
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
-BASE_URL = 'https://localhost'
+BASE_URL = 'http://localhost'
 MEDIA_ROOT = '/var/www/media/'
-MEDIA_URL = 'https://localhost/media/'
+MEDIA_URL = 'http://localhost/media/'
 STATIC_URL = '/gvsigonline/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
+
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_core/static'),
     os.path.join(BASE_DIR, 'gvsigol_auth/static'),
@@ -328,11 +329,11 @@ GVSIGOL_USERS_CARTODB = {
 PUBLIC_VIEWER = True
 
 GEOSERVER_PATH = '/gs-local'
-FRONTEND_URL = 'https://localhost/'
+FRONTEND_URL = 'http://localhost'
 
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
-    'URL': 'https://localhost/gs-local',
+    'URL': 'http://localhost/gs-local',
     'USER': GEOSERVER_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'PASSWORD': GEOSERVER_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'CLUSTER_NODES':[],
