@@ -20,38 +20,8 @@
 			var button = '<li id="print-div" title="'+gettext("Print map")+'"><a href="#" id="print" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-print"></i></a></li>';
 			$('#toolbar-buttons').append(button);
 		
-			if( navigator.userAgent.toLowerCase().indexOf('firefox') > -1 ){ 
-				var tool = new print(printProvider, conf, map);
-				viewer.core.loadTool(tool);
-			}else{
-				$("#print").on('click', function(e) {
-					e.preventDefault();
-					
-					var body = '';
-					body += '<div class="row">';
-					body += 	'<div class="col-md-12 form-group">';
-					body += 		'<label for="export-map-title">' + gettext('Function not available') + '</label><br />';
-					body += 		'<label class="export-map-content" style="font-weight: normal;">' + gettext('This functionality is only available on Mozilla Firefox') + '</label>';					
-					body += 	'</div>';
-					body += '</div>';
-					
-					$('#float-modal .modal-body').empty();
-					$('#float-modal .modal-body').append(body);
-					
-					var buttons = '';
-					buttons += '<button id="float-modal-accept-print" type="button" class="btn btn-default">' + gettext('Accept') + '</button>';
-					
-					$('#float-modal .modal-footer').empty();
-					$('#float-modal .modal-footer').append(buttons);
-					
-					$("#float-modal").modal('show');
-					
-					var self = this;	
-					$('#float-modal-accept-print').on('click', function () {
-						$('#float-modal').modal('hide');
-					});
-				});
-			}
+			var tool = new print(printProvider, conf, map);
+			viewer.core.loadTool(tool);
 			
 			
 		},
