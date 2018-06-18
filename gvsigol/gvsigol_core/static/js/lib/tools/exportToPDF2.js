@@ -58,38 +58,65 @@ exportToPDF.prototype.deactivable = true;
  */
 exportToPDF.prototype.handler = function(e) {
 	e.preventDefault();
-	
-	var body = '';
-	body += '<div class="row">';
-	body += 	'<div class="col-md-12 form-group">';
-	body += 		'<label for="export-map-title">' + gettext('Map title') + '</label>';
-	body += 		'<input placeholder="' + gettext('Map title') + '" name="export-map-title" id="export-map-title" type="text" class="form-control">';					
-	body += 	'</div>';
-	body += '</div>';
-	
-	$('#float-modal .modal-body').empty();
-	$('#float-modal .modal-body').append(body);
-	
-	var buttons = '';
-	buttons += '<button id="float-modal-cancel-print" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
-	buttons += '<button id="float-modal-accept-print" type="button" class="btn btn-default">' + gettext('Print') + '</button>';
-	
-	$('#float-modal .modal-footer').empty();
-	$('#float-modal .modal-footer').append(buttons);
-	
-	$("#float-modal").modal('show');
-	
-	var self = this;	
-	$('#float-modal-accept-print').on('click', function () {
-		var title = $('#export-map-title').val();
-		
-		window.map = self.map;
-		window.title = title;
-		window.open('/gvsigonline/core/export/' + self.conf.pid + '/');       
-		window.focus();
-		
-		$('#float-modal').modal('hide');
-	});
+	if( navigator.userAgent.toLowerCase().indexOf('firefox') > -1 ){ 
+		var body = '';
+		body += '<div class="row">';
+		body += 	'<div class="col-md-12 form-group">';
+		body += 		'<label for="export-map-title">' + gettext('Map title') + '</label>';
+		body += 		'<input placeholder="' + gettext('Map title') + '" name="export-map-title" id="export-map-title" type="text" class="form-control">';					
+		body += 	'</div>';
+		body += '</div>';
+
+		$('#float-modal .modal-body').empty();
+		$('#float-modal .modal-body').append(body);
+
+		var buttons = '';
+		buttons += '<button id="float-modal-cancel-print" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
+		buttons += '<button id="float-modal-accept-print" type="button" class="btn btn-default">' + gettext('Print') + '</button>';
+
+		$('#float-modal .modal-footer').empty();
+		$('#float-modal .modal-footer').append(buttons);
+
+		$("#float-modal").modal('show');
+
+		var self = this;	
+		$('#float-modal-accept-print').on('click', function () {
+			var title = $('#export-map-title').val();
+
+			window.map = self.map;
+			window.title = title;
+			window.open('/gvsigonline/core/export/' + self.conf.pid + '/');       
+			window.focus();
+
+			$('#float-modal').modal('hide');
+		});
+
+
+	}else{
+		var body = '';
+		body += '<div class="row">';
+		body += 	'<div class="col-md-12 form-group">';
+		body += 		'<label for="export-map-title">' + gettext('Function not available') + '</label><br />';
+		body += 		'<label class="export-map-content" style="font-weight: normal;">' + gettext('This functionality is only available on Mozilla Firefox') + '</label>';					
+		body += 	'</div>';
+		body += '</div>';
+
+		$('#float-modal .modal-body').empty();
+		$('#float-modal .modal-body').append(body);
+
+		var buttons = '';
+		buttons += '<button id="float-modal-accept-print" type="button" class="btn btn-default">' + gettext('Accept') + '</button>';
+
+		$('#float-modal .modal-footer').empty();
+		$('#float-modal .modal-footer').append(buttons);
+
+		$("#float-modal").modal('show');
+
+		var self = this;	
+		$('#float-modal-accept-print').on('click', function () {
+			$('#float-modal').modal('hide');
+		});
+	}
 };
 
 /**
