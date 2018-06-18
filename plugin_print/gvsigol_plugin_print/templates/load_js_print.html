@@ -24,7 +24,33 @@
 				var tool = new print(printProvider, conf, map);
 				viewer.core.loadTool(tool);
 			}else{
-				alert("hola");
+				button.on('click', function(e) {
+					e.preventDefault();
+					
+					var body = '';
+					body += '<div class="row">';
+					body += 	'<div class="col-md-12 form-group">';
+					body += 		'<label for="export-map-title">' + gettext('Function not available') + '</label>';
+					body += 		'<label for="export-map-content">' + gettext('This functionality is only available on Mozilla Firefox') + '</label>';					
+					body += 	'</div>';
+					body += '</div>';
+					
+					$('#float-modal .modal-body').empty();
+					$('#float-modal .modal-body').append(body);
+					
+					var buttons = '';
+					buttons += '<button id="float-modal-accept-print" type="button" class="btn btn-default">' + gettext('Print') + '</button>';
+					
+					$('#float-modal .modal-footer').empty();
+					$('#float-modal .modal-footer').append(buttons);
+					
+					$("#float-modal").modal('show');
+					
+					var self = this;	
+					$('#float-modal-accept-print').on('click', function () {
+						$('#float-modal').modal('hide');
+					});
+				});
 			}
 			
 			
