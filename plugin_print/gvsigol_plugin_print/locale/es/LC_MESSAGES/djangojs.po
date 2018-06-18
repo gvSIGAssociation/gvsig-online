@@ -37,6 +37,9 @@ msgstr "Aviso legal"
 msgid "Rotation"
 msgstr "Rotación"
 
+msgid "Accept"
+msgstr "Aceptar"
+
 msgid "Print"
 msgstr "Imprimir"
 
