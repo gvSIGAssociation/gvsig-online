@@ -24,7 +24,7 @@
 				var tool = new print(printProvider, conf, map);
 				viewer.core.loadTool(tool);
 			}else{
-				button.on('click', function(e) {
+				$("#print").on('click', function(e) {
 					e.preventDefault();
 					
 					var body = '';
