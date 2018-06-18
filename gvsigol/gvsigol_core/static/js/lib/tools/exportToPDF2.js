@@ -58,7 +58,7 @@ exportToPDF.prototype.deactivable = true;
  */
 exportToPDF.prototype.handler = function(e) {
 	e.preventDefault();
-	if( navigator.userAgent.toLowerCase().indexOf('firefox') > -1 ){ 
+	if( navigator.userAgent.toLowerCase().indexOf('firefox') > -1 || !this.conf.is_public_project){ 
 		var body = '';
 		body += '<div class="row">';
 		body += 	'<div class="col-md-12 form-group">';
