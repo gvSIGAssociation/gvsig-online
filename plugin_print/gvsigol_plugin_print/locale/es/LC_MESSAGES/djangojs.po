@@ -51,3 +51,9 @@ msgstr "Ha de seleccionar una plantilla"
 
 msgid "Error loading print plugin"
 msgstr "Error cargando plugin de impresión"
+
+msgid "Function not available"
+msgstr "Herramienta no disponible"
+
+msgid "This functionality is only available on Mozilla Firefox"
+msgstr "Esta funcionalidad está sólo disponible en Mozilla Firefox"
