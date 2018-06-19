@@ -2114,7 +2114,6 @@ def enumeration_update(request, eid):
         return render_to_response('enumeration_update.html', {'eid': eid, 'enumeration': enum, 'items': items, 'count': len(items) + 1}, context_instance=RequestContext(request))
    
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
 @csrf_exempt
 def get_enumeration(request):
     if request.method == 'POST':
