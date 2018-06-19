@@ -825,7 +825,7 @@ def project_get_conf(request):
             'base_layers': base_layers,
             'is_public_project': False,
             'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL']),
-            'geoserver_frontend_url': gvsigol.settings.FRONTEND_URL,
+            'geoserver_frontend_url':gvsigol.settings.FRONTEND_URL + gvsigol.settings.GEOSERVER_PATH,
             'geoserver_base_url_no_auth': gvsigol.settings.GVSIGOL_SERVICES['URL'],
             'resource_manager': resource_manager,
             'remote_auth': settings.AUTH_WITH_REMOTE_USER
