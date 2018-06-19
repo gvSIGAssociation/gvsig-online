@@ -2200,7 +2200,7 @@ def is_grouped_symbology_request(request, url, aux_response, styles, future_sess
 
 @csrf_exempt
 def get_feature_info(request):
-    if request.method == 'POST':  
+    if request.method == 'POST':
         results = []    
         layers_str = request.POST.get('layers_json')
         layers_json = json.loads(layers_str)
@@ -2209,6 +2209,9 @@ def get_feature_info(request):
         full_features = []
         
         rs = []
+        response = {
+        }
+
         try:
             fut_session = FuturesSession()
             for layer_array in layers_array:
@@ -2251,7 +2254,10 @@ def get_feature_info(request):
                         })
                 i = i + 1
         except Exception as e:
-            print e.message    
+            print e.message  
+            response = {
+                'error':  str(e.message)
+            }  
             
         for resultset in results:
         
@@ -2321,9 +2327,9 @@ def get_feature_info(request):
             if features:
                 full_features = full_features + features
                 
-        response = {
-            'features': full_features
-        }
+            response = {
+                'features': full_features
+            }
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
