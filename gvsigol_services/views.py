@@ -2201,13 +2201,13 @@ def is_grouped_symbology_request(request, url, aux_response, styles, future_sess
 
 @csrf_exempt
 def get_feature_info(request):
-    if request.method == 'POST':      
+    if request.method == 'POST':  
+        results = []    
         layers_str = request.POST.get('layers_json')
         layers_json = json.loads(layers_str)
         
         layers_array = layers_json
         full_features = []
-        
         
         rs = []
         try:
@@ -2234,7 +2234,6 @@ def get_feature_info(request):
                 aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
                 rs.append(is_grouped_symbology_request(request, url, aux_response, styles, fut_session))
                 
-            results = []
             i=0
             for layer_array in layers_array:
                 url = layer_array['url']
