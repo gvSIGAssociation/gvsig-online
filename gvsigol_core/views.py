@@ -138,6 +138,8 @@ def home(request):
             
     if len (projects_by_user) == 1 and not is_superuser(user) and from_login:
         return redirect('project_load', project_name=projects_by_user[0].project.name)
+    elif len (public_projects) == 1 and not is_superuser(user) and from_login:
+        return redirect('public_project_load', project_name=public_projects[0].get('name'))
     else:
         external_ldap_mode = True
         if 'AD' in settings.GVSIGOL_LDAP and settings.GVSIGOL_LDAP['AD'].__len__() > 0:
