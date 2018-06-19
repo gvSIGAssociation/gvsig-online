@@ -200,7 +200,7 @@ print.prototype.createPrintJob = function(template) {
 			if (mapLayers[i].getVisible()) {
 				var layer = {
 					//"baseURL": "http://localhost/gs-local/ws_jrodrigo/wms",
-					"baseURL": self.conf.geoserver_frontend_url + mapLayers[i].wms_url_no_auth,
+					"baseURL": mapLayers[i].wms_url_no_auth,
 			  	    "opacity": mapLayers[i].getOpacity(),
 			  	    "type": "WMS",
 		  			"imageFormat": "image/png",
@@ -224,7 +224,7 @@ print.prototype.createPrintJob = function(template) {
 				
 				var legend = {
 					"name": mapLayers[i].title,
-		            "icons": [self.conf.geoserver_frontend_url + mapLayers[i].legend_no_auth]
+		            "icons": [mapLayers[i].legend_no_auth]
 		        };
 				/*var legend = {
 					"name": mapLayers[i].title,
