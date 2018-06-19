@@ -2212,8 +2212,6 @@ def get_feature_info(request):
         response = {
         }
         urls = []
-        username = ''
-        password = ''
         
         try:
             fut_session = FuturesSession()
@@ -2232,16 +2230,10 @@ def get_feature_info(request):
                 
                 auth2 = None
                 if query_layer != 'plg_catastro':
-                    #if 'username' in request.session and 'password' in request.session:
-                    #    if request.session['username'] is not None and request.session['password'] is not None:
-                    if 'username' in request.POST and 'password' in request.POST:
-                        username = request.POST.get('username')
-                        password = request.POST.get('password')
                     if 'username' in request.session and 'password' in request.session:
-                        username = request.session['username']
-                        password = request.session['password']
-                        auth2 = (username, password)
-                        #auth2 = ('admin', 'geoserver')
+                        if request.session['username'] is not None and request.session['password'] is not None:
+                            auth2 = (username, password)
+                            #auth2 = ('admin', 'geoserver')
                 
                 aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
                 rs.append(is_grouped_symbology_request(request, url, aux_response, styles, fut_session))
@@ -2267,9 +2259,7 @@ def get_feature_info(request):
             print e.message  
             response = {
                 'error':  str(e.message),
-                'urls': urls,
-                'username' : username,
-                'password': password
+                'urls': urls
             }  
             
         for resultset in results:
