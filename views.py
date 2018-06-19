@@ -136,7 +136,7 @@ def home(request):
                         projects.append(project)                    
          
             
-    if len (projects_by_user) == 1 and len (public_projects) == 0 not is_superuser(user) and from_login:
+    if len (projects_by_user) == 1 and len (public_projects) == 0 and not is_superuser(user) and from_login:
         return redirect('project_load', project_name=projects_by_user[0].project.name)
     elif len (projects_by_user) == 0 and len (public_projects) == 1 and not is_superuser(user) and from_login:
         return redirect('public_project_load', project_name=public_projects[0].get('name'))
