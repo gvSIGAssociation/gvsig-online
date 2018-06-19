@@ -51,6 +51,9 @@ def staff_required(function):
 def is_superuser(user):            
     return user.is_superuser
 
+def is_staff(user):            
+    return user.is_staff
+
 def get_all_groups():
     groups_list = UserGroup.objects.all()
     
