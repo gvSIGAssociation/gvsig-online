@@ -2212,7 +2212,11 @@ def get_feature_info(request):
         response = {
         }
         urls = []
-
+        username = ''
+        password = ''
+        if 'username' in request.session and 'password' in request.session:
+            username = request.session['username']
+            password = request.session['password']
         try:
             fut_session = FuturesSession()
             for layer_array in layers_array:
@@ -2259,7 +2263,9 @@ def get_feature_info(request):
             print e.message  
             response = {
                 'error':  str(e.message),
-                'urls': urls
+                'urls': urls,
+                'username' : username,
+                'password': password
             }  
             
         for resultset in results:
