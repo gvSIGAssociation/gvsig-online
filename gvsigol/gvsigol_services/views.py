@@ -2214,6 +2214,9 @@ def get_feature_info(request):
         urls = []
         username = ''
         password = ''
+        if 'username' in request.POST and 'password' in request.POST:
+            username = request.POST.get('username')
+            password = request.POST.get('password')
         if 'username' in request.session and 'password' in request.session:
             username = request.session['username']
             password = request.session['password']
@@ -2234,10 +2237,11 @@ def get_feature_info(request):
                 
                 auth2 = None
                 if query_layer != 'plg_catastro':
-                    if 'username' in request.session and 'password' in request.session:
-                        if request.session['username'] is not None and request.session['password'] is not None:
-                            auth2 = (request.session['username'], request.session['password'])
-                            #auth2 = ('admin', 'geoserver')
+                    #if 'username' in request.session and 'password' in request.session:
+                    #    if request.session['username'] is not None and request.session['password'] is not None:
+                    if username.__len__()>0 and password.__len__()>0:
+                        auth2 = (request.session['username'], request.session['password'])
+                    #auth2 = ('admin', 'geoserver')
                 
                 aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
                 rs.append(is_grouped_symbology_request(request, url, aux_response, styles, fut_session))
