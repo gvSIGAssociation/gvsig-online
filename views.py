@@ -2551,7 +2551,6 @@ def unlock_layer(request, lock_id):
     lock.delete()
     return redirect('lock_list')
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
 @csrf_exempt
 def get_feature_resources(request):
     if request.method == 'POST':      
