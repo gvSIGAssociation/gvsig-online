@@ -2211,6 +2211,7 @@ def get_feature_info(request):
         rs = []
         response = {
         }
+        urls = []
 
         try:
             fut_session = FuturesSession()
@@ -2219,6 +2220,7 @@ def get_feature_info(request):
                 if 'styles' in layer_array:
                     styles = layer_array['styles']
                 url = layer_array['url']
+                urls.append(url)
                 query_layer = layer_array['query_layer']
                 ws= None
                 if 'workspace' in layer_array:
@@ -2256,7 +2258,8 @@ def get_feature_info(request):
         except Exception as e:
             print e.message  
             response = {
-                'error':  str(e.message)
+                'error':  str(e.message),
+                'urls': urls
             }  
             
         for resultset in results:
