@@ -31,7 +31,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
-from gvsigol_auth.utils import superuser_required, is_superuser, staff_required
+from gvsigol_auth.utils import superuser_required, is_superuser, is_staff, staff_required
 import utils as core_utils
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
 from django.views.decorators.cache import cache_control
@@ -136,9 +136,9 @@ def home(request):
                         projects.append(project)                    
          
             
-    if len (projects_by_user) == 1 and len (public_projects) == 0 and not is_superuser(user) and from_login:
+    if len (projects_by_user) == 1 and len (public_projects) == 0 and not is_superuser(user) and not is_staff(user) and from_login:
         return redirect('project_load', project_name=projects_by_user[0].project.name)
-    elif len (projects_by_user) == 0 and len (public_projects) == 1 and not is_superuser(user) and from_login:
+    elif len (projects_by_user) == 0 and len (public_projects) == 1 and not is_superuser(user) and not is_staff(user) and from_login:
         return redirect('public_project_load', project_name=public_projects[0].get('name'))
     else:
         external_ldap_mode = True
