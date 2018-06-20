@@ -485,14 +485,16 @@ def project_update(request, pid):
             selected_base_layers.append(base_layer_project.baselayer.id)
             if base_layer_project.is_default:
                 selected_base_layer = base_layer_project.baselayer.id
-                
-        toc = json.loads(project.toc_order)
-        for g in toc:
-            group = toc.get(g)
-            ordered_layers = sorted(group.get('layers').iteritems(), key=lambda (x, y): y['order'], reverse=True)
-            group['layers'] = ordered_layers
-        ordered_toc = sorted(toc.iteritems(), key=lambda (x, y): y['order'], reverse=True)
         
+        if project.toc_order:        
+            toc = json.loads(project.toc_order)
+            for g in toc:
+                group = toc.get(g)
+                ordered_layers = sorted(group.get('layers').iteritems(), key=lambda (x, y): y['order'], reverse=True)
+                group['layers'] = ordered_layers
+            ordered_toc = sorted(toc.iteritems(), key=lambda (x, y): y['order'], reverse=True)
+        else:
+            ordered_toc = []
         return render_to_response('project_update.html', {'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'base_layers': base_layers, 'selected_base_layers': selected_base_layers,'selected_base_layer': selected_base_layer, 'has_geocoding_plugin': has_geocoding_plugin, 'toc': ordered_toc}, context_instance=RequestContext(request))
     
     
