@@ -266,6 +266,8 @@ def toc_update_layer_group(old_layergroup, old_name, new_name, title):
         p.project.save()
    
 def toc_remove_layergroups(toc_structure, layer_groups): 
+    if not toc_structure:
+        return json.dumps({})
     json_toc = json.loads(toc_structure)
     for lg in layer_groups:
         layergroup = LayerGroup.objects.get(id=lg)
