@@ -66,6 +66,8 @@ def home(request):
     if 'HTTP_REFERER' in request.META:
         if 'auth/login_user' in request.META['HTTP_REFERER']:
             from_login = True
+    if settings.AUTH_WITH_REMOTE_USER == True:
+            from_login = True
     
     projects_by_user = []
     for usergroup_user in groups_by_user:
