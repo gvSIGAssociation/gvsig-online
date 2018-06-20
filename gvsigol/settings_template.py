@@ -276,7 +276,7 @@ GVSIGOL_USERS_CARTODB = {
 PUBLIC_VIEWER = True
 
 GEOSERVER_PATH = '/geoserver'
-FRONTEND_URL = '##FRONTEND_URL##'
+FRONTEND_URL = 'https://devel.gvsigonline.com'
 
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
