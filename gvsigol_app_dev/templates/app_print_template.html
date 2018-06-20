@@ -235,7 +235,7 @@
 			doc.setFontType("italic");
 			doc.setTextColor(50, 50, 50);
 			doc.setFontSize(8);
-			doc.text(225, 205, "© 2016 SCOLAB");
+			doc.text(225, 205, "© 2018 SCOLAB");
 			
 			//north
 			doc.addImage(north, 'JPEG', 250, 182, 12, 12);
@@ -246,9 +246,21 @@
 			//doc.rect(70, 170, 200, 35, 'FD');
 			//doc.addImage(legend, 'JPEG', 20, 170, 200, 35);
 			
-	        doc.output('datauri');
+	        //doc.output('datauri');
+	        var uri = doc.output('dataurlstring');
+	        openDataUriWindow(uri);
 		}
 		
+		function openDataUriWindow(url) {
+		    var html = '<html>' +
+		        '<style>html, body { padding: 0; margin: 0; } iframe { width: 100%; height: 100%; border: 0;}  </style>' +
+		        '<body>' +
+		        '<iframe id="pdf-iframe" src="' + url + '"></iframe>' +
+		        '</body></html>';
+		    a = window.open("", "_self");
+	    	a.document.write(html);
+	    	//this.close();
+		}
 	</script> 
 </head>
 <body onLoad=init();>
