@@ -2232,7 +2232,7 @@ def get_feature_info(request):
                 if query_layer != 'plg_catastro':
                     if 'username' in request.session and 'password' in request.session:
                         if request.session['username'] is not None and request.session['password'] is not None:
-                            auth2 = (username, password)
+                            auth2 = (request.session['username'], request.session['password'])
                             #auth2 = ('admin', 'geoserver')
                 
                 aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
