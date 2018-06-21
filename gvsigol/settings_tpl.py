@@ -244,8 +244,8 @@ SITE_ID=1
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 BASE_URL = '##BASE_URL##'
 MEDIA_ROOT = '##MEDIA_ROOT##'
-MEDIA_URL = '##BASE_URL##/media/'
-STATIC_URL = '/static/'
+MEDIA_URL = '##BASE_URL##/##MEDIA_PATH##/'
+STATIC_URL = '/##STATIC_PATH##'
 STATIC_ROOT = '##GVSIGOL_HOME##/gvsigol/assets'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',

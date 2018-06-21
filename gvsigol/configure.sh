@@ -194,6 +194,19 @@ function configure() {
 	fi												
 	grep -rl "##FILEMANAGER_DIR##"  | xargs sed -i "s ##FILEMANAGER_DIR## $FILEMANAGER_DIR g"
 	
+	if [ -z $MEDIA_PATH ]; then
+		echo "WARNING: MEDIA_PATH is not defined, using media"					
+		MEDIA_PATH="media"
+	fi												
+	grep -rl "##MEDIA_PATH##"  | xargs sed -i "s ##MEDIA_PATH## $MEDIA_PATH g"
+
+	if [ -z $STATIC_PATH ]; then
+		echo "WARNING: STATIC_PATH is not defined, using static"					
+		MEDIA_PATH="static"
+	fi												
+	grep -rl "##STATIC_PATH##"  | xargs sed -i "s ##STATIC_PATH## $STATIC_PATH g"
+
+	
 	if [ -z $GVSIGOL_SKIN ]; then
 		echo "WARNING: GVSIGOL_SKIN is not defined, using skin-blue"					
 		GVSIGOL_SKIN="skin-blue"
