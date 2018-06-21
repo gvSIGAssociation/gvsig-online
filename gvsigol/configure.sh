@@ -27,7 +27,7 @@ function configure() {
 		echo "WARNING: GVSIGOL_PATH is not defined using, using gvsigonline."	
 		GVSIGOL_PATH="gvsigonline"	
 	fi
-	grep -rl "##GVSIGOL_PATH##"  | xargs sed -i "s/##GVSIGOL_PATH##/$GVSIGOL_PATH/g"
+	grep -rl "##GVSIGOL_PATH##"  | xargs sed -i "s ##GVSIGOL_PATH## $GVSIGOL_PATH g"
 	grep -rl "/gvsigonline/" | xargs sed -i "s /gvsigonline/ /$GVSIGOL_PATH/ g"
 	grep -rl "\^gvsigonline/" | xargs sed -i "s \^gvsigonline/ \^$GVSIGOL_PATH/ g"
 	
