@@ -149,6 +149,9 @@ DATABASES = {
         'PASSWORD': '##DB_PASSWD##',
         'HOST': '##DB_HOST##',
         'PORT': '##DB_PORT##',
+        'OPTIONS' : {
+            'options': '-c search_path=##DB_SCHEMA##'
+        }
     }
 }
 POSTGIS_VERSION = (2, 1, 2)
