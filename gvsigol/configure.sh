@@ -274,7 +274,7 @@ function configure() {
 }
 
 function move_template() {
-	mv settings_tpl.py settings.py
+	mv gvsigol/settings_tpl.py gvsigol/settings.py
 }
 
 configure
