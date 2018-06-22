@@ -208,7 +208,7 @@ function configure() {
 
 	if [ -z $STATIC_PATH ]; then
 		echo "WARNING: STATIC_PATH is not defined, using static"					
-		MEDIA_PATH="static"
+		STATIC_PATH="static"
 	fi												
 	grep -rl "##STATIC_PATH##"  | xargs sed -i "s ##STATIC_PATH## $STATIC_PATH g"
 
