@@ -156,6 +156,12 @@ function configure() {
 	fi
 	grep -rl "##DB_PASSWD##"  | xargs sed -i "s/##DB_PASSWD##/$DB_PASSWD/g"		
 
+	if [ -z $DB_SCHEMA ]; then
+		echo "WARNING: DB_SCHEMA is not defined, using public"					
+		DB_SCHEMA="public"
+	fi
+	grep -rl "##DB_SCHEMA##"  | xargs sed -i "s/##DB_SCHEMA##/$DB_SCHEMA/g"		
+
 	echo "INFO: CRS_FROM_SETTINGS"
 	if [ -z $CRS_FROM_SETTINGS ]; then
 		echo "WARNING: CRS_FROM_SETTINGS is not defined, using default value False"					
