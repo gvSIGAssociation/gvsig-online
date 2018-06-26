@@ -411,27 +411,31 @@ class Geoserver():
         style_type = 'US'
         
         aux = None
-        if geom_type == RASTER:
-            style_type = 'CT'
-        else:  
-            params = json.loads(layer.datastore.connection_params)
-            host = params['host']
-            port = params['port']
-            dbname = params['database']
-            user = params['user']
-            passwd = params['passwd']
-            schema = params.get('schema', 'public')
-            print '[test1]: ' + str(params)
-            try:
+        try:
+            if geom_type == RASTER:
+                style_type = 'CT'
+            else:  
+                params = json.loads(layer.datastore.connection_params)
+                host = params['host']
+                port = params['port']
+                dbname = params['database']
+                user = params['user']
+                passwd = params['passwd']
+                schema = params.get('schema', 'public')
+                print '[test1]: ' + str(params)
+                
                 i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
                 count = i.get_estimated_count(schema, layer.name)
                 aux = count[0]
                 print '[test2]: ' + str(aux)
-            except Exception as ex:
-                print str(ex)
-                return False
+                print '[test2.1]: ' + str(layer.id)
                 
-        sld_body = symbology_services.create_default_style(layer.id, style_name, style_type, geom_type, aux)
+                    
+            sld_body = symbology_services.create_default_style(layer.id, style_name, style_type, geom_type, aux)
+        
+        except Exception as ex:
+                print str(ex.message)
+                return False
      
         try:
             catalog = self.getGsconfig()
