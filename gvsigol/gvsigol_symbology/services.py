@@ -35,13 +35,13 @@ import os
 
 def create_default_style(layer_id, style_name, style_type, geom_type, count):
     layer = Layer.objects.get(id=int(layer_id))
-    
+
     minscaledenominator = -1
     maxscaledenominator = -1
     if count and count > 200000:
         minscaledenominator = 0
         maxscaledenominator = 50000
-        
+ 
     style = Style(
         name = style_name,
         title = _('Default style for: ') + layer.title,
@@ -56,7 +56,7 @@ def create_default_style(layer_id, style_name, style_type, geom_type, count):
         layer = layer
     )
     style_layer.save()
-    
+
     if style.is_default:
         layer_styles = StyleLayer.objects.filter(layer=layer)
         for ls in layer_styles:
@@ -84,7 +84,7 @@ def create_default_style(layer_id, style_name, style_type, geom_type, count):
         order = 0
     )
     rule.save()
-        
+  
     if symbol_type == 'PolygonSymbolizer':
         symbolizer = PolygonSymbolizer(
             rule = rule,

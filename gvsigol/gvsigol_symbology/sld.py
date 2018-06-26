@@ -2120,7 +2120,7 @@ class StyledLayerDescriptor(SLDNode):
             logging.debug('Storing new schema into cache.')
 
             localschema = NamedTemporaryFile(delete=False)
-
+            '''
             localschema_backup_path = './StyledLayerDescriptor-backup.xsd'
             try:
                 #logging.debug('Cache hit for backup schema document.')
@@ -2145,7 +2145,11 @@ class StyledLayerDescriptor(SLDNode):
                 resp.close()
                 localschema_backup.close()
                 localschema_backup = open(localschema_backup_path, 'rb')
-
+            '''
+            curr_path = os.path.abspath(os.path.dirname(__file__))
+            xsd_path = os.path.join(curr_path, 'StyledLayerDescriptor.xsd')
+            localschema_backup = open(xsd_path, 'rb')
+            
             localschema.write(localschema_backup.read())
             localschema.close()
             localschema_backup.close()
