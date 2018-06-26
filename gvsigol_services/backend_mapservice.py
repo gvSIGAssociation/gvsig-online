@@ -422,10 +422,14 @@ class Geoserver():
             passwd = params['passwd']
             schema = params.get('schema', 'public')
             print str(params)
-            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-            count = i.get_estimated_count(schema, layer.name)
-            aux = count[0]
-            print str(aux)
+            try:
+                i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+                count = i.get_estimated_count(schema, layer.name)
+                aux = count[0]
+                print str(aux)
+            except Exception as ex:
+                print str(ex)
+                return False
                 
         sld_body = symbology_services.create_default_style(layer.id, style_name, style_type, geom_type, aux)
      
