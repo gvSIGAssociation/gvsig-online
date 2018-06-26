@@ -422,15 +422,11 @@ class Geoserver():
                 user = params['user']
                 passwd = params['passwd']
                 schema = params.get('schema', 'public')
-                print '[test1]: ' + str(params)
                 
                 i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
                 count = i.get_estimated_count(schema, layer.name)
                 aux = count[0]
-                print '[test2]: ' + str(aux)
-                print '[test2.1]: ' + str(layer.id)
-                
-                    
+    
             sld_body = symbology_services.create_default_style(layer.id, style_name, style_type, geom_type, aux)
         
         except Exception as ex:
