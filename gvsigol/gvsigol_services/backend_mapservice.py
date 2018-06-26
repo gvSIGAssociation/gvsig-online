@@ -421,12 +421,12 @@ class Geoserver():
             user = params['user']
             passwd = params['passwd']
             schema = params.get('schema', 'public')
-            print str(params)
+            print '[test1]: ' + str(params)
             try:
                 i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
                 count = i.get_estimated_count(schema, layer.name)
                 aux = count[0]
-                print str(aux)
+                print '[test2]: ' + str(aux)
             except Exception as ex:
                 print str(ex)
                 return False
