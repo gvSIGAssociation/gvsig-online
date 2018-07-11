@@ -1,4 +1,5 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
+from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token, verify_jwt_token
 
 urlpatterns = [
     url(r'^login_user/$', 'gvsigol_auth.views.login_user', name='login_user'), 
@@ -16,4 +17,12 @@ urlpatterns = [
     url(r'^group_list/$', 'gvsigol_auth.views.group_list', name='group_list'),
     url(r'^group_add/$', 'gvsigol_auth.views.group_add', name='group_add'),
     url(r'^group_delete/(?P<gid>[0-9]+)/$', 'gvsigol_auth.views.group_delete', name='group_delete'),
+    
+    url(r'^api-token-auth/$', 'rest_framework_jwt.views.obtain_jwt_token', name='api-token-auth'),
+    url(r'^api-token-refresh/$', 'rest_framework_jwt.views.refresh_jwt_token', name='api-token-refresh'),
+    url(r'^api-token-verify/$', 'rest_framework_jwt.views.verify_jwt_token', name='api-token-verify'),
+    
+    url(r'^api-token-auth/$', obtain_jwt_token, name='api-token-auth'),
+    url(r'^api-token-refresh/$', refresh_jwt_token, name='api-token-refresh'),
+    url(r'^api-token-verify/$', verify_jwt_token, name='api-token-verify'), 
 ]
