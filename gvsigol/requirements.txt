@@ -16,6 +16,8 @@ django-auth-ldap==1.2.7
 #django-filter
 #django-rest-auth
 #django-formtools
+djangorestframework==3.5.3
+djangorestframework-jwt==1.11.0
 
 ##Instalamos el driver de PostgreSQL para python:
 psycopg2==2.6.1
