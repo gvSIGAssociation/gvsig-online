@@ -24,9 +24,6 @@ if(is_enabled){
 		type : 'POST',
 		async : false,
 		url : '/gvsigonline/geocoding/get_conf/',
-		beforeSend : function(xhr) {
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-		},
 		success : function(response) {
 			if(response['has_providers']){
 				var map = viewer.core.getMap();
