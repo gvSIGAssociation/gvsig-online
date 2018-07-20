@@ -42,6 +42,7 @@ from gvsigol_services.views import backend_resource_list_available,\
     backend_resource_list
 from gvsigol_services.backend_mapservice import backend as mapservice_backend
 from gvsigol_services.backend_postgis import Introspect
+from django.views.decorators.csrf import csrf_exempt
 
 
 providers_order = []
@@ -407,6 +408,7 @@ def provider_delta_import(request, provider_id):
     return redirect('provider_list')
 
 
+@csrf_exempt
 def get_conf(request):
     if request.method == 'POST': 
         provider = Provider.objects.all()

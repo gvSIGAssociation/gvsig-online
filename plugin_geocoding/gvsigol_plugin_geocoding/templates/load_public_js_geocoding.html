@@ -38,8 +38,8 @@ if(is_enabled){
 				new search(map, response);
 			}
 		},
-		error : function() {
-			alert("Error loading geocoder");
+		error : function(error) {
+			alert("Error loading geocoder: "+e);
 		}
 	});	
 }
