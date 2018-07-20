@@ -77,12 +77,12 @@ class CartoCiudad2():
         address = json.loads(address_str)
         
         params = {
-            'id': address['id'],
+            'id': address['address[id]'],
             #'address': address['address[address]'],
             'source': 'new_cartociudad',
-            'type': address['type'],
-            'tip_via': address['tip_via'],
-            'portal': address['portalNumber'],
+            'type': address['address[type]'],
+            'tip_via': address['address[tip_via]'],
+            'portal': address['address[portalNumber]'],
             'cod_postal_filter': settings.CARTOCIUDAD_INE_MUN_FILTER
         }
 
