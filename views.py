@@ -551,47 +551,46 @@ def backend_fields_list(request):
         if ds:
             layer = Layer.objects.filter(datastore=ds, name=name).first()
             
-            if layer:
-                params = json.loads(ds.connection_params)
-                host = params['host']
-                port = params['port']
-                dbname = params['database']
-                user = params['user']
-                passwd = params['passwd']
-                schema = params.get('schema', 'public')
-                i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-                layer_defs = i.get_fields_info(layer.name, schema)
-                result_resources = []
-                conf = None
-                if layer and layer.conf:
-                    conf = ast.literal_eval(layer.conf)
-                for resource_def in layer_defs:
-                    resource = resource_def['name']
-                    if conf:
-                        founded = False
-                        for f in conf['fields']:
-                            if f['name'] == resource:
-                                field = {}
-                                field['name'] = f['name']
-                                for id, language in LANGUAGES:
-                                    field['title-'+id] = f['title-'+id]
-                                result_resources.append(field)
-                                founded = True
-                        if not founded:
+            params = json.loads(ds.connection_params)
+            host = params['host']
+            port = params['port']
+            dbname = params['database']
+            user = params['user']
+            passwd = params['passwd']
+            schema = params.get('schema', 'public')
+            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+            layer_defs = i.get_fields_info(name, schema)
+            result_resources = []
+            conf = None
+            if layer and layer.conf:
+                conf = ast.literal_eval(layer.conf)
+            for resource_def in layer_defs:
+                resource = resource_def['name']
+                if conf:
+                    founded = False
+                    for f in conf['fields']:
+                        if f['name'] == resource:
                             field = {}
-                            field['name'] = resource
+                            field['name'] = f['name']
                             for id, language in LANGUAGES:
-                                field['title-'+id] = resource
+                                field['title-'+id] = f['title-'+id]
                             result_resources.append(field)
-                    else:
+                            founded = True
+                    if not founded:
                         field = {}
                         field['name'] = resource
                         for id, language in LANGUAGES:
                             field['title-'+id] = resource
                         result_resources.append(field)
-                        
-                result_resources_sorted = sorted(result_resources) 
-                return HttpResponse(json.dumps(result_resources_sorted))
+                else:
+                    field = {}
+                    field['name'] = resource
+                    for id, language in LANGUAGES:
+                        field['title-'+id] = resource
+                    result_resources.append(field)
+                    
+            result_resources_sorted = sorted(result_resources) 
+            return HttpResponse(json.dumps(result_resources_sorted))
     
     return HttpResponseBadRequest()    
  
