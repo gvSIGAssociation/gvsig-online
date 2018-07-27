@@ -14,7 +14,7 @@ function configure() {
 	#		DEBUG=False
 	#	fi
 	#fi	
-	#grep -rl "##DEBUG##"  | xargs sed -i "s/##DEBUG##/$DEBUG/g"		
+	grep -rl "##DEBUG##"  | xargs sed -i "s/##DEBUG##/$DEBUG/g"		
 	
 	#echo "INFO: Replace HTTP_PROTOCOL"											
 	#if [ -z $HTTP_PROTOCOL ]; then
@@ -22,7 +22,7 @@ function configure() {
 	#	HTTP_PROTOCOL="https"
 	#fi
 	
-	echo "INFO: Replace GVSIGOL_PATH"
+	#echo "INFO: Replace GVSIGOL_PATH"
 	#if [ -z $GVSIGOL_PATH ]; then
 	#	echo "WARNING: GVSIGOL_PATH is not defined using, using gvsigonline."	
 	#	GVSIGOL_PATH="gvsigonline"	
