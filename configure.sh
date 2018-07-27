@@ -4,16 +4,16 @@ function configure() {
 	echo "INFO: Replace settings from variables ..."
 	
 	#echo "INFO: Replace DEBUG"
-	#if [ -z $DEBUG ]; then
-	#	echo "WARNING: DEBUG is not defined, using default value True."
-	#	DEBUG=True
-	#else
-	#	if [ "$DEBUG" = "true" ]; then
-	#		DEBUG=True
-	#	else
-	#		DEBUG=False
-	#	fi
-	#fi	
+	if [ -z $DEBUG ]; then
+		echo "WARNING: DEBUG is not defined, using default value True."
+		DEBUG=True
+	else
+		if [ "$DEBUG" = "true" ]; then
+			DEBUG=True
+		else
+			DEBUG=False
+		fi
+	fi	
 	grep -rl "##DEBUG##"  | xargs sed -i "s/##DEBUG##/$DEBUG/g"		
 	
 	#echo "INFO: Replace HTTP_PROTOCOL"											
