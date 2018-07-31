@@ -40,13 +40,7 @@ function configure() {
 	fi
 	grep -rl "##GVSIGOL_HOME##"  | xargs sed -i "s ##GVSIGOL_HOME## $GVSIGOL_HOME g"		
 
-	echo "INFO: GVSIGOL_PASSWD"		
-	if [ -z $GVSIGOL_PASSWD ]; then
-		echo "WARNING: GVSIGOL_PASSWD is not defined, find and replace ##GVSIGOL_PASSWD##"
-		GVSIGOL_PASSWD="##GVSIGOL_PASSWD##"
-	else
-		grep -rl "##GVSIGOL_PASSWD##"  | xargs sed -i "s/##GVSIGOL_PASSWD##/$GVSIGOL_PASSWD/g"								
-	fi	
+
 
 	echo "INFO: CRS_FROM_SETTINGS"
 	if [ -z $CRS_FROM_SETTINGS ]; then
