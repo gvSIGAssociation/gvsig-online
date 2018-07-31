@@ -16,30 +16,16 @@ function configure() {
 	fi	
 	grep -rl "##DEBUG##"  | xargs sed -i "s/##DEBUG##/$DEBUG/g"		
 	
-	#echo "INFO: Replace HTTP_PROTOCOL"											
-	#if [ -z $HTTP_PROTOCOL ]; then
-	#	echo "WARNING: HTTP_PROTOCOL is not defined, using https."
-	#	HTTP_PROTOCOL="https"
-	#fi
 	
-	#echo "INFO: Replace GVSIGOL_PATH"
-	#if [ -z $GVSIGOL_PATH ]; then
-	#	echo "WARNING: GVSIGOL_PATH is not defined using, using gvsigonline."	
-	#	GVSIGOL_PATH="gvsigonline"	
-	#fi
+	echo "INFO: Replace GVSIGOL_PATH"
+	if [ -z $GVSIGOL_PATH ]; then
+		echo "WARNING: GVSIGOL_PATH is not defined using, using gvsigonline."	
+		GVSIGOL_PATH="gvsigonline"	
+	fi
 	grep -rl "##GVSIGOL_PATH##"  | xargs sed -i "s ##GVSIGOL_PATH## $GVSIGOL_PATH g"
 	grep -rl "/gvsigonline/" | xargs sed -i "s /gvsigonline/ /$GVSIGOL_PATH/ g"
 	grep -rl "\^gvsigonline/" | xargs sed -i "s \^gvsigonline/ \^$GVSIGOL_PATH/ g"
 	
-	echo "INFO: Replace GVSIGOL_HOST"
-	if [ -z $GVSIGOL_HOST ]; then
-		echo "ERROR: GVSIGOL_HOST is not defined."
-		exit -1 
-	else
-		grep -rl "##GVSIGOL_HOST##"  | xargs sed -i "s/##GVSIGOL_HOST##/$GVSIGOL_HOST/g"			
-		BASE_URL="$HTTP_PROTOCOL:\/\/$GVSIGOL_HOST"
-		grep -rl "##BASE_URL##"  | xargs sed -i "s ##BASE_URL## $BASE_URL g"	
-	fi	
 	
 	echo "INFO: Replace GVSIGOL_PLUGINS"
 	if [ -z $GVSIGOL_PLUGINS ]; then
@@ -61,106 +47,6 @@ function configure() {
 	else
 		grep -rl "##GVSIGOL_PASSWD##"  | xargs sed -i "s/##GVSIGOL_PASSWD##/$GVSIGOL_PASSWD/g"								
 	fi	
-	
-	echo "INFO: FRONTEND_URL"
-	if [ -z $FRONTEND_URL ]; then
-		echo "WARNING: FRONTEND_URL is not defined, using externo.gva.es ..."
-		FRONTEND_URL="externo.gva.es"
-	fi
-	grep -rl "##FRONTEND_URL##"  | xargs sed -i "s ##FRONTEND_URL## $FRONTEND_URL g"								
-
-	echo "INFO: GEOSERVER_HOST "		
-	if [ -z $GEOSERVER_HOST ]; then
-		echo "WARNING: GEOSERVER_HOST is not defined, using GVSIGOL_HOST ."
-		GEOSERVER_HOST=$GVSIGOL_HOST
-	fi
-	grep -rl "##GEOSERVER_HOST##"  | xargs sed -i "s/##GEOSERVER_HOST##/$GEOSERVER_HOST/g"
-
-	if [ -z $GEOSERVER_DATA_DIR ]; then
-		echo "WARNING: GEOSERVER_DATA_DIR is not defined, using '/var/lib/geoserver_data' ."
-		GEOSERVER_DATA_DIR=/var/lib/geoserver_data
-	fi
-	grep -rl "##GEOSERVER_DATA_DIR##"  | xargs sed -i "s/##GEOSERVER_DATA_DIR##/$GEOSERVER_DATA_DIR/g"
-	
-	echo "INFO: GEOSERVER_REST_URL"	
-	if [ -z $GEOSERVER_REST_URL ]; then
-		echo "WARNING: GEOSERVER_REST_URL is not defined, using HTTP_PROTOCOL and GEOSERVER_HOST ."
-		GEOSERVER_REST_URL="$HTTP_PROTOCOL://$GEOSERVER_HOST/geoserver/rest"
-	fi
-	GEOSERVER_BASE_URL="$HTTP_PROTOCOL://$GVSIGOL_HOST/geoserver"
-	GEOWEBCACHE_REST_URL="$HTTP_PROTOCOL://$GVSIGOL_HOST/geoserver/gwc/rest"
-	grep -rl "##GEOSERVER_BASE_URL##"  | xargs sed -i "s ##GEOSERVER_BASE_URL## $GEOSERVER_BASE_URL g"
-	grep -rl "##GEOWEBCACHE_REST_URL##"  | xargs sed -i "s ##GEOWEBCACHE_REST_URL## $GEOWEBCACHE_REST_URL g"
-	
-	echo "INFO: GEOSERVER_PASSWD"
-	if [ -z $GEOSERVER_PASSWD ]; then
-		echo "WARNING: GEOSERVER_PASSWD is not defined, find and replace ##GEOSERVER_PASSWD##."
-		GEOSERVER_PASSWD="##GEOSERVER_PASSWD##"
-	fi
-	grep -rl "##GEOSERVER_PASSWD##"  | xargs sed -i "s/##GEOSERVER_PASSWD##/$GEOSERVER_PASSWD/g"
-
-	echo "INFO: LDAP"		
-	if [ -z $LDAP_HOST ]; then
-		echo "WARNING: LDAP_HOST is not defined, using GVSIGOL_HOST."		
-		LDAP_HOST=$GVSIGOL_HOST
-	fi
-	grep -rl "##LDAP_HOST##"  | xargs sed -i "s/##LDAP_HOST##/$LDAP_HOST/g"	
-		
-	if [ -z $LDAP_PORT ]; then
-		echo "WARNING: LDAP_PORT is not defined, using 389"					
-		LDAP_PORT="389"
-	fi
-	grep -rl "##LDAP_PORT##"  | xargs sed -i "s/##LDAP_PORT##/$LDAP_PORT/g"				
-	if [ -z $LDAP_ROOT_DN ]; then
-		echo "WARNING: LDAP_ROOT_DN is not defined, using dc=local,dc=gvsigonline,dc=com"					
-		LDAP_ROOT_DN="dc=local,dc=gvsigonline,dc=com"
-	fi
-	grep -rl "##LDAP_ROOT_DN##"  | xargs sed -i "s/##LDAP_ROOT_DN##/$LDAP_ROOT_DN/g"						
-	if [ -z $LDAP_BIND_USER ]; then
-		echo "WARNING: LDAP_BIND_USER is not defined, using cn=admin,$LDAP_ROOT_DN."					
-		LDAP_BIND_USER="cn=admin,$LDAP_ROOT_DN"
-	fi
-	grep -rl "##LDAP_BIND_USER##"  | xargs sed -i "s/##LDAP_BIND_USER##/$LDAP_BIND_USER/g"		
-	if [ -z $LDAP_BIND_PASSWD ]; then
-		echo "WARNING: LDAP_BIND_PASSWD is not defined, find and replace ##LDAP_BIND_PASSWD##."					
-		LDAP_BIND_PASSWD="##LDAP_BIND_PASSWD##"
-	fi
-	grep -rl "##LDAP_BIND_PASSWD##"  | xargs sed -i "s/##LDAP_BIND_PASSWD##/$LDAP_BIND_PASSWD/g"		
-	
-	grep -rl "##LDAP_AD_SUFFIX##"  | xargs sed -i "s/##LDAP_AD_SUFFIX##/$LDAP_AD_SUFFIX/g" 
-	
-	echo "INFO: DB"	
-	if [ -z $DB_HOST ]; then
-		echo "WARNING: DB_HOST is not defined, using GVSIGOL_HOST."					
-		DB_HOST=$GVSIGOL_HOST
-	fi
-	grep -rl "##DB_HOST##"  | xargs sed -i "s/##DB_HOST##/$DB_HOST/g"
-	if [ -z $DB_NAME ]; then
-		echo "WARNING: DB_NAME is not defined, using database name gvsigonline."					
-		DB_NAME="gvsigonline"
-	fi
-	grep -rl "##DB_NAME##"  | xargs sed -i "s/##DB_NAME##/$DB_NAME/g"		
-	if [ -z $DB_PORT ]; then
-		echo "WARNING: DB_PORT is not defined, using 5432."					
-		DB_PORT="5432"
-	fi
-	grep -rl "##DB_PORT##"  | xargs sed -i "s/##DB_PORT##/$DB_PORT/g"		
-	if [ -z $DB_USER ]; then
-		echo "WARNING: DB_USER is not defined, using gvsigonline"					
-		DB_USER="gvsigonline"
-	fi
-	grep -rl "##DB_USER##"  | xargs sed -i "s/##DB_USER##/$DB_USER/g"		
-	if [ -z $DB_PASSWD ]; then
-		echo "WARNING: DB_PASSWD is not defined, find and replace ##DB_PASSWD##"					
-		DB_PASSWD="##DB_PASSWD##"
-	fi
-	grep -rl "##DB_PASSWD##"  | xargs sed -i "s/##DB_PASSWD##/$DB_PASSWD/g"		
-
-	if [ -z $DB_SCHEMA ]; then
-		echo "WARNING: DB_SCHEMA is not defined, using public"					
-		DB_SCHEMA="public"
-	fi
-	grep -rl "##DB_SCHEMA##"  | xargs sed -i "s/##DB_SCHEMA##/$DB_SCHEMA/g"		
 
 	echo "INFO: CRS_FROM_SETTINGS"
 	if [ -z $CRS_FROM_SETTINGS ]; then
