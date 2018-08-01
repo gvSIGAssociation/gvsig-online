@@ -4875,6 +4875,19 @@ table.table.dataTable tbody tr td{
     display: table-cell;
 }
 
+.input-group span.temporal-buttons-disabled.input-group-addon,
+span.temporal-buttons.temporal-buttons-disabled {
+	background-color: #eee;
+}
+.input-group-date-label{
+    font-weight: bold;
+    float: left;
+    width: 50%;
+    text-align: right;
+    padding-right: 10px;
+    padding-top: 5px;
+}
+
 .input-group-addon:hover,
 .temporal-buttons:hover{
 	background-color:#ddd;
