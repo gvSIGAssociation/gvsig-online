@@ -52,6 +52,18 @@ var layerTree = function(conf, map, isPublic) {
 /**
  * TODO.
  */
+layerTree.prototype.refreshSlider = function() {
+	var slider = $("#temporary-layers-slider");
+	var input = $("input[name=temporary-group]:checked");
+	if(input.attr("data-value") == "single"){
+		slider.slider('option', 'slide').call(slider, slider, {value: slider.slider('option','value')});
+	}
+	if(input.attr("data-value") == "range"){
+		var slider_values = [slider.slider('option','values')[0], slider.slider('option','values')[1]];
+		slider.slider('option', 'slide').call(slider, slider, {values: slider_values});
+	}
+};
+
 layerTree.prototype.createTree = function() {
 	
 	var self = this;
@@ -296,14 +308,111 @@ layerTree.prototype.createTree = function() {
 	temporary_tree += '	<div id="enable-temporary-error"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;&nbsp;' + gettext("A visible layer with temporal properties is needed") + '</div>';
 	temporary_tree += '	<div class="box-body temporary-body">';
 	
-	var input_from = '<div class="input-group date col-md-9" id="datetimepicker-from"><input id="temporary-from" class="form-control"/><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>'+
-	'<span class="input-group-addon temporal-buttons-empty-gap"></span><span class="temporal-buttons temporal-buttons-left temporal-buttons-left-from"><i class="fa fa-minus" aria-hidden="true"></i></span><span class="temporal-buttons temporal-buttons-right temporal-buttons-right-from"><i class="fa fa-plus" aria-hidden="true"></i></span></div>';
-	var input_to = '<div class="input-group date col-md-9" id="datetimepicker-to"><input id="temporary-to" class="form-control"/><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>'+
-	'<span class="input-group-addon temporal-buttons-empty-gap"></span><span class="temporal-buttons temporal-buttons-left temporal-buttons-left-to"><i class="fa fa-minus" aria-hidden="true"></i></span><span class="temporal-buttons temporal-buttons-right temporal-buttons-right-to"><i class="fa fa-plus" aria-hidden="true"></i></span></div>';
+	var input_from = ''+
+	'<div class="col-md-1">'+
+		'<input type="radio" id="from-date-value" class="temporal-type-radio" name="from-date-value" checked>'+
+	'</div>'+
+	'<div class="input-group date col-md-9" id="datetimepicker-from">'+
+		'<input id="temporary-from" class="form-control from-date-value"/>'+
+		'<span class="input-group-addon from-date-value">'+
+			'<span class="glyphicon glyphicon-calendar from-date-value"></span>'+
+		'</span>'+
+		'<span class="input-group-addon temporal-buttons-empty-gap"></span>'+
+		'<span class="temporal-buttons temporal-buttons-left temporal-buttons-left-from from-date-value">'+
+			'<i class="fa fa-minus" aria-hidden="true"></i>'+
+		'</span>'+
+		'<span class="temporal-buttons temporal-buttons-right temporal-buttons-right-from from-date-value">'+
+			'<i class="fa fa-plus" aria-hidden="true"></i>'+
+		'</span>'+
+	'</div>'+
+	
+	'<div class="col-md-2" style="margin-top:5px"></div>'+
+	'<div class="col-md-1" style="margin-top:5px">'+
+		'<input type="radio" id="from-custom-date-value" class="temporal-type-radio" name="from-date-value">'+
+	'</div>'+
+	'<div class="input-group date col-md-9" style="margin-top:5px">'+
+		'<input id="from-custom-value" class="form-control" style="width:100%" value="PRESENT" disabled>'+
+		'<span class="temporal-buttons temporal-buttons-disabled temporal-buttons-left from-custom-definition-button from-custom-date-value">'+
+			'<i class="fa fa-edit" aria-hidden="true"></i>'+
+		'</span>'+
+	'</div>'+
+	'<div class="col-md-3"></div>'+
+	'<div id="from-custom-definition-panel" class="input-group date col-md-9" style="background-color:#eee; display:none;">'+
+		'<span class="text input-group-date-label">' + gettext('year(s)') + '</span>'+
+		'<input id="from-custom-value-year" class="form-control" style="width:50%" type="number" value="0"><br/>'+
+		
+		'<span class="text input-group-date-label">'+ gettext('month(s)') + '</span>'+
+		'<input id="from-custom-value-month" class="form-control" style="width:50%" type="number" value="0"><br/>'+
+		
+		'<span class="text input-group-date-label">' + gettext('day(s)') + '</span>'+
+		'<input id="from-custom-value-day" class="form-control" style="width:50%" type="number" value="0"><br/>'+
+		
+		'<span class="text input-group-date-label">' + gettext('hour(s)') + '</span>'+
+		'<input id="from-custom-value-hour" class="form-control" style="width:50%" type="number" value="0"><br/>'+
+		
+		'<span class="text input-group-date-label">' + gettext('minute(s)') + '</span>'+
+		'<input id="from-custom-value-minute" class="form-control" style="width:50%" type="number" value="0"><br/>'+
+		
+		'<span class="text input-group-date-label">' + gettext('second(s)') + '</span>'+
+		'<input id="from-custom-value-second" class="form-control" style="width:50%" type="number" value="0"><br/>'+
+	
+		'<span class="temporal-buttons temporal-buttons-left from-input-group-date-apply-present date col-md-9" style="width: 50%;">'+
+			gettext('Clear')+
+		'</span>'+
+		'<span class="temporal-buttons temporal-buttons-left from-input-group-date-apply date col-md-9" style="width: 50%;">'+
+			gettext('apply relative date')+
+		'</span>'+
+	'</div>';
+	
+	
+	var input_to = ''+
+	'<div class="col-md-1">'+
+		'<input type="radio" id="to-date-value" class="temporal-type-radio" name="to-date-value" checked>'+
+	'</div>'+
+	'<div class="input-group date col-md-9" id="datetimepicker-to"><input id="temporary-to" class="form-control to-date-value"/><span class="input-group-addon to-date-value"><span class="glyphicon glyphicon-calendar to-date-value"></span></span>'+
+	'<span class="input-group-addon temporal-buttons-empty-gap"></span><span class="temporal-buttons temporal-buttons-left temporal-buttons-left-to to-date-value"><i class="fa fa-minus" aria-hidden="true"></i></span><span class="temporal-buttons temporal-buttons-right temporal-buttons-right-to to-date-value"><i class="fa fa-plus" aria-hidden="true"></i></span></div>'+
+	
+	'<div class="col-md-2" style="margin-top:5px"></div>'+
+	'<div class="col-md-1" style="margin-top:5px">'+
+		'<input type="radio" id="to-custom-date-value" class="temporal-type-radio" name="to-date-value">'+
+	'</div>'+
+	'<div class="input-group date col-md-9" style="margin-top:5px">'+
+		'<input id="to-custom-value" class="form-control" style="width:100%" value="PRESENT" disabled>'+
+		'<span class="temporal-buttons temporal-buttons-disabled temporal-buttons-left to-custom-definition-button to-custom-date-value">'+
+			'<i class="fa fa-edit" aria-hidden="true"></i>'+
+		'</span>'+
+	'</div>'+
+	'<div class="col-md-3"></div>'+
+	'<div id="to-custom-definition-panel" class="input-group date col-md-9" style="background-color:#eee; display:none;">'+
+		'<span class="text input-group-date-label">' + gettext('year(s)') + '</span>'+
+		'<input id="to-custom-value-year" class="form-control" style="width:50%" type="number" value="0"><br/>'+
+		
+		'<span class="text input-group-date-label">'+ gettext('month(s)') + '</span>'+
+		'<input id="to-custom-value-month" class="form-control" style="width:50%" type="number" value="0"><br/>'+
+		
+		'<span class="text input-group-date-label">' + gettext('day(s)') + '</span>'+
+		'<input id="to-custom-value-day" class="form-control" style="width:50%" type="number" value="0"><br/>'+
+		
+		'<span class="text input-group-date-label">' + gettext('hour(s)') + '</span>'+
+		'<input id="to-custom-value-hour" class="form-control" style="width:50%" type="number" value="0"><br/>'+
+		
+		'<span class="text input-group-date-label">' + gettext('minute(s)') + '</span>'+
+		'<input id="to-custom-value-minute" class="form-control" style="width:50%" type="number" value="0"><br/>'+
+		
+		'<span class="text input-group-date-label">' + gettext('second(s)') + '</span>'+
+		'<input id="to-custom-value-second" class="form-control" style="width:50%" type="number" value="0"><br/>'+
+	
+		'<span class="temporal-buttons temporal-buttons-left to-input-group-date-apply-present date col-md-9" style="width: 50%;">'+
+			gettext('Clear')+
+		'</span>'+
+		'<span class="temporal-buttons temporal-buttons-left to-input-group-date-apply date col-md-9" style="width: 50%;">'+
+			gettext('apply relative date')+
+		'</span>'+
+	'</div>';
 
 //	temporary_tree += '			<label style="display: block; margin-top: 8px; width: 95%;">' + gettext('Temporary range') + '</label>';
-	temporary_tree += '			<div id="from_label_div" class="temporary_field"><div class="col-md-3" style="padding:0px"><span class="text" style="font-weight:bold;margin-left:3px;">' + gettext('From') + '</span></div>'+input_from+'<div style="clear:both"></div></div>';
-	temporary_tree += '			<div id="to_label_div" class="temporary_field"><div class="col-md-3" style="padding:0px"><span class="text" style="font-weight:bold;margin-left:3px;" >' + gettext('To') + '</span></div>'+input_to+'<div style="clear:both"></div></div>';
+	temporary_tree += '			<div id="from_label_div" class="temporary_field"><div class="col-md-2" style="padding:0px"><span class="text" style="font-weight:bold;margin-left:3px;">' + gettext('From') + '</span></div>'+input_from+'<div style="clear:both"></div></div>';
+	temporary_tree += '			<div id="to_label_div" class="temporary_field"><div class="col-md-2" style="padding:0px"><span class="text" style="font-weight:bold;margin-left:3px;" >' + gettext('To') + '</span></div>'+input_to+'<div style="clear:both"></div></div>';
 	temporary_tree += '			<div id="step_label_div"><span class="text" style="font-weight:bold;margin-left:3px;" >' + gettext('Step') + '</span><div class="pull-right">'+/*'<input id="temporary-step-value" type="number" class="ui-slider-step" min=1 value="1" disabled/>'+*/'<select id="temporary-step-unit"><option value="second">' + gettext('second(s)') + '</option><option value="minute">' + gettext('minute(s)') + '</option><option value="hour">' + gettext('hour(s)') + '</option><option value="day" selected>' + gettext('day(s)') + '</option><option value="month">' + gettext('month(s)') + '</option><option value="year">' + gettext('year(s)') + '</option></select></div><div style="clear:both"></div></div>';
 	temporary_tree += '			<div id="temporary-layers-slider" class="temporary-layers-slider"></div>';
 	
@@ -380,7 +489,175 @@ layerTree.prototype.createTree = function() {
 	
 	this.$temporary_container.append(temporary_tree);
 	
-	$(".temporary-check").click(function(){
+	$(".temporal-type-radio").unbind("change").change(function(){
+		$(".temporal-type-radio").each(function(){
+			var value =  $(this).is(':checked');
+			var name = $(this).attr("id");
+			
+			$("input."+name+"").each(function(){
+				$(this).attr("disabled",!value);
+			});
+			$("select."+name+"").each(function(){
+				$(this).attr("disabled",!value);
+			});
+			if(value){
+				$("span."+name+"").each(function(){
+					$(this).removeClass("temporal-buttons-disabled");
+				});
+			}else{
+				$("span."+name+"").each(function(){
+					$(this).addClass("temporal-buttons-disabled");
+				});
+			}
+		});
+		self.refreshSlider();
+	});
+	
+	$(".from-input-group-date-apply-present").unbind("click").click(function(){
+		$("#from-custom-value-year").val(0);
+		$("#from-custom-value-month").val(0);
+		$("#from-custom-value-day").val(0);
+		$("#from-custom-value-hour").val(0);
+		$("#from-custom-value-minute").val(0);
+		$("#from-custom-value-second").val(0);
+		
+		$("#from-custom-value").val("PRESENT");
+		$("#from-custom-definition-panel").slideUp();
+
+		self.refreshSlider();
+	});
+	
+	$(".from-input-group-date-apply").unbind("click").click(function(){
+		var year = $("#from-custom-value-year").val();
+		var month = $("#from-custom-value-month").val();
+		var day = $("#from-custom-value-day").val();
+		var hour = $("#from-custom-value-hour").val();
+		var minute = $("#from-custom-value-minute").val();
+		var second = $("#from-custom-value-second").val();
+		
+		if(year == 0 && month == 0 && day == 0 && hour == 0 && minute == 0 && second == 0){
+			$("#from-custom-value").val("PRESENT");
+		}else{
+			var result = "P";
+			if(!(year == 0 && month == 0 && day == 0)){
+				if(year != 0){
+					result += (year + "Y");
+				}
+				if(month != 0){
+					result += (month + "M");
+				}
+				if(day != 0){
+					result += (day + "D");
+				}
+			}
+			if(!(hour == 0 && minute == 0 && second == 0)){
+				result += "T";
+				if(hour != 0){
+					result += (hour + "H");
+				}
+				if(minute != 0){
+					result += (minute + "M");
+				}
+				if(second != 0){
+					result += (second + "S");
+				}
+			}
+			if($("#temporary-range").is(":checked")){
+				if($("#to-date-value").is(":checked") || $("#to-custom-value").val() == "PRESENT"){
+					$("#from-custom-value").val(result);
+				}else{
+					alert(gettext("Only relative intervals can be defined if the other field is PRESENT or a concrete date."));
+				}
+			}else{
+				alert(gettext("Only PRESENT is available in Instant mode. You need to define a RANGE to use relative intervals"));
+			}
+		}
+		$("#from-custom-definition-panel").slideUp();
+
+		self.refreshSlider();
+	});
+	
+	$(".from-custom-definition-button").unbind("click").click(function(){
+		if($("#temporary-range").is(":checked")){
+			$("#from-custom-definition-panel").slideDown();
+		}else{
+			alert(gettext("Only PRESENT is available in Instant mode. You need to define a RANGE to use relative intervals"));
+		}
+	});
+	
+	
+	$(".to-input-group-date-apply-present").unbind("click").click(function(){
+		$("#to-custom-value-year").val(0);
+		$("#to-custom-value-month").val(0);
+		$("#to-custom-value-day").val(0);
+		$("#to-custom-value-hour").val(0);
+		$("#to-custom-value-minute").val(0);
+		$("#to-custom-value-second").val(0);
+		
+		$("#to-custom-value").val("PRESENT");
+		$("#to-custom-definition-panel").slideUp();
+		
+		self.refreshSlider();
+	});
+	
+	$(".to-input-group-date-apply").unbind("click").click(function(){
+		var year = $("#to-custom-value-year").val();
+		var month = $("#to-custom-value-month").val();
+		var day = $("#to-custom-value-day").val();
+		var hour = $("#to-custom-value-hour").val();
+		var minute = $("#to-custom-value-minute").val();
+		var second = $("#to-custom-value-second").val();
+		
+		if(year == 0 && month == 0 && day == 0 && hour == 0 && minute == 0 && second == 0){
+			$("#to-custom-value").val("PRESENT");
+		}else{
+			var result = "P";
+			if(!(year == 0 && month == 0 && day == 0)){
+				if(year != 0){
+					result += (year + "Y");
+				}
+				if(month != 0){
+					result += (month + "M");
+				}
+				if(day != 0){
+					result += (day + "D");
+				}
+			}
+			if(!(hour == 0 && minute == 0 && second == 0)){
+				result += "T";
+				if(hour != 0){
+					result += (hour + "H");
+				}
+				if(minute != 0){
+					result += (minute + "M");
+				}
+				if(second != 0){
+					result += (second + "S");
+				}
+			}
+			
+			if($("#temporary-range").is(":checked")){
+				if($("#from-date-value").is(":checked") || $("#from-custom-value").val() == "PRESENT"){
+					$("#to-custom-value").val(result);
+				}else{
+					alert(gettext("Only relative intervals can be defined if the other field is PRESENT or a concrete date."));
+				}
+			}else{
+				alert(gettext("Only PRESENT is available in Instant mode. You need to define a RANGE to use relative intervals"));
+			}
+		}
+		$("#to-custom-definition-panel").slideUp();
+
+		self.refreshSlider();
+	});
+	
+	$(".to-custom-definition-button").unbind("click").click(function(){
+		$("#to-custom-definition-panel").slideDown();
+	});
+	
+	
+	
+	$(".temporary-check").unbind("click").click(function(){
 		self.showHideTemporalPanel();
 	});
 
@@ -1007,9 +1284,16 @@ layerTree.prototype.updateTemporalLayers = function(startDate, endDate) {
 			if((jQuery.inArray(maplayer.get("id"), layers)>-1)){
 				if($(".temporary-check").is(':checked')){
 					if(startDate){
-						var start = startDate.toISOString();
-						start = this.adaptToStep(maplayer, startDate);
+						var start = '';
 						var end = '';
+						
+						
+						if($("#from-custom-date-value").is(':checked')){
+							start = $("#from-custom-value").val();
+						}else{
+							start = startDate.toISOString();
+							start = this.adaptToStep(maplayer, startDate);
+						}
 						
 						/*
 						var minCloseDate = null;
@@ -1059,7 +1343,12 @@ layerTree.prototype.updateTemporalLayers = function(startDate, endDate) {
 						}else{
 						*/
 							if (endDate){
-								end = this.adaptToStep(maplayer, endDate);
+								if($("#to-custom-date-value").is(':checked')){
+									end = $("#to-custom-value").val();
+								}else{
+									end = this.adaptToStep(maplayer, endDate);
+								}
+
 								start = start + "/" + end;
 							}
 						/*}*/
