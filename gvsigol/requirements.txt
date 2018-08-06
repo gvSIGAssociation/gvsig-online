@@ -75,3 +75,4 @@ suds==0.4
 
 django-jenkins==0.110.0
 
+python-resize-image==1.1.11
