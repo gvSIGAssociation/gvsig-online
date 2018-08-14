@@ -327,3 +327,6 @@ msgstr ""
 
 msgid "Invalid identifier. Unable to get requested geometry"
 msgstr ""
+
+msgid "Habilitar características temporales"
+msgstr "Active temporal dimension"
