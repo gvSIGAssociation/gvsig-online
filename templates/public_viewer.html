@@ -220,9 +220,9 @@
 					      	<select id="custom-mouse-position-projection" class="custom-mouse-position-projection">
 					      		{% for key, value in supported_crs.items %}
 						      		{% if key == "4326" %}
-						        		<option value="{{value.code}}" selected>{{value.code}}</option>
+						        		<option value="{{value.code}}" selected>{{value.title}}</option>
 						        	{% else %}
-						        		<option value="{{value.code}}">{{value.code}}</option>
+						        		<option value="{{value.code}}">{{value.title}}</option>
 						        	{% endif %}
 					        	{% endfor %}
 					      	</select>
