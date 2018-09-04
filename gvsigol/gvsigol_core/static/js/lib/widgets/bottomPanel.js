@@ -50,10 +50,26 @@ bottomPanel.prototype.hidePanel = function() {
     );
 };
 
+bottomPanel.prototype.minimizePanel = function() {
+    $('.panel-wrapper').animate(
+    	{bottom : -(bottomPanel.getAnimationMinimizedOffset())}, 
+    	bottomPanel.animationDuration, 
+    	bottomPanel.animationEasing, function() {
+    		bottomPanel.isVisible = false;
+    		$('.panel-wrapper').addClass("minimized-table");
+    	}
+    );
+};
+
+bottomPanel.prototype.maximizePanel = function() {
+    this.showPanel();
+};
+
 /**
  * TODO
  */
 bottomPanel.prototype.showPanel = function() {
+	$('.panel-wrapper').removeClass("minimized-table");
 	$('.panel-wrapper').animate(
 		{bottom : 0}, 
 		bottomPanel.animationDuration, 
@@ -77,3 +93,10 @@ bottomPanel.prototype.togglePanel = function() {
 bottomPanel.prototype.getAnimationOffset = function() {
 	return $('.panel-content').height();
 };
+
+
+bottomPanel.prototype.getAnimationMinimizedOffset = function() {
+	return $('.panel-content').height()-$('.nav-tabs li.pull-right').height();
+};
+
+

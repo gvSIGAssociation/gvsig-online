@@ -73,16 +73,20 @@ attributeTable.prototype.createUI = function() {
 	ui += '<div class="row">';
 	ui += 	'<div class="col-md-12">';
 	ui += 		'<div class="nav-tabs-custom">';
+	ui += 			'<div>';
 	ui += 			'<ul class="nav nav-tabs">';
 	ui += 				'<li class="active"><a href="#tab_data" data-toggle="tab"><i class="fa fa-table"></i></a></li>';
 	ui += 				'<li><a href="#tab_filter" data-toggle="tab"><i class="fa fa-filter"></i></a></li>';
 	ui +=				'<li class="pull-right"><a id="close-table" href="javascript:void(0)" class="text-muted"><i class="fa fa-times"></i></a></li>';
+	ui +=				'<li class="pull-right"><a id="maximize-table" href="javascript:void(0)" class="text-muted"><i class="fa fa-table"></i></a></li>';
+	ui +=				'<li class="pull-right"><a id="minimize-table" href="javascript:void(0)" class="text-muted"><i class="fa fa-minus"></i></a></li>';
 	ui += 			'</ul>';
 	ui += 			'<div class="tab-content">';
 	ui += 				'<div class="tab-pane active" id="tab_data">';
 	ui += 				'</div>';
 	ui += 				'<div class="tab-pane" id="tab_filter">';
 	ui += 				'</div>';
+	ui += 			'</div>';
 	ui += 			'</div>';
 	ui += 		'</div>';
 	ui += 	'</div>';
@@ -637,6 +641,14 @@ attributeTable.prototype.registerEvents = function() {
 	
 	$("#close-table").on('click', function(){
 		bottomPanel.hidePanel();
+	});
+	
+	$("#minimize-table").on('click', function(){
+		bottomPanel.minimizePanel();
+	});
+	
+	$("#maximize-table").on('click', function(){
+		bottomPanel.maximizePanel();
 	});
 	
 	$("#filter-value-select").on('change', function(){
