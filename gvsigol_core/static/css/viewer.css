@@ -446,6 +446,27 @@ html, body {
    background-color: #FDF709 !important;	
 }
 
+
+.panel-wrapper.minimized-table .panel-content, 
+.panel-wrapper.minimized-table .panel-content .row .col-md-12 .nav-tabs-custom {
+	background-color: rgba(255,255,255,0);
+}
+
+.panel-wrapper.minimized-table .panel-content .row .col-md-12 .nav-tabs-custom div .nav-tabs li,
+.panel-wrapper.minimized-table .panel-content .row .col-md-12 .nav-tabs-custom div .nav-tabs #minimize-table{
+	display:none;
+}
+
+.panel-wrapper .panel-content .row .col-md-12 .nav-tabs-custom div .nav-tabs #maximize-table {
+	display:none;
+}
+
+.panel-wrapper.minimized-table .panel-content .row .col-md-12 .nav-tabs-custom div .nav-tabs li.pull-right,
+.panel-wrapper.minimized-table .panel-content .row .col-md-12 .nav-tabs-custom div .nav-tabs #maximize-table {
+	display:block;
+	background-color: rgba(255,255,255,1);
+}
+
 @media only screen and (max-width: 1300px) {
 	
 	.ol-toolbar {
