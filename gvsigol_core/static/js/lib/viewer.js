@@ -105,9 +105,13 @@ viewer.core = {
 		
 		this.zoombar = new ol.control.Zoom();
 		
+		var osm = new ol.layer.Tile({
+    		source: new ol.source.OSM()
+    	});
+		
 		var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false});
 		//this.overviewmap = new ol.control.OverviewMap({collapsed: false, layers:default_layers});
-		this.overviewmap = new ol.control.OverviewMap({collapsed: false});
+		this.overviewmap = new ol.control.OverviewMap({collapsed: false, layers: [osm]});
 		this.map = new ol.Map({
 			interactions: interactions,
       		controls: [
