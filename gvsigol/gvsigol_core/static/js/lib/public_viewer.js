@@ -108,13 +108,17 @@ viewer.core = {
 		
 		this.zoombar = new ol.control.Zoom();
 		
+		var osm = new ol.layer.Tile({
+    		source: new ol.source.OSM()
+    	});
+		
 		var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false});
 		this.map = new ol.Map({
 			interactions: interactions,
       		controls: [
 				this.zoombar,
 				new ol.control.ScaleLine(),					
-      			new ol.control.OverviewMap({collapsed: false}),
+      			new ol.control.OverviewMap({collapsed: false, layers: [osm]}),
       			mousePositionControl
       		],
       		renderer: 'canvas',
