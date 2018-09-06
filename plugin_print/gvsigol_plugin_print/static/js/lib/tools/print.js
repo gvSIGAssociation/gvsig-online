@@ -199,7 +199,7 @@ print.prototype.createPrintJob = function(template) {
 		if (!mapLayers[i].baselayer && mapLayers[i].layer_name != 'plg_catastro' && !(mapLayers[i] instanceof ol.layer.Vector)) {
 			if (mapLayers[i].getVisible()) {
 				var layer = {
-					//"baseURL": "http://localhost/gs-local/ws_jrodrigo/wms",
+					//"baseURL": "http://localhost/gs-local/ws_gestion/wms",
 					"baseURL": mapLayers[i].wms_url_no_auth,
 			  	    "opacity": mapLayers[i].getOpacity(),
 			  	    "type": "WMS",
@@ -228,7 +228,7 @@ print.prototype.createPrintJob = function(template) {
 		        };
 				/*var legend = {
 					"name": mapLayers[i].title,
-			        "icons": ["http://localhost:8080/geoserver/ws_jrodrigo/wms?SERVICE=WMS&VERSION=1.1.1&layer=t$recinto&REQUEST=getlegendgraphic&FORMAT=image/png"]
+			        "icons": ["http://localhost:8080/geoserver/ws_jrodrigo/wms?SERVICE=WMS&VERSION=1.1.1&layer=lista_repetidores&REQUEST=getlegendgraphic&FORMAT=image/png"]
 			    };*/
 				legends.push(legend);
 			}									
@@ -268,12 +268,16 @@ print.prototype.createPrintJob = function(template) {
 									matrixSize.push(lastSize*2);
 									scale = scale / 2;
 								}
+								var tileSize = 256;
+								if (tileGrid.getTileSize()) {
+									tileSize = tileGrid.getTileSize();
+								}
 								matrices.push({
 						            "identifier": z,
 						            "matrixSize": matrixSize,
 						            "scaleDenominator": scale,
-						            //"tileSize": [tileGrid.getTileSize(), tileGrid.getTileSize()],
-						            "tileSize": tileGrid.tmpSize_,
+						            "tileSize": [tileSize, tileSize],
+						            //"tileSize": tileGrid.tmpSize_,
 						            "topLeftCorner": [-2.003750834E7, 2.0037508E7]
 								});
 							}
