@@ -2799,6 +2799,10 @@ def describeFeatureType(request):
             schema = params.get('schema', 'public')
             i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
             layer_defs = i.get_fields_info(layer.name, schema)
+            layer_mv_defs = []
+            if layer_defs.__len__() == 0:
+                layer_mv_defs = i.get_fields_mv_info(layer.name, schema)
+            layer_defs = layer_defs + layer_mv_defs
             geom_defs = i.get_geometry_columns_info(layer.name, schema)
             pk_defs = i.get_pk_columns(layer.name, schema)
             
