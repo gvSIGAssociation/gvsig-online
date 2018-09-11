@@ -227,6 +227,24 @@ class Introspect:
         return [{'order':r[0], 'name': r[1], 'type': r[2], 'length': r[3], 'precision': r[4], 'scale': r[5], 'nullable': r[6]} for r in self.cursor.fetchall()]
     
     
+    def get_fields_mv_info(self, table, schema='public'):
+        self.cursor.execute("""   
+        SELECT a.attnum, a.attname,
+        pg_catalog.format_type(a.atttypid, a.atttypmod), NULL, NULL, NULL,
+        (CASE WHEN (a.attnotnull IS NOT NULL AND a.attnotnull = TRUE) THEN 'YES' ELSE 'NO' END)
+        FROM pg_attribute a
+        JOIN pg_class t on a.attrelid = t.oid
+        JOIN pg_namespace s on t.relnamespace = s.oid
+        WHERE a.attnum > 0 
+        AND NOT a.attisdropped
+        AND s.nspname = %s 
+        AND t.relname = %s
+        ORDER BY a.attnum;
+        """, [schema, table])
+
+        return [{'order':r[0], 'name': r[1], 'type': r[2], 'length': r[3], 'precision': r[4], 'scale': r[5], 'nullable': r[6]} for r in self.cursor.fetchall()]
+    
+
     def get_mosaic_temporal_info(self, table, schema='public',default_mode=None, default_value=None):
         query = "SELECT COALESCE(to_char(MIN(date), 'YYYY-MM-DD HH24:MI:SS'), '') FROM "+schema+"."+table+""
         self.cursor.execute(query, [])
