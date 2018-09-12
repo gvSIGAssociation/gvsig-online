@@ -2395,6 +2395,23 @@ def get_datatable_data(request):
         
         
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
+        
+        definition = mapservice_backend.getFeaturetype(layer.datastore.workspace, layer.datastore, layer.name, layer.title)
+        aux_encoded_property_name = ' '
+        if 'featureType' in definition and 'attributes' in definition['featureType'] and 'attribute' in definition['featureType']['attributes']:
+            attributes = definition['featureType']['attributes']['attribute']
+            for attribute in attributes:
+                aux_encoded_property_name += attribute['name'] + ' '
+                
+        num_fields = encoded_property_name.split(',').__len__()
+        found = -1
+        idx = 0
+        while found == -1 and num_fields - 1 >= idx:
+            sortby_field = encoded_property_name.split(',')[idx]
+            found = aux_encoded_property_name.find(' ' + sortby_field + ' ')
+            idx = idx + 1
+        encoded_property_name = aux_encoded_property_name.strip().replace(' ',',')
+        
         params = json.loads(layer.datastore.connection_params)
         i = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
         pk_defs = i.get_pk_columns(layer.name, params.get('schema', 'public'))
