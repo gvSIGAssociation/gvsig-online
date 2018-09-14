@@ -23,14 +23,18 @@ from gvsigol_services.backend_mapservice import backend as mapservice
 from gvsigol_plugin_catalog import settings as plugin_settings
 from django.core.exceptions import ImproperlyConfigured
 from gvsigol_plugin_catalog.models import LayerMetadata
-import api as xmlapi
+from gvsigol_plugin_catalog import api_old as xmlapi_old
+from gvsigol_plugin_catalog import api_new as xmlapi_new
 
 class UnsupportedRequestError(Exception):
     pass
 
 class Geonetwork():
-    def __init__(self, service_url, user, password):
-        self.xmlapi = xmlapi.Geonetwork(service_url)
+    def __init__(self, version, service_url, user, password):
+        if version == 'api0.1':
+            self.xmlapi = xmlapi_new.Geonetwork(service_url)
+        else:
+            self.xmlapi = xmlapi_old.Geonetwork(service_url)
         self.user = user
         self.password = password
         
@@ -38,8 +42,9 @@ class Geonetwork():
         try:
             self.xmlapi.gn_auth(self.user, self.password)
             uuid = self.xmlapi.gn_insert_metadata(layer, abstract, ws, layer_info, ds_type)
-            self.xmlapi.add_thumbnail(uuid, layer.thumbnail.url)
-            self.xmlapi.set_metadata_privileges(uuid)
+            self.xmlapi.gn_auth(self.user, self.password)
+            self.xmlapi.add_thumbnail(uuid[0], layer.thumbnail.url)
+            self.xmlapi.set_metadata_privileges(uuid[0])
             self.xmlapi.gn_unauth()
             return uuid
         
@@ -62,7 +67,7 @@ class Geonetwork():
         try:
             (ds_type, layer_info) = mapservice.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
             muuid = self.metadata_insert(layer, layer.abstract, layer.datastore.workspace, layer_info, ds_type)
-            lm = LayerMetadata(layer=layer, metadata_uuid=muuid)
+            lm = LayerMetadata(layer=layer, metadata_uuid=muuid[0], metadata_id=muuid[1])
             lm.save()
             
         except Exception as e:
@@ -96,10 +101,11 @@ class Geonetwork():
 
 def initialize():
     try:
+        version = plugin_settings.CATALOG_API_VERSION
         service_url = plugin_settings.CATALOG_URL
         user = plugin_settings.CATALOG_USER
         password = plugin_settings.CATALOG_PASSWORD
-        geonetwork_service = Geonetwork(service_url, user, password) 
+        geonetwork_service = Geonetwork(version, service_url, user, password) 
         return geonetwork_service
     
     except:
