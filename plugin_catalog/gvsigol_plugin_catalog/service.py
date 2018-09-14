@@ -34,7 +34,7 @@ class Geonetwork():
         if version == 'api0.1':
             self.xmlapi = xmlapi_new.Geonetwork(service_url)
         else:
-            self.xmlapi = xmlapi_old.Geonetwork(service_url)
+            self.xmlapi = xmlapi_old.Geonetwork(service_url + '/srv/eng/')
         self.user = user
         self.password = password
         
@@ -104,7 +104,7 @@ class Geonetwork():
 def initialize():
     try:
         version = plugin_settings.CATALOG_API_VERSION
-        service_url = plugin_settings.CATALOG_URL
+        service_url = plugin_settings.CATALOG_BASE_URL
         user = plugin_settings.CATALOG_USER
         password = plugin_settings.CATALOG_PASSWORD
         geonetwork_service = Geonetwork(version, service_url, user, password) 
