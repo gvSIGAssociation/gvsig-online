@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-CATALOG_URL = 'http://localhost:8080/geonetwork/srv/spa/'
+CATALOG_URL = 'http://localhost:8080/geonetwork/srv/api/'
 CATALOG_USER = 'admin'
 CATALOG_PASSWORD = 'admin'
 # valid values: 'legacy3.2', 'api0.1'

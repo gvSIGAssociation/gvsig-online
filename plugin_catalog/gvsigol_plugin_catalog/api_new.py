@@ -42,13 +42,29 @@ class Geonetwork():
     def get_service_url(self):
         return self.service_url
     
+    def get_auth(self):
+        return self.session.auth
+    
     def gn_auth(self, user, password):
         self.session.auth = (user, password)
         try:
             URL = 'http://localhost:8080/geonetwork/srv/eng/info?type=me'
-            self.session.post(URL)
+            r = self.session.post(URL)
+            if r.status_code==403:
+                
+                headers = {
+                    'X-XSRF-TOKEN': self.get_csrf_token()
+                }
+                
+                r = self.session.post(URL, auth=(user, password), headers=headers)
+                if r.status_code==200:
+                    return True
+                return False
+            else:
+                return False
         except Exception as e:
             print (e.message)
+            return False
         
     def gn_unauth(self):
         self.session.auth = None
@@ -69,6 +85,7 @@ class Geonetwork():
         xml = self.create_metadata(layer, abstract, ws, layer_info, ds_type)
              
         r = self.session.put(url, data=xml.encode('utf-8'), headers=headers)
+        
         if r.status_code==201:
             response = json.loads(r.text)
             
@@ -87,7 +104,8 @@ class Geonetwork():
 
             if uuid and id:
                 return [uuid, id]
-              
+        else:
+            return False    
         raise FailedRequestError(r.status_code, r.content)
         
     
