@@ -40,23 +40,24 @@ class Geonetwork():
         
     def metadata_insert(self, layer, abstract, ws, layer_info, ds_type):
         try:
-            self.xmlapi.gn_auth(self.user, self.password)
-            uuid = self.xmlapi.gn_insert_metadata(layer, abstract, ws, layer_info, ds_type)
-            self.xmlapi.gn_auth(self.user, self.password)
-            self.xmlapi.add_thumbnail(uuid[0], layer.thumbnail.url)
-            self.xmlapi.set_metadata_privileges(uuid[0])
-            self.xmlapi.gn_unauth()
-            return uuid
+            if self.xmlapi.gn_auth(self.user, self.password):
+                uuid = self.xmlapi.gn_insert_metadata(layer, abstract, ws, layer_info, ds_type)
+                self.xmlapi.add_thumbnail(uuid[0], layer.thumbnail.url)
+                self.xmlapi.set_metadata_privileges(uuid[0])
+                self.xmlapi.gn_unauth()
+                return uuid
+            return None
         
         except Exception as e:
             print e
         
     def metadata_delete(self, lm):
         try:
-            self.xmlapi.gn_auth(self.user, self.password)
-            self.xmlapi.gn_delete_metadata(lm)
-            self.xmlapi.gn_unauth()
-            return True
+            if self.xmlapi.gn_auth(self.user, self.password):
+                self.xmlapi.gn_delete_metadata(lm)
+                self.xmlapi.gn_unauth()
+                return True
+            return False
         
         except Exception as e:
             print e
@@ -67,8 +68,9 @@ class Geonetwork():
         try:
             (ds_type, layer_info) = mapservice.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
             muuid = self.metadata_insert(layer, layer.abstract, layer.datastore.workspace, layer_info, ds_type)
-            lm = LayerMetadata(layer=layer, metadata_uuid=muuid[0], metadata_id=muuid[1])
-            lm.save()
+            if muuid:
+                lm = LayerMetadata(layer=layer, metadata_uuid=muuid[0], metadata_id=muuid[1])
+                lm.save()
             
         except Exception as e:
             print e
