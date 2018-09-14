@@ -48,7 +48,8 @@ class Geonetwork():
     def gn_auth(self, user, password):
         self.session.auth = (user, password)
         try:
-            URL = 'http://localhost:8080/geonetwork/srv/eng/info?type=me'
+            #URL = 'http://localhost:8080/geonetwork/srv/eng/info?type=me'
+            URL = self.service_url + "/srv/eng/info?type=me"
             r = self.session.post(URL)
             if r.status_code==403:
                 
@@ -76,7 +77,7 @@ class Geonetwork():
     def gn_insert_metadata(self, layer, abstract, ws, layer_info, ds_type):
         #curl -X PUT --header 'Content-Type: application/xml' --header 'Accept: application/json' -d '.........XML_code............'  
         # 'http://localhost:8080/geonetwork/srv/api/0.1/records?metadataType=METADATA&assignToCatalog=true&uuidProcessing=generateUUID&transformWith=_none_'
-        url = self.service_url + "0.1/records?metadataType=METADATA&assignToCatalog=true&transformWith=_none_"
+        url = self.service_url + "/srv/api/0.1/records?metadataType=METADATA&assignToCatalog=true&transformWith=_none_"
         headers = {
             'Content-Type': 'application/xml',
             'Accept': 'application/json',
@@ -110,7 +111,7 @@ class Geonetwork():
         
     
     def add_thumbnail(self, uuid, thumbnail_url):      
-        url = self.service_url + "0.1/records/"+uuid+"/attachments?url=" + thumbnail_url
+        url = self.service_url + "/srv/api/0.1/records/"+uuid+"/attachments?url=" + thumbnail_url
         headers = {
             'X-XSRF-TOKEN': self.get_csrf_token()
         }
@@ -134,7 +135,7 @@ class Geonetwork():
         }
         response2 = []
         
-        url2 = self.service_url + "0.1/operations"
+        url2 = self.service_url + "/srv/api/0.1/operations"
         r2 = self.session.get(url2, headers=headers)
         if r2.status_code==200:
             response2 = json.loads(r2.text)
@@ -157,7 +158,7 @@ class Geonetwork():
             privileges["privileges"].append(privi_group)
         
         
-        url = self.service_url + "0.1/groups"
+        url = self.service_url + "/srv/api/0.1/groups"
         r = self.session.get(url, headers=headers)
         if r.status_code==200:
             response = json.loads(r.text)
@@ -179,8 +180,8 @@ class Geonetwork():
                 privileges["privileges"].append(privi_group)
         
         
-        #url3 = self.service_url + "md.privileges.update?_content_type=json&_1_0=on&_1_1=on&_2_0=on&_2_3=on&uuid=" + uuid
-        url3 = self.service_url + "0.1/records/"+ uuid +"/sharing"
+        #url3 = self.service_url + "srv/api/md.privileges.update?_content_type=json&_1_0=on&_1_1=on&_2_0=on&_2_3=on&uuid=" + uuid
+        url3 = self.service_url + "/srv/api/0.1/records/"+ uuid +"/sharing"
         headers = {
                 'Accept': '*/*',
                 'content-type': 'application/json',
@@ -197,7 +198,7 @@ class Geonetwork():
     def gn_delete_metadata(self, lm):
         #curl -X DELETE --header 'Accept: */*' 'http://localhost:8080/geonetwork/srv/api/0.1/records/159?withBackup=false'
         #NOTE: uuid is an id not in format 97769e85-2e7b-418b-a8c8-0163bfb97aac
-        url = self.service_url + "0.1/records/"+str(lm.metadata_id)+"?withBackup=false"
+        url = self.service_url + "/srv/api/0.1/records/"+str(lm.metadata_id)+"?withBackup=false"
         headers = {
             'Accept': 'application/json',
             'X-XSRF-TOKEN': self.get_csrf_token()
