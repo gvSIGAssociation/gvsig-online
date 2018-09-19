@@ -1,0 +1,30 @@
+{% load staticfiles %}
+
+<link rel="stylesheet" type="text/css" href="{% static "css/catalog.css" %}" />
+<script type="text/javascript" src="{% static "js/catalog_map.js" %}"></script>
+<script type="text/javascript" src="{% static "js/catalog.js" %}"></script>
+
+<script type="text/javascript">
+	var catalog = new catalog(null,null);
+	
+	var html = '';
+	
+	html += '<ul class="nav navbar-nav">';
+	html += '    <li><a href="#" id="show_map" class="dropdown-toggle">Map</a></li>';
+	html += '</ul>'
+	html += '<ul class="nav navbar-nav">';
+	html += '    <li><a href="#" id="show_catalog" class="dropdown-toggle">Catalog</a></li>';
+	html += '</ul>'
+	
+	$("#viewer-navbar").append(html);
+	
+	
+	$("#show_catalog").click(function(){
+		catalog.showPanel()
+	});
+	
+	$("#show_map").click(function(){
+		catalog.hidePanel()
+	});
+	
+</script>
