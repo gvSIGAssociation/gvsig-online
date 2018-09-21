@@ -28,13 +28,12 @@ var CatalogMap = function(catalog, container_id) {
 	this.map = null;	
 	this.vector_layer = null;
 	this.selected_feat = null;
+	this.interaction = null;
 	this.initialization(container_id);
 };
 
 CatalogMap.prototype.cleanData = function(){
-	if(this.selected_feat != null){
-		this.vector_source.removeFeature(this.selected_feat);
-	}
+	this.vector_source.clear();
 	this.selected_feat = null;
 }
 
@@ -101,11 +100,16 @@ CatalogMap.prototype.initialization = function(container_id){
 	this.vector_layer = new ol.layer.Vector({
         source: this.vector_source
     });
-	var interaction = new ol.interaction.DragBox({
-	    condition: ol.events.condition.platformModifierKeyOnly,
+	
+	this.interaction = new ol.interaction.DragBox({
+	    condition: ol.events.condition.platformModifierKeyOnly
 	});
 	
-	interaction.on('boxend', function (evt) {
+	this.interaction.on('boxstart', function (evt) {
+		self.vector_source.clear();
+	});
+	
+	this.interaction.on('boxend', function (evt) {
 	    var geom = evt.target.getGeometry();
 	    console.log(geom);
 	    self.selected_feat = new ol.Feature({
@@ -132,7 +136,7 @@ CatalogMap.prototype.initialization = function(container_id){
 	    })
 	});
 	
-	this.map.addInteraction(interaction);
+	this.map.addInteraction(this.interaction);
 	
 	$("#catalog_map_full").hide();
 }
