@@ -76,15 +76,27 @@ class CartoCiudad2():
         '''
         address = json.loads(address_str)
         
-        params = {
-            'id': address['address[id]'],
-            #'address': address['address[address]'],
-            'source': 'new_cartociudad',
-            'type': address['address[type]'],
-            'tip_via': address['address[tip_via]'],
-            'portal': address['address[portalNumber]'],
-            'cod_postal_filter': settings.CARTOCIUDAD_INE_MUN_FILTER
-        }
+        params = {}
+        if 'address[id]' in address:
+           params = {
+                'id': address['address[id]'],
+                'address': address['address[address]'],
+                'source': 'new_cartociudad',
+                'type': address['address[type]'],
+                'tip_via': address['address[tip_via]'],
+                'portal': address['address[portalNumber]'],
+                'cod_postal_filter': settings.CARTOCIUDAD_INE_MUN_FILTER
+            } 
+        else:
+            params = {
+                'id': address['id'],
+                'address': address['address'],
+                'source': 'new_cartociudad',
+                'type': address['type'],
+                'tip_via': address['tip_via'],
+                'portal': address['portalNumber'],
+                'cod_postal_filter': settings.CARTOCIUDAD_INE_MUN_FILTER
+            }
 
         #url = "?".join((self.urls['candidates_url'], urlencode(params)))
         json_result =  self.get_json_from_url(self.urls['find_url'], params)
@@ -133,6 +145,8 @@ class CartoCiudad2():
     
             data = json.loads(respuesta)
             if data:
+                if 'address' in params:
+                    data['address'] = params['address']
                 return data
         return []
         
