@@ -50,7 +50,18 @@ class Geonetwork():
         
         except Exception as e:
             print e
+    '''
+    def metadata_editor(self, uuid):
+        try:
+            if self.xmlapi.gn_auth(self.user, self.password):
+                content = self.xmlapi.gn_metadata_editor(uuid)
+                self.xmlapi.gn_unauth()
+                return content
+            return None
         
+        except Exception as e:
+            print e
+    ''' 
     def metadata_delete(self, lm):
         try:
             if self.xmlapi.gn_auth(self.user, self.password):

@@ -20,3 +20,25 @@
 '''
 @author: jrodrigo <jrodrigo@scolab.es>
 '''
+
+'''
+from django.shortcuts import render_to_response, RequestContext, redirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
+from django.shortcuts import render
+import json
+import ast
+from django.views.decorators.csrf import csrf_exempt
+from service import geonetwork_service
+
+@require_http_methods(["GET"])
+def metadata_form(request, metadata_id):
+    
+    if geonetwork_service!=None and request.method == 'GET':
+        response = geonetwork_service.metadata_editor(metadata_id)
+        return HttpResponse(response, content_type='text/plain')
+        
+    return HttpResponse(status=500)
+    
+'''
