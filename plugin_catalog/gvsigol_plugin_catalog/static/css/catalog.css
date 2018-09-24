@@ -30,6 +30,49 @@
 	display:none;
 }
 
+.catalog-link{
+	list-style-type:none;
+	padding: 10px 0px;
+}
+
+.catalog-link:hover{
+	background-color: #eee;
+}
+
+.catalog-link i{
+    padding: 0px 10px;
+    font-size: 35px;
+    float: left;
+    width: 65px;
+    text-align: center;
+}
+
+.catalog-link-li{
+	list-style-type: disc;
+    margin-left: 20px;
+    color: #888;
+}
+.catalog-link span{
+    float: left;
+    margin-top: 8px;
+}
+
+.catalog-link span.catalog-link-resource{
+    float: left;
+    margin-top: 0px;
+}
+
+.catalog-link span .catalog-entry-subtitle{
+	color: #888;
+	margin-top: 0px;
+}
+
+.catalog-link-button{
+	float:right;
+	margin-right: 10px;
+	width: 100px;
+}
+
 .catalog_map {
 	height: 260px;
     padding: 20px 0px 0px 0px;

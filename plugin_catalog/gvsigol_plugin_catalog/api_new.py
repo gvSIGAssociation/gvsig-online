@@ -108,7 +108,26 @@ class Geonetwork():
         else:
             return False    
         raise FailedRequestError(r.status_code, r.content)
+    
+    '''
+    def gn_metadata_editor(self, uuid):
+        #curl -X PUT --header 'Content-Type: application/xml' --header 'Accept: application/json' -d '.........XML_code............'  
+        # 'http://localhost:8080/geonetwork/srv/api/0.1/records?metadataType=METADATA&assignToCatalog=true&uuidProcessing=generateUUID&transformWith=_none_'
+        url = self.service_url + "/srv/api/0.1/records/" + uuid + "/editor"
+        headers = {
+            'Content-Type': 'application/xml',
+            'Accept': 'application/xml',
+            'X-XSRF-TOKEN': self.get_csrf_token()
+        }
+        r = self.session.get(url,  headers=headers)
         
+        if r.status_code==200:
+            response = r.text
+            return response
+        else:
+            return False    
+        raise FailedRequestError(r.status_code, r.content)
+    '''    
     
     def add_thumbnail(self, uuid, thumbnail_url):      
         url = self.service_url + "/srv/api/0.1/records/"+uuid+"/attachments?url=" + thumbnail_url

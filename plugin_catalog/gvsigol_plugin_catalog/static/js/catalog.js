@@ -28,6 +28,7 @@ var catalog = function(map, conf) {
 	this.conf = conf;
 	this.catalog_panel = null;
 	this.catalog_map = null;
+	this.data = {};
 	this.initialization();
 };
 
@@ -221,9 +222,9 @@ catalog.prototype.getMetadataEntry = function(metadata){
 		met += '		<div class="catalog_content_thumbnail"></div>';
 		met += '	</div>';
 		met += '	<div class="col-md-12">';
-		met += '			<div class="catalog_content_button_place col-md-4"><div class="catalog_content_button">Details</div></div>';
-		met += '			<div class="catalog_content_button_place col-md-4"><div class="catalog_content_button">Map</div></div>';
-		met += '			<div class="catalog_content_button_place col-md-4"><div class="catalog_content_button">Download</div></div>';
+		met += '			<div class="catalog_content_button_place col-md-4"><div name="'+ metadata['geonet:info']['uuid'] +'" class="catalog_content_button catalog_details">Details</div></div>';
+		met += '			<div class="catalog_content_button_place col-md-4"><div name="'+ metadata['geonet:info']['uuid'] +'" class="catalog_content_button catalog_linkmap">Map</div></div>';
+		met += '			<div class="catalog_content_button_place col-md-4"><div name="'+ metadata['geonet:info']['uuid'] +'" class="catalog_content_button catalog_download">Download</div></div>';
 		met += '	</div>';
 		met += '</div>';
 	}else{
@@ -248,6 +249,57 @@ catalog.prototype.getKeywordQuery = function(keywords, key){
 	}
 	cats = cats.replace(new RegExp(' ', 'g'), '+');
 	return cats;
+}
+
+catalog.prototype.createResourceLink = function(links){
+	var link = links.split('|');
+	var content = '';
+	if(link.length==6){
+		var type = link[4].trim();
+		if(type.startsWith("text/")){
+			content += '<li class="catalog-link">';
+			content += '	<a href="'+link[2]+'" target="_blank">';
+			content += '		<i class="fa fa-globe" aria-hidden="true"></i>';
+			content += '		<span>' + link[1] + '</span>';
+			content += '		<div class="catalog-link-button catalog_content_button">'+gettext("Go")+'</div>';
+			content += '		<div style="clear:both"></div>';
+			content += '	</a>';
+			content += '</li>';
+		}else{
+			if(type == "application/zip"){
+				content += '<li class="catalog-link">';
+				content += '	<a href="'+link[2]+'" target="_blank">';
+				content += '		<i class="fa fa-file-archive-o" aria-hidden="true"></i>';
+				content += '		<span class="catalog-link-resource"><p>' + link[1] + '<br/><span class="catalog-entry-subtitle">' + link[0] + '</span></p></span>';
+				content += '		<div class="catalog-link-button catalog_content_button">'+gettext("Download")+'</div>';content += '		<div style="clear:both"></div>';
+				content += '	</a>';
+				content += '</li>';
+			}
+		}
+		
+	}
+	return content;
+}
+
+
+catalog.prototype.createResourceMap = function(links){
+	var link = links.split('|');
+	var content = '';
+	if(link.length==6){
+		var type = link[4].trim();
+		if(!type.startsWith("text/") && type != "application/zip"){
+			content += '<li class="catalog-link">';
+			content += '	<a href="'+link[2]+'" target="_blank">';
+			content += '		<i class="fa fa-map-o" aria-hidden="true"></i>';
+			content += '		<span class="catalog-link-resource"><p>' + link[1] + '<br/><span class="catalog-entry-subtitle">' + link[0] + '</span></p></span>';
+			content += '		<div class="catalog-link-button catalog_content_button">'+gettext("Add")+'</div>';
+			content += '		<div style="clear:both"></div>';
+			content += '	</a>';
+			content += '</li>';
+		}
+		
+	}
+	return content;
 }
 
 catalog.prototype.getCatalogFilters = function(query, search, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent){
@@ -287,6 +339,7 @@ catalog.prototype.getCatalogFilters = function(query, search, categories, keywor
 		success: function(response) {
 			try{
 				console.log(response);
+				self.data = {};
 				
 				var filter_code = '';
 				for(var idx = 0; idx < response.summary.dimension.length; idx++){
@@ -315,13 +368,137 @@ catalog.prototype.getCatalogFilters = function(query, search, categories, keywor
 					for(var idx = 0; idx < response.metadata.length; idx++){
 						var metadata = response.metadata[idx];
 						content_code += self.getMetadataEntry(metadata);
+						self.data[metadata['geonet:info']['uuid']] = metadata;
 					}
 				}else{
 					var metadata = response.metadata;
 					content_code += self.getMetadataEntry(metadata);
+					self.data[metadata['geonet:info']['uuid']] = metadata;
 				}
 				$("#catalog_content").html(content_code);
 				
+				
+				$(".catalog_details").unbind("click").click(function(){
+					var id = $(this).attr("name");
+					$('.modal-catalog-title').html(gettext("Details"));
+					var links = self.data[id].link;
+					
+					var content = "";
+//					var url = '/gvsigonline/catalog/get_editor/'+id+"/";	
+//						$.ajax({
+//						url: url,
+//						success: function(response) {
+//							console.log(response);
+//							var aux_content = "";
+//							aux_content += '<div style="padding: 10px">' + response;
+//							aux_content += '<div style="clear:both"></div>';
+//							aux_content += '</div>';
+//							$('.modal-catalog-body').html(aux_content);
+//							$('#modal-catalog').modal('show');
+//						}
+//					});
+					
+					var aux_content = "";
+					var data = self.data[id];
+					aux_content += '<div style="padding: 10px">';
+					aux_content += '<ul>';
+					for(var key in data){
+						aux_content += '<li class="catalog-link">';
+						aux_content += '	<a href="#">';
+						aux_content += '		<span class="catalog-link-resource"><p style="font-weight: bold">' + key + '';
+						if(Array.isArray(data[key])){
+							aux_content += '		</p></span>';
+							aux_content += '		<div style="clear:both"></div>';
+							aux_content += '		<ul>';
+							for(var i=0; i<data[key].length; i++){
+								aux_content += '		<li class="catalog-link-li catalog-entry-subtitle">' + data[key][i] + '</li>';
+							}
+							aux_content += '		</ul>';
+						}else{
+							aux_content += '		</p></span>';
+							aux_content += '		<div style="clear:both"></div>';
+							aux_content += '		<span class="catalog-entry-subtitle" style="float:left; margin-left: 20px">' + data[key] + '</span>';
+							aux_content += '		<div style="clear:both"></div>';
+						}
+						
+						aux_content += '	</a>';
+						aux_content += '</li>';
+					}
+					aux_content += '</ul>';
+					aux_content += '</div>';
+					$('.modal-catalog-body').html(aux_content);
+					$('#modal-catalog').modal('show');
+					
+				});
+				
+				
+				$(".catalog_download").unbind("click").click(function(){
+					var id = $(this).attr("name");
+					$('.modal-catalog-title').html(gettext("List of downloads"));
+					var links = self.data[id].link;
+					
+					var content = "<ul>";
+					var aux_content = "";
+					if(Array.isArray(links)){
+						for(var i=0; i<links.length; i++){
+							aux_content += self.createResourceLink(links[i]);
+						}
+					}else{
+						if(links){
+							aux_content += self.createResourceLink(links);
+						}
+					}
+					content += aux_content + "<ul>";
+					
+					if(aux_content.length == 0){
+						aux_content += '<div style="padding: 10px">';
+						aux_content += '<div class="no_catalog_content col-md-12">';
+						aux_content += '<i class="fa fa-ban" aria-hidden="true"></i>   ';
+						aux_content += 'No se encontraron resultados';
+						aux_content += '</div>';
+						aux_content += '<div style="clear:both"></div>';
+						aux_content += '</div>';
+						
+						content = aux_content;
+					}
+					
+					$('.modal-catalog-body').html(content);
+					$('#modal-catalog').modal('show');
+				});
+				
+				$(".catalog_linkmap").unbind("click").click(function(){
+					var id = $(this).attr("name");
+					$('.modal-catalog-title').html(gettext("List of layers"));
+					var links = self.data[id].link;
+					
+					var content = "<ul>";
+					var aux_content = "";
+					if(Array.isArray(links)){
+						for(var i=0; i<links.length; i++){
+							aux_content += self.createResourceMap(links[i]);
+						}
+					}else{
+						if(links){
+							aux_content += self.createResourceMap(links);
+						}
+					}
+					content += aux_content + "<ul>";
+					
+					if(aux_content.length == 0){
+						aux_content += '<div style="padding: 10px">';
+						aux_content += '<div class="no_catalog_content col-md-12">';
+						aux_content += '<i class="fa fa-ban" aria-hidden="true"></i>   ';
+						aux_content += 'No se encontraron resultados';
+						aux_content += '</div>';
+						aux_content += '<div style="clear:both"></div>';
+						aux_content += '</div>';
+						
+						content = aux_content;
+					}
+					
+					$('.modal-catalog-body').html(content);
+					$('#modal-catalog').modal('show');
+				});
 				
 				$(".catalog_filter_entry_ck").unbind("click").click(function(){
 					var search = $("#gn-any-field").val();
