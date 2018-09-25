@@ -23,9 +23,10 @@
 /**
  * TODO
  */
-var catalog = function(map, conf) {
-	this.map = $("#container");	
-	this.conf = conf;
+var catalog = function(map, layerTree) {
+	this.map = map;
+	this.map_container = $("#container");	
+	this.layerTree = layerTree;
 	this.catalog_panel = null;
 	this.catalog_map = null;
 	this.data = {};
@@ -289,10 +290,10 @@ catalog.prototype.createResourceMap = function(links){
 		var type = link[4].trim();
 		if(!type.startsWith("text/") && type != "application/zip"){
 			content += '<li class="catalog-link">';
-			content += '	<a href="'+link[2]+'" target="_blank">';
+			content += '	<a>';
 			content += '		<i class="fa fa-map-o" aria-hidden="true"></i>';
 			content += '		<span class="catalog-link-resource"><p>' + link[1] + '<br/><span class="catalog-entry-subtitle">' + link[0] + '</span></p></span>';
-			content += '		<div class="catalog-link-button catalog_content_button">'+gettext("Add")+'</div>';
+			content += '		<div class="catalog-link-button catalog_content_button catalog_add_layer" url="'+link[2]+'" name="' + link[0] + '" title="' + link[1] + '">'+gettext("Add")+'</div>';
 			content += '		<div style="clear:both"></div>';
 			content += '	</a>';
 			content += '</li>';
@@ -301,6 +302,124 @@ catalog.prototype.createResourceMap = function(links){
 	}
 	return content;
 }
+
+catalog.prototype.linkResourceMap = function(){
+	var self = this;
+	
+	$(".catalog_add_layer").unbind("click").click(function(){
+		var url = $(this).attr("url");
+		var name = $(this).attr("name");
+		var title = $(this).attr("title");
+		
+		var catalogLayer = new ol.layer.Tile({
+	          source: new ol.source.TileWMS({
+	            url: url,
+	            params: {'LAYERS': name, 'TILED': true},
+	            serverType: 'geoserver',
+	          }),
+	          id : "geonetwork-" + name
+		});
+		
+		self.map.addLayer(catalogLayer);
+		
+		var groupEntry = $("#geonetwork-group");
+		if(groupEntry.length == 0){
+			self.createLayerGroup();
+		}
+		
+		var group_visible = false;
+		group_visible = $("#layergroup-geonetwork-group").is(":checked");
+		self.createLayer(name, title, group_visible, groupEntry.length);
+		
+		$('#modal-catalog').modal('hide');
+		self.hidePanel();
+	});
+}
+
+
+catalog.prototype.createLayerGroup = function() {
+	var self = this;
+	var groupId = 'geonetwork-group';
+	
+	var tree = '';
+	tree += '			<li class="box box-default collapsed-box" id="' + groupId + '">';
+	tree += '				<div class="box-header with-border">';
+	tree += '					<input type="checkbox" class="layer-group" id="layergroup-' + groupId + '">';
+	tree += '					<span class="text">' + gettext("Geonetwork layers") + '</span>';
+	tree += '					<div class="box-tools pull-right">';
+	tree += '						<button class="btn btn-box-tool btn-box-tool-custom group-collapsed-button" data-widget="collapse">';
+	tree += '							<i class="fa fa-plus"></i>';
+	tree += '						</button>';
+	tree += '					</div>';
+	tree += '				</div>';
+	tree += '				<div data-groupnumber="' + (100 * 100) + '" class="box-body layer-tree-groups geonetwork-layer-group" style="display: none;">';
+	tree += '				</div>';
+	tree += '			</li>';
+
+	$(".layer-tree").append(tree);
+	
+	$(".layer-group").unbind("change").change(function (e) {
+		var groupId = 'geonetwork-layer-group'; 
+		var checked = this.checked;
+		
+		$("."+groupId+" .layer-box").each(function(){
+			var id = $(this).attr("data-layerid");
+			var layers = self.map.getLayers();
+			
+			layers.forEach(function(layer){
+				if (!layer.baselayer) {
+					if (layer.get("id") === id) {
+						var layerCheckbox = document.getElementById(id);
+						if (checked) {
+							layer.setVisible(true);
+							layerCheckbox.checked = true;
+							layerCheckbox.disabled = true;
+						} else {
+							layer.setVisible(false);
+							layerCheckbox.checked = false;
+							layerCheckbox.disabled = false;
+						}
+					}
+				};
+			}, this);
+		})
+	});
+}
+
+catalog.prototype.createLayer = function(name, title, group_visible, zIndex) {
+	var id = "geonetwork-" + name;
+	
+	var ui = '';
+	ui += '<div id="layer-box-' + id + '" data-layerid="' + id + '" data-zindex="'+ (100 + zIndex) +'" class="box layer-box thin-border box-default collapsed-box">';
+	ui += '		<div class="box-header with-border">';
+	if (group_visible) {
+		ui += '		<input type="checkbox" id="' + id + '" class="geonetwork-ck" disabled checked>';
+	}else{
+		ui += '		<input type="checkbox" id="' + id + '" class="geonetwork-ck" checked>';
+	}
+	ui += '			<span class="text">' + title + '</span>';
+	ui += '		</div>';
+	ui += '</div>';
+	
+	$(".geonetwork-layer-group").append(ui);
+	
+	$(".geonetwork-ck").unbind("change").change(function (e) {
+		var layers = self.map.getLayers();
+		layers.forEach(function(layer){
+			if (!layer.baselayer) {
+				if (layer.get("id") === this.id) {
+					if (layer.getVisible() == true) {
+						layer.setVisible(false);
+					} else {
+						layer.setVisible(true);
+					}
+				}
+			};
+		}, this);
+	});
+	
+
+};
 
 catalog.prototype.getCatalogFilters = function(query, search, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent){
 	var self = this;
@@ -498,6 +617,8 @@ catalog.prototype.getCatalogFilters = function(query, search, categories, keywor
 					
 					$('.modal-catalog-body').html(content);
 					$('#modal-catalog').modal('show');
+					
+					self.linkResourceMap();
 				});
 				
 				$(".catalog_filter_entry_ck").unbind("click").click(function(){
@@ -520,14 +641,14 @@ catalog.prototype.getCatalogFilters = function(query, search, categories, keywor
 
 catalog.prototype.showPanel = function(){
 	this.catalog_panel.show();
-	this.map.hide();
+	this.map_container.hide();
 	if(!this.catalog_map){
 		this.catalog_map = new CatalogMap(this, "catalog_map");
 	}
 }
 
 catalog.prototype.hidePanel = function(){
-	this.map.show();
+	this.map_container.show();
 	this.catalog_panel.hide();
 }
 

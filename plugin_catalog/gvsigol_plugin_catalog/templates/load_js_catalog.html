@@ -5,7 +5,7 @@
 <script type="text/javascript" src="{% static "js/catalog.js" %}"></script>
 
 <script type="text/javascript">
-	var catalog = new catalog(null,null);
+	var catalog = new catalog(viewer.core.map, viewer.core.layerTree);
 	
 	var html = '';
 	
