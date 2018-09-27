@@ -144,7 +144,7 @@ function configure() {
 	grep -rl "##LOGOUT_PAGE_URL##"  | xargs sed -i "s ##LOGOUT_PAGE_URL## $LOGOUT_PAGE_URL g"
 	
 	
-	grep -rl "##GEOSERVER_CLUSTER_NODES##"  | xargs sed -i "s/##GEOSERVER_CLUSTER_NODES##/$GEOSERVER_CLUSTER_NODES/g"						
+	grep -rl "##GEOSERVER_CLUSTER_NODES##"  | xargs sed -i "s ##GEOSERVER_CLUSTER_NODES## $GEOSERVER_CLUSTER_NODES g"						
 	grep -rl "##GVSIGOL_TOOLS##"  | xargs sed -i "s/##GVSIGOL_TOOLS##/$GVSIGOL_TOOLS/g" 
 	grep -rl "##IP_FO##"  | xargs sed -i "s/##IP_FO##/$IP_FO/g" | true
 	grep -rl "##IP_NODE0##"  | xargs sed -i "s/##IP_NODE0##/$IP_NODE0/g"  | true
