@@ -451,13 +451,15 @@ catalog.prototype.getCatalogFilters = function(query, search, categories, keywor
 	if(extent && extent.length > 0){
 		filters += "&geometry="+extent;
 	}
-	
-	var url = 'http://localhost:8080/geonetwork/srv/spa/q?_content_type=json'+filters+'&bucket=s101&facet.q='+query+'&fast=index&resultType=details&sortBy=relevance';
+
+	//var url = 'http://localhost:8080/geonetwork/srv/spa/q?_content_type=json'+filters+'&bucket=s101&facet.q='+query+'&fast=index&resultType=details&sortBy=relevance';
+	var url = '/gvsigonline/catalog/get_query/?_content_type=json'+filters+'&bucket=s101&facet.q='+query+'&fast=index&resultType=details&sortBy=relevance';
 	$.ajax({
 		url: url,
 		success: function(response) {
 			try{
 				console.log(response);
+				response = JSON.parse(response);
 				self.data = {};
 				
 				var filter_code = '';
@@ -635,6 +637,8 @@ catalog.prototype.getCatalogFilters = function(query, search, categories, keywor
 		},
 		error: function(jqXHR, textStatus) {
 			console.log(textStatus);
+			content_code = self.getMetadataEntry(null);
+			$("#catalog_content").html(content_code);
 		}
 	});
 }

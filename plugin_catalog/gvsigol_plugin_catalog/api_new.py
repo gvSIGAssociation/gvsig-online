@@ -227,6 +227,18 @@ class Geonetwork():
         if r.status_code==204:
             return True
         raise FailedRequestError(r.status_code, r.content)
+    
+    def get_query(self, query):
+        url = self.service_url + "/srv/spa/q?" + query
+        headers = {
+            'Accept': 'application/json',
+            'X-XSRF-TOKEN': self.get_csrf_token()
+        }
+              
+        r = self.session.get(url, headers=headers)
+        if r.status_code==200:
+            return r.content
+        raise FailedRequestError(r.status_code, r.content)
         
     def create_metadata(self, layer, abstract, ws, layer_info, ds_type):
         minx = str(layer_info[ds_type]['latLonBoundingBox']['minx'])
