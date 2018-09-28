@@ -21,7 +21,7 @@
 @author: jrodrigo <jrodrigo@scolab.es>
 '''
 
-'''
+
 from django.shortcuts import render_to_response, RequestContext, redirect, HttpResponse
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from django.contrib.auth.decorators import login_required
@@ -32,6 +32,30 @@ import ast
 from django.views.decorators.csrf import csrf_exempt
 from service import geonetwork_service
 
+
+def get_query(request):
+    
+    if geonetwork_service!=None and request.method == 'GET':
+        try:
+            parameters = request.GET
+            
+            query = ''
+            for key in parameters:
+                query += key+'='
+                for item in parameters.get(key):
+                    query+=item
+                query += '&'
+            
+            response = geonetwork_service.get_query(query)
+            aux_response = json.loads(response)
+            return HttpResponse(response, content_type='text/plain')
+        except Exception as e:
+            return HttpResponse(status=500, content=e.message)
+        
+    return HttpResponse(status=500)
+
+
+'''
 @require_http_methods(["GET"])
 def metadata_form(request, metadata_id):
     
