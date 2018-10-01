@@ -38,7 +38,7 @@ msgid "Welcome to gvSIG Online"
 msgstr ""
 
 #: templates/index.html:146
-msgid "Public viewer"
+msgid "Public viewers"
 msgstr ""
 
 #: templates/index.html:148
@@ -46,7 +46,7 @@ msgid "Display the territory, orthophotos and thematic mapping"
 msgstr ""
 
 #: templates/index.html:149
-msgid "Access to public viewer"
+msgid "Access to the list of public viewers"
 msgstr ""
 
 #: templates/index.html:158
