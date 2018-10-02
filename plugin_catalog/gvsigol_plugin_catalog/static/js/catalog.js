@@ -220,7 +220,20 @@ catalog.prototype.getMetadataEntry = function(metadata){
 		met += '		<p class="catalog_content_abstract block-with-text">'+ metadata['abstract'] +'</p>';
 		met += '	</div>';
 		met += '	<div class="col-md-3 catalog_content_lateral">';
-		met += '		<div class="catalog_content_thumbnail"></div>';
+		met += '		<div class="catalog_content_thumbnail">';
+		
+		var image_src = "";
+		if("image" in metadata){
+			for(var i=0; i<metadata["image"].length; i++){
+				var image_info = metadata["image"][i].split("|");
+				if(image_info[0] == "overview"){
+					image_src = image_info[1];
+					break;
+				}
+			}
+		}
+		met += '			<img src="'+image_src+'" style="width:100%;" onerror="this.src=\'/gvsigonline/static/img/no_thumbnail.jpg\';"/>';
+		met += '		</div>';
 		met += '	</div>';
 		met += '	<div class="col-md-12">';
 		met += '			<div class="catalog_content_button_place col-md-4"><div name="'+ metadata['geonet:info']['uuid'] +'" class="catalog_content_button catalog_details">Details</div></div>';
@@ -458,7 +471,6 @@ catalog.prototype.getCatalogFilters = function(query, search, categories, keywor
 		url: url,
 		success: function(response) {
 			try{
-				console.log(response);
 				response = JSON.parse(response);
 				self.data = {};
 				
