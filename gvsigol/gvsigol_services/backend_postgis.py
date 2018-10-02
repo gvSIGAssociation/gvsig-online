@@ -312,7 +312,13 @@ class Introspect:
     
     
     def get_widget_geometry_info(self, table, schema='public', field=None, value=None, default_geometry_field='wkb_geometry'):
-        query = "SELECT json_build_object('type','Feature', 'geometry', ST_AsGeoJSON("+ default_geometry_field +")::json, 'srs', ST_SRID("+ default_geometry_field +"), 'properties', to_json(row)) FROM (SELECT * FROM "+schema+"."+table+" WHERE " + field + " = '" + value +"' LIMIT 1) row;"
+        
+        if not field or not value:
+            where = ''
+        else:
+            where = " WHERE " + field + " = '" + value +"'" 
+            
+        query = "SELECT json_build_object('type','Feature', 'geometry', ST_AsGeoJSON("+ default_geometry_field +")::json, 'srs', ST_SRID("+ default_geometry_field +"), 'properties', to_json(row)) FROM (SELECT * FROM "+schema+"."+table + where+" LIMIT 1) row;"
         self.cursor.execute(query, [])
         geom = None
         for r in self.cursor.fetchall():
