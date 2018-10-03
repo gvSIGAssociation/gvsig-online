@@ -27,19 +27,91 @@ var search = function(map, conf) {
 	this.map = map;	
 	this.conf = conf;
 	this.overlay = null;	
+	this.menus = null;	
 	this.popup = null;
 	this.popupCloser = null;
 	this.popupContent = null;
 	this.contextmenu = null;
 	this.initUI();
-	this.activeContextMenu();
+	this.loadTool();
 };
+
+search.prototype.loadTool = function(){
+
+	this.id = "inverse-geocoding";
+	
+	var button = document.createElement('button');
+	button.setAttribute("id", this.id);
+	button.setAttribute("class", "toolbar-button");
+	button.setAttribute("title", gettext('Inverse geocoding'));
+	var icon = document.createElement('i');
+	icon.setAttribute("class", "fa fa-map-signs");
+	icon.setAttribute("aria-hidden", "true");
+	button.appendChild(icon);
+	
+	this.$button = $(button);
+	
+	$('#toolbar').append(button);
+	
+	var this_ = this;
+	
+	var handler = function(e) {
+		this_.handler(e);
+	};
+	
+	button.addEventListener('click', handler, false);
+	button.addEventListener('touchstart', handler, false);
+	
+	this.map.tools.push(this);
+};
+
+/**
+* TODO
+*/
+search.prototype.active = false;
+
+/**
+* TODO
+*/
+search.prototype.deactivable = true;
+
+search.prototype.handler = function(e) {
+	e.preventDefault();
+	if (this.active) {
+		this.deactivate();
+
+	} else {
+		for (var i=0; i<this.map.tools.length; i++){
+			if (this.id != this.map.tools[i].id) {
+				if (this.map.tools[i].deactivable == true) {
+					this.map.tools[i].deactivate();
+				}
+			}
+		}
+
+		this.$button.addClass('button-active');
+		this.active = true;
+		this.activeContextMenu();
+	}
+};
+
+search.prototype.deactivate = function() {			
+	this.$button.removeClass('button-active');
+	this.active = false;
+	this.removeContextMenu();
+};
+
 
 search.prototype.activeContextMenu = function(){
 	if(this.contextmenu == null){
 		return;
 	}
-	var self = this;
+	
+	this.contextmenu = new ContextMenu({
+		width: 170,
+		defaultItems: false, // defaultItems are (for now) Zoom In/Zoom Out
+		items: this.menus,
+	});
 	
 	this.map.addControl(this.contextmenu);
 }
@@ -48,7 +120,6 @@ search.prototype.removeContextMenu = function(){
 	if(this.contextmenu == null){
 		return;
 	}
-	
 	this.map.removeControl(this.contextmenu);
 }
 
@@ -69,10 +140,10 @@ search.prototype.initUI = function() {
 			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},
 		success	:function(response){
-			var menus = [];
+			self.menus = [];
 			for(var i=0; i<response.types.length; i++){
 				if(response.types[i] == "nominatim"){
-					menus.push({
+					self.menus.push({
 						text: 'Dirección de Nominatim',
 						classname: 'geocoding-contextmenu', // add some CSS rules
 						callback: function (obj) {
@@ -98,7 +169,7 @@ search.prototype.initUI = function() {
 				}
 				
 				if(response.types[i] == "new_cartociudad"){
-					menus.push({
+					self.menus.push({
 						text: 'Dirección de CartoCiudad (Nuevo)',
 						classname: 'geocoding-contextmenu', // add some CSS rules
 						callback: function (obj) {
@@ -124,7 +195,7 @@ search.prototype.initUI = function() {
 				}
 
 				if(response.types[i] == "cartociudad"){
-					menus.push({
+					self.menus.push({
 						text: 'Dirección de CartoCiudad',
 						classname: 'geocoding-contextmenu', // add some CSS rules
 						callback: function (obj) {
@@ -150,7 +221,7 @@ search.prototype.initUI = function() {
 				}
 
 				if(response.types[i] == "googlemaps"){
-					menus.push({
+					self.menus.push({
 						text: 'Dirección de Google Maps',
 						classname: 'geocoding-contextmenu', // add some CSS rules
 						callback: function (obj) {
@@ -176,11 +247,11 @@ search.prototype.initUI = function() {
 				}
 			}
 
-			if(menus.length > 0){
+			if(self.menus.length > 0){
 				self.contextmenu = new ContextMenu({
 					width: 170,
 					defaultItems: false, // defaultItems are (for now) Zoom In/Zoom Out
-					items: menus,
+					items: self.menus,
 				});
 			}
 		},

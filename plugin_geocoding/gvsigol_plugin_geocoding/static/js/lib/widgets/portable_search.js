@@ -65,9 +65,6 @@ search.prototype.initUI = function() {
 		type: 'POST',
 		async: false,
 		url: '/gvsigonline/geocoding/get_providers_activated/',
-		beforeSend:function(xhr){
-			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-		},
 		success	:function(response){
 			var menus = [];
 			for(var i=0; i<response.types.length; i++){
