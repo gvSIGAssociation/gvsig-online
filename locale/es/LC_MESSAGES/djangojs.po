@@ -343,6 +343,9 @@ msgstr "Zoom al proyecto"
 msgid "Clean map"
 msgstr "Limpiar mapa"
 
+msgid "Inverse geocoding"
+msgstr "Buscar dirección"
+
 msgid "More element info"
 msgstr "Más información del elemento"
 
