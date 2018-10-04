@@ -280,7 +280,6 @@ class Geonetwork():
                 bound[0].text = maxy
 
     def get_updated_metadata(self, layer, uuid, layer_info, ds_type):
-https://devel.gvsigonline.com/geonetwork/srv/spa/xml.metadata.get?uuid=8803230a-f724-47d9-adff-969ed796b20a
         url = self.service_url + "xml.metadata.get?uuid=" + uuid
         r = self.session.get(url)
         if r.status_code==200:
@@ -291,7 +290,6 @@ https://devel.gvsigonline.com/geonetwork/srv/spa/xml.metadata.get?uuid=8803230a-
                 self.update_extent(geog_bounding_box, layer_info, ds_type)
             return et.tostring(tree, encoding='UTF-8')
         raise FailedRequestError(r.status_code, r.content)
-    
 
 class RequestError(Exception):
     def __init__(self, status_code=-1, server_message=""):
