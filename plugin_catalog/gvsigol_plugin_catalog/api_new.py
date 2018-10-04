@@ -334,8 +334,8 @@ class Geonetwork():
         metadata +=                     '<gco:CharacterString>' + layer.thumbnail.url + '</gco:CharacterString>'
         metadata +=                 '</gmd:fileName>'
         metadata +=                 '<gmd:fileDescription>'
-        metadata +=                     '<gco:CharacterString>thumbnail</gco:CharacterString>
-        metadata +=                 '</gmd:fileDescription>
+        metadata +=                     '<gco:CharacterString>thumbnail</gco:CharacterString>'
+        metadata +=                 '</gmd:fileDescription>'
         metadata +=             '</gmd:MD_BrowseGraphic></gmd:graphicOverview>'
         metadata +=             '<gmd:extent>'
         metadata +=                 '<gmd:EX_Extent>'
