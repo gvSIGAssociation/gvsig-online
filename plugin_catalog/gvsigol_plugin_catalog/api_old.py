@@ -60,21 +60,25 @@ class Geonetwork():
         raise FailedRequestError(r.status_code, r.content)
 
         
-    def gn_insert_metadata(self, layer, abstract, ws, layer_info, ds_type):
-        
+    def gn_insert_metadata(self, layer, abstract, ws, layer_info, ds_type, md_record=None):
+        if md_record:
+            md_record = md_record.decode("utf-8")
+        else:
+            md_record = self.create_metadata(layer, abstract, ws, layer_info, ds_type)
+
         url = self.service_url + "xml.metadata.insert"
         headers = {'content-type': 'application/xml'}
         
-        xml =   '<?xml version="1.0" encoding="UTF-8"?>'
-        xml +=  '<request>'
-        xml +=      '<group>2</group>'
-        xml +=      '<category>_none_</category>'
-        xml +=      '<styleSheet>_none_</styleSheet>'
-        xml +=      '<uuidAction>generateUUID</uuidAction>'
-        xml +=      '<data><![CDATA['
-        xml +=          self.create_metadata(layer, abstract, ws, layer_info, ds_type)
-        xml +=      ']]></data>'
-        xml +=  '</request>'
+        xml =   u'<?xml version="1.0" encoding="UTF-8"?>'
+        xml +=  u'<request>'
+        xml +=      u'<group>2</group>'
+        xml +=      u'<category>_none_</category>'
+        xml +=      u'<styleSheet>_none_</styleSheet>'
+        xml +=      u'<uuidAction>generateUUID</uuidAction>'
+        xml +=      u'<data><![CDATA['
+        xml +=          md_record
+        xml +=      u']]></data>'
+        xml +=  u'</request>'
         
         r = self.session.post(url, data=xml.encode('utf-8'), headers=headers)
         if r.status_code==200:
@@ -255,6 +259,38 @@ class Geonetwork():
         metadata += '</gmd:MD_Metadata>'
         
         return metadata
+
+    def update_extent(self, geo_bb_elem, layer_info, ds_type):
+        minx = str(layer_info[ds_type]['latLonBoundingBox']['minx'])
+        miny = str(layer_info[ds_type]['latLonBoundingBox']['miny'])
+        maxx = str(layer_info[ds_type]['latLonBoundingBox']['maxx'])
+        if layer_info[ds_type]['latLonBoundingBox']['minx'] > layer_info[ds_type]['latLonBoundingBox']['maxx']:
+            maxx = str(layer_info[ds_type]['latLonBoundingBox']['minx'] + 1)
+        maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
+        if layer_info[ds_type]['latLonBoundingBox']['miny'] > layer_info[ds_type]['latLonBoundingBox']['maxy']:
+            maxy = str(layer_info[ds_type]['latLonBoundingBox']['miny'] + 1)
+        for bound in geo_bb_elem:
+            if bound.tag == '{http://www.isotc211.org/2005/gmd}westBoundLongitude':
+                bound[0].text = minx
+            elif bound.tag == '{http://www.isotc211.org/2005/gmd}eastBoundLongitude':
+                bound[0].text = maxx
+            elif bound.tag == '{http://www.isotc211.org/2005/gmd}southBoundLatitude':
+                bound[0].text = miny
+            elif bound.tag == '{http://www.isotc211.org/2005/gmd}northBoundLatitude':
+                bound[0].text = maxy
+
+    def get_updated_metadata(self, layer, uuid, layer_info, ds_type):
+https://devel.gvsigonline.com/geonetwork/srv/spa/xml.metadata.get?uuid=8803230a-f724-47d9-adff-969ed796b20a
+        url = self.service_url + "xml.metadata.get?uuid=" + uuid
+        r = self.session.get(url)
+        if r.status_code==200:
+            import xml.etree.ElementTree as et
+            tree = et.fromstring(r.text)
+            ns = {'gmd': 'http://www.isotc211.org/2005/gmd'}
+            for geog_bounding_box in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox', ns):
+                self.update_extent(geog_bounding_box, layer_info, ds_type)
+            return et.tostring(tree, encoding='UTF-8')
+        raise FailedRequestError(r.status_code, r.content)
     
 
 class RequestError(Exception):

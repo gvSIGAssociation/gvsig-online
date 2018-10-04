@@ -5,7 +5,7 @@ mv settings_tpl.py settings.py
 
 if [ -z $GEONETWORK_HOST ]; then
         echo "WARNING: GEONETWORK_HOST is not defined, building using GVSIGOL_HOST ."
-        GEONETWORK_HOST=$GVSIGOL_HOST
+        GEONETWORK_HOST=$FRONTEND_URL
 fi
 grep -rl "##GEONETWORK_HOST##"  | xargs sed -i "s/##GEONETWORK_HOST##/$GEONETWORK_HOST/g"
 
