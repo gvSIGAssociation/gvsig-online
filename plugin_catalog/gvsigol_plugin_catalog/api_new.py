@@ -74,7 +74,7 @@ class Geonetwork():
         cookie = self.session.cookies.get_dict()
         return cookie.get('XSRF-TOKEN')
     
-    def gn_insert_metadata(self, layer, abstract, ws, layer_info, ds_type):
+    def gn_insert_metadata(self, layer, abstract, ws, layer_info, ds_type, md_record=None):
         #curl -X PUT --header 'Content-Type: application/xml' --header 'Accept: application/json' -d '.........XML_code............'  
         # 'http://localhost:8080/geonetwork/srv/api/0.1/records?metadataType=METADATA&assignToCatalog=true&uuidProcessing=generateUUID&transformWith=_none_'
         url = self.service_url + "/srv/api/0.1/records?metadataType=METADATA&assignToCatalog=true&transformWith=_none_"
@@ -83,9 +83,10 @@ class Geonetwork():
             'Accept': 'application/json',
             'X-XSRF-TOKEN': self.get_csrf_token()
         }
-        xml = self.create_metadata(layer, abstract, ws, layer_info, ds_type)
-             
-        r = self.session.put(url, data=xml.encode('utf-8'), headers=headers)
+        if not md_record:
+            xml = self.create_metadata(layer, abstract, ws, layer_info, ds_type)
+            md_record = xml.encode('utf-8')
+        r = self.session.put(url, data=md_record, headers=headers)
         
         if r.status_code==201:
             response = json.loads(r.text)
@@ -108,6 +109,7 @@ class Geonetwork():
         else:
             return False    
         raise FailedRequestError(r.status_code, r.content)
+
     
     '''
     def gn_metadata_editor(self, uuid):
@@ -127,9 +129,24 @@ class Geonetwork():
         else:
             return False    
         raise FailedRequestError(r.status_code, r.content)
-    '''    
+    '''
+
+    def add_thumbnail(self, uuid, thumbnail_url):
+        # We use the existing gvSIG Online thumbnail when inserting the metadata,
+        # so we don't need to insert using GN internal file storage.
+        #
+        # If needed, we could use something as:
+        ## https://test.gvsigonline.com/geonetwork/srv/api/records/112/editor?&commit=true
+        # followed by
+        ## https://test.gvsigonline.com/geonetwork/srv/api/records/112/processes/thumbnail-add?thumbnail_url=https://test.gvsigonline.com/geonetwork/srv/api/records/597860bc-8cfb-4354-8e18-fbc716269df8/attachments/VPOBMQAX.png&thumbnail_desc=test2&process=thumbnail-add&id=112
+        ## 
+        pass
     
-    def add_thumbnail(self, uuid, thumbnail_url):      
+    def add_thumbnail_attachment(self, uuid, thumbnail_url):
+        """
+        Adds a thumbnail as an attachment to the metadata record using the Geonetwork internal file store.
+        Note this action does NOT add the thumnail to the metadata content (graphicOverview).
+        """
         url = self.service_url + "/srv/api/0.1/records/"+uuid+"/attachments?url=" + thumbnail_url
         headers = {
             'X-XSRF-TOKEN': self.get_csrf_token()
@@ -312,6 +329,14 @@ class Geonetwork():
         metadata +=             '<gmd:abstract>'
         metadata +=                 '<gco:CharacterString>' + abstract + '</gco:CharacterString>'
         metadata +=             '</gmd:abstract>'
+        metadata +=             '<gmd:graphicOverview><gmd:MD_BrowseGraphic>'
+        metadata +=                 '<gmd:fileName>'
+        metadata +=                     '<gco:CharacterString>' + layer.thumbnail.url + '</gco:CharacterString>'
+        metadata +=                 '</gmd:fileName>'
+        metadata +=                 '<gmd:fileDescription>'
+        metadata +=                     '<gco:CharacterString>thumbnail</gco:CharacterString>
+        metadata +=                 '</gmd:fileDescription>
+        metadata +=             '</gmd:MD_BrowseGraphic></gmd:graphicOverview>'
         metadata +=             '<gmd:extent>'
         metadata +=                 '<gmd:EX_Extent>'
         metadata +=                     '<gmd:geographicElement>'
@@ -323,10 +348,10 @@ class Geonetwork():
         metadata +=                                 '<gco:Decimal>' + maxx + '</gco:Decimal>'
         metadata +=                             '</gmd:eastBoundLongitude>'
         metadata +=                             '<gmd:southBoundLatitude>'
-        metadata +=                                 '<gco:Decimal>' + maxy + '</gco:Decimal>'
+        metadata +=                                 '<gco:Decimal>' + miny + '</gco:Decimal>'
         metadata +=                             '</gmd:southBoundLatitude>'
         metadata +=                             '<gmd:northBoundLatitude>'
-        metadata +=                                 '<gco:Decimal>' + miny + '</gco:Decimal>'
+        metadata +=                                 '<gco:Decimal>' + maxy + '</gco:Decimal>'
         metadata +=                             '</gmd:northBoundLatitude>'
         metadata +=                         '</gmd:EX_GeographicBoundingBox>'
         metadata +=                     '</gmd:geographicElement>'
@@ -365,6 +390,43 @@ class Geonetwork():
         metadata +=                             '</gmd:description>'
         metadata +=                         '</gmd:CI_OnlineResource>'
         metadata +=                     '</gmd:onLine>'
+        if ds_type:
+            if ds_type[0] == 'v' and ws.wfs_endpoint:
+                metadata +=             '<gmd:onLine>'
+                metadata +=                 '<gmd:CI_OnlineResource>'
+                metadata +=                     '<gmd:linkage>'
+                metadata +=                         '<gmd:URL>' + ws.wfs_endpoint + '</gmd:URL>'
+                metadata +=                     '</gmd:linkage>'
+                metadata +=                     '<gmd:protocol>'
+                metadata +=                         '<gco:CharacterString>OGC:WFS</gco:CharacterString>'
+                metadata +=                     '</gmd:protocol>'
+                metadata +=                     '<gmd:name>'
+                metadata +=                         '<gco:CharacterString>' + ws.name + ':' + layer.name + '</gco:CharacterString>'
+                metadata +=                     '</gmd:name>'
+                metadata +=                     '<gmd:description>'
+                metadata +=                         '<gco:CharacterString>' + layer.title + '</gco:CharacterString>'
+                metadata +=                     '</gmd:description>'
+                metadata +=                     '<gmd:function><gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download"/></gmd:function>'
+                metadata +=                 '</gmd:CI_OnlineResource>'
+                metadata +=             '</gmd:onLine>'
+            elif ds_type[0] == 'r' and ws.wcs_endpoint:
+                metadata +=             '<gmd:onLine>'
+                metadata +=                 '<gmd:CI_OnlineResource>'
+                metadata +=                     '<gmd:linkage>'
+                metadata +=                         '<gmd:URL>' + ws.wcs_endpoint + '</gmd:URL>'
+                metadata +=                     '</gmd:linkage>'
+                metadata +=                     '<gmd:protocol>'
+                metadata +=                         '<gco:CharacterString>OGC:WCS</gco:CharacterString>'
+                metadata +=                     '</gmd:protocol>'
+                metadata +=                     '<gmd:name>'
+                metadata +=                         '<gco:CharacterString>' + ws.name + ':' + layer.name + '</gco:CharacterString>'
+                metadata +=                     '</gmd:name>'
+                metadata +=                     '<gmd:description>'
+                metadata +=                         '<gco:CharacterString>' + layer.title + '</gco:CharacterString>'
+                metadata +=                     '</gmd:description>'
+                metadata +=                     '<gmd:function><gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download"/></gmd:function>'
+                metadata +=                 '</gmd:CI_OnlineResource>'
+                metadata +=             '</gmd:onLine>'
         metadata +=                 '</gmd:MD_DigitalTransferOptions>'
         metadata +=             '</gmd:transferOptions>'
         metadata +=         '</gmd:MD_Distribution>'
@@ -373,7 +435,43 @@ class Geonetwork():
         metadata += '</gmd:MD_Metadata>'
         
         return metadata
-    
+
+    def update_extent(self, geo_bb_elem, layer_info, ds_type):
+        minx = str(layer_info[ds_type]['latLonBoundingBox']['minx'])
+        miny = str(layer_info[ds_type]['latLonBoundingBox']['miny'])
+        maxx = str(layer_info[ds_type]['latLonBoundingBox']['maxx'])
+        if layer_info[ds_type]['latLonBoundingBox']['minx'] > layer_info[ds_type]['latLonBoundingBox']['maxx']:
+            maxx = str(layer_info[ds_type]['latLonBoundingBox']['minx'] + 1)
+        maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
+        if layer_info[ds_type]['latLonBoundingBox']['miny'] > layer_info[ds_type]['latLonBoundingBox']['maxy']:
+            maxy = str(layer_info[ds_type]['latLonBoundingBox']['miny'] + 1)
+        for bound in geo_bb_elem:
+            if bound.tag == '{http://www.isotc211.org/2005/gmd}westBoundLongitude':
+                bound[0].text = minx
+            elif bound.tag == '{http://www.isotc211.org/2005/gmd}eastBoundLongitude':
+                bound[0].text = maxx
+            elif bound.tag == '{http://www.isotc211.org/2005/gmd}southBoundLatitude':
+                bound[0].text = miny
+            elif bound.tag == '{http://www.isotc211.org/2005/gmd}northBoundLatitude':
+                bound[0].text = maxy
+
+    def get_updated_metadata(self, layer, uuid, layer_info, ds_type):
+        headers = {
+            'Accept': 'application/xml',
+            'Content-Type': 'application/xml',
+            'X-XSRF-TOKEN': self.get_csrf_token()
+        }
+        md_url = self.service_url + "/srv/api/0.1/records/" + uuid
+        md_response = self.session.get(md_url, headers=headers)
+        if md_response.status_code==200:
+            import xml.etree.ElementTree as et
+            tree = et.fromstring(md_response.text)
+            ns = {'gmd': 'http://www.isotc211.org/2005/gmd'}
+            for geog_bounding_box in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox', ns):
+                self.update_extent(geog_bounding_box, layer_info, ds_type)
+            return et.tostring(tree, encoding='UTF-8')
+        raise FailedRequestError(r.status_code, r.content)
+
 
 class RequestError(Exception):
     def __init__(self, status_code=-1, server_message=""):
