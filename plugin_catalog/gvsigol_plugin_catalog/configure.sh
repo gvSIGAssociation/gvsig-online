@@ -3,25 +3,19 @@
 echo "Running install script for catalog plugin ..."
 mv settings_tpl.py settings.py
 
-if [ -z "$GEONETWORK_HOST" ]; then
-        if [ -n "$FRONTEND_URL" ]; then
-                echo "WARNING: GEONETWORK_HOST is not defined, building using FRONTEND_URL."
-                GEONETWORK_HOST=$FRONTEND_URL
-        else
-                echo "WARNING: GEONETWORK_HOST is not defined, building using GVSIGOL_HOST."
-                GEONETWORK_HOST=$GVSIGOL_HOST
-        fi
-fi
-grep -rl "##GEONETWORK_HOST##"  | xargs sed -i "s/##GEONETWORK_HOST##/$GEONETWORK_HOST/g"
-
 if [ -z "$CATALOG_BASE_URL" ]; then
-        echo "WARNING: CATALOG_BASE_URL is not defined, using HTTP_PROTOCOL and GEONETWORK_HOST ."
-        CATALOG_BASE_URL="$HTTP_PROTOCOL://$GEONETWORK_HOST/geonetwork"
+        if [ -n "$FRONTEND_URL" ]; then
+                echo "WARNING: CATALOG_BASE_URL is not defined, building using FRONTEND_URL."
+                CATALOG_BASE_URL="$FRONTEND_URL/geonetwork"
+        else
+                echo "WARNING: CATALOG_BASE_URL is not defined, building using HTTP_PROTOCOL and GVSIGOL_HOST."
+                GEONETWORK_HOST="$HTTP_PROTOCOL://$GVSIGOL_HOST/geonetwork"
+        fi
 fi
 
 if [ -z "$CATALOG_URL" ]; then
-        echo "WARNING: CATALOG_URL is not defined, using HTTP_PROTOCOL and GEONETWORK_HOST ."
-        CATALOG_URL="$HTTP_PROTOCOL://$GEONETWORK_HOST/geonetwork/srv/eng/"
+        echo "WARNING: CATALOG_URL is not defined, using CATALOG_BASE_URL ."
+        CATALOG_URL="$CATALOG_BASE_URL/srv/eng/"
 fi
 
 if [ -z "$CATALOG_API_VERSION" ]; then
