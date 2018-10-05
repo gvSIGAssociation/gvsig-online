@@ -25,6 +25,7 @@ from django.core.exceptions import ImproperlyConfigured
 from gvsigol_plugin_catalog.models import LayerMetadata
 from gvsigol_plugin_catalog import api_old as xmlapi_old
 from gvsigol_plugin_catalog import api_new as xmlapi_new
+import logging
 
 logger = logging.getLogger(__name__)
 
