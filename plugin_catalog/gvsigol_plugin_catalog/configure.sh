@@ -10,6 +10,7 @@ if [ -z "$GEONETWORK_HOST" ]; then
         else
                 echo "WARNING: GEONETWORK_HOST is not defined, building using GVSIGOL_HOST."
                 GEONETWORK_HOST=$GVSIGOL_HOST
+        fi
 fi
 grep -rl "##GEONETWORK_HOST##"  | xargs sed -i "s/##GEONETWORK_HOST##/$GEONETWORK_HOST/g"
 
@@ -33,16 +34,26 @@ if [ -z "$GEONETWORK_USER" ]; then
         GEONETWORK_USER="admin"
 fi
 if [ -z "$GEONETWORK_PASS" ]; then
-        echo "WARNING: GEONETWORK_PASS is not defined, using 'admin'."
-        GEONETWORK_PASS="admin"
+        if [ -n "$GVSIGOL_PASSWD" ]; then
+                echo "WARNING: GEONETWORK_PASS is not defined, using GVSIGOL_PASSWD."
+                GEONETWORK_PASS="$GVSIGOL_PASSWD"
+        else
+                echo "WARNING: GEONETWORK_PASS is not defined, using 'admin'."
+                GEONETWORK_PASS="admin"
+        fi
 fi
+
+# debugging...
+echo "CATALOG_API_VERSION" $CATALOG_API_VERSION
+echo "CATALOG_URL" $CATALOG_URL
+echo "CATALOG_BASE_URL" $CATALOG_BASE_URL
+echo "GEONETWORK_USER" $GEONETWORK_USER
+echo "GEONETWORK_PASS" $GEONETWORK_PASS
+
 grep -rl "##CATALOG_API_VERSION##"  | xargs sed -i "s ##CATALOG_API_VERSION## $CATALOG_API_VERSION g"
 grep -rl "##CATALOG_URL##"  | xargs sed -i "s ##CATALOG_URL## $CATALOG_URL g"
 grep -rl "##CATALOG_BASE_URL##" | xargs sed -i "s ##CATALOG_BASE_URL## $CATALOG_BASE_URL g" 
 grep -rl "##GEONETWORK_USER##" | xargs sed -i "s/##GEONETWORK_USER##/$GEONETWORK_USER/g"
-grep -rl "##GEONETWORK_PASS##" | xargs sed -i "s/##GEONETWORK_PASS##/$GVSIG_ONLINE_PASSWORD/g"
-
-
-
+grep -rl "##GEONETWORK_PASS##" | xargs sed -i "s/##GEONETWORK_PASS##/$GEONETWORK_PASS/g"
 
 
