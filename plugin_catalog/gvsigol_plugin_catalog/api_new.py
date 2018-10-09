@@ -35,6 +35,7 @@ class Geonetwork():
         self.session = requests.Session()
         self.session.verify = False
         self.service_url = service_url
+        self.register_namespaces()
         
     def get_session(self):
         return self.session
@@ -110,34 +111,50 @@ class Geonetwork():
             return False    
         raise FailedRequestError(r.status_code, r.content)
 
-    
-    '''
-    def gn_metadata_editor(self, uuid):
-        #curl -X PUT --header 'Content-Type: application/xml' --header 'Accept: application/json' -d '.........XML_code............'  
-        # 'http://localhost:8080/geonetwork/srv/api/0.1/records?metadataType=METADATA&assignToCatalog=true&uuidProcessing=generateUUID&transformWith=_none_'
-        url = self.service_url + "/srv/api/0.1/records/" + uuid + "/editor"
+    def csw_update_metadata(uuid, updated_xml_md):
+        metadata = '<csw:Transaction xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" xmlns:ogc="http://www.opengis.net/ogc" service="CSW" version="2.0.2">'
+        metadata +=     '<csw:Update>'
+        metadata +=         updated_xml_md
+        metadata +=         '<csw:Constraint version="1.1.0">'
+        metadata +=             '<ogc:Filter>'
+        metadata +=                 '<ogc:PropertyIsEqualTo>'
+        metadata +=                     '<ogc:PropertyName>identifier</ogc:PropertyName>'
+        metadata +=                     '<ogc:Literal>' + uuid + '</ogc:Literal>'
+        metadata +=                 '</ogc:PropertyIsEqualTo>'
+        metadata +=             '</ogc:Filter>'
+        metadata +=         '</csw:Constraint>'
+        metadata +=     '</csw:Update>'
+        metadata += '</csw:Transaction>'
         headers = {
-            'Content-Type': 'application/xml',
             'Accept': 'application/xml',
+            'Content-Type': 'application/xml',
             'X-XSRF-TOKEN': self.get_csrf_token()
         }
-        r = self.session.get(url,  headers=headers)
-        
-        if r.status_code==200:
-            response = r.text
-            return response
-        else:
-            return False    
+        csw_transaction_url = self.service_url + "/srv/eng/csw-publication"
+        csw_response = self.session.post(csw_transaction_url, headers=headers, data=metadata)
+        if csw_response.status_code==200:
+            tree = ET.fromstring(csw_response.text)
+            ns = {'csw': 'http://www.opengis.net/cat/csw/2.0.2'}
+            for total_updated in tree.findall('./csw:TransactionResponse/csw:TransactionSummary/csw:totalUpdated', ns):
+                if total_updated.text == '1':
+                    return uuid
         raise FailedRequestError(r.status_code, r.content)
-    '''
+
+    def gn_update_metadata(self, uuid, layer, abstract, layer_info, ds_type):
+        """
+        Updates the metadata record based on the layer data (currently just extent).
+        It uses a CSW update transaction for the update. Previously, we were deleting and re-inserting
+        the record, but that approach removed any existing permissions, user rating, etc, so it was a
+        bad idea.
+        """
+        updated_xml_md = self.get_updated_metadata(layer, uuid, layer_info, ds_type)
+        return self.csw_update_metadata(uuid, updated_xml_md)
 
     def add_thumbnail(self, uuid, thumbnail_url):
         # We use the existing gvSIG Online thumbnail when inserting the metadata,
         # so we don't need to insert using GN internal file storage.
         #
         # If needed, we could use something as:
-        ## https://test.gvsigonline.com/geonetwork/srv/api/records/112/editor?&commit=true
-        # followed by
         ## https://test.gvsigonline.com/geonetwork/srv/api/records/112/processes/thumbnail-add?thumbnail_url=https://test.gvsigonline.com/geonetwork/srv/api/records/597860bc-8cfb-4354-8e18-fbc716269df8/attachments/VPOBMQAX.png&thumbnail_desc=test2&process=thumbnail-add&id=112
         ## 
         pass
@@ -256,8 +273,8 @@ class Geonetwork():
         if r.status_code==200:
             return r.content
         raise FailedRequestError(r.status_code, r.content)
-        
-    def create_metadata(self, layer, abstract, ws, layer_info, ds_type):
+
+    def get_extent(self, layer_info, ds_type):
         minx = str(layer_info[ds_type]['latLonBoundingBox']['minx'])
         miny = str(layer_info[ds_type]['latLonBoundingBox']['miny'])
         maxx = str(layer_info[ds_type]['latLonBoundingBox']['maxx'])
@@ -266,6 +283,10 @@ class Geonetwork():
         maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
         if layer_info[ds_type]['latLonBoundingBox']['miny'] > layer_info[ds_type]['latLonBoundingBox']['maxy']:
             maxy = str(layer_info[ds_type]['latLonBoundingBox']['miny'] + 1)
+        return (minx, miny, maxx, maxy)
+
+    def create_metadata(self, layer, abstract, ws, layer_info, ds_type):
+        minx, miny, maxx, maxy = self.get_extent(layer_info, ds_type)
         crs_object = layer_info[ds_type]['nativeBoundingBox']['crs']
         
         crs = None
@@ -437,14 +458,7 @@ class Geonetwork():
         return metadata
 
     def update_extent(self, geo_bb_elem, layer_info, ds_type):
-        minx = str(layer_info[ds_type]['latLonBoundingBox']['minx'])
-        miny = str(layer_info[ds_type]['latLonBoundingBox']['miny'])
-        maxx = str(layer_info[ds_type]['latLonBoundingBox']['maxx'])
-        if layer_info[ds_type]['latLonBoundingBox']['minx'] > layer_info[ds_type]['latLonBoundingBox']['maxx']:
-            maxx = str(layer_info[ds_type]['latLonBoundingBox']['minx'] + 1)
-        maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
-        if layer_info[ds_type]['latLonBoundingBox']['miny'] > layer_info[ds_type]['latLonBoundingBox']['maxy']:
-            maxy = str(layer_info[ds_type]['latLonBoundingBox']['miny'] + 1)
+        minx, miny, maxx, maxy = self.get_extent(layer_info, ds_type)
         for bound in geo_bb_elem:
             if bound.tag == '{http://www.isotc211.org/2005/gmd}westBoundLongitude':
                 bound[0].text = minx
@@ -455,6 +469,18 @@ class Geonetwork():
             elif bound.tag == '{http://www.isotc211.org/2005/gmd}northBoundLatitude':
                 bound[0].text = maxy
 
+    def register_namespaces(self):
+        """
+        Arbitrary names can be used, but we'll register the typical names to produce
+        "beautiful" XML.
+        """
+        ET.register_namespace('gmd', 'http://www.isotc211.org/2005/gmd')
+        ET.register_namespace('gml', 'http://www.opengis.net/gml')
+        ET.register_namespace('gco', 'http://www.isotc211.org/2005/gco')
+        ET.register_namespace('csw', 'http://www.opengis.net/cat/csw/2.0.2')
+        ET.register_namespace('ogc', 'http://www.opengis.net/ogc')
+
+
     def get_updated_metadata(self, layer, uuid, layer_info, ds_type):
         headers = {
             'Accept': 'application/xml',
@@ -464,12 +490,11 @@ class Geonetwork():
         md_url = self.service_url + "/srv/api/0.1/records/" + uuid
         md_response = self.session.get(md_url, headers=headers)
         if md_response.status_code==200:
-            import xml.etree.ElementTree as et
-            tree = et.fromstring(md_response.text)
+            tree = ET.fromstring(md_response.text)
             ns = {'gmd': 'http://www.isotc211.org/2005/gmd'}
             for geog_bounding_box in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox', ns):
                 self.update_extent(geog_bounding_box, layer_info, ds_type)
-            return et.tostring(tree, encoding='UTF-8')
+            return ET.tostring(tree, encoding='UTF-8')
         raise FailedRequestError(r.status_code, r.content)
 
 

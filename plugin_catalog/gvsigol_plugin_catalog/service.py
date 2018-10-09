@@ -88,22 +88,6 @@ class Geonetwork():
         except Exception as e:
             print e
             return False
-
-    def metadata_update(self, layer, abstract, ws, layer_info, ds_type):
-        try:
-            if self.xmlapi.gn_auth(self.user, self.password):
-                updated_md = self.get_updated_metadata(layer, lm.metadata_id, layer_info, ds_type)
-                # FIXME: we should do an update instead of delate + insert (update API not available on GN version >= 3.4??)
-                self.xmlapi.gn_delete_metadata(lm)
-                uuid = self.xmlapi.gn_insert_metadata(layer, abstract, ws, layer_info, ds_type, md_record=updated_md)
-                self.xmlapi.add_thumbnail(uuid[0], layer.thumbnail.url)
-                self.xmlapi.set_metadata_privileges(uuid[0])
-                self.xmlapi.gn_unauth()
-                return uuid
-            return None
-        
-        except Exception as e:
-            print e
         
     def layer_created_handler(self, sender, **kwargs):
         layer = kwargs['layer']
@@ -115,7 +99,7 @@ class Geonetwork():
                 lm.save()
             
         except Exception as e:
-            print e
+            logger.exception("layer metadata create failed")
             pass
         
     def layer_updated_handler(self, sender, **kwargs):
@@ -123,15 +107,11 @@ class Geonetwork():
         try:
             lm = LayerMetadata.objects.get(layer=layer)
             (ds_type, layer_info) = mapservice.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
-            muuid = self.metadata_update(layer, layer.abstract, layer.datastore.workspace, layer_info, ds_type)
-            if lm.metadata_id != muuid:
-                # we don't expect the uuid to change!
-                logger.error("metadata uuid changed from " + lm.metadata_id + " to " + muuid)
-                lm.metadata_uuid=muuid
-                lm.save()
-            
+            if self.xmlapi.gn_auth(self.user, self.password):
+                self.xmlapi.gn_update_metadata(uuid, layer, abstract, ws, layer_info, ds_type)
+                self.xmlapi.gn_unauth()
         except Exception as e:
-            print e
+            logger.exception("layer metadata update failed")
             pass
         
     def layer_deleted_handler(self, sender, **kwargs):
@@ -142,7 +122,7 @@ class Geonetwork():
             lm.delete()
             
         except Exception as e:
-            print e
+            logger.exception("layer metadata delete failed")
             pass
 
 def initialize():
