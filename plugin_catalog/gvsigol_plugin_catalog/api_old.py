@@ -33,6 +33,7 @@ class Geonetwork():
         self.session = requests.Session()
         self.session.verify = False
         self.service_url = service_url
+        self.register_namespaces()
         
     def get_session(self):
         return self.session
@@ -89,6 +90,38 @@ class Geonetwork():
                     return child.text
                        
         raise FailedRequestError(r.status_code, r.content)
+
+    def csw_update_metadata(uuid, updated_xml_md):
+        metadata = '<csw:Transaction xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" xmlns:ogc="http://www.opengis.net/ogc" service="CSW" version="2.0.2">'
+        metadata +=     '<csw:Update>'
+        metadata +=         updated_xml_md
+        metadata +=         '<csw:Constraint version="1.1.0">'
+        metadata +=             '<ogc:Filter>'
+        metadata +=                 '<ogc:PropertyIsEqualTo>'
+        metadata +=                     '<ogc:PropertyName>identifier</ogc:PropertyName>'
+        metadata +=                     '<ogc:Literal>' + uuid + '</ogc:Literal>'
+        metadata +=                 '</ogc:PropertyIsEqualTo>'
+        metadata +=             '</ogc:Filter>'
+        metadata +=         '</csw:Constraint>'
+        metadata +=     '</csw:Update>'
+        metadata += '</csw:Transaction>'
+        headers = {
+            'Accept': 'application/xml',
+            'Content-Type': 'application/xml',
+        }
+        csw_transaction_url = self.service_url + "/srv/eng/csw-publication"
+        csw_response = self.session.post(csw_transaction_url, headers=headers, data=metadata)
+        if csw_response.status_code==200:
+            tree = ET.fromstring(csw_response.text)
+            ns = {'csw': 'http://www.opengis.net/cat/csw/2.0.2'}
+            for total_updated in tree.findall('./csw:TransactionResponse/csw:TransactionSummary/csw:totalUpdated', ns):
+                if total_updated.text == '1':
+                    return uuid
+        raise FailedRequestError(r.status_code, r.content)
+
+    def gn_update_metadata(self, uuid, layer, abstract, layer_info, ds_type):
+        updated_xml_md = self.get_updated_metadata(layer, uuid, layer_info, ds_type)
+        return self.csw_update_metadata(uuid, updated_xml_md)
     
     def add_thumbnail(self, uuid, thumbnail_url):      
         op = "md.processing"        
@@ -283,13 +316,23 @@ class Geonetwork():
         url = self.service_url + "xml.metadata.get?uuid=" + uuid
         r = self.session.get(url)
         if r.status_code==200:
-            import xml.etree.ElementTree as et
-            tree = et.fromstring(r.text)
+            tree = ET.fromstring(r.text)
             ns = {'gmd': 'http://www.isotc211.org/2005/gmd'}
             for geog_bounding_box in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox', ns):
                 self.update_extent(geog_bounding_box, layer_info, ds_type)
-            return et.tostring(tree, encoding='UTF-8')
+            return ET.tostring(tree, encoding='UTF-8')
         raise FailedRequestError(r.status_code, r.content)
+
+    def register_namespaces(self):
+        """
+        Arbitrary names can be used, but we'll register the typical names to produce
+        "beautiful" XML.
+        """
+        ET.register_namespace('gmd', 'http://www.isotc211.org/2005/gmd')
+        ET.register_namespace('gml', 'http://www.opengis.net/gml')
+        ET.register_namespace('gco', 'http://www.isotc211.org/2005/gco')
+        ET.register_namespace('csw', 'http://www.opengis.net/cat/csw/2.0.2')
+        ET.register_namespace('ogc', 'http://www.opengis.net/ogc')
 
 class RequestError(Exception):
     def __init__(self, status_code=-1, server_message=""):
