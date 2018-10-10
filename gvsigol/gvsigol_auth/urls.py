@@ -5,6 +5,9 @@ urlpatterns = [
     url(r'^login_user/$', 'gvsigol_auth.views.login_user', name='login_user'), 
     url(r'^logout_user/$', 'gvsigol_auth.views.logout_user', name='logout_user'),
     
+    #url(r'^password_change/done/$', 'gvsigol_auth.views.password_change_done', name='password_change_done'),
+    url(r'^reset/(?P<user_id>[0-9]+)/(?P<uid>.+)/(?P<token>.+)/$', 'gvsigol_auth.views.password_reset_confirmation', name='password_reset_confirmation'),
+    url(r'^reset/done/$', 'gvsigol_auth.views.password_reset_complete', name='password_reset_confirmation_complete'),
     url(r'^password_update/$', 'gvsigol_auth.views.password_update', name='password_update'),
     url(r'^password_reset/$', 'gvsigol_auth.views.password_reset', name='password_reset'),
     url(r'^password_reset_success/$', 'gvsigol_auth.views.password_reset_success', name='password_reset_success'),
