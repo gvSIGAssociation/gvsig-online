@@ -238,6 +238,8 @@ def password_reset_complete(request):
 
     user = User.objects.get(id=user_id)
 
+    errors = ''
+    
     if user is not None and default_token_generator.check_token(user, token):
         validlink = True
         title = _('Enter new password')
@@ -246,14 +248,27 @@ def password_reset_complete(request):
             user.set_password(temp_pass)
             user.save()
             core_services.ldap_change_user_password(user, temp_pass)
-            return redirect('login_user')
+            
+            request.session['username'] = user.username
+            request.session['password'] = temp_pass
+            user = authenticate(username=user.username, password=temp_pass)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    return redirect('home')
+                
+                else:
+                    errors = _("Your account has been disabled")
+            else:
+                errors = _("The username and password you have entered do not match our records")
+
 
     else:
         validlink = False
         form = None
-        title = _('Invalid token. Your link has expired, you need to ask for another one.')
+        errors =  _('Invalid token. Your link has expired, you need to ask for another one.')
             
-    return render_to_response('registration/password_reset_confirm.html', {'errors': [title]}, RequestContext(request))
+    return render_to_response('registration/password_reset_confirm.html', {'errors': errors}, RequestContext(request))
        
 
 
