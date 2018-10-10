@@ -35,10 +35,15 @@ from gvsigol_services import utils as services_utils
 from gvsigol_services.models import Workspace
 import random, string
 from utils import superuser_required, staff_required
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
 import utils as auth_utils
 import json
 import re
 import base64
+
+from django.contrib.auth.forms import SetPasswordForm
 
 from gvsigol.settings import GVSIGOL_LDAP, LOGOUT_PAGE_URL, AUTH_WITH_REMOTE_USER
 
@@ -179,29 +184,79 @@ def password_update(request):
             response = {'success': False} 
                 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
-    
+
+
+
+
+  
 def password_reset(request):
     if request.method == 'POST':
         errors = []
         username = request.POST.get('username')
         try:
             user = User.objects.get(username__exact=username)
-            temp_pass = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
-            user.set_password(temp_pass)
-            user.save()
-            core_services.ldap_change_user_password(user, temp_pass)
-            auth_utils.send_reset_password_email(user.email, temp_pass)
-            return redirect('password_reset_success')
+            #temp_pass = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
+            #user.set_password(temp_pass)
+            #user.save()
+            #core_services.ldap_change_user_password(user, temp_pass)
             
-        except:            
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token =  default_token_generator.make_token(user)
+            
+            auth_utils.send_reset_password_email(user.email, user.id, uid, token)
+            return redirect('password_reset_success')
+             
+        except Exception as e:            
             errors.append(_('User account does not exist'))
-            return render_to_response('password_reset2.html', {'errors': errors}, RequestContext(request))
+            return render_to_response('password_reset.html', {'errors': errors}, RequestContext(request))
             
     else:
         if 'AD' in GVSIGOL_LDAP and GVSIGOL_LDAP['AD'].__len__() > 0:
             return redirect('login_user')
-        return render_to_response('password_reset2.html', {}, RequestContext(request))
-        
+        return render_to_response('password_reset.html', {}, RequestContext(request))
+
+
+
+def password_reset_confirmation(request, user_id, uid, token):
+    context = {
+        'user_id' : user_id,
+        'uid': uid,
+        'token': token
+        }
+            
+    return render_to_response('registration/password_reset_confirm.html', context, RequestContext(request))
+       
+
+def password_reset_complete(request):
+    """
+    View that checks the hash in a password reset link and presents a
+    form for entering a new password.
+    """
+    user_id = request.POST.get('user_id')
+    uid = request.POST.get('uid')
+    token = request.POST.get('token')
+
+    user = User.objects.get(id=user_id)
+
+    if user is not None and default_token_generator.check_token(user, token):
+        validlink = True
+        title = _('Enter new password')
+        if request.method == 'POST':
+            temp_pass = request.POST.get('password')
+            user.set_password(temp_pass)
+            user.save()
+            core_services.ldap_change_user_password(user, temp_pass)
+            return redirect('login_user')
+
+    else:
+        validlink = False
+        form = None
+        title = _('Invalid token. Your link has expired, you need to ask for another one.')
+            
+    return render_to_response('registration/password_reset_confirm.html', {'errors': [title]}, RequestContext(request))
+       
+
+
 
 def password_reset_success(request):
     return render_to_response('password_reset_success.html', {}, RequestContext(request))
