@@ -207,7 +207,7 @@ def password_reset(request):
             return redirect('password_reset_success')
              
         except Exception as e:            
-            errors.append(_('User account does not exist'))
+            errors.append(_('User account does not exist') + ': ' + str(e))
             return render_to_response('password_reset.html', {'errors': errors}, RequestContext(request))
             
     else:
