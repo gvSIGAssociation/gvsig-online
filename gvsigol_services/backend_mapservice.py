@@ -36,6 +36,7 @@ import tempfile, zipfile
 import sys, os, shutil
 import forms_geoserver
 import rest_geoserver
+from rest_geoserver import RequestError
 import signals
 import requests
 import gdal_tools

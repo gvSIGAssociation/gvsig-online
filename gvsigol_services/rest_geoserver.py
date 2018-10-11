@@ -890,10 +890,11 @@ class RequestError(Exception):
             msg += u'\nServer message: ' + self.server_message
         else:
             msg += u'\nServer message: ' + self.server_message.decode('utf-8', 'replace')
-        if self.message and isinstance(self.message, unicode):
-            msg += u'\nMessage: ' + self.message
-        else:
-            msg += u'\nMessage: ' + self.message.decode('utf-8', 'replace')
+        if self.message:
+            if isinstance(self.message, unicode):
+                msg += u'\nMessage: ' + self.message
+            else:
+                msg += u'\nMessage: ' + self.message.decode('utf-8', 'replace')
 
 class UploadError(RequestError):
     pass
