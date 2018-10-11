@@ -479,7 +479,7 @@ class Geoserver():
             return True
         
         except Exception as e:
-            logger.exception('Añadiendo estilo: ' + name)
+            logger.exception('Adding style: ' + name)
             return False
         
     def updateStyle(self, layer, style_name, sld_body):
