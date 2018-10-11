@@ -15,6 +15,20 @@ body {
   overflow-x: hidden;
   overflow-y: auto;
 }
+input[type='checkbox'] {
+    width:20px;
+    height:20px;
+    background:white;
+    border-radius:5px;
+    border:2px solid #555;
+}
+input[type='checkbox']:checked {
+    background: #abd;
+}
+input[type=radio] {
+    width: 20px;
+    height: 20px;
+}
 .mini-map {
   height: 400px;
   width: 100%;
@@ -1742,7 +1756,7 @@ a:focus {
 }
 .btn-box-tool {
   padding: 5px;
-  font-size: 14px;
+  font-size: 20px;
   font-weight: bold;
   background: transparent;
 }
