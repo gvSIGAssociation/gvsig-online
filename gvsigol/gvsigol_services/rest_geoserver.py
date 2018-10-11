@@ -881,7 +881,19 @@ class RequestError(Exception):
         if self.message:
             return self.message
         else:
-            return self.server_message 
+            return self.server_message
+
+    def get_detailed_message(self):
+        from builtins import str as text
+        msg = u'Status: ' + text(self.status_code)
+        if isinstance(self.server_message, unicode):
+            msg += u'\nServer message: ' + self.server_message
+        else:
+            msg += u'\nServer message: ' + self.server_message.decode('utf-8', 'replace')
+        if self.message and isinstance(self.message, unicode):
+            msg += u'\nMessage: ' + self.message
+        else:
+            msg += u'\nMessage: ' + self.message.decode('utf-8', 'replace')
 
 class UploadError(RequestError):
     pass
