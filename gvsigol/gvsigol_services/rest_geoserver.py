@@ -895,6 +895,7 @@ class RequestError(Exception):
                 msg += u'\nMessage: ' + self.message
             else:
                 msg += u'\nMessage: ' + self.message.decode('utf-8', 'replace')
+        return msg
 
 class UploadError(RequestError):
     pass
