@@ -502,10 +502,12 @@ class Geoserver():
                 self.rest_catalog.update_layer_styles_configuration(layer, style_name, default_style, style_list, user=self.user, password=self.password)
                 self.updateThumbnail(layer, 'update')
             return True
-        
+        except RequestError as e:
+            logger.exception('Updating style: ' + style_name)
+            logger.error(e.get_detailed_message())
         except Exception as e:
-            logger.exception('Actualizando estilo: ' + style_name)
-            return False
+            logger.exception('Updating style: ' + style_name)
+        return False
         
     def updateThumbnail(self, layer, mode):
         if not 'no_thumbnail.jpg' in layer.thumbnail.name:
