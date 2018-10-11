@@ -309,7 +309,7 @@ layerTree.prototype.createTree = function() {
 	temporary_tree += '	<div class="box-body temporary-body">';
 	
 	var input_from = ''+
-	'<div class="col-md-1">'+
+	'<div class="col-md-1" style="padding: 0px 7px;">'+
 		'<input type="radio" id="from-date-value" class="temporal-type-radio" name="from-date-value" checked>'+
 	'</div>'+
 	'<div class="input-group date col-md-9" id="datetimepicker-from">'+
@@ -327,7 +327,7 @@ layerTree.prototype.createTree = function() {
 	'</div>'+
 	
 	'<div class="col-md-2" style="margin-top:5px"></div>'+
-	'<div class="col-md-1" style="margin-top:5px">'+
+	'<div class="col-md-1" style="padding: 0px 7px;margin-top:5px">'+
 		'<input type="radio" id="from-custom-date-value" class="temporal-type-radio" name="from-date-value">'+
 	'</div>'+
 	'<div class="input-group date col-md-9" style="margin-top:5px">'+
@@ -366,14 +366,14 @@ layerTree.prototype.createTree = function() {
 	
 	
 	var input_to = ''+
-	'<div class="col-md-1">'+
+	'<div class="col-md-1" style="padding: 0px 7px;">'+
 		'<input type="radio" id="to-date-value" class="temporal-type-radio" name="to-date-value" checked>'+
 	'</div>'+
 	'<div class="input-group date col-md-9" id="datetimepicker-to"><input id="temporary-to" class="form-control to-date-value"/><span class="input-group-addon to-date-value"><span class="glyphicon glyphicon-calendar to-date-value"></span></span>'+
 	'<span class="input-group-addon temporal-buttons-empty-gap"></span><span class="temporal-buttons temporal-buttons-left temporal-buttons-left-to to-date-value"><i class="fa fa-minus" aria-hidden="true"></i></span><span class="temporal-buttons temporal-buttons-right temporal-buttons-right-to to-date-value"><i class="fa fa-plus" aria-hidden="true"></i></span></div>'+
 	
 	'<div class="col-md-2" style="margin-top:5px"></div>'+
-	'<div class="col-md-1" style="margin-top:5px">'+
+	'<div class="col-md-1" style="padding: 0px 7px;margin-top:5px">'+
 		'<input type="radio" id="to-custom-date-value" class="temporal-type-radio" name="to-date-value">'+
 	'</div>'+
 	'<div class="input-group date col-md-9" style="margin-top:5px">'+
@@ -419,12 +419,12 @@ layerTree.prototype.createTree = function() {
 	
 	temporary_tree += '<div style="margin-left:10px;">';
 	temporary_tree += 	'<input type="radio" id="temporary-single" data-value="single" name="temporary-group" checked>';
-	temporary_tree += 	'<span class="text">'+gettext('Single')+'</span>';
+	temporary_tree += 	'<span class="text" style="vertical-align: super;margin-left:10px">'+gettext('Single')+'</span>';
 	temporary_tree += '</div>';
 	
 	temporary_tree += '<div style="margin-left:10px;">';
 	temporary_tree += 	'<input type="radio" id="temporary-range" data-value="range" name="temporary-group">';
-	temporary_tree += 	'<span class="text">'+gettext('Range')+'</span>';
+	temporary_tree += 	'<span class="text" style="vertical-align: super;margin-left:10px">'+gettext('Range')+'</span>';
 	temporary_tree += '</div>';
 	
 	
