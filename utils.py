@@ -126,7 +126,7 @@ def send_reset_password_email(email, id, uid, token):
         
         body = _(u'This is your new temporary password') + ':\n\n'
         
-        body = body + '  - ' + _(u'Password') + ': ' + gvsigol.settings.BASE_URL +'/gvsigonline/auth/reset/' + str(id) + '/' + uid + '/' + token + '/ \n\n'
+        body = body + gvsigol.settings.BASE_URL +'/gvsigonline/auth/reset/' + str(id) + '/' + uid + '/' + token + '/ \n\n'
         
         toAddress = [email]           
         fromAddress = gvsigol.settings.EMAIL_HOST_USER
