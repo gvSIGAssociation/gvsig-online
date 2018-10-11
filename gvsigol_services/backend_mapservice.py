@@ -49,6 +49,8 @@ import unicodedata
 import logging
 from dbfread import DBF
 
+logger = logging.getLogger(__name__)
+
 class UnsupportedRequestError(Exception):
     pass
 
@@ -364,7 +366,7 @@ class Geoserver():
             return result
         
         except Exception as e:
-            logging.error("Error retrieving geometry info")
+            logger.exception("Error retrieving geometry info")
             return None
     
     def get_geometry_info(self, layer, as_srid=True):
@@ -396,16 +398,13 @@ class Geoserver():
             return {"geomtype": the_type, "srs": srs}
         
         except Exception as e:
-            logging.error("Error retrieving geometry info")
+            logger.error("Error retrieving geometry info")
             return None
     
     def createDefaultStyle(self, layer, style_name):
         geom_type = self.get_geometry_type(layer)
-        import logging
         logging.basicConfig(level=logging.INFO)
-        logger = logging.getLogger(__name__)
-        
-        logger.error('[backend_mapserver] Creando el estilo por defecto para layer: ' + layer.name + ' (' + str(geom_type) + ')')
+        logger.info('[backend_mapserver] Creando el estilo por defecto para layer: ' + layer.name + ' (' + str(geom_type) + ')')
         
         
         style_type = 'US'
@@ -430,6 +429,7 @@ class Geoserver():
             sld_body = symbology_services.create_default_style(layer.id, style_name, style_type, geom_type, aux)
         
         except Exception as ex:
+                logger.exception('Creando el estilo por defecto para layer: ' + layer.name + ' (' + str(geom_type) + ')')
                 print str(ex.message)
                 return False
      
@@ -441,6 +441,7 @@ class Geoserver():
             return True
         
         except Exception as e:
+            logger.exception('Creando el estilo por defecto para layer: ' + layer.name + ' (' + str(geom_type) + ')')
             return False
     
     def createOverwrittenStyle(self, name, data, overwrite):
@@ -452,6 +453,7 @@ class Geoserver():
             return True
         
         except Exception as e:
+            logger.exception('Sobreescribiendo estilo: ' + name)
             return False
     
     def createStyle(self, name, data):
@@ -477,6 +479,7 @@ class Geoserver():
             return True
         
         except Exception as e:
+            logger.exception('Añadiendo estilo: ' + name)
             return False
         
     def updateStyle(self, layer, style_name, sld_body):
@@ -501,7 +504,7 @@ class Geoserver():
             return True
         
         except Exception as e:
-            print e
+            logger.exception('Actualizando estilo: ' + style_name)
             return False
         
     def updateThumbnail(self, layer, mode):
@@ -521,7 +524,7 @@ class Geoserver():
             return layer
         
         except Exception as e:
-            print e.message
+            logger.exception('Actualizando thumbnail: ' + layer.name)
             pass
         
     def deleteStyle(self, name):
@@ -531,7 +534,7 @@ class Geoserver():
             catalog.delete(style, purge=True, recurse=False)
             return True        
         except Exception as e:
-            print e.message
+            logger.exception('Borrando estilo: ' + name)
             pass
         
     def deleteLayerStyles(self, lyr):
@@ -559,6 +562,7 @@ class Geoserver():
             return True
         
         except Exception as e:
+            logger.exception('Borrando estilos de capa: ' + lyr.name)
             return False
         
     def updateBoundingBoxFromData(self, layer):
@@ -590,6 +594,7 @@ class Geoserver():
                 else:    
                     return self.createCoverage(workspace, store, name, title)   
         except Exception as e:
+            logger.exception('Creando capa: ' + name)
             raise rest_geoserver.FailedRequestError(-1, str(e.server_message))
         
     def getFeaturetype(self, workspace, datastore, name, title):
@@ -599,10 +604,10 @@ class Geoserver():
         try:
             return self.rest_catalog.create_feature_type(name, title, datastore.name, workspace.name, user=self.user, password=self.password)
         except rest_geoserver.FailedRequestError as e:
-            print ("ERROR createFeatureType failedrequest exception: " + e.get_message())
+            logger.exception('ERROR createFeatureType failed: ' + name)
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
-            print ("ERROR createFeatureType unknown exception: " + e.get_message())
+            logger.exception('ERROR createFeatureType failed: ' + name)
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
         
     def createImageMosaic(self, workspace, store, name, title):
@@ -614,8 +619,10 @@ class Geoserver():
             return self.rest_catalog.create_coveragestore(workspace.name, store.name, 'ImageMosaic', file, mosaic_name, user=self.user, password=self.password)
             #return self.rest_catalog.create_coverage(name, title, coveragestore.name, workspace.name, user=self.user, password=self.password)                                           
         except rest_geoserver.FailedRequestError as e:
+            logger.exception('ERROR createImageMosaic failed: ' + name)
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
+            logger.exception('ERROR createImageMosaic failed: ' + name)
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
         
     def createImageMosaicLayer(self, workspace, store, name, title, coverage_name):
@@ -624,16 +631,20 @@ class Geoserver():
             return result
             #return self.rest_catalog.create_coverage(name, title, coveragestore.name, workspace.name, user=self.user, password=self.password)                                           
         except rest_geoserver.FailedRequestError as e:
+            logger.exception('ERROR createImageMosaicLayer failed. Name ' + name + ' - Store: ' + store.name)
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
+            logger.exception('ERROR createImageMosaicLayer failed. Name ' + name + ' - Store: ' + store.name)
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published") + ": Error " + str(e.status_code) + " - " + e.server_message)
     
     def updateImageMosaicTemporal(self, store, layer):
         try:
             self.createimagemosaic(store, layer)
         except rest_geoserver.FailedRequestError as e:
+            logger.exception('ERROR updateImageMosaicTemporal failed. Layer ' + layer.name + ' - Store: ' + store.name)
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
+            logger.exception('ERROR updateImageMosaicTemporal failed. Layer ' + layer.name + ' - Store: ' + store.name)
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
     
     
@@ -650,8 +661,10 @@ class Geoserver():
         try:
             return self.rest_catalog.create_coverage(name, title, coveragestore.name, workspace.name, user=self.user, password=self.password)
         except rest_geoserver.FailedRequestError as e:
+            logger.exception('ERROR createCoverage failed. Layer: ' + layer.name + ' - Store: ' + coveragestore.name)
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
+            logger.exception('ERROR createCoverage failed. Layer: ' + layer.name + ' - Store: ' + coveragestore.name)
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
     
     def createWMSLayer(self, workspace, store, name, title):
@@ -674,8 +687,10 @@ class Geoserver():
                 return self.rest_catalog.create_or_update_gs_layer_group(layer_group.name, layer_group.title, user=self.user, password=self.password)
             return True
         except rest_geoserver.FailedRequestError as e:
+            logger.exception('ERROR createOrUpdateGeoserverLayerGroup failed. Group name: ' + layer_group.name)
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer group. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
+            logger.exception('ERROR createOrUpdateGeoserverLayerGroup failed. Group name: ' + layer_group.name)
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer group could not be published"))
         
     def createOrUpdateSortedGeoserverLayerGroup(self, toc):
@@ -684,14 +699,17 @@ class Geoserver():
         except rest_geoserver.FailedRequestError as e:
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer group. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
+            logger.exception('ERROR createOrUpdateSortedGeoserverLayerGroup failed')
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer group could not be published"))
         
     def deleteGeoserverLayerGroup(self, layer_group):
         try:
             return self.rest_catalog.delete_gs_layer_group(layer_group, user=self.user, password=self.password)
         except rest_geoserver.FailedRequestError as e:
+            logger.exception('ERROR deleteGeoserverLayerGroup')
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer group. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
+            logger.exception('ERROR deleteGeoserverLayerGroup')
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer group could not be published"))
     
     def deleteResource(self, workspace, datastore, layer, purge=None):
@@ -704,11 +722,11 @@ class Geoserver():
                     catalog.delete(resource, purge, True)
                 except Exception as e:
                     # only fail if layer exists but deletion failed
-                    print e.message
+                    logger.exception('ERROR deleteResource. Layer:' + layer.name)
                     pass
         except Exception as e:
             # only fail if layer exists but deletion failed
-            print e.message
+            logger.exception('ERROR deleteResource. Layer:' + layer.name)
             pass
         
         return True
@@ -722,7 +740,7 @@ class Geoserver():
             catalog.save(resource)
             return True
         except Exception as e:
-            print ("ERROR: updateResource unknown exception: " + str(e))
+            logger.exception('ERROR updateResource. Resource:' + name)
             return False
         
     def setQueryable(self, workspace, ds_name, ds_type, name, queryable):
@@ -1573,7 +1591,7 @@ class Geoserver():
             return True
         
         except Exception as e:
-            print e
+            logger.exception('ERROR clearCache. Layer:' + str(layer))
             return False
         
     def clearLayerGroupCache(self, name):
@@ -1582,7 +1600,7 @@ class Geoserver():
             return True
         
         except Exception as e:
-            print e
+            logger.exception('ERROR clearCache. Group:' + str(name))
             return False
         
     def addGridSubset(self, ws, layer):
