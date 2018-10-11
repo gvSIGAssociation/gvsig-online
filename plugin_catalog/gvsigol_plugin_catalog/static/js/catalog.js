@@ -232,7 +232,7 @@ catalog.prototype.getMetadataEntry = function(metadata){
 				}
 			}
 		}
-		met += '			<img src="'+image_src+'" style="width:100%;" onerror="this.src=\'/gvsigonline/static/img/no_thumbnail.jpg\';"/>';
+		met += '			<img src="'+image_src+'" style="width:100%;"/>';
 		met += '		</div>';
 		met += '	</div>';
 		met += '	<div class="col-md-12">';
