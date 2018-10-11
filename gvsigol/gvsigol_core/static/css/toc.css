@@ -22,6 +22,7 @@
   display: inline-block;
   margin-left: 5px;
   font-weight: 600;
+  vertical-align: super;
 }
 .layer-tree > li .label {
   margin-left: 10px;
@@ -70,6 +71,7 @@
   display: inline-block;
   cursor: move;
   margin: 0 5px;
+  vertical-align: super;
 }
 
 .layer-box {
