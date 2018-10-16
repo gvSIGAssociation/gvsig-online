@@ -469,6 +469,14 @@ class Geonetwork():
             elif bound.tag == '{http://www.isotc211.org/2005/gmd}northBoundLatitude':
                 bound[0].text = maxy
 
+    def update_thumbnail(self, browse_graphic_elem, thumbnail_url):
+        ns = {'gmd': 'http://www.isotc211.org/2005/gmd'}
+        desc = browse_graphic_elem.findall('./gmd:fileDescription/gmd:CharacterString', ns)
+        if len(desc) > 0 and desc[0].text = 'thumbnail':
+            file_name = browse_graphic_elem.findall('./gmd:fileName/gmd:CharacterString', ns)
+            if len(file_name) > 0:
+                file_name[0].text = thumbnail_url
+
     def register_namespaces(self):
         """
         Arbitrary names can be used, but we'll register the typical names to produce
@@ -492,11 +500,13 @@ class Geonetwork():
         if md_response.status_code==200:
             tree = ET.fromstring(md_response.text)
             ns = {'gmd': 'http://www.isotc211.org/2005/gmd'}
-            for geog_bounding_box in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox', ns):
-                self.update_extent(geog_bounding_box, layer_info, ds_type)
+            for geog_bounding_box_elements in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox', ns):
+                self.update_extent(geog_bounding_box_elements, layer_info, ds_type)
+            return ET.tostring(tree, encoding='UTF-8')
+            for thumbnail_elements in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic', ns):
+                self.update_thumbnail(thumbnail_elements, layer.thumbnail.url)
             return ET.tostring(tree, encoding='UTF-8')
         raise FailedRequestError(r.status_code, r.content)
-
 
 class RequestError(Exception):
     def __init__(self, status_code=-1, server_message=""):

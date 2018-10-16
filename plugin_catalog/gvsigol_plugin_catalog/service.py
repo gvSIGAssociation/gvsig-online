@@ -108,7 +108,7 @@ class Geonetwork():
             lm = LayerMetadata.objects.get(layer=layer)
             (ds_type, layer_info) = mapservice.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
             if self.xmlapi.gn_auth(self.user, self.password):
-                self.xmlapi.gn_update_metadata(uuid, layer, abstract, ws, layer_info, ds_type)
+                self.xmlapi.gn_update_metadata(lm.metadata_uuid, layer, layer.abstract, layer.datastore.workspace, layer_info, ds_type)
                 self.xmlapi.gn_unauth()
         except Exception as e:
             logger.exception("layer metadata update failed")
