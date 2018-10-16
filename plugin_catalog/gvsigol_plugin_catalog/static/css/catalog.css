@@ -91,9 +91,9 @@
 }
 
 #catalog_filter {
-	margin-top: 20px;
-	border-right: solid 1px #ccc;
-	padding: 20px;
+    margin-top: 20px;
+    margin-right: 0px;
+    padding-right: 0px;
 }
 
 #catalog_content {
@@ -103,14 +103,11 @@
 .catalog_filter_title {
     border-bottom: 2px solid #888;
     text-transform: uppercase;
-    font-size: 15px;
     font-weight: bold;
 }
 
 .catalog_filter_entry {
-	list-style-type: none;
-	font-size: 15px;
-    color: #888;
+  font-weight: 600;
 }
 
 .catalog_filter_entry.catalog_filter_entry_ck_sel {
