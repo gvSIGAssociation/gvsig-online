@@ -237,9 +237,21 @@ catalog.prototype.getMetadataEntry = function(metadata){
 		met += '		</div>';
 		met += '	</div>';
 		met += '	<div class="col-md-12">';
-		met += '			<div class="catalog_content_button_place col-md-4"><div name="'+ metadata['geonet:info']['uuid'] +'" class="catalog_content_button catalog_details">Details</div></div>';
-		met += '			<div class="catalog_content_button_place col-md-4"><div name="'+ metadata['geonet:info']['uuid'] +'" class="catalog_content_button catalog_linkmap">Map</div></div>';
-		met += '			<div class="catalog_content_button_place col-md-4"><div name="'+ metadata['geonet:info']['uuid'] +'" class="catalog_content_button catalog_download">Download</div></div>';
+		met += '			<div class="catalog_content_button_place col-md-4">';
+		met += '				<a name="'+ metadata['geonet:info']['uuid'] +'" href="#" class="btn btn-block btn-social btn-custom-tool catalog_content_button catalog_details">';
+		met += ' 					<i class="fa fa-search" aria-hidden="true"></i>Details';
+		met += '				</a>';
+		met += '			</div>';
+		met += '			<div class="catalog_content_button_place col-md-4">';
+		met += '				<a name="'+ metadata['geonet:info']['uuid'] +'" href="#" class="btn btn-block btn-social btn-custom-tool catalog_content_button catalog_linkmap">';
+		met += ' 					<i class="fa fa-map-o" aria-hidden="true"></i>Map';
+		met += '				</a>';
+		met += '			</div>';
+		met += '			<div class="catalog_content_button_place col-md-4">';
+		met += '				<a name="'+ metadata['geonet:info']['uuid'] +'" href="#" class="btn btn-block btn-social btn-custom-tool catalog_content_button catalog_download">';
+		met += ' 					<i class="fa fa-download" aria-hidden="true"></i>Download';
+		met += '				</a>';
+		met += '			</div>';
 		met += '	</div>';
 		met += '</div>';
 	}else{
