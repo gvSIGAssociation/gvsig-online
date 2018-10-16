@@ -23,5 +23,5 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='layer',
             name='time_resolution',
-        ),
+        ), 
     ]
