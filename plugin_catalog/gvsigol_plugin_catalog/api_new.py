@@ -472,7 +472,7 @@ class Geonetwork():
     def update_thumbnail(self, browse_graphic_elem, thumbnail_url):
         ns = {'gmd': 'http://www.isotc211.org/2005/gmd'}
         desc = browse_graphic_elem.findall('./gmd:fileDescription/gmd:CharacterString', ns)
-        if len(desc) > 0 and desc[0].text = 'thumbnail':
+        if len(desc) > 0 and desc[0].text == 'thumbnail':
             file_name = browse_graphic_elem.findall('./gmd:fileName/gmd:CharacterString', ns)
             if len(file_name) > 0:
                 file_name[0].text = thumbnail_url
