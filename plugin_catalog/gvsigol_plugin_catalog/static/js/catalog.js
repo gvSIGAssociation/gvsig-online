@@ -208,7 +208,7 @@ catalog.prototype.getCatalogEntry = function(query, cat, entry){
 		selected = " catalog_filter_entry_ck_sel"
 	}
 
-	return '<li class="catalog_filter_entry' + selected + '"><input ' + checked + ' type="checkbox" class="catalog_filter_entry_ck" name="'+ entry_name + '"/>&nbsp;&nbsp;&nbsp;'+ entry['@label'] + ' (' + entry['@count'] +')</li>';
+	return '<div class="catalog_filter_entry' + selected + '"><input ' + checked + ' type="checkbox" class="catalog_filter_entry_ck" name="'+ entry_name + '"/>&nbsp;&nbsp;&nbsp;'+ entry['@label'] + ' (' + entry['@count'] +')</div>';
 }
 
 catalog.prototype.getMetadataEntry = function(metadata){
@@ -642,21 +642,32 @@ catalog.prototype.getCatalogFilters = function(query, search, categories, keywor
 				var filter_code = '';
 				for(var idx = 0; idx < response.summary.dimension.length; idx++){
 					var cat = response.summary.dimension[idx];
-					if('category' in cat && Array.isArray(cat.category) && cat.category.length > 0){
-						filter_code += '<ul class="catalog_filter_cat"><p class="catalog_filter_title">'+ cat['@label'] +'</p>';
-						for(var idx2 = 0; idx2 < cat.category.length; idx2++){
-							var entry = cat.category[idx2];
+					if('category' in cat && ((Array.isArray(cat.category) && cat.category.length > 0) || ('category' in cat && '@value' in cat.category))){
+						filter_code += '<ul class="catalog_filter_cat">'+
+							'<li class="box box-default" style="list-style-type: none;">'+	
+							'<div class="box-header with-border catalog_filter_title">'+
+								'<span class="text">'+ 
+								cat['@label'] +
+								'</span>'+
+								'<div class="box-tools pull-right">'+
+									'<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">'+
+									'<i class="fa fa-minus"></i>'+
+									'</button>'+
+								'</div>'+
+							'</div>'+
+							'<div id="baselayers-group" class="box-body" style="display:block">';
+						if('category' in cat && Array.isArray(cat.category) && cat.category.length > 0){
+							for(var idx2 = 0; idx2 < cat.category.length; idx2++){
+								var entry = cat.category[idx2];
+								filter_code += self.getCatalogEntry(query, cat, entry);
+							}
+						}
+						if('category' in cat && '@value' in cat.category){
+							var entry = cat.category;
 							filter_code += self.getCatalogEntry(query, cat, entry);
 						}
-						filter_code += '</ul>';
+						filter_code += '</div></li></ul>';
 					}
-					if('category' in cat && '@value' in cat.category){
-						filter_code += '<ul class="catalog_filter_cat"><p class="catalog_filter_title">'+ cat['@label'] +'</p>';
-						var entry = cat.category;
-						filter_code += self.getCatalogEntry(query, cat, entry);
-						filter_code += '</ul>';
-					}
-					
 				}
 				$("#catalog_filter").html(filter_code);
 				
