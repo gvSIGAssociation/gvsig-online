@@ -325,7 +325,7 @@ SUPPORTED_CRS = {
         'definition': '+proj=longlat +datum=WGS84 +no_defs +axis=neu',
         'units': 'degrees'
     },
-    ##SUPORTED_CRS## 
+    ##SUPPORTED_CRS## 
 }
 
 GVSIGOL_TOOLS = {
