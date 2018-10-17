@@ -84,7 +84,7 @@ searchByCoordinate.prototype.handler = function(e) {
 	var body = '';
 	body += '<div class="row">';
 	body += 	'<div class="col-md-12 form-group">';	
-	body += 	'<label>' + gettext('Select projection') + '</label>';
+	body += 	'<label>' + gettext('Coordinate Reference System') + '</label>';
 	body += 	'<select id="projection-select" class="form-control">';
 	body += 		'<option value="EPSG:4326" selected>WGS84 (EPSG:4326)</option>';
 	for (var key in this.conf.supported_crs) {
@@ -97,11 +97,11 @@ searchByCoordinate.prototype.handler = function(e) {
 	body += '</div>';
 	body += '<div class="row">';
 	body += 	'<div class="col-md-6 form-group">';
-	body += 		'<label for="longitude">' + gettext('Longitude') + ' - X</label>';
+	body += 		'<label for="longitude">' + gettext('Longitude') + '/X</label>';
 	body += 		'<input placeholder="" name="longitude" id="longitude" type="text" class="form-control">';					
 	body += 	'</div>';
 	body += 	'<div class="col-md-6 form-group">';
-	body += 		'<label for="latitude">' + gettext('Latitude') + ' - Y</label>';
+	body += 		'<label for="latitude">' + gettext('Latitude') + '/Y</label>';
 	body += 		'<input placeholder="" name="latitude" id="latitude" type="text" class="form-control">';					
 	body += 	'</div>';
 
