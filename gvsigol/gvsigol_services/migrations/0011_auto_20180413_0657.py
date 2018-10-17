@@ -19,9 +19,5 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='layer',
             name='time_mosaic_elev_regex',
-        ),
-        migrations.RemoveField(
-            model_name='layer',
-            name='time_resolution',
-        ),        
+        ),     
     ]
