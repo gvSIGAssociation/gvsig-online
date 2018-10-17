@@ -103,24 +103,68 @@ search.prototype.deactivate = function() {
 
 
 search.prototype.activeContextMenu = function(){
+	var self = this;
+//	this.contextmenu = new ContextMenu({
+//		width: 170,
+//		defaultItems: false, // defaultItems are (for now) Zoom In/Zoom Out
+//		items: this.menus,
+//	});
+//	
+//	this.map.addControl(this.contextmenu);
+	this.map.on('click', this.clickHandler, self);
+	
+	
+	
+}
+
+search.prototype.clickHandler = function(evt, aux){
+	var self = this;
+	
 	if(this.contextmenu == null){
-		return;
+		this.contextmenu = new ol.Overlay.Popup();
+		this.map.addOverlay(this.contextmenu);
 	}
+	var mapCoordinates = evt.coordinate;
 	
-	this.contextmenu = new ContextMenu({
-		width: 170,
-		defaultItems: false, // defaultItems are (for now) Zoom In/Zoom Out
-		items: this.menus,
-	});
+	if(this.menus.length > 1){
+		var html = '<ul>'
+		for(var i=0; i<this.menus.length; i++){
+			html += '<li name="'+ this.menus[i].classname +'" class="inverse-geocoding-type">'+ this.menus[i].text +'</li>';
+		}
+		html += '</ul>';
+		
+		this.contextmenu.show(mapCoordinates, '<div class="popup-wrapper getfeatureinfo-popup">'+html+'</div>');	
+		
+		$(".inverse-geocoding-type").unbind("click").click(function(){
+			var name = $(this).text();
+			for(var i=0; i<self.menus.length; i++){
+				if(self.menus[i].text == name){
+					self.menus[i].callback(evt);
+					self.contextmenu.hide();
+				}
+			}
+		})
+	}else{
+		if(this.menus.length == 1){
+			this.menus[0].callback(evt);
+		}
+		if(this.menus.length == 0){
+			html = gettext('No hay ningún geocodificador activo');
+			this.contextmenu.show(mapCoordinates, '<div class="popup-wrapper getfeatureinfo-popup">'+html+'</div>');	
+		}
+	}	
 	
-	this.map.addControl(this.contextmenu);
 }
 
 search.prototype.removeContextMenu = function(){
+	var self = this;
 	if(this.contextmenu == null){
 		return;
 	}
-	this.map.removeControl(this.contextmenu);
+//	this.map.removeControl(this.contextmenu);
+	this.map.removeOverlay(this.contextmenu);
+	this.contextmenu = null;
+	this.map.un('click', this.clickHandler, self);
 }
 
 /**
@@ -248,11 +292,11 @@ search.prototype.initUI = function() {
 			}
 
 			if(self.menus.length > 0){
-				self.contextmenu = new ContextMenu({
-					width: 170,
-					defaultItems: false, // defaultItems are (for now) Zoom In/Zoom Out
-					items: self.menus,
-				});
+//				self.contextmenu = new ContextMenu({
+//					width: 170,
+//					defaultItems: false, // defaultItems are (for now) Zoom In/Zoom Out
+//					items: self.menus,
+//				});
 			}
 		},
 		error: function(){}
