@@ -220,6 +220,9 @@ msgstr "Buscar por coordenadas"
 msgid "Select projection"
 msgstr "Seleccionar proyección"
 
+msgid "Coordinate Reference System"
+msgstr "Sistema de coordenadas"
+
 msgid "Latitude"
 msgstr "Latitud"
 
