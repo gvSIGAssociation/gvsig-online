@@ -48,7 +48,7 @@ function configure() {
 		CRS_FROM_SETTINGS="False"
 	fi
 	grep -rl "##CRS_FROM_SETTINGS##"  | xargs sed -i "s/##CRS_FROM_SETTINGS##/$CRS_FROM_SETTINGS/g"
-	grep -rl "##SUPORTED_CRS##"  | xargs sed -i 's ##SUPORTED_CRS## $SUPORTED_CRS g' 		
+	grep -rl "##SUPPORTED_CRS##"  | xargs sed -i 's ##SUPPORTED_CRS## $SUPPORTED_CRS g' 		
 																
 	echo "INFO: AUTH_WITH_REMOTE_USER"																
 	if [ -z $AUTH_WITH_REMOTE_USER ]; then
