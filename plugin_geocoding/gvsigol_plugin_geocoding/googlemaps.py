@@ -121,7 +121,7 @@ class GoogleMaps():
         
         message =  _('Not founded')
         if 'status' in json_results and json_results['status'] == 'OVER_QUERY_LIMIT':
-            message = _('The rate-limit is exceeded for this API')
+            message = _('Not founded. The rate-limit is exceeded for this API')
         if 'results' in json_results:
             for result in json_results['results']:
                 parse_result = {
