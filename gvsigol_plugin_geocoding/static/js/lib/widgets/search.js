@@ -191,7 +191,7 @@ search.prototype.initUI = function() {
 						text: 'Dirección de Nominatim',
 						classname: 'geocoding-contextmenu', // add some CSS rules
 						callback: function (obj) {
-							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4258');	
+							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
 							$.ajax({
 								type: 'POST',
 								async: false,
@@ -217,7 +217,7 @@ search.prototype.initUI = function() {
 						text: 'Dirección de CartoCiudad (Nuevo)',
 						classname: 'geocoding-contextmenu', // add some CSS rules
 						callback: function (obj) {
-							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4258');	
+							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
 							$.ajax({
 								type: 'POST',
 								async: false,
@@ -243,7 +243,7 @@ search.prototype.initUI = function() {
 						text: 'Dirección de CartoCiudad',
 						classname: 'geocoding-contextmenu', // add some CSS rules
 						callback: function (obj) {
-							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4258');	
+							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
 							$.ajax({
 								type: 'POST',
 								async: false,
@@ -269,7 +269,7 @@ search.prototype.initUI = function() {
 						text: 'Dirección de Google Maps',
 						classname: 'geocoding-contextmenu', // add some CSS rules
 						callback: function (obj) {
-							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4258');	
+							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
 							$.ajax({
 								type: 'POST',
 								async: false,
