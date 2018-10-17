@@ -118,6 +118,10 @@ class GoogleMaps():
         }
         
         json_results = self.get_json_from_url(self.urls['reverse_url'], params)
+        
+        message =  _('Not founded')
+        if 'status' in json_results and json_results['status'] == 'OVER_QUERY_LIMIT':
+            message = _('The rate-limit is exceeded for this API')
         if 'results' in json_results:
             for result in json_results['results']:
                 parse_result = {
@@ -127,7 +131,7 @@ class GoogleMaps():
                 }
                 return parse_result
         parse_result = {
-                    'address': _('Not founded'),
+                    'address': message,
                     'lat': coordinate[1], 
                     'lng': coordinate[0]
                 }
