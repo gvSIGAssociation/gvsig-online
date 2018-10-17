@@ -89,6 +89,7 @@ tr.ui-state-default.ui-sortable-handle{ height:50px}
 
 .float-search-tool{float:left; padding:15px 10px; position:absolute; z-index:1000;}
 
+.inverse-geocoding-type:hover{background-color: #eee}
 
 @media only screen and (max-width: 575px) {
 	.viewer-search-form {
