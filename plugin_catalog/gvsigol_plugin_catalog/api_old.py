@@ -33,7 +33,6 @@ class Geonetwork():
         self.session = requests.Session()
         self.session.verify = False
         self.service_url = service_url
-        self.register_namespaces()
         
     def get_session(self):
         return self.session
@@ -293,46 +292,16 @@ class Geonetwork():
         
         return metadata
 
-    def update_extent(self, geo_bb_elem, layer_info, ds_type):
-        minx = str(layer_info[ds_type]['latLonBoundingBox']['minx'])
-        miny = str(layer_info[ds_type]['latLonBoundingBox']['miny'])
-        maxx = str(layer_info[ds_type]['latLonBoundingBox']['maxx'])
-        if layer_info[ds_type]['latLonBoundingBox']['minx'] > layer_info[ds_type]['latLonBoundingBox']['maxx']:
-            maxx = str(layer_info[ds_type]['latLonBoundingBox']['minx'] + 1)
-        maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
-        if layer_info[ds_type]['latLonBoundingBox']['miny'] > layer_info[ds_type]['latLonBoundingBox']['maxy']:
-            maxy = str(layer_info[ds_type]['latLonBoundingBox']['miny'] + 1)
-        for bound in geo_bb_elem:
-            if bound.tag == '{http://www.isotc211.org/2005/gmd}westBoundLongitude':
-                bound[0].text = minx
-            elif bound.tag == '{http://www.isotc211.org/2005/gmd}eastBoundLongitude':
-                bound[0].text = maxx
-            elif bound.tag == '{http://www.isotc211.org/2005/gmd}southBoundLatitude':
-                bound[0].text = miny
-            elif bound.tag == '{http://www.isotc211.org/2005/gmd}northBoundLatitude':
-                bound[0].text = maxy
-
     def get_updated_metadata(self, layer, uuid, layer_info, ds_type):
         url = self.service_url + "xml.metadata.get?uuid=" + uuid
-        r = self.session.get(url)
-        if r.status_code==200:
-            tree = ET.fromstring(r.text)
-            ns = {'gmd': 'http://www.isotc211.org/2005/gmd'}
-            for geog_bounding_box in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox', ns):
-                self.update_extent(geog_bounding_box, layer_info, ds_type)
-            return ET.tostring(tree, encoding='UTF-8')
-        raise FailedRequestError(r.status_code, r.content)
-
-    def register_namespaces(self):
-        """
-        Arbitrary names can be used, but we'll register the typical names to produce
-        "beautiful" XML.
-        """
-        ET.register_namespace('gmd', 'http://www.isotc211.org/2005/gmd')
-        ET.register_namespace('gml', 'http://www.opengis.net/gml')
-        ET.register_namespace('gco', 'http://www.isotc211.org/2005/gco')
-        ET.register_namespace('csw', 'http://www.opengis.net/cat/csw/2.0.2')
-        ET.register_namespace('ogc', 'http://www.opengis.net/ogc')
+        md_response = self.session.get(url)
+        if md_response.status_code == 200:
+            extent_tuple = self.get_extent(layer_info, ds_type)
+            # TODO: we can later generalize this import to call a different module according to the
+            # metadata standard of the record to be updated
+            from gvsigol_plugin_catalog.mdstandards import iso19139_2007
+            return iso19139_2007.update_metadata(md_response.text, extent_tuple, layer.thumbnail.url)
+        raise FailedRequestError(md_response.status_code, md_response.content)
 
 class RequestError(Exception):
     def __init__(self, status_code=-1, server_message=""):
