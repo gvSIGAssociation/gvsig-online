@@ -35,7 +35,6 @@ class Geonetwork():
         self.session = requests.Session()
         self.session.verify = False
         self.service_url = service_url
-        self.register_namespaces()
         
     def get_session(self):
         return self.session
@@ -412,7 +411,7 @@ class Geonetwork():
         metadata +=                         '</gmd:CI_OnlineResource>'
         metadata +=                     '</gmd:onLine>'
         if ds_type:
-            if ds_type[0] == 'v' and ws.wfs_endpoint:
+            if ds_type == 'featureType' and ws.wfs_endpoint:
                 metadata +=             '<gmd:onLine>'
                 metadata +=                 '<gmd:CI_OnlineResource>'
                 metadata +=                     '<gmd:linkage>'
@@ -430,7 +429,7 @@ class Geonetwork():
                 metadata +=                     '<gmd:function><gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download"/></gmd:function>'
                 metadata +=                 '</gmd:CI_OnlineResource>'
                 metadata +=             '</gmd:onLine>'
-            elif ds_type[0] == 'r' and ws.wcs_endpoint:
+            elif ds_type in ('coverage', 'imagemosaic') and ws.wcs_endpoint:
                 metadata +=             '<gmd:onLine>'
                 metadata +=                 '<gmd:CI_OnlineResource>'
                 metadata +=                     '<gmd:linkage>'
@@ -457,38 +456,6 @@ class Geonetwork():
         
         return metadata
 
-    def update_extent(self, geo_bb_elem, layer_info, ds_type):
-        minx, miny, maxx, maxy = self.get_extent(layer_info, ds_type)
-        for bound in geo_bb_elem:
-            if bound.tag == '{http://www.isotc211.org/2005/gmd}westBoundLongitude':
-                bound[0].text = minx
-            elif bound.tag == '{http://www.isotc211.org/2005/gmd}eastBoundLongitude':
-                bound[0].text = maxx
-            elif bound.tag == '{http://www.isotc211.org/2005/gmd}southBoundLatitude':
-                bound[0].text = miny
-            elif bound.tag == '{http://www.isotc211.org/2005/gmd}northBoundLatitude':
-                bound[0].text = maxy
-
-    def update_thumbnail(self, browse_graphic_elem, thumbnail_url):
-        ns = {'gmd': 'http://www.isotc211.org/2005/gmd'}
-        desc = browse_graphic_elem.findall('./gmd:fileDescription/gmd:CharacterString', ns)
-        if len(desc) > 0 and desc[0].text == 'thumbnail':
-            file_name = browse_graphic_elem.findall('./gmd:fileName/gmd:CharacterString', ns)
-            if len(file_name) > 0:
-                file_name[0].text = thumbnail_url
-
-    def register_namespaces(self):
-        """
-        Arbitrary names can be used, but we'll register the typical names to produce
-        "beautiful" XML.
-        """
-        ET.register_namespace('gmd', 'http://www.isotc211.org/2005/gmd')
-        ET.register_namespace('gml', 'http://www.opengis.net/gml')
-        ET.register_namespace('gco', 'http://www.isotc211.org/2005/gco')
-        ET.register_namespace('csw', 'http://www.opengis.net/cat/csw/2.0.2')
-        ET.register_namespace('ogc', 'http://www.opengis.net/ogc')
-
-
     def get_updated_metadata(self, layer, uuid, layer_info, ds_type):
         headers = {
             'Accept': 'application/xml',
@@ -497,15 +464,12 @@ class Geonetwork():
         }
         md_url = self.service_url + "/srv/api/0.1/records/" + uuid
         md_response = self.session.get(md_url, headers=headers)
-        if md_response.status_code==200:
-            tree = ET.fromstring(md_response.text)
-            ns = {'gmd': 'http://www.isotc211.org/2005/gmd'}
-            for geog_bounding_box_elements in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox', ns):
-                self.update_extent(geog_bounding_box_elements, layer_info, ds_type)
-            return ET.tostring(tree, encoding='UTF-8')
-            for thumbnail_elements in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic', ns):
-                self.update_thumbnail(thumbnail_elements, layer.thumbnail.url)
-            return ET.tostring(tree, encoding='UTF-8')
+        if md_response.status_code == 200:
+            extent_tuple = self.get_extent(layer_info, ds_type)
+            # TODO: we can later generalize this import to call a different module according to the
+            # metadata standard of the record to be updated
+            from gvsigol_plugin_catalog.mdstandards import iso19139_2007
+            return iso19139_2007.update_metadata(md_response.text, extent_tuple, layer.thumbnail.url)
         raise FailedRequestError(r.status_code, r.content)
 
 class RequestError(Exception):

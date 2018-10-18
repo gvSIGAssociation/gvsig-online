@@ -135,6 +135,8 @@ def initialize():
         return geonetwork_service
     
     except:
+        #logging.basicConfig()
+        logger.exception("initialization error")
         raise ImproperlyConfigured
 
 geonetwork_service = initialize()
