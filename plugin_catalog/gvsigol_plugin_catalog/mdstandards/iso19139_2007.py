@@ -19,7 +19,7 @@ def update_thumbnail(browse_graphic_elem, thumbnail_url):
     desc = browse_graphic_elem.findall('./gmd:fileDescription/gco:CharacterString', ns)
     print desc
     print browse_graphic_elem[0]
-    if len(desc) > 0 and desc[0].text == u'thumbnail':
+    if len(desc) > 0 and desc[0].text == u'gvsigol thumbnail':
         file_names = browse_graphic_elem.findall('./gmd:fileName/gco:CharacterString', ns)
         if len(file_names) > 0:
             file_names[0].text = thumbnail_url
