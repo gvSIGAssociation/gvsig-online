@@ -373,7 +373,7 @@ class Geonetwork():
         raise FailedRequestError(r.status_code, r.content)
     
     def get_query(self, query):
-        url = self.service_url + "/srv/spa/q?" + query
+        url = self.service_url + "/srv/eng/q?" + query
         headers = {
             'Accept': 'application/json',
             'X-XSRF-TOKEN': self.get_csrf_token()
@@ -465,7 +465,7 @@ class Geonetwork():
         metadata +=                     '<gco:CharacterString>' + layer.thumbnail.url + '</gco:CharacterString>'
         metadata +=                 '</gmd:fileName>'
         metadata +=                 '<gmd:fileDescription>'
-        metadata +=                     '<gco:CharacterString>thumbnail</gco:CharacterString>'
+        metadata +=                     '<gco:CharacterString>gvsigol thumbnail</gco:CharacterString>'
         metadata +=                 '</gmd:fileDescription>'
         metadata +=             '</gmd:MD_BrowseGraphic></gmd:graphicOverview>'
         metadata +=             '<gmd:extent>'
