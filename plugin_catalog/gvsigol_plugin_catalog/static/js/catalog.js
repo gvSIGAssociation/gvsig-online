@@ -298,7 +298,8 @@ catalog.prototype.createResourceLink = function(links){
 				content += '	<a href="'+link[2]+'" target="_blank">';
 				content += '		<i class="fa fa-file-archive-o" aria-hidden="true"></i>';
 				content += '		<span class="catalog-link-resource"><p>' + link[1] + '<br/><span class="catalog-entry-subtitle">' + link[0] + '</span></p></span>';
-				content += '		<div class="catalog-link-button catalog_content_button">'+gettext("Download")+'</div>';content += '		<div style="clear:both"></div>';
+				content += '		<div class="catalog-link-button catalog_content_button">'+gettext("Download")+'</div>';
+				content += '		<div style="clear:both"></div>';
 				content += '	</a>';
 				content += '</li>';
 			}
@@ -799,54 +800,60 @@ catalog.prototype.getCatalogFilters = function(query, search, categories, keywor
 
 catalog.prototype.createDetailsPanel = function(id){
 	var self = this;
-	$('.modal-catalog-title').html(gettext("Details"));
-	var links = self.data[id].link;
 	
-	var content = "";
-//	var url = '/gvsigonline/catalog/get_editor/'+id+"/";	
-//		$.ajax({
-//		url: url,
-//		success: function(response) {
-//			console.log(response);
-//			var aux_content = "";
-//			aux_content += '<div style="padding: 10px">' + response;
-//			aux_content += '<div style="clear:both"></div>';
-//			aux_content += '</div>';
-//			$('.modal-catalog-body').html(aux_content);
-//			$('#modal-catalog').modal('show');
+//	var links = self.data[id].link;
+//	var content = "";	
+//	var aux_content = "";
+//	var data = self.data[id];
+//	aux_content += '<div style="padding: 10px">';
+//	aux_content += '<ul>';
+//	for(var key in data){
+//		aux_content += '<li class="catalog-link">';
+//		aux_content += '	<a href="#">';
+//		aux_content += '		<span class="catalog-link-resource"><p style="font-weight: bold">' + key + '';
+//		if(Array.isArray(data[key])){
+//			aux_content += '		</p></span>';
+//			aux_content += '		<div style="clear:both"></div>';
+//			aux_content += '		<ul>';
+//			for(var i=0; i<data[key].length; i++){
+//				aux_content += '		<li class="catalog-link-li catalog-entry-subtitle">' + data[key][i] + '</li>';
+//			}
+//			aux_content += '		</ul>';
+//		}else{
+//			aux_content += '		</p></span>';
+//			aux_content += '		<div style="clear:both"></div>';
+//			aux_content += '		<span class="catalog-entry-subtitle" style="float:left; margin-left: 20px">' + data[key] + '</span>';
+//			aux_content += '		<div style="clear:both"></div>';
 //		}
-//	});
+//		
+//		aux_content += '	</a>';
+//		aux_content += '</li>';
+//	}
+//	aux_content += '</ul>';
+//	aux_content += '</div>';
 	
-	var aux_content = "";
-	var data = self.data[id];
-	aux_content += '<div style="padding: 10px">';
-	aux_content += '<ul>';
-	for(var key in data){
-		aux_content += '<li class="catalog-link">';
-		aux_content += '	<a href="#">';
-		aux_content += '		<span class="catalog-link-resource"><p style="font-weight: bold">' + key + '';
-		if(Array.isArray(data[key])){
-			aux_content += '		</p></span>';
-			aux_content += '		<div style="clear:both"></div>';
-			aux_content += '		<ul>';
-			for(var i=0; i<data[key].length; i++){
-				aux_content += '		<li class="catalog-link-li catalog-entry-subtitle">' + data[key][i] + '</li>';
+	$.ajax({
+		type: "GET",
+		async: false,
+		url: "/gvsigonline/catalog/get_metadata/"+id+"/?getPanel=true",
+		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		success: function(response){
+			if ("html" in response) {
+				$('.modal-catalog-title').html(gettext("Details"));
+				$('.modal-catalog-body').html(response['html']);
+				$('#modal-catalog').modal('show');
+			} else {
+				alert('Error');
 			}
-			aux_content += '		</ul>';
-		}else{
-			aux_content += '		</p></span>';
-			aux_content += '		<div style="clear:both"></div>';
-			aux_content += '		<span class="catalog-entry-subtitle" style="float:left; margin-left: 20px">' + data[key] + '</span>';
-			aux_content += '		<div style="clear:both"></div>';
-		}
-		
-		aux_content += '	</a>';
-		aux_content += '</li>';
-	}
-	aux_content += '</ul>';
-	aux_content += '</div>';
-	$('.modal-catalog-body').html(aux_content);
-	$('#modal-catalog').modal('show');
+
+		},
+		error: function(){}
+	});
+	
+	
+	
 }
 
 catalog.prototype.showPanel = function(){

@@ -261,6 +261,117 @@ class Geonetwork():
             return True
         raise FailedRequestError(r.status_code, r.content)
     
+    def gn_get_metadata(self, metadata_id):
+        #curl -X DELETE --header 'Accept: */*' 'http://localhost:8080/geonetwork/srv/api/0.1/records/159?withBackup=false'
+        #NOTE: uuid is an id not in format 97769e85-2e7b-418b-a8c8-0163bfb97aac
+        url = self.service_url + "/srv/api/0.1/records/"+str(metadata_id)+""
+        headers = {
+            'Accept': 'application/xml',
+            'X-XSRF-TOKEN': self.get_csrf_token()
+        }
+              
+        r = self.session.get(url, headers=headers)
+        if r.status_code==200:
+            tree = ET.fromstring(r.text)
+            ns = {'gmd': 'http://www.isotc211.org/2005/gmd'}
+            
+            metadata_id = tree.findall('./gmd:fileIdentifier/', ns)[0].text
+            title = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/', ns)[0].text
+            abstract = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/', ns)[0].text
+            publish_date = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/', ns)[0].text
+            
+            period_start = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_TemporalExtent/gmd:extent/', ns)[0]._children[0].text
+            period_end = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_TemporalExtent/gmd:extent/', ns)[0]._children[1].text
+            
+            categories = []
+            for category in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:topicCategory/gmd:MD_TopicCategoryCode/', ns):
+                categories.append(category.text)
+            
+            keywords = []
+            for keyword in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/', ns):
+                keywords.append(keyword.text)
+            
+            representation_type = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialRepresentationType/', ns)[0].attrib['codeListValue'] 
+            scale = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/', ns)[0].text 
+            srs = tree.findall('./gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code/', ns)[0].text 
+            
+            #https://test.gvsigonline.com/geonetwork/srv/spa/region.getmap.png?mapsrs=EPSG:3857&width=250&background=settings&geomsrs=EPSG:4326&geom=Polygon((-18.1595005217%2043.9729489023,4.96320908311%2043.9729489023,4.96320908311%2025.9993588695,-18.1595005217%2025.9993588695,-18.1595005217%2043.9729489023))
+            coords_w = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:westBoundLongitude/', ns)[0].text
+            coords_e = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:eastBoundLongitude/', ns)[0].text
+            coords_s = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:southBoundLatitude/', ns)[0].text
+            coords_n = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:northBoundLatitude/', ns)[0].text
+            
+            image_url = self.service_url + '/srv/spa/region.getmap.png?mapsrs=EPSG:3857&width=250&background=osm&geomsrs=EPSG:4326&geom=Polygon(('+coords_w+' '+coords_s+','+coords_e+' '+coords_s+','+coords_e+' '+coords_n+','+coords_w+' '+coords_n+','+coords_w+' '+coords_s+'))'
+            
+            #thumbnails
+            thumbnails_urls = []
+            for thumbnail_url in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileName/', ns):
+                thumbnails_urls.append(thumbnail_url.text)
+                
+            thumbnail_names = []
+            for thumbnail_name in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileDescription/', ns):
+                thumbnail_names.append(thumbnail_name.text)
+            
+            thumbnails = []
+            if thumbnails_urls.__len__() == thumbnail_names.__len__():
+                for i in range(0,thumbnails_urls.__len__()):
+                    thumbnail = {
+                        'url' : thumbnails_urls[i],
+                        'name': thumbnail_names[i]
+                    }
+                    thumbnails.append(thumbnail)
+            
+            #resources
+            resources_urls = []
+            for resources_url in tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:linkage/', ns):
+                resources_urls.append(resources_url.text)
+                
+            resources_names = []
+            for resources_name in tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:name/', ns):
+                resources_names.append(resources_name.text)
+                
+            resources_protocols = []
+            for resources_protocol in tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:protocol/', ns):
+                resources_protocols.append(resources_protocol.text)
+                
+            resources_descriptions = []
+            for resources_description in tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:description/', ns):
+                resources_descriptions.append(resources_description.text)
+            
+            resources = []
+            if resources_names.__len__() == resources_urls.__len__() and resources_protocols.__len__() == resources_urls.__len__() and resources_descriptions.__len__() == resources_urls.__len__():
+                for i in range(0,resources_urls.__len__()):
+                    res = {
+                        'url' : resources_urls[i],
+                        'name': resources_names[i],
+                        'protocol': resources_protocols[i],
+                        'descriptions' : resources_descriptions[i]
+                    }
+                    resources.append(res)
+            
+            
+            resource = {
+                'metadata_id': metadata_id,
+                'title': title,
+                'abstract': abstract,
+                'publish_date': publish_date,
+                'period_start': period_start,
+                'period_end': period_end,
+                'categories': categories,
+                'keywords': keywords,
+                'representation_type': representation_type,
+                'scale': scale,
+                'srs': srs,
+                'image_url': image_url,
+                'thumbnails': thumbnails,
+                'resources': resources
+            }
+            
+            return resource
+            #return ET.tostring(tree, encoding='UTF-8')
+            #return r.content
+        raise FailedRequestError(r.status_code, r.content)
+    
     def get_query(self, query):
         url = self.service_url + "/srv/spa/q?" + query
         headers = {
