@@ -225,8 +225,8 @@ EXTRA_LANG_INFO = {
 LANG_INFO = dict(django.conf.locale.LANG_INFO.items() + EXTRA_LANG_INFO.items())
 django.conf.locale.LANG_INFO = LANG_INFO
 
-LANGUAGES = ( ##LANGUAGES## 
-)
+LANGUAGES = [ ##LANGUAGES## 
+]
 
 LOCALE_PATHS = (
     '##GVSIG_ONLINE_HOME##/gvsigol/gvsigol/locale',
