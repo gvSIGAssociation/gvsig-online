@@ -20,31 +20,31 @@ msgstr ""
 "The institution is not responsible for the information that can be obtained through links to external systems."
 
 msgid "Print params"
-msgstr "Paràmetres d'impresió"
+msgstr ""
 
 msgid "Select print template"
-msgstr "Seleccionar plantilla d'impressió"
+msgstr ""
 
 msgid "Select template"
-msgstr "Seleccionar plantilla"
+msgstr ""
 
 msgid "Title"
-msgstr "Titol"
+msgstr ""
 
 msgid "Legal warning"
-msgstr "Avís legal"
+msgstr ""
 
 msgid "Rotation"
-msgstr "Rotació"
+msgstr ""
 
 msgid "Print"
-msgstr "Imprimir"
+msgstr ""
 
 msgid "Cancel"
-msgstr "Cancel.lar"
+msgstr "Cancel"
 
 msgid "You must select a template"
-msgstr "Heu de seleccionar una plantilla"
+msgstr ""
 
 msgid "Error loading print plugin"
-msgstr "Error carregant plugin d'impresió"
+msgstr ""
