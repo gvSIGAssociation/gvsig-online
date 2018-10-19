@@ -40,7 +40,18 @@ class Geonetwork():
             self.xmlapi = xmlapi_old.Geonetwork(service_url + '/srv/eng/')
         self.user = user
         self.password = password
+    
+    def get_metadata(self, uuid):
+        try:
+            if self.xmlapi.gn_auth(self.user, self.password):
+                content = self.xmlapi.gn_get_metadata(uuid)
+                self.xmlapi.gn_unauth()
+                return content
+            return None
         
+        except Exception as e:
+            print e
+    
     def metadata_insert(self, layer, abstract, ws, layer_info, ds_type):
         try:
             if self.xmlapi.gn_auth(self.user, self.password):
