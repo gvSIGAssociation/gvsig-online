@@ -551,19 +551,23 @@ catalog.prototype.createLayer = function(name, title, group_visible, zIndex) {
 	$(".geonetwork-layer-group").append(ui);
 	
 	$(".geonetwork-ck").unbind("change").change(function (e) {
-		var layers = self.map.getLayers();
-		var id = $(this).attr("id");
-		layers.forEach(function(layer){
-			if (!layer.baselayer) {
-				if (layer.get("id") === id) {
-					if (layer.getVisible() == true) {
-						layer.setVisible(false);
-					} else {
-						layer.setVisible(true);
+		try {
+			var layers = self.map.getLayers();
+			var id = $(this).attr("id");
+			layers.forEach(function(layer){
+				if (!layer.baselayer) {
+					if (layer.get("id") === id) {
+						if (layer.getVisible() == true) {
+							layer.setVisible(false);
+						} else {
+							layer.setVisible(true);
+						}
 					}
-				}
-			};
-		}, this);
+				};
+			}, this);
+		} catch (e) {
+			console.log(e);
+		}
 	});
 	
 	$(".remove-metadata-link").unbind("click").click(function (e) {
@@ -704,7 +708,7 @@ catalog.prototype.getCatalogFilters = function(query, search, categories, keywor
 	//var url = '/geonetwork/srv/eng/q?_content_type=json&bucket=s101&facet.q=&fast=index&from=1&resultType=details&sortBy=relevance';
 
 	// TODO: move config to plugin settings
-	var facetsConfig = {"orgName": {"title": "Organization"}, "orgName": {"title": "Source Catalog"},
+	var facetsConfig = {"orgName": {"title": "Organization"}, "sourceCatalog": {"title": "Source Catalog"},
 "createDateYear": {"title": "Year"}, "spatialRepresentationType": {"title": "Representation type"}, "maintenanceAndUpdateFrequency": {"title": "Update frequencies"}, "denominator": {"title": "Scale"}, "serviceType": {"title": "Service type"}, "gemetKeyword": {"title": "GEMET keywords"}, "panaceaKeyword": [{"name": "interregMedProjects", "title": "INTERREG Med Projects", "labelPattern": ".* project$"}, {"name": "panaceaWorkingGroups", "title": "Working group", "labelPattern": "^(.(?! project$))+$"}]};
 	var facetsOrder = ["panaceaWorkingGroups", "interregMedProjects", "type", "spatialRepresentationType"];
 	var disabledFacets = ["mdActions"];
@@ -730,8 +734,8 @@ catalog.prototype.getCatalogFilters = function(query, search, categories, keywor
 							}
 						}
  						else {
-							if (cat['@name'] in facetsConfig) {
-								var filterLabel = facetsConfig[cat['@name']];
+							if (facetsConfig[cat['@name']]) {
+								var filterLabel = facetsConfig[cat['@name']]['title'];
 							}
 							else {
 								var filterLabel = cat['@label'];
@@ -742,9 +746,9 @@ catalog.prototype.getCatalogFilters = function(query, search, categories, keywor
 				}
 				// insert filters in defined order
 				for(var idx = 0; idx < facetsOrder.length; idx++){
-					if (shownFilters[factesOrder[idx]]) {
-						all_filters_code += shownFilters[factesOrder[idx]];
-						delete shownFilters[factesOrder[idx]];
+					if (shownFilters[facetsOrder[idx]]) {
+						all_filters_code += shownFilters[facetsOrder[idx]];
+						delete shownFilters[facetsOrder[idx]];
 					}
 				}
 				// insert the rest of filters
