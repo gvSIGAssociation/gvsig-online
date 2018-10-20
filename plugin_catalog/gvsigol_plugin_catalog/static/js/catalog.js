@@ -23,7 +23,7 @@
 /**
  * TODO
  */
-var catalog = function(map, layerTree) {
+var CatalogView = function(map, layerTree) {
 	this.map = map;
 	this.map_container = $("#container");	
 	this.layerTree = layerTree;
@@ -33,7 +33,7 @@ var catalog = function(map, layerTree) {
 	this.initialization();
 };
 
-catalog.prototype.initialization = function(){
+CatalogView.prototype.initialization = function(){
 	var self = this;
 	var filters = this.getCatalogFilters("");
 	
@@ -170,7 +170,7 @@ catalog.prototype.initialization = function(){
 	});
 }
 
-catalog.prototype.filterCatalog = function(){
+CatalogView.prototype.filterCatalog = function(){
 	var search = $("#gn-any-field").val();
 	var categories = $("#categoriesF").val();
 	var keywords = $("#keywordsF").val();
@@ -184,7 +184,7 @@ catalog.prototype.filterCatalog = function(){
 
 }
 
-catalog.prototype.launchQuery = function(search, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent){
+CatalogView.prototype.launchQuery = function(search, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent){
 	var query = "";
 	var is_first = true;
 	$(".catalog_filter_entry_ck").each(function(){
@@ -200,8 +200,14 @@ catalog.prototype.launchQuery = function(search, categories, keywords, resources
 	this.getCatalogFilters(query, search, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent);
 }
 
-catalog.prototype.getCatalogEntry = function(query, cat, entry){
-	var entry_name = cat['@name'] + '%2F' + entry['@value'];
+CatalogView.prototype.getCatalogEntry = function(query, cat, entry, filterName){
+    var entry_name;
+    if (filterName) {
+        entry_name = filterName + '%2F' + encodeURIComponent(encodeURIComponent(entry['@value']));
+    }
+    else {
+        entry_name = cat['@name'] + '%2F' + encodeURIComponent(encodeURIComponent(entry['@value']));
+    }
 	var checked = "";
 	var selected = "";
 	if(query.includes(entry_name)){
@@ -212,7 +218,7 @@ catalog.prototype.getCatalogEntry = function(query, cat, entry){
 	return '<div class="catalog_filter_entry' + selected + '"><input ' + checked + ' type="checkbox" class="catalog_filter_entry_ck" name="'+ entry_name + '"/>&nbsp;&nbsp;&nbsp;'+ entry['@label'] + ' (' + entry['@count'] +')</div>';
 }
 
-catalog.prototype.getFilterEntry = function(query, cat, filterTitle){
+CatalogView.prototype.getFilterEntry = function(query, cat, filterTitle, filterName){
 	var filter_code = '<ul class="catalog_filter_cat">'+
 		'<li class="box box-default" style="list-style-type: none;">'+	
 		'<div class="box-header with-border catalog_filter_title">'+
@@ -229,30 +235,30 @@ catalog.prototype.getFilterEntry = function(query, cat, filterTitle){
 	if('category' in cat && Array.isArray(cat.category) && cat.category.length > 0){
 		for(var idx = 0; idx < cat.category.length; idx++){
 			var entry = cat.category[idx];
-			filter_code += this.getCatalogEntry(query, cat, entry);
+			filter_code += this.getCatalogEntry(query, cat, entry, filterName);
 		}
 	}
 	if('category' in cat && '@value' in cat.category){
 		var entry = cat.category;
-		filter_code += this.getCatalogEntry(query, cat, entry);
+		filter_code += this.getCatalogEntry(query, cat, entry, filterName);
 	}
 	filter_code += '</div></li></ul>';
 	return filter_code;
 }
 
-catalog.prototype.applyPatternBasedCategories = function(entry, config, subcategories){
+CatalogView.prototype.applyPatternBasedCategories = function(entry, config, subcategories){
 	for(var idx = 0; idx < config.length; idx++){
 		var currentConf = config[idx];
 		if (currentConf['labelPattern'] && entry['@label'].match(config[idx]['labelPattern'])) {
 			if (!subcategories[currentConf['name']]) {
-				subcategories[currentConf['name']] = {"@name": currentConf['name'], "@label": currentConf['title'], "entries": []};
+				subcategories[currentConf['name']] = {"@name": currentConf['name'], "@label": currentConf['title'], "category": []};
 			}
-			subcategories[currentConf['name']]["entries"].push(entry);
+			subcategories[currentConf['name']]["category"].push(entry);
 		}
 	}
 }
 
-catalog.prototype.getPatternBasedCategories = function(cat, config){
+CatalogView.prototype.getPatternBasedCategories = function(cat, config){
 	var subCategories = {};
 	if('category' in cat && Array.isArray(cat.category) && cat.category.length > 0){
 		for(var idx = 0; idx < cat.category.length; idx++){
@@ -267,7 +273,7 @@ catalog.prototype.getPatternBasedCategories = function(cat, config){
 	return subCategories;
 }
 
-catalog.prototype.getMetadataEntry = function(metadata){
+CatalogView.prototype.getMetadataEntry = function(metadata){
 	var met = '';
 	if(metadata){
 		met += '<div class="catalog_content_layer col-md-6">';
@@ -318,7 +324,7 @@ catalog.prototype.getMetadataEntry = function(metadata){
 	return met;
 }
 
-catalog.prototype.getKeywordQuery = function(keywords, key){
+CatalogView.prototype.getKeywordQuery = function(keywords, key){
 	var cat_array = keywords.split(";");
 	var cats = "";
 	for(var i=0; i<cat_array.length; i++){
@@ -333,7 +339,7 @@ catalog.prototype.getKeywordQuery = function(keywords, key){
 	return cats;
 }
 
-catalog.prototype.createResourceLink = function(links){
+CatalogView.prototype.createResourceLink = function(links){
 	var link = links.split('|');
 	var content = '';
 	if(link.length==6){
@@ -365,7 +371,7 @@ catalog.prototype.createResourceLink = function(links){
 }
 
 
-catalog.prototype.createResourceMap = function(id, links){
+CatalogView.prototype.createResourceMap = function(id, links){
 	var link = links.split('|');
 	var content = '';
 	if(link.length==6){
@@ -385,7 +391,7 @@ catalog.prototype.createResourceMap = function(id, links){
 	return content;
 }
 
-catalog.prototype.linkResourceMap = function(){
+CatalogView.prototype.linkResourceMap = function(){
 	var self = this;
 	
 	$(".catalog_add_layer").unbind("click").click(function(){
@@ -424,7 +430,7 @@ catalog.prototype.linkResourceMap = function(){
 }
 
 
-catalog.prototype.createLayerGroup = function() {
+CatalogView.prototype.createLayerGroup = function() {
 	var self = this;
 	var groupId = 'geonetwork-group';
 	
@@ -485,7 +491,7 @@ catalog.prototype.createLayerGroup = function() {
 }
 
 
-catalog.prototype.reorder = function(event,ui) {
+CatalogView.prototype.reorder = function(event,ui) {
 	var groupNumber = ui.item[0].parentNode.dataset.groupnumber;
 	var groupLayers = ui.item[0].parentNode.children;
 	var mapLayers = this.map.getLayers();
@@ -505,7 +511,7 @@ catalog.prototype.reorder = function(event,ui) {
 };
 
 
-catalog.prototype.createLayer = function(name, title, group_visible, zIndex) {
+CatalogView.prototype.createLayer = function(name, title, group_visible, zIndex) {
 	var self = this;
 	
 	var id = "geonetwork-" + name.replace(":", "-");
@@ -646,7 +652,7 @@ catalog.prototype.createLayer = function(name, title, group_visible, zIndex) {
 
 };
 
-catalog.prototype.zoomToLayer = function(layer) {
+CatalogView.prototype.zoomToLayer = function(layer) {
 	var self = this;
 	var layer_name = layer.get("id").replace("geonetwork-", "");
 
@@ -672,7 +678,7 @@ catalog.prototype.zoomToLayer = function(layer) {
 		});
 }
 
-catalog.prototype.getCatalogFilters = function(query, search, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent){
+CatalogView.prototype.getCatalogFilters = function(query, search, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent){
 	var self = this;
 	var filters = ""
 	if(search && search.length > 0){
@@ -713,12 +719,14 @@ catalog.prototype.getCatalogFilters = function(query, search, categories, keywor
 	var facetsOrder = ["panaceaWorkingGroups", "interregMedProjects", "type", "spatialRepresentationType"];
 	var disabledFacets = ["mdActions"];
 
-	var url = '/gvsigonline/catalog/get_query/?_content_type=json&bucket=s101&facet.q='+query+'&fast=index&from=1&resultType=details&sortBy=relevance';
+        // FIXME: this should be parametrized from config
+	var url = '/geonetwork/srv/eng/q?_content_type=json&bucket=s101&facet.q='+query+'&fast=index&from=1&resultType=details&sortBy=relevance';
+   	//var url = '/gvsigonline/catalog/get_query/?_content_type=json&bucket=s101&facet.q='+query+'&fast=index&from=1&resultType=details&sortBy=relevance';
 	$.ajax({
 		url: url,
 		success: function(response) {
 			try{
-				response = JSON.parse(response);
+				//response = JSON.parse(response);
 				self.data = {};
 				
 				var all_filters_code = '';
@@ -730,7 +738,7 @@ catalog.prototype.getCatalogFilters = function(query, search, categories, keywor
 							var subFilters = self.getPatternBasedCategories(cat, facetsConfig[cat['@name']]);
 							for(var subFilterName in subFilters){
 								var subFilter = subFilters[subFilterName];
-								shownFilters[cat['@name']] = self.getFilterEntry(query, subFilter, subFilter['@label']);
+								shownFilters[subFilter['@name']] = self.getFilterEntry(query, subFilter, subFilter['@label'], cat['@name']);
 							}
 						}
  						else {
@@ -871,7 +879,7 @@ catalog.prototype.getCatalogFilters = function(query, search, categories, keywor
 	});
 }
 
-catalog.prototype.createDetailsPanel = function(id){
+CatalogView.prototype.createDetailsPanel = function(id){
 	var self = this;
 	
 //	var links = self.data[id].link;
@@ -929,7 +937,7 @@ catalog.prototype.createDetailsPanel = function(id){
 	
 }
 
-catalog.prototype.showPanel = function(){
+CatalogView.prototype.showPanel = function(){
 	this.catalog_panel.show();
 	this.map_container.hide();
 	if(!this.catalog_map){
@@ -937,7 +945,7 @@ catalog.prototype.showPanel = function(){
 	}
 }
 
-catalog.prototype.hidePanel = function(){
+CatalogView.prototype.hidePanel = function(){
 	this.map_container.show();
 	this.catalog_panel.hide();
 }
