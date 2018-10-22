@@ -137,7 +137,7 @@ def createDetailsPanel(response, metadata_id):
              
     html += '    </div>'
     
-    html += '    <div class="col-md-4" style="background-color: #eee;padding-bottom: 20px;">'
+    html += '    <div class="col-md-4" style="background-color: #eee;padding: 20px;">'
     if response['thumbnails'].__len__() > 0: 
         for thumbnail in response['thumbnails']:
             html += '            <img src="'+thumbnail['url']+'" alt="'+thumbnail['name']+'" style="width:100%"/><br />'
