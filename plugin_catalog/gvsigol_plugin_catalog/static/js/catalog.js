@@ -537,11 +537,11 @@ CatalogView.prototype.createLayer = function(name, title, group_visible, zIndex)
 	ui += '			</div>';
 	ui += '			</div>';
 	ui += '		<div class="box-body" style="display: none;">';
-	ui += '			<a id="show-metadata-' + id + '" data-layerid="' + id2 + '" class="btn btn-block btn-social btn-custom-tool show-metadata-link">';
+	ui += '			<a id="show-metadata-' + id + '" data-layerid="' + id2 + '" class="btn btn-block btn-social btn-custom-tool show-metadata-link show-metadata-link2">';
 	ui += '				<i class="fa fa-external-link"></i> ' + gettext('Layer metadata');
 	ui += '			</a>';
 	
-	ui += '	<a id="zoom-to-layer-' + id + '" href="#" data-layerid="' + id2 + '" class="btn btn-block btn-social btn-custom-tool zoom-to-layer">';
+	ui += '	<a id="zoom-to-layer-' + id + '" href="#" data-layerid="' + id2 + '" class="btn btn-block btn-social btn-custom-tool zoom-to-layer zoom-to-layer2">';
 	ui += '		<i class="fa fa-search" aria-hidden="true"></i> ' + gettext('Zoom to layer');
 	ui += '	</a>';
 	
@@ -620,7 +620,7 @@ CatalogView.prototype.createLayer = function(name, title, group_visible, zIndex)
 		}, this);
 	});
 	
-	$(".zoom-to-layer").unbind("click").on('click', function(e) {
+	$(".zoom-to-layer2").unbind("click").on('click', function(e) {
 		var layers = self.map.getLayers();
 		var selectedLayer = null;
 		var id = $(this).attr("data-layerid");
@@ -634,7 +634,7 @@ CatalogView.prototype.createLayer = function(name, title, group_visible, zIndex)
 		self.zoomToLayer(selectedLayer);
 	});
 	
-	$(".show-metadata-link").unbind("click").on('click', function(e) {
+	$(".show-metadata-link2").unbind("click").on('click', function(e) {
 		var layers = self.map.getLayers();
 		var selectedLayer = null;
 		var id = $(this).attr("data-layerid");
