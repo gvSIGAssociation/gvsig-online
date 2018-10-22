@@ -71,112 +71,107 @@ def get_metadata_id(request, layer_ws, layer_name):
                     if not response:
                         return  HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
                     
-                    response['html'] = createDetailsPanel(response, layerMetadata.metadata_uuid)
+                    #http://localhost/gvsigonline/catalog/get_metadata/<metadata_id>/?getPanel=true
+                    html = '<div class="row" style="padding: 20px;">'
+                    html += '    <div class="col-md-8">'
+                    html += '        <h4 class="modal-catalog-title" style="font-weight:bold">'+response['title']+'</h4>'
+                    html += '        <p>'+response['abstract']+'</p>'
+                    html += '        <br /><h4 class="modal-catalog-title">'+'About this resource'+'</h4>'
+                    html += '        <span class="catalog_detail_attr">'+'Categories'+':</span>'
+                     
+                    categories = ''
+                    cat_count = 0
+                    for cat in response['categories']:
+                        if cat and cat.strip() != '':
+                            if cat_count > 0:
+                                categories += ',' + cat
+                            else:
+                                categories += cat
+                                cat_count += 1
+                     
+                    html += '        '+ categories
+                    html += '        <br />'
+                
+                    html += '        <span class="catalog_detail_attr">'+'Keywords'+':</span>'
+                    keywords = ''
+                    key_count = 0
+                    for key in response['keywords']:
+                        if key and key.strip() != '':
+                            if key_count > 0:
+                                keywords += ',' + key
+                            else:
+                                keywords += key
+                                key_count += 1
+                                 
+                    html += '        '+ keywords
+                    html += '        <br />'
+                    
+                    html += '        <span class="catalog_detail_attr">'+'Legal constraints'+':</span>'
+                    html += '        .......TO DO....'
+                    html += '        <br />'
+                 
+                    html += '        <br /><br /><h4 class="modal-catalog-title">'+'Technical information'+'</h4>'
+                        
+                    html += '        <span class="catalog_detail_attr">'+'Representation type'+':</span>'
+                    html += '        '+response['representation_type']
+                    html += '        <br />'
+                             
+                    html += '        <span class="catalog_detail_attr">'+'Scale'+':</span>'
+                    html += '        1:'+response['scale']
+                    html += '        <br />'
+                             
+                    html += '        <span class="catalog_detail_attr">'+'Coordinate Reference System'+':</span>'
+                    html += '        '+response['srs']
+                    html += '        <br />'
+                             
+                    html += '        <span class="catalog_detail_attr">'+'Metadata identifier'+':</span>'
+                    html += '        '+response['metadata_id']
+                    html += '        <br />'
+                             
+                    html += '    </div>'
+                    
+                    html += '    <div class="col-md-4" style="background-color: #eee;padding: 20px;">'
+                    if response['thumbnails'].__len__() > 0: 
+                        for thumbnail in response['thumbnails']:
+                            html += '            <img src="'+thumbnail['url']+'" alt="'+thumbnail['name']+'" style="width:100%"/><br />'
+                     
+                    html += '        <br /><br /><h4 class="modal-catalog-title">'+'Download and links'+'</h4>'
+                    if response['resources'].__len__() > 0: 
+                        for resource in response['resources']:
+                            default_key = 'name'
+                            if not resource[default_key]:
+                                default_key = 'descriptions'
+                            html += '            '+ str(resource[default_key])
+                            if resource['protocol'] == 'WWW:DOWNLOAD-1.0-http--download':
+                                html += '                <a href="'+resource['url']+'" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">Download</a>'
+                            if resource['protocol'] == "OGC:WMS":
+                                html += '                <a href="'+resource['url']+'?service=WMS&request=GetCapabilities" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">OGC:WMS</a>'
+                            if resource['protocol'] == "OGC:WFS-1.0.0-http-get-capabilities":
+                                html += '                <a href="'+resource['url']+'?service=WFS&version=1.0.0&request=GetFeature&typeName='+str(resource['name'])+'&outputFormat=SHAPE-ZIP" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">Get shape</a>'
+                            html += '            <div style="clear:both"></div>'
+                    else:
+                        html += '        '+'No hay recursos disponibles'
+                     
+                    html += '        <br /><br /><h4 class="modal-catalog-title">'+'Spatial Extent'+'</h4>'
+                    html += '        <img class="gn-img-thumbnail img-thumbnail gn-img-extent" data-ng-src="'+response['image_url']+'" src="'+response['image_url']+'" style="width:100%"/>'
+                             
+                    html += '        <br /><br /><h4 class="modal-catalog-title">'+'Temporal Extent'+'</h4>'
+                    html += '        <span class="catalog_detail_attr">'+'Publication date'+':</span>'
+                    html += '        '+response['publish_date']
+                    html += '        <br />'
+                             
+                    html += '        <span class="catalog_detail_attr">'+'Period'+':</span>'
+                    html += '        '+response['period_start']+' - '+response['period_end']
+                    html += '        <br />'
+                             
+                    html += '    </div>'
+                    html += '</div>' 
+                    
+                    response['html']= html
                 response['success'] = True
                 
     return HttpResponse(json.dumps(response), content_type='application/json')
 
-def createDetailsPanel(response, metadata_id):
-
-    #http://localhost/gvsigonline/catalog/get_metadata/<metadata_id>/?getPanel=true
-    html = '<div class="row" style="padding: 20px;">'
-    html += '    <div class="col-md-8">'
-    html += '        <h4 class="modal-catalog-title" style="font-weight:bold">'+response['title']+'</h4>'
-    html += '        <p>'+response['abstract']+'</p>'
-    html += '        <br /><h4 class="modal-catalog-title">'+'About this resource'+'</h4>'
-    html += '        <span class="catalog_detail_attr">'+'Categories'+':</span>'
-     
-    categories = ''
-    cat_count = 0
-    for cat in response['categories']:
-        if cat and cat.strip() != '':
-            if cat_count > 0:
-                categories += ',' + cat
-            else:
-                categories += cat
-                cat_count += 1
-     
-    html += '        '+ categories
-    html += '        <br />'
-
-    html += '        <span class="catalog_detail_attr">'+'Keywords'+':</span>'
-    keywords = ''
-    key_count = 0
-    for key in response['keywords']:
-        if key and key.strip() != '':
-            if key_count > 0:
-                keywords += ',' + key
-            else:
-                keywords += key
-                key_count += 1
-                 
-    html += '        '+ keywords
-    html += '        <br />'
-    
-    html += '        <span class="catalog_detail_attr">'+'Legal constraints'+':</span>'
-    html += '        .......TO DO....'
-    html += '        <br />'
- 
-    html += '        <br /><br /><h4 class="modal-catalog-title">'+'Technical information'+'</h4>'
-        
-    html += '        <span class="catalog_detail_attr">'+'Representation type'+':</span>'
-    html += '        '+response['representation_type']
-    html += '        <br />'
-             
-    html += '        <span class="catalog_detail_attr">'+'Scale'+':</span>'
-    html += '        1:'+response['scale']
-    html += '        <br />'
-             
-    html += '        <span class="catalog_detail_attr">'+'Coordinate Reference System'+':</span>'
-    html += '        '+response['srs']
-    html += '        <br />'
-             
-    html += '        <span class="catalog_detail_attr">'+'Metadata identifier'+':</span>'
-    html += '        '+response['metadata_id']
-    html += '        <br />'
-             
-    html += '    </div>'
-    
-    html += '    <div class="col-md-4" style="background-color: #eee;padding: 20px;">'
-    if response['thumbnails'].__len__() > 0: 
-        for thumbnail in response['thumbnails']:
-            html += '            <img src="'+thumbnail['url']+'" alt="'+thumbnail['name']+'" style="width:100%"/><br />'
-     
-    html += '        <br /><br /><h4 class="modal-catalog-title">'+'Download and links'+'</h4>'
-    if response['resources'].__len__() > 0: 
-        for resource in response['resources']:
-            default_key = 'name'
-            if not resource[default_key]:
-                default_key = 'descriptions'
-            html += '            '+ str(resource[default_key])
-            if resource['protocol'] == 'WWW:DOWNLOAD-1.0-http--download':
-                html += '                <a href="'+resource['url']+'" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">Download</a>'
-            if resource['protocol'] == "OGC:WMS":
-                html += '                <a href="'+resource['url']+'?service=WMS&request=GetCapabilities" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">OGC:WMS</a>'
-            if resource['protocol'] == "OGC:WFS-1.0.0-http-get-capabilities":
-                html += '                <a href="'+resource['url']+'?service=WFS&version=1.0.0&request=GetFeature&typeName='+str(resource['name'])+'&outputFormat=SHAPE-ZIP" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">Get shape</a>'
-            html += '            <div style="clear:both"></div>'
-    else:
-        html += '        '+'No hay recursos disponibles'
-     
-    html += '        <br /><br /><h4 class="modal-catalog-title">'+'Spatial Extent'+'</h4>'
-    html += '        <img class="gn-img-thumbnail img-thumbnail gn-img-extent" data-ng-src="'+response['image_url']+'" src="'+response['image_url']+'" style="width:100%"/>'
-             
-    html += '        <br /><br /><h4 class="modal-catalog-title">'+'Temporal Extent'+'</h4>'
-    html += '        <span class="catalog_detail_attr">'+'Publication date'+':</span>'
-    html += '        '+response['publish_date']
-    html += '        <br />'
-             
-    html += '        <span class="catalog_detail_attr">'+'Period'+':</span>'
-    html += '        '+response['period_start']+' - '+response['period_end']
-    html += '        <br />'
-             
-    html += '    </div>'
-    html += '</div>' 
-    
-    response['html']= html
-    
-    return response
 
 
 def get_metadata(request, metadata_id, get_panel=False):
@@ -192,7 +187,103 @@ def get_metadata(request, metadata_id, get_panel=False):
             if not response:
                 return  HttpResponse(json.dumps({}, indent=4), content_type='application/json')
             if get_panel:
-                response = createDetailsPanel(response, metadata_id)
+                #http://localhost/gvsigonline/catalog/get_metadata/<metadata_id>/?getPanel=true
+                html = '<div class="row" style="padding: 20px;">'
+                html += '    <div class="col-md-8">'
+                html += '        <h4 class="modal-catalog-title" style="font-weight:bold">'+response['title']+'</h4>'
+                html += '        <p>'+response['abstract']+'</p>'
+                html += '        <br /><h4 class="modal-catalog-title">'+'About this resource'+'</h4>'
+                html += '        <span class="catalog_detail_attr">'+'Categories'+':</span>'
+                 
+                categories = ''
+                cat_count = 0
+                for cat in response['categories']:
+                    if cat and cat.strip() != '':
+                        if cat_count > 0:
+                            categories += ',' + cat
+                        else:
+                            categories += cat
+                            cat_count += 1
+                 
+                html += '        '+ categories
+                html += '        <br />'
+            
+                html += '        <span class="catalog_detail_attr">'+'Keywords'+':</span>'
+                keywords = ''
+                key_count = 0
+                for key in response['keywords']:
+                    if key and key.strip() != '':
+                        if key_count > 0:
+                            keywords += ',' + key
+                        else:
+                            keywords += key
+                            key_count += 1
+                             
+                html += '        '+ keywords
+                html += '        <br />'
+                
+                html += '        <span class="catalog_detail_attr">'+'Legal constraints'+':</span>'
+                html += '        .......TO DO....'
+                html += '        <br />'
+             
+                html += '        <br /><br /><h4 class="modal-catalog-title">'+'Technical information'+'</h4>'
+                    
+                html += '        <span class="catalog_detail_attr">'+'Representation type'+':</span>'
+                html += '        '+response['representation_type']
+                html += '        <br />'
+                         
+                html += '        <span class="catalog_detail_attr">'+'Scale'+':</span>'
+                html += '        1:'+response['scale']
+                html += '        <br />'
+                         
+                html += '        <span class="catalog_detail_attr">'+'Coordinate Reference System'+':</span>'
+                html += '        '+response['srs']
+                html += '        <br />'
+                         
+                html += '        <span class="catalog_detail_attr">'+'Metadata identifier'+':</span>'
+                html += '        '+response['metadata_id']
+                html += '        <br />'
+                         
+                html += '    </div>'
+                
+                html += '    <div class="col-md-4" style="background-color: #eee;padding: 20px;">'
+                if response['thumbnails'].__len__() > 0: 
+                    for thumbnail in response['thumbnails']:
+                        html += '            <img src="'+thumbnail['url']+'" alt="'+thumbnail['name']+'" style="width:100%"/><br />'
+                 
+                html += '        <br /><br /><h4 class="modal-catalog-title">'+'Download and links'+'</h4>'
+                if response['resources'].__len__() > 0: 
+                    for resource in response['resources']:
+                        default_key = 'name'
+                        if not resource[default_key]:
+                            default_key = 'descriptions'
+                        html += '            '+ str(resource[default_key])
+                        if resource['protocol'] == 'WWW:DOWNLOAD-1.0-http--download':
+                            html += '                <a href="'+resource['url']+'" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">Download</a>'
+                        if resource['protocol'] == "OGC:WMS":
+                            html += '                <a href="'+resource['url']+'?service=WMS&request=GetCapabilities" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">OGC:WMS</a>'
+                        if resource['protocol'] == "OGC:WFS-1.0.0-http-get-capabilities":
+                            html += '                <a href="'+resource['url']+'?service=WFS&version=1.0.0&request=GetFeature&typeName='+str(resource['name'])+'&outputFormat=SHAPE-ZIP" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">Get shape</a>'
+                        html += '            <div style="clear:both"></div>'
+                else:
+                    html += '        '+'No hay recursos disponibles'
+                 
+                html += '        <br /><br /><h4 class="modal-catalog-title">'+'Spatial Extent'+'</h4>'
+                html += '        <img class="gn-img-thumbnail img-thumbnail gn-img-extent" data-ng-src="'+response['image_url']+'" src="'+response['image_url']+'" style="width:100%"/>'
+                         
+                html += '        <br /><br /><h4 class="modal-catalog-title">'+'Temporal Extent'+'</h4>'
+                html += '        <span class="catalog_detail_attr">'+'Publication date'+':</span>'
+                html += '        '+response['publish_date']
+                html += '        <br />'
+                         
+                html += '        <span class="catalog_detail_attr">'+'Period'+':</span>'
+                html += '        '+response['period_start']+' - '+response['period_end']
+                html += '        <br />'
+                         
+                html += '    </div>'
+                html += '</div>' 
+                
+                response['html']= html
                 
                 return  HttpResponse(json.dumps(response, indent=4), content_type='application/json')
             else:
