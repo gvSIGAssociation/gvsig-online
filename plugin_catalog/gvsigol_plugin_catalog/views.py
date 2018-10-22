@@ -143,17 +143,17 @@ def get_metadata(request, metadata_id):
                             default_key = 'descriptions'
                         html += '            '+ str(resource[default_key])
                         if resource['protocol'] == 'WWW:DOWNLOAD-1.0-http--download':
-                            html += '                <a href="'+resource['url']+'" target="_blank" style="float:right; background-color:#eee; padding:5px; width:75px">Download</a>'
+                            html += '                <a href="'+resource['url']+'" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">Download</a>'
                         if resource['protocol'] == "OGC:WMS":
-                            html += '                <a href="'+resource['url']+'?service=WMS&request=GetCapabilities" target="_blank" style="float:right; background-color:#eee; padding:5px; width:75px">OGC:WMS</a>'
+                            html += '                <a href="'+resource['url']+'?service=WMS&request=GetCapabilities" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">OGC:WMS</a>'
                         if resource['protocol'] == "OGC:WFS-1.0.0-http-get-capabilities":
-                            html += '                <a href="'+resource['url']+'?service=WFS&version=1.0.0&request=GetFeature&typeName='+str(resource['name'])+'&outputFormat=SHAPE-ZIP" target="_blank" style="float:right; background-color:#eee; padding:5px; width:75px">Get shape</a>'
+                            html += '                <a href="'+resource['url']+'?service=WFS&version=1.0.0&request=GetFeature&typeName='+str(resource['name'])+'&outputFormat=SHAPE-ZIP" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">Get shape</a>'
                         html += '            <div style="clear:both"></div>'
                 else:
                      html += '        '+'No hay recursos disponibles'
                 
                 html += '        <br /><br /><h4 class="modal-catalog-title">'+'Spatial Extent'+'</h4>'
-                html += '        <img class="gn-img-thumbnail img-thumbnail gn-img-extent" data-ng-src="'+response['image_url']+'" src="'+response['image_url']+'"/>'
+                html += '        <img class="gn-img-thumbnail img-thumbnail gn-img-extent" data-ng-src="'+response['image_url']+'" src="'+response['image_url']+'" style="width:100%"/>'
                         
                 html += '        <br /><br /><h4 class="modal-catalog-title">'+'Temporal Extent'+'</h4>'
                 html += '        <span class="catalog_detail_attr">'+'Publication date'+':</span>'
