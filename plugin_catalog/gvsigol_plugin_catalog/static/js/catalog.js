@@ -36,7 +36,7 @@ var CatalogView = function(map, layerTree) {
 CatalogView.prototype.initialization = function(){
 	var self = this;
 	var filters = this.getCatalogFilters("");
-	
+
 	var catalogPanel = '';
 	catalogPanel += '<div id="catalog_container">';
 
@@ -128,29 +128,29 @@ CatalogView.prototype.initialization = function(){
 	catalogPanel += '</div>';
 	catalogPanel += '</div>';
 
-	
+
 	catalogPanel += '<div class="col-md-3" id="catalog_filter">';
 	catalogPanel += '</div>';
-	
+
 	catalogPanel += '<div class="col-md-9" id="catalog_content">';
 	catalogPanel += '</div>';
-	
-	
+
+
 	catalogPanel += '</div>';
 	$("body").append(catalogPanel);
-	
+
 	this.catalog_panel = $("#catalog_container");
-	
-	
+
+
 	$("#catalog-search-button").unbind("click").click(function(){
 		self.filterCatalog();
 	});
-	
+
 	$("#catalog-search-advanced-button").unbind("click").click(function(){
 		$("#catalog_search_advanced").toggle();
 		$("#catalog_map_full").toggle(); 
 	});
-	
+
 	$("#catalog-clear-button").unbind("click").click(function(){
 		$("#gn-any-field").val("");
 		$("#categoriesF").val("");
@@ -163,7 +163,7 @@ CatalogView.prototype.initialization = function(){
 		self.catalog_map.cleanData();
 		self.launchQuery();
 	});
-	
+
 	$("#catalog_map_clean").unbind("click").click(function(){
 		self.catalog_map.cleanData();
 		self.filterCatalog();
@@ -195,19 +195,19 @@ CatalogView.prototype.launchQuery = function(search, categories, keywords, resou
 			query += $(this).attr("name");
 			is_first = false;
 		}
-		
+
 	});
 	this.getCatalogFilters(query, search, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent);
 }
 
 CatalogView.prototype.getCatalogEntry = function(query, cat, entry, filterName){
-    var entry_name;
-    if (filterName) {
-        entry_name = filterName + '%2F' + encodeURIComponent(encodeURIComponent(entry['@value']));
-    }
-    else {
-        entry_name = cat['@name'] + '%2F' + encodeURIComponent(encodeURIComponent(entry['@value']));
-    }
+	var entry_name;
+	if (filterName) {
+		entry_name = filterName + '%2F' + encodeURIComponent(encodeURIComponent(entry['@value']));
+	}
+	else {
+		entry_name = cat['@name'] + '%2F' + encodeURIComponent(encodeURIComponent(entry['@value']));
+	}
 	var checked = "";
 	var selected = "";
 	if(query.includes(entry_name)){
@@ -220,18 +220,18 @@ CatalogView.prototype.getCatalogEntry = function(query, cat, entry, filterName){
 
 CatalogView.prototype.getFilterEntry = function(query, cat, filterTitle, filterName){
 	var filter_code = '<ul class="catalog_filter_cat">'+
-		'<li class="box box-default" style="list-style-type: none;">'+	
-		'<div class="box-header with-border catalog_filter_title">'+
-			'<span class="text">'+ 
-			filterTitle +
-			'</span>'+
-			'<div class="box-tools pull-right">'+
-				'<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">'+
-				'<i class="fa fa-minus"></i>'+
-				'</button>'+
-			'</div>'+
-		'</div>'+
-		'<div id="baselayers-group" class="box-body" style="display:block">';
+	'<li class="box box-default" style="list-style-type: none;">'+	
+	'<div class="box-header with-border catalog_filter_title">'+
+	'<span class="text">'+ 
+	filterTitle +
+	'</span>'+
+	'<div class="box-tools pull-right">'+
+	'<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">'+
+	'<i class="fa fa-minus"></i>'+
+	'</button>'+
+	'</div>'+
+	'</div>'+
+	'<div id="baselayers-group" class="box-body" style="display:block">';
 	if('category' in cat && Array.isArray(cat.category) && cat.category.length > 0){
 		for(var idx = 0; idx < cat.category.length; idx++){
 			var entry = cat.category[idx];
@@ -283,7 +283,7 @@ CatalogView.prototype.getMetadataEntry = function(metadata){
 		met += '	</div>';
 		met += '	<div class="col-md-3 catalog_content_lateral">';
 		met += '		<div class="catalog_content_thumbnail">';
-		
+
 		var image_src = "";
 		if("image" in metadata){
 			for(var i=0; i<metadata["image"].length; i++){
@@ -363,9 +363,20 @@ CatalogView.prototype.createResourceLink = function(links){
 				content += '		<div style="clear:both"></div>';
 				content += '	</a>';
 				content += '</li>';
+			}else{
+				if(type == "OGC:WFS"){
+					content += '<li class="catalog-link">';
+					content += '	<a href="'+link[2]+'?service=WFS&version=1.0.0&request=GetFeature&typeName='+str(link[0])+'&outputFormat=SHAPE-ZIP" target="_blank">';
+					content += '		<i class="fa fa-file-archive-o" aria-hidden="true"></i>';
+					content += '		<span class="catalog-link-resource"><p>' + link[1] + '<br/><span class="catalog-entry-subtitle">' + link[0] + '</span></p></span>';
+					content += '		<div class="catalog-link-button catalog_content_button">'+gettext("Download")+'</div>';
+					content += '		<div style="clear:both"></div>';
+					content += '	</a>';
+					content += '</li>';
+				}
 			}
 		}
-		
+
 	}
 	return content;
 }
@@ -386,44 +397,44 @@ CatalogView.prototype.createResourceMap = function(id, links){
 			content += '	</a>';
 			content += '</li>';
 		}
-		
+
 	}
 	return content;
 }
 
 CatalogView.prototype.linkResourceMap = function(){
 	var self = this;
-	
+
 	$(".catalog_add_layer").unbind("click").click(function(){
 		var url = $(this).attr("url");
 		var name = $(this).attr("name");
 		var title = $(this).attr("title");
 		var id = $(this).attr("data-id");
-		
+
 		var catalogLayer = new ol.layer.Tile({
-	          source: new ol.source.TileWMS({
-	            url: url,
-	            params: {
-	            	'LAYERS': name, 
-	            	'TILED': true, 
-	            	'dataid': id
-	            },
-	            serverType: 'geoserver',
-	          }),
-	          id : "geonetwork-" + name
+			source: new ol.source.TileWMS({
+				url: url,
+				params: {
+					'LAYERS': name, 
+					'TILED': true, 
+					'dataid': id
+				},
+				serverType: 'geoserver',
+			}),
+			id : "geonetwork-" + name
 		});
-		
+
 		self.map.addLayer(catalogLayer);
-		
+
 		var groupEntry = $("#geonetwork-group");
 		if(groupEntry.length == 0){
 			self.createLayerGroup();
 		}
-		
+
 		var group_visible = false;
 		group_visible = $("#layergroup-geonetwork-group").is(":checked");
 		self.createLayer(name, title, group_visible, groupEntry.length);
-		
+
 		$('#modal-catalog').modal('hide');
 		self.hidePanel();
 	});
@@ -433,7 +444,7 @@ CatalogView.prototype.linkResourceMap = function(){
 CatalogView.prototype.createLayerGroup = function() {
 	var self = this;
 	var groupId = 'geonetwork-group';
-	
+
 	var tree = '';
 	tree += '			<li class="box box-default collapsed-box" id="' + groupId + '">';
 	tree += '				<div class="box-header with-border">';
@@ -450,15 +461,15 @@ CatalogView.prototype.createLayerGroup = function() {
 	tree += '			</li>';
 
 	$(".layer-tree").append(tree);
-	
+
 	$(".layer-group").unbind("change").change(function (e) {
 		var groupId = 'geonetwork-layer-group'; 
 		var checked = this.checked;
-		
+
 		$("."+groupId+" .layer-box").each(function(){
 			var id = $(this).attr("data-layerid");
 			var layers = self.map.getLayers();
-			
+
 			layers.forEach(function(layer){
 				if (!layer.baselayer) {
 					if (layer.get("id") === id) {
@@ -477,7 +488,7 @@ CatalogView.prototype.createLayerGroup = function() {
 			}, this);
 		})
 	});
-	
+
 	$(".layer-tree-groups").sortable({
 		placeholder: "sort-highlight",
 		handle: ".handle",
@@ -495,10 +506,10 @@ CatalogView.prototype.reorder = function(event,ui) {
 	var groupNumber = ui.item[0].parentNode.dataset.groupnumber;
 	var groupLayers = ui.item[0].parentNode.children;
 	var mapLayers = this.map.getLayers();
-	
+
 	var zindex = parseInt(groupNumber);
 	var mapLayers_length = mapLayers.getLength();
-	
+
 	for (var i=0; i<groupLayers.length; i++) {
 		var layerid = groupLayers[i].dataset.layerid;
 		mapLayers.forEach(function(layer){
@@ -513,10 +524,10 @@ CatalogView.prototype.reorder = function(event,ui) {
 
 CatalogView.prototype.createLayer = function(name, title, group_visible, zIndex) {
 	var self = this;
-	
+
 	var id = "geonetwork-" + name.replace(":", "-");
 	var id2 = "geonetwork-" + name;
-	
+
 	var ui = '';
 	ui += '<div id="layer-box-' + id + '" data-layerid="' + id2 + '" data-zindex="'+ (100 + zIndex) +'" class="box layer-box thin-border box-default collapsed-box">';
 	ui += '		<div class="box-header with-border">';
@@ -540,22 +551,22 @@ CatalogView.prototype.createLayer = function(name, title, group_visible, zIndex)
 	ui += '			<a id="show-metadata-' + id + '" data-layerid="' + id2 + '" class="btn btn-block btn-social btn-custom-tool show-metadata-link show-metadata-link2">';
 	ui += '				<i class="fa fa-external-link"></i> ' + gettext('Layer metadata');
 	ui += '			</a>';
-	
+
 	ui += '	<a id="zoom-to-layer-' + id + '" href="#" data-layerid="' + id2 + '" class="btn btn-block btn-social btn-custom-tool zoom-to-layer zoom-to-layer2">';
 	ui += '		<i class="fa fa-search" aria-hidden="true"></i> ' + gettext('Zoom to layer');
 	ui += '	</a>';
-	
+
 	ui += '			<a id="remove-metadata-' + id + '" data-layerid="' + id2 + '" class="btn btn-block btn-social btn-custom-tool remove-metadata-link">';
 	ui += '				<i class="fa fa-times"></i> ' + gettext('Remove layer');
 	ui += '			</a>';
-		
+
 	ui += '			<label style="display: block; margin-top: 8px; width: 95%;">' + gettext('Opacity') + '<span id="layer-opacity-output-' + id + '" class="margin-l-15 gol-slider-output">%</span></label>';
 	ui += '			<div id="layer-opacity-slider" data-layerid="' + id2 + '" class="layer-opacity-slider"></div>';
 	ui += '		</div>';
 	ui += '</div>';
-	
+
 	$(".geonetwork-layer-group").append(ui);
-	
+
 	$(".geonetwork-ck").unbind("change").change(function (e) {
 		try {
 			var layers = self.map.getLayers();
@@ -575,7 +586,7 @@ CatalogView.prototype.createLayer = function(name, title, group_visible, zIndex)
 			console.log(e);
 		}
 	});
-	
+
 	$(".remove-metadata-link").unbind("click").click(function (e) {
 		var id = $(this).attr("data-layerid");
 		var layers = self.map.getLayers();
@@ -589,13 +600,13 @@ CatalogView.prototype.createLayer = function(name, title, group_visible, zIndex)
 			};
 		}, this);
 	});
-	
+
 	$( "#layer-box-" + id + " .layer-opacity-slider" ).slider({
-	    min: 0,
-	    max: 100,
-	    value: 100,
-	    slide: function( event, ui ) {
-	    	var layers = self.map.getLayers();
+		min: 0,
+		max: 100,
+		value: 100,
+		slide: function( event, ui ) {
+			var layers = self.map.getLayers();
 			var id = this.dataset.layerid;
 			layers.forEach(function(layer){
 				if (!("baselayer" in layer) || layer.baselayer == false) {
@@ -605,9 +616,9 @@ CatalogView.prototype.createLayer = function(name, title, group_visible, zIndex)
 					}
 				}						
 			}, this);
-	    }
+		}
 	});
-	
+
 	$(".opacity-range").unbind("change").on('change', function(e) {
 		var layers = self.map.getLayers();
 		var id = $(this).attr("data-layerid");
@@ -619,7 +630,7 @@ CatalogView.prototype.createLayer = function(name, title, group_visible, zIndex)
 			}						
 		}, this);
 	});
-	
+
 	$(".zoom-to-layer2").unbind("click").on('click', function(e) {
 		var layers = self.map.getLayers();
 		var selectedLayer = null;
@@ -633,7 +644,7 @@ CatalogView.prototype.createLayer = function(name, title, group_visible, zIndex)
 		}, this);
 		self.zoomToLayer(selectedLayer);
 	});
-	
+
 	$(".show-metadata-link2").unbind("click").on('click', function(e) {
 		var layers = self.map.getLayers();
 		var selectedLayer = null;
@@ -648,7 +659,7 @@ CatalogView.prototype.createLayer = function(name, title, group_visible, zIndex)
 		}, this);
 		//self.showMetadata(selectedLayer);
 	});
-	
+
 
 };
 
@@ -659,31 +670,31 @@ CatalogView.prototype.zoomToLayer = function(layer) {
 	var url = layer.getSource().urls[0]+'?request=GetCapabilities&service=WMS';
 	var parser = new ol.format.WMSCapabilities();
 	$.ajax(url).then(function(response) {
-		   var result = parser.read(response);
-		   var Layers = result.Capability.Layer.Layer; 
-		   var extent;
-		   for (var i=0, len = Layers.length; i<len; i++) {
-		     var layerobj = Layers[i];
-		     //if (layerobj.Name == layer_name) {
-		         extent = layerobj.EX_GeographicBoundingBox;
-		         break;
-		     //}
-		   }
-		   if((extent[0]==0 && extent[1]==0 && extent[2]==-1 && extent[3]==-1 )||
-			   (extent[0]==-1 && extent[1]==-1 && extent[2]==0 && extent[3]==0 )){
-			   return;
-		   }
-		   var ext = ol.proj.transformExtent(extent, ol.proj.get('EPSG:4326'), ol.proj.get('EPSG:3857'));
-		   self.map.getView().fit(ext, self.map.getSize());
-		});
+		var result = parser.read(response);
+		var Layers = result.Capability.Layer.Layer; 
+		var extent;
+		for (var i=0, len = Layers.length; i<len; i++) {
+			var layerobj = Layers[i];
+			//if (layerobj.Name == layer_name) {
+			extent = layerobj.EX_GeographicBoundingBox;
+			break;
+			//}
+		}
+		if((extent[0]==0 && extent[1]==0 && extent[2]==-1 && extent[3]==-1 )||
+				(extent[0]==-1 && extent[1]==-1 && extent[2]==0 && extent[3]==0 )){
+			return;
+		}
+		var ext = ol.proj.transformExtent(extent, ol.proj.get('EPSG:4326'), ol.proj.get('EPSG:3857'));
+		self.map.getView().fit(ext, self.map.getSize());
+	});
 }
 
 CatalogView.prototype.getCatalogFilters = function(query, search, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent){
 	var self = this;
 	var filters = ""
-	if(search && search.length > 0){
-		filters += "&any="+search;
-	}
+		if(search && search.length > 0){
+			filters += "&any="+search;
+		}
 	if(resources && resources.length > 0){
 		filters += this.getKeywordQuery(resources, "orgName");
 	}
@@ -715,20 +726,20 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 
 	// TODO: move config to plugin settings
 	var facetsConfig = {"orgName": {"title": "Organization"}, "sourceCatalog": {"title": "Source Catalog"},
-"createDateYear": {"title": "Year"}, "spatialRepresentationType": {"title": "Representation type"}, "maintenanceAndUpdateFrequency": {"title": "Update frequencies"}, "denominator": {"title": "Scale"}, "serviceType": {"title": "Service type"}, "gemetKeyword": {"title": "GEMET keywords"}, "panaceaKeyword": [{"name": "interregMedProjects", "title": "INTERREG Med Projects", "labelPattern": ".* project$"}, {"name": "panaceaWorkingGroups", "title": "Working group", "labelPattern": "^(.(?! project$))+$"}]};
+			"createDateYear": {"title": "Year"}, "spatialRepresentationType": {"title": "Representation type"}, "maintenanceAndUpdateFrequency": {"title": "Update frequencies"}, "denominator": {"title": "Scale"}, "serviceType": {"title": "Service type"}, "gemetKeyword": {"title": "GEMET keywords"}, "panaceaKeyword": [{"name": "interregMedProjects", "title": "INTERREG Med Projects", "labelPattern": ".* project$"}, {"name": "panaceaWorkingGroups", "title": "Working group", "labelPattern": "^(.(?! project$))+$"}]};
 	var facetsOrder = ["panaceaWorkingGroups", "interregMedProjects", "type", "spatialRepresentationType"];
 	var disabledFacets = ["mdActions"];
 
-        // FIXME: this should be parametrized from config
+	// FIXME: this should be parametrized from config
 	var url = '/geonetwork/srv/eng/q?_content_type=json&bucket=s101&facet.q='+query+'&fast=index&from=1&resultType=details&sortBy=relevance';
-   	//var url = '/gvsigonline/catalog/get_query/?_content_type=json&bucket=s101&facet.q='+query+'&fast=index&from=1&resultType=details&sortBy=relevance';
+	//var url = '/gvsigonline/catalog/get_query/?_content_type=json&bucket=s101&facet.q='+query+'&fast=index&from=1&resultType=details&sortBy=relevance';
 	$.ajax({
 		url: url,
 		success: function(response) {
 			try{
 				//response = JSON.parse(response);
 				self.data = {};
-				
+
 				var all_filters_code = '';
 				var shownFilters = {};
 				for(var idx = 0; idx < response.summary.dimension.length; idx++){
@@ -741,7 +752,7 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 								shownFilters[subFilter['@name']] = self.getFilterEntry(query, subFilter, subFilter['@label'], cat['@name']);
 							}
 						}
- 						else {
+						else {
 							if (facetsConfig[cat['@name']]) {
 								var filterLabel = facetsConfig[cat['@name']]['title'];
 							}
@@ -765,8 +776,8 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 				}
 
 				$("#catalog_filter").html(all_filters_code);
-				
-				
+
+
 				var content_code = '';
 				if(Array.isArray(response.metadata)){
 					for(var idx = 0; idx < response.metadata.length; idx++){
@@ -780,20 +791,20 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 					self.data[metadata['geonet:info']['uuid']] = metadata;
 				}
 				$("#catalog_content").html(content_code);
-				
-				
+
+
 				$(".catalog_details").unbind("click").click(function(){
 					var id = $(this).attr("name");
 					self.createDetailsPanel(id);
-					
+
 				});
-				
-				
+
+
 				$(".catalog_download").unbind("click").click(function(){
 					var id = $(this).attr("name");
 					$('.modal-catalog-title').html(gettext("List of downloads"));
 					var links = self.data[id].link;
-					
+
 					var content = "<ul>";
 					var aux_content = "";
 					if(Array.isArray(links)){
@@ -806,7 +817,7 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 						}
 					}
 					content += aux_content + "<ul>";
-					
+
 					if(aux_content.length == 0){
 						aux_content += '<div style="padding: 10px">';
 						aux_content += '<div class="no_catalog_content col-md-12">';
@@ -815,50 +826,92 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 						aux_content += '</div>';
 						aux_content += '<div style="clear:both"></div>';
 						aux_content += '</div>';
-						
+
 						content = aux_content;
 					}
-					
+
 					$('.modal-catalog-body').html(content);
 					$('#modal-catalog').modal('show');
 				});
-				
+
 				$(".catalog_linkmap").unbind("click").click(function(){
-					var id = $(this).attr("name");
-					$('.modal-catalog-title').html(gettext("List of layers"));
+//					var id = $(this).attr("name");
+//					$('.modal-catalog-title').html(gettext("List of layers"));
+//					var links = self.data[id].link;
+
+//					var content = "<ul>";
+//					var aux_content = "";
+//					if(Array.isArray(links)){
+//					for(var i=0; i<links.length; i++){
+//					aux_content += self.createResourceMap(id, links[i]);
+//					}
+//					}else{
+//					if(links){
+//					aux_content += self.createResourceMap(id, links);
+//					}
+//					}
+//					content += aux_content + "<ul>";
+
+//					if(aux_content.length == 0){
+//					aux_content += '<div style="padding: 10px">';
+//					aux_content += '<div class="no_catalog_content col-md-12">';
+//					aux_content += '<i class="fa fa-ban" aria-hidden="true"></i>   ';
+//					aux_content += 'No se encontraron resultados';
+//					aux_content += '</div>';
+//					aux_content += '<div style="clear:both"></div>';
+//					aux_content += '</div>';
+
+//					content = aux_content;
+//					}
+
+//					$('.modal-catalog-body').html(content);
+//					$('#modal-catalog').modal('show');
+
+//					self.linkResourceMap();
+
 					var links = self.data[id].link;
-					
-					var content = "<ul>";
-					var aux_content = "";
-					if(Array.isArray(links)){
-						for(var i=0; i<links.length; i++){
-							aux_content += self.createResourceMap(id, links[i]);
-						}
-					}else{
-						if(links){
-							aux_content += self.createResourceMap(id, links);
+					if(!Array.isArray(links)){
+						links = [links];
+					}
+					for(var i=0; i<links.length; i++){
+						var link = links[i].split('|');
+						var content = '';
+						if(link.length==6){
+							var type = link[4].trim();
+							if(type == "OGC:WMS"){
+								var url = link[2];
+								var name = link[0];
+								var title = link[1];
+			
+								var catalogLayer = new ol.layer.Tile({
+									source: new ol.source.TileWMS({
+										url: url,
+										params: {
+											'LAYERS': name, 
+											'TILED': true, 
+											'dataid': id
+										},
+										serverType: 'geoserver',
+									}),
+									id : "geonetwork-" + name
+								});
+
+								self.map.addLayer(catalogLayer);
+
+								var groupEntry = $("#geonetwork-group");
+								if(groupEntry.length == 0){
+									self.createLayerGroup();
+								}
+
+								var group_visible = false;
+								group_visible = $("#layergroup-geonetwork-group").is(":checked");
+								self.createLayer(name, title, group_visible, groupEntry.length);
+								break;
+							}
 						}
 					}
-					content += aux_content + "<ul>";
-					
-					if(aux_content.length == 0){
-						aux_content += '<div style="padding: 10px">';
-						aux_content += '<div class="no_catalog_content col-md-12">';
-						aux_content += '<i class="fa fa-ban" aria-hidden="true"></i>   ';
-						aux_content += 'No se encontraron resultados';
-						aux_content += '</div>';
-						aux_content += '<div style="clear:both"></div>';
-						aux_content += '</div>';
-						
-						content = aux_content;
-					}
-					
-					$('.modal-catalog-body').html(content);
-					$('#modal-catalog').modal('show');
-					
-					self.linkResourceMap();
 				});
-				
+
 				$(".catalog_filter_entry_ck").unbind("click").click(function(){
 					var search = $("#gn-any-field").val();
 					var categories = $("#categoriesF").val();
@@ -866,7 +919,7 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 					var resources = $("#orgNameF").val();
 					self.launchQuery(search, categories, keywords, resources);
 				})
-				
+
 			} catch (e) {
 				console.log(e);
 			}
@@ -881,7 +934,7 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 
 CatalogView.prototype.createDetailsPanel = function(id){
 	var self = this;
-	
+
 //	var links = self.data[id].link;
 //	var content = "";	
 //	var aux_content = "";
@@ -889,30 +942,30 @@ CatalogView.prototype.createDetailsPanel = function(id){
 //	aux_content += '<div style="padding: 10px">';
 //	aux_content += '<ul>';
 //	for(var key in data){
-//		aux_content += '<li class="catalog-link">';
-//		aux_content += '	<a href="#">';
-//		aux_content += '		<span class="catalog-link-resource"><p style="font-weight: bold">' + key + '';
-//		if(Array.isArray(data[key])){
-//			aux_content += '		</p></span>';
-//			aux_content += '		<div style="clear:both"></div>';
-//			aux_content += '		<ul>';
-//			for(var i=0; i<data[key].length; i++){
-//				aux_content += '		<li class="catalog-link-li catalog-entry-subtitle">' + data[key][i] + '</li>';
-//			}
-//			aux_content += '		</ul>';
-//		}else{
-//			aux_content += '		</p></span>';
-//			aux_content += '		<div style="clear:both"></div>';
-//			aux_content += '		<span class="catalog-entry-subtitle" style="float:left; margin-left: 20px">' + data[key] + '</span>';
-//			aux_content += '		<div style="clear:both"></div>';
-//		}
-//		
-//		aux_content += '	</a>';
-//		aux_content += '</li>';
+//	aux_content += '<li class="catalog-link">';
+//	aux_content += '	<a href="#">';
+//	aux_content += '		<span class="catalog-link-resource"><p style="font-weight: bold">' + key + '';
+//	if(Array.isArray(data[key])){
+//	aux_content += '		</p></span>';
+//	aux_content += '		<div style="clear:both"></div>';
+//	aux_content += '		<ul>';
+//	for(var i=0; i<data[key].length; i++){
+//	aux_content += '		<li class="catalog-link-li catalog-entry-subtitle">' + data[key][i] + '</li>';
+//	}
+//	aux_content += '		</ul>';
+//	}else{
+//	aux_content += '		</p></span>';
+//	aux_content += '		<div style="clear:both"></div>';
+//	aux_content += '		<span class="catalog-entry-subtitle" style="float:left; margin-left: 20px">' + data[key] + '</span>';
+//	aux_content += '		<div style="clear:both"></div>';
+//	}
+
+//	aux_content += '	</a>';
+//	aux_content += '</li>';
 //	}
 //	aux_content += '</ul>';
 //	aux_content += '</div>';
-	
+
 	$.ajax({
 		type: "GET",
 		async: false,
@@ -932,9 +985,9 @@ CatalogView.prototype.createDetailsPanel = function(id){
 		},
 		error: function(){}
 	});
-	
-	
-	
+
+
+
 }
 
 CatalogView.prototype.showPanel = function(){

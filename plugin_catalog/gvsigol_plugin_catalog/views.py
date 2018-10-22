@@ -262,7 +262,7 @@ def get_metadata(request, metadata_id, get_panel=False):
                             html += '                <a href="'+resource['url']+'" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">Download</a>'
                         if resource['protocol'] == "OGC:WMS":
                             html += '                <a href="'+resource['url']+'?service=WMS&request=GetCapabilities" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">OGC:WMS</a>'
-                        if resource['protocol'] == "OGC:WFS-1.0.0-http-get-capabilities":
+                        if resource['protocol'] == "OGC:WFS-1.0.0-http-get-capabilities" or resource['protocol'] == "OGC:WFS":
                             html += '                <a href="'+resource['url']+'?service=WFS&version=1.0.0&request=GetFeature&typeName='+str(resource['name'])+'&outputFormat=SHAPE-ZIP" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">Get shape</a>'
                         html += '            <div style="clear:both"></div>'
                 else:
