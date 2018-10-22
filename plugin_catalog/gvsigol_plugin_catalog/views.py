@@ -133,7 +133,7 @@ def get_metadata(request, metadata_id):
                 html += '    <div class="col-md-4" style="background-color: #eee;padding-bottom: 20px;">'
                 if response['thumbnails'].__len__() > 0: 
                     for thumbnail in response['thumbnails']:
-                        html += '            <img src="'+thumbnail['url']+'" alt="'+thumbnail['name']+'"/><br />'
+                        html += '            <img src="'+thumbnail['url']+'" alt="'+thumbnail['name']+'" style="width:100%"/><br />'
                 
                 html += '        <br /><br /><h4 class="modal-catalog-title">'+'Download and links'+'</h4>'
                 if response['resources'].__len__() > 0: 
@@ -150,7 +150,7 @@ def get_metadata(request, metadata_id):
                             html += '                <a href="'+resource['url']+'?service=WFS&version=1.0.0&request=GetFeature&typeName='+str(resource['name'])+'&outputFormat=SHAPE-ZIP" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">Get shape</a>'
                         html += '            <div style="clear:both"></div>'
                 else:
-                     html += '        '+'No hay recursos disponibles'
+                    html += '        '+'No hay recursos disponibles'
                 
                 html += '        <br /><br /><h4 class="modal-catalog-title">'+'Spatial Extent'+'</h4>'
                 html += '        <img class="gn-img-thumbnail img-thumbnail gn-img-extent" data-ng-src="'+response['image_url']+'" src="'+response['image_url']+'" style="width:100%"/>'
