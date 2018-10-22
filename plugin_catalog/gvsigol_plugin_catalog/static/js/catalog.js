@@ -366,7 +366,7 @@ CatalogView.prototype.createResourceLink = function(links){
 			}else{
 				if(type == "OGC:WFS"){
 					content += '<li class="catalog-link">';
-					content += '	<a href="'+link[2]+'?service=WFS&version=1.0.0&request=GetFeature&typeName='+str(link[0])+'&outputFormat=SHAPE-ZIP" target="_blank">';
+					content += '	<a href="'+link[2]+'?service=WFS&version=1.0.0&request=GetFeature&typeName='+link[0]+'&outputFormat=SHAPE-ZIP" target="_blank">';
 					content += '		<i class="fa fa-file-archive-o" aria-hidden="true"></i>';
 					content += '		<span class="catalog-link-resource"><p>' + link[1] + '<br/><span class="catalog-entry-subtitle">' + link[0] + '</span></p></span>';
 					content += '		<div class="catalog-link-button catalog_content_button">'+gettext("Download")+'</div>';
@@ -835,7 +835,7 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 				});
 
 				$(".catalog_linkmap").unbind("click").click(function(){
-//					var id = $(this).attr("name");
+					var id = $(this).attr("name");
 //					$('.modal-catalog-title').html(gettext("List of layers"));
 //					var links = self.data[id].link;
 
@@ -877,7 +877,7 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 						var link = links[i].split('|');
 						var content = '';
 						if(link.length==6){
-							var type = link[4].trim();
+							var type = link[3].trim();
 							if(type == "OGC:WMS"){
 								var url = link[2];
 								var name = link[0];
