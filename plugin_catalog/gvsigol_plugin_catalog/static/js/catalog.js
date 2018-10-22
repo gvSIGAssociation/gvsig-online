@@ -286,12 +286,14 @@ CatalogView.prototype.getMetadataEntry = function(metadata){
 
 		var image_src = "";
 		if("image" in metadata){
+			var image = metadata["image"];
+			if(!Array.isArray(image)){
+				image = [image];
+			}
 			for(var i=0; i<metadata["image"].length; i++){
 				var image_info = metadata["image"][i].split("|");
-				if(image_info[0] == "overview"){
-					image_src = image_info[1];
-					break;
-				}
+				image_src = image_info[1];
+				break;
 			}
 		}
 		met += '			<img src="'+image_src+'" style="width:100%;"/>';
@@ -906,6 +908,8 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 								var group_visible = false;
 								group_visible = $("#layergroup-geonetwork-group").is(":checked");
 								self.createLayer(name, title, group_visible, groupEntry.length);
+								
+								self.hidePanel();
 								break;
 							}
 						}
