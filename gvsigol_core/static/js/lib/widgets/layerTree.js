@@ -1854,37 +1854,62 @@ layerTree.prototype.setEditionBar = function(editionbar) {
  */
 layerTree.prototype.showMetadata = function(layer) {
 	
-	$('#float-modal .modal-title').empty();
-	$('#float-modal .modal-title').append(gettext('Layer metadata'));
-	
-	var body = '';
-	body += '<div class="row">';
-	body += 	'<div class="col-md-12">';
-	body += 		'<p>' + layer.abstract + '</p>';				
-	body += 	'</div>';
-	body += '</div>';
-	
-	$('#float-modal .modal-body').empty();
-	$('#float-modal .modal-body').append(body);
-	
-	var buttons = '';
-	buttons += '<button id="float-modal-cancel-metadata" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
-	if (layer.metadata != '') {
-		buttons += '<button id="float-modal-show-metadata" type="button" class="btn btn-default">' + gettext('Show in geonetwork') + '</button>';
-	}
-	
-	$('#float-modal .modal-footer').empty();
-	$('#float-modal .modal-footer').append(buttons);
-	
-	$("#float-modal").modal('show');
-	
-	var self = this;	
-	$('#float-modal-show-metadata').on('click', function () {
-		var win = window.open(layer.metadata, '_blank');
-		  win.focus();
-		
-		$('#float-modal').modal('hide');
+	$.ajax({
+		type: "GET",
+		async: false,
+		url: "/gvsigonline/catalog/get_metadata_id/"+layer.workspace+"/"+layer.layer_name+"/",
+		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		success: function(response){
+			if ("html" in response) {
+				$('#float-modal .modal-title').empty();
+				$('#float-modal .modal-title').html(gettext("Details"));
+				$('#float-modal .modal-body').empty();
+				$('#float-modal .modal-body').html(response['html']);
+				$('#float-modal').modal('show');
+			} else {
+				alert('Error getting metadata');
+			}
+
+		},
+		error: function(){
+			alert('Error');
+		}
 	});
+	
+	
+//	$('#float-modal .modal-title').empty();
+//	$('#float-modal .modal-title').append(gettext('Layer metadata'));
+//	
+//	var body = '';
+//	body += '<div class="row">';
+//	body += 	'<div class="col-md-12">';
+//	body += 		'<p>' + layer.abstract + '</p>';				
+//	body += 	'</div>';
+//	body += '</div>';
+//	
+//	$('#float-modal .modal-body').empty();
+//	$('#float-modal .modal-body').append(body);
+//	
+//	var buttons = '';
+//	buttons += '<button id="float-modal-cancel-metadata" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
+//	if (layer.metadata != '') {
+//		buttons += '<button id="float-modal-show-metadata" type="button" class="btn btn-default">' + gettext('Show in geonetwork') + '</button>';
+//	}
+//	
+//	$('#float-modal .modal-footer').empty();
+//	$('#float-modal .modal-footer').append(buttons);
+//	
+//	$("#float-modal").modal('show');
+//	
+//	var self = this;	
+//	$('#float-modal-show-metadata').on('click', function () {
+//		var win = window.open(layer.metadata, '_blank');
+//		  win.focus();
+//		
+//		$('#float-modal').modal('hide');
+//	});
 };
 
 /**
