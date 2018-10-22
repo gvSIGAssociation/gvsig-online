@@ -280,7 +280,7 @@ class Geonetwork():
               
         r = self.session.get(url, headers=headers)
         if r.status_code==200:
-            tree = ET.fromstring(r.text)
+            tree = ET.fromstring(r.text.encode('utf8'))
             ns = {'gmd': 'http://www.isotc211.org/2005/gmd'}
             
             
