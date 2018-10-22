@@ -290,8 +290,8 @@ CatalogView.prototype.getMetadataEntry = function(metadata){
 			if(!Array.isArray(image)){
 				image = [image];
 			}
-			for(var i=0; i<metadata["image"].length; i++){
-				var image_info = metadata["image"][i].split("|");
+			for(var i=0; i< image.length; i++){
+				var image_info = image[i].split("|");
 				image_src = image_info[1];
 				break;
 			}
