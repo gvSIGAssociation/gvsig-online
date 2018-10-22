@@ -261,10 +261,18 @@ class Geonetwork():
             return True
         raise FailedRequestError(r.status_code, r.content)
     
+    def getTextFromXMLNode(self, tree, ns, filter):
+        aux = tree.findall(filter, ns)
+        if aux.__len__() > 0:
+            return aux[0].text
+        
+        return ''
+    
     def gn_get_metadata(self, metadata_id):
         #curl -X DELETE --header 'Accept: */*' 'http://localhost:8080/geonetwork/srv/api/0.1/records/159?withBackup=false'
         #NOTE: uuid is an id not in format 97769e85-2e7b-418b-a8c8-0163bfb97aac
         url = self.service_url + "/srv/api/0.1/records/"+str(metadata_id)+""
+        print ("Getting metadata from uuid:" + str(metadata_id) + " -> " + url)
         headers = {
             'Accept': 'application/xml',
             'X-XSRF-TOKEN': self.get_csrf_token()
@@ -275,13 +283,18 @@ class Geonetwork():
             tree = ET.fromstring(r.text)
             ns = {'gmd': 'http://www.isotc211.org/2005/gmd'}
             
-            metadata_id = tree.findall('./gmd:fileIdentifier/', ns)[0].text
-            title = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/', ns)[0].text
-            abstract = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/', ns)[0].text
-            publish_date = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/', ns)[0].text
             
-            period_start = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_TemporalExtent/gmd:extent/', ns)[0]._children[0].text
-            period_end = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_TemporalExtent/gmd:extent/', ns)[0]._children[1].text
+            metadata_id = self.getTextFromXMLNode(tree, ns, './gmd:fileIdentifier/')
+            title = self.getTextFromXMLNode(tree, ns, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/')
+            abstract = self.getTextFromXMLNode(tree, ns, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/')
+            publish_date = self.getTextFromXMLNode(tree, ns, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/')
+            
+            period_start = ''
+            period_end = ''
+            aux = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_TemporalExtent/gmd:extent/', ns)
+            if aux.__len__() > 0:
+                period_start = aux[0]._children[0].text
+                period_end = aux[0]._children[1].text
             
             categories = []
             for category in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:topicCategory/gmd:MD_TopicCategoryCode/', ns):
@@ -291,15 +304,18 @@ class Geonetwork():
             for keyword in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/', ns):
                 keywords.append(keyword.text)
             
-            representation_type = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialRepresentationType/', ns)[0].attrib['codeListValue'] 
-            scale = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/', ns)[0].text 
-            srs = tree.findall('./gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code/', ns)[0].text 
+            representation_type = ''
+            aux = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialRepresentationType/', ns)
+            if aux.__len__() > 0:
+                representation_type = aux[0].attrib['codeListValue'] 
+            scale = self.getTextFromXMLNode(tree, ns, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/') 
+            srs = self.getTextFromXMLNode(tree, ns, './gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code/') 
             
             #https://test.gvsigonline.com/geonetwork/srv/spa/region.getmap.png?mapsrs=EPSG:3857&width=250&background=settings&geomsrs=EPSG:4326&geom=Polygon((-18.1595005217%2043.9729489023,4.96320908311%2043.9729489023,4.96320908311%2025.9993588695,-18.1595005217%2025.9993588695,-18.1595005217%2043.9729489023))
-            coords_w = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:westBoundLongitude/', ns)[0].text
-            coords_e = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:eastBoundLongitude/', ns)[0].text
-            coords_s = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:southBoundLatitude/', ns)[0].text
-            coords_n = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:northBoundLatitude/', ns)[0].text
+            coords_w = self.getTextFromXMLNode(tree, ns, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:westBoundLongitude/')
+            coords_e = self.getTextFromXMLNode(tree, ns, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:eastBoundLongitude/')
+            coords_s = self.getTextFromXMLNode(tree, ns, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:southBoundLatitude/')
+            coords_n = self.getTextFromXMLNode(tree, ns, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:northBoundLatitude/')
             
             image_url = self.service_url + '/srv/spa/region.getmap.png?mapsrs=EPSG:3857&width=250&background=osm&geomsrs=EPSG:4326&geom=Polygon(('+coords_w+' '+coords_s+','+coords_e+' '+coords_s+','+coords_e+' '+coords_n+','+coords_w+' '+coords_n+','+coords_w+' '+coords_s+'))'
             
