@@ -66,7 +66,7 @@ from lxml import html
 from requests_futures.sessions import FuturesSession
 import requests
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("gvsigol")
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
