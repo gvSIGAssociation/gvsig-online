@@ -27,6 +27,8 @@ from models import Layer, LayerGroup, Workspace, Datastore
 import requests
 import json
 from datetime import datetime
+from lxml import etree as ET
+from builtins import str as text
 
 PURGE_NONE="none"
 PURGE_METADATA="metadata"
@@ -801,7 +803,7 @@ class Geoserver():
     
     def update_layer_styles_configuration(self, layer, style_name, default_style, styles_list, user=None, password=None):
         xml = self.get_layer_styles_configuration(layer, user, password)
-        
+        tree = ET.fromstring(xml)
         
         url = self.gwc_url + '/layers/'+layer.datastore.workspace.name +':'+layer.name+'.xml'
         #print '########################### update_layer_styles_configuration: ' + url
@@ -813,24 +815,23 @@ class Geoserver():
         
         headers = {'content-type': 'text/xml'}
         
-        start_index = xml.find('<stringParameterFilter>')
-        end_index = xml.find('</stringParameterFilter>')
-        
-        start_xml = xml[:start_index+'<stringParameterFilter>'.__len__()]
-        end_xml = xml[end_index:]
-        
-        style_xml = ''
-        style_xml += '      <key>STYLES</key>'
-        style_xml += '      <defaultValue>'+default_style+'</defaultValue>'
-        style_xml += '      <normalize/>'
-        style_xml += '      <values>'
-        for style_list in styles_list: 
-            style_xml += '        <string>'+style_list+'</string>'
-        style_xml += '      </values>'
-        
-        aux_xml = start_xml + style_xml + end_xml
-        
-        r = self.session.post(url, data=aux_xml, headers=headers, auth=auth)
+        for parameterFiltersElem in tree.findall('./parameterFilters'):
+            for styleParameterFilterElem in parameterFiltersElem.findall('./styleParameterFilter'):
+                styleParameterFilterElem.getparent().remove(styleParameterFilterElem)
+            styleParameterFilterElem = ET.SubElement(parameterFiltersElem, 'styleParameterFilter')
+            keyElem = ET.SubElement(styleParameterFilterElem, 'key')
+            keyElem.text = 'STYLES'
+            defaultValueElem = ET.SubElement(styleParameterFilterElem, 'defaultValue')
+            if default_style:
+                defaultValueElem.text = default_style
+            elif len(styles_list) > 0:
+                defaultValueElem.text = styles_list[0]
+            # ET.SubElement(styleParameterFilterElem, 'normalize')
+            #valuesElem = ET.SubElement(styleParameterFilterElem, 'values')
+            #for style_list in styles_list: 
+            #    stringValueElem = ET.SubElement(valuesElem, 'string')
+            #    stringValueElem.text = style_list
+        r = self.session.post(url, data=ET.tostring(tree, encoding='UTF-8'), headers=headers, auth=auth)
         if r.status_code==200:
             return True
         raise UploadError(r.status_code, r.content)
