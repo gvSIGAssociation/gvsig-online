@@ -50,7 +50,7 @@ import unicodedata
 import logging
 from dbfread import DBF
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("gvsigol")
 
 class UnsupportedRequestError(Exception):
     pass
@@ -149,7 +149,7 @@ class Geoserver():
             self.getGsconfig().create_workspace(name, uri)
             return True
         except Exception as e:
-            print str(e)
+            logger.exception("Error creating workspace");
             return False
         
     def getWorkspace(self, name):
