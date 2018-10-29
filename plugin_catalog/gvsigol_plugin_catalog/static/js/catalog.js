@@ -733,7 +733,7 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 	var disabledFacets = ["mdActions"];
 
 	// FIXME: this should be parametrized from config
-	var url = '/geonetwork/srv/eng/q?_content_type=json&bucket=s101&facet.q='+query+'&fast=index&from=1&resultType=details&sortBy=relevance';
+	var url = '/geonetwork/srv/eng/q?_content_type=json' + filters + '&bucket=s101&facet.q=' + query + '&fast=index&from=1&resultType=details&sortBy=relevance';
 	//var url = '/gvsigonline/catalog/get_query/?_content_type=json&bucket=s101&facet.q='+query+'&fast=index&from=1&resultType=details&sortBy=relevance';
 	$.ajax({
 		url: url,
@@ -790,7 +790,13 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 				}else{
 					var metadata = response.metadata;
 					content_code += self.getMetadataEntry(metadata);
-					self.data[metadata['geonet:info']['uuid']] = metadata;
+					if (metadata) {
+						self.data[metadata['geonet:info']['uuid']] = metadata;	
+					}
+					else {
+						self.data = {};
+					}
+					
 				}
 				$("#catalog_content").html(content_code);
 
