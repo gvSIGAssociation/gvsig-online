@@ -300,7 +300,7 @@ class Geonetwork():
             # TODO: we can later generalize this import to call a different module according to the
             # metadata standard of the record to be updated
             from gvsigol_plugin_catalog.mdstandards import iso19139_2007
-            return iso19139_2007.update_metadata(md_response.text, extent_tuple, layer.thumbnail.url)
+            return iso19139_2007.update_metadata(md_response.content, extent_tuple, layer.thumbnail.url)
         raise FailedRequestError(md_response.status_code, md_response.content)
 
 class RequestError(Exception):

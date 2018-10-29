@@ -6,13 +6,13 @@ def update_extent(geo_bb_elem, extent_tuple):
     minx, miny, maxx, maxy = extent_tuple
     for bound in geo_bb_elem:
         if bound.tag == '{http://www.isotc211.org/2005/gmd}westBoundLongitude':
-            bound[0].text = "{:f}".format(minx)
+            bound[0].text = minx
         elif bound.tag == '{http://www.isotc211.org/2005/gmd}eastBoundLongitude':
-            bound[0].text = "{:f}".format(maxx)
+            bound[0].text = maxx
         elif bound.tag == '{http://www.isotc211.org/2005/gmd}southBoundLatitude':
-            bound[0].text = "{:f}".format(miny)
+            bound[0].text = miny
         elif bound.tag == '{http://www.isotc211.org/2005/gmd}northBoundLatitude':
-            bound[0].text = "{:f}".format(maxy)
+            bound[0].text = maxy
 
 def update_thumbnail(browse_graphic_elem, thumbnail_url):
     ns = {'gmd': 'http://www.isotc211.org/2005/gmd', 'gco': 'http://www.isotc211.org/2005/gco'}
@@ -31,5 +31,5 @@ def update_metadata(xml_str, extent_tuple, thumbnail_url):
         update_extent(geog_bounding_box_element, extent_tuple)
     for thumbnail_element in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic', ns):
         update_thumbnail(thumbnail_element, thumbnail_url)
-    return ET.tostring(tree, encoding='UTF-8')
+    return ET.tostring(tree, encoding='unicode')
 
