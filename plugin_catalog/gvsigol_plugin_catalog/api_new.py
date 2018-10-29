@@ -110,34 +110,34 @@ class Geonetwork():
             return False    
         raise FailedRequestError(r.status_code, r.content)
 
-    def csw_update_metadata(uuid, updated_xml_md):
-        metadata = '<csw:Transaction xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" xmlns:ogc="http://www.opengis.net/ogc" service="CSW" version="2.0.2">'
-        metadata +=     '<csw:Update>'
+    def csw_update_metadata(self, uuid, updated_xml_md):
+        metadata = u'<csw:Transaction xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" xmlns:ogc="http://www.opengis.net/ogc" service="CSW" version="2.0.2">'
+        metadata +=     u'<csw:Update>'
         metadata +=         updated_xml_md
-        metadata +=         '<csw:Constraint version="1.1.0">'
-        metadata +=             '<ogc:Filter>'
-        metadata +=                 '<ogc:PropertyIsEqualTo>'
-        metadata +=                     '<ogc:PropertyName>identifier</ogc:PropertyName>'
-        metadata +=                     '<ogc:Literal>' + uuid + '</ogc:Literal>'
-        metadata +=                 '</ogc:PropertyIsEqualTo>'
-        metadata +=             '</ogc:Filter>'
-        metadata +=         '</csw:Constraint>'
-        metadata +=     '</csw:Update>'
-        metadata += '</csw:Transaction>'
+        metadata +=         u'<csw:Constraint version="1.1.0">'
+        metadata +=             u'<ogc:Filter>'
+        metadata +=                 u'<ogc:PropertyIsEqualTo>'
+        metadata +=                     u'<ogc:PropertyName>identifier</ogc:PropertyName>'
+        metadata +=                     u'<ogc:Literal>' + uuid + u'</ogc:Literal>'
+        metadata +=                 u'</ogc:PropertyIsEqualTo>'
+        metadata +=             u'</ogc:Filter>'
+        metadata +=         u'</csw:Constraint>'
+        metadata +=     u'</csw:Update>'
+        metadata += u'</csw:Transaction>'
         headers = {
             'Accept': 'application/xml',
             'Content-Type': 'application/xml',
             'X-XSRF-TOKEN': self.get_csrf_token()
         }
         csw_transaction_url = self.service_url + "/srv/eng/csw-publication"
-        csw_response = self.session.post(csw_transaction_url, headers=headers, data=metadata)
+        csw_response = self.session.post(csw_transaction_url, headers=headers, data=metadata.encode("UTF-8"))
         if csw_response.status_code==200:
             tree = ET.fromstring(csw_response.text)
             ns = {'csw': 'http://www.opengis.net/cat/csw/2.0.2'}
-            for total_updated in tree.findall('./csw:TransactionResponse/csw:TransactionSummary/csw:totalUpdated', ns):
+            for total_updated in tree.findall('./csw:TransactionSummary/csw:totalUpdated', ns):
                 if total_updated.text == '1':
                     return uuid
-        raise FailedRequestError(r.status_code, r.content)
+        raise FailedRequestError(csw_response.status_code, csw_response.content)
 
     def gn_update_metadata(self, uuid, layer, abstract, layer_info, ds_type):
         """
@@ -401,14 +401,14 @@ class Geonetwork():
         raise FailedRequestError(r.status_code, r.content)
 
     def get_extent(self, layer_info, ds_type):
-        minx = str(layer_info[ds_type]['latLonBoundingBox']['minx'])
-        miny = str(layer_info[ds_type]['latLonBoundingBox']['miny'])
-        maxx = str(layer_info[ds_type]['latLonBoundingBox']['maxx'])
+        minx = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['minx'])
+        miny = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['miny'])
+        maxx = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['maxx'])
         if layer_info[ds_type]['latLonBoundingBox']['minx'] > layer_info[ds_type]['latLonBoundingBox']['maxx']:
-            maxx = str(layer_info[ds_type]['latLonBoundingBox']['minx'] + 1)
+            maxx = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['minx'] + 1)
         maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
         if layer_info[ds_type]['latLonBoundingBox']['miny'] > layer_info[ds_type]['latLonBoundingBox']['maxy']:
-            maxy = str(layer_info[ds_type]['latLonBoundingBox']['miny'] + 1)
+            maxy = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['miny'] + 1)
         return (minx, miny, maxx, maxy)
 
     def create_metadata(self, layer, abstract, ws, layer_info, ds_type):
@@ -596,8 +596,8 @@ class Geonetwork():
             # TODO: we can later generalize this import to call a different module according to the
             # metadata standard of the record to be updated
             from gvsigol_plugin_catalog.mdstandards import iso19139_2007
-            return iso19139_2007.update_metadata(md_response.text, extent_tuple, layer.thumbnail.url)
-        raise FailedRequestError(r.status_code, r.content)
+            return iso19139_2007.update_metadata(md_response.content, extent_tuple, layer.thumbnail.url)
+        raise FailedRequestError(md_response.status_code, md_response.content)
 
 class RequestError(Exception):
     def __init__(self, status_code=-1, server_message=""):
