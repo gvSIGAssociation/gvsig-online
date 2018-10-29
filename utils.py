@@ -446,7 +446,7 @@ supported_crs_array = []
 def get_supported_crs(used_crs=None):   
     global supported_crs
     global supported_crs_array
-    if not supported_crs or used_crs:
+    if (not supported_crs) or used_crs:
         
         if settings.USE_DEFAULT_SUPPORTED_CRS:
             for item in settings.SUPPORTED_CRS.items():
@@ -490,16 +490,22 @@ def get_supported_crs(used_crs=None):
             connection.close();
                 
         for row in rows:
-            s = row[3]
-            data = s[s.find('[')+1:s.find(',')]
+            s = row[4]
+            
+            unit_found = s.find('+units=')
+            unit_const = '+units='.__len__()
+            if unit_found > -1:
+                data = s[unit_found+unit_const:unit_found+unit_const+1]
+                if data == 'm':
+                    unit = 'meter'
+            else:
+                unit = 'degree'
+            
+            
+            s2 = row[3]
+            data = s2[s2.find('[')+1:s2.find(',')]
             data = data.replace('"', '')
-            
-            unit_idx = s.find('UNIT[')+5
-            unit = s[unit_idx :s.find(',', unit_idx)]
-            unit = unit.replace('"', '')
-            if unit == 'metre':
-                unit = 'meter'
-            
+                
             axis_order = ''
             if row[2] in file_crs and row[4]:
                 axis_order = ' +axis=neu'
@@ -526,7 +532,7 @@ def get_supported_crs(used_crs=None):
    
 def get_supported_crs_array(used_crs=None):  
     global supported_crs_array
-    if not supported_crs_array or used_crs:   
+    if (not supported_crs_array) or used_crs:   
         get_supported_crs(used_crs)
     return supported_crs_array
      
