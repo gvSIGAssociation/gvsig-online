@@ -5,7 +5,27 @@
 <script type="text/javascript" src="{% static "js/catalog.js" %}"></script>
 
 <script type="text/javascript">
-	var catalog = new CatalogView(viewer.core.getMap(), viewer.core.layerTree);
+	var catalog = new CatalogView(viewer.core.getMap(),
+			viewer.core.layerTree,
+			{
+				{% if 'gvsigol_plugin_catalog' in plugins_config %}
+					{% if 'CATALOG_FACETS_CONFIG' in plugins_config.gvsigol_plugin_catalog %}
+						facetsConfig: {{ plugins_config.gvsigol_plugin_catalog.CATALOG_FACETS_CONFIG|safe }},
+					{% else %}
+						facetsConfig: {},
+					{% endif %}
+					{% if 'CATALOG_FACETS_ORDER' in plugins_config.gvsigol_plugin_catalog %}
+						facetsOrder: {{ plugins_config.gvsigol_plugin_catalog.CATALOG_FACETS_ORDER|safe }},
+					{% else %}
+						facetsOrder: [],
+					{% endif %}
+					{% if 'CATALOG_DISABLED_FACETS' in plugins_config.gvsigol_plugin_catalog %}
+						disabledFacets: {{ plugins_config.gvsigol_plugin_catalog.CATALOG_DISABLED_FACETS|safe }}
+					{% else %}
+						disabledFacets: []
+					{% endif %}
+				{% endif %}
+			});
 	
 	var html = '';
 	
