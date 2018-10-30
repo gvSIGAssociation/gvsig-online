@@ -520,8 +520,28 @@ def project_load(request, project_name):
         has_image = True
         if "no_project.png" in project.image.url:
             has_image = False
-            
-        response = render_to_response('viewer.html', {'has_image': has_image, 'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id, 'extra_params': json.dumps(request.GET)}, context_instance=RequestContext(request))
+
+        import importlib
+        plugins_config = {}
+        for plugin in gvsigol.settings.INSTALLED_APPS:
+            if 'gvsigol_app_' in plugin or 'gvsigol_plugin_' in plugin:
+                try:
+                    plugin_settings = importlib.import_module(plugin + ".settings")
+                    settings_dict = {}
+                    for config_var in dir(plugin_settings):
+                        if not config_var.startswith("__"):
+                            settings_dict[config_var] = getattr(plugin_settings, config_var)
+                    if len(settings_dict) > 0:
+                        plugins_config[plugin] = settings_dict
+                except ImportError:
+                    pass
+        response = render_to_response('viewer.html', {'has_image': has_image,
+                                                      'supported_crs': core_utils.get_supported_crs(),
+                                                      'project': project,
+                                                      'pid': project.id,
+                                                      'extra_params': json.dumps(request.GET),
+                                                      'plugins_config': plugins_config},
+                                       context_instance=RequestContext(request))
         #Expira la caché cada día
         tomorrow = datetime.datetime.now() + datetime.timedelta(days = 1)
         tomorrow = datetime.datetime.replace(tomorrow, hour=0, minute=0, second=0)
