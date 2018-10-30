@@ -23,13 +23,17 @@
 /**
  * TODO
  */
-var CatalogView = function(map, layerTree) {
+var CatalogView = function(map, layerTree, config) {
 	this.map = map;
 	this.map_container = $("#container");	
 	this.layerTree = layerTree;
 	this.catalog_panel = null;
 	this.catalog_map = null;
 	this.data = {};
+	this.config = config;
+	this.config.facetsConfig = this.config.facetsConfig || {};
+	this.config.facetsOrder = this.config.facetsOrder || [];
+	this.config.disabledFacets = this.config.disabledFacets || [];
 	this.initialization();
 };
 
@@ -721,17 +725,11 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 	if(extent && extent.length > 0){
 		filters += "&geometry="+extent;
 	}
-
-	//var url = 'http://localhost:8080/geonetwork/srv/spa/q?_content_type=json'+filters+'&bucket=s101&facet.q='+query+'&fast=index&resultType=details&sortBy=relevance';
-	//var url = '/gvsigonline/catalog/get_query/?_content_type=json'+filters+'&bucket=s101&facet.q='+query+'&fast=index&resultType=details&sortBy=relevance';
-	//var url = '/geonetwork/srv/eng/q?_content_type=json&bucket=s101&facet.q=&fast=index&from=1&resultType=details&sortBy=relevance';
-
-	// TODO: move config to plugin settings
-	var facetsConfig = {"orgName": {"title": "Organization"}, "sourceCatalog": {"title": "Source Catalog"},
-			"createDateYear": {"title": "Year"}, "spatialRepresentationType": {"title": "Representation type"}, "maintenanceAndUpdateFrequency": {"title": "Update frequencies"}, "denominator": {"title": "Scale"}, "serviceType": {"title": "Service type"}, "gemetKeyword": {"title": "GEMET keywords"}, "panaceaKeyword": [{"name": "interregMedProjects", "title": "INTERREG Med Projects", "labelPattern": ".* project$"}, {"name": "panaceaWorkingGroups", "title": "Working group", "labelPattern": "^(.(?! project$))+$"}]};
-	var facetsOrder = ["panaceaWorkingGroups", "interregMedProjects", "type", "spatialRepresentationType"];
-	var disabledFacets = ["mdActions"];
-
+	
+	var facetsConfig = self.config.facetsConfig;
+	var facetsOrder = self.config.facetsOrder;
+	var disabledFacets = self.config.disabledFacets;
+	
 	// FIXME: this should be parametrized from config
 	var url = '/geonetwork/srv/eng/q?_content_type=json' + filters + '&bucket=s101&facet.q=' + query + '&fast=index&from=1&resultType=details&sortBy=relevance';
 	//var url = '/gvsigonline/catalog/get_query/?_content_type=json&bucket=s101&facet.q='+query+'&fast=index&from=1&resultType=details&sortBy=relevance';
@@ -993,7 +991,9 @@ CatalogView.prototype.createDetailsPanel = function(id){
 			}
 
 		},
-		error: function(){}
+		error: function(jqXHR, textStatus){
+			console.log(textStatus);
+		}
 	});
 
 
