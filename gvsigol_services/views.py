@@ -100,6 +100,7 @@ def workspace_add(request):
                     form.cleaned_data['wms_endpoint'],
                     form.cleaned_data['wfs_endpoint'],
                     form.cleaned_data['wcs_endpoint'],
+                    form.cleaned_data['wmts_endpoint'],
                     form.cleaned_data['cache_endpoint']):
                     
                     isPublic = False
@@ -1884,7 +1885,7 @@ def layer_create_with_group(request, layergroup_id):
                     style_name = workspace.name + '_' + newRecord.name + '_default'
                     mapservice_backend.createDefaultStyle(newRecord, style_name)
                     mapservice_backend.setLayerStyle(newRecord, style_name, True)
-                    mapservice_backend.updateThumbnail(newRecord, 'create')
+                    #mapservice_backend.updateThumbnail(newRecord, 'create')
                     
                     time_resolution = 0
                     if (time_resolution_year != None and time_resolution_year > 0) or (time_resolution_month != None and time_resolution_month > 0) or (time_resolution_week != None and time_resolution_week > 0) or (time_resolution_day != None and time_resolution_day > 0):
@@ -1912,6 +1913,9 @@ def layer_create_with_group(request, layergroup_id):
                 core_utils.toc_add_layer(newRecord)
                 mapservice_backend.createOrUpdateGeoserverLayerGroup(newRecord.layer_group)
                 mapservice_backend.reload_nodes()
+                
+                if form.cleaned_data['datastore'].type != 'e_WMS':
+                    mapservice_backend.updateThumbnail(newRecord, 'create')
                 
                 layer_autoconfig(newRecord.id)
                 
@@ -2398,16 +2402,20 @@ def get_datatable_data(request):
         
         definition = mapservice_backend.getFeaturetype(layer.datastore.workspace, layer.datastore, layer.name, layer.title)
         aux_encoded_property_name = ' '
+        sortby_field = None
         if 'featureType' in definition and 'attributes' in definition['featureType'] and 'attribute' in definition['featureType']['attributes']:
             attributes = definition['featureType']['attributes']['attribute']
             for attribute in attributes:
                 aux_encoded_property_name += attribute['name'] + ' '
+                if not sortby_field and not attribute['binding'].startswith('com.vividsolutions.jts.geom'):
+                    sortby_field = attribute['name']
                 
         num_fields = encoded_property_name.split(',').__len__()
         found = -1
         idx = 0
         while found == -1 and num_fields - 1 >= idx:
-            sortby_field = encoded_property_name.split(',')[idx]
+            if not sortby_field:
+                sortby_field = encoded_property_name.split(',')[idx]
             found = aux_encoded_property_name.find(' ' + sortby_field + ' ')
             idx = idx + 1
         encoded_property_name = aux_encoded_property_name.strip().replace(' ',',')
@@ -2416,7 +2424,8 @@ def get_datatable_data(request):
         i = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
         pk_defs = i.get_pk_columns(layer.name, params.get('schema', 'public'))
         
-        sortby_field = encoded_property_name.split(',')[0]
+        if not sortby_field:
+            sortby_field = encoded_property_name.split(',')[0]
         '''
         if len(pk_defs) >= 1:
             sortby_field = str(pk_defs[0])
@@ -2474,9 +2483,11 @@ def get_datatable_data(request):
                     'OUTPUTFORMAT': 'application/json',
                     'MAXFEATURES': max_features,
                     'STARTINDEX': start_index,
-                    'PROPERTYNAME': encoded_property_name,
-                    'SORTBY': sortby_field
+                    'PROPERTYNAME': encoded_property_name
                 }
+                if sortby_field != 'wkb_geometry':
+                    values['SORTBY'] = sortby_field
+                
                 if cql_filter == '':
                     values['cql_filter'] = raw_search_cql
                 else:
