@@ -32,6 +32,7 @@ class Workspace(models.Model):
     wms_endpoint = models.CharField(max_length=500, null=True, blank=True)
     wfs_endpoint = models.CharField(max_length=500, null=True, blank=True)
     wcs_endpoint = models.CharField(max_length=500, null=True, blank=True)
+    wmts_endpoint = models.CharField(max_length=500, null=True, blank=True)
     cache_endpoint = models.CharField(max_length=500, null=True, blank=True)
     created_by = models.CharField(max_length=100)
     is_public = models.BooleanField(default=False)
