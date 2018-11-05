@@ -377,6 +377,9 @@ def get_cache_url(request, workspace):
         
     return cache_url
     '''
+    if workspace.wmts_endpoint and workspace.wmts_endpoint.__len__() > 0:
+        return workspace.wmts_endpoint
+    
     return workspace.cache_endpoint
 
 def get_catalog_url(request, layer):   

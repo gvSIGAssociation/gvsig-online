@@ -541,62 +541,106 @@ viewer.core = {
 					});
 					
 				} else {
-					var wmsParams = {
-						'LAYERS': layerConf.workspace + ':' + layerConf.name, 
-						'FORMAT': 'image/png', 
-						'VERSION': '1.1.1'
-					};
-					if (layerConf.cached) {
-						wmsParams['WIDTH'] = self.conf.tile_size;
-						wmsParams['HEIGHT'] = self.conf.tile_size;
+					if(url.endsWith('/gwc/service/wmts')){	
+						var default_srs = 'EPSG:4326';
+						
+						var projection = new ol.proj.get(default_srs);
+						var projectionExtent = projection.getExtent();
+						var size = ol.extent.getWidth(projectionExtent) / 256;
+						var resolutions = new Array(22);
+						var matrixIds = new Array(22);
+						for (var z = 0; z < 22; ++z) {
+						    resolutions[z] = size / Math.pow(2, z+1);
+						    matrixIds[z] = default_srs+':'+z;
+						}
+						;
+						var tileGrid = new ol.tilegrid.WMTS(
+						        {
+						            origin: ol.extent.getTopLeft(projectionExtent),
+						            resolutions: resolutions,
+						            matrixIds: matrixIds
+						        }
+						);
+						
+						
+						var ignSource3 = new ol.source.WMTS({ 
+							layer: layerConf.workspace + ':' + layerConf.name,
+							url: url,
+							projection: projection,
+							matrixSet: default_srs,
+							format:'image/png',
+							tileGrid: tileGrid,
+							crossOrigin: 'anonymous',
+				            wrapX: true
+						});
+				        var wmsLayer = new ol.layer.Tile({
+					 		id: layerId,
+					 		source: ignSource3,
+					 		visible: visible
+					 	});
+				        wmsLayer.baselayer = false;
+				        wmsLayer.layer_name=layerConf.workspace + ':' + layerConf.name;
+					 						
+					}else{
+						var wmsParams = {
+							'LAYERS': layerConf.workspace + ':' + layerConf.name, 
+							'FORMAT': 'image/png', 
+							'VERSION': '1.1.1'
+						};
+						if (layerConf.cached) {
+							wmsParams['WIDTH'] = self.conf.tile_size;
+							wmsParams['HEIGHT'] = self.conf.tile_size;
+						}
+						var wmsSource = new ol.source.TileWMS({
+							url: url,
+							visible: layerConf.visible,
+							params: wmsParams,
+							serverType: 'geoserver'
+						});
+						wmsLayer = new ol.layer.Tile({
+							id: layerId,
+							source: wmsSource,
+							visible: visible
+						});
 					}
-					var wmsSource = new ol.source.TileWMS({
-						url: url,
-						visible: layerConf.visible,
-						params: wmsParams,
-						serverType: 'geoserver'
-					});
-					wmsLayer = new ol.layer.Tile({
-						id: layerId,
-						source: wmsSource,
-						visible: visible
-					});
 				}
 				
-				wmsLayer.on('change:visible', function(){
-					self.legend.reloadLegend();
-				});
-				wmsLayer.baselayer = false;
-				wmsLayer.layer_name = layerConf.name;
-				wmsLayer.wms_url = layerConf.wms_url;
-				wmsLayer.wms_url_no_auth = layerConf.wms_url_no_auth;
-				wmsLayer.wfs_url = layerConf.wfs_url;
-				wmsLayer.wfs_url_no_auth = layerConf.wfs_url_no_auth;
-				wmsLayer.cache_url = layerConf.cache_url;
-				wmsLayer.title = layerConf.title;
-				wmsLayer.abstract = layerConf.abstract;
-				wmsLayer.metadata = layerConf.metadata;
-				wmsLayer.legend = layerConf.legend;
-				wmsLayer.legend_no_auth = layerConf.legend_no_auth;
-				wmsLayer.legend_graphic = layerConf.legend_graphic;
-				wmsLayer.legend_graphic_no_auth = layerConf.legend_graphic_no_auth;
-				wmsLayer.queryable = layerConf.queryable;
-				wmsLayer.highlight = layerConf.highlight;
-				wmsLayer.highlight_scale = layerConf.highlight_scale;
-				wmsLayer.is_vector = layerConf.is_vector;
-				wmsLayer.write_roles = layerConf.write_roles;
-				wmsLayer.namespace = layerConf.namespace;
-				wmsLayer.workspace = layerConf.workspace
-				wmsLayer.crs = layerConf.crs;
-				wmsLayer.order = layerConf.order;
-				wmsLayer.styles = layerConf.styles;
-				wmsLayer.setZIndex(parseInt(layerConf.order));
-				wmsLayer.conf = JSON.parse(layerConf.conf);
-				wmsLayer.parentGroup = group.groupName;
-				
-				wmsLayer.time_resolution = layerConf.time_resolution;
-				
-				this.map.addLayer(wmsLayer);
+				if(wmsLayer){
+					wmsLayer.on('change:visible', function(){
+						self.legend.reloadLegend();
+					});
+					wmsLayer.baselayer = false;
+					wmsLayer.layer_name = layerConf.name;
+					wmsLayer.wms_url = layerConf.wms_url;
+					wmsLayer.wms_url_no_auth = layerConf.wms_url_no_auth;
+					wmsLayer.wfs_url = layerConf.wfs_url;
+					wmsLayer.wfs_url_no_auth = layerConf.wfs_url_no_auth;
+					wmsLayer.cache_url = layerConf.cache_url;
+					wmsLayer.title = layerConf.title;
+					wmsLayer.abstract = layerConf.abstract;
+					wmsLayer.metadata = layerConf.metadata;
+					wmsLayer.legend = layerConf.legend;
+					wmsLayer.legend_no_auth = layerConf.legend_no_auth;
+					wmsLayer.legend_graphic = layerConf.legend_graphic;
+					wmsLayer.legend_graphic_no_auth = layerConf.legend_graphic_no_auth;
+					wmsLayer.queryable = layerConf.queryable;
+					wmsLayer.highlight = layerConf.highlight;
+					wmsLayer.highlight_scale = layerConf.highlight_scale;
+					wmsLayer.is_vector = layerConf.is_vector;
+					wmsLayer.write_roles = layerConf.write_roles;
+					wmsLayer.namespace = layerConf.namespace;
+					wmsLayer.workspace = layerConf.workspace
+					wmsLayer.crs = layerConf.crs;
+					wmsLayer.order = layerConf.order;
+					wmsLayer.styles = layerConf.styles;
+					wmsLayer.setZIndex(parseInt(layerConf.order));
+					wmsLayer.conf = JSON.parse(layerConf.conf);
+					wmsLayer.parentGroup = group.groupName;
+					
+					wmsLayer.time_resolution = layerConf.time_resolution;
+					
+					this.map.addLayer(wmsLayer);
+				}
 			}
 		}
 	},
