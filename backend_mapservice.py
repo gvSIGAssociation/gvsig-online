@@ -144,7 +144,7 @@ class Geoserver():
         
     def createWorkspace(self, name, uri, description=None,
                         wms_endpoint=None, wfs_endpoint=None,
-                        wcs_endpoint=None, cache_endpoint=None):
+                        wcs_endpoint=None, wmts_endpoint=None, cache_endpoint=None):
         try:
             self.getGsconfig().create_workspace(name, uri)
             return True
@@ -1689,6 +1689,10 @@ class Geoserver():
                 maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
                 minx = str(layer_info[ds_type]['latLonBoundingBox']['minx'])
                 miny = str(layer_info[ds_type]['latLonBoundingBox']['miny'])
+                if layer_info[ds_type]['latLonBoundingBox']['minx'] > layer_info[ds_type]['latLonBoundingBox']['maxx']:
+                    maxx = str(layer_info[ds_type]['latLonBoundingBox']['minx'] +1)
+                if layer_info[ds_type]['latLonBoundingBox']['miny'] > layer_info[ds_type]['latLonBoundingBox']['maxy']:
+                    maxy = str(layer_info[ds_type]['latLonBoundingBox']['miny'] +1)
                 bbox = minx + "," + miny + "," + maxx + "," + maxy 
             else:
                 bbox = i.get_bbox_firstgeom(schema, layer.name, 0.01)  
@@ -1698,6 +1702,10 @@ class Geoserver():
             maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
             minx = str(layer_info[ds_type]['latLonBoundingBox']['minx'])
             miny = str(layer_info[ds_type]['latLonBoundingBox']['miny'])
+            if layer_info[ds_type]['latLonBoundingBox']['minx'] > layer_info[ds_type]['latLonBoundingBox']['maxx']:
+                maxx = str(layer_info[ds_type]['latLonBoundingBox']['minx'] +1)
+            if layer_info[ds_type]['latLonBoundingBox']['miny'] > layer_info[ds_type]['latLonBoundingBox']['maxy']:
+                maxy = str(layer_info[ds_type]['latLonBoundingBox']['miny'] +1)
             bbox = minx + "," + miny + "," + maxx + "," + maxy
             
         
