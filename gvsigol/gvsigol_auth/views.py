@@ -405,6 +405,7 @@ def user_add(request):
                             url + ws_name + '/wms',
                             url + ws_name + '/wfs',
                             url + ws_name + '/wcs',
+                            url + 'gwc/service/wmts',
                             url + 'gwc/service/wms'):
                                 
                             # save it on DB if successfully created
@@ -415,6 +416,7 @@ def user_add(request):
                                 wms_endpoint = url + ws_name + '/wms',
                                 wfs_endpoint = url + ws_name + '/wfs',
                                 wcs_endpoint = url + ws_name + '/wcs',
+                                wmts_endpoint = url + 'gwc/service/wmts',
                                 cache_endpoint = url + 'gwc/service/wms',
                                 created_by = user.username,
                                 is_public = False
