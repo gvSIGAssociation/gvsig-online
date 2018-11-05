@@ -175,6 +175,111 @@ getFeatureInfo.prototype.hasLayers = function() {
 	return hasLayers;
 };
 
+
+
+
+/**
+ *  refs #3004 
+ *  Code extracted from https://github.com/IGNF/geoportal-extensions
+ *  to add getGetFeatureInfoUrl support to WMTS Source
+ */
+getFeatureInfo.prototype.assign = function (dest, source) {
+    dest = dest || {};
+    for (var prop in source) {
+        if (source.hasOwnProperty(prop)) {
+            dest[prop] = source[prop];
+        }
+    }
+    return dest;
+},
+
+/**
+ *  refs #3004 
+ *  Code extracted from https://github.com/IGNF/geoportal-extensions
+ *  to add getGetFeatureInfoUrl support to WMTS Source
+ */
+getFeatureInfo.prototype.getWMTSFeatureInfoUrl = function (source, coordinate2, zoom, projection, params) {
+	var resolution = source.tileGrid.getResolutions()[zoom];
+    var pixelRatio = (source && source.tilePixelRatio_) ? source.tilePixelRatio_ : 1;
+
+    var tileGrid = source.tileGrid;
+    
+    var coordinate = ol.proj.transform(coordinate2, projection.getCode(), source.matrixSet_);	
+    var tileCoord = source.tileGrid.getTileCoordForCoordAndResolution(coordinate, resolution);
+
+    // this code is duplicated from createFromWMTSTemplate function
+    var getTransformedTileCoord = function (tileCoord, tileGrid, projection) {
+        var tmpTileCoord = [0, 0, 0]; /* Note : [z(zoomLevel),x,y] */
+        var tmpExtent = ol.extent.createEmpty();
+        var x = tileCoord[1];
+        var y = -tileCoord[2] - 1;
+        var tileExtent = tileGrid.getTileCoordExtent(tileCoord);
+        var projectionExtent = projection.getExtent();
+        var extent = projectionExtent;
+
+        if (extent != null && projection.isGlobal() && extent[0] === projectionExtent[0] && extent[2] === projectionExtent[2]) {
+            var numCols = Math.ceil(ol.extent.getWidth(extent) / ol.extent.getWidth(tileExtent));
+            x = x % numCols;
+            tmpTileCoord[0] = tileCoord[0];
+            tmpTileCoord[1] = x;
+            tmpTileCoord[2] = tileCoord[2];
+            tileExtent = tileGrid.getTileCoordExtent(tmpTileCoord, tmpExtent);
+        }
+        if (!ol.extent.intersects(tileExtent, extent) /* || ol.extent.touches(tileExtent, extent) */) {
+            return null;
+        }
+        return [tileCoord[0], x, y];
+    };
+
+    var tileExtent = tileGrid.getTileCoordExtent(tileCoord);
+    var transformedTileCoord = getTransformedTileCoord(tileCoord, tileGrid, projection);
+
+    if (tileGrid.getResolutions().length <= tileCoord[0]) {
+        return undefined;
+    }
+
+    var tileResolution = tileGrid.getResolution(tileCoord[0]);
+    var tileMatrix = tileGrid.getMatrixIds()[tileCoord[0]];
+
+    var baseParams = {
+        SERVICE : "WMTS",
+        VERSION : "1.0.0",
+        REQUEST : "GetFeatureInfo",
+        LAYER : source.layer_,
+        TILECOL : transformedTileCoord[1],
+        TILEROW : transformedTileCoord[2],
+        TILEMATRIX : tileMatrix,
+        TILEMATRIXSET : source.matrixSet_,
+        FORMAT : source.format_ || "image/png"
+    };
+
+    this.assign(baseParams, params);
+
+    /* var tileSize = tileGrid.getTileSize();
+    var x = Math.floor(tileSize*((coordinate[0]-tileExtent[0])/(tileExtent[2]-tileExtent[0])));
+    var y = Math.floor(tileSize*((tileExtent[3]-coordinate[1])/(tileExtent[3]-tileExtent[1]))); */
+
+    var x = Math.floor((coordinate[0] - tileExtent[0]) / (tileResolution / pixelRatio));
+    var y = Math.floor((tileExtent[3] - coordinate[1]) / (tileResolution / pixelRatio));
+
+    baseParams["I"] = x;
+    baseParams["J"] = y;
+
+    var url = source.urls[0];
+
+    var str = "";
+    for (var key in baseParams) {
+        if (str != "") {
+            str += "&";
+        }
+        str += key + "=" + baseParams[key];
+    }
+    
+    var featureInfoUrl = url +'?'+ str; //Gp.Helper.normalyzeUrl(url, baseParams);
+
+    return featureInfoUrl;
+}
+
 /**
  * Handle pointer click.
  * @param {ol.MapBrowserEvent} evt
@@ -232,25 +337,39 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 		
 		for (var i=0; i<queryLayers.length; i++) {
 			qLayer = queryLayers[i];
-			url = qLayer.getSource().getGetFeatureInfoUrl(
-				evt.coordinate, 
-				viewResolution, 
-				this.map.getView().getProjection().getCode(),
-				{'INFO_FORMAT': 'application/json', 'FEATURE_COUNT': '100'}
-			);
-			
-			
-			var stls = []
-			if(qLayer.hasOwnProperty('styles')){
-				stls = qLayer.styles;
+			url = null;
+			if(qLayer.getSource() instanceof ol.source.WMTS){
+				var zoom = map.getView().getZoom();
+				url = self.getWMTSFeatureInfoUrl(
+						qLayer.getSource(),
+						evt.coordinate, 
+						zoom, 
+						this.map.getView().getProjection(),
+						{'INFOFORMAT': 'application/json', 'FEATURE_COUNT': '100'}
+					);
+			}else{
+				url = qLayer.getSource().getGetFeatureInfoUrl(
+					evt.coordinate, 
+					viewResolution, 
+					this.map.getView().getProjection().getCode(),
+					{'INFO_FORMAT': 'application/json', 'FEATURE_COUNT': '100'}
+				);
 			}
-			var queryLayer = {
-		  		url: url,
-		  		query_layer: qLayer.layer_name,
-		  		workspace: qLayer.workspace,
-		  		styles: stls
-			};
-			layers_info.push(queryLayer);
+			
+			if(url != null){
+				var stls = []
+				if(qLayer.hasOwnProperty('styles')){
+					stls = qLayer.styles;
+				}
+				var queryLayer = {
+			  		url: url,
+			  		query_layer: qLayer.layer_name,
+			  		workspace: qLayer.workspace,
+			  		styles: stls
+				};
+				layers_info.push(queryLayer);
+			}
+			
 		}
 		
 		if(layers_info.length > 0){
