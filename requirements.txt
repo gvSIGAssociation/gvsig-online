@@ -7,7 +7,7 @@ geopy==1.14.0
 gisdata==0.5.4
 
 # Python 2 / 3 compatibility layer
-future
+future==0.17.1
 
 ## auth
 python-ldap==2.4.25
