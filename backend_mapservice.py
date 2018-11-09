@@ -132,11 +132,26 @@ class Geoserver():
         return self.rest_catalog.get_fonts(user=self.user, password=self.password)
     
     def reload_nodes(self):
-        print "DEBUG: Reloading Geoserver nodes ......"
+        print "INFO: Reloading Geoserver nodes ......"
         try:
+            
+            #only reload nodes with low update_sequence
+            #from random import randint
             if len(self.cluster_nodes) > 0:
+                d = {}                
                 for node in self.cluster_nodes:
-                    self.rest_catalog.reload(node, user=self.user, password=self.password)
+                    us_string =  self.rest_catalog.get_update_sequence(node, user=self.user, password=self.password)
+                    us_json = json.loads(us_string)
+                    us = us_json['global']['updateSequence']
+                    d[node] = us
+                #    d[node] = randint(0, 99999)  
+                sorted_d = sorted((value, key) for (key,value) in d.items())
+                for key, value in sorted_d[:-1]:
+                    print  "INFO: Reloading ... " + value + " with updatedSequence " + str(key) 
+                    self.rest_catalog.reload(value, user=self.user, password=self.password)                        
+            #if len(self.cluster_nodes) > 0:
+            #    for node in self.cluster_nodes:                    
+            #        self.rest_catalog.reload(node, user=self.user, password=self.password)
             return True
         except Exception as e:
             print str(e)

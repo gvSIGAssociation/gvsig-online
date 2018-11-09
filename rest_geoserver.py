@@ -857,7 +857,18 @@ class Geoserver():
             return "image/tiff"
         else:
             return "application/zip"
-        
+    
+    def get_update_sequence(self, node_url, user=None, password=None):
+        url = node_url + "/rest/settings.json"
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+        r = self.session.get(url, json={}, auth=auth)
+        if r.status_code==200:
+            return r._content
+        raise FailedRequestError(r.status_code, r.content)
+            
     
     def __update_dict(self, d, u):
         for k, v in u.iteritems():
