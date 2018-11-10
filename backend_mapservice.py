@@ -169,8 +169,11 @@ class Geoserver():
         
     def getWorkspace(self, name):
         try:
-            self.getGsconfig().get_workspace(name)
-            return True
+            ws = self.getGsconfig().get_workspace(name)
+            if ws is None: 
+                return False
+            else:
+                return True
         except Exception as e:
             print str(e)
             return False
