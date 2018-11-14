@@ -131,8 +131,8 @@ class Geoserver():
     def getSupportedFonts(self):
         return self.rest_catalog.get_fonts(user=self.user, password=self.password)
     
-    def reload_nodes(self):
-        print "INFO: Reloading Geoserver nodes ......"
+    def reload_nodes_minseq(self):
+        print "INFO: Reloading Geoserver nodes with min sequence ......"
         try:
             
             #only reload nodes with low update_sequence
@@ -156,6 +156,18 @@ class Geoserver():
         except Exception as e:
             print str(e)
             return False
+
+    def reload_nodes(self):
+        print "DEBUG: Reloading Geoserver nodes ......"
+        try:
+            if len(self.cluster_nodes) > 0:
+                for node in self.cluster_nodes:
+                    self.rest_catalog.reload(node, user=self.user, password=self.password)
+            return True
+        except Exception as e:
+            print str(e)
+            return False
+
         
     def createWorkspace(self, name, uri, description=None,
                         wms_endpoint=None, wfs_endpoint=None,
