@@ -105,6 +105,8 @@ class GoogleMaps():
                         'lng': result['geometry']['location']['lng']
                     }
                     return parse_result
+            if 'error_message' in json_results:
+                return json_results
         return {}
         
         
