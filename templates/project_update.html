@@ -499,9 +499,13 @@
     					if(response.address){
     						var address = response.address;
     						if(address != null){
-    							var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], 'EPSG:4326', 'EPSG:3857');	
-    							map.getView().setCenter(coordinate);
-    							map.getView().setZoom(14);
+    							if(!("status" in address) || address.status != "OVER_QUERY_LIMIT"){
+	    							var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], 'EPSG:4326', 'EPSG:3857');	
+	    							map.getView().setCenter(coordinate);
+	    							map.getView().setZoom(14);
+    							}else{
+    								alert("Error " + address.status + ": " + address.error_message)
+    							}	
     						}
     					}
     				},
