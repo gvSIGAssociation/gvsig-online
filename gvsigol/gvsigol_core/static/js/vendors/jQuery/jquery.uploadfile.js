@@ -294,6 +294,20 @@
             }
             return result;
         }
+        
+        function checkResourceExists(name) {
+        	var filename_exists = false;
+            $("#resources-list .box.box-default .box-body a").each(function(){
+                    var url = $(this).attr("href");
+                    if(url.endsWith("/" + name)){
+                            filename_exists = true;
+                    }
+            });
+            
+        	return filename_exists;
+	    }
+
+
 
         function serializeAndUploadFiles(s, obj, files) {
             for(var i = 0; i < files.length; i++) {
@@ -315,36 +329,41 @@
                         obj.errorLog);
                     continue;
                 }
-                obj.selectedFiles++;
-                obj.existingFileNames.push(files[i].name);
-                var ts = s;
-                var fd = new FormData();
-                var fileName = s.fileName.replace("[]", "");
-                fd.append(fileName, files[i]);
-                var extraData = s.formData;
-                if(extraData) {
-                    var sData = serializeData(extraData);
-                    for(var j = 0; j < sData.length; j++) {
-                        if(sData[j]) {
-                            fd.append(sData[j][0], sData[j][1]);
-                        }
-                    }
+                if(isFileDuplicate(obj, files[i].name) || checkResourceExists(files[i].name)){
+                	$("<div class='" + s.errorClass + "'><b>" + files[i].name + "</b> FileName already exists </div>").appendTo(obj.errorLog);
+                    continue;
+                }else{
+	                obj.selectedFiles++;
+	                obj.existingFileNames.push(files[i].name);
+	                var ts = s;
+	                var fd = new FormData();
+	                var fileName = s.fileName.replace("[]", "");
+	                fd.append(fileName, files[i]);
+	                var extraData = s.formData;
+	                if(extraData) {
+	                    var sData = serializeData(extraData);
+	                    for(var j = 0; j < sData.length; j++) {
+	                        if(sData[j]) {
+	                            fd.append(sData[j][0], sData[j][1]);
+	                        }
+	                    }
+	                }
+	                ts.fileData = fd;
+                
+	                var pd = new createProgressDiv(obj, s);
+	                var fileNameStr = "";
+	                if(s.showFileCounter) fileNameStr = obj.fileCounter + s.fileCounterStyle + files[i].name
+	                else fileNameStr = files[i].name;
+	
+	                pd.filename.html(fileNameStr);
+	                var form = $("<form style='display:block; position:absolute;left: 150px;' class='" + obj.formGroup + "' method='" + s.method + "' action='" +
+	                    s.url + "' enctype='" + s.enctype + "'></form>");
+	                form.appendTo('body');
+	                var fileArray = [];
+	                fileArray.push(files[i].name);
+	                ajaxFormSubmit(form, ts, pd, fileArray, obj, files[i]);
+	                obj.fileCounter++;
                 }
-                ts.fileData = fd;
-
-                var pd = new createProgressDiv(obj, s);
-                var fileNameStr = "";
-                if(s.showFileCounter) fileNameStr = obj.fileCounter + s.fileCounterStyle + files[i].name
-                else fileNameStr = files[i].name;
-
-                pd.filename.html(fileNameStr);
-                var form = $("<form style='display:block; position:absolute;left: 150px;' class='" + obj.formGroup + "' method='" + s.method + "' action='" +
-                    s.url + "' enctype='" + s.enctype + "'></form>");
-                form.appendTo('body');
-                var fileArray = [];
-                fileArray.push(files[i].name);
-                ajaxFormSubmit(form, ts, pd, fileArray, obj, files[i]);
-                obj.fileCounter++;
             }
         }
 
