@@ -2849,7 +2849,7 @@ def describeFeatureType(request):
     
         except Exception as e:
             print e.message
-            response = {'fields': []}
+            response = {'fields': [], 'error': e.message}
             pass
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
