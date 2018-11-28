@@ -25,6 +25,7 @@
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror/lib/codemirror.css" %}" />
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror/theme/xq-dark.css" %}" />
 	<link rel="stylesheet" href="{% static "css/symbology.css" %}">
+	<link rel="stylesheet" href="{% static "css/googlefonts.css" %}">
 	<link rel="stylesheet" href="{% static "css/gvsigOL.css" %}">
 	
 	{% for app in INSTALLED_APPS %}												  
@@ -58,8 +59,8 @@
 	
 		<header class="main-header">
 			<a href="/gvsigonline/" class="logo">
-				<span class="logo-mini"><b>G</b>OL</span>
-				<span class="logo-lg"><b>gvsig</b>OL</span>
+				<span class="logo-mini"><b>{{GVSIGOL_NAME_SHORT}}</b>{{GVSIGOL_SURNAME_SHORT}}</span>
+				<span class="logo-lg"><b>{{GVSIGOL_NAME}}</b>{{GVSIGOL_SURNAME}}</span>
 			</a>
 
 			<nav class="navbar navbar-static-top" role="navigation">
