@@ -22,6 +22,7 @@
 	<link rel="stylesheet" href="{% static "js/vendors/DataTables-1.10.11/extensions/Select/css/select.dataTables.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/Buttons-1.2.4/css/buttons.dataTables.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/ol-4.0.1/ol.css" %}">
+	<link rel="stylesheet" href="{% static "css/googlefonts.css" %}">
 	<link rel="stylesheet" href="{% static "css/gvsigOL.css" %}">
 	<link rel="stylesheet" href="{% static "css/skins/_all-skins.min.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror/lib/codemirror.css" %}" />
@@ -60,8 +61,8 @@
 	
 		<header class="main-header">
 			<a href="/gvsigonline/" class="logo">
-				<span class="logo-mini"><b>G</b>OL</span>
-				<span class="logo-lg"><b>gvsig</b>OL</span>
+				<span class="logo-mini"><b>{{GVSIGOL_NAME_SHORT}}</b>{{GVSIGOL_SURNAME_SHORT}}</span>
+				<span class="logo-lg"><b>{{GVSIGOL_NAME}}</b>{{GVSIGOL_SURNAME}}</span>
 			</a>
 
 			<nav class="navbar navbar-static-top" role="navigation">
