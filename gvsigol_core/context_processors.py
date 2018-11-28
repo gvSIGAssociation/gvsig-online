@@ -30,4 +30,8 @@ def global_settings(request):
         'PUBLIC_VIEWER': gvsigol.settings.PUBLIC_VIEWER,
         'GVSIGOL_ENABLE_ENUMERATIONS': gvsigol.settings.GVSIGOL_ENABLE_ENUMERATIONS,
         'GVSIGOL_SKIN': gvsigol.settings.GVSIGOL_SKIN,
+        'GVSIGOL_NAME': gvsigol.settings.GVSIGOL_NAME,
+        'GVSIGOL_SURNAME': gvsigol.settings.GVSIGOL_SURNAME,
+        'GVSIGOL_NAME_SHORT': gvsigol.settings.GVSIGOL_NAME_SHORT,
+        'GVSIGOL_SURNAME_SHORTv': gvsigol.settings.GVSIGOL_SURNAME_SHORT,
     }
