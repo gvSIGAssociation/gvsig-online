@@ -361,6 +361,7 @@ class Geoserver():
             return True
         
         except Exception as e:
+            logger.exception("error setting style", e)
             return False     
         
     def get_geometry_type(self, layer):
@@ -378,6 +379,7 @@ class Geoserver():
                 return 'raster'
         
         except Exception as e:
+            logger.exception("error getting geometry type", e)
             return False
     
     def get_feature_type(self, workspace, datastore, name, title):

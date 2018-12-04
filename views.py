@@ -911,7 +911,8 @@ def layer_update(request, layer_id):
         else:
             highlight_scale = -1
             
-        
+        layer_md_uuid = request.POST.get('layer_md_uuid')
+        core_utils.update_layer_metadata_uuid(layer, layer_md_uuid)
                 
         old_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
         
@@ -978,7 +979,7 @@ def layer_update(request, layer_id):
                 mapservice_backend.createOrUpdateGeoserverLayerGroup(new_layer_group)
                                 
             mapservice_backend.reload_nodes()   
-            
+        
         if redirect_to_layergroup:
             return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer_id})+"?redirect=grouplayer-redirect")
         else:
@@ -1013,8 +1014,10 @@ def layer_update(request, layer_id):
                 highlight_scale = -1
         else:
             highlight_scale = -1
-            
-        return render(request, 'layer_update.html', {'layer': layer, 'highlight_scale': highlight_scale, 'workspace': workspace, 'form': form, 'layer_id': layer_id, 'date_fields': json.dumps(date_fields), 'redirect_to_layergroup': redirect_to_layergroup})
+
+        md_uuid = core_utils.get_layer_metadata_uuid(layer)
+        plugins_config = core_utils.get_plugins_config()
+        return render(request, 'layer_update.html', {'layer': layer, 'highlight_scale': highlight_scale, 'workspace': workspace, 'form': form, 'layer_id': layer_id, 'date_fields': json.dumps(date_fields), 'redirect_to_layergroup': redirect_to_layergroup, 'layer_md_uuid': md_uuid, 'plugins_config': plugins_config})
 
 def get_date_fields(layer_id):
     date_fields = []
