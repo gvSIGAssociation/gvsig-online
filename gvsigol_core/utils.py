@@ -31,6 +31,8 @@ import json
 import psycopg2
 import os
 from numpy import genfromtxt
+import importlib
+import gvsigol
 
 def is_valid_project(user, project_name):
     valid = False
@@ -402,6 +404,33 @@ def get_catalog_url(request, layer):
         
     return catalog_url
 
+def get_layer_metadata_uuid(layer):   
+    if 'gvsigol_plugin_catalog' in settings.INSTALLED_APPS:
+        from gvsigol_plugin_catalog import settings as catalog_settings
+        from gvsigol_plugin_catalog.models import  LayerMetadata
+        
+        try: 
+            lm = LayerMetadata.objects.get(layer=layer)
+            return lm.metadata_uuid
+        except Exception as e:
+            pass
+    return ''
+
+def update_layer_metadata_uuid(layer, uuid):   
+    if 'gvsigol_plugin_catalog' in settings.INSTALLED_APPS:
+        from gvsigol_plugin_catalog import settings as catalog_settings
+        from gvsigol_plugin_catalog.models import  LayerMetadata
+        
+        try: 
+            lm = LayerMetadata.objects.get(layer=layer)
+            lm.metadata_uuid = uuid
+            lm.save()
+        except Exception as e:
+            lm = LayerMetadata()
+            lm.layer = layer
+            lm.metadata_uuid = uuid
+            lm.save()
+
 def sendMail(user, password):
             
     subject = _(u'New user account')
@@ -539,3 +568,18 @@ def get_supported_crs_array(used_crs=None):
         get_supported_crs(used_crs)
     return supported_crs_array
      
+def get_plugins_config():
+    plugins_config = {}
+    for plugin in gvsigol.settings.INSTALLED_APPS:
+        if 'gvsigol_app_' in plugin or 'gvsigol_plugin_' in plugin:
+            try:
+                plugin_settings = importlib.import_module(plugin + ".settings")
+                settings_dict = {}
+                for config_var in dir(plugin_settings):
+                    if not config_var.startswith("__"):
+                        settings_dict[config_var] = getattr(plugin_settings, config_var)
+                if len(settings_dict) > 0:
+                    plugins_config[plugin] = settings_dict
+            except ImportError:
+                pass
+    return plugins_config

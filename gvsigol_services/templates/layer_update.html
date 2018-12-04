@@ -198,7 +198,31 @@
 							</div>
 						</div>
 					</div>
-					
+					{% if 'gvsigol_plugin_catalog' in INSTALLED_APPS %}
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<span>{% trans "Layer metadata" %}.</span>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-4 form-group">
+							<label for="uuid">{% trans "Metadata UUID" %}</label>
+							<input name="uuid" id="uuid" type="text" class="form-control" value="{{layer_md_uuid}}">
+						</div>
+					</div>
+					<div id="mdtoolseditdiv" class="row {% if layer_md_uuid %}{% else %}hidden d-none{% endif %}">
+						<div class="col-md-2 form-group">
+							<label for="edit_metadata_btn">{% trans "Metadata tools" %}</label>
+							<a id="edit_metadata_btn" href="{{plugins_config.gvsigol_plugin_catalog.CATALOG_BASE_URL}}/srv/eng/catalog.search#/metadata/{{layer_md_uuid}}" role="button" target="_blank" class="btn btn-default form-control">{% trans "Edit in catalog" %}</a>
+						</div>
+					</div>
+					<div id="mdtoolscreatediv" class="row {% if layer_md_uuid %}hidden d-none{% else %}{% endif %}">
+						<div class="col-md-2 form-group">
+							<label for="create_metadata_btn">{% trans "Metadata tools" %}</label>
+							<button id="create_metadata_btn" type="button" class="btn btn-default form-control">{% trans "Create metadata" %}</button>
+						</div>
+					</div>
+					{% endif %}
 				</div>
 				
 				<div class="box-footer">
@@ -362,6 +386,28 @@ $('#submenu-layers').addClass("active");
 			format: 'DD-MM-YYYY HH:mm:ss',
 			showClose: true
 		});
+		
+		{% if 'gvsigol_plugin_catalog' in INSTALLED_APPS %}
+		{% if 'CATALOG_FACETS_CONFIG' in plugins_config.gvsigol_plugin_catalog %}
+		facetsConfig: {{ plugins_config.gvsigol_plugin_catalog.CATALOG_BASE_URL }},
+		{% endif %}
+		$('#create_metadata_btn').click(function() {
+			var url = '{% url 'create_metadata' layer_id %}';
+			$.ajax({url: url, type: 'post', data: {}, 
+				headers: {'X-CSRFToken': $.cookie('csrftoken')},
+				success: function(data, textStatus, jqXHR) {
+					if (data.status=='ok') {
+						$('#uuid').val(data.uuid);
+						$('#mdtoolseditdiv').removeClass('hidden d-none');
+						$('#mdtoolscreatediv').addClass('hidden d-none');
+						var new_url = '{{plugins_config.gvsigol_plugin_catalog.CATALOG_BASE_URL}}' + '/srv/eng/catalog.search#/metadata/' + data.uuid;
+						$('#edit_metadata_btn').attr('href', new_url);
+					}
+				}
+			});
+		});
+		{% endif %}
+
 	});
 </script>
 {% endblock %}
