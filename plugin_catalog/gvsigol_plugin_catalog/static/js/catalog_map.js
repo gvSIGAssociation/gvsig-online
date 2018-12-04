@@ -128,7 +128,7 @@ CatalogMap.prototype.initialization = function(container_id){
 	    ],
 	    view: new ol.View({
 	        center: [0, 0],
-	        zoom: 2,
+	        zoom: 0,
 	        projection: 'EPSG:4326',
 	    })
 	});
