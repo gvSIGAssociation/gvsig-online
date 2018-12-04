@@ -181,7 +181,14 @@ CatalogView.prototype.initialization = function(){
 }
 
 CatalogView.prototype.filterCatalog = function(){
-	var search = $("#gn-any-field").val();
+	var searchTerms = $("#gn-any-field").val().split(" ");
+	var search = '';
+	for (var i=0; i<searchTerms.length; i++) {
+		// add wildcards to search for partial terms
+		if (searchTerms[i] != "") {
+			search += searchTerms[i]+"* ";
+		}
+	}
 	var categories = $("#categoriesF").val();
 	var keywords = $("#keywordsF").val();
 	var resources = $("#orgNameF").val();
@@ -286,10 +293,12 @@ CatalogView.prototype.getPatternBasedCategories = function(cat, config){
 CatalogView.prototype.getMetadataEntry = function(metadata){
 	var met = '';
 	if(metadata){
+		var title = metadata['defaultTitle'] || '';
+		var abstract = metadata['abstract'] || '';
 		met += '<div class="catalog_content_layer col-md-6">';
 		met += '	<div class="col-md-9">';
-		met += '		<p class="catalog_content_title block-with-text">'+ metadata['defaultTitle'] +'</p>';
-		met += '		<p class="catalog_content_abstract block-with-text">'+ metadata['abstract'] +'</p>';
+		met += '		<p class="catalog_content_title block-with-text">'+ title +'</p>';
+		met += '		<p class="catalog_content_abstract block-with-text">'+ abstract +'</p>';
 		met += '	</div>';
 		met += '	<div class="col-md-3 catalog_content_lateral">';
 		met += '		<div class="catalog_content_thumbnail">';
