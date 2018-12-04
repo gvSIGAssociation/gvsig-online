@@ -55,7 +55,7 @@ CatalogView.prototype.initialization = function(){
 	catalogPanel += '	<div class="row">';
 	catalogPanel += '		<div class="col-md-offset-1 col-md-10 relative">';
 	catalogPanel += '    		<div class="input-group gn-form-any">';
-	catalogPanel += '				<input type="text" class="form-control input-lg ng-pristine ng-untouched ng-valid ng-empty" id="gn-any-field" placeholder="Search..." data-ng-keyup="$event.keyCode == 13 &amp;&amp; triggerSearch()" data-typeahead="address for address in getAnySuggestions($viewValue)" data-typeahead-loading="anyLoading" data-typeahead-min-length="1" data-typeahead-focus-first="false" data-typeahead-wait-ms="300" aria-autocomplete="list" aria-expanded="false" aria-owns="typeahead-310-2994">';
+	catalogPanel += '				<input type="text" class="form-control input-lg" id="gn-any-field" placeholder="Search..." data-typeahead="address for address in getAnySuggestions($viewValue)" data-typeahead-loading="anyLoading" data-typeahead-min-length="1" data-typeahead-focus-first="false" data-typeahead-wait-ms="300" aria-autocomplete="list" aria-expanded="false" aria-owns="typeahead-310-2994">';
 
 	catalogPanel += '				<div class="input-group-btn">';
 	catalogPanel += '					<button id="catalog-search-advanced-button" type="button" class="btn btn-default btn-lg ng-pristine ng-untouched ng-valid ng-not-empty" data-ng-model="searchObj.advancedMode" btn-checkbox="" btn-checkbox-true="1" btn-checkbox-false="0">';
@@ -148,6 +148,12 @@ CatalogView.prototype.initialization = function(){
 
 	$("#catalog-search-button").unbind("click").click(function(){
 		self.filterCatalog();
+	});
+	
+	$("#gn-any-field").off("keypress").on("keypress", function(e){
+		if(e.keyCode == 13) {
+			self.filterCatalog();
+		}
 	});
 
 	$("#catalog-search-advanced-button").unbind("click").click(function(){
