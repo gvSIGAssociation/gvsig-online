@@ -25,6 +25,8 @@ from datetime import datetime
 import requests
 import json
 import re
+from gvsigol_plugin_catalog.mdstandards import registry
+#from gvsigol_plugin_catalog.mdstandards import iso19139_2007
 
 class Geonetwork():
     """
@@ -74,7 +76,7 @@ class Geonetwork():
         cookie = self.session.cookies.get_dict()
         return cookie.get('XSRF-TOKEN')
     
-    def gn_insert_metadata(self, layer, abstract, ws, layer_info, ds_type, md_record=None):
+    def gn_insert_metadata(self, md_record):
         #curl -X PUT --header 'Content-Type: application/xml' --header 'Accept: application/json' -d '.........XML_code............'  
         # 'http://localhost:8080/geonetwork/srv/api/0.1/records?metadataType=METADATA&assignToCatalog=true&uuidProcessing=generateUUID&transformWith=_none_'
         url = self.service_url + "/srv/api/0.1/records?metadataType=METADATA&assignToCatalog=true&transformWith=_none_"
@@ -83,12 +85,10 @@ class Geonetwork():
             'Accept': 'application/json',
             'X-XSRF-TOKEN': self.get_csrf_token()
         }
-        if not md_record:
-            xml = self.create_metadata(layer, abstract, ws, layer_info, ds_type)
-            md_record = xml.encode('utf-8')
-        r = self.session.put(url, data=md_record, headers=headers)
+        r = self.session.put(url, data=md_record.encode("UTF-8"), headers=headers)
         
         if r.status_code==201:
+            print md_record
             response = json.loads(r.text)
             
             uuid = None
@@ -214,6 +214,7 @@ class Geonetwork():
         r = self.session.get(url, headers=headers)
         if r.status_code==200:
             response = json.loads(r.text)
+            print r.text
             
             #Otros grupos
             for group in response:
@@ -239,6 +240,7 @@ class Geonetwork():
                 'content-type': 'application/json',
                 'X-XSRF-TOKEN': self.get_csrf_token()
             }
+        print privileges
         r3 = self.session.put(url3, data=json.dumps(privileges), headers=headers)
         if r3.status_code==204:
             return True
@@ -261,13 +263,67 @@ class Geonetwork():
             return True
         raise FailedRequestError(r.status_code, r.content)
     
-    def getTextFromXMLNode(self, tree, ns, filter):
-        aux = tree.findall(filter, ns)
-        if aux.__len__() > 0:
-            return aux[0].text
+    def getTextFromXMLNode(self, tree, xpath_filter, ns):
+        if tree is not None:
+            for item in tree.findall(xpath_filter, ns):
+                if item.text:
+                    return item.text
+        return ''
+
+    def getXMLNode(self, tree, xpath_filter, ns):
+        if tree:
+            aux = tree.findall(xpath_filter, ns)
+            if len(aux) > 0:
+                return aux[0]
         
+        return None
+    
+    def getXMLCodeText(self, node, attribName='codeListValue', ns={}):
+        if node:
+            if node.text != '':
+                return node.text
+            return getattr(node, attribName, '')
         return ''
     
+    def _getXMLConstraints(self, tree, xpath_filter, ns):
+        useLimitations = []
+        accessConstraints = []
+        useConstraints = []
+        otherConstraints = []
+        for constraintsNode in tree.findall(xpath_filter, ns):
+            for useLimitationsNode in constraintsNode.findall('./gmd:MD_Constraints/gmd:useLimitation/gco:CharacterString/', ns):
+                useLimitations.append(useLimitationsNode.text)
+            for accessConstraintsNode in constraintsNode.findall('./gmd:MD_LegalConstraints/gmd:accessConstraints/gmd:MD_RestrictionCode/', ns):
+                accessConstraints.append(self.getXMLCodeText(accessConstraintsNode, 'codeListValue', ns))
+            for useConstraintsNode in constraintsNode.findall('./gmd:MD_LegalConstraints/gmd:useConstraints/gmd:MD_RestrictionCode/', ns):
+                useConstraints.append(self.getXMLCodeText(useConstraintsNode, ns=ns))
+            for otherConstraintsNode in constraintsNode.findall('./gmd:MD_LegalConstraints/gmd:otherConstraints/gco:CharacterString/', ns):
+                otherConstraints.append(otherConstraintsNode.text)
+        return {
+                'useLimitations': useLimitations,
+                'accessConstraints': accessConstraints,
+                'useConstraints': useConstraints,
+                'otherConstraints': otherConstraints
+                }
+    
+    def _getResponsibleParty(self, node, ns):
+        # TODO: manage mutiplicities (e.g. online resource, phone, etc)
+        individualName = self.getTextFromXMLNode(node, './gmd:individualName/gco:CharacterString/', ns)
+        organisationName = self.getTextFromXMLNode(node, './gmd:organisationName/gco:CharacterString/', ns)
+        roleNode = self.getXMLNode(node, './gmd:role/gco:CharacterString/', ns)
+        role = self.getXMLCodeText(roleNode, ns=ns)
+        email = self.getTextFromXMLNode(node, './gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString/', ns)
+        phone = self.getTextFromXMLNode(node, './gmd:contactInfo/gmd:CI_Contact/gmd:phone/gmd:CI_Telephone/gmd:voice/gco:CharacterString/', ns)
+        url = self.getTextFromXMLNode(node, './gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource/gmd:linkage/gmd:URL/', ns)
+        return {
+            'individualName': individualName,
+            'organisationName': organisationName,
+            'role': role,
+            'email': email,
+            'phone': phone,
+            'url': url
+            }
+        
     def gn_get_metadata(self, metadata_id):
         #curl -X DELETE --header 'Accept: */*' 'http://localhost:8080/geonetwork/srv/api/0.1/records/159?withBackup=false'
         #NOTE: uuid is an id not in format 97769e85-2e7b-418b-a8c8-0163bfb97aac
@@ -281,18 +337,19 @@ class Geonetwork():
         r = self.session.get(url, headers=headers)
         if r.status_code==200:
             tree = ET.fromstring(r.text.encode('utf8'))
-            ns = {'gmd': 'http://www.isotc211.org/2005/gmd'}
+            print r.text
+            ns = {'gmd': 'http://www.isotc211.org/2005/gmd', 'gco': 'http://www.isotc211.org/2005/gco'}
             
             
-            metadata_id = self.getTextFromXMLNode(tree, ns, './gmd:fileIdentifier/')
-            title = self.getTextFromXMLNode(tree, ns, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/')
-            abstract = self.getTextFromXMLNode(tree, ns, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/')
-            publish_date = self.getTextFromXMLNode(tree, ns, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/')
+            metadata_id = self.getTextFromXMLNode(tree, './gmd:fileIdentifier/', ns)
+            title = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/', ns)
+            abstract = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/', ns)
+            publish_date = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/', ns)
             
             period_start = ''
             period_end = ''
             aux = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_TemporalExtent/gmd:extent/', ns)
-            if aux.__len__() > 0:
+            if len(aux) > 0:
                 period_start = aux[0]._children[0].text
                 period_end = aux[0]._children[1].text
             
@@ -306,16 +363,16 @@ class Geonetwork():
             
             representation_type = ''
             aux = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialRepresentationType/', ns)
-            if aux.__len__() > 0:
+            if len(aux) > 0:
                 representation_type = aux[0].attrib['codeListValue'] 
-            scale = self.getTextFromXMLNode(tree, ns, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/') 
-            srs = self.getTextFromXMLNode(tree, ns, './gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code/') 
+            scale = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/', ns) 
+            srs = self.getTextFromXMLNode(tree, './gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code/', ns)
             
             #https://test.gvsigonline.com/geonetwork/srv/spa/region.getmap.png?mapsrs=EPSG:3857&width=250&background=settings&geomsrs=EPSG:4326&geom=Polygon((-18.1595005217%2043.9729489023,4.96320908311%2043.9729489023,4.96320908311%2025.9993588695,-18.1595005217%2025.9993588695,-18.1595005217%2043.9729489023))
-            coords_w = self.getTextFromXMLNode(tree, ns, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:westBoundLongitude/')
-            coords_e = self.getTextFromXMLNode(tree, ns, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:eastBoundLongitude/')
-            coords_s = self.getTextFromXMLNode(tree, ns, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:southBoundLatitude/')
-            coords_n = self.getTextFromXMLNode(tree, ns, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:northBoundLatitude/')
+            coords_w = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:westBoundLongitude/', ns)
+            coords_e = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:eastBoundLongitude/', ns)
+            coords_s = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:southBoundLatitude/', ns)
+            coords_n = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:northBoundLatitude/', ns)
             
             image_url = self.service_url + '/srv/spa/region.getmap.png?mapsrs=EPSG:3857&width=250&background=osm&geomsrs=EPSG:4326&geom=Polygon(('+coords_w+' '+coords_s+','+coords_e+' '+coords_s+','+coords_e+' '+coords_n+','+coords_w+' '+coords_n+','+coords_w+' '+coords_s+'))'
             
@@ -336,6 +393,10 @@ class Geonetwork():
                         'name': thumbnail_names[i]
                     }
                     thumbnails.append(thumbnail)
+            
+            
+            resource_constraints = self._getXMLConstraints(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceConstraints/', ns)
+            metadata_constraints = self._getXMLConstraints(tree, './gmd:metadataConstraints/', ns)
             
             #resources
             resources_urls = []
@@ -380,7 +441,9 @@ class Geonetwork():
                 'srs': srs,
                 'image_url': image_url,
                 'thumbnails': thumbnails,
-                'resources': resources
+                'resources': resources,
+                'resource_constraints': resource_constraints,
+                'metadata_constraints': metadata_constraints
             }
             
             return resource
@@ -400,189 +463,6 @@ class Geonetwork():
             return r.content
         raise FailedRequestError(r.status_code, r.content)
 
-    def get_extent(self, layer_info, ds_type):
-        minx = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['minx'])
-        miny = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['miny'])
-        maxx = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['maxx'])
-        if layer_info[ds_type]['latLonBoundingBox']['minx'] > layer_info[ds_type]['latLonBoundingBox']['maxx']:
-            maxx = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['minx'] + 1)
-        maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
-        if layer_info[ds_type]['latLonBoundingBox']['miny'] > layer_info[ds_type]['latLonBoundingBox']['maxy']:
-            maxy = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['miny'] + 1)
-        return (minx, miny, maxx, maxy)
-
-    def create_metadata(self, layer, abstract, ws, layer_info, ds_type):
-        minx, miny, maxx, maxy = self.get_extent(layer_info, ds_type)
-        crs_object = layer_info[ds_type]['nativeBoundingBox']['crs']
-        
-        crs = None
-        if isinstance(crs_object,dict):
-            crs = str(crs_object['$'])
-        else:
-            crs = str(crs_object)
-        
-        metadata =  '<gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" '
-        metadata +=     'xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:gmx="http://www.isotc211.org/2005/gmx" '
-        metadata +=     'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gco="http://www.isotc211.org/2005/gco" '
-        metadata +=     'xmlns:gml="http://www.opengis.net/gml" xmlns:gts="http://www.isotc211.org/2005/gts" '
-        metadata +=     'xmlns:geonet="http://www.fao.org/geonetwork" xsi:schemaLocation="http://www.isotc211.org/2005/gmd ../schema.xsd">'
-        
-        metadata +=     '<gmd:metadataStandardName>'
-        metadata +=         '<gco:CharacterString>ISO 19115:2003/19139</gco:CharacterString>'
-        metadata +=     '</gmd:metadataStandardName>'
-        
-        metadata +=     '<gmd:metadataStandardVersion>'
-        metadata +=         '<gco:CharacterString>1.0</gco:CharacterString>'
-        metadata +=     '</gmd:metadataStandardVersion>'
-        
-        metadata +=     '<gmd:spatialRepresentationInfo/>'
-        
-        metadata +=     '<gmd:referenceSystemInfo>'
-        metadata +=         '<gmd:MD_ReferenceSystem>'
-        metadata +=             '<gmd:referenceSystemIdentifier>'
-        metadata +=                 '<gmd:RS_Identifier>'
-        metadata +=                     '<gmd:code>'
-        metadata +=                         '<gco:CharacterString>' + crs + '</gco:CharacterString>'
-        metadata +=                     '</gmd:code>'
-        metadata +=                 '</gmd:RS_Identifier>'
-        metadata +=             '</gmd:referenceSystemIdentifier>'
-        metadata +=         '</gmd:MD_ReferenceSystem>'
-        metadata +=     '</gmd:referenceSystemInfo>'
-        
-        metadata +=     '<gmd:identificationInfo>'
-        metadata +=         '<gmd:MD_DataIdentification>'
-        metadata +=             '<gmd:citation>'
-        metadata +=                 '<gmd:CI_Citation>'
-        metadata +=                     '<gmd:title xsi:type="gmd:PT_FreeText_PropertyType">'
-        metadata +=                         '<gco:CharacterString>' + layer.title + '</gco:CharacterString>'
-        metadata +=                         '<gmd:PT_FreeText>'
-        metadata +=                             '<gmd:textGroup>'
-        metadata +=                                 '<gmd:LocalisedCharacterString locale="#ES">' + layer.title + '</gmd:LocalisedCharacterString>'
-        metadata +=                             '</gmd:textGroup>'
-        metadata +=                         '</gmd:PT_FreeText>'
-        metadata +=                     '</gmd:title>'
-        metadata +=                     '<gmd:date>'
-        metadata +=                         '<gmd:CI_Date>'
-        metadata +=                             '<gmd:date>'
-        metadata +=                                 '<gco:DateTime>' + str(datetime.now()) + '</gco:DateTime>'
-        metadata +=                             '</gmd:date> '
-        metadata +=                             '<gmd:dateType>'
-        metadata +=                                 '<gmd:CI_DateTypeCode codeList="./resources/codeList.xml#CI_DateTypeCode" codeListValue="creation"/>'
-        metadata +=                             '</gmd:dateType>'
-        metadata +=                         '</gmd:CI_Date>'
-        metadata +=                     '</gmd:date>'
-        metadata +=                 '</gmd:CI_Citation>'
-        metadata +=             '</gmd:citation>'
-        metadata +=             '<gmd:abstract>'
-        metadata +=                 '<gco:CharacterString>' + abstract + '</gco:CharacterString>'
-        metadata +=             '</gmd:abstract>'
-        metadata +=             '<gmd:graphicOverview><gmd:MD_BrowseGraphic>'
-        metadata +=                 '<gmd:fileName>'
-        metadata +=                     '<gco:CharacterString>' + layer.thumbnail.url + '</gco:CharacterString>'
-        metadata +=                 '</gmd:fileName>'
-        metadata +=                 '<gmd:fileDescription>'
-        metadata +=                     '<gco:CharacterString>gvsigol thumbnail</gco:CharacterString>'
-        metadata +=                 '</gmd:fileDescription>'
-        metadata +=             '</gmd:MD_BrowseGraphic></gmd:graphicOverview>'
-        metadata +=             '<gmd:extent>'
-        metadata +=                 '<gmd:EX_Extent>'
-        metadata +=                     '<gmd:geographicElement>'
-        metadata +=                         '<gmd:EX_GeographicBoundingBox>'
-        metadata +=                             '<gmd:westBoundLongitude>'
-        metadata +=                                 '<gco:Decimal>' + minx + '</gco:Decimal>'
-        metadata +=                             '</gmd:westBoundLongitude>'
-        metadata +=                             '<gmd:eastBoundLongitude>'
-        metadata +=                                 '<gco:Decimal>' + maxx + '</gco:Decimal>'
-        metadata +=                             '</gmd:eastBoundLongitude>'
-        metadata +=                             '<gmd:southBoundLatitude>'
-        metadata +=                                 '<gco:Decimal>' + miny + '</gco:Decimal>'
-        metadata +=                             '</gmd:southBoundLatitude>'
-        metadata +=                             '<gmd:northBoundLatitude>'
-        metadata +=                                 '<gco:Decimal>' + maxy + '</gco:Decimal>'
-        metadata +=                             '</gmd:northBoundLatitude>'
-        metadata +=                         '</gmd:EX_GeographicBoundingBox>'
-        metadata +=                     '</gmd:geographicElement>'
-        metadata +=                 '</gmd:EX_Extent>'
-        metadata +=             '</gmd:extent>'
-        metadata +=         '</gmd:MD_DataIdentification>'
-        metadata +=     '</gmd:identificationInfo>'
-        
-        metadata +=     '<gmd:distributionInfo>'
-        metadata +=         '<gmd:MD_Distribution>'
-        metadata +=             '<gmd:distributionFormat>'
-        metadata +=                 '<gmd:MD_Format>'
-        metadata +=                     '<gmd:name>'
-        metadata +=                         '<gco:CharacterString>ShapeFile</gco:CharacterString>'
-        metadata +=                     '</gmd:name>'
-        metadata +=                     '<gmd:version>'
-        metadata +=                         '<gco:CharacterString>Grass Version 6.1</gco:CharacterString>'
-        metadata +=                     '</gmd:version>'
-        metadata +=                 '</gmd:MD_Format>'
-        metadata +=             '</gmd:distributionFormat>'
-        metadata +=             '<gmd:transferOptions>'
-        metadata +=                 '<gmd:MD_DigitalTransferOptions>'
-        metadata +=                     '<gmd:onLine>'
-        metadata +=                         '<gmd:CI_OnlineResource>'
-        metadata +=                             '<gmd:linkage>'
-        metadata +=                                 '<gmd:URL>' + ws.wms_endpoint + '</gmd:URL>'
-        metadata +=                             '</gmd:linkage>'
-        metadata +=                             '<gmd:protocol>'
-        metadata +=                                 '<gco:CharacterString>OGC:WMS</gco:CharacterString>'
-        metadata +=                             '</gmd:protocol>'
-        metadata +=                             '<gmd:name>'
-        metadata +=                                 '<gco:CharacterString>' + ws.name + ':' + layer.name + '</gco:CharacterString>'
-        metadata +=                             '</gmd:name>'
-        metadata +=                             '<gmd:description>'
-        metadata +=                                 '<gco:CharacterString>' + layer.title + '</gco:CharacterString>'
-        metadata +=                             '</gmd:description>'
-        metadata +=                         '</gmd:CI_OnlineResource>'
-        metadata +=                     '</gmd:onLine>'
-        if ds_type:
-            if ds_type == 'featureType' and ws.wfs_endpoint:
-                metadata +=             '<gmd:onLine>'
-                metadata +=                 '<gmd:CI_OnlineResource>'
-                metadata +=                     '<gmd:linkage>'
-                metadata +=                         '<gmd:URL>' + ws.wfs_endpoint + '</gmd:URL>'
-                metadata +=                     '</gmd:linkage>'
-                metadata +=                     '<gmd:protocol>'
-                metadata +=                         '<gco:CharacterString>OGC:WFS</gco:CharacterString>'
-                metadata +=                     '</gmd:protocol>'
-                metadata +=                     '<gmd:name>'
-                metadata +=                         '<gco:CharacterString>' + ws.name + ':' + layer.name + '</gco:CharacterString>'
-                metadata +=                     '</gmd:name>'
-                metadata +=                     '<gmd:description>'
-                metadata +=                         '<gco:CharacterString>' + layer.title + '</gco:CharacterString>'
-                metadata +=                     '</gmd:description>'
-                metadata +=                     '<gmd:function><gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download"/></gmd:function>'
-                metadata +=                 '</gmd:CI_OnlineResource>'
-                metadata +=             '</gmd:onLine>'
-            elif ds_type in ('coverage', 'imagemosaic') and ws.wcs_endpoint:
-                metadata +=             '<gmd:onLine>'
-                metadata +=                 '<gmd:CI_OnlineResource>'
-                metadata +=                     '<gmd:linkage>'
-                metadata +=                         '<gmd:URL>' + ws.wcs_endpoint + '</gmd:URL>'
-                metadata +=                     '</gmd:linkage>'
-                metadata +=                     '<gmd:protocol>'
-                metadata +=                         '<gco:CharacterString>OGC:WCS</gco:CharacterString>'
-                metadata +=                     '</gmd:protocol>'
-                metadata +=                     '<gmd:name>'
-                metadata +=                         '<gco:CharacterString>' + ws.name + ':' + layer.name + '</gco:CharacterString>'
-                metadata +=                     '</gmd:name>'
-                metadata +=                     '<gmd:description>'
-                metadata +=                         '<gco:CharacterString>' + layer.title + '</gco:CharacterString>'
-                metadata +=                     '</gmd:description>'
-                metadata +=                     '<gmd:function><gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download"/></gmd:function>'
-                metadata +=                 '</gmd:CI_OnlineResource>'
-                metadata +=             '</gmd:onLine>'
-        metadata +=                 '</gmd:MD_DigitalTransferOptions>'
-        metadata +=             '</gmd:transferOptions>'
-        metadata +=         '</gmd:MD_Distribution>'
-        metadata +=     '</gmd:distributionInfo>'
-        
-        metadata += '</gmd:MD_Metadata>'
-        
-        return metadata
-
     def get_updated_metadata(self, layer, uuid, layer_info, ds_type):
         headers = {
             'Accept': 'application/xml',
@@ -595,8 +475,10 @@ class Geonetwork():
             extent_tuple = self.get_extent(layer_info, ds_type)
             # TODO: we can later generalize this import to call a different module according to the
             # metadata standard of the record to be updated
-            from gvsigol_plugin_catalog.mdstandards import iso19139_2007
-            return iso19139_2007.update_metadata(md_response.content, extent_tuple, layer.thumbnail.url)
+            
+            updater = registry.getupdater(md_response.content)
+            return updater.update_all(extent_tuple, layer.thumbnail.url).tostring()
+            #return iso19139_2007.update_metadata(md_response.content, extent_tuple, layer.thumbnail.url)
         raise FailedRequestError(md_response.status_code, md_response.content)
 
 class RequestError(Exception):

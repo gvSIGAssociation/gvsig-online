@@ -26,6 +26,7 @@ from gvsigol_plugin_catalog.models import LayerMetadata
 from gvsigol_plugin_catalog import api_old as xmlapi_old
 from gvsigol_plugin_catalog import api_new as xmlapi_new
 import logging
+from gvsigol_plugin_catalog.mdstandards import registry
 
 logger = logging.getLogger("gvsigol")
 
@@ -51,11 +52,47 @@ class Geonetwork():
         
         except Exception as e:
             print e
+            
+    def create_metadata(self, layer, layer_info, ds_type):
+        ws = layer.datastore.workspace
+        minx, miny, maxx, maxy = self.get_extent(layer_info, ds_type)
+        crs_object = layer_info[ds_type]['nativeBoundingBox']['crs']
+        if isinstance(crs_object,dict):
+            crs = str(crs_object['$'])
+        else:
+            crs = str(crs_object)
+        
+        wms_endpoint = ws.wms_endpoint
+        if ds_type == 'featureType':
+            wfs_endpoint = ws.wfs_endpoint
+            wcs_endpoint = None
+        elif ds_type in ('coverage', 'imagemosaic') and ws.wcs_endpoint:
+            wfs_endpoint = None
+            wcs_endpoint = ws.wcs_endpoint
+        else:
+            wfs_endpoint = None
+            wcs_endpoint = None
+
+        mdfields = {
+            'title': layer.title,
+            'abstract': layer.abstract,
+            'qualified_name': ws.name + ':' + layer.name,
+            'extent_tuple': (minx, miny, maxx, maxy),
+            'crs': crs,
+            'thumbnail_url': layer.thumbnail.url,
+            'wms_endpoint': wms_endpoint,
+            'wfs_endpoint': wfs_endpoint,
+            'wcs_endpoint': wcs_endpoint
+            }
+        
+        return registry.create('dataset', mdfields)
     
-    def metadata_insert(self, layer, abstract, ws, layer_info, ds_type):
+    def metadata_insert(self, layer):
+        (ds_type, layer_info) = mapservice.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
+        md_record = self.create_metadata(layer, layer_info, ds_type)
         try:
             if self.xmlapi.gn_auth(self.user, self.password):
-                uuid = self.xmlapi.gn_insert_metadata(layer, abstract, ws, layer_info, ds_type)
+                uuid = self.xmlapi.gn_insert_metadata(md_record)
                 self.xmlapi.add_thumbnail(uuid[0], layer.thumbnail.url)
                 self.xmlapi.set_metadata_privileges(uuid[0])
                 self.xmlapi.gn_unauth()
@@ -63,7 +100,7 @@ class Geonetwork():
             return None
         
         except Exception as e:
-            print e
+            logger.exception("Error inserting metadata", e)
             
     def get_query(self, query):
         try:
@@ -75,19 +112,7 @@ class Geonetwork():
         
         except Exception as e:
             print e        
-    
-    '''
-    def metadata_editor(self, uuid):
-        try:
-            if self.xmlapi.gn_auth(self.user, self.password):
-                content = self.xmlapi.gn_metadata_editor(uuid)
-                self.xmlapi.gn_unauth()
-                return content
-            return None
-        
-        except Exception as e:
-            print e
-    ''' 
+
     def metadata_delete(self, lm):
         try:
             if self.xmlapi.gn_auth(self.user, self.password):
@@ -103,8 +128,7 @@ class Geonetwork():
     def layer_created_handler(self, sender, **kwargs):
         layer = kwargs['layer']
         try:
-            (ds_type, layer_info) = mapservice.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
-            muuid = self.metadata_insert(layer, layer.abstract, layer.datastore.workspace, layer_info, ds_type)
+            muuid = self.metadata_insert(layer)
             if muuid:
                 lm = LayerMetadata(layer=layer, metadata_uuid=muuid[0], metadata_id=muuid[1])
                 lm.save()
@@ -135,6 +159,17 @@ class Geonetwork():
         except Exception as e:
             logger.exception("layer metadata delete failed")
             pass
+
+    def get_extent(self, layer_info, ds_type):
+        minx = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['minx'])
+        miny = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['miny'])
+        maxx = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['maxx'])
+        if layer_info[ds_type]['latLonBoundingBox']['minx'] > layer_info[ds_type]['latLonBoundingBox']['maxx']:
+            maxx = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['minx'] + 1)
+        maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
+        if layer_info[ds_type]['latLonBoundingBox']['miny'] > layer_info[ds_type]['latLonBoundingBox']['maxy']:
+            maxy = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['miny'] + 1)
+        return (minx, miny, maxx, maxy)
 
 def initialize():
     try:

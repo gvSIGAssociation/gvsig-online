@@ -60,11 +60,7 @@ class Geonetwork():
         raise FailedRequestError(r.status_code, r.content)
 
         
-    def gn_insert_metadata(self, layer, abstract, ws, layer_info, ds_type, md_record=None):
-        if md_record:
-            md_record = md_record.decode("utf-8")
-        else:
-            md_record = self.create_metadata(layer, abstract, ws, layer_info, ds_type)
+    def gn_insert_metadata(self, md_record):
 
         url = self.service_url + "xml.metadata.insert"
         headers = {'content-type': 'application/xml'}
@@ -90,7 +86,7 @@ class Geonetwork():
                        
         raise FailedRequestError(r.status_code, r.content)
 
-    def csw_update_metadata(uuid, updated_xml_md):
+    def csw_update_metadata(self, uuid, updated_xml_md):
         metadata = '<csw:Transaction xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" xmlns:ogc="http://www.opengis.net/ogc" service="CSW" version="2.0.2">'
         metadata +=     '<csw:Update>'
         metadata +=         updated_xml_md
@@ -116,7 +112,7 @@ class Geonetwork():
             for total_updated in tree.findall('./csw:TransactionResponse/csw:TransactionSummary/csw:totalUpdated', ns):
                 if total_updated.text == '1':
                     return uuid
-        raise FailedRequestError(r.status_code, r.content)
+        raise FailedRequestError(csw_response.status_code, csw_response.content)
 
     def gn_update_metadata(self, uuid, layer, abstract, layer_info, ds_type):
         updated_xml_md = self.get_updated_metadata(layer, uuid, layer_info, ds_type)

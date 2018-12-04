@@ -977,7 +977,7 @@ CatalogView.prototype.createDetailsPanel = function(id){
 	$.ajax({
 		type: "GET",
 		async: false,
-		url: "/gvsigonline/catalog/get_metadata/"+id+"/?getPanel=true",
+		url: "/gvsigonline/catalog/get_metadata/"+id,
 		beforeSend:function(xhr){
 			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},
@@ -985,6 +985,7 @@ CatalogView.prototype.createDetailsPanel = function(id){
 			if ("html" in response) {
 				$('.modal-catalog-title').html(gettext("Details"));
 				$('.modal-catalog-body').html(response['html']);
+				$('.modal-catalog-footer').html("");
 				$('#modal-catalog').modal('show');
 			} else {
 				alert('Error');
