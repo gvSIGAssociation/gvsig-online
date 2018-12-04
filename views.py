@@ -915,7 +915,8 @@ def select_public_project(request):
 def public_project_load(request, project_name):
     if core_utils.is_valid_public_project(project_name):
         project = Project.objects.get(name__exact=project_name)
-        response = render_to_response('public_viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id}, context_instance=RequestContext(request))
+        plugins_config = core_utils.get_plugins_config()
+        response = render_to_response('public_viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id, 'plugins_config': plugins_config}, context_instance=RequestContext(request))
         #Expira la caché cada día
         tomorrow = datetime.datetime.now() + datetime.timedelta(days = 1)
         tomorrow = datetime.datetime.replace(tomorrow, hour=0, minute=0, second=0)
