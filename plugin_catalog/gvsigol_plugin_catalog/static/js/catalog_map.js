@@ -73,19 +73,16 @@ CatalogMap.prototype.refreshData = function(features){
 CatalogMap.prototype.getSelectedArea = function(){
 	if(this.selected_feat != null){
 		var geom = this.selected_feat.getGeometry();
-		var coords = geom.flatCoordinates;
+		var coords = geom.getCoordinates();
 	    var area = null;
-	    if(coords.length > 0){
+	    if(coords.length > 0 && Array.isArray(coords[0])){
+	    	var outerPoly = coords[0];
 		    area = "POLYGON((";
-		    for(var i=0; i<coords.length; i++){
-		    	if(i%2==1){
-		    		area += "+"+coords[i];
-		    		if(i != coords.length-1){
-		    			area += ",";
-		    		}
-		    	}else{
-		    		area += coords[i];
-		    	}
+		    for(var i=0; i<outerPoly.length; i++){
+		    	area += outerPoly[i][0] + '+' + outerPoly[i][1];
+		    	if(i != outerPoly.length-1){
+	    			area += ",";
+	    		}
 		    }
 		    area += "))";
 	    }
