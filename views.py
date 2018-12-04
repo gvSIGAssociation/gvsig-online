@@ -521,20 +521,7 @@ def project_load(request, project_name):
         if "no_project.png" in project.image.url:
             has_image = False
 
-        import importlib
-        plugins_config = {}
-        for plugin in gvsigol.settings.INSTALLED_APPS:
-            if 'gvsigol_app_' in plugin or 'gvsigol_plugin_' in plugin:
-                try:
-                    plugin_settings = importlib.import_module(plugin + ".settings")
-                    settings_dict = {}
-                    for config_var in dir(plugin_settings):
-                        if not config_var.startswith("__"):
-                            settings_dict[config_var] = getattr(plugin_settings, config_var)
-                    if len(settings_dict) > 0:
-                        plugins_config[plugin] = settings_dict
-                except ImportError:
-                    pass
+        plugins_config = core_utils.get_plugins_config()
         response = render_to_response('viewer.html', {'has_image': has_image,
                                                       'supported_crs': core_utils.get_supported_crs(),
                                                       'project': project,
