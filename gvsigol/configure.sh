@@ -156,7 +156,13 @@ function configure() {
 	fi
 	grep -rl "##GVSIGOL_ENABLE_ENUMERATIONS##"  | xargs sed -i "s/##GVSIGOL_ENABLE_ENUMERATIONS##/$GVSIGOL_ENABLE_ENUMERATIONS/g"
 	grep -rl "##CONTEXT_PROCESSORS##"  | xargs sed -i "s/##CONTEXT_PROCESSORS##/$CONTEXT_PROCESSORS/g"  | true
-			
+	
+	# sustituye nombre de la aplicacion
+	grep -rl "##GVSIGOL_NAME##"  | xargs sed -i "s/##GVSIGOL_NAME##/$GVSIGOL_NAME/g"  | true
+	grep -rl "##GVSIGOL_SURNAME##"  | xargs sed -i "s/##GVSIGOL_SURNAME##/$GVSIGOL_SURNAME/g"  | true
+	grep -rl "##GVSIGOL_NAME_SHORT##"  | xargs sed -i "s/##GVSIGOL_NAME_SHORT##/$GVSIGOL_NAME_SHORT/g"  | true
+	grep -rl "##GVSIGOL_SURNAME_SHORT##"  | xargs sed -i "s/##GVSIGOL_SURNAME_SHORT##/$GVSIGOL_SURNAME_SHORT/g"  | true
+
 }
 
 function move_template() {
