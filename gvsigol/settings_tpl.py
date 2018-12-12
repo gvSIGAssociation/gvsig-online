@@ -302,7 +302,7 @@ GVSIGOL_SERVICES = {
 }
                      
 TILE_SIZE = 256
-MAX_ZOOM_LEVEL = 18
+MAX_ZOOM_LEVEL = ##MAX_ZOOM_LEVELS##
 
 # Must be a valid iconv encoding name. Use iconv --list on Linux to see valid names 
 SUPPORTED_ENCODINGS = [ "LATIN1", "UTF-8", "ISO-8859-15", "WINDOWS-1252"]
