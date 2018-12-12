@@ -826,7 +826,8 @@ def project_get_conf(request):
             "view": {
                 "center_lat": project.center_lat,
                 "center_lon": project.center_lon, 
-                "zoom": project.zoom 
+                "zoom": project.zoom,
+                "max_zoom_level": gvsigol.settings.MAX_ZOOM_LEVEL
             }, 
             'supported_crs': supported_crs,
             'workspaces': workspaces,
