@@ -163,6 +163,12 @@ function configure() {
 	grep -rl "##GVSIGOL_NAME_SHORT##"  | xargs sed -i "s/##GVSIGOL_NAME_SHORT##/$GVSIGOL_NAME_SHORT/g"  | true
 	grep -rl "##GVSIGOL_SURNAME_SHORT##"  | xargs sed -i "s/##GVSIGOL_SURNAME_SHORT##/$GVSIGOL_SURNAME_SHORT/g"  | true
 
+	# max zoom levels
+	if [ -z $MAX_ZOOM_LEVELS ]; then
+		echo "WARNING: MAX_ZOOM_LEVELS is not defined, using default value 18"					
+		MAX_ZOOM_LEVELS="18"
+	fi
+	grep -rl "##MAX_ZOOM_LEVELS##"  | xargs sed -i "s/##MAX_ZOOM_LEVELS##/$MAX_ZOOM_LEVELS/g"  | true
 }
 
 function move_template() {
