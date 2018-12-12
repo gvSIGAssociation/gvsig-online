@@ -190,7 +190,7 @@ DATABASES = {
         'PORT': '5432',
     }
 }
-POSTGIS_VERSION = (2, 1, 2)
+POSTGIS_VERSION = (2, 3, 3)
 
 AUTH_WITH_REMOTE_USER = False
 
@@ -290,8 +290,8 @@ SITE_ID=1
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
-BASE_URL = 'http://localhost'
-MEDIA_ROOT = '/var/www/media/'
+BASE_URL = 'https://localhost'
+MEDIA_ROOT = '/Library/WebServer/Documents/media/'
 MEDIA_URL = 'http://localhost/media/'
 STATIC_URL = '/gvsigonline/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
@@ -302,13 +302,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_services/static'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
-    os.path.join(BASE_DIR, 'gvsigol_app_dev/static'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/static'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/static'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_geocoding/static'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_etl/static'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_edition/static'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_graphiccapture/static')
+    os.path.join(BASE_DIR, 'gvsigol_app_dev/static')
 )
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -333,7 +327,7 @@ FRONTEND_URL = 'http://localhost'
 
 GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
-    'URL': 'http://localhost/gs-local',
+    'URL': 'https://localhost/gs-local',
     'USER': GEOSERVER_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'PASSWORD': GEOSERVER_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'CLUSTER_NODES':[],
@@ -360,6 +354,7 @@ GVSIGOL_SERVICES = {
 }
 
 TILE_SIZE = 256
+MAX_ZOOM_LEVEL = 18 
 
 # Must be a valid iconv encoding name. Use iconv --list on Linux to see valid names 
 SUPPORTED_ENCODINGS = [ "LATIN1", "UTF-8", "ISO-8859-15", "WINDOWS-1252"]
