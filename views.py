@@ -840,7 +840,8 @@ def project_get_conf(request):
             'geoserver_frontend_url':gvsigol.settings.FRONTEND_URL + gvsigol.settings.GEOSERVER_PATH,
             'geoserver_base_url_no_auth': gvsigol.settings.GVSIGOL_SERVICES['URL'],
             'resource_manager': resource_manager,
-            'remote_auth': settings.AUTH_WITH_REMOTE_USER
+            'remote_auth': settings.AUTH_WITH_REMOTE_USER,
+            'temporal_advanced_parameters': gvsigol.settings.TEMPORAL_ADVANCED_PARAMETERS
         } 
         
         return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
@@ -1112,7 +1113,8 @@ def public_viewer_get_conf(request):
             'is_public_project': True,
             'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL']),
             'geoserver_frontend_url': os.path.join(gvsigol.settings.FRONTEND_URL, gvsigol.settings.GEOSERVER_PATH),
-            'resource_manager': resource_manager
+            'resource_manager': resource_manager,
+            'temporal_advanced_parameters': gvsigol.settings.TEMPORAL_ADVANCED_PARAMETERS
         } 
 
         if request.user and request.user.id:
