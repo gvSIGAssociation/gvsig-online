@@ -170,7 +170,10 @@ function configure() {
 	fi
 	grep -rl "##MAX_ZOOM_LEVELS##"  | xargs sed -i "s/##MAX_ZOOM_LEVELS##/$MAX_ZOOM_LEVELS/g"  | true
 	
-	grep -rl "##TEMPORAL_ADVANCED_PARAMETERS##"  | xargs sed -i "s/##TEMPORAL_ADVANCED_PARAMETERS##/$TEMPORAL_ADVANCED_PARAMETERS/g"  | true
+	if [ -z $TEMPORAL_ADVANCED_PARAMETERS ]; then
+		echo "WARNING: TEMPORAL_ADVANCED_PARAMETERS is not defined, using default value False"					
+		TEMPORAL_ADVANCED_PARAMETERS="False"
+	grep -rl "##TEMPORAL_ADVANCED_PARAMETERS##"  | xargs sed -i "s/##TEMPORAL_ADVANCED_PARAMETERS##/$TEMPORAL_ADVANCED_PARAMETERS/g"
 }
 
 function move_template() {
