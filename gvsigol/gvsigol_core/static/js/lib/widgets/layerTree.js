@@ -308,11 +308,11 @@ layerTree.prototype.createTree = function() {
 	temporary_tree += '	<div id="enable-temporary-error"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;&nbsp;' + gettext("A visible layer with temporal properties is needed") + '</div>';
 	temporary_tree += '	<div class="box-body temporary-body">';
 	
-	var input_from = ''+
-	'<div class="col-md-1" style="padding: 0px 7px;">'+
-		'<input type="radio" id="from-date-value" class="temporal-type-radio" name="from-date-value" checked>'+
-	'</div>'+
-	'<div class="input-group date col-md-9" id="datetimepicker-from">'+
+	var input_from = '<div class="col-md-1" style="padding: 0px 7px;">';
+	if(this.conf.temporal_advanced_parameters){
+		input_from += '<input type="radio" id="from-date-value" class="temporal-type-radio" name="from-date-value" checked>';
+	}
+	input_from += '</div><div class="input-group date col-md-9" id="datetimepicker-from">'+
 		'<input id="temporary-from" class="form-control from-date-value"/>'+
 		'<span class="input-group-addon from-date-value">'+
 			'<span class="glyphicon glyphicon-calendar from-date-value"></span>'+
@@ -324,19 +324,22 @@ layerTree.prototype.createTree = function() {
 		'<span class="temporal-buttons temporal-buttons-right temporal-buttons-right-from from-date-value">'+
 			'<i class="fa fa-plus" aria-hidden="true"></i>'+
 		'</span>'+
-	'</div>'+
+	'</div>';
 	
-	'<div class="col-md-2" style="margin-top:5px"></div>'+
-	'<div class="col-md-1" style="padding: 0px 7px;margin-top:5px">'+
-		'<input type="radio" id="from-custom-date-value" class="temporal-type-radio" name="from-date-value">'+
-	'</div>'+
-	'<div class="input-group date col-md-9" style="margin-top:5px">'+
-		'<input id="from-custom-value" class="form-control" style="width:100%" value="PRESENT" disabled>'+
-		'<span class="temporal-buttons temporal-buttons-disabled temporal-buttons-left from-custom-definition-button from-custom-date-value">'+
-			'<i class="fa fa-edit" aria-hidden="true"></i>'+
-		'</span>'+
-	'</div>'+
-	'<div class="col-md-3"></div>'+
+	if(this.conf.temporal_advanced_parameters){
+		input_from += '<div class="col-md-2" style="margin-top:5px"></div>'+
+		'<div class="col-md-1" style="padding: 0px 7px;margin-top:5px">'+
+			'<input type="radio" id="from-custom-date-value" class="temporal-type-radio" name="from-date-value">'+
+		'</div>'+
+		'<div class="input-group date col-md-9" style="margin-top:5px">'+
+			'<input id="from-custom-value" class="form-control" style="width:100%" value="PRESENT" disabled>'+
+			'<span class="temporal-buttons temporal-buttons-disabled temporal-buttons-left from-custom-definition-button from-custom-date-value">'+
+				'<i class="fa fa-edit" aria-hidden="true"></i>'+
+			'</span>'+
+		'</div>';
+	}
+	
+	input_from += '<div class="col-md-3"></div>'+
 	'<div id="from-custom-definition-panel" class="input-group date col-md-9" style="background-color:#eee; display:none;">'+
 		'<span class="text input-group-date-label">' + gettext('year(s)') + '</span>'+
 		'<input id="from-custom-value-year" class="form-control" style="width:50%" type="number" value="0"><br/>'+
@@ -365,24 +368,28 @@ layerTree.prototype.createTree = function() {
 	'</div>';
 	
 	
-	var input_to = ''+
-	'<div class="col-md-1" style="padding: 0px 7px;">'+
-		'<input type="radio" id="to-date-value" class="temporal-type-radio" name="to-date-value" checked>'+
-	'</div>'+
-	'<div class="input-group date col-md-9" id="datetimepicker-to"><input id="temporary-to" class="form-control to-date-value"/><span class="input-group-addon to-date-value"><span class="glyphicon glyphicon-calendar to-date-value"></span></span>'+
-	'<span class="input-group-addon temporal-buttons-empty-gap"></span><span class="temporal-buttons temporal-buttons-left temporal-buttons-left-to to-date-value"><i class="fa fa-minus" aria-hidden="true"></i></span><span class="temporal-buttons temporal-buttons-right temporal-buttons-right-to to-date-value"><i class="fa fa-plus" aria-hidden="true"></i></span></div>'+
+	var input_to = '<div class="col-md-1" style="padding: 0px 7px;">';
+	if(this.conf.temporal_advanced_parameters){
+		input_to += '<input type="radio" id="to-date-value" class="temporal-type-radio" name="to-date-value" checked>';
+	}
 	
-	'<div class="col-md-2" style="margin-top:5px"></div>'+
-	'<div class="col-md-1" style="padding: 0px 7px;margin-top:5px">'+
-		'<input type="radio" id="to-custom-date-value" class="temporal-type-radio" name="to-date-value">'+
-	'</div>'+
-	'<div class="input-group date col-md-9" style="margin-top:5px">'+
-		'<input id="to-custom-value" class="form-control" style="width:100%" value="PRESENT" disabled>'+
-		'<span class="temporal-buttons temporal-buttons-disabled temporal-buttons-left to-custom-definition-button to-custom-date-value">'+
-			'<i class="fa fa-edit" aria-hidden="true"></i>'+
-		'</span>'+
-	'</div>'+
-	'<div class="col-md-3"></div>'+
+	input_to += '</div><div class="input-group date col-md-9" id="datetimepicker-to"><input id="temporary-to" class="form-control to-date-value"/><span class="input-group-addon to-date-value"><span class="glyphicon glyphicon-calendar to-date-value"></span></span>'+
+	'<span class="input-group-addon temporal-buttons-empty-gap"></span><span class="temporal-buttons temporal-buttons-left temporal-buttons-left-to to-date-value"><i class="fa fa-minus" aria-hidden="true"></i></span><span class="temporal-buttons temporal-buttons-right temporal-buttons-right-to to-date-value"><i class="fa fa-plus" aria-hidden="true"></i></span></div>';
+	
+	if(this.conf.temporal_advanced_parameters){
+		input_to += '<div class="col-md-2" style="margin-top:5px"></div>'+
+		'<div class="col-md-1" style="padding: 0px 7px;margin-top:5px">'+
+			'<input type="radio" id="to-custom-date-value" class="temporal-type-radio" name="to-date-value">'+
+		'</div>'+
+		'<div class="input-group date col-md-9" style="margin-top:5px">'+
+			'<input id="to-custom-value" class="form-control" style="width:100%" value="PRESENT" disabled>'+
+			'<span class="temporal-buttons temporal-buttons-disabled temporal-buttons-left to-custom-definition-button to-custom-date-value">'+
+				'<i class="fa fa-edit" aria-hidden="true"></i>'+
+			'</span>'+
+		'</div>';
+	}
+	
+	input_to += '<div class="col-md-3"></div>'+
 	'<div id="to-custom-definition-panel" class="input-group date col-md-9" style="background-color:#eee; display:none;">'+
 		'<span class="text input-group-date-label">' + gettext('year(s)') + '</span>'+
 		'<input id="to-custom-value-year" class="form-control" style="width:50%" type="number" value="0"><br/>'+
