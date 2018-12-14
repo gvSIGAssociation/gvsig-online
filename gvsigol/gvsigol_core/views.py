@@ -590,6 +590,7 @@ def get_default_style(layer):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def project_get_conf(request):
     if request.method == 'POST':
+        errors = []
         pid = request.POST.get('pid')
         
         project = Project.objects.get(id=int(pid))
@@ -635,142 +636,156 @@ def project_get_conf(request):
             
             idx = 0
             for l in layers_in_group:
-                read_roles = services_utils.get_read_roles(l)
-                write_roles = services_utils.get_write_roles(l)
-                
-                readable = False
-                if len(read_roles) == 0:
-                    readable = True
-                else:
-                    for ur in user_roles:
-                        for rr in read_roles:
-                            if ur == rr:
-                                readable = True
-                
-                if readable:             
-                    layer = {}                
-                    layer['name'] = l.name
-                    layer['title'] = l.title
-                    layer['abstract'] = l.abstract
-                    layer['visible'] = l.visible  
-                    layer['queryable'] = l.queryable 
-                    layer['highlight'] = l.highlight
-                    if l.highlight:
-                        layer['highlight_scale'] = int(l.highlight_scale)
-                        
-                    layer['time_enabled'] = l.time_enabled
-                    if layer['time_enabled']:
-                        layer['ref'] = l.id
-                        layer['time_enabled_field'] = l.time_enabled_field
-                        layer['time_enabled_endfield'] = l.time_enabled_endfield
-                        layer['time_presentation'] = l.time_presentation
-                        layer['time_resolution_year'] = l.time_resolution_year
-                        layer['time_resolution_month'] = l.time_resolution_month
-                        layer['time_resolution_week'] = l.time_resolution_week
-                        layer['time_resolution_day'] = l.time_resolution_day
-                        layer['time_resolution_hour'] = l.time_resolution_hour
-                        layer['time_resolution_minute'] = l.time_resolution_minute
-                        layer['time_resolution_second'] = l.time_resolution_second
-                        layer['time_default_value_mode'] = l.time_default_value_mode
-                        layer['time_default_value'] = l.time_default_value
-                        
-                        layer['time_resolution'] = l.time_resolution
+                try:
+                    read_roles = services_utils.get_read_roles(l)
+                    write_roles = services_utils.get_write_roles(l)
                     
-                    layer['cached'] = l.cached
-
-                    order = int(conf_group['groupOrder']) + l.order
-                    '''
-                    order = int(conf_group['groupOrder']) + layers_in_group.__len__() - idx
-                    if toc.get(group.name) and 'layers' in toc.get(group.name): 
-                        for layer_toc in toc.get(group.name).get('layers'):
-                            lyr_toc = toc.get(group.name).get('layers').get(layer_toc)
-                            if lyr_toc.get('name') == l.name:
-                                if 'order' in lyr_toc:
-                                    order = lyr_toc.get('order')
-                    '''
-                    layer['order'] = order 
-                    layer['single_image'] = l.single_image
-                    layer['read_roles'] = read_roles
-                    layer['write_roles'] = write_roles
-                    layer['styles'] = get_layer_styles(l)
-                    
-                    try:
-                        json_conf = ast.literal_eval(l.conf)
-                        layer['conf'] = json.dumps(json_conf)
-                    except:
-                        layer['conf'] = "{\"fields\":[]}"
-                        pass
-                    
-                    datastore = Datastore.objects.get(id=l.datastore_id)
-                    workspace = Workspace.objects.get(id=datastore.workspace_id)
-                    
-                    if datastore.type == 'v_SHP' or datastore.type == 'v_PostGIS': 
-                        layer['is_vector'] = True
+                    readable = False
+                    if len(read_roles) == 0:
+                        readable = True
                     else:
-                        layer['is_vector'] = False
+                        for ur in user_roles:
+                            for rr in read_roles:
+                                if ur == rr:
+                                    readable = True
                     
-                    layer_info = None
-                    defaultCrs = None
-                    if datastore.type == 'e_WMS':
-                        #(ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
-                        defaultCrs = 'EPSG:4326'
-                    else:
-                        (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
-                        if ds_type == 'imagemosaic':
-                            ds_type = 'coverage'
-                        defaultCrs = layer_info[ds_type]['srs']
-                    
-                    crs_code = int(defaultCrs.split(':')[1])
-                    if crs_code in core_utils.get_supported_crs():
-                        epsg = core_utils.get_supported_crs()[crs_code]
-                        layer['crs'] = {
-                            'crs': defaultCrs,
-                            'units': epsg['units']
-                        }
-                        used_crs.append(epsg)
+                    if readable:             
+                        layer = {}                
+                        layer['name'] = l.name
+                        layer['title'] = l.title
+                        layer['abstract'] = l.abstract
+                        layer['visible'] = l.visible  
+                        layer['queryable'] = l.queryable 
+                        layer['highlight'] = l.highlight
+                        if l.highlight:
+                            layer['highlight_scale'] = int(l.highlight_scale)
+                            
+                        layer['time_enabled'] = l.time_enabled
+                        if layer['time_enabled']:
+                            layer['ref'] = l.id
+                            layer['time_enabled_field'] = l.time_enabled_field
+                            layer['time_enabled_endfield'] = l.time_enabled_endfield
+                            layer['time_presentation'] = l.time_presentation
+                            layer['time_resolution_year'] = l.time_resolution_year
+                            layer['time_resolution_month'] = l.time_resolution_month
+                            layer['time_resolution_week'] = l.time_resolution_week
+                            layer['time_resolution_day'] = l.time_resolution_day
+                            layer['time_resolution_hour'] = l.time_resolution_hour
+                            layer['time_resolution_minute'] = l.time_resolution_minute
+                            layer['time_resolution_second'] = l.time_resolution_second
+                            layer['time_default_value_mode'] = l.time_default_value_mode
+                            layer['time_default_value'] = l.time_default_value
+                            
+                            layer['time_resolution'] = l.time_resolution
                         
-                    layer['wms_url'] = core_utils.get_wms_url(request, workspace)
-                    layer['wms_url_no_auth'] = workspace.wms_endpoint
-                    layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
-                    layer['wfs_url_no_auth'] = workspace.wfs_endpoint
-                    layer['namespace'] = workspace.uri
-                    layer['workspace'] = workspace.name   
-                    layer['metadata'] = core_utils.get_catalog_url(request, l)             
-                    if l.cached:  
-                        layer['cache_url'] = core_utils.get_cache_url(request, workspace)
-                    else:
-                        layer['cache_url'] = core_utils.get_wms_url(request, workspace)
-                    
-                    if datastore.type == 'e_WMS':
-                        layer['legend'] = ""
-                    else: 
-                        ls = get_default_style(l)
-                        if ls is None:
-                            print 'CAPA SIN ESTILO POR DEFECTO: ' + l.name
-                            layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
-                            layer['legend_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
-                            layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
-                            layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
-                                
+                        layer['cached'] = l.cached
+    
+                        order = int(conf_group['groupOrder']) + l.order
+                        '''
+                        order = int(conf_group['groupOrder']) + layers_in_group.__len__() - idx
+                        if toc.get(group.name) and 'layers' in toc.get(group.name): 
+                            for layer_toc in toc.get(group.name).get('layers'):
+                                lyr_toc = toc.get(group.name).get('layers').get(layer_toc)
+                                if lyr_toc.get('name') == l.name:
+                                    if 'order' in lyr_toc:
+                                        order = lyr_toc.get('order')
+                        '''
+                        layer['order'] = order 
+                        layer['single_image'] = l.single_image
+                        layer['read_roles'] = read_roles
+                        layer['write_roles'] = write_roles
+                        layer['styles'] = get_layer_styles(l)
+                        
+                        try:
+                            json_conf = ast.literal_eval(l.conf)
+                            layer['conf'] = json.dumps(json_conf)
+                        except:
+                            layer['conf'] = "{\"fields\":[]}"
+                            pass
+                        
+                        datastore = Datastore.objects.get(id=l.datastore_id)
+                        workspace = Workspace.objects.get(id=datastore.workspace_id)
+                        
+                        if datastore.type == 'v_SHP' or datastore.type == 'v_PostGIS': 
+                            layer['is_vector'] = True
                         else:
-                            if not ls.has_custom_legend:
+                            layer['is_vector'] = False
+                        
+                        layer_info = None
+                        defaultCrs = None
+                        if datastore.type == 'e_WMS':
+                            #(ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
+                            defaultCrs = 'EPSG:4326'
+                        else:
+                            (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
+                            if ds_type == 'imagemosaic':
+                                ds_type = 'coverage'
+                            defaultCrs = layer_info[ds_type]['srs']
+                        
+                        crs_code = int(defaultCrs.split(':')[1])
+                        if crs_code in core_utils.get_supported_crs():
+                            epsg = core_utils.get_supported_crs()[crs_code]
+                            layer['crs'] = {
+                                'crs': defaultCrs,
+                                'units': epsg['units']
+                            }
+                            used_crs.append(epsg)
+                            
+                        layer['wms_url'] = core_utils.get_wms_url(request, workspace)
+                        layer['wms_url_no_auth'] = workspace.wms_endpoint
+                        layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
+                        layer['wfs_url_no_auth'] = workspace.wfs_endpoint
+                        layer['namespace'] = workspace.uri
+                        layer['workspace'] = workspace.name   
+                        layer['metadata'] = core_utils.get_catalog_url(request, l)             
+                        if l.cached:  
+                            layer['cache_url'] = core_utils.get_cache_url(request, workspace)
+                        else:
+                            layer['cache_url'] = core_utils.get_wms_url(request, workspace)
+                        
+                        if datastore.type == 'e_WMS':
+                            layer['legend'] = ""
+                        else: 
+                            ls = get_default_style(l)
+                            if ls is None:
+                                print 'CAPA SIN ESTILO POR DEFECTO: ' + l.name
                                 layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
                                 layer['legend_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
                                 layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
                                 layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                    
                             else:
-                                layer['legend'] = ls.custom_legend_url
-                                layer['legend_no_auth'] = ls.custom_legend_url
-                                layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
-                                layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                if not ls.has_custom_legend:
+                                    layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                    layer['legend_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                    layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                    layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                else:
+                                    layer['legend'] = ls.custom_legend_url
+                                    layer['legend_no_auth'] = ls.custom_legend_url
+                                    layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                    layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                            
+                        layers.append(layer)
                         
-                    layers.append(layer)
+                        w = {}
+                        w['name'] = workspace.name
+                        w['wms_url'] = workspace.wms_endpoint
+                        workspaces.append(w)
+                    idx = idx + 1
+                
+                except Exception as e:
+                    datastore = Datastore.objects.get(id=l.datastore_id)
+                    workspace = Workspace.objects.get(id=datastore.workspace_id)
                     
-                    w = {}
-                    w['name'] = workspace.name
-                    w['wms_url'] = workspace.wms_endpoint
-                    workspaces.append(w)
-                idx = idx + 1
+                    error = {
+                        'layer': l.name,
+                        'datastore': datastore.name,
+                        'workspace': workspace.name,
+                        'error': str(e)
+                    }
+                    errors.append(error)
+                    pass
                 
             if len(layers) > 0:   
                 ordered_layers = sorted(layers, key=itemgetter('order'), reverse=True)
@@ -841,7 +856,8 @@ def project_get_conf(request):
             'geoserver_base_url_no_auth': gvsigol.settings.GVSIGOL_SERVICES['URL'],
             'resource_manager': resource_manager,
             'remote_auth': settings.AUTH_WITH_REMOTE_USER,
-            'temporal_advanced_parameters': gvsigol.settings.TEMPORAL_ADVANCED_PARAMETERS
+            'temporal_advanced_parameters': gvsigol.settings.TEMPORAL_ADVANCED_PARAMETERS,
+            'errors': errors
         } 
         
         return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
@@ -931,6 +947,7 @@ def public_project_load(request, project_name):
 @csrf_exempt
 def public_viewer_get_conf(request):
     if request.method == 'POST':
+        errors = []
         pid = request.POST.get('pid')
         
         project = Project.objects.get(id=int(pid))
@@ -954,117 +971,131 @@ def public_viewer_get_conf(request):
             
             idx = 0
             for l in layers_in_group:
-                read_roles = services_utils.get_read_roles(l)
-                write_roles = services_utils.get_write_roles(l)
-                
-                if len(read_roles) <= 0:
-                    layer = {}                
-                    layer['name'] = l.name
-                    layer['title'] = l.title
-                    layer['abstract'] = l.abstract
-                    layer['visible'] = l.visible 
-                    layer['queryable'] = l.queryable 
-                    layer['time_enabled'] = l.time_enabled 
-                    if layer['time_enabled']:
-                        layer['ref'] = l.id
-                        layer['time_enabled_field'] = l.time_enabled_field
-                        layer['time_enabled_endfield'] = l.time_enabled_endfield
-                        layer['time_presentation'] = l.time_presentation
-                        layer['time_resolution_year'] = l.time_resolution_year
-                        layer['time_resolution_month'] = l.time_resolution_month
-                        layer['time_resolution_week'] = l.time_resolution_week
-                        layer['time_resolution_day'] = l.time_resolution_day
-                        layer['time_resolution_hour'] = l.time_resolution_hour
-                        layer['time_resolution_minute'] = l.time_resolution_minute
-                        layer['time_resolution_second'] = l.time_resolution_second
-                        layer['time_default_value_mode'] = l.time_default_value_mode
-                        layer['time_default_value'] = l.time_default_value
-                    layer['cached'] = l.cached
+                try:
+                    read_roles = services_utils.get_read_roles(l)
+                    write_roles = services_utils.get_write_roles(l)
                     
-                    order = int(conf_group['groupOrder']) + l.order
-                    '''
-                    order = int(conf_group['groupOrder']) + layers_in_group.__len__() - idx
-                    
-                    if toc.get(group.name) and 'layers' in toc.get(group.name): 
-                        for layer_toc in toc.get(group.name).get('layers'):
-                            lyr_toc = toc.get(group.name).get('layers').get(layer_toc)
-                            if lyr_toc.get('name') == l.name:
-                                order = lyr_toc.get('order')
-                    '''   
-                    layer['order'] = order 
-                    layer['single_image'] = l.single_image
-                    layer['read_roles'] = read_roles
-                    layer['write_roles'] = write_roles
-                    layer['styles'] = get_layer_styles(l)
-                    
-                    try:
-                        json_conf = ast.literal_eval(l.conf)
-                        layer['conf'] = json.dumps(json_conf)
-                    except:
-                        layer['conf'] = "{\"fields\":[]}"
-                        pass
-                    
+                    if len(read_roles) <= 0:
+                        layer = {}                
+                        layer['name'] = l.name
+                        layer['title'] = l.title
+                        layer['abstract'] = l.abstract
+                        layer['visible'] = l.visible 
+                        layer['queryable'] = l.queryable 
+                        layer['time_enabled'] = l.time_enabled 
+                        if layer['time_enabled']:
+                            layer['ref'] = l.id
+                            layer['time_enabled_field'] = l.time_enabled_field
+                            layer['time_enabled_endfield'] = l.time_enabled_endfield
+                            layer['time_presentation'] = l.time_presentation
+                            layer['time_resolution_year'] = l.time_resolution_year
+                            layer['time_resolution_month'] = l.time_resolution_month
+                            layer['time_resolution_week'] = l.time_resolution_week
+                            layer['time_resolution_day'] = l.time_resolution_day
+                            layer['time_resolution_hour'] = l.time_resolution_hour
+                            layer['time_resolution_minute'] = l.time_resolution_minute
+                            layer['time_resolution_second'] = l.time_resolution_second
+                            layer['time_default_value_mode'] = l.time_default_value_mode
+                            layer['time_default_value'] = l.time_default_value
+                        layer['cached'] = l.cached
+                        
+                        order = int(conf_group['groupOrder']) + l.order
+                        '''
+                        order = int(conf_group['groupOrder']) + layers_in_group.__len__() - idx
+                        
+                        if toc.get(group.name) and 'layers' in toc.get(group.name): 
+                            for layer_toc in toc.get(group.name).get('layers'):
+                                lyr_toc = toc.get(group.name).get('layers').get(layer_toc)
+                                if lyr_toc.get('name') == l.name:
+                                    order = lyr_toc.get('order')
+                        '''   
+                        layer['order'] = order 
+                        layer['single_image'] = l.single_image
+                        layer['read_roles'] = read_roles
+                        layer['write_roles'] = write_roles
+                        layer['styles'] = get_layer_styles(l)
+                        
+                        try:
+                            json_conf = ast.literal_eval(l.conf)
+                            layer['conf'] = json.dumps(json_conf)
+                        except:
+                            layer['conf'] = "{\"fields\":[]}"
+                            pass
+                        
+                        datastore = Datastore.objects.get(id=l.datastore_id)
+                        workspace = Workspace.objects.get(id=datastore.workspace_id)
+                        
+                        if datastore.type == 'v_SHP' or datastore.type == 'v_PostGIS': 
+                            layer['is_vector'] = True
+                        else:
+                            layer['is_vector'] = False
+                        
+                        layer_info = None
+                        defaultCrs = None
+                        if datastore.type == 'e_WMS':
+                            (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
+                            defaultCrs = 'EPSG:4326'
+                        else:
+                            (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
+                            if ds_type == 'imagemosaic':
+                                ds_type = 'coverage'
+                            defaultCrs = layer_info[ds_type]['srs']
+                            
+                        if defaultCrs.split(':')[1] in core_utils.get_supported_crs():
+                            epsg = core_utils.get_supported_crs()[defaultCrs.split(':')[1]]
+                            layer['crs'] = {
+                                'crs': defaultCrs,
+                                'units': epsg['units']
+                            }
+                            
+                        layer['wms_url'] = core_utils.get_wms_url(request, workspace)
+                        layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
+                        layer['namespace'] = workspace.uri
+                        layer['workspace'] = workspace.name  
+                        layer['metadata'] = core_utils.get_catalog_url(request, l)             
+                        if l.cached:  
+                            layer['cache_url'] = core_utils.get_cache_url(request, workspace)
+                        else:
+                            layer['cache_url'] = core_utils.get_wms_url(request, workspace)
+                        
+                        if datastore.type == 'e_WMS':
+                            layer['legend'] = ""
+                        else: 
+                            ls = get_default_style(l)
+                            if ls is None:
+                                print 'CAPA SIN ESTILO POR DEFECTO: ' + l.name
+                                layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
+                                layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
+                                    
+                            else:
+                                if not ls.has_custom_legend:
+                                    layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
+                                    layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
+                                else:
+                                    layer['legend'] = ls.custom_legend_url
+                                    layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
+    
+                        layers.append(layer)
+                        
+                        w = {}
+                        w['name'] = workspace.name
+                        w['wms_url'] = workspace.wms_endpoint
+                        workspaces.append(w)
+                    idx = idx + 1
+                except Exception as e:
                     datastore = Datastore.objects.get(id=l.datastore_id)
                     workspace = Workspace.objects.get(id=datastore.workspace_id)
                     
-                    if datastore.type == 'v_SHP' or datastore.type == 'v_PostGIS': 
-                        layer['is_vector'] = True
-                    else:
-                        layer['is_vector'] = False
-                    
-                    layer_info = None
-                    defaultCrs = None
-                    if datastore.type == 'e_WMS':
-                        (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
-                        defaultCrs = 'EPSG:4326'
-                    else:
-                        (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
-                        if ds_type == 'imagemosaic':
-                            ds_type = 'coverage'
-                        defaultCrs = layer_info[ds_type]['srs']
+                    error = {
+                        'layer': l.name,
+                        'datastore': datastore.name,
+                        'workspace': workspace.name,
+                        'error': str(e)
+                    }
+                    errors.append(error)
+                    pass
                         
-                    if defaultCrs.split(':')[1] in core_utils.get_supported_crs():
-                        epsg = core_utils.get_supported_crs()[defaultCrs.split(':')[1]]
-                        layer['crs'] = {
-                            'crs': defaultCrs,
-                            'units': epsg['units']
-                        }
                         
-                    layer['wms_url'] = core_utils.get_wms_url(request, workspace)
-                    layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
-                    layer['namespace'] = workspace.uri
-                    layer['workspace'] = workspace.name  
-                    layer['metadata'] = core_utils.get_catalog_url(request, l)             
-                    if l.cached:  
-                        layer['cache_url'] = core_utils.get_cache_url(request, workspace)
-                    else:
-                        layer['cache_url'] = core_utils.get_wms_url(request, workspace)
-                    
-                    if datastore.type == 'e_WMS':
-                        layer['legend'] = ""
-                    else: 
-                        ls = get_default_style(l)
-                        if ls is None:
-                            print 'CAPA SIN ESTILO POR DEFECTO: ' + l.name
-                            layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                            layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                                
-                        else:
-                            if not ls.has_custom_legend:
-                                layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                                layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                            else:
-                                layer['legend'] = ls.custom_legend_url
-                                layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-
-                    layers.append(layer)
-                    
-                    w = {}
-                    w['name'] = workspace.name
-                    w['wms_url'] = workspace.wms_endpoint
-                    workspaces.append(w)
-                idx = idx + 1
-            
             if len(layers) > 0:   
                 ordered_layers = sorted(layers, key=itemgetter('order'), reverse=True)
                 conf_group['layers'] = ordered_layers
@@ -1114,7 +1145,8 @@ def public_viewer_get_conf(request):
             'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL']),
             'geoserver_frontend_url': os.path.join(gvsigol.settings.FRONTEND_URL, gvsigol.settings.GEOSERVER_PATH),
             'resource_manager': resource_manager,
-            'temporal_advanced_parameters': gvsigol.settings.TEMPORAL_ADVANCED_PARAMETERS
+            'temporal_advanced_parameters': gvsigol.settings.TEMPORAL_ADVANCED_PARAMETERS,
+            'errors': errors
         } 
 
         if request.user and request.user.id:
