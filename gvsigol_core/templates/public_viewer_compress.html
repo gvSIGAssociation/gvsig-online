@@ -382,7 +382,7 @@
 				}
 				viewer.core.initialize(response);
 
-				if(response.errors){
+				if(response.errors && response.errors.length > 0){
 					var html = "<ul>";
 					for(var i=0; i<response.errors.length; i++){
 						html += "<li>"+response.errors[i].workspace+"."+response.errors[i].layer+"</li>";				
