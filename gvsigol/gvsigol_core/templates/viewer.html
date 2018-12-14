@@ -264,6 +264,28 @@
 		</div>
 	</div>
 	
+	
+	<!-- Modal -->
+	<div class="modal fade" id="modal-layer_loading_error" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="myModalLabel">{% trans "Error loading layers" %}</h4>
+				</div>
+				<div class="modal-body">
+					<p></p>
+				</div>
+				<div class="modal-footer">
+					<button id="button-layer_loading_error-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Accept" %}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
 	<div id="floating-modal">
 	</div>
 
@@ -405,6 +427,17 @@
 					proj4.defs(response.supported_crs[key].code, response.supported_crs[key].definition);	
 				}
 				viewer.core.initialize(response, extraParams);
+				
+				if(response.errors){
+					var html = "<ul>";
+					for(var i=0; i<response.errors.length; i++){
+						html += "<li>"+response.errors[i].workspace+"."+response.errors[i].layer+"</li>";				
+					}
+					html += "</ul>";
+					$("#modal-layer_loading_error .modal-body").html(html);
+					
+					$('#modal-layer_loading_error').modal('show');
+				}
 			},
 			error : function() {
 			}
