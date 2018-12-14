@@ -173,6 +173,7 @@ function configure() {
 	if [ -z $TEMPORAL_ADVANCED_PARAMETERS ]; then
 		echo "WARNING: TEMPORAL_ADVANCED_PARAMETERS is not defined, using default value False"					
 		TEMPORAL_ADVANCED_PARAMETERS="False"
+	fi
 	grep -rl "##TEMPORAL_ADVANCED_PARAMETERS##"  | xargs sed -i "s/##TEMPORAL_ADVANCED_PARAMETERS##/$TEMPORAL_ADVANCED_PARAMETERS/g"
 }
 
