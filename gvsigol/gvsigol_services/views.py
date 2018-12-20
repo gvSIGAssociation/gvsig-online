@@ -911,7 +911,7 @@ def layer_update(request, layer_id):
         else:
             highlight_scale = -1
             
-        layer_md_uuid = request.POST.get('layer_md_uuid')
+        layer_md_uuid = request.POST.get('uuid')
         core_utils.update_layer_metadata_uuid(layer, layer_md_uuid)
                 
         old_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
