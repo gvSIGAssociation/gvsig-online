@@ -556,7 +556,7 @@ viewer.core = {
 						    resolutions[z] = size / Math.pow(2, z);
 						    matrixIds[z] = default_srs+':'+z;
 						}
-						;
+
 						var tileGrid = new ol.tilegrid.WMTS(
 						        {
 						            origin: ol.extent.getTopLeft(projectionExtent),
