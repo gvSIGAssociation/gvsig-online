@@ -550,10 +550,10 @@ viewer.core = {
 						var projection = new ol.proj.get(default_srs);
 						var projectionExtent = projection.getExtent();
 						var size = ol.extent.getWidth(projectionExtent) / 256;
-						var resolutions = new Array(22);
-						var matrixIds = new Array(22);
-						for (var z = 0; z < 22; ++z) {
-						    resolutions[z] = size / Math.pow(2, z+1);
+						var resolutions = new Array(21);
+						var matrixIds = new Array(21);
+						for (var z = 0; z < 21; ++z) {
+						    resolutions[z] = size / Math.pow(2, z);
 						    matrixIds[z] = default_srs+':'+z;
 						}
 						;
