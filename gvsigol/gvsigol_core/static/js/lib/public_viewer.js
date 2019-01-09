@@ -341,7 +341,7 @@ viewer.core = {
 
 				} else {
 					if(url.endsWith('/gwc/service/wmts')){
-						var default_srs = 'EPSG:3857';
+						var default_srs = 'EPSG:4326';
 						if("crs" in layerConf && "crs" in layer.crs){
 							default_srs = layerConf.crs.crs;
 						}
