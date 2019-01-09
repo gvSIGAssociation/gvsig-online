@@ -165,8 +165,8 @@ function configure() {
 
 	# max zoom levels
 	if [ -z $MAX_ZOOM_LEVELS ]; then
-		echo "WARNING: MAX_ZOOM_LEVELS is not defined, using default value 18"					
-		MAX_ZOOM_LEVELS="18"
+		echo "WARNING: MAX_ZOOM_LEVELS is not defined, using default value 21"					
+		MAX_ZOOM_LEVELS="21"
 	fi
 	grep -rl "##MAX_ZOOM_LEVELS##"  | xargs sed -i "s/##MAX_ZOOM_LEVELS##/$MAX_ZOOM_LEVELS/g"  | true
 	
