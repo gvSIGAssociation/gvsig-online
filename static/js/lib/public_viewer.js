@@ -26,35 +26,35 @@ var viewer = viewer || {};
  * TODO
  */
 viewer.core = {
-		
+
 	map: null,
-	
+
 	conf: null,
-	
+
 	toolbar: null,
-	
+
 	zoombar: null,
-	
+
 	tools: new Array(),
-	
+
 	legend: null,
-	
+
 	search: null,
-	
+
 	layerTree: null,
-	
+
 	layerCount: 0,
-		
+
     initialize: function(conf) {
     	this.conf = conf;
     	this._authenticate();
     	this._createMap();
     	this._initToolbar();
     	this._loadLayers();
-    	this._createWidgets();    	    	
+    	this._createWidgets();
     	this._loadTools();
     },
-    
+
     _authenticate: function() {
 		var self = this;
 		if('user' in self.conf){
@@ -65,7 +65,7 @@ viewer.core = {
 					'VERSION': '1.1.1',
 					'REQUEST': 'GetCapabilities'
 				},
-				async: false,	                
+				async: false,
 				method: 'GET',
 				headers: {
 					"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
@@ -77,7 +77,7 @@ viewer.core = {
 			});
 		}
     },
-    
+
     _createMap: function() {
     	var self = this;
     	var blank = new ol.layer.Tile({
@@ -89,7 +89,7 @@ viewer.core = {
     	    })
     	});
     	blank.baselayer = true;
-    	
+
 //    	var osm = new ol.layer.Tile({
 //    		id: this._nextLayerId(),
 //        	label: gettext('OpenStreetMap'),
@@ -97,7 +97,7 @@ viewer.core = {
 //          	source: new ol.source.OSM()
 //        });
 //		osm.baselayer = true;
-		
+
 		var mousePositionControl = new ol.control.MousePosition({
 	        coordinateFormat: ol.coordinate.createStringXY(4),
 	        projection: 'EPSG:4326',
@@ -105,19 +105,19 @@ viewer.core = {
 	        target: document.getElementById('custom-mouse-position-output'),
 	        undefinedHTML: '----------, ----------'
 	    });
-		
+
 		this.zoombar = new ol.control.Zoom();
-		
+
 		var osm = new ol.layer.Tile({
     		source: new ol.source.OSM()
     	});
-		
+
 		var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false});
 		this.map = new ol.Map({
 			interactions: interactions,
       		controls: [
 				this.zoombar,
-				new ol.control.ScaleLine(),					
+				new ol.control.ScaleLine(),
       			new ol.control.OverviewMap({collapsed: false, layers: [osm]}),
       			mousePositionControl
       		],
@@ -131,30 +131,30 @@ viewer.core = {
             	zoom: self.conf.view.zoom
         	})
 		});
-		
+
 		var projectionSelect = document.getElementById('custom-mouse-position-projection');
 	    projectionSelect.addEventListener('change', function(event) {
 	    	mousePositionControl.setProjection(ol.proj.get(event.target.value));
 	    });
-		
+
 		$(document).on('sidebar:opened', function(){
 			$('.ol-scale-line').css('left', '408px');
 			$('.custom-mouse-position').css('left', '580px');
 		});
-		
+
 		$(document).on('sidebar:closed', function(){
 			$('.ol-scale-line').css('left', '8px');
 			$('.custom-mouse-position').css('left', '180px');
 		});
     },
-    
+
     _initToolbar: function() {
     	var self = this;
-    	
+
     	if (ol.has.TOUCH) {
     		$(".toolbar-button").css("font-size", "1.5em");
     	}
-    	
+
     	$('#toolbar').on( "control-active", function(e) {
     		  for (var i=0; i<self.tools.length; i++){
     			  if (e.target.id != self.tools[i].id) {
@@ -166,28 +166,28 @@ viewer.core = {
     			  }
     		  }
     		  if (self.layerTree.getEditionBar()) {
-    			  self.layerTree.getEditionBar().deactivateControls(); 
-    		  }   		  
+    			  self.layerTree.getEditionBar().deactivateControls();
+    		  }
     	});
     },
-    
+
     _loadLayers: function() {
     	this._loadBaseLayers();
     	this._loadOverlays();
     	this._loadLayerGroups();
     },
-    
-    _createWidgets: function() {   
+
+    _createWidgets: function() {
     	this.layerTree = new layerTree(this.conf, this.map);
     	this.legend = new legend(this.conf, this.map);
     },
-    
-    _loadBaseLayers: function() {		
+
+    _loadBaseLayers: function() {
 	    var self = this;
     	var base_layers = this.conf.base_layers;
-    	
+
     	var layers = this.map.getLayers();
-     	
+
     	for(var i=0; i<base_layers.length; i++){
     		var base_layer = base_layers[i];
     		if (base_layer['type'] == 'WMS') {
@@ -202,10 +202,10 @@ viewer.core = {
 				});
 				wmsLayer.baselayer = true;
 				this.map.addLayer(wmsLayer);
-				base_layer['id'] = this.layerCount; 
+				base_layer['id'] = this.layerCount;
 				this._nextLayerId();
-			} 
-    		if (base_layer['type'] == 'WMTS') {		
+			}
+    		if (base_layer['type'] == 'WMTS') {
 	    		var parser = new ol.format.WMTSCapabilities();
 	    		var capabilities_url = base_layer['url'] + '?request=GetCapabilities' + '&version=' + base_layer['version']  + '&service=' + base_layer['type'];
 	    	      fetch(capabilities_url).then(function(response) {
@@ -249,7 +249,7 @@ viewer.core = {
 	    	      });
 	    	      this._nextLayerId();
 			}
-	    	
+
 	    	if (base_layer['type'] == 'Bing') {
 	    		var bingLayer = new ol.layer.Tile({
 					id: "gol-layer-" + (i+1),
@@ -263,10 +263,10 @@ viewer.core = {
 				});
 				bingLayer.baselayer = true;
 				this.map.addLayer(bingLayer);
-				base_layer['id'] = this.layerCount; 
+				base_layer['id'] = this.layerCount;
 				this._nextLayerId();
 	    	}
-	    	
+
 	    	if (base_layer['type'] == 'OSM') {
 	    		var osm_source = null;
 	    		if('url' in base_layer && base_layer['url'].length > 0){
@@ -284,33 +284,33 @@ viewer.core = {
 	            });
 	    		osm.baselayer = true;
 				this.map.addLayer(osm);
-				base_layer['id'] = this.layerCount; 
+				base_layer['id'] = this.layerCount;
 				this._nextLayerId();
 			}
-	    	
+
 	    	if (base_layer['type'] == 'XYZ') {
 	    		var xyz = new ol.layer.Tile({
 	    			id: "gol-layer-" + (i+1),
 	    			label: base_layer['title'],
 	    		  	visible: base_layer['active'],
 	    		  	source: new ol.source.XYZ({
-	    		  		url: base_layer['url']	
+	    		  		url: base_layer['url']
 	    		    })
 	    		});
 	    		xyz.baselayer = true;
 				this.map.addLayer(xyz);
-				base_layer['id'] = this.layerCount; 
+				base_layer['id'] = this.layerCount;
 				this._nextLayerId();
 			}
-	    	
+
     	}
 	},
-	
 
-	
+
+
 	_loadOverlays: function() {
 		var self = this;
-		for (var i=0; i<this.conf.layerGroups.length; i++) {			
+		for (var i=0; i<this.conf.layerGroups.length; i++) {
 			var group = this.conf.layerGroups[i];
 			for (var k=0; k<group.layers.length; k++) {
 				var layerConf = group.layers[k];
@@ -321,7 +321,7 @@ viewer.core = {
 					url = layerConf.cache_url;
 				}
 				var wmsLayer = null;
-				
+
 				var visible = layerConf.visible;
 				if(group.visible){
 					visible = false;
@@ -338,11 +338,14 @@ viewer.core = {
 						source: wmsSource,
 						visible: visible
 					});
-					
+
 				} else {
-					if(url.endsWith('/gwc/service/wmts')){	
-						var default_srs = 'EPSG:4326';
-						
+					if(url.endsWith('/gwc/service/wmts')){
+						var default_srs = 'EPSG:3857';
+						if("crs" in layerConf && "crs" in layer.crs){
+							default_srs = layerConf.crs.crs;
+						}
+
 						var projection = new ol.proj.get(default_srs);
 						var projectionExtent = projection.getExtent();
 						var size = ol.extent.getWidth(projectionExtent) / 256;
@@ -360,9 +363,9 @@ viewer.core = {
 						            matrixIds: matrixIds
 						        }
 						);
-						
-						
-						var ignSource3 = new ol.source.WMTS({ 
+
+
+						var ignSource3 = new ol.source.WMTS({
 							layer: layerConf.workspace + ':' + layerConf.name,
 							url: url,
 							projection: projection,
@@ -379,11 +382,11 @@ viewer.core = {
 					 	});
 				        wmsLayer.baselayer = false;
 				        wmsLayer.layer_name=layerConf.workspace + ':' + layerConf.name;
-					 						
+
 					}else{
 						var wmsParams = {
-							'LAYERS': layerConf.workspace + ':' + layerConf.name, 
-							'FORMAT': 'image/png', 
+							'LAYERS': layerConf.workspace + ':' + layerConf.name,
+							'FORMAT': 'image/png',
 							'VERSION': '1.1.1'
 						};
 						if (layerConf.cached) {
@@ -403,7 +406,7 @@ viewer.core = {
 						});
 					}
 				}
-				
+
 				if(wmsLayer){
 					wmsLayer.on('change:visible', function(){
 						self.legend.reloadLegend();
@@ -428,38 +431,38 @@ viewer.core = {
 					wmsLayer.setZIndex(parseInt(layerConf.order));
 					wmsLayer.conf = JSON.parse(layerConf.conf);
 					wmsLayer.parentGroup = group;
-					
+
 					this.map.addLayer(wmsLayer);
 				}
 			}
 		}
 	},
-	
+
 	_loadLayerGroups: function() {
 		var self = this;
-		for (var i=0; i<this.conf.layerGroups.length; i++) {			
+		for (var i=0; i<this.conf.layerGroups.length; i++) {
 			var group = this.conf.layerGroups[i];
 			var url = null;
 			var cached = group.cached;
-			
+
 			if (cached) {
 				url = this.conf.geoserver_frontend_url + '/gwc/service/wms';
 			} else {
 				url = this.conf.geoserver_frontend_url + '/wms';
 			}
-			
+
 			var layerGroupSource = new ol.source.TileWMS({
 				url: url,
 				params: {'LAYERS': group.groupName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
 				//crossOrigin: '*',
 				serverType: 'geoserver'
 			});
-			var layerGroup = new ol.layer.Tile({			
+			var layerGroup = new ol.layer.Tile({
 				id: group.groupName,
 				source: layerGroupSource,
 				visible: group.visible
 			});
-				
+
 			layerGroup.on('change:visible', function(){
 				self.legend.reloadLegend();
 			});
@@ -475,7 +478,7 @@ viewer.core = {
 			this.map.addLayer(layerGroup);
 		}
 	},
-	
+
 	_loadTools: function() {
 		this.tools.push(new projectZoom(this.map, this.conf));
     	this.tools.push(new getFeatureInfo(this.map, this.conf.tools.get_feature_info_control.private_fields_prefix));
@@ -487,12 +490,12 @@ viewer.core = {
     	this.tools.push(new cleanMap(this.map));
     	this.map.tools = this.tools;
     },
-    
+
     loadTool: function(tool) {
     	this.tools.push(tool);
     	this.map.tools.push(tool);
     },
-    
+
     getTool: function(id) {
     	var tool = null;
     	for (var i=0; i<this.tools.length; i++) {
@@ -502,15 +505,15 @@ viewer.core = {
     	}
     	return tool;
     },
-    
+
     getMap: function(){
     	return this.map;
     },
-    
+
     getConf: function(){
     	return this.conf;
     },
-    
+
     _nextLayerId: function() {
     	return "gol-layer-" + this.layerCount++;
     }
