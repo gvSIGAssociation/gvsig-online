@@ -998,8 +998,8 @@ layerTree.prototype.assignStyleToLayer = function(layer, style) {
 		var ignSource3 = new ol.source.WMTS({
 			layer: layer.getSource()['layer_'],
 			url: layer.getSource()['urls'][0],
-			projection: layer.getSource()['projection'],
-			matrixSet: layer.getSource()['matrixSet'],
+			projection: layer.getSource()['projection_'],
+			matrixSet: layer.getSource()['matrixSet_'],
 			format:'image/png',
 			tileGrid: layer.getSource()['tileGrid'],
 			crossOrigin: 'anonymous',
