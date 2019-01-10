@@ -993,7 +993,21 @@ layerTree.prototype.assignStyleToLayer = function(layer, style) {
 	if(!(layer.getSource() instanceof ol.source.WMTS)){
 		layer.getSource().updateParams({"STYLES":style});
 	}else{
-		layer.getSource()['style_'] = style;
+		//layer.getSource()['style_'] = style;
+
+		var ignSource3 = new ol.source.WMTS({
+			layer: layer.getSource()['layer_'],
+			url: layer.getSource()['urls'][0],
+			projection: layer.getSource()['projection'],
+			matrixSet: layer.getSource()['matrixSet'],
+			format:'image/png',
+			tileGrid: layer.getSource()['tileGrid'],
+			crossOrigin: 'anonymous',
+			style: style,
+            wrapX: true
+		});
+
+		layer.setSource(ignSource3);
 	}
 	var selectedStyle = null;
 	for (var i=0; i<layer.styles.length; i++) {
