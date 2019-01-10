@@ -992,6 +992,8 @@ layerTree.prototype.hasTemporaryLayersActive = function() {
 layerTree.prototype.assignStyleToLayer = function(layer, style) {
 	if(!(layer.getSource() instanceof ol.source.WMTS)){
 		layer.getSource().updateParams({"STYLES":style});
+	}else{
+		layer.getSource()['style_'] = style;
 	}
 	var selectedStyle = null;
 	for (var i=0; i<layer.styles.length; i++) {
