@@ -28,39 +28,39 @@ import json, requests
 import logging
 
 class Cartociudad():
-    
+
     def __init__(self, provider, type):
         self.urls = settings.GEOCODING_PROVIDER['cartociudad']
         self.providers=[]
         self.providers.append(provider)
-        
-        
-        
+
+
+
     def get_type(self):
         return 'cartociudad'
-    
-    
+
+
     def is_unique_instance(self):
         return False
-    
-    
+
+
     def set_database_config(self,provider):
         params = json.loads(provider.params)
-        
+
         datastore_id = params["datastore_id"]
         datastore = Datastore.objects.get(id=datastore_id)
         connection_params = json.loads(datastore.connection_params)
 
         response = requests.get(url=self.urls['configuration_url'], params=connection_params)
         return response.status_code == 200
-    
-        
+
+
     def append(self, provider):
         self.providers.append(provider)
         if provider.type == 'cartociudad':
             self.set_database_config(provider)
-        
-    
+
+
     def geocode(self, query, exactly_one):
         '''
         http://localhost:8090/geocodersolr/api/geocoder/candidatesJsonp?q=casas&autocancel=true&limit=20&countrycodes=es
@@ -77,12 +77,12 @@ class Cartociudad():
 
         #url = "?".join((self.urls['candidates_url'], urlencode(params)))
         return self.get_json_from_url(self.urls['candidates_url'], params)
-    
+
     def find(self, address_str, exactly_one):
         '''
         http://localhost:8090/geocodersolr/api/geocoder/candidatesJsonp?q=casas&autocancel=true&limit=20&countrycodes=es
         '''
-        
+
         address = json.loads(address_str)
         if address['address[source]'] == 'user':
             params = {
@@ -94,10 +94,10 @@ class Cartociudad():
                 'lng': address['address[lng]']
             }
             return params
-        
+
         params = {
             'id': address['address[id]'],
-            #'address': address['address[address]'],
+            'address': address['address[address]'],
             'source': address['address[source]'],
             'type': address['address[type]'],
             'tip_via': address['address[tip_via]'],
@@ -111,16 +111,16 @@ class Cartociudad():
             updated_data = False
             for provider in self.providers:
                 if provider.type == 'cartociudad':
-                    updated_data = self.set_database_config(provider)    
+                    updated_data = self.set_database_config(provider)
             if updated_data:
                 json_result = self.get_json_from_url(self.urls['find_url'], params)
-                
-        return json_result
-        
-        
-        
 
-    def reverse(self, coordinate, exactly_one, language): 
+        return json_result
+
+
+
+
+    def reverse(self, coordinate, exactly_one, language):
         '''
         http://localhost:8090/geocodersolr/api/geocoder/candidatesJsonp?q=casas&autocancel=true&limit=20&countrycodes=es
         '''
@@ -128,26 +128,26 @@ class Cartociudad():
             'lat': coordinate[1],
             'lon': coordinate[0]
         }
-        
+
         json_result =  self.get_json_from_url(self.urls['reverse_url'], params)
         if not json_result:
             updated_data = False
             for provider in self.providers:
                 if provider.type == 'cartociudad':
-                    updated_data = self.set_database_config(provider)    
+                    updated_data = self.set_database_config(provider)
             if updated_data:
                 json_result = self.get_json_from_url(self.urls['reverse_url'], params)
-                
+
         return json_result
-    
-    
+
+
     def get_json_from_url(self, url, params):
         response = requests.get(url=url, params=params)
         if response.status_code == 200:
             respuesta = response.content
             if respuesta.startswith('callback('):
                 respuesta = respuesta['callback('.__len__():-1]
-            
+
             data = json.loads(respuesta)
             if isinstance(data, list):
                 for datum in data:
@@ -165,8 +165,8 @@ class Cartociudad():
                             data['image'] = str(provider.image)
                 return data
         return []
-    
-    
+
+
     def get_provider_priority(self):
         num_total = self.providers.__len__()
         providers_order = {}
@@ -179,4 +179,3 @@ class Cartociudad():
                     order = num_total-1
                 providers_order[table_name] = ((num_total-order)*step)
         return providers_order
-        
