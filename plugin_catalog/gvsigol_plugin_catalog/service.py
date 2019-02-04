@@ -51,6 +51,7 @@ class Geonetwork():
             return None
         
         except Exception as e:
+            logger.exception(e);
             print e
             
     def create_metadata(self, layer, layer_info, ds_type):

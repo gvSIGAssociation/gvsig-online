@@ -36,6 +36,9 @@ from gvsigol_services.models import Layer
 from gvsigol_plugin_catalog.models import LayerMetadata
 from gvsigol_auth.utils import staff_required
 from django.http import JsonResponse
+import logging
+
+logger = logging.getLogger("gvsigol")
 
 def get_query(request):
     if geonetwork_service!=None and request.method == 'GET':
@@ -58,6 +61,7 @@ def get_query(request):
     return HttpResponse(status=500)
 
 def get_metadata_id(request, layer_ws, layer_name):
+    logger.debug('get_metadata_id: '+layer_ws+":"+layer_name)
     response = {}
     response['success'] = False
     
@@ -69,7 +73,11 @@ def get_metadata_id(request, layer_ws, layer_name):
                 layerMetadata = LayerMetadata.objects.filter(layer=layer)
                 if layerMetadata and layerMetadata[0].metadata_uuid != None and layerMetadata[0].metadata_uuid != '':
                     response = geonetwork_service.get_metadata(layerMetadata[0].metadata_uuid)
-                    response['success'] = True
+                    if isinstance(response, dict):
+                        response['success'] = True
+                    else:
+                        logger.debug(type(response))
+                        return {'success': False};
     response['html']= get_metadata_as_html(response)
     return HttpResponse(json.dumps(response), content_type='application/json')
 
