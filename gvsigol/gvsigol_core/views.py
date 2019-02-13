@@ -968,14 +968,25 @@ def public_viewer_get_conf(request):
             conf_group['visible'] = group.visible
             layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('order')
             layers = []
-            
+            user_roles = core_utils.get_group_names_by_user(request.user)
+
             idx = 0
             for l in layers_in_group:
                 try:
                     read_roles = services_utils.get_read_roles(l)
                     write_roles = services_utils.get_write_roles(l)
-                    
-                    if len(read_roles) <= 0:
+                                        
+                    readable = False
+                    if len(read_roles) == 0:
+                        readable = True
+                    else:
+                        for ur in user_roles:
+                            for rr in read_roles:
+                                if ur == rr:
+                                    readable = True
+                                    
+                    #if len(read_roles) <= 0:
+                    if readable:
                         layer = {}                
                         layer['name'] = l.name
                         layer['title'] = l.title
