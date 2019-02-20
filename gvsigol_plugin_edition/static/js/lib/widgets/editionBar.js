@@ -726,7 +726,7 @@ EditionBar.prototype.showInfo = function(evt, layer, features, selectInteraction
 	$('.item-fid').click(function(){
 		var feat_aux = null;
 		for(var i=0; i<features.length; i++){
-			if(features[i].getId() == this.parentNode.parentNode.dataset.fid){
+			if(features[i].getId() == this.dataset.fid){
 				feat_aux = features[i];
 			}
 		}
