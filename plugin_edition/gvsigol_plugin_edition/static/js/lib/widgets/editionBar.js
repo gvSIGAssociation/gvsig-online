@@ -806,7 +806,7 @@ EditionBar.prototype.addModifyInteraction = function() {
 				if (self.lastEditedFeature != null) {
 					self.revertEditedFeature();
 				}
-		        if(selectedFeatures.length > 1){
+		        if(evt.selected.length > 1){
 		        	self.showInfo(evt, self.selectedLayer, evt.selected)
 		        }else{
 		        	self.editFeatureForm(evt.selected[0]);
