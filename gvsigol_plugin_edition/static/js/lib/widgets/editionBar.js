@@ -723,8 +723,7 @@ EditionBar.prototype.showInfo = function(evt, layer, features, selectInteraction
 	});
 
 	self.map.getView().setCenter(evt.mapBrowserEvent.coordinate);
-	$('.item-fid .feature-info-label-info').click(function(){
-//		console.log("self.showMoreInfo("+this.parentNode.parentNode.dataset.fid+", features, 'features');");
+	$('.item-fid').click(function(){
 		var feat_aux = null;
 		for(var i=0; i<features.length; i++){
 			if(features[i].getId() == this.parentNode.parentNode.dataset.fid){
