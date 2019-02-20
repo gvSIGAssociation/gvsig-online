@@ -807,7 +807,7 @@ EditionBar.prototype.addModifyInteraction = function() {
 				}
 
 				var features = [];
-		        self.map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+		        self.map.forEachFeatureAtPixel(evt.mapBrowserEvent.pixel, function(feature, layer) {
 		        	if(layer.workspace == self.selectedLayer.workspace && layer.name == self.selectedLayer.name){
 		        		features.push(feature);
 		        	}
