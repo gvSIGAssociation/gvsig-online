@@ -733,7 +733,7 @@ EditionBar.prototype.showInfo = function(evt, layer, features, selectInteraction
 		}
 		if(feat_aux){
 			selectInteraction.getFeatures().clear();
-			selectInteraction.select(feat_aux);
+			selectInteraction.getFeatures().push(feat_aux);
 
 			self.editFeatureForm(feat_aux);
 		}
