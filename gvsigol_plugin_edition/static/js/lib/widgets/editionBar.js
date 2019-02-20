@@ -734,6 +734,7 @@ EditionBar.prototype.showInfo = function(evt, layer, features){
 		if(feat_aux){
 			self.editFeatureForm(feat_aux);
 		}
+		self.map.removeOverlay(self.popup);
 	});
 
 
