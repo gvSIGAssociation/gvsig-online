@@ -724,7 +724,7 @@ EditionBar.prototype.showInfo = function(evt, layer, features){
 
 	self.map.getView().setCenter(evt.mapBrowserEvent.coordinate);
 	$('.item-fid .feature-info-label-info').click(function(){
-		console.log("self.showMoreInfo("+this.parentNode.parentNode.dataset.fid+", features, 'features');");
+//		console.log("self.showMoreInfo("+this.parentNode.parentNode.dataset.fid+", features, 'features');");
 		var feat_aux = null;
 		for(var i=0; i<features.length; i++){
 			if(features[i].getId() == this.parentNode.parentNode.dataset.fid){
@@ -806,7 +806,13 @@ EditionBar.prototype.addModifyInteraction = function() {
 					self.revertEditedFeature();
 				}
 
-				self.showInfo(evt, self.selectedLayer, evt.selected)
+				var features = [];
+		        self.map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+		        	if(layer.workspace == self.selectedLayer.workspace && layer.name == self.selectedLayer.name){
+		        		features.push(feature);
+		        	}
+		        });
+				self.showInfo(evt, self.selectedLayer, features)
 				//self.editFeatureForm(evt.selected[0]);
 				$("#jqueryEasyOverlayDiv").css("display", "none");
 			}, this);
