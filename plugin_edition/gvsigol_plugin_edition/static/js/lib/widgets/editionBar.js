@@ -577,7 +577,7 @@ EditionBar.prototype.addDrawInCenterInteraction = function() {
 
 
 
-EditionBar.prototype.showInfo = function(layer, features){
+EditionBar.prototype.showInfo = function(evt, layer, features){
 
 	var self = this;
 	this.popup = new ol.Overlay.Popup();
@@ -854,7 +854,7 @@ EditionBar.prototype.addModifyInteraction = function() {
 					self.revertEditedFeature();
 				}
 
-				self.showInfo(self.selectedLayer, evt.selected)
+				self.showInfo(evt, self.selectedLayer, evt.selected)
 				//self.editFeatureForm(evt.selected[0]);
 				$("#jqueryEasyOverlayDiv").css("display", "none");
 			}, this);
