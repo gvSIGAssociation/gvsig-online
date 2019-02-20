@@ -812,7 +812,9 @@ EditionBar.prototype.addModifyInteraction = function() {
 		        		features.push(feature);
 		        	}
 		        });
-				self.showInfo(evt, self.selectedLayer, features)
+		        if(features.length > 0){
+		        	self.showInfo(evt, self.selectedLayer, features)
+		        }
 				//self.editFeatureForm(evt.selected[0]);
 				$("#jqueryEasyOverlayDiv").css("display", "none");
 			}, this);
