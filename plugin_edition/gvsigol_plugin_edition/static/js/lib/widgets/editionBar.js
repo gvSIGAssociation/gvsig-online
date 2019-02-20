@@ -577,7 +577,7 @@ EditionBar.prototype.addDrawInCenterInteraction = function() {
 
 
 
-EditionBar.prototype.showInfo = function(evt, layer, features){
+EditionBar.prototype.showInfo = function(evt, layer, features, selectInteraction){
 
 	var self = this;
 	this.popup = new ol.Overlay.Popup();
@@ -732,6 +732,9 @@ EditionBar.prototype.showInfo = function(evt, layer, features){
 			}
 		}
 		if(feat_aux){
+			selectInteraction.getFeatures().clear();
+			selectInteraction.select(feat_aux);
+
 			self.editFeatureForm(feat_aux);
 		}
 		self.map.removeOverlay(self.popup);
@@ -807,7 +810,7 @@ EditionBar.prototype.addModifyInteraction = function() {
 					self.revertEditedFeature();
 				}
 		        if(evt.selected.length > 1){
-		        	self.showInfo(evt, self.selectedLayer, evt.selected)
+		        	self.showInfo(evt, self.selectedLayer, evt.selected, self.selectInteraction)
 		        }else{
 		        	self.editFeatureForm(evt.selected[0]);
 		        }
