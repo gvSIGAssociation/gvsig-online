@@ -26,7 +26,7 @@
 var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 	$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
 	$("#jqueryEasyOverlayDiv").css("display", "block");
-	
+
 	var this_ = this;
 	this.click_callback = function(evt) {
 		$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
@@ -46,7 +46,7 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 		this.resourceManager = new GvsigolResourceManager(this.selectedLayer);
 	} else if (layerTree.conf.resource_manager == 'alfresco') {
 		this.resourceManager = new AlfrescoResourceManager(this.selectedLayer);
-	}	
+	}
 	this.featureType = featureType;
 	this.detailsTab = $('#details-tab');
 	this.geometryType = null;
@@ -76,13 +76,13 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 			}
 		}
 	}
-	
+
 	$('#map').append('<div id="editionbar" class="editionbar ol-unselectable ol-control"></div>');
 
 	var drawControl = document.createElement('button');
 	drawControl.setAttribute("id", "draw-control");
 	drawControl.setAttribute("class", "toolbar-button");
-	
+
 	var icon = document.createElement('i');
 	var drawHandler = null;
 	if (this.geometryType == 'Point' || this.geometryType == 'MultiPoint') {
@@ -92,7 +92,7 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 		drawHandler = function(e) {
 			this_.drawPointHandler(e);
 		};
-		
+
 	} else if (this.geometryType == 'LineString' || this.geometryType == 'MultiLineString') {
 		drawControl.setAttribute("title", gettext('Add line'));
 		icon.setAttribute("class", "fa fa-code-fork");
@@ -100,7 +100,7 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 		drawHandler = function(e) {
 			this_.drawLineHandler(e);
 		};
-		
+
 	} else if (this.geometryType == 'Polygon' || this.geometryType == 'MultiPolygon') {
 		drawControl.setAttribute("title", gettext('Add polygon'));
 		icon.setAttribute("class", "fa fa-object-ungroup");
@@ -108,14 +108,14 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 		drawHandler = function(e) {
 			this_.drawPolygonHandler(e);
 		};
-		
+
 	}
-	
-	
+
+
 	var drawInCenterControl = document.createElement('button');
 	drawInCenterControl.setAttribute("id", "draw-in-center-control");
 	drawInCenterControl.setAttribute("class", "toolbar-button");
-	
+
 	var icon2 = document.createElement('i');
 	var drawHandler2 = null;
 	if (this.geometryType == 'Point' || this.geometryType == 'MultiPoint') {
@@ -126,7 +126,7 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 			this_.drawPointInCenterHandler(e);
 		};
 	}
-	
+
 	var modifyControl = document.createElement('button');
 	modifyControl.setAttribute("id", "modify-control");
 	modifyControl.setAttribute("class", "toolbar-button");
@@ -137,7 +137,7 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 	var modHandler = function(e) {
 		this_.modifyHandler(e);
 	};
-	
+
 	var removeControl = document.createElement('button');
 	removeControl.setAttribute("id", "remove-control");
 	removeControl.setAttribute("class", "toolbar-button");
@@ -148,7 +148,7 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 	var rmvHandler = function(e) {
 		this_.removeHandler(e);
 	};
-	
+
 	var stopEdition = document.createElement('button');
 	stopEdition.setAttribute("id", "stop-edition");
 	stopEdition.setAttribute("class", "toolbar-button");
@@ -159,13 +159,13 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 	var stopHandler = function(e) {
 		this_.stopEditionHandler(e);
 	};
-	
+
 	this.$drawInCenterControl = $(drawInCenterControl);
 	this.$drawControl = $(drawControl);
 	this.$modifyControl = $(modifyControl);
 	this.$removeControl = $(removeControl);
 	this.$stopEdition = $(stopEdition);
-	
+
 	if (this.geometryType == 'Point' || this.geometryType == 'MultiPoint') {
 		$('#editionbar').append(drawInCenterControl);
 	}
@@ -173,30 +173,30 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 	$('#editionbar').append(modifyControl);
 	$('#editionbar').append(removeControl);
 	$('#editionbar').append(stopEdition);
-	
+
 	drawInCenterControl.addEventListener('click', drawHandler2, false);
 	drawInCenterControl.addEventListener('touchstart', drawHandler2, false);
-	
+
 	drawControl.addEventListener('click', drawHandler, false);
 	drawControl.addEventListener('touchstart', drawHandler, false);
-	
+
 	modifyControl.addEventListener('click', modHandler, false);
 	modifyControl.addEventListener('touchstart', modHandler, false);
-	
+
 	removeControl.addEventListener('click', rmvHandler, false);
 	removeControl.addEventListener('touchstart', rmvHandler, false);
-	
+
 	stopEdition.addEventListener('click', stopHandler, false);
 	stopEdition.addEventListener('touchstart', stopHandler, false);
-	
+
 	this.formatWFS = new ol.format.WFS();
 	this.formatGML = null;
-	
+
 	var uri = this.selectedLayer.namespace.split('/');
 	var ws = uri[uri.length - 1];
 	this.formatGeoJSON = new ol.format.GeoJSON({geometryName: this.geometryName});
 	this.mapSRS = 'EPSG:3857';
-	
+
 	this.source = new ol.source.Vector({
 		format: this.formatGeoJSON,
 		loader: function(extent, resolution, projection) {
@@ -215,7 +215,7 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 							featureType: this_.selectedLayer.layer_name,
 							srsName: this_.mapSRS
 						});
-						
+
 						var features = this_.formatGeoJSON.readFeatures(response);
 						this_.source.addFeatures(features);
 					} catch (e) {
@@ -234,11 +234,11 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 			});
 		},
 		strategy: function() {
-			var extent = this_.map.getView().calculateExtent(this_.map.getSize()); 
+			var extent = this_.map.getView().calculateExtent(this_.map.getSize());
 			return [extent];
 		}
 	});
-	
+
 	var style = null;
 	if (this.geometryType == 'Point' || this.geometryType == 'MultiPoint') {
 		style = new ol.style.Style({
@@ -248,13 +248,13 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 				stroke: new ol.style.Stroke({color: 'rgba(0,0,255, 1.0)', width: 2})
 			})
 		});
-		
+
 	} else if (this.geometryType == 'LineString' || this.geometryType == 'MultiLineString') {
 		style = new ol.style.Style({
 			fill: new ol.style.Fill({color: 'rgba(0,0,255, 0.5)'}),
 			stroke: new ol.style.Stroke({color: 'rgba(0,0,255, 1.0)', width: 3, lineDash: [4,4]})
 		});
-		
+
 	} else if (this.geometryType == 'Polygon' || this.geometryType == 'MultiPolygon') {
 		style = new ol.style.Style({
 			fill: new ol.style.Fill({color: 'rgba(0,0,255, 0.5)'}),
@@ -266,13 +266,13 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 		source: this_.source,
 		style: style
 	});
-	
+
 	this.map.addLayer(this.wfsLayer);
-	
+
 	this.source.on('change', function() {
 		$("#jqueryEasyOverlayDiv").css("display", "none");
 	});
-	
+
 	var controls = this.map.getControls();
 	for(var i=0; i<controls.array_.length; i++){
 		var control = controls.array_[i];
@@ -338,10 +338,10 @@ EditionBar.prototype.drawPointInCenterHandler = function(e) {
 		$("#center-cursor").show();
 		this.$drawInCenterControl.addClass('button-active');
 		this.$drawInCenterControl.trigger('control-active', [this]);
-		
+
 		this.addDrawInCenterInteraction();
 	}
-	
+
 
 };
 
@@ -359,7 +359,7 @@ EditionBar.prototype.drawPointHandler = function(e) {
 		this.$drawControl.trigger('control-active', [this]);
 		this.addDrawInteraction();
 	}
-	
+
 
 };
 
@@ -439,7 +439,7 @@ EditionBar.prototype.stopEdition = function() {
 		this.map.addControl(this.contextmenu);
 	}
 	this.showLayersTab();
-	
+
 }
 
 EditionBar.prototype.stopEditionHandler = function(e) {
@@ -448,7 +448,7 @@ EditionBar.prototype.stopEditionHandler = function(e) {
 	if (e!=null) {
 		e.preventDefault();
 	}
-	
+
 	var selectedTab = $(".nav-tabs li.active").children("a");
 	if(selectedTab){
 		var href = selectedTab.prop("href");
@@ -457,7 +457,7 @@ EditionBar.prototype.stopEditionHandler = function(e) {
 			if(href_parts[1] == 'details-tab'){
 				is_in_edition = true;
 				$('#modal-end-edition').modal('show');
-				
+
 				$('#button-end-edition-accept').unbind("click").click(function() {
 					$('#modal-end-edition').modal('hide');
 					self.stopEdition();
@@ -481,7 +481,7 @@ EditionBar.prototype.stopEditionHandler = function(e) {
  * TODO
  */
 EditionBar.prototype.addDrawInteraction = function() {
-	
+
 	var self = this;
 
 	this.drawInteraction = new ol.interaction.Draw({
@@ -489,7 +489,7 @@ EditionBar.prototype.addDrawInteraction = function() {
 		type: (this.geometryType),
 		geometryName: this.geometryName,
 		style: new ol.style.Style({
-	        image: 
+	        image:
 		        new ol.style.Circle({
 		            fill: new ol.style.Fill({
 		                color: '#0099ff'
@@ -522,11 +522,11 @@ EditionBar.prototype.addDrawInteraction = function() {
 			self.lastAddedFeature = evt.feature;
 			self.createFeatureForm(evt.feature);
 		}, this);
-	
+
 };
 
 EditionBar.prototype.addDrawInCenterInteraction = function() {
-	
+
 	var self = this;
 
 	this.drawInCenterInteraction = new ol.interaction.Draw({
@@ -534,7 +534,7 @@ EditionBar.prototype.addDrawInCenterInteraction = function() {
 		type: (this.geometryType),
 		geometryName: this.geometryName,
 		style: new ol.style.Style({
-	        image: 
+	        image:
 		        new ol.style.Circle({
 		            fill: new ol.style.Fill({
 		                color: '#0099ff'
@@ -565,32 +565,248 @@ EditionBar.prototype.addDrawInCenterInteraction = function() {
 	this.drawInCenterInteraction.on('drawend',
 		function(evt) {
 			self.lastAddedFeature = evt.feature;
-			
+
 			var feature = evt.feature;
 			var pos = self.map.getView().getCenter();
 			var geoms = feature.getGeometry();
 			geoms.flatCoordinates = pos;
 			self.createFeatureForm(evt.feature);
 		}, this);
-	
+
 };
+
+
+
+EditionBar.prototype.showInfo = function(layer, features){
+
+	var self = this;
+	this.popup = new ol.Overlay.Popup();
+	this.map.addOverlay(this.popup);
+
+	var html = '<ul class="products-list product-list-in-box">';
+
+	var srs = $("#custom-mouse-position-projection").val();
+	var unit =  $('#custom-mouse-position-projection option:selected').attr('data-attr');
+
+	var wgs84 = ol.proj.transform(evt.mapBrowserEvent.coordinate, 'EPSG:3857', srs)
+
+	var coord_1 = wgs84[1].toFixed(5).replace(/0{0,2}$/, "");
+	var coord_2 = wgs84[0].toFixed(5).replace(/0{0,2}$/, "");
+
+	if(unit == "degrees"){
+		if(wgs84[1]<0){
+			coord_1 = Math.abs(wgs84[1]).toFixed(5).replace(/0{0,2}$/, "") + "S";
+		}else{
+			coord_1 = wgs84[1].toFixed(5).replace(/0{0,2}$/, "") + "N";
+		}
+
+		if(wgs84[0]<0){
+			coord_2 = Math.abs(wgs84[0]).toFixed(5).replace(/0{0,2}$/, "") + "W";
+		}else{
+			coord_2 = wgs84[0].toFixed(5).replace(/0{0,2}$/, "") + "E";
+		}
+
+		var aux = coord_2;
+		coord_2 = coord_1;
+		coord_1 = aux;
+	}
+	html += '<li class="item">';
+	html += 	'<div class="feature-info">';
+	html += 		'<span style="font-size: 12px;">' + gettext('Coordinates') + ' ('+srs+'):</span>' + '<br /><span style="font-weight: bold; font-size: 12px;"> ' + coord_2 + ', '+ coord_1 + '</span>';
+	html += 	'</div>';
+	html += '</li>';
+
+	for (var i in features) {
+
+			var fid = features[i].id;
+			var is_first_configured = true;
+			var item_shown = false;
+			var selectedLayer = layer;
+
+			var feature_id = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+selectedLayer.title +"."+features[i].id + "</span>";
+			feature_id += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext('More element info')+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span></div><br />';
+			feature_id += "<br />";
+
+			var language = $("#select-language").val();
+			if (selectedLayer != null) {
+				if (selectedLayer.conf != null) {
+					var fields_trans = selectedLayer.conf;
+					if(fields_trans["fields"]){
+						var fields = fields_trans["fields"];
+						var feature_id2 = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+selectedLayer.title + "</span>";
+						feature_id2 += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext("Detalles de atributos")+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span></div><div style=\"clear:both; margin-bottom:10px;\"></div>';
+
+						var feature_added = 0;
+
+						var feature_fields = "";
+						var feature_fields2 = "";
+						for(var ix=0; ix<fields.length; ix++){
+							if(fields[ix]["infovisible"] != null){
+								item_shown = fields[ix]["infovisible"];
+								if(item_shown){
+									feature_added ++;
+								}
+							}
+							var key = fields[ix]["name"];
+							var key_trans = fields[ix]["title-"+language];
+							if(key_trans.length == 0){
+								key_trans = key;
+							}
+							if(item_shown && key && features[i].getProperties() && (typeof features[i].getProperties()[key] == 'boolean' || features[i].getProperties()[key])){
+								var text = features[i].getProperties()[key];
+
+								if(typeof features[i].getProperties()[key] == 'boolean' && text == true){
+									text = "<input type='checkbox' checked onclick=\"return false;\">";
+								}else{
+									if(typeof features[i].getProperties()[key] == 'boolean' && text == false){
+										text = "<input type='checkbox' onclick=\"return false;\">";
+									}
+								}
+
+								var complex_data = false;
+								if(key.startsWith("cd_json_")){
+									try{
+										complex_data = true;
+										var data_json = JSON.parse(text);
+										for(nkey in data_json){
+											var aux_text = data_json[nkey];
+											if(aux_text.length > 45){
+												aux_text = aux_text.substring(0,45) + "...";
+											}
+											if (!aux_text.toString().startsWith('http')) {
+												feature_fields += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
+												feature_fields2 += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
+											} else {
+												feature_fields += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\"><a href=\"" + data_json[nkey] + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
+												feature_fields2 += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\"><a href=\"" + data_json[nkey] + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
+											}
+										}
+									}catch(err){
+										complex_data = false;
+									}
+								}
+
+								if(!complex_data){
+									var aux_text = text;
+									var datetime_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(.[0-9]{3})?Z$/i;
+									if(datetime_format.test(text)){
+										var match = datetime_format.exec(text);
+										aux_text = match[3]+"/"+match[2]+"/"+match[1]+" "+match[4]+":"+match[5]+":"+match[6];
+										if(match.length > 7){
+											//aux_text += match[7];
+										}
+									}
+									var date_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})Z$/i;
+									if(date_format.test(text)){
+										var match = date_format.exec(text);
+										aux_text = match[3]+"/"+match[2]+"/"+match[1];
+									}
+									var time_format = /^([0-9]{2}):([0-9]{2}):([0-9]{2})(.[0-9]{3})?Z$/i;
+									if(time_format.test(text)){
+										var match = time_format.exec(text);
+										aux_text = match[3]+":"+match[2]+":"+match[1];
+									}
+									if(text.length > 45){
+										aux_text = text.substring(0,45) + "...";
+									}
+									if (!text.toString().startsWith('http')) {
+										feature_fields += "<span>" + aux_text + "</span><div style=\"clear:both\"></div>";
+										feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
+									} else {
+										feature_fields += "<span><a href=\"" + text + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">" + aux_text + "</a></span><div style=\"clear:both\"></div>";
+										feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\"><a href=\"" + text + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
+									}
+								}
+
+							}
+						}
+
+						if(feature_added > 0){
+							if(feature_added > 1){
+								feature_id2 += feature_fields2;
+							}
+							else{
+								feature_id2 += feature_fields;
+							}
+							feature_id = feature_id2;
+						}
+
+					}
+				}
+			}
+
+			html += '<li class="item feature-item show_info">';
+			html += 	'<div class="feature-info">';
+			html += 		'<div href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;padding: 5px;">' + feature_id + '</div>';
+			html += 	'</div>';
+			html += '</li>';
+
+//			if (features[i].crs) {
+//				var newFeature = new ol.Feature();
+//		  		var sourceCRS = 'EPSG:' + features[i].crs.properties.name.split('::')[1];
+//		  		var projection = new ol.proj.Projection({
+//		    		code: sourceCRS,
+//		    	});
+//		    	ol.proj.addProjection(projection);
+//		    	if (features[i].feature.geometry.type == 'Point') {
+//		    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates));
+//		    	} else if (features[i].feature.geometry.type == 'MultiPoint') {
+//		    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates[0]));
+//		    	} else if (features[i].feature.geometry.type == 'LineString' || features[i].feature.geometry.type == 'MultiLineString') {
+//		    		newFeature.setGeometry(new ol.geom.MultiLineString([features[i].feature.geometry.coordinates[0]]));
+//		    	} else if (features[i].feature.geometry.type == 'Polygon' || features[i].feature.geometry.type == 'MultiPolygon') {
+//		    		newFeature.setGeometry(new ol.geom.MultiPolygon(features[i].feature.geometry.coordinates));
+//		    	}
+//		    	newFeature.setProperties(features[i].feature.properties);
+//				newFeature.setId(fid);
+//
+//				newFeature.getGeometry().transform(projection, 'EPSG:3857');
+//				this.source.addFeature(newFeature);
+//			}
+
+	}
+	html += '</ul>';
+	this.popup.show(evt.mapBrowserEvent.coordinate, '<div class="popup-wrapper getfeatureinfo-popup">' + html + '</div>');
+	$(".getfeatureinfo-popup").parent().parent().children(".ol-popup-closer").unbind("click").click(function() {
+	 	return false;
+	});
+
+	self.map.getView().setCenter(evt.mapBrowserEvent.coordinate);
+	$('.item-fid .feature-info-label-info').click(function(){
+		console.log("self.showMoreInfo("+this.parentNode.parentNode.dataset.fid+", features, 'features');");
+		var feat_aux = null;
+		for(var i=0; i<features.length; i++){
+			if(features[i].id == this.parentNode.parentNode.dataset.fid){
+				feat_aux = features[i];
+			}
+		}
+		if(feat_aux){
+			self.editFeatureForm(feat_aux);
+		}
+	});
+
+
+	$.overlayout();
+	$("#jqueryEasyOverlayDiv").css("display", "none");
+};
+
 
 /**
  * TODO
  */
 EditionBar.prototype.addModifyInteraction = function() {
-	
+
 	var self = this;
-	
+
 	//this.map.un('click', this.click_callback);
 	this.map.on('click', this.click_callback);
-	
+
 	this.selectInteraction = new ol.interaction.Select({
 		wrapX: false,
 		hitTolerance: 20,
 		condition: ol.events.condition.click,
 		style: new ol.style.Style({
-	        image: 
+	        image:
 		        new ol.style.Circle({
 		            fill: new ol.style.Fill({
 		                color: '#FDF709'
@@ -607,11 +823,11 @@ EditionBar.prototype.addModifyInteraction = function() {
 		        })
 		    })
 	});
-	
+
 	this.modifyInteraction = new ol.interaction.Modify({
 		features: this.selectInteraction.getFeatures(),
 		style: new ol.style.Style({
-	        image: 
+	        image:
 		        new ol.style.Circle({
 		            fill: new ol.style.Fill({
 		                color: '#FDF709'
@@ -628,29 +844,31 @@ EditionBar.prototype.addModifyInteraction = function() {
 		        })
 		    })
 	});
-	
+
 	this.map.addInteraction(this.selectInteraction);
 	this.map.addInteraction(this.modifyInteraction);
-	
+
 	this.selectInteraction.on('select',
 			function(evt) {
 				if (self.lastEditedFeature != null) {
 					self.revertEditedFeature();
 				}
-				self.editFeatureForm(evt.selected[0]);
+
+				self.showInfo(self.selectedLayer, evt.selected)
+				//self.editFeatureForm(evt.selected[0]);
 				$("#jqueryEasyOverlayDiv").css("display", "none");
 			}, this);
-			
+
 	this.selectInteraction.on('change',
 			function(evt) {
 				$("#jqueryEasyOverlayDiv").css("display", "none");
 			}, this);
-			
+
 	this.modifyInteraction.on('modifystart',
 		function(evt) {
 			console.log('Modify feature start');
 		}, this);
-		
+
 	this.modifyInteraction.on('modifyend',
 		function(evt) {
 			self.editFeatureForm(evt.features.getArray()[0]);
@@ -662,13 +880,13 @@ EditionBar.prototype.addModifyInteraction = function() {
  * TODO
  */
 EditionBar.prototype.addRemoveInteraction = function() {
-	
+
 	var self = this;
-	
+
 	this.removeInteraction = new ol.interaction.Select({
 		wrapX: false,
 		style: new ol.style.Style({
-	        image: 
+	        image:
 		        new ol.style.Circle({
 		            fill: new ol.style.Fill({
 		                color: '#FDF709'
@@ -685,9 +903,9 @@ EditionBar.prototype.addRemoveInteraction = function() {
 		        })
 		    })
 	});
-	
+
 	this.map.addInteraction(this.removeInteraction);
-	
+
 	this.removeInteraction.on('select',
 	    function(evt) {
 			self.removeFeatureForm(evt, evt.selected[0]);
@@ -705,12 +923,12 @@ EditionBar.prototype.deactivateControls = function() {
 		self.lastAddedFeature = null;
 	}
 	this.revertEditedFeature();
-	
+
 	this.$drawInCenterControl.removeClass('button-active');
 	this.$drawControl.removeClass('button-active');
 	this.$modifyControl.removeClass('button-active');
 	this.$removeControl.removeClass('button-active');
-	
+
 	$('#editionbar').on( "control-active", function(e) {
 		for (var i=0; i<self.map.tools.length; i++){
 			if (e.target.id != self.map.tools[i].id) {
@@ -723,30 +941,30 @@ EditionBar.prototype.deactivateControls = function() {
 		}
 	});
 	$("#center-cursor").hide();
-	
+
 	this.showLayersTab();
-	
+
 	if (this.drawInCenterInteraction != null) {
 		this.map.removeInteraction(this.drawInCenterInteraction);
 		this.drawInCenterInteraction = null;
 	}
-	
+
 	if (this.drawInteraction != null) {
 		this.map.removeInteraction(this.drawInteraction);
 		this.drawInteraction = null;
 	}
-	
+
 	if (this.modifyInteraction != null) {
 		this.map.removeInteraction(this.modifyInteraction);
 		this.modifyInteraction = null;
 		this.map.un('click', this.click_callback);
 	}
-	
+
 	if (this.selectInteraction != null) {
 		this.map.removeInteraction(this.selectInteraction);
 		this.selectInteraction = null;
 	}
-	
+
 	if (this.removeInteraction != null) {
 		this.map.removeInteraction(this.removeInteraction);
 		this.removeInteraction = null;
@@ -758,7 +976,7 @@ EditionBar.prototype.deactivateControls = function() {
 /**
  * @param {Event} e Browser event.
  */
-EditionBar.prototype.removeVectorLayer = function() {	
+EditionBar.prototype.removeVectorLayer = function() {
 	this.source.clear();
 	this.map.removeLayer(this.wfsLayer);
 
@@ -768,7 +986,7 @@ EditionBar.prototype.removeVectorLayer = function() {
 /**
  * @param {Event} e Browser event.
  */
-EditionBar.prototype.getEnumeration = function(enumName) {	
+EditionBar.prototype.getEnumeration = function(enumName) {
 	var enumeration = {};
 	$.ajax({
 		type: 'POST',
@@ -783,11 +1001,11 @@ EditionBar.prototype.getEnumeration = function(enumName) {
 		},
 	  	error: function(){}
 	});
-	
+
 	return enumeration;
 };
 
-EditionBar.prototype.getEnumerations = function(enumNames) {	
+EditionBar.prototype.getEnumerations = function(enumNames) {
 	var enumerations = [];
 	$.ajax({
 		type: 'POST',
@@ -809,7 +1027,7 @@ EditionBar.prototype.getEnumerations = function(enumNames) {
 		},
 	  	error: function(){}
 	});
-	
+
 	return enumerations;
 };
 
@@ -825,41 +1043,41 @@ EditionBar.prototype.isNumericType = function(type){
 
 EditionBar.prototype.getNumericProperties = function(featureType){
 	var type = featureType.type;
-	
+
 	if(type == 'smallint'){
 		return "min=-32768 max=32767 step=1"
-	} 
-	
+	}
+
 	if(type == 'integer'){
 		return "min=-2147483648 max=2147483648 step=1"
-	} 
-	
+	}
+
 	if(type == 'bigint'){
 		return "min=-9223372036854775808 max=9223372036854775808 step=1"
-	} 
-	
-	
+	}
+
+
 	if(type == 'smallserial'){
 		return "min=1 max=32767 step=1"
-	} 
-	
+	}
+
 	if(type == 'serial'){
 		return "min=1 max=2147483647 step=1"
-	} 
-	
+	}
+
 	if(type == 'bigserial'){
 		return "min=1 max=9223372036854775808 step=1"
-	} 
-	
+	}
+
 	if(type == 'real'){
 		return "step=any"
-	} 
-	
-	
+	}
+
+
 	if(type == 'double precision'){
 		return "step=any"
-	} 
-	
+	}
+
 	if(type == 'decimal' || type == 'numeric' ){
 		var min_string="0";
 		for(var i=0; i<featureType.precision-featureType.scale; i++){
@@ -885,8 +1103,8 @@ EditionBar.prototype.getNumericProperties = function(featureType){
 		scale += "1";
 		return "min=-"+min_string+" max="+ min_string +" step="+scale;
 		//return "min=-999999999999999 max=999999999999999 step=0,000000000000000000001";
-	} 
-	
+	}
+
 
 	return "";
 }
@@ -901,7 +1119,7 @@ EditionBar.prototype.getFeatureTypeDefinition = function(name){
 			type = featureType.type;
 		}
 	}
-	
+
 	if(type == 'smallint'){
 		return {
 			type: 'smallint',
@@ -909,8 +1127,8 @@ EditionBar.prototype.getFeatureTypeDefinition = function(name){
 			max: 32767,
 			step: 1
 		}
-	} 
-	
+	}
+
 	if(type == 'integer'){
 		return {
 			type: 'integer',
@@ -918,8 +1136,8 @@ EditionBar.prototype.getFeatureTypeDefinition = function(name){
 			max: 2147483647,
 			step: 1
 		}
-	} 
-	
+	}
+
 	if(type == 'bigint'){
 		return {
 			type: 'bigint',
@@ -927,9 +1145,9 @@ EditionBar.prototype.getFeatureTypeDefinition = function(name){
 			max: 9223372036854775808,
 			step: 1
 		}
-	} 
-	
-	
+	}
+
+
 	if(type == 'smallserial'){
 		return {
 			type: 'smallserial',
@@ -937,8 +1155,8 @@ EditionBar.prototype.getFeatureTypeDefinition = function(name){
 			max: 32767,
 			step: 1
 		}
-	} 
-	
+	}
+
 	if(type == 'serial'){
 		return {
 			type: 'serial',
@@ -946,8 +1164,8 @@ EditionBar.prototype.getFeatureTypeDefinition = function(name){
 			max: 2147483647,
 			step: 1
 		}
-	} 
-	
+	}
+
 	if(type == 'bigserial'){
 		return {
 			type: 'bigserial',
@@ -955,8 +1173,8 @@ EditionBar.prototype.getFeatureTypeDefinition = function(name){
 			max: 9223372036854775808,
 			step: 1
 		}
-	} 
-	
+	}
+
 	if(type == 'real'){
 		return {
 			type: 'real',
@@ -964,9 +1182,9 @@ EditionBar.prototype.getFeatureTypeDefinition = function(name){
 			max: null,
 			step: 0.000001
 		}
-	} 
-	
-	
+	}
+
+
 	if(type == 'double precision'){
 		return {
 			type: 'double precision',
@@ -974,8 +1192,8 @@ EditionBar.prototype.getFeatureTypeDefinition = function(name){
 			max: null,
 			step: 0.000000000000001
 		}
-	} 
-	
+	}
+
 	if(type == 'decimal' || type == 'numeric' ){
 		var min_string="0";
 		for(var i=0; i<featureType.precision; i++){
@@ -1000,8 +1218,8 @@ EditionBar.prototype.getFeatureTypeDefinition = function(name){
 			max: parseInt(min_string),
 			step: parseInt(scale)
 		}
-	} 
-	
+	}
+
 
 	return {
 		type: null,
@@ -1029,18 +1247,18 @@ EditionBar.prototype.isDateType = function(type){
 
 EditionBar.prototype.getDateProperties = function(featureType){
 	var type = featureType.type;
-	
+
 	if(type == 'date'){
 		return 'DD-MM-YYYY';
-	} 
-	
+	}
+
 	if(type.startsWith('timestamp ')){
 		return 'DD-MM-YYYY HH:mm:ss';
-	} 
-	
+	}
+
 	if(type.startsWith('time ')){
 		return 'HH:mm:ss';
-	} 
+	}
 }
 
 EditionBar.prototype.isGeomType = function(type){
@@ -1055,18 +1273,18 @@ EditionBar.prototype.isGeomType = function(type){
 /**
  * @param {Event} e Browser event.
  */
-EditionBar.prototype.createFeatureForm = function(feature) {		
+EditionBar.prototype.createFeatureForm = function(feature) {
 	if (feature) {
 		this.showDetailsTab();
-		this.detailsTab.empty();	
+		this.detailsTab.empty();
 		var self = this;
 		var datetimearray = [];
 		var enumeration_names = [];
-		
+
 		var featureProperties = '';
 		featureProperties += '<div class="box">';
 		featureProperties += 	'<div class="feature-div box-body no-padding">';
-		
+
 		var fields = this.selectedLayer.conf.fields;
 		for (var i=0; i<this.featureType.length; i++) {
 			if (!this.isGeomType(this.featureType[i].type) && this.featureType[i].name != 'id') {
@@ -1091,7 +1309,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 					if (this.isNumericType(this.featureType[i].type)) {
 						var numeric_conf = this.getNumericProperties(this.featureType[i]);
 						featureProperties += '<input id="' + this.featureType[i].name + '" type="number" '+ numeric_conf+' class="form-control">';
-						
+
 					} else if (this.isDateType(this.featureType[i].type)) {
 						var dateformat = this.getDateProperties(this.featureType[i]);
 						datetimearray.push({
@@ -1127,9 +1345,9 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 								featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control">';
 							}
 						}
-						
+
 					}  else if (this.featureType[i].type == 'boolean') {
-						featureProperties += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';			
+						featureProperties += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';
 					}
 					featureProperties += '</div>';
 				}
@@ -1139,7 +1357,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 		featureProperties +=       '</div>';
 		featureProperties += 	'</div>';
 		featureProperties += '</div>';
-		
+
 		var ui = '';
 		ui += '<div class="nav-tabs-custom">';
 		ui += 	'<ul class="nav nav-tabs">';
@@ -1159,15 +1377,15 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 		ui += 		'</div>';
 		ui += 	'</div>';
 		ui += '</div>';
-		
+
 		this.detailsTab.append(ui);
-		
+
 		var enums = this.getEnumerations(enumeration_names);
 		for(var i=0; i<enums.length; i++){
 			var enumeration = enums[i];
-			
+
 			var enum_html = '';
-			
+
 			if(enumeration && enumeration.items){
 				var has_multiple = $("#div-"+enumeration.name).attr("data-type");
 				if(has_multiple!="multiple"){
@@ -1175,7 +1393,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 				}else{
 					enum_html += '<select id="' + enumeration.name + '" class="form-control multipleSelect" multiple="multiple">';
 				}
-				
+
 				for (var j=0; j<enumeration.items.length; j++) {
 					enum_html += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
 				}
@@ -1183,26 +1401,26 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 			}else{
 				enum_html += '<input id="' + enumeration.name + '" type="text" class="form-control">';
 			}
-			
+
 			$("#div-"+enumeration.name).html(enum_html);
 		}
-		
-		
+
+
 		$.gvsigOL.controlSidebar.open();
 		this.resourceManager.registerEvents();
-		
+
 		var uploader = null;
 		if (this.resourceManager.getEngine() == 'gvsigol') {
 			uploader = this.resourceManager.createUploader();
 		}
-		
+
 		for(var ixx=0; ixx < datetimearray.length; ixx++){
 			$('#'+datetimearray[ixx].name).datetimepicker({
 				format: datetimearray[ixx].format, //'DD-MM-YYYY HH:mm:ss',
 				showClose: true
 			});
 		}
-		
+
 		$('#edit_feature_properties .form-control').on('blur', function (evt) {
 			if(evt.currentTarget.value == ""){
 				delete feature.values_[evt.currentTarget.id];
@@ -1217,7 +1435,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 			props[evt.currentTarget.id] = evt.currentTarget.checked;
 			feature.setProperties(props);
 		});
-		
+
 
 		$(".feature-div").each(self.createAllErrors);
 
@@ -1225,7 +1443,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 			var field_name = $(this).attr("data-orig");
 			var feature_id = $(this).attr("data-value");
 			var self = $(this);
-			$.getJSON("/gvsigonline/forms/get_form_link/", 
+			$.getJSON("/gvsigonline/forms/get_form_link/",
 					{
 					'field_name': field_name,
 					'feature_id': feature_id
@@ -1233,24 +1451,24 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 						if("token" in data && data["token"].length > 0){
 							$("#"+field_name).val(data["token"]);
 							self.attr("data-value", data["token"]);
-							
+
 						}
 						if("url" in data && data["url"].length > 0){
 							self.attr("href", data["url"]);
 						}
-				
+
 			}).fail(function() {
 			});
 		});
-		
+
 		 $('.form-link-open').on('click', function () {
-			 if($(this).attr("data-value") == null || $(this).attr("href") == null || 
+			 if($(this).attr("data-value") == null || $(this).attr("href") == null ||
 		    		 $(this).attr("data-value") == "" || $(this).attr("href") == ""){
 				 messageBox.show('warning', gettext('No hay ninguna encuesta activa para ser rellenada. Para responder encuesta, por favor activarla en Limesurvey'));
 		    	 return false;
 		     }
 		 });
-		
+
 		$('#save-feature').on('click', function () {
 			if(self.showAllErrorMessages()){
 			var properties = {};
@@ -1266,7 +1484,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 								if(field.value != ""){
 									properties[field.id] = self.getDateTime(field.value);
 								}
-							}else{ 
+							}else{
 								if (self.isStringType(self.featureType[i].type)) {
 									if(self.featureType[i].name.startsWith("enmm_")){
 										value = "";
@@ -1277,12 +1495,12 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 											}
 											value = value + option.value;
 										}
-										properties[field.id] = value;	
+										properties[field.id] = value;
 									}else if(self.featureType[i].name.startsWith("form_")){
-										properties[field.id] = field.value;	
+										properties[field.id] = field.value;
 									}else{
 										if (field.value != null) {
-											properties[field.id] = field.value;	
+											properties[field.id] = field.value;
 										}
 									}
 								} else if (field && field.value != '' && field.value != null && field.value != 'null') {
@@ -1303,10 +1521,10 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 					var yyyy = today.getFullYear();
 					if(dd<10){
 					    dd='0'+dd;
-					} 
+					}
 					if(mm<10){
 					    mm='0'+mm;
-					} 
+					}
 					properties['last_modification'] = yyyy+'-'+mm+'-'+dd;
 				}
 			}
@@ -1326,7 +1544,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 						});
 						uploader.startUpload();
 					}
-					
+
 				} else if (self.resourceManager.getEngine() == 'alfresco'){
 					self.resourceManager.saveResource(transaction.fid);
 				}
@@ -1338,10 +1556,10 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 			parent.$("body").trigger("feature-edition", stringjson);
 			}
 		});
-		
+
 		$('#save-feature-cancel').on('click', function () {
 			$('.form-link-open').each(function () {
-				$.getJSON("/gvsigonline/forms/delete_form_link/", 
+				$.getJSON("/gvsigonline/forms/delete_form_link/",
 						{
 						'field_name': $(this).attr("data-orig"),
 						'feature_id': $(this).attr("data-value")
@@ -1354,7 +1572,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 			self.lastAddedFeature = null;
 			self.showLayersTab();
 		});
-		
+
 		$('.multipleSelect').fastselect();
 	}
 
@@ -1370,14 +1588,14 @@ EditionBar.prototype.showAllErrorMessages = function() {
 	ui += 	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
 	ui +=   '<h4><i class="icon fa fa-ban"></i> Error!</h4>';
 	ui +=   gettext('Failed to save the new record. Please check values');
-	
+
 	var invalidFields = form.find(":invalid").each(function(index, node) {
 		var label = $( "#" + node.id).parent().find("span.edit-feature-field").first(),
 		// Opera incorrectly does not fill the validationMessage property.
 		message = node.validationMessage || 'Invalid value.';
 		ui +=    "<li><span>" + label.html() + "</span> - " + message + "</li>" ;
 	});
-	
+
 	var self = this;
 	var nullable_error = false;
 	for (var i=0; i<self.featureType.length; i++) {
@@ -1397,12 +1615,12 @@ EditionBar.prototype.showAllErrorMessages = function() {
 								value = value + ";";
 							}
 							value = value + option.value;
-						}	
+						}
 					}else if(self.featureType[i].name.startsWith("form_")){
-						value = field.value;	
+						value = field.value;
 					}else{
 						if (field.value != null) {
-							value = field.value;	
+							value = field.value;
 						}
 					}
 				} else if (field && field.value != '' && field.value != null && field.value != 'null') {
@@ -1411,17 +1629,17 @@ EditionBar.prototype.showAllErrorMessages = function() {
 				if(self.featureType[i].nullable == 'NO' && (value == null || value == "")){
 					nullable_error = true;
 					ui  +=    "<li><span>" + self.featureType[i].name + "</span> - " + gettext("can't be null") + "</li>" ;
-				} 
+				}
 			}
 		}
 	}
-	
+
 	ui += '</div>';
 	if(!(!invalidFields || invalidFields.length <= 0) || nullable_error){
 		$('#edition-error').append(ui);
 		return false;
 	}
-	
+
 	return true;
 };
 
@@ -1450,7 +1668,7 @@ EditionBar.prototype.createAllErrors = function() {
 /**
  * @param {Event} e Browser event.
  */
-EditionBar.prototype.getDateTime = function(time) {	
+EditionBar.prototype.getDateTime = function(time) {
 	if(time == ""){
 		return null;
 	}
@@ -1463,17 +1681,17 @@ EditionBar.prototype.getDateTime = function(time) {
 		time = time + 'T' + time_array[1];
 	}
 	time=time+'Z';
-	
+
 	return time
 }
 
-EditionBar.prototype.modifyDateTime = function(time) {	
+EditionBar.prototype.modifyDateTime = function(time) {
 	if(time == ""){
 		return null;
 	}
 	time = time.replace("Z", "");
 	time = time.replace("T", " ");
-	
+
 	time_array = time.split(" ");
 	time_date_array = time_array[0].split("-");
 	if(time_date_array.length == 3){
@@ -1482,24 +1700,24 @@ EditionBar.prototype.modifyDateTime = function(time) {
 	if(time_array.length > 1){
 		time = time + ' ' + time_array[1];
 	}
-	
+
 	return time
 }
 
 
-EditionBar.prototype.editFeatureForm = function(feature) {	
+EditionBar.prototype.editFeatureForm = function(feature) {
 	if (feature) {
 		this.backupFeature(feature);
 		this.showDetailsTab();
-		this.detailsTab.empty();	
+		this.detailsTab.empty();
 		var self = this;
 		var datetimearray = [];
 		var enumeration_names = [];
-		
+
 		var featureProperties = '';
 		featureProperties += '<div class="box">';
 		featureProperties += 	'<div class="feature-div box-body no-padding">';
-		
+
 		var fields = this.selectedLayer.conf.fields;
 		for (var i=0; i<this.featureType.length; i++) {
 			if (!this.isGeomType(this.featureType[i].type) && this.featureType[i].name != 'id') {
@@ -1541,8 +1759,8 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 						});
 						featureProperties += '<div id="datetimepicker-' + this.featureType[i].name + '"><input id="' + this.featureType[i].name + '" class="form-control"  value="' + value + '"/></div>';
 						//featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="'+dateformat+'" value="' + value + '">';
-						
-					} else if (this.isStringType(this.featureType[i].type)) {				
+
+					} else if (this.isStringType(this.featureType[i].type)) {
 						if (this.featureType[i].name.startsWith("enm_") || this.featureType[i].name.startsWith("enmm_")) {
 							var name = this.featureType[i].name;
 							var has_multiple = false;
@@ -1567,29 +1785,29 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 								value = "";
 							}
 							if("length" in this.featureType[i] && this.featureType[i].length>0){
-								featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" maxlength="'+this.featureType[i].length+'" value="' + value + '">'; 
+								featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" maxlength="'+this.featureType[i].length+'" value="' + value + '">';
 							}else{
 								featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + value + '">';
 							}
 						}
-						
+
 					}  else if (this.featureType[i].type == 'boolean') {
 						if (value) {
 							featureProperties += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox" checked>';
 						} else {
 							featureProperties += '<input id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';
-						}				
+						}
 					}
 					featureProperties += '</div>';
 				}
 			}
 		}
 		featureProperties +=		'<div class="col-md-12 form-group" id="edition-error">';
-		
+
 		featureProperties +=      '</div>';
 		featureProperties += 	'</div>';
-		featureProperties += '</div>';	
-		
+		featureProperties += '</div>';
+
 		var ui = '';
 		ui += '<div class="nav-tabs-custom">';
 		ui += 	'<ul class="nav nav-tabs">';
@@ -1609,15 +1827,15 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 		ui += 		'</div>';
 		ui += 	'</div>';
 		ui += '</div>';
-		
+
 		this.detailsTab.append(ui);
-		
+
 		var enums = this.getEnumerations(enumeration_names);
 		for(var i=0; i<enums.length; i++){
 			var enumeration = enums[i];
-			
+
 			var enum_html = '';
-			
+
 			if(enumeration && enumeration.items){
 				var has_multiple = $("#div-"+enumeration.name).attr("data-type");
 				var enum_value = $("#div-"+enumeration.name).attr("data-value");
@@ -1638,10 +1856,10 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 				enum_html += 	'</select>';
 			}else{
 				enum_html += '<input id="' + enumeration.name + '" type="text" class="form-control">';
-			}	
+			}
 			$("#div-"+enumeration.name).html(enum_html);
 		}
-		
+
 		$.gvsigOL.controlSidebar.open();
 		this.resourceManager.registerEvents();
 
@@ -1650,7 +1868,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 			this.resourceManager.loadResources(feature);
 			uploader = this.resourceManager.createUploader();
 		}
-		
+
 		$('#edit_feature_properties .form-control').on('blur', function (evt) {
 			var props = feature.getProperties();
 //			if(evt.currentTarget.type == "number" && evt.currentTarget.value == ""){
@@ -1666,23 +1884,23 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 			props[evt.currentTarget.id] = evt.currentTarget.checked;
 			feature.setProperties(props);
 		});
-		
+
 		for(var ixx=0; ixx < datetimearray.length; ixx++){
 			$('#'+datetimearray[ixx].name).datetimepicker({
 				format: datetimearray[ixx].format, //'DD-MM-YYYY HH:mm:ss',
 				showClose: true
 			});
 		}
-		
+
 
 
 		$(".feature-div").each(self.createAllErrors);
-		
+
 		$('.form-link-open').each(function () {
 			var field_name = $(this).attr("data-orig");
 			var feature_id = $(this).attr("data-value");
 			var self = $(this);
-			$.getJSON("/gvsigonline/forms/get_form_link/", 
+			$.getJSON("/gvsigonline/forms/get_form_link/",
 					{
 					'field_name': field_name,
 					'feature_id': feature_id
@@ -1690,25 +1908,25 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 						if("token" in data && data["token"].length > 0){
 							$("#"+field_name).val(data["token"]);
 							self.attr("data-value", data["token"]);
-							
+
 						}
 						if("url" in data && data["url"].length > 0){
 							self.attr("href", data["url"]);
 						}
-				
+
 			}).fail(function() {
 			});
 		});
-		
+
 		$('.form-link-open').on('click', function () {
-		     if($(this).attr("data-value") == null || $(this).attr("href") == null || 
+		     if($(this).attr("data-value") == null || $(this).attr("href") == null ||
 		    		 $(this).attr("data-value") == "" || $(this).attr("href") == ""){
 		    	 messageBox.show('warning', gettext('No hay ninguna encuesta activa para ser rellenada. Para responder encuesta, por favor activarla en Limesurvey'));
 		    	 return false;
 		     }
 		 });
-	
-		
+
+
 		$('#edit-feature').on('click', function () {
 			if(self.showAllErrorMessages()){
 			var properties = {};
@@ -1718,12 +1936,12 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 					if(field != null && field.id != null){
 						if (self.featureType[i].type == 'boolean') {
 							properties[field.id] = field.checked;
-						}else{ 
+						}else{
 							if(self.isDateType(self.featureType[i].type)){
 								if(field.value != ""){
 									properties[field.id] = self.getDateTime(field.value);
 								}
-							}else{ 
+							}else{
 								if (self.isStringType(self.featureType[i].type)) {
 									if(self.featureType[i].name.startsWith("enmm_")){
 										value = "";
@@ -1734,12 +1952,12 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 											}
 											value = value + option.value;
 										}
-										properties[field.id] = value;	
+										properties[field.id] = value;
 									}else if(self.featureType[i].name.startsWith("form_")){
-										properties[field.id] = field.value;	
+										properties[field.id] = field.value;
 									}else{
 										if (field.value != null) {
-											properties[field.id] = field.value;	
+											properties[field.id] = field.value;
 										}
 									}
 								} else if (field && field.value != '' && field.value != null && field.value != 'null') {
@@ -1760,10 +1978,10 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 					var yyyy = today.getFullYear();
 					if(dd<10){
 					    dd='0'+dd;
-					} 
+					}
 					if(mm<10){
 					    mm='0'+mm;
-					} 
+					}
 					properties['last_modification'] = yyyy+'-'+mm+'-'+dd;
 				}
 			}
@@ -1782,7 +2000,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 						});
 						uploader.startUpload();
 					}
-					
+
 				} else if (self.resourceManager.getEngine() == 'alfresco'){
 					self.resourceManager.updateResource(transaction.fid);
 				}
@@ -1790,20 +2008,20 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 				self.clearFeatureBackup();
 				self.selectInteraction.getFeatures().clear();
 				self.showLayersTab();
-			}		
-			
+			}
+
 			var geojson_obj = new ol.format.GeoJSON();
 			var stringjson = geojson_obj.writeFeature(feature);
 			parent.$("body").trigger("feature-edition", stringjson);
 			}
 		});
-		
+
 		$('#edit-feature-cancel').on('click', function () {
 			self.revertEditedFeature();
 			self.selectInteraction.getFeatures().clear();
 			self.showLayersTab();
 		});
-		
+
 		$('.multipleSelect').fastselect();
 	}
 
@@ -1850,14 +2068,14 @@ EditionBar.prototype.revertEditedFeature = function() {
 /**
  * @param {Event} e Browser event.
  */
-EditionBar.prototype.removeFeatureForm = function(evt, feature) {	
-	
+EditionBar.prototype.removeFeatureForm = function(evt, feature) {
+
 	if (feature) {
 		this.showDetailsTab();
-		
-		this.detailsTab.empty();	
+
+		this.detailsTab.empty();
 		var self = this;
-		
+
 		var ui = '';
 		ui += '<div class="box">';
 		ui += 		'<div class="box-header with-border">';
@@ -1874,7 +2092,7 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 				if (this.isNumericType(this.featureType[i].type)) {
 					var numeric_conf = this.getNumericProperties(this.featureType[i]);
 					ui += '<input disabled id="' + this.featureType[i].name + '" type="number" '+ numeric_conf+' class="form-control" value="' + feature.getProperties()[this.featureType[i].name] + '">';
-					
+
 				} else if (this.isDateType(this.featureType[i].type)) {
 					var dbDate = feature.getProperties()[this.featureType[i].name];
 					if (dbDate != null) {
@@ -1885,8 +2103,8 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 						var dateformat = this.getDateProperties(this.featureType[i]);
 						ui += '<input disabled id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="'+dateformat+'" value="">';
 					}
-					
-					
+
+
 				} else if (this.isStringType(this.featureType[i].type)) {
 					var value = feature.getProperties()[this.featureType[i].name];
 					if (this.featureType[i].name.startsWith("form_")) {
@@ -1899,7 +2117,7 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 						ui += '<input disabled id="' + this.featureType[i].name + '" type="checkbox" class="checkbox" checked>';
 					} else {
 						ui += '<input disabled id="' + this.featureType[i].name + '" type="checkbox" class="checkbox">';
-					}				
+					}
 				}
 				ui += '</div>';
 			}
@@ -1910,15 +2128,15 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 		ui += 			'<button id="save-feature-cancel" class="btn btn-default">' + gettext('Cancel') + '</button>';
 		ui += 		'</div>';
 		ui += '</div>';
-		
+
 		this.detailsTab.append(ui);
 		$.gvsigOL.controlSidebar.open();
-		
+
 		$('.form-link-open').each(function () {
 			var field_name = $(this).attr("data-orig");
 			var feature_id = $(this).attr("data-value");
 			var self = $(this);
-			$.getJSON("/gvsigonline/forms/get_form_link/", 
+			$.getJSON("/gvsigonline/forms/get_form_link/",
 					{
 					'field_name': field_name,
 					'feature_id': feature_id
@@ -1926,23 +2144,23 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 						if("token" in data && data["token"].length > 0){
 							$("#"+field_name).val(data["token"]);
 							self.attr("data-value", data["token"]);
-							
+
 						}
 						if("url" in data && data["url"].length > 0){
 							self.attr("href", data["url"]);
 						}
-				
+
 			}).fail(function() {
 			});
 		});
-		
+
 		$('#remove-feature').on('click', function () {
 			var transaction = self.transactWFS('delete', feature);
 			if (transaction.success) {
 				var deleted = self.resourceManager.deleteResources(feature);
 				if (deleted) {
 					$('.form-link-open').each(function () {
-						$.getJSON("/gvsigonline/forms/delete_form_link/", 
+						$.getJSON("/gvsigonline/forms/delete_form_link/",
 								{
 								'field_name': $(this).attr("data-orig"),
 								'feature_id': $(this).attr("data-value")
@@ -1956,14 +2174,14 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 					self.selectedLayer.getSource().updateParams({"time": Date.now()});
 					self.showLayersTab();
 				}
-			}		
+			}
 		});
-		
+
 		$('#save-feature-cancel').on('click', function () {
 			self.removeInteraction.getFeatures().clear();
 			self.showLayersTab();
 		});
-	
+
 	}
 
 };
@@ -1979,7 +2197,7 @@ EditionBar.prototype.transactWFS = function(p,f) {
 	var node;
 
 	var feat = this.verifyGeometryField(f);
-	
+
 	switch(p) {
 		case 'delete':
 			node = this.formatWFS.writeTransaction(null,null,[feat],this.formatGML);
@@ -2014,7 +2232,7 @@ EditionBar.prototype.transactWFS = function(p,f) {
 				/* Trigger a bounding box recalculating after insertions or
 				 * updates to ensure the bounding box of the service covers
 				 * all the layer geometries.
-				 * 
+				 *
 				 * Avoid using it on deletions as triggering
 				 * an update on an empty layer will produce incorrect
 				 * bounding boxes.
@@ -2026,7 +2244,7 @@ EditionBar.prototype.transactWFS = function(p,f) {
 					console.error(e);
 				}
 			}
-			
+
 		} catch (err) {
 			$('#edition-error').empty();
 			var ui = '';
@@ -2053,9 +2271,9 @@ EditionBar.prototype.transactWFS = function(p,f) {
 			$('#edition-error').append(ui);
 			success = false;
 		}
-		
+
 	});
-	
+
 	return {
 		success: success,
 		fid: fid
@@ -2064,7 +2282,7 @@ EditionBar.prototype.transactWFS = function(p,f) {
 
 /**
  * Triggers an update of the bounding box of the service.
- * 
+ *
  */
 EditionBar.prototype.updateServiceBoundingBox = function(workspace,layerName) {
 	$.ajax({
@@ -2128,12 +2346,12 @@ EditionBar.prototype.verifyGeometryField = function(feature) {
 		if (this.isGeomType(this.featureType[i].type)) {
 			featureTypeGeometryName = this.featureType[i].name;
 		}
-			
+
 	}
-	
+
 	if (feature.getGeometryName() == featureTypeGeometryName) {
 		return feature;
-		
+
 	} else {
 		var props = feature.getProperties();
 		props[featureTypeGeometryName] = props[feature.getGeometryName()];
@@ -2142,6 +2360,6 @@ EditionBar.prototype.verifyGeometryField = function(feature) {
     	feature.setProperties(props);
 	}
 	feature.setGeometryName(featureTypeGeometryName);
-	
+
 	return feature;
 };
