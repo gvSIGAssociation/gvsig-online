@@ -598,7 +598,7 @@ EditionBar.prototype.showInfo = function(evt, layer, features){
 			var item_shown = false;
 			var selectedLayer = layer;
 
-			var feature_id = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+selectedLayer.title +"."+features[i].getId() + "</span>";
+			var feature_id = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+features[i].getId() + "</span>";
 			feature_id += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext('More element info')+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span></div><br />';
 			feature_id += "<br />";
 
