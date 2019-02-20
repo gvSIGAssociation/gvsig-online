@@ -806,14 +806,24 @@ EditionBar.prototype.addModifyInteraction = function() {
 					self.revertEditedFeature();
 				}
 
-				var features = [];
-		        self.map.forEachFeatureAtPixel(evt.mapBrowserEvent.pixel, function(feature, layer) {
-		        	if(layer.workspace == self.selectedLayer.workspace && layer.name == self.selectedLayer.name){
-		        		features.push(feature);
-		        	}
-		        });
-		        if(features.length > 0){
-		        	self.showInfo(evt, self.selectedLayer, features)
+				var selectedFeatures = [];
+//		        self.map.forEachFeatureAtPixel(evt.mapBrowserEvent.pixel, function(feature, layer) {
+//		        	if(layer.workspace == self.selectedLayer.workspace && layer.name == self.selectedLayer.name){
+//		        		selectedFeatures.push(feature);
+//		        	}
+//		        });
+				var feature = new ol.Feature(
+						{geometry: new ol.geom.Point(evt.mapBrowserEvent.coordinate)}
+				);
+				var extent = feature.getGeometry().getExtent();
+				self.selectedLayer.getSource().forEachFeatureIntersectingExtent(extent, function(feature) {
+			          selectedFeatures.push(feature);
+			    });
+
+
+
+		        if(selectedFeatures.length > 0){
+		        	self.showInfo(evt, self.selectedLayer, selectedFeatures)
 		        }
 				//self.editFeatureForm(evt.selected[0]);
 				$("#jqueryEasyOverlayDiv").css("display", "none");
