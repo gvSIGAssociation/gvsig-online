@@ -585,34 +585,9 @@ EditionBar.prototype.showInfo = function(evt, layer, features){
 
 	var html = '<ul class="products-list product-list-in-box">';
 
-	var srs = $("#custom-mouse-position-projection").val();
-	var unit =  $('#custom-mouse-position-projection option:selected').attr('data-attr');
-
-	var wgs84 = ol.proj.transform(evt.mapBrowserEvent.coordinate, 'EPSG:3857', srs)
-
-	var coord_1 = wgs84[1].toFixed(5).replace(/0{0,2}$/, "");
-	var coord_2 = wgs84[0].toFixed(5).replace(/0{0,2}$/, "");
-
-	if(unit == "degrees"){
-		if(wgs84[1]<0){
-			coord_1 = Math.abs(wgs84[1]).toFixed(5).replace(/0{0,2}$/, "") + "S";
-		}else{
-			coord_1 = wgs84[1].toFixed(5).replace(/0{0,2}$/, "") + "N";
-		}
-
-		if(wgs84[0]<0){
-			coord_2 = Math.abs(wgs84[0]).toFixed(5).replace(/0{0,2}$/, "") + "W";
-		}else{
-			coord_2 = wgs84[0].toFixed(5).replace(/0{0,2}$/, "") + "E";
-		}
-
-		var aux = coord_2;
-		coord_2 = coord_1;
-		coord_1 = aux;
-	}
 	html += '<li class="item">';
 	html += 	'<div class="feature-info">';
-	html += 		'<span style="font-size: 12px;">' + gettext('Coordinates') + ' ('+srs+'):</span>' + '<br /><span style="font-weight: bold; font-size: 12px;"> ' + coord_2 + ', '+ coord_1 + '</span>';
+	html += 		'<span style="font-size: 12px;">' + gettext('Select feature to edit') + '</span>' + '<br />';
 	html += 	'</div>';
 	html += '</li>';
 
@@ -740,30 +715,6 @@ EditionBar.prototype.showInfo = function(evt, layer, features){
 			html += 		'<div href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;padding: 5px;">' + feature_id + '</div>';
 			html += 	'</div>';
 			html += '</li>';
-
-//			if (features[i].crs) {
-//				var newFeature = new ol.Feature();
-//		  		var sourceCRS = 'EPSG:' + features[i].crs.properties.name.split('::')[1];
-//		  		var projection = new ol.proj.Projection({
-//		    		code: sourceCRS,
-//		    	});
-//		    	ol.proj.addProjection(projection);
-//		    	if (features[i].feature.geometry.type == 'Point') {
-//		    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates));
-//		    	} else if (features[i].feature.geometry.type == 'MultiPoint') {
-//		    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates[0]));
-//		    	} else if (features[i].feature.geometry.type == 'LineString' || features[i].feature.geometry.type == 'MultiLineString') {
-//		    		newFeature.setGeometry(new ol.geom.MultiLineString([features[i].feature.geometry.coordinates[0]]));
-//		    	} else if (features[i].feature.geometry.type == 'Polygon' || features[i].feature.geometry.type == 'MultiPolygon') {
-//		    		newFeature.setGeometry(new ol.geom.MultiPolygon(features[i].feature.geometry.coordinates));
-//		    	}
-//		    	newFeature.setProperties(features[i].feature.properties);
-//				newFeature.setId(fid);
-//
-//				newFeature.getGeometry().transform(projection, 'EPSG:3857');
-//				this.source.addFeature(newFeature);
-//			}
-
 	}
 	html += '</ul>';
 	this.popup.show(evt.mapBrowserEvent.coordinate, '<div class="popup-wrapper getfeatureinfo-popup">' + html + '</div>');
