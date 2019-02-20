@@ -618,12 +618,12 @@ EditionBar.prototype.showInfo = function(evt, layer, features){
 
 	for (var i in features) {
 
-			var fid = features[i].id;
+			var fid = features[i].getId();
 			var is_first_configured = true;
 			var item_shown = false;
 			var selectedLayer = layer;
 
-			var feature_id = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+selectedLayer.title +"."+features[i].id + "</span>";
+			var feature_id = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+selectedLayer.title +"."+features[i].getId() + "</span>";
 			feature_id += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext('More element info')+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span></div><br />';
 			feature_id += "<br />";
 
@@ -776,7 +776,7 @@ EditionBar.prototype.showInfo = function(evt, layer, features){
 		console.log("self.showMoreInfo("+this.parentNode.parentNode.dataset.fid+", features, 'features');");
 		var feat_aux = null;
 		for(var i=0; i<features.length; i++){
-			if(features[i].id == this.parentNode.parentNode.dataset.fid){
+			if(features[i].getId() == this.parentNode.parentNode.dataset.fid){
 				feat_aux = features[i];
 			}
 		}
