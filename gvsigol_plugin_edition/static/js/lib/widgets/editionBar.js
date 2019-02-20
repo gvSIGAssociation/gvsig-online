@@ -757,6 +757,7 @@ EditionBar.prototype.addModifyInteraction = function() {
 		wrapX: false,
 		hitTolerance: 20,
 		condition: ol.events.condition.click,
+		multi: true,
 		style: new ol.style.Style({
 	        image:
 		        new ol.style.Circle({
@@ -805,27 +806,11 @@ EditionBar.prototype.addModifyInteraction = function() {
 				if (self.lastEditedFeature != null) {
 					self.revertEditedFeature();
 				}
-
-				var selectedFeatures = [];
-//		        self.map.forEachFeatureAtPixel(evt.mapBrowserEvent.pixel, function(feature, layer) {
-//		        	if(layer.workspace == self.selectedLayer.workspace && layer.name == self.selectedLayer.name){
-//		        		selectedFeatures.push(feature);
-//		        	}
-//		        });
-				var feature = new ol.Feature(
-						{geometry: new ol.geom.Point(evt.mapBrowserEvent.coordinate)}
-				);
-				var extent = feature.getGeometry().getExtent();
-				self.selectedLayer.getSource().forEachFeatureIntersectingExtent(extent, function(feature) {
-			          selectedFeatures.push(feature);
-			    });
-
-
-
-		        if(selectedFeatures.length > 0){
-		        	self.showInfo(evt, self.selectedLayer, selectedFeatures)
+		        if(selectedFeatures.length > 1){
+		        	self.showInfo(evt, self.selectedLayer, evt.selected)
+		        }else{
+		        	self.editFeatureForm(evt.selected[0]);
 		        }
-				//self.editFeatureForm(evt.selected[0]);
 				$("#jqueryEasyOverlayDiv").css("display", "none");
 			}, this);
 
