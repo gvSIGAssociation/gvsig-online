@@ -244,8 +244,8 @@ print.prototype.createPrintJob = function(template) {
 					if (mapLayers[i].getSource().getStyle()) {
 						layer['styles'] = [mapLayers[i].getSource().getStyle()];
 					}
-					if (mapLayers[i].getSource().getDimemsions() && "TIME" in mapLayers[i].getSource().getDimemsions()) {
-						layer['customParams']['TIME'] = mapLayers[i].getSource().getDimemsions()['TIME'];
+					if (mapLayers[i].getSource().getDimensions() && "TIME" in mapLayers[i].getSource().getDimensions()) {
+						layer['customParams']['TIME'] = mapLayers[i].getSource().getDimensions()['TIME'];
 					}
 					if (mapLayers[i].isLayerGroup) {
 						layer['layers'] = [mapLayers[i].layer_name];
