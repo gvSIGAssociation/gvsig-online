@@ -28,16 +28,16 @@ var print = function(printProvider, conf, map) {
 	this.printProvider = printProvider;
 	this.conf = conf;
 	this.map = map;
-	
+
 	this.id = "print";
 	this.$button = $("#print");
-	
+
 	this.detailsTab = $('#details-tab');
-	
+
 	this.lastAngle = 0;
 	this.extentLayer = null;
 	this.capabilities = null;
-	
+
 	var this_ = this;
 	var handler = function(e) {
 		this_.handler(e);
@@ -64,26 +64,26 @@ print.prototype.deactivable = true;
 print.prototype.handler = function(e) {
 	e.preventDefault();
 	var self = this;
-	
+
 	if (!this.active) {
 		this.extentLayer = new ol.layer.Vector({
 			source: new ol.source.Vector()
 		});
 		this.map.addLayer(this.extentLayer);
-		
+
 		this.showDetailsTab();
 		this.detailsTab.empty();
-		
+
 		this.capabilities = this.getCapabilities('a4_landscape');
 		this.renderPrintExtent(this.capabilities.layouts[0].attributes[3].clientInfo);
 		var eventKey = this.map.getView().on('propertychange', function() {
 	        self.extentLayer.getSource().clear();
 	        self.lastAngle = 0;
-	        self.renderPrintExtent(self.capabilities.layouts[0].attributes[3].clientInfo); 
+	        self.renderPrintExtent(self.capabilities.layouts[0].attributes[3].clientInfo);
 	    });
-		
+
 		var templates = this.getTemplates();
-		
+
 		var ui = '';
 		ui += '<div class="box box-default">';
 		ui += 	'<div class="box-header with-border">';
@@ -127,7 +127,7 @@ print.prototype.handler = function(e) {
 		ui += 			'<div class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Legal warning') + '</label>';
 		ui += 				'<textarea class="form-control" name="print-legal" id="print-legal" rows="5">' + this.printProvider.legal_advice + '</textarea>';
-		ui += 			'</div>';		
+		ui += 			'</div>';
 		ui += 		'</div>';
 		ui += 	'</div>';
 		ui += 	'<div class="box-footer clearfix">';
@@ -135,19 +135,19 @@ print.prototype.handler = function(e) {
 		ui += 		'<a href="javascript:void(0)" id="cancel-print" class="btn btn-sm btn-danger btn-flat pull-right margin-r-10"><i class="fa fa-times margin-r-5"></i>' + gettext('Cancel') + '</a>';
 		ui += 	'</div>';
 		ui += '</div>';
-		
+
 		this.detailsTab.append(ui);
 		$.gvsigOL.controlSidebar.open();
-		
+
 		$('#print-template').on('change', function(e) {
 			var template = $('#print-template').val();
 			self.capabilities = self.getCapabilities(template);
-			
+
 			self.extentLayer.getSource().clear();
 	        self.lastAngle = 0;
 	        self.renderPrintExtent(self.capabilities.layouts[0].attributes[3].clientInfo);
 		});
-		
+
 		$('#print-rotation').on('change', function(e) {
 			var feature = self.extentLayer.getSource().getFeatures()[0];
 		    var center = self.map.getView().getCenter();
@@ -158,7 +158,7 @@ print.prototype.handler = function(e) {
 			self.extentLayer.getSource().dispatchEvent('change');
 			self.lastAngle = this.value;
 		});
-		
+
 		$('#accept-print').on('click', function () {
 			var template = $('#print-template').val();
 			if (template != null) {
@@ -167,9 +167,9 @@ print.prototype.handler = function(e) {
 			} else {
 				messageBox.show('warning', gettext('You must select a template'));
 			}
-			
+
 		});
-		
+
 		$('#cancel-print').on('click', function () {
 			ol.Observable.unByKey(eventKey);
 			self.removeExtentLayer();
@@ -177,7 +177,7 @@ print.prototype.handler = function(e) {
 			self.capabilities = null;
 			self.active = false;
 		});
-		
+
 		this.active = true;
 	}
 };
@@ -191,37 +191,96 @@ print.prototype.createPrintJob = function(template) {
 	var legalWarning = $('#print-legal').val();
 	var rotation = $('#print-rotation').val();
 	var dpi = $('#print-dpi').val();
-	
+
 	var mapLayers = this.map.getLayers().getArray();
 	var printLayers = new Array();
 	var legends = new Array();
 	for (var i=0; i<mapLayers.length; i++) {
 		if (!mapLayers[i].baselayer && mapLayers[i].layer_name != 'plg_catastro' && !(mapLayers[i] instanceof ol.layer.Vector)) {
 			if (mapLayers[i].getVisible()) {
-				var layer = {
-					//"baseURL": "http://localhost/gs-local/ws_gestion/wms",
-					"baseURL": mapLayers[i].wms_url_no_auth,
-			  	    "opacity": mapLayers[i].getOpacity(),
-			  	    "type": "WMS",
-		  			"imageFormat": "image/png",
-		  			"customParams": {
-		  				"TRANSPARENT": "true"
-		  			},
-					"mergeableParams": {},
-		  	    };
-				if (mapLayers[i].getSource().getParams()['STYLES']) {
-					layer['styles'] = [mapLayers[i].getSource().getParams()['STYLES']];
+				var layer = null;
+				if(mapLayers[i].getSource() instanceof ol.source.WMTS){
+					var initialScale = 559082263.950892933;
+					var scale = 0;
+					var matrices = new Array();
+					var tileGrid = baseLayers[i].getSource().getTileGrid();
+					var lastSize = 1;
+					for (var z = 0; z < 18; ++z) {
+						var matrixSize = new Array();
+						if (z == 0) {
+							matrixSize.push(1);
+							matrixSize.push(1);
+							scale = initialScale;
+
+						} else if (z >= 1) {
+							lastSize = lastSize*2;
+							matrixSize.push(lastSize*2);
+							matrixSize.push(lastSize*2);
+							scale = scale / 2;
+						}
+						matrices.push({
+				            "identifier": z,
+				            "matrixSize": matrixSize,
+				            "scaleDenominator": scale,
+				            //"tileSize": [tileGrid.getTileSize(), tileGrid.getTileSize()],
+				            "tileSize": tileGrid.tmpSize_,
+				            "topLeftCorner": [-2.003750834E7, 2.0037508E7]
+						});
+					}
+
+					layer = {
+							"type": "WMTS",
+					        "baseURL":mapLayers[i].getSource().getUrls()[0],
+					        "opacity": 1.0,
+					        "layer": mapLayers[i].getSource().getLayer(),
+					        "version": "1.0.0",
+					        "requestEncoding": "KVP",
+					        "dimensions": null,
+					        "dimensionParams": {},
+					        "matrixSet": mapLayers[i].getSource().getMatrixSet(),
+					        "matrices": matrices,
+					        "imageFormat": "image/png"
+				  	    };
+					if (mapLayers[i].getSource().getStyle()) {
+						layer['styles'] = [mapLayers[i].getSource().getStyle()];
+					}
+					if (mapLayers[i].getSource().getDimemsions() && "TIME" in mapLayers[i].getSource().getDimemsions()) {
+						layer['customParams']['TIME'] = mapLayers[i].getSource().getDimemsions()['TIME'];
+					}
+					if (mapLayers[i].isLayerGroup) {
+						layer['layers'] = [mapLayers[i].layer_name];
+					} else {
+						layer['layers'] = [mapLayers[i].workspace + ':' + mapLayers[i].layer_name];
+					}
+				}else{
+					layer = {
+							//"baseURL": "http://localhost/gs-local/ws_jrodrigo/wms",
+							"baseURL": mapLayers[i].wms_url_no_auth,
+					  	    "opacity": mapLayers[i].getOpacity(),
+					  	    "type": "WMS",
+				  			"imageFormat": "image/png",
+				  			"customParams": {
+				  				"TRANSPARENT": "true"
+				  			},
+							"mergeableParams": {},
+				  	    };
+					if (mapLayers[i].getSource().getParams()['STYLES']) {
+						layer['styles'] = [mapLayers[i].getSource().getParams()['STYLES']];
+					}
+					if (mapLayers[i].getSource().getParams()['TIME']) {
+						layer['customParams']['TIME'] = mapLayers[i].getSource().getParams()['TIME'];
+					}
+					if (mapLayers[i].isLayerGroup) {
+						layer['layers'] = [mapLayers[i].layer_name];
+					} else {
+						layer['layers'] = [mapLayers[i].workspace + ':' + mapLayers[i].layer_name];
+					}
 				}
-				if (mapLayers[i].getSource().getParams()['TIME']) {
-					layer['customParams']['TIME'] = mapLayers[i].getSource().getParams()['TIME'];
+
+				if(layer){
+					printLayers.push(layer);
 				}
-				if (mapLayers[i].isLayerGroup) {
-					layer['layers'] = [mapLayers[i].layer_name];
-				} else {
-					layer['layers'] = [mapLayers[i].workspace + ':' + mapLayers[i].layer_name];
-				}
-				printLayers.push(layer);
-				
+
 				var legend = {
 					"name": mapLayers[i].title,
 		            "icons": [mapLayers[i].legend_no_auth]
@@ -231,10 +290,10 @@ print.prototype.createPrintJob = function(template) {
 			        "icons": ["http://localhost:8080/geoserver/ws_jrodrigo/wms?SERVICE=WMS&VERSION=1.1.1&layer=lista_repetidores&REQUEST=getlegendgraphic&FORMAT=image/png"]
 			    };*/
 				legends.push(legend);
-			}									
+			}
 		}
 	}
-	
+
 	var baseLayers = this.map.getLayers().getArray();
 	for (var i=0; i<baseLayers.length; i++) {
 		if (baseLayers[i].baselayer) {
@@ -248,20 +307,20 @@ print.prototype.createPrintJob = function(template) {
 						  	    "type": "OSM",
 						  	    "imageExtension": "png"
 							});
-							
+
 						} else if (baseLayers[i].getSource() instanceof ol.source.WMTS) {
 							var initialScale = 559082263.950892933;
 							var scale = 0;
 							var matrices = new Array();
-							var tileGrid = baseLayers[i].getSource().getTileGrid(); 
+							var tileGrid = baseLayers[i].getSource().getTileGrid();
 							var lastSize = 1;
-							for (var z = 0; z < 18; ++z) {						
+							for (var z = 0; z < 18; ++z) {
 								var matrixSize = new Array();
 								if (z == 0) {
 									matrixSize.push(1);
 									matrixSize.push(1);
 									scale = initialScale;
-									
+
 								} else if (z >= 1) {
 									lastSize = lastSize*2;
 									matrixSize.push(lastSize*2);
@@ -294,7 +353,7 @@ print.prototype.createPrintJob = function(template) {
 						        "matrices": matrices,
 						        "imageFormat": "image/png"
 							});
-							
+
 						} else if (baseLayers[i].getSource() instanceof ol.source.TileWMS) {
 							printLayers.push({
 								"type": "WMS",
@@ -306,7 +365,7 @@ print.prototype.createPrintJob = function(template) {
 						        	"TRANSPARENT": "true"
 						        }
 							});
-							
+
 						} else if (baseLayers[i].getSource() instanceof ol.source.XYZ) {
 							printLayers.push({
 								"baseURL": baseLayers[i].getSource().getUrls()[0],
@@ -355,7 +414,7 @@ print.prototype.createPrintJob = function(template) {
 	  	},
 	  	error: function(){}
 	});
-	
+
 };
 
 print.prototype.getCurrentScale = function (dpi) {
@@ -455,7 +514,7 @@ print.prototype.renderPrintExtent = function(clientInfo) {
 /**
  * TODO
  */
-print.prototype.deactivate = function() {			
+print.prototype.deactivate = function() {
 	this.$button.removeClass('button-active');
 	this.active = false;
 };
@@ -470,7 +529,7 @@ print.prototype.showDetailsTab = function(p,f) {
 /**
  * @param {Event} e Browser event.
  */
-print.prototype.removeExtentLayer = function() {	
+print.prototype.removeExtentLayer = function() {
 	this.extentLayer.getSource().clear();
 	this.map.removeLayer(this.extentLayer);
 
