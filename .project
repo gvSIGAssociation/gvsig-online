@@ -4,6 +4,11 @@
 	<comment></comment>
 	<projects>
 		<project>app_dev</project>
+		<project>plugin_catalog</project>
+		<project>plugin_edition</project>
+		<project>plugin_geocoding</project>
+		<project>plugin_sync</project>
+		<project>plugin_trip_planner</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
