@@ -10,7 +10,7 @@ gisdata==0.5.4
 future==0.17.1
 
 ## auth
-python-ldap==2.4.25
+python-ldap==2.5.2
 django-auth-ldap==1.2.7
 
 ## django rest framework
@@ -54,7 +54,7 @@ argparse==1.2.1
 wsgiref==0.1.2
 
 cmislib==0.5.1
-lxml==3.7.2
+lxml==4.3.0
 
 # Cron para aguas de valencia
 schedule==0.4.2
