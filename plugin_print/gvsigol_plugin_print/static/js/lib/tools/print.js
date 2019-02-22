@@ -231,22 +231,25 @@ print.prototype.createPrintJob = function(template) {
 					layer = {
 							"type": "WMTS",
 					        "baseURL":mapLayers[i].getSource().getUrls()[0],
-					        "opacity": 1.0,
+					        "opacity": mapLayers[i].getOpacity(),
 					        "layer": mapLayers[i].getSource().getLayer(),
 					        "version": "1.0.0",
 					        "requestEncoding": "KVP",
-					        "dimensions": null,
+					        "dimensions": mapLayers[i].getSource().getDimensions(),
 					        "dimensionParams": {},
 					        "matrixSet": mapLayers[i].getSource().getMatrixSet(),
 					        "matrices": matrices,
+					        "customParams": {
+				  				"TRANSPARENT": "true"
+				  			},
 					        "imageFormat": "image/png"
 				  	    };
 					if (mapLayers[i].getSource().getStyle()) {
 						layer['styles'] = [mapLayers[i].getSource().getStyle()];
 					}
-					if (mapLayers[i].getSource().getDimensions() && "TIME" in mapLayers[i].getSource().getDimensions()) {
-						layer['customParams']['TIME'] = mapLayers[i].getSource().getDimensions()['TIME'];
-					}
+//					if (mapLayers[i].getSource().getDimensions() && "TIME" in mapLayers[i].getSource().getDimensions()) {
+//						layer['customParams']['TIME'] = mapLayers[i].getSource().getDimensions()['TIME'];
+//					}
 //					if (mapLayers[i].isLayerGroup) {
 //						layer['layers'] = [mapLayers[i].layer_name];
 //					} else {
