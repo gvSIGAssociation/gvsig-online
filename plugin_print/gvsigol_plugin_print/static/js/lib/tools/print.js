@@ -247,11 +247,11 @@ print.prototype.createPrintJob = function(template) {
 					if (mapLayers[i].getSource().getDimensions() && "TIME" in mapLayers[i].getSource().getDimensions()) {
 						layer['customParams']['TIME'] = mapLayers[i].getSource().getDimensions()['TIME'];
 					}
-					if (mapLayers[i].isLayerGroup) {
-						layer['layers'] = [mapLayers[i].layer_name];
-					} else {
-						layer['layers'] = [mapLayers[i].workspace + ':' + mapLayers[i].layer_name];
-					}
+//					if (mapLayers[i].isLayerGroup) {
+//						layer['layers'] = [mapLayers[i].layer_name];
+//					} else {
+//						layer['layers'] = [mapLayers[i].workspace + ':' + mapLayers[i].layer_name];
+//					}
 				}else{
 					layer = {
 							//"baseURL": "http://localhost/gs-local/ws_jrodrigo/wms",
