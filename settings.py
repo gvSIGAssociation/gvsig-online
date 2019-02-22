@@ -27,6 +27,7 @@
 import os
 import ldap
 import django.conf.locale
+from django.conf import settings
 from django_auth_ldap.config import LDAPSearch
 from django.utils.translation import ugettext_lazy as _
 from django.core.files.storage import FileSystemStorage
@@ -43,7 +44,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '##SECRET_KEY##'
+SECRET_KEY = 'q-#1q+!^2@4#3@hgmrgne%1nh4q4(@wpi-x(y^1^1cqnz^7d(g'
 if len(SECRET_KEY) == 14:
     # It has not been replaced by deployment scripts
     # Generate a random one
@@ -102,6 +103,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
+GDAL_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\gdal202.dll'
+
+
 
 # Application definition
 
@@ -123,14 +128,15 @@ INSTALLED_APPS = [
     'gvsigol_plugin_edition',
     #'gvsigol_plugin_worldwind',
     #'gvsigol_plugin_shps_folder',
-    #'gvsigol_plugin_geocoding',
+    'gvsigol_plugin_geocoding',
     #'gvsigol_plugin_etl',
     #'gvsigol_plugin_form',
-    #'gvsigol_plugin_sync',
+    'gvsigol_plugin_sync',
     #'gvsigol_plugin_catastro',
     #'gvsigol_plugin_alfresco',
     #'gvsigol_plugin_print',
     'gvsigol_plugin_catalog',
+    'gvsigol_plugin_trip_planner',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -146,7 +152,7 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CRONTAB_ACTIVE = False
+CRONTAB_ACTIVE = True
 ROOT_URLCONF = 'gvsigol.urls'
 
 TEMPLATES = [
@@ -291,7 +297,7 @@ SITE_ID=1
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 BASE_URL = 'https://localhost'
-MEDIA_ROOT = '/Library/WebServer/Documents/media/'
+MEDIA_ROOT = 'D:/dev/Apache24/media/'
 MEDIA_URL = 'http://localhost/media/'
 STATIC_URL = '/gvsigonline/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
@@ -322,7 +328,7 @@ GVSIGOL_USERS_CARTODB = {
 
 PUBLIC_VIEWER = True
 
-GEOSERVER_PATH = '/gs-local'
+GEOSERVER_PATH = '/geoserver'
 FRONTEND_URL = 'http://localhost'
 
 GVSIGOL_SERVICES = {
@@ -349,8 +355,8 @@ GVSIGOL_SERVICES = {
     # NOTE: we are migrating gdal_tools to the external library pygdaltools
     # OGR path is only necessary if different from the one defined on gdal_tools.OGR2OGR_PATH
     # In the future we will only need GDALTOOLS_BASEPATH variable
-    'OGR2OGR_PATH': '/usr/bin/ogr2ogr',
-    'GDALTOOLS_BASEPATH': '/usr/bin'
+    'OGR2OGR_PATH': 'C:/OSGeo4W64/bin/ogr2ogr',
+    'GDALTOOLS_BASEPATH': 'C:/OSGeo4W64/bin'
 }
 
 TILE_SIZE = 256
