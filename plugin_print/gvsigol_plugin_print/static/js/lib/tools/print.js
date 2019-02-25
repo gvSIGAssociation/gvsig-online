@@ -219,7 +219,7 @@ print.prototype.createPrintJob = function(template) {
 							scale = scale / 2;
 						}
 						matrices.push({
-				            "identifier": z,
+				            "identifier": tileGrid.getMatrixId(z),
 				            "matrixSize": matrixSize,
 				            "scaleDenominator": scale,
 				            //"tileSize": [tileGrid.getTileSize(), tileGrid.getTileSize()],
@@ -335,7 +335,7 @@ print.prototype.createPrintJob = function(template) {
 									tileSize = tileGrid.getTileSize();
 								}
 								matrices.push({
-						            "identifier": z,
+						            "identifier": tileGrid.getMatrixId(z),
 						            "matrixSize": matrixSize,
 						            "scaleDenominator": scale,
 						            "tileSize": [tileSize, tileSize],
