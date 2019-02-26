@@ -26,19 +26,25 @@ from gvsigol import settings
 from django.utils.translation import ugettext as _
 import json
 
-class GTFSProvider(models.Model):   
+class GTFSProvider(models.Model):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=250, null=True, blank=True)
     url = models.URLField(null=False, blank=False, max_length=400)
-    
+
     #params = models.TextField()
-    
+
     #table_name = models.CharField(max_length=100, null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
     last_update = models.DateTimeField(auto_now_add=False, null=True, blank=True)
-    
-  
-     
-    
+
+
+class APPMobileConfig(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=250, null=True, blank=True)
+    params = models.TextField()
+
+
+
+
 
