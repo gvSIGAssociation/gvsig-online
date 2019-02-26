@@ -22,7 +22,7 @@
 
 						{% if is_saved %}
 						<div id="message-div-ok" style="">
-							<p>Mobile configuration saved successfully</p>
+							<p>{% trans "Mobile configuration saved successfully" %}</p>
 						</div>
 						{% endif %}
 
@@ -126,23 +126,23 @@
 	function is_valid(params){
 		var msgs = [];
 		if(params["url_contact"].length == 0){
-			msgs.push("Url contact can't be empty");
+			msgs.push(gettext("Url contact can't be empty"));
 		}else{
 			if(!is_valid_url(params["url_contact"])){
-				msgs.push("Url contact hasn't correct format (" + params["url_contact"] +")");
+				msgs.push(gettext("Url contact hasn't correct format") + " (" + params["url_contact"] +")");
 			}
 		}
 
 		for(var i=0; i<params["base_layers"].length; i++){
 			var base_layer = params["base_layers"][i];
 			if(base_layer["title"].length == 0){
-				msgs.push("Base layer nº" + (i+1) +": title can't be empty");
+				msgs.push(gettext("Base layer") + " nº" + (i+1) +": "+ gettext("title can't be empty"));
 			}
 			if(base_layer["url"].length == 0){
-				msgs.push("Base layer nº" + (i+1) +": url can't be empty");
+				msgs.push(gettext("Base layer") + " nº" + (i+1) +": "+ gettext("url can't be empty"));
 			}else{
 				if(!is_valid_url(base_layer["url"])){
-					msgs.push("Base layer nº" + (i+1) +": url hasn't correct format (" + base_layer["url"] + ")");
+					msgs.push(gettext("Base layer") + " nº" + (i+1) +": "+ gettext("url hasn't correct format") +" (" + base_layer["url"] + ")");
 				}
 			}
 		}
@@ -155,8 +155,8 @@
 				"<div class=\"base_layer_item row\">"+
 
 				"<div class=\"col-md-1 form-group\"><input type=\"radio\" class=\"base_layer_check\" name=\"base_layer_check\"></div>"+
-				"<div class=\"col-md-4 form-group\"><input type=\"text\" class=\"form-control base_layer_name\" placeHolder=\"Insert a base_layer title\" name=\"base_layer_name\" value=\"\"></div>"+
-				"<div class=\"col-md-6 form-group\"><input type=\"text\" class=\"col-md-4 form-group form-control base_layer_url\" placeHolder=\"Insert a base_layer url\" name=\"base_layer_url\" value=\"\"></div>"+
+				"<div class=\"col-md-4 form-group\"><input type=\"text\" class=\"form-control base_layer_name\" placeHolder=\""+ gettext("Insert a base_layer title") + "\" name=\"base_layer_name\" value=\"\"></div>"+
+				"<div class=\"col-md-6 form-group\"><input type=\"text\" class=\"col-md-4 form-group form-control base_layer_url\" placeHolder=\""+ gettext("Insert a base_layer url") + "\" name=\"base_layer_url\" value=\"\"></div>"+
 				"<div class=\"col-md-1 form-group\"><i class=\"fa fa-times base_layer_remove\" aria-hidden=\"true\"></i></div>"+
 				"</div>"
 		);
@@ -199,8 +199,8 @@
 			$("#base_layer_div").append(
 					"<div class=\"base_layer_item row\">"+
 					"<div class=\"col-md-1 form-group\"><input type=\"radio\" class=\"base_layer_check\" name=\"base_layer_check\""+ checked +"></div>"+
-					"<div class=\"col-md-4 form-group\"><input type=\"text\" class=\"form-control base_layer_name\" placeHolder=\"Insert a base_layer title\" name=\"base_layer_name\" value=\""+base_layer["title"]+"\"></div>"+
-					"<div class=\"col-md-6 form-group\"><input type=\"text\" class=\"form-control base_layer_url\" placeHolder=\"Insert a base_layer url\" name=\"base_layer_url\" value=\""+base_layer["url"]+"\"></div>"+
+					"<div class=\"col-md-4 form-group\"><input type=\"text\" class=\"form-control base_layer_name\" placeHolder=\""+ gettext("Insert a base_layer title") + "\" name=\"base_layer_name\" value=\""+base_layer["title"]+"\"></div>"+
+					"<div class=\"col-md-6 form-group\"><input type=\"text\" class=\"form-control base_layer_url\" placeHolder=\""+ gettext("Insert a base_layer url") + "\" name=\"base_layer_url\" value=\""+base_layer["url"]+"\"></div>"+
 					"<div class=\"col-md-1 form-group\"><i class=\"fa fa-times base_layer_remove\" aria-hidden=\"true\"></i></div>"+
 					"</div>"
 			);
@@ -214,13 +214,7 @@
 	}
 
 	$().ready(function() {
-// 		var config = {};
-// 		if("{{ params }}".length > 0){
-// 			config = JSON.parse({{params}});
-// 		}
-
 		var config = {{ params|safe }};
-
 
 		if(!("url_contact" in config)){
 			config["url_contact"] = "";
@@ -231,8 +225,6 @@
 		}
 
 		loadConfig(config);
-
-		console.log("Config:" + JSON.stringify(config));
 	});
 </script>
 {% endblock %}

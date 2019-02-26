@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-04-18 08:21+0200\n"
+"POT-Creation-Date: 2019-02-26 13:36+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,350 +18,208 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: gvsigol_plugin_geocoding/forms_services.py:36
-#: gvsigol_plugin_geocoding/forms_services.py:56
-#: gvsigol_plugin_geocoding/templates/provider_add.html:43
-#: gvsigol_plugin_geocoding/templates/provider_list.html:23
-#: gvsigol_plugin_geocoding/templates/provider_update.html:42
-msgid "Type"
+#: forms_services.py:35 forms_services.py:47 forms_services.py:66
+#: templates/app_mobile_config_update.html:51
+#: templates/gtfs_provider_add.html:43 templates/gtfs_provider_list.html:22
+#: templates/gtfs_provider_update.html:50
+msgid "Name"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/forms_services.py:38
-#: gvsigol_plugin_geocoding/forms_services.py:58
-#: gvsigol_plugin_geocoding/templates/provider_add.html:50
-#: gvsigol_plugin_geocoding/templates/provider_update.html:50
-msgid "Workspace"
+#: forms_services.py:36 forms_services.py:48 forms_services.py:67
+#: templates/app_mobile_config_update.html:58
+#: templates/gtfs_provider_add.html:50 templates/gtfs_provider_list.html:23
+#: templates/gtfs_provider_update.html:57
+msgid "Description"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/forms_services.py:39
-#: gvsigol_plugin_geocoding/forms_services.py:59
-msgid "Datastore"
+#: forms_services.py:37 forms_services.py:49
+#: templates/gtfs_provider_add.html:58 templates/gtfs_provider_list.html:24
+#: templates/gtfs_provider_update.html:65
+msgid "Url"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/forms_services.py:40
-#: gvsigol_plugin_geocoding/forms_services.py:60
-msgid "Resource"
+#: forms_services.py:38 forms_services.py:50
+#: templates/gtfs_provider_list.html:25 templates/gtfs_provider_update.html:72
+msgid "Active"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/forms_services.py:42
-#: gvsigol_plugin_geocoding/forms_services.py:62
-#: gvsigol_plugin_geocoding/templates/provider_list.html:22
-msgid "Id"
+#: forms_services.py:56
+msgid "Hour"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/forms_services.py:43
-#: gvsigol_plugin_geocoding/forms_services.py:63
-msgid "Text"
+#: forms_services.py:57
+msgid "Minutes"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/forms_services.py:44
-#: gvsigol_plugin_geocoding/forms_services.py:64
-msgid "Geom"
+#: forms_services.py:68
+msgid "Config"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/forms_services.py:46
-#: gvsigol_plugin_geocoding/forms_services.py:66
-#: gvsigol_plugin_geocoding/templates/provider_add.html:92
-#: gvsigol_plugin_geocoding/templates/provider_list.html:24
-#: gvsigol_plugin_geocoding/templates/provider_update.html:96
-msgid "Category"
+#: templates/app_mobile_config_update.html:14
+msgid "Update APP Mobile Config"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/forms_services.py:48
-#: gvsigol_plugin_geocoding/forms_services.py:68
-msgid "Parameters"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/settings.py:31
-#: gvsigol_plugin_geocoding/settings_template.py:31
-msgid "Servicios de Google Maps"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/settings.py:32
-#: gvsigol_plugin_geocoding/settings_template.py:32
-msgid "Servicios de Nominatim"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/settings.py:33
-#: gvsigol_plugin_geocoding/settings_template.py:33
-msgid "Cartografía de CartoCiudad"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/settings.py:34
-#: gvsigol_plugin_geocoding/settings_template.py:34
-msgid "Otras fuentes de datos"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/templates/dashboard_geocoding_menu.html:6
-msgid "Geocoding"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/templates/provider_add.html:12
-#: gvsigol_plugin_geocoding/templates/provider_list.html:13
-msgid "Add provider"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/templates/provider_add.html:14
-#: gvsigol_plugin_geocoding/templates/provider_update.html:16
+#: templates/app_mobile_config_update.html:16
+#: templates/gtfs_provider_add.html:14 templates/gtfs_provider_update.html:16
 msgid "Save"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_add.html:57
-#: gvsigol_plugin_geocoding/templates/provider_update.html:59
-msgid "Data Store"
+#: templates/app_mobile_config_update.html:25
+msgid "Mobile configuration saved successfully"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_add.html:64
-#: gvsigol_plugin_geocoding/templates/provider_update.html:67
-msgid "Resource name"
+#: templates/app_mobile_config_update.html:67
+msgid "Contact URL"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_add.html:71
-#: gvsigol_plugin_geocoding/templates/provider_update.html:75
-msgid "ID Field"
+#: templates/app_mobile_config_update.html:74
+msgid "Base_layers"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_add.html:78
-#: gvsigol_plugin_geocoding/templates/provider_update.html:82
-msgid "Text Field"
+#: templates/app_mobile_config_update.html:76
+msgid "Add"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_add.html:85
-#: gvsigol_plugin_geocoding/templates/provider_update.html:89
-msgid "Geom Field"
+#: templates/dashboard_trip_planner_menu.html:9
+#: templates/dashboard_trip_planner_menu.html:22
+msgid "Trip Planner"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_add.html:106
-msgid "Select image"
+#: templates/dashboard_trip_planner_menu.html:14
+#: templates/dashboard_trip_planner_menu.html:23
+msgid "Config APP Mobile"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_add.html:116
-#: gvsigol_plugin_geocoding/templates/provider_update.html:116
-msgid "Advanced params"
+#: templates/dashboard_trip_planner_menu.html:20
+msgid "Plugins"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_add.html:224
-#: gvsigol_plugin_geocoding/templates/provider_add.html:271
-#: gvsigol_plugin_geocoding/templates/provider_update.html:277
-msgid "Data store contains no resources to publish"
+#: templates/gtfs_provider_add.html:12
+msgid "Add provider"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_add.html:241
-msgid "Choose dataStore"
+#: templates/gtfs_provider_add.html:65
+msgid "isActive"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_add.html:247
-#: gvsigol_plugin_geocoding/templates/provider_add.html:293
-#: gvsigol_plugin_geocoding/templates/provider_add.html:301
-#: gvsigol_plugin_geocoding/templates/provider_add.html:346
-#: gvsigol_plugin_geocoding/templates/provider_update.html:299
-#: gvsigol_plugin_geocoding/templates/provider_update.html:307
-#: gvsigol_plugin_geocoding/templates/provider_update.html:350
-msgid "Service is unavailable"
+#: templates/gtfs_provider_list.html:11
+msgid "GTFS Providers list"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_add.html:254
-msgid "No valid workspace selected"
+#: templates/gtfs_provider_list.html:13
+msgid "Add GTFS provider"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_add.html:288
-#: gvsigol_plugin_geocoding/templates/provider_update.html:294
-msgid "Choose resource"
+#: templates/gtfs_provider_list.html:21
+msgid "Id"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_add.html:308
-#: gvsigol_plugin_geocoding/templates/provider_add.html:353
-#: gvsigol_plugin_geocoding/templates/provider_update.html:314
-#: gvsigol_plugin_geocoding/templates/provider_update.html:357
-msgid "No valid data store selected"
+#: templates/gtfs_provider_list.html:58
+msgid "Download and Rebuild Graph at:"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_add.html:323
-#: gvsigol_plugin_geocoding/templates/provider_update.html:327
-msgid "Resource contains no fields"
+#: templates/gtfs_provider_list.html:62
+msgid "Enter hour (from 0-23)"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_add.html:340
-#: gvsigol_plugin_geocoding/templates/provider_update.html:344
-msgid "Choose field"
+#: templates/gtfs_provider_list.html:67
+msgid "Enter minutes (from 0-59)"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:11
-msgid "Providers list"
+#: templates/gtfs_provider_list.html:70
+msgid "Set up cronjob"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:21
-msgid "Order"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/templates/provider_list.html:25
-msgid "Provider"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/templates/provider_list.html:39
-msgid "(Default)"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/templates/provider_list.html:62
-#: gvsigol_plugin_geocoding/templates/provider_list.html:109
+#: templates/gtfs_provider_list.html:87 templates/gtfs_provider_list.html:135
 msgid "Delete provider"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:65
+#: templates/gtfs_provider_list.html:90
 msgid "The provider will be removed, Do you want continue?"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:68
+#: templates/gtfs_provider_list.html:93
 msgid "Cancel"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:69
+#: templates/gtfs_provider_list.html:94
 msgid "Accept"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:85
+#: templates/gtfs_provider_list.html:111
 msgid "Processing request..."
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:86
+#: templates/gtfs_provider_list.html:112
 #, python-format
 msgid "Search%(sep)s"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:87
+#: templates/gtfs_provider_list.html:113
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:88
+#: templates/gtfs_provider_list.html:114
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:89
+#: templates/gtfs_provider_list.html:115
 msgid "Showing from 0 to 0 of 0 records"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:90
+#: templates/gtfs_provider_list.html:116
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:92
+#: templates/gtfs_provider_list.html:118
 msgid "Loading..."
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:93
-#: gvsigol_plugin_geocoding/templates/provider_list.html:94
+#: templates/gtfs_provider_list.html:119 templates/gtfs_provider_list.html:120
 msgid "No records available"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:96
+#: templates/gtfs_provider_list.html:122
 msgid "First"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:97
+#: templates/gtfs_provider_list.html:123
 msgid "Previous"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:98
+#: templates/gtfs_provider_list.html:124
 msgid "Next"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:99
+#: templates/gtfs_provider_list.html:125
 msgid "Last"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:102
+#: templates/gtfs_provider_list.html:128
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:103
+#: templates/gtfs_provider_list.html:129
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_list.html:113
-msgid "Update data provider"
+#: templates/gtfs_provider_list.html:139 templates/gtfs_provider_update.html:14
+msgid "Update GTFS provider"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_update.html:14
-msgid "Update provider"
+#: templates/gtfs_provider_update.html:42
+msgid "ID Field"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/templates/provider_update.html:107
-msgid "Change image?"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/templates/provider_update.html:134
-msgid "Import process status"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/templates/provider_update.html:143
-msgid "Last Update"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/templates/provider_update.html:148
-msgid "No data uplodaded"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/templates/provider_update.html:153
-msgid "Error in process"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/templates/provider_update.html:158
-msgid "No information available"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/templates/provider_update.html:164
-msgid "Indexing since"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/templates/provider_update.html:168
-#: gvsigol_plugin_geocoding/templates/provider_update.html:182
-msgid "Request"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/templates/provider_update.html:169
-#: gvsigol_plugin_geocoding/templates/provider_update.html:183
-msgid "Fetched"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/templates/provider_update.html:170
-#: gvsigol_plugin_geocoding/templates/provider_update.html:184
-msgid "Skipped"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/templates/provider_update.html:171
-#: gvsigol_plugin_geocoding/templates/provider_update.html:185
-msgid "Processed"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/templates/provider_update.html:198
-msgid "Update data"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/templates/provider_update.html:205
-msgid "Upload full data"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/templates/provider_update.html:409
-msgid "Duration"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/views.py:104 gvsigol_plugin_geocoding/views.py:238
-msgid "Error: DataStore has not a valid CartoCiudad schema (Needed , "
-msgstr ""
-
-#: gvsigol_plugin_geocoding/views.py:113
-msgid "Error: this type of provider is already added to the project"
-msgstr ""
-
-#: gvsigol_plugin_geocoding/views.py:138
+#: views.py:86
 msgid "Error: provider could not be published"
 msgstr ""
 
-#: gvsigol_plugin_geocoding/views.py:200
-msgid "Provider not found"
+#: views.py:105
+msgid "GTFS Provider not found"
 msgstr ""
