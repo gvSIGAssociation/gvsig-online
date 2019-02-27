@@ -179,7 +179,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 GVSIGOL_LDAP = {
-    'ENABLED': True,
+    'ENABLED': ##LDAP_ENABLED##,
     'HOST':'##LDAP_HOST##',
     'PORT': '##LDAP_PORT##',
     'DOMAIN': '##LDAP_ROOT_DN##',
@@ -191,7 +191,7 @@ GVSIGOL_LDAP = {
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.RemoteUserBackend',
     'django_auth_ldap.backend.LDAPBackend',
-    #'django.contrib.auth.backends.ModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
 )
 AUTH_LDAP_SERVER_URI = "ldap://##LDAP_HOST##:##LDAP_PORT##"
 AUTH_LDAP_ROOT_DN = "##LDAP_ROOT_DN##"
