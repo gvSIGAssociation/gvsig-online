@@ -124,9 +124,22 @@ class Cartociudad():
         '''
         http://localhost:8090/geocodersolr/api/geocoder/candidatesJsonp?q=casas&autocancel=true&limit=20&countrycodes=es
         '''
+        schema = 'cartociudad'
+        for provider in self.providers:
+            if provider.type == 'cartociudad':
+                params = json.loads(provider.params)
+
+                datastore_id = params["datastore_id"]
+                datastore = Datastore.objects.get(id=datastore_id)
+                connection_params = json.loads(datastore.connection_params)
+
+                if 'schema' in connection_params:
+                    schema = connection_params['schema']
+
         params = {
             'lat': coordinate[1],
-            'lon': coordinate[0]
+            'lon': coordinate[0],
+            'schema': schema
         }
 
         json_result =  self.get_json_from_url(self.urls['reverse_url'], params)
