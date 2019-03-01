@@ -25,14 +25,8 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-STATIC_URL = '/gvsigonline/static/'
 
-LAST_MODIFIED_FIELD_NAME="last_modified"
-
-URL_SOLR="##SOLR_URL##"
-DIR_SOLR_CONFIG="/var/solr/data/gvsigonline/conf/"
-FILE_DATE_CONFIG="data-config.xml"
-FILE_SOLR_CONFIG="solrconfig.xml"
-SOLR_CORE_NAME="gvsigonline"
+GTFS_CRONTAB = "2 0 * * *"
+GTFS_SCRIPT  = "pwd"
 
    
