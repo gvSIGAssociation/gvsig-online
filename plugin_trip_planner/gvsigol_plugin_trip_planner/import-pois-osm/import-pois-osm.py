@@ -3,6 +3,7 @@ import osr
 import shapely
 from shapely.geometry import Point
 import geopandas as gpd
+import requests
 import sys
 import os
 
@@ -33,7 +34,7 @@ import os
 
 
 # Usage: python import-pois-osm
-def extract_points(pbfFile):
+def extract_points(pbfFile, reverseGeocodeUrl):
     driver=ogr.GetDriverByName('OSM') # able to read .osm or .pbf files
     data = driver.Open(pbfFile)
     layer = data.GetLayer('points')
@@ -93,7 +94,22 @@ def extract_points(pbfFile):
                                         subcat = aux
 
         if subcat:
-                data_list.append([name,highway,category,subcat,shapely_geo])
+                payload = {'lon': coords[0], 'lat': coords[1]}
+                address = ' '
+                try:
+                        r = requests.get(reverseGeocodeUrl, payload)
+                        res = r.json()
+                        portalNumber = res.get('portalNumber')
+                        if 0 != portalNumber:
+                                address = '{0} {1} {2}'.format(res.get('tip_via'), res.get('address'), portalNumber)
+                        else:
+                                address = '{0} {1}'.format(res.get('tip_via'), res.get('address'))
+
+                except requests.exceptions.RequestException as e:
+                        print e
+                except ValueError as jsonErr:
+                        print jsonErr
+                data_list.append([name,highway,category,subcat,shapely_geo, address])
 
     print(len(data_list))
     # create the data source
@@ -124,6 +140,9 @@ def create_shapefile(data_list, fileDest):
         field_4 = ogr.FieldDefn("Subcat", ogr.OFTString)
         field_4.SetWidth(50)
         layer.CreateField(field_4)
+        field_5 = ogr.FieldDefn("Address", ogr.OFTString)
+        field_5.SetWidth(70)
+        layer.CreateField(field_5)
 
         # Process the text file and add the attributes and features to the shapefile
         for row in data_list:
@@ -139,6 +158,7 @@ def create_shapefile(data_list, fileDest):
                 feature.SetField("Highway", row[1])
                 feature.SetField("Category", row[2])
                 feature.SetField("Subcat", row[3])
+                feature.SetField("Address", row[5])
 
                 # create the WKT for the feature using Python string formatting
                 wkt = "POINT(%f %f)" %  (float(row[4].x) , float(row[4].y))
@@ -161,4 +181,6 @@ def create_shapefile(data_list, fileDest):
 reload(sys)
 sys.setdefaultencoding('latin1')
 
-extract_points('D:/otp/graphs/vlc/osm_area_metropolitana_01.pbf')
+reverseGeocodeUrl = 'https://trip-planner.gvsigonline.com/geocodersolr/api/geocoder/reverseGeocode' # ?lon=-0.3576982972310994&lat=39.4767836851722
+
+extract_points('D:/otp/area_metropolitana_grande.pbf', reverseGeocodeUrl)
