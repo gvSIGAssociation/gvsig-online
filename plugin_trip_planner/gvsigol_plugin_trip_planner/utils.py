@@ -36,17 +36,23 @@ def download_file(url, dstFile):
     
 
 def download_file_if_newer(url, dstFile):
-    r = requests.head(url)
-    url_time = r.headers['last-modified']
-    url_date = parsedate(url_time)
-    
-    file_time = datetime.datetime.fromtimestamp(os.path.getmtime(dstFile))
-    tz = get_localzone()
-    local_dt = tz.localize(file_time)
-    utc_dt = local_dt.astimezone(pytz.utc)
-
-    if url_date > utc_dt :
-        return download_file(url, dstFile)
-    else:
-        return False
+    try :
+        r = requests.head(url)
         
+        url_time = r.headers.getheader('Last-Modified')
+        if None == url_time :
+            return download_file(url, dstFile)
+        url_date = parsedate(url_time)
+        
+        file_time = datetime.datetime.fromtimestamp(os.path.getmtime(dstFile))
+        tz = get_localzone()
+        local_dt = tz.localize(file_time)
+        utc_dt = local_dt.astimezone(pytz.utc)
+    
+        if url_date > utc_dt :
+            return download_file(url, dstFile)
+        else:
+            return False
+    except requests.exceptions.RequestException as e:
+        print e
+        return False
