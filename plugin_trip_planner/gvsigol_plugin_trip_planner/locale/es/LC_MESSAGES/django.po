@@ -72,6 +72,10 @@ msgstr "Configuración guardada con éxito"
 msgid "Contact URL"
 msgstr "URL de formulario de contacto"
 
+#: templates/app_mobile_config_update.html:67
+msgid "Geocoder URL"
+msgstr "URL de búsqeuda de direcciones"
+
 #: templates/app_mobile_config_update.html:74
 msgid "Base_layers"
 msgstr "Capas base"
