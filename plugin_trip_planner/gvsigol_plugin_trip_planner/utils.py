@@ -39,7 +39,7 @@ def download_file_if_newer(url, dstFile):
     try :
         r = requests.head(url)
         
-        url_time = r.headers.getheader('Last-Modified')
+        url_time = r.headers['last-modified']
         if None == url_time :
             return download_file(url, dstFile)
         url_date = parsedate(url_time)
