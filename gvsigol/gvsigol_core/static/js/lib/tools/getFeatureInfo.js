@@ -28,7 +28,7 @@ var getFeatureInfo = function(map, prefix) {
 
 	this.map = map;
 	this.prefix = prefix;
-	
+
 	this.id = "get-feature-info";
 
 	var button = document.createElement('button');
@@ -38,13 +38,13 @@ var getFeatureInfo = function(map, prefix) {
 	var icon = document.createElement('i');
 	icon.setAttribute("class", "fa fa-info");
 	button.appendChild(icon);
-	
+
 	this.$button = $(button);
-	
+
 	$('#toolbar').append(button);
 
 	var this_ = this;
-  
+
 	var handler = function(e) {
 		this_.handler(e);
 	};
@@ -97,9 +97,9 @@ getFeatureInfo.prototype.handler = function(e) {
 	e.preventDefault();
 	if (this.active) {
 		this.deactivate();
-		
+
 	} else {
-		
+
 			for (var i=0; i<this.map.tools.length; i++){
 			  if (this.id != this.map.tools[i].id) {
 				  if (this.map.tools[i].deactivable == true) {
@@ -107,20 +107,20 @@ getFeatureInfo.prototype.handler = function(e) {
 				  }
 			  }
 		  }
-		  
-		
+
+
 		if (this.hasLayers()) {
 			this.popup = new ol.Overlay.Popup();
 			this.map.addOverlay(this.popup);
-        	
+
 			this.$button.addClass('button-active');
 			this.active = true;
 			this.$button.trigger('control-active', [this]);
-	    	
+
 	    	var self = this;
 
-			this.map.on('click', this.clickHandler, self);		
-			this.source = new ol.source.Vector();				
+			this.map.on('click', this.clickHandler, self);
+			this.source = new ol.source.Vector();
 			this.resultLayer = new ol.layer.Vector({
 				source: this.source,
 			  	style: new ol.style.Style({
@@ -141,21 +141,21 @@ getFeatureInfo.prototype.handler = function(e) {
 			});
 			this.resultLayer.baselayer = true;
 			this.map.addLayer(this.resultLayer);
-			
+
 		} else {
 			messageBox.show('warning', gettext('No layers available.'));
 		}
-		
+
 	}
 };
 
 /**
  * TODO
  */
-getFeatureInfo.prototype.hasLayers = function() {	
-	
+getFeatureInfo.prototype.hasLayers = function() {
+
 	var hasLayers = false;
-	
+
 	var layers = this.map.getLayers().getArray();
 	var queryLayers = new Array();
 	for (var i=0; i<layers.length; i++) {
@@ -164,14 +164,14 @@ getFeatureInfo.prototype.hasLayers = function() {
 				if (layers[i].getVisible()) {
 					queryLayers.push(layers[i]);
 				}
-			}									
+			}
 		}
 	}
-	
-	if (queryLayers.length > 0) {					
+
+	if (queryLayers.length > 0) {
 		hasLayers = true;
 	}
-	
+
 	return hasLayers;
 };
 
@@ -179,7 +179,7 @@ getFeatureInfo.prototype.hasLayers = function() {
 
 
 /**
- *  refs #3004 
+ *  refs #3004
  *  Code extracted from https://github.com/IGNF/geoportal-extensions
  *  to add getGetFeatureInfoUrl support to WMTS Source
  */
@@ -194,17 +194,18 @@ getFeatureInfo.prototype.assign = function (dest, source) {
 },
 
 /**
- *  refs #3004 
+ *  refs #3004
  *  Code extracted from https://github.com/IGNF/geoportal-extensions
  *  to add getGetFeatureInfoUrl support to WMTS Source
  */
 getFeatureInfo.prototype.getWMTSFeatureInfoUrl = function (source, coordinate2, zoom, projection, params) {
+	zoom = Math.round(zoom);
 	var resolution = source.tileGrid.getResolutions()[zoom];
     var pixelRatio = (source && source.tilePixelRatio_) ? source.tilePixelRatio_ : 1;
 
     var tileGrid = source.tileGrid;
-    
-    var coordinate = ol.proj.transform(coordinate2, projection.getCode(), source.matrixSet_);	
+
+    var coordinate = ol.proj.transform(coordinate2, projection.getCode(), source.matrixSet_);
     var tileCoord = source.tileGrid.getTileCoordForCoordAndResolution(coordinate, resolution);
 
     // this code is duplicated from createFromWMTSTemplate function
@@ -274,7 +275,7 @@ getFeatureInfo.prototype.getWMTSFeatureInfoUrl = function (source, coordinate2, 
         }
         str += key + "=" + baseParams[key];
     }
-    
+
     var featureInfoUrl = url +'?'+ str; //Gp.Helper.normalyzeUrl(url, baseParams);
 
     return featureInfoUrl;
@@ -290,21 +291,21 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 	$("body").overlay();
 	$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
 	$('#jqueryEasyOverlayDiv').hide().show(0);
-	
+
 	this.source.clear();
-	
+
 	var self = this;
 	this.showFirst = true;
-	
+
 	this.mapCoordinates = evt.coordinate;
-	
+
 	this.source.clear();
 	if (this.active) {
 		var layers = this.map.getLayers().getArray();
 		var queryLayers = new Array();
 		var url = null;
 		var auxLayer = null;
-		
+
 		for (var i=0; i<layers.length; i++) {
 			if (!layers[i].baselayer) {
 				if (layers[i].wms_url && layers[i].getVisible()) {
@@ -313,7 +314,7 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 						for (var j=0; j<layers.length; j++) {
 							if (!layers[j].baselayer) {
 								if (layers[j].wms_url) {
-									if ((typeof layers[j].parentGroup === 'string' && layers[j].parentGroup == parent.layer_name) || 
+									if ((typeof layers[j].parentGroup === 'string' && layers[j].parentGroup == parent.layer_name) ||
 											(layers[j].parentGroup != undefined && layers[j].parentGroup.groupName == parent.layer_name)){
 										queryLayers.push(layers[j]);
 									}
@@ -323,18 +324,18 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 					}else{
 						queryLayers.push(layers[i]);
 					}
-				}						
+				}
 			}
 		}
-		
+
 		var viewResolution = /** @type {number} */ (this.map.getView().getResolution());
 		var qLayer = null;
 		var url = null;
 		var ajaxRequests = new Array();
 		var features = new Array();
-		
+
 		var layers_info = [];
-		
+
 		for (var i=0; i<queryLayers.length; i++) {
 			qLayer = queryLayers[i];
 			url = null;
@@ -342,20 +343,20 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 				var zoom = map.getView().getZoom();
 				url = self.getWMTSFeatureInfoUrl(
 						qLayer.getSource(),
-						evt.coordinate, 
-						zoom, 
+						evt.coordinate,
+						zoom,
 						this.map.getView().getProjection(),
 						{'INFOFORMAT': 'application/json', 'FEATURE_COUNT': '100'}
 					);
 			}else{
 				url = qLayer.getSource().getGetFeatureInfoUrl(
-					evt.coordinate, 
-					viewResolution, 
+					evt.coordinate,
+					viewResolution,
 					this.map.getView().getProjection().getCode(),
 					{'INFO_FORMAT': 'application/json', 'FEATURE_COUNT': '100'}
 				);
 			}
-			
+
 			if(url != null){
 				var stls = []
 				if(qLayer.hasOwnProperty('styles')){
@@ -369,9 +370,9 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 				};
 				layers_info.push(queryLayer);
 			}
-			
+
 		}
-		
+
 		if(layers_info.length > 0){
 			var req = $.ajax({
 				type: 'POST',
@@ -388,7 +389,7 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 				  				for (var i=0; i<queryLayers.length; i++) {
 				  					if(response.features[k].query_layer == queryLayers[i].layer_name){
 				  						qLayer =  queryLayers[i]
-				  					} 
+				  					}
 				  				}
 				  				if(qLayer != null){
 					  				features.push({
@@ -403,7 +404,7 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 				  				for (var j=0; j<queryLayers.length; j++) {
 				  					if(response.features[k].layer_name == queryLayers[j].layer_name){
 				  						qLayer =  queryLayers[j]
-				  					} 
+				  					}
 				  				}
 				  				if(qLayer != null){
 					  				features.push({
@@ -414,19 +415,19 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 					  				});
 				  				}
 				  			}
-			  			}	  			
+			  			}
 			  		}
 			  	},
 			  	error: function(){}
 			});
-				
+
 			ajaxRequests.push(req);
 		}
-		
-		$.when(undefined, ajaxRequests).then(function(){ 
+
+		$.when(undefined, ajaxRequests).then(function(){
 		     self.showInfo(features);
 		});
-		
+
 	}
 };
 
@@ -434,7 +435,7 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
  * TODO
  */
 getFeatureInfo.prototype.showInfo = function(features){
-	
+
 	var self = this;
 	var detailsTab = $('#details-tab');
 	detailsTab.empty();
@@ -444,66 +445,66 @@ getFeatureInfo.prototype.showInfo = function(features){
 	}
 
 	var html = '<ul class="products-list product-list-in-box">';
-	
+
 	var srs = $("#custom-mouse-position-projection").val();
 	var unit =  $('#custom-mouse-position-projection option:selected').attr('data-attr');
 
 	var wgs84 = ol.proj.transform(self.mapCoordinates, 'EPSG:3857', srs)
-	
+
 	var coord_1 = wgs84[1].toFixed(5).replace(/0{0,2}$/, "");
 	var coord_2 = wgs84[0].toFixed(5).replace(/0{0,2}$/, "");
-	
+
 	if(unit == "degrees"){
 		if(wgs84[1]<0){
 			coord_1 = Math.abs(wgs84[1]).toFixed(5).replace(/0{0,2}$/, "") + "S";
 		}else{
 			coord_1 = wgs84[1].toFixed(5).replace(/0{0,2}$/, "") + "N";
 		}
-		
+
 		if(wgs84[0]<0){
 			coord_2 = Math.abs(wgs84[0]).toFixed(5).replace(/0{0,2}$/, "") + "W";
 		}else{
 			coord_2 = wgs84[0].toFixed(5).replace(/0{0,2}$/, "") + "E";
 		}
-		
+
 		var aux = coord_2;
 		coord_2 = coord_1;
 		coord_1 = aux;
 	}
 	html += '<li class="item">';
 	html += 	'<div class="feature-info">';
-	html += 		'<span style="font-size: 12px;">' + gettext('Coordinates') + ' ('+srs+'):</span>' + '<br /><span style="font-weight: bold; font-size: 12px;"> ' + coord_2 + ', '+ coord_1 + '</span>';	
+	html += 		'<span style="font-size: 12px;">' + gettext('Coordinates') + ' ('+srs+'):</span>' + '<br /><span style="font-weight: bold; font-size: 12px;"> ' + coord_2 + ', '+ coord_1 + '</span>';
 	html += 	'</div>';
 	html += '</li>';
-	
+
 	for (var i in features) {
 		if (features[i].type == 'feature' && features[i].feature.type == 'raster') {
 			var feature_id = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+features[i].layer.title+ "</span>";
 			feature_id += "<br />";
-			
+
 			for(key in features[i].feature.properties){
 				feature_id += "<span  style=\"font-weight:normal;\">" + key + "</span><span class=\"pull-right\">"+ features[i].feature.properties[key] + "</span><br />";
 			}
-			
+
 			html += '<li class="item feature-item show_info">';
 			html += 	'<div class="feature-info">';
 			html += 		'<div href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444; padding: 5px;">' + feature_id + '</div>';
 			html += 	'</div>';
 			html += '</li>';
 		}
-		else{ 
+		else{
 			if (features[i].type == 'feature') {
-		
+
 			var fid = features[i].feature.id;
 			var is_first_configured = true;
 			var item_shown = false;
 			var selectedLayer = features[i].layer;
-			
+
 			var feature_id = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+features[i].layer.title +"."+features[i].feature.feature + "</span>";
 			feature_id += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext('More element info')+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
 			feature_id += 		'<span class="label feature-info-button feature-info-label-resource" title="'+gettext('Multimedia resources')+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><br />';
 			feature_id += "<br />";
-			
+
 			var language = $("#select-language").val();
 			if (selectedLayer != null) {
 				if (selectedLayer.conf != null) {
@@ -515,7 +516,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 						feature_id2 += 		'<span class="label feature-info-button feature-info-label-resource" title="'+gettext("Mostrar recursos")+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><div style=\"clear:both; margin-bottom:10px;\"></div>';
 
 						var feature_added = 0;
-						
+
 						var feature_fields = "";
 						var feature_fields2 = "";
 						for(var ix=0; ix<fields.length; ix++){
@@ -532,7 +533,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 							}
 							if(item_shown && key && features[i].feature.properties && (typeof features[i].feature.properties[key] == 'boolean' || features[i].feature.properties[key])){
 								var text = features[i].feature.properties[key];
-								
+
 								if(typeof features[i].feature.properties[key] == 'boolean' && text == true){
 									text = "<input type='checkbox' checked onclick=\"return false;\">";
 								}else{
@@ -540,7 +541,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 										text = "<input type='checkbox' onclick=\"return false;\">";
 									}
 								}
-								
+
 								var complex_data = false;
 								if(key.startsWith("cd_json_")){
 									try{
@@ -595,10 +596,10 @@ getFeatureInfo.prototype.showInfo = function(features){
 										feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\"><a href=\"" + text + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
 									}
 								}
-								
+
 							}
 						}
-						
+
 						if(feature_added > 0){
 							if(feature_added > 1){
 								feature_id2 += feature_fields2;
@@ -608,17 +609,17 @@ getFeatureInfo.prototype.showInfo = function(features){
 							}
 							feature_id = feature_id2;
 						}
-						
+
 					}
 				}
-			}	
-			
+			}
+
 			html += '<li class="item feature-item show_info">';
 			html += 	'<div class="feature-info">';
 			html += 		'<div href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;padding: 5px;">' + feature_id + '</div>';
 			html += 	'</div>';
 			html += '</li>';
-			
+
 			if (features[i].crs) {
 				var newFeature = new ol.Feature();
 		  		var sourceCRS = 'EPSG:' + features[i].crs.properties.name.split('::')[1];
@@ -627,9 +628,9 @@ getFeatureInfo.prototype.showInfo = function(features){
 		    	});
 		    	ol.proj.addProjection(projection);
 		    	if (features[i].feature.geometry.type == 'Point') {
-		    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates));				
+		    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates));
 		    	} else if (features[i].feature.geometry.type == 'MultiPoint') {
-		    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates[0]));				
+		    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates[0]));
 		    	} else if (features[i].feature.geometry.type == 'LineString' || features[i].feature.geometry.type == 'MultiLineString') {
 		    		newFeature.setGeometry(new ol.geom.MultiLineString([features[i].feature.geometry.coordinates[0]]));
 		    	} else if (features[i].feature.geometry.type == 'Polygon' || features[i].feature.geometry.type == 'MultiPolygon') {
@@ -637,22 +638,22 @@ getFeatureInfo.prototype.showInfo = function(features){
 		    	}
 		    	newFeature.setProperties(features[i].feature.properties);
 				newFeature.setId(fid);
-						
+
 				newFeature.getGeometry().transform(projection, 'EPSG:3857');
 				this.source.addFeature(newFeature);
 			}
-			
+
 		} else if (features[i].type == 'catastro') {
 			html += '<li class="item">';
 			html += 	'<div class="feature-info">';
-			html += 		'Ref. Catastral: <a target="_blank" href="' + features[i].href + '" class="product-title item-fid" style="color: #00c0ef;">' + features[i].text;	
+			html += 		'Ref. Catastral: <a target="_blank" href="' + features[i].href + '" class="product-title item-fid" style="color: #00c0ef;">' + features[i].text;
 			html += 	'</div>';
 			html += '</li>';
-		}	
 		}
-	}	
+		}
+	}
 	html += '</ul>';
-	this.popup.show(self.mapCoordinates, '<div class="popup-wrapper getfeatureinfo-popup">' + html + '</div>');	
+	this.popup.show(self.mapCoordinates, '<div class="popup-wrapper getfeatureinfo-popup">' + html + '</div>');
 	$(".getfeatureinfo-popup").parent().parent().children(".ol-popup-closer").unbind("click").click(function() {
 		var detailsTab = $('#details-tab');
 	 	detailsTab.empty();
@@ -667,7 +668,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 	$('.item-fid .feature-info-label-info').click(function(){
 		self.showMoreInfo(this.parentNode.parentNode.dataset.fid, features, 'features');
 	});
-	
+
 	$('.item-fid .feature-info-label-resource').click(function(){
 		self.showMoreInfo(this.parentNode.parentNode.dataset.fid, features, 'resources');
 	});
@@ -685,12 +686,12 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 	for (var i in features) {
 		if (features[i].type == 'feature') {
 			if (fid == features[i].feature.id) {
-				selectedFeature = features[i].feature; 
+				selectedFeature = features[i].feature;
 				selectedLayer = features[i].layer;
 			}
 		}
 	}
-	
+
 	if (selectedFeature != null && selectedLayer != null) {
 		if (selectedFeature.type.toLowerCase() == 'feature') {
 			var detailsTab = $('#details-tab');
@@ -701,7 +702,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 			infoContent += 	'</div>';
 			infoContent += 	'<div class="box-body" style="padding: 20px;">';
 			infoContent += 		'<ul class="products-list product-list-in-box">';
-			
+
 			var language = $("#select-language").val();
 			var featureType = this.describeFeatureType(selectedLayer);
 			for (var i=0; i<featureType.length; i++) {
@@ -718,8 +719,8 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 						value = "<input type='checkbox' onclick=\"return false;\">";
 					}
 				}
-				
-				if (!key.startsWith(this.prefix)) {	
+
+				if (!key.startsWith(this.prefix)) {
 					var item_shown = true;
 					var key_original = key;
 					if (selectedLayer != null) {
@@ -740,8 +741,8 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 								}
 							}
 						}
-					}	
-					
+					}
+
 					var complex_data = false;
 					if(key_original.startsWith("cd_json_")){
 						try{
@@ -754,7 +755,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 								if (!value.toString().startsWith('http')) {
 									infoContent += 		'<span class="product-description">' + nkey + '</span>';
 									infoContent += 		'<a href="javascript:void(0)" class="product-title">' + data_json[nkey] + '</a>';
-									
+
 								} else {
 									infoContent += 		'<span class="product-description">' + nkey + '</span>';
 									infoContent += 		'<a href="' + data_json[nkey] + '" style="color: #00c0ef !important;" target="_blank" class="product-description">' + data_json[nkey] + '</a>';
@@ -772,7 +773,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 							var match = datetime_format.exec(value);
 							value = match[3]+"/"+match[2]+"/"+match[1]+" "+match[4]+":"+match[5]+":"+match[6];
 						}
-						
+
 						var date_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})Z$/i;
 						if(date_format.test(value)){
 							var match = date_format.exec(value);
@@ -789,7 +790,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 							if (!value.toString().startsWith('http')) {
 								infoContent += 		'<span class="product-description">' + key + '</span>';
 								infoContent += 		'<a href="javascript:void(0)" class="product-title">' + value + '</a>';
-								
+
 							} else {
 								infoContent += 		'<span class="product-description">' + key + '</span>';
 								infoContent += 		'<a href="' + value + '" style="color: #00c0ef !important;" target="_blank" class="product-description">' + value + '</a>';
@@ -804,20 +805,20 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 			infoContent += 		'</ul>';
 			infoContent += 	'</div>';
 			infoContent += '</div>';
-			
+
 			if (selectedFeature.resources && (selectedFeature.resources.length > 0)) {
 				var resourcesContent = '';
 				resourcesContent += '<div class="box box-default">';
 				resourcesContent += 	'<div class="box-body" style="padding: 20px;">';
 				resourcesContent += 		'<ul style="list-style: none;">';
 				for (var i=0; i<selectedFeature.resources.length; i++) {
-					if (selectedFeature.resources[i].type == 'image') {	
+					if (selectedFeature.resources[i].type == 'image') {
 						resourcesContent += '<li style="padding: 20px;">';
 						resourcesContent += '<a href="' + selectedFeature.resources[i].url + '" data-toggle="lightbox" data-gallery="example-gallery">';
 						resourcesContent += '	<img src="' + selectedFeature.resources[i].url + '" class="img-fluid adjust-image">';
 						resourcesContent += '</a>';
 						resourcesContent += '</li>';
-						
+
 					} else if  (selectedFeature.resources[i].type == 'pdf') {
 						resourcesContent += '<li style="padding: 20px;">';
 						resourcesContent += '<a href="' + selectedFeature.resources[i].url + '" target="_blank">';
@@ -825,7 +826,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 						resourcesContent += 	'<span style="color:#00c0ef;">' + selectedFeature.resources[i].name + '</span>';
 						resourcesContent += '</a>';
 						resourcesContent += '</li>';
-						
+
 					} else if  (selectedFeature.resources[i].type == 'video') {
 						resourcesContent += '<li style="padding: 20px;">';
 						resourcesContent += '<a href="' + selectedFeature.resources[i].url + '" target="_blank">';
@@ -833,7 +834,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 						resourcesContent += 	'<span style="color:#00c0ef;">' + selectedFeature.resources[i].name + '</span>';
 						resourcesContent += '</a>';
 						resourcesContent += '</li>';
-						
+
 					} else if  (selectedFeature.resources[i].type == 'file') {
 						resourcesContent += '<li style="padding: 20px;">';
 						resourcesContent += '<a href="' + selectedFeature.resources[i].url + '" target="_blank">';
@@ -841,13 +842,13 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 						resourcesContent += 	'<span style="color:#00c0ef;">' + selectedFeature.resources[i].name + '</span>';
 						resourcesContent += '</a>';
 						resourcesContent += '</li>';
-						
+
 					} else if (selectedFeature.resources[i].type == 'alfresco_dir') {
-						
+
 						var resourcePath = selectedFeature.resources[i].url.split('|')[1]
 						var splitedPath = resourcePath.split('/')
 						var folderName = splitedPath[splitedPath.length-1]
-						
+
 						resourcesContent += '<li>';
 						resourcesContent += '<div class="box box-primary">';
 						resourcesContent += 	'<div class="box-body">';
@@ -874,7 +875,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 				resourcesContent += 	'</div>';
 				resourcesContent += '</div>';
 			}
-			
+
 			var ui = '';
 			ui += '<div class="nav-tabs-custom">';
 			ui += '<ul class="nav nav-tabs">';
@@ -894,12 +895,12 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 			}
 			ui += '</div>';
 			ui += '</div>';
-			
+
 			detailsTab.empty();
 			$.gvsigOL.controlSidebar.open();
 			$('.nav-tabs a[href="#details-tab"]').tab('show');
 			detailsTab.append(ui);
-			
+
 			$('#view-resources').on('click', function (e) {
 				e.preventDefault();
 				var url = this.dataset.url
@@ -909,7 +910,7 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 			});
 		}
 	}
-	
+
 	if(tab_opened=='resources'){
 		$('.nav-tabs a[href="#tab_resources_content"]').tab('show');
 	}
@@ -923,9 +924,9 @@ getFeatureInfo.prototype.isGeomType = function(type){
 }
 
 getFeatureInfo.prototype.describeFeatureType = function(layer) {
-	
+
 	var featureType = new Array();
-	
+
 	$.ajax({
 		type: 'POST',
 		async: false,
@@ -941,7 +942,7 @@ getFeatureInfo.prototype.describeFeatureType = function(layer) {
 		},
 	  	error: function(){}
 	});
-	
+
 	return featureType;
 };
 
@@ -950,10 +951,10 @@ getFeatureInfo.prototype.describeFeatureType = function(layer) {
  * TODO
  */
 getFeatureInfo.prototype.getLayerTitle = function(feature){
-	
+
 	var layerTitle = null;
 	var layerName = feature.id.split('.')[0];
-	
+
 	var layers = this.map.getLayers().getArray();
 	for (var i=0; i<layers.length; i++) {
 		if (!layers[i].baselayer) {
@@ -961,17 +962,17 @@ getFeatureInfo.prototype.getLayerTitle = function(feature){
 				if (layers[i].layer_name == layerName) {
 					layerTitle = layers[i].title;
 				}
-			}						
+			}
 		}
 	}
-	
+
 	return layerTitle;
 };
 
 /**
  * TODO
  */
-getFeatureInfo.prototype.deactivate = function() {			
+getFeatureInfo.prototype.deactivate = function() {
 	this.$button.removeClass('button-active');
 	if (this.source) this.source.clear();
 	if (this.resultLayer) this.map.removeLayer(this.resultLayer);
