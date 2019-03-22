@@ -23,9 +23,9 @@ djangorestframework==3.5.3
 djangorestframework-jwt==1.11.0
 
 ##Instalamos el driver de PostgreSQL para python:
-#psycopg2>=2.7,<2.8 --no-binary psycopg2
+psycopg2>=2.7,<2.8 --no-binary psycopg2
 # *NOTE:* Es necesario instalar previamente la libreria _libpq-dev_
-psycopg2-binary>=2.7,<2.8
+#psycopg2-binary>=2.7,<2.8
 
 ##Instalamos Pillow para que django soporte la gestion de images;
 Pillow==3.4.2
