@@ -2451,9 +2451,12 @@ def get_datatable_data(request):
                     'OUTPUTFORMAT': 'application/json',
                     'MAXFEATURES': max_features,
                     'STARTINDEX': start_index,
-                    'PROPERTYNAME': encoded_property_name,
-                    'SORTBY': sortby_field
+                    'PROPERTYNAME': encoded_property_name
                 }
+
+                if sortby_field != 'wkb_geometry':
+                    values['SORTBY'] = sortby_field
+
                 if cql_filter != '':
                     values['cql_filter'] = cql_filter
 
