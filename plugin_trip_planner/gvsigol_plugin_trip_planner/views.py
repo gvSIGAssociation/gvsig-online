@@ -174,6 +174,9 @@ def gtfs_crontab_update(request):
             tAux = "{0}:{1}:00".format(aux[0], aux[1])
             t = datetime.strptime(tAux, '%H:%M:%S')
             my_app_config.initialize_trip_planner_gtfs_cron(CRONTAB_ACTIVE, t, 1, 'days')
+        else: # Update now
+            cron_trip_planner_refresh(0)
+            
 
 
 
