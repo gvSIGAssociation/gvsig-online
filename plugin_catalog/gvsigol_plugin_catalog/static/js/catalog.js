@@ -578,7 +578,7 @@ CatalogView.prototype.createLayer = function(name, title, url, dataId, bbox, gro
 	removeLayerButtonUI +=    '</a>';
 	
 	var newLayerUI = $(layerTree.createOverlayUI(newLayer, $("#layergroup-"+groupId).is(":checked")));
-	newLayerUI.find(".box-body").append(removeLayerButtonUI);
+	newLayerUI.find(".box-body .zoom-to-layer").after(removeLayerButtonUI);
 	$(".geonetwork-layer-group").append(newLayerUI);
 	layerTree.setLayerEvents();
 	
