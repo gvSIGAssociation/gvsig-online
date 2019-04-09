@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 CATALOG_BASE_URL = 'https://gvsigol.localhost/geonetwork'
 CATALOG_URL = CATALOG_BASE_URL + '/srv/eng/'
+CATALOG_QUERY_URL = CATALOG_BASE_URL + '/srv/eng/q'
 CATALOG_USER = 'sysadmin'
 CATALOG_PASSWORD = 'admin'
 # valid values: 'legacy3.2', 'api0.1'

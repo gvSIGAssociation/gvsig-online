@@ -18,15 +18,17 @@
 
 /**
  * @author: José Badía <jbadia@scolab.es>
+ * @author: César Marinez <cmartinez@scolab.es>
  */
 
 /**
  * TODO
  */
-var CatalogView = function(map, layerTree, config) {
-	this.map = map;
+var CatalogView = function(mapViewer, config) {
+	this.mapViewer = mapViewer;
+	this.map = mapViewer.getMap();
 	this.map_container = $("#container");	
-	this.layerTree = layerTree;
+	this.layerTree = mapViewer.getLayerTree();
 	this.catalog_panel = null;
 	this.catalog_map = null;
 	this.data = {};
@@ -432,30 +434,14 @@ CatalogView.prototype.linkResourceMap = function(){
 		var title = $(this).attr("title");
 		var id = $(this).attr("data-id");
 
-		var catalogLayer = new ol.layer.Tile({
-			source: new ol.source.TileWMS({
-				url: url,
-				params: {
-					'LAYERS': name, 
-					'TILED': true, 
-					'dataid': id
-				},
-				serverType: 'geoserver',
-			}),
-			id : "geonetwork-" + name
-		});
-
-		self.map.addLayer(catalogLayer);
-
-		var groupEntry = $("#geonetwork-group");
-		if(groupEntry.length == 0){
-			self.createLayerGroup();
-		}
-
 		var group_visible = false;
 		group_visible = $("#layergroup-geonetwork-group").is(":checked");
-		self.createLayer(name, title, group_visible, groupEntry.length);
-
+		try {
+			self.createLayer(name, title, url, id, null, group_visible);
+		}
+		catch (error) {
+			console.log(error);
+		}
 		$('#modal-catalog').modal('hide');
 		self.hidePanel();
 	});
@@ -464,7 +450,7 @@ CatalogView.prototype.linkResourceMap = function(){
 
 CatalogView.prototype.createLayerGroup = function() {
 	var self = this;
-	var groupId = 'geonetwork-group';
+	var groupId = 'gvsigol-geonetwork-group';
 
 	var tree = '';
 	tree += '			<li class="box box-default collapsed-box" id="' + groupId + '">';
@@ -482,15 +468,15 @@ CatalogView.prototype.createLayerGroup = function() {
 	tree += '			</li>';
 
 	$(".layer-tree").append(tree);
-
-	$(".layer-group").unbind("change").change(function (e) {
-		var groupId = 'geonetwork-layer-group'; 
+	
+	$("#layergroup-gvsigol-geonetwork-group").unbind("change").change(function (e) {
+		var groupId = 'layergroup-geonetwork-group'; 
 		var checked = this.checked;
 
-		$("."+groupId+" .layer-box").each(function(){
-			var id = $(this).attr("data-layerid");
+		$("#gvsigol-geonetwork-group").find(".layer-box").each(function(idx, el) {
+			var id = el.getAttribute("data-layerid");
+			var layerCheckbox = document.getElementById(id);
 			var layers = self.map.getLayers();
-
 			layers.forEach(function(layer){
 				if (!layer.baselayer) {
 					if (layer.get("id") === id) {
@@ -505,20 +491,9 @@ CatalogView.prototype.createLayerGroup = function() {
 							layerCheckbox.disabled = false;
 						}
 					}
-				};
-			}, this);
-		})
-	});
-
-	$(".layer-tree-groups").sortable({
-		placeholder: "sort-highlight",
-		handle: ".handle",
-		forcePlaceholderSize: true,
-		zIndex: 999999
-	});
-	var self = this;
-	$(".layer-tree-groups").on("sortupdate", function(event, ui){
-		self.reorder(event, ui);
+				}
+			});
+		});
 	});
 }
 
@@ -542,73 +517,88 @@ CatalogView.prototype.reorder = function(event,ui) {
 	}
 };
 
-
-CatalogView.prototype.createLayer = function(name, title, group_visible, zIndex) {
+CatalogView.prototype._createOLLayer = function(url, name, title, dataId, bbox) {
 	var self = this;
-
-	var id = "geonetwork-" + name.replace(":", "-");
-	var id2 = "geonetwork-" + name;
-
-	var ui = '';
-	ui += '<div id="layer-box-' + id + '" data-layerid="' + id2 + '" data-zindex="'+ (100 + zIndex) +'" class="box layer-box thin-border box-default collapsed-box">';
-	ui += '		<div class="box-header with-border">';
-	ui += '			<span class="handle"> ';
-	ui += '				<i class="fa fa-ellipsis-v"></i>';
-	ui += '				<i class="fa fa-ellipsis-v"></i>';
-	ui += '			</span>';
-	if (group_visible) {
-		ui += '		<input type="checkbox" id="' + id2 + '" class="geonetwork-ck" disabled checked>';
-	}else{
-		ui += '		<input type="checkbox" id="' + id2 + '" class="geonetwork-ck" checked>';
+	
+	if (url.endsWith("?")) {
+		url = url.substring(0, url.length-1);
 	}
-	ui += '			<span class="text">' + title + '</span>';
-	ui += '			<div class="box-tools pull-right">';
-	ui += '				<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
-	ui += '					<i class="fa fa-plus"></i>';
-	ui += '				</button>';
-	ui += '			</div>';
-	ui += '			</div>';
-	ui += '		<div class="box-body" style="display: none;">';
-	ui += '			<a id="show-metadata-' + id + '" data-layerid="' + id2 + '" class="btn btn-block btn-social btn-custom-tool show-metadata-link show-metadata-link2">';
-	ui += '				<i class="fa fa-external-link"></i> ' + gettext('Layer metadata');
-	ui += '			</a>';
-
-	ui += '	<a id="zoom-to-layer-' + id + '" href="#" data-layerid="' + id2 + '" class="btn btn-block btn-social btn-custom-tool zoom-to-layer zoom-to-layer2">';
-	ui += '		<i class="fa fa-search" aria-hidden="true"></i> ' + gettext('Zoom to layer');
-	ui += '	</a>';
-
-	ui += '			<a id="remove-metadata-' + id + '" data-layerid="' + id2 + '" class="btn btn-block btn-social btn-custom-tool remove-metadata-link">';
-	ui += '				<i class="fa fa-times"></i> ' + gettext('Remove layer');
-	ui += '			</a>';
-
-	ui += '			<label style="display: block; margin-top: 8px; width: 95%;">' + gettext('Opacity') + '<span id="layer-opacity-output-' + id + '" class="margin-l-15 gol-slider-output">%</span></label>';
-	ui += '			<div id="layer-opacity-slider" data-layerid="' + id2 + '" class="layer-opacity-slider"></div>';
-	ui += '		</div>';
-	ui += '</div>';
-
-	$(".geonetwork-layer-group").append(ui);
-
-	$(".geonetwork-ck").unbind("change").change(function (e) {
-		try {
-			var layers = self.map.getLayers();
-			var id = $(this).attr("id");
-			layers.forEach(function(layer){
-				if (!layer.baselayer) {
-					if (layer.get("id") === id) {
-						if (layer.getVisible() == true) {
-							layer.setVisible(false);
-						} else {
-							layer.setVisible(true);
-						}
-					}
-				};
-			}, this);
-		} catch (e) {
-			console.log(e);
-		}
+	
+	var catalogLayer = new ol.layer.Tile({
+		source: new ol.source.TileWMS({
+			url: url,
+			params: {
+				'LAYERS': name, 
+				'TILED': true, 
+				'dataid': dataId
+			},
+			serverType: 'geoserver'
+		}),
+		id: dataId
+	});
+	catalogLayer.baselayer = false;
+	catalogLayer.dataid = dataId;
+	catalogLayer.id = dataId;
+	catalogLayer.layer_name = name;
+	//catalogLayer.legend = this.conf.geoserver_frontend_url + '/wms' + '?SERVICE=WMS&VERSION=1.1.1&layer=' + name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on';
+	catalogLayer.legend = url + '?SERVICE=WMS&VERSION=1.1.1&layer=' + name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on';
+	catalogLayer.queryable = true;
+	catalogLayer.title = title;
+	catalogLayer.visible = true;
+	catalogLayer.wms_url = url;
+	if (bbox != null && bbox.length>0) {
+		catalogLayer.bboxwgs84 = bbox;		
+	}
+	catalogLayer.on('change:visible', function(){
+		self.mapViewer.getLegend().reloadLegend();
 	});
 
-	$(".remove-metadata-link").unbind("click").click(function (e) {
+	self.map.addLayer(catalogLayer);
+	return catalogLayer;
+}
+
+
+
+CatalogView.prototype.createLayer = function(name, title, url, dataId, bbox, group_visible) {
+	var self = this;
+	var newLayer = self._createOLLayer(url, name, title, dataId, bbox);
+	
+	var groupId = "gvsigol-geonetwork-group";
+	var groupEntry = $("#"+groupId);
+	var zIndex = groupEntry.length;
+	if(zIndex == 0){
+		self.createLayerGroup();
+	}
+
+	var layerTree = self.mapViewer.getLayerTree();
+	//var conf = {}
+	
+	var removeLayerButtonUI = '<a id="remove-catalog-layer-' + dataId + '" data-layerid="' + dataId + '" class="btn btn-block btn-social btn-custom-tool remove-catalog-layer-btn">';
+	removeLayerButtonUI +=    '	<i class="fa fa-times"></i> ' + gettext('Remove layer');
+	removeLayerButtonUI +=    '</a>';
+	
+	var newLayerUI = $(layerTree.createOverlayUI(newLayer, $("#layergroup-"+groupId).is(":checked")));
+	newLayerUI.find(".box-body").append(removeLayerButtonUI);
+	$(".geonetwork-layer-group").append(newLayerUI);
+	layerTree.setLayerEvents();
+	
+	$(".show-metadata-link").unbind("click").on('click', function(e) {
+		var layers = self.map.getLayers();
+		var selectedLayer = null;
+		var layerContainer = $(this).parents('.layer-box');
+		var id = layerContainer.first().attr("data-layerid");
+		layers.forEach(function(layer){
+			if (!layer.baselayer) {
+				if (id===layer.get("id")) {
+					selectedLayer = layer;
+					self.createDetailsPanel(selectedLayer.getSource().getParams()["dataid"]);
+				}
+			}
+		}, this);
+	});
+	
+
+	$(".remove-catalog-layer-btn").unbind("click").click(function (e) {
 		var id = $(this).attr("data-layerid");
 		var layers = self.map.getLayers();
 		layers.forEach(function(layer){
@@ -616,99 +606,46 @@ CatalogView.prototype.createLayer = function(name, title, group_visible, zIndex)
 				if (layer.get("id") === id) {
 					layer.setVisible(false);
 					self.map.removeLayer([layer]);
-					$("#layer-box-" + id.replace(":", "-")).remove();
+					$("#layer-box-" + id).remove();
 				}
 			};
 		}, this);
 	});
-
-	$( "#layer-box-" + id + " .layer-opacity-slider" ).slider({
-		min: 0,
-		max: 100,
-		value: 100,
-		slide: function( event, ui ) {
-			var layers = self.map.getLayers();
-			var id = this.dataset.layerid;
-			layers.forEach(function(layer){
-				if (!("baselayer" in layer) || layer.baselayer == false) {
-					if (id===layer.get("id")) {
-						layer.setOpacity(parseFloat(ui.value)/100);
-						$("#layer-opacity-output-" + id).text(ui.value + '%');
-					}
-				}						
-			}, this);
-		}
-	});
-
-	$(".opacity-range").unbind("change").on('change', function(e) {
-		var layers = self.map.getLayers();
-		var id = $(this).attr("data-layerid");
-		layers.forEach(function(layer){
-			if (!("baselayer" in layer) || layer.baselayer == false) {
-				if (id===layer.get("id")) {
-					layer.setOpacity(this.valueAsNumber/100);
-				}
-			}						
-		}, this);
-	});
-
-	$(".zoom-to-layer2").unbind("click").on('click', function(e) {
-		var layers = self.map.getLayers();
-		var selectedLayer = null;
-		var id = $(this).attr("data-layerid");
-		layers.forEach(function(layer){
-			if (!("baselayer" in layer) || layer.baselayer == false) {
-				if (id===layer.get("id")) {
-					selectedLayer = layer;
-				}
-			}						
-		}, this);
-		self.zoomToLayer(selectedLayer);
-	});
-
-	$(".show-metadata-link2").unbind("click").on('click', function(e) {
-		var layers = self.map.getLayers();
-		var selectedLayer = null;
-		var id = $(this).attr("data-layerid");
-		layers.forEach(function(layer){
-			if (!("baselayer" in layer) || layer.baselayer == false) {
-				if (id===layer.get("id")) {
-					selectedLayer = layer;
-					self.createDetailsPanel(selectedLayer.getSource().getParams()["dataid"]);
-				}
-			}						
-		}, this);
-		//self.showMetadata(selectedLayer);
-	});
-
-
+	
+	self.mapViewer.getLegend().reloadLegend();
 };
-
+/*
 CatalogView.prototype.zoomToLayer = function(layer) {
 	var self = this;
-	var layer_name = layer.get("id").replace("geonetwork-", "");
-
-	var url = layer.getSource().urls[0]+'?request=GetCapabilities&service=WMS';
-	var parser = new ol.format.WMSCapabilities();
-	$.ajax(url).then(function(response) {
-		var result = parser.read(response);
-		var Layers = result.Capability.Layer.Layer; 
-		var extent;
-		for (var i=0, len = Layers.length; i<len; i++) {
-			var layerobj = Layers[i];
-			//if (layerobj.Name == layer_name) {
-			extent = layerobj.EX_GeographicBoundingBox;
-			break;
-			//}
-		}
-		if((extent[0]==0 && extent[1]==0 && extent[2]==-1 && extent[3]==-1 )||
-				(extent[0]==-1 && extent[1]==-1 && extent[2]==0 && extent[3]==0 )){
-			return;
-		}
-		var ext = ol.proj.transformExtent(extent, ol.proj.get('EPSG:4326'), ol.proj.get('EPSG:3857'));
-		self.map.getView().fit(ext, self.map.getSize());
-	});
-}
+	if (layer.bboxwgs84) { // use extent from metadata if available
+		var extent = ol.proj.transformExtent(layer.bboxwgs84, ol.proj.get('EPSG:4326'), ol.proj.get('EPSG:3857'));
+		self.map.getView().fit(extent, self.map.getSize());
+	}
+	else { // query getCapabilities otherwise
+		var layer_name = layer.get("id").replace("geonetwork-", "");
+	
+		var url = layer.getSource().urls[0]+'?request=GetCapabilities&service=WMS';
+		var parser = new ol.format.WMSCapabilities();
+		$.ajax(url).then(function(response) {
+			var result = parser.read(response);
+			var Layers = result.Capability.Layer.Layer; 
+			var extent;
+			for (var i=0, len = Layers.length; i<len; i++) {
+				var layerobj = Layers[i];
+				//if (layerobj.Name == layer_name) {
+				extent = layerobj.EX_GeographicBoundingBox;
+				break;
+				//}
+			}
+			if((extent[0]==0 && extent[1]==0 && extent[2]==-1 && extent[3]==-1 )||
+					(extent[0]==-1 && extent[1]==-1 && extent[2]==0 && extent[3]==0 )){
+				return;
+			}
+			var ext = ol.proj.transformExtent(extent, ol.proj.get('EPSG:4326'), ol.proj.get('EPSG:3857'));
+			self.map.getView().fit(ext, self.map.getSize());
+		});
+	}
+}*/
 
 CatalogView.prototype.getCatalogFilters = function(query, search, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent){
 	var self = this;
@@ -746,7 +683,15 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 	var disabledFacets = self.config.disabledFacets;
 	
 	// FIXME: this should be parametrized from config
-	var url = '/geonetwork/srv/eng/q?_content_type=json' + filters + '&bucket=s101&facet.q=' + query + '&fast=index&from=1&resultType=details&sortBy=relevance';
+	var url;
+	if (self.config.queryUrl) {
+		url = self.config.queryUrl;
+	}
+	else {
+		url = '/geonetwork/srv/eng/q';
+	}
+	// TODO: authentication
+	url = url + '?_content_type=json' + filters + '&bucket=s101&facet.q=' + query + '&fast=index&from=1&resultType=details&sortBy=relevance';
 	//var url = '/gvsigonline/catalog/get_query/?_content_type=json&bucket=s101&facet.q='+query+'&fast=index&from=1&resultType=details&sortBy=relevance';
 	$.ajax({
 		url: url,
@@ -891,6 +836,14 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 //					self.linkResourceMap();
 
 					var links = self.data[id].link;
+					var geoBox = [];
+					if (self.data[id].geoBox) {
+						var geoBoxStrList = self.data[id].geoBox.split("|");
+						for (var i=0; i<geoBoxStrList.length; i++) {
+							var bboxValue = parseFloat(geoBoxStrList[i]);
+							geoBox.push(bboxValue);
+						}
+					}
 					if(!Array.isArray(links)){
 						links = [links];
 					}
@@ -898,35 +851,26 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 						var link = links[i].split('|');
 						var content = '';
 						if(link.length==6){
-							var type = link[3].trim();
+							var type = link[3].trim().substring(0, 7);
 							if(type == "OGC:WMS"){
 								var url = link[2];
 								var name = link[0];
 								var title = link[1];
-			
-								var catalogLayer = new ol.layer.Tile({
-									source: new ol.source.TileWMS({
-										url: url,
-										params: {
-											'LAYERS': name, 
-											'TILED': true, 
-											'dataid': id
-										},
-										serverType: 'geoserver',
-									}),
-									id : "geonetwork-" + name
-								});
-
-								self.map.addLayer(catalogLayer);
-
-								var groupEntry = $("#geonetwork-group");
-								if(groupEntry.length == 0){
-									self.createLayerGroup();
+								if (title=="") {
+									title = self.data[id].title;
+								}
+								if (title=="") {
+									title = name;
 								}
 
 								var group_visible = false;
 								group_visible = $("#layergroup-geonetwork-group").is(":checked");
-								self.createLayer(name, title, group_visible, groupEntry.length);
+								try {
+									self.createLayer(name, title, url, id, geoBox, group_visible);
+								}
+								catch(error) {
+									console.log(error);
+								}
 								
 								self.hidePanel();
 								break;

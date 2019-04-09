@@ -5,8 +5,7 @@
 <script type="text/javascript" src="{% static "js/catalog.js" %}"></script>
 
 <script type="text/javascript">
-	var catalog = new CatalogView(viewer.core.getMap(),
-		viewer.core.layerTree,
+	var catalog = new CatalogView(viewer.core,
 		{
 			{% if 'gvsigol_plugin_catalog' in plugins_config %}
 				{% if 'CATALOG_FACETS_CONFIG' in plugins_config.gvsigol_plugin_catalog %}
@@ -20,9 +19,14 @@
 					facetsOrder: [],
 				{% endif %}
 				{% if 'CATALOG_DISABLED_FACETS' in plugins_config.gvsigol_plugin_catalog %}
-					disabledFacets: {{ plugins_config.gvsigol_plugin_catalog.CATALOG_DISABLED_FACETS|safe }}
+					disabledFacets: {{ plugins_config.gvsigol_plugin_catalog.CATALOG_DISABLED_FACETS|safe }},
 				{% else %}
-					disabledFacets: []
+					disabledFacets: [],
+				{% endif %}
+				{% if 'CATALOG_QUERY_URL' in plugins_config.gvsigol_plugin_catalog %}
+					queryUrl: '{{ plugins_config.gvsigol_plugin_catalog.CATALOG_QUERY_URL|safe }}'
+				{% else %}
+					queryUrl: ""
 				{% endif %}
 			{% endif %}
 		});
