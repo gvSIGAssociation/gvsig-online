@@ -724,6 +724,10 @@ viewer.core = {
     	return this.layerTree;
     },
 
+    getLegend: function() {
+    	return this.legend;
+    },
+    
     getMap: function(){
     	return this.map;
     },
