@@ -23,12 +23,12 @@
 /**
  * TODO
  */
-var attributeTable = function(layer, map, conf) {	
+var attributeTable = function(layer, map, conf) {
 	this.id = "data-table";
 	this.map = map;
 	this.conf = conf;
-	this.layer = layer;	
-	this.source = new ol.source.Vector();	
+	this.layer = layer;
+	this.source = new ol.source.Vector();
 	this.filterCode = null;
 	this.selectedType = null;
 	this.resultLayer = new ol.layer.Vector({
@@ -67,9 +67,9 @@ attributeTable.prototype.initialize = function() {
  * TODO
  */
 attributeTable.prototype.createUI = function() {
-	
+
 	var ui = '';
-	
+
 	ui += '<div class="row">';
 	ui += 	'<div class="col-md-12">';
 	ui += 		'<div class="nav-tabs-custom">';
@@ -91,10 +91,10 @@ attributeTable.prototype.createUI = function() {
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += '</div>';
-	
+
 	$('.panel-content').empty();
 	$('.panel-content').append(ui);
-	
+
 	var featureType = this.describeFeatureType();
 	this.createTableUI(featureType);
 	this.createFiltersUI(featureType);
@@ -104,13 +104,13 @@ attributeTable.prototype.createUI = function() {
  * TODO
  */
 attributeTable.prototype.createTableUI = function(featureType) {
-	
+
 	var self = this;
-	
+
 	var properties = new Array();
 	var propertiesWithType = new Array();
 	var columns = new Array();
-	
+
 	var table = $("<table>", {id: 'table-' + this.layer.get("id"), class: 'stripe nowrap cell-border hover', style: "width: 100%;"});
 	var thead = $("<thead>", {style: "width: 100%;"});
 	var trow = $("<tr>");
@@ -135,7 +135,7 @@ attributeTable.prototype.createTableUI = function(featureType) {
 						}
 					}
 				}
-				
+
 				if(column_shown){
 					properties.push(featureType[i].name);
 					propertiesWithType.push(featureType[i].name + '|' + featureType[i].type);
@@ -155,7 +155,7 @@ attributeTable.prototype.createTableUI = function(featureType) {
 							return value;
 						 }
 					});
-					
+
 					var th = $("<th>", {html: feat_name});
 					trow.append(th);
 				}
@@ -170,10 +170,10 @@ attributeTable.prototype.createTableUI = function(featureType) {
 	});
 	thead.append(trow);
 	table.append(thead);
-	
+
 	$('#tab_data').empty();
 	$('#tab_data').append(table);
-	
+
 	var tableButtons = new Array();
 	tableButtons.push({
 		extend: 'csvHtml5',
@@ -208,7 +208,7 @@ attributeTable.prototype.createTableUI = function(featureType) {
                 }
             }
         }
-   	 	
+
 	});
 	/*tableButtons.push({
    	 	extend: 'print',
@@ -223,10 +223,10 @@ attributeTable.prototype.createTableUI = function(featureType) {
             action: function ( e, dt, node, config ) {
             	var t = $('#table-' + self.layer.get("id")).DataTable();
             	var selectedRows = t.rows('.selected').data();
-            	if (selectedRows.length > 0){	
+            	if (selectedRows.length > 0){
             		self.zoomToSelection(selectedRows);
                 	self.createPrintJob(featureType, selectedRows);
-                	
+
     	    	} else {
     	    		messageBox.show('warning', gettext('You must select at least one row'));
     	    	}
@@ -238,13 +238,13 @@ attributeTable.prototype.createTableUI = function(featureType) {
         action: function ( e, dt, node, config ) {
         	var t = $('#table-' + self.layer.get("id")).DataTable();
         	var selectedRows = t.rows('.selected').data();
-	    	if (selectedRows.length > 0){	
+	    	if (selectedRows.length > 0){
 	    		self.zoomToSelection(selectedRows);
-	    		
+
 	    	} else {
 	    		messageBox.show('warning', gettext('You must select at least one row'));
 	    	}
-        	
+
         }
     });
 	tableButtons.push({
@@ -255,7 +255,7 @@ attributeTable.prototype.createTableUI = function(featureType) {
 		extend: 'selectNone',
         text: '<i class="fa fa-eraser margin-r-5"></i> ' + gettext('Clear selection')
     });
-	
+
 	var dt = $('#table-' + this.layer.get("id")).DataTable({
 		language: {
     		processing		: gettext("Processing request") + "...",
@@ -318,7 +318,7 @@ attributeTable.prototype.createTableUI = function(featureType) {
 attributeTable.prototype.change_alias_from_cql_filter = function(cql_filter) {
 	var fields_trans = this.layer.conf;
 	var language = $("#select-language").val();
-	
+
 	if(fields_trans != null && fields_trans["fields"] != undefined){
 		var fields = fields_trans["fields"];
 		for(var ix=0; ix<fields.length; ix++){
@@ -329,10 +329,10 @@ attributeTable.prototype.change_alias_from_cql_filter = function(cql_filter) {
 				var filter_string =  new RegExp("("+feat_name_trans+")([^\\w'\"]+)","g");
 				cql_filter = cql_filter.replace(filter_string, feat_name+"$2")
 			}
-			
+
 		}
 	}
-	
+
 	return cql_filter;
 };
 
@@ -341,10 +341,10 @@ attributeTable.prototype.change_alias_from_cql_filter = function(cql_filter) {
  */
 attributeTable.prototype.createFiltersUI = function(featureType) {
 	var self = this;
-	
+
 	var fields_trans = this.layer.conf;
 	var language = $("#select-language").val();
-	
+
 	var ui = '';
 	ui += '<div style="background: #f6f6f6;" class="row">';
 	ui += 	'<div class="col-md-12">';
@@ -381,7 +381,7 @@ attributeTable.prototype.createFiltersUI = function(featureType) {
 	ui += 					'</div>';
 	ui += 					'<div class="col-md-5">';
 	ui += 						'<div id="calculator">';
-	ui += 							'<div class="form-group">';	
+	ui += 							'<div class="form-group">';
 	ui += 								'<label>' + gettext('Select field') + '</label>';
 	ui += 								'<select id="filter-field-select" class="form-control">';
 	ui += 									'<option value="" selected disabled>--</option>';
@@ -402,15 +402,15 @@ attributeTable.prototype.createFiltersUI = function(featureType) {
 					}
 				}
 			}
-			
-			
-			
+
+
+
 			ui += '<option class="filter-field-option" data-orig="' + featureType[i].name + '" value="' + featureType[i].type + '">' + feat_name + '</option>';
 		}
 	}
 	ui += 								'</select>';
 	ui += 							'</div>';
-	ui += 							'<div class="form-group">';	
+	ui += 							'<div class="form-group">';
 	ui += 								'<label>' + gettext('Select value') + '</label>';
 	ui += 								'<select id="filter-value-select" class="form-control">';
 	ui += 									'<option value="" selected disabled>--</option>';
@@ -447,10 +447,10 @@ attributeTable.prototype.createFiltersUI = function(featureType) {
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += '</div>';
-	
+
 	$('#tab_filter').empty();
 	$('#tab_filter').append(ui);
-	
+
 	var filterElement = document.getElementById('cql_filter');
 	this.filterCode = CodeMirror.fromTextArea(filterElement, {
 		value: "",
@@ -459,7 +459,7 @@ attributeTable.prototype.createFiltersUI = function(featureType) {
 		lineNumbers: true,
 		lineWrapping: true
 	});
-	
+
 	// Add onclick event to all the keys and perform operations
 	var keys = document.querySelectorAll('#calculator span');
 	for(var i = 0; i < keys.length; i++) {
@@ -467,10 +467,10 @@ attributeTable.prototype.createFiltersUI = function(featureType) {
 			var btnVal = this.innerText;
 			var currentFilter = self.filterCode.getValue();
 			currentFilter += btnVal + ' ';
-			self.filterCode.setValue(currentFilter);		
-		} 
+			self.filterCode.setValue(currentFilter);
+		}
 	}
-	
+
 };
 
 /**
@@ -484,7 +484,8 @@ attributeTable.prototype.describeFeatureType = function() {
 	  	url: '/gvsigonline/services/describeFeatureType/',
 	  	data: {
 	  		'layer': this.layer.layer_name,
-			'workspace': this.layer.workspace
+			'workspace': this.layer.workspace,
+			'skip_pks': true
 		},
 	  	success	:function(response){
 	  		if("fields" in response){
@@ -493,7 +494,7 @@ attributeTable.prototype.describeFeatureType = function() {
 		},
 	  	error: function(){}
 	});
-	
+
 	return featureType;
 };
 
@@ -531,7 +532,7 @@ attributeTable.prototype.isDateType = function(type){
  */
 attributeTable.prototype.loadUniqueValues = function(field) {
 	var self = this;
-	
+
 	$.ajax({
 		type: 'POST',
 		async: false,
@@ -565,30 +566,30 @@ attributeTable.prototype.zoomToSelection = function(rows) {
 	for (var i=0; i<rows.length; i++) {
 		fids.push(rows[i].featureid);
 	}
-	
+
 	$.ajax({
 		type: 'POST',
 		async: false,
-	  	url: this.layer.wfs_url,							
+	  	url: this.layer.wfs_url,
 	  	data: {
 	  		'service': 'WFS',
 			'version': '1.1.0',
 			'request': 'GetFeature',
-			'typename': this.layer.workspace + ':' + typename, 
+			'typename': this.layer.workspace + ':' + typename,
 			'srsname': 'EPSG:3857',
 			'outputFormat': 'application/json',
 			'featureId': fids.toString()
 	  	},
 	  	success	:function(response){
 	    	self.source.clear();
-	    	
+
 	    	if (response.features.length > 0 ) {
 	    		for (var i=0; i<response.features.length; i++) {
 		    		var newFeature = new ol.Feature();
 			    	if (response.features[i].geometry.type == 'Point') {
-			    		newFeature.setGeometry(new ol.geom.Point(response.features[i].geometry.coordinates));				
+			    		newFeature.setGeometry(new ol.geom.Point(response.features[i].geometry.coordinates));
 			    	} else if (response.features[i].geometry.type == 'MultiPoint') {
-			    		newFeature.setGeometry(new ol.geom.MultiPoint(response.features[i].geometry.coordinates));	
+			    		newFeature.setGeometry(new ol.geom.MultiPoint(response.features[i].geometry.coordinates));
 			    	} else if (response.features[i].geometry.type == 'LineString' || response.features[i].geometry.type == 'MultiLineString') {
 			    		newFeature.setGeometry(new ol.geom.MultiLineString([response.features[i].geometry.coordinates[0]]));
 			    	} else if (response.features[i].geometry.type == 'Polygon' || response.features[i].geometry.type == 'MultiPolygon') {
@@ -598,14 +599,14 @@ attributeTable.prototype.zoomToSelection = function(rows) {
 					newFeature.setId(response.features[i].id);
 					self.source.addFeature(newFeature);
 		    	}
-		    	
+
 		    	var extent = self.source.getExtent();
 		    	self.map.getView().fit(extent, self.map.getSize());
-		    	
+
 	    	} else {
 	    		messageBox.show('warning', gettext('Invalid identifier. Unable to get requested geometry'));
 	    	}
-	    	
+
 	  	},
 	  	error: function(){}
 	});
@@ -628,7 +629,7 @@ attributeTable.prototype.registerEvents = function() {
 	$("a[href='#tab_filter']").on('shown.bs.tab', function(e) {
 		self.filterCode.refresh();
 	 });
-	
+
 	$("#filter-field-select").on('change', function(){
 		self.selectedType = $('option:selected', $(this)).val();
 		var value = $('option:selected', $(this)).text();
@@ -638,51 +639,51 @@ attributeTable.prototype.registerEvents = function() {
 		var value_orig = $('option:selected', $(this)).attr("data-orig");
 		self.loadUniqueValues(value_orig);
 	});
-	
+
 	$("#close-table").on('click', function(){
 		bottomPanel.hidePanel();
 	});
-	
+
 	$("#minimize-table").on('click', function(){
 		bottomPanel.minimizePanel();
 	});
-	
+
 	$("#maximize-table").on('click', function(){
 		bottomPanel.maximizePanel();
 	});
-	
+
 	$("#filter-value-select").on('change', function(){
 		var currentFilter = self.filterCode.getValue();
 		if (self.isStringType(self.selectedType)) {
 			currentFilter += "'" + this.value + "' ";
-			
+
 		} else if (self.isDateType(self.selectedType)) {
 			currentFilter += "'" + this.value + "' ";
-			
+
 		}  else if (self.selectedType == 'xsd:boolean') {
 			currentFilter += "'" + this.value + "' ";
-			
+
 		} else {
 			currentFilter += this.value + ' ';
 		}
 		self.filterCode.setValue(currentFilter);
 		$("#filter-field-select").prop('selectedIndex', 0);
 	});
-	
+
 	$("#apply-filter").on('click', function(){
 		var t = $('#table-' + self.layer.get("id")).DataTable();
 		$('.nav-tabs a[href="#tab_data"]').tab('show');
 		t.ajax.reload();
 	});
-	
+
 	$("#clear-filter").on('click', function(){
 		self.filterCode.setValue('');
 		var t = $('#table-' + self.layer.get("id")).DataTable();
 		$('.nav-tabs a[href="#tab_data"]').tab('show');
 		t.ajax.reload();
 	});
-	
-	
+
+
 };
 
 /**
@@ -690,7 +691,7 @@ attributeTable.prototype.registerEvents = function() {
  */
 attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 	var self = this;
-	
+
 	$("body").overlay();
 	var mapLayers = this.map.getLayers().getArray();
 	var printLayers = new Array();
@@ -714,7 +715,7 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 					layer['layers'] = [mapLayers[i].workspace + ':' + mapLayers[i].layer_name];
 				}
 				printLayers.push(layer);
-				
+
 				var legend = {
 					"name": mapLayers[i].title,
 		            "icons": [mapLayers[i].legend_no_auth]
@@ -724,10 +725,10 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 			        "icons": ["http://localhost:8080/geoserver/ws_jrodrigo/wms?SERVICE=WMS&VERSION=1.1.1&layer=parcelas_no_urb&REQUEST=getlegendgraphic&FORMAT=image/png"]
 			    };*/
 				legends.push(legend);
-			}									
+			}
 		}
 	}
-	
+
 	var baseLayers = this.map.getLayers().getArray();
 	for (var i=0; i<baseLayers.length; i++) {
 		if (baseLayers[i].baselayer) {
@@ -741,19 +742,19 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 						  	    "type": "OSM",
 						  	    "imageExtension": "png"
 							});
-							
+
 						} else if (baseLayers[i].getSource() instanceof ol.source.WMTS) {
 							var initialScale = 559082263.950892933;
 							var scale = 0;
 							var matrices = new Array();
-							var tileGrid = baseLayers[i].getSource().getTileGrid(); 
+							var tileGrid = baseLayers[i].getSource().getTileGrid();
 							for (var z = 0; z < 18; ++z) {
 								var matrixSize = new Array();
 								if (z == 0) {
 									matrixSize.push(1);
 									matrixSize.push(1);
 									scale = initialScale;
-									
+
 								} else if (z >= 1) {
 									matrixSize.push(z*2);
 									matrixSize.push(z*2);
@@ -780,7 +781,7 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 						        "matrices": matrices,
 						        "imageFormat": "image/png"
 							});
-							
+
 						} else if (baseLayers[i].getSource() instanceof ol.source.TileWMS) {
 							printLayers.push({
 								"type": "WMS",
@@ -792,7 +793,7 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 						        	"TRANSPARENT": "true"
 						        }
 							});
-							
+
 						} else if (baseLayers[i].getSource() instanceof ol.source.XYZ) {
 							printLayers.push({
 								"baseURL": baseLayers[i].getSource().getUrls()[0],
@@ -805,7 +806,7 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 			}
 		}
 	}
-	
+
 	for (var i=0; i<featureType.length; i++) {
 		if (self.isGeomType(featureType[i].type)) {
 			featureType.splice(i, 1);
@@ -817,7 +818,7 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 	}
 	var clonedFeatureType = featureType.slice(0);
 	var datasource = self.getDataSource(clonedFeatureType, selectedRows);
-	
+
 	$.ajax({
 		type: 'POST',
 		async: true,
@@ -854,7 +855,7 @@ attributeTable.prototype.createPrintJob = function(featureType, selectedRows) {
 	  	error: function(){}
 	});
 
-	
+
 };
 
 attributeTable.prototype.getCurrentScale = function () {
@@ -876,19 +877,19 @@ attributeTable.prototype.getScaleFromResolution = function (resolution) {
 };
 
 attributeTable.prototype.getDataSource = function (featureType, selectedRows) {
-	
+
 	var datasource = new Array();
 	var columnsPerRow = 7
 
 	var groupsOfColumns = new Array();
-	
+
 	while (featureType.length > 7) {
 		groupsOfColumns.push(featureType.splice(0, columnsPerRow))
 	}
 	if (featureType.length > 0) {
 		groupsOfColumns.push(featureType)
 	}
-	
+
 	for (var i=0; i < selectedRows.length; i++) {
 		for (var j=0; j<groupsOfColumns.length; j++) {
 			var d = {};
@@ -899,12 +900,12 @@ attributeTable.prototype.getDataSource = function (featureType, selectedRows) {
 				d['title'] = '';
 			}
 			d['table'] = {};
-			
-			var columns = new Array();		
+
+			var columns = new Array();
 			for (var k=0; k < groupsOfColumns[j].length; k++) {
 				columns.push(groupsOfColumns[j][k].name);
 			}
-			
+
 			var data = new Array();
 			for (l=0; l<columns.length; l++) {
 				for (var key in selectedRows[i]) {
@@ -913,15 +914,15 @@ attributeTable.prototype.getDataSource = function (featureType, selectedRows) {
 					}
 				}
 			}
-			
-			
+
+
 			d.table['columns'] = columns;
 			d.table['data'] = [data];
-	
+
 			datasource.push(d);
 		}
 	}
-	
+
 	return datasource;
 };
 
