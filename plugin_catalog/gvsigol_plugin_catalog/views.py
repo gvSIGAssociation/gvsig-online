@@ -115,25 +115,40 @@ def get_metadata_as_html(response):
         
             if len(response['keywords'])>0:
                 html += '        <span class="catalog_detail_attr">'+'Keywords'+':</span>'
-                keywords = ', '.join(response['keywords'])
+                keywords = [ '<span class="badge">' + kw + '</span>' for kw in response['keywords']]
+                keywords = ' '.join(keywords)
                 html += '        '+ keywords
                 html += '        <br />'
 
+            contactsHtml = ''
+            for resource_contact in response['contacts']['resource_contacts']:
+                if resource_contact.get('organisation'):
+                    contactsHtml += '<p><span class="catalog_detail_attr">'+resource_contact.get('role', 'Contact')+": </span>"+resource_contact.get('organisation')+'</p>'
+            if contactsHtml != '':
+                html += '        <h4 class="modal-catalog-title">'+'Resource Contacts'+'</h4>'
+                html += contactsHtml
+            contactsHtml = ''
+            for resource_contact in response['contacts']['metadata_contacts']:
+                if resource_contact.get('organisation'):
+                    contactsHtml += '<p><span class="catalog_detail_attr">'+resource_contact.get('role', 'Contact')+": </span>"+resource_contact.get('organisation')+'</p>'
+            if contactsHtml != '':
+                html += '        <h4 class="modal-catalog-title">'+'Metadata Contacts'+'</h4>'
+                html += contactsHtml
+            
             resConstraints = ''
             for useLimitation in response['resource_constraints']['useLimitations']:
-                resConstraints += '        <span class="catalog_detail_attr">Use limitation:'+useLimitation+'</span><br><br>'
+                resConstraints += '        <span class="catalog_detail_attr">Use limitation: </span>'+useLimitation+'<br>'
             for accessConstraint in response['resource_constraints']['accessConstraints']:
-                resConstraints += '        <span class="catalog_detail_attr">Access constraint:'+accessConstraint+'</span><br><br>'
+                resConstraints += '        <span class="catalog_detail_attr">Access constraint: </span>'+accessConstraint+'<br>'
             for useConstraint in response['resource_constraints']['useConstraints']:
-                resConstraints += '        <span class="catalog_detail_attr">Use constraint type:'+useConstraint+'</span><br><br>'
+                resConstraints += '        <span class="catalog_detail_attr">Use constraint type: </span>'+useConstraint+'<br>'
             for otherConstraint in response['resource_constraints']['otherConstraints']:
-                resConstraints += '        <span class="catalog_detail_attr">Constraint description:'+otherConstraint+'</span><br><br>'
+                resConstraints += '        <span class="catalog_detail_attr">Constraint description: </span>'+otherConstraint+'<br>'
             if resConstraints != '':
-                html += '        <span class="catalog_detail_attr">'+'Resource constraints'+':</span>'
+                html += '        <h4 class="modal-catalog-title">'+'Resource constraints'+'</h4>'
                 html += resConstraints
-            html += '        <br />'
          
-            html += '        <br /><br /><h4 class="modal-catalog-title">'+'Technical information'+'</h4>'
+            html += '        <h4 class="modal-catalog-title">'+'Technical information'+'</h4>'
             
             if response.get('representation_type', None):
                 html += '        <span class="catalog_detail_attr">'+'Representation type'+':</span>'
@@ -180,12 +195,13 @@ def get_metadata_as_html(response):
                      
             html += '    </div>'
             
-            html += '    <div class="col-md-4" style="background-color: #eee;padding: 20px;">'
-            if len(response['thumbnails']) > 0: 
+            html += '    <div class="col-md-4" style="border: 1px solid #ddd; border-radius: 4px; padding: 20px;">'
+            if len(response['thumbnails']) > 0:
+                html += '<h4 class="modal-catalog-title">'+'Overview'+'</h4>' 
                 for thumbnail in response['thumbnails']:
                     html += '            <img src="'+thumbnail['url']+'" alt="'+thumbnail['name']+'" style="width:100%"/><br />'
-             
-            html += '        <br /><br /><h4 class="modal-catalog-title">'+'Download and links'+'</h4>'
+            html += '        <h4 class="modal-catalog-title">'+'Download and links'+'</h4>'
+            resources = ""
             if len(response['resources']) > 0: 
                 for resource in response['resources']:
                     if resource.get('name'):
@@ -197,26 +213,27 @@ def get_metadata_as_html(response):
                         default_key = 'descriptions'
                     if resource.get('url'):
                         if resource['protocol'] == 'WWW:DOWNLOAD-1.0-http--download':
-                            html += '            '+ str(res_desc)
-                            html += '                <a href="'+resource['url']+'" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">Download</a>'
+                            resources += '            '+ str(res_desc)
+                            resources += '                <a href="'+resource['url']+'" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">Download</a>'
                         elif "OGC:WFS" in resource['protocol']:
-                            html += '            '+ str(res_desc)
-                            html += '                <a href="'+resource['url']+'?service=WFS&version=1.0.0&request=GetFeature&typeName='+str(resource['name'])+'&outputFormat=SHAPE-ZIP" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">Get shape</a>'
+                            resources += '            '+ str(res_desc)
+                            resources += '                <a href="'+resource['url']+'?service=WFS&version=1.0.0&request=GetFeature&typeName='+str(resource['name'])+'&outputFormat=SHAPE-ZIP" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">Get shape</a>'
                         elif not 'OGC:' in resource['protocol']:
-                            html += '            '+ str(res_desc)
-                            html += '                <a href="'+resource['url']+'" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">Download</a>'
-                        html += '            <div style="clear:both"></div>'
-            else:
-                html += '        '+'No hay recursos disponibles'
+                            resources += '            '+ str(res_desc)
+                            resources += '                <a href="'+resource['url']+'" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:75px">Download</a>'
+                        #resources += '            <div style="clear:both"></div>'
+            if resources == "":
+                resources += '<p>'+'No resources available'+'</p>'
+            html += resources
+            html += '            <div style="clear:both"></div>'
             
-             
-            html += '        <br /><br /><h4 class="modal-catalog-title">'+'Spatial Extent'+'</h4>'
+            html += '        <h4 class="modal-catalog-title">'+'Spatial Extent'+'</h4>'
             html += '        <img class="gn-img-thumbnail img-thumbnail gn-img-extent" data-ng-src="'+response['image_url']+'" src="'+response['image_url']+'" style="width:100%"/>'
             
             temporal_extent_html = ''
-            if 'publish_date' in response:
+            if response.get('publish_date'):
                 temporal_extent_html += '        <span class="catalog_detail_attr">'+'Publication date'+':</span>'
-                temporal_extent_html += '        '+response['publish_date']
+                temporal_extent_html += '        '+response.get('publish_date')
                 temporal_extent_html += '        <br />'
             
             if response.get('period_start'):

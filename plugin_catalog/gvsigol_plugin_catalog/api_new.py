@@ -279,10 +279,10 @@ class Geonetwork():
         return None
     
     def getXMLCodeText(self, node, attribName='codeListValue', ns={}):
-        if node:
-            if node.text != '':
+        if node is not None:
+            if node.text:
                 return node.text
-            return getattr(node, attribName, '')
+            return node.get(attribName, '')
         return ''
     
     def _getXMLConstraints(self, tree, xpath_filter, ns):
@@ -291,13 +291,13 @@ class Geonetwork():
         useConstraints = []
         otherConstraints = []
         for constraintsNode in tree.findall(xpath_filter, ns):
-            for useLimitationsNode in constraintsNode.findall('./gmd:MD_Constraints/gmd:useLimitation/gco:CharacterString/', ns):
+            for useLimitationsNode in constraintsNode.findall('./gmd:MD_Constraints/gmd:useLimitation/gco:CharacterString', ns):
                 useLimitations.append(useLimitationsNode.text)
-            for accessConstraintsNode in constraintsNode.findall('./gmd:MD_LegalConstraints/gmd:accessConstraints/gmd:MD_RestrictionCode/', ns):
+            for accessConstraintsNode in constraintsNode.findall('./gmd:MD_LegalConstraints/gmd:accessConstraints/gmd:MD_RestrictionCode', ns):
                 accessConstraints.append(self.getXMLCodeText(accessConstraintsNode, 'codeListValue', ns))
-            for useConstraintsNode in constraintsNode.findall('./gmd:MD_LegalConstraints/gmd:useConstraints/gmd:MD_RestrictionCode/', ns):
+            for useConstraintsNode in constraintsNode.findall('./gmd:MD_LegalConstraints/gmd:useConstraints/gmd:MD_RestrictionCode', ns):
                 useConstraints.append(self.getXMLCodeText(useConstraintsNode, ns=ns))
-            for otherConstraintsNode in constraintsNode.findall('./gmd:MD_LegalConstraints/gmd:otherConstraints/gco:CharacterString/', ns):
+            for otherConstraintsNode in constraintsNode.findall('./gmd:MD_LegalConstraints/gmd:otherConstraints/gco:CharacterString', ns):
                 otherConstraints.append(otherConstraintsNode.text)
         return {
                 'useLimitations': useLimitations,
@@ -395,8 +395,8 @@ class Geonetwork():
                     thumbnails.append(thumbnail)
             
             
-            resource_constraints = self._getXMLConstraints(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceConstraints/', ns)
-            metadata_constraints = self._getXMLConstraints(tree, './gmd:metadataConstraints/', ns)
+            resource_constraints = self._getXMLConstraints(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceConstraints', ns)
+            metadata_constraints = self._getXMLConstraints(tree, './gmd:metadataConstraints', ns)
             
             #resources
             resources_urls = []
@@ -425,7 +425,41 @@ class Geonetwork():
                         'descriptions' : resources_descriptions[i]
                     }
                     resources.append(res)
-            
+            resource_contacts = []
+            for pointOfContact in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:pointOfContact', ns):
+                contact = {}
+                organisation = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString', ns)
+                role = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:role/gmd:CI_RoleCode', ns)
+                if organisation is not None:
+                    contact['organisation'] = organisation.text
+                if role is not None:
+                    contact['role'] = self.getXMLCodeText(role)
+                resource_contacts.append(contact)
+            metadata_contacts = []
+            for pointOfContact in tree.findall('./gmd:contact', ns):
+                contact = {}
+                organisation = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString', ns)
+                role = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:role/gmd:CI_RoleCode', ns)
+                if organisation is not None:
+                    contact['organisation'] = organisation.text
+                if role is not None:
+                    contact['role'] = self.getXMLCodeText(role)
+                metadata_contacts.append(contact)
+            responsible_parties = []
+            for responsibleParty in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty', ns):
+                contact = {}
+                organisation = responsibleParty.find('./gmd:organisationName/gco:CharacterString', ns)
+                role = pointOfContact.find('./gmd:role/gmd:CI_RoleCode', ns)
+                if organisation:
+                    contact['organisation'] = organisation.text
+                if role:
+                    contact['role'] = self.getXMLCodeText(role)
+                responsible_parties.append(contact)
+            contacts = {
+                'metadata_contacts': metadata_contacts,
+                'resource_contacts': resource_contacts,
+                'responsible_parties': responsible_parties
+                }
             
             resource = {
                 'metadata_id': metadata_id,
@@ -443,7 +477,8 @@ class Geonetwork():
                 'thumbnails': thumbnails,
                 'resources': resources,
                 'resource_constraints': resource_constraints,
-                'metadata_constraints': metadata_constraints
+                'metadata_constraints': metadata_constraints,
+                'contacts': contacts
             }
             
             return resource
