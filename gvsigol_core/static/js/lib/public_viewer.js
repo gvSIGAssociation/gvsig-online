@@ -506,6 +506,15 @@ viewer.core = {
     	return tool;
     },
 
+    getLayerTree: function() {
+    	return this.layerTree;
+    },
+    
+    getLegend: function() {
+    	return this.legend;
+    },
+    
+    
     getMap: function(){
     	return this.map;
     },
