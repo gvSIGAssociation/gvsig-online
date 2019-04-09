@@ -2408,7 +2408,13 @@ def get_datatable_data(request):
         sortby_field = None
         if 'featureType' in definition and 'attributes' in definition['featureType'] and 'attribute' in definition['featureType']['attributes']:
             attributes = definition['featureType']['attributes']['attribute']
-            for attribute in attributes:
+            if isinstance(attributes, list):
+                for attribute in attributes:
+                    aux_encoded_property_name += attribute['name'] + ' '
+                    if not sortby_field and not attribute['binding'].startswith('com.vividsolutions.jts.geom'):
+                        sortby_field = attribute['name']
+            else:
+                attribute = attributes
                 aux_encoded_property_name += attribute['name'] + ' '
                 if not sortby_field and not attribute['binding'].startswith('com.vividsolutions.jts.geom'):
                     sortby_field = attribute['name']
@@ -2468,9 +2474,10 @@ def get_datatable_data(request):
                 properties = properties_with_type.split(',')
                 encoded_value = search_value.encode('ascii', 'replace')
 
+                geoserver_fields = encoded_property_name.split(',')
                 raw_search_cql = '('
                 for p in properties:
-                    if p.split('|')[0] != 'id':
+                    if p.split('|')[0] != 'id' and p.split('|')[0] in geoserver_fields:
                         if is_string_type(p.split('|')[1]):
                             raw_search_cql += p.split('|')[0] + " ILIKE '%" + encoded_value.replace('?', '_') +"%'"
                             raw_search_cql += ' OR '
@@ -2826,6 +2833,7 @@ def describeFeatureType(request):
     if request.method == 'POST':
         lyr = request.POST.get('layer')
         workspace = request.POST.get('workspace')
+        skip_pks = request.POST.get('skip_pks')
         try:
             layer = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
             params = json.loads(layer.datastore.connection_params)
@@ -2835,6 +2843,8 @@ def describeFeatureType(request):
             user = params['user']
             passwd = params['passwd']
             schema = params.get('schema', 'public')
+
+
             i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
             layer_defs = i.get_fields_info(layer.name, schema)
             layer_mv_defs = []
@@ -2853,6 +2863,26 @@ def describeFeatureType(request):
                 for pk_def in pk_defs:
                     if layer_def['name'] == pk_def:
                         layer_defs.remove(layer_def)
+
+            if skip_pks == 'true':
+                definition = mapservice_backend.getFeaturetype(layer.datastore.workspace, layer.datastore, layer.name, layer.title)
+                aux_encoded_property_name = ''
+                if 'featureType' in definition and 'attributes' in definition['featureType'] and 'attribute' in definition['featureType']['attributes']:
+                    attributes = definition['featureType']['attributes']['attribute']
+                    if isinstance(attributes, list):
+                        for attribute in attributes:
+                            aux_encoded_property_name += attribute['name'] + ' '
+                    else:
+                        attribute = attributes
+                        aux_encoded_property_name += attribute['name'] + ' '
+
+                names = aux_encoded_property_name.split(' ');
+                layer_defs_aux = []
+                for layer_def in layer_defs:
+                    if layer_def.get('name') in names:
+                        layer_defs_aux.append(layer_def)
+
+                layer_defs = layer_defs_aux
 
             response = {'fields': layer_defs}
 
