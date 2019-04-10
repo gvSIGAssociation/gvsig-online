@@ -295,6 +295,7 @@ def get_metadata(request, metadata_uuid):
                 return render_to_response('catalog_details.html', response, context_instance=RequestContext(request))
             
         except Exception as e:
+            logger.exception(e)
             return HttpResponse(status=500, content=e.message)
         
     return HttpResponse(status=500)
