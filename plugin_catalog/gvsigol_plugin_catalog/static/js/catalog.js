@@ -836,14 +836,23 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 //					self.linkResourceMap();
 
 					var links = self.data[id].link;
-					var geoBox = [];
-					if (self.data[id].geoBox) {
-						var geoBoxStrList = self.data[id].geoBox.split("|");
-						for (var i=0; i<geoBoxStrList.length; i++) {
-							var bboxValue = parseFloat(geoBoxStrList[i]);
-							geoBox.push(bboxValue);
+					try {
+						var geoBox = [];
+						if (self.data[id].geoBox) {
+							if (Array.isArray(self.data[id].geoBox)) {
+								// TODO: merge all the bboxes in this case
+								var geoBoxStrList = self.data[id].geoBox[0].split("|");
+							}
+							else {
+								var geoBoxStrList = self.data[id].geoBox.split("|");
+							}
+							for (var i=0; i<geoBoxStrList.length; i++) {
+								var bboxValue = parseFloat(geoBoxStrList[i]);
+								geoBox.push(bboxValue);
+							}
 						}
 					}
+					catch (e) {}
 					if(!Array.isArray(links)){
 						links = [links];
 					}
