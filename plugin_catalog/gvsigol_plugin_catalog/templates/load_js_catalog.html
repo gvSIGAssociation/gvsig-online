@@ -24,7 +24,7 @@
 						disabledFacets: [],
 					{% endif %}
 					{% if 'CATALOG_QUERY_URL' in plugins_config.gvsigol_plugin_catalog %}
-						queryUrl: '{{ plugins_config.gvsigol_plugin_catalog.CATALOG_QUERY_URL|safe }}';
+						queryUrl: '{{ plugins_config.gvsigol_plugin_catalog.CATALOG_QUERY_URL|safe }}'
 					{% else %}
 						queryUrl: ""
 					{% endif %}
