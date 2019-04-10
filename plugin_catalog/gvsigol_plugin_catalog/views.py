@@ -286,8 +286,10 @@ def get_metadata(request, metadata_uuid):
                 sharing = False
             
             if not sharing:
-                response = geonetwork_service.get_metadata(metadata_uuid)
-                response['html'] = get_metadata_as_html(response)
+                metadataJsonSummary = geonetwork_service.get_metadata(metadata_uuid)
+                response = {
+                    'html': get_metadata_as_html(metadataJsonSummary)
+                }
                 return  HttpResponse(json.dumps(response, indent=4), content_type='application/json')
             else:
                 # FIXME
