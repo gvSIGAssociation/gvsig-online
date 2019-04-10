@@ -37,6 +37,7 @@ from gvsigol_plugin_catalog.models import LayerMetadata
 from gvsigol_auth.utils import staff_required
 from django.http import JsonResponse
 import logging
+from gvsigol_plugin_catalog import settings as catalog_settings
 
 logger = logging.getLogger("gvsigol")
 
@@ -121,29 +122,41 @@ def get_metadata_as_html(response):
                 html += '        <br />'
 
             contactsHtml = ''
-            for resource_contact in response['contacts']['resource_contacts']:
-                if resource_contact.get('organisation'):
-                    contactsHtml += '<p><span class="catalog_detail_attr">'+resource_contact.get('role', 'Contact')+": </span>"+resource_contact.get('organisation')+'</p>'
+            for contact in response['contacts']['resource_contacts']:
+                if contact.get('organisation'):
+                    if contact.get('onlineResource') and contact.get('onlineResource').get('url'):
+                        onlineResourceHtml = '&nbsp;&nbsp;<a href="'+contact.get('onlineResource').get('url')+'" target="_blank" class="fa fa-external-link"> ' + contact.get('onlineResource').get('name') + '</a>'
+                    else:
+                        onlineResourceHtml = ''
+                    contactsHtml += '<p><span class="catalog_detail_attr">'+contact.get('role', 'Contact')+": </span>"+contact.get('organisation')+onlineResourceHtml+'</p>'
             if contactsHtml != '':
                 html += '        <h4 class="modal-catalog-title">'+'Resource Contacts'+'</h4>'
                 html += contactsHtml
             contactsHtml = ''
-            for resource_contact in response['contacts']['metadata_contacts']:
-                if resource_contact.get('organisation'):
-                    contactsHtml += '<p><span class="catalog_detail_attr">'+resource_contact.get('role', 'Contact')+": </span>"+resource_contact.get('organisation')+'</p>'
+            for contact in response['contacts']['metadata_contacts']:
+                if contact.get('organisation'):
+                    if contact.get('onlineResource') and contact.get('onlineResource').get('url'):
+                        onlineResourceHtml = '&nbsp;&nbsp;<a href="'+contact.get('onlineResource').get('url')+'" target="_blank" class="fa fa-external-link"> ' + contact.get('onlineResource').get('name') + '</a>'
+                    else:
+                        onlineResourceHtml = ''
+                    contactsHtml += '<p><span class="catalog_detail_attr">'+contact.get('role', 'Contact')+": </span>"+contact.get('organisation')+onlineResourceHtml+'</p>'
             if contactsHtml != '':
                 html += '        <h4 class="modal-catalog-title">'+'Metadata Contacts'+'</h4>'
                 html += contactsHtml
             
             resConstraints = ''
             for useLimitation in response['resource_constraints']['useLimitations']:
-                resConstraints += '        <span class="catalog_detail_attr">Use limitation: </span>'+useLimitation+'<br>'
+                if useLimitation:
+                    resConstraints += '        <span class="catalog_detail_attr">Use limitation: </span>'+useLimitation+'<br>'
             for accessConstraint in response['resource_constraints']['accessConstraints']:
-                resConstraints += '        <span class="catalog_detail_attr">Access constraint: </span>'+accessConstraint+'<br>'
+                if accessConstraint:
+                    resConstraints += '        <span class="catalog_detail_attr">Access constraint: </span>'+accessConstraint+'<br>'
             for useConstraint in response['resource_constraints']['useConstraints']:
-                resConstraints += '        <span class="catalog_detail_attr">Use constraint type: </span>'+useConstraint+'<br>'
+                if useConstraint:
+                    resConstraints += '        <span class="catalog_detail_attr">Use constraint type: </span>'+useConstraint+'<br>'
             for otherConstraint in response['resource_constraints']['otherConstraints']:
-                resConstraints += '        <span class="catalog_detail_attr">Constraint description: </span>'+otherConstraint+'<br>'
+                if otherConstraint:
+                    resConstraints += '        <span class="catalog_detail_attr">Constraint description: </span>'+otherConstraint+'<br>'
             if resConstraints != '':
                 html += '        <h4 class="modal-catalog-title">'+'Resource constraints'+'</h4>'
                 html += resConstraints
@@ -164,10 +177,13 @@ def get_metadata_as_html(response):
                 html += '        <span class="catalog_detail_attr">'+'Coordinate Reference System'+':</span>'
                 html += '        '+response['srs']
                 html += '        <br />'
+            #https://gvsigol.localhost/geonetwork/srv/eng/catalog.search#/metadata/8dd47e35-2895-40df-9bf5-4f43d4257bb2
             
             if response.get('metadata_id', None):
+                gn_md_url = catalog_settings.CATALOG_BASE_URL + "/srv/eng/catalog.search#metadata/" + response.get('metadata_id', '')
                 html += '        <span class="catalog_detail_attr">'+'Metadata identifier'+':</span>'
-                html += '        '+response['metadata_id']
+                html += '        '+response.get('metadata_id', '')
+                html += '        &nbsp;&nbsp;<a class="fa fa-external-link" target="_blank" href="' + gn_md_url + '">'+' Show in Catalog'+'</a>'
                 html += '        <br />'
             # online services
             ogcservices_html = ''
@@ -190,7 +206,7 @@ def get_metadata_as_html(response):
                         ogcservices_html += '                <span>WCS: '+resource['url']+'?service=WCS&request=GetCapabilities>'
                     ogcservices_html += '            <div style="clear:both"></div>'
             if ogcservices_html != '':
-                html += '        <br /><br /><h4 class="modal-catalog-title">'+'Online services'+'</h4>'
+                html += '        <h4 class="modal-catalog-title">'+'Online services'+'</h4>'
                 html += ogcservices_html
                      
             html += '    </div>'
