@@ -27,6 +27,8 @@ import json
 import re
 from gvsigol_plugin_catalog.mdstandards import registry
 #from gvsigol_plugin_catalog.mdstandards import iso19139_2007
+import logging
+logger = logging.getLogger("gvsigol")
 
 class Geonetwork():
     """
@@ -358,172 +360,177 @@ class Geonetwork():
               
         r = self.session.get(url, headers=headers)
         if r.status_code==200:
-            tree = ET.fromstring(r.text.encode('utf8'))
-            print r.text
-            ns = {'gmd': 'http://www.isotc211.org/2005/gmd', 'gco': 'http://www.isotc211.org/2005/gco'}
-            
-            
-            metadata_id = self.getTextFromXMLNode(tree, './gmd:fileIdentifier/', ns)
-            title = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/', ns)
-            abstract = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/', ns)
-            publish_date = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/', ns)
-            
-            period_start = ''
-            period_end = ''
-            aux = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_TemporalExtent/gmd:extent/', ns)
-            if len(aux) > 0:
-                period_start = aux[0]._children[0].text
-                period_end = aux[0]._children[1].text
-            
-            categories = []
-            for category in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:topicCategory/gmd:MD_TopicCategoryCode/', ns):
-                categories.append(category.text)
-            
-            keywords = []
-            for keyword in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/', ns):
-                keywords.append(keyword.text)
-            
-            representation_type = ''
-            aux = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialRepresentationType/', ns)
-            if len(aux) > 0:
-                representation_type = aux[0].attrib['codeListValue'] 
-            scale = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/', ns) 
-            srs = self.getTextFromXMLNode(tree, './gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code/', ns)
-            
-            #https://test.gvsigonline.com/geonetwork/srv/spa/region.getmap.png?mapsrs=EPSG:3857&width=250&background=settings&geomsrs=EPSG:4326&geom=Polygon((-18.1595005217%2043.9729489023,4.96320908311%2043.9729489023,4.96320908311%2025.9993588695,-18.1595005217%2025.9993588695,-18.1595005217%2043.9729489023))
-            coords_w = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:westBoundLongitude/', ns)
-            coords_e = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:eastBoundLongitude/', ns)
-            coords_s = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:southBoundLatitude/', ns)
-            coords_n = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:northBoundLatitude/', ns)
-            
-            image_url = self.service_url + '/srv/spa/region.getmap.png?mapsrs=EPSG:3857&width=250&background=osm&geomsrs=EPSG:4326&geom=Polygon(('+coords_w+' '+coords_s+','+coords_e+' '+coords_s+','+coords_e+' '+coords_n+','+coords_w+' '+coords_n+','+coords_w+' '+coords_s+'))'
-            
-            #thumbnails
-            thumbnails_urls = []
-            for thumbnail_url in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileName/', ns):
-                thumbnails_urls.append(thumbnail_url.text)
+            try:
+                tree = ET.fromstring(r.text.encode('utf8'))
+                print r.text
+                ns = {'gmd': 'http://www.isotc211.org/2005/gmd', 'gco': 'http://www.isotc211.org/2005/gco'}
                 
-            thumbnail_names = []
-            for thumbnail_name in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileDescription/', ns):
-                thumbnail_names.append(thumbnail_name.text)
-            
-            thumbnails = []
-            if thumbnails_urls.__len__() == thumbnail_names.__len__():
-                for i in range(0,thumbnails_urls.__len__()):
-                    thumbnail = {
-                        'url' : thumbnails_urls[i],
-                        'name': thumbnail_names[i]
+                
+                metadata_id = self.getTextFromXMLNode(tree, './gmd:fileIdentifier/', ns)
+                title = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/', ns)
+                abstract = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/', ns)
+                publish_date = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/', ns)
+                
+                period_start = ''
+                period_end = ''
+                aux = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_TemporalExtent/gmd:extent/', ns)
+                if len(aux) > 0:
+                    period_start = aux[0]._children[0].text
+                    period_end = aux[0]._children[1].text
+                
+                categories = []
+                for category in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:topicCategory/gmd:MD_TopicCategoryCode/', ns):
+                    categories.append(category.text)
+                
+                keywords = []
+                for keyword in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/', ns):
+                    keywords.append(keyword.text)
+                
+                representation_type = ''
+                aux = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialRepresentationType/', ns)
+                if len(aux) > 0:
+                    representation_type = aux[0].attrib['codeListValue'] 
+                scale = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/', ns) 
+                srs = self.getTextFromXMLNode(tree, './gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code/', ns)
+                
+                #https://test.gvsigonline.com/geonetwork/srv/spa/region.getmap.png?mapsrs=EPSG:3857&width=250&background=settings&geomsrs=EPSG:4326&geom=Polygon((-18.1595005217%2043.9729489023,4.96320908311%2043.9729489023,4.96320908311%2025.9993588695,-18.1595005217%2025.9993588695,-18.1595005217%2043.9729489023))
+                coords_w = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:westBoundLongitude/', ns)
+                coords_e = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:eastBoundLongitude/', ns)
+                coords_s = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:southBoundLatitude/', ns)
+                coords_n = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:northBoundLatitude/', ns)
+                
+                image_url = self.service_url + '/srv/spa/region.getmap.png?mapsrs=EPSG:3857&width=250&background=osm&geomsrs=EPSG:4326&geom=Polygon(('+coords_w+' '+coords_s+','+coords_e+' '+coords_s+','+coords_e+' '+coords_n+','+coords_w+' '+coords_n+','+coords_w+' '+coords_s+'))'
+                
+                #thumbnails
+                thumbnails_urls = []
+                for thumbnail_url in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileName/', ns):
+                    thumbnails_urls.append(thumbnail_url.text)
+                    
+                thumbnail_names = []
+                for thumbnail_name in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileDescription/', ns):
+                    thumbnail_names.append(thumbnail_name.text)
+                
+                thumbnails = []
+                if thumbnails_urls.__len__() == thumbnail_names.__len__():
+                    for i in range(0,thumbnails_urls.__len__()):
+                        thumbnail = {
+                            'url' : thumbnails_urls[i],
+                            'name': thumbnail_names[i]
+                        }
+                        thumbnails.append(thumbnail)
+                
+                
+                resource_constraints = self._getXMLConstraints(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceConstraints', ns)
+                metadata_constraints = self._getXMLConstraints(tree, './gmd:metadataConstraints', ns)
+                
+                #resources
+                resources = []
+                for onlineResourceNode in tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource', ns):
+                    onlineResource = self._getOnlineResource(onlineResourceNode, ns)
+                    resources.append(onlineResource)
+                """
+                resources_urls = []
+                for resources_url in tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:linkage/', ns):
+                    resources_urls.append(resources_url.text)
+                    
+                resources_names = []
+                for resources_name in tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:name/', ns):
+                    resources_names.append(resources_name.text)
+                    
+                resources_protocols = []
+                for resources_protocol in tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:protocol/', ns):
+                    resources_protocols.append(resources_protocol.text)
+                    
+                resources_descriptions = []
+                for resources_description in tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:description/', ns):
+                    resources_descriptions.append(resources_description.text)
+                
+                resources = []
+                if resources_names.__len__() == resources_urls.__len__() and resources_protocols.__len__() == resources_urls.__len__() and resources_descriptions.__len__() == resources_urls.__len__():
+                    for i in range(0,resources_urls.__len__()):
+                        res = {
+                            'url' : resources_urls[i],
+                            'name': resources_names[i],
+                            'protocol': resources_protocols[i],
+                            'descriptions' : resources_descriptions[i]
+                        }
+                        resources.append(res)
+                """
+                resource_contacts = []
+                for pointOfContact in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:pointOfContact', ns):
+                    contact = {}
+                    organisation = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString', ns)
+                    role = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:role/gmd:CI_RoleCode', ns)
+                    if organisation is not None:
+                        contact['organisation'] = organisation.text
+                    if role is not None:
+                        contact['role'] = self.getXMLCodeText(role)
+                    contactInfoNode = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource', ns)
+                    if contactInfoNode is not None:
+                        onlineResource = self._getOnlineResource(contactInfoNode, ns)
+                        contact['onlineResource'] = onlineResource
+                    resource_contacts.append(contact)
+                metadata_contacts = []
+                for pointOfContact in tree.findall('./gmd:contact', ns):
+                    contact = {}
+                    organisation = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString', ns)
+                    role = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:role/gmd:CI_RoleCode', ns)
+                    if organisation is not None:
+                        contact['organisation'] = organisation.text
+                    if role is not None:
+                        contact['role'] = self.getXMLCodeText(role)
+                    contactInfoNode = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource', ns)
+                    if contactInfoNode is not None:
+                        onlineResource = self._getOnlineResource(contactInfoNode, ns)
+                        contact['onlineResource'] = onlineResource
+                    metadata_contacts.append(contact)
+                responsible_parties = []
+                for responsibleParty in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty', ns):
+                    contact = {}
+                    organisation = responsibleParty.find('./gmd:organisationName/gco:CharacterString', ns)
+                    role = responsibleParty.find('./gmd:role/gmd:CI_RoleCode', ns)
+                    if organisation is not None:
+                        contact['organisation'] = organisation.text
+                    if role is not None:
+                        contact['role'] = self.getXMLCodeText(role)
+                    contactInfoNode = responsibleParty.find('./gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource', ns)
+                    if contactInfoNode is not None:
+                        onlineResource = self._getOnlineResource(contactInfoNode, ns)
+                        contact['onlineResource'] = onlineResource
+                    responsible_parties.append(contact)
+                contacts = {
+                    'metadata_contacts': metadata_contacts,
+                    'resource_contacts': resource_contacts,
+                    'responsible_parties': responsible_parties
                     }
-                    thumbnails.append(thumbnail)
-            
-            
-            resource_constraints = self._getXMLConstraints(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceConstraints', ns)
-            metadata_constraints = self._getXMLConstraints(tree, './gmd:metadataConstraints', ns)
-            
-            #resources
-            resources = []
-            for onlineResourceNode in tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource', ns):
-                onlineResource = self._getOnlineResource(onlineResourceNode, ns)
-                resources.append(onlineResource)
-            """
-            resources_urls = []
-            for resources_url in tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:linkage/', ns):
-                resources_urls.append(resources_url.text)
                 
-            resources_names = []
-            for resources_name in tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:name/', ns):
-                resources_names.append(resources_name.text)
-                
-            resources_protocols = []
-            for resources_protocol in tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:protocol/', ns):
-                resources_protocols.append(resources_protocol.text)
-                
-            resources_descriptions = []
-            for resources_description in tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:description/', ns):
-                resources_descriptions.append(resources_description.text)
-            
-            resources = []
-            if resources_names.__len__() == resources_urls.__len__() and resources_protocols.__len__() == resources_urls.__len__() and resources_descriptions.__len__() == resources_urls.__len__():
-                for i in range(0,resources_urls.__len__()):
-                    res = {
-                        'url' : resources_urls[i],
-                        'name': resources_names[i],
-                        'protocol': resources_protocols[i],
-                        'descriptions' : resources_descriptions[i]
-                    }
-                    resources.append(res)
-            """
-            resource_contacts = []
-            for pointOfContact in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:pointOfContact', ns):
-                contact = {}
-                organisation = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString', ns)
-                role = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:role/gmd:CI_RoleCode', ns)
-                if organisation is not None:
-                    contact['organisation'] = organisation.text
-                if role is not None:
-                    contact['role'] = self.getXMLCodeText(role)
-                contactInfoNode = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource', ns)
-                if contactInfoNode is not None:
-                    onlineResource = self._getOnlineResource(contactInfoNode, ns)
-                    contact['onlineResource'] = onlineResource
-                resource_contacts.append(contact)
-            metadata_contacts = []
-            for pointOfContact in tree.findall('./gmd:contact', ns):
-                contact = {}
-                organisation = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString', ns)
-                role = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:role/gmd:CI_RoleCode', ns)
-                if organisation is not None:
-                    contact['organisation'] = organisation.text
-                if role is not None:
-                    contact['role'] = self.getXMLCodeText(role)
-                contactInfoNode = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource', ns)
-                if contactInfoNode is not None:
-                    onlineResource = self._getOnlineResource(contactInfoNode, ns)
-                    contact['onlineResource'] = onlineResource
-                metadata_contacts.append(contact)
-            responsible_parties = []
-            for responsibleParty in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty', ns):
-                contact = {}
-                organisation = responsibleParty.find('./gmd:organisationName/gco:CharacterString', ns)
-                role = responsibleParty.find('./gmd:role/gmd:CI_RoleCode', ns)
-                if organisation is not None:
-                    contact['organisation'] = organisation.text
-                if role is not None:
-                    contact['role'] = self.getXMLCodeText(role)
-                contactInfoNode = responsibleParty.find('./gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource', ns)
-                if contactInfoNode is not None:
-                    onlineResource = self._getOnlineResource(contactInfoNode, ns)
-                    contact['onlineResource'] = onlineResource
-                responsible_parties.append(contact)
-            contacts = {
-                'metadata_contacts': metadata_contacts,
-                'resource_contacts': resource_contacts,
-                'responsible_parties': responsible_parties
+                resource = {
+                    'metadata_id': metadata_id,
+                    'title': title,
+                    'abstract': abstract,
+                    'publish_date': publish_date,
+                    'period_start': period_start,
+                    'period_end': period_end,
+                    'categories': categories,
+                    'keywords': keywords,
+                    'representation_type': representation_type,
+                    'scale': scale,
+                    'srs': srs,
+                    'image_url': image_url,
+                    'thumbnails': thumbnails,
+                    'resources': resources,
+                    'resource_constraints': resource_constraints,
+                    'metadata_constraints': metadata_constraints,
+                    'contacts': contacts
                 }
-            
-            resource = {
-                'metadata_id': metadata_id,
-                'title': title,
-                'abstract': abstract,
-                'publish_date': publish_date,
-                'period_start': period_start,
-                'period_end': period_end,
-                'categories': categories,
-                'keywords': keywords,
-                'representation_type': representation_type,
-                'scale': scale,
-                'srs': srs,
-                'image_url': image_url,
-                'thumbnails': thumbnails,
-                'resources': resources,
-                'resource_constraints': resource_constraints,
-                'metadata_constraints': metadata_constraints,
-                'contacts': contacts
-            }
-            
-            return resource
+                
+                return resource
+            except Exception as e:
+                logger.exception(e)
             #return ET.tostring(tree, encoding='UTF-8')
             #return r.content
+        logger.error(r.status_code)
+        logger.error(r.content)
         raise FailedRequestError(r.status_code, r.content)
     
     def get_query(self, query):

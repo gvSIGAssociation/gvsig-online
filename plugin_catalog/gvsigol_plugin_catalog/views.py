@@ -265,8 +265,8 @@ def get_metadata_as_html(response):
              
             return html     
     except Exception as e:
-        print e
-        pass
+        logger.exception(e)
+        #print e
         
     html = '<div class="row" style="padding: 20px;">'
     html += '    <div class="col-md-8">'
