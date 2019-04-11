@@ -2373,7 +2373,7 @@ def is_numeric_type(type):
 
 
 def is_string_type(type):
-    if type == 'character varying' or type == 'varchar' or type == 'character' or type == 'char' or type == 'text':
+    if type.startswith('character varying') or type.startswith('varchar') or type.startswith('character') or type.startswith('char') or type.startswith('text'):
         return True;
     return False;
 
@@ -2491,6 +2491,8 @@ def get_datatable_data(request):
                     raw_search_cql = raw_search_cql[:-4]
 
                 raw_search_cql += ')'
+                if raw_search_cql == '()':
+                    raw_search_cql = ''
 
                 values = {
                     'SERVICE': 'WFS',
