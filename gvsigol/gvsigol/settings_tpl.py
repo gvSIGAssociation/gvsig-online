@@ -267,39 +267,26 @@ GVSIGOL_USERS_CARTODB = {
     'dbpassword': '##DB_PASSWD##'
 }
 
-PUBLIC_VIEWER = True
-
 GEOSERVER_PATH = '/geoserver'
 FRONTEND_URL = '##FRONTEND_URL##'
 #FRONTEND_URL = 'https://intranet-pre.gva.es'
 
-GVSIGOL_SERVICES = {
-    'ENGINE':'geoserver',
-    'URL': '##GEOSERVER_BASE_URL##',
-    'USER': 'root',
-    'PASSWORD': '##GEOSERVER_PASSWD##',
-    'CLUSTER_NODES':[##GEOSERVER_CLUSTER_NODES##],
-    'SUPPORTED_TYPES': (
-                        ('v_PostGIS', _('PostGIS vector')),
-                        #('v_SHP', _('Shapefile folder')),                        
-                        ('c_GeoTIFF', _('GeoTiff')),
-                        ('e_WMS', _('Cascading WMS')),
-    ),
-    # if MOSAIC_DB entry is omitted, mosaic indexes will be stored as SHPs
-    'MOSAIC_DB': {
-                  'host': '##DB_HOST##',
-                  'port': '##DB_PORT##',
-                  'database': '##DB_NAME##',
-                  'schema': 'imagemosaic',
-                  'user': '##DB_USER##',
-                  'passwd': '##DB_PASSWD##'
-    },
-    # NOTE: we are migrating gdal_tools to the external library pygdaltools.
-    # In the future we will only need GDALTOOLS_BASEPATH variable 
-    # OGR path is only necessary if different from the one defined on gdal_tools.OGR2OGR_PATH
-    'OGR2OGR_PATH': '##OGR2OGR_PATH##',
-    'GDALTOOLS_BASEPATH': '##GDALTOOLS_BASEPATH##'
+# if MOSAIC_DB entry is omitted, mosaic indexes will be stored as SHPs
+MOSAIC_DB = {
+    'host': '##DB_HOST##',
+    'port': '##DB_PORT##',
+    'database': '##DB_NAME##',
+    'schema': 'imagemosaic',
+    'user': '##DB_USER##',
+    'passwd': '##DB_PASSWD##'
 }
+    
+# NOTE: we are migrating gdal_tools to the external library pygdaltools.
+# In the future we will only need GDALTOOLS_BASEPATH variable 
+# OGR path is only necessary if different from the one defined on gdal_tools.OGR2OGR_PATH
+OGR2OGR_PATH = '##OGR2OGR_PATH##',
+GDALTOOLS_BASEPATH = '##GDALTOOLS_BASEPATH##'
+    
                      
 TILE_SIZE = 256
 MAX_ZOOM_LEVEL = ##MAX_ZOOM_LEVELS##

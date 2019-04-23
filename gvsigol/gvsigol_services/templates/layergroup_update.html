@@ -34,6 +34,21 @@
 							<p>* {{ message }}</p>
 						</div>
 						{% endif %}
+						
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="layergroup_workspace_id">{% trans "Select workspace" %}</label>
+								<select class="form-control" id="layergroup_workspace_id" name="layergroup_workspace_id">
+									{% for workspace in workspaces %}
+										{% if workspace.id == layergroup.workspace_id %}
+											<option value="{{workspace.id}}" selected>{{workspace.name}}</option>
+										{% else %}
+											<option value="{{workspace.id}}">{{workspace.name}}</option>
+										{% endif %}	
+									{% endfor %}
+								</select>
+							</div>
+						</div>
 										
 						<div class="row">
 							<div class="col-md-12">

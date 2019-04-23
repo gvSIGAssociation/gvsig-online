@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import django.db.models.deletion
+from gvsigol_services.forms_services import blank
 
 
 class Migration(migrations.Migration):
@@ -133,6 +134,20 @@ class Migration(migrations.Migration):
                 ('created_by', models.CharField(max_length=100)),
             ],
         ),
+        migrations.CreateModel(
+            name='Server',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=100, unique=True)),
+                ('title', models.CharField(blank=True, max_length=100, null=True)),
+                ('description', models.CharField(blank=True, max_length=500, null=True)),
+                ('type', models.CharField(max_length=50, choices=[('geoserver', 'geoserver'), ('mapserver', 'mapserver')], default='geoserver')),
+                ('frontend_url', models.CharField(max_length=500)),
+                ('user', models.CharField(max_length=25)),
+                ('password', models.CharField(max_length=100)),
+                ('default', models.BooleanField(default=False)),
+            ],
+        ),
         migrations.AddField(
             model_name='layer',
             name='layer_group',
@@ -142,5 +157,10 @@ class Migration(migrations.Migration):
             model_name='datastore',
             name='workspace',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='gvsigol_services.Workspace'),
+        ),
+        migrations.AddField(
+            model_name='workspace',
+            name='server',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='gvsigol_services.Server'),
         ),
     ]

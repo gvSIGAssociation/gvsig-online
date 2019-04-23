@@ -548,7 +548,8 @@ $(document).ready(function() {
 				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 			},
 			data: {
-				name: "{{style.name}}"
+				name: "{{style.name}}",
+				layer_id: "{{layer_id}}"
 			},
 			success: function(response){
 				

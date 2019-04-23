@@ -1,5 +1,5 @@
 from gvsigol_services.models import Datastore
-from gvsigol_services.backend_mapservice import backend as mapservice
+from gvsigol_services.geographic_servers import geographic_servers
 from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.forms_geoserver import PostgisLayerUploadForm
 from django.views.generic import TemplateView, FormView
@@ -76,24 +76,26 @@ class ExportToDatabaseView(FilemanagerMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(ExportToDatabaseView, self).get_context_data(**kwargs)
         
-        form = mapservice.getUploadForm('v_PostGIS', self.request.user)
+        form = PostgisLayerUploadForm(user=self.request.user)
+        
         context['form'] = form
         if self.message:
             if self.message != '':
                 context['message'] = self.message
                 self.message = ''
         context['file'] = self.fm.file_details()
-        
+    
         return context
     
     def post(self, request, *args, **kwargs):
         form = PostgisLayerUploadForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             try:
-                if mapservice.exportShpToPostgis(form.cleaned_data):
+                gs = geographic_servers.get_server_by_id(form.cleaned_data['datastore'].workspace.server.id)
+                if gs.exportShpToPostgis(form.cleaned_data):
                     request.session.message = _('Export process done successfully')
                     return redirect("/gvsigonline/filemanager/?path=" + request.POST.get('directory_path'))
-                
+            
             except rest_geoserver.RequestError as e:
                 message = e.server_message
                 request.session['message'] = str(message)
