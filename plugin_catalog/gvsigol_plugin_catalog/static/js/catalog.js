@@ -540,7 +540,6 @@ CatalogView.prototype._createOLLayer = function(url, name, title, dataId, bbox) 
 	catalogLayer.dataid = dataId;
 	catalogLayer.id = dataId;
 	catalogLayer.layer_name = name;
-	//catalogLayer.legend = this.conf.geoserver_frontend_url + '/wms' + '?SERVICE=WMS&VERSION=1.1.1&layer=' + name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on';
 	catalogLayer.legend = url + '?SERVICE=WMS&VERSION=1.1.1&layer=' + name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on';
 	catalogLayer.queryable = true;
 	catalogLayer.title = title;

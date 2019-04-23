@@ -19,7 +19,7 @@
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 from gvsigol_services import signals
-from gvsigol_services.backend_mapservice import backend as mapservice
+from gvsigol_services.backend_geoserver import backend as mapservice
 from gvsigol_plugin_catalog import settings as plugin_settings
 from django.core.exceptions import ImproperlyConfigured
 from gvsigol_plugin_catalog.models import LayerMetadata

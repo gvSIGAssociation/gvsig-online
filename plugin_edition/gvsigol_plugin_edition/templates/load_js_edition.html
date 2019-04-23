@@ -7,57 +7,59 @@
 	var map = viewer.core.getMap();
 	var conf = viewer.core.getConf();
 	
-	var layers = map.getLayers();
-	var is_enabled = true;
-	var is_portable = false;
-	var portable_write_groups =[]
-	if('widget_conf' in viewer.core){
-		is_portable = true;
-		if('Editing' in viewer.core['widget_conf']){
-			var geo_conf = viewer.core['widget_conf']['Editing'];
-			if('active' in geo_conf){
-				is_enabled = geo_conf["active"];
-				if(geo_conf["group_names"] != null){
-					portable_write_groups = geo_conf["group_names"];
+	if (!conf.is_public_project) {
+		var layers = map.getLayers();
+		var is_enabled = true;
+		var is_portable = false;
+		var portable_write_groups =[]
+		if('widget_conf' in viewer.core){
+			is_portable = true;
+			if('Editing' in viewer.core['widget_conf']){
+				var geo_conf = viewer.core['widget_conf']['Editing'];
+				if('active' in geo_conf){
+					is_enabled = geo_conf["active"];
+					if(geo_conf["group_names"] != null){
+						portable_write_groups = geo_conf["group_names"];
+					}
 				}
 			}
 		}
-	}
-	if(!is_portable){
-		layers.forEach(function(layer){
-			if (layer.baselayer == false) {
-				if (layer.is_vector) {
-			    	if (layer.write_roles.length >= 1) {
-			    		if (userCanWrite(layer, conf.user.permissions.roles)) {
-			    			var ui = '';
-			    			ui += '	<a id="start-edition-' + layer.get('id') + '" href="#" class="btn btn-block btn-social btn-custom-tool start-edition-link">';
-			    			ui += '		<i class="fa fa-edit"></i> ' + gettext('Edit layer');
-			    			ui += '	</a>';
-			    			$('#layer-box-' + layer.get('id') + ' .box-body').prepend(ui);
-			    		}
-			    	}
-			    }				
-			}
-		}, this);
-	}else{
-		if(is_enabled){
+		if(!is_portable){
 			layers.forEach(function(layer){
 				if (layer.baselayer == false) {
 					if (layer.is_vector) {
 				    	if (layer.write_roles.length >= 1) {
-				    		if (userCanWrite(layer, portable_write_groups)) {
+				    		if (userCanWrite(layer, conf.user.permissions.roles)) {
 				    			var ui = '';
-				    			ui += '	<a id="start-edition-' + layer.get('id') + '" href="#" class="btn btn-block btn-social btn-custom-tool edition-tool-toc-button start-edition-link">';
-				    			ui += '		<i class="fa fa-edit"></i>';
+				    			ui += '	<a id="start-edition-' + layer.get('id') + '" href="#" class="btn btn-block btn-social btn-custom-tool start-edition-link">';
+				    			ui += '		<i class="fa fa-edit"></i> ' + gettext('Edit layer');
 				    			ui += '	</a>';
-				    			var selector = '#layer-box-' + layer.get('id') + ' .box-header';
-				    			$(selector).append(ui);
+				    			$('#layer-box-' + layer.get('id') + ' .box-body').prepend(ui);
 				    		}
 				    	}
 				    }				
 				}
 			}, this);
-		}
+		}else{
+			if(is_enabled){
+				layers.forEach(function(layer){
+					if (layer.baselayer == false) {
+						if (layer.is_vector) {
+					    	if (layer.write_roles.length >= 1) {
+					    		if (userCanWrite(layer, portable_write_groups)) {
+					    			var ui = '';
+					    			ui += '	<a id="start-edition-' + layer.get('id') + '" href="#" class="btn btn-block btn-social btn-custom-tool edition-tool-toc-button start-edition-link">';
+					    			ui += '		<i class="fa fa-edit"></i>';
+					    			ui += '	</a>';
+					    			var selector = '#layer-box-' + layer.get('id') + ' .box-header';
+					    			$(selector).append(ui);
+					    		}
+					    	}
+					    }				
+					}
+				}, this);
+			}
+		}	
 	}
 	
 	$(".start-edition-link").on('click', function(e) {

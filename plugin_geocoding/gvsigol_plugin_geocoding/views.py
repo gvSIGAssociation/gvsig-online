@@ -40,7 +40,6 @@ import ast
 from gvsigol_services.models import Workspace, Datastore
 from gvsigol_services.views import backend_resource_list_available,\
     backend_resource_list
-from gvsigol_services.backend_mapservice import backend as mapservice_backend
 from gvsigol_services.backend_postgis import Introspect
 from django.views.decorators.csrf import csrf_exempt
 
@@ -184,8 +183,6 @@ def isValidCartociudadDB(datastore):
     i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
     resources = i.get_tables(schema)
     
-    
-    #resources = mapservice_backend.getResources(datastore.workspace, datastore, "all")
     resources_needed = []
     
     #if not geocoding_setting.CARTOCIUDAD_DB_CODIGO_POSTAL in resources:
