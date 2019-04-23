@@ -263,38 +263,25 @@ GVSIGOL_USERS_CARTODB = {
     'dbpassword': 'postgres'
 }
 
-PUBLIC_VIEWER = True
-
 GEOSERVER_PATH = '/gs-local'
 FRONTEND_URL = 'https://localhost'
 
-GVSIGOL_SERVICES = {
-    'ENGINE':'geoserver',
-    'URL': 'https://localhost/gs-local',
-    'USER': 'admin',
-    'PASSWORD': 'geoserver',
-    'CLUSTER_NODES':[],
-    'SUPPORTED_TYPES': (
-                        ('v_PostGIS', _('PostGIS vector')),
-                        #('v_SHP', _('Shapefile folder')),                        
-                        ('c_GeoTIFF', _('GeoTiff')),
-                        ('e_WMS', _('Cascading WMS')),
-    ),
-    # if MOSAIC_DB entry is omitted, mosaic indexes will be stored as SHPs
-    'MOSAIC_DB': {
-                  'host': 'localhost',
-                  'port': '5432',
-                  'database': 'gvsigonline_v2',
-                  'schema': 'imagemosaic',
-                  'user': 'postgres',
-                  'passwd': 'postgres'
-    },
-    # NOTE: we are migrating gdal_tools to the external library pygdaltools
-    # OGR path is only necessary if different from the one defined on gdal_tools.OGR2OGR_PATH
-    # In the future we will only need GDALTOOLS_BASEPATH variable
-    'OGR2OGR_PATH': '/usr/bin/ogr2ogr',
-    'GDALTOOLS_BASEPATH': '/usr/bin'
+# if MOSAIC_DB entry is omitted, mosaic indexes will be stored as SHPs
+MOSAIC_DB = {
+    'host': 'localhost',
+    'port': '5432',
+    'database': 'gvsigonline_v2',
+    'schema': 'imagemosaic',
+    'user': 'postgres',
+    'passwd': 'postgres'
 }
+
+# NOTE: we are migrating gdal_tools to the external library pygdaltools
+# OGR path is only necessary if different from the one defined on gdal_tools.OGR2OGR_PATH
+# In the future we will only need GDALTOOLS_BASEPATH variable
+OGR2OGR_PATH = '/usr/bin/ogr2ogr',
+GDALTOOLS_BASEPATH = '/usr/bin'
+
 
 TILE_SIZE = 256
 
