@@ -267,10 +267,6 @@ GVSIGOL_USERS_CARTODB = {
     'dbpassword': '##DB_PASSWD##'
 }
 
-GEOSERVER_PATH = '/geoserver'
-FRONTEND_URL = '##FRONTEND_URL##'
-#FRONTEND_URL = 'https://intranet-pre.gva.es'
-
 # if MOSAIC_DB entry is omitted, mosaic indexes will be stored as SHPs
 MOSAIC_DB = {
     'host': '##DB_HOST##',

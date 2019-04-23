@@ -320,9 +320,6 @@ GVSIGOL_USERS_CARTODB = {
     'dbpassword': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 }
 
-GEOSERVER_PATH = '/gs-local'
-FRONTEND_URL = 'https://localhost'
-
 MOSAIC_DB = {
     'host': 'localhost',
     'port': '5432',
