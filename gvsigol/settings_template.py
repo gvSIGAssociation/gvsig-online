@@ -273,39 +273,24 @@ GVSIGOL_USERS_CARTODB = {
     'dbpassword': '##DATABASE_PASSWORD##'
 }
 
-PUBLIC_VIEWER = True
-
 GEOSERVER_PATH = '/geoserver'
 FRONTEND_URL = 'https://devel.gvsigonline.com'
 
-GVSIGOL_SERVICES = {
-    'ENGINE':'geoserver',
-    'URL': '##GEOSERVER_BASE_URL##',
-    'USER': 'root',
-    'PASSWORD': '##GEOSERVER_ADMIN_PASS##',
-    'CLUSTER_NODES':[##GEOSERVER_CLUSTER_NODES##],
-    'SUPPORTED_TYPES': (
-                        ('v_PostGIS', _('PostGIS vector')),
-                        #('v_SHP', _('Shapefile folder')),                        
-                        ('c_GeoTIFF', _('GeoTiff')),
-                        ('e_WMS', _('Cascading WMS')),
-                        ('c_ImageMosaic', _('ImageMosaic')),
-    ),
-    # if MOSAIC_DB entry is omitted, mosaic indexes will be stored as SHPs
-    'MOSAIC_DB': {
-                  'host': '##DATABASE_HOST##',
-                  'port': '##DATABASE_PORT##',
-                  'database': 'gvsigonline',
-                  'schema': 'imagemosaic',
-                  'user': '##DATABASE_USER##',
-                  'passwd': '##DATABASE_PASSWORD##'
-    },
-    # NOTE: we are migrating gdal_tools to the external library pygdaltools.
-    # In the future we will only need GDALTOOLS_BASEPATH variable 
-    # OGR path is only necessary if different from the one defined on gdal_tools.OGR2OGR_PATH
-    'OGR2OGR_PATH': '##OGR2OGR_PATH##',
-    'GDALTOOLS_BASEPATH': '##GDALTOOLS_BASEPATH##'
+# if MOSAIC_DB entry is omitted, mosaic indexes will be stored as SHPs
+MOSAIC_DB = {
+    'host': '##DATABASE_HOST##',
+    'port': '##DATABASE_PORT##',
+    'database': 'gvsigonline',
+    'schema': 'imagemosaic',
+    'user': '##DATABASE_USER##',
+    'passwd': '##DATABASE_PASSWORD##'
 }
+
+# NOTE: we are migrating gdal_tools to the external library pygdaltools.
+# In the future we will only need GDALTOOLS_BASEPATH variable 
+# OGR path is only necessary if different from the one defined on gdal_tools.OGR2OGR_PATH
+OGR2OGR_PATH = '##OGR2OGR_PATH##',
+GDALTOOLS_BASEPATH = '##GDALTOOLS_BASEPATH##'
                      
 TILE_SIZE = 256
 

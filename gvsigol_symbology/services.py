@@ -22,12 +22,10 @@
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
-from models import Library, Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, TextSymbolizer, RasterSymbolizer, ColorMap
+from models import Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, RasterSymbolizer, ColorMap
 from django.utils.translation import ugettext_lazy as _
-from gvsigol_core import utils as core_utils
 from gvsigol_core import geom
 from gvsigol_services.models import Layer
-from django.http import HttpResponse
 import utils, sld_builder
 import tempfile
 import json
@@ -147,8 +145,6 @@ def create_default_style(layer_id, style_name, style_type, geom_type, count):
 def sld_import(name, is_default, layer_id, file, mapservice):
     
     layer = Layer.objects.get(id=int(layer_id))
-    datastore = layer.datastore
-    workspace = datastore.workspace
     
     ### write the data to a temp file
     tup = tempfile.mkstemp() # make a tmp file
@@ -429,8 +425,7 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
     s = mapservice.getStyle(style.name)
     if s is None:        
         print "DEBUG: style not exists in Geoserver .. " + style.name
-        if mapservice.createStyle(style.name, sld_body): 
-            aux = layer.datastore.workspace.name + ":"+ layer.name
+        if mapservice.createStyle(style.name, sld_body):
             mapservice.setLayerStyle(layer, cloned_style_name, style.is_default)
         else:
             "DEBUG: problem creating style !!!!!" + style.name

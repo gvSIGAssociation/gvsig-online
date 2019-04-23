@@ -17,32 +17,30 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from doctest import master
 
 '''
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
-from models import ColorMap, ColorMapEntry, Library, Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, TextSymbolizer, RasterSymbolizer
-from gvsigol_services.backend_mapservice import backend as mapservice
+from models import ColorMap, ColorMapEntry, Library, Style, StyleLayer, Rule, Symbolizer, RasterSymbolizer
+
+from gvsigol_services.geographic_servers import geographic_servers
+
 from gvsigol_services.models import Layer, Datastore, Workspace
 from gvsigol_core import utils as core_utils
-from django.http import HttpResponse
 from gvsigol import settings
-import utils, sld_utils, sld_builder
-import tempfile, zipfile
-import os, shutil
-import StringIO
+import utils, sld_builder
 import string
 import random
-import utils
 import json
-import re
 
 def create_style(request, json_data, layer_id, is_preview=False, has_custom_legend=None):
 
     layer = Layer.objects.get(id=int(layer_id))
     datastore = layer.datastore
     workspace = datastore.workspace
+    gs = geographic_servers.get_server_by_id(workspace.server.id)
     
     layer_styles = StyleLayer.objects.filter(layer=layer)
     is_default = False
@@ -143,23 +141,27 @@ def create_style(request, json_data, layer_id, is_preview=False, has_custom_lege
         order = order + 1
          
     sld_body = sld_builder.build_sld(layer, style)
+
     if is_preview:
-        if mapservice.createOverwrittenStyle(style.name, sld_body, True): 
+        if gs.createOverwrittenStyle(style.name, sld_body, True): 
             return True
         else:
             return False
     else:
-        if mapservice.createOverwrittenStyle(style.name, sld_body, True): 
+        if gs.createOverwrittenStyle(style.name, sld_body, True): 
             if not is_preview:
-                mapservice.setLayerStyle(layer, style.name, style.is_default)
+                gs.setLayerStyle(layer, style.name, style.is_default)
             return True
             
         else:
             return False
-    
+
 def update_style(request, json_data, layer_id, style_id, is_preview=False, has_custom_legend=None):   
     style = Style.objects.get(id=int(style_id))
     layer = Layer.objects.get(id=int(layer_id))
+    datastore = layer.datastore
+    workspace = datastore.workspace
+    gs = geographic_servers.get_server_by_id(workspace.server.id)
     
     layer_styles = StyleLayer.objects.filter(layer=layer)
     style_is_default = False
@@ -171,9 +173,7 @@ def update_style(request, json_data, layer_id, style_id, is_preview=False, has_c
             s = Style.objects.get(id=ls.style.id)
             s.is_default = False
             s.save()
-        datastore = layer.datastore
-        workspace = datastore.workspace
-        mapservice.setLayerStyle(layer, style.name, style.is_default)
+        gs.setLayerStyle(layer, style.name, style.is_default)
     else:
         has_default_style = False
         for ls in layer_styles:
@@ -181,11 +181,8 @@ def update_style(request, json_data, layer_id, style_id, is_preview=False, has_c
             if s != style and s.is_default:
                 has_default_style = True
         if not has_default_style:
-            datastore = layer.datastore
-            workspace = datastore.workspace
             style_is_default = True
-            mapservice.setLayerStyle(layer, style.name, True)
-        
+            gs.setLayerStyle(layer, style.name, True)
     
     if has_custom_legend == 'true':
         style.has_custom_legend = True
@@ -279,24 +276,26 @@ def update_style(request, json_data, layer_id, style_id, is_preview=False, has_c
         order = order + 1
     
     sld_body = sld_builder.build_sld(layer, style)
+
     if is_preview:
-        if mapservice.createOverwrittenStyle(style.name, sld_body, True): 
+        if gs.createOverwrittenStyle(style.name, sld_body, True): 
             return True
         else:
             return False
     else:
-        if mapservice.updateStyle(layer, style.name, sld_body): 
-            mapservice.setLayerStyle(layer, style.name, style.is_default)
+        if gs.updateStyle(layer, style.name, sld_body): 
+            gs.setLayerStyle(layer, style.name, style.is_default)
             return True
         else:
             return False
-   
 
 def get_conf(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
-        
+    gs = geographic_servers.get_server_by_id(workspace.server.id)
+    master = gs.get_master_node(gs.id)
+    
     index = len(StyleLayer.objects.filter(layer=layer))
     styleLayers = StyleLayer.objects.filter(layer=layer)
     for style_layer in styleLayers:
@@ -309,13 +308,13 @@ def get_conf(request, layer_id):
                 index = aux_index + 1
         except ValueError:
             print "Error getting index"
-    
-    (ds_type, resource) = mapservice.getResourceInfo(workspace.name, datastore, layer.name, "json")
+
+    (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
 
     layer_url = core_utils.get_wms_url(request, workspace)
     layer_wfs_url = core_utils.get_wfs_url(request, workspace)
     
-    preview_url = settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
+    preview_url = master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
                       
     conf = {
         'layer_id': layer_id,

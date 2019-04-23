@@ -103,8 +103,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
-GDAL_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\gdal202.dll'
+#GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
+#GDAL_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\gdal202.dll'
 
 
 
@@ -124,19 +124,13 @@ INSTALLED_APPS = [
     'gvsigol_filemanager',
     'gvsigol_core',
     'gvsigol_app_dev',
-    #'gvsigol_plugin_graphiccapture',
     'gvsigol_plugin_edition',
-    #'gvsigol_plugin_worldwind',
-    #'gvsigol_plugin_shps_folder',
-    'gvsigol_plugin_geocoding',
-    #'gvsigol_plugin_etl',
-    #'gvsigol_plugin_form',
-    'gvsigol_plugin_sync',
-    #'gvsigol_plugin_catastro',
-    #'gvsigol_plugin_alfresco',
-    #'gvsigol_plugin_print',
-    'gvsigol_plugin_catalog',
-    'gvsigol_plugin_trip_planner',
+    'gvsigol_plugin_worldwind',
+    #'gvsigol_plugin_geocoding',
+    'gvsigol_plugin_print',
+    #'gvsigol_plugin_catalog',
+    #'gvsigol_app_libraregepa',
+    #'gvsigol_plugin_regepa',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -297,8 +291,8 @@ SITE_ID=1
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 BASE_URL = 'https://localhost'
-MEDIA_ROOT = 'D:/dev/Apache24/media/'
-MEDIA_URL = 'http://localhost/media/'
+MEDIA_ROOT = '/usr/local/var/www/media/'
+MEDIA_URL = 'https://localhost/media/'
 STATIC_URL = '/gvsigonline/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 
@@ -326,38 +320,20 @@ GVSIGOL_USERS_CARTODB = {
     'dbpassword': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 }
 
-PUBLIC_VIEWER = True
+GEOSERVER_PATH = '/gs-local'
+FRONTEND_URL = 'https://localhost'
 
-GEOSERVER_PATH = '/geoserver'
-FRONTEND_URL = 'http://localhost'
+MOSAIC_DB = {
+    'host': 'localhost',
+    'port': '5432',
+    'database': 'gvsigonline_v2',
+    'schema': 'imagemosaic',
+    'user': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
+    'passwd': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
+},
 
-GVSIGOL_SERVICES = {
-    'ENGINE':'geoserver',
-    'URL': 'https://localhost/gs-local',
-    'USER': GEOSERVER_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
-    'PASSWORD': GEOSERVER_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
-    'CLUSTER_NODES':[],
-    'SUPPORTED_TYPES': (
-                        ('v_PostGIS', _('PostGIS vector')),
-                        #('v_SHP', _('Shapefile folder')),                        
-                        ('c_GeoTIFF', _('GeoTiff')),
-                        ('e_WMS', _('Cascading WMS')),
-    ),
-    # if MOSAIC_DB entry is omitted, mosaic indexes will be stored as SHPs
-    'MOSAIC_DB': {
-                  'host': 'localhost',
-                  'port': '5432',
-                  'database': 'gvsigonline_v2',
-                  'schema': 'imagemosaic',
-                  'user': DB_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
-                  'passwd': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
-    },
-    # NOTE: we are migrating gdal_tools to the external library pygdaltools
-    # OGR path is only necessary if different from the one defined on gdal_tools.OGR2OGR_PATH
-    # In the future we will only need GDALTOOLS_BASEPATH variable
-    'OGR2OGR_PATH': 'C:/OSGeo4W64/bin/ogr2ogr',
-    'GDALTOOLS_BASEPATH': 'C:/OSGeo4W64/bin'
-}
+OGR2OGR_PATH = '/usr/local/bin/ogr2ogr'
+GDALTOOLS_BASEPATH = '/usr/local/bin'
 
 TILE_SIZE = 256
 MAX_ZOOM_LEVEL = 18 

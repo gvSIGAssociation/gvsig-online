@@ -67,13 +67,6 @@ def is_valid_project(user, project_name):
         print e
         return valid
     
-def is_valid_public_project(pname):
-    valid = False
-    project = Project.objects.get(name__exact=pname)
-    if project.is_public:
-        valid = True
-                        
-    return valid
 
 def get_all_groups():
     groups_list = UserGroup.objects.all()

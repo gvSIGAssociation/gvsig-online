@@ -20,28 +20,66 @@
 '''
 @author: César Martinez <cmartinez@scolab.es>
 '''
-from models import Workspace, Datastore, Layer, LayerGroup
+from models import Workspace, Datastore, Layer, LayerGroup, Server
 from gvsigol_core.models import BaseLayer
 from django.utils.translation import ugettext as _
-from backend_mapservice import backend
+from gvsigol_services.geographic_servers import geographic_servers
 from django import forms
+import string
+import random
 import json
 from gvsigol.settings import BASELAYER_SUPPORTED_TYPES
 
 
-supported_types = tuple((x,x) for x in BASELAYER_SUPPORTED_TYPES)
+baselayer_supported_types = tuple((x,x) for x in BASELAYER_SUPPORTED_TYPES)
 layers = (('---', _('No se han podido obtener las capas')), ('1.3.0', 'version 1.3.0'))
 version = (('1.1.1', _('1.1.1')), ('1.3.0', _('1.3.0')), ('1.0.0', _('1.0.0')))
 blank = (('', '---------'),)
+servers = (('geoserver', 'geoserver'), ('mapserver', 'mapserver'))
 
-time_presentation_op = (('CONTINUOUS_INTERVAL', _('continuous interval')),)
+time_presentation_op = (
+    ('CONTINUOUS_INTERVAL', _('continuous interval')),
+)
 #time_presentation_op = (('CONTINUOUS_INTERVAL', _('continuous interval')), ('DISCRETE_INTERVAL', _('interval and resolution')), ('LIST', _('list')))
-time_default_value_mode_op = (('MINIMUM', _('smallest domain value')), ('MAXIMUM', _('biggest domain value')), ('NEAREST', _('nearest to the reference value')), ('FIXED', _('reference value')))
+time_default_value_mode_op = (
+    ('MINIMUM', _('smallest domain value')), 
+    ('MAXIMUM', _('biggest domain value')), 
+    ('NEAREST', _('nearest to the reference value')), 
+    ('FIXED', _('reference value'))
+)
 #time_default_value_mode_op = (('MINIMUM', _('smallest domain value')), ('MAXIMUM', _('biggest domain value')))
-time_resolution = (('second', _('seconds')),('minute', _('minutes')),('hour', _('hours')),('day', _('days')),('month', _('months')),('year', _('years')),)
+time_resolution = (
+    ('second', _('seconds')),
+    ('minute', _('minutes')),
+    ('hour', _('hours')),
+    ('day', _('days')),
+    ('month', _('months')),
+    ('year', _('years')),
+)
 
+supported_types = (
+    ('v_PostGIS', _('PostGIS vector')),
+    ('c_GeoTIFF', _('GeoTiff')),
+    ('e_WMS', _('Cascading WMS')),
+    ('c_ImageMosaic', _('ImageMosaic')), 
+)
 
-class WorkspaceForm(forms.Form):   
+def random_id():
+    return 'server_' + ''.join(random.choice(string.ascii_uppercase) for i in range(6))
+    
+
+class ServerForm(forms.Form):
+    name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1', 'readonly': 'true'}))
+    title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '2'}))
+    description = forms.CharField(label=_(u'Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))
+    type = forms.ChoiceField(label=_(u'Type'), required=False, choices=servers, widget=forms.Select(attrs={'class':'form-control', 'tabindex': '4'}))
+    frontend_url = forms.CharField(label=_(u'Frontend URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '5'}))
+    user = forms.CharField(label=_(u'User'), required=False, max_length=25, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '7'}))
+    password = forms.CharField(required=True, widget=forms.PasswordInput(attrs={'class' : 'form-control', 'tabindex': '8'}))
+    default = forms.BooleanField(label=_(u'Default'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'style' : 'margin-left: 10px'}))
+
+class WorkspaceForm(forms.Form):  
+    server = forms.ModelChoiceField(label=_(u'Server'), required=True, queryset=Server.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'})) 
     name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1'}))
     description = forms.CharField(label=_(u'Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '2'}))
     uri = forms.CharField(required=True, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))
@@ -54,7 +92,7 @@ class WorkspaceForm(forms.Form):
     
 class DatastoreForm(forms.Form):
     workspace = forms.ModelChoiceField(label=_(u'Workspace'), required=True, queryset=Workspace.objects.all().order_by('name'), widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
-    type = forms.ChoiceField(label=_(u'Type'), choices=backend.getSupportedTypes(), required=True, widget=forms.Select(attrs={'class':'form-control'}))
+    type = forms.ChoiceField(label=_(u'Type'), choices=supported_types, required=True, widget=forms.Select(attrs={'class':'form-control'}))
     file = forms.CharField(label=_(u'File'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))  
     name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     description = forms.CharField(label=_(u'Description'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))
@@ -70,9 +108,10 @@ class DatastoreForm(forms.Form):
         connection_params = cleaned_data.get("connection_params")
 
         if name and workspace:
-            if backend.datastore_exists(workspace.name, name):
+            gs = geographic_servers.get_server_by_id(workspace.server.id)
+            if gs.datastore_exists(workspace.name, name):
                 self.add_error('name', _("Datastore already exists")) 
-        
+
         if connection_params:
             try:
                 json.loads(connection_params) 
@@ -168,7 +207,7 @@ class BaseLayerForm(forms.ModelForm):
     #name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     title = forms.CharField(label=_(u'Title'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     
-    type = forms.ChoiceField(label=_(u'Type'), choices=supported_types, required=True, widget=forms.Select(attrs={'class' : 'form-control'}))
+    type = forms.ChoiceField(label=_(u'Type'), choices=baselayer_supported_types, required=True, widget=forms.Select(attrs={'class' : 'form-control'}))
     version = forms.ChoiceField(label=_(u'Version'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control'}))
    
     url = forms.CharField(label=_(u'URL'), required=False, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))

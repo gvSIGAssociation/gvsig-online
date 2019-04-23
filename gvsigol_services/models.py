@@ -25,7 +25,31 @@ from django.db import models
 from gvsigol_auth.models import UserGroup
 from gvsigol import settings
 
+class Server(models.Model):
+    TYPE_CHOICES = (
+        ('geoserver', 'geoserver'),
+        ('mapserver', 'mapserver')
+    )
+    name = models.CharField(max_length=100, unique=True)
+    title = models.CharField(max_length=100, null=True, blank=True)
+    description = models.CharField(max_length=500, null=True, blank=True)
+    type = models.CharField(max_length=50, choices=TYPE_CHOICES, default='geoserver')
+    frontend_url = models.CharField(max_length=500)
+    user = models.CharField(max_length=25)
+    password = models.CharField(max_length=100)
+    default = models.BooleanField(default=False)
+    
+    def __unicode__(self):
+        return self.name
+    
+class Node(models.Model):
+    server = models.ForeignKey(Server)
+    status = models.CharField(max_length=25)
+    url = models.CharField(max_length=500)
+    is_master = models.BooleanField(default=False)
+
 class Workspace(models.Model):
+    server = models.ForeignKey(Server)
     name = models.CharField(max_length=250, unique=True)
     description = models.CharField(max_length=500, null=True, blank=True)
     uri = models.CharField(max_length=500)
@@ -54,6 +78,7 @@ class Datastore(models.Model):
  
     
 class LayerGroup(models.Model):
+    workspace_id = models.IntegerField(null=True, default=0)
     name = models.CharField(max_length=150) 
     title = models.CharField(max_length=500, null=True, blank=True) 
     visible = models.BooleanField(default=False)

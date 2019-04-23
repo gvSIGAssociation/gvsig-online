@@ -23,7 +23,6 @@ from gvsigol_core.geom import RASTER
 from models import Layer, LayerGroup, Datastore, Workspace, DataRule, LayerReadGroup, LayerWriteGroup
 from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer
 from gvsigol_symbology import services as symbology_services
-from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
 from backend_postgis import Introspect
 import xml.etree.ElementTree as ET
@@ -47,7 +46,6 @@ import string
 import json
 import re
 import unicodedata
-import logging
 from dbfread import DBF
 
 logger = logging.getLogger("gvsigol")
@@ -76,27 +74,26 @@ _valid_sql_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 class Geoserver():
     CREATE_TYPE_SQL_VIEW = "gs_sql_view"
     CREATE_TYPE_VECTOR_LAYER = "gs_vector_layer"
-    def __init__(self, base_url, user, password, cluster_nodes, supported_types=None):
-        self.base_url = base_url
-        self.rest_url = self.base_url+"/rest"
-        self.gwc_url = base_url+"/gwc/rest"
-        self.cluster_nodes = cluster_nodes
+    def __init__(self, id, default, name, user, password, master_node, slave_nodes):
+        self.id = id
+        self.default = default
+        self.name = name
+        self.conf_url = master_node
+        self.rest_url = master_node + "/rest"
+        self.gwc_url = master_node + "/gwc/rest"
+        self.slave_nodes = slave_nodes
         self.rest_catalog = rest_geoserver.Geoserver(self.rest_url, self.gwc_url)
-        self.supported_types = supported_types
         self.user = user
         self.password = password
-        if supported_types is not None:
-            self.supported_types = supported_types
-        else:
-            self.supported_types = (
-                #('v_SHP', _('Shapefile folder')),
-                ('v_PostGIS', _('PostGIS vector')),
-                ('c_GeoTIFF', _('GeoTiff')),
-                ('e_WMS', _('Cascading WMS')),
-                ('c_ImageMosaic', _('ImageMosaic')), 
-            )
+        self.supported_types = (
+            ('v_PostGIS', _('PostGIS vector')),
+            ('c_GeoTIFF', _('GeoTiff')),
+            ('e_WMS', _('Cascading WMS')),
+            ('c_ImageMosaic', _('ImageMosaic')),
+        )
 
-        gdal_tools.OGR2OGR_PATH = settings.GVSIGOL_SERVICES.get('OGR2OGR_PATH', gdal_tools.OGR2OGR_PATH)
+        if settings.OGR2OGR_PATH is not None and settings.OGR2OGR_PATH != '':
+            gdal_tools.OGR2OGR_PATH = settings.OGR2OGR_PATH
         
         self.supported_srs_plain = [ x[0] for x in forms_geoserver.supported_srs ]
         self.supported_encodings_plain = [ x[0] for x in forms_geoserver.supported_encodings ]
@@ -134,11 +131,11 @@ class Geoserver():
     def reload_nodes(self):
         try:
             # get sequence from master
-            us_master = self.rest_catalog.get_update_sequence(self.base_url, user=self.user, password=self.password)
+            us_master = self.rest_catalog.get_update_sequence(self.conf_url, user=self.user, password=self.password)
             print "INFO: Reloading Geoserver all nodes except master configured with IP FO in Aapche. Update Sequence = " + str(us_master)
             # reload all nodes except master
-            if len(self.cluster_nodes) > 0:                                
-                for node in self.cluster_nodes:
+            if len(self.slave_nodes) > 0:                                
+                for node in self.slave_nodes:
                     us =  self.rest_catalog.get_update_sequence(node, user=self.user, password=self.password)
                     if us != us_master:
                         print  "INFO: Reloading ... " + node + " with updatedSequence " + str(us) 
@@ -151,8 +148,8 @@ class Geoserver():
     def reload_all_nodes(self):
         print "DEBUG: Reloading Geoserver nodes ......"
         try:
-            if len(self.cluster_nodes) > 0:
-                for node in self.cluster_nodes:
+            if len(self.slave_nodes) > 0:
+                for node in self.slave_nodes:
                     self.rest_catalog.reload(node, user=self.user, password=self.password)
             return True
         except Exception as e:
@@ -160,9 +157,7 @@ class Geoserver():
             return False
 
         
-    def createWorkspace(self, name, uri, description=None,
-                        wms_endpoint=None, wfs_endpoint=None,
-                        wcs_endpoint=None, wmts_endpoint=None, cache_endpoint=None):
+    def createWorkspace(self, name, uri):
         try:
             self.getGsconfig().create_workspace(name, uri)
             return True
@@ -194,8 +189,8 @@ class Geoserver():
             print str(e)
             return False
         
-    def getBaseUrl(self):
-        return self.base_url
+    def getConfUrl(self):
+        return self.conf_url
 
     def createDatastore(self, workspace, type, name, description, connection_params):
         """
@@ -687,10 +682,10 @@ class Geoserver():
         try:
             return self.rest_catalog.create_coverage(name, title, coveragestore.name, workspace.name, user=self.user, password=self.password)
         except rest_geoserver.FailedRequestError as e:
-            logger.exception('ERROR createCoverage failed. Layer: ' + layer.name + ' - Store: ' + coveragestore.name)
+            logger.exception('ERROR createCoverage failed. Layer: ' + name + ' - Store: ' + coveragestore.name)
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
         except Exception as e:
-            logger.exception('ERROR createCoverage failed. Layer: ' + layer.name + ' - Store: ' + coveragestore.name)
+            logger.exception('ERROR createCoverage failed. Layer: ' + name + ' - Store: ' + coveragestore.name)
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
     
     def createWMSLayer(self, workspace, store, name, title):
@@ -1901,7 +1896,7 @@ class Geoserver():
         fd.close()
     
     def __create_im_datastore_properties(self, folder_path):
-        mosaic_db = settings.GVSIGOL_SERVICES.get('MOSAIC_DB')
+        mosaic_db = settings.MOSAIC_DB
         if mosaic_db is not None:
             fd = open(folder_path + "/datastore.properties","w+")
             fd.write("SPI=org.geotools.data.postgis.PostgisNGDataStoreFactory\n")
@@ -1923,22 +1918,3 @@ class Geoserver():
             
             
             fd.close()
-
-def get_default_backend():
-    try:
-        backend_str = settings.GVSIGOL_SERVICES.get('ENGINE', 'geoserver')
-        base_url = settings.GVSIGOL_SERVICES['URL']
-        user = settings.GVSIGOL_SERVICES['USER']
-        password = settings.GVSIGOL_SERVICES['PASSWORD']
-        cluster_nodes = settings.GVSIGOL_SERVICES['CLUSTER_NODES']
-        supported_types = settings.GVSIGOL_SERVICES.get('SUPPORTED_TYPES', None)
-    except:
-        raise ImproperlyConfigured
-
-    if backend_str=='geoserver':
-        backend = Geoserver(base_url, user, password, cluster_nodes, supported_types)
-    else:
-        raise ImproperlyConfigured
-    return backend
-
-backend = get_default_backend()

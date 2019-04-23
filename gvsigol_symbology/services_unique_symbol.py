@@ -23,18 +23,12 @@
 '''
 
 from models import Library, Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, TextSymbolizer
-from gvsigol_services.backend_mapservice import backend as mapservice
+from gvsigol_services.geographic_servers import geographic_servers
 from gvsigol_services.models import Layer, Datastore, Workspace
 from gvsigol_core import utils as core_utils
-from django.http import HttpResponse
 from gvsigol import settings
-import utils, sld_utils, sld_builder
-import tempfile, zipfile
-import os, shutil
-import StringIO
-import utils
+import utils, sld_builder
 import json
-import re
 import ast
 
 def create_style(request, json_data, layer_id, is_preview=False):
@@ -42,6 +36,7 @@ def create_style(request, json_data, layer_id, is_preview=False):
     layer = Layer.objects.get(id=int(layer_id))
     datastore = layer.datastore
     workspace = datastore.workspace
+    gs = geographic_servers.get_server_by_id(workspace.server.id)
 
     layer_styles = StyleLayer.objects.filter(layer=layer)
     is_default = False
@@ -178,15 +173,16 @@ def create_style(request, json_data, layer_id, is_preview=False):
                 symbolizer.save()
 
     sld_body = sld_builder.build_sld(layer, style)
+
     if is_preview:
-        if mapservice.createOverwrittenStyle(style.name, sld_body, True):
+        if gs.createOverwrittenStyle(style.name, sld_body, True): 
             return True
         else:
             return False
     else:
-        if mapservice.createStyle(style.name, sld_body):
+        if gs.createStyle(style.name, sld_body): 
             if not is_preview:
-                mapservice.setLayerStyle(layer, style.name, style.is_default)
+                gs.setLayerStyle(layer, style.name, style.is_default)
             return True
 
         else:
@@ -195,6 +191,9 @@ def create_style(request, json_data, layer_id, is_preview=False):
 def update_style(request, json_data, layer_id, style_id, is_preview=False):
     style = Style.objects.get(id=int(style_id))
     layer = Layer.objects.get(id=int(layer_id))
+    datastore = layer.datastore
+    workspace = datastore.workspace
+    gs = geographic_servers.get_server_by_id(workspace.server.id)
 
     layer_styles = StyleLayer.objects.filter(layer=layer)
     style_is_default = False
@@ -206,9 +205,8 @@ def update_style(request, json_data, layer_id, style_id, is_preview=False):
             s = Style.objects.get(id=ls.style.id)
             s.is_default = False
             s.save()
-        datastore = layer.datastore
-        workspace = datastore.workspace
-        mapservice.setLayerStyle(layer, style.name, style.is_default)
+        gs.setLayerStyle(layer, style.name, style.is_default)
+
     else:
         has_default_style = False
         for ls in layer_styles:
@@ -216,10 +214,8 @@ def update_style(request, json_data, layer_id, style_id, is_preview=False):
             if s != style and s.is_default:
                 has_default_style = True
         if not has_default_style:
-            datastore = layer.datastore
-            workspace = datastore.workspace
             style_is_default = True
-            mapservice.setLayerStyle(layer, style.name, True)
+            gs.setLayerStyle(layer, style.name, True)
 
 
     style.title = json_data.get('title')
@@ -349,24 +345,26 @@ def update_style(request, json_data, layer_id, style_id, is_preview=False):
     sld_body = sld_builder.build_sld(layer, style)
 
     if is_preview:
-        if mapservice.createOverwrittenStyle(style.name, sld_body, True):
+        if gs.createOverwrittenStyle(style.name, sld_body, True): 
             return True
         else:
             return False
     else:
-        if mapservice.updateStyle(layer, style.name, sld_body):
-            mapservice.setLayerStyle(layer, style.name, style.is_default)
+        if gs.updateStyle(layer, style.name, sld_body): 
+            gs.setLayerStyle(layer, style.name, style.is_default)
             return True
         else:
             return False
+
 
 
 def get_conf(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
-
-
+    gs = geographic_servers.get_server_by_id(workspace.server.id)
+    master = gs.get_master_node(gs.id)
+       
     index = len(StyleLayer.objects.filter(layer=layer))
     styleLayers = StyleLayer.objects.filter(layer=layer)
     for style_layer in styleLayers:
@@ -379,8 +377,8 @@ def get_conf(request, layer_id):
                 index = aux_index + 1
         except ValueError:
             print "Error getting index"
-
-    (ds_type, resource) = mapservice.getResourceInfo(workspace.name, datastore, layer.name, "json")
+            
+    (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
     fields = utils.get_fields(resource)
     if layer.conf:
         new_fields = []
@@ -405,20 +403,20 @@ def get_conf(request, layer_id):
     feature_type = utils.get_feature_type(fields)
     alphanumeric_fields = utils.get_alphanumeric_fields(fields)
 
-    supported_fonts_str = mapservice.getSupportedFonts()
+    supported_fonts_str = gs.getSupportedFonts()
     supported_fonts = json.loads(supported_fonts_str)
     sorted_fonts = utils.sortFontsArray(supported_fonts.get("fonts"))
-
+    
     layer_url = core_utils.get_wms_url(request, workspace)
     layer_wfs_url = core_utils.get_wfs_url(request, workspace)
 
     preview_url = ''
     if feature_type == 'PointSymbolizer':
-        preview_url = settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point'
+        preview_url = master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point'    
     elif feature_type == 'LineSymbolizer':
-        preview_url = settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line'
+        preview_url = master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line'     
     elif feature_type == 'PolygonSymbolizer':
-        preview_url = settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
+        preview_url = master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
 
     conf = {
         'featureType': feature_type,

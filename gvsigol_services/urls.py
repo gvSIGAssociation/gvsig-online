@@ -1,6 +1,11 @@
 from django.conf.urls import url
 
 urlpatterns = [
+    url(r'^server_list/$', 'gvsigol_services.views.server_list', name='server_list'),
+    url(r'^server_add/$', 'gvsigol_services.views.server_add', name='server_add'),
+    url(r'^server_delete/(?P<svid>\d+)/$', 'gvsigol_services.views.server_delete', name='server_delete'),
+    url(r'^server_update/(?P<svid>[0-9]+)/$', 'gvsigol_services.views.server_update', name='server_update'), 
+    url(r'^get_server/(?P<svid>\d+)/$', 'gvsigol_services.views.get_server', name='get_server'),  
     url(r'^workspace_list/$', 'gvsigol_services.views.workspace_list', name='workspace_list'),
     url(r'^workspace_add/$', 'gvsigol_services.views.workspace_add', name='workspace_add'),
     url(r'^workspace_import/$', 'gvsigol_services.views.workspace_import', name='workspace_import'),
@@ -15,6 +20,7 @@ urlpatterns = [
     url(r'^backend_resource_list_configurable/$', 'gvsigol_services.views.backend_resource_list_configurable', name='backend_resource_list_configurable'),
     url(r'^backend_resource_list/$', 'gvsigol_services.views.backend_resource_list', name='backend_resource_list'),
     url(r'^backend_fields_list/$', 'gvsigol_services.views.backend_fields_list', name='backend_fields_list'),
+    url(r'^backend_layergroup_list_available/$', 'gvsigol_services.views.backend_layergroup_list_available', name='backend_layergroup_list_available'),
     url(r'^layer_list/$', 'gvsigol_services.views.layer_list', name='layer_list'),
     url(r'^layer_add/$', 'gvsigol_services.views.layer_add', name='layer_add'),
     url(r'^layer_add/(?P<layergroup_id>[0-9]+)/$', 'gvsigol_services.views.layer_add_with_group', name='layer_add_with_group'),
@@ -60,9 +66,7 @@ urlpatterns = [
 
     url(r'^layers_get_temporal_properties/$', 'gvsigol_services.views.layers_get_temporal_properties', name='layers_get_temporal_properties'),
     url(r'^get_date_fields_from_resource/$', 'gvsigol_services.views.get_date_fields_from_resource', name='get_date_fields_from_resource'),
-    
-    url(r'^get_geoserver_info/$', 'gvsigol_services.views.get_geoserver_info', name='get_geoserver_info'),
-    
+        
     url(r'^describeLayerConfig/$', 'gvsigol_services.views.describeLayerConfig', name='describeLayerConfig'),
     
 ]
