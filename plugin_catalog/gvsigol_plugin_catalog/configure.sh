@@ -3,16 +3,6 @@
 echo "Running install script for catalog plugin ..."
 mv settings_tpl.py settings.py
 
-if [ -z "$CATALOG_BASE_URL" ]; then
-        if [ -n "$FRONTEND_URL" ]; then
-                echo "WARNING: CATALOG_BASE_URL is not defined, building using FRONTEND_URL."
-                CATALOG_BASE_URL="$FRONTEND_URL/geonetwork"
-        else
-                echo "WARNING: CATALOG_BASE_URL is not defined, building using HTTP_PROTOCOL and GVSIGOL_HOST."
-                GEONETWORK_HOST="$HTTP_PROTOCOL://$GVSIGOL_HOST/geonetwork"
-        fi
-fi
-
 if [ -z "$CATALOG_URL" ]; then
         echo "WARNING: CATALOG_URL is not defined, using CATALOG_BASE_URL ."
         CATALOG_URL="$CATALOG_BASE_URL/srv/eng/"
