@@ -7,7 +7,7 @@
 	var map = viewer.core.getMap();
 	var conf = viewer.core.getConf();
 	
-	if (!conf.is_public_project) {
+	if (conf.user) {
 		var layers = map.getLayers();
 		var is_enabled = true;
 		var is_portable = false;
