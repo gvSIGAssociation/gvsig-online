@@ -509,7 +509,10 @@ def load(request, project_name):
     project = Project.objects.get(name__exact=project_name)
     
     if project.is_public:
-        return redirect('load_public_project', project_name=project.name)
+        if request.user and request.user.is_authenticated():
+            return redirect('load_project', project_name=project.name)
+        else:
+            return redirect('load_public_project', project_name=project.name)
     
     else:
         return redirect('load_project', project_name=project.name)
@@ -945,7 +948,7 @@ def select_public_project(request):
         return render_to_response('select_public_project.html', {'projects': projects}, RequestContext(request))
     
     elif len (public_projects) == 1:
-        return redirect('load_public_project', project_name=public_projects[0].name)
+        return redirect('load', project_name=public_projects[0].name)
     
     elif len (public_projects) > 1:
         for pp in public_projects:
