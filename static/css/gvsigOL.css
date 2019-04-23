@@ -3265,7 +3265,7 @@ table.text-center th {
  * https://github.com/lipis/bootstrap-social
  */
  .btn-social.btn-select{
-    padding:0px;
+    /*padding:0px;*/
 }
 
  .btn-social.btn-select select.symbol-to-layer{
