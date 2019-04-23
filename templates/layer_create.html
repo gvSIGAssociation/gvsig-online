@@ -678,8 +678,59 @@
 		}
 	};
 	
+	function updateLayerGroupList(id_datastore) {
+		if (id_datastore) {
+			$("body").overlay();
+			$.getJSON("{% url 'backend_layergroup_list_available' %}", {id_datastore: id_datastore}, function(data){
+				var layer_group_select = $("#id_layer_group");
+				var previousValue = layer_group_select.val();
+				var placeholderSelected = true;
+				
+				if (data==null || data.length==0) {
+					var text = "{% trans 'No layer groups available' %}";
+					rebuildSelect(layer_group_select, text, true);
+					$.overlayout();
+					return;
+				}
+				var options = [];
+				for (var i=0; i<data.length; i++) {
+					var attribs = {
+						value: data[i],
+						text: data[i]
+					};
+					if (previousValue == data[i]) {
+						attribs['selected']='true';
+						placeholderSelected = false;
+					}
+					options.push($('<option>', attribs));
+				}
+				var text = '{% trans "Choose layer group" %}';
+				rebuildSelect(layer_group_select, text, placeholderSelected, options);
+				$.overlayout();
+				
+			}).fail(function() {
+				var layer_group_select = $("#id_layer_group");
+				var text = "{% trans 'No layer groups available' %}";
+				rebuildSelect(layer_group_select, text, true);
+				$.overlayout();
+			});
+		}
+		else {
+			var layer_group_select = $("#id_layer_group");
+			var text = "{% trans 'No valid data store selected' %}";
+			rebuildSelect(layer_group_select, text, true);
+		}
+	};
+	
 	
 	$(document).ready(function() {
+		updateLayerGroupList($("#id_datastore").val());
+		
+		$("#id_datastore").change(function() {
+			var id_datastore = $('option:selected', $(this)).val();
+			updateLayerGroupList(id_datastore);
+		});
+		
 		// translate default layer group
 		var opts = $("#id_layer_group > option");
 		for(var i=0; i<opts.length; i++){

@@ -22,14 +22,14 @@ from httplib import HTTPResponse
 '''
 
 from models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, Enumeration, EnumerationItem,\
-    LayerLock
+    LayerLock, Server, Node
 from geoserver import workspace
-from forms_services import WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, BaseLayerForm
+from forms_services import ServerForm, WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, BaseLayerForm
 from forms_geoserver import CreateFeatureTypeForm
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
 from django.shortcuts import render_to_response, redirect, RequestContext
-from backend_mapservice import backend as mapservice_backend
+from geographic_servers import geographic_servers
 from backend_postgis import Introspect
 from gvsigol_services.backend_resources import resource_manager
 from gvsigol_auth.utils import superuser_required, staff_required
@@ -40,7 +40,7 @@ from django.views.decorators.csrf import csrf_exempt
 from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES, INSTALLED_APPS, WMS_MAX_VERSION, WMTS_MAX_VERSION, BING_LAYERS
 from django.utils.translation import ugettext as _
 from gvsigol_services.models import LayerResource
-from gvsigol.settings import GVSIGOL_SERVICES
+from gvsigol.settings import MOSAIC_DB
 from django.core.urlresolvers import reverse
 from gvsigol_core import utils as core_utils
 from gvsigol_core.models import Project
@@ -65,6 +65,8 @@ from owslib.wmts import WebMapTileService
 from lxml import html
 from requests_futures.sessions import FuturesSession
 import requests
+import string
+import random
 
 logger = logging.getLogger("gvsigol")
 
@@ -72,6 +74,196 @@ _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 CONNECT_TIMEOUT = 3.05
 READ_TIMEOUT = 30
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_safe
+@superuser_required
+def server_list(request):
+    response = {
+        'servers': Server.objects.values()
+    }
+    return render_to_response('server_list.html', response, context_instance=RequestContext(request))
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@superuser_required
+@require_http_methods(["GET", "POST", "HEAD"])
+def server_add(request):
+    if request.method == 'POST':
+        form = ServerForm(request.POST)
+        if form.is_valid():
+            # save it on DB if successfully created
+            server = Server(**form.cleaned_data)
+            server.save()
+            
+            if len(Server.objects.all()) == 1:
+                server.default = True
+                server.save()
+                
+            elif len(Server.objects.all()) > 1:
+                if form.cleaned_data['default'] == True:
+                    for s in Server.objects.all():
+                        s.default = False
+                        s.save()
+                    server.default = True
+                    server.save()
+                     
+            
+            nodes = json.loads(request.POST.get('nodes'))
+            for n in nodes:
+                node = Node(
+                    server = server,
+                    status = n['status'],
+                    url = n['url'],
+                    is_master = n['is_master']
+                )
+                node.save()
+            
+            has_master = False
+            if len(Node.objects.all()) > 0:
+                for n in Node.objects.all():
+                    if n.is_master:
+                        has_master = True
+                
+                if not has_master:
+                    Node.objects.all()[0].is_master = True
+            
+            geographic_servers.add_server(server)
+            
+            return HttpResponseRedirect(reverse('server_list'))
+                
+    else:
+        name = 'server_' + ''.join(random.choice(string.ascii_uppercase) for i in range(6))
+        form = ServerForm(initial={'name': name})
+            
+    return render(request, 'server_add.html', {'form': form})
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_POST
+@superuser_required
+def server_delete(request, svid):
+    try:
+    
+        sv_object = Server.objects.get(id=svid)
+        gs = geographic_servers.get_server_by_id(svid)
+        
+        for ws in Workspace.objects.filter(server_id=sv_object.id):
+            if gs.deleteWorkspace(ws):
+                datastores = Datastore.objects.filter(workspace_id=ws.id)
+                for ds in datastores:
+                    layers = Layer.objects.filter(datastore_id=ds.id)
+                    for l in layers:
+                        gs.deleteLayerStyles(l)
+                ws.delete()
+            
+            else:
+                return HttpResponseBadRequest()
+        
+        for n in Node.objects.filter(server_id=sv_object.id):
+            n.delete()
+             
+        sv_object.delete()
+        return HttpResponseRedirect(reverse('server_list'))
+        
+    except Exception as e:
+        print e.message 
+        return HttpResponseNotFound(e.message ) 
+    
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@superuser_required
+def server_update(request, svid):
+    if request.method == 'POST':
+        title = request.POST.get('server_title')
+        description = request.POST.get('server_description')
+        frontend_url = request.POST.get('server_frontend_url')
+        user = request.POST.get('server_user')
+        password = request.POST.get('server_password')
+        
+        server = Server.objects.get(id=int(svid))
+        
+        old_frontend_url = server.frontend_url
+        
+        if 'default' in request.POST:
+            for s in Server.objects.all():
+                s.default = False
+                s.save()
+            server.default = True
+            server.save()
+        
+        server.title = title
+        server.description = description
+        server.frontend_url = frontend_url
+        server.user = user
+        server.password = password
+        server.save() 
+        
+        workspaces = Workspace.objects.filter(server_id=server.id)
+        for ws in workspaces:
+            ws.uri = ws.uri.replace(old_frontend_url, frontend_url)
+            ws.wms_endpoint = ws.wms_endpoint.replace(old_frontend_url, frontend_url)
+            ws.wfs_endpoint = ws.wfs_endpoint.replace(old_frontend_url, frontend_url)
+            ws.wcs_endpoint = ws.wcs_endpoint.replace(old_frontend_url, frontend_url)
+            ws.wmts_endpoint = ws.wmts_endpoint.replace(old_frontend_url, frontend_url)
+            ws.cache_endpoint = ws.cache_endpoint.replace(old_frontend_url, frontend_url)
+            ws.save()
+        
+        json_nodes = json.loads(request.POST.get('nodes')) 
+        for n in json_nodes:
+            if 'exists' in n:
+                node = Node.objects.get(id=int(n['id']))
+                node.status = n['status']
+                node.url = n['url']
+                node.is_master = n['is_master']
+                node.save()
+                
+            else:
+                node = Node(
+                    server = server,
+                    status = n['status'],
+                    url = n['url'],
+                    is_master = n['is_master']
+                )
+                node.save()        
+          
+        return redirect('server_list')
+
+    else:
+        server = Server.objects.get(id=int(svid))
+        nodes = []
+        for n in Node.objects.filter(server_id=server.id):
+            node = {
+                'id': n.id,
+                'status': n.status,
+                'url': n.url,
+                'is_master': n.is_master,
+                'exists': True
+            }
+            nodes.append(node)
+
+        return render_to_response('server_update.html', {'svid': svid, 'server': server, 'nodes': json.dumps(nodes)}, context_instance=RequestContext(request))
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_POST
+@superuser_required
+def get_server(request, svid):
+    try:
+        s = Server.objects.get(id=svid)
+        
+        server = {}
+        server['name'] = s.name
+        server['title'] = s.title
+        server['description'] = s.description
+        server['type'] = s.type
+        server['frontend_url'] = s.frontend_url
+        
+        response = {
+            'server': server
+        }
+
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+    
+    except:
+        return HttpResponseNotFound('<h1>Server not found{0}</h1>'.format(s.name))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_safe
@@ -94,7 +286,8 @@ def workspace_add(request):
                 form.add_error(None, _("Invalid workspace name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name))
             else:
                 # first create the ws on the backend
-                if mapservice_backend.createWorkspace(form.cleaned_data['name'],
+                gs = geographic_servers.get_server_by_id(form.cleaned_data['server'].id)
+                if gs.createWorkspace(form.cleaned_data['name'],
                     form.cleaned_data['uri'],
                     form.cleaned_data['description'],
                     form.cleaned_data['wms_endpoint'],
@@ -112,16 +305,24 @@ def workspace_add(request):
                     newWs.created_by = request.user.username
                     newWs.is_public = isPublic
                     newWs.save()
-                    mapservice_backend.reload_nodes()
+                    gs.reload_nodes()
                     return HttpResponseRedirect(reverse('workspace_list'))
                 else:
                     # FIXME: the backend should raise an exception to identify the cause (e.g. workspace exists, backend is offline)
                     form.add_error(None, _("Error: workspace could not be created"))
 
     else:
-        form = WorkspaceForm()
+        sv = None
+        for s in Server.objects.all():
+            if s.default:
+                sv = s
 
-    return render(request, 'workspace_add.html', {'form': form, 'service_base_url': mapservice_backend.getBaseUrl()})
+        if len(Server.objects.all()) > 0:
+            if sv == None:
+                sv = Server.objects.all()[0] 
+        form = WorkspaceForm(initial={'server': sv})
+
+    return render(request, 'workspace_add.html', {'form': form})
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
@@ -143,7 +344,8 @@ def workspace_import(request):
     else:
         # create empty form
         # FIXME: probably does not work
-        workspaces = mapservice_backend.get_workspaces()
+        server = geographic_servers.get_server_by_id(id)
+        workspaces = server.get_workspaces()
         workspace_names = [n for n in workspaces['name']]
         querySet = Workspace.objects.all().exclude(name__in=workspace_names)
         response = {
@@ -158,14 +360,15 @@ def workspace_import(request):
 def workspace_delete(request, wsid):
     try:
         ws = Workspace.objects.get(id=wsid)
-        if mapservice_backend.deleteWorkspace(ws):
+        gs = geographic_servers.get_server_by_id(ws.server.id)
+        if gs.deleteWorkspace(ws):
             datastores = Datastore.objects.filter(workspace_id=ws.id)
             for ds in datastores:
                 layers = Layer.objects.filter(datastore_id=ds.id)
                 for l in layers:
-                    mapservice_backend.deleteLayerStyles(l)
+                    gs.deleteLayerStyles(l)
             ws.delete()
-            mapservice_backend.reload_nodes()
+            gs.reload_nodes()
             return HttpResponseRedirect(reverse('workspace_list'))
         else:
             return HttpResponseBadRequest()
@@ -260,8 +463,10 @@ def datastore_add(request):
             if _valid_name_regex.search(name) == None:
                 form.add_error(None, _("Invalid datastore name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name))
             else:
+                ws = form.cleaned_data['workspace']
+                gs = geographic_servers.get_server_by_id(ws.server.id)
                 # first create the datastore on the backend
-                if mapservice_backend.createDatastore(form.cleaned_data['workspace'],
+                if gs.createDatastore(form.cleaned_data['workspace'],
                                                       form.cleaned_data['type'],
                                                       form.cleaned_data['name'],
                                                       form.cleaned_data['description'],
@@ -276,16 +481,16 @@ def datastore_add(request):
                         created_by=request.user.username
                     )
                     newRecord.save()
-                    mapservice_backend.reload_nodes()
+                    gs.reload_nodes()
 
-                    '''
                     if type == 'c_ImageMosaic':
                         try:
-                            mapservice_backend.uploadImageMosaic(newRecord.workspace, newRecord)
-                            mapservice_backend.reload_nodes()
+                            gs.uploadImageMosaic(newRecord.workspace, newRecord)
+                            gs.reload_nodes()
+                            
                         except Exception as e:
                             pass
-                    '''
+                   
                     return HttpResponseRedirect(reverse('datastore_list'))
                 else:
                     # FIXME: the backend should raise an exception to identify the cause (e.g. datastore exists, backend is offline)
@@ -325,7 +530,8 @@ def datastore_update(request, datastore_id):
                     got_params['password'] = params['password']
                     connection_params = json.dumps(got_params)
 
-                if mapservice_backend.updateDatastore(datastore.workspace.name, datastore.name,
+                gs = geographic_servers.get_server_by_id(datastore.workspace.server.id)
+                if gs.updateDatastore(datastore.workspace.name, datastore.name,
                                                       description, dstype, connection_params):
                     # REST API does not allow to can't change the workspace or name of a datastore
                     #datastore.workspace = workspace
@@ -333,7 +539,7 @@ def datastore_update(request, datastore_id):
                     datastore.description = description
                     datastore.connection_params = connection_params
                     datastore.save()
-                    mapservice_backend.reload_nodes()
+                    gs.reload_nodes()
                     return HttpResponseRedirect(reverse('datastore_list'))
                 else:
                     form.add_error(None, _("Error updating datastore"))
@@ -356,11 +562,11 @@ def datastore_update(request, datastore_id):
 def datastore_delete(request, dsid):
     try:
         ds = Datastore.objects.get(id=dsid)
-
-        if mapservice_backend.deleteDatastore(ds.workspace, ds) or ds.type == 'c_ImageMosaic':
+        gs = geographic_servers.get_server_by_id(ds.workspace.server.id)
+        if gs.deleteDatastore(ds.workspace, ds) or ds.type == 'c_ImageMosaic':
             layers = Layer.objects.filter(datastore_id=ds.id)
             for l in layers:
-                mapservice_backend.deleteLayerStyles(l)
+                gs.deleteLayerStyles(l)
 
             Datastore.objects.all().filter(name=ds.name).delete()
             if ds.type == 'c_ImageMosaic':
@@ -377,16 +583,15 @@ def datastore_delete(request, dsid):
                 if os.path.isfile(mosaic_url + "/sample_image.dat"):
                     os.remove(mosaic_url + "/sample_image.dat")
 
-                mosaic_params = GVSIGOL_SERVICES['MOSAIC_DB']
-                host = mosaic_params['host']
-                port = mosaic_params['port']
-                dbname = mosaic_params['database']
-                user = mosaic_params['user']
-                passwd = mosaic_params['passwd']
+                host = MOSAIC_DB['host']
+                port = MOSAIC_DB['port']
+                dbname = MOSAIC_DB['database']
+                user = MOSAIC_DB['user']
+                passwd = MOSAIC_DB['passwd']
                 schema = 'imagemosaic'
                 i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
                 i.delete_mosaic(ds.name, schema)
-            mapservice_backend.reload_nodes()
+            gs.reload_nodes()
             return HttpResponseRedirect(reverse('datastore_list'))
         else:
             return HttpResponseBadRequest()
@@ -423,9 +628,10 @@ def layer_delete(request, layer_id):
 @staff_required
 def layer_delete_operation(request, layer_id):
     layer = Layer.objects.get(pk=layer_id)
-    mapservice_backend.deleteGeoserverLayerGroup(layer.layer_group)
-    mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer)
-    mapservice_backend.deleteLayerStyles(layer)
+    gs = geographic_servers.get_server_by_id(layer.datastore.workspace.server.id)
+    gs.deleteGeoserverLayerGroup(layer.layer_group)
+    gs.deleteResource(layer.datastore.workspace, layer.datastore, layer)
+    gs.deleteLayerStyles(layer)
     signals.layer_deleted.send(sender=None, layer=layer)
 
     if layer.datastore.type == 'c_ImageMosaic':
@@ -439,12 +645,11 @@ def layer_delete_operation(request, layer_id):
         if os.path.isfile(mosaic_url + "/sample_image.dat"):
             os.remove(mosaic_url + "/sample_image.dat")
 
-        mosaic_params = GVSIGOL_SERVICES['MOSAIC_DB']
-        host = mosaic_params['host']
-        port = mosaic_params['port']
-        dbname = mosaic_params['database']
-        user = mosaic_params['user']
-        passwd = mosaic_params['passwd']
+        host = MOSAIC_DB['host']
+        port = MOSAIC_DB['port']
+        dbname = MOSAIC_DB['database']
+        user = MOSAIC_DB['user']
+        passwd = MOSAIC_DB['passwd']
         schema = 'imagemosaic'
         i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
         i.delete_mosaic(layer.datastore.name, schema)
@@ -453,10 +658,10 @@ def layer_delete_operation(request, layer_id):
         if os.path.isfile(layer.thumbnail.path):
             os.remove(layer.thumbnail.path)
     Layer.objects.all().filter(pk=layer_id).delete()
-    mapservice_backend.setDataRules()
+    gs.setDataRules()
     core_utils.toc_remove_layer(layer)
-    mapservice_backend.createOrUpdateGeoserverLayerGroup(layer.layer_group)
-    mapservice_backend.reload_nodes()
+    gs.createOrUpdateGeoserverLayerGroup(layer.layer_group)
+    gs.reload_nodes()
 
 
 
@@ -471,8 +676,9 @@ def backend_datastore_list(request):
     if 'id_workspace' in request.GET:
         id_ws = request.GET['id_workspace']
         ws = Workspace.objects.get(id=id_ws)
+        gs = geographic_servers.get_server_by_id(ws.server.id)
         if ws:
-            datastores = mapservice_backend.getDataStores(ws)
+            datastores = gs.getDataStores(ws)
             datastores_sorted = sorted(datastores)
             return HttpResponse(json.dumps(datastores_sorted))
     return HttpResponseBadRequest()
@@ -490,9 +696,33 @@ def backend_resource_list_available(request):
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
         if ds:
-            resources = mapservice_backend.getResources(ds.workspace, ds, 'available')
+            gs = geographic_servers.get_server_by_id(ds.workspace.server.id)
+            resources = gs.getResources(ds.workspace, ds, 'available')
             resources_sorted = sorted(resources)
             return HttpResponse(json.dumps(resources_sorted))
+    return HttpResponseBadRequest()
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def backend_layergroup_list_available(request):
+    """
+    Lists the resources existing on a data store, retrieving the information
+    directly from the backend (which may differ from resurces available on
+    Django DB). Useful to register new resources on Django DB.
+    """
+    if 'id_datastore' in request.GET:
+        id_ds = request.GET['id_datastore']
+        ds = Datastore.objects.get(id=id_ds)
+        if ds:
+            layer_groups = []
+            for lg in LayerGroup.objects.filter(workspace_id=ds.workspace.id):
+                layer_group = {
+                    'value': lg.id,
+                    'text': lg.name
+                }
+                layer_groups.append(layer_group)
+            return HttpResponse(json.dumps(layer_groups))
+        
     return HttpResponseBadRequest()
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -507,7 +737,8 @@ def backend_resource_list_configurable(request):
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
         if ds:
-            resources = mapservice_backend.getResources(ds.workspace, ds, 'configurable')
+            gs = geographic_servers.get_server_by_id(ds.workspace.server.id)
+            resources = gs.getResources(ds.workspace, ds, 'configurable')
             resources_sorted = sorted(resources)
             return HttpResponse(json.dumps(resources_sorted))
     return HttpResponseBadRequest()
@@ -528,7 +759,8 @@ def backend_resource_list(request):
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
         if ds:
-            resources = mapservice_backend.getResources(ds.workspace, ds, type)
+            gs = geographic_servers.get_server_by_id(ds.workspace.server.id)
+            resources = gs.getResources(ds.workspace, ds, type)
             resources_sorted = sorted(resources)
             return HttpResponse(json.dumps(resources_sorted))
     return HttpResponseBadRequest()
@@ -689,19 +921,16 @@ def layer_add_with_group(request, layergroup_id):
                     for field in fields:
                         if ' ' in field:
                             raise ValueError(_("Invalid layer fields: '{value}'. Layer can't have fields with whitespaces").format(value=field))
-
+                
+                gs = geographic_servers.get_server_by_id(form.cleaned_data['datastore'].workspace.server.id)
                 # first create the resource on the backend
-                mapservice_backend.createResource(
+                gs.createResource(
                     form.cleaned_data['datastore'].workspace,
                     form.cleaned_data['datastore'],
                     form.cleaned_data['name'],
                     form.cleaned_data['title']
                 )
-
-                #if form.cleaned_data['datastore'].type == 'c_ImageMosaic':
-                #    dts = form.cleaned_data['datastore']
-                #    mapservice_backend.createImageMosaic(dts.workspace, dts, form.cleaned_data['name'],  form.cleaned_data['title'])
-
+                
                 # save it on DB if successfully created
                 newRecord = Layer(**form.cleaned_data)
                 newRecord.created_by = request.user.username
@@ -730,11 +959,11 @@ def layer_add_with_group(request, layergroup_id):
                 newRecord.save()
 
                 if form.cleaned_data['datastore'].type == 'c_ImageMosaic':
-                    mapservice_backend.updateImageMosaicTemporal(form.cleaned_data['datastore'], newRecord)
+                    gs.updateImageMosaicTemporal(form.cleaned_data['datastore'], newRecord)
 
                 if form.cleaned_data['datastore'].type != 'e_WMS':
                     if form.cleaned_data['datastore'].type != 'c_ImageMosaic':
-                        mapservice_backend.setQueryable(
+                        gs.setQueryable(
                             form.cleaned_data['datastore'].workspace.name,
                             form.cleaned_data['datastore'].name,
                             form.cleaned_data['datastore'].type,
@@ -746,9 +975,9 @@ def layer_add_with_group(request, layergroup_id):
                     workspace = Workspace.objects.get(id=datastore.workspace_id)
 
                     style_name = workspace.name + '_' + newRecord.name + '_default'
-                    mapservice_backend.createDefaultStyle(newRecord, style_name)
-                    mapservice_backend.setLayerStyle(newRecord, style_name, True)
-                    newRecord2 = mapservice_backend.updateThumbnail(newRecord, 'create')
+                    gs.createDefaultStyle(newRecord, style_name)
+                    gs.setLayerStyle(newRecord, style_name, True)
+                    newRecord2 = gs.updateThumbnail(newRecord, 'create')
 
                     if datastore.type == 'v_PostGIS':
                         time_resolution = 0
@@ -770,19 +999,19 @@ def layer_add_with_group(request, layergroup_id):
                                 time_resolution = time_resolution + (int(time_resolution_minute) * 60)
                             if (time_resolution_second != None and time_resolution_second > 0):
                                 time_resolution = time_resolution + (int(time_resolution_second))
-                        mapservice_backend.setTimeEnabled(workspace.name, datastore.name, datastore.type, newRecord.name, time_enabled, time_field, time_endfield, time_presentation, time_resolution, time_default_value_mode, time_default_value)
+                        gs.setTimeEnabled(workspace.name, datastore.name, datastore.type, newRecord.name, time_enabled, time_field, time_endfield, time_presentation, time_resolution, time_default_value_mode, time_default_value)
 
                     if newRecord2:
                         newRecord2.save()
                         newRecord = newRecord2
 
                 core_utils.toc_add_layer(newRecord)
-                mapservice_backend.createOrUpdateGeoserverLayerGroup(newRecord.layer_group)
-                mapservice_backend.reload_nodes()
+                gs.createOrUpdateGeoserverLayerGroup(newRecord.layer_group)
+                gs.reload_nodes()
 
                 if form.cleaned_data['datastore'].type == 'v_PostGIS':
                     fields=[]
-                    (ds_type, resource) = mapservice_backend.getResourceInfo(workspace.name, datastore, newRecord.name, "json")
+                    (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, newRecord.name, "json")
                     resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
                     for f in resource_fields:
                         field = {}
@@ -917,7 +1146,8 @@ def layer_update(request, layer_id):
         old_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
 
         ds = Datastore.objects.get(id=layer.datastore.id)
-        if mapservice_backend.updateResource(workspace, datastore, name, title):
+        gs = geographic_servers.get_server_by_id(ds.workspace.server.id)
+        if gs.updateResource(workspace, datastore, name, title):
             layer.title = title
             layer.cached = cached
             layer.visible = is_visible
@@ -943,11 +1173,11 @@ def layer_update(request, layer_id):
             layer.save()
 
             if layer.datastore.type == 'c_ImageMosaic':
-                mapservice_backend.updateImageMosaicTemporal(layer.datastore, layer)
+                gs.updateImageMosaicTemporal(layer.datastore, layer)
 
 
             if ds.type != 'e_WMS':
-                mapservice_backend.setQueryable(workspace, ds.name, ds.type, name, is_queryable)
+                gs.setQueryable(workspace, ds.name, ds.type, name, is_queryable)
                 if ds.type == 'v_PostGIS':
                     time_resolution = 0
                     if (time_resolution_year != None and time_resolution_year > 0) or (time_resolution_month != None and time_resolution_month > 0) or (time_resolution_week != None and time_resolution_week > 0) or (time_resolution_day != None and time_resolution_day > 0):
@@ -969,17 +1199,17 @@ def layer_update(request, layer_id):
                         if (time_resolution_second != None and time_resolution_second > 0):
                             time_resolution = time_resolution + (int(time_resolution_second))
 
-                    mapservice_backend.setTimeEnabled(workspace, ds.name, ds.type, name, time_enabled, time_field, time_endfield, time_presentation, time_resolution, time_default_value_mode, time_default_value)
+                    gs.setTimeEnabled(workspace, ds.name, ds.type, name, time_enabled, time_field, time_endfield, time_presentation, time_resolution, time_default_value_mode, time_default_value)
 
             new_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
 
             if old_layer_group.id != new_layer_group.id:
                 core_utils.toc_move_layer(layer, old_layer_group)
-                mapservice_backend.createOrUpdateGeoserverLayerGroup(old_layer_group)
-                mapservice_backend.createOrUpdateGeoserverLayerGroup(new_layer_group)
-
-            mapservice_backend.reload_nodes()
-
+                gs.createOrUpdateGeoserverLayerGroup(old_layer_group)
+                gs.createOrUpdateGeoserverLayerGroup(new_layer_group)
+                                
+            gs.reload_nodes()   
+        
         if redirect_to_layergroup:
             return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': layer_id})+"?redirect=grouplayer-redirect")
         else:
@@ -1025,7 +1255,8 @@ def get_date_fields(layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
-    (ds_type, resource) = mapservice_backend.getResourceInfo(workspace.name, datastore, layer.name, "json")
+    gs = geographic_servers.get_server_by_id(workspace.server.id)
+    (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
     resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
     for f in resource_fields:
         if f['binding'] == 'java.sql.Date':
@@ -1078,7 +1309,8 @@ def layer_autoconfig(layer_id):
 
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
-    (ds_type, resource) = mapservice_backend.getResourceInfo(workspace.name, datastore, layer.name, "json")
+    gs = geographic_servers.get_server_by_id(workspace.server.id)
+    (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
     resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
     for f in resource_fields:
         field = {}
@@ -1175,7 +1407,8 @@ def layer_config(request, layer_id):
 
             datastore = Datastore.objects.get(id=layer.datastore_id)
             workspace = Workspace.objects.get(id=datastore.workspace_id)
-            (ds_type, resource) = mapservice_backend.getResourceInfo(workspace.name, datastore, layer.name, "json")
+            gs = geographic_servers.get_server_by_id(workspace.server.id)
+            (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
             resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
             for f in resource_fields:
                 field = {}
@@ -1198,7 +1431,8 @@ def layer_config(request, layer_id):
         except:
             datastore = Datastore.objects.get(id=layer.datastore_id)
             workspace = Workspace.objects.get(id=datastore.workspace_id)
-            (ds_type, resource) = mapservice_backend.getResourceInfo(workspace.name, datastore, layer.name, "json")
+            gs = geographic_servers.get_server_by_id(workspace.server.id)
+            (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
             resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
             for f in resource_fields:
                 field = {}
@@ -1239,12 +1473,11 @@ def layers_get_temporal_properties(request):
             layer = Layer.objects.get(id=layer_id)
             params = json.loads(layer.datastore.connection_params)
             if layer.datastore.type == 'c_ImageMosaic':
-                mosaic_params = GVSIGOL_SERVICES['MOSAIC_DB']
-                host = mosaic_params['host']
-                port = mosaic_params['port']
-                dbname = mosaic_params['database']
-                user = mosaic_params['user']
-                passwd = mosaic_params['passwd']
+                host = MOSAIC_DB['host']
+                port = MOSAIC_DB['port']
+                dbname = MOSAIC_DB['database']
+                user = MOSAIC_DB['user']
+                passwd = MOSAIC_DB['passwd']
                 schema = 'imagemosaic'
                 i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
                 temporal_defs = i.get_mosaic_temporal_info(layer.name, schema, layer.time_default_value_mode, layer.time_default_value)
@@ -1293,15 +1526,15 @@ def layer_boundingbox_from_data(request):
         workspace = Workspace.objects.get(name=ws_name)
         layer_query_set = Layer.objects.filter(name=layer_name, datastore__workspace=workspace)
         layer = layer_query_set[0]
-
-        mapservice_backend.updateBoundingBoxFromData(layer)
-        mapservice_backend.clearCache(workspace.name, layer)
-        mapservice_backend.updateThumbnail(layer, 'update')
-
+        gs = geographic_servers.get_server_by_id(workspace.server.id)
+        gs.updateBoundingBoxFromData(layer)  
+        gs.clearCache(workspace.name, layer)
+        gs.updateThumbnail(layer, 'update')
+        
         layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
-        mapservice_backend.createOrUpdateGeoserverLayerGroup(layer_group)
-        mapservice_backend.clearLayerGroupCache(layer_group.name)
-        mapservice_backend.reload_nodes()
+        gs.createOrUpdateGeoserverLayerGroup(layer_group)
+        gs.clearLayerGroupCache(layer_group.name)
+        gs.reload_nodes()
 
         return HttpResponse('{"response": "ok"}', content_type='application/json')
 
@@ -1313,16 +1546,17 @@ def layer_cache_clear(layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     datastore = Datastore.objects.get(id=layer.datastore.id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
-    mapservice_backend.clearCache(workspace.name, layer)
-    mapservice_backend.reload_nodes()
-
-    mapservice_backend.updateBoundingBoxFromData(layer)
-    mapservice_backend.clearCache(workspace.name, layer)
-    mapservice_backend.updateThumbnail(layer, 'update')
+    gs = geographic_servers.get_server_by_id(workspace.server.id)
+    gs.clearCache(workspace.name, layer)
+    gs.reload_nodes()
+            
+    gs.updateBoundingBoxFromData(layer)  
+    gs.clearCache(workspace.name, layer)
+    gs.updateThumbnail(layer, 'update')
 
     layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
-    mapservice_backend.createOrUpdateGeoserverLayerGroup(layer_group)
-    mapservice_backend.clearLayerGroupCache(layer_group.name)
+    gs.createOrUpdateGeoserverLayerGroup(layer_group)
+    gs.clearLayerGroupCache(layer_group.name)
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -1331,12 +1565,14 @@ def layer_cache_clear(layer_id):
 def cache_clear(request, layer_id):
     redirect_to_layergroup = request.GET.get('redirect')
 
+    layer = Layer.objects.get(id=int(layer_id))
+    gs = geographic_servers.get_server_by_id(layer.datastore.workspace.server.id)
     if request.method == 'GET' or request.method == 'POST':
         layer_cache_clear(layer_id)
-        mapservice_backend.reload_nodes()
+        gs.reload_nodes()
+        
     if request.method == 'GET':
-        if redirect_to_layergroup:
-            layer = Layer.objects.get(id=int(layer_id))
+        if redirect_to_layergroup:           
             layergroup_id = layer.layer_group.id
             return HttpResponseRedirect(reverse('layergroup_update', kwargs={'lgid': layergroup_id}))
         else:
@@ -1357,14 +1593,22 @@ def layergroup_cache_clear(request, layergroup_id):
 
 
 def layer_group_cache_clear(layergroup):
-    mapservice_backend.deleteGeoserverLayerGroup(layergroup)
+    last = None    
     layers = Layer.objects.filter(layer_group_id=int(layergroup.id))
     for layer in layers:
         layer_cache_clear(layer.id)
+        last = layer
 
-    mapservice_backend.createOrUpdateGeoserverLayerGroup(layergroup)
-    mapservice_backend.clearLayerGroupCache(layergroup.name)
-    mapservice_backend.reload_nodes()
+    gs = geographic_servers.get_server_by_id(last.datastore.workspace.server.id)
+    gs.deleteGeoserverLayerGroup(layergroup)
+
+    gs.createOrUpdateGeoserverLayerGroup(layergroup)
+    gs.clearLayerGroupCache(layergroup.name)
+    gs.reload_nodes()
+
+
+
+
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -1429,10 +1673,10 @@ def layer_permissions_update(request, layer_id):
                 write_groups.append(group)
             except:
                 pass
-
-
-        mapservice_backend.setLayerDataRules(layer, read_groups, write_groups)
-        mapservice_backend.reload_nodes()
+                
+        gs = geographic_servers.get_server_by_id(layer.datastore.workspace.server.id)        
+        gs.setLayerDataRules(layer, read_groups, write_groups)
+        gs.reload_nodes()
 
         if redirect_to_layergroup:
             layergroup_id = layer.layer_group.id
@@ -1492,6 +1736,7 @@ def layergroup_list(request):
     layergroups = []
     for lg in layergroups_list:
         if lg.name != '__default__':
+            ws = Workspace.objects.get(id=lg.workspace_id)
             projects = []
             project_layergroups = ProjectLayerGroup.objects.filter(layer_group_id=lg.id)
             for alg in project_layergroups:
@@ -1502,6 +1747,7 @@ def layergroup_list(request):
             layergroup['title'] = lg.title
             layergroup['cached'] = lg.cached
             layergroup['projects'] = '; '.join(projects)
+            layergroup['workspace'] = ws.name
             layergroups.append(layergroup)
 
     response = {
@@ -1523,6 +1769,7 @@ def layergroup_add_with_project(request, project_id):
     if request.method == 'POST':
         name = request.POST.get('layergroup_name') + '_' + request.user.username
         title = request.POST.get('layergroup_title')
+        workspace_id = request.POST.get('layergroup_workspace_id')
 
         cached = False
         if 'cached' in request.POST:
@@ -1545,6 +1792,7 @@ def layergroup_add_with_project(request, project_id):
 
             if not exists:
                 layergroup = LayerGroup(
+                    workspace_id = workspace_id,
                     name = name,
                     title = title,
                     cached = cached,
@@ -1552,7 +1800,8 @@ def layergroup_add_with_project(request, project_id):
                     created_by = request.user.username
                 )
                 layergroup.save()
-                mapservice_backend.reload_nodes()
+                #server = geographic_servers.get_server_by_id(id)
+                #server.reload_nodes()
 
                 project_id = request.POST.get('layergroup_project_id')
                 if project_id and project_id != '':
@@ -1593,7 +1842,11 @@ def layergroup_add_with_project(request, project_id):
         return redirect('layergroup_list')
 
     else:
-        return render_to_response('layergroup_add.html', {'project_id': project_id}, context_instance=RequestContext(request))
+        response = {
+            'project_id': project_id,
+            'workspaces': Workspace.objects.values()
+        }
+        return render_to_response('layergroup_add.html', response, context_instance=RequestContext(request))
 
 
 def layergroup_mapserver_toc(group, toc_string):
@@ -1602,6 +1855,7 @@ def layergroup_mapserver_toc(group, toc_string):
         layers_array = {}
         i=0
         toc_array = toc_array[::-1]
+        last = None
         for toc_entry in toc_array:
             layers = Layer.objects.filter(name=toc_entry,layer_group_id=group.id).order_by('order')
             for layer in layers:
@@ -1614,6 +1868,7 @@ def layergroup_mapserver_toc(group, toc_string):
                 layer.save()
                 i = i + 1
                 layers_array[layer.name] = layer_json
+                last = layer
 
         toc_object = {
             'name': group.name,
@@ -1625,27 +1880,10 @@ def layergroup_mapserver_toc(group, toc_string):
 
         toc={}
         toc[group.name] = toc_object
-
-        mapservice_backend.createOrUpdateSortedGeoserverLayerGroup(toc)
-        mapservice_backend.reload_nodes()
-
-
-@login_required(login_url='/gvsigonline/auth/login_user/')
-@csrf_exempt
-def get_geoserver_info(request):
-    info = mapservice_backend.getGsconfig()
-    info = None
-    try:
-        response = {
-                'response': 200,
-                'base_url': info.gs_base_url
-            }
-    except:
-        response = {
-                'response': 500,
-                'base_url': None
-            }
-    return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+        
+        gs = geographic_servers.get_server_by_id(last.datastore.workspace.server.id)  
+        gs.createOrUpdateSortedGeoserverLayerGroup(toc)
+        gs.reload_nodes()
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -1725,9 +1963,16 @@ def layergroup_update(request, lgid):
 
     else:
         layergroup = LayerGroup.objects.get(id=int(lgid))
-        layers = Layer.objects.filter(layer_group_id=layergroup.id).order_by('-order')
+        layers = Layer.objects.filter(layer_group_id=layergroup.id).order_by('-order') 
+        
+        response = {
+            'lgid': lgid, 
+            'layergroup': layergroup, 
+            'layers': layers,
+            'workspaces': Workspace.objects.values()
+        }
 
-        return render_to_response('layergroup_update.html', {'lgid': lgid, 'layergroup': layergroup, 'layers': layers}, context_instance=RequestContext(request))
+        return render_to_response('layergroup_update.html', response, context_instance=RequestContext(request))
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -1737,6 +1982,7 @@ def layergroup_delete(request, lgid):
         layergroup = LayerGroup.objects.get(id=int(lgid))
         layers = Layer.objects.filter(layer_group_id=layergroup.id)
         projects_by_layergroup = ProjectLayerGroup.objects.filter(layer_group_id=layergroup.id)
+        last = None
         for p in projects_by_layergroup:
             p.project.toc_order = core_utils.toc_remove_layergroups(p.project.toc_order, [layergroup.id])
             p.project.save()
@@ -1744,12 +1990,14 @@ def layergroup_delete(request, lgid):
         for layer in layers:
             default_layer_group = LayerGroup.objects.get(name__exact='__default__')
             layer.layer_group = default_layer_group
-            layer.save()
-
-        mapservice_backend.deleteGeoserverLayerGroup(layergroup)
+            layer.save() 
+            last = layer 
+        
+        gs = geographic_servers.get_server_by_id(last.datastore.workspace.server.id)        
+        gs.deleteGeoserverLayerGroup(layergroup)
         layergroup.delete()
-        mapservice_backend.setDataRules()
-        mapservice_backend.reload_nodes()
+        gs.setDataRules()
+        gs.reload_nodes()
         response = {
             'deleted': True
         }
@@ -1831,11 +2079,12 @@ def layer_create_with_group(request, layergroup_id):
         form = CreateFeatureTypeForm(request.POST, user=request.user)
         if form.is_valid():
             try:
+                gs = geographic_servers.get_server_by_id(form.cleaned_data['datastore'].workspace.server.id)
                 form.cleaned_data['name'] = prepare_string(form.cleaned_data['name'])
-                mapservice_backend.createTable(form.cleaned_data)
+                gs.createTable(form.cleaned_data)
 
                 # first create the resource on the backend
-                mapservice_backend.createResource(
+                gs.createResource(
                     form.cleaned_data['datastore'].workspace,
                     form.cleaned_data['datastore'],
                     form.cleaned_data['name'],
@@ -1843,7 +2092,7 @@ def layer_create_with_group(request, layergroup_id):
                 )
 
                 if form.cleaned_data['datastore'].type != 'e_WMS':
-                    mapservice_backend.setQueryable(
+                    gs.setQueryable(
                         form.cleaned_data['datastore'].workspace.name,
                         form.cleaned_data['datastore'].name,
                         form.cleaned_data['datastore'].type,
@@ -1886,9 +2135,8 @@ def layer_create_with_group(request, layergroup_id):
                     workspace = Workspace.objects.get(id=datastore.workspace_id)
 
                     style_name = workspace.name + '_' + newRecord.name + '_default'
-                    mapservice_backend.createDefaultStyle(newRecord, style_name)
-                    mapservice_backend.setLayerStyle(newRecord, style_name, True)
-                    #mapservice_backend.updateThumbnail(newRecord, 'create')
+                    gs.createDefaultStyle(newRecord, style_name)
+                    gs.setLayerStyle(newRecord, style_name, True)
 
                     time_resolution = 0
                     if (time_resolution_year != None and time_resolution_year > 0) or (time_resolution_month != None and time_resolution_month > 0) or (time_resolution_week != None and time_resolution_week > 0) or (time_resolution_day != None and time_resolution_day > 0):
@@ -1909,16 +2157,16 @@ def layer_create_with_group(request, layergroup_id):
                             time_resolution = time_resolution + (int(time_resolution_minute) * 60)
                         if (time_resolution_second != None and time_resolution_second > 0):
                             time_resolution = time_resolution + (int(time_resolution_second))
-                    mapservice_backend.setTimeEnabled(workspace.name, datastore.name, datastore.type, newRecord.name, time_enabled, time_field, time_endfield, time_presentation, time_resolution, time_default_value_mode, time_default_value)
+                    gs.setTimeEnabled(workspace.name, datastore.name, datastore.type, newRecord.name, time_enabled, time_field, time_endfield, time_presentation, time_resolution, time_default_value_mode, time_default_value)
 
                     newRecord.save()
 
                 core_utils.toc_add_layer(newRecord)
-                mapservice_backend.createOrUpdateGeoserverLayerGroup(newRecord.layer_group)
-                mapservice_backend.reload_nodes()
+                gs.createOrUpdateGeoserverLayerGroup(newRecord.layer_group)
+                gs.reload_nodes()
 
                 if form.cleaned_data['datastore'].type != 'e_WMS':
-                    mapservice_backend.updateThumbnail(newRecord, 'create')
+                    gs.updateThumbnail(newRecord, 'create')
 
                 layer_autoconfig(newRecord.id)
 
@@ -2173,7 +2421,8 @@ def get_geom_tables(request, datastore_id):
     if request.method == 'GET':
         try:
             ds = Datastore.objects.get(pk=datastore_id)
-            tables = mapservice_backend.getGeomColumns(ds)
+            gs = geographic_servers.get_server_by_id(ds.workspace.server.id)
+            tables = gs.getGeomColumns(ds)
             data = { 'tables': tables}
             return render(request, 'geom_table_list.html', data)
         except:
@@ -2383,8 +2632,6 @@ def get_datatable_data(request):
         layer_name = request.POST.get('layer_name')
         workspace = request.POST.get('workspace')
         wfs_url = request.POST.get('wfs_url')
-        if len(GVSIGOL_SERVICES['CLUSTER_NODES']) >= 1:
-            wfs_url = GVSIGOL_SERVICES['CLUSTER_NODES'][0] + '/' + workspace + '/wfs'
         property_name = request.POST.get('property_name')
         properties_with_type = request.POST.get('properties_with_type')
         start_index = request.POST.get('start')
@@ -2398,12 +2645,10 @@ def get_datatable_data(request):
         recordsFiltered = 0
 
         encoded_property_name = property_name.encode('utf-8')
-
-
-
+         
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
-
-        definition = mapservice_backend.getFeaturetype(layer.datastore.workspace, layer.datastore, layer.name, layer.title)
+        gs = geographic_servers.get_server_by_id(layer.datastore.workspace.server.id)
+        definition = gs.getFeaturetype(layer.datastore.workspace, layer.datastore, layer.name, layer.title)
         aux_encoded_property_name = ' '
         sortby_field = None
         if 'featureType' in definition and 'attributes' in definition['featureType'] and 'attribute' in definition['featureType']['attributes']:
@@ -2411,12 +2656,12 @@ def get_datatable_data(request):
             if isinstance(attributes, list):
                 for attribute in attributes:
                     aux_encoded_property_name += attribute['name'] + ' '
-                    if not sortby_field and not attribute['binding'].startswith('com.vividsolutions.jts.geom'):
+                    if not sortby_field and not 'jts.geom' in attribute['binding']:
                         sortby_field = attribute['name']
             else:
                 attribute = attributes
                 aux_encoded_property_name += attribute['name'] + ' '
-                if not sortby_field and not attribute['binding'].startswith('com.vividsolutions.jts.geom'):
+                if not sortby_field and not 'jts.geom' in attribute['binding']:
                     sortby_field = attribute['name']
 
         num_fields = encoded_property_name.split(',').__len__()
@@ -2466,8 +2711,8 @@ def get_datatable_data(request):
                 if cql_filter != '':
                     values['cql_filter'] = cql_filter
 
-                recordsTotal = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, None)
-                recordsFiltered = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, cql_filter)
+                recordsTotal = gs.getFeatureCount(request, wfs_url, layer_name, None)
+                recordsFiltered = gs.getFeatureCount(request, wfs_url, layer_name, cql_filter)
                 #recordsFiltered = recordsTotal
 
             else:
@@ -2511,8 +2756,8 @@ def get_datatable_data(request):
                     values['cql_filter'] = raw_search_cql
                 else:
                     values['cql_filter'] = cql_filter + ' AND ' + raw_search_cql
-                recordsTotal = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, None)
-                recordsFiltered = mapservice_backend.getFeatureCount(request, wfs_url, layer_name, cql_filter)
+                recordsTotal = gs.getFeatureCount(request, wfs_url, layer_name, None)
+                recordsFiltered = gs.getFeatureCount(request, wfs_url, layer_name, cql_filter)
 
             params = urllib.urlencode(values)
             req = requests.Session()
@@ -2794,11 +3039,12 @@ def describeLayerConfig(request):
 
                 layer_info = None
                 defaultCrs = None
+                gs = geographic_servers.get_server_by_id(workspace.server.id)
                 if datastore.type == 'e_WMS':
-                    (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
+                    (ds_type, layer_info) = gs.getResourceInfo(workspace.name, datastore, l.name, "json")
                     defaultCrs = 'EPSG:4326'
                 else:
-                    (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
+                    (ds_type, layer_info) = gs.getResourceInfo(workspace.name, datastore, l.name, "json")
                     defaultCrs = layer_info[ds_type]['srs']
 
                 if defaultCrs.split(':')[1] in core_utils.get_supported_crs():
@@ -2866,8 +3112,9 @@ def describeFeatureType(request):
                     if layer_def['name'] == pk_def:
                         layer_defs.remove(layer_def)
 
-            if skip_pks == 'true':
-                definition = mapservice_backend.getFeaturetype(layer.datastore.workspace, layer.datastore, layer.name, layer.title)
+            if skip_pks == 'true':        
+                gs = geographic_servers.get_server_by_id(layer.datastore.workspace.server.id)
+                definition = gs.getFeaturetype(layer.datastore.workspace, layer.datastore, layer.name, layer.title)
                 aux_encoded_property_name = ''
                 if 'featureType' in definition and 'attributes' in definition['featureType'] and 'attribute' in definition['featureType']['attributes']:
                     attributes = definition['featureType']['attributes']['attribute']

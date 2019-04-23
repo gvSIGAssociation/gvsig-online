@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+    # -*- coding: utf-8 -*-
 
 '''
     gvSIG Online.
@@ -22,13 +22,11 @@
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
 
-from gvsigol.settings import GVSIGOL_SERVICES
 from models import Layer, LayerGroup, Workspace, Datastore
 import requests
 import json
 from datetime import datetime
 from lxml import etree as ET
-from builtins import str as text
 
 PURGE_NONE="none"
 PURGE_METADATA="metadata"
@@ -592,11 +590,12 @@ class Geoserver():
             for l in layers_in_group:
                 datastore = Datastore.objects.get(id=l.datastore.id)
                 workspace = Workspace.objects.get(id=datastore.workspace_id)
+                
                 layer = {}
                 layer["@type"] = "layer"
                 layer["name"] = workspace.name + ":"+ l.name
                 layer["title"] = l.title
-                layer["href"] = GVSIGOL_SERVICES['URL'] + '/layers/' + l.name + '.json'
+                layer["href"] = self.service_url + '/layers/' + l.name + '.json'
                 layers.append(layer)
 
             data = {
@@ -609,6 +608,7 @@ class Geoserver():
                     }
                 }
             }
+            
             logger.error('[rest_geoserver] Start create_or_update_gs_layer_group petition -> ' + json.dumps(data))
             r = self.session.post(self.service_url + "/layergroups/", json=data, auth=auth)
             logger.error('[rest_geoserver] End create_or_update_gs_layer_group petition : ' + str(r.status_code) + ' ' + str(r.content))
@@ -644,10 +644,11 @@ class Geoserver():
                 #       if l.name == tl[1]['name']:
                     datastore = Datastore.objects.get(id=l.datastore.id)
                     workspace = Workspace.objects.get(id=datastore.workspace_id)
+                    
                     layer = {}
                     layer["@type"] = "layer"
                     layer["name"] = workspace.name + ":"+ l.name
-                    layer["href"] = GVSIGOL_SERVICES['URL'] + '/layers/' + l.name + '.json'
+                    layer["href"] = self.service_url + '/layers/' + l.name + '.json'
                     layers.append(layer)
 
                 data = {
