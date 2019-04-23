@@ -23,7 +23,7 @@
 '''
 
 from django.shortcuts import render_to_response, RequestContext, redirect, HttpResponse
-from gvsigol_services.backend_mapservice import backend as mapservice
+from gvsigol_services.geographic_servers import geographic_servers
 from gvsigol_services.models import Workspace, Datastore, Layer
 from gvsigol_services import utils as service_utils
 from django.contrib.auth.decorators import login_required
@@ -38,7 +38,6 @@ import utils
 import json
 import ast
 from gvsigol_services.gdal_tools import get_raster_stats
-import sys
 from gvsigol_services.backend_postgis import Introspect
 import re
 
@@ -61,17 +60,19 @@ def get_raster_statistics(request, layer_id):
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 
-def delete_preview_style(request, name):
+def delete_preview_style(request, name, layer_id):
     styles = Style.objects.filter(name=name+'__tmp')
     success = True
+    layer = Layer.objects.get(id=int(layer_id))
+    gs = geographic_servers.get_server_by_id(layer.datastore.workspace.server.id)
     for style in styles:
         try:
-            services.delete_style(style.id, mapservice)
+            services.delete_style(style.id, gs)
             style.delete()
-        except Exception as e:
+        except Exception:
             success = False
             pass
-    
+        
     return success
   
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -141,7 +142,8 @@ def style_layer_delete(request):
                 message = _('Can not delete a default style')
             else:
                 try:
-                    services.delete_style(style_id, mapservice)
+                    gs = geographic_servers.get_server_by_id(layer.datastore.workspace.server.id)
+                    services.delete_style(style_id, gs)
                     success = True
                     
                 except Exception as e:
@@ -199,7 +201,7 @@ def unique_symbol_add(request, layer_id):
         json_data = json.loads(style_data)
         
         if services_unique_symbol.create_style(request, json_data, layer_id):   
-            delete_preview_style(request, json_data.get('name'))            
+            delete_preview_style(request, json_data.get('name'), layer_id)            
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -217,7 +219,7 @@ def unique_symbol_update(request, layer_id, style_id):
         json_data = json.loads(style_data)
         
         if services_unique_symbol.update_style(request, json_data, layer_id, style_id):  
-            delete_preview_style(request, json_data.get('name'))             
+            delete_preview_style(request, json_data.get('name'), layer_id)             
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -275,7 +277,7 @@ def unique_values_add(request, layer_id):
         json_data = json.loads(style_data)
         
         if services_unique_values.create_style(request, json_data, layer_id):      
-            delete_preview_style(request, json_data.get('name'))         
+            delete_preview_style(request, json_data.get('name'), layer_id)         
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -296,7 +298,7 @@ def unique_values_update(request, layer_id, style_id):
         json_data = json.loads(style_data)
         
         if services_unique_values.update_style(request, json_data, layer_id, style_id):  
-            delete_preview_style(request, json_data.get('name'))             
+            delete_preview_style(request, json_data.get('name'), layer_id)             
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -374,7 +376,8 @@ def get_unique_values(request):
 def remove_temporal_preview(request):
     if request.method == 'POST':
         name = request.POST['name']
-        delete_preview_style(request, name)
+        layer_id = request.POST['layer_id']
+        delete_preview_style(request, name, layer_id)
         
     return HttpResponse(json.dumps({'success': 'OK'}, indent=4), content_type='application/json')
     
@@ -386,7 +389,7 @@ def intervals_add(request, layer_id):
         json_data = json.loads(style_data)
         
         if services_intervals.create_style(request, json_data, layer_id): 
-            delete_preview_style(request, json_data.get('name'))           
+            delete_preview_style(request, json_data.get('name'), layer_id)           
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -451,7 +454,7 @@ def intervals_update(request, layer_id, style_id):
         json_data = json.loads(style_data)
         
         if services_intervals.update_style(request, json_data, layer_id, style_id):
-            delete_preview_style(request, json_data.get('name'))            
+            delete_preview_style(request, json_data.get('name'), layer_id)            
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -530,7 +533,7 @@ def clustered_points_add(request, layer_id):
         json_data = json.loads(style_data)
         
         if services_clustered_points.create_style(request, json_data, layer_id):     
-            delete_preview_style(request, json_data.get('name'))          
+            delete_preview_style(request, json_data.get('name'), layer_id)          
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -548,7 +551,7 @@ def clustered_points_update(request, layer_id, style_id):
         json_data = json.loads(style_data)
         
         if services_clustered_points.update_style(request, json_data, layer_id, style_id):     
-            delete_preview_style(request, json_data.get('name'))          
+            delete_preview_style(request, json_data.get('name'), layer_id)          
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -597,7 +600,7 @@ def expressions_add(request, layer_id):
         json_data = json.loads(style_data)
         
         if services_expressions.create_style(request, json_data, layer_id): 
-            delete_preview_style(request, json_data.get('name'))              
+            delete_preview_style(request, json_data.get('name'), layer_id)              
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -611,7 +614,6 @@ def expressions_add(request, layer_id):
 @staff_required
 def create_sld(request):  
     if request.method == 'POST':
-        type = request.POST['type']
         style_data = request.POST['style_data']
         layer_id = request.POST['layer_id']
         json_data = json.loads(style_data)
@@ -634,7 +636,7 @@ def expressions_update(request, layer_id, style_id):
         json_data = json.loads(style_data)
         
         if services_expressions.update_style(request, json_data, layer_id, style_id):  
-            delete_preview_style(request, json_data.get('name'))             
+            delete_preview_style(request, json_data.get('name'), layer_id)             
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -684,7 +686,7 @@ def color_table_add(request, layer_id):
         json_data = json.loads(style_data)
         
         if services_color_table.create_style(request, json_data, layer_id, False, has_custom_legend):   
-            delete_preview_style(request, json_data.get('name'))           
+            delete_preview_style(request, json_data.get('name'), layer_id)           
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -705,7 +707,7 @@ def color_table_update(request, layer_id, style_id):
         json_data = json.loads(style_data)
         
         if services_color_table.update_style(request, json_data, layer_id, style_id, False, has_custom_legend):         
-            delete_preview_style(request, json_data.get('name'))     
+            delete_preview_style(request, json_data.get('name'), layer_id)     
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -756,6 +758,8 @@ def sld_import(request, layer_id):
         
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
+    
+    gs = geographic_servers.get_server_by_id(workspace.server.id)
         
     if request.method == 'POST': 
         style_name = request.POST.get('sld-name')
@@ -765,7 +769,7 @@ def sld_import(request, layer_id):
             is_default = True
         
         if 'sld-file' in request.FILES: 
-            if services.sld_import(style_name, is_default, layer_id, request.FILES['sld-file'], request, mapservice):        
+            if services.sld_import(style_name, is_default, layer_id, request.FILES['sld-file'], request, gs):        
                 return redirect('style_layer_list')
             else:
                 response = {
@@ -773,6 +777,7 @@ def sld_import(request, layer_id):
                     'layer_id': layer_id,
                     'style_name': workspace.name + '_' + layer.name + '_' + str(index)
                 }
+            
         
         else:
             response = {
@@ -896,11 +901,6 @@ def color_ramp_delete(request, color_ramp_id):
     folder = ColorRampFolder.objects.get(id=int(folder_id))
     colorramp.delete()
     
-    response = {
-        'library': folder.color_ramp_library,
-        'folder': folder,
-        'color_ramps': ColorRamp.objects.filter(color_ramp_folder_id=folder.id)
-    }
     return redirect('/gvsigonline/symbology/color_ramp_folder_update/'+str(folder.id)+'/')
 
 
@@ -1139,13 +1139,15 @@ def library_update(request, library_id):
                 'symbolizers': json.dumps(symbolizers)
             }
             rules.append(rule)
-            
+        
+        gs = geographic_servers.get_default_server()
+        master = gs.get_master_node(gs.id)    
         response = {
             'library': library,
             'rules': rules,
-            'preview_point_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
-            'preview_line_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
-            'preview_polygon_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
+            'preview_point_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
+            'preview_line_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
+            'preview_polygon_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
         }
         return render_to_response('library_update.html', response, context_instance=RequestContext(request))
     
@@ -1309,13 +1311,15 @@ def symbol_add(request, library_id, symbol_type):
             message = e.message
             return HttpResponse(json.dumps({'message':message, 'success': False}, indent=4), content_type='application/json')
  
-    else:          
+    else: 
+        gs = geographic_servers.get_default_server()
+        master = gs.get_master_node(gs.id)         
         response = {
             'library_id': library_id,
             'symbol_type': symbol_type,
-            'preview_point_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
-            'preview_line_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
-            'preview_polygon_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
+            'preview_point_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
+            'preview_line_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
+            'preview_polygon_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
         }
         if symbol_type == 'ExternalGraphicSymbolizer':
             return render_to_response('external_graphic_add.html', response, context_instance=RequestContext(request))
@@ -1354,11 +1358,13 @@ def symbol_update(request, symbol_id):
             return render_to_response('external_graphic_update.html', response, context_instance=RequestContext(request))
         
         else:
+            gs = geographic_servers.get_default_server()
+            master = gs.get_master_node(gs.id)
             response = {
                 'rule': services_library.get_symbol(r, ftype),
-                'preview_point_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
-                'preview_line_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
-                'preview_polygon_url': settings.GVSIGOL_SERVICES['URL'] + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
+                'preview_point_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
+                'preview_line_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
+                'preview_polygon_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
             }
             return render_to_response('symbol_update.html', response, context_instance=RequestContext(request))
     

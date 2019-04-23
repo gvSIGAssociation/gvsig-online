@@ -25,19 +25,17 @@ from __builtin__ import file
 
 from models import Style, Library, Rule, LibraryRule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, TextSymbolizer, ExternalGraphicSymbolizer, ColorRamp, ColorRampFolder, ColorRampLibrary
 from gvsigol_services.models import Layer
-from gvsigol_services.backend_mapservice import backend as mapservice
-from gvsigol_core import utils as core_utils
-from gvsigol import settings
+from gvsigol_services.geographic_servers import geographic_servers
 from django.utils.translation import ugettext as _
-from django.http import HttpResponse
 import utils, sld_utils, sld_builder, sld_reader
+from django.http import HttpResponse
+from gvsigol import settings
+from xml.dom import minidom
 import tempfile, zipfile
 import StringIO
 import json
 import re
 import os
-import unicodedata
-from xml.dom import minidom
 import ast
 
 _valid_name_regex=re.compile("^[a-zA-Z_\s][a-zA-Z0-9_\s]*$")
@@ -62,6 +60,7 @@ class InvalidValue(RequestError):
     pass
 
 def add_symbol(request, json_rule, library_id, symbol_type):
+    gs = geographic_servers.get_default_server()
     
     name = json_rule.get('name')
     title = json_rule.get('title')
@@ -163,15 +162,17 @@ def add_symbol(request, json_rule, library_id, symbol_type):
             symbolizer.save()  
             
     sld_body = sld_builder.build_library_symbol(rule)
-    if mapservice.createStyle(style.name, sld_body): 
+
+    if gs.createStyle(style.name, sld_body): 
         return True
         
     else:
-        mapservice.updateStyle(None, style.name, sld_body)
+        gs.updateStyle(None, style.name, sld_body)
         return True
     
 def update_symbol(request, json_rule, rule, library_rule):
     try:
+        gs = geographic_servers.get_default_server()
         
         name = json_rule.get('name')
         title = json_rule.get('title')
@@ -259,11 +260,12 @@ def update_symbol(request, json_rule, rule, library_rule):
                 symbolizer.save()
     
         style = Style.objects.get(id=rule.style.id)
-        if mapservice.deleteStyle(style.name): 
+
+        if gs.deleteStyle(style.name): 
             sld_body = sld_builder.build_library_symbol(rule)
-            if not mapservice.createStyle(style.name, sld_body): 
+            if not gs.createStyle(style.name, sld_body): 
                 return False
-            
+
         return True
     
     except Exception as e:
@@ -271,6 +273,7 @@ def update_symbol(request, json_rule, rule, library_rule):
     
 def delete_symbol(rule, library_rule):
     try:
+        gs = geographic_servers.get_default_server()
         symbolizers = Symbolizer.objects.filter(rule_id=rule.id)
         for symbolizer in symbolizers:
             if get_ftype(symbolizer) == 'ExternalGraphic':
@@ -280,9 +283,10 @@ def delete_symbol(rule, library_rule):
         library_rule.delete()
 
         style = Style.objects.get(id=rule.style.id)
-        if mapservice.deleteStyle(style.name):            
+
+        if gs.deleteStyle(style.name):            
             style.delete()
-            
+
         rule.delete()
     
     except Exception as e:
@@ -539,6 +543,7 @@ def remove_accents(string):
     return string
 
 def upload_library(name, description, file):
+    gs = geographic_servers.get_default_server()
     
     library = Library(
         name = name,
@@ -708,9 +713,10 @@ def upload_library(name, description, file):
             sld.export(output, 0)
             sld_body = output.getvalue()
             output.close()
-                
-            mapservice.createStyle(style.name, sld_body)
-    mapservice.reload_nodes()
+           
+            gs.createStyle(style.name, sld_body)
+    gs.reload_nodes()
+
     utils.__delete_temporaries(file_path)
 
 def upload_sld(file):
