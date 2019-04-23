@@ -25,15 +25,15 @@ from gvsigol_symbology.models import StyleLayer
 
 from django.shortcuts import render_to_response, RequestContext, HttpResponse, redirect
 from models import Project, ProjectUserGroup, ProjectLayerGroup, BaseLayer, BaseLayerProject
-from gvsigol_services.models import Workspace, Datastore, Layer, LayerGroup
+from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup
 from gvsigol_auth.models import UserGroup, UserGroupUser
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
-from gvsigol_auth.utils import superuser_required, is_superuser, is_staff, staff_required
+from gvsigol_auth.utils import is_superuser, is_staff, staff_required
 import utils as core_utils
-from gvsigol_services.backend_mapservice import backend as mapservice_backend
+from gvsigol_services.geographic_servers import geographic_servers
 from django.views.decorators.cache import cache_control
 from gvsigol import settings
 import gvsigol_services.utils as services_utils
@@ -135,19 +135,13 @@ def home(request):
                         if p.id == ua.project_id:
                             exists = True
                     if exists:
-                        projects.append(project)                    
-         
-            
-    if len (projects_by_user) == 1 and len (public_projects) == 0 and not is_superuser(user) and not is_staff(user) and from_login:
-        return redirect('project_load', project_name=projects_by_user[0].project.name)
-    elif len (projects_by_user) == 0 and len (public_projects) == 1 and not is_superuser(user) and not is_staff(user) and from_login:
-        return redirect('public_project_load', project_name=public_projects[0].get('name'))
-    else:
-        external_ldap_mode = True
-        if 'AD' in settings.GVSIGOL_LDAP and settings.GVSIGOL_LDAP['AD'].__len__() > 0:
-            external_ldap_mode = False
+                        projects.append(project) 
+                        
+    external_ldap_mode = True
+    if 'AD' in settings.GVSIGOL_LDAP and settings.GVSIGOL_LDAP['AD'].__len__() > 0:
+        external_ldap_mode = False
 
-        return render_to_response('home.html', {'projects': projects, 'public_projects': public_projects, 'external_ldap_mode': external_ldap_mode}, RequestContext(request))
+    return render_to_response('home.html', {'projects': projects, 'public_projects': public_projects, 'external_ldap_mode': external_ldap_mode}, RequestContext(request))                   
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -510,10 +504,19 @@ def project_delete(request, pid):
         }     
         return HttpResponse(json.dumps(response, indent=4), content_type='project/json')
     
+    
+def load(request, project_name):
+    project = Project.objects.get(name__exact=project_name)
+    
+    if project.is_public:
+        return redirect('load_public_project', project_name=project.name)
+    
+    else:
+        return redirect('load_project', project_name=project.name)
+    
 @login_required(login_url='/gvsigonline/auth/login_user/')
-#Expira la caché cada día
 @cache_control(max_age=86400)
-def project_load(request, project_name):
+def load_project(request, project_name):
     if core_utils.is_valid_project(request.user, project_name):
         project = Project.objects.get(name__exact=project_name)
         
@@ -522,22 +525,56 @@ def project_load(request, project_name):
             has_image = False
 
         plugins_config = core_utils.get_plugins_config()
-        response = render_to_response('viewer.html', {'has_image': has_image,
-                                                      'supported_crs': core_utils.get_supported_crs(),
-                                                      'project': project,
-                                                      'pid': project.id,
-                                                      'extra_params': json.dumps(request.GET),
-                                                      'plugins_config': plugins_config},
-                                       context_instance=RequestContext(request))
+        response = render_to_response('viewer.html', {
+            'has_image': has_image,
+            'supported_crs': core_utils.get_supported_crs(),
+            'project': project,
+            'pid': project.id,
+            'extra_params': json.dumps(request.GET),
+            'plugins_config': plugins_config
+            },
+            context_instance=RequestContext(request)
+        )
+        
         #Expira la caché cada día
         tomorrow = datetime.datetime.now() + datetime.timedelta(days = 1)
         tomorrow = datetime.datetime.replace(tomorrow, hour=0, minute=0, second=0)
         expires = datetime.datetime.strftime(tomorrow, "%a, %d-%b-%Y %H:%M:%S GMT")     
         response.set_cookie('key', expires = expires)
+        
         return response
     
     else:
         return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
+    
+
+@cache_control(max_age=86400)
+def load_public_project(request, project_name):
+    project = Project.objects.get(name__exact=project_name)
+        
+    has_image = True
+    if "no_project.png" in project.image.url:
+        has_image = False
+
+    plugins_config = core_utils.get_plugins_config()
+    response = render_to_response('viewer.html', {
+        'has_image': has_image,
+        'supported_crs': core_utils.get_supported_crs(),
+        'project': project,
+        'pid': project.id,
+        'extra_params': json.dumps(request.GET),
+        'plugins_config': plugins_config
+        },
+        context_instance=RequestContext(request)
+    )
+        
+    #Expira la caché cada día
+    tomorrow = datetime.datetime.now() + datetime.timedelta(days = 1)
+    tomorrow = datetime.datetime.replace(tomorrow, hour=0, minute=0, second=0)
+    expires = datetime.datetime.strftime(tomorrow, "%a, %d-%b-%Y %H:%M:%S GMT")     
+    response.set_cookie('key', expires = expires)
+        
+    return response
 
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -587,7 +624,7 @@ def get_default_style(layer):
             default = stl
     return default
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+
 def project_get_conf(request):
     if request.method == 'POST':
         errors = []
@@ -615,9 +652,11 @@ def project_get_conf(request):
         project_layers_groups = ProjectLayerGroup.objects.filter(project_id=project.id)
         layer_groups = []
         workspaces = []
+        
         count = 0
         for project_group in project_layers_groups:            
             group = LayerGroup.objects.get(id=project_group.layer_group_id)
+            ws = Workspace.objects.get(id=group.workspace_id)
             
             conf_group = {}
             conf_group['groupTitle'] = group.title
@@ -630,6 +669,9 @@ def project_get_conf(request):
             conf_group['groupName'] = group.name
             conf_group['cached'] = group.cached
             conf_group['visible'] = group.visible
+            conf_group['wms_endpoint'] = ws.wms_endpoint
+            conf_group['wfs_endpoint'] = ws.wfs_endpoint
+            conf_group['cache_endpoint'] = ws.cache_endpoint
             layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('order')
             layers = []
             user_roles = core_utils.get_group_names_by_user(request.user)
@@ -681,15 +723,6 @@ def project_get_conf(request):
                         layer['cached'] = l.cached
     
                         order = int(conf_group['groupOrder']) + l.order
-                        '''
-                        order = int(conf_group['groupOrder']) + layers_in_group.__len__() - idx
-                        if toc.get(group.name) and 'layers' in toc.get(group.name): 
-                            for layer_toc in toc.get(group.name).get('layers'):
-                                lyr_toc = toc.get(group.name).get('layers').get(layer_toc)
-                                if lyr_toc.get('name') == l.name:
-                                    if 'order' in lyr_toc:
-                                        order = lyr_toc.get('order')
-                        '''
                         layer['order'] = order 
                         layer['single_image'] = l.single_image
                         layer['read_roles'] = read_roles
@@ -714,10 +747,10 @@ def project_get_conf(request):
                         layer_info = None
                         defaultCrs = None
                         if datastore.type == 'e_WMS':
-                            #(ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
                             defaultCrs = 'EPSG:4326'
                         else:
-                            (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
+                            server = geographic_servers.get_server_by_id(workspace.server.id)
+                            (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, l.name, "json")
                             if ds_type == 'imagemosaic':
                                 ds_type = 'coverage'
                             defaultCrs = layer_info[ds_type]['srs']
@@ -817,27 +850,16 @@ def project_get_conf(request):
             base_layer['active'] = bsly_proj.is_default
             
             base_layers.append(base_layer)
-            
-            
+        
+        auth_urls = []    
+        for s in Server.objects.all():
+            auth_urls.append(s.frontend_url + '/wms')
+               
         conf = {
             'pid': pid,
             'project_name': project.name,
             'project_title': project.title,
             'project_image': project.image.url,
-            'user': {
-                'id': request.user.id,
-                'username': request.user.first_name + ' ' + request.user.last_name,
-                'login': request.user.username,
-                'email': request.user.email,
-                'permissions': {
-                    'is_superuser': is_superuser(request.user),
-                    'roles': core_utils.get_group_names_by_user(request.user)
-                },
-                'credentials': {
-                    'username': request.session['username'],
-                    'password': request.session['password']
-                }
-            },
             "view": {
                 "center_lat": project.center_lat,
                 "center_lon": project.center_lon, 
@@ -850,15 +872,29 @@ def project_get_conf(request):
             'tools': gvsigol.settings.GVSIGOL_TOOLS,
             'tile_size': gvsigol.settings.TILE_SIZE,
             'base_layers': base_layers,
-            'is_public_project': False,
-            'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL']),
-            'geoserver_frontend_url':gvsigol.settings.FRONTEND_URL + gvsigol.settings.GEOSERVER_PATH,
-            'geoserver_base_url_no_auth': gvsigol.settings.GVSIGOL_SERVICES['URL'],
+            'is_public_project': project.is_public,
             'resource_manager': resource_manager,
             'remote_auth': settings.AUTH_WITH_REMOTE_USER,
             'temporal_advanced_parameters': gvsigol.settings.TEMPORAL_ADVANCED_PARAMETERS,
-            'errors': errors
+            'errors': errors,
+            'auth_urls': auth_urls
         } 
+        
+        if request.user and request.user.id:
+            conf['user'] = {
+                'id': request.user.id,
+                'username': request.user.first_name + ' ' + request.user.last_name,
+                'login': request.user.username,
+                'email': request.user.email,
+                'permissions': {
+                    'is_superuser': is_superuser(request.user),
+                    'roles': core_utils.get_group_names_by_user(request.user)
+                },
+                'credentials': {
+                    'username': request.session['username'],
+                    'password': request.session['password']
+                }
+            }
         
         return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
 
@@ -871,7 +907,8 @@ def toc_update(request, pid):
         project.save()      
         
         toc_object = json.loads(toc)
-        mapservice_backend.createOrUpdateSortedGeoserverLayerGroup(toc_object)
+        server = geographic_servers.get_server_by_id(id)
+        server.createOrUpdateSortedGeoserverLayerGroup(toc_object)
          
         return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
     
@@ -908,7 +945,7 @@ def select_public_project(request):
         return render_to_response('select_public_project.html', {'projects': projects}, RequestContext(request))
     
     elif len (public_projects) == 1:
-        return redirect('public_project_load', project_name=public_projects[0].name)
+        return redirect('load_public_project', project_name=public_projects[0].name)
     
     elif len (public_projects) > 1:
         for pp in public_projects:
@@ -928,257 +965,8 @@ def select_public_project(request):
             projects.append(project)
             
         return render_to_response('select_public_project.html', {'projects': projects}, RequestContext(request))
-
-@cache_control(max_age=86400)  
-def public_project_load(request, project_name):
-    if core_utils.is_valid_public_project(project_name):
-        project = Project.objects.get(name__exact=project_name)
-        plugins_config = core_utils.get_plugins_config()
-        response = render_to_response('public_viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id, 'plugins_config': plugins_config}, context_instance=RequestContext(request))
-        #Expira la caché cada día
-        tomorrow = datetime.datetime.now() + datetime.timedelta(days = 1)
-        tomorrow = datetime.datetime.replace(tomorrow, hour=0, minute=0, second=0)
-        expires = datetime.datetime.strftime(tomorrow, "%a, %d-%b-%Y %H:%M:%S GMT")     
-        response.set_cookie('key', expires = expires)
-        return response
-    else:
-        return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
-            
-@csrf_exempt
-def public_viewer_get_conf(request):
-    if request.method == 'POST':
-        errors = []
-        pid = request.POST.get('pid')
-        
-        project = Project.objects.get(id=int(pid))
-        toc = json.loads(project.toc_order)
-            
-        project_layers_groups = ProjectLayerGroup.objects.filter(project_id=project.id)
-        layer_groups = []
-        workspaces = []
-        for project_group in project_layers_groups:            
-            group = LayerGroup.objects.get(id=project_group.layer_group_id)
-            
-            conf_group = {}
-            conf_group['groupTitle'] = group.title
-            conf_group['groupId'] = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
-            conf_group['groupOrder'] = toc.get(group.name).get('order')
-            conf_group['groupName'] = group.name
-            conf_group['cached'] = group.cached
-            conf_group['visible'] = group.visible
-            layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('order')
-            layers = []
-            user_roles = core_utils.get_group_names_by_user(request.user)
-
-            idx = 0
-            for l in layers_in_group:
-                try:
-                    read_roles = services_utils.get_read_roles(l)
-                    write_roles = services_utils.get_write_roles(l)
-                                        
-                    readable = False
-                    if len(read_roles) == 0:
-                        readable = True
-                    else:
-                        for ur in user_roles:
-                            for rr in read_roles:
-                                if ur == rr:
-                                    readable = True
-                                    
-                    #if len(read_roles) <= 0:
-                    if readable:
-                        layer = {}                
-                        layer['name'] = l.name
-                        layer['title'] = l.title
-                        layer['abstract'] = l.abstract
-                        layer['visible'] = l.visible 
-                        layer['queryable'] = l.queryable 
-                        layer['time_enabled'] = l.time_enabled 
-                        if layer['time_enabled']:
-                            layer['ref'] = l.id
-                            layer['time_enabled_field'] = l.time_enabled_field
-                            layer['time_enabled_endfield'] = l.time_enabled_endfield
-                            layer['time_presentation'] = l.time_presentation
-                            layer['time_resolution_year'] = l.time_resolution_year
-                            layer['time_resolution_month'] = l.time_resolution_month
-                            layer['time_resolution_week'] = l.time_resolution_week
-                            layer['time_resolution_day'] = l.time_resolution_day
-                            layer['time_resolution_hour'] = l.time_resolution_hour
-                            layer['time_resolution_minute'] = l.time_resolution_minute
-                            layer['time_resolution_second'] = l.time_resolution_second
-                            layer['time_default_value_mode'] = l.time_default_value_mode
-                            layer['time_default_value'] = l.time_default_value
-                        layer['cached'] = l.cached
-                        
-                        order = int(conf_group['groupOrder']) + l.order
-                        '''
-                        order = int(conf_group['groupOrder']) + layers_in_group.__len__() - idx
-                        
-                        if toc.get(group.name) and 'layers' in toc.get(group.name): 
-                            for layer_toc in toc.get(group.name).get('layers'):
-                                lyr_toc = toc.get(group.name).get('layers').get(layer_toc)
-                                if lyr_toc.get('name') == l.name:
-                                    order = lyr_toc.get('order')
-                        '''   
-                        layer['order'] = order 
-                        layer['single_image'] = l.single_image
-                        layer['read_roles'] = read_roles
-                        layer['write_roles'] = write_roles
-                        layer['styles'] = get_layer_styles(l)
-                        
-                        try:
-                            json_conf = ast.literal_eval(l.conf)
-                            layer['conf'] = json.dumps(json_conf)
-                        except:
-                            layer['conf'] = "{\"fields\":[]}"
-                            pass
-                        
-                        datastore = Datastore.objects.get(id=l.datastore_id)
-                        workspace = Workspace.objects.get(id=datastore.workspace_id)
-                        
-                        if datastore.type == 'v_SHP' or datastore.type == 'v_PostGIS': 
-                            layer['is_vector'] = True
-                        else:
-                            layer['is_vector'] = False
-                        
-                        layer_info = None
-                        defaultCrs = None
-                        if datastore.type == 'e_WMS':
-                            (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
-                            defaultCrs = 'EPSG:4326'
-                        else:
-                            (ds_type, layer_info) = mapservice_backend.getResourceInfo(workspace.name, datastore, l.name, "json")
-                            if ds_type == 'imagemosaic':
-                                ds_type = 'coverage'
-                            defaultCrs = layer_info[ds_type]['srs']
-                            
-                        if defaultCrs.split(':')[1] in core_utils.get_supported_crs():
-                            epsg = core_utils.get_supported_crs()[defaultCrs.split(':')[1]]
-                            layer['crs'] = {
-                                'crs': defaultCrs,
-                                'units': epsg['units']
-                            }
-                            
-                        layer['wms_url'] = core_utils.get_wms_url(request, workspace)
-                        layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
-                        layer['namespace'] = workspace.uri
-                        layer['workspace'] = workspace.name  
-                        layer['metadata'] = core_utils.get_catalog_url(request, l)             
-                        if l.cached:  
-                            layer['cache_url'] = core_utils.get_cache_url(request, workspace)
-                        else:
-                            layer['cache_url'] = core_utils.get_wms_url(request, workspace)
-                        
-                        if datastore.type == 'e_WMS':
-                            layer['legend'] = ""
-                        else: 
-                            ls = get_default_style(l)
-                            if ls is None:
-                                print 'CAPA SIN ESTILO POR DEFECTO: ' + l.name
-                                layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                                layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                                    
-                            else:
-                                if not ls.has_custom_legend:
-                                    layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                                    layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
-                                else:
-                                    layer['legend'] = ls.custom_legend_url
-                                    layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png'
     
-                        layers.append(layer)
-                        
-                        w = {}
-                        w['name'] = workspace.name
-                        w['wms_url'] = workspace.wms_endpoint
-                        workspaces.append(w)
-                    idx = idx + 1
-                except Exception as e:
-                    datastore = Datastore.objects.get(id=l.datastore_id)
-                    workspace = Workspace.objects.get(id=datastore.workspace_id)
-                    
-                    error = {
-                        'layer': l.name,
-                        'datastore': datastore.name,
-                        'workspace': workspace.name,
-                        'error': str(e)
-                    }
-                    errors.append(error)
-                    pass
-                        
-                        
-            if len(layers) > 0:   
-                ordered_layers = sorted(layers, key=itemgetter('order'), reverse=True)
-                conf_group['layers'] = ordered_layers
-                layer_groups.append(conf_group)
-            
-        ordered_layer_groups = sorted(layer_groups, key=itemgetter('groupOrder'), reverse=True)
         
-        resource_manager = 'gvsigol'
-        if 'gvsigol_plugin_alfresco' in gvsigol.settings.INSTALLED_APPS:
-            resource_manager = 'alfresco'
-            
-        bsly_projs = BaseLayerProject.objects.filter(project=project).order_by('order')
-        
-        base_layers = []
-        for bsly_proj in bsly_projs:
-            bsly = bsly_proj.baselayer
-            
-            base_layer = {}
-            if bsly.type_params:
-                bsly_params = json.loads(bsly.type_params)
-                base_layer.update(bsly_params)
-            
-            base_layer['name'] = bsly.name
-            base_layer['title'] = bsly.title
-            base_layer['type'] = bsly.type
-            base_layer['active'] = bsly_proj.is_default
-            
-            base_layers.append(base_layer)
-        
-        conf = {
-            'pid': pid,
-            'project_name': project.name,
-            'project_title': project.title,
-            'project_image': project.image.url,
-            "view": {
-                "center_lat": project.center_lat,
-                "center_lon": project.center_lon, 
-                "zoom": project.zoom 
-            }, 
-            'supported_crs': core_utils.get_supported_crs(),
-            'base_layers': base_layers,
-            'workspaces': workspaces,
-            'layerGroups': ordered_layer_groups,
-            'tools': gvsigol.settings.GVSIGOL_TOOLS,  
-            'tile_size': gvsigol.settings.TILE_SIZE,          
-            'is_public_project': True,
-            'geoserver_base_url': core_utils.get_geoserver_base_url(request, gvsigol.settings.GVSIGOL_SERVICES['URL']),
-            'geoserver_frontend_url': os.path.join(gvsigol.settings.FRONTEND_URL, gvsigol.settings.GEOSERVER_PATH),
-            'resource_manager': resource_manager,
-            'temporal_advanced_parameters': gvsigol.settings.TEMPORAL_ADVANCED_PARAMETERS,
-            'errors': errors
-        } 
-
-        if request.user and request.user.id:
-            conf['user'] = {
-                'id': request.user.id,
-                'username': request.user.first_name + ' ' + request.user.last_name,
-                'login': request.user.username,
-                'email': request.user.email,
-                'permissions': {
-                    'is_superuser': is_superuser(request.user),
-                    'roles': core_utils.get_group_names_by_user(request.user)
-                },
-                'credentials': {
-                    'username': request.session['username'],
-                    'password': request.session['password']
-                }
-            }
-        
-        
-        return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
-    
 def documentation(request):
     lang = request.LANGUAGE_CODE
     response = {
