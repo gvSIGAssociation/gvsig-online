@@ -29,9 +29,11 @@
 						</div>
 						{% endif %}
 								
-						{% if message %}
+						{% if errors %}
 						<div id="form-error" style="color:#ff0000;">
-							<p>* {{ message }}</p>
+							{% for error in errors %}
+							<p>* {{ error.message }}</p>
+							{% endfor %}
 						</div>
 						{% endif %}
 										

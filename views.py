@@ -30,10 +30,9 @@ from forms import UserCreateForm, UserGroupForm
 from models import UserGroupUser, UserGroup
 from django.contrib.auth.models import User
 from gvsigol_auth.services import services as core_services
-from gvsigol_services.backend_mapservice import backend as mapservice_backend
+from gvsigol_services.geographic_servers import geographic_servers
 from gvsigol_services import utils as services_utils
-from gvsigol_services.models import Workspace
-import random, string
+from gvsigol_services.models import Workspace, Server
 from utils import superuser_required, staff_required
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
@@ -42,8 +41,6 @@ import utils as auth_utils
 import json
 import re
 import base64
-
-from django.contrib.auth.forms import SetPasswordForm
 
 from gvsigol.settings import GVSIGOL_LDAP, LOGOUT_PAGE_URL, AUTH_WITH_REMOTE_USER
 
@@ -195,10 +192,6 @@ def password_reset(request):
         username = request.POST.get('username')
         try:
             user = User.objects.get(username__exact=username)
-            #temp_pass = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
-            #user.set_password(temp_pass)
-            #user.save()
-            #core_services.ldap_change_user_password(user, temp_pass)
             
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token =  default_token_generator.make_token(user)
@@ -233,7 +226,6 @@ def password_reset_complete(request):
     form for entering a new password.
     """
     user_id = request.POST.get('user_id')
-    uid = request.POST.get('uid')
     token = request.POST.get('token')
 
     user = User.objects.get(id=user_id)
@@ -241,8 +233,6 @@ def password_reset_complete(request):
     errors = ''
     
     if user is not None and default_token_generator.check_token(user, token):
-        validlink = True
-        title = _('Enter new password')
         if request.method == 'POST':
             temp_pass = request.POST.get('password')
             user.set_password(temp_pass)
@@ -264,8 +254,6 @@ def password_reset_complete(request):
 
 
     else:
-        validlink = False
-        form = None
         errors =  _('Invalid token. Your link has expired, you need to ask for another one.')
             
     return render_to_response('registration/password_reset_confirm.html', {'errors': errors}, RequestContext(request))
@@ -335,7 +323,10 @@ def user_add(request):
                 if 'group-' in key:
                     assigned_groups.append(int(key.split('-')[1]))
             
-            try:         
+            try: 
+                gs = geographic_servers.get_default_server()
+                server_object = Server.objects.get(id=int(gs.id))
+                                
                 if form.data['password1'] == form.data['password2']:
                     user = User(
                         username = form.data['username'].lower(),
@@ -395,21 +386,13 @@ def user_add(request):
                         core_services.add_data_directory(ugroup)
                         core_services.ldap_add_group_member(user, ugroup)
                         
-                        url = mapservice_backend.getBaseUrl() + '/'
+                        url = server_object.frontend_url + '/'
                         ws_name = 'ws_' + form.data['username'].lower()
                         
-                        if mapservice_backend.createWorkspace(
-                            ws_name,
-                            url + ws_name,
-                            '',
-                            url + ws_name + '/wms',
-                            url + ws_name + '/wfs',
-                            url + ws_name + '/wcs',
-                            url + 'gwc/service/wmts',
-                            url + 'gwc/service/wms'):
-                                
+                        if gs.createWorkspace(ws_name, url + ws_name):          
                             # save it on DB if successfully created
                             newWs = Workspace(
+                                server = server_object,
                                 name = ws_name,
                                 description = '',
                                 uri = url + ws_name,
@@ -426,7 +409,7 @@ def user_add(request):
                             ds_name = 'ds_' + form.data['username'].lower()
                             services_utils.create_datastore(request, user.username, ds_name, newWs)
                             
-                            mapservice_backend.reload_nodes()
+                            gs.reload_nodes()
                         
                         
                     auth_utils.sendMail(user, form.data['password1'])
@@ -436,7 +419,7 @@ def user_add(request):
             except Exception as e:
                 print "ERROR: Problem creating user " + str(e)
                 errors = []
-                #errors.append({'message': _("The username already exists")})
+                errors.append({'message': _("There must be at least one server")})
                 groups = auth_utils.get_all_groups()
                 return render_to_response('user_add.html', {'form': form, 'groups': groups, 'errors': errors,'show_pass_form':show_pass_form}, context_instance=RequestContext(request))
 
