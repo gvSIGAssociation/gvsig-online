@@ -1767,10 +1767,11 @@ def layergroup_add(request):
 @staff_required
 def layergroup_add_with_project(request, project_id):
     if request.method == 'POST':
-        name = request.POST.get('layergroup_name') + '_' + request.user.username
+        name = request.POST.get('layergroup_name')
         title = request.POST.get('layergroup_title')
         workspace_id = request.POST.get('layergroup_workspace_id')
-
+        ws = Workspace.objects.get(id=int(workspace_id))
+        
         cached = False
         if 'cached' in request.POST:
             cached = True
@@ -1780,6 +1781,7 @@ def layergroup_add_with_project(request, project_id):
             visible = True
 
         if name != '':
+            name = request.POST.get('layergroup_name') + '_' + request.user.username
             if _valid_name_regex.search(name) == None:
                 message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
                 return render_to_response('layergroup_add.html', {'message': message}, context_instance=RequestContext(request))
@@ -1800,8 +1802,6 @@ def layergroup_add_with_project(request, project_id):
                     created_by = request.user.username
                 )
                 layergroup.save()
-                #server = geographic_servers.get_server_by_id(id)
-                #server.reload_nodes()
 
                 project_id = request.POST.get('layergroup_project_id')
                 if project_id and project_id != '':
@@ -1833,11 +1833,11 @@ def layergroup_add_with_project(request, project_id):
 
             else:
                 message = _(u'Layer group name already exists')
-                return render_to_response('layergroup_add.html', {'message': message, 'project_id': project_id}, context_instance=RequestContext(request))
+                return render_to_response('layergroup_add.html', {'message': message, 'project_id': project_id, 'workspaces': Workspace.objects.values()}, context_instance=RequestContext(request))
 
         else:
             message = _(u'You must enter a name for layer group')
-            return render_to_response('layergroup_add.html', {'message': message, 'project_id': project_id}, context_instance=RequestContext(request))
+            return render_to_response('layergroup_add.html', {'message': message, 'project_id': project_id, 'workspaces': Workspace.objects.values()}, context_instance=RequestContext(request))
 
         return redirect('layergroup_list')
 
@@ -1980,9 +1980,10 @@ def layergroup_update(request, lgid):
 def layergroup_delete(request, lgid):
     if request.method == 'POST':
         layergroup = LayerGroup.objects.get(id=int(lgid))
+        ws = Workspace.objects.get(id=layergroup.workspace_id)
         layers = Layer.objects.filter(layer_group_id=layergroup.id)
         projects_by_layergroup = ProjectLayerGroup.objects.filter(layer_group_id=layergroup.id)
-        last = None
+
         for p in projects_by_layergroup:
             p.project.toc_order = core_utils.toc_remove_layergroups(p.project.toc_order, [layergroup.id])
             p.project.save()
@@ -1990,14 +1991,17 @@ def layergroup_delete(request, lgid):
         for layer in layers:
             default_layer_group = LayerGroup.objects.get(name__exact='__default__')
             layer.layer_group = default_layer_group
-            layer.save() 
-            last = layer 
+            layer.save()
         
-        gs = geographic_servers.get_server_by_id(last.datastore.workspace.server.id)        
-        gs.deleteGeoserverLayerGroup(layergroup)
-        layergroup.delete()
-        gs.setDataRules()
-        gs.reload_nodes()
+        gs = geographic_servers.get_server_by_id(ws.server.id)  
+        try:      
+            gs.deleteGeoserverLayerGroup(layergroup)
+            gs.setDataRules()
+            gs.reload_nodes()
+            
+        except Exception:
+            layergroup.delete()
+        
         response = {
             'deleted': True
         }
