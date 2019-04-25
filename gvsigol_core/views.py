@@ -336,7 +336,53 @@ def project_add(request):
             
         base_layers = BaseLayer.objects.all()
         
-        return render_to_response('project_add.html', {'layergroups': layergroups, 'groups': groups, 'base_layers': base_layers, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+        tools = [{
+            'id': 1,
+            'checked': True,
+            'title': 'Herramientas de zoom',
+            'description': 'Zoom más, zoom menos, ...'
+        }, {
+            'id': 2,
+            'checked': True,
+            'title': 'Información',
+            'description': 'Información del mapa en un punto'
+        }, {
+            'id': 3,
+            'checked': True,
+            'title': 'Herramientas de medida',
+            'description': 'Permite medir áreas y distancias'
+        }, {
+            'id': 4,
+            'checked': True,
+            'title': 'Exportar a PDF',
+            'description': 'Exporta la vista actual a PDF'
+        }, {
+            'id': 5,
+            'checked': True,
+            'title': 'Buscar coordenadas',
+            'description': 'Centra el mapa en unas coordenadas dadas'
+        }, {
+            'id': 6,
+            'checked': True,
+            'title': 'Geolocalización',
+            'description': 'Centra el mapa en la posición actual'
+        }]
+        
+        app_id = 7
+        from django import apps
+
+        for key in apps.apps.app_configs:
+            app = apps.apps.app_configs[key]
+            if 'gvsigol_plugin_' in app.name:
+                tools.append({
+                    'id': app_id,
+                    'checked': False,
+                    'title': app.verbose_name,
+                    'description': app.label
+                })
+                app_id += 1
+        
+        return render_to_response('project_add.html', {'layergroups': layergroups, 'tools': tools, 'groups': groups, 'base_layers': base_layers, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')

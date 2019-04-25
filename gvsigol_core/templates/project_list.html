@@ -5,15 +5,17 @@
 {% block content %}
 <div class="row">
 	<div class="col-md-12">
-		<div class="box">
-		
-			<div class="box-header with-border">
-				<h3 class="box-title">{% trans "Projects list" %}</h3>
+		<div class="row">
+			<div class="col-md-12 form-group">
 				<div class="box-tools pull-right">
 					<button id="button-add-project" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add project" %}</button>
 				</div>
 			</div>
-			
+		</div>	
+		<div class="box">
+			<div class="box-header with-border">
+				<h3 class="box-title">{% trans "Projects list" %}</h3>
+			</div>		
 			<div class="box-body">
 				<table class="table" id="projects-table">
 					<thead>

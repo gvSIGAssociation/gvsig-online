@@ -6,16 +6,14 @@
 	<div class="row">
 		<div class="col-md-12">
 			<form role="form" method="post" action="/gvsigonline/services/server_update/{{svid}}/">
-				<div class="box">
-					<div class="box-header with-border">
-						<h3 class="box-title">{% trans "Update server" %}</h3>
+				<div class="row">
+					<div class="col-md-12 form-group">
 						<div class="box-tools pull-right">
-							<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+							<button id="save_button" class="save_button btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Update" %}</button>					
 						</div>
 					</div>
-
-					<div class="box-body">
-						{% csrf_token %}					
+					<div class="row" style="padding-left: 30px;">
+						{% csrf_token %}
 						<div id="form-error" style="color:#ff0000;">
 							<ul>
 							{% for field in form %}
@@ -23,89 +21,106 @@
 									<li>{{field.label}}. {{ field.errors|striptags }}</li>
 								{% endif %}	
 							{% endfor %}
+							{% for field, msg in form.errors.iteritems %}
+								<li>{{ msg|striptags }}</li>
+							{% endfor %}
 							</ul>
-						</div>
-								
-						{% if message %}
-						<div id="form-error" style="color:#ff0000;">
-							<p>* {{ message }}</p>
-						</div>
-						{% endif %}
-										
-						<div class="row">
-							<div class="col-md-12">
-								<label>{% trans "Title" %}</label>
-								<input placeholder="{% trans 'Title' %}" name="server_title" id="server_title" type="text" class="form-control" value="{{server.title}}">							
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-md-12">
-								<label>{% trans "Description" %}</label>
-								<input placeholder="{% trans 'Description' %}" name="server_description" id="server_description" type="text" class="form-control" value="{{server.description}}">							
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-md-12">
-								<label>{% trans "Frontend URL" %}</label>
-								<input placeholder="{% trans 'Frontend URL' %}" name="server_frontend_url" id="server_frontend_url" type="text" class="form-control" value="{{server.frontend_url}}">							
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-md-12">
-								<label>{% trans "User" %}</label>
-								<input placeholder="{% trans 'User' %}" name="server_user" id="server_user" type="text" class="form-control" value="{{server.user}}">							
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-md-12">
-								<label>{% trans "Password" %}</label>
-								<input placeholder="{% trans 'Password' %}" name="server_password" id="server_password" type="text" class="form-control" value="{{server.password}}">							
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label for="default">{% trans "Default" %}</label>&nbsp;&nbsp;
-								{% if server.default %}
-								<input type="checkbox" name="default"  id="default" checked/>
-								{% else %}
-								<input type="checkbox" name="default"  id="default"/>
-								{% endif %}								
-							</div>
-						</div>	
-					</div>			
-				</div>
-				<div id="server-nodes" class="row">
-					<div class="col-md-12">
-						<div class="box">
-							<div class="box-header with-border">
-								<h3 class="box-title">{% trans "Server nodes" %}</h3>
-							</div>
-							<div class="box-body">
-								<div class="table-responsive">
-									<table id="server-nodes-table" class="table no-margin">
-										<thead>
-											<tr>
-												<th>{% trans "Status" %}</th>
-												<th>{% trans "URL" %}</th>
-												<th>{% trans "Is master?" %}</th>
-												<th></th>
-											</tr>
-										</thead>
-										<tbody id="server-nodes-table-body"></tbody>
-									</table>
-								</div>
-							</div>
-							<div class="box-footer clearfix">
-								<a id="add-node-button" href="javascript:void(0)" style="font-size: 14px;" class="btn-sm btn-box-tool pull-left margin-r-5">
-									<i class="fa fa-plus margin-r-5"></i>{% trans "Add node" %}
-								</a>
-							</div>
-							<input type="hidden" name="nodes" id="nodes" value="{{form.nodes.value|default_if_none:''}}" />
 						</div>
 					</div>
 				</div>
-			</form>
-		</div>				
+				
+				<ul class="nav nav-tabs">
+              		<li class="active"><a href="#tab-server-main" data-toggle="tab">{% trans "Server" %}</a></li>
+              		<li><a href="#tab-server-nodes" data-toggle="tab">{% trans "Nodes" %}</a></li>
+            	</ul>
+            	
+            	<div class="tab-content">
+              		<div class="tab-pane active" id="tab-server-main">
+              			<div class="row">
+							<div class="col-md-12">
+								<div class="box">
+              						<div class="box-body">
+										<div class="row">
+											<div class="col-md-12">
+												<label>{% trans "Title" %}</label>
+												<input placeholder="{% trans 'Title' %}" name="server_title" id="server_title" type="text" class="form-control" value="{{server.title}}">							
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-md-12">
+												<label>{% trans "Description" %}</label>
+												<input placeholder="{% trans 'Description' %}" name="server_description" id="server_description" type="text" class="form-control" value="{{server.description}}">							
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-md-12">
+												<label>{% trans "Frontend URL" %}</label>
+												<input placeholder="{% trans 'Frontend URL' %}" name="server_frontend_url" id="server_frontend_url" type="text" class="form-control" value="{{server.frontend_url}}">							
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-md-12">
+												<label>{% trans "User" %}</label>
+												<input placeholder="{% trans 'User' %}" name="server_user" id="server_user" type="text" class="form-control" value="{{server.user}}">							
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-md-12">
+												<label>{% trans "Password" %}</label>
+												<input placeholder="{% trans 'Password' %}" name="server_password" id="server_password" type="text" class="form-control" value="{{server.password}}">							
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-md-12 form-group">
+												<label for="default">{% trans "Default" %}</label>&nbsp;&nbsp;
+												{% if server.default %}
+												<input type="checkbox" name="default"  id="default" checked/>
+												{% else %}
+												<input type="checkbox" name="default"  id="default"/>
+												{% endif %}								
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+              		</div>
+              		
+              		<div class="tab-pane" id="tab-server-nodes">
+              			<div class="row">
+							<div class="col-md-12">
+								<div class="box">
+									<div class="box-header with-border">
+										<h3 class="box-title">{% trans "Server nodes" %}</h3>
+									</div>
+									<div class="box-body">
+										<div class="table-responsive">
+											<table id="server-nodes-table" class="table no-margin">
+												<thead>
+													<tr>
+														<th>{% trans "Status" %}</th>
+														<th>{% trans "URL" %}</th>
+														<th>{% trans "Is master?" %}</th>
+														<th></th>
+													</tr>
+												</thead>
+												<tbody id="server-nodes-table-body"></tbody>
+											</table>
+										</div>
+									</div>
+									<div class="box-footer clearfix">
+										<a id="add-node-button" href="javascript:void(0)" style="font-size: 14px;" class="btn-sm btn-box-tool pull-left margin-r-5">
+											<i class="fa fa-plus margin-r-5"></i>{% trans "Add node" %}
+										</a>
+									</div>
+									<input type="hidden" name="nodes" id="nodes" value="{{form.nodes.value|default_if_none:''}}" />
+								</div>
+							</div>
+						</div>
+              		</div>	
+          		</div>
+          	</form>
+		</div>
 	</div>
 	
 	<!-- Modal -->
@@ -125,8 +140,8 @@
 			</div>
 		</div>
 	</div>
-	
 {% endblock %}
+
 {% block extra-scripts %}
 <script>
 	$('#menu-manage-services').addClass("active");

@@ -3,107 +3,101 @@
 {% load i18n %}
 
 {% block content %}	
+
+{% if redirect_to_layergroup %}
+<form role="form" method="post" action="/gvsigonline/services/layer_config/{{layer_id}}/?redirect=layergroup-redirect">
+{% else %}
+<form role="form" method="post" action="/gvsigonline/services/layer_config/{{layer_id}}/">
+{% endif %}
 <div class="row">
 	<div class="col-md-12">
+		<div class="row">
+			<div class="col-md-12 form-group">
+				<div class="box-tools pull-right">
+					<button type="submit" class="btn btn-default btn-sm save-button">{% trans "Save" %} <i class="fa fa-floppy-o margin-l-5"></i></button>					
+				</div>
+			</div>				
+		</div>
 		<div class="box">
-			{% if redirect_to_layergroup %}
-			<form role="form" method="post" action="/gvsigonline/services/layer_config/{{layer_id}}/?redirect=layergroup-redirect">
-			{% else %}
-			<form role="form" method="post" action="/gvsigonline/services/layer_config/{{layer_id}}/">
+			{% csrf_token %}
+			{% if form.errors %}
+			<div id="form-error" style="color:#ff0000;">
+				<ul>
+				{% for field in form %}
+					{% if field.errors %}
+						<li>{{field.label}}. {{ field.errors|striptags }}</li>
+					{% endif %}	
+				{% endfor %}
+				</ul>
+			</div>
+			{% endif %}
+					
+			{% if message %}
+			<div id="form-error" style="color:#ff0000;">
+				<p>* {{ message }}</p>
+			</div>
 			{% endif %}
 			
-				<div class="box-header with-border">
-					<h3 class="box-title">{% trans "Configure layer" %}</h3>
-					<div class="box-tools pull-right">
-						<button type="submit" class="btn btn-default btn-sm save-button">{% trans "Save" %} <i class="fa fa-floppy-o margin-l-5"></i></button>					
-					</div>
-				</div>
-
-				{% csrf_token %}
-				<div class="box-body">										
-					{% if form.errors %}
-					<div id="form-error" style="color:#ff0000;">
-						<ul>
-						{% for field in form %}
-							{% if field.errors %}
-								<li>{{field.label}}. {{ field.errors|striptags }}</li>
-							{% endif %}	
-						{% endfor %}
-						</ul>
-					</div>
-					{% endif %}
-							
-					{% if message %}
-					<div id="form-error" style="color:#ff0000;">
-						<p>* {{ message }}</p>
-					</div>
-					{% endif %}
-					
-					<div id="layer-fields" class="row">
-						<div class="col-md-12">
-							<div class="box">
-								<div class="box-body">
-									<div class="table-responsive">
-										<table id="field-list-table" class="table no-margin">
-											<thead>
+			<div class="box-body">										
+				<div id="layer-fields" class="row">
+					<div class="col-md-12">
+						<div class="table-responsive">
+							<table id="field-list-table" class="table no-margin">
+								<thead>
+									<tr>
+										<th>{% trans "Field name" %}</th>
+										{% for id, language in available_languages %}
+										<th>{% trans "Field title" %}&nbsp;({{ language }})</th>
+										{% endfor %}
+										<th>{% trans "Is visible?" %}</th>
+										<th>{% trans "Is editable?" %}</th>
+										<th>{% trans "Is shown in getFeatureInfo?" %}</th>
+									</tr>
+								</thead>
+								<tbody id="field-list-table-body">
+									{% for f in fields %}
+										{% with counter=forloop.counter %}
 												<tr>
-													<th>{% trans "Field name" %}</th>
+													<td><input readonly name="field-name-{{counter}}" type="text" class="form-control" value="{{f.name}}"></td>
 													{% for id, language in available_languages %}
-													<th>{% trans "Field title" %}&nbsp;({{ language }})</th>
+													<td><input name="field-title-{{id}}-{{counter}}" type="text" class="form-control" placeHolder="{{f.name}}" value=""></td>
 													{% endfor %}
-													<th>{% trans "Is visible?" %}</th>
-													<th>{% trans "Is editable?" %}</th>
-													<th>{% trans "Is shown in getFeatureInfo?" %}</th>
+													{% if f.visible %}
+													<td><input type="checkbox" name="field-visible-{{counter}}" checked/></td>
+													{% else %}
+													<td><input type="checkbox" name="field-visible-{{counter}}"/></td>
+													{% endif %}
+													{% if f.editable %}
+													<td><input type="checkbox" name="field-editable-{{counter}}" checked/></td>
+													{% else %}
+														{% if f.editableactive %}
+														<td><input type="checkbox" name="field-editable-{{counter}}"/></td>
+														{% else %}
+														<td><input type="checkbox" disabled name="field-editable-{{counter}}"/></td>
+														{% endif %}
+													{% endif %}
+													{% if f.infovisible %}
+													<td><input type="checkbox" name="field-infovisible-{{counter}}" checked/></td>
+													{% else %}
+													<td><input type="checkbox" name="field-infovisible-{{counter}}"/></td>
+													{% endif %}
 												</tr>
-											</thead>
-											<tbody id="field-list-table-body">
-												{% for f in fields %}
-													{% with counter=forloop.counter %}
-															<tr>
-																<td><input readonly name="field-name-{{counter}}" type="text" class="form-control" value="{{f.name}}"></td>
-																{% for id, language in available_languages %}
-																<td><input name="field-title-{{id}}-{{counter}}" type="text" class="form-control" placeHolder="{{f.name}}" value=""></td>
-																{% endfor %}
-																{% if f.visible %}
-																<td><input type="checkbox" name="field-visible-{{counter}}" checked/></td>
-																{% else %}
-																<td><input type="checkbox" name="field-visible-{{counter}}"/></td>
-																{% endif %}
-																{% if f.editable %}
-																<td><input type="checkbox" name="field-editable-{{counter}}" checked/></td>
-																{% else %}
-																	{% if f.editableactive %}
-																	<td><input type="checkbox" name="field-editable-{{counter}}"/></td>
-																	{% else %}
-																	<td><input type="checkbox" disabled name="field-editable-{{counter}}"/></td>
-																	{% endif %}
-																{% endif %}
-																{% if f.infovisible %}
-																<td><input type="checkbox" name="field-infovisible-{{counter}}" checked/></td>
-																{% else %}
-																<td><input type="checkbox" name="field-infovisible-{{counter}}"/></td>
-																{% endif %}
-															</tr>
-															{% if forloop.last %}
-															<input type="hidden" name="counter" value="{{counter}}" />
-												    	{% endif %}
-															
-													{% endwith %}
-												{% endfor %}
+												{% if forloop.last %}
+												<input type="hidden" name="counter" value="{{counter}}" />
+									    	{% endif %}
 												
-											</tbody>
-										</table>
-									</div>
-								</div>
-							</div>
+										{% endwith %}
+									{% endfor %}	
+								</tbody>
+							</table>
 						</div>
 					</div>
 				</div>
-                 
-			</form>		
+			</div>		
 		</div>
 	</div>
 </div>
+</form>
 {% endblock %}
 
 {% block extra-scripts %}
