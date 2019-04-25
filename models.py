@@ -18,6 +18,7 @@ class Project(models.Model):
     toc_order = models.TextField(null=True, blank=True)
     created_by = models.CharField(max_length=100)
     is_public = models.BooleanField(default=False)
+    tools = models.TextField(null=True, blank=True) 
     
     def __unicode__(self):
         return self.name + ' - ' + self.description
