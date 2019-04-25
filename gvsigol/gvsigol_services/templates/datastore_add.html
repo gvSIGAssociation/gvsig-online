@@ -3,91 +3,88 @@
 {% load i18n %}
 
 {% block content %}
+<form id="main_form" role="form" method="post" action="/gvsigonline/services/datastore_add/">
 <div class="row">
 	<div class="col-md-12">
-		<div class="box padding-20">
-			<form id="main_form" role="form" method="post" action="/gvsigonline/services/datastore_add/">
-				{% csrf_token %}
-				<div class="box-header with-border">
-					<h3 class="box-title">{% trans "Add datastore" %}</h3>
-					<div class="box-tools pull-right">
-						<div id="save_button" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</div>					
+		<div class="row">
+			<div class="col-md-12 form-group">
+				<div class="box-tools pull-right">
+					<div id="save_button" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</div>					
+				</div>
+			</div>				
+		</div>
+		<div class="box padding-20">	
+			{% csrf_token %}
+			{% if form.errors %}
+				<div id="form-error" style="color:#ff0000;">
+					<ul>
+					{% for field in form %}
+						{% if field.errors %}
+							<li>{{field.label}}. {{ field.errors|striptags }}</li>
+						{% endif %}	
+					{% endfor %}
+					{% for field, msg in form.errors.iteritems %}
+						<li>{{ msg|striptags }}</li>
+					{% endfor %}
+					</ul>
+				</div>
+			{% endif %}				
+			<div class="box-body">		
+				<div class="row">
+					<div class="col-md-12 form-group">	
+						<label for="id_workspace">{% trans "Workspace" %}</label>
+						{{ form.workspace }}									
 					</div>
-				</div>					
-				<div class="box-body">
-				
-					{% if form.errors %}
-					<div id="form-error" style="color:#ff0000;">
-						<ul>
-						{% for field in form %}
-							{% if field.errors %}
-								<li>{{field.label}}. {{ field.errors|striptags }}</li>
-							{% endif %}	
-						{% endfor %}
-						{% for field, msg in form.errors.iteritems %}
-							<li>{{ msg|striptags }}</li>
-						{% endfor %}
-						</ul>
+				</div>			
+				<div class="row">
+					<div class="col-md-12 form-group">	
+						<label for="id_workspace">{% trans "Type" %}</label>
+						{{ form.type }}									
 					</div>
-					{% endif %}
+				</div>	
 					
-					<div class="row">
-						<div class="col-md-12 form-group">	
-							<label for="id_workspace">{% trans "Workspace" %}</label>
-							{{ form.workspace }}									
-						</div>
-					</div>	
-					
-					<div class="row">
-						<div class="col-md-12 form-group">	
-							<label for="id_workspace">{% trans "Type" %}</label>
-							{{ form.type }}									
-						</div>
-					</div>	
-					
-					<div class="row" id="select-file-row" style="display: none;">
-						<div class="col-md-2">
-							<a href="#" id="select-file-button" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>{% trans "Select file" %}</a>					
-						</div>
-						<div class="col-md-10">
-							{{ form.file }}			
-						</div>
-					</div>		
-					
-					<div class="row">		
-						<div class="col-md-12 form-group">
-							<label for="id_name">{% trans "Name" %}</label>
-							{{ form.name }}
-						</div>	
+				<div class="row" id="select-file-row" style="display: none;">
+					<div class="col-md-2">
+						<a href="#" id="select-file-button" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>{% trans "Select file" %}</a>					
 					</div>
-					
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="id_description">{% trans "Description" %}</label>
-							{{ form.description }}						
-						</div>
-					</div>	
-					
-					<div class="row" id="connection-params-row">
-						<div class="col-md-12 form-group">
-							<label for="id_connection_params">{% trans "Connection params" %}</label>
-							{{ form.connection_params }}						
-						</div>
+					<div class="col-md-10">
+						{{ form.file }}			
 					</div>
+				</div>		
 					
-					<div class="row select-mosaic_dimension" style="display: none;">
-						<div class="col-md-12">
-							<input type="checkbox" id="time_dimension_input" name="time_dimension_input"/><label>{% trans "Temporal dimension" %}</label>
-						</div>
-						<div class="col-md-6">
-							 <input class="form-control" id="time_dimension_text" maxlength="500" name="time_dimension_text" type="text" placeHolder="(?<=_)[0-9]{8}" disabled>	
-						</div>
-						<div class="col-md-6">
-							 <input class="form-control" id="time_dimension_format" maxlength="500" name="time_dimension_format" type="text" placeHolder="yyyyMMdd" disabled>	
-						</div>
+				<div class="row">		
+					<div class="col-md-12 form-group">
+						<label for="id_name">{% trans "Name" %}</label>
+						{{ form.name }}
 					</div>	
+				</div>
 					
-					<div  style="display: none;">
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label for="id_description">{% trans "Description" %}</label>
+						{{ form.description }}						
+					</div>
+				</div>	
+					
+				<div class="row" id="connection-params-row">
+					<div class="col-md-12 form-group">
+						<label for="id_connection_params">{% trans "Connection params" %}</label>
+						{{ form.connection_params }}						
+					</div>
+				</div>
+					
+				<div class="row select-mosaic_dimension" style="display: none;">
+					<div class="col-md-12">
+						<input type="checkbox" id="time_dimension_input" name="time_dimension_input"/><label>{% trans "Temporal dimension" %}</label>
+					</div>
+					<div class="col-md-6">
+						 <input class="form-control" id="time_dimension_text" maxlength="500" name="time_dimension_text" type="text" placeHolder="(?<=_)[0-9]{8}" disabled>	
+					</div>
+					<div class="col-md-6">
+						 <input class="form-control" id="time_dimension_format" maxlength="500" name="time_dimension_format" type="text" placeHolder="yyyyMMdd" disabled>	
+					</div>
+				</div>				
+				<div  style="display: none;">
 					<div class="row select-mosaic_dimension" style="display: none;">
 						<div class="col-md-12">
 							<input type="checkbox" id="elevation_dimension_input" name="elevation_dimension_input"/><label>{% trans "Elevation dimension" %}</label>
@@ -99,13 +96,12 @@
 							<input class="form-control" id="elevation_dimension_format" maxlength="500" name="elevation_dimension_format" type="text" placeHolder="" disabled>	
 						</div>
 					</div>
-					</div>		
-					
-				</div>									
-			</form>	
+				</div>		
+			</div>									
 		</div>
 	</div>				
 </div>
+</form>	
 {% endblock %}
 
 {% block extra-scripts %}

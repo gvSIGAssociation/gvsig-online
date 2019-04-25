@@ -3,91 +3,88 @@
 {% load i18n %}
 
 {% block content %}	
+<form id="layer-group-form" role="form" method="post" action="/gvsigonline/services/layergroup_add/">
 	<div class="row">
 		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-12 form-group">
+					<div class="box-tools pull-right">
+						<button id="save_button" type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+					</div>
+				</div>				
+			</div>
 			<div class="box">
-
-				<form id="layer-group-form" role="form" method="post" action="/gvsigonline/services/layergroup_add/">
-					<div class="box-header with-border">
-						<h3 class="box-title">{% trans "Add layer group" %}</h3>
-						<div class="box-tools pull-right">
-							<button id="save_button" type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+				{% csrf_token %}					
+				{% if form.errors %}
+				<div id="form-error" style="color:#ff0000;">
+					<ul>
+					{% for field in form %}
+						{% if field.errors %}
+							<li>{{field.label}}. {{ field.errors|striptags }}</li>
+						{% endif %}	
+					{% endfor %}
+					</ul>
+				</div>
+				{% endif %}				
+				{% if message %}
+				<div id="form-error" style="color:#ff0000;">
+					<p>* {{ message }}</p>
+				</div>
+				{% endif %}
+				<div class="box-body">
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="layergroup_workspace_id">{% trans "Select workspace" %}</label>
+							<select class="form-control" id="layergroup_workspace_id" name="layergroup_workspace_id">
+								{% for workspace in workspaces %}
+								<option value="{{workspace.id}}">{{workspace.name}}</option>
+								{% endfor %}
+							</select>
 						</div>
 					</div>
-				
-					<div class="box-body">
-					{% csrf_token %}					
-						{% if form.errors %}
-						<div id="form-error" style="color:#ff0000;">
-							<ul>
-							{% for field in form %}
-								{% if field.errors %}
-									<li>{{field.label}}. {{ field.errors|striptags }}</li>
-								{% endif %}	
-							{% endfor %}
-							</ul>
-						</div>
-						{% endif %}
-								
-						{% if message %}
-						<div id="form-error" style="color:#ff0000;">
-							<p>* {{ message }}</p>
-						</div>
-						{% endif %}
-						
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label for="layergroup_workspace_id">{% trans "Select workspace" %}</label>
-								<select class="form-control" id="layergroup_workspace_id" name="layergroup_workspace_id">
-									{% for workspace in workspaces %}
-									<option value="{{workspace.id}}">{{workspace.name}}</option>
-									{% endfor %}
-								</select>
-							</div>
-						</div>
 										
-						<div class="row">
-							<div class="col-md-12">
-								<label for="layergroup_name">{% trans "Name" %}</label>
-								<input placeholder="{% trans 'Layer group name' %}" name="layergroup_name" id="layergroup_name" type="text" class="form-control">									
-							</div>
+					<div class="row">
+						<div class="col-md-12">
+							<label for="layergroup_name">{% trans "Name" %}</label>
+							<input placeholder="{% trans 'Layer group name' %}" name="layergroup_name" id="layergroup_name" type="text" class="form-control">									
 						</div>
+					</div>
 							
-						<div class="row">
-							<div class="col-md-12">
-								<label for="layergroup_title">{% trans "Title" %}</label>
-								<input placeholder="{% trans 'Layer group title' %}" name="layergroup_title" id="layergroup_title" type="text" class="form-control">								
-							</div>
+					<div class="row">
+						<div class="col-md-12">
+							<label for="layergroup_title">{% trans "Title" %}</label>
+							<input placeholder="{% trans 'Layer group title' %}" name="layergroup_title" id="layergroup_title" type="text" class="form-control">								
 						</div>
+					</div>
 						
-						{% if project_id %}
-							<input type="hidden" name="layergroup_project_id" id="layergroup_project_id" value="{{project_id}}"/>
-						{% else %}
-							<input type="hidden" name="layergroup_project_id" id="layergroup_project_id" value=""/>
-						{% endif %}
-						<br>
+					{% if project_id %}
+						<input type="hidden" name="layergroup_project_id" id="layergroup_project_id" value="{{project_id}}"/>
+					{% else %}
+						<input type="hidden" name="layergroup_project_id" id="layergroup_project_id" value=""/>
+					{% endif %}
+					<br>
 						
-						<div class="row">
-							<div class="checkbox col-md-6">								
-								<label>
-									<input type="checkbox" name="cached" id="cached" />{% trans "Create cache for the layer group" %}
-								</label>
-							</div>
-							<div class="checkbox col-md-6">								
-								<label>
-									<input type="checkbox" name="visible" id="visible" />{% trans "Is visible" %}
-								</label>
-							</div>
+					<div class="row">
+						<div class="checkbox col-md-6">								
+							<label>
+								<input type="checkbox" name="cached" id="cached" />{% trans "Create cache for the layer group" %}
+							</label>
 						</div>
-						<div class="box-tools pull-right">
-							<div id="button-create-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn button-add-layer btn-box-tool"><i class="fa fa-database margin-r-5"></i> {% trans "Create empty layer" %}</div>
-							<div id="button-import-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn button-add-layer btn-box-tool"><i class="fa fa-cloud-upload margin-r-5"></i> {% trans "Publish layer" %}</div>				
+						<div class="checkbox col-md-6">								
+							<label>
+								<input type="checkbox" name="visible" id="visible" />{% trans "Is visible" %}
+							</label>
 						</div>
-					</div>		
-				</form>		
+					</div>
+					<div class="box-tools pull-right">
+						<div id="button-create-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn btn-sm btn-default"><i class="fa fa-database margin-r-5"></i> {% trans "Create empty layer" %}</div>
+						<div id="button-import-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn btn-sm btn-default"><i class="fa fa-cloud-upload margin-r-5"></i> {% trans "Publish layer" %}</div>				
+					</div>
+				</div>				
 			</div>
 		</div>				
 	</div>
+</form>
 
 <!-- Modal -->
 <div class="modal fade" id="modal-add-layer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -111,6 +108,7 @@
 	</div>
 </div>
 {% endblock %}
+
 {% block extra-scripts %}
 <script>
 	$('#menu-manage-services').addClass("active");
