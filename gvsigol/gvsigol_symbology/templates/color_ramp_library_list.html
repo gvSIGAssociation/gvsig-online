@@ -5,16 +5,15 @@
 {% block content %}	  	
 <div class="row">
 	<div class="col-md-12">
-		<div class="box">
-		
-			<div class="box-header with-border">
-				<h3 class="box-title">{% trans "Color ramp libraries" %}</h3>
+		<div class="row">
+			<div class="col-md-12 form-group">
 				<div class="box-tools pull-right">
 					<button id="button-add-library" class="btn btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add library" %}</button>
 					<button id="button-import-library" class="btn btn-default btn-sm"><i class="fa fa-upload margin-r-5"></i> {% trans "Import library" %}</button>
 				</div>
-			</div>
-			
+			</div>				
+		</div>
+		<div class="box">
 			<div class="box-body">
 				<table class="table" id="libraries-table">
 					<thead>

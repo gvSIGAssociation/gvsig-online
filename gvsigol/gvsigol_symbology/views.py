@@ -1141,7 +1141,7 @@ def library_update(request, library_id):
             rules.append(rule)
         
         gs = geographic_servers.get_default_server()
-        master = gs.get_master_node(gs.id)    
+        master = geographic_servers.get_master_node(gs.id)    
         response = {
             'library': library,
             'rules': rules,
@@ -1313,7 +1313,7 @@ def symbol_add(request, library_id, symbol_type):
  
     else: 
         gs = geographic_servers.get_default_server()
-        master = gs.get_master_node(gs.id)         
+        master = geographic_servers.get_master_node(gs.id)         
         response = {
             'library_id': library_id,
             'symbol_type': symbol_type,
@@ -1359,7 +1359,7 @@ def symbol_update(request, symbol_id):
         
         else:
             gs = geographic_servers.get_default_server()
-            master = gs.get_master_node(gs.id)
+            master = geographic_servers.get_master_node(gs.id)
             response = {
                 'rule': services_library.get_symbol(r, ftype),
                 'preview_point_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',

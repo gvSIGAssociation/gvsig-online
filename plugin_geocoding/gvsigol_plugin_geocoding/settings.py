@@ -25,6 +25,9 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+APP_TITLE = 'Catálogo de metadatos'
+APP_DESCRIPTION = 'Catálogo de metadatos'
+
 GEOCODING_PROVIDER_NAME='nominatim'
 
 GEOCODING_SUPPORTED_TYPES = (
