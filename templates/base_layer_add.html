@@ -3,121 +3,98 @@
 {% load i18n %}
 
 {% block content %}
+<form role="form" method="post" action="/gvsigonline/services/base_layer/base_layer_add/">
 <div class="row">
 	<div class="col-md-12">
+		<div class="row">
+			<div class="col-md-12 form-group">
+				<div class="box-tools pull-right">
+					<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+				</div>
+			</div>				
+		</div>
 		<div class="box padding-20">
-			<form role="form" method="post" action="/gvsigonline/services/base_layer/base_layer_add/">
-				{% csrf_token %}
-				<div class="box-header with-border">
-					<h3 class="box-title">{% trans "Add base layer" %}</h3>
-					<div class="box-tools pull-right">
-						<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+			{% csrf_token %}
+			<div id="form-error" style="color:#ff0000;">
+				<ul>
+				{% if form.errors %}
+				{% for field in form %}
+					{% if field.errors %}
+						<li>{{field.label}}. {{ field.errors|striptags }}</li>
+					{% endif %}	
+				{% endfor %}
+				{% for field, msg in form.errors.iteritems %}
+					<li>{{ msg|striptags }}</li>
+				{% endfor %}
+				{% endif %}
+				</ul>
+			</div>				
+			<div class="box-body">
+				<div class="row">		
+					<div class="col-md-12 form-group">
+						<label for="id_type">{% trans "Type" %}</label>
+						{{ form.type }}
+					</div>	
+				</div>	
+				<div class="row layers-control xyz-control wms-control wmts-control osm-control">		
+					<div class="col-md-12 form-group">
+						<label for="id_url">{% trans "Url" %}</label>
+						{{ form.url }}
+					</div>	
+				</div>
+				<div class="row layers-control wms-control wmts-control">
+					<div class="col-md-9 form-group">
+						<div id="connect-alert" class="alert-box-message"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "Alert: this url is not in the same domain. Several browsers could not load this base layer due to cross-domain policy." %}</div>					
 					</div>
-				</div>					
-				<div class="box-body">
-				
-					
-					<div id="form-error" style="color:#ff0000;">
-						<ul>
-						{% if form.errors %}
-						{% for field in form %}
-							{% if field.errors %}
-								<li>{{field.label}}. {{ field.errors|striptags }}</li>
-							{% endif %}	
-						{% endfor %}
-						{% for field, msg in form.errors.iteritems %}
-							<li>{{ msg|striptags }}</li>
-						{% endfor %}
-						{% endif %}
-						</ul>
+					<div class="col-md-3 form-group">
+						<div id="connect-button" class="btn btn-default btn-sm pull-right"><i class="fa fa-plug" aria-hidden="true"></i> {% trans "Connect" %}</div>					
 					</div>
-					
-					
-					<!-- 
-					<div class="row">		
-						<div class="col-md-12 form-group">
-							<label for="id_name">{% trans "Name" %}</label>
-							{{ form.name }}
-						</div>	
-					</div>
-					-->
-					
-					<div class="row">		
-						<div class="col-md-12 form-group">
-							<label for="id_type">{% trans "Type" %}</label>
-							{{ form.type }}
-						</div>	
-					</div>
-					
-					
-					<div class="row layers-control xyz-control wms-control wmts-control osm-control">		
-						<div class="col-md-12 form-group">
-							<label for="id_url">{% trans "Url" %}</label>
-							{{ form.url }}
-						</div>	
-					</div>
-					
-					<div class="row layers-control wms-control wmts-control">
-						<div class="col-md-9 form-group">
-							<div id="connect-alert" class="alert-box-message"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "Alert: this url is not in the same domain. Several browsers could not load this base layer due to cross-domain policy." %}</div>					
-						</div>
-						<div class="col-md-3 form-group">
-							<div id="connect-button" class="btn btn-default btn-sm pull-right"><i class="fa fa-plug" aria-hidden="true"></i> {% trans "Connect" %}</div>					
-						</div>
-					</div>
-					
-					<div class="row">		
-						<div class="col-md-12 form-group">
-							<label for="id_title">{% trans "Title" %}</label>
-							{{ form.title }}
-						</div>	
-					</div>
-					
-					<div class="row layers-control wms-control wmts-control">		
-						<div class="col-md-12 form-group">
-							<label for="id_version">{% trans "Version" %}</label>
-							{{ form.version }}
-						</div>	
-					</div>
-					
-					<div class="row layers-control bing-control wms-control wmts-control">		
-						<div class="col-md-12 form-group">
-							<label for="id_layers">{% trans "Layers" %}</label>
-							{{ form.layers }}
-							<datalist id="id_layer_list">
-							</datalist>
-						</div>	
-					</div>
-					
-					<div class="row layers-control wms-control wmts-control">		
-						<div class="col-md-12 form-group">
-							<label for="id_format">{% trans "Format" %}</label>
-							{{ form.format }}
-							<datalist id="id_format_list">
-							</datalist>
-						</div>	
-					</div>
-					
-					<div class="row layers-control wmts-control">		
-						<div class="col-md-12 form-group">
-							<label for="id_format">{% trans "MatrixSet" %}</label>
-							{{ form.matrixset }}
-						</div>	
-					</div>
-					
-					<div class="row layers-control bing-control xyz-control osm-control">		
-						<div class="col-md-12 form-group">
-							<label for="id_apikey">{% trans "Api-key" %}</label>
-							{{ form.key }}
-						</div>	
-					</div>
-																	
-				</div>									
-			</form>	
+				</div>
+				<div class="row">		
+					<div class="col-md-12 form-group">
+						<label for="id_title">{% trans "Title" %}</label>
+						{{ form.title }}
+					</div>	
+				</div>
+				<div class="row layers-control wms-control wmts-control">		
+					<div class="col-md-12 form-group">
+						<label for="id_version">{% trans "Version" %}</label>
+						{{ form.version }}
+					</div>	
+				</div>
+				<div class="row layers-control bing-control wms-control wmts-control">		
+					<div class="col-md-12 form-group">
+						<label for="id_layers">{% trans "Layers" %}</label>
+						{{ form.layers }}
+						<datalist id="id_layer_list">
+						</datalist>
+					</div>	
+				</div>
+				<div class="row layers-control wms-control wmts-control">		
+					<div class="col-md-12 form-group">
+						<label for="id_format">{% trans "Format" %}</label>
+						{{ form.format }}
+						<datalist id="id_format_list">
+						</datalist>
+					</div>	
+				</div>
+				<div class="row layers-control wmts-control">		
+					<div class="col-md-12 form-group">
+						<label for="id_format">{% trans "MatrixSet" %}</label>
+						{{ form.matrixset }}
+					</div>	
+				</div>
+				<div class="row layers-control bing-control xyz-control osm-control">		
+					<div class="col-md-12 form-group">
+						<label for="id_apikey">{% trans "Api-key" %}</label>
+						{{ form.key }}
+					</div>	
+				</div>												
+			</div>									
 		</div>
 	</div>				
 </div>
-
+</form>
 {% endblock %}
 
 {% block extra-scripts %}
