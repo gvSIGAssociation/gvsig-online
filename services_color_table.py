@@ -294,7 +294,7 @@ def get_conf(request, layer_id):
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
     gs = geographic_servers.get_server_by_id(workspace.server.id)
-    master = gs.get_master_node(gs.id)
+    master = geographic_servers.get_master_node(gs.id)
     
     index = len(StyleLayer.objects.filter(layer=layer))
     styleLayers = StyleLayer.objects.filter(layer=layer)

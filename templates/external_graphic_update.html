@@ -2,20 +2,19 @@
 {% load staticfiles %}
 {% load i18n %}
 
-{% block content %}	
-<div class="row">
-	<div class="col-md-12">
-		<div class="box">
-			
-			<form role="form">
-				<div class="box-header with-border">
-					<h3 class="box-title">{% trans "Update symbol" %}</h3>
+{% block content %}
+<form role="form">	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-12 form-group">
 					<div class="box-tools pull-right">
 						<button id="delete-symbol" type="button" class="btn btn-danger btn-sm"><i class="fa fa-times margin-r-5"></i> {% trans "Delete" %}</button>	
-						<button id="save-symbol" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+						<button id="save-symbol" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Update" %}</button>					
 					</div>
-				</div>
-	
+				</div>				
+			</div>
+			<div class="box">	
 				<div class="box-body">
 					{% csrf_token %}					
 					<div class="row">
@@ -53,12 +52,11 @@
 							</div>
 						</div>						
 					</div>						
-	           	</div>
-	           	
-			</form>
-		</div>
-	</div>				
-</div>
+	           	</div>	
+			</div>
+		</div>				
+	</div>
+</form>
 {% endblock %}
 
 {% block extra-scripts %}
