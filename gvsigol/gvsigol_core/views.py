@@ -230,6 +230,7 @@ def project_add(request):
         zoom = request.POST.get('zoom')
         toc = request.POST.get('toc_value')
         toc_mode = request.POST.get('toc_mode')
+        tools = request.POST.get('project_tools')
         
         is_public = False
         if 'is_public' in request.POST:
@@ -246,7 +247,6 @@ def project_add(request):
         assigned_baselayers = []
         assigned_layergroups = []
         assigned_usergroups = []
-        assigned_tools = []
         for key in request.POST:
             if 'baselayer-' in key:
                 assigned_baselayers.append(int(key.split('-')[1]))
@@ -254,10 +254,6 @@ def project_add(request):
                 assigned_layergroups.append(int(key.split('-')[1]))
             if 'usergroup-' in key:
                 assigned_usergroups.append(int(key.split('-')[1]))
-            if 'tool-' in key:
-                assigned_tools.append(key.split('-')[1])
-                
-        tools = ';'.join(assigned_tools)
                 
         exists = False
         projects = Project.objects.all()
@@ -407,6 +403,7 @@ def project_update(request, pid):
         zoom = request.POST.get('zoom')
         toc = request.POST.get('toc_value')
         toc_mode = request.POST.get('toc_mode')
+        tools = request.POST.get('project_tools')
         
         is_public = False
         if 'is_public' in request.POST:
@@ -455,6 +452,7 @@ def project_update(request, pid):
         project.is_public = is_public
         project.toc_order = toc
         project.toc_mode = toc_mode
+        project.tools = tools
         
         if has_image:
             project.image = request.FILES['project-image']
@@ -537,7 +535,7 @@ def project_update(request, pid):
             ordered_toc = sorted(toc.iteritems(), key=lambda (x, y): y['order'], reverse=True)
         else:
             ordered_toc = []
-        return render_to_response('project_update.html', {'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'base_layers': base_layers, 'selected_base_layers': selected_base_layers,'selected_base_layer': selected_base_layer, 'has_geocoding_plugin': has_geocoding_plugin, 'toc': ordered_toc}, context_instance=RequestContext(request))
+        return render_to_response('project_update.html', {'tools': json.loads(project.tools),'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'base_layers': base_layers, 'selected_base_layers': selected_base_layers,'selected_base_layer': selected_base_layer, 'has_geocoding_plugin': has_geocoding_plugin, 'toc': ordered_toc}, context_instance=RequestContext(request))
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
