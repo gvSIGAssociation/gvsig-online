@@ -28,16 +28,16 @@ from models import Project, ProjectUserGroup, ProjectLayerGroup, BaseLayer, Base
 from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup
 from gvsigol_auth.models import UserGroup, UserGroupUser
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
-from gvsigol_auth.utils import is_superuser, is_staff, staff_required
+from gvsigol_auth.utils import is_superuser, staff_required
 import utils as core_utils
 from gvsigol_services.geographic_servers import geographic_servers
 from django.views.decorators.cache import cache_control
 from gvsigol import settings
 import gvsigol_services.utils as services_utils
 from operator import itemgetter
+from django import apps
 import gvsigol
 import urllib
 import random
@@ -46,7 +46,6 @@ import string
 import json
 import ast
 import re
-import os
 
 from django.views.decorators.clickjacking import xframe_options_exempt
 
@@ -179,6 +178,48 @@ def project_add(request):
         providers = Provider.objects.all()
         has_geocoding_plugin = providers.__len__() > 0
         
+    project_tools = [{
+        'name': 'gvsigol_tool_zoom',
+        'checked': True,
+        'title': 'Herramientas de zoom',
+        'description': 'Zoom más, zoom menos, ...'
+    }, {
+        'name': 'gvsigol_tool_info',
+        'checked': True,
+        'title': 'Información',
+        'description': 'Información del mapa en un punto'
+    }, {
+        'name': 'gvsigol_tool_measure',
+        'checked': True,
+        'title': 'Herramientas de medida',
+        'description': 'Permite medir áreas y distancias'
+    }, {
+        'name': 'gvsigol_tool_export',
+        'checked': True,
+        'title': 'Exportar a PDF',
+        'description': 'Exporta la vista actual a PDF'
+    }, {
+        'name': 'gvsigol_tool_coordinate',
+        'checked': True,
+        'title': 'Buscar coordinates',
+        'description': 'Centra el mapa en unas coordenadas dadas'
+    }, {
+        'name': 'gvsigol_tool_location',
+        'checked': True,
+        'title': 'Geolocalización',
+        'description': 'Centra el mapa en la posición actual'
+    }]
+
+    for key in apps.apps.app_configs:
+        app = apps.apps.app_configs[key]
+        if 'gvsigol_plugin_' in app.name:
+            project_tools.append({
+                'name': app.name,
+                'checked': False,
+                'title': app.name,
+                'description': app.verbose_name
+            })
+        
     if request.method == 'POST':
         name = request.POST.get('project-name')
         title = request.POST.get('project-title')
@@ -205,6 +246,7 @@ def project_add(request):
         assigned_baselayers = []
         assigned_layergroups = []
         assigned_usergroups = []
+        assigned_tools = []
         for key in request.POST:
             if 'baselayer-' in key:
                 assigned_baselayers.append(int(key.split('-')[1]))
@@ -212,6 +254,10 @@ def project_add(request):
                 assigned_layergroups.append(int(key.split('-')[1]))
             if 'usergroup-' in key:
                 assigned_usergroups.append(int(key.split('-')[1]))
+            if 'tool-' in key:
+                assigned_tools.append(key.split('-')[1])
+                
+        tools = ';'.join(assigned_tools)
                 
         exists = False
         projects = Project.objects.all()
@@ -233,12 +279,12 @@ def project_add(request):
         
         if name == '':
             message = _(u'You must enter an project name')
-            return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'groups': groups, 'base_layers': base_layers, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+            return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'tools': project_tools, 'groups': groups, 'base_layers': base_layers, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
         
         if _valid_name_regex.search(name) == None:
             message = _(u"Invalid project name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
-            return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'groups': groups, 'base_layers': base_layers, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
-          
+            return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'tools': project_tools, 'groups': groups, 'base_layers': base_layers, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+         
         if not exists:
             project = None
             if has_image:
@@ -254,7 +300,8 @@ def project_add(request):
                     toc_order = toc,
                     toc_mode = toc_mode,
                     created_by = request.user.username,
-                    is_public = is_public
+                    is_public = is_public,
+                    tools = tools
                 )
             else:
                 project = Project(
@@ -268,7 +315,8 @@ def project_add(request):
                     toc_order = toc,
                     toc_mode = toc_mode,
                     created_by = request.user.username,
-                    is_public = is_public
+                    is_public = is_public,
+                    tools = tools
                 )
             project.save()
             
@@ -315,7 +363,7 @@ def project_add(request):
             
         else:
             message = _(u'Project name already exists')
-            return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'base_layers': base_layers, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+            return render_to_response('project_add.html', {'message': message, 'tools': project_tools , 'layergroups': layergroups, 'base_layers': base_layers, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
         
        
         
@@ -336,53 +384,7 @@ def project_add(request):
             
         base_layers = BaseLayer.objects.all()
         
-        tools = [{
-            'id': 1,
-            'checked': True,
-            'title': 'Herramientas de zoom',
-            'description': 'Zoom más, zoom menos, ...'
-        }, {
-            'id': 2,
-            'checked': True,
-            'title': 'Información',
-            'description': 'Información del mapa en un punto'
-        }, {
-            'id': 3,
-            'checked': True,
-            'title': 'Herramientas de medida',
-            'description': 'Permite medir áreas y distancias'
-        }, {
-            'id': 4,
-            'checked': True,
-            'title': 'Exportar a PDF',
-            'description': 'Exporta la vista actual a PDF'
-        }, {
-            'id': 5,
-            'checked': True,
-            'title': 'Buscar coordenadas',
-            'description': 'Centra el mapa en unas coordenadas dadas'
-        }, {
-            'id': 6,
-            'checked': True,
-            'title': 'Geolocalización',
-            'description': 'Centra el mapa en la posición actual'
-        }]
-        
-        app_id = 7
-        from django import apps
-
-        for key in apps.apps.app_configs:
-            app = apps.apps.app_configs[key]
-            if 'gvsigol_plugin_' in app.name:
-                tools.append({
-                    'id': app_id,
-                    'checked': False,
-                    'title': app.verbose_name,
-                    'description': app.label
-                })
-                app_id += 1
-        
-        return render_to_response('project_add.html', {'layergroups': layergroups, 'tools': tools, 'groups': groups, 'base_layers': base_layers, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+        return render_to_response('project_add.html', {'layergroups': layergroups, 'tools': project_tools, 'groups': groups, 'base_layers': base_layers, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -903,12 +905,15 @@ def project_get_conf(request):
         auth_urls = []    
         for s in Server.objects.all():
             auth_urls.append(s.frontend_url + '/wms')
-               
+           
+        project_tools = project.tools.split(';')  
+          
         conf = {
             'pid': pid,
             'project_name': project.name,
             'project_title': project.title,
             'project_image': project.image.url,
+            'project_tools': project_tools,
             "view": {
                 "center_lat": project.center_lat,
                 "center_lon": project.center_lon, 
