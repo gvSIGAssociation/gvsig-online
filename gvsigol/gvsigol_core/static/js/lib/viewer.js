@@ -503,14 +503,27 @@ viewer.core = {
 	},
 
 	_loadTools: function() {
-		this.tools.push(new projectZoom(this.map, this.conf));
-    	this.tools.push(new getFeatureInfo(this.map, this.conf.tools.get_feature_info_control.private_fields_prefix));
-    	this.tools.push(new measureLength(this.map));
-    	this.tools.push(new measureArea(this.map));
-    	this.tools.push(new exportToPDF(this.conf, this.map));
-    	this.tools.push(new searchByCoordinate(this.conf, this.map));
-    	this.tools.push(new geolocation(this.map));
-    	this.tools.push(new cleanMap(this.map));
+		if (this.ifToolInConf('gvsigol_tool_zoom')) {
+			this.tools.push(new projectZoom(this.map, this.conf));
+		}
+		if (this.ifToolInConf('gvsigol_tool_info')) {
+			this.tools.push(new getFeatureInfo(this.map, this.conf.tools.get_feature_info_control.private_fields_prefix));
+		}
+		if (this.ifToolInConf('gvsigol_tool_measure')) {
+			this.tools.push(new measureLength(this.map));
+			this.tools.push(new measureArea(this.map));
+		}
+		if (this.ifToolInConf('gvsigol_tool_export')) {
+			this.tools.push(new exportToPDF(this.conf, this.map));
+		}
+		if (this.ifToolInConf('gvsigol_tool_coordinate')) {
+			this.tools.push(new searchByCoordinate(this.conf, this.map));
+		}
+		if (this.ifToolInConf('gvsigol_tool_location')) {
+			this.tools.push(new geolocation(this.map));
+		}
+		this.tools.push(new cleanMap(this.map));
+    	
     	this.map.tools = this.tools;
     },
 
@@ -527,6 +540,16 @@ viewer.core = {
     		}
     	}
     	return tool;
+    },
+    
+    ifToolInConf: function(toolId) {
+    	var toolInConf = false;
+    	for (var i=0; i < this.conf.project_tools.length; i++) {
+    		if (this.conf.project_tools[i] == toolId) {
+    			toolInConf = true
+    		}
+    	}
+    	return toolInConf;
     },
 
     getLayerTree: function() {

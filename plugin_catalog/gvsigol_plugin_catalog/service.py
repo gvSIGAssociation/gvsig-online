@@ -19,7 +19,7 @@
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 from gvsigol_services import signals
-from gvsigol_services.backend_geoserver import backend as mapservice
+from gvsigol_services.geographic_servers import geographic_servers
 from gvsigol_plugin_catalog import settings as plugin_settings
 from django.core.exceptions import ImproperlyConfigured
 from gvsigol_plugin_catalog.models import LayerMetadata
@@ -89,7 +89,8 @@ class Geonetwork():
         return registry.create('dataset', mdfields)
     
     def metadata_insert(self, layer):
-        (ds_type, layer_info) = mapservice.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
+        gs = geographic_servers.get_server_by_id(layer.datastore.workspace.server.id)
+        (ds_type, layer_info) = gs.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
         md_record = self.create_metadata(layer, layer_info, ds_type)
         try:
             if self.xmlapi.gn_auth(self.user, self.password):
@@ -142,7 +143,9 @@ class Geonetwork():
         layer = kwargs['layer']
         try:
             lm = LayerMetadata.objects.get(layer=layer)
-            (ds_type, layer_info) = mapservice.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
+            
+            gs = geographic_servers.get_server_by_id(layer.datastore.workspace.server.id)
+            (ds_type, layer_info) = gs.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
             if self.xmlapi.gn_auth(self.user, self.password):
                 self.xmlapi.gn_update_metadata(lm.metadata_uuid, layer, layer.abstract, layer_info, ds_type)
                 self.xmlapi.gn_unauth()

@@ -19,7 +19,7 @@
 
 <!-- Get configuration from a project  -->	
 <script type="text/javascript">
-	
+if (viewer.core.ifToolInConf('gvsigol_plugin_worldwind')) {	
 	$.ajax({
 		type : 'POST',
 		async : false,
@@ -39,4 +39,5 @@
 			alert("Error loading WorldWind");
 		}
 	});
+}
 </script>

@@ -5,6 +5,8 @@
 <script type="text/javascript" src="{% static "js/catalog.js" %}"></script>
 
 <script type="text/javascript">
+if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')) {
+	
 	var catalog = new CatalogView(viewer.core,
 			{
 				{% if 'gvsigol_plugin_catalog' in plugins_config %}
@@ -73,5 +75,5 @@
 	$("#show_map").click(function(){
 		catalog.hidePanel()
 	});
-	
+}	
 </script>
