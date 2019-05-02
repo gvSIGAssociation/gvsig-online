@@ -544,9 +544,10 @@ viewer.core = {
     
     ifToolInConf: function(toolId) {
     	var toolInConf = false;
-    	for (var i=0; i < this.conf.project_tools.length; i++) {
-    		if (this.conf.project_tools[i] == toolId) {
-    			toolInConf = true
+    	var tools = JSON.parse(this.conf.project_tools);
+    	for (var i=0; i < tools.length; i++) {
+    		if (tools[i].name == toolId) {
+    			toolInConf = tools[i].checked
     		}
     	}
     	return toolInConf;

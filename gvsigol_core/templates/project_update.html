@@ -241,9 +241,9 @@
 														<div class="checkbox pull-right">													
 															<label>
 																{% if tool.checked %}
-																	<input type="checkbox" name="tool-{{tool.id}}" id="tool-{{tool.id}}" checked/>{% trans "Assign tool" %}
+																	<input type="checkbox" class="project-tool" type="checkbox" data-title="{{tool.title}}" data-name="{{tool.name}}" data-description="{{tool.description}}" name="tool-{{tool.name}}" id="tool-{{tool.name}}" checked/>{% trans "Assign tool" %}
 																{% else %}
-																	<input type="checkbox" name="tool-{{tool.id}}" id="tool-{{tool.id}}"/>{% trans "Assign tool" %}
+																	<input type="checkbox" class="project-tool" type="checkbox" data-title="{{tool.title}}" data-name="{{tool.name}}" data-description="{{tool.description}}" name="tool-{{tool.name}}" id="tool-{{tool.name}}"/>{% trans "Assign tool" %}
 																{% endif %}
 															</label>
 														</div>
@@ -255,6 +255,7 @@
 										</ul>
 										<ul class="pagination"></ul>
 									</div>
+									<input type="hidden" id="project_tools" name="project_tools" value=""/>
 								</div>
 							</div>
 						</div>
@@ -471,6 +472,20 @@
 				toc[groupName] = group;
 			}
 			$("#toc_value").val(JSON.stringify(toc));
+			
+			var toolList = $('.project-tool');
+			var projectTools = new Array();
+			for (var k=0; k<toolList.length; k++) {
+				var tool = {
+					'name': toolList[k].dataset.name,
+				    'checked': toolList[k].checked,
+				    'title': toolList[k].dataset.title,
+				    'description': toolList[k].dataset.description	
+				};
+				projectTools.push(tool);
+				
+			}
+			$("#project_tools").val(JSON.stringify(projectTools));
 			
 	  		$("#project-form").submit();
 	  	    return false; 
