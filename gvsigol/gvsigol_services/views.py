@@ -288,13 +288,7 @@ def workspace_add(request):
                 # first create the ws on the backend
                 gs = geographic_servers.get_server_by_id(form.cleaned_data['server'].id)
                 if gs.createWorkspace(form.cleaned_data['name'],
-                    form.cleaned_data['uri'],
-                    form.cleaned_data['description'],
-                    form.cleaned_data['wms_endpoint'],
-                    form.cleaned_data['wfs_endpoint'],
-                    form.cleaned_data['wcs_endpoint'],
-                    form.cleaned_data['wmts_endpoint'],
-                    form.cleaned_data['cache_endpoint']):
+                    form.cleaned_data['uri']):
 
                     isPublic = False
                     if form.cleaned_data['is_public']:
