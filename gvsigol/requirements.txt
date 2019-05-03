@@ -33,7 +33,7 @@ Pillow==3.4.2
 
 ## gsconfig
 gsconfig==1.0.3
-requests==2.7.0
+requests==2.21.0
 
 # async requests
 requests-futures==0.9.7
