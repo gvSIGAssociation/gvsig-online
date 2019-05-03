@@ -207,7 +207,7 @@ def get_fields(resource):
 def get_alphanumeric_fields(fields):
     alphanumeric_fields = []
     for field in fields:
-        if not field.get('binding').startswith('com.vividsolutions.jts.geom'):
+        if not 'jts.geom.' in field.get('binding'):
             alphanumeric_fields.append(field)
             
     return alphanumeric_fields

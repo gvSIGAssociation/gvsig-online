@@ -114,8 +114,8 @@ def fromJTS(geom_type):
     Converts from JTS geometry definition to gvSIG Online definition.
     Returns None if the geom is not supported in gvSIG Online
     """
-    if geom_type.startswith(__JTS_GEOM_PACKAGE):
-        geom_type = geom_type[len(__JTS_GEOM_PACKAGE):]
+    if 'jts.geom.' in geom_type:
+        geom_type = geom_type.split('.')[-1]
         if validateGeomDef(geom_type):
             return geom_type
 

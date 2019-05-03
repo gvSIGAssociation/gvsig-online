@@ -2411,12 +2411,12 @@ def get_datatable_data(request):
             if isinstance(attributes, list):
                 for attribute in attributes:
                     aux_encoded_property_name += attribute['name'] + ' '
-                    if not sortby_field and not attribute['binding'].startswith('com.vividsolutions.jts.geom'):
+                    if not sortby_field and not 'jts.geom' in attribute['binding']:
                         sortby_field = attribute['name']
             else:
                 attribute = attributes
                 aux_encoded_property_name += attribute['name'] + ' '
-                if not sortby_field and not attribute['binding'].startswith('com.vividsolutions.jts.geom'):
+                if not sortby_field and not 'jts.geom' in attribute['binding']:
                     sortby_field = attribute['name']
 
         num_fields = encoded_property_name.split(',').__len__()

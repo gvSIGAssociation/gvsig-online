@@ -264,7 +264,7 @@ def get_fields(resource):
 def get_alphanumeric_fields(fields):
     alphanumeric_fields = []
     for field in fields:
-        if not field.get('binding').startswith('com.vividsolutions.jts.geom'):
+        if not 'jts.geom' in field.get('binding'):
             alphanumeric_fields.append(field)
             
     return alphanumeric_fields
@@ -287,8 +287,8 @@ def get_numeric_fields(fields):
 def get_feature_type(fields):
     featureType = None
     for field in fields:
-        if field.get('binding').startswith('com.vividsolutions.jts.geom'):
-            auxType = field.get('binding').replace('com.vividsolutions.jts.geom.', '')
+        if 'jts.geom' in field.get('binding'):
+            auxType = field.get('binding').split('.')[-1]
             if auxType == "Point" or auxType == "MultiPoint":
                 featureType = "PointSymbolizer"
             if auxType == "Line" or auxType == "MultiLineString":
