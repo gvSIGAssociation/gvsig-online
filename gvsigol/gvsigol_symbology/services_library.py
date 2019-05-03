@@ -25,7 +25,7 @@ from __builtin__ import file
 
 from models import Style, Library, Rule, LibraryRule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, TextSymbolizer, ExternalGraphicSymbolizer, ColorRamp, ColorRampFolder, ColorRampLibrary
 from gvsigol_services.models import Layer
-from gvsigol_services.geographic_servers import geographic_servers
+import gvsigol_services.geographic_servers
 from django.utils.translation import ugettext as _
 import utils, sld_utils, sld_builder, sld_reader
 from django.http import HttpResponse
@@ -60,7 +60,7 @@ class InvalidValue(RequestError):
     pass
 
 def add_symbol(request, json_rule, library_id, symbol_type):
-    gs = geographic_servers.get_default_server()
+    gs = geographic_servers.get_instance().get_default_server()
     
     name = json_rule.get('name')
     title = json_rule.get('title')
@@ -172,7 +172,7 @@ def add_symbol(request, json_rule, library_id, symbol_type):
     
 def update_symbol(request, json_rule, rule, library_rule):
     try:
-        gs = geographic_servers.get_default_server()
+        gs = geographic_servers.get_instance().get_default_server()
         
         name = json_rule.get('name')
         title = json_rule.get('title')
@@ -273,7 +273,7 @@ def update_symbol(request, json_rule, rule, library_rule):
     
 def delete_symbol(rule, library_rule):
     try:
-        gs = geographic_servers.get_default_server()
+        gs = geographic_servers.get_instance().get_default_server()
         symbolizers = Symbolizer.objects.filter(rule_id=rule.id)
         for symbolizer in symbolizers:
             if get_ftype(symbolizer) == 'ExternalGraphic':
@@ -543,7 +543,7 @@ def remove_accents(string):
     return string
 
 def upload_library(name, description, file):
-    gs = geographic_servers.get_default_server()
+    gs = geographic_servers.get_instance().get_default_server()
     
     library = Library(
         name = name,

@@ -32,7 +32,7 @@ from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
 from gvsigol_auth.utils import is_superuser, staff_required
 import utils as core_utils
-from gvsigol_services.geographic_servers import geographic_servers
+import gvsigol_services.geographic_servers
 from django.views.decorators.cache import cache_control
 from gvsigol import settings
 import gvsigol_services.utils as services_utils
@@ -798,7 +798,7 @@ def project_get_conf(request):
                         if datastore.type == 'e_WMS':
                             defaultCrs = 'EPSG:4326'
                         else:
-                            server = geographic_servers.get_server_by_id(workspace.server.id)
+                            server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
                             (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, l.name, "json")
                             if ds_type == 'imagemosaic':
                                 ds_type = 'coverage'
@@ -959,7 +959,7 @@ def toc_update(request, pid):
         project.save()      
         
         toc_object = json.loads(toc)
-        server = geographic_servers.get_server_by_id(id)
+        server = geographic_servers.get_instance().get_server_by_id(id)
         server.createOrUpdateSortedGeoserverLayerGroup(toc_object)
          
         return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')

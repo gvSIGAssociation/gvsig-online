@@ -1,5 +1,5 @@
 from gvsigol_services.models import Datastore
-from gvsigol_services.geographic_servers import geographic_servers
+import gvsigol_services.geographic_servers
 from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.forms_geoserver import PostgisLayerUploadForm
 from django.views.generic import TemplateView, FormView
@@ -91,7 +91,7 @@ class ExportToDatabaseView(FilemanagerMixin, TemplateView):
         form = PostgisLayerUploadForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             try:
-                gs = geographic_servers.get_server_by_id(form.cleaned_data['datastore'].workspace.server.id)
+                gs = geographic_servers.get_instance().get_server_by_id(form.cleaned_data['datastore'].workspace.server.id)
                 if gs.exportShpToPostgis(form.cleaned_data):
                     request.session.message = _('Export process done successfully')
                     return redirect("/gvsigonline/filemanager/?path=" + request.POST.get('directory_path'))

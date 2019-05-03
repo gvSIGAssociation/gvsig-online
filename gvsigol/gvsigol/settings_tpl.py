@@ -392,3 +392,10 @@ LOGGING = {
 }
 
 TEMPORAL_ADVANCED_PARAMETERS = ##TEMPORAL_ADVANCED_PARAMETERS##
+
+LEGACY_GVSIGOL_SERVICES = { ## We introduce this variable for providing a default Server value when migrating from 2.3.x or earlier versions
+    'ENGINE':'geoserver',
+    'URL': '##GEOSERVER_BASE_URL##',
+    'USER': 'root',
+    'PASSWORD': '##GEOSERVER_PASSWD##',
+}

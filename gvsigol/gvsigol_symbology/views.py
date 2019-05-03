@@ -23,7 +23,7 @@
 '''
 
 from django.shortcuts import render_to_response, RequestContext, redirect, HttpResponse
-from gvsigol_services.geographic_servers import geographic_servers
+import gvsigol_services.geographic_servers
 from gvsigol_services.models import Workspace, Datastore, Layer
 from gvsigol_services import utils as service_utils
 from django.contrib.auth.decorators import login_required
@@ -64,7 +64,7 @@ def delete_preview_style(request, name, layer_id):
     styles = Style.objects.filter(name=name+'__tmp')
     success = True
     layer = Layer.objects.get(id=int(layer_id))
-    gs = geographic_servers.get_server_by_id(layer.datastore.workspace.server.id)
+    gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
     for style in styles:
         try:
             services.delete_style(style.id, gs)
@@ -142,7 +142,7 @@ def style_layer_delete(request):
                 message = _('Can not delete a default style')
             else:
                 try:
-                    gs = geographic_servers.get_server_by_id(layer.datastore.workspace.server.id)
+                    gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
                     services.delete_style(style_id, gs)
                     success = True
                     
@@ -759,7 +759,7 @@ def sld_import(request, layer_id):
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
     
-    gs = geographic_servers.get_server_by_id(workspace.server.id)
+    gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
         
     if request.method == 'POST': 
         style_name = request.POST.get('sld-name')
@@ -1140,8 +1140,8 @@ def library_update(request, library_id):
             }
             rules.append(rule)
         
-        gs = geographic_servers.get_default_server()
-        master = geographic_servers.get_master_node(gs.id)    
+        gs = geographic_servers.get_instance().get_default_server()
+        master = geographic_servers.get_instance().get_master_node(gs.id)    
         response = {
             'library': library,
             'rules': rules,
@@ -1312,8 +1312,8 @@ def symbol_add(request, library_id, symbol_type):
             return HttpResponse(json.dumps({'message':message, 'success': False}, indent=4), content_type='application/json')
  
     else: 
-        gs = geographic_servers.get_default_server()
-        master = geographic_servers.get_master_node(gs.id)         
+        gs = geographic_servers.get_instance().get_default_server()
+        master = geographic_servers.get_instance().get_master_node(gs.id)         
         response = {
             'library_id': library_id,
             'symbol_type': symbol_type,
@@ -1358,8 +1358,8 @@ def symbol_update(request, symbol_id):
             return render_to_response('external_graphic_update.html', response, context_instance=RequestContext(request))
         
         else:
-            gs = geographic_servers.get_default_server()
-            master = geographic_servers.get_master_node(gs.id)
+            gs = geographic_servers.get_instance().get_default_server()
+            master = geographic_servers.get_instance().get_master_node(gs.id)
             response = {
                 'rule': services_library.get_symbol(r, ftype),
                 'preview_point_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
