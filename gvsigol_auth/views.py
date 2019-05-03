@@ -30,7 +30,7 @@ from forms import UserCreateForm, UserGroupForm
 from models import UserGroupUser, UserGroup
 from django.contrib.auth.models import User
 from gvsigol_auth.services import services as core_services
-from gvsigol_services.geographic_servers import geographic_servers
+import gvsigol_services.geographic_servers
 from gvsigol_services import utils as services_utils
 from gvsigol_services.models import Workspace, Server
 from utils import superuser_required, staff_required
@@ -324,7 +324,7 @@ def user_add(request):
                     assigned_groups.append(int(key.split('-')[1]))
             
             try: 
-                gs = geographic_servers.get_default_server()
+                gs = geographic_servers.get_instance().get_default_server()
                 server_object = Server.objects.get(id=int(gs.id))
                                 
                 if form.data['password1'] == form.data['password2']:

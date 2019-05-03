@@ -48,8 +48,12 @@ class Node(models.Model):
     url = models.CharField(max_length=500)
     is_master = models.BooleanField(default=False)
 
+def get_default_server():
+    theServer = Server.objects.get(default=True)
+    return theServer.id
+
 class Workspace(models.Model):
-    server = models.ForeignKey(Server)
+    server = models.ForeignKey(Server, default=get_default_server)
     name = models.CharField(max_length=250, unique=True)
     description = models.CharField(max_length=500, null=True, blank=True)
     uri = models.CharField(max_length=500)

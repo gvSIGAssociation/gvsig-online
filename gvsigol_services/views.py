@@ -29,7 +29,7 @@ from forms_geoserver import CreateFeatureTypeForm
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
 from django.shortcuts import render_to_response, redirect, RequestContext
-from geographic_servers import geographic_servers
+import geographic_servers
 from backend_postgis import Introspect
 from gvsigol_services.backend_resources import resource_manager
 from gvsigol_auth.utils import superuser_required, staff_required
@@ -127,7 +127,7 @@ def server_add(request):
                 if not has_master:
                     Node.objects.all()[0].is_master = True
             
-            geographic_servers.add_server(server)
+            geographic_servers.get_instance().add_server(server)
             
             return HttpResponseRedirect(reverse('server_list'))
                 
@@ -144,7 +144,7 @@ def server_delete(request, svid):
     try:
     
         sv_object = Server.objects.get(id=svid)
-        gs = geographic_servers.get_server_by_id(svid)
+        gs = geographic_servers.get_instance().get_server_by_id(svid)
         
         for ws in Workspace.objects.filter(server_id=sv_object.id):
             if gs.deleteWorkspace(ws):
@@ -281,7 +281,7 @@ def workspace_add(request):
                 form.add_error(None, _("Invalid workspace name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name))
             else:
                 # first create the ws on the backend
-                gs = geographic_servers.get_server_by_id(form.cleaned_data['server'].id)
+                gs = geographic_servers.get_instance().get_server_by_id(form.cleaned_data['server'].id)
                 if gs.createWorkspace(form.cleaned_data['name'],
                     form.cleaned_data['uri']):
 
@@ -333,7 +333,7 @@ def workspace_import(request):
     else:
         # create empty form
         # FIXME: probably does not work
-        server = geographic_servers.get_server_by_id(id)
+        server = geographic_servers.get_instance().get_server_by_id(id)
         workspaces = server.get_workspaces()
         workspace_names = [n for n in workspaces['name']]
         querySet = Workspace.objects.all().exclude(name__in=workspace_names)
@@ -349,7 +349,7 @@ def workspace_import(request):
 def workspace_delete(request, wsid):
     try:
         ws = Workspace.objects.get(id=wsid)
-        gs = geographic_servers.get_server_by_id(ws.server.id)
+        gs = geographic_servers.get_instance().get_server_by_id(ws.server.id)
         if gs.deleteWorkspace(ws):
             datastores = Datastore.objects.filter(workspace_id=ws.id)
             for ds in datastores:
@@ -453,7 +453,7 @@ def datastore_add(request):
                 form.add_error(None, _("Invalid datastore name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name))
             else:
                 ws = form.cleaned_data['workspace']
-                gs = geographic_servers.get_server_by_id(ws.server.id)
+                gs = geographic_servers.get_instance().get_server_by_id(ws.server.id)
                 # first create the datastore on the backend
                 if gs.createDatastore(form.cleaned_data['workspace'],
                                                       form.cleaned_data['type'],
@@ -519,7 +519,7 @@ def datastore_update(request, datastore_id):
                     got_params['password'] = params['password']
                     connection_params = json.dumps(got_params)
 
-                gs = geographic_servers.get_server_by_id(datastore.workspace.server.id)
+                gs = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
                 if gs.updateDatastore(datastore.workspace.name, datastore.name,
                                                       description, dstype, connection_params):
                     # REST API does not allow to can't change the workspace or name of a datastore
@@ -551,7 +551,7 @@ def datastore_update(request, datastore_id):
 def datastore_delete(request, dsid):
     try:
         ds = Datastore.objects.get(id=dsid)
-        gs = geographic_servers.get_server_by_id(ds.workspace.server.id)
+        gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
         if gs.deleteDatastore(ds.workspace, ds) or ds.type == 'c_ImageMosaic':
             layers = Layer.objects.filter(datastore_id=ds.id)
             for l in layers:
@@ -617,7 +617,7 @@ def layer_delete(request, layer_id):
 @staff_required
 def layer_delete_operation(request, layer_id):
     layer = Layer.objects.get(pk=layer_id)
-    gs = geographic_servers.get_server_by_id(layer.datastore.workspace.server.id)
+    gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
     gs.deleteGeoserverLayerGroup(layer.layer_group)
     gs.deleteResource(layer.datastore.workspace, layer.datastore, layer)
     gs.deleteLayerStyles(layer)
@@ -665,7 +665,7 @@ def backend_datastore_list(request):
     if 'id_workspace' in request.GET:
         id_ws = request.GET['id_workspace']
         ws = Workspace.objects.get(id=id_ws)
-        gs = geographic_servers.get_server_by_id(ws.server.id)
+        gs = geographic_servers.get_instance().get_server_by_id(ws.server.id)
         if ws:
             datastores = gs.getDataStores(ws)
             datastores_sorted = sorted(datastores)

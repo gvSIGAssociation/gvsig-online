@@ -24,7 +24,7 @@ from gvsigol.settings import MEDIA_ROOT
 from models import LayerReadGroup, LayerWriteGroup
 from gvsigol_auth.models import UserGroup
 from gvsigol_services.models import Datastore, LayerResource
-from geographic_servers import geographic_servers
+import geographic_servers
 from gvsigol import settings
 import psycopg2
 import json
@@ -86,7 +86,7 @@ def create_datastore(request, username, ds_name, ws):
     connection_params = '{ "host": "' + dbhost + '", "port": "' + dbport + '", "database": "' + dbname + '", "schema": "' + ds_name + '", "user": "' + dbuser + '", "passwd": "' + dbpassword + '", "dbtype": "postgis" }'
     
     if create_schema(ds_name):
-        gs = geographic_servers.get_server_by_id(ws.server.id)
+        gs = geographic_servers.get_instance().get_server_by_id(ws.server.id)
         if gs.createDatastore(ws, ds_type, ds_name, description, connection_params):
             # save it on DB if successfully created
             datastore = Datastore(
