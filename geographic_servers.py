@@ -85,4 +85,9 @@ class GeographicServers(Singleton):
             if n.is_master:
                 return n      
 
-geographic_servers = GeographicServers()
+__geographic_servers = None
+
+def get_instance():
+    if __geographic_servers is None:
+        __geographic_servers = GeographicServers()
+    return __geographic_servers

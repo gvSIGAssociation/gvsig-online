@@ -23,7 +23,7 @@
 from models import Workspace, Datastore, Layer, LayerGroup, Server
 from gvsigol_core.models import BaseLayer
 from django.utils.translation import ugettext as _
-from gvsigol_services.geographic_servers import geographic_servers
+import gvsigol_services.geographic_servers
 from django import forms
 import string
 import random
@@ -108,7 +108,7 @@ class DatastoreForm(forms.Form):
         connection_params = cleaned_data.get("connection_params")
 
         if name and workspace:
-            gs = geographic_servers.get_server_by_id(workspace.server.id)
+            gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
             if gs.datastore_exists(workspace.name, name):
                 self.add_error('name', _("Datastore already exists")) 
 
