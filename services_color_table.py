@@ -25,7 +25,7 @@ from doctest import master
 
 from models import ColorMap, ColorMapEntry, Library, Style, StyleLayer, Rule, Symbolizer, RasterSymbolizer
 
-from gvsigol_services.geographic_servers import geographic_servers
+import gvsigol_services.geographic_servers
 
 from gvsigol_services.models import Layer, Datastore, Workspace
 from gvsigol_core import utils as core_utils
@@ -40,7 +40,7 @@ def create_style(request, json_data, layer_id, is_preview=False, has_custom_lege
     layer = Layer.objects.get(id=int(layer_id))
     datastore = layer.datastore
     workspace = datastore.workspace
-    gs = geographic_servers.get_server_by_id(workspace.server.id)
+    gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
     
     layer_styles = StyleLayer.objects.filter(layer=layer)
     is_default = False
@@ -161,7 +161,7 @@ def update_style(request, json_data, layer_id, style_id, is_preview=False, has_c
     layer = Layer.objects.get(id=int(layer_id))
     datastore = layer.datastore
     workspace = datastore.workspace
-    gs = geographic_servers.get_server_by_id(workspace.server.id)
+    gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
     
     layer_styles = StyleLayer.objects.filter(layer=layer)
     style_is_default = False
@@ -293,8 +293,8 @@ def get_conf(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
-    gs = geographic_servers.get_server_by_id(workspace.server.id)
-    master = geographic_servers.get_master_node(gs.id)
+    gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+    master = geographic_servers.get_instance().get_master_node(gs.id)
     
     index = len(StyleLayer.objects.filter(layer=layer))
     styleLayers = StyleLayer.objects.filter(layer=layer)
