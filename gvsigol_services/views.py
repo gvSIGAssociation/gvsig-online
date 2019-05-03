@@ -206,25 +206,20 @@ def server_update(request, svid):
             ws.wmts_endpoint = ws.wmts_endpoint.replace(old_frontend_url, frontend_url)
             ws.cache_endpoint = ws.cache_endpoint.replace(old_frontend_url, frontend_url)
             ws.save()
+            
+        for n in Node.objects.filter(server=server):
+            n.delete()
         
         json_nodes = json.loads(request.POST.get('nodes')) 
         for n in json_nodes:
-            if 'exists' in n:
-                node = Node.objects.get(id=int(n['id']))
-                node.status = n['status']
-                node.url = n['url']
-                node.is_master = n['is_master']
-                node.save()
-                
-            else:
-                node = Node(
-                    server = server,
-                    status = n['status'],
-                    url = n['url'],
-                    is_master = n['is_master']
-                )
-                node.save()        
-          
+            node = Node(
+                server = server,
+                status = n['status'],
+                url = n['url'],
+                is_master = n['is_master']
+            )
+            node.save()
+
         return redirect('server_list')
 
     else:
