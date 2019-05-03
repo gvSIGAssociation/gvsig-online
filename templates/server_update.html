@@ -109,7 +109,7 @@
 										</div>
 									</div>
 									<div class="box-footer clearfix">
-										<a id="add-node-button" href="javascript:void(0)" style="font-size: 14px;" class="btn-sm btn-box-tool pull-left margin-r-5">
+										<a id="add-node-button" href="javascript:void(0)" style="font-size: 12px;" class="btn btn-sm btn-default pull-left margin-r-5">
 											<i class="fa fa-plus margin-r-5"></i>{% trans "Add node" %}
 										</a>
 									</div>
@@ -167,12 +167,12 @@
 			
 			$(".edit-node-" + n.id).on('click', function(e){	
 				e.preventDefault();
-				createModalContent(n.id, 'update');
+				createModalContent(this.dataset.nodeid, 'update');
 			});
 			
 			$(".delete-node-" + n.id).on('click', function(e){	
 				e.preventDefault();
-				deleteNode(n.id);
+				deleteNode(this.dataset.nodeid);
 			});
 		}			
 	};
@@ -194,12 +194,12 @@
 		
 		$(".edit-node-" + node.id).on('click', function(e){	
 			e.preventDefault();
-			createModalContent(node.id, 'update');
+			createModalContent(this.dataset.nodeid, 'update');
 		});
 		
 		$(".delete-node-" + node.id).on('click', function(e){	
 			e.preventDefault();
-			deleteNode(node.id);
+			deleteNode(this.dataset.nodeid);
 		});
 		
 	};
