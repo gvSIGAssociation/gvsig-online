@@ -455,3 +455,10 @@ LOGGING = {
 }
 
 TEMPORAL_ADVANCED_PARAMETERS = False
+
+LEGACY_GVSIGOL_SERVICES = {
+    'ENGINE':'geoserver',
+    'URL': 'https://localhost/geoserver',
+    'USER': GEOSERVER_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
+    'PASSWORD': GEOSERVER_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
+}
