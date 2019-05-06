@@ -685,7 +685,7 @@ def backend_resource_list_available(request):
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
         if ds:
-            gs = geographic_servers.get_server_by_id(ds.workspace.server.id)
+            gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
             resources = gs.getResources(ds.workspace, ds, 'available')
             resources_sorted = sorted(resources)
             return HttpResponse(json.dumps(resources_sorted))
@@ -704,7 +704,7 @@ def backend_layergroup_list_available(request):
         ds = Datastore.objects.get(id=id_ds)
         if ds:
             layer_groups = []
-            for lg in LayerGroup.objects.filter(workspace_id=ds.workspace.id):
+            for lg in LayerGroup.objects.filter(server_id=ds.workspace.server.id):
                 layer_group = {
                     'value': lg.id,
                     'text': lg.name
@@ -726,7 +726,7 @@ def backend_resource_list_configurable(request):
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
         if ds:
-            gs = geographic_servers.get_server_by_id(ds.workspace.server.id)
+            gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
             resources = gs.getResources(ds.workspace, ds, 'configurable')
             resources_sorted = sorted(resources)
             return HttpResponse(json.dumps(resources_sorted))
@@ -748,7 +748,7 @@ def backend_resource_list(request):
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
         if ds:
-            gs = geographic_servers.get_server_by_id(ds.workspace.server.id)
+            gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
             resources = gs.getResources(ds.workspace, ds, type)
             resources_sorted = sorted(resources)
             return HttpResponse(json.dumps(resources_sorted))
@@ -911,7 +911,7 @@ def layer_add_with_group(request, layergroup_id):
                         if ' ' in field:
                             raise ValueError(_("Invalid layer fields: '{value}'. Layer can't have fields with whitespaces").format(value=field))
                 
-                gs = geographic_servers.get_server_by_id(form.cleaned_data['datastore'].workspace.server.id)
+                gs = geographic_servers.get_instance().get_server_by_id(form.cleaned_data['datastore'].workspace.server.id)
                 # first create the resource on the backend
                 gs.createResource(
                     form.cleaned_data['datastore'].workspace,
@@ -1135,7 +1135,7 @@ def layer_update(request, layer_id):
         old_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
 
         ds = Datastore.objects.get(id=layer.datastore.id)
-        gs = geographic_servers.get_server_by_id(ds.workspace.server.id)
+        gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
         if gs.updateResource(workspace, datastore, name, title):
             layer.title = title
             layer.cached = cached
@@ -1244,7 +1244,7 @@ def get_date_fields(layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
-    gs = geographic_servers.get_server_by_id(workspace.server.id)
+    gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
     (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
     resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
     for f in resource_fields:
@@ -1298,7 +1298,7 @@ def layer_autoconfig(layer_id):
 
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
-    gs = geographic_servers.get_server_by_id(workspace.server.id)
+    gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
     (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
     resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
     for f in resource_fields:
@@ -1396,7 +1396,7 @@ def layer_config(request, layer_id):
 
             datastore = Datastore.objects.get(id=layer.datastore_id)
             workspace = Workspace.objects.get(id=datastore.workspace_id)
-            gs = geographic_servers.get_server_by_id(workspace.server.id)
+            gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
             (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
             resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
             for f in resource_fields:
@@ -1420,7 +1420,7 @@ def layer_config(request, layer_id):
         except:
             datastore = Datastore.objects.get(id=layer.datastore_id)
             workspace = Workspace.objects.get(id=datastore.workspace_id)
-            gs = geographic_servers.get_server_by_id(workspace.server.id)
+            gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
             (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
             resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
             for f in resource_fields:
@@ -1515,7 +1515,7 @@ def layer_boundingbox_from_data(request):
         workspace = Workspace.objects.get(name=ws_name)
         layer_query_set = Layer.objects.filter(name=layer_name, datastore__workspace=workspace)
         layer = layer_query_set[0]
-        gs = geographic_servers.get_server_by_id(workspace.server.id)
+        gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
         gs.updateBoundingBoxFromData(layer)  
         gs.clearCache(workspace.name, layer)
         gs.updateThumbnail(layer, 'update')
@@ -1535,7 +1535,7 @@ def layer_cache_clear(layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     datastore = Datastore.objects.get(id=layer.datastore.id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
-    gs = geographic_servers.get_server_by_id(workspace.server.id)
+    gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
     gs.clearCache(workspace.name, layer)
     gs.reload_nodes()
             
@@ -1555,7 +1555,7 @@ def cache_clear(request, layer_id):
     redirect_to_layergroup = request.GET.get('redirect')
 
     layer = Layer.objects.get(id=int(layer_id))
-    gs = geographic_servers.get_server_by_id(layer.datastore.workspace.server.id)
+    gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
     if request.method == 'GET' or request.method == 'POST':
         layer_cache_clear(layer_id)
         gs.reload_nodes()
@@ -1588,7 +1588,7 @@ def layer_group_cache_clear(layergroup):
         layer_cache_clear(layer.id)
         last = layer
 
-    gs = geographic_servers.get_server_by_id(last.datastore.workspace.server.id)
+    gs = geographic_servers.get_instance().get_server_by_id(last.datastore.workspace.server.id)
     gs.deleteGeoserverLayerGroup(layergroup)
 
     gs.createOrUpdateGeoserverLayerGroup(layergroup)
@@ -1663,7 +1663,7 @@ def layer_permissions_update(request, layer_id):
             except:
                 pass
                 
-        gs = geographic_servers.get_server_by_id(layer.datastore.workspace.server.id)        
+        gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)        
         gs.setLayerDataRules(layer, read_groups, write_groups)
         gs.reload_nodes()
 
@@ -1725,7 +1725,7 @@ def layergroup_list(request):
     layergroups = []
     for lg in layergroups_list:
         if lg.name != '__default__':
-            ws = Workspace.objects.get(id=lg.workspace_id)
+            server = Server.objects.get(id=lg.server_id)
             projects = []
             project_layergroups = ProjectLayerGroup.objects.filter(layer_group_id=lg.id)
             for alg in project_layergroups:
@@ -1736,7 +1736,7 @@ def layergroup_list(request):
             layergroup['title'] = lg.title
             layergroup['cached'] = lg.cached
             layergroup['projects'] = '; '.join(projects)
-            layergroup['workspace'] = ws.name
+            layergroup['server'] = server.title
             layergroups.append(layergroup)
 
     response = {
@@ -1758,8 +1758,8 @@ def layergroup_add_with_project(request, project_id):
     if request.method == 'POST':
         name = request.POST.get('layergroup_name')
         title = request.POST.get('layergroup_title')
-        workspace_id = request.POST.get('layergroup_workspace_id')
-        ws = Workspace.objects.get(id=int(workspace_id))
+        server_id = request.POST.get('layergroup_server_id')
+        server = Server.objects.get(id=int(server_id))
         
         cached = False
         if 'cached' in request.POST:
@@ -1783,7 +1783,7 @@ def layergroup_add_with_project(request, project_id):
 
             if not exists:
                 layergroup = LayerGroup(
-                    workspace_id = workspace_id,
+                    server_id = server_id,
                     name = name,
                     title = title,
                     cached = cached,
@@ -1870,7 +1870,7 @@ def layergroup_mapserver_toc(group, toc_string):
         toc={}
         toc[group.name] = toc_object
         
-        gs = geographic_servers.get_server_by_id(last.datastore.workspace.server.id)  
+        gs = geographic_servers.get_instance().get_server_by_id(last.datastore.workspace.server.id)  
         gs.createOrUpdateSortedGeoserverLayerGroup(toc)
         gs.reload_nodes()
 
@@ -1969,7 +1969,7 @@ def layergroup_update(request, lgid):
 def layergroup_delete(request, lgid):
     if request.method == 'POST':
         layergroup = LayerGroup.objects.get(id=int(lgid))
-        ws = Workspace.objects.get(id=layergroup.workspace_id)
+        server = Server.objects.get(id=layergroup.server_id)
         layers = Layer.objects.filter(layer_group_id=layergroup.id)
         projects_by_layergroup = ProjectLayerGroup.objects.filter(layer_group_id=layergroup.id)
 
@@ -1982,7 +1982,7 @@ def layergroup_delete(request, lgid):
             layer.layer_group = default_layer_group
             layer.save()
         
-        gs = geographic_servers.get_server_by_id(ws.server.id)  
+        gs = geographic_servers.get_instance().get_server_by_id(server.id)  
         try:      
             gs.deleteGeoserverLayerGroup(layergroup)
             gs.setDataRules()
@@ -2072,7 +2072,7 @@ def layer_create_with_group(request, layergroup_id):
         form = CreateFeatureTypeForm(request.POST, user=request.user)
         if form.is_valid():
             try:
-                gs = geographic_servers.get_server_by_id(form.cleaned_data['datastore'].workspace.server.id)
+                gs = geographic_servers.get_instance().get_server_by_id(form.cleaned_data['datastore'].workspace.server.id)
                 form.cleaned_data['name'] = prepare_string(form.cleaned_data['name'])
                 gs.createTable(form.cleaned_data)
 
@@ -2414,7 +2414,7 @@ def get_geom_tables(request, datastore_id):
     if request.method == 'GET':
         try:
             ds = Datastore.objects.get(pk=datastore_id)
-            gs = geographic_servers.get_server_by_id(ds.workspace.server.id)
+            gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
             tables = gs.getGeomColumns(ds)
             data = { 'tables': tables}
             return render(request, 'geom_table_list.html', data)
@@ -2640,7 +2640,7 @@ def get_datatable_data(request):
         encoded_property_name = property_name.encode('utf-8')
          
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
-        gs = geographic_servers.get_server_by_id(layer.datastore.workspace.server.id)
+        gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
         definition = gs.getFeaturetype(layer.datastore.workspace, layer.datastore, layer.name, layer.title)
         aux_encoded_property_name = ' '
         sortby_field = None
@@ -3032,7 +3032,7 @@ def describeLayerConfig(request):
 
                 layer_info = None
                 defaultCrs = None
-                gs = geographic_servers.get_server_by_id(workspace.server.id)
+                gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
                 if datastore.type == 'e_WMS':
                     (ds_type, layer_info) = gs.getResourceInfo(workspace.name, datastore, l.name, "json")
                     defaultCrs = 'EPSG:4326'
@@ -3106,7 +3106,7 @@ def describeFeatureType(request):
                         layer_defs.remove(layer_def)
 
             if skip_pks == 'true':        
-                gs = geographic_servers.get_server_by_id(layer.datastore.workspace.server.id)
+                gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
                 definition = gs.getFeaturetype(layer.datastore.workspace, layer.datastore, layer.name, layer.title)
                 aux_encoded_property_name = ''
                 if 'featureType' in definition and 'attributes' in definition['featureType'] and 'attribute' in definition['featureType']['attributes']:

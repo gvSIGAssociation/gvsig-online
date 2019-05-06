@@ -32,7 +32,7 @@ from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
 from gvsigol_auth.utils import is_superuser, staff_required
 import utils as core_utils
-import gvsigol_services.geographic_servers
+import gvsigol_services.geographic_servers as geographic_servers
 from django.views.decorators.cache import cache_control
 from gvsigol import settings
 import gvsigol_services.utils as services_utils
@@ -535,7 +535,8 @@ def project_update(request, pid):
             ordered_toc = sorted(toc.iteritems(), key=lambda (x, y): y['order'], reverse=True)
         else:
             ordered_toc = []
-        return render_to_response('project_update.html', {'tools': json.loads(project.tools),'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'base_layers': base_layers, 'selected_base_layers': selected_base_layers,'selected_base_layer': selected_base_layer, 'has_geocoding_plugin': has_geocoding_plugin, 'toc': ordered_toc}, context_instance=RequestContext(request))
+        projectTools = json.loads(project.tools) if project.tools else [];
+        return render_to_response('project_update.html', {'tools': projectTools,'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'base_layers': base_layers, 'selected_base_layers': selected_base_layers,'selected_base_layer': selected_base_layer, 'has_geocoding_plugin': has_geocoding_plugin, 'toc': ordered_toc}, context_instance=RequestContext(request))
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -705,7 +706,7 @@ def project_get_conf(request):
         count = 0
         for project_group in project_layers_groups:            
             group = LayerGroup.objects.get(id=project_group.layer_group_id)
-            ws = Workspace.objects.get(id=group.workspace_id)
+            server = Server.objects.get(id=group.server_id)
             
             conf_group = {}
             conf_group['groupTitle'] = group.title
@@ -718,9 +719,9 @@ def project_get_conf(request):
             conf_group['groupName'] = group.name
             conf_group['cached'] = group.cached
             conf_group['visible'] = group.visible
-            conf_group['wms_endpoint'] = ws.wms_endpoint
-            conf_group['wfs_endpoint'] = ws.wfs_endpoint
-            conf_group['cache_endpoint'] = ws.cache_endpoint
+            conf_group['wms_endpoint'] = server.getWmsEndpoint()
+            conf_group['wfs_endpoint'] = server.getWfsEndpoint()
+            conf_group['cache_endpoint'] = server.getCacheEndpoint()
             layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('order')
             layers = []
             user_roles = core_utils.get_group_names_by_user(request.user)
