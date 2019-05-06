@@ -34,10 +34,10 @@
 				<div class="box-body">
 					<div class="row">
 						<div class="col-md-12 form-group">
-							<label for="layergroup_workspace_id">{% trans "Select workspace" %}</label>
-							<select class="form-control" id="layergroup_workspace_id" name="layergroup_workspace_id">
-								{% for workspace in workspaces %}
-								<option value="{{workspace.id}}">{{workspace.name}}</option>
+							<label for="layergroup_server_id">{% trans "Select server" %}</label>
+							<select class="form-control" id="layergroup_server_id" name="layergroup_server_id">
+								{% for server in servers %}
+								<option value="{{server.id}}">{{server.title}}</option>
 								{% endfor %}
 							</select>
 						</div>

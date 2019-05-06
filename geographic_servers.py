@@ -88,6 +88,7 @@ class GeographicServers(Singleton):
 __geographic_servers = None
 
 def get_instance():
+    global __geographic_servers
     if __geographic_servers is None:
         __geographic_servers = GeographicServers()
     return __geographic_servers

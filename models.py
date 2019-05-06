@@ -39,6 +39,21 @@ class Server(models.Model):
     password = models.CharField(max_length=100)
     default = models.BooleanField(default=False)
     
+    def getWmsEndpoint(self):
+        return self.frontend_url + "/wms"
+    
+    def getWfsEndpoint(self):
+        return self.frontend_url + "/wfs"
+    
+    def getWcsEndpoint(self):
+        return self.frontend_url + "/wcs"
+    
+    def getWmtsEndpoint(self):
+        return self.frontend_url + "/wmts"
+    
+    def getCacheEndpoint(self):
+        return self.frontend_url + "/gwc/service/wms"
+    
     def __unicode__(self):
         return self.name
     
@@ -82,7 +97,7 @@ class Datastore(models.Model):
  
     
 class LayerGroup(models.Model):
-    workspace_id = models.IntegerField(null=True, default=0)
+    server_id = models.IntegerField(null=True, default=get_default_server)
     name = models.CharField(max_length=150) 
     title = models.CharField(max_length=500, null=True, blank=True) 
     visible = models.BooleanField(default=False)

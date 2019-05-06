@@ -26,6 +26,14 @@ def create_default_server(apps, schema_editor):
                 server.password = LEGACY_GVSIGOL_SERVICES.get("PASSWORD", "")
                 server.default = True
                 server.save()
+                
+                Node = apps.get_model("gvsigol_services", "Node")
+                node = Node()
+                node.server = server
+                node.status = 'active';
+                node.url = server.frontend_url
+                node.is_master = True
+                node.save()
                 return
         print "\n    ** Aviso gvsigol: no se creará un Server por defecto. Añada LEGACY_GVSIGOL_SERVICES a settings si es necesario"
     except Exception as error:
