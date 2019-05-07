@@ -2476,12 +2476,16 @@ def get_feature_info(request):
 
                 print url
 
+                servers = Server.objects.all()
                 auth2 = None
-                if query_layer != 'plg_catastro':
-                    if 'username' in request.session and 'password' in request.session:
-                        if request.session['username'] is not None and request.session['password'] is not None:
-                            auth2 = (request.session['username'], request.session['password'])
-                            #auth2 = ('admin', 'geoserver')
+                for server in servers:
+                    if url.startswith(server.frontend_url):
+                        if query_layer != 'plg_catastro':
+                            if 'username' in request.session and 'password' in request.session:
+                                if request.session['username'] is not None and request.session['password'] is not None:
+                                    auth2 = (request.session['username'], request.session['password'])
+                                    break
+                                    #auth2 = ('admin', 'geoserver')
 
                 aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
                 rs.append(is_grouped_symbology_request(request, url, aux_response, styles, fut_session))
@@ -2530,15 +2534,12 @@ def get_feature_info(request):
                     features.append(feat)
 
             else:
-                try:
-                    if ws:
-                        w = Workspace.objects.get(name__exact=ws)
-
-                        layer = Layer.objects.get(name=query_layer, datastore__workspace__name=w.name)
-
-                        response = resultset['response']
-                        if response:
-                            geojson = json.loads(response)
+                if resultset.get('response'):
+                    try:
+                        geojson = json.loads(resultset.get('response'))
+                        if ws:
+                            w = Workspace.objects.get(name__exact=ws)
+                            layer = Layer.objects.get(name=query_layer, datastore__workspace__name=w.name)
 
                             for i in range(0, len(geojson['features'])):
                                 fid = geojson['features'][i].get('id')
@@ -2566,9 +2567,17 @@ def get_feature_info(request):
                                 geojson['features'][i]['layer_name'] = resultset['query_layer']
 
                             features = geojson['features']
+                        else:
+                            for i in range(0, len(geojson['features'])):
+                                fid = geojson['features'][i].get('id')
+                                geojson['features'][i]['resources'] = []
+                                geojson['features'][i]['all_correct'] = resultset['response']
+                                geojson['features'][i]['feature'] = fid
+                                geojson['features'][i]['layer_name'] = resultset['query_layer']
 
-                except Exception as e:
-                    print e.message
+                            features = geojson['features']
+                    except Exception as e:
+                        print e.message
                     #logger.exception("get_feature_info")
                     #response = req.get(url, verify=False)
                     #geojson = json.loads(response.text)
