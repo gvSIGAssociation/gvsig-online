@@ -544,7 +544,7 @@ viewer.core = {
     
     ifToolInConf: function(toolId) {
     	var toolInConf = false;
-    	var tools = JSON.parse(this.conf.project_tools);
+    	var tools = this.conf.project_tools;
     	for (var i=0; i < tools.length; i++) {
     		if (tools[i].name == toolId) {
     			toolInConf = tools[i].checked
