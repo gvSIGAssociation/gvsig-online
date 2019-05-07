@@ -19,6 +19,7 @@
 '''
 from gvsigol_core.utils import get_supported_crs
 from gvsigol_symbology.models import StyleLayer
+from gdaltools.metadata import project
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
@@ -167,6 +168,63 @@ def project_list(request):
     }     
     return render_to_response('project_list.html', response, context_instance=RequestContext(request))
 
+def get_core_tools(enabled=True):
+    return [{
+        'name': 'gvsigol_tool_zoom',
+        'checked': enabled,
+        'title': 'Herramientas de zoom',
+        'description': 'Zoom más, zoom menos, ...'
+    }, {
+        'name': 'gvsigol_tool_info',
+        'checked': enabled,
+        'title': 'Información',
+        'description': 'Información del mapa en un punto'
+    }, {
+        'name': 'gvsigol_tool_measure',
+        'checked': enabled,
+        'title': 'Herramientas de medida',
+        'description': 'Permite medir áreas y distancias'
+    }, {
+        'name': 'gvsigol_tool_export',
+        'checked': enabled,
+        'title': 'Exportar a PDF',
+        'description': 'Exporta la vista actual a PDF'
+    }, {
+        'name': 'gvsigol_tool_coordinate',
+        'checked': enabled,
+        'title': 'Buscar coordinates',
+        'description': 'Centra el mapa en unas coordenadas dadas'
+    }, {
+        'name': 'gvsigol_tool_location',
+        'checked': enabled,
+        'title': 'Geolocalización',
+        'description': 'Centra el mapa en la posición actual'
+    }]
+
+def get_plugin_tools(enabled=False):
+    project_tools = []
+    for key in apps.apps.app_configs:
+        app = apps.apps.app_configs[key]
+        if 'gvsigol_plugin_' in app.name:
+            project_tools.append({
+                'name': app.name,
+                'checked': enabled,
+                'title': app.name,
+                'description': app.verbose_name
+            })
+    return project_tools
+    
+def get_available_tools(core_enabled=True, plugin_enabled=False):
+    """
+    Gets the definition of available tools
+    (core tools plus plugin tools)
+    
+    Parameters:
+    :param core_enabled: Whether the core tools should enabled. Defaults to True
+    :param plugin_enabled: Whether the plugin tools should enabled. Defaults to False   
+    """
+    return get_core_tools(core_enabled) + get_plugin_tools(plugin_enabled)
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def project_add(request):
@@ -178,47 +236,7 @@ def project_add(request):
         providers = Provider.objects.all()
         has_geocoding_plugin = providers.__len__() > 0
         
-    project_tools = [{
-        'name': 'gvsigol_tool_zoom',
-        'checked': True,
-        'title': 'Herramientas de zoom',
-        'description': 'Zoom más, zoom menos, ...'
-    }, {
-        'name': 'gvsigol_tool_info',
-        'checked': True,
-        'title': 'Información',
-        'description': 'Información del mapa en un punto'
-    }, {
-        'name': 'gvsigol_tool_measure',
-        'checked': True,
-        'title': 'Herramientas de medida',
-        'description': 'Permite medir áreas y distancias'
-    }, {
-        'name': 'gvsigol_tool_export',
-        'checked': True,
-        'title': 'Exportar a PDF',
-        'description': 'Exporta la vista actual a PDF'
-    }, {
-        'name': 'gvsigol_tool_coordinate',
-        'checked': True,
-        'title': 'Buscar coordinates',
-        'description': 'Centra el mapa en unas coordenadas dadas'
-    }, {
-        'name': 'gvsigol_tool_location',
-        'checked': True,
-        'title': 'Geolocalización',
-        'description': 'Centra el mapa en la posición actual'
-    }]
-
-    for key in apps.apps.app_configs:
-        app = apps.apps.app_configs[key]
-        if 'gvsigol_plugin_' in app.name:
-            project_tools.append({
-                'name': app.name,
-                'checked': False,
-                'title': app.name,
-                'description': app.verbose_name
-            })
+    project_tools = get_available_tools()
         
     if request.method == 'POST':
         name = request.POST.get('project-name')
@@ -535,7 +553,7 @@ def project_update(request, pid):
             ordered_toc = sorted(toc.iteritems(), key=lambda (x, y): y['order'], reverse=True)
         else:
             ordered_toc = []
-        projectTools = json.loads(project.tools) if project.tools else [];
+        projectTools = json.loads(project.tools) if project.tools else get_available_tools(True, True)
         return render_to_response('project_update.html', {'tools': projectTools,'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'base_layers': base_layers, 'selected_base_layers': selected_base_layers,'selected_base_layer': selected_base_layer, 'has_geocoding_plugin': has_geocoding_plugin, 'toc': ordered_toc}, context_instance=RequestContext(request))
     
     
@@ -904,8 +922,8 @@ def project_get_conf(request):
         auth_urls = []    
         for s in Server.objects.all():
             auth_urls.append(s.frontend_url + '/wms')
-           
-        project_tools = project.tools.split(';')  
+        
+        project_tools = json.loads(project.tools) if project.tools else get_available_tools(True, True)  
           
         conf = {
             'pid': pid,
