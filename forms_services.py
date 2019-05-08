@@ -23,7 +23,7 @@
 from models import Workspace, Datastore, Layer, LayerGroup, Server
 from gvsigol_core.models import BaseLayer
 from django.utils.translation import ugettext as _
-import gvsigol_services.geographic_servers
+from gvsigol_services import geographic_servers
 from django import forms
 import string
 import random
