@@ -1,5 +1,5 @@
 from gvsigol_services.models import Datastore
-import gvsigol_services.geographic_servers
+from gvsigol_services import geographic_servers
 from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.forms_geoserver import PostgisLayerUploadForm
 from django.views.generic import TemplateView, FormView
