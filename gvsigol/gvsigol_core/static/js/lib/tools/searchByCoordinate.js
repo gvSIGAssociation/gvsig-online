@@ -31,6 +31,7 @@ var searchByCoordinate = function(conf, map) {
 	
 	this.id = "search-by-coordinate";
 
+	var td = document.createElement('td');
 	var button = document.createElement('button');
 	button.setAttribute("id", this.id);
 	button.setAttribute("class", "toolbar-button");
@@ -38,10 +39,11 @@ var searchByCoordinate = function(conf, map) {
 	var icon = document.createElement('i');
 	icon.setAttribute("class", "fa fa-map-marker");
 	button.appendChild(icon);
+	td.appendChild(button);
 	
 	this.$button = $(button);
 	
-	$('#toolbar').append(button);
+	document.getElementById('mouse-position').children[0].children[0].appendChild(td);
 
 	var this_ = this;
   
