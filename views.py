@@ -30,7 +30,7 @@ from forms import UserCreateForm, UserGroupForm
 from models import UserGroupUser, UserGroup
 from django.contrib.auth.models import User
 from gvsigol_auth.services import services as core_services
-import gvsigol_services.geographic_servers
+from gvsigol_services import geographic_servers
 from gvsigol_services import utils as services_utils
 from gvsigol_services.models import Workspace, Server
 from utils import superuser_required, staff_required
@@ -181,9 +181,6 @@ def password_update(request):
             response = {'success': False} 
                 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
-
-
-
 
   
 def password_reset(request):
