@@ -33,7 +33,7 @@ from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
 from gvsigol_auth.utils import is_superuser, staff_required
 import utils as core_utils
-import gvsigol_services.geographic_servers as geographic_servers
+from gvsigol_services import geographic_servers
 from django.views.decorators.cache import cache_control
 from gvsigol import settings
 import gvsigol_services.utils as services_utils

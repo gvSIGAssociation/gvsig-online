@@ -1759,7 +1759,6 @@ def layergroup_add_with_project(request, project_id):
         name = request.POST.get('layergroup_name')
         title = request.POST.get('layergroup_title')
         server_id = request.POST.get('layergroup_server_id')
-        server = Server.objects.get(id=int(server_id))
         
         cached = False
         if 'cached' in request.POST:
@@ -1833,7 +1832,7 @@ def layergroup_add_with_project(request, project_id):
     else:
         response = {
             'project_id': project_id,
-            'workspaces': Workspace.objects.values()
+            'servers': Server.objects.values()
         }
         return render_to_response('layergroup_add.html', response, context_instance=RequestContext(request))
 
