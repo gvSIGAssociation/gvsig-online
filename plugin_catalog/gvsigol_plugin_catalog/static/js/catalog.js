@@ -313,7 +313,10 @@ CatalogView.prototype.getMetadataEntry = function(metadata){
 			}
 			for(var i=0; i< image.length; i++){
 				var image_info = image[i].split("|");
-				image_src = image_info[1];
+				if (image_info[1] && // we want to avoid relative URLs for images
+						(image_info[1].lastIndexOf("http://", 0) === 0 || image_info[1].lastIndexOf("https://", 0) === 0)) {
+					image_src = image_info[1];
+				}
 				break;
 			}
 		}
