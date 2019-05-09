@@ -63,7 +63,8 @@ urlpatterns = [
     url(r'^base_layer/base_layer_add/$', services_views.base_layer_add, name='base_layer_add'),
     url(r'^base_layer/base_layer_update/(?P<base_layer_id>[0-9]+)/$', services_views.base_layer_update, name='base_layer_update'),
     url(r'^base_layer/base_layer_delete/(?P<base_layer_id>[0-9]+)/$', services_views.base_layer_delete, name='base_layer_delete'),
-    url(r'^base_layer/get_capabilities_from_url/$', services_views.get_capabilities_from_url, name='base_layer_delete'),
+    url(r'^base_layer/get_capabilities_from_url/$', services_views.get_capabilities_from_url, name='base_layer_get_capabilities'),
+    url(r'^get_capabilities/$', services_views.get_capabilities, name='get_capabilities'),
 
     url(r'^layers_get_temporal_properties/$', services_views.layers_get_temporal_properties, name='layers_get_temporal_properties'),
     url(r'^get_date_fields_from_resource/$', services_views.get_date_fields_from_resource, name='get_date_fields_from_resource'),
