@@ -67,6 +67,7 @@ from requests_futures.sessions import FuturesSession
 import requests
 import string
 import random
+from future.moves.urllib.parse import urlparse, urlencode
 
 logger = logging.getLogger("gvsigol")
 
@@ -2477,8 +2478,10 @@ def get_feature_info(request):
 
                 servers = Server.objects.all()
                 auth2 = None
+                url_obj = urlparse(url)
                 for server in servers:
-                    if url.startswith(server.frontend_url):
+                    server_url_obj = urlparse(server.frontend_url)
+                    if url_obj.netloc == server_url_obj.netloc:
                         if query_layer != 'plg_catastro':
                             if 'username' in request.session and 'password' in request.session:
                                 if request.session['username'] is not None and request.session['password'] is not None:
@@ -3329,21 +3332,16 @@ def base_layer_delete(request, base_layer_id):
     else:
         return redirect('home')
 
-
-@login_required(login_url='/gvsigonline/auth/login_user/')
-@require_POST
-@staff_required
-def get_capabilities_from_url(request):
-    url = request.POST.get('url')
-    service = request.POST.get('type')
-    version = request.POST.get('version')
-    layer = request.POST.get('layer')
-
-    values={
-    }
+def ows_get_capabilities(url, service, version, layer, remove_extra_params=True):
+    if remove_extra_params:
+        # remove any param in the query string
+        urlObj = urlparse(url)
+        url = urlObj.scheme + u'://' + urlObj.netloc + urlObj.path
 
     layers = []
     formats = []
+    infoformats = []
+    styles = []
     matrixsets = []
     title = ''
 
@@ -3359,13 +3357,29 @@ def get_capabilities_from_url(request):
             matrixsets = []
             layers = list(wms.contents)
             formats = wms.getOperationByName('GetMap').formatOptions
+            infoformats = wms.getOperationByName('GetFeatureInfo').formatOptions
+            lyr = wms.contents.get(layer)
+            if not lyr:
+                for capabLyrName in wms.contents:
+                    # try discarding the workspace
+                    layer_parts = capabLyrName.split(":")
+                    if len(layer_parts) > 1 and layer_parts[1] == layer:
+                        lyr = wms.contents.get(capabLyrName)
+                        break
+            if lyr:
+                for style_name in lyr.styles:
+                    style = lyr.styles[style_name]
+                    title = style.title if style.title else style_name
+                    style_def = {'name': style_name, 'title':title}
+                    if style.legend:
+                        style_def['custom_legend_url'] = style.legend
+                    styles.append(style_def)
 
         except Exception as e:
             print 'Add base layer ERROR: ' + str(e.message)
             data = {'response': '500',
              'message':  str(e.message)}
-
-            return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
+            return data
 
     if service == 'WMTS':
         try:
@@ -3375,30 +3389,66 @@ def get_capabilities_from_url(request):
             title = wmts.identification.title
 
             layers = list(wmts.contents)
-            if (not layer or layer == '') and layers.__len__() > 0:
+            if (not layer) and layers.__len__() > 0:
                 layer = layers[0]
-            if layer and layer != '':
-                for format in wmts.contents.get(layer).formats:
-                    if not format in formats:
-                        formats.append(format)
-                for matrixset in wmts.contents.get(layer).tilematrixsets:
+            else:
+                lyr = wmts.contents.get(layer)
+                for lyr_format in lyr.formats:
+                    if not lyr_format in formats:
+                        formats.append(lyr_format)
+                for infoformat in lyr.infoformats:
+                    if not infoformat in infoformats:
+                        infoformats.append(infoformat)
+                for matrixset in lyr.tilematrixsets:
                     if not matrixset in matrixsets:
                         matrixsets.append(matrixset)
+                for style_name in lyr.styles:
+                    style = lyr.styles[style_name]
+                    title = style.title if style.title else style_name
+                    style_def = {'name': style_name, 'title':title}
+                    if style.legend:
+                        style_def['custom_legend_url'] = style.legend
+                    styles.append(style_def)
+                for lyr_style in wms.contents.get(layer).styles:
+                    styles.append(lyr_style)
         except Exception as e:
             data = {'response': '500',
              'message':  str(e.message)}
-
-            return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
+            return data
 
     data = {
         'response': '200',
         'version': version,
         'layers': layers,
         'formats': formats,
+        'infoformats': infoformats,
+        'styles': styles,
         'title': title,
         'matrixsets': matrixsets
     }
 
+    return data
+
+@require_GET
+def get_capabilities(request):
+    url = request.GET.get('url')
+    service = request.GET.get('type')
+    version = request.GET.get('version')
+    layer = request.GET.get('layer')
+    
+    data = ows_get_capabilities(url, service, version, layer)
+    return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_POST
+@staff_required
+def get_capabilities_from_url(request):
+    url = request.POST.get('url')
+    service = request.POST.get('type')
+    version = request.POST.get('version')
+    layer = request.POST.get('layer')
+    
+    data = ows_get_capabilities(url, service, version, layer, False)
     return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
 
 
