@@ -500,7 +500,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 			var item_shown = false;
 			var selectedLayer = features[i].layer;
 
-			var feature_id = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+features[i].layer.title +"."+features[i].feature.feature + "</span>";
+			var feature_id = "<a href=\"javascript:void(0)\" class=\"feature-info-label-title\" style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+features[i].layer.title +"."+features[i].feature.feature + "</a>";
 			feature_id += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext('More element info')+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
 			feature_id += 		'<span class="label feature-info-button feature-info-label-resource" title="'+gettext('Multimedia resources')+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><br />';
 			feature_id += "<br />";
@@ -665,6 +665,9 @@ getFeatureInfo.prototype.showInfo = function(features){
 	});
 
 	self.map.getView().setCenter(self.mapCoordinates);
+	$('.item-fid .feature-info-label-title').click(function(){
+		self.showMoreInfo(this.parentNode.dataset.fid, features, 'features');
+	});
 	$('.item-fid .feature-info-label-info').click(function(){
 		self.showMoreInfo(this.parentNode.parentNode.dataset.fid, features, 'features');
 	});
@@ -705,101 +708,121 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 
 			var language = $("#select-language").val();
 			var featureType = this.describeFeatureType(selectedLayer);
-			for (var i=0; i<featureType.length; i++) {
-				if (!this.isGeomType(featureType[i].type)) {
-				var key = featureType[i].name;
-				var value = selectedFeature.properties[key];
-				if (value == "null" || value == null) {
-					value = "";
-				}
-				if(featureType[i].type == "boolean"){
-					if(value == true){
-						value = "<input type='checkbox' checked onclick=\"return false;\">";
-					}else {
-						value = "<input type='checkbox' onclick=\"return false;\">";
+			if (featureType.length>0) {
+				for (var i=0; i<featureType.length; i++) {
+					if (!this.isGeomType(featureType[i].type)) {
+					var key = featureType[i].name;
+					var value = selectedFeature.properties[key];
+					if (value == "null" || value == null) {
+						value = "";
 					}
-				}
-
-				if (!key.startsWith(this.prefix)) {
-					var item_shown = true;
-					var key_original = key;
-					if (selectedLayer != null) {
-						if (selectedLayer.conf != null) {
-							var fields_trans = selectedLayer.conf;
-							if(fields_trans["fields"]){
-								var fields = fields_trans["fields"];
-								for(var ix=0; ix<fields.length; ix++){
-									if(fields[ix].name.toLowerCase() == key){
-										if(fields[ix]["visible"] != null){
-											item_shown = fields[ix]["visible"];
-										}
-										var feat_name_trans = fields[ix]["title-"+language];
-										if(feat_name_trans){
-											key = feat_name_trans;
+					if(featureType[i].type == "boolean"){
+						if(value == true){
+							value = "<input type='checkbox' checked onclick=\"return false;\">";
+						}else {
+							value = "<input type='checkbox' onclick=\"return false;\">";
+						}
+					}
+	
+					if (!key.startsWith(this.prefix)) {
+						var item_shown = true;
+						var key_original = key;
+						if (selectedLayer != null) {
+							if (selectedLayer.conf != null) {
+								var fields_trans = selectedLayer.conf;
+								if(fields_trans["fields"]){
+									var fields = fields_trans["fields"];
+									for(var ix=0; ix<fields.length; ix++){
+										if(fields[ix].name.toLowerCase() == key){
+											if(fields[ix]["visible"] != null){
+												item_shown = fields[ix]["visible"];
+											}
+											var feat_name_trans = fields[ix]["title-"+language];
+											if(feat_name_trans){
+												key = feat_name_trans;
+											}
 										}
 									}
 								}
 							}
 						}
-					}
-
-					var complex_data = false;
-					if(key_original.startsWith("cd_json_")){
-						try{
-							complex_data = true;
-							var data_json = JSON.parse(value);
-							for(nkey in data_json){
+	
+						var complex_data = false;
+						if(key_original.startsWith("cd_json_")){
+							try{
+								complex_data = true;
+								var data_json = JSON.parse(value);
+								for(nkey in data_json){
+									infoContent += '<li class="item">';
+									infoContent += 	'<div class="feature-info">';
+									var aux_text = data_json[nkey];
+									if (!value.toString().startsWith('http')) {
+										infoContent += 		'<span class="product-description">' + nkey + '</span>';
+										infoContent += 		'<a href="javascript:void(0)" class="product-title">' + data_json[nkey] + '</a>';
+	
+									} else {
+										infoContent += 		'<span class="product-description">' + nkey + '</span>';
+										infoContent += 		'<a href="' + data_json[nkey] + '" style="color: #00c0ef !important;" target="_blank" class="product-description">' + data_json[nkey] + '</a>';
+									}
+									infoContent += 	'</div>';
+									infoContent += '</li>';
+								}
+							}catch(err){
+								complex_data = false;
+							}
+						}
+						if(!complex_data){
+							var datetime_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})Z$/i;
+							if(datetime_format.test(value)){
+								var match = datetime_format.exec(value);
+								value = match[3]+"/"+match[2]+"/"+match[1]+" "+match[4]+":"+match[5]+":"+match[6];
+							}
+	
+							var date_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})Z$/i;
+							if(date_format.test(value)){
+								var match = date_format.exec(value);
+								value = match[3]+"/"+match[2]+"/"+match[1];
+							}
+							var time_format = /^([0-9]{2}):([0-9]{2}):([0-9]{2})Z$/i;
+							if(time_format.test(value)){
+								var match = time_format.exec(value);
+								value = match[3]+":"+match[2]+":"+match[1];
+							}
+							if(item_shown){
 								infoContent += '<li class="item">';
 								infoContent += 	'<div class="feature-info">';
-								var aux_text = data_json[nkey];
 								if (!value.toString().startsWith('http')) {
-									infoContent += 		'<span class="product-description">' + nkey + '</span>';
-									infoContent += 		'<a href="javascript:void(0)" class="product-title">' + data_json[nkey] + '</a>';
-
+									infoContent += 		'<span class="product-description">' + key + '</span>';
+									infoContent += 		'<span class="product-title">' + value + '</span>';
+	
 								} else {
-									infoContent += 		'<span class="product-description">' + nkey + '</span>';
-									infoContent += 		'<a href="' + data_json[nkey] + '" style="color: #00c0ef !important;" target="_blank" class="product-description">' + data_json[nkey] + '</a>';
+									infoContent += 		'<span class="product-description">' + key + '</span>';
+									infoContent += 		'<a href="' + value + '" style="color: #00c0ef !important;" target="_blank" class="product-description">' + value + '</a>';
 								}
 								infoContent += 	'</div>';
 								infoContent += '</li>';
 							}
-						}catch(err){
-							complex_data = false;
 						}
 					}
-					if(!complex_data){
-						var datetime_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})Z$/i;
-						if(datetime_format.test(value)){
-							var match = datetime_format.exec(value);
-							value = match[3]+"/"+match[2]+"/"+match[1]+" "+match[4]+":"+match[5]+":"+match[6];
-						}
-
-						var date_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})Z$/i;
-						if(date_format.test(value)){
-							var match = date_format.exec(value);
-							value = match[3]+"/"+match[2]+"/"+match[1];
-						}
-						var time_format = /^([0-9]{2}):([0-9]{2}):([0-9]{2})Z$/i;
-						if(time_format.test(value)){
-							var match = time_format.exec(value);
-							value = match[3]+":"+match[2]+":"+match[1];
-						}
-						if(item_shown){
-							infoContent += '<li class="item">';
-							infoContent += 	'<div class="feature-info">';
-							if (!value.toString().startsWith('http')) {
-								infoContent += 		'<span class="product-description">' + key + '</span>';
-								infoContent += 		'<a href="javascript:void(0)" class="product-title">' + value + '</a>';
-
-							} else {
-								infoContent += 		'<span class="product-description">' + key + '</span>';
-								infoContent += 		'<a href="' + value + '" style="color: #00c0ef !important;" target="_blank" class="product-description">' + value + '</a>';
-							}
-							infoContent += 	'</div>';
-							infoContent += '</li>';
-						}
 					}
 				}
+			}
+			else {
+				for (var key in selectedFeature.properties) {
+
+					infoContent += '<li class="item">';
+					infoContent += 	'<div class="feature-info">';
+					infoContent +=		'<span class="product-description">' + key + '</span>';
+					var value = selectedFeature.properties[key]
+					if (value != null) {
+						infoContent +=		'<span class="product-title">' + selectedFeature.properties[key] + '</span>';
+					}
+					else {
+						infoContent +=		'<span class="product-title"></span>';
+					}
+					
+					infoContent += 	'</div>';
+					infoContent += '</li>';
 				}
 			}
 			infoContent += 		'</ul>';

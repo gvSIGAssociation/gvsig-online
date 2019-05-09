@@ -40,7 +40,7 @@ from django.views.decorators.csrf import csrf_exempt
 from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES, INSTALLED_APPS, WMS_MAX_VERSION, WMTS_MAX_VERSION, BING_LAYERS
 from django.utils.translation import ugettext as _
 from gvsigol_services.models import LayerResource
-from gvsigol.settings import GVSIGOL_SERVICES
+from gvsigol.settings import GVSIGOL_SERVICES, FRONTEND_URL
 from django.core.urlresolvers import reverse
 from gvsigol_core import utils as core_utils
 from gvsigol_core.models import Project
@@ -65,6 +65,7 @@ from owslib.wmts import WebMapTileService
 from lxml import html
 from requests_futures.sessions import FuturesSession
 import requests
+from future.moves.urllib.parse import urlparse
 
 logger = logging.getLogger("gvsigol")
 
@@ -2235,10 +2236,13 @@ def get_feature_info(request):
                 print url
 
                 auth2 = None
-                if query_layer != 'plg_catastro':
-                    if 'username' in request.session and 'password' in request.session:
-                        if request.session['username'] is not None and request.session['password'] is not None:
-                            auth2 = (request.session['username'], request.session['password'])
+                url_obj = urlparse(url)
+                server_url_obj = urlparse(FRONTEND_URL)
+                if url_obj.netloc == server_url_obj.netloc:
+                    if query_layer != 'plg_catastro':
+                        if 'username' in request.session and 'password' in request.session:
+                            if request.session['username'] is not None and request.session['password'] is not None:
+                                auth2 = (request.session['username'], request.session['password'])
                             #auth2 = ('admin', 'geoserver')
 
                 aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
@@ -2289,14 +2293,11 @@ def get_feature_info(request):
 
             else:
                 try:
-                    if ws:
-                        w = Workspace.objects.get(name__exact=ws)
-
-                        layer = Layer.objects.get(name=query_layer, datastore__workspace__name=w.name)
-
-                        response = resultset['response']
-                        if response:
-                            geojson = json.loads(response)
+                    if resultset.get('response'):
+                        geojson = json.loads(resultset.get('response'))
+                        if ws:
+                            w = Workspace.objects.get(name__exact=ws)
+                            layer = Layer.objects.get(name=query_layer, datastore__workspace__name=w.name)
 
                             for i in range(0, len(geojson['features'])):
                                 fid = geojson['features'][i].get('id')
@@ -2322,9 +2323,14 @@ def get_feature_info(request):
                                 geojson['features'][i]['all_correct'] = resultset['response']
                                 geojson['features'][i]['feature'] = fid
                                 geojson['features'][i]['layer_name'] = resultset['query_layer']
-
-                            features = geojson['features']
-
+                        else:
+                            for i in range(0, len(geojson['features'])):
+                                fid = geojson['features'][i].get('id')
+                                geojson['features'][i]['resources'] = []
+                                geojson['features'][i]['all_correct'] = resultset['response']
+                                geojson['features'][i]['feature'] = fid
+                                geojson['features'][i]['layer_name'] = resultset['query_layer']
+                        features = geojson['features']
                 except Exception as e:
                     print e.message
                     #logger.exception("get_feature_info")
