@@ -56,7 +56,7 @@ class Geonetwork():
             
     def create_metadata(self, layer, layer_info, ds_type):
         ws = layer.datastore.workspace
-        minx, miny, maxx, maxy = self.get_extent(layer_info, ds_type)
+        minx, miny, maxx, maxy = self.xmlapi.get_extent(layer_info, ds_type)
         crs_object = layer_info[ds_type]['nativeBoundingBox']['crs']
         if isinstance(crs_object,dict):
             crs = str(crs_object['$'])
@@ -160,17 +160,6 @@ class Geonetwork():
         except Exception as e:
             logger.exception("layer metadata delete failed")
             pass
-
-    def get_extent(self, layer_info, ds_type):
-        minx = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['minx'])
-        miny = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['miny'])
-        maxx = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['maxx'])
-        if layer_info[ds_type]['latLonBoundingBox']['minx'] > layer_info[ds_type]['latLonBoundingBox']['maxx']:
-            maxx = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['minx'] + 1)
-        maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
-        if layer_info[ds_type]['latLonBoundingBox']['miny'] > layer_info[ds_type]['latLonBoundingBox']['maxy']:
-            maxy = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['miny'] + 1)
-        return (minx, miny, maxx, maxy)
 
 def initialize():
     try:
