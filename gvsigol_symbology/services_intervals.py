@@ -23,7 +23,7 @@
 '''
 
 from models import Library, Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, TextSymbolizer
-import gvsigol_services.geographic_servers
+from gvsigol_services import geographic_servers
 from gvsigol_services.models import Layer, Datastore, Workspace
 from gvsigol_core import utils as core_utils
 from gvsigol import settings
