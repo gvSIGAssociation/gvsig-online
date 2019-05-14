@@ -45,13 +45,13 @@ search.prototype.loadTool = function(){
 	button.setAttribute("class", "toolbar-button");
 	button.setAttribute("title", gettext('Inverse geocoding'));
 	var icon = document.createElement('i');
-	icon.setAttribute("class", "fa fa-map-signs");
+	icon.setAttribute("class", "icon-reverse-geocoding");
 	icon.setAttribute("aria-hidden", "true");
 	button.appendChild(icon);
 	
 	this.$button = $(button);
 	
-	$('#toolbar').append(button);
+	$('#viewer-search-form-input').append(button);
 	
 	var this_ = this;
 	
