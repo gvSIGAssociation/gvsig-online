@@ -516,11 +516,11 @@ viewer.core = {
 		if (this.ifToolInConf('gvsigol_tool_export')) {
 			this.tools.push(new exportToPDF(this.conf, this.map));
 		}
-		if (this.ifToolInConf('gvsigol_tool_coordinate')) {
-			this.tools.push(new searchByCoordinate(this.conf, this.map));
-		}
 		if (this.ifToolInConf('gvsigol_tool_location')) {
 			this.tools.push(new geolocation(this.map));
+		}
+		if (this.ifToolInConf('gvsigol_tool_coordinate')) {
+			this.tools.push(new searchByCoordinate(this.conf, this.map));
 		}
 		this.tools.push(new cleanMap(this.map));
     	
