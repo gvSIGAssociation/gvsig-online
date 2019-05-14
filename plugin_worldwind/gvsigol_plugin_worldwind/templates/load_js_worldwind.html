@@ -12,7 +12,7 @@
 <script>$("#divWW").detach().prependTo("#map");</script>
 
 <!-- WW library	-->
-<script type="text/javascript" src="{% static "js/vendors/worldwind/worldwindlib.js" %}"></script> 	
+<script type="text/javascript" src="{% static "js/vendors/worldwind-0.9.0/worldwind.min.js" %}"></script> 	
  
 <!-- WW control -->
 <script type="text/javascript" src="{% static "js/lib/ChangeToWWControl.js" %}"></script>
@@ -20,6 +20,10 @@
 <!-- Get configuration from a project  -->	
 <script type="text/javascript">
 if (viewer.core.ifToolInConf('gvsigol_plugin_worldwind')) {	
+	
+	var button = '<li role="presentation"><a id="change-to-3d-view" role="menuitem" tabindex="-1" href="#"><i style="margin-right: 10px;" class="icon-3d"></i>'+gettext("3D View")+'</a></li>';
+	$('#gvsigol-navbar-views-menu').append(button);
+	
 	$.ajax({
 		type : 'POST',
 		async : false,
@@ -31,9 +35,6 @@ if (viewer.core.ifToolInConf('gvsigol_plugin_worldwind')) {
 			var map = viewer.core.getMap();
 			var tool = new ChangeToWWControl(map, response);
 			viewer.core.loadTool(tool);			
-			//Al añadir una nueva entrada en la barra de herramientas debemos
-			//desplazar la barra de edición para evitar solapes
-			$('.editionbar').css("top","230");
 		},
 		error : function() {
 			alert("Error loading WorldWind");
