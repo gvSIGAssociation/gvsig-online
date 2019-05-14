@@ -202,18 +202,10 @@ ChangeToWWControl.prototype.getElevationModel = function() {
 		this.maxElevation = 8850; // Height of Mt. Everest
 		this.pixelIsPoint = false; // World Wind WMS elevation layers return pixel-as-area images
 		this.urlBuilder = new WorldWind.WmsUrlBuilder(provider.provider_url,provider.provider_layers, "", provider.provider_version);
-		
-	     //this.urlBuilder = new WorldWind.WmsUrlBuilder("http://worldwind26.arc.nasa.gov/elev","GEBCO,aster_v2,USGS-NED", "", "1.3.0");
-	     //No funciona con Geoserver
-	     //this.urlBuilder = new WorldWind.WmsUrlBuilder("http://localhost/geoserver/elevation/wms","mdt05_0721", "", "1.3.0");
-	     //this.urlBuilder.crs="CRS:84"
-	     //this.urlBuilder = new WorldWind.WmsUrlBuilder("http://localhost/cgi-bin/mapserv?map=/home/jvhigon/test/worldwind/wms/mapfile.map","mdt05-0721-h30-lidar", "", "1.1.1");			
 	 };
 	
 	 CustomEarthElevationModel.prototype = Object.create(WorldWind.ElevationModel.prototype);	
-	 //return new CustomEarthElevationModel();
-	 
-	 return new WorldWind.EarthElevationModel()
+	 return new CustomEarthElevationModel();
 };
 
 
@@ -235,7 +227,6 @@ ChangeToWWControl.prototype.onOLMoveEnd = function(evt) {
 	var latlon = ol.proj.transform(center,'EPSG:3857', 'EPSG:4326');
 	var zoom = map.getView().getZoom(); 
 	this.goToAnimator.goTo(new WorldWind.Position(latlon[1], latlon[0], z));
-	//console.log("Zoom actual: " + zoom);
 };
 
 
@@ -255,16 +246,6 @@ ChangeToWWControl.prototype.onOLRotation = function(evt) {
  * 
  */
 ChangeToWWControl.prototype.loadBaseLayer = function(map) {
-	//if (this.provider.baseLayerType == 'Bing'){
-	//	this.wwd.addLayer(new WorldWind.BingAerialWithLabelsLayer());
-	//}else{
-	//	this.wwd.addLayer(new WorldWind.OpenStreetMapImageLayer());
-	//}
-	//this.wwd.addLayer(new WorldWind.BMNGOneImageLayer());
-	//this.wwd.addLayer(new WorldWind.BMNGLandsatLayer());	
-	//this.wwd.addLayer(new WorldWind.CompassLayer());	
-	
-	//layer.getSource() instanceof ol.source.TileWMS
 	var layers = map.getLayers();
 	for (var i = 0; i < layers.getLength(); i++) {
 		l = layers.item(i);
