@@ -28,20 +28,8 @@ var ChangeToWWControl = function(map, provider) {
 	this.map = map;
 	this.provider = provider;
 	
-	this.id = "change-to-ww-control";
-	
-
-	var button = document.createElement('button');
-	button.setAttribute("id", this.id);
-	button.setAttribute("class", "toolbar-button");
-	button.setAttribute("title", gettext('Change to 3D view'));
-	var icon = document.createElement('i');
-	icon.setAttribute("class", "icon-3d");
-	button.appendChild(icon);
-	
-	this.$button = $(button);
-	
-	$('#toolbar').append(button);
+	this.id = "change-to-3d-view";
+	this.$button = $("#change-to-3d-view");
 
 	var this_ = this;
   
@@ -49,12 +37,18 @@ var ChangeToWWControl = function(map, provider) {
 		this_.handler(e);
 	};
 
-	button.addEventListener('click', handler, false);
-	button.addEventListener('touchstart', handler, false);
+	this.$button.on('click', handler);
+	this.$button.on('touchstart', handler);
+	
+	$('#change-to-2D').on('change-to-2D-event', function() {
+		this_.deactivate();
+	});
 
 	//objetos WW
 	this.wwd = null;
 	this.goToAnimator=null;
+	
+	
 };
 
 /**
@@ -72,27 +66,13 @@ ChangeToWWControl.prototype.deactivable = false;
  */
 ChangeToWWControl.prototype.handler = function(e) {
 	e.preventDefault();
-	if (this.active) {
-		this.deactivate();
-		
-	} else {
-		if (this.wwd == null){
-			this.initWW();		
-		}
-
-		this.$button.addClass('button-active');
-		this.active = true;
-		this.$button.trigger('control-active', [this]);		
-		this.hideControls();
-		//muestro el componente 
-		$('#canvasWW').css("display","block");		
-		// PRUEBA: mostrar propiedades de las capas
-		//this.map.getLayers().forEach(function (lyr) {
-	    //    console.log(lyr.layer_name);         
-	    //    console.log(lyr.getVisible());         
-	    //    console.log(lyr);         
-	    //});
+	if (this.wwd == null){
+		this.initWW();		
 	}
+	this.active = true;
+	this.$button.trigger('control-active', [this]);		
+	this.hideControls();
+	$('#canvasWW').css("display","block");
 };
 
 /**
@@ -105,7 +85,7 @@ ChangeToWWControl.prototype.hideControls = function() {
 	$('#measure-area').css("display","none");
 	$('#measure-length').css("display","none");
 	$('#mouse-position').css("display","none");
-	$('#inverse-geocoding').css("display","none");
+	//$('#inverse-geocoding').css("display","none");
 	//$('#intersect-by-radio-control').css("display","none");
 	$('.ol-overviewmap').css("display","none");
 	$('.ol-viewport').css("display","none");
@@ -136,10 +116,10 @@ ChangeToWWControl.prototype.resetControls = function() {
  * TODO: se calcula el zoom a partir del log(altitud). Deberíra realizarse una mejor aproximación.
  */
 ChangeToWWControl.prototype.deactivate = function() {			
-	this.$button.removeClass('button-active');
 	this.active = false;	
 	this.resetControls();
 	$('#canvasWW').css("display","none");
+	
 	//set correct OL center
 	var lat = this.wwd.navigator.lookAtLocation.latitude;
 	var lon = this.wwd.navigator.lookAtLocation.longitude;	
@@ -148,18 +128,13 @@ ChangeToWWControl.prototype.deactivate = function() {
 	var position = [lon,lat];
 	var center = ol.proj.transform(position, 'EPSG:4326', 'EPSG:3857');
 	this.map.getView().setCenter(center);
+	
 	//set correct zoom	
 	var zoom = 20 - Math.floor(Math.log(alt));	
 	this.map.getView().setZoom(zoom);
-	//set correct rotation
-	//var rot_radians = rot * (Math.PI/180);
-	//this.map.getView().setRotation(rot_radians * -1);
-	this.map.getView().setRotation(0);
 	
-	//console.log(this.wwd.navigator.range);
-	//console.log(this.wwd.navigator.lookAtLocation.latitude);
-	//console.log(this.wwd.navigator.lookAtLocation.longitude);
-	//console.log(this.wwd.navigator.worldWindow.viewport.x);
+	//set correct rotation
+	this.map.getView().setRotation(0);
 };
 
 /**
@@ -184,20 +159,6 @@ ChangeToWWControl.prototype.initWW = function() {
 
 	//move smoothly
 	this.goToAnimator = new WorldWind.GoToAnimator(this.wwd);
-	
-	//cargamos capa WMS de ejemplo
-	//this.TestaddLayerWMS();
-	
-	//creamos polygon de prueba
-	//this.createPolygon();
-	//creamos geojson prueba
-	//this.createGeoJSON();
-	
-	// evento de movimiento de mouse
-    // Listen for mouse moves and highlight the placemarks that the cursor rolls over.
-    // this.wwd.addEventListener("mousemove", this.onWWMouseMove);
-    // Listen for taps on mobile devices and highlight the placemarks that the user taps.
-    //var tapRecognizer = new WorldWind.TapRecognizer(this.wwd, this.onClick);
     
     //evento de click (tb para mobiles)
     new WorldWind.ClickRecognizer(this.wwd, this.onWWClick);
