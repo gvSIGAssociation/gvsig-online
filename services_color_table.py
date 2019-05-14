@@ -25,11 +25,10 @@ from doctest import master
 
 from models import ColorMap, ColorMapEntry, Library, Style, StyleLayer, Rule, Symbolizer, RasterSymbolizer
 
-import gvsigol_services.geographic_servers
+from gvsigol_services import geographic_servers
 
 from gvsigol_services.models import Layer, Datastore, Workspace
 from gvsigol_core import utils as core_utils
-from gvsigol import settings
 import utils, sld_builder
 import string
 import random

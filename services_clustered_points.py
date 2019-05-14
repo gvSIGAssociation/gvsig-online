@@ -17,25 +17,18 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from geoserver import style
 
 '''
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
 from models import Library, Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, TextSymbolizer
-import gvsigol_services.geographic_servers
+from gvsigol_services import geographic_servers
 from gvsigol_services.models import Layer, Datastore, Workspace
 from gvsigol_core import utils as core_utils
-from django.http import HttpResponse
 from gvsigol import settings
-import utils, sld_utils, sld_builder
-import tempfile, zipfile
-import os, shutil
-import StringIO
-import utils
+import utils, sld_builder
 import json
-import re
 import ast
 
 def create_style(request, json_data, layer_id, is_preview=False):
