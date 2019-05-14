@@ -73,6 +73,7 @@ ChangeToWWControl.prototype.handler = function(e) {
 	this.$button.trigger('control-active', [this]);		
 	this.hideControls();
 	$('#canvasWW').css("display","block");
+	$('body').css('background', 'black');
 };
 
 /**
@@ -85,12 +86,13 @@ ChangeToWWControl.prototype.hideControls = function() {
 	$('#measure-area').css("display","none");
 	$('#measure-length').css("display","none");
 	$('#mouse-position').css("display","none");
+	$('#clean-map').css("display","none");
 	//$('#inverse-geocoding').css("display","none");
 	//$('#intersect-by-radio-control').css("display","none");
 	$('.ol-overviewmap').css("display","none");
 	$('.ol-viewport').css("display","none");
 	//$('#base-layers').css("display","none");
-	$('#toolbar').css("top", "6px");
+	$('#toolbar').css("display", "none");
 };
 
 /**
@@ -108,7 +110,7 @@ ChangeToWWControl.prototype.resetControls = function() {
 	$('.ol-overviewmap').css("display","");
 	$('.ol-viewport').css("display","block");
 	$('#base-layers').css("display","block");
-	$('#toolbar').css("top", "");
+	$('#toolbar').css("display", "block");
 };
 
 /**
@@ -119,6 +121,7 @@ ChangeToWWControl.prototype.deactivate = function() {
 	this.active = false;	
 	this.resetControls();
 	$('#canvasWW').css("display","none");
+	$('body').css('background', 'white');
 	
 	//set correct OL center
 	var lat = this.wwd.navigator.lookAtLocation.latitude;
@@ -149,8 +152,11 @@ ChangeToWWControl.prototype.initWW = function() {
 	var coordsdisplay = new WorldWind.CoordinatesDisplayLayer(this.wwd);
 	this.wwd.addLayer(coordsdisplay);
 	var controls = new WorldWind.ViewControlsLayer(this.wwd);
-	controls.placement = new WorldWind.Offset(WorldWind.OFFSET_FRACTION, 0.5, WorldWind.OFFSET_FRACTION, 0.1);
-	controls.alignment = new WorldWind.Offset(WorldWind.OFFSET_FRACTION, 0.5, WorldWind.OFFSET_FRACTION, 1);
+	//controls.placement = new WorldWind.Offset(WorldWind.OFFSET_FRACTION, 0.5, WorldWind.OFFSET_FRACTION, 0.1);
+	//controls.alignment = new WorldWind.Offset(WorldWind.OFFSET_FRACTION, 0.5, WorldWind.OFFSET_FRACTION, 1);
+	
+	controls.placement = new WorldWind.Offset(WorldWind.OFFSET_FRACTION, 0.99, WorldWind.OFFSET_FRACTION, 0.98);
+    controls.alignment = new WorldWind.Offset(WorldWind.OFFSET_FRACTION, 1, WorldWind.OFFSET_FRACTION, 1);
 
 	this.wwd.addLayer(controls);
 	//Start the view pointing to a longitude within the current time zone
@@ -166,6 +172,9 @@ ChangeToWWControl.prototype.initWW = function() {
     
     //TODO: no he conseguido gestionar el evento de cambio de rotación
     //new WorldWind.GestureRecognizer(this.wwd, this.onWWGesture);
+    
+    this.wwd.addLayer(new WorldWind.AtmosphereLayer());
+    this.wwd.addLayer(new WorldWind.StarFieldLayer());
         
 	// Añadimos capas
 	this.loadBaseLayer(this.map);
@@ -202,7 +211,9 @@ ChangeToWWControl.prototype.getElevationModel = function() {
 	 };
 	
 	 CustomEarthElevationModel.prototype = Object.create(WorldWind.ElevationModel.prototype);	
-	 return new CustomEarthElevationModel();
+	 //return new CustomEarthElevationModel();
+	 
+	 return new WorldWind.EarthElevationModel()
 };
 
 
@@ -251,8 +262,7 @@ ChangeToWWControl.prototype.loadBaseLayer = function(map) {
 	//}
 	//this.wwd.addLayer(new WorldWind.BMNGOneImageLayer());
 	//this.wwd.addLayer(new WorldWind.BMNGLandsatLayer());	
-	//this.wwd.addLayer(new WorldWind.CompassLayer());
-	
+	//this.wwd.addLayer(new WorldWind.CompassLayer());	
 	
 	//layer.getSource() instanceof ol.source.TileWMS
 	var layers = map.getLayers();
@@ -278,7 +288,8 @@ ChangeToWWControl.prototype.loadBaseLayer = function(map) {
 				lyr = new WorldWind.WmsLayer(config,null );
 			} else 	if (l.getSource() instanceof ol.source.XYZ){
 				if (l.getSource() instanceof ol.source.OSM){
-					lyr = new WorldWind.OpenStreetMapImageLayer();
+					//lyr = new WorldWind.OpenStreetMapImageLayer();
+					lyr = new WorldWind.BMNGLandsatLayer();
 				} else{
 					continue;
 				}
