@@ -8,6 +8,11 @@
 	var conf = viewer.core.getConf();
 	
 	if (viewer.core.ifToolInConf('gvsigol_plugin_print')) {
+		
+		//var button = '<li id="print-div" title="'+gettext("Print map")+'"><a href="#" id="print" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-print"></i></a></li>';
+		var button = '<li role="presentation"><a id="print" role="menuitem" tabindex="-1" href="#"><i class="fa fa-print m-r-5"></i>'+gettext("Print")+'</a></li>';
+		$('#gvsigol-navbar-file-menu').append(button);
+		
 		$.ajax({
 			type : 'POST',
 			async : false,
@@ -18,9 +23,6 @@
 			success : function(response) {
 				var printProvider = response;
 				
-				var button = '<li id="print-div" title="'+gettext("Print map")+'"><a href="#" id="print" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-print"></i></a></li>';
-				$('#toolbar-buttons').append(button);
-			
 				var tool = new print(printProvider, conf, map);
 				viewer.core.loadTool(tool);
 				
