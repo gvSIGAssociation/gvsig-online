@@ -41,8 +41,9 @@ if (viewer.core.ifToolInConf('gvsigol_plugin_geocoding')) {
 						var map = viewer.core.getMap();
 						var ui = '';
 						ui += '<div class="viewer-search-form">';
-						ui += 	'<div class="input-group">';
+						ui += 	'<div id="viewer-search-form-input" class="input-group">';
 						ui += 		'<input type="text" name="search-widget-input" id="autocomplete" class="form-control" placeholder="' + gettext("Search") + '...">';
+						ui += 	'</div>';
 						ui += 	'</div>';
 						ui += '</div>';
 						
