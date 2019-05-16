@@ -88,14 +88,29 @@
           	<div class="navbar-header">
       				<img src="{% static "img/logo_principal.png"%}" height=50 onError="this.style='display:none'">
 			</div>
-
+			
 			<div class="navbar-custom-menu">
-				<ul class="nav navbar-nav">
+				<ul id="gvsigol-navbar-menus" class="nav navbar-nav">
+					<li class="dropdown">
+		            	<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+		                	{% trans "File" %} <span class="caret"></span>
+		                </a>
+		                <ul id="gvsigol-navbar-file-menu" class="dropdown-menu"></ul>
+		           	</li>
 				
+					<li class="dropdown">
+		            	<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+		                	{% trans "Views" %} <span class="caret"></span>
+		                </a>
+		                <ul id="gvsigol-navbar-views-menu" class="dropdown-menu">
+		                	<li id="change-to-2D" role="presentation"><a role="menuitem" tabindex="-1" href="#"><i class="fa fa-map m-r-5"></i>{% trans "View 2D" %}</a></li>
+		                </ul>
+		           	</li>
+				</ul>
+				<ul class="nav navbar-nav">
 					<li class="dropdown user user-menu">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown"> 
-							<img src="{% static "img/user.png" %}" class="user-image" alt="User Image"> 
-							<span class="hidden-xs">{{user.username}}</span>
+							<i style="font-size: 16px;" class="fa fa-user"></i>
 						</a>
 						<ul class="dropdown-menu">
 							<li class="user-header">
@@ -130,16 +145,6 @@
 					</li>
 				</ul>
 			</div>
-			
-			<div class="navbar-custom-menu">
-				<ul id="toolbar-buttons" class="nav navbar-nav">	
-					<li id="gvsigol-doc-link" title="{% trans 'manual gvsigonline' %}"><a href="/gvsigonline/core/documentation/" target="_blank" id="help" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-question-circle"></i></a></li>				
-					{% if not 'gvsigol_plugin_print' in INSTALLED_APPS %}		
-					<!-- <li id="export-pdf-div" title="{% trans 'exportar pdf' %}"><a href="#" id="export-to-pdf" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-file-pdf-o"></i></a></li>  -->
-					{% endif %}		
-				</ul>
-			</div>
-
 		</nav>
 	</header>
 	
