@@ -392,6 +392,10 @@
 		    $(this).ekkoLightbox();
 		});
 		
+		$('#change-to-2D').on('click', function() {
+			$("body").trigger('change-to-2D-event');
+		});
+		
 		var extraParams = {{extra_params|safe}};
 		$.ajax({
 			type : 'POST',
