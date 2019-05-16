@@ -36,6 +36,16 @@ var CatalogView = function(mapViewer, config) {
 	this.config.facetsConfig = this.config.facetsConfig || {};
 	this.config.facetsOrder = this.config.facetsOrder || [];
 	this.config.disabledFacets = this.config.disabledFacets || [];
+	
+	var self = this;
+	$('body').on('change-to-2D-event', function() {
+		self.hidePanel();
+	});
+	
+	$('body').on('change-to-3D-event', function() {
+		self.hidePanel();
+	});
+	
 	this.initialization();
 };
 
@@ -974,6 +984,7 @@ CatalogView.prototype.createDetailsPanel = function(id){
 CatalogView.prototype.showPanel = function(){
 	this.catalog_panel.show();
 	this.map_container.hide();
+	$('.viewer-search-form').css("display","none");
 	if(!this.catalog_map){
 		this.catalog_map = new CatalogMap(this, "catalog_map");
 	}
@@ -982,5 +993,6 @@ CatalogView.prototype.showPanel = function(){
 CatalogView.prototype.hidePanel = function(){
 	this.map_container.show();
 	this.catalog_panel.hide();
+	$('.viewer-search-form').css("display","block");
 }
 

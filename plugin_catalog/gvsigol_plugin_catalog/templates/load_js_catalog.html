@@ -35,15 +35,25 @@ if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')) {
 	
 	var html = '';
 	
-	html += '<ul class="nav navbar-nav">';
+	/*html += '<ul class="nav navbar-nav">';
 	html += '    <li><a href="#" id="show_map" class="dropdown-toggle">Map</a></li>';
 	html += '</ul>'
 	html += '<ul class="nav navbar-nav">';
 	html += '    <li><a href="#" id="show_catalog" class="dropdown-toggle">Catalog</a></li>';
 	html += '</ul>';
 	
-	$("#viewer-navbar").append(html);
+	$("#viewer-navbar").append(html);*/
 	
+	html += '<li class="dropdown">';
+	html += 	'<a class="dropdown-toggle" data-toggle="dropdown" href="#">';
+	html += 		gettext('Catalog') + ' <span class="caret"></span>';
+	html += 	'</a>';
+	html += 	'<ul id="gvsigol-navbar-views-menu" class="dropdown-menu">';
+	html += 		'<li id="show_catalog" role="presentation"><a role="menuitem" tabindex="-1" href="#"><i class="fa fa-newspaper-o m-r-5"></i>' + gettext('Catalog and downloads') + '</a></li>';
+	html += 	'</ul>';
+	html += '</li>';
+	
+	$("#gvsigol-navbar-menus").append(html);
 	
 	var modal = '';
 	modal += '<div class="modal fade" id="modal-catalog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">';
@@ -69,11 +79,8 @@ if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')) {
 	
 	
 	$("#show_catalog").click(function(){
-		catalog.showPanel()
-	});
-	
-	$("#show_map").click(function(){
-		catalog.hidePanel()
+		$("body").trigger('show-catalog-event');
+		catalog.showPanel();
 	});
 }	
 </script>

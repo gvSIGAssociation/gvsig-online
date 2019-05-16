@@ -40,8 +40,16 @@ var ChangeToWWControl = function(map, provider) {
 	this.$button.on('click', handler);
 	this.$button.on('touchstart', handler);
 	
-	$('#change-to-2D').on('change-to-2D-event', function() {
-		this_.deactivate();
+	$('body').on('change-to-2D-event', function() {
+		if (this_.active) {
+			this_.deactivate();
+		}
+	});
+	
+	$('body').on('show-catalog-event', function() {
+		if (this_.active) {
+			this_.deactivate();
+		}
 	});
 
 	//objetos WW
@@ -70,7 +78,8 @@ ChangeToWWControl.prototype.handler = function(e) {
 		this.initWW();		
 	}
 	this.active = true;
-	this.$button.trigger('control-active', [this]);		
+	this.$button.trigger('control-active', [this]);	
+	$('body').trigger('change-to-3D-event', [this]);
 	this.hideControls();
 	$('#canvasWW').css("display","block");
 	$('body').css('background', 'black');
