@@ -28,6 +28,8 @@ from gvsigol_services.models import Datastore
 from django.utils.translation import ugettext as _
 import json
 
+def get_default_provider_icon():
+    return settings.STATIC_URL + 'img/geocoding/toponimo.png'
 
 class Provider(models.Model):   
     type = models.CharField(max_length=100)
@@ -40,7 +42,7 @@ class Provider(models.Model):
     #table_name = models.CharField(max_length=100, null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
-    image = models.ImageField(upload_to='images', default=settings.STATIC_URL + 'img/geocoding/toponimo.png', null=True, blank=True)
+    image = models.ImageField(upload_to='images', default=get_default_provider_icon, null=True, blank=True)
     order = models.IntegerField(null=False, default=10)
     last_update = models.DateTimeField(auto_now_add=False, null=True, blank=True) 
     
