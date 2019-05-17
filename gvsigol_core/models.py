@@ -5,11 +5,14 @@ from gvsigol import settings
 from gvsigol_auth.models import UserGroup
 from gvsigol_services.models import LayerGroup
 
+def get_default_project_image():
+    return settings.STATIC_URL + 'img/no_project.png'
+
 class Project(models.Model):
     name = models.CharField(max_length=100, unique=True)
     title = models.CharField(max_length=100, null=True, blank=True)
     description = models.CharField(max_length=250, null=True, blank=True)
-    image = models.ImageField(upload_to='images', default=settings.STATIC_URL + 'img/no_project.png', null=True, blank=True)
+    image = models.ImageField(upload_to='images', default=get_default_project_image, null=True, blank=True)
     center_lat = models.CharField(max_length=100)
     center_lon = models.CharField(max_length=100)
     zoom = models.IntegerField(null=False, default=10)
