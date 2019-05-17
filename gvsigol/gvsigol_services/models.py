@@ -107,6 +107,8 @@ class LayerGroup(models.Model):
     def __unicode__(self):
         return self.name
 
+def get_default_layer_thumbnail():
+    return settings.STATIC_URL + 'img/no_thumbnail.jpg'
 
 class Layer(models.Model):
     datastore = models.ForeignKey(Datastore)
@@ -137,7 +139,7 @@ class Layer(models.Model):
     highlight_scale = models.FloatField(null=True, blank=True)
     order = models.IntegerField(default=100)
     created_by = models.CharField(max_length=100)
-    thumbnail = models.ImageField(upload_to='thumbnails', default=settings.STATIC_URL + 'img/no_thumbnail.jpg', null=True, blank=True)
+    thumbnail = models.ImageField(upload_to='thumbnails', default=get_default_layer_thumbnail, null=True, blank=True)
     conf = models.TextField(null=True, blank=True)
     
     def __unicode__(self):
