@@ -35,11 +35,11 @@ __WELL_KNOWN_LABELS = ( # just needed for triggering xgettext makemessages detec
     )
 
 WELL_KNOWN_NAMES = (
-    ('circle', 'Circle'),
-    ('square', 'Square'),
-    ('triangle', 'Triangle'),
-    ('star', 'star'),
-    ('cross', 'cross'),
+    ('circle', 'Círculo'),
+    ('square', 'Cuadrado'),
+    ('triangle', 'Triángulo'),
+    ('star', 'Estrella'),
+    ('cross', 'Cruz'),
 )
 
 UNIQUE_SYMBOL = 'US'
