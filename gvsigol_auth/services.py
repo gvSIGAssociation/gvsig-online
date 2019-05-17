@@ -438,8 +438,10 @@ class GvSigOnlineServicesAD(GvSigOnlineServices):
             self.ldap_add_default_group_member(user)
             #print "Creando usuario ..." + attrs['userPassword']
      
-            
+__gvsigOnline = None
 def get_services():
+    if __gvsigOnline:
+        return __gvsigOnline
     try:
         is_enabled = GVSIGOL_LDAP['ENABLED']
         host = GVSIGOL_LDAP['HOST']
@@ -452,17 +454,14 @@ def get_services():
         raise ImproperlyConfigured
     
     if not ad_suffix:
-        gvsigOnline = GvSigOnlineServices(is_enabled, host, port, domain, username, password)
+        __gvsigOnline = GvSigOnlineServices(is_enabled, host, port, domain, username, password)
     else:        
-        gvsigOnline = GvSigOnlineServicesAD(is_enabled, host, port, domain, username, password)
+        __gvsigOnline = GvSigOnlineServicesAD(is_enabled, host, port, domain, username, password)
         
     if is_enabled:
-        gvsigOnline.ldap_create_default_group()
-        gvsigOnline.ldap_create_admin_group()
-        gvsigOnline.ldap_create_admin_user()
+        __gvsigOnline.ldap_create_default_group()
+        __gvsigOnline.ldap_create_admin_group()
+        __gvsigOnline.ldap_create_admin_user()
+    __gvsigOnline.create_default_layer_group()
+    return __gvsigOnline
 
-    gvsigOnline.create_default_layer_group()
-
-    return gvsigOnline
-
-services = get_services()

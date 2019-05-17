@@ -29,7 +29,7 @@ from django.utils.translation import ugettext as _
 from forms import UserCreateForm, UserGroupForm
 from models import UserGroupUser, UserGroup
 from django.contrib.auth.models import User
-from gvsigol_auth.services import services as core_services
+from gvsigol_auth import services as auth_services
 from gvsigol_services import geographic_servers
 from gvsigol_services import utils as services_utils
 from gvsigol_services.models import Workspace, Server
@@ -173,7 +173,7 @@ def password_update(request):
             user.set_password(password1)
             user.save()
             
-            core_services.ldap_change_user_password(user, password1)
+            auth_services.get_services().ldap_change_user_password(user, password1)
             
             response = {'success': True}
             
@@ -234,7 +234,7 @@ def password_reset_complete(request):
             temp_pass = request.POST.get('password')
             user.set_password(temp_pass)
             user.save()
-            core_services.ldap_change_user_password(user, temp_pass)
+            auth_services.get_services().ldap_change_user_password(user, temp_pass)
             
             request.session['username'] = user.username
             request.session['password'] = temp_pass
@@ -344,8 +344,8 @@ def user_add(request):
                     admin_group = aux[0]
                     
                     if user.is_superuser:
-                        core_services.ldap_add_user(user, form.data['password1'], True)                        
-                        core_services.ldap_add_group_member(user, admin_group)
+                        auth_services.get_services().ldap_add_user(user, form.data['password1'], True)                        
+                        auth_services.get_services().ldap_add_group_member(user, admin_group)
                         usergroup_user = UserGroupUser(
                             user = user,
                             user_group = admin_group
@@ -353,8 +353,8 @@ def user_add(request):
                         usergroup_user.save()
                         
                     else:
-                        core_services.ldap_add_user(user, form.data['password1'], False)
-                        #core_services.ldap_add_group_member(user, admin_group)
+                        auth_services.get_services().ldap_add_user(user, form.data['password1'], False)
+                        #auth_services.get_services().ldap_add_group_member(user, admin_group)
                         
                     for ag in assigned_groups:
                         user_group = UserGroup.objects.get(id=ag)
@@ -363,7 +363,7 @@ def user_add(request):
                             user_group = user_group
                         )
                         usergroup_user.save()
-                        core_services.ldap_add_group_member(user, user_group)
+                        auth_services.get_services().ldap_add_group_member(user, user_group)
                      
                     #User backend 
                     if is_superuser or is_staff:  
@@ -379,9 +379,9 @@ def user_add(request):
                         )
                         ugroup_user.save()
                             
-                        core_services.ldap_add_group(ugroup)
-                        core_services.add_data_directory(ugroup)
-                        core_services.ldap_add_group_member(user, ugroup)
+                        auth_services.get_services().ldap_add_group(ugroup)
+                        auth_services.get_services().add_data_directory(ugroup)
+                        auth_services.get_services().ldap_add_group_member(user, ugroup)
                         
                         url = server_object.frontend_url + '/'
                         ws_name = 'ws_' + form.data['username'].lower()
@@ -465,19 +465,19 @@ def user_update(request, uid):
             user.is_superuser = True
             user.save()
             admin_group = UserGroup.objects.get(name__exact='admin')
-            core_services.ldap_add_group_member(user, admin_group)
+            auth_services.get_services().ldap_add_group_member(user, admin_group)
             assigned_groups.append(admin_group.id)
         
         if user.is_superuser and not is_superuser:
             user.is_superuser = False
             user.save()
             admin_group = UserGroup.objects.get(name__exact='admin')
-            core_services.ldap_delete_group_member(user, admin_group)
+            auth_services.get_services().ldap_delete_group_member(user, admin_group)
         
         groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
         for ugu in  groups_by_user:
             user_group = UserGroup.objects.get(id=ugu.user_group.id)
-            core_services.ldap_delete_group_member(user, user_group)
+            auth_services.get_services().ldap_delete_group_member(user, user_group)
             ugu.delete()
                   
         for ag in assigned_groups:
@@ -487,7 +487,7 @@ def user_update(request, uid):
                 user_group = user_group
             )
             usergroup_user.save()
-            core_services.ldap_add_group_member(user, user_group)
+            auth_services.get_services().ldap_add_group_member(user, user_group)
             
         return redirect('user_list')
                 
@@ -507,10 +507,10 @@ def user_delete(request, uid):
         groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
         for ugu in  groups_by_user:
             user_group = UserGroup.objects.get(id=ugu.user_group.id)
-            core_services.ldap_delete_group_member(user, user_group)
+            auth_services.get_services().ldap_delete_group_member(user, user_group)
         
-        core_services.ldap_delete_default_group_member(user)   
-        core_services.ldap_delete_user(user)           
+        auth_services.get_services().ldap_delete_default_group_member(user)   
+        auth_services.get_services().ldap_delete_user(user)           
         user.delete()
             
         response = {
@@ -560,8 +560,8 @@ def group_add(request):
                 )
                 group.save()
                     
-                core_services.ldap_add_group(group)
-                core_services.add_data_directory(group)                               
+                auth_services.get_services().ldap_add_group(group)
+                auth_services.get_services().add_data_directory(group)                               
                           
                 return redirect('group_list')
             
@@ -583,8 +583,8 @@ def group_delete(request, gid):
     if request.method == 'POST':
         group = UserGroup.objects.get(id=int(gid))
         
-        core_services.ldap_delete_group(group)           
-        core_services.delete_data_directory(group)
+        auth_services.get_services().ldap_delete_group(group)           
+        auth_services.get_services().delete_data_directory(group)
         
         group.delete()
             
