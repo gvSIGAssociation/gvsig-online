@@ -52,7 +52,7 @@ SymbologyUtils.prototype.shapes = [
 ];
 
 SymbologyUtils.prototype.linePatterns = [
-	{value: 'none', imgsrc: IMG_PATH + 'default.png'},
+	{value: 'none', imgsrc: IMG_PATH + 'default-symbol.png'},
 	{value: '5 10', imgsrc: IMG_PATH + '5_10.png'},
 	{value: '10 5', imgsrc: IMG_PATH + '10_5.png'},
 	{value: '5 1', imgsrc: IMG_PATH + '5_1.png'},
