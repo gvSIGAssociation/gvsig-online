@@ -25,12 +25,21 @@ from django.db import models
 from gvsigol_services.models import Layer
 from django.utils.translation import ugettext as _
 
-WELL_KNOWN_NAMES = (
-    ('circle', _('Circle')),
-    ('square', _('Square')),
-    ('triangle', _('Triangle')),
+
+__WELL_KNOWN_LABELS = ( # just needed for triggering xgettext makemessages detection
+    ('Circle', _('Circle')),
+    ('Square', _('Square')),
+    ('Triangle', _('Triangle')),
     ('star', _('star')),
     ('cross', _('Cross')),
+    )
+
+WELL_KNOWN_NAMES = (
+    ('circle', 'Circle'),
+    ('square', 'Square'),
+    ('triangle', 'Triangle'),
+    ('star', 'star'),
+    ('cross', 'cross'),
 )
 
 UNIQUE_SYMBOL = 'US'
