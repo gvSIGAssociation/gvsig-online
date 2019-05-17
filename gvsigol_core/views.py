@@ -552,7 +552,10 @@ def project_update(request, pid):
                 group['layers'] = ordered_layers
             ordered_toc = sorted(toc.iteritems(), key=lambda (x, y): y['order'], reverse=True)
         else:
-            ordered_toc = []
+            ordered_toc = {}
+            for g in layer_groups:
+                ordered_toc[g['name']] = {'name': g['name'], 'title': g['title'], 'order': 1000, 'layers': {}}
+            ordered_toc = sorted(ordered_toc.iteritems(), key=lambda (x, y): y['order'], reverse=True)
         projectTools = json.loads(project.tools) if project.tools else get_available_tools(True, True)
         return render_to_response('project_update.html', {'tools': projectTools,'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'base_layers': base_layers, 'selected_base_layers': selected_base_layers,'selected_base_layer': selected_base_layer, 'has_geocoding_plugin': has_geocoding_plugin, 'toc': ordered_toc}, context_instance=RequestContext(request))
     
