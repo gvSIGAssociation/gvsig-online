@@ -20,6 +20,7 @@
 from gvsigol_core.utils import get_supported_crs
 from gvsigol_symbology.models import StyleLayer
 from gdaltools.metadata import project
+from gvsigol_core.models import SharedView
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
@@ -199,6 +200,11 @@ def get_core_tools(enabled=True):
         'checked': enabled,
         'title': 'Geolocalización',
         'description': 'Centra el mapa en la posición actual'
+    }, {
+        'name': 'gvsigol_tool_shareview',
+        'checked': enabled,
+        'title': 'Compartir vista',
+        'description': 'Permite compartir la vista en su estado actual'
     }]
 
 def get_plugin_tools(enabled=False):
@@ -602,7 +608,8 @@ def load_project(request, project_name):
             'project': project,
             'pid': project.id,
             'extra_params': json.dumps(request.GET),
-            'plugins_config': plugins_config
+            'plugins_config': plugins_config,
+            'is_shared_view': False,
             },
             context_instance=RequestContext(request)
         )
@@ -634,7 +641,8 @@ def load_public_project(request, project_name):
         'project': project,
         'pid': project.id,
         'extra_params': json.dumps(request.GET),
-        'plugins_config': plugins_config
+        'plugins_config': plugins_config,
+        'is_shared_view': False,
         },
         context_instance=RequestContext(request)
     )
@@ -700,6 +708,7 @@ def project_get_conf(request):
     if request.method == 'POST':
         errors = []
         pid = request.POST.get('pid')
+        is_shared_view = json.loads(request.POST.get('shared_view'))
         
         project = Project.objects.get(id=int(pid))
         if not project.toc_order:
@@ -834,7 +843,8 @@ def project_get_conf(request):
                                 'units': epsg['units']
                             }
                             used_crs.append(epsg)
-                            
+                        
+                        layer['opacity'] = 1   
                         layer['wms_url'] = core_utils.get_wms_url(request, workspace)
                         layer['wms_url_no_auth'] = workspace.wms_endpoint
                         layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
@@ -969,7 +979,13 @@ def project_get_conf(request):
                     'password': request.session['password']
                 }
             }
-        
+        if is_shared_view:
+            view_name = request.POST.get('shared_view_name')
+            shared_view = SharedView.objects.get(name__exact=view_name)
+            state = json.loads(shared_view.state)
+            
+            conf = core_utils.set_state(conf, state)
+              
         return HttpResponse(json.dumps(conf, indent=4), content_type='application/json')
 
     
@@ -1051,3 +1067,100 @@ def documentation(request):
         'mobile_url': settings.BASE_URL + '/docs/mobile/' + lang + '/'
     }
     return render_to_response('documentation.html', response, RequestContext(request))
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+def save_shared_view(request):
+    if request.method == 'POST':
+        pid = int(request.POST.get('pid'))
+        description = request.POST.get('description')
+        view_state = request.POST.get('view_state')
+        
+        name = ''.join(random.choice(string.ascii_uppercase) for i in range(10))
+        shared_project = SharedView(
+            name=name,
+            project_id=pid,
+            description=description,
+            state=view_state,
+            expiration_date=datetime.datetime.now() + datetime.timedelta(days = settings.SHARED_VIEW_EXPIRATION_TIME),
+            created_by=request.user.username
+        )
+        shared_project.save()
+        
+        response = {
+            'shared_url': settings.BASE_URL + '/gvsigonline/core/load_shared_view/' + name
+        }
+            
+        return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+    
+@cache_control(max_age=86400)
+def load_shared_view(request, view_name):
+    try:
+        shared_view = SharedView.objects.get(name__exact=view_name)
+        project = Project.objects.get(id=shared_view.project_id)
+            
+        has_image = True
+        if "no_project.png" in project.image.url:
+            has_image = False
+    
+        plugins_config = core_utils.get_plugins_config()
+        response = render_to_response('viewer.html', {
+            'has_image': has_image,
+            'supported_crs': core_utils.get_supported_crs(),
+            'project': project,
+            'pid': project.id,
+            'extra_params': json.dumps(request.GET),
+            'plugins_config': plugins_config,
+            'is_shared_view': True,
+            'shared_view_name': shared_view.name
+            },
+            context_instance=RequestContext(request)
+        )
+            
+        #Expira la caché cada día
+        tomorrow = datetime.datetime.now() + datetime.timedelta(days = 1)
+        tomorrow = datetime.datetime.replace(tomorrow, hour=0, minute=0, second=0)
+        expires = datetime.datetime.strftime(tomorrow, "%a, %d-%b-%Y %H:%M:%S GMT")     
+        response.set_cookie('key', expires = expires)
+            
+        return response
+    
+    except Exception:
+        return redirect('not_found_sharedview')
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def shared_view_list(request):
+    
+    shared_view_list = SharedView.objects.all()
+    
+    shared_views = []
+    for sv in shared_view_list:
+        shared_view = {}
+        shared_view['id'] = sv.id
+        shared_view['name'] = sv.name
+        shared_view['created_by'] = sv.created_by
+        shared_view['expiration_date'] = sv.expiration_date
+        shared_view['description'] = sv.description
+        shared_views.append(shared_view)
+                      
+    response = {
+        'shared_views': shared_views
+    }     
+    return render_to_response('shared_view_list.html', response, context_instance=RequestContext(request))
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def shared_view_delete(request, svid):        
+    if request.method == 'POST':
+        shared_view = SharedView.objects.get(id=int(svid))
+        shared_view.delete()
+            
+        response = {
+            'deleted': True
+        }     
+        return HttpResponse(json.dumps(response, indent=4), content_type='project/json')
+    
+def not_found_sharedview(request):
+    response = render_to_response('not_found_sharedview.html', {}, context_instance=RequestContext(request))
+    response.status_code = 404
+    return response

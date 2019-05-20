@@ -37,6 +37,10 @@ var layerTree = function(conf, map, isPublic) {
 	this.min_val = 0;
 	this.max_val = 1;
 	this.mosaic_values = {};
+	this.state = {
+		base_layers: this.conf.base_layers,
+		layerGroups: this.conf.layerGroups
+	};
 };
 
 /**
@@ -123,8 +127,10 @@ layerTree.prototype.createTree = function() {
 				var mapLayer = self.getGroupLayerFromMap(group.groupName);
 				if (checked) {
 					mapLayer.setVisible(true);
+					self.changeState(group, 'layergroup', 'set-visibility', true);
 				} else {
 					mapLayer.setVisible(false);
+					self.changeState(group, 'layergroup', 'set-visibility', false);
 				}
 				for (var j=0; j<group.layers.length; j++) {
 					var layer = group.layers[j];
@@ -158,15 +164,29 @@ layerTree.prototype.setLayerEvents = function() {
 	$( ".layer-opacity-slider" ).slider({
 	    min: 0,
 	    max: 100,
-	    value: 100,
+	    //value: 100,
+	    create: function( event, ui ) {
+	    	var layers = self.map.getLayers();
+			var id = this.dataset.layerid;
+			layers.forEach(function(layer){
+				if (layer.baselayer == false) {
+					if (id===layer.get("id")) {
+						$(this).slider( "value", layer.getOpacity() * 100);
+						$("#layer-opacity-output-" + id).text((layer.getOpacity() * 100).toString() + '%');
+					}
+				}						
+			}, this);
+	    },
 	    slide: function( event, ui ) {
 	    	var layers = self.map.getLayers();
 			var id = this.dataset.layerid;
 			layers.forEach(function(layer){
 				if (layer.baselayer == false) {
 					if (id===layer.get("id")) {
-						layer.setOpacity(parseFloat(ui.value)/100);
+						var opacity = parseFloat(ui.value)/100;
+						layer.setOpacity(opacity);
 						$("#layer-opacity-output-" + id).text(ui.value + '%');
+						self.changeState(layer, 'overlay', 'change-opacity', opacity);
 					}
 				}						
 			}, this);
@@ -194,6 +214,7 @@ layerTree.prototype.setLayerEvents = function() {
 				if (layer.get("id") === this.id) {
 					if (layer.getVisible() == true) {
 						layer.setVisible(false);
+						self.changeState(layer, 'overlay', 'set-visibility', false);
 						if($("#layer-"+layer.get("id")).length){
 							$("#layer-"+layer.get("id")).css("display", "none");
 							if(self.hasTemporaryLayersActive()){
@@ -206,6 +227,7 @@ layerTree.prototype.setLayerEvents = function() {
 						}
 					} else {
 						layer.setVisible(true);
+						self.changeState(layer, 'overlay', 'set-visibility', true);
 						if($("#layer-"+layer.get("id")).length){
 							$("#layer-"+layer.get("id")).css("display", "block");
 							self.refreshTemporalInfo();	
@@ -1950,6 +1972,7 @@ layerTree.prototype.showMetadata = function(layer) {
  * TODO
  */
 layerTree.prototype.reorder = function(event,ui) {
+	var self = this;
 	var groupNumber = ui.item[0].parentNode.dataset.groupnumber;
 	var groupLayers = ui.item[0].parentNode.children;
 	var mapLayers = this.map.getLayers();
@@ -1961,9 +1984,57 @@ layerTree.prototype.reorder = function(event,ui) {
 		var layerid = groupLayers[i].dataset.layerid;
 		mapLayers.forEach(function(layer){
 			if (layer.get('id') == layerid) {
-				layer.setZIndex(parseInt(zindex) + mapLayers_length);
+				var order = parseInt(zindex) + mapLayers_length;
+				layer.setZIndex(order);
+				self.changeState(layer, 'overlay', 'change-order', order);
 				mapLayers_length--;
 			}
 		}, this);
 	}
+};
+
+/**
+ * TODO
+ */
+layerTree.prototype.changeState = function(object, objectType, action, value) {
+	
+	if (objectType == 'overlay') {
+		for (var i=0; i<this.state.layerGroups.length; i++) {
+			for (var j=0; j<this.state.layerGroups[i].layers.length; j++) {	
+				if (this.state.layerGroups[i].layers[j].id == object.get('id')) {
+					if (action == 'change-opacity') {
+						this.state.layerGroups[i].layers[j].opacity = value;
+						
+					} else if (action == 'set-visibility') {
+						this.state.layerGroups[i].layers[j].visible = value;
+						
+					} else if (action == 'change-order') {
+						this.state.layerGroups[i].layers[j].order = value;
+					}
+				}				
+				
+			}
+		}
+		
+	} else if (objectType == 'baselayer') {
+		
+		
+	} else if (objectType == 'layergroup') {
+		for (var i=0; i<this.state.layerGroups.length; i++) {
+			if (this.state.layerGroups[i].groupName == object.groupName) {
+				if (action == 'set-visibility') {
+					this.state.layerGroups[i].visible = value;
+					
+				}
+			}				
+		}
+	}
+	
+};
+
+/**
+ * TODO
+ */
+layerTree.prototype.getState = function() {
+	return this.state;
 };

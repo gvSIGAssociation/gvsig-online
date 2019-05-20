@@ -60,3 +60,15 @@ class BaseLayerProject(models.Model):
     
     def __unicode__(self):
         return self.baselayer.name +"-"+self.project.id
+    
+class SharedView(models.Model):
+    name = models.CharField(max_length=10, unique=True)
+    project_id = models.IntegerField()
+    description = models.CharField(max_length=250, null=True, blank=True)
+    state = models.TextField(null=True, blank=True)
+    creation_date = models.DateField(auto_now=True)
+    expiration_date = models.DateField(null=False)
+    created_by = models.CharField(max_length=100)
+    
+    def __unicode__(self):
+        return self.name

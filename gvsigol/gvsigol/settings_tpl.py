@@ -399,3 +399,5 @@ LEGACY_GVSIGOL_SERVICES = { ## We introduce this variable for providing a defaul
     'USER': 'root',
     'PASSWORD': '##GEOSERVER_PASSWD##',
 }
+
+SHARED_VIEW_EXPIRATION_TIME=1 #EN DIAS

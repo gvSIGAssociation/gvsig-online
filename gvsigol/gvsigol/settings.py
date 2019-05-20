@@ -123,14 +123,11 @@ INSTALLED_APPS = [
     'gvsigol_symbology',
     'gvsigol_filemanager',
     'gvsigol_core',
-    'gvsigol_app_dev',
-    'gvsigol_plugin_edition',
+    'gvsigol_app_test',
     'gvsigol_plugin_worldwind',
-    #'gvsigol_plugin_geocoding',
     'gvsigol_plugin_print',
-    #'gvsigol_plugin_catalog',
-    #'gvsigol_app_libraregepa',
-    #'gvsigol_plugin_regepa',
+    'gvsigol_plugin_geocoding',
+    'gvsigol_plugin_catalog',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -337,7 +334,7 @@ MAX_ZOOM_LEVEL = 18
 
 # Must be a valid iconv encoding name. Use iconv --list on Linux to see valid names 
 SUPPORTED_ENCODINGS = [ "LATIN1", "UTF-8", "ISO-8859-15", "WINDOWS-1252"]
-USE_DEFAULT_SUPPORTED_CRS = True
+USE_DEFAULT_SUPPORTED_CRS = False
 SUPPORTED_CRS = {
     '3857': {
         'code': 'EPSG:3857',
@@ -462,3 +459,5 @@ LEGACY_GVSIGOL_SERVICES = {
     'USER': GEOSERVER_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'PASSWORD': GEOSERVER_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 }
+
+SHARED_VIEW_EXPIRATION_TIME=1 #EN DIAS
