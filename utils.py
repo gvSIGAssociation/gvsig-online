@@ -583,3 +583,26 @@ def get_plugins_config():
             except ImportError:
                 pass
     return plugins_config
+
+def set_state(conf, state):
+    for conf_bl in conf['base_layers']:
+        for state_bl in state['base_layers']:
+            if conf_bl['name'] == state_bl['name']:
+                conf_bl['active'] = state_bl['active']
+                            
+    for conf_lg in conf['layerGroups']:
+        for state_lg in state['layerGroups']:
+            if conf_lg['groupName'] == state_lg['groupName']:
+                conf_lg['visible'] = state_lg['visible']
+                for conf_l in conf_lg['layers']:
+                    for state_l in state_lg['layers']:
+                        if conf_l['name'] == state_l['name']:
+                            conf_l['visible'] = state_l['visible']
+                            conf_l['opacity'] = state_l['opacity']
+                            conf_l['order'] = state_l['order']
+                            
+    conf['view'] = {}
+    conf['view'] = state['view']
+                
+    return conf
+            
