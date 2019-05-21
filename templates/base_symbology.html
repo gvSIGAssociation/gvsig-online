@@ -67,7 +67,7 @@
 				<a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button"> <span class="sr-only">Toggle navigation</span></a>				
 				<div class="navbar-custom-menu">
 					<ul class="nav navbar-nav">	
-						<li title="{% trans 'manual gvsigonline' %}"><a href="/gvsigonline/core/documentation/" target="_blank" id="help" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-question-circle"></i></a></li>	
+						<li title="{% trans 'gvsigonline docs' %}"><a href="/gvsigonline/core/documentation/" target="_blank" id="help" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-question-circle"></i></a></li>	
 						<li>
 							<form id="select-language-form" action="{% url 'set_language' %}" method="post">{% csrf_token %}
 							    <select id="select-language" name="language" class="form-control" style="margin-top: 10px;">
