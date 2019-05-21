@@ -168,43 +168,43 @@ def project_list(request):
         'projects': projects
     }     
     return render_to_response('project_list.html', response, context_instance=RequestContext(request))
-
+_(u'You must enter an project name')
 def get_core_tools(enabled=True):
     return [{
         'name': 'gvsigol_tool_zoom',
         'checked': enabled,
-        'title': 'Herramientas de zoom',
-        'description': 'Zoom más, zoom menos, ...'
+        'title': _(u'Zoom tools'),
+        'description': _(u'Zoom in, zoom out, ...')
     }, {
         'name': 'gvsigol_tool_info',
         'checked': enabled,
-        'title': 'Información',
-        'description': 'Información del mapa en un punto'
+        'title': _(u'Feature info'),
+        'description': _(u'Map information at point')
     }, {
         'name': 'gvsigol_tool_measure',
         'checked': enabled,
-        'title': 'Herramientas de medida',
-        'description': 'Permite medir áreas y distancias'
+        'title': _(u'Measure tools'),
+        'description': _(u'It allows to measure areas and distances')
     }, {
         'name': 'gvsigol_tool_export',
         'checked': enabled,
-        'title': 'Exportar a PDF',
-        'description': 'Exporta la vista actual a PDF'
+        'title': _(u'Export to PDF'),
+        'description': _(u'Exports the current view to PDF')
     }, {
         'name': 'gvsigol_tool_coordinate',
         'checked': enabled,
-        'title': 'Buscar coordinates',
-        'description': 'Centra el mapa en unas coordenadas dadas'
+        'title': _(u'Search coordinates'),
+        'description': _(u'Center the map at given coordinates')
     }, {
         'name': 'gvsigol_tool_location',
         'checked': enabled,
-        'title': 'Geolocalización',
-        'description': 'Centra el mapa en la posición actual'
+        'title': _(u'Geolocation'),
+        'description': _(u'Center the map in the current position')
     }, {
         'name': 'gvsigol_tool_shareview',
         'checked': enabled,
-        'title': 'Compartir vista',
-        'description': 'Permite compartir la vista en su estado actual'
+        'title': _(u'Share view'),
+        'description': _(u'Allows you to share the view in its current state')
     }]
 
 def get_plugin_tools(enabled=False):
