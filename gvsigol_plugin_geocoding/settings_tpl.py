@@ -28,11 +28,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GEOCODING_PROVIDER_NAME='nominatim'
 
 GEOCODING_SUPPORTED_TYPES = (
-                ('googlemaps', _('Servicios de Google Maps')),
-                ('nominatim', _('Servicios de Nominatim')),
-                ('cartociudad', _('Cartografía de CartoCiudad')),
-                ('new_cartociudad', _('(Nuevo) Cartografía de CartoCiudad')),
-                ('user', _('Otras fuentes de datos')),
+                ('googlemaps', _('Google Maps services')),
+                ('nominatim', _('Nominatim services')),
+                ('cartociudad', _('Cartography of CartoCiudad')),
+                ('new_cartociudad', _('(New) Cartography of CartoCiudad')),
+                ('user', _('Other data sources')),
             )
 
 GEOCODING_PROVIDER = {
