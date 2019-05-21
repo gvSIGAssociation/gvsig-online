@@ -1878,7 +1878,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 		$('.form-link-open').on('click', function () {
 		     if($(this).attr("data-value") == null || $(this).attr("href") == null ||
 		    		 $(this).attr("data-value") == "" || $(this).attr("href") == ""){
-		    	 messageBox.show('warning', gettext('No hay ninguna encuesta activa para ser rellenada. Para responder encuesta, por favor activarla en Limesurvey'));
+		    	 messageBox.show('warning', gettext('There is no active survey to be filled out. To answer the survey, please activate it in Limesurvey'));
 		    	 return false;
 		     }
 		 });
