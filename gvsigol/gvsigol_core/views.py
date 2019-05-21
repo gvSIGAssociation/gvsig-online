@@ -1091,7 +1091,8 @@ def save_shared_view(request):
         }
             
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
-    
+
+@login_required(login_url='/gvsigonline/auth/login_user/')    
 @cache_control(max_age=86400)
 def load_shared_view(request, view_name):
     try:
