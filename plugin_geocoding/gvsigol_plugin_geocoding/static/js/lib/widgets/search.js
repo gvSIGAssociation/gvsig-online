@@ -149,7 +149,7 @@ search.prototype.clickHandler = function(evt, aux){
 			this.menus[0].callback(evt);
 		}
 		if(this.menus.length == 0){
-			html = gettext('No hay ningún geocodificador activo');
+			html = gettext('There is no active geocoder');
 			this.contextmenu.show(mapCoordinates, '<div class="popup-wrapper getfeatureinfo-popup">'+html+'</div>');	
 		}
 	}	

@@ -52,7 +52,7 @@
 			{{ resource.name }}
 			
 			{% if resource.protocol == 'WWW:DOWNLOAD-1.0-http--download' %}
-				<a href="{{ resource.url }}" target="_blank" style="float:right; background-color:#eee; padding:5px; width:75px">Download</a>
+				<a href="{{ resource.url }}" target="_blank" style="float:right; background-color:#eee; padding:5px; width:75px">{% trans 'Download' %}</a>
 			{% endif %}
 			
 			{% if resource.protocol == "OGC:WMS" %}
@@ -60,7 +60,7 @@
 			{% endif %}
 			
 			{% if resource.protocol == "OGC:WFS-1.0.0-http-get-capabilities" %}
-				<a href="{{ resource.url }}?service=WFS&version=1.0.0&request=GetFeature&typeName={{ resource.name }}&outputFormat=SHAPE-ZIP" target="_blank" style="float:right; background-color:#eee; padding:5px; width:75px">Get shape</a>
+				<a href="{{ resource.url }}?service=WFS&version=1.0.0&request=GetFeature&typeName={{ resource.name }}&outputFormat=SHAPE-ZIP" target="_blank" style="float:right; background-color:#eee; padding:5px; width:75px">{% trans 'Get shape' %}</a>
 			{% endif %} 
 			<div style="clear:both"></div>
 		{% endfor %}

@@ -330,7 +330,7 @@ layerTree.prototype.createTemporaryTab = function() {
 	var self = this;
 	var temporary_tree = '';
 	temporary_tree += '<div style="background-color:#f9fafc">';
-	temporary_tree += '<input type="checkbox" id="enable-temporary" class="temporary-check">'+ gettext("Habilitar características temporales")+'</input> <div id="temporary-panel">';
+	temporary_tree += '<input type="checkbox" id="enable-temporary" class="temporary-check">'+ gettext("Enable temporary features")+'</input> <div id="temporary-panel">';
 	temporary_tree += '	<div id="enable-temporary-error"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;&nbsp;' + gettext("A visible layer with temporal properties is needed") + '</div>';
 	temporary_tree += '	<div class="box-body temporary-body">';
 	
