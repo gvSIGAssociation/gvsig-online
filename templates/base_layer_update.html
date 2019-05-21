@@ -266,7 +266,7 @@ $().ready(function(){
 				}
 			},
 			error: function(err){
-				alert(gettext("Error intentando conectar"));
+				alert(gettext("Error trying to connect"));
 				if('response' in err){
 					$("#form-error ul").empty().append("<li>"+err['message']+'</li>')
 				}
