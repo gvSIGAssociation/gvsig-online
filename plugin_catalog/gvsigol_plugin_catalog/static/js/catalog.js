@@ -993,6 +993,6 @@ CatalogView.prototype.showPanel = function(){
 CatalogView.prototype.hidePanel = function(){
 	this.map_container.show();
 	this.catalog_panel.hide();
-	$('.viewer-search-form').css("display","block");
+	$('.viewer-search-form').css("display","inline-block");
 }
 

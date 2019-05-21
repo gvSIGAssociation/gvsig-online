@@ -96,11 +96,8 @@ ChangeToWWControl.prototype.hideControls = function() {
 	$('#measure-length').css("display","none");
 	$('#mouse-position').css("display","none");
 	$('#clean-map').css("display","none");
-	//$('#inverse-geocoding').css("display","none");
-	//$('#intersect-by-radio-control').css("display","none");
 	$('.ol-overviewmap').css("display","none");
 	$('.ol-viewport').css("display","none");
-	//$('#base-layers').css("display","none");
 	$('#toolbar').css("display", "none");
 };
 
@@ -114,8 +111,7 @@ ChangeToWWControl.prototype.resetControls = function() {
 	$('#measure-area').css("display","block");
 	$('#measure-length').css("display","block");
 	$('#mouse-position').css("display","block");
-	$('#inverse-geocoding').css("display","block");
-	//$('#intersect-by-radio-control').css("display","block");
+	$('#clean-map').css("display","block");
 	$('.ol-overviewmap').css("display","");
 	$('.ol-viewport').css("display","block");
 	$('#base-layers').css("display","block");

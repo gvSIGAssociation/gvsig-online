@@ -5,7 +5,7 @@
 #
 WORLDWIND_DEFAULT_PROVIDER = {
         'active': True,
-        'provider_url': 'https://##GVSIGOL_HOST##/elev',
+        'provider_url': 'https://worldwind26.arc.nasa.gov/elev',
         'provider_version': '1.3.0',
         'provider_layers': 'GEBCO,aster_v2,USGS-NED',
         'baseLayerType' : 'Bing'
