@@ -512,8 +512,8 @@ getFeatureInfo.prototype.showInfo = function(features){
 					if(fields_trans["fields"]){
 						var fields = fields_trans["fields"];
 						var feature_id2 = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+selectedLayer.title + "</span>";
-						feature_id2 += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext("Detalles de atributos")+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
-						feature_id2 += 		'<span class="label feature-info-button feature-info-label-resource" title="'+gettext("Mostrar recursos")+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><div style=\"clear:both; margin-bottom:10px;\"></div>';
+						feature_id2 += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext("Attribute details")+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
+						feature_id2 += 		'<span class="label feature-info-button feature-info-label-resource" title="'+gettext("Show resources")+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><div style=\"clear:both; margin-bottom:10px;\"></div>';
 
 						var feature_added = 0;
 
