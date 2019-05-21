@@ -440,6 +440,7 @@ class GvSigOnlineServicesAD(GvSigOnlineServices):
      
 __gvsigOnline = None
 def get_services():
+    global __gvsigOnline
     if __gvsigOnline:
         return __gvsigOnline
     try:
