@@ -647,8 +647,13 @@ msgstr "Compartir vista"
 msgid "Allows you to share the view in its current state"
 msgstr "Permite compartir la vista en su estado actual"
 
+msgid "Coordinate calculator"
+msgstr "Calculadora de coordenadas"
+
+msgid "Transform coordinates between different systems"
+msgstr "Transforma las coordenadas entre diferentes sistemas"
+
 #: views.py:305
-#, python-brace-format
 msgid ""
 "Invalid project name: '{value}'. Identifiers must begin with a letter or an "
 "underscore (_). Subsequent characters can be letters, underscores or numbers"

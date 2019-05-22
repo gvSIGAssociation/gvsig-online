@@ -523,6 +523,9 @@ viewer.core = {
 		if (this.ifToolInConf('gvsigol_tool_coordinate')) {
 			this.tools.push(new searchByCoordinate(this.conf, this.map));
 		}
+		if (this.ifToolInConf('gvsigol_tool_coordinatecalc')) {
+			this.tools.push(new coordinateCalculator(this.conf, this.map));
+		}
 		if (this.ifToolInConf('gvsigol_tool_shareview')) {
 			this.tools.push(new shareView(this.conf, this.map, this.layerTree));
 		}
