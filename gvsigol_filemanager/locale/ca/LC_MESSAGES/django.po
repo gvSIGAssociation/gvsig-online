@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-11-10 10:17+0100\n"
+"POT-Creation-Date: 2019-05-21 14:28+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Language: ca_ES\n"
+"X-Source-Language: C\n"
 
 #: forms.py:5
 msgid "Directory name"
@@ -47,7 +49,7 @@ msgid "Data store"
 msgstr "Magatzem de dades"
 
 #: templates/browser/export_to_database.html:70
-#: templates/browser/filemanager_list.html:22
+#: templates/browser/filemanager_list.html:23
 msgid "Name"
 msgstr "Nom"
 
@@ -67,50 +69,49 @@ msgstr "sistema de coordenades"
 msgid "Default"
 msgstr "Per defecte"
 
-#: templates/browser/filemanager_list.html:20
+#: templates/browser/filemanager_list.html:21
 msgid "Select"
 msgstr "Seleccionar"
 
-#: templates/browser/filemanager_list.html:23
+#: templates/browser/filemanager_list.html:24
 msgid "Size"
 msgstr "Mida"
 
-#: templates/browser/filemanager_list.html:24
+#: templates/browser/filemanager_list.html:25
 msgid "Date"
 msgstr "Data"
 
-#: templates/browser/filemanager_list.html:27
+#: templates/browser/filemanager_list.html:28
 msgid "Actions"
 msgstr "Accions"
 
-#: templates/browser/filemanager_list.html:62
+#: templates/browser/filemanager_list.html:65
 msgid "Delete directory"
 msgstr "Eliminar directori"
 
-#: templates/browser/filemanager_list.html:65
+#: templates/browser/filemanager_list.html:68
 msgid "Export to database"
 msgstr "Exportar a bse de dades"
 
-#: templates/browser/filemanager_list.html:70
-#, fuzzy
+#: templates/browser/filemanager_list.html:73
 #| msgid "Export to database"
 msgid "Transform to database"
-msgstr "Exportar a bse de dades"
+msgstr "Transformar a base de dades"
 
-#: templates/browser/filemanager_list.html:74
+#: templates/browser/filemanager_list.html:77
 msgid "Delete file"
 msgstr "Eliminar archiu"
 
-#: templates/browser/filemanager_list.html:85
+#: templates/browser/filemanager_list.html:88
 msgid "Nothing to see here."
-msgstr "No hi ha arxius per mostrar"
+msgstr "No hi ha arxius per mostrar."
 
-#: templates/browser/filemanager_list.html:94
+#: templates/browser/filemanager_list.html:97
 #: templates/filemanager_create_directory.html:13
 msgid "Create directory"
 msgstr "Crear directori"
 
-#: templates/browser/filemanager_list.html:95
+#: templates/browser/filemanager_list.html:98
 #: templates/filemanager_upload.html:14
 msgid "Upload"
 msgstr "Pujar"
@@ -119,14 +120,22 @@ msgstr "Pujar"
 msgid "File manager"
 msgstr "Administrador de arxius"
 
-#: views.py:94
+#: views.py:96
 msgid "Export process done successfully"
-msgstr ""
+msgstr "Procés d’exportació realitzat correctament"
 
-#: views.py:116
+#: views.py:118
 msgid "Server error"
 msgstr "Error del servidor"
 
-#: views.py:119
+#: views.py:121
 msgid "You must fill in all fields"
 msgstr "Ha d'omplir tots els camps"
+
+#: views.py:162 views.py:173
+msgid "Error deleting resource"
+msgstr "Error eliminant recurs"
+
+#: views.py:162
+msgid "exists in datastore"
+msgstr "Existeix en el magatzem de dades"

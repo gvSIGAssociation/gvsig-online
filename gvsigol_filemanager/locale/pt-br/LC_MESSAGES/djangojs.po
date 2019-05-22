@@ -14,5 +14,23 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-msgid ""
+msgid "Drag files here"
+msgstr ""
+
+msgid "Abort"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Done"
+msgstr ""
+
+msgid "Select"
+msgstr ""
+
+msgid "You must select a file"
 msgstr ""

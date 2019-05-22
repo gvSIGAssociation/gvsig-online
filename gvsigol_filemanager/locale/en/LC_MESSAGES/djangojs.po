@@ -31,3 +31,6 @@ msgstr ""
 
 msgid "Select"
 msgstr ""
+
+msgid "You must select a file"
+msgstr ""
