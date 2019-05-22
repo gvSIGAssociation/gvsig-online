@@ -1,29 +1,37 @@
-#    gvSIG Online.
-#    Copyright (C) 2010-2017 SCOLAB.
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Language: ca_ES\n"
+"X-Source-Language: C\n"
 
+# gvSIG Online.
+# Copyright (C) 2010-2017 SCOLAB.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # export_a4h.html
 msgid "Printing date"
-msgstr "Data d'impressió"
+msgstr "Dada d'impressió"
 
 msgid "Printing message"
 msgstr "Missatge d'impressió"
 
 # viewer.js
 msgid "Blank"
-msgstr "Buida"
+msgstr "Blanc"
 
 msgid "OpenStreetMap"
 msgstr "OpenStreetMap"
@@ -33,19 +41,19 @@ msgid "Processing request"
 msgstr "Processant petició"
 
 msgid "Search"
-msgstr "Cerca"
+msgstr "Cercar"
 
 msgid "Showing"
 msgstr "Mostrant"
 
 msgid "Showing from"
-msgstr "Mostrant des de"
+msgstr "Mostrant desde"
 
 msgid "registers"
 msgstr "registres"
 
 msgid "to"
-msgstr "fins a"
+msgstr "fins"
 
 msgid "of"
 msgstr "de"
@@ -66,7 +74,7 @@ msgid "Previous"
 msgstr "Anterior"
 
 msgid "Next"
-msgstr "Següent"
+msgstr "Pròxim"
 
 msgid "Last"
 msgstr "Últim"
@@ -86,20 +94,23 @@ msgstr "Seleccionar tot"
 msgid "Clear selection"
 msgstr "Netejar selecció"
 
-msgid "Print selection"
-msgstr "Imprimir selecció"
-
 msgid "You must select at least one row"
-msgstr "Heu de seleccionar al menys una fila"
+msgstr "Heu de seleccionar almenys una fila"
+
+msgid "Print selection"
+msgstr "Selecció d'impressió"
 
 msgid "Advanced filter"
 msgstr "Filtre avançat"
 
+msgid "A visible layer with temporal properties is needed"
+msgstr "Es necessita una capa visible amb propietats temporals"
+
 msgid "Select field"
-msgstr "Seleccionar camp"
+msgstr "Camp seleccionat"
 
 msgid "Select value"
-msgstr "Seleccionar valor"
+msgstr "Valor seleccionat"
 
 msgid "Apply filter"
 msgstr "Aplicar filtre"
@@ -108,6 +119,15 @@ msgid "Clear filter"
 msgstr "Netejar filtre"
 
 # editionBar.js
+msgid "Add point to center"
+msgstr "Afegir punt al centre"
+
+msgid "can't be empty"
+msgstr "No pot estar buit"
+
+msgid "can't be null"
+msgstr "No pot ser nul"
+
 msgid "Add point"
 msgstr "Afegir punt"
 
@@ -118,52 +138,51 @@ msgid "Add polygon"
 msgstr "Afegir polígon"
 
 msgid "Edit feature"
-msgstr "Editar element"
+msgstr "Editar feature"
 
 msgid "Remove feature"
-msgstr "Eliminar element"
+msgstr "Eliminar feature"
 
 msgid "Stop edition"
-msgstr "Finalitzar edició"
+msgstr "Cancel···lar edició"
 
 msgid "Error starting edition"
-msgstr "Error començant edició"
+msgstr "Error en començar l’edició"
 
 msgid "Feature properties"
-msgstr "Propietats"
+msgstr "Propietats de la feature"
 
 msgid "Feature resources"
-msgstr "Recursos"
+msgstr "Propietats del recurs"
 
 msgid "remove"
-msgstr "eliminar"
+msgstr "Eliminar"
 
 msgid "Failed to remove layer lock"
-msgstr "Fallada al eliminar el bloqueig de la capa"
+msgstr "No s'ha pogut eliminar el bloqueig de capes"
 
 msgid "New feature"
-msgstr "Nou element"
+msgstr "Nova feature"
 
 msgid "Save"
 msgstr "Guardar"
 
 msgid "Cancel"
-msgstr "Cancel·lar"
+msgstr "Cancel···lar"
 
 msgid "Failed to save the new record. Please check values"
-msgstr "Error al guardar el nou element. Per favor revise els valors"
+msgstr "No s’ha pogut guardar el registre nou. Comproveu els valors"
 
 # exportToPDF.js
 msgid "Map title"
 msgstr "Títol del mapa"
 
 msgid "Print"
-msgstr "Imprimir"
-
+msgstr "Impressió"
 
 # geolocation.js
 msgid "Get current location"
-msgstr "Aconseguir posició actual"
+msgstr "Obtenir la ubicació actual"
 
 # getFeatureInfo.js
 msgid "Point information"
@@ -179,10 +198,10 @@ msgid "Coordinates"
 msgstr "Coordenades"
 
 msgid "View resources"
-msgstr "Veure recursos"
+msgstr "Mostrar recursos"
 
 msgid "Feature info"
-msgstr "Informació de l'element"
+msgstr "Feature info"
 
 msgid "Multimedia resources"
 msgstr "Recursos multimèdia"
@@ -192,10 +211,10 @@ msgid "Measure area"
 msgstr "Mesurar àrea"
 
 msgid "Click to continue measuring"
-msgstr "Cliqueu per continuar mesurant"
+msgstr "Feu clic per continuar mesurant"
 
 msgid "Click to start measuring"
-msgstr "Cliqueu per començar a mesurar"
+msgstr "Feu clic per començar la mesura"
 
 # measureLength.js
 msgid "Measure length"
@@ -203,10 +222,13 @@ msgstr "Mesurar distància"
 
 # measureLength.js
 msgid "Search by coordinate"
-msgstr "Cercar per coordenades"
+msgstr "Cercar coordenades"
 
 msgid "Select projection"
-msgstr "Seleccionar projecció"
+msgstr "Sleccionar projecció"
+
+msgid "Coordinate Reference System"
+msgstr "Sistema de referència de coordenades"
 
 msgid "Latitude"
 msgstr "Latitud"
@@ -215,36 +237,36 @@ msgid "Longitude"
 msgstr "Longitud"
 
 msgid "Find"
-msgstr "Trobar"
+msgstr "Cercar"
 
 # messageBox.js
 msgid "Success"
-msgstr "Realitzat"
+msgstr "Èxit"
 
 msgid "Warning"
-msgstr "Avís"
+msgstr "Advertiment"
 
 # layerTree.js
 msgid "The layer you are trying to edit is locked"
-msgstr "La capa que està intentant editar està bloquejada"
+msgstr "La capa que intenta editar està bloquejada"
 
 msgid "Base layers"
 msgstr "Capes base"
 
 msgid "None"
-msgstr "Buida"
+msgstr "Cap"
 
 msgid "Bing roads"
 msgstr "Bing carreteres"
 
 msgid "Bing aerial"
-msgstr "Bing aèria"
+msgstr "Bing aeri"
 
 msgid "Bing aerial with labels"
-msgstr "Bing aèria amb etiquetes"
+msgstr "Bing aeri amb etiquetes"
 
 msgid "You are editing the layer"
-msgstr "Vostè està editant la capa"
+msgstr "Esteu editant la capa"
 
 msgid "Layer metadata"
 msgstr "Metadades de la capa"
@@ -259,7 +281,7 @@ msgid "Opacity"
 msgstr "Opacitat"
 
 msgid "Show in geonetwork"
-msgstr "Mostrar a geonetwork"
+msgstr "Mostrar en geonetwork"
 
 msgid "Version"
 msgstr "Versió"
@@ -307,10 +329,10 @@ msgid "Queryable"
 msgstr "Consultable"
 
 msgid "MaxScaleDenominator"
-msgstr "Escala màxima"
+msgstr "MaxScaleDenominator"
 
 msgid "MinScaleDenominator"
-msgstr "Escala mínima"
+msgstr "MinScaleDenominator"
 
 msgid "Default CRS"
 msgstr "CRS per defecte"
@@ -319,12 +341,99 @@ msgid "BoundingBox"
 msgstr "BoundingBox"
 
 msgid "GeographicBoundingBox"
-msgstr "BoundingBox geogràfica"
+msgstr "GeographicBoundingBox"
 
+msgid "Zoom to layer"
+msgstr "Zoom a la capa"
 
-#cleanMap.js
+msgid "Project zoom"
+msgstr "Zoom del projecte"
+
 msgid "Clean map"
 msgstr "Netejar mapa"
 
+msgid "Inverse geocoding"
+msgstr "Geocodificació inversa"
+
+msgid "More element info"
+msgstr "Més informació del element"
+
 msgid "Invalid identifier. Unable to get requested geometry"
 msgstr "Identificador no vàlid. No es pot obtenir la geometria sol·licitada"
+
+msgid "Temporary layers"
+msgstr "Capes temporals"
+
+msgid "From"
+msgstr "Desde"
+
+msgid "To"
+msgstr "fins"
+
+msgid "Step"
+msgstr "Pas"
+
+msgid "Single"
+msgstr "Unic"
+
+msgid "Range"
+msgstr "Range"
+
+msgid "temporary_field"
+msgstr "camp_inicial_temporal"
+
+msgid "temporary_endfield"
+msgstr "camp_final_temporal"
+
+msgid "second(s)"
+msgstr "segon(s)"
+
+msgid "minute(s)"
+msgstr "minut(s)"
+
+msgid "hour(s)"
+msgstr "hore(s)"
+
+msgid "day(s)"
+msgstr "dies"
+
+msgid "month(s)"
+msgstr "mes(os)"
+
+msgid "year(s)"
+msgstr "any(s)"
+
+msgid "Attribute details"
+msgstr "Detalls de l'atribut"
+
+msgid "Show resources"
+msgstr "Mostrar recursos"
+
+msgid "Enable temporary features"
+msgstr "Activa les funcions temporals"
+
+msgid "apply relative date"
+msgstr "Aplicar la data relativa"
+
+msgid "Temporary range"
+msgstr "Rang temporal"
+
+msgid ""
+"Only relative intervals can be defined if the other field is PRESENT or a "
+"concrete date."
+msgstr ""
+"Només es poden definir intervals relatius si l’altre camp és PRESENT o una "
+"data concreta."
+
+msgid ""
+"Only PRESENT is available in Instant mode. You need to define a RANGE to use "
+"relative intervals"
+msgstr ""
+"Només PRESENT està disponible en mode instantani. Heu de definir un GAMMA "
+"per utilitzar intervals relatius"
+
+msgid "Image Mosaic"
+msgstr "Mosaic d'imatge"
+
+msgid "Share view"
+msgstr "Compartir vista"

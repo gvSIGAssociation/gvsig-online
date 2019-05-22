@@ -16,383 +16,360 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Language: ca_ES\n"
-"X-Source-Language: C\n"
 
 #: templates/404.html:10 templates/not_found_sharedview.html.py:10
 msgid "Page not found"
-msgstr "Pàgina no trobada"
+msgstr ""
 
 #: templates/404.html:13 templates/not_found_sharedview.html.py:13
 msgid "We could not find the page you were looking for. Meanwhile, you may"
-msgstr "La pàgina que ha sol·licitat no existeix, Mentrestant, pot"
+msgstr ""
 
 #: templates/404.html:14 templates/500.html.py:14
 #: templates/not_found_sharedview.html:14
 msgid "return to dashboard"
-msgstr "tornar al panell de control"
+msgstr ""
 
 #: templates/500.html:10
 msgid "Something went wrong"
-msgstr "Alguna cosa ha sortit malament"
+msgstr ""
 
 #: templates/500.html:13
 msgid "We will work on fixing that right away. Meanwhile, you may"
-msgstr "Estem treballant per solucionar el problema. Mentrestant, pot"
+msgstr ""
 
 #: templates/base.html:72 templates/base_compress.html.py:72
 msgid "gvsigonline docs"
-msgstr "Manual de gvSIGOnline"
+msgstr ""
 
 #: templates/base.html:102 templates/base_compress.html.py:102
 #: templates/viewer.html:141 templates/viewer_compress.html.py:141
 msgid "Sign out"
-msgstr "Tancar sessió"
+msgstr ""
 
 #: templates/base.html:120 templates/base_compress.html.py:120
 #: templates/viewer.html:138 templates/viewer_compress.html.py:138
 msgid "Dashboard"
-msgstr "Panell de control"
+msgstr ""
 
 #: templates/base.html:126 templates/base_compress.html.py:126
 msgid "Home"
-msgstr "Inici"
+msgstr ""
 
 #: templates/base.html:162 templates/base_compress.html.py:162
 #: templates/documentation.html:117 templates/ogc_services.html.py:86
 #: templates/select_public_project.html:79
 msgid "Version"
-msgstr "Versió"
+msgstr ""
 
 #: templates/base_compress.html:166 templates/ogc_services.html.py:90
 msgid "All rights reserved"
-msgstr "Tots els drets reservats"
+msgstr ""
 
 #: templates/dashboard_core_menu.html:5 templates/dashboard_core_menu.html:8
 msgid "Projects"
-msgstr "Projectes"
+msgstr ""
 
 #: templates/dashboard_core_menu.html:9
 msgid "Shared views"
-msgstr "Vistes compartides"
+msgstr ""
 
 #: templates/documentation.html:49
 msgid "Web application"
-msgstr "Aplicació web"
+msgstr ""
 
 #: templates/documentation.html:58
 msgid "Introduction and concepts"
-msgstr "Introducció i conceptes"
+msgstr ""
 
 #: templates/documentation.html:59
 msgid ""
 "Features of the platform and license. Definition of the objects and entities "
 "that are part of the environment."
 msgstr ""
-"Característiques de la plataforma i llicència. Definició d'objectes i "
-"entitats que són part de l'entorn."
 
 #: templates/documentation.html:67
 msgid "Administration Guide"
-msgstr "Guia d'administració"
+msgstr ""
 
 #: templates/documentation.html:68
 msgid ""
 "This guide is intended for platform admin users. It teaches the steps to "
-"carry out the management of users and groups, services, symbology, projects "
-"... "
+"carry out the management of users and groups, services, symbology, "
+"projects ... "
 msgstr ""
-"Aquesta guia està destinada als usuaris administradors de la plataforma. "
-"Mostra els passos per portar a terme la gestió d'usuaris i grups, serveis, "
-"simbologia, projectes ... "
 
 #: templates/documentation.html:76
 msgid "Map viewer user manual"
-msgstr "Manual d'usuari del visor de mapes"
+msgstr ""
 
 #: templates/documentation.html:77
 msgid ""
 "This manual provides a review of each of the features offered by the map "
 "viewer"
 msgstr ""
-"Aquest manual proporciona una revisió de cadascuna de les característiques "
-"ofertes pel visor de mapes"
 
 #: templates/documentation.html:85
 msgid "Plugins"
-msgstr "Plugins"
+msgstr ""
 
 #: templates/documentation.html:86
 msgid "Plugins add features that are not initially present on the platform"
 msgstr ""
-"Els plugins afegeixen funcionalitats que no estan presents inicialment a la "
-"plataforma"
 
 #: templates/documentation.html:95
 msgid "Mobile application"
-msgstr "Aplicació mòbil"
+msgstr ""
 
 #: templates/documentation.html:104
 msgid "User manual"
-msgstr "Manual d'usuari"
+msgstr ""
 
 #: templates/documentation.html:105
 msgid ""
 "Learn how to manage geographic information from a mobile device or tablet"
 msgstr ""
-"Aprenga a administrar la informació geogràfica des d'un dispositiu mòbil o "
-"una tablet"
 
 #: templates/home.html:18 utils.py:453
 msgid "Username"
-msgstr "Nom d'usuari"
+msgstr ""
 
 #: templates/home.html:20 utils.py:456
 msgid "Email"
-msgstr "Correu electrònic"
+msgstr ""
 
 #: templates/home.html:22
 msgid "Is admin?"
-msgstr "És administrador?"
+msgstr ""
 
 #: templates/home.html:24
 msgid "You are logged in as root"
-msgstr "Ha iniciat sessió com a superusuari"
+msgstr ""
 
 #: templates/home.html:26
 msgid "You are logged in as management user"
-msgstr "Ha iniciat sessió com a usuari de gestió"
+msgstr ""
 
 #: templates/home.html:28
 msgid "You are logged in as basic user"
-msgstr "Ha iniciat sessió com a usuari bàsic"
+msgstr ""
 
 #: templates/home.html:30
 msgid "Last login"
-msgstr "Última conexió"
+msgstr ""
 
 #: templates/home.html:34 utils.py:457 utils.py:469
 msgid "Password"
-msgstr "Contrasenya"
+msgstr ""
 
 #: templates/home.html:35
 msgid "Click here"
-msgstr "Cliqueu aquí"
+msgstr ""
 
 #: templates/home.html:35
 msgid "to update your password"
-msgstr "Per actualitzar la seua contrasenya"
+msgstr ""
 
 #: templates/home.html:39
 msgid "Passwords doesn't match"
-msgstr "Les contrasenyes no coincideixen"
+msgstr ""
 
 #: templates/home.html:44 templates/home.html.py:45 utils.py:465
 msgid "New password"
-msgstr "Nova contrasenya"
+msgstr ""
 
 #: templates/home.html:51 templates/home.html.py:52
 msgid "Repeat new password"
-msgstr "Repetir contrasenya"
+msgstr ""
 
 #: templates/home.html:57
 msgid "Update password"
-msgstr "Actualitzar contrasenya"
+msgstr ""
 
 #: templates/home.html:69
-#| msgid "Projects list"
 msgid "Private projects list"
-msgstr "Llistat de projectes.privats"
+msgstr ""
 
 #: templates/home.html:72 templates/project_list.html.py:11
 #: templates/select_public_project.html:53
 msgid "Add project"
-msgstr "Afegir projecte"
+msgstr ""
 
 #: templates/home.html:74 templates/home.html.py:103
-#| msgid "Buscar proyectos..."
 msgid "Search projects..."
-msgstr "Cercar projectes..."
+msgstr ""
 
 #: templates/home.html:85 templates/home.html.py:114
 #: templates/select_public_project.html:65
 msgid "Load project"
-msgstr "Carregar projecte"
+msgstr ""
 
 #: templates/home.html:101
-#| msgid "Projects list"
 msgid "Public projects list"
-msgstr "Llistat de projectes"
+msgstr ""
 
 #: templates/ogc_services.html:61
 msgid "WMS Service"
-msgstr "Servei WMS"
+msgstr ""
 
 #: templates/ogc_services.html:61 templates/ogc_services.html.py:71
 msgid "Show capabilities"
-msgstr "Mostra característiques"
+msgstr ""
 
 #: templates/ogc_services.html:71
 msgid "WFS Service"
-msgstr "Servei WFS"
+msgstr ""
 
 #: templates/ogc_services.html:104
 msgid "Service capabilities"
-msgstr "Característiques del servei"
+msgstr ""
 
 #: templates/project_add.html:12 templates/toc_update.html.py:13
 msgid "Save"
-msgstr "Guardar"
+msgstr ""
 
 #: templates/project_add.html:26 templates/project_update.html.py:26
-#| msgid "Projects"
 msgid "Project"
-msgstr "Projecte"
+msgstr ""
 
 #: templates/project_add.html:27 templates/project_update.html.py:27
-#| msgid "Assign base layers"
 msgid "Base layers"
-msgstr "Capes base"
+msgstr ""
 
 #: templates/project_add.html:28 templates/project_update.html.py:28
-#| msgid "Add layer group"
 msgid "Layer groups"
-msgstr "Grup de capes"
+msgstr ""
 
 #: templates/project_add.html:29 templates/project_update.html.py:29
 msgid "Tools"
-msgstr "Eines"
+msgstr ""
 
 #: templates/project_add.html:30 templates/project_update.html.py:30
-#| msgid "Assign user groups"
 msgid "User groups"
-msgstr "Grups d'usuaris"
+msgstr ""
 
 #: templates/project_add.html:39 templates/project_list.html.py:24
 #: templates/shared_view_list.html:17
 msgid "Name"
-msgstr "Nom"
+msgstr ""
 
 #: templates/project_add.html:40
 msgid "Project name"
-msgstr "Nom del projecte"
+msgstr ""
 
 #: templates/project_add.html:45 templates/project_list.html.py:25
 #: templates/project_update.html:41
 msgid "Title"
-msgstr "Títol"
+msgstr ""
 
 #: templates/project_add.html:46 templates/project_update.html.py:42
 msgid "Project title"
-msgstr "Títol del projecte"
+msgstr ""
 
 #: templates/project_add.html:51 templates/project_list.html.py:26
 #: templates/project_update.html:48 templates/shared_view_list.html.py:20
 msgid "Description"
-msgstr "Descripció"
+msgstr ""
 
 #: templates/project_add.html:52 templates/project_update.html.py:49
 msgid "Project description"
-msgstr "Descripció del projecte"
+msgstr ""
 
 #: templates/project_add.html:57 templates/project_list.html.py:27
 #: templates/project_update.html:55
 msgid "Is public?"
-msgstr "És públic?"
+msgstr ""
 
 #: templates/project_add.html:61 templates/project_update.html.py:64
 msgid "Toc panel presentation"
-msgstr "Presentació del TOC"
+msgstr ""
 
 #: templates/project_add.html:63 templates/project_update.html.py:67
 #: templates/project_update.html:69
 msgid "Toc hidden"
-msgstr "TOC ocult"
+msgstr ""
 
 #: templates/project_add.html:64 templates/project_update.html.py:72
 #: templates/project_update.html:74
 msgid "Show toc and groups"
-msgstr "Mostra TOC i grups"
+msgstr ""
 
 #: templates/project_add.html:65 templates/project_update.html.py:77
 #: templates/project_update.html:79
 msgid "Show toc, groups and layers"
-msgstr "Mostra TOC, grups i capes"
+msgstr ""
 
 #: templates/project_add.html:74 templates/project_update.html.py:89
 msgid "Locate place..."
-msgstr "Cercar lloc..."
+msgstr ""
 
 #: templates/project_add.html:93 templates/project_update.html.py:108
 msgid "Change image?"
-msgstr "Canviar imatge?"
+msgstr ""
 
 #: templates/project_add.html:93 templates/project_update.html.py:108
 msgid "Supported formats"
-msgstr "Formats suportats"
+msgstr ""
 
 #: templates/project_add.html:106 templates/project_update.html.py:121
 msgid "Search base layer..."
-msgstr "Cercar capes base..."
+msgstr ""
 
 #: templates/project_add.html:124 templates/project_update.html.py:140
 #: templates/project_update.html:142
 msgid "Assign base layers"
-msgstr "Assignar capes base"
+msgstr ""
 
 #: templates/project_add.html:126 templates/project_update.html.py:146
 #: templates/project_update.html:148
 msgid "Mark as default"
-msgstr "Marcar per defecte"
+msgstr ""
 
 #: templates/project_add.html:146 templates/project_update.html.py:170
 msgid "Add layer group"
-msgstr "Afegir grup de capes"
+msgstr ""
 
 #: templates/project_add.html:147 templates/project_update.html.py:171
-#| msgid "Add layer group"
 msgid "Search layer group..."
-msgstr "Cercar grup de capes..."
+msgstr ""
 
 #: templates/project_add.html:162 templates/project_add.html.py:164
 #: templates/project_update.html:186 templates/project_update.html.py:188
 msgid "Assign layer group"
-msgstr "Asignar grup de capes"
+msgstr ""
 
 #: templates/project_add.html:207 templates/project_update.html.py:230
-#| msgid "Search"
 msgid "Search tool..."
-msgstr "Eina de recerca..."
+msgstr ""
 
 #: templates/project_add.html:221 templates/project_add.html.py:223
 #: templates/project_update.html:244 templates/project_update.html.py:246
 msgid "Assign tool"
-msgstr "Assignar eina"
+msgstr ""
 
 #: templates/project_add.html:246 templates/project_update.html.py:269
 msgid "Search user group..."
-msgstr "Cercar grup d'usuari..."
+msgstr ""
 
 #: templates/project_add.html:260 templates/project_add.html.py:262
 #: templates/project_update.html:283 templates/project_update.html.py:285
 msgid "Assign user group"
-msgstr "Asignar grup d'usuari"
+msgstr ""
 
 #: templates/project_add.html:294 templates/project_update.html.py:316
 msgid "Create new layer group"
-msgstr "Crear nou grup de capes"
+msgstr ""
 
 #: templates/project_add.html:297 templates/project_update.html.py:319
 msgid "Is needed to save this project first, Do you want continue?"
-msgstr "Cal guardar el projecte primer, Voleu continuar?"
+msgstr ""
 
 #: templates/project_add.html:300 templates/project_list.html.py:68
 #: templates/project_update.html:322 templates/shared_view_list.html.py:57
 #: templates/viewer.html:239 templates/viewer.html.py:264
 #: templates/viewer_compress.html:239 templates/viewer_compress.html.py:265
 msgid "Cancel"
-msgstr "Cancel·lar"
+msgstr ""
 
 #: templates/project_add.html:301 templates/project_list.html.py:69
 #: templates/project_update.html:323 templates/shared_view_list.html.py:58
@@ -400,205 +377,202 @@ msgstr "Cancel·lar"
 #: templates/viewer.html:287 templates/viewer_compress.html.py:240
 #: templates/viewer_compress.html:266 templates/viewer_compress.html.py:288
 msgid "Accept"
-msgstr "Acceptar"
+msgstr ""
 
 #: templates/project_list.html:17 templates/select_public_project.html.py:50
 msgid "Projects list"
-msgstr "Llistat de projectes"
+msgstr ""
 
 #: templates/project_list.html:62 templates/project_list.html.py:110
 msgid "Delete project"
-msgstr "Eliminar projecte"
+msgstr ""
 
 #: templates/project_list.html:65
 msgid "The project will be removed, Do you want continue?"
-msgstr "El projecte serà eliminat, Voleu continuar?"
+msgstr ""
 
 #: templates/project_list.html:86 templates/shared_view_list.html.py:75
 msgid "Processing request..."
-msgstr "Processant petició..."
+msgstr ""
 
 #: templates/project_list.html:87 templates/shared_view_list.html.py:76
 #, python-format
 msgid "Search%(sep)s"
-msgstr "Cercar%(sep)s"
+msgstr ""
 
 #: templates/project_list.html:88 templates/shared_view_list.html.py:77
 #, python-format
 msgid "Showing %(numrecords)s records"
-msgstr "Mostrant %(numrecords)s registres"
+msgstr ""
 
 #: templates/project_list.html:89 templates/shared_view_list.html.py:78
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
-msgstr "Mostrant des de %(start)s fins %(end)s de %(numrecords)s registres"
+msgstr ""
 
 #: templates/project_list.html:90 templates/shared_view_list.html.py:79
 msgid "Showing from 0 to 0 of 0 records"
-msgstr "Mostrant des de 0 fins 0 de 0 registres"
+msgstr ""
 
 #: templates/project_list.html:91 templates/shared_view_list.html.py:80
 #, python-format
 msgid "Filtering %(max)s records"
-msgstr "Filtrant %(max)s registres"
+msgstr ""
 
 #: templates/project_list.html:93 templates/shared_view_list.html.py:82
 msgid "Loading..."
-msgstr "Carregant..."
+msgstr ""
 
 #: templates/project_list.html:94 templates/project_list.html.py:95
 #: templates/shared_view_list.html:83 templates/shared_view_list.html.py:84
 msgid "No records available"
-msgstr "No hi ha registres disponibles"
+msgstr ""
 
 #: templates/project_list.html:97 templates/shared_view_list.html.py:86
 msgid "First"
-msgstr "Primer"
+msgstr ""
 
 #: templates/project_list.html:98 templates/shared_view_list.html.py:87
 msgid "Previous"
-msgstr "Anterior"
+msgstr ""
 
 #: templates/project_list.html:99 templates/shared_view_list.html.py:88
 msgid "Next"
-msgstr "Següent"
+msgstr ""
 
 #: templates/project_list.html:100 templates/shared_view_list.html.py:89
 msgid "Last"
-msgstr "Últim"
+msgstr ""
 
 #: templates/project_list.html:103 templates/shared_view_list.html.py:92
 #, python-format
 msgid "%(sep)sSort ascending"
-msgstr "%(sep)sOrdre ascendent"
+msgstr ""
 
 #: templates/project_list.html:104 templates/shared_view_list.html.py:93
 #, python-format
 msgid "%(sep)sSort descending"
-msgstr "%(sep)sOrdre descendent"
+msgstr ""
 
 #: templates/project_list.html:114
 msgid "TOC order"
-msgstr "Ordre del TOC"
+msgstr ""
 
 #: templates/project_list.html:118
 msgid "Update project"
-msgstr "Actualitzar projecte"
+msgstr ""
 
 #: templates/project_update.html:12
-#| msgid "Update TOC"
 msgid "Update"
-msgstr "Actualitzar"
+msgstr ""
 
 #: templates/shared_view_list.html:10
 msgid "Shared views list"
-msgstr "Llista de vistes compartides"
+msgstr ""
 
 #: templates/shared_view_list.html:18
 msgid "Created by"
-msgstr "Creat per"
+msgstr ""
 
 #: templates/shared_view_list.html:19
 msgid "Expiration date"
-msgstr "Data d'expiració"
+msgstr ""
 
 #: templates/shared_view_list.html:51
-#| msgid "Delete project"
 msgid "Delete view"
-msgstr "Eliminar vista"
+msgstr ""
 
 #: templates/shared_view_list.html:54
-#| msgid "The project will be removed, Do you want continue?"
 msgid "The view will be removed, Do you want continue?"
-msgstr "El vista serà eliminada, Voleu continuar?"
+msgstr ""
 
 #: templates/shared_view_list.html:99
 msgid "Delete shared view"
-msgstr "Eliminar vista compartida"
+msgstr ""
 
 #: templates/toc_update.html:11
 msgid "Update TOC"
-msgstr "Actualitzar TOC"
+msgstr ""
 
 #: templates/viewer.html:96 templates/viewer_compress.html.py:96
 msgid "File"
-msgstr "Arxiu"
+msgstr ""
 
 #: templates/viewer.html:103 templates/viewer_compress.html.py:103
 msgid "Views"
-msgstr "Vistes"
+msgstr ""
 
 #: templates/viewer.html:106 templates/viewer_compress.html.py:106
 msgid "View 2D"
-msgstr "Vista 2D"
+msgstr ""
 
 #: templates/viewer.html:168 templates/viewer_compress.html.py:168
 msgid "Layer tree"
-msgstr "Arbre de capes"
+msgstr ""
 
 #: templates/viewer.html:169 templates/viewer_compress.html.py:169
 msgid "Legend"
-msgstr "Llegenda"
+msgstr ""
 
 #: templates/viewer.html:170 templates/viewer_compress.html.py:170
 msgid "Details"
-msgstr "Detalls"
+msgstr ""
 
 #: templates/viewer.html:171 templates/viewer_compress.html.py:171
 msgid "Temporary"
-msgstr "Temporal"
+msgstr ""
 
 #: templates/viewer.html:258 templates/viewer_compress.html.py:259
 msgid "End edition"
-msgstr "Terminar edició"
+msgstr ""
 
 #: templates/viewer.html:261 templates/viewer_compress.html.py:262
 msgid "Changes don't saved will be missed. Continue?"
-msgstr "Els canvis no guardats es perdran. Continuar?"
+msgstr ""
 
 #: templates/viewer.html:281 templates/viewer_compress.html.py:282
 msgid "Error loading layers"
-msgstr "Error carregant capes"
+msgstr ""
 
 #: templates/viewer.html:503 templates/viewer_compress.html.py:464
 msgid "Close"
-msgstr "Tancar"
+msgstr ""
 
 #: utils.py:436
 msgid "New user account"
-msgstr "Nou compte d'usuari"
+msgstr ""
 
 #: utils.py:452
 msgid "Account data"
-msgstr "Dades del compte"
+msgstr ""
 
 #: utils.py:454
 msgid "First name"
-msgstr "Nom"
+msgstr ""
 
 #: utils.py:455
 msgid "Last name"
-msgstr "Cognom"
+msgstr ""
 
 #: utils.py:467
 msgid "This is your new temporary password"
-msgstr "Aquesta és la contrasenya provisionalment"
+msgstr ""
 
 #: views.py:171 views.py:301
 msgid "You must enter an project name"
-msgstr "Ha d'introduir un nom de projecte"
+msgstr ""
 
 #: views.py:176
 msgid "Zoom tools"
-msgstr "Eines de zoom"
+msgstr ""
 
 #: views.py:177
 msgid "Zoom in, zoom out, ..."
-msgstr "Zoom mès, zoom menys, ..."
+msgstr ""
 
 #: views.py:181
 msgid "Feature info"
-msgstr "Eina d'informació"
+msgstr ""
 
 #: views.py:182
 msgid "Map information at point"
@@ -606,44 +580,43 @@ msgstr ""
 
 #: views.py:186
 msgid "Measure tools"
-msgstr "Eines de mesura"
+msgstr ""
 
 #: views.py:187
 msgid "It allows to measure areas and distances"
-msgstr "Permet mesurar àrees i distàncies"
+msgstr ""
 
 #: views.py:191
 msgid "Export to PDF"
-msgstr "Exportar a PDF"
+msgstr ""
 
 #: views.py:192
 msgid "Exports the current view to PDF"
-msgstr "Exporta la vista actual a PDF"
+msgstr ""
 
 #: views.py:196
 msgid "Search coordinates"
-msgstr "Buscar coordenades"
+msgstr ""
 
 #: views.py:197
 msgid "Center the map at given coordinates"
-msgstr "Centra el mapa a les coordenades donades"
+msgstr ""
 
 #: views.py:201
-#| msgid "Web application"
 msgid "Geolocation"
-msgstr "Geolocalització"
+msgstr ""
 
 #: views.py:202
 msgid "Center the map in the current position"
-msgstr "Centra el mapa a la posició actual"
+msgstr ""
 
 #: views.py:206
 msgid "Share view"
-msgstr "Compartir vista"
+msgstr ""
 
 #: views.py:207
 msgid "Allows you to share the view in its current state"
-msgstr "Permet compartir la vista en el seu estat actual"
+msgstr ""
 
 #: views.py:305
 #, python-brace-format
@@ -651,37 +624,7 @@ msgid ""
 "Invalid project name: '{value}'. Identifiers must begin with a letter or an "
 "underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr ""
-"Nom de projecte invàlid: '{value}'. Els identificadors han de començar per "
-"una lletra o guió baix (_). Els següents caracters poden ser lletres, guió "
-"baix o nombres"
 
 #: views.py:385
 msgid "Project name already exists"
-msgstr "El nom del projecte ja existeix"
-
-#~ msgid "Select image"
-#~ msgstr "Seleccionar imatge"
-
-#~ msgid "Buscar capas base..."
-#~ msgstr "Cercar capes base..."
-
-#~ msgid "Buscar grupo de usuarios..."
-#~ msgstr "Cercar grup d'usuaris"
-
-#~ msgid "Assign layer groups"
-#~ msgstr "Afegir grups de capes"
-
-#~ msgid "Buscar grupo de capas..."
-#~ msgstr "Cercar grup de capes"
-
-#~ msgid "Anonymous"
-#~ msgstr "Anònim"
-
-#~ msgid "Anonymous user"
-#~ msgstr "Usuari anònim"
-
-#~ msgid "Exit"
-#~ msgstr "Sortir"
-
-#~ msgid "You are logged in as an non-administrator user"
-#~ msgstr "Ha iniciat sessió com usuari no administrador"
+msgstr ""
