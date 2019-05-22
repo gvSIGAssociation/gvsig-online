@@ -196,6 +196,11 @@ def get_core_tools(enabled=True):
         'title': _(u'Search coordinates'),
         'description': _(u'Center the map at given coordinates')
     }, {
+        'name': 'gvsigol_tool_coordinatecalc',
+        'checked': enabled,
+        'title': _(u'Coordinate calculator'),
+        'description': _(u'Transform coordinates between different systems')
+    }, {
         'name': 'gvsigol_tool_location',
         'checked': enabled,
         'title': _(u'Geolocation'),

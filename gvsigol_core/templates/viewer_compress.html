@@ -396,14 +396,28 @@
 			$("body").trigger('change-to-2D-event');
 		});
 		
+		var sharedView = false;
+		{% if is_shared_view %}
+			sharedView = true;
+		{% endif %}
+		
+		var data = {};
+		if (sharedView) {
+			data['pid'] = '{{pid}}';
+			data['shared_view'] = true;
+			data['shared_view_name'] = '{{shared_view_name}}';
+			
+		} else {
+			data['pid'] = '{{pid}}';
+			data['shared_view'] = false;
+		}
+		
 		var extraParams = {{extra_params|safe}};
 		$.ajax({
 			type : 'POST',
 			async : false,
 			url : '/gvsigonline/core/project_get_conf/',
-			data : {
-				pid : '{{pid}}'
-			},
+			data : data,
 			beforeSend : function(xhr) {
 				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 			},
