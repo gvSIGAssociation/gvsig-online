@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-11 09:39+0200\n"
+"POT-Creation-Date: 2019-05-21 14:27+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,34 +17,36 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Language: es_ES\n"
+"X-Source-Language: C\n"
 
 #: forms.py:30 templates/user_list.html.py:23 templates/user_update.html.py:29
 #: templates/user_update.html:30 utils.py:112
 msgid "First name"
 msgstr "Nombre"
 
-#: forms.py:31 templates/user_add.html.py:44 templates/user_list.html.py:24
+#: forms.py:31 templates/user_add.html.py:46 templates/user_list.html.py:24
 #: templates/user_update.html:33 templates/user_update.html.py:34 utils.py:113
 msgid "Last name"
 msgstr "Apellidos"
 
-#: forms.py:32 templates/login.html.py:45 templates/user_add.html.py:51
+#: forms.py:32 templates/login.html.py:46 templates/user_add.html.py:53
 #: templates/user_list.html:22 templates/user_update.html.py:40
 #: templates/user_update.html:41 utils.py:111
 msgid "Username"
 msgstr "Nombre de usuario"
 
-#: forms.py:33 templates/user_add.html.py:55 templates/user_list.html.py:25
+#: forms.py:33 templates/user_add.html.py:57 templates/user_list.html.py:25
 #: templates/user_update.html:44 templates/user_update.html.py:45 utils.py:114
 msgid "Email"
 msgstr "Correo electrónico"
 
-#: forms.py:34 templates/login.html.py:49 templates/user_add.html.py:63
-#: utils.py:115 utils.py:129
+#: forms.py:34 templates/login.html.py:50 templates/user_add.html.py:65
+#: utils.py:115
 msgid "Password"
 msgstr "Contraseña"
 
-#: forms.py:35 templates/user_add.html.py:67
+#: forms.py:35 templates/user_add.html.py:69
 msgid "Repeat password"
 msgstr "Repetir contraseña"
 
@@ -64,26 +66,22 @@ msgstr "Usuarios"
 msgid "Groups"
 msgstr "Grupos"
 
-#: templates/group_add.html:12 templates/group_list.html.py:13
-msgid "Add group"
-msgstr "Añadir grupo"
-
-#: templates/group_add.html:14 templates/user_add.html.py:14
-#: templates/user_update.html:14
+#: templates/group_add.html:12 templates/user_add.html.py:12
+#: templates/user_update.html:12
 msgid "Save"
 msgstr "Guardar"
 
-#: templates/group_add.html:41 templates/group_list.html.py:22
+#: templates/group_add.html:39 templates/group_list.html.py:22
 msgid "Name"
 msgstr "Nombre"
 
-#: templates/group_add.html:48 templates/group_list.html.py:23
+#: templates/group_add.html:46 templates/group_list.html.py:23
 msgid "Description"
 msgstr "Descripción"
 
 #: templates/group_list.html:11
-msgid "Groups list"
-msgstr "Lista de grupos"
+msgid "Add group"
+msgstr "Añadir grupo"
 
 #: templates/group_list.html:52 templates/group_list.html.py:100
 msgid "Delete group"
@@ -103,7 +101,7 @@ msgstr "Aceptar"
 
 #: templates/group_list.html:76 templates/user_list.html.py:88
 msgid "Processing request..."
-msgstr "Procesando petición"
+msgstr "Procesando petición..."
 
 #: templates/group_list.html:77 templates/user_list.html.py:89
 #, python-format
@@ -180,98 +178,96 @@ msgstr "Usted no dispone de permisos de administración. Usted puede"
 msgid "return to dashboard"
 msgstr "regresar al panel de control"
 
-#: templates/login.html:38
+#: templates/login.html:39
 msgid "Sign in to start your session"
 msgstr "Inicie sesión con su usuario"
 
-#: templates/login.html:54
+#: templates/login.html:55
 msgid "Sign In"
 msgstr "Iniciar sesión"
 
-#: templates/login.html:59
+#: templates/login.html:60
 msgid "I forgot my password"
 msgstr "He olvidado mi contraseña"
 
-#: templates/password_reset.html:38
+#: templates/password_reset.html:39
 msgid "Enter your username to retrieve your password"
 msgstr "Introduzca su nombre de usuario para recuperar su contraseña"
 
-#: templates/password_reset.html:45
+#: templates/password_reset.html:46
 msgid "Insert your username"
 msgstr "Introduzca su nombre de usuario"
 
-#: templates/password_reset.html:50
-#: templates/registration/password_reset_confirm.html:58
+#: templates/password_reset.html:51
+#: templates/registration/password_reset_confirm.html:59
 msgid "Send"
 msgstr "Enviar"
 
-#: templates/password_reset2.html:38
-msgid "Contacte con el administrador"
-msgstr ""
-
-#: templates/password_reset_success.html:38
-msgid "We've sent an email to your account with a link to set the new password"
-msgstr "Hemos enviado un correo a su cuenta con un enlace para restituir su nueva constraseña"
+#: templates/password_reset2.html:39
+#| msgid "Contacte con el administrador"
+msgid "Contact the system administrator"
+msgstr "Contacte con el administrador del sistema"
 
 #: templates/password_reset_success.html:39
+msgid "We've sent an email to your account with a link to set the new password"
+msgstr ""
+"Hemos enviado un correo a su cuenta con un enlace para restituir su nueva "
+"constraseña"
+
+#: templates/password_reset_success.html:40
 msgid "Return"
 msgstr "Volver"
 
-#: templates/registration/password_reset_confirm.html:38
+#: templates/registration/password_reset_confirm.html:39
 msgid "Enter new your password"
 msgstr "Introduzca nueva contraseña"
 
-#: templates/registration/password_reset_confirm.html:49
+#: templates/registration/password_reset_confirm.html:50
 msgid "Insert new password"
 msgstr "Nueva contraseña"
 
-#: templates/registration/password_reset_confirm.html:53
-
+#: templates/registration/password_reset_confirm.html:54
 msgid "Confirm new password"
 msgstr "Confirme la nueva contraseña"
 
-#: templates/registration/password_reset_confirm.html:87
+#: templates/registration/password_reset_confirm.html:88
 msgid "Password confirmation doesn't match"
-msgstr ""
+msgstr "La confirmación de la contraseña no coincide"
 
-#: templates/registration/password_reset_confirm.html:90
+#: templates/registration/password_reset_confirm.html:91
 msgid "Password can't be empty"
-msgstr ""
+msgstr "La contraseña no puede estar vacía"
 
-#: templates/registration/password_reset_confirm.html:93
+#: templates/registration/password_reset_confirm.html:94
 msgid "Password has contain at least 8 characters"
-msgstr ""
+msgstr "La contraseña debe contener al menos 8 caracteres"
 
-#: templates/user_add.html:12 templates/user_list.html.py:13
-msgid "Add user"
-msgstr "Añadir usuario"
-
-#: templates/user_add.html:40
+#: templates/user_add.html:42
 msgid "First Name"
 msgstr "Nombre"
 
-#: templates/user_add.html:81 templates/user_update.html.py:55
+#: templates/user_add.html:83 templates/user_update.html.py:55
 #: templates/user_update.html:57
 msgid "Is superuser"
 msgstr "Es superusuario"
 
-#: templates/user_add.html:86 templates/user_update.html.py:64
+#: templates/user_add.html:88 templates/user_update.html.py:64
 #: templates/user_update.html:66
 msgid "Can manage projects"
 msgstr "Puede gestionar proyectos"
 
-#: templates/user_add.html:93 templates/user_update.html.py:74
+#: templates/user_add.html:95 templates/user_update.html.py:74
 msgid "Assign groups"
 msgstr "Asignar grupos"
 
-#: templates/user_add.html:106 templates/user_update.html.py:88
+#: templates/user_add.html:108 templates/user_update.html.py:88
 #: templates/user_update.html:90
 msgid "Assign group"
 msgstr "Asignar grupo"
 
 #: templates/user_list.html:11
-msgid "Users list"
-msgstr "Lista de usuarios"
+msgid "Add user"
+msgstr "Añadir usuario"
 
 #: templates/user_list.html:26
 msgid "is superuser"
@@ -289,7 +285,7 @@ msgstr "Eliminar usuario"
 msgid "The user will be removed, Do you want continue?"
 msgstr "El usuario será eliminado, ¿Desea continuar?"
 
-#: templates/user_list.html:116 templates/user_update.html.py:12
+#: templates/user_list.html:116
 msgid "Update user"
 msgstr "Actualizar usuario"
 
@@ -309,43 +305,54 @@ msgstr "Nueva contraseña"
 msgid "This is your new temporary password"
 msgstr "Por favor, siga el enlace que sigue para poder cambiar su contraseña"
 
-#: views.py:73 views.py:153 views.py:261
+#: views.py:70 views.py:150 views.py:248
 msgid "Your account has been disabled"
 msgstr "Su cuenta ha sido deshabilitada"
 
-#: views.py:75 views.py:77 views.py:155 views.py:157 views.py:263
+#: views.py:72 views.py:74 views.py:152 views.py:154 views.py:250
 msgid "The username and password you have entered do not match our records"
 msgstr "El nombre de usuario y contraseña no coinciden"
 
-#: views.py:210
+#: views.py:200
 msgid "User account does not exist"
 msgstr "La cuenta de usuario no existe"
 
-#: views.py:245
-#, fuzzy
-#| msgid "New password"
-msgid "Enter new password"
-msgstr "Nueva contraseña"
-
-#: views.py:269
+#: views.py:254
 msgid "Invalid token. Your link has expired, you need to ask for another one."
-msgstr ""
+msgstr "Token no válido. Su enlace ha caducado, debe solicitar otro."
 
-#: views.py:384
+#: views.py:372
 msgid "User group for"
 msgstr "Grupo de usuario para"
 
-#: views.py:568
+#: views.py:419
+msgid "There must be at least one server"
+msgstr "Debe haber al menos un servidor"
+
+#: views.py:550
 msgid "Admin is a reserved group"
 msgstr "Admin es un grupo reservado"
 
-#: views.py:572
-#, python-brace-format
+#: views.py:554
 msgid ""
 "Invalid user group name: '{value}'. Identifiers must begin with a letter or "
 "an underscore (_). Subsequent characters can be letters, underscores or "
 "numbers"
 msgstr ""
+"Nombre de grupo de usuarios no válido: '{valor}'. Los identificadores deben "
+"comenzar con una letra oun guión bajo (_). Los caracteres subsiguientes "
+"pueden ser letras, guiones bajos onúmeros"
+
+#~ msgid "Groups list"
+#~ msgstr "Lista de grupos"
+
+#~ msgid "Users list"
+#~ msgstr "Lista de usuarios"
+
+#, fuzzy
+#~| msgid "New password"
+#~ msgid "Enter new password"
+#~ msgstr "Nueva contraseña"
 
 #~ msgid "The username already exists"
 #~ msgstr "El nombre de usuario ya existe"
