@@ -254,7 +254,8 @@ LANGUAGES = (
     ('es', _('Spanish')),
     ('va', _('Valencian')),
     ('ca', _('Catalan')), 
-    ('en', _('English')),   
+    ('en', _('English')),
+    ('pt-br', _('Portuguese')),
 )
 LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol/locale'),
@@ -263,13 +264,12 @@ LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol_services/locale'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/locale'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_app_dev/locale'),
+    os.path.join(BASE_DIR, 'gvsigol_app_test/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_shps_folder/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_geocoding/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_etl/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_edition/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_graphiccapture/locale')
+    os.path.join(BASE_DIR, 'gvsigol_plugin_catalog/locale'),
+    os.path.join(BASE_DIR, 'gvsigol_plugin_print/locale')
 )
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True

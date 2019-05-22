@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-22 17:17+0100\n"
+"POT-Creation-Date: 2019-05-21 14:27+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,31 +17,25 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Language: ca_ES\n"
+"X-Source-Language: C\n"
 
-#: settings.py:194 settings_template.py:169
+#: settings.py:254
 msgid "Spanish"
 msgstr "Espanyol"
 
-#: settings.py:195
+#: settings.py:255
 msgid "Valencian"
 msgstr "Valencià"
 
-#: settings.py:196 settings_template.py:170
+#: settings.py:256
 msgid "Catalan"
 msgstr "Català"
 
-#: settings.py:197 settings_template.py:171
+#: settings.py:257
 msgid "English"
 msgstr "Anglés"
 
-#: settings.py:272 settings_template.py:227
-msgid "PostGIS vector"
-msgstr ""
-
-#: settings.py:274 settings_template.py:229
-msgid "GeoTiff"
-msgstr ""
-
-#: settings.py:275 settings_template.py:230
-msgid "Cascading WMS"
-msgstr "WMS en cascada"
+#: settings.py:258
+msgid "Portuguese"
+msgstr "Portuguès"
