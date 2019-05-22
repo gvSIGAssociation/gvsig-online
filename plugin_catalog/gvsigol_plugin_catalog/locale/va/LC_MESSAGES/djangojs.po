@@ -1,0 +1,5 @@
+msgid "Catalog"
+msgstr "Catàleg"
+
+msgid "Catalog and downloads"
+msgstr "Catàleg i descarregues"

@@ -31,3 +31,6 @@ msgstr "Hecho"
 
 msgid "Select"
 msgstr "Seleccionar"
+
+msgid "You must select a file"
+msgstr "Debe seleccionar un archivo"

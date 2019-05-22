@@ -100,7 +100,7 @@ CatalogView.prototype.initialization = function(){
 	catalogPanel += '   		</div>';
 	catalogPanel += '			<div class="">';
 	catalogPanel += '               <div class="btn-group btn-group-xs">';
-	catalogPanel += '      			     <span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Palabras clave') + '</strong>';
+	catalogPanel += '      			     <span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Keywords') + '</strong>';
 	catalogPanel += ' 		        </div>';
 	catalogPanel += ' 		        <br>';
 	catalogPanel += '       		<input type="text" id="keywordsF" placeHolder="' + gettext('Separated by') + ' \';\'    P.ej: cat_1;cat_2;..." value="" class="form-control"/>';

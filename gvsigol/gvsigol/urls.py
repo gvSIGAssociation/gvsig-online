@@ -22,7 +22,7 @@ import settings
 handler404 = 'gvsigol_core.views.not_found_view'
 
 js_info_dict = {
-    'packages': ('gvsigol_auth','gvsigol_core','gvsigol_services','gvsigol_symbology','gvsigol_plugin_print','gvsigol_plugin_etl','gvsigol_plugin_graphiccapture', 'gvsigol_plugin_regepa'),
+    'packages': ('gvsigol_auth','gvsigol_core','gvsigol_services','gvsigol_symbology','gvsigol_plugin_print','gvsigol_plugin_etl','gvsigol_plugin_graphiccapture', 'gvsigol_plugin_regepa', 'gvsigol_plugin_catalog', 'gvsigol_plugin_worldwind', 'gvsigol_plugin_edition', 'gvsigol_plugin_print', 'gvsigol_plugin_geocoding'),
 }
 
 urlpatterns = [

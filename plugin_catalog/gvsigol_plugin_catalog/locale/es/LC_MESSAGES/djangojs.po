@@ -1,0 +1,71 @@
+msgid "Catalog"
+msgstr "Catálogo"
+
+msgid "Catalog and downloads"
+msgstr "Catálogo y descargas"
+
+msgid "Press Ctrl to mark an area"
+msgstr "Presione Ctrl para marcar un área"
+
+msgid "Clean"
+msgstr "Limpiar"
+
+msgid "Search"
+msgstr "Buscar"
+
+msgid "Clean current search, filters and order"
+msgstr "Limpiar búsqueda actual, filtros y orden"
+
+msgid "Categories"
+msgstr "Categorías"
+
+msgid "Separated by"
+msgstr "Separado por"
+
+msgid "Keywords"
+msgstr "Palabras clave"
+
+msgid "Contact for the resource"
+msgstr "Contacto del recurso"
+
+msgid "Resources"
+msgstr "Recursos"
+
+msgid "From..."
+msgstr "Desde..."
+
+msgid "To..."
+msgstr "Hasta"
+
+msgid "Records"
+msgstr "Registros"
+
+msgid "Details"
+msgstr "Detalles"
+
+msgid "Map"
+msgstr "Mapa"
+
+msgid "Download"
+msgstr "Descargas"
+
+msgid "No results found"
+msgstr "No se han encontrado resultados"
+
+msgid "Go"
+msgstr "Ir"
+
+msgid "Add"
+msgstr "Añadir"
+
+msgid "Catalog layers"
+msgstr "Capas del catálogo"
+
+msgid "Remove layer"
+msgstr "Eliminar capa"
+
+msgid "List of downloads"
+msgstr "Lista de descargas"
+
+msgid "List of layers"
+msgstr "Lista de capas"

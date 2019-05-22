@@ -21,13 +21,16 @@ msgid "Abort"
 msgstr "Abortar"
 
 msgid "Cancel"
-msgstr "Cancelar"
+msgstr "Cancel·lar"
 
 msgid "Delete"
 msgstr "Eliminar"
 
 msgid "Done"
-msgstr "Hecho"
+msgstr "Fet"
 
 msgid "Select"
 msgstr "Seleccionar"
+
+msgid "You must select a file"
+msgstr "Heu de seleccionar un arxiu"

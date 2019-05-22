@@ -14,5 +14,37 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-msgid ""
+msgid "legalwarning"
+msgstr ""
+"All the cartographic contents of this web and of the services that it provides are property of this institution."
+"The institution is not responsible for the information that can be obtained through links to external systems."
+
+msgid "Print params"
+msgstr ""
+
+msgid "Select print template"
+msgstr ""
+
+msgid "Select template"
+msgstr ""
+
+msgid "Title"
+msgstr ""
+
+msgid "Legal warning"
+msgstr ""
+
+msgid "Rotation"
+msgstr ""
+
+msgid "Print"
+msgstr ""
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "You must select a template"
+msgstr ""
+
+msgid "Error loading print plugin"
 msgstr ""
