@@ -618,8 +618,13 @@ msgstr ""
 msgid "Allows you to share the view in its current state"
 msgstr ""
 
+msgid "Coordinate calculator"
+msgstr ""
+
+msgid "Transform coordinates between different systems"
+msgstr ""
+
 #: views.py:305
-#, python-brace-format
 msgid ""
 "Invalid project name: '{value}'. Identifiers must begin with a letter or an "
 "underscore (_). Subsequent characters can be letters, underscores or numbers"

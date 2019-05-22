@@ -618,6 +618,12 @@ msgstr ""
 msgid "Allows you to share the view in its current state"
 msgstr ""
 
+msgid "Coordinate calculator"
+msgstr ""
+
+msgid "Transform coordinates between different systems"
+msgstr ""
+
 #: views.py:305
 #, python-brace-format
 msgid ""
