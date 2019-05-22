@@ -23,6 +23,9 @@ msgstr "Seleccionar tipo"
 msgid "Select enumeration"
 msgstr "Seleccionar enumeración"
 
+msgid "Select multiple enumeration"
+msgstr "Seleccionar enumeración multiple"
+
 msgid "Field name"
 msgstr "Nombre del campo"
 
@@ -58,3 +61,36 @@ msgstr "Crear capa vacía"
 
 msgid "Publish layer"
 msgstr "Publicar capa"
+
+msgid "Error in GetCapabilities"
+msgstr "Error en GetCapabilities"
+
+msgid "Error trying to connect"
+msgstr "Error intentando conectar"
+
+msgid "Insert item name"
+msgstr "Inserte nombre del item"
+
+msgid "Select form"
+msgstr "Seleccionar formulario"
+
+msgid "Status"
+msgstr "Estado"
+
+msgid "active"
+msgstr "activo"
+
+msgid "inactive"
+msgstr "inactivo"
+
+msgid "URL"
+msgstr "URL"
+
+msgid "Is master?"
+msgstr "Es maestro?"
+
+msgid "Save node"
+msgstr "Guardar nodo"
+
+msgid "Edit node"
+msgstr "Editar nodo"
