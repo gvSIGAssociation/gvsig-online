@@ -139,8 +139,10 @@ print.prototype.handler = function(e) {
 		ui += 				'<label>' + gettext('Scale') + '</label>';
 		ui += 				'<select id="print-scale" class="form-control">';
 		ui += 				'<option value="">' + gettext('AutoScale') + '</option>';
-		for (var i=0; i<scales.length; i++) {
-				ui += 	'<option value="' + scales[i] + '">1:' + scales[i] + '</option>';
+		if (scales) {
+			for (var i=0; i<scales.length; i++) {
+					ui += 	'<option value="' + scales[i] + '">1:' + scales[i] + '</option>';
+			}
 		}
 
 		ui += 				'</select>';
