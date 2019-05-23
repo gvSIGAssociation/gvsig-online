@@ -121,6 +121,7 @@
 							</li>
 							<li class="user-header">
 								<form id="select-language-form" action="{% url 'set_language' %}" method="post">{% csrf_token %}
+									<input name="next" type="hidden" value="{{ request.get_full_path }}" />
 								    <select id="select-language" name="language" class="form-control" style="margin-top: 10px;">
 								        {% get_current_language as LANGUAGE_CODE %}
 								        {% get_available_languages as LANGUAGES %}
