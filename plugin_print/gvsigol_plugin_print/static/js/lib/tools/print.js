@@ -70,19 +70,34 @@ print.prototype.handler = function(e) {
 			source: new ol.source.Vector()
 		});
 		this.map.addLayer(this.extentLayer);
+		
+	    var translate = new ol.interaction.Translate({
+	        layers: [this.extentLayer]
+	      });
+	    this.map.addInteraction(translate);
+
 
 		this.showDetailsTab();
 		this.detailsTab.empty();
 
 		this.capabilities = this.getCapabilities('a4_landscape');
 		this.renderPrintExtent(this.capabilities.layouts[0].attributes[3].clientInfo);
-		var eventKey = this.map.getView().on('propertychange', function() {
+		var currZoom = map.getView().getZoom();
+		var eventKey = this.map.on('moveend', function(e) {
+		  var newZoom = map.getView().getZoom();
+		  if (currZoom != newZoom) {
+		    currZoom = newZoom;
 	        self.extentLayer.getSource().clear();
-	        self.lastAngle = 0;
+	        self.extentLayer.changed();
 	        self.renderPrintExtent(self.capabilities.layouts[0].attributes[3].clientInfo);
-	    });
+	        
+		  }
+		});
 
 		var templates = this.getTemplates();
+		
+		var scales = this.getScales(this.capabilities);
+
 
 		var ui = '';
 		ui += '<div class="box box-default">';
@@ -118,6 +133,16 @@ print.prototype.handler = function(e) {
 		ui += 					'<option selected value="240">240 dpi</option>';
 		ui += 					'<option value="320">320 dpi</option>';
 		ui += 					'<option value="400">400 dpi</option>';
+		ui += 				'</select>';
+		ui += 			'</div>';
+		ui += 			'<div class="col-md-12 form-group">';
+		ui += 				'<label>' + gettext('Scale') + '</label>';
+		ui += 				'<select id="print-scale" class="form-control">';
+		ui += 				'<option value="">' + gettext('AutoScale') + '</option>';
+		for (var i=0; i<scales.length; i++) {
+				ui += 	'<option value="' + scales[i] + '">1:' + scales[i] + '</option>';
+		}
+
 		ui += 				'</select>';
 		ui += 			'</div>';
 		ui += 			'<div class="col-md-12 form-group">';
@@ -158,6 +183,14 @@ print.prototype.handler = function(e) {
 			self.extentLayer.getSource().dispatchEvent('change');
 			self.lastAngle = this.value;
 		});
+		
+		$('#print-scale').on('change', function(e) {
+			var scaleVal = $("#print-scale option:selected").val();
+			if (scaleVal) {
+				self.map.getView().setResolution(self.getResolutionForScale(scaleVal));
+			}
+		});
+
 
 		$('#accept-print').on('click', function () {
 			var template = $('#print-template').val();
@@ -191,6 +224,12 @@ print.prototype.createPrintJob = function(template) {
 	var legalWarning = $('#print-legal').val();
 	var rotation = $('#print-rotation').val();
 	var dpi = $('#print-dpi').val();
+	var scale = $('#print-scale').val();
+	var useNearestScale = true;
+	if (!scale) {
+		scale = self.getScaleForResolution(); // Actual scale of the view if the user has not selected a scale
+		useNearestScale = false;
+	}
 
 	var mapLayers = this.map.getLayers().getArray();
 	var printLayers = new Array();
@@ -381,14 +420,9 @@ print.prototype.createPrintJob = function(template) {
 			}
 		}
 	}
-	var f = self.renderPrintExtent(self.capabilities.layouts[0].attributes[3].clientInfo);
-	$.ajax({
-		type: 'POST',
-		async: true,
-	  	url: self.printProvider.url + '/print/' + template + '/report.pdf',
-	  	processData: false,
-	    contentType: 'application/json',
-	  	data: JSON.stringify({
+	var f = self.extentLayer.getSource().getFeatures()[0];
+	var bAcceptsOverview = false;
+	var dataToPost = {
 	  		"layout": self.capabilities.layouts[0].name,
 		  	"outputFormat": "pdf",
 		  	"attributes": {
@@ -399,7 +433,8 @@ print.prototype.createPrintJob = function(template) {
 		  			"dpi": parseInt(dpi),
 		  			"rotation": rotation,
 		  			//"center": self.map.getView().getCenter(),
-		  			"scale": self.getCurrentScale(parseInt(dpi)),
+		  			"scale": scale,
+		  			"useNearestScale": useNearestScale,
 		  			"layers": printLayers,
 		  			"bbox": f.getGeometry().getExtent()
 		  	    },
@@ -409,9 +444,28 @@ print.prototype.createPrintJob = function(template) {
 		  	    	"name": "",
 		            "classes": legends
 		        },
-		        "crs": "EPSG:3857",
+		        "crs": "EPSG:3857"
 		  	}
-		}),
+	};
+	if (self.capabilities.layouts[0].attributes[4].name == 'overviewMap') {
+		bAcceptsOverview = true;
+		dataToPost.overviewMap = {
+	            "layers": [
+		              {
+		                "type": "OSM",
+						"baseURL": "http://a.tile.openstreetmap.org",
+				  	    "imageExtension": "png"		                	
+		              }
+		            ]
+		          };
+	}
+	$.ajax({
+		type: 'POST',
+		async: true,
+	  	url: self.printProvider.url + '/print/' + template + '/report.pdf',
+	  	processData: false,
+	    contentType: 'application/json',
+	  	data: JSON.stringify(dataToPost),
 	  	success	:function(response){
 	  		self.getReport(response);
 	  	},
@@ -419,6 +473,26 @@ print.prototype.createPrintJob = function(template) {
 	});
 
 };
+
+print.prototype.getScales = function (capabilities) {
+	// attribute 3 is 'map'
+    var scales = capabilities.layouts[0].attributes[3].clientInfo.scales;
+    return scales;
+};
+
+
+var inchesPerMeter = 39.3700787;
+var dpi = 96;
+
+print.prototype.getResolutionForScale = function (scaleDenominator) {
+  return scaleDenominator / inchesPerMeter / dpi;
+}
+
+print.prototype.getScaleForResolution = function() {
+	const resolution = this.map.getView().getResolution();
+	const mpu = this.map.getView().getProjection().getMetersPerUnit();
+	return parseFloat(resolution.toString()) * mpu * inchesPerMeter * dpi;
+}
 
 print.prototype.getCurrentScale = function (dpi) {
     var resolution = this.map.getView().getResolution();
@@ -504,11 +578,12 @@ print.prototype.renderPrintExtent = function(clientInfo) {
         targetHeight = mapComponentHeight * scaleFactor;
         targetWidth = targetHeight * desiredPrintRatio;
     }
-
+    
     geomExtent = this.map.getView().calculateExtent([
         targetWidth,
         targetHeight
     ]);
+    
     feat = new ol.Feature(ol.geom.Polygon.fromExtent(geomExtent));
     this.extentLayer.getSource().addFeature(feat);
     return feat;

@@ -42,6 +42,7 @@ def extract_points(pbfFile, reverseGeocodeUrl):
     amenityTags = ('hospital', 'taxi', 'parking', 'cine', 'police', 'post office', 'theatre', 'university', 'school/college')
     variousTags = ('marketplace',)
     tourismTags = ('attraction', 'historic', 'information', 'monument', 'museum', 'artcentre', 'shops', 'shopping centre', 'department store')
+    historicTags = ('monument', 'museum')
 
     layerDefinition = layer.GetLayerDefn()
 
@@ -55,7 +56,7 @@ def extract_points(pbfFile, reverseGeocodeUrl):
     i = 0
     numFeatures = len(features)
     for f in features:
-        if i % 10 == 0:
+        if i % 100 == 0:
                 print 'Processing {0} of {1}'.format(i, numFeatures)
         i = i+1
         # if i > 1000:
@@ -69,7 +70,6 @@ def extract_points(pbfFile, reverseGeocodeUrl):
                 continue
         # print aux
         # print name
-        highway=data['properties']['highway']
         other_tags=data['properties']['other_tags']
         category = 'amenity'
         subcat = None
@@ -92,24 +92,45 @@ def extract_points(pbfFile, reverseGeocodeUrl):
                                 aux = feat[feat.rfind('>')+2:feat.rfind('"')]
                                 if aux in tourismTags:
                                         subcat = aux
+                        else:
+                                if other_tags and 'historic' in other_tags:
+                                        feat=[x for x in other_tags.split(',') if 'historic' in x][0]
+                                        category = 'historic'
+                                        aux = feat[feat.rfind('>')+2:feat.rfind('"')]
+                                        print 'Historic: ' + name + ' Subcat: ' + aux
+                                        if aux in historicTags:
+                                                subcat = aux
 
         if subcat:
                 payload = {'lon': coords[0], 'lat': coords[1]}
                 address = ' '
+                muni = ' '
                 try:
                         r = requests.get(reverseGeocodeUrl, payload)
                         res = r.json()
                         portalNumber = res.get('portalNumber')
+                        muni = res.get('muni')
+
                         if 0 != portalNumber:
-                                address = '{0} {1} {2}'.format(res.get('tip_via'), res.get('address'), portalNumber)
+                                address = '{0} {1} {2}'.format(res.get('tip_via'), res.get('address'), portalNumber, muni)
                         else:
-                                address = '{0} {1}'.format(res.get('tip_via'), res.get('address'))
+                                address = '{0} {1}'.format(res.get('tip_via'), res.get('address'), muni)
 
                 except requests.exceptions.RequestException as e:
                         print e
                 except ValueError as jsonErr:
                         print jsonErr
-                data_list.append([name,highway,category,subcat,shapely_geo, address])
+                nameUni = name.decode('utf-8')
+
+                try:
+                        nameAndAddress = nameUni + u' - ' + address + u', ' + muni
+                        data_list.append([nameUni,nameAndAddress,category,subcat,shapely_geo, address, muni])
+                except TypeError as e2:
+                        print e2
+                        print nameUni
+                        print address
+                        print muni
+
 
     print(len(data_list))
     # create the data source
@@ -131,8 +152,8 @@ def create_shapefile(data_list, fileDest):
         field_name = ogr.FieldDefn("Name", ogr.OFTString)
         field_name.SetWidth(24)
         layer.CreateField(field_name)
-        field_2 = ogr.FieldDefn("Highway", ogr.OFTString)
-        field_2.SetWidth(24)
+        field_2 = ogr.FieldDefn("NameAndA", ogr.OFTString)
+        field_2.SetWidth(240)
         layer.CreateField(field_2)
         field_3 = ogr.FieldDefn("Category", ogr.OFTString)
         field_3.SetWidth(50)
@@ -141,8 +162,12 @@ def create_shapefile(data_list, fileDest):
         field_4.SetWidth(50)
         layer.CreateField(field_4)
         field_5 = ogr.FieldDefn("Address", ogr.OFTString)
-        field_5.SetWidth(70)
+        field_5.SetWidth(140)
         layer.CreateField(field_5)
+        field_6 = ogr.FieldDefn("Municipio", ogr.OFTString)
+        field_6.SetWidth(80)
+        layer.CreateField(field_6)
+
 
         # Process the text file and add the attributes and features to the shapefile
         for row in data_list:
@@ -150,15 +175,26 @@ def create_shapefile(data_list, fileDest):
                 feature = ogr.Feature(layer.GetLayerDefn())
                 # Set the attributes using the values from the delimited text file
                 
-                strDecoded = row[0].decode('utf-8')
-                strUTF8 = strDecoded.encode('utf-8')
+                strUTF8 = row[0].encode('utf-8')
                 # print(strUTF8)
                 feature.SetField("Name", strUTF8)
                 # feature.SetField("Name", row[0])
-                feature.SetField("Highway", row[1])
+                strUnicode = row[1]
+                strUTF8 = strUnicode.encode('utf-8')
+                feature.SetField("NameAndA", strUTF8)
+
                 feature.SetField("Category", row[2])
                 feature.SetField("Subcat", row[3])
-                feature.SetField("Address", row[5])
+
+                strUni = row[5]
+                strUTF8 = strUni.encode('utf-8')
+
+                feature.SetField("Address", strUTF8)
+
+                strUni = row[6] # .decode('utf-8')
+                strUTF8 = strUni.encode('utf-8')
+                feature.SetField("Municipio", strUTF8)
+
 
                 # create the WKT for the feature using Python string formatting
                 wkt = "POINT(%f %f)" %  (float(row[4].x) , float(row[4].y))
