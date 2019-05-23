@@ -40,6 +40,9 @@ msgstr "Título"
 msgid "Legal warning"
 msgstr "Aviso legal"
 
+msgid "Resolution"
+msgstr "Resolución"
+
 msgid "Rotation"
 msgstr "Rotación"
 

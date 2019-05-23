@@ -37,8 +37,12 @@ msgstr ""
 msgid "Legal warning"
 msgstr ""
 
+msgid "Resolution"
+msgstr "Resolution"
+
 msgid "Rotation"
-msgstr ""
+msgstr "Rotación"
+
 
 msgid "Print"
 msgstr ""
