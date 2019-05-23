@@ -86,57 +86,41 @@ coordinateCalculator.prototype.handler = function(e) {
 	
 	var ui = '';
 	ui += '<div class="row">';
-	ui += 	'<div class="col-md-12 form-group">';	
-	ui += 	'<label>' + gettext('Origin coordinates') + '</label>';
-	ui += 	'<select id="origin-coordinate-system" class="form-control">';
-	ui += 		'<option value="EPSG:4326" selected>WGS84 (EPSG:4326)</option>';
-	ui += 		'<option value="degrees">' + gettext('Degrees, minutes, seconds') + '</option>';
+	ui += 	'<div class="col-md-9 form-group">';	
+	ui += 		'<label>' + gettext('Origin coordinates') + '</label>';
+	ui += 		'<select id="origin-coordinate-system" class="form-control">';
+	ui += 			'<option value="" selected disabled>' + gettext('Select reference system') + '</option>';
 	for (var key in this.conf.supported_crs) {
-		if (this.conf.supported_crs[key].code != 'EPSG:4326') {
-			ui += '<option value="' + this.conf.supported_crs[key].code + '">' + this.conf.supported_crs[key].title + ' (' + this.conf.supported_crs[key].code + ')' + '</option>';
-		}
+		ui += '<option data-units="' + this.conf.supported_crs[key].units + '" value="' + this.conf.supported_crs[key].code + '">' + this.conf.supported_crs[key].title + ' (' + this.conf.supported_crs[key].code + ')' + '</option>';
 	}
-	ui += 	'</select>';
+	ui += 		'</select>';
+	ui += 	'</div>';
+	ui += 	'<div class="col-md-3 form-group">';	
+	ui += 		'<label>' + gettext('Format') + '</label>';
+	ui += 		'<select id="origin-format" class="form-control">';
+	ui += 		'</select>';
 	ui += 	'</div>';
 	ui += '</div>';
 	ui += '<div id="origin-inputs" class="row">';
-	ui += 	'<div class="col-md-6 form-group">';
-	ui += 		'<label for="origin-longitude">' + gettext('Longitude') + '/X</label>';
-	ui += 		'<input placeholder="" name="origin-longitude" id="origin-longitude" type="text" class="form-control">';					
-	ui += 	'</div>';
-	ui += 	'<div class="col-md-6 form-group">';
-	ui += 		'<label for="origin-latitude">' + gettext('Latitude') + '/Y</label>';
-	ui += 		'<input placeholder="" name="origin-latitude" id="origin-latitude" type="text" class="form-control">';					
-	ui += 	'</div>';
 	ui += '</div>';
 	
 	ui += '<div class="row">';
-	ui += 	'<div class="col-md-12 form-group">';	
-	ui += 	'<label>' + gettext('Destination coordinates') + '</label>';
-	ui += 	'<select id="destination-coordinate-system" class="form-control">';
-	ui += 		'<option value="EPSG:4326">WGS84 (EPSG:4326)</option>';
-	ui += 		'<option value="degrees" selected>' + gettext('Degrees, minutes, seconds') + '</option>';
+	ui += 	'<div class="col-md-9 form-group">';	
+	ui += 		'<label>' + gettext('Destination coordinates') + '</label>';
+	ui += 		'<select id="destination-coordinate-system" class="form-control">';
+	ui += 			'<option value="" selected disabled>' + gettext('Select reference system') + '</option>';
 	for (var key in this.conf.supported_crs) {
-		if (this.conf.supported_crs[key].code != 'EPSG:4326') {
-			ui += '<option value="' + this.conf.supported_crs[key].code + '">' + this.conf.supported_crs[key].title + ' (' + this.conf.supported_crs[key].code + ')' + '</option>';
-		}
+		ui += '<option data-units="' + this.conf.supported_crs[key].units + '" value="' + this.conf.supported_crs[key].code + '">' + this.conf.supported_crs[key].title + ' (' + this.conf.supported_crs[key].code + ')' + '</option>';
 	}
-	ui += 	'</select>';
+	ui += 		'</select>';
+	ui += 	'</div>';
+	ui += 	'<div class="col-md-3 form-group">';	
+	ui += 		'<label>' + gettext('Format') + '</label>';
+	ui += 		'<select id="destination-format" class="form-control">';
+	ui += 		'</select>';
 	ui += 	'</div>';
 	ui += '</div>';
 	ui += '<div id="destination-inputs" class="row">';
-	ui += 	'<div class="col-md-3 form-group">';
-	ui += 		'<label for="destination-degrees">' + gettext('Degrees') + '</label>';
-	ui += 		'<input placeholder="" name="destination-degrees" id="destination-degrees" type="text" class="form-control">';					
-	ui += 	'</div>';
-	ui += 	'<div class="col-md-3 form-group">';
-	ui += 		'<label for="destination-minutes">' + gettext('Minutes') + '</label>';
-	ui += 		'<input placeholder="" name="destination-minutes" id="destination-minutes" type="text" class="form-control">';					
-	ui += 	'</div>';
-	ui += 	'<div class="col-md-3 form-group">';
-	ui += 		'<label for="destination-seconds">' + gettext('Seconds') + '</label>';
-	ui += 		'<input placeholder="" name="destination-seconds" id="destination-seconds" type="text" class="form-control">';					
-	ui += 	'</div>';
 	ui += '</div>';
 	
 	$('#float-modal .modal-body').empty();
@@ -152,30 +136,116 @@ coordinateCalculator.prototype.handler = function(e) {
 	$("#float-modal").modal('show');	
 	
 	$("#origin-coordinate-system").on('change', function(){
-		var selected = $('option:selected', $(this)).val();
+		var refSystem = $('option:selected', $(this)).val();
+		var units = $('option:selected', $(this)).data('units');
+		
+		if (units == 'degrees') {
+			$('#origin-format').append($('<option>', {value: '', text: gettext('Select format ...'), selected: true, disabled: true}));
+			$('#origin-format').append($('<option>', {value: 'GG', text: gettext('Decimal degrees'), selected: false}));
+			$('#origin-format').append($('<option>', {value: 'DMS', text: gettext('Degrees, minutes and seconds'), selected: false}));
+			
+		} else if (units == 'meters'){
+			$('#origin-format').append($('<option>', {value: '', text: gettext('Select format ...'), selected: true, disabled: true}));
+			$('#origin-format').append($('<option>', {value: 'XY', text: gettext('X/Y'), selected: true}));
+		}
+	});
+	
+	$("#origin-format").on('change', function(){
+		var format = $('option:selected', $(this)).val();
 		
 		var ui = '';
-		if (selected != 'degrees') {
+		if (format == 'DMS') {
+			ui += '<div class="row">';
+			ui += 	'<div class="col-md-2 form-group" style="padding: 20px; margin-left: 20px; font-weight: bold;">';
+			ui += 		'<span style="margin-left:20px;">' + gettext('Longitude') + '</span>';
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-2 form-group">';
+			ui += 		'<label for="origin-lon-degrees">' + gettext('Degrees') + '</label>';
+			ui += 		'<input placeholder="" name="origin-lon-degrees" id="origin-lon-degrees" type="text" class="form-control">';					
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-2 form-group">';
+			ui += 		'<label for="origin-lon-minutes">' + gettext('Minutes') + '</label>';
+			ui += 		'<input placeholder="" name="origin-lon-minutes" id="origin-lon-minutes" type="text" class="form-control">';					
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-2 form-group">';
+			ui += 		'<label for="origin-lon-seconds">' + gettext('Seconds') + '</label>';
+			ui += 		'<input placeholder="" name="origin-lon-seconds" id="origin-lon-seconds" type="text" class="form-control">';					
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-3 form-group">';
+			ui += 		'<label>(180E 180W)</label>';
+			ui += 		'<select id="origin-ew" class="form-control">';
+			ui += 			'<option value="origin-east" selected>' + gettext('EAST') + '</option>';
+			ui += 			'<option value="origin-west" selected>' + gettext('WEST') + '</option>';
+			ui += 		'</select>';
+			ui += 	'</div>';
+			ui += '</div>';
+			ui += '<div class="row">';
+			ui += 	'<div class="col-md-2 form-group" style="padding: 20px; margin-left: 20px; font-weight: bold;">';
+			ui += 		'<span style="margin-left:20px;">' + gettext('Latitude') + '</span>';
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-2 form-group">';
+			ui += 		'<label for="origin-lat-degrees">' + gettext('Degrees') + '</label>';
+			ui += 		'<input placeholder="" name="origin-lat-degrees" id="origin-lat-degrees" type="text" class="form-control">';					
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-2 form-group">';
+			ui += 		'<label for="origin-lat-minutes">' + gettext('Minutes') + '</label>';
+			ui += 		'<input placeholder="" name="origin-lat-minutes" id="origin-lat-minutes" type="text" class="form-control">';					
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-2 form-group">';
+			ui += 		'<label for="origin-lat-seconds">' + gettext('Seconds') + '</label>';
+			ui += 		'<input placeholder="" name="origin-lat-seconds" id="origin-lat-seconds" type="text" class="form-control">';					
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-3 form-group">';
+			ui += 		'<label>(90N 90S)</label>';
+			ui += 		'<select id="origin-ns" class="form-control">';
+			ui += 			'<option value="origin-north" selected>' + gettext('NORTH') + '</option>';
+			ui += 			'<option value="origin-south" selected>' + gettext('SOUTH') + '</option>';
+			ui += 		'</select>';
+			ui += 	'</div>';
+			ui += '</div>';
+			
+		} else if (format == 'GG'){
+			ui += '<div class="row">';
+			ui += 	'<div class="col-md-3 form-group" style="padding: 20px; margin-left: 20px; font-weight: bold;">';
+			ui += 		'<span style="margin-left:20px;">' + gettext('Longitude') + '</span>';
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-4 form-group">';
+			ui += 		'<label for="origin-longitude">' + gettext('Degrees') + '</label>';
+			ui += 		'<input placeholder="" name="origin-longitude" id="origin-longitude" type="text" class="form-control">';					
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-4 form-group">';
+			ui += 		'<label>(180E 180W)</label>';
+			ui += 		'<select id="origin-ew" class="form-control">';
+			ui += 			'<option value="origin-east" selected>' + gettext('EAST') + '</option>';
+			ui += 			'<option value="origin-west" selected>' + gettext('WEST') + '</option>';
+			ui += 		'</select>';
+			ui += 	'</div>';
+			ui += '</div>';
+			ui += '<div class="row">';
+			ui += 	'<div class="col-md-3 form-group" style="padding: 20px; margin-left: 20px; font-weight: bold;">';
+			ui += 		'<span style="margin-left:20px;">' + gettext('Latitude') + '</span>';
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-4 form-group">';
+			ui += 		'<label for="origin-latitude">' + gettext('Degrees') + '</label>';
+			ui += 		'<input placeholder="" name="origin-latitude" id="origin-latitude" type="text" class="form-control">';					
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-4 form-group">';
+			ui += 		'<label>(90N 90S)</label>';
+			ui += 		'<select id="origin-ns" class="form-control">';
+			ui += 			'<option value="origin-north" selected>' + gettext('NORTH') + '</option>';
+			ui += 			'<option value="origin-south" selected>' + gettext('SOUTH') + '</option>';
+			ui += 		'</select>';
+			ui += 	'</div>';
+			ui += '</div>';
+			
+		} else if (format == 'XY'){
 			ui += '<div class="col-md-6 form-group">';
-			ui += 	'<label for="origin-longitude">' + gettext('Longitude') + '/X</label>';
-			ui += 	'<input placeholder="" name="origin-longitude" id="origin-longitude" type="text" class="form-control">';					
+			ui += 	'<label for="origin-x">X</label>';
+			ui += 	'<input placeholder="" name="origin-x" id="origin-x" type="text" class="form-control">';					
 			ui += '</div>';
 			ui += '<div class="col-md-6 form-group">';
-			ui += 	'<label for="origin-latitude">' + gettext('Latitude') + '/Y</label>';
-			ui += 	'<input placeholder="" name="origin-latitude" id="origin-latitude" type="text" class="form-control">';					
-			ui += '</div>';
-		} else {
-			ui += '<div class="col-md-3 form-group">';
-			ui += 	'<label for="origin-degrees">' + gettext('Degrees') + '/X</label>';
-			ui += 	'<input placeholder="" name="origin-degrees" id="origin-degrees" type="text" class="form-control">';					
-			ui += '</div>';
-			ui += '<div class="col-md-3 form-group">';
-			ui += 	'<label for="origin-minutes">' + gettext('Minutes') + '/Y</label>';
-			ui += 	'<input placeholder="" name="origin-minutes" id="origin-minutes" type="text" class="form-control">';					
-			ui += '</div>';
-			ui += '<div class="col-md-3 form-group">';
-			ui += 	'<label for="origin-seconds">' + gettext('Seconds') + '/Y</label>';
-			ui += 	'<input placeholder="" name="origin-seconds" id="origin-seconds" type="text" class="form-control">';					
+			ui += 	'<label for="origin-y">Y</label>';
+			ui += 	'<input placeholder="" name="origin-y" id="origin-y" type="text" class="form-control">';					
 			ui += '</div>';
 			
 		}
@@ -184,37 +254,123 @@ coordinateCalculator.prototype.handler = function(e) {
 		$('#origin-inputs').append(ui);
 	});
 	
-	$("#destination-coordinate-system").on('change', function(){
-		var selected = $('option:selected', $(this)).val();
+	$("#destination-format").on('change', function(){
+		var format = $('option:selected', $(this)).val();
 		
 		var ui = '';
-		if (selected != 'degrees') {
-			ui += '<div class="col-md-6 form-group">';
-			ui += 	'<label for="destination-longitude">' + gettext('Longitude') + '/X</label>';
-			ui += 	'<input placeholder="" name="destination-longitude" id="destination-longitude" type="text" class="form-control">';					
+		if (format == 'DMS') {
+			ui += '<div class="row">';
+			ui += 	'<div class="col-md-2 form-group" style="padding: 20px; margin-left: 20px; font-weight: bold;">';
+			ui += 		'<span style="margin-left:20px;">' + gettext('Longitude') + '</span>';
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-2 form-group">';
+			ui += 		'<label for="destination-lon-degrees">' + gettext('Degrees') + '</label>';
+			ui += 		'<input readonly placeholder="" name="destination-lon-degrees" id="destination-lon-degrees" type="text" class="form-control">';					
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-2 form-group">';
+			ui += 		'<label for="destination-lon-minutes">' + gettext('Minutes') + '</label>';
+			ui += 		'<input readonly placeholder="" name="destination-lon-minutes" id="destination-lon-minutes" type="text" class="form-control">';					
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-2 form-group">';
+			ui += 		'<label for="destination-lon-seconds">' + gettext('Seconds') + '</label>';
+			ui += 		'<input readonly placeholder="" name="destination-lon-seconds" id="destination-lon-seconds" type="text" class="form-control">';					
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-3 form-group">';
+			ui += 		'<label>(180E 180W)</label>';
+			ui += 		'<select id="destination-ew" class="form-control">';
+			ui += 			'<option value="destination-east" selected>' + gettext('EAST') + '</option>';
+			ui += 			'<option value="destination-west" selected>' + gettext('WEST') + '</option>';
+			ui += 		'</select>';
+			ui += 	'</div>';
 			ui += '</div>';
-			ui += '<div class="col-md-6 form-group">';
-			ui += 	'<label for="destination-latitude">' + gettext('Latitude') + '/Y</label>';
-			ui += 	'<input placeholder="" name="destination-latitude" id="destination-latitude" type="text" class="form-control">';					
+			ui += '<div class="row">';
+			ui += 	'<div class="col-md-2 form-group" style="padding: 20px; margin-left: 20px; font-weight: bold;">';
+			ui += 		'<span style="margin-left:20px;">' + gettext('Latitude') + '</span>';
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-2 form-group">';
+			ui += 		'<label for="destination-lat-degrees">' + gettext('Degrees') + '</label>';
+			ui += 		'<input readonly placeholder="" name="destination-lat-degrees" id="destination-lat-degrees" type="text" class="form-control">';					
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-2 form-group">';
+			ui += 		'<label for="destination-lat-minutes">' + gettext('Minutes') + '</label>';
+			ui += 		'<input readonly placeholder="" name="destination-lat-minutes" id="destination-lat-minutes" type="text" class="form-control">';					
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-2 form-group">';
+			ui += 		'<label for="destination-lat-seconds">' + gettext('Seconds') + '</label>';
+			ui += 		'<input readonly placeholder="" name="destination-lat-seconds" id="destination-lat-seconds" type="text" class="form-control">';					
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-3 form-group">';
+			ui += 		'<label>(90N 90S)</label>';
+			ui += 		'<select id="destination-ns" class="form-control">';
+			ui += 			'<option value="destination-north" selected>' + gettext('NORTH') + '</option>';
+			ui += 			'<option value="destination-south" selected>' + gettext('SOUTH') + '</option>';
+			ui += 		'</select>';
+			ui += 	'</div>';
 			ui += '</div>';
 			
-		} else {
-			ui += '<div class="col-md-3 form-group">';
-			ui += 	'<label for="destination-degrees">' + gettext('Degrees') + '</label>';
-			ui += 	'<input placeholder="" name="destination-degrees" id="destination-degrees" type="text" class="form-control">';					
+		} else if (format == 'GG'){
+			ui += '<div class="row">';
+			ui += 	'<div class="col-md-3 form-group" style="padding: 20px; margin-left: 20px; font-weight: bold;">';
+			ui += 		'<span style="margin-left:20px;">' + gettext('Longitude') + '</span>';
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-4 form-group">';
+			ui += 		'<label for="destination-longitude">' + gettext('Degrees') + '</label>';
+			ui += 		'<input readonly placeholder="" name="destination-longitude" id="destination-longitude" type="text" class="form-control">';					
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-4 form-group">';
+			ui += 		'<label>(180E 180W)</label>';
+			ui += 		'<select id="destination-ew" class="form-control">';
+			ui += 			'<option value="destination-east" selected>' + gettext('EAST') + '</option>';
+			ui += 			'<option value="destination-west" selected>' + gettext('WEST') + '</option>';
+			ui += 		'</select>';
+			ui += 	'</div>';
 			ui += '</div>';
-			ui += '<div class="col-md-3 form-group">';
-			ui += 	'<label for="destination-minutes">' + gettext('Minutes') + '</label>';
-			ui += 	'<input placeholder="" name="destination-minutes" id="destination-minutes" type="text" class="form-control">';					
+			ui += '<div class="row">';
+			ui += 	'<div class="col-md-3 form-group" style="padding: 20px; margin-left: 20px; font-weight: bold;">';
+			ui += 		'<span style="margin-left:20px;">' + gettext('Latitude') + '</span>';
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-4 form-group">';
+			ui += 		'<label for="destination-latitude">' + gettext('Degrees') + '</label>';
+			ui += 		'<input readonly placeholder="" name="destination-latitude" id="destination-latitude" type="text" class="form-control">';					
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-4 form-group">';
+			ui += 		'<label>(90N 90S)</label>';
+			ui += 		'<select id="destination-ns" class="form-control">';
+			ui += 			'<option value="destination-north" selected>' + gettext('NORTH') + '</option>';
+			ui += 			'<option value="destination-south" selected>' + gettext('SOUTH') + '</option>';
+			ui += 		'</select>';
+			ui += 	'</div>';
 			ui += '</div>';
-			ui += '<div class="col-md-3 form-group">';
-			ui += 	'<label for="destination-seconds">' + gettext('Seconds') + '</label>';
-			ui += 	'<input placeholder="" name="destination-seconds" id="destination-seconds" type="text" class="form-control">';					
+			
+		} else if (format == 'XY'){
+			ui += '<div class="col-md-6 form-group">';
+			ui += 	'<label for="origin-x">X</label>';
+			ui += 	'<input readonly placeholder="" name="destination-x" id="origin-x" type="text" class="form-control">';					
 			ui += '</div>';
+			ui += '<div class="col-md-6 form-group">';
+			ui += 	'<label for="origin-y">Y</label>';
+			ui += 	'<input readonly placeholder="" name="destination-y" id="origin-y" type="text" class="form-control">';					
+			ui += '</div>';
+			
 		}
 		
 		$('#destination-inputs').empty();
 		$('#destination-inputs').append(ui);
+	});
+	
+	$("#destination-coordinate-system").on('change', function(){
+		var refSystem = $('option:selected', $(this)).val();
+		var units = $('option:selected', $(this)).data('units');
+		
+		if (units == 'degrees') {
+			$('#destination-format').append($('<option>', {value: '', text: gettext('Select format ...'), selected: true, disabled: true}));
+			$('#destination-format').append($('<option>', {value: 'GG', text: gettext('Decimal degrees'), selected: false}));
+			$('#destination-format').append($('<option>', {value: 'DMS', text: gettext('Degrees, minutes and seconds'), selected: false}));
+			
+		} else if (units == 'meters'){
+			$('#destination-format').append($('<option>', {value: '', text: gettext('Select format ...'), selected: true, disabled: true}));
+			$('#destination-format').append($('<option>', {value: 'XY', text: gettext('X/Y'), selected: false}));
+		}
 	});
 	
 	$('#float-modal-accept-coord').on('click', function () {
