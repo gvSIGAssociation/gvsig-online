@@ -23,14 +23,17 @@
 /**
  * TODO
  */
-var attributeTable = function(layer, map, conf) {
+var attributeTable = function(layer, map, conf, viewer) {
 	this.id = "data-table";
 	this.map = map;
 	this.conf = conf;
+	this.viewer = viewer;
 	this.layer = layer;
-	this.source = new ol.source.Vector();
+
 	this.filterCode = null;
 	this.selectedType = null;
+
+	this.source = new ol.source.Vector();
 	this.resultLayer = new ol.layer.Vector({
 		source: this.source,
 	  	style: new ol.style.Style({
@@ -52,8 +55,17 @@ var attributeTable = function(layer, map, conf) {
 	this.resultLayer.baselayer = true;
 	this.resultLayer.setZIndex(99999999);
 	this.map.addLayer(this.resultLayer);
+
+
+	this.table = null;
 	this.initialize();
+
+	var self = this;
+	this.selectFeatureslistener = self.selectFeatures.bind(self);
+	this.selectTablelistener = self.selectTableEvent.bind(self)
+	document.addEventListener("selectionChange", self.selectFeatureslistener);
 };
+
 
 /**
  * TODO
@@ -256,7 +268,8 @@ attributeTable.prototype.createTableUI = function(featureType) {
         text: '<i class="fa fa-eraser margin-r-5"></i> ' + gettext('Clear selection')
     });
 
-	var dt = $('#table-' + this.layer.get("id")).DataTable({
+	var self = this;
+	this.table = $('#table-' + this.layer.get("id")).DataTable({
 		language: {
     		processing		: gettext("Processing request") + "...",
 	        search			: gettext("Search") + "&nbsp;:",
@@ -280,7 +293,8 @@ attributeTable.prototype.createTableUI = function(featureType) {
 	        }
 	    },
 	    select: {
-            style: 'multi'
+            style: 'multi',
+            items: 'row'
         },
         stateSave: true,
         "processing": true,
@@ -311,9 +325,104 @@ attributeTable.prototype.createTableUI = function(featureType) {
         dom: 'Bfrtp<"top"l><"bottom"i>',
         "bSort" : false,
 	    "lengthMenu": [[10, 25, 50, 100, 500, 1000], [10, 25, 50, 100, 500, 1000]],
-	    buttons: tableButtons
+	    buttons: tableButtons,
+	    "initComplete": function(settings, json){
+	    	self.table.on('select', self.selectTablelistener);
+	    	self.table.on('deselect', self.selectTablelistener);
+	    },
+	    "drawCallback": function(settings, json) {
+	        self.selectFeatures();
+	    }
     });
 };
+
+attributeTable.prototype.selectTableEvent = function(e, dt, items, indexes) {
+	var self = this;
+	document.removeEventListener("selectionChange", self.selectFeatureslistener);
+	var fids = [];
+	var rowData = self.table.rows( indexes ).data().toArray();
+	for(var i=0; i<rowData.length; i++){
+		fids.push(rowData[i].featureid);
+	}
+	self.getSelectedFeatures(fids);
+	document.addEventListener("selectionChange", self.selectFeatureslistener);
+}
+
+
+attributeTable.prototype.getSelectedFeatures = function(fids){
+	var self = this;
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: this.layer.wfs_url,
+	  	data: {
+	  		'service': 'WFS',
+			'version': '1.1.0',
+			'request': 'GetFeature',
+			'typename': this.layer.workspace + ':' + this.layer.layer_name,
+			'srsname': 'EPSG:3857',
+			'outputFormat': 'application/json',
+			'featureId': fids.toString()
+	  	},
+	  	success	:function(response){
+	    	if (response.features.length > 0 ) {
+	    		var newFeatures = [];
+	    		for (var i=0; i<response.features.length; i++) {
+		    		var newFeature = new ol.Feature();
+			    	if (response.features[i].geometry.type == 'Point') {
+			    		newFeature.setGeometry(new ol.geom.Point(response.features[i].geometry.coordinates));
+			    	} else if (response.features[i].geometry.type == 'MultiPoint') {
+			    		newFeature.setGeometry(new ol.geom.MultiPoint(response.features[i].geometry.coordinates));
+			    	} else if (response.features[i].geometry.type == 'LineString') {
+			    		newFeature.setGeometry(new ol.geom.LineString(response.features[i].geometry.coordinates));
+			    	} else if (response.features[i].geometry.type == 'MultiLineString') {
+			    		newFeature.setGeometry(new ol.geom.MultiLineString(response.features[i].geometry.coordinates));
+			    	} else if (response.features[i].geometry.type == 'Polygon') {
+			    		newFeature.setGeometry(new ol.geom.Polygon(response.features[i].geometry.coordinates));
+			    	} else if (response.features[i].geometry.type == 'MultiPolygon') {
+			    		newFeature.setGeometry(new ol.geom.MultiPolygon(response.features[i].geometry.coordinates));
+			    	}
+			    	newFeature.setProperties(response.features[i].properties);
+					newFeature.setId(response.features[i].id);
+
+					newFeatures.push(newFeature);
+		    	}
+	    		self.viewer.addSelectedFeaturesSource(self.layer.workspace + ':' +self.layer.layer_name, newFeatures);
+
+	    	} else {
+	    		messageBox.show('warning', gettext('Invalid identifier. Unable to get requested geometry'));
+	    	}
+
+	  	},
+	  	error: function(){}
+	});
+
+}
+
+
+attributeTable.prototype.selectFeatures = function() {
+	var self = this;
+	document.removeEventListener("selectionChange", self.selectFeatureslistener);
+	self.table.off('select', self.selectTablelistener);
+	self.table.off('deselect', self.selectTablelistener);
+
+	var selectedFeatures = self.viewer.getSelectedFeaturesForLayer(this.layer.workspace+":"+this.layer.layer_name);
+	if(selectedFeatures == null){
+		return;
+	}
+	var selectedFeatureIds = selectedFeatures.map(function(a) {return a.getId();});
+	self.table.rows().every(function (rowIdx, tableLoop, rowLoop) {
+    	if (selectedFeatureIds.includes(this.data().featureid)) {
+    	    this.select();
+    	}else{
+    		this.deselect();
+    	}
+	});
+
+	self.table.on('select', self.selectTablelistener);
+    self.table.on('deselect', self.selectTablelistener);
+	document.addEventListener("selectionChange", self.selectFeatureslistener);
+}
 
 attributeTable.prototype.change_alias_from_cql_filter = function(cql_filter) {
 	var fields_trans = this.layer.conf;

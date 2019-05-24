@@ -23,9 +23,10 @@
 /**
  * TODO
  */
-var layerTree = function(conf, map, isPublic) {
+var layerTree = function(conf, map, viewer, isPublic) {
 	this.map = map;	
 	this.conf = conf;
+	this.viewer = viewer;
 	this.editionBar = null;
 	this.is_first_time = true;
 	this.$container = $('#layer-tree-tab');
@@ -261,7 +262,7 @@ layerTree.prototype.setLayerEvents = function() {
 				}
 			}						
 		}, this);
-		var dataTable = new attributeTable(selectedLayer, self.map, self.conf);
+		var dataTable = new attributeTable(selectedLayer, self.map, self.conf, self.viewer);
 		dataTable.show();
 		dataTable.registerEvents();
 	});
