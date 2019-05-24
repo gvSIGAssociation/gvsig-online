@@ -45,6 +45,12 @@ viewer.core = {
 
 	layerCount: 0,
 
+	selectedFeatures: {},
+
+	selectedFeatureIds: {},
+
+	selectedFeatureSource: null,
+
 	overviewmap: null,
 
     initialize: function(conf, extraParams) {
@@ -185,7 +191,7 @@ viewer.core = {
     },
 
     _createWidgets: function() {
-    	this.layerTree = new layerTree(this.conf, this.map);
+    	this.layerTree = new layerTree(this.conf, this.map, this);
     	this.legend = new legend(this.conf, this.map);
     },
 
@@ -529,8 +535,12 @@ viewer.core = {
 		if (this.ifToolInConf('gvsigol_tool_shareview')) {
 			this.tools.push(new shareView(this.conf, this.map, this.layerTree));
 		}
-		this.tools.push(new cleanMap(this.map));
-    	
+		if (this.ifToolInConf('gvsigol_tool_selectfeature')) {
+			this.tools.push(new selectFeature(this.map, this));
+		}
+
+		this.tools.push(new cleanMap(this.map, this));
+
     	this.map.tools = this.tools;
     },
 
@@ -548,7 +558,7 @@ viewer.core = {
     	}
     	return tool;
     },
-    
+
     ifToolInConf: function(toolId) {
     	var toolInConf = false;
     	var tools = this.conf.project_tools;
@@ -567,7 +577,7 @@ viewer.core = {
     getLegend: function() {
     	return this.legend;
     },
-    
+
     getMap: function(){
     	return this.map;
     },
@@ -582,6 +592,101 @@ viewer.core = {
 
     _nextLayerId: function() {
     	return "gol-layer-" + this.layerCount++;
+    },
+
+    addSelectedFeaturesSource: function(layer, features){
+    	if(features.length == 0){
+    		return;
+    	}
+
+    	if(!(layer in this.selectedFeatures)){
+    		this.selectedFeatures[layer] = features;
+    		this.getSelectedFeaturesSource();
+        	if(this.selectedFeatureSource != null){
+        		this.getSelectedFeaturesSource().addFeatures(features);
+        	}
+    	}else{
+    		var featuresToAdd = [];
+    		for(var j=0; j<features.length; j++){
+    			var founded = false;
+	    		for(var i=this.selectedFeatures[layer].length-1; i>=0; i--){
+	    			if(this.selectedFeatures[layer][i].getId() == features[j].getId()){
+	    				this.getSelectedFeaturesSource().removeFeature(this.selectedFeatures[layer][i]);
+	    				this.selectedFeatures[layer].splice(i, 1);
+	    				founded = true;
+	    			}
+	    		}
+	    		if(!founded){
+	    			featuresToAdd.push(features[j]);
+	    		}
+    		}
+    		if(this.selectedFeatures[layer].length == 0){
+    			this.selectedFeatures[layer] = featuresToAdd;
+    		}else{
+    			this.selectedFeatures[layer] = this.selectedFeatures[layer].concat(featuresToAdd);
+    		}
+    		this.getSelectedFeaturesSource();
+        	if(this.selectedFeatureSource != null){
+        		this.getSelectedFeaturesSource().addFeatures(featuresToAdd);
+        	}
+    	}
+
+    	document.dispatchEvent(new Event("selectionChange"));
+
+    },
+
+    clearSelectedFeatures: function(layer){
+    	if(this.selectedFeatures[layer] != null){
+    		for(var i=0; i<this.selectedFeatures[layer].length; i++){
+    			var feature = this.selectedFeatures[layer][i];
+    			self.getSelectedFeaturesSource().removeFeature(feature);
+    		}
+    	}
+    	this.selectedFeatures[layer] = [];
+
+    	document.dispatchEvent(new Event("selectionChange"));
+    },
+
+    clearAllSelectedFeatures: function(){
+    	this.selectedFeatures = {};
+    	this.getSelectedFeaturesSource().clear();
+
+    	document.dispatchEvent(new Event("selectionChange"));
+    },
+
+    getSelectedFeaturesForLayer: function(layer){
+    	if(!(layer in this.selectedFeatures)){
+    		return [];
+    	}
+    	return this.selectedFeatures[layer];
+    },
+
+    getSelectedFeaturesSource: function(){
+    	if(this.selectedFeatureSource == null){
+    		this.selectedFeatureSource = new ol.source.Vector();
+    		var selectLayer = new ol.layer.Vector({
+				source: this.selectedFeatureSource,
+			  	style: new ol.style.Style({
+			    	fill: new ol.style.Fill({
+			      		color: 'rgba(255, 255, 255, 0.2)'
+			    	}),
+			    	stroke: new ol.style.Stroke({
+			      		color: '#0099ff',
+			      		width: 2
+			    	}),
+			    	image: new ol.style.Circle({
+			      		radius: 7,
+			      		fill: new ol.style.Fill({
+			        		color: '#0099ff'
+			      		})
+			    	})
+			  	})
+			});
+			this.map.addLayer(selectLayer);
+			selectLayer.setZIndex(100000);
+    	}
+
+    	return this.selectedFeatureSource;
     }
 
 }

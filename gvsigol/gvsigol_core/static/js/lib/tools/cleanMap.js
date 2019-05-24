@@ -23,10 +23,11 @@
 /**
  * TODO
  */
-var cleanMap = function(map) {
+var cleanMap = function(map, viewer) {
 
 	this.map = map;
-	
+	this.viewer = viewer;
+
 	this.id = "clean-map";
 
 	var button = document.createElement('button');
@@ -36,13 +37,13 @@ var cleanMap = function(map) {
 	var icon = document.createElement('i');
 	icon.setAttribute("class", "fa fa-eraser");
 	button.appendChild(icon);
-	
+
 	this.$button = $(button);
-	
+
 	$('#toolbar').append(button);
 
 	var this_ = this;
-  
+
 	var handler = function(e) {
 		this_.handler(e);
 	};
@@ -70,19 +71,20 @@ cleanMap.prototype.handler = function(e) {
 	var self = this;
 	if (this.active) {
 		this.deactivate();
-		
+
 	} else {
 		this.$button.addClass('button-active');
 		this.active = true;
 		this.$button.trigger('control-active', [this]);
-		
-		var layers = this.map.getLayers().getArray();
-		for (var i=0; i<layers.length; i++) {
-			if (layers[i] instanceof ol.layer.Vector) {		
-				layers[i].getSource().clear();
-			}
-		}
-		
+
+//		var layers = this.map.getLayers().getArray();
+//		for (var i=0; i<layers.length; i++) {
+//			if (layers[i] instanceof ol.layer.Vector) {
+//				layers[i].getSource().clear();
+//			}
+//		}
+		this.viewer.clearAllSelectedFeatures();
+
 		this.deactivate();
 	}
 };
