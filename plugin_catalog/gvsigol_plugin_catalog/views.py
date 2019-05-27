@@ -66,20 +66,22 @@ def get_metadata_id(request, layer_ws, layer_name):
     response = {}
     response['success'] = False
     
-    response = {}
-    if request.method == 'GET':
-        layers = Layer.objects.filter(name=layer_name)
-        for layer in layers:
-            if layer.datastore.workspace.name == layer_ws:
-                layerMetadata = LayerMetadata.objects.filter(layer=layer)
-                if layerMetadata and layerMetadata[0].metadata_uuid != None and layerMetadata[0].metadata_uuid != '':
-                    response = geonetwork_service.get_metadata(layerMetadata[0].metadata_uuid)
-                    if isinstance(response, dict):
-                        response['success'] = True
-                    else:
-                        logger.debug(type(response))
-                        return {'success': False};
-    response['html']= get_metadata_as_html(response)
+    try:
+        if request.method == 'GET':
+            layers = Layer.objects.filter(name=layer_name)
+            for layer in layers:
+                if layer.datastore.workspace.name == layer_ws:
+                    layerMetadata = LayerMetadata.objects.filter(layer=layer)
+                    if layerMetadata and layerMetadata[0].metadata_uuid != None and layerMetadata[0].metadata_uuid != '':
+                        md_response = geonetwork_service.get_metadata(layerMetadata[0].metadata_uuid)
+                        if isinstance(response, dict):
+                            response = md_response
+                            response['success'] = True
+                            response['html']= get_metadata_as_html(response)
+                        else:
+                            logger.debug(type(response))
+    except Exception as e:
+        logger.exception(e)
     return HttpResponse(json.dumps(response), content_type='application/json')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -97,6 +99,7 @@ def create_metadata(request, layer_id):
             lm.save()
             return JsonResponse({'status': 'ok', 'uuid': uuid, 'id': the_id})
         except Exception as e:
+            logger.exception(e)
             return HttpResponse(status=500, content=e.message)
 
 def get_metadata_as_html(response):
