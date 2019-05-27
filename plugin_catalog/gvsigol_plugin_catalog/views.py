@@ -74,7 +74,7 @@ def get_metadata_id(request, layer_ws, layer_name):
                     layerMetadata = LayerMetadata.objects.filter(layer=layer)
                     if layerMetadata and layerMetadata[0].metadata_uuid != None and layerMetadata[0].metadata_uuid != '':
                         md_response = geonetwork_service.get_metadata(layerMetadata[0].metadata_uuid)
-                        if isinstance(response, dict):
+                        if isinstance(md_response, dict):
                             response = md_response
                             response['success'] = True
                             response['html']= get_metadata_as_html(response)
