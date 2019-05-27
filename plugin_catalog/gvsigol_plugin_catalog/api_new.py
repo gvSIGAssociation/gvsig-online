@@ -362,9 +362,8 @@ class Geonetwork():
         if r.status_code==200:
             try:
                 tree = ET.fromstring(r.text.encode('utf8'))
-                print r.text
+                logger.debug(r.text)
                 ns = {'gmd': 'http://www.isotc211.org/2005/gmd', 'gco': 'http://www.isotc211.org/2005/gco'}
-                
                 
                 metadata_id = self.getTextFromXMLNode(tree, './gmd:fileIdentifier/', ns)
                 title = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/', ns)
