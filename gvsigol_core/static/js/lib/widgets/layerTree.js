@@ -194,6 +194,28 @@ layerTree.prototype.setLayerEvents = function() {
 	    }
 	});
 
+	$( ".layer-swipe-slider" ).slider({
+	    min: 0,
+	    max: 100,
+	    range: true,
+	    values: [0,100],
+	    slide: function( event, ui ) {
+	    	var layers = self.map.getLayers();
+			var id = this.dataset.layerid;
+			layers.forEach(function(layer){
+				if (layer.baselayer == false) {
+					if (id===layer.get("id")) {
+						$("#layer-swipe-output-" + id).text(ui.values[0] + '% - ' + ui.values[1] + '%');
+						layer["swipe-min"] = ui.values[0];
+						layer["swipe-max"] = ui.values[1];
+
+						self.map.render();
+					}
+				}
+			}, this);
+	    }
+	});
+
 	$("input[name=baselayers-group]:radio").unbind("change").change(function (e) {
 		var baseLayers = self.map.getLayers();
 		baseLayers.forEach(function(layer){
@@ -1794,6 +1816,33 @@ layerTree.prototype.createTemporaryOverlayUI = function(layer) {
 layerTree.prototype.createOverlayUI = function(layer, group_visible) {
 	
 	var mapLayer = this.getLayerFromMap(layer);
+
+
+	mapLayer.on('precompose', function(event) {
+		var min = 0;
+		var max = 100;
+		if(event.target.hasOwnProperty("swipe-min")){
+			min = event.target["swipe-min"]
+		}
+		if(event.target.hasOwnProperty("swipe-max")){
+			max = event.target["swipe-max"]
+		}
+
+        var ctx = event.context;
+        var width = ctx.canvas.width * (min / 100);
+        var width2 = ctx.canvas.width * (max / 100);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(width, 0, ctx.canvas.width - (ctx.canvas.width - width2) - width, ctx.canvas.height);
+        ctx.clip();
+      });
+
+	mapLayer.on('postcompose', function(event) {
+        var ctx = event.context;
+        ctx.restore();
+      });
+
 	var id = layer.id;
 	
 	var ui = '';
@@ -1852,6 +1901,8 @@ layerTree.prototype.createOverlayUI = function(layer, group_visible) {
 	
 	ui += '			<label style="display: block; margin-top: 8px; width: 95%;">' + gettext('Opacity') + '<span id="layer-opacity-output-' + layer.id + '" class="margin-l-15 gol-slider-output">%</span></label>';
 	ui += '			<div id="layer-opacity-slider" data-layerid="' + layer.id + '" class="layer-opacity-slider"></div>';
+	ui += '			<label style="display: block; margin-top: 8px; width: 95%;">' + gettext('Swipe') + '<span id="layer-swipe-output-' + layer.id + '" class="margin-l-15 gol-slider-output">0% - 100%</span></label>';
+	ui += '			<div id="layer-swipe-slider" data-layerid="' + layer.id + '" class="layer-swipe-slider"></div>';
 	ui += '		</div>';
 	ui += '</div>';
 	
