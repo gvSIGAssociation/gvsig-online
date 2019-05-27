@@ -70,11 +70,8 @@ print.prototype.handler = function(e) {
 			source: new ol.source.Vector()
 		});
 		this.map.addLayer(this.extentLayer);
+		this.zoomChangedFromScale = false;
 		
-	    var translate = new ol.interaction.Translate({
-	        layers: [this.extentLayer]
-	      });
-	    this.map.addInteraction(translate);
 
 
 		this.showDetailsTab();
@@ -82,21 +79,32 @@ print.prototype.handler = function(e) {
 
 		this.capabilities = this.getCapabilities('a4_landscape');
 		this.renderPrintExtent(this.capabilities.layouts[0].attributes[3].clientInfo);
+	    var translate = new ol.interaction.Translate({
+	        layers: [this.extentLayer]
+	      });
+	    translate.setActive(true);
+	    this.map.addInteraction(translate);
+		
 		var currZoom = map.getView().getZoom();
 		var eventKey = this.map.on('moveend', function(e) {
 		  var newZoom = map.getView().getZoom();
 		  if (currZoom != newZoom) {
+			if (self.zoomChangedFromScale == false) {
+				$('#print-scale').val('');
+			}
+			else
+				self.zoomChangedFromScale = false;
 		    currZoom = newZoom;
 	        self.extentLayer.getSource().clear();
-	        self.extentLayer.changed();
+//	        self.extentLayer.changed();
 	        self.renderPrintExtent(self.capabilities.layouts[0].attributes[3].clientInfo);
-	        
+	        translate.setActive(true);	        
 		  }
 		});
 
 		var templates = this.getTemplates();
 		
-		var scales = this.getScales(this.capabilities);
+		var scales = this.printProvider.default_scales; //this.getScales(this.capabilities);
 
 
 		var ui = '';
@@ -141,7 +149,7 @@ print.prototype.handler = function(e) {
 		ui += 				'<option value="">' + gettext('AutoScale') + '</option>';
 		if (scales) {
 			for (var i=0; i<scales.length; i++) {
-					ui += 	'<option value="' + scales[i] + '">1:' + scales[i] + '</option>';
+					ui += 	'<option value="' + scales[i] + '">1:' + scales[i].toLocaleString() + '</option>';
 			}
 		}
 
@@ -189,6 +197,7 @@ print.prototype.handler = function(e) {
 		$('#print-scale').on('change', function(e) {
 			var scaleVal = $("#print-scale option:selected").val();
 			if (scaleVal) {
+				self.zoomChangedFromScale = true;
 				self.map.getView().setResolution(self.getResolutionForScale(scaleVal));
 			}
 		});
@@ -588,6 +597,7 @@ print.prototype.renderPrintExtent = function(clientInfo) {
     
     feat = new ol.Feature(ol.geom.Polygon.fromExtent(geomExtent));
     this.extentLayer.getSource().addFeature(feat);
+    this.extentLayer.changed();
     return feat;
 };
 
