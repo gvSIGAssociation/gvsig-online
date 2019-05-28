@@ -597,6 +597,7 @@ print.prototype.renderPrintExtent = function(clientInfo) {
     
     feat = new ol.Feature(ol.geom.Polygon.fromExtent(geomExtent));
     this.extentLayer.getSource().addFeature(feat);
+    this.extentLayer.setZIndex(this.map.getLayers().length);
     this.extentLayer.changed();
     return feat;
 };
