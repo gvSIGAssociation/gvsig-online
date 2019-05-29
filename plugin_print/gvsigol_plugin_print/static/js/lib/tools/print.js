@@ -135,15 +135,6 @@ print.prototype.handler = function(e) {
 		ui += 				'<input id="print-title" type="text" class="form-control" value="' + this.conf.project_title + '">';
 		ui += 			'</div>';
 		ui += 			'<div class="col-md-12 form-group">';
-		ui += 				'<label>' + gettext('Resolution') + '</label>';
-		ui += 				'<select id="print-dpi" class="form-control">';
-		ui += 					'<option value="180">180 dpi</option>';
-		ui += 					'<option selected value="240">240 dpi</option>';
-		ui += 					'<option value="320">320 dpi</option>';
-		ui += 					'<option value="400">400 dpi</option>';
-		ui += 				'</select>';
-		ui += 			'</div>';
-		ui += 			'<div class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Scale') + '</label>';
 		ui += 				'<select id="print-scale" class="form-control">';
 		ui += 				'<option value="">' + gettext('AutoScale') + '</option>';
@@ -156,9 +147,31 @@ print.prototype.handler = function(e) {
 		ui += 				'</select>';
 		ui += 			'</div>';
 		ui += 			'<div class="col-md-12 form-group">';
+		ui += 				'<label>' + gettext('Resolution') + '</label>';
+		ui += 				'<select id="print-dpi" class="form-control">';
+		ui += 					'<option value="180">180 dpi</option>';
+		ui += 					'<option selected value="240">240 dpi</option>';
+		ui += 					'<option value="320">320 dpi</option>';
+//		ui += 					'<option value="400">400 dpi</option>';
+		ui += 				'</select>';
+		ui += 			'</div>';
+		
+		ui += 			'<div class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Rotation') + '</label>';
 		ui += 				'<input id="print-rotation" type="number" step="any" class="form-control" value="0">';
 		ui += 			'</div>';
+		
+		ui += 			'<div class="col-md-12 form-group">';
+		ui += 				'<label>' + gettext('Format') + '</label>';
+		ui += 				'<select id="print-format" class="form-control">';
+//		ui += 					'<option value="bmp">.bmp</option>';
+//		ui += 					'<option value="jpeg">.jpeg</option>';
+		ui += 					'<option selected value="pdf">.pdf</option>';
+		ui += 					'<option value="png">.png</option>';
+//		ui += 					'<option value="svg">.svg</option>';
+		ui += 				'</select>';
+		ui += 			'</div>';
+		
 		ui += 			'<div class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Legal warning') + '</label>';
 		ui += 				'<textarea class="form-control" name="print-legal" id="print-legal" rows="5">' + this.printProvider.legal_advice + '</textarea>';
@@ -433,11 +446,14 @@ print.prototype.createPrintJob = function(template) {
 	}
 	var f = self.extentLayer.getSource().getFeatures()[0];
 	var bAcceptsOverview = false;
+	var outputFormat = $("#print-format option:selected").val();
+
 	var dataToPost = {
 	  		"layout": self.capabilities.layouts[0].name,
-		  	"outputFormat": "pdf",
+		  	"outputFormat": outputFormat,
 		  	"attributes": {
 		  		"title": title,
+		  		"scale": '1: ' + Number.parseInt(scale).toLocaleString(),
 		  		"legalWarning": legalWarning,
 		  		"map": {
 		  			"projection": "EPSG:3857",
@@ -473,7 +489,7 @@ print.prototype.createPrintJob = function(template) {
 	$.ajax({
 		type: 'POST',
 		async: true,
-	  	url: self.printProvider.url + '/print/' + template + '/report.pdf',
+	  	url: self.printProvider.url + '/print/' + template + '/report.' + outputFormat,
 	  	processData: false,
 	    contentType: 'application/json',
 	  	data: JSON.stringify(dataToPost),

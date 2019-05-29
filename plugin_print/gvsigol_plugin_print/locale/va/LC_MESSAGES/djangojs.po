@@ -17,6 +17,9 @@
 msgid "AutoScale"
 msgstr "Escala Automàtica"
 
+msgid "Format"
+msgstr "Format"
+
 msgid "legalwarning"
 msgstr ""
 "Tots els continguts cartogràfics d'aquest web i dels serveis que proporciona són propietat d'aquesta institució."
