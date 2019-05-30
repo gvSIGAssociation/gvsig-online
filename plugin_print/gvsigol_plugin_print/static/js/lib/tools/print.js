@@ -248,10 +248,10 @@ print.prototype.createPrintJob = function(template) {
 	var legalWarning = $('#print-legal').val();
 	var rotation = $('#print-rotation').val();
 	var dpi = $('#print-dpi').val();
-	var scale = $('#print-scale').val();
+	var scaleToSet = $('#print-scale').val();
 	var useNearestScale = true;
-	if (!scale) {
-		scale = self.getScaleForResolution(); // Actual scale of the view if the user has not selected a scale
+	if (!scaleToSet) {
+		scaleToSet = self.getScaleForResolution(); // Actual scale of the view if the user has not selected a scale
 		useNearestScale = false;
 	}
 
@@ -453,15 +453,15 @@ print.prototype.createPrintJob = function(template) {
 		  	"outputFormat": outputFormat,
 		  	"attributes": {
 		  		"title": title,
-		  		"scale": '1: ' + Number.parseInt(scale).toLocaleString(),
+		  		"scale": '1: ' + Number.parseInt(scaleToSet).toLocaleString(),
 		  		"legalWarning": legalWarning,
 		  		"map": {
 		  			"projection": "EPSG:3857",
 		  			"dpi": parseInt(dpi),
 		  			"rotation": rotation,
 		  			//"center": self.map.getView().getCenter(),
-		  			"scale": scale,
-		  			"useNearestScale": useNearestScale,
+		  			"scale": scaleToSet,
+		  			"useNearestScale": false, //useNearestScale,
 		  			"layers": printLayers,
 		  			"bbox": f.getGeometry().getExtent()
 		  	    },
@@ -477,6 +477,7 @@ print.prototype.createPrintJob = function(template) {
 	if (self.capabilities.layouts[0].attributes[4].name == 'overviewMap') {
 		bAcceptsOverview = true;
 		dataToPost.overviewMap = {
+				"zoomFactor":5,
 	            "layers": [
 		              {
 		                "type": "OSM",
