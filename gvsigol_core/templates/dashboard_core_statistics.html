@@ -1,0 +1,271 @@
+{% load staticfiles %}
+{% load i18n %}
+<div class="tab-pane" id="tab-statistics-core" style="background-color:white;padding:10px">
+
+
+	<div style="background-color:#eee; padding-left:20px;padding-right:20px;padding-top:1px;padding-bottom:5px;">
+	<h3 style="font-weight:bold">Get project request statistics<div id="filter-icon" style="float:right"><i class="fa fa-filter" aria-hidden="true"></i></div></h3>
+	<div class="row hidden" id="filter-div" style="padding: 15px;background-color: rgba(200,200,200,0.4);">
+
+		<div class="col-md-4 form-group">
+			Petitions from date<br/>
+			<input type="date" name="filter_start_date" class="form-control" style="width:100%" onchange="reload_data();">
+		</div>
+
+		<div class="col-md-4 form-group">
+			Petitions to date<br/>
+			<input type="date" name="filter_end_date" class="form-control" style="width:100%" onchange="reload_data();">
+		</div>
+
+		<div class="col-md-4 form-group">
+			Petitions done by user<br />
+			<select name="filter_username" class="form-control" style="width:100%" onchange="reload_data();">
+		  		<option value="all">All</option>
+		  		<option value="anonymous">Anonymous</option>
+
+		  		{% for user in users %}
+		  		<option value="{{ user.username }}">{{ user.username }}</option>
+		  		{% endfor %}
+			</select>
+		</div>
+
+		<div class="col-md-4 form-group">
+			Divide by time?
+			<input type="checkbox" name="filter_time" class="form-control"  onchange="reload_data();">
+		</div>
+
+		<div class="col-md-4 form-group">
+			Time division<br />
+			<select name="filter_time_pattern" class="form-control" style="width:100%" onchange="reload_data();">
+		  		<option value="YYYY">Year</option>
+		  		<option value="MM-YYYY">Month</option>
+				<option value="dd-MM-YYYY">Day</option>
+			</select>
+		</div>
+
+		<div class="col-md-12 form-group">
+			<span style="font-weight:bold">Total petitions: <span id="core-absolute-total"></span></span>
+		</div>
+	</div>
+	</div>
+
+	<div class="row" style="margin-top: 15px;">
+		<div class="col-md-6 form-group">
+			<div class="col-md-12 form-group">
+				<span style="font-size: 17px;font-weight: bold;">Top projects demanded:</span>
+			</div>
+			<div class="col-md-12 form-group" style="overflow:auto">
+				<table id="target-by-user-table" class="display" style="width:100%">
+			        <thead>
+			            <tr>
+			            	<th>Interval</th>
+			                <th>Project</th>
+			                <th>Num petitions</th>
+			            </tr>
+			        </thead>
+			        <tbody id="core-absolute-top">
+			        </tbody>
+			    </table>
+		    </div>
+		</div>
+		<div class="col-md-6 form-group" style="">
+
+			<div id="target-by-user-chart" class="col-md-12 form-group">
+			</div>
+		</div>
+	</div>
+
+</div>
+<script type="text/javascript">
+	var users = {};
+	{% for user in users %}
+	users["{{ user.id }}"] = "{{ user.username }}"
+	{% endfor %}
+
+	var projects = {};
+	{% for project in projects %}
+	projects["{{ project.id }}"] = "{{ project.title }}"
+	{% endfor %}
+
+	function random_rgba() {
+	    var o = Math.round, r = Math.random, s = 255;
+	    return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',0.2)';
+	}
+
+
+	function reload_data(){
+		console.log("Loading all CORE panel data...");
+		$("#core-absolute-top").html("");
+
+		var username = $("select[name=filter_username]").val();
+		var start_date = $("input[name=filter_start_date]").val();
+		var end_date = $("input[name=filter_end_date]").val();
+		var time = $("input[name=filter_time]:checked").length > 0;
+		var time_pattern = $("select[name=filter_time_pattern]").val();
+
+		// 'Total getConf' petitions
+		$.ajax({
+			type: 'POST',
+			async: false,
+		  	url: '/gvsigonline/statistics/get-target-by-user/gvsigol_core/get_conf/',
+		  	data: {
+		  		'username': username,
+				'get_count': true,
+				'start_date': start_date,
+				'end_date': end_date,
+				'group_by_date': false,
+				'date_pattern': 'YYYY'
+
+			},
+		  	success	:function(response){
+		  		if("count" in response){
+		  			$("#core-absolute-total").html(response["count"])
+		  		}
+			},
+		  	error: function(){}
+		});
+
+
+		// 'Top projects' petition
+		$.ajax({
+			type: 'POST',
+			async: false,
+		  	url: '/gvsigonline/statistics/get-target-by-user/gvsigol_core/get_conf/',
+		  	data: {
+		  		'username': username,
+				'get_count': false,
+				'start_date': start_date,
+				'end_date': end_date,
+				'group_by_date': time,
+				'date_pattern': time_pattern
+			},
+		  	success	:function(response){
+		  		console.log(response);
+
+		  		$("#target-by-user-chart").empty();
+		  		$("#target-by-user-chart").html('<canvas id="target-by-user-chart-canvas" height="400" width="400"></canvas>')
+		  		var canvas = document.getElementById('target-by-user-chart-canvas');
+		  		var ctx = canvas.getContext('2d');
+		  		ctx.setTransform(1, 0, 0, 1, 0, 0);
+		  		ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		  		var datasets = [];
+		  		var labels = [];
+
+		  		if("count" in response) {
+		  			var results = response["count"]
+			  		for(var key in results){
+			  			var color = random_rgba();
+				  		var aux = {
+		  		            label: "",
+		  		            data: [],
+		  		            backgroundColor: color,
+		  		          	borderColor: color.replace("0.2)", "1)"),
+		  		            borderWidth: 1
+		  		        }
+
+				  		for(var i=0; i<labels.length; i++){
+				  			aux.data.push(null);
+				  		}
+
+				  		var name = "";
+			  			if(results[key][1] in projects){
+			  				name = projects[results[key][1]];
+			  			}else{
+			  				name = results[key][1];
+			  			}
+
+				  		var founded = false;
+				  		for(var i=0; i<datasets.length; i++){
+				  			if(datasets[i]["label"] == name){
+				  				aux = datasets[i];
+				  				founded = true;
+				  			}
+				  		}
+				  		if(!founded){
+				  			datasets.push(aux);
+				  		}
+
+				  		var add_labels = false;
+				  		var indexof = labels.indexOf(results[key][0])
+				  		if(indexof == -1){
+				  			labels.push(results[key][0]);
+				  			add_labels = true;
+				  		}
+
+			  			aux.label = name;
+			  			if(indexof == -1){
+			  				aux.data.push(results[key][2]);
+			  			}else{
+			  				aux.data[indexof] = results[key][2];
+			  			}
+			  			for(var i=0; i<datasets.length; i++){
+				  			if(datasets[i]["label"] != name && add_labels){
+				  				datasets[i].data.push(null)
+				  			}
+				  		}
+
+			  			var interval = results[key][0];
+			  			if(!interval){
+			  				interval = '-';
+			  			}
+			  			$("#core-absolute-top").append("<tr><td>"+ interval +"</td><td>"+ name +"</td><td>"+ results[key][2] +"</td></tr>");
+			  		}
+		  		}
+
+		  		if(labels.length == 1 && labels[0] == null){
+		  			labels[0] = 'Project requests';
+		  		}
+
+		  		var myChart = new Chart(ctx, {
+		  		    type: 'bar',
+		  		    data: {
+		  		        labels: labels,
+		  		        datasets: datasets
+		  		    },
+			  		options: {
+			  		    scales: {
+			  		        yAxes: [{
+			  		            ticks: {
+			  		                beginAtZero: true
+			  		            }
+			  		        }]
+			  		    }
+			  		}
+		  		});
+			},
+		  	error: function(){}
+		});
+	}
+
+
+	$().ready(function() {
+		$("#statistics-tab-controller").append('<li id="li-statistics-core"><a href="#tab-statistics-core" data-toggle="tab">core</a></li>');
+
+		$("#li-statistics-core").click(function(){
+			reload_data();
+
+			$("#li-statistics-core").unbind("click");
+		});
+
+		$("#filter-icon").click(function(){
+			if($("#filter-div").hasClass("hidden")){
+				$("#filter-div").removeClass("hidden");
+			}else{
+				$("#filter-div").addClass("hidden");
+			}
+		});
+
+		$.extend( true, $.fn.dataTable.defaults, {
+		    "searching": false,
+		    "ordering": false,
+		    "paging":   false,
+	        "info":     false
+		} );
+
+		$("#target-by-user-table").DataTable({
+	        "order": [[ 1, "desc" ]]
+	    } );
+
+	});
+</script>
