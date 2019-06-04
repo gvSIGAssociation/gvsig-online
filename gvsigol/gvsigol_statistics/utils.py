@@ -52,11 +52,21 @@ def close_DB_connection(connection):
 
 
 
-def get_actions(verb, is_count=False, user=None, target=None, start_date=None, end_date=None):
+def get_actions(verb, reverse=False, is_count=False, user=None, target=None, start_date=None, end_date=None, group_by_date=None, date_pattern=None):
     conn = get_DB_connection()
     cursor = conn.cursor()
 
+    selector = 'target'
+    if reverse:
+        selector = 'actor'
+
     select = '*'
+
+    if group_by_date:
+        select = 'to_char(timestamp, \'' + date_pattern +'\') as time_pattern, '+selector+'_content_type_id, '+selector+'_object_id, COUNT(*)'
+    else:
+        select = 'NULL, '+selector+'_content_type_id, '+selector+'_object_id, COUNT(*)'
+
     if is_count:
         select = 'COUNT(*)'
 
@@ -66,7 +76,7 @@ def get_actions(verb, is_count=False, user=None, target=None, start_date=None, e
 
     end_date_query = '';
     if end_date:
-        end_date_query = ' AND timestamp < ' + end_date
+        end_date_query = ' AND timestamp <= ' + end_date
 
     user_query = ''
     if not user or user == 'all':
@@ -82,9 +92,10 @@ def get_actions(verb, is_count=False, user=None, target=None, start_date=None, e
         target_query = ' AND target_object_id = \'' + str(target) + '\''
 
     group_by_query =''
-    #group_by_query = ' GROUP BY DATEPART(timestamp, timestamp), DATEPART(timestamp, timestamp)'
-
-    # SELECT count(*) bugs_count, target_object_id, to_char(timestamp, 'YYYY-MM-dd') as day_of_week FROM public.actstream_action WHERE verb LIKE 'gvsigol_core/get_conf' group by day_of_week, target_object_id order by bugs_count desc;
+    if group_by_date:
+        group_by_query = ' GROUP BY time_pattern, '+selector+'_object_id, '+selector+'_content_type_id order by to_date(to_char(timestamp, \'' + date_pattern +'\'), \'' + date_pattern +'\') asc'
+    else:
+        group_by_query = ' GROUP BY '+selector+'_content_type_id, '+selector+'_object_id order by '+selector+'_object_id asc'
 
 
     query = "SELECT "+select+" FROM public.actstream_action WHERE verb LIKE '" + verb + "'" + user_query + target_query + start_date_query + end_date_query + group_by_query +';'
