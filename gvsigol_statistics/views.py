@@ -47,7 +47,8 @@ from actstream.models import Action
 
 from dateutil import parser
 from datetime import datetime
-
+from importlib import import_module
+from django.contrib.contenttypes.models import ContentType
 
 @csrf_exempt
 def get_target_by_user(request, plugin_name, action_name):
@@ -90,105 +91,83 @@ def get_target_by_user(request, plugin_name, action_name):
 
         get_count = request.POST.get('get_count') == 'true'
         target_id = None
-        actions = get_actions(operation_id, get_count, user_id, target_id, start_date_string, end_date_string)
+
+        group_by_date = request.POST.get('group_by_date') == 'true'
+        date_pattern = request.POST.get('date_pattern')
+
+        reverse = request.POST.get('reverse') == 'true'
+
+        actions = get_actions(operation_id, reverse, get_count, user_id, target_id, start_date_string, end_date_string, group_by_date, date_pattern)
 
         #Operate with the query results
         results = {}
 
         if get_count:
-            results["count"] = actions[0][0]
+            results["count"] = actions
             count_results = results
         else:
-            count_results = {}
-            for action in actions:
-                key = str(action[4]) #target_id
-                if not key in count_results:
-                    count_results[key] = []
-                count_results[key].append(action[0])
+
+            results["count"] = actions
+            count_results = results
+            #count_results = {}
+            #for action in actions:
+            #    key = str(action[4]) #target_id
+            #    if not key in count_results:
+            #        count_results[key] = []
+            #    count_results[key].append(action[0])
 
 
         return HttpResponse(json.dumps(count_results, indent=4), content_type='application/json')
 
 
 @csrf_exempt
-def get_user_by_target(request, plugin_name, action_name):
+def get_targets_from_content_type(request):
     if request.method == 'POST':
-        operation_id = plugin_name +'/' + action_name
-        #actions = Action.objects.get(verb=operation_id)
+        content_type_id = request.POST.get('content_type_id')
+        field_name = request.POST.get('field_name')
 
-        username = request.POST.get('username')
-        user_id = 'all' #by default for all users
-        if username:
-            if username == 'anonymous' or username == 'all': #special cases: 'all' and 'anonymous' (in 'anonymous', target id and contenttype will be the same)
-                user_id = username
+        targets_bd = []
+        if content_type_id and content_type_id.__len__() > 0:
+            cctt = ContentType.objects.get(id=content_type_id)
+            model_class = cctt.model_class()
+            targets_bd = model_class.objects.all()
+
+        targets = {}
+        for target_bd in targets_bd:
+            if hasattr(target_bd, field_name):
+                targets[target_bd.id] = str(getattr(target_bd, field_name))
             else:
-                users = User.objects.filter(username=username) #username is a concrete name
-                if users.__len__() > 0:
-                    user_id = users[0].id
+                targets[target_bd.id] = str(target_bd)
 
-        #num_rows = request.POST.get('number_rows')
-        end_date = request.POST.get('end_date')
-        end_date_string = None
-        if end_date:
-            try:
-                dt = parser.parse(end_date)
-                end_date_py = datetime(dt.year, dt.month, dt.day,dt.hour, dt.minute, dt.second)
-                end_date_string = end_date_py.strftime("'%Y/%m/%d %H:%M:%S'")
-            except StandardError, e:
-                print "Failed get end date", e
+        response = {
+            'targets': targets
+        }
 
-
-        start_date = request.POST.get('start_date')
-        start_date_string = None
-        if start_date:
-            try:
-                dt = parser.parse(start_date)
-                start_date_py = datetime(dt.year, dt.month, dt.day,dt.hour, dt.minute, dt.second)
-                start_date_string = start_date_py.strftime("'%Y/%m/%d %H:%M:%S'")
-            except StandardError, e:
-                print "Failed get start date", e
-
-
-        get_count = request.POST.get('get_count') == 'true'
-
-
-        target = request.POST.get('target')
-        target_id = None
-        if target:
-            if target == 'all':
-                target_id = None
-            else:
-                target_id = target
-
-        actions = get_actions(operation_id, get_count, user_id, target_id, start_date_string, end_date_string)
-
-        #Operate with the query results
-        results = {}
-
-        if get_count:
-            results["count"] = actions[0][0]
-            count_results = results
-        else:
-            count_results = {}
-            for action in actions:
-                key = str(action[1]) #target_id
-                if not key in count_results:
-                    count_results[key] = []
-                count_results[key].append(action[0])
-
-
-        return HttpResponse(json.dumps(count_results, indent=4), content_type='application/json')
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @superuser_required
 def statistics_list(request):
+    statistics_conf = []
+    for app in settings.INSTALLED_APPS:
+        try:
+            mod = import_module('%s.settings' % app)
+            if mod:
+                print app
+                if hasattr(mod, 'STATISTICS'):
+                    print mod.STATISTICS
+                    statistics_conf = statistics_conf + mod.STATISTICS
+        except:
+            pass
+
 
     projects = Project.objects.all()
     users = User.objects.all()
     response = {
         'users': users,
-        'projects': projects
+        'projects': projects,
+        'statistics_conf': statistics_conf
     }
     return render_to_response('statistics_list.html', response, context_instance=RequestContext(request))

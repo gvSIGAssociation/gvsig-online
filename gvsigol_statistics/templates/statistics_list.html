@@ -15,16 +15,10 @@
 					<span>Main Panel</span>
 				</div>
 
-				{% for plugin in INSTALLED_APPS %}
-					{% if 'gvsigol_plugin_' in plugin %}
-						{% with "dashboard_"|add:plugin|cut:"gvsigol_plugin_"|add:"_statistics.html" as aux %}
-							{% include_if_exists aux %}
-						{% endwith %}
-			   		{% elif 'gvsigol_' in plugin %}
-						{% with "dashboard_"|add:plugin|cut:"gvsigol_"|add:"_statistics.html" as aux %}
-							{% include_if_exists aux %}
-						{% endwith %}
-			   		{% endif %}
+				{% for plugin in statistics_conf %}
+					{% with "dashboard_statistics.html" as aux %}
+						{% include_if_exists aux %}
+					{% endwith %}
 			   	{% endfor %}
 
 			</div>
