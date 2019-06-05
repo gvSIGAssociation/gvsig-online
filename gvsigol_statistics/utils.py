@@ -61,14 +61,17 @@ def get_actions(verb, reverse=False, is_count=False, user=None, target=None, sta
         selector = 'actor'
 
     select = '*'
-
+    group_by_date_query = 'NULL'
     if group_by_date:
-        select = 'to_char(timestamp, \'' + date_pattern +'\') as time_pattern, '+selector+'_content_type_id, '+selector+'_object_id, COUNT(*)'
-    else:
-        select = 'NULL, '+selector+'_content_type_id, '+selector+'_object_id, COUNT(*)'
+        group_by_date_query = 'to_char(timestamp, \'' + date_pattern +'\') as time_pattern'
 
+    half_select = ', '+selector+'_content_type_id, '+selector+'_object_id, COUNT(*) as count'
+    half_empty_select = ', NULL, NULL, COUNT(*) as count'
+    select = group_by_date_query + half_select
     if is_count:
-        select = 'COUNT(*)'
+        select = 'NULL' + half_empty_select
+
+
 
     start_date_query = '';
     if start_date:
@@ -91,14 +94,35 @@ def get_actions(verb, reverse=False, is_count=False, user=None, target=None, sta
     if target:
         target_query = ' AND target_object_id = \'' + str(target) + '\''
 
-    group_by_query =''
+    group_by_query = ''
+    order_by_query = ''
     if group_by_date:
-        group_by_query = ' GROUP BY time_pattern, '+selector+'_object_id, '+selector+'_content_type_id order by to_date(to_char(timestamp, \'' + date_pattern +'\'), \'' + date_pattern +'\') asc'
+        group_by_query = ' GROUP BY time_pattern, '+selector+'_object_id, '+selector+'_content_type_id'
+        order_by_query = ' ORDER BY to_date(to_char(timestamp, \'' + date_pattern +'\'), \'' + date_pattern +'\') asc, count desc'
     else:
-        group_by_query = ' GROUP BY '+selector+'_content_type_id, '+selector+'_object_id order by '+selector+'_object_id asc'
+        group_by_query = ' GROUP BY '+selector+'_content_type_id, '+selector+'_object_id'
+        order_by_query = ' ORDER BY count DESC'
 
 
-    query = "SELECT "+select+" FROM public.actstream_action WHERE verb LIKE '" + verb + "'" + user_query + target_query + start_date_query + end_date_query + group_by_query +';'
+    query = ''
+    if not reverse:
+        query = "SELECT "+select+" FROM public.actstream_action WHERE verb LIKE '" + verb + "'" + user_query + target_query + start_date_query + end_date_query + group_by_query
+        query = query + order_by_query + ";"
+    else:
+        reverse_where2 = '(actor_content_type_id = target_content_type_id AND actor_object_id = target_object_id) '
+        reverse_where = '(target_content_type_id IS NULL OR (actor_content_type_id <> target_content_type_id AND actor_object_id <> target_object_id))'
+        query = "SELECT "+select+" FROM public.actstream_action WHERE verb LIKE '" + verb + "' AND " + reverse_where +  user_query + target_query + start_date_query + end_date_query + group_by_query
+        if not user or user == 'all' or user == 'anonymous':
+            query = query + " UNION ALL " + "SELECT "+ group_by_date_query + half_empty_select+" FROM public.actstream_action WHERE verb LIKE '" + verb + "' AND " + reverse_where2 + user_query + target_query + start_date_query + end_date_query
+            if group_by_date:
+                query = query + " GROUP BY time_pattern "
+                query = 'SELECT * FROM (' + query + ') AS aux ORDER BY to_date(time_pattern, \'' + date_pattern +'\') asc;'
+            else:
+                query = query + order_by_query + ";"
+        else:
+            query = query + order_by_query + ";"
+
+
     print query
 
     values = []
