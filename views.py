@@ -41,6 +41,7 @@ import utils as auth_utils
 import json
 import re
 import base64
+from actstream import action
 
 from gvsigol.settings import GVSIGOL_LDAP, LOGOUT_PAGE_URL, AUTH_WITH_REMOTE_USER
 
@@ -64,6 +65,7 @@ def login_user(request):
             if user is not None:
                 if user.is_active:
                     login(request, user)
+                    action.send(user, verb="gvsigol_auth/login")
                     return redirect('home')
                 
                 else:
