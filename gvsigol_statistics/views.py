@@ -50,8 +50,65 @@ from datetime import datetime
 from importlib import import_module
 from django.contrib.contenttypes.models import ContentType
 
+
+
 @csrf_exempt
-def get_target_by_user(request, plugin_name, action_name):
+def register_action(request):
+    if request.method == 'POST':
+
+        actor_id = request.POST.get('actor_id')
+        actor_type = request.POST.get('actor_type')
+        if not actor_type:
+            actor_type = 'user'
+        actor_app = request.POST.get('actor_app')
+        target_id = request.POST.get('target_id')
+        target_type = request.POST.get('target_type')
+        target_app = request.POST.get('target_app')
+        action_object_id = request.POST.get('action_object_id')
+        action_object_type = request.POST.get('action_object_type')
+        action_object_app = request.POST.get('action_object_app')
+
+        actor_class = get_class_from_content_type(actor_app, actor_type)
+        actor = None
+        if actor_class and actor_id:
+            actor = actor_class.objects.get(id=actor_id)
+
+        action_object_class = get_class_from_content_type(action_object_app, action_object_type)
+        action_object = None
+        if action_object_class and action_object_id:
+            action_object = action_object_class.objects.get(id=action_object_id)
+
+        target_class = get_class_from_content_type(target_app, target_type)
+        target = None
+        if target_class and target_id:
+            target = target_class.objects.get(id=target_id)
+
+        verb = request.POST.get('verb')
+
+        data = request.POST.get('data')
+        description = request.POST.get('description')
+
+
+        try:
+            if not data:
+                action.send(actor, verb=verb, action_object=action_object, target=target, description=description)
+            else:
+                action.send(actor, verb=verb, action_object=action_object, target=target, data=data, description=description)
+
+            result = {
+                'status' : 'OK'
+            }
+
+        except StandardError, e:
+            result = {
+                'status' : 'ERROR',
+                'msg': str(e)
+            }
+
+        return HttpResponse(json.dumps(result, indent=4), content_type='application/json')
+
+@csrf_exempt
+def get_registered_actions(request, plugin_name, action_name):
     if request.method == 'POST':
         operation_id = plugin_name +'/' + action_name
         #actions = Action.objects.get(verb=operation_id)
@@ -120,6 +177,30 @@ def get_target_by_user(request, plugin_name, action_name):
         return HttpResponse(json.dumps(count_results, indent=4), content_type='application/json')
 
 
+def get_class_from_content_type(content_type_app, content_type_name):
+    if content_type_app:
+        content_type_app = content_type_app.lower()
+    if content_type_name:
+        content_type_name = content_type_name.lower()
+    if content_type_app and content_type_app.__len__() > 0 and content_type_name and content_type_name.__len__() > 0:
+        cctt = ContentType.objects.filter(app_label=content_type_app, model=content_type_name)
+        if cctt.__len__() > 0:
+            model_class = cctt[0].model_class()
+            return model_class
+
+    if content_type_name and content_type_name.__len__() > 0:
+        cctt = ContentType.objects.filter(model=content_type_name)
+        if cctt.__len__() > 0:
+            model_class = cctt[0].model_class()
+            return model_class
+
+    if content_type_name and content_type_name.__len__() > 0:
+        cctt = ContentType.objects.get(id=content_type_name)
+        model_class = cctt.model_class()
+        return model_class
+
+    return None
+
 @csrf_exempt
 def get_targets_from_content_type(request):
     if request.method == 'POST':
@@ -162,12 +243,9 @@ def statistics_list(request):
         except:
             pass
 
-
-    projects = Project.objects.all()
     users = User.objects.all()
     response = {
         'users': users,
-        'projects': projects,
         'statistics_conf': statistics_conf
     }
     return render_to_response('statistics_list.html', response, context_instance=RequestContext(request))
