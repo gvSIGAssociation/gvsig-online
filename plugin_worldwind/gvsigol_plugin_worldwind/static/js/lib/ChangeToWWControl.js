@@ -55,6 +55,7 @@ var ChangeToWWControl = function(map, provider) {
 	//objetos WW
 	this.wwd = null;
 	this.goToAnimator=null;
+	this.tools3d = new Array();
 	
 	
 };
@@ -82,6 +83,11 @@ ChangeToWWControl.prototype.handler = function(e) {
 	$('body').trigger('change-to-3D-event', [this]);
 	this.hideControls();
 	$('#canvasWW').css("display","block");
+	
+	if (viewer.core.ifToolInConf('gvsigol_tool_measure')) {
+		$('#toolbar3d').css("display","block");
+	}
+	
 	$('body').css('background', 'black');
 };
 
@@ -126,6 +132,7 @@ ChangeToWWControl.prototype.deactivate = function() {
 	this.active = false;	
 	this.resetControls();
 	$('#canvasWW').css("display","none");
+	$('#toolbar3d').css("display","none");
 	$('body').css('background', 'white');
 	
 	//set correct OL center
@@ -153,7 +160,8 @@ ChangeToWWControl.prototype.initWW = function() {
 
 	// Iniciamos Window
     WorldWind.Logger.setLoggingLevel(WorldWind.Logger.LEVEL_INFO);
-	this.wwd = new WorldWind.WorldWindow("canvasWW",this.getElevationModel());
+	// this.wwd = new WorldWind.WorldWindow("canvasWW",this.getElevationModel());
+	this.wwd = new WorldWind.WorldWindow("canvasWW"); // Usamos el modelo de alturas por defecto
 	var coordsdisplay = new WorldWind.CoordinatesDisplayLayer(this.wwd);
 	this.wwd.addLayer(coordsdisplay);
 	var controls = new WorldWind.ViewControlsLayer(this.wwd);
@@ -172,14 +180,20 @@ ChangeToWWControl.prototype.initWW = function() {
 	this.goToAnimator = new WorldWind.GoToAnimator(this.wwd);
     
     //evento de click (tb para mobiles)
-    new WorldWind.ClickRecognizer(this.wwd, this.onWWClick);
-    new WorldWind.TapRecognizer(this.wwd, this.onWWClick);
+//    new WorldWind.ClickRecognizer(this.wwd, this.onWWClick);
+//    new WorldWind.TapRecognizer(this.wwd, this.onWWClick);
     
     //TODO: no he conseguido gestionar el evento de cambio de rotación
     //new WorldWind.GestureRecognizer(this.wwd, this.onWWGesture);
     
     this.wwd.addLayer(new WorldWind.AtmosphereLayer());
     this.wwd.addLayer(new WorldWind.StarFieldLayer());
+    
+    if (viewer.core.ifToolInConf('gvsigol_tool_measure')) {
+		this.tools3d.push(new measureLength3d(this.wwd));
+		this.tools3d.push(new measureArea3d(this.wwd));
+	}
+
         
 	// Añadimos capas
 	this.loadBaseLayer(this.map);
@@ -192,8 +206,9 @@ ChangeToWWControl.prototype.initWW = function() {
     
 };
 
+
 /**
- * Obtenemos el modelo de elevaciones
+ * Obtenemos el modelo de elevaciones ** NOT USED ** 
  */
 ChangeToWWControl.prototype.getElevationModel = function() {	
 
@@ -252,6 +267,8 @@ ChangeToWWControl.prototype.onOLRotation = function(evt) {
  */
 ChangeToWWControl.prototype.loadBaseLayer = function(map) {
 	var layers = map.getLayers();
+	// var terrainLayer = new WorldWind.BMNGLandsatLayer();
+	// this.addLayer(terrainLayer);
 	for (var i = 0; i < layers.getLength(); i++) {
 		l = layers.item(i);
 		if (l.baselayer){			
@@ -576,7 +593,7 @@ ChangeToWWControl.prototype.onClickEvent = function(evt) {
 };
 
 /**
- * Evento de click en el globo 
+ * Evento de click en el globo ** NOT USED ** (Delete handler??)
  */
 ChangeToWWControl.prototype.onWWClick = function(recognizer) {			
     // Obtain the event location.
