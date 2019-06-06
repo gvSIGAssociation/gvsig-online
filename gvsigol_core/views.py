@@ -31,7 +31,7 @@ from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGr
 from gvsigol_auth.models import UserGroup, UserGroupUser
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from gvsigol_auth.utils import is_superuser, staff_required
 import utils as core_utils
 from gvsigol_services import geographic_servers
@@ -50,6 +50,8 @@ import ast
 import re
 
 from django.views.decorators.clickjacking import xframe_options_exempt
+from actstream import action
+from actstream.models import Action
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
@@ -642,6 +644,8 @@ def load_project(request, project_name):
         expires = datetime.datetime.strftime(tomorrow, "%a, %d-%b-%Y %H:%M:%S GMT")
         response.set_cookie('key', expires = expires)
 
+        action.send(request.user, verb="gvsigol_core/get_conf", action_object=project)
+
         return response
 
     else:
@@ -674,6 +678,8 @@ def load_public_project(request, project_name):
     tomorrow = datetime.datetime.replace(tomorrow, hour=0, minute=0, second=0)
     expires = datetime.datetime.strftime(tomorrow, "%a, %d-%b-%Y %H:%M:%S GMT")
     response.set_cookie('key', expires = expires)
+
+    action.send(project, verb="gvsigol_core/get_conf", action_object=project)
 
     return response
 

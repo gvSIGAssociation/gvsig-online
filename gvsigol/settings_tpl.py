@@ -86,6 +86,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
+    'django.contrib.sites',
+    'gvsigol_statistics',
     'rest_framework',
     'gvsigol_auth',
     'gvsigol_services',
@@ -94,6 +96,13 @@ INSTALLED_APPS = [
     'gvsigol_core',
     ##GVSIGOL_PLUGINS##
 ]
+INSTALLED_APPS.append('actstream')
+
+ACTSTREAM_SETTINGS = {
+    'FETCH_RELATIONS': True,
+    'USE_JSONFIELD': True,
+}
+
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -120,6 +129,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'gvsigol_services/templates'),
             os.path.join(BASE_DIR, 'gvsigol_symbology/templates'),
             os.path.join(BASE_DIR, 'gvsigol_filemanager/templates'),            
+            os.path.join(BASE_DIR, 'gvsigol_statistics/templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -229,6 +239,7 @@ LOCALE_PATHS = (
     '##GVSIGOL_HOME##/gvsigol/gvsigol_symbology/locale',
     '##GVSIGOL_HOME##/gvsigol/gvsigol_auth/locale',
     '##GVSIGOL_HOME##/gvsigol/gvsigol_filemanager/locale',
+    '##GVSIGOL_HOME##/gvsigol/gvsigol_statistics/locale',
 )
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
