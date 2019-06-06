@@ -56,7 +56,7 @@ def get_actions(verb, reverse=False, is_count=False, user=None, target=None, sta
     conn = get_DB_connection()
     cursor = conn.cursor()
 
-    selector = 'target'
+    selector = 'action_object'
     if reverse:
         selector = 'actor'
 
@@ -86,13 +86,13 @@ def get_actions(verb, reverse=False, is_count=False, user=None, target=None, sta
         user_query = ''
     else:
         if user == 'anonymous':
-            user_query = ' AND actor_content_type_id = target_content_type_id AND actor_object_id = target_object_id'
+            user_query = ' AND actor_content_type_id = action_object_content_type_id AND actor_object_id = action_object_object_id'
         else:
             user_query = ' AND actor_object_id = \'' + str(user) + '\''
 
     target_query = ''
     if target:
-        target_query = ' AND target_object_id = \'' + str(target) + '\''
+        target_query = ' AND action_object_object_id = \'' + str(target) + '\''
 
     group_by_query = ''
     order_by_query = ''
@@ -109,8 +109,8 @@ def get_actions(verb, reverse=False, is_count=False, user=None, target=None, sta
         query = "SELECT "+select+" FROM public.actstream_action WHERE verb LIKE '" + verb + "'" + user_query + target_query + start_date_query + end_date_query + group_by_query
         query = query + order_by_query + ";"
     else:
-        reverse_where2 = '(actor_content_type_id = target_content_type_id AND actor_object_id = target_object_id) '
-        reverse_where = '(target_content_type_id IS NULL OR (actor_content_type_id <> target_content_type_id AND actor_object_id <> target_object_id))'
+        reverse_where2 = '(actor_content_type_id = action_object_content_type_id AND actor_object_id = action_object_object_id) '
+        reverse_where = '(action_object_content_type_id IS NULL OR (actor_content_type_id <> action_object_content_type_id AND actor_object_id <> action_object_object_id))'
         query = "SELECT "+select+" FROM public.actstream_action WHERE verb LIKE '" + verb + "' AND " + reverse_where +  user_query + target_query + start_date_query + end_date_query + group_by_query
         if not user or user == 'all' or user == 'anonymous':
             query = query + " UNION ALL " + "SELECT "+ group_by_date_query + half_empty_select+" FROM public.actstream_action WHERE verb LIKE '" + verb + "' AND " + reverse_where2 + user_query + target_query + start_date_query + end_date_query
