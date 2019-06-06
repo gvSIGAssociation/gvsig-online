@@ -80,3 +80,8 @@ suds==0.4
 django-jenkins==0.110.0
 
 python-resize-image==1.1.11
+
+django-activity-stream==0.8.0
+django-jsonfield==1.2.0
+django-jsonfield-compat==0.4.4
+

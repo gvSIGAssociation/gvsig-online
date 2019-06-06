@@ -29,6 +29,9 @@ class GvsigolCoreConfig(AppConfig):
     name = 'gvsigol_core'
 
     def ready(self):
+        from actstream import registry
+        registry.register(self.get_model('Project'))
+
         try:
             # ensure we have a proper environment
             self.config_gdaltools()
