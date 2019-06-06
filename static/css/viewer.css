@@ -496,8 +496,7 @@ html, body {
 	    text-align: center;
 	    text-decoration: none;
 	    color: #666;
-	}
-	
+	}	
 	
 	.custom-mouse-position-projection {
 	    font-size: 12px;
@@ -548,6 +547,26 @@ html, body {
 	}
 
 }
+
+.ol-control button.ol-btn-round {
+	border-radius: 50%;
+    background-color: #ffffff9c;
+    color: black;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 0px;
+    width: 24px;
+    height: 24px;
+    margin: 8px;
+}
+
+.ol-control button:focus.ol-btn-round,
+.ol-control button:hover.ol-btn-round {
+    background-color: #ffffff;
+    outline: 0;
+}
+
+
 
 .ui-dialog-titlebar-close {
   background: url("../js/vendors/jQueryUI/images/ui-icons_888888_256x240.png") repeat scroll -93px -128px rgba(0, 0, 0, 0);
