@@ -406,7 +406,7 @@ class Geoserver():
             else:
                 auth = self.session.auth
             r = self.session.get(url, auth=auth)
-            if r.status_code==201:
+            if r.status_code==200:
                 json = r.json()
                 if type == 'available' or type == 'available_with_geom':
                     if json['list'] and json['list']['string']:
