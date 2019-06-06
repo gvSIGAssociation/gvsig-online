@@ -560,7 +560,7 @@ msgstr "Los cambios que no se hayan salvado se perdarán. ¿Continuar?"
 
 #: templates/viewer.html:281 templates/viewer_compress.html.py:282
 msgid "Error loading layers"
-msgstr "Error caragando capas"
+msgstr "Error cargando capas"
 
 #: templates/viewer.html:503 templates/viewer_compress.html.py:464
 msgid "Close"
