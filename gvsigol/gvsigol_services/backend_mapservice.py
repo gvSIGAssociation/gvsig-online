@@ -837,9 +837,8 @@ class Geoserver():
                 return self.rest_catalog.get_wmsresources(workspace.name, datastore.name, self.user, self.password)
                 #return store.get_resources(available=available)
             
-        except:
-            e = sys.exc_info()[0]
-            pass 
+        except rest_geoserver.FailedRequestError as e:
+            print e.get_message()
     
          
     def getResource(self, workspace, datastore, resource):

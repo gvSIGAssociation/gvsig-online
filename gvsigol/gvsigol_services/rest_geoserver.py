@@ -406,18 +406,19 @@ class Geoserver():
             else:
                 auth = self.session.auth
             r = self.session.get(url, auth=auth)
-            json = r.json()
-            
-            
-            if type == 'available' or type == 'available_with_geom':
-                if json['list'] and json['list']['string']:
-                    resources = json['list']['string']
-                    return [resource for resource in resources]
+            if r.status_code==201:
+                json = r.json()
+                if type == 'available' or type == 'available_with_geom':
+                    if json['list'] and json['list']['string']:
+                        resources = json['list']['string']
+                        return [resource for resource in resources]
+                else:
+                    if json['featureTypes'] and json['featureTypes']['featureType']:
+                        resources = json['featureTypes']['featureType']
+                        return [resource['name'] for resource in resources]
+                return []
             else:
-                if json['featureTypes'] and json['featureTypes']['featureType']:
-                    resources = json['featureTypes']['featureType']
-                    return [resource['name'] for resource in resources]
-            return []
+                raise FailedRequestError(r.status_code, r.content)
             
         return json
     
