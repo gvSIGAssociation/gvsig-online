@@ -118,6 +118,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
+    'django.contrib.sites',
+    'gvsigol_statistics',
     'gvsigol_auth',
     'gvsigol_services',
     'gvsigol_symbology',
@@ -128,7 +130,14 @@ INSTALLED_APPS = [
     'gvsigol_plugin_print',
     'gvsigol_plugin_geocoding',
     'gvsigol_plugin_catalog',
+    'actstream'
 ]
+
+ACTSTREAM_SETTINGS = {
+    'FETCH_RELATIONS': True,
+    'USE_JSONFIELD': True,
+}
+
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -150,6 +159,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
+            os.path.join(BASE_DIR, 'gvsigol_statistics/templates'),
             os.path.join(BASE_DIR, 'gvsigol_auth/templates'),
             os.path.join(BASE_DIR, 'gvsigol_core/templates'),
             os.path.join(BASE_DIR, 'gvsigol_services/templates'),
@@ -263,6 +273,7 @@ LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol_auth/locale'),
     os.path.join(BASE_DIR, 'gvsigol_services/locale'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/locale'),
+    os.path.join(BASE_DIR, 'gvsigol_statistics/locale'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/locale'),
     os.path.join(BASE_DIR, 'gvsigol_app_test/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/locale'),
@@ -299,6 +310,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_services/static'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
+    os.path.join(BASE_DIR, 'gvsigol_statistics/static'),
     os.path.join(BASE_DIR, 'gvsigol_app_dev/static')
 )
 STATICFILES_FINDERS = (
