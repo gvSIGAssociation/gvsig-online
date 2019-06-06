@@ -67,3 +67,8 @@ if 'gvsigol_filemanager' in settings.INSTALLED_APPS:
     urlpatterns += [
         url(r'^gvsigonline/filemanager/', include('gvsigol_filemanager.urls', namespace='filemanager')),      
     ]
+
+if 'gvsigol_statistics' in settings.INSTALLED_APPS:
+    urlpatterns += [
+        url(r'^gvsigonline/statistics/', include('gvsigol_statistics.urls', namespace='statistics')),
+    ]
