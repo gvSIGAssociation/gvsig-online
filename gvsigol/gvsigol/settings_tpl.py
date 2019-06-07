@@ -34,7 +34,7 @@ if '__file__' in globals():
 else:
     BASE_DIR = os.path.join(os.path.abspath(os.getcwd()), "gvsigol")
 
-# Eliminando warnings molestos  
+# Eliminando warnings molestos
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -59,7 +59,7 @@ if len(SECRET_KEY) == 14:
                 from django.utils.crypto import get_random_string
                 def get_random_secret_key():
                     chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
-                    return get_random_string(50, chars) 
+                    return get_random_string(50, chars)
             from django.core.management import utils
             import os
             SECRET_KEY = get_random_secret_key()
@@ -89,6 +89,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'gvsigol_statistics',
     'rest_framework',
+    'gvsigol_statistics',
     'gvsigol_auth',
     'gvsigol_services',
     'gvsigol_symbology',
@@ -128,7 +129,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'gvsigol_core/templates'),
             os.path.join(BASE_DIR, 'gvsigol_services/templates'),
             os.path.join(BASE_DIR, 'gvsigol_symbology/templates'),
-            os.path.join(BASE_DIR, 'gvsigol_filemanager/templates'),            
+            os.path.join(BASE_DIR, 'gvsigol_filemanager/templates'),
             os.path.join(BASE_DIR, 'gvsigol_statistics/templates'),
         ],
         'APP_DIRS': True,
@@ -229,7 +230,7 @@ EXTRA_LANG_INFO = {
 LANG_INFO = dict(django.conf.locale.LANG_INFO.items() + EXTRA_LANG_INFO.items())
 django.conf.locale.LANG_INFO = LANG_INFO
 
-LANGUAGES = [ ##LANGUAGES## 
+LANGUAGES = [ ##LANGUAGES##
 ]
 
 LOCALE_PATHS = (
@@ -287,18 +288,18 @@ MOSAIC_DB = {
     'user': '##DB_USER##',
     'passwd': '##DB_PASSWD##'
 }
-    
+
 # NOTE: we are migrating gdal_tools to the external library pygdaltools.
-# In the future we will only need GDALTOOLS_BASEPATH variable 
+# In the future we will only need GDALTOOLS_BASEPATH variable
 # OGR path is only necessary if different from the one defined on gdal_tools.OGR2OGR_PATH
 OGR2OGR_PATH = '##OGR2OGR_PATH##'
 GDALTOOLS_BASEPATH = '##GDALTOOLS_BASEPATH##'
-    
-                     
+
+
 TILE_SIZE = 256
 MAX_ZOOM_LEVEL = ##MAX_ZOOM_LEVELS##
 
-# Must be a valid iconv encoding name. Use iconv --list on Linux to see valid names 
+# Must be a valid iconv encoding name. Use iconv --list on Linux to see valid names
 SUPPORTED_ENCODINGS = [ "LATIN1", "UTF-8", "ISO-8859-15", "WINDOWS-1252"]
 USE_DEFAULT_SUPPORTED_CRS = ##CRS_FROM_SETTINGS##
 SUPPORTED_CRS = {
@@ -314,7 +315,7 @@ SUPPORTED_CRS = {
         'definition': '+proj=longlat +datum=WGS84 +no_defs +axis=neu',
         'units': 'degrees'
     },
-    ##SUPPORTED_CRS## 
+    ##SUPPORTED_CRS##
 }
 
 GVSIGOL_TOOLS = {
@@ -325,12 +326,12 @@ GVSIGOL_TOOLS = {
     'attribute_table': {
         'private_fields_prefix': '_',
         'show_search': True
-    }    
+    }
 }
-                     
+
 GVSIGOL_ENABLE_ENUMERATIONS = ##GVSIGOL_ENABLE_ENUMERATIONS##
 
-                   
+
 #skin-blue
 #skin-blue-light
 #skin-red
