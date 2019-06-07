@@ -121,40 +121,41 @@ def login_user(request):
                 findUser = User.objects.get(username=username)
             except User.DoesNotExist:
                 findUser = None
-            if findUser is not None:
-                password = request.GET.get('pass')
-                request.session['username'] = username
-                request.session['password'] = password
-                user = authenticate(username=username, password=password)
-                if user is not None:
-                    if user.is_active:
-                        login(request, user)
-                        id_solicitud = request.GET.get('id_solicitud')
-                        dni = request.GET.get('dni')
-                        expediente = request.GET.get('expediente')
-                        token = request.GET.get('token')
-                        if id_solicitud is not None:                            
-                            response = redirect(request.GET.get('next'))
-                            response['Location'] += '?id_solicitud=' + id_solicitud + '&token=' + token
-                            return response
-                        
-                        elif dni is not None:
-                            response = redirect(request.GET.get('next'))
-                            response['Location'] += '?dni=' + dni + '&token=' + token
-                            return response
-                        
-                        elif expediente is not None:
-                            response = redirect(request.GET.get('next'))
-                            response['Location'] += '?expediente=' + expediente + '&token=' + token
-                            return response
-                    
+            password = request.GET.get('pass')
+            if findUser is not None or password is not None:
+                if findUser is not None:
+                    request.session['username'] = username
+                    request.session['password'] = password
+                    user = authenticate(username=username, password=password)
+                    if user is not None:
+                        if user.is_active:
+                            login(request, user)
+                            id_solicitud = request.GET.get('id_solicitud')
+                            dni = request.GET.get('dni')
+                            expediente = request.GET.get('expediente')
+                            token = request.GET.get('token')
+                            if id_solicitud is not None:
+                                response = redirect(request.GET.get('next'))
+                                response['Location'] += '?id_solicitud=' + id_solicitud + '&token=' + token
+                                return response
+
+                            elif dni is not None:
+                                response = redirect(request.GET.get('next'))
+                                response['Location'] += '?dni=' + dni + '&token=' + token
+                                return response
+
+                            elif expediente is not None:
+                                response = redirect(request.GET.get('next'))
+                                response['Location'] += '?expediente=' + expediente + '&token=' + token
+                                return response
+
+                        else:
+                            errors.append({'message': _("Your account has been disabled")})
                     else:
-                        errors.append({'message': _("Your account has been disabled")})
+                        errors.append({'message': _("The username and password you have entered do not match our records")})
                 else:
                     errors.append({'message': _("The username and password you have entered do not match our records")})
-            else:
-                errors.append({'message': _("The username and password you have entered do not match our records")})
-                
+
     external_ldap_mode = True
     if 'AD' in GVSIGOL_LDAP and GVSIGOL_LDAP['AD'].__len__() > 0:
         external_ldap_mode = False
