@@ -52,9 +52,12 @@ var measureLength3d = function(wwd) {
 	// 
     this.pathPositions = new Array();
     this.locations = new Array();
+    // this.texts = new Array(); // array de text renderables, para poder borrarlos bien.
 
     this.overlayLayer = new WorldWind.RenderableLayer("Measures");
     this.overlayLayer2 = new WorldWind.RenderableLayer("Measures2");
+    this.wwd.addLayer(this.overlayLayer);
+    this.wwd.addLayer(this.overlayLayer2);
     
     // Define the path attributes.
     this.pathAttributes = new WorldWind.ShapeAttributes(null);        
@@ -64,13 +67,7 @@ var measureLength3d = function(wwd) {
     this.pathAttributes2 = new WorldWind.ShapeAttributes(null);
     this.pathAttributes2.outlineColor = new WorldWind.Color(1, 1, 1, 0.6);
     this.pathAttributes2.outlineWidth = 5;
-    
-    this.path = new WorldWind.SurfacePolyline(this.locations, this.pathAttributes);
-    this.pathBorder = new WorldWind.SurfacePolyline(this.locations, this.pathAttributes2);
-
-    this.wwd.addLayer(this.overlayLayer);
-    this.wwd.addLayer(this.overlayLayer2); // Segment when mouse is moving
-    
+        
     // Create our measuring objects.
     this.lengthMeasurer = new WorldWind.LengthMeasurer(this.wwd);
 
@@ -115,6 +112,8 @@ measureLength3d.prototype._handler = function(e) {
 		this.active = true;
         this.$button.trigger('control-active', [this]);
 
+        this.path = new WorldWind.SurfacePolyline(this.locations, this.pathAttributes);
+        this.pathBorder = new WorldWind.SurfacePolyline(this.locations, this.pathAttributes2);    
         this.overlayLayer.addRenderable(this.pathBorder);
         this.overlayLayer.addRenderable(this.path);    
         this._addListeners();
@@ -158,9 +157,19 @@ measureLength3d.prototype._onWWClick = function(recognizer) {
             this.pathBorder.boundaries = this.locations;
 
             var text = new WorldWind.GeographicText(position, this._formatDistance(distance));                    
-
+            // this.texts.push(text);
             this.overlayLayer.addRenderable(text);
             this.overlayLayer.refresh();
+        }
+        else {
+            this.overlayLayer.removeAllRenderables();
+            this.overlayLayer2.removeAllRenderables();
+            this.overlayLayer.addRenderable(this.pathBorder);
+            this.overlayLayer.addRenderable(this.path);
+            this.path.boundaries = [];
+            this.pathBorder.boundaries = [];
+            this.overlayLayer.refresh();
+            this.overlayLayer2.refresh();
         }
     }
 
@@ -173,6 +182,9 @@ measureLength3d.prototype._keyListener = function(evt) {
     }
 }
 
+measureLength3d.prototype._doubleClickListener = function(evt) {
+    this._removeOverlays();
+}
 
 measureLength3d.prototype._addListeners = function() {
 
@@ -195,6 +207,7 @@ measureLength3d.prototype._addListeners = function() {
         this.wwd.addEventListener("touchmove", this._eventListener.bind(this));
     }
 
+    this.wwd.addEventListener('dblclick', this._doubleClickListener.bind(this));
     
 }
 
@@ -268,13 +281,14 @@ measureLength3d.prototype._removeListeners = function() {
         this.wwd.removeEventListener("mouseleave", this._eventListener);
         this.wwd.removeEventListener("touchstart", this._eventListener);
         this.wwd.removeEventListener("touchmove", this._eventListener);
-    }        
+    }
 
+    this.wwd.removeEventListener('dblclick', this._doubleClickListener);
 
 }
 
 measureLength3d.prototype.deactivate = function() {			
-    this._removeOverlays();
+    this._removeOverlays(true);
     this._removeListeners();
     this.$button.blur();
 	this.active = false;
@@ -283,12 +297,20 @@ measureLength3d.prototype.deactivate = function() {
 /**
  * TODO
  */
-measureLength3d.prototype._removeOverlays = function() {
+measureLength3d.prototype._removeOverlays = function(bRedraw) {
     this.pathPositions = [];
     this.locations = [];
-    this.path.boundaries = [];
-    this.pathBorder.boundaries = [];
-    this.overlayLayer2.removeAllRenderables();
-    this.overlayLayer.removeAllRenderables();
-    this.wwd.redraw();
+    // this.path.boundaries = [];
+    // this.pathBorder.boundaries = [];
+    // this.overlayLayer2.removeAllRenderables();
+    // Remove only texts
+    // for(var i =0; i < this.texts.length; i++) {
+    //     this.overlayLayer.removeRenderable(this.texts[i]);
+    // };
+    // this.texts = [];
+    // this.overlayLayer.removeAllRenderables();    
+    // this.overlayLayer.addRenderable(this.path);
+    if (bRedraw) {
+        this.wwd.redraw();
+    }
 };

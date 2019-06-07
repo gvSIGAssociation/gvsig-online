@@ -34,6 +34,9 @@ var measureArea3d = function(wwd) {
 
     this.overlayLayer = new WorldWind.RenderableLayer("Measures");
     this.overlayLayer2 = new WorldWind.RenderableLayer("Measures2");
+    this.wwd.addLayer(this.overlayLayer);
+    this.wwd.addLayer(this.overlayLayer2);
+
     
     // Define the path attributes.
     this.pathAttributes = new WorldWind.ShapeAttributes(null);        
@@ -156,6 +159,10 @@ measureArea3d.prototype._keyListener = function(evt) {
     }
 }
 
+measureArea3d.prototype._doubleClickListener = function(evt) {
+    this._removeOverlays();
+}
+
 
 measureArea3d.prototype._addListeners = function() {
 
@@ -177,6 +184,7 @@ measureArea3d.prototype._addListeners = function() {
         this.wwd.addEventListener("touchstart", this._eventListener.bind(this));
         this.wwd.addEventListener("touchmove", this._eventListener.bind(this));
     }
+    this.wwd.addEventListener('dblclick', this._doubleClickListener.bind(this));
 
     
 }
@@ -267,11 +275,12 @@ measureArea3d.prototype._removeListeners = function() {
         this.wwd.removeEventListener("touchmove", this._eventListener);
     }        
 
+    this.wwd.removeEventListener('dblclick', this._doubleClickListener);
 
 }
 
 measureArea3d.prototype.deactivate = function() {			
-    this._removeOverlays();
+    this._removeOverlays(true);
     this._removeListeners();
     this.$button.blur();
 	this.active = false;
@@ -280,12 +289,14 @@ measureArea3d.prototype.deactivate = function() {
 /**
  * TODO
  */
-measureArea3d.prototype._removeOverlays = function() {
+measureArea3d.prototype._removeOverlays = function(bRedraw) {
     this.pathPositions = [];
     this.locations = [];
     this.path.boundaries = [];
     this.pathBorder.boundaries = [];
-    this.overlayLayer2.removeAllRenderables();
-    this.overlayLayer.removeAllRenderables();
-    this.wwd.redraw();
+    if (bRedraw) {
+        this.overlayLayer2.removeAllRenderables();
+        this.overlayLayer.removeAllRenderables();    
+        this.wwd.redraw();
+    }
 };
