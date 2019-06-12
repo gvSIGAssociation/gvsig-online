@@ -23,13 +23,16 @@ import urllib
 import os
 import datetime
 import pytz
+import ssl
 from dateutil.parser import parse as parsedate
 from tzlocal import get_localzone # $ pip install tzlocal
 from __builtin__ import False
 
+
 def download_file(url, dstFile):
     try:
-        urllib.urlretrieve(url, dstFile)
+        context = ssl._create_unverified_context()        
+        urllib.urlretrieve(url, dstFile, context = context)
         return True
     except:
         return False
