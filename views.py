@@ -81,9 +81,9 @@ def style_layer_list(request):
     
     layers = None
     if request.user.is_superuser:
-        layers = Layer.objects.all()
+        layers = Layer.objects.filter(external=False)
     else:
-        layers = Layer.objects.filter(created_by__exact=request.user.username)
+        layers = Layer.objects.filter(created_by__exact=request.user.username).filter(external=False)
     
     for lyr in layers:
         layerStyles = StyleLayer.objects.filter(layer=lyr)
