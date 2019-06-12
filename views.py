@@ -26,7 +26,7 @@ from gvsigol_core.models import SharedView
 '''
 
 from django.shortcuts import render_to_response, RequestContext, HttpResponse, redirect
-from models import Project, ProjectUserGroup, ProjectLayerGroup, BaseLayer, BaseLayerProject
+from models import Project, ProjectUserGroup, ProjectLayerGroup#, BaseLayer, BaseLayerProject
 from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup
 from gvsigol_auth.models import UserGroup, UserGroupUser
 from django.contrib.auth.decorators import login_required
@@ -170,9 +170,14 @@ def project_list(request):
         'projects': projects
     }
     return render_to_response('project_list.html', response, context_instance=RequestContext(request))
-_(u'You must enter an project name')
+
 def get_core_tools(enabled=True):
     return [{
+        'name': 'gvsigol_tool_navigationhistory',
+        'checked': enabled,
+        'title': _(u'Navigation history'),
+        'description': _(u'Browse the view forward and backward')
+    },{
         'name': 'gvsigol_tool_zoom',
         'checked': enabled,
         'title': _(u'Zoom tools'),
@@ -232,7 +237,7 @@ def get_plugin_tools(enabled=False):
             })
     return project_tools
 
-def get_available_tools(core_enabled=True, plugin_enabled=False):
+def get_available_tools(core_enabled=True, plugin_enabled=True):
     """
     Gets the definition of available tools
     (core tools plus plugin tools)
@@ -248,7 +253,6 @@ def get_available_tools(core_enabled=True, plugin_enabled=False):
 def project_add(request):
 
     has_geocoding_plugin = False
-    base_layers = BaseLayer.objects.all()
     if 'gvsigol_plugin_geocoding' in settings.INSTALLED_APPS:
         from gvsigol_plugin_geocoding.models import Provider
         providers = Provider.objects.all()
@@ -276,16 +280,17 @@ def project_add(request):
         if 'project-image' in request.FILES:
             has_image = True
 
-        default_baselayer = None
-        if 'default_base_layer_selected' in request.POST:
-            default_baselayer = request.POST.get('default_base_layer_selected')
+        selected_base_layer = None
+        if 'selected_base_layer' in request.POST:
+            selected_base_layer = request.POST.get('selected_base_layer')
+            
+        selected_base_group = None
+        if 'selected_base_group' in request.POST:
+            selected_base_group = request.POST.get('selected_base_group')
 
-        assigned_baselayers = []
         assigned_layergroups = []
         assigned_usergroups = []
         for key in request.POST:
-            if 'baselayer-' in key:
-                assigned_baselayers.append(int(key.split('-')[1]))
             if 'layergroup-' in key:
                 assigned_layergroups.append(int(key.split('-')[1]))
             if 'usergroup-' in key:
@@ -302,6 +307,21 @@ def project_add(request):
             layergroups = LayerGroup.objects.exclude(name='__default__')
         else:
             layergroups = LayerGroup.objects.exclude(name='__default__').filter(created_by__exact=request.user.username)
+            
+        prepared_layer_groups = []
+        for lg in layergroups:
+            layer_group = {}
+            layer_group['id'] = lg.id
+            layer_group['name'] = lg.name
+            layer_group['title'] = lg.title
+            layer_group['layers'] = []
+            layers = Layer.objects.filter(layer_group_id=lg.id)
+            for l in layers:
+                layer_group['layers'].append({
+                    'id': l.id,
+                    'title': l.title
+                })
+            prepared_layer_groups.append(layer_group)
 
         groups = None
         if request.user.is_superuser:
@@ -311,11 +331,11 @@ def project_add(request):
 
         if name == '':
             message = _(u'You must enter an project name')
-            return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'tools': project_tools, 'groups': groups, 'base_layers': base_layers, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+            return render_to_response('project_add.html', {'message': message, 'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
 
         if _valid_name_regex.search(name) == None:
             message = _(u"Invalid project name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
-            return render_to_response('project_add.html', {'message': message, 'layergroups': layergroups, 'tools': project_tools, 'groups': groups, 'base_layers': base_layers, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+            return render_to_response('project_add.html', {'message': message, 'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
 
         if not exists:
             project = None
@@ -352,25 +372,21 @@ def project_add(request):
                 )
             project.save()
 
-            for bly in assigned_baselayers:
-                baselayer = BaseLayer.objects.get(id=bly)
-                is_default = False
-                if default_baselayer and int(default_baselayer) == baselayer.id:
-                    is_default = True
-                project_baselayer = BaseLayerProject(
-                    project = project,
-                    baselayer = baselayer,
-                    is_default = is_default
-                )
-                project_baselayer.save()
-
             for alg in assigned_layergroups:
                 layergroup = LayerGroup.objects.get(id=alg)
+                baselayer_group = False
+                if selected_base_group != '' and alg == int(selected_base_group):
+                    baselayer_group = True
                 project_layergroup = ProjectLayerGroup(
                     project = project,
-                    layer_group = layergroup
+                    layer_group = layergroup,
+                    multiselect = True,
+                    baselayer_group = baselayer_group
                 )
                 project_layergroup.save()
+                if baselayer_group:
+                    project_layergroup.default_baselayer = int(selected_base_layer)
+                    project_layergroup.save()
 
             for aug in assigned_usergroups:
                 usergroup = UserGroup.objects.get(id=aug)
@@ -395,7 +411,7 @@ def project_add(request):
 
         else:
             message = _(u'Project name already exists')
-            return render_to_response('project_add.html', {'message': message, 'tools': project_tools , 'layergroups': layergroups, 'base_layers': base_layers, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+            return render_to_response('project_add.html', {'message': message, 'tools': project_tools , 'layergroups': prepared_layer_groups, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
 
 
 
@@ -413,10 +429,23 @@ def project_add(request):
             groups = core_utils.get_all_groups()
         else:
             groups = core_utils.get_user_groups(request.user.username)
+        
+        prepared_layer_groups = []
+        for lg in layergroups:
+            layer_group = {}
+            layer_group['id'] = lg.id
+            layer_group['name'] = lg.name
+            layer_group['title'] = lg.title
+            layer_group['layers'] = []
+            layers = Layer.objects.filter(layer_group_id=lg.id)
+            for l in layers:
+                layer_group['layers'].append({
+                    'id': l.id,
+                    'title': l.title
+                })
+            prepared_layer_groups.append(layer_group)
 
-        base_layers = BaseLayer.objects.all()
-
-        return render_to_response('project_add.html', {'layergroups': layergroups, 'tools': project_tools, 'groups': groups, 'base_layers': base_layers, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+        return render_to_response('project_add.html', {'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -445,16 +474,17 @@ def project_update(request, pid):
         if 'is_public' in request.POST:
             is_public = True
 
-        default_baselayer = None
-        if 'default_base_layer_selected' in request.POST:
-            default_baselayer = request.POST.get('default_base_layer_selected')
+        selected_base_layer = None
+        if 'selected_base_layer' in request.POST:
+            selected_base_layer = request.POST.get('selected_base_layer')
+            
+        selected_base_group = None
+        if 'selected_base_group' in request.POST:
+            selected_base_group = request.POST.get('selected_base_group')
 
-        assigned_baselayers = []
         assigned_layergroups = []
         assigned_usergroups = []
         for key in request.POST:
-            if 'baselayer-' in key:
-                assigned_baselayers.append(int(key.split('-')[1]))
             if 'layergroup-' in key:
                 assigned_layergroups.append(int(key.split('-')[1]))
             if 'usergroup-' in key:
@@ -495,35 +525,27 @@ def project_update(request, pid):
 
         project.save()
 
-        for bl in BaseLayerProject.objects.filter(project_id=project.id):
-            bl.delete()
-
         for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
             lg.delete()
 
         for ug in ProjectUserGroup.objects.filter(project_id=project.id):
             ug.delete()
-
-
-        for bly in assigned_baselayers:
-            baselayer = BaseLayer.objects.get(id=bly)
-            is_default = False
-            if default_baselayer and int(default_baselayer) == baselayer.id:
-                is_default = True
-            project_baselayer = BaseLayerProject(
-                project = project,
-                baselayer = baselayer,
-                is_default = is_default
-            )
-            project_baselayer.save()
-
+            
         for alg in assigned_layergroups:
             layergroup = LayerGroup.objects.get(id=alg)
+            baselayer_group = False
+            if alg == int(selected_base_group):
+                baselayer_group = True
             project_layergroup = ProjectLayerGroup(
                 project = project,
-                layer_group = layergroup
+                layer_group = layergroup,
+                multiselect = True,
+                baselayer_group = baselayer_group
             )
             project_layergroup.save()
+            if baselayer_group:
+                project_layergroup.default_baselayer = int(selected_base_layer)
+                project_layergroup.save()
 
         for aug in assigned_usergroups:
             usergroup = UserGroup.objects.get(id=aug)
@@ -552,15 +574,6 @@ def project_update(request, pid):
         project = Project.objects.get(id=int(pid))
         groups = core_utils.get_all_groups_checked_by_project(request, project)
         layer_groups = core_utils.get_all_layer_groups_checked_by_project(request, project)
-        base_layers = BaseLayer.objects.all()
-        base_layers_project = BaseLayerProject.objects.filter(project=project)
-        selected_base_layers=[]
-
-        selected_base_layer=-1
-        for base_layer_project in base_layers_project:
-            selected_base_layers.append(base_layer_project.baselayer.id)
-            if base_layer_project.is_default:
-                selected_base_layer = base_layer_project.baselayer.id
 
         if project.toc_order:
             toc = json.loads(project.toc_order)
@@ -586,8 +599,22 @@ def project_update(request, pid):
             if not founded:
                 defaultTool['checked'] = False
                 projectTools.append(defaultTool)
+              
+        for lg in layer_groups:
+            lg['layers'] = []
+            layers = Layer.objects.filter(layer_group_id=lg['id'])
+            for l in layers:   
+                baselayer = False           
+                if lg['baselayer_group']:
+                    if l.id == lg['default_baselayer']:
+                        baselayer = True
+                lg['layers'].append({
+                    'id': l.id,
+                    'title': l.title,
+                    'baselayer': baselayer
+                })
 
-        return render_to_response('project_update.html', {'tools': projectTools,'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'base_layers': base_layers, 'selected_base_layers': selected_base_layers,'selected_base_layer': selected_base_layer, 'has_geocoding_plugin': has_geocoding_plugin, 'toc': ordered_toc}, context_instance=RequestContext(request))
+        return render_to_response('project_update.html', {'tools': projectTools,'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'has_geocoding_plugin': has_geocoding_plugin, 'toc': ordered_toc}, context_instance=RequestContext(request))
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -777,158 +804,211 @@ def project_get_conf(request):
             conf_group['groupName'] = group.name
             conf_group['cached'] = group.cached
             conf_group['visible'] = group.visible
+            if project_group.baselayer_group:
+                conf_group['visible'] = False 
+            conf_group['basegroup'] = project_group.baselayer_group
             conf_group['wms_endpoint'] = server.getWmsEndpoint()
             conf_group['wfs_endpoint'] = server.getWfsEndpoint()
             conf_group['cache_endpoint'] = server.getCacheEndpoint()
             layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('order')
             layers = []
             user_roles = core_utils.get_group_names_by_user(request.user)
-
+            
+            allows_getmap = True
+            servers_list = []
+            
             idx = 0
             for l in layers_in_group:
-                try:
-                    read_roles = services_utils.get_read_roles(l)
-                    write_roles = services_utils.get_write_roles(l)
-
-                    readable = False
-                    if len(read_roles) == 0:
-                        readable = True
-                    else:
-                        for ur in user_roles:
-                            for rr in read_roles:
-                                if ur == rr:
-                                    readable = True
-
-                    if readable:
-                        layer = {}
-                        layer['name'] = l.name
-                        layer['title'] = l.title
-                        layer['abstract'] = l.abstract
-                        layer['visible'] = l.visible
-                        layer['queryable'] = l.queryable
-                        layer['highlight'] = l.highlight
-                        if l.highlight:
-                            layer['highlight_scale'] = int(l.highlight_scale)
-
-                        layer['time_enabled'] = l.time_enabled
-                        if layer['time_enabled']:
-                            layer['ref'] = l.id
-                            layer['time_enabled_field'] = l.time_enabled_field
-                            layer['time_enabled_endfield'] = l.time_enabled_endfield
-                            layer['time_presentation'] = l.time_presentation
-                            layer['time_resolution_year'] = l.time_resolution_year
-                            layer['time_resolution_month'] = l.time_resolution_month
-                            layer['time_resolution_week'] = l.time_resolution_week
-                            layer['time_resolution_day'] = l.time_resolution_day
-                            layer['time_resolution_hour'] = l.time_resolution_hour
-                            layer['time_resolution_minute'] = l.time_resolution_minute
-                            layer['time_resolution_second'] = l.time_resolution_second
-                            layer['time_default_value_mode'] = l.time_default_value_mode
-                            layer['time_default_value'] = l.time_default_value
-
-                            layer['time_resolution'] = l.time_resolution
-
-                        layer['cached'] = l.cached
-
-                        order = int(conf_group['groupOrder']) + l.order
-                        layer['order'] = order
-                        layer['single_image'] = l.single_image
-                        layer['read_roles'] = read_roles
-                        layer['write_roles'] = write_roles
-                        layer['styles'] = get_layer_styles(l)
-
-                        try:
-                            json_conf = ast.literal_eval(l.conf)
-                            layer['conf'] = json.dumps(json_conf)
-                        except:
-                            layer['conf'] = "{\"fields\":[]}"
-                            pass
-
-                        datastore = Datastore.objects.get(id=l.datastore_id)
-                        workspace = Workspace.objects.get(id=datastore.workspace_id)
-
-                        if datastore.type == 'v_SHP' or datastore.type == 'v_PostGIS':
-                            layer['is_vector'] = True
+                if not l.external:
+                    try:
+                        read_roles = services_utils.get_read_roles(l)
+                        write_roles = services_utils.get_write_roles(l)
+    
+                        readable = False
+                        if len(read_roles) == 0:
+                            readable = True
                         else:
-                            layer['is_vector'] = False
-
-                        layer_info = None
-                        defaultCrs = None
-                        if datastore.type == 'e_WMS':
-                            defaultCrs = 'EPSG:4326'
-                        else:
-                            server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-                            (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, l.name, "json")
-                            if ds_type == 'imagemosaic':
-                                ds_type = 'coverage'
-                            defaultCrs = layer_info[ds_type]['srs']
-
-                        crs_code = int(defaultCrs.split(':')[1])
-                        if crs_code in core_utils.get_supported_crs():
-                            epsg = core_utils.get_supported_crs()[crs_code]
-                            layer['crs'] = {
-                                'crs': defaultCrs,
-                                'units': epsg['units']
-                            }
-                            used_crs.append(epsg)
-
-                        layer['opacity'] = 1
-                        layer['wms_url'] = core_utils.get_wms_url(request, workspace)
-                        layer['wms_url_no_auth'] = workspace.wms_endpoint
-                        layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
-                        layer['wfs_url_no_auth'] = workspace.wfs_endpoint
-                        layer['namespace'] = workspace.uri
-                        layer['workspace'] = workspace.name
-                        layer['metadata'] = core_utils.get_catalog_url(request, l)
-                        if l.cached:
-                            layer['cache_url'] = core_utils.get_cache_url(request, workspace)
-                        else:
-                            layer['cache_url'] = core_utils.get_wms_url(request, workspace)
-
-                        if datastore.type == 'e_WMS':
-                            layer['legend'] = ""
-                        else:
-                            ls = get_default_style(l)
-                            if ls is None:
-                                print 'CAPA SIN ESTILO POR DEFECTO: ' + l.name
-                                layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
-                                layer['legend_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
-                                layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
-                                layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
-
+                            for ur in user_roles:
+                                for rr in read_roles:
+                                    if ur == rr:
+                                        readable = True
+    
+                        if readable:
+                            layer = {}
+                            layer['external'] = False
+                            if project_group.baselayer_group:
+                                layer['baselayer'] = True
+                                if l.id == project_group.default_baselayer:
+                                    layer['default_baselayer'] = True
+                                else:
+                                    layer['default_baselayer'] = False
                             else:
-                                if not ls.has_custom_legend:
+                                layer['baselayer'] = False
+                                
+                            layer['name'] = l.name
+                            layer['title'] = l.title
+                            layer['abstract'] = l.abstract
+                            layer['visible'] = l.visible
+                            layer['type'] = l.type
+                            layer['queryable'] = l.queryable
+    
+                            layer['time_enabled'] = l.time_enabled
+                            if layer['time_enabled']:
+                                layer['ref'] = l.id
+                                layer['time_enabled_field'] = l.time_enabled_field
+                                layer['time_enabled_endfield'] = l.time_enabled_endfield
+                                layer['time_presentation'] = l.time_presentation
+                                layer['time_resolution_year'] = l.time_resolution_year
+                                layer['time_resolution_month'] = l.time_resolution_month
+                                layer['time_resolution_week'] = l.time_resolution_week
+                                layer['time_resolution_day'] = l.time_resolution_day
+                                layer['time_resolution_hour'] = l.time_resolution_hour
+                                layer['time_resolution_minute'] = l.time_resolution_minute
+                                layer['time_resolution_second'] = l.time_resolution_second
+                                layer['time_default_value_mode'] = l.time_default_value_mode
+                                layer['time_default_value'] = l.time_default_value
+    
+                                layer['time_resolution'] = l.time_resolution
+    
+                            layer['cached'] = l.cached
+    
+                            order = int(conf_group['groupOrder']) + l.order
+                            layer['order'] = order
+                            layer['single_image'] = l.single_image
+                            layer['read_roles'] = read_roles
+                            layer['write_roles'] = write_roles
+                            layer['styles'] = get_layer_styles(l)
+    
+                            try:
+                                json_conf = ast.literal_eval(l.conf)
+                                layer['conf'] = json.dumps(json_conf)
+                            except:
+                                layer['conf'] = "{\"fields\":[]}"
+                                pass
+    
+                            datastore = Datastore.objects.get(id=l.datastore_id)
+                            workspace = Workspace.objects.get(id=datastore.workspace_id)
+                            
+                            servers_list.append(workspace.server.name)
+                            
+                            if datastore.type == 'v_SHP' or datastore.type == 'v_PostGIS':
+                                layer['is_vector'] = True
+                            else:
+                                layer['is_vector'] = False
+    
+                            layer_info = None
+                            defaultCrs = None
+                            if datastore.type == 'e_WMS':
+                                defaultCrs = 'EPSG:4326'
+                            else:
+                                server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+                                (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, l.name, "json")
+                                if ds_type == 'imagemosaic':
+                                    ds_type = 'coverage'
+                                defaultCrs = layer_info[ds_type]['srs']
+    
+                            crs_code = int(defaultCrs.split(':')[1])
+                            if crs_code in core_utils.get_supported_crs():
+                                epsg = core_utils.get_supported_crs()[crs_code]
+                                layer['crs'] = {
+                                    'crs': defaultCrs,
+                                    'units': epsg['units']
+                                }
+                                used_crs.append(epsg)
+    
+                            layer['opacity'] = 1
+                            layer['wms_url'] = core_utils.get_wms_url(request, workspace)
+                            layer['wms_url_no_auth'] = workspace.wms_endpoint
+                            layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
+                            layer['wfs_url_no_auth'] = workspace.wfs_endpoint
+                            layer['namespace'] = workspace.uri
+                            layer['workspace'] = workspace.name
+                            layer['metadata'] = core_utils.get_catalog_url(request, l)
+                            if l.cached:
+                                layer['cache_url'] = core_utils.get_cache_url(request, workspace)
+                            else:
+                                layer['cache_url'] = core_utils.get_wms_url(request, workspace)
+    
+                            if datastore.type == 'e_WMS':
+                                layer['legend'] = ""
+                            else:
+                                ls = get_default_style(l)
+                                if ls is None:
+                                    print 'CAPA SIN ESTILO POR DEFECTO: ' + l.name
                                     layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
                                     layer['legend_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
                                     layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
                                     layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+    
                                 else:
-                                    layer['legend'] = ls.custom_legend_url
-                                    layer['legend_no_auth'] = ls.custom_legend_url
-                                    layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
-                                    layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
-
-                        layers.append(layer)
-
-                        w = {}
-                        w['name'] = workspace.name
-                        w['wms_url'] = workspace.wms_endpoint
-                        workspaces.append(w)
-                    idx = idx + 1
-
-                except Exception as e:
-                    datastore = Datastore.objects.get(id=l.datastore_id)
-                    workspace = Workspace.objects.get(id=datastore.workspace_id)
-
-                    error = {
-                        'layer': l.name,
-                        'datastore': datastore.name,
-                        'workspace': workspace.name,
-                        'error': str(e)
-                    }
-                    errors.append(error)
-                    pass
-
+                                    if not ls.has_custom_legend:
+                                        layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                        layer['legend_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                        layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                        layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                    else:
+                                        layer['legend'] = ls.custom_legend_url
+                                        layer['legend_no_auth'] = ls.custom_legend_url
+                                        layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                        layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+    
+                            layers.append(layer)
+    
+                            w = {}
+                            w['name'] = workspace.name
+                            w['wms_url'] = workspace.wms_endpoint
+                            workspaces.append(w)
+                        idx = idx + 1
+    
+                    except Exception as e:
+                        datastore = Datastore.objects.get(id=l.datastore_id)
+                        workspace = Workspace.objects.get(id=datastore.workspace_id)
+    
+                        error = {
+                            'layer': l.name,
+                            'datastore': datastore.name,
+                            'workspace': workspace.name,
+                            'error': str(e)
+                        }
+                        errors.append(error)
+                        pass
+                    
+                else:
+                    allows_getmap = False
+                    
+                    layer = {}
+                    if project_group.baselayer_group:
+                        layer['baselayer'] = True
+                        if l.id == project_group.default_baselayer:
+                            layer['default_baselayer'] = True
+                        else:
+                            layer['default_baselayer'] = False
+                    else:
+                        layer['baselayer'] = False
+                    
+                    layer['opacity'] = 1
+                    layer['external'] = True   
+                    layer['name'] = l.name
+                    layer['title'] = l.title
+                    layer['abstract'] = l.abstract
+                    layer['visible'] = l.visible
+                    layer['queryable'] = l.queryable
+                    layer['cached'] = l.cached
+                    layer['type'] = l.type
+                    if l.external_params:
+                        params = json.loads(l.external_params)
+                        layer.update(params)
+    
+                    order = int(conf_group['groupOrder']) + l.order
+                    layer['order'] = order
+                    
+                    layers.append(layer)
+            
+            if allows_getmap:
+                if len(servers_list) > 0 :
+                    allows_getmap = all(elem == servers_list[0] for elem in servers_list)        
+            conf_group['allows_getmap'] = allows_getmap
+            
             if len(layers) > 0:
                 ordered_layers = sorted(layers, key=itemgetter('order'), reverse=True)
                 conf_group['layers'] = ordered_layers
@@ -942,23 +1022,7 @@ def project_get_conf(request):
         if 'gvsigol_plugin_alfresco' in gvsigol.settings.INSTALLED_APPS:
             resource_manager = 'alfresco'
 
-        bsly_projs = BaseLayerProject.objects.filter(project=project).order_by('order')
 
-        base_layers = []
-        for bsly_proj in bsly_projs:
-            bsly = bsly_proj.baselayer
-
-            base_layer = {}
-            if bsly.type_params:
-                bsly_params = json.loads(bsly.type_params)
-                base_layer.update(bsly_params)
-
-            base_layer['name'] = bsly.name
-            base_layer['title'] = bsly.title
-            base_layer['type'] = bsly.type
-            base_layer['active'] = bsly_proj.is_default
-
-            base_layers.append(base_layer)
 
         auth_urls = []
         for s in Server.objects.all():
@@ -983,7 +1047,6 @@ def project_get_conf(request):
             'layerGroups': ordered_layer_groups,
             'tools': gvsigol.settings.GVSIGOL_TOOLS,
             'tile_size': gvsigol.settings.TILE_SIZE,
-            'base_layers': base_layers,
             'is_public_project': project.is_public,
             'resource_manager': resource_manager,
             'remote_auth': settings.AUTH_WITH_REMOTE_USER,

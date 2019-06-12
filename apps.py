@@ -27,6 +27,7 @@ class my_schedule_thread(threading.Thread):
 
 class GvsigolCoreConfig(AppConfig):
     name = 'gvsigol_core'
+    label = 'gvsigol_core'
 
     def ready(self):
         from actstream import registry

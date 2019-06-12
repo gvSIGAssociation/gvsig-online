@@ -64,7 +64,7 @@ legend.prototype.getLegendsFromVisibleLayers = function() {
 	html += '	<div class="box-body">';
 	var layers = this.map.getLayers().getArray();
 	for (var i=0; i<layers.length; i++) {
-		if (!layers[i].baselayer) {
+		if (!layers[i].baselayer && !layers[i].external) {
 			if (layers[i].wms_url && layers[i].getVisible()) {
 				if (layers[i].legend != "") {
 					html += 		'<div class="box box-widget">';

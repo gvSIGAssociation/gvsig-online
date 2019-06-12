@@ -159,7 +159,7 @@ getFeatureInfo.prototype.hasLayers = function() {
 	var layers = this.map.getLayers().getArray();
 	var queryLayers = new Array();
 	for (var i=0; i<layers.length; i++) {
-		if (!layers[i].baselayer) {
+		if (!layers[i].baselayer && !layers[i].external) {
 			if (layers[i].queryable) {
 				if (layers[i].getVisible()) {
 					queryLayers.push(layers[i]);
@@ -307,12 +307,12 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 		var auxLayer = null;
 
 		for (var i=0; i<layers.length; i++) {
-			if (!layers[i].baselayer) {
+			if (!layers[i].baselayer && !layers[i].external) {
 				if (layers[i].wms_url && layers[i].getVisible()) {
 					if( layers[i].isLayerGroup){
 						var parent = layers[i];
 						for (var j=0; j<layers.length; j++) {
-							if (!layers[j].baselayer) {
+							if (!layers[j].baselayer && !layers[j].external) {
 								if (layers[j].wms_url) {
 									if ((typeof layers[j].parentGroup === 'string' && layers[j].parentGroup == parent.layer_name) ||
 											(layers[j].parentGroup != undefined && layers[j].parentGroup.groupName == parent.layer_name)){
@@ -980,7 +980,7 @@ getFeatureInfo.prototype.getLayerTitle = function(feature){
 
 	var layers = this.map.getLayers().getArray();
 	for (var i=0; i<layers.length; i++) {
-		if (!layers[i].baselayer) {
+		if (!layers[i].baselayer && !layers[i].external) {
 			if (layers[i].layer_name && layers[i].title) {
 				if (layers[i].layer_name == layerName) {
 					layerTitle = layers[i].title;
