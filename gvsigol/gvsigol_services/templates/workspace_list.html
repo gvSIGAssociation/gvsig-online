@@ -34,7 +34,11 @@
 							<td>{{ ws.name }}</td>
 							<td>{{ ws.description }}</td>
 							<td>{{ ws.uri }}</td>
-							<td>{{ ws.is_public }}</td>
+							{% if ws.is_public %}
+							<td><input disabled type="checkbox" checked/></td>
+							{% else %}
+							<td><input disabled type="checkbox"/></td>
+							{% endif %}
 							<td></td>
 							<td></td>
 						</tr>

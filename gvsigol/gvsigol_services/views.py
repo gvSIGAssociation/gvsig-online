@@ -24,7 +24,7 @@ from httplib import HTTPResponse
 from models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, Enumeration, EnumerationItem,\
     LayerLock, Server, Node
 from geoserver import workspace
-from forms_services import ServerForm, WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, BaseLayerForm
+from forms_services import ServerForm, WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, ExternalLayerForm
 from forms_geoserver import CreateFeatureTypeForm
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
@@ -34,7 +34,7 @@ from backend_postgis import Introspect
 from gvsigol_services.backend_resources import resource_manager
 from gvsigol_auth.utils import superuser_required, staff_required
 from django.contrib.auth.models import User
-from gvsigol_core.models import ProjectLayerGroup, BaseLayer
+from gvsigol_core.models import ProjectLayerGroup
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES, INSTALLED_APPS, WMS_MAX_VERSION, WMTS_MAX_VERSION, BING_LAYERS
@@ -151,7 +151,7 @@ def server_delete(request, svid):
             if gs.deleteWorkspace(ws):
                 datastores = Datastore.objects.filter(workspace_id=ws.id)
                 for ds in datastores:
-                    layers = Layer.objects.filter(datastore_id=ds.id)
+                    layers = Layer.objects.filter(external=False).filter(datastore_id=ds.id)
                     for l in layers:
                         gs.deleteLayerStyles(l)
                 ws.delete()
@@ -354,7 +354,7 @@ def workspace_delete(request, wsid):
         if gs.deleteWorkspace(ws):
             datastores = Datastore.objects.filter(workspace_id=ws.id)
             for ds in datastores:
-                layers = Layer.objects.filter(datastore_id=ds.id)
+                layers = Layer.objects.filter(external=False).filter(datastore_id=ds.id)
                 for l in layers:
                     gs.deleteLayerStyles(l)
             ws.delete()
@@ -554,7 +554,7 @@ def datastore_delete(request, dsid):
         ds = Datastore.objects.get(id=dsid)
         gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
         if gs.deleteDatastore(ds.workspace, ds) or ds.type == 'c_ImageMosaic':
-            layers = Layer.objects.filter(datastore_id=ds.id)
+            layers = Layer.objects.filter(external=False).filter(datastore_id=ds.id)
             for l in layers:
                 gs.deleteLayerStyles(l)
 
@@ -595,9 +595,9 @@ def layer_list(request):
 
     layer_list = None
     if request.user.is_superuser:
-        layer_list = Layer.objects.all()
+        layer_list = Layer.objects.filter(external=False)
     else:
-        layer_list = Layer.objects.filter(created_by__exact=request.user.username)
+        layer_list = Layer.objects.filter(created_by__exact=request.user.username).filter(external=False)
 
     response = {
         'layers': layer_list
@@ -619,7 +619,8 @@ def layer_delete(request, layer_id):
 def layer_delete_operation(request, layer_id):
     layer = Layer.objects.get(pk=layer_id)
     gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
-    gs.deleteGeoserverLayerGroup(layer.layer_group)
+    if layer.layer_group.name != '__default__':
+        gs.deleteGeoserverLayerGroup(layer.layer_group)
     gs.deleteResource(layer.datastore.workspace, layer.datastore, layer)
     gs.deleteLayerStyles(layer)
     signals.layer_deleted.send(sender=None, layer=layer)
@@ -772,7 +773,7 @@ def backend_fields_list(request):
         ws = Workspace.objects.get(id=id_ws)
         ds = Datastore.objects.get(name=ds_name, workspace=ws)
         if ds:
-            layer = Layer.objects.filter(datastore=ds, name=name).first()
+            layer = Layer.objects.filter(external=False).filter(datastore=ds, name=name).first()
 
             params = json.loads(ds.connection_params)
             host = params['host']
@@ -834,7 +835,6 @@ def layer_add_with_group(request, layergroup_id):
     if request.method == 'POST':
         form = LayerForm(request.POST)
         abstract = request.POST.get('md-abstract')
-        highlight_scale = None
         is_visible = False
 
         if 'visible' in request.POST:
@@ -886,14 +886,6 @@ def layer_add_with_group(request, layergroup_id):
 
             time_resolution = request.POST.get('time_resolution')
 
-        highlight = False
-        if 'highlight' in request.POST:
-            highlight = True
-            highlight_scale = request.POST.get('highlight_scale')
-        else:
-            highlight_scale = -1
-
-
         if form.is_valid():
             try:
                 if form.cleaned_data['datastore'].type == 'v_PostGIS':
@@ -923,14 +915,13 @@ def layer_add_with_group(request, layergroup_id):
                 
                 # save it on DB if successfully created
                 newRecord = Layer(**form.cleaned_data)
+                newRecord.external = False
                 newRecord.created_by = request.user.username
                 newRecord.type = form.cleaned_data['datastore'].type
                 newRecord.visible = is_visible
                 newRecord.queryable = is_queryable
                 newRecord.cached = cached
                 newRecord.single_image = single_image
-                newRecord.highlight = highlight
-                newRecord.highlight_scale = float(highlight_scale)
                 newRecord.abstract = abstract
                 newRecord.time_enabled = time_enabled
                 newRecord.time_enabled_field = time_field
@@ -1071,7 +1062,6 @@ def layer_update(request, layer_id):
         title = request.POST.get('title')
         #style = request.POST.get('style')
         layer_group_id = request.POST.get('layer_group')
-        highlight_scale = None
 
         is_visible = False
         if 'visible' in request.POST:
@@ -1123,13 +1113,6 @@ def layer_update(request, layer_id):
 
             time_resolution = request.POST.get('time_resolution')
 
-        highlight = False
-        if 'highlight' in request.POST:
-            highlight = True
-            highlight_scale = request.POST.get('highlight_scale')
-        else:
-            highlight_scale = -1
-
         layer_md_uuid = request.POST.get('uuid')
         core_utils.update_layer_metadata_uuid(layer, layer_md_uuid)
 
@@ -1143,8 +1126,6 @@ def layer_update(request, layer_id):
             layer.visible = is_visible
             layer.queryable = is_queryable
             layer.single_image = single_image
-            layer.highlight = highlight
-            layer.highlight_scale = float(highlight_scale)
             layer.layer_group_id = layer_group_id
             layer.time_enabled = time_enabled
             layer.time_enabled_field = time_field
@@ -1227,17 +1208,9 @@ def layer_update(request, layer_id):
                             if field['name'] == data_field:
                                 date_fields.append(field)
 
-        if layer.highlight_scale is not None:
-            if int(layer.highlight_scale) >=0:
-                highlight_scale = int(layer.highlight_scale)
-            else:
-                highlight_scale = -1
-        else:
-            highlight_scale = -1
-
         md_uuid = core_utils.get_layer_metadata_uuid(layer)
         plugins_config = core_utils.get_plugins_config()
-        return render(request, 'layer_update.html', {'layer': layer, 'highlight_scale': highlight_scale, 'workspace': workspace, 'form': form, 'layer_id': layer_id, 'date_fields': json.dumps(date_fields), 'redirect_to_layergroup': redirect_to_layergroup, 'layer_md_uuid': md_uuid, 'plugins_config': plugins_config})
+        return render(request, 'layer_update.html', {'layer': layer, 'workspace': workspace, 'form': form, 'layer_id': layer_id, 'date_fields': json.dumps(date_fields), 'redirect_to_layergroup': redirect_to_layergroup, 'layer_md_uuid': md_uuid, 'plugins_config': plugins_config})
 
 def get_date_fields(layer_id):
     date_fields = []
@@ -1514,7 +1487,7 @@ def layer_boundingbox_from_data(request):
         if ":" in layer_name:
             layer_name = layer_name.split(":")[1]
         workspace = Workspace.objects.get(name=ws_name)
-        layer_query_set = Layer.objects.filter(name=layer_name, datastore__workspace=workspace)
+        layer_query_set = Layer.objects.filter(external=False).filter(name=layer_name, datastore__workspace=workspace)
         layer = layer_query_set[0]
         gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
         gs.updateBoundingBoxFromData(layer)  
@@ -1584,17 +1557,19 @@ def layergroup_cache_clear(request, layergroup_id):
 
 def layer_group_cache_clear(layergroup):
     last = None    
-    layers = Layer.objects.filter(layer_group_id=int(layergroup.id))
+    layers = Layer.objects.filter(external=False).filter(layer_group_id=int(layergroup.id))
     for layer in layers:
-        layer_cache_clear(layer.id)
-        last = layer
+        if not layer.external:
+            layer_cache_clear(layer.id)
+            last = layer
 
-    gs = geographic_servers.get_instance().get_server_by_id(last.datastore.workspace.server.id)
-    gs.deleteGeoserverLayerGroup(layergroup)
-
-    gs.createOrUpdateGeoserverLayerGroup(layergroup)
-    gs.clearLayerGroupCache(layergroup.name)
-    gs.reload_nodes()
+    if last:
+        gs = geographic_servers.get_instance().get_server_by_id(last.datastore.workspace.server.id)
+        gs.deleteGeoserverLayerGroup(layergroup)
+    
+        gs.createOrUpdateGeoserverLayerGroup(layergroup)
+        gs.clearLayerGroupCache(layergroup.name)
+        gs.reload_nodes()
 
 
 
@@ -1685,7 +1660,7 @@ def get_resources_from_workspace(request):
     # FIXME
     if request.method == 'POST':
         wid = request.POST.get('workspace_id')
-        layer_list = Layer.objects.all()
+        layer_list = Layer.objects.filter(external=False)
 
         resources = []
         for r in layer_list:
@@ -1705,7 +1680,7 @@ def get_resources_from_workspace(request):
 def resource_published(resource):
     # FIXME
     published = False
-    layers = Layer.objects.all()
+    layers = Layer.objects.filter(external=False)
     for layer in layers:
         if layer.resource.id == resource.id:
             published = True
@@ -1848,16 +1823,17 @@ def layergroup_mapserver_toc(group, toc_string):
         for toc_entry in toc_array:
             layers = Layer.objects.filter(name=toc_entry,layer_group_id=group.id).order_by('order')
             for layer in layers:
-                layer_json = {
-                        'name': layer.name,
-                        'title': layer.title,
-                        'order': 1000+i
-                    }
-                layer.order = i
-                layer.save()
-                i = i + 1
-                layers_array[layer.name] = layer_json
-                last = layer
+                if not layer.external:
+                    layer_json = {
+                            'name': layer.name,
+                            'title': layer.title,
+                            'order': 1000+i
+                        }
+                    layer.order = i
+                    layer.save()
+                    i = i + 1
+                    layers_array[layer.name] = layer_json
+                    last = layer
 
         toc_object = {
             'name': group.name,
@@ -1870,9 +1846,10 @@ def layergroup_mapserver_toc(group, toc_string):
         toc={}
         toc[group.name] = toc_object
         
-        gs = geographic_servers.get_instance().get_server_by_id(last.datastore.workspace.server.id)  
-        gs.createOrUpdateSortedGeoserverLayerGroup(toc)
-        gs.reload_nodes()
+        if last:
+            gs = geographic_servers.get_instance().get_server_by_id(last.datastore.workspace.server.id)  
+            gs.createOrUpdateSortedGeoserverLayerGroup(toc)
+            gs.reload_nodes()
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -3187,131 +3164,157 @@ def describeFeatureTypeWithPk(request):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_safe
 @staff_required
-def base_layer_list(request):
+def external_layer_list(request):
     if request.user.is_superuser:
-        baselayer_list = BaseLayer.objects.all()
+        external_layer_list = Layer.objects.filter(external=True)
 
         response = {
-            'baselayer': baselayer_list
+            'external_layers': external_layer_list
         }
-        return render_to_response('base_layer_list.html', response, context_instance=RequestContext(request))
+        return render_to_response('external_layer_list.html', response, context_instance=RequestContext(request))
     else:
         return redirect('home')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
-def base_layer_add(request):
+def external_layer_add(request):
     if request.user.is_superuser:
         if request.method == 'POST':
-            form = BaseLayerForm(request.POST)
-            has_errors = False
+            form = ExternalLayerForm(request.POST)
+            
             try:
-                newBaseLayer = BaseLayer()
-                newBaseLayer.title = request.POST.get('title')
-                newBaseLayer.type = request.POST.get('type')
+                is_visible = False
+                if 'visible' in request.POST:
+                    is_visible = True
+        
+                cached = False
+                if 'cached' in request.POST:
+                    cached = True
+                    
+                external_layer = Layer()
+                external_layer.external = True
+                external_layer.title = request.POST.get('title')
+                external_layer.layer_group_id = request.POST.get('layer_group')
+                external_layer.type = request.POST.get('type')
+                external_layer.visible = is_visible
+                external_layer.queryable = False
+                external_layer.cached = cached
+                external_layer.single_image = False
+                external_layer.time_enabled = False
+                external_layer.created_by = request.user.username
+                
                 params = {}
-
-                if newBaseLayer.type == 'WMTS' or newBaseLayer.type == 'WMS':
+                if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
                     params['version'] = request.POST.get('version')
                     params['url'] = request.POST.get('url')
                     params['layers'] = request.POST.get('layers')
                     params['format'] = request.POST.get('format')
-                if newBaseLayer.type == 'WMTS':
+                    
+                if external_layer.type == 'WMTS':
                     params['matrixset'] = request.POST.get('matrixset')
 
-                if newBaseLayer.type == 'Bing':
+                if external_layer.type == 'Bing':
                     params['key'] = request.POST.get('key')
                     params['layers'] = request.POST.get('layers')
 
-                if newBaseLayer.type == 'XYZ' or newBaseLayer.type == 'OSM':
+                if external_layer.type == 'XYZ' or external_layer.type == 'OSM':
                     params['url'] = request.POST.get('url')
                     params['key'] = request.POST.get('key')
 
-                newBaseLayer.type_params = json.dumps(params)
+                external_layer.external_params = json.dumps(params)
 
-                newBaseLayer.save()
+                external_layer.save()
 
-                newBaseLayer.name = 'baselayer_' + str(newBaseLayer.id)
-                newBaseLayer.save()
+                external_layer.name = 'externallayer_' + str(external_layer.id)
+                external_layer.save()
 
-                return redirect('base_layer_list')
-
-                #msg = _("Error: fill all the BaseLayer fields")
-                #form.add_error(None, msg)
+                return redirect('external_layer_list')
 
             except Exception as e:
                 try:
                     msg = e.get_message()
                 except:
-                    msg = _("Error: BaseLayer could not be published")
+                    msg = _("Error: ExternalLayer could not be published")
                 form.add_error(None, msg)
 
         else:
-            form = BaseLayerForm()
+            form = ExternalLayerForm()
 
-        return render(request, 'base_layer_add.html', {'form': form, 'bing_layers': BING_LAYERS})
+        return render(request, 'external_layer_add.html', {'form': form, 'bing_layers': BING_LAYERS})
     else:
         return redirect('home')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
-def base_layer_update(request, base_layer_id):
+def external_layer_update(request, external_layer_id):
     if request.user.is_superuser:
-        baselayer = BaseLayer.objects.get(id=base_layer_id)
+        external_layer = Layer.objects.get(id=external_layer_id)
         if request.method == 'POST':
-            form = BaseLayerForm(request.POST)
+            form = ExternalLayerForm(request.POST)
             try:
-                baselayer.title = request.POST.get('title')
-                baselayer.type = request.POST.get('type')
+                is_visible = False
+                if 'visible' in request.POST:
+                    is_visible = True
+        
+                cached = False
+                if 'cached' in request.POST:
+                    cached = True
+                    
+                external_layer.title = request.POST.get('title')
+                external_layer.type = request.POST.get('type')
+                external_layer.layer_group_id = request.POST.get('layer_group')
+                external_layer.visible = is_visible
+                external_layer.cached = cached
                 params = {}
 
-                if baselayer.type == 'WMTS' or baselayer.type == 'WMS':
+                if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
                     params['version'] = request.POST.get('version')
                     params['url'] = request.POST.get('url')
                     params['layers'] = request.POST.get('layers')
                     params['format'] = request.POST.get('format')
-                if baselayer.type == 'WMTS':
+                    
+                if external_layer.type == 'WMTS':
                     params['matrixset'] = request.POST.get('matrixset')
 
-                if baselayer.type == 'Bing':
+                if external_layer.type == 'Bing':
                     params['key'] = request.POST.get('key')
                     params['layers'] = request.POST.get('layers')
 
-                if baselayer.type == 'XYZ' or baselayer.type == 'OSM':
+                if external_layer.type == 'XYZ' or external_layer.type == 'OSM':
                     params['url'] = request.POST.get('url')
                     params['key'] = request.POST.get('key')
 
 
-                baselayer.type_params = json.dumps(params)
-                baselayer.save()
-                return redirect('base_layer_list')
+                external_layer.external_params = json.dumps(params)
+                external_layer.save()
+                return redirect('external_layer_list')
 
 
             except Exception as e:
                 try:
                     msg = e.get_message()
                 except:
-                    msg = _("Error: baselayer could not be published")
+                    msg = _("Error: externallayer could not be published")
                 form.add_error(None, msg)
 
         else:
-            form = BaseLayerForm(instance=baselayer)
+            form = ExternalLayerForm(instance=external_layer)
 
-            if baselayer.type_params:
-                params = json.loads(baselayer.type_params)
+            if external_layer.external_params:
+                params = json.loads(external_layer.external_params)
                 for key in params:
                     form.initial[key] = params[key]
 
 
             response= {
                 'form': form,
-                'baselayer': baselayer,
+                'external_layer': external_layer,
                 'bing_layers': BING_LAYERS
             }
 
-        return render(request, 'base_layer_update.html', response)
+        return render(request, 'external_layer_update.html', response)
     else:
         return redirect('home')
 
@@ -3320,15 +3323,15 @@ def base_layer_update(request, base_layer_id):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_POST
 @staff_required
-def base_layer_delete(request, base_layer_id):
+def external_layer_delete(request, external_layer_id):
     if request.user.is_superuser:
         try:
-            tr = BaseLayer.objects.get(id=base_layer_id)
-            tr.delete()
+            external_layer = Layer.objects.get(id=external_layer_id)
+            external_layer.delete()
         except Exception as e:
-            return HttpResponse('Error deleting baselayer: ' + str(e), status=500)
+            return HttpResponse('Error deleting external_layer: ' + str(e), status=500)
 
-        return redirect('base_layer_list')
+        return redirect('external_layer_list')
     else:
         return redirect('home')
 

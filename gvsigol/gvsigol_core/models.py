@@ -38,11 +38,13 @@ class ProjectUserGroup(models.Model):
 class ProjectLayerGroup(models.Model):
     project = models.ForeignKey(Project, default=None)
     layer_group = models.ForeignKey(LayerGroup, default=None)
+    multiselect = models.BooleanField(default=True)
+    baselayer_group = models.BooleanField(default=False)
+    default_baselayer = models.IntegerField(null=True, blank=True)
     
     def __unicode__(self):
         return self.project.name + ' - ' + self.layer_group.name
-    
-    
+ 
 class BaseLayer(models.Model):
     name = models.CharField(max_length=150, null=True, blank=True) 
     title = models.CharField(max_length=150) 
@@ -60,7 +62,7 @@ class BaseLayerProject(models.Model):
     
     def __unicode__(self):
         return self.baselayer.name +"-"+self.project.id
-    
+       
 class SharedView(models.Model):
     name = models.CharField(max_length=10, unique=True)
     project_id = models.IntegerField()

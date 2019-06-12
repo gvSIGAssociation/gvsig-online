@@ -491,7 +491,7 @@ CatalogView.prototype.createLayerGroup = function() {
 			var layerCheckbox = document.getElementById(id);
 			var layers = self.map.getLayers();
 			layers.forEach(function(layer){
-				if (!layer.baselayer) {
+				if (!layer.baselayer && !layer.external) {
 					if (layer.get("id") === id) {
 						var layerCheckbox = document.getElementById(id);
 						if (checked) {
@@ -600,7 +600,7 @@ CatalogView.prototype.createLayer = function(name, title, url, dataId, bbox, gro
 		var layerContainer = $(this).parents('.layer-box');
 		var id = layerContainer.first().attr("data-layerid");
 		layers.forEach(function(layer){
-			if (!layer.baselayer) {
+			if (!layer.baselayer && !layer.external) {
 				if (id===layer.get("id")) {
 					selectedLayer = layer;
 					self.createDetailsPanel(selectedLayer.getSource().getParams()["dataid"]);
@@ -614,7 +614,7 @@ CatalogView.prototype.createLayer = function(name, title, url, dataId, bbox, gro
 		var id = $(this).attr("data-layerid");
 		var layers = self.map.getLayers();
 		layers.forEach(function(layer){
-			if (!layer.baselayer) {
+			if (!layer.baselayer && !layer.external) {
 				if (layer.get("id") === id) {
 					layer.setVisible(false);
 					self.map.removeLayer([layer]);

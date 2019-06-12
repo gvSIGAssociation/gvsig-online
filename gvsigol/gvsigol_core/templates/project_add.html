@@ -24,7 +24,7 @@
 				
 				<ul class="nav nav-tabs">
               		<li class="active"><a href="#tab-project-main" data-toggle="tab">{% trans "Project" %}</a></li>
-              		<li><a href="#tab-project-baselayers" data-toggle="tab">{% trans "Base layers" %}</a></li>
+<!--               		<li><a href="#tab-project-baselayers" data-toggle="tab">{% trans "Base layers" %}</a></li> -->
               		<li><a href="#tab-project-layergroups" data-toggle="tab">{% trans "Layer groups" %}</a></li>
               		<li><a href="#tab-project-tools" data-toggle="tab">{% trans "Tools" %}</a></li>
               		<li><a href="#tab-project-usergroups" data-toggle="tab">{% trans "User groups" %}</a></li>
@@ -99,44 +99,6 @@
               			</div>
               		</div>
               		
-              		<div class="tab-pane" id="tab-project-baselayers">
-              			<div id="base-layer-box" class="box searchable-list-box">
-							<div class="box-header">
-								<div class="col-md-6">
-									<input type="text" class="search3 form-control" placeHolder="{% trans 'Search base layer...' %}"/>
-								</div>
-							</div>
-							<div class="box-body">
-								<ul class="products-list product-list-in-box list3">
-									{% for base_layer in base_layers %}
-									<li class="item">
-										<div class="product-img">
-											<img src="{% static "img/layers.png" %}" alt="Layers Image">
-										</div>
-										<div class="product-info">
-											<a href="javascript:void(0)" class="product-title">
-												<div class="checkbox pull-left">	
-													<span class="searchable-base-layer">{{base_layer.title}}</span><br />
-													<span class="searchable-base-layer" style="font-weight: normal">{{base_layer.name}}</span>
-												</div>
-												<div class="checkbox pull-right">													
-													<label>
-														<input type="checkbox" name="baselayer-{{base_layer.id}}" id="baselayer-{{base_layer.id}}"/><span style="width:150px;">{% trans "Assign base layers" %}</span>
-														<br/>
-														<input type="radio" name="baselayers-default" id="baselayer-{{base_layer.id}}-default"/><span style="width:150px;">{% trans "Mark as default" %}</span>
-													</label>
-												</div>
-											</a> 
-											<span class="product-description"><span class="searchable-layer">{{base_layers.type}}</span></span>
-										</div>
-									</li> 
-									{% endfor %}
-								</ul>
-								<ul class="pagination"></ul>
-							</div>
-						</div>
-              		</div>
-              		
               		<div class="tab-pane" id="tab-project-layergroups">
               			<div class="row">
 							<div class="col-md-9">
@@ -156,17 +118,38 @@
 												</div>
 												<div class="product-info">
 													<a href="javascript:void(0)" class="product-title"><span class="searchable-layer">{{layergroup.title}}</span>
-														<div class="checkbox pull-right">													
+														<div style="margin-right: 10px;" class="radio pull-right">													
 															<label>
-																{% if layergroup.checked %}
-																	<input type="checkbox" class="layergroup-input" data-id="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}" checked/>{% trans "Assign layer group" %}
-																{% else %}
-																	<input type="checkbox" class="layergroup-input" data-id="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}"/>{% trans "Assign layer group" %}
-																{% endif %}
+																<input type="radio" class="selected-base-group" data-id="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group" value="{{layergroup.id}}" id="selected-base-group-{{layergroup.id}}"/>{% trans "Base group" %}
 															</label>
 														</div>
-													</a> 
+														<div style="margin-right: 10px;" class="checkbox pull-right">													
+															<label>
+																<input type="checkbox" class="layergroup-input" data-id="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}"/>{% trans "Add" %}
+															</label>
+														</div>
+													</a>
 													<span class="product-description"><span class="searchable-layer-desc">{{layergroup.name}}</span></span>
+												</div>
+												<div class="box-body">
+													<ul id="basegroup-layers-{{layergroup.id}}" class="products-list product-list-in-box basegroup-layers" style="display: none;">
+														{% for l in layergroup.layers %}
+														<li class="item">
+															<div class="product-info">
+																<a href="javascript:void(0)" class="product-title">
+																	<div class="checkbox pull-left">	
+																		<span class="searchable-base-layer">{{l.title}}</span><br />
+																	</div>
+																	<div class="checkbox pull-right">													
+																		<label>
+																			<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}"/><span style="width:150px;">{% trans "Mark as default" %}</span>
+																		</label>
+																	</div>
+																</a> 
+															</div>
+														</li> 
+														{% endfor %}
+													</ul>
 												</div>
 											</li> 
 											{% endfor %}
@@ -175,7 +158,8 @@
 									</div>
 								</div>
 							</div>
-							<input type="hidden" id="default_base_layer_selected" name="default_base_layer_selected" value="{{ selected_base_layer }}"/>
+							<input type="hidden" id="selected_base_layer" name="selected_base_layer"/>
+							<input type="hidden" id="selected_base_group" name="selected_base_group"/>
 							<div class="col-md-3" style="background-color:#eee">
 								<div class="box searchable-list-box">
 									<div class="box-body toc-layer-update">
@@ -364,36 +348,6 @@
 		  		}
 		  	});
 		});
-
-		var searcheableList3 = new List('base-layer-box', {
-	  		  valueNames: ['searchable-base-layer'],
-	  		  listClass:'list3',
-	  		  searchClass: 'search3',
-	  		  page: 3,
-	  		  pagination: false
-	  		});
-		
-		searcheableList3.on('updated', function(list) {
-			updateDefaultBaseLayer();
-		});
-		
-		function updateDefaultBaseLayer(){
-			var selected_item = $("#default_base_layer_selected").val();
-			$("input[name=baselayers-default]").prop("checked", false);
-			$("#baselayer-"+selected_item+"-default").prop("checked", true);
-			
-			$("input[name=baselayers-default]").unbind("change").on("change", function(){
-				var split = this.id.split("-");
-				if(split.length==3){
-					var base_layer_id = split[1];
-					$("#baselayer-"+base_layer_id+"").prop("checked", true);
-					$("#default_base_layer_selected").val(base_layer_id);
-				}
-				
-			})
-		}
-		
-		updateDefaultBaseLayer();
 		
     	$(".save_button").click(function(e){
     		e.preventDefault(); // prevents default
@@ -405,10 +359,7 @@
     			var item = searcheableList2.items[i];
     			item.show();
     		}
-    		for(var i=0; i<searcheableList3.items.length; i++){
-	  			var item = searcheableList3.items[i];
-	  			item.show();
-	  		}
+    		
 	  		
 			var toc = {}
 			var root = $('#toc');
@@ -447,7 +398,7 @@
     		$("#project-form").submit();
     	    return false; 
 
-    	})
+    	});
     	
     	$('#add-layer-group-button').click(function() {
 			$('#button-add-layer-group-accept').click( function() {
@@ -459,10 +410,7 @@
 	    			var item = searcheableList2.items[i];
 	    			item.show();
 	    		}
-	    		for(var i=0; i<searcheableList3.items.length; i++){
-		  			var item = searcheableList3.items[i];
-		  			item.show();
-		  		}
+
 				$('#project-form').attr('action', '/gvsigonline/core/project_add/?redirect=new-layer-group');
 				$('#save_button').trigger('click');
 			});
@@ -474,7 +422,12 @@
 			var transformedCoordinate = ol.proj.transform(coordinate, 'EPSG:3857', 'EPSG:4326');
 			var extent = map.getView().calculateExtent(map.getSize()); 
 			var zoom = map.getView().getZoom();
-
+			
+			var selectedBaseLayer = $('input:radio[name=baselayers-default]:checked').val();
+			var selectedBaseGroup = $('input:radio[name=selected-base-group]:checked').val();
+			$("#selected_base_layer").val(selectedBaseLayer);
+			$("#selected_base_group").val(selectedBaseGroup);
+			
 			$("#center-lat").val(transformedCoordinate[1]);
 			$("#center-lon").val(transformedCoordinate[0]);
 			$("#extent").val(extent);
@@ -551,22 +504,82 @@
 		  		var data_id = $(this).attr("data-id");
 		  		var data_name = $(this).attr("data-name");
 		  		var data_title = $(this).attr("data-title");
-		  		var newdata = '<div id="lg_'+data_name+'" data-name="'+data_name+'" data-title="'+data_title+'" data-order="'+500+'" class="box box-default collapsed-box toc-layergroup">'+
-				'<div class="box-header with-border">'+
-				'	<span class="handle" style="margin-right: 20px;"> '+
-				'		<i class="fa fa-ellipsis-v"></i>'+
-				'		<i class="fa fa-ellipsis-v"></i>'+
-				'	</span>'+
-				'	<span class="text">'+data_title+'</span>'+
-				'</div>'+	
-				'</div>';	
-				$("#toc").append(newdata);
+		  		
+		  		if(!$("#selected-base-group-" + data_id).is(':checked')){
+		  			var newdata = '<div id="lg_'+data_name+'" data-name="'+data_name+'" data-title="'+data_title+'" data-order="'+500+'" class="box box-default collapsed-box toc-layergroup">'+
+					'<div class="box-header with-border">'+
+					'	<span class="handle" style="margin-right: 20px;"> '+
+					'		<i class="fa fa-ellipsis-v"></i>'+
+					'		<i class="fa fa-ellipsis-v"></i>'+
+					'	</span>'+
+					'	<span class="text">'+data_title+'</span>'+
+					'</div>'+	
+					'</div>';	
+					$("#toc").append(newdata);	
+		  		}
+		  		
 	  		}else{
 	  			var data_id = $(this).attr("data-id");
 		  		var data_name = $(this).attr("data-name");
 		  		
-				$("#lg_"+data_name).remove()
+		  		if ($("#selected-base-group-" + data_id).is(':checked')) {
+		  			$("#selected-base-group-" + data_id).prop("checked", false);
+		  			$('.basegroup-layers').css("display", "none");
+		  		}
+		  		
+				$("#lg_"+data_name).remove();
 	  		}
+	  	});
+	  	
+	  	
+	  	$('input[name=selected-base-group]').change(function(e) {
+	  		var data_id = $(this).attr("data-id");
+	  		var data_name = $(this).attr("data-name");
+	  		var data_title = $(this).attr("data-title");
+	  		
+	  		$('.baselayers-default').each(function( index ) {
+	  			$(this).prop("checked", false);
+	  		});
+	  		
+			$('.basegroup-layers').css("display", "none");
+			$('#basegroup-layers-' + this.dataset.id).css("display", "block");
+			
+			$('#basegroup-layers-' + this.dataset.id + " li").first().find( "input" ).prop("checked", true);
+			
+			if(!$("#layergroup-" + data_id).is(':checked')){
+	  			$("#layergroup-" + data_id).prop("checked", true);
+	  		}
+			
+			$("#lg_"+data_name).remove();
+			
+			$('.layergroup-input').each(function( index ) {
+				var id = $(this).attr("data-id");
+		  		var name = $(this).attr("data-name");
+		  		var title = $(this).attr("data-title");
+		  		
+		  		if (id != data_id) {
+		  			if ($("#layergroup-" + id).is(':checked')) {
+		  				var exists = false;
+		  				if($("#lg_" + name).length) {
+		  					exists = true;
+		  				}
+		  				if (!exists) {
+		  					var newdata = '<div id="lg_'+name+'" data-name="'+name+'" data-title="'+title+'" data-order="'+500+'" class="box box-default collapsed-box toc-layergroup">'+
+							'<div class="box-header with-border">'+
+							'	<span class="handle" style="margin-right: 20px;"> '+
+							'		<i class="fa fa-ellipsis-v"></i>'+
+							'		<i class="fa fa-ellipsis-v"></i>'+
+							'	</span>'+
+							'	<span class="text">'+title+'</span>'+
+							'</div>'+	
+							'</div>';	
+							$("#toc").append(newdata);	
+		  				}
+		  				
+		  			}
+		  		}
+			});
+			
 	  	});
 	});
 </script>

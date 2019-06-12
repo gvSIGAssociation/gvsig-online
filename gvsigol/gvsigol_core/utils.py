@@ -181,11 +181,19 @@ def get_all_layer_groups_checked_by_project(request, project):
                 if lgba.layer_group_id == g.id:
                     checked = True
                     layer_group['checked'] = checked
+                    #layer_group['multiselect'] = lgba.multiselect
+                    layer_group['baselayer_group'] = lgba.baselayer_group
+                    if lgba.baselayer_group:
+                        layer_group['default_baselayer'] = lgba.default_baselayer
                            
             layer_group['id'] = g.id
             layer_group['name'] = g.name
             layer_group['title'] = g.title
             layer_groups.append(layer_group)
+            
+    for aux in layer_groups:
+        if not 'baselayer_group' in aux:
+            aux['baselayer_group'] = False
         
     return layer_groups
 
@@ -585,11 +593,6 @@ def get_plugins_config():
     return plugins_config
 
 def set_state(conf, state):
-    for conf_bl in conf['base_layers']:
-        for state_bl in state['base_layers']:
-            if conf_bl['name'] == state_bl['name']:
-                conf_bl['active'] = state_bl['active']
-                            
     for conf_lg in conf['layerGroups']:
         for state_lg in state['layerGroups']:
             if conf_lg['groupName'] == state_lg['groupName']:
@@ -600,6 +603,8 @@ def set_state(conf, state):
                             conf_l['visible'] = state_l['visible']
                             conf_l['opacity'] = state_l['opacity']
                             conf_l['order'] = state_l['order']
+                            conf_l['baselayer'] = state_l['baselayer']
+                            conf_l['default_baselayer'] = state_l['default_baselayer']
                             
     conf['view'] = {}
     conf['view'] = state['view']

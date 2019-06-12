@@ -340,7 +340,7 @@ SymbologyUtils.prototype.reloadLayerPreview = function(name){
 	var layers = this.map.getLayers();
 	var self = this;
 	layers.forEach(function(layer){
-		if (!layer.baselayer) {
+		if (!layer.baselayer && !layer.external) {
 			if (layer.get("id") === 'preview-layer') {
 				layer.getSource().updateParams({'STYLES': name+"__tmp", time_: (new Date()).getTime()});
 				self.map.render();

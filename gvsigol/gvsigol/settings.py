@@ -164,7 +164,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'gvsigol_core/templates'),
             os.path.join(BASE_DIR, 'gvsigol_services/templates'),
             os.path.join(BASE_DIR, 'gvsigol_symbology/templates'),
-            os.path.join(BASE_DIR, 'gvsigol_filemanager/templates')
+            os.path.join(BASE_DIR, 'gvsigol_filemanager/templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -346,17 +346,11 @@ MAX_ZOOM_LEVEL = 18
 
 # Must be a valid iconv encoding name. Use iconv --list on Linux to see valid names 
 SUPPORTED_ENCODINGS = [ "LATIN1", "UTF-8", "ISO-8859-15", "WINDOWS-1252"]
-USE_DEFAULT_SUPPORTED_CRS = False
+USE_DEFAULT_SUPPORTED_CRS = True
 SUPPORTED_CRS = {
     '3857': {
         'code': 'EPSG:3857',
         'title': 'WGS 84 / Pseudo-Mercator',
-        'definition': '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs',
-        'units': 'meters'
-    },
-    '900913': {
-        'code': 'EPSG:900913',
-        'title': 'Google Maps Global Mercator -- Spherical Mercator',
         'definition': '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs',
         'units': 'meters'
     },
@@ -437,7 +431,7 @@ CONTROL_FIELDS = [{
                 'type': 'date'
                 }]
 
-BASELAYER_SUPPORTED_TYPES = ['WMS', 'WMTS', 'XYZ', 'Bing', 'OSM']
+EXTERNAL_LAYER_SUPPORTED_TYPES = ['WMS', 'WMTS', 'XYZ', 'Bing', 'OSM']
 
 WMTS_MAX_VERSION = '1.0.0'
 WMS_MAX_VERSION = '1.3.0'

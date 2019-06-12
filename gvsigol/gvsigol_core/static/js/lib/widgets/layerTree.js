@@ -65,52 +65,64 @@ layerTree.prototype.createTree = function() {
 	this.layerCount = 0;
 	var groupCount = 1;
 	
+	var baseGroup = null;
+	if (this.conf.layerGroups) {
+		for (var i=0; i<this.conf.layerGroups.length; i++) {
+			if (this.conf.layerGroups[i].basegroup) {
+				baseGroup = this.conf.layerGroups[i];
+			}
+		}
+	}
+	
 	var tree = '';
 	tree += '<div class="box">';
 	tree += '	<div class="box-body">';
 	tree += '		<ul class="layer-tree">';
-	tree += '			<li class="box box-default"; id="base-layers">';
-	tree += '				<div class="box-header with-border">';
-	tree += '					<span class="text">' + gettext('Base layers') + '</span>';
-	tree += '					<div class="box-tools pull-right">';
-	tree += '						<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
-	tree += '							<i class="fa fa-minus"></i>';
-	tree += '						</button>';
-	tree += '					</div>';
-	tree += '				</div>';
-	tree += '				<div id="baselayers-group" class="box-body" style="display: block; font-size: 12px;">';
-	tree += 					self.createBaseLayerUI(gettext('None'), false);
-	for (var i=0; i<this.conf.base_layers.length; i++) {
-		var base_layer = this.conf.base_layers[i];
-		tree += 				self.createBaseLayerUI(gettext(base_layer['title']), base_layer['name'], base_layer['active']);
+	if (baseGroup != null) {
+		tree += '			<li class="box box-default"; id="base-layers">';
+		tree += '				<div class="box-header with-border">';
+		tree += '					<span class="text">' + baseGroup.groupTitle + '</span>';
+		tree += '					<div class="box-tools pull-right">';
+		tree += '						<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
+		tree += '							<i class="fa fa-minus"></i>';
+		tree += '						</button>';
+		tree += '					</div>';
+		tree += '				</div>';
+		tree += '				<div id="baselayers-group" class="box-body" style="display: block; font-size: 12px;">';
+		//tree += 					self.createBaseLayerUI(0, gettext('None'), false);
+		for (var j=0; j<baseGroup.layers.length; j++) {	
+			var layer = baseGroup.layers[j];				
+			tree += 				self.createBaseLayerUI(layer);
+		}
+		tree += '				</div>';
+		tree += '			</li>';
 	}
-	
-	tree += '				</div>';
-	tree += '			</li>';
 	if (this.conf.layerGroups) {
 		for (var i=0; i<this.conf.layerGroups.length; i++) {
 			var layerGroup = this.conf.layerGroups[i];
-			tree += '			<li class="box box-default collapsed-box" id="' + layerGroup.groupId + '">';
-			tree += '				<div class="box-header with-border">';
-			if (layerGroup.visible) {
-				tree += '					<input type="checkbox" class="layer-group" id="layergroup-' + layerGroup.groupId + '" checked>';
-			} else {
-				tree += '					<input type="checkbox" class="layer-group" id="layergroup-' + layerGroup.groupId + '">';
+			if (!layerGroup.basegroup) {
+				tree += '			<li class="box box-default collapsed-box" id="' + layerGroup.groupId + '">';
+				tree += '				<div class="box-header with-border">';
+				if (layerGroup.visible) {
+					tree += '					<input type="checkbox" class="layer-group" id="layergroup-' + layerGroup.groupId + '" checked>';
+				} else {
+					tree += '					<input type="checkbox" class="layer-group" id="layergroup-' + layerGroup.groupId + '">';
+				}
+				tree += '					<span class="text">' + layerGroup.groupTitle + '</span>';
+				tree += '					<div class="box-tools pull-right">';
+				tree += '						<button class="btn btn-box-tool btn-box-tool-custom group-collapsed-button" data-widget="collapse">';
+				tree += '							<i class="fa fa-plus"></i>';
+				tree += '						</button>';
+				tree += '					</div>';
+				tree += '				</div>';
+				tree += '				<div data-groupnumber="' + (groupCount++) * 100 + '" class="box-body layer-tree-groups" style="display: none;">';
+				for (var j=0; j<layerGroup.layers.length; j++) {	
+					var layer = layerGroup.layers[j];				
+					tree += self.createOverlayUI(layer, layerGroup.visible);
+				}
+				tree += '				</div>';
+				tree += '			</li>';
 			}
-			tree += '					<span class="text">' + layerGroup.groupTitle + '</span>';
-			tree += '					<div class="box-tools pull-right">';
-			tree += '						<button class="btn btn-box-tool btn-box-tool-custom group-collapsed-button" data-widget="collapse">';
-			tree += '							<i class="fa fa-plus"></i>';
-			tree += '						</button>';
-			tree += '					</div>';
-			tree += '				</div>';
-			tree += '				<div data-groupnumber="' + (groupCount++) * 100 + '" class="box-body layer-tree-groups" style="display: none;">';
-			for (var j=0; j<layerGroup.layers.length; j++) {	
-				var layer = layerGroup.layers[j];				
-				tree += self.createOverlayUI(layer, layerGroup.visible);
-			}
-			tree += '				</div>';
-			tree += '			</li>';
 		}
 	}
 	tree += '		</ul>';
@@ -125,32 +137,63 @@ layerTree.prototype.createTree = function() {
 		for (var i=0; i<self.conf.layerGroups.length; i++) {			
 			var group = self.conf.layerGroups[i];
 			if (group.groupId == groupId) {
-				var mapLayer = self.getGroupLayerFromMap(group.groupName);
-				if (checked) {
-					mapLayer.setVisible(true);
-					self.changeState(group, 'layergroup', 'set-visibility', true);
+				if (group.allows_getmap) {
+					var mapLayer = self.getGroupLayerFromMap(group.groupName);
+					if (mapLayer) {
+						if (checked) {
+							mapLayer.setVisible(true);
+							self.changeState(group, 'layergroup', 'set-visibility', true);
+						} else {
+							mapLayer.setVisible(false);
+							self.changeState(group, 'layergroup', 'set-visibility', false);
+						}
+						for (var j=0; j<group.layers.length; j++) {
+							var layer = group.layers[j];
+							var layerCheckbox = document.getElementById(layer.id);
+							var mapLayer = self.getLayerFromMap(layer);
+							if (checked) {
+								mapLayer.setVisible(false);
+								layerCheckbox.checked = true;
+								layerCheckbox.disabled = true;
+								
+								$(".layer-opacity-slider[data-layerid='"+layer.id+"']").slider( "option", "disabled", true );
+							} else {
+								mapLayer.setVisible(false);
+								layerCheckbox.checked = false;
+								layerCheckbox.disabled = false;
+								
+								$(".layer-opacity-slider[data-layerid='"+layer.id+"']").slider( "option", "disabled", false );
+							}
+						}
+					}
+					
 				} else {
-					mapLayer.setVisible(false);
-					self.changeState(group, 'layergroup', 'set-visibility', false);
-				}
-				for (var j=0; j<group.layers.length; j++) {
-					var layer = group.layers[j];
-					var layerCheckbox = document.getElementById(layer.id);
-					var mapLayer = self.getLayerFromMap(layer);
 					if (checked) {
-						mapLayer.setVisible(false);
-						layerCheckbox.checked = true;
-						layerCheckbox.disabled = true;
-						
-						$(".layer-opacity-slider[data-layerid='"+layer.id+"']").slider( "option", "disabled", true );
+						self.changeState(group, 'layergroup', 'set-visibility', true);
 					} else {
-						mapLayer.setVisible(false);
-						layerCheckbox.checked = false;
-						layerCheckbox.disabled = false;
-						
-						$(".layer-opacity-slider[data-layerid='"+layer.id+"']").slider( "option", "disabled", false );
+						self.changeState(group, 'layergroup', 'set-visibility', false);
+					}
+					for (var j=0; j<group.layers.length; j++) {
+						var layer = group.layers[j];
+						var layerCheckbox = document.getElementById(layer.id);
+						var mapLayer = self.getLayerFromMap(layer);
+						if (checked) {
+							mapLayer.setVisible(true);
+							layerCheckbox.checked = true;
+							//layerCheckbox.disabled = false;
+							
+							//$(".layer-opacity-slider[data-layerid='"+layer.id+"']").slider( "option", "disabled", true );
+						} else {
+							mapLayer.setVisible(false);
+							layerCheckbox.checked = false;
+							//layerCheckbox.disabled = false;
+							
+							//$(".layer-opacity-slider[data-layerid='"+layer.id+"']").slider( "option", "disabled", false );
+						}
 					}
 				}
+				
+				
 			}			
 		}
 	});
@@ -187,7 +230,7 @@ layerTree.prototype.setLayerEvents = function() {
 						var opacity = parseFloat(ui.value)/100;
 						layer.setOpacity(opacity);
 						$("#layer-opacity-output-" + id).text(ui.value + '%');
-						self.changeState(layer, 'overlay', 'change-opacity', opacity);
+						self.changeState(layer, 'layer', 'change-opacity', opacity);
 					}
 				}						
 			}, this);
@@ -222,9 +265,11 @@ layerTree.prototype.setLayerEvents = function() {
 			if (layer.baselayer) {
 				if (layer.getVisible() == true) {
 					layer.setVisible(false);
+					self.changeState(layer, 'layer', 'change-baselayer', false);
 				}
 				if (layer.get('id') == this.id) {
 					layer.setVisible(true);
+					self.changeState(layer, 'layer', 'change-baselayer', true);
 				}
 			}						
 		}, this);
@@ -237,7 +282,7 @@ layerTree.prototype.setLayerEvents = function() {
 				if (layer.get("id") === this.id) {
 					if (layer.getVisible() == true) {
 						layer.setVisible(false);
-						self.changeState(layer, 'overlay', 'set-visibility', false);
+						self.changeState(layer, 'layer', 'set-visibility', false);
 						if($("#layer-"+layer.get("id")).length){
 							$("#layer-"+layer.get("id")).css("display", "none");
 							if(self.hasTemporaryLayersActive()){
@@ -250,7 +295,7 @@ layerTree.prototype.setLayerEvents = function() {
 						}
 					} else {
 						layer.setVisible(true);
-						self.changeState(layer, 'overlay', 'set-visibility', true);
+						self.changeState(layer, 'layer', 'set-visibility', true);
 						if($("#layer-"+layer.get("id")).length){
 							$("#layer-"+layer.get("id")).css("display", "block");
 							self.refreshTemporalInfo();	
@@ -1581,49 +1626,6 @@ layerTree.prototype.refreshTemporalSlider = function() {
 	    	update_min = false;
 		}
 		
-//		if(input.attr("data-value") == "list"){
-//			var valMap = [min_val,max_val,min_val,max_val,min_val,max_val];
-//			$("#to_label_div").css("display","none");
-//			if($(".temporary-layers-slider").data("slider")){
-//				$(".temporary-layers-slider").slider( "destroy" );
-//			}
-//			$(".temporary-layers-slider").slider({
-//		         min: 0,
-//		         max: valMap.length - 1,
-//		         value: min_val,
-//		         range: false,
-//		         step: 1,
-//		         slide: function(event, ui) {
-//		          var dt_cur_to = new Date(valMap[ui.value]*1000)
-//		          var formatted = self.formatDate(dt_cur_from);
-//		          $("#temporary-from").val(formatted);
-//		         }
-//		     });
-//		}
-//		
-//		if(input.attr("data-value") == "list_range"){
-//			var valMap = [min_val,max_val,min_val,max_val,min_val,max_val];
-//			$("#to_label_div").css("display","block");
-//			if($(".temporary-layers-slider").data("slider")){
-//				$(".temporary-layers-slider").slider( "destroy" );
-//			}
-//			$(".temporary-layers-slider").slider({
-//		         min: 0,
-//		         max: valMap.length - 1,
-//		         value: min_val,
-//		         step: 1,
-//		         range: true,
-//		         slide: function(event, ui) {
-//		        	 var dt_cur_from = new Date(valMap[ui.values[0]]*1000)
-//		        	 var formatted = self.formatDate(dt_cur_from);
-//				     $("#temporary-from").val(formatted);
-//		        	 var dt_cur_to = new Date(valMap[ui.values[1]]*1000)
-//		        	 var formatted = self.formatDate(dt_cur_to);
-//				    $("#temporary-to").val(formatted);
-//		         }
-//		     });
-//		}
-		
 		if(update_min && self.min_val){
 			var dt_cur_from = new Date(self.min_val*1000); //.format("yyyy-mm-dd hh:ii:ss");
 			var formatted = self.formatDate(dt_cur_from);
@@ -1730,18 +1732,18 @@ layerTree.prototype.getGroupLayerFromMap = function(tocLayer) {
 	return mapLayer;
 };
 
-layerTree.prototype.createBaseLayerUI = function(name, name_id, checked) {
-	var count = this.layerCount++;
-	var id = "gol-layer-" + count;		    
+layerTree.prototype.createBaseLayerUI = function(layer) {	
+	var mapLayer = this.getLayerFromMap(layer);
+	var id = layer.id;
     
 	var ui = '';
 	ui += '<div style="margin-left:20px;">';
-	if (checked) {
-		ui += 	'<input type="radio" id="' + id + '" data-origin="'+name_id+'" name="baselayers-group" checked>';
+	if (layer['default_baselayer']) {
+		ui += 	'<input type="radio" id="' + id + '" data-origin="'+layer['name']+'" name="baselayers-group" checked>';
 	} else {
-		ui += 	'<input type="radio" id="' + id + '" data-origin="'+name_id+'" name="baselayers-group">';
+		ui += 	'<input type="radio" id="' + id + '" data-origin="'+layer['name']+'" name="baselayers-group">';
 	}
-	ui += 		'<span class="text">' + name + '</span>';
+	ui += 		'<span class="text">' + layer['title'] + '</span>';
 	ui += '</div>';
 	
 	return ui;
@@ -1817,7 +1819,6 @@ layerTree.prototype.createOverlayUI = function(layer, group_visible) {
 	
 	var mapLayer = this.getLayerFromMap(layer);
 
-
 	mapLayer.on('precompose', function(event) {
 		var min = 0;
 		var max = 100;
@@ -1869,18 +1870,19 @@ layerTree.prototype.createOverlayUI = function(layer, group_visible) {
 	ui += '			</div>';
 	ui += '		</div>';
 	ui += '		<div class="box-body" style="display: none;">';
-	ui += '			<a id="show-metadata-' + id + '" class="btn btn-block btn-social btn-custom-tool show-metadata-link">';
-	ui += '				<i class="fa fa-external-link"></i> ' + gettext('Layer metadata');
-	ui += '			</a>';
-	if (layer.queryable && layer.is_vector) {	    
-	    ui += '	<a id="show-attribute-table-' + id + '" data-id="' + id + '" class="btn btn-block btn-social btn-custom-tool show-attribute-table-link">';
-		ui += '		<i class="fa fa-table"></i> ' + gettext('Attribute table');
+	if (!layer.external){
+		if( layer.queryable && layer.is_vector) {	    
+			ui += '	<a id="show-attribute-table-' + id + '" data-id="' + id + '" class="btn btn-block btn-social btn-custom-tool show-attribute-table-link">';
+			ui += '		<i class="fa fa-table"></i> ' + gettext('Attribute table');
+			ui += '	</a>';
+		}
+		ui += '	<a id="show-metadata-' + id + '" class="btn btn-block btn-social btn-custom-tool show-metadata-link">';
+		ui += '		<i class="fa fa-external-link"></i> ' + gettext('Layer metadata');
 		ui += '	</a>';
-    }	
-
-	ui += '	<a id="zoom-to-layer-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool zoom-to-layer">';
-	ui += '		<i class="fa fa-search" aria-hidden="true"></i> ' + gettext('Zoom to layer');
-	ui += '	</a>';
+		ui += '	<a id="zoom-to-layer-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool zoom-to-layer">';
+		ui += '		<i class="fa fa-search" aria-hidden="true"></i> ' + gettext('Zoom to layer');
+		ui += '	</a>';
+	}
 	
 	if(layer.styles){
 		ui += '		<div class="btn btn-block btn-social btn-select btn-custom-tool"><i class="fa fa-map-marker" aria-hidden="true"></i><select id="symbol-to-layer-' + id + '" class="symbol-to-layer btn btn-block btn-custom-tool">';
@@ -2038,7 +2040,7 @@ layerTree.prototype.reorder = function(event,ui) {
 			if (layer.get('id') == layerid) {
 				var order = parseInt(zindex) + mapLayers_length;
 				layer.setZIndex(order);
-				self.changeState(layer, 'overlay', 'change-order', order);
+				self.changeState(layer, 'layer', 'change-order', order);
 				mapLayers_length--;
 			}
 		}, this);
@@ -2050,7 +2052,7 @@ layerTree.prototype.reorder = function(event,ui) {
  */
 layerTree.prototype.changeState = function(object, objectType, action, value) {
 	
-	if (objectType == 'overlay') {
+	if (objectType == 'layer') {
 		for (var i=0; i<this.state.layerGroups.length; i++) {
 			for (var j=0; j<this.state.layerGroups[i].layers.length; j++) {	
 				if (this.state.layerGroups[i].layers[j].id == object.get('id')) {
@@ -2062,14 +2064,14 @@ layerTree.prototype.changeState = function(object, objectType, action, value) {
 						
 					} else if (action == 'change-order') {
 						this.state.layerGroups[i].layers[j].order = value;
+						
+					} else if (action == 'change-baselayer') {
+						this.state.layerGroups[i].layers[j].default_baselayer = value;
 					}
 				}				
 				
 			}
 		}
-		
-	} else if (objectType == 'baselayer') {
-		
 		
 	} else if (objectType == 'layergroup') {
 		for (var i=0; i<this.state.layerGroups.length; i++) {
