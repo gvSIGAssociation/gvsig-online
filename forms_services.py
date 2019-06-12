@@ -21,17 +21,16 @@
 @author: César Martinez <cmartinez@scolab.es>
 '''
 from models import Workspace, Datastore, Layer, LayerGroup, Server
-from gvsigol_core.models import BaseLayer
 from django.utils.translation import ugettext as _
 from gvsigol_services import geographic_servers
 from django import forms
 import string
 import random
 import json
-from gvsigol.settings import BASELAYER_SUPPORTED_TYPES
+from gvsigol.settings import EXTERNAL_LAYER_SUPPORTED_TYPES
 
 
-baselayer_supported_types = tuple((x,x) for x in BASELAYER_SUPPORTED_TYPES)
+external_layer_supported_types = tuple((x,x) for x in EXTERNAL_LAYER_SUPPORTED_TYPES)
 layers = (('---', _('No se han podido obtener las capas')), ('1.3.0', 'version 1.3.0'))
 version = (('1.1.1', _('1.1.1')), ('1.3.0', _('1.3.0')), ('1.0.0', _('1.0.0')))
 blank = (('', '---------'),)
@@ -199,15 +198,17 @@ class LayerUploadTypeForm(forms.ModelForm):
         fields = ['type']
     type = forms.ModelChoiceField(required=True, queryset=Workspace.objects.all())
 
-class BaseLayerForm(forms.ModelForm):
+class ExternalLayerForm(forms.ModelForm):
     class Meta:
-        model = BaseLayer
-        fields = ['title', 'type', 'version', 'url', 'layers', 'format', 'key']
+        model = Layer
+        fields = ['title', 'layer_group', 'type', 'version', 'url', 'layers', 'format', 'key']
         
     #name = forms.CharField(label=_(u'Name'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     title = forms.CharField(label=_(u'Title'), required=True, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     
-    type = forms.ChoiceField(label=_(u'Type'), choices=baselayer_supported_types, required=True, widget=forms.Select(attrs={'class' : 'form-control'}))
+    layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, queryset=LayerGroup.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    
+    type = forms.ChoiceField(label=_(u'Type'), choices=external_layer_supported_types, required=True, widget=forms.Select(attrs={'class' : 'form-control'}))
     version = forms.ChoiceField(label=_(u'Version'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control'}))
    
     url = forms.CharField(label=_(u'URL'), required=False, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
