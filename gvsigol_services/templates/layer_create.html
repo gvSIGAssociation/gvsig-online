@@ -652,10 +652,10 @@
 		}
 		for (var i=0; i<data.length; i++) {
 			var attribs = {
-				value: data[i],
-				text: data[i]
+				value: data[i].value,
+				text: data[i].text
 			};
-			if (previousValue == data[i]) {
+			if (previousValue == data[i].value) {
 				attribs['selected']='true';
 				placeholderSelected = false;
 			}
@@ -696,10 +696,10 @@
 				var options = [];
 				for (var i=0; i<data.length; i++) {
 					var attribs = {
-						value: data[i],
-						text: data[i]
+						value: data[i].value,
+						text: data[i].text
 					};
-					if (previousValue == data[i]) {
+					if (previousValue == data[i].value) {
 						attribs['selected']='true';
 						placeholderSelected = false;
 					}
