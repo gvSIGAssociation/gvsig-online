@@ -619,7 +619,8 @@ def layer_delete(request, layer_id):
 def layer_delete_operation(request, layer_id):
     layer = Layer.objects.get(pk=layer_id)
     gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
-    gs.deleteGeoserverLayerGroup(layer.layer_group)
+    if layer.layer_group.name != '__default__':
+        gs.deleteGeoserverLayerGroup(layer.layer_group)
     gs.deleteResource(layer.datastore.workspace, layer.datastore, layer)
     gs.deleteLayerStyles(layer)
     signals.layer_deleted.send(sender=None, layer=layer)
