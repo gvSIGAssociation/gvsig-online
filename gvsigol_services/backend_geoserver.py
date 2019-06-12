@@ -1500,7 +1500,7 @@ class Geoserver():
             r.delete()
         self.rest_catalog.get_session().delete(self.rest_catalog.get_service_url() + "/security/acl/services/wfs.Transaction", verify=False, auth=(self.user, self.password))
         
-        layers = Layer.objects.all()  
+        layers = Layer.objects.filter(external=False)  
         transaction_roles = [] 
         for layer in layers:
             who_can_read = []

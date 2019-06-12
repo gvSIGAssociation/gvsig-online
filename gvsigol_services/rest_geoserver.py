@@ -588,15 +588,16 @@ class Geoserver():
         if len(layers_in_group) > 0:   
             layers = []
             for l in layers_in_group:
-                datastore = Datastore.objects.get(id=l.datastore.id)
-                workspace = Workspace.objects.get(id=datastore.workspace_id)
-                
-                layer = {}
-                layer["@type"] = "layer"
-                layer["name"] = workspace.name + ":"+ l.name
-                layer["title"] = l.title
-                layer["href"] = self.service_url + '/layers/' + l.name + '.json'
-                layers.append(layer)
+                if not l.external:
+                    datastore = Datastore.objects.get(id=l.datastore.id)
+                    workspace = Workspace.objects.get(id=datastore.workspace_id)
+                    
+                    layer = {}
+                    layer["@type"] = "layer"
+                    layer["name"] = workspace.name + ":"+ l.name
+                    layer["title"] = l.title
+                    layer["href"] = self.service_url + '/layers/' + l.name + '.json'
+                    layers.append(layer)
 
             data = {
                 "layerGroup": {
@@ -641,15 +642,15 @@ class Geoserver():
                 layers = []
                 #for tl in layers_in_toc:
                 for l in layers_in_group:
-                #       if l.name == tl[1]['name']:
-                    datastore = Datastore.objects.get(id=l.datastore.id)
-                    workspace = Workspace.objects.get(id=datastore.workspace_id)
-                    
-                    layer = {}
-                    layer["@type"] = "layer"
-                    layer["name"] = workspace.name + ":"+ l.name
-                    layer["href"] = self.service_url + '/layers/' + l.name + '.json'
-                    layers.append(layer)
+                    if not l.external:
+                        datastore = Datastore.objects.get(id=l.datastore.id)
+                        workspace = Workspace.objects.get(id=datastore.workspace_id)
+                        
+                        layer = {}
+                        layer["@type"] = "layer"
+                        layer["name"] = workspace.name + ":"+ l.name
+                        layer["href"] = self.service_url + '/layers/' + l.name + '.json'
+                        layers.append(layer)
 
                 data = {
                     "layerGroup": {

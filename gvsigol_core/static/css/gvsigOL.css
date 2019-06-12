@@ -15,8 +15,9 @@ body {
   overflow-y: auto;
 }
 input[type='checkbox'] {
-    width:20px;
-    height:20px;
+    /*width:20px;
+    height:20px;*/
+    margin-right: 5px;
     background:white;
     border-radius:5px;
     border:2px solid #555;
@@ -25,8 +26,9 @@ input[type='checkbox']:checked {
     background: #abd;
 }
 input[type=radio] {
-    width: 20px;
-    height: 20px;
+    /*width:20px;
+    height:20px;*/
+    margin-right: 5px;
 }
 .mini-map {
   height: 400px;
