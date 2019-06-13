@@ -31,10 +31,11 @@ from __builtin__ import False
 
 def download_file(url, dstFile):
     try:
-        context = ssl._create_unverified_context()        
-        urllib.urlretrieve(url, dstFile, context = context)
+        unverified_context = ssl._create_unverified_context()        
+        urllib.urlretrieve(url, dstFile, context = unverified_context)
         return True
-    except:
+    except Exception as e:
+        print(e)
         return False
     
 
