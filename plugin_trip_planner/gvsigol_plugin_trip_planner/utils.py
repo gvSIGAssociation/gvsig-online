@@ -19,20 +19,32 @@
 '''
 
 import requests
-import urllib
+import urllib3
 import os
 import datetime
 import pytz
 import ssl
 from dateutil.parser import parse as parsedate
 from tzlocal import get_localzone # $ pip install tzlocal
+from shutil import copyfileobj
+
 from __builtin__ import False
 
 
 def download_file(url, dstFile):
     try:
-        unverified_context = ssl._create_unverified_context()        
-        urllib.urlretrieve(url, dstFile, context = unverified_context)
+#         unverified_context = ssl._create_unverified_context()        
+#         urllib.urlretrieve(url, dstFile, context = unverified_context)
+        # c = urllib3.PoolManager()
+        
+        r = requests.get(url, allow_redirects=True, verify=False)
+        open(dstFile, 'wb').write(r.content)
+        
+        # with c.request('GET',url, preload_content=False, verify=False) as resp, open(dstFile, 'wb') as out_file:
+#         with r.content as resp, open(dstFile, 'wb') as out_file:
+#             shutil.copyfileobj(resp, out_file)
+#         
+#         resp.release_conn()     # not 100% sure this is required though        
         return True
     except Exception as e:
         print(e)
