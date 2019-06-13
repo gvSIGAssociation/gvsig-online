@@ -1,18 +1,36 @@
+/**
+ * gvSIG Online.
+ * Copyright (C) 2010-2017 SCOLAB.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 /**
- * TODO
+ * @author: Francisco J. Peñarrubia <fjp@scolab.es>
  */
-var measureArea3d = function(wwd) {
+
+var measureAngle3d = function(wwd) {
 	this.wwd = wwd;
 	
-	this.id = "measure-area-3d";
+	this.id = "measure-angle-3d";
 
 	var button = document.createElement('button');
 	button.setAttribute("id", this.id);
 	button.setAttribute("class", "ol-btn-round");
-	button.setAttribute("title", gettext('Measure area'));
+	button.setAttribute("title", gettext('Measure angle'));
 	var icon = document.createElement('i');
-	icon.setAttribute("class", "icon-measure-area");
+	icon.setAttribute("class", "icon-measure-angle");
 	button.appendChild(icon);
 	
 	this.$button = $(button);
@@ -31,12 +49,12 @@ var measureArea3d = function(wwd) {
 	// 
     this.pathPositions = new Array();
     this.locations = new Array();
+    // this.texts = new Array(); // array de text renderables, para poder borrarlos bien.
 
     this.overlayLayer = new WorldWind.RenderableLayer("Measures");
     this.overlayLayer2 = new WorldWind.RenderableLayer("Measures2");
     this.wwd.addLayer(this.overlayLayer);
     this.wwd.addLayer(this.overlayLayer2);
-
     
     // Define the path attributes.
     this.pathAttributes = new WorldWind.ShapeAttributes(null);        
@@ -46,22 +64,9 @@ var measureArea3d = function(wwd) {
     this.pathAttributes2 = new WorldWind.ShapeAttributes(null);
     this.pathAttributes2.outlineColor = new WorldWind.Color(1, 1, 1, 0.6);
     this.pathAttributes2.outlineWidth = 5;
-
-    this.areaAttributes = new WorldWind.ShapeAttributes(null);
-    this.areaAttributes.outlineColor = new WorldWind.Color(0,0,1,0.9);
-    this.areaAttributes.outlineWidth = 5;
-    this.areaAttributes.interiorColor = new WorldWind.Color(1, 1, 1, 0.2)
-    
-    
-    this.path = new WorldWind.SurfacePolyline(this.locations, this.pathAttributes);
-    this.pathBorder = new WorldWind.SurfacePolyline(this.locations, this.pathAttributes2);
-
-    this.wwd.addLayer(this.overlayLayer);
-    this.wwd.addLayer(this.overlayLayer2); // Segment when mouse is moving
-    
+        
     // Create our measuring objects.
     this.lengthMeasurer = new WorldWind.LengthMeasurer(this.wwd);
-    this.areaMeasurer = new WorldWind.AreaMeasurer(this.wwd);
 
     this.clickRecognizer = new WorldWind.ClickRecognizer(this.wwd, this._onWWClick.bind(this));
     this.tapRecognizer = new WorldWind.TapRecognizer(this.wwd, this._onWWClick.bind(this));
@@ -71,25 +76,25 @@ var measureArea3d = function(wwd) {
 
 };
 
-measureArea3d.prototype._formatArea = function(a) {
-    var meters = a;
-    var km = meters / 1000000.0;
-    var formatted = meters.toLocaleString(navigator.language, { maximumFractionDigits: 1 }) + ' m2';
-    if (a > 1000000) {
-        formatted = km.toLocaleString(navigator.language, { maximumFractionDigits: 1 }) + ' km2';
+measureAngle3d.prototype._formatDistance = function(dist) {
+    var meters = dist;
+    var km = meters / 1000.0;
+    var formatted = meters.toLocaleString(navigator.language, { maximumFractionDigits: 2 }) + ' m';
+    if (dist > 1000) {
+        formatted = km.toLocaleString(navigator.language, { maximumFractionDigits: 1 }) + ' km';
     }
     return formatted;
 }
 
 
-measureArea3d.prototype.active = false;
+measureAngle3d.prototype.active = false;
 
-measureArea3d.prototype.deactivable = true;
+measureAngle3d.prototype.deactivable = true;
 
 /**
  * @param {Event} e Browser event.
  */
-measureArea3d.prototype._handler = function(e) {
+measureAngle3d.prototype._handler = function(e) {
 	e.preventDefault();
 		
 	if (this.active) {
@@ -102,6 +107,8 @@ measureArea3d.prototype._handler = function(e) {
 		this.active = true;
         this.$button.trigger('control-active', [this]);
 
+        this.path = new WorldWind.SurfacePolyline(this.locations, this.pathAttributes);
+        this.pathBorder = new WorldWind.SurfacePolyline(this.locations, this.pathAttributes2);    
         this.overlayLayer.addRenderable(this.pathBorder);
         this.overlayLayer.addRenderable(this.path);    
         this._addListeners();
@@ -111,13 +118,13 @@ measureArea3d.prototype._handler = function(e) {
 /**
  * TODO
  */
-measureArea3d.prototype.isActive = function() {
+measureAngle3d.prototype.isActive = function() {
 	return this.active;
 };
 
 
 
-measureArea3d.prototype._onWWClick = function(recognizer) {			
+measureAngle3d.prototype._onWWClick = function(recognizer) {			
     // Obtain the event location.
     var x = recognizer.clientX,
         y = recognizer.clientY;
@@ -139,30 +146,65 @@ measureArea3d.prototype._onWWClick = function(recognizer) {
         var distance = this.lengthMeasurer.getLength(this.pathPositions, true, WorldWind.GREAT_CIRCLE);
         var loc = new WorldWind.MeasuredLocation(position.latitude, position.longitude, distance);
         this.locations.push(loc);
-        if (this.locations.length > 1)
+        var numPoints = this.pathPositions.length;
+        if (numPoints > 1)
         {
             this.path.boundaries = this.locations;
             this.pathBorder.boundaries = this.locations;
 
+            if (numPoints > 2) {
+                var pA = this.pathPositions[numPoints-3];
+                var pB = this.pathPositions[numPoints-2];
+                var pC = this.pathPositions[numPoints-1];
+
+                var v1 = new WorldWind.Vec3(0,0,0);
+                var v2 = new WorldWind.Vec3(0,0,0);
+                var v3 = new WorldWind.Vec3(0,0,0);
+
+                this.wwd.globe.computePointFromPosition(pA.latitude, pA.longitude, pA.altitude, v1);
+                this.wwd.globe.computePointFromPosition(pB.latitude, pB.longitude, pB.altitude, v2);
+                this.wwd.globe.computePointFromPosition(pC.latitude, pC.longitude, pC.altitude, v3);
+
+                // Be careful!. Subtract modifies the original vec3. This is the reason
+                // we calculate vA after vB
+                var vB = v3.subtract(v2);
+                var vA = v2.subtract(v1);
+
+                var angleRads = WorldWind.MeasurerUtils.angleBetweenVectors(vA,vB);
+                var angleDegrees = angleRads * WorldWind.Angle.RADIANS_TO_DEGREES;
+                var angleDMS = WorldWind.Angle.toDMSString(angleDegrees);
+
+                var text = new WorldWind.GeographicText(pB, angleDMS);
+                this.overlayLayer.addRenderable(text);
+            }
             this.overlayLayer.refresh();
+        }
+        else {
+            this.overlayLayer.removeAllRenderables();
+            this.overlayLayer2.removeAllRenderables();
+            this.overlayLayer.addRenderable(this.pathBorder);
+            this.overlayLayer.addRenderable(this.path);
+            this.path.boundaries = [];
+            this.pathBorder.boundaries = [];
+            this.overlayLayer.refresh();
+            this.overlayLayer2.refresh();
         }
     }
 
 };
 
-measureArea3d.prototype._keyListener = function(evt) {
+measureAngle3d.prototype._keyListener = function(evt) {
     evt = evt || window.event;
     if (evt.keyCode == 27) {
         this.deactivate();
     }
 }
 
-measureArea3d.prototype._doubleClickListener = function(evt) {
+measureAngle3d.prototype._doubleClickListener = function(evt) {
     this._removeOverlays();
 }
 
-
-measureArea3d.prototype._addListeners = function() {
+measureAngle3d.prototype._addListeners = function() {
 
     document.addEventListener('keydown', this._keyListener.bind(this));   
 
@@ -182,12 +224,12 @@ measureArea3d.prototype._addListeners = function() {
         this.wwd.addEventListener("touchstart", this._eventListener.bind(this));
         this.wwd.addEventListener("touchmove", this._eventListener.bind(this));
     }
-    this.wwd.addEventListener('dblclick', this._doubleClickListener.bind(this));
 
+    this.wwd.addEventListener('dblclick', this._doubleClickListener.bind(this));
     
 }
 
-measureArea3d.prototype._eventListener = function(event) {
+measureAngle3d.prototype._eventListener = function(event) {
     if (event.type.indexOf("pointer") !== -1) {
         this.eventType = event.pointerType; // possible values are "mouse", "pen" and "touch"
     } else if (event.type.indexOf("mouse") !== -1) {
@@ -226,27 +268,13 @@ measureArea3d.prototype._eventListener = function(event) {
             var tempPath = new WorldWind.SurfacePolyline(tempLocations, this.pathAttributes);
             var tempPathBorder = new WorldWind.SurfacePolyline(tempLocations, this.pathAttributes2);
 
-            // var text = new WorldWind.GeographicText(position, this._formatDistance(distance));
+            var text = new WorldWind.GeographicText(position, this._formatDistance(distance));
 
             this.overlayLayer2.removeAllRenderables();
 
             this.overlayLayer2.addRenderable(tempPath);
             this.overlayLayer2.addRenderable(tempPathBorder);
-            // this.overlayLayer2.addRenderable(text);
-            if (tempPositions.length > 2) {
-                var areaPositions = tempPositions.slice(0);
-                areaPositions.push(tempPositions[0]);
-                var area = this.areaMeasurer.getArea(areaPositions, true, WorldWind.GREAT_CIRCLE);
-                // console.debug('Area: ' + area);
-                var areaLocations = areaPositions.map(function(p) {
-                    var loc = new WorldWind.Location(p.latitude, p.longitude);
-                    return loc;
-                });
-                var shapeArea = new WorldWind.SurfacePolygon(areaLocations, this.areaAttributes);
-                this.overlayLayer2.addRenderable(shapeArea);
-                var text = new WorldWind.GeographicText(tempPositions[0], this._formatArea(area));
-                this.overlayLayer2.addRenderable(text);
-            }
+            this.overlayLayer2.addRenderable(text);
 
             this.overlayLayer2.refresh();                    
         }
@@ -254,7 +282,7 @@ measureArea3d.prototype._eventListener = function(event) {
 
 }
 
-measureArea3d.prototype._removeListeners = function() {
+measureAngle3d.prototype._removeListeners = function() {
     document.removeEventListener('keydown', this._keyListener);   
 
     this.clickRecognizer.enabled = false;
@@ -271,13 +299,13 @@ measureArea3d.prototype._removeListeners = function() {
         this.wwd.removeEventListener("mouseleave", this._eventListener);
         this.wwd.removeEventListener("touchstart", this._eventListener);
         this.wwd.removeEventListener("touchmove", this._eventListener);
-    }        
+    }
 
     this.wwd.removeEventListener('dblclick', this._doubleClickListener);
 
 }
 
-measureArea3d.prototype.deactivate = function() {			
+measureAngle3d.prototype.deactivate = function() {			
     this._removeOverlays(true);
     this._removeListeners();
     this.$button.blur();
@@ -287,14 +315,20 @@ measureArea3d.prototype.deactivate = function() {
 /**
  * TODO
  */
-measureArea3d.prototype._removeOverlays = function(bRedraw) {
+measureAngle3d.prototype._removeOverlays = function(bRedraw) {
     this.pathPositions = [];
     this.locations = [];
-    this.path.boundaries = [];
-    this.pathBorder.boundaries = [];
+    // this.path.boundaries = [];
+    // this.pathBorder.boundaries = [];
+    // this.overlayLayer2.removeAllRenderables();
+    // Remove only texts
+    // for(var i =0; i < this.texts.length; i++) {
+    //     this.overlayLayer.removeRenderable(this.texts[i]);
+    // };
+    // this.texts = [];
+    // this.overlayLayer.removeAllRenderables();    
+    // this.overlayLayer.addRenderable(this.path);
     if (bRedraw) {
-        this.overlayLayer2.removeAllRenderables();
-        this.overlayLayer.removeAllRenderables();    
         this.wwd.redraw();
     }
 };

@@ -198,6 +198,19 @@ ChangeToWWControl.prototype.initWW = function() {
     if (viewer.core.ifToolInConf('gvsigol_tool_measure')) {
 		this.tools3d.push(new measureLength3d(this.wwd));
 		this.tools3d.push(new measureArea3d(this.wwd));
+		this.tools3d.push(new measureAngle3d(this.wwd));
+		var self = this;
+		$('#toolbar3d').on( "control-active", function(e) {
+			for (var i=0; i<self.tools3d.length; i++){
+				if (e.target.id != self.tools3d[i].id) {
+					if (self.tools3d[i].deactivable == true) {
+						if (self.tools3d[i].active) {
+							self.tools3d[i].deactivate();
+						}
+					}
+				}
+			}
+	  });
 	}
 
         
@@ -209,6 +222,20 @@ ChangeToWWControl.prototype.initWW = function() {
 	// Añadimos eventos de movimiento de mapa de OL3
 	this.map.on('moveend', this.onOLMoveEnd, this);
 	this.map.getView().on('change:rotation', this.onOLRotation, this);
+
+	var zoom = this.map.getView().getZoom(); 
+	var extent = this.map.getView().calculateExtent(this.map.getSize());
+	var z;
+	if (extent[0] > extent[2]){
+		z = Math.abs(extent[0]-extent[2]);
+	}else{
+		z = Math.abs(extent[2]-extent[0]);
+	}	 
+
+	var center = this.map.getView().getCenter();
+	var latlon = ol.proj.transform(center,'EPSG:3857', 'EPSG:4326');
+	this.goToAnimator.goTo(new WorldWind.Position(latlon[1], latlon[0], z));
+
     
 };
 

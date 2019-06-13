@@ -92,9 +92,7 @@ measureLength3d.prototype._formatDistance = function(dist) {
 
 measureLength3d.prototype.active = false;
 
-/**
- * TODO
- *memeasureLength3d3dth.prototype.deactivable = true;
+measureLength3d.prototype.deactivable = true;
 
 /**
  * @param {Event} e Browser event.
@@ -302,15 +300,9 @@ measureLength3d.prototype._removeOverlays = function(bRedraw) {
     this.locations = [];
     // this.path.boundaries = [];
     // this.pathBorder.boundaries = [];
-    // this.overlayLayer2.removeAllRenderables();
-    // Remove only texts
-    // for(var i =0; i < this.texts.length; i++) {
-    //     this.overlayLayer.removeRenderable(this.texts[i]);
-    // };
-    // this.texts = [];
-    // this.overlayLayer.removeAllRenderables();    
-    // this.overlayLayer.addRenderable(this.path);
     if (bRedraw) {
+        this.overlayLayer2.removeAllRenderables();
+        this.overlayLayer.removeAllRenderables();    
         this.wwd.redraw();
     }
 };
