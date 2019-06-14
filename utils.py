@@ -34,7 +34,7 @@ def get_all_user_groups_checked_by_layer(layer):
     groups_list = UserGroup.objects.all()
     read_groups = LayerReadGroup.objects.filter(layer=layer)
     write_groups = LayerWriteGroup.objects.filter(layer=layer)
-    
+
     groups = []
     for g in groups_list:
         if g.name != 'admin' and g.name != 'public':
@@ -42,7 +42,7 @@ def get_all_user_groups_checked_by_layer(layer):
             for lrg in read_groups:
                 if lrg.group_id == g.id:
                     group['read_checked'] = True
-            
+
             for lwg in write_groups:
                 if lwg.group_id == g.id:
                     group['write_checked'] = True
@@ -51,7 +51,7 @@ def get_all_user_groups_checked_by_layer(layer):
             group['name'] = g.name
             group['description'] = g.description
             groups.append(group)
-        
+
     return groups
 
 def get_read_roles(layer):
@@ -60,60 +60,60 @@ def get_read_roles(layer):
     for layer_read_group in layer_read_groups:
         group = UserGroup.objects.get(id=layer_read_group.group_id)
         roles.append(group.name)
-        
+
     return roles
-        
+
 def get_write_roles(layer):
     roles = []
     layer_write_groups = LayerWriteGroup.objects.filter(layer_id=layer.id)
     for layer_write_group in layer_write_groups:
         group = UserGroup.objects.get(id=layer_write_group.group_id)
         roles.append(group.name)
-        
+
     return roles
 
-#TODO: llevar al paquete del core   
+#TODO: llevar al paquete del core
 def create_datastore(request, username, ds_name, ws):
-    
+
     ds_type = 'v_PostGIS'
     description = 'BBDD ' + ds_name
-    
+
     dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
     dbport = settings.GVSIGOL_USERS_CARTODB['dbport']
     dbname = settings.GVSIGOL_USERS_CARTODB['dbname']
     dbuser = settings.GVSIGOL_USERS_CARTODB['dbuser']
     dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
     connection_params = '{ "host": "' + dbhost + '", "port": "' + dbport + '", "database": "' + dbname + '", "schema": "' + ds_name + '", "user": "' + dbuser + '", "passwd": "' + dbpassword + '", "dbtype": "postgis" }'
-    
+
     if create_schema(ds_name):
         gs = geographic_servers.get_instance().get_server_by_id(ws.server.id)
         if gs.createDatastore(ws, ds_type, ds_name, description, connection_params):
             # save it on DB if successfully created
             datastore = Datastore(
-                workspace = ws, 
-                type = ds_type, 
-                name = ds_name, 
-                description = description, 
+                workspace = ws,
+                type = ds_type,
+                name = ds_name,
+                description = description,
                 connection_params = connection_params,
                 created_by=username
             )
             datastore.save()
-                
+
             return datastore
-        
-#TODO: llevar al paquete del core            
+
+#TODO: llevar al paquete del core
 def create_schema(ds_name):
     dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
     dbport = settings.GVSIGOL_USERS_CARTODB['dbport']
     dbname = settings.GVSIGOL_USERS_CARTODB['dbname']
     dbuser = settings.GVSIGOL_USERS_CARTODB['dbuser']
     dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
-    
+
     connection = get_connection(dbhost, dbport, dbname, dbuser, dbpassword)
     cursor = connection.cursor()
-    
-    try:        
-        create_schema = "CREATE SCHEMA IF NOT EXISTS " + ds_name + " AUTHORIZATION " + dbuser + ";"       
+
+    try:
+        create_schema = "CREATE SCHEMA IF NOT EXISTS " + ds_name + " AUTHORIZATION " + dbuser + ";"
         cursor.execute(create_schema)
 
     except StandardError, e:
@@ -122,31 +122,35 @@ def create_schema(ds_name):
             return True
         else:
             return False
-    
+
     close_connection(cursor, connection)
     return True
 
-#TODO: llevar al paquete del core     
-def get_connection(host, port, database, user, password):    
+#TODO: llevar al paquete del core
+def get_connection(host, port, database, user, password):
     try:
         conn = psycopg2.connect("host=" + host +" port=" + port +" dbname=" + database +" user=" + user +" password="+ password);
         conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
         print "Connect ... "
-        
+
     except StandardError, e:
         print "Failed to connect!", e
         return []
-    
+
     return conn;
 
-def get_distinct_query(host, port, schema, database, user, password, layer, field):
+def get_distinct_query(host, port, schema, database, user, password, layer, field, where=None):
     values = []
     conn = get_connection(host, port, database, user, password)
     cursor = conn.cursor()
-    
+
+    where_query = ''
+    if where:
+        where_query = " " + str(where) + " "
+
     try:
-        sql = 'SELECT DISTINCT("' + field + '") FROM ' + schema + '.' + layer + ' ORDER BY "' + field + '" ASC;'
-        
+        sql = 'SELECT DISTINCT("' + field + '") FROM ' + schema + '.' + layer + where_query + ' ORDER BY "' + field + '" ASC;'
+
         cursor.execute(sql);
         rows = cursor.fetchall()
         for row in rows:
@@ -161,33 +165,33 @@ def get_distinct_query(host, port, schema, database, user, password, layer, fiel
     except StandardError, e:
         print "Query error!", e
         return []
-    
+
     close_connection(cursor, conn)
-    return values 
+    return values
 
 def get_minmax_query(host, port, schema, database, user, password, layer, field):
     conn = get_connection(host, port, database, user, password)
     cursor = conn.cursor()
-    
+
     try:
         sql = 'SELECT MIN("' + field + '") AS MinValue, MAX("' + field + '") AS MaxValue FROM ' + schema + '.' + layer + ' WHERE "' + field + '" IS NOT NULL;'
-        
+
         cursor.execute(sql);
         rows = cursor.fetchall()
 
     except StandardError, e:
         print "Fallo en el getMIN y getMAX", e
         return {}
-    
+
     close_connection(cursor, conn)
-    
+
     if len(rows) > 0:
         minmax = rows[0]
         if len(minmax) == 2:
             min = minmax[0]
             max = minmax[1]
             return json.dumps({'min': float(min), 'max': float(max)})
-    
+
     return {}
 
 #TODO: llevar al paquete del core
@@ -195,12 +199,12 @@ def close_connection(cursor, conn):
     #Close connection and exit
     cursor.close();
     conn.close();
-    
+
 def get_fields(resource):
     fields = None
     if resource != None:
         fields = resource.get('featureType').get('attributes').get('attribute')
-        
+
     return fields
 
 def get_alphanumeric_fields(fields):
@@ -208,13 +212,13 @@ def get_alphanumeric_fields(fields):
     for field in fields:
         if not 'jts.geom' in field.get('binding'):
             alphanumeric_fields.append(field)
-            
+
     return alphanumeric_fields
 
 def get_resources_dir(resource_type):
-    
+
     if resource_type == LayerResource.EXTERNAL_IMAGE:
-        the_path = os.path.join(MEDIA_ROOT, "resources/image") 
+        the_path = os.path.join(MEDIA_ROOT, "resources/image")
     elif  resource_type == LayerResource.EXTERNAL_PDF:
         the_path = os.path.join(MEDIA_ROOT, "resources/pdf")
     elif  resource_type == LayerResource.EXTERNAL_DOC:
@@ -229,7 +233,7 @@ def get_resources_dir(resource_type):
 
 def get_resource_type(lr):
     url = None
-    type = None 
+    type = None
     if lr.type == LayerResource.EXTERNAL_IMAGE:
         type = 'image'
         url = os.path.join(settings.MEDIA_URL, lr.path)
@@ -248,5 +252,5 @@ def get_resource_type(lr):
     elif lr.type == LayerResource.EXTERNAL_ALFRESCO_DIR:
         type = 'alfresco_dir'
         url = lr.path
-    
+
     return [type, url]
