@@ -389,7 +389,20 @@ class Introspect:
     def insert_sql(self, schema, table_name, sql):
         query = "INSERT INTO " + schema + "." + table_name + " " + sql + ";"
         self.cursor.execute(query)
-           
+
+    def select_sql(self, schema, table_name, sql):
+        query = "SELECT * FROM " + schema + "." + table_name + " " + sql + ";"
+        self.cursor.execute(query)
+        rows = self.cursor.fetchall()
+
+        return rows
+
+    def custom_query(self, query):
+        self.cursor.execute(query)
+        rows = self.cursor.fetchall()
+
+        return rows
+
     def set_transaction(self, schema, table_name):
         query = "BEGIN;"
         self.cursor.execute(query)
