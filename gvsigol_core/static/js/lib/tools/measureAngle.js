@@ -359,7 +359,7 @@ measureAngle.prototype.formatArea = function(polygon) {
 		var resultDegree = Math.acos(((Math.pow(p12, 2)) + (Math.pow(p13, 2)) - (Math.pow(p23, 2))) / (2 * p12 * p13)) * 180 / Math.PI;
 		
 		var output;
-		output = gettext('Interior angle') + ': ' + resultDegree + ' ' + '<sup>o</sup><br />';
+		output = gettext('Interior angle') + ': ' + parseInt(resultDegree) + ' ' + '<sup>o</sup><br />';
 		output += gettext('Exterior angle') + ': ' + (360 - parseInt(resultDegree)).toString() + ' ' + '<sup>o</sup>';
 		return output;
 	} 
