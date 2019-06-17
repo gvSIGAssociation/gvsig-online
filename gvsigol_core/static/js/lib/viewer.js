@@ -236,8 +236,15 @@ viewer.core = {
 				source: wmsSource,
 				visible: visible
 			});
+			wmsLayer.wms_url = externalLayer['url'];
+			wmsLayer.title = externalLayer['title'];
 			wmsLayer.baselayer = baselayer;
 			wmsLayer.setZIndex(parseInt(externalLayer.order));
+			wmsLayer.legend = externalLayer['url'] + '?SERVICE=WMS&VERSION=1.1.1&layer=' + externalLayer['layers'] + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on';
+			wmsLayer.legend_no_auth = externalLayer['url'] + '?SERVICE=WMS&VERSION=1.1.1&layer=' + externalLayer['layers'] + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on';
+			wmsLayer.on('change:visible', function(){
+				self.legend.reloadLegend();
+			});
 			this.map.addLayer(wmsLayer);		
 		}
     	if (externalLayer['type'] == 'WMTS') {
@@ -537,6 +544,7 @@ viewer.core = {
 		if (this.ifToolInConf('gvsigol_tool_measure')) {
 			this.tools.push(new measureLength(this.map));
 			this.tools.push(new measureArea(this.map));
+			this.tools.push(new measureAngle(this.map));
 		}
 		if (this.ifToolInConf('gvsigol_tool_export')) {
 			this.tools.push(new exportToPDF(this.conf, this.map));
