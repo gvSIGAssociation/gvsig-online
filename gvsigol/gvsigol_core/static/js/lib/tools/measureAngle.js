@@ -24,18 +24,18 @@
 /**
  * TODO
  */
-var measureArea = function(map) {
+var measureAngle = function(map) {
 
 	this.map = map;
 	
-	this.id = "measure-area";
+	this.id = "measure-angle";
 
 	var button = document.createElement('button');
 	button.setAttribute("id", this.id);
 	button.setAttribute("class", "toolbar-button");
-	button.setAttribute("title", gettext('Measure area'));
+	button.setAttribute("title", gettext('Measure angle'));
 	var icon = document.createElement('i');
-	icon.setAttribute("class", "icon-measure-area");
+	icon.setAttribute("class", "icon-measure-angle");
 	button.appendChild(icon);
 	
 	this.$button = $(button);
@@ -56,77 +56,77 @@ var measureArea = function(map) {
 /**
  * TODO
  */
-measureArea.prototype.drawLayer = null;
+measureAngle.prototype.drawLayer = null;
 
 /**
  * TODO
  */
-measureArea.prototype.sketch = null;
+measureAngle.prototype.sketch = null;
 
 /**
  * TODO
  */
-measureArea.prototype.lastSketch = null;
+measureAngle.prototype.lastSketch = null;
 
 /**
  * TODO
  */
-measureArea.prototype.helpTooltipElement = null;
+measureAngle.prototype.helpTooltipElement = null;
 
 /**
  * TODO
  */
-measureArea.prototype.helpTooltip = null;
+measureAngle.prototype.helpTooltip = null;
 
 /**
  * TODO
  */
-measureArea.prototype.measureTooltipElement = null;
+measureAngle.prototype.measureTooltipElement = null;
 
 /**
  * TODO
  */
-measureArea.prototype.measureTooltip = null;
+measureAngle.prototype.measureTooltip = null;
 
 /**
  * TODO
  */
-measureArea.prototype.lastMeasureTooltip = null;
+measureAngle.prototype.lastMeasureTooltip = null;
 
 /**
  * TODO
  */
-measureArea.prototype.continuePolygonMsg = '';
+measureAngle.prototype.continuePolygonMsg = '';
 
 /**
  * TODO
  */
-measureArea.prototype.draw = null;
+measureAngle.prototype.draw = null;
 
 /**
  * TODO
  */
-measureArea.prototype.source = null;
+measureAngle.prototype.source = null;
 
 /**
  * TODO
  */
-measureArea.prototype.drawLayer = null;
+measureAngle.prototype.drawLayer = null;
 
 /**
  * TODO
  */
-measureArea.prototype.active = false;
+measureAngle.prototype.active = false;
 
 /**
  * TODO
  */
-measureArea.prototype.deactivable = true;
+measureAngle.prototype.deactivable = true;
 
 /**
  * @param {Event} e Browser event.
  */
-measureArea.prototype.handler = function(e) {
+measureAngle.prototype.handler = function(e) {
 	e.preventDefault();
 	
 	
@@ -148,18 +148,18 @@ measureArea.prototype.handler = function(e) {
 /**
  * TODO
  */
-measureArea.prototype.isActive = function() {
+measureAngle.prototype.isActive = function() {
 	return this.active;
 };
 
 /**
  * TODO
  */
-measureArea.prototype.addVectorLayerToMap = function() {
+measureAngle.prototype.addVectorLayerToMap = function() {
 
 	this.drawLayer = new ol.layer.Vector({
 		source: this.source,
-		style: new ol.style.Style({
+		style: [new ol.style.Style({
 			fill: new ol.style.Fill({
 				color: 'rgba(255, 255, 255, 0.2)'
 	        }),
@@ -173,7 +173,20 @@ measureArea.prototype.addVectorLayerToMap = function() {
 	            	color: '#ffcc33'
 	            })
 	        })
-		})
+		}),
+		new ol.style.Style({
+	          image: new ol.style.Circle({
+	            radius: 5,
+	            fill: new ol.style.Fill({
+	              color: 'orange'
+	            })
+	          }),
+	          geometry: function(feature) {
+	            // return the coordinates of the first ring of the polygon
+	            var coordinates = [feature.getGeometry().getCoordinates()[0][1]];
+	            return new ol.geom.MultiPoint(coordinates);
+	          }
+	        })]
 	});
 	this.map.addLayer(this.drawLayer);
 	this.drawLayer.setZIndex(100000000);
@@ -183,7 +196,7 @@ measureArea.prototype.addVectorLayerToMap = function() {
  * Handle pointer move.
  * @param {ol.MapBrowserEvent} evt
  */
-measureArea.prototype.pointerMoveHandler = function(evt) {
+measureAngle.prototype.pointerMoveHandler = function(evt) {
 	if (evt.dragging) {
     	return;
   	}
@@ -202,7 +215,7 @@ measureArea.prototype.pointerMoveHandler = function(evt) {
   	this.helpTooltip.setPosition(evt.coordinate);
 };
 
-measureArea.prototype.addInteraction = function() {
+measureAngle.prototype.addInteraction = function() {
 	var self = this;
 	
 	this.draw = new ol.interaction.Draw({
@@ -226,7 +239,8 @@ measureArea.prototype.addInteraction = function() {
             		color: 'rgba(255, 255, 255, 0.2)'
             	})
             })
-	    })
+	    }),
+	    maxPoints: 3
 	});
 	this.map.addInteraction(this.draw);
 
@@ -244,24 +258,22 @@ measureArea.prototype.addInteraction = function() {
 	    		this.source.removeFeature(this.lastSketch);
 	    	}
 	    	
-	    	/** @type {ol.Coordinate|undefined} */
-            var tooltipCoord = evt.coordinate;
-
             listener = this.sketch.getGeometry().on('change', function(evt) {
-              var geom = evt.target;
+              self.geom = evt.target;
               var output;
-              if (geom instanceof ol.geom.Polygon) {
-                output = self.formatArea(geom);
-                tooltipCoord = geom.getLastCoordinate();
+              if (self.geom instanceof ol.geom.Polygon) {
+                output = self.formatArea(self.geom);
               }
               self.measureTooltipElement.innerHTML = output;
-              self.measureTooltip.setPosition(tooltipCoord);
+              
             });
             
 	    }, this);
 
 	this.draw.on('drawend',
 	    function(evt) {
+			this.measureTooltip.setPosition(this.geom.getCoordinates()[0][1]);
+			this.geom = null;
 	    	this.measureTooltipElement.className = 'tooltip tooltip-static';
 	        this.measureTooltip.setOffset([0, -7]);
 	        this.lastSketch = this.sketch;
@@ -276,7 +288,7 @@ measureArea.prototype.addInteraction = function() {
 /**
  * Creates a new help tooltip
  */
-measureArea.prototype.createHelpTooltip = function() {
+measureAngle.prototype.createHelpTooltip = function() {
 	if (this.helpTooltipElement) {
     	this.helpTooltipElement.parentNode.removeChild(this.helpTooltipElement);
   	}
@@ -294,7 +306,7 @@ measureArea.prototype.createHelpTooltip = function() {
 /**
  * Creates a new measure tooltip
  */
-measureArea.prototype.createMeasureTooltip = function() {
+measureAngle.prototype.createMeasureTooltip = function() {
   	if (this.measureTooltipElement) {
 	  	this.measureTooltipElement.parentNode.removeChild(this.measureTooltipElement);
   	}
@@ -313,21 +325,43 @@ measureArea.prototype.createMeasureTooltip = function() {
  * @param {ol.geom.Polygon} polygon
  * @return {string}
  */
-measureArea.prototype.formatArea = function(polygon) {
+measureAngle.prototype.formatArea = function(polygon) {
 	
-	var wgs84Sphere = new ol.Sphere(6378137);
-	var sourceProj = this.map.getView().getProjection();
-	var geom = /** @type {ol.geom.Polygon} */(polygon.clone().transform(sourceProj, 'EPSG:4326'));
-	var coordinates = geom.getLinearRing(0).getCoordinates();
-	var area = Math.abs(wgs84Sphere.geodesicArea(coordinates));
+	var coordinates = polygon.getLinearRing(0).getCoordinates();
+	
+	if (this.geom.getCoordinates()[0].length == 4) {
+		var p2={
+			x:coordinates[0][0],
+			y:coordinates[0][1]
+		};
 
-	var output;
-	output = gettext('Area') + ': ' + (Math.round(area * 100) / 100) + ' ' + 'm<sup>2</sup><br />';
-	output += gettext('Perimeter') + ': ' + this.formatLength(coordinates);
-	return output;
+		var p1={
+			x:coordinates[1][0],
+			y:coordinates[1][1]
+		};
+
+		var p3={
+			x:coordinates[2][0],
+			y:coordinates[2][1]	
+		};
+
+		var p12 = Math.sqrt(Math.pow((p1.x - p2.x),2) + Math.pow((p1.y - p2.y),2));
+		var p13 = Math.sqrt(Math.pow((p1.x - p3.x),2) + Math.pow((p1.y - p3.y),2));
+		var p23 = Math.sqrt(Math.pow((p2.x - p3.x),2) + Math.pow((p2.y - p3.y),2));
+
+		//angle in radians
+		var resultRadian = Math.acos(((Math.pow(p12, 2)) + (Math.pow(p13, 2)) - (Math.pow(p23, 2))) / (2 * p12 * p13));
+
+		//angle in degrees
+		var resultDegree = Math.acos(((Math.pow(p12, 2)) + (Math.pow(p13, 2)) - (Math.pow(p23, 2))) / (2 * p12 * p13)) * 180 / Math.PI;
+		
+		return resultDegree + ' <sup>o</sup>';
+	} 
+	
+	
 };
 
-measureArea.prototype.formatLength = function(coordinates) {
+measureAngle.prototype.formatLength = function(coordinates) {
 	var length = 0;
 	var wgs84Sphere = new ol.Sphere(6378137);
 		
@@ -349,7 +383,7 @@ measureArea.prototype.formatLength = function(coordinates) {
 /**
  * TODO
  */
-measureArea.prototype.deactivate = function() {			
+measureAngle.prototype.deactivate = function() {			
 	this.removeOverlays();
 	this.map.removeLayer(this.drawLayer);
 	this.map.removeInteraction(this.draw);
@@ -371,7 +405,7 @@ measureArea.prototype.deactivate = function() {
 /**
  * TODO
  */
-measureArea.prototype.removeOverlays = function(){
+measureAngle.prototype.removeOverlays = function(){
 	this.map.removeOverlay(this.helpTooltip);
 	this.map.removeOverlay(this.measureTooltip);
 	var overlays = this.map.getOverlays().getArray();

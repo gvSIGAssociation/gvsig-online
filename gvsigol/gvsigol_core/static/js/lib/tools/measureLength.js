@@ -157,24 +157,24 @@ measureLength.prototype.addVectorLayerToMap = function() {
 
 	this.drawLayer = new ol.layer.Vector({
 		source: this.source,
-	  	style: new ol.style.Style({
-	    	fill: new ol.style.Fill({
-	      		color: 'rgba(255, 255, 255, 0.2)'
-	    	}),
-	    	stroke: new ol.style.Stroke({
-	      		color: '#0099ff',
-	      		width: 2
-	    	}),
-	    	image: new ol.style.Circle({
-	      		radius: 7,
-	      		fill: new ol.style.Fill({
-	        		color: '#0099ff'
-	      		})
-	    	}),
-	    	zIndex: 2000000
-	  	})
+		style: new ol.style.Style({
+			fill: new ol.style.Fill({
+				color: 'rgba(255, 255, 255, 0.2)'
+	        }),
+	        stroke: new ol.style.Stroke({
+	        	color: '#ffcc33',
+	            width: 2
+	        }),
+	        image: new ol.style.Circle({
+	        	radius: 7,
+	            fill: new ol.style.Fill({
+	            	color: '#ffcc33'
+	            })
+	        })
+		})
 	});
 	this.map.addLayer(this.drawLayer);
+	this.drawLayer.setZIndex(100000000);
 };
 
 /**
@@ -205,7 +205,26 @@ measureLength.prototype.addInteraction = function() {
 	
 	this.draw = new ol.interaction.Draw({
 		source: this.source,
-	    type: /** @type {ol.geom.GeometryType} */ ('LineString')
+	    type: /** @type {ol.geom.GeometryType} */ ('LineString'),
+	    style: new ol.style.Style({
+	    	fill: new ol.style.Fill({
+	    		color: 'rgba(255, 255, 255, 0.2)'
+            }),
+            stroke: new ol.style.Stroke({
+            	color: 'rgba(0, 0, 0, 0.5)',
+            	lineDash: [10, 10],
+            	width: 2
+            }),
+            image: new ol.style.Circle({
+            	radius: 5,
+            	stroke: new ol.style.Stroke({
+            		color: 'rgba(0, 0, 0, 0.7)'
+            	}),
+            	fill: new ol.style.Fill({
+            		color: 'rgba(255, 255, 255, 0.2)'
+            	})
+            })
+	    })
 	});
 	this.map.addInteraction(this.draw);
 
