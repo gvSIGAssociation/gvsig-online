@@ -175,18 +175,21 @@ measureAngle.prototype.addVectorLayerToMap = function() {
 	        })
 		}),
 		new ol.style.Style({
-	          image: new ol.style.Circle({
-	            radius: 5,
-	            fill: new ol.style.Fill({
-	              color: 'orange'
-	            })
-	          }),
-	          geometry: function(feature) {
+			image: new ol.style.Circle({
+            	radius: 50,
+            	stroke: new ol.style.Stroke({
+            		color: 'rgba(0, 0, 0, 0.7)'
+            	}),
+            	fill: new ol.style.Fill({
+            		color: 'rgba(255, 255, 255, 0.2)'
+            	})
+            }),
+	        geometry: function(feature) {
 	            // return the coordinates of the first ring of the polygon
 	            var coordinates = [feature.getGeometry().getCoordinates()[0][1]];
 	            return new ol.geom.MultiPoint(coordinates);
 	          }
-	        })]
+	       	})]
 	});
 	this.map.addLayer(this.drawLayer);
 	this.drawLayer.setZIndex(100000000);
@@ -355,7 +358,10 @@ measureAngle.prototype.formatArea = function(polygon) {
 		//angle in degrees
 		var resultDegree = Math.acos(((Math.pow(p12, 2)) + (Math.pow(p13, 2)) - (Math.pow(p23, 2))) / (2 * p12 * p13)) * 180 / Math.PI;
 		
-		return resultDegree + ' <sup>o</sup>';
+		var output;
+		output = gettext('Interior angle') + ': ' + resultDegree + ' ' + '<sup>o</sup><br />';
+		output += gettext('Exterior angle') + ': ' + (360 - parseInt(resultDegree)).toString() + ' ' + '<sup>o</sup>';
+		return output;
 	} 
 	
 	
