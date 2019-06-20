@@ -28,6 +28,13 @@
 	$('#submenu-statistics').addClass("active");
 
 	$().ready(function() {
+		var first_tab = $("#statistics-tab-controller li").first()
+		if(first_tab != null){
+			var first_link = first_tab.find("a").first();
+			if(first_link != null){
+				first_link.trigger("click");
+			}
+		}
 	});
 </script>
 {% endblock %}
