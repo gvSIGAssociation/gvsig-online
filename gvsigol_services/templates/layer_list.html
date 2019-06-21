@@ -250,7 +250,11 @@ $(document).ready(function() {
 						location.reload();
 					}
 				},
-				error: function(){}
+				error: function(){
+					$('#modal-delete-layer').modal('hide');
+					$.overlayout();
+					location.reload();
+				}
 			});
 		});
 	}
