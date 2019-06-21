@@ -68,6 +68,8 @@ import requests
 import string
 import random
 from future.moves.urllib.parse import urlparse, urlencode
+import rest_geoserver
+from rest_geoserver import RequestError
 
 logger = logging.getLogger("gvsigol")
 
@@ -610,7 +612,32 @@ def layer_delete(request, layer_id):
     try:
         layer_delete_operation(request, layer_id)
         return HttpResponseRedirect(reverse('datastore_list'))
+    except rest_geoserver.FailedRequestError as e:
+        if e.status_code == 503:
+            msg = _('ERROR can\'t connect with GeoServer')
+            data = {
+                    'status': 'ERROR',
+                    'status_code': 503,
+                    'message': msg,
+                }
+            return HttpResponse(json.dumps(data))
+        if e.status_code == 500:
+            msg = _('ERROR can\'t remove GeoServer data. Forcing remove from DataBase')
+            layer = Layer.objects.get(pk=layer_id)
+            if not 'no_thumbnail.jpg' in layer.thumbnail.name:
+                if os.path.isfile(layer.thumbnail.path):
+                    os.remove(layer.thumbnail.path)
+            Layer.objects.all().filter(pk=layer_id).delete()
+            core_utils.toc_remove_layer(layer)
 
+            data = {
+                    'status': 'ERROR',
+                    'status_code': 500,
+                    'message': msg,
+                }
+            return HttpResponse(json.dumps(data))
+
+        raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer group. Backend error: {msg}").format(msg=e.get_message()))
     except Exception as e:
         return HttpResponseNotFound('<h1>Error deleting layer: {0}</h1>'.format(layer_id))
 

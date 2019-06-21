@@ -1,6 +1,6 @@
-{% extends "base.html" %} 
-{% load staticfiles %} 
-{% load i18n %} 
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
 
 {% block content %}
 <div class="row">
@@ -9,12 +9,14 @@
 			<div class="col-md-12 form-group">
 				<div class="box-tools pull-right">
 					<button id="button-create-layer" class="btn btn-sm btn-default"><i class="fa fa-database margin-r-5"></i> {% trans "Create empty layer" %}</button>
-					<button id="button-import-layer" class="btn btn-sm btn-default"><i class="fa fa-cloud-upload margin-r-5"></i> {% trans "Publish layer" %}</button>				
+					<button id="button-import-layer" class="btn btn-sm btn-default"><i class="fa fa-cloud-upload margin-r-5"></i> {% trans "Publish layer" %}</button>
 				</div>
 			</div>
 		</div>
-		
+
 		<div class="box">
+			<div id="form-error" style="color:#ff0000;">
+			</div>
 			<div class="box-body">
 				<table class="table" id="layers-table">
 					<thead>
@@ -57,7 +59,7 @@
 			</div>
 		</div>
 	</div>
-</div>      
+</div>
 
 <!-- Modal -->
 <div class="modal fade" id="modal-delete-layer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -85,12 +87,27 @@
 <div class="modal fade" id="modal-edit-layer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
-			
+
 			<div class="modal-body">
 				<h4>{% trans "Raster layers are not configurable" %}</h4>
 			</div>
 			<div class="modal-footer">
 				<button id="button-delete-layer-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-force-delete-layer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+
+			<div class="modal-body">
+				<h4>{% trans "This layer can't be remove from GeoServer, but it was delete from the list anyway" %}</h4>
+			</div>
+			<div class="modal-footer">
+				<button id="button-force-delete-accept" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Accept" %}</button>
 			</div>
 		</div>
 	</div>
@@ -148,13 +165,13 @@ $(document).ready(function() {
 	    "dom": 'T<"clear">lfrtip',
 		"bLengthChange": false
 	});
-		 
+
 	$('#layers-table tbody').on('click', 'button', function (){
 		var row = table.row($(this).parents('tr'));
-	    var data = row.data();  
+	    var data = row.data();
 	    if (this.name == "button-update-layer") {
 	        updateLayer(data);
-	        
+
 	    } else if (this.name == "button-config-layer"){
 	    	var start_index = data[1].indexOf('data-origin=');
 	    	var type = "v_PostGIS";
@@ -166,39 +183,39 @@ $(document).ready(function() {
 		    		type = type_aux.substring(0,end_index);
 		    	}
 	   		}
-		    if(type == "v_PostGIS"){	
+		    if(type == "v_PostGIS"){
 				configLayer(data, row);
 		    }else{
 		    	$('#modal-edit-layer').modal('show');
 		    }
-			
+
 		} else if (this.name == "button-clear-cache"){
 			clearCache(data, row);
-			
+
 		} else if (this.name == "button-delete-layer"){
-	        deleteLayer(data, row);   
+	        deleteLayer(data, row);
 	    }
 	});
-	
+
 	$('#button-import-layer').click( function() {
 		location.href = '/gvsigonline/services/layer_add/';
 	});
 	$('#button-create-layer').click( function() {
 		location.href = "{% url 'layer_create'%}";
 	});
-	
-	function updateLayer(data){			
+
+	function updateLayer(data){
 		location.href = '/gvsigonline/services/layer_update/' + data[0] + '/';
 	}
-	
-	function configLayer(data){			
+
+	function configLayer(data){
 		location.href = '/gvsigonline/services/layer_config/' + data[0] + '/';
 	}
-	
-	function clearCache(data){			
+
+	function clearCache(data){
 		location.href = '/gvsigonline/services/cache_clear/' + data[0] + '/';
 	}
-	
+
 	function deleteLayer(data, row){
 		$('#button-delete-layer-accept').click( function() {
 			$("body").overlay();
@@ -210,15 +227,34 @@ $(document).ready(function() {
 				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 				},
 				success	:function(response){
-					$('#modal-delete-layer').modal('hide');
-					$.overlayout();
-					location.reload();
+					try{
+						var json_response = JSON.parse(response);
+						if( json_response.hasOwnProperty("status") && json_response["status"] == "ERROR"){
+							if(json_response["status_code"] == 500){
+								$('#modal-force-delete-layer').modal('show');
+								$('#button-force-delete-accept').click(function(){
+									$('#modal-force-delete-layer').modal('hide');
+									$.overlayout();
+									location.reload();
+								})
+							}else{
+								$("#form-error").html("<br /><span style=\"margin: 25px\">" + json_response["message"] + "</span>");
+							}
+						}
+						$('#modal-delete-layer').modal('hide');
+						$.overlayout();
+
+					}catch(e){
+						$('#modal-delete-layer').modal('hide');
+						$.overlayout();
+						location.reload();
+					}
 				},
 				error: function(){}
 			});
 		});
 	}
-	    
+
 });
 </script>
 {% endblock %}
