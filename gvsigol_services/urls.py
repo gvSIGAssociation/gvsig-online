@@ -65,7 +65,11 @@ urlpatterns = [
     url(r'^external_layer_delete/(?P<external_layer_id>[0-9]+)/$', services_views.external_layer_delete, name='external_layer_delete'),
     url(r'^get_capabilities_from_url/$', services_views.get_capabilities_from_url, name='external_layer_get_capabilities'),
     url(r'^get_capabilities/$', services_views.get_capabilities, name='get_capabilities'),
-
+    url(r'^cache_list/$', services_views.cache_list, name='cache_list'),
+    url(r'^cache_config/(?P<layer_id>[0-9]+)/$', services_views.cache_config, name='cache_config'),
+    url(r'^get_cache_tasks/$', services_views.get_cache_tasks, name='get_cache_tasks'),
+    url(r'^kill_all_tasks/$', services_views.kill_all_tasks, name='kill_all_tasks'),
+    
     url(r'^layers_get_temporal_properties/$', services_views.layers_get_temporal_properties, name='layers_get_temporal_properties'),
     url(r'^get_date_fields_from_resource/$', services_views.get_date_fields_from_resource, name='get_date_fields_from_resource'),
         

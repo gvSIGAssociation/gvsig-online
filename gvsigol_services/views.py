@@ -30,8 +30,9 @@ from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpRespon
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
 from django.shortcuts import render_to_response, redirect, RequestContext
 import geographic_servers
+import rest_geowebcache as geowebcache
 from backend_postgis import Introspect
-from gvsigol_services.backend_resources import resource_manager
+from gvsigol_services.backend_resources import resource_manager 
 from gvsigol_auth.utils import superuser_required, staff_required
 from django.contrib.auth.models import User
 from gvsigol_core.models import ProjectLayerGroup
@@ -3219,10 +3220,21 @@ def external_layer_add(request):
                 if 'cached' in request.POST:
                     cached = True
                     
+                crs_list = []
+                for key in request.POST:
+                    if 'crs_' in key:
+                        crs_list.append({
+                            'key': key.split('_')[1],
+                            'value': request.POST[key]
+                        })
+                
+                layer_group = LayerGroup.objects.get(id=int(request.POST.get('layer_group')))
+                server = Server.objects.get(id=layer_group.server_id)
+                    
                 external_layer = Layer()
                 external_layer.external = True
                 external_layer.title = request.POST.get('title')
-                external_layer.layer_group_id = request.POST.get('layer_group')
+                external_layer.layer_group_id = layer_group.id
                 external_layer.type = request.POST.get('type')
                 external_layer.visible = is_visible
                 external_layer.queryable = False
@@ -3235,6 +3247,7 @@ def external_layer_add(request):
                 if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
                     params['version'] = request.POST.get('version')
                     params['url'] = request.POST.get('url')
+                    params['cache_url'] = server.getCacheEndpoint()
                     params['layers'] = request.POST.get('layers')
                     params['format'] = request.POST.get('format')
                     
@@ -3255,6 +3268,10 @@ def external_layer_add(request):
 
                 external_layer.name = 'externallayer_' + str(external_layer.id)
                 external_layer.save()
+                
+                if external_layer.cached:
+                    if external_layer.type == 'WMS':
+                        geowebcache.get_instance().add_layer(None, external_layer, server, crs_list)
 
                 return redirect('external_layer_list')
 
@@ -3354,7 +3371,13 @@ def external_layer_delete(request, external_layer_id):
     if request.user.is_superuser:
         try:
             external_layer = Layer.objects.get(id=external_layer_id)
+            server = Server.objects.get(id=external_layer.layer_group.server_id)
+            
+            if external_layer.cached:
+                geowebcache.get_instance().delete_layer(None, external_layer, server)
+                
             external_layer.delete()
+                    
         except Exception as e:
             return HttpResponse('Error deleting external_layer: ' + str(e), status=500)
 
@@ -3374,6 +3397,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
     styles = []
     matrixsets = []
     title = ''
+    crs_list = None
 
     if service == 'WMS':
         if not version:
@@ -3399,11 +3423,12 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
             if lyr:
                 for style_name in lyr.styles:
                     style = lyr.styles[style_name]
-                    title = style.title if style.title else style_name
+                    title = style['title'] if style['title'] else style_name
                     style_def = {'name': style_name, 'title':title}
-                    if style.legend:
-                        style_def['custom_legend_url'] = style.legend
+                    if style['legend']:
+                        style_def['custom_legend_url'] = style['legend']
                     styles.append(style_def)
+                crs_list = lyr.crs_list
 
         except Exception as e:
             print 'Add base layer ERROR: ' + str(e.message)
@@ -3454,7 +3479,8 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
         'infoformats': infoformats,
         'styles': styles,
         'title': title,
-        'matrixsets': matrixsets
+        'matrixsets': matrixsets,
+        'crs_list': crs_list
     }
 
     return data
@@ -3482,3 +3508,135 @@ def get_capabilities_from_url(request):
     return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
 
 
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_safe
+@staff_required
+def cache_list(request):
+
+    layer_list = None
+    if request.user.is_superuser:
+        layer_list = Layer.objects.filter(cached=True)
+    else:
+        layer_list = Layer.objects.filter(created_by__exact=request.user.username).filter(cached=True)
+
+    response = {
+        'layers': layer_list
+    }
+    return render_to_response('cache_list.html', response, context_instance=RequestContext(request))
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_http_methods(["GET", "POST", "HEAD"])
+@staff_required
+def cache_config(request, layer_id):
+    layer = Layer.objects.get(id=int(layer_id))
+    layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
+    server = Server.objects.get(id=layer_group.server_id)
+    
+    if request.method == 'POST':
+        format = request.POST.get('input_format')
+        grid_set = request.POST.get('input_grid_set')
+        min_x = request.POST.get('input_min_x')
+        min_y = request.POST.get('input_min_y')
+        max_x = request.POST.get('input_max_x')
+        max_y = request.POST.get('input_max_y')
+        number_of_tasks = request.POST.get('input_number_of_task')
+        operation_type = request.POST.get('input_operation_type')
+        zoom_start = request.POST.get('input_zoom_start')
+        zoom_stop = request.POST.get('input_zoom_stop')
+        
+        try:
+            if layer.external:
+                geowebcache.get_instance().execute_cache_operation(None, layer, server, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
+            else:
+                geowebcache.get_instance().execute_cache_operation(layer.datastore.workspace.name, layer, server, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
+                
+            layer_list = None
+            if request.user.is_superuser:
+                layer_list = Layer.objects.filter(cached=True)
+            else:
+                layer_list = Layer.objects.filter(created_by__exact=request.user.username).filter(cached=True)
+        
+            response = {
+                'layers': layer_list
+            }
+            return render_to_response('cache_list.html', response, context_instance=RequestContext(request))
+            
+        except Exception as e:
+            message = e
+            config = None
+            tasks = None
+            if layer.external:
+                config = geowebcache.get_instance().get_layer(None, layer, server).get('wmsLayer')
+                tasks = geowebcache.get_instance().get_pending_and_running_tasks(None, layer, server)
+            else:
+                config = geowebcache.get_instance().get_layer(layer.datastore.workspace.name, layer, server).get('GeoServerLayer')
+                tasks = geowebcache.get_instance().get_pending_and_running_tasks(layer.datastore.workspace.name, layer, server)
+            
+            response = {
+                "message": message,
+                "layer_id": layer_id,
+                "max_zoom_level": range(settings.MAX_ZOOM_LEVEL + 1),
+                "grid_subsets": config.get('gridSubsets'),
+                "json_grid_subsets": json.dumps(config.get('gridSubsets')),
+                "formats": settings.CACHE_OPTIONS['FORMATS'],
+                "tasks": tasks['long-array-array']
+            }
+                
+            return render_to_response('cache_config.html', response, context_instance=RequestContext(request))
+        
+        
+        
+    
+    else:      
+        config = None
+        tasks = None
+        if layer.external:
+            config = geowebcache.get_instance().get_layer(None, layer, server).get('wmsLayer')
+            tasks = geowebcache.get_instance().get_pending_and_running_tasks(None, layer, server)
+        else:
+            config = geowebcache.get_instance().get_layer(layer.datastore.workspace.name, layer, server).get('GeoServerLayer')
+            tasks = geowebcache.get_instance().get_pending_and_running_tasks(layer.datastore.workspace.name, layer, server)
+           
+        response = {
+            "layer_id": layer_id,
+            "max_zoom_level": range(settings.MAX_ZOOM_LEVEL + 1),
+            "grid_subsets": config.get('gridSubsets'),
+            "json_grid_subsets": json.dumps(config.get('gridSubsets')),
+            "formats": settings.CACHE_OPTIONS['FORMATS'],
+            "tasks": tasks['long-array-array']
+        }
+            
+        return render_to_response('cache_config.html', response, context_instance=RequestContext(request))
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_POST
+@staff_required
+def get_cache_tasks(request):
+    layer_id = request.POST.get('layer_id')
+    layer = Layer.objects.get(id=int(layer_id))
+    layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
+    server = Server.objects.get(id=layer_group.server_id)
+    
+    tasks = None
+    if layer.external:
+        tasks = geowebcache.get_instance().get_pending_and_running_tasks(None, layer, server)
+    else:
+        tasks = geowebcache.get_instance().get_pending_and_running_tasks(layer.datastore.workspace.name, layer, server)
+    
+    return HttpResponse(json.dumps(tasks, indent=4), content_type='application/json')
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_POST
+@staff_required
+def kill_all_tasks(request):
+    layer_id = request.POST.get('layer_id')
+    layer = Layer.objects.get(id=int(layer_id))
+    layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
+    server = Server.objects.get(id=layer_group.server_id)
+    
+    if layer.external:
+        geowebcache.get_instance().kill_all_tasks(None, layer, server)
+    else:
+        geowebcache.get_instance().kill_all_tasks(layer.datastore.workspace.name, layer, server)
+    
+    return HttpResponse(json.dumps({}, indent=4), content_type='application/json')

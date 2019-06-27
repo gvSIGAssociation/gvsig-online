@@ -226,26 +226,42 @@ viewer.core = {
 	    externalLayer.id = layerId;
 	    
     	if (externalLayer['type'] == 'WMS') {
+    		/*var url = externalLayer['url'];
+    		var layersParam = externalLayer['layers'];
+    		if (externalLayer['cached']) {
+    			url = externalLayer['cache_url'];
+    			layersParam = externalLayer['name'];
+    		}*/
 			var wmsSource = new ol.source.TileWMS({
-				url: externalLayer['url'],
+				url: externalLayer['url'] + 'kk',
 				crossOrigin: 'anonymous',
-				params: {'LAYERS': externalLayer['layers'], 'FORMAT': externalLayer['format'], 'VERSION': externalLayer['version']}
+				params: {'LAYERS': externalLayer['layers'], 'FORMAT': externalLayer['format'], 'VERSION': externalLayer['version'], 'SRS': 'EPSG:3857'}
+			});
+			wmsSource.once('tileloaderror', function(e){
+				console.log('Error');
+				this.setUrl(externalLayer['cache_url']);
+				this.updateParams({'LAYERS': externalLayer['name'], 'FORMAT': externalLayer['format'], 'VERSION': externalLayer['version'], 'SRS': 'EPSG:3857'});
 			});
 			var wmsLayer = new ol.layer.Tile({
 				id: layerId,
 				source: wmsSource,
 				visible: visible
 			});
+
 			wmsLayer.wms_url = externalLayer['url'];
+			wmsLayer.cached_url = externalLayer['cache_url'];
 			wmsLayer.title = externalLayer['title'];
 			wmsLayer.baselayer = baselayer;
 			wmsLayer.setZIndex(parseInt(externalLayer.order));
-			wmsLayer.legend = externalLayer['url'] + '?SERVICE=WMS&VERSION=1.1.1&layer=' + externalLayer['layers'] + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on';
-			wmsLayer.legend_no_auth = externalLayer['url'] + '?SERVICE=WMS&VERSION=1.1.1&layer=' + externalLayer['layers'] + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on';
+			if (!externalLayer['cached']) {
+				wmsLayer.legend = externalLayer['url'] + '?SERVICE=WMS&VERSION=1.1.1&layer=' + externalLayer['layers'] + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on';
+				wmsLayer.legend_no_auth = externalLayer['url'] + '?SERVICE=WMS&VERSION=1.1.1&layer=' + externalLayer['layers'] + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on';
+			}
 			wmsLayer.on('change:visible', function(){
 				self.legend.reloadLegend();
 			});
-			this.map.addLayer(wmsLayer);		
+			
+			this.map.addLayer(wmsLayer);
 		}
     	if (externalLayer['type'] == 'WMTS') {
     		var parser = new ol.format.WMTSCapabilities();

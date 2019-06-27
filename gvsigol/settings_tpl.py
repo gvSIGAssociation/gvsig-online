@@ -412,3 +412,8 @@ LEGACY_GVSIGOL_SERVICES = { ## We introduce this variable for providing a defaul
 }
 
 SHARED_VIEW_EXPIRATION_TIME=1 #EN DIAS
+
+CACHE_OPTIONS = {
+    'GRID_SUBSETS': ['EPSG:3857', 'EPSG:4326'],
+    'FORMATS': ['PNG']
+}
