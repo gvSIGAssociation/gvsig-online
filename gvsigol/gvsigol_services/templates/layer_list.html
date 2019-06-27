@@ -43,7 +43,7 @@
 							<td>{{ layer.title }}</td>
 							<td>{{ layer.datastore.name }}</td>
 							<td>{{ layer.layer_group.name }} ({{layer.layer_group.title }})</td>
-							{% if el.cached %}
+							{% if layer.cached %}
 							<td><input disabled type="checkbox" checked/></td>
 							{% else %}
 							<td><input disabled type="checkbox"/></td>

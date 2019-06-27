@@ -54,6 +54,9 @@ class Server(models.Model):
     def getCacheEndpoint(self):
         return self.frontend_url + "/gwc/service/wms"
     
+    def getGWCRestEndpoint(self):
+        return self.frontend_url + "/gwc/rest"
+    
     def __unicode__(self):
         return self.name
     

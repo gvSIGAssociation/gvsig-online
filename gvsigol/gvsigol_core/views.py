@@ -995,6 +995,12 @@ def project_get_conf(request):
                     layer['queryable'] = l.queryable
                     layer['cached'] = l.cached
                     layer['type'] = l.type
+                    
+                    if l.cached:
+                        if l.external_params:
+                            params = json.loads(l.external_params)
+                            layer['cache_url'] = params.get('cache_url')
+                        
                     if l.external_params:
                         params = json.loads(l.external_params)
                         layer.update(params)
