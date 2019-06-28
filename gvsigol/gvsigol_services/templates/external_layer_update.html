@@ -224,12 +224,28 @@ $().ready(function(){
 					}
 				}
 				
+				if (data.crs_list) {
+					for (var i=0; i<data.crs_list.length; i++) {
+						var minx = data.crs_list[i][0].toString();
+						var miny = data.crs_list[i][1].toString();
+						var maxx = data.crs_list[i][2].toString();
+						var maxy = data.crs_list[i][3].toString();
+						var bounds = minx + ';' + miny + ';' + maxx + ';' + maxy;
+						$('<input>').attr({
+						    type: 'hidden',
+						    id: 'crs_' + data.crs_list[i][4],
+						    name: 'crs_' + data.crs_list[i][4],
+						    value: bounds
+						}).appendTo('form');
+					}
+				}
+				
 				 if('layers' in data){
 					$("#id_layers").empty();
 					var layers = data['layers'];
 					for(var i=0;i<layers.length; i++){
 	 					if(layers[i] == layer){
-							$("#id_layers").append('<option value="' + layers[i] + '" select>' + layers[i] + '</option>');
+							$("#id_layers").append('<option value="' + layers[i] + '" selected>' + layers[i] + '</option>');
 						}else{
 	 						$("#id_layers").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
 						}
