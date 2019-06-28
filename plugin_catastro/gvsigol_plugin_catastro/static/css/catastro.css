@@ -1,0 +1,19 @@
+.catastro-search-button{
+	border: 1px solid rgba(0, 0, 0, 0.2);
+	float: right;
+	padding: 2px 5px;
+	border-radius: 3px;
+}
+
+.catastro-search-button:hover{
+	background-color: rgba(0, 0, 0, 0.1);
+}
+
+.select2-drop.select2-drop-active{
+	margin-top:-15px;
+}
+
+.form-sel.form-control.select2-container{
+	border-width: 0px;
+	padding: 0px;
+}

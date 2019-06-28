@@ -1,4 +1,5 @@
 {% load staticfiles %}
+<script type="text/javascript" src="{% static "js/catastro.js" %}"></script>
 <script type="text/javascript">
 
 	$.ajax({
@@ -10,17 +11,17 @@
 		},
 		success : function(response) {
 			var map = viewer.core.getMap();
-			
+
 			var id = viewer.core._nextLayerId();
-			
+
 			var layers = map.getLayers();
 			var zindex = 0;
 			layers.forEach(function(layer){
 				if (layer.baselayer) {
 					zindex = layer.getZIndex();
-				}						
+				}
 			}, this);
-			
+
 			var catastro = new ol.layer.Image({
 				id: id,
 				label: 'Catastro',
@@ -29,8 +30,8 @@
 					url: response.url_catastro,
 					ratio: 1.1,
 					params: {
-						'LAYERS': 'Catastro', 
-						'FORMAT': 'image/png', 
+						'LAYERS': 'Catastro',
+						'FORMAT': 'image/png',
 						'VERSION': '1.1.1',
 						'SRS': 'EPSG:3857'
 					}
@@ -41,17 +42,18 @@
 			catastro.layer_name = 'plg_catastro';
 			catastro.wms_url = response.url_catastro;
 			catastro.setZIndex(zindex + 1);
-			
-			layers.insertAt(0, catastro);	    
-			
+
+			layers.insertAt(0, catastro);
+
 			var ui = '';
 			ui += '<div style="margin-left:20px;">';
 			ui += 	'<input type="checkbox" id="catastro_checkbox">';
 			ui += 	'<span class="text">Catastro</span>';
+			ui += 	'<div class="catastro-search-button"><i class="fa fa-search" aria-hidden="true"></i></div>';
 			ui += '</div>';
-			
+
 			$('#baselayers-group').append(ui);
-			
+
 			$("#catastro_checkbox").change(function (e) {
 				if (catastro.getVisible() == true) {
 					catastro.setVisible(false);
@@ -59,10 +61,14 @@
 					catastro.setVisible(true);
 				}
 			});
+			
+			$(".catastro-search-button").click(function(){
+				createFloatForm();
+			})
 		},
 		error : function() {
 			alert("Error loading plugin");
 		}
 	});
-	
+
 </script>
