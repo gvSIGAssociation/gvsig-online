@@ -1,0 +1,382 @@
+function createFloatForm(){
+
+
+var	ui = '<ul class="nav nav-tabs">';
+	ui += 	'<li class="active"><a class="tab-popup" data-name="cadastral-reference-sel" href="#tab-cadastral-reference" data-toggle="tab">' + gettext('Referencia catastral') + '</a></li>';
+	ui += 	'<li><a class="tab-popup" data-name="location-sel" href="#tab-location" data-toggle="tab">' + gettext('Localización') + '</a></li>';
+	//ui += 	'<li><a class="tab-popup" data-name="registral-code-sel" href="#tab-registral-code" data-toggle="tab">' + gettext('Código Registral Único') + '</a></li>';
+	ui += '</ul><br />';
+
+	ui += '<div class="tab-content">';
+	ui += 	'<div class="cadastral-tab tab-pane active" id="tab-cadastral-reference">';
+	ui += '<div class="row">';
+	ui += 	'<div class="col-md-6 form-group">';
+	ui += 		'<label>' + gettext('Provincia') + '(*)</label>';
+	ui += 		'<select id="provincia-rc-input" class="form-sel cadastral-reference-sel form-control js-example-basic-single"></select>';
+	ui += 	'</div>';
+	ui += 	'<div class="col-md-6 form-group">';
+	ui += 		'<label>' + gettext('Municipio') + '(*)</label>';
+	ui += 		'<select id="municipio-rc-input" class="form-control form-sel cadastral-reference-sel js-example-basic-single"></select>';
+	ui += 	'</div>';
+	ui += 	'<div class="col-md-12 form-group">';
+	ui += 		'<label>' + gettext('Referencia catastral') + '(*)</label>';
+	ui += 		'<input type="text" id="cadastral_reference_input" class="form-control form-sel cadastral-reference-sel">';
+	ui += 	'</div>';
+	ui += '</div>';
+	ui += 	'</div>';
+	ui += 	'<div class="cadastral-tab tab-pane" id="tab-location">';
+	ui += '<div class="row">';
+	ui += 	'<div class="col-md-6 form-group">';
+	ui += 		'<label>' + gettext('Provincia') + '(*)</label>';
+	ui += 		'<select id="provincia-input" class="form-control form-sel location-sel js-example-basic-single"></select>';
+	ui += 	'</div>';
+	ui += 	'<div class="col-md-6 form-group">';
+	ui += 		'<label>' + gettext('Municipio') + '(*)</label>';
+	ui += 		'<select id="municipio-input" class="form-control form-sel location-sel js-example-basic-single"></select>';
+	ui += 	'</div>';
+	ui += 	'<div class="col-md-12 form-group">';
+	ui += 		'<input type="radio" id="urban_radio" class="form-sel location-sel" name="urban_rustic_radio" value="urban_radio" checked>';
+	ui += 		'<label>' + gettext('Urbanos') + '</label>';
+	ui += 	'</div>';
+	ui += 	'<div id="urban_div" class="col-md-12 form-group">';
+	ui += 		'<div class="col-md-2 form-group">';
+	ui += 			'<label>' + gettext('Tipo vía') + '(*)</label>';
+	ui += 			'<input id="road-type-input" class="form-control form-sel" disabled readonly>';
+	ui += 		'</div>';
+	ui += 		'<div class="col-md-8 form-group">';
+	ui += 			'<label>' + gettext('Nombre vía') + '(*)</label>';
+	ui += 			'<select id="road-name-input" class="form-control form-sel location-sel urban-sel js-example-basic-single"></select>';
+	ui += 		'</div>';
+	ui += 		'<div class="col-md-2 form-group">';
+	ui += 			'<label>' + gettext('Número') + '(**)</label>';
+	ui += 			'<input type="text" id="road-number-input" class="form-control form-sel location-sel urban-sel">';
+	ui += 		'</div>';
+
+	ui += 		'<div class="col-md-3 form-group">';
+	ui += 			'<label>' + gettext('Bloque') + '</label>';
+	ui += 			'<input type="text" id="road-block-input" class="form-control form-sel location-sel urban-sel">';
+	ui += 		'</div>';
+	ui += 		'<div class="col-md-3 form-group">';
+	ui += 			'<label>' + gettext('Escalera') + '</label>';
+	ui += 			'<input type="text" id="road-stair-input" class="form-control form-sel location-sel urban-sel">';
+	ui += 		'</div>';
+	ui += 		'<div class="col-md-3 form-group">';
+	ui += 			'<label>' + gettext('Planta') + '</label>';
+	ui += 			'<input type="text" id="road-floor-input" class="form-control form-sel location-sel urban-sel">';
+	ui += 		'</div>';
+	ui += 		'<div class="col-md-3 form-group">';
+	ui += 			'<label>' + gettext('Puerta') + '</label>';
+	ui += 			'<input type="text" id="road-door-input" class="form-control form-sel location-sel urban-sel">';
+	ui += 		'</div>';
+	ui += 	'</div>';
+	ui += 	'<div class="col-md-12 form-group">';
+	ui += 		'<input type="radio" id="rustic_radio" class="form-sel location-sel" name="urban_rustic_radio" value="rustic_radio">';
+	ui += 		'<label>' + gettext('Rústico') + '</label>';
+	ui += 	'</div>';
+	ui += 	'<div id="rustic_div" class="col-md-12 form-group">';
+	ui += 		'<div class="col-md-6 form-group">';
+	ui += 			'<label>' + gettext('Polígono') + '(*)</label>';
+	ui += 			'<input type="text" id="road_polygon_input" class="form-control form-sel location-sel rustic-sel" disabled>';
+	ui += 		'</div>';
+	ui += 		'<div class="col-md-6 form-group">';
+	ui += 			'<label>' + gettext('Parcela') + '(*)</label>';
+	ui += 			'<input type="text" id="road_parcel_input" class="form-control form-sel location-sel rustic-sel" disabled>';
+	ui += 		'</div>';
+	ui += '</div>';
+	ui += 		'</div>';
+	ui += 	'</div>';
+	ui += 	'<div class="cadastral-tab tab-pane" id="tab-registral-code">';
+	ui += '<div class="row">';
+	ui += 	'<div class="col-md-12 form-group">';
+	ui += 		'<label>' + gettext('Código Registral Único') + '(*)</label>';
+	ui += 		'<input type="text" id="unic_registral_code_input" class="form-control form-sel registral-code-sel">';
+	ui += 	'</div>';
+	ui += 	'</div>';
+	ui += '</div>';
+	ui += '<div id="destination-inputs" class="row">';
+	ui += '</div>';
+
+	$('#float-modal .modal-body').empty();
+	$('#float-modal .modal-body').append(ui);
+
+	var buttons = '';
+	buttons += '<button id="float-modal-cancel-coordcalc" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
+	buttons += '<button id="float-modal-accept-coordcalc" type="button" class="btn btn-default">' + gettext('Calculate') + '</button>';
+
+	$('#float-modal .modal-footer').empty();
+	$('#float-modal .modal-footer').append(buttons);
+
+//	$('#float-modal .modal-header').empty();
+//	$('#float-modal .modal-header').append(ui2);
+
+	$("#float-modal").modal('show');
+
+	$("#float-modal-accept-coordcalc").on('click', function(){
+		var tab = $(".cadastral-tab.active").first().attr("id");
+
+		var url = "";
+		var params = "";
+
+		var rc = "";
+		var srs = "EPSG:4326";
+
+		var type = null;
+		var params = {};
+
+		if(tab == "tab-cadastral-reference"){
+			type = 'ref_catastral';
+			params = {
+				provincia : $("#provincia-rc-input").val(),
+				municipio : $("#municipio-rc-input").val(),
+				rc : $("#cadastral_reference_input").val()
+			}
+		}
+
+		if(tab == "tab-registral-code"){
+			type = 'reg_code';
+			params = {
+				cr: $("#unic_registral_code_input").val()
+			}
+		}
+
+
+		if(tab == "tab-location"){
+			type = 'location';
+			params = {
+				provincia : $("#provincia-input").val(),
+				municipio : $("#municipio-input").val()
+			}
+
+			var provincia = $("#provincia-input").val();
+			var municipio = $("#municipio-input").val();
+
+			if($("#urban_radio").is(":checked")){
+				params['urban_radio'] = true;
+				params['tipovia'] = $("#road-type-input").val();
+				params['nombrevia'] = $("#road-name-input").val();
+				params['numerovia'] = $("#road-number-input").val();
+				params['kmvia'] = $("#road-km-input").val();
+				params['bloquevia'] = $("#road-block-input").val();
+				params['escaleravia'] = $("#road-stair-input").val();
+				params['plantavia'] = $("#road-floor-input").val();
+				params['puertavia'] = $("#road-door-input").val();
+			}
+
+			if($("#rustic_radio").is(":checked")){
+				params['poligonovia'] = $("#road-polygon-input").val();
+				params['parcelavia'] = $("#road-parcel-input").val();
+			}
+		}
+
+
+
+
+		var final_url = '/gvsigonline/catastro/get_referencia_catastral/'
+		$.ajax({
+			type: 'POST',
+			async: false,
+		  	url: final_url,
+		  	data: {
+		  		'tipo': type,
+		  		'params': JSON.stringify(params)
+			},
+		  	success	:function(data){
+                var coordinate = ol.proj.transform([parseFloat(data['xcen']), parseFloat(data['ycen'])], data['srs'], 'EPSG:3857');
+
+                var popup = new ol.Overlay.Popup();
+                viewer.core.map.addOverlay(popup);
+        		var popupContent = '<p style="font-weight:bold">' + data['rc'] + '</p>';
+        		popup.show(coordinate, '<div class="popup-wrapper">' + popupContent + '</div>');
+
+                viewer.core.map.getView().setCenter(coordinate);
+                viewer.core.map.getView().setZoom(18);
+
+			},
+		  	error: function(){
+		  		console.log("Can't get RC")
+		  	}
+		});
+
+
+
+		$("#float-modal").modal('hide');
+	});
+
+	$(".tab-popup").click(function(){
+		var selector = $(this).attr("data-name");
+
+		$(".form-sel").each(function(){
+			if($(this).hasClass(selector)){
+				$(this).prop('disabled', false);
+			}else{
+				$(this).prop('disabled', true);
+			}
+		});
+
+
+		if(!$("#urban_radio").prop('disabled') && $("#urban_radio").is(":checked")){
+			$(".urban-sel").each(function(){
+				$(this).prop('disabled', false);
+			});
+			$(".rustic-sel").each(function(){
+				$(this).prop('disabled', true);
+			});
+		}
+
+		if(!$("#rustic_radio").prop('disabled') && $("#rustic_radio").is(":checked")){
+			$(".urban-sel").each(function(){
+				$(this).prop('disabled', true);
+			});
+			$(".rustic-sel").each(function(){
+				$(this).prop('disabled', false);
+			});
+		}
+	})
+
+	$("input[name=urban_rustic_radio]").change(function(){
+		if(!$("#urban_radio").prop('disabled') && $("#urban_radio").is(":checked")){
+			$(".urban-sel").each(function(){
+				$(this).prop('disabled', false);
+			});
+			$(".rustic-sel").each(function(){
+				$(this).prop('disabled', true);
+			});
+		}
+
+		if(!$("#rustic_radio").prop('disabled') && $("#rustic_radio").is(":checked")){
+			$(".urban-sel").each(function(){
+				$(this).prop('disabled', true);
+			});
+			$(".rustic-sel").each(function(){
+				$(this).prop('disabled', false);
+			});
+		}
+	})
+
+
+	var provincias_url = '/gvsigonline/catastro/get_provincias/'
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: provincias_url,
+		success: function(data){
+	  		var options = "<option value=\"---\">---</option>";
+
+	  		$(data).find('prov').each(function() {
+                var key = $(this).find("cpine").text();
+                var value = $(this).find("np").text();
+                options += "<option value=\""+value+"\">"+value+"</option>";
+            });
+	  		$("#provincia-rc-input").empty().html(options)
+	  		$("#provincia-input").empty().html(options);
+
+	  		$("#provincia-rc-input").unbind("change").change(function(){
+	  			onMunicipallyKeyPress($(this).attr("id"));
+	  		})
+
+	  		$("#provincia-input").unbind("change").change(function(){
+	  			onMunicipallyKeyPress($(this).attr("id"));
+	  		})
+
+	  		$(".js-example-basic-single").select2();
+		},
+	  	error: function(){
+	  		console.log("Can't get provinces")
+	  	}
+	});
+}
+
+function onPortalKeyPress(){
+	var province = $("#provincia-input").select2('data').text;
+	var municipio = $("#municipio-input").select2('data').text;
+	var tipovia = $("#road-type-input").text();
+	var nombrevia = $("#road-name-input").select2('data').text;
+
+	var portal_url = 'http://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCallejero.asmx/ConsultaNumero?Provincia='+province+'&Municipio='+municipio+"&TipoVia="+tipovia+"&NombreVia="+nombrevia+"&Numero=";
+
+}
+
+
+function onAddressKeyPress(){
+	var province = $("#provincia-input").select2('data').text;
+	var municipio = $("#municipio-input").select2('data').text;
+
+	var address_url = '/gvsigonline/catastro/get_vias/';
+
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: address_url,
+	  	data: {
+	  		'provincia': province,
+	  		'municipio': municipio
+		},
+		success: function(data){
+	  		var options = "<option value=\"---\">---</option>";;
+
+	  		$(data).find('dir').each(function() {
+                var key = $(this).find("cv").text();
+                var type = $(this).find("tv").text();
+                var value = $(this).find("nv").text();
+                options += "<option data-name=\""+value+"\" data-type=\""+type+"\" value=\""+value+"\">"+value+"</option>";
+            });
+	  		$("#road-name-input").empty().html(options)
+
+	  		$("#road-name-input.js-example-basic-single").select2();
+
+	  		$("#road-name-input").unbind("change").change(function(){
+	  			var value = $("#road-name-input").select2('data').text;
+	  			var type = "";
+
+	  			var option = $("#road-name-input option[data-name=\""+value+"\"]")
+	  			if(option.length > 0){
+	  				type = option.first().attr("data-type")
+	  			}
+
+	  			$("#road-type-input").val(type);
+
+	  			onPortalKeyPress();
+	  		})
+		},
+	  	error: function(){
+	  		console.log("Can't get addresses")
+	  	}
+	});
+}
+
+
+
+function onMunicipallyKeyPress(id){
+	var province = $("#"+id).select2('data').text;
+    var suffix = id.substring("provincia-".length);
+
+	var municipio_url = '/gvsigonline/catastro/get_municipios/';
+
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: municipio_url,
+	  	data: {
+	  		'provincia': province
+		},
+	  	success	:function(data){
+	  		var options = "<option value=\"---\">---</option>";
+
+	  		$(data).find('muni').each(function() {
+                var value = $(this).find("nm").text();
+                options += "<option value=\""+value+"\">"+value+"</option>";
+            });
+	  		$("#municipio-" + suffix).empty().html(options)
+
+	  		$("#municipio-" + suffix+".js-example-basic-single").select2();
+
+	  		$("#municipio-input").unbind("change").change(function(){
+	  			onAddressKeyPress();
+	  		})
+		},
+	  	error: function(){
+	  		console.log("Can't get municipios")
+	  	}
+	});
+
+}
