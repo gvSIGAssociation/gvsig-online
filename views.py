@@ -40,6 +40,7 @@ from gvsigol import settings
 import gvsigol_services.utils as services_utils
 from operator import itemgetter
 from django import apps
+from django.core.mail import send_mail
 import gvsigol
 import urllib
 import random
@@ -1169,25 +1170,46 @@ def documentation(request):
 def save_shared_view(request):
     if request.method == 'POST':
         pid = int(request.POST.get('pid'))
-        description = request.POST.get('description')
+        emails = request.POST.get('emails')
         view_state = request.POST.get('view_state')
 
         name = ''.join(random.choice(string.ascii_uppercase) for i in range(10))
         shared_project = SharedView(
             name=name,
             project_id=pid,
-            description=description,
             state=view_state,
             expiration_date=datetime.datetime.now() + datetime.timedelta(days = settings.SHARED_VIEW_EXPIRATION_TIME),
             created_by=request.user.username
         )
         shared_project.save()
-
+        
+        shared_url = settings.BASE_URL + '/gvsigonline/auth/login_user/?next=/gvsigonline/core/load_shared_view/' + name
+        
+        for email in emails.split(';'):
+            send_shared_view(email, shared_url)
+        
         response = {
-            'shared_url': settings.BASE_URL + '/gvsigonline/core/load_shared_view/' + name
+            'shared_url': shared_url
         }
 
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+    
+def send_shared_view(destination, shared_url):
+    if gvsigol.settings.EMAIL_BACKEND_ACTIVE:       
+        subject = _(u'Shared view')
+        
+        body = _(u'Shared view') + ':\n\n'   
+        body = body + '  - ' + _(u'Link') + ': ' + shared_url + '\n'
+        
+        toAddress = [destination]           
+        fromAddress = gvsigol.settings.EMAIL_HOST_USER
+        
+        print 'Restore message: ' + body
+        try:
+            send_mail(subject, body, fromAddress, toAddress, fail_silently=False)
+        except Exception as e:
+            print e.smtp_error
+            pass
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @cache_control(max_age=86400)

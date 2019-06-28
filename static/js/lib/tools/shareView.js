@@ -53,8 +53,8 @@ shareView.prototype.handler = function(e) {
 	var ui = '';
 	ui += '<div class="row">';
 	ui += 	'<div class="col-md-12 form-group">';	
-	ui += 	'<label>' + gettext('Description') + '</label>';
-	ui += 	'<textarea class="form-control" name="shareview-description" id="shareview-description" rows="5"></textarea>';
+	ui += 	'<label>' + gettext('Share view with the following users') + '</label>';
+	ui += 	'<textarea class="form-control" name="shareview-emails" id="shareview-emails" rows="3" placeholder"Enter email addresses separated by semicolons"></textarea>';
 	ui += 	'</div>';
 	ui += '</div>';
 	
@@ -72,8 +72,8 @@ shareView.prototype.handler = function(e) {
 	
 	var self = this;	
 	$('#float-modal-accept-shareview').on('click', function () {
-		var description = $('#shareview-description').val();
-		self.save(description);
+		var emails = $('#shareview-emails').val();
+		self.save(emails);
 		$('#float-modal').modal('hide');
 	});
 };
@@ -81,7 +81,7 @@ shareView.prototype.handler = function(e) {
 /**
  * TODO
  */
-shareView.prototype.save = function(description) {
+shareView.prototype.save = function(emails) {
 	var self = this;
 	
 	var viewState = this.layerTree.getState();
@@ -105,12 +105,10 @@ shareView.prototype.save = function(description) {
 		},
 	  	data: {
 	  		'pid': self.conf.pid,
-	  		'description': description,
+	  		'emails': emails,
 			'view_state': JSON.stringify(viewState),
 		},
-	  	success	:function(response){
-	  		alert(response.shared_url);
-		},
+	  	success	:function(response){},
 	  	error: function(){}
 	});
 };
