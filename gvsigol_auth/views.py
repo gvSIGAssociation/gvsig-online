@@ -66,7 +66,12 @@ def login_user(request):
                 if user.is_active:
                     login(request, user)
                     action.send(user, verb="gvsigol_auth/login")
-                    return redirect('home')
+                    next = request.POST.get('next')
+                    if next:
+                        response = redirect(next)
+                        return response
+                    else:
+                        return redirect('home')
                 
                 else:
                     errors.append({'message': _("Your account has been disabled")})
@@ -134,6 +139,7 @@ def login_user(request):
                             dni = request.GET.get('dni')
                             expediente = request.GET.get('expediente')
                             token = request.GET.get('token')
+                            next = request.GET.get('next')
                             if id_solicitud is not None:
                                 response = redirect(request.GET.get('next'))
                                 response['Location'] += '?id_solicitud=' + id_solicitud + '&token=' + token
