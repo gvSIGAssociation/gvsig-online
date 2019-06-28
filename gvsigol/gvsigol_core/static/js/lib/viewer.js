@@ -233,7 +233,7 @@ viewer.core = {
     			layersParam = externalLayer['name'];
     		}*/
 			var wmsSource = new ol.source.TileWMS({
-				url: externalLayer['url'] + 'kk',
+				url: externalLayer['url'],
 				crossOrigin: 'anonymous',
 				params: {'LAYERS': externalLayer['layers'], 'FORMAT': externalLayer['format'], 'VERSION': externalLayer['version'], 'SRS': 'EPSG:3857'}
 			});

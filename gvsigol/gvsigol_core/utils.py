@@ -604,7 +604,8 @@ def set_state(conf, state):
                             conf_l['opacity'] = state_l['opacity']
                             conf_l['order'] = state_l['order']
                             conf_l['baselayer'] = state_l['baselayer']
-                            conf_l['default_baselayer'] = state_l['default_baselayer']
+                            if state_l['baselayer']:
+                                conf_l['default_baselayer'] = state_l['default_baselayer']
                             
     conf['view'] = {}
     conf['view'] = state['view']
