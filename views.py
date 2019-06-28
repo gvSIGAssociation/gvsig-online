@@ -3295,6 +3295,8 @@ def external_layer_add(request):
 def external_layer_update(request, external_layer_id):
     if request.user.is_superuser:
         external_layer = Layer.objects.get(id=external_layer_id)
+        layer_group = LayerGroup.objects.get(id=external_layer.layer_group.id)
+        server = Server.objects.get(id=layer_group.server_id)
         if request.method == 'POST':
             form = ExternalLayerForm(request.POST)
             try:
@@ -3305,6 +3307,21 @@ def external_layer_update(request, external_layer_id):
                 cached = False
                 if 'cached' in request.POST:
                     cached = True
+                    
+                crs_list = []
+                for key in request.POST:
+                    if 'crs_' in key:
+                        crs_list.append({
+                            'key': key.split('_')[1],
+                            'value': request.POST[key]
+                        })
+                    
+                if external_layer.cached and not cached:
+                    geowebcache.get_instance().delete_layer(None, external_layer, server)
+                    
+                if not external_layer.cached and cached:
+                    if external_layer.type == 'WMS':
+                        geowebcache.get_instance().add_layer(None, external_layer, server, crs_list)
                     
                 external_layer.title = request.POST.get('title')
                 external_layer.type = request.POST.get('type')
