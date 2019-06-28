@@ -74,5 +74,20 @@
 				{% endwith %}
 			{% endif %}
 		{% endfor %}
+		
+		<script>
+		$(document).ready(function() {
+			var url = new URL(window.location.href);
+			var next = url.searchParams.get("next");
+			if (next != null) {
+				$('<input>').attr({
+				    type: 'hidden',
+				    name: 'next',
+				    value: next
+				}).appendTo('form');
+			}
+		});
+		</script>
 	</body>
 </html>
+
