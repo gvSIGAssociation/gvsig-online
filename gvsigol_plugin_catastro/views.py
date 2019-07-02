@@ -79,6 +79,36 @@ def get_vias(request):
 
 
 
+@csrf_exempt
+def get_rc_by_coords(request):
+    if request.method == 'POST':
+        xcen = request.POST.get('xcen')
+        ycen = request.POST.get('ycen')
+        srs = request.POST.get('srs')
+
+        response = {}
+        response['xcen'] = xcen
+        response['ycen'] = ycen
+        response['srs'] = srs
+
+        address_url = settings.URL_API_CATASTRO + '/OVCCoordenadas.asmx/Consulta_RCCOOR?SRS='+srs+'&Coordenada_X='+xcen+'&Coordenada_Y='+ycen
+        r = requests.get(url = address_url, params = {})
+
+        tree = ElementTree.fromstring(r.content)
+
+        for aux1 in tree.iter('{http://www.catastro.meh.es/}coordenadas'):
+            for aux2 in aux1.iter('{http://www.catastro.meh.es/}coord'):
+                for aux3 in aux2.iter('{http://www.catastro.meh.es/}pc'):
+                    for aux5 in aux3.iter('{http://www.catastro.meh.es/}pc1'):
+                        response['rc'] = aux5.text
+                    for aux5 in aux3.iter('{http://www.catastro.meh.es/}pc2'):
+                        response['rc'] += aux5.text
+
+                for aux3 in aux2.iter('{http://www.catastro.meh.es/}ldt'):
+                    response['address'] = aux3.text
+
+        return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+
 
 @csrf_exempt
 def get_rc_info(request):
@@ -107,7 +137,6 @@ def get_rc_info(request):
             response = response.replace('<link href="https://www1.sedecatastro.gob.es/MasterPage/css/bootstrap.min.css" rel="stylesheet">','')
             response = response.replace('<link href="https://www1.sedecatastro.gob.es/MasterPage/css/print.css" type="text/css" rel="stylesheet" media="print">','')
             response = response.replace('<script src="https://www1.sedecatastro.gob.es/MasterPage/js/bootstrap.min.js"  type="text/javascript"></script>','')
-            #<script src="https://www1.sedecatastro.gob.es/MasterPage/js/bootstrap.min.js"  type="text/javascript"></script>
 
         else:
             response = ''
@@ -262,11 +291,5 @@ def get_referencia_catastral(request):
                     for aux3 in aux2.iter('{http://www.catastro.meh.es/}ldt'):
                         response['address'] = aux3.text
 
-
-            if 'xcen' in response and 'ycen' in response and 'srs' in response:
-                polygon_url = 'https://www1.sedecatastro.gob.es/Cartografia/SECParcelaGeoJSON.aspx?SRS='+response['srs']+'&x='+response['xcen']+'&y='+response['ycen']+'&linea=&COOR='
-
-                r = requests.get(url = final_url, params = {})
-                tree = ElementTree.fromstring(r.content)
 
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')

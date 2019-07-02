@@ -1,7 +1,11 @@
 var CatastroForm = function(){
+	this.vectorSource = null;
+	this.vectorLayer = null;
 
-this.vectorSource = null;
-this.vectorLayer = null;
+	this.createForm();
+}
+
+CatastroForm.prototype.createForm = function(){
 
 var self = this;
 
@@ -296,10 +300,20 @@ var	ui = '<ul class="nav nav-tabs">';
 	});
 }
 
+CatastroForm.prototype.clearCatastroLayer = function(){
+	var self = this;
+	if(self.vectorSource != null){
+		self.vectorSource.clear();
+		viewer.core.map.removeLayer(self.vectorLayer);
+		self.vectorSource = null;
+		self.vectorLayer = null;
+	}
+}
+
 CatastroForm.prototype.getRefCatastralInfo = function(coord_x, coord_y, srs){
 
 	var final_url = '/gvsigonline/catastro/get_rc_info/';
-	var popupContent = '<p>' + gettext("Referencia catastral") + ':</p><p style="font-weight:bold">' + data['rc'] + '</p>';
+	var popupContent = '';
 
 	$.ajax({
 		type: 'POST',
@@ -314,16 +328,6 @@ CatastroForm.prototype.getRefCatastralInfo = function(coord_x, coord_y, srs){
 	  		popupContent = response;
 	  	}
 	});
-
-//	var coordinate = ol.proj.transform([coord_x, coord_y], srs, 'EPSG:3857');
-//    var popup = new ol.Overlay.Popup();
-//    viewer.core.map.addOverlay(popup);
-//
-//	popup.show(coordinate, '<div class="popup-wrapper">' + popupContent + '</div>');
-//
-//    viewer.core.map.getView().setCenter(coordinate);
-//    viewer.core.map.getView().setZoom(18);
-
 
 	$('#float-modal .modal-body').empty();
 	$('#float-modal .modal-body').html(popupContent);
@@ -417,6 +421,45 @@ CatastroForm.prototype.getRefCatastralPolygon = function(ref_catastral){
 
 					self.vectorLayer.setZIndex(99999998);
 					viewer.core.map.addLayer(self.vectorLayer);
+
+					$(".catastro-clear-button").each(function(){
+						$(this).css("display", "block");
+					});
+
+
+					viewer.core.map.on("click", function(e) {
+						viewer.core.map.forEachFeatureAtPixel(e.pixel, function (feature, layer) {
+					        if(layer.getProperties()['name'] == 'catastro_layer' && feature){
+					        	var point = ol.proj.transform(e.coordinate, viewer.core.map.getView().getProjection().getCode(), 'EPSG:4326');
+					        	var address_url = '/gvsigonline/catastro/get_rc_by_coords/';
+					        	$.ajax({
+					        		type: 'POST',
+					        		async: false,
+					        	  	url: address_url,
+					        	  	data: {
+					        	  		'xcen': point[0],
+					        	  		'ycen': point[1],
+					        	  		'srs': 'EPSG:4326'
+					        		},
+					        		success: function(data){
+					        			var coordinate = ol.proj.transform([parseFloat(data['xcen']), parseFloat(data['ycen'])], data['srs'], 'EPSG:3857');
+					    				var popup = new ol.Overlay.Popup();
+					    				viewer.core.map.addOverlay(popup);
+					    				var popupContent = '<p>'+data['address']+'</p><p>' + gettext("Referencia catastral") + ':&nbsp;<span style="font-weight:bold">' + data['rc'] + '</span></p>';
+					    				popup.show(coordinate, '<div id="popup-show-more-info" class="popup-wrapper">' + popupContent + '</div>');
+
+					    				viewer.core.map.getView().setCenter(coordinate);
+					    				viewer.core.map.getView().setZoom(18);
+					                    self.getRefCatastralPolygon(data['rc']);
+
+					                    $("#popup-show-more-info").click(function(){
+					                    	self.getRefCatastralInfo(parseFloat(data['xcen']), parseFloat(data['ycen']), data['srs'])
+					                    })
+					        		}
+					        	});
+					        }
+					    });
+					});
 				}
 
 
