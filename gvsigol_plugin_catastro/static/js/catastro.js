@@ -194,7 +194,7 @@ var	ui = '<ul class="nav nav-tabs">';
                 var coordinate = ol.proj.transform([parseFloat(data['xcen']), parseFloat(data['ycen'])], data['srs'], 'EPSG:3857');
 				var popup = new ol.Overlay.Popup();
 				viewer.core.map.addOverlay(popup);
-				var popupContent = '<p>'+data['address']+'</p><p>' + gettext("Referencia catastral") + ':&nbsp;<span style="font-weight:bold">' + data['rc'] + '</span></p>';
+				var popupContent = '<p>'+data['address']+'</p><p>' + gettext("RC") + ':&nbsp;<span style="font-weight:bold">' + data['rc'] + '</span></p>';
 				popup.show(coordinate, '<div id="popup-show-more-info" class="popup-wrapper">' + popupContent + '</div>');
 
 				viewer.core.map.getView().setCenter(coordinate);
@@ -445,7 +445,7 @@ CatastroForm.prototype.getRefCatastralPolygon = function(ref_catastral){
 					        			var coordinate = ol.proj.transform([parseFloat(data['xcen']), parseFloat(data['ycen'])], data['srs'], 'EPSG:3857');
 					    				var popup = new ol.Overlay.Popup();
 					    				viewer.core.map.addOverlay(popup);
-					    				var popupContent = '<p>'+data['address']+'</p><p>' + gettext("Referencia catastral") + ':&nbsp;<span style="font-weight:bold">' + data['rc'] + '</span></p>';
+					    				var popupContent = '<p>'+data['address']+'</p><p>' + gettext("RC") + ':&nbsp;<span style="font-weight:bold">' + data['rc'] + '</span></p>';
 					    				popup.show(coordinate, '<div id="popup-show-more-info" class="popup-wrapper">' + popupContent + '</div>');
 
 					    				viewer.core.map.getView().setCenter(coordinate);
