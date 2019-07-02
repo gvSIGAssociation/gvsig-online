@@ -29,6 +29,8 @@ import requests
 from django.views.decorators.csrf import csrf_exempt
 from xml.etree import ElementTree
 
+from django.contrib.gis.geos import Polygon, Point, MultiPoint, GeometryCollection
+
 def get_conf(request):
     if request.method == 'POST':
         response = {
@@ -77,6 +79,90 @@ def get_vias(request):
 
 
 
+
+@csrf_exempt
+def get_rc_info(request):
+    if request.method == 'POST':
+        xcen = request.POST.get('xcen')
+        ycen = request.POST.get('ycen')
+        srs = request.POST.get('srs')
+
+        if srs:
+            srs = srs.replace("EPSG:", "")
+
+        if xcen and ycen and srs:
+            address_url = 'https://www1.sedecatastro.gob.es/CYCBienInmueble/OVCListaBienes.aspx?origen=Carto&huso='+srs+'&x='+xcen+'&y='+ycen
+
+            r = requests.get(url = address_url, params = {})
+            response = r.content
+            response = response.replace('<script src="/MasterPage/js/jquery.min.js"></script>','')
+            response = response.replace('<link href="../RecursosComunes/Estilos/jquery-ui.css" rel="stylesheet" type="text/css">','')
+            response = response.replace('../Cartografia', 'https://www1.sedecatastro.gob.es/Cartografia')
+            response = response.replace('/MasterPage', 'https://www1.sedecatastro.gob.es/MasterPage')
+            response = response.replace('../RecursosComunes', 'https://www1.sedecatastro.gob.es/RecursosComunes')
+            response = response.replace('../CYCBienInmueble', 'https://www1.sedecatastro.gob.es/CYCBienInmueble')
+
+            response = response.replace('<link href="https://www1.sedecatastro.gob.es/MasterPage/css/noframes2.css"  type="text/css" rel="stylesheet" >','')
+            response = response.replace('<link href="https://www1.sedecatastro.gob.es/RecursosComunes/Estilos/jquery-ui.css" rel="stylesheet" type="text/css" />','')
+            response = response.replace('<link href="https://www1.sedecatastro.gob.es/MasterPage/css/bootstrap.min.css" rel="stylesheet">','')
+            response = response.replace('<link href="https://www1.sedecatastro.gob.es/MasterPage/css/print.css" type="text/css" rel="stylesheet" media="print">','')
+            response = response.replace('<script src="https://www1.sedecatastro.gob.es/MasterPage/js/bootstrap.min.js"  type="text/javascript"></script>','')
+            #<script src="https://www1.sedecatastro.gob.es/MasterPage/js/bootstrap.min.js"  type="text/javascript"></script>
+
+        else:
+            response = ''
+
+        return HttpResponse(response, content_type='plain/html')
+
+@csrf_exempt
+def get_referencia_catastral_polygon(request):
+    if request.method == 'POST':
+        ref_catastral = request.POST.get('ref_catastral').lstrip()
+        srs='EPSG::4326'
+
+        catastral_url = 'http://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx?service=wfs&version=2&request=getfeature&STOREDQUERIE_ID=GetParcel&refcat='+ref_catastral+'&srsname='+srs
+        r = requests.get(url = catastral_url, params = {})
+        tree = ElementTree.fromstring(r.content)
+        features = []
+
+        '''
+        prefix ='{http://www.opengis.net/wfs/2.0}'
+        prefix2 ='{http://inspire.ec.europa.eu/schemas/cp/4.0}'
+        '''
+
+        prefix3 = '{http://www.opengis.net/gml/3.2}'
+        poslist = tree.findall(".//"+ prefix3 + "posList")
+
+        features = []
+        for points in poslist:
+            dimension = points.attrib['srsDimension']
+            count = points.attrib['srsDimension']
+
+            feature = {
+                'coords' : points.text,
+                'srs': srs.replace('::', ':'),
+                'dimension': dimension,
+                'count': count
+            }
+
+            features.append(feature)
+
+        response = {
+            'featureCollection': features
+        }
+
+
+        '''
+        for aux1 in tree.iter(prefix + 'member'):
+            for aux2 in aux1.iter(prefix2 + 'CadastralParcel'):
+                for aux3 in aux2.iter(prefix2 + 'geometry'):
+                    print 'asdfa'
+        '''
+
+
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+
+
 @csrf_exempt
 def get_referencia_catastral(request):
     if request.method == 'POST':
@@ -91,7 +177,7 @@ def get_referencia_catastral(request):
         if typex == 'ref_catastral':
             provincia = params['provincia']
             municipio = params['municipio']
-            rc = params['rc']
+            rc = params['rc'].lstrip()
 
             '''
             url = settings.URL_API_CATASTRO + "/OVCCallejero.asmx/Consulta_DNPRC?Provincia="+provincia+"&Municipio="+municipio+"&RC="+rc
@@ -160,7 +246,6 @@ def get_referencia_catastral(request):
 
         if rc.__len__() > 0:
             final_url = settings.URL_API_CATASTRO + "/OVCCoordenadas.asmx/Consulta_CPMRC?Provincia=&Municipio=&SRS="+ srs +"&RC="+ rc[0:14]
-            print 'Coordinadas url: ' + final_url
 
             r = requests.get(url = final_url, params = {})
             tree = ElementTree.fromstring(r.content)
@@ -174,5 +259,14 @@ def get_referencia_catastral(request):
                             response['ycen'] = aux5.text
                         response['srs'] = srs
                         response['rc'] = rc[0:14]
+                    for aux3 in aux2.iter('{http://www.catastro.meh.es/}ldt'):
+                        response['address'] = aux3.text
+
+
+            if 'xcen' in response and 'ycen' in response and 'srs' in response:
+                polygon_url = 'https://www1.sedecatastro.gob.es/Cartografia/SECParcelaGeoJSON.aspx?SRS='+response['srs']+'&x='+response['xcen']+'&y='+response['ycen']+'&linea=&COOR='
+
+                r = requests.get(url = final_url, params = {})
+                tree = ElementTree.fromstring(r.content)
 
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')

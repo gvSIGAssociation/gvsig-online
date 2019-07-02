@@ -1,5 +1,9 @@
-function createFloatForm(){
+var CatastroForm = function(){
 
+this.vectorSource = null;
+this.vectorLayer = null;
+
+var self = this;
 
 var	ui = '<ul class="nav nav-tabs">';
 	ui += 	'<li class="active"><a class="tab-popup" data-name="cadastral-reference-sel" href="#tab-cadastral-reference" data-toggle="tab">' + gettext('Referencia catastral') + '</a></li>';
@@ -181,25 +185,31 @@ var	ui = '<ul class="nav nav-tabs">';
 		  		'params': JSON.stringify(params)
 			},
 		  	success	:function(data){
+		  		$("#float-modal").modal('hide');
+
                 var coordinate = ol.proj.transform([parseFloat(data['xcen']), parseFloat(data['ycen'])], data['srs'], 'EPSG:3857');
+				var popup = new ol.Overlay.Popup();
+				viewer.core.map.addOverlay(popup);
+				var popupContent = '<p>'+data['address']+'</p><p>' + gettext("Referencia catastral") + ':&nbsp;<span style="font-weight:bold">' + data['rc'] + '</span></p>';
+				popup.show(coordinate, '<div id="popup-show-more-info" class="popup-wrapper">' + popupContent + '</div>');
 
-                var popup = new ol.Overlay.Popup();
-                viewer.core.map.addOverlay(popup);
-        		var popupContent = '<p style="font-weight:bold">' + data['rc'] + '</p>';
-        		popup.show(coordinate, '<div class="popup-wrapper">' + popupContent + '</div>');
+				viewer.core.map.getView().setCenter(coordinate);
+				viewer.core.map.getView().setZoom(18);
+                self.getRefCatastralPolygon(data['rc']);
 
-                viewer.core.map.getView().setCenter(coordinate);
-                viewer.core.map.getView().setZoom(18);
-
+                $("#popup-show-more-info").click(function(){
+                	self.getRefCatastralInfo(parseFloat(data['xcen']), parseFloat(data['ycen']), data['srs'])
+                })
 			},
 		  	error: function(){
-		  		console.log("Can't get RC")
+		  		console.log("Can't get RC");
+		  		$("#float-modal").modal('hide');
 		  	}
 		});
 
 
 
-		$("#float-modal").modal('hide');
+
 	});
 
 	$(".tab-popup").click(function(){
@@ -271,11 +281,11 @@ var	ui = '<ul class="nav nav-tabs">';
 	  		$("#provincia-input").empty().html(options);
 
 	  		$("#provincia-rc-input").unbind("change").change(function(){
-	  			onMunicipallyKeyPress($(this).attr("id"));
+	  			self.onMunicipallyKeyPress($(this).attr("id"));
 	  		})
 
 	  		$("#provincia-input").unbind("change").change(function(){
-	  			onMunicipallyKeyPress($(this).attr("id"));
+	  			self.onMunicipallyKeyPress($(this).attr("id"));
 	  		})
 
 	  		$(".js-example-basic-single").select2();
@@ -286,7 +296,140 @@ var	ui = '<ul class="nav nav-tabs">';
 	});
 }
 
-function onPortalKeyPress(){
+CatastroForm.prototype.getRefCatastralInfo = function(coord_x, coord_y, srs){
+
+	var final_url = '/gvsigonline/catastro/get_rc_info/';
+	var popupContent = '<p>' + gettext("Referencia catastral") + ':</p><p style="font-weight:bold">' + data['rc'] + '</p>';
+
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: final_url,
+	  	data: {
+	  		'xcen': coord_x,
+	  		'ycen': coord_y,
+	  		'srs': srs
+		},
+	  	success	:function(response){
+	  		popupContent = response;
+	  	}
+	});
+
+//	var coordinate = ol.proj.transform([coord_x, coord_y], srs, 'EPSG:3857');
+//    var popup = new ol.Overlay.Popup();
+//    viewer.core.map.addOverlay(popup);
+//
+//	popup.show(coordinate, '<div class="popup-wrapper">' + popupContent + '</div>');
+//
+//    viewer.core.map.getView().setCenter(coordinate);
+//    viewer.core.map.getView().setZoom(18);
+
+
+	$('#float-modal .modal-body').empty();
+	$('#float-modal .modal-body').html(popupContent);
+
+	var buttons = '';
+	buttons += '<button id="float-modal-cancel-coordcalc" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Accept') + '</button>';
+
+	$('#float-modal .modal-footer').empty();
+	$('#float-modal .modal-footer').append(buttons);
+
+	$("#float-modal").modal('show');
+}
+
+CatastroForm.prototype.getRefCatastralPolygon = function(ref_catastral){
+	var self = this;
+	var final_url = '/gvsigonline/catastro/get_referencia_catastral_polygon/'
+		$.ajax({
+			type: 'POST',
+			async: false,
+		  	url: final_url,
+		  	data: {
+		  		'ref_catastral': ref_catastral
+			},
+			dataType: 'json',
+		  	success	:function(response){
+		  		var features = [];
+				for(var i=0; i<response['featureCollection'].length; i++){
+					var features_coords = response['featureCollection'][i]['coords'];
+					var dimension = response['featureCollection'][i]['dimension'];
+					var srs = response['featureCollection'][i]['srs'];
+
+					var features_coords_split = features_coords.split(" ");
+					var polyCoords = [];
+
+					var j=0;
+					while(j<features_coords_split.length) {
+						var feat_coords = [];
+						for(var k=0; k<parseInt(dimension); k++){
+							feat_coords.push(parseFloat(features_coords_split[j]))
+							j++;
+						}
+						feat_coords = feat_coords.reverse();
+						polyCoords.push(ol.proj.transform(feat_coords, srs, 'EPSG:3857'));
+					}
+
+					var feature = new ol.Feature({
+					    geometry: new ol.geom.Polygon([polyCoords])
+					})
+					features.push(feature);
+				}
+
+
+
+				if(self.vectorSource != null){
+					self.vectorSource.addFeatures(features)
+				}else{
+					self.vectorSource = new ol.source.Vector({
+				        features: features
+				    });
+				}
+
+				if(self.vectorLayer == null){
+					var styles = [
+
+				        new ol.style.Style({
+				          stroke: new ol.style.Stroke({
+				            color: 'black',
+				            width: 1
+				          }),
+				          fill: new ol.style.Fill({
+				            color: 'rgba(0, 0, 0, 0.1)'
+				          })
+				        }),
+				        new ol.style.Style({
+				          image: new ol.style.Circle({
+				            radius: 6,
+				            fill: new ol.style.Fill({
+				              color: 'black'
+				            })
+				          })
+
+				        })
+				      ];
+
+
+					self.vectorLayer = new ol.layer.Vector({
+						source: self.vectorSource,
+			            name: 'catastro_layer',
+			            style: styles
+					});
+
+					self.vectorLayer.setZIndex(99999998);
+					viewer.core.map.addLayer(self.vectorLayer);
+				}
+
+
+			},
+		  	error: function(){
+		  		console.log("Can't get RC")
+		  	}
+		});
+
+
+}
+
+CatastroForm.prototype.onPortalKeyPress = function(){
 	var province = $("#provincia-input").select2('data').text;
 	var municipio = $("#municipio-input").select2('data').text;
 	var tipovia = $("#road-type-input").text();
@@ -297,7 +440,8 @@ function onPortalKeyPress(){
 }
 
 
-function onAddressKeyPress(){
+CatastroForm.prototype.onAddressKeyPress = function(){
+	var self = this;
 	var province = $("#provincia-input").select2('data').text;
 	var municipio = $("#municipio-input").select2('data').text;
 
@@ -335,7 +479,7 @@ function onAddressKeyPress(){
 
 	  			$("#road-type-input").val(type);
 
-	  			onPortalKeyPress();
+	  			self.onPortalKeyPress();
 	  		})
 		},
 	  	error: function(){
@@ -346,7 +490,8 @@ function onAddressKeyPress(){
 
 
 
-function onMunicipallyKeyPress(id){
+CatastroForm.prototype.onMunicipallyKeyPress = function(id){
+	var self = this;
 	var province = $("#"+id).select2('data').text;
     var suffix = id.substring("provincia-".length);
 
@@ -371,7 +516,7 @@ function onMunicipallyKeyPress(id){
 	  		$("#municipio-" + suffix+".js-example-basic-single").select2();
 
 	  		$("#municipio-input").unbind("change").change(function(){
-	  			onAddressKeyPress();
+	  			self.onAddressKeyPress();
 	  		})
 		},
 	  	error: function(){
