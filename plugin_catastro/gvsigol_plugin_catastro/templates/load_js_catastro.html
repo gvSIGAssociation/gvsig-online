@@ -50,6 +50,7 @@
 			ui += 	'<input type="checkbox" id="catastro_checkbox">';
 			ui += 	'<span class="text">Catastro</span>';
 			ui += 	'<div class="catastro-search-button"><i class="fa fa-search" aria-hidden="true"></i></div>';
+			ui += 	'<div class="catastro-clear-button"><i class="fa fa-eraser" aria-hidden="true"></i></div>';
 			ui += '</div>';
 
 			$('#baselayers-group').append(ui);
@@ -63,8 +64,18 @@
 			});
 
 			$(".catastro-search-button").click(function(){
-				new CatastroForm();
+				var map = viewer.core.map;
+				if(!map.hasOwnProperty('catastro')){
+					map['catastro'] = new CatastroForm();
+				}else{
+					map.catastro.createForm();
+				}
 			})
+
+			$(".catastro-clear-button").click(function(){
+				var map = viewer.core.map;
+				map.catastro.clearCatastroLayer();
+			});
 		},
 		error : function() {
 			alert("Error loading plugin");

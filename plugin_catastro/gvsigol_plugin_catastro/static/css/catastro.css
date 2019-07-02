@@ -5,6 +5,14 @@
 	border-radius: 3px;
 }
 
+.catastro-clear-button{
+	border: 1px solid rgba(0, 0, 0, 0.2);
+	float: right;
+	padding: 2px 5px;
+	border-radius: 3px;
+	display:none;
+}
+
 .catastro-search-button:hover{
 	background-color: rgba(0, 0, 0, 0.1);
 }
