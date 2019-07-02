@@ -308,6 +308,10 @@ CatastroForm.prototype.clearCatastroLayer = function(){
 		self.vectorSource = null;
 		self.vectorLayer = null;
 	}
+
+	$(".catastro-clear-button").each(function(){
+		$(this).css("display", "none");
+	});
 }
 
 CatastroForm.prototype.getRefCatastralInfo = function(coord_x, coord_y, srs){
