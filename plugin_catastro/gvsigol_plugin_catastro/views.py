@@ -154,11 +154,6 @@ def get_referencia_catastral_polygon(request):
         tree = ElementTree.fromstring(r.content)
         features = []
 
-        '''
-        prefix ='{http://www.opengis.net/wfs/2.0}'
-        prefix2 ='{http://inspire.ec.europa.eu/schemas/cp/4.0}'
-        '''
-
         prefix3 = '{http://www.opengis.net/gml/3.2}'
         poslist = tree.findall(".//"+ prefix3 + "posList")
 
@@ -179,15 +174,6 @@ def get_referencia_catastral_polygon(request):
         response = {
             'featureCollection': features
         }
-
-
-        '''
-        for aux1 in tree.iter(prefix + 'member'):
-            for aux2 in aux1.iter(prefix2 + 'CadastralParcel'):
-                for aux3 in aux2.iter(prefix2 + 'geometry'):
-                    print 'asdfa'
-        '''
-
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
