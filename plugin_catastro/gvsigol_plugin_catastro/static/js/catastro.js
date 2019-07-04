@@ -476,21 +476,23 @@ CatastroForm.prototype.getRefCatastralPolygon = function(ref_catastral){
 
 }
 
-CatastroForm.prototype.onPortalKeyPress = function(){
-	var province = $("#provincia-input").select2('data').text;
-	var municipio = $("#municipio-input").select2('data').text;
-	var tipovia = $("#road-type-input").text();
-	var nombrevia = $("#road-name-input").select2('data').text;
-
-	var portal_url = 'http://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCallejero.asmx/ConsultaNumero?Provincia='+province+'&Municipio='+municipio+"&TipoVia="+tipovia+"&NombreVia="+nombrevia+"&Numero=";
-
-}
-
 
 CatastroForm.prototype.onAddressKeyPress = function(){
 	var self = this;
-	var province = $("#provincia-input").select2('data').text;
-	var municipio = $("#municipio-input").select2('data').text;
+	var component = $("#provincia-input").select2('data');
+	var province = "";
+	if(Array.isArray(component)){
+		province = component[0].text;
+	}else{
+		province = component.text;
+	}
+	var component2 = $("#municipio-input").select2('data');
+	var municipio = "";
+	if(Array.isArray(component2)){
+		municipio = component2[0].text;
+	}else{
+		municipio = component2.text;
+	}
 
 	var address_url = '/gvsigonline/catastro/get_vias/';
 
@@ -516,7 +518,13 @@ CatastroForm.prototype.onAddressKeyPress = function(){
 	  		$("#road-name-input.js-example-basic-single").select2();
 
 	  		$("#road-name-input").unbind("change").change(function(){
-	  			var value = $("#road-name-input").select2('data').text;
+	  			var component = $("#road-name-input").select2('data');
+	  			var value = "";
+	  			if(Array.isArray(component)){
+	  				value = component[0].text;
+	  			}else{
+	  				value = component.text;
+	  			};
 	  			var type = "";
 
 	  			var option = $("#road-name-input option[data-name=\""+value+"\"]")
@@ -525,8 +533,6 @@ CatastroForm.prototype.onAddressKeyPress = function(){
 	  			}
 
 	  			$("#road-type-input").val(type);
-
-	  			self.onPortalKeyPress();
 	  		})
 		},
 	  	error: function(){
