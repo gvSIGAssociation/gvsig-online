@@ -4,13 +4,13 @@
 {% load include_if_exists %}
 <html>
 <head>
-	
+
 	<title>gvSIG Online</title>
-	
+
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-	
+
 	<link rel="stylesheet" href="{% static "js/vendors/jQueryUI/jquery-ui.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.6/css/bootstrap.min.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-datepicker-1.6.4-dist/css/bootstrap-datepicker.css" %}">
@@ -21,13 +21,14 @@
 	<link rel="stylesheet" href="{% static "js/vendors/DataTables-1.10.11/media/css/jquery.dataTables.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/DataTables-1.10.11/extensions/Select/css/select.dataTables.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/Buttons-1.2.4/css/buttons.dataTables.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/search-in-components/select2.min.css" %}" />
 	<link rel="stylesheet" href="{% static "js/vendors/ol-4.0.1/ol.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/ol-4.0.1/ol3-popup.css" %}">
 <!-- 	<link rel="stylesheet" href="{% static "js/vendors/ol-ext/ol-ext.css" %}"> -->
 	<link rel="stylesheet" href="{% static "css/uploadfile.css" %}">
 	<link rel="stylesheet" href="{% static "css/googlefonts.css" %}">
 	<link rel="stylesheet" href="{% static "css/gvsigOL.css" %}">
-	<link rel="stylesheet" href="{% static "css/viewer.css" %}">	
+	<link rel="stylesheet" href="{% static "css/viewer.css" %}">
 	<link rel="stylesheet" href="{% static "css/skins/_all-skins.min.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror/lib/codemirror.css" %}" />
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror/theme/xq-dark.css" %}" />
@@ -40,24 +41,24 @@
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-    
 
-    {% for app in INSTALLED_APPS %}												  
-		{% if 'gvsigol_app_' in app %}	
-			{% with "load_css_"|add:app|cut:"gvsigol_app_"|add:".html" as aux %}	   			 	
+
+    {% for app in INSTALLED_APPS %}
+		{% if 'gvsigol_app_' in app %}
+			{% with "load_css_"|add:app|cut:"gvsigol_app_"|add:".html" as aux %}
 				{% include_if_exists aux %}
 			{% endwith %}
-		{% endif %}		    					
+		{% endif %}
 	{% endfor %}
-	
-	{% for plugin in INSTALLED_APPS %}												  
-		{% if 'gvsigol_plugin_' in plugin %}	
-			{% with "load_css_"|add:plugin|cut:"gvsigol_plugin_"|add:".html" as aux %}	   			 	
+
+	{% for plugin in INSTALLED_APPS %}
+		{% if 'gvsigol_plugin_' in plugin %}
+			{% with "load_css_"|add:plugin|cut:"gvsigol_plugin_"|add:".html" as aux %}
 				{% include_if_exists aux %}
 			{% endwith %}
-		{% endif %}		    					
+		{% endif %}
 	{% endfor %}
-    
+
 </head>
 
 <body class="{{GVSIGOL_SKIN}}">
@@ -76,19 +77,19 @@
 			</div>
 		</div>
 	</div>
-	
+
 	<header class="main-header map-header">
 
 		<!-- Header Navbar: style can be found in header.less -->
 		<nav id="viewer-navbar" class="navbar navbar-static-top" style="margin-left:0px;" role="navigation">
-			
+
 			<!-- Sidebar toggle button-->
           	<a href="#" class="sidebar-toggle" data-toggle="control-sidebar" role="button"></a>
-          	
+
           	<div class="navbar-header">
       				<img src="{% static "img/logo_principal.png"%}" height=50 onError="this.style='display:none'">
 			</div>
-			
+
 			<div class="navbar-custom-menu">
 				<ul id="gvsigol-navbar-menus" class="nav navbar-nav">
 					<li class="dropdown">
@@ -97,7 +98,7 @@
 		                </a>
 		                <ul id="gvsigol-navbar-file-menu" class="dropdown-menu"></ul>
 		           	</li>
-				
+
 					<li class="dropdown">
 		            	<a class="dropdown-toggle" data-toggle="dropdown" href="#">
 		                	{% trans "Views" %} <span class="caret"></span>
@@ -109,7 +110,7 @@
 				</ul>
 				<ul class="nav navbar-nav">
 					<li class="dropdown user user-menu">
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown"> 
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown">
 							<i style="font-size: 16px;" class="fa fa-user"></i>
 						</a>
 						<ul class="dropdown-menu">
@@ -130,9 +131,9 @@
 								            <option style="" value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected="selected"{% endif %}>
 								                {% trans language.name_translated %}
 								            </option>
-								        {% endfor %}								      
-								    </select>		
-							    </form>							 
+								        {% endfor %}
+								    </select>
+							    </form>
 						    </li>
 							<li class="user-footer">
 								<div class="pull-left">
@@ -148,10 +149,10 @@
 			</div>
 		</nav>
 	</header>
-	
+
 	<div id="container">
 		<aside class="control-sidebar control-sidebar-light  control-sidebar-closed" style="position: fixed; height: 100%;">
-			
+
 			<div class="project-info-div">
 				{% if has_image %}
 				<div class="pull-left image">
@@ -163,7 +164,7 @@
 <!-- 					<a href="#"><i class="fa fa-circle text-success"></i> Online</a> -->
 				</div>
 			</div>
-			
+
 
 			<ul id="gvsigol-toc-tabs" class="nav nav-tabs nav-justified control-sidebar-tabs">
 				<li class="active" title="{% trans "Layer tree" %}"><a href="#layer-tree-tab" data-toggle="tab"><i class="icon-layers"></i></a></li>
@@ -173,25 +174,25 @@
 			</ul>
 
 			<div id="gvsigol-toc-tabs-content" class="tab-content" style="height: 88%;">
-			
+
 				<!-- Layer tree -->
 				<div class="tab-pane active" id="layer-tree-tab" style="overflow-y: auto; height: 100%;">
 				</div>
-				
+
 				<!-- Legend -->
 				<div class="tab-pane" id="legend-tab" style="overflow-y: auto; height: 100%;">
 				</div>
-				
+
 				<!-- Details -->
 				<div class="tab-pane" id="details-tab" style="overflow-y: auto; height: 100%;">
 				</div>
-				
+
 				<!-- Temporary -->
 				<div class="tab-pane" id="temporary-tab" style="overflow-y: auto; height: 100%;">
 				</div>
-			</div>			
+			</div>
 		</aside>
-		
+
 		<div class="panel-wrapper">
 <!-- 			<div class="panel-controller"> -->
 <!-- 				<div class="tab-controller"> -->
@@ -202,9 +203,9 @@
 		</div>
 
 		<div id="map">
-		
+
 			<div id="center-cursor"></div>
-			
+
 			<table id="mouse-position" class="custom-mouse-position ol-unselectable ol-control">
 				<tr>
 					<td id="custom-mouse-position-output"></td>
@@ -223,7 +224,7 @@
 					</td>
 				</tr>
 			</table>
-			
+
 			<div id="toolbar" class="ol-toolbar ol-unselectable ol-control"></div>
 
 			<div class="modal" id="float-modal" tabindex="-1" role="dialog" aria-labelledby="myFloatModal">
@@ -243,11 +244,11 @@
 					</div>
 				</div>
 			</div>
-			
-		</div>	
+
+		</div>
 	</div>
-	
-		
+
+
 	<!-- Modal -->
 	<div class="modal fade" id="modal-end-edition" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
@@ -269,8 +270,8 @@
 			</div>
 		</div>
 	</div>
-	
-	
+
+
 	<!-- Modal -->
 	<div class="modal fade" id="modal-layer_loading_error" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
@@ -291,12 +292,12 @@
 			</div>
 		</div>
 	</div>
-	
+
 	<div id="floating-modal">
 	</div>
 
 	<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
-	
+
 	<script>
 		if (!String.prototype.startsWith) {
 			String.prototype.startsWith = function(searchString, position) {
@@ -305,7 +306,7 @@
 		  	};
 		}
 	</script>
-	
+
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jQuery-2.1.4.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.cookie.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.easy-overlay.js" %}"></script>
@@ -346,6 +347,7 @@
 	<script type="text/javascript" src="{% static "js/vendors/DataTables-1.10.11/media/js/jquery.dataTables.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/DataTables-1.10.11/extensions/Select/js/dataTables.select.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/Buttons-1.2.4/js/dataTables.buttons.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/search-in-components/select2.full.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/Buttons-1.2.4/js/buttons.flash.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/Buttons-1.2.4/js/buttons.html5.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/Buttons-1.2.4/js/buttons.print.js" %}"></script>
@@ -361,14 +363,14 @@
 	<script type="text/javascript" src="{% static "js/vendors/codemirror/mode/xml/xml.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/fastsearch/fastsearch.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/fastsearch/fastselect.min.js" %}"></script>
-	
+
 	<script type="text/javascript" src="{% static "js/vendors/jquery-loading-overlay-1.5.4/src/loadingoverlay.min.js" %}"></script>
-	
+
 	<script type="text/javascript" src="{% static "js/dist/gvsigol-compress.js" %}"></script>
 	<script>
 		var messageBox = new messageBox();
 	</script>
-	
+
 	<script type="text/javascript">
 		$(document).ready(function(){
 	    	$("#select-language").change(function() {
@@ -376,43 +378,43 @@
 			});
 	    });
 	</script>
-	
+
 	<script type="text/javascript">
-	
+
 		var bottomPanel = new bottomPanel();
 		$(document).on('click', '.tab-controller', function() {
 	    	bottomPanel.togglePanel();
 	    });
-	
+
 		$("#modal-table-dialog").draggable({
 		    handle: ".modal-header"
 		});
-		
+
 		$(document).on('click', '[data-toggle="lightbox"]', function(event) {
 		    event.preventDefault();
 		    $(this).ekkoLightbox();
 		});
-		
+
 		$('#change-to-2D').on('click', function() {
 			$("body").trigger('change-to-2D-event');
 		});
-		
+
 		var sharedView = false;
 		{% if is_shared_view %}
 			sharedView = true;
 		{% endif %}
-		
+
 		var data = {};
 		if (sharedView) {
 			data['pid'] = '{{pid}}';
 			data['shared_view'] = true;
 			data['shared_view_name'] = '{{shared_view_name}}';
-			
+
 		} else {
 			data['pid'] = '{{pid}}';
 			data['shared_view'] = false;
 		}
-		
+
 		var extraParams = {{extra_params|safe}};
 		$.ajax({
 			type : 'POST',
@@ -424,18 +426,18 @@
 			},
 			success : function(response) {
 				for (var key in response.supported_crs) {
-					proj4.defs(response.supported_crs[key].code, response.supported_crs[key].definition);	
+					proj4.defs(response.supported_crs[key].code, response.supported_crs[key].definition);
 				}
 				viewer.core.initialize(response, extraParams);
 
 				if(response.errors && response.errors.length > 0){
 					var html = "<ul>";
 					for(var i=0; i<response.errors.length; i++){
-						html += "<li>"+response.errors[i].workspace+"."+response.errors[i].layer+"</li>";				
+						html += "<li>"+response.errors[i].workspace+"."+response.errors[i].layer+"</li>";
 					}
 					html += "</ul>";
 					$("#modal-layer_loading_error .modal-body").html(html);
-					
+
 					$('#modal-layer_loading_error').modal('show');
 				}
 			},
@@ -443,27 +445,27 @@
 			}
 		});
 	</script>
-	
-	{% for app in INSTALLED_APPS %}												  
-		{% if 'gvsigol_app_' in app %}	
-			{% with "load_js_"|add:app|cut:"gvsigol_app_"|add:".html" as aux %}	   			 	
+
+	{% for app in INSTALLED_APPS %}
+		{% if 'gvsigol_app_' in app %}
+			{% with "load_js_"|add:app|cut:"gvsigol_app_"|add:".html" as aux %}
 				{% include_if_exists aux %}
 			{% endwith %}
-		{% endif %}		    					
+		{% endif %}
 	{% endfor %}
-	
-	{% for plugin in INSTALLED_APPS %}												  
-		{% if 'gvsigol_plugin_' in plugin %}	
-			{% with "load_js_"|add:plugin|cut:"gvsigol_plugin_"|add:".html" as aux %}	   			 	
+
+	{% for plugin in INSTALLED_APPS %}
+		{% if 'gvsigol_plugin_' in plugin %}
+			{% with "load_js_"|add:plugin|cut:"gvsigol_plugin_"|add:".html" as aux %}
 				{% include_if_exists aux %}
 			{% endwith %}
-		{% endif %}		    					
+		{% endif %}
 	{% endfor %}
 	<script>
 	$(document).ready(function() {
-		
+
 		$.overlayout();
-		
+
 		$("#table-dialog").dialog({
 			dialogClass: "no-close table-dialog",
 			autoOpen: false,
@@ -517,16 +519,16 @@
 		    });
 
 		}
-		
+
 		{% if project.toc_mode == "toc_groups" %}
 			$(".sidebar-toggle").trigger("click");
-		{% endif %}	
+		{% endif %}
 		{% if project.toc_mode == "toc_layers" %}
 			$(".sidebar-toggle").trigger("click");
 			$(".group-collapsed-button").trigger("click");
-		{% endif %}	
-	
-		
+		{% endif %}
+
+
 	});
 	</script>
 </body>
