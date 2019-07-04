@@ -539,7 +539,13 @@ CatastroForm.prototype.onAddressKeyPress = function(){
 
 CatastroForm.prototype.onMunicipallyKeyPress = function(id){
 	var self = this;
-	var province = $("#"+id).select2('data').text;
+	var component = $("#"+id).select2('data');
+	var province = "";
+	if(Array.isArray(component)){
+		province = component[0].text;
+	}else{
+		province = component.text;
+	}
     var suffix = id.substring("provincia-".length);
 
 	var municipio_url = '/gvsigonline/catastro/get_municipios/';
