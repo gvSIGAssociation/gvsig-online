@@ -423,7 +423,8 @@ def layer_delete(request, layer_id):
 @staff_required
 def layer_delete_operation(request, layer_id):
     layer = Layer.objects.get(pk=layer_id)
-    mapservice_backend.deleteGeoserverLayerGroup(layer.layer_group)
+    if layer.layer_group.name != '__default__':
+        mapservice_backend.deleteGeoserverLayerGroup(layer.layer_group)
     mapservice_backend.deleteResource(layer.datastore.workspace, layer.datastore, layer)
     mapservice_backend.deleteLayerStyles(layer)
     signals.layer_deleted.send(sender=None, layer=layer)
