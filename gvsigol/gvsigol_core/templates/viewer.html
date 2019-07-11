@@ -297,7 +297,7 @@
 
 
 	<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
-
+	<script src="https://cdn.polyfill.io/v2/polyfill.js?features=fetch"></script>
 	<script>
 		if (!String.prototype.startsWith) {
 			String.prototype.startsWith = function(searchString, position) {
