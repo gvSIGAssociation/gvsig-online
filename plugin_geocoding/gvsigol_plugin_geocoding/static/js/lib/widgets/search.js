@@ -289,6 +289,33 @@ search.prototype.initUI = function() {
 						}
 					});
 				}
+				
+				if(response.types[i] == "ide_uy"){
+					self.menus.push({
+						text: 'Dirección de IDE Uruguay',
+						classname: 'geocoding-contextmenu', // add some CSS rules
+						callback: function (obj) {
+							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
+							$.ajax({
+								type: 'POST',
+								async: false,
+								url: '/gvsigonline/geocoding/get_location_address/',
+								beforeSend:function(xhr){
+									xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+								},
+								data: {
+									'coord': coordinate[0] + ","+ coordinate[1],
+									'type': 'ide_uy'
+								},
+								success	:function(response){
+									self.locate(response, 'EPSG:4326', false);
+								},
+								error: function(){}
+							});
+						}
+					});
+				}
+				
 			}
 
 			if(self.menus.length > 0){
@@ -379,7 +406,32 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 				}
 				this.popup.show(coordinate, '<div><p>' + callejero + '</p></div>');
 			}else{
-				this.popup.show(coordinate, '<div><p>' + address.address + '</p></div>');
+				if (address.source == "ide_uy") {
+					var callejero = "";
+					if(address.tip_via && (address.tip_via.trim() != 0)){
+						callejero = address.tip_via + " ";
+					}
+					if(address.address && (address.address.trim() != 0)){
+						callejero = callejero + address.address;
+					}
+					if(address.portalNumber && (address.portalNumber != 0)){
+						callejero = callejero + " " + address.portalNumber;
+					}
+					if(address.localidad && (address.localidad.trim() != 0)){
+						if (callejero.trim() != 0)
+							callejero = callejero + ", " + address.localidad;
+						else
+							callejero = address.localidad;
+					}
+					if(address.departamento && (address.departamento.trim() != 0)){
+						callejero = callejero + " (" + address.departamento + ")";
+					}					
+					this.popup.show(coordinate, '<div><p>' + callejero + '</p></div>');					
+				}
+				else
+				{
+					this.popup.show(coordinate, '<div><p>' + address.address + '</p></div>');
+				}
 			}
 		}
 		this.map.getView().setCenter(coordinate);

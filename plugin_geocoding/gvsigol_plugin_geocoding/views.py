@@ -43,6 +43,9 @@ from gvsigol_services.views import backend_resource_list_available,\
 from gvsigol_services.backend_postgis import Introspect
 from django.views.decorators.csrf import csrf_exempt
 
+from timeit import default_timer as timer
+
+
 
 providers_order = []
 geocoder = None
@@ -452,10 +455,14 @@ def find_first_candidate(request):
     
 def search_candidates(request):
     if request.method == 'GET':
+        start = timer()
         query = request.GET.get('q')  
         suggestions = get_geocoder().search_candidates(query)
-            
-        return HttpResponse(json.dumps(suggestions, indent=4), content_type='application/json')
+        stop = timer()
+        aux = json.dumps(suggestions, indent=4)
+        print(stop -start)
+        
+        return HttpResponse(aux, content_type='application/json')
     
 def find_candidate(request):
     suggestion = {}

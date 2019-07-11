@@ -26,7 +26,10 @@ import settings
 from cartociudad2 import CartoCiudad2
 from cartociudad import Cartociudad
 from nominatim import Nominatim 
+from ide_uy import IdeUY
 import json, ast
+from timeit import default_timer as timer
+
 
 class Geocoder():
     
@@ -55,6 +58,11 @@ class Geocoder():
         if provider.type == 'googlemaps':
             geocoder[provider.type] = GoogleMaps(provider)
             self.geocoders.append(geocoder)
+
+        if provider.type == 'ide_uy':
+            geocoder[provider.type] = IdeUY(provider)
+            self.geocoders.append(geocoder)
+            
             
         if provider.type == 'cartociudad' or provider.type == 'user':
             geocoder['cartociudad'] = Cartociudad(provider, provider.type)
@@ -63,7 +71,7 @@ class Geocoder():
           
     def search_candidates(self, query):
         suggestions = []
-        
+        start = timer();
         for geocoder_types in self.geocoders:
             for geocoder_type in geocoder_types:
                 geocoder = geocoder_types[geocoder_type]
@@ -77,7 +85,8 @@ class Geocoder():
             "query": query,
             "suggestions": suggestions
         }
-        
+        stop = timer()
+        print('search_candidates:' + query + ':' + str(stop-start))
         return response
     
     
