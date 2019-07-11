@@ -305,6 +305,14 @@
 		    	return this.indexOf(searchString, position) === position;
 		  	};
 		}
+		if (!String.prototype.endsWith) {
+		    String.prototype.endsWith = function(search, this_len) {
+		        if (this_len === undefined || this_len > this.length) {
+		            this_len = this.length;
+		        }
+		        return this.substring(this_len - search.length, this_len) === search;
+		    };
+		}
 	</script>
 
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jQuery-2.1.4.min.js" %}"></script>
