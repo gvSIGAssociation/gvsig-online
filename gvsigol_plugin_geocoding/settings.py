@@ -36,6 +36,7 @@ GEOCODING_SUPPORTED_TYPES = (
                 ('cartociudad', _('Cartography of CartoCiudad')),
                 ('new_cartociudad', _('(New) Cartography of CartoCiudad')),
                 ('user', _('Other data sources')),
+                ('ide_uy', _('IDE Uruguay Geocoder'))
             )
 
 GEOCODING_PROVIDER = {
@@ -73,7 +74,15 @@ GEOCODING_PROVIDER = {
         'country_codes': 'es',
         'autocancel': True,
         'max_results': 10
-    }
+    },
+    'ide_uy': {
+        'candidates_url': 'http://127.0.0.1:8080/api/v1/geocode/candidates',
+        'find_url': 'http://127.0.0.1:8080/api/v1/geocode/find',
+        'reverse_url': 'http://127.0.0.1:8080/api/v1/geocode/reverse',  
+        'max_results': 10,
+        'filter': ''
+    },
+    
 }
 
 STATIC_URL = '/gvsigonline/static/'
