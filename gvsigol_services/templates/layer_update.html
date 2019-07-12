@@ -112,7 +112,15 @@
 						{% else %}
 						<input type="checkbox" name="time_enabled"  id="time_enabled"/>
 						{% endif %}
-						<label for="visible">{% trans "time_enabled" %}</label>
+						<label for="time_enabled">{% trans "time_enabled" %}</label>
+					</div>
+					<div class="col-md-4 form-group">
+						{% if layer.allow_download %}
+						<input type="checkbox" name="allow_download"  id="allow_download" checked/>
+						{% else %}
+						<input type="checkbox" name="allow_download"  id="allow_download"/>
+						{% endif %}
+						<label for="allow_download">{% trans "Allow downloads" %}</label>
 					</div>
 				</div>	
 				<div class="box-body time_enabled-check">
