@@ -94,7 +94,7 @@ viewer.core = {
     _createMap: function() {
     	var self = this;
 
-    	/*var blank = new ol.layer.Tile({
+    	var blank = new ol.layer.Tile({
     		id: this._nextLayerId(),
     		label: gettext('Blank'),
           	visible: false,
@@ -103,7 +103,7 @@ viewer.core = {
     	    })
     	});
     	blank.baselayer = true;
-    	var default_layers = [blank];*/
+    	var default_layers = [blank];
 
 		var mousePositionControl = new ol.control.MousePosition({
 	        coordinateFormat: ol.coordinate.createStringXY(4),
@@ -131,7 +131,7 @@ viewer.core = {
       		],
       		renderer: 'canvas',
       		target: 'map',
-      		//layers: default_layers,
+      		layers: default_layers,
 			view: new ol.View({
         		center: ol.proj.transform([parseFloat(self.conf.view.center_lon), parseFloat(self.conf.view.center_lat)], 'EPSG:4326', 'EPSG:3857'),
         		minZoom: 0,
@@ -252,6 +252,9 @@ viewer.core = {
 			wmsLayer.cached_url = externalLayer['cache_url'];
 			wmsLayer.title = externalLayer['title'];
 			wmsLayer.baselayer = baselayer;
+			wmsLayer.queryable = true;
+			wmsLayer.external = true;
+			wmsLayer.layer_name = externalLayer['name'];
 			wmsLayer.setZIndex(parseInt(externalLayer.order));
 			if (!externalLayer['cached']) {
 				wmsLayer.legend = externalLayer['url'] + '?SERVICE=WMS&VERSION=1.1.1&layer=' + externalLayer['layers'] + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on';
@@ -295,6 +298,7 @@ viewer.core = {
 	    					visible: visible
 	    				});
 	    				ignLayer3.baselayer = true;
+	    				ignLayer3.external = true;
 	    				self.map.addLayer(ignLayer3);
 	    			}
 	    			
@@ -317,6 +321,7 @@ viewer.core = {
 			});
 			bingLayer.baselayer = baselayer;
 			bingLayer.setZIndex(parseInt(externalLayer.order));
+			bingLayer.external = true;
 			this.map.addLayer(bingLayer);
     	}
 
@@ -337,6 +342,7 @@ viewer.core = {
               	source: osm_source
             });
     		osm.baselayer = baselayer;
+    		osm.external = true;
     		osm.setZIndex(parseInt(externalLayer.order));
 			this.map.addLayer(osm);
 		}
@@ -352,6 +358,7 @@ viewer.core = {
     		    })
     		});
     		xyz.baselayer = baselayer;
+    		xyz.external = true;
     		xyz.setZIndex(parseInt(externalLayer.order));
 			this.map.addLayer(xyz);
 		}
@@ -492,6 +499,7 @@ viewer.core = {
 			wmsLayer.setZIndex(parseInt(layerConf.order));
 			wmsLayer.conf = JSON.parse(layerConf.conf);
 			wmsLayer.parentGroup = group.groupName;
+			wmsLayer.external = false;
 
 			wmsLayer.time_resolution = layerConf.time_resolution;
 
