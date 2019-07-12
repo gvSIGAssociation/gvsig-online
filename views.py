@@ -3499,12 +3499,14 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                         matrixsets.append(matrixset)
                 for style_name in lyr.styles:
                     style = lyr.styles[style_name]
-                    title = style.title if style.title else style_name
+                    title = style_name
+                    if 'title' in style:
+                        title = style['title']
                     style_def = {'name': style_name, 'title':title}
-                    if style.legend:
-                        style_def['custom_legend_url'] = style.legend
+                    if 'legend' in style:
+                        style_def['custom_legend_url'] = style['legend']
                     styles.append(style_def)
-                for lyr_style in wms.contents.get(layer).styles:
+                for lyr_style in wmts.contents.get(layer).styles:
                     styles.append(lyr_style)
         except Exception as e:
             data = {'response': '500',
