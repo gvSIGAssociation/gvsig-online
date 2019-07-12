@@ -26,7 +26,7 @@ from gvsigol_core.models import SharedView
 '''
 
 from django.shortcuts import render_to_response, RequestContext, HttpResponse, redirect
-from models import Project, ProjectUserGroup, ProjectLayerGroup#, BaseLayer, BaseLayerProject
+from models import Project, ProjectUserGroup, ProjectLayerGroup
 from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup
 from gvsigol_auth.models import UserGroup, UserGroupUser
 from django.contrib.auth.decorators import login_required

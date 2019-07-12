@@ -144,7 +144,7 @@ msgid "Remove feature"
 msgstr "Eliminar feature"
 
 msgid "Stop edition"
-msgstr "Cancel···lar edició"
+msgstr "Terminar edició"
 
 msgid "Error starting edition"
 msgstr "Error en començar l’edició"
@@ -268,8 +268,20 @@ msgstr "Bing aeri amb etiquetes"
 msgid "You are editing the layer"
 msgstr "Esteu editant la capa"
 
-msgid "Layer metadata"
-msgstr "Metadades de la capa"
+msgid "Information and downloads"
+msgstr ""
+
+msgid "Download links"
+msgstr ""
+
+msgid "Download shapefile"
+msgstr ""
+
+msgid "Download CSV"
+msgstr ""
+
+msgid "Download GML"
+msgstr ""
 
 msgid "Attribute table"
 msgstr "Taula d'atributs"
