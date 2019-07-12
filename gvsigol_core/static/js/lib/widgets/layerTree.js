@@ -2048,7 +2048,34 @@ layerTree.prototype.showMetadata = function(layer) {
 
 		},
 		error: function(){
-			alert('Error');
+			if (!layer.baselayer) {
+				if (layer.wfs_url) {
+					var shapeLink = layer.wfs_url + '?service=WFS&request=GetFeature&version=1.0.0&outputFormat=shape-zip&typeName=' + layer.layer_name;
+					var gmlLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=GML3&typeName=' + layer.layer_name;
+					var csvLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=csv&typeName=' + layer.layer_name;
+					var ui = '';
+					ui += '<div class="row">';
+					ui += 	'<div class="col-md-12 form-group">';	
+					ui += 	'<span>' + gettext('Download links') + '</span>';
+					ui += 	'</div>';
+					ui += '</div>';
+					ui += '<div class="row">';
+					ui += 	'<div class="col-md-4 form-group">';	
+					ui += 		'<i style="margin-right: 10px;" class="fa fa-download"></i><a href="' + shapeLink + '">' + gettext('Download shapefile') + '</a>';
+					ui += 	'</div>';
+					ui += 	'<div class="col-md-4 form-group">';	
+					ui += 		'<i style="margin-right: 10px;" class="fa fa-download"></i><a href="' + csvLink + '">' + gettext('Download CSV') + '</a>';
+					ui += 	'</div>';
+					ui += 	'<div class="col-md-4 form-group">';	
+					ui += 		'<i style="margin-right: 10px;" class="fa fa-download"></i><a target="_blank" href="' + gmlLink + '">' + gettext('Download GML') + '</a>';
+					ui += 	'</div>';
+					ui += '</div>';
+					
+					$('#float-modal .modal-body').empty();
+					$('#float-modal .modal-body').append(ui);
+					$('#float-modal').modal('show');
+				}						
+			}
 		}
 	});
 	
