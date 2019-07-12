@@ -261,8 +261,20 @@ msgstr ""
 msgid "You are editing the layer"
 msgstr ""
 
-msgid "Layer metadata"
-msgstr ""
+msgid "Information and downloads"
+msgstr "Información y descargas"
+
+msgid "Download links"
+msgstr "Links de descarga"
+
+msgid "Download shapefile"
+msgstr "Descargar shapefile"
+
+msgid "Download CSV"
+msgstr "Descargar CSV"
+
+msgid "Download GML"
+msgstr "Descargar GML"
 
 msgid "Attribute table"
 msgstr ""

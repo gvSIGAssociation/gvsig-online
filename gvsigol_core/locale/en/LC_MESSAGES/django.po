@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-07-02 09:28+0200\n"
+"POT-Creation-Date: 2019-07-11 18:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -362,8 +362,8 @@ msgstr ""
 
 #: templates/project_add.html:284 templates/project_list.html.py:70
 #: templates/project_update.html:315 templates/shared_view_list.html.py:55
-#: templates/viewer.html:240 templates/viewer.html.py:265
-#: templates/viewer_compress.html:240 templates/viewer_compress.html.py:266
+#: templates/viewer.html:265 templates/viewer_compress.html.py:240
+#: templates/viewer_compress.html:266
 msgid "Cancel"
 msgstr ""
 
@@ -514,6 +514,11 @@ msgstr ""
 msgid "Temporary"
 msgstr ""
 
+#: templates/viewer.html:240 templates/viewer.html.py:508
+#: templates/viewer_compress.html:479
+msgid "Close"
+msgstr ""
+
 #: templates/viewer.html:259 templates/viewer_compress.html.py:260
 msgid "End edition"
 msgstr ""
@@ -524,10 +529,6 @@ msgstr ""
 
 #: templates/viewer.html:282 templates/viewer_compress.html.py:283
 msgid "Error loading layers"
-msgstr ""
-
-#: templates/viewer.html:508 templates/viewer_compress.html.py:479
-msgid "Close"
 msgstr ""
 
 #: utils.py:444
