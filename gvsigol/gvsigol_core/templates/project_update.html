@@ -412,9 +412,21 @@
 		  		var data_name = $(this).attr("data-name");
 		  		var data_title = $(this).attr("data-title");
 		  		
+		  		var visibleItems = searcheableList2.visibleItems;
+		  		for(var i=0; i<searcheableList2.items.length; i++){
+	    			var item = searcheableList2.items[i];
+	    			item.show();
+	    		}
+		  		
 		  		$('.baselayers-default').each(function( index ) {
 		  			$(this).prop("checked", false);
 		  		});
+		  		
+		  		$('.selected-base-group').each(function( index ) {
+		  			$(this).prop("checked", false);
+		  		});
+		  		
+		  		$('#selected-base-group-' + this.dataset.id).prop("checked", true);
 		  		
 				$('.basegroup-layers').css("display", "none");
 				$('#basegroup-layers-' + this.dataset.id).css("display", "block");
@@ -454,6 +466,13 @@
 			  			}
 			  		}
 				});
+				for(var i=0; i<searcheableList2.items.length; i++){
+	    			var item = searcheableList2.items[i];
+	    			item.hide();
+	    		}
+				for(var i=0; i<visibleItems.length; i++){
+	    			var item = visibleItems[i].show();
+	    		}
 				
 		  	});
 		});
@@ -645,9 +664,21 @@
 	  		var data_name = $(this).attr("data-name");
 	  		var data_title = $(this).attr("data-title");
 	  		
+	  		var visibleItems = searcheableList2.visibleItems;
+	  		for(var i=0; i<searcheableList2.items.length; i++){
+    			var item = searcheableList2.items[i];
+    			item.show();
+    		}
+	  		
 	  		$('.baselayers-default').each(function( index ) {
 	  			$(this).prop("checked", false);
 	  		});
+	  		
+	  		$('.selected-base-group').each(function( index ) {
+	  			$(this).prop("checked", false);
+	  		});
+	  		
+	  		$('#selected-base-group-' + this.dataset.id).prop("checked", true);
 	  		
 			$('.basegroup-layers').css("display", "none");
 			$('#basegroup-layers-' + this.dataset.id).css("display", "block");
@@ -687,6 +718,14 @@
 		  			}
 		  		}
 			});
+			
+			for(var i=0; i<searcheableList2.items.length; i++){
+    			var item = searcheableList2.items[i];
+    			item.hide();
+    		}
+			for(var i=0; i<visibleItems.length; i++){
+    			var item = visibleItems[i].show();
+    		}
 			
 	  	});
 	});
