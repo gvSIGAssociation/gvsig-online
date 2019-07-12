@@ -1753,18 +1753,21 @@ layerTree.prototype.createBaseLayerUI = function(layer) {
 	var mapLayer = this.getBaseLayerFromMap(layer);
 	var id = layer.id;
     
-	mapLayer.setZIndex(this.baseLayerIndex);
-	this.baseLayerIndex++;
-	
 	var ui = '';
-	ui += '<div style="margin-left:20px;">';
-	if (layer['default_baselayer']) {
-		ui += 	'<input type="radio" id="' + id + '" data-origin="'+layer['name']+'" name="baselayers-group" checked>';
-	} else {
-		ui += 	'<input type="radio" id="' + id + '" data-origin="'+layer['name']+'" name="baselayers-group">';
+	if (mapLayer) {
+		mapLayer.setZIndex(this.baseLayerIndex);
+		this.baseLayerIndex++;
+		
+		ui += '<div style="margin-left:20px;">';
+		if (layer['default_baselayer']) {
+			ui += 	'<input type="radio" id="' + id + '" data-origin="'+layer['name']+'" name="baselayers-group" checked>';
+		} else {
+			ui += 	'<input type="radio" id="' + id + '" data-origin="'+layer['name']+'" name="baselayers-group">';
+		}
+		ui += 		'<span class="text">' + layer['title'] + '</span>';
+		ui += '</div>';
 	}
-	ui += 		'<span class="text">' + layer['title'] + '</span>';
-	ui += '</div>';
+	
 	
 	return ui;
 };
@@ -1787,58 +1790,61 @@ layerTree.prototype.createTemporaryOverlayUI = function(layer) {
 	var id = layer.id;
 	
 	var ui = '';
-	if (layer.time_enabled) {	
-		var language = $("#select-language").val();
-	
-		var conf = JSON.parse(layer.conf);
-		var fields = conf.fields;
-		var time_field = layer.time_enabled_field;
-		for(var i=0; i<fields.length; i++){
-			if(fields[i].name == time_field && fields[i]["title-"+language] != ""){
-				time_field = fields[i]["title-"+language];
-			}
-		}
+	if (mapLayer) {
+		if (layer.time_enabled) {	
+			var language = $("#select-language").val();
 		
-		var visibility = 'style="display: none;"';
-		if(layer.visible){
-			visibility = 'style="display: block;"';
-		}
-		
-		ui += '<div id="layer-' + id + '" data-layerid="' + id + '" data-id="'+layer.ref+'" data-zindex="' + mapLayer.getZIndex() + '" class="temporary-layer box thin-border box-default collapsed-box" '+visibility+'>';
-		ui += '		<div class="box-header with-border">';
-	
-//		ui += '		<input type="checkbox" class="temporary-layer temp-'+id+'" id="' + id + '" data-id="'+layer.ref+'">';
-	
-		ui += '			<span class="text">' + layer.title + '</span>';
-		ui += '			<div class="box-tools pull-right">';
-		ui += '				<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
-		ui += '					<i class="fa fa-plus"></i>';
-		ui += '				</button>';
-		ui += '			</div>';
-		ui += '		</div>';
-		ui += '		<div class="box-body" style="display: none;">';
-		
-		if(fields.length > 0){
-			ui +=  			gettext('temporary_field') + '<span class="pull-right" style="font-weight:bold;">'+time_field+'</span><div style="clear:both"></div>';
-			
-			if(layer.time_enabled_endfield != null && layer.time_enabled_endfield != ""){
-				var time_endfield = layer.time_enabled_endfield;
-				for(var i=0; i<fields.length; i++){
-					if(fields[i].name == time_endfield && fields[i]["title-"+language] != ""){
-						time_endfield = fields[i]["title-"+language];
-					}
+			var conf = JSON.parse(layer.conf);
+			var fields = conf.fields;
+			var time_field = layer.time_enabled_field;
+			for(var i=0; i<fields.length; i++){
+				if(fields[i].name == time_field && fields[i]["title-"+language] != ""){
+					time_field = fields[i]["title-"+language];
 				}
-				ui +=  			gettext('temporary_endfield') + '<span class="pull-right" style="font-weight:bold;">'+time_endfield+'</span><div style="clear:both"></div>';
 			}
-		
-		}else{
-			ui +=  			'<span class="pull-right" style="font-weight:bold;">'+gettext('Image Mosaic')+'</span><div style="clear:both"></div>';
 			
-		}
+			var visibility = 'style="display: none;"';
+			if(layer.visible){
+				visibility = 'style="display: block;"';
+			}
+			
+			ui += '<div id="layer-' + id + '" data-layerid="' + id + '" data-id="'+layer.ref+'" data-zindex="' + mapLayer.getZIndex() + '" class="temporary-layer box thin-border box-default collapsed-box" '+visibility+'>';
+			ui += '		<div class="box-header with-border">';
 		
-		ui += '		</div>';
-		ui += '</div>';
+//			ui += '		<input type="checkbox" class="temporary-layer temp-'+id+'" id="' + id + '" data-id="'+layer.ref+'">';
+		
+			ui += '			<span class="text">' + layer.title + '</span>';
+			ui += '			<div class="box-tools pull-right">';
+			ui += '				<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
+			ui += '					<i class="fa fa-plus"></i>';
+			ui += '				</button>';
+			ui += '			</div>';
+			ui += '		</div>';
+			ui += '		<div class="box-body" style="display: none;">';
+			
+			if(fields.length > 0){
+				ui +=  			gettext('temporary_field') + '<span class="pull-right" style="font-weight:bold;">'+time_field+'</span><div style="clear:both"></div>';
+				
+				if(layer.time_enabled_endfield != null && layer.time_enabled_endfield != ""){
+					var time_endfield = layer.time_enabled_endfield;
+					for(var i=0; i<fields.length; i++){
+						if(fields[i].name == time_endfield && fields[i]["title-"+language] != ""){
+							time_endfield = fields[i]["title-"+language];
+						}
+					}
+					ui +=  			gettext('temporary_endfield') + '<span class="pull-right" style="font-weight:bold;">'+time_endfield+'</span><div style="clear:both"></div>';
+				}
+			
+			}else{
+				ui +=  			'<span class="pull-right" style="font-weight:bold;">'+gettext('Image Mosaic')+'</span><div style="clear:both"></div>';
+				
+			}
+			
+			ui += '		</div>';
+			ui += '</div>';
+		}
 	}
+	
 	
 	
 	return ui;
@@ -1848,100 +1854,99 @@ layerTree.prototype.createTemporaryOverlayUI = function(layer) {
 layerTree.prototype.createOverlayUI = function(layer, group_visible) {
 	
 	var mapLayer = this.getLayerFromMap(layer);
-
-	mapLayer.on('precompose', function(event) {
-		var min = 0;
-		var max = 100;
-		if(event.target.hasOwnProperty("swipe-min")){
-			min = event.target["swipe-min"]
-		}
-		if(event.target.hasOwnProperty("swipe-max")){
-			max = event.target["swipe-max"]
-		}
-
-        var ctx = event.context;
-        var width = ctx.canvas.width * (min / 100);
-        var width2 = ctx.canvas.width * (max / 100);
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(width, 0, ctx.canvas.width - (ctx.canvas.width - width2) - width, ctx.canvas.height);
-        ctx.clip();
-      });
-
-	mapLayer.on('postcompose', function(event) {
-        var ctx = event.context;
-        ctx.restore();
-      });
-
-	var id = layer.id;
 	
 	var ui = '';
-	ui += '<div id="layer-box-' + id + '" data-layerid="' + id + '" data-zindex="' + mapLayer.getZIndex() + '" class="box layer-box thin-border box-default collapsed-box">';
-	ui += '		<div class="box-header with-border">';
-	ui += '			<span class="handle"> ';
-	ui += '				<i class="fa fa-ellipsis-v"></i>';
-	ui += '				<i class="fa fa-ellipsis-v"></i>';
-	ui += '			</span>';
-	if (group_visible) {
-		ui += '		<input type="checkbox" id="' + id + '" disabled checked>';
-	}else{
-		if (layer.visible) {
-			ui += '		<input type="checkbox" id="' + id + '" checked>';
-		} else {
-			ui += '		<input type="checkbox" id="' + id + '">';
-		}
-	}
-	ui += '			<span class="text">' + layer.title + '</span>';
-	ui += '			<div class="box-tools pull-right">';
-	ui += '				<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
-	ui += '					<i class="fa fa-plus"></i>';
-	ui += '				</button>';
-	ui += '			</div>';
-	ui += '		</div>';
-	ui += '		<div class="box-body" style="display: none;">';
-	if (!layer.external){
-		if( layer.queryable && layer.is_vector) {	    
-			ui += '	<a id="show-attribute-table-' + id + '" data-id="' + id + '" class="btn btn-block btn-social btn-custom-tool show-attribute-table-link">';
-			ui += '		<i class="fa fa-table"></i> ' + gettext('Attribute table');
-			ui += '	</a>';
-		}
-		if( layer.allow_download) {
-			ui += '	<a id="show-metadata-' + id + '" class="btn btn-block btn-social btn-custom-tool show-metadata-link">';
-			ui += '		<i class="fa fa-external-link"></i> ' + gettext('Information and downloads');
-			ui += '	</a>';
-		}
-		ui += '	<a id="zoom-to-layer-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool zoom-to-layer">';
-		ui += '		<i class="fa fa-search" aria-hidden="true"></i> ' + gettext('Zoom to layer');
-		ui += '	</a>';
-	}
-	
-	if(layer.styles){
-		ui += '		<div class="btn btn-block btn-social btn-select btn-custom-tool"><i class="fa fa-map-marker" aria-hidden="true"></i><select id="symbol-to-layer-' + id + '" class="symbol-to-layer btn btn-block btn-custom-tool">';
-		for(var i=0; i<layer.styles.length; i++){
-			var ttitle = layer.styles[i].title;
-			if(!ttitle || ttitle.length == 0){
-				ttitle = layer.styles[i].name;
+	if (mapLayer) {
+		mapLayer.on('precompose', function(event) {
+			var min = 0;
+			var max = 100;
+			if(event.target.hasOwnProperty("swipe-min")){
+				min = event.target["swipe-min"]
 			}
-			
-			if(layer.styles[i].is_default){
-				ui += '		<option value="'+layer.styles[i].name+'" selected><i class="fa fa-search" aria-hidden="true"></i>'+ ttitle +'</option>';
-			}else{
-				ui += '		<option value="'+layer.styles[i].name+'"><i class="fa fa-search" aria-hidden="true"></i>'+ ttitle +'</option>';
+			if(event.target.hasOwnProperty("swipe-max")){
+				max = event.target["swipe-max"]
+			}
+
+	        var ctx = event.context;
+	        var width = ctx.canvas.width * (min / 100);
+	        var width2 = ctx.canvas.width * (max / 100);
+
+	        ctx.save();
+	        ctx.beginPath();
+	        ctx.rect(width, 0, ctx.canvas.width - (ctx.canvas.width - width2) - width, ctx.canvas.height);
+	        ctx.clip();
+	      });
+
+		mapLayer.on('postcompose', function(event) {
+	        var ctx = event.context;
+	        ctx.restore();
+	      });
+
+		var id = layer.id;
+		
+		ui += '<div id="layer-box-' + id + '" data-layerid="' + id + '" data-zindex="' + mapLayer.getZIndex() + '" class="box layer-box thin-border box-default collapsed-box">';
+		ui += '		<div class="box-header with-border">';
+		ui += '			<span class="handle"> ';
+		ui += '				<i class="fa fa-ellipsis-v"></i>';
+		ui += '				<i class="fa fa-ellipsis-v"></i>';
+		ui += '			</span>';
+		if (group_visible) {
+			ui += '		<input type="checkbox" id="' + id + '" disabled checked>';
+		}else{
+			if (layer.visible) {
+				ui += '		<input type="checkbox" id="' + id + '" checked>';
+			} else {
+				ui += '		<input type="checkbox" id="' + id + '">';
 			}
 		}
-		ui += '	</select></div>';
+		ui += '			<span class="text">' + layer.title + '</span>';
+		ui += '			<div class="box-tools pull-right">';
+		ui += '				<button class="btn btn-box-tool btn-box-tool-custom" data-widget="collapse">';
+		ui += '					<i class="fa fa-plus"></i>';
+		ui += '				</button>';
+		ui += '			</div>';
+		ui += '		</div>';
+		ui += '		<div class="box-body" style="display: none;">';
+		if (!layer.external){
+			if( layer.queryable && layer.is_vector) {	    
+				ui += '	<a id="show-attribute-table-' + id + '" data-id="' + id + '" class="btn btn-block btn-social btn-custom-tool show-attribute-table-link">';
+				ui += '		<i class="fa fa-table"></i> ' + gettext('Attribute table');
+				ui += '	</a>';
+			}
+			if( layer.allow_download) {
+				ui += '	<a id="show-metadata-' + id + '" class="btn btn-block btn-social btn-custom-tool show-metadata-link">';
+				ui += '		<i class="fa fa-external-link"></i> ' + gettext('Information and downloads');
+				ui += '	</a>';
+			}
+			ui += '	<a id="zoom-to-layer-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool zoom-to-layer">';
+			ui += '		<i class="fa fa-search" aria-hidden="true"></i> ' + gettext('Zoom to layer');
+			ui += '	</a>';
+		}
+		
+		if(layer.styles){
+			ui += '		<div class="btn btn-block btn-social btn-select btn-custom-tool"><i class="fa fa-map-marker" aria-hidden="true"></i><select id="symbol-to-layer-' + id + '" class="symbol-to-layer btn btn-block btn-custom-tool">';
+			for(var i=0; i<layer.styles.length; i++){
+				var ttitle = layer.styles[i].title;
+				if(!ttitle || ttitle.length == 0){
+					ttitle = layer.styles[i].name;
+				}
+				
+				if(layer.styles[i].is_default){
+					ui += '		<option value="'+layer.styles[i].name+'" selected><i class="fa fa-search" aria-hidden="true"></i>'+ ttitle +'</option>';
+				}else{
+					ui += '		<option value="'+layer.styles[i].name+'"><i class="fa fa-search" aria-hidden="true"></i>'+ ttitle +'</option>';
+				}
+			}
+			ui += '	</select></div>';
+		}
+		
+		ui += '			<label style="display: block; margin-top: 8px; width: 95%;">' + gettext('Opacity') + '<span id="layer-opacity-output-' + layer.id + '" class="margin-l-15 gol-slider-output">%</span></label>';
+		ui += '			<div id="layer-opacity-slider" data-layerid="' + layer.id + '" class="layer-opacity-slider"></div>';
+		ui += '			<label style="display: block; margin-top: 8px; width: 95%;">' + gettext('Swipe') + '<span id="layer-swipe-output-' + layer.id + '" class="margin-l-15 gol-slider-output">0% - 100%</span></label>';
+		ui += '			<div id="layer-swipe-slider" data-layerid="' + layer.id + '" class="layer-swipe-slider"></div>';
+		ui += '		</div>';
+		ui += '</div>';
 	}
-	
-	ui += '			<label style="display: block; margin-top: 8px; width: 95%;">' + gettext('Opacity') + '<span id="layer-opacity-output-' + layer.id + '" class="margin-l-15 gol-slider-output">%</span></label>';
-	ui += '			<div id="layer-opacity-slider" data-layerid="' + layer.id + '" class="layer-opacity-slider"></div>';
-	ui += '			<label style="display: block; margin-top: 8px; width: 95%;">' + gettext('Swipe') + '<span id="layer-swipe-output-' + layer.id + '" class="margin-l-15 gol-slider-output">0% - 100%</span></label>';
-	ui += '			<div id="layer-swipe-slider" data-layerid="' + layer.id + '" class="layer-swipe-slider"></div>';
-	ui += '		</div>';
-	ui += '</div>';
-	
-	
-	
 	return ui;
 };
 
