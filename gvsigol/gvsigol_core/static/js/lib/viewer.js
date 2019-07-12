@@ -266,7 +266,7 @@ viewer.core = {
 			
 			this.map.addLayer(wmsLayer);
 		}
-    	if (externalLayer['type'] == 'WMTS') {
+    	/*if (externalLayer['type'] == 'WMTS') {
     		var parser = new ol.format.WMTSCapabilities();
     		var capabilities_url = externalLayer['url'] + '?request=GetCapabilities' + '&version=' + externalLayer['version']  + '&service=' + externalLayer['type'];
 	    	fetch(capabilities_url).then(function(response) {
@@ -306,6 +306,52 @@ viewer.core = {
 	    			console.log("error loading wmts '" + externalLayer['url']+"':" + err)
 	    		}
 	    	});
+		}*/
+    	
+    	if (externalLayer['type'] == 'WMTS') {
+    		var parser = new ol.format.WMTSCapabilities();
+    		var capabilities_url = externalLayer['url'] + '?request=GetCapabilities' + '&version=' + externalLayer['version']  + '&service=' + externalLayer['type'];
+    		$.ajax({
+    			url: capabilities_url,
+    			async: false,
+    			method: 'POST',
+    			error: function(jqXHR, textStatus, errorThrown){},
+    			success: function(text){
+    				var result = parser.read(text);
+    	    		try{
+    	    			var options = ol.source.WMTS.optionsFromCapabilities(result, {
+    	    				matrixSet: externalLayer['matrixset'],
+    	  		          	layer: externalLayer['layers']
+    	  		      	});
+    	    			if(options && options.urls && options.urls.length > 0){
+    	    				if(!externalLayer['url'].endsWith('?')){
+    	    					options.urls[0] = externalLayer['url'] + '?';
+    	    				}
+    	    			}
+    	    			var is_baselayer = false;
+    	    			for(var k=0; k<options.urls.length; k++){
+    	    				if(externalLayer['url'].replace("https://", "http://")+'?' == options.urls[k].replace("https://", "http://")){
+    	    					is_baselayer = true;
+    	    				}
+    	    			}
+    	    			options.crossOrigin = 'anonymous';
+    	    			if(is_baselayer){
+    	    				var ignSource3 = new ol.source.WMTS((options));
+    	    				var ignLayer3 = new ol.layer.Tile({
+    	    					id: layerId,
+    	    					source: ignSource3,
+    	    					visible: visible
+    	    				});
+    	    				ignLayer3.baselayer = true;
+    	    				ignLayer3.external = true;
+    	    				self.map.addLayer(ignLayer3);
+    	    			}
+    	    			
+    	    		} catch(err){
+    	    			console.log("error loading wmts '" + externalLayer['url']+"':" + err)
+    	    		}
+    			}
+    		});
 		}
 
     	if (externalLayer['type'] == 'Bing') {
