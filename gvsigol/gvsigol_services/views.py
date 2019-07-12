@@ -2469,33 +2469,41 @@ def get_feature_info(request):
         try:
             fut_session = FuturesSession()
             for layer_array in layers_array:
-                styles = []
-                if 'styles' in layer_array:
-                    styles = layer_array['styles']
-                url = layer_array['url']
-                urls.append(url)
-                query_layer = layer_array['query_layer']
-                ws= None
-                if 'workspace' in layer_array:
-                    ws = layer_array['workspace']
-
-                print url
-
-                servers = Server.objects.all()
-                auth2 = None
-                url_obj = urlparse(url)
-                for server in servers:
-                    server_url_obj = urlparse(server.frontend_url)
-                    if url_obj.netloc == server_url_obj.netloc:
-                        if query_layer != 'plg_catastro':
-                            if 'username' in request.session and 'password' in request.session:
-                                if request.session['username'] is not None and request.session['password'] is not None:
-                                    auth2 = (request.session['username'], request.session['password'])
-                                    break
-                                    #auth2 = ('admin', 'geoserver')
-
-                aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
-                rs.append(is_grouped_symbology_request(request, url, aux_response, styles, fut_session))
+                if layer_array['external']:
+                    styles = []
+                    if 'styles' in layer_array:
+                        styles = layer_array['styles']
+                    aux_response = fut_session.get(layer_array['url'], verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+                    rs.append(is_grouped_symbology_request(request, layer_array['url'], aux_response, styles, fut_session))
+                    
+                else:
+                    styles = []
+                    if 'styles' in layer_array:
+                        styles = layer_array['styles']
+                    url = layer_array['url']
+                    urls.append(url)
+                    query_layer = layer_array['query_layer']
+                    ws= None
+                    if 'workspace' in layer_array:
+                        ws = layer_array['workspace']
+    
+                    print url
+    
+                    servers = Server.objects.all()
+                    auth2 = None
+                    url_obj = urlparse(url)
+                    for server in servers:
+                        server_url_obj = urlparse(server.frontend_url)
+                        if url_obj.netloc == server_url_obj.netloc:
+                            if query_layer != 'plg_catastro':
+                                if 'username' in request.session and 'password' in request.session:
+                                    if request.session['username'] is not None and request.session['password'] is not None:
+                                        auth2 = (request.session['username'], request.session['password'])
+                                        break
+                                        #auth2 = ('admin', 'geoserver')
+    
+                    aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+                    rs.append(is_grouped_symbology_request(request, url, aux_response, styles, fut_session))
 
             i=0
             for layer_array in layers_array:
