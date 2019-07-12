@@ -159,7 +159,7 @@ getFeatureInfo.prototype.hasLayers = function() {
 	var layers = this.map.getLayers().getArray();
 	var queryLayers = new Array();
 	for (var i=0; i<layers.length; i++) {
-		if (!layers[i].baselayer && !layers[i].external) {
+		if (!layers[i].baselayer) {
 			if (layers[i].queryable) {
 				if (layers[i].getVisible()) {
 					queryLayers.push(layers[i]);
@@ -307,12 +307,12 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 		var auxLayer = null;
 
 		for (var i=0; i<layers.length; i++) {
-			if (!layers[i].baselayer && !layers[i].external) {
+			if (!layers[i].baselayer) {
 				if (layers[i].wms_url && layers[i].getVisible()) {
 					if( layers[i].isLayerGroup){
 						var parent = layers[i];
 						for (var j=0; j<layers.length; j++) {
-							if (!layers[j].baselayer && !layers[j].external) {
+							if (!layers[j].baselayer) {
 								if (layers[j].wms_url) {
 									if ((typeof layers[j].parentGroup === 'string' && layers[j].parentGroup == parent.layer_name) ||
 											(layers[j].parentGroup != undefined && layers[j].parentGroup.groupName == parent.layer_name)){
@@ -353,7 +353,7 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 					evt.coordinate,
 					viewResolution,
 					this.map.getView().getProjection().getCode(),
-					{'INFO_FORMAT': 'application/json', 'FEATURE_COUNT': '100'}
+					{'INFO_FORMAT': 'application/geojson', 'FEATURE_COUNT': '100'}
 				);
 			}
 
@@ -368,6 +368,11 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 			  		workspace: qLayer.workspace,
 			  		styles: stls
 				};
+				if (qLayer.external) {
+					queryLayer['external'] = true;
+				} else {
+					queryLayer['external'] = false;
+				}
 				layers_info.push(queryLayer);
 			}
 
@@ -499,148 +504,152 @@ getFeatureInfo.prototype.showInfo = function(features){
 			var is_first_configured = true;
 			var item_shown = false;
 			var selectedLayer = features[i].layer;
-
-			var feature_id = "<a href=\"javascript:void(0)\" class=\"feature-info-label-title\" style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+features[i].layer.title +"."+features[i].feature.feature + "</a>";
-			feature_id += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext('More element info')+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
-			feature_id += 		'<span class="label feature-info-button feature-info-label-resource" title="'+gettext('Multimedia resources')+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><br />';
-			feature_id += "<br />";
-
-			var language = $("#select-language").val();
-			if (selectedLayer != null) {
-				if (selectedLayer.conf != null) {
-					var fields_trans = selectedLayer.conf;
-					if(fields_trans["fields"]){
-						var fields = fields_trans["fields"];
-						var feature_id2 = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+selectedLayer.title + "</span>";
-						feature_id2 += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext("Attribute details")+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
-						feature_id2 += 		'<span class="label feature-info-button feature-info-label-resource" title="'+gettext("Show resources")+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><div style=\"clear:both; margin-bottom:10px;\"></div>';
-
-						var feature_added = 0;
-
-						var feature_fields = "";
-						var feature_fields2 = "";
-						for(var ix=0; ix<fields.length; ix++){
-							if(fields[ix]["infovisible"] != null){
-								item_shown = fields[ix]["infovisible"];
-								if(item_shown){
-									feature_added ++;
-								}
-							}
-							var key = fields[ix]["name"];
-							var key_trans = fields[ix]["title-"+language];
-							if(key_trans.length == 0){
-								key_trans = key;
-							}
-							if(item_shown && key && features[i].feature.properties && (typeof features[i].feature.properties[key] == 'boolean' || features[i].feature.properties[key])){
-								var text = features[i].feature.properties[key];
-
-								if(typeof features[i].feature.properties[key] == 'boolean' && text == true){
-									text = "<input type='checkbox' checked onclick=\"return false;\">";
-								}else{
-									if(typeof features[i].feature.properties[key] == 'boolean' && text == false){
-										text = "<input type='checkbox' onclick=\"return false;\">";
+			
+			if (!selectedLayer.external) {
+				var feature_id = "<a href=\"javascript:void(0)\" class=\"feature-info-label-title\" style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+features[i].layer.title +"."+features[i].feature.feature + "</a>";
+				feature_id += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext('More element info')+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
+				feature_id += 		'<span class="label feature-info-button feature-info-label-resource" title="'+gettext('Multimedia resources')+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><br />';
+				feature_id += "<br />";
+	
+				var language = $("#select-language").val();
+				if (selectedLayer != null) {
+					if (selectedLayer.conf != null) {
+						var fields_trans = selectedLayer.conf;
+						if(fields_trans["fields"]){
+							var fields = fields_trans["fields"];
+							var feature_id2 = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+selectedLayer.title + "</span>";
+							feature_id2 += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext("Attribute details")+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
+							feature_id2 += 		'<span class="label feature-info-button feature-info-label-resource" title="'+gettext("Show resources")+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><div style=\"clear:both; margin-bottom:10px;\"></div>';
+	
+							var feature_added = 0;
+	
+							var feature_fields = "";
+							var feature_fields2 = "";
+							for(var ix=0; ix<fields.length; ix++){
+								if(fields[ix]["infovisible"] != null){
+									item_shown = fields[ix]["infovisible"];
+									if(item_shown){
+										feature_added ++;
 									}
 								}
-
-								var complex_data = false;
-								if(key.startsWith("cd_json_")){
-									try{
-										complex_data = true;
-										var data_json = JSON.parse(text);
-										for(nkey in data_json){
-											var aux_text = data_json[nkey];
-											if(aux_text.length > 45){
-												aux_text = aux_text.substring(0,45) + "...";
-											}
-											if (!aux_text.toString().startsWith('http')) {
-												feature_fields += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
-												feature_fields2 += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
-											} else {
-												feature_fields += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\"><a href=\"" + data_json[nkey] + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
-												feature_fields2 += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\"><a href=\"" + data_json[nkey] + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
-											}
-										}
-									}catch(err){
-										complex_data = false;
-									}
+								var key = fields[ix]["name"];
+								var key_trans = fields[ix]["title-"+language];
+								if(key_trans.length == 0){
+									key_trans = key;
 								}
-
-								if(!complex_data){
-									var aux_text = text;
-									var datetime_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(.[0-9]{3})?Z$/i;
-									if(datetime_format.test(text)){
-										var match = datetime_format.exec(text);
-										aux_text = match[3]+"/"+match[2]+"/"+match[1]+" "+match[4]+":"+match[5]+":"+match[6];
-										if(match.length > 7){
-											//aux_text += match[7];
+								if(item_shown && key && features[i].feature.properties && (typeof features[i].feature.properties[key] == 'boolean' || features[i].feature.properties[key])){
+									var text = features[i].feature.properties[key];
+	
+									if(typeof features[i].feature.properties[key] == 'boolean' && text == true){
+										text = "<input type='checkbox' checked onclick=\"return false;\">";
+									}else{
+										if(typeof features[i].feature.properties[key] == 'boolean' && text == false){
+											text = "<input type='checkbox' onclick=\"return false;\">";
 										}
 									}
-									var date_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})Z$/i;
-									if(date_format.test(text)){
-										var match = date_format.exec(text);
-										aux_text = match[3]+"/"+match[2]+"/"+match[1];
+	
+									var complex_data = false;
+									if(key.startsWith("cd_json_")){
+										try{
+											complex_data = true;
+											var data_json = JSON.parse(text);
+											for(nkey in data_json){
+												var aux_text = data_json[nkey];
+												if(aux_text.length > 45){
+													aux_text = aux_text.substring(0,45) + "...";
+												}
+												if (!aux_text.toString().startsWith('http')) {
+													feature_fields += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
+													feature_fields2 += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
+												} else {
+													feature_fields += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\"><a href=\"" + data_json[nkey] + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
+													feature_fields2 += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\"><a href=\"" + data_json[nkey] + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
+												}
+											}
+										}catch(err){
+											complex_data = false;
+										}
 									}
-									var time_format = /^([0-9]{2}):([0-9]{2}):([0-9]{2})(.[0-9]{3})?Z$/i;
-									if(time_format.test(text)){
-										var match = time_format.exec(text);
-										aux_text = match[3]+":"+match[2]+":"+match[1];
+	
+									if(!complex_data){
+										var aux_text = text;
+										var datetime_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(.[0-9]{3})?Z$/i;
+										if(datetime_format.test(text)){
+											var match = datetime_format.exec(text);
+											aux_text = match[3]+"/"+match[2]+"/"+match[1]+" "+match[4]+":"+match[5]+":"+match[6];
+											if(match.length > 7){
+												//aux_text += match[7];
+											}
+										}
+										var date_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})Z$/i;
+										if(date_format.test(text)){
+											var match = date_format.exec(text);
+											aux_text = match[3]+"/"+match[2]+"/"+match[1];
+										}
+										var time_format = /^([0-9]{2}):([0-9]{2}):([0-9]{2})(.[0-9]{3})?Z$/i;
+										if(time_format.test(text)){
+											var match = time_format.exec(text);
+											aux_text = match[3]+":"+match[2]+":"+match[1];
+										}
+										if(text.length > 45){
+											aux_text = text.substring(0,45) + "...";
+										}
+										if (!text.toString().startsWith('http')) {
+											feature_fields += "<span>" + aux_text + "</span><div style=\"clear:both\"></div>";
+											feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
+										} else {
+											feature_fields += "<span><a href=\"" + text + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">" + aux_text + "</a></span><div style=\"clear:both\"></div>";
+											feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\"><a href=\"" + text + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
+										}
 									}
-									if(text.length > 45){
-										aux_text = text.substring(0,45) + "...";
-									}
-									if (!text.toString().startsWith('http')) {
-										feature_fields += "<span>" + aux_text + "</span><div style=\"clear:both\"></div>";
-										feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
-									} else {
-										feature_fields += "<span><a href=\"" + text + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">" + aux_text + "</a></span><div style=\"clear:both\"></div>";
-										feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\"><a href=\"" + text + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
-									}
+	
 								}
-
 							}
+	
+							if(feature_added > 0){
+								if(feature_added > 1){
+									feature_id2 += feature_fields2;
+								}
+								else{
+									feature_id2 += feature_fields;
+								}
+								feature_id = feature_id2;
+							}
+	
 						}
-
-						if(feature_added > 0){
-							if(feature_added > 1){
-								feature_id2 += feature_fields2;
-							}
-							else{
-								feature_id2 += feature_fields;
-							}
-							feature_id = feature_id2;
-						}
-
 					}
 				}
-			}
-
-			html += '<li class="item feature-item show_info">';
-			html += 	'<div class="feature-info">';
-			html += 		'<div href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;padding: 5px;">' + feature_id + '</div>';
-			html += 	'</div>';
-			html += '</li>';
-
-			if (features[i].crs) {
-				var newFeature = new ol.Feature();
-		  		var sourceCRS = 'EPSG:' + features[i].crs.properties.name.split('::')[1];
-		  		var projection = new ol.proj.Projection({
-		    		code: sourceCRS,
-		    	});
-		    	ol.proj.addProjection(projection);
-		    	if (features[i].feature.geometry.type == 'Point') {
-		    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates));
-		    	} else if (features[i].feature.geometry.type == 'MultiPoint') {
-		    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates[0]));
-		    	} else if (features[i].feature.geometry.type == 'LineString' || features[i].feature.geometry.type == 'MultiLineString') {
-		    		newFeature.setGeometry(new ol.geom.MultiLineString([features[i].feature.geometry.coordinates[0]]));
-		    	} else if (features[i].feature.geometry.type == 'Polygon' || features[i].feature.geometry.type == 'MultiPolygon') {
-		    		newFeature.setGeometry(new ol.geom.MultiPolygon(features[i].feature.geometry.coordinates));
-		    	}
-		    	newFeature.setProperties(features[i].feature.properties);
-				newFeature.setId(fid);
-
-				newFeature.getGeometry().transform(projection, 'EPSG:3857');
-				this.source.addFeature(newFeature);
+	
+				html += '<li class="item feature-item show_info">';
+				html += 	'<div class="feature-info">';
+				html += 		'<div href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;padding: 5px;">' + feature_id + '</div>';
+				html += 	'</div>';
+				html += '</li>';
+	
+				if (features[i].crs) {
+					var newFeature = new ol.Feature();
+			  		var sourceCRS = 'EPSG:' + features[i].crs.properties.name.split('::')[1];
+			  		var projection = new ol.proj.Projection({
+			    		code: sourceCRS,
+			    	});
+			    	ol.proj.addProjection(projection);
+			    	if (features[i].feature.geometry.type == 'Point') {
+			    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates));
+			    	} else if (features[i].feature.geometry.type == 'MultiPoint') {
+			    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates[0]));
+			    	} else if (features[i].feature.geometry.type == 'LineString' || features[i].feature.geometry.type == 'MultiLineString') {
+			    		newFeature.setGeometry(new ol.geom.MultiLineString([features[i].feature.geometry.coordinates[0]]));
+			    	} else if (features[i].feature.geometry.type == 'Polygon' || features[i].feature.geometry.type == 'MultiPolygon') {
+			    		newFeature.setGeometry(new ol.geom.MultiPolygon(features[i].feature.geometry.coordinates));
+			    	}
+			    	newFeature.setProperties(features[i].feature.properties);
+					newFeature.setId(fid);
+	
+					newFeature.getGeometry().transform(projection, 'EPSG:3857');
+					this.source.addFeature(newFeature);
+				}
+			} else {
+				
 			}
 
 		} else if (features[i].type == 'catastro') {
@@ -980,7 +989,7 @@ getFeatureInfo.prototype.getLayerTitle = function(feature){
 
 	var layers = this.map.getLayers().getArray();
 	for (var i=0; i<layers.length; i++) {
-		if (!layers[i].baselayer && !layers[i].external) {
+		if (!layers[i].baselayer) {
 			if (layers[i].layer_name && layers[i].title) {
 				if (layers[i].layer_name == layerName) {
 					layerTitle = layers[i].title;
