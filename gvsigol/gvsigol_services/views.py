@@ -880,6 +880,10 @@ def layer_add_with_group(request, layergroup_id):
         if 'single_image' in request.POST:
             single_image = True
             cached = False
+            
+        allow_download = False
+        if 'allow_download' in request.POST:
+            allow_download = True
 
         time_enabled = False
         time_field=''
@@ -948,6 +952,7 @@ def layer_add_with_group(request, layergroup_id):
                 newRecord.type = form.cleaned_data['datastore'].type
                 newRecord.visible = is_visible
                 newRecord.queryable = is_queryable
+                newRecord.allow_download = allow_download
                 newRecord.cached = cached
                 newRecord.single_image = single_image
                 newRecord.abstract = abstract
@@ -1107,6 +1112,10 @@ def layer_update(request, layer_id):
         if 'single_image' in request.POST:
             single_image = True
             cached = False
+            
+        allow_download = False
+        if 'allow_download' in request.POST:
+            allow_download = True
 
         time_enabled = False
         time_field=''
@@ -1153,6 +1162,7 @@ def layer_update(request, layer_id):
             layer.cached = cached
             layer.visible = is_visible
             layer.queryable = is_queryable
+            layer.allow_download = allow_download
             layer.single_image = single_image
             layer.layer_group_id = layer_group_id
             layer.time_enabled = time_enabled
@@ -2039,6 +2049,10 @@ def layer_create_with_group(request, layergroup_id):
         if 'single_image' in request.POST:
             single_image = True
             cached = False
+            
+        allow_download = False
+        if 'allow_download' in request.POST:
+            allow_download = True
 
         time_enabled = False
         time_field=''
@@ -2109,6 +2123,7 @@ def layer_create_with_group(request, layergroup_id):
                     type = form.cleaned_data['datastore'].type,
                     visible = is_visible,
                     queryable = is_queryable,
+                    allow_download = allow_download,
                     cached = cached,
                     single_image = single_image
                 )

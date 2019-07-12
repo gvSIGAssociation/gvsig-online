@@ -500,6 +500,7 @@ viewer.core = {
 			wmsLayer.conf = JSON.parse(layerConf.conf);
 			wmsLayer.parentGroup = group.groupName;
 			wmsLayer.external = false;
+			wmsLayer.allow_download = layerConf.allow_download;
 
 			wmsLayer.time_resolution = layerConf.time_resolution;
 
