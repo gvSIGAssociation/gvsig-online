@@ -380,22 +380,81 @@
 			  		var data_id = $(this).attr("data-id");
 			  		var data_name = $(this).attr("data-name");
 			  		var data_title = $(this).attr("data-title");
-			  		var newdata = '<div id="lg_'+data_name+'" data-name="'+data_name+'" data-title="'+data_title+'" data-order="'+500+'" class="box box-default collapsed-box toc-layergroup">'+
-					'<div class="box-header with-border">'+
-					'	<span class="handle" style="margin-right: 20px;"> '+
-					'		<i class="fa fa-ellipsis-v"></i>'+
-					'		<i class="fa fa-ellipsis-v"></i>'+
-					'	</span>'+
-					'	<span class="text">'+data_title+'</span>'+
-					'</div>'+	
-					'</div>';	
-					$("#toc").append(newdata);
+			  		
+			  		if(!$("#selected-base-group-" + data_id).is(':checked')){
+			  			var newdata = '<div id="lg_'+data_name+'" data-name="'+data_name+'" data-title="'+data_title+'" data-order="'+500+'" class="box box-default collapsed-box toc-layergroup">'+
+						'<div class="box-header with-border">'+
+						'	<span class="handle" style="margin-right: 20px;"> '+
+						'		<i class="fa fa-ellipsis-v"></i>'+
+						'		<i class="fa fa-ellipsis-v"></i>'+
+						'	</span>'+
+						'	<span class="text">'+data_title+'</span>'+
+						'</div>'+	
+						'</div>';	
+						$("#toc").append(newdata);	
+			  		}
+			  		
 		  		}else{
 		  			var data_id = $(this).attr("data-id");
 			  		var data_name = $(this).attr("data-name");
 			  		
-					$("#lg_"+data_name).remove()
+			  		if ($("#selected-base-group-" + data_id).is(':checked')) {
+			  			$("#selected-base-group-" + data_id).prop("checked", false);
+			  			$('.basegroup-layers').css("display", "none");
+			  		}
+			  		
+					$("#lg_"+data_name).remove();
 		  		}
+		  	});
+			
+			$('input[name=selected-base-group]').change(function(e) {
+		  		var data_id = $(this).attr("data-id");
+		  		var data_name = $(this).attr("data-name");
+		  		var data_title = $(this).attr("data-title");
+		  		
+		  		$('.baselayers-default').each(function( index ) {
+		  			$(this).prop("checked", false);
+		  		});
+		  		
+				$('.basegroup-layers').css("display", "none");
+				$('#basegroup-layers-' + this.dataset.id).css("display", "block");
+				
+				$('#basegroup-layers-' + this.dataset.id + " li").first().find( "input" ).prop("checked", true);
+				
+				if(!$("#layergroup-" + data_id).is(':checked')){
+		  			$("#layergroup-" + data_id).prop("checked", true);
+		  		}
+				
+				$("#lg_"+data_name).remove();
+				
+				$('.layergroup-input').each(function( index ) {
+					var id = $(this).attr("data-id");
+			  		var name = $(this).attr("data-name");
+			  		var title = $(this).attr("data-title");
+			  		
+			  		if (id != data_id) {
+			  			if ($("#layergroup-" + id).is(':checked')) {
+			  				var exists = false;
+			  				if($("#lg_" + name).length) {
+			  					exists = true;
+			  				}
+			  				if (!exists) {
+			  					var newdata = '<div id="lg_'+name+'" data-name="'+name+'" data-title="'+title+'" data-order="'+500+'" class="box box-default collapsed-box toc-layergroup">'+
+								'<div class="box-header with-border">'+
+								'	<span class="handle" style="margin-right: 20px;"> '+
+								'		<i class="fa fa-ellipsis-v"></i>'+
+								'		<i class="fa fa-ellipsis-v"></i>'+
+								'	</span>'+
+								'	<span class="text">'+title+'</span>'+
+								'</div>'+	
+								'</div>';	
+								$("#toc").append(newdata);	
+			  				}
+			  				
+			  			}
+			  		}
+				});
+				
 		  	});
 		});
 		

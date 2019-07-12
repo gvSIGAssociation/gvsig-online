@@ -1906,9 +1906,11 @@ layerTree.prototype.createOverlayUI = function(layer, group_visible) {
 			ui += '		<i class="fa fa-table"></i> ' + gettext('Attribute table');
 			ui += '	</a>';
 		}
-		ui += '	<a id="show-metadata-' + id + '" class="btn btn-block btn-social btn-custom-tool show-metadata-link">';
-		ui += '		<i class="fa fa-external-link"></i> ' + gettext('Information and downloads');
-		ui += '	</a>';
+		if( layer.allow_download) {
+			ui += '	<a id="show-metadata-' + id + '" class="btn btn-block btn-social btn-custom-tool show-metadata-link">';
+			ui += '		<i class="fa fa-external-link"></i> ' + gettext('Information and downloads');
+			ui += '	</a>';
+		}
 		ui += '	<a id="zoom-to-layer-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool zoom-to-layer">';
 		ui += '		<i class="fa fa-search" aria-hidden="true"></i> ' + gettext('Zoom to layer');
 		ui += '	</a>';
@@ -2011,7 +2013,6 @@ layerTree.prototype.showMetadata = function(layer) {
 			} else {
 				if (!layer.baselayer) {
 					if (layer.wfs_url) {
-						
 						var shapeLink = layer.wfs_url + '?service=WFS&request=GetFeature&version=1.0.0&outputFormat=shape-zip&typeName=' + layer.layer_name;
 						var gmlLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=GML3&typeName=' + layer.layer_name;
 						var csvLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=csv&typeName=' + layer.layer_name;
