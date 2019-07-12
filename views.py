@@ -852,6 +852,7 @@ def project_get_conf(request):
                             layer['visible'] = l.visible
                             layer['type'] = l.type
                             layer['queryable'] = l.queryable
+                            layer['allow_download'] = l.allow_download
     
                             layer['time_enabled'] = l.time_enabled
                             if layer['time_enabled']:
