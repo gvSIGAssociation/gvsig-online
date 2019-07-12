@@ -76,9 +76,9 @@ GEOCODING_PROVIDER = {
         'max_results': 10
     },
     'ide_uy': {
-        'candidates_url': 'http://127.0.0.1:8080/api/v1/geocode/candidates',
-        'find_url': 'http://127.0.0.1:8080/api/v1/geocode/find',
-        'reverse_url': 'http://127.0.0.1:8080/api/v1/geocode/reverse',  
+        'candidates_url': 'http://127.0.0.1:8090/api/v1/geocode/candidates',
+        'find_url': 'http://127.0.0.1:8090/api/v1/geocode/find',
+        'reverse_url': 'http://127.0.0.1:8090/api/v1/geocode/reverse',  
         'max_results': 10,
         'filter': ''
     },
