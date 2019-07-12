@@ -126,6 +126,7 @@ class Layer(models.Model):
     queryable = models.BooleanField(default=True)
     cached = models.BooleanField(default=False)
     single_image = models.BooleanField(default=False)
+    allow_download = models.BooleanField(default=True)
     time_enabled = models.BooleanField(default=False)
     time_enabled_field = models.CharField(max_length=150, null=True, blank=True) 
     time_enabled_endfield = models.CharField(max_length=150, null=True, blank=True) 
