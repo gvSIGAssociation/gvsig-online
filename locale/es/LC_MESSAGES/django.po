@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-07-02 09:28+0200\n"
+"POT-Creation-Date: 2019-07-11 18:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -103,8 +103,8 @@ msgstr "Guía de administración"
 #: templates/documentation.html:68
 msgid ""
 "This guide is intended for platform admin users. It teaches the steps to "
-"carry out the management of users and groups, services, symbology, projects "
-"... "
+"carry out the management of users and groups, services, symbology, "
+"projects ... "
 msgstr ""
 "Esta guía está destinada para los usuarios administradores de la plataforma. "
 "Muestra los pasos para llevar a cabo la gestión de usuarios y grupos, "
@@ -338,7 +338,6 @@ msgstr "Buscar grupo de capas..."
 
 #: templates/project_add.html:123 templates/project_update.html.py:138
 #: templates/project_update.html:140
-#| msgid "User groups"
 msgid "Base group"
 msgstr "Grupos base"
 
@@ -380,8 +379,8 @@ msgstr "Es necesario guardar el proyecto primero, ¿Desea continuar?"
 
 #: templates/project_add.html:284 templates/project_list.html.py:70
 #: templates/project_update.html:315 templates/shared_view_list.html.py:55
-#: templates/viewer.html:240 templates/viewer.html.py:265
-#: templates/viewer_compress.html:240 templates/viewer_compress.html.py:266
+#: templates/viewer.html:265 templates/viewer_compress.html.py:240
+#: templates/viewer_compress.html:266
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -532,6 +531,11 @@ msgstr "Detalles"
 msgid "Temporary"
 msgstr "Visualizar datos históricos"
 
+#: templates/viewer.html:240 templates/viewer.html.py:508
+#: templates/viewer_compress.html:479
+msgid "Close"
+msgstr "Cerrar"
+
 #: templates/viewer.html:259 templates/viewer_compress.html.py:260
 msgid "End edition"
 msgstr "Finalizar edición"
@@ -543,10 +547,6 @@ msgstr "Los cambios que no se hayan salvado se perdarán. ¿Continuar?"
 #: templates/viewer.html:282 templates/viewer_compress.html.py:283
 msgid "Error loading layers"
 msgstr "Error cargando capas"
-
-#: templates/viewer.html:508 templates/viewer_compress.html.py:479
-msgid "Close"
-msgstr "Cerrar"
 
 #: utils.py:444
 msgid "New user account"
@@ -641,7 +641,6 @@ msgid "Allows you to share the view in its current state"
 msgstr "Permite compartir la vista en su estado actual"
 
 #: views.py:224
-#| msgid "Select image"
 msgid "Select feature"
 msgstr "Seleccionar elemento"
 
@@ -668,7 +667,6 @@ msgid "Project name already exists"
 msgstr "El nombre del proyecto ya existe"
 
 #: views.py:1199 views.py:1201
-#| msgid "Shared views"
 msgid "Shared view"
 msgstr "Vista compartida"
 
