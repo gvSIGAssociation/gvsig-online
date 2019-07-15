@@ -454,6 +454,11 @@ getFeatureInfo.prototype.showInfo = function(features){
 	var srs = $("#custom-mouse-position-projection").val();
 	var unit =  $('#custom-mouse-position-projection option:selected').attr('data-attr');
 
+	var aux = ol.proj.get(srs)
+	if(aux == null){
+		srs = "EPSG:4326";
+		unit = "degrees"
+	}
 	var wgs84 = ol.proj.transform(self.mapCoordinates, 'EPSG:3857', srs)
 
 	var coord_1 = wgs84[1].toFixed(5).replace(/0{0,2}$/, "");
