@@ -281,10 +281,10 @@ selectFeature.prototype.clickHandler = function(evt, isArea) {
 			if(evt.coordinate.length == 2){
 				var distance = this.distance;
 				var pixel_low = [evt.pixel[0]-distance, evt.pixel[1]+distance];
-				var point_low = map.getCoordinateFromPixel(pixel_low);
+				var point_low = self.map.getCoordinateFromPixel(pixel_low);
 
 				var pixel_high = [evt.pixel[0]+distance, evt.pixel[1]-distance];
-				var point_high = map.getCoordinateFromPixel(pixel_high);
+				var point_high = self.map.getCoordinateFromPixel(pixel_high);
 
 //				var x = coordinate[0];
 //				var y = coordinate[1];
