@@ -3275,7 +3275,7 @@ table.text-center th {
     padding-left: 40px;
 }
 
- 
+
 .btn-social {
   position: relative;
   padding-left: 44px;
@@ -4750,7 +4750,7 @@ table.text-center th {
 }
 
 table.dataTable thead th span.subname, table.dataTable tfoot th span.subname{
-    font-weight: normal; 
+    font-weight: normal;
 }
 
 .searchable-list-box .pagination li {
@@ -4774,11 +4774,11 @@ table.dataTable thead th span.subname, table.dataTable tfoot th span.subname{
 }
 
 .products-list > .item.feature-item:hover{
-	background: #eee; 
+	background: #eee;
 }
 
 .product-list-in-box > .item.feature-item{
-	border-bottom: 1px solid #ddd; 
+	border-bottom: 1px solid #ddd;
 }
 
 .product-list-in-box > .item.feature-item.show_info{
@@ -4800,9 +4800,9 @@ table.dataTable thead th span.subname, table.dataTable tfoot th span.subname{
 	background-color: #eee;
 }
 
-.nav-tabs-custom > .nav-tabs > li.active.excel-tab > a, 
+.nav-tabs-custom > .nav-tabs > li.active.excel-tab > a,
 .nav-tabs-custom > .nav-tabs > li.active.excel-tab:hover > a,
-.nav-tabs-custom > .nav-tabs > li.active.csv-tab > a, 
+.nav-tabs-custom > .nav-tabs > li.active.csv-tab > a,
 .nav-tabs-custom > .nav-tabs > li.active.csv-tab:hover > a  {
     background-color: #eee;
 }
@@ -4926,8 +4926,8 @@ span.temporal-buttons.temporal-buttons-disabled {
 }
 
 input.temporary-check[type=checkbox]{
-	margin: 20px 10px 20px 20px;	
-}	
+	margin: 20px 10px 20px 20px;
+}
 
 .temporary-body{
 	display:none;
@@ -5023,7 +5023,7 @@ input.temporary-check[type=checkbox]{
 .item-group-div{
 	background-color: #eee;
 	border-top: 1px solid #ccc;
-	border-bottom: 1px solid #ccc;	
+	border-bottom: 1px solid #ccc;
 }
 
 .li-item{
@@ -5069,4 +5069,20 @@ input.temporary-check[type=checkbox]{
     padding: 2px 20px;
 }
 
+#select-buffer-radius {
+	margin-right: 52px;
+    float: left;
+    height: 25px;
+}
+
+#select-buffer-button {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    color:white;
+    background-color: #3155a6;
+    float: right;
+    padding: 2px 5px;
+    border-radius: 3px;
+    position: relative;
+    top: -25px;
+}
 
