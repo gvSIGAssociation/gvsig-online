@@ -196,7 +196,7 @@ viewer.core = {
 				} else {
 					this._loadInternalLayer(layerConf, group, k);
 				}
-				
+
 			}
 		}
     	this._loadLayerGroups();
@@ -209,7 +209,7 @@ viewer.core = {
 
     _loadExternalLayer: function(externalLayer, group, index) {
 	    var self = this;
-	    
+
 	    var visible = false;
 	    var baselayer = false;
 	    if (externalLayer['baselayer']) {
@@ -221,10 +221,10 @@ viewer.core = {
 	    	visible = externalLayer['visible'];
 	    }
 	    if(group.visible){ visible = false; }
-	    
+
 	    var layerId = this._nextLayerId();
 	    externalLayer.id = layerId;
-	    
+
     	if (externalLayer['type'] == 'WMS') {
     		/*var url = externalLayer['url'];
     		var layersParam = externalLayer['layers'];
@@ -263,7 +263,7 @@ viewer.core = {
 			wmsLayer.on('change:visible', function(){
 				self.legend.reloadLegend();
 			});
-			
+
 			this.map.addLayer(wmsLayer);
 		}
     	/*if (externalLayer['type'] == 'WMTS') {
@@ -301,7 +301,7 @@ viewer.core = {
 	    				ignLayer3.external = true;
 	    				self.map.addLayer(ignLayer3);
 	    			}
-	    			
+
 	    		} catch(err){
 	    			console.log("error loading wmts '" + externalLayer['url']+"':" + err)
 	    		}
@@ -413,7 +413,7 @@ viewer.core = {
 
 	_loadInternalLayer: function(internalLayer, group) {
 		var self = this;
-		
+
 		var layerConf = internalLayer;
 		var layerId = this._nextLayerId();
 		layerConf.id = layerId;
@@ -422,7 +422,7 @@ viewer.core = {
 			url = layerConf.cache_url;
 		}
 		var wmsLayer = null;
-		
+
 		var visible = false;
 	    var baselayer = false;
 	    if (internalLayer['baselayer']) {
@@ -634,7 +634,9 @@ viewer.core = {
 		}
 		if (this.ifToolInConf('gvsigol_tool_selectfeature')) {
 			this.tools.push(new selectFeature(this.map, this));
+			this.tools.push(new selectFeatureByBuffer(this.map, this));
 		}
+
 
 		this.tools.push(new cleanMap(this.map, this));
 
