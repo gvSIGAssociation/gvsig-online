@@ -353,7 +353,7 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 					evt.coordinate,
 					viewResolution,
 					this.map.getView().getProjection().getCode(),
-					{'INFO_FORMAT': 'application/geojson', 'FEATURE_COUNT': '100'}
+					{'INFO_FORMAT': 'application/json', 'FEATURE_COUNT': '100'}
 				);
 			}
 
