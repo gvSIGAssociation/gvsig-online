@@ -28,7 +28,6 @@ from cartociudad import Cartociudad
 from nominatim import Nominatim 
 from ide_uy import IdeUY
 import json, ast
-from timeit import default_timer as timer
 
 
 class Geocoder():
@@ -71,7 +70,6 @@ class Geocoder():
           
     def search_candidates(self, query):
         suggestions = []
-        start = timer();
         for geocoder_types in self.geocoders:
             for geocoder_type in geocoder_types:
                 geocoder = geocoder_types[geocoder_type]
@@ -85,8 +83,6 @@ class Geocoder():
             "query": query,
             "suggestions": suggestions
         }
-        stop = timer()
-        print('search_candidates:' + query + ':' + str(stop-start))
         return response
     
     
