@@ -26,7 +26,6 @@ import settings
 import urllib2
 import json, requests, ast
 from urlparse import urlparse
-from timeit import default_timer as timer
     
 class IdeUY():
     
@@ -54,7 +53,6 @@ class IdeUY():
         www.cartociudad.es/geocoder/api/geocoder/candidatesJsonp?q=blasco ibañez&limit=10     
         http://127.0.0.1:8080/api/v1/geocode/candidates?q=ordo%C3%B1ez canelones&limit=10   
         '''
-        start = timer()
         params = {
             'q': query,
             'limit': self.urls['max_results']
@@ -70,8 +68,6 @@ class IdeUY():
                 json_result['category'] = provider.category
                 json_result['image'] = str(provider.image)
             
-        stop = timer()
-        print(stop-start)
         return json_results
     
     

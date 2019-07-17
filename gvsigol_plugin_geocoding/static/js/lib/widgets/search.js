@@ -414,18 +414,18 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 					if(address.address && (address.address.trim() != 0)){
 						callejero = callejero + address.address;
 					}
-					if(address.portalNumber && (address.portalNumber != 0)){
-						callejero = callejero + " " + address.portalNumber;
-					}
-					if(address.localidad && (address.localidad.trim() != 0)){
-						if (callejero.trim() != 0)
-							callejero = callejero + ", " + address.localidad;
-						else
-							callejero = address.localidad;
-					}
-					if(address.departamento && (address.departamento.trim() != 0)){
-						callejero = callejero + " (" + address.departamento + ")";
-					}					
+//					if(address.portalNumber && (address.portalNumber != 0)){
+//						callejero = callejero + " " + address.portalNumber;
+//					}
+//					if(address.localidad && (address.localidad.trim() != 0)){
+//						if (callejero.trim() != 0)
+//							callejero = callejero + ", " + address.localidad;
+//						else
+//							callejero = address.localidad;
+//					}
+//					if(address.departamento && (address.departamento.trim() != 0)){
+//						callejero = callejero + " (" + address.departamento + ")";
+//					}					
 					this.popup.show(coordinate, '<div><p>' + callejero + '</p></div>');					
 				}
 				else
