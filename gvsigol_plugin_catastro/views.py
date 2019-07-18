@@ -143,33 +143,42 @@ def get_rc_info(request):
 
         return HttpResponse(response, content_type='plain/html')
 
+
+def get_rc_polygon(ref_catastral, srs='EPSG::4326'):
+
+    catastral_url = 'http://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx?service=wfs&version=2&request=getfeature&STOREDQUERIE_ID=GetParcel&refcat='+ref_catastral+'&srsname='+srs
+    r = requests.get(url = catastral_url, params = {})
+    tree = ElementTree.fromstring(r.content)
+    features = []
+
+    prefix3 = '{http://www.opengis.net/gml/3.2}'
+    poslist = tree.findall(".//"+ prefix3 + "posList")
+
+    features = []
+    for points in poslist:
+        dimension = points.attrib['srsDimension']
+        count = points.attrib['srsDimension']
+
+        feature = {
+            'coords' : points.text,
+            'srs': srs.replace('::', ':'),
+            'dimension': dimension,
+            'count': count
+        }
+
+        features.append(feature)
+
+    return features
+
+
+
 @csrf_exempt
 def get_referencia_catastral_polygon(request):
     if request.method == 'POST':
         ref_catastral = request.POST.get('ref_catastral').lstrip()
         srs='EPSG::4326'
 
-        catastral_url = 'http://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx?service=wfs&version=2&request=getfeature&STOREDQUERIE_ID=GetParcel&refcat='+ref_catastral+'&srsname='+srs
-        r = requests.get(url = catastral_url, params = {})
-        tree = ElementTree.fromstring(r.content)
-        features = []
-
-        prefix3 = '{http://www.opengis.net/gml/3.2}'
-        poslist = tree.findall(".//"+ prefix3 + "posList")
-
-        features = []
-        for points in poslist:
-            dimension = points.attrib['srsDimension']
-            count = points.attrib['srsDimension']
-
-            feature = {
-                'coords' : points.text,
-                'srs': srs.replace('::', ':'),
-                'dimension': dimension,
-                'count': count
-            }
-
-            features.append(feature)
+        features = get_rc_polygon(ref_catastral, srs)
 
         response = {
             'featureCollection': features
