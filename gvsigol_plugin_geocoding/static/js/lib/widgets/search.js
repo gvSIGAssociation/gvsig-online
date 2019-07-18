@@ -232,7 +232,9 @@ search.prototype.initUI = function() {
 								success	:function(response){
 									self.locate(response, 'EPSG:4258', false);
 								},
-								error: function(){}
+								error: function(xhr, status, error) {
+									  console.err(xhr.responseText);
+								}
 							});
 						}
 					});
@@ -310,7 +312,9 @@ search.prototype.initUI = function() {
 								success	:function(response){
 									self.locate(response, 'EPSG:4326', false);
 								},
-								error: function(){}
+								error: function(xhr, status, error) {
+									  console.err(xhr.responseText);
+								}
 							});
 						}
 					});
@@ -326,7 +330,9 @@ search.prototype.initUI = function() {
 //				});
 			}
 		},
-		error: function(){}
+		error: function(xhr, status, error) {
+			  console.err(xhr.responseText);
+		}
 	});
 
 	$('#autocomplete').autocomplete({
@@ -372,7 +378,9 @@ search.prototype.initUI = function() {
 						self.locate(response.address, 'EPSG:4258', true);
 					}
 				},
-				error: function(){}
+				error: function(xhr, status, error) {
+					  console.err(xhr.responseText);
+				}
 			});
 		}
 

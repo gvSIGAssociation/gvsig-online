@@ -77,14 +77,20 @@ class IdeUY():
         http://127.0.0.1:8080/api/v1/geocode/find?type=calle&nomvia=YAGUARON&departamento=MONTEVIDEO&localidad=MONTEVIDEO
         '''
         address = json.loads(address_str)
+        typeSearch = "calle"
+        inmueble = address['address[inmueble]'] 
+        if (inmueble != ''):
+            typeSearch = "inmueble"
+        
         
         params = {}
         params = {
-            'type': "calle",
+            'type': typeSearch,
             'nomvia': address['address[nomVia]'],
             'source': 'ide_uy',
             'localidad': address['address[localidad]'],
-            'departamento': address['address[departamento]']
+            'departamento': address['address[departamento]'],
+            'inmueble': inmueble
         }
         if ('0' != address['address[portalNumber]']):
             params['portal'] = address['address[portalNumber]']
