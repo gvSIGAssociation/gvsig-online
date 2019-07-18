@@ -115,7 +115,7 @@ class ExportToDatabaseView(FilemanagerMixin, TemplateView):
                 return redirect("/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path'))
                 
             except Exception as exc:
-                request.session['message'] = _('Server error')
+                request.session['message'] = _('Server error') +  ":" + str(exc)
                 return redirect("/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path'))
         else:
             request.session['message'] = _('You must fill in all fields')
