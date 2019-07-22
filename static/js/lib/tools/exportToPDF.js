@@ -30,7 +30,17 @@ var exportToPDF = function(conf, map) {
 	
 	this.id = "export-to-pdf";
 	
-	this.$button = $("#export-to-pdf");
+	var button = document.createElement('button');
+	button.setAttribute("id", this.id);
+	button.setAttribute("class", "toolbar-button");
+	button.setAttribute("title", gettext('Export to PDF'));
+	var icon = document.createElement('i');
+	icon.setAttribute("class", "fa fa-file-pdf-o");
+	button.appendChild(icon);
+	
+	this.$button = $(button);
+	
+	$('#toolbar').append(button);
 
 	var this_ = this;
   
