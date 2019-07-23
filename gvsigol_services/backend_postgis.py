@@ -403,6 +403,10 @@ class Introspect:
 
         return rows
 
+    def custom_no_return_query(self, query):
+        self.cursor.execute(query)
+
+
     def set_transaction(self, schema, table_name):
         query = "BEGIN;"
         self.cursor.execute(query)
