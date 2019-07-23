@@ -263,7 +263,11 @@ def project_add(request):
 
     if request.method == 'POST':
         name = request.POST.get('project-name')
-        title = request.POST.get('project-title')
+
+        name = re.sub(r'[^a-zA-Z0-9 ]',r'',name) #for remove all characters
+        name = re.sub(' ','',name)
+
+                title = request.POST.get('project-title')
         description = request.POST.get('project-description')
         latitude = request.POST.get('center-lat')
         longitude = request.POST.get('center-lon')
@@ -535,8 +539,11 @@ def project_update(request, pid):
         for alg in assigned_layergroups:
             layergroup = LayerGroup.objects.get(id=alg)
             baselayer_group = False
-            if alg == int(selected_base_group):
-                baselayer_group = True
+            try:
+                if alg == int(selected_base_group):
+                    baselayer_group = True
+            except:
+                print 'ERROR: selected_base_group is not defined'
             project_layergroup = ProjectLayerGroup(
                 project = project,
                 layer_group = layergroup,
