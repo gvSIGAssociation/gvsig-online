@@ -36,6 +36,7 @@ var selectFeatureByBuffer = function(map, viewer) {
 	this.selectedFeatures = [];
 	this.interaction = null;
 	this.interaction_dragBox = null;
+	this.circleFeature = null;
 
 	var button = document.createElement('button');
 	button.setAttribute("id", this.id);
@@ -179,21 +180,24 @@ selectFeatureByBuffer.prototype.showPopup =function(evt) {
 
 
 	var circle = new ol.geom.Circle(self.mapCoordinates, parseInt(self.distance));
-    var circleFeature = new ol.Feature(circle);
+    self.circleFeature = new ol.Feature(circle);
     self.source.clear();
-    self.source.addFeature(circleFeature);
+    self.source.addFeature(self.circleFeature);
 
 	self.map.getView().setCenter(self.mapCoordinates);
 	$('#select-buffer-radius').change(function(){
 		self.distance = $(this).val();
 		var circle = new ol.geom.Circle(self.mapCoordinates, parseInt(self.distance));
-        var circleFeature = new ol.Feature(circle);
+        self.circleFeature = new ol.Feature(circle);
 
         self.source.clear();
-        self.source.addFeature(circleFeature);
+        self.source.addFeature(self.circleFeature);
 	});
 	$('#select-buffer-button').click(function(){
-		alert("Selecciono!");
+		if(self.circleFeature != null){
+			var polygon_geom = ol.geom.Polygon.fromCircle(self.circleFeature.getGeometry(), 16)
+			self.clickHandler(polygon_geom.getCoordinates(), true);
+		}
 		self.source.clear();
 	});
 
@@ -286,7 +290,7 @@ selectFeatureByBuffer.prototype.getFeatureGeometryName = function(layer) {
  * @param {ol.MapBrowserEvent} evt
  */
 
-selectFeatureByBuffer.prototype.clickHandler = function(evt, isArea) {
+selectFeatureByBuffer.prototype.clickHandler = function(coords, isArea) {
 
 //	$("body").overlay();
 //	$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
@@ -295,7 +299,7 @@ selectFeatureByBuffer.prototype.clickHandler = function(evt, isArea) {
 	var self = this;
 	this.showFirst = true;
 
-	this.mapCoordinates = evt.coordinate;
+
 
 	if (this.active) {
 		var layers = this.map.getLayers().getArray();
@@ -332,42 +336,62 @@ selectFeatureByBuffer.prototype.clickHandler = function(evt, isArea) {
 
 		var layers_info = [];
 
+		var coord_str = ""
+		for(var j=0; j<coords[0].length; j++){
+			var coord = coords[0][j];
+			var coor_x = (""+coord[0]).match(/(-)?\d+(\.\d{1,2})?/)
+			var coor_y = (""+coord[1]).match(/(-)?\d+(\.\d{1,2})?/)
+			coord_str += coor_x[0]+','+coor_y[0]+' ';
+		}
+
 		for (var i=0; i<queryLayers.length; i++) {
-
-
 			const qLayer = queryLayers[i];
 
 			url = qLayer.wfs_url + '?service=WFS&' +
-			'version=1.1.0&request=GetFeature&typename=' + qLayer.workspace + ':' + qLayer.layer_name +
+			'version=1.0.0&request=GetFeature&typename=' + qLayer.workspace + ':' + qLayer.layer_name +
 			'&outputFormat=json&srsName=' + this.map.getView().getProjection().getCode();
 
-			if(evt.coordinate.length == 2){
-				var distance = this.distance;
-				var pixel_low = [evt.pixel[0]-distance, evt.pixel[1]+distance];
-				var point_low = self.map.getCoordinateFromPixel(pixel_low);
-
-				var pixel_high = [evt.pixel[0]+distance, evt.pixel[1]-distance];
-				var point_high = self.map.getCoordinateFromPixel(pixel_high);
-
-//				var x = coordinate[0];
-//				var y = coordinate[1];
+//			if(evt.coordinate.length == 2){
+//				var distance = this.distance;
+//				var pixel_low = [evt.pixel[0]-distance, evt.pixel[1]+distance];
+//				var point_low = self.map.getCoordinateFromPixel(pixel_low);
 //
-//				var extent = [x-distance, y-distance, x+distance, y+distance];
-//				evt.coordinate = extent;
-				evt.coordinate = point_low.concat(point_high)
-			}
-
+//				var pixel_high = [evt.pixel[0]+distance, evt.pixel[1]-distance];
+//				var point_high = self.map.getCoordinateFromPixel(pixel_high);
+//
+////				var x = coordinate[0];
+////				var y = coordinate[1];
+////
+////				var extent = [x-distance, y-distance, x+distance, y+distance];
+////				evt.coordinate = extent;
+//				evt.coordinate = point_low.concat(point_high)
+//			}
+			var geometryName = self.getFeatureGeometryName(qLayer);
 			var href = new URL(url);
-			href.searchParams.set('BBOX', evt.coordinate.join()+",urn:ogc:def:crs:EPSG:3857");
+			var shape = '<Filter xmlns="http://www.opengis.net/owc" xmlns:gml="http://www.opengis.net/gml">'+
+				'<Intersects>'+
+					'<PropertyName>'+geometryName+'</PropertyName>'+
+					'<gml:Polygon srsDimension="2" srsName="urn:ogc:def:crs:EPSG::3857">'+
+						'<gml:outerBoundaryIs>'+
+							'<gml:LinearRing>'+
+								'<gml:coordinates>'+coord_str;
+			shape +=			'</gml:coordinates>'+
+							'</gml:LinearRing>'+
+						'</gml:outerBoundaryIs>'+
+					'</gml:Polygon>'+
+				'</Intersects>'+
+			'</Filter>';
+
+			href.searchParams.set('filter', shape);
 			url = href.toString()
 
 			$.ajax({
 				url: url,
 				success: function(response) {
-					var geometryName = self.getFeatureGeometryName(qLayer);
 					var formatGeoJSON = new ol.format.GeoJSON({geometryName: geometryName});
 					var features = formatGeoJSON.readFeatures(response);
 					self.viewer.addSelectedFeaturesSource(qLayer.workspace+":"+qLayer.layer_name, features);
+					if(self.popup) self.popup.hide();
 				},
 				error: function(jqXHR, textStatus) {
 					console.log(textStatus);
@@ -417,6 +441,7 @@ selectFeatureByBuffer.prototype.describeFeatureType = function(layer) {
 selectFeatureByBuffer.prototype.deactivate = function() {
 	this.$button.removeClass('button-active');
 	if (this.source) this.source.clear();
+	this.circleFeature = null;
 	if (this.resultLayer) this.map.removeLayer(this.resultLayer);
 	this.map.un('click', this.showPopup, this);
 	this.active = false;
