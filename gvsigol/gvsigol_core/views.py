@@ -267,7 +267,7 @@ def project_add(request):
         name = re.sub(r'[^a-zA-Z0-9 ]',r'',name) #for remove all characters
         name = re.sub(' ','',name)
 
-                title = request.POST.get('project-title')
+        title = request.POST.get('project-title')
         description = request.POST.get('project-description')
         latitude = request.POST.get('center-lat')
         longitude = request.POST.get('center-lon')
