@@ -84,6 +84,14 @@
 						</datalist>
 					</div>	
 				</div>
+				<div class="row layers-control wms-control wmts-control">		
+					<div class="col-md-12 form-group">
+						<label for="id_infoformat">{% trans "Featureinfo format" %}</label>
+						{{ form.infoformat }}
+						<datalist id="id_infoformat_list">
+						</datalist>
+					</div>	
+				</div>
 				<div class="row layers-control wmts-control">		
 					<div class="col-md-12 form-group">
 						<label for="id_format">{% trans "MatrixSet" %}</label>
@@ -124,6 +132,7 @@
 $().ready(function(){ 
 	var url = "";
 	var format_or = "";
+	var infoformat_or = "";
 	var matrixset = "";
 	var version = "";
 	var layer = "";
@@ -225,6 +234,18 @@ $().ready(function(){
 								$("#id_format").append('<option value="' + layers[i] + '" select>' + layers[i] + '</option>');
 							}else{
 		 						$("#id_format").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
+							}
+						}
+					}
+				 
+				 if('infoformats' in data){
+					 $("#id_infoformat").empty();
+						var layers = data['infoformats'];
+						for(var i=0;i<layers.length; i++){
+		 					if(layers[i] == infoformat_or){
+								$("#id_infoformat").append('<option value="' + layers[i] + '" select>' + layers[i] + '</option>');
+							}else{
+		 						$("#id_infoformat").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
 							}
 						}
 					}
