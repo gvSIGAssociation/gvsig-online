@@ -215,6 +215,7 @@ class ExternalLayerForm(forms.ModelForm):
     layers = forms.ChoiceField(label=_(u'Layers'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
 
     format = forms.ChoiceField(label=_(u'Format'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
+    infoformat = forms.ChoiceField(label=_(u'Featureinfo format'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     matrixset = forms.ChoiceField(label=_(u'Matrixset'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     key = forms.CharField(label=_(u'Apikey'), required=False, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
     

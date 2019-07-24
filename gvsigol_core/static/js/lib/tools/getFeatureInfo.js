@@ -339,6 +339,10 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 		for (var i=0; i<queryLayers.length; i++) {
 			qLayer = queryLayers[i];
 			url = null;
+			var infoFormat = 'application/json';
+			if (qLayer.infoFormat) {
+				infoFormat = qLayer.infoFormat;
+			}
 			if(qLayer.getSource() instanceof ol.source.WMTS){
 				var zoom = map.getView().getZoom();
 				url = self.getWMTSFeatureInfoUrl(
@@ -346,14 +350,14 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 						evt.coordinate,
 						zoom,
 						this.map.getView().getProjection(),
-						{'INFOFORMAT': 'application/json', 'FEATURE_COUNT': '100'}
+						{'INFOFORMAT': infoFormat, 'FEATURE_COUNT': '100'}
 					);
 			}else{
 				url = qLayer.getSource().getGetFeatureInfoUrl(
 					evt.coordinate,
 					viewResolution,
 					this.map.getView().getProjection().getCode(),
-					{'INFO_FORMAT': 'application/json', 'FEATURE_COUNT': '100'}
+					{'INFO_FORMAT': infoFormat, 'FEATURE_COUNT': '100'}
 				);
 			}
 
@@ -404,6 +408,22 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 					  					layer: qLayer
 					  				});
 				  				}
+				  				
+				  			} else if (response.features[k].type == 'plain_or_html') {
+				  				var qLayer = null;
+				  				for (var i=0; i<queryLayers.length; i++) {
+				  					if(response.features[k].query_layer == queryLayers[i].layer_name){
+				  						qLayer =  queryLayers[i]
+				  					}
+				  				}
+				  				if(qLayer != null){
+					  				features.push({
+					  					type: 'plain_or_html',
+					  					text: response.features[k].text,
+					  					layer: qLayer
+					  				});
+				  				}
+				  				
 				  			} else {
 			  					var qLayer = null;
 				  				for (var j=0; j<queryLayers.length; j++) {
@@ -505,165 +525,189 @@ getFeatureInfo.prototype.showInfo = function(features){
 		else{
 			if (features[i].type == 'feature') {
 
-			var fid = features[i].feature.id;
-			var is_first_configured = true;
-			var item_shown = false;
-			var selectedLayer = features[i].layer;
-			
-			if (!selectedLayer.external) {
-				var feature_id = "<a href=\"javascript:void(0)\" class=\"feature-info-label-title\" style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+features[i].layer.title +"."+features[i].feature.feature + "</a>";
-				feature_id += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext('More element info')+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
-				feature_id += 		'<span class="label feature-info-button feature-info-label-resource" title="'+gettext('Multimedia resources')+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><br />';
-				feature_id += "<br />";
-	
-				var language = $("#select-language").val();
-				if (selectedLayer != null) {
-					if (selectedLayer.conf != null) {
-						var fields_trans = selectedLayer.conf;
-						if(fields_trans["fields"]){
-							var fields = fields_trans["fields"];
-							var feature_id2 = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+selectedLayer.title + "</span>";
-							feature_id2 += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext("Attribute details")+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
-							feature_id2 += 		'<span class="label feature-info-button feature-info-label-resource" title="'+gettext("Show resources")+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><div style=\"clear:both; margin-bottom:10px;\"></div>';
-	
-							var feature_added = 0;
-	
-							var feature_fields = "";
-							var feature_fields2 = "";
-							for(var ix=0; ix<fields.length; ix++){
-								if(fields[ix]["infovisible"] != null){
-									item_shown = fields[ix]["infovisible"];
-									if(item_shown){
-										feature_added ++;
-									}
-								}
-								var key = fields[ix]["name"];
-								var key_trans = fields[ix]["title-"+language];
-								if(key_trans.length == 0){
-									key_trans = key;
-								}
-								if(item_shown && key && features[i].feature.properties && (typeof features[i].feature.properties[key] == 'boolean' || features[i].feature.properties[key])){
-									var text = features[i].feature.properties[key];
-	
-									if(typeof features[i].feature.properties[key] == 'boolean' && text == true){
-										text = "<input type='checkbox' checked onclick=\"return false;\">";
-									}else{
-										if(typeof features[i].feature.properties[key] == 'boolean' && text == false){
-											text = "<input type='checkbox' onclick=\"return false;\">";
+				var fid = features[i].feature.id;
+				var is_first_configured = true;
+				var item_shown = false;
+				var selectedLayer = features[i].layer;
+				
+				if (!selectedLayer.external) {
+					var feature_id = "<a href=\"javascript:void(0)\" class=\"feature-info-label-title\" style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+features[i].layer.title +"."+features[i].feature.feature + "</a>";
+					feature_id += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext('More element info')+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
+					feature_id += 		'<span class="label feature-info-button feature-info-label-resource" title="'+gettext('Multimedia resources')+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><br />';
+					feature_id += "<br />";
+		
+					var language = $("#select-language").val();
+					if (selectedLayer != null) {
+						if (selectedLayer.conf != null) {
+							var fields_trans = selectedLayer.conf;
+							if(fields_trans["fields"]){
+								var fields = fields_trans["fields"];
+								var feature_id2 = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+selectedLayer.title + "</span>";
+								feature_id2 += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext("Attribute details")+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
+								feature_id2 += 		'<span class="label feature-info-button feature-info-label-resource" title="'+gettext("Show resources")+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><div style=\"clear:both; margin-bottom:10px;\"></div>';
+		
+								var feature_added = 0;
+		
+								var feature_fields = "";
+								var feature_fields2 = "";
+								for(var ix=0; ix<fields.length; ix++){
+									if(fields[ix]["infovisible"] != null){
+										item_shown = fields[ix]["infovisible"];
+										if(item_shown){
+											feature_added ++;
 										}
 									}
-	
-									var complex_data = false;
-									if(key.startsWith("cd_json_")){
-										try{
-											complex_data = true;
-											var data_json = JSON.parse(text);
-											for(nkey in data_json){
-												var aux_text = data_json[nkey];
-												if(aux_text.length > 45){
-													aux_text = aux_text.substring(0,45) + "...";
-												}
-												if (!aux_text.toString().startsWith('http')) {
-													feature_fields += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
-													feature_fields2 += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
-												} else {
-													feature_fields += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\"><a href=\"" + data_json[nkey] + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
-													feature_fields2 += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\"><a href=\"" + data_json[nkey] + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
-												}
-											}
-										}catch(err){
-											complex_data = false;
-										}
+									var key = fields[ix]["name"];
+									var key_trans = fields[ix]["title-"+language];
+									if(key_trans.length == 0){
+										key_trans = key;
 									}
-	
-									if(!complex_data){
-										var aux_text = text;
-										var datetime_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(.[0-9]{3})?Z$/i;
-										if(datetime_format.test(text)){
-											var match = datetime_format.exec(text);
-											aux_text = match[3]+"/"+match[2]+"/"+match[1]+" "+match[4]+":"+match[5]+":"+match[6];
-											if(match.length > 7){
-												//aux_text += match[7];
+									if(item_shown && key && features[i].feature.properties && (typeof features[i].feature.properties[key] == 'boolean' || features[i].feature.properties[key])){
+										var text = features[i].feature.properties[key];
+		
+										if(typeof features[i].feature.properties[key] == 'boolean' && text == true){
+											text = "<input type='checkbox' checked onclick=\"return false;\">";
+										}else{
+											if(typeof features[i].feature.properties[key] == 'boolean' && text == false){
+												text = "<input type='checkbox' onclick=\"return false;\">";
 											}
 										}
-										var date_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})Z$/i;
-										if(date_format.test(text)){
-											var match = date_format.exec(text);
-											aux_text = match[3]+"/"+match[2]+"/"+match[1];
+		
+										var complex_data = false;
+										if(key.startsWith("cd_json_")){
+											try{
+												complex_data = true;
+												var data_json = JSON.parse(text);
+												for(nkey in data_json){
+													var aux_text = data_json[nkey];
+													if(aux_text.length > 45){
+														aux_text = aux_text.substring(0,45) + "...";
+													}
+													if (!aux_text.toString().startsWith('http')) {
+														feature_fields += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
+														feature_fields2 += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
+													} else {
+														feature_fields += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\"><a href=\"" + data_json[nkey] + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
+														feature_fields2 += "<span  style=\"font-weight:normal;\">" + nkey + "</span><span class=\"pull-right\"><a href=\"" + data_json[nkey] + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
+													}
+												}
+											}catch(err){
+												complex_data = false;
+											}
 										}
-										var time_format = /^([0-9]{2}):([0-9]{2}):([0-9]{2})(.[0-9]{3})?Z$/i;
-										if(time_format.test(text)){
-											var match = time_format.exec(text);
-											aux_text = match[3]+":"+match[2]+":"+match[1];
+		
+										if(!complex_data){
+											var aux_text = text;
+											var datetime_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(.[0-9]{3})?Z$/i;
+											if(datetime_format.test(text)){
+												var match = datetime_format.exec(text);
+												aux_text = match[3]+"/"+match[2]+"/"+match[1]+" "+match[4]+":"+match[5]+":"+match[6];
+												if(match.length > 7){
+													//aux_text += match[7];
+												}
+											}
+											var date_format = /^([0-9]{4})-([0-9]{2})-([0-9]{2})Z$/i;
+											if(date_format.test(text)){
+												var match = date_format.exec(text);
+												aux_text = match[3]+"/"+match[2]+"/"+match[1];
+											}
+											var time_format = /^([0-9]{2}):([0-9]{2}):([0-9]{2})(.[0-9]{3})?Z$/i;
+											if(time_format.test(text)){
+												var match = time_format.exec(text);
+												aux_text = match[3]+":"+match[2]+":"+match[1];
+											}
+											if(text.length > 45){
+												aux_text = text.substring(0,45) + "...";
+											}
+											if (!text.toString().startsWith('http')) {
+												feature_fields += "<span>" + aux_text + "</span><div style=\"clear:both\"></div>";
+												feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
+											} else {
+												feature_fields += "<span><a href=\"" + text + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">" + aux_text + "</a></span><div style=\"clear:both\"></div>";
+												feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\"><a href=\"" + text + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
+											}
 										}
-										if(text.length > 45){
-											aux_text = text.substring(0,45) + "...";
-										}
-										if (!text.toString().startsWith('http')) {
-											feature_fields += "<span>" + aux_text + "</span><div style=\"clear:both\"></div>";
-											feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\">"+ aux_text + "</span><div style=\"clear:both\"></div>";
-										} else {
-											feature_fields += "<span><a href=\"" + text + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">" + aux_text + "</a></span><div style=\"clear:both\"></div>";
-											feature_fields2 += "<span  style=\"font-weight:normal;\">" + key_trans + "</span><span class=\"pull-right\"><a href=\"" + text + "\" style=\"color: #00c0ef !important;\" target=\"_blank\" class=\"product-description\">"+ aux_text + "</a></span><div style=\"clear:both\"></div>";
-										}
+		
 									}
-	
 								}
+		
+								if(feature_added > 0){
+									if(feature_added > 1){
+										feature_id2 += feature_fields2;
+									}
+									else{
+										feature_id2 += feature_fields;
+									}
+									feature_id = feature_id2;
+								}
+		
 							}
-	
-							if(feature_added > 0){
-								if(feature_added > 1){
-									feature_id2 += feature_fields2;
-								}
-								else{
-									feature_id2 += feature_fields;
-								}
-								feature_id = feature_id2;
-							}
-	
 						}
 					}
+		
+					html += '<li class="item feature-item show_info">';
+					html += 	'<div class="feature-info">';
+					html += 		'<div href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;padding: 5px;">' + feature_id + '</div>';
+					html += 	'</div>';
+					html += '</li>';
+		
+					if (features[i].crs) {
+						var newFeature = new ol.Feature();
+				  		var sourceCRS = 'EPSG:' + features[i].crs.properties.name.split('::')[1];
+				  		var projection = new ol.proj.Projection({
+				    		code: sourceCRS,
+				    	});
+				    	ol.proj.addProjection(projection);
+				    	if (features[i].feature.geometry.type == 'Point') {
+				    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates));
+				    	} else if (features[i].feature.geometry.type == 'MultiPoint') {
+				    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates[0]));
+				    	} else if (features[i].feature.geometry.type == 'LineString' || features[i].feature.geometry.type == 'MultiLineString') {
+				    		newFeature.setGeometry(new ol.geom.MultiLineString([features[i].feature.geometry.coordinates[0]]));
+				    	} else if (features[i].feature.geometry.type == 'Polygon' || features[i].feature.geometry.type == 'MultiPolygon') {
+				    		newFeature.setGeometry(new ol.geom.MultiPolygon(features[i].feature.geometry.coordinates));
+				    	}
+				    	newFeature.setProperties(features[i].feature.properties);
+						newFeature.setId(fid);
+		
+						newFeature.getGeometry().transform(projection, 'EPSG:3857');
+						this.source.addFeature(newFeature);
+					}
+				} else {
+					html += '<li class="item feature-item show_info">';
+					html += 	'<div class="feature-info">';
+					html += 		'<div href="javascript:void(0)" data-fid="' + i + '" class="product-title external-item-fid" style="color: #444;padding: 5px;">';
+					html += 			'<a href="javascript:void(0)" class="feature-info-label-title" style="font-weight:bold; color:#0b6bd1; margin:0px 5px;">' + selectedLayer.title + '</a>';
+					html += 			'<div class="feature-buttons" style="margin-right:-10px;">';
+					html += 			'<span class="label feature-info-button feature-info-label-info " title="' + gettext("Attribute details") + '"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
+					html += 		'</div>';
+					html += 		'<br><br>';
+					html += 	'</div>';
+					html += 	'</div>';
+					html += '</li>';
 				}
 	
-				html += '<li class="item feature-item show_info">';
+			} else if (features[i].type == 'catastro') {
+				html += '<li class="item">';
 				html += 	'<div class="feature-info">';
-				html += 		'<div href="javascript:void(0)" data-fid="' + fid + '" class="product-title item-fid" style="color: #444;padding: 5px;">' + feature_id + '</div>';
+				html += 		'Ref. Catastral: <a target="_blank" href="' + features[i].href + '" class="product-title item-fid" style="color: #00c0ef;">' + features[i].text;
 				html += 	'</div>';
 				html += '</li>';
-	
-				if (features[i].crs) {
-					var newFeature = new ol.Feature();
-			  		var sourceCRS = 'EPSG:' + features[i].crs.properties.name.split('::')[1];
-			  		var projection = new ol.proj.Projection({
-			    		code: sourceCRS,
-			    	});
-			    	ol.proj.addProjection(projection);
-			    	if (features[i].feature.geometry.type == 'Point') {
-			    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates));
-			    	} else if (features[i].feature.geometry.type == 'MultiPoint') {
-			    		newFeature.setGeometry(new ol.geom.Point(features[i].feature.geometry.coordinates[0]));
-			    	} else if (features[i].feature.geometry.type == 'LineString' || features[i].feature.geometry.type == 'MultiLineString') {
-			    		newFeature.setGeometry(new ol.geom.MultiLineString([features[i].feature.geometry.coordinates[0]]));
-			    	} else if (features[i].feature.geometry.type == 'Polygon' || features[i].feature.geometry.type == 'MultiPolygon') {
-			    		newFeature.setGeometry(new ol.geom.MultiPolygon(features[i].feature.geometry.coordinates));
-			    	}
-			    	newFeature.setProperties(features[i].feature.properties);
-					newFeature.setId(fid);
-	
-					newFeature.getGeometry().transform(projection, 'EPSG:3857');
-					this.source.addFeature(newFeature);
-				}
-			} else {
 				
+			}  else if (features[i].type == 'plain_or_html') {
+				var selectedLayer = features[i].layer;
+				html += '<li class="item feature-item show_info">';
+				html += 	'<div class="feature-info">';
+				html += 		'<div href="javascript:void(0)" data-fid="' + i + '" class="product-title external-item-fid" style="color: #444;padding: 5px;">';
+				html += 			'<a href="javascript:void(0)" class="feature-info-label-title" style="font-weight:bold; color:#0b6bd1; margin:0px 5px;">' + selectedLayer.title + '</a>';
+				html += 			'<div class="feature-buttons" style="margin-right:-10px;">';
+				html += 			'<span class="label feature-info-button feature-info-label-info " title="' + gettext("Attribute details") + '"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
+				html += 		'</div>';
+				html += 		'<br><br>';
+				html += 	'</div>';
+				html += 	'</div>';
+				html += '</li>';
 			}
-
-		} else if (features[i].type == 'catastro') {
-			html += '<li class="item">';
-			html += 	'<div class="feature-info">';
-			html += 		'Ref. Catastral: <a target="_blank" href="' + features[i].href + '" class="product-title item-fid" style="color: #00c0ef;">' + features[i].text;
-			html += 	'</div>';
-			html += '</li>';
-		}
 		}
 	}
 	html += '</ul>';
@@ -688,6 +732,13 @@ getFeatureInfo.prototype.showInfo = function(features){
 
 	$('.item-fid .feature-info-label-resource').click(function(){
 		self.showMoreInfo(this.parentNode.parentNode.dataset.fid, features, 'resources');
+	});
+	
+	$('.external-item-fid .feature-info-label-title').click(function(){
+		self.externalShowMoreInfo(this.parentNode.dataset.fid, features, 'features');
+	});
+	$('.external-item-fid .feature-info-label-info').click(function(){
+		self.externalShowMoreInfo(this.parentNode.parentNode.dataset.fid, features, 'features');
 	});
 
 	$.overlayout();
@@ -950,6 +1001,90 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 
 	if(tab_opened=='resources'){
 		$('.nav-tabs a[href="#tab_resources_content"]').tab('show');
+	}
+};
+
+/**
+ * TODO
+ */
+getFeatureInfo.prototype.externalShowMoreInfo = function(fid, features, tab_opened){
+	var detailsTab = $('#details-tab');
+	var selectedFeature = null;
+	var selectedLayer = null;
+	for (var i in features) {
+		if (features[i].type == 'feature') {
+			if (fid == i) {
+				selectedFeature = features[i].feature;
+				selectedLayer = features[i].layer;
+			}
+		}
+	}
+
+	if (selectedFeature != null && selectedLayer != null) {
+		if (selectedFeature.type.toLowerCase() == 'feature') {
+			var infoContent = '';
+			infoContent += '<div class="box box-default">';
+			infoContent += 	'<div class="box-header with-border">';
+			infoContent += 		'<span class="text">' + selectedLayer.title + '</span>';
+			infoContent += 	'</div>';
+			infoContent += 	'<div class="box-body" style="padding: 20px;">';
+			infoContent += 		'<ul class="products-list product-list-in-box">';
+			for (var key in selectedFeature.properties) {
+
+				infoContent += '<li class="item">';
+				infoContent += 	'<div class="feature-info">';
+				infoContent +=		'<span class="product-description">' + key + '</span>';
+				var value = selectedFeature.properties[key]
+				if (value != null) {
+					infoContent +=		'<span class="product-title">' + selectedFeature.properties[key] + '</span>';
+				}
+				else {
+					infoContent +=		'<span class="product-title"></span>';
+				}
+				
+				infoContent += 	'</div>';
+				infoContent += '</li>';
+			}
+			infoContent += 		'</ul>';
+			infoContent += 	'</div>';
+			infoContent += '</div>';
+
+			var ui = '';
+			ui += '<div class="nav-tabs-custom">';
+			ui += '<ul class="nav nav-tabs">';
+			ui += 		'<li class="active"><a href="#tab_info_content" data-toggle="tab" aria-expanded="true" style="font-weight: bold;">' + gettext('Feature info') + '</a></li>';
+			ui += '</ul>';
+			ui += '<div class="tab-content">';
+			ui += '<div class="tab-pane active" id="tab_info_content">';
+			ui += infoContent;
+			ui += '</div>';
+			ui += '</div>';
+			ui += '</div>';
+
+			detailsTab.empty();
+			$.gvsigOL.controlSidebar.open();
+			$('.nav-tabs a[href="#details-tab"]').tab('show');
+			detailsTab.append(ui);
+		}
+		
+	} else {
+		var ui = '';
+		ui += '<div class="nav-tabs-custom">';
+		ui += '<ul class="nav nav-tabs">';
+		ui += 		'<li class="active"><a href="#tab_info_content" data-toggle="tab" aria-expanded="true" style="font-weight: bold;">' + gettext('Feature info') + '</a></li>';
+		ui += '</ul>';
+		ui += '<div class="tab-content">';
+		ui += '<div class="tab-pane active" id="tab_info_content">';
+		ui += features[0].text;
+		ui += '</div>';
+		ui += '</div>';
+		ui += '</div>';
+
+		detailsTab.empty();
+		$.gvsigOL.controlSidebar.open();
+		$('.nav-tabs a[href="#details-tab"]').tab('show');
+		detailsTab.append(ui);
+		
 	}
 };
 

@@ -237,10 +237,13 @@ viewer.core = {
 				crossOrigin: 'anonymous',
 				params: {'LAYERS': externalLayer['layers'], 'FORMAT': externalLayer['format'], 'VERSION': externalLayer['version'], 'SRS': 'EPSG:3857'}
 			});
-			wmsSource.once('tileloaderror', function(e){
-				console.log('Error');
-				this.setUrl(externalLayer['cache_url']);
-				this.updateParams({'LAYERS': externalLayer['name'], 'FORMAT': externalLayer['format'], 'VERSION': externalLayer['version'], 'SRS': 'EPSG:3857'});
+			var tileErrorCount = 0;
+			wmsSource.on('tileloaderror', function(e){
+				if (tileErrorCount > 10) {
+					this.setUrl(externalLayer['cache_url']);
+					this.updateParams({'LAYERS': externalLayer['name'], 'FORMAT': externalLayer['format'], 'VERSION': externalLayer['version'], 'SRS': 'EPSG:3857'});
+				}
+				tileErrorCount++;
 			});
 			var wmsLayer = new ol.layer.Tile({
 				id: layerId,
@@ -256,6 +259,7 @@ viewer.core = {
 			wmsLayer.external = true;
 			wmsLayer.layer_name = externalLayer['name'];
 			wmsLayer.setZIndex(parseInt(externalLayer.order));
+			wmsLayer.infoFormat = externalLayer['infoformat'];
 			if (!externalLayer['cached']) {
 				wmsLayer.legend = externalLayer['url'] + '?SERVICE=WMS&VERSION=1.1.1&layer=' + externalLayer['layers'] + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on';
 				wmsLayer.legend_no_auth = externalLayer['url'] + '?SERVICE=WMS&VERSION=1.1.1&layer=' + externalLayer['layers'] + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on';
@@ -344,6 +348,7 @@ viewer.core = {
     	    				});
     	    				ignLayer3.baselayer = true;
     	    				ignLayer3.external = true;
+    	    				ignLayer3.infoFormat = externalLayer['infoformat'];
     	    				self.map.addLayer(ignLayer3);
     	    			}
     	    			
