@@ -62,6 +62,7 @@ import os
 import unicodedata
 from datetime import datetime
 from owslib.wms import WebMapService
+from owslib.util import Authentication
 from owslib.wmts import WebMapTileService
 from lxml import html
 from requests_futures.sessions import FuturesSession
@@ -2562,7 +2563,7 @@ def get_feature_info(request):
                     feat['query_layer'] = query_layer
                     features = []
                     features.append(feat)
-
+    
             else:
                 if resultset.get('response'):
                     try:
@@ -2606,14 +2607,16 @@ def get_feature_info(request):
                                 geojson['features'][i]['layer_name'] = resultset['query_layer']
 
                             features = geojson['features']
+                            
                     except Exception as e:
                         print e.message
-                    #logger.exception("get_feature_info")
-                    #response = req.get(url, verify=False)
-                    #geojson = json.loads(response.text)
-                    #for i in range(0, len(geojson['features'])):
-                    #    geojson['features'][i]['resources'] = []
-                    #features = geojson['features']
+                        feat = {}
+                        feat['type'] = 'plain_or_html'
+                        feat['text'] = resultset.get('response')
+                        feat['query_layer'] = query_layer
+                        features = []
+                        features.append(feat)
+                        
             if features:
                 full_features = full_features + features
 
@@ -3273,6 +3276,7 @@ def external_layer_add(request):
                     params['cache_url'] = server.getCacheEndpoint()
                     params['layers'] = request.POST.get('layers')
                     params['format'] = request.POST.get('format')
+                    params['infoformat'] = request.POST.get('infoformat')
                     
                 if external_layer.type == 'WMTS':
                     params['matrixset'] = request.POST.get('matrixset')
@@ -3358,6 +3362,7 @@ def external_layer_update(request, external_layer_id):
                     params['url'] = request.POST.get('url')
                     params['layers'] = request.POST.get('layers')
                     params['format'] = request.POST.get('format')
+                    params['infoformat'] = request.POST.get('infoformat')
                     
                 if external_layer.type == 'WMTS':
                     params['matrixset'] = request.POST.get('matrixset')
@@ -3444,14 +3449,21 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
             version = WMS_MAX_VERSION
         try:
             print 'Add base layer: ' + url+ ', version: ' + version
-            wms = WebMapService(url, version=version)
+            auth = Authentication(verify=False)
+            wms = WebMapService(url, version=version, auth=auth)
 
             print 'Add base layer type ' + wms.identification.type
             title = wms.identification.title
             matrixsets = []
             layers = list(wms.contents)
-            formats = wms.getOperationByName('GetMap').formatOptions
-            infoformats = wms.getOperationByName('GetFeatureInfo').formatOptions
+            all_formats = wms.getOperationByName('GetMap').formatOptions
+            for f in all_formats:
+                if f == 'image/png' or f == 'image/jpeg':
+                    formats.append(f)
+            all_infoformats = wms.getOperationByName('GetFeatureInfo').formatOptions
+            for i_format in all_infoformats:
+                if i_format == 'text/plain' or i_format == 'text/html' or i_format == 'application/json' or i_format == 'application/geojson':
+                    infoformats.append(i_format)
             lyr = wms.contents.get(layer)
             if not lyr:
                 for capabLyrName in wms.contents:
@@ -3490,10 +3502,12 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                 lyr = wmts.contents.get(layer)
                 for lyr_format in lyr.formats:
                     if not lyr_format in formats:
-                        formats.append(lyr_format)
+                        if lyr_format == 'image/png' or lyr_format == 'image/jpeg':
+                            formats.append(lyr_format)
                 for infoformat in lyr.infoformats:
                     if not infoformat in infoformats:
-                        infoformats.append(infoformat)
+                        if infoformat == 'text/plain' or infoformat == 'text/html' or infoformat == 'application/json' or infoformat == 'application/geojson':
+                            infoformats.append(infoformat)
                 for matrixset in lyr.tilematrixsets:
                     if not matrixset in matrixsets:
                         matrixsets.append(matrixset)
