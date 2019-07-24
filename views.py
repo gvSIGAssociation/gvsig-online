@@ -136,23 +136,12 @@ def login_user(request):
                         if user.is_active:
                             login(request, user)
                             id_solicitud = request.GET.get('id_solicitud')
-                            dni = request.GET.get('dni')
-                            expediente = request.GET.get('expediente')
+                            app = request.GET.get('app')
                             token = request.GET.get('token')
                             next = request.GET.get('next')
-                            if id_solicitud is not None:
-                                response = redirect(request.GET.get('next'))
-                                response['Location'] += '?id_solicitud=' + id_solicitud + '&token=' + token
-                                return response
-
-                            elif dni is not None:
-                                response = redirect(request.GET.get('next'))
-                                response['Location'] += '?dni=' + dni + '&token=' + token
-                                return response
-
-                            elif expediente is not None:
-                                response = redirect(request.GET.get('next'))
-                                response['Location'] += '?expediente=' + expediente + '&token=' + token
+                            if id_solicitud is not None and app is not None:
+                                response = redirect(next)
+                                response['Location'] += '?id_solicitud=' + id_solicitud + '&app=' + app + '&token=' + token
                                 return response
 
                         else:
