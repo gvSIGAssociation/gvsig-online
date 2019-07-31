@@ -233,7 +233,7 @@ search.prototype.initUI = function() {
 									self.locate(response, 'EPSG:4258', false);
 								},
 								error: function(xhr, status, error) {
-									  console.err(xhr.responseText);
+									  console.error(xhr.responseText);
 								}
 							});
 						}
@@ -313,7 +313,7 @@ search.prototype.initUI = function() {
 									self.locate(response, 'EPSG:4326', false);
 								},
 								error: function(xhr, status, error) {
-									  console.err(xhr.responseText);
+									  console.error(xhr.responseText);
 								}
 							});
 						}
@@ -331,7 +331,7 @@ search.prototype.initUI = function() {
 			}
 		},
 		error: function(xhr, status, error) {
-			  console.err(xhr.responseText);
+			  console.error(xhr.responseText);
 		}
 	});
 
@@ -379,7 +379,7 @@ search.prototype.initUI = function() {
 					}
 				},
 				error: function(xhr, status, error) {
-					  console.err(xhr.responseText);
+					  console.error(xhr.responseText);
 				}
 			});
 		}
