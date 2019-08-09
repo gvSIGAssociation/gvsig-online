@@ -35,7 +35,7 @@ var exportToPDF = function(conf, map) {
 	button.setAttribute("class", "toolbar-button");
 	button.setAttribute("title", gettext('Export to PDF'));
 	var icon = document.createElement('i');
-	icon.setAttribute("class", "fa fa-file-pdf-o");
+	icon.setAttribute("class", "fa fa-print");
 	button.appendChild(icon);
 	
 	this.$button = $(button);
