@@ -73,7 +73,7 @@ exportToPDF.prototype.handler = function(e) {
 		var body = '';
 		body += '<div class="row">';
 		body += 	'<div class="col-md-12 form-group">';
-		body += 		'<label for="export-map-title">' + gettext('Map title') + '</label>';
+		body += 		'<label style="background-color: #3c8dbc !important; padding: 10px; border-radius: 5px; color: white; margin-bottom: 15px;" for="export-map-title">' + gettext('Map title') + '</label>';
 		body += 		'<input placeholder="' + gettext('Map title') + '" name="export-map-title" id="export-map-title" type="text" class="form-control">';					
 		body += 	'</div>';
 		body += '</div>';
@@ -83,7 +83,7 @@ exportToPDF.prototype.handler = function(e) {
 		
 		var buttons = '';
 		buttons += '<button id="float-modal-cancel-print" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
-		buttons += '<button id="float-modal-accept-print" type="button" class="btn btn-default">' + gettext('Print') + '</button>';
+		buttons += '<button id="float-modal-accept-print" style="border:none; color: white;background-color: #07579E !important" type="button" class="btn btn-default">' + gettext('Print') + '</button>';
 		
 		$('#float-modal .modal-footer').empty();
 		$('#float-modal .modal-footer').append(buttons);
