@@ -235,13 +235,13 @@ viewer.core = {
 			var wmsSource = new ol.source.TileWMS({
 				url: externalLayer['url'],
 				crossOrigin: 'anonymous',
-				params: {'LAYERS': externalLayer['layers'], 'FORMAT': externalLayer['format'], 'VERSION': externalLayer['version'], 'SRS': 'EPSG:3857'}
+				params: {'LAYERS': externalLayer['layers'], 'FORMAT': externalLayer['format'], 'VERSION': externalLayer['version'], 'SRS': 'EPSG:3857', 'TRANSPARENT': 'TRUE'}
 			});
 			var tileErrorCount = 0;
 			wmsSource.on('tileloaderror', function(e){
 				if (tileErrorCount > 10) {
 					this.setUrl(externalLayer['cache_url']);
-					this.updateParams({'LAYERS': externalLayer['name'], 'FORMAT': externalLayer['format'], 'VERSION': externalLayer['version'], 'SRS': 'EPSG:3857'});
+					this.updateParams({'LAYERS': externalLayer['name'], 'FORMAT': externalLayer['format'], 'VERSION': externalLayer['version'], 'SRS': 'EPSG:3857', 'TRANSPARENT': 'TRUE'});
 				}
 				tileErrorCount++;
 			});
@@ -349,6 +349,7 @@ viewer.core = {
     	    				ignLayer3.baselayer = true;
     	    				ignLayer3.external = true;
     	    				ignLayer3.infoFormat = externalLayer['infoformat'];
+    	    				ignLayer3.setZIndex(parseInt(externalLayer.order));
     	    				self.map.addLayer(ignLayer3);
     	    			}
     	    			
