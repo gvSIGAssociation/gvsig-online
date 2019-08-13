@@ -194,11 +194,6 @@ def get_core_tools(enabled=True):
         'title': _(u'Measure tools'),
         'description': _(u'It allows to measure areas and distances')
     }, {
-        'name': 'gvsigol_tool_export',
-        'checked': enabled,
-        'title': _(u'Export to PDF'),
-        'description': _(u'Exports the current view to PDF')
-    }, {
         'name': 'gvsigol_tool_coordinate',
         'checked': enabled,
         'title': _(u'Search coordinates'),
