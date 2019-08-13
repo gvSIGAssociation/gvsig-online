@@ -623,9 +623,9 @@ viewer.core = {
 			this.tools.push(new measureArea(this.map));
 			this.tools.push(new measureAngle(this.map));
 		}
-		if (this.ifToolInConf('gvsigol_tool_export')) {
+		/*if (this.ifToolInConf('gvsigol_tool_export')) {
 			this.tools.push(new exportToPDF(this.conf, this.map));
-		}
+		}*/
 		if (this.ifToolInConf('gvsigol_tool_location')) {
 			this.tools.push(new geolocation(this.map));
 		}

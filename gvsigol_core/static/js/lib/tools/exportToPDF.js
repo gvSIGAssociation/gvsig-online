@@ -67,6 +67,7 @@ exportToPDF.prototype.deactivable = true;
  * @param {Event} e Browser event.
  */
 exportToPDF.prototype.handler = function(e) {
+	var self = this;
 	e.preventDefault();
 	//if( navigator.userAgent.toLowerCase().indexOf('firefox') > -1 || !this.conf.is_public_project){ 
 		
@@ -76,6 +77,10 @@ exportToPDF.prototype.handler = function(e) {
 		body += 		'<label style="background-color: #3c8dbc !important; padding: 10px; border-radius: 5px; color: white; margin-bottom: 15px;" for="export-map-title">' + gettext('Map title') + '</label>';
 		body += 		'<input placeholder="' + gettext('Map title') + '" name="export-map-title" id="export-map-title" type="text" class="form-control">';					
 		body += 	'</div>';
+		body += '</div>';
+		
+		body += '<div class="row">';
+		body +=     '<div class="col-md-12 form-group" id="previewmap" style="width:600px;height:400px;"></div>';
 		body += '</div>';
 		
 		$('#float-modal .modal-body').empty();
@@ -90,11 +95,24 @@ exportToPDF.prototype.handler = function(e) {
 		
 		$("#float-modal").modal('show');
 		
+		var osm = new ol.layer.Tile({
+    		source: new ol.source.OSM()
+    	});
+		var printMap = new ol.Map({
+	        layers: this.map.getLayers(),
+	        target: 'previewmap',
+	        renderer: 'canvas',
+	        view: new ol.View({
+	            center: self.map.getView().getCenter(),
+	            zoom: self.map.getView().getZoom() - 2
+	        })
+	    });
+		
 		var self = this;	
 		$('#float-modal-accept-print').on('click', function () {
 			var title = $('#export-map-title').val();
 			
-			window.map = self.map;
+			window.map = printMap;
 			window.title = title;
 			window.open('/gvsigonline/core/export/' + self.conf.pid + '/');       
 			window.focus();
