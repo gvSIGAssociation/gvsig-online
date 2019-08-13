@@ -1787,7 +1787,7 @@ def layergroup_add_with_project(request, project_id):
             name = request.POST.get('layergroup_name') + '_' + request.user.username
             if _valid_name_regex.search(name) == None:
                 message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
-                return render_to_response('layergroup_add.html', {'message': message}, context_instance=RequestContext(request))
+                return render_to_response('layergroup_add.html', {'message': message, 'servers': Server.objects.values()}, context_instance=RequestContext(request))
 
             exists = False
             layergroups = LayerGroup.objects.all()
@@ -1836,11 +1836,11 @@ def layergroup_add_with_project(request, project_id):
 
             else:
                 message = _(u'Layer group name already exists')
-                return render_to_response('layergroup_add.html', {'message': message, 'project_id': project_id, 'workspaces': Workspace.objects.values()}, context_instance=RequestContext(request))
+                return render_to_response('layergroup_add.html', {'message': message, 'servers': Server.objects.values(), 'project_id': project_id, 'workspaces': Workspace.objects.values()}, context_instance=RequestContext(request))
 
         else:
             message = _(u'You must enter a name for layer group')
-            return render_to_response('layergroup_add.html', {'message': message, 'project_id': project_id, 'workspaces': Workspace.objects.values()}, context_instance=RequestContext(request))
+            return render_to_response('layergroup_add.html', {'message': message, 'servers': Server.objects.values(), 'project_id': project_id, 'workspaces': Workspace.objects.values()}, context_instance=RequestContext(request))
 
         return redirect('layergroup_list')
 
@@ -1943,7 +1943,7 @@ def layergroup_update(request, lgid):
             if not exists:
                 if _valid_name_regex.search(name) == None:
                     message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
-                    return render_to_response('layergroup_add.html', {'message': message}, context_instance=RequestContext(request))
+                    return render_to_response('layergroup_update.html', {'message': message, 'servers': Server.objects.values()}, context_instance=RequestContext(request))
 
                 layergroup.name = name
                 layergroup.title = title
@@ -1964,7 +1964,7 @@ def layergroup_update(request, lgid):
 
             else:
                 message = _(u'Layer group name already exists')
-                return render_to_response('layergroup_update.html', {'message': message, 'layergroup': layergroup}, context_instance=RequestContext(request))
+                return render_to_response('layergroup_update.html', {'message': message, 'layergroup': layergroup, 'servers': Server.objects.values()}, context_instance=RequestContext(request))
 
     else:
         layergroup = LayerGroup.objects.get(id=int(lgid))
@@ -1974,7 +1974,8 @@ def layergroup_update(request, lgid):
             'lgid': lgid, 
             'layergroup': layergroup, 
             'layers': layers,
-            'workspaces': Workspace.objects.values()
+            'workspaces': Workspace.objects.values(),
+            'servers': Server.objects.values()
         }
 
         return render_to_response('layergroup_update.html', response, context_instance=RequestContext(request))
