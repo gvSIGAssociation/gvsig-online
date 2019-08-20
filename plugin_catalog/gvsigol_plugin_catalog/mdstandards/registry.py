@@ -1,35 +1,55 @@
 # -*- coding: utf-8 -*-
 from lxml import etree as ET
 from builtins import str as text
+from abc import ABCMeta, abstractmethod
+from future.utils import with_metaclass
 
 _registry = []
 _CONFIG = {'DEFAULT_MANAGER': None}
 
-class BaseStandardManager(object):
-    def getcode(self):
+
+class BaseStandardManager(with_metaclass(ABCMeta, object)):
+    def get_code(self):
         """
         A string identifying the metadata standard managed by this class, e.g. "ISO19139:2007"
         """
         pass
     
-    def getpriority(self):
+    def get_priority(self):
         """
         The priority is used to decide which manager should be used to update a metadata record.
-        If several managers are able to update a record (according to the canupdate() method,
+        If several managers are able to update a record (according to the can_update() method,
         then the one with higher priority will be selected.
         """
         return 100
     
-    def getupdaterinstance(self, metadata_record):
+    @abstractmethod
+    def get_updater_instance(self, metadata_record):
         pass
     
-    def getupdater(self, metadata_record):
-        if self.canupdate(metadata_record):
-            return self.getupdaterinstance(metadata_record)
+    def get_updater(self, metadata_record):
+        if self.can_update(metadata_record):
+            return self.get_updater_instance(metadata_record)
         return None
-    def canupdate(self, metadata_record):
-        return False
     
+    @abstractmethod
+    def can_update(self, metadata_record):
+        """
+        Whether this manager is able to update the provided metadata record.
+        Note that a manager might be read/only, so it would be able to extract
+        information from the record but not to update it. 
+        """
+        pass
+    
+    @abstractmethod
+    def can_extract(self, metadata_record):
+        """
+        Whether this manager is able to parse and extract information from
+        the provided metadata record.
+        """
+        pass
+    
+    @abstractmethod
     def create(self, mdtype, mdfields):
         pass
 
@@ -48,7 +68,7 @@ class XmlStandardUpdater(object):
         return ET.tostring(self.tree, encoding=encoding)
 
 def _prioritysorter(item):
-    return item.getpriority()
+    return item.get_priority()
 
 def register(standard_manager, default=False):
     _registry.append(standard_manager)
@@ -56,10 +76,10 @@ def register(standard_manager, default=False):
     if default:
         _CONFIG['DEFAULT_MANAGER'] = standard_manager
 
-def getupdater(metadata_record):
+def get_updater(metadata_record):
     tree = ET.fromstring(metadata_record)
     for manager in _registry:
-        updater = manager.getupdater(tree)
+        updater = manager.get_updater(tree)
         if updater:
             return updater
 
@@ -67,5 +87,5 @@ def create(mdtype, mdfields, mdcode=None):
     if not mdcode:
         return _CONFIG['DEFAULT_MANAGER'].create(mdtype, mdfields)
     for manager in _registry:
-        if manager.getcode() == mdcode:
+        if manager.get_code() == mdcode:
             return manager.create(mdtype, mdfields)

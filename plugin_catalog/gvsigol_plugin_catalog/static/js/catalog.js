@@ -914,6 +914,7 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 		},
 		error: function(jqXHR, textStatus) {
 			console.log(textStatus);
+			console.log(jqXHR);
 			content_code = self.getMetadataEntry(null);
 			$("#catalog_content").html(content_code);
 		}
@@ -974,6 +975,7 @@ CatalogView.prototype.createDetailsPanel = function(id){
 		},
 		error: function(jqXHR, textStatus){
 			console.log(textStatus);
+			console.log(jqXHR);
 		}
 	});
 

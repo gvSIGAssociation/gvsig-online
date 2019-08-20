@@ -29,6 +29,7 @@ from gvsigol_plugin_catalog.mdstandards import registry
 #from gvsigol_plugin_catalog.mdstandards import iso19139_2007
 import logging
 logger = logging.getLogger("gvsigol")
+from xmlutils import getTextFromXMLNode, getXMLNode, getXMLCodeText
 
 class Geonetwork():
     """
@@ -265,28 +266,7 @@ class Geonetwork():
             return True
         raise FailedRequestError(r.status_code, r.content)
     
-    def getTextFromXMLNode(self, tree, xpath_filter, ns):
-        if tree is not None:
-            for item in tree.findall(xpath_filter, ns):
-                if item.text:
-                    return item.text
-        return ''
-
-    def getXMLNode(self, tree, xpath_filter, ns):
-        if tree:
-            aux = tree.findall(xpath_filter, ns)
-            if len(aux) > 0:
-                return aux[0]
-        
-        return None
-    
-    def getXMLCodeText(self, node, attribName='codeListValue', ns={}):
-        if node is not None:
-            if node.text:
-                return node.text
-            return node.get(attribName, '')
-        return ''
-    
+   
     def _getXMLConstraints(self, tree, xpath_filter, ns):
         useLimitations = []
         accessConstraints = []
@@ -297,9 +277,9 @@ class Geonetwork():
                 if useLimitationsNode.text:
                     useLimitations.append(useLimitationsNode.text)
             for accessConstraintsNode in constraintsNode.findall('./gmd:MD_LegalConstraints/gmd:accessConstraints/gmd:MD_RestrictionCode', ns):
-                accessConstraints.append(self.getXMLCodeText(accessConstraintsNode, 'codeListValue', ns))
+                accessConstraints.append(getXMLCodeText(accessConstraintsNode, 'codeListValue', ns))
             for useConstraintsNode in constraintsNode.findall('./gmd:MD_LegalConstraints/gmd:useConstraints/gmd:MD_RestrictionCode', ns):
-                useConstraints.append(self.getXMLCodeText(useConstraintsNode, ns=ns))
+                useConstraints.append(getXMLCodeText(useConstraintsNode, ns=ns))
             for otherConstraintsNode in constraintsNode.findall('./gmd:MD_LegalConstraints/gmd:otherConstraints/gco:CharacterString', ns):
                 if otherConstraintsNode.text:
                     otherConstraints.append(otherConstraintsNode.text)
@@ -312,13 +292,13 @@ class Geonetwork():
     
     def _getResponsibleParty(self, node, ns):
         # TODO: manage mutiplicities (e.g. online resource, phone, etc)
-        individualName = self.getTextFromXMLNode(node, './gmd:individualName/gco:CharacterString/', ns)
-        organisationName = self.getTextFromXMLNode(node, './gmd:organisationName/gco:CharacterString/', ns)
-        roleNode = self.getXMLNode(node, './gmd:role/gco:CharacterString/', ns)
-        role = self.getXMLCodeText(roleNode, ns=ns)
-        email = self.getTextFromXMLNode(node, './gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString/', ns)
-        phone = self.getTextFromXMLNode(node, './gmd:contactInfo/gmd:CI_Contact/gmd:phone/gmd:CI_Telephone/gmd:voice/gco:CharacterString/', ns)
-        url = self.getTextFromXMLNode(node, './gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource/gmd:linkage/gmd:URL/', ns)
+        individualName = getTextFromXMLNode(node, './gmd:individualName/gco:CharacterString/', ns)
+        organisationName = getTextFromXMLNode(node, './gmd:organisationName/gco:CharacterString/', ns)
+        roleNode = getXMLNode(node, './gmd:role/gco:CharacterString/', ns)
+        role = getXMLCodeText(roleNode, ns=ns)
+        email = getTextFromXMLNode(node, './gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString/', ns)
+        phone = getTextFromXMLNode(node, './gmd:contactInfo/gmd:CI_Contact/gmd:phone/gmd:CI_Telephone/gmd:voice/gco:CharacterString/', ns)
+        url = getTextFromXMLNode(node, './gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource/gmd:linkage/gmd:URL/', ns)
         onlineResources = []
         for onlineResourceNode in node.findall('./gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource'):
             onlineResource = self._getOnlineResource(onlineResourceNode, ns)
@@ -333,12 +313,12 @@ class Geonetwork():
             }
         
     def _getOnlineResource(self, node, ns):
-        url = self.getTextFromXMLNode(node, './gmd:linkage/gmd:URL', ns)
-        protocol = self.getTextFromXMLNode(node, './gmd:protocol/gco:CharacterString', ns)
-        name = self.getTextFromXMLNode(node, './gmd:name/gco:CharacterString', ns)
-        description = self.getTextFromXMLNode(node, './gmd:description/gco:CharacterString', ns)
-        applicationProfile = self.getTextFromXMLNode(node, './gmd:applicationProfile/gco:CharacterString', ns)
-        function = self.getTextFromXMLNode(node, './gmd:function/gco:CharacterString', ns)
+        url = getTextFromXMLNode(node, './gmd:linkage/gmd:URL', ns)
+        protocol = getTextFromXMLNode(node, './gmd:protocol/gco:CharacterString', ns)
+        name = getTextFromXMLNode(node, './gmd:name/gco:CharacterString', ns)
+        description = getTextFromXMLNode(node, './gmd:description/gco:CharacterString', ns)
+        applicationProfile = getTextFromXMLNode(node, './gmd:applicationProfile/gco:CharacterString', ns)
+        function = getTextFromXMLNode(node, './gmd:function/gco:CharacterString', ns)
         return {
             'name': name,
             'description': description,
@@ -365,10 +345,10 @@ class Geonetwork():
                 logger.debug(r.text)
                 ns = {'gmd': 'http://www.isotc211.org/2005/gmd', 'gco': 'http://www.isotc211.org/2005/gco'}
                 
-                metadata_id = self.getTextFromXMLNode(tree, './gmd:fileIdentifier/', ns)
-                title = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/', ns)
-                abstract = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/', ns)
-                publish_date = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/', ns)
+                metadata_id = getTextFromXMLNode(tree, './gmd:fileIdentifier/', ns)
+                title = getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/', ns)
+                abstract = getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/', ns)
+                publish_date = getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/', ns)
                 
                 period_start = ''
                 period_end = ''
@@ -389,14 +369,14 @@ class Geonetwork():
                 aux = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialRepresentationType/', ns)
                 if len(aux) > 0:
                     representation_type = aux[0].attrib['codeListValue'] 
-                scale = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/', ns) 
-                srs = self.getTextFromXMLNode(tree, './gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code/', ns)
+                scale = getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/', ns) 
+                srs = getTextFromXMLNode(tree, './gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code/', ns)
                 
                 #https://test.gvsigonline.com/geonetwork/srv/spa/region.getmap.png?mapsrs=EPSG:3857&width=250&background=settings&geomsrs=EPSG:4326&geom=Polygon((-18.1595005217%2043.9729489023,4.96320908311%2043.9729489023,4.96320908311%2025.9993588695,-18.1595005217%2025.9993588695,-18.1595005217%2043.9729489023))
-                coords_w = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:westBoundLongitude/', ns)
-                coords_e = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:eastBoundLongitude/', ns)
-                coords_s = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:southBoundLatitude/', ns)
-                coords_n = self.getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:northBoundLatitude/', ns)
+                coords_w = getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:westBoundLongitude/', ns)
+                coords_e = getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:eastBoundLongitude/', ns)
+                coords_s = getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:southBoundLatitude/', ns)
+                coords_n = getTextFromXMLNode(tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:northBoundLatitude/', ns)
                 
                 image_url = self.service_url + '/srv/spa/region.getmap.png?mapsrs=EPSG:3857&width=250&background=osm&geomsrs=EPSG:4326&geom=Polygon(('+coords_w+' '+coords_s+','+coords_e+' '+coords_s+','+coords_e+' '+coords_n+','+coords_w+' '+coords_n+','+coords_w+' '+coords_s+'))'
                 
@@ -463,7 +443,7 @@ class Geonetwork():
                     if organisation is not None:
                         contact['organisation'] = organisation.text
                     if role is not None:
-                        contact['role'] = self.getXMLCodeText(role)
+                        contact['role'] = getXMLCodeText(role)
                     contactInfoNode = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource', ns)
                     if contactInfoNode is not None:
                         onlineResource = self._getOnlineResource(contactInfoNode, ns)
@@ -477,7 +457,7 @@ class Geonetwork():
                     if organisation is not None:
                         contact['organisation'] = organisation.text
                     if role is not None:
-                        contact['role'] = self.getXMLCodeText(role)
+                        contact['role'] = getXMLCodeText(role)
                     contactInfoNode = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource', ns)
                     if contactInfoNode is not None:
                         onlineResource = self._getOnlineResource(contactInfoNode, ns)
@@ -491,7 +471,7 @@ class Geonetwork():
                     if organisation is not None:
                         contact['organisation'] = organisation.text
                     if role is not None:
-                        contact['role'] = self.getXMLCodeText(role)
+                        contact['role'] = getXMLCodeText(role)
                     contactInfoNode = responsibleParty.find('./gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource', ns)
                     if contactInfoNode is not None:
                         onlineResource = self._getOnlineResource(contactInfoNode, ns)
@@ -557,7 +537,7 @@ class Geonetwork():
             # TODO: we can later generalize this import to call a different module according to the
             # metadata standard of the record to be updated
             
-            updater = registry.getupdater(md_response.content)
+            updater = registry.get_updater(md_response.content)
             return updater.update_all(extent_tuple, layer.thumbnail.url).tostring()
             #return iso19139_2007.update_metadata(md_response.content, extent_tuple, layer.thumbnail.url)
         raise FailedRequestError(md_response.status_code, md_response.content)
@@ -572,6 +552,23 @@ class Geonetwork():
         if layer_info[ds_type]['latLonBoundingBox']['miny'] > layer_info[ds_type]['latLonBoundingBox']['maxy']:
             maxy = "{:f}".format(layer_info[ds_type]['latLonBoundingBox']['miny'] + 1)
         return (minx, miny, maxx, maxy)
+    
+                
+    def get_online_resources(self, record_uuid):
+        """
+        Returns a list of OnlineResource objects, describing the online resources
+        encoded in the provided metadata_record_uuid
+        """
+        url = self.service_url + "/srv/api/0.1/records/" + record_uuid + "/related?type=onlines" # /related?type=onlines&start=1&rows=100
+        headers = {
+            'Accept': 'application/json',
+            'X-XSRF-TOKEN': self.get_csrf_token()
+        }
+              
+        r = self.session.get(url, headers=headers)
+        if r.status_code==200:
+            return r.text
+        raise FailedRequestError(r.status_code, r.content)
 
 class RequestError(Exception):
     def __init__(self, status_code=-1, server_message=""):

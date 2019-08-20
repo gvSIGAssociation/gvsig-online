@@ -15,8 +15,10 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from gvsigol_plugin_catalog.xmlutils import getLocalizedText
 '''
 @author: Javi Rodrigo <jrodrigo@scolab.es>
+@author: Cesar Martinez Izquierdo <cmartinez@scolab.es>
 '''
 from gvsigol_services import signals
 from gvsigol_services import geographic_servers
@@ -27,18 +29,39 @@ from gvsigol_plugin_catalog import api_old as xmlapi_old
 from gvsigol_plugin_catalog import api_new as xmlapi_new
 import logging
 from gvsigol_plugin_catalog.mdstandards import registry
+import xml.etree.ElementTree as ET
+from xmlutils import getTextFromXMLNode
+from django.utils.translation import get_language
 
 logger = logging.getLogger("gvsigol")
 
 class UnsupportedRequestError(Exception):
     pass
 
+
+ONLINE_RES_TYPE_WFS = 'WFS'
+ONLINE_RES_TYPE_WMS = 'WMS'
+ONLINE_RES_TYPE_WCS = 'WCS'
+ONLINE_RES_TYPE_HTTP = 'HTTP'
+ONLINE_RES_TYPE_OTHER = 'OTHER'
+
+class OnlineResource():
+    def __init__(self, res_type, url, protocol, name, desc, app_profile, function):
+        self.res_type = res_type,
+        self.url = url
+        self.protocol = protocol
+        self.name = name
+        self.desc = desc
+        self.app_profile = app_profile
+        self.function = function
+
+
 class Geonetwork():
     def __init__(self, version, service_url, user, password):
-        if version == 'api0.1':
-            self.xmlapi = xmlapi_new.Geonetwork(service_url)
-        else:
+        if version == 'legacy3.2':
             self.xmlapi = xmlapi_old.Geonetwork(service_url + '/srv/eng/')
+        else: # version == 'api0.1':
+            self.xmlapi = xmlapi_new.Geonetwork(service_url)
         self.user = user
         self.password = password
     
@@ -54,6 +77,37 @@ class Geonetwork():
             logger.exception(e);
             print e
             
+            
+    def get_online_resources(self, record_uuid):
+        """
+        Returns a list of OnlineResource objects, describing the online resources
+        encoded in the provided metadata_record
+        """
+        try:
+            online_resources = []
+            if self.xmlapi.gn_auth(self.user, self.password):
+                content = self.xmlapi.get_online_resources(record_uuid)
+                self.xmlapi.gn_unauth()
+                tree = ET.fromstring(content.encode('utf8'))
+                online_resource = OnlineResource()
+                for onlines_node in tree.findall('./related/onlines/item/'):
+                    urlNode = getTextFromXMLNode(onlines_node, './url/')
+                    online_resource.url = getLocalizedText(urlNode)
+                    titleNode = getTextFromXMLNode(onlines_node, './title/')
+                    online_resource.title = getLocalizedText(titleNode)
+                    online_resource.res_type = getTextFromXMLNode(onlines_node, './type/')
+                    online_resource.protocol = getTextFromXMLNode(onlines_node, './protocol/')
+                    descriptionNode = getTextFromXMLNode(onlines_node, './description/')
+                    online_resource.desc = getLocalizedText(descriptionNode)
+                    online_resource.function = getTextFromXMLNode(onlines_node, './function/')
+                    online_resource.app_profile = getTextFromXMLNode(onlines_node, './applicationProfile/')
+                online_resources.append(online_resource)
+        
+        except Exception as e:
+            logger.exception(e);
+            print e
+        return online_resources
+        
     def create_metadata(self, layer, layer_info, ds_type):
         ws = layer.datastore.workspace
         minx, miny, maxx, maxy = self.xmlapi.get_extent(layer_info, ds_type)
@@ -128,8 +182,8 @@ class Geonetwork():
             return False
         
     def layer_created_handler(self, sender, **kwargs):
-        layer = kwargs['layer']
         try:
+            layer = kwargs['layer']
             muuid = self.metadata_insert(layer)
             if muuid:
                 lm = LayerMetadata(layer=layer, metadata_uuid=muuid[0], metadata_id=muuid[1])
@@ -140,8 +194,8 @@ class Geonetwork():
             pass
         
     def layer_updated_handler(self, sender, **kwargs):
-        layer = kwargs['layer']
         try:
+            layer = kwargs['layer']
             lm = LayerMetadata.objects.get(layer=layer)
             
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
@@ -154,15 +208,20 @@ class Geonetwork():
             pass
         
     def layer_deleted_handler(self, sender, **kwargs):
-        layer = kwargs['layer']
         try:
-            lm = LayerMetadata.objects.get(layer=layer)            
+            layer = kwargs['layer']
+            lm = LayerMetadata.objects.get(layer=layer)
             self.metadata_delete(lm)
             lm.delete()
-            
         except Exception as e:
             logger.exception("layer metadata delete failed")
             pass
+
+def connect_signals(geonetwork_service):
+    signals.layer_created.connect(geonetwork_service.layer_created_handler)
+    signals.layer_updated.connect(geonetwork_service.layer_updated_handler)
+    signals.layer_deleted.connect(geonetwork_service.layer_deleted_handler)
+
 
 def initialize():
     try:
@@ -179,6 +238,15 @@ def initialize():
         raise ImproperlyConfigured
 
 geonetwork_service = initialize()
-signals.layer_created.connect(geonetwork_service.layer_created_handler)
-signals.layer_updated.connect(geonetwork_service.layer_updated_handler)
-signals.layer_deleted.connect(geonetwork_service.layer_deleted_handler)
+connect_signals(geonetwork_service)
+
+
+#__geonetwork_service = None
+def get_instance():
+    return geonetwork_service
+    """
+    if __geonetwork_service is None:
+        __geonetwork_service = initialize()
+        connect_signals(__geonetwork_service)
+    return __geonetwork_service
+    """

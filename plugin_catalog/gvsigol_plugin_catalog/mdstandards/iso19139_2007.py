@@ -3,7 +3,16 @@ from lxml import etree as ET
 from builtins import str as text
 from registry import XmlStandardUpdater, BaseStandardManager
 from datetime import datetime
+from django.utils.translation import ugettext as _
 
+
+def define_translations():
+    """
+    Force some strings to be detected by gettext/makemessages
+    """
+    _('author')
+    _('owner')
+    _('Contact')
 
 namespaces = {'gmd': 'http://www.isotc211.org/2005/gmd', 'gco': 'http://www.isotc211.org/2005/gco'}
 
@@ -181,17 +190,14 @@ def create_datset_metadata(mdfields):
     return metadata
 
 class Iso19139_2007Manager(BaseStandardManager):
-    def getcode(self):
+    def get_code(self):
         return 'Iso19139_2007Manager'
 
-    def getupdaterinstance(self, metadata_record):
+    def get_updater_instance(self, metadata_record):
         return Iso19139_2007Updater(metadata_record)
     
-    def canupdate(self, metadata_record):
-        root_qname = ET.QName(metadata_record)
-        if root_qname.localname == 'MD_Metadata' and root_qname.namespace == namespaces['gmd']:
-            return True
-        return False    
+    def can_update(self, metadata_record):
+        return self.can_update(metadata_record)
 
     def create(self, mdtype, mdfields):
         if mdtype == 'dataset':
@@ -199,6 +205,14 @@ class Iso19139_2007Manager(BaseStandardManager):
         elif mdtype == 'service':
             pass # TODO
     
+    def can_extract(self, metadata_record):
+        root_qname = ET.QName(metadata_record)
+        if root_qname.localname == 'MD_Metadata' and root_qname.namespace == namespaces['gmd']:
+            return True
+        return False
+    
+    def get_online_resources(self, metadata_record):
+        return []
 
 def update_extent(geo_bb_elem, extent_tuple):
     minx, miny, maxx, maxy = extent_tuple
