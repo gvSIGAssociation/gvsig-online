@@ -86,6 +86,7 @@ class IdeUY():
         params = {}
         params = {
             'type': typeSearch,
+            'idcalle': address['address[id]'],
             'nomvia': address['address[nomVia]'],
             'source': 'ide_uy',
             'localidad': address['address[localidad]'],
