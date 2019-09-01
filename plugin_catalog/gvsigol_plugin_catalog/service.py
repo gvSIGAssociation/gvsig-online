@@ -200,7 +200,7 @@ class Geonetwork():
             
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
             (ds_type, layer_info) = gs.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
-            if self.xmlapi.gn_auth(self.user, self.password):
+            if self.xmlapi.gn_auth(self.user, self.password) and lm.metadata_uuid:
                 self.xmlapi.gn_update_metadata(lm.metadata_uuid, layer, layer.abstract, layer_info, ds_type)
                 self.xmlapi.gn_unauth()
         except Exception as e:
