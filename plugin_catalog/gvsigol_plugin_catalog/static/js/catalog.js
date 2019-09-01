@@ -389,8 +389,7 @@ CatalogView.prototype.createResourceLink = function(links){
 			content += '		<div style="clear:both"></div>';
 			content += '	</a>';
 			content += '</li>';
-		}else{
-			if(type == "application/zip"){
+		} else if(type == "application/zip"){
 				content += '<li class="catalog-link">';
 				content += '	<a href="'+link[2]+'" target="_blank">';
 				content += '		<i class="fa fa-file-archive-o" aria-hidden="true"></i>';
@@ -399,8 +398,7 @@ CatalogView.prototype.createResourceLink = function(links){
 				content += '		<div style="clear:both"></div>';
 				content += '	</a>';
 				content += '</li>';
-			}else{
-				if(type == "OGC:WFS"){
+		} else if(type == "OGC:WFS"){
 					content += '<li class="catalog-link">';
 					content += '	<a href="'+link[2]+'?service=WFS&version=1.0.0&request=GetFeature&typeName='+link[0]+'&outputFormat=SHAPE-ZIP" target="_blank">';
 					content += '		<i class="fa fa-file-archive-o" aria-hidden="true"></i>';
@@ -409,10 +407,16 @@ CatalogView.prototype.createResourceLink = function(links){
 					content += '		<div style="clear:both"></div>';
 					content += '	</a>';
 					content += '</li>';
-				}
-			}
+		} else if(type == "OGC:WCS"){
+			content += '<li class="catalog-link">';
+			content += '	<a href="'+link[2]+'?service=WCS&version=2.0.0&request=GetCoverage&CoverageId='+link[0]+'" target="_blank">';
+			content += '		<i class="fa fa-file-archive-o" aria-hidden="true"></i>';
+			content += '		<span class="catalog-link-resource"><p>' + link[1] + '<br/><span class="catalog-entry-subtitle">' + link[0] + '</span></p></span>';
+			content += '		<div class="catalog-link-button catalog_content_button">'+gettext("Download")+'</div>';
+			content += '		<div style="clear:both"></div>';
+			content += '	</a>';
+			content += '</li>';
 		}
-
 	}
 	return content;
 }
@@ -557,6 +561,7 @@ CatalogView.prototype._createOLLayer = function(url, name, title, dataId, bbox) 
 	catalogLayer.queryable = true;
 	catalogLayer.title = title;
 	catalogLayer.visible = true;
+	catalogLayer.allow_download = true;
 	catalogLayer.wms_url = url;
 	if (bbox != null && bbox.length>0) {
 		catalogLayer.bboxwgs84 = bbox;		
@@ -694,7 +699,6 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 	var facetsOrder = self.config.facetsOrder;
 	var disabledFacets = self.config.disabledFacets;
 	
-	// FIXME: this should be parametrized from config
 	var url;
 	if (self.config.queryUrl) {
 		url = self.config.queryUrl;
