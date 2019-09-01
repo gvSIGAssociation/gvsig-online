@@ -1955,16 +1955,18 @@ layerTree.prototype.zoomToLayer = function(layer) {
 	if (Array.isArray(layer.bboxwgs84) && layer.bboxwgs84.length==4) { // use extent from metadata if available
 		var extent = ol.proj.transformExtent(layer.bboxwgs84, ol.proj.get('EPSG:4326'), ol.proj.get('EPSG:3857'));
 		self.map.getView().fit(extent, self.map.getSize());
+		return;
 	}
 	
 	var layer_name = layer.layer_name;
 
 	var url = layer.wms_url+'?request=GetCapabilities&service=WMS';
+	console.log(url);
 	var parser = new ol.format.WMSCapabilities();
 	$.ajax(url).then(function(response) {
 		   var result = parser.read(response);
 		   var Layers = result.Capability.Layer.Layer; 
-		   var extent;
+		   var extent = null;
 		   for (var i=0, len = Layers.length; i<len; i++) {
 		     var layerobj = Layers[i];
 		     if (layerobj.Name == layer_name) {
@@ -1972,7 +1974,7 @@ layerTree.prototype.zoomToLayer = function(layer) {
 		         break;
 		     }
 		   }
-		   if((extent[0]==0 && extent[1]==0 && extent[2]==-1 && extent[3]==-1 )||
+		   if((extent===null || extent[0]==0 && extent[1]==0 && extent[2]==-1 && extent[3]==-1 )||
 			   (extent[0]==-1 && extent[1]==-1 && extent[2]==0 && extent[3]==0 )){
 			   return;
 		   }
