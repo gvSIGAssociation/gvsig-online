@@ -153,6 +153,7 @@ class Geonetwork():
                 self.xmlapi.set_metadata_privileges(uuid[0])
                 self.xmlapi.gn_unauth()
                 return uuid
+            logger.error("Error authenticating in catalog")
             return None
         
         except Exception as e:
