@@ -31,6 +31,8 @@ import logging
 logger = logging.getLogger("gvsigol")
 from xmlutils import getTextFromXMLNode, getXMLNode, getXMLCodeText
 
+DEFAULT_TIMEOUT = 5 #seconds
+
 class Geonetwork():
     """
     geonetwork-py is a Python interface to Geonetwork XML API
@@ -55,14 +57,14 @@ class Geonetwork():
         try:
             #URL = 'http://localhost:8080/geonetwork/srv/eng/info?type=me'
             URL = self.service_url + "/srv/eng/info?type=me"
-            r = self.session.post(URL)
+            r = self.session.post(URL, timeout=DEFAULT_TIMEOUT)
             if r.status_code==403:
                 
                 headers = {
                     'X-XSRF-TOKEN': self.get_csrf_token()
                 }
                 
-                r = self.session.post(URL, auth=(user, password), headers=headers)
+                r = self.session.post(URL, auth=(user, password), headers=headers, timeout=DEFAULT_TIMEOUT)
                 if r.status_code==200:
                     return True
                 return False
@@ -88,7 +90,7 @@ class Geonetwork():
             'Accept': 'application/json',
             'X-XSRF-TOKEN': self.get_csrf_token()
         }
-        r = self.session.put(url, data=md_record.encode("UTF-8"), headers=headers)
+        r = self.session.put(url, data=md_record.encode("UTF-8"), headers=headers, timeout=DEFAULT_TIMEOUT)
         
         if r.status_code==201:
             print md_record
@@ -133,7 +135,7 @@ class Geonetwork():
             'X-XSRF-TOKEN': self.get_csrf_token()
         }
         csw_transaction_url = self.service_url + "/srv/eng/csw-publication"
-        csw_response = self.session.post(csw_transaction_url, headers=headers, data=metadata.encode("UTF-8"))
+        csw_response = self.session.post(csw_transaction_url, headers=headers, data=metadata.encode("UTF-8"), timeout=DEFAULT_TIMEOUT)
         if csw_response.status_code==200:
             tree = ET.fromstring(csw_response.text)
             ns = {'csw': 'http://www.opengis.net/cat/csw/2.0.2'}
@@ -170,7 +172,7 @@ class Geonetwork():
         headers = {
             'X-XSRF-TOKEN': self.get_csrf_token()
         }
-        r = self.session.put(url, headers=headers)
+        r = self.session.put(url, headers=headers, timeout=DEFAULT_TIMEOUT)
         if r.status_code==201:
             return True
         else: 
@@ -191,7 +193,7 @@ class Geonetwork():
         response2 = []
         
         url2 = self.service_url + "/srv/api/0.1/operations"
-        r2 = self.session.get(url2, headers=headers)
+        r2 = self.session.get(url2, headers=headers, timeout=DEFAULT_TIMEOUT)
         if r2.status_code==200:
             response2 = json.loads(r2.text)
         
@@ -214,7 +216,7 @@ class Geonetwork():
         
         
         url = self.service_url + "/srv/api/0.1/groups"
-        r = self.session.get(url, headers=headers)
+        r = self.session.get(url, headers=headers, timeout=DEFAULT_TIMEOUT)
         if r.status_code==200:
             response = json.loads(r.text)
             print r.text
@@ -244,7 +246,7 @@ class Geonetwork():
                 'X-XSRF-TOKEN': self.get_csrf_token()
             }
         print privileges
-        r3 = self.session.put(url3, data=json.dumps(privileges), headers=headers)
+        r3 = self.session.put(url3, data=json.dumps(privileges), headers=headers, timeout=DEFAULT_TIMEOUT)
         if r3.status_code==204:
             return True
         else: 
@@ -261,7 +263,7 @@ class Geonetwork():
             'X-XSRF-TOKEN': self.get_csrf_token()
         }
               
-        r = self.session.delete(url, headers=headers)
+        r = self.session.delete(url, headers=headers, timeout=DEFAULT_TIMEOUT)
         if r.status_code==204:
             return True
         raise FailedRequestError(r.status_code, r.content)
@@ -338,7 +340,7 @@ class Geonetwork():
             'X-XSRF-TOKEN': self.get_csrf_token()
         }
               
-        r = self.session.get(url, headers=headers)
+        r = self.session.get(url, headers=headers, timeout=DEFAULT_TIMEOUT)
         if r.status_code==200:
             try:
                 tree = ET.fromstring(r.text.encode('utf8'))
@@ -519,7 +521,7 @@ class Geonetwork():
             'X-XSRF-TOKEN': self.get_csrf_token()
         }
               
-        r = self.session.get(url, headers=headers)
+        r = self.session.get(url, headers=headers, timeout=DEFAULT_TIMEOUT)
         if r.status_code==200:
             return r.content
         raise FailedRequestError(r.status_code, r.content)
@@ -531,7 +533,7 @@ class Geonetwork():
             'X-XSRF-TOKEN': self.get_csrf_token()
         }
         md_url = self.service_url + "/srv/api/0.1/records/" + uuid
-        md_response = self.session.get(md_url, headers=headers)
+        md_response = self.session.get(md_url, headers=headers, timeout=DEFAULT_TIMEOUT)
         if md_response.status_code == 200:
             extent_tuple = self.get_extent(layer_info, ds_type)
             # TODO: we can later generalize this import to call a different module according to the
@@ -565,7 +567,7 @@ class Geonetwork():
             'X-XSRF-TOKEN': self.get_csrf_token()
         }
               
-        r = self.session.get(url, headers=headers)
+        r = self.session.get(url, headers=headers, timeout=DEFAULT_TIMEOUT)
         if r.status_code==200:
             return r.text
         raise FailedRequestError(r.status_code, r.content)
