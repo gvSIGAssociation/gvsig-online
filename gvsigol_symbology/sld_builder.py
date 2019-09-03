@@ -223,7 +223,7 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
                     rule.Filter = f2 
                 
                 else:
-                    rule.create_filter(f[0].get('field'), get_operation_symbol(f[0].get('operation')), str(f[0].get('value')))
+                    rule.create_filter(f[0].get('field'), get_operation_symbol(f[0].get('operation')), f[0].get('value'))
                 
             elif len(f) >= 3:
                 rule.Filter = build_complex_filter(f, rule)
