@@ -45,8 +45,6 @@ var CatalogView = function(mapViewer, config) {
 	$('body').on('change-to-3D-event', function() {
 		self.hidePanel();
 	});
-	
-	this.initialization();
 };
 
 CatalogView.prototype.initialization = function(){
@@ -988,6 +986,9 @@ CatalogView.prototype.createDetailsPanel = function(id){
 }
 
 CatalogView.prototype.showPanel = function(){
+	if (this.catalog_panel===null) {
+		this.initialization();
+	}
 	this.catalog_panel.show();
 	this.map_container.hide();
 	$('.viewer-search-form').css("display","none");
@@ -998,7 +999,9 @@ CatalogView.prototype.showPanel = function(){
 
 CatalogView.prototype.hidePanel = function(){
 	this.map_container.show();
-	this.catalog_panel.hide();
+	if (this.catalog_panel) {
+		this.catalog_panel.hide();
+	}
 	$('.viewer-search-form').css("display","inline-block");
 }
 
