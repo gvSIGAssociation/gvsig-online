@@ -70,6 +70,7 @@ viewer.core = {
 
     _authenticate: function() {
     	var self = this;
+      
     	for (var i=0; i<self.conf.auth_urls.length; i++) {
     		$.ajax({
     			url: self.conf.auth_urls[i],
@@ -79,12 +80,13 @@ viewer.core = {
     				'REQUEST': 'GetCapabilities'
     			},
     			async: false,
+    			dataType: 'jsonp',
     			method: 'GET',
     			headers: {
     				"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
     			},
     			error: function(jqXHR, textStatus, errorThrown){},
-    			success: function(){
+    			success: function(resp){
     				console.log('Authenticated');
     			}
     		});
