@@ -112,7 +112,7 @@
 					<div class="col-md-6 form-group">
 						<input type="checkbox" name="cached" id="cached"/>
 						<label for="cached">{% trans "Cached" %}</label>	
-					</div>					
+					</div>			
 				</div>											
 			</div>									
 		</div>
@@ -211,6 +211,15 @@ $().ready(function(){
 						    value: bounds
 						}).appendTo('form');
 					}
+				}
+				
+				if (data.capabilities) {
+					$('<input>').attr({
+					    type: 'hidden',
+					    id: 'capabilities',
+					    name: 'capabilities',
+					    value: JSON.stringify(data.capabilities)
+					}).appendTo('form');
 				}
 				
 				 if('layers' in data){
