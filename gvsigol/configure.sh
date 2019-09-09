@@ -99,6 +99,12 @@ function configure() {
 	fi												
 	grep -rl "##GVSIGOL_SKIN##"  | xargs sed -i "s/##GVSIGOL_SKIN##/$GVSIGOL_SKIN/g"
 	
+	if [ -z $CACHE_OPERATION_MODE ]; then
+		echo "WARNING: CACHE_OPERATION_MODE is not defined, using ONLY_MASTER"					
+		CACHE_OPERATION_MODE="ONLY_MASTER"
+	fi
+	grep -rl "##CACHE_OPERATION_MODE##"  | xargs sed -i "s/##CACHE_OPERATION_MODE##/$CACHE_OPERATION_MODE/g"
+	
 	if [ -z $GDALTOOLS_BASEPATH ]; then
 		echo "WARNING: GDALTOOLS_BASEPATH is not defined, using /usr/bin"					
 		GDALTOOLS_BASEPATH="/usr/bin"
