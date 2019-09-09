@@ -3281,6 +3281,7 @@ def external_layer_add(request):
                     
                 if external_layer.type == 'WMTS':
                     params['matrixset'] = request.POST.get('matrixset')
+                    params['capabilities'] = request.POST.get('capabilities')
 
                 if external_layer.type == 'Bing':
                     params['key'] = request.POST.get('key')
@@ -3299,7 +3300,9 @@ def external_layer_add(request):
                 
                 if external_layer.cached:
                     if external_layer.type == 'WMS':
-                        geowebcache.get_instance().add_layer(None, external_layer, server, crs_list)
+                        master_node = geographic_servers.get_instance().get_master_node(server.id)
+                        geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
+                        geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
 
                 return redirect('external_layer_list')
 
@@ -3343,13 +3346,16 @@ def external_layer_update(request, external_layer_id):
                             'key': key.split('_')[1],
                             'value': request.POST[key]
                         })
-                    
+                
+                master_node = geographic_servers.get_instance().get_master_node(server.id)   
                 if external_layer.cached and not cached:
-                    geowebcache.get_instance().delete_layer(None, external_layer, server)
+                    geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
+                    geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
                     
                 if not external_layer.cached and cached:
                     if external_layer.type == 'WMS':
-                        geowebcache.get_instance().add_layer(None, external_layer, server, crs_list)
+                        geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
+                        geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
                     
                 external_layer.title = request.POST.get('title')
                 external_layer.type = request.POST.get('type')
@@ -3367,6 +3373,7 @@ def external_layer_update(request, external_layer_id):
                     
                 if external_layer.type == 'WMTS':
                     params['matrixset'] = request.POST.get('matrixset')
+                    params['capabilities'] = request.POST.get('capabilities')
 
                 if external_layer.type == 'Bing':
                     params['key'] = request.POST.get('key')
@@ -3418,9 +3425,10 @@ def external_layer_delete(request, external_layer_id):
         try:
             external_layer = Layer.objects.get(id=external_layer_id)
             server = Server.objects.get(id=external_layer.layer_group.server_id)
-            
+            master_node = geographic_servers.get_instance().get_master_node(server.id)
             if external_layer.cached:
-                geowebcache.get_instance().delete_layer(None, external_layer, server)
+                geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
+                geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
                 
             external_layer.delete()
                     
@@ -3442,6 +3450,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
     infoformats = []
     styles = []
     matrixsets = []
+    capabilities = None
     title = ''
     crs_list = None
 
@@ -3495,6 +3504,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                 version = WMTS_MAX_VERSION
             wmts = WebMapTileService(url, version=version)
             title = wmts.identification.title
+            capabilities = wmts.getServiceXML()
 
             layers = list(wmts.contents)
             if (not layer) and layers.__len__() > 0:
@@ -3512,6 +3522,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                 for matrixset in lyr.tilematrixsets:
                     if not matrixset in matrixsets:
                         matrixsets.append(matrixset)
+                    
                 for style_name in lyr.styles:
                     style = lyr.styles[style_name]
                     title = style_name
@@ -3523,6 +3534,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                     styles.append(style_def)
                 for lyr_style in wmts.contents.get(layer).styles:
                     styles.append(lyr_style)
+                
         except Exception as e:
             data = {'response': '500',
              'message':  str(e.message)}
@@ -3537,6 +3549,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
         'styles': styles,
         'title': title,
         'matrixsets': matrixsets,
+        'capabilities': capabilities,
         'crs_list': crs_list
     }
 
@@ -3603,9 +3616,28 @@ def cache_config(request, layer_id):
         
         try:
             if layer.external:
-                geowebcache.get_instance().execute_cache_operation(None, layer, server, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
+                if settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ONLY_MASTER':
+                    master_node = geographic_servers.get_instance().get_master_node(server.id)
+                    url = master_node.getUrl()
+                    geowebcache.get_instance().execute_cache_operation(None, layer, server, url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
+                
+                elif settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ALL_NODES':
+                    all_nodes = geographic_servers.get_instance().get_all_nodes(server.id)
+                    for n in all_nodes:
+                        url = n.getUrl()
+                        geowebcache.get_instance().execute_cache_operation(None, layer, server, url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
+                    
             else:
-                geowebcache.get_instance().execute_cache_operation(layer.datastore.workspace.name, layer, server, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
+                if settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ONLY_MASTER':
+                    master_node = geographic_servers.get_instance().get_master_node(server.id)
+                    url = master_node.getUrl()
+                    geowebcache.get_instance().execute_cache_operation(layer.datastore.workspace.name, layer, server, url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
+                
+                elif settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ALL_NODES':
+                    all_nodes = geographic_servers.get_instance().get_all_nodes(server.id)
+                    for n in all_nodes:
+                        url = n.getUrl()
+                        geowebcache.get_instance().execute_cache_operation(layer.datastore.workspace.name, layer, server, url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
                 
             layer_list = None
             if request.user.is_superuser:
@@ -3622,12 +3654,13 @@ def cache_config(request, layer_id):
             message = e
             config = None
             tasks = None
+            master_node = geographic_servers.get_instance().get_master_node(server.id)
             if layer.external:
-                config = geowebcache.get_instance().get_layer(None, layer, server).get('wmsLayer')
-                tasks = geowebcache.get_instance().get_pending_and_running_tasks(None, layer, server)
+                config = geowebcache.get_instance().get_layer(None, layer, server, master_node.getUrl()).get('wmsLayer')
+                tasks = geowebcache.get_instance().get_pending_and_running_tasks(None, layer, server, master_node.getUrl())
             else:
-                config = geowebcache.get_instance().get_layer(layer.datastore.workspace.name, layer, server).get('GeoServerLayer')
-                tasks = geowebcache.get_instance().get_pending_and_running_tasks(layer.datastore.workspace.name, layer, server)
+                config = geowebcache.get_instance().get_layer(layer.datastore.workspace.name, layer, server, master_node.getUrl()).get('GeoServerLayer')
+                tasks = geowebcache.get_instance().get_pending_and_running_tasks(layer.datastore.workspace.name, layer, server, master_node.getUrl())
             
             response = {
                 "message": message,
@@ -3647,12 +3680,13 @@ def cache_config(request, layer_id):
     else:      
         config = None
         tasks = None
+        master_node = geographic_servers.get_instance().get_master_node(server.id)
         if layer.external:
-            config = geowebcache.get_instance().get_layer(None, layer, server).get('wmsLayer')
-            tasks = geowebcache.get_instance().get_pending_and_running_tasks(None, layer, server)
+            config = geowebcache.get_instance().get_layer(None, layer, server, master_node.getUrl()).get('wmsLayer')
+            tasks = geowebcache.get_instance().get_pending_and_running_tasks(None, layer, server, master_node.getUrl())
         else:
-            config = geowebcache.get_instance().get_layer(layer.datastore.workspace.name, layer, server).get('GeoServerLayer')
-            tasks = geowebcache.get_instance().get_pending_and_running_tasks(layer.datastore.workspace.name, layer, server)
+            config = geowebcache.get_instance().get_layer(layer.datastore.workspace.name, layer, server, master_node.getUrl()).get('GeoServerLayer')
+            tasks = geowebcache.get_instance().get_pending_and_running_tasks(layer.datastore.workspace.name, layer, server, master_node.getUrl())
            
         response = {
             "layer_id": layer_id,
@@ -3673,12 +3707,13 @@ def get_cache_tasks(request):
     layer = Layer.objects.get(id=int(layer_id))
     layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
     server = Server.objects.get(id=layer_group.server_id)
+    master_node = geographic_servers.get_instance().get_master_node(server.id)
     
     tasks = None
     if layer.external:
-        tasks = geowebcache.get_instance().get_pending_and_running_tasks(None, layer, server)
+        tasks = geowebcache.get_instance().get_pending_and_running_tasks(None, layer, server, master_node.getUrl())
     else:
-        tasks = geowebcache.get_instance().get_pending_and_running_tasks(layer.datastore.workspace.name, layer, server)
+        tasks = geowebcache.get_instance().get_pending_and_running_tasks(layer.datastore.workspace.name, layer, server, master_node.getUrl())
     
     return HttpResponse(json.dumps(tasks, indent=4), content_type='application/json')
 
@@ -3690,10 +3725,13 @@ def kill_all_tasks(request):
     layer = Layer.objects.get(id=int(layer_id))
     layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
     server = Server.objects.get(id=layer_group.server_id)
+    master_node = geographic_servers.get_instance().get_master_node(server.id)
     
     if layer.external:
-        geowebcache.get_instance().kill_all_tasks(None, layer, server)
+        geowebcache.get_instance().kill_all_tasks(None, layer, server, master_node.getUrl())
     else:
-        geowebcache.get_instance().kill_all_tasks(layer.datastore.workspace.name, layer, server)
+        geowebcache.get_instance().kill_all_tasks(layer.datastore.workspace.name, layer, server, master_node.getUrl())
+    
+    geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
     
     return HttpResponse(json.dumps({}, indent=4), content_type='application/json')

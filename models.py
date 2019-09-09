@@ -65,6 +65,9 @@ class Node(models.Model):
     status = models.CharField(max_length=25)
     url = models.CharField(max_length=500)
     is_master = models.BooleanField(default=False)
+    
+    def getUrl(self):
+        return self.url
 
 def get_default_server():
     theServer = Server.objects.get(default=True)

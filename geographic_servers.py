@@ -76,7 +76,10 @@ class GeographicServers:
     def get_master_node(self, id):
         for n in Node.objects.filter(server_id=int(id)):
             if n.is_master:
-                return n      
+                return n   
+            
+    def get_all_nodes(self, id):
+        return Node.objects.filter(server_id=int(id))
 
 __geographic_servers = None
 
