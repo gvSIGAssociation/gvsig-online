@@ -588,7 +588,7 @@ viewer.core = {
 
 				if (cached) {
 					url = group.cache_endpoint;
-					params = {'LAYERS': group.groupName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'};
+					params = {'LAYERS': group.groupName, 'FORMAT': 'image/png', 'VERSION': '1.1.1', 'TILED': 'TRUE'};
 				} else {
 					url = group.wms_endpoint;
 					params = {'LAYERS': group.groupName, 'FORMAT': 'image/png', 'VERSION': '1.1.0'};
