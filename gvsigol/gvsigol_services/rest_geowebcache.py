@@ -75,14 +75,14 @@ class APIGeoWebCache():
     def get_session(self):
         return self.session
     
-    def get_layer(self, ws, layer, server):
+    def get_layer(self, ws, layer, server, master_node_url):
         layer_name = None
         if ws is None:
             layer_name = layer.name
         else:
             layer_name = ws + ":" + layer.name
             
-        api_url = server.getGWCRestEndpoint() + "/layers/" + layer_name + ".json"
+        api_url = master_node_url + "/gwc/rest/layers/" + layer_name + ".json"
         
         auth = (server.user, server.password)
         headers = {'content-type': 'application/json'}
@@ -92,7 +92,7 @@ class APIGeoWebCache():
         
         raise FailedRequestError(response.status_code, response.content)
     
-    def add_layer(self, ws, layer, server, crs_list):
+    def add_layer(self, ws, layer, server, master_node_url, crs_list):
         layer_name = None
         wms_layers = None
         url = None
@@ -137,7 +137,7 @@ class APIGeoWebCache():
         xml +=  "<wmsLayers>" + wms_layers + "</wmsLayers>"
         xml += "</wmsLayer>"
         
-        api_url = server.getGWCRestEndpoint() + "/layers/" + layer_name + ".xml"
+        api_url = master_node_url + "/gwc/rest/layers/" + layer_name + ".xml"
         
         auth = (server.user, server.password)
         headers = {'content-type': 'text/xml'}
@@ -147,7 +147,7 @@ class APIGeoWebCache():
         
         raise FailedRequestError(response.status_code, response.content)
     
-    def modify_layer(self, ws, layer, server):
+    def modify_layer(self, ws, layer, server, master_node_url):
         layer_name = None
         if ws is None:
             layer_name = layer.name
@@ -171,7 +171,7 @@ class APIGeoWebCache():
         xml +=  "<wmsLayers>" + layer_name + "</wmsLayers>"
         xml += "</wmsLayer>"
         
-        api_url = server.getGWCRestEndpoint() + "/layers/" + layer_name + ".xml"
+        api_url = master_node_url + "/gwc/rest/layers/" + layer_name + ".xml"
         
         auth = (server.user, server.password)
         headers = {'content-type': 'text/xml'}
@@ -181,14 +181,14 @@ class APIGeoWebCache():
         
         raise FailedRequestError(response.status_code, response.content)
     
-    def delete_layer(self, ws, layer, server):
+    def delete_layer(self, ws, layer, server, master_node_url):
         layer_name = None
         if ws is None:
             layer_name = layer.name
         else:
             layer_name = ws + ":" + layer.name
             
-        api_url = server.getGWCRestEndpoint() + "/layers/" + layer_name + ".xml"
+        api_url = master_node_url + "/gwc/rest/layers/" + layer_name + ".xml"
         
         auth = (server.user, server.password)
         headers = {'content-type': 'text/xml'}
@@ -198,7 +198,7 @@ class APIGeoWebCache():
         
         raise FailedRequestError(response.status_code, response.content)
     
-    def execute_cache_operation(self, ws, layer, server, minx, miny, maxx, maxy, grid_set, zoom_start, zoom_stop, format, op_type, thread_count):
+    def execute_cache_operation(self, ws, layer, server, url, minx, miny, maxx, maxy, grid_set, zoom_start, zoom_stop, format, op_type, thread_count):
         layer_name = None
         if ws is None:
             layer_name = layer.name
@@ -224,7 +224,7 @@ class APIGeoWebCache():
         xml +=  "<threadCount>" + thread_count + "</threadCount>"
         xml += "</seedRequest>"
         
-        api_url = server.getGWCRestEndpoint() + "/seed/" + layer_name + ".xml"
+        api_url = url + "/gwc/rest/seed/" + layer_name + ".xml"
         
         auth = (server.user, server.password)
         headers = {'content-type': 'text/xml'}
@@ -234,14 +234,14 @@ class APIGeoWebCache():
         
         raise FailedRequestError(response.status_code, response.content)
     
-    def get_pending_and_running_tasks(self, ws, layer, server):
+    def get_pending_and_running_tasks(self, ws, layer, server, master_node_url):
         layer_name = None
         if ws is None:
             layer_name = layer.name
         else:
             layer_name = ws + ":" + layer.name
             
-        api_url = server.getGWCRestEndpoint() + "/seed/" + layer_name + ".json"
+        api_url = master_node_url + "/gwc/rest/seed/" + layer_name + ".json"
         
         auth = (server.user, server.password)
         headers = {'content-type': 'application/json'}
@@ -251,14 +251,14 @@ class APIGeoWebCache():
         
         raise FailedRequestError(response.status_code, response.content)
     
-    def kill_all_tasks(self, ws, layer, server):
+    def kill_all_tasks(self, ws, layer, server, master_node_url):
         layer_name = None
         if ws is None:
             layer_name = layer.name
         else:
             layer_name = ws + ":" + layer.name
             
-        api_url = server.getGWCRestEndpoint() + "/seed/" + layer_name
+        api_url = master_node_url + "/gwc/rest/seed/" + layer_name
         
         auth = (server.user, server.password)
         headers = {'content-type': 'application/json'}

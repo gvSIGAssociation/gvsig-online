@@ -70,6 +70,10 @@ viewer.core = {
 
     _authenticate: function() {
     	var self = this;
+    	
+    	var authenticateCallback = function(json) {
+    		alert();
+    	};
       
     	for (var i=0; i<self.conf.auth_urls.length; i++) {
     		$.ajax({
@@ -81,6 +85,7 @@ viewer.core = {
     			},
     			async: false,
     			dataType: 'jsonp',
+    			jsonpCallback: "authenticateCallback",
     			method: 'GET',
     			headers: {
     				"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
@@ -272,49 +277,58 @@ viewer.core = {
 
 			this.map.addLayer(wmsLayer);
 		}
-    	/*if (externalLayer['type'] == 'WMTS') {
-    		var parser = new ol.format.WMTSCapabilities();
-    		var capabilities_url = externalLayer['url'] + '?request=GetCapabilities' + '&version=' + externalLayer['version']  + '&service=' + externalLayer['type'];
-	    	fetch(capabilities_url).then(function(response) {
-	    		return response.text();
-	    	}).then(function(text) {
-	    		var result = parser.read(text);
-	    		try{
-	    			var options = ol.source.WMTS.optionsFromCapabilities(result, {
-	    				matrixSet: externalLayer['matrixset'],
-	  		          	layer: externalLayer['layers']
-	  		      	});
-	    			if(options && options.urls && options.urls.length > 0){
-	    				if(!externalLayer['url'].endsWith('?')){
-	    					options.urls[0] = externalLayer['url'] + '?';
-	    				}
-	    			}
-	    			var is_baselayer = false;
-	    			for(var k=0; k<options.urls.length; k++){
-	    				if(externalLayer['url'].replace("https://", "http://")+'?' == options.urls[k].replace("https://", "http://")){
-	    					is_baselayer = true;
-	    				}
-	    			}
-	    			options.crossOrigin = 'anonymous';
-	    			if(is_baselayer){
-	    				var ignSource3 = new ol.source.WMTS((options));
-	    				var ignLayer3 = new ol.layer.Tile({
-	    					id: layerId,
-	    					source: ignSource3,
-	    					visible: visible
-	    				});
-	    				ignLayer3.baselayer = true;
-	    				ignLayer3.external = true;
-	    				self.map.addLayer(ignLayer3);
-	    			}
-
-	    		} catch(err){
-	    			console.log("error loading wmts '" + externalLayer['url']+"':" + err)
-	    		}
-	    	});
-		}*/
     	
     	if (externalLayer['type'] == 'WMTS') {
+    		
+    		var xmlDoc = null;
+    		try {
+    			xmlDoc = jQuery.parseXML(JSON.parse(externalLayer['capabilities']));
+    		} catch(err){
+    			xmlDoc = jQuery.parseXML(externalLayer['capabilities']);
+    			
+    		}
+    		
+    		try {
+    			var parser = new ol.format.WMTSCapabilities();
+	    		var result = parser.read(xmlDoc);
+	    		
+	    		var options = ol.source.WMTS.optionsFromCapabilities(result, {
+					matrixSet: externalLayer['matrixset'],
+			          	layer: externalLayer['layers']
+			      	});
+				if(options && options.urls && options.urls.length > 0){
+					if(!externalLayer['url'].endsWith('?')){
+						options.urls[0] = externalLayer['url'] + '?';
+					}
+				}
+				var is_baselayer = false;
+				for(var k=0; k<options.urls.length; k++){
+					if(externalLayer['url'].replace("https://", "http://")+'?' == options.urls[k].replace("https://", "http://")){
+						is_baselayer = true;
+					}
+				}
+				options.crossOrigin = 'anonymous';
+	    		
+				var wmtsSource = new ol.source.WMTS((options));
+				
+	    		var wmtsLayer = new ol.layer.Tile({
+	    			id: layerId,
+					source: wmtsSource,
+					visible: visible
+	    		});
+	    		wmtsLayer.baselayer = externalLayer['baselayer'];
+	    		wmtsLayer.external = true;
+	    		wmtsLayer.infoFormat = externalLayer['infoformat'];
+	    		wmtsLayer.setZIndex(parseInt(externalLayer.order));
+				self.map.addLayer(wmtsLayer);
+			
+    		} catch(err){
+    			console.log(err);
+    			
+    		}
+		}
+    	
+    	/*if (externalLayer['type'] == 'WMTS') {
     		var parser = new ol.format.WMTSCapabilities();
     		var capabilities_url = externalLayer['url'] + '?request=GetCapabilities' + '&version=' + externalLayer['version']  + '&service=' + externalLayer['type'];
     		$.ajax({
@@ -360,7 +374,7 @@ viewer.core = {
     	    		}
     			}
     		});
-		}
+		}*/
 
     	if (externalLayer['type'] == 'Bing') {
     		var bingLayer = new ol.layer.Tile({

@@ -41,6 +41,8 @@ import gvsigol_services.utils as services_utils
 from operator import itemgetter
 from django import apps
 from django.core.mail import send_mail
+from owslib.util import Authentication
+from owslib.wmts import WebMapTileService
 import gvsigol
 import urllib
 import random
@@ -1007,6 +1009,15 @@ def project_get_conf(request):
                         
                     if l.external_params:
                         params = json.loads(l.external_params)
+                        if l.type == 'WMTS' and not 'capabilities' in params:
+                            version = settings.WMTS_MAX_VERSION
+                            if 'version' in params:
+                                version = params['version']
+                            wmts = WebMapTileService(params['url'], version=version)
+                            capabilities = wmts.getServiceXML()
+                            params['capabilities'] = capabilities
+                            l.external_params = json.dumps(params)
+                            l.save()
                         layer.update(params)
     
                     order = int(conf_group['groupOrder']) + l.order
