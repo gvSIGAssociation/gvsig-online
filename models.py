@@ -21,6 +21,7 @@ class Project(models.Model):
     toc_order = models.TextField(null=True, blank=True)
     created_by = models.CharField(max_length=100)
     is_public = models.BooleanField(default=False)
+    show_project_icon = models.BooleanField(default=True)
     tools = models.TextField(null=True, blank=True) 
     
     def __unicode__(self):
