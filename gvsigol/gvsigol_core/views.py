@@ -277,6 +277,10 @@ def project_add(request):
         is_public = False
         if 'is_public' in request.POST:
             is_public = True
+            
+        show_project_icon = False
+        if 'show_project_icon' in request.POST:
+            show_project_icon = True
 
         has_image = False
         if 'project-image' in request.FILES:
@@ -355,6 +359,7 @@ def project_add(request):
                     toc_mode = toc_mode,
                     created_by = request.user.username,
                     is_public = is_public,
+                    show_project_icon = show_project_icon,
                     tools = tools
                 )
             else:
@@ -370,6 +375,7 @@ def project_add(request):
                     toc_mode = toc_mode,
                     created_by = request.user.username,
                     is_public = is_public,
+                    show_project_icon = show_project_icon,
                     tools = tools
                 )
             project.save()
@@ -475,6 +481,10 @@ def project_update(request, pid):
         is_public = False
         if 'is_public' in request.POST:
             is_public = True
+            
+        show_project_icon = False
+        if 'show_project_icon' in request.POST:
+            show_project_icon = True
 
         selected_base_layer = None
         if 'selected_base_layer' in request.POST:
@@ -521,6 +531,7 @@ def project_update(request, pid):
         project.toc_order = toc
         project.toc_mode = toc_mode
         project.tools = tools
+        project.show_project_icon = show_project_icon
 
         if has_image:
             project.image = request.FILES['project-image']
@@ -1069,6 +1080,7 @@ def project_get_conf(request):
             'tools': gvsigol.settings.GVSIGOL_TOOLS,
             'tile_size': gvsigol.settings.TILE_SIZE,
             'is_public_project': project.is_public,
+            'show_project_icon': project.show_project_icon,
             'resource_manager': resource_manager,
             'remote_auth': settings.AUTH_WITH_REMOTE_USER,
             'temporal_advanced_parameters': gvsigol.settings.TEMPORAL_ADVANCED_PARAMETERS,
