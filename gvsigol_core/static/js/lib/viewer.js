@@ -473,10 +473,6 @@ viewer.core = {
 		} else {
 			if(url.endsWith('/gwc/service/wmts')){
 				var default_srs = 'EPSG:3857';
-				if("crs" in layerConf && "crs" in layerConf.crs){
-					default_srs = layerConf.crs.crs;
-				}
-
 				var projection = new ol.proj.get(default_srs);
 				var projectionExtent = projection.getExtent();
 				var size = ol.extent.getWidth(projectionExtent) / 256;
@@ -496,7 +492,7 @@ viewer.core = {
 				);
 
 
-				var ignSource3 = new ol.source.WMTS({
+				var wmtsSource = new ol.source.WMTS({
 					layer: layerConf.workspace + ':' + layerConf.name,
 					url: url,
 					projection: projection,
@@ -508,7 +504,7 @@ viewer.core = {
 				});
 		        var wmsLayer = new ol.layer.Tile({
 			 		id: layerId,
-			 		source: ignSource3,
+			 		source: wmtsSource,
 			 		visible: visible
 			 	});
 		        wmsLayer.baselayer = baselayer;
