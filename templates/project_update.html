@@ -109,6 +109,17 @@
 										</div>
 									</div>	
 								</div>
+								
+								<div class="row">
+									<div class="col-md-6 form-group">
+										<label for="show_project_icon">{% trans "Show project icon in TOC" %}</label>&nbsp;&nbsp;
+										{% if project.show_project_icon %}
+										<input checked type="checkbox" name="show_project_icon" id="show_project_icon"/>
+										{% else %}
+										<input type="checkbox" name="show_project_icon" id="show_project_icon"/>
+										{% endif %}															
+									</div>
+								</div>
 							</div>
               			</div>
               		</div>
