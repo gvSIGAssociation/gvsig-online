@@ -92,6 +92,18 @@ class APIGeoWebCache():
         
         raise FailedRequestError(response.status_code, response.content)
     
+    def get_group(self, group, server, master_node_url):
+            
+        api_url = master_node_url + "/gwc/rest/layers/" + group.name + ".json"
+        
+        auth = (server.user, server.password)
+        headers = {'content-type': 'application/json'}
+        response = self.session.get(api_url, headers=headers, auth=auth)
+        if response.status_code==200:
+            return json.loads(response.content)
+        
+        raise FailedRequestError(response.status_code, response.content)
+    
     def add_layer(self, ws, layer, server, master_node_url, crs_list):
         layer_name = None
         wms_layers = None
@@ -234,6 +246,36 @@ class APIGeoWebCache():
         
         raise FailedRequestError(response.status_code, response.content)
     
+    def execute_group_cache_operation(self, group, server, url, minx, miny, maxx, maxy, grid_set, zoom_start, zoom_stop, format, op_type, thread_count):      
+        xml = ""
+        xml += "<seedRequest>"
+        xml +=  "<name>" + group.name + "</name>"
+        xml +=  "<bounds>"
+        xml +=      "<coords>"
+        xml +=          "<double>" + minx + "</double>"
+        xml +=          "<double>" + miny + "</double>"
+        xml +=          "<double>" + maxx + "</double>"
+        xml +=          "<double>" + maxy + "</double>"
+        xml +=      "</coords>"
+        xml +=  "</bounds>"
+        xml +=  "<gridSetId>" + grid_set + "</gridSetId>"
+        xml +=  "<zoomStart>" + zoom_start + "</zoomStart>"
+        xml +=  "<zoomStop>" + zoom_stop + "</zoomStop>"
+        xml +=  "<format>" + format + "</format>"
+        xml +=  "<type>" + op_type + "</type>"
+        xml +=  "<threadCount>" + thread_count + "</threadCount>"
+        xml += "</seedRequest>"
+        
+        api_url = url + "/gwc/rest/seed/" + group.name + ".xml"
+        
+        auth = (server.user, server.password)
+        headers = {'content-type': 'text/xml'}
+        response = self.session.post(api_url, data=xml, headers=headers, auth=auth)
+        if response.status_code==200:
+            return True
+        
+        raise FailedRequestError(response.status_code, response.content)
+    
     def get_pending_and_running_tasks(self, ws, layer, server, master_node_url):
         layer_name = None
         if ws is None:
@@ -251,6 +293,17 @@ class APIGeoWebCache():
         
         raise FailedRequestError(response.status_code, response.content)
     
+    def get_group_pending_and_running_tasks(self, group, server, master_node_url):
+        api_url = master_node_url + "/gwc/rest/seed/" + group.name + ".json"
+        
+        auth = (server.user, server.password)
+        headers = {'content-type': 'application/json'}
+        response = self.session.get(api_url, headers=headers, auth=auth)
+        if response.status_code==200:
+            return json.loads(response.content)
+        
+        raise FailedRequestError(response.status_code, response.content)
+    
     def kill_all_tasks(self, ws, layer, server, master_node_url):
         layer_name = None
         if ws is None:
@@ -259,6 +312,17 @@ class APIGeoWebCache():
             layer_name = ws + ":" + layer.name
             
         api_url = master_node_url + "/gwc/rest/seed/" + layer_name
+        
+        auth = (server.user, server.password)
+        headers = {'content-type': 'application/json'}
+        response = self.session.post(api_url, data="kill_all=all", headers=headers, auth=auth)
+        if response.status_code==200:
+            return True
+        
+        raise FailedRequestError(response.status_code, response.content)
+    
+    def kill_all_group_tasks(self, group, server, master_node_url):
+        api_url = master_node_url + "/gwc/rest/seed/" + group.name
         
         auth = (server.user, server.password)
         headers = {'content-type': 'application/json'}
