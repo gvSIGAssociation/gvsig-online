@@ -1582,6 +1582,16 @@ def cache_clear(request, layer_id):
 
     else:
         return HttpResponse('{"response": "ok"}', content_type='application/json')
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_http_methods(["GET", "POST", "HEAD"])
+@staff_required
+def group_cache_clear(request, layergroup_id):
+    if request.method == 'GET':
+        layergroup = LayerGroup.objects.get(id=int(layergroup_id))
+        layer_group_cache_clear(layergroup)
+
+        return redirect('layergroup_list')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
@@ -3584,20 +3594,24 @@ def get_capabilities_from_url(request):
 def cache_list(request):
 
     layer_list = None
+    group_list = None
     if request.user.is_superuser:
         layer_list = Layer.objects.filter(cached=True)
+        group_list = LayerGroup.objects.filter(cached=True)
     else:
         layer_list = Layer.objects.filter(created_by__exact=request.user.username).filter(cached=True)
+        group_list = LayerGroup.objects.filter(created_by__exact=request.user.username).filter(cached=True)
 
     response = {
-        'layers': layer_list
+        'layers': layer_list,
+        'groups': group_list
     }
     return render_to_response('cache_list.html', response, context_instance=RequestContext(request))
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
-def cache_config(request, layer_id):
+def layer_cache_config(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
     server = Server.objects.get(id=layer_group.server_id)
@@ -3638,7 +3652,13 @@ def cache_config(request, layer_id):
                     for n in all_nodes:
                         url = n.getUrl()
                         geowebcache.get_instance().execute_cache_operation(layer.datastore.workspace.name, layer, server, url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
-                
+            
+            gs = geographic_servers.get_instance().get_server_by_id(server.id)
+            gs.reload_nodes()
+            
+            gs.updateBoundingBoxFromData(layer)
+            gs.updateThumbnail(layer, 'update')
+       
             layer_list = None
             if request.user.is_superuser:
                 layer_list = Layer.objects.filter(cached=True)
@@ -3672,7 +3692,7 @@ def cache_config(request, layer_id):
                 "tasks": tasks['long-array-array']
             }
                 
-            return render_to_response('cache_config.html', response, context_instance=RequestContext(request))
+            return render_to_response('layer_cache_config.html', response, context_instance=RequestContext(request))
         
         
         
@@ -3697,7 +3717,97 @@ def cache_config(request, layer_id):
             "tasks": tasks['long-array-array']
         }
             
-        return render_to_response('cache_config.html', response, context_instance=RequestContext(request))
+        return render_to_response('layer_cache_config.html', response, context_instance=RequestContext(request))
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_http_methods(["GET", "POST", "HEAD"])
+@staff_required
+def group_cache_config(request, group_id):
+    layer_group = LayerGroup.objects.get(id=int(group_id))
+    server = Server.objects.get(id=layer_group.server_id)
+    
+    if request.method == 'POST':
+        format = request.POST.get('input_format')
+        grid_set = request.POST.get('input_grid_set')
+        min_x = request.POST.get('input_min_x')
+        min_y = request.POST.get('input_min_y')
+        max_x = request.POST.get('input_max_x')
+        max_y = request.POST.get('input_max_y')
+        number_of_tasks = request.POST.get('input_number_of_task')
+        operation_type = request.POST.get('input_operation_type')
+        zoom_start = request.POST.get('input_zoom_start')
+        zoom_stop = request.POST.get('input_zoom_stop')
+        
+        try:
+            if settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ONLY_MASTER':
+                master_node = geographic_servers.get_instance().get_master_node(server.id)
+                url = master_node.getUrl()
+                geowebcache.get_instance().execute_group_cache_operation(layer_group, server, url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
+                
+            elif settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ALL_NODES':
+                all_nodes = geographic_servers.get_instance().get_all_nodes(server.id)
+                for n in all_nodes:
+                    url = n.getUrl()
+                    geowebcache.get_instance().execute_group_cache_operation(layer_group, server, url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
+            
+            gs = geographic_servers.get_instance().get_server_by_id(server.id)
+            gs.reload_nodes()    
+            layer_list = None
+            group_list = None
+            if request.user.is_superuser:
+                layer_list = Layer.objects.filter(cached=True)
+                group_list = LayerGroup.objects.filter(cached=True)
+            else:
+                group_list = LayerGroup.objects.filter(created_by__exact=request.user.username).filter(cached=True)
+        
+            response = {
+                'layers': layer_list,
+                'groups': group_list
+            }
+            return render_to_response('cache_list.html', response, context_instance=RequestContext(request))
+            
+        except Exception as e:
+            message = e
+            config = None
+            tasks = None
+            master_node = geographic_servers.get_instance().get_master_node(server.id)
+            
+            config = geowebcache.get_instance().get_group(layer_group, server, master_node.getUrl()).get('GeoServerLayer')
+            tasks = geowebcache.get_instance().get_group_pending_and_running_tasks(layer_group, server, master_node.getUrl())
+            
+            response = {
+                "message": message,
+                "group_id": group_id,
+                "max_zoom_level": range(settings.MAX_ZOOM_LEVEL + 1),
+                "grid_subsets": config.get('gridSubsets'),
+                "json_grid_subsets": json.dumps(config.get('gridSubsets')),
+                "formats": settings.CACHE_OPTIONS['FORMATS'],
+                "tasks": tasks['long-array-array']
+            }
+                
+            return render_to_response('group_cache_config.html', response, context_instance=RequestContext(request))
+        
+        
+        
+    
+    else:      
+        config = None
+        tasks = None
+        master_node = geographic_servers.get_instance().get_master_node(server.id)
+        
+        config = geowebcache.get_instance().get_group(layer_group, server, master_node.getUrl()).get('GeoServerLayer')
+        tasks = geowebcache.get_instance().get_group_pending_and_running_tasks(layer_group, server, master_node.getUrl())
+                
+        response = {
+            "group_id": group_id,
+            "max_zoom_level": range(settings.MAX_ZOOM_LEVEL + 1),
+            "grid_subsets": config.get('gridSubsets'),
+            "json_grid_subsets": json.dumps(config.get('gridSubsets')),
+            "formats": settings.CACHE_OPTIONS['FORMATS'],
+            "tasks": tasks['long-array-array']
+        }
+            
+        return render_to_response('group_cache_config.html', response, context_instance=RequestContext(request))
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_POST
@@ -3720,6 +3830,19 @@ def get_cache_tasks(request):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_POST
 @staff_required
+def get_group_cache_tasks(request):
+    group_id = request.POST.get('group_id')
+    layer_group = LayerGroup.objects.get(id=int(group_id))
+    server = Server.objects.get(id=layer_group.server_id)
+    master_node = geographic_servers.get_instance().get_master_node(server.id)
+    
+    tasks = geowebcache.get_instance().get_group_pending_and_running_tasks(layer_group, server, master_node.getUrl())
+    
+    return HttpResponse(json.dumps(tasks, indent=4), content_type='application/json')
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_POST
+@staff_required
 def kill_all_tasks(request):
     layer_id = request.POST.get('layer_id')
     layer = Layer.objects.get(id=int(layer_id))
@@ -3731,6 +3854,21 @@ def kill_all_tasks(request):
         geowebcache.get_instance().kill_all_tasks(None, layer, server, master_node.getUrl())
     else:
         geowebcache.get_instance().kill_all_tasks(layer.datastore.workspace.name, layer, server, master_node.getUrl())
+    
+    geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
+    
+    return HttpResponse(json.dumps({}, indent=4), content_type='application/json')
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_POST
+@staff_required
+def kill_all_group_tasks(request):
+    group_id = request.POST.get('group_id')
+    layer_group = LayerGroup.objects.get(id=int(group_id))
+    server = Server.objects.get(id=layer_group.server_id)
+    master_node = geographic_servers.get_instance().get_master_node(server.id)
+    
+    geowebcache.get_instance().kill_all_tasks(layer_group, server, master_node.getUrl())
     
     geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
     
