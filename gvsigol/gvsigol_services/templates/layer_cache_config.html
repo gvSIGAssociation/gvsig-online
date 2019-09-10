@@ -3,7 +3,7 @@
 {% load i18n %}
 
 {% block content %}
-<form id="cache-config-form" role="form" method="post" action="/gvsigonline/services/cache_config/{{layer_id}}/">
+<form id="cache-config-form" role="form" method="post" action="/gvsigonline/services/layer_cache_config/{{layer_id}}/">
 	<div class="row">
 		<div class="col-md-12">
 			<div class="row" style="padding-left: 30px;">
@@ -66,10 +66,13 @@
 						<div class="row">
 							<div class="col-md-3 form-group">
 								<label for="input_grid_set">{% trans "Grid set" %}</label>
+<!-- 								<select class="form-control" id="input_grid_set" name="input_grid_set" tabindex="2" aria-hidden="true"> -->
+<!-- 									{% for gs in grid_subsets %} -->
+<!-- 										<option value="{{gs.gridSetName}}">{{gs.gridSetName}}</option> -->
+<!-- 									{% endfor %} -->
+<!-- 								</select> -->
 								<select class="form-control" id="input_grid_set" name="input_grid_set" tabindex="2" aria-hidden="true">
-									{% for gs in grid_subsets %}
-										<option value="{{gs.gridSetName}}">{{gs.gridSetName}}</option>
-									{% endfor %}
+									<option value="EPSG:3857">EPSG:3857</option>
 								</select>
 							</div>
 							<div class="col-md-3 form-group">
@@ -180,24 +183,43 @@ $().ready(function() {
 			zoom : 2
 		})
 	});
+	var extent = map.getView().calculateExtent(map.getSize());
+	$('#input_min_x').val(extent[0]);
+	$('#input_min_y').val(extent[1]);
+	$('#input_max_x').val(extent[2]);
+	$('#input_max_y').val(extent[3]);
+	
+	map.on('moveend', function (){
+		var extent = map.getView().calculateExtent(map.getSize());
+		$('#input_min_x').val(extent[0]);
+		$('#input_min_y').val(extent[1]);
+		$('#input_max_x').val(extent[2]);
+		$('#input_max_y').val(extent[3]);
+	});
 	
 	var gridSubsets = {{json_grid_subsets|safe}};
 	for (var i=0; i<gridSubsets.length; i++) {
 		if (gridSubsets[i].gridSetName == $("#input_grid_set option:first").val()) {
-			var zoomStart = gridSubsets[i].zoomStart;
-			var zoomStop = gridSubsets[i].zoomStop;
-			$('#input_zoom_start option[value=' + zoomStart + ']').attr('selected','selected');
-			$('#input_zoom_stop option[value=' + zoomStop + ']').attr('selected','selected');
-			$('#input_min_x').val(gridSubsets[i].extent.coords[0]);
-			$('#input_min_y').val(gridSubsets[i].extent.coords[1]);
-			$('#input_max_x').val(gridSubsets[i].extent.coords[2]);
-			$('#input_max_y').val(gridSubsets[i].extent.coords[3]);
+			if (gridSubsets[i].zoomStart && gridSubsets[i].zoomStop) {
+				var zoomStart = gridSubsets[i].zoomStart;
+				var zoomStop = gridSubsets[i].zoomStop;
+				$('#input_zoom_start option[value=' + zoomStart + ']').attr('selected','selected');
+				$('#input_zoom_stop option[value=' + zoomStop + ']').attr('selected','selected');
+			}
+			if (gridSubsets[i].extent) {
+				$('#input_min_x').val(gridSubsets[i].extent.coords[0]);
+				$('#input_min_y').val(gridSubsets[i].extent.coords[1]);
+				$('#input_max_x').val(gridSubsets[i].extent.coords[2]);
+				$('#input_max_y').val(gridSubsets[i].extent.coords[3]);
+			}
 		}
 	}
 	
 	for (var i=0; i<gridSubsets.length; i++) {
 		if (gridSubsets[i].gridSetName == 'EPSG:3857') {
-			map.getView().fit([gridSubsets[i].extent.coords[0], gridSubsets[i].extent.coords[1], gridSubsets[i].extent.coords[2], gridSubsets[i].extent.coords[3]], map.getSize());
+			if (gridSubsets[i].extent) {
+				map.getView().fit([gridSubsets[i].extent.coords[0], gridSubsets[i].extent.coords[1], gridSubsets[i].extent.coords[2], gridSubsets[i].extent.coords[3]], map.getSize());
+			}
 		}
 	}
 	
