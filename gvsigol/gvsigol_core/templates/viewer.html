@@ -153,7 +153,8 @@
 	<div id="container">
 
 		<aside class="control-sidebar control-sidebar-light control-sidebar-closed" style="position: fixed; height: 100%;">
-
+			
+			{% if project.show_project_icon %}
 			<div class="project-info-div">
 				{% if has_image %}
 				<div class="pull-left image">
@@ -165,6 +166,7 @@
 <!-- 					<a href="#"><i class="fa fa-circle text-success"></i> Online</a> -->
 				</div>
 			</div>
+			{% endif %}
 
 			<ul id="gvsigol-toc-tabs" class="nav nav-tabs nav-justified control-sidebar-tabs">
 				<li class="active" title="{% trans "Layer tree" %}"><a href="#layer-tree-tab" data-toggle="tab"><i class="icon-layers"></i></a></li>
