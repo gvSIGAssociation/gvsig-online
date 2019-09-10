@@ -71,7 +71,7 @@
   display: inline-block;
   cursor: move;
   margin: 0 5px;
-  vertical-align: super;
+  /*vertical-align: super;*/
 }
 
 .layer-box {
