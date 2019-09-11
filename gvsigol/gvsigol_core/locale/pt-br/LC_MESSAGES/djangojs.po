@@ -249,6 +249,9 @@ msgstr ""
 msgid "None"
 msgstr ""
 
+msgid "No layer"
+msgstr ""
+
 msgid "Bing roads"
 msgstr ""
 
@@ -261,8 +264,17 @@ msgstr ""
 msgid "You are editing the layer"
 msgstr ""
 
-msgid "Information and downloads"
-msgstr "Información y descargas"
+msgid "Downloads"
+msgstr ""
+
+msgid "Layer metadata"
+msgstr ""
+
+msgid "Details"
+msgstr ""
+
+msgid "Metadata"
+msgstr ""
 
 msgid "Download links"
 msgstr "Links de descarga"
