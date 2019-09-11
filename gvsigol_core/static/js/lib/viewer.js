@@ -318,6 +318,7 @@ viewer.core = {
 	    		});
 	    		wmtsLayer.baselayer = externalLayer['baselayer'];
 	    		wmtsLayer.external = true;
+	    		wmtsLayer.queryable = false;
 	    		wmtsLayer.infoFormat = externalLayer['infoformat'];
 	    		wmtsLayer.setZIndex(parseInt(externalLayer.order));
 				self.map.addLayer(wmtsLayer);
