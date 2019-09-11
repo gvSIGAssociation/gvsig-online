@@ -584,10 +584,10 @@ viewer.core = {
 
 				if (cached) {
 					url = group.cache_endpoint;
-					params = {'LAYERS': group.groupName, 'FORMAT': 'image/png', 'VERSION': '1.1.1', 'TILED': 'TRUE', 'WIDTH': '512', 'HEIGHT': '512'};
+					params = {'LAYERS': group.groupName, 'FORMAT': 'image/png', 'VERSION': '1.1.1', 'TILED': 'TRUE', 'WIDTH': '256', 'HEIGHT': '256'};
 				} else {
 					url = group.wms_endpoint;
-					params = {'LAYERS': group.groupName, 'FORMAT': 'image/png', 'VERSION': '1.1.0', 'WIDTH': '512', 'HEIGHT': '512'};
+					params = {'LAYERS': group.groupName, 'FORMAT': 'image/png', 'VERSION': '1.1.0', 'WIDTH': '256', 'HEIGHT': '256'};
 				}
 
 				var layerGroupSource = new ol.source.TileWMS({
