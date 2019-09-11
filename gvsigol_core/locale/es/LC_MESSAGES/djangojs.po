@@ -256,6 +256,9 @@ msgstr "Capas base"
 msgid "None"
 msgstr "Nada"
 
+msgid "No layer"
+msgstr "Sin capa"
+
 msgid "Bing roads"
 msgstr "Bing carreteras"
 
@@ -268,8 +271,17 @@ msgstr "Bing aérea con etiquetas"
 msgid "You are editing the layer"
 msgstr "Usted está editando la capa"
 
-msgid "Information and downloads"
-msgstr "Información y descargas"
+msgid "Downloads"
+msgstr "Descargas"
+
+msgid "Layer metadata"
+msgstr "Metadatos de la capa"
+
+msgid "Details"
+msgstr "Detalles"
+
+msgid "Metadata"
+msgstr "Metadatos"
 
 msgid "Download links"
 msgstr "Links de descarga"
