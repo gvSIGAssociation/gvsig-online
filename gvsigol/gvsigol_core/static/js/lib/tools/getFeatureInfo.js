@@ -288,9 +288,9 @@ getFeatureInfo.prototype.getWMTSFeatureInfoUrl = function (source, coordinate2, 
 
 getFeatureInfo.prototype.clickHandler = function(evt) {
 
-	$("body").overlay();
+	/*$("body").overlay();
 	$("#jqueryEasyOverlayDiv").css("opacity", "0.5");
-	$('#jqueryEasyOverlayDiv').hide().show(0);
+	$('#jqueryEasyOverlayDiv').hide().show(0);*/
 
 	this.source.clear();
 
@@ -308,7 +308,7 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 
 		for (var i=0; i<layers.length; i++) {
 			if (!layers[i].baselayer) {
-				if (layers[i].wms_url && layers[i].getVisible()) {
+				if (layers[i].wms_url && layers[i].getVisible() && layers[i].queryable) {
 					if( layers[i].isLayerGroup){
 						var parent = layers[i];
 						for (var j=0; j<layers.length; j++) {
@@ -332,7 +332,6 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 		var qLayer = null;
 		var url = null;
 		var ajaxRequests = new Array();
-		var features = new Array();
 
 		var layers_info = [];
 
@@ -382,76 +381,77 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 
 		}
 
+		self.showPopup();
+		var count = 0;
 		if(layers_info.length > 0){
-			var req = $.ajax({
-				type: 'POST',
-				async: false,
-			  	url: '/gvsigonline/services/get_feature_info/',
-			  	data: {
-			  		layers_json: JSON.stringify(layers_info)
-			  	},
-			  	success	:function(response){
-			  		if (response.features && response.features.length > 0) {
-			  			for (var k in response.features) {
-				  			if (response.features[k].type == 'catastro') {
-				  				var qLayer = null;
-				  				for (var i=0; i<queryLayers.length; i++) {
-				  					if(response.features[k].query_layer == queryLayers[i].layer_name){
-				  						qLayer =  queryLayers[i]
-				  					}
-				  				}
-				  				if(qLayer != null){
-					  				features.push({
-					  					type: 'catastro',
-					  					text: response.features[k].text,
-					  					href: response.features[k].href,
-					  					layer: qLayer
-					  				});
-				  				}
-				  				
-				  			} else if (response.features[k].type == 'plain_or_html') {
-				  				var qLayer = null;
-				  				for (var i=0; i<queryLayers.length; i++) {
-				  					if(response.features[k].query_layer == queryLayers[i].layer_name){
-				  						qLayer =  queryLayers[i]
-				  					}
-				  				}
-				  				if(qLayer != null){
-					  				features.push({
-					  					type: 'plain_or_html',
-					  					text: response.features[k].text,
-					  					layer: qLayer
-					  				});
-				  				}
-				  				
-				  			} else {
-			  					var qLayer = null;
-				  				for (var j=0; j<queryLayers.length; j++) {
-				  					if(response.features[k].layer_name == queryLayers[j].layer_name){
-				  						qLayer =  queryLayers[j]
-				  					}
-				  				}
-				  				if(qLayer != null){
-					  				features.push({
-					  					type: 'feature',
-					  					crs: response.crs,
-					  					feature: response.features[k],
-					  					layer:  qLayer
-					  				});
-				  				}
+			for (var k=0; k<layers_info.length; k++) {
+				$.ajax({
+					type: 'POST',
+					async: true,
+				  	url: '/gvsigonline/services/get_feature_info/',
+				  	data: {
+				  		layers_json: JSON.stringify([layers_info[k]])
+				  	},
+				  	success	:function(response){
+				  		var features = new Array();
+				  		if (response.features && response.features.length > 0) {
+				  			for (var k in response.features) {
+					  			if (response.features[k].type == 'catastro') {
+					  				var qLayer = null;
+					  				for (var i=0; i<queryLayers.length; i++) {
+					  					if(response.features[k].query_layer == queryLayers[i].layer_name){
+					  						qLayer =  queryLayers[i]
+					  					}
+					  				}
+					  				if(qLayer != null){
+						  				features.push({
+						  					type: 'catastro',
+						  					text: response.features[k].text,
+						  					href: response.features[k].href,
+						  					layer: qLayer
+						  				});
+					  				}
+					  				
+					  			} else if (response.features[k].type == 'plain_or_html') {
+					  				var qLayer = null;
+					  				for (var i=0; i<queryLayers.length; i++) {
+					  					if(response.features[k].query_layer == queryLayers[i].layer_name){
+					  						qLayer =  queryLayers[i]
+					  					}
+					  				}
+					  				if(qLayer != null){
+						  				features.push({
+						  					type: 'plain_or_html',
+						  					text: response.features[k].text,
+						  					layer: qLayer
+						  				});
+					  				}
+					  				
+					  			} else {
+				  					var qLayer = null;
+					  				for (var j=0; j<queryLayers.length; j++) {
+					  					if(response.features[k].layer_name == queryLayers[j].layer_name){
+					  						qLayer =  queryLayers[j]
+					  					}
+					  				}
+					  				if(qLayer != null){
+						  				features.push({
+						  					type: 'feature',
+						  					crs: response.crs,
+						  					feature: response.features[k],
+						  					layer:  qLayer
+						  				});
+					  				}
+					  			}
 				  			}
-			  			}
-			  		}
-			  	},
-			  	error: function(){}
-			});
-
-			ajaxRequests.push(req);
+				  		}
+				  		self.appendInfo(features, count);
+				  		count++;
+				  	},
+				  	error: function(){}
+				});
+			}
 		}
-
-		$.when(undefined, ajaxRequests).then(function(){
-		     self.showInfo(features);
-		});
 
 	}
 };
@@ -459,7 +459,7 @@ getFeatureInfo.prototype.clickHandler = function(evt) {
 /**
  * TODO
  */
-getFeatureInfo.prototype.showInfo = function(features){
+getFeatureInfo.prototype.showPopup = function(){
 
 	var self = this;
 	var detailsTab = $('#details-tab');
@@ -469,7 +469,7 @@ getFeatureInfo.prototype.showInfo = function(features){
 		$('.nav-tabs a[href="#layer-tree-tab"]').tab('show');
 	}
 
-	var html = '<ul class="products-list product-list-in-box">';
+	var html = '<ul id="feature-info-results" class="products-list product-list-in-box">';
 
 	var srs = $("#custom-mouse-position-projection").val();
 	var unit =  $('#custom-mouse-position-projection option:selected').attr('data-attr');
@@ -507,6 +507,31 @@ getFeatureInfo.prototype.showInfo = function(features){
 	html += 	'</div>';
 	html += '</li>';
 
+	
+	html += '</ul>';
+	this.popup.show(self.mapCoordinates, '<div class="popup-wrapper getfeatureinfo-popup">' + html + '</div>');
+	$(".getfeatureinfo-popup").parent().parent().children(".ol-popup-closer").unbind("click").click(function() {
+		var detailsTab = $('#details-tab');
+	 	detailsTab.empty();
+	 	var tab_id = $("ul.nav-tabs li.active").index();
+		if(tab_id==2){
+			$('.nav-tabs a[href="#layer-tree-tab"]').tab('show');
+		}
+	 	return false;
+	});
+
+	self.map.getView().setCenter(self.mapCoordinates);
+
+	//$.overlayout();
+	//$("#jqueryEasyOverlayDiv").css("display", "none");
+};
+
+/**
+ * TODO
+ */
+getFeatureInfo.prototype.appendInfo = function(features, count){
+	var self = this;
+	var html = '';
 	for (var i in features) {
 		if (features[i].type == 'feature' && features[i].feature.type == 'raster') {
 			var feature_id = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+features[i].layer.title+ "</span>";
@@ -531,9 +556,9 @@ getFeatureInfo.prototype.showInfo = function(features){
 				var selectedLayer = features[i].layer;
 				
 				if (!selectedLayer.external) {
-					var feature_id = "<a href=\"javascript:void(0)\" class=\"feature-info-label-title\" style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+features[i].layer.title +"."+features[i].feature.feature + "</a>";
-					feature_id += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext('More element info')+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
-					feature_id += 		'<span class="label feature-info-button feature-info-label-resource" title="'+gettext('Multimedia resources')+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><br />';
+					var feature_id = "<a href=\"javascript:void(0)\" class=\"feature-info-label-title"+count+"\" style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+features[i].layer.title +"."+features[i].feature.feature + "</a>";
+					feature_id += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info'+count+'" title="'+gettext('More element info')+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
+					feature_id += 		'<span class="label feature-info-button feature-info-label-resource'+count+'" title="'+gettext('Multimedia resources')+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><br />';
 					feature_id += "<br />";
 		
 					var language = $("#select-language").val();
@@ -543,8 +568,8 @@ getFeatureInfo.prototype.showInfo = function(features){
 							if(fields_trans["fields"]){
 								var fields = fields_trans["fields"];
 								var feature_id2 = "<span style=\"font-weight:bold; color:#0b6bd1; margin:0px 5px;\">"+selectedLayer.title + "</span>";
-								feature_id2 += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info " title="'+gettext("Attribute details")+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
-								feature_id2 += 		'<span class="label feature-info-button feature-info-label-resource" title="'+gettext("Show resources")+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><div style=\"clear:both; margin-bottom:10px;\"></div>';
+								feature_id2 += 		'<div class="feature-buttons" style="margin-right:-10px;"><span class="label feature-info-button feature-info-label-info'+count+'" title="'+gettext("Attribute details")+'"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
+								feature_id2 += 		'<span class="label feature-info-button feature-info-label-resource'+count+'" title="'+gettext("Show resources")+'"><i class="fa fa-picture-o" aria-hidden="true"></i></span></div><div style=\"clear:both; margin-bottom:10px;\"></div>';
 		
 								var feature_added = 0;
 		
@@ -677,9 +702,9 @@ getFeatureInfo.prototype.showInfo = function(features){
 					html += '<li class="item feature-item show_info">';
 					html += 	'<div class="feature-info">';
 					html += 		'<div href="javascript:void(0)" data-fid="' + i + '" class="product-title external-item-fid" style="color: #444;padding: 5px;">';
-					html += 			'<a href="javascript:void(0)" class="feature-info-label-title" style="font-weight:bold; color:#0b6bd1; margin:0px 5px;">' + selectedLayer.title + '</a>';
+					html += 			'<a href="javascript:void(0)" class="feature-info-label-title'+count+'" style="font-weight:bold; color:#0b6bd1; margin:0px 5px;">' + selectedLayer.title + '</a>';
 					html += 			'<div class="feature-buttons" style="margin-right:-10px;">';
-					html += 			'<span class="label feature-info-button feature-info-label-info " title="' + gettext("Attribute details") + '"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
+					html += 			'<span class="label feature-info-button feature-info-label-info'+count+'" title="' + gettext("Attribute details") + '"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
 					html += 		'</div>';
 					html += 		'<br><br>';
 					html += 	'</div>';
@@ -699,9 +724,9 @@ getFeatureInfo.prototype.showInfo = function(features){
 				html += '<li class="item feature-item show_info">';
 				html += 	'<div class="feature-info">';
 				html += 		'<div href="javascript:void(0)" data-fid="' + i + '" class="product-title external-item-fid" style="color: #444;padding: 5px;">';
-				html += 			'<a href="javascript:void(0)" class="feature-info-label-title" style="font-weight:bold; color:#0b6bd1; margin:0px 5px;">' + selectedLayer.title + '</a>';
+				html += 			'<a href="javascript:void(0)" class="feature-info-label-title'+count+'" style="font-weight:bold; color:#0b6bd1; margin:0px 5px;">' + selectedLayer.title + '</a>';
 				html += 			'<div class="feature-buttons" style="margin-right:-10px;">';
-				html += 			'<span class="label feature-info-button feature-info-label-info " title="' + gettext("Attribute details") + '"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
+				html += 			'<span class="label feature-info-button feature-info-label-info'+count+'" title="' + gettext("Attribute details") + '"><i class="fa fa-list-ul" aria-hidden="true"></i></span>';
 				html += 		'</div>';
 				html += 		'<br><br>';
 				html += 	'</div>';
@@ -710,39 +735,25 @@ getFeatureInfo.prototype.showInfo = function(features){
 			}
 		}
 	}
-	html += '</ul>';
-	this.popup.show(self.mapCoordinates, '<div class="popup-wrapper getfeatureinfo-popup">' + html + '</div>');
-	$(".getfeatureinfo-popup").parent().parent().children(".ol-popup-closer").unbind("click").click(function() {
-		var detailsTab = $('#details-tab');
-	 	detailsTab.empty();
-	 	var tab_id = $("ul.nav-tabs li.active").index();
-		if(tab_id==2){
-			$('.nav-tabs a[href="#layer-tree-tab"]').tab('show');
-		}
-	 	return false;
-	});
-
-	self.map.getView().setCenter(self.mapCoordinates);
-	$('.item-fid .feature-info-label-title').click(function(){
+	$('#feature-info-results').append(html);
+	
+	$('.item-fid .feature-info-label-title' + count).click(function(){
 		self.showMoreInfo(this.parentNode.dataset.fid, features, 'features');
 	});
-	$('.item-fid .feature-info-label-info').click(function(){
+	$('.item-fid .feature-info-label-info' + count).click(function(){
 		self.showMoreInfo(this.parentNode.parentNode.dataset.fid, features, 'features');
 	});
 
-	$('.item-fid .feature-info-label-resource').click(function(){
+	$('.item-fid .feature-info-label-resource' + count).click(function(){
 		self.showMoreInfo(this.parentNode.parentNode.dataset.fid, features, 'resources');
 	});
 	
-	$('.external-item-fid .feature-info-label-title').click(function(){
+	$('.external-item-fid .feature-info-label-title' + count).click(function(){
 		self.externalShowMoreInfo(this.parentNode.dataset.fid, features, 'features');
 	});
-	$('.external-item-fid .feature-info-label-info').click(function(){
+	$('.external-item-fid .feature-info-label-info' + count).click(function(){
 		self.externalShowMoreInfo(this.parentNode.parentNode.dataset.fid, features, 'features');
 	});
-
-	$.overlayout();
-	$("#jqueryEasyOverlayDiv").css("display", "none");
 };
 
 /**
