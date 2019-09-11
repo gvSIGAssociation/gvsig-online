@@ -350,6 +350,20 @@ layerTree.prototype.setLayerEvents = function() {
 		self.showMetadata(selectedLayer);
 	});
 	
+	$(".layer-downloads-link").unbind("click").on('click', function(e) {
+		var layers = self.map.getLayers();
+		var selectedLayer = null;
+		var id = this.id.split("layer-downloads-")[1];
+		layers.forEach(function(layer){
+			if (layer.baselayer == false) {
+				if (id===layer.get("id")) {
+					selectedLayer = layer;
+				}
+			}						
+		}, this);
+		self.layerDownloads(selectedLayer);
+	});
+	
 	$(".zoom-to-layer").unbind("click").on('click', function(e) {
 		var layers = self.map.getLayers();
 		var selectedLayer = null;
@@ -1776,7 +1790,7 @@ layerTree.prototype.createEmptyBaseLayerUI = function() {
 	var ui = '';
 	ui += '<div style="margin-left:20px;">';
 	ui += 	'<input type="radio" id="gol-layer-empty" data-origin="empty" name="baselayers-group">';
-	ui += 	'<span class="text">' + gettext('None') + '</span>';
+	ui += 	'<span class="text">' + gettext('No layer') + '</span>';
 	ui += '</div>';
 	
 	return ui;
@@ -1914,10 +1928,13 @@ layerTree.prototype.createOverlayUI = function(layer, group_visible) {
 				ui += '	</a>';
 			}
 			if( layer.allow_download) {
-				ui += '	<a id="show-metadata-' + id + '" class="btn btn-block btn-social btn-custom-tool show-metadata-link">';
-				ui += '		<i class="fa fa-external-link"></i> ' + gettext('Information and downloads');
+				ui += '	<a id="layer-downloads-' + id + '" class="btn btn-block btn-social btn-custom-tool layer-downloads-link">';
+				ui += '		<i class="fa fa-download"></i> ' + gettext('Downloads');
 				ui += '	</a>';
 			}
+			ui += '	<a id="show-metadata-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool show-metadata-link">';
+			ui += '		<i class="fa fa-newspaper-o" aria-hidden="true"></i> ' + gettext('Metadata');
+			ui += '	</a>';
 			ui += '	<a id="zoom-to-layer-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool zoom-to-layer">';
 			ui += '		<i class="fa fa-search" aria-hidden="true"></i> ' + gettext('Zoom to layer');
 			ui += '	</a>';
@@ -2001,6 +2018,40 @@ layerTree.prototype.setEditionBar = function(editionbar) {
 /**
  * TODO
  */
+layerTree.prototype.layerDownloads = function(layer) {
+	if (!layer.baselayer) {
+		if (layer.wfs_url) {
+			var shapeLink = layer.wfs_url + '?service=WFS&request=GetFeature&version=1.0.0&outputFormat=shape-zip&typeName=' + layer.layer_name;
+			var gmlLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=GML3&typeName=' + layer.layer_name;
+			var csvLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=csv&typeName=' + layer.layer_name;
+			var ui = '';
+			ui += '<div class="row">';
+			ui += 	'<div class="col-md-12 form-group">';	
+			ui += 	'<span>' + gettext('Download links') + '</span>';
+			ui += 	'</div>';
+			ui += '</div>';
+			ui += '<div class="row">';
+			ui += 	'<div class="col-md-4 form-group">';	
+			ui += 		'<i style="margin-right: 10px;" class="fa fa-download"></i><a href="' + shapeLink + '">' + gettext('Download shapefile') + '</a>';
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-4 form-group">';	
+			ui += 		'<i style="margin-right: 10px;" class="fa fa-download"></i><a href="' + csvLink + '">' + gettext('Download CSV') + '</a>';
+			ui += 	'</div>';
+			ui += 	'<div class="col-md-4 form-group">';	
+			ui += 		'<i style="margin-right: 10px;" class="fa fa-download"></i><a target="_blank" href="' + gmlLink + '">' + gettext('Download GML') + '</a>';
+			ui += 	'</div>';
+			ui += '</div>';
+			
+			$('#float-modal .modal-body').empty();
+			$('#float-modal .modal-body').append(ui);
+			$('#float-modal').modal('show');
+		}						
+	}
+};
+
+/**
+ * TODO
+ */
 layerTree.prototype.showMetadata = function(layer) {
 	
 	$.ajax({
@@ -2018,101 +2069,45 @@ layerTree.prototype.showMetadata = function(layer) {
 				$('#float-modal .modal-body').html(response['html']);
 				$('#float-modal').modal('show');
 			} else {
-				if (!layer.baselayer) {
-					if (layer.wfs_url) {
-						var shapeLink = layer.wfs_url + '?service=WFS&request=GetFeature&version=1.0.0&outputFormat=shape-zip&typeName=' + layer.layer_name;
-						var gmlLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=GML3&typeName=' + layer.layer_name;
-						var csvLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=csv&typeName=' + layer.layer_name;
-						var ui = '';
-						ui += '<div class="row">';
-						ui += 	'<div class="col-md-12 form-group">';	
-						ui += 	'<span>' + gettext('Download links') + '</span>';
-						ui += 	'</div>';
-						ui += '</div>';
-						ui += '<div class="row">';
-						ui += 	'<div class="col-md-4 form-group">';	
-						ui += 		'<i style="margin-right: 10px;" class="fa fa-download"></i><a href="' + shapeLink + '">' + gettext('Download shapefile') + '</a>';
-						ui += 	'</div>';
-						ui += 	'<div class="col-md-4 form-group">';	
-						ui += 		'<i style="margin-right: 10px;" class="fa fa-download"></i><a href="' + csvLink + '">' + gettext('Download CSV') + '</a>';
-						ui += 	'</div>';
-						ui += 	'<div class="col-md-4 form-group">';	
-						ui += 		'<i style="margin-right: 10px;" class="fa fa-download"></i><a target="_blank" href="' + gmlLink + '">' + gettext('Download GML') + '</a>';
-						ui += 	'</div>';
-						ui += '</div>';
-						
-						$('#float-modal .modal-body').empty();
-						$('#float-modal .modal-body').append(ui);
-						$('#float-modal').modal('show');
-					}						
+				$('#float-modal .modal-title').empty();
+				$('#float-modal .modal-title').append(gettext('Layer metadata'));
+				
+				var body = '';
+				body += '<div class="row">';
+				body += 	'<div class="col-md-12">';
+				body += 		'<p>' + layer.abstract + '</p>';				
+				body += 	'</div>';
+				body += '</div>';
+				
+				$('#float-modal .modal-body').empty();
+				$('#float-modal .modal-body').append(body);
+				
+				var buttons = '';
+				buttons += '<button id="float-modal-cancel-metadata" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
+				if (layer.metadata != '') {
+					buttons += '<button id="float-modal-show-metadata" type="button" class="btn btn-default">' + gettext('Show in geonetwork') + '</button>';
 				}
+				
+				$('#float-modal .modal-footer').empty();
+				$('#float-modal .modal-footer').append(buttons);
+				
+				$("#float-modal").modal('show');
+				
+				var self = this;	
+				$('#float-modal-show-metadata').on('click', function () {
+					var win = window.open(layer.metadata, '_blank');
+					  win.focus();
+					
+					$('#float-modal').modal('hide');
+				});
 			}
 
 		},
-		error: function(){
-			if (!layer.baselayer) {
-				if (layer.wfs_url) {
-					var shapeLink = layer.wfs_url + '?service=WFS&request=GetFeature&version=1.0.0&outputFormat=shape-zip&typeName=' + layer.layer_name;
-					var gmlLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=GML3&typeName=' + layer.layer_name;
-					var csvLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=csv&typeName=' + layer.layer_name;
-					var ui = '';
-					ui += '<div class="row">';
-					ui += 	'<div class="col-md-12 form-group">';	
-					ui += 	'<span>' + gettext('Download links') + '</span>';
-					ui += 	'</div>';
-					ui += '</div>';
-					ui += '<div class="row">';
-					ui += 	'<div class="col-md-4 form-group">';	
-					ui += 		'<i style="margin-right: 10px;" class="fa fa-download"></i><a href="' + shapeLink + '">' + gettext('Download shapefile') + '</a>';
-					ui += 	'</div>';
-					ui += 	'<div class="col-md-4 form-group">';	
-					ui += 		'<i style="margin-right: 10px;" class="fa fa-download"></i><a href="' + csvLink + '">' + gettext('Download CSV') + '</a>';
-					ui += 	'</div>';
-					ui += 	'<div class="col-md-4 form-group">';	
-					ui += 		'<i style="margin-right: 10px;" class="fa fa-download"></i><a target="_blank" href="' + gmlLink + '">' + gettext('Download GML') + '</a>';
-					ui += 	'</div>';
-					ui += '</div>';
-					
-					$('#float-modal .modal-body').empty();
-					$('#float-modal .modal-body').append(ui);
-					$('#float-modal').modal('show');
-				}						
-			}
-		}
+		error: function(){}
 	});
 	
 	
-//	$('#float-modal .modal-title').empty();
-//	$('#float-modal .modal-title').append(gettext('Layer metadata'));
-//	
-//	var body = '';
-//	body += '<div class="row">';
-//	body += 	'<div class="col-md-12">';
-//	body += 		'<p>' + layer.abstract + '</p>';				
-//	body += 	'</div>';
-//	body += '</div>';
-//	
-//	$('#float-modal .modal-body').empty();
-//	$('#float-modal .modal-body').append(body);
-//	
-//	var buttons = '';
-//	buttons += '<button id="float-modal-cancel-metadata" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
-//	if (layer.metadata != '') {
-//		buttons += '<button id="float-modal-show-metadata" type="button" class="btn btn-default">' + gettext('Show in geonetwork') + '</button>';
-//	}
-//	
-//	$('#float-modal .modal-footer').empty();
-//	$('#float-modal .modal-footer').append(buttons);
-//	
-//	$("#float-modal").modal('show');
-//	
-//	var self = this;	
-//	$('#float-modal-show-metadata').on('click', function () {
-//		var win = window.open(layer.metadata, '_blank');
-//		  win.focus();
-//		
-//		$('#float-modal').modal('hide');
-//	});
+
 };
 
 /**
