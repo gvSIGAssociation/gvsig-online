@@ -22,6 +22,7 @@
 from gvsigol_services.models import Datastore
 from geopy.compat import urlencode
 from geopy.util import logger
+from gvsigol import settings as core_settings
 import settings
 import urllib2
 import json, requests
@@ -51,7 +52,7 @@ class Cartociudad():
         datastore = Datastore.objects.get(id=datastore_id)
         connection_params = json.loads(datastore.connection_params)
 
-        response = requests.get(url=self.urls['configuration_url'], params=connection_params)
+        response = requests.get(url=self.urls['configuration_url'], params=connection_params, proxies=core_settings.PROXIES)
         return response.status_code == 200
 
 
@@ -155,7 +156,7 @@ class Cartociudad():
 
 
     def get_json_from_url(self, url, params):
-        response = requests.get(url=url, params=params)
+        response = requests.get(url=url, params=params, proxies=core_settings.PROXIES)
         if response.status_code == 200:
             respuesta = response.content
             if respuesta.startswith('callback('):

@@ -20,12 +20,9 @@
 @author: Jose Badia <jbadia@scolab.es>
 '''
 from django.utils.translation import ugettext as _
-from geopy.compat import urlencode
-from geopy.util import logger
 import settings
-import urllib2
-import json, requests, ast
-from urlparse import urlparse
+from gvsigol import settings as core_settings
+import json, requests
     
 class CartoCiudad2():
     
@@ -137,7 +134,7 @@ class CartoCiudad2():
     
     @staticmethod   
     def get_json_from_url(url, params):
-        response = requests.get(url=url, params=params)
+        response = requests.get(url=url, params=params, proxies=core_settings.PROXIES)
         if response.status_code == 200:
             respuesta = response.content
             if respuesta.startswith('callback('):
