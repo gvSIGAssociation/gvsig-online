@@ -426,3 +426,8 @@ try:
         }
 except:
     print "No proxies defined."
+    PROXIES = {
+        "http"  : None,
+        "https" : None,
+        "ftp"   : None
+    }
