@@ -68,7 +68,7 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth
-        r = self.session.post(url, auth=auth, proxies=settings.PROXIES)
+        r = self.session.post(url, auth=auth)
         if r.status_code==200:
             return True
         raise FailedRequestError(r.status_code, r.content)
@@ -107,7 +107,7 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth
-        r = self.session.post(url, json=data, auth=auth, proxies=settings.PROXIES)
+        r = self.session.post(url, json=data, auth=auth)
         if r.status_code==201:
             return True
         raise FailedRequestError(r.status_code, r.content)
@@ -119,7 +119,7 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth
-        r = self.session.post(url, json=data, auth=auth, proxies=settings.PROXIES)
+        r = self.session.post(url, json=data, auth=auth)
         if r.status_code==201:
             return True
         raise FailedRequestError(r.status_code, r.content)
@@ -131,7 +131,7 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth
-        r = self.session.post(url, json=data, auth=auth, proxies=settings.PROXIES)
+        r = self.session.post(url, json=data, auth=auth)
         if r.status_code==201:
             return True
         raise FailedRequestError(r.status_code, r.content)
@@ -160,7 +160,7 @@ class Geoserver():
             data +=     "<password>" + wmspassword + "</password>"
         data += "</wmsStore>"
         
-        r = self.session.post(url, data=data, headers=headers, auth=auth, proxies=settings.PROXIES)
+        r = self.session.post(url, data=data, headers=headers, auth=auth)
         if r.status_code==201:
             return True
         raise UploadError(r.status_code, r.content)
@@ -188,7 +188,7 @@ class Geoserver():
         data +=     '<metadata />'
         data += '</wmsStore>'
         
-        r = self.session.put(url, data=data, headers=headers, auth=auth, proxies=settings.PROXIES)
+        r = self.session.put(url, data=data, headers=headers, auth=auth)
         if r.status_code==200:
             return True
         raise UploadError(r.status_code, r.content)
@@ -216,7 +216,7 @@ class Geoserver():
         data +=     "<coverageName>" + coverage_name + "</coverageName>"
         data += "</coverageStore>"
         
-        r = self.session.post(url, data=data, headers=headers, auth=auth, proxies=settings.PROXIES)
+        r = self.session.post(url, data=data, headers=headers, auth=auth)
         if r.status_code==202:
             return True
         raise UploadError(r.status_code, r.content)
@@ -237,7 +237,7 @@ class Geoserver():
         data +=     "<title>" + title + "</title>"
         data += "</coverage>"
         
-        r = self.session.post(url, data=data, headers=headers, auth=auth, proxies=settings.PROXIES)
+        r = self.session.post(url, data=data, headers=headers, auth=auth)
         if r.status_code==201:
             return True
         raise UploadError(r.status_code, r.content)
@@ -251,7 +251,7 @@ class Geoserver():
         else:
             auth = self.session.auth
         
-        r = self.session.post(url, auth=auth, proxies=settings.PROXIES)
+        r = self.session.post(url, auth=auth)
         if r.status_code==202:
             return True
         raise UploadError(r.status_code, r.content)
@@ -266,9 +266,9 @@ class Geoserver():
             auth = self.session.auth
         if isinstance(file, basestring):
             with open(file, 'rb') as f:
-                r = self.session.put(url, data=f, headers=headers, auth=auth, proxies=settings.PROXIES)
+                r = self.session.put(url, data=f, headers=headers, auth=auth)
         else:
-            r = self.session.put(url, data=file, headers=headers, auth=auth, proxies=settings.PROXIES)
+            r = self.session.put(url, data=file, headers=headers, auth=auth)
         if r.status_code==201:
             return True
         raise UploadError(r.status_code, r.content)
@@ -314,7 +314,7 @@ class Geoserver():
         else:
             auth = self.session.auth
             
-        r = self.session.put(url, json=data, auth=auth, proxies=settings.PROXIES)
+        r = self.session.put(url, json=data, auth=auth)
         if r.status_code==200:
             return True
         
@@ -361,7 +361,7 @@ class Geoserver():
         else:
             auth = self.session.auth
         
-        r = self.session.put(url, headers=headers, auth=auth, data=bs_data, proxies=settings.PROXIES)
+        r = self.session.put(url, headers=headers, auth=auth, data=bs_data)
         if r.status_code==200:
             return True
         
@@ -374,7 +374,7 @@ class Geoserver():
                 auth = (user, password)
             else:
                 auth = self.session.auth
-            response = self.session.post(url, data=params, auth=auth, proxies=settings.PROXIES)
+            response = self.session.post(url, data=params, auth=auth)
             return response 
         
         except Exception as e:
@@ -387,7 +387,7 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth
-        r = self.session.get(url, auth=auth, proxies=settings.PROXIES)
+        r = self.session.get(url, auth=auth)
         return r.json()
     
     
@@ -404,7 +404,7 @@ class Geoserver():
                 auth = (user, password)
             else:
                 auth = self.session.auth
-            r = self.session.get(url, auth=auth, proxies=settings.PROXIES)
+            r = self.session.get(url, auth=auth)
             json = r.json()
             
             
@@ -427,7 +427,7 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth
-        r = self.session.get(url, auth=auth, proxies=settings.PROXIES)
+        r = self.session.get(url, auth=auth)
         json = r.json()
         
         if json['list'] and json['list']['string']:
@@ -442,7 +442,7 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth
-        r = self.session.get(url, auth, proxies=settings.PROXIES)
+        r = self.session.get(url, auth)
         return r.json()
     
     def delete_coveragestore(self, workspace, coveragestore, purge=None, recurse=False, user=None, password=None):
@@ -456,7 +456,7 @@ class Geoserver():
             params['purge'] = purge
         if recurse:
             params['recurse'] = "true" 
-        r = self.session.delete(url, params=params, auth=auth, proxies=settings.PROXIES)
+        r = self.session.delete(url, params=params, auth=auth)
 
     def get_coverage(self, workspace, coveragestore, coverage, user=None, password=None):
         url = self.service_url + "/workspaces/" + workspace + "/coveragestores/" + coveragestore + "/coverages/" + coverage + ".json"
@@ -464,7 +464,7 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth        
-        r = self.session.get(url, auth=auth, proxies=settings.PROXIES)
+        r = self.session.get(url, auth=auth)
         if r.status_code==200:
             return r.json()
         raise FailedRequestError(r.status_code, r.content)
@@ -475,7 +475,7 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth
-        r = self.session.get(url, auth=auth, proxies=settings.PROXIES)
+        r = self.session.get(url, auth=auth)
         if r.status_code==404:
             return None
         return r.json()
@@ -489,7 +489,7 @@ class Geoserver():
         data_str = json.dumps(json_data)
         print "json:"
         print data_str
-        r = self.session.put(url, json=json_data, auth=auth, proxies=settings.PROXIES)
+        r = self.session.put(url, json=json_data, auth=auth)
         if r.status_code==200:
             return
         raise UploadError(r.status_code, r.content)
@@ -506,7 +506,7 @@ class Geoserver():
             auth = self.session.auth
         
         data = {"featureType": {"name": feature_type, "enabled": "true"}}
-        r = self.session.put(url, json=data, auth=auth, proxies=settings.PROXIES)
+        r = self.session.put(url, json=data, auth=auth)
         if r.status_code==200:
             return
         raise UploadError(r.status_code, r.content)
@@ -523,7 +523,7 @@ class Geoserver():
             auth = self.session.auth
         
         data = {"featureType": {"name": feature_type, "enabled": "true"}}
-        r = self.session.put(url, json=data, auth=auth, proxies=settings.PROXIES)
+        r = self.session.put(url, json=data, auth=auth)
         if r.status_code==200:
             return
         raise UploadError(r.status_code, r.content)
@@ -562,7 +562,7 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth
-        r = self.session.post(url, json=data, auth=auth, proxies=settings.PROXIES)
+        r = self.session.post(url, json=data, auth=auth)
         if r.status_code==201:
             return True
         raise FailedRequestError(r.status_code, r.content)
@@ -579,9 +579,9 @@ class Geoserver():
             auth = self.session.auth
         
         # delete the layergroup if exists
-        response_get = self.session.get(self.service_url + "/layergroups/"+lg_name+".json", auth=auth, proxies=settings.PROXIES)
+        response_get = self.session.get(self.service_url + "/layergroups/"+lg_name+".json", auth=auth)
         if response_get.status_code==200:
-            r = self.session.delete(self.service_url + "/layergroups/" + lg_name + ".json", params={}, auth=auth, proxies=settings.PROXIES)
+            r = self.session.delete(self.service_url + "/layergroups/" + lg_name + ".json", params={}, auth=auth)
             
         group = LayerGroup.objects.get(name__exact=lg_name)
         layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('order')
@@ -612,7 +612,7 @@ class Geoserver():
             }
             
             logger.error('[rest_geoserver] Start create_or_update_gs_layer_group petition -> ' + json.dumps(data))
-            r = self.session.post(self.service_url + "/layergroups/", json=data, auth=auth, proxies=settings.PROXIES)
+            r = self.session.post(self.service_url + "/layergroups/", json=data, auth=auth)
             logger.error('[rest_geoserver] End create_or_update_gs_layer_group petition : ' + str(r.status_code) + ' ' + str(r.content))
             if r.status_code==201:
                 return True
@@ -631,9 +631,9 @@ class Geoserver():
         
         # delete the layergroup if exists
         for toc_group in toc:
-            response_get = self.session.get(self.service_url + "/layergroups/" + toc[toc_group].get('name') + ".json", auth=auth, proxies=settings.PROXIES)
+            response_get = self.session.get(self.service_url + "/layergroups/" + toc[toc_group].get('name') + ".json", auth=auth)
             if response_get.status_code==200:
-                r = self.session.delete(self.service_url + "/layergroups/" + toc[toc_group].get('name') + ".json", params={}, auth=auth, proxies=settings.PROXIES)
+                r = self.session.delete(self.service_url + "/layergroups/" + toc[toc_group].get('name') + ".json", params={}, auth=auth)
             
             group = LayerGroup.objects.get(name__exact=toc[toc_group].get('name'))
             layers_in_group = Layer.objects.filter(layer_group_id=group.id).order_by('order')
@@ -663,7 +663,7 @@ class Geoserver():
                             }
                     }
                 }
-                r = self.session.post(self.service_url + "/layergroups/", json=data, auth=auth, proxies=settings.PROXIES)
+                r = self.session.post(self.service_url + "/layergroups/", json=data, auth=auth)
                 if r.status_code==201:
                     return True
             
@@ -679,7 +679,7 @@ class Geoserver():
         else:
             auth = self.session.auth
         
-        r = self.session.delete(self.service_url + "/layergroups/" + layer_group.name + ".json", params={}, auth=auth, proxies=settings.PROXIES)
+        r = self.session.delete(self.service_url + "/layergroups/" + layer_group.name + ".json", params={}, auth=auth)
         if r.status_code==200:
             return True
         
@@ -694,7 +694,7 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth
-        r = self.session.get(url, json={}, auth=auth, proxies=settings.PROXIES)
+        r = self.session.get(url, json={}, auth=auth)
         if r.status_code==200:
             return r._content
         raise FailedRequestError(r.status_code, r.content)
@@ -707,7 +707,7 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth
-        r = self.session.post(url, data=xml, headers=headers, auth=auth, proxies=settings.PROXIES)
+        r = self.session.post(url, data=xml, headers=headers, auth=auth)
         if r.status_code==200:
             return True
         raise FailedRequestError(r.status_code, r.content)
@@ -720,7 +720,7 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth
-        r = self.session.post(url, data=xml, headers=headers, auth=auth, proxies=settings.PROXIES)
+        r = self.session.post(url, data=xml, headers=headers, auth=auth)
         if r.status_code==200:
             return True
         raise FailedRequestError(r.status_code, r.content)
@@ -767,7 +767,7 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth
-        r = self.session.post(url, data=xml, headers=headers, auth=auth, proxies=settings.PROXIES)
+        r = self.session.post(url, data=xml, headers=headers, auth=auth)
         if r.status_code==201:
             return True
         raise FailedRequestError(r.status_code, r.content)
@@ -784,7 +784,7 @@ class Geoserver():
         headers = {'content-type': 'text/xml'}
         data_xml = "<style><name>"+style_name+"</name></style>"
         
-        r = self.session.post(url, data=data_xml, headers=headers, auth=auth, proxies=settings.PROXIES)
+        r = self.session.post(url, data=data_xml, headers=headers, auth=auth)
         if r.status_code==201:
             return True
         raise UploadError(r.status_code, r.content)
@@ -798,7 +798,7 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth
-        r = self.session.get(url, json={}, auth=auth, proxies=settings.PROXIES)
+        r = self.session.get(url, json={}, auth=auth)
         if r.status_code==200:
             return r._content
         raise FailedRequestError(r.status_code, r.content)
@@ -834,7 +834,7 @@ class Geoserver():
             #for style_list in styles_list: 
             #    stringValueElem = ET.SubElement(valuesElem, 'string')
             #    stringValueElem.text = style_list
-        r = self.session.post(url, data=ET.tostring(tree, encoding='UTF-8'), headers=headers, auth=auth, proxies=settings.PROXIES)
+        r = self.session.post(url, data=ET.tostring(tree, encoding='UTF-8'), headers=headers, auth=auth)
         if r.status_code==200:
             return True
         raise UploadError(r.status_code, r.content)
@@ -848,7 +848,7 @@ class Geoserver():
             auth = self.session.auth
         
         headers = { "content-type": "application/vnd.ogc.sld+xml" }
-        r = self.session.put(url, data=sld_body.encode('utf-8'), headers=headers, auth=auth, proxies=settings.PROXIES)
+        r = self.session.put(url, data=sld_body.encode('utf-8'), headers=headers, auth=auth)
         if r.status_code==200:
             return True
         raise UploadError(r.status_code, r.content)
@@ -867,7 +867,7 @@ class Geoserver():
             auth = (user, password)
         else:
             auth = self.session.auth
-        r = self.session.get(url, json={}, auth=auth, proxies=settings.PROXIES)
+        r = self.session.get(url, json={}, auth=auth)
         if r.status_code==200:
             return r._content
         raise FailedRequestError(r.status_code, r.content)
