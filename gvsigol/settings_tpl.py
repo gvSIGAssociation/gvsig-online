@@ -418,9 +418,11 @@ CACHE_OPTIONS = {
     'FORMATS': ['image/png'],
     'OPERATION_MODE': '##CACHE_OPERATION_MODE##'
 }
-
-PROXIES = {
-    "http"  : os.environ['HTTP_PROXY'],
-    "https" : os.environ['HTTPS_PROXY'],
-    "ftp"   : None
-}
+try:
+    PROXIES = {
+        "http"  : os.environ['HTTP_PROXY'],
+        "https" : os.environ['HTTPS_PROXY'],
+        "ftp"   : None
+        }
+except:
+    print "No proxies defined."
