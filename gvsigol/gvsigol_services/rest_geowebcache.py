@@ -86,7 +86,7 @@ class APIGeoWebCache():
         
         auth = (server.user, server.password)
         headers = {'content-type': 'application/json'}
-        response = self.session.get(api_url, headers=headers, auth=auth, proxies=settings.PROXIES)
+        response = self.session.get(api_url, headers=headers, auth=auth)
         if response.status_code==200:
             return json.loads(response.content)
         
@@ -98,7 +98,7 @@ class APIGeoWebCache():
         
         auth = (server.user, server.password)
         headers = {'content-type': 'application/json'}
-        response = self.session.get(api_url, headers=headers, auth=auth, proxies=settings.PROXIES)
+        response = self.session.get(api_url, headers=headers, auth=auth)
         if response.status_code==200:
             return json.loads(response.content)
         
@@ -153,7 +153,7 @@ class APIGeoWebCache():
         
         auth = (server.user, server.password)
         headers = {'content-type': 'text/xml'}
-        response = self.session.put(api_url, data=xml, headers=headers, auth=auth, proxies=settings.PROXIES)
+        response = self.session.put(api_url, data=xml, headers=headers, auth=auth)
         if response.status_code==200:
             return True
         
@@ -187,7 +187,7 @@ class APIGeoWebCache():
         
         auth = (server.user, server.password)
         headers = {'content-type': 'text/xml'}
-        response = self.session.post(api_url, data=xml, headers=headers, auth=auth, proxies=settings.PROXIES)
+        response = self.session.post(api_url, data=xml, headers=headers, auth=auth)
         if response.status_code==200:
             return True
         
@@ -204,7 +204,7 @@ class APIGeoWebCache():
         
         auth = (server.user, server.password)
         headers = {'content-type': 'text/xml'}
-        response = self.session.delete(api_url, headers=headers, auth=auth, proxies=settings.PROXIES)
+        response = self.session.delete(api_url, headers=headers, auth=auth)
         if response.status_code==200:
             return True
         
@@ -240,7 +240,7 @@ class APIGeoWebCache():
         
         auth = (server.user, server.password)
         headers = {'content-type': 'text/xml'}
-        response = self.session.post(api_url, data=xml, headers=headers, auth=auth, proxies=settings.PROXIES)
+        response = self.session.post(api_url, data=xml, headers=headers, auth=auth)
         if response.status_code==200:
             return True
         
@@ -270,7 +270,7 @@ class APIGeoWebCache():
         
         auth = (server.user, server.password)
         headers = {'content-type': 'text/xml'}
-        response = self.session.post(api_url, data=xml, headers=headers, auth=auth, proxies=settings.PROXIES)
+        response = self.session.post(api_url, data=xml, headers=headers, auth=auth)
         if response.status_code==200:
             return True
         
@@ -287,7 +287,7 @@ class APIGeoWebCache():
         
         auth = (server.user, server.password)
         headers = {'content-type': 'application/json'}
-        response = self.session.get(api_url, headers=headers, auth=auth, proxies=settings.PROXIES)
+        response = self.session.get(api_url, headers=headers, auth=auth)
         if response.status_code==200:
             return json.loads(response.content)
         
@@ -298,7 +298,7 @@ class APIGeoWebCache():
         
         auth = (server.user, server.password)
         headers = {'content-type': 'application/json'}
-        response = self.session.get(api_url, headers=headers, auth=auth, proxies=settings.PROXIES)
+        response = self.session.get(api_url, headers=headers, auth=auth)
         if response.status_code==200:
             return json.loads(response.content)
         
@@ -315,7 +315,7 @@ class APIGeoWebCache():
         
         auth = (server.user, server.password)
         headers = {'content-type': 'application/json'}
-        response = self.session.post(api_url, data="kill_all=all", headers=headers, auth=auth, proxies=settings.PROXIES)
+        response = self.session.post(api_url, data="kill_all=all", headers=headers, auth=auth)
         if response.status_code==200:
             return True
         
@@ -326,7 +326,7 @@ class APIGeoWebCache():
         
         auth = (server.user, server.password)
         headers = {'content-type': 'application/json'}
-        response = self.session.post(api_url, data="kill_all=all", headers=headers, auth=auth, proxies=settings.PROXIES)
+        response = self.session.post(api_url, data="kill_all=all", headers=headers, auth=auth)
         if response.status_code==200:
             return True
         
@@ -344,7 +344,7 @@ class APIGeoWebCache():
             auth = (user, password)
         else:
             auth = self.session.auth
-        r = self.session.post(url, data=xml, headers=headers, auth=auth, proxies=settings.PROXIES)
+        r = self.session.post(url, data=xml, headers=headers, auth=auth)
         
         if r.status_code==200:
             return True
@@ -364,7 +364,7 @@ class APIGeoWebCache():
         else:
             auth = self.session.auth
             
-        r = self.session.post(url, data=xml, headers=headers, auth=auth, proxies=settings.PROXIES)
+        r = self.session.post(url, data=xml, headers=headers, auth=auth)
         if r.status_code==200:
             return True
         
