@@ -1681,7 +1681,7 @@ class Geoserver():
             
         req = requests.Session()
         req.auth = (self.user, self.password)
-        response = req.post(url, data=values, verify=False)
+        response = req.post(url, data=values, verify=False, proxies=settings.PROXIES)
         root = ET.fromstring(response.text)
         numberOfFeatures = int(root.attrib['numberOfFeatures'])
         
@@ -1747,7 +1747,7 @@ class Geoserver():
         req = requests.Session()
         req.auth = (self.user, self.password)
         print ws.wms_endpoint + "?" + params
-        response = req.get(ws.wms_endpoint + "?" + params, verify=False, stream=True)
+        response = req.get(ws.wms_endpoint + "?" + params, verify=False, stream=True, proxies=settings.PROXIES)
         with open(settings.MEDIA_ROOT + "thumbnails/" + iname, 'wb') as f:
             for block in response.iter_content(1024):
                 if not block:

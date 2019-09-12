@@ -2813,7 +2813,7 @@ def get_datatable_data(request):
                     #req.auth = ('admin', 'geoserver')
 
             print wfs_url + "?" + params
-            response = req.post(wfs_url, data=values, verify=False)
+            response = req.post(wfs_url, data=values, verify=False, proxies=settings.PROXIES)
             jsonString = response.text
             geojson = json.loads(jsonString)
 
