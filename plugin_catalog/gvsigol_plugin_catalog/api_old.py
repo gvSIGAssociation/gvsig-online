@@ -22,6 +22,7 @@
 '''
 import xml.etree.ElementTree as ET
 from datetime import datetime
+from gvsigol import settings
 import requests
 
 class Geonetwork():
@@ -54,7 +55,7 @@ class Geonetwork():
             'X-XSRF-TOKEN': self.get_csrf_token()
         }
               
-        r = self.session.get(url, headers=headers)
+        r = self.session.get(url, headers=headers, proxies=settings.PROXIES)
         if r.status_code==200:
             return r.content
         raise FailedRequestError(r.status_code, r.content)
@@ -76,7 +77,7 @@ class Geonetwork():
         xml +=      u']]></data>'
         xml +=  u'</request>'
         
-        r = self.session.post(url, data=xml.encode('utf-8'), headers=headers)
+        r = self.session.post(url, data=xml.encode('utf-8'), headers=headers, proxies=settings.PROXIES)
         if r.status_code==200:
             response = ET.fromstring(r.text)
             
@@ -105,7 +106,7 @@ class Geonetwork():
             'Content-Type': 'application/xml',
         }
         csw_transaction_url = self.service_url + "/srv/eng/csw-publication"
-        csw_response = self.session.post(csw_transaction_url, headers=headers, data=metadata)
+        csw_response = self.session.post(csw_transaction_url, headers=headers, data=metadata, proxies=settings.PROXIES)
         if csw_response.status_code==200:
             tree = ET.fromstring(csw_response.text)
             ns = {'csw': 'http://www.opengis.net/cat/csw/2.0.2'}
@@ -121,11 +122,11 @@ class Geonetwork():
     def add_thumbnail(self, uuid, thumbnail_url):      
         op = "md.processing"        
         url = self.service_url + op + "?uuid=" + uuid + "&process=thumbnail-add&thumbnail_url=" + thumbnail_url       
-        r = self.session.get(url)
+        r = self.session.get(url, proxies=settings.PROXIES)
         if r.status_code==200:
             op = "md.edit"       
             url = self.service_url + op + "?uuid=" + uuid + "&process=thumbnail-add&thumbnail_url=" + thumbnail_url         
-            r = self.session.get(url)
+            r = self.session.get(url, proxies=settings.PROXIES)
             if r.status_code==200:
                 return True
                     
@@ -135,7 +136,7 @@ class Geonetwork():
     def set_metadata_privileges(self, uuid):
         url = self.service_url + "md.privileges.update?_content_type=json&_1_0=on&_1_1=on&_2_0=on&_2_3=on&uuid=" + uuid
         
-        r = self.session.get(url)
+        r = self.session.get(url, proxies=settings.PROXIES)
         if r.status_code==200:
             return True
                     
@@ -151,7 +152,7 @@ class Geonetwork():
         xml +=      '<uuid>' + lm.metadata_uuid + '</uuid>'
         xml +=  '</request>'
         
-        r = self.session.post(url, data=xml, headers=headers)
+        r = self.session.post(url, data=xml, headers=headers, proxies=settings.PROXIES)
         if r.status_code==200:
             return True
         raise FailedRequestError(r.status_code, r.content)
@@ -290,7 +291,7 @@ class Geonetwork():
 
     def get_updated_metadata(self, layer, uuid, layer_info, ds_type):
         url = self.service_url + "xml.metadata.get?uuid=" + uuid
-        md_response = self.session.get(url)
+        md_response = self.session.get(url, proxies=settings.PROXIES)
         if md_response.status_code == 200:
             extent_tuple = self.get_extent(layer_info, ds_type)
             # TODO: we can later generalize this import to call a different module according to the
