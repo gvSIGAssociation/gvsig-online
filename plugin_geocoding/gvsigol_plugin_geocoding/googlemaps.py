@@ -23,6 +23,7 @@ from django.utils.translation import ugettext as _
 from geopy.compat import urlencode
 from geopy.util import logger
 from geopy.geocoders import Nominatim as Nominatim_geocoder
+from gvsigol import settings as core_settings
 import settings
 import urllib2
 import json, requests, ast
@@ -145,7 +146,7 @@ class GoogleMaps():
 
     @staticmethod
     def get_json_from_url(url, params):
-        response = requests.get(url=url, params=params)
+        response = requests.get(url=url, params=params, proxies=core_settings.PROXIES)
         if response.status_code == 200:
             respuesta = response.content
             if respuesta.startswith('callback('):

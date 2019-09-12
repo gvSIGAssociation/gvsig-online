@@ -20,12 +20,8 @@
 @author: Jose Badia <jbadia@scolab.es>
 '''
 from django.utils.translation import ugettext as _
-from geopy.compat import urlencode
-from geopy.util import logger
 from geopy.geocoders import Nominatim as Nominatim_geocoder
-import settings
-import urllib2
-import json, requests, ast
+import json
 from urlparse import urlparse
 
 class Nominatim():
