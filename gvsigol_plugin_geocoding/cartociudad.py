@@ -52,7 +52,7 @@ class Cartociudad():
         datastore = Datastore.objects.get(id=datastore_id)
         connection_params = json.loads(datastore.connection_params)
 
-        response = requests.get(url=self.urls['configuration_url'], params=connection_params, proxies=core_settings.PROXIES)
+        response = requests.get(url=self.urls['configuration_url'], params=connection_params)
         return response.status_code == 200
 
 
@@ -156,7 +156,7 @@ class Cartociudad():
 
 
     def get_json_from_url(self, url, params):
-        response = requests.get(url=url, params=params, proxies=core_settings.PROXIES)
+        response = requests.get(url=url, params=params)
         if response.status_code == 200:
             respuesta = response.content
             if respuesta.startswith('callback('):

@@ -134,7 +134,7 @@ class CartoCiudad2():
     
     @staticmethod   
     def get_json_from_url(url, params):
-        response = requests.get(url=url, params=params, proxies=core_settings.PROXIES)
+        response = requests.get(url=url, params=params)
         if response.status_code == 200:
             respuesta = response.content
             if respuesta.startswith('callback('):
