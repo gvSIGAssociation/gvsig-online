@@ -504,10 +504,10 @@ getFeatureInfo.prototype.showPopup = function(){
 	html += '<li class="item">';
 	html += 	'<div class="feature-info">';
 	html += 		'<span style="font-size: 12px;">' + gettext('Coordinates') + ' ('+srs+'):</span>' + '<br /><span style="font-weight: bold; font-size: 12px;"> ' + coord_2 + ', '+ coord_1 + '</span>';
+	html += 		'<div style="float: right;height: 20px;width: 20px; margin-bottom:10px;" id="info-spinner"></div>';
 	html += 	'</div>';
 	html += '</li>';
 
-	
 	html += '</ul>';
 	this.popup.show(self.mapCoordinates, '<div class="popup-wrapper getfeatureinfo-popup">' + html + '</div>');
 	$(".getfeatureinfo-popup").parent().parent().children(".ol-popup-closer").unbind("click").click(function() {
@@ -530,6 +530,7 @@ getFeatureInfo.prototype.showPopup = function(){
  * TODO
  */
 getFeatureInfo.prototype.appendInfo = function(features, count){
+	$("#info-spinner").overlay();
 	var self = this;
 	var html = '';
 	for (var i in features) {
@@ -754,6 +755,8 @@ getFeatureInfo.prototype.appendInfo = function(features, count){
 	$('.external-item-fid .feature-info-label-info' + count).click(function(){
 		self.externalShowMoreInfo(this.parentNode.parentNode.dataset.fid, features, 'features');
 	});
+	
+	$("#info-spinner").overlayout();
 };
 
 /**
