@@ -91,11 +91,11 @@ layerTree.prototype.createTree = function() {
 		tree += '					</div>';
 		tree += '				</div>';
 		tree += '				<div id="baselayers-group" class="box-body" style="display: block; font-size: 12px;">';
-		tree += 					self.createEmptyBaseLayerUI();
 		for (var j=0; j<baseGroup.layers.length; j++) {	
 			var layer = baseGroup.layers[j];				
 			tree += 				self.createBaseLayerUI(layer);
 		}
+		tree += 					self.createEmptyBaseLayerUI();
 		tree += '				</div>';
 		tree += '			</li>';
 	}
