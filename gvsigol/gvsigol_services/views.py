@@ -2500,7 +2500,7 @@ def get_feature_info(request):
                     styles = []
                     if 'styles' in layer_array:
                         styles = layer_array['styles']
-                    aux_response = fut_session.get(layer_array['url'], verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+                    aux_response = fut_session.get(layer_array['url'], verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT), proxies=settings.PROXIES)
                     rs.append(is_grouped_symbology_request(request, layer_array['url'], aux_response, styles, fut_session))
                     
                 else:
@@ -2529,7 +2529,7 @@ def get_feature_info(request):
                                         break
                                         #auth2 = ('admin', 'geoserver')
     
-                    aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+                    aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT), proxies=settings.PROXIES)
                     rs.append(is_grouped_symbology_request(request, url, aux_response, styles, fut_session))
 
             i=0
