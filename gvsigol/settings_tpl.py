@@ -419,6 +419,8 @@ CACHE_OPTIONS = {
     'OPERATION_MODE': '##CACHE_OPERATION_MODE##'
 }
 try:
+    print("Proxy HTTP:"  + os.environ['HTTP_PROXY'])
+    print("Proxy HTTPS:"  + os.environ['HTTPS_PROXY'])
     PROXIES = {
         "http"  : os.environ['HTTP_PROXY'],
         "https" : os.environ['HTTPS_PROXY'],
