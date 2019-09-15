@@ -359,7 +359,7 @@ layerTree.prototype.setLayerEvents = function() {
 				if (id===layer.get("id")) {
 					selectedLayer = layer;
 				}
-			}						
+			}
 		}, this);
 		self.layerDownloads(selectedLayer);
 	});
@@ -1927,14 +1927,18 @@ layerTree.prototype.createOverlayUI = function(layer, group_visible) {
 				ui += '		<i class="fa fa-table"></i> ' + gettext('Attribute table');
 				ui += '	</a>';
 			}
-			if( layer.allow_download) {
-				ui += '	<a id="layer-downloads-' + id + '" class="btn btn-block btn-social btn-custom-tool layer-downloads-link">';
-				ui += '		<i class="fa fa-download"></i> ' + gettext('Downloads');
-				ui += '	</a>';
-			}
+		}
+		if (layer.allow_download && (viewer.core.getDownloadManager().isManagerEnabled() || (layer.wfs_url || layer.wcs_url))) {
+			ui += '	<a id="layer-downloads-' + id + '" class="btn btn-block btn-social btn-custom-tool layer-downloads-link">';
+			ui += '		<i class="fa fa-download"></i> ' + gettext('Downloads');
+			ui += '	</a>';
+		}
+		if (layer.metadata || (!layer.external)) {
 			ui += '	<a id="show-metadata-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool show-metadata-link">';
 			ui += '		<i class="fa fa-newspaper-o" aria-hidden="true"></i> ' + gettext('Metadata');
 			ui += '	</a>';
+		}
+		if (!layer.external) {
 			ui += '	<a id="zoom-to-layer-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool zoom-to-layer">';
 			ui += '		<i class="fa fa-search" aria-hidden="true"></i> ' + gettext('Zoom to layer');
 			ui += '	</a>';
@@ -1978,7 +1982,6 @@ layerTree.prototype.zoomToLayer = function(layer) {
 	var layer_name = layer.layer_name;
 
 	var url = layer.wms_url+'?request=GetCapabilities&service=WMS';
-	console.log(url);
 	var parser = new ol.format.WMSCapabilities();
 	$.ajax(url).then(function(response) {
 		   var result = parser.read(response);
@@ -2019,34 +2022,7 @@ layerTree.prototype.setEditionBar = function(editionbar) {
  * TODO
  */
 layerTree.prototype.layerDownloads = function(layer) {
-	if (!layer.baselayer) {
-		if (layer.wfs_url) {
-			var shapeLink = layer.wfs_url + '?service=WFS&request=GetFeature&version=1.0.0&outputFormat=shape-zip&typeName=' + layer.layer_name;
-			var gmlLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=GML3&typeName=' + layer.layer_name;
-			var csvLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=csv&typeName=' + layer.layer_name;
-			var ui = '';
-			ui += '<div class="row">';
-			ui += 	'<div class="col-md-12 form-group">';	
-			ui += 	'<span>' + gettext('Download links') + '</span>';
-			ui += 	'</div>';
-			ui += '</div>';
-			ui += '<div class="row">';
-			ui += 	'<div class="col-md-4 form-group">';	
-			ui += 		'<i style="margin-right: 10px;" class="fa fa-download"></i><a href="' + shapeLink + '">' + gettext('Download shapefile') + '</a>';
-			ui += 	'</div>';
-			ui += 	'<div class="col-md-4 form-group">';	
-			ui += 		'<i style="margin-right: 10px;" class="fa fa-download"></i><a href="' + csvLink + '">' + gettext('Download CSV') + '</a>';
-			ui += 	'</div>';
-			ui += 	'<div class="col-md-4 form-group">';	
-			ui += 		'<i style="margin-right: 10px;" class="fa fa-download"></i><a target="_blank" href="' + gmlLink + '">' + gettext('Download GML') + '</a>';
-			ui += 	'</div>';
-			ui += '</div>';
-			
-			$('#float-modal .modal-body').empty();
-			$('#float-modal .modal-body').append(ui);
-			$('#float-modal').modal('show');
-		}						
-	}
+	viewer.core.getDownloadManager().layerDownloads(layer);
 };
 
 /**
@@ -2064,7 +2040,7 @@ layerTree.prototype.showMetadata = function(layer) {
 		success: function(response){
 			if ("html" in response) {
 				$('#float-modal .modal-title').empty();
-				$('#float-modal .modal-title').html(gettext("Details"));
+				$('#float-modal .modal-title').html(gettext('Layer metadata'));
 				$('#float-modal .modal-body').empty();
 				$('#float-modal .modal-body').html(response['html']);
 				$('#float-modal').modal('show');
@@ -2084,7 +2060,7 @@ layerTree.prototype.showMetadata = function(layer) {
 				
 				var buttons = '';
 				buttons += '<button id="float-modal-cancel-metadata" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
-				if (layer.metadata != '') {
+				if (layer.metadata_url != '') {
 					buttons += '<button id="float-modal-show-metadata" type="button" class="btn btn-default">' + gettext('Show in geonetwork') + '</button>';
 				}
 				
@@ -2095,7 +2071,7 @@ layerTree.prototype.showMetadata = function(layer) {
 				
 				var self = this;	
 				$('#float-modal-show-metadata').on('click', function () {
-					var win = window.open(layer.metadata, '_blank');
+					var win = window.open(layer.metadata_url, '_blank');
 					  win.focus();
 					
 					$('#float-modal').modal('hide');

@@ -544,11 +544,14 @@ viewer.core = {
 			wmsLayer.wms_url = layerConf.wms_url;
 			wmsLayer.wms_url_no_auth = layerConf.wms_url_no_auth;
 			wmsLayer.wfs_url = layerConf.wfs_url;
+			wmsLayer.wcs_url = layerConf.wcs_url;
 			wmsLayer.wfs_url_no_auth = layerConf.wfs_url_no_auth;
 			wmsLayer.cache_url = layerConf.cache_url;
 			wmsLayer.title = layerConf.title;
 			wmsLayer.abstract = layerConf.abstract;
-			wmsLayer.metadata = layerConf.metadata;
+			console.log(layerConf);
+			wmsLayer.metadata = layerConf.metadata || '';
+			wmsLayer.metadata_url = layerConf.metadata_url | '';
 			wmsLayer.legend = layerConf.legend;
 			wmsLayer.legend_no_auth = layerConf.legend_no_auth;
 			wmsLayer.legend_graphic = layerConf.legend_graphic;
@@ -805,6 +808,14 @@ viewer.core = {
     	}
 
     	return this.selectedFeatureSource;
-    }
+    },
+    
+
+	getDownloadManager: function() {
+		if (this.downloadManager === undefined) {
+			this.downloadManager = new DownloadManagerClientUI();
+		}
+		return this.downloadManager;
+	}
 
 }

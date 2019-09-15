@@ -936,11 +936,15 @@ def project_get_conf(request):
                             layer['opacity'] = 1
                             layer['wms_url'] = core_utils.get_wms_url(request, workspace)
                             layer['wms_url_no_auth'] = workspace.wms_endpoint
-                            layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
-                            layer['wfs_url_no_auth'] = workspace.wfs_endpoint
+                            if datastore.type.startswith('v_'):
+                                layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
+                                layer['wfs_url_no_auth'] = workspace.wfs_endpoint
+                            elif datastore.type.startswith('c_'):
+                                layer['wcs_url'] = workspace.wcs_endpoint
                             layer['namespace'] = workspace.uri
                             layer['workspace'] = workspace.name
-                            layer['metadata'] = core_utils.get_catalog_url(request, l)
+                            layer['metadata'] = core_utils.get_layer_metadata_uuid(l)
+                            layer['metadata_url'] = core_utils.get_catalog_url_from_uuid(request, layer['metadata'])
                             if l.cached:
                                 layer['cache_url'] = core_utils.get_cache_url(request, workspace)
                             else:
@@ -1012,6 +1016,8 @@ def project_get_conf(request):
                     layer['queryable'] = l.queryable
                     layer['cached'] = l.cached
                     layer['type'] = l.type
+                    layer['metadata'] = core_utils.get_layer_metadata_uuid(l)
+                    layer['metadata_url'] = core_utils.get_catalog_url_from_uuid(request, layer['metadata'])
                     
                     if l.cached:
                         if l.external_params:
