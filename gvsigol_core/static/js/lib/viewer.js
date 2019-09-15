@@ -549,7 +549,6 @@ viewer.core = {
 			wmsLayer.cache_url = layerConf.cache_url;
 			wmsLayer.title = layerConf.title;
 			wmsLayer.abstract = layerConf.abstract;
-			console.log(layerConf);
 			wmsLayer.metadata = layerConf.metadata || '';
 			wmsLayer.metadata_url = layerConf.metadata_url | '';
 			wmsLayer.legend = layerConf.legend;
@@ -813,7 +812,7 @@ viewer.core = {
 
 	getDownloadManager: function() {
 		if (this.downloadManager === undefined) {
-			this.downloadManager = new DownloadManagerClientUI();
+			this.downloadManager = new DownloadManagerUI();
 		}
 		return this.downloadManager;
 	}
