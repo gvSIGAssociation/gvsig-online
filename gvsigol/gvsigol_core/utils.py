@@ -394,20 +394,31 @@ def get_catalog_url(request, layer):
         url = catalog_settings.CATALOG_URL
         try: 
             lm = LayerMetadata.objects.get(layer=layer)
-            if 'username' in request.session:
-                if request.session['username'] is not None and request.session['password'] is not None:
-                    split_catalog_url = url.split('//')
-                    catalog_url = split_catalog_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_catalog_url[1]  + 'catalog.search#/metadata/' + lm.metadata_uuid
-            else:
-                catalog_url = url + 'catalog.search#/metadata/' + lm.metadata_uuid
+            catalog_url = get_catalog_url_from_uuid(request, lm.metadata_uuid, url)
         except Exception as e:
             pass
         
     return catalog_url
 
-def get_layer_metadata_uuid(layer):   
-    if 'gvsigol_plugin_catalog' in settings.INSTALLED_APPS:
+def get_catalog_url_from_uuid(request, metadata_uuid, baseUrl=None):
+    metadata_url = ''
+    if not baseUrl and 'gvsigol_plugin_catalog' in settings.INSTALLED_APPS:
         from gvsigol_plugin_catalog import settings as catalog_settings
+        baseUrl = catalog_settings.CATALOG_URL
+    try:
+        if 'username' in request.session:
+            if request.session['username'] is not None and request.session['password'] is not None:
+                split_catalog_url = baseUrl.split('//')
+                metadata_url = split_catalog_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_catalog_url[1]  + 'catalog.search#/metadata/' + metadata_uuid
+        else:
+            metadata_url = baseUrl + 'catalog.search#/metadata/' + metadata_uuid
+    except Exception as e:
+        pass
+        
+    return metadata_url
+
+def get_layer_metadata_uuid(layer):
+    if 'gvsigol_plugin_catalog' in settings.INSTALLED_APPS:
         from gvsigol_plugin_catalog.models import  LayerMetadata
         
         try: 

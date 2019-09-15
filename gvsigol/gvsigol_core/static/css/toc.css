@@ -95,3 +95,11 @@
 	font-size: 12px;
     font-weight: 300;
 }
+
+.download-btn {
+	text-align: center;
+}
+
+.download-btn > .fa {
+	color: #333;
+}
