@@ -4,6 +4,7 @@
 <script type="text/javascript" src="{% static "js/catalog_map.js" %}"></script>
 <script type="text/javascript" src="{% static "js/catalog.js" %}"></script>
 
+
 <script type="text/javascript">
 if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')) {
 	
@@ -58,17 +59,17 @@ if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')) {
 	var modal = '';
 	modal += '<div class="modal fade" id="modal-catalog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">';
 	modal += '	<div class="modal-dialog" role="document" style="width:auto;margin:30px 50px 30px 50px;">';
-	modal += '		<div class="modal-content">';
+	modal += '		<div class="modal-content modal-catalog-content">';
 	modal += '			<div class="modal-header">';
 	modal += '				<button type="button" class="close" data-dismiss="modal"';
 	modal += '					aria-label="Close">';
 	modal += '					<span aria-hidden="true">&times;</span>';
 	modal += '				</button>';
-	modal += '				<h4 class="modal-catalog-title" id="myModalLabel"></h4>';
+	modal += '				<h4 class="modal-title" id="myModalLabel"></h4>';
 	modal += '			</div>';
-	modal += '			<div class="modal-catalog-body">';
+	modal += '			<div class="modal-body">';
 	modal += '			</div>';
-	modal += '			<div class="modal-catalog-footer">';
+	modal += '			<div class="modal-footer">';
 	modal += '			</div>';
 	modal += '		</div>';
 	modal += '	</div>';

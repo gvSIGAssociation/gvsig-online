@@ -1,6 +1,6 @@
 /**
  * gvSIG Online.
- * Copyright (C) 2010-2017 SCOLAB.
+ * Copyright (C) 2010-2019 SCOLAB.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -32,7 +32,7 @@ var CatalogView = function(mapViewer, config) {
 	this.catalog_panel = null;
 	this.catalog_map = null;
 	this.data = {};
-	this.config = config;
+	this.config = config || {} ;
 	this.config.facetsConfig = this.config.facetsConfig || {};
 	this.config.facetsOrder = this.config.facetsOrder || [];
 	this.config.disabledFacets = this.config.disabledFacets || [];
@@ -45,6 +45,7 @@ var CatalogView = function(mapViewer, config) {
 	$('body').on('change-to-3D-event', function() {
 		self.hidePanel();
 	});
+	
 };
 
 CatalogView.prototype.initialization = function(){
@@ -55,91 +56,97 @@ CatalogView.prototype.initialization = function(){
 	catalogPanel += '<div id="catalog_container">';
 
 	catalogPanel += '<div id="catalog_search_full" class="row">';
-	catalogPanel += '<div id="catalog_map_search" class="col-md-3">';
-	catalogPanel += '<div id="catalog_map_full">';
-	catalogPanel += '<div id="catalog_map" class="catalog_map"></div>';
-	catalogPanel += '<p class="catalog_map_text">' + gettext('Press Ctrl to mark an area') + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a id="catalog_map_clean" href="#">' + gettext('Clean') + '</a></p>';
-	catalogPanel += '</div>';
-	catalogPanel += '</div>';
-	catalogPanel += '<div id="catalog_search" class="col-md-9">';
-	catalogPanel += '	<div class="row">';
-	catalogPanel += '		<div class="col-md-offset-1 col-md-10 relative">';
-	catalogPanel += '    		<div class="input-group gn-form-any">';
-	catalogPanel += '				<input type="text" class="form-control input-lg" id="gn-any-field" placeholder="' + gettext('Search...') + '" data-typeahead="address for address in getAnySuggestions($viewValue)" data-typeahead-loading="anyLoading" data-typeahead-min-length="1" data-typeahead-focus-first="false" data-typeahead-wait-ms="300" aria-autocomplete="list" aria-expanded="false" aria-owns="typeahead-310-2994">';
-
-	catalogPanel += '				<div class="input-group-btn">';
-	catalogPanel += '					<button id="catalog-search-advanced-button" type="button" class="btn btn-default btn-lg ng-pristine ng-untouched ng-valid ng-not-empty" data-ng-model="searchObj.advancedMode" btn-checkbox="" btn-checkbox-true="1" btn-checkbox-false="0">';
-	catalogPanel += '						<i class="fa fa-ellipsis-v"></i>';
-	catalogPanel += '					</button>';
-
-	catalogPanel += '					<button id="catalog-search-button" type="button" class="btn btn-primary btn-lg">';
-	catalogPanel += '						&nbsp;&nbsp;';
-	catalogPanel += '						<i class="fa fa-search"></i>';
-	catalogPanel += '             			&nbsp;&nbsp;';
-	catalogPanel += '					</button>';
-	catalogPanel += '					<button id="catalog-clear-button" type="button" title="' + gettext('Clean current search, filters and order') + '" class="btn btn-link btn-lg">';
-	catalogPanel += '						<i class="fa fa-times"></i>';
-	catalogPanel += '					</button>';
-	catalogPanel += '				</div>';
-	catalogPanel += '			</div>';
-	catalogPanel += '		</div>';
-	catalogPanel += '		<div class="col-lg-3">';
+	catalogPanel += '	<div id="catalog_map_search" class="col-md-3">';
+	catalogPanel += '		<div id="catalog_map_full">';
+	catalogPanel += '			<div id="catalog_map" class="catalog_map"></div>';
+	catalogPanel += '			<p class="catalog_map_text">' + gettext('Press Ctrl to mark an area') + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a id="catalog_map_clean" href="#">' + gettext('Clean') + '</a></p>';
 	catalogPanel += '		</div>';
 	catalogPanel += '	</div>';
-	catalogPanel += '</div>';
+	catalogPanel += '	<div id="catalog_search" class="col-md-7">';
+	catalogPanel += '		<div class="row">';
+	catalogPanel += '			<div class="col-md-offset-1 col-md-10 relative">';
+	catalogPanel += '				<div class="input-group gn-form-any">';
+	catalogPanel += '					<input type="text" class="form-control input-lg" id="gn-any-field" placeholder="' + gettext('Search...') + '" data-typeahead="address for address in getAnySuggestions($viewValue)" data-typeahead-loading="anyLoading" data-typeahead-min-length="1" data-typeahead-focus-first="false" data-typeahead-wait-ms="300" aria-autocomplete="list" aria-expanded="false" aria-owns="typeahead-310-2994">';
+
+	catalogPanel += '					<div class="input-group-btn">';
+	catalogPanel += '						<button id="catalog-search-advanced-button" type="button" class="btn btn-default btn-lg ng-pristine ng-untouched ng-valid ng-not-empty" data-ng-model="searchObj.advancedMode" btn-checkbox="" btn-checkbox-true="1" btn-checkbox-false="0">';
+	catalogPanel += '							<i class="fa fa-ellipsis-v"></i>';
+	catalogPanel += '						</button>';
+
+	catalogPanel += '						<button id="catalog-search-button" type="button" class="btn btn-primary btn-lg">';
+	catalogPanel += '							&nbsp;&nbsp;';
+	catalogPanel += '							<i class="fa fa-search"></i>';
+	catalogPanel += '							&nbsp;&nbsp;';
+	catalogPanel += '						</button>';
+	catalogPanel += '						<button id="catalog-clear-button" type="button" title="' + gettext('Clean current search, filters and order') + '" class="btn btn-link btn-lg">';
+	catalogPanel += '							<i class="fa fa-times"></i>';
+	catalogPanel += '						</button>';
+	catalogPanel += '					</div>';
+	catalogPanel += '				</div>';
+	catalogPanel += '			</div>';
+	catalogPanel += '			<div class="col-lg-3">';
+	catalogPanel += '			</div>';
+	catalogPanel += '		</div>';
+	catalogPanel += '	</div>';
+	if (viewer.core.getDownloadManager().isManagerEnabled()) {
+		catalogPanel += '	<div id="catalog_download_list_btn" class="col-md-1 catalog-download-list-btn">';
+		catalogPanel += '		<div class="input-group"><span class="form-control  input-lg"><span class="download_list_count">0</span><i class="fa fa-shopping-cart fa-icon-button-right"></i></span>';
+		catalogPanel += '		</div>';
+		catalogPanel += '	</div>';
+	}
 	catalogPanel += '	<div id="catalog_search_advanced" class="row">';
 	catalogPanel += '		<div class="catalog_search_advanced_col col-md-4">';
 	catalogPanel += '			<div class="">';
-	catalogPanel += '               <div class="btn-group btn-group-xs">';
-	catalogPanel += '      			     <span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Categories') + '</strong>';
-	catalogPanel += ' 		        </div>';
-	catalogPanel += ' 		        <br>';
+	catalogPanel += '				<div class="btn-group btn-group-xs">';
+	catalogPanel += '					<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Categories') + '</strong>';
+	catalogPanel += '				</div>';
+	catalogPanel += '				<br>';
 	catalogPanel += '				<input type="text" id="categoriesF" placeHolder="' + gettext('Separated by') + ' \';\'    P.ej: cat_1;cat_2;..." value="" class="form-control"/>';
-	catalogPanel += '   		</div>';
+	catalogPanel += '			</div>';
 	catalogPanel += '			<div class="">';
-	catalogPanel += '               <div class="btn-group btn-group-xs">';
-	catalogPanel += '      			     <span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Keywords') + '</strong>';
-	catalogPanel += ' 		        </div>';
-	catalogPanel += ' 		        <br>';
-	catalogPanel += '       		<input type="text" id="keywordsF" placeHolder="' + gettext('Separated by') + ' \';\'    P.ej: cat_1;cat_2;..." value="" class="form-control"/>';
-	catalogPanel += '	      	</div>';
-	catalogPanel += '      		<div class="">';
-	catalogPanel += '               <div class="btn-group btn-group-xs">';
-	catalogPanel += '      			     <span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Contact for the resource') + '</strong>';
-	catalogPanel += ' 		        </div>';
-	catalogPanel += ' 		        <br>';
-	catalogPanel += ' 			    <input type="text" id="orgNameF" placeHolder="' + gettext('Separated by') + ' \';\'    P.ej: cat_1;cat_2;..." value="" class="form-control"/>';
-	catalogPanel += '   		</div>';
-	catalogPanel += ' 		</div>';
-	catalogPanel += '    	<div class="catalog_search_advanced_col col-md-4">';
-	catalogPanel += '        <div data-gn-period-chooser="resourcesCreatedTheLast" data-date-from="searchObj.params.creationDateFrom" data-date-to="searchObj.params.creationDateTo" class="ng-isolate-scope">';
-	catalogPanel += '		<div class="btn-group btn-group-xs">';
-	catalogPanel += '      			<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Resources') + '</strong>';
-	catalogPanel += ' 		</div>';
-	catalogPanel += ' 		<br>';
-	catalogPanel += '  		<div class="row">';
-	catalogPanel += '    			<div class="col-md-6">';
-	catalogPanel += '        			<input id="catalog_resource_from" placeholder="' + gettext('From...') + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="">';
-	catalogPanel += '    			</div>';
-	catalogPanel += '    			<div class="col-md-6">';
-	catalogPanel += '        			<input id="catalog_resource_to" placeholder="' + gettext('To...') + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="">';
-	catalogPanel += '    			</div>';
-	catalogPanel += '  		</div>';
-	catalogPanel += '		<div class="btn-group btn-group-xs">';
-	catalogPanel += '      			<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Records') + '</strong>';
-	catalogPanel += ' 		</div>';
-	catalogPanel += ' 		<br>';
-	catalogPanel += '  		<div class="row">';
-	catalogPanel += '    			<div class="col-md-6">';
-	catalogPanel += '        			<input id="catalog_register_from" placeholder="' + gettext('From...') + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="">';
-	catalogPanel += '    			</div>';
-	catalogPanel += '    			<div class="col-md-6">';
-	catalogPanel += '      				<input id="catalog_register_to" placeholder="' + gettext('To...') + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="">';
-	catalogPanel += '    			</div>';
-	catalogPanel += '  		</div>';
-	catalogPanel += '	   </div>';
-	catalogPanel += '	   </div>';
-	catalogPanel += '</div>';
+	catalogPanel += '				<div class="btn-group btn-group-xs">';
+	catalogPanel += '					<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Keywords') + '</strong>';
+	catalogPanel += '				</div>';
+	catalogPanel += '				<br>';
+	catalogPanel += '				<input type="text" id="keywordsF" placeHolder="' + gettext('Separated by') + ' \';\'    P.ej: cat_1;cat_2;..." value="" class="form-control"/>';
+	catalogPanel += '			</div>';
+	catalogPanel += '			<div class="">';
+	catalogPanel += '				<div class="btn-group btn-group-xs">';
+	catalogPanel += '					<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Contact for the resource') + '</strong>';
+	catalogPanel += '				</div>';
+	catalogPanel += '				<br>';
+	catalogPanel += '				<input type="text" id="orgNameF" placeHolder="' + gettext('Separated by') + ' \';\'    P.ej: cat_1;cat_2;..." value="" class="form-control"/>';
+	catalogPanel += '			</div>';
+	catalogPanel += '		</div>';
+	catalogPanel += '		<div class="catalog_search_advanced_col col-md-4">';
+	catalogPanel += '			<div data-gn-period-chooser="resourcesCreatedTheLast" data-date-from="searchObj.params.creationDateFrom" data-date-to="searchObj.params.creationDateTo" class="ng-isolate-scope">';
+	catalogPanel += '				<div class="btn-group btn-group-xs">';
+	catalogPanel += '					<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Resources') + '</strong>';
+	catalogPanel += '				</div>';
+	catalogPanel += '				<br>';
+	catalogPanel += '				<div class="row">';
+	catalogPanel += '					<div class="col-md-6">';
+	catalogPanel += '						<input id="catalog_resource_from" placeholder="' + gettext('From...') + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="">';
+	catalogPanel += '					</div>';
+	catalogPanel += '					<div class="col-md-6">';
+	catalogPanel += '						<input id="catalog_resource_to" placeholder="' + gettext('To...') + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="">';
+	catalogPanel += '					</div>';
+	catalogPanel += '				</div>';
+	catalogPanel += '				<div class="btn-group btn-group-xs">';
+	catalogPanel += '					<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Records') + '</strong>';
+	catalogPanel += '				</div>';
+	catalogPanel += '				<br>';
+	catalogPanel += '				<div class="row">';
+	catalogPanel += '					<div class="col-md-6">';
+	catalogPanel += '						<input id="catalog_register_from" placeholder="' + gettext('From...') + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="">';
+	catalogPanel += '					</div>';
+	catalogPanel += '					<div class="col-md-6">';
+	catalogPanel += '						<input id="catalog_register_to" placeholder="' + gettext('To...') + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="">';
+	catalogPanel += '					</div>';
+	catalogPanel += '				</div>';
+	catalogPanel += '			</div>';
+	catalogPanel += '		</div>';
+	catalogPanel += '	</div>';
 	catalogPanel += '</div>';
 
 
@@ -378,64 +385,57 @@ CatalogView.prototype.createResourceLink = function(links){
 	var content = '';
 	if(link.length==6){
 		var type = link[4].trim();
-		if(type.startsWith("text/")){
+		var link_url = link[2];
+		var layer_name = link[0];
+		var layer_title = link[1];
+		if(type == "OGC:WFS"){
+			var shapeLink = link_url + '?service=WFS&request=GetFeature&version=1.0.0&outputFormat=shape-zip&typeName=' + layer_name;
+			var gmlLink = link_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=GML3&typeName=' + layer_name;
+			var csvLink = link_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=csv&typeName=' + layer_name;
 			content += '<li class="catalog-link">';
-			content += '	<a href="'+link[2]+'" target="_blank">';
-			content += '		<i class="fa fa-globe" aria-hidden="true"></i>';
-			content += '		<span>' + link[1] + '</span>';
-			content += '		<div class="catalog-link-button catalog_content_button">'+gettext("Go")+'</div>';
-			content += '		<div style="clear:both"></div>';
-			content += '	</a>';
+			content += '<div class="row">';
+			content += '<div class="col-md-4 form-group">';	
+			content +=   '<i class="fa fa-file-archive-o" aria-hidden="true"></i>';
+			content +=   '<span class="catalog-link-resource"><p>' + layer_title + '<br/><span class="catalog-entry-subtitle">' + layer_name + '</span></p></span>';
+			content += '</div>';
+			content += 	'<div class="col-md-2 form-group">';	
+			content += 		'<a href="' + shapeLink + '"><div class="download-btn"><i style="margin-right: 10px;" class="fa fa-download"></i>' + gettext('Download ShapeFile') + '</div></a>';
+			content += 	'</div>';
+			content += 	'<div class="col-md-2 form-group">';	
+			content += 		'<a href="' + csvLink + '"><div class="download-btn"><i style="margin-right: 10px;" class="fa fa-download"></i>' + gettext('Download CSV') + '</div></a>';
+			content += 	'</div>';
+			content += 	'<div class="col-md-2 form-group">';	
+			content += 		'<a target="_blank" href="' + gmlLink + '"><div class="download-btn"><i style="margin-right: 10px;" class="fa fa-download"></i>' + gettext('Download GML') + '</div></a>';
+			content += 	'</div>';
+			content += '</div>';
 			content += '</li>';
-		} else if(type == "application/zip"){
-				content += '<li class="catalog-link">';
-				content += '	<a href="'+link[2]+'" target="_blank">';
-				content += '		<i class="fa fa-file-archive-o" aria-hidden="true"></i>';
-				content += '		<span class="catalog-link-resource"><p>' + link[1] + '<br/><span class="catalog-entry-subtitle">' + link[0] + '</span></p></span>';
-				content += '		<div class="catalog-link-button catalog_content_button">'+gettext("Download")+'</div>';
-				content += '		<div style="clear:both"></div>';
-				content += '	</a>';
-				content += '</li>';
-		} else if(type == "OGC:WFS"){
-					content += '<li class="catalog-link">';
-					content += '	<a href="'+link[2]+'?service=WFS&version=1.0.0&request=GetFeature&typeName='+link[0]+'&outputFormat=SHAPE-ZIP" target="_blank">';
-					content += '		<i class="fa fa-file-archive-o" aria-hidden="true"></i>';
-					content += '		<span class="catalog-link-resource"><p>' + link[1] + '<br/><span class="catalog-entry-subtitle">' + link[0] + '</span></p></span>';
-					content += '		<div class="catalog-link-button catalog_content_button">'+gettext("Download")+'</div>';
-					content += '		<div style="clear:both"></div>';
-					content += '	</a>';
-					content += '</li>';
 		} else if(type == "OGC:WCS"){
+			var wcs_link = link_url + '?service=WCS&version=2.0.0&request=GetCoverage&CoverageId='+layer_name;
 			content += '<li class="catalog-link">';
-			content += '	<a href="'+link[2]+'?service=WCS&version=2.0.0&request=GetCoverage&CoverageId='+link[0]+'" target="_blank">';
-			content += '		<i class="fa fa-file-archive-o" aria-hidden="true"></i>';
-			content += '		<span class="catalog-link-resource"><p>' + link[1] + '<br/><span class="catalog-entry-subtitle">' + link[0] + '</span></p></span>';
-			content += '		<div class="catalog-link-button catalog_content_button">'+gettext("Download")+'</div>';
-			content += '		<div style="clear:both"></div>';
-			content += '	</a>';
+			content += '<div class="row">';
+			content += '<div class="col-md-4 form-group">';	
+			content +=   '<i class="fa fa-file-archive-o" aria-hidden="true"></i>';
+			content +=   '<span class="catalog-link-resource"><p>' + layer_title + '<br/><span class="catalog-entry-subtitle">' + layer_name + '</span></p></span>';
+			content += '</div>';
+			content += 	'<div class="col-md-2 form-group">';	
+			content += 		'<a href="' + wcs_link + '"><div class="download-btn"><i style="margin-right: 10px;" class="fa fa-download"></i>' + gettext('Access raster data') + '</div></a>';
+			content += 	'</div>';
+			content += '</div>';
 			content += '</li>';
 		}
-	}
-	return content;
-}
-
-
-CatalogView.prototype.createResourceMap = function(id, links){
-	var link = links.split('|');
-	var content = '';
-	if(link.length==6){
-		var type = link[4].trim();
-		if(!type.startsWith("text/") && type != "application/zip"){
+		else if(type.startsWith("text/") || type == 'application/zip' || type == 'application/pdf'){
 			content += '<li class="catalog-link">';
-			content += '	<a>';
-			content += '		<i class="fa fa-map-o" aria-hidden="true"></i>';
-			content += '		<span class="catalog-link-resource"><p>' + link[1] + '<br/><span class="catalog-entry-subtitle">' + link[0] + '</span></p></span>';
-			content += '		<div data-id="'+ id +'" class="catalog-link-button catalog_content_button catalog_add_layer" url="'+link[2]+'" name="' + link[0] + '" title="' + link[1] + '">'+gettext("Add")+'</div>';
-			content += '		<div style="clear:both"></div>';
-			content += '	</a>';
+			content += '<div class="row">';
+			content += '<div class="col-md-6 form-group">';	
+			content +=   '<i class="fa fa-file-archive-o" aria-hidden="true"></i>';
+			content +=   '<span class="catalog-link-resource"><p>' + layer_title + '<br/><span class="catalog-entry-subtitle">' + layer_name + '</span></p></span>';
+			content += '</div>';
+			content += 	'<div class="col-md-2 form-group">';	
+			content += 		'<a href="' + link_url + '"><div class="download-btn"><i style="margin-right: 10px;" class="fa fa-download"></i>' + gettext('Access resource') + '</div></a>';
+			content += 	'</div>';
+			content += '</div>';
 			content += '</li>';
 		}
-
 	}
 	return content;
 }
@@ -532,7 +532,7 @@ CatalogView.prototype.reorder = function(event,ui) {
 	}
 };
 
-CatalogView.prototype._createOLLayer = function(url, name, title, dataId, bbox) {
+CatalogView.prototype._createOLLayer = function(url, name, title, dataId, bbox, wfs_url, wcs_url) {
 	var self = this;
 	
 	if (url.endsWith("?")) {
@@ -561,6 +561,13 @@ CatalogView.prototype._createOLLayer = function(url, name, title, dataId, bbox) 
 	catalogLayer.visible = true;
 	catalogLayer.allow_download = true;
 	catalogLayer.wms_url = url;
+	catalogLayer.metadata = '';
+	if (wcs_url) {
+		catalogLayer.wcs_url = wcs_url;
+	}
+	if (wfs_url) {
+		catalogLayer.wfs_url = wfs_url;
+	}
 	if (bbox != null && bbox.length>0) {
 		catalogLayer.bboxwgs84 = bbox;		
 	}
@@ -574,9 +581,9 @@ CatalogView.prototype._createOLLayer = function(url, name, title, dataId, bbox) 
 
 
 
-CatalogView.prototype.createLayer = function(name, title, url, dataId, bbox, group_visible) {
+CatalogView.prototype.createLayer = function(name, title, url, dataId, bbox, group_visible, wfs_url, wcs_url) {
 	var self = this;
-	var newLayer = self._createOLLayer(url, name, title, dataId, bbox);
+	var newLayer = self._createOLLayer(url, name, title, dataId, bbox, wfs_url, wcs_url);
 	
 	var groupId = "gvsigol-geonetwork-group";
 	var groupEntry = $("#"+groupId);
@@ -586,7 +593,6 @@ CatalogView.prototype.createLayer = function(name, title, url, dataId, bbox, gro
 	}
 
 	var layerTree = self.mapViewer.getLayerTree();
-	//var conf = {}
 	
 	var removeLayerButtonUI = '<a id="remove-catalog-layer-' + dataId + '" data-layerid="' + dataId + '" class="btn btn-block btn-social btn-custom-tool remove-catalog-layer-btn">';
 	removeLayerButtonUI +=    '	<i class="fa fa-times"></i> ' + gettext('Remove layer');
@@ -606,7 +612,15 @@ CatalogView.prototype.createLayer = function(name, title, url, dataId, bbox, gro
 			if (!layer.baselayer && !layer.external) {
 				if (id===layer.get("id")) {
 					selectedLayer = layer;
-					self.createDetailsPanel(selectedLayer.getSource().getParams()["dataid"]);
+					var dataid = selectedLayer.getSource().getParams()["dataid"];
+					if (dataid) {
+						// layer was created from catalog, it may not be registerd on gvSIGOL
+						self.createDetailsPanel(selectedLayer.getSource().getParams()["dataid"]);
+					}
+					else {
+						// normal layer, we can use the layer tree methods
+						viewer.core.layerTree.showMetadata(selectedLayer);
+					}
 				}
 			}
 		}, this);
@@ -779,75 +793,62 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 
 				});
 
+				if (viewer.core.getDownloadManager().isManagerEnabled()) {
+					$(".catalog-download-list-btn").unbind("click").click(function(){
+						// we will use a different modal so we create a new clientUI
+						var ui = new DownloadManagerUI('#modal-catalog', viewer.core.getDownloadManager().getClient());
+						//viewer.core.getDownloadManager().initDownloadList($('.modal-catalog-content'));
+						ui.initDownloadList();
+						$('#modal-catalog').modal('show');
+						setTimeout(function() {
+							$(ui.modalSelector).LoadingOverlay("hide");
+						}, ui.getClient().config.timeout);
+
+					});
+				}
 
 				$(".catalog_download").unbind("click").click(function(){
 					var id = $(this).attr("name");
-					$('.modal-catalog-title').html(gettext("List of downloads"));
-					var links = self.data[id].link;
-
-					var content = "<ul>";
-					var aux_content = "";
-					if(Array.isArray(links)){
-						for(var i=0; i<links.length; i++){
-							aux_content += self.createResourceLink(links[i]);
-						}
-					}else{
-						if(links){
-							aux_content += self.createResourceLink(links);
-						}
+					if (viewer.core.getDownloadManager().isManagerEnabled()) {
+						// we will use a different modal so we create a new clientUI
+						var ui = new DownloadManagerUI('#modal-catalog', viewer.core.getDownloadManager().getClient());
+						ui.layerDownloads(id);
 					}
-					content += aux_content + "<ul>";
-
-					if(aux_content.length == 0){
-						aux_content += '<div style="padding: 10px">';
-						aux_content += '<div class="no_catalog_content col-md-12">';
-						aux_content += '<i class="fa fa-ban" aria-hidden="true"></i>   ';
-						aux_content += gettext('No results found');
-						aux_content += '</div>';
-						aux_content += '<div style="clear:both"></div>';
-						aux_content += '</div>';
-
-						content = aux_content;
+					else {
+						$('#modal-catalog .modal-title').html(gettext("List of downloads"));
+						var links = self.data[id].link;
+						var content = "<ul>";
+						var aux_content = "";
+						if(Array.isArray(links)){
+							for(var i=0; i<links.length; i++){
+								aux_content += self.createResourceLink(links[i]);
+							}
+						}else{
+							if(links){
+								aux_content += self.createResourceLink(links);
+							}
+						}
+						content += aux_content + "</ul>";
+	
+						if(aux_content.length == 0){
+							aux_content += '<div style="padding: 10px">';
+							aux_content += '<div class="no_catalog_content col-md-12">';
+							aux_content += '<i class="fa fa-ban" aria-hidden="true"></i>   ';
+							aux_content += gettext('No results found');
+							aux_content += '</div>';
+							aux_content += '<div style="clear:both"></div>';
+							aux_content += '</div>';
+	
+							content = aux_content;
+						}
+	
+						$('#modal-catalog .modal-body').html(content);
+						$('#modal-catalog').modal('show');
 					}
-
-					$('.modal-catalog-body').html(content);
-					$('#modal-catalog').modal('show');
 				});
 
 				$(".catalog_linkmap").unbind("click").click(function(){
 					var id = $(this).attr("name");
-//					$('.modal-catalog-title').html(gettext("List of layers"));
-//					var links = self.data[id].link;
-
-//					var content = "<ul>";
-//					var aux_content = "";
-//					if(Array.isArray(links)){
-//					for(var i=0; i<links.length; i++){
-//					aux_content += self.createResourceMap(id, links[i]);
-//					}
-//					}else{
-//					if(links){
-//					aux_content += self.createResourceMap(id, links);
-//					}
-//					}
-//					content += aux_content + "<ul>";
-
-//					if(aux_content.length == 0){
-//					aux_content += '<div style="padding: 10px">';
-//					aux_content += '<div class="no_catalog_content col-md-12">';
-//					aux_content += '<i class="fa fa-ban" aria-hidden="true"></i>   ';
-//					aux_content += 'No se encontraron resultados';
-//					aux_content += '</div>';
-//					aux_content += '<div style="clear:both"></div>';
-//					aux_content += '</div>';
-
-//					content = aux_content;
-//					}
-
-//					$('.modal-catalog-body').html(content);
-//					$('#modal-catalog').modal('show');
-
-//					self.linkResourceMap();
 
 					var links = self.data[id].link;
 					try {
@@ -870,35 +871,44 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 					if(!Array.isArray(links)){
 						links = [links];
 					}
+					var wms = {};
+					var wcs_url = '';
+					var wfs_url = '';
 					for(var i=0; i<links.length; i++){
 						var link = links[i].split('|');
 						var content = '';
 						if(link.length==6){
 							var type = link[3].trim().substring(0, 7);
 							if(type == "OGC:WMS"){
-								var url = link[2];
-								var name = link[0];
-								var title = link[1];
-								if (title=="") {
-									title = self.data[id].title;
+								wms.url = link[2];
+								wms.name = link[0];
+								wms.title = link[1];
+								if (wms.title=="") {
+									wms.title = self.data[id].title;
 								}
-								if (title=="") {
-									title = name;
+								if (wms.title=="") {
+									wms.title = name;
 								}
-
-								var group_visible = false;
-								group_visible = $("#layergroup-geonetwork-group").is(":checked");
-								try {
-									self.createLayer(name, title, url, id, geoBox, group_visible);
-								}
-								catch(error) {
-									console.log(error);
-								}
-								
-								self.hidePanel();
-								break;
+							}
+							else if (type == "OGC:WFS"){
+								wfs_url = link[2];
+							}
+							else if (type == "OGC:WCS"){
+								wcs_url = link[2];
 							}
 						}
+					}
+					if (wms.url) {
+						var group_visible = false;
+						group_visible = $("#layergroup-geonetwork-group").is(":checked");
+						try {
+							self.createLayer(wms.name, wms.title, wms.url, id, geoBox, group_visible, wfs_url, wcs_url);
+						}
+						catch(error) {
+							console.log(error);
+						}
+						
+						self.hidePanel();
 					}
 				});
 
@@ -925,38 +935,6 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 
 CatalogView.prototype.createDetailsPanel = function(id){
 	var self = this;
-
-//	var links = self.data[id].link;
-//	var content = "";	
-//	var aux_content = "";
-//	var data = self.data[id];
-//	aux_content += '<div style="padding: 10px">';
-//	aux_content += '<ul>';
-//	for(var key in data){
-//	aux_content += '<li class="catalog-link">';
-//	aux_content += '	<a href="#">';
-//	aux_content += '		<span class="catalog-link-resource"><p style="font-weight: bold">' + key + '';
-//	if(Array.isArray(data[key])){
-//	aux_content += '		</p></span>';
-//	aux_content += '		<div style="clear:both"></div>';
-//	aux_content += '		<ul>';
-//	for(var i=0; i<data[key].length; i++){
-//	aux_content += '		<li class="catalog-link-li catalog-entry-subtitle">' + data[key][i] + '</li>';
-//	}
-//	aux_content += '		</ul>';
-//	}else{
-//	aux_content += '		</p></span>';
-//	aux_content += '		<div style="clear:both"></div>';
-//	aux_content += '		<span class="catalog-entry-subtitle" style="float:left; margin-left: 20px">' + data[key] + '</span>';
-//	aux_content += '		<div style="clear:both"></div>';
-//	}
-
-//	aux_content += '	</a>';
-//	aux_content += '</li>';
-//	}
-//	aux_content += '</ul>';
-//	aux_content += '</div>';
-
 	$.ajax({
 		type: "GET",
 		async: false,
@@ -966,9 +944,9 @@ CatalogView.prototype.createDetailsPanel = function(id){
 		},
 		success: function(response){
 			if ("html" in response) {
-				$('.modal-catalog-title').html(gettext("Details"));
-				$('.modal-catalog-body').html(response['html']);
-				$('.modal-catalog-footer').html("");
+				$('#modal-catalog .modal-title').html(gettext("Details"));
+				$('#modal-catalog .modal-body').html(response['html']);
+				$('#modal-catalog .modal-footer').html("");
 				$('#modal-catalog').modal('show');
 			} else {
 				alert('Error');
@@ -980,9 +958,6 @@ CatalogView.prototype.createDetailsPanel = function(id){
 			console.log(jqXHR);
 		}
 	});
-
-
-
 }
 
 CatalogView.prototype.showPanel = function(){

@@ -9,8 +9,13 @@
 }
 
 #catalog_search {
-	padding: 20px 0px 20px 0px;
+	padding: 20px 0px 20px 30px;
 	background-color: #f4f4f4;
+}
+
+#catalog_download_list_btn {
+	padding: 20px 30px 20px 30px;
+	background-color: #f4f4f4;	
 }
 
 #catalog_search_full{
@@ -33,10 +38,18 @@
 .catalog-link{
 	list-style-type:none;
 	padding: 10px 0px;
+	margin-top: 8px;
 }
 
+/*
 .catalog-link:hover{
 	background-color: #eee;
+}*/
+
+
+.download-btn {
+	
+	line-height: 35px;
 }
 
 .catalog-link i{
@@ -54,7 +67,7 @@
 }
 .catalog-link span{
     float: left;
-    margin-top: 8px;
+    margin-top: 0px;
 }
 
 .catalog-link span.catalog-link-resource{

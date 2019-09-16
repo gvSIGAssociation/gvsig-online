@@ -278,7 +278,18 @@ def get_metadata_as_html(response):
     html += '</div>'
     return html
 
-def get_metadata(request, metadata_uuid):
+def get_metadata(request, layer_id):
+    try:
+        theId = int(layer_id)
+        lm = LayerMetadata.objects.get(id=theId)
+        if (lm.uuid):
+            return get_metadata_from_uuid(request, lm.uuid)
+    except:
+        if (layer_id):
+            return get_metadata_from_uuid(request, layer_id)
+    return HttpResponse(status=500)
+
+def get_metadata_from_uuid(request, metadata_uuid):
     # FIXME: we should only query using admin user if the user is admin or staff
     geonetwork_instance = geonetwork_service.get_instance()
     if geonetwork_instance != None and request.method == 'GET':
