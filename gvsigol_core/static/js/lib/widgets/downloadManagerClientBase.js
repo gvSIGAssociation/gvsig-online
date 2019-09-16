@@ -33,15 +33,6 @@ if (typeof DownloadManagerUI === 'undefined') {
 
 DownloadManagerUI.prototype.isManagerEnabled = function() {
 	return viewer.core.ifToolInConf('gvsigol_plugin_downloadman');
-	/*
-	console.log(new Error().stack);
-	console.log(DownloadManagerUI.layerAvailableDownloads);
-	console.log(this.layerAvailableDownloads);
-	console.log(viewer.core.getDownloadManager().layerAvailableDownloads);
-	// prototype will be extended by the download manager plugin when available
-	if (this.layerAvailableDownloads === undefined) {
-		return false;
-	}*/
 }
 
 DownloadManagerUI.prototype.layerDownloads = function(layer) {
@@ -54,10 +45,7 @@ DownloadManagerUI.prototype.layerDownloads = function(layer) {
 }
 
 DownloadManagerUI.prototype.layerDirectDownloads = function(layer) {
-	console.log(layer);
 	if (!layer.baselayer) {
-		console.log(layer.wfs_url);
-		console.log(layer.wcs_url)
 		if (layer.wfs_url) {
 			var shapeLink = layer.wfs_url + '?service=WFS&request=GetFeature&version=1.0.0&outputFormat=shape-zip&typeName=' + layer.layer_name;
 			var gmlLink = layer.wfs_url + '?service=WFS&version=1.1.0&request=GetFeature&outputFormat=GML3&typeName=' + layer.layer_name;
