@@ -88,12 +88,6 @@ CatalogView.prototype.initialization = function(){
 	catalogPanel += '			</div>';
 	catalogPanel += '		</div>';
 	catalogPanel += '	</div>';
-	if (viewer.core.getDownloadManager().isManagerEnabled()) {
-		catalogPanel += '	<div id="catalog_download_list_btn" class="col-md-1 catalog-download-list-btn">';
-		catalogPanel += '		<div class="input-group"><span class="form-control  input-lg"><span class="download_list_count">0</span><i class="fa fa-shopping-cart fa-icon-button-right"></i></span>';
-		catalogPanel += '		</div>';
-		catalogPanel += '	</div>';
-	}
 	catalogPanel += '	<div id="catalog_search_advanced" class="row">';
 	catalogPanel += '		<div class="catalog_search_advanced_col col-md-4">';
 	catalogPanel += '			<div class="">';
@@ -795,24 +789,14 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 
 				if (viewer.core.getDownloadManager().isManagerEnabled()) {
 					$(".catalog-download-list-btn").unbind("click").click(function(){
-						// we will use a different modal so we create a new clientUI
-						var ui = new DownloadManagerUI('#modal-catalog', viewer.core.getDownloadManager().getClient());
-						//viewer.core.getDownloadManager().initDownloadList($('.modal-catalog-content'));
-						ui.initDownloadList();
-						$('#modal-catalog').modal('show');
-						setTimeout(function() {
-							$(ui.modalSelector).LoadingOverlay("hide");
-						}, ui.getClient().config.timeout);
-
+						viewer.core.getDownloadManager().showDownloadList();
 					});
 				}
 
 				$(".catalog_download").unbind("click").click(function(){
 					var id = $(this).attr("name");
 					if (viewer.core.getDownloadManager().isManagerEnabled()) {
-						// we will use a different modal so we create a new clientUI
-						var ui = new DownloadManagerUI('#modal-catalog', viewer.core.getDownloadManager().getClient());
-						ui.layerDownloads(id);
+						viewer.core.getDownloadManager().layerDownloads(id);
 					}
 					else {
 						$('#modal-catalog .modal-title').html(gettext("List of downloads"));
