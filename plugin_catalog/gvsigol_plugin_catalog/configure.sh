@@ -15,7 +15,7 @@ fi
 
 if [ -z "$GEONETWORK_USER" ]; then
         echo "WARNING: GEONETWORK_USER is not defined, using 'admin'."
-        GEONETWORK_USER="admin"
+        GEONETWORK_USER="root"
 fi
 if [ -z "$GEONETWORK_PASS" ]; then
         if [ -n "$GVSIGOL_PASSWD" ]; then
