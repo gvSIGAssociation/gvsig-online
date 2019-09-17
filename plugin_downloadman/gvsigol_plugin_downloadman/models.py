@@ -118,8 +118,8 @@ class ResourceLocator(models.Model):
     FOLDERPATH_SOURCE_TYPE = 'FD'
     HTTP_LINK_SOURCE_TYPE = 'HT'
     
-    GEONETWORK_UUID = 'GNUU'
-    GVSIGOL_LAYER_ID = 'GVID'
+    GEONETWORK_UUID = 'GN'
+    GVSIGOL_LAYER_ID = 'GV'
     
     RESOURCE_TYPES_CHOICES = (
         (CATALOG_SOURCE_TYPE, 'Catalog'),
