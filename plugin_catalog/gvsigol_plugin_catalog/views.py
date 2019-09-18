@@ -22,8 +22,8 @@
 @author: jrodrigo <jrodrigo@scolab.es>
 '''
 
-from django.template import RequestContext
-from django.shortcuts import render_to_response, redirect, HttpResponse
+
+from django.shortcuts import render, redirect, HttpResponse
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
@@ -309,7 +309,7 @@ def get_metadata_from_uuid(request, metadata_uuid):
             else:
                 # FIXME
                 #http://localhost/gvsigonline/catalog/get_metadata/<metadata_id>/
-                return render_to_response('catalog_details.html', response, context_instance=RequestContext(request))
+                return render(request, 'catalog_details.html', response)
             
         except Exception as e:
             logger.exception(e)
