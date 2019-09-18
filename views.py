@@ -97,6 +97,7 @@ def home(request):
             else:
                 image = p.image.url
 
+            image = '/' + image
             project = {}
             project['id'] = p.id
             project['name'] = p.name
@@ -119,7 +120,7 @@ def home(request):
                 image = p.image.url.replace(settings.MEDIA_URL, '')
             else:
                 image = p.image.url
-
+            image = '/' + image
             project = {}
             project['id'] = p.id
             project['name'] = p.name
@@ -1159,7 +1160,7 @@ def export(request, pid):
         image = p.image.url.replace(settings.MEDIA_URL, '')
     else:
         image = p.image.url
-
+    image = '/' + image
     return render(request, 'app_print_template.html', {'print_logo_url': urllib.unquote(image)})
 
 def ogc_services(request):
@@ -1185,7 +1186,7 @@ def select_public_project(request):
                 image = p.image.url.replace(settings.MEDIA_URL, '')
             else:
                 image = p.image.url
-
+            image = '/' + image
             project = {}
             project['id'] = p.id
             project['name'] = p.name
