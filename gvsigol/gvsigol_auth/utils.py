@@ -20,7 +20,7 @@
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
-from django.shortcuts import render_to_response, RequestContext
+from django.shortcuts import render
 from django.core.mail import send_mail
 from django.utils.translation import ugettext as _
 from models import UserGroup, UserGroupUser
@@ -31,7 +31,7 @@ def superuser_required(function):
         if request.user.is_superuser:
             return function(request, *args, **kwargs)
         else:
-            return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
+            return render(request, 'illegal_operation.html', {})
 
     wrap.__doc__=function.__doc__
     wrap.__name__=function.__name__
@@ -42,7 +42,7 @@ def staff_required(function):
         if request.user.is_staff:
             return function(request, *args, **kwargs)
         else:
-            return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
+            return render(request, 'illegal_operation.html', {})
 
     wrap.__doc__=function.__doc__
     wrap.__name__=function.__name__

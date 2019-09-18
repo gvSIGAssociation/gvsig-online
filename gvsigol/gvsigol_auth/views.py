@@ -22,7 +22,7 @@ from gvsigol import settings
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 
-from django.shortcuts import render_to_response, RequestContext, HttpResponse, redirect
+from django.shortcuts import render, HttpResponse, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -154,7 +154,7 @@ def login_user(request):
     external_ldap_mode = True
     if 'AD' in GVSIGOL_LDAP and GVSIGOL_LDAP['AD'].__len__() > 0:
         external_ldap_mode = False
-    return render_to_response('login.html', {'errors': errors, 'external_ldap_mode': external_ldap_mode}, RequestContext(request))
+    return render(request, 'login.html', {'errors': errors, 'external_ldap_mode': external_ldap_mode})
 
 def logout_user(request):
     logout(request)
@@ -196,12 +196,12 @@ def password_reset(request):
              
         except Exception as e:            
             errors.append(_('User account does not exist') + ': ' + str(e))
-            return render_to_response('password_reset.html', {'errors': errors}, RequestContext(request))
+            return render(request, 'password_reset.html', {'errors': errors})
             
     else:
         if 'AD' in GVSIGOL_LDAP and GVSIGOL_LDAP['AD'].__len__() > 0:
             return redirect('login_user')
-        return render_to_response('password_reset.html', {}, RequestContext(request))
+        return render(request, 'password_reset.html', {})
 
 
 
@@ -212,7 +212,7 @@ def password_reset_confirmation(request, user_id, uid, token):
         'token': token
         }
             
-    return render_to_response('registration/password_reset_confirm.html', context, RequestContext(request))
+    return render(request, 'registration/password_reset_confirm.html', context)
        
 
 def password_reset_complete(request):
@@ -251,13 +251,13 @@ def password_reset_complete(request):
     else:
         errors =  _('Invalid token. Your link has expired, you need to ask for another one.')
             
-    return render_to_response('registration/password_reset_confirm.html', {'errors': errors}, RequestContext(request))
+    return render(request, 'registration/password_reset_confirm.html', {'errors': errors})
        
 
 
 
 def password_reset_success(request):
-    return render_to_response('password_reset_success.html', {}, RequestContext(request))
+    return render(request, 'password_reset_success.html', {})
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -288,7 +288,7 @@ def user_list(request):
     response = {
         'users': users
     }     
-    return render_to_response('user_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'user_list.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @superuser_required
@@ -416,17 +416,17 @@ def user_add(request):
                 errors = []
                 errors.append({'message': _("There must be at least one server")})
                 groups = auth_utils.get_all_groups()
-                return render_to_response('user_add.html', {'form': form, 'groups': groups, 'errors': errors,'show_pass_form':show_pass_form}, context_instance=RequestContext(request))
+                return render(request, 'user_add.html', {'form': form, 'groups': groups, 'errors': errors,'show_pass_form':show_pass_form})
 
         else:
             groups = auth_utils.get_all_groups()
-            return render_to_response('user_add.html', {'form': form, 'groups': groups, 'show_pass_form':show_pass_form}, context_instance=RequestContext(request))
+            return render(request, 'user_add.html', {'form': form, 'groups': groups, 'show_pass_form':show_pass_form})
         
     else:
         
         form = UserCreateForm()
         groups = auth_utils.get_all_groups()
-        return render_to_response('user_add.html', {'form': form, 'groups': groups, 'show_pass_form':show_pass_form}, context_instance=RequestContext(request))
+        return render(request, 'user_add.html', {'form': form, 'groups': groups, 'show_pass_form':show_pass_form})
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -493,7 +493,7 @@ def user_update(request, uid):
     else:
         selected_user = User.objects.get(id=int(uid))    
         groups = auth_utils.get_all_groups_checked_by_user(selected_user)
-        return render_to_response('user_update.html', {'uid': uid, 'selected_user': selected_user, 'user': request.user, 'groups': groups}, context_instance=RequestContext(request))
+        return render(request, 'user_update.html', {'uid': uid, 'selected_user': selected_user, 'user': request.user, 'groups': groups})
         
         
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -533,7 +533,7 @@ def group_list(request):
     response = {
         'groups': groups
     }     
-    return render_to_response('group_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'group_list.html', response)
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -565,14 +565,14 @@ def group_add(request):
             
             except Exception as e:
                 print str(e)
-                return render_to_response('group_add.html', {'form': form, 'message': message}, context_instance=RequestContext(request))
+                return render(request, 'group_add.html', {'form': form, 'message': message})
                 
         else:
-            return render_to_response('group_add.html', {'form': form}, context_instance=RequestContext(request))
+            return render(request, 'group_add.html', {'form': form})
         
     else:
         form = UserGroupForm()
-        return render_to_response('group_add.html', {'form': form}, context_instance=RequestContext(request))
+        return render(request, 'group_add.html', {'form': form})
          
         
 @login_required(login_url='/gvsigonline/auth/login_user/')

@@ -28,7 +28,7 @@ from forms_services import ServerForm, WorkspaceForm, DatastoreForm, LayerForm, 
 from forms_geoserver import CreateFeatureTypeForm
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
-from django.shortcuts import render_to_response, redirect, RequestContext
+from django.shortcuts import render, redirect
 import geographic_servers
 import rest_geowebcache as geowebcache
 from backend_postgis import Introspect
@@ -87,7 +87,7 @@ def server_list(request):
     response = {
         'servers': Server.objects.values()
     }
-    return render_to_response('server_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'server_list.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @superuser_required
@@ -240,7 +240,7 @@ def server_update(request, svid):
             }
             nodes.append(node)
 
-        return render_to_response('server_update.html', {'svid': svid, 'server': server, 'nodes': json.dumps(nodes)}, context_instance=RequestContext(request))
+        return render(request, 'server_update.html', {'svid': svid, 'server': server, 'nodes': json.dumps(nodes)})
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_POST
@@ -272,7 +272,7 @@ def workspace_list(request):
     response = {
         'workspaces': Workspace.objects.values()
     }
-    return render_to_response('workspace_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'workspace_list.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @superuser_required
@@ -345,7 +345,7 @@ def workspace_import(request):
         response = {
             'workspaces': querySet.values()
         }
-        return render_to_response('workspace_import.html', response, context_instance=RequestContext(request))
+        return render(request, 'workspace_import.html', response)
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -388,7 +388,7 @@ def workspace_update(request, wid):
 
     else:
         workspace = Workspace.objects.get(id=int(wid))
-        return render_to_response('workspace_update.html', {'wid': wid, 'workspace': workspace}, context_instance=RequestContext(request))
+        return render(request, 'workspace_update.html', {'wid': wid, 'workspace': workspace})
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -416,7 +416,7 @@ def datastore_list(request):
     response = {
         'datastores': datastore_list
     }
-    return render_to_response('datastore_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'datastore_list.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
@@ -606,7 +606,7 @@ def layer_list(request):
     response = {
         'layers': layer_list
     }
-    return render_to_response('layer_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'layer_list.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -1701,7 +1701,7 @@ def layer_permissions_update(request, layer_id):
         try:
             layer = Layer.objects.get(pk=layer_id)
             groups = utils.get_all_user_groups_checked_by_layer(layer)
-            return render_to_response('layer_permissions_add.html', {'layer_id': layer.id, 'name': layer.name, 'type': layer.type, 'groups': groups, 'redirect_to_layergroup': redirect_to_layergroup}, context_instance=RequestContext(request))
+            return render(request, 'layer_permissions_add.html', {'layer_id': layer.id, 'name': layer.name, 'type': layer.type, 'groups': groups, 'redirect_to_layergroup': redirect_to_layergroup})
         except Exception as e:
             return HttpResponseNotFound('<h1>Layer not found: {0}</h1>'.format(layer_id))
 
@@ -1767,7 +1767,7 @@ def layergroup_list(request):
     response = {
         'layergroups': layergroups
     }
-    return render_to_response('layergroup_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'layergroup_list.html', response)
 
 
 
@@ -1797,7 +1797,7 @@ def layergroup_add_with_project(request, project_id):
             name = request.POST.get('layergroup_name') + '_' + request.user.username
             if _valid_name_regex.search(name) == None:
                 message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
-                return render_to_response('layergroup_add.html', {'message': message, 'servers': Server.objects.values()}, context_instance=RequestContext(request))
+                return render(request, 'layergroup_add.html', {'message': message, 'servers': Server.objects.values()})
 
             exists = False
             layergroups = LayerGroup.objects.all()
@@ -1846,11 +1846,11 @@ def layergroup_add_with_project(request, project_id):
 
             else:
                 message = _(u'Layer group name already exists')
-                return render_to_response('layergroup_add.html', {'message': message, 'servers': Server.objects.values(), 'project_id': project_id, 'workspaces': Workspace.objects.values()}, context_instance=RequestContext(request))
+                return render(request, 'layergroup_add.html', {'message': message, 'servers': Server.objects.values(), 'project_id': project_id, 'workspaces': Workspace.objects.values()})
 
         else:
             message = _(u'You must enter a name for layer group')
-            return render_to_response('layergroup_add.html', {'message': message, 'servers': Server.objects.values(), 'project_id': project_id, 'workspaces': Workspace.objects.values()}, context_instance=RequestContext(request))
+            return render(request, 'layergroup_add.html', {'message': message, 'servers': Server.objects.values(), 'project_id': project_id, 'workspaces': Workspace.objects.values()})
 
         return redirect('layergroup_list')
 
@@ -1859,7 +1859,7 @@ def layergroup_add_with_project(request, project_id):
             'project_id': project_id,
             'servers': Server.objects.values()
         }
-        return render_to_response('layergroup_add.html', response, context_instance=RequestContext(request))
+        return render(request, 'layergroup_add.html', response)
 
 
 def layergroup_mapserver_toc(group, toc_string):
@@ -1953,7 +1953,7 @@ def layergroup_update(request, lgid):
             if not exists:
                 if _valid_name_regex.search(name) == None:
                     message = _("Invalid layer group name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
-                    return render_to_response('layergroup_update.html', {'message': message, 'servers': Server.objects.values()}, context_instance=RequestContext(request))
+                    return render(request, 'layergroup_update.html', {'message': message, 'servers': Server.objects.values()})
 
                 layergroup.name = name
                 layergroup.title = title
@@ -1974,7 +1974,7 @@ def layergroup_update(request, lgid):
 
             else:
                 message = _(u'Layer group name already exists')
-                return render_to_response('layergroup_update.html', {'message': message, 'layergroup': layergroup, 'servers': Server.objects.values()}, context_instance=RequestContext(request))
+                return render(request, 'layergroup_update.html', {'message': message, 'layergroup': layergroup, 'servers': Server.objects.values()})
 
     else:
         layergroup = LayerGroup.objects.get(id=int(lgid))
@@ -1988,7 +1988,7 @@ def layergroup_update(request, lgid):
             'servers': Server.objects.values()
         }
 
-        return render_to_response('layergroup_update.html', response, context_instance=RequestContext(request))
+        return render(request, 'layergroup_update.html', response)
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -2288,7 +2288,7 @@ def enumeration_list(request):
     response = {
         'enumerations': enumerations
     }
-    return render_to_response('enumeration_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'enumeration_list.html', response)
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -2337,19 +2337,19 @@ def enumeration_add(request):
                 index = len(Enumeration.objects.all())
                 enum_name = 'enm_' + str(index)
                 message = _(u'You must enter a title for enumeration')
-                return render_to_response('enumeration_add.html', {'message': message, 'enum_name': enum_name}, context_instance=RequestContext(request))
+                return render(request, 'enumeration_add.html', {'message': message, 'enum_name': enum_name})
         else:
             index = len(Enumeration.objects.all())
             enum_name = 'enm_' + str(index)
             message = _(u'Name already taken')
-            return render_to_response('enumeration_add.html', {'message': message, 'enum_name': enum_name}, context_instance=RequestContext(request))
+            return render(request, 'enumeration_add.html', {'message': message, 'enum_name': enum_name})
 
         return redirect('enumeration_list')
 
     else:
         index = len(Enumeration.objects.all())
         enum_name = 'enm_' + str(index)
-        return render_to_response('enumeration_add.html', {'enum_name': enum_name}, context_instance=RequestContext(request))
+        return render(request, 'enumeration_add.html', {'enum_name': enum_name})
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -2390,7 +2390,7 @@ def enumeration_update(request, eid):
         enum = Enumeration.objects.get(id=int(eid))
         items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('name')
 
-        return render_to_response('enumeration_update.html', {'eid': eid, 'enumeration': enum, 'items': items, 'count': len(items) + 1}, context_instance=RequestContext(request))
+        return render(request, 'enumeration_update.html', {'eid': eid, 'enumeration': enum, 'items': items, 'count': len(items) + 1})
 
 
 @csrf_exempt
@@ -2887,7 +2887,7 @@ def lock_list(request):
     response = {
         'locks': lock_list
     }
-    return render_to_response('lock_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'lock_list.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
@@ -3236,7 +3236,7 @@ def external_layer_list(request):
         response = {
             'external_layers': external_layer_list
         }
-        return render_to_response('external_layer_list.html', response, context_instance=RequestContext(request))
+        return render(request, 'external_layer_list.html', response)
     else:
         return redirect('home')
 
@@ -3606,7 +3606,7 @@ def cache_list(request):
         'layers': layer_list,
         'groups': group_list
     }
-    return render_to_response('cache_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'cache_list.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
@@ -3668,7 +3668,7 @@ def layer_cache_config(request, layer_id):
             response = {
                 'layers': layer_list
             }
-            return render_to_response('cache_list.html', response, context_instance=RequestContext(request))
+            return render(request, 'cache_list.html', response)
             
         except Exception as e:
             message = e
@@ -3692,7 +3692,7 @@ def layer_cache_config(request, layer_id):
                 "tasks": tasks['long-array-array']
             }
                 
-            return render_to_response('layer_cache_config.html', response, context_instance=RequestContext(request))
+            return render(request, 'layer_cache_config.html', response)
         
         
         
@@ -3717,7 +3717,7 @@ def layer_cache_config(request, layer_id):
             "tasks": tasks['long-array-array']
         }
             
-        return render_to_response('layer_cache_config.html', response, context_instance=RequestContext(request))
+        return render(request, 'layer_cache_config.html', response)
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
@@ -3764,7 +3764,7 @@ def group_cache_config(request, group_id):
                 'layers': layer_list,
                 'groups': group_list
             }
-            return render_to_response('cache_list.html', response, context_instance=RequestContext(request))
+            return render(request, 'cache_list.html', response)
             
         except Exception as e:
             message = e
@@ -3785,7 +3785,7 @@ def group_cache_config(request, group_id):
                 "tasks": tasks['long-array-array']
             }
                 
-            return render_to_response('group_cache_config.html', response, context_instance=RequestContext(request))
+            return render(request, 'group_cache_config.html', response)
         
         
         
@@ -3807,7 +3807,7 @@ def group_cache_config(request, group_id):
             "tasks": tasks['long-array-array']
         }
             
-        return render_to_response('group_cache_config.html', response, context_instance=RequestContext(request))
+        return render(request, 'group_cache_config.html', response)
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_POST
