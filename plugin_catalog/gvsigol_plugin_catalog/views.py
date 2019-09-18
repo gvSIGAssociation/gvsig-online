@@ -22,8 +22,8 @@
 @author: jrodrigo <jrodrigo@scolab.es>
 '''
 
-
-from django.shortcuts import render_to_response, RequestContext, redirect, HttpResponse
+from django.template import RequestContext
+from django.shortcuts import render_to_response, redirect, HttpResponse
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET

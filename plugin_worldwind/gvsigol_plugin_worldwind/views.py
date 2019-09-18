@@ -26,9 +26,10 @@ from forms import DirectoryPath
 import settings
 import services
 
+from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from gvsigol_auth.utils import superuser_required
-from django.shortcuts import render_to_response, RequestContext, redirect
+from django.shortcuts import render_to_response, redirect
 from gvsigol.settings import FILEMANAGER_DIRECTORY
 from django.http import  HttpResponse
 import json

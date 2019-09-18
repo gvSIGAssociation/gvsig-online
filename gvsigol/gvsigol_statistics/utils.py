@@ -20,9 +20,7 @@
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
-from django.shortcuts import render_to_response, RequestContext
-from django.utils.translation import ugettext as _
-import gvsigol.settings
+
 from gvsigol import settings
 
 import psycopg2
