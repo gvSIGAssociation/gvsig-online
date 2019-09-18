@@ -22,8 +22,7 @@ from gvsigol import settings
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 
-from django.template import RequestContext
-from django.shortcuts import render_to_response, HttpResponse, redirect, render
+from django.shortcuts import render, HttpResponse, redirect, render
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -249,5 +248,4 @@ def statistics_list(request):
         'users': users,
         'statistics_conf': statistics_conf
     }
-    #return render_to_response('statistics_list.html', response, context_instance=RequestContext(request))
     return render(request, 'statistics_list.html', response)
