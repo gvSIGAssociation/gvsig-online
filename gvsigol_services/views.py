@@ -3238,192 +3238,190 @@ def external_layer_list(request):
         }
         return render(request, 'external_layer_list.html', response)
     else:
-        return redirect('home')
+        external_layer_list = Layer.objects.filter(external=True).filter(created_by__exact=request.user.username)
+        response = {
+            'external_layers': external_layer_list
+        }
+        return render(request, 'external_layer_list.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def external_layer_add(request):
-    if request.user.is_superuser:
-        if request.method == 'POST':
-            form = ExternalLayerForm(request.POST)
-            
-            try:
-                is_visible = False
-                if 'visible' in request.POST:
-                    is_visible = True
+    if request.method == 'POST':
+        form = ExternalLayerForm(request.POST)
         
-                cached = False
-                if 'cached' in request.POST:
-                    cached = True
-                    
-                crs_list = []
-                for key in request.POST:
-                    if 'crs_' in key:
-                        crs_list.append({
-                            'key': key.split('_')[1],
-                            'value': request.POST[key]
-                        })
+        try:
+            is_visible = False
+            if 'visible' in request.POST:
+                is_visible = True
+    
+            cached = False
+            if 'cached' in request.POST:
+                cached = True
                 
-                layer_group = LayerGroup.objects.get(id=int(request.POST.get('layer_group')))
-                server = Server.objects.get(id=layer_group.server_id)
-                    
-                external_layer = Layer()
-                external_layer.external = True
-                external_layer.title = request.POST.get('title')
-                external_layer.layer_group_id = layer_group.id
-                external_layer.type = request.POST.get('type')
-                external_layer.visible = is_visible
-                external_layer.queryable = False
-                external_layer.cached = cached
-                external_layer.single_image = False
-                external_layer.time_enabled = False
-                external_layer.created_by = request.user.username
+            crs_list = []
+            for key in request.POST:
+                if 'crs_' in key:
+                    crs_list.append({
+                        'key': key.split('_')[1],
+                        'value': request.POST[key]
+                    })
+            
+            layer_group = LayerGroup.objects.get(id=int(request.POST.get('layer_group')))
+            server = Server.objects.get(id=layer_group.server_id)
                 
-                params = {}
-                if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
-                    params['version'] = request.POST.get('version')
-                    params['url'] = request.POST.get('url')
-                    params['cache_url'] = server.getCacheEndpoint()
-                    params['layers'] = request.POST.get('layers')
-                    params['format'] = request.POST.get('format')
-                    params['infoformat'] = request.POST.get('infoformat')
-                    
-                if external_layer.type == 'WMTS':
-                    params['matrixset'] = request.POST.get('matrixset')
-                    params['capabilities'] = request.POST.get('capabilities')
-
-                if external_layer.type == 'Bing':
-                    params['key'] = request.POST.get('key')
-                    params['layers'] = request.POST.get('layers')
-
-                if external_layer.type == 'XYZ' or external_layer.type == 'OSM':
-                    params['url'] = request.POST.get('url')
-                    params['key'] = request.POST.get('key')
-
-                external_layer.external_params = json.dumps(params)
-
-                external_layer.save()
-
-                external_layer.name = 'externallayer_' + str(external_layer.id)
-                external_layer.save()
+            external_layer = Layer()
+            external_layer.external = True
+            external_layer.title = request.POST.get('title')
+            external_layer.layer_group_id = layer_group.id
+            external_layer.type = request.POST.get('type')
+            external_layer.visible = is_visible
+            external_layer.queryable = False
+            external_layer.cached = cached
+            external_layer.single_image = False
+            external_layer.time_enabled = False
+            external_layer.created_by = request.user.username
+            
+            params = {}
+            if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
+                params['version'] = request.POST.get('version')
+                params['url'] = request.POST.get('url')
+                params['cache_url'] = server.getCacheEndpoint()
+                params['layers'] = request.POST.get('layers')
+                params['format'] = request.POST.get('format')
+                params['infoformat'] = request.POST.get('infoformat')
                 
-                if external_layer.cached:
-                    if external_layer.type == 'WMS':
-                        master_node = geographic_servers.get_instance().get_master_node(server.id)
-                        geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
-                        geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
+            if external_layer.type == 'WMTS':
+                params['matrixset'] = request.POST.get('matrixset')
+                params['capabilities'] = request.POST.get('capabilities')
 
-                return redirect('external_layer_list')
+            if external_layer.type == 'Bing':
+                params['key'] = request.POST.get('key')
+                params['layers'] = request.POST.get('layers')
 
-            except Exception as e:
-                try:
-                    msg = e.get_message()
-                except:
-                    msg = _("Error: ExternalLayer could not be published")
-                form.add_error(None, msg)
+            if external_layer.type == 'XYZ' or external_layer.type == 'OSM':
+                params['url'] = request.POST.get('url')
+                params['key'] = request.POST.get('key')
 
-        else:
-            form = ExternalLayerForm()
+            external_layer.external_params = json.dumps(params)
 
-        return render(request, 'external_layer_add.html', {'form': form, 'bing_layers': BING_LAYERS})
+            external_layer.save()
+
+            external_layer.name = 'externallayer_' + str(external_layer.id)
+            external_layer.save()
+            
+            if external_layer.cached:
+                if external_layer.type == 'WMS':
+                    master_node = geographic_servers.get_instance().get_master_node(server.id)
+                    geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
+                    geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
+
+            return redirect('external_layer_list')
+
+        except Exception as e:
+            try:
+                msg = e.get_message()
+            except:
+                msg = _("Error: ExternalLayer could not be published")
+            form.add_error(None, msg)
+
     else:
-        return redirect('home')
+        form = ExternalLayerForm()
+
+    return render(request, 'external_layer_add.html', {'form': form, 'bing_layers': BING_LAYERS})
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
 def external_layer_update(request, external_layer_id):
-    if request.user.is_superuser:
-        external_layer = Layer.objects.get(id=external_layer_id)
-        layer_group = LayerGroup.objects.get(id=external_layer.layer_group.id)
-        server = Server.objects.get(id=layer_group.server_id)
-        if request.method == 'POST':
-            form = ExternalLayerForm(request.POST)
-            try:
-                is_visible = False
-                if 'visible' in request.POST:
-                    is_visible = True
-        
-                cached = False
-                if 'cached' in request.POST:
-                    cached = True
-                    
-                crs_list = []
-                for key in request.POST:
-                    if 'crs_' in key:
-                        crs_list.append({
-                            'key': key.split('_')[1],
-                            'value': request.POST[key]
-                        })
+    external_layer = Layer.objects.get(id=external_layer_id)
+    layer_group = LayerGroup.objects.get(id=external_layer.layer_group.id)
+    server = Server.objects.get(id=layer_group.server_id)
+    if request.method == 'POST':
+        form = ExternalLayerForm(request.POST)
+        try:
+            is_visible = False
+            if 'visible' in request.POST:
+                is_visible = True
+    
+            cached = False
+            if 'cached' in request.POST:
+                cached = True
                 
-                master_node = geographic_servers.get_instance().get_master_node(server.id)   
-                if external_layer.cached and not cached:
-                    geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
+            crs_list = []
+            for key in request.POST:
+                if 'crs_' in key:
+                    crs_list.append({
+                        'key': key.split('_')[1],
+                        'value': request.POST[key]
+                    })
+            
+            master_node = geographic_servers.get_instance().get_master_node(server.id)   
+            if external_layer.cached and not cached:
+                geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
+                geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
+                
+            if not external_layer.cached and cached:
+                if external_layer.type == 'WMS':
+                    geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
                     geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
-                    
-                if not external_layer.cached and cached:
-                    if external_layer.type == 'WMS':
-                        geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
-                        geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
-                    
-                external_layer.title = request.POST.get('title')
-                external_layer.type = request.POST.get('type')
-                external_layer.layer_group_id = request.POST.get('layer_group')
-                external_layer.visible = is_visible
-                external_layer.cached = cached
-                params = {}
+                
+            external_layer.title = request.POST.get('title')
+            external_layer.type = request.POST.get('type')
+            external_layer.layer_group_id = request.POST.get('layer_group')
+            external_layer.visible = is_visible
+            external_layer.cached = cached
+            params = {}
 
-                if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
-                    params['version'] = request.POST.get('version')
-                    params['url'] = request.POST.get('url')
-                    params['layers'] = request.POST.get('layers')
-                    params['format'] = request.POST.get('format')
-                    params['infoformat'] = request.POST.get('infoformat')
-                    
-                if external_layer.type == 'WMTS':
-                    params['matrixset'] = request.POST.get('matrixset')
-                    params['capabilities'] = request.POST.get('capabilities')
+            if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
+                params['version'] = request.POST.get('version')
+                params['url'] = request.POST.get('url')
+                params['layers'] = request.POST.get('layers')
+                params['format'] = request.POST.get('format')
+                params['infoformat'] = request.POST.get('infoformat')
+                
+            if external_layer.type == 'WMTS':
+                params['matrixset'] = request.POST.get('matrixset')
+                params['capabilities'] = request.POST.get('capabilities')
 
-                if external_layer.type == 'Bing':
-                    params['key'] = request.POST.get('key')
-                    params['layers'] = request.POST.get('layers')
+            if external_layer.type == 'Bing':
+                params['key'] = request.POST.get('key')
+                params['layers'] = request.POST.get('layers')
 
-                if external_layer.type == 'XYZ' or external_layer.type == 'OSM':
-                    params['url'] = request.POST.get('url')
-                    params['key'] = request.POST.get('key')
+            if external_layer.type == 'XYZ' or external_layer.type == 'OSM':
+                params['url'] = request.POST.get('url')
+                params['key'] = request.POST.get('key')
 
 
-                external_layer.external_params = json.dumps(params)
-                external_layer.save()
-                return redirect('external_layer_list')
+            external_layer.external_params = json.dumps(params)
+            external_layer.save()
+            return redirect('external_layer_list')
 
 
-            except Exception as e:
-                try:
-                    msg = e.get_message()
-                except:
-                    msg = _("Error: externallayer could not be published")
-                form.add_error(None, msg)
+        except Exception as e:
+            try:
+                msg = e.get_message()
+            except:
+                msg = _("Error: externallayer could not be published")
+            form.add_error(None, msg)
 
-        else:
-            form = ExternalLayerForm(instance=external_layer)
-
-            if external_layer.external_params:
-                params = json.loads(external_layer.external_params)
-                for key in params:
-                    form.initial[key] = params[key]
-
-
-            response= {
-                'form': form,
-                'external_layer': external_layer,
-                'bing_layers': BING_LAYERS
-            }
-
-        return render(request, 'external_layer_update.html', response)
     else:
-        return redirect('home')
+        form = ExternalLayerForm(instance=external_layer)
+
+        if external_layer.external_params:
+            params = json.loads(external_layer.external_params)
+            for key in params:
+                form.initial[key] = params[key]
+
+
+        response= {
+            'form': form,
+            'external_layer': external_layer,
+            'bing_layers': BING_LAYERS
+        }
+
+    return render(request, 'external_layer_update.html', response)
 
 
 
@@ -3431,23 +3429,20 @@ def external_layer_update(request, external_layer_id):
 @require_POST
 @staff_required
 def external_layer_delete(request, external_layer_id):
-    if request.user.is_superuser:
-        try:
-            external_layer = Layer.objects.get(id=external_layer_id)
-            server = Server.objects.get(id=external_layer.layer_group.server_id)
-            master_node = geographic_servers.get_instance().get_master_node(server.id)
-            if external_layer.cached:
-                geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
-                geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
+    try:
+        external_layer = Layer.objects.get(id=external_layer_id)
+        server = Server.objects.get(id=external_layer.layer_group.server_id)
+        master_node = geographic_servers.get_instance().get_master_node(server.id)
+        if external_layer.cached:
+            geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
+            geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
+            
+        external_layer.delete()
                 
-            external_layer.delete()
-                    
-        except Exception as e:
-            return HttpResponse('Error deleting external_layer: ' + str(e), status=500)
+    except Exception as e:
+        return HttpResponse('Error deleting external_layer: ' + str(e), status=500)
 
-        return redirect('external_layer_list')
-    else:
-        return redirect('home')
+    return redirect('external_layer_list')
 
 def ows_get_capabilities(url, service, version, layer, remove_extra_params=True):
     if remove_extra_params:
