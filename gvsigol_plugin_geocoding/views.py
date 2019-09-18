@@ -22,8 +22,7 @@
 @author: Jose Badia <jbadia@scolab.es>
 '''
 
-from django.template import RequestContext
-from django.shortcuts import render_to_response, redirect, HttpResponse
+from django.shortcuts import render, redirect, HttpResponse
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from geocoder import Geocoder
 from django.contrib.auth.decorators import login_required
@@ -70,7 +69,7 @@ def provider_list(request):
     response = {
         'providers': providers
     }
-    return render_to_response('provider_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'provider_list.html', response)
 
 
 
