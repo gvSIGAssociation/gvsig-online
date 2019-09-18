@@ -125,11 +125,15 @@ INSTALLED_APPS = [
     'gvsigol_symbology',
     'gvsigol_filemanager',
     'gvsigol_core',
-    'gvsigol_app_test',
-    'gvsigol_plugin_worldwind',
-    'gvsigol_plugin_print',
-    'gvsigol_plugin_geocoding',
+    #'gvsigol_app_repsol',
+    'gvsigol_app_ideuy',
+    #'gvsigol_app_librapicassa',
+    #'gvsigol_plugin_worldwind',
+    #'gvsigol_plugin_print',
+    #'gvsigol_plugin_geocoding',
     'gvsigol_plugin_catalog',
+    #'gvsigol_plugin_picassa',
+    'gvsigol_plugin_uampp',
     'actstream'
 ]
 
@@ -168,13 +172,13 @@ TEMPLATES = [
         ],
         'APP_DIRS': True,
         'OPTIONS': {
-            'context_processors': [
+            'context_processors': [        
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'gvsigol_core.context_processors.global_settings',
                 'django.contrib.messages.context_processors.messages',
-                'django.core.context_processors.i18n',
+                'django.template.context_processors.i18n',
                 'django.template.context_processors.media',
             ],
         },
@@ -287,12 +291,12 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 LOGOUT_PAGE_URL = '/gvsigonline/'
 
 # Email settings
-EMAIL_BACKEND_ACTIVE = False
+EMAIL_BACKEND_ACTIVE = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.yourdomain.org'
-EMAIL_HOST_USER = 'gvsigonline@yourdomain.org'
-EMAIL_HOST_PASSWORD = 'yourpass'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'gvsigonline@scolab.es'
+EMAIL_HOST_PASSWORD = 'Ohp2leej'
 EMAIL_PORT = 587
 SITE_ID=1
 
@@ -311,7 +315,8 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
     os.path.join(BASE_DIR, 'gvsigol_statistics/static'),
-    os.path.join(BASE_DIR, 'gvsigol_app_dev/static')
+    os.path.join(BASE_DIR, 'gvsigol_app_librapicassa/static'),
+    os.path.join(BASE_DIR, 'gvsigol_plugin_picassa/static'),
 )
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -470,5 +475,12 @@ SHARED_VIEW_EXPIRATION_TIME=1 #EN DIAS
 
 CACHE_OPTIONS = {
     'GRID_SUBSETS': ['EPSG:3857', 'EPSG:4326'],
-    'FORMATS': ['image/png']
+    'FORMATS': ['image/png'],
+    'OPERATION_MODE': 'ONLY_MASTER'
+}
+
+PROXIES = {
+    "http"  : None,
+    "https" : None,
+    "ftp"   : None
 }
