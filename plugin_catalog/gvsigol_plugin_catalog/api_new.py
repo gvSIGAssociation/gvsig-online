@@ -20,7 +20,7 @@
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
-import xml.etree.ElementTree as ET
+from lxml import etree as ET
 from gvsigol import settings
 from datetime import datetime
 import requests
@@ -344,8 +344,8 @@ class Geonetwork():
         r = self.session.get(url, headers=headers, timeout=DEFAULT_TIMEOUT, proxies=settings.PROXIES)
         if r.status_code==200:
             try:
-                tree = ET.fromstring(r.text.encode('utf8'))
-                logger.debug(r.text)
+                tree = ET.fromstring(r.content)
+                logger.debug(r.content)
                 ns = {'gmd': 'http://www.isotc211.org/2005/gmd', 'gco': 'http://www.isotc211.org/2005/gco'}
                 
                 metadata_id = getTextFromXMLNode(tree, './gmd:fileIdentifier/', ns)
