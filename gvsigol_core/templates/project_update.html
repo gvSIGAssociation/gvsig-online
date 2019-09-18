@@ -50,12 +50,21 @@
 								</div>	
 						
 								<div class="row">
-									<div class="col-md-6 form-group">
+									<div class="col-md-3 form-group">
 										<label for="is_public">{% trans "Is public?" %}</label>&nbsp;&nbsp;
 										{% if project.is_public %}
 										<input type="checkbox" name="is_public"  id="is_public" checked/>
 										{% else %}
 										<input type="checkbox" name="is_public"  id="is_public"/>
+										{% endif %}								
+									</div>
+									
+									<div class="col-md-3 form-group">
+										<label for="selectable_groups">{% trans "Selectable layer groups" %}</label>&nbsp;&nbsp;
+										{% if project.selectable_groups %}
+										<input type="checkbox" name="selectable_groups"  id="selectable_groups" checked/>
+										{% else %}
+										<input type="checkbox" name="selectable_groups"  id="selectable_groups"/>
 										{% endif %}								
 									</div>
 									

@@ -105,11 +105,14 @@ layerTree.prototype.createTree = function() {
 			if (!layerGroup.basegroup) {
 				tree += '			<li class="box box-default collapsed-box" id="' + layerGroup.groupId + '">';
 				tree += '				<div class="box-header with-border">';
-				if (layerGroup.visible) {
-					tree += '					<input type="checkbox" class="layer-group" id="layergroup-' + layerGroup.groupId + '" checked>';
-				} else {
-					tree += '					<input type="checkbox" class="layer-group" id="layergroup-' + layerGroup.groupId + '">';
+				if (this.conf.selectable_groups) {
+					if (layerGroup.visible) {
+						tree += '					<input type="checkbox" class="layer-group" id="layergroup-' + layerGroup.groupId + '" checked>';
+					} else {
+						tree += '					<input type="checkbox" class="layer-group" id="layergroup-' + layerGroup.groupId + '">';
+					}
 				}
+				tree += '					<i class="fa fa-folder-o"></i>';
 				tree += '					<span class="text">' + layerGroup.groupTitle + '</span>';
 				tree += '					<div class="box-tools pull-right">';
 				tree += '						<button class="btn btn-box-tool btn-box-tool-custom group-collapsed-button" data-widget="collapse">';
@@ -132,6 +135,14 @@ layerTree.prototype.createTree = function() {
 	tree += '</div>';
 	
 	this.$container.append(tree);
+	
+	$("[data-widget='collapse']").click(function(){
+		if (this.parentNode.parentNode.children[0].className == 'fa fa-folder-o') {
+			this.parentNode.parentNode.children[0].className = 'fa fa-folder-open-o';
+		} else if (this.parentNode.parentNode.children[0].className == 'fa fa-folder-open-o') {
+			this.parentNode.parentNode.children[0].className = 'fa fa-folder-o';
+		}
+	});
 	
 	$(".layer-group").unbind("change").change(function (e) {
 		var groupId = this.id.split('-')[1]; 
