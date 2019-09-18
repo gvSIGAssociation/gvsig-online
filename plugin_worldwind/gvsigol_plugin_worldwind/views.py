@@ -26,10 +26,9 @@ from forms import DirectoryPath
 import settings
 import services
 
-from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from gvsigol_auth.utils import superuser_required
-from django.shortcuts import render_to_response, redirect
+from django.shortcuts import render, redirect
 from gvsigol.settings import FILEMANAGER_DIRECTORY
 from django.http import  HttpResponse
 import json
@@ -60,7 +59,7 @@ def list(request):
     response = {
         'providers': providers
     }     
-    return render_to_response('ww_providers_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'ww_providers_list.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @superuser_required
@@ -80,14 +79,14 @@ def add(request):
                     return redirect('list')          
         else:
             form = DirectoryPath();      
-            return render_to_response('ww_provider_add.html',  {'fm_directory': FILEMANAGER_DIRECTORY + "/", 'form': form}, context_instance=RequestContext(request))  
+            return render(request, 'ww_provider_add.html',  {'fm_directory': FILEMANAGER_DIRECTORY + "/", 'form': form})  
     except IntegrityError as e:
         form.add_error(None, _("Error: Provider already defined for this project."))    
-        return render_to_response('ww_provider_add.html',  {'fm_directory': FILEMANAGER_DIRECTORY + "/", 'form': form}, context_instance=RequestContext(request))
+        return render(request, 'ww_provider_add.html',  {'fm_directory': FILEMANAGER_DIRECTORY + "/", 'form': form})
     except Exception as e:        
         form.add_error(None, _("Error: "))
         form.add_error(None, str(e))    
-        return render_to_response('ww_provider_add.html',  {'fm_directory': FILEMANAGER_DIRECTORY + "/", 'form': form}, context_instance=RequestContext(request))
+        return render(request, 'ww_provider_add.html',  {'fm_directory': FILEMANAGER_DIRECTORY + "/", 'form': form})
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')

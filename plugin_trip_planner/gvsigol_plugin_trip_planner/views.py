@@ -18,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from gvsigol_plugin_trip_planner.models import GTFSProvider, APPMobileConfig
-from django.shortcuts import render_to_response, RequestContext, redirect, HttpResponse, get_object_or_404
+from django.shortcuts import render, redirect, HttpResponse, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
@@ -60,7 +60,7 @@ def gtfs_provider_list(request):
         'cron_hour': aux[0],
         'cron_minutes': aux[1]
     }
-    return render_to_response('gtfs_provider_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'gtfs_provider_list.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @superuser_required

@@ -21,7 +21,7 @@
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 
-from django.shortcuts import render_to_response, RequestContext
+from django.shortcuts import render
 from gvsigol import settings
 
 def index(request):
@@ -35,4 +35,4 @@ def index(request):
         from gvsigol_plugin_sync import settings as sync_settings
         resp['GVSIGOL_APP_DOWNLOAD_LINK'] = sync_settings.GVSIGOL_APP_DOWNLOAD_LINK
         
-    return render_to_response('index.html', resp, RequestContext(request))
+    return render(request, 'index.html', resp)

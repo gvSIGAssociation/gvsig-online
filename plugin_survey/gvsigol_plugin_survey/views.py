@@ -39,7 +39,7 @@ from django.views.decorators.http import require_http_methods, require_safe,requ
 from django.contrib.auth.decorators import login_required
 from gvsigol_auth.utils import superuser_required, staff_required
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render_to_response, RequestContext, redirect
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 import json
 from django.utils.translation import ugettext as _
@@ -97,7 +97,7 @@ def survey_list(request):
     response = {
         'surveys': surveys
     }
-    return render_to_response('survey_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'survey_list.html', response)
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -167,18 +167,18 @@ def survey_add(request):
             
             if name == '':
                 message = _(u'You must enter an survey name')
-                return render_to_response('survey_add.html', {'message': message, 'form': form}, context_instance=RequestContext(request))
+                return render(request, 'survey_add.html', {'message': message, 'form': form})
             
             if _valid_name_regex.search(name) == None:
                 message = _(u"Invalid survey name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
-                return render_to_response('survey_add.html', {'message': message, 'form': form}, context_instance=RequestContext(request))
+                return render(request, 'survey_add.html', {'message': message, 'form': form})
               
             if not exists:     
                 newSurvey.save()
                 return redirect('survey_update', survey_id=newSurvey.id)
             else:
                 message = _(u'Exists a project with the same name')
-                return render_to_response('survey_add.html', {'message': message, 'form': form}, context_instance=RequestContext(request))
+                return render(request, 'survey_add.html', {'message': message, 'form': form})
         
        
             #msg = _("Error: fill all the survey fields")
@@ -488,7 +488,7 @@ def survey_permissions(request, survey_id):
             survey = Survey.objects.get(pk=survey_id)
             rgroups = get_all_read_user_groups_checked_by_survey(survey)   
             wgroups = get_all_write_user_groups_checked_by_survey(survey)   
-            return render_to_response('survey_permissions_add.html', {'survey_id': survey.id, 'name': survey.name,  'read_groups': rgroups,  'write_groups': wgroups}, context_instance=RequestContext(request))
+            return render(request, 'survey_permissions_add.html', {'survey_id': survey.id, 'name': survey.name,  'read_groups': rgroups,  'write_groups': wgroups})
         except Exception as e:
             return HttpResponseNotFound('<h1>Survey not found: {0}</h1>'.format(survey_id))
 
