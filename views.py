@@ -22,7 +22,7 @@
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 
-from django.shortcuts import render_to_response, RequestContext, redirect, HttpResponse
+from django.shortcuts import render, redirect, HttpResponse
 from gvsigol_services import geographic_servers
 from gvsigol_services.models import Workspace, Datastore, Layer
 from gvsigol_services import utils as service_utils
@@ -96,7 +96,7 @@ def style_layer_list(request):
     response = {
         'layerStyles': ls
     }
-    return render_to_response('style_layer_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'style_layer_list.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -189,7 +189,7 @@ def select_legend_type(request, layer_id):
         'is_points': is_points
     }
         
-    return render_to_response('select_legend_type.html', response, context_instance=RequestContext(request))
+    return render(request, 'select_legend_type.html', response)
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -208,7 +208,7 @@ def unique_symbol_add(request, layer_id):
         
     else:                 
         response = services_unique_symbol.get_conf(request, layer_id)     
-        return render_to_response('unique_symbol_add.html', response, context_instance=RequestContext(request))
+        return render(request, 'unique_symbol_add.html', response)
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -265,7 +265,7 @@ def unique_symbol_update(request, layer_id, style_id):
                 response['property_name'] = rule_filter.get('property_name')    
          
         
-        return render_to_response('unique_symbol_update.html', response, context_instance=RequestContext(request))
+        return render(request, 'unique_symbol_update.html', response)
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -287,7 +287,7 @@ def unique_values_add(request, layer_id):
         color_ramps = ColorRampLibrary.objects.all()        
         response["ramp_libraries"] = color_ramps
         
-        return render_to_response('unique_values_add.html', response, context_instance=RequestContext(request))
+        return render(request, 'unique_values_add.html', response)
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -346,7 +346,7 @@ def unique_values_update(request, layer_id, style_id):
         color_ramps = ColorRampLibrary.objects.all()        
         response["ramp_libraries"] = color_ramps
         
-        return render_to_response('unique_values_update.html', response, context_instance=RequestContext(request))
+        return render(request, 'unique_values_update.html', response)
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -399,7 +399,7 @@ def intervals_add(request, layer_id):
         color_ramps = ColorRampLibrary.objects.all()        
         response["ramp_libraries"] = color_ramps
         
-        return render_to_response('intervals_add.html', response, context_instance=RequestContext(request))
+        return render(request, 'intervals_add.html', response)
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -502,7 +502,7 @@ def intervals_update(request, layer_id, style_id):
         color_ramps = ColorRampLibrary.objects.all()        
         response["ramp_libraries"] = color_ramps
         
-        return render_to_response('intervals_update.html', response, context_instance=RequestContext(request))
+        return render(request, 'intervals_update.html', response)
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -540,7 +540,7 @@ def clustered_points_add(request, layer_id):
         
     else:                 
         response = services_expressions.get_conf(request, layer_id) 
-        return render_to_response('clustered_points_add.html', response, context_instance=RequestContext(request))
+        return render(request, 'clustered_points_add.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -588,7 +588,7 @@ def clustered_points_update(request, layer_id, style_id):
             response['maxscale'] = int(style.maxscale)
         response['rules'] = json.dumps(rules)        
         
-        return render_to_response('clustered_points_update.html', response, context_instance=RequestContext(request))
+        return render(request, 'clustered_points_update.html', response)
     
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -607,7 +607,7 @@ def expressions_add(request, layer_id):
         
     else:                 
         response = services_expressions.get_conf(request, layer_id) 
-        return render_to_response('expressions_add.html', response, context_instance=RequestContext(request))
+        return render(request, 'expressions_add.html', response)
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -673,7 +673,7 @@ def expressions_update(request, layer_id, style_id):
             response['maxscale'] = int(style.maxscale)
         response['rules'] = json.dumps(rules)        
         
-        return render_to_response('expressions_update.html', response, context_instance=RequestContext(request))
+        return render(request, 'expressions_update.html', response)
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -695,7 +695,7 @@ def color_table_add(request, layer_id):
         response = services_color_table.get_conf(request, layer_id)    
         color_ramps = ColorRampLibrary.objects.all()        
         response["ramp_libraries"] = color_ramps 
-        return render_to_response('color_table_add.html', response, context_instance=RequestContext(request))
+        return render(request, 'color_table_add.html', response)
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -746,7 +746,7 @@ def color_table_update(request, layer_id, style_id):
         color_ramps = ColorRampLibrary.objects.all()        
         response["ramp_libraries"] = color_ramps
         
-        return render_to_response('color_table_update.html', response, context_instance=RequestContext(request))
+        return render(request, 'color_table_update.html', response)
     
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -786,7 +786,7 @@ def sld_import(request, layer_id):
             }
             
             
-        return render_to_response('sld_import.html', response, context_instance=RequestContext(request))
+        return render(request, 'sld_import.html', response)
     
     else:   
         response = {
@@ -794,7 +794,7 @@ def sld_import(request, layer_id):
             'style_name': workspace.name + '_' + layer.name + '_' + str(index)
         }
         
-        return render_to_response('sld_import.html', response, context_instance=RequestContext(request))
+        return render(request, 'sld_import.html', response)
 
 
 @staff_required
@@ -802,7 +802,7 @@ def color_ramp_list(request):
     response = {
         'color_ramps': ColorRamp.objects.all()
     }
-    return render_to_response('color_ramp_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'color_ramp_list.html', response)
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -835,13 +835,13 @@ def color_ramp_add(request, color_ramp_folder_id):
                 'message': _('You must enter a correct name for the color ramp (without uppercases, whitespaces or other special characters)')
             
             }
-            return render_to_response('color_ramp_add.html', response, context_instance=RequestContext(request))
+            return render(request, 'color_ramp_add.html', response)
     
     else:   
         response = {
             'folder': folder
         }
-        return render_to_response('color_ramp_add.html', response, context_instance=RequestContext(request))
+        return render(request, 'color_ramp_add.html', response)
   
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -863,7 +863,7 @@ def color_ramp_update(request, color_ramp_id):
                 'color_ramp': cramp,
             }
             
-            return render_to_response('color_ramp_update.html', response, context_instance=RequestContext(request))
+            return render(request, 'color_ramp_update.html', response)
      
         return redirect('/gvsigonline/symbology/color_ramp_folder_update/'+str(cramp.color_ramp_folder_id)+'/')
     
@@ -871,7 +871,7 @@ def color_ramp_update(request, color_ramp_id):
         response = {
             'color_ramp': cramp,
         }
-        return render_to_response('color_ramp_update.html', response, context_instance=RequestContext(request))
+        return render(request, 'color_ramp_update.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -908,7 +908,7 @@ def color_ramp_library_list(request):
     response = {
         'libraries': ColorRampLibrary.objects.all()
     }
-    return render_to_response('color_ramp_library_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'color_ramp_library_list.html', response)
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -928,10 +928,10 @@ def color_ramp_library_add(request):
         
         else:
             message = _('You must enter a correct name for the library (without uppercases, whitespaces or other special characters)')
-            return render_to_response('color_ramp_library_add.html', {'message': message}, context_instance=RequestContext(request))
+            return render(request, 'color_ramp_library_add.html', {'message': message})
     
     else:   
-        return render_to_response('color_ramp_library_add.html', {}, context_instance=RequestContext(request))
+        return render(request, 'color_ramp_library_add.html', {})
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -953,7 +953,7 @@ def color_ramp_library_update(request, color_ramp_library_id):
             'library': library,
             'folders': ColorRampFolder.objects.filter(color_ramp_library_id=library.id)
         }
-        return render_to_response('color_ramp_library_update.html', response, context_instance=RequestContext(request))
+        return render(request, 'color_ramp_library_update.html', response)
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -989,14 +989,14 @@ def color_ramp_library_import(request):
             elif name == '' and not 'library-file' in request.FILES:
                 message = _('You must enter a name for the library and select a file')
                 
-            return render_to_response('color_ramp_library_import.html', {'message': message}, context_instance=RequestContext(request))
+            return render(request, 'color_ramp_library_import.html', {'message': message})
         
         except Exception as e:
             message = e.message
-            return render_to_response('color_ramp_library_import.html', {'message': message}, context_instance=RequestContext(request))
+            return render(request, 'color_ramp_library_import.html', {'message': message})
     
     else:   
-        return render_to_response('color_ramp_library_import.html', {}, context_instance=RequestContext(request))
+        return render(request, 'color_ramp_library_import.html', {})
     
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -1024,14 +1024,14 @@ def color_ramp_folder_add(request, color_ramp_library_id):
                 'library': library,
                 'message': _('You must enter a correct name for the library (without uppercases, whitespaces or other special characters)')
             }
-            return render_to_response('color_ramp_folder_add.html', response, context_instance=RequestContext(request))
+            return render(request, 'color_ramp_folder_add.html', response)
     
     else:   
         library = ColorRampLibrary.objects.get(id=int(color_ramp_library_id))
         response = {
             'library': library
         }
-        return render_to_response('color_ramp_folder_add.html', response, context_instance=RequestContext(request))
+        return render(request, 'color_ramp_folder_add.html', response)
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -1048,7 +1048,7 @@ def color_ramp_folder_update(request, color_ramp_folder_id):
             'library': folder.color_ramp_library,
             'folders': ColorRampFolder.objects.filter(color_ramp_library_id=folder.color_ramp_library.id)
         }
-        return render_to_response('color_ramp_library_update.html', response, context_instance=RequestContext(request))
+        return render(request, 'color_ramp_library_update.html', response)
 
     
     else:   
@@ -1060,7 +1060,7 @@ def color_ramp_folder_update(request, color_ramp_folder_id):
             'folder': folder,
             'color_ramps': color_ramps
         }
-        return render_to_response('color_ramp_folder_update.html', response, context_instance=RequestContext(request))
+        return render(request, 'color_ramp_folder_update.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -1072,7 +1072,7 @@ def color_ramp_folder_delete(request, color_ramp_folder_id):
     response = {
         'library': library
     }
-    return render_to_response('color_ramp_library_update.html', response, context_instance=RequestContext(request))
+    return render(request, 'color_ramp_library_update.html', response)
 
 
   
@@ -1081,7 +1081,7 @@ def library_list(request):
     response = {
         'libraries': Library.objects.all()
     }
-    return render_to_response('library_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'library_list.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -1100,10 +1100,10 @@ def library_add(request, library_id):
         
         else:
             message = _('You must enter a correct name for the library (without uppercases, whitespaces or other special characters)')
-            return render_to_response('library_add.html', {'message': message}, context_instance=RequestContext(request))
+            return render(request, 'library_add.html', {'message': message})
     
     else:   
-        return render_to_response('library_add.html', {}, context_instance=RequestContext(request))
+        return render(request, 'library_add.html', {})
 
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -1148,7 +1148,7 @@ def library_update(request, library_id):
             'preview_line_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
             'preview_polygon_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
         }
-        return render_to_response('library_update.html', response, context_instance=RequestContext(request))
+        return render(request, 'library_update.html', response)
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -1175,14 +1175,14 @@ def library_import(request):
             elif name == '' and not 'library-file' in request.FILES:
                 message = _('You must enter a name for the library and select a file')
                 
-            return render_to_response('library_import.html', {'message': message}, context_instance=RequestContext(request))
+            return render(request, 'library_import.html', {'message': message})
         
         except Exception as e:
             message = e.message
-            return render_to_response('library_import.html', {'message': message}, context_instance=RequestContext(request))
+            return render(request, 'library_import.html', {'message': message})
     
     else:   
-        return render_to_response('library_import.html', {}, context_instance=RequestContext(request))
+        return render(request, 'library_import.html', {})
     
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -1321,10 +1321,10 @@ def symbol_add(request, library_id, symbol_type):
             'preview_polygon_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
         }
         if symbol_type == 'ExternalGraphicSymbolizer':
-            return render_to_response('external_graphic_add.html', response, context_instance=RequestContext(request))
+            return render(request, 'external_graphic_add.html', response)
         
         else:
-            return render_to_response('symbol_add.html', response, context_instance=RequestContext(request))
+            return render(request, 'symbol_add.html', response)
     
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -1354,7 +1354,7 @@ def symbol_update(request, symbol_id):
             response = {
                 'rule': services_library.get_symbol(r, ftype)
             }
-            return render_to_response('external_graphic_update.html', response, context_instance=RequestContext(request))
+            return render(request, 'external_graphic_update.html', response)
         
         else:
             gs = geographic_servers.get_instance().get_default_server()
@@ -1365,7 +1365,7 @@ def symbol_update(request, symbol_id):
                 'preview_line_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
                 'preview_polygon_url': master.url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
             }
-            return render_to_response('symbol_update.html', response, context_instance=RequestContext(request))
+            return render(request, 'symbol_update.html', response)
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
