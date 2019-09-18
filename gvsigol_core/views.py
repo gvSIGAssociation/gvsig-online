@@ -25,7 +25,7 @@ from gvsigol_core.models import SharedView
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 
-from django.shortcuts import render_to_response, RequestContext, HttpResponse, redirect
+from django.shortcuts import render, HttpResponse, redirect
 from models import Project, ProjectUserGroup, ProjectLayerGroup
 from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup
 from gvsigol_auth.models import UserGroup, UserGroupUser
@@ -59,7 +59,7 @@ from actstream.models import Action
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 def not_found_view(request):
-    response = render_to_response('404.html', {}, context_instance=RequestContext(request))
+    response = render(request, '404.html', {})
     response.status_code = 404
     return response
 
@@ -147,7 +147,7 @@ def home(request):
     if 'AD' in settings.GVSIGOL_LDAP and settings.GVSIGOL_LDAP['AD'].__len__() > 0:
         external_ldap_mode = False
 
-    return render_to_response('home.html', {'projects': projects, 'public_projects': public_projects, 'external_ldap_mode': external_ldap_mode}, RequestContext(request))
+    return render(request, 'home.html', {'projects': projects, 'public_projects': public_projects, 'external_ldap_mode': external_ldap_mode})
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -172,7 +172,7 @@ def project_list(request):
     response = {
         'projects': projects
     }
-    return render_to_response('project_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'project_list.html', response)
 
 def get_core_tools(enabled=True):
     return [{
@@ -337,11 +337,11 @@ def project_add(request):
 
         if name == '':
             message = _(u'You must enter an project name')
-            return render_to_response('project_add.html', {'message': message, 'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+            return render(request, 'project_add.html', {'message': message, 'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
 
         if _valid_name_regex.search(name) == None:
             message = _(u"Invalid project name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name)
-            return render_to_response('project_add.html', {'message': message, 'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+            return render(request, 'project_add.html', {'message': message, 'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
 
         if not exists:
             project = None
@@ -419,7 +419,7 @@ def project_add(request):
 
         else:
             message = _(u'Project name already exists')
-            return render_to_response('project_add.html', {'message': message, 'tools': project_tools , 'layergroups': prepared_layer_groups, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+            return render(request, 'project_add.html', {'message': message, 'tools': project_tools , 'layergroups': prepared_layer_groups, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
 
 
 
@@ -453,7 +453,7 @@ def project_add(request):
                 })
             prepared_layer_groups.append(layer_group)
 
-        return render_to_response('project_add.html', {'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin}, context_instance=RequestContext(request))
+        return render(request, 'project_add.html', {'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -630,7 +630,7 @@ def project_update(request, pid):
                     'baselayer': baselayer
                 })
 
-        return render_to_response('project_update.html', {'tools': projectTools,'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'has_geocoding_plugin': has_geocoding_plugin, 'toc': ordered_toc}, context_instance=RequestContext(request))
+        return render(request, 'project_update.html', {'tools': projectTools,'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'has_geocoding_plugin': has_geocoding_plugin, 'toc': ordered_toc})
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -669,7 +669,7 @@ def load_project(request, project_name):
             has_image = False
 
         plugins_config = core_utils.get_plugins_config()
-        response = render_to_response('viewer.html', {
+        response = render(request, 'viewer.html', {
             'has_image': has_image,
             'supported_crs': core_utils.get_supported_crs(),
             'project': project,
@@ -677,8 +677,7 @@ def load_project(request, project_name):
             'extra_params': json.dumps(request.GET),
             'plugins_config': plugins_config,
             'is_shared_view': False,
-            },
-            context_instance=RequestContext(request)
+            }
         )
 
         #Expira la caché cada día
@@ -692,7 +691,7 @@ def load_project(request, project_name):
         return response
 
     else:
-        return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
+        return render(request, 'illegal_operation.html', {})
 
 
 @cache_control(max_age=86400)
@@ -704,7 +703,7 @@ def load_public_project(request, project_name):
         has_image = False
 
     plugins_config = core_utils.get_plugins_config()
-    response = render_to_response('viewer.html', {
+    response = render(request, 'viewer.html', {
         'has_image': has_image,
         'supported_crs': core_utils.get_supported_crs(),
         'project': project,
@@ -712,8 +711,7 @@ def load_public_project(request, project_name):
         'extra_params': json.dumps(request.GET),
         'plugins_config': plugins_config,
         'is_shared_view': False,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
     #Expira la caché cada día
@@ -733,7 +731,7 @@ def load_public_project(request, project_name):
 def portable_project_load(request, project_name):
     if core_utils.is_valid_project(request.user, project_name):
         project = Project.objects.get(name__exact=project_name)
-        response = render_to_response('portable_viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id, 'extra_params': json.dumps(request.GET)}, context_instance=RequestContext(request))
+        response = render(request, 'portable_viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id, 'extra_params': json.dumps(request.GET)})
         #Expira la caché cada día
         tomorrow = datetime.datetime.now() + datetime.timedelta(days = 1)
         tomorrow = datetime.datetime.replace(tomorrow, hour=0, minute=0, second=0)
@@ -741,12 +739,12 @@ def portable_project_load(request, project_name):
         response.set_cookie('key', expires = expires)
         return response
     else:
-        return render_to_response('illegal_operation.html', {}, context_instance=RequestContext(request))
+        return render(request, 'illegal_operation.html', {})
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def blank_page(request):
-    return render_to_response('blank_page.html', {}, context_instance=RequestContext(request))
+    return render(request, 'blank_page.html', {})
 
 
 def get_layer_styles(layer):
@@ -1140,7 +1138,7 @@ def toc_update(request, pid):
             ordered_layers = sorted(group.get('layers').iteritems(), key=lambda (x, y): y['order'], reverse=True)
             group['layers'] = ordered_layers
         ordered_toc = sorted(toc.iteritems(), key=lambda (x, y): y['order'], reverse=True)
-        return render_to_response('toc_update.html', {'toc': ordered_toc, 'pid': pid}, context_instance=RequestContext(request))
+        return render(request, 'toc_update.html', {'toc': ordered_toc, 'pid': pid})
 
 def export(request, pid):
     p = Project.objects.get(id=pid)
@@ -1150,11 +1148,11 @@ def export(request, pid):
     else:
         image = p.image.url
 
-    return render_to_response('app_print_template.html', {'print_logo_url': urllib.unquote(image)}, context_instance=RequestContext(request))
+    return render(request, 'app_print_template.html', {'print_logo_url': urllib.unquote(image)})
 
 def ogc_services(request):
     workspaces = Workspace.objects.filter(is_public=True)
-    return render_to_response('ogc_services.html', {'workspaces': workspaces}, RequestContext(request))
+    return render(request, 'ogc_services.html', {'workspaces': workspaces})
 
 def select_public_project(request):
     public_projects = Project.objects.filter(is_public=True)
@@ -1162,7 +1160,7 @@ def select_public_project(request):
     projects = []
 
     if len (public_projects) <= 0:
-        return render_to_response('select_public_project.html', {'projects': projects}, RequestContext(request))
+        return render(request, 'select_public_project.html', {'projects': projects})
 
     elif len (public_projects) == 1:
         return redirect('load', project_name=public_projects[0].name)
@@ -1184,7 +1182,7 @@ def select_public_project(request):
             project['image'] = urllib.unquote(image)
             projects.append(project)
 
-        return render_to_response('select_public_project.html', {'projects': projects}, RequestContext(request))
+        return render(request, 'select_public_project.html', {'projects': projects})
 
 
 def documentation(request):
@@ -1196,7 +1194,7 @@ def documentation(request):
         'plugins_url': settings.BASE_URL + '/docs/web/plugins/' + lang + '/',
         'mobile_url': settings.BASE_URL + '/docs/mobile/' + lang + '/'
     }
-    return render_to_response('documentation.html', response, RequestContext(request))
+    return render(request, 'documentation.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 def save_shared_view(request):
@@ -1255,7 +1253,7 @@ def load_shared_view(request, view_name):
             has_image = False
 
         plugins_config = core_utils.get_plugins_config()
-        response = render_to_response('viewer.html', {
+        response = render(request, 'viewer.html', {
             'has_image': has_image,
             'supported_crs': core_utils.get_supported_crs(),
             'project': project,
@@ -1264,8 +1262,7 @@ def load_shared_view(request, view_name):
             'plugins_config': plugins_config,
             'is_shared_view': True,
             'shared_view_name': shared_view.name
-            },
-            context_instance=RequestContext(request)
+            }
         )
 
         #Expira la caché cada día
@@ -1298,7 +1295,7 @@ def shared_view_list(request):
     response = {
         'shared_views': shared_views
     }
-    return render_to_response('shared_view_list.html', response, context_instance=RequestContext(request))
+    return render(request, 'shared_view_list.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -1313,6 +1310,6 @@ def shared_view_delete(request, svid):
         return HttpResponse(json.dumps(response, indent=4), content_type='project/json')
 
 def not_found_sharedview(request):
-    response = render_to_response('not_found_sharedview.html', {}, context_instance=RequestContext(request))
+    response = render(request, 'not_found_sharedview.html', {})
     response.status_code = 404
     return response
