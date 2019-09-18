@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf.urls import include, url, i18n
 from django.views.i18n import javascript_catalog
 from django.contrib import admin
+from django.urls import reverse
 
 import settings
 
@@ -27,7 +28,8 @@ js_info_dict = {
 
 urlpatterns = [
     url(r'^gvsigonline/i18n/', include(i18n)),
-    url(r'^gvsigonline/jsi18n/$', javascript_catalog, js_info_dict),    
+    #url(r'^gvsigonline/jsi18n/$', javascript_catalog, js_info_dict),   
+    url(r'^gvsigonline/jsi18n/$', javascript_catalog, js_info_dict, name='javascript-catalog'),
     url(r'^gvsigonline/admin/', include(admin.site.urls)),
 ]
 
