@@ -93,7 +93,8 @@ def home(request):
         for p in Project.objects.all():
             image = ''
             if "no_project.png" in p.image.url:
-                image = p.image.url.replace(settings.MEDIA_URL, '')
+                media_url = settings.MEDIA_URL[:-1]
+                image = p.image.url.replace(media_url, '')
             else:
                 image = p.image.url
 
@@ -116,7 +117,8 @@ def home(request):
         for p in Project.objects.all():
             image = ''
             if "no_project.png" in p.image.url:
-                image = p.image.url.replace(settings.MEDIA_URL, '')
+                media_url = settings.MEDIA_URL[:-1]
+                image = p.image.url.replace(media_url, '')
             else:
                 image = p.image.url
                 
@@ -1156,7 +1158,8 @@ def export(request, pid):
     p = Project.objects.get(id=pid)
     image = ''
     if "no_project.png" in p.image.url:
-        image = p.image.url.replace(settings.MEDIA_URL, '')
+        media_url = settings.MEDIA_URL[:-1]
+        image = p.image.url.replace(media_url, '')
     else:
         image = p.image.url
         
@@ -1182,7 +1185,8 @@ def select_public_project(request):
             p = Project.objects.get(id=pp.id)
             image = ''
             if "no_project.png" in p.image.url:
-                image = p.image.url.replace(settings.MEDIA_URL, '')
+                media_url = settings.MEDIA_URL[:-1]
+                image = p.image.url.replace(media_url, '')
             else:
                 image = p.image.url
 
