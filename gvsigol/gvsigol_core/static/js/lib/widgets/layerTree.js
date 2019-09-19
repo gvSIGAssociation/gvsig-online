@@ -112,7 +112,7 @@ layerTree.prototype.createTree = function() {
 						tree += '					<input type="checkbox" class="layer-group" id="layergroup-' + layerGroup.groupId + '">';
 					}
 				}
-				tree += '					<i class="fa fa-folder-o"></i>';
+				tree += '					<i style="cursor: pointer;" class="layertree-folder-icon fa fa-folder-o"></i>';
 				tree += '					<span class="text">' + layerGroup.groupTitle + '</span>';
 				tree += '					<div class="box-tools pull-right">';
 				tree += '						<button class="btn btn-box-tool btn-box-tool-custom group-collapsed-button" data-widget="collapse">';
@@ -136,11 +136,23 @@ layerTree.prototype.createTree = function() {
 	
 	this.$container.append(tree);
 	
+	$(".layertree-folder-icon").click(function(){
+		if (this.parentNode.parentNode.className == 'box box-default') {
+			this.parentNode.parentNode.className = 'box box-default collapsed-box';
+			$(this.parentNode.parentNode.children[1]).css('display', 'none');
+			this.parentNode.parentNode.children[0].children[0].className = "layertree-folder-icon fa fa-folder-o";
+		} else if (this.parentNode.parentNode.className == 'box box-default collapsed-box') {
+			this.parentNode.parentNode.className = 'box box-default';
+			$(this.parentNode.parentNode.children[1]).css('display', 'block');
+			this.parentNode.parentNode.children[0].children[0].className = "layertree-folder-icon fa fa-folder-open-o";
+		}
+	});
+	
 	$("[data-widget='collapse']").click(function(){
-		if (this.parentNode.parentNode.children[0].className == 'fa fa-folder-o') {
-			this.parentNode.parentNode.children[0].className = 'fa fa-folder-open-o';
-		} else if (this.parentNode.parentNode.children[0].className == 'fa fa-folder-open-o') {
-			this.parentNode.parentNode.children[0].className = 'fa fa-folder-o';
+		if (this.parentNode.parentNode.children[0].className == 'layertree-folder-icon fa fa-folder-o') {
+			this.parentNode.parentNode.children[0].className = 'layertree-folder-icon fa fa-folder-open-o';
+		} else if (this.parentNode.parentNode.children[0].className == 'layertree-folder-icon fa fa-folder-open-o') {
+			this.parentNode.parentNode.children[0].className = 'layertree-folder-icon fa fa-folder-o';
 		}
 	});
 	
