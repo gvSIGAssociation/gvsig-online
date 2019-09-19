@@ -127,7 +127,12 @@ viewer.core = {
     	});
 
 		var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false});
-		this.overviewmap = new ol.control.OverviewMap({collapsed: false, layers: [osm]});
+		this.overviewmap = new ol.control.OverviewMap({
+			collapsed: false, 
+			layers: [osm],
+			collapseLabel: '»',
+			label: '«'
+		});
 		this.map = new ol.Map({
 			interactions: interactions,
       		controls: [
