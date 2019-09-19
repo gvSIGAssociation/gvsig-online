@@ -32,7 +32,7 @@ if (typeof DownloadManagerUI === 'undefined') {
 }
 
 DownloadManagerUI.prototype.isManagerEnabled = function() {
-	return viewer.core.ifToolInConf('gvsigol_plugin_downloadman');
+	return (this.layerAvailableDownloads !== undefined) && viewer.core.ifToolInConf('gvsigol_plugin_downloadman');
 }
 
 DownloadManagerUI.prototype.layerDownloads = function(layer) {
