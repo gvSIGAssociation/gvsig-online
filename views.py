@@ -3868,3 +3868,20 @@ def kill_all_group_tasks(request):
     geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
     
     return HttpResponse(json.dumps({}, indent=4), content_type='application/json')
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_http_methods(["GET", "POST", "HEAD"])
+@staff_required
+def update_thumbnail(request, layer_id):
+    layer = Layer.objects.get(id=int(layer_id))
+    layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
+    server = Server.objects.get(id=layer_group.server_id)
+    
+    try:
+        gs = geographic_servers.get_instance().get_server_by_id(server.id)
+        gs.updateThumbnail(layer, 'update')
+        return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+        
+    except Exception as e:
+        print str(e)
+        return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
