@@ -252,8 +252,13 @@ viewer.core = {
 			var tileErrorCount = 0;
 			wmsSource.on('tileloaderror', function(e){
 				if (tileErrorCount > 10) {
-					this.setUrl(externalLayer['cache_url']);
-					this.updateParams({'LAYERS': externalLayer['name'], 'FORMAT': externalLayer['format'], 'VERSION': externalLayer['version'], 'SRS': 'EPSG:3857', 'TRANSPARENT': 'TRUE'});
+					if (externalLayer['cached']) {
+						if (externalLayer['cache_url']) {
+							this.setUrl(externalLayer['cache_url']);
+							this.updateParams({'LAYERS': externalLayer['name'], 'FORMAT': externalLayer['format'], 'VERSION': externalLayer['version'], 'SRS': 'EPSG:3857', 'TRANSPARENT': 'TRUE'});
+						}
+					}
+					
 				}
 				tileErrorCount++;
 			});
