@@ -38,6 +38,7 @@ from django.http import JsonResponse
 import logging
 from gvsigol_plugin_catalog import settings as catalog_settings
 from django.utils.translation import ugettext as _
+from gvsigol_core import utils as core_utils
 
 logger = logging.getLogger("gvsigol")
 
@@ -78,7 +79,7 @@ def get_metadata_id(request, layer_ws, layer_name):
                         if isinstance(md_response, dict):
                             response = md_response
                             response['success'] = True
-                            response['html']= get_metadata_as_html(response)
+                            response['html']= get_metadata_as_html(response, core_utils.get_iso_language(request).part2b)
                         else:
                             logger.debug(type(response))
     except Exception as e:
@@ -103,7 +104,7 @@ def create_metadata(request, layer_id):
             logger.exception(e)
             return HttpResponse(status=500, content=e.message)
 
-def get_metadata_as_html(response):
+def get_metadata_as_html(response, lang='eng'):
     try:
         if response:
             #http://localhost/gvsigonline/catalog/get_metadata/<metadata_id>/?getPanel=true
@@ -184,7 +185,7 @@ def get_metadata_as_html(response):
             #https://gvsigol.localhost/geonetwork/srv/eng/catalog.search#/metadata/8dd47e35-2895-40df-9bf5-4f43d4257bb2
             
             if response.get('metadata_id', None):
-                gn_md_url = catalog_settings.CATALOG_BASE_URL + "/srv/eng/catalog.search#metadata/" + response.get('metadata_id', '')
+                gn_md_url = catalog_settings.CATALOG_BASE_URL + "/srv/" + lang + "/catalog.search#metadata/" + response.get('metadata_id', '')
                 html += '        <span class="catalog_detail_attr">' + _('Metadata identifier') + ':</span>'
                 html += '        '+response.get('metadata_id', '')
                 html += '        &nbsp;&nbsp;<a class="fa fa-external-link" target="_blank" href="' + gn_md_url + '">'+_(' Show in Catalog')+'</a>'
@@ -303,7 +304,7 @@ def get_metadata_from_uuid(request, metadata_uuid):
             if not sharing:
                 metadataJsonSummary = geonetwork_instance.get_metadata(metadata_uuid)
                 response = {
-                    'html': get_metadata_as_html(metadataJsonSummary)
+                    'html': get_metadata_as_html(metadataJsonSummary, core_utils.get_iso_language(request).part2b)
                 }
                 return  HttpResponse(json.dumps(response, indent=4), content_type='application/json')
             else:

@@ -24,51 +24,18 @@
 					disabledFacets: [],
 				{% endif %}
 				{% if 'CATALOG_QUERY_URL' in plugins_config.gvsigol_plugin_catalog %}
-					queryUrl: '{{ plugins_config.gvsigol_plugin_catalog.CATALOG_QUERY_URL|safe }}'
+					queryUrl: '{{ plugins_config.gvsigol_plugin_catalog.CATALOG_QUERY_URL }}',
 				{% else %}
-					queryUrl: ""
+					queryUrl: "",
+				{% endif %}
+				{% if 'METADATA_VIEWER_BUTTON' in plugins_config.gvsigol_plugin_catalog %}
+					metadata_viewer_button: '{{ plugins_config.gvsigol_plugin_catalog.METADATA_VIEWER_BUTTON }}',
+				{% else %}
+					metadata_viewer_button: "FULL",
 				{% endif %}
 			{% endif %}
 		});
 	
-	var html = '';
-	
-	html += '<ul class="nav navbar-nav">';
-	html += '    <li><a href="#" id="show_map" class="dropdown-toggle">Map</a></li>';
-	html += '</ul>'
-	html += '<ul class="nav navbar-nav">';
-	html += '    <li><a href="#" id="show_catalog" class="dropdown-toggle">Catalog</a></li>';
-	html += '</ul>'
-	
-	$("#viewer-navbar").append(html);
-	
-	var modal = '';
-	modal += '<div class="modal fade" id="modal-catalog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">';
-	modal += '	<div class="modal-dialog" role="document" style="width:auto;margin:30px 50px 30px 50px;">';
-	modal += '		<div class="modal-content">';
-	modal += '			<div class="modal-header">';
-	modal += '				<button type="button" class="close" data-dismiss="modal"';
-	modal += '					aria-label="Close">';
-	modal += '					<span aria-hidden="true">&times;</span>';
-	modal += '				</button>';
-	modal += '				<h4 class="modal-title" id="myModalLabel"></h4>';
-	modal += '			</div>';
-	modal += '			<div class="modal-body">';
-	modal += '			</div>';
-	modal += '			<div class="modal-footer">';
-	modal += '			</div>';
-	modal += '		</div>';
-	modal += '	</div>';
-	modal += '</div>';
-	
-	$("body").append(modal);
-	
-	$("#show_catalog").click(function(){
-		catalog.showPanel()
-	});
-	
-	$("#show_map").click(function(){
-		catalog.hidePanel()
-	});
+	catalog.install();
 }
 </script>

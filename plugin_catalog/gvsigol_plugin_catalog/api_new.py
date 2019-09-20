@@ -356,9 +356,9 @@ class Geonetwork():
                 period_start = ''
                 period_end = ''
                 aux = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_TemporalExtent/gmd:extent/', ns)
-                if len(aux) > 0:
-                    period_start = aux[0]._children[0].text
-                    period_end = aux[0]._children[1].text
+                if len(aux) > 0 and len(aux[0]) == 2:
+                    period_start = aux[0][0].text
+                    period_end = aux[0][1].text
                 
                 categories = []
                 for category in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:topicCategory/gmd:MD_TopicCategoryCode/', ns):
