@@ -3256,9 +3256,9 @@ def external_layer_add(request):
             if 'visible' in request.POST:
                 is_visible = True
     
-            #cached = False
-            #if 'cached' in request.POST:
-            #    cached = True
+            cached = False
+            if 'cached' in request.POST:
+                cached = True
                 
             crs_list = []
             for key in request.POST:
@@ -3278,8 +3278,7 @@ def external_layer_add(request):
             external_layer.type = request.POST.get('type')
             external_layer.visible = is_visible
             external_layer.queryable = False
-            #external_layer.cached = cached
-            external_layer.cached = True
+            external_layer.cached = cached
             external_layer.single_image = False
             external_layer.time_enabled = False
             external_layer.created_by = request.user.username
@@ -3312,11 +3311,11 @@ def external_layer_add(request):
             external_layer.name = 'externallayer_' + str(external_layer.id)
             external_layer.save()
             
-            #if external_layer.cached:
-            if external_layer.type == 'WMS':
-                master_node = geographic_servers.get_instance().get_master_node(server.id)
-                geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
-                geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
+            if external_layer.cached:
+                if external_layer.type == 'WMS':
+                    master_node = geographic_servers.get_instance().get_master_node(server.id)
+                    geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
+                    geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
 
             return redirect('external_layer_list')
 
@@ -3346,9 +3345,9 @@ def external_layer_update(request, external_layer_id):
             if 'visible' in request.POST:
                 is_visible = True
     
-            #cached = False
-            #if 'cached' in request.POST:
-            #    cached = True
+            cached = False
+            if 'cached' in request.POST:
+                cached = True
                 
             crs_list = []
             for key in request.POST:
@@ -3358,21 +3357,21 @@ def external_layer_update(request, external_layer_id):
                         'value': request.POST[key]
                     })
             
-            #master_node = geographic_servers.get_instance().get_master_node(server.id)   
-            #if external_layer.cached and not cached:
-            #    geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
-            #    geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
+            master_node = geographic_servers.get_instance().get_master_node(server.id)   
+            if external_layer.cached and not cached:
+                geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
+                geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
                 
-            #if not external_layer.cached and cached:
-            #    if external_layer.type == 'WMS':
-            #        geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
-            #        geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
+            if not external_layer.cached and cached:
+                if external_layer.type == 'WMS':
+                    geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
+                    geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
                 
             external_layer.title = request.POST.get('title')
             external_layer.type = request.POST.get('type')
             external_layer.layer_group_id = request.POST.get('layer_group')
             external_layer.visible = is_visible
-            #external_layer.cached = cached
+            external_layer.cached = cached
             params = {}
 
             if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
