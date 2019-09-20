@@ -33,6 +33,8 @@ import os
 from numpy import genfromtxt
 import importlib
 import gvsigol
+from iso639 import languages
+
 
 def is_valid_project(user, project_name):
     valid = False
@@ -400,20 +402,22 @@ def get_catalog_url(request, layer):
         
     return catalog_url
 
-def get_catalog_url_from_uuid(request, metadata_uuid, baseUrl=None):
+def get_catalog_url_from_uuid(request, metadata_uuid, baseUrl=None, lang=None):
     metadata_url = ''
-    if not baseUrl and 'gvsigol_plugin_catalog' in settings.INSTALLED_APPS:
-        from gvsigol_plugin_catalog import settings as catalog_settings
-        baseUrl = catalog_settings.CATALOG_URL
-    try:
-        if 'username' in request.session:
-            if request.session['username'] is not None and request.session['password'] is not None:
-                split_catalog_url = baseUrl.split('//')
-                metadata_url = split_catalog_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_catalog_url[1]  + 'catalog.search#/metadata/' + metadata_uuid
-        else:
-            metadata_url = baseUrl + 'catalog.search#/metadata/' + metadata_uuid
-    except Exception as e:
-        pass
+    if metadata_uuid:
+        if lang is None:
+            lang = get_iso_language(request).part2b
+        if not baseUrl and 'gvsigol_plugin_catalog' in settings.INSTALLED_APPS:
+            from gvsigol_plugin_catalog import settings as catalog_settings
+            baseUrl = catalog_settings.CATALOG_BASE_URL
+        try:
+            if 'username' in request.session:
+                if request.session['username'] is not None and request.session['password'] is not None:
+                    split_catalog_url = baseUrl.split('//')
+                    baseUrl = split_catalog_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_catalog_url[1]
+            metadata_url = baseUrl + '/srv/' + lang + '/catalog.search#/metadata/' + metadata_uuid
+        except Exception as e:
+            pass
         
     return metadata_url
 
@@ -622,4 +626,9 @@ def set_state(conf, state):
     conf['view'] = state['view']
                 
     return conf
-            
+
+def get_iso_language(request, default_lang='en'):
+    try:
+        return languages.get(part1=request.LANGUAGE_CODE)
+    except:
+        return languages.get(part1=default_lang)

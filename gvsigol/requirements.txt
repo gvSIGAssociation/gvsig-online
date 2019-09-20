@@ -89,5 +89,8 @@ django-jsonfield-compat==0.4.4
 # Comprobar el timestamp de un fichero antes de bajarlo
 tzlocal==1.5.1
 
+# language code database
+iso-639
+
 # job and queque manager, for download manager and email queues
 celery==4.3.0
