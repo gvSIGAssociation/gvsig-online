@@ -11,13 +11,14 @@ import json
 from django.http import JsonResponse
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.translation import ugettext as _
-from gvsigol_plugin_downloadman import tasks as downman_tasks
+from gvsigol_plugin_downloadman.tasks import processDownloadRequest
 from gvsigol_plugin_downloadman import models as downman_models
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.crypto import get_random_string
 from datetime import date
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
+
 
 DATA_TYPE_VECTOR = 'VECTOR_DATA_TYPE'
 DATA_TYPE_RASTER = 'RASTER_DATA_TYPE'
@@ -157,7 +158,7 @@ def getLayerDownloadResources(request, layer_id):
     """
     layer_id: can be the id of the layer on gvsigol/Django, or a metadata uuid from geonetwork
     """
-    try:
+    try:    
         layer = getLayer(layer_id)
         resources = doGetLayerDownloadResources(layer, request.user)
     except:
@@ -233,8 +234,8 @@ def _getParam(params, name):
         
 def _getParamValue(params, name):
     for param in params:
-        if param.name == name:
-            return param.value
+        if param.get('name') == name:
+            return param.get('value')
 
 def _getWfsRequest(layer_name, baseUrl, params):
     file_format = _getParamValue(params, FORMAT_PARAM_NAME)
@@ -271,13 +272,14 @@ def createResourceLocator(resource, downloadRequest):
     locator.ds_type = downman_models.ResourceLocator.HTTP_LINK_SOURCE_TYPE
     locator.layer_id =  resource_descriptor.get('layer_id')
     layer = getLayer(locator.layer_id)
-    locator.layer_id =  resource_descriptor.get('layer_id')
+    locator.name =  layer.name
+    locator.title = layer.title
     locator.laye_id_type = downman_models.ResourceLocator.GVSIGOL_LAYER_ID
     params = resource.get('param_values', [])
-    if layer and resource.name == DATA_TYPE_VECTOR:
+    if layer and resource_descriptor.get('name') == DATA_TYPE_VECTOR:
         baseUrl = layer.datastore.workspace.wfs_endpoint
         locator.data_source = _getWfsRequest(layer.name, baseUrl, params)
-    elif layer and resource.name == DATA_TYPE_RASTER:
+    elif layer and resource_descriptor.get('name') == DATA_TYPE_RASTER:
         baseUrl = layer.datastore.workspace.wcs_endpoint
         locator.data_source = _getWcsRequest(layer.name, baseUrl, params)
     else:
@@ -302,34 +304,51 @@ def requestDownload(request):
             if request.user and not request.user.is_anonymous():
                 downRequest.requested_by = request.user.email
             else:
-                downRequest.requested_by_external = json_data.email
+                downRequest.requested_by_external = json_data.get('email', 'anonymous')
             downRequest.validity = downman_models.get_default_validity()
             downRequest.pending_authorization = False
             downRequest.request_status = downman_models.DownloadRequest.PACKAGE_QUEUED_STATUS;
             downRequest.request_random_id = date.today().strftime("%Y%m%d") + get_random_string(length=32)
-            downRequest.json_request = request.body
+            downRequest.json_request = request.body.decode("UTF-8")
             downRequest.save()
             
-            for resource in json_data:
+            for resource in json_data.get('resources', []):
                 createResourceLocator(resource, downRequest)
-            downman_tasks.processDownloadRequest(downRequest.id)
-            tracking_url = reverse('download-request-tracking', args=(downRequest.request_random_id,))
-            return JsonResponse({"status": "Download queued", 'download_id': downRequest.request_random_id, 'tracking_url': tracking_url})
+            
+            try:
+                #processDownloadRequest(downRequest.id)
+                result = processDownloadRequest.delay(downRequest.id)
+                tracking_url = reverse('download-request-tracking', args=(downRequest.request_random_id,))
+                print(result.backend)
+            except:
+                logger.exception("error queuing task")
+                downRequest.request_status = downman_models.DownloadRequest.PERMANENT_PACKAGE_ERROR_STATUS
+                downRequest.save()
+                tracking_url = ''
+
+            print "volviendo"
+            status_text = ''
+            for (choice_code, choice_desc) in downman_models.DownloadRequest.REQUEST_STATUS_CHOICES:
+                if downRequest.request_status == choice_code:
+                    _status_text = _(choice_desc)
+
+            return JsonResponse({"status_code": downRequest.request_status, "status": status_text, 'download_id': downRequest.request_random_id, 'tracking_url': tracking_url})
     # TODO: error handling
     return JsonResponse({"status": "error"})
 
 def requestTracking(request, uuid):
     # TODO: return a proper template
     try:
-        r = DownloadRequest.objects.get(request_random_id=uuid)
+        r = downman_models.DownloadRequest.objects.get(request_random_id=uuid)
         # TODO: contemplar todos los estados
-        if r.request_status == DownloadRequest.COMPLETED_STATUS:
+        if r.request_status == downman_models.DownloadRequest.COMPLETED_STATUS:
             return HttpResponse("Ready")
-        if r.request_status == DownloadRequest.PERMANENT_PACKAGE_ERROR_STATUS:
+        if r.request_status == downman_models.DownloadRequest.PERMANENT_PACKAGE_ERROR_STATUS:
             return HttpResponse("Error de empaquetado")
         else:
             return HttpResponse("En preparación")
     except:
+        logger.exception("error getting the task")
         pass
     return HttpResponse("Petición de descarga no encontrada")
 

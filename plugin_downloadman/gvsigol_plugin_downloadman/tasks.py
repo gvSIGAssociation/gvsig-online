@@ -16,6 +16,7 @@ from __future__ import absolute_import, unicode_literals
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from billiard.compat import resource
 '''
 @author: Cesar Martinez Izquierdo <cmartinez@scolab.es>
 '''
@@ -29,25 +30,33 @@ import os
 import tempfile
 import zipfile
 import requests
+import logging
+
+#logger = logging.getLogger("gvsigol-celery")
+logger = logging.getLogger("gvsigol")
+
 
 __TMP_DIR = None
 __TARGET_DIR = None
+DEFAULT_TIMEOUT = 60
 
 def getTmpDir():
+    global __TMP_DIR
     if not __TMP_DIR:
         try:
             if not os.path.exists(settings.TMP_DIR):
-                os.makedirs(settings.TMP_DIR, 700)
+                os.makedirs(settings.TMP_DIR, 0o700)
         except:
             pass
         __TMP_DIR = settings.TMP_DIR
     return __TMP_DIR
 
 def getTargetDir():
+    global __TARGET_DIR
     if not __TARGET_DIR:
         try:
             if not os.path.exists(settings.TARGET_DIR):
-                os.makedirs(settings.TARGET_DIR, 700)
+                os.makedirs(settings.TARGET_DIR, 0o700)
         except:
             pass
         __TARGET_DIR = settings.TARGET_DIR
@@ -64,15 +73,16 @@ def resolveLinkLocator(resourceLocator):
     (fd, tmp_path) = tempfile.mkstemp('.tmp', 'ideuydm', dir=getTmpDir())
     tmp_file = os.fdopen(fd, "wb")
     
-    r = requests.get(resourceLocator.data_source, stream=True)
+    logger.debug(resourceLocator.data_source)
+    r = requests.get(resourceLocator.data_source, stream=True, verify=False, timeout=DEFAULT_TIMEOUT)
     for chunk in r.iter_content(chunk_size=128):
         tmp_file.write(chunk)
     tmp_file.close()
-    desc = ResourceDescription(tmp_path, resourceLocator.name)
+    desc = ResourceDescription(resourceLocator.name, tmp_path)
     return [desc]
 
 def resolveLocator(resourceLocator):
-    if resourceLocator.res_type == ResourceLocator.HTTP_LINK_SOURCE_TYPE:
+    if resourceLocator.ds_type == ResourceLocator.HTTP_LINK_SOURCE_TYPE:
         return resolveLinkLocator(resourceLocator)
     return []
 
@@ -90,30 +100,44 @@ def packageRequest(downloadRequest):
         zip_file = os.fdopen(fd, "w")
         with zipfile.ZipFile(zip_file, 'w', zipfile.ZIP_DEFLATED, allowZip64=True) as zipobj:
             # 2. add each resource to the zip file
-            locators = downloadRequest.resource_locator_set.all()
+            locators = downloadRequest.resourcelocator_set.all()
             for resourceLocator in locators:
                 _addResource(zipobj, resourceLocator)
     except:
+        logger.exception("error packaing request")
         try:
             if zip_file:
                 zip_file.close()
                 os.remove(zip_path)
         except:
+            logger.exception("error packaing request")
             pass
         # remove temp zip file
         # raise an error
         return
     return zip_path
 
+import os
+def touch(fname, times=None):
+    with open(fname, 'a'):
+        os.utime(fname, times)
+
 @shared_task
 def processDownloadRequest(request_id):
+    logger.debug("starting processDownloadRequest")
     # 1 get request
-    request = DownloadRequest.objects.get(request_id)
+    try:
+        touch('/tmp/cmi00001')
+    except:
+        pass
+    print request_id
+    request = DownloadRequest.objects.get(id=request_id)
     # 2 package
     zip_path = packageRequest(request)
+    print zip_path
     if zip_path:
             
-        request.request_status = request.PACKAGED_STATUS
+        request.request_status = DownloadRequest.PACKAGED_STATUS
         request.save()
         # 3. create the link
         new_link = DownloadLink()
@@ -122,7 +146,7 @@ def processDownloadRequest(request_id):
         new_link.valid_to = datetime.datetime.now() + datetime.timedelta(seconds = request.validity)
         new_link.request_random_id = request.request_random_id
         new_link.save()
-        
+        print "done"
         # 4. notify: send the link to the user
         
     else:
@@ -139,16 +163,17 @@ def processDownloadRequest(request_id):
             delay = 43200 + (request.retry_count - 3)*86400 # 12 hours + 24 hours * number_of_retries_after_first_day 
         if delay > get_packaging_max_retry_time():
             # permanent package error
-            request.status = request.PERMANENT_PACKAGE_ERROR_STATUS
+            request.status = DownloadRequest.PERMANENT_PACKAGE_ERROR_STATUS
             request.save()
             return
         
-        request.status = request.PACKAGE_ERROR_STATUS
+        request.status = DownloadRequest.PACKAGING_ERROR_STATUS
         request.retry_count = request.retry_count + 1 
         request.save()
         if request.retry_count > 3:
             # notify temporary error to user
             pass
         
-        packageRequest.apply_async(queue='downman', countdown=delay, kwargs={'request_id': request_id})
+        #packageRequest.apply_async(queue='downman', countdown=delay, kwargs={'request_id': request_id})
+        packageRequest.delay(request_id)
 

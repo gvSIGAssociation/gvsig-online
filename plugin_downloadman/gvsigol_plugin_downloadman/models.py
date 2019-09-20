@@ -51,8 +51,6 @@ class DownloadRequest(models.Model):
     NOTIFICATION_ERROR_STATUS = 'RE' # An error was found during  notification
     PERMANENT_NOTIFICATION_ERROR_STATUS = 'RE' # A permanent error was found during notification
 
-
-
     REQUEST_STATUS_CHOICES = (
         (PENDING_AUTHORIZATION_STATUS, 'Pending authorization'),
         (PENDING_INITIAL_NOTIFICATION_STATUS, 'Initial notification pending'),

@@ -136,24 +136,45 @@ DownloadManagerClient.prototype.queryAvailableResources = function(layer_id, wor
 	});
 }
 
-DownloadManagerClient.prototype.startDownloadRequest = function(){
+DownloadManagerClient.prototype.startDownloadRequest = function(email, success_callback, error_callback, callback_context){
 	var self = this;
 	var queryUrl = self.config.baseQueryUrl + "request/";
 	console.log(queryUrl);
 
 	try {
-		var data = JSON.stringify(this.getDownloadList());
+		var request = {
+			"resources": this.getDownloadList()
+		}
+		if (email !== null) {
+			request["email"] = email;
+		}
+		var data = JSON.stringify(request);
 	} catch (e) {console.log("error stringify"); console.log(e)}
 	
-	$.post(queryUrl, data).done(function() {
-	    console.log('success');
-	  })
-	  .fail(function() {
-	    console.log('failed');
-	  })
-	  .always(function() {
-		  console.log('finished');
-	  });
+	$.post(queryUrl, data).done(function(result) {
+		console.log('success');
+		console.log(result);
+		if (result.status_code == 'QP') {
+			console.log('qp');
+			console.log(success_callback)
+			success_callback.apply(callback_context, [result, true]);
+			self.clearDownloadList();
+			console.log('aaa');
+		}
+		else {
+			error_callback.apply(callback_context, [result, false]);
+		}
+	
+	})
+	.fail(function(err) {
+		console.log('failed');
+		console.log(err);
+		error_callback.apply(callback_context, err, false);
+	})
+	.always(function(val) {
+		console.log('finished');
+		 console.log(val);
+	});
 }
 
 DownloadManagerClient.prototype.getDownloadList = function(){
@@ -162,6 +183,11 @@ DownloadManagerClient.prototype.getDownloadList = function(){
 
 DownloadManagerClient.prototype.getDownloadListCount = function(){
 	return this.layerList.length;
+}
+
+
+DownloadManagerClient.prototype.clearDownloadList = function(){
+	this.layerList.splice(0);
 }
 
 
@@ -317,7 +343,7 @@ DownloadManagerUI.prototype.initAvailableResources = function(downloadResources)
 		});
 		self.getClient().addLayer(clickedResource, values);
 	});
-	$(self.modalSelector).LoadingOverlay("hide");
+	$(self.modalSelector + " .modal-dialog").LoadingOverlay("hide");
 }
 
 DownloadManagerUI.prototype.initAvailableResourcesError = function(){
@@ -330,7 +356,7 @@ DownloadManagerUI.prototype.initAvailableResourcesError = function(){
 	content += '</div>';
 	$(this.modalSelector).find('.modal-body').html(content);
 	$(this.modalSelector).find('.modal-title').html(gettext("Available downloads"));	
-	$(this.modalSelector).LoadingOverlay("hide");
+	$(this.modalSelector + " .modal-dialog").LoadingOverlay("hide");
 }
 
 DownloadManagerUI.prototype.initDownloadList = function(){
@@ -363,7 +389,9 @@ DownloadManagerUI.prototype.initDownloadList = function(){
 	});
 	
 	$(".start-downloading-btn").unbind("click").click(function(){
-		self.getClient().startDownloadRequest();
+		alert('No disponible temporalmente');
+		// deshabilitamos para evitar ir creando peticiones que todavía no gestionamos al 100%
+		//self.getClient().startDownloadRequest(null, DownloadManagerUI.prototype.showDownloadQueued, DownloadManagerUI.prototype.showDownloadQueued, self);
 	});
 }
 
@@ -377,6 +405,41 @@ DownloadManagerUI.prototype.getClient = function() {
 		this.downloadClient = new DownloadManagerClient();
 	}
 	return this.downloadClient; 
+}
+
+DownloadManagerUI.prototype.showDownloadQueued = function(json_result, success){
+	console.log("showDownloadQueued");
+	var content = '';
+	content += '<div style="padding: 10px">';
+	if (success) {
+		content += '<div class="alert alert-success col-md-12">';
+		content += '<i class="fa fa-envelope fa-icon-button-left" aria-hidden="true"></i>';
+		content += gettext('Your download request has been registered. You will receive an email when your request is ready for download.');
+		content += gettext('You can also use this tracking link to get updates about your request:');
+		content += gettext('<a target="_blank" href="' + json_result.tracking_url + '">' + json_result.tracking_url + '</a>');
+		$(this.modalSelector).find('.modal-footer').empty();
+	}
+	else {
+		content += '<div class="alert alert-danger col-md-12">';
+		content += '<i class="fa fa-exclamation-circle fa-icon-button-left" aria-hidden="true"></i>';
+		content += gettext('There was an error processing your download request. Please, try again later');
+		var footer = '	<button class="btn btn-default downman-footer-button catalog-download-list-btn" type="button"><span class="download_list_count">' + self.getClient().getDownloadListCount() + '</span><i class="fa fa-shopping-cart fa-icon-button-left fa-icon-button-right" aria-hidden="true"></i>'+gettext("Ver lista de descargas")+'</button>';
+		footer += '		<div style="clear:both"></div>';
+		$(self.modalSelector).find('.modal-footer').html(footer);
+		$(".catalog-download-list-btn").unbind("click").click(function(){
+			self.showDownloadList();
+		});
+	}
+	content += '</div>';
+	content += '<div style="clear:both"></div>';
+	content += '</div>';
+	console.log(this.modalSelector);
+	console.log($(this.modalSelector));
+
+	$(this.modalSelector).find('.modal-body').html(content);
+	$(this.modalSelector).find('.modal-title').html(gettext("Download request"));
+	$(this.modalSelector).modal('show');
+	console.log("showDownloadQueued end");
 }
 
 
@@ -395,9 +458,9 @@ DownloadManagerUI.prototype.layerAvailableDownloads = function(layer) {
 	$(this.modalSelector).find('.modal-title').html(gettext("Available downloads"));
 	$(this.modalSelector).find('.modal-body').empty();
 	$(this.modalSelector).find('.modal-footer').empty();
-	$(this.modalSelector).LoadingOverlay("show");
-	this.getClient().queryAvailableResources(layer_id, workspace_name, this.initAvailableResources, this.initAvailableResourcesError, this);
+	$(this.modalSelector + " .modal-dialog").LoadingOverlay("show");
 	$(this.modalSelector).modal('show');
+	this.getClient().queryAvailableResources(layer_id, workspace_name, this.initAvailableResources, this.initAvailableResourcesError, this);
 	setTimeout(function() {
 		$(self.modalSelector).LoadingOverlay("hide");
 	}, this.getClient().config.timeout);
