@@ -368,7 +368,6 @@ def get_conf(request, layer_id):
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
     gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-    server = geographic_servers.get_instance().get_server_by_id(gs.id)
     
     index = len(StyleLayer.objects.filter(layer=layer))
     styleLayers = StyleLayer.objects.filter(layer=layer)
@@ -414,11 +413,11 @@ def get_conf(request, layer_id):
     
     preview_url = ''
     if feature_type == 'PointSymbolizer':
-        preview_url = server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point'    
+        preview_url = workspace.server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point'    
     elif feature_type == 'LineSymbolizer':      
-        preview_url = server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line'     
+        preview_url = workspace.server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line'     
     elif feature_type == 'PolygonSymbolizer': 
-        preview_url = server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
+        preview_url = workspace.server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
                   
     conf = {
         'featureType': feature_type,
