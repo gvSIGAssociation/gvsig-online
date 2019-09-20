@@ -38,7 +38,7 @@
 						{% for layer in layers %}
 						<tr>
 							<td>{{ layer.id }}</td>
-							<td><img data-origin="{{ layer.type }}" src="{{ layer.thumbnail.url }}" height="60" width="84"></td>
+							<td><img class="layerlist-preview" style="cursor: pointer;" id="layerlist-preview-{{ layer.id }}" data-layerid="{{ layer.id }}" data-origin="{{ layer.type }}" src="{{ layer.thumbnail.url }}" height="60" width="84"></td>
 							<td>{{ layer.name }}</td>
 							<td>{{ layer.title }}</td>
 							<td>{{ layer.datastore.name }}</td>
@@ -195,6 +195,32 @@ $(document).ready(function() {
 		} else if (this.name == "button-delete-layer"){
 	        deleteLayer(data, row);
 	    }
+	});
+	
+	$('.layerlist-preview').on('click', function (){
+		var _this = this;
+		
+		var layerId = this.dataset.layerid;
+		
+		$("#layerlist-preview-" + layerId).overlay();
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/services/update_thumbnail/' + layerId + '/',
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			success	:function(response){
+				if (response.success) {
+					_this.src = _this.src;
+				}
+				$("#layerlist-preview-" + layerId).overlayout();
+			},
+			error: function(){
+				$("#layerlist-preview-" + layerId).overlayout();
+			}
+		});
+		
 	});
 
 	$('#button-import-layer').click( function() {
