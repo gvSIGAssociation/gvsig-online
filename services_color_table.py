@@ -292,8 +292,7 @@ def get_conf(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
-    gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-    server = geographic_servers.get_instance().get_server_by_id(gs.id)   
+    gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id) 
     
     index = len(StyleLayer.objects.filter(layer=layer))
     styleLayers = StyleLayer.objects.filter(layer=layer)
@@ -313,7 +312,7 @@ def get_conf(request, layer_id):
     layer_url = core_utils.get_wms_url(request, workspace)
     layer_wfs_url = core_utils.get_wfs_url(request, workspace)
     
-    preview_url = server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
+    preview_url = workspace.server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
                       
     conf = {
         'layer_id': layer_id,
