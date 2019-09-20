@@ -55,6 +55,7 @@ import re
 from django.views.decorators.clickjacking import xframe_options_exempt
 from actstream import action
 from actstream.models import Action
+from iso639 import languages
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
@@ -816,6 +817,8 @@ def project_get_conf(request):
         project_layers_groups = ProjectLayerGroup.objects.filter(project_id=project.id)
         layer_groups = []
         workspaces = []
+        
+        language = core_utils.get_iso_language(request)
 
         count = 0
         for project_group in project_layers_groups:
@@ -957,7 +960,7 @@ def project_get_conf(request):
                             layer['namespace'] = workspace.uri
                             layer['workspace'] = workspace.name
                             layer['metadata'] = core_utils.get_layer_metadata_uuid(l)
-                            layer['metadata_url'] = core_utils.get_catalog_url_from_uuid(request, layer['metadata'])
+                            layer['metadata_url'] = core_utils.get_catalog_url_from_uuid(request, layer['metadata'], lang=language.part2b)
                             if l.cached:
                                 layer['cache_url'] = core_utils.get_cache_url(request, workspace)
                             else:
@@ -1030,7 +1033,7 @@ def project_get_conf(request):
                     layer['cached'] = l.cached
                     layer['type'] = l.type
                     layer['metadata'] = core_utils.get_layer_metadata_uuid(l)
-                    layer['metadata_url'] = core_utils.get_catalog_url_from_uuid(request, layer['metadata'])
+                    layer['metadata_url'] = core_utils.get_catalog_url_from_uuid(request, layer['metadata'], lang=language.part2b)
                     
                     if l.cached:
                         if l.external_params:
@@ -1107,6 +1110,13 @@ def project_get_conf(request):
             'errors': errors,
             'auth_urls': auth_urls
         }
+        
+        if language:
+            conf['language'] = {
+                'iso639_1': request.LANGUAGE_CODE,
+                'iso639_2b': language.part2b
+            }
+        
 
         if request.user and request.user.id:
             conf['user'] = {

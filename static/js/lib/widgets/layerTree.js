@@ -360,6 +360,7 @@ layerTree.prototype.setLayerEvents = function() {
 	});
 	
 	$(".show-metadata-link").unbind("click").on('click', function(e) {
+		console.log(".show-metadata-link viewer");
 		var layers = self.map.getLayers();
 		var selectedLayer = null;
 		var id = this.id.split("show-metadata-")[1];
@@ -2052,6 +2053,38 @@ layerTree.prototype.layerDownloads = function(layer) {
  * TODO
  */
 layerTree.prototype.showMetadata = function(layer) {
+	$('#float-modal .modal-title').empty();
+	$('#float-modal .modal-title').append(layer.title);
+	
+	var body = '';
+	body += '<div class="row">';
+	body += 	'<div class="col-md-12">';
+	body += 		'<p>' + layer.abstract + '</p>';				
+	body += 	'</div>';
+	body += '</div>';
+	
+	$('#float-modal .modal-body').empty();
+	$('#float-modal .modal-body').append(body);
+	
+	var buttons = '';
+	buttons += '<button id="float-modal-cancel-metadata" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
+	if (layer.metadata_url != '') {
+		buttons += '<button id="float-modal-show-metadata" type="button" class="btn btn-default">' + gettext('Show in geonetwork') + '</button>';
+	}
+	
+	$('#float-modal .modal-footer').empty();
+	$('#float-modal .modal-footer').append(buttons);
+	
+	$("#float-modal").modal('show');
+	
+	var self = this;	
+	$('#float-modal-show-metadata').on('click', function () {
+		var win = window.open(layer.metadata_url, '_blank');
+		  win.focus();
+		
+		$('#float-modal').modal('hide');
+	});
+	return;
 	
 	$.ajax({
 		type: "GET",
