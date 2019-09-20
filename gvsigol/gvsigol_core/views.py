@@ -690,6 +690,7 @@ def load_project(request, project_name):
             'extra_params': json.dumps(request.GET),
             'plugins_config': plugins_config,
             'is_shared_view': False,
+            'main_page': settings.LOGOUT_PAGE_URL
             }
         )
 
@@ -724,6 +725,7 @@ def load_public_project(request, project_name):
         'extra_params': json.dumps(request.GET),
         'plugins_config': plugins_config,
         'is_shared_view': False,
+        'main_page': settings.LOGOUT_PAGE_URL
         }
     )
 
@@ -1277,7 +1279,8 @@ def load_shared_view(request, view_name):
             'extra_params': json.dumps(request.GET),
             'plugins_config': plugins_config,
             'is_shared_view': True,
-            'shared_view_name': shared_view.name
+            'shared_view_name': shared_view.name,
+            'main_page': settings.LOGOUT_PAGE_URL
             }
         )
 
