@@ -24,13 +24,7 @@ if (viewer.core.ifToolInConf('gvsigol_plugin_downloadman')) {
 	$("#gvsigol-navbar-menus").append(html);
 	
 	$(".viewer-download-list-btn").unbind("click").click(function(){
-		console.log('click');
-		viewer.core.getDownloadManager().initDownloadList();
-		$(viewer.core.getDownloadManager().modalSelector).modal('show');
-		setTimeout(function() {
-			$(viewer.core.getDownloadManager().modalSelector).LoadingOverlay("hide");
-		}, viewer.core.getDownloadManager().getClient().config.timeout);
-
+		viewer.core.getDownloadManager().showDownloadList();
 	});
 }
 </script>
