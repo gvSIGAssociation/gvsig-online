@@ -442,7 +442,6 @@ DownloadManagerUI.prototype.showDownloadQueued = function(json_result, success){
 	console.log("showDownloadQueued end");
 }
 
-
 DownloadManagerUI.prototype.layerAvailableDownloads = function(layer) {
 	var self = this;
 	var workspace_name, layer_id;
@@ -450,7 +449,13 @@ DownloadManagerUI.prototype.layerAvailableDownloads = function(layer) {
 		layer_id = layer;
 		workspace_name = null;
 	}
+	else if (layer.metadata){
+		layer_id = layer.metadata;
+		workspace_name = null;
+	}
 	else {
+		console.log("assumed to be internal");
+		console.log(layer);
 		//var layer_id = layer.get("id");
 		workspace_name = layer.workspace;
 		layer_id = layer.layer_name;
@@ -465,3 +470,4 @@ DownloadManagerUI.prototype.layerAvailableDownloads = function(layer) {
 		$(self.modalSelector).LoadingOverlay("hide");
 	}, this.getClient().config.timeout);
 }
+
