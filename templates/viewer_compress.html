@@ -78,6 +78,24 @@
 		</div>
 	</div>
 
+	<div class="modal" id="float-modal" tabindex="-1" role="dialog" aria-labelledby="float-modal-label">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="float-modal-label"></h4>
+				</div>
+				<div class="modal-body"></div>
+				<div class="modal-footer">
+					<button id="float-modal-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+					<button id="float-modal-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<header class="main-header map-header">
 
 		<!-- Header Navbar: style can be found in header.less -->
@@ -228,31 +246,12 @@
 			</table>
 
 			<div id="toolbar" class="ol-toolbar ol-unselectable ol-control"></div>
-
-			<div class="modal" id="float-modal" tabindex="-1" role="dialog" aria-labelledby="myFloatModal">
-				<div class="modal-dialog modal-lg" role="document">
-					<div class="modal-content">
-						<div class="modal-header">
-							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							</button>
-							<h4 class="modal-title" id="myModalLabel"></h4>
-						</div>
-						<div class="modal-body"></div>
-						<div class="modal-footer">
-							<button id="float-modal-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-							<button id="float-modal-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
-						</div>
-					</div>
-				</div>
-			</div>
-
 		</div>
 	</div>
 
 
 	<!-- Modal -->
-	<div class="modal fade" id="modal-end-edition" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal fade" id="modal-end-edition" tabindex="-1" role="dialog" aria-labelledby="my-modal-end-edition-label">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -260,7 +259,7 @@
 						aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
-					<h4 class="modal-title" id="myModalLabel">{% trans "End edition" %}</h4>
+					<h4 class="modal-title" id="my-modal-end-edition-label">{% trans "End edition" %}</h4>
 				</div>
 				<div class="modal-body">
 					<p>{% trans "Changes don't saved will be missed. Continue?" %}</p>
@@ -275,7 +274,7 @@
 
 
 	<!-- Modal -->
-	<div class="modal fade" id="modal-layer_loading_error" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal fade" id="modal-layer_loading_error" tabindex="-1" role="dialog" aria-labelledby="my-modal-layer_loading_error">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -283,7 +282,7 @@
 						aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
-					<h4 class="modal-title" id="myModalLabel">{% trans "Error loading layers" %}</h4>
+					<h4 class="modal-title" id="my-modal-layer_loading_error">{% trans "Error loading layers" %}</h4>
 				</div>
 				<div class="modal-body">
 					<p></p>
