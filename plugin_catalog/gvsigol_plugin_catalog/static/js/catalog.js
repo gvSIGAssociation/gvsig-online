@@ -36,6 +36,8 @@ var CatalogView = function(mapViewer, config) {
 	this.config.facetsConfig = this.config.facetsConfig || {};
 	this.config.facetsOrder = this.config.facetsOrder || [];
 	this.config.disabledFacets = this.config.disabledFacets || [];
+	this.config.resultsPerPage = this.config.resultsPerPage || 20;
+	this.fromResult = 1;
 	
 	var self = this;
 	$('body').on('change-to-2D-event', function() {
@@ -143,7 +145,7 @@ CatalogView.prototype.initialization = function(){
 	catalogPanel += '	</div>';
 	catalogPanel += '</div>';
 
-
+	catalogPanel += '<div class="row text-center"><div class="col-md-12 center-block"><ul class="catalog-pager pagination"></div></div>';
 	catalogPanel += '<div class="col-md-3" id="catalog_filter">';
 	catalogPanel += '</div>';
 
@@ -667,6 +669,41 @@ CatalogView.prototype.zoomToLayer = function(layer) {
 	}
 }*/
 
+CatalogView.prototype.updatePager = function(totalCount) {
+	var self = this;
+	var pagerEntries = '';
+	if (self.fromResult==1) {
+		pagerEntries += '<li class="disabled"><a href="#">&laquo;</a></li>';
+	}
+	else {
+		pagerEntries += '<li><a href="#" class="prev-result-page">&laquo;</a></li>';
+	}
+	var numPages = Math.ceil(self.fromResult/self.config.resultsPerPage);
+	var currentPage = Math.ceil(totalCount / self.config.resultsPerPage);
+	pagerEntries += '<li class="disabled"><a hef="#">' + numPages + ' / ' + currentPage +'</a></li>';
+	if ((self.fromResult + self.config.resultsPerPage-1) <= totalCount) {
+		pagerEntries += '<li><a href="#" class="next-result-page">&raquo;</a></li>';
+	}
+	else {
+		pagerEntries += '<li class="disabled"><a href="#">&raquo;</a></li>';
+	}
+	$('.catalog-pager').html(pagerEntries);
+	$(".next-result-page").unbind("click").click(function(){
+		self.fromResult = self.fromResult + self.config.resultsPerPage;
+		self.filterCatalog();
+	});
+	$(".prev-result-page").unbind("click").click(function(){
+		var fromResult = self.fromResult - self.config.resultsPerPage;
+		if (fromResult<1) {
+			self.fromResult = 1;
+		}
+		else {
+			self.fromResult = fromResult;
+		}
+		self.filterCatalog();
+	});
+}
+
 CatalogView.prototype.getCatalogFilters = function(query, search, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent){
 	var self = this;
 	var filters = ""
@@ -697,6 +734,9 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 	if(extent && extent.length > 0){
 		filters += "&geometry="+extent;
 	}
+	filters += "&from="+self.fromResult;
+	var to = self.fromResult + self.config.resultsPerPage - 1;
+	filters += "&to="+to;
 	
 	var facetsConfig = self.config.facetsConfig;
 	var facetsOrder = self.config.facetsOrder;
@@ -710,7 +750,7 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 		self.getLocalizedEndpoint() + "/q";
 	}
 	// TODO: authentication
-	url = url + '?_content_type=json' + filters + '&bucket=s101&facet.q=' + query + '&fast=index&from=1&resultType=details&sortBy=title';
+	url = url + '?_content_type=json' + filters + '&bucket=s101&facet.q=' + query + '&fast=index&resultType=details&sortBy=title';
 	//var url = '/gvsigonline/catalog/get_query/?_content_type=json&bucket=s101&facet.q='+query+'&fast=index&from=1&resultType=details&sortBy=relevance';
 	$.ajax({
 		url: url,
@@ -718,7 +758,8 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 			try{
 				//response = JSON.parse(response);
 				self.data = {};
-
+				
+				self.updatePager(response.summary['@count']);
 				var all_filters_code = '';
 				var shownFilters = {};
 				for(var idx = 0; idx < response.summary.dimension.length; idx++){
