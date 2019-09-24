@@ -16,7 +16,6 @@ Including another URLconf
 from django.conf.urls import include, url, i18n
 from django.views.i18n import javascript_catalog
 from django.contrib import admin
-from django.urls import reverse
 
 import settings
 
