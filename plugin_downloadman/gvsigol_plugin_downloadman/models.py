@@ -92,8 +92,12 @@ class DownloadRequest(models.Model):
     json_request = models.TextField() # we keep the request as received from the client for debugging purposes
 
 class DownloadLink(models.Model):
-    contents = models.ForeignKey('DownloadRequest', on_delete=models.CASCADE)
-    prepared_download = models.FileField() # the path to the file to download
+    contents = models.OneToOneField(
+        DownloadRequest,
+        on_delete=models.CASCADE,
+        primary_key=True,
+    )
+    prepared_download_path = models.FilePathField() # the path to the file to download
     download_count = models.PositiveIntegerField(default=0)
     valid_to=models.DateTimeField(db_index=True)
     request_random_id = models.TextField(db_index=True)
@@ -108,36 +112,30 @@ class ResourceSettings(models.Model):
     layer_uuid = models.TextField(unique=True)
     restricted = models.BooleanField()
 
+FORMAT_PARAM_NAME = 'format'
+
+
 class ResourceLocator(models.Model):
-    CATALOG_SOURCE_TYPE = 'CT'
-    GVSIGOL_LAYER = 'GV'
-    GEOSERVER_SOURCE_TYPE = 'GS'
-    FILEPATH_SOURCE_TYPE = 'FI'
-    FOLDERPATH_SOURCE_TYPE = 'FD'
-    HTTP_LINK_SOURCE_TYPE = 'HT'
-    
     GEONETWORK_UUID = 'GN'
     GVSIGOL_LAYER_ID = 'GV'
     
-    RESOURCE_TYPES_CHOICES = (
-        (CATALOG_SOURCE_TYPE, 'Catalog'),
-        (GVSIGOL_LAYER, 'gvSIGOL Layer'),
-        (GEOSERVER_SOURCE_TYPE, 'Geoserver'),
-        (FILEPATH_SOURCE_TYPE, 'File Path'),
-        (FOLDERPATH_SOURCE_TYPE, 'Folder Path'),
-        (HTTP_LINK_SOURCE_TYPE, 'Http Link'),
-    )
+    GVSIGOL_DATA_SOURCE_TYPE = 'GVSIGOL_DATA_SOURCE'
+    GEONETWORK_CATALOG_DATA_SOURCE_TYPE = 'GEONET_DATA_SOURCE'
+    
+    OGC_WFS_RESOURCE_TYPE = 'OGC_WFS_RESOURCE_TYPE'
+    OGC_WCS_RESOURCE_TYPE = 'OGC_WCS_RESOURCE_TYPE'
+    HTTP_LINK_RESOURCE_TYPE = 'HTTP_LINK_TYPE'
     
     ID_TYPES = (
-        (GEONETWORK_UUID, 'GEONETWORK_UUID'),
-        (GVSIGOL_LAYER_ID, 'GVSIGOL_LAYER_ID')
+        (GEONETWORK_UUID, GEONETWORK_CATALOG_DATA_SOURCE_TYPE),
+        (GVSIGOL_LAYER_ID, GVSIGOL_DATA_SOURCE_TYPE)
     )
     
-    # res_internal_id = models.PositiveIntegerField()
-    ds_type = models.CharField(max_length=2, choices=RESOURCE_TYPES_CHOICES)
+    # res_einternal_id = models.PositiveIntegerField()
+    #ds_type = models.CharField(max_length=3, choices=RESOURCE_TYPES_CHOICES)
     data_source  = models.TextField() # description of the layer data source and download params
     layer_id = models.TextField(null=True, blank=True)
-    laye_id_type = models.CharField(max_length=2, choices=ID_TYPES)
+    layer_id_type = models.CharField(max_length=2, choices=ID_TYPES)
     #resolved_layer_url = models.TextField(null=True, blank=True)
     name = models.TextField()
     title = models.TextField()
@@ -146,7 +144,7 @@ class ResourceLocator(models.Model):
 
 class DownloadLog(models.Model):
     layer_id = models.TextField(null=True, blank=True)
-    laye_id_type = models.CharField(max_length=2, choices=ResourceLocator.ID_TYPES)
+    layer_id_type = models.CharField(max_length=2, choices=ResourceLocator.ID_TYPES)
     date = models.DateTimeField(auto_now_add=True)
     request = models.ForeignKey('DownloadRequest', on_delete=models.CASCADE)
 

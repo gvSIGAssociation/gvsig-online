@@ -37,12 +37,15 @@ var ResourceDownloadParamValue = function(resource_param, value) {
 	this.value = value;
 }
 
-var ResourceDescriptor = function(layer_id, layer_title, resource_name, title, direct_download_url, params) {
+var ResourceDescriptor = function(layer_id, layer_title, resource_name, title, params, data_source_type, resource_type, url, direct_download) {
 	this.layer_id = layer_id;
 	this.layer_title = layer_title;
 	this.name = resource_name;
 	this.title = title;
-	this.direct_download_url = direct_download_url || '';
+	this.direct_download = this.direct_download || false;
+	this.url = url || '';
+	this.data_source_type = data_source_type || '';
+	this.resource_type = resource_type || '';
 	this.params = params || [];
 }
 
@@ -115,7 +118,15 @@ DownloadManagerClient.prototype.queryAvailableResources = function(layer_id, wor
 						downloadParam = new ResourceDownloadParam(res.params[j].name, res.params[j].title, res.params[j].options);
 						params.push(downloadParam);
 					}
-					var resource = new ResourceDescriptor(response[i].layer_id, response[i].layer_title, response[i].name, response[i].title,  response[i].direct_download_url, params);
+					var resource = new ResourceDescriptor(response[i].layer_id,
+							response[i].layer_title,
+							response[i].name,
+							response[i].title,
+							params,
+							response[i].data_source_type,
+							response[i].resource_type,
+							response[i].url,
+							response[i].direct_download);
 					resources.push(resource);
 				}
 			} catch (e) {
@@ -188,6 +199,7 @@ DownloadManagerClient.prototype.getDownloadListCount = function(){
 
 DownloadManagerClient.prototype.clearDownloadList = function(){
 	this.layerList.splice(0);
+	this.downloadListUpdated();
 }
 
 
@@ -389,8 +401,9 @@ DownloadManagerUI.prototype.initDownloadList = function(){
 	});
 	
 	$(".start-downloading-btn").unbind("click").click(function(){
-		alert('No disponible temporalmente');
 		// deshabilitamos para evitar ir creando peticiones que todavía no gestionamos al 100%
+		alert('No disponible temporalmente');
+		
 		//self.getClient().startDownloadRequest(null, DownloadManagerUI.prototype.showDownloadQueued, DownloadManagerUI.prototype.showDownloadQueued, self);
 	});
 }
