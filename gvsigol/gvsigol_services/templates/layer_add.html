@@ -16,158 +16,219 @@
 				<div class="box-tools pull-right">
 					<button type="submit" class="btn btn-default btn-sm save-button">{% trans "Next" %} <i class="fa fa-angle-right margin-l-5"></i></button>					
 				</div>
+			</div>
+			<div class="row" style="padding-left: 30px;">
+				{% csrf_token %}
+				<div id="form-error" style="color:#ff0000;">
+					<ul>
+					{% for field in form %}
+						{% if field.errors %}
+							<li>{{field.label}}. {{ field.errors|striptags }}</li>
+						{% endif %}	
+					{% endfor %}
+					{% for field, msg in form.errors.iteritems %}
+						<li>{{ msg|striptags }}</li>
+					{% endfor %}
+					</ul>
+				</div>
 			</div>				
 		</div>
-		<div class="box">
-			{% csrf_token %}					
-			{% if form.errors %}
-			<div id="form-error" style="color:#ff0000;">
-				<ul>
-				{{ form.non_field_errors }}
-				{% for field in form %}
-					{% if field.errors %}
-						<li>{{field.label}}. {{ field.errors|striptags }}</li>
-					{% endif %}	
-				{% endfor %}
-				</ul>
-			</div>
-			{% endif %}				
-			{% if message %}
-			<div id="form-error" style="color:#ff0000;">
-				<p>* {{ message }}</p>
-			</div>
-			{% endif %}	
-			<div class="box-body">				
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<label for="id_datastore">{% trans "Data Store" %}</label>
-						{{ form.datastore }}						
-					</div>
-				</div>								
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<label for="id_name">{% trans "Resource name" %}</label>
-						{{ form.name }}						
-					</div>
-				</div>							
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<label for="id_title">{% trans "Title" %}</label>
-						{{ form.title }}						
-					</div>
-				</div>				
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<label for="id_layer_group">{% trans "Layer group" %}</label>
-						{{ form.layer_group }}						
-					</div>
-				</div>									
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<span>{% trans "Layer properties in the viewer" %}.</span>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-md-4 form-group">
-						<input type="checkbox" name="visible" id="visible"/>
-						<label for="visible">{% trans "Visible" %}</label>														
-					</div>
-					<div class="col-md-4 form-group">
-						<input type="checkbox" name="cached" id="cached"/>
-						<label for="cached">{% trans "Cached" %}</label>	
-					</div>
-					<div class="col-md-4 form-group">
-						<input type="checkbox" name="queryable" id="queryable" checked/>
-						<label for="queryable">{% trans "Queryable" %}</label>
-					</div>						
-				</div>					
-				<div class="row">
-					<div class="col-md-4 form-group">
-						<input type="checkbox" name="single_image" id="single_image" />	
-						<label for="single_image">{% trans "Single image (No tiles)" %}</label>											
-					</div>
-					<div class="col-md-4 form-group">
-						<input type="checkbox" name="time_enabled"  id="time_enabled"/>
-						<label for="time_enabled">{% trans "time_enabled" %}</label>
-					</div>
-					<div class="col-md-4 form-group">
-						<input type="checkbox" name="allow_download"  id="allow_download"/>
-						<label for="allow_download">{% trans "Allow downloads" %}</label>
-					</div>
-				</div>
-				
-				<div class="box-body time_enabled-check">
-					<div class="image_mosaic_tmp_fields">
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label class="active" for="id_time_enabled_field">{% trans "time_enabled field" %}</label>
-								{{ form.time_enabled_field }}
-							</div>
-						</div>
-				
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label class="active" for="id_time_enabled_endfield">{% trans "End time_enabled field" %}</label>
-								{{ form.time_enabled_endfield }}
-							</div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label class="active" for="id_time_resolution">{% trans "Time resolution" %}</label>
-							{{ form.time_resolution }}
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label class="active" for="id_time_presentation">{% trans "Time presentation" %}</label>
-							{{ form.time_presentation }}
-						</div>
-					</div>	
-					<div class="row time_presentation">
-						<div class="col-md-12 form-group">
-							<label class="active" for="id_time_resolution">{% trans "Time resolution (years, months, weeks, days, hours, minutes and seconds)" %}</label><br />
-							
-							{{ form.time_resolution_year }}
-							{{ form.time_resolution_month }}
-							{{ form.time_resolution_week }}
-							{{ form.time_resolution_day }}
-							{{ form.time_resolution_hour }}
-							{{ form.time_resolution_minute }}
-							{{ form.time_resolution_second }}
-							
-							<div style="clear:both"></div>
-						</div>
-					</div>			
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label class="active" for="id_time_default_value_mode">{% trans "Default value mode" %}</label>
-							{{ form.time_default_value_mode }}
-						</div>
-					</div>					
-					<div class="row time_default_value">
-						<div class="col-md-12 form-group">
-							<label class="active" for="id_time_default_value">{% trans "Default value" %}</label>
-							<div class="input-group date col-md-12" id="datetimepicker">
-								{{ form.time_default_value }}
-								<!--  <input id="id_time_default_value" name="time_default_value" class="form-control"/>-->
-								<span class="input-group-addon">
-									<span class="glyphicon glyphicon-calendar"></span>
-								</span>
+		
+		<ul class="nav nav-tabs">
+          	<li class="active"><a href="#tab-layer-general" data-toggle="tab">{% trans "General" %}</a></li>
+          	<li><a href="#tab-layer-properties" data-toggle="tab">{% trans "Display properties" %}</a></li>
+          	<li><a href="#tab-layer-metadata" data-toggle="tab">{% trans "Metadata" %}</a></li>
+          	<li><a href="#tab-layer-detailedinfo" data-toggle="tab">{% trans "Detailed information" %}</a></li>
+        </ul>
+        	
+        <div class="tab-content">
+        
+          	<div class="tab-pane active" id="tab-layer-general">
+          		<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+          					<div class="box-body">
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="id_datastore">{% trans "Data Store" %}</label>
+										{{ form.datastore }}						
+									</div>
+								</div>								
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="id_name">{% trans "Resource name" %}</label>
+										{{ form.name }}						
+									</div>
+								</div>							
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="id_title">{% trans "Title" %}</label>
+										{{ form.title }}						
+									</div>
+								</div>				
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="id_layer_group">{% trans "Layer group" %}</label>
+										{{ form.layer_group }}						
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-				<br/>
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<label for="md-abstract">{% trans "Metadata: Abstract" %}</label>
-			        	<textarea class="form-control" name="md-abstract" id="md-abstract" rows="5">{% trans "Some description of the layer" %}</textarea>	     	
-			        </div>
-				</div>					
-           	</div>		
-		</div>
-	</div>				
+          	</div>
+          	
+          	<div class="tab-pane" id="tab-layer-properties">
+		    	<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+		          			<div class="box-body">
+								<div class="row">
+									<div class="col-md-4 form-group">
+										<input type="checkbox" name="visible" id="visible"/>
+										<label for="visible">{% trans "Visible" %}</label>														
+									</div>
+									<div class="col-md-4 form-group">
+										<input type="checkbox" name="cached" id="cached"/>
+										<label for="cached">{% trans "Cached" %}</label>	
+									</div>
+									<div class="col-md-4 form-group">
+										<input type="checkbox" name="queryable" id="queryable" checked/>
+										<label for="queryable">{% trans "Queryable" %}</label>
+									</div>						
+								</div>					
+								<div class="row">
+									<div class="col-md-4 form-group">
+										<input type="checkbox" name="single_image" id="single_image" />	
+										<label for="single_image">{% trans "Single image (No tiles)" %}</label>											
+									</div>
+									<div class="col-md-4 form-group">
+										<input type="checkbox" name="time_enabled"  id="time_enabled"/>
+										<label for="time_enabled">{% trans "time_enabled" %}</label>
+									</div>
+									<div class="col-md-4 form-group">
+										<input type="checkbox" name="allow_download"  id="allow_download"/>
+										<label for="allow_download">{% trans "Allow downloads" %}</label>
+									</div>
+								</div>
+								
+								<div class="box-body time_enabled-check">
+									<div class="image_mosaic_tmp_fields">
+										<div class="row">
+											<div class="col-md-12 form-group">
+												<label class="active" for="id_time_enabled_field">{% trans "time_enabled field" %}</label>
+												{{ form.time_enabled_field }}
+											</div>
+										</div>
+								
+										<div class="row">
+											<div class="col-md-12 form-group">
+												<label class="active" for="id_time_enabled_endfield">{% trans "End time_enabled field" %}</label>
+												{{ form.time_enabled_endfield }}
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12 form-group">
+											<label class="active" for="id_time_resolution">{% trans "Time resolution" %}</label>
+											{{ form.time_resolution }}
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12 form-group">
+											<label class="active" for="id_time_presentation">{% trans "Time presentation" %}</label>
+											{{ form.time_presentation }}
+										</div>
+									</div>	
+									<div class="row time_presentation">
+										<div class="col-md-12 form-group">
+											<label class="active" for="id_time_resolution">{% trans "Time resolution (years, months, weeks, days, hours, minutes and seconds)" %}</label><br />
+											
+											{{ form.time_resolution_year }}
+											{{ form.time_resolution_month }}
+											{{ form.time_resolution_week }}
+											{{ form.time_resolution_day }}
+											{{ form.time_resolution_hour }}
+											{{ form.time_resolution_minute }}
+											{{ form.time_resolution_second }}
+											
+											<div style="clear:both"></div>
+										</div>
+									</div>			
+									<div class="row">
+										<div class="col-md-12 form-group">
+											<label class="active" for="id_time_default_value_mode">{% trans "Default value mode" %}</label>
+											{{ form.time_default_value_mode }}
+										</div>
+									</div>					
+									<div class="row time_default_value">
+										<div class="col-md-12 form-group">
+											<label class="active" for="id_time_default_value">{% trans "Default value" %}</label>
+											<div class="input-group date col-md-12" id="datetimepicker">
+												{{ form.time_default_value }}
+												<!--  <input id="id_time_default_value" name="time_default_value" class="form-control"/>-->
+												<span class="input-group-addon">
+													<span class="glyphicon glyphicon-calendar"></span>
+												</span>
+											</div>
+										</div>
+									</div>
+								</div>	
+							</div>
+						</div>
+					</div>
+				</div>
+		    </div>
+		    
+		    <div class="tab-pane" id="tab-layer-metadata">
+          		<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+          					<div class="box-body">
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="md-abstract">{% trans "Metadata: Abstract" %}</label>
+							        	<textarea class="form-control" name="md-abstract" id="md-abstract" rows="5">{% trans "Some description of the layer" %}</textarea>	     	
+							        </div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+          	</div>
+          	
+          	<div class="tab-pane" id="tab-layer-detailedinfo">
+          		<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+          					<div class="box-body">
+          						<div class="row">
+	          						<div class="col-md-6 form-group">
+	          							<input type="checkbox" name="detailed_info_enabled" id="detailed_info_enabled"/>
+										<label for="detailed_info_enabled">{% trans "Enable metaquality" %}</label>												
+									</div>
+								</div>	
+	          					<div style="display: none;" class="row" id="detailed_info_button_title-row">
+									<div class="col-md-12 form-group">
+										<label for="detailed_info_button_title">{% trans "Button title in the TOC" %}</label>
+										<input placeholder="{% trans 'Button title' %}" name="detailed_info_button_title" id="detailed_info_button_title" value="{% trans "Detailed info" %}" type="text" class="form-control">										
+									</div>
+								</div>	
+									
+								<div style="display: none;" class="row" id="detailed_info_html-row">
+									<div class="col-md-12 form-group">
+										<label for="detailed_info_html">{% trans "HTML" %}</label>
+										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5"></textarea>						
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+          	</div>
+        		
+		</div> 	
+	</div>		
 </div>
 </form>
 {% endblock %}
@@ -419,15 +480,54 @@
 		}
 	};
 	
+	function fileExists(url) {
+	    if(url){
+	        var req = new XMLHttpRequest();
+	        req.open('GET', url, false);
+	        req.send();
+	        return req.status==200;
+	        
+	    } else {
+	        return false;
+	    }
+	};
 	
 	$(document).ready(function() {
 		
+		var detailedInfoHTML = document.getElementById('detailed_info_html');
+		var codemirror = CodeMirror.fromTextArea(detailedInfoHTML, {
+			mode: "text/html",
+	        extraKeys: {"Ctrl-Space": "autocomplete"},
+			theme: "xq-dark",
+			lineNumbers: true
+		});
+		
+		var code = '';
+		if (fileExists(HTML_PATH + 'detailed_info.html')) {
+			code += '<iframe src="'+ HTML_PATH +'/detailed_info.html" frameborder="0"></iframe>';
+			
+		} else {
+			code += '<div class="col-md-12"> \n';
+			code += '\t <h2>{% trans "Layer title" %}</h2> \n';
+			code += '\t <p>{% trans "Layer description" %}</p> \n';
+			code += '</div> \n';
+		}
+		
+		$('#detailed_info_enabled').click(function(){
+			if ($('#detailed_info_enabled').is(":checked")) {
+				$('#detailed_info_button_title-row').css('display', 'block');
+				$('#detailed_info_html-row').css('display', 'block');
+				codemirror.setValue(code);
+				codemirror.refresh();
+				
+			} else {
+				$('#detailed_info_button_title-row').css('display', 'none');
+				$('#detailed_info_html-row').css('display', 'none');
+			}
+		});
+		
 		updateResourceList($("#id_datastore").val());
 		updateLayerGroupList($("#id_datastore").val());
-		
-// 		var date_fields = {{ date_fields|safe }};
-// 		create_date_select("id_time_enabled_field", date_fields, "");
-// 		create_date_select("id_time_enabled_endfield", date_fields, "");
 		
 	
 		$("#id_datastore").change(function() {
