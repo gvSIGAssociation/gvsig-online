@@ -373,6 +373,20 @@ layerTree.prototype.setLayerEvents = function() {
 		self.showMetadata(selectedLayer);
 	});
 	
+	$(".detailed-info-link").unbind("click").on('click', function(e) {
+		var layers = self.map.getLayers();
+		var selectedLayer = null;
+		var id = this.id.split("detailed-info-")[1];
+		layers.forEach(function(layer){
+			if (layer.baselayer == false) {
+				if (id===layer.get("id")) {
+					selectedLayer = layer;
+				}
+			}						
+		}, this);
+		self.detailedInfo(selectedLayer);
+	});
+	
 	$(".layer-downloads-link").unbind("click").on('click', function(e) {
 		var layers = self.map.getLayers();
 		var selectedLayer = null;
@@ -1961,6 +1975,11 @@ layerTree.prototype.createOverlayUI = function(layer, group_visible) {
 			ui += '		<i class="fa fa-newspaper-o" aria-hidden="true"></i> ' + gettext('Metadata');
 			ui += '	</a>';
 		}
+		if (layer.detailed_info_enabled) {
+			ui += '	<a id="detailed-info-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool detailed-info-link">';
+			ui += '		<i class="fa fa-info-circle" aria-hidden="true"></i> ' + layer.detailed_info_button_title;
+			ui += '	</a>';
+		}
 		if (!layer.external) {
 			ui += '	<a id="zoom-to-layer-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool zoom-to-layer">';
 			ui += '		<i class="fa fa-search" aria-hidden="true"></i> ' + gettext('Zoom to layer');
@@ -2084,6 +2103,27 @@ layerTree.prototype.showMetadata = function(layer) {
 		$('#float-modal').modal('hide');
 	});
 	return;
+};
+
+/**
+ * TODO
+ */
+layerTree.prototype.detailedInfo = function(layer) {
+	var body = '';
+	body += '<div class="row">';
+	body += 	layer.detailed_info_html;
+	body += '</div>';
+	
+	$('#float-modal .modal-body').empty();
+	$('#float-modal .modal-body').append(body);
+	
+	var buttons = '';
+	buttons += '<button id="float-modal-cancel-metadata" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
+	
+	$('#float-modal .modal-footer').empty();
+	$('#float-modal .modal-footer').append(buttons);
+	
+	$("#float-modal").modal('show');
 };
 
 /**
