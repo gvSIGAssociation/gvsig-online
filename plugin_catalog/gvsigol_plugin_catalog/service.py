@@ -15,7 +15,6 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from gvsigol_plugin_catalog.xmlutils import getLocalizedText
 '''
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 @author: Cesar Martinez Izquierdo <cmartinez@scolab.es>
@@ -29,9 +28,6 @@ from gvsigol_plugin_catalog import api_old as xmlapi_old
 from gvsigol_plugin_catalog import api_new as xmlapi_new
 import logging
 from gvsigol_plugin_catalog.mdstandards import registry
-import xml.etree.ElementTree as ET
-from xmlutils import getTextFromXMLNode
-from django.utils.translation import get_language
 
 logger = logging.getLogger("gvsigol")
 
@@ -77,7 +73,12 @@ class Geonetwork():
             logger.exception(e);
             print e
             
-            
+    def _get_first_dict_value(self, d):
+        if len(d) > 0:
+            key = next(iter(d))
+            return d.get(key, '')
+        return ''
+        
     def get_online_resources(self, record_uuid):
         """
         Returns a list of OnlineResource objects, describing the online resources
@@ -86,23 +87,18 @@ class Geonetwork():
         try:
             online_resources = []
             if self.xmlapi.gn_auth(self.user, self.password):
-                content = self.xmlapi.get_online_resources(record_uuid)
+                onlinesJson = self.xmlapi.get_online_resources(record_uuid)
+                for online in onlinesJson.get('onlines', []):
+                    res_type = online.get('type', '')
+                    url = self._get_first_dict_value(online.get('url', {}))
+                    protocol = online.get('protocol')
+                    title = self._get_first_dict_value(online.get('title', {}))
+                    desc = self._get_first_dict_value(online.get('description', {}))
+                    app_profile = online.get('applicationProfile', '')
+                    function = online.get('function', '')
+                    online_resource = OnlineResource(res_type, url, protocol, title, desc, app_profile, function)
+                    online_resources.append(online_resource) 
                 self.xmlapi.gn_unauth()
-                tree = ET.fromstring(content.encode('utf8'))
-                online_resource = OnlineResource()
-                for onlines_node in tree.findall('./related/onlines/item/'):
-                    urlNode = getTextFromXMLNode(onlines_node, './url/')
-                    online_resource.url = getLocalizedText(urlNode)
-                    titleNode = getTextFromXMLNode(onlines_node, './title/')
-                    online_resource.title = getLocalizedText(titleNode)
-                    online_resource.res_type = getTextFromXMLNode(onlines_node, './type/')
-                    online_resource.protocol = getTextFromXMLNode(onlines_node, './protocol/')
-                    descriptionNode = getTextFromXMLNode(onlines_node, './description/')
-                    online_resource.desc = getLocalizedText(descriptionNode)
-                    online_resource.function = getTextFromXMLNode(onlines_node, './function/')
-                    online_resource.app_profile = getTextFromXMLNode(onlines_node, './applicationProfile/')
-                online_resources.append(online_resource)
-        
         except Exception as e:
             logger.exception(e);
             print e

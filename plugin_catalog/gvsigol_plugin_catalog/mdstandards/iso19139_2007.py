@@ -210,9 +210,6 @@ class Iso19139_2007Manager(BaseStandardManager):
         if root_qname.localname == 'MD_Metadata' and root_qname.namespace == namespaces['gmd']:
             return True
         return False
-    
-    def get_online_resources(self, metadata_record):
-        return []
 
 def update_extent(geo_bb_elem, extent_tuple):
     minx, miny, maxx, maxy = extent_tuple

@@ -565,12 +565,13 @@ class Geonetwork():
         url = self.service_url + "/srv/api/0.1/records/" + record_uuid + "/related?type=onlines" # /related?type=onlines&start=1&rows=100
         headers = {
             'Accept': 'application/json',
+            #'Accept': 'application/xml',
             'X-XSRF-TOKEN': self.get_csrf_token()
         }
               
         r = self.session.get(url, headers=headers, timeout=DEFAULT_TIMEOUT, proxies=settings.PROXIES)
         if r.status_code==200:
-            return r.text
+            return r.json()
         raise FailedRequestError(r.status_code, r.content)
 
 class RequestError(Exception):

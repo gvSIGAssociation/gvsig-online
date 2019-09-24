@@ -22,7 +22,7 @@
 @author: Cesar Martinez Izquierdo
 '''
 
-def getTextFromXMLNode(tree, xpath_filter, ns):
+def getTextFromXMLNode(tree, xpath_filter, ns={}):
     if tree is not None:
         for item in tree.findall(xpath_filter, ns):
             if item.text:
@@ -31,7 +31,7 @@ def getTextFromXMLNode(tree, xpath_filter, ns):
 
 def getXMLNode(tree, xpath_filter, ns):
     if tree:
-        aux = tree.findall(xpath_filter, ns)
+        aux = tree.findall(xpath_filter, ns={})
         if len(aux) > 0:
             return aux[0]
     
