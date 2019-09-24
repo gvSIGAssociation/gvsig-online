@@ -277,7 +277,7 @@ $(document).ready(function(){
 	var detailedInfoHTML = document.getElementById('detailed_info_html');
 	if ('False' == '{{html|safe}}') {
 		if (fileExists(HTML_PATH + 'detailed_info.html')) {
-			detailedInfoHTML.innerHTML = '<iframe src="'+ HTML_PATH +'detailed_info.html" frameborder="0"></iframe>';
+			detailedInfoHTML.innerHTML = '<iframe width="800" height="600" src="'+ HTML_PATH +'detailed_info.html" frameborder="0"></iframe>';
 			
 		} else {
 			var aux = '';
