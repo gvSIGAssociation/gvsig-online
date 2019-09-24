@@ -41,12 +41,15 @@
 			</div>
 			
 			<ul class="nav nav-tabs">
-             	<li class="active"><a href="#tab-layercreate-main" data-toggle="tab">{% trans "Layer" %}</a></li>
-             	<li><a href="#tab-layercreate-fields" data-toggle="tab">{% trans "Fields" %}</a></li>
+             	<li class="active"><a href="#tab-layer-general" data-toggle="tab">{% trans "General" %}</a></li>
+             	<li><a href="#tab-layer-fields" data-toggle="tab">{% trans "Fields" %}</a></li>
+             	<li><a href="#tab-layer-properties" data-toggle="tab">{% trans "Display properties" %}</a></li>
+          		<li><a href="#tab-layer-metadata" data-toggle="tab">{% trans "Metadata" %}</a></li>
+          		<li><a href="#tab-layer-detailedinfo" data-toggle="tab">{% trans "Detailed information" %}</a></li>
            	</ul>
            	
            	<div class="tab-content">
-             	<div class="tab-pane active" id="tab-layercreate-main">
+             	<div class="tab-pane active" id="tab-layer-general">
              		<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -84,13 +87,51 @@
 											<label for="id_layer_group">{% trans "Layer group" %}</label>
 											{{ form.layer_group }}						
 										</div>
-									</div>				
-									<div class="row">
-										<div class="col-md-12 form-group">
-											<span>{% trans "Layer properties in the viewer" %}.</span>
-										</div>
+									</div>								
+				            	</div>
+							</div>
+						</div>
+					</div>
+             	</div>
+             		
+             	<div class="tab-pane" id="tab-layer-fields">
+             		<div class="row">
+						<div class="col-md-12">
+							<div class="box">
+								<div class="box-header with-border">
+									<h3 class="box-title">{% trans "Field list" %}</h3>
+								</div>
+								<div class="box-body">
+									<div class="table-responsive">
+										<table id="field-list-table" class="table no-margin">
+											<thead>
+												<tr>
+													<th>{% trans "Field name" %}</th>
+													<th>{% trans "Field type" %}</th>
+													<th></th>
+												</tr>
+											</thead>
+											<tbody id="field-list-table-body"></tbody>
+										</table>
 									</div>
-									<div class="row">
+								</div>
+								<div class="box-footer clearfix">
+									<a id="add-field-button" href="javascript:void(0)" class="btn btn-box-tool pull-left margin-r-5">
+										<i class="fa fa-plus margin-r-5"></i>{% trans "Add field" %}
+									</a>
+								</div>
+								<input type="hidden" name="fields" id="fields" value="{{form.fields.value|default_if_none:''}}" />
+							</div>
+						</div>
+					</div>
+             	</div>	
+             	
+             	<div class="tab-pane" id="tab-layer-properties">
+	          		<div class="row">
+						<div class="col-md-12">
+							<div class="box">
+	          					<div class="box-body">
+	          						<div class="row">
 										<div class="col-md-4 form-group">
 											<input type="checkbox" name="visible" id="visible"/>
 											<label for="visible">{% trans "Visible" %}</label>														
@@ -175,50 +216,40 @@
 											</div>
 										</div>
 									</div>
-									<br/>	
-									<div class="row">
-										<div class="col-md-12 form-group">
+								</div>
+							</div>
+						</div>
+					</div>
+	          	</div>
+             	
+             	<div class="tab-pane" id="tab-layer-metadata">
+	          		<div class="row">
+						<div class="col-md-12">
+							<div class="box">
+	          					<div class="box-body">
+	          						<div class="row">
+	          							<div class="col-md-12 form-group">
 											<label for="md-abstract">{% trans "Metadata: Abstract" %}</label>
 								        	<textarea class="form-control" name="md-abstract" id="md-abstract" rows="5">{% trans "Some description of the layer" %}</textarea>	     	
 								        </div>
-									</div>					
-				            	</div>
-							</div>
-						</div>
-					</div>
-             	</div>
-             		
-             	<div class="tab-pane" id="tab-layercreate-fields">
-             		<div class="row">
-						<div class="col-md-12">
-							<div class="box">
-								<div class="box-header with-border">
-									<h3 class="box-title">{% trans "Field list" %}</h3>
-								</div>
-								<div class="box-body">
-									<div class="table-responsive">
-										<table id="field-list-table" class="table no-margin">
-											<thead>
-												<tr>
-													<th>{% trans "Field name" %}</th>
-													<th>{% trans "Field type" %}</th>
-													<th></th>
-												</tr>
-											</thead>
-											<tbody id="field-list-table-body"></tbody>
-										</table>
 									</div>
 								</div>
-								<div class="box-footer clearfix">
-									<a id="add-field-button" href="javascript:void(0)" class="btn btn-box-tool pull-left margin-r-5">
-										<i class="fa fa-plus margin-r-5"></i>{% trans "Add field" %}
-									</a>
-								</div>
-								<input type="hidden" name="fields" id="fields" value="{{form.fields.value|default_if_none:''}}" />
 							</div>
 						</div>
 					</div>
-             	</div>	
+	          	</div>
+             	
+             	<div class="tab-pane" id="tab-layer-detailedinfo">
+	          		<div class="row">
+						<div class="col-md-12">
+							<div class="box">
+	          					<div class="box-body">
+								</div>
+							</div>
+						</div>
+					</div>
+	          	</div>
+          	
          	</div>		
 		</div>				
 	</div>

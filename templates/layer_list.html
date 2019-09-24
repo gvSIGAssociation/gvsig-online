@@ -32,13 +32,14 @@
 							<th></th>
 							<th></th>
 							<th></th>
+							<th></th>
 						</tr>
 					</thead>
 					<tbody>
 						{% for layer in layers %}
 						<tr>
 							<td>{{ layer.id }}</td>
-							<td><img class="layerlist-preview" style="cursor: pointer;" id="layerlist-preview-{{ layer.id }}" data-layerid="{{ layer.id }}" data-origin="{{ layer.type }}" src="{{ layer.thumbnail.url }}" height="60" width="84"></td>
+							<td><img style="cursor: pointer;" id="layerpreview-{{ layer.id }}" data-origin="{{ layer.type }}" src="{{ layer.thumbnail.url }}" height="60" width="84"></td>
 							<td>{{ layer.name }}</td>
 							<td>{{ layer.title }}</td>
 							<td>{{ layer.datastore.name }}</td>
@@ -48,6 +49,7 @@
 							{% else %}
 							<td><input disabled type="checkbox"/></td>
 							{% endif %}
+							<td></td>
 							<td></td>
 							<td></td>
 							<td></td>
@@ -158,9 +160,13 @@ $(document).ready(function() {
 	       	"data": null,
 	        "defaultContent": '<button type="button" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Configure layer" %}' + '" class="btn bg-purple"><i class="fa fa-cogs"></i></button>'
 	  	},{
-	      	"targets": -4,
+	      	"targets": -5,
 	       	"data": null,
 	        "defaultContent": '<button type="button" name="button-update-layer" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update layer" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
+	  	},{
+	      	"targets": -4,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-update-thumbnail" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update thumbnail" %}' + '" class="btn btn-primary"><i class="fa fa-file-image-o"></i></button>'
 	  	}],
 	    "dom": 'T<"clear">lfrtip',
 		"bLengthChange": false
@@ -189,6 +195,9 @@ $(document).ready(function() {
 		    	$('#modal-edit-layer').modal('show');
 		    }
 
+		} else if (this.name == "button-update-thumbnail"){
+			updateThumbnail(data, row);
+
 		} else if (this.name == "button-clear-cache"){
 			clearCache(data, row);
 
@@ -196,13 +205,19 @@ $(document).ready(function() {
 	        deleteLayer(data, row);
 	    }
 	});
+
+	$('#button-import-layer').click( function() {
+		location.href = '/gvsigonline/services/layer_add/';
+	});
+	$('#button-create-layer').click( function() {
+		location.href = "{% url 'layer_create'%}";
+	});
 	
-	$('.layerlist-preview').on('click', function (){
+	function updateThumbnail(data){
 		var _this = this;
-		
-		var layerId = this.dataset.layerid;
-		
-		$("#layerlist-preview-" + layerId).overlay();
+		var layerId = data[0];
+
+		$("#layerpreview-" + layerId).overlay();
 		$.ajax({
 			type: 'POST',
 			async: false,
@@ -212,23 +227,16 @@ $(document).ready(function() {
 			},
 			success	:function(response){
 				if (response.success) {
-					_this.src = _this.src;
+					document.getElementById("layerpreview-" + layerId).src = response.updated_thumbnail;
 				}
-				$("#layerlist-preview-" + layerId).overlayout();
+				$("#layerpreview-" + layerId).overlayout();
 			},
 			error: function(){
-				$("#layerlist-preview-" + layerId).overlayout();
+				$("#layerpreview-" + layerId).overlayout();
 			}
 		});
 		
-	});
-
-	$('#button-import-layer').click( function() {
-		location.href = '/gvsigonline/services/layer_add/';
-	});
-	$('#button-create-layer').click( function() {
-		location.href = "{% url 'layer_create'%}";
-	});
+	}
 
 	function updateLayer(data){
 		location.href = '/gvsigonline/services/layer_update/' + data[0] + '/';
