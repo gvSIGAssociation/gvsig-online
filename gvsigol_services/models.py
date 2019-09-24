@@ -148,6 +148,9 @@ class Layer(models.Model):
     created_by = models.CharField(max_length=100)
     thumbnail = models.ImageField(upload_to='thumbnails', default=get_default_layer_thumbnail, null=True, blank=True)
     conf = models.TextField(null=True, blank=True)
+    detailed_info_enabled = models.BooleanField(default=True)
+    detailed_info_button_title = models.CharField(max_length=150, null=True, blank=True, default='Detailed info')
+    detailed_info_html = models.TextField(null=True, blank=True)
     
     def __unicode__(self):
         return self.name

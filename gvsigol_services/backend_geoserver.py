@@ -855,7 +855,7 @@ class Geoserver():
             ds_type = 'featureType'
         elif store.type == 'e_WMS':
             url = self.rest_catalog.service_url + "/workspaces/" + workspace + "/wmsstores/" + store.name + "/wmslayers/" + featureType +"."+type
-            ds_type = 'wms'
+            ds_type = 'wmsLayer'
         elif store.type == 'c_GeoTIFF':
             url = self.rest_catalog.service_url + "/workspaces/" + workspace + "/coveragestores/" + store.name + "/coverages/" + featureType +"."+type
             ds_type = 'coverage'

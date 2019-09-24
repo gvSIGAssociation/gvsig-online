@@ -885,6 +885,14 @@ def layer_add_with_group(request, layergroup_id):
         allow_download = False
         if 'allow_download' in request.POST:
             allow_download = True
+            
+        detailed_info_enabled = False
+        detailed_info_button_title = request.POST.get('detailed_info_button_title')
+        detailed_info_html = request.POST.get('detailed_info_html')
+        if 'detailed_info_enabled' in request.POST:
+            detailed_info_enabled = True
+            detailed_info_button_title = request.POST.get('detailed_info_button_title')
+            detailed_info_html = request.POST.get('detailed_info_html')
 
         time_enabled = False
         time_field=''
@@ -907,13 +915,6 @@ def layer_add_with_group(request, layergroup_id):
             time_field = request.POST.get('time_enabled_field')
             time_endfield = request.POST.get('time_enabled_endfield')
             time_presentation = request.POST.get('time_presentation')
-            #time_resolution_year = request.POST.get('time_resolution_year')
-            #time_resolution_month = request.POST.get('time_resolution_month')
-            #time_resolution_week = request.POST.get('time_resolution_week')
-            #time_resolution_day = request.POST.get('time_resolution_day')
-            #time_resolution_hour = request.POST.get('time_resolution_hour')
-            #time_resolution_minute = request.POST.get('time_resolution_minute')
-            #time_resolution_second = request.POST.get('time_resolution_second')
             time_default_value_mode = request.POST.get('time_default_value_mode')
             time_default_value = request.POST.get('time_default_value')
 
@@ -971,6 +972,9 @@ def layer_add_with_group(request, layergroup_id):
                 newRecord.time_default_value_mode = time_default_value_mode
                 newRecord.time_default_value = time_default_value
                 newRecord.time_resolution = time_resolution
+                newRecord.detailed_info_enabled = detailed_info_enabled
+                newRecord.detailed_info_button_title = detailed_info_button_title
+                newRecord.detailed_info_html = detailed_info_html
                 newRecord.save()
 
                 if form.cleaned_data['datastore'].type == 'c_ImageMosaic':
@@ -1117,6 +1121,14 @@ def layer_update(request, layer_id):
         allow_download = False
         if 'allow_download' in request.POST:
             allow_download = True
+            
+        detailed_info_enabled = False
+        detailed_info_button_title = request.POST.get('detailed_info_button_title')
+        detailed_info_html = request.POST.get('detailed_info_html')
+        if 'detailed_info_enabled' in request.POST:
+            detailed_info_enabled = True
+            detailed_info_button_title = request.POST.get('detailed_info_button_title')
+            detailed_info_html = request.POST.get('detailed_info_html')
 
         time_enabled = False
         time_field=''
@@ -1180,6 +1192,9 @@ def layer_update(request, layer_id):
             layer.time_default_value_mode = time_default_value_mode
             layer.time_default_value = time_default_value
             layer.time_resolution = time_resolution
+            layer.detailed_info_enabled = detailed_info_enabled
+            layer.detailed_info_button_title = detailed_info_button_title
+            layer.detailed_info_html = detailed_info_html
             layer.save()
 
             if layer.datastore.type == 'c_ImageMosaic':
@@ -3879,8 +3894,8 @@ def update_thumbnail(request, layer_id):
     
     try:
         gs = geographic_servers.get_instance().get_server_by_id(server.id)
-        gs.updateThumbnail(layer, 'update')
-        return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+        layer = gs.updateThumbnail(layer, 'update')
+        return HttpResponse(json.dumps({'success': True, 'updated_thumbnail': layer.thumbnail.url}, indent=4), content_type='application/json')
         
     except Exception as e:
         print str(e)
