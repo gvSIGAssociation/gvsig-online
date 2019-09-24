@@ -261,7 +261,7 @@
 				selectObj.append(extraOptions[i]);
 			}
 		}
-	}
+	};
 	
 	function make_temporal_form(){
 		$(".time_presentation").css("display", "none");
@@ -281,7 +281,7 @@
 			});
 		}
 		
-	}
+	};
 	
 	function create_date_select(field, data, previousValue){
 		var language = $("#select-language").val();
@@ -309,7 +309,7 @@
 		}
 		var text = '{% trans "Choose field" %}';
 		rebuildSelect(name_select, text, placeholderSelected, options);
-	}
+	};
 
 	
 	function temporary_field(field){
@@ -323,7 +323,7 @@
 			field.parent().removeClass("time_enabled-check");
 			$(".box-body.time_enabled-check").css("display", "none");
 		}
-	}
+	};
 
 	function updateResourceList(id_datastore) {
 		if (id_datastore) {
@@ -504,7 +504,7 @@
 		
 		var code = '';
 		if (fileExists(HTML_PATH + 'detailed_info.html')) {
-			code += '<iframe src="'+ HTML_PATH +'/detailed_info.html" frameborder="0"></iframe>';
+			code += '<iframe src="'+ HTML_PATH +'detailed_info.html" frameborder="0"></iframe>';
 			
 		} else {
 			code += '<div class="col-md-12"> \n';

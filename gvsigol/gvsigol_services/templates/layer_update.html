@@ -284,15 +284,10 @@
 								{% endif %}
 									<div class="col-md-12 form-group">
 										<label for="detailed_info_html">{% trans "HTML" %}</label>
-										{% if layer.detailed_info_html == None %}
-										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5">
-<div class="col-md-12">
-	<h2>{{layer.title}}</h2>
-	<p>{{layer.abstract}}</p>
-</div>
-										</textarea>
+										{% if layer.detailed_info_html != None %}
+										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5">{{layer.detailed_info_html}}</textarea>
 										{% else %}
-										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5">{{layer.detailed_info_html}}</textarea>	
+										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5"></textarea>	
 										{% endif %}					
 									</div>
 								</div>
@@ -330,7 +325,7 @@ $('#submenu-layers').addClass("active");
 				selectObj.append(extraOptions[i]);
 			}
 		}
-	}
+	};
 	
 	function make_temporal_form(){
 		$(".time_presentation").css("display", "none");
@@ -350,7 +345,7 @@ $('#submenu-layers').addClass("active");
 			});
 		}
 		
-	}
+	};
 	
 	function create_date_select(field, data, previousValue, allow_blank){
 		var language = $("#select-language").val();
@@ -386,7 +381,7 @@ $('#submenu-layers').addClass("active");
 		}
 		var text = '{% trans "Choose field" %}';
 		rebuildSelect(name_select, text, placeholderSelected, options);
-	}
+	};
 
 	
 	function temporary_field(field){
@@ -400,11 +395,37 @@ $('#submenu-layers').addClass("active");
 			field.parent().removeClass("time_enabled-check");
 			$(".box-body.time_enabled-check").css("display", "none");
 		}
-	}
+	};
+	
+	function fileExists(url) {
+	    if(url){
+	        var req = new XMLHttpRequest();
+	        req.open('GET', url, false);
+	        req.send();
+	        return req.status==200;
+	        
+	    } else {
+	        return false;
+	    }
+	};
 
 	$(document).ready(function() {
 		
 		var detailedInfoHTML = document.getElementById('detailed_info_html');
+		if ('False' == '{{html|safe}}') {
+			if (fileExists(HTML_PATH + 'detailed_info.html')) {
+				detailedInfoHTML.innerHTML = '<iframe src="'+ HTML_PATH +'detailed_info.html" frameborder="0"></iframe>';
+				
+			} else {
+				var aux = '';
+				aux += '<div class="col-md-12"> \n';
+				aux += '\t <h2>{% trans "Layer title" %}</h2> \n';
+				aux += '\t <p>{% trans "Layer description" %}</p> \n';
+				aux += '</div> \n';
+				detailedInfoHTML.innerHTML = aux;
+			}
+		}
+		
 		var codemirror = CodeMirror.fromTextArea(detailedInfoHTML, {
 			mode: "text/html",
 	        extraKeys: {"Ctrl-Space": "autocomplete"},
@@ -412,8 +433,6 @@ $('#submenu-layers').addClass("active");
 			theme: "xq-dark",
 			lineNumbers: true
 		});
-
-		codemirror.refresh();
 		
 		$('#detailed_info_enabled').click(function(){
 			if ($('#detailed_info_enabled').is(":checked")) {
