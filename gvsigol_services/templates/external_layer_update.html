@@ -201,6 +201,40 @@
 					<div class="col-md-12">
 						<div class="box">
           					<div class="box-body">
+          						<div class="row">
+	          						<div class="col-md-6 form-group">
+	          							{% if layer.detailed_info_enabled %}
+	          							<input type="checkbox" name="detailed_info_enabled" id="detailed_info_enabled" checked/>
+	          							{% else %}
+	          							<input type="checkbox" name="detailed_info_enabled" id="detailed_info_enabled"/>
+	          							{% endif %}
+										<label for="detailed_info_enabled">{% trans "Enable metaquality" %}</label>												
+									</div>
+								</div>
+								{% if layer.detailed_info_enabled %}
+	          					<div class="row" id="detailed_info_button_title-row">
+	          					{% else %}
+	          					<div style="display: none;" class="row" id="detailed_info_button_title-row">
+	          					{% endif %}
+									<div class="col-md-12 form-group">
+										<label for="detailed_info_button_title">{% trans "Button title in the TOC" %}</label>
+										<input value="{{layer.detailed_info_button_title}}" placeholder="{% trans 'Button title' %}" name="detailed_info_button_title" id="detailed_info_button_title" value="{% trans "Detailed info" %}" type="text" class="form-control">										
+									</div>
+								</div>	
+								{% if layer.detailed_info_enabled %}	
+								<div class="row" id="detailed_info_html-row">
+								{% else %}
+								<div style="display: none;" class="row" id="detailed_info_html-row">
+								{% endif %}
+									<div class="col-md-12 form-group">
+										<label for="detailed_info_html">{% trans "HTML" %}</label>
+										{% if layer.detailed_info_html != None %}
+										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5">{{layer.detailed_info_html}}</textarea>
+										{% else %}
+										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5"></textarea>	
+										{% endif %}					
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -217,7 +251,18 @@
 	$('#submenu-externallayers').addClass("active");
 </script>
 <script type="text/javascript">
-$().ready(function(){ 
+function fileExists(url) {
+    if(url){
+        var req = new XMLHttpRequest();
+        req.open('GET', url, false);
+        req.send();
+        return req.status==200;
+        
+    } else {
+        return false;
+    }
+};
+$(document).ready(function(){ 
 	
 	var bing_layers = {{bing_layers|safe}};
 	var url = "{{ form.url.value }}";
@@ -228,6 +273,41 @@ $().ready(function(){
 	var version = params['version'];
 	var layer = params['layers'];
 	var wmts_success = true;
+	
+	var detailedInfoHTML = document.getElementById('detailed_info_html');
+	if ('False' == '{{html|safe}}') {
+		if (fileExists(HTML_PATH + 'detailed_info.html')) {
+			detailedInfoHTML.innerHTML = '<iframe src="'+ HTML_PATH +'detailed_info.html" frameborder="0"></iframe>';
+			
+		} else {
+			var aux = '';
+			aux += '<div class="col-md-12"> \n';
+			aux += '\t <h2>{% trans "Layer title" %}</h2> \n';
+			aux += '\t <p>{% trans "Layer description" %}</p> \n';
+			aux += '</div> \n';
+			detailedInfoHTML.innerHTML = aux;
+		}
+	}
+	
+	var codemirror = CodeMirror.fromTextArea(detailedInfoHTML, {
+		mode: "text/html",
+        extraKeys: {"Ctrl-Space": "autocomplete"},
+        autoRefresh:true,
+		theme: "xq-dark",
+		lineNumbers: true
+	});
+	
+	$('#detailed_info_enabled').click(function(){
+		if ($('#detailed_info_enabled').is(":checked")) {
+			$('#detailed_info_button_title-row').css('display', 'block');
+			$('#detailed_info_html-row').css('display', 'block');
+			codemirror.refresh();
+			
+		} else {
+			$('#detailed_info_button_title-row').css('display', 'none');
+			$('#detailed_info_html-row').css('display', 'none');
+		}
+	});
 	
 	function updateFormfields(){
 		var type = $("#id_type option:selected").val();

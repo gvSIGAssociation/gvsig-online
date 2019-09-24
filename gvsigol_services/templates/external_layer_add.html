@@ -166,6 +166,25 @@
 					<div class="col-md-12">
 						<div class="box">
           					<div class="box-body">
+          						<div class="row">
+	          						<div class="col-md-6 form-group">
+	          							<input type="checkbox" name="detailed_info_enabled" id="detailed_info_enabled"/>
+										<label for="detailed_info_enabled">{% trans "Enable metaquality" %}</label>												
+									</div>
+								</div>	
+	          					<div style="display: none;" class="row" id="detailed_info_button_title-row">
+									<div class="col-md-12 form-group">
+										<label for="detailed_info_button_title">{% trans "Button title in the TOC" %}</label>
+										<input placeholder="{% trans 'Button title' %}" name="detailed_info_button_title" id="detailed_info_button_title" value="{% trans "Detailed info" %}" type="text" class="form-control">										
+									</div>
+								</div>	
+									
+								<div style="display: none;" class="row" id="detailed_info_html-row">
+									<div class="col-md-12 form-group">
+										<label for="detailed_info_html">{% trans "HTML" %}</label>
+										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5"></textarea>						
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -184,9 +203,19 @@
 	$('#submenu-externallayers').addClass("active");
 </script>
 <script type="text/javascript">
-	
+function fileExists(url) {
+    if(url){
+        var req = new XMLHttpRequest();
+        req.open('GET', url, false);
+        req.send();
+        return req.status==200;
+        
+    } else {
+        return false;
+    }
+};	
 
-$().ready(function(){ 
+$(document).ready(function(){ 
 	var url = "";
 	var format_or = "";
 	var infoformat_or = "";
@@ -194,6 +223,38 @@ $().ready(function(){
 	var version = "";
 	var layer = "";
 	var bing_layers = {{bing_layers|safe}};
+	
+	var detailedInfoHTML = document.getElementById('detailed_info_html');
+	var codemirror = CodeMirror.fromTextArea(detailedInfoHTML, {
+		mode: "text/html",
+        extraKeys: {"Ctrl-Space": "autocomplete"},
+		theme: "xq-dark",
+		lineNumbers: true
+	});
+	
+	var code = '';
+	if (fileExists(HTML_PATH + 'detailed_info.html')) {
+		code += '<iframe src="'+ HTML_PATH +'detailed_info.html" frameborder="0"></iframe>';
+		
+	} else {
+		code += '<div class="col-md-12"> \n';
+		code += '\t <h2>{% trans "Layer title" %}</h2> \n';
+		code += '\t <p>{% trans "Layer description" %}</p> \n';
+		code += '</div> \n';
+	}
+	
+	$('#detailed_info_enabled').click(function(){
+		if ($('#detailed_info_enabled').is(":checked")) {
+			$('#detailed_info_button_title-row').css('display', 'block');
+			$('#detailed_info_html-row').css('display', 'block');
+			codemirror.setValue(code);
+			codemirror.refresh();
+			
+		} else {
+			$('#detailed_info_button_title-row').css('display', 'none');
+			$('#detailed_info_html-row').css('display', 'none');
+		}
+	});
 	
 	function updateFormfields(){
 		var type = $("#id_type option:selected").val();
