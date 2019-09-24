@@ -884,6 +884,9 @@ def project_get_conf(request):
                             layer['type'] = l.type
                             layer['queryable'] = l.queryable
                             layer['allow_download'] = l.allow_download
+                            layer['detailed_info_enabled'] = l.detailed_info_enabled
+                            layer['detailed_info_button_title'] = l.detailed_info_button_title
+                            layer['detailed_info_html'] = l.detailed_info_html
     
                             layer['time_enabled'] = l.time_enabled
                             if layer['time_enabled']:
@@ -1032,6 +1035,9 @@ def project_get_conf(request):
                     layer['queryable'] = l.queryable
                     layer['cached'] = l.cached
                     layer['type'] = l.type
+                    layer['detailed_info_enabled'] = l.detailed_info_enabled
+                    layer['detailed_info_button_title'] = l.detailed_info_button_title
+                    layer['detailed_info_html'] = l.detailed_info_html
                     layer['metadata'] = core_utils.get_layer_metadata_uuid(l)
                     layer['metadata_url'] = core_utils.get_catalog_url_from_uuid(request, layer['metadata'], lang=language.part2b)
                     

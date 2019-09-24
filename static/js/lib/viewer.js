@@ -274,6 +274,9 @@ viewer.core = {
 			wmsLayer.baselayer = baselayer;
 			wmsLayer.queryable = true;
 			wmsLayer.external = true;
+			wmsLayer.detailed_info_enabled = externalLayer['detailed_info_enabled'];
+			wmsLayer.detailed_info_button_title = externalLayer['detailed_info_button_title'];
+			wmsLayer.detailed_info_html = externalLayer['detailed_info_html'];
 			wmsLayer.layer_name = externalLayer['name'];
 			wmsLayer.setZIndex(parseInt(externalLayer.order));
 			wmsLayer.infoFormat = externalLayer['infoformat'];
@@ -306,11 +309,11 @@ viewer.core = {
 					matrixSet: externalLayer['matrixset'],
 			          	layer: externalLayer['layers']
 			      	});
-				if(options && options.urls && options.urls.length > 0){
+				/*if(options && options.urls && options.urls.length > 0){
 					if(!externalLayer['url'].endsWith('?')){
 						options.urls[0] = externalLayer['url'] + '?';
 					}
-				}
+				}*/
 				var is_baselayer = false;
 				for(var k=0; k<options.urls.length; k++){
 					if(externalLayer['url'].replace("https://", "http://")+'?' == options.urls[k].replace("https://", "http://")){
@@ -330,6 +333,9 @@ viewer.core = {
 	    		wmtsLayer.external = true;
 	    		wmtsLayer.queryable = false;
 	    		wmtsLayer.infoFormat = externalLayer['infoformat'];
+	    		wmtsLayer.detailed_info_enabled = externalLayer['detailed_info_enabled'];
+	    		wmtsLayer.detailed_info_button_title = externalLayer['detailed_info_button_title'];
+	    		wmtsLayer.detailed_info_html = externalLayer['detailed_info_html'];
 	    		wmtsLayer.setZIndex(parseInt(externalLayer.order));
 				self.map.addLayer(wmtsLayer);
 			
@@ -559,6 +565,9 @@ viewer.core = {
 			wmsLayer.cache_url = layerConf.cache_url;
 			wmsLayer.title = layerConf.title;
 			wmsLayer.abstract = layerConf.abstract;
+			wmsLayer.detailed_info_enabled = layerConf.detailed_info_enabled;
+			wmsLayer.detailed_info_button_title = layerConf.detailed_info_button_title;
+			wmsLayer.detailed_info_html = layerConf.detailed_info_html;
 			wmsLayer.metadata = layerConf.metadata || '';
 			wmsLayer.metadata_url = layerConf.metadata_url || '';
 			wmsLayer.legend = layerConf.legend;
