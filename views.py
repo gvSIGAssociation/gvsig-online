@@ -1264,7 +1264,10 @@ def layer_update(request, layer_id):
 
         md_uuid = core_utils.get_layer_metadata_uuid(layer)
         plugins_config = core_utils.get_plugins_config()
-        return render(request, 'layer_update.html', {'layer': layer, 'workspace': workspace, 'form': form, 'layer_id': layer_id, 'date_fields': json.dumps(date_fields), 'redirect_to_layergroup': redirect_to_layergroup, 'layer_md_uuid': md_uuid, 'plugins_config': plugins_config})
+        html = True
+        if layer.detailed_info_html == None:
+            html = False
+        return render(request, 'layer_update.html', {'html': html, 'layer': layer, 'workspace': workspace, 'form': form, 'layer_id': layer_id, 'date_fields': json.dumps(date_fields), 'redirect_to_layergroup': redirect_to_layergroup, 'layer_md_uuid': md_uuid, 'plugins_config': plugins_config})
 
 def get_date_fields(layer_id):
     date_fields = []
@@ -3275,6 +3278,14 @@ def external_layer_add(request):
             if 'cached' in request.POST:
                 cached = True
                 
+            detailed_info_enabled = False
+            detailed_info_button_title = request.POST.get('detailed_info_button_title')
+            detailed_info_html = request.POST.get('detailed_info_html')
+            if 'detailed_info_enabled' in request.POST:
+                detailed_info_enabled = True
+                detailed_info_button_title = request.POST.get('detailed_info_button_title')
+                detailed_info_html = request.POST.get('detailed_info_html')
+                
             crs_list = []
             for key in request.POST:
                 if 'crs_' in key:
@@ -3296,6 +3307,9 @@ def external_layer_add(request):
             external_layer.cached = cached
             external_layer.single_image = False
             external_layer.time_enabled = False
+            external_layer.detailed_info_enabled = detailed_info_enabled
+            external_layer.detailed_info_button_title = detailed_info_button_title
+            external_layer.detailed_info_html = detailed_info_html
             external_layer.created_by = request.user.username
             
             params = {}
@@ -3364,6 +3378,14 @@ def external_layer_update(request, external_layer_id):
             if 'cached' in request.POST:
                 cached = True
                 
+            detailed_info_enabled = False
+            detailed_info_button_title = request.POST.get('detailed_info_button_title')
+            detailed_info_html = request.POST.get('detailed_info_html')
+            if 'detailed_info_enabled' in request.POST:
+                detailed_info_enabled = True
+                detailed_info_button_title = request.POST.get('detailed_info_button_title')
+                detailed_info_html = request.POST.get('detailed_info_html')
+                
             crs_list = []
             for key in request.POST:
                 if 'crs_' in key:
@@ -3387,6 +3409,9 @@ def external_layer_update(request, external_layer_id):
             external_layer.layer_group_id = request.POST.get('layer_group')
             external_layer.visible = is_visible
             external_layer.cached = cached
+            external_layer.detailed_info_enabled = detailed_info_enabled
+            external_layer.detailed_info_button_title = detailed_info_button_title
+            external_layer.detailed_info_html = detailed_info_html
             params = {}
 
             if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
@@ -3428,12 +3453,17 @@ def external_layer_update(request, external_layer_id):
             params = json.loads(external_layer.external_params)
             for key in params:
                 form.initial[key] = params[key]
+                
+        html = True
+        if external_layer.detailed_info_html == None:
+            html = False
 
 
         response= {
             'form': form,
             'external_layer': external_layer,
-            'bing_layers': BING_LAYERS
+            'bing_layers': BING_LAYERS,
+            'html': html
         }
 
     return render(request, 'external_layer_update.html', response)
