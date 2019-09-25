@@ -39,6 +39,10 @@ if [ -z "$CATALOG_DISABLED_FACETS" ]; then
         echo "WARNING: CATALOG_DISABLED_FACETS is not defined, using '[]'."
         CATALOG_DISABLED_FACETS="[]"
 fi
+if [ -z "$METADATA_VIEWER_BUTTON" ]; then
+        echo "WARNING: METADATA_VIEWER_BUTTON is not defined, using default value 'LINK'."
+        METADATA_VIEWER_BUTTON="LINK"
+fi
 
 # debugging...
 echo "CATALOG_API_VERSION" $CATALOG_API_VERSION
@@ -58,4 +62,5 @@ grep -rl "##GEONETWORK_PASS##" | xargs sed -i "s/##GEONETWORK_PASS##/$GEONETWORK
 grep -rl "##CATALOG_FACETS_CONFIG##" | xargs sed -i "s/##CATALOG_FACETS_CONFIG##/$CATALOG_FACETS_CONFIG/g"
 grep -rl "##CATALOG_FACETS_ORDER##" | xargs sed -i "s/##CATALOG_FACETS_ORDER##/$CATALOG_FACETS_ORDER/g"
 grep -rl "##CATALOG_DISABLED_FACETS##" | xargs sed -i "s/##CATALOG_DISABLED_FACETS##/$CATALOG_DISABLED_FACETS/g"
+grep -rl "##METADATA_VIEWER_BUTTON##" | xargs sed -i "s/##METADATA_VIEWER_BUTTON##/$METADATA_VIEWER_BUTTON/g"
 
