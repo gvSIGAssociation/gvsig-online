@@ -319,9 +319,12 @@ print.prototype.createPrintJob = function(template) {
 //						layer['layers'] = [mapLayers[i].workspace + ':' + mapLayers[i].layer_name];
 //					}
 				}else{
+					var wms_url = mapLayers[i].wms_url_no_auth;
+					if (wms_url === undefined)
+						wms_url = mapLayers[i].wms_url;
 					layer = {
 							//"baseURL": "http://localhost/gs-local/ws_jrodrigo/wms",
-							"baseURL": mapLayers[i].wms_url_no_auth,
+							"baseURL": wms_url,
 					  	    "opacity": mapLayers[i].getOpacity(),
 					  	    "type": "WMS",
 				  			"imageFormat": "image/png",
@@ -340,6 +343,9 @@ print.prototype.createPrintJob = function(template) {
 						layer['layers'] = [mapLayers[i].layer_name];
 					} else {
 						layer['layers'] = [mapLayers[i].workspace + ':' + mapLayers[i].layer_name];
+					}
+					if (mapLayers[i].external) {
+						layer['layers'] = mapLayers[i].getSource().getParams().LAYERS;
 					}
 				}
 
