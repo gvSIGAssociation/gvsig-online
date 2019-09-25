@@ -1998,20 +1998,22 @@ layerTree.prototype.createOverlayUI = function(layer, group_visible) {
 		}
 		
 		if(layer.styles){
-			ui += '		<div class="btn btn-block btn-social btn-select btn-custom-tool"><i class="fa fa-map-marker" aria-hidden="true"></i><select id="symbol-to-layer-' + id + '" class="symbol-to-layer btn btn-block btn-custom-tool">';
-			for(var i=0; i<layer.styles.length; i++){
-				var ttitle = layer.styles[i].title;
-				if(!ttitle || ttitle.length == 0){
-					ttitle = layer.styles[i].name;
+			if (layer.styles.length > 1) {
+				ui += '		<div class="btn btn-block btn-social btn-select btn-custom-tool"><i class="fa fa-map-marker" aria-hidden="true"></i><select id="symbol-to-layer-' + id + '" class="symbol-to-layer btn btn-block btn-custom-tool">';
+				for(var i=0; i<layer.styles.length; i++){
+					var ttitle = layer.styles[i].title;
+					if(!ttitle || ttitle.length == 0){
+						ttitle = layer.styles[i].name;
+					}
+					
+					if(layer.styles[i].is_default){
+						ui += '		<option value="'+layer.styles[i].name+'" selected><i class="fa fa-search" aria-hidden="true"></i>'+ ttitle +'</option>';
+					}else{
+						ui += '		<option value="'+layer.styles[i].name+'"><i class="fa fa-search" aria-hidden="true"></i>'+ ttitle +'</option>';
+					}
 				}
-				
-				if(layer.styles[i].is_default){
-					ui += '		<option value="'+layer.styles[i].name+'" selected><i class="fa fa-search" aria-hidden="true"></i>'+ ttitle +'</option>';
-				}else{
-					ui += '		<option value="'+layer.styles[i].name+'"><i class="fa fa-search" aria-hidden="true"></i>'+ ttitle +'</option>';
-				}
+				ui += '	</select></div>';
 			}
-			ui += '	</select></div>';
 		}
 		
 		ui += '			<label style="display: block; margin-top: 8px; width: 95%;">' + gettext('Opacity') + '<span id="layer-opacity-output-' + layer.id + '" class="margin-l-15 gol-slider-output">%</span></label>';
