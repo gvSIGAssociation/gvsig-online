@@ -345,7 +345,7 @@ print.prototype.createPrintJob = function(template) {
 						layer['layers'] = [mapLayers[i].workspace + ':' + mapLayers[i].layer_name];
 					}
 					if (mapLayers[i].external) {
-						layer['layers'] = mapLayers[i].getSource().getParams().LAYERS;
+						layer['layers'] = [mapLayers[i].getSource().getParams().LAYERS];
 					}
 				}
 
