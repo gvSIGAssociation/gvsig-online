@@ -191,7 +191,6 @@ ChangeToWWControl.prototype.initWW = function() {
     
     //TODO: no he conseguido gestionar el evento de cambio de rotación
     //new WorldWind.GestureRecognizer(this.wwd, this.onWWGesture);
-    
     this.wwd.addLayer(new WorldWind.AtmosphereLayer());
     this.wwd.addLayer(new WorldWind.StarFieldLayer());
     
@@ -262,22 +261,38 @@ ChangeToWWControl.prototype.getElevationModel = function() {
 
 		WorldWind.ElevationModel.call(this);
 
-		// this.addCoverage(new WorldWind.GebcoElevationCoverage());
+//		this.addCoverage(new WorldWind.GebcoElevationCoverage());
 		// this.addCoverage(new WorldWind.AsterV2ElevationCoverage());
 		// this.addCoverage(new WorldWind.UsgsNedElevationCoverage());
 		// this.addCoverage(new WorldWind.UsgsNedHiElevationCoverage());
 
 		// NOTA: Probar qué pasa con el provider que definimos nosotros. Probablemente
 		// no podemos mezclar varios layers. Quizás con el default GEBCO sería suficiente.
-
+		
+		// TEST ALTURAS URUGUAY
+		// https://mapas.ide.uy/cgi-bin/relieve?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&
+		//      FORMAT=application/bil16&TRANSPARENT=true&
+		//      LAYERS=mdt_nacional&WIDTH=256&HEIGHT=256&SRS=EPSG%3A3857&STYLES=&
+		//      BBOX=-6105178.323193599%2C-4050551.002888061%2C-6085610.443952593%2C-4030983.123647056
+		var heightUrlUruguay = 'https://mapas.ide.uy/cgi-bin/relieve?'; 
+		
 		var customCoverage = new WorldWind.TiledElevationCoverage({
 			coverageSector: WorldWind.Sector.FULL_SPHERE,
 			resolution: 0.008333333333333,
 			retrievalImageFormat: "application/bil16",
 			minElevation: -11000,
 			maxElevation: 8850,
-			urlBuilder: new WorldWind.WmsUrlBuilder(provider.provider_url, 'GEBCO' /*provider.provider_layers*/, "", provider.provider_version)
+			urlBuilder: new WorldWind.WmsUrlBuilder(heightUrlUruguay, 'mdt_nacional', "", provider.provider_version)
 		});
+
+//		var customCoverage = new WorldWind.TiledElevationCoverage({
+//			coverageSector: WorldWind.Sector.FULL_SPHERE,
+//			resolution: 0.008333333333333,
+//			retrievalImageFormat: "application/bil16",
+//			minElevation: -11000,
+//			maxElevation: 8850,
+//			urlBuilder: new WorldWind.WmsUrlBuilder(provider.provider_url, 'GEBCO' /*provider.provider_layers*/, "", provider.provider_version)
+//		});
 		this.addCoverage(customCoverage);
 
 
@@ -355,10 +370,14 @@ ChangeToWWControl.prototype.loadBaseLayer = function(map) {
 				lyr = new WorldWind.WmsLayer(config,null );
 			} else 	if (l.getSource() instanceof ol.source.XYZ){
 				if (l.getSource() instanceof ol.source.OSM){
-					//lyr = new WorldWind.OpenStreetMapImageLayer();
-					lyr = new WorldWind.BMNGLandsatLayer();
+					// FJP: No sé si va a funcionar esto. En WorldWind hacen un poco de trampa
+					// y la capa OSM es en realidad un WMTS que sirven ellos en
+					// https://tiles.maps.eox.at/wmts/1.0.0/WMTSCapabilities.xml
+					lyr = new WorldWind.OpenStreetMapImageLayer();
+					// lyr = new WorldWind.BMNGLandsatLayer();
 				} else{
-					continue;
+					// TODO: Basarnos en RestTiledImageLayer para leer las de tipo xyz
+					continue; 
 				}
 			} else 	if (l.getSource() instanceof ol.source.WMTS){
 				continue;
@@ -388,7 +407,7 @@ ChangeToWWControl.prototype.loadBaseLayer = function(map) {
 			} else {
 				continue;
 			}		
-			
+			if (!lyr) continue;
 			// add layer
 			if (l.getVisible()){
 				lyr.enabled = true;
