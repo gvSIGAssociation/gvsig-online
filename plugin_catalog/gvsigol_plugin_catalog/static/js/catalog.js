@@ -1030,7 +1030,7 @@ CatalogView.prototype._replaceMetadataBtnEvents = function() {
 			var layers = self.map.getLayers();
 			layers.forEach(function(layer){
 				if (!layer.baselayer) {
-					console.log(layer);
+					//console.log(layer);
 					if (element.id===("show-metadata-" + layer.get("id"))) {
 						selectedLayer = layer;
 						if (!layer.metadata) {
