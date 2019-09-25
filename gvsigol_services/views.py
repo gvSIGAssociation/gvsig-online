@@ -1265,7 +1265,7 @@ def layer_update(request, layer_id):
         md_uuid = core_utils.get_layer_metadata_uuid(layer)
         plugins_config = core_utils.get_plugins_config()
         html = True
-        if layer.detailed_info_html == None:
+        if layer.detailed_info_html == None or layer.detailed_info_html == '' or layer.detailed_info_html == 'null':
             html = False
         return render(request, 'layer_update.html', {'html': html, 'layer': layer, 'workspace': workspace, 'form': form, 'layer_id': layer_id, 'date_fields': json.dumps(date_fields), 'redirect_to_layergroup': redirect_to_layergroup, 'layer_md_uuid': md_uuid, 'plugins_config': plugins_config})
 
@@ -3455,7 +3455,7 @@ def external_layer_update(request, external_layer_id):
                 form.initial[key] = params[key]
                 
         html = True
-        if external_layer.detailed_info_html == None:
+        if external_layer.detailed_info_html == None or external_layer.detailed_info_html == '' or external_layer.detailed_info_html == 'null':
             html = False
 
 
