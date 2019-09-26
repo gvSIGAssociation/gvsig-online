@@ -210,14 +210,17 @@ CatalogView.prototype.getLocalizedEndpoint = function() {
 }
 
 CatalogView.prototype.filterCatalog = function(){
-	var searchTerms = $("#gn-any-field").val().split(" ");
-	var search = '';
+	var search = $("#gn-any-field").val().split(" ");
+	
+	/*
+	 * var search = '';
 	for (var i=0; i<searchTerms.length; i++) {
 		// add wildcards to search for partial terms
 		if (searchTerms[i] != "") {
 			search += searchTerms[i]+"* ";
 		}
 	}
+	*/
 	var categories = $("#categoriesF").val();
 	var keywords = $("#keywordsF").val();
 	var resources = $("#orgNameF").val();
