@@ -475,7 +475,6 @@ CatalogView.prototype.linkResourceMap = function(){
 		self.hidePanel();
 	});
 }
-self.mapViewer.getConf()
 
 CatalogView.prototype.createLayerGroup = function() {
 	var self = this;
