@@ -57,6 +57,9 @@ var ChangeToWWControl = function(map, provider) {
 	this.goToAnimator=null;
 	this.tools3d = new Array();
 	
+	// Diccionario con los capabilities
+	this.dictCapabilities = {};
+	
 	
 };
 
@@ -411,24 +414,32 @@ ChangeToWWControl.prototype.loadLayer = function(l) {
 	        // Layer displaying Global Hillshade based on GMTED2010
 	        var layerIdentifier = l.getSource().getLayer();
 
-	        // Called synchronously to parse and create the WMTS layer
-	        var request = new XMLHttpRequest();
-	        request.open('GET', serviceAddress, false);  // `false` makes the request synchronous
-	        request.send(null);
-	        if (request.status === 200) {
-	          // console.log(request.responseText);
-              // Create a WmtsCapabilities object from the XML DOM
-	          var wmtsCapabilities = new WorldWind.WmtsCapabilities(request.responseXML);
-	          // Retrieve a WmtsLayerCapabilities object by the desired layer name
-	          var wmtsLayerCapabilities = wmtsCapabilities.getLayer(layerIdentifier);
-	          // Form a configuration object from the WmtsLayerCapabilities object
-	          var wmtsConfig = WorldWind.WmtsLayer.formLayerConfiguration(wmtsLayerCapabilities);
-	          // Create the WMTS Layer from the configuration object
-	          lyr = new WorldWind.WmtsLayer(wmtsConfig);
-	          lyr.resourceUrlForTile = this.myResourceUrlForTile;
+	        var wmtsCapabilities = this.dictCapabilities[serviceAddress];
+	        if (!wmtsCapabilities) {	        		        
+		        // Called synchronously to parse and create the WMTS layer
+		        var request = new XMLHttpRequest();
+		        request.open('GET', serviceAddress, false);  // `false` makes the request synchronous
+		        request.send(null);
+		        if (request.status === 200) {
+		          // console.log(request.responseText);
+	              // Create a WmtsCapabilities object from the XML DOM
+		          wmtsCapabilities = new WorldWind.WmtsCapabilities(request.responseXML);
+		          this.dictCapabilities[serviceAddress] = wmtsCapabilities;
+		        }
+		        else
+		        {
+		        	console.debug("Error cargando Capabilities de la capa " + layerIdentifier);
+		        	return;
+		        }
 	        }
-	        else
-	        	return;
+	        // Retrieve a WmtsLayerCapabilities object by the desired layer name
+	        var wmtsLayerCapabilities = wmtsCapabilities.getLayer(layerIdentifier);
+	        // Form a configuration object from the WmtsLayerCapabilities object
+	        var wmtsConfig = WorldWind.WmtsLayer.formLayerConfiguration(wmtsLayerCapabilities);
+	        // Create the WMTS Layer from the configuration object
+	        lyr = new WorldWind.WmtsLayer(wmtsConfig);
+	        lyr.resourceUrlForTile = this.myResourceUrlForTile;
+	        
 		} else 	if (l.getSource() instanceof ol.source.TileWMS){
 			var wms_url = l.wms_url_no_auth;
 			if (wms_url === undefined)
