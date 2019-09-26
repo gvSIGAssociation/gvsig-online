@@ -403,9 +403,11 @@ ChangeToWWControl.prototype.loadLayer = function(l) {
 				return; 
 			}
 		} else 	if (l.getSource() instanceof ol.source.WMTS){
-			console.debug("Hacer WMTS");
 	        // Web Map Tiling Service information from
-	        var serviceAddress = l.getSource().urls[0] + "SERVICE=WMTS&REQUEST=GetCapabilities&VERSION=1.0.0";
+			var url = l.getSource().urls[0];
+			if (!url.endsWith('?'))
+				url = url + '?';
+	        var serviceAddress =  url + "SERVICE=WMTS&REQUEST=GetCapabilities&VERSION=1.0.0";
 	        // Layer displaying Global Hillshade based on GMTED2010
 	        var layerIdentifier = l.getSource().getLayer();
 
