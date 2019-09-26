@@ -344,6 +344,32 @@ ChangeToWWControl.prototype.onOLRotation = function(evt) {
 	this.wwd.redraw();
 };
 
+ChangeToWWControl.prototype.myResourceUrlForTile = function (tile, imageFormat) {
+    var url;
+    if (this.resourceUrl) {
+    	var styleSearch = /{Style}/i;
+        url = this.resourceUrl.replace(styleSearch, this.styleIdentifier).replace("{TileMatrixSet}", this.tileMatrixSet.identifier).replace("{TileMatrix}", tile.tileMatrix.identifier).replace("{TileCol}", tile.column).replace("{TileRow}", tile.row);
+        if (this.timeString) {
+            url = url.replace("{Time}", this.timeString);
+        }
+    } else {
+        url = this.serviceUrl + "service=WMTS&request=GetTile&version=1.0.0";
+        url += "&Layer=" + this.layerIdentifier;
+        if (this.styleIdentifier) {
+            url += "&Style=" + this.styleIdentifier;
+        }
+        url += "&Format=" + imageFormat;
+        if (this.timeString) {
+            url += "&Time=" + this.timeString;
+        }
+        url += "&TileMatrixSet=" + this.tileMatrixSet.identifier;
+        url += "&TileMatrix=" + tile.tileMatrix.identifier;
+        url += "&TileRow=" + tile.row;
+        url += "&TileCol=" + tile.column;
+    }
+    return url;
+};
+
 
 ChangeToWWControl.prototype.loadLayer = function(l) {
 //	if (l.baselayer){			
@@ -378,7 +404,29 @@ ChangeToWWControl.prototype.loadLayer = function(l) {
 			}
 		} else 	if (l.getSource() instanceof ol.source.WMTS){
 			console.debug("Hacer WMTS");
-			return; 
+	        // Web Map Tiling Service information from
+	        var serviceAddress = l.getSource().urls[0] + "SERVICE=WMTS&REQUEST=GetCapabilities&VERSION=1.0.0";
+	        // Layer displaying Global Hillshade based on GMTED2010
+	        var layerIdentifier = l.getSource().getLayer();
+
+	        // Called synchronously to parse and create the WMTS layer
+	        var request = new XMLHttpRequest();
+	        request.open('GET', serviceAddress, false);  // `false` makes the request synchronous
+	        request.send(null);
+	        if (request.status === 200) {
+	          // console.log(request.responseText);
+              // Create a WmtsCapabilities object from the XML DOM
+	          var wmtsCapabilities = new WorldWind.WmtsCapabilities(request.responseXML);
+	          // Retrieve a WmtsLayerCapabilities object by the desired layer name
+	          var wmtsLayerCapabilities = wmtsCapabilities.getLayer(layerIdentifier);
+	          // Form a configuration object from the WmtsLayerCapabilities object
+	          var wmtsConfig = WorldWind.WmtsLayer.formLayerConfiguration(wmtsLayerCapabilities);
+	          // Create the WMTS Layer from the configuration object
+	          lyr = new WorldWind.WmtsLayer(wmtsConfig);
+	          lyr.resourceUrlForTile = this.myResourceUrlForTile;
+	        }
+	        else
+	        	return;
 		} else 	if (l.getSource() instanceof ol.source.TileWMS){
 			var wms_url = l.wms_url_no_auth;
 			if (wms_url === undefined)
@@ -407,10 +455,10 @@ ChangeToWWControl.prototype.loadLayer = function(l) {
 			var apikey = l.getSource().apiKey_;
 			if (p.label == 'Road'){
 				//lyr = new WorldWind.BingRoadsLayer(apikey);
-				lyr = new WorldWind.BingRoadsLayer();
+				lyr = new WorldWind.BingRoadsLayer(apikey);
 			} else {					
 				//lyr = new WorldWind.BingAerialWithLabelsLayer(apikey);
-				lyr = new WorldWind.BingAerialWithLabelsLayer();
+				lyr = new WorldWind.BingAerialWithLabelsLayer(apikey);
 			}
 		} else {
 			console.debug("Hacer Otro tipo de capa");
