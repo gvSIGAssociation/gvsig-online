@@ -781,7 +781,7 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 		self.getLocalizedEndpoint() + "/q";
 	}
 	// TODO: authentication
-	url = url + '?_content_type=json' + filters + '&bucket=s101&facet.q=' + query + '&fast=index&resultType=details&sortBy=title';
+	url = url + '?_content_type=json' + filters + '&bucket=s101&facet.q=' + query + '&fast=index&resultType=details&sortBy=relevance';
 	//var url = '/gvsigonline/catalog/get_query/?_content_type=json&bucket=s101&facet.q='+query+'&fast=index&from=1&resultType=details&sortBy=relevance';
 	$.ajax({
 		url: url,
