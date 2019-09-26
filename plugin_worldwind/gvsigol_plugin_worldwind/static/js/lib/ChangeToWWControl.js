@@ -214,7 +214,7 @@ ChangeToWWControl.prototype.initWW = function() {
 
         
 	// Añadimos capas
-	this.loadBaseLayer(this.map);
+	// this.loadBaseLayer(this.map);
 	//this.loadGrid();
     this.loadLayers(this.map);
 	
@@ -275,6 +275,9 @@ ChangeToWWControl.prototype.getElevationModel = function() {
 		//      LAYERS=mdt_nacional&WIDTH=256&HEIGHT=256&SRS=EPSG%3A3857&STYLES=&
 		//      BBOX=-6105178.323193599%2C-4050551.002888061%2C-6085610.443952593%2C-4030983.123647056
 		var heightUrlUruguay = 'https://mapas.ide.uy/cgi-bin/relieve?'; 
+		
+		// TODO: REVISAR CON CHEVI SI LA CAPA ES mdt_nacional O mdt_nacional_10m
+		// TODO: REVISAR el parámetro resolution y si devuelve info de punto o el pixel es de tipo area. (Ver docs de WW)
 		
 		var customCoverage = new WorldWind.TiledElevationCoverage({
 			coverageSector: WorldWind.Sector.FULL_SPHERE,
@@ -341,171 +344,157 @@ ChangeToWWControl.prototype.onOLRotation = function(evt) {
 	this.wwd.redraw();
 };
 
+
+ChangeToWWControl.prototype.loadLayer = function(l) {
+//	if (l.baselayer){			
+		var p = l.getProperties();
+		var lyr;
+		var config;
+		if (p.label == 'Vacía'){
+			config = {service: this.provider.provider_url, 
+	            layerNames: "grid",
+	            sector: new WorldWind.Sector(-90,90,-180,180),
+	            //levelZeroDelta: new WorldWind.Location(0,43),
+	            levelZeroDelta: new WorldWind.Location(36,36),
+	            format: 'image/png',
+	            numLevels: 20,
+	            size: 256,
+	            coordinateSystem: 'EPSG:4326',
+	            title: "grid",
+	            version: '1.1.1'
+	         };
+			lyr = new WorldWind.WmsLayer(config,null );
+		} else 	if (l.getSource() instanceof ol.source.XYZ){
+			if (l.getSource() instanceof ol.source.OSM){
+				// FJP: No sé si va a funcionar esto. En WorldWind hacen un poco de trampa
+				// y la capa OSM es en realidad un WMTS que sirven ellos en
+				// https://tiles.maps.eox.at/wmts/1.0.0/WMTSCapabilities.xml
+				lyr = new WorldWind.OpenStreetMapImageLayer();
+				// lyr = new WorldWind.BMNGLandsatLayer();
+			} else{
+				// TODO: Basarnos en RestTiledImageLayer para leer las de tipo xyz
+				console.debug("Hacer RestTiledImageLayer");
+				return; 
+			}
+		} else 	if (l.getSource() instanceof ol.source.WMTS){
+			console.debug("Hacer WMTS");
+			return; 
+		} else 	if (l.getSource() instanceof ol.source.TileWMS){
+			var wms_url = l.wms_url_no_auth;
+			if (wms_url === undefined)
+				wms_url = l.wms_url;
+			
+			if (l.cached)
+			{
+				// TODO: ADD WMTS
+				console.debug("Deberías tener en cuenta que es cacheada")
+			}
+
+			config = {service: l.getSource().urls[0], 
+	            layerNames: l.getSource().getParams().LAYERS,
+	            sector: new WorldWind.Sector(-90,90,-180,180),
+	            //levelZeroDelta: new WorldWind.Location(0,43),
+	            levelZeroDelta: new WorldWind.Location(36,36),
+	            format: l.getSource().getParams().FORMAT,
+	            numLevels: 20,
+	            size: 256,
+	            coordinateSystem: 'EPSG:4326',
+	            title: l.title,
+	            version:  l.getSource().getParams().VERSION
+	        };
+	        lyr = new WorldWind.WmsLayer(config,null );
+		} else 	if (l.getSource() instanceof ol.source.BingMaps){
+			var apikey = l.getSource().apiKey_;
+			if (p.label == 'Road'){
+				//lyr = new WorldWind.BingRoadsLayer(apikey);
+				lyr = new WorldWind.BingRoadsLayer();
+			} else {					
+				//lyr = new WorldWind.BingAerialWithLabelsLayer(apikey);
+				lyr = new WorldWind.BingAerialWithLabelsLayer();
+			}
+		} else {
+			console.debug("Hacer Otro tipo de capa");
+			return; 
+		}		
+		if (!lyr) return;
+		// add layer
+		if (l.getVisible()){
+			lyr.enabled = true;
+		}else{
+			lyr.enabled = false;
+		}			
+		this.wwd.addLayer(lyr);
+		// this.wwd.redraw();	
+		
+		// Create listener
+		l.on('propertychange', function (evt) {
+		    if (evt.key === 'visible') {
+		    	this.enabled = !evt.oldValue;
+		    }
+		},lyr);
+//	}	
+}
+
 /**
  * 
  */
-ChangeToWWControl.prototype.loadBaseLayer = function(map) {
-	var layers = map.getLayers();
-	// var terrainLayer = new WorldWind.BMNGLandsatLayer();
-	// this.addLayer(terrainLayer);
-	for (var i = 0; i < layers.getLength(); i++) {
-		l = layers.item(i);
-		if (l.baselayer){			
-			var p = l.getProperties();
-			var lyr;
-			var config;
-			if (p.label == 'Vacía'){
-				config = {service: this.provider.provider_url, 
-		            layerNames: "grid",
-		            sector: new WorldWind.Sector(-90,90,-180,180),
-		            //levelZeroDelta: new WorldWind.Location(0,43),
-		            levelZeroDelta: new WorldWind.Location(36,36),
-		            format: 'image/png',
-		            numLevels: 20,
-		            size: 256,
-		            coordinateSystem: 'EPSG:4326',
-		            title: "grid",
-		            version: '1.1.1'
-		         };
-				lyr = new WorldWind.WmsLayer(config,null );
-			} else 	if (l.getSource() instanceof ol.source.XYZ){
-				if (l.getSource() instanceof ol.source.OSM){
-					// FJP: No sé si va a funcionar esto. En WorldWind hacen un poco de trampa
-					// y la capa OSM es en realidad un WMTS que sirven ellos en
-					// https://tiles.maps.eox.at/wmts/1.0.0/WMTSCapabilities.xml
-					lyr = new WorldWind.OpenStreetMapImageLayer();
-					// lyr = new WorldWind.BMNGLandsatLayer();
-				} else{
-					// TODO: Basarnos en RestTiledImageLayer para leer las de tipo xyz
-					continue; 
-				}
-			} else 	if (l.getSource() instanceof ol.source.WMTS){
-				continue;
-			} else 	if (l.getSource() instanceof ol.source.TileWMS){
-				config = {service: l.getSource().urls[0], 
-		            layerNames: l.getSource().params_.LAYERS,
-		            sector: new WorldWind.Sector(-90,90,-180,180),
-		            //levelZeroDelta: new WorldWind.Location(0,43),
-		            levelZeroDelta: new WorldWind.Location(36,36),
-		            format: l.getSource().params_.FORMAT,
-		            numLevels: 20,
-		            size: 256,
-		            coordinateSystem: 'EPSG:4326',
-		            title: "Base WMS",
-		            version:  l.getSource().params_.VERSION
-		        };
-		        lyr = new WorldWind.WmsLayer(config,null );
-			} else 	if (l.getSource() instanceof ol.source.BingMaps){
-				var apikey = l.getSource().apiKey_;
-				if (p.label == 'Road'){
-					//lyr = new WorldWind.BingRoadsLayer(apikey);
-					lyr = new WorldWind.BingRoadsLayer();
-				} else {					
-					//lyr = new WorldWind.BingAerialWithLabelsLayer(apikey);
-					lyr = new WorldWind.BingAerialWithLabelsLayer();
-				}
-			} else {
-				continue;
-			}		
-			if (!lyr) continue;
-			// add layer
-			if (l.getVisible()){
-				lyr.enabled = true;
-			}else{
-				lyr.enabled = false;
-			}			
-			this.wwd.addLayer(lyr);
-			this.wwd.redraw();	
-			
-			// Create listener
-			l.on('propertychange', function (evt) {
-			    if (evt.key === 'visible') {
-			    	this.enabled = !evt.oldValue;
-			    }
-			},lyr);
-		}	
-	}
-};
+//ChangeToWWControl.prototype.loadBaseLayer = function(map) {
+//	var layers = map.getLayers();
+//	// var terrainLayer = new WorldWind.BMNGLandsatLayer();
+//	// this.addLayer(terrainLayer);
+//	for (var i = 0; i < layers.getLength(); i++) {
+//		l = layers.item(i);
+//		this.loadLayer(l);
+//	}
+//};
 
 /**
  * Load WMS grid Layer
  */
-ChangeToWWControl.prototype.loadGrid = function(map) {
-		config = {service: this.provider.provider_url, 
-		            layerNames: "grid",
-		            sector: new WorldWind.Sector(-90,90,-180,180),
-		            //levelZeroDelta: new WorldWind.Location(0,43),
-		            levelZeroDelta: new WorldWind.Location(36,36),
-		            format: 'image/png',
-		            numLevels: 20,
-		            size: 256,
-		            coordinateSystem: 'EPSG:4326',
-		            title: "grid",
-		            version: '1.1.1'
-		           	 };
-			lyr = new WorldWind.WmsLayer(config,null );
-			//if (l.getVisible()){
-				lyr.enabled = true;
-			//}else{
-			//	lyr.enabled = false;
-			//}			
-			this.wwd.addLayer(lyr);
-			this.wwd.redraw();
-			
-}
+//ChangeToWWControl.prototype.loadGrid = function(map) {
+//		config = {service: this.provider.provider_url, 
+//		            layerNames: "grid",
+//		            sector: new WorldWind.Sector(-90,90,-180,180),
+//		            //levelZeroDelta: new WorldWind.Location(0,43),
+//		            levelZeroDelta: new WorldWind.Location(36,36),
+//		            format: 'image/png',
+//		            numLevels: 20,
+//		            size: 256,
+//		            coordinateSystem: 'EPSG:4326',
+//		            title: "grid",
+//		            version: '1.1.1'
+//		           	 };
+//			lyr = new WorldWind.WmsLayer(config,null );
+//			//if (l.getVisible()){
+//				lyr.enabled = true;
+//			//}else{
+//			//	lyr.enabled = false;
+//			//}			
+//			this.wwd.addLayer(lyr);
+//			this.wwd.redraw();
+//			
+//}
 
 /**
  * Load all layers in OL map
  */
 ChangeToWWControl.prototype.loadLayers = function(map) {
 	var layers = map.getLayers();
-	for (var i = 0; i < layers.getLength(); i++) {
+	for (var i = layers.getLength(); i >= 0; --i) {
 		var config;
 		var lyr;
 		l = layers.item(i)		
-		//console.log(l);
-	    //console.log(l.wms_url);
-		//console.log(l.layer_name);
-		//console.log(l.getExtent());
-		//console.log(l.getVisible());
-		//console.log(l.getProperties());		
-		if (l.layer_name){
-			
-			//Añadimos a WW
-			config = {service: l.wms_url, 
-		            layerNames: l.layer_name,
-		            sector: new WorldWind.Sector(-90,90,-180,180),
-		            //levelZeroDelta: new WorldWind.Location(0,43),
-		            levelZeroDelta: new WorldWind.Location(36,36),
-		            format: 'image/png',
-		            numLevels: 20,
-		            size: 256,
-		            coordinateSystem: 'EPSG:4326',
-		            title: l.title,
-		            version: '1.1.1'
-		           	 };
-			lyr = new WorldWind.WmsLayer(config,null );
-			if (l.getVisible()){
-				lyr.enabled = true;
-			}else{
-				lyr.enabled = false;
-			}			
-			this.wwd.addLayer(lyr);
-			this.wwd.redraw();
-			
-			// Creamos listener
-			l.on('propertychange', function (evt) {
-				//console.log(evt.key);
-			    if (evt.key === 'visible') {
-			    	this.enabled = !evt.oldValue;
-			    }
-			    if (evt.key === 'opacity') {
-			        //console.log('cambiando opacidad');			        
-			        this.opacity = evt.target.getOpacity();
-			    }
-			},lyr);
-		}
+		console.log(l);
+//	    console.log(l.wms_url);
+//		console.log(l.layer_name);
+//		console.log(l.getExtent());
+//		console.log(l.getVisible());
+//		console.log(l.getProperties());		
+		if (l){
+			this.loadLayer(l);
+		}		
 	}
+	this.wwd.redraw();	
 };
 
 /**
