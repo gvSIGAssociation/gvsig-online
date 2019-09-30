@@ -914,6 +914,10 @@ def project_get_conf(request):
                             layer['read_roles'] = read_roles
                             layer['write_roles'] = write_roles
                             layer['styles'] = get_layer_styles(l)
+                            
+                            if l.external_params:
+                                params = json.loads(l.external_params)
+                                layer['format'] = params.get('format')
     
                             try:
                                 json_conf = ast.literal_eval(l.conf)
@@ -1045,6 +1049,7 @@ def project_get_conf(request):
                         if l.external_params:
                             params = json.loads(l.external_params)
                             layer['cache_url'] = params.get('cache_url')
+                            layer['format'] = params.get('format')
                         
                     if l.external_params:
                         params = json.loads(l.external_params)
