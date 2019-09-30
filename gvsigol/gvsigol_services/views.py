@@ -975,6 +975,11 @@ def layer_add_with_group(request, layergroup_id):
                 newRecord.detailed_info_enabled = detailed_info_enabled
                 newRecord.detailed_info_button_title = detailed_info_button_title
                 newRecord.detailed_info_html = detailed_info_html
+                
+                params = {}
+                params['format'] = request.POST.get('format')
+                newRecord.external_params = json.dumps(params)
+                
                 newRecord.save()
 
                 if form.cleaned_data['datastore'].type == 'c_ImageMosaic':
@@ -1195,6 +1200,11 @@ def layer_update(request, layer_id):
             layer.detailed_info_enabled = detailed_info_enabled
             layer.detailed_info_button_title = detailed_info_button_title
             layer.detailed_info_html = detailed_info_html
+            
+            params = {}
+            params['format'] = request.POST.get('format')
+            layer.external_params = json.dumps(params)
+            
             layer.save()
 
             if layer.datastore.type == 'c_ImageMosaic':
@@ -1245,6 +1255,11 @@ def layer_update(request, layer_id):
         datastore = Datastore.objects.get(id=layer.datastore.id)
         workspace = Workspace.objects.get(id=datastore.workspace_id)
         form = LayerUpdateForm(instance=layer)
+        
+        if layer.external_params:
+            params = json.loads(layer.external_params)
+            for key in params:
+                form.initial[key] = params[key]
 
         if not request.user.is_superuser:
             form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
@@ -3516,10 +3531,12 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
             title = wms.identification.title
             matrixsets = []
             layers = list(wms.contents)
-            all_formats = wms.getOperationByName('GetMap').formatOptions
-            for f in all_formats:
-                if f == 'image/png' or f == 'image/jpeg':
-                    formats.append(f)
+            #all_formats = wms.getOperationByName('GetMap').formatOptions
+            #for f in all_formats:
+            #    if f == 'image/png' or f == 'image/jpeg':
+            #        formats.append(f)
+            formats.append('image/jpeg')
+            formats.append('image/png')
             all_infoformats = wms.getOperationByName('GetFeatureInfo').formatOptions
             for i_format in all_infoformats:
                 if i_format == 'text/plain' or i_format == 'text/html' or i_format == 'application/json' or i_format == 'application/geojson':
@@ -3561,10 +3578,12 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                 layer = layers[0]
             else:
                 lyr = wmts.contents.get(layer)
-                for lyr_format in lyr.formats:
-                    if not lyr_format in formats:
-                        if lyr_format == 'image/png' or lyr_format == 'image/jpeg':
-                            formats.append(lyr_format)
+                #for lyr_format in lyr.formats:
+                #    if not lyr_format in formats:
+                #        if lyr_format == 'image/png' or lyr_format == 'image/jpeg':
+                #            formats.append(lyr_format)
+                formats.append('image/jpeg')
+                formats.append('image/png')
                 for infoformat in lyr.infoformats:
                     if not infoformat in infoformats:
                         if infoformat == 'text/plain' or infoformat == 'text/html' or infoformat == 'application/json' or infoformat == 'application/geojson':

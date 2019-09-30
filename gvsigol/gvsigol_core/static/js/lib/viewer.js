@@ -474,11 +474,15 @@ viewer.core = {
 	    }
 	    if(group.visible){ visible = false; }
 
+	    var format = 'image/png';
+	    if (layerConf.format) {
+	    	format = internalLayer['format'];
+	    }
 		if (layerConf.single_image) {
 			var wmsSource = new ol.source.ImageWMS({
 				url: url,
 				visible: layerConf.visible,
-				params: {'LAYERS': layerConf.workspace + ':' + layerConf.name, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
+				params: {'LAYERS': layerConf.workspace + ':' + layerConf.name, 'FORMAT': format, 'VERSION': '1.1.1'},
 				serverType: 'geoserver'
 			});
 			wmsLayer = new ol.layer.Image({
@@ -530,7 +534,7 @@ viewer.core = {
 			}else{
 				var wmsParams = {
 					'LAYERS': layerConf.workspace + ':' + layerConf.name,
-					'FORMAT': 'image/png',
+					'FORMAT': format,
 					'VERSION': '1.1.1'
 				};
 				if (layerConf.cached) {

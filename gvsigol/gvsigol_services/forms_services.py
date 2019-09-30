@@ -36,6 +36,8 @@ version = (('1.1.1', _('1.1.1')), ('1.3.0', _('1.3.0')), ('1.0.0', _('1.0.0')))
 blank = (('', '---------'),)
 servers = (('geoserver', 'geoserver'), ('mapserver', 'mapserver'))
 
+img_formats = (('image/png', 'image/png'), ('image/jpeg', 'image/jpeg'))
+
 time_presentation_op = (
     ('CONTINUOUS_INTERVAL', _('continuous interval')),
 )
@@ -142,11 +144,12 @@ class DatastoreUpdateForm(forms.ModelForm):
 class LayerForm(forms.ModelForm):
     class Meta:
         model = Layer
-        fields = ['datastore', 'name', 'title', 'layer_group', 'visible', 'queryable', 'time_enabled', 'time_enabled_endfield', 'time_resolution', 'time_presentation', 'time_default_value_mode', 'time_default_value']
+        fields = ['datastore', 'name', 'title', 'layer_group', 'format','visible', 'queryable', 'time_enabled', 'time_enabled_endfield', 'time_resolution', 'time_presentation', 'time_default_value_mode', 'time_default_value']
     datastore = forms.ModelChoiceField(label=_(u'Datastore'), required=True, queryset=Datastore.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
     name = forms.CharField(label=_(u'Name'), required=True, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
     title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, queryset=LayerGroup.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    format = forms.ChoiceField(label=_(u'Format'), required=False, choices=img_formats, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     #visible = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
     #queryable = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
     time_enabled_field = forms.CharField(label=_(u'Field'), required=False, widget=forms.Select(attrs={'class' : 'form-control'}))
@@ -173,6 +176,7 @@ class LayerUpdateForm(forms.ModelForm):
     name = forms.CharField(label=_(u'Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control', 'readonly': 'true'}))
     title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     layer_group = forms.ModelChoiceField(label=_(u'Layer group'), required=True, queryset=LayerGroup.objects.all().order_by('name'), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    format = forms.ChoiceField(label=_(u'Format'), required=False, choices=img_formats, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     #visible = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
     #queryable = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
     #cached = forms.BooleanField(initial=True, widget=forms.CheckboxInput(attrs={'class' : 'validate filled-in'}))
