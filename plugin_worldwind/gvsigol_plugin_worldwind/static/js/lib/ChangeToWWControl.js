@@ -350,8 +350,25 @@ ChangeToWWControl.prototype.onOLRotation = function(evt) {
 ChangeToWWControl.prototype.myResourceUrlForTile = function (tile, imageFormat) {
     var url;
     if (this.resourceUrl) {
-    	var styleSearch = /{Style}/i;
-        url = this.resourceUrl.replace(styleSearch, this.styleIdentifier).replace("{TileMatrixSet}", this.tileMatrixSet.identifier).replace("{TileMatrix}", tile.tileMatrix.identifier).replace("{TileCol}", tile.column).replace("{TileRow}", tile.row);
+    	url = this.resourceUrl;
+        if (this.styleIdentifier) {
+        	var styleSearch = /{Style}/i;
+            url = url.replace(styleSearch, this.styleIdentifier);
+        }
+        if (tile.level) {
+        	var z = tile.level.levelNumber+1; //Math.pow(2, tile.level.levelNumber);
+        	var y = tile.column; //(1 << z) - tile.row -1;
+        	var x = tile.row; //tile.column;
+            url = url.replace("{TileMatrix}", z);
+            url = url.replace("{TileCol}", y).replace("{TileRow}", x); 
+        }        
+        if (tile.tileMatrix) {
+            url = url.replace("{TileCol}", tile.column).replace("{TileRow}", tile.row);
+            url = url.replace("{TileMatrix}", tile.tileMatrix.identifier);
+        }        
+        if (this.tileMatrixSet) {
+            url = url.replace("{TileMatrixSet}", this.tileMatrixSet.identifier);
+        }
         if (this.timeString) {
             url = url.replace("{Time}", this.timeString);
         }
@@ -402,43 +419,105 @@ ChangeToWWControl.prototype.loadLayer = function(l) {
 				// lyr = new WorldWind.BMNGLandsatLayer();
 			} else{
 				// TODO: Basarnos en RestTiledImageLayer para leer las de tipo xyz
-				console.debug("Hacer RestTiledImageLayer");
-				return; 
+				var url = l.getSource().urls[0];
+				if (!url.endsWith('?'))
+				{
+					if (-1 == url.indexOf('?')) // No está por enmedio
+						url = url + '?';
+					else
+						url = url + '&';
+				}
+				lyr = new WorldWind.MercatorTiledImageLayer(
+						new WorldWind.Sector(-90, 90, -180, 180), 
+						new WorldWind.Location(90, 180),
+						20,	'image/png', l.getProperties().label, 256, 256		
+				);
+				
+	            lyr.urlBuilder = {
+	            		urlTemplate: url,
+	                    urlForTile: function (tile, imageFormat) {
+                            return this.urlTemplate.replace(
+                                "{z}",
+                                (tile.level.levelNumber + 1)).replace("{x}",
+                                tile.column).replace("{y}",
+                                tile.row
+                            );
+	                    }
+	                };
+
+				
+				// Trick
+				lyr.imageSize = 256;
+				lyr.mapSizeForLevel = function (levelNumber) {
+		            return 256 << (levelNumber + 1);
+		        };
+		        // End trick
+
 			}
 		} else 	if (l.getSource() instanceof ol.source.WMTS){
 	        // Web Map Tiling Service information from
 			var url = l.getSource().urls[0];
 			if (!url.endsWith('?'))
-				url = url + '?';
-	        var serviceAddress =  url + "SERVICE=WMTS&REQUEST=GetCapabilities&VERSION=1.0.0";
-	        // Layer displaying Global Hillshade based on GMTED2010
-	        var layerIdentifier = l.getSource().getLayer();
+			{
+				if (-1 == url.indexOf('?')) // No está por enmedio
+					url = url + '?';
+				else
+					url = url + '&';
+			}
+			if (-1 != url.indexOf('TileRow')) {
+				// Test. Ojo, ArcGis va al revés que mapbox. Mapbox va con x/y, como OSM y Planet.
+				// url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{TileMatrix}/{TileCol}/{TileRow}';
+				// url = 'https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{TileMatrix}/{TileCol}/{TileRow}?access_token=pk.eyJ1IjoiZnBlbmFycnUiLCJhIjoiY2poMXprMHg0MGIydjJ3cnluam1nMmRuMyJ9.abnLDxLCophGfhRpAmasEg';				
+				
+				lyr = new WorldWind.MercatorTiledImageLayer(
+						new WorldWind.Sector(-90, 90, -180, 180), 
+						new WorldWind.Location(90, 180),
+						20,	l.getSource().getFormat(), l.getSource().getLayer(), 256, 256		
+				);
 
-	        var wmtsCapabilities = this.dictCapabilities[serviceAddress];
-	        if (!wmtsCapabilities) {	        		        
-		        // Called synchronously to parse and create the WMTS layer
-		        var request = new XMLHttpRequest();
-		        request.open('GET', serviceAddress, false);  // `false` makes the request synchronous
-		        request.send(null);
-		        if (request.status === 200) {
-		          // console.log(request.responseText);
-	              // Create a WmtsCapabilities object from the XML DOM
-		          wmtsCapabilities = new WorldWind.WmtsCapabilities(request.responseXML);
-		          this.dictCapabilities[serviceAddress] = wmtsCapabilities;
+
+				// Trick
+				lyr.imageSize = 256;
+				lyr.mapSizeForLevel = function (levelNumber) {
+		            return 256 << (levelNumber + 1);
+		        };
+
+				lyr.resourceUrl = url;
+		        lyr.resourceUrlForTile = this.myResourceUrlForTile;
+		        // End trick
+			}
+			else
+			{
+		        var serviceAddress =  url + "SERVICE=WMTS&REQUEST=GetCapabilities&VERSION=1.0.0";
+		        // Layer displaying Global Hillshade based on GMTED2010
+		        var layerIdentifier = l.getSource().getLayer();
+	
+		        var wmtsCapabilities = this.dictCapabilities[serviceAddress];
+		        if (!wmtsCapabilities) {	        		        
+			        // Called synchronously to parse and create the WMTS layer
+			        var request = new XMLHttpRequest();
+			        request.open('GET', serviceAddress, false);  // `false` makes the request synchronous
+			        request.send(null);
+			        if (request.status === 200) {
+			          // console.log(request.responseText);
+		              // Create a WmtsCapabilities object from the XML DOM
+			          wmtsCapabilities = new WorldWind.WmtsCapabilities(request.responseXML);
+			          this.dictCapabilities[serviceAddress] = wmtsCapabilities;
+			        }
+			        else
+			        {
+			        	console.debug("Error cargando Capabilities de la capa " + layerIdentifier);
+			        	return;
+			        }
 		        }
-		        else
-		        {
-		        	console.debug("Error cargando Capabilities de la capa " + layerIdentifier);
-		        	return;
-		        }
-	        }
-	        // Retrieve a WmtsLayerCapabilities object by the desired layer name
-	        var wmtsLayerCapabilities = wmtsCapabilities.getLayer(layerIdentifier);
-	        // Form a configuration object from the WmtsLayerCapabilities object
-	        var wmtsConfig = WorldWind.WmtsLayer.formLayerConfiguration(wmtsLayerCapabilities);
-	        // Create the WMTS Layer from the configuration object
-	        lyr = new WorldWind.WmtsLayer(wmtsConfig);
-	        lyr.resourceUrlForTile = this.myResourceUrlForTile;
+		        // Retrieve a WmtsLayerCapabilities object by the desired layer name
+		        var wmtsLayerCapabilities = wmtsCapabilities.getLayer(layerIdentifier);
+		        // Form a configuration object from the WmtsLayerCapabilities object
+		        var wmtsConfig = WorldWind.WmtsLayer.formLayerConfiguration(wmtsLayerCapabilities);
+		        // Create the WMTS Layer from the configuration object
+		        lyr = new WorldWind.WmtsLayer(wmtsConfig);
+		        lyr.resourceUrlForTile = this.myResourceUrlForTile;
+			}
 	        
 		} else 	if (l.getSource() instanceof ol.source.TileWMS){
 			var wms_url = l.wms_url_no_auth;
