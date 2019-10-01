@@ -22,6 +22,10 @@
 						<tr>
 							<th>ID</th>	
 							<th>{% trans "Project" %}</th>
+							<th>{% trans "Type" %}</th>
+							<th>{% trans "Height URL" %}</th>
+							<th>{% trans "Directory Path" %}</th>
+							<th>{% trans "Layers" %}</th>
 							<th></th>
 						</tr>
 					</thead>
@@ -30,6 +34,10 @@
 						<tr>
 							<td>{{ provider.id }}</td>
 							<td>{{ provider.project.name }}</td>
+							<td>{{ provider.type }}</td>
+							<td>{{ provider.heightUrl }}</td>
+							<td>{{ provider.directory_path }}</td>
+							<td>{{ provider.layers }}</td>
 							<td></td>
 						</tr>
 						{% endfor %}

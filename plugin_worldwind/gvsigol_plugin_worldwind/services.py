@@ -31,7 +31,6 @@ import os
 # Only support tif files
 #
 def create_service_wms(project_id, path):
-
     mapfile = path + "/" + str(project_id) + ".map"
     shape = str(project_id) + ".shp"
     print ("Creando mapfile ..." + mapfile)

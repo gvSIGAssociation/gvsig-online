@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+# from win32.lib.netbios import MAX_LANA
 
 
 '''
@@ -31,8 +32,15 @@ from gvsigol_core.models import Project
 
 class WorldwindProvider(models.Model):
     #name = models.CharField(max_length=100, unique=True, default="")
-    path = models.CharField(max_length=250, default="")
+    TYPE_CHOICES = [
+        ('url', 'Url'),
+        ('mapserver', 'Mapserver')
+    ]
+    type = models.CharField(max_length=250, choices = TYPE_CHOICES, default="url", blank = False)
+    path = models.CharField(max_length=250, default="", blank=True, null=True)
     project = models.OneToOneField(Project)
+    heightUrl = models.URLField(max_length=250, default="")
+    layers = models.CharField(max_length=250, default="elevation", blank=True, null = True);
     
    # class Meta:
    #     unique_together = (("id", "project"),)

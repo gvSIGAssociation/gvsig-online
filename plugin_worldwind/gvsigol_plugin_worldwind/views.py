@@ -52,8 +52,11 @@ def list(request):
         provider = {}
         provider['id'] = i.id
         #provider['name'] = i.name
+        provider['type'] = i.type
         provider['path'] = i.path
         provider['project'] = i.project
+        provider['heightUrl'] = i.heightUrl
+        provider['layers'] = i.layers
         providers.append(provider)
                       
     response = {
@@ -71,12 +74,26 @@ def add(request):
             if form.is_valid():
                 dir_path =  form.cleaned_data['directory_path'];     
                 project = form.cleaned_data['projects'];
-                if services.create_service_wms(project.id, dir_path) is False:
-                    form.add_error(None, _("Error: Problem creating mapfile."))
-                else:           
-                    provider = WorldwindProvider(path = dir_path, project = project)             
+                type = form.cleaned_data['type'];
+                heightUrl = form.cleaned_data['heightUrl'];
+                layers = form.cleaned_data['layers'];
+                if type == 'url':
+                    provider = WorldwindProvider(
+                        type = type, path = dir_path,
+                         project = project, heightUrl = heightUrl,
+                         layers = layers
+                        )             
                     provider.save()           
-                    return redirect('list')          
+                    return redirect('list')
+                else:                    
+                    if services.create_service_wms(project.id, dir_path) is False:
+                        form.add_error(None, _("Error: Problem creating mapfile."))
+                    else:           
+                        provider = WorldwindProvider(
+                            type = 'mapserver', path = dir_path, project = project, 
+                            heightUrl = '', layers = layers)             
+                        provider.save()           
+                        return redirect('list')          
         else:
             form = DirectoryPath();      
             return render(request, 'ww_provider_add.html',  {'fm_directory': FILEMANAGER_DIRECTORY + "/", 'form': form})  
@@ -110,12 +127,15 @@ def conf(request, id):
     try:
         try:
             provider = WorldwindProvider.objects.get(project=id)
-            url = settings.MAPSERVER_URL + "?map=" + provider.path + "/" + str(id) + ".map" 
+            if (provider.type == 'url'):
+                url = provider.heightUrl
+            else:
+                url = settings.MAPSERVER_URL + "?map=" + provider.path + "/" + str(id) + ".map" 
             baseLayerType = settings.WORLDWIND_DEFAULT_PROVIDER.get('baseLayerType')                   
             response = {
                     'provider_url': url,
                     'provider_version': '1.3.0',
-                    'provider_layers': 'elevation',
+                    'provider_layers': provider.layers,
                     'baseLayer': baseLayerType
             }  
         except WorldwindProvider.DoesNotExist:

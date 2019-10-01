@@ -277,8 +277,8 @@ ChangeToWWControl.prototype.getElevationModel = function() {
 		//      FORMAT=application/bil16&TRANSPARENT=true&
 		//      LAYERS=mdt_nacional&WIDTH=256&HEIGHT=256&SRS=EPSG%3A3857&STYLES=&
 		//      BBOX=-6105178.323193599%2C-4050551.002888061%2C-6085610.443952593%2C-4030983.123647056
-		var heightUrlUruguay = 'https://mapas.ide.uy/cgi-bin/relieve?'; 
-		
+		// var heightUrlUruguay = 'https://mapas.ide.uy/cgi-bin/relieve?'; 
+		var heightUrl = provider.provider_url;
 		// TODO: REVISAR CON CHEVI SI LA CAPA ES mdt_nacional O mdt_nacional_10m
 		// TODO: REVISAR el parámetro resolution y si devuelve info de punto o el pixel es de tipo area. (Ver docs de WW)
 		
@@ -288,7 +288,7 @@ ChangeToWWControl.prototype.getElevationModel = function() {
 			retrievalImageFormat: "application/bil16",
 			minElevation: -11000,
 			maxElevation: 8850,
-			urlBuilder: new WorldWind.WmsUrlBuilder(heightUrlUruguay, 'mdt_nacional', "", provider.provider_version)
+			urlBuilder: new WorldWind.WmsUrlBuilder(heightUrl, provider.provider_layers /*'mdt_nacional'*/, "", provider.provider_version)
 		});
 
 //		var customCoverage = new WorldWind.TiledElevationCoverage({
