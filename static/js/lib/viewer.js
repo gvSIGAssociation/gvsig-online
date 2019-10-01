@@ -518,7 +518,7 @@ viewer.core = {
 					url: url,
 					projection: projection,
 					matrixSet: default_srs,
-					format:'image/png',
+					format:format,
 					tileGrid: tileGrid,
 					crossOrigin: 'anonymous',
 		            wrapX: true
