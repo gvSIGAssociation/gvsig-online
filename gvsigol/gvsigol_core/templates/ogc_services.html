@@ -77,6 +77,18 @@
 								</ul>
 							</div>
 						</div>
+					{% empty %}
+						<div class="box">
+							<div class="box-body">
+								<ul class="products-list product-list-in-box">
+									<li class="item">
+										<div class="product-info">
+											<span class="product-title wms-capabilities-link">{% trans "No services have been published" %}</span></a> 
+										</div>
+									</li>
+								</ul>
+							</div>
+						</div>
 					{% endfor %}
 				</section>
 			</div>
