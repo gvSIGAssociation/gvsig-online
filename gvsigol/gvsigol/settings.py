@@ -119,29 +119,33 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'django.contrib.sites',
-    'gvsigol_statistics',
     'gvsigol_auth',
     'gvsigol_services',
     'gvsigol_symbology',
     'gvsigol_filemanager',
     'gvsigol_core',
+    #'gvsigol_app_dev',
+    'gvsigol_app_panacea',
+    'gvsigol_plugin_edition',
+    'gvsigol_plugin_worldwind',
+    'gvsigol_plugin_geocoding',
+    'gvsigol_plugin_print',
+    'gvsigol_statistics',
+     #'gvsigol_app_test',
     #'gvsigol_app_repsol',
-    'gvsigol_app_ideuy',
+    #'gvsigol_app_ideuy',
     #'gvsigol_app_librapicassa',
     #'gvsigol_plugin_worldwind',
     #'gvsigol_plugin_print',
     #'gvsigol_plugin_geocoding',
     'gvsigol_plugin_catalog',
+    'gvsigol_plugin_downloadman',
+    #'gvsigol_app_libraregepa',
+    #'gvsigol_plugin_regepa',
+    'actstream',
     #'gvsigol_plugin_picassa',
-    'gvsigol_plugin_uampp',
-    'actstream'
+    #'gvsigol_plugin_uampp',
 ]
-
-ACTSTREAM_SETTINGS = {
-    'FETCH_RELATIONS': True,
-    'USE_JSONFIELD': True,
-}
-
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -224,23 +228,24 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 GVSIGOL_LDAP = {
-    'ENABLED': False,
-    'HOST':'devel.gvsigonline.com',
+    'ENABLED': True,
+    'HOST':'localhost',
     'PORT': '389',
-    'DOMAIN': 'dc=test,dc=gvsigonline,dc=com',
+    'DOMAIN': 'dc=local,dc=gvsigonline,dc=com',
     'USERNAME': LDAP_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'PASSWORD': LDAP_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'AD': ''
 }
+
 
 AUTHENTICATION_BACKENDS = (
     #'django.contrib.auth.backends.RemoteUserBackend',
     #'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
-AUTH_LDAP_SERVER_URI = "ldap://devel.gvsigonline.com:389"
-AUTH_LDAP_ROOT_DN = "dc=test,dc=gvsigonline,dc=com"
-AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=test,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
+AUTH_LDAP_SERVER_URI = "ldap://localhost:389"
+AUTH_LDAP_ROOT_DN = "dc=dev,dc=gvsigonline,dc=com"
+AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=dev,dc=gvsigonline,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 
 
 # Internationalization
@@ -276,8 +281,8 @@ LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol_core/locale'),
     os.path.join(BASE_DIR, 'gvsigol_auth/locale'),
     os.path.join(BASE_DIR, 'gvsigol_services/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_symbology/locale'),
     os.path.join(BASE_DIR, 'gvsigol_statistics/locale'),
+    os.path.join(BASE_DIR, 'gvsigol_symbology/locale'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/locale'),
     os.path.join(BASE_DIR, 'gvsigol_app_test/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_worldwind/locale'),
@@ -302,9 +307,9 @@ SITE_ID=1
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
-BASE_URL = 'https://localhost'
-MEDIA_ROOT = '/usr/local/var/www/media/'
-MEDIA_URL = 'https://localhost/media/'
+BASE_URL = 'https://gvsigol.localhost'
+MEDIA_ROOT = '/var/www/sites/gvsigol.localhost/media/'
+MEDIA_URL = 'https://gvsigol.localhost/media/'
 STATIC_URL = '/gvsigonline/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 
@@ -314,7 +319,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_services/static'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
-    os.path.join(BASE_DIR, 'gvsigol_statistics/static'),
+    os.path.join(BASE_DIR, 'gvsigol_statistics/locale'),
     os.path.join(BASE_DIR, 'gvsigol_app_librapicassa/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_picassa/static'),
 )
@@ -343,8 +348,8 @@ MOSAIC_DB = {
     'passwd': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 },
 
-OGR2OGR_PATH = '/usr/local/bin/ogr2ogr'
-GDALTOOLS_BASEPATH = '/usr/local/bin'
+OGR2OGR_PATH = '/usr/bin/ogr2ogr'
+GDALTOOLS_BASEPATH = '/usr/bin'
 
 TILE_SIZE = 256
 MAX_ZOOM_LEVEL = 18 
@@ -356,6 +361,12 @@ SUPPORTED_CRS = {
     '3857': {
         'code': 'EPSG:3857',
         'title': 'WGS 84 / Pseudo-Mercator',
+        'definition': '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs',
+        'units': 'meters'
+    },
+    '900913': {
+        'code': 'EPSG:900913',
+        'title': 'Google Maps Global Mercator -- Spherical Mercator',
         'definition': '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs',
         'units': 'meters'
     },
@@ -466,12 +477,16 @@ TEMPORAL_ADVANCED_PARAMETERS = False
 
 LEGACY_GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
-    'URL': 'https://localhost/geoserver',
+    'URL': 'https://gvsigol.localhost/geoserver',
     'USER': GEOSERVER_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'PASSWORD': GEOSERVER_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 }
 
-SHARED_VIEW_EXPIRATION_TIME=1 #EN DIAS
+
+#CELERY_BROKER_URL = 'amqp://'
+#CELERY_BROKER_URL = 'amqp://gvsigol:12345678@pimenton:5672/gvsigol'
+CELERY_BROKER_URL = 'pyamqp://gvsigol:12345678@pimenton:5672/gvsigol'
+CELERY_TASK_ACKS_LATE = True
 
 CACHE_OPTIONS = {
     'GRID_SUBSETS': ['EPSG:3857', 'EPSG:4326'],
