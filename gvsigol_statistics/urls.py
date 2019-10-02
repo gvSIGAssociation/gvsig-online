@@ -1,5 +1,5 @@
 from django.conf.urls import include, url
-import views
+from gvsigol_statistics import views
 
 urlpatterns = [
     url(r'^activity/', include('actstream.urls')),
