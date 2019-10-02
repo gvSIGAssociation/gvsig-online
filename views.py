@@ -406,15 +406,18 @@ def user_add(request):
                             
                             gs.reload_nodes()
                         
-                        
-                    auth_utils.sendMail(user, form.data['password1'])
+                    try:    
+                        auth_utils.sendMail(user, form.data['password1'])
+                    except Exception as ex:
+                        print str(ex)
+                        pass
     
                     return redirect('user_list')
             
             except Exception as e:
                 print "ERROR: Problem creating user " + str(e)
                 errors = []
-                errors.append({'message': _("There must be at least one server")})
+                errors.append({'message': "ERROR: Problem creating user " + str(e)})
                 groups = auth_utils.get_all_groups()
                 return render(request, 'user_add.html', {'form': form, 'groups': groups, 'errors': errors,'show_pass_form':show_pass_form})
 
