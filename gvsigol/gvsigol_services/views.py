@@ -948,6 +948,7 @@ def layer_add_with_group(request, layergroup_id):
                 )
                 
                 # save it on DB if successfully created
+                del form.cleaned_data['format']
                 newRecord = Layer(**form.cleaned_data)
                 newRecord.external = False
                 newRecord.created_by = request.user.username
