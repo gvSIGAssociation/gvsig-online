@@ -404,10 +404,10 @@ def get_catalog_url(request, layer):
 
 def get_catalog_url_from_uuid(request, metadata_uuid, baseUrl=None, lang=None):
     metadata_url = ''
-    if metadata_uuid:
+    if metadata_uuid and 'gvsigol_plugin_catalog' in settings.INSTALLED_APPS:
         if lang is None:
             lang = get_iso_language(request).part2b
-        if not baseUrl and 'gvsigol_plugin_catalog' in settings.INSTALLED_APPS:
+        if not baseUrl:
             from gvsigol_plugin_catalog import settings as catalog_settings
             baseUrl = catalog_settings.CATALOG_BASE_URL
         try:
