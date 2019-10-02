@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import absolute_import, unicode_literals
+from builtins import str as text
 '''
     gvSIG Online.
     Copyright (C) 2019 SCOLAB.
@@ -24,7 +25,7 @@ from __future__ import absolute_import, unicode_literals
 
 from celery import shared_task
 from gvsigol_plugin_downloadman.models import DownloadRequest, DownloadLink, ResourceLocator
-from gvsigol_plugin_downloadman.models import get_packaging_max_retry_time
+from gvsigol_plugin_downloadman.models import get_packaging_max_retry_time, get_mail_max_retry_time
 import datetime
 from . import settings
 import os
@@ -34,20 +35,38 @@ import requests
 import logging
 from gvsigol_plugin_downloadman.models import FORMAT_PARAM_NAME
 import json
+from django.core import mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.utils.translation import override
+from django.core.urlresolvers import reverse
+from django.utils.formats import date_format
+from django.utils import timezone
+from gvsigol import settings as core_settings
+import re
+
+
 from gvsigol_plugin_downloadman.utils import getLayer
+try:
+    from gvsigol_plugin_downloadman.settings import LOCAL_PATHS_WHITELIST
+except:
+    LOCAL_PATHS_WHITELIST = []
 
 #logger = logging.getLogger("gvsigol-celery")
 logger = logging.getLogger("gvsigol")
 
 
 __TMP_DIR = None
-__TARGET_DIR = None
+__TARGET_ROOT = None
 DEFAULT_TIMEOUT = 60
 
 class Error(Exception):
     pass
 
 class PreparationException(Exception):
+    pass
+
+class ForbiddenAccessException(Exception):
     pass
 
 
@@ -63,15 +82,15 @@ def getTmpDir():
     return __TMP_DIR
 
 def getTargetDir():
-    global __TARGET_DIR
-    if not __TARGET_DIR:
+    global __TARGET_ROOT
+    if not __TARGET_ROOT:
         try:
-            if not os.path.exists(settings.TARGET_DIR):
-                os.makedirs(settings.TARGET_DIR, 0o700)
+            if not os.path.exists(settings.TARGET_ROOT):
+                os.makedirs(settings.TARGET_ROOT, 0o700)
         except:
             pass
-        __TARGET_DIR = settings.TARGET_DIR
-    return __TARGET_DIR
+        __TARGET_ROOT = settings.TARGET_ROOT
+    return __TARGET_ROOT
 
 
 class ResourceDescription():
@@ -84,6 +103,28 @@ def _getParamValue(params, name):
     for param in params:
         if param.get('name') == name:
             return param.get('value')
+
+
+def _getExtension(file_format):
+     # FIXME: we should have a more flexible approach to get file extension
+
+    if not file_format:
+        return ''
+    
+    ff_lower = file_format.lower()
+    if ff_lower == 'shape-zip':
+        return ".shp.zip"
+    elif 'jpg' in ff_lower or 'jpeg' in ff_lower:
+        return ".jpg"
+    elif 'png' in ff_lower:
+        return '.png'
+    elif 'gml' in ff_lower:
+        return '.gml'
+    elif 'csv' in ff_lower:
+        return '.csv'
+    elif 'tif' in ff_lower:
+        return '.tif'
+    return "." + file_format
 
 def _normalizeWxsUrl(url):
         return url.split("?")[0]
@@ -133,12 +174,28 @@ def resolveLinkLocator(url, resource_name):
     # returns an array because a GIS dataset may be composed of several files (e.g. SHP, DBF, SHX, PRJ etc for a shapefile resource)
     return [desc]
 
+def resolveFileLocator(url, resource_name):
+    local_path = url[7:]
+    if not local_path.startswith("/"):
+        local_path = "/" + local_path
+    # remove any "../.." and get absolute path
+    local_path = os.path.abspath(os.path.realpath(local_path))
+    
+    # we only allow local paths that are subfolders of the paths defined in LOCAL_PATHS_WHITELIST variable
+    for path in LOCAL_PATHS_WHITELIST:
+        if local_path.startswith(path):
+            return [ResourceDescription(resource_name, local_path)]
+    raise ForbiddenAccessException
+
 def resolveLocator(resourceLocator):
     resource_descriptor = json.loads(resourceLocator.data_source)
     res_type = resource_descriptor.get('resource_type')
     resource_name = resource_descriptor.get('name')
+
     resource_url = resource_descriptor.get('url')
-    params = resource_descriptor.get('param_values', [])
+    print resource_descriptor
+    params = resource_descriptor.get('params', [])
+
     if resourceLocator.layer_id_type == ResourceLocator.GEONETWORK_UUID:
         url = getCatalogResourceURL(res_type, resource_name, resource_url, params)
     elif resourceLocator.layer_id_type == ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE:
@@ -148,27 +205,49 @@ def resolveLocator(resourceLocator):
         return []
     
     if url:
-        return resolveLinkLocator(url, resource_name)
+        print url
+        print params
+        file_format = _getParamValue(params, FORMAT_PARAM_NAME)
+        print file_format
+        # remove non-a-z_ or numeric characters
+        resource_name = re.sub('[^\w\s_-]', '', resource_name).strip().lower()
+        resource_name = resource_name + _getExtension(file_format)
+        print resource_name
+        if (url.startswith("http://") or url.startswith("https://")):
+            return resolveLinkLocator(url, resource_name)
+        if url.startswith("file://"):
+            return resolveFileLocator(url)
+            
     # TODO: error management
     return []
 
 def _addResource(zipobj, resourceLocator):
     resourceDescList = resolveLocator(resourceLocator)
+    i = 0
     for resourceDesc in resourceDescList:
-        zipobj.write(resourceDesc.res_path, resourceDesc.name)
+        res_name = text(i) + "-" + resourceDesc.name
+        zipobj.write(resourceDesc.res_path, res_name)
         os.remove(resourceDesc.res_path)
+        i = i + 1
 
 def packageRequest(downloadRequest):
     zip_file = None
     try:
         # 1. create temporary zip file
-        (fd, zip_path) = tempfile.mkstemp('.zip', 'ideuy', getTargetDir())
+        prefix = 'ideuy' + datetime.date.today().strftime("%Y%m%d") + "-";
+        (fd, zip_path) = tempfile.mkstemp('.zip', prefix, getTargetDir())
+        print zip_path
         zip_file = os.fdopen(fd, "w")
         with zipfile.ZipFile(zip_file, 'w', zipfile.ZIP_DEFLATED, allowZip64=True) as zipobj:
             # 2. add each resource to the zip file
             locators = downloadRequest.resourcelocator_set.all()
             for resourceLocator in locators:
                 _addResource(zipobj, resourceLocator)
+        print 'closing'
+        zip_file.close()
+        print 'closed'
+        os.chmod(zip_path, 0o444)
+        print 'chmodded'
     except:
         logger.exception("error packaing request")
         print "error packaging request"
@@ -178,42 +257,142 @@ def packageRequest(downloadRequest):
                 os.remove(zip_path)
         except:
             logger.exception("error packaing request")
-            pass
         raise PreparationException
     return zip_path
 
-import os
-def touch(fname, times=None):
-    with open(fname, 'a'):
-        os.utime(fname, times)
-        
-def getNextRetryDelay(request):
-    if request.retry_count == 0:
+def getNextPackagingRetryDelay(request):
+    if request.package_retry_count == 0:
         delay = 300 # 5 minutes
-    elif request.retry_count == 1:
+    elif request.package_retry_count == 1:
         delay = 3600 # 60 minutes
-    elif request.retry_count == 2:
+    elif request.package_retry_count == 2:
         delay = 21600 # 6 hours
-    elif request.retry_count == 3:
+    elif request.package_retry_count == 3:
         delay = 43200 # 12 hours
     else:
-        delay = 43200 + (request.retry_count - 3)*86400 # 12 hours + 24 hours * number_of_retries_after_first_day 
+        delay = 43200 + (request.package_retry_count - 3)*86400 # 12 hours + 24 hours * number_of_retries_after_first_day 
     if delay > get_packaging_max_retry_time():
         delay = 0
     return delay
 
+def getNextMailRetryDelay(request):
+    if request.notify_retry_count < 3:
+        delay = 3600 # 60 minutes
+    else:
+        delay = delay = 21600 # 6 hours
+    if delay > get_mail_max_retry_time():
+        delay = 0
+    return delay
+
+def get_language(request):
+    if request.language:
+        return request.language
+    else:
+        try:
+            return core_settings.LANGUAGE_CODE
+        except:
+            return 'en-us'
+
+@shared_task(bind=True)
+def notifyCompletedRequest(self, link_id):
+    try:
+        logger.debug("starting notify task completed")
+        link = DownloadLink.objects.get(id=link_id)
+        request = link.contents
+        # validity must be computed from the moment the user gets notified
+        link.valid_to = timezone.now() + datetime.timedelta(seconds = request.validity)
+        link.save()
+        
+        if request.request_status != DownloadRequest.PACKAGED_STATUS:
+            return
+
+        with override(get_language(request)):
+            subject = _('Download service: your request is ready - %(requestid)') % {'requestid': request.request_random_id}
+        
+            download_link = reverse('download-link', args=(link.link_random_id,))
+            valid_to = date_format(download_link.valid_to, 'DATE_FORMAT')
+            plain_message = _('Your download request is ready. You can download it in the following link: %(url). The link will be available until %(valid_to)') % {'url': download_link, 'valid_to': valid_to}
+            # html_message = render_to_string('mail_template.html', {'context': 'values'})
+            #plain_message = strip_tags(html_message)
+            if request.requested_by_user:
+                to = request.requested_by_user
+            else:
+                to = request.requested_by_external
+            try:
+                from core_settings import EMAIL_HOST_USER
+                from_email =  EMAIL_HOST_USER
+            except:
+                logger.exception("EMAIL_HOST_USER has not been configured")
+                raise
+            mail.send_mail(subject, plain_message, from_email, [to])
+            request.request_status = DownloadRequest.COMPLETED_STATUS
+            request.notification_status = DownloadRequest.NOTIFICATION_COMPLETED_STATUS
+            request.save()
+            # TODO: include an HTML version of the email
+            #mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+
+    except Exception as exc:
+        logger.exception("Download request completed: error notifying the user")
+        delay = getNextMailRetryDelay(request)
+        if delay:
+            request.request_status = DownloadRequest.NOTIFICATION_ERROR_STATUS
+            request.package_retry_count = request.notify_retry_count + 1 
+            request.save()
+            self.retry(exc=exc, countdown=delay)
+        else:
+            # maximum retry time reached
+            request.request_status = DownloadRequest.PERMANENT_NOTIFICATION_ERROR_STATUS
+            request.save()
+
+    
+    
+@shared_task(bind=True)
+def notifyPermanentFailedRequest(self, request_id):
+    try:
+        request = DownloadRequest.objects.get(id=request_id)
+        with override(get_language(request)):
+            subject = _('Download service: your request has failed - %(requestid)') % {'requestid': request.request_random_id}
+            plain_message = _('Sorry, your download request could not be completed. Please, try again or contact the service support.')
+            # html_message = render_to_string('mail_template.html', {'context': 'values'})
+            #plain_message = strip_tags(html_message)
+            if request.requested_by_user:
+                to = request.requested_by_user
+            else:
+                to = request.requested_by_external
+            try:
+                from core_settings import EMAIL_HOST_USER
+                from_email =  EMAIL_HOST_USER
+            except:
+                logger.exception("EMAIL_HOST_USER has not been configured")
+                raise
+            mail.send_mail(subject, plain_message, from_email, [to])
+            # TODO: include an HTML version of the email
+            #mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+
+    except Exception as exc:
+        logger.exception("Download request failed: error notifying the user")
+        delay = getNextMailRetryDelay(request)
+        if delay:
+            request.package_retry_count = request.notify_retry_count + 1
+            request.notification_status = DownloadRequest.NOTIFICATION_ERROR_STATUS
+            request.save()
+            self.retry(exc=exc, countdown=delay)
+        else:
+            # maximum retry time reached, don't retry again
+            request.notification_status = DownloadRequest.PERMANENT_NOTIFICATION_ERROR_STATUS
+            request.save()
+
+            pass
+
+
 @shared_task(bind=True)
 def processDownloadRequest(self, request_id):
     logger.debug("starting processDownloadRequest")
-    print "starting processDownloadRequest"
     # 1 get request
-    try:
-        touch('/tmp/cmi00001')
-    except:
-        pass
     print request_id
     try:
         request = DownloadRequest.objects.get(id=request_id)
+        print request.request_random_id
         if request.request_status == DownloadRequest.COMPLETED_STATUS or request.request_status == DownloadRequest.PERMANENT_PACKAGE_ERROR_STATUS or \
                 request.request_status == DownloadRequest.CANCELLED_STATUS or request.request_status == DownloadRequest.REJECTED_STATUS or \
                 request.request_status == DownloadRequest.HOLD_STATUS or request.request_status == DownloadRequest.PERMANENT_NOTIFICATION_ERROR_STATUS:
@@ -225,7 +404,7 @@ def processDownloadRequest(self, request_id):
             # 3. create the link
             new_link = DownloadLink()
             new_link.contents = request
-            new_link.valid_to = datetime.datetime.now() + datetime.timedelta(seconds = request.validity)
+            new_link.valid_to = datetime.datetime.utcnow() + datetime.timedelta(seconds = request.validity)
             new_link.request_random_id = request.request_random_id
             new_link.prepared_download_path = zip_path
             new_link.save()
@@ -233,17 +412,20 @@ def processDownloadRequest(self, request_id):
             request.request_status = DownloadRequest.PACKAGED_STATUS
             request.save()
             # 4. notify: send the link to the user
+            notifyCompletedRequest.apply_async(args=[new_link.pk], queue='notify')
             print "done"
     except Exception as exc:
         logger.exception("error preparing download request")
         print "error preparing download request"
-        delay = getNextRetryDelay(request)
+        delay = getNextPackagingRetryDelay(request)
         if delay:
             request.request_status = DownloadRequest.PACKAGING_ERROR_STATUS
-            request.retry_count = request.retry_count + 1 
+            request.package_retry_count = request.package_retry_count + 1 
             request.save()
             self.retry(exc=exc, countdown=delay)
         else:
             # maximum retry time reached
             request.request_status = DownloadRequest.PERMANENT_PACKAGE_ERROR_STATUS
             request.save()
+            notifyPermanentFailedRequest.apply_async(args=[new_link.id], queue='notify')
+            

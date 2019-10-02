@@ -38,23 +38,20 @@ class DownloadRequest(models.Model):
     FAILED_REQUEST_NOTIFICATION_QUEUED = 'FA' # Queued for user notification
     
     PENDING_AUTHORIZATION_STATUS = 'AU'
-    PENDING_INITIAL_NOTIFICATION_STATUS = 'IN'
-    PENDING_FINAL_NOTIFICATION_STATUS = 'FN'
     PACKAGE_QUEUED_STATUS = 'QP' # Queued for package preparation
     PACKAGED_STATUS = 'CT' # The download package was sucessfully created
     COMPLETED_STATUS = 'CT' # The download package was sucessfully created and notified
     REJECTED_STATUS = 'RE' # Rejected or cancelled by the admins
     HOLD_STATUS = 'HO' # Set on hold by admins    
     CANCELLED_STATUS = 'CL' # Cancelled by the user
-    PACKAGING_ERROR_STATUS = 'RE' # An error was found during preparation of the package
-    PERMANENT_PACKAGE_ERROR_STATUS = 'RE' # A permanent error was found during preparation
-    NOTIFICATION_ERROR_STATUS = 'RE' # An error was found during  notification
-    PERMANENT_NOTIFICATION_ERROR_STATUS = 'RE' # A permanent error was found during notification
+    PACKAGING_ERROR_STATUS = 'ER' # An error was found during preparation of the package
+    PERMANENT_PACKAGE_ERROR_STATUS = 'PE' # A permanent error was found during preparation
+    NOTIFICATION_COMPLETED_STATUS = 'NC'
+    NOTIFICATION_ERROR_STATUS = 'NE' # An error was found during  notification
+    PERMANENT_NOTIFICATION_ERROR_STATUS = 'NP' # A permanent error was found during notification
 
     REQUEST_STATUS_CHOICES = (
         (PENDING_AUTHORIZATION_STATUS, 'Pending authorization'),
-        (PENDING_INITIAL_NOTIFICATION_STATUS, 'Initial notification pending'),
-        (PENDING_FINAL_NOTIFICATION_STATUS, 'Final notification pending'),
         (PACKAGE_QUEUED_STATUS, 'Package queued'),
         (PACKAGED_STATUS, 'Packaged'),
         (COMPLETED_STATUS, 'Completed'),
@@ -63,15 +60,11 @@ class DownloadRequest(models.Model):
         (CANCELLED_STATUS, 'Cancelled'),
         (PACKAGING_ERROR_STATUS, 'Packaging error'),
         (PERMANENT_PACKAGE_ERROR_STATUS, 'Permanent packaging error'),
+    )
+    NOTIFICATION_STATUS_CHOICES = (
+        (NOTIFICATION_COMPLETED_STATUS, 'Notification completed'),
         (NOTIFICATION_ERROR_STATUS, 'Notification error'),
         (PERMANENT_NOTIFICATION_ERROR_STATUS, 'Permanent notification error'),
-    )
-    
-    """
-    Notifications are queued, we need to know
-    """
-    NOTIFICATION_STATUS_CHOICES = (
-        (REGISTERED_REQUEST_NOTIFICATION_QUEUED, 'Registered request notification has been queued'),
     )
     
     #definition = models.TextField()
@@ -87,9 +80,11 @@ class DownloadRequest(models.Model):
     # cancelled, on hold, requeued for preparation, error...
     request_status = models.CharField(max_length=2, choices=REQUEST_STATUS_CHOICES)
     notification_status = models.CharField(max_length=2, null=True, choices=NOTIFICATION_STATUS_CHOICES)
-    retry_count = models.PositiveIntegerField(default=0)
+    package_retry_count = models.PositiveIntegerField(default=0)
+    notify_retry_count = models.PositiveIntegerField(default=0)
     request_random_id = models.TextField(db_index=True)
     json_request = models.TextField() # we keep the request as received from the client for debugging purposes
+    language = models.CharField(max_length=50, blank=True)
 
 class DownloadLink(models.Model):
     contents = models.OneToOneField(
@@ -100,7 +95,7 @@ class DownloadLink(models.Model):
     prepared_download_path = models.FilePathField() # the path to the file to download
     download_count = models.PositiveIntegerField(default=0)
     valid_to=models.DateTimeField(db_index=True)
-    request_random_id = models.TextField(db_index=True)
+    link_random_id = models.TextField(db_index=True)
 
 # class DownmanConfig(models.Model):
     # number of seconds the download link will be up since notified to the user
@@ -154,5 +149,10 @@ def get_default_validity():
 
 
 def get_packaging_max_retry_time():
+    # TODO: we could get it for a settings entry, or a settings table in DB
+    return 518400  # = 6 days
+
+
+def get_mail_max_retry_time():
     # TODO: we could get it for a settings entry, or a settings table in DB
     return 518400  # = 6 days

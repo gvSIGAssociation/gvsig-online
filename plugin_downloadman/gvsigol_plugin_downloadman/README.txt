@@ -29,9 +29,23 @@ sudo rabbitmqctl set_permissions -p gvsigol gvsigol ".*" ".*" ".*"
 CONFIGURATION
 ==============
 
-The user name, password and URL for the message broker must be specified on a variable on settings.py
+The user name, password and URL for the message broker must be specified on a variable on settings.py (in gvsigol/gvsigol)
 For instance:
 CELERY_BROKER_URL = 'pyamqp://gvsigol:12345678@localhost:5672/gvsigol'
+
+Email must also be configured to send mail notifications to users. For instance:
+EMAIL_HOST = 'youremailhost.com'
+EMAIL_HOST_USER = 'youremailuser@youremailhost.com'
+EMAIL_HOST_PASSWORD = 'xxxxxxxxx'
+EMAIL_PORT = 25
+EMAIL_TIMEOUT = 30
+
+Maybe also:
+EMAIL_USE_TLS = True
+
+or:
+EMAIL_USE_SSL = True
+
 
 
 EXECUTION

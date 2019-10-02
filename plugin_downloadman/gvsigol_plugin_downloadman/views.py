@@ -12,11 +12,17 @@ from gvsigol_plugin_downloadman.tasks import processDownloadRequest
 from gvsigol_plugin_downloadman import models as downman_models
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.crypto import get_random_string
-from datetime import date
+from datetime import date, datetime
+from django.utils import timezone
+from django.utils.formats import date_format
+
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from models import FORMAT_PARAM_NAME
 from utils import getLayer
+from settings import TARGET_URL, TARGET_ROOT
+import os
+from tasks import Error
 
 logger = logging.getLogger("gvsigol")
 
@@ -285,16 +291,6 @@ def doGetLayerDownloadResources(layer, user):
         pass
     return all_resources
 
-def _getParam(params, name):
-    for param in params:
-        if param.name == name:
-            return param
-
-
-def _getMimeType(file_format):
-    # TODO
-    return file_format
-
 def createResourceLocator(resource, downloadRequest):
     # TODO: error management
     locator = downman_models.ResourceLocator()
@@ -309,12 +305,19 @@ def createResourceLocator(resource, downloadRequest):
     """
     resource_descriptor = resource.get('resource_descriptor', {})
     ds_type = resource_descriptor.get('data_source_type')
-    res_type = resource_descriptor.get('resource_type')
+    #res_type = resource_descriptor.get('resource_type')
     resource_name = resource_descriptor.get('name')
-    resource_url = resource_descriptor.get('url')
-    params = resource.get('param_values', [])
+    #resource_url = resource_descriptor.get('url')
+    param_values = resource.get('param_values', [])
+    #resource_descriptor['params'] = params
+    for param in resource_descriptor.get('params', []):
+        for value in param_values:
+            if value.get('param', {}).get('name') == param.get('name'):
+                param['value'] = value.get('value') 
     locator.data_source = json.dumps(resource_descriptor)
     print locator.data_source
+    logger.debug('data_source')
+    logger.debug(locator.data_source)
     """
     if ds_type == downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE:
         json_resources = json.dumps(resource_descriptor)
@@ -327,9 +330,12 @@ def createResourceLocator(resource, downloadRequest):
     #locator.res_id = resource_descriptor.get('layer_id')
     locator.name = resource_descriptor.get('layer_name')
     #locator.res_internal_id = resource.download_id
-    print "layer_id"
-    print locator.layer_id
+    #print "layer_id"
+    #print locator.layer_id
     locator.layer_id =  resource_descriptor.get('layer_id')
+    logger.debug('layer_id')
+    logger.debug(locator.layer_id)
+
 
     if ds_type == downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE:
         locator.layer_id_type = downman_models.ResourceLocator.GEONETWORK_UUID
@@ -390,23 +396,61 @@ def requestDownload(request):
     return JsonResponse({"status": "error"})
 
 def requestTracking(request, uuid):
-    # TODO: return a proper template
     try:
         r = downman_models.DownloadRequest.objects.get(request_random_id=uuid)
+        result = {}
+        result['download_uuid'] =  r.request_random_id
         # TODO: contemplar todos los estados
-        if r.request_status == downman_models.DownloadRequest.COMPLETED_STATUS:
+        if r.request_status == downman_models.DownloadRequest.COMPLETED_STATUS or r.request_status == downman_models.DownloadRequest.PACKAGED_STATUS:
             if r.downloadlink:
-                return HttpResponse("Ready: " + r.downloadlink.prepared_download_path)
+                if timezone.now() > r.downloadlink.valid_to:
+                    print "expired"
+                    result['download_status'] = _('Your download request has expired and it is not longer available. You can start a new request')
+                    result['details'] = ''
+                    return render(request, 'track_request.html', result)
+                result['download_url'] = getRealDownloadUrl(r.downloadlink.prepared_download_path)
+                result['download_status'] = _('Your request is ready for download')
+                valid_to = date_format(r.downloadlink.valid_to, 'DATE_FORMAT')
+                print valid_to
+                result['details'] = _('The link will be available until %(valid_to)s') % {'valid_to': valid_to}
             else:
-                return HttpResponse("Error de empaquetado")
-        if r.request_status == downman_models.DownloadRequest.PERMANENT_PACKAGE_ERROR_STATUS:
-            return HttpResponse("Error de empaquetado")
+                result['download_status'] = _('Your download request could not be processed.')
+                result['details'] = _('You can create a new request if you are still interested on these datasets')
+        elif r.request_status == downman_models.DownloadRequest.PERMANENT_PACKAGE_ERROR_STATUS:
+            result['download_status'] = _('Your download request could not be processed.')
+            result['details'] = _('You can create a new request if you are still interested on these datasets')
+        elif r.request_status == downman_models.DownloadRequest.PENDING_AUTHORIZATION_STATUS:
+            result['download_status'] = _('Your download request requires authorization from IDEUY.')
+            result['details'] = _('You will receive an email when it becomes available')
+        elif r.request_status == downman_models.DownloadRequest.HOLD_STATUS:
+            result['download_status'] = _('Your download request requires confirmation from IDEUY.')
+            result['details'] = _('You will receive an email when it becomes available')
+        elif r.request_status == downman_models.DownloadRequest.REJECTED_STATUS:
+            result['download_status'] = _('Sorry, your download request has been rejected.')
+            result['details'] = _('You can contact IDEUY if you believe this is a mistake')
+        elif r.request_status == downman_models.DownloadRequest.CANCELLED_STATUS:
+            result['download_status'] = _('You have cancelled this download request.')
+            result['details'] = _('You should create a new request if you are still interested on these datasets')
         else:
-            return HttpResponse("En preparación")
+            result['download_status'] = _('Your download request is being prepared.')
+            result['details'] = _('You will receive an email when it becomes available')
+        return render(request, 'track_request.html', result)
     except:
+        print "ummm no task"
         logger.exception("error getting the task")
         pass
-    return HttpResponse("Petición de descarga no encontrada")
+    print "ummmh"
+    return render(request, 'track_request.html', {'download_status': _('Your download request could not be found'), 'details': '', 'download_uuid':  uuid})
+
+def getRealDownloadUrl(download_path):
+    if os.path.exists(download_path) and download_path.startswith(TARGET_ROOT):
+        rel_path = os.path.relpath(download_path, TARGET_ROOT)
+        if TARGET_URL.endswith("/"):
+            return TARGET_URL + rel_path
+        return TARGET_URL + "/" + rel_path
+    raise Error
+
 
 def downloadLink(request, uuid):
+    
     pass

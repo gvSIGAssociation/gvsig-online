@@ -20,11 +20,11 @@
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
-from gvsigol_plugin_catalog.models import LayerMetadata
 from gvsigol_services.models import Layer
 import logging
 
 logger = logging.getLogger("gvsigol")
+
 
 def getLayer(id_or_uuid):
     try:
@@ -32,8 +32,15 @@ def getLayer(id_or_uuid):
         return Layer.objects.get(id=django_id)
     except:
         try:
+            from gvsigol_plugin_catalog.models import LayerMetadata
             lm = LayerMetadata.objects.get(metadata_uuid=id_or_uuid)
             return lm.layer
         except:
             logger.exception("Error retrieving layer metadata with uuid: " + id_or_uuid)
             pass
+
+
+def _getParam(params, name):
+    for param in params:
+        if param.name == name:
+            return param
