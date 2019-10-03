@@ -20,16 +20,10 @@
  * @author: César Martinez <cmartinez@scolab.es>
  */
 
-var ResourceDownloadParam = function(param_name, title, param_options, value) {
+var ResourceDownloadParam = function(param_name, title, param_options) {
 	this.name = param_name;
 	this.title = title;
 	this.options = param_options;
-	if (value === undefined) {
-		this.value = null;
-	}
-	else {
-		this.value = value;
-	}
 }
 
 var ResourceDownloadParamValue = function(resource_param, value) {
@@ -162,15 +156,13 @@ DownloadManagerClient.prototype.startDownloadRequest = function(email, success_c
 		var data = JSON.stringify(request);
 	} catch (e) {console.log("error stringify"); console.log(e)}
 	
-	$.post(queryUrl, data).done(function(result) {
-		console.log('success');
-		console.log(result);
+	$.post({"url": queryUrl,
+			"data": data,
+			"timeout": : this.config.timeout).done(function(result) {
 		if (result.status_code == 'QP') {
-			console.log('qp');
 			console.log(success_callback)
 			success_callback.apply(callback_context, [result, true]);
 			self.clearDownloadList();
-			console.log('aaa');
 		}
 		else {
 			error_callback.apply(callback_context, [result, false]);
@@ -178,14 +170,9 @@ DownloadManagerClient.prototype.startDownloadRequest = function(email, success_c
 	
 	})
 	.fail(function(err) {
-		console.log('failed');
 		console.log(err);
 		error_callback.apply(callback_context, err, false);
 	})
-	.always(function(val) {
-		console.log('finished');
-		 console.log(val);
-	});
 }
 
 DownloadManagerClient.prototype.getDownloadList = function(){
@@ -371,6 +358,26 @@ DownloadManagerUI.prototype.initAvailableResourcesError = function(){
 	$(this.modalSelector + " .modal-dialog").LoadingOverlay("hide");
 }
 
+DownloadManagerUI.prototype._updateStartDownloadButton = function(){
+	if(this.getClient().getDownloadList().length > 0){
+		if (viewer.core.conf.user) {
+			document.getElementById('start-download-btn').disabled = false;
+			return;
+		}
+		else {
+			try {
+				var email =  document.getElementById("contactemail").value;
+				if (email.length>6 && email.includes("@")) {
+					document.getElementById('start-download-btn').disabled = false;
+					return;
+				}
+			}
+			catch {}
+		}
+	}
+	document.getElementById('start-download-btn').disabled = true;
+}
+
 DownloadManagerUI.prototype.initDownloadList = function(){
 	var downloadResources = this.getClient().getDownloadList();
 	var self = this;
@@ -378,6 +385,10 @@ DownloadManagerUI.prototype.initDownloadList = function(){
 	for (var i=0; i<downloadResources.length; i++) {
 		content += this.createDownloadResource(downloadResources[i]);
 	}
+	if (!viewer.core.conf.user) {
+		content += '<div><label for="contactemail" class="control-label">' + gettext("Email") + '</label><input id="contactemail" type="email" class="form-control"></div>';
+	}
+	
 	if(downloadResources.length == 0){
 		content += '<div style="padding: 10px">';
 		content += '<div class="downman-no-content col-md-12">';
@@ -390,21 +401,33 @@ DownloadManagerUI.prototype.initDownloadList = function(){
 
 	$(self.modalSelector).find('.modal-body').html(content);
 	$(self.modalSelector).find('.modal-title').html(gettext("List of downloads"));
-	
-	var footer = '	<button class="btn btn-default downman-footer-button start-downloading-btn" type="button"><i class="fa file-download fa-icon-button-left" aria-hidden="true"></i></span>'+gettext("Start downloading")+'</button>';
+
+	var footer = '	<button  id="start-download-btn" class="btn btn-default downman-footer-button start-downloading-btn" type="button"><i class="fa file-download fa-icon-button-left" aria-hidden="true"></i></span>'+gettext("Start downloading")+'</button>';
 	footer += '		<div style="clear:both"></div>';
 	$(self.modalSelector).find('.modal-footer').html(footer);
+	
+	this._updateStartDownloadButton();
+	
 	$(".remove-resource-btn").unbind("click").click(function(){
 		var download_id = event.currentTarget.getAttribute("data-downloadid");
 		self.getClient().removeLayer(download_id);
 		$(".modal-body").find('li[data-downloadid="'+download_id+'"]').remove();
+		self._updateStartDownloadButton();
 	});
 	
 	$(".start-downloading-btn").unbind("click").click(function(){
 		// deshabilitamos para evitar ir creando peticiones que todavía no gestionamos al 100%
-		alert('No disponible temporalmente');
-		
-		//self.getClient().startDownloadRequest(null, DownloadManagerUI.prototype.showDownloadQueued, DownloadManagerUI.prototype.showDownloadQueued, self);
+		//alert('No disponible temporalmente');
+		if (document.getElementById("contactemail")) {
+			var email =  document.getElementById("contactemail").value;
+		}
+		else {
+			self.getClient().startDownloadRequest(email, DownloadManagerUI.prototype.showDownloadQueued, DownloadManagerUI.prototype.showDownloadQueued, self);	
+		}
+	});
+	
+	$("#contactemail").change(function(){
+		self._updateStartDownloadButton();
 	});
 }
 
@@ -421,7 +444,6 @@ DownloadManagerUI.prototype.getClient = function() {
 }
 
 DownloadManagerUI.prototype.showDownloadQueued = function(json_result, success){
-	console.log("showDownloadQueued");
 	var content = '';
 	content += '<div style="padding: 10px">';
 	if (success) {
@@ -446,13 +468,10 @@ DownloadManagerUI.prototype.showDownloadQueued = function(json_result, success){
 	content += '</div>';
 	content += '<div style="clear:both"></div>';
 	content += '</div>';
-	console.log(this.modalSelector);
-	console.log($(this.modalSelector));
 
 	$(this.modalSelector).find('.modal-body').html(content);
 	$(this.modalSelector).find('.modal-title').html(gettext("Download request"));
 	$(this.modalSelector).modal('show');
-	console.log("showDownloadQueued end");
 }
 
 DownloadManagerUI.prototype.layerAvailableDownloads = function(layer) {
@@ -467,8 +486,6 @@ DownloadManagerUI.prototype.layerAvailableDownloads = function(layer) {
 		workspace_name = null;
 	}
 	else {
-		console.log("assumed to be internal");
-		console.log(layer);
 		//var layer_id = layer.get("id");
 		workspace_name = layer.workspace;
 		layer_id = layer.layer_name;
