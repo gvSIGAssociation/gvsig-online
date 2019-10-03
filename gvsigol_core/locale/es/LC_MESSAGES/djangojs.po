@@ -104,7 +104,7 @@ msgid "Advanced filter"
 msgstr "Filtro avanzado"
 
 msgid "A visible layer with temporal properties is needed"
-msgstr "Una capa visible con características temporales es necesaria"
+msgstr "Una capa visible con propiedades temporales es necesaria"
 
 msgid "Select field"
 msgstr "Seleccionar campo"
