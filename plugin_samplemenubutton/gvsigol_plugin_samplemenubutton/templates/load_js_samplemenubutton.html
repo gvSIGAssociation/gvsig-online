@@ -1,0 +1,37 @@
+{% load staticfiles %}
+<script>
+	var IMG_PATH = '{% static "img/" %}';
+</script>
+<script type="text/javascript" src="{% static "js/lib/tools/samplemenubutton.js" %}"></script>
+<script type="text/javascript">
+	var map = viewer.core.getMap();
+	var conf = viewer.core.getConf();
+	
+	if (viewer.core.ifToolInConf('gvsigol_plugin_samplemenubutton')) {
+		
+		var button = '<li role="presentation"><a id="samplemenubutton" role="menuitem" tabindex="-1" href="#"><i class="fa fa-bug m-r-5"></i>'+gettext("Sample menu button")+'</a></li>';
+		$('#gvsigol-navbar-file-menu').append(button);
+		
+		$.ajax({
+			type : 'POST',
+			async : false,
+			url : '/gvsigonline/print/get_conf/',
+			beforeSend : function(xhr) {
+				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			success : function(response) {
+				var url = response.sample_url;
+				
+				var tool = new SampleMenuButton(url, conf, map);
+				viewer.core.loadTool(tool);
+				
+				
+			},
+			error : function() {
+				messageBox.show('error', gettext('Error loading samplemenubutton plugin'));
+			}
+		});
+	}
+	
+	
+</script>
