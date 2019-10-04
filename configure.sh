@@ -148,6 +148,12 @@ function configure() {
 		LOGOUT_PAGE_URL="/gvsigonline/"
 	fi
 	grep -rl "##LOGOUT_PAGE_URL##"  | xargs sed -i "s ##LOGOUT_PAGE_URL## $LOGOUT_PAGE_URL g"
+
+	if [ -z $CELERY_BROKER_URL ]; then
+		echo "WARNING: CELERY_BROKER_URL is not defined, deriving one from GVSIGOL_HOST and GVSIGOL_PASSWD"					
+		CELERY_BROKER_URL="pyamqp://gvsigol:$GVSIGOL_PASSWD@$GVSIGOL_HOST:5672/gvsigol"
+	fi
+	grep -rl "##CELERY_BROKER_URL##"  | xargs sed -i "s ##CELERY_BROKER_URL## $CELERY_BROKER_URL g"
 	
 	
 	grep -rl "##GEOSERVER_CLUSTER_NODES##"  | xargs sed -i "s ##GEOSERVER_CLUSTER_NODES## $GEOSERVER_CLUSTER_NODES g"						
