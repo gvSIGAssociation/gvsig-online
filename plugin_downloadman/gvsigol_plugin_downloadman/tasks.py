@@ -27,7 +27,7 @@ from celery import shared_task
 from gvsigol_plugin_downloadman.models import DownloadRequest, DownloadLink, ResourceLocator
 from gvsigol_plugin_downloadman.models import get_packaging_max_retry_time, get_mail_max_retry_time
 import datetime
-from . import settings
+from gvsigol_plugin_downloadman import settings
 import os
 import tempfile
 import zipfile
