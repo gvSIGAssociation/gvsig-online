@@ -44,7 +44,8 @@ from django.utils.formats import date_format
 from django.utils import timezone
 from gvsigol import settings as core_settings
 import re
-
+from django.utils.translation import ugettext as _
+from django.utils.crypto import get_random_string
 
 from gvsigol_plugin_downloadman.utils import getLayer
 try:
@@ -58,7 +59,7 @@ logger = logging.getLogger("gvsigol")
 
 __TMP_DIR = None
 __TARGET_ROOT = None
-DEFAULT_TIMEOUT = 60
+DEFAULT_TIMEOUT = 900
 
 class Error(Exception):
     pass
@@ -94,9 +95,10 @@ def getTargetDir():
 
 
 class ResourceDescription():
-    def __init__(self, name, res_path):
+    def __init__(self, name, res_path, temporary=False):
         self.name = name
         self.res_path = res_path
+        self.temporary = temporary
 
         
 def _getParamValue(params, name):
@@ -170,7 +172,7 @@ def resolveLinkLocator(url, resource_name):
     for chunk in r.iter_content(chunk_size=128):
         tmp_file.write(chunk)
     tmp_file.close()
-    desc = ResourceDescription(resource_name, tmp_path)
+    desc = ResourceDescription(resource_name, tmp_path, True)
     # returns an array because a GIS dataset may be composed of several files (e.g. SHP, DBF, SHX, PRJ etc for a shapefile resource)
     return [desc]
 
@@ -210,13 +212,14 @@ def resolveLocator(resourceLocator):
         file_format = _getParamValue(params, FORMAT_PARAM_NAME)
         print file_format
         # remove non-a-z_ or numeric characters
+        resource_name = resource_name.replace(":", "_")
         resource_name = re.sub('[^\w\s_-]', '', resource_name).strip().lower()
         resource_name = resource_name + _getExtension(file_format)
         print resource_name
         if (url.startswith("http://") or url.startswith("https://")):
             return resolveLinkLocator(url, resource_name)
         if url.startswith("file://"):
-            return resolveFileLocator(url)
+            return resolveFileLocator(url, resource_name)
             
     # TODO: error management
     return []
@@ -227,14 +230,15 @@ def _addResource(zipobj, resourceLocator):
     for resourceDesc in resourceDescList:
         res_name = text(i) + "-" + resourceDesc.name
         zipobj.write(resourceDesc.res_path, res_name)
-        os.remove(resourceDesc.res_path)
+        if resourceDesc.temporary:
+            os.remove(resourceDesc.res_path)
         i = i + 1
 
-def packageRequest(downloadRequest):
+def packageRequest(downloadRequest, link_uuid):
     zip_file = None
     try:
         # 1. create temporary zip file
-        prefix = 'ideuy' + datetime.date.today().strftime("%Y%m%d") + "-";
+        prefix = 'ideuy' + link_uuid
         (fd, zip_path) = tempfile.mkstemp('.zip', prefix, getTargetDir())
         print zip_path
         zip_file = os.fdopen(fd, "w")
@@ -297,7 +301,7 @@ def get_language(request):
 def notifyCompletedRequest(self, link_id):
     try:
         logger.debug("starting notify task completed")
-        link = DownloadLink.objects.get(id=link_id)
+        link = DownloadLink.objects.get(pk=link_id)
         request = link.contents
         # validity must be computed from the moment the user gets notified
         link.valid_to = timezone.now() + datetime.timedelta(seconds = request.validity)
@@ -307,11 +311,20 @@ def notifyCompletedRequest(self, link_id):
             return
 
         with override(get_language(request)):
-            subject = _('Download service: your request is ready - %(requestid)') % {'requestid': request.request_random_id}
-        
-            download_link = reverse('download-link', args=(link.link_random_id,))
-            valid_to = date_format(download_link.valid_to, 'DATE_FORMAT')
-            plain_message = _('Your download request is ready. You can download it in the following link: %(url). The link will be available until %(valid_to)') % {'url': download_link, 'valid_to': valid_to}
+            subject = _('Download service: your request is ready - %(requestid)s') % {'requestid': request.request_random_id}
+            resolvedUrl = reverse('download-request-tracking', args=(request.request_random_id,))
+            try:
+                base_url = settings.BASE_URL
+                if base_url.endswith("/"):
+                    download_url = base_url + resolvedUrl
+                else:
+                    download_url = base_url + "/" + resolvedUrl
+            except:
+                download_url = resolvedUrl
+            valid_to = date_format(link.valid_to, 'DATE_FORMAT')
+            print download_url
+            print valid_to
+            plain_message = _('Your download request is ready. You can download it in the following link: %(url)s\nThe link will be available until %(valid_to)s') % {'url': download_url, 'valid_to': valid_to}
             # html_message = render_to_string('mail_template.html', {'context': 'values'})
             #plain_message = strip_tags(html_message)
             if request.requested_by_user:
@@ -319,8 +332,7 @@ def notifyCompletedRequest(self, link_id):
             else:
                 to = request.requested_by_external
             try:
-                from core_settings import EMAIL_HOST_USER
-                from_email =  EMAIL_HOST_USER
+                from_email =  core_settings.EMAIL_HOST_USER
             except:
                 logger.exception("EMAIL_HOST_USER has not been configured")
                 raise
@@ -349,9 +361,9 @@ def notifyCompletedRequest(self, link_id):
 @shared_task(bind=True)
 def notifyPermanentFailedRequest(self, request_id):
     try:
-        request = DownloadRequest.objects.get(id=request_id)
+        request = DownloadRequest.objects.get(pk=request_id)
         with override(get_language(request)):
-            subject = _('Download service: your request has failed - %(requestid)') % {'requestid': request.request_random_id}
+            subject = _('Download service: your request has failed - %(requestid)s') % {'requestid': request.request_random_id}
             plain_message = _('Sorry, your download request could not be completed. Please, try again or contact the service support.')
             # html_message = render_to_string('mail_template.html', {'context': 'values'})
             #plain_message = strip_tags(html_message)
@@ -398,14 +410,15 @@ def processDownloadRequest(self, request_id):
                 request.request_status == DownloadRequest.HOLD_STATUS or request.request_status == DownloadRequest.PERMANENT_NOTIFICATION_ERROR_STATUS:
             return
         # 2 package
-        zip_path = packageRequest(request)
+        link_uuid = datetime.date.today().strftime("%Y%m%d") + get_random_string(length=32)
+        zip_path = packageRequest(request, link_uuid)
         print zip_path
         if zip_path:
             # 3. create the link
             new_link = DownloadLink()
             new_link.contents = request
             new_link.valid_to = datetime.datetime.utcnow() + datetime.timedelta(seconds = request.validity)
-            new_link.request_random_id = request.request_random_id
+            new_link.link_random_id = link_uuid
             new_link.prepared_download_path = zip_path
             new_link.save()
             

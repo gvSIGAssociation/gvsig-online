@@ -92,7 +92,7 @@ class DownloadLink(models.Model):
         on_delete=models.CASCADE,
         primary_key=True,
     )
-    prepared_download_path = models.FilePathField() # the path to the file to download
+    prepared_download_path = models.FilePathField(max_length=1000) # the path to the file to download
     download_count = models.PositiveIntegerField(default=0)
     valid_to=models.DateTimeField(db_index=True)
     link_random_id = models.TextField(db_index=True)
