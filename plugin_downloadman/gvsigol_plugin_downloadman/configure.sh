@@ -1,0 +1,41 @@
+#!/bin/bash
+
+echo "Running install script for catalog plugin ..."
+mv settings_tpl.py settings.py
+
+TMP_DIR='##DOWNLOADMANAGER_TMP_DIR##'
+TARGET_ROOT='##DOWNLOADMANAGER_TARGET_ROOT##'
+TARGET_URL = '##DOWNLOADMANAGER_BASE_URL##/'
+LOCAL_PATHS_WHITELIST = [##DOWNLOADMANAGER_LOCAL_PATHS_WHITELIST##]
+
+if [ -z "$DOWNLOADMANAGER_TMP_DIR" ]; then
+        echo "WARNING: DOWNLOADMANAGER_TMP_DIR is not defined, using '/var/tmp/downloadman' ."
+        DOWNLOADMANAGER_TMP_DIR="/var/tmp/downloadman"
+fi
+
+if [ -z "$DOWNLOADMANAGER_TARGET_ROOT" ]; then
+        echo "WARNING: DOWNLOADMANAGER_TARGET_ROOT is not defined, using '/var/www/media/data/downloadman'."
+        DOWNLOADMANAGER_TARGET_ROOT="/var/www/media/data/downloadman"
+fi
+
+if [ -z "$DOWNLOADMANAGER_BASE_URL" ]; then
+        echo "WARNING: DOWNLOADMANAGER_BASE_URL is not defined, deriving from 'GVSIGOL_HOST'."
+        DOWNLOADMANAGER_BASE_URL="$GVSIGOL_HOST/media/data/downloadman"
+fi
+
+if [ -z "$LOCAL_PATHS_WHITELIST" ]; then
+        echo "WARNING: LOCAL_PATHS_WHITELIST is not defined, using DOWNLOADMANAGER_TARGET_ROOT."
+        LOCAL_PATHS_WHITELIST="$DOWNLOADMANAGER_TARGET_ROOT"
+fi
+
+# debugging...
+echo "DOWNLOADMANAGER_TMP_DIR" $DOWNLOADMANAGER_TMP_DIR
+echo "DOWNLOADMANAGER_TARGET_ROOT" $DOWNLOADMANAGER_TARGET_ROOT
+echo "DOWNLOADMANAGER_BASE_URL" $DOWNLOADMANAGER_BASE_URL
+echo "LOCAL_PATHS_WHITELIST" $LOCAL_PATHS_WHITELIST
+
+grep -rl "##DOWNLOADMANAGER_TMP_DIR##"  | xargs sed -i "s ##DOWNLOADMANAGER_TMP_DIR## $DOWNLOADMANAGER_TMP_DIR g"
+grep -rl "##DOWNLOADMANAGER_TARGET_ROOT##"  | xargs sed -i "s ##DOWNLOADMANAGER_TARGET_ROOT## $DOWNLOADMANAGER_TARGET_ROOT g"
+grep -rl "##DOWNLOADMANAGER_BASE_URL##" | xargs sed -i "s ##DOWNLOADMANAGER_BASE_URL## $DOWNLOADMANAGER_BASE_URL g" 
+grep -rl "##LOCAL_PATHS_WHITELIST##" | xargs sed -i "s/##LOCAL_PATHS_WHITELIST##/$LOCAL_PATHS_WHITELIST/g"
+
