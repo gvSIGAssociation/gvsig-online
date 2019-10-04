@@ -3,11 +3,6 @@
 echo "Running install script for catalog plugin ..."
 mv settings_tpl.py settings.py
 
-DOWNLOADMANAGER_TMP_DIR='##DOWNLOADMANAGER_TMP_DIR##'
-DOWNLOADMANAGER_TARGET_ROOT='##DOWNLOADMANAGER_TARGET_ROOT##'
-DOWNLOADMANAGER_BASE_URL = '##DOWNLOADMANAGER_BASE_URL##/'
-DOWNLOADMANAGER_LOCAL_PATHS_WHITELIST = [##DOWNLOADMANAGER_LOCAL_PATHS_WHITELIST##]
-
 if [ -z "$DOWNLOADMANAGER_TMP_DIR" ]; then
         echo "WARNING: DOWNLOADMANAGER_TMP_DIR is not defined, using '/var/tmp/downloadman' ."
         DOWNLOADMANAGER_TMP_DIR="/var/tmp/downloadman"
