@@ -32,6 +32,8 @@ CONFIGURATION
 The user name, password and URL for the message broker must be specified on a variable on settings.py (in gvsigol/gvsigol)
 For instance:
 CELERY_BROKER_URL = 'pyamqp://gvsigol:12345678@localhost:5672/gvsigol'
+Some additional variables are required:
+CELERY_TASK_ACKS_LATE = True
 
 Email must also be configured to send mail notifications to users. For instance:
 EMAIL_HOST = 'youremailhost.com'
