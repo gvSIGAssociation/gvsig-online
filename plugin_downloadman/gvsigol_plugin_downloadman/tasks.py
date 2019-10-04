@@ -27,7 +27,6 @@ from celery import shared_task
 from gvsigol_plugin_downloadman.models import DownloadRequest, DownloadLink, ResourceLocator
 from gvsigol_plugin_downloadman.models import get_packaging_max_retry_time, get_mail_max_retry_time
 import datetime
-from gvsigol_plugin_downloadman import settings
 import os
 import tempfile
 import zipfile
@@ -48,6 +47,7 @@ from django.utils.translation import ugettext as _
 from django.utils.crypto import get_random_string
 
 from gvsigol_plugin_downloadman.utils import getLayer
+from gvsigol_plugin_downloadman.settings import TMP_DIR,TARGET_ROOT, BASE_URL
 try:
     from gvsigol_plugin_downloadman.settings import LOCAL_PATHS_WHITELIST
 except:
@@ -75,22 +75,22 @@ def getTmpDir():
     global __TMP_DIR
     if not __TMP_DIR:
         try:
-            if not os.path.exists(settings.TMP_DIR):
-                os.makedirs(settings.TMP_DIR, 0o700)
+            if not os.path.exists(TMP_DIR):
+                os.makedirs(TMP_DIR, 0o700)
         except:
             pass
-        __TMP_DIR = settings.TMP_DIR
+        __TMP_DIR = TMP_DIR
     return __TMP_DIR
 
 def getTargetDir():
     global __TARGET_ROOT
     if not __TARGET_ROOT:
         try:
-            if not os.path.exists(settings.TARGET_ROOT):
-                os.makedirs(settings.TARGET_ROOT, 0o700)
+            if not os.path.exists(TARGET_ROOT):
+                os.makedirs(TARGET_ROOT, 0o700)
         except:
             pass
-        __TARGET_ROOT = settings.TARGET_ROOT
+        __TARGET_ROOT = TARGET_ROOT
     return __TARGET_ROOT
 
 
@@ -314,7 +314,7 @@ def notifyCompletedRequest(self, link_id):
             subject = _('Download service: your request is ready - %(requestid)s') % {'requestid': request.request_random_id}
             resolvedUrl = reverse('download-request-tracking', args=(request.request_random_id,))
             try:
-                base_url = settings.BASE_URL
+                base_url = BASE_URL
                 if base_url.endswith("/"):
                     download_url = base_url + resolvedUrl
                 else:
