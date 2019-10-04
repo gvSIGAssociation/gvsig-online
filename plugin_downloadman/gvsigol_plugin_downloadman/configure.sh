@@ -14,13 +14,13 @@ if [ -z "$DOWNLOADMANAGER_TMP_DIR" ]; then
 fi
 
 if [ -z "$DOWNLOADMANAGER_TARGET_ROOT" ]; then
-        echo "WARNING: DOWNLOADMANAGER_TARGET_ROOT is not defined, using '/var/www/media/data/downloadman'."
-        DOWNLOADMANAGER_TARGET_ROOT="/var/www/media/data/downloadman"
+        echo "WARNING: DOWNLOADMANAGER_TARGET_ROOT is not defined, using '/var/www/media/data/downloads'."
+        DOWNLOADMANAGER_TARGET_ROOT="/var/www/media/data/downloads"
 fi
 
 if [ -z "$DOWNLOADMANAGER_BASE_URL" ]; then
         echo "WARNING: DOWNLOADMANAGER_BASE_URL is not defined, deriving from 'GVSIGOL_HOST'."
-        DOWNLOADMANAGER_BASE_URL="$GVSIGOL_HOST/media/data/downloadman"
+        DOWNLOADMANAGER_BASE_URL="$GVSIGOL_HOST/media/data/downloads"
 fi
 
 if [ -z "$LOCAL_PATHS_WHITELIST" ]; then
