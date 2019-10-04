@@ -52,7 +52,7 @@ var LayerDownloadDescriptor = function(download_res_id, resource_descriptor, par
 var DownloadManagerClient = function(config) {
 	this.config = config || {};
 	this.config.baseQueryUrl = this.config.queryUrl || '/gvsigonline/downloadmanager/';
-	this.config.timeout = this.config.timeout || 5000;
+	this.config.timeout = this.config.timeout || 20000;
 	this.nextDescriptorId = 0;
 	this.layerList = [];
 }
@@ -144,7 +144,6 @@ DownloadManagerClient.prototype.queryAvailableResources = function(layer_id, wor
 DownloadManagerClient.prototype.startDownloadRequest = function(email, success_callback, error_callback, callback_context){
 	var self = this;
 	var queryUrl = self.config.baseQueryUrl + "request/";
-	console.log(queryUrl);
 
 	try {
 		var request = {
@@ -155,24 +154,25 @@ DownloadManagerClient.prototype.startDownloadRequest = function(email, success_c
 		}
 		var data = JSON.stringify(request);
 	} catch (e) {console.log("error stringify"); console.log(e)}
+	$.ajax({
+		type: 'POST',
+		url: queryUrl,
+		data: data,
+		timeout: self.config.timeout
+		}).done(function(result) {
+			if (result.status_code == 'QP') {
+				success_callback.apply(callback_context, [result, true]);
+				self.clearDownloadList();
+			}
+			else {
+				error_callback.apply(callback_context, [result, false]);
+			}
 	
-	$.post({"url": queryUrl,
-			"data": data,
-			"timeout": : this.config.timeout).done(function(result) {
-		if (result.status_code == 'QP') {
-			console.log(success_callback)
-			success_callback.apply(callback_context, [result, true]);
-			self.clearDownloadList();
-		}
-		else {
-			error_callback.apply(callback_context, [result, false]);
-		}
-	
-	})
-	.fail(function(err) {
-		console.log(err);
-		error_callback.apply(callback_context, err, false);
-	})
+		})
+		.fail(function(err) {
+			console.log(err);
+			error_callback.apply(callback_context, err, false);
+	});
 }
 
 DownloadManagerClient.prototype.getDownloadList = function(){
@@ -418,15 +418,19 @@ DownloadManagerUI.prototype.initDownloadList = function(){
 	$(".start-downloading-btn").unbind("click").click(function(){
 		// deshabilitamos para evitar ir creando peticiones que todavía no gestionamos al 100%
 		//alert('No disponible temporalmente');
-		if (document.getElementById("contactemail")) {
+		try {
 			var email =  document.getElementById("contactemail").value;
 		}
-		else {
-			self.getClient().startDownloadRequest(email, DownloadManagerUI.prototype.showDownloadQueued, DownloadManagerUI.prototype.showDownloadQueued, self);	
+		catch(e) {
+			var email = null;
 		}
+		self.getClient().startDownloadRequest(email, DownloadManagerUI.prototype.showDownloadQueued, DownloadManagerUI.prototype.showDownloadQueued, self);	
 	});
 	
 	$("#contactemail").change(function(){
+		self._updateStartDownloadButton();
+	});
+	$("#contactemail").keypress(function(){
 		self._updateStartDownloadButton();
 	});
 }
@@ -458,7 +462,7 @@ DownloadManagerUI.prototype.showDownloadQueued = function(json_result, success){
 		content += '<div class="alert alert-danger col-md-12">';
 		content += '<i class="fa fa-exclamation-circle fa-icon-button-left" aria-hidden="true"></i>';
 		content += gettext('There was an error processing your download request. Please, try again later');
-		var footer = '	<button class="btn btn-default downman-footer-button catalog-download-list-btn" type="button"><span class="download_list_count">' + self.getClient().getDownloadListCount() + '</span><i class="fa fa-shopping-cart fa-icon-button-left fa-icon-button-right" aria-hidden="true"></i>'+gettext("Ver lista de descargas")+'</button>';
+		var footer = '	<button class="btn btn-default downman-footer-button catalog-download-list-btn" type="button"><span class="download_list_count">' + this.getClient().getDownloadListCount() + '</span><i class="fa fa-shopping-cart fa-icon-button-left fa-icon-button-right" aria-hidden="true"></i>'+gettext("Ver lista de descargas")+'</button>';
 		footer += '		<div style="clear:both"></div>';
 		$(self.modalSelector).find('.modal-footer').html(footer);
 		$(".catalog-download-list-btn").unbind("click").click(function(){
