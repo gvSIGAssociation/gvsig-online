@@ -219,7 +219,10 @@ def resolveLocator(resourceLocator):
         if (url.startswith("http://") or url.startswith("https://")):
             return resolveLinkLocator(url, resource_name)
         if url.startswith("file://"):
-            return resolveFileLocator(url, resource_name)
+            if url.endswith("/"):
+                return resolveFileLocator(url, resource_name)
+            else:
+                return resolveFileLocator(url, os.path.basename(url))
             
     # TODO: error management
     return []

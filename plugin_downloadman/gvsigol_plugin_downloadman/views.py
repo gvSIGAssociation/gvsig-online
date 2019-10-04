@@ -239,8 +239,7 @@ def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
                 elif layer:
                     resource_title = layer.title
                 else:
-                    resource_title = _('Resource ') + metadata_uuid
-                    
+                    resource_title = os.path.basename(onlineResource.url)
             if layer:
                 layer_name = layer.name
                 layer_title = layer.title
