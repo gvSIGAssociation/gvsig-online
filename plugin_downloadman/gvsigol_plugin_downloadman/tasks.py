@@ -47,7 +47,7 @@ from django.utils.translation import ugettext as _
 from django.utils.crypto import get_random_string
 
 from gvsigol_plugin_downloadman.utils import getLayer
-from gvsigol_plugin_downloadman.settings import TMP_DIR,TARGET_ROOT, BASE_URL
+from gvsigol_plugin_downloadman.settings import TMP_DIR,TARGET_ROOT
 try:
     from gvsigol_plugin_downloadman.settings import LOCAL_PATHS_WHITELIST
 except:
@@ -314,7 +314,7 @@ def notifyCompletedRequest(self, link_id):
             subject = _('Download service: your request is ready - %(requestid)s') % {'requestid': request.request_random_id}
             resolvedUrl = reverse('download-request-tracking', args=(request.request_random_id,))
             try:
-                base_url = BASE_URL
+                base_url = core_settings.MEDIA_URLBASE_URL
                 if base_url.endswith("/"):
                     download_url = base_url + resolvedUrl
                 else:
