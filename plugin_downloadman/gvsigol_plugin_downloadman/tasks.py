@@ -177,6 +177,8 @@ def resolveLinkLocator(url, resource_name):
     return [desc]
 
 def resolveFileLocator(url, resource_name):
+    logger.debug("starting resolveFileLocator")
+    logger.debug(url)
     local_path = url[7:]
     if not local_path.startswith("/"):
         local_path = "/" + local_path
