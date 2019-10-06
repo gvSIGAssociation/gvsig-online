@@ -14,8 +14,8 @@ if [ -z "$DOWNLOADMANAGER_TARGET_ROOT" ]; then
 fi
 
 if [ -z "$DOWNLOADMANAGER_BASE_URL" ]; then
-        echo "WARNING: DOWNLOADMANAGER_BASE_URL is not defined, deriving from 'GVSIGOL_HOST'."
-        DOWNLOADMANAGER_BASE_URL="$GVSIGOL_HOST/media/data/downloads"
+        echo "WARNING: DOWNLOADMANAGER_BASE_URL is not defined, deriving from 'BASE_URL'."
+        DOWNLOADMANAGER_BASE_URL="$BASE_URL/media/data/downloads"
 fi
 
 if [ -z "$DOWNLOADMANAGER_LOCAL_PATHS_WHITELIST" ]; then
