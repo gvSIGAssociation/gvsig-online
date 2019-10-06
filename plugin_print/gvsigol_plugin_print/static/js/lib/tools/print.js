@@ -268,6 +268,7 @@ print.prototype.createPrintJob = function(template) {
 					var matrices = new Array();
 					var tileGrid = mapLayers[i].getSource().getTileGrid();
 					var lastSize = 1;
+					var format = mapLayers[i].getSource().getFormat();
 					for (var z = 0; z < 18; ++z) {
 						var matrixSize = new Array();
 						if (z == 0) {
@@ -305,7 +306,7 @@ print.prototype.createPrintJob = function(template) {
 					        "customParams": {
 				  				"TRANSPARENT": "true"
 				  			},
-					        "imageFormat": "image/png"
+					        "imageFormat": format
 				  	    };
 					if (mapLayers[i].getSource().getStyle()) {
 						layer['styles'] = [mapLayers[i].getSource().getStyle()];
@@ -386,6 +387,7 @@ print.prototype.createPrintJob = function(template) {
 							var matrices = new Array();
 							var tileGrid = baseLayers[i].getSource().getTileGrid();
 							var lastSize = 1;
+							var format = mapLayers[i].getSource().getFormat();
 							for (var z = 0; z < 18; ++z) {
 								var matrixSize = new Array();
 								if (z == 0) {
@@ -423,7 +425,7 @@ print.prototype.createPrintJob = function(template) {
 						        "dimensionParams": {},
 						        "matrixSet": baseLayers[i].getSource().getMatrixSet(),
 						        "matrices": matrices,
-						        "imageFormat": "image/png"
+						        "imageFormat": format
 							});
 
 						} else if (baseLayers[i].getSource() instanceof ol.source.TileWMS) {
