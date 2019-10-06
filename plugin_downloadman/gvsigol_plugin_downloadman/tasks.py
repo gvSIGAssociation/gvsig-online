@@ -186,9 +186,9 @@ def resolveFileLocator(url, resource_name):
     for path in LOCAL_PATHS_WHITELIST:
         if local_path.startswith(path):
             return [ResourceDescription(resource_name, local_path)]
-    print "local_path"
-    print local_path
-    print LOCAL_PATHS_WHITELIST
+    logger.debug("local_path")
+    logger.debug(local_path)
+    logger.debug(LOCAL_PATHS_WHITELIST)
     raise ForbiddenAccessException
 
 def resolveLocator(resourceLocator):
