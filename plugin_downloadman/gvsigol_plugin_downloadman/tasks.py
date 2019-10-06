@@ -182,11 +182,13 @@ def resolveFileLocator(url, resource_name):
         local_path = "/" + local_path
     # remove any "../.." and get absolute path
     local_path = os.path.abspath(os.path.realpath(local_path))
-    
     # we only allow local paths that are subfolders of the paths defined in LOCAL_PATHS_WHITELIST variable
     for path in LOCAL_PATHS_WHITELIST:
         if local_path.startswith(path):
             return [ResourceDescription(resource_name, local_path)]
+    print "local_path"
+    print local_path
+    print LOCAL_PATHS_WHITELIST
     raise ForbiddenAccessException
 
 def resolveLocator(resourceLocator):
