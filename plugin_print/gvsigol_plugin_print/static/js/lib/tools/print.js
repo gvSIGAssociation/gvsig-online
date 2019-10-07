@@ -269,6 +269,11 @@ print.prototype.createPrintJob = function(template) {
 					var tileGrid = mapLayers[i].getSource().getTileGrid();
 					var lastSize = 1;
 					var format = mapLayers[i].getSource().getFormat();
+					var tileSize = 256;
+					if (tileGrid.getTileSize(0)) {
+						tileSize = tileGrid.getTileSize(0);
+					}
+
 					for (var z = 0; z < 18; ++z) {
 						var matrixSize = new Array();
 						if (z == 0) {
@@ -282,12 +287,17 @@ print.prototype.createPrintJob = function(template) {
 							matrixSize.push(lastSize*2);
 							scale = scale / 2;
 						}
+						var tileSizeZ = 256;
+						if (tileGrid.getTileSize(z)) {
+							tileSizeZ = tileGrid.getTileSize(z);
+						}
+
 						matrices.push({
-				            "identifier": tileGrid.getMatrixIds()[z],
+				            "identifier": z,
 				            "matrixSize": matrixSize,
 				            "scaleDenominator": scale,
 				            //"tileSize": [tileGrid.getTileSize(), tileGrid.getTileSize()],
-				            "tileSize": tileGrid.tmpSize_,
+				            "tileSize": [tileSizeZ, tileSizeZ],
 				            "topLeftCorner": [-2.003750834E7, 2.0037508E7]
 						});
 					}
@@ -309,7 +319,7 @@ print.prototype.createPrintJob = function(template) {
 					        "imageFormat": format
 				  	    };
 					if (mapLayers[i].getSource().getStyle()) {
-						layer['styles'] = [mapLayers[i].getSource().getStyle()];
+						layer['style'] = [mapLayers[i].getSource().getStyle()];
 					}
 //					if (mapLayers[i].getSource().getDimensions() && "TIME" in mapLayers[i].getSource().getDimensions()) {
 //						layer['customParams']['TIME'] = mapLayers[i].getSource().getDimensions()['TIME'];
@@ -319,6 +329,13 @@ print.prototype.createPrintJob = function(template) {
 //					} else {
 //						layer['layers'] = [mapLayers[i].workspace + ':' + mapLayers[i].layer_name];
 //					}
+				} else if (mapLayers[i].getSource() instanceof ol.source.XYZ) {
+					printLayers.push({
+						"baseURL": mapLayers[i].getSource().getUrls()[0],
+					    "type": "OSM",
+					    "tileSize": [256, 256],
+					    "imageExtension": "png"
+					});
 				}else{
 					var wms_url = mapLayers[i].wms_url_no_auth;
 					if (wms_url === undefined)
@@ -335,7 +352,7 @@ print.prototype.createPrintJob = function(template) {
 							"mergeableParams": {},
 				  	    };
 					if (mapLayers[i].getSource().getParams()['STYLES']) {
-						layer['styles'] = [mapLayers[i].getSource().getParams()['STYLES']];
+						layer['style'] = [mapLayers[i].getSource().getParams()['STYLES']];
 					}
 					if (mapLayers[i].getSource().getParams()['TIME']) {
 						layer['customParams']['TIME'] = mapLayers[i].getSource().getParams()['TIME'];
@@ -388,6 +405,11 @@ print.prototype.createPrintJob = function(template) {
 							var tileGrid = baseLayers[i].getSource().getTileGrid();
 							var lastSize = 1;
 							var format = mapLayers[i].getSource().getFormat();
+							var tileSize = 256;
+							if (tileGrid.getTileSize(0)) {
+								tileSize = tileGrid.getTileSize();
+							}
+
 							for (var z = 0; z < 18; ++z) {
 								var matrixSize = new Array();
 								if (z == 0) {
@@ -401,16 +423,16 @@ print.prototype.createPrintJob = function(template) {
 									matrixSize.push(lastSize*2);
 									scale = scale / 2;
 								}
-								var tileSize = 256;
-								if (tileGrid.getTileSize()) {
-									tileSize = tileGrid.getTileSize();
+								var tileSizeZ = 256;
+								if (tileGrid.getTileSize(z)) {
+									tileSizeZ = tileGrid.getTileSize(z);
 								}
+
 								matrices.push({
-						            "identifier": tileGrid.getMatrixIds()[z],
+						            "identifier": z,
 						            "matrixSize": matrixSize,
+						            "tileSize": [tileSizeZ, tileSizeZ],
 						            "scaleDenominator": scale,
-						            "tileSize": [tileSize, tileSize],
-						            //"tileSize": tileGrid.tmpSize_,
 						            "topLeftCorner": [-2.003750834E7, 2.0037508E7]
 								});
 							}
@@ -423,6 +445,7 @@ print.prototype.createPrintJob = function(template) {
 						        "requestEncoding": "KVP",
 						        "dimensions": null,
 						        "dimensionParams": {},
+						        // "tileSize": [tileSize, tileSize],
 						        "matrixSet": baseLayers[i].getSource().getMatrixSet(),
 						        "matrices": matrices,
 						        "imageFormat": format
@@ -444,7 +467,8 @@ print.prototype.createPrintJob = function(template) {
 							printLayers.push({
 								"baseURL": baseLayers[i].getSource().getUrls()[0],
 							    "type": "OSM",
-							    "imageExtension": "jpg"
+							    "tileSize": [256, 256],
+							    "imageExtension": "png"
 							});
 						}
 					}
