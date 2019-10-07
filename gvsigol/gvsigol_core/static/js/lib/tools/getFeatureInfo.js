@@ -205,7 +205,7 @@ getFeatureInfo.prototype.getWMTSFeatureInfoUrl = function (source, coordinate2, 
 
     var tileGrid = source.tileGrid;
 
-    var coordinate = ol.proj.transform(coordinate2, projection.getCode(), source.matrixSet_);
+    var coordinate = ol.proj.transform(coordinate2, projection.getCode(), source.getMatrixSet());
     var tileCoord = source.tileGrid.getTileCoordForCoordAndResolution(coordinate, resolution);
 
     // this code is duplicated from createFromWMTSTemplate function
@@ -250,7 +250,7 @@ getFeatureInfo.prototype.getWMTSFeatureInfoUrl = function (source, coordinate2, 
         TILECOL : transformedTileCoord[1],
         TILEROW : transformedTileCoord[2],
         TILEMATRIX : tileMatrix,
-        TILEMATRIXSET : source.matrixSet_,
+        TILEMATRIXSET : source..getMatrixSet(),
         FORMAT : source.format_ || "image/png"
     };
 
