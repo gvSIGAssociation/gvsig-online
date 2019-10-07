@@ -122,7 +122,7 @@ def delete(request,id):
     except Exception as e:
         print e
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+
 def conf(request, id):
     try:
         try:
