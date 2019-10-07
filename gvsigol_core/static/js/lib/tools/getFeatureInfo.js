@@ -250,8 +250,8 @@ getFeatureInfo.prototype.getWMTSFeatureInfoUrl = function (source, coordinate2, 
         TILECOL : transformedTileCoord[1],
         TILEROW : transformedTileCoord[2],
         TILEMATRIX : tileMatrix,
-        TILEMATRIXSET : source..getMatrixSet(),
-        FORMAT : source.format_ || "image/png"
+        TILEMATRIXSET : source.getMatrixSet(),
+        FORMAT : source.getFormat() || "image/png"
     };
 
     this.assign(baseParams, params);
