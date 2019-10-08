@@ -274,7 +274,7 @@ print.prototype.createPrintJob = function(template) {
 						tileSize = tileGrid.getTileSize(0);
 					}
 
-					for (var z = 0; z < 18; ++z) {
+					for (var z = 0; z < tileGrid.getMatrixIds().length; ++z) {
 						var matrixSize = new Array();
 						if (z == 0) {
 							matrixSize.push(1);
@@ -409,7 +409,7 @@ print.prototype.createPrintJob = function(template) {
 								tileSize = tileGrid.getTileSize();
 							}
 
-							for (var z = 0; z < 18; ++z) {
+							for (var z = 0; z < tileGrid.getMatrixIds().length; ++z) {
 								var matrixSize = new Array();
 								if (z == 0) {
 									matrixSize.push(1);
