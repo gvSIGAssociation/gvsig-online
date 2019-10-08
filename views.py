@@ -1620,6 +1620,30 @@ def cache_clear(request, layer_id):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
+def manage_cache_clear(request, layer_id):
+
+    layer = Layer.objects.get(id=int(layer_id))
+    layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
+    server = Server.objects.get(id=layer_group.server_id)
+    gs = geographic_servers.get_instance().get_server_by_id(server.id)
+    if request.method == 'GET' or request.method == 'POST':
+        if layer.external:
+            print 'TO DO'
+            
+        else:
+            layer_cache_clear(layer_id)
+            
+        gs.reload_nodes()
+        
+    if request.method == 'GET':
+        return redirect('cache_list')
+
+    else:
+        return HttpResponse('{"response": "ok"}', content_type='application/json')
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_http_methods(["GET", "POST", "HEAD"])
+@staff_required
 def group_cache_clear(request, layergroup_id):
     if request.method == 'GET':
         layergroup = LayerGroup.objects.get(id=int(layergroup_id))

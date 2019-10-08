@@ -32,7 +32,6 @@
 							<th></th>
 							<th></th>
 							<th></th>
-							<th></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -49,7 +48,6 @@
 							{% else %}
 							<td><input disabled type="checkbox"/></td>
 							{% endif %}
-							<td></td>
 							<td></td>
 							<td></td>
 							<td></td>
@@ -154,17 +152,13 @@ $(document).ready(function() {
 	    },{
 	      	"targets": -2,
 	       	"data": null,
-	        "defaultContent": '<button type="button" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="' + '{% trans "Clear cache" %}' + '" class="btn btn-warning"><i class="fa fa-refresh"></i></button>'
-	  	},{
-	      	"targets": -3,
-	       	"data": null,
 	        "defaultContent": '<button type="button" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Configure layer" %}' + '" class="btn bg-purple"><i class="fa fa-cogs"></i></button>'
 	  	},{
-	      	"targets": -5,
+	      	"targets": -4,
 	       	"data": null,
 	        "defaultContent": '<button type="button" name="button-update-layer" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update layer" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
 	  	},{
-	      	"targets": -4,
+	      	"targets": -3,
 	       	"data": null,
 	        "defaultContent": '<button type="button" name="button-update-thumbnail" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update thumbnail" %}' + '" class="btn btn-primary"><i class="fa fa-file-image-o"></i></button>'
 	  	}],
