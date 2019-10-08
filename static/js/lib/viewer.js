@@ -83,7 +83,7 @@ viewer.core = {
     				'VERSION': '1.1.1',
     				'REQUEST': 'GetCapabilities'
     			},
-    			async: false,
+    			async: true,
     			dataType: 'jsonp',
     			jsonpCallback: "authenticateCallback",
     			method: 'GET',
