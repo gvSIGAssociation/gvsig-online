@@ -1982,9 +1982,11 @@ layerTree.prototype.createOverlayUI = function(layer, group_visible) {
 			ui += '	</a>';
 		}
 		if (layer.metadata || (!layer.external)) {
-			ui += '	<a id="show-metadata-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool show-metadata-link">';
-			ui += '		<i class="fa fa-newspaper-o" aria-hidden="true"></i> ' + gettext('Metadata');
-			ui += '	</a>';
+			if (!layer.imported) {
+				ui += '	<a id="show-metadata-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool show-metadata-link">';
+				ui += '		<i class="fa fa-newspaper-o" aria-hidden="true"></i> ' + gettext('Metadata');
+				ui += '	</a>';
+			}
 		}
 		if (layer.detailed_info_enabled) {
 			ui += '	<a id="detailed-info-' + id + '" href="#" class="btn btn-block btn-social btn-custom-tool detailed-info-link">';
@@ -2031,6 +2033,10 @@ layerTree.prototype.zoomToLayer = function(layer) {
 	if (Array.isArray(layer.bboxwgs84) && layer.bboxwgs84.length==4) { // use extent from metadata if available
 		var extent = ol.proj.transformExtent(layer.bboxwgs84, ol.proj.get('EPSG:4326'), ol.proj.get('EPSG:3857'));
 		self.map.getView().fit(extent, self.map.getSize());
+		return;
+		
+	} else if (layer.imported) {
+		self.map.getView().fit(layer.getSource().getExtent(), self.map.getSize());
 		return;
 	}
 	
@@ -2157,7 +2163,9 @@ layerTree.prototype.reorder = function(event,ui) {
 			if (layer.get('id') == layerid) {
 				var order = parseInt(zindex) + mapLayers_length;
 				layer.setZIndex(order);
-				self.changeState(layer, 'layer', 'change-order', order);
+				if (!layer.imported) {
+					self.changeState(layer, 'layer', 'change-order', order);
+				}
 				mapLayers_length--;
 			}
 		}, this);
