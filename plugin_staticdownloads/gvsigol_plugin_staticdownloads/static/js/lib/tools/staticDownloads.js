@@ -51,7 +51,41 @@ StaticDownloads.prototype.deactivable = true;
  */
 StaticDownloads.prototype.handler = function(e) {
 	e.preventDefault();
-	window.open(this.url,'_blank','width=780,height=600,left=150,top=200,toolbar=0,status=0');	
+	//window.open(this.url,'_blank','width=780,height=600,left=150,top=200,toolbar=0,status=0');	
+	
+	
+	e.preventDefault();
+	if(self.modal == null){
+		self.modal = '<div class="modal fade ui-draggable" id="modal-sd-dialog" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="">'+
+		'	<div class="modal-dialog" role="document" style="width: 800px; height: 600px;">'+
+		'		<div class="modal-content">'+
+		'			<button id="close-modal-sd" type="button" class="close" data-dismiss="modal" aria-label="Close" style="float:right;font-size: 40px;margin-right: 10px;">'+
+		'				<span aria-hidden="true">×</span>'+
+		'			</button>'+
+		'			<div id="modal-sd-custom_content" style="float:left" class="modal-body">Custom HTML content'+
+		'			</div>'+
+		' 			<div style="clear:both"></div>'+
+		'		</div>'+
+		'	</div>'+
+		'</div>';
+		$('body').append(self.modal);
+		
+		$("#modal-sd-dialog").modal('show');
+		this.url = 'https://visor-test.ide.uy/descargas/';
+		$('#modal-sd-custom_content').html(
+			'<iframe width="760" height="600" src="'+ this.url +'" frameborder="0"></iframe>'
+		);
+
+		$('#close-modal-sd').unbind("click").click(function(){
+			$("#modal-sd-dialog").modal('hide');
+			self.modal2 = null;
+		});
+		
+	} else {
+		$("#modal-sd-dialog").modal('hide');
+		self.modal2 = null;
+		
+	}
 };
 
 /**
