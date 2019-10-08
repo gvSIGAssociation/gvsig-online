@@ -293,10 +293,9 @@ print.prototype.createPrintJob = function(template) {
 						}
 
 						matrices.push({
-				            "identifier": z,
+				            "identifier": tileGrid.getMatrixIds()[z],
 				            "matrixSize": matrixSize,
 				            "scaleDenominator": scale,
-				            //"tileSize": [tileGrid.getTileSize(), tileGrid.getTileSize()],
 				            "tileSize": [tileSizeZ, tileSizeZ],
 				            "topLeftCorner": [-2.003750834E7, 2.0037508E7]
 						});
@@ -319,7 +318,7 @@ print.prototype.createPrintJob = function(template) {
 					        "imageFormat": format
 				  	    };
 					if (mapLayers[i].getSource().getStyle()) {
-						layer['style'] = [mapLayers[i].getSource().getStyle()];
+						layer['style'] = mapLayers[i].getSource().getStyle();
 					}
 //					if (mapLayers[i].getSource().getDimensions() && "TIME" in mapLayers[i].getSource().getDimensions()) {
 //						layer['customParams']['TIME'] = mapLayers[i].getSource().getDimensions()['TIME'];
@@ -352,7 +351,7 @@ print.prototype.createPrintJob = function(template) {
 							"mergeableParams": {},
 				  	    };
 					if (mapLayers[i].getSource().getParams()['STYLES']) {
-						layer['style'] = [mapLayers[i].getSource().getParams()['STYLES']];
+						layer['styles'] = [mapLayers[i].getSource().getParams()['STYLES']];
 					}
 					if (mapLayers[i].getSource().getParams()['TIME']) {
 						layer['customParams']['TIME'] = mapLayers[i].getSource().getParams()['TIME'];
@@ -429,7 +428,7 @@ print.prototype.createPrintJob = function(template) {
 								}
 
 								matrices.push({
-						            "identifier": z,
+									"identifier": tileGrid.getMatrixIds()[z],
 						            "matrixSize": matrixSize,
 						            "tileSize": [tileSizeZ, tileSizeZ],
 						            "scaleDenominator": scale,
@@ -445,7 +444,6 @@ print.prototype.createPrintJob = function(template) {
 						        "requestEncoding": "KVP",
 						        "dimensions": null,
 						        "dimensionParams": {},
-						        // "tileSize": [tileSize, tileSize],
 						        "matrixSet": baseLayers[i].getSource().getMatrixSet(),
 						        "matrices": matrices,
 						        "imageFormat": format
