@@ -71,7 +71,6 @@ StaticDownloads.prototype.handler = function(e) {
 		$('body').append(self.modal);
 		
 		$("#modal-sd-dialog").modal('show');
-		this.url = 'https://visor-test.ide.uy/descargas/';
 		$('#modal-sd-custom_content').html(
 			'<iframe width="760" height="600" src="'+ this.url +'" frameborder="0"></iframe>'
 		);
