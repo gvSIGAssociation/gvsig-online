@@ -77,12 +77,12 @@ StaticDownloads.prototype.handler = function(e) {
 
 		$('#close-modal-sd').unbind("click").click(function(){
 			$("#modal-sd-dialog").modal('hide');
-			self.modal2 = null;
+			self.modal = null;
 		});
 		
 	} else {
 		$("#modal-sd-dialog").modal('hide');
-		self.modal2 = null;
+		self.modal = null;
 		
 	}
 };
