@@ -274,6 +274,7 @@ viewer.core = {
 			wmsLayer.baselayer = baselayer;
 			wmsLayer.queryable = true;
 			wmsLayer.external = true;
+			wmsLayer.imported = false;
 			wmsLayer.detailed_info_enabled = externalLayer['detailed_info_enabled'];
 			wmsLayer.detailed_info_button_title = externalLayer['detailed_info_button_title'];
 			wmsLayer.detailed_info_html = externalLayer['detailed_info_html'];
@@ -332,6 +333,7 @@ viewer.core = {
 	    		wmtsLayer.baselayer = externalLayer['baselayer'];
 	    		wmtsLayer.external = true;
 	    		wmtsLayer.queryable = false;
+	    		wmtsLayer.imported = false;
 	    		wmtsLayer.infoFormat = externalLayer['infoformat'];
 	    		wmtsLayer.detailed_info_enabled = externalLayer['detailed_info_enabled'];
 	    		wmtsLayer.detailed_info_button_title = externalLayer['detailed_info_button_title'];
@@ -407,6 +409,7 @@ viewer.core = {
 			bingLayer.baselayer = baselayer;
 			bingLayer.setZIndex(parseInt(externalLayer.order));
 			bingLayer.external = true;
+			bingLayer.imported = false;
 			this.map.addLayer(bingLayer);
     	}
 
@@ -428,6 +431,7 @@ viewer.core = {
             });
     		osm.baselayer = baselayer;
     		osm.external = true;
+    		osm.imported = false;
     		osm.setZIndex(parseInt(externalLayer.order));
 			this.map.addLayer(osm);
 		}
@@ -444,6 +448,7 @@ viewer.core = {
     		});
     		xyz.baselayer = baselayer;
     		xyz.external = true;
+    		xyz.imported = false;
     		xyz.setZIndex(parseInt(externalLayer.order));
 			this.map.addLayer(xyz);
 		}
@@ -590,6 +595,7 @@ viewer.core = {
 			wmsLayer.conf = JSON.parse(layerConf.conf);
 			wmsLayer.parentGroup = group.groupName;
 			wmsLayer.external = false;
+			wmsLayer.imported = false;
 			wmsLayer.allow_download = layerConf.allow_download;
 
 			wmsLayer.time_resolution = layerConf.time_resolution;
