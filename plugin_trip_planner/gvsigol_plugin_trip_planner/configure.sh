@@ -8,4 +8,4 @@ if [ -z "$GTFS_SCRIPT" ]; then
         exit -1        
 fi
 
-grep -rl "##GTFS_SCRIPT##"  | xargs sed -i "s%%##GTFS_SCRIPT##%%$GTFS_SCRIPT%%g"
+grep -rl "##GTFS_SCRIPT##"  | xargs sed -i "s%##GTFS_SCRIPT##%$GTFS_SCRIPT%g"
