@@ -101,7 +101,7 @@
 							</div>
 						</div>	
 						
-						<div class="row nominatim-param googlemaps-param new_cartociudad-param user-param">
+						<div class="row nominatim-param googlemaps-param new_cartociudad-param user-param ide_uy-param">
 							<div class="col-md-12" style="margin-bottom: 20px;">
 								<div class="provider-img">
 									<img id="image-preview" src={{image_photo_url}} alt="">
@@ -113,10 +113,10 @@
 							</div>	
 						</div>	
 						
-						<div class="row nominatim-param googlemaps-param new_cartociudad-param" id="params-row">
+						<div class="row nominatim-param googlemaps-param new_cartociudad-param ide_uy-param" id="params-row">
 							<div class="col-md-12 form-group">
 								<div id="advanced-params-button">
-								<label for="id_params">{% trans "Advanced params" %}</label>
+								<label for="id_params">{% trans "Advanced params" %} (editable only in settings file) </label>
 								<div class="pull-right"><i id="advanced-params-icon" class="fa fa-plus"></i></div>
 								</div>	
 								<div id="advanced-params">
@@ -132,7 +132,7 @@
 				</form>	
 				
 				
-				{% if type != "nominatim" and type != "googlemaps" and type != "new_cartociudad" %}
+				{% if type != "nominatim" and type != "googlemaps" and type != "new_cartociudad" and type != "ide_uy" %}
 					<div class="box-header process-title">
 								<h3 class="title">{% trans "Import process status" %}</h3>
 						</div>

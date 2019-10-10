@@ -22,7 +22,7 @@
 @author: Jose Badia <jbadia@scolab.es>
 '''
 
-from django.shortcuts import render, redirect, HttpResponse
+from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from geocoder import Geocoder
 from django.contrib.auth.decorators import login_required
@@ -31,7 +31,7 @@ from gvsigol_plugin_geocoding.models import Provider
 from django.utils.translation import ugettext as _
 from gvsigol_auth.utils import superuser_required, staff_required
 from forms_services import ProviderForm, ProviderUpdateForm
-from django.shortcuts import render
+
 from gvsigol_plugin_geocoding import settings as geocoding_setting
 from gvsigol import settings
 from gvsigol_plugin_geocoding.utils import *
@@ -42,6 +42,8 @@ from gvsigol_services.views import backend_resource_list_available,\
     backend_resource_list
 from gvsigol_services.backend_postgis import Introspect
 from django.views.decorators.csrf import csrf_exempt
+
+from time import time
 
 
 
@@ -312,7 +314,8 @@ def provider_update(request, provider_id):
             
         form.fields['params'].initial = provider.params
     
-    image_url = settings.STATIC_URL + 'img/geocoding/toponimo.png'
+    image_url = settings.BASE_URL + 'img/geocoding/toponimo.png'
+    #image_url = 'img/geocoding/toponimo.png'
     if provider.image:
         image_url = provider.image.url
         # HACK HTTPS
@@ -411,12 +414,21 @@ def get_conf(request):
     if request.method == 'POST': 
         provider = Provider.objects.all()
         has_providers = provider.__len__() > 0
+        # if has_providers == False :            
         response = {
             'has_providers': has_providers, 
             'candidates_url': geocoding_setting.GEOCODING_PROVIDER['cartociudad']['candidates_url'],
             'find_url': geocoding_setting.GEOCODING_PROVIDER['cartociudad']['find_url'],
             'reverse_url': geocoding_setting.GEOCODING_PROVIDER['cartociudad']['reverse_url']
-        }       
+        }
+#         else:
+#             params = json.loads(provider[0].params)
+#             response = {
+#                 'has_providers': has_providers, 
+#                 'candidates_url': params['candidates_url'],
+#                 'find_url': params['find_url'],
+#                 'reverse_url': params['reverse_url']
+#             }                   
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')           
 
 
@@ -432,8 +444,8 @@ def upload_shp_cartociudad(request, provider_id):
 @staff_required 
 def upload_shp_cartociudad_status(request):
     status = {}
-    if request.method == 'GET':
-        status = get_cartociudad_status()
+    # if request.method == 'GET':
+    #    status = get_cartociudad_status()
             
     return HttpResponse(json.dumps(status, indent=4), content_type='application/json')
     
@@ -454,8 +466,13 @@ def find_first_candidate(request):
 def search_candidates(request):
     if request.method == 'GET':
         query = request.GET.get('q')  
+        t1 = time()
         suggestions = get_geocoder().search_candidates(query)
+        t2 = time()
         aux = json.dumps(suggestions, indent=4)
+        t3 = time()
+        
+        print 'Tsuggestions: ', (t2-t1)*1000 , 'msecs Tjson=', (t3-t2)*1000 
         
         return HttpResponse(aux, content_type='application/json')
     
