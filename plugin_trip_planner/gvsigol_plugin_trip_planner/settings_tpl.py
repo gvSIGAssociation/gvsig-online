@@ -27,6 +27,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 GTFS_CRONTAB = "2 0 * * *"
-GTFS_SCRIPT  = ##GTFS_SCRIPT##
+GTFS_SCRIPT  = "##GTFS_SCRIPT##"
 
    
