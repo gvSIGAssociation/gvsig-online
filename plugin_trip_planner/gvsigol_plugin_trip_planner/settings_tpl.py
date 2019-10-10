@@ -27,6 +27,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 GTFS_CRONTAB = "2 0 * * *"
-GTFS_SCRIPT  = "mkdir -p /var/www/media/data/GTFS; rm -f /var/otp/graphs/vlc/*.zip; cp /var/www/media/data/GTFS/*.zip /var/otp/graphs/vlc/; java -Xmx2G -jar /var/otp/otp-1.4.0-shaded.jar --build /var/otp/graphs/vlc; sudo service otp restart"
+GTFS_SCRIPT  = ##GTFS_SCRIPT##
 
    
