@@ -76,12 +76,27 @@ GEOCODING_PROVIDER = {
         'max_results': 10
     },
     'ide_uy': {
-        'candidates_url': 'http://127.0.0.1:8090/api/v1/geocode/candidates',
-        'find_url': 'http://127.0.0.1:8090/api/v1/geocode/find',
-        'reverse_url': 'http://127.0.0.1:8090/api/v1/geocode/reverse',  
+        'candidates_url': 'http://ideuy.gvsigonline.com:8090/api/v1/geocode/candidates',
+        'find_url': 'http://ideuy.gvsigonline.com:8090/api/v1/geocode/find',
+        'reverse_url': 'http://ideuy.gvsigonline.com:8090/api/v1/geocode/reverse',  
         'max_results': 10,
         'filter': ''
     },
+#     'ide_uy': {
+#         'candidates_url': 'https://callejerouy-direcciones.agesic.gub.uy/direcciones-0.0.2-SNAPSHOT/api/v1/geocode/candidates',
+#         'find_url': 'https://callejerouy-direcciones.agesic.gub.uy/direcciones-0.0.2-SNAPSHOT/api/v1/geocode/find',
+#         'reverse_url': 'https://callejerouy-direcciones.agesic.gub.uy/direcciones-0.0.2-SNAPSHOT/api/v1/geocode/reverse',  
+#         'max_results': 10,
+#         'filter': ''
+#     },
+    
+#     'ide_uy': {
+#         'candidates_url': 'http://127.0.0.1:8090/api/v1/geocode/candidates',
+#         'find_url': 'http://127.0.0.1:8090/api/v1/geocode/find',
+#         'reverse_url': 'http://127.0.0.1:8090/api/v1/geocode/reverse',  
+#         'max_results': 10,
+#         'filter': ''
+#     },
     
 }
 

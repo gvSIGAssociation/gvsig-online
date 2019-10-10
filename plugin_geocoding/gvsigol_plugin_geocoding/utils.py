@@ -20,7 +20,7 @@
 from geoserver.workspace import Workspace
 from models import Provider
 from gvsigol_services.models import Datastore
-from gvsigol import settings
+# from gvsigol import settings
 from gvsigol_plugin_geocoding import settings as geocoding_settings
 import json
 import xml.etree.cElementTree as ET

@@ -29,7 +29,8 @@ from django.utils.translation import ugettext as _
 import json
 
 def get_default_provider_icon():
-    return settings.STATIC_URL + 'img/geocoding/toponimo.png'
+    return settings.BASE_URL + 'img/geocoding/toponimo.png'
+    #return 'img/geocoding/toponimo.png'
 
 class Provider(models.Model):   
     type = models.CharField(max_length=100)
