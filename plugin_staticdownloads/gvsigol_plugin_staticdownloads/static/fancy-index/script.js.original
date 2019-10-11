@@ -189,17 +189,6 @@
 
   fixTable();
   addTitle();
-  
-  document.title = document.title.replace ('Index of', 'Descargas IDEUY:');
-  var elem = document.getElementById ('indexlist');
-  elem.innerHTML = elem.innerHTML.replace ('Index of', '&Iacute;ndice de :');
-  elem = document.getElementsByClassName ('indexcolname') [0];
-  elem.innerHTML = elem.innerHTML.replace ('Name', 'Nombre:');
-  elem = document.getElementsByClassName ('indexcollastmod') [0];
-  elem.innerHTML = elem.innerHTML.replace ('Last modified', '&Uacute;ltima modificaci&oacute;n:');
-  elem = document.getElementsByClassName ('indexcolsize') [0];
-  elem.innerHTML = elem.innerHTML.replace ('Size', 'Tama&ntilde;o:');
-  
   fixTime();
   addSearch();
 }
