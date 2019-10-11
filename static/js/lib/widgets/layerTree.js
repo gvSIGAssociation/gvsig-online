@@ -2035,7 +2035,7 @@ layerTree.prototype.zoomToLayer = function(layer) {
 		self.map.getView().fit(extent, self.map.getSize());
 		return;
 		
-	} else if (layer.imported) {
+	} else if (layer.imported && layer.is_vector) {
 		self.map.getView().fit(layer.getSource().getExtent(), self.map.getSize());
 		return;
 	}
