@@ -25,64 +25,64 @@ msgstr "Nome"
 #: forms.py:31 templates/user_add.html.py:46 templates/user_list.html.py:24
 #: templates/user_update.html:33 templates/user_update.html.py:34 utils.py:113
 msgid "Last name"
-msgstr ""
+msgstr "Sobrenome"
 
 #: forms.py:32 templates/login.html.py:46 templates/user_add.html.py:53
 #: templates/user_list.html:22 templates/user_update.html.py:40
 #: templates/user_update.html:41 utils.py:111
 msgid "Username"
-msgstr ""
+msgstr "Nome de usuário"
 
 #: forms.py:33 templates/user_add.html.py:57 templates/user_list.html.py:25
 #: templates/user_update.html:44 templates/user_update.html.py:45 utils.py:114
 msgid "Email"
-msgstr ""
+msgstr "Correio electrónico"
 
 #: forms.py:34 templates/login.html.py:50 templates/user_add.html.py:65
 #: utils.py:115
 msgid "Password"
-msgstr ""
+msgstr "Senha"
 
 #: forms.py:35 templates/user_add.html.py:69
 msgid "Repeat password"
-msgstr ""
+msgstr "Repita a senha"
 
 #: services.py:72
 msgid "Group for admin users"
-msgstr ""
+msgstr "Grupo para usuários administradores"
 
 #: templates/dashboard_auth_menu.html:4
 msgid "Users and groups"
-msgstr ""
+msgstr "Usuários e grupos"
 
 #: templates/dashboard_auth_menu.html:6
 msgid "Users"
-msgstr ""
+msgstr "Usuários"
 
 #: templates/dashboard_auth_menu.html:7 templates/user_list.html.py:28
 msgid "Groups"
-msgstr ""
+msgstr "Grupos"
 
 #: templates/group_add.html:12 templates/user_add.html.py:12
 #: templates/user_update.html:12
 msgid "Save"
-msgstr ""
+msgstr "Salvar"
 
 #: templates/group_add.html:39 templates/group_list.html.py:22
 msgid "Name"
-msgstr ""
+msgstr "Nome"
 
 #: templates/group_add.html:46 templates/group_list.html.py:23
 msgid "Description"
-msgstr ""
+msgstr "Descrição"
 
 #: templates/group_list.html:11
 msgid "Add group"
-msgstr ""
+msgstr "Adicionar grupo"
 
 #: templates/group_list.html:52 templates/group_list.html.py:100
 msgid "Delete group"
-msgstr ""
+msgstr "Excluir grupo"
 
 #: templates/group_list.html:55
 msgid "The group will be removed, Do you want continue?"
@@ -90,20 +90,20 @@ msgstr ""
 
 #: templates/group_list.html:58 templates/user_list.html.py:70
 msgid "Cancel"
-msgstr ""
+msgstr "Cancelar"
 
 #: templates/group_list.html:59 templates/user_list.html.py:71
 msgid "Accept"
-msgstr ""
+msgstr "Aceitar"
 
 #: templates/group_list.html:76 templates/user_list.html.py:88
 msgid "Processing request..."
-msgstr ""
+msgstr "Processar solicitação"
 
 #: templates/group_list.html:77 templates/user_list.html.py:89
 #, python-format
 msgid "Search%(sep)s"
-msgstr ""
+msgstr "Pesquisar"
 
 #: templates/group_list.html:78 templates/user_list.html.py:90
 #, python-format
