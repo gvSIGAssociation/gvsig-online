@@ -20,7 +20,7 @@ msgstr ""
 #: forms.py:30 templates/user_list.html.py:23 templates/user_update.html.py:29
 #: templates/user_update.html:30 utils.py:112
 msgid "First name"
-msgstr ""
+msgstr "Nome"
 
 #: forms.py:31 templates/user_add.html.py:46 templates/user_list.html.py:24
 #: templates/user_update.html:33 templates/user_update.html.py:34 utils.py:113
