@@ -131,201 +131,201 @@ msgstr "Carregando"
 #: templates/group_list.html:84 templates/group_list.html.py:85
 #: templates/user_list.html:96 templates/user_list.html.py:97
 msgid "No records available"
-msgstr ""
+msgstr "Nenhum registro disponível"
 
 #: templates/group_list.html:87 templates/user_list.html.py:99
 msgid "First"
-msgstr ""
+msgstr "Primeiro"
 
 #: templates/group_list.html:88 templates/user_list.html.py:100
 msgid "Previous"
-msgstr ""
+msgstr "Anterior"
 
 #: templates/group_list.html:89 templates/user_list.html.py:101
 msgid "Next"
-msgstr ""
+msgstr "Seguinte"
 
 #: templates/group_list.html:90 templates/user_list.html.py:102
 msgid "Last"
-msgstr ""
+msgstr "Último"
 
 #: templates/group_list.html:93 templates/user_list.html.py:105
 #, python-format
 msgid "%(sep)sSort ascending"
-msgstr ""
+msgstr "%(sep)sSort ascendente"
 
 #: templates/group_list.html:94 templates/user_list.html.py:106
 #, python-format
 msgid "%(sep)sSort descending"
-msgstr ""
+msgstr "%(sep)sSort descendente"
 
 #: templates/illegal_operation.html:7
-msgid "Illegal operation"
-msgstr ""
+msgid "%(sep)sSort descendente"
+msgstr "%(sep)sSort descendente"
 
 #: templates/illegal_operation.html:10
 msgid "Something went wrong"
-msgstr ""
+msgstr "Algo falhou"
 
 #: templates/illegal_operation.html:13
 msgid "You don't have administrative permissions. Meanwhile, you may"
-msgstr ""
+msgstr "Você não tem permissões administrativas. Enquanto isso, você pode"
 
 #: templates/illegal_operation.html:14
 msgid "return to dashboard"
-msgstr ""
+msgstr "voltar ao painel de instrumentos"
 
 #: templates/login.html:39
 msgid "Sign in to start your session"
-msgstr ""
+msgstr "Inicie a sessão para começar a trabalhar"
 
 #: templates/login.html:55
 msgid "Sign In"
-msgstr ""
+msgstr "Inicie a sessão"
 
 #: templates/login.html:60
 msgid "I forgot my password"
-msgstr ""
+msgstr "Esqueci minha senha"
 
 #: templates/password_reset.html:39
 msgid "Enter your username to retrieve your password"
-msgstr ""
+msgstr "Digite seu nome de usuário para recuperar sua senha"
 
 #: templates/password_reset.html:46
 msgid "Insert your username"
-msgstr ""
+msgstr "Insira o seu nome de usuário"
 
 #: templates/password_reset.html:51
 #: templates/registration/password_reset_confirm.html:59
 msgid "Send"
-msgstr ""
+msgstr "Enviar"
 
 #: templates/password_reset2.html:39
 msgid "Contact the system administrator"
-msgstr ""
+msgstr "Contactar com o administrador do sistema"
 
 #: templates/password_reset_success.html:39
 msgid "We've sent an email to your account with a link to set the new password"
-msgstr ""
+msgstr "Mandamos um e-mail para a sua conta com um link para definir a nova senha"
 
 #: templates/password_reset_success.html:40
 msgid "Return"
-msgstr ""
+msgstr "Retorno"
 
 #: templates/registration/password_reset_confirm.html:39
 msgid "Enter new your password"
-msgstr ""
+msgstr "Digite sua nova senha"
 
 #: templates/registration/password_reset_confirm.html:50
 msgid "Insert new password"
-msgstr ""
+msgstr "Inserir nova senha"
 
 #: templates/registration/password_reset_confirm.html:54
 msgid "Confirm new password"
-msgstr ""
+msgstr "Confirme a nova senha"
 
 #: templates/registration/password_reset_confirm.html:88
 msgid "Password confirmation doesn't match"
-msgstr ""
+msgstr "A senha de confirmação não corresponde"
 
 #: templates/registration/password_reset_confirm.html:91
 msgid "Password can't be empty"
-msgstr ""
+msgstr "A senha não pode estar vazia"
 
 #: templates/registration/password_reset_confirm.html:94
 msgid "Password has contain at least 8 characters"
-msgstr ""
+msgstr "A senha tem pelo menos 8 caracteres"
 
 #: templates/user_add.html:42
 msgid "First Name"
-msgstr ""
+msgstr "Nome"
 
 #: templates/user_add.html:83 templates/user_update.html.py:55
 #: templates/user_update.html:57
 msgid "Is superuser"
-msgstr ""
+msgstr "É superusuário"
 
 #: templates/user_add.html:88 templates/user_update.html.py:64
 #: templates/user_update.html:66
 msgid "Can manage projects"
-msgstr ""
+msgstr "Pode gerenciar projetos"
 
 #: templates/user_add.html:95 templates/user_update.html.py:74
 msgid "Assign groups"
-msgstr ""
+msgstr "Atribuir grupos"
 
 #: templates/user_add.html:108 templates/user_update.html.py:88
 #: templates/user_update.html:90
 msgid "Assign group"
-msgstr ""
+msgstr "Atribuir grupos"
 
 #: templates/user_list.html:11
 msgid "Add user"
-msgstr ""
+msgstr "Adicionar usuário"
 
 #: templates/user_list.html:26
 msgid "is superuser"
-msgstr ""
+msgstr "é superusuário"
 
 #: templates/user_list.html:27
 msgid "is staff"
-msgstr ""
+msgstr "É funcionário"
 
 #: templates/user_list.html:64 templates/user_list.html.py:112
 msgid "Delete user"
-msgstr ""
+msgstr "Apagar usuário"
 
 #: templates/user_list.html:67
 msgid "The user will be removed, Do you want continue?"
-msgstr ""
+msgstr "O usuário será removido. Você quer continuar?"
 
 #: templates/user_list.html:116
 msgid "Update user"
-msgstr ""
+msgstr "Atualizar usuário"
 
 #: utils.py:94
 msgid "New user account"
-msgstr ""
+msgstr "Nova conta de usuário"
 
 #: utils.py:110
 msgid "Account data"
-msgstr ""
+msgstr "Dados da conta"
 
 #: utils.py:125
 msgid "New password"
-msgstr ""
+msgstr "Nova senha"
 
 #: utils.py:127
 msgid "This is your new temporary password"
-msgstr ""
+msgstr "Esta é a sua nova senha temporária"
 
 #: views.py:70 views.py:150 views.py:248
 msgid "Your account has been disabled"
-msgstr ""
+msgstr "Sua conta foi desativada"
 
 #: views.py:72 views.py:74 views.py:152 views.py:154 views.py:250
 msgid "The username and password you have entered do not match our records"
-msgstr ""
+msgstr "O nome de usuário e a senha que você digitou não correspondem ao seu registro."
 
 #: views.py:200
 msgid "User account does not exist"
-msgstr ""
+msgstr "A conta de usuário não existe"
 
 #: views.py:254
 msgid "Invalid token. Your link has expired, you need to ask for another one."
-msgstr ""
+msgstr "Código inválido. Seu link expirou, você precisa solicitar outro"
 
 #: views.py:372
 msgid "User group for"
-msgstr ""
+msgstr "Grupo de usuários para"
 
 #: views.py:419
 msgid "There must be at least one server"
-msgstr ""
+msgstr "Deve haver pelo menos um servidor"
 
 #: views.py:550
 msgid "Admin is a reserved group"
-msgstr ""
+msgstr "Admin é um grupo reservado"
 
 #: views.py:554
 #, python-brace-format
@@ -333,4 +333,4 @@ msgid ""
 "Invalid user group name: '{value}'. Identifiers must begin with a letter or "
 "an underscore (_). Subsequent characters can be letters, underscores or "
 "numbers"
-msgstr ""
+msgstr "números"
