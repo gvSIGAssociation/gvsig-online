@@ -108,16 +108,16 @@ msgstr "Pesquisar"
 #: templates/group_list.html:78 templates/user_list.html.py:90
 #, python-format
 msgid "Showing %(numrecords)s records"
-msgstr ""
+msgstr "Mostrando registros"
 
 #: templates/group_list.html:79 templates/user_list.html.py:91
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
-msgstr ""
+msgstr "Mostrando desde % (começo) até % (final) de (numregistros) registros"
 
 #: templates/group_list.html:80 templates/user_list.html.py:92
 msgid "Showing from 0 to 0 of 0 records"
-msgstr ""
+msgstr "Mostrando desde 0 até 0 registros"
 
 #: templates/group_list.html:81 templates/user_list.html.py:93
 #, python-format
