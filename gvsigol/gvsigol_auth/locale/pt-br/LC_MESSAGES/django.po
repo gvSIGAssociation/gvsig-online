@@ -122,11 +122,11 @@ msgstr "Mostrando desde 0 até 0 registros"
 #: templates/group_list.html:81 templates/user_list.html.py:93
 #, python-format
 msgid "Filtering %(max)s records"
-msgstr ""
+msgstr "Filtragem % (max)s de registros"
 
 #: templates/group_list.html:83 templates/user_list.html.py:95
 msgid "Loading..."
-msgstr ""
+msgstr "Carregando"
 
 #: templates/group_list.html:84 templates/group_list.html.py:85
 #: templates/user_list.html:96 templates/user_list.html.py:97
