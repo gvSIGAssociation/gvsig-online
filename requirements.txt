@@ -60,6 +60,8 @@ lxml==4.3.0
 # Cron para aguas de valencia
 schedule==0.4.2
 
+# Ver #3727
+openpyxl==2.6.4
 # Lectura de DBFs
 dbfread==2.0.7
 django-excel==0.0.6
