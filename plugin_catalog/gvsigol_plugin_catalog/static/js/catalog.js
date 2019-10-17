@@ -52,111 +52,111 @@ var CatalogView = function(mapViewer, config) {
 
 CatalogView.prototype.initialization = function(){
 	var self = this;
-	var filters = this.getCatalogFilters("");
-
 	var catalogPanel = '';
-	catalogPanel += '<div id="catalog_container">';
-
-	catalogPanel += '<div id="catalog_search_full" class="row">';
-	catalogPanel += '	<div id="catalog_map_search" class="col-md-3">';
-	catalogPanel += '		<div id="catalog_map_full">';
-	catalogPanel += '			<div id="catalog_map" class="catalog_map"></div>';
-	catalogPanel += '			<p class="catalog_map_text">' + gettext('Press Ctrl to mark an area') + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a id="catalog_map_clean" href="#">' + gettext('Clean') + '</a></p>';
+	catalogPanel += '<div id="catalog_container"><div class="container-fluid">';
+	catalogPanel += '	<div id="catalog_search_full" class="row">';
+	catalogPanel += '		<div id="catalog_map_search" class="col-sm-5">';
+	catalogPanel += '			<div id="catalog_map_full">';
+	catalogPanel += '				<div id="catalog_map" class="catalog_map"></div>';
+	catalogPanel += '				<div class="checkbox">';
+	catalogPanel += '					<label>';
+	catalogPanel += '						<input type="checkbox" id="chck_mapareaoverlap" value="mapareaoverlap" checked>';
+	catalogPanel += 						gettext('Include only results overlapping with map visible area');
+	catalogPanel += '					</label>';
+	catalogPanel += '				</div>';
+	catalogPanel += '			</div>';
+	catalogPanel += '		</div>';
+	catalogPanel += '		<div class="col-sm-7">';
+	catalogPanel += '			<div id="catalog_search"  class="row">';
+	catalogPanel += '				<div class="col-sm-12">';
+	catalogPanel += '					<div class="input-group gn-form-any">';
+	catalogPanel += '						<input type="text" class="form-control input-lg" id="gn-any-field" placeholder="' + gettext('Search...') + '" data-typeahead="address for address in getAnySuggestions($viewValue)" data-typeahead-loading="anyLoading" data-typeahead-min-length="1" data-typeahead-focus-first="false" data-typeahead-wait-ms="300" aria-autocomplete="list" aria-expanded="false" aria-owns="typeahead-310-2994">';
+	catalogPanel += '						<div class="input-group-btn">';
+	catalogPanel += '							<button id="catalog-search-advanced-button" type="button" class="btn btn-default btn-lg ng-pristine ng-untouched ng-valid ng-not-empty" data-ng-model="searchObj.advancedMode" btn-checkbox="" btn-checkbox-true="1" btn-checkbox-false="0">';
+	catalogPanel += '								<i class="fa fa-ellipsis-v"></i>';
+	catalogPanel += '							</button>';
+	catalogPanel += '							<button id="catalog-search-button" type="button" class="btn btn-primary btn-lg">';
+	catalogPanel += '								&nbsp;&nbsp;';
+	catalogPanel += '								<i class="fa fa-search"></i>';
+	catalogPanel += '								&nbsp;&nbsp;';
+	catalogPanel += '							</button>';
+	catalogPanel += '							<button id="catalog-clear-button" type="button" title="' + gettext('Clean current search, filters and order') + '" class="btn btn-link btn-lg">';
+	catalogPanel += '								<i class="fa fa-times"></i>';
+	catalogPanel += '							</button>';
+	catalogPanel += '						</div>';
+	catalogPanel += '					</div>';
+	catalogPanel += '				</div>';
+	catalogPanel += '			</div>';
+	catalogPanel += '			<div id="catalog_search_advanced" class="row">';
+	catalogPanel += '				<div class="catalog_search_advanced_col col-md-4">';
+	catalogPanel += '					<div class="">';
+	catalogPanel += '						<div class="btn-group btn-group-xs">';
+	catalogPanel += '							<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Categories') + '</strong>';
+	catalogPanel += '						</div>';
+	catalogPanel += '						<br>';
+	catalogPanel += '						<input type="text" id="categoriesF" placeHolder="' + gettext('Separated by') + ' \';\'    P.ej: cat_1;cat_2;..." value="" class="form-control"/>';
+	catalogPanel += '					</div>';
+	catalogPanel += '					<div class="">';
+	catalogPanel += '						<div class="btn-group btn-group-xs">';
+	catalogPanel += '						<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Keywords') + '</strong>';
+	catalogPanel += '						</div>';
+	catalogPanel += '						<br>';
+	catalogPanel += '						<input type="text" id="keywordsF" placeHolder="' + gettext('Separated by') + ' \';\'    P.ej: cat_1;cat_2;..." value="" class="form-control"/>';
+	catalogPanel += '					</div>';
+	catalogPanel += '					<div class="">';
+	catalogPanel += '						<div class="btn-group btn-group-xs">';
+	catalogPanel += '							<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Contact for the resource') + '</strong>';
+	catalogPanel += '						</div>';
+	catalogPanel += '						<br>';
+	catalogPanel += '						<input type="text" id="orgNameF" placeHolder="' + gettext('Separated by') + ' \';\'    P.ej: cat_1;cat_2;..." value="" class="form-control"/>';
+	catalogPanel += '					</div>';
+	catalogPanel += '				</div>';
+	catalogPanel += '				<div class="catalog_search_advanced_col col-md-4">';
+	catalogPanel += '					<div data-gn-period-chooser="resourcesCreatedTheLast" data-date-from="searchObj.params.creationDateFrom" data-date-to="searchObj.params.creationDateTo" class="ng-isolate-scope">';
+	catalogPanel += '						<div class="btn-group btn-group-xs">';
+	catalogPanel += '							<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Resources') + '</strong>';
+	catalogPanel += '						</div>';
+	catalogPanel += '						<br>';
+	catalogPanel += '						<div class="row">';
+	catalogPanel += '							<div class="col-md-6">';
+	catalogPanel += '								<input id="catalog_resource_from" placeholder="' + gettext('From...') + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="">';
+	catalogPanel += '							</div>';
+	catalogPanel += '							<div class="col-md-6">';
+	catalogPanel += '								<input id="catalog_resource_to" placeholder="' + gettext('To...') + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="">';
+	catalogPanel += '							</div>';
+	catalogPanel += '						</div>';
+	catalogPanel += '						<div class="btn-group btn-group-xs">';
+	catalogPanel += '							<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Records') + '</strong>';
+	catalogPanel += '						</div>';
+	catalogPanel += '						<br>';
+	catalogPanel += '						<div class="row">';
+	catalogPanel += '							<div class="col-md-6">';
+	catalogPanel += '								<input id="catalog_register_from" placeholder="' + gettext('From...') + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="">';
+	catalogPanel += '							</div>';
+	catalogPanel += '							<div class="col-md-6">';
+	catalogPanel += '								<input id="catalog_register_to" placeholder="' + gettext('To...') + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="">';
+	catalogPanel += '							</div>';
+	catalogPanel += '						</div>';
+	catalogPanel += '					</div>';
+	catalogPanel += '				</div>';
+	catalogPanel += '			</div>';
 	catalogPanel += '		</div>';
 	catalogPanel += '	</div>';
-	catalogPanel += '	<div id="catalog_search" class="col-md-7">';
-	catalogPanel += '		<div class="row">';
-	catalogPanel += '			<div class="col-md-offset-1 col-md-10 relative">';
-	catalogPanel += '				<div class="input-group gn-form-any">';
-	catalogPanel += '					<input type="text" class="form-control input-lg" id="gn-any-field" placeholder="' + gettext('Search...') + '" data-typeahead="address for address in getAnySuggestions($viewValue)" data-typeahead-loading="anyLoading" data-typeahead-min-length="1" data-typeahead-focus-first="false" data-typeahead-wait-ms="300" aria-autocomplete="list" aria-expanded="false" aria-owns="typeahead-310-2994">';
-
-	catalogPanel += '					<div class="input-group-btn">';
-	catalogPanel += '						<button id="catalog-search-advanced-button" type="button" class="btn btn-default btn-lg ng-pristine ng-untouched ng-valid ng-not-empty" data-ng-model="searchObj.advancedMode" btn-checkbox="" btn-checkbox-true="1" btn-checkbox-false="0">';
-	catalogPanel += '							<i class="fa fa-ellipsis-v"></i>';
-	catalogPanel += '						</button>';
-
-	catalogPanel += '						<button id="catalog-search-button" type="button" class="btn btn-primary btn-lg">';
-	catalogPanel += '							&nbsp;&nbsp;';
-	catalogPanel += '							<i class="fa fa-search"></i>';
-	catalogPanel += '							&nbsp;&nbsp;';
-	catalogPanel += '						</button>';
-	catalogPanel += '						<button id="catalog-clear-button" type="button" title="' + gettext('Clean current search, filters and order') + '" class="btn btn-link btn-lg">';
-	catalogPanel += '							<i class="fa fa-times"></i>';
-	catalogPanel += '						</button>';
-	catalogPanel += '					</div>';
-	catalogPanel += '				</div>';
-	catalogPanel += '			</div>';
-	catalogPanel += '			<div class="col-lg-3">';
+	catalogPanel += '	<div id="catalog_results" class="row">';
+	catalogPanel += '		<div class="col">';
+	catalogPanel += '			<div class="row text-center"><div class="col-md-12 center-block"><ul class="catalog-pager pagination"></div></div>';
+	catalogPanel += '			<div class="row">';
+	catalogPanel += '				<div class="col-sm-3" id="catalog_filter"></div>';
+	catalogPanel += '				<div class="col-sm-9" id="catalog_content"></div>';
 	catalogPanel += '			</div>';
 	catalogPanel += '		</div>';
 	catalogPanel += '	</div>';
-	catalogPanel += '	<div id="catalog_search_advanced" class="row">';
-	catalogPanel += '		<div class="catalog_search_advanced_col col-md-4">';
-	catalogPanel += '			<div class="">';
-	catalogPanel += '				<div class="btn-group btn-group-xs">';
-	catalogPanel += '					<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Categories') + '</strong>';
-	catalogPanel += '				</div>';
-	catalogPanel += '				<br>';
-	catalogPanel += '				<input type="text" id="categoriesF" placeHolder="' + gettext('Separated by') + ' \';\'    P.ej: cat_1;cat_2;..." value="" class="form-control"/>';
-	catalogPanel += '			</div>';
-	catalogPanel += '			<div class="">';
-	catalogPanel += '				<div class="btn-group btn-group-xs">';
-	catalogPanel += '					<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Keywords') + '</strong>';
-	catalogPanel += '				</div>';
-	catalogPanel += '				<br>';
-	catalogPanel += '				<input type="text" id="keywordsF" placeHolder="' + gettext('Separated by') + ' \';\'    P.ej: cat_1;cat_2;..." value="" class="form-control"/>';
-	catalogPanel += '			</div>';
-	catalogPanel += '			<div class="">';
-	catalogPanel += '				<div class="btn-group btn-group-xs">';
-	catalogPanel += '					<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Contact for the resource') + '</strong>';
-	catalogPanel += '				</div>';
-	catalogPanel += '				<br>';
-	catalogPanel += '				<input type="text" id="orgNameF" placeHolder="' + gettext('Separated by') + ' \';\'    P.ej: cat_1;cat_2;..." value="" class="form-control"/>';
-	catalogPanel += '			</div>';
-	catalogPanel += '		</div>';
-	catalogPanel += '		<div class="catalog_search_advanced_col col-md-4">';
-	catalogPanel += '			<div data-gn-period-chooser="resourcesCreatedTheLast" data-date-from="searchObj.params.creationDateFrom" data-date-to="searchObj.params.creationDateTo" class="ng-isolate-scope">';
-	catalogPanel += '				<div class="btn-group btn-group-xs">';
-	catalogPanel += '					<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Resources') + '</strong>';
-	catalogPanel += '				</div>';
-	catalogPanel += '				<br>';
-	catalogPanel += '				<div class="row">';
-	catalogPanel += '					<div class="col-md-6">';
-	catalogPanel += '						<input id="catalog_resource_from" placeholder="' + gettext('From...') + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="">';
-	catalogPanel += '					</div>';
-	catalogPanel += '					<div class="col-md-6">';
-	catalogPanel += '						<input id="catalog_resource_to" placeholder="' + gettext('To...') + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="">';
-	catalogPanel += '					</div>';
-	catalogPanel += '				</div>';
-	catalogPanel += '				<div class="btn-group btn-group-xs">';
-	catalogPanel += '					<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Records') + '</strong>';
-	catalogPanel += '				</div>';
-	catalogPanel += '				<br>';
-	catalogPanel += '				<div class="row">';
-	catalogPanel += '					<div class="col-md-6">';
-	catalogPanel += '						<input id="catalog_register_from" placeholder="' + gettext('From...') + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="">';
-	catalogPanel += '					</div>';
-	catalogPanel += '					<div class="col-md-6">';
-	catalogPanel += '						<input id="catalog_register_to" placeholder="' + gettext('To...') + '" data-provide="datepicker" class="form-control" data-date-format="yyyy-mm-dd" value="">';
-	catalogPanel += '					</div>';
-	catalogPanel += '				</div>';
-	catalogPanel += '			</div>';
-	catalogPanel += '		</div>';
-	catalogPanel += '	</div>';
-	catalogPanel += '</div>';
-
-	catalogPanel += '<div class="row text-center"><div class="col-md-12 center-block"><ul class="catalog-pager pagination"></div></div>';
-	catalogPanel += '<div class="col-md-3" id="catalog_filter">';
-	catalogPanel += '</div>';
-
-	catalogPanel += '<div class="col-md-9" id="catalog_content">';
-	catalogPanel += '</div>';
-
-
-	catalogPanel += '</div>';
+	catalogPanel += '</div></div>';
 	$("body").append(catalogPanel);
-
 	this.catalog_panel = $("#catalog_container");
+	if(!this.catalog_map){
+		this.catalog_map = new CatalogMap(this, "catalog_map");
+	}
 
 
 	$("#catalog-search-button").unbind("click").click(function(){
@@ -171,7 +171,7 @@ CatalogView.prototype.initialization = function(){
 
 	$("#catalog-search-advanced-button").unbind("click").click(function(){
 		$("#catalog_search_advanced").toggle();
-		$("#catalog_map_full").toggle(); 
+		//$("#catalog_map_full").toggle(); 
 	});
 
 	$("#catalog-clear-button").unbind("click").click(function(){
@@ -191,6 +191,10 @@ CatalogView.prototype.initialization = function(){
 		self.catalog_map.cleanData();
 		self.filterCatalog();
 	});
+	$("#chck_mapareaoverlap").unbind("click").click(function(){
+		self.filterCatalog();
+	});
+	this.getCatalogFilters("", null, null, null, null, null, null, null, null, this.catalog_map.getSelectedArea());
 }
 
 CatalogView.prototype.getLocalizedEndpoint = function() {
@@ -328,11 +332,11 @@ CatalogView.prototype.getMetadataEntry = function(metadata){
 		var title = metadata['defaultTitle'] || '';
 		var abstract = metadata['abstract'] || '';
 		met += '<div class="catalog_content_layer col-md-6">';
-		met += '	<div class="col-md-9">';
+		met += '	<div class="col-sm-9">';
 		met += '		<p class="catalog_content_title block-with-text">'+ title +'</p>';
 		met += '		<p class="catalog_content_abstract block-with-text">'+ abstract +'</p>';
 		met += '	</div>';
-		met += '	<div class="col-md-3 catalog_content_lateral">';
+		met += '	<div class="col-sm-3 catalog_content_lateral">';
 		met += '		<div class="catalog_content_thumbnail">';
 
 		var image_src = "";
@@ -350,29 +354,37 @@ CatalogView.prototype.getMetadataEntry = function(metadata){
 				break;
 			}
 		}
+		
+		var md_url = this.getMetadataUrl(metadata['geonet:info']['uuid']); 
+		
 		met += '			<img src="'+image_src+'" style="width:100%;"/>';
 		met += '		</div>';
 		met += '	</div>';
-		met += '	<div class="col-md-12">';
-		met += '			<div class="catalog_content_button_place col-md-4">';
-		met += '				<a name="'+ metadata['geonet:info']['uuid'] +'" href="#" class="btn btn-block btn-social btn-custom-tool catalog_content_button catalog_details">';
-		met += ' 					<i class="fa fa-search" aria-hidden="true"></i>' + gettext('Details');
+		met += '	<div class="col-sm-12">';
+		met += '			<div class="catalog_content_button_place col-sm-3">';
+		met += '				<a name="'+ metadata['geonet:info']['uuid'] +'" href="#" class="btn btn-block btn-social catalog_content_button btn-custom-tool catalog_details">';
+		met += ' 					<i class="fa fa-search" aria-hidden="true"></i><span>' + gettext('Details') + '</span>';
 		met += '				</a>';
 		met += '			</div>';
-		met += '			<div class="catalog_content_button_place col-md-4">';
-		met += '				<a name="'+ metadata['geonet:info']['uuid'] +'" href="#" class="btn btn-block btn-social btn-custom-tool catalog_content_button catalog_linkmap">';
-		met += ' 					<i class="fa fa-map-o" aria-hidden="true"></i>' + gettext('Map');
+		met += '			<div class="catalog_content_button_place col-sm-3">';
+		met += '				<a name="'+ metadata['geonet:info']['uuid'] +'" href="#" class="btn btn-block btn-social catalog_content_button btn-custom-tool catalog_linkmap">';
+		met += ' 					<i class="fa fa-map-o" aria-hidden="true"></i><span>' + gettext('Map') + '</span>';
 		met += '				</a>';
 		met += '			</div>';
-		met += '			<div class="catalog_content_button_place col-md-4">';
-		met += '				<a name="'+ metadata['geonet:info']['uuid'] +'" href="#" class="btn btn-block btn-social btn-custom-tool catalog_content_button catalog_download">';
-		met += ' 					<i class="fa fa-download" aria-hidden="true"></i>' + gettext('Download');
+		met += '			<div class="catalog_content_button_place col-sm-3">';
+		met += '				<a name="'+ metadata['geonet:info']['uuid'] +'" href="#" class="btn btn-block btn-social catalog_content_button btn-custom-tool catalog_download">';
+		met += ' 					<i class="fa fa-download" aria-hidden="true"></i><span>' + gettext('Download') + '</span>';
+		met += '				</a>';
+		met += '			</div>';
+		met += '			<div class="catalog_content_button_place col-sm-3">';
+		met += '				<a target="_blank" name="'+ metadata['geonet:info']['uuid'] +'" href="' + md_url + '" class="btn btn-block btn-social btn-custom-tool catalog_content_button catalog_catalogmd">';
+		met += ' 					<i class="fa fa-newspaper-o" aria-hidden="true"></i><span>' + gettext('Catalog') + '</span>';
 		met += '				</a>';
 		met += '			</div>';
 		met += '	</div>';
 		met += '</div>';
 	}else{
-		met += '<div class="no_catalog_content col-md-12">';
+		met += '<div class="no_catalog_content col-sm-12">';
 		met += '<i class="fa fa-ban" aria-hidden="true"></i>   ';
 		met += 	gettext('No results found');
 		met += '</div>';
@@ -486,7 +498,9 @@ CatalogView.prototype.createLayerGroup = function() {
 	var tree = '';
 	tree += '			<li class="box box-default collapsed-box" id="' + groupId + '">';
 	tree += '				<div class="box-header with-border">';
-	//tree += '					<input type="checkbox" class="layer-group" id="layergroup-' + groupId + '">';
+	if (viewer.core.conf.selectable_groups) {
+		tree += '				<input type="checkbox" class="layer-group" id="layergroup-' + groupId + '">';		
+	}
 	tree += '					<i style="cursor: pointer;" class="layertree-folder-icon fa fa-folder-o"></i>';
 	tree += '					<span class="text">' + gettext("Catalog layers") + '</span>';
 	tree += '					<div class="box-tools pull-right">';
@@ -712,9 +726,10 @@ CatalogView.prototype.updatePager = function(totalCount) {
 	else {
 		pagerEntries += '<li><a href="#" class="prev-result-page">&laquo;</a></li>';
 	}
-	var numPages = Math.ceil(self.fromResult/self.config.resultsPerPage);
-	var currentPage = Math.ceil(totalCount / self.config.resultsPerPage);
-	pagerEntries += '<li class="disabled"><a hef="#">' + numPages + ' / ' + currentPage +'</a></li>';
+	var currentPage = Math.ceil(self.fromResult/self.config.resultsPerPage);
+	var numPages = Math.ceil(totalCount / self.config.resultsPerPage);
+	if (numPages<1) numPages = 1;
+	pagerEntries += '<li class="disabled"><a hef="#">' + currentPage + ' / ' + numPages +'</a></li>';
 	if ((self.fromResult + self.config.resultsPerPage-1) <= totalCount) {
 		pagerEntries += '<li><a href="#" class="next-result-page">&raquo;</a></li>';
 	}
@@ -1037,11 +1052,9 @@ CatalogView.prototype.showPanel = function(){
 		this.initialization();
 	}
 	this.catalog_panel.show();
+	this.catalog_map.map.updateSize();
 	this.map_container.hide();
 	$('.viewer-search-form').css("display","none");
-	if(!this.catalog_map){
-		this.catalog_map = new CatalogMap(this, "catalog_map");
-	}
 }
 
 CatalogView.prototype.hidePanel = function(){
@@ -1114,28 +1127,6 @@ CatalogView.prototype._replaceMetadataBtnEvents = function() {
 CatalogView.prototype.install = function() {
 	var self = this;
 	
-	var html = '';
-	
-	/*html += '<ul class="nav navbar-nav">';
-	html += '    <li><a href="#" id="show_map" class="dropdown-toggle">Map</a></li>';
-	html += '</ul>'
-	html += '<ul class="nav navbar-nav">';
-	html += '    <li><a href="#" id="show_catalog" class="dropdown-toggle">Catalog</a></li>';
-	html += '</ul>';
-	
-	$("#viewer-navbar").append(html);*/
-	
-	html += '<li class="dropdown">';
-	html += 	'<a class="dropdown-toggle" data-toggle="dropdown" href="#">';
-	html += 		gettext('Catalog') + ' <span class="caret"></span>';
-	html += 	'</a>';
-	html += 	'<ul id="gvsigol-navbar-views-menu" class="dropdown-menu">';
-	html += 		'<li id="show_catalog" role="presentation"><a role="menuitem" tabindex="-1" href="#"><i class="fa fa-newspaper-o m-r-5"></i>' + gettext('Catalog and downloads') + '</a></li>';
-	html += 	'</ul>';
-	html += '</li>';
-	
-	$("#gvsigol-navbar-menus").append(html);
-	
 	var modal = '';
 	modal += '<div class="modal fade" id="modal-catalog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">';
 	modal += '	<div class="modal-dialog" role="document" style="width:auto;margin:30px 50px 30px 50px;">';
@@ -1168,4 +1159,40 @@ CatalogView.prototype.install = function() {
 	
 	this._replaceMetadataBtnEvents();
 }
+
+CatalogView.prototype.installNavBars = function() {
+	var self = this;
+	
+	var html = '';
+	
+	/*html += '<ul class="nav navbar-nav">';
+	html += '    <li><a href="#" id="show_map" class="dropdown-toggle">Map</a></li>';
+	html += '</ul>'
+	html += '<ul class="nav navbar-nav">';
+	html += '    <li><a href="#" id="show_catalog" class="dropdown-toggle">Catalog</a></li>';
+	html += '</ul>';
+	
+	$("#viewer-navbar").append(html);*/
+	
+	html += '<li class="dropdown">';
+	html += 	'<a class="dropdown-toggle" data-toggle="dropdown" href="#">';
+	html += 		gettext('Catalog') + ' <span class="caret"></span>';
+	html += 	'</a>';
+	html += 	'<ul id="gvsigol-navbar-views-menu" class="dropdown-menu">';
+	html += 		'<li id="show_catalog" role="presentation"><a role="menuitem" tabindex="-1" href="#"><i class="fa fa-newspaper-o m-r-5"></i>' + gettext('Catalog and downloads') + '</a></li>';
+	html += 	'</ul>';
+	html += '</li>';
+	
+	$("#gvsigol-navbar-menus").append(html);
+	
+	$("#show_catalog").click(function(){
+		$("body").trigger('show-catalog-event');
+		self.showPanel();
+	});
+	
+	$("#show_map").click(function(){
+		self.hidePanel()
+	});
+}
+
 

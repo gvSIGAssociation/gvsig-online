@@ -8,9 +8,25 @@
     display: none;
 }
 
+
 #catalog_search {
-	padding: 20px 0px 20px 30px;
-	background-color: #f4f4f4;
+	padding: 20px 0px 20px 0px;
+}
+
+/*
+.catalog_search_advanced_col {
+	padding: 10px 30px;
+}
+
+#catalog_map .ol-attribution {
+	display:none;
+}
+
+*/
+
+
+#catalog_search_advanced{
+	display:none;
 }
 
 #catalog_download_list_btn {
@@ -20,19 +36,6 @@
 
 #catalog_search_full{
 	background-color: #f4f4f4;
-}
-
-#catalog_search_advanced{
-	display:none;
-	background-color: #f4f4f4;
-}
-
-.catalog_search_advanced_col {
-	padding: 10px 30px;
-}
-
-#catalog_map .ol-attribution {
-	display:none;
 }
 
 .catalog-link{
@@ -87,11 +90,11 @@
 }
 
 .catalog_map {
-	height: 260px;
-    padding: 20px 0px 0px 0px;
+	height: 400px;
+    padding: 0px 0px 0px 0px;
 	background-color: #f4f4f4;
 	margin-left: 15px;
-    margin-right: -15px;
+    margin-right: 15px;
 }
 
 .catalog_map_text{
@@ -161,6 +164,8 @@
 
 .catalog_content_button {
 	text-align: center;
+	padding-left: 38px;
+	padding-right: 6px;
 }
 
 .catalog_content_title.block-with-text{

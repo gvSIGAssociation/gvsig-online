@@ -43,7 +43,14 @@ if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')) {
 					{% endif %}
 				{% endif %}
 			});
-	
+	{% if 'DISABLE_CATALOG_NAVBAR_MENUS' in plugins_config.gvsigol_plugin_catalog %}
+		var installCatalog = !('{{ plugins_config.gvsigol_plugin_catalog.DISABLE_CATALOG_NAVBAR_MENUS }}' == 'True');
+	{% else %}
+		var installCatalog = true;
+	{% endif %}
+	if (installCatalog) {
+		catalog.installNavBars();
+	}
 	catalog.install();
 }	
 </script>

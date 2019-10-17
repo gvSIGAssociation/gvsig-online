@@ -71,22 +71,21 @@ CatalogMap.prototype.refreshData = function(features){
 }
 
 CatalogMap.prototype.getSelectedArea = function(){
-	if(this.selected_feat != null){
+	if (document.getElementById("chck_mapareaoverlap").checked) {
+		var extent = this.map.getView().calculateExtent();
+		var area = ol.geom.Polygon.fromExtent(extent);
+		var format =  new ol.format.WKT();
+		return format.writeGeometry(area, this.map.getView().getProjection(), 'EPSG:4326');
+	}
+	return null;
+}
+
+
+CatalogMap.prototype.getDrawnArea = function(){
+	if (document.getElementById("chck_mapareaoverlap").checked && this.selected_feat != null){
 		var geom = this.selected_feat.getGeometry();
-		var coords = geom.getCoordinates();
-	    var area = null;
-	    if(coords.length > 0 && Array.isArray(coords[0])){
-	    	var outerPoly = coords[0];
-		    area = "POLYGON((";
-		    for(var i=0; i<outerPoly.length; i++){
-		    	area += outerPoly[i][0] + '+' + outerPoly[i][1];
-		    	if(i != outerPoly.length-1){
-	    			area += ",";
-	    		}
-		    }
-		    area += "))";
-	    }
-	    return area;
+		var format =  new ol.format.WKT();
+		return format.writeGeometry(geom, this.map.getView().getProjection(), 'EPSG:4326');
 	}
 	return null;
 }
@@ -117,23 +116,34 @@ CatalogMap.prototype.initialization = function(container_id){
 	    
 	    self.catalog.filterCatalog();
 	});
-	
+
+	var mainMapView = viewer.core.map.getView();
+	var baselayers = [];
+	viewer.core.map.getLayers().forEach(function(l) {
+		if (l.baselayer) {
+			// required by layer switcher
+			l.base = true;
+			if (!l.title) {
+				l.title = l.getProperties().label;
+			}
+			baselayers.push(l);
+		}
+	});
+	if (baselayers.lenght == 0) {
+		baseLayers.push(new ol.layer.Tile({
+			source: new ol.source.OSM()
+		}));
+	}
 	this.map = new ol.Map({
 	    target: container_id,
-	    layers: [
-	        new ol.layer.Tile({
-	            source: new ol.source.OSM()
-	        }),
-	        this.vector_layer
-	    ],
+	    layers: baselayers,
 	    view: new ol.View({
-	        center: [0, 0],
-	        zoom: 0,
-	        projection: 'EPSG:4326',
+	        center: mainMapView.getCenter(),
+	        zoom: mainMapView.getZoom(),
+	        constrainResolution: true,
+	        projection: 'EPSG:3857',
 	    })
 	});
 	
 	this.map.addInteraction(this.interaction);
-	
-	$("#catalog_map_full").hide();
 }
