@@ -39,6 +39,7 @@ import logging
 from gvsigol_plugin_catalog import settings as catalog_settings
 from django.utils.translation import ugettext as _
 from gvsigol_core import utils as core_utils
+import os
 
 logger = logging.getLogger("gvsigol")
 
@@ -230,6 +231,10 @@ def get_metadata_as_html(response, lang='eng'):
                         res_desc = resource.get('name')
                     else:
                         res_desc = resource.get('description', _('Resource'))
+                    if res_desc == '' and resource.get('url'):
+                        res_desc = os.path.basename(resource.get('url'))
+                        if res_desc == '':
+                            res_desc = os.path.basename(os.path.dirname(resource.get('url')))
                     if resource.get('url'):
                         if resource['protocol'] == 'WWW:DOWNLOAD-1.0-http--download':
                             resources += '            <li><div>'+ str(res_desc) + '</div>'
