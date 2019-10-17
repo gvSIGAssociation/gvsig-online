@@ -73,9 +73,9 @@ CatalogMap.prototype.refreshData = function(features){
 CatalogMap.prototype.getSelectedArea = function(){
 	if (document.getElementById("chck_mapareaoverlap").checked) {
 		var extent = this.map.getView().calculateExtent();
-		var area = ol.geom.Polygon.fromExtent(extent);
+		var geom = ol.geom.Polygon.fromExtent(extent);
 		var format =  new ol.format.WKT();
-		return format.writeGeometry(area, this.map.getView().getProjection(), 'EPSG:4326');
+		return format.writeGeometry(geom, {dataProjection: 'EPSG:4326', featureProjection: this.map.getView().getProjection()});
 	}
 	return null;
 }
@@ -85,7 +85,7 @@ CatalogMap.prototype.getDrawnArea = function(){
 	if (document.getElementById("chck_mapareaoverlap").checked && this.selected_feat != null){
 		var geom = this.selected_feat.getGeometry();
 		var format =  new ol.format.WKT();
-		return format.writeGeometry(geom, this.map.getView().getProjection(), 'EPSG:4326');
+		return format.writeGeometry(geom, {dataProjection: 'EPSG:4326', featureProjection: this.map.getView().getProjection()});
 	}
 	return null;
 }

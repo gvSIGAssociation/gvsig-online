@@ -8,22 +8,13 @@
     display: none;
 }
 
-
 #catalog_search {
 	padding: 20px 0px 20px 0px;
-}
-
-/*
-.catalog_search_advanced_col {
-	padding: 10px 30px;
 }
 
 #catalog_map .ol-attribution {
 	display:none;
 }
-
-*/
-
 
 #catalog_search_advanced{
 	display:none;
