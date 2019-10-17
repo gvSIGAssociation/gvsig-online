@@ -8,7 +8,7 @@ import json
 from django.http import JsonResponse
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.translation import ugettext as _
-from gvsigol_plugin_downloadman.tasks import processDownloadRequest
+from gvsigol_plugin_downloadman.tasks import processDownloadRequest, resolveFileLocator
 from gvsigol_plugin_downloadman import models as downman_models
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.crypto import get_random_string
@@ -32,7 +32,7 @@ class DownloadParam():
         self.title = title;
 
 class ResourceDownloadDescriptor():
-    def __init__(self, layer_id, layer_name, layer_title, resource_name, resource_title, dataSourceType=downman_models.ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.OGC_WFS_RESOURCE_TYPE, url='', directDownload=False, dataFormats=[], resolutions=[], scales=[], crss=[]):
+    def __init__(self, layer_id, layer_name, layer_title, resource_name, resource_title, dataSourceType=downman_models.ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.OGC_WFS_RESOURCE_TYPE, url='', directDownloadUrl=None, dataFormats=[], resolutions=[], scales=[], crss=[]):
         self.layer_id = layer_id
         self.layer_name = layer_name
         self.layer_title = layer_title
@@ -40,7 +40,7 @@ class ResourceDownloadDescriptor():
         self.title = resource_title
         self.dataSourceType = dataSourceType
         self.resourceType = resourceType
-        self.directDownload = directDownload
+        self.directDownloadUrl = directDownloadUrl
         self.dataFormats = self._processOptions(dataFormats)
         self.resolutions = self._processOptions(resolutions)
         self.scales = self._processOptions(scales)
@@ -88,7 +88,7 @@ class ResourceDownloadDescriptor():
             "name": "RASTER_DATA_TYPE",
             "title": "Datos ráster",
             "url": "http://yourserver/geoserver/service/wms",
-            "direct_download": false,
+            "direct_download_url": '',
             "": ""
             "params": [
               {
@@ -120,7 +120,7 @@ class ResourceDownloadDescriptor():
             "name": "RASTER_DATA_TYPE",
             "title": "Datos ráster",
             "url": "http://yourserver/geoserver/service/wms",
-            "direct_download": false,
+            "direct_download_url": '',
             "": ""
             "params": [
               {
@@ -162,11 +162,13 @@ class ResourceDownloadDescriptor():
             "layer_title": self.layer_title,
             "resource_type": self.resourceType,
             "data_source_type": self.dataSourceType,
-            "direct_download": self.directDownload,
             "name": self.name,
             "title": self.title,
             "url": self.url,
             "params": params}
+        if self.directDownloadUrl:
+            result["direct_download_url"] = self.directDownloadUrl
+        print result 
         return result
         #return json.dumps(result)
 
@@ -255,14 +257,24 @@ def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
                     resource = ResourceDownloadDescriptor(metadata_uuid, layer_name, layer_title, resource_name, _("Raster data"), dataSourceType = downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.OGC_WCS_RESOURCE_TYPE, dataFormats=['GEOTIFF_16', 'GEOTIFF_32', 'GEOTIFF_8'], url=onlineResource.url)
                 else: # assume Geoserver
                     resource = ResourceDownloadDescriptor(metadata_uuid, layer_name, layer_title, resource_name, _("Raster data"), dataSourceType = downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.OGC_WCS_RESOURCE_TYPE, dataFormats=['image/geotiff', 'image/png'], url=onlineResource.url)
-            elif (onlineResource.protocol.startswith('WWW:DOWNLOAD-') and onlineResource.protocol.endswith('-download')) or onlineResource.protocol.startswith('FILE:'):
-                resource = ResourceDownloadDescriptor(metadata_uuid, layer_name, layer_title, resource_name, resource_title, dataSourceType = downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.HTTP_LINK_RESOURCE_TYPE, url=onlineResource.url)
+            elif (onlineResource.protocol.startswith('WWW:DOWNLOAD-') and onlineResource.protocol.endswith('-download')) \
+                    or (onlineResource.protocol.startswith('WWW:LINK-') and onlineResource.protocol.endswith('-link')) \
+                    or onlineResource.protocol.startswith('FILE:'):
+                directDownloadUrl = None
+                if onlineResource.url:
+                    if onlineResource.url.startswith("http://") or onlineResource.url.startswith("https://"): 
+                        directDownloadUrl = onlineResource.url
+                    if onlineResource.url.startswith("file://"):
+                        try:
+                            directDownloadUrl = getDirectDownloadUrl(onlineResource.url, resource_title)
+                        except:
+                            logger.exception("Error resolving file download resource for layer")
+                resource = ResourceDownloadDescriptor(metadata_uuid, layer_name, layer_title, resource_name, resource_title, dataSourceType = downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.HTTP_LINK_RESOURCE_TYPE, url=onlineResource.url, directDownloadUrl=directDownloadUrl)
             #elif onlineResource.protocol.startswith('WWW:LINK-'):
             if resource:
                 all_resources.append(resource)
     except:
         logger.exception("Error getting download resources for layer")
-        pass
     return all_resources
 
 
@@ -442,12 +454,34 @@ def requestTracking(request, uuid):
     return render(request, 'track_request.html', {'download_status': _('Your download request could not be found'), 'details': '', 'download_uuid':  uuid})
 
 def getRealDownloadUrl(download_path):
+    """
+    Gets the public download URL for a processed download request
+    """
     if os.path.exists(download_path) and download_path.startswith(TARGET_ROOT):
         rel_path = os.path.relpath(download_path, TARGET_ROOT)
         if TARGET_URL.endswith("/"):
             return TARGET_URL + rel_path
         return TARGET_URL + "/" + rel_path
     raise Error
+
+def getDirectDownloadUrl(url, name):
+    """
+    Gets the public download URL for direct download resource
+    """
+    resources = resolveFileLocator(url, name)
+    if len(resources)>0:
+        download_path = resources[0].res_path
+        if os.path.exists(download_path):
+            if download_path.startswith(TARGET_ROOT):
+                rel_path = os.path.relpath(download_path, TARGET_ROOT)
+                if TARGET_URL.endswith("/"):
+                    return TARGET_URL + rel_path
+                return TARGET_URL + "/" + rel_path
+            elif download_path.startswith(DOWNLOADS_ROOT):
+                rel_path = os.path.relpath(download_path, DOWNLOADS_ROOT)
+                if DOWNLOADS_URL.endswith("/"):
+                    return DOWNLOADS_URL + rel_path
+                return DOWNLOADS_URL + "/" + rel_path
 
 
 def downloadLink(request, uuid):

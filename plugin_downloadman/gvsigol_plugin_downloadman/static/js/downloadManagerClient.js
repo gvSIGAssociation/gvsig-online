@@ -31,12 +31,12 @@ var ResourceDownloadParamValue = function(resource_param, value) {
 	this.value = value;
 }
 
-var ResourceDescriptor = function(layer_id, layer_title, resource_name, title, params, data_source_type, resource_type, url, direct_download) {
+var ResourceDescriptor = function(layer_id, layer_title, resource_name, title, params, data_source_type, resource_type, url, direct_download_url) {
 	this.layer_id = layer_id;
 	this.layer_title = layer_title;
 	this.name = resource_name;
 	this.title = title;
-	this.direct_download = this.direct_download || false;
+	this.direct_download_url = direct_download_url || '';
 	this.url = url || '';
 	this.data_source_type = data_source_type || '';
 	this.resource_type = resource_type || '';
@@ -112,6 +112,7 @@ DownloadManagerClient.prototype.queryAvailableResources = function(layer_id, wor
 						downloadParam = new ResourceDownloadParam(res.params[j].name, res.params[j].title, res.params[j].options);
 						params.push(downloadParam);
 					}
+					console.log(response);
 					var resource = new ResourceDescriptor(response[i].layer_id,
 							response[i].layer_title,
 							response[i].name,
@@ -120,7 +121,7 @@ DownloadManagerClient.prototype.queryAvailableResources = function(layer_id, wor
 							response[i].data_source_type,
 							response[i].resource_type,
 							response[i].url,
-							response[i].direct_download);
+							response[i].direct_download_url);
 					resources.push(resource);
 				}
 			} catch (e) {
@@ -259,9 +260,10 @@ DownloadManagerUI.prototype.createDownloadResource = function(downloadDescriptor
 DownloadManagerUI.prototype.createAvailableResource = function(resource) {
 	var downloadParams = resource.params;
 	var param, paramOption;
-
-	var content = '<li class="downman-link downman-download-resource" data-downloadresource="' + resource.name + '"><div class="form-inline"><div class="form-group"><div class="col-md-10">';
-	content += '<i class="fa fa-file-archive-o download-resource" aria-hidden="true"></i><label class="control-label download-resource download-resource-title">' + resource.title + '</label>' ;
+	var content = '';
+	content = '<div class="row downman-download-resource" data-downloadresource="' + resource.name + '">';
+	content += '	<div class="downman-link col-sm-8">';
+	content += '		<i class="fa fa-file-archive-o download-resource" aria-hidden="true"></i><label class="control-label download-resource-title">' + resource.title + '</label>' ;
 
 	for (var j=0; j<downloadParams.length; j++) {
 		param = downloadParams[j];
@@ -277,9 +279,16 @@ DownloadManagerUI.prototype.createAvailableResource = function(resource) {
 		content += paramHtml;
 	}
 
-	content += '	</div><div class="col-md-2">';
-	content += '<button class="btn btn-default downman-footer-button download-resource-btn" type="button" data-layerid="' + resource.layer_id + '" data-downloadresource="' + resource.name + '">'+gettext("Add to download list")+'</button>';
-	content += '</div></div></div></li>';
+	content += '	</div>';
+	content += '	<div class="col-sm-2">';
+	content += '		<button class="btn btn-default add-to-download-btn download-resource-btn" type="button" data-layerid="' + resource.layer_id + '" data-downloadresource="' + resource.name + '">'+gettext("Add to download list")+'</button>';
+	if (resource.direct_download_url) {
+		content += '	</div><div class="col-sm-2">';
+		content += '<a target="_blank" href="' + resource.direct_download_url + '" class="btn btn-default download-resource-btn">'+gettext("Direct download")+'</a>';
+	}
+	content += '	</div>';
+	content += '</div>';
+	console.log(content);
 	return content;
 } 
 
@@ -305,7 +314,7 @@ DownloadManagerUI.prototype._getParam = function(resource, param_name){
 DownloadManagerUI.prototype.initAvailableResources = function(downloadResources){
 	var self = this;
 	self.resources = downloadResources;
-	var content = '';
+	var content = '<div class="container-fluid">';
 	for (var i=0; i<downloadResources.length; i++) {
 		content += this.createAvailableResource(downloadResources[i]);
 	}
@@ -318,6 +327,7 @@ DownloadManagerUI.prototype.initAvailableResources = function(downloadResources)
 		content += '<div style="clear:both"></div>';
 		content += '</div>';
 	}
+	content += '</div>';
 
 	$(self.modalSelector).find('.modal-body').html(content);
 	var footer = '	<button class="btn btn-default downman-footer-button catalog-download-list-btn" type="button"><span class="download_list_count">' + self.getClient().getDownloadListCount() + '</span><i class="fa fa-shopping-cart fa-icon-button-left fa-icon-button-right" aria-hidden="true"></i>'+gettext("View download list")+'</button>';
@@ -329,7 +339,7 @@ DownloadManagerUI.prototype.initAvailableResources = function(downloadResources)
 	$(".catalog-download-list-btn").unbind("click").click(function(){
 		self.showDownloadList();
 	});
-	$(".download-resource-btn").unbind("click").click(function(event){
+	$(".add-to-download-btn").unbind("click").click(function(event){
 		var layer_id = event.currentTarget.getAttribute("data-layerid");
 		var resource_name = event.currentTarget.getAttribute("data-downloadresource");
 		var clickedResource = self._getSelectedResource(resource_name);

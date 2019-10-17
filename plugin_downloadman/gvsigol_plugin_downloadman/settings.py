@@ -5,6 +5,8 @@ TMP_DIR="/tmp/gol-downman"
 TARGET_ROOT='/var/www/downloads'
 from gvsigol.settings import BASE_URL
 TARGET_URL = BASE_URL + '/media/downloads'
+DOWNLOADS_URL = BASE_URL + '/downloads'
+DOWNLOADS_ROOT = '/var/www/downloads'
 
 LOCAL_PATHS_WHITELIST = ["/var/www/downloads"]
 

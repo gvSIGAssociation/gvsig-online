@@ -50,3 +50,6 @@ msgstr "También puede usar este enlace de seguimiento para consultar el estado 
 msgid "There was an error processing your download request. Please, try again later"
 msgstr "Hubo un error procesando su petición. Por favor, inténtelo más tarde"
 
+msgid "Direct download"
+msgstr "Descarga directa"
+

@@ -187,7 +187,8 @@ def resolveFileLocator(url, resource_name):
     # we only allow local paths that are subfolders of the paths defined in LOCAL_PATHS_WHITELIST variable
     for path in LOCAL_PATHS_WHITELIST:
         if local_path.startswith(path):
-            return [ResourceDescription(resource_name, local_path)]
+            res = ResourceDescription(resource_name, local_path)
+            return [res]
     logger.debug("local_path")
     logger.debug(local_path)
     logger.debug(LOCAL_PATHS_WHITELIST)

@@ -50,3 +50,6 @@ msgstr ""
 msgid "There was an error processing your download request. Please, try again later"
 msgstr ""
 
+msgid "Direct download"
+msgstr ""
+
