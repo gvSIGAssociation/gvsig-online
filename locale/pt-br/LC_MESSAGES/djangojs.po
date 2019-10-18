@@ -1,225 +1,233 @@
-#    gvSIG Online.
-#    Copyright (C) 2010-2017 SCOLAB.
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-msgid "Loading components. Please wait"
+msgid ""
 msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Language: pt_BR\n"
+"X-Source-Language: C\n"
+
+# gvSIG Online.
+# Copyright (C) 2010-2017 SCOLAB.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+msgid "Loading components. Please wait"
+msgstr "Carregando componentes. Por favor aguarde"
 
 msgid "Color map entry"
-msgstr ""
+msgstr "Entrada de mapa de cores"
 
 msgid "Color"
-msgstr ""
+msgstr "Cores"
 
 msgid "Quantity"
-msgstr ""
+msgstr "Quantidade"
 
 msgid "Label"
-msgstr ""
+msgstr "Rótulo"
 
 msgid "Opacity"
-msgstr ""
+msgstr "Opacidade"
 
 msgid "Rule"
-msgstr ""
+msgstr "Norma"
 
 msgid "Expressions"
-msgstr ""
+msgstr "Expressões"
 
 msgid "Save filter"
-msgstr ""
+msgstr "Salvar filtro"
 
 msgid "Add expression"
-msgstr ""
+msgstr "Adicionar expressão"
 
 msgid "Select field"
-msgstr ""
+msgstr "Marcar campo"
 
 msgid "Select operation"
-msgstr ""
+msgstr "Selecionar operação"
 
 msgid "Filter preview"
-msgstr ""
+msgstr "Pré-visualização do filtro"
 
 msgid "Value"
-msgstr ""
+msgstr "Valor"
 
 msgid "Value1"
-msgstr ""
+msgstr "Valor1"
 
 msgid "Value2"
-msgstr ""
+msgstr "Valor2"
 
 msgid "contains"
-msgstr ""
+msgstr "Inclui"
 
 msgid "Circle"
-msgstr ""
+msgstr "Círculo"
 
 msgid "Square"
-msgstr ""
+msgstr "Quadrado"
 
 msgid "Triangle"
-msgstr ""
+msgstr "Triângulo"
 
 msgid "Star"
-msgstr ""
+msgstr "Estrela"
 
 msgid "Cross"
-msgstr ""
+msgstr "Cruz"
 
 msgid "Stroke"
-msgstr ""
+msgstr "Traços"
 
 msgid "Stroke color"
-msgstr ""
+msgstr "Traços de cores"
 
 msgid "Stroke width"
-msgstr ""
+msgstr "Largura do traço"
 
 msgid "Stroke opacity"
-msgstr ""
+msgstr "Opacidade do curso"
 
 msgid "Select pattern"
-msgstr ""
+msgstr "Selecionar padrão"
 
 msgid "Graphic"
-msgstr ""
+msgstr "Gráfico"
 
 msgid "Fill"
-msgstr ""
+msgstr "Preencher"
 
 msgid "Rotation"
-msgstr ""
+msgstr "Rotação"
 
 msgid "Select shape"
-msgstr ""
+msgstr "Seleccionar forma"
 
 msgid "Fill color"
-msgstr ""
+msgstr "Preencher cor"
 
 msgid "Fill opacity"
-msgstr ""
+msgstr "Preencher opacidade"
 
 msgid "Edit rule"
-msgstr ""
+msgstr "Processar regra"
 
 msgid "Edit filter"
-msgstr ""
+msgstr "Editar filtro"
 
 msgid "Preview"
-msgstr ""
+msgstr "Pré-visualização"
 
 msgid "Append symbolizer"
-msgstr ""
+msgstr "Anexar símbolo"
 
 msgid "Import from library"
-msgstr ""
+msgstr "Importar da biblioteca"
 
 msgid "Append color map entry"
-msgstr ""
+msgstr "Anexar entrada de mapa de cores"
 
 msgid "Rule name"
-msgstr ""
+msgstr "Nome da regra"
 
 msgid "Rule title"
-msgstr ""
+msgstr "Título da norma"
 
 msgid "Save"
-msgstr ""
+msgstr "Salvar"
 
 msgid "Selected symbol is not compatible with the layer"
-msgstr ""
+msgstr "O símbolo selecionado não é compatível com a camada"
 
 msgid "Image symbols can only be edited from the library"
-msgstr ""
+msgstr "Os símbolos de imagem só podem ser editados a partir da biblioteca"
 
 msgid "Normal"
-msgstr ""
+msgstr "Normal"
 
 msgid "Cursive"
-msgstr ""
+msgstr "Cursiva"
 
 msgid "Oblique"
-msgstr ""
+msgstr "Oblíquo"
 
 msgid "Bold"
-msgstr ""
+msgstr "Negrita"
 
 msgid "Is equal to"
-msgstr ""
+msgstr "É igual a"
 
 msgid "Is null"
-msgstr ""
+msgstr "É nulo"
 
 msgid "Contains"
-msgstr ""
+msgstr "Contém"
 
 msgid "Is not equal"
-msgstr ""
+msgstr "Não é igual"
 
 msgid "Is greater than"
-msgstr ""
+msgstr "É maior que"
 
 msgid "Is greater than or equal to"
-msgstr ""
+msgstr "É maior ou igual a"
 
 msgid "Is less than"
-msgstr ""
+msgstr "É inferior a"
 
 msgid "Is less than or equal to"
-msgstr ""
+msgstr "É menor ou igual a"
 
 msgid "Is between"
-msgstr ""
+msgstr "Está entre"
 
 msgid "Font"
-msgstr ""
+msgstr "Tipo de letra"
 
 msgid "Halo"
-msgstr ""
+msgstr "Halo"
 
 msgid "Label field"
-msgstr ""
+msgstr "Campo de etiqueta"
 
 msgid "Font family"
-msgstr ""
+msgstr "Família de fontes"
 
 msgid "Font size"
-msgstr ""
+msgstr "Tamanho de fonte"
 
 msgid "Font color"
-msgstr ""
+msgstr "Cor da fonte"
 
 msgid "Font weight"
-msgstr ""
+msgstr "Tamanho da fonte"
 
 msgid "Font style"
-msgstr ""
+msgstr "Estilo de fonte"
 
 msgid "Halo color"
-msgstr ""
+msgstr "Cor Halo"
 
 msgid "Halo opacity"
-msgstr ""
+msgstr "Halo opacidade"
 
 msgid "Halo radius"
-msgstr ""
+msgstr "Raio de halo"
 
 msgid "You must select a field"
-msgstr ""
+msgstr "É necessário selecionar um campo"
 
 msgid "The number of intervals must be greater than 0"
-msgstr ""
+msgstr "O número de intervalos deve ser superior a 0"
