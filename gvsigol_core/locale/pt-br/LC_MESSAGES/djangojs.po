@@ -1,280 +1,288 @@
-#    gvSIG Online.
-#    Copyright (C) 2010-2017 SCOLAB.
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Language: pt_BR\n"
+"X-Source-Language: C\n"
 
+# gvSIG Online.
+# Copyright (C) 2010-2017 SCOLAB.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # export_a4h.html
 msgid "Printing date"
-msgstr ""
+msgstr "Data de impressão"
 
 msgid "Printing message"
-msgstr ""
+msgstr "Impressão da mensagem"
 
 # viewer.js
 msgid "Blank"
-msgstr ""
+msgstr "Em branco"
 
 msgid "OpenStreetMap"
-msgstr ""
+msgstr "OpenStreetMap"
 
 # attributeTable.js
 msgid "Processing request"
-msgstr ""
+msgstr "Processando solicitação"
 
 msgid "Search"
-msgstr ""
+msgstr "Procurar"
 
 msgid "Showing"
-msgstr ""
+msgstr "Exibição"
 
 msgid "Showing from"
-msgstr ""
+msgstr "a partir de"
 
 msgid "registers"
-msgstr ""
+msgstr "Cadastros"
 
 msgid "to"
-msgstr ""
+msgstr "a"
 
 msgid "of"
-msgstr ""
+msgstr "de"
 
 msgid "Filtering"
-msgstr ""
+msgstr "Filtro"
 
 msgid "Loading"
-msgstr ""
+msgstr "Carregando"
 
 msgid "No records available"
-msgstr ""
+msgstr "Nenhum registro disponível"
 
 msgid "First"
-msgstr ""
+msgstr "Primeiro"
 
 msgid "Previous"
-msgstr ""
+msgstr "Anterior"
 
 msgid "Next"
-msgstr ""
+msgstr "Seguinte"
 
 msgid "Last"
-msgstr ""
+msgstr "Último"
 
 msgid "Sort ascending"
-msgstr ""
+msgstr "Ordenar por ordem crescente"
 
 msgid "Sort descending"
-msgstr ""
+msgstr "Ordenação decrescente"
 
 msgid "Zoom to selection"
-msgstr ""
+msgstr "Zoom para seleção"
 
 msgid "Select all"
-msgstr ""
+msgstr "Selecionar todos"
 
 msgid "Clear selection"
-msgstr ""
+msgstr "Limpar seleção"
 
 msgid "You must select at least one row"
-msgstr ""
+msgstr "Você deve selecionar pelo menos uma linha"
 
 msgid "Print selection"
-msgstr ""
+msgstr "Seleção de impressão"
 
 msgid "Advanced filter"
-msgstr ""
+msgstr "Filtro avançado"
 
 msgid "A visible layer with temporal properties is needed"
-msgstr ""
+msgstr "Uma camada visível com propriedades temporais é necessária"
 
 msgid "Select field"
-msgstr ""
+msgstr "Selecionar campo"
 
 msgid "Select value"
-msgstr ""
+msgstr "Selecionar valor"
 
 msgid "Apply filter"
-msgstr ""
+msgstr "Aplicar filtro"
 
 msgid "Clear filter"
-msgstr ""
+msgstr "Limpar filtro"
 
 # editionBar.js
 msgid "Add point to center"
-msgstr ""
+msgstr "Adicionar um ponto ao centro"
 
 msgid "can't be empty"
-msgstr ""
+msgstr "Não pode estar vazio"
 
 msgid "can't be null"
-msgstr ""
+msgstr "não pode ser nulo"
 
 msgid "Add point"
-msgstr ""
+msgstr "Adicionar ponto"
 
 msgid "Add line"
-msgstr ""
+msgstr "Adicionar linha"
 
 msgid "Add polygon"
-msgstr ""
+msgstr "Adicionar poligono"
 
 msgid "Edit feature"
-msgstr ""
+msgstr "Editar função"
 
 msgid "Remove feature"
-msgstr ""
+msgstr "Excluir função"
 
 msgid "Stop edition"
-msgstr ""
+msgstr "Parar Edição"
 
 msgid "Error starting edition"
-msgstr ""
+msgstr "Erro na edição inicial"
 
 msgid "Feature properties"
-msgstr ""
+msgstr "Propriedades"
 
 msgid "Feature resources"
-msgstr ""
+msgstr "Recursos da característica"
 
 msgid "remove"
-msgstr ""
+msgstr "Excluir"
 
 msgid "Failed to remove layer lock"
-msgstr ""
+msgstr "Falha ao remover ou bloqueio da camada"
 
 msgid "New feature"
-msgstr ""
+msgstr "novo recurso"
 
 msgid "Save"
-msgstr ""
+msgstr "Salvar"
 
 msgid "Cancel"
-msgstr ""
+msgstr "Cancelar"
 
 msgid "Failed to save the new record. Please check values"
 msgstr ""
+"Não foi possível guardar o novo registo. Por favor, verifique os valores"
 
 # exportToPDF.js
 msgid "Map title"
-msgstr ""
+msgstr "Título do mapa"
 
 msgid "Print"
-msgstr ""
-
+msgstr "Imprimir"
 
 # geolocation.js
 msgid "Get current location"
-msgstr ""
+msgstr "Obter localização atual"
 
 # getFeatureInfo.js
 msgid "Point information"
-msgstr ""
+msgstr "Informação do ponto"
 
 msgid "No layers available"
-msgstr ""
+msgstr "Não há camadas disponíveis"
 
 msgid "More info"
-msgstr ""
+msgstr "Mais informação"
 
 msgid "Coordinates"
-msgstr ""
+msgstr "Coordenadas"
 
 msgid "View resources"
-msgstr ""
+msgstr "Ver recursos"
 
 msgid "Feature info"
-msgstr ""
+msgstr "Característica em"
 
 msgid "Multimedia resources"
-msgstr ""
+msgstr "Recursos multimédia"
 
 # measureArea.js
 msgid "Measure area"
-msgstr ""
+msgstr "Área de medida"
 
 msgid "Click to continue measuring"
-msgstr ""
+msgstr "Clique para continuar a medição"
 
 msgid "Click to start measuring"
-msgstr ""
+msgstr "Clique para iniciar a medição"
 
 # measureLength.js
 msgid "Measure length"
-msgstr ""
+msgstr "Medir comprimento"
 
 # measureLength.js
 msgid "Search by coordinate"
-msgstr ""
+msgstr "Busca por coordenadas"
 
 msgid "Select projection"
-msgstr ""
+msgstr "Seleccionar projecção"
 
 msgid "Coordinate Reference System"
-msgstr ""
+msgstr "Sistema de Referência de Coordenadas"
 
 msgid "Latitude"
-msgstr ""
+msgstr "Latitude"
 
 msgid "Longitude"
-msgstr ""
+msgstr "Longitude"
 
 msgid "Find"
-msgstr ""
+msgstr "Procurar"
 
 # messageBox.js
 msgid "Success"
-msgstr ""
+msgstr "Sucesso"
 
 msgid "Warning"
-msgstr ""
+msgstr "Aviso"
 
 # layerTree.js
 msgid "The layer you are trying to edit is locked"
-msgstr ""
+msgstr "A camada que você está tentando editar está bloqueada"
 
 msgid "Base layers"
-msgstr ""
+msgstr "Camadas de base"
 
 msgid "None"
-msgstr ""
+msgstr "nenhum"
 
 msgid "No layer"
-msgstr ""
+msgstr "Nenhuma camada"
 
 msgid "Bing roads"
-msgstr ""
+msgstr "Bing estradas"
 
 msgid "Bing aerial"
-msgstr ""
+msgstr "Bing aéreo"
 
 msgid "Bing aerial with labels"
-msgstr ""
+msgstr "Bing aéreo com marcadores"
 
 msgid "You are editing the layer"
-msgstr ""
+msgstr "Você está editando a camada"
 
 msgid "Downloads"
-msgstr ""
+msgstr "Baixar"
 
 msgid "Layer metadata"
-msgstr ""
+msgstr "Metadados de camada"
 
 msgid "Details"
-msgstr ""
+msgstr "Detalhes"
 
 msgid "Metadata"
-msgstr ""
+msgstr "Metadata"
 
 msgid "Download links"
 msgstr "Links de descarga"
@@ -289,161 +297,168 @@ msgid "Download GML"
 msgstr "Descargar GML"
 
 msgid "Attribute table"
-msgstr ""
+msgstr "Tabela de atributos"
 
 msgid "Edit layer"
-msgstr ""
+msgstr "Editar camada"
 
 msgid "Opacity"
-msgstr ""
+msgstr "Opacidade"
 
 msgid "Show in geonetwork"
-msgstr ""
+msgstr "Mostrar em Geonetwork"
 
 msgid "Version"
-msgstr ""
+msgstr "Version"
 
 msgid "Summary"
-msgstr ""
+msgstr "Sumário"
 
 msgid "Requests"
-msgstr ""
+msgstr "Solicitações"
 
 msgid "Supported CRS"
-msgstr ""
+msgstr "CRS Suportado"
 
 msgid "Layers"
-msgstr ""
+msgstr "Camadas"
 
 msgid "Organization"
-msgstr ""
+msgstr "Organização"
 
 msgid "Contact person"
-msgstr ""
+msgstr "Pessoa de contacto"
 
 msgid "Address"
-msgstr ""
+msgstr "Endereço"
 
 msgid "City"
-msgstr ""
+msgstr "Cidade"
 
 msgid "Country"
-msgstr ""
+msgstr "País"
 
 msgid "Email"
-msgstr ""
+msgstr "Correio eletrónico"
 
 msgid "Name"
-msgstr ""
+msgstr "Nome"
 
 msgid "Title"
-msgstr ""
+msgstr "Título"
 
 msgid "Abstract"
-msgstr ""
+msgstr "Resumo"
 
 msgid "Queryable"
-msgstr ""
+msgstr "Questões"
 
 msgid "MaxScaleDenominator"
-msgstr ""
+msgstr "Denominador de Escala Máxima"
 
 msgid "MinScaleDenominator"
-msgstr ""
+msgstr "Denominador de Escala Mínima"
 
 msgid "Default CRS"
-msgstr ""
+msgstr "SRC padrão"
 
 msgid "BoundingBox"
-msgstr ""
+msgstr "Caixa de delimitação"
 
 msgid "GeographicBoundingBox"
-msgstr ""
+msgstr "Caixa de delimitação geográfica"
 
 msgid "Zoom to layer"
-msgstr ""
+msgstr "Zoom para camada"
 
 msgid "Project zoom"
-msgstr ""
+msgstr "Zoom de projeto"
 
-#cleanMap.js
 msgid "Clean map"
-msgstr ""
+msgstr "Limpar mapa"
 
 msgid "Inverse geocoding"
-msgstr ""
+msgstr "Geocodificação Inversa"
 
 msgid "More element info"
-msgstr ""
+msgstr "Mais informações sobre o elemento"
 
 msgid "Invalid identifier. Unable to get requested geometry"
-msgstr ""
+msgstr "Identificador inválido. Não é possível obter a geometria solicitada"
 
 msgid "Temporary layers"
-msgstr ""
+msgstr "Camadas temporárias"
 
 msgid "From"
-msgstr ""
+msgstr "Desde"
 
 msgid "To"
-msgstr ""
+msgstr "a"
 
 msgid "Step"
-msgstr ""
+msgstr "Passo"
 
 msgid "Single"
-msgstr ""
+msgstr "Individual"
 
 msgid "Range"
-msgstr ""
+msgstr "Faixa"
 
 msgid "temporary_field"
-msgstr ""
+msgstr "campo_temporário\n"
 
 msgid "temporary_endfield"
-msgstr ""
+msgstr "temporário _ campofinal"
 
 msgid "second(s)"
-msgstr ""
+msgstr "segundo(s)"
 
 msgid "minute(s)"
-msgstr ""
+msgstr "minuto(s)"
 
 msgid "hour(s)"
-msgstr ""
+msgstr "hora(s)"
 
 msgid "day(s)"
-msgstr ""
+msgstr "dia(s)"
 
 msgid "month(s)"
-msgstr ""
+msgstr "mês(es)"
 
 msgid "year(s)"
-msgstr ""
+msgstr "ano(s)"
 
 msgid "Attribute details"
-msgstr ""
+msgstr "Detalhes do atributo"
 
 msgid "Show resources"
-msgstr ""
+msgstr "Mostrar recursos"
 
 msgid "Enable temporary features"
-msgstr ""
+msgstr "Ativar recursos temporários"
 
 msgid "apply relative date"
-msgstr ""
+msgstr "aplicar data de referência"
 
 msgid "Temporary range"
-msgstr ""
+msgstr "Intervalo temporário"
 
-msgid "Only relative intervals can be defined if the other field is PRESENT or a concrete date."
+msgid ""
+"Only relative intervals can be defined if the other field is PRESENT or a "
+"concrete date."
 msgstr ""
+"Apenas intervalos relativos podem ser definidos se o outro campo for "
+"PRESENTE ou uma data concreta"
 
-msgid "Only PRESENT is available in Instant mode. You need to define a RANGE to use relative intervals"
+msgid ""
+"Only PRESENT is available in Instant mode. You need to define a RANGE to use "
+"relative intervals"
 msgstr ""
+"Somente a opção PRESENT está disponível no modo Instantâneo. Você precisa "
+"definir uma escala para usar intervalos relativos"
 
 msgid "Image Mosaic"
-msgstr ""
+msgstr "Mosaico de imagens"
 
 msgid "Share view"
-msgstr ""
+msgstr "Compartilhar visão"
