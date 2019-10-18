@@ -1,50 +1,50 @@
-2. Conceptos
+2. Conceitos
 ============
 
 
-2.1 Panel de control
+2.1 Painel de controle
 --------------------
-El panel de control es la interfaz principal de administración de gvSIG Online. 
+O painel de controle é a principal interface de administração de gvSIG Online. 
 
-El panel de control se divide en varios componentes:
+O painel de controle é dividido em vários componentes:
 
-*   **Barra superior:** En la barra superior encontramos el menú de sesión del usuario y el selector del idioma.
+*   **Barra superior:** Na barra superior encontramos o menu de sessão de usuário e o seletor de idioma.
 
-*   **Menú principal:** Desde donde podemos acceder a la gestión de las entidades de la plataforma (usuarios y grupos, servicios, estilos, …).
+*   **Menu principal:** Onde podemos ter acesso à gestão das entidades da plataforma (usuários e grupos, serviços, estilos, …).
 
-*   **Contenido principal:** En el área de contenido se irán cargando las vistas con los formularios en función de la selección que hagamos en el menú principal.
+*   **Conteúdo principal:** Na área de conteúdo as vistas serão carregadas com os formulários dependendo da seleção que fizermos no menu principal. 
     
 .. image:: ../images/dashboard_main.png
    :align: center
     
-En función del rol que implemente nuestro usuario el panel de control mostrará unos componentes u otros.
+Dependendo da função que o nosso usuário implementar, o painel de controle irá mostrar alguns componentes ou outros.  
 
-Al acceder al panel de control por defecto se muestra la vista de *“Inicio”*, donde se muestra un resumen con la información de usuario, y un listado con los proyectos que este tiene disponibles.
+Ao acessar o painel de controle padrão, a exibição *“Início”* é mostrada, onde um resumo é mostrado com as informações do usuário e uma lista com os projetos que o usuário tem disponíveis.
 
-.. note::
-   Si nuestro usuario no implementa el rol de superusuario, y solo tiene asignado un proyecto, accedera directamente al proyecto sin pasar por el panel de control.
+.. Anotação::
+   Se o nosso usuário não implementar o papel de superusuário, e tiver apenas um projeto atribuído a ele, ele irá acessar o projeto diretamente sem passar pelo painel de controle.
    
    
 2.2 Visor de mapas
 ------------------
-El visor de mapas es la interfaz de visualización de la plataforma que permite la visualización de los proyectos configurados desde el panel de control.  
+O visualizador de mapas é a interface de visualização da plataforma que permite a visualização dos projetos configurados a partir do painel de controle. 
 
 .. image:: ../images/viewer1_2.png
    :align: center
 
-La plataforma ofrece dos tipos de visores de mapas:
+A plataforma oferece dois tipos de visualizadores de mapas:
 
-*   **Visor público:** Accesible para cualquier usuario sin necesidad de estar registrado en la plataforma. Ofrece una serie de funcionalidades básicas: Zoom, búsqueda, herramientas de medida e información, etc
+*   **Visor público:**  Acessível a qualquer usuário sem ter que se registrar na plataforma. Oferece uma série de funcionalidades básicas: Zoom, ferramentas de busca, medição e informação, etc. 
 
-*   **Visor restringido:** Accesible solo para usuarios registrados en la plataforma. Además en función del nivel de acceso del usuario, este tipo de visor ofrecerá unas funcionalidades específicas, además de las básicas.
+*   **Visor restrito:** Acessível apenas para usuários registrados da plataforma. Também dependendo do nível de acesso do usuário, este tipo de visualizador oferecerá funcionalidades específicas, além das básicas.
 	
 	
-2.3 Usuarios y grupos de usuarios
+2.3 Utilizadores e grupos de utilizadores
 ---------------------------------
-GvSIG Online utiliza dos entidades principales tanto para gestionar la autenticación, como para gestionar los permisos para el tratamiento de datos y acceso a los servicios de la plataforma. 
-Estas dos entidades son los *"usuarios"* y los *"grupos de usuarios"*.
+O GvSIG Online utiliza duas entidades principais tanto para gerenciar a autenticação quanto para gerenciar permissões para processamento de dados e acesso a serviços da plataforma.
+Estas duas entidades são os *"usuários"* e os *"grupos de usuários"*.
 
-Toda la información de autenticación es centralizada desde el servicio LDAP.
+Todas as informações de autenticação são centralizadas a partir do serviço LDAP.
 
 .. image:: ../images/ldap.png
    :align: center
