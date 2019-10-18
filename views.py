@@ -3457,6 +3457,7 @@ def external_layer_update(request, external_layer_id):
             if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
                 params['version'] = request.POST.get('version')
                 params['url'] = request.POST.get('url')
+                params['cache_url'] = server.getCacheEndpoint()
                 params['layers'] = request.POST.get('layers')
                 params['format'] = request.POST.get('format')
                 params['infoformat'] = request.POST.get('infoformat')
