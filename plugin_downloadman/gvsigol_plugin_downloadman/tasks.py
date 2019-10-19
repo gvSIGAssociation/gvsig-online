@@ -182,8 +182,8 @@ def resolveFileLocator(url, resource_name):
     local_path = url[7:]
     if not local_path.startswith("/"):
         local_path = "/" + local_path
-    # remove any "../.." and get absolute path
-    local_path = os.path.abspath(os.path.realpath(local_path))
+    # remove any "../.."
+    local_path = os.path.abspath(local_path)
     # we only allow local paths that are subfolders of the paths defined in LOCAL_PATHS_WHITELIST variable
     for path in LOCAL_PATHS_WHITELIST:
         if local_path.startswith(path):
