@@ -465,24 +465,36 @@ def getRealDownloadUrl(download_path):
     raise Error
 
 def getDirectDownloadUrl(url, name):
-    """
-    Gets the public download URL for direct download resource
-    """
-    resources = resolveFileLocator(url, name)
-    if len(resources)>0:
-        download_path = resources[0].res_path
-        if os.path.exists(download_path):
-            if download_path.startswith(TARGET_ROOT):
-                rel_path = os.path.relpath(download_path, TARGET_ROOT)
-                if TARGET_URL.endswith("/"):
-                    return TARGET_URL + rel_path
-                return TARGET_URL + "/" + rel_path
-            elif download_path.startswith(DOWNLOADS_ROOT):
-                rel_path = os.path.relpath(download_path, DOWNLOADS_ROOT)
-                if DOWNLOADS_URL.endswith("/"):
-                    return DOWNLOADS_URL + rel_path
-                return DOWNLOADS_URL + "/" + rel_path
-
+    try:
+        """
+        Gets the public download URL for direct download resource
+        """
+        logger.debug("getDirectDownloadUrl")
+        logger.debug(url)
+        logger.debug(name)
+        resources = resolveFileLocator(url, name)
+        if len(resources)>0:
+            logger.debug("download_path")
+            download_path = resources[0].res_path
+            logger.debug(download_path)
+            if os.path.exists(download_path):
+                logger.debug("exists")
+                if download_path.startswith(TARGET_ROOT):
+                    logger.debug("within TARGET_ROOT")
+                    rel_path = os.path.relpath(download_path, TARGET_ROOT)
+                    logger.debug(rel_path)
+                    if TARGET_URL.endswith("/"):
+                        return TARGET_URL + rel_path
+                    return TARGET_URL + "/" + rel_path
+                elif download_path.startswith(DOWNLOADS_ROOT):
+                    logger.debug("within DOWNLOADS_ROOT")
+                    rel_path = os.path.relpath(download_path, DOWNLOADS_ROOT)
+                    logger.debug(rel_path)
+                    if DOWNLOADS_URL.endswith("/"):
+                        return DOWNLOADS_URL + rel_path
+                    return DOWNLOADS_URL + "/" + rel_path
+    except:
+        logger.exception("error getting download url")
 
 def downloadLink(request, uuid):
     

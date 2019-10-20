@@ -184,8 +184,12 @@ def resolveFileLocator(url, resource_name):
         local_path = "/" + local_path
     # remove any "../.."
     local_path = os.path.abspath(local_path)
+    logger.debug("local_path")
+    logger.debug(local_path)
     # we only allow local paths that are subfolders of the paths defined in LOCAL_PATHS_WHITELIST variable
     for path in LOCAL_PATHS_WHITELIST:
+        logger.debug("path")
+        logger.debug(path)
         if local_path.startswith(path):
             res = ResourceDescription(resource_name, local_path)
             return [res]
