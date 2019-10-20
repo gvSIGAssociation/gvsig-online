@@ -20,7 +20,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from models import FORMAT_PARAM_NAME
 from utils import getLayer
-from settings import TARGET_URL, TARGET_ROOT
+from settings import TARGET_URL, TARGET_ROOT, DOWNLOADS_ROOT, DOWNLOADS_URL
 import os
 from tasks import Error
 
