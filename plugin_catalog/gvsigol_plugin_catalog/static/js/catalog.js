@@ -214,9 +214,10 @@ CatalogView.prototype.getLocalizedEndpoint = function() {
 }
 
 CatalogView.prototype.filterCatalog = function(){
-	var search = $("#gn-any-field").val().split(" ");
+	var search = $("#gn-any-field").val();
 	// hack: remove accents since Geonetwork index removes them
 	// This should be fixed/configured in Geonetwork. What about Ñ??
+	/*
 	search = search.replace("á", "a");
 	search = search.replace("Á", "A");
 	search = search.replace("é", "e");
@@ -227,16 +228,21 @@ CatalogView.prototype.filterCatalog = function(){
 	search = search.replace("Ó", "O");
 	search = search.replace("ú", "u");
 	search = search.replace("Ú", "U");
-	
-	/*
-	 * var search = '';
+	*/
+	var searchTerms = $("#gn-any-field").val().split(" ");
+	var orWildcardSearch = '';
+	var first = true;
 	for (var i=0; i<searchTerms.length; i++) {
 		// add wildcards to search for partial terms
 		if (searchTerms[i] != "") {
-			search += searchTerms[i]+"* ";
+			if (!first) {
+				orWildcardSearch = orWildcardSearch + "+";
+			}
+			orWildcardSearch += searchTerms[i]+"*";
 		}
+		first = false;
 	}
-	*/
+
 	var categories = $("#categoriesF").val();
 	var keywords = $("#keywordsF").val();
 	var resources = $("#orgNameF").val();
@@ -245,7 +251,7 @@ CatalogView.prototype.filterCatalog = function(){
 	var date_from = $("#catalog_register_from").val();
 	var date_to = $("#catalog_register_to").val();
 	var extent = this.catalog_map.getSelectedArea();
-	this.launchQuery(search, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent);
+	this.launchQuery(orWildcardSearch, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent);
 
 }
 
