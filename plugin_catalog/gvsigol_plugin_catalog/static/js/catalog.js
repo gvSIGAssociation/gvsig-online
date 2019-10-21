@@ -60,7 +60,7 @@ CatalogView.prototype.initialization = function(){
 	catalogPanel += '				<div id="catalog_map" class="catalog_map"></div>';
 	catalogPanel += '				<div class="checkbox">';
 	catalogPanel += '					<label>';
-	catalogPanel += '						<input type="checkbox" id="chck_mapareaoverlap" value="mapareaoverlap" checked>';
+	catalogPanel += '						<input type="checkbox" id="chck_mapareaoverlap" value="mapareaoverlap">';
 	catalogPanel += 						gettext('Include only results overlapping with map visible area');
 	catalogPanel += '					</label>';
 	catalogPanel += '				</div>';
@@ -1191,6 +1191,7 @@ CatalogView.prototype.installNavBars = function() {
 	
 	$("#viewer-navbar").append(html);*/
 	
+	/*
 	html += '<li class="dropdown">';
 	html += 	'<a class="dropdown-toggle" data-toggle="dropdown" href="#">';
 	html += 		gettext('Catalog') + ' <span class="caret"></span>';
@@ -1200,7 +1201,10 @@ CatalogView.prototype.installNavBars = function() {
 	html += 	'</ul>';
 	html += '</li>';
 	
-	$("#gvsigol-navbar-menus").append(html);
+	$("#gvsigol-navbar-menus").append(html);*/
+	
+    var button = '<li id="show_catalog" role="presentation"><a role="menuitem" tabindex="-1" href="#"><i class="fa fa-newspaper-o m-r-5"></i>' + gettext('Catalog') + '</a></li>';
+    $('#gvsigol-navbar-views-menu').append(button);
 	
 	$("#show_catalog").click(function(){
 		$("body").trigger('show-catalog-event');
