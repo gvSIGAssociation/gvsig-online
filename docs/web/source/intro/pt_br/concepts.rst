@@ -39,7 +39,7 @@ A plataforma oferece dois tipos de visualizadores de mapas:
 *   **Visor restrito:** Acessível apenas para usuários registrados da plataforma. Também dependendo do nível de acesso do usuário, este tipo de visualizador oferecerá funcionalidades específicas, além das básicas.
 	
 	
-2.3 Utilizadores e grupos de utilizadores
+2.3 Usuários e grupos de usuários
 ---------------------------------
 O GvSIG Online utiliza duas entidades principais tanto para gerenciar a autenticação quanto para gerenciar permissões para processamento de dados e acesso a serviços da plataforma.
 Estas duas entidades são os *"usuários"* e os *"grupos de usuários"*.
@@ -49,225 +49,225 @@ Todas as informações de autenticação são centralizadas a partir do serviço
 .. image:: ../images/ldap.png
    :align: center
 
-2.3.1 Roles de usuario
+2.3.1 Funções do usuário
 ~~~~~~~~~~~~~~~~~~~~~~
-Cada usuario implementa un rol, el cual le confiere una serie de permisos que definen el acceso a la plataforma y como el usuario interactua con las entidades.
+Cada usuário implementa uma função, que confere uma série de permissões que definem o acesso à plataforma e como o usuário interage com as entidades.
 
-Los roles que puede implementar un usuario son los siguientes:
+As funções que um usuário pode implementar são as seguintes:
 
-*   **Superusuario**: Tiene acceso a toda la plataforma, pudiendo administrar cualquier objeto haya sido creado por el o por otros usuarios. También puede administrar usuarios y grupos.
+*   **Superusuário**: Tem acesso a toda a plataforma, podendo gerenciar qualquer objeto criado por ele ou por outros usuários. Ele também pode gerenciar usuários e grupos.
 
-*   **Gestión**: Los usuarios que implementan el rol de gestión pueden gestionar proyectos, y capas, pero están restringidos a un espacio de trabajo. Este rol no permite la gestión de otros usuarios y grupos.
+*   **Gestão**: Os usuários que implementam o papel de gestão podem gerenciar projetos e camadas, mas eles estão restritos a um único espaço de trabalho. Esta função não permite a gestão de outros utilizadores e grupos. 
 
-*   **Básico**: Los usuarios que implementan el rol básico únicamente pueden consultar los proyectos que les han sido asignados por usuarios de rol superior, no pudiendo gestionar capas ni proyectos.
+*   **Básico**: Os usuários que implementam a função básica só podem consultar os projetos que lhes foram atribuídos por usuários de uma função superior, não sendo capazes de gerenciar camadas ou projetos. 
 
-2.3.2 Espacio de trabajo de usuario
+2.3.2 Espaço de trabalho do usuário
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Cuando creamos un nuevo usuario automáticamente se genera la siguiente estructura en la plataforma:
+Quando criamos um novo usuário automaticamente gera a seguinte estrutura na plataforma:
 
-*   Usuario
+*   Usuário
 
-*   Grupo para el usuario. El grupo se llamará como el usuario precedido del prefijo *ug_*
+*   Grupo para o usuário. O grupo será nomeado como o usuário predecido pelo prefixo *ug_*
 
-*   Espacio de trabajo en el servidor de mapas para el usuario
+*   Espaço de trabalho no servidor de mapas para o usuário 
 
-*   Esquema en BBDD y almacén de datos vectorial en el servidor de mapas asociado al esquema, donde el usuario podrá publicar sus capas.
+*   Armazenamento do esquema DB e dos dados vetoriais no servidor de mapas associado ao esquema, onde o usuário poderá publicar seus layers.
 
-*   Directorio en el sistema de ficheros desde donde el usuario podrá gestionar sus archivos. El directorio se llamará como el usuario precedido del prefijo *ug_*
+*   Diretório no sistema de arquivos de onde o usuário pode gerenciar seus arquivos. O diretório será chamado como o usuário precedido pelo prefixo *ug_*
 
 
-2.4 Servicios
+2.4 Serviços
 -------------
-gvSIG Online utiliza un servidor de mapas para publicar y acceder a las capas de información geográfica. 
-Los servicios de mapas están basados en los estándares del `Open Geospatial Consortium <http://www.opengeospatial.org/>`_ (OGC), 
-que permiten que las capas sean interoperables tanto con el visor integrado en gvSIG Online como con otros visores y aplicaciones SIG de escritorio como gvSIG Desktop.
+O gvSIG Online usa um servidor de mapas para publicar e acessar as camadas de informação geográfica. 
+Os serviços de mapas são baseados nos padrões  do `Open Geospatial Consortium <http://www.opengeospatial.org/>`_ (OGC), 
+que permitem que as camadas sejam interoperáveis tanto com o visualizador integrado no gvSIG Online quanto com outros visualizadores e aplicativos GIS de desktop, como o gvSIG Desktop. 
 
-El módulo de servicios permite publicar y gestionar las capas de gvSIG Online.
+O módulo de serviços permite publicar e gerenciar as camadas do gvSIG Online. 
 
-2.4.1 Espacios de trabajo
+2.4.1 Espaços de trabalho
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-Los espacios de trabajo son contenedores que se utilizan para organizar elementos diversos como capas y almacenes de datos. 
+Os espaços de trabalho são containers usados para organizar vários itens, como camadas e armazéns de dados. 
 
-Los espacios de trabajo se identifican por su nombre, que debe ser único, y permiten agrupar capas y almacenes de datos similares.
+Os espaços de trabalho são identificados pelo seu nome, que deve ser único, e permitem agrupar e armazenar dados semelhantes. 
 
-2.4.2 Almacenes de datos
+2.4.2 Armazenamento de Dados
 ~~~~~~~~~~~~~~~~~~~~~~~~
-Los almacenes de datos definen conexiones a fuentes de datos ráster o vectoriales, como bases de datos PostGIS, 
-carpetas de ficheros SHP o ficheros ráster individuales.
+Os armazenamentos de dados definem conexões com fontes de dados raster e vetoriais, como bancos de dados PostGIS, 
+pastas de arquivos SHP ou arquivos raster individuais. 
 
-Los almacenes de datos vectoriales permiten definir los parámetros de conexión una única vez para todas las capas presentes en el almacén.
+O armazenamento de dados vetoriais permitem definir parâmetros de conexão apenas uma vez para todas as camadas de armazenamento. 
 
-Por contra, los almacenes de datos ráster definen los parámetros de un fichero ráster individual, que contiene una única capa.
+Em contraste, as armazenagens de dados raster definem os parâmetros de um arquivo raster individual, que contém uma única camada.
 
-Existen diferentes tipos de almacenes de datos en gvSIG Online:
+Existem diferentes tipos de armazenamento de dados no gvSIG Online:
 
-*   **PostGIS vectorial**: Almacena capas vectoriales en una base de datos PostGIS
+*   **PostGIS vetor**: Armazena camadas de vetoriais numa base de dados PostGIS
 
-*   **GeoTiff**: Capa ráster en formato GeoTiff, que almacena la geo-referenciación de la capa dentro de los metadatos Tiff
+*   **GeoTiff**: Camada rasterizada em formato GeoTiff, que armazena a georreferenciação da camada dentro dos metadatos Tiff
 
-*   **WMS en cascada**: Almacena la dirección de un servicio WMS para posteriormente ser publicada las capas que tenga disponibles.
+*   **Cascata WMS**: Armazena o endereço de um serviço WMS para posteriormente publicar as camadas disponíveis.
 
-Es importante entender que para poder añadir un almacén de datos, debemos partir de una fuente de datos que exista previamente. 
-Por ejemplo, para poder añadir un almacén de datos de tipo PostGIS vectorial, la base de datos espacial debe existir previamente. 
-De esta forma, los que estamos haciendo es registrar en gvSIG Online (y en Geoserver) los parámetros de conexión a dicha base de datos. 
-De la misma forma, para añadir un almacén de datos de tipo ráster, el fichero ráster debe existir previamente en el servidor
-(en este caso estamos registrando en gvSIG Online la ruta a dicho fichero ráster).
+É importante entender que, para adicionar um armazenamento de dados, devemos começar a partir de uma fonte de dados previamente existente. 
+Por exemplo, para adicionar um armazenamento de dados do tipo PostGIS vetorial, o banco de dados espacial deve existir anteriormente. 
+Desta forma, o que estamos a fazer é registrar no gvSIG Online (e no Geoserver) os parâmetros de ligação a esta base de dados. 
+Da mesma forma, para adicionar um aramzenamento de dados do tipo raster, o arquivo raster deve existir previamente no servidor
+(neste caso estamos registrando no gvSIG Online o caminho para este arquivo raster).
 
-2.4.3 Capas
+2.4.3 Camadas
 ~~~~~~~~~~~
-Una capa es un conjunto estructurado de información geográfica y alfanumérica que describe un aspecto de la realidad (parcelas, áreas protegidas, usos del suelo, precipitación, etc).
+Uma camada é um conjunto estructurado de informações geográficas e alfanuméricas que descreve um aspecto da realidade (parcelas, áreas protegidas, uso do solo, precipitação, etc).
 
-Existen dos tipos diferenciados de capas: vectoriales y ráster. Las capas vectoriales contienen registros de base de datos, cada uno de los cuales posee una o más geometrías asociadas. Las capas ráster
-definen una matriz de valores y se utilizan frecuentemente para representar fenómenos continuos en el espacio tales como temperatura, elevación, precipitación o color (ortofotos). Es habitual utilizar formatos de imagen para almacenar capas ráster.
+Existem dois tipos diferentes de camadas: vector e raster. As camadas vectoriais contêm registros de base de dados, cada um dos quais tem uma ou mais geometrias associadas. As camadas rasterizadas
+definem uma matriz de valores e são frequentemente utilizadas para representar fenómenos contínuos no espaço, tais como temperatura, elevação, precipitação ou cor (ortofotos). É comum usar formatos de imagem para armazenar camadas rasterizadas.
 
-Dentro de cada uno de estos tipos principales podemos encontrar diferentes tipos más especializados.
+Dentro de cada um destes tipos principais podemos encontrar diferentes tipos mais especializados.
 
-2.4.4 Grupos de capas
+2.4.4 Grupos de camadas
 ~~~~~~~~~~~~~~~~~~~~~
-Los grupos de capas como su nombre indica se utilizan para agrupar capas por una temática específica. Los grupos de capas nos permiten agilizar la asginación de capas a un proyectos.
-Además desde el visor de mapas podremos visualizar el grupo de capas como una única capa, mejorando los tiempos de respuesta en la visualización.
+Os grupos de camadas como o nome indica são usados para agrupar camadas por um tema específico. Os grupos de camadas nos permitem acelerar a atribuição de camadas a um projetos.
+Também a partir do visor de mapas podemos visualizar o grupo de camadas como uma única camada, melhorando os tempos de resposta na exibição.
 
-2.4.5 Bloqueos
+2.4.5 Bloqueios
 ~~~~~~~~~~~~~~
-Cuando una capa está en modo edición automáticamente se bloquea para evitar errores en la escritura de los datos.
+Quando uma camada está em modo de edição, ela é bloqueada automaticamente para evitar erros na escrita dos dados.
 
-Existen dos tipos de bloqueos:
+Existem dois tipos de bloqueios:
 
-*   **Bloqueos del geoportal**: cuando 
+*   **Bloqueios do geoportal**: Quando 
 
-*   **Bloqueos de la aplicación móvil**:
+*   **Bloqueios a aplicação móvel**:
 
 
-2.4.6 Capas Bases
+2.4.6 Camadas Bases
 ~~~~~~~~~~~~~~~~~
-Son aquellas capas que se usan como cartografía de referencia para anclar o usar (como bien su nombre indica) de base en los proyectos. Se puede hacer uso de distintos tipos de proveedores como OSM, BING (con su API-key), teselas XYZ, servicios WMS y WMTS.
+São aquelas camadas que são usadas como referência cartográfica para ancorar ou usar (como seu nome indica) de base nos projetos. É possível utilizar diferentes tipos de proveedores como OSM, BING (com sua chave API), XYZ tesserae, serviços WMS e WMTS.
 
-Éstas capas se pueden gestionar previamente por un usuario administrador, una vez definidas se podrán asignar y fijar por defecto a cada uno de los proyectos de forma independiente.
+Estas camadas podem ser previamente geridas por um usuário administrador, uma vez definidas podem ser atribuídas e definidas por defeito a cada um dos projetos de forma independente.
  
 
-2.5 Tipos de datos
+2.5 Tipos de dados
 ------------------
-Desde gvsig online, se ofrece la opción de generar datos de tipo dominio (listado de enumeraciones y multiple enumeración) y también permite tener campos de control interno en la edición de capas.
+A partir do gvsig online,ele oferece a opção de gerar dados de tipo de domínio (lista de enumeração e enumeração múltipla) e também permite ter campos de controle interno na edição de camadas.
 
 
-2.5.1 Enumeraciones
+2.5.1 Enumerações
 ~~~~~~~~~~~~~~~~~~~
-Las enumeraciones son un tipo especial de entidades que definen dominios de valores. Es posible utilizarlas en la creación de nuevas capas cuando deseemos crear un tipo de campo que contenga un listado de elementos y poder seleccionar un único item de dicho listado.
+As enumerações são um tipo especial de entidades que definem domínios de valor. É possível utilizá-los na criação de novas camadas quando se deseja criar um tipo de campo que contenha uma lista de elementos e poder seleccionar um único item desta lista. 
 
-La nomenclatura usada en la BD para ser reconocida como campo de dominio es: **enm_#_acti**
+A nomenclatura usada en la DB para ser reconhecida como um campo de dominio é: **enm_#_acti**
 
-Donde: 
+Onde: 
 
-* *enm* = tipo de dato enumeración.
+* *enm* = enumeração do tipo de dados.
 
-* *#* = número que asigna el sistema por defecto cuando se crean nuevas listas de enumeraciones.
+* *#* = número atribuído pelo sistema por default quando novas listas de enumerações são criadas.
 
-* *acti* = Las primeras cuatro letras del título de la lista de enumeraciones. Para este ejemplo, el título es: 'Actividad'
+* *acti* = As quatro primeiras letras do título da lista de enumeração. Para este exemplo, o título é: 'Atividade'
 
 
-2.5.2  Múltiple enumeración
+2.5.2  Enumeração múltipla
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-A diferencia del tipo enumeración, este campo permite seleccionar varios elementos de un conjunto de dominios disponibles en un 'listado de enumeración', esta opción se hace disponible cuando se crea una capa vacía en el sistema, seleccionando éste tipo de dato y posteriormente escogiendo algunos de los listados disponibles en las enumeraciones.
+Ao contrário do tipo de enumeração,este campo permite selecionar vários elementos de um conjunto de domínios disponíveis numa 'lista de enumeração', esta opção fica disponível quando se cria uma camada vazia no sistema, selecionando este tipo de dados e depois escolhendo algumas das listas disponíveis nas enumerações.
 
 Nomenclatura: **enmm_#_acti**
 
-Donde: 
+Onde: 
 
-* *enmm* = tipo de dato múltiple enumeración.
+* *enmm* = enumeração múltipla de tipos de dados.
 
-* *#* = número que asigna el sistema por defecto cuando se crean nuevas listas de enumeraciones.
+* *#* = número atribuído pelo sistema por default quando novas listas de enumerações são criadas.
 
-* *acti* = Las primeras cuatro letras del título de la lista de enumeraciones. Para este ejemplo, el título es: 'Actividad'
+* *acti* = As quatro primeiras  letras do título da lista de enumeração. Para este exemplo, o titulo é: 'Atividade'
 
 
-2.5.3 Campos de control interno
+2.5.3 Campos de controle interno
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Estos campos son generados automáticamente cuando se crea una capa vacía desde el sistema, los campos son:
+Esses campos são gerados automaticamente quando se cria uma camada vazia do sistema, os campos são:
 
- *  **modified_by**: Es un campo que no permite su edición dentro de la tabla. Cuando se edita y guarda un elemento de la capa (atributos o geometría), este campo '*Modified by*' se rellena automáticamente con el nombre del usuario que estaba autenticado en el sistema. 
+ *  **modified_by**: É um campo que não permite sua edição dentro da tabela. Ao editar e guardar um elemento da camada (atributos o geometría), este campo '*Modified by*' é automaticamente preenchido com o nome do usuário que foi autenticado no sistema. 
 
- *  **last_modification:** Es otro campo que no permite su edición en la tabla. Cuando se edita y guarda un elemento de la capa (atributos o geometría), este campo '*last_modification*' se rellena automáticamente con la fecha que registra el ordenador o móvil.
+ *  **last_modification:** Este é outro campo que não permite editar na tabela. Ao editar e guardar um elemento da camada (atributos ou geometria), este campo '*last_modification*' é automaticamente preenchido com a data registrada pelo computador ou móvel. 
 
-.. NOTE::
-   Estos tipos de datos también pueden ser añadidos manualmente a la tabla de atributos de cualquier capa por medio de la BD antes de que la capa sea publicada en el sistema.
+.. Nota::
+   Esses tipos de dados também podem ser adicionados manualmente à tabela de atributos de qualquer camada por meio do DB antes que a camada seja publicada no sistema.
 
-2.6 Administrador de archivos
+2.6 Gerenciador de arquivos
 -----------------------------
-El administrador de archivos nos permite subir ficheros a la plataforma de gvSIG Online, para posteriormente realizar operaciones sobre ellos.
+O gerenciador de arquivos nos permite fazer upload de arquivos para a plataforma gvSIG Online, para operações posteriores sobre eles. 
 
-El administrador de archivos gestiona directorios en función de los grupos de usuarios. Por cada grupo de usuarios creado existirá un directorio en el servidor. 
-Por tanto a la hora de explorar los directorios, únicamente podremos visualizar aquellos directorios que tengamos asignados por pertenencia al grupo.
+O gerenciador de arquivos gerencia diretórios de acordo com grupos de usuários. Para cada grupo de usuários criado haverá um diretório no servidor.  
+Portanto, no momento de explorar os diretórios, só poderemos visualizar os diretórios que temos atribuídos por pertencer ao grupo.
 
 
-2.7 Proyectos
+2.7 Projetos
 -------------
-Podemos definir un proyecto como una unidad de agregación de objetos que mediante una configuración dada, permiten una visualización gráfica.
+Podemos definir um projeto como uma unidade de agregação de objetos que, por meio de uma determinada configuração, permite uma visualização gráfica. 
 
-Un proyecto está formado por los siguientes elementos:
+Um projeto é formado pelos seguintes elementos:
 
-*   Información general: nombre, descripción y logo del proyecto
+*   Informações gerais: nome, descrição e logotipo do projeto
 
-*   Una vista de mapa (centro y extensión)
+*   Uma vista de mapa (centro e extensão)
 
-*   Capas bases
+*   Camadas base
 
-*   Grupos de usuarios
+*   Grupos de usuários
 
-*   Grupos de capas
+*   Grupos de camadas
 
-Existen 2 tipos de proyectos:
+Existem 2 tipos de projetos:
 
-*   **Proyectos de acceso público**: Los datos que son visualizados no poseen ningún tipo de restricción. Pueden ser accedidos de forma anónima por usuarios que no estén registrados en la plataforma.
+*   **Projetos de acceso público**: Os dados exibidos não têm restrições. Eles podem ser acessados anonimamente por usuários que não estão registrados na plataforma.
 
-*   **Proyectos de acceso restringido**: Los datos poseen restricciones de acceso y uso para determinados grupos de usuarios. Solo pueden ser accedidos por usuarios que estén dados de alta en la plataforma.
+*   **Projetos de acesso restrito**: Os dados têm restrições de acesso e uso para determinados grupos de usuários. Eles só podem ser acessados por usuários registrados na plataforma.
 
 
-2.8 Simbología
+2.8 Simbologia
 --------------
 
-2.8.1 Leyendas
+2.8.1 Legendas
 ~~~~~~~~~~~~~~
-Otra de las funcionalidades que ofrece gvSIG Online es la posibilidad de modificar la simbología de las capas y aplicarles distintos tipos de leyenda.
+Outra das funcionalidades oferecidas pelo gvSIG Online é a possibilidade de modificar a simbologia das camadas e aplicar diferentes tipos de legendas a elas.
 
-La leyenda nos indicará la forma y los criterios que se emplearán para mostrar los datos en el mapa, para una mejor visualización y comprensión de los datos que se representan en el geoportal a través de las distintas capas.
+A legenda nos indicará a forma e os critérios que serão usados para mostrar os dados no mapa, para uma melhor visualização e compreensação dos dados que são representados no geoportal através das diferentes camadas.
 
-Las leyendas están formadas por uno o más símbolos. Cada símbolo puede estar formado a su vez por uno o más simbolizadores, lo que nos permitirá crear símbolos de mayor complejidad.
+As legendas consistem em um ou mais símbolos. Cada símbolo pode ser formado por um ou mais simbolizadores, o que nos permitirá criar símbolos mais complexos.
 
-En función del tipo de geometría de la capa (punto, linea o polígono) los simbolizadores pueden ser de los siguientes tipos:
+Dependendo do tipo de geometria da camada (ponto, linha ou polígono) os simbolizadores podem ser de los seguintes tipos:
 
-*   Geometría tipo punto(PointSymbolizer): Marcadores vectoriales(Mark) o imágenes(ExternalGraphic).
+*   Geometria de tipo ponto(PointSymbolizer): Marcadores vetoriais(Mark) ou imagens(ExternalGraphic).
 
-*   Geometría de tipo línea(LineSymbolizer): Simbolizador vectorial.
+*   Geometria de tipo linha(LineSymbolizer): Simbolizador vetorial.
 
-*   Geometría de tipo polígono(PolygonSymbolizer): Simbolizador vectorial.
+*   Geometría de tipo polígono(PolygonSymbolizer): Simbolizador vetorial.
 
-Además de los símbolos vectoriales también se podrán definir símbolos para capas raster (RasterSymbolizer) y simbolizadores que definen texto o etiquetas (TextSymbolizer).
+Além dos símbolos vetoriais também é possível definir símbolos para camadas rasterizadas (RasterSymbolizer) e símbolos que definem texto ou etiquetas (TextSymbolizer).
 
-Existen diversos tipos de leyenda en función de si el tipo de capa es vectorial o ráster.
+Existem vários tipos de legendas, dependendo se o tipo de camada é vetorial ou raster.
 
-Los tipos de leyenda para las capas vectoriales son:
+Os tipos de legendas para camadas vetoriais são:
 
-*	*Leyenda de símbolo único*
+*	*Legenda de símbolo único*
 
-*	*Leyenda de valores únicos*
+*	*Legenda de valores únicos*
 
-*	*Leyenda de intervalos*
+*	*Legenda de intervalos*
 
-*	*Leyenda de expresiones*
+*	*Legenda de expressões*
 
-Para las capas de tipo ráster existe un tipo de leyenda que es el *Tabla de color*.
+Para as camadas do tipo raster há um tipo de legenda que é a *Tabela de cores*.
 
 
 2.8.2 Bibliotecas de símbolos
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Las bibliotecas de símbolos nos permiten crear y agrupar símbolos genéricos que posteriormente podremos *"importar"* desde las leyendas de capa.
-Además podremos *"exportar"* las librerías de símbolos para poder compartir o hacer copias de las mismas. 
+As bibliotecas de símbolos permitem criar e agrupar símbolos genéricos que podemos mais tarde *"importar"* de legendas de camadas.
+Também poderemos *"exportar"* as bibliotecas de símbolos para que possamos compartilhar ou fazer cópias delas. 
 
 
 2.9 Plugins
 -----------
-Los plugins se consideran componentes o aplicaciones desarrolladas de forma independientes al sistemas básico. Por lo tanto, son complementos extras que pueden añadirse al sistema. Cada plugin es desarrolado para abarcar funcionalidades específicas según las necesidades de cada cliente.
+Os plugins são considerados componentes ou aplicações desenvolvidas independentemente dos sistemas básicos. Eles são, por tanto, plugins extras que podem ser adicionados ao sistema. Cada plugin é desenvolvido para cobrir funcionalidades específicas de acordo com as necessidades de cada cliente.
 
-Esta entrada será visible en el panel de control si se disponen de aplicaciones, por ejemplo: el Geocoding (aplicación para la búsqueda por direcciones), Worldwind (configurador de MDT para 3D), transformaciones, entre otros.
+Esta entrada será visível no painel de controle se as aplocações estiverem disponíveis, por exemplo: Geocodificação (aplicação para pesquisa de endereços), Worldwind (configurador de MDT para 3D), transformações, entre outras.
 
 
