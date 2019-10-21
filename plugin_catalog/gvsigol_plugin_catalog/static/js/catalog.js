@@ -217,11 +217,11 @@ CatalogView.prototype.filterCatalog = function(){
 	var search = $("#gn-any-field").val();
 	// hack: remove accents since Geonetwork index removes them
 	// This should be fixed/configured in Geonetwork. What about Ñ??
-	search = search.replace("á", "a");
-	search = search.replace("Á", "A");
+	search = search.replace("\xE1", "a");
+	search = search.replace("\xC1", "A");
 	search = search.replace("é", "e");
 	search = search.replace("É", "E");
-	search = search.replace("í", "i");
+	search = search.replace("\xED", "i");
 	search = search.replace("Í", "I");
 	search = search.replace("ó", "o");
 	search = search.replace("Ó", "O");
