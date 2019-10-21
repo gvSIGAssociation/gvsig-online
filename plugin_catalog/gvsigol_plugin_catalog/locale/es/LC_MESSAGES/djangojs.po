@@ -70,3 +70,6 @@ msgstr "Lista de descargas"
 msgid "List of layers"
 msgstr "Lista de capas"
 
+msgid "Include only results overlapping with map visible area"
+msgstr "Incluir sólo los resultados que se solapen con el área visible del mapa"
+

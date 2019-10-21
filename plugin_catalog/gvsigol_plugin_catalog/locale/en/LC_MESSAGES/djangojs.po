@@ -69,3 +69,6 @@ msgstr ""
 
 msgid "List of layers"
 msgstr ""
+
+msgid "Include only results overlapping with map visible area"
+msgstr "Incluir sólo los resultados que se solapen con el área visible del mapa"
