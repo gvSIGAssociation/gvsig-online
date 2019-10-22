@@ -136,6 +136,7 @@ CatalogMap.prototype.initialization = function(container_id){
 	}
 	var mainMapExtent = mainMapView.calculateExtent();
 	// apply a similar extent to the new map
+	var size = [$('#' + container_id).width(), $('#' + container_id).height()];
 	var resolution = ol.extent.getHeight(mainMapExtent) / size[1];
 	this.map = new ol.Map({
 	    target: container_id,
