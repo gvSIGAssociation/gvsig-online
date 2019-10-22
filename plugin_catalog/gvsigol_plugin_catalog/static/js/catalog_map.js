@@ -134,12 +134,15 @@ CatalogMap.prototype.initialization = function(container_id){
 			source: new ol.source.OSM()
 		}));
 	}
+	var mainMapExtent = mainMapView.calculateExtent();
+	// apply a similar extent to the new map
+	var resolution = ol.extent.getHeight(mainMapExtent) / size[1];
 	this.map = new ol.Map({
 	    target: container_id,
 	    layers: baselayers,
 	    view: new ol.View({
 	        center: mainMapView.getCenter(),
-	        zoom: mainMapView.getZoom(),
+	        resolution: resolution,
 	        constrainResolution: true,
 	        projection: 'EPSG:3857',
 	    })
