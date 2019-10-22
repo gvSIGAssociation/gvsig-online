@@ -73,6 +73,7 @@ CatalogMap.prototype.refreshData = function(features){
 CatalogMap.prototype.getSelectedArea = function(){
 	if (document.getElementById("chck_mapareaoverlap").checked) {
 		var extent = this.map.getView().calculateExtent();
+		console.log(extent);
 		var geom = ol.geom.Polygon.fromExtent(extent);
 		var format =  new ol.format.WKT();
 		return format.writeGeometry(geom, {dataProjection: 'EPSG:4326', featureProjection: this.map.getView().getProjection()});
@@ -89,6 +90,32 @@ CatalogMap.prototype.getDrawnArea = function(){
 	}
 	return null;
 }
+
+/**
+ * This method should not be necessary in newer OL versions
+ */
+CatalogMap.prototype.getZoomForResolution = function(resolution) {
+	var view = this.map.getView();
+	var offset = 0;
+	var max, zoomFactor;
+	console.log("Resolutions");
+	console.log(view.getResolutions());
+	console.log(view.getMaxResolution());
+	if (view.getResolutions()) {
+		var nearest = ol.array.linearFindNearest(view.getResolutions(), resolution, 1);
+		offset = nearest;
+		max = view.view.getResolutions()[nearest];
+		if (nearest == view.getResolutions().length - 1) {
+			zoomFactor = 2;
+		} else {
+			zoomFactor = max / view.getResolutions()[nearest + 1];
+		}
+	 } else {
+		 max = view.getMaxResolution();
+		 zoomFactor = 2;
+	}
+	return offset + Math.log(max / resolution) / Math.log(zoomFactor);
+};
 
 CatalogMap.prototype.initialization = function(container_id){
 	var self = this;
@@ -134,20 +161,23 @@ CatalogMap.prototype.initialization = function(container_id){
 			source: new ol.source.OSM()
 		}));
 	}
-	var mainMapExtent = mainMapView.calculateExtent();
-	// apply a similar extent to the new map
-	var size = [$('#' + container_id).width(), $('#' + container_id).height()];
-	var resolution = ol.extent.getHeight(mainMapExtent) / size[1];
+
 	this.map = new ol.Map({
 	    target: container_id,
 	    layers: baselayers,
 	    view: new ol.View({
 	        center: mainMapView.getCenter(),
-	        resolution: resolution,
+	        zoom: 0,
 	        constrainResolution: true,
 	        projection: 'EPSG:3857',
 	    })
 	});
-	
+
+	// apply to the new map a similar extent compared to the main map
+	var mainMapExtent = mainMapView.calculateExtent();
+	var height = $('#' + container_id).height();
+	var resolution = ol.extent.getHeight(mainMapExtent) / height;
+	var zoom = this.getZoomForResolution(resolution);
+	this.map.getView().setZoom(Math.round(zoom));
 	this.map.addInteraction(this.interaction);
 }

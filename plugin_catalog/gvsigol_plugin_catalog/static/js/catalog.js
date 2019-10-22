@@ -60,7 +60,7 @@ CatalogView.prototype.initialization = function(){
 	catalogPanel += '				<div id="catalog_map" class="catalog_map"></div>';
 	catalogPanel += '				<div class="checkbox">';
 	catalogPanel += '					<label>';
-	catalogPanel += '						<input type="checkbox" id="chck_mapareaoverlap" value="mapareaoverlap">';
+	catalogPanel += '						<input type="checkbox" id="chck_mapareaoverlap" value="mapareaoverlap" checked>';
 	catalogPanel += 						gettext('Include only results overlapping with map visible area');
 	catalogPanel += '					</label>';
 	catalogPanel += '				</div>';
@@ -194,7 +194,6 @@ CatalogView.prototype.initialization = function(){
 	$("#chck_mapareaoverlap").unbind("click").click(function(){
 		self.filterCatalog();
 	});
-	this.getCatalogFilters("", null, null, null, null, null, null, null, null, this.catalog_map.getSelectedArea());
 }
 
 CatalogView.prototype.getLocalizedEndpoint = function() {
@@ -1066,12 +1065,20 @@ CatalogView.prototype.createDetailsPanel = function(layer){
 
 CatalogView.prototype.showPanel = function(){
 	if (this.catalog_panel===null) {
+		var firstTime = true;
 		this.initialization();
+	}
+	else {
+		var firstTime = false;
 	}
 	this.catalog_panel.show();
 	this.catalog_map.map.updateSize();
 	this.map_container.hide();
 	$('.viewer-search-form').css("display","none");
+	if (firstTime) {
+		// apply filters after the map has been loaded
+		this.getCatalogFilters("", null, null, null, null, null, null, null, null, this.catalog_map.getSelectedArea());
+	}
 }
 
 CatalogView.prototype.hidePanel = function(){
