@@ -12,7 +12,9 @@ from gvsigol_services import rest_geoserver
 from django.views.generic.base import View
 from forms import DirectoryCreateForm
 from core import Filemanager
+from zipfile import ZipFile
 import json
+import os
 
 class FilemanagerMixin(object):
     def dispatch(self, request, *args, **kwargs):
@@ -136,7 +138,7 @@ class UploadFileView(FilemanagerMixin, View):
         
         file = request.FILES['files']
         extension = file.name.split(".")[1]
-        
+        '''
         if extension == "zip":
             folder = file.name.split(".")[0]
             #self.fm.extract_zip(file, folder)
@@ -144,6 +146,8 @@ class UploadFileView(FilemanagerMixin, View):
         else:
             # TODO: get filepath and validate characters in name, validate mime type and extension
             self.fm.upload_file(filedata = request.FILES['files'])
+        '''    
+        self.fm.upload_file(filedata = request.FILES['files'])
 
         return HttpResponse(json.dumps({
             'files': [],
@@ -152,7 +156,7 @@ class UploadFileView(FilemanagerMixin, View):
         
 class DeleteFileView(FilemanagerMixin, View):
     def post(self, request, *args, **kwargs):
-        path = 'file://' + FILEMANAGER_DIRECTORY +'/'+ request.POST.get('path')
+        path = FILEMANAGER_DIRECTORY +'/'+ request.POST.get('path')
         geotiffs = Datastore.objects.filter(type__in=['c_GeoTIFF','c_ImageMosaic'])
         for geotiff in geotiffs:
             params = json.loads(geotiff.connection_params)
@@ -161,7 +165,7 @@ class DeleteFileView(FilemanagerMixin, View):
                     'success': False,
                     'message': _('Error deleting resource') + ' ' + path + ' ' + _('exists in datastore') + ': ' + geotiff.name 
                 }))
-
+        
         if self.fm.delete(path):
             return HttpResponse(json.dumps({
                 'success': True
@@ -173,6 +177,23 @@ class DeleteFileView(FilemanagerMixin, View):
                 'message': _('Error deleting resource') + ' ' + path
             }))
 
+class UnzipFileView(FilemanagerMixin, View):
+    def post(self, request, *args, **kwargs):
+        path = FILEMANAGER_DIRECTORY +'/'+ request.POST.get('path')
+        
+        try:
+            folder = path.split(".")[0]
+            self.fm.extract_zip(path, folder)
+
+            return HttpResponse(json.dumps({
+                'success': True
+            }))
+            
+        except Exception as e:
+            return HttpResponse(json.dumps({
+                'success': False,
+                'message': _('Error deleting resource') + ' ' + path
+            }))
 
 class DirectoryCreateView(FilemanagerMixin, FormView):
     template_name = 'filemanager_create_directory.html'
