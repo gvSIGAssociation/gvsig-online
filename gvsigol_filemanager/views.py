@@ -139,7 +139,7 @@ class UploadFileView(FilemanagerMixin, View):
         
         if extension == "zip":
             folder = file.name.split(".")[0]
-            self.fm.extract_zip(file, folder)
+            #self.fm.extract_zip(file, folder)
             
         else:
             # TODO: get filepath and validate characters in name, validate mime type and extension
