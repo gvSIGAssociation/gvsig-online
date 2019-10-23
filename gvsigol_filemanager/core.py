@@ -128,7 +128,7 @@ class Filemanager(object):
     
     def extract_zip(self, file, folder):
         zfile = zipfile.ZipFile(file)
-        zfile.extractall(self.location)
+        zfile.extractall(folder)
     
     def delete(self, name):
         try:
@@ -149,6 +149,11 @@ class Filemanager(object):
             
         except Exception as e:
             if e.errno == 21:
+                path = name.replace('file://', '')
+                self.set_permission_to_dir(path, 775)
+                shutil.rmtree(path)
+                return True
+            if e.errno == 1:
                 path = name.replace('file://', '')
                 self.set_permission_to_dir(path, 775)
                 shutil.rmtree(path)
