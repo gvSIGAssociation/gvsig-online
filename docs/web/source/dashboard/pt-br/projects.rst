@@ -1,52 +1,52 @@
-6. Proyectos
+6. Projetos
 ============
 
-6.1 Crear, modificar y eliminar proyectos
+6.1 Criação, modificação e exclusão projetos
 -----------------------------------------
-Para crear un nuevo proyecto seleccionaremos desde panel de control, menú de la izquierda la opción *"Proyectos"*, lo que nos llevará a la vista listado de proyectos.
+Para criar um novo projecto seleccione a partir do painel de controlo a opção *"Projetos"*, do menu esquerdo, que nos levará à vista de lista de projectos.
 
 .. image:: ../images/project1.png
    :align: center
 
-A continuación seleccionamos la opción *"Añadir proyecto"* (**1**), que se encuentra en la parte superior derecha, para abrir la vista que nos permitirá crear un nuevo proyecto.
+Depois seleccionamos a opção *"Adicionar projeto"* (**1**), que está na parte superior direita, para abrir a vista que nos permitirá criar um novo projecto. 
 
 .. image:: ../images/project2.png
    :align: center
 
-El formulario para crear un nuevo proyecto está formado por los siguientes campos:
+O formulário para criar um novo projeto consiste nos seguintes campos:
 
-*   **Nombre** del proyecto
+*   **Nome** do projeto
 
-*   **Descripción** del proyecto
+*   **Descrição** do projeto
 
-*   **¿Es público?:** Indicamos si el proyecto será acccesible publicamente, sin necesidad de estar autenticado en la plataforma
+*   **¿É público?:** Indicamos se o projeto será acessível publicamente, sem a necessidade de ser autenticado na plataforma.
 
-*   **Vista**: Centraremos el mapa y le añadiremos el zoom deseado
+*   **Visualizar**: Centralizar o mapa e adicionar o zoom desejado
 
-*   **Imagen**: Logo del proyecto que se mostrará en el listado de proyectos. Si no se define ninguna se asignará una por defecto.
+*   **Imagem**: Logotipo do projeto que será mostrado na lista de projetos. Se nenhum estiver definido, um será atribuído por padrão.
 
-Además de estos campos en la parte inferior aparecerán dos listados:
+Além destes campos na parte inferior aparecerão duas listas:
 
 .. image:: ../images/project3.png
    :align: center
    
-*   **Capas base**: Permite asignar las capas base del proyecto, así como la que estará cargada por defecto.
+*   **Camadas base**: Permite atribuir as camadas base do projeto,  bem como as que serão carregadas por padrão. 
 
-*   **Grupos de usuario**: Grupos de usuario(roles) para los que el proyecto estará disponible. Los usuarios administradores tendrán acceso a todos los proyectos.
+*   **Grupos de usuario**: Grupos de usuários (funções) para os quais o projeto estará disponível. Usuários administradores terão acesso a todos os projetos.
 
-*   **Grupos de capas**: Grupos de capas que estarán disponibles en el visor para este proyecto.
-
-
-Para modificar un proyecto existente seleccionaremos el botón (**2**) *"Actualizar proyecto"*, que se encuentra en la parte derecha en cada fila del listado de proyectos.
-
-Para eliminar un proyecto existente seleccionaremos el botón (**4**) *"Eliminar proyecto"*, que se encuentra en la parte derecha en cada fila del listado de proyectos.
+*   **Grupos de camadas**: Grupos de camadas que estarão disponíveis no visualizador para este projeto.
 
 
-6.2 Configurar el orden del TOC
+Para modificar um projeto existente selecione o botão(**2**) *"Atualizar projeto"*, que se está no lado direito de cada linha da lista de projetos. 
+
+Para excluir um projeto existente, selecione o botão (**4**) *"Excluir projeto"*, que está no lado direito de cada linha da lista de projetos.
+
+
+6.2 Definir ordem TOC
 -------------------------------
-Para cada uno de los proyectos es posible definir un orden particular de las capas y grupos de capas. Para ello en el listado de proyectos seleccionaremos el botón (**3**) *"Ordenar TOC"*.
+Para cada projeto é possível definir uma determinada ordem de camadas e grupos de camadas. Para isso, selecione o botão (**3**) *"Classificar TOC"* na lista de projetos. 
 
-A continuación en la vista aparecerán los grupos de capas y dentro de ellos si los desplegamos las capas. Las capas pueden ser ordenadas mediante las flechas que se encuentran en la parte derecha de las mismas, mientras que los grupos de capas pueden ser ordenados usando la técnica de arrastrar y soltar.
+Então na vista aparecerão os grupos de camadas e dentro deles se nós os desdobrarmos as camadas. As camadas podem ser ordenadas usando as setas no lado direito das camadas, enquanto os grupos de camadas podem ser ordenados usando arrastar e soltar.
 
 .. image:: ../images/project4.png
    :align: center
