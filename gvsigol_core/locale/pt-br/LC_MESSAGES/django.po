@@ -427,7 +427,7 @@ msgstr "Mostrando %(numrecords)s registros"
 #: templates/project_list.html:91 templates/shared_view_list.html:76
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
-msgstr "Mostrando desde %(comeÃ§o)s atÃ© %(fim)s de %(numrecords)s registros"
+msgstr "Mostrando desde %(start)s até %(end)s de %(numrecords)s registros"
 
 #: templates/project_list.html:92 templates/shared_view_list.html:77
 msgid "Showing from 0 to 0 of 0 records"
@@ -628,7 +628,7 @@ msgstr "GeolocalizaÃ§Ã£o"
 
 #: views.py:215
 msgid "Center the map in the current position"
-msgstr "Centrar o mapa na posiÃ§Ã£o actual"
+msgstr "Centrar o mapa na posição actual"
 
 #: views.py:219
 msgid "Share view"
@@ -636,7 +636,7 @@ msgstr "Vista de compartilhamento"
 
 #: views.py:220
 msgid "Allows you to share the view in its current state"
-msgstr "Permite-lhe compartilhar a visualizaÃ§Ã£o em seu estado atual"
+msgstr "Permite-lhe compartilhar a visualizasão em seu estado atual"
 
 #: views.py:224
 msgid "Select feature"
@@ -644,7 +644,7 @@ msgstr "Seleccionar caracterÃ­stica"
 
 #: views.py:225
 msgid "Select features from current layers"
-msgstr "Selecionar caracterÃ­sticas das camadas atuais"
+msgstr "Selecionar características das camadas atuais"
 
 #: views.py:346
 msgid "You must enter an project name"
@@ -656,13 +656,13 @@ msgid ""
 "Invalid project name: '{value}'. Identifiers must begin with a letter or an "
 "underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr ""
-"Nome invÃ¡lido do projeto: '{valor}'. Os identificadores devem comeÃ§ar com "
+"Nome invÃ¡lido do projeto: '{value}'. Os identificadores devem començar com "
 "uma letra ou uma sublinhado (_). Os caracteres subsequentes podem ser "
-"letras, sublinhados ou nÃºmeros"
+"letras, sublinhados ou números"
 
 #: views.py:430
 msgid "Project name already exists"
-msgstr "O nome do projeto jÃ¡ existe"
+msgstr "O nome do projeto já existe"
 
 #: views.py:1263 views.py:1265
 msgid "Shared view"

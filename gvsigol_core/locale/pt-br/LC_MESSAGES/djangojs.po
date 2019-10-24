@@ -405,7 +405,7 @@ msgid "Range"
 msgstr "Faixa"
 
 msgid "temporary_field"
-msgstr "campo_temporário\n"
+msgstr "campo_temporário"
 
 msgid "temporary_endfield"
 msgstr "temporário _ campofinal"
