@@ -52,7 +52,7 @@ msgstr "Símbolo padrão"
 #, python-brace-format
 msgid "Invalid name: '{value}'. Name should not contain any special characters"
 msgstr ""
-"Nome inválido: \"{valor}\". O nome não deve conter caracteres especiais"
+"Nome inválido: '{value}'. O nome não deve conter caracteres especiais"
 
 #: templates/base_symbology.html:70 templates/base_symbology_compress.html:70
 msgid "gvsigonline docs"
@@ -383,7 +383,7 @@ msgstr "Descrição"
 #: templates/color_ramp_folder_update.html:13
 #: templates/color_ramp_library_update.html:13
 msgid "Update ramp color library"
-msgstr "Atualizar biblioteca de degradê de cores \n"
+msgstr "Atualizar biblioteca de degradê de cores"
 
 #: templates/color_ramp_folder_update.html:41
 msgid "Library name"
@@ -479,14 +479,14 @@ msgstr "Pesquisar%(sep)s"
 #: templates/style_layer_list.html.py:64
 #, python-format
 msgid "Showing %(numrecords)s records"
-msgstr "Mostrando %( númregistros)s registros)"
+msgstr "Mostrando %(numrecords)s registros"
 
 #: templates/color_ramp_library_list.html:105
 #: templates/color_ramp_library_update.html:130 templates/library_list.html:83
 #: templates/style_layer_list.html.py:65
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
-msgstr "Mostrando desde %( início)s até %(fim)s de %(numregistros)s registros"
+msgstr "Mostrando desde %(start)s até %(end)s de %(numrecords)s registros"
 
 #: templates/color_ramp_library_list.html:106
 #: templates/color_ramp_library_update.html:131 templates/library_list.html:84
@@ -624,7 +624,7 @@ msgstr "Seleccionar imagem"
 #: templates/color_table_add.html:87 templates/color_table_update.html:108
 #: templates/intervals_add.html.py:70 templates/intervals_update.html:74
 msgid "Select number of intervals"
-msgstr "Selecione o número de intervalos\n"
+msgstr "Selecione o número de intervalos"
 
 #: templates/color_table_add.html:92 templates/color_table_update.html:113
 #: templates/intervals_add.html.py:75 templates/intervals_update.html:79

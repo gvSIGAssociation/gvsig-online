@@ -101,22 +101,22 @@ msgstr "Aceitar"
 
 #: templates/group_list.html:76 templates/user_list.html.py:88
 msgid "Processing request..."
-msgstr "Processar solicitação"
+msgstr "Processar solicitação..."
 
 #: templates/group_list.html:77 templates/user_list.html.py:89
 #, python-format
 msgid "Search%(sep)s"
-msgstr "Pesquisar"
+msgstr "Pesquisar%(sep)s"
 
 #: templates/group_list.html:78 templates/user_list.html.py:90
 #, python-format
 msgid "Showing %(numrecords)s records"
-msgstr "Mostrando registros"
+msgstr "Mostrando %(numrecords)s registros"
 
 #: templates/group_list.html:79 templates/user_list.html.py:91
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
-msgstr "Mostrando desde % (começo) até % (final) de (numregistros) registros"
+msgstr "Mostrando desde %(start)s até %(end)s de %(numrecords)s registros"
 
 #: templates/group_list.html:80 templates/user_list.html.py:92
 msgid "Showing from 0 to 0 of 0 records"
@@ -125,11 +125,11 @@ msgstr "Mostrando desde 0 até 0 registros"
 #: templates/group_list.html:81 templates/user_list.html.py:93
 #, python-format
 msgid "Filtering %(max)s records"
-msgstr "Filtragem % (max)s de registros"
+msgstr "Filtragem %(max)s de registros"
 
 #: templates/group_list.html:83 templates/user_list.html.py:95
 msgid "Loading..."
-msgstr "Carregando"
+msgstr "Carregando..."
 
 #: templates/group_list.html:84 templates/group_list.html.py:85
 #: templates/user_list.html:96 templates/user_list.html.py:97
@@ -340,6 +340,6 @@ msgid ""
 "an underscore (_). Subsequent characters can be letters, underscores or "
 "numbers"
 msgstr ""
-"Nome de grupo de usuários inválido: '{valor}'. Os identificadores devem "
+"Nome de grupo de usuários inválido: '{value}'. Os identificadores devem "
 "começar com uma letra ouum sublinhado (_). Os caracteres subsequentes podem "
 "ser letras, sublinhados ou números"
