@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-05-21 14:27+0200\n"
+"POT-Creation-Date: 2019-10-24 12:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,33 +17,32 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: forms.py:30 templates/user_list.html.py:23 templates/user_update.html.py:29
+#: forms.py:30 templates/user_list.html:23 templates/user_update.html:29
 #: templates/user_update.html:30 utils.py:112
 msgid "First name"
 msgstr ""
 
-#: forms.py:31 templates/user_add.html.py:46 templates/user_list.html.py:24
-#: templates/user_update.html:33 templates/user_update.html.py:34 utils.py:113
+#: forms.py:31 templates/user_add.html:46 templates/user_list.html:24
+#: templates/user_update.html:33 templates/user_update.html:34 utils.py:113
 msgid "Last name"
 msgstr ""
 
-#: forms.py:32 templates/login.html.py:46 templates/user_add.html.py:53
-#: templates/user_list.html:22 templates/user_update.html.py:40
+#: forms.py:32 templates/login.html:47 templates/user_add.html:53
+#: templates/user_list.html:22 templates/user_update.html:40
 #: templates/user_update.html:41 utils.py:111
 msgid "Username"
 msgstr ""
 
-#: forms.py:33 templates/user_add.html.py:57 templates/user_list.html.py:25
-#: templates/user_update.html:44 templates/user_update.html.py:45 utils.py:114
+#: forms.py:33 templates/user_add.html:57 templates/user_list.html:25
+#: templates/user_update.html:44 templates/user_update.html:45 utils.py:114
 msgid "Email"
 msgstr ""
 
-#: forms.py:34 templates/login.html.py:50 templates/user_add.html.py:65
-#: utils.py:115
+#: forms.py:34 templates/login.html:51 templates/user_add.html:65 utils.py:115
 msgid "Password"
 msgstr ""
 
-#: forms.py:35 templates/user_add.html.py:69
+#: forms.py:35 templates/user_add.html:69
 msgid "Repeat password"
 msgstr ""
 
@@ -59,20 +58,20 @@ msgstr ""
 msgid "Users"
 msgstr ""
 
-#: templates/dashboard_auth_menu.html:7 templates/user_list.html.py:28
+#: templates/dashboard_auth_menu.html:7 templates/user_list.html:28
 msgid "Groups"
 msgstr ""
 
-#: templates/group_add.html:12 templates/user_add.html.py:12
+#: templates/group_add.html:12 templates/user_add.html:12
 #: templates/user_update.html:12
 msgid "Save"
 msgstr ""
 
-#: templates/group_add.html:39 templates/group_list.html.py:22
+#: templates/group_add.html:39 templates/group_list.html:22
 msgid "Name"
 msgstr ""
 
-#: templates/group_add.html:46 templates/group_list.html.py:23
+#: templates/group_add.html:46 templates/group_list.html:23
 msgid "Description"
 msgstr ""
 
@@ -80,7 +79,7 @@ msgstr ""
 msgid "Add group"
 msgstr ""
 
-#: templates/group_list.html:52 templates/group_list.html.py:100
+#: templates/group_list.html:52 templates/group_list.html:100
 msgid "Delete group"
 msgstr ""
 
@@ -88,73 +87,73 @@ msgstr ""
 msgid "The group will be removed, Do you want continue?"
 msgstr ""
 
-#: templates/group_list.html:58 templates/user_list.html.py:70
+#: templates/group_list.html:58 templates/user_list.html:70
 msgid "Cancel"
 msgstr ""
 
-#: templates/group_list.html:59 templates/user_list.html.py:71
+#: templates/group_list.html:59 templates/user_list.html:71
 msgid "Accept"
 msgstr ""
 
-#: templates/group_list.html:76 templates/user_list.html.py:88
+#: templates/group_list.html:76 templates/user_list.html:88
 msgid "Processing request..."
 msgstr ""
 
-#: templates/group_list.html:77 templates/user_list.html.py:89
+#: templates/group_list.html:77 templates/user_list.html:89
 #, python-format
 msgid "Search%(sep)s"
 msgstr ""
 
-#: templates/group_list.html:78 templates/user_list.html.py:90
+#: templates/group_list.html:78 templates/user_list.html:90
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr ""
 
-#: templates/group_list.html:79 templates/user_list.html.py:91
+#: templates/group_list.html:79 templates/user_list.html:91
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr ""
 
-#: templates/group_list.html:80 templates/user_list.html.py:92
+#: templates/group_list.html:80 templates/user_list.html:92
 msgid "Showing from 0 to 0 of 0 records"
 msgstr ""
 
-#: templates/group_list.html:81 templates/user_list.html.py:93
+#: templates/group_list.html:81 templates/user_list.html:93
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr ""
 
-#: templates/group_list.html:83 templates/user_list.html.py:95
+#: templates/group_list.html:83 templates/user_list.html:95
 msgid "Loading..."
 msgstr ""
 
-#: templates/group_list.html:84 templates/group_list.html.py:85
-#: templates/user_list.html:96 templates/user_list.html.py:97
+#: templates/group_list.html:84 templates/group_list.html:85
+#: templates/user_list.html:96 templates/user_list.html:97
 msgid "No records available"
 msgstr ""
 
-#: templates/group_list.html:87 templates/user_list.html.py:99
+#: templates/group_list.html:87 templates/user_list.html:99
 msgid "First"
 msgstr ""
 
-#: templates/group_list.html:88 templates/user_list.html.py:100
+#: templates/group_list.html:88 templates/user_list.html:100
 msgid "Previous"
 msgstr ""
 
-#: templates/group_list.html:89 templates/user_list.html.py:101
+#: templates/group_list.html:89 templates/user_list.html:101
 msgid "Next"
 msgstr ""
 
-#: templates/group_list.html:90 templates/user_list.html.py:102
+#: templates/group_list.html:90 templates/user_list.html:102
 msgid "Last"
 msgstr ""
 
-#: templates/group_list.html:93 templates/user_list.html.py:105
+#: templates/group_list.html:93 templates/user_list.html:105
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr ""
 
-#: templates/group_list.html:94 templates/user_list.html.py:106
+#: templates/group_list.html:94 templates/user_list.html:106
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr ""
@@ -175,64 +174,64 @@ msgstr ""
 msgid "return to dashboard"
 msgstr ""
 
-#: templates/login.html:39
+#: templates/login.html:40
 msgid "Sign in to start your session"
 msgstr ""
 
-#: templates/login.html:55
+#: templates/login.html:56
 msgid "Sign In"
 msgstr ""
 
-#: templates/login.html:60
+#: templates/login.html:61
 msgid "I forgot my password"
 msgstr ""
 
-#: templates/password_reset.html:39
+#: templates/password_reset.html:40
 msgid "Enter your username to retrieve your password"
 msgstr ""
 
-#: templates/password_reset.html:46
+#: templates/password_reset.html:47
 msgid "Insert your username"
 msgstr ""
 
-#: templates/password_reset.html:51
-#: templates/registration/password_reset_confirm.html:59
+#: templates/password_reset.html:52
+#: templates/registration/password_reset_confirm.html:61
 msgid "Send"
 msgstr ""
 
-#: templates/password_reset2.html:39
+#: templates/password_reset2.html:40
 msgid "Contact the system administrator"
 msgstr ""
 
-#: templates/password_reset_success.html:39
+#: templates/password_reset_success.html:40
 msgid "We've sent an email to your account with a link to set the new password"
 msgstr ""
 
-#: templates/password_reset_success.html:40
+#: templates/password_reset_success.html:41
 msgid "Return"
 msgstr ""
 
-#: templates/registration/password_reset_confirm.html:39
+#: templates/registration/password_reset_confirm.html:41
 msgid "Enter new your password"
 msgstr ""
 
-#: templates/registration/password_reset_confirm.html:50
+#: templates/registration/password_reset_confirm.html:52
 msgid "Insert new password"
 msgstr ""
 
-#: templates/registration/password_reset_confirm.html:54
+#: templates/registration/password_reset_confirm.html:56
 msgid "Confirm new password"
 msgstr ""
 
-#: templates/registration/password_reset_confirm.html:88
+#: templates/registration/password_reset_confirm.html:90
 msgid "Password confirmation doesn't match"
 msgstr ""
 
-#: templates/registration/password_reset_confirm.html:91
+#: templates/registration/password_reset_confirm.html:93
 msgid "Password can't be empty"
 msgstr ""
 
-#: templates/registration/password_reset_confirm.html:94
+#: templates/registration/password_reset_confirm.html:96
 msgid "Password has contain at least 8 characters"
 msgstr ""
 
@@ -240,21 +239,21 @@ msgstr ""
 msgid "First Name"
 msgstr ""
 
-#: templates/user_add.html:83 templates/user_update.html.py:55
+#: templates/user_add.html:83 templates/user_update.html:55
 #: templates/user_update.html:57
 msgid "Is superuser"
 msgstr ""
 
-#: templates/user_add.html:88 templates/user_update.html.py:64
+#: templates/user_add.html:88 templates/user_update.html:64
 #: templates/user_update.html:66
 msgid "Can manage projects"
 msgstr ""
 
-#: templates/user_add.html:95 templates/user_update.html.py:74
+#: templates/user_add.html:95 templates/user_update.html:74
 msgid "Assign groups"
 msgstr ""
 
-#: templates/user_add.html:108 templates/user_update.html.py:88
+#: templates/user_add.html:108 templates/user_update.html:88
 #: templates/user_update.html:90
 msgid "Assign group"
 msgstr ""
@@ -271,7 +270,7 @@ msgstr ""
 msgid "is staff"
 msgstr ""
 
-#: templates/user_list.html:64 templates/user_list.html.py:112
+#: templates/user_list.html:64 templates/user_list.html:112
 msgid "Delete user"
 msgstr ""
 
@@ -299,35 +298,31 @@ msgstr ""
 msgid "This is your new temporary password"
 msgstr ""
 
-#: views.py:70 views.py:150 views.py:248
+#: views.py:77 views.py:148 views.py:246
 msgid "Your account has been disabled"
 msgstr ""
 
-#: views.py:72 views.py:74 views.py:152 views.py:154 views.py:250
+#: views.py:79 views.py:81 views.py:150 views.py:152 views.py:248
 msgid "The username and password you have entered do not match our records"
 msgstr ""
 
-#: views.py:200
+#: views.py:198
 msgid "User account does not exist"
 msgstr ""
 
-#: views.py:254
+#: views.py:252
 msgid "Invalid token. Your link has expired, you need to ask for another one."
 msgstr ""
 
-#: views.py:372
+#: views.py:370
 msgid "User group for"
 msgstr ""
 
-#: views.py:419
-msgid "There must be at least one server"
-msgstr ""
-
-#: views.py:550
+#: views.py:551
 msgid "Admin is a reserved group"
 msgstr ""
 
-#: views.py:554
+#: views.py:555
 #, python-brace-format
 msgid ""
 "Invalid user group name: '{value}'. Identifiers must begin with a letter or "
