@@ -1,243 +1,245 @@
 5. Simbología
 =============
-Para crear o modificar la leyenda de una capa seleccionaremos la entrada *"Estilos de capa"* en el menú de simbología.
+Para criar ou modificar a legenda de uma camada selecione a entrada *"Estilos de camada"* no menu de simbologia.
 
 .. image:: ../images/sym1_2.png
    :align: center
 
-- Aparecerá un listado con las capas disponibles. 
-- Cada capa del listado dispone de un selector donde se muestran las leyendas o estilos disponibles para la capa. 
-- Para cada estilo de capa se le podrá añadir un *'nuevo estilo'* (**1**) y tantos como se deseen teer en el recuadro de selector de estilos que dispone cada capa. 
-- Los estilos definidos se podrán seleccionar para ser modificadas(2).
-- El estilo que no se esté usando como leyenda de la capa, es decir, que no esté fijada por defecto, se puede eliminar seleccionando el estilo en el selector y luego botón (**3**) *'Eliminar estilo'*.
+- Aparecerá uma lista de camadas disponíveis.
+- Cada camada na lista tem um seletor onde as legendas ou estilos disponíveis para a camada são mostrados. 
+- Para cada estilo de camada você pode adicionar um *'novo estilo'* (**1**) e tantos quantos quiser na caixa de seleção de estilo fornecida por cada camada. 
+- Os estilos definidos podem ser selecionados para serem modificados(2).
+- O estilo que não está sendo usado como uma legenda de camada, ou seja, que não está definido por padrão, pode ser removido selecionando o estilo no seletor e, em seguida, o botão (**3**) *'Excluir estilo'*.
 
-Si seleccionamos el botón el botón añadir se nos mostrará una vista para que seleccionemos el tipo de leyenda que deseamos crear.
-En caso de que la capa sea de tipo vectorial el menú que se nos mostrará será el siguiente:
+Se seleccionarmos o botão Adicionar, o botão Adicionar mostrará uma vista para seleccionar o tipo de legenda que queremos criar.
+Se a camada é de tipo vetorial, o menu que será mostrado será o seguinte:
 
 .. image:: ../images/sym2.png
    :align: center
    
-Y si es de tipo raster de esta forma:
+E se for do tipo raster desta maneira:
 
 .. image:: ../images/sym3.png
    :align: center
 
-5.1 Leyenda de símbolo único
+5.1 Legenda de Símbolo Único
 ----------------------------
-La leyenda de símbolo único es la más simple de todas y nos permite definir un estilo que será aplicado a todos los elementos de una capa de la misma forma, sin hacer ningún tipo de distinción.
+A legenda do símbolo único é a mais simples de todas e permite-nos definir um estilo que será aplicado a todos os elementos de uma camada da mesma forma, sem fazer qualquer distinção.
 
 .. image:: ../images/sym4_2.png
    :align: center
 
 
-La vista para crear una leyenda de símbolo único está divida en tres áreas:
+A vista para criar uma legenda de símbolo única é dividida em três áreas:
 
-**1** - El área de metadatos(recuadro rojo) contiene los siguientes campos:
+**1** - A área de metadados (caixa vermelha) contém os seguintes campos:
 
-*   **Nombre**: El nombre del estilo se genera por defecto por tanto no es necesario definirlo.
+*   **Nome**: O nome do estilo é gerado por padrão, portanto não é necessário defini-lo.
 
-*   **Título**: Título que aparecerá en la leyenda que se muestra en el visor.
+*   **Título**: Título que aparecerá na legenda mostrada no visualizador.
 
-*   **Escala mínima**: Escala mínima a partir de la cual será mostrada la leyenda (por defecto está 'sin límites').
+*   **Escala mínima**: Escala mínima a partir da qual a legenda será mostrada (por defeito é 'sem limites').
 
-*   **Escala máxima**: Escala máxima hasta la cual será mostrada la leyenda (por defecto está 'sin límites').
+*   **Escala máxima**: Escala máxima até a qual a legenda será mostrada (por padrão é 'sem limites').
 
-*   **Por defecto**: Si seleccionamos este check, el estilo será el que se muestre por defecto en el visor.
+*   **Padrão**: Se seleccionarmos esta opção, o estilo será o que aparece por defeito no visualizador.
 
-**2** - El área de pre-visualización (recuadro morado) contiene el mapa donde podremos observar el estilo de la leyenda y la entrada para añadir 'etiqueta'
-Para actualizar la pre-visualización lo haremos a través del botón *"Actualizar previsualización"* situado en la parte superior derecha.
+**2** - A área de visualização (caixa roxa) contém o mapa onde podemos ver o estilo da legenda e a entrada para adicionar o ''rótulo''
+Para atualizar a visualização, vamos fazê-lo através do botão *"Atualizar visualização"* localizado no canto superior dereito.
 
 
-**3** - El área de simbolizadores (recuadro verde) Desde aquí iremos añadiendo los distintos simbolizadores que conformarán finalmente el símbolo.
+**3** -  A área dos simbolizadores (caixa verde) A partir daqui estaremos adicionando os diferentes simbolizadores que finalmente formarão o símbolo.
 
-Tenemos dos opciones para agregar simbolizadores:
+Temos duas opções para adicionar simbolizadores:
 
-*   **Importar un símbolo desde una libreria:** Se nos mostrará un dialogo con desplegable donde seleccionaremos la biblioteca de símbolos. A continuación seleccionaremos el símbolo.
+*   **Importar um símbolo de uma biblioteca:** Será mostrado um diálogo onde seleccionaremos a biblioteca de símbolos. Em seguida, seleccione o símbolo.
 
 .. image:: ../images/sym5_2.png
    :align: center
 
-*   **Añadir uno o varios simbolizadores:** Como hemos comentado anteriormente un símbolo puede estar formado por uno o más simbolizadores.
+*   **Adicionar um ou mais simbolizadores:** Como mencionado acima, um símbolo pode consistir em um ou mais simbolizadores.
 
 .. image:: ../images/sym6_2.png
    :align: center
 
-Podremos editar o eliminar un simbolizador desde los botones que se encuentran en la parte derecha.
+Você pode editar ou excluir um simbolizador dos botões à direita.
 
 .. image:: ../images/sym7.png
    :align: center
 
-Al seleccionar el botón de edición se abrirá un dialogo donde podremos configurar los valores de las propiedades del simbolizador en función de su tipo.
+Selecionando o botão editar abrirá um diálogo onde poderemos configurar os valores das propriedades do simbolizador em função do seu tipo.
 
 .. image:: ../images/sym8.png
    :align: center
 
-En caso de tener varios simbolizadores podemos definir el orden de visualización de los mismos mediante la técnica de arrastrar y soltar. Para ello seleccionaremos el simbolizador y lo arrastraremos a la posición deseada.
+No caso de termos vários simbolizadores podemos definir a ordem de visualização dos mesmos através da técnica de arrastar e largar. Para isso, selecione o simbolizador e arraste-o para a posição desejada.
 
 .. image:: ../images/sym9.png
    :align: center
 
 
-5.2 Añadir etiquetado
+5.2 Adicionar etiquetagem
 ---------------------
-Las etiquetas son un tipo especial de simbolizadores de tipo texto. Para añadir una nueva etiqueta seleccionaremos el botón *"Añadir etiqueta"* que se ubica en la esquina superior derecha de cada ventana de configuración de estilo.
-
+As etiquetas são um tipo especial de simbolizadores de texto. Para adicionar uma nova etiqueta selecione o botão *"Añadir etiqueta"* localizado no canto superior direito de cada janela de definição de estilo.
 
 .. image:: ../images/sym10_2.png
    :align: center
 
-- La ventana de configuración de etiquetado consta de cuatro (4) pestañas, general, fuente, halo y filtro.
+-  A janela de configuração de etiquetagem consiste em quatro (4) separadores, geral, fonte, halo e filtro.
 
-- Cuando se activa la ventana de etiquetado se muestra por defecto la primera pestaña '*General'*, desde esta opción se puede:
+-   Quando a janela de etiquetagem é ativada, a primeira aba '*General'* é exibida por padrão, a partir desta opção você pode:
 
-            - activar el 'check' para poder habilitar las demás pestañas de configuración de etiquetado,
-            - Se añade un título, este se verá reflejado en la leyenda del mapa. Por defecto estará el nombre del campo que el sistema detecta para etiquetar. 
-            - se puede definir una escala mínima y máxima en la que se mostrará el etiquetado sobre el mapa del proyecto.
+            - activar o 'check' para activar os outros separadores da configuração de etiquetagem,
+            - Um título é adicionado, isto será refletido na legenda do mapa. Por padrão, haverá o nome do campo que o sistema detecta para etiquetar.
+            - Você pode definir uma escala mínima e máxima na qual a etiqueta será mostrada no mapa do projeto.
 
 .. image:: ../images/sym11_2.png
    :align: center
 
-- En la pestaña *'fuente'* como cualquier otro simbolizador una vez activado el check anterior, podremos editar sus propiedades.
+- No separador *'fonte'* como qualquer outro simbolizador uma vez activada a verificação anterior, poderemos editar as suas propriedades.
 
 .. image:: ../images/sym11_3.png
    :align: center
 
-- La pestaña *'halo'* sirve para definir el color de sombreado sobre la fuente. Esto es opcional para el usuario.
+-  A aba *'halo'* é usada para definir a cor do sombreamento na fonte. Isto é opcional para o usuário.
 
-- La pestaña *'filtro'*, como su nombre lo indica se puede realizar una expresión básica para que ejecute un filtro sobre las etiquetas que se quieran mostrar.
+-  O tabulador *'filtro'*, como seu nome indica, pode ser utilizado como expressão básica para executar um filtro nas etiquetas a serem exibidas.
 
 .. image:: ../images/sym11_4.png
    :align: center
    
-También se puede construir filtros con **'OR expression'** o **'AND expression'**, para esta opción se configura la expresión del primer filtro *(recuadro azul)* y luego se debe pinchar sobre el botón *'add'* y seleccionar la expresión, a continuación se añade un 'AND u OR' y otra ventana de filtro para configurar la siguiente expresión *(recuadro amarillo)*.
+Você também pode construir filtros com **'OR expression'** ou **'AND expression'**, para esta opção você configura a expressão do primeiro filtro *(caixa azul)* e então clique no botão *'add'* e selecione a expressão, então adicione um 'AND ou OR' e outra janela de filtro para configurar a próxima expressão *(caixa amarela)*.
 
 .. image:: ../images/sym11_5.png
    :align: center
    
 
-5.3 Leyenda de valores únicos
+5.3 Legenda de valores únicos
 -----------------------------
-La leyenda de valores únicos genera una clasificación de símbolos en función de un campo de la capa.
+A legenda de valores exclusivos gera uma classificação de símbolos de acordo com um campo no layer.
 
 .. image:: ../images/sym12_2.png
    :align: center
 
-- Seleccionaremos el campo por el que deseamos realizar la clasificación (**1**), y a continuación se crearán de forma automática las clases correspondientes (**2**).
+- Selecionar o campo pelo qual deseja classificar(**1**), e, em seguida, criar automaticamente as classes correspondentes (**2**).
 
-- Cada una de las clases creadas puede ser modificada de la misma forma que si se tratara de un símbolo único.
+- Cada uma das classes criadas pode ser modificada da mesma forma como se fosse um símbolo único.
 
-- Se puede asignar una escala mínima y máxima de visualización (**3**) que se aplicará por defecto para todas las clases.
+- Você pode atribuir uma escala de exibição mínima e máxima (**3**) que será aplicada por padrão para todas as classes.
 
-- Para cada clase por separado también se puede asignar escala mínima y máxima, esto se hace desde la herramienta que se ubica a la derecha de la clase *'editar regla'* (**4**), se debe activar el check de 'visible por escala'
+- Para cada classe separadamente você também pode atribuir escala mínima e máxima, isto é feito a partir da ferramenta localizada à direita da classe *'editar regra'* (**4**), você deve ativar a verificação de 'visível por escala'.
+
 
 .. image:: ../images/sym12_3.png
    :align: center
 
-- En la ventana de 'editar regla' también se puede añadir o cambiar el título de la clase y este será el que se muestre en la leyenda del visor de mapa.
+- Na janela 'editar regra' você também pode adicionar ou alterar o título da classe e este será o mostrado na legenda do visualizador de mapas.
 
-.. note::
-   Si no se quiere editar la escala a cada una de las clases, éstas tedrán por defecto la escala aplicada en la capa general.
+.. nota::
+   Se você não quiser editar a escala para cada classe, elas serão o padrão para a escala aplicada na camada geral.
 
 
-5.4 Leyenda de intervalos
+5.4 Legenda dos intervalos
 -------------------------
-El tipo de leyenda más habitual para representar datos numéricos quizá sea la de intervalos, que permite clasificar los valores disponibles en los distintos elementos en una serie de rangos.
-Para generar la leyenda de intervalos en primer lugar seleccionaremos el campo por el que deseamos realizar la clasificación (1) (solo aparecerán los campos numéricos),
-y a continuación seleccionaremos el número de intervalos (2).
+O tipo mais comum de legenda para representar dados numéricos pode ser a de intervalos, o que permite classificar os valores disponíveis nos diferentes elementos de uma série de intervalos.
+Para gerar a legenda de intervalos, primeiro selecione o campo pelo qual deseja classificar (1) (somente os campos numéricos aparecerão)
+e, em seguida, selecione o número de intervalos (2).
 
 .. image:: ../images/sym13.png
    :align: center
 
-- Cada una de las clases creadas puede ser modificada de la misma forma que si se tratara de un símbolo único.
+- Cada uma das classes criadas pode ser modificada da mesma forma como se fosse um símbolo único.
 
-- También se puede personalizar la escala a cada clase como en el caso de Valores únicos.
+-  Você também pode personalizar a escala para cada classe como no caso de Valores únicos.
 
-5.5 Leyenda de expresiones
+5.5 Legenda de expressões
 --------------------------
-Mediante esta leyenda podremos asignar un tipo de símbolo a los elementos que cumplan con una determinada condición o expresión. Y, por supuesto, podemos tener en una misma leyenda tantas condiciones como deseemos.
+Com esta legenda podemos atribuir um tipo de símbolo aos elementos que cumprem uma determinada condição ou expressão. E, claro, podemos ter na mesma lenda tantas condições quantas quisermos.
 
-- Para crear un un símbolo seleccionaremos el botón *"Añadir nueva regla"* (1), lo que nos creará un nuevo símbolo con los valores por defecto.
+- Para criar um símbolo selecione o botão *"Adicionar nova regra"* (1), que irá criar um novo símbolo com os valores padrão.
 
-- Cada una de las clases creadas puede ser modificada de la misma forma que si se tratara de un símbolo único
+- Cada uma das classes criadas pode ser modificada da mesma forma como se fosse um símbolo único.
 
-- Asignarle escala y cambiar el título a cada una de las reglas por medio de la herramienta *'editar regla'* (**2**)
+- Calcular e alterar o título de cada regra usando a ferramenta *'editar regra'* (**2**)
 
-- Para definir la condición de filtrado seleccionaremos en el menú de herramientas la opción *"Editar filtro"* (**2**).
+- Para definir a condição de filtragem, selecionar no menu de ferramentas a opção *"Editar filtro"* (**2**).
 
 .. image:: ../images/sym14_2.png
    :align: center
 
-A continuación se nos mostrará un diálogo, desde donde podremos definir el primer filtro simple.
+A seguir será mostrada uma caixa de diálogo, a partir da qual poderemos definir o primeiro filtro simples.
 
 .. image:: ../images/sym15.png
    :align: center
 
-De igual manera que los filtros del etiquetado, se podrá realizar un estilo componiendo un filtro con las expresiones **'AND'** y **'OR'**.
+Da mesma forma que os filtros de etiquetagem, você pode criar um estilo compondo um filtro com as expressões ' **'AND'** e **'OR'**.
 
 .. image:: ../images/sym15_2.png
    :align: center
 
 
-5.6 Mapa de color (ráster)
+5.6 Mapa de cores (raster)
 --------------------------
-Mediante esta leyenda podremos asignar una tabla de colores a una capa de tipo ráster. Las rampas de color se utilizan, por ejemplo, para aplicaciones específicas, como mostrar la elevación o precipitación.
+Com esta legenda podemos atribuir uma tabela de cores a uma camada rasterizada. Rampas coloridas são usadas, por exemplo, para aplicações específicas, como exibição de elevação ou precipitação.
 
-Para añadir una nueva entrada a la tabla de colores seleccionaremos el botón *"Añadir entrada de color"* (1).
+Para adicionar uma nova entrada à tabela de cores seleccione o botão *"Adicionar entrada de cor"* (1).
 
 .. image:: ../images/sym16.png
    :align: center
 
-Podremos añadir tantas entradas de color como deseemos. Para editar los valores de cada una de las entradas seleccionaremos el botón editar.
+Podemos adicionar quantas entradas coloridas quisermos. Para editar os valores de cada uma das entradas, selecione o botão editar.
 
-A continuación se nos mostrará un dialogo para que configuremos los valores.
+
+Em seguida, será mostrada uma caixa de diálogo para configurar os valores. 
 
 .. image:: ../images/sym17.png
    :align: center
 
-*   **Color:** Seleccionaremos el color deseado para la entrada.
+*   **Color:** Selecione a cor desejada para a entrada.
 
-*   **Cantidad:** Aquí seleccionaremos el valor del ráster por el que filtraremos.
+*   **Quantidade:** Aqui vamos selecionar o valor do raster pelo qual vamos filtrar.
 
-*   **Etiqueta:** Etiqueta que se mostrará al representar la leyenda para este valor.
+*   **Rótulo:**  Rótulo que será mostrado ao representar a legenda para este valor.
 
-*   **Opacidad:** Nivel de opacidad para esta entrada de color.
+*   **Opacidade:** Nível de opacidade para esta entrada de cor.
 
 
 
 5.7 Bibliotecas de símbolos
 ---------------------------
-Las bibliotecas de símbolos nos permiten crear y agrupar símbolos genéricos que posteriormente podremos importar desde las leyendas de capa.
+As bibliotecas de símbolos permitem criar e agrupar símbolos genéricos que posteriormente podemos importar de legendas de camadas.
 
-Para crear una nueva biblioteca de símbolos seleccionaremos la entrada *"Bibliotecas de símbolos"* en el menú de simbología.
+Para criar uma nova biblioteca de símbolos seleccione a entrada  *"Bibliotecas de símbolos"* no menu de simbologia.
 
 .. image:: ../images/sym18.png
    :align: center
 
-Para crea una nueva biblioteca seleccionaremos el botón *"Añadir biblioteca"* que se encuentra en la parte superior derecha, y rellenaremos los campos nombre y descripción en el formulario.
+Para criar uma nova biblioteca, selecione o botão *"Adicionar biblioteca"* no canto superior direito e preencha os campos de nome e descrição no formulário.
 
-Podremos también importar bibliotecas que hayan sido creadas previamente en la plataforma. Las bibliotecas de símbolos son archivos están formadas por un archivo ZIP que contiene un fichero con extensión .sld por cada uno de los símbolos y un directorio resources con loas imágenes en caso de que haya símbolos puntuales de tipo imagen.
+Também poderemos importar bibliotecas que tenham sido previamente criadas na plataforma. As bibliotecas de símbolos são ficheiros compostos por um arquivo ZIP contendo um ficheiro com uma extensão .sld para cada um dos símbolos e um diretório de recursos com as imagens no caso de existirem símbolos pontuais do tipo de imagem.
 
-Para añadir símbolos a una biblioteca seleccionaremos la opción actualizar biblioteca en el listado (botón verde).
+Para adicionar símbolos a uma biblioteca seleccione a opção actualizar biblioteca na lista (botão verde).
 
-Podremos añadir 4 tipos de símbolos: Gráficos externos (imágenes), puntos, líneas y polígonos.
+Podemos adicionar 4 tipos de símbolos: gráficos externos (imagens), pontos, linhas e polígonos.
  
-En caso de que el símbolo que deseemos añadir sea de tipo imagen el interfaz nos permitirá seleccionar la imagen desde nuestro sistema de ficheros local.
+Se o símbolo que queremos adicionar é um tipo de imagem, a interface permitir-nos-á seleccionar a imagem do nosso sistema de ficheiros local. 
 
 .. image:: ../images/sym19.png
    :align: center
 
-.. note::
-   Actualmente únicamente se soportan imágenes en formato PNG.
+.. nota::
+   Atualmente apenas imagens em formato PNG são suportadas.
 
-Conforme vayamos añadiendo símbolos estos irán apareciendo en la vista de la biblioteca, desde donde podremos seleccionarlos para modificarlos o eliminarlos.
+
+Na medida em que vamos adicionando símbolos, estes aparecerão na vista da biblioteca, desde onde podemos os selecionar para modificar ou apagar.
 
 .. image:: ../images/sym20.png
    :align: center
 
-Podremos exportar cualquier biblioteca de símbolos, para tener un resguardo de la misma y poder restaurarla posteriormente o compartirla con otros usuarios de la aplicación. Para ello seleccionaremos el botón naranja.
+Poderemos exportar qualquer biblioteca de símbolos, ter um comprovante do mesmo e poder restaurar mais tarde ou compartilhar com outros usuários da aplicação. Para isso, selecione o botão laranja.
 
-Al seleccionar exportar se genera un archivo ZIP que contiene la definición de cada uno de los símbolos en formato SLD, y un directorio “resources” que contendrá las imágenes de los símbolos que sean de tipo gráfico externo.
+A seleção da exportação gera um arquivo ZIP que contém a definição de cada um dos símbolos no formato SLD, e um diretório de "recursos" que conterá as imagens dos símbolos que são de tipo gráfico externo.
 
-Por último para eliminar una biblioteca seleccinaremos el botón rojo.
+Finalmente, para apagar uma biblioteca, seleccione o botão vermelho.
 
-Al eliminar la biblioteca borraremos esta y todos los símbolos que hayan asociados a ella.
+Ao apagar a biblioteca nós apagaremos este e todos os símbolos que têm associado a ele.
