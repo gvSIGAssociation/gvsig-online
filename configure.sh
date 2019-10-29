@@ -127,6 +127,37 @@ function configure() {
 		fi		
 	fi
 	grep -rl "##EMAIL_BACKEND_ACTIVE##"  | xargs sed -i "s/##EMAIL_BACKEND_ACTIVE##/$EMAIL_BACKEND_ACTIVE/g"
+	if [ -z $EMAIL_USE_TLS ]; then
+		EMAIL_USE_TLS="True"
+	else
+		if [ "$EMAIL_USE_TLS" = "true" ]; then
+			EMAIL_USE_TLS=True
+		else
+			EMAIL_USE_TLS=False
+		fi		
+	fi
+	grep -rl "##EMAIL_USE_TLS##"  | xargs sed -i "s/##EMAIL_USE_TLS##/$EMAIL_USE_TLS/g"
+	if [ -z $EMAIL_HOST ]; then
+		echo "WARNING: EMAIL_HOST is not defined, assuming localhost"
+		EMAIL_HOST="localhost"
+	fi
+	grep -rl "##EMAIL_HOST##"  | xargs sed -i "s ##EMAIL_HOST## $EMAIL_HOST g"
+	if [ -z $EMAIL_HOST_USER ]; then
+		echo "WARNING: EMAIL_HOST_USER is not defined, assuming 'gvsigol'"
+		EMAIL_HOST="gvsigol"
+	fi
+	grep -rl "##EMAIL_HOST_USER##"  | xargs sed -i "s ##EMAIL_HOST_USER## $EMAIL_HOST_USER g"
+	if [ -z $EMAIL_HOST_PASSWORD ]; then
+		echo "WARNING: EMAIL_HOST_PASSWORD is not defined, using GVSIGOL_PASSWD"
+		EMAIL_HOST_PASSWORD="$GVSIGOL_PASSWD"
+	fi
+	grep -rl "##EMAIL_HOST_PASSWORD##"  | xargs sed -i "s ##EMAIL_HOST_PASSWORD## $EMAIL_HOST_PASSWORD g"
+	if [ -z $EMAIL_TIMEOUT ]; then
+		echo "WARNING: EMAIL_TIMEOUT is not defined, using 60 seconds"
+		EMAIL_TIMEOUT=60
+	fi
+	grep -rl "##EMAIL_TIMEOUT##"  | xargs sed -i "s ##EMAIL_TIMEOUT## $EMAIL_TIMEOUT g"
+
 	
 	#TODO: hay que llevarlo a la app 
 	if [ "$LANGUAGES" = "" ]; then
@@ -150,7 +181,7 @@ function configure() {
 	grep -rl "##LOGOUT_PAGE_URL##"  | xargs sed -i "s ##LOGOUT_PAGE_URL## $LOGOUT_PAGE_URL g"
 
 	if [ -z $CELERY_BROKER_URL ]; then
-		echo "WARNING: CELERY_BROKER_URL is not defined, deriving one assuming localhost and GVSIGOL_PASSWD"					
+		echo "WARNING: CELERY_BROKER_URL is not defined, deriving one assuming localhost and GVSIGOL_PASSWD"
 		CELERY_BROKER_URL="pyamqp://gvsigol:$GVSIGOL_PASSWD@localhost:5672/gvsigol"
 	fi
 	grep -rl "##CELERY_BROKER_URL##"  | xargs sed -i "s ##CELERY_BROKER_URL## $CELERY_BROKER_URL g"
