@@ -436,4 +436,3 @@ except:
     }
     
 CELERY_BROKER_URL = '##CELERY_BROKER_URL##'
-CELERY_TASK_ACKS_LATE = True
