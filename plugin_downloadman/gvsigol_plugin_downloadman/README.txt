@@ -50,14 +50,24 @@ EMAIL_USE_SSL = True
 
 
 
-EXECUTION
-===========
+EXECUTION (DEVELOPMENT)
+=======================
 
 cd gvsigol
 # We need to start at least a celery worker. We define 2 queues (package and notify)
 celery -A gvsigol worker -l info -Q package,notify
 # if we want debug log level:
 celery -A gvsigol worker -l debug -Q package,notify
+# We execute a different worker for Celery Beat (scheduler)
+celery -A gvsigol beat 
+
+EXECUTION (PRODUCTION)
+=======================
+
+In install/celery/ folder contains systemd scripts to execute the workers as services.
+By default, it will start a group of nodes (named "package") to process download requests
+and another group of nodes for the rest of tasks (mailing/notifying, cleaning periodic
+tasks, etc). The config file can be customized to adapt these settings to any workload. 
 
 MONITORING
 ===========

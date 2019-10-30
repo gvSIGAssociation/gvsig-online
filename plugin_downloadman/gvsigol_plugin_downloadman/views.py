@@ -368,9 +368,7 @@ def createResourceLocator(resource, downloadRequest):
 def requestDownload(request):
     if request.is_ajax():
         if request.method == 'POST':
-            print 'Raw Data: "%s"' % request.body
             json_data = json.loads(request.body)
-            print json_data
             downRequest = downman_models.DownloadRequest()
             if request.user and not request.user.is_anonymous():
                 downRequest.requested_by = request.user.email
@@ -389,14 +387,12 @@ def requestDownload(request):
             try:
                 #processDownloadRequest(downRequest.id)
                 # this requires the Celery worker to be started, see README
-                result = processDownloadRequest.apply_async(args=[downRequest.id], queue='package')
-                print(result.backend)
+                processDownloadRequest.apply_async(args=[downRequest.id], queue='package')
             except:
                 logger.exception("error queuing task")
                 downRequest.request_status = downman_models.DownloadRequest.PERMANENT_PACKAGE_ERROR_STATUS
                 downRequest.save()
 
-            print "volviendo"
             status_text = ''
             for (choice_code, choice_desc) in downman_models.DownloadRequest.REQUEST_STATUS_CHOICES:
                 if downRequest.request_status == choice_code:
@@ -415,14 +411,12 @@ def requestTracking(request, uuid):
         if r.request_status == downman_models.DownloadRequest.COMPLETED_STATUS or r.request_status == downman_models.DownloadRequest.PACKAGED_STATUS:
             if r.downloadlink:
                 if timezone.now() > r.downloadlink.valid_to:
-                    print "expired"
                     result['download_status'] = _('Your download request has expired and it is not longer available. You can start a new request')
                     result['details'] = ''
                     return render(request, 'track_request.html', result)
                 result['download_url'] = getRealDownloadUrl(r.downloadlink.prepared_download_path)
                 result['download_status'] = _('Your request is ready for download')
                 valid_to = date_format(r.downloadlink.valid_to, 'DATE_FORMAT')
-                print valid_to
                 result['details'] = _('The link will be available until %(valid_to)s') % {'valid_to': valid_to}
             else:
                 result['download_status'] = _('Your download request could not be processed.')
@@ -447,10 +441,8 @@ def requestTracking(request, uuid):
             result['details'] = _('You will receive an email when it becomes available')
         return render(request, 'track_request.html', result)
     except:
-        print "ummm no task"
         logger.exception("error getting the task")
         pass
-    print "ummmh"
     return render(request, 'track_request.html', {'download_status': _('Your download request could not be found'), 'details': '', 'download_uuid':  uuid})
 
 def getRealDownloadUrl(download_path):
@@ -469,27 +461,17 @@ def getDirectDownloadUrl(url, name):
         """
         Gets the public download URL for direct download resource
         """
-        logger.debug("getDirectDownloadUrl")
-        logger.debug(url)
-        logger.debug(name)
         resources = resolveFileLocator(url, name)
         if len(resources)>0:
-            logger.debug("download_path")
             download_path = resources[0].res_path
-            logger.debug(download_path)
             if os.path.exists(download_path):
-                logger.debug("exists")
                 if download_path.startswith(TARGET_ROOT):
-                    logger.debug("within TARGET_ROOT")
                     rel_path = os.path.relpath(download_path, TARGET_ROOT)
-                    logger.debug(rel_path)
                     if TARGET_URL.endswith("/"):
                         return TARGET_URL + rel_path
                     return TARGET_URL + "/" + rel_path
                 elif download_path.startswith(DOWNLOADS_ROOT):
-                    logger.debug("within DOWNLOADS_ROOT")
                     rel_path = os.path.relpath(download_path, DOWNLOADS_ROOT)
-                    logger.debug(rel_path)
                     if DOWNLOADS_URL.endswith("/"):
                         return DOWNLOADS_URL + rel_path
                     return DOWNLOADS_URL + "/" + rel_path

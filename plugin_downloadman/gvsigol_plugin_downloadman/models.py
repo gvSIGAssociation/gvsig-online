@@ -39,6 +39,8 @@ class DownloadRequest(models.Model):
     
     PENDING_AUTHORIZATION_STATUS = 'AU'
     PACKAGE_QUEUED_STATUS = 'QP' # Queued for package preparation
+    WAITING_SPACE_STATUS = 'SP' # Queued for package preparation
+    PROCESSING_STATUS = 'PR' # Queued for package preparation
     PACKAGED_STATUS = 'CT' # The download package was sucessfully created
     COMPLETED_STATUS = 'CT' # The download package was sucessfully created and notified
     REJECTED_STATUS = 'RE' # Rejected or cancelled by the admins
@@ -53,6 +55,8 @@ class DownloadRequest(models.Model):
     REQUEST_STATUS_CHOICES = (
         (PENDING_AUTHORIZATION_STATUS, 'Pending authorization'),
         (PACKAGE_QUEUED_STATUS, 'Package queued'),
+        (PROCESSING_STATUS, 'Processing request'),
+        (WAITING_SPACE_STATUS, 'Queued, waiting for free space'),
         (PACKAGED_STATUS, 'Packaged'),
         (COMPLETED_STATUS, 'Completed'),
         (REJECTED_STATUS, 'Rejected'),
@@ -78,7 +82,7 @@ class DownloadRequest(models.Model):
     # status: 
     # - pending authorization, queued for preparation, ready for download,
     # cancelled, on hold, requeued for preparation, error...
-    request_status = models.CharField(max_length=2, choices=REQUEST_STATUS_CHOICES)
+    request_status = models.CharField(max_length=2, choices=REQUEST_STATUS_CHOICES, db_index=True)
     notification_status = models.CharField(max_length=2, null=True, choices=NOTIFICATION_STATUS_CHOICES)
     package_retry_count = models.PositiveIntegerField(default=0)
     notify_retry_count = models.PositiveIntegerField(default=0)

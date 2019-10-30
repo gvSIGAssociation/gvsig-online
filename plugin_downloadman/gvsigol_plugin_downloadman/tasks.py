@@ -23,10 +23,11 @@ from builtins import str as text
 @author: Cesar Martinez Izquierdo <cmartinez@scolab.es>
 '''
 
-from celery import shared_task
+from celery import shared_task, task
 from gvsigol_plugin_downloadman.models import DownloadRequest, DownloadLink, ResourceLocator
 from gvsigol_plugin_downloadman.models import get_packaging_max_retry_time, get_mail_max_retry_time
-import datetime
+from datetime import date, timedelta, datetime
+
 import os
 import tempfile
 import zipfile
@@ -48,10 +49,16 @@ from django.utils.crypto import get_random_string
 
 from gvsigol_plugin_downloadman.utils import getLayer
 from gvsigol_plugin_downloadman.settings import TMP_DIR,TARGET_ROOT
+from django.conf import settings
+import shutil
+from gvsigol.celery import app as celery_app
+
+from gvsigol.settings import GVSIGOL_NAME
 try:
     from gvsigol_plugin_downloadman.settings import LOCAL_PATHS_WHITELIST
 except:
     LOCAL_PATHS_WHITELIST = []
+    
 
 #logger = logging.getLogger("gvsigol-celery")
 logger = logging.getLogger("gvsigol")
@@ -60,6 +67,34 @@ logger = logging.getLogger("gvsigol")
 __TMP_DIR = None
 __TARGET_ROOT = None
 DEFAULT_TIMEOUT = 900
+LINK_UUID_RANDOM_LENGTH = 32 
+LINK_UUID_FULL_LENGTH = 40
+
+if hasattr(settings, 'DOWNMAN_UNKNOWN_FILES_MAX_AGE'):
+    UNKNOWN_FILES_MAX_AGE = settings.DOWNMAN_UNKNOWN_FILES_MAX_AGE
+else:
+    UNKNOWN_FILES_MAX_AGE = 20 # days
+
+if hasattr(settings, 'DOWNMAN_MIN_TARGET_SPACE'):
+    MIN_TARGET_SPACE = settings.DOWNMAN_MIN_TARGET_SPACE
+else:
+    MIN_TARGET_SPACE = 209715200 # bytes == 200 MB
+
+if hasattr(settings, 'DOWNMAN_MIN_TMP_SPACE'):
+    MIN_TMP_SPACE = settings.DOWNMAN_MIN_TMP_SPACE
+else:
+    MIN_TMP_SPACE = 104857600 # bytes == 100 MB
+
+if hasattr(settings, 'DOWNMAN_FREE_SPACE_RETRY_DELAY'):
+    FREE_SPACE_RETRY_DELAY = settings.DOWNMAN_FREE_SPACE_RETRY_DELAY
+else:
+    FREE_SPACE_RETRY_DELAY = 60 # seconds == 1 minute
+if hasattr(settings, 'DOWNMAN_CLEAN_TASK_FREQUENCY'):
+    CLEAN_TASK_FREQUENCY = settings.DOWNMAN_CLEAN_TASK_FREQUENCY
+else:
+    #CLEAN_TASK_FREQUENCY = 1200.0 # seconds == 20 minutes
+    CLEAN_TASK_FREQUENCY = 20.0 # seconds == 20 minutes
+
 
 class Error(Exception):
     pass
@@ -70,6 +105,17 @@ class PreparationException(Exception):
 class ForbiddenAccessException(Exception):
     pass
 
+def getFreeSpace(path):
+    try:
+        usage  = os.statvfs(path)
+        return (usage.f_frsize * usage.f_bfree)
+    except:
+        try:
+            usage = shutil.disk_usage(path)
+            return usage.free
+        except:
+            logger.exception("Error getting free space")
+            return 0
 
 def getTmpDir():
     global __TMP_DIR
@@ -246,11 +292,20 @@ def _addResource(zipobj, resourceLocator):
             os.remove(resourceDesc.res_path)
         i = i + 1
 
+def _getPackagePrefix():
+    if GVSIGOL_NAME:
+        return GVSIGOL_NAME.lower()
+    else:
+        return "gvsigol"
+
+def _parseLinkUiid(fname):
+    return fname[len(_getPackagePrefix()):LINK_UUID_FULL_LENGTH+len(_getPackagePrefix())] 
+
 def packageRequest(downloadRequest, link_uuid):
     zip_file = None
     try:
-        # 1. create temporary zip file
-        prefix = 'ideuy' + link_uuid
+        # 1. create target zip file
+        prefix = _getPackagePrefix() + link_uuid + "_"
         (fd, zip_path) = tempfile.mkstemp('.zip', prefix, getTargetDir())
         print zip_path
         zip_file = os.fdopen(fd, "w")
@@ -316,7 +371,7 @@ def notifyCompletedRequest(self, link_id):
         link = DownloadLink.objects.get(pk=link_id)
         request = link.contents
         # validity must be computed from the moment the user gets notified
-        link.valid_to = timezone.now() + datetime.timedelta(seconds = request.validity)
+        link.valid_to = timezone.now() + timedelta(seconds = request.validity)
         link.save()
         
         if request.request_status != DownloadRequest.PACKAGED_STATUS:
@@ -326,7 +381,7 @@ def notifyCompletedRequest(self, link_id):
             subject = _('Download service: your request is ready - %(requestid)s') % {'requestid': request.request_random_id}
             resolvedUrl = reverse('download-request-tracking', args=(request.request_random_id,))
             try:
-                base_url = core_settings.MEDIA_URLBASE_URL
+                base_url = core_settings.BASE_URL
                 if base_url.endswith("/"):
                     download_url = base_url + resolvedUrl
                 else:
@@ -384,8 +439,7 @@ def notifyPermanentFailedRequest(self, request_id):
             else:
                 to = request.requested_by_external
             try:
-                from core_settings import EMAIL_HOST_USER
-                from_email =  EMAIL_HOST_USER
+                from_email =  settings.EMAIL_HOST_USER
             except:
                 logger.exception("EMAIL_HOST_USER has not been configured")
                 raise
@@ -421,15 +475,33 @@ def processDownloadRequest(self, request_id):
                 request.request_status == DownloadRequest.CANCELLED_STATUS or request.request_status == DownloadRequest.REJECTED_STATUS or \
                 request.request_status == DownloadRequest.HOLD_STATUS or request.request_status == DownloadRequest.PERMANENT_NOTIFICATION_ERROR_STATUS:
             return
+        
+        if request.request_status != DownloadRequest.WAITING_SPACE_STATUS:
+            if DownloadRequest.objects.filter(request_status=DownloadRequest.WAITING_SPACE_STATUS).count()>0:
+                # avoid newer request to be processer before older requests
+                logger.debug("Delaying execution till previous tasks get enough available space on target dir")
+                self.retry(countdown=FREE_SPACE_RETRY_DELAY)
+                return
+        
+        if getFreeSpace(getTargetDir()) < MIN_TARGET_SPACE:
+            request.request_status = DownloadRequest.WAITING_SPACE_STATUS
+            request.save()
+            logger.debug("Available space in target dir is below the minimum threshold")
+            self.retry(countdown=FREE_SPACE_RETRY_DELAY)
+            return
+        
+        request.request_status = DownloadRequest.PROCESSING_STATUS
+        request.save()
+        
         # 2 package
-        link_uuid = datetime.date.today().strftime("%Y%m%d") + get_random_string(length=32)
+        link_uuid = date.today().strftime("%Y%m%d") + get_random_string(length=32)
         zip_path = packageRequest(request, link_uuid)
         print zip_path
         if zip_path:
             # 3. create the link
             new_link = DownloadLink()
             new_link.contents = request
-            new_link.valid_to = datetime.datetime.utcnow() + datetime.timedelta(seconds = request.validity)
+            new_link.valid_to = datetime.utcnow() + timedelta(seconds = request.validity)
             new_link.link_random_id = link_uuid
             new_link.prepared_download_path = zip_path
             new_link.save()
@@ -453,4 +525,42 @@ def processDownloadRequest(self, request_id):
             request.request_status = DownloadRequest.PERMANENT_PACKAGE_ERROR_STATUS
             request.save()
             notifyPermanentFailedRequest.apply_async(args=[new_link.id], queue='notify')
+
+
+@celery_app.on_after_finalize.connect
+def setup_periodic_tasks(sender, **kwargs):
+    # Calls test('hello') every 10 seconds.
+    sender.add_periodic_task(CLEAN_TASK_FREQUENCY, cleanOutdatedRequests.s(), options={'queue' : 'gvsigolperiodic'})
+
+@task(bind=True)
+def cleanOutdatedRequests(self):
+    for root, dirs, files in os.walk(getTargetDir()):
+        for f in files:
+            fullpath = os.path.join(root, f)
+            try:
+                link_uuid = _parseLinkUiid(f)
+                link = DownloadLink.objects.get(link_random_id=link_uuid)
+                if fullpath != link.prepared_download_path:
+                    raise Error
+                if timezone.now() > link.valid_to:
+                    # request is oudated
+                    os.remove(link.prepared_download_path)
+                elif link.contents.request_status == DownloadRequest.CANCELLED_STATUS or link.contents.request_status == DownloadRequest.REJECTED_STATUS:
+                    # for some status value such as cancelled, we should also remove the file
+                    os.remove(link.prepared_download_path)
+                """
+                elif link.contents.request_status == DownloadRequest.COMPLETED_STATUS or link.contents.request_status == DownloadRequest.PERMANENT_PACKAGE_ERROR_STATUS or \
+                    link.contents.request_status == DownloadRequest.HOLD_STATUS or link.contents.request_status == DownloadRequest.PERMANENT_NOTIFICATION_ERROR_STATUS:
+                    # for some status value such as cancelled, we should also remove the file
+                    pass
+                """
+            except:
+                logger.exception("error getting link")
+                # if older than UNKNOWN_FILES_MAX_AGE days, remove the file
+                modified_time = os.path.getmtime(fullpath)
+                if date.fromtimestamp(modified_time) < (date.today() - timedelta(days=UNKNOWN_FILES_MAX_AGE)):
+                    try:
+                        os.remove(fullpath)
+                    except:
+                        logger.exception("Error cleaning request package")
             
