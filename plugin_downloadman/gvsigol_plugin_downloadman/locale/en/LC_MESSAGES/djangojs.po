@@ -41,10 +41,9 @@ msgstr ""
 msgid "Start downloading"
 msgstr ""
 
-msgid "Your download request has been registered. You will receive an email when your request is ready for download."
-msgstr ""
-
-msgid "You can also use this tracking link to get updates about your request:"
+msgid ""
+"Your download request has been registered. You will receive an email when your request is ready for download. "
+"You can also use this tracking link to check the status of your request: "
 msgstr ""
 
 msgid "There was an error processing your download request. Please, try again later"

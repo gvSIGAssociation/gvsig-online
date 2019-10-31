@@ -41,11 +41,12 @@ msgstr "Lista de descargas"
 msgid "Start downloading"
 msgstr "Comenzar descarga"
 
-msgid "Your download request has been registered. You will receive an email when your request is ready for download."
-msgstr "Su petición de descarga se ha registrado. Recibirá un correo electrónico cuando su petición esté lista para descargar"
-
-msgid "You can also use this tracking link to get updates about your request:"
-msgstr "También puede usar este enlace de seguimiento para consultar el estado de su petición:"
+msgid ""
+"Your download request has been registered. You will receive an email when your request is ready for download. "
+"You can also use this tracking link to check the status of your request: "
+msgstr ""
+"Su petición de descarga se ha registrado. Recibirá un correo electrónico cuando su petición esté lista para descargar. "
+"También puede usar este enlace de seguimiento para consultar el estado de su petición: "
 
 msgid "There was an error processing your download request. Please, try again later"
 msgstr "Hubo un error procesando su petición. Por favor, inténtelo más tarde"
