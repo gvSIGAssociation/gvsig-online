@@ -8,67 +8,70 @@ msgid "Press Ctrl to mark an area"
 msgstr ""
 
 msgid "Clean"
-msgstr ""
+msgstr "Netejar"
 
 msgid "Search"
-msgstr ""
+msgstr "Cercar"
 
 msgid "Clean current search, filters and order"
-msgstr ""
+msgstr "Netejar cerca actual, filtres i ordre"
 
 msgid "Categories"
-msgstr ""
+msgstr "Categories"
 
 msgid "Separated by"
-msgstr ""
+msgstr "Separades per"
 
 msgid "Keywords"
-msgstr ""
+msgstr "Paraules clau"
 
 msgid "Contact for the resource"
-msgstr ""
+msgstr "Contacte del recurs"
 
 msgid "Resources"
-msgstr ""
+msgstr "Recursos"
 
 msgid "From..."
-msgstr ""
+msgstr "Des de..."
 
 msgid "To..."
-msgstr ""
+msgstr "Fins..."
 
 msgid "Records"
-msgstr ""
+msgstr "Registres"
 
 msgid "Details"
-msgstr ""
+msgstr "Detalles"
 
 msgid "Map"
-msgstr ""
+msgstr "Mapa"
 
 msgid "Download"
-msgstr ""
+msgstr "Descarregar"
 
 msgid "No results found"
-msgstr ""
+msgstr "No s'han trobat resultats"
 
 msgid "Go"
-msgstr ""
+msgstr "Anar"
 
 msgid "Add"
-msgstr ""
+msgstr "Afegir"
 
 msgid "Catalog layers"
-msgstr ""
+msgstr "Capes del catàleg"
 
-msgid "PRemove layer"
-msgstr ""
+msgid "Remove layer"
+msgstr "Esborrar capa"
 
 msgid "List of downloads"
-msgstr ""
+msgstr "Llistat de descàrregues"
 
 msgid "List of layers"
-msgstr ""
+msgstr "Llistat de capes"
 
 msgid "Include only results overlapping with map visible area"
-msgstr ""
+msgstr "Incloure només resultats que es solapin amb l'àrea visible al mapa"
+
+msgid "Metadatum"
+msgstr "Metadada"
