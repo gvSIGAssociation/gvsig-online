@@ -120,7 +120,7 @@ layerTree.prototype.createTree = function() {
 				tree += '						</button>';
 				tree += '					</div>';
 				tree += '				</div>';
-				tree += '				<div data-groupnumber="' + (groupCount++) * 100 + '" class="box-body layer-tree-groups" style="display: none;">';
+				tree += '				<div data-grouporder="' + layerGroup.groupOrder + '" data-groupnumber="' + (groupCount++) * 100 + '" class="box-body layer-tree-groups" style="display: none;">';
 				for (var j=0; j<layerGroup.layers.length; j++) {	
 					var layer = layerGroup.layers[j];				
 					tree += self.createOverlayUI(layer, layerGroup.visible);
@@ -2150,18 +2150,18 @@ layerTree.prototype.detailedInfo = function(layer) {
  */
 layerTree.prototype.reorder = function(event,ui) {
 	var self = this;
-	var groupNumber = ui.item[0].parentNode.dataset.groupnumber;
+	var groupOrder = ui.item[0].parentNode.dataset.grouporder;
 	var groupLayers = ui.item[0].parentNode.children;
 	var mapLayers = this.map.getLayers();
 	
-	var zindex = parseInt(groupNumber);
+	var zindex = parseInt(groupOrder);
 	var mapLayers_length = mapLayers.getLength();
 	
 	for (var i=0; i<groupLayers.length; i++) {
 		var layerid = groupLayers[i].dataset.layerid;
 		mapLayers.forEach(function(layer){
 			if (layer.get('id') == layerid) {
-				var order = parseInt(zindex) + mapLayers_length;
+				var order = zindex + mapLayers_length;
 				layer.setZIndex(order);
 				if (!layer.imported) {
 					self.changeState(layer, 'layer', 'change-order', order);
