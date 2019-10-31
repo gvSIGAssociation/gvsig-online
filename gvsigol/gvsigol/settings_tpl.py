@@ -99,6 +99,8 @@ INSTALLED_APPS = [
     ##GVSIGOL_PLUGINS##
 ]
 INSTALLED_APPS.append('actstream')
+INSTALLED_APPS.append('corsheaders')
+INSTALLED_APPS.append('drf_yasg')
 
 ACTSTREAM_SETTINGS = {
     'FETCH_RELATIONS': True,
