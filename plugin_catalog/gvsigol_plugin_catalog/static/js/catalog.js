@@ -487,8 +487,6 @@ CatalogView.prototype.linkResourceMap = function(){
 	var self = this;
 
 	$(".catalog_add_layer").unbind("click").click(function(){
-		console.log('catalog-add-layer');
-		console.log($(this));
 		var url = $(this).attr("url");
 		var name = $(this).attr("name");
 		var title = $(this).attr("title");
@@ -507,9 +505,24 @@ CatalogView.prototype.linkResourceMap = function(){
 	});
 }
 
+CatalogView.prototype.getMaxGroupOrder = function() {
+	var maxGroupOrder = 0;
+	for (var i=0; i<viewer.core.conf.layerGroups.length; i++) {
+		var group = viewer.core.conf.layerGroups[i];
+		if (group.groupOrder > maxGroupOrder) {
+			maxGroupOrder = group.groupOrder; 
+		}
+	}
+	return maxGroupOrder;
+}
+CatalogView.prototype.getCatalogGroupOrder = function() {
+	return this.getMaxGroupOrder() + 1000;
+}
+
 CatalogView.prototype.createLayerGroup = function() {
 	var self = this;
 	var groupId = 'gvsigol-geonetwork-group';
+	var groupOrder = this.getCatalogGroupOrder();
 
 	var tree = '';
 	tree += '			<li class="box box-default collapsed-box" id="' + groupId + '">';
@@ -525,7 +538,7 @@ CatalogView.prototype.createLayerGroup = function() {
 	tree += '						</button>';
 	tree += '					</div>';
 	tree += '				</div>';
-	tree += '				<div data-groupnumber="' + (100 * 100) + '" class="box-body layer-tree-groups geonetwork-layer-group" style="display: none;">';
+	tree += '				<div data-grouporder="' + groupOrder + '" data-groupnumber="' + groupOrder + '" class="box-body layer-tree-groups geonetwork-layer-group" style="display: none;">';
 	tree += '				</div>';
 	tree += '			</li>';
 
@@ -590,32 +603,13 @@ CatalogView.prototype.createLayerGroup = function() {
 	});
 }
 
-
-CatalogView.prototype.reorder = function(event,ui) {
-	var groupNumber = ui.item[0].parentNode.dataset.groupnumber;
-	var groupLayers = ui.item[0].parentNode.children;
-	var mapLayers = this.map.getLayers();
-
-	var zindex = parseInt(groupNumber);
-	var mapLayers_length = mapLayers.getLength();
-
-	for (var i=0; i<groupLayers.length; i++) {
-		var layerid = groupLayers[i].dataset.layerid;
-		mapLayers.forEach(function(layer){
-			if (layer.get('id') == layerid) {
-				layer.setZIndex(parseInt(zindex) + mapLayers_length);
-				mapLayers_length--;
-			}
-		}, this);
-	}
-};
-
 CatalogView.prototype._createOLLayer = function(url, name, title, abstract, dataId, bbox, wfs_url, wcs_url) {
 	var self = this;
 	
 	if (url.endsWith("?")) {
 		url = url.substring(0, url.length-1);
 	}
+	var zIndex = $("#layer-tree-tab #gvsigol-geonetwork-group .layer-box").length + this.getCatalogGroupOrder();
 	
 	var catalogLayer = new ol.layer.Tile({
 		source: new ol.source.TileWMS({
@@ -627,7 +621,8 @@ CatalogView.prototype._createOLLayer = function(url, name, title, abstract, data
 			},
 			serverType: 'geoserver'
 		}),
-		id: dataId
+		id: dataId,
+		zIndex: zIndex
 	});
 	catalogLayer.baselayer = false;
 	catalogLayer.dataid = dataId;
@@ -667,11 +662,9 @@ CatalogView.prototype.createLayer = function(name, title, abstract, url, dataId,
 	
 	var groupId = "gvsigol-geonetwork-group";
 	var groupEntry = $("#"+groupId);
-	var zIndex = groupEntry.length;
-	if(zIndex == 0){
+	if(groupEntry.length == 0){
 		self.createLayerGroup();
 	}
-
 	var layerTree = self.mapViewer.getLayerTree();
 	
 	var removeLayerButtonUI = '<a id="remove-catalog-layer-' + dataId + '" data-layerid="' + dataId + '" class="btn btn-block btn-social btn-custom-tool remove-catalog-layer-btn">';
@@ -680,7 +673,7 @@ CatalogView.prototype.createLayer = function(name, title, abstract, url, dataId,
 	
 	var newLayerUI = $(layerTree.createOverlayUI(newLayer, $("#layergroup-"+groupId).is(":checked")));
 	newLayerUI.find(".box-body .zoom-to-layer").after(removeLayerButtonUI);
-	$(".geonetwork-layer-group").append(newLayerUI);
+	$(".geonetwork-layer-group").prepend(newLayerUI);
 	layerTree.setLayerEvents();
 	this._replaceMetadataBtnEvents();
 
@@ -936,15 +929,10 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 
 				$(".catalog_linkmap").unbind("click").click(function(){
 					var id = $(this).attr("name");
-					console.log("catalog_linkmap");
-					console.log(id);
-					console.log($(this));
-					console.log(self.data);
 					var layerSummary = self.data[id]; 
 					var links = layerSummary.link;
 					var title = layerSummary.title || layerSummary.defaultTitle || layerSummary.name || '';
 					var abstract = layerSummary.abstract || title;
-					console.log(title);
 					try {
 						var geoBox = [];
 						if (self.data[id].geoBox) {
@@ -1023,14 +1011,11 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 }
 
 CatalogView.prototype.createDetailsPanel = function(layer){
-	console.log(layer);
-	console.log(typeof(layer));
 	var url;
 	if (!layer) {
 		return;
 	}
 	if (typeof layer === 'string') {
-		console.log(layer);
 		// it is a metadata uuid
 		url = "/gvsigonline/catalog/get_metadata/"+layer;
 	}
@@ -1114,7 +1099,6 @@ CatalogView.prototype._replaceMetadataBtnEvents = function() {
 	}
 	
 	$(".show-metadata-link").unbind("click").on('click', function(e) {
-		console.log(".show-metadata-link catalog");
 		var layers = self.map.getLayers();
 		var selectedLayer = null;
 		var layerContainer = $(this).parents('.layer-box');
