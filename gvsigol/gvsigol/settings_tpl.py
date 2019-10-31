@@ -403,6 +403,12 @@ SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False
 }
 
+JWT_AUTH = {
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
+    'JWT_ALLOW_REFRESH': True,
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
+}
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
