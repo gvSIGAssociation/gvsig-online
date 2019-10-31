@@ -23,6 +23,7 @@ djangorestframework==3.5.3
 djangorestframework-jwt==1.11.0
 drf-yasg==1.17.0
 swagger_spec_validator==2.4.3
+django-cors-headers==3.0.2
 
 
 
