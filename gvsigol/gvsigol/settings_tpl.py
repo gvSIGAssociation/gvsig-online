@@ -28,6 +28,8 @@ from django_auth_ldap.config import LDAPSearch
 from django.utils.translation import ugettext_lazy as _
 from django.core.files.storage import FileSystemStorage
 
+GVSIGOL_VERSION = '2.6.0'
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 if '__file__' in globals():
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -268,8 +270,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     #'compressor.finders.CompressorFinder',
 )
-
-GVSIGOL_VERSION = '2.6.0'
 
 GVSIGOL_USERS_CARTODB = {
     'dbhost': '##DB_HOST##',
