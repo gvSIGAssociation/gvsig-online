@@ -1,0 +1,54 @@
+#    gvSIG Online.
+#    Copyright (C) 2019 SCOLAB.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+msgid "Add to download list"
+msgstr ""
+
+msgid "No results found"
+msgstr ""
+
+msgid "View download list"
+msgstr ""
+
+msgid "Available downloads"
+msgstr ""
+
+msgid "The list of downloads could not be retrieved. Try again later or contact the service administrator if the error persists"
+msgstr ""
+
+msgid "Email"
+msgstr ""
+
+msgid "No layers have been selected for download"
+msgstr ""
+
+msgid "List of downloads"
+msgstr ""
+
+msgid "Start downloading"
+msgstr ""
+
+msgid ""
+"Your download request has been registered. You will receive an email when your request is ready for download. "
+"You can also use this tracking link to check the status of your request: "
+msgstr ""
+
+msgid "There was an error processing your download request. Please, try again later"
+msgstr ""
+
+msgid "Direct download"
+msgstr ""
+
