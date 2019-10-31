@@ -467,10 +467,8 @@ def notifyPermanentFailedRequest(self, request_id):
 def processDownloadRequest(self, request_id):
     logger.debug("starting processDownloadRequest")
     # 1 get request
-    print request_id
     try:
         request = DownloadRequest.objects.get(id=request_id)
-        print request.request_random_id
         if request.request_status == DownloadRequest.COMPLETED_STATUS or request.request_status == DownloadRequest.PERMANENT_PACKAGE_ERROR_STATUS or \
                 request.request_status == DownloadRequest.CANCELLED_STATUS or request.request_status == DownloadRequest.REJECTED_STATUS or \
                 request.request_status == DownloadRequest.HOLD_STATUS or request.request_status == DownloadRequest.PERMANENT_NOTIFICATION_ERROR_STATUS:
@@ -496,7 +494,6 @@ def processDownloadRequest(self, request_id):
         # 2 package
         link_uuid = date.today().strftime("%Y%m%d") + get_random_string(length=32)
         zip_path = packageRequest(request, link_uuid)
-        print zip_path
         if zip_path:
             # 3. create the link
             new_link = DownloadLink()
