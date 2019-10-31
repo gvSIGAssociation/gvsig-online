@@ -20,7 +20,7 @@
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
-
+import datetime
 import os
 import ldap
 import django.conf.locale
