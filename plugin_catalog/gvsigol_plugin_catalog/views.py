@@ -199,18 +199,19 @@ def get_metadata_as_html(response, lang='eng'):
                 else:
                     res_desc = resource.get('description', _('Resource'))
                 if resource.get('url'):
+                    url = getBaseOgcServiceUrl(resource.get('url'))
                     if "OGC:WMS" in resource['protocol']:
                         ogcservices_html += '            WMS: '
                         ogcservices_html += '('+ str(res_desc)+')'
-                        ogcservices_html += '                <span>'+resource['url']+'?service=WMS&request=GetCapabilities>'
+                        ogcservices_html += '                <span>'+url+'?service=WMS&request=GetCapabilities</span>'
                     elif "OGC:WFS" in resource['protocol']:
                         ogcservices_html += '            WFS: '
                         ogcservices_html += '('+ str(res_desc)+')'
-                        ogcservices_html += '                <span>'+resource['url']+'?service=WFS&request=GetCapabilities>'
+                        ogcservices_html += '                <span>'+url+'?service=WFS&request=GetCapabilities</span>'
                     elif "OGC:WCS" in resource['protocol']:
                         ogcservices_html += '            WCS: '
                         ogcservices_html += '('+ str(res_desc)+')'
-                        ogcservices_html += '                <span>WCS: '+resource['url']+'?service=WCS&request=GetCapabilities>'
+                        ogcservices_html += '                <span>WCS: '+url+'?service=WCS&request=GetCapabilities</span>'
                     ogcservices_html += '            <div style="clear:both"></div>'
             if ogcservices_html != '':
                 html += '        <h4 class="modal-catalog-title">' + _('Online services') +'</h4>'
@@ -324,4 +325,5 @@ def get_metadata_from_uuid(request, metadata_uuid):
     return HttpResponse(status=500)
 
 
-
+def getBaseOgcServiceUrl(url):
+    return url.split("?")[0]
