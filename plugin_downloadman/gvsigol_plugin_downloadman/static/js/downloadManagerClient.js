@@ -463,8 +463,9 @@ DownloadManagerUI.prototype.showDownloadQueued = function(json_result, success){
 	if (success) {
 		content += '<div class="alert alert-success col-md-12">';
 		content += '<i class="fa fa-envelope fa-icon-button-left" aria-hidden="true"></i>';
-		content += gettext('Your download request has been registered. You will receive an email when your request is ready for download.');
-		content += gettext('You can also use this tracking link to check the status of your request:');
+		var msg = 'Your download request has been registered. You will receive an email when your request is ready for download. ';
+		msg += 'You can also use this tracking link to check the status of your request: ';
+		content += gettext(msg);
 		content += gettext('<a target="_blank" href="' + json_result.tracking_url + '">' + json_result.tracking_url + '</a>');
 		$(this.modalSelector).find('.modal-footer').empty();
 	}
