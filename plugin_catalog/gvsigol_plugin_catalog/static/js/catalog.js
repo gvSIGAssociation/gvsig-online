@@ -394,7 +394,7 @@ CatalogView.prototype.getMetadataEntry = function(metadata){
 		met += '			</div>';
 		met += '			<div class="catalog_content_button_place col-sm-3">';
 		met += '				<a target="_blank" name="'+ metadata['geonet:info']['uuid'] +'" href="' + md_url + '" class="btn btn-block btn-social btn-custom-tool catalog_content_button catalog_catalogmd">';
-		met += ' 					<i class="fa fa-newspaper-o" aria-hidden="true"></i><span>' + gettext('Catalog') + '</span>';
+		met += ' 					<i class="fa fa-newspaper-o" aria-hidden="true"></i><span>' + gettext('Metadatum') + '</span>';
 		met += '				</a>';
 		met += '			</div>';
 		met += '	</div>';
