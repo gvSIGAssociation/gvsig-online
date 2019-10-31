@@ -145,6 +145,8 @@ INSTALLED_APPS = [
     'actstream',
     #'gvsigol_plugin_picassa',
     #'gvsigol_plugin_uampp',
+    'corsheaders',
+    'drf_yasg',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -158,7 +160,11 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 CRONTAB_ACTIVE = True
 ROOT_URLCONF = 'gvsigol.urls'
@@ -452,6 +458,32 @@ EXTERNAL_LAYER_SUPPORTED_TYPES = ['WMS', 'WMTS', 'XYZ', 'Bing', 'OSM']
 WMTS_MAX_VERSION = '1.0.0'
 WMS_MAX_VERSION = '1.3.0'
 BING_LAYERS = ['Road','Aerial','AerialWithLabels']
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+}
+
+
+SWAGGER_SETTINGS = {
+    "api_key": '',
+    "is_authenticated": False, 
+    "is_superuser": False,  
+    'SECURITY_DEFINITIONS': {
+        'api_key': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization'
+        }
+    },
+    'USE_SESSION_AUTH': False
+}
 
 LOGGING = {
     'version': 1,
