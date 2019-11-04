@@ -49,6 +49,7 @@ import unicodedata
 from dbfread import DBF
 
 logger = logging.getLogger("gvsigol")
+DEFAULT_REQUEST_TIMEOUT = 5
 
 class UnsupportedRequestError(Exception):
     pass
@@ -863,7 +864,7 @@ class Geoserver():
             url = self.rest_catalog.service_url + "/workspaces/" + workspace + "/coveragestores/" + store.name + "/coverages/" + featureType +"."+type
             ds_type = 'imagemosaic'
         
-        r = self.rest_catalog.session.get(url, auth=(self.user, self.password))
+        r = self.rest_catalog.session.get(url, auth=(self.user, self.password), timeout=DEFAULT_REQUEST_TIMEOUT)
         if r.status_code==200:
             content = r.content
             jsonData = json.loads(content)
