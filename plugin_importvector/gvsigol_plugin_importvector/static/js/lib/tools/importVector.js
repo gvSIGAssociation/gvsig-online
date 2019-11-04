@@ -89,7 +89,7 @@ ImportVector.prototype.createUploadForm = function() {
 		self.modal += 					'</form>';
 		self.modal += 			'</div>';
 		self.modal += 			'<div class="modal-footer">';
-		self.modal += 				'<button id="button-importvector-cancel" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
+		self.modal += 				'<button id="button-importvector-cancel" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Close') + '</button>';
 		self.modal += 				'<button id="button-importvector-accept" type="button" class="btn btn-default">' + gettext('Accept') + '</button>';
 		self.modal += 			'</div>';
 		self.modal += 		'</div>';

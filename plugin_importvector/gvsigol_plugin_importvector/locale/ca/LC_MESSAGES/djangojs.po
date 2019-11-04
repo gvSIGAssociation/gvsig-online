@@ -34,3 +34,6 @@ msgstr "Debe seleccionar un archivo"
 
 msgid "You must indicate a title for the layer"
 msgstr "Debe indicar un título para la capa"
+
+msgid "Close"
+msgstr ""
