@@ -141,7 +141,10 @@ def login_user(request):
                             next = request.GET.get('next')
                             if id_solicitud is not None and app is not None:
                                 response = redirect(next)
-                                response['Location'] += '?id_solicitud=' + id_solicitud + '&app=' + app + '&token=' + token
+                                if token is None:
+                                    response['Location'] += '?id_solicitud=' + id_solicitud + '&app=' + app
+                                else:
+                                    response['Location'] += '?id_solicitud=' + id_solicitud + '&app=' + app + '&token=' + token
                                 return response
 
                         else:
