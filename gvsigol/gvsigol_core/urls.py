@@ -10,8 +10,6 @@ urlpatterns = [
     url(r'^load/(?P<project_name>.*)/$', core_views.load, name='load'),
     url(r'^load_project/(?P<project_name>.*)/$', core_views.load_project, name='load_project'),
     url(r'^load_public_project/(?P<project_name>.*)/$', core_views.load_public_project, name='load_public_project'),
-    # keep compatibility with old project URLs:
-    url(r'^public_project_load/(?P<project_name>.*)/$', core_views.load_public_project, name='public_project_load'),
     url(r'^project_get_conf/$', core_views.project_get_conf, name='project_get_conf'),
     url(r'^toc_update/(?P<pid>[0-9]+)/$', core_views.toc_update, name='toc_update'),
     url(r'^export/(?P<pid>[0-9]+)/$', core_views.export, name='export'),
@@ -25,4 +23,7 @@ urlpatterns = [
     url(r'^shared_view_list/$', core_views.shared_view_list, name='shared_view_list'),
     url(r'^shared_view_delete/(?P<svid>[0-9]+)/$', core_views.shared_view_delete, name='shared_view_delete'),
     url(r'^not_found_sharedview/$', core_views.not_found_sharedview, name='not_found_sharedview'),
+    # keep compatibility with old project URLs:
+    url(r'^public_project_load/(?P<project_name>.*)/$', core_views.load_public_project, name='public_project_load'),
+    url(r'^project_load/(?P<project_name>.*)/$', core_views.load_project, name='project_load'),
 ]
