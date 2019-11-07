@@ -1,0 +1,154 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-10-04 08:44+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Language: pt_BR\n"
+"X-Source-Language: C\n"
+
+#: models.py:10
+msgid "Pending authorization"
+msgstr "Autorização pendente"
+
+#: tasks.py:314
+#, python-format
+msgid "Download service: your request is ready - %(requestid)s"
+msgstr "Serviço de download: o seu pedido está pronto - %(requestid)s"
+
+#: tasks.py:327
+#, python-format
+msgid ""
+"Your download request is ready. You can download it in the following link: "
+"%(url)s\n"
+"The link will be available until %(valid_to)s"
+msgstr ""
+"O seu pedido de download está pronto. Você pode baixá-lo no seguinte link: "
+"%(url)s\n"
+"O link estará disponível até %(valid_to)s"
+
+#: tasks.py:366
+#, python-format
+msgid "Download service: your request has failed - %(requestid)s"
+msgstr "Serviço de download: o seu pedido falhou - %(requestid)s"
+
+#: tasks.py:367
+msgid ""
+"Sorry, your download request could not be completed. Please, try again or "
+"contact the service support."
+msgstr "Lamentamos, mas o seu pedido de download não pôde ser concluído. Por favor, tente novamente ou entre em contato com o suporte ao serviço."
+
+#: templates/track_request.html:39
+msgid "Download service"
+msgstr "Serviço de descarga"
+
+#: templates/track_request.html:50
+#, python-format
+msgid ""
+" 'Use the following link if your download does not start automatically: <a "
+"href=\"%(download_url)s\">%(download_url)s</a>' "
+msgstr "'Use o seguinte link se o download não começar automaticamente: <ahref=\"%(download_url)s\">%(download_url)s</a>' "
+
+#: templates/track_request.html:59
+msgid "Download request: "
+msgstr "Solicitação de descarga: "
+
+#: templates/track_request.html:67
+msgid "Version"
+msgstr "Versão"
+
+#: templates/track_request.html:71
+msgid "All rights reserved"
+msgstr "Todos os direitos reservados"
+
+#: views.py:156
+msgid "File format"
+msgstr "Formato do arquivo"
+
+#: views.py:242
+msgid "Resource "
+msgstr "Recurso "
+
+#: views.py:252 views.py:282
+msgid "Vector data"
+msgstr "Dados vectoriais"
+
+#: views.py:256 views.py:258 views.py:279
+msgid "Raster data"
+msgstr "Dados rasterizados"
+
+#: views.py:408
+msgid ""
+"Your download request has expired and it is not longer available. You can "
+"start a new request"
+msgstr ""
+"Seu pedido de download expirou e não está mais disponível. Você pode iniciar uma nova solicitação"
+
+#: views.py:412
+msgid "Your request is ready for download"
+msgstr "Seu pedido está pronto para ser baixado"
+
+#: views.py:415
+#, python-format
+msgid "The link will be available until %(valid_to)s"
+msgstr "O link estará disponível até %(valid_to)s"
+
+#: views.py:417 views.py:420
+msgid "Your download request could not be processed."
+msgstr "O seu pedido de download não pôde ser processado."
+
+#: views.py:418 views.py:421
+msgid ""
+"You can create a new request if you are still interested on these datasets"
+msgstr ""
+"Pode criar um novo pedido se ainda estiver interessado nestes conjuntos de dados"
+
+#: views.py:423
+msgid "Your download request requires authorization from IDEUY."
+msgstr "Seu pedido de descarga requer autorização da IDEUY."
+
+#: views.py:424 views.py:427 views.py:436
+msgid "You will receive an email when it becomes available"
+msgstr "Você receberá um e-mail quando ele estiver disponível"
+
+#: views.py:426
+msgid "Your download request requires confirmation from IDEUY."
+msgstr "Seu pedido de download requer confirmação da IDEUY."
+
+#: views.py:429
+msgid "Sorry, your download request has been rejected."
+msgstr "Desculpe, o seu pedido de descarga foi rejeitado."
+
+#: views.py:430
+msgid "You can contact IDEUY if you believe this is a mistake"
+msgstr "Você pode entrar em contato com IDEUY se você acredita que isso é um erro"
+
+#: views.py:432
+msgid "You have cancelled this download request."
+msgstr "Você cancelou este pedido de descarga."
+
+#: views.py:433
+msgid ""
+"You should create a new request if you are still interested on these datasets"
+msgstr "Você deve criar uma nova solicitação se você ainda estiver interessado nesses conjuntos de dados"
+
+#: views.py:435
+msgid "Your download request is being prepared."
+msgstr "Seu pedido de descarga está sendo preparado."
+
+#: views.py:443
+msgid "Your download request could not be found"
+msgstr "O seu pedido de descarga não pôde ser encontrado"
