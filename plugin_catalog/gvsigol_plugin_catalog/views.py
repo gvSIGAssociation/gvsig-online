@@ -122,7 +122,7 @@ def get_metadata_as_html(response, lang='eng'):
         
             if len(response['keywords'])>0:
                 html += '        <span class="catalog_detail_attr">' +_('Keywords') + ':</span>'
-                keywords = [ '<span class="badge">' + kw + '</span>' for kw in response['keywords']]
+                keywords = [ '<span class="badge">' + kw + '</span>' for kw in response['keywords'] if kw]
                 keywords = ' '.join(keywords)
                 html += '        '+ keywords
                 html += '        <br />'
