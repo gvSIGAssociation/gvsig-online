@@ -1,0 +1,345 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-05-21 14:27+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Language: pt_BR\n"
+"X-Source-Language: C\n"
+
+#: forms.py:30 templates/user_list.html.py:23 templates/user_update.html.py:29
+#: templates/user_update.html:30 utils.py:112
+msgid "First name"
+msgstr "Nome"
+
+#: forms.py:31 templates/user_add.html.py:46 templates/user_list.html.py:24
+#: templates/user_update.html:33 templates/user_update.html.py:34 utils.py:113
+msgid "Last name"
+msgstr "Sobrenome"
+
+#: forms.py:32 templates/login.html.py:46 templates/user_add.html.py:53
+#: templates/user_list.html:22 templates/user_update.html.py:40
+#: templates/user_update.html:41 utils.py:111
+msgid "Username"
+msgstr "Nome de usuário"
+
+#: forms.py:33 templates/user_add.html.py:57 templates/user_list.html.py:25
+#: templates/user_update.html:44 templates/user_update.html.py:45 utils.py:114
+msgid "Email"
+msgstr "Correio electrónico"
+
+#: forms.py:34 templates/login.html.py:50 templates/user_add.html.py:65
+#: utils.py:115
+msgid "Password"
+msgstr "Senha"
+
+#: forms.py:35 templates/user_add.html.py:69
+msgid "Repeat password"
+msgstr "Repita a senha"
+
+#: services.py:72
+msgid "Group for admin users"
+msgstr "Grupo para usuários administradores"
+
+#: templates/dashboard_auth_menu.html:4
+msgid "Users and groups"
+msgstr "Usuários e grupos"
+
+#: templates/dashboard_auth_menu.html:6
+msgid "Users"
+msgstr "Usuários"
+
+#: templates/dashboard_auth_menu.html:7 templates/user_list.html.py:28
+msgid "Groups"
+msgstr "Grupos"
+
+#: templates/group_add.html:12 templates/user_add.html.py:12
+#: templates/user_update.html:12
+msgid "Save"
+msgstr "Salvar"
+
+#: templates/group_add.html:39 templates/group_list.html.py:22
+msgid "Name"
+msgstr "Nome"
+
+#: templates/group_add.html:46 templates/group_list.html.py:23
+msgid "Description"
+msgstr "Descrição"
+
+#: templates/group_list.html:11
+msgid "Add group"
+msgstr "Adicionar grupo"
+
+#: templates/group_list.html:52 templates/group_list.html.py:100
+msgid "Delete group"
+msgstr "Excluir grupo"
+
+#: templates/group_list.html:55
+msgid "The group will be removed, Do you want continue?"
+msgstr "O grupo será removido. Você quer continuar?"
+
+#: templates/group_list.html:58 templates/user_list.html.py:70
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: templates/group_list.html:59 templates/user_list.html.py:71
+msgid "Accept"
+msgstr "Aceitar"
+
+#: templates/group_list.html:76 templates/user_list.html.py:88
+msgid "Processing request..."
+msgstr "Processar solicitação..."
+
+#: templates/group_list.html:77 templates/user_list.html.py:89
+#, python-format
+msgid "Search%(sep)s"
+msgstr "Pesquisar%(sep)s"
+
+#: templates/group_list.html:78 templates/user_list.html.py:90
+#, python-format
+msgid "Showing %(numrecords)s records"
+msgstr "Mostrando %(numrecords)s registros"
+
+#: templates/group_list.html:79 templates/user_list.html.py:91
+#, python-format
+msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
+msgstr "Mostrando desde %(start)s até %(end)s de %(numrecords)s registros"
+
+#: templates/group_list.html:80 templates/user_list.html.py:92
+msgid "Showing from 0 to 0 of 0 records"
+msgstr "Mostrando desde 0 até 0 registros"
+
+#: templates/group_list.html:81 templates/user_list.html.py:93
+#, python-format
+msgid "Filtering %(max)s records"
+msgstr "Filtragem %(max)s de registros"
+
+#: templates/group_list.html:83 templates/user_list.html.py:95
+msgid "Loading..."
+msgstr "Carregando..."
+
+#: templates/group_list.html:84 templates/group_list.html.py:85
+#: templates/user_list.html:96 templates/user_list.html.py:97
+msgid "No records available"
+msgstr "Nenhum registro disponível"
+
+#: templates/group_list.html:87 templates/user_list.html.py:99
+msgid "First"
+msgstr "Primeiro"
+
+#: templates/group_list.html:88 templates/user_list.html.py:100
+msgid "Previous"
+msgstr "Anterior"
+
+#: templates/group_list.html:89 templates/user_list.html.py:101
+msgid "Next"
+msgstr "Seguinte"
+
+#: templates/group_list.html:90 templates/user_list.html.py:102
+msgid "Last"
+msgstr "Último"
+
+#: templates/group_list.html:93 templates/user_list.html.py:105
+#, python-format
+msgid "%(sep)sSort ascending"
+msgstr "%(sep)sSort ascendente"
+
+#: templates/group_list.html:94 templates/user_list.html.py:106
+#, python-format
+msgid "%(sep)sSort descending"
+msgstr "%(sep)sSort descendente"
+
+#: templates/illegal_operation.html:7
+msgid "%(sep)sSort descendente"
+msgstr "%(sep)sSort descendente"
+
+#: templates/illegal_operation.html:10
+msgid "Something went wrong"
+msgstr "Algo falhou"
+
+#: templates/illegal_operation.html:13
+msgid "You don't have administrative permissions. Meanwhile, you may"
+msgstr "Você não tem permissões administrativas. Enquanto isso, você pode"
+
+#: templates/illegal_operation.html:14
+msgid "return to dashboard"
+msgstr "voltar ao painel de instrumentos"
+
+#: templates/login.html:39
+msgid "Sign in to start your session"
+msgstr "Inicie a sessão para começar a trabalhar"
+
+#: templates/login.html:55
+msgid "Sign In"
+msgstr "Inicie a sessão"
+
+#: templates/login.html:60
+msgid "I forgot my password"
+msgstr "Esqueci minha senha"
+
+#: templates/password_reset.html:39
+msgid "Enter your username to retrieve your password"
+msgstr "Digite seu nome de usuário para recuperar sua senha"
+
+#: templates/password_reset.html:46
+msgid "Insert your username"
+msgstr "Insira o seu nome de usuário"
+
+#: templates/password_reset.html:51
+#: templates/registration/password_reset_confirm.html:59
+msgid "Send"
+msgstr "Enviar"
+
+#: templates/password_reset2.html:39
+msgid "Contact the system administrator"
+msgstr "Contactar com o administrador do sistema"
+
+#: templates/password_reset_success.html:39
+msgid "We've sent an email to your account with a link to set the new password"
+msgstr ""
+"Mandamos um e-mail para a sua conta com um link para definir a nova senha"
+
+#: templates/password_reset_success.html:40
+msgid "Return"
+msgstr "Retorno"
+
+#: templates/registration/password_reset_confirm.html:39
+msgid "Enter new your password"
+msgstr "Digite sua nova senha"
+
+#: templates/registration/password_reset_confirm.html:50
+msgid "Insert new password"
+msgstr "Inserir nova senha"
+
+#: templates/registration/password_reset_confirm.html:54
+msgid "Confirm new password"
+msgstr "Confirme a nova senha"
+
+#: templates/registration/password_reset_confirm.html:88
+msgid "Password confirmation doesn't match"
+msgstr "A senha de confirmação não corresponde"
+
+#: templates/registration/password_reset_confirm.html:91
+msgid "Password can't be empty"
+msgstr "A senha não pode estar vazia"
+
+#: templates/registration/password_reset_confirm.html:94
+msgid "Password has contain at least 8 characters"
+msgstr "A senha tem pelo menos 8 caracteres"
+
+#: templates/user_add.html:42
+msgid "First Name"
+msgstr "Nome"
+
+#: templates/user_add.html:83 templates/user_update.html.py:55
+#: templates/user_update.html:57
+msgid "Is superuser"
+msgstr "É superusuário"
+
+#: templates/user_add.html:88 templates/user_update.html.py:64
+#: templates/user_update.html:66
+msgid "Can manage projects"
+msgstr "Pode gerenciar projetos"
+
+#: templates/user_add.html:95 templates/user_update.html.py:74
+msgid "Assign groups"
+msgstr "Atribuir grupos"
+
+#: templates/user_add.html:108 templates/user_update.html.py:88
+#: templates/user_update.html:90
+msgid "Assign group"
+msgstr "Atribuir grupos"
+
+#: templates/user_list.html:11
+msgid "Add user"
+msgstr "Adicionar usuário"
+
+#: templates/user_list.html:26
+msgid "is superuser"
+msgstr "É superusuário"
+
+#: templates/user_list.html:27
+msgid "is staff"
+msgstr "É funcionário"
+
+#: templates/user_list.html:64 templates/user_list.html.py:112
+msgid "Delete user"
+msgstr "Apagar usuário"
+
+#: templates/user_list.html:67
+msgid "The user will be removed, Do you want continue?"
+msgstr "O usuário será removido. Você quer continuar?"
+
+#: templates/user_list.html:116
+msgid "Update user"
+msgstr "Atualizar usuário"
+
+#: utils.py:94
+msgid "New user account"
+msgstr "Nova conta de usuário"
+
+#: utils.py:110
+msgid "Account data"
+msgstr "Dados da conta"
+
+#: utils.py:125
+msgid "New password"
+msgstr "Nova senha"
+
+#: utils.py:127
+msgid "This is your new temporary password"
+msgstr "Esta é a sua nova senha temporária"
+
+#: views.py:70 views.py:150 views.py:248
+msgid "Your account has been disabled"
+msgstr "Sua conta foi desativada"
+
+#: views.py:72 views.py:74 views.py:152 views.py:154 views.py:250
+msgid "The username and password you have entered do not match our records"
+msgstr ""
+"O nome de usuário e a senha que você digitou não correspondem ao seu "
+"registro."
+
+#: views.py:200
+msgid "User account does not exist"
+msgstr "A conta de usuário não existe"
+
+#: views.py:254
+msgid "Invalid token. Your link has expired, you need to ask for another one."
+msgstr "Código inválido. Seu link expirou, você precisa solicitar outro"
+
+#: views.py:372
+msgid "User group for"
+msgstr "Grupo de usuários para"
+
+#: views.py:419
+msgid "There must be at least one server"
+msgstr "Deve haver pelo menos um servidor"
+
+#: views.py:550
+msgid "Admin is a reserved group"
+msgstr "Admin é um grupo reservado"
+
+#: views.py:554
+#, python-brace-format
+msgid ""
+"Invalid user group name: '{value}'. Identifiers must begin with a letter or "
+"an underscore (_). Subsequent characters can be letters, underscores or "
+"numbers"
+msgstr ""
+"Nome de grupo de usuários inválido: '{value}'. Os identificadores devem "
+"começar com uma letra ouum sublinhado (_). Os caracteres subsequentes podem "
+"ser letras, sublinhados ou números"
