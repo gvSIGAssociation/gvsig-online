@@ -150,7 +150,11 @@
 								        {% get_language_info_list for LANGUAGES as languages %}
 								        {% for language in languages %}
 								            <option style="" value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected="selected"{% endif %}>
-								                {% trans language.name_translated %}
+								                {% if language.code == 'pt' %}
+								                	{% trans language.name_translated %} (BR)
+								                {% else %}
+								                	{% trans language.name_translated %}
+								                {% endif %}
 								            </option>
 								        {% endfor %}
 								    </select>
