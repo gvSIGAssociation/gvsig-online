@@ -285,12 +285,10 @@ UniqueSymbol.prototype.update = function(layerId, styleId) {
 			style_data: JSON.stringify(style)
 		},
 		success: function(response){
-			if (response.success) {
-				location.href = "/gvsigonline/symbology/style_layer_list/";
-			} else {
-				alert('Error');
+			if (!response.success) {
+				console.log('Error updating style')
 			}
-
+			location.href = "/gvsigonline/symbology/style_layer_list/";			
 		},
 		error: function(){}
 	});
