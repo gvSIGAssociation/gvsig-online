@@ -17,18 +17,25 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from gvsigol.settings import MEDIA_ROOT
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
-from models import LayerReadGroup, LayerWriteGroup
-from gvsigol_auth.models import UserGroup
-from gvsigol_services.models import Datastore, LayerResource
-import geographic_servers
-from gvsigol import settings
-import psycopg2
+
 import json
 import os
+from string import strip
+
+from django.http.response import HttpResponse
+import psycopg2
+
+import geographic_servers
+from gvsigol import settings
+from gvsigol.settings import MEDIA_ROOT
+from gvsigol_auth.models import UserGroup
+from gvsigol_services.models import Datastore, LayerResource, \
+    LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup
+from models import LayerReadGroup, LayerWriteGroup
+
 
 def get_all_user_groups_checked_by_layer(layer):
     groups_list = UserGroup.objects.all()
@@ -254,3 +261,38 @@ def get_resource_type(lr):
         url = lr.path
 
     return [type, url]
+
+def is_field_enumerated(column_name, table_name, datastore):    
+    """
+    Returns true if the field is enumerated and false if not. The second parameter is true if the enumeration is multiple
+    """
+    enums = LayerFieldEnumeration.objects.filter(layername=table_name, schema=datastore, field=column_name)
+    if len(enums) > 0:
+        return True, enums[0].multiple
+    return False, False
+
+def get_enum_item_list(column_name, lyr_name, workspace_name):    
+    """
+    Gets the list of items of a enumerated field
+    """
+    lyr_obj = Layer.objects.get(name=lyr_name, datastore__workspace__name=workspace_name)
+    if(lyr_obj is not None):
+        enums = LayerFieldEnumeration.objects.filter(layername=lyr_name, schema=lyr_obj.datastore.name, field=column_name)
+        if len(enums) > 0:
+            return EnumerationItem.objects.filter(enumeration_id=enums[0].enumeration_id)
+        
+def get_enum_entry(column_name, lyr_name, workspace_name):    
+    """
+    Gets the list of items of a enumerated field
+    """
+    lyr_obj = Layer.objects.get(name=lyr_name, datastore__workspace__name=workspace_name)
+    if(lyr_obj is not None):
+        enums = LayerFieldEnumeration.objects.filter(layername=lyr_name, schema=lyr_obj.datastore.name, field=column_name)
+        if len(enums) > 0:
+            return Enumeration.objects.get(id=enums[0].enumeration_id)
+            
+    
+def get_exception(code, msg):
+    response = HttpResponse(msg)
+    response.status_code = code
+    return response    

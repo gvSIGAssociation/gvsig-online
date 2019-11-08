@@ -52,6 +52,7 @@
 										<th>{% trans "Is visible?" %}</th>
 										<th>{% trans "Is editable?" %}</th>
 										<th>{% trans "Is shown in getFeatureInfo?" %}</th>
+										<th>{% trans "Convert to enum" %}</th>
 									</tr>
 								</thead>
 								<tbody id="field-list-table-body">
@@ -81,6 +82,7 @@
 													{% else %}
 													<td><input type="checkbox" name="field-infovisible-{{counter}}"/></td>
 													{% endif %}
+													<td><button id="button-convert-enum-{{counter}}" data="" type="button" name="button-convert-enum" data-toggle="tooltip" data-placement="bottom" title="" class="btn btn-success" data-original-title="Convertir a enumerado"><i class="fa fa-edit"></i></button></td>
 												</tr>
 												{% if forloop.last %}
 												<input type="hidden" name="counter" value="{{counter}}" />
@@ -98,6 +100,24 @@
 	</div>
 </div>
 </form>
+
+<div class="modal fade" id="modal-convert-to-enum" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title">{% trans "Convert to enum" %}</h4>
+			</div>
+			<div class="modal-body">
+			</div>
+			<div class="modal-footer">
+			</div>
+		</div>
+	</div>
+</div>
+
 {% endblock %}
 
 {% block extra-scripts %}
@@ -119,8 +139,99 @@
 			for(var j=0; j<available_languages.length; j++){
 				var lang = available_languages[j];
 				$("input[name=field-title-"+lang+"-"+(i+1)+"]").val(field["title-"+lang]);
+				//$("#button-convert-enum-" + (i+1)).prop('title', field["name"]);
+				//console.log($("#button-convert-enum-" + (i+1)).prop('title'))
+				
 			}
 		}
 	});
+	
+	$('#field-list-table-body').on('click', 'button', function (evt){
+	    if (this.name == "button-convert-enum") {
+	    	id = $(this).prop('id');
+	    	id = id.substring(id.lastIndexOf('-') + 1);
+	    	fieldName = $("input[name=field-name-" + id + "]").val();
+	    	createModalContent(fieldName);
+	    }
+	});
+	
+	function createModalContent(fieldName){
+		$('#modal-convert-to-enum .modal-body').empty();
+		var ui = '';
+		ui += '<div id="div-name" class="row">';
+		
+		ui += '<div class="col-md-12 form-group">';
+		ui += 	'<label>' + gettext('Select enumeration') + '</label>';
+		ui += 	'<select id="enumeration-list" class="form-control">';
+				'{% for enum in enumerations %}'
+					ui += '<option value="{{enum.id}}">{{enum.title}}</option>';
+				'{% endfor%}'
+		ui += 	'</select>';
+		ui += '</div>';
+		
+		ui += '</div>';
+		$('#modal-convert-to-enum .modal-body').append(ui);
+		var buttons = '';
+		buttons += '<button id="add-field-cancel" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
+		buttons += '<button id="convert" type="button" class="btn btn-default">' + gettext('Convert') + '</button>';
+		buttons += '<button id="autogen" type="button" class="btn btn-default">' + gettext('Autogen') + '</button>';
+		$('#modal-convert-to-enum .modal-footer').empty();
+		$('#modal-convert-to-enum .modal-footer').append(buttons);
+		
+		$('#convert').on('click', function () {
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/services/convert_to_enumerate/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+			  	data:{
+			  		'field': fieldName,
+			  		'enum_id': $('#enumeration-list').val(),
+			  		'layer_id': "{{layer_id}}",
+			  		'layer_name': "{{layer}}",
+			  		'autogen': 'False'
+			  	},
+				success	:function(response) {
+					messageBox.show('Info', gettext('Convert ok'));
+					$('#modal-convert-to-enum').modal('hide');
+				},
+				error: function() {
+					messageBox.show('error', files.responseText);
+					$('#modal-convert-to-enum').modal('hide');
+				}
+			});
+		});
+		
+		$('#autogen').on('click', function () {
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/services/convert_to_enumerate/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+			  	data:{
+			  		'field': fieldName,
+			  		'enum_id': $('#enumeration-list').val(),
+			  		'layer_id': "{{layer_id}}",
+			  		'layer_name': "{{layer}}",
+			  		'autogen': 'True'
+			  	},
+				success	:function(response) {
+					messageBox.show('Info', gettext('Autogen ok'));
+					$('#modal-convert-to-enum').modal('hide');
+				},
+				error: function(files, status, errMsg) {
+					messageBox.show('error', files.responseText);
+					$('#modal-convert-to-enum').modal('hide');
+				}
+			});
+		});
+		
+		$('#modal-convert-to-enum').modal('show');
+	}
+	
 </script>
 {% endblock %}
