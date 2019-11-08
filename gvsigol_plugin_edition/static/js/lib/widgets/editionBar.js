@@ -274,16 +274,18 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer) {
 	});
 
 	var controls = this.map.getControls();
-	for(var i=0; i<controls.array_.length; i++){
-		var control = controls.array_[i];
-		if('options' in control){
-			if('eventType' in control.options /*&& 'id' in control.options*/){
-				var eventType = control.options['eventType'];
-				//var id = control.options['id'];
-				if(/*id == 'geocoding-contextmenu' && */eventType == "contextmenu"){
-					$(".ol-ctx-menu-container > ul > .geocoding-contextmenu").remove();
-					this.contextmenu = control;
-					this.map.removeControl(this.contextmenu);
+	if(controls.array_ != undefined) {
+		for(var i=0; i<controls.array_.length; i++){
+			var control = controls.array_[i];
+			if('options' in control){
+				if('eventType' in control.options /*&& 'id' in control.options*/){
+					var eventType = control.options['eventType'];
+					//var id = control.options['id'];
+					if(/*id == 'geocoding-contextmenu' && */eventType == "contextmenu"){
+						$(".ol-ctx-menu-container > ul > .geocoding-contextmenu").remove();
+						this.contextmenu = control;
+						this.map.removeControl(this.contextmenu);
+					}
 				}
 			}
 		}
@@ -962,14 +964,16 @@ EditionBar.prototype.getEnumeration = function(enumName) {
 	return enumeration;
 };
 
-EditionBar.prototype.getEnumerations = function(enumNames) {
+EditionBar.prototype.getEnumerations = function(enumNames, layerName, workspace) {
 	var enumerations = [];
 	$.ajax({
 		type: 'POST',
 		async: false,
 	  	url: "/gvsigonline/services/get_enumeration/",
 	  	data: {
-	  		'enum_names': enumNames.toString()
+	  		'enum_names': enumNames.toString(),
+	  		'layer_name': layerName.toString(),
+	  		'workspace': workspace
 		},
 	  	success	:function(response){
 	  		var enms = response.enumerations;
@@ -1275,22 +1279,19 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 						});
 						featureProperties += '<div id="datetimepicker-' + this.featureType[i].name + '"><input id="' + this.featureType[i].name + '" class="form-control"/></div>';
 						//featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="'+dateformat+'">';
+					} else if (this.featureType[i].type.endsWith("enumeration")) {
+						var name = this.featureType[i].name;
+						var has_multiple = false;
+						if(this.featureType[i].type == "multiple_enumeration") {
+							has_multiple = true;
+							enumeration_names.push(this.featureType[i].name);
+							featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="multiple"></div>';
+						} else {
+							enumeration_names.push(this.featureType[i].name);
+							featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="single"></div>';
+						}
 					} else if (this.isStringType(this.featureType[i].type)) {
-						if (this.featureType[i].name.startsWith("enm_") || this.featureType[i].name.startsWith("enmm_")) {
-							var name = this.featureType[i].name;
-							var has_multiple = false;
-							if(this.featureType[i].name.startsWith("enmm_")){
-								has_multiple = this.featureType[i].name.startsWith("enmm_");
-								//name = name.replace("enmm_", "enm_");
-								//var enumeration = this.getEnumeration(name);
-								enumeration_names.push(this.featureType[i].name);
-								featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="multiple"></div>';
-							}else{
-								//var enumeration = this.getEnumeration(name);
-								enumeration_names.push(this.featureType[i].name);
-								featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="single"></div>';
-							}
-						} else if (this.featureType[i].name.startsWith("form_")) {
+						if (this.featureType[i].name.startsWith("form_")) {
 							featureProperties += '<br/><a target="_blank" class="form-link form-link-open form-control" href="" data-orig="'+ this.featureType[i].name +'" data-value=""><i class="fa fa-check-square-o" aria-hidden="true"></i>&nbsp;&nbsp;' + gettext("Show form") + '</a>';
 							featureProperties += '<input id="' + this.featureType[i].name + '" type="hidden" value="">';
 						} else if (this.featureType[i].name.startsWith("cd_json_")) {
@@ -1337,7 +1338,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 
 		this.detailsTab.append(ui);
 
-		var enums = this.getEnumerations(enumeration_names);
+		var enums = this.getEnumerations(enumeration_names, this.selectedLayer.layer_name, this.selectedLayer.workspace);
 		for(var i=0; i<enums.length; i++){
 			var enumeration = enums[i];
 
@@ -1442,18 +1443,18 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 									properties[field.id] = self.getDateTime(field.value);
 								}
 							}else{
-								if (self.isStringType(self.featureType[i].type)) {
-									if(self.featureType[i].name.startsWith("enmm_")){
-										value = "";
-										for(var ix=0; ix<field.selectedOptions.length; ix++){
-											var option = field.selectedOptions[ix];
-											if(ix != 0){
-												value = value + ";";
-											}
-											value = value + option.value;
+								if (self.featureType[i].type.endsWith("enumeration")) {
+									value = "";
+									for(var ix=0; ix<field.selectedOptions.length; ix++){
+										var option = field.selectedOptions[ix];
+										if(ix != 0){
+											value = value + ";";
 										}
-										properties[field.id] = value;
-									}else if(self.featureType[i].name.startsWith("form_")){
+										value = value + option.value;
+									}
+									properties[field.id] = value;
+								} else if (self.isStringType(self.featureType[i].type)) {
+									if(self.featureType[i].name.startsWith("form_")){
 										properties[field.id] = field.value;
 									}else{
 										if (field.value != null) {
@@ -1553,7 +1554,7 @@ EditionBar.prototype.showAllErrorMessages = function() {
 		ui +=    "<li><span>" + label.html() + "</span> - " + message + "</li>" ;
 	});
 
-	var self = this;
+		var self = this;
 	var nullable_error = false;
 	for (var i=0; i<self.featureType.length; i++) {
 		if (!self.isGeomType(self.featureType[i].type) && self.featureType[i].name != 'id') {
@@ -1562,18 +1563,17 @@ EditionBar.prototype.showAllErrorMessages = function() {
 				var value = null;
 				if (self.featureType[i].type == 'boolean') {
 					value = field.checked;
-				}
-				else if (self.isStringType(self.featureType[i].type)) {
-					if(self.featureType[i].name.startsWith("enmm_")){
-						value = "";
-						for(var ix=0; ix<field.selectedOptions.length; ix++){
-							var option = field.selectedOptions[ix];
-							if(ix != 0){
-								value = value + ";";
-							}
-							value = value + option.value;
+				} else if (self.featureType[i].type.endsWith("enumeration")) {
+					value = "";
+					for(var ix=0; ix<field.selectedOptions.length; ix++){
+						var option = field.selectedOptions[ix];
+						if(ix != 0){
+							value = value + ";";
 						}
-					}else if(self.featureType[i].name.startsWith("form_")){
+						value = value + option.value;
+					}
+				} else if (self.isStringType(self.featureType[i].type)) {
+					if(self.featureType[i].name.startsWith("form_")){
 						value = field.value;
 					}else{
 						if (field.value != null) {
@@ -1717,22 +1717,19 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 						featureProperties += '<div id="datetimepicker-' + this.featureType[i].name + '"><input id="' + this.featureType[i].name + '" class="form-control"  value="' + value + '"/></div>';
 						//featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="'+dateformat+'" value="' + value + '">';
 
+					} else if (this.featureType[i].type.endsWith("enumeration")) {
+						var name = this.featureType[i].name;
+						var has_multiple = false;
+						if(this.featureType[i].type == "multiple_enumeration") {
+							has_multiple = true;
+							enumeration_names.push(this.featureType[i].name);
+							featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="multiple" data-value="' + value + '"></div>';
+						} else {
+							enumeration_names.push(this.featureType[i].name);
+							featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="single" data-value="'+value+'"></div>';
+						}
 					} else if (this.isStringType(this.featureType[i].type)) {
-						if (this.featureType[i].name.startsWith("enm_") || this.featureType[i].name.startsWith("enmm_")) {
-							var name = this.featureType[i].name;
-							var has_multiple = false;
-							if(this.featureType[i].name.startsWith("enmm_")){
-								has_multiple = this.featureType[i].name.startsWith("enmm_");
-								//name = name.replace("enmm_", "enm_");
-								//var enumeration = this.getEnumeration(name);
-								enumeration_names.push(this.featureType[i].name);
-								featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="multiple" data-value="'+value+'"></div>';
-							}else{
-								//var enumeration = this.getEnumeration(name);
-								enumeration_names.push(this.featureType[i].name);
-								featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="single" data-value="'+value+'"></div>';
-							}
-						} else if (this.featureType[i].name.startsWith("form_")) {
+						if (this.featureType[i].name.startsWith("form_")) {
 							featureProperties += '<br/><a target="_blank" class="form-link form-link-open form-control" href="" data-orig="'+ this.featureType[i].name +'" data-value="' + value + '"><i class="fa fa-check-square-o" aria-hidden="true"></i>&nbsp;&nbsp;' + gettext("Show form") + '</a>';
 							featureProperties += '<input id="' + this.featureType[i].name + '" type="hidden" value="' + value + '">';
 						} else if (this.featureType[i].name.startsWith("cd_json_")) {
@@ -1787,7 +1784,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 
 		this.detailsTab.append(ui);
 
-		var enums = this.getEnumerations(enumeration_names);
+		var enums = this.getEnumerations(enumeration_names, this.selectedLayer.layer_name, this.selectedLayer.workspace);
 		for(var i=0; i<enums.length; i++){
 			var enumeration = enums[i];
 
@@ -1885,7 +1882,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 
 
 		$('#edit-feature').on('click', function () {
-			if(self.showAllErrorMessages()){
+			if(self.showAllErrorMessages()) {
 			var properties = {};
 			for (var i=0; i<self.featureType.length; i++) {
 				if (!self.isGeomType(self.featureType[i].type) && self.featureType[i].name != 'id') {
@@ -1893,41 +1890,40 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 					if(field != null && field.id != null){
 						if (self.featureType[i].type == 'boolean') {
 							properties[field.id] = field.checked;
-						}else{
-							if(self.isDateType(self.featureType[i].type)){
+						} else {
+							if(self.isDateType(self.featureType[i].type)) {
 								if(field.value != ""){
 									properties[field.id] = self.getDateTime(field.value);
 								}
-							}else{
-								if (self.isStringType(self.featureType[i].type)) {
-									if(self.featureType[i].name.startsWith("enmm_")){
-										value = "";
-										for(var ix=0; ix<field.selectedOptions.length; ix++){
-											var option = field.selectedOptions[ix];
-											if(ix != 0){
-												value = value + ";";
-											}
-											value = value + option.value;
-										}
-										properties[field.id] = value;
-									}else if(self.featureType[i].name.startsWith("form_")){
+							} else if(self.featureType[i].type == "multiple_enumeration") {
+								value = "";
+								for(var ix=0; ix<field.selectedOptions.length; ix++) {
+									var option = field.selectedOptions[ix];
+									if(ix != 0) {
+										value = value + ";";
+									}
+									value = value + option.value;
+								}
+								properties[field.id] = value;
+							} else if (self.isStringType(self.featureType[i].type)) {
+									if(self.featureType[i].name.startsWith("form_")) {
 										properties[field.id] = field.value;
-									}else{
+									} else {
 										if (field.value != null) {
 											properties[field.id] = field.value;
 										}
 									}
 								} else if (field && field.value != '' && field.value != null && field.value != 'null') {
 										properties[field.id] = field.value;
-								}
 							}
 						}
 					}
 				}
-				if(self.featureType[i].name == 'modified_by'){
+				
+				if(self.featureType[i].name == 'modified_by') {
 					properties['modified_by'] = self.layerTree.conf.user.credentials.username;
 				}
-				if(self.featureType[i].name == 'last_modification'){
+				if(self.featureType[i].name == 'last_modification') {
 					var today = new Date();
 					var dd = today.getDate();
 					var mm = today.getMonth()+1; //January is 0!
