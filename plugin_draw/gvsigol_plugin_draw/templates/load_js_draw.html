@@ -1,0 +1,186 @@
+{% load staticfiles %}
+{% load i18n %}
+<script>
+	var IMG_PATH = '{% static "img/" %}';
+</script>
+<script type="text/javascript" src="{% static "js/vendors/jquery.ddslick.js" %}"></script>
+<script type="text/javascript" src="{% static "js/lib/tools/StyleSettings.js" %}"></script>
+<script type="text/javascript" src="{% static "js/lib/tools/DrawPoint.js" %}"></script>
+<script type="text/javascript" src="{% static "js/lib/tools/DrawLine.js" %}"></script>
+<script type="text/javascript" src="{% static "js/lib/tools/DrawArrow.js" %}"></script>
+<script type="text/javascript" src="{% static "js/lib/tools/DrawPolygon.js" %}"></script>
+<script type="text/javascript" src="{% static "js/lib/tools/InsertText.js" %}"></script>
+<script type="text/javascript">
+	var map = viewer.core.getMap();
+	var conf = viewer.core.getConf();
+	
+	if (viewer.core.ifToolInConf('gvsigol_plugin_draw')) {
+		var drawModal = '';
+		drawModal += '<div class="modal" id="float-draw-modal" tabindex="-1" role="dialog" aria-labelledby="float-modal-label">';
+		drawModal += 	'<div class="modal-dialog modal-lg" role="document">';
+		drawModal += 		'<div class="modal-content">';
+		drawModal += 			'<div class="modal-header">';
+		drawModal += 				'<button type="button" class="close" data-dismiss="modal" aria-label="Close">';
+		drawModal += 					'<span aria-hidden="true">&times;</span>';
+		drawModal += 				'</button>';
+		drawModal += 				'<h4 class="modal-title" id="float-modal-label"></h4>';
+		drawModal += 			'</div>';
+		drawModal += 			'<div class="modal-body"></div>';
+		drawModal += 			'<div class="modal-footer">';
+		drawModal += 				'<button id="float-modal-cancel" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Close') + '</button>';
+		drawModal += 			'</div>';
+		drawModal += 		'</div>';
+		drawModal += 	'</div>';
+		drawModal += '</div>';
+		$('body').append(drawModal);
+		
+		var source = new ol.source.Vector();
+		var drawLayer = new ol.layer.Vector({
+			source: source
+		});
+		drawLayer.setZIndex(99999999);
+		drawLayer.printable = true;
+		map.addLayer(drawLayer);
+		
+		var styleSettings = new StyleSettings(map, drawLayer);
+		var drawPoint = new DrawPoint(map, drawLayer);
+		var drawLine = new DrawLine(map, drawLayer);
+		var drawArrow = new DrawArrow(map, drawLayer);
+		var drawPolygon = new DrawPolygon(map, drawLayer);
+		var insertText = new InsertText(map, drawLayer);
+		
+		drawLayer.drawStyleSettings = styleSettings;
+	
+		var drawTools = '';
+		drawTools += '<li class="dropdown">';
+		drawTools += 	'<a class="dropdown-toggle" data-toggle="dropdown" href="#">';
+		drawTools += 		gettext("Draw")+' <span class="caret"></span>';
+		drawTools += 	'</a>';
+		drawTools += 	'<ul id="gvsigol-navbar-file-menu" class="dropdown-menu">';
+		drawTools += 		'<li style="margin-left: 5px; padding: 2px;"><input id="draw-point-input" type="checkbox"><i style="margin-right: 5px;" class="fa fa-circle"></i>' + gettext("Draw point") + '</li>';
+		drawTools += 		'<li style="margin-left: 5px; padding: 2px;"><input id="draw-line-input" type="checkbox"><i style="margin-right: 5px;" class="fa fa-code-fork"></i>' + gettext("Draw line") + '</li>';
+		drawTools += 		'<li style="margin-left: 5px; padding: 2px;"><input id="draw-arrow-input" type="checkbox"><i style="margin-right: 5px;" class="fa fa-long-arrow-right"></i>' + gettext("Draw arrow") + '</li>';
+		drawTools += 		'<li style="margin-left: 5px; padding: 2px;"><input id="draw-polygon-input" type="checkbox"><i style="margin-right: 5px;" class="fa fa-object-ungroup"></i>' + gettext("Draw polygon") + '</li>';
+		drawTools += 		'<li style="margin-left: 5px; padding: 2px;"><input id="insert-text-input" type="checkbox"><i style="margin-right: 5px;" class="fa fa-text-width"></i>' + gettext("Insert text") + '</li>';
+		drawTools += 		'<li role="presentation" class="divider"></li>';
+		drawTools += 		'<li role="presentation"><a id="clean-draw-layer" role="menuitem" tabindex="-1" href="#"><i class="fa fa-eraser m-r-5"></i>'+gettext("Clean drawings")+'</a></li>';
+		drawTools += 		'<li role="presentation" class="divider"></li>';
+		drawTools += 		'<li role="presentation"><a id="draw-style-settings" role="menuitem" tabindex="-1" href="#"><i class="fa fa-cogs m-r-5"></i>'+gettext("Style settings")+'</a></li>';
+		drawTools += 	'</ul>';
+		drawTools += '</li>';
+		
+		$('#gvsigol-navbar-menus').prepend(drawTools);
+
+		 
+		$('#draw-point-input').click(function(){
+			deactivateOthers('draw-point-input');
+			if (drawPoint.isActive()) {
+				drawPoint.deactivate();
+			} else {
+				drawPoint.activate();
+			}
+		});
+		$('#draw-line-input').click(function(){
+			deactivateOthers('draw-line-input');
+			if (drawLine.isActive()) {
+				drawLine.deactivate();
+			} else {
+				drawLine.activate();
+			}
+		});
+		$('#draw-arrow-input').click(function(){
+			deactivateOthers('draw-arrow-input');
+			if (drawArrow.isActive()) {
+				drawArrow.deactivate();
+			} else {
+				drawArrow.activate();
+			}
+			
+		});
+		$('#draw-polygon-input').click(function(){
+			deactivateOthers('draw-polygon-input');
+			if (drawPolygon.isActive()) {
+				drawPolygon.deactivate();
+			} else {
+				drawPolygon.activate();
+			}
+		});
+		$('#insert-text-input').click(function(){
+			deactivateOthers('insert-text-input');
+			if (insertText.isActive()) {
+				insertText.deactivate();
+			} else {
+				insertText.activate();
+			}
+		});
+		$('#clean-draw-layer').click(function(){
+			deactivateOthers('');
+			drawLayer.getSource().clear();
+		});
+		$('#draw-style-settings').click(function(){
+			deactivateOthers('');
+			styleSettings.show();
+		});
+		
+		var count = 1;
+		$('#float-draw-modal').on('hidden.bs.modal', function () {
+			var style = styleSettings.getStyle();
+			var styleName = 'style_' + count;
+			styleSettings.addPrintStyle(style, styleName);
+			
+			drawPoint.setStyle(style.point, styleName);
+			drawLine.setStyle(style.line, styleName);
+			drawArrow.setStyle(style.arrow, styleName);
+			drawPolygon.setStyle(style.polygon, styleName);
+			insertText.setStyle(style.text, styleName);
+			
+			count++;
+		});
+	}
+	
+	function deactivateOthers(selected) {
+		if ($('#draw-point-input').is(':checked')) {
+			if ('draw-point-input' != selected) {
+				$('#draw-point-input').prop("checked", false);
+				if (drawPoint.isActive()) {
+					drawPoint.deactivate();
+				}
+			}
+			
+		}
+		if ($('#draw-line-input').is(':checked')) {
+			if ('draw-line-input' != selected) {
+				$('#draw-line-input').prop("checked", false);
+				if (drawLine.isActive()) {
+					drawLine.deactivate();
+				}
+			}
+		}
+		if ($('#draw-arrow-input').is(':checked')) {
+			if ('draw-arrow-input' != selected) {
+				$('#draw-arrow-input').prop("checked", false);
+				if (drawArrow.isActive()) {
+					drawArrow.deactivate();
+				}
+			}
+		}
+		if ($('#draw-polygon-input').is(':checked')) {
+			if ('draw-polygon-input' != selected) {
+				$('#draw-polygon-input').prop("checked", false);
+				if (drawPolygon.isActive()) {
+					drawPolygon.deactivate();
+				}
+			}
+		}
+		if ($('#insert-text-input').is(':checked')) {
+			if ('insert-text-input' != selected) {
+				$('#insert-text-input').prop("checked", false);
+				if (inserText.isActive()) {
+					inserText.deactivate();
+				}
+			}
+		}
+	}
+	
+	
+</script>
