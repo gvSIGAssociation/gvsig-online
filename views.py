@@ -72,6 +72,7 @@ import random
 from future.moves.urllib.parse import urlparse, urlencode
 import rest_geoserver
 from rest_geoserver import RequestError
+from models import LayerFieldEnumeration
 
 logger = logging.getLogger("gvsigol")
 
@@ -1484,9 +1485,67 @@ def layer_config(request, layer_id):
                         field['editable'] = False
                 field['infovisible'] = False
                 fields.append(field)
+                
+        enums = Enumeration.objects.all();
+        
+        return render(request, 'layer_config.html', {'layer': layer, 'layer_id': layer.id, 'fields': fields, 'fields_json': json.dumps(fields), 'available_languages': LANGUAGES, 'available_languages_array': available_languages, 'redirect_to_layergroup': redirect_to_layergroup, 'enumerations': enums})
 
-        return render(request, 'layer_config.html', {'layer': layer, 'layer_id': layer.id, 'fields': fields, 'fields_json': json.dumps(fields), 'available_languages': LANGUAGES, 'available_languages_array': available_languages, 'redirect_to_layergroup': redirect_to_layergroup})
 
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_http_methods(["POST"])
+@staff_required
+def convert_to_enumerate(request):
+    try: 
+        field = request.POST['field']
+        enum_id = request.POST['enum_id']
+        layer_name = request.POST['layer_name']
+        layer_id = request.POST['layer_id']
+        autogen = False if request.POST['autogen'] == 'False' else True
+    except Exception:
+        return utils.get_exception(400, 'Error in the input params')
+    usr = request.user
+
+    layer = Layer.objects.get(id=layer_id)
+    datastore_name = layer.datastore.name
+       
+    is_enum, _ = utils.is_field_enumerated(field, layer_name, datastore_name)         
+    if is_enum:
+        return utils.get_exception(405, 'The field is already enumerated')
+    
+    if autogen:
+        params = json.loads(layer.datastore.connection_params)
+        con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
+        sql = "SELECT " + field + " FROM " + datastore_name + "." + layer_name + " GROUP BY " + field 
+        con.cursor.execute(sql)
+        rows = con.cursor.fetchall()
+        enum_table = Enumeration()
+        enum_table.name =  layer_name + "_" + field 
+        enum_table.title = re.sub(r'\w+', lambda m:m.group(0).capitalize(), layer_name) + " " + re.sub(r'\w+', lambda m:m.group(0).capitalize(), field)
+        enum_table.created_by = usr
+        enum_table.save()
+        enum_id = enum_table.id
+        i = 0
+        for row in rows:
+            item = EnumerationItem()
+            item.name = row[0]
+            item.selected = False
+            item.order = i
+            i = i +1
+            item.enumeration_id = enum_id
+            item.save()
+    
+    if enum_id == None:
+        return utils.get_exception(400, 'We cannot find a enumerated with this name')
+    
+    field_enum = LayerFieldEnumeration()
+    field_enum.layername = layer
+    field_enum.schema = datastore_name
+    field_enum.field = field
+    field_enum.enumeration_id = enum_id
+    field_enum.multiple = False
+    field_enum.save()   
+    
+    return HttpResponse('{"response": "ok"}', content_type='application/json') 
 
 @require_http_methods(["POST"])
 @csrf_exempt
@@ -2212,6 +2271,16 @@ def layer_create_with_group(request, layergroup_id):
                 newRecord.time_default_value = time_default_value
                 newRecord.time_resolution = time_resolution
                 newRecord.save()
+                
+                for i in form.cleaned_data['fields']:
+                    if 'enumkey' in i:
+                        field_enum = LayerFieldEnumeration()
+                        field_enum.layername = form.cleaned_data['name']
+                        field_enum.schema = form.cleaned_data['datastore'].name
+                        field_enum.field = i['name']
+                        field_enum.enumeration_id = int(i['enumkey']) 
+                        field_enum.multiple = True if i['type'] == 'multiple_enumeration' else False
+                        field_enum.save() 
 
                 if form.cleaned_data['datastore'].type != 'e_WMS':
                     datastore = Datastore.objects.get(id=newRecord.datastore.id)
@@ -2456,13 +2525,14 @@ def get_enumeration(request):
     if request.method == 'POST':
         enumerations = []
         enum_names = request.POST.get('enum_names')
+        layer_name = request.POST.get('layer_name')
+        workspace = request.POST.get('workspace')
         if enum_names.__len__() > 0:
             enum_names_array = enum_names.split(',')
             for enum_name in enum_names_array:
-                enum_name2 = enum_name.replace('enmm_', 'enm_')
-                enum = Enumeration.objects.get(name__exact=enum_name2)
-                enum_items = EnumerationItem.objects.filter(enumeration_id=enum.id).order_by('name')
-
+                enum_items = utils.get_enum_item_list(enum_name, layer_name, workspace)
+                enum = utils.get_enum_entry(enum_name, layer_name, workspace)
+                title = enum.title if enum is not None else 'No title defined'
                 items = []
                 for i in enum_items:
                     item = {}
@@ -2471,7 +2541,7 @@ def get_enumeration(request):
                     items.append(item)
 
                 enumeration = {
-                    'title': enum.title,
+                    'title': title,
                     'items': items,
                     'name': enum_name
                 }
@@ -3179,73 +3249,84 @@ def describeLayerConfig(request):
             pass
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
-
+    
 @csrf_exempt
 def describeFeatureType(request):
     if request.method == 'POST':
         lyr = request.POST.get('layer')
         workspace = request.POST.get('workspace')
         skip_pks = request.POST.get('skip_pks')
-        try:
-            layer = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
-            params = json.loads(layer.datastore.connection_params)
-            host = params['host']
-            port = params['port']
-            dbname = params['database']
-            user = params['user']
-            passwd = params['passwd']
-            schema = params.get('schema', 'public')
+        feat_type = _describeFeatureType(lyr, workspace, skip_pks)
+        return HttpResponse(json.dumps(feat_type, indent=4), content_type='application/json')
+
+def _describeFeatureType(lyr, workspace, skip_pks):
+    try:
+        layer = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
+        params = json.loads(layer.datastore.connection_params)
+        host = params['host']
+        port = params['port']
+        dbname = params['database']
+        user = params['user']
+        passwd = params['passwd']
+        schema = params.get('schema', 'public')
 
 
-            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
-            layer_defs = i.get_fields_info(layer.name, schema)
-            layer_mv_defs = []
-            if layer_defs.__len__() == 0:
-                layer_mv_defs = i.get_fields_mv_info(layer.name, schema)
-            layer_defs = layer_defs + layer_mv_defs
-            geom_defs = i.get_geometry_columns_info(layer.name, schema)
-            pk_defs = i.get_pk_columns(layer.name, schema)
+        i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+        layer_defs = i.get_fields_info(layer.name, schema)
+        layer_mv_defs = []
+        if layer_defs.__len__() == 0:
+            layer_mv_defs = i.get_fields_mv_info(layer.name, schema)
+        layer_defs = layer_defs + layer_mv_defs
+        geom_defs = i.get_geometry_columns_info(layer.name, schema)
+        pk_defs = i.get_pk_columns(layer.name, schema)
 
-            for layer_def in layer_defs:
-                for geom_def in geom_defs:
-                    if layer_def['name'] == geom_def[2]:
-                        layer_def['type'] = geom_def[5]
-                        layer_def['length'] = geom_def[4]
-            for layer_def in layer_defs:
-                for pk_def in pk_defs:
-                    if layer_def['name'] == pk_def:
-                        layer_defs.remove(layer_def)
+        for layer_def in layer_defs:
+            for geom_def in geom_defs:
+                if layer_def['name'] == geom_def[2]:
+                    layer_def['type'] = geom_def[5]
+                    layer_def['length'] = geom_def[4]
+        for layer_def in layer_defs:
+            for pk_def in pk_defs:
+                if layer_def['name'] == pk_def:
+                    layer_defs.remove(layer_def)
+            enum, multiple = utils.is_field_enumerated(layer_def['name'], lyr, layer.datastore.name)
+            if enum:
+                if multiple:
+                    layer_def['type'] = 'multiple_enumeration'
+                else:
+                    layer_def['type'] = 'enumeration'
 
-            if skip_pks == 'true':        
-                gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
-                definition = gs.getFeaturetype(layer.datastore.workspace, layer.datastore, layer.name, layer.title)
-                aux_encoded_property_name = ''
-                if 'featureType' in definition and 'attributes' in definition['featureType'] and 'attribute' in definition['featureType']['attributes']:
-                    attributes = definition['featureType']['attributes']['attribute']
-                    if isinstance(attributes, list):
-                        for attribute in attributes:
-                            aux_encoded_property_name += attribute['name'] + ' '
-                    else:
-                        attribute = attributes
+        if skip_pks == 'true':        
+            gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+            definition = gs.getFeaturetype(layer.datastore.workspace, layer.datastore, layer.name, layer.title)
+            aux_encoded_property_name = ''
+            if 'featureType' in definition and 'attributes' in definition['featureType'] and 'attribute' in definition['featureType']['attributes']:
+                attributes = definition['featureType']['attributes']['attribute']
+                if isinstance(attributes, list):
+                    for attribute in attributes:
                         aux_encoded_property_name += attribute['name'] + ' '
+                else:
+                    attribute = attributes
+                    aux_encoded_property_name += attribute['name'] + ' '
 
-                names = aux_encoded_property_name.split(' ');
-                layer_defs_aux = []
-                for layer_def in layer_defs:
-                    if layer_def.get('name') in names:
-                        layer_defs_aux.append(layer_def)
+            names = aux_encoded_property_name.split(' ');
+            layer_defs_aux = []
+            for layer_def in layer_defs:
+                if layer_def.get('name') in names:
+                    layer_defs_aux.append(layer_def)
 
-                layer_defs = layer_defs_aux
+            layer_defs = layer_defs_aux
 
-            response = {'fields': layer_defs}
+        response = {'fields': layer_defs}
 
 
-        except Exception as e:
-            print e.message
-            response = {'fields': [], 'error': e.message}
-            pass
+    except Exception as e:
+        print e.message
+        response = {'fields': [], 'error': e.message}
+        pass
+    
+    return response
 
-        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 @csrf_exempt
 def describeFeatureTypeWithPk(request):
