@@ -240,3 +240,10 @@ class EnumerationItem(models.Model):
     def __unicode__(self):
         return self.name
     
+class LayerFieldEnumeration(models.Model):
+    enumeration = models.ForeignKey(Enumeration, on_delete=models.CASCADE)
+    layername = models.CharField(max_length=150)
+    schema = models.CharField(max_length=150)
+    field = models.CharField(max_length=150) 
+    multiple = models.BooleanField(default=False)
+    

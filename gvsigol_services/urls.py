@@ -30,6 +30,7 @@ urlpatterns = [
     url(r'^layer_update/(?P<layer_id>[0-9]+)/$', services_views.layer_update, name='layer_update'),
     url(r'^layer_delete/(?P<layer_id>[0-9]+)/$', services_views.layer_delete, name='layer_delete'),
     url(r'^layer_config/(?P<layer_id>[0-9]+)/$', services_views.layer_config, name='layer_config'),
+    url(r'^convert_to_enumerate/$', services_views.convert_to_enumerate, name='convert_to_enumerate'),
     url(r'^layer_cache_clear/(?P<layer_id>[0-9]+)/$', services_views.cache_clear, name='cache_clear'),
     url(r'^manage_cache_clear/(?P<layer_id>[0-9]+)/$', services_views.manage_cache_clear, name='manage_cache_clear'),
     url(r'^group_cache_clear/(?P<layer_id>[0-9]+)/$', services_views.group_cache_clear, name='group_cache_clear'),

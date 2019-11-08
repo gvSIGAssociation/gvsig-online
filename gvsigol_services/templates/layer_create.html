@@ -562,21 +562,29 @@
 			if ( $('#field-db-type').val() == 'enumeration') {
 				dv += '<div class="col-md-12 form-group">';
 				dv += 	'<label>' + gettext('Select enumeration') + '</label>';
-				dv += 	'<select id="field-name-'+id+'" class="form-control">';
+				dv += 	'<select id="field-enum-'+id+'" class="form-control">';
 						'{% for enum in enumerations %}'
-				dv += 	'<option value="{{enum.name}}">{{enum.title}}</option>';
+				dv += 	'<option value="{{enum.id}}">{{enum.title}}</option>';
 						'{% endfor%}'
 				dv += 	'</select>';
+				dv += '</div>';
+				dv += '<div class="col-md-12 form-group">';
+				dv += 	'<label>' + gettext('Field name') + '</label>';
+				dv += 	'<input type="text" id="field-name-'+id+'" name="field-name-'+id+'" class="form-control">';
 				dv += '</div>';
 				
 			} else if ( $('#field-db-type').val() == 'multiple_enumeration') {
 				dv += '<div class="col-md-12 form-group">';
 				dv += 	'<label>' + gettext('Select multiple enumeration') + '</label>';
-				dv += 	'<select id="field-name-'+id+'" class="form-control">';
+				dv += 	'<select id="field-enum-'+id+'" class="form-control">';
 						'{% for enum in enumerations %}'
-				dv += 	'<option value="{{enum.name}}">{{enum.title}}</option>';
+				dv += 	'<option value="{{enum.id}}">{{enum.title}}</option>';
 						'{% endfor%}'
 				dv += 	'</select>';
+				dv += '</div>';
+				dv += '<div class="col-md-12 form-group">';
+				dv += 	'<label>' + gettext('Field name') + '</label>';
+				dv += 	'<input type="text" id="field-name-'+id+'" name="field-name-'+id+'" class="form-control">';
 				dv += '</div>';
 				
 			} else if ( $('#field-db-type').val() == 'form') {
@@ -603,12 +611,14 @@
 		$('#add-field-accept').on('click', function () {
 			var name = $('#field-name-'+id).val();
 			var type = $('#field-db-type').val();
+			var enumkey = $('#field-enum-'+id).val();
 			
 			if (validateRegex(name)) {
 				var field = {
 					id: id,
 					name: name,
-					type: type
+					type: type,
+					enumkey: enumkey
 				};
 				
 				addField(field);

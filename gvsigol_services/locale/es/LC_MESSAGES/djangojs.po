@@ -94,3 +94,15 @@ msgstr "Guardar nodo"
 
 msgid "Edit node"
 msgstr "Editar nodo"
+
+msgid "Convert"
+msgstr "Convertir"
+
+msgid "Autogen"
+msgstr "Autogenerar"
+
+msgid "Autogen ok"
+msgstr "Generación correcta del campo enumerado"
+
+msgid "Convert ok"
+msgstr "Se ha asignado el campo enumerado correctamente"
