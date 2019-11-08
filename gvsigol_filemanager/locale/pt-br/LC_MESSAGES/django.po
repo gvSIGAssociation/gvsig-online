@@ -30,7 +30,7 @@ msgstr "Exportar"
 
 #: templates/browser/export_to_database.html:44
 msgid "Warning!"
-msgstr "Av¡so!"
+msgstr "Aviso!"
 
 #: templates/browser/export_to_database.html:45
 msgid ""
