@@ -16,10 +16,13 @@ def inserts_in_layerfieldenumeration(apps, schema_editor):
             cursor = schema_editor.connection.cursor()
             cursor.execute(sql)
             rows = cursor.fetchall()
+            print "->Analizando capa %s.%s" % (ds_name, lyr.name)
             for i in rows:
                 if(i[3].startswith("enm_") or i[3].startswith("enmm_")):
+                    print "->Capa %s.%s columna %s es enumerada" % (ds_name, lyr.name, i[3])
                     enum = Enumeration.objects.get(name = i[3])
                     if(enum is not None):
+                        print "->Existe una enumeracion para la capa %s.%s columna %s" % (ds_name, lyr.name, i[3])
                         lfe = LayerFieldEnumeration()
                         lfe.layername = lyr.name
                         lfe.schema = ds_name
