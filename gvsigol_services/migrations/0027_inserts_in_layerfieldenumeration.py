@@ -20,7 +20,12 @@ def inserts_in_layerfieldenumeration(apps, schema_editor):
             for i in rows:
                 if(i[3].startswith("enm_") or i[3].startswith("enmm_")):
                     print "->Capa %s.%s columna %s es enumerada" % (ds_name, lyr.name, i[3])
-                    enum = Enumeration.objects.get(name = i[3])
+                    enum = None
+                    try:
+                        enum = Enumeration.objects.get(name = i[3])
+                    except Exception:
+                        print "->No se ha encontrado un enumerado para la capa %s.%s columna %s" % (ds_name, lyr.name, i[3])
+                        continue
                     if(enum is not None):
                         print "->Existe una enumeracion para la capa %s.%s columna %s" % (ds_name, lyr.name, i[3])
                         lfe = LayerFieldEnumeration()
