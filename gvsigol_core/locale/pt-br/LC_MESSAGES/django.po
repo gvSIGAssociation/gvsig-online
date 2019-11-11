@@ -27,7 +27,7 @@ msgstr "Página não encontrada"
 #: templates/404.html:13 templates/not_found_sharedview.html:13
 msgid "We could not find the page you were looking for. Meanwhile, you may"
 msgstr ""
-"NÃ£o conseguimos encontrar a pÃ¡gina que procura. Enquanto isso, vocÃª pode"
+"Não conseguimos encontrar a página que procura. Enquanto isso, você pode"
 
 #: templates/404.html:14 templates/500.html:14
 #: templates/not_found_sharedview.html:14
@@ -41,11 +41,11 @@ msgstr "Algo falhou"
 #: templates/500.html:13
 msgid "We will work on fixing that right away. Meanwhile, you may"
 msgstr ""
-"Vamos trabalhar para consertar isso imediatamente. Enquanto isso, vocÃª pode"
+"Vamos trabalhar para consertar isso imediatamente. Enquanto isso, você pode"
 
 #: templates/base.html:73 templates/base_compress.html:73
 msgid "gvsigonline docs"
-msgstr "vsigonline docs"
+msgstr "gvsigonline docs"
 
 #: templates/base.html:104 templates/base_compress.html:104
 #: templates/viewer.html:160 templates/viewer_compress.html:162
@@ -65,7 +65,7 @@ msgstr "Inicial"
 #: templates/documentation.html:117 templates/ogc_services.html:86
 #: templates/select_public_project.html:79
 msgid "Version"
-msgstr "VersÃ£o"
+msgstr "Versão"
 
 #: templates/base_compress.html:169 templates/ogc_services.html:90
 msgid "All rights reserved"
@@ -81,23 +81,23 @@ msgstr "Vista compartilhada"
 
 #: templates/documentation.html:49
 msgid "Web application"
-msgstr "AplicaÃ§Ã£o Web"
+msgstr "Aplicação Web"
 
 #: templates/documentation.html:58
 msgid "Introduction and concepts"
-msgstr "IntroduÃ§Ã£o e conceitos"
+msgstr "Introdução e conceitos"
 
 #: templates/documentation.html:59
 msgid ""
 "Features of the platform and license. Definition of the objects and entities "
 "that are part of the environment."
 msgstr ""
-"CaracterÃ­sticas da plataforma e da licenÃ§a. DefiniÃ§Ã£o dos objetos e "
+"Caracterí­sticas da plataforma e da licença. Definição dos objetos e "
 "entidades que fazem parte do ambiente"
 
 #: templates/documentation.html:67
 msgid "Administration Guide"
-msgstr "Guia de AdministraÃ§Ã£o"
+msgstr "Guia de Administração"
 
 #: templates/documentation.html:68
 msgid ""
@@ -105,8 +105,8 @@ msgid ""
 "carry out the management of users and groups, services, symbology, projects "
 "... "
 msgstr ""
-"Este manual Ã© destinado a usuÃ¡rios admin da plataforma. Ele ensina os "
-"passos para efectuar a gestÃ£o de usuÃ¡rios e grupos, serviÃ§os, simbologia, "
+"Este manual é destinado a usuários admin da plataforma. Ele ensina os passos "
+"para efectuar a gestão de usuários e grupos, serviços, simbologia, "
 "projetos... "
 
 #: templates/documentation.html:76
@@ -118,7 +118,7 @@ msgid ""
 "This manual provides a review of each of the features offered by the map "
 "viewer"
 msgstr ""
-"Este manual fornece uma revisÃ£o de cada uma das caracterÃ­sticas oferecidas "
+"Este manual fornece uma revisão de cada uma das caracterí­sticas oferecidas "
 "pelo visor de mapas"
 
 #: templates/documentation.html:85
@@ -128,51 +128,50 @@ msgstr "Plugins"
 #: templates/documentation.html:86
 msgid "Plugins add features that are not initially present on the platform"
 msgstr ""
-"Plugins adicionam recursos que nÃ£o estÃ£o inicialmente presentes na "
-"plataforma"
+"Plugins adicionam recursos que não estão inicialmente presentes na plataforma"
 
 #: templates/documentation.html:95
 msgid "Mobile application"
-msgstr "AplicaÃ§Ã£o para celular"
+msgstr "Aplicação para celular"
 
 #: templates/documentation.html:104
 msgid "User manual"
-msgstr "Manual do usuÃ¡rio"
+msgstr "Manual do usuário"
 
 #: templates/documentation.html:105
 msgid ""
 "Learn how to manage geographic information from a mobile device or tablet"
 msgstr ""
-"Saiba como gerenciar informaÃ§Ãµes geogrÃ¡ficas de um dispositivo celular ou "
+"Saiba como gerenciar informações geográficas de um dispositivo celular ou "
 "tablet"
 
 #: templates/home.html:18 utils.py:476
 msgid "Username"
-msgstr "Username"
+msgstr "Nome de usuário"
 
 #: templates/home.html:20 utils.py:479
 msgid "Email"
-msgstr "Correio electrÃ³nico"
+msgstr "Correio electrónico"
 
 #: templates/home.html:22
 msgid "Is admin?"
-msgstr "Ã‰ admin?"
+msgstr "É administrador?"
 
 #: templates/home.html:24
 msgid "You are logged in as root"
-msgstr "VocÃª estÃ¡ logado como administrador"
+msgstr "Você está logado como administrador"
 
 #: templates/home.html:26
 msgid "You are logged in as management user"
-msgstr "VocÃª estÃ¡ logado como usuÃ¡rio de administraÃ§Ã£o"
+msgstr "Você está logado como usuário de administração"
 
 #: templates/home.html:28
 msgid "You are logged in as basic user"
-msgstr "VocÃª estÃ¡ logado como usuÃ¡rio bÃ¡sico"
+msgstr "Você está logado como usuário básico"
 
 #: templates/home.html:30
 msgid "Last login"
-msgstr "Ãšltimo Login"
+msgstr "Último Login"
 
 #: templates/home.html:34 utils.py:480 utils.py:492
 msgid "Password"
@@ -188,7 +187,7 @@ msgstr "para atualizar sua senha"
 
 #: templates/home.html:39
 msgid "Passwords doesn't match"
-msgstr "As senhas nÃ£o correspondem"
+msgstr "As senhas não correspondem"
 
 #: templates/home.html:44 templates/home.html:45 utils.py:488
 msgid "New password"
@@ -222,11 +221,11 @@ msgstr "Carregar projeto"
 
 #: templates/home.html:101
 msgid "Public projects list"
-msgstr "Lista de projetos pÃºblicos"
+msgstr "Lista de projetos públicos"
 
 #: templates/ogc_services.html:61
 msgid "WMS Service"
-msgstr "ServiÃ§o WMS"
+msgstr "Serviço WMS"
 
 #: templates/ogc_services.html:61 templates/ogc_services.html:71
 msgid "Show capabilities"
@@ -234,11 +233,11 @@ msgstr "Mostrar capacidades"
 
 #: templates/ogc_services.html:71
 msgid "WFS Service"
-msgstr "ServiÃ§o WFS"
+msgstr "Serviço WFS"
 
 #: templates/ogc_services.html:104
 msgid "Service capabilities"
-msgstr "Capacidades de serviÃ§o"
+msgstr "Capacidades de serviço"
 
 #: templates/project_add.html:12 templates/toc_update.html:13
 msgid "Save"
@@ -262,7 +261,7 @@ msgstr "Ferramentas"
 
 #: templates/project_add.html:30 templates/project_update.html:29
 msgid "User groups"
-msgstr "Grupo de usuÃ¡rios"
+msgstr "Grupo de usuários"
 
 #: templates/project_add.html:39 templates/project_list.html:24
 #: templates/shared_view_list.html:17
@@ -276,28 +275,28 @@ msgstr "Nome do projeto"
 #: templates/project_add.html:45 templates/project_list.html:25
 #: templates/project_update.html:40
 msgid "Title"
-msgstr "TÃ­tulo"
+msgstr "Tí­tulo"
 
 #: templates/project_add.html:46 templates/project_update.html:41
 msgid "Project title"
-msgstr "TÃ­tulo do projeto"
+msgstr "Tí­tulo do projeto"
 
 #: templates/project_add.html:51 templates/project_list.html:26
 #: templates/project_update.html:47
 msgid "Description"
-msgstr "DescriÃ§Ã£o"
+msgstr "Descrição"
 
 #: templates/project_add.html:52 templates/project_update.html:48
 msgid "Project description"
-msgstr "DescriÃ§Ã£o do projeto"
+msgstr "Descrição do projeto"
 
 #: templates/project_add.html:57 templates/project_update.html:63
 msgid "Selectable layer groups"
-msgstr "Grupos de camadas selecionÃ¡veis"
+msgstr "Grupos de camadas selecionáveis"
 
 #: templates/project_add.html:61 templates/project_update.html:72
 msgid "Toc panel presentation"
-msgstr "ApresentaÃ§Ã£o do painel Toc"
+msgstr "Apresentação do painel Toc"
 
 #: templates/project_add.html:63 templates/project_update.html:75
 #: templates/project_update.html:77
@@ -317,7 +316,7 @@ msgstr "Mostrar toc, grupos e camadas"
 #: templates/project_add.html:71 templates/project_list.html:27
 #: templates/project_update.html:54
 msgid "Is public?"
-msgstr "Ã‰ pÃºblico?"
+msgstr "É público?"
 
 #: templates/project_add.html:80 templates/project_update.html:97
 msgid "Locate place..."
@@ -333,7 +332,7 @@ msgstr "Formatos suportados"
 
 #: templates/project_add.html:106 templates/project_update.html:124
 msgid "Show project icon in TOC"
-msgstr "Mostrar Ã­cone de projeto em TOC"
+msgstr "Mostrar í­cone de projeto em TOC"
 
 #: templates/project_add.html:120 templates/project_update.html:142
 msgid "Add layer group"
@@ -356,7 +355,7 @@ msgstr "Adicionar"
 #: templates/project_add.html:157 templates/project_update.html:192
 #: templates/project_update.html:194
 msgid "Mark as default"
-msgstr "Marcar como padrÃ£o"
+msgstr "Marcar como padrão"
 
 #: templates/project_add.html:203 templates/project_update.html:243
 msgid "Search tool..."
@@ -369,12 +368,12 @@ msgstr "Atribuir ferramenta"
 
 #: templates/project_add.html:242 templates/project_update.html:282
 msgid "Search user group..."
-msgstr "Pesquisar grupo de usuÃ¡rios..."
+msgstr "Pesquisar grupo de usuários..."
 
 #: templates/project_add.html:256 templates/project_add.html:258
 #: templates/project_update.html:296 templates/project_update.html:298
 msgid "Assign user group"
-msgstr "Atribuir grupo de usuÃ¡rios"
+msgstr "Atribuir grupo de usuários"
 
 #: templates/project_add.html:290 templates/project_update.html:329
 msgid "Create new layer group"
@@ -382,7 +381,7 @@ msgstr "Criar novo grupo de camadas"
 
 #: templates/project_add.html:293 templates/project_update.html:332
 msgid "Is needed to save this project first, Do you want continue?"
-msgstr "Ã‰ necessÃ¡rio salvar este projeto primeiro. VocÃª quer continuar?"
+msgstr "É necessário salvar este projeto primeiro. Você quer continuar?"
 
 #: templates/project_add.html:296 templates/project_list.html:70
 #: templates/project_update.html:335 templates/shared_view_list.html:55
@@ -409,11 +408,11 @@ msgstr "Excluir projetos"
 
 #: templates/project_list.html:67
 msgid "The project will be removed, Do you want continue?"
-msgstr "O projeto serÃ¡ removido. VocÃª quer continuar?"
+msgstr "O projeto será removido. Você quer continuar?"
 
 #: templates/project_list.html:88 templates/shared_view_list.html:73
 msgid "Processing request..."
-msgstr "Processando solicitaÃ§Ã£o..."
+msgstr "Processando solicitação..."
 
 #: templates/project_list.html:89 templates/shared_view_list.html:74
 #, python-format
@@ -446,7 +445,7 @@ msgstr "Carregando..."
 #: templates/project_list.html:96 templates/project_list.html:97
 #: templates/shared_view_list.html:81 templates/shared_view_list.html:82
 msgid "No records available"
-msgstr "Nenhum registro disponÃ­vel"
+msgstr "Nenhum registro disponí­vel"
 
 #: templates/project_list.html:99 templates/shared_view_list.html:84
 msgid "First"
@@ -462,7 +461,7 @@ msgstr "Seguinte"
 
 #: templates/project_list.html:102 templates/shared_view_list.html:87
 msgid "Last"
-msgstr "Ãšltimo"
+msgstr "Último"
 
 #: templates/project_list.html:105 templates/shared_view_list.html:90
 #, python-format
@@ -492,23 +491,23 @@ msgstr "Criado por"
 
 #: templates/shared_view_list.html:19
 msgid "Expiration date"
-msgstr "Data de expiraÃ§Ã£o"
+msgstr "Data de expiração"
 
 #: templates/shared_view_list.html:49
 msgid "Delete view"
-msgstr "Eliminar visÃ£o"
+msgstr "Eliminar visão"
 
 #: templates/shared_view_list.html:52
 msgid "The view will be removed, Do you want continue?"
-msgstr "A vista serÃ¡ removida. Quer continuar?"
+msgstr "A vista será removida. Quer continuar?"
 
 #: templates/shared_view_list.html:97
 msgid "Delete shared view"
-msgstr "Excluir visÃ£o compartilhada"
+msgstr "Excluir visão compartilhada "
 
 #: templates/toc_update.html:11
 msgid "Update TOC"
-msgstr "AtualizaÃ§Ã£o TOC\t"
+msgstr "Atualização TOC\t"
 
 #: templates/viewer.html:92 templates/viewer.html:527
 #: templates/viewer_compress.html:497
@@ -529,7 +528,7 @@ msgstr "Exibir 2D"
 
 #: templates/viewer.html:189 templates/viewer_compress.html:191
 msgid "Layer tree"
-msgstr "Ã�rvore de camadas"
+msgstr "Árvore de camadas"
 
 #: templates/viewer.html:190 templates/viewer_compress.html:192
 msgid "Legend"
@@ -541,15 +540,15 @@ msgstr "Detalhes"
 
 #: templates/viewer.html:192 templates/viewer_compress.html:194
 msgid "Temporary"
-msgstr "TemporÃ¡rio"
+msgstr "Temporário"
 
 #: templates/viewer.html:260 templates/viewer_compress.html:263
 msgid "End edition"
-msgstr "EdiÃ§Ã£o final"
+msgstr "Edição final"
 
 #: templates/viewer.html:263 templates/viewer_compress.html:266
 msgid "Changes don't saved will be missed. Continue?"
-msgstr "As alteraÃ§Ãµes nÃ£o guardadas serÃ£o perdidas. Continuar?"
+msgstr "As alterações não guardadas serão perdidas. Continuar?"
 
 #: templates/viewer.html:283 templates/viewer_compress.html:286
 msgid "Error loading layers"
@@ -557,7 +556,7 @@ msgstr "Erro nas camadas carregadas"
 
 #: utils.py:459
 msgid "New user account"
-msgstr "Nova conta de usuÃ¡rio"
+msgstr "Nova conta de usuário"
 
 #: utils.py:475
 msgid "Account data"
@@ -573,15 +572,15 @@ msgstr "Sobrenome"
 
 #: utils.py:490
 msgid "This is your new temporary password"
-msgstr "Esta Ã© a sua nova senha temporÃ¡ria"
+msgstr "Esta é a  sua nova senha temporária"
 
 #: views.py:184
 msgid "Navigation history"
-msgstr "HistÃ³rico de navegaÃ§Ã£o"
+msgstr "Histórico de navegação"
 
 #: views.py:185
 msgid "Browse the view forward and backward"
-msgstr "Navegue pela janela para a frente e para trÃ¡s"
+msgstr "Navegue pela janela para a frente e para trás"
 
 #: views.py:189
 msgid "Zoom tools"
@@ -593,11 +592,11 @@ msgstr "Ampliar zoom, diminuir zoom "
 
 #: views.py:194
 msgid "Feature info"
-msgstr "InformaÃ§Ã£o de caracterÃ­sticas"
+msgstr "Informação de caracterí­sticas"
 
 #: views.py:195
 msgid "Map information at point"
-msgstr "InformaÃ§Ãµes do mapa no ponto"
+msgstr "Informações do mapa no ponto"
 
 #: views.py:199
 msgid "Measure tools"
@@ -605,7 +604,7 @@ msgstr "Ferramentas de medida"
 
 #: views.py:200
 msgid "It allows to measure areas and distances"
-msgstr "Permite medir Ã¡reas e distÃ¢ncias"
+msgstr "Permite medir áreas e distâncias"
 
 #: views.py:204
 msgid "Search coordinates"
@@ -625,7 +624,7 @@ msgstr "Transformar coordenadas entre diferentes sistemas"
 
 #: views.py:214
 msgid "Geolocation"
-msgstr "GeolocalizaÃ§Ã£o"
+msgstr "Geolocalização"
 
 #: views.py:215
 msgid "Center the map in the current position"
@@ -641,7 +640,7 @@ msgstr "Permite-lhe compartilhar a visualizasão em seu estado atual"
 
 #: views.py:224
 msgid "Select feature"
-msgstr "Seleccionar caracterÃ­stica"
+msgstr "Seleccionar caracterí­stica"
 
 #: views.py:225
 msgid "Select features from current layers"
@@ -649,7 +648,7 @@ msgstr "Selecionar características das camadas atuais"
 
 #: views.py:346
 msgid "You must enter an project name"
-msgstr "Ã‰ necessÃ¡rio inserir um nome de projeto"
+msgstr "É  necessário inserir um nome de projeto"
 
 #: views.py:350
 #, python-brace-format
@@ -657,7 +656,7 @@ msgid ""
 "Invalid project name: '{value}'. Identifiers must begin with a letter or an "
 "underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr ""
-"Nome invÃ¡lido do projeto: '{value}'. Os identificadores devem començar com "
+"Nome inválido do projeto: '{value}'. Os identificadores devem començar com "
 "uma letra ou uma sublinhado (_). Os caracteres subsequentes podem ser "
 "letras, sublinhados ou números"
 
