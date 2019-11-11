@@ -22,7 +22,7 @@ msgstr ""
 
 #: templates/404.html:10 templates/not_found_sharedview.html:10
 msgid "Page not found"
-msgstr "PÃ¡gina nÃ£o encontrada"
+msgstr "Página não encontrada"
 
 #: templates/404.html:13 templates/not_found_sharedview.html:13
 msgid "We could not find the page you were looking for. Meanwhile, you may"
@@ -105,8 +105,8 @@ msgid ""
 "carry out the management of users and groups, services, symbology, projects "
 "... "
 msgstr ""
-"Este manual Ã© destinado a usuÃ¡rios admin da plataforma. Ele ensina os passos "
-"para efectuar a gestÃ£o de usuÃ¡rios e grupos, serviÃ§os, simbologia, "
+"Este manual Ã© destinado a usuÃ¡rios admin da plataforma. Ele ensina os "
+"passos para efectuar a gestÃ£o de usuÃ¡rios e grupos, serviÃ§os, simbologia, "
 "projetos... "
 
 #: templates/documentation.html:76
@@ -128,7 +128,8 @@ msgstr "Plugins"
 #: templates/documentation.html:86
 msgid "Plugins add features that are not initially present on the platform"
 msgstr ""
-"Plugins adicionam recursos que nÃ£o estÃ£o inicialmente presentes na plataforma"
+"Plugins adicionam recursos que nÃ£o estÃ£o inicialmente presentes na "
+"plataforma"
 
 #: templates/documentation.html:95
 msgid "Mobile application"
