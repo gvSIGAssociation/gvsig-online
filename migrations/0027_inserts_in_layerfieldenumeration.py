@@ -30,7 +30,7 @@ def inserts_in_layerfieldenumeration(apps, schema_editor):
                         else:
                             lfe.multiple = False
                         lfe.save()
-                        print "-> Migrado el campo enumerado %s a la versión nueva" % i[3]
+                        print "-> Migrado el campo enumerado %s a la version nueva" % i[3]
                     
     except Exception as error:
         print error
