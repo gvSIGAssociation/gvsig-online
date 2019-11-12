@@ -4,7 +4,6 @@
 	var IMG_PATH = '{% static "img/" %}';
 </script>
 <script type="text/javascript" src="{% static "js/vendors/jquery.ddslick.js" %}"></script>
-<script type="text/javascript" src="{% static "js/vendors/jquery.ddslick.js" %}"></script>
 <script type="text/javascript" src="{% static "js/lib/tools/StyleSettings.js" %}"></script>
 <script type="text/javascript" src="{% static "js/lib/tools/DrawPointControl.js" %}"></script>
 <script type="text/javascript" src="{% static "js/lib/tools/DrawLineControl.js" %}"></script>
@@ -16,9 +15,13 @@
 	var conf = viewer.core.getConf();
 	
 	if (viewer.core.ifToolInConf('gvsigol_plugin_draw')) {
+		
+		var active = false;
+		
+		var button = '<li role="presentation"><a id="show_hide_draw" role="menuitem" tabindex="-1" href="#"><i class="fa fa-pencil m-r-5"></i>'+gettext("Show/Hide draw tools")+'</a></li>';
+		$('#gvsigol-navbar-file-menu').append(button);
+		
 		var drawBar = new ol.control.Bar({ toggleOne: true, group:true });
-		map.addControl(drawBar);
-		//drawBar.setPosition('top-left');
 		
 		var drawModal = '';
 		drawModal += '<div class="modal" id="float-draw-modal" tabindex="-1" role="dialog" aria-labelledby="float-modal-label">';
@@ -74,16 +77,6 @@
 		textLayer.printable = true;
 		textLayer.drawType = 'text';
 		map.addLayer(textLayer);
-		
-		var select = new ol.interaction.Select({
-			layers: [textLayer]
-		});
-
-		var modify = new ol.interaction.Modify({
-		  	features: select.getFeatures()
-		});
-		map.addInteraction(select);
-		map.addInteraction(modify);
 		
 		var drawPoint = new DrawPointControl(drawBar, map, pointLayer);
 		var drawLine = new DrawLineControl(drawBar, map, lineLayer);
@@ -182,23 +175,13 @@
 				});
 			});
 			
-			$('.drawed-text-move-button').click(function(e){
-				var fid = this.dataset.fid;
-				var dtype = this.dataset.dtype;
-				
-				textLayer.getSource().getFeatures().forEach(function(feature){ 
-					if (feature.getId() == fid) {
-						
-					}
-				});
-			});
-			
 			$('.drawed-text-remove-button').click(function(e){
 				var fid = this.dataset.fid;
 				var dtype = this.dataset.dtype;
 				
 				textLayer.getSource().getFeatures().forEach(function(feature){ 
 					if (feature.getId() == fid) {
+						feature.setStyle(null);
 						textLayer.getSource().removeFeature(feature);
 						textLayer.setVisible(false);
 						textLayer.setVisible(true);
@@ -207,6 +190,31 @@
 				});
 			});
 		});
+		
+		$('#show_hide_draw').click(function(e){
+			if (active) {
+				pointLayer.getSource().clear();
+				lineLayer.getSource().clear();
+				polygonLayer.getSource().clear();
+				textLayer.getSource().clear();
+				map.removeControl(drawBar);
+				active = false;
+				
+			} else {
+				map.addControl(drawBar);
+				active = true;
+			}
+		});
+		
+		var select = new ol.interaction.Select({
+			layers: [textLayer]
+		});
+
+		var modify = new ol.interaction.Modify({
+		  	features: select.getFeatures()
+		});
+		map.addInteraction(select);
+		map.addInteraction(modify);
 	}
 	
 </script>

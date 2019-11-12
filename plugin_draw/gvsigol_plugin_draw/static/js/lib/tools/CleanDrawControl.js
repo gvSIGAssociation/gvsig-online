@@ -36,6 +36,15 @@ var CleanDrawControl = function(drawBar, pointLayer, lineLayer, polygonLayer, te
 			lineLayer.getSource().clear();
 			polygonLayer.getSource().clear();
 			textLayer.getSource().clear();
+			
+			pointLayer.setVisible(false);
+			pointLayer.setVisible(true);
+			lineLayer.setVisible(false);
+			lineLayer.setVisible(true);
+			polygonLayer.setVisible(false);
+			polygonLayer.setVisible(true);
+			textLayer.setVisible(false);
+			textLayer.setVisible(true);
 			this.toggle();
 		}
 	});
