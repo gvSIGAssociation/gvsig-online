@@ -619,3 +619,12 @@ html, body {
 .ui-dialog-titlebar-close:hover {
   background: url("../js/vendors/jQueryUI/images/ui-icons_222222_256x240.png") repeat scroll -93px -128px rgba(0, 0, 0, 0);
 }
+
+.ol-popup.default {
+    /*border: 1px solid #666;*/
+}
+
+.ol-popup .anchor {
+    margin: auto;
+    /*border-color: #666;*/
+}
