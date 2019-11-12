@@ -462,3 +462,7 @@ except:
     }
     
 CELERY_BROKER_URL = '##CELERY_BROKER_URL##'
+
+OSM_TILING_1 = ""
+OSM_TILING_2 = ""
+OSM_TILING_3 = ""

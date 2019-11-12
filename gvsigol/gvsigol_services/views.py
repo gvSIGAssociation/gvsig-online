@@ -15,64 +15,70 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from httplib import HTTPResponse
-
 '''
 @author: Cesar Martinez <cmartinez@scolab.es>
 '''
 
-from models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, Enumeration, EnumerationItem,\
-    LayerLock, Server, Node
-from geoserver import workspace
-from forms_services import ServerForm, WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, ExternalLayerForm
-from forms_geoserver import CreateFeatureTypeForm
-from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
-from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
-from django.shortcuts import render, redirect
-import geographic_servers
-import rest_geowebcache as geowebcache
-from backend_postgis import Introspect
-from gvsigol_services.backend_resources import resource_manager 
-from gvsigol_auth.utils import superuser_required, staff_required
-from django.contrib.auth.models import User
-from gvsigol_core.models import ProjectLayerGroup
+import ast
+from datetime import datetime
+from httplib import HTTPResponse
+import json
+import logging
+from math import floor
+import os
+import random
+import re
+import shutil
+import string
+import unicodedata
+import urllib
+import zipfile
+
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
-from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES, INSTALLED_APPS, WMS_MAX_VERSION, WMTS_MAX_VERSION, BING_LAYERS
-from django.utils.translation import ugettext as _
-from gvsigol_services.models import LayerResource
-from gvsigol.settings import MOSAIC_DB
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
+from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.utils import timezone
+from django.utils.translation import ugettext as _
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods, require_safe, require_POST, require_GET
+from future.moves.urllib.parse import urlparse, urlencode
+from geoserver import workspace
+from lxml import html
+from owslib.util import Authentication
+from owslib.wms import WebMapService
+from owslib.wmts import WebMapTileService
+import requests
+from requests_futures.sessions import FuturesSession
+
+from backend_postgis import Introspect
+from forms_geoserver import CreateFeatureTypeForm
+from forms_services import ServerForm, WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, ExternalLayerForm
+from gdal_tools import gdalsrsinfo
+import geographic_servers
+from gvsigol import settings
+from gvsigol.settings import FILEMANAGER_DIRECTORY, LANGUAGES, INSTALLED_APPS, WMS_MAX_VERSION, WMTS_MAX_VERSION, BING_LAYERS
+from gvsigol.settings import MOSAIC_DB
+from gvsigol_auth.models import UserGroup
+from gvsigol_auth.utils import superuser_required, staff_required
 from gvsigol_core import utils as core_utils
 from gvsigol_core.models import Project
-from gvsigol_auth.models import UserGroup
-from django.shortcuts import render
-from django.utils import timezone
-from gdal_tools import gdalsrsinfo
-from gvsigol import settings
+from gvsigol_core.models import ProjectLayerGroup
+from gvsigol_services.backend_resources import resource_manager 
+from gvsigol_services.models import LayerResource
+import gvsigol_services.tiling_service as tiling_service
 import locks_utils
-import logging
-import signals
-import urllib
-import utils
-import json
-import ast
-import re
-import os
-import unicodedata
-from datetime import datetime
-from owslib.wms import WebMapService
-from owslib.util import Authentication
-from owslib.wmts import WebMapTileService
-from lxml import html
-from requests_futures.sessions import FuturesSession
-import requests
-import string
-import random
-from future.moves.urllib.parse import urlparse, urlencode
-import rest_geoserver
-from rest_geoserver import RequestError
 from models import LayerFieldEnumeration
+from models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, Enumeration, EnumerationItem, \
+    LayerLock, Server, Node
+from rest_geoserver import RequestError
+import rest_geoserver
+import rest_geowebcache as geowebcache
+import signals
+import utils
+
 
 logger = logging.getLogger("gvsigol")
 
@@ -2519,7 +2525,26 @@ def enumeration_update(request, eid):
 
         return render(request, 'enumeration_update.html', {'eid': eid, 'enumeration': enum, 'items': items, 'count': len(items) + 1})
 
-
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def create_base_layer(request, pid):
+    if request.method == 'POST':   
+        if tiling_service.exists_base_layer_tiled(pid):
+            return utils.get_exception(400, 'The base layer already exists')
+        tiles = None
+        try:
+            tiles = int(request.POST.get('tiles'))
+        except Exception:
+            return utils.get_exception(400, 'Wrong number of tiles')
+        
+        if tiles is not None:
+            tiling_service.tiling_base_layer(pid, tiles)
+        else:
+            return utils.get_exception(400, 'Wrong number of tiles')
+                
+    return HttpResponse('{"response": "ok"}', content_type='application/json')
+  
+     
 @csrf_exempt
 def get_enumeration(request):
     if request.method == 'POST':

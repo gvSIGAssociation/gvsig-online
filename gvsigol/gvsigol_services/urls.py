@@ -75,6 +75,7 @@ urlpatterns = [
     url(r'^get_group_cache_tasks/$', services_views.get_group_cache_tasks, name='get_group_cache_tasks'),
     url(r'^kill_all_tasks/$', services_views.kill_all_tasks, name='kill_all_tasks'),
     url(r'^kill_all_group_tasks/$', services_views.kill_all_group_tasks, name='kill_all_group_tasks'),
+    url(r'^create_base_layer/(?P<pid>[0-9]+)/$', services_views.create_base_layer, name='create_base_layer'),
     
     url(r'^layers_get_temporal_properties/$', services_views.layers_get_temporal_properties, name='layers_get_temporal_properties'),
     url(r'^get_date_fields_from_resource/$', services_views.get_date_fields_from_resource, name='get_date_fields_from_resource'),
