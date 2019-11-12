@@ -644,7 +644,7 @@ def project_update(request, pid):
                     'baselayer': baselayer
                 })
 
-        return render(request, 'project_update.html', {'tools': projectTools,'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'has_geocoding_plugin': has_geocoding_plugin, 'toc': ordered_toc})
+        return render(request, 'project_update.html', {'tools': projectTools,'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'has_geocoding_plugin': has_geocoding_plugin, 'toc': ordered_toc, 'superuser' : is_superuser(request.user)})
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
