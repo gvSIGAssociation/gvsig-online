@@ -23,7 +23,9 @@
 /**
  * TODO
  */
-var StyleSettings = function() {
+var StyleSettings = function(drawBar) {
+	var self = this;
+	this.drawBar = drawBar;
 	this.style = {
 		point: {
 			well_known_name: 'circle',
@@ -55,9 +57,9 @@ var StyleSettings = function() {
 		},
 		text: {}
 	};
-	this.printStyles = {
+	this.pointPrintStyles = {
 		"version" : "2",
-		"[style_name=style_0]" : {
+		"[style_name='point_style_0']" : {
 			"symbolizers" : [{
 				"type" : "point",
 				"fillColor": "#ffcc33",
@@ -66,29 +68,60 @@ var StyleSettings = function() {
 				"pointRadius": 8,
 				"strokeColor": "#ffcc33",
 				"strokeWidth": 2
-			}, {
+			}
+		]}
+	};
+	this.linePrintStyles = {
+		"version" : "2",
+		"[style_name='line_style_0']" : {
+			"symbolizers" : [{
 				"type" : "line",
 				"strokeColor":"#ffcc33",
 				"strokeWidth":5
-			}, {
+			}
+		]}
+	};
+	this.arrowPrintStyles = {
+		"version" : "2",
+		"[style_name='arrow_style_0']" : {
+			"symbolizers" : [{
+				"type" : "line",
+				"strokeColor":"#ffcc33",
+				"strokeWidth":5
+			}
+		]}
+	};
+	this.polygonPrintStyles = {
+		"version" : "2",
+		"[style_name='polygon_style_0']" : {
+			"symbolizers" : [{
 				"type" : "polygon",
 				"fillColor": "#ffcc33",
 				"fillOpacity": 1.0,
 				"strokeColor": "#ffcc33",
 				"strokeWidth": 2
-			}, {
-				"type" : "text",
-				"fontColor": "#000000",
-				"fontFamily": "sans-serif",
-				"fontSize": "12px",
-				"fontStyle": "normal",
-				"fontWeight": "bold",
-				"label": "[name]",
 			}
 		]}
 	};
+	this.textPrintStyles = {
+		"version" : "2",
+		"[style_name='text_style_0']" : {
+			"symbolizers" : []
+		}
+	};
 	
 	this.createModal();
+	
+	this.control = new ol.control.Toggle({	
+		html: '<i class="fa fa-cogs" ></i>',
+		className: "edit",
+		title: gettext('Style settings'),
+		onToggle: function(active){
+			self.show();
+			this.toggle();
+		}
+	});
+	this.drawBar.addControl(this.control);
 };
 
 StyleSettings.prototype.deactivable = false;
@@ -461,27 +494,55 @@ StyleSettings.prototype.getStyle = function() {
 	return this.style;
 };
 
-StyleSettings.prototype.addPrintStyle = function(style, styleName) {
-	this.printStyles['[style_name=' + styleName + ']'] = {
+StyleSettings.prototype.addPointPrintStyle = function(point, styleName) {
+	this.pointPrintStyles["[style_name='" + styleName + "']"] = {
 		symbolizers: [{
 			"type" : "point",
-			"fillColor": style.point.fill_color,
-			"fillOpacity": style.point.fill_opacity,
-			"graphicName": style.point.well_known_name,
-			"pointRadius": style.point.size,
-			"strokeColor": style.point.stroke_color,
-			"strokeWidth": style.point.stroke_width
-		}, {
+			"fillColor": point.fill_color,
+			"fillOpacity": point.fill_opacity,
+			"graphicName": point.well_known_name,
+			"pointRadius": point.size,
+			"strokeColor": point.stroke_color,
+			"strokeWidth": point.stroke_width
+		}]
+	};
+};
+
+StyleSettings.prototype.addLinePrintStyle = function(line, styleName) {
+	this.linePrintStyles["[style_name='" + styleName + "']"] = {
+		symbolizers: [{
 			"type" : "line",
-			"strokeColor": style.line.stroke_color,
-			"strokeWidth": style.line.stroke_width,
-		}, {
+			"strokeColor": line.stroke_color,
+			"strokeWidth": line.stroke_width,
+		}]
+	};
+};
+
+StyleSettings.prototype.addArrowPrintStyle = function(arrow, styleName) {
+	this.arrowPrintStyles["[style_name='" + styleName + "']"] = {
+		symbolizers: [{
+			"type" : "line",
+			"strokeColor": arrow.stroke_color,
+			"strokeWidth": arrow.stroke_width,
+		}]
+	};
+};
+
+StyleSettings.prototype.addPolygonPrintStyle = function(polygon, styleName) {
+	this.polygonPrintStyles["[style_name='" + styleName + "']"] = {
+		symbolizers: [{
 			"type" : "polygon",
-			"fillColor": style.polygon.fill_color,
-			"fillOpacity": style.polygon.fill_opacity,
-			"strokeColor": style.polygon.stroke_color,
-			"strokeWidth": style.polygon.stroke_width,
-		}, {
+			"fillColor": polygon.fill_color,
+			"fillOpacity": polygon.fill_opacity,
+			"strokeColor": polygon.stroke_color,
+			"strokeWidth": polygon.stroke_width,
+		}]
+	};
+};
+
+StyleSettings.prototype.addTextPrintStyle = function(text, styleName) {
+	this.textPrintStyles["[style_name='" + styleName + "']"] = {
+		symbolizers: [{
 			"type" : "text",
 			"fontColor": "#000000",
 			"fontFamily": "sans-serif",
@@ -493,8 +554,24 @@ StyleSettings.prototype.addPrintStyle = function(style, styleName) {
 	};
 };
 
-StyleSettings.prototype.getPrintStyles = function() {
-	return this.printStyles;
+StyleSettings.prototype.getPointPrintStyles = function() {
+	return this.pointPrintStyles;
+};
+
+StyleSettings.prototype.getLinePrintStyles = function() {
+	return this.linePrintStyles;
+};
+
+StyleSettings.prototype.getArrowPrintStyles = function() {
+	return this.arrowPrintStyles;
+};
+
+StyleSettings.prototype.getPolygonPrintStyles = function() {
+	return this.polygonPrintStyles;
+};
+
+StyleSettings.prototype.getTextPrintStyles = function() {
+	return this.textPrintStyles;
 };
 
 StyleSettings.prototype.show = function() {

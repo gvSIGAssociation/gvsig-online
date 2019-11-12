@@ -23,44 +23,85 @@
 /**
  * TODO
  */
-var InsertText = function(map, drawLayer) {
+var DrawLineControl = function(drawBar, map, drawLayer) {
+	var self = this;
 	this.map = map;
+	this.drawBar = drawBar;
 	this.drawLayer = drawLayer;
-	this.styleName = 'style_0';
-	this.style = {};
+	this.styleName = 'line_style_0';
+	this.style = {
+		stroke_color: '#f15511',
+		stroke_width: 2,
+		stroke_dash_array: 'none'
+	};
 	
 	this.drawInteraction = new ol.interaction.Draw({
 		source: this.drawLayer.getSource(),
 		type: 'LineString'
 	});
 
+	this.drawInteraction.on('drawend',
+		function(evt) {
+			var drawed = evt.feature;
+			drawed.setProperties({'style_name': this.styleName});
+			var style = self.getStyle(drawed);
+			drawed.setStyle(style);
+			
+		}, this);
+	
+	this.control = new ol.control.Toggle({	
+		html: '<i class="fa fa-code-fork" ></i>',
+		className: "edit",
+		title: gettext('Draw line'),
+		interaction: this.drawInteraction,
+		onToggle: function(active){
+			if (active) {
+				self.activate();
+			} else {
+				self.deactivate();
+			}
+		}
+	});
+	this.drawBar.addControl(this.control);
+
 };
 
 
-InsertText.prototype.active = false;
+DrawLineControl.prototype.active = false;
 
-InsertText.prototype.isActive = function(e) {
+DrawLineControl.prototype.isActive = function(e) {
 	return this.active;
 
 };
 
-InsertText.prototype.activate = function(e) {
+DrawLineControl.prototype.activate = function(e) {
 	this.active = true;
 	this.map.addInteraction(this.drawInteraction);
 
 };
 
-InsertText.prototype.deactivate = function() {
+DrawLineControl.prototype.deactivate = function() {
 	this.active = false;
 	this.map.removeInteraction(this.drawInteraction);
 };
 
-InsertText.prototype.setStyle = function(style, styleName) {
+DrawLineControl.prototype.getStyle = function(feature) {
+	var style = new ol.style.Style({
+    	stroke: new ol.style.Stroke({
+        	color: this.style.stroke_color,
+        	width: this.style.stroke_width
+      	})
+    });
+	
+	return style;
+};
+
+DrawLineControl.prototype.setStyle = function(style, styleName) {
 	this.styleName = styleName;
 	this.style = style;
 };
 
-InsertText.prototype.hexToRgb = function(hex) {
+DrawLineControl.prototype.hexToRgb = function(hex) {
 	// Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
 	var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
 	hex = hex.replace(shorthandRegex, function(m, r, g, b) {

@@ -164,11 +164,13 @@ viewer.core = {
 
 		$(document).on('sidebar:opened', function(){
 			$('.ol-scale-line').css('left', '408px');
+			//$('.ol-bar').css('left', '408px');
 			$('.custom-mouse-position').css('left', '580px');
 		});
 
 		$(document).on('sidebar:closed', function(){
 			$('.ol-scale-line').css('left', '8px');
+			//$('.ol-bar').css('left', '8px');
 			$('.custom-mouse-position').css('left', '180px');
 		});
     },

@@ -23,22 +23,21 @@
 /**
  * TODO
  */
-var DrawPolygon = function(map, drawLayer) {
+var DrawArrow = function(map, drawLayer) {
 	var self = this;
 	this.map = map;
 	this.drawLayer = drawLayer;
-	this.styleName = 'style_0';
+	this.styleName = 'arrow_style_0';
 	this.style = {
-		fill_color: '#ffcc33',
-		fill_opacity: 0.2,
 		stroke_color: '#ffcc33',
-		stroke_width: 2/*,
-		stroke_opacity: 1.0*/
+		stroke_width: 2,
+		//stroke_opacity: 1.0,
+		stroke_dash_array: 'none'
 	};
 	
 	this.drawInteraction = new ol.interaction.Draw({
 		source: this.drawLayer.getSource(),
-		type: 'Polygon'
+		type: 'LineString'
 	});
 
 	this.drawInteraction.on('drawend',
@@ -53,47 +52,61 @@ var DrawPolygon = function(map, drawLayer) {
 };
 
 
-DrawPolygon.prototype.active = false;
+DrawArrow.prototype.active = false;
 
-DrawPolygon.prototype.isActive = function(e) {
+DrawArrow.prototype.isActive = function(e) {
 	return this.active;
 
 };
 
-DrawPolygon.prototype.activate = function(e) {
+DrawArrow.prototype.activate = function(e) {
 	this.active = true;
 	this.map.addInteraction(this.drawInteraction);
 
 };
 
-DrawPolygon.prototype.deactivate = function() {
+DrawArrow.prototype.deactivate = function() {
 	this.active = false;
 	this.map.removeInteraction(this.drawInteraction);
 };
 
-DrawPolygon.prototype.getStyle = function(feature) {
-	var self = this;
+DrawArrow.prototype.getStyle = function(feature) {
+	var geometry = feature.getGeometry();
+	var styles = [
+	    // linestring
+	    new ol.style.Style({
+	    	stroke: new ol.style.Stroke({
+	    		color: this.style.stroke_color,
+	        	width: this.style.stroke_width
+	      	})
+	    })
+	];
 	
-	var fillColor = self.hexToRgb(self.style.fill_color);
-	var style = new ol.style.Style({
-		fill: new ol.style.Fill({
-      		color: 'rgba(' + fillColor.r + ',' + fillColor.g + ',' + fillColor.b + ',' + self.style.fill_opacity + ')'
-    	}),
-    	stroke: new ol.style.Stroke({
-      		color: self.style.stroke_color,
-      		width: self.style.stroke_width
-    	})
-    });
+	geometry.forEachSegment(function(start, end) {
+		var dx = end[0] - start[0];
+	    var dy = end[1] - start[1];
+	    var rotation = Math.atan2(dy, dx);
+	    // arrows
+	    styles.push(new ol.style.Style({
+	    	geometry: new ol.geom.Point(end),
+	      	image: new ol.style.Icon({
+	        	src: IMG_PATH + 'arrow.png',
+	        	anchor: [0.75, 0.5],
+	        	rotateWithView: true,
+	        	rotation: -rotation
+	      	})
+	    }));
+	});
 	
-	return style;
+	return styles;
 };
 
-DrawPolygon.prototype.setStyle = function(style, styleName) {
+DrawArrow.prototype.setStyle = function(style, styleName) {
 	this.styleName = styleName;
 	this.style = style;
 };
 
-DrawPolygon.prototype.hexToRgb = function(hex) {
+DrawArrow.prototype.hexToRgb = function(hex) {
 	// Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
 	var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
 	hex = hex.replace(shorthandRegex, function(m, r, g, b) {

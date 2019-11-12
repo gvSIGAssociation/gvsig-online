@@ -23,21 +23,23 @@
 /**
  * TODO
  */
-var DrawLine = function(map, drawLayer) {
+var DrawPolygonControl = function(drawBar, map, drawLayer) {
 	var self = this;
 	this.map = map;
+	this.drawBar = drawBar;
 	this.drawLayer = drawLayer;
-	this.styleName = 'style_0';
+	this.styleName = 'polygon_style_0';
 	this.style = {
-		stroke_color: '#ffcc33',
-		stroke_width: 2,
-		//stroke_opacity: 1.0,
-		stroke_dash_array: 'none'
+		fill_color: '#f15511',
+		fill_opacity: 0.2,
+		stroke_color: '#f15511',
+		stroke_width: 2/*,
+		stroke_opacity: 1.0*/
 	};
 	
 	this.drawInteraction = new ol.interaction.Draw({
 		source: this.drawLayer.getSource(),
-		type: 'LineString'
+		type: 'Polygon'
 	});
 
 	this.drawInteraction.on('drawend',
@@ -48,45 +50,66 @@ var DrawLine = function(map, drawLayer) {
 			drawed.setStyle(style);
 			
 		}, this);
+	
+	this.control = new ol.control.Toggle({	
+		html: '<i class="fa fa-object-ungroup" ></i>',
+		className: "edit",
+		title: gettext('Draw polygon'),
+		interaction: this.drawInteraction,
+		onToggle: function(active){
+			if (active) {
+				self.activate();
+			} else {
+				self.deactivate();
+			}
+		}
+	});
+	this.drawBar.addControl(this.control);
 
 };
 
 
-DrawLine.prototype.active = false;
+DrawPolygonControl.prototype.active = false;
 
-DrawLine.prototype.isActive = function(e) {
+DrawPolygonControl.prototype.isActive = function(e) {
 	return this.active;
 
 };
 
-DrawLine.prototype.activate = function(e) {
+DrawPolygonControl.prototype.activate = function(e) {
 	this.active = true;
 	this.map.addInteraction(this.drawInteraction);
 
 };
 
-DrawLine.prototype.deactivate = function() {
+DrawPolygonControl.prototype.deactivate = function() {
 	this.active = false;
 	this.map.removeInteraction(this.drawInteraction);
 };
 
-DrawLine.prototype.getStyle = function(feature) {
+DrawPolygonControl.prototype.getStyle = function(feature) {
+	var self = this;
+	
+	var fillColor = self.hexToRgb(self.style.fill_color);
 	var style = new ol.style.Style({
+		fill: new ol.style.Fill({
+      		color: 'rgba(' + fillColor.r + ',' + fillColor.g + ',' + fillColor.b + ',' + self.style.fill_opacity + ')'
+    	}),
     	stroke: new ol.style.Stroke({
-        	color: this.style.stroke_color,
-        	width: this.style.stroke_width
-      	})
+      		color: self.style.stroke_color,
+      		width: self.style.stroke_width
+    	})
     });
 	
 	return style;
 };
 
-DrawLine.prototype.setStyle = function(style, styleName) {
+DrawPolygonControl.prototype.setStyle = function(style, styleName) {
 	this.styleName = styleName;
 	this.style = style;
 };
 
-DrawLine.prototype.hexToRgb = function(hex) {
+DrawPolygonControl.prototype.hexToRgb = function(hex) {
 	// Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
 	var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
 	hex = hex.replace(shorthandRegex, function(m, r, g, b) {

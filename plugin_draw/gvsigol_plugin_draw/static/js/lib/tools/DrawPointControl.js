@@ -23,26 +23,25 @@
 /**
  * TODO
  */
-var DrawPoint = function(map, drawLayer) {
+var DrawPointControl = function(drawBar, map, drawLayer) {
 	var self = this;
 	this.map = map;
+	this.drawBar = drawBar;
 	this.drawLayer = drawLayer;
-	this.styleName = 'style_0';
+	this.styleName = 'point_style_0';
 	this.style = {
 		well_known_name: 'circle',
 		size: 8,
-		fill_color: '#ffcc33',
+		fill_color: '#f15511',
 		fill_opacity: 1.0,
-		stroke_color: '#ffcc33',
-		stroke_width: 2/*,
-		stroke_opacity: 1.0*/
+		stroke_color: '#f15511',
+		stroke_width: 2
 	};
 	
 	this.drawInteraction = new ol.interaction.Draw({
 		source: this.drawLayer.getSource(),
 		type: 'Point'
 	});
-
 	this.drawInteraction.on('drawend',
 		function(evt) {
 			var drawed = evt.feature;
@@ -51,29 +50,44 @@ var DrawPoint = function(map, drawLayer) {
 			drawed.setStyle(style);
 			
 		}, this);
+	
+	
+	this.control = new ol.control.Toggle({	
+		html: '<i class="fa fa-map-marker" ></i>',
+		className: "edit",
+		title: gettext('Draw point'),
+		interaction: this.drawInteraction,
+		onToggle: function(active){
+			if (active) {
+				self.activate();
+			} else {
+				self.deactivate();
+			}
+		}
+	});
+	this.drawBar.addControl(this.control);
+	
+	
 
 };
 
-
-DrawPoint.prototype.active = false;
-
-DrawPoint.prototype.isActive = function(e) {
+DrawPointControl.prototype.isActive = function(e) {
 	return this.active;
 
 };
 
-DrawPoint.prototype.activate = function(e) {
+DrawPointControl.prototype.activate = function(e) {
 	this.active = true;
 	this.map.addInteraction(this.drawInteraction);
 
 };
 
-DrawPoint.prototype.deactivate = function() {
+DrawPointControl.prototype.deactivate = function() {
 	this.active = false;
 	this.map.removeInteraction(this.drawInteraction);
 };
 
-DrawPoint.prototype.getStyle = function(feature) {
+DrawPointControl.prototype.getStyle = function(feature) {
 	var self = this;
 	
 	var fillColor = this.hexToRgb(this.style.fill_color);
@@ -91,12 +105,12 @@ DrawPoint.prototype.getStyle = function(feature) {
 	return style;
 };
 
-DrawPoint.prototype.setStyle = function(style, styleName) {
+DrawPointControl.prototype.setStyle = function(style, styleName) {
 	this.styleName = styleName;
 	this.style = style;
 };
 
-DrawPoint.prototype.hexToRgb = function(hex) {
+DrawPointControl.prototype.hexToRgb = function(hex) {
 	// Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
 	var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
 	hex = hex.replace(shorthandRegex, function(m, r, g, b) {
@@ -111,7 +125,7 @@ DrawPoint.prototype.hexToRgb = function(hex) {
 	} : null;
 };
 
-DrawPoint.prototype.getImageStyle = function() {
+DrawPointControl.prototype.getImageStyle = function() {
 	var fillColor = this.hexToRgb(this.style.fill_color);
 	
 	var fill = new ol.style.Fill({
