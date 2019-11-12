@@ -129,6 +129,27 @@
 										{% endif %}															
 									</div>
 								</div>
+								
+								
+								{% if superuser %}
+								<div class="row">
+									<div class="col-md-6 form-group">
+										<label>{% trans "Create base layer" %}</label>&nbsp;&nbsp;
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-2 form-group">
+										<button id="button-create-base-layer" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Create" %}</button>															
+									</div>
+									<div class="col-md-2 form-group">
+										<input placeholder="{% trans 'Tiles per side' %}" name="tiles-side" id="tiles-side" type="text" class="form-control" value="16">															
+									</div>
+									<div class="col-md-6 form-group">
+										<label>{% trans "Tiles per side in the last level" %}</label>&nbsp;&nbsp;															
+									</div>
+								</div>
+								{% endif %}	
+								
 							</div>
               			</div>
               		</div>
@@ -562,7 +583,28 @@
 				$('#save_button').trigger('click');
 			});
 		});
-		
+	  	
+	  	$('#button-create-base-layer').click(function() {
+	  		value = $("#tiles-side").val()
+	  		$.ajax({
+				type: 'POST',
+				async: false,
+				data: {
+					"tiles":value
+				},
+				url: '/gvsigonline/services/create_base_layer/{{pid}}/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				success	:function(response){
+					messageBox.show('info', gettext('tile process ended'));
+				},
+				error: function(jqXHR, textStatus, errorThrown){
+					messageBox.show('error', gettext(jqXHR.responseText));
+				}
+			});
+		});
+	  	
 		$('#project-form').submit(function() {
 			$("body").overlay();
 			var coordinate = map.getView().getCenter();

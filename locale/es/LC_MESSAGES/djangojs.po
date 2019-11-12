@@ -461,3 +461,12 @@ msgstr "Mosaico de imágenes"
 
 msgid "Share view"
 msgstr "Compartir vista"
+
+msgid "The base layer already exists"
+msgstr "La capa base ya está generada. Debe eliminarla antes"
+
+msgid "Wrong number of tiles"
+msgstr "El número de teselas por lado es incorrecto"
+
+msgid "tile process ended"
+msgstr "El proceso de generación de teselas de la capa base ha terminado"
