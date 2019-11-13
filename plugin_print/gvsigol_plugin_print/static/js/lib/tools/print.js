@@ -259,7 +259,7 @@ print.prototype.createPrintJob = function(template) {
 	var printLayers = new Array();
 	var legends = new Array();
 	for (var i=0; i<mapLayers.length; i++) {
-		if (!mapLayers[i].baselayer && mapLayers[i].layer_name != 'plg_catastro' && !(mapLayers[i] instanceof ol.layer.Vector)) {
+		if (!mapLayers[i].baselayer && mapLayers[i].layer_name != 'plg_catastro'/* && !(mapLayers[i] instanceof ol.layer.Vector)*/) {
 			if (mapLayers[i].getVisible()) {
 				var layer = null;
 				if(mapLayers[i].getSource() instanceof ol.source.WMTS){
@@ -335,7 +335,17 @@ print.prototype.createPrintJob = function(template) {
 					    "tileSize": [256, 256],
 					    "imageExtension": "png"
 					});
-				}else{
+					
+				} else if (mapLayers[i].getSource() instanceof ol.source.Vector) {
+					if (mapLayers[i].printable) {
+						printLayers.push({
+						    "type": "geojson",
+						    "geoJson": self.getGeoJSON(mapLayers[i]),
+						    "style": self.getVectorStyles(mapLayers[i])
+						});
+					}	
+					
+				} else {
 					var wms_url = mapLayers[i].wms_url_no_auth;
 					if (wms_url === undefined)
 						wms_url = mapLayers[i].wms_url;
@@ -495,8 +505,8 @@ print.prototype.createPrintJob = function(template) {
 		  			"layers": printLayers,
 		  			"bbox": f.getGeometry().getExtent()
 		  	    },
-		  	    "logo_url": self.conf.project_image,
-		  	    //"logo_url": "https://demo.gvsigonline.com/media/images/igvsb.jpg",
+		  	    //"logo_url": self.conf.project_image,
+		  	    "logo_url": "https://demo.gvsigonline.com/media/images/igvsb.jpg",
 		  	    "legend": {
 		  	    	"name": "",
 		            "classes": legends
@@ -679,4 +689,44 @@ print.prototype.removeExtentLayer = function() {
 print.prototype.showLayersTab = function(p,f) {
 	this.detailsTab.empty();
 	$('.nav-tabs a[href="#layer-tree-tab"]').tab('show');
+};
+
+/**
+ * TODO
+ */
+print.prototype.getGeoJSON = function(layer) {
+	var format = new ol.format.GeoJSON();
+    var geojsonStr = format.writeFeatures(layer.getSource().getFeatures());
+    return JSON.parse(geojsonStr);
+};
+
+/**
+ * TODO
+ */
+print.prototype.getVectorStyles = function(layer) {
+	var styles = null;
+	
+	if (layer.drawStyleSettings) {
+		if (layer.drawType == 'point') {
+			styles = layer.drawStyleSettings.getPointPrintStyles();
+			
+		} else if (layer.drawType == 'line') {
+			styles = layer.drawStyleSettings.getLinePrintStyles();
+			
+		} else if (layer.drawType == 'arrow') {
+			styles = layer.drawStyleSettings.getArrowPrintStyles();
+			
+		} else if (layer.drawType == 'polygon') {
+			styles = layer.drawStyleSettings.getPolygonPrintStyles();
+			
+		} else if (layer.drawType == 'text') {
+			styles = layer.drawStyleSettings.getTextPrintStyles();
+			
+		}
+		
+	} else if (layer.randomStyle){
+		styles = layer.randomStyle;
+	}
+	
+	return styles;
 };
