@@ -22,6 +22,10 @@ msgstr ""
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+msgid "Import from service"
+msgstr "Importar de serviço"
+
 msgid "Import layer from service"
 msgstr "Importar camada de serviço"
 
