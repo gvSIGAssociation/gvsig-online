@@ -14,80 +14,83 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-msgid "Show/Hide draw tools"
-msgstr "Mostrar/Ocultar herramientas dibujo"
+msgid "Show draw tools"
+msgstr "Show draw tools"
+
+msgid "Close draw bar"
+msgstr "Close draw bar"
 
 msgid "Close"
-msgstr "Cerrar"
+msgstr "Close"
 
 msgid "Insert text"
-msgstr "Insertar texto"
+msgstr "Insert text"
 
 msgid "Delete"
-msgstr "Eliminar"
+msgstr "Delete"
 
 msgid "Save"
-msgstr "Guardar"
+msgstr "Save"
 
 msgid "Clean drawings"
-msgstr "Eliminar dibujos"
+msgstr "Clean drawings"
 
 msgid "Draw point"
-msgstr "Dibujar punto"
+msgstr "Draw point"
 
 msgid "Draw line"
-msgstr "Dibujar línea"
+msgstr "Draw line"
 
 msgid "Draw polygon"
-msgstr "Dibujar polígono"
+msgstr "Draw polygon"
 
 msgid "Style settings"
-msgstr "Propiedades de estilo"
+msgstr "Style settings"
 
 msgid "Circle"
-msgstr "Círculo"
+msgstr "Circle"
 
 msgid "Square"
-msgstr "Cuadrado"
+msgstr "Square"
 
 msgid "Triangle"
-msgstr "Triángulo"
+msgstr "Triangle"
 
 msgid "Star"
-msgstr "Estrella"
+msgstr "Star"
 
 msgid "Cross"
-msgstr "Cruz"
+msgstr "Cross"
 
 msgid "Point"
-msgstr "Punto"
+msgstr "Point"
 
 msgid "Line"
-msgstr "Línea"
+msgstr "Line"
 
 msgid "Polygon"
-msgstr "Polígono"
+msgstr "Polygon"
 
 msgid "Text"
-msgstr "Texto"
+msgstr "Text"
 
 msgid "Select shape"
-msgstr "Seleccionar forma"
+msgstr "Select shape"
 
 msgid "Size"
-msgstr "Tamaño"
+msgstr "Size"
 
 msgid "Fill color"
-msgstr "Color de relleno"
+msgstr "Fill color"
 
 msgid "Fill opacity"
-msgstr "Opacidad del relleno"
+msgstr "Fill opacity"
 
 msgid "Stroke color"
-msgstr "Color de línea"
+msgstr "Stroke color"
 
 msgid "Stroke width"
-msgstr "Grosor de línea"
+msgstr "Stroke width"
 
 msgid "Select pattern"
-msgstr "Seleccionar patrón"
+msgstr "Select pattern"

@@ -10,15 +10,14 @@
 <script type="text/javascript" src="{% static "js/lib/tools/DrawPolygonControl.js" %}"></script>
 <script type="text/javascript" src="{% static "js/lib/tools/InsertTextControl.js" %}"></script>
 <script type="text/javascript" src="{% static "js/lib/tools/CleanDrawControl.js" %}"></script>
+<script type="text/javascript" src="{% static "js/lib/tools/CloseDrawControl.js" %}"></script>
 <script type="text/javascript">
 	var map = viewer.core.getMap();
 	var conf = viewer.core.getConf();
 	
 	if (viewer.core.ifToolInConf('gvsigol_plugin_draw')) {
 		
-		var active = false;
-		
-		var button = '<li role="presentation"><a id="show_hide_draw" role="menuitem" tabindex="-1" href="#"><i class="fa fa-pencil m-r-5"></i>'+gettext("Show/Hide draw tools")+'</a></li>';
+		var button = '<li role="presentation"><a id="show_draw" role="menuitem" tabindex="-1" href="#"><i class="fa fa-pencil m-r-5"></i>'+gettext("Show draw tools")+'</a></li>';
 		$('#gvsigol-navbar-file-menu').append(button);
 		
 		var drawBar = new ol.control.Bar({ toggleOne: true, group:true });
@@ -42,53 +41,13 @@
 		drawModal += '</div>';
 		$('body').append(drawModal);
 		
-		var pointSource = new ol.source.Vector();
-		var pointLayer = new ol.layer.Vector({
-			source: pointSource
-		});
-		pointLayer.setZIndex(99999999);
-		pointLayer.printable = true;
-		pointLayer.drawType = 'point';
-		map.addLayer(pointLayer);
-		
-		var lineSource = new ol.source.Vector();
-		var lineLayer = new ol.layer.Vector({
-			source: lineSource
-		});
-		lineLayer.setZIndex(99999999);
-		lineLayer.printable = true;
-		lineLayer.drawType = 'line';
-		map.addLayer(lineLayer);
-		
-		var polygonSource = new ol.source.Vector();
-		var polygonLayer = new ol.layer.Vector({
-			source: polygonSource
-		});
-		polygonLayer.setZIndex(99999999);
-		polygonLayer.printable = true;
-		polygonLayer.drawType = 'polygon';
-		map.addLayer(polygonLayer);
-		
-		var textSource = new ol.source.Vector();
-		var textLayer = new ol.layer.Vector({
-			source: textSource
-		});
-		textLayer.setZIndex(99999999);
-		textLayer.printable = true;
-		textLayer.drawType = 'text';
-		map.addLayer(textLayer);
-		
-		var drawPoint = new DrawPointControl(drawBar, map, pointLayer);
-		var drawLine = new DrawLineControl(drawBar, map, lineLayer);
-		var drawPolygon = new DrawPolygonControl(drawBar, map, polygonLayer);
-		var insertText = new InsertTextControl(drawBar, map, textLayer);
-		var cleanControl = new CleanDrawControl(drawBar, pointLayer, lineLayer, polygonLayer, textLayer);
 		var styleSettings = new StyleSettings(drawBar);
-		
-		pointLayer.drawStyleSettings = styleSettings;
-		lineLayer.drawStyleSettings = styleSettings;
-		polygonLayer.drawStyleSettings = styleSettings;
-		textLayer.drawStyleSettings = styleSettings;
+		var drawPoint = new DrawPointControl(drawBar, map, styleSettings);
+		var drawLine = new DrawLineControl(drawBar, map, styleSettings);
+		var drawPolygon = new DrawPolygonControl(drawBar, map, styleSettings);
+		var insertText = new InsertTextControl(drawBar, map, styleSettings);
+		var cleanControl = new CleanDrawControl(drawBar, drawPoint.getLayer(), drawLine.getLayer(), drawPolygon.getLayer(), insertText.getLayer());
+		var closeControl = new CloseDrawControl(map, drawBar, drawPoint.getLayer(), drawLine.getLayer(), drawPolygon.getLayer(), insertText.getLayer());
 		
 		var count = 1;
 		$('#float-draw-modal').on('hidden.bs.modal', function () {
@@ -163,7 +122,7 @@
 				
 				var value = $('#drawed-text-input-' + this.dataset.fid).val();
 				
-				textLayer.getSource().getFeatures().forEach(function(feature){ 
+				insertText.getLayer().getSource().getFeatures().forEach(function(feature){ 
 					if (feature.getId() == fid) {
 						var props = feature.getProperties();
 						props['text'] = value;
@@ -179,35 +138,24 @@
 				var fid = this.dataset.fid;
 				var dtype = this.dataset.dtype;
 				
-				textLayer.getSource().getFeatures().forEach(function(feature){ 
+				insertText.getLayer().getSource().getFeatures().forEach(function(feature){ 
 					if (feature.getId() == fid) {
 						feature.setStyle(null);
-						textLayer.getSource().removeFeature(feature);
-						textLayer.setVisible(false);
-						textLayer.setVisible(true);
+						insertText.getLayer().getSource().removeFeature(feature);
+						insertText.getLayer().setVisible(false);
+						insertText.getLayer().setVisible(true);
 						popup.hide();
 					}
 				});
 			});
 		});
 		
-		$('#show_hide_draw').click(function(e){
-			if (active) {
-				pointLayer.getSource().clear();
-				lineLayer.getSource().clear();
-				polygonLayer.getSource().clear();
-				textLayer.getSource().clear();
-				map.removeControl(drawBar);
-				active = false;
-				
-			} else {
-				map.addControl(drawBar);
-				active = true;
-			}
+		$('#show_draw').click(function(e){
+			map.addControl(drawBar);
 		});
 		
 		var select = new ol.interaction.Select({
-			layers: [textLayer]
+			layers: [insertText.getLayer()]
 		});
 
 		var modify = new ol.interaction.Modify({

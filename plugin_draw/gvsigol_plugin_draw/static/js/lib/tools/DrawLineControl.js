@@ -23,17 +23,27 @@
 /**
  * TODO
  */
-var DrawLineControl = function(drawBar, map, drawLayer) {
+var DrawLineControl = function(drawBar, map, styleSettings) {
 	var self = this;
 	this.map = map;
 	this.drawBar = drawBar;
-	this.drawLayer = drawLayer;
 	this.styleName = 'line_style_0';
 	this.style = {
 		stroke_color: '#f15511',
 		stroke_width: 2,
 		stroke_dash_array: 'none'
 	};
+	
+	this.source = new ol.source.Vector();
+	this.drawLayer = new ol.layer.Vector({
+		source: this.source
+	});
+	this.drawLayer.setZIndex(99999999);
+	this.drawLayer.printable = true;
+	this.drawLayer.drawType = 'point';
+	map.addLayer(this.drawLayer);
+	
+	this.drawLayer.drawStyleSettings = styleSettings;
 	
 	this.drawInteraction = new ol.interaction.Draw({
 		source: this.drawLayer.getSource(),
@@ -114,4 +124,8 @@ DrawLineControl.prototype.hexToRgb = function(hex) {
 		g: parseInt(result[2], 16),
 		b: parseInt(result[3], 16)
 	} : null;
+};
+
+DrawLineControl.prototype.getLayer = function() {
+	return this.drawLayer;
 };

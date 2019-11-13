@@ -23,11 +23,10 @@
 /**
  * TODO
  */
-var DrawPolygonControl = function(drawBar, map, drawLayer) {
+var DrawPolygonControl = function(drawBar, map, styleSettings) {
 	var self = this;
 	this.map = map;
 	this.drawBar = drawBar;
-	this.drawLayer = drawLayer;
 	this.styleName = 'polygon_style_0';
 	this.style = {
 		fill_color: '#f15511',
@@ -36,6 +35,17 @@ var DrawPolygonControl = function(drawBar, map, drawLayer) {
 		stroke_width: 2/*,
 		stroke_opacity: 1.0*/
 	};
+	
+	this.source = new ol.source.Vector();
+	this.drawLayer = new ol.layer.Vector({
+		source: this.source
+	});
+	this.drawLayer.setZIndex(99999999);
+	this.drawLayer.printable = true;
+	this.drawLayer.drawType = 'point';
+	map.addLayer(this.drawLayer);
+	
+	this.drawLayer.drawStyleSettings = styleSettings;
 	
 	this.drawInteraction = new ol.interaction.Draw({
 		source: this.drawLayer.getSource(),
@@ -122,4 +132,8 @@ DrawPolygonControl.prototype.hexToRgb = function(hex) {
 		g: parseInt(result[2], 16),
 		b: parseInt(result[3], 16)
 	} : null;
+};
+
+DrawPolygonControl.prototype.getLayer = function() {
+	return this.drawLayer;
 };
