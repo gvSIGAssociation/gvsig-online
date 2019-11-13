@@ -30,6 +30,7 @@ var InsertTextControl = function(drawBar, map, drawLayer) {
 	this.drawLayer = drawLayer;
 	this.styleName = 'text_style_0';
 	this.style = {
+		font_size: 16,
 		fill_color: '#f15511',
 		fill_opacity: 1.0,
 		stroke_color: '#ffffff',
@@ -133,7 +134,7 @@ InsertTextControl.prototype.hexToRgb = function(hex) {
 InsertTextControl.prototype.getTextStyle = function() {
 	return new ol.style.Text({
 		textAlign: 'center',
-		font: 'normal 16px/1 Arial',
+		font: 'normal ' + this.style.font_size + 'px/1 sans-serif',
 		text: this.style.text,
 		fill: new ol.style.Fill({color: this.style.fill_color}),
 		stroke: new ol.style.Stroke({color: this.style.stroke_color, width: this.style.stroke_width}),

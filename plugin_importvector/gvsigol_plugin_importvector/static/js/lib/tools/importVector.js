@@ -206,6 +206,8 @@ ImportVector.prototype.createUploadForm = function() {
 					vectorLayer.title = title;
 					vectorLayer.visible = true;
 					vectorLayer.imported = true;
+					vectorLayer.printable = true;
+					vectorLayer.randomStyle = self.getVectorStyle('polygon');
 
 					self.map.addLayer(vectorLayer);
 					self.createVectorLayerUI (vectorLayer, layerId);
@@ -231,6 +233,52 @@ ImportVector.prototype.createUploadForm = function() {
 	}
 };
 
+ImportVector.prototype.getVectorStyle = function(gtype) {
+	if (gtype == 'point') {
+		return {
+			"version" : "2",
+			"*" : {
+				"symbolizers" : [{
+					"type" : "point",
+					"fillColor": this.vectorRandomStyle.fill_color,
+					"fillOpacity": this.vectorRandomStyle.fill_opacity,
+					"graphicName": "circle",
+					"pointRadius": this.vectorRandomStyle.radius,
+					"strokeColor": this.vectorRandomStyle.stroke_color,
+					"strokeWidth": this.vectorRandomStyle.stroke_width
+				}
+			]}
+		};
+		
+	} else if (gtype == 'line') {
+		return {
+			"version" : "2",
+			"*" : {
+				"symbolizers" : [{
+					"type" : "line",
+					"strokeColor": this.vectorRandomStyle.stroke_color,
+					"strokeWidth": this.vectorRandomStyle.stroke_width
+				}
+			]}
+		};
+		
+	} else if (gtype == 'polygon') {
+		return {
+			"version" : "2",
+			"*" : {
+				"symbolizers" : [{
+					"type" : "polygon",
+					"fillColor": this.vectorRandomStyle.fill_color,
+					"fillOpacity": this.vectorRandomStyle.fill_opacity,
+					"strokeColor": this.vectorRandomStyle.stroke_color,
+					"strokeWidth": this.vectorRandomStyle.stroke_width
+				}
+			]}
+		};
+		
+	}
+};
+
 ImportVector.prototype.getRandomStyle = function() {
 	
 	var getColor = function () { return Math.floor(Math.random()*256) };	
@@ -239,6 +287,15 @@ ImportVector.prototype.getRandomStyle = function() {
 	var b = getColor();
     var rgbColor = "rgb(" + r + "," + g + "," + b + ")";
     var rgbColorOpacity = "rgba(" + r + "," + g + "," + b + ", 0.3)";
+    var hexColor = this.rgbToHex(r,g,b);
+    	
+    this.vectorRandomStyle = {
+    	fill_color: hexColor,
+    	fill_opacity: 0.3,
+    	stroke_color: hexColor,
+    	stroke_width: 2,
+    	radius: 7
+    };
 	
 	var style = new ol.style.Style({
     	fill: new ol.style.Fill({
@@ -260,6 +317,10 @@ ImportVector.prototype.getRandomStyle = function() {
     	})
   	});
 	return style;
+};
+
+ImportVector.prototype.rgbToHex = function(r, g, b) {
+	return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 };
 
 ImportVector.prototype.createLayerGroup = function() {

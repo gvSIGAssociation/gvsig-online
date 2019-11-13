@@ -55,7 +55,14 @@ var StyleSettings = function(drawBar) {
 			stroke_width: 2/*,
 			stroke_opacity: 1.0*/
 		},
-		text: {}
+		text: {
+			font_size: 16,
+			fill_color: '#f15511',
+			fill_opacity: 1.0,
+			stroke_color: '#ffffff',
+			stroke_width: 4,
+			text: gettext('Insert text')
+		}
 	};
 	this.pointPrintStyles = {
 		"version" : "2",
@@ -106,7 +113,16 @@ var StyleSettings = function(drawBar) {
 	this.textPrintStyles = {
 		"version" : "2",
 		"[style_name='text_style_0']" : {
-			"symbolizers" : []
+			"symbolizers" : [{
+				"type" : "text",
+				"fontColor": '#f15511',
+				"haloColor": '#ffffff',
+			    "haloRadius": 4,
+				"fontFamily": "sans-serif",
+				"fontSize": "16px",
+				"fontStyle": "normal",
+				"label": '[text]'
+			}]
 		}
 	};
 	
@@ -351,6 +367,30 @@ StyleSettings.prototype.getPolygonTabUI = function() {
 StyleSettings.prototype.getTextTabUI = function() {
 	var ui = '';
 	ui += '<div class="tab-pane" id="text-tab">';
+	ui += 	'<div class="row">';
+	ui += 		'<div class="col-md-12 form-group">';
+	ui += 			'<label>' + gettext('Font size') + '</label>';
+	ui += 			'<input id="text-font-size" type="number" class="form-control" value="' + parseInt(this.style.text.font_size) + '">';					
+	ui += 		'</div>';
+	ui += 	'</div>';
+	ui += 	'<div class="row">';
+	ui += 		'<div class="col-md-12 form-group">';
+	ui += 			'<label>' + gettext('Fill color') + '</label>';
+	ui += 			'<input id="text-fill-color" type="color" value="' + this.style.text.fill_color + '" class="form-control color-chooser">';					
+	ui += 		'</div>';
+	ui += 	'</div>';
+	ui += 	'<div class="row">';
+	ui += 		'<div class="col-md-12 form-group">';
+	ui += 			'<label>' + gettext('Stroke color') + '</label>';
+	ui += 			'<input id="text-stroke-color" type="color" value="' + this.style.text.stroke_color + '" class="form-control color-chooser">';					
+	ui += 		'</div>';
+	ui += 	'</div>';
+	ui += 	'<div class="row">';
+	ui += 		'<div class="col-md-12 form-group">';
+	ui += 			'<label>' + gettext('Stroke width') + '</label>';
+	ui += 			'<input id="text-stroke-width" type="number" class="form-control" value="' + parseInt(this.style.text.stroke_width) + '">';					
+	ui += 		'</div>';
+	ui += 	'</div>';
 	ui += '</div>';
 	
 	return ui;
@@ -488,6 +528,20 @@ StyleSettings.prototype.registerEvents = function() {
 	$("#polygon-stroke-width").on('change', function(e) {
 		self.style.polygon.stroke_width = this.value;
 	});
+	
+	
+	$("#text-font-size").on('change', function(e) {
+		self.style.text.font_size = this.value;
+	});	
+	$("#text-fill-color").on('change', function(e) {
+		self.style.text.fill_color = this.value;
+	});	
+	$("#text-stroke-color").on('change', function(e) {
+		self.style.text.stroke_color = this.value;
+	});
+	$("#text-stroke-width").on('change', function(e) {
+		self.style.text.stroke_width = this.value;
+	});
 };
 
 StyleSettings.prototype.getStyle = function() {
@@ -544,12 +598,13 @@ StyleSettings.prototype.addTextPrintStyle = function(text, styleName) {
 	this.textPrintStyles["[style_name='" + styleName + "']"] = {
 		symbolizers: [{
 			"type" : "text",
-			"fontColor": "#000000",
+			"fontColor": text.fill_color,
+			"haloColor": text.stoke_color,
+		    "haloRadius": text.stroke_width,
 			"fontFamily": "sans-serif",
-			"fontSize": "12px",
+			"fontSize": text.font_size + "px",
 			"fontStyle": "normal",
-			"fontWeight": "bold",
-			"label": "[name]",
+			"label": '[text]',
 		}]
 	};
 };
