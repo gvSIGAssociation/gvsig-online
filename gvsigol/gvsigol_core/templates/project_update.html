@@ -36,6 +36,17 @@
               					<input type="hidden" id="project-name" name="project-name" value="{{project.name}}"/>
 						
 								<div class="row">
+									<div class="col-md-3 form-group">
+										<label for="is_public">{% trans "Is public?" %}</label>&nbsp;&nbsp;
+										{% if project.is_public %}
+										<input type="checkbox" name="is_public"  id="is_public" checked/>
+										{% else %}
+										<input type="checkbox" name="is_public"  id="is_public"/>
+										{% endif %}								
+									</div>
+								</div>
+								
+								<div class="row">
 									<div class="col-md-12 form-group">
 										<label for="project-title">{% trans "Title" %}</label>
 										<input placeholder="{% trans 'Project title' %}" name="project-title" id="project-title" type="text" class="form-control" value="{{project.title}}">						
@@ -48,26 +59,8 @@
 										<input placeholder="{% trans 'Project description' %}" name="project-description" id="project-description" type="text" class="form-control" value="{{project.description}}">						
 									</div>
 								</div>	
-						
+								
 								<div class="row">
-									<div class="col-md-3 form-group">
-										<label for="is_public">{% trans "Is public?" %}</label>&nbsp;&nbsp;
-										{% if project.is_public %}
-										<input type="checkbox" name="is_public"  id="is_public" checked/>
-										{% else %}
-										<input type="checkbox" name="is_public"  id="is_public"/>
-										{% endif %}								
-									</div>
-									
-									<div class="col-md-3 form-group">
-										<label for="selectable_groups">{% trans "Selectable layer groups" %}</label>&nbsp;&nbsp;
-										{% if project.selectable_groups %}
-										<input type="checkbox" name="selectable_groups"  id="selectable_groups" checked/>
-										{% else %}
-										<input type="checkbox" name="selectable_groups"  id="selectable_groups"/>
-										{% endif %}								
-									</div>
-									
 									<div class="col-md-6 form-group">
 										<label for="is_public">{% trans "Toc panel presentation" %}</label>
 										<select class="form-control" id="id_toc_mode" name="toc_mode" tabindex="-1" aria-hidden="true">
@@ -87,6 +80,25 @@
 												<option value="toc_layers">{% trans "Show toc, groups and layers" %}</option>
 											{% endif %}	
 										</select>
+									</div>
+									<div class="col-md-3 form-group">
+										<label for="selectable_groups">{% trans "Selectable layer groups" %}</label>&nbsp;&nbsp;
+										{% if project.selectable_groups %}
+										<input type="checkbox" name="selectable_groups"  id="selectable_groups" checked/>
+										{% else %}
+										<input type="checkbox" name="selectable_groups"  id="selectable_groups"/>
+										{% endif %}								
+									</div>
+								</div>
+						
+								<div class="row">
+									<div class="col-md-3 form-group">
+										<label for="restricted_extent">{% trans "Restricted extent" %}</label>&nbsp;&nbsp;
+										{% if project.restricted_extent %}
+										<input type="checkbox" name="restricted_extent"  id="restricted_extent" checked/>
+										{% else %}
+										<input type="checkbox" name="restricted_extent"  id="restricted_extent"/>
+										{% endif %}								
 									</div>
 								</div>	
 					

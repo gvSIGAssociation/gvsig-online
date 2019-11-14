@@ -35,6 +35,12 @@
               			<div class="box">
               				<div class="box-body">
               					<div class="row">
+									<div class="col-md-3 form-group">
+										<label for="is_public">{% trans "Is public?" %}</label>&nbsp;&nbsp;
+										<input type="checkbox" name="is_public" id="is_public"/>														
+									</div>
+								</div>
+              					<div class="row">
 		              				<div class="col-md-12 form-group">
 										<label for="project-name">{% trans "Name" %}</label>
 										<input placeholder="{% trans 'Project name' %}" name="project-name" id="project-name" type="text" class="form-control">						
@@ -54,10 +60,6 @@
 								</div>
 								<div class="row">
 									<div class="col-md-6 form-group">
-										<label for="selectable_groups">{% trans "Selectable layer groups" %}</label>&nbsp;&nbsp;
-										<input type="checkbox" name="selectable_groups" id="selectable_groups"/>														
-									</div>
-									<div class="col-md-6 form-group">
 										<label for="is_public">{% trans "Toc panel presentation" %}</label>
 										<select class="form-control" id="id_toc_mode" name="toc_mode" tabindex="-1" aria-hidden="true">
 											<option value="toc_hidden">{% trans "Toc hidden" %}</option>
@@ -65,11 +67,15 @@
 											<option value="toc_layers">{% trans "Show toc, groups and layers" %}</option>
 										</select>
 									</div>
+									<div class="col-md-3 form-group">
+										<label for="selectable_groups">{% trans "Selectable layer groups" %}</label>&nbsp;&nbsp;
+										<input type="checkbox" name="selectable_groups" id="selectable_groups"/>														
+									</div>
 								</div>
 								<div class="row">
 									<div class="col-md-6 form-group">
-										<label for="is_public">{% trans "Is public?" %}</label>&nbsp;&nbsp;
-										<input type="checkbox" name="is_public" id="is_public"/>														
+										<label for="restricted_extent">{% trans "Restricted extent" %}</label>&nbsp;&nbsp;
+										<input type="checkbox" name="restricted_extent" id="restricted_extent"/>														
 									</div>
 								</div>
 								

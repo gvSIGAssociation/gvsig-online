@@ -133,6 +133,13 @@ viewer.core = {
 			collapseLabel: '»',
 			label: '«'
 		});
+		
+		var view = new ol.View({
+    		center: ol.proj.transform([parseFloat(self.conf.view.center_lon), parseFloat(self.conf.view.center_lat)], 'EPSG:4326', 'EPSG:3857'),
+    		minZoom: 0,
+    		maxZoom: self.conf.view.max_zoom_level,
+        	zoom: self.conf.view.zoom + 1
+    	});
 		this.map = new ol.Map({
 			interactions: interactions,
       		controls: [
@@ -144,13 +151,21 @@ viewer.core = {
       		renderer: 'canvas',
       		target: 'map',
       		layers: default_layers,
-			view: new ol.View({
-        		center: ol.proj.transform([parseFloat(self.conf.view.center_lon), parseFloat(self.conf.view.center_lat)], 'EPSG:4326', 'EPSG:3857'),
-        		minZoom: 0,
-        		maxZoom: self.conf.view.max_zoom_level,
-            	zoom: self.conf.view.zoom
-        	})
+			view: view
 		});
+		
+		if (self.conf.view.restricted_extent) {
+			this.map.setView(
+				new ol.View({
+					extent: this.map.getView().calculateExtent(this.map.getSize()),   
+					center: ol.proj.transform([parseFloat(self.conf.view.center_lon), parseFloat(self.conf.view.center_lat)], 'EPSG:4326', 'EPSG:3857'),
+		    		minZoom: self.conf.view.zoom + 1,
+		    		maxZoom: self.conf.view.max_zoom_level,
+		        	zoom: self.conf.view.zoom + 1
+				})
+			);
+		}
+		
 
 		this.extentLayer = new ol.layer.Vector({
 			source: new ol.source.Vector()
