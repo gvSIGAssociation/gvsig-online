@@ -255,12 +255,6 @@ viewer.core = {
 	    externalLayer.id = layerId;
 
     	if (externalLayer['type'] == 'WMS') {
-    		/*var url = externalLayer['url'];
-    		var layersParam = externalLayer['layers'];
-    		if (externalLayer['cached']) {
-    			url = externalLayer['cache_url'];
-    			layersParam = externalLayer['name'];
-    		}*/
 			var wmsSource = new ol.source.TileWMS({
 				url: externalLayer['url'],
 				crossOrigin: 'anonymous',

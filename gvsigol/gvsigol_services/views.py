@@ -3847,8 +3847,9 @@ def layer_cache_config(request, layer_id):
             gs = geographic_servers.get_instance().get_server_by_id(server.id)
             gs.reload_nodes()
             
-            gs.updateBoundingBoxFromData(layer)
-            gs.updateThumbnail(layer, 'update')
+            if not layer.external:
+                gs.updateBoundingBoxFromData(layer)
+                gs.updateThumbnail(layer, 'update')
        
             layer_list = None
             if request.user.is_superuser:
