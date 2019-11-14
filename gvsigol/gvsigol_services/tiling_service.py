@@ -191,7 +191,7 @@ def tiling_base_layer(prj_id, tiles_side):
             os.mkdir(layers_dir)
         with zipfile.ZipFile(base_zip, 'r') as zipObj:
             zipObj.extractall(path=layers_dir)
-            os.rename(layers_dir + '/tiles_download', folder_prj)
+            shutil.move(layers_dir + '/tiles_download', folder_prj)
             tiling = Tiling(folder_prj)
             tiling.create_tiles_from_utm(min_x, min_y, max_x, max_y, tiling.get_zoom_level(floor(max_x - min_x)/1000, tiles_side))
             shutil.make_archive(folder_prj, 'zip', folder_prj)
