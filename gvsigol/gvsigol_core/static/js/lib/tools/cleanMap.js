@@ -77,12 +77,12 @@ cleanMap.prototype.handler = function(e) {
 		this.active = true;
 		this.$button.trigger('control-active', [this]);
 
-//		var layers = this.map.getLayers().getArray();
-//		for (var i=0; i<layers.length; i++) {
-//			if (layers[i] instanceof ol.layer.Vector) {
-//				layers[i].getSource().clear();
-//			}
-//		}
+		var layers = this.map.getLayers().getArray();
+		for (var i=0; i<layers.length; i++) {
+			if (layers[i] instanceof ol.layer.Vector) {
+				layers[i].getSource().clear();
+			}
+		}
 		this.viewer.clearAllSelectedFeatures();
 
 		this.deactivate();
