@@ -260,27 +260,67 @@ viewer.core = {
 				crossOrigin: 'anonymous',
 				params: {'LAYERS': externalLayer['layers'], 'FORMAT': externalLayer['format'], 'VERSION': externalLayer['version'], 'SRS': 'EPSG:3857', 'TRANSPARENT': 'TRUE'}
 			});
-			var tileErrorCount = 0;
+			wmsSource.layer_name = externalLayer['name'];
 			wmsSource.on('tileloaderror', function(e){
-				if (tileErrorCount > 10) {
-					if (externalLayer['cached'] && externalLayer['cache_url']) {
-						this.setUrl(externalLayer['cache_url']);
-						this.updateParams({'LAYERS': externalLayer['name'], 'FORMAT': externalLayer['format'], 'VERSION': externalLayer['version'], 'SRS': 'EPSG:3857', 'TRANSPARENT': 'TRUE'});
+				var eLayer = null;
+				self.map.getLayers().forEach(function(layer){
+					if (layer.layer_name == this.layer_name) {
+						eLayer = layer;
+					}						
+				}, this);
+				
+				if (eLayer) {
+					if (this.getUrls()[0] == eLayer.cached_url) {
+						if (eLayer.baselayer) {
+							$('#' + eLayer.id).parent().css('color', '#ff0000');
+							$('#' + eLayer.id).parent().children('input').prop( "checked", false );
+							$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
+							$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
+							
+						} else {
+							$('#' + eLayer.id).parent().css('color', '#ff0000');
+							$('#' + eLayer.id).parent().children('input').prop( "checked", false );
+							$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
+							$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
+							
+						}
+						self.map.removeLayer(eLayer);
 						
 					} else {
-						
+						if (eLayer.cached && eLayer.cached_url) {
+							this.setUrl(eLayer.cached_url);
+							this.updateParams({'LAYERS': eLayer.layer_name, 'FORMAT': eLayer.format, 'VERSION': eLayer.version, 'SRS': 'EPSG:3857', 'TRANSPARENT': 'TRUE'});
+							
+						} else {
+							if (eLayer.baselayer) {
+								$('#' + eLayer.id).parent().css('color', '#ff0000');
+								$('#' + eLayer.id).parent().children('input').prop( "checked", false );
+								$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
+								$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
+								
+							} else {
+								$('#' + eLayer.id).parent().css('color', '#ff0000');
+								$('#' + eLayer.id).parent().children('input').prop( "checked", false );
+								$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
+								$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
+								
+							}
+							self.map.removeLayer(eLayer);
+						}
 					}
-					
 				}
-				tileErrorCount++;
+				
+				
 			});
 			var wmsLayer = new ol.layer.Tile({
 				id: layerId,
 				source: wmsSource,
 				visible: visible
 			});
-
+			
+			wmsLayer.id = layerId;
 			wmsLayer.wms_url = externalLayer['url'];
+			wmsLayer.cached = externalLayer['cached'];
 			wmsLayer.cached_url = externalLayer['cache_url'];
 			wmsLayer.title = externalLayer['title'];
 			wmsLayer.baselayer = baselayer;
@@ -293,6 +333,8 @@ viewer.core = {
 			wmsLayer.layer_name = externalLayer['name'];
 			wmsLayer.setZIndex(parseInt(externalLayer.order));
 			wmsLayer.infoFormat = externalLayer['infoformat'];
+			wmsLayer.format = externalLayer['format'];
+			wmsLayer.version = externalLayer['version'];
 			if (!externalLayer['cached']) {
 				wmsLayer.legend = externalLayer['url'] + '?SERVICE=WMS&VERSION=1.1.1&layer=' + externalLayer['layers'] + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on';
 				wmsLayer.legend_no_auth = externalLayer['url'] + '?SERVICE=WMS&VERSION=1.1.1&layer=' + externalLayer['layers'] + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on';
@@ -320,13 +362,8 @@ viewer.core = {
 	    		
 	    		var options = ol.source.WMTS.optionsFromCapabilities(result, {
 					matrixSet: externalLayer['matrixset'],
-			          	layer: externalLayer['layers']
-			      	});
-				/*if(options && options.urls && options.urls.length > 0){
-					if(!externalLayer['url'].endsWith('?')){
-						options.urls[0] = externalLayer['url'] + '?';
-					}
-				}*/
+			        layer: externalLayer['layers']
+			    });
 				var is_baselayer = false;
 				for(var k=0; k<options.urls.length; k++){
 					if(externalLayer['url'].replace("https://", "http://")+'?' == options.urls[k].replace("https://", "http://")){
@@ -336,12 +373,41 @@ viewer.core = {
 				options.crossOrigin = 'anonymous';
 	    		
 				var wmtsSource = new ol.source.WMTS((options));
+				wmtsSource.layer_name = externalLayer['name'];
+				wmtsSource.on('tileloaderror', function(e){
+					var eLayer = null;
+					self.map.getLayers().forEach(function(layer){
+						if (layer.layer_name == this.layer_name) {
+							eLayer = layer;
+						}						
+					}, this);
+					
+					if (eLayer) {
+						if (eLayer.baselayer) {
+							$('#' + eLayer.id).parent().css('color', '#ff0000');
+							$('#' + eLayer.id).parent().children('input').prop( "checked", false );
+							$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
+							$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
+							
+						} else {
+							$('#' + eLayer.id).parent().css('color', '#ff0000');
+							$('#' + eLayer.id).parent().children('input').prop( "checked", false );
+							$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
+							$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
+							
+						}
+						self.map.removeLayer(eLayer);
+					}
+					
+					
+				});
 				
 	    		var wmtsLayer = new ol.layer.Tile({
 	    			id: layerId,
 					source: wmtsSource,
 					visible: visible
 	    		});
+	    		wmtsLayer.id = layerId;
 	    		wmtsLayer.baselayer = externalLayer['baselayer'];
 	    		wmtsLayer.external = true;
 	    		wmtsLayer.queryable = false;
