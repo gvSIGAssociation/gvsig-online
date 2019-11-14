@@ -288,6 +288,10 @@ def project_add(request):
         selectable_groups = False
         if 'selectable_groups' in request.POST:
             selectable_groups = True
+            
+        restricted_extent = False
+        if 'restricted_extent' in request.POST:
+            restricted_extent = True
 
         has_image = False
         if 'project-image' in request.FILES:
@@ -368,6 +372,7 @@ def project_add(request):
                     is_public = is_public,
                     show_project_icon = show_project_icon,
                     selectable_groups = selectable_groups,
+                    restricted_extent = restricted_extent,
                     tools = tools
                 )
             else:
@@ -385,6 +390,7 @@ def project_add(request):
                     is_public = is_public,
                     show_project_icon = show_project_icon,
                     selectable_groups = selectable_groups,
+                    restricted_extent = restricted_extent,
                     tools = tools
                 )
             project.save()
@@ -498,6 +504,10 @@ def project_update(request, pid):
         selectable_groups = False
         if 'selectable_groups' in request.POST:
             selectable_groups = True
+            
+        restricted_extent = False
+        if 'restricted_extent' in request.POST:
+            restricted_extent = True
 
         selected_base_layer = None
         if 'selected_base_layer' in request.POST:
@@ -546,6 +556,7 @@ def project_update(request, pid):
         project.tools = tools
         project.show_project_icon = show_project_icon
         project.selectable_groups = selectable_groups
+        project.restricted_extent = restricted_extent
 
         if has_image:
             project.image = request.FILES['project-image']
@@ -1102,6 +1113,8 @@ def project_get_conf(request):
             'project_image': project.image.url,
             'project_tools': project_tools,
             "view": {
+                "restricted_extent": project.restricted_extent,
+                "extent": project.extent.split(','),
                 "center_lat": project.center_lat,
                 "center_lon": project.center_lon,
                 "zoom": project.zoom,
