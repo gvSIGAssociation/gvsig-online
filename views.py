@@ -3626,7 +3626,8 @@ def external_layer_delete(request, external_layer_id):
         server = Server.objects.get(id=external_layer.layer_group.server_id)
         master_node = geographic_servers.get_instance().get_master_node(server.id)
         if external_layer.cached:
-            geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
+            if external_layer.type == 'WMS':  
+                geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
             geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
             
         external_layer.delete()
@@ -3787,10 +3788,10 @@ def cache_list(request):
     layer_list = None
     group_list = None
     if request.user.is_superuser:
-        layer_list = Layer.objects.filter(cached=True)
+        layer_list = Layer.objects.filter(cached=True).exclude(type='WMTS')
         group_list = LayerGroup.objects.filter(cached=True)
     else:
-        layer_list = Layer.objects.filter(created_by__exact=request.user.username).filter(cached=True)
+        layer_list = Layer.objects.filter(created_by__exact=request.user.username).filter(cached=True).exclude(type='WMTS')
         group_list = LayerGroup.objects.filter(created_by__exact=request.user.username).filter(cached=True)
 
     response = {
