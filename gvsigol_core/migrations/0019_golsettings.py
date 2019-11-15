@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gvsigol_core', '0017_project_selectable_groups'),
+        ('gvsigol_core', '0018_project_restricted_extent.py'),
     ]
 
     operations = [
