@@ -48,7 +48,6 @@ class ProjectLayerGroup(models.Model):
     def __unicode__(self):
         return self.project.name + ' - ' + self.layer_group.name
 
-       
 class SharedView(models.Model):
     name = models.CharField(max_length=10, unique=True)
     project_id = models.IntegerField()
@@ -60,3 +59,51 @@ class SharedView(models.Model):
     
     def __unicode__(self):
         return self.name
+
+class SettingsManager(models.Manager):
+    def get_value(self, plugin_name, key, default=""):
+        try:
+            return GolSettings.objects.get(plugin_name=plugin_name, key = key).value
+        except GolSettings.DoesNotExist:
+            return default
+    
+    def set_value(self, plugin_name, key, value):
+        new_setting = GolSettings()
+        new_setting.plugin_name = plugin_name
+        new_setting.key = key
+        new_setting.value = value
+        new_setting.save()
+    
+class GolSettings(models.Model):
+    """
+    Used to store settings (key/value pairs) that can be changed at runtime,
+    so they can't be stored in settings.py
+    
+    To avoid key collisions, a plugin_name must also be provided to set or
+    get a key/value pair. Examples:
+    
+    # set "link_validity" key
+    GolSettings.set_value(
+        plugin_name="gvsigol_plugin_downloadman",
+        key = "link_validity",
+        value = "32")
+
+    # get "link_validity" key
+    validity = GolSettings.get_value(
+        plugin_name="gvsigol_plugin_downloadman",
+        key = "link_validity")
+        
+    # get "link_validity" key and provide a default value in case this key has not been defined
+    validity = GolSettings.get_value(
+        plugin_name="gvsigol_plugin_downloadman",
+        key = "link_validity",
+        default = "9")
+    
+    A GolSettings.DoesNotExist exception will be raised if the key is not defined and
+    no default has been provided
+    """
+    plugin_name = models.TextField()
+    key = models.TextField()
+    value = models.TextField()
+    unique_together = ('plugin_name', 'key')
+    objects = SettingsManager()
