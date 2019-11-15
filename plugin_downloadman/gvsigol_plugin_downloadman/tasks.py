@@ -2,6 +2,9 @@
 
 from __future__ import absolute_import, unicode_literals
 from builtins import str as text
+from billiard.compat import resource
+from billiard import process
+from pydoc import plain
 '''
     gvSIG Online.
     Copyright (C) 2019 SCOLAB.
@@ -58,7 +61,8 @@ try:
     from gvsigol_plugin_downloadman.settings import LOCAL_PATHS_WHITELIST
 except:
     LOCAL_PATHS_WHITELIST = []
-    
+
+from gvsigol_plugin_downloadman.settings import DOWNLOADS_URL
 
 #logger = logging.getLogger("gvsigol-celery")
 logger = logging.getLogger("gvsigol")
@@ -92,8 +96,16 @@ else:
 if hasattr(settings, 'DOWNMAN_CLEAN_TASK_FREQUENCY'):
     CLEAN_TASK_FREQUENCY = settings.DOWNMAN_CLEAN_TASK_FREQUENCY
 else:
-    #CLEAN_TASK_FREQUENCY = 1200.0 # seconds == 20 minutes
-    CLEAN_TASK_FREQUENCY = 20.0 # seconds == 20 minutes
+    CLEAN_TASK_FREQUENCY = 1200.0 # seconds == 20 minutes
+    #CLEAN_TASK_FREQUENCY = 20.0 # seconds
+
+# valid values:
+# - NEVER: a direct link will always be returned, even for non-static URLs (e.g WFS and WCS requests)
+# - DYNAMIC [Not implemented yet]: dynamic links (e.g. WFS and WCS requests) will be async processed and packaged
+if hasattr(settings, 'DOWNMAN_PACKAGING_BEHAVIOUR'):
+    DOWNMAN_PACKAGING_BEHAVIOUR = settings.DOWNMAN_PACKAGING_BEHAVIOUR
+else:
+    DOWNMAN_PACKAGING_BEHAVIOUR = 'NEVER'
 
 
 class Error(Exception):
@@ -111,7 +123,7 @@ def getFreeSpace(path):
         return (usage.f_frsize * usage.f_bfree)
     except:
         try:
-            usage = shutil.disk_usage(path)
+            usage = shutil.disk_usage(path) #@UndefinedVariable 
             return usage.free
         except:
             logger.exception("Error getting free space")
@@ -146,6 +158,14 @@ class ResourceDescription():
         self.res_path = res_path
         self.temporary = temporary
 
+
+class ResolvedLocator():
+    def __init__(self, url, name, title = "", desc="", processed=False):
+        self.url = url
+        self.name = name
+        self.title = title
+        self.desc = desc
+        self.processed = processed
         
 def _getParamValue(params, name):
     for param in params:
@@ -193,22 +213,24 @@ def _getWcsRequest(layer_name, baseUrl, params):
 def getCatalogResourceURL(res_type, resource_name, resource_url, params):
     # We must get the catalog online resources again and ensure the provided URL is in the catalog
     if res_type == ResourceLocator.HTTP_LINK_RESOURCE_TYPE:
-        return resource_url
+        return (resource_url, False)
     elif res_type == ResourceLocator.OGC_WCS_RESOURCE_TYPE:
-        return _getWcsRequest(resource_name, resource_url, params)
+        return (_getWcsRequest(resource_name, resource_url, params), True)
     elif res_type == ResourceLocator.OGC_WFS_RESOURCE_TYPE:
-        return _getWfsRequest(resource_name, resource_url, params)
+        return (_getWfsRequest(resource_name, resource_url, params), True)
+    return (None, False)
 
 def getGvsigolResourceURL(res_type, layer, params):
     if layer:
         if res_type == ResourceLocator.OGC_WFS_RESOURCE_TYPE and layer.datastore.workspace.wfs_endpoin:
             baseUrl = layer.datastore.workspace.wfs_endpoint
-            return _getWfsRequest(layer.name, baseUrl, params)
+            return (_getWfsRequest(layer.name, baseUrl, params), True)
         elif res_type == ResourceLocator.OGC_WCS_RESOURCE_TYPE and layer.datastore.workspace.wcs_endpoint:
             baseUrl = layer.datastore.workspace.wcs_endpoint
-            return _getWcsRequest(layer.name, baseUrl, params)
+            return (_getWcsRequest(layer.name, baseUrl, params), True)
+    return (None, False)
 
-def resolveLinkLocator(url, resource_name):
+def retrieveLinkLocator(url, resource_name):
     # TODO: authentication and permissions
     (fd, tmp_path) = tempfile.mkstemp('.tmp', 'ideuydm', dir=getTmpDir())
     tmp_file = os.fdopen(fd, "wb")
@@ -238,13 +260,62 @@ def resolveFileLocator(url, resource_name):
         logger.debug(path)
         if local_path.startswith(path):
             res = ResourceDescription(resource_name, local_path)
-            return [res]
+            return res
     logger.debug("local_path")
     logger.debug(local_path)
     logger.debug(LOCAL_PATHS_WHITELIST)
     raise ForbiddenAccessException
 
-def resolveLocator(resourceLocator):
+def resolveLocator(resourceLocator, download_request):
+    """
+    Parses the resourceLocator to translate the locator on a concrete URL or local file.
+    If the resource described by the locator is static (does not require processing)
+    a DownloadLink is also created.
+    If the resource is dynamic, then the behaviour depends on DOWNMAN_PACKAGING_BEHAVIOUR
+    variable. When DOWNMAN_PACKAGING_BEHAVIOUR is NEVER, the download link is also
+    created for dynamic resources.
+    When DOWNMAN_PACKAGING_BEHAVIOUR is DYNAMIC [not implemented yet], then the DownloadLink will not be
+    created at this stage and a new task will be
+    scheduled to create a temporal package for the download link.
+    """
+    resource_descriptor = json.loads(resourceLocator.data_source)
+    res_type = resource_descriptor.get('resource_type')
+    resource_name = resource_descriptor.get('name', '')
+
+    resource_url = resource_descriptor.get('url')
+    logger.debug(resource_descriptor)
+    params = resource_descriptor.get('params', [])
+
+    if resourceLocator.layer_id_type == ResourceLocator.GEONETWORK_UUID:
+        (resourceLocator.resolved_url, resourceLocator.is_dynamic) = getCatalogResourceURL(res_type, resource_name, resource_url, params)
+    elif resourceLocator.layer_id_type == ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE:
+        layer = getLayer(resourceLocator.layer_id)
+        (resourceLocator.resolved_url, resourceLocator.is_dynamic) = getGvsigolResourceURL(res_type, layer, params)
+    
+    if resourceLocator.resolved_url:
+        if resourceLocator.is_dynamic and DOWNMAN_PACKAGING_BEHAVIOUR == 'DYNAMIC':
+            resourceLocator.status = ResourceLocator.PROCESSING_STATUS
+            resourceLocator.save()
+        else:
+            resourceLocator.status = ResourceLocator.PROCESSED_STATUS
+            new_link = DownloadLink()
+            new_link.request = download_request
+            link_uuid = date.today().strftime("%Y%m%d") + get_random_string(length=32)
+            new_link.valid_to = timezone.now() + timedelta(seconds = download_request.validity)
+            new_link.link_random_id = link_uuid
+            logger.debug("resolved_url")
+            logger.debug(resourceLocator.resolved_url)
+            if resourceLocator.resolved_url.startswith("file://"):
+                if resourceLocator.resolved_url.endswith("/"):
+                    new_link.prepared_download_path = resolveFileLocator(resourceLocator.resolved_url, resource_name).res_path
+                else:
+                    new_link.prepared_download_path = resolveFileLocator(resourceLocator.resolved_url, os.path.basename(resourceLocator.resolved_url)).res_path
+            new_link.save()
+            resourceLocator.download_link = new_link
+            resourceLocator.save()
+            return new_link
+
+def resolveLocatorOld(resourceLocator):
     resource_descriptor = json.loads(resourceLocator.data_source)
     res_type = resource_descriptor.get('resource_type')
     resource_name = resource_descriptor.get('name')
@@ -272,7 +343,8 @@ def resolveLocator(resourceLocator):
         resource_name = resource_name + _getExtension(file_format)
         print resource_name
         if (url.startswith("http://") or url.startswith("https://")):
-            return resolveLinkLocator(url, resource_name)
+            
+            return retrieveLinkLocator(url, resource_name)
         if url.startswith("file://"):
             if url.endswith("/"):
                 return resolveFileLocator(url, resource_name)
@@ -365,33 +437,21 @@ def get_language(request):
             return 'en-us'
 
 @shared_task(bind=True)
-def notifyCompletedRequest(self, link_id):
+def notifyReceivedRequest(self, request_id, only_if_queued=True):
     try:
-        logger.debug("starting notify task completed")
-        link = DownloadLink.objects.get(pk=link_id)
-        request = link.contents
-        # validity must be computed from the moment the user gets notified
-        link.valid_to = timezone.now() + timedelta(seconds = request.validity)
-        link.save()
-        
-        if request.request_status != DownloadRequest.PACKAGED_STATUS:
+        logger.debug("starting notifyReceivedRequest")
+        request = DownloadRequest.objects.get(pk=request_id)
+        if only_if_queued and request.request_status != DownloadRequest.REQUEST_QUEUED_STATUS:
             return
-
         with override(get_language(request)):
-            subject = _('Download service: your request is ready - %(requestid)s') % {'requestid': request.request_random_id}
-            resolvedUrl = reverse('download-request-tracking', args=(request.request_random_id,))
-            try:
-                base_url = core_settings.BASE_URL
-                if base_url.endswith("/"):
-                    download_url = base_url + resolvedUrl
-                else:
-                    download_url = base_url + "/" + resolvedUrl
-            except:
-                download_url = resolvedUrl
-            valid_to = date_format(link.valid_to, 'DATE_FORMAT')
-            print download_url
-            print valid_to
-            plain_message = _('Your download request is ready. You can download it in the following link: %(url)s\nThe link will be available until %(valid_to)s') % {'url': download_url, 'valid_to': valid_to}
+            tracking_url = reverse('download-request-tracking', args=(request.request_random_id,))
+                    
+            subject = _('Download service: your request has been received - %(requestid)s') % {'requestid': request.request_random_id}
+            plain_message = _(u'Your download request has been received.')
+            plain_message += _('\nYou can use this tracking link to check the status of your request: %(url)s\n') % {'url': tracking_url}
+            plain_message += _('\nIncluded resources:')
+            for locator in request.resourcelocator_set.all():
+                plain_message += u' - {0!s}\n'.format(locator.name)
             # html_message = render_to_string('mail_template.html', {'context': 'values'})
             #plain_message = strip_tags(html_message)
             if request.requested_by_user:
@@ -423,8 +483,90 @@ def notifyCompletedRequest(self, link_id):
             request.request_status = DownloadRequest.PERMANENT_NOTIFICATION_ERROR_STATUS
             request.save()
 
-    
-    
+@shared_task(bind=True)
+def notifyRequestProgress(self, request_id):
+    try:
+        logger.debug("starting notify task completed")
+        request = DownloadRequest.objects.get(pk=request_id)
+        with override(get_language(request)):
+            tracking_url = reverse('download-request-tracking', args=(request.request_random_id,))
+                    
+            if request.request_status == DownloadRequest.COMPLETED_STATUS:
+                subject = _('Download service: your request is ready - %(requestid)s') % {'requestid': request.request_random_id}
+                plain_message = _(u'Your download request is ready.\n')
+            elif request.request_status == DownloadRequest.COMPLETED_WITH_ERRORS:
+                subject = _('Download service: your request is ready - %(requestid)s') % {'requestid': request.request_random_id}
+                plain_message = _(u'Your download request is ready. Some resources failed to be processed and are not available for download at the moment.\n')
+            else:
+                subject = _('Download service: request progress - %(requestid)s') % {'requestid': request.request_random_id}
+                plain_message = _(u'Your download request has been partially processed.\n')
+            plain_message +=  _('You can use the following links to download the requested resources:\n')
+                
+            """
+            try:
+                base_url = core_settings.BASE_URL
+                if base_url.endswith("/"):
+                    download_url = base_url + resolvedUrl
+                else:
+                    download_url = base_url + "/" + resolvedUrl
+            except:
+                download_url = resolvedUrl
+            """
+            count = 1
+            for link in request.downloadlink_set.all():
+                link_url = reverse('downman-download-resource', args=(request.request_random_id, link.link_random_id))
+                logger.debug(link_url)
+                valid_to = date_format(link.valid_to, 'DATETIME_FORMAT')
+                link.save()
+                logger.debug(valid_to)
+                linkResources = link.resourcelocator_set.all()
+                if len(linkResources)==1:
+                    plain_message += u' {0:2d}- {1!s}: {2!s}\n'.format(count, linkResources[0].name, link_url)
+                else:
+                    plain_message += u' {0:2d}- {1!s}: {2!s}\n'.format(count, _('Prepared package'), link_url)
+                    plain_message += _(u'    -- Link valid until {0!s}:\n').format(valid_to)
+                    plain_message += _(u'    -- Contents:')
+                    for linkResource in linkResources:
+                        plain_message += _(u'     -- {0!s} - {1!s}\n').format(linkResource.name, linkResource.title)
+                count += 1
+            locators =  request.resourcelocator_set.filter(download_link__isnull=True)
+            if len(locators)>0:
+                plain_message += _('\nThe following resources are still being processed:|n')
+                for locator in locators:
+                    plain_message += u' - {0!s}\n'.format(locator.name)
+            plain_message += _('\nYou can also use this tracking link to check the status of your request: %(url)s\n') % {'url': tracking_url}
+            # html_message = render_to_string('mail_template.html', {'context': 'values'})
+            #plain_message = strip_tags(html_message)
+            if request.requested_by_user:
+                to = request.requested_by_user
+            else:
+                to = request.requested_by_external
+            try:
+                from_email =  core_settings.EMAIL_HOST_USER
+            except:
+                logger.exception("EMAIL_HOST_USER has not been configured")
+                raise
+            logger.debug(u"mailing: " + to)
+            mail.send_mail(subject, plain_message, from_email, [to])
+            request.request_status = DownloadRequest.COMPLETED_STATUS
+            request.notification_status = DownloadRequest.NOTIFICATION_COMPLETED_STATUS
+            request.save()
+            # TODO: include an HTML version of the email
+            #mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+
+    except Exception as exc:
+        logger.exception("Download request completed: error notifying the user")
+        delay = getNextMailRetryDelay(request)
+        if delay:
+            request.request_status = DownloadRequest.NOTIFICATION_ERROR_STATUS
+            request.package_retry_count = request.notify_retry_count + 1 
+            request.save()
+            self.retry(exc=exc, countdown=delay)
+        else:
+            # maximum retry time reached
+            request.request_status = DownloadRequest.PERMANENT_NOTIFICATION_ERROR_STATUS
+            request.save()
+
 @shared_task(bind=True)
 def notifyPermanentFailedRequest(self, request_id):
     try:
@@ -469,28 +611,36 @@ def processDownloadRequest(self, request_id):
     # 1 get request
     try:
         request = DownloadRequest.objects.get(id=request_id)
-        if request.request_status == DownloadRequest.COMPLETED_STATUS or request.request_status == DownloadRequest.PERMANENT_PACKAGE_ERROR_STATUS or \
-                request.request_status == DownloadRequest.CANCELLED_STATUS or request.request_status == DownloadRequest.REJECTED_STATUS or \
-                request.request_status == DownloadRequest.HOLD_STATUS or request.request_status == DownloadRequest.PERMANENT_NOTIFICATION_ERROR_STATUS:
-            return
-        
-        if request.request_status != DownloadRequest.WAITING_SPACE_STATUS:
-            if DownloadRequest.objects.filter(request_status=DownloadRequest.WAITING_SPACE_STATUS).count()>0:
-                # avoid newer request to be processer before older requests
-                logger.debug("Delaying execution till previous tasks get enough available space on target dir")
-                self.retry(countdown=FREE_SPACE_RETRY_DELAY)
-                return
-        
-        if getFreeSpace(getTargetDir()) < MIN_TARGET_SPACE:
-            request.request_status = DownloadRequest.WAITING_SPACE_STATUS
-            request.save()
-            logger.debug("Available space in target dir is below the minimum threshold")
-            self.retry(countdown=FREE_SPACE_RETRY_DELAY)
+        if request.request_status != DownloadRequest.REQUEST_QUEUED_STATUS:
+            logger.debug("Task already processed: " + request_id)
             return
         
         request.request_status = DownloadRequest.PROCESSING_STATUS
         request.save()
         
+        # 2 classify resources
+        locators = request.resourcelocator_set.all()
+        processed_locators = 0
+        total_locators = 0
+        errors = 0
+        for resourceLocator in locators:
+            total_locators += 1
+            try:
+                new_link = resolveLocator(resourceLocator, request)
+                if new_link:
+                    processed_locators += 1
+            except:
+                logger.exception("Error resolving locator")
+                errors += 1
+        if total_locators == processed_locators:
+            request.request_status = DownloadRequest.COMPLETED_STATUS
+            request.save()
+        elif errors > 0:
+            request.request_status = DownloadRequest.COMPLETED_WITH_ERRORS
+            request.save()
+        notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
+        
+        """
         # 2 package
         link_uuid = date.today().strftime("%Y%m%d") + get_random_string(length=32)
         zip_path = packageRequest(request, link_uuid)
@@ -503,13 +653,15 @@ def processDownloadRequest(self, request_id):
             new_link.prepared_download_path = zip_path
             new_link.save()
             
-            request.request_status = DownloadRequest.PACKAGED_STATUS
+            request.request_status = DownloadRequest.COMPLETED_STATUSf                
             request.save()
             # 4. notify: send the link to the user
             notifyCompletedRequest.apply_async(args=[new_link.pk], queue='notify')
             print "done"
+        """
     except Exception as exc:
         logger.exception("error preparing download request")
+        """
         print "error preparing download request"
         delay = getNextPackagingRetryDelay(request)
         if delay:
@@ -522,7 +674,7 @@ def processDownloadRequest(self, request_id):
             request.request_status = DownloadRequest.PERMANENT_PACKAGE_ERROR_STATUS
             request.save()
             notifyPermanentFailedRequest.apply_async(args=[new_link.id], queue='notify')
-
+        """
 
 @celery_app.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):
@@ -534,6 +686,7 @@ def cleanOutdatedRequests(self):
     for root, dirs, files in os.walk(getTargetDir()):
         for f in files:
             fullpath = os.path.join(root, f)
+            link_uuid = ''
             try:
                 link_uuid = _parseLinkUiid(f)
                 link = DownloadLink.objects.get(link_random_id=link_uuid)
@@ -542,22 +695,19 @@ def cleanOutdatedRequests(self):
                 if timezone.now() > link.valid_to:
                     # request is oudated
                     os.remove(link.prepared_download_path)
-                elif link.contents.request_status == DownloadRequest.CANCELLED_STATUS or link.contents.request_status == DownloadRequest.REJECTED_STATUS:
-                    # for some status value such as cancelled, we should also remove the file
-                    os.remove(link.prepared_download_path)
-                """
-                elif link.contents.request_status == DownloadRequest.COMPLETED_STATUS or link.contents.request_status == DownloadRequest.PERMANENT_PACKAGE_ERROR_STATUS or \
-                    link.contents.request_status == DownloadRequest.HOLD_STATUS or link.contents.request_status == DownloadRequest.PERMANENT_NOTIFICATION_ERROR_STATUS:
-                    # for some status value such as cancelled, we should also remove the file
-                    pass
-                """
+                else:
+                    for resource in link.resourcelocator_set.all():
+                        if resource.status == ResourceLocator.CANCELLED_STATUS or resource.status == ResourceLocator.REJECTED_STATUS:
+                            # for some status value such as cancelled, we should also remove the file
+                            os.remove(link.prepared_download_path)
+                            break
             except:
-                logger.exception("error getting link")
-                # if older than UNKNOWN_FILES_MAX_AGE days, remove the file
-                modified_time = os.path.getmtime(fullpath)
-                if date.fromtimestamp(modified_time) < (date.today() - timedelta(days=UNKNOWN_FILES_MAX_AGE)):
-                    try:
+                try:
+                    logger.exception(u"error getting link: " + fullpath + u" - " + link_uuid)
+                    # if older than UNKNOWN_FILES_MAX_AGE days, remove the file
+                    modified_time = os.path.getmtime(fullpath)
+                    if date.fromtimestamp(modified_time) < (date.today() - timedelta(days=UNKNOWN_FILES_MAX_AGE)):
                         os.remove(fullpath)
-                    except:
-                        logger.exception("Error cleaning request package")
+                except:
+                    logger.exception("Error cleaning request package")
             

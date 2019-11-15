@@ -31,11 +31,12 @@ var ResourceDownloadParamValue = function(resource_param, value) {
 	this.value = value;
 }
 
-var ResourceDescriptor = function(layer_id, layer_title, resource_name, title, params, data_source_type, resource_type, url, direct_download_url) {
+var ResourceDescriptor = function(layer_id, layer_name, layer_title, resource_name, resource_title, params, data_source_type, resource_type, url, direct_download_url) {
 	this.layer_id = layer_id;
+	this.layer_name = layer_name;
 	this.layer_title = layer_title;
 	this.name = resource_name;
-	this.title = title;
+	this.title = resource_title;
 	this.direct_download_url = direct_download_url || '';
 	this.url = url || '';
 	this.data_source_type = data_source_type || '';
@@ -114,6 +115,7 @@ DownloadManagerClient.prototype.queryAvailableResources = function(layer_id, wor
 					}
 					console.log(response);
 					var resource = new ResourceDescriptor(response[i].layer_id,
+							response[i].layer_name,
 							response[i].layer_title,
 							response[i].name,
 							response[i].title,
@@ -161,7 +163,7 @@ DownloadManagerClient.prototype.startDownloadRequest = function(email, success_c
 		data: data,
 		timeout: self.config.timeout
 		}).done(function(result) {
-			if (result.status_code == 'QP') {
+			if (result.status_code == 'RQ') {
 				success_callback.apply(callback_context, [result, true]);
 				self.clearDownloadList();
 			}

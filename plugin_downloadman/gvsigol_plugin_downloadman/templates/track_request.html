@@ -45,18 +45,17 @@
 		<div class="content-wrapper background-grey">
 			<div class="container">
 				<section class="content background-grey">
-				<h2>{{ download_status }}</h2>
-				{% if download_url %}
-				<h3>{% blocktrans %} 'Use the following link if your download does not start automatically: <a href="{{ download_url }}">{{ download_url }}</a>' {% endblocktrans %}</h3>
-					<script>
-						window.onload = function () {
-							window.setTimeout(function () {
-								location.href = "{{ download_url }}";
-						}, 2000);
-						};
-					</script>
+				<h3>{% trans "Status: " %}{{ download_status }}</h3>
+				<h4>{% trans "Requested resources: " %}</h4>
+				{% if link_count %}
+					<table class="table">
+					<tr><th>{% trans "Name" %}</th><th>{% trans "Status" %}</th><th>{% trans "Valid to" %}</th><th>{% trans "URL" %}</th></tr>
+					{% for link in links %}
+						<tr><td>{{ link.name }}</td><td>{{ link.status }}</td><td>{{ link.valid_to }}</td><td><a href="{{ link.download_url }}">{{ link.download_url }}</a></td></tr>
+					{% endfor %}
+					</table>
 				{% endif %}
-				<h3>{% trans "Download request: " %}{{ download_uuid }}</h3>
+				<h4>{% trans "Download request: " %}{{ download_uuid }}</h4>
 				<p>{{details}}</p>
 				</section>
 			</div>

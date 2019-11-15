@@ -1,27 +1,8 @@
 from __future__ import unicode_literals
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_noop as _
 
 from django.db import models
 
-# Create your models here.
-#Job
-
-def define_translations():
-    PENDING_AUTHORIZATION_STATUS = _('Pending authorization')
-    """
-        (PENDING_INITIAL_NOTIFICATION_STATUS, 'Initial notification pending', _('Initial notification pending')),
-        (PENDING_FINAL_NOTIFICATION_STATUS, 'Final notification pending', _('Initial notification pending')),
-        (PACKAGE_QUEUED_STATUS, 'Package queued', _('Package qeued')),
-        (PACKAGED_STATUS, 'Packaged', _('Packaged')),
-        (COMPLETED_STATUS, 'Completed', _('Completed')),
-        (REJECTED_STATUS, 'Rejected', _('Rejected')),
-        (HOLD_STATUS, 'On hold', _('On hold')),
-        (CANCELLED_STATUS, 'Cancelled', _('Cancelled')),
-        (PACKAGING_ERROR_STATUS, 'Packaging error', _('Packaging error')),
-        (PERMANENT_PACKAGE_ERROR_STATUS, 'Permanent packaging error', _('Permanent packaging error')),
-        (NOTIFICATION_ERROR_STATUS, 'Notification error', _('Notification error')),
-        (PERMANENT_NOTIFICATION_ERROR_STATUS, 'Permanent notification error', _('Permanent notification error')),
-    """
 
 class AuthorizationRequestForm(models.Model):
     definition = models.TextField()
@@ -32,43 +13,27 @@ class DownloadRequest(models.Model):
     A request to download one or several datasets. One request may have several associated resource
     locators, which describe the actual data to be included in the request
     """
-    REGISTERED_REQUEST_NOTIFICATION_QUEUED = 'RG' # Queued for first user notification (request registered)
-    READY_REQUEST_NOTIFICATION_QUEUED = 'RY' # Queued for user notification
-    REJECTED_REQUEST_NOTIFICATION_QUEUED = 'RJ' # Queued for user notification
-    FAILED_REQUEST_NOTIFICATION_QUEUED = 'FA' # Queued for user notification
-    
-    PENDING_AUTHORIZATION_STATUS = 'AU'
-    PACKAGE_QUEUED_STATUS = 'QP' # Queued for package preparation
-    WAITING_SPACE_STATUS = 'SP' # Queued for package preparation
+    REQUEST_QUEUED_STATUS = 'RQ' # Queued for package preparation
     PROCESSING_STATUS = 'PR' # Queued for package preparation
-    PACKAGED_STATUS = 'CT' # The download package was sucessfully created
     COMPLETED_STATUS = 'CT' # The download package was sucessfully created and notified
-    REJECTED_STATUS = 'RE' # Rejected or cancelled by the admins
-    HOLD_STATUS = 'HO' # Set on hold by admins    
-    CANCELLED_STATUS = 'CL' # Cancelled by the user
-    PACKAGING_ERROR_STATUS = 'ER' # An error was found during preparation of the package
-    PERMANENT_PACKAGE_ERROR_STATUS = 'PE' # A permanent error was found during preparation
+    COMPLETED_WITH_ERRORS = 'CE' # An error was found during preparation of the package
+    QUEUEING_ERROR = 'QE' # The request could not be queued
+
     NOTIFICATION_COMPLETED_STATUS = 'NC'
     NOTIFICATION_ERROR_STATUS = 'NE' # An error was found during  notification
     PERMANENT_NOTIFICATION_ERROR_STATUS = 'NP' # A permanent error was found during notification
 
     REQUEST_STATUS_CHOICES = (
-        (PENDING_AUTHORIZATION_STATUS, 'Pending authorization'),
-        (PACKAGE_QUEUED_STATUS, 'Package queued'),
-        (PROCESSING_STATUS, 'Processing request'),
-        (WAITING_SPACE_STATUS, 'Queued, waiting for free space'),
-        (PACKAGED_STATUS, 'Packaged'),
-        (COMPLETED_STATUS, 'Completed'),
-        (REJECTED_STATUS, 'Rejected'),
-        (HOLD_STATUS, 'On hold'),
-        (CANCELLED_STATUS, 'Cancelled'),
-        (PACKAGING_ERROR_STATUS, 'Packaging error'),
-        (PERMANENT_PACKAGE_ERROR_STATUS, 'Permanent packaging error'),
+        (REQUEST_QUEUED_STATUS, _('Request queued')),
+        (PROCESSING_STATUS, _('Processing request')),
+        (COMPLETED_STATUS, _('Completed')),
+        (COMPLETED_WITH_ERRORS, _('Completed with errors')),
+        (QUEUEING_ERROR, _('Error queueing request')),
     )
     NOTIFICATION_STATUS_CHOICES = (
-        (NOTIFICATION_COMPLETED_STATUS, 'Notification completed'),
-        (NOTIFICATION_ERROR_STATUS, 'Notification error'),
-        (PERMANENT_NOTIFICATION_ERROR_STATUS, 'Permanent notification error'),
+        (NOTIFICATION_COMPLETED_STATUS, _('Notification completed')),
+        (NOTIFICATION_ERROR_STATUS, _('Notification error')),
+        (PERMANENT_NOTIFICATION_ERROR_STATUS, _('Permanent notification error')),
     )
     
     #definition = models.TextField()
@@ -78,11 +43,10 @@ class DownloadRequest(models.Model):
     # number of seconds the download link will be up since notified to the user
     validity = models.IntegerField()
     authorization_request = models.TextField()
-    pending_authorization = models.BooleanField()
     # status: 
     # - pending authorization, queued for preparation, ready for download,
     # cancelled, on hold, requeued for preparation, error...
-    request_status = models.CharField(max_length=2, choices=REQUEST_STATUS_CHOICES, db_index=True)
+    request_status = models.CharField(max_length=2, default=REQUEST_QUEUED_STATUS, choices=REQUEST_STATUS_CHOICES, db_index=True)
     notification_status = models.CharField(max_length=2, null=True, choices=NOTIFICATION_STATUS_CHOICES)
     package_retry_count = models.PositiveIntegerField(default=0)
     notify_retry_count = models.PositiveIntegerField(default=0)
@@ -90,29 +54,34 @@ class DownloadRequest(models.Model):
     json_request = models.TextField() # we keep the request as received from the client for debugging purposes
     language = models.CharField(max_length=50, blank=True)
 
-class DownloadLink(models.Model):
-    contents = models.OneToOneField(
-        DownloadRequest,
-        on_delete=models.CASCADE,
-        primary_key=True,
-    )
-    prepared_download_path = models.FilePathField(max_length=1000) # the path to the file to download
-    download_count = models.PositiveIntegerField(default=0)
-    valid_to=models.DateTimeField(db_index=True)
-    link_random_id = models.TextField(db_index=True)
-
 # class DownmanConfig(models.Model):
     # number of seconds the download link will be up since notified to the user
     #default_validity  = models.IntegerField()
     #default_validation_form = models.ForeignKey('ValidationForm', null=True, on_delete=models.SET_NULL)
     #direct_download_threshold_kb  = models.IntegerField()
 
-class ResourceSettings(models.Model):
-    layer_uuid = models.TextField(unique=True)
-    restricted = models.BooleanField()
+#class ResourceSettings(models.Model):
+#    layer_uuid = models.TextField(unique=True)
+#    restricted = models.BooleanField()
 
 FORMAT_PARAM_NAME = 'format'
 
+
+class DownloadLink(models.Model):
+    PROCESSED_STATUS = 'PR'
+    USER_CANCELLED_STATUS = 'UC'
+    ADMIN_CANCELLED_STATUS = 'AC'
+
+    STATUS_CHOICES = (
+        (PROCESSED_STATUS, _('Processed')),
+        (USER_CANCELLED_STATUS, _('Cancelled by the user')),
+        (ADMIN_CANCELLED_STATUS, _('Cancelled by the administrator')),
+    )
+    request = models.ForeignKey('DownloadRequest', on_delete=models.CASCADE)
+    prepared_download_path = models.TextField(null=True, blank=True)
+    valid_to=models.DateTimeField(db_index=True)
+    link_random_id = models.TextField(db_index=True, unique=True)
+    status = models.CharField(max_length=2, default=PROCESSED_STATUS, choices=STATUS_CHOICES, db_index=True)
 
 class ResourceLocator(models.Model):
     GEONETWORK_UUID = 'GN'
@@ -123,11 +92,35 @@ class ResourceLocator(models.Model):
     
     OGC_WFS_RESOURCE_TYPE = 'OGC_WFS_RESOURCE_TYPE'
     OGC_WCS_RESOURCE_TYPE = 'OGC_WCS_RESOURCE_TYPE'
-    HTTP_LINK_RESOURCE_TYPE = 'HTTP_LINK_TYPE'
+    HTTP_LINK_RESOURCE_TYPE = 'HTTP_LINK_TYPE' # TODO: rename to URL_RESOURCE_TYPE ??
     
     ID_TYPES = (
         (GEONETWORK_UUID, GEONETWORK_CATALOG_DATA_SOURCE_TYPE),
         (GVSIGOL_LAYER_ID, GVSIGOL_DATA_SOURCE_TYPE)
+    )
+    
+    PENDING_AUTHORIZATION_STATUS = 'AU'
+    PACKAGE_QUEUED_STATUS = 'QP' # Queued for package preparation
+    WAITING_SPACE_STATUS = 'SP' # Queued for package preparation
+    PROCESSING_STATUS = 'PG' # Queued for package preparation
+    PROCESSED_STATUS = 'PD' # The download package was sucessfully created
+    REJECTED_STATUS = 'RE' # Rejected or cancelled by the admins
+    HOLD_STATUS = 'HO' # Set on hold by admins    
+    CANCELLED_STATUS = 'CL' # Cancelled by the user
+    PACKAGING_ERROR_STATUS = 'ER' # An error was found during preparation of the package
+    PERMANENT_PACKAGE_ERROR_STATUS = 'PE' # A permanent error was found during preparation
+
+    REQUEST_STATUS_CHOICES = (
+        (PENDING_AUTHORIZATION_STATUS, _('Pending authorization')),
+        (PACKAGE_QUEUED_STATUS, _('Package queued')),
+        (PROCESSING_STATUS, _('Processing resource')),
+        (WAITING_SPACE_STATUS, _('Queued, waiting for free space')),
+        (PROCESSED_STATUS, _('Processed')),
+        (REJECTED_STATUS, _('Rejected')),
+        (HOLD_STATUS, _('On hold')),
+        (CANCELLED_STATUS, _('Cancelled')),
+        (PACKAGING_ERROR_STATUS, _('Packaging error')),
+        (PERMANENT_PACKAGE_ERROR_STATUS, _('Permanent packaging error')),
     )
     
     # res_einternal_id = models.PositiveIntegerField()
@@ -135,17 +128,23 @@ class ResourceLocator(models.Model):
     data_source  = models.TextField() # description of the layer data source and download params
     layer_id = models.TextField(null=True, blank=True)
     layer_id_type = models.CharField(max_length=2, choices=ID_TYPES)
-    #resolved_layer_url = models.TextField(null=True, blank=True)
     name = models.TextField()
     title = models.TextField()
-    #mime_type = models.CharField(max_length=255)
+    layer_name = models.TextField()
+    layer_title = models.TextField()
+    pending_authorization = models.BooleanField(default=False)
+    status = models.CharField(max_length=2, default=PACKAGE_QUEUED_STATUS, choices=REQUEST_STATUS_CHOICES, db_index=True)
+    download_count = models.PositiveIntegerField(default=0)
+    resolved_url =  models.TextField(null=True, blank=True)
+    is_dynamic = models.BooleanField(default=False)
+    download_link = models.ForeignKey('DownloadLink', on_delete=models.CASCADE, null=True)
     request = models.ForeignKey('DownloadRequest', on_delete=models.CASCADE)
+    #mime_type = models.CharField(max_length=255)
+    
 
 class DownloadLog(models.Model):
-    layer_id = models.TextField(null=True, blank=True)
-    layer_id_type = models.CharField(max_length=2, choices=ResourceLocator.ID_TYPES)
     date = models.DateTimeField(auto_now_add=True)
-    request = models.ForeignKey('DownloadRequest', on_delete=models.CASCADE)
+    resource = models.ForeignKey('ResourceLocator', on_delete=models.CASCADE)
 
 def get_default_validity():
     # TODO: we could get it for a settings entry, or a settings table in DB
