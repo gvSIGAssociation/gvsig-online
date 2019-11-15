@@ -1006,7 +1006,8 @@ def project_get_conf(request):
                                         layer['legend_no_auth'] = ls.custom_legend_url
                                         layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
                                         layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
-    
+                            
+                            layer['timeout'] = l.timeout
                             layers.append(layer)
     
                             w = {}
@@ -1078,6 +1079,7 @@ def project_get_conf(request):
                     order = int(conf_group['groupOrder']) + l.order
                     layer['order'] = order
                     
+                    layer['timeout'] = l.timeout
                     layers.append(layer)
             
             if allows_getmap:

@@ -261,6 +261,50 @@ viewer.core = {
 				params: {'LAYERS': externalLayer['layers'], 'FORMAT': externalLayer['format'], 'VERSION': externalLayer['version'], 'SRS': 'EPSG:3857', 'TRANSPARENT': 'TRUE'}
 			});
 			wmsSource.layer_name = externalLayer['name'];
+			wmsSource.loadend = false;
+			wmsSource.on('tileloadstart', function() {
+				var time = 0;
+				var pid;
+				var _this = this;
+				pid = setInterval(function() {
+					if (time < externalLayer['timeout']) {
+						time += 1000;
+					} else {
+						if (!_this.loadend) {
+							var eLayer = null;
+							clearInterval(pid);
+							self.map.getLayers().forEach(function(layer){
+								if (layer.layer_name == _this.layer_name) {
+									eLayer = layer;
+								}						
+							}, _this);
+							
+							if (eLayer) {
+								if (eLayer.baselayer) {
+									$('#' + eLayer.id).parent().css('color', '#ff0000');
+									$('#' + eLayer.id).parent().children('input').prop( "checked", false );
+									$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
+									$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
+									
+								} else {
+									$('#' + eLayer.id).parent().css('color', '#ff0000');
+									$('#' + eLayer.id).parent().children('input').prop( "checked", false );
+									$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
+									$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
+									
+								}
+								self.map.removeLayer(eLayer);
+							}
+						}
+	
+					}
+				}, 1000);
+			
+			});
+			wmsSource.on('tileloadend', function() {
+				this.loadend = true;
+			
+			});
 			wmsSource.on('tileloaderror', function(e){
 				var eLayer = null;
 				self.map.getLayers().forEach(function(layer){
@@ -374,6 +418,50 @@ viewer.core = {
 	    		
 				var wmtsSource = new ol.source.WMTS((options));
 				wmtsSource.layer_name = externalLayer['name'];
+				wmtsSource.loadend = false;
+				wmtsSource.on('tileloadstart', function() {
+					var time = 0;
+					var pid;
+					var _this = this;
+					pid = setInterval(function() {
+						if (time < externalLayer['timeout']) {
+							time += 1000;
+						} else {
+							if (!_this.loadend) {
+								var eLayer = null;
+								clearInterval(pid);
+								self.map.getLayers().forEach(function(layer){
+									if (layer.layer_name == _this.layer_name) {
+										eLayer = layer;
+									}						
+								}, _this);
+								
+								if (eLayer) {
+									if (eLayer.baselayer) {
+										$('#' + eLayer.id).parent().css('color', '#ff0000');
+										$('#' + eLayer.id).parent().children('input').prop( "checked", false );
+										$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
+										$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
+										
+									} else {
+										$('#' + eLayer.id).parent().css('color', '#ff0000');
+										$('#' + eLayer.id).parent().children('input').prop( "checked", false );
+										$('#' + eLayer.id).parent().children('input').css( "display", 'none' );
+										$('#' + eLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
+										
+									}
+									self.map.removeLayer(eLayer);
+								}
+							}
+		
+						}
+					}, 1000);
+				
+				});
+				wmsSource.on('tileloadend', function() {
+					this.loadend = true;
+				
+				});
 				wmtsSource.on('tileloaderror', function(e){
 					var eLayer = null;
 					self.map.getLayers().forEach(function(layer){
@@ -424,54 +512,6 @@ viewer.core = {
     			
     		}
 		}
-    	
-    	/*if (externalLayer['type'] == 'WMTS') {
-    		var parser = new ol.format.WMTSCapabilities();
-    		var capabilities_url = externalLayer['url'] + '?request=GetCapabilities' + '&version=' + externalLayer['version']  + '&service=' + externalLayer['type'];
-    		$.ajax({
-    			url: capabilities_url,
-    			async: false,
-    			method: 'POST',
-    			error: function(jqXHR, textStatus, errorThrown){},
-    			success: function(text){
-    				var result = parser.read(text);
-    	    		try{
-    	    			var options = ol.source.WMTS.optionsFromCapabilities(result, {
-    	    				matrixSet: externalLayer['matrixset'],
-    	  		          	layer: externalLayer['layers']
-    	  		      	});
-    	    			if(options && options.urls && options.urls.length > 0){
-    	    				if(!externalLayer['url'].endsWith('?')){
-    	    					options.urls[0] = externalLayer['url'] + '?';
-    	    				}
-    	    			}
-    	    			var is_baselayer = false;
-    	    			for(var k=0; k<options.urls.length; k++){
-    	    				if(externalLayer['url'].replace("https://", "http://")+'?' == options.urls[k].replace("https://", "http://")){
-    	    					is_baselayer = true;
-    	    				}
-    	    			}
-    	    			options.crossOrigin = 'anonymous';
-    	    			if(is_baselayer){
-    	    				var ignSource3 = new ol.source.WMTS((options));
-    	    				var ignLayer3 = new ol.layer.Tile({
-    	    					id: layerId,
-    	    					source: ignSource3,
-    	    					visible: visible
-    	    				});
-    	    				ignLayer3.baselayer = true;
-    	    				ignLayer3.external = true;
-    	    				ignLayer3.infoFormat = externalLayer['infoformat'];
-    	    				ignLayer3.setZIndex(parseInt(externalLayer.order));
-    	    				self.map.addLayer(ignLayer3);
-    	    			}
-    	    			
-    	    		} catch(err){
-    	    			console.log("error loading wmts '" + externalLayer['url']+"':" + err)
-    	    		}
-    			}
-    		});
-		}*/
 
     	if (externalLayer['type'] == 'Bing') {
     		var bingLayer = new ol.layer.Tile({
