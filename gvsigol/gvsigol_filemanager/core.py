@@ -111,10 +111,12 @@ class Filemanager(object):
                     listing.append(_helper(directoryname, 'Directory', ''))
 
         for filename in files:
-            extension = filename.split('.')[1]
-            #if extension.lower() in visible_extensions:
-            #    listing.append(_helper(filename, 'File', extension))
-            listing.append(_helper(filename, 'File', extension))
+            parts = filename.split('.')
+            if len(parts) > 1:
+                extension = parts[1]
+                #if extension.lower() in visible_extensions:
+                #    listing.append(_helper(filename, 'File', extension))
+                listing.append(_helper(filename, 'File', extension))
 
         return listing
 
