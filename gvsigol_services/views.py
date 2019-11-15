@@ -3457,6 +3457,7 @@ def external_layer_add(request):
             external_layer.detailed_info_button_title = detailed_info_button_title
             external_layer.detailed_info_html = detailed_info_html
             external_layer.created_by = request.user.username
+            external_layer.timeout = request.POST.get('timeout')
             
             params = {}
             if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
@@ -3558,6 +3559,7 @@ def external_layer_update(request, external_layer_id):
             external_layer.detailed_info_enabled = detailed_info_enabled
             external_layer.detailed_info_button_title = detailed_info_button_title
             external_layer.detailed_info_html = detailed_info_html
+            external_layer.timeout = request.POST.get('timeout')
             params = {}
 
             if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
