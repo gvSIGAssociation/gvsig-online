@@ -151,6 +151,7 @@ class Layer(models.Model):
     detailed_info_enabled = models.BooleanField(default=True)
     detailed_info_button_title = models.CharField(max_length=150, null=True, blank=True, default='Detailed info')
     detailed_info_html = models.TextField(null=True, blank=True)
+    timeout = models.IntegerField(null=True, default=30000)
     
     def __unicode__(self):
         return self.name
