@@ -187,6 +187,19 @@ function configure() {
 	grep -rl "##CELERY_BROKER_URL##"  | xargs sed -i "s ##CELERY_BROKER_URL## $CELERY_BROKER_URL g"
 	
 	
+	if [ -z $ELEVATION_URL ]; then
+		echo "WARNING: ELEVATION_URL is not defined, using empty"					
+		ELEVATION_URL=""
+	fi												
+	grep -rl "##ELEVATION_URL##"  | xargs sed -i "s/##ELEVATION_URL##/$ELEVATION_URL/g"
+	
+	if [ -z $ELEVATION_LAYER ]; then
+		echo "WARNING: ELEVATION_LAYER is not defined, using empty"					
+		ELEVATION_LAYER=""
+	fi												
+	grep -rl "##ELEVATION_LAYER##"  | xargs sed -i "s/##ELEVATION_LAYER##/$ELEVATION_LAYER/g"
+	
+	
 	grep -rl "##GEOSERVER_CLUSTER_NODES##"  | xargs sed -i "s ##GEOSERVER_CLUSTER_NODES## $GEOSERVER_CLUSTER_NODES g"						
 	grep -rl "##GVSIGOL_TOOLS##"  | xargs sed -i "s/##GVSIGOL_TOOLS##/$GVSIGOL_TOOLS/g" 
 	grep -rl "##IP_FO##"  | xargs sed -i "s/##IP_FO##/$IP_FO/g" | true
