@@ -191,7 +191,7 @@ function configure() {
 		echo "WARNING: ELEVATION_URL is not defined, using empty"					
 		ELEVATION_URL=""
 	fi												
-	grep -rl "##ELEVATION_URL##"  | xargs sed -i "s/##ELEVATION_URL##/$ELEVATION_URL/g"
+	grep -rl "##ELEVATION_URL##"  | xargs sed -i "s ##ELEVATION_URL## $ELEVATION_URL g"
 	
 	if [ -z $ELEVATION_LAYER ]; then
 		echo "WARNING: ELEVATION_LAYER is not defined, using empty"					
