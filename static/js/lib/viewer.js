@@ -458,7 +458,7 @@ viewer.core = {
 					}, 1000);
 				
 				});
-				wmsSource.on('tileloadend', function() {
+				wmtsSource.on('tileloadend', function() {
 					this.loadend = true;
 				
 				});
