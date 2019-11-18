@@ -72,13 +72,24 @@ GEOCODING_PROVIDER = {
         'autocancel': True,
         'max_results': 10
     },
+    # http://callejerouy2-direcciones.paas.red.uy/api/v1/geocode/candidates?limit=10&q=general%20ordo%C3%B1ez%2C%20montevideo&soloLocalidad=false
+    # Direccion interna de OpenShift
     'ide_uy': {
-        'candidates_url': 'https://callejerouy-direcciones.agesic.gub.uy/direcciones-0.0.2-SNAPSHOT/api/v1/geocode/candidates',
-        'find_url': 'https://callejerouy-direcciones.agesic.gub.uy/direcciones-0.0.2-SNAPSHOT/api/v1/geocode/find',
-        'reverse_url': 'https://callejerouy-direcciones.agesic.gub.uy/direcciones-0.0.2-SNAPSHOT/api/v1/geocode/reverse',  
+        'candidates_url': 'http://callejerouy2-direcciones.paas.red.uy/api/v1/geocode/candidates',
+        'find_url': 'http://callejerouy2-direcciones.paas.red.uy/api/v1/geocode/find',
+        'reverse_url': 'http://callejerouy2-direcciones.paas.red.uy/api/v1/geocode/reverse',  
         'max_results': 10,
         'filter': ''
     }
+    
+    #'ide_uy': {
+    #    'candidates_url': 'https://callejerouy-direcciones.agesic.gub.uy/direcciones-0.0.2-SNAPSHOT/api/v1/geocode/candidates',
+    #    'find_url': 'https://callejerouy-direcciones.agesic.gub.uy/direcciones-0.0.2-SNAPSHOT/api/v1/geocode/find',
+    #    'reverse_url': 'https://callejerouy-direcciones.agesic.gub.uy/direcciones-0.0.2-SNAPSHOT/api/v1/geocode/reverse',  
+    #    'max_results': 10,
+    #    'filter': ''
+    #}
+    
 
 }
 
