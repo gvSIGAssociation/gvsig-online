@@ -24,10 +24,11 @@
 /**
  * TODO
  */
-var getFeatureInfo = function(map, prefix) {
+var getFeatureInfo = function(conf, map, prefix) {
 
 	this.map = map;
 	this.prefix = prefix;
+	this.conf = conf;
 
 	this.id = "get-feature-info";
 
@@ -51,6 +52,21 @@ var getFeatureInfo = function(map, prefix) {
 
 	button.addEventListener('click', handler, false);
 	button.addEventListener('touchstart', handler, false);
+	
+	this.zLayer = new ol.layer.Tile({
+		source: new ol.source.TileWMS({
+			url: this.conf.elevation_url,
+			visible: false,
+			params: {
+				'LAYERS': this.conf.elevation_layer,
+				'FORMAT': 'image/png',
+				'VERSION': '1.1.1'
+			},
+			serverType: 'geoserver'
+		}),
+		visible: false
+	});
+	this.map.addLayer(this.zLayer);
 
 };
 
@@ -109,7 +125,7 @@ getFeatureInfo.prototype.handler = function(e) {
 		  }
 
 
-		if (this.hasLayers()) {
+		/*if (this.hasLayers()) {
 			this.popup = new ol.Overlay.Popup();
 			this.map.addOverlay(this.popup);
 
@@ -144,7 +160,39 @@ getFeatureInfo.prototype.handler = function(e) {
 
 		} else {
 			messageBox.show('warning', gettext('No layers available.'));
-		}
+		}*/
+		
+		this.popup = new ol.Overlay.Popup();
+		this.map.addOverlay(this.popup);
+
+		this.$button.addClass('button-active');
+		this.active = true;
+		this.$button.trigger('control-active', [this]);
+
+    	var self = this;
+
+		this.map.on('click', this.clickHandler, self);
+		this.source = new ol.source.Vector();
+		this.resultLayer = new ol.layer.Vector({
+			source: this.source,
+		  	style: new ol.style.Style({
+		    	fill: new ol.style.Fill({
+		      		color: 'rgba(255, 255, 255, 0.2)'
+		    	}),
+		    	stroke: new ol.style.Stroke({
+		      		color: '#0099ff',
+		      		width: 2
+		    	}),
+		    	image: new ol.style.Circle({
+		      		radius: 7,
+		      		fill: new ol.style.Fill({
+		        		color: '#0099ff'
+		      		})
+		    	})
+		  	})
+		});
+		this.resultLayer.baselayer = true;
+		this.map.addLayer(this.resultLayer);
 
 	}
 };
@@ -501,9 +549,13 @@ getFeatureInfo.prototype.showPopup = function(){
 		coord_2 = coord_1;
 		coord_1 = aux;
 	}
+	var elevation = '';
+	if (this.conf.elevation_url && this.conf.elevation_layer) {
+		elevation = gettext('Elevation') + ': ' + this.getElevation() + ' m';
+	}
 	html += '<li class="item">';
 	html += 	'<div class="feature-info">';
-	html += 		'<span style="font-size: 12px;">' + gettext('Coordinates') + ' ('+srs+'):</span>' + '<br /><span style="font-weight: bold; font-size: 12px;"> ' + coord_2 + ', '+ coord_1 + '</span>';
+	html += 		'<span style="font-size: 12px;">' + gettext('Coordinates') + ' ('+srs+'):</span>' + '<br /><span style="font-weight: bold; font-size: 12px;"> ' + coord_2 + ', '+ coord_1 + '  ' + elevation + '</span>';
 	html += 		'<div style="float: right;height: 20px;width: 20px; margin-bottom:10px;" id="info-spinner"></div>';
 	html += 	'</div>';
 	html += '</li>';
@@ -524,6 +576,34 @@ getFeatureInfo.prototype.showPopup = function(){
 
 	//$.overlayout();
 	//$("#jqueryEasyOverlayDiv").css("display", "none");
+};
+
+/**
+ * TODO
+ */
+getFeatureInfo.prototype.getElevation = function(){
+	var self = this;
+	var elevation = '';
+	
+	var featureInfoUrl = this.zLayer.getSource().getGetFeatureInfoUrl(
+    	this.mapCoordinates,
+		this.map.getView().getResolution(),
+		this.map.getView().getProjection().getCode(),
+		{'INFO_FORMAT': 'text/html'}
+	);
+    
+	$.ajax({
+		type: 'GET',
+		async: false,
+	  	url: featureInfoUrl,
+	  	success	:function(response){
+	  		elevation = response.replace('↵', '');
+	  		elevation = parseFloat(elevation).toFixed(2);
+		},
+	  	error: function(){}
+	});
+
+	return elevation;
 };
 
 /**
