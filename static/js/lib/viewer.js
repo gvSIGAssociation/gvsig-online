@@ -778,7 +778,7 @@ viewer.core = {
 			this.tools.push(new projectZoom(this.map, this.conf));
 		}
 		if (this.ifToolInConf('gvsigol_tool_info')) {
-			this.tools.push(new getFeatureInfo(this.map, this.conf.tools.get_feature_info_control.private_fields_prefix));
+			this.tools.push(new getFeatureInfo(this.conf, this.map, this.conf.tools.get_feature_info_control.private_fields_prefix));
 		}
 		if (this.ifToolInConf('gvsigol_tool_measure')) {
 			this.tools.push(new measureLength(this.map));
