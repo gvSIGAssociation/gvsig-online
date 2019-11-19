@@ -49,7 +49,7 @@ from dateutil import parser
 from datetime import datetime
 from importlib import import_module
 from django.contrib.contenttypes.models import ContentType
-
+from builtins import str as text
 
 
 @csrf_exempt
@@ -216,9 +216,9 @@ def get_targets_from_content_type(request):
         targets = {}
         for target_bd in targets_bd:
             if hasattr(target_bd, field_name):
-                targets[target_bd.id] = str(getattr(target_bd, field_name))
+                targets[target_bd.id] = text(getattr(target_bd, field_name))
             else:
-                targets[target_bd.id] = str(target_bd)
+                targets[target_bd.id] = text(target_bd)
 
         response = {
             'targets': targets
