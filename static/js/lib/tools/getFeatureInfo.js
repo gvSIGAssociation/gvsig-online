@@ -535,19 +535,37 @@ getFeatureInfo.prototype.showPopup = function(){
 		coord_1 = aux;
 	}
 	var elevation = '';
+	var hiddenInput = coord_2 + ',' + coord_1;
 	var elevationControl = viewer.core.getTool('elevation-control');
 	if (elevationControl != null) {
-		elevation = gettext('Elevation') + ': ' + this.getElevation(elevationControl) + ' m';
+		var elev = this.getElevation(elevationControl);
+		elevation = gettext('Elevation') + ': ' + elev + ' m';
+		hiddenInput = hiddenInput + ',' + elev;
 	}
+
 	html += '<li class="item">';
 	html += 	'<div class="feature-info">';
-	html += 		'<span style="font-size: 12px;">' + gettext('Coordinates') + ' ('+srs+'):</span>' + '<br /><span style="font-weight: bold; font-size: 12px;"> ' + coord_2 + ', '+ coord_1 + '  ' + elevation + '</span>';
+	html += 		'<i id="coord-to-clipboard" style="margin-right: 5px; cursor: pointer;" class="fa fa-clipboard"></i><span style="font-size: 12px;">' + gettext('Coordinates') + ' ('+srs+')</span>' + '<br /><span style="font-weight: bold; font-size: 12px;"> ' + coord_2 + ', '+ coord_1 + '  ' + elevation + '</span>';
 	html += 		'<div style="float: right;height: 20px;width: 20px; margin-bottom:10px;" id="info-spinner"></div>';
+	html += 		'<textarea style="display: block;height: 1px;width: 1px;" class="coords-to-copy">' + hiddenInput + '</textarea>';
 	html += 	'</div>';
 	html += '</li>';
 
 	html += '</ul>';
 	this.popup.show(self.mapCoordinates, '<div class="popup-wrapper getfeatureinfo-popup">' + html + '</div>');
+	
+	$('#coord-to-clipboard').on('click', function() {
+		var cutTextarea = document.querySelector('.coords-to-copy');
+		cutTextarea.select();
+		try {
+		    var successful = document.execCommand('cut');
+		    var msg = successful ? 'successful' : 'unsuccessful';
+		    console.log('Cutting text command was ' + msg);
+		  } catch(err) {
+		    console.log('Oops, unable to cut');
+		  }
+	});
+	
 	$(".getfeatureinfo-popup").parent().parent().children(".ol-popup-closer").unbind("click").click(function() {
 		var detailsTab = $('#details-tab');
 	 	detailsTab.empty();
