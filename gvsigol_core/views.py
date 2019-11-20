@@ -1137,11 +1137,6 @@ def project_get_conf(request):
             'auth_urls': auth_urls
         }
         
-        if hasattr(settings, 'ELEVATION_LAYER') and hasattr(settings, 'ELEVATION_URL'):
-            if settings.ELEVATION_URL != '' and settings.ELEVATION_LAYER != '':
-                conf['elevation_url'] = settings.ELEVATION_URL
-                conf['elevation_layer'] = settings.ELEVATION_LAYER
-        
         if language:
             conf['language'] = {
                 'iso639_1': request.LANGUAGE_CODE,

@@ -7110,8 +7110,8 @@ ol.control.Profil.prototype.setGeometry = function(g, options)
 		t.push ([d, z, ti, p]);
 	}
 	// Info
-	this.element.querySelector(".track-info .zmin").textContent = zmin.toFixed(2)+this.info.altitudeUnits;
-	this.element.querySelector(".track-info .zmax").textContent = zmax.toFixed(2)+this.info.altitudeUnits;
+	this.element.querySelector(".track-info .zmin").textContent = parseFloat(zmin).toFixed(2)+this.info.altitudeUnits;
+	this.element.querySelector(".track-info .zmax").textContent = parseFloat(zmax).toFixed(2)+this.info.altitudeUnits;
 	if (d>1000)
 	{	this.element.querySelector(".track-info .dist").textContent = (d/1000).toFixed(1)+this.info.distanceUnitsKM;
 	}
