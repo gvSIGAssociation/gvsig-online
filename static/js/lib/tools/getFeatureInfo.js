@@ -52,21 +52,6 @@ var getFeatureInfo = function(conf, map, prefix) {
 
 	button.addEventListener('click', handler, false);
 	button.addEventListener('touchstart', handler, false);
-	
-	this.zLayer = new ol.layer.Tile({
-		source: new ol.source.TileWMS({
-			url: this.conf.elevation_url,
-			visible: false,
-			params: {
-				'LAYERS': this.conf.elevation_layer,
-				'FORMAT': 'image/png',
-				'VERSION': '1.1.1'
-			},
-			serverType: 'geoserver'
-		}),
-		visible: false
-	});
-	this.map.addLayer(this.zLayer);
 
 };
 
@@ -550,8 +535,9 @@ getFeatureInfo.prototype.showPopup = function(){
 		coord_1 = aux;
 	}
 	var elevation = '';
-	if (this.conf.elevation_url && this.conf.elevation_layer) {
-		elevation = gettext('Elevation') + ': ' + this.getElevation() + ' m';
+	var elevationControl = viewer.core.getTool('elevation-control');
+	if (elevationControl != null) {
+		elevation = gettext('Elevation') + ': ' + this.getElevation(elevationControl) + ' m';
 	}
 	html += '<li class="item">';
 	html += 	'<div class="feature-info">';
@@ -581,11 +567,11 @@ getFeatureInfo.prototype.showPopup = function(){
 /**
  * TODO
  */
-getFeatureInfo.prototype.getElevation = function(){
+getFeatureInfo.prototype.getElevation = function(elevationControl){
 	var self = this;
 	var elevation = '';
 	
-	var featureInfoUrl = this.zLayer.getSource().getGetFeatureInfoUrl(
+	var featureInfoUrl = elevationControl.getZLayer().getSource().getGetFeatureInfoUrl(
     	this.mapCoordinates,
 		this.map.getView().getResolution(),
 		this.map.getView().getProjection().getCode(),
