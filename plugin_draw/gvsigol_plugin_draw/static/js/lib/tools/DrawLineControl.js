@@ -40,7 +40,7 @@ var DrawLineControl = function(drawBar, map, styleSettings) {
 	});
 	this.drawLayer.setZIndex(99999999);
 	this.drawLayer.printable = true;
-	this.drawLayer.drawType = 'point';
+	this.drawLayer.drawType = 'line';
 	map.addLayer(this.drawLayer);
 	
 	this.drawLayer.drawStyleSettings = styleSettings;
