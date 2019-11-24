@@ -77,6 +77,9 @@ See https://docs.celeryproject.org/en/latest/userguide/monitoring.html
 # Inspect active tasks:
 celery -A gvsigol inspect active
 
+# Inspect scheduled tasks (includes to-be-retried tasks):
+celery -A gvsigol inspect scheduled
+
 # Inspect prefetched tasks:
 celery -A gvsigol inspect reserved
 

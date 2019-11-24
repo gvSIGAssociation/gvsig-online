@@ -8,7 +8,7 @@ import json
 from django.http import JsonResponse
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.translation import ugettext as _
-from gvsigol_plugin_downloadman.tasks import processDownloadRequest, resolveFileLocator, notifyReceivedRequest
+from gvsigol_plugin_downloadman.tasks import processDownloadRequest, resolveFileUrl, notifyReceivedRequest
 from gvsigol_plugin_downloadman import models as downman_models
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.crypto import get_random_string
@@ -25,6 +25,9 @@ import os
 from tasks import Error
 from sendfile import sendfile
 from django.shortcuts import redirect
+from actstream import action
+from django.contrib.auth.models import User
+from collections import namedtuple
 
 logger = logging.getLogger("gvsigol")
 
@@ -235,11 +238,13 @@ def getOgcDownloadDescriptor(layer_uuid, onlineResource, layer, fallbackTitle, d
         resource_title = onlineResource.desc
     else:
         resource_title = fallbackTitle
-    if layer:
+    if layer and layer.name:
         layer_name = layer.name
-        layer_title = layer.title
     else:
         layer_name = resource_name
+    if layer and layer.title:
+        layer_title = layer.title
+    else:
         layer_title = resource_title
     return ResourceDownloadDescriptor(layer_uuid, layer_name, layer_title, resource_name, resource_title, dataSourceType=dataSourceType, resourceType=resourceType, dataFormats=dataFormats, url=onlineResource.url)
     
@@ -247,6 +252,14 @@ def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
     all_resources = []
     try:
         geonetwork_instance = geonetwork_service.get_instance()
+        if not layer:
+            xml_md = geonetwork_instance.get_metadata_raw(metadata_uuid)
+            if xml_md:
+                from gvsigol_plugin_catalog.mdstandards import registry
+                reader = registry.get_reader(xml_md)
+                layer_title = reader.get_title()
+                LayerTuple = namedtuple('LayerTuple', ['name', 'title'])
+                layer = LayerTuple('', layer_title)
         onlineResources = geonetwork_instance.get_online_resources(metadata_uuid)
         for onlineResource in onlineResources:
             resource = None
@@ -267,8 +280,7 @@ def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
                                                     _('Raster data'),
                                                     dataSourceType=downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE,
                                                     resourceType=downman_models.ResourceLocator.OGC_WCS_RESOURCE_TYPE,
-                                                    dataFormats=['GEOTIFF_16', 'GEOTIFF_32', 'GEOTIFF_8'],
-                                                    url=onlineResource.url)
+                                                    dataFormats=['GEOTIFF_16', 'GEOTIFF_32', 'GEOTIFF_8'])
                 else: # assume Geoserver
                     resource = getOgcDownloadDescriptor(metadata_uuid,
                                                     onlineResource,
@@ -276,8 +288,7 @@ def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
                                                     _('Raster data'),
                                                     dataSourceType=downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE,
                                                     resourceType=downman_models.ResourceLocator.OGC_WCS_RESOURCE_TYPE,
-                                                    dataFormats=['image/geotiff', 'image/png'],
-                                                    url=onlineResource.url)
+                                                    dataFormats=['image/geotiff', 'image/png'])
             elif (onlineResource.protocol.startswith('WWW:DOWNLOAD-') and onlineResource.protocol.endswith('-download')) \
                     or (onlineResource.protocol.startswith('WWW:LINK-') and onlineResource.protocol.endswith('-link')) \
                     or onlineResource.protocol.startswith('FILE:'):
@@ -293,11 +304,13 @@ def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
                     resource_title = onlineResource.desc
                 else:
                     resource_title = resource_name
-                if layer:
+                if layer and layer.name:
                     layer_name = layer.name
-                    layer_title = layer.title
                 else:
                     layer_name = resource_name
+                if layer and layer.title:
+                    layer_title = layer.title
+                else:
                     layer_title = resource_title
 
                 directDownloadUrl = None
@@ -398,7 +411,7 @@ def requestDownload(request):
             json_data = json.loads(request.body)
             downRequest = downman_models.DownloadRequest()
             if request.user and not request.user.is_anonymous():
-                downRequest.requested_by_user = request.user.email
+                downRequest.requested_by_user = request.user.username
             else:
                 downRequest.requested_by_external = json_data.get('email', 'anonymous')
             downRequest.validity = downman_models.get_default_validity()
@@ -419,11 +432,7 @@ def requestDownload(request):
                 downRequest.request_status = downman_models.DownloadRequest.QUEUEING_ERROR
                 downRequest.save()
 
-            status_text = ''
-            for (choice_code, choice_desc) in downman_models.DownloadRequest.REQUEST_STATUS_CHOICES:
-                if downRequest.request_status == choice_code:
-                    _status_text = _(choice_desc)
-
+            status_text = downRequest.get_request_status_description()
             return JsonResponse({"status_code": downRequest.request_status, "status": status_text, 'download_id': downRequest.request_random_id, 'tracking_url': tracking_url})
     # TODO: error handling
     return JsonResponse({"status": "error"})
@@ -433,20 +442,11 @@ def requestTracking(request, uuid):
         r = downman_models.DownloadRequest.objects.get(request_random_id=uuid)
         result = {}
         result['download_uuid'] =  r.request_random_id
-        for (choice_code, choice_desc) in downman_models.DownloadRequest.REQUEST_STATUS_CHOICES:
-                if r.request_status == choice_code:
-                    result['download_status'] = _(choice_desc)
-                    
-        # TODO: contemplar todos los estados
-        """
-                    for (choice_code, choice_desc) in downman_models.DownloadRequest.REQUEST_STATUS_CHOICES:
-                if downRequest.request_status == choice_code:
-                    _status_text = _(choice_desc)
-        """
+        result['download_status'] = r.get_request_status_description()
 
         result['links'] = []
         links = r.downloadlink_set.all()
-        result['link_count'] = len(links)
+        #result['link_count'] = len(links)
         count = 1
         for downloadlink in links:
             link = {}
@@ -455,25 +455,38 @@ def requestTracking(request, uuid):
             else:
                 valid_to = date_format(downloadlink.valid_to, 'DATETIME_FORMAT')
                 link['valid_to'] = valid_to
-
+                link['status'] = downloadlink.get_status_description()
                 if downloadlink.status == downman_models.DownloadLink.PROCESSED_STATUS:
                     link['download_url'] = reverse('downman-download-resource', args=(uuid, downloadlink.link_random_id,)) 
-                for (choice_code, choice_desc) in downman_models.DownloadLink.STATUS_CHOICES:
-                    if downloadlink.status == choice_code:
-                        link['status'] = _(choice_desc)
-                linkResources = downloadlink.resourcelocator_set.all()
-                if len(linkResources)==1:
-                    link['name'] = u'{0:d}-{1!s}\n'.format(count, linkResources[0].name)
-                else:
-                    link['name'] = u'{0:2d}-{1!s}\n'.format(count, _('Prepared package'))
-                count += 1
+            linkResources = downloadlink.resourcelocator_set.all()
+            if len(linkResources)==1:
+                link['name'] = u'{0:d}-{1!s} [{2!s}]\n'.format(count, linkResources[0].fq_title, linkResources[0].name)
+            else:
+                link['name'] = u'{0:2d}-{1!s}\n'.format(count, _('Multiresource package'))
+                link['locators'] = []
+                locator_count =1
+                for locator in linkResources:
+                    link['locators'].append({'name': u'{0:d}-{1!s} [{2!s}]\n'.format(locator_count, locator.fq_title, locator.name)})
+                    locator_count += 1
+                link['name'] = u'{0:2d}-{1!s}\n'.format(count, _('Multiresource package'))
+            count += 1
             result['links'].append(link)
+        #plain_message += _('\nThe following resources are still being processed:|n')
+        for locator in r.resourcelocator_set.filter(download_link__isnull=True):
+            link = {}
+            link['status'] = locator.get_status_description()
+            link['valid_to'] = '-'
+            link['download_url'] = '-'
+            link['name'] = u'{0:d}-{1!s} [{2!s}]\n'.format(count, locator.fq_title, locator.name)
+            result['links'].append(link)
+            count += 1
+        result['link_count'] = count
         return render(request, 'track_request.html', result)
         """
             else:
                 result['download_status'] = _('Your download request could not be processed.')
                 result['details'] = _('You can create a new request if you are still interested on these datasets')
-        elif r.request_status == downman_models.DownloadRequest.PERMANENT_PACKAGE_ERROR_STATUS:
+        elif r.request_status == downman_models.DownloadRequest.PERMANENT_ERROR_STATUS:
             result['download_status'] = _('Your download request could not be processed.')
             result['details'] = _('You can create a new request if you are still interested on these datasets')
         elif r.request_status == downman_models.DownloadRequest.PENDING_AUTHORIZATION_STATUS:
@@ -515,38 +528,67 @@ def getDirectDownloadUrl(url, name):
         """
         Gets the public download URL for direct download resource
         """
-        resources = resolveFileLocator(url, name)
-        if len(resources)>0:
-            download_path = resources[0].res_path
-            if os.path.exists(download_path):
-                if download_path.startswith(TARGET_ROOT):
-                    rel_path = os.path.relpath(download_path, TARGET_ROOT)
-                    if TARGET_URL.endswith("/"): #@UndefinedVariable
-                        return TARGET_URL + rel_path
-                    return TARGET_URL + "/" + rel_path
-                elif download_path.startswith(DOWNLOADS_ROOT):
-                    rel_path = os.path.relpath(download_path, DOWNLOADS_ROOT)
-                    if DOWNLOADS_URL.endswith("/"): #@UndefinedVariable
-                        return DOWNLOADS_URL + rel_path
-                    return DOWNLOADS_URL + "/" + rel_path
+        download_path = resolveFileUrl(url)
+        if os.path.exists(download_path):
+            if download_path.startswith(TARGET_ROOT):
+                rel_path = os.path.relpath(download_path, TARGET_ROOT)
+                if TARGET_URL.endswith("/"): #@UndefinedVariable
+                    return TARGET_URL + rel_path
+                return TARGET_URL + "/" + rel_path
+            elif download_path.startswith(DOWNLOADS_ROOT):
+                rel_path = os.path.relpath(download_path, DOWNLOADS_ROOT)
+                if DOWNLOADS_URL.endswith("/"): #@UndefinedVariable
+                    return DOWNLOADS_URL + rel_path
+                return DOWNLOADS_URL + "/" + rel_path
     except:
         logger.exception("error getting download url")
 
 def downloadResource(request, uuid, resuuid):
     try:
         link = downman_models.DownloadLink.objects.get(link_random_id=resuuid, request__request_random_id=uuid)
+        if timezone.now() > link.valid_to:
+            return render(request, 'downman_error_page.html', {'message': _('Your download request has expired'), 'details': _('You can start a new request using the Download Service')})
+        link.download_count += 1
+        link.save()
         
         # log download statistics
         for resourceLocator in link.resourcelocator_set.all():
-            logDownload = downman_models.DownloadLog()
-            logDownload.resource = resourceLocator
-            logDownload.save()
-            resourceLocator.download_count += resourceLocator.download_count
+            resourceLocator.download_count += 1
             resourceLocator.save()
-        
-        # TODO: register stats
+            # We can't directly send an action based on the ResouceLocatorn, because the same layer and resource is represented using several ResourceLocators,
+            # so we need to create proxy log tables
+            try: 
+                ldown_log = downman_models.LayerProxy.objects.get(layer_id=resourceLocator.layer_id, layer_id_type=resourceLocator.layer_id_type)
+            except:
+                ldown_log = downman_models.LayerProxy()
+                ldown_log.layer_id = resourceLocator.layer_id
+                ldown_log.layer_id_type = resourceLocator.layer_id_type
+            ldown_log.name = resourceLocator.layer_name
+            ldown_log.title = resourceLocator.layer_title
+            ldown_log.title_name = resourceLocator.layer_title + u'[' + resourceLocator.name + u']'
+            ldown_log.save()
+            try:
+                lrdown_log = downman_models.LayerResourceProxy.objects.get(layer=ldown_log, name=resourceLocator.name)
+            except:
+                logger.exception("error")
+                lrdown_log = downman_models.LayerResourceProxy()
+                lrdown_log.name = resourceLocator.name
+                lrdown_log.layer = ldown_log
+            lrdown_log.title = resourceLocator.title
+            lrdown_log.fq_name = resourceLocator.fq_name
+            lrdown_log.fq_title_name = resourceLocator.fq_title_name
+            lrdown_log.fq_title = resourceLocator.fq_title
+            lrdown_log.save()
+            if link.request.requested_by_user:
+                user = User.objects.get(username=link.request.requested_by_user)
+                #action.send(user, verb="gvsigol_plugin_downloadman/resource_downloaded", action_object=resourceLocator)
+                action.send(user, verb="gvsigol_plugin_downloadman/layer_resource_downloaded", action_object=lrdown_log)
+                action.send(user, verb="gvsigol_plugin_downloadman/layer_downloaded", action_object=ldown_log)
+            else:
+                action.send(None, verb="gvsigol_plugin_downloadman/layer_resource_downloaded", action_object=lrdown_log)
+                action.send(None, verb="gvsigol_plugin_downloadman/layer_downloaded", action_object=ldown_log)
+
         if link.prepared_download_path:
-            logger.debug(link.prepared_download_path)
             return sendfile(request, link.prepared_download_path)
         else:
             for locator in link.resourcelocator_set.all():
@@ -554,7 +596,4 @@ def downloadResource(request, uuid, resuuid):
                 return redirect(locator.resolved_url)
     except:
         logger.exception("invalid uuid - resuuid pair")
-    # TODO:
-    # - register stats
-    # - use xsendfile
-    return JsonResponse({"status": "Error"})
+    return render(request, 'downman_error_page.html', {'message': _('The resource could not be found'), 'details': _('Contact the service administrators if you believe this is an error')})

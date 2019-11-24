@@ -8,5 +8,7 @@ class GvsigolDownloadManConfig(AppConfig):
     verbose_name = "Download Manager"
     label = "gvsigol_plugin_downloadman"
 
-    #def ready(self):
-        #pass
+    def ready(self):
+        from actstream import registry
+        registry.register(self.get_model('LayerProxy'))
+        registry.register(self.get_model('LayerResourceProxy'))

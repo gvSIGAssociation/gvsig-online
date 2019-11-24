@@ -45,31 +45,8 @@
 		<div class="content-wrapper background-grey">
 			<div class="container">
 				<section class="content background-grey">
-				<h3>{% trans "Status: " %}{{ download_status }}</h3>
-				<h4>{% trans "Requested resources: " %}</h4>
-				{% if link_count %}
-					<table class="table">
-					<tr><th>{% trans "Name" %}</th><th>{% trans "Status" %}</th><th>{% trans "Valid to" %}</th><th>{% trans "URL" %}</th></tr>
-					{% for link in links %}
-						<tr>
-							<td>{{ link.name }}
-							{% if link.locators %}
-							<ul>
-							{% for locator in link.locators %}
-								<li>{{ locator.name }}</li>
-							{% endfor %}
-							</ul>
-							{% endif %}
-							</td>
-							<td>{{ link.status }}</td>
-							<td>{{ link.valid_to }}</td>
-							<td><a href="{{ link.download_url }}">{{ link.download_url }}</a></td>
-						</tr>
-					{% endfor %}
-					</table>
-				{% endif %}
-				<h4>{% trans "Download request: " %}{{ download_uuid }}</h4>
-				<p>{{details}}</p>
+				<h3>{{ message }}</h3>
+				<p>{{ details }}</p>
 				</section>
 			</div>
 		</div>
