@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+	<div class="row">
+		<div class="col-md-12">
+			<form role="form" method="post" action="downloadmanager/dashboard/update/{{download_request.pk}}/">
+				<div class="row">
+					<div class="row" style="padding-left: 30px;">
+						{% csrf_token %}
+						<div id="form-error" style="color:#ff0000;">
+							<ul>
+							{% for field in form %}
+								{% if field.errors %}
+									<li>{{field.label}}. {{ field.errors|striptags }}</li>
+								{% endif %}	
+							{% endfor %}
+							{% for field, msg in form.errors.iteritems %}
+								<li>{{ msg|striptags }}</li>
+							{% endfor %}
+							</ul>
+						</div>
+					</div>
+				</div>
+				<div class="box">
+					<div class="box-body">
+						<div class="row">
+							<div class="col-md-6">
+								<label>{% trans "Date" %}</label>
+								<input class="form-control" readonly name="requested_date" id="requested_date" type="text" value="{{download_request.requested_date}}">
+							</div>
+							<div class="col-md-6">
+								<label>{% trans "User" %}</label>
+								<div class="input-group">
+									{% if download_request.requested_by_user %}
+									<input class="form-control" readonly name="user" id="user" type="text" value="{{ download_request.requested_by_user }}">
+									<span class="input-group-addon" id="user_type">{% trans 'Internal user' %}</span>
+									{% else %}
+									<input class="form-control" readonly name="user" id="user" type="text" value="{{ download_request.requested_by_external }}">
+									<span class="input-group-addon" id="user_type">{% trans 'External user' %}</span>
+									{% endif %}
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<label>{% trans "Status" %}</label>
+								<input readonly name="request_status" id="request_status" type="text" class="form-control" value="{{download_request.status_desc}}">
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+					<div class="box-header">
+						<h3 class="box-title">{% trans "Requested resources" %}</h3>
+					</div>
+					<div class="box-body">
+						<table class="table" id="requests-table">
+							<thead>
+								<tr>
+									<th>ID</th>
+									<th>{% trans "Status" %}</th>
+									<th>{% trans "Resource description" %}</th>
+									<th>{% trans "Layer id" %}</th>
+									<th>{% trans "Type" %}</th>
+									<th>{% trans "Download count" %}</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for resourceLocator in download_request.resourcelocator_set.all %}
+								<tr>
+									<td>{{ resourceLocator.id }}</td>
+									<td>{{ resourceLocator.status_desc }}</td>
+									<td>{{ resourceLocator.fq_title_name }}</td>
+									<td>{{ resourceLocator.layer_id }}</td>
+									<td>{{ resourceLocator.layer_id_type }}</td>
+									<td>{{ resourceLocator.download_count }}</td>
+									<td></td>
+								</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-plugins').addClass("active");
+	$('#submenu-downloadman').addClass("active");
+
+	$( document ).ready(function() {
+
+	});
+</script>
+{% endblock %}

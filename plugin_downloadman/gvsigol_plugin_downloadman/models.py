@@ -3,6 +3,16 @@ from django.utils.translation import ugettext_noop as _
 
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
+from django.db.models import Q
+import gvsigol_core
+import apps
+from gvsigol_core.models import GolSettings
+
+SETTINGS_KEY_VALIDITY = 'default_link_validity'
+DEFAULT_VALIDITY = 604800 # seconds = 7 days
+SETTINGS_KEY_MAX_PUBLIC_DOWNLOAD_SIZE = 'max_public_download_size'
+DEFAULT_MAX_PUBLIC_DOWNLOAD_SIZE = 314572800 # bytes = 300 MB
 
 
 class AuthorizationRequestForm(models.Model):
@@ -38,14 +48,6 @@ class DownloadRequest(models.Model):
         (NOTIFICATION_ERROR_STATUS, _('Notification error')),
         (PERMANENT_NOTIFICATION_ERROR_STATUS, _('Permanent notification error')),
     )
-    def get_request_status_description(self):
-        for (choice_code, choice_desc) in DownloadRequest.REQUEST_STATUS_CHOICES:
-            if self.request_status == choice_code:
-                return _(choice_desc)
-    def get_notification_status_description(self):
-        for (choice_code, choice_desc) in DownloadRequest.NOTIFICATION_STATUS_CHOICES:
-            if self.notification_status == choice_code:
-                return _(choice_desc)
     
     #definition = models.TextField()
     requested_by_external = models.CharField(max_length=500) # the email for non authenticated users
@@ -54,9 +56,6 @@ class DownloadRequest(models.Model):
     # number of seconds the download link will be up since notified to the user
     validity = models.IntegerField()
     authorization_request = models.TextField()
-    # status: 
-    # - pending authorization, queued for preparation, ready for download,
-    # cancelled, on hold, requeued for preparation, error...
     request_status = models.CharField(max_length=2, default=REQUEST_QUEUED_STATUS, choices=REQUEST_STATUS_CHOICES, db_index=True)
     notification_status = models.CharField(max_length=2, null=True, choices=NOTIFICATION_STATUS_CHOICES)
     package_retry_count = models.PositiveIntegerField(default=0)
@@ -64,7 +63,51 @@ class DownloadRequest(models.Model):
     request_random_id = models.TextField(db_index=True)
     json_request = models.TextField() # we keep the request as received from the client for debugging purposes
     language = models.CharField(max_length=50, blank=True)
+    @property
+    def status_desc(self):
+        for (choice_code, choice_desc) in DownloadRequest.REQUEST_STATUS_CHOICES:
+            if self.request_status == choice_code:
+                return _(choice_desc)
+    
+    @property
+    def active(self):
+        now = timezone.now()
+        for locator in self.resourcelocator_set:
+            # the Request is active if there is any associated ResourceLocator in the following statuses
+            if locator.status in [
+                    ResourceLocator.PACKAGE_QUEUED_STATUS,
+                    ResourceLocator.PENDING_AUTHORIZATION_STATUS,
+                    ResourceLocator.WAITING_SPACE_STATUS,
+                    ResourceLocator.PROCESSING_STATUS,
+                    ResourceLocator.TEMPORAL_ERROR_STATUS,
+                    ResourceLocator.HOLD_STATUS,
+                    ]:
+                return True
+        for downloadLink in self.downloadlink_set:
+            # the Request is also active if there is any associated DownloadLink which is currently valid
+            if downloadLink.valid_to > now:
+                return True
+        return False 
 
+    @property
+    def contents_desc(self):
+        locators = self.resourcelocator_set.all()
+        if len(locators)==1:
+            return locators[0].fq_title_name
+        else:
+            return _('Multiresource package')
+
+    @property
+    def contents_details(self):
+        locators = self.resourcelocator_set.all()
+        return ", ".join([ locator.fq_title_name for locator in locators ])
+    
+    @property
+    def notification_status_desc(self):
+        for (choice_code, choice_desc) in DownloadRequest.NOTIFICATION_STATUS_CHOICES:
+            if self.notification_status == choice_code:
+                return _(choice_desc)
+            
 # class DownmanConfig(models.Model):
     # number of seconds the download link will be up since notified to the user
     #default_validity  = models.IntegerField()
@@ -88,16 +131,21 @@ class DownloadLink(models.Model):
         (USER_CANCELLED_STATUS, _('Cancelled by the user')),
         (ADMIN_CANCELLED_STATUS, _('Cancelled by the administrator')),
     )
-    def get_status_description(self):
+    @property
+    def status_desc(self):
         for (choice_code, choice_desc) in DownloadLink.STATUS_CHOICES:
             if self.status == choice_code:
                 return _(choice_desc)
-    request = models.ForeignKey('DownloadRequest', on_delete=models.CASCADE)
+    request = models.ForeignKey('DownloadRequest', on_delete=models.CASCADE, db_index=False)
     prepared_download_path = models.TextField(null=True, blank=True)
     valid_to=models.DateTimeField(db_index=True)
     link_random_id = models.TextField(db_index=True, unique=True)
-    status = models.CharField(max_length=2, default=PROCESSED_STATUS, choices=STATUS_CHOICES, db_index=True)
+    status = models.CharField(max_length=2, default=PROCESSED_STATUS, choices=STATUS_CHOICES)
     download_count = models.PositiveIntegerField(default=0)
+    class Meta:
+        indexes = [
+            models.Index(fields=['request', 'valid_to']),
+            ]
 
 class ResourceLocator(models.Model):
     GEONETWORK_UUID = 'GN'
@@ -139,7 +187,8 @@ class ResourceLocator(models.Model):
         (PERMANENT_ERROR_STATUS, _('Permanent error')),
     )
     
-    def get_status_description(self):
+    @property
+    def status_desc(self):
         for (choice_code, choice_desc) in ResourceLocator.REQUEST_STATUS_CHOICES:
             if self.status == choice_code:
                 return _(choice_desc)
@@ -167,13 +216,17 @@ class ResourceLocator(models.Model):
             return self.layer_title + u" [" + self.name + u"]"
         return self.layer_title + u" - " + self.title + u" [" + self.name + u"]"
     pending_authorization = models.BooleanField(default=False)
-    status = models.CharField(max_length=2, default=PACKAGE_QUEUED_STATUS, choices=REQUEST_STATUS_CHOICES, db_index=True)
+    status = models.CharField(max_length=2, default=PACKAGE_QUEUED_STATUS, choices=REQUEST_STATUS_CHOICES)
     download_count = models.PositiveIntegerField(default=0)
     resolved_url =  models.TextField(null=True, blank=True)
     is_dynamic = models.BooleanField(default=False)
     download_link = models.ForeignKey('DownloadLink', on_delete=models.CASCADE, null=True)
-    request = models.ForeignKey('DownloadRequest', on_delete=models.CASCADE)
+    request = models.ForeignKey('DownloadRequest', on_delete=models.CASCADE, db_index=False)
     #mime_type = models.CharField(max_length=255)
+    class Meta:
+        indexes = [
+            models.Index(fields=['request', 'status', 'pending_authorization',]),
+            ]
     
 
 class LayerProxy(models.Model):
@@ -182,11 +235,15 @@ class LayerProxy(models.Model):
     Statistics are calculated based on model instances.
     Since there is no model for catalog layers, we need to create proxy log tables
     """
-    layer_id = models.TextField(null=True, blank=True)
+    layer_id = models.TextField()
     layer_id_type = models.CharField(max_length=2, choices=ResourceLocator.ID_TYPES)
     name = models.TextField()
     title = models.TextField()
     title_name = models.TextField()
+    class Meta:
+        indexes = [
+            models.Index(fields=['layer_id', 'layer_id_type']),
+            ]
 
 class LayerResourceProxy(models.Model):
     """
@@ -204,8 +261,10 @@ class LayerResourceProxy(models.Model):
     layer = models.ForeignKey('LayerProxy', on_delete=models.CASCADE)
 
 def get_default_validity():
-    # TODO: we could get it for a settings entry, or a settings table in DB
-    return 604800  # = 7 days
+    return GolSettings.objects.get_value(apps.PLUGIN_NAME, SETTINGS_KEY_VALIDITY, DEFAULT_VALIDITY)
+
+def get_max_public_download_size():
+    return GolSettings.objects.get_value(apps.PLUGIN_NAME, SETTINGS_KEY_MAX_PUBLIC_DOWNLOAD_SIZE, DEFAULT_MAX_PUBLIC_DOWNLOAD_SIZE)
 
 
 def get_packaging_max_retry_time():

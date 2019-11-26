@@ -27,7 +27,14 @@ from sendfile import sendfile
 from django.shortcuts import redirect
 from actstream import action
 from django.contrib.auth.models import User
+from django.db.models import Q
+
 from collections import namedtuple
+from django.views.decorators.http import require_POST, require_GET, require_safe
+from gvsigol_core.models import GolSettings
+from gvsigol_plugin_downloadman.models import SETTINGS_KEY_VALIDITY, SETTINGS_KEY_MAX_PUBLIC_DOWNLOAD_SIZE
+import apps
+from django.http.response import Http404
 
 logger = logging.getLogger("gvsigol")
 
@@ -432,8 +439,7 @@ def requestDownload(request):
                 downRequest.request_status = downman_models.DownloadRequest.QUEUEING_ERROR
                 downRequest.save()
 
-            status_text = downRequest.get_request_status_description()
-            return JsonResponse({"status_code": downRequest.request_status, "status": status_text, 'download_id': downRequest.request_random_id, 'tracking_url': tracking_url})
+            return JsonResponse({"status_code": downRequest.request_status, "status": downRequest.status_desc, 'download_id': downRequest.request_random_id, 'tracking_url': tracking_url})
     # TODO: error handling
     return JsonResponse({"status": "error"})
 
@@ -442,7 +448,7 @@ def requestTracking(request, uuid):
         r = downman_models.DownloadRequest.objects.get(request_random_id=uuid)
         result = {}
         result['download_uuid'] =  r.request_random_id
-        result['download_status'] = r.get_request_status_description()
+        result['download_status'] = r.status_desc
 
         result['links'] = []
         links = r.downloadlink_set.all()
@@ -455,7 +461,7 @@ def requestTracking(request, uuid):
             else:
                 valid_to = date_format(downloadlink.valid_to, 'DATETIME_FORMAT')
                 link['valid_to'] = valid_to
-                link['status'] = downloadlink.get_status_description()
+                link['status'] = downloadlink.status_desc
                 if downloadlink.status == downman_models.DownloadLink.PROCESSED_STATUS:
                     link['download_url'] = reverse('downman-download-resource', args=(uuid, downloadlink.link_random_id,)) 
             linkResources = downloadlink.resourcelocator_set.all()
@@ -474,7 +480,7 @@ def requestTracking(request, uuid):
         #plain_message += _('\nThe following resources are still being processed:|n')
         for locator in r.resourcelocator_set.filter(download_link__isnull=True):
             link = {}
-            link['status'] = locator.get_status_description()
+            link['status'] = locator.status_desc
             link['valid_to'] = '-'
             link['download_url'] = '-'
             link['name'] = u'{0:d}-{1!s} [{2!s}]\n'.format(count, locator.fq_title, locator.name)
@@ -597,3 +603,76 @@ def downloadResource(request, uuid, resuuid):
     except:
         logger.exception("invalid uuid - resuuid pair")
     return render(request, 'downman_error_page.html', {'message': _('The resource could not be found'), 'details': _('Contact the service administrators if you believe this is an error')})
+
+
+def render_settings(request):
+    response = {
+        'download_requests': [],
+        'settings_class': "active",
+        'active_class': "",
+        'archived_class': "",
+        'validity': downman_models.get_default_validity(),
+        'max_public_download_size': downman_models.get_max_public_download_size()
+    }
+    return render(request, 'downman_index.html', response)
+
+@require_safe
+def dashboard_index(request):
+    selected_tab = request.GET.get("tab", "active")
+    now = timezone.now()
+    if selected_tab == "settings":
+        return render_settings(request)
+    elif selected_tab == "archived":
+        settings_class = ""
+        active_class = ""
+        archived_class = "active"
+        request_list = downman_models.DownloadRequest.objects.filter(
+            Q(downloadlink__valid_to__gte=now) | \
+            Q(resourcelocator__status=downman_models.ResourceLocator.PACKAGE_QUEUED_STATUS) | \
+            Q(resourcelocator__status=downman_models.ResourceLocator.PENDING_AUTHORIZATION_STATUS) | \
+            Q(resourcelocator__status=downman_models.ResourceLocator.WAITING_SPACE_STATUS) | \
+            Q(resourcelocator__status=downman_models.ResourceLocator.PROCESSING_STATUS) | \
+            Q(resourcelocator__status=downman_models.ResourceLocator.TEMPORAL_ERROR_STATUS) | \
+            Q(resourcelocator__status=downman_models.ResourceLocator.HOLD_STATUS)).distinct()
+    else: # "active"
+        settings_class = ""
+        active_class = "active"
+        archived_class = ""
+        request_list = downman_models.DownloadRequest.objects.exclude( \
+            Q(downloadlink__valid_to__gte=now) | \
+            Q(resourcelocator__status=downman_models.ResourceLocator.PACKAGE_QUEUED_STATUS) | \
+            Q(resourcelocator__status=downman_models.ResourceLocator.PENDING_AUTHORIZATION_STATUS) | \
+            Q(resourcelocator__status=downman_models.ResourceLocator.WAITING_SPACE_STATUS) | \
+            Q(resourcelocator__status=downman_models.ResourceLocator.PROCESSING_STATUS) | \
+            Q(resourcelocator__status=downman_models.ResourceLocator.TEMPORAL_ERROR_STATUS) | \
+            Q(resourcelocator__status=downman_models.ResourceLocator.HOLD_STATUS)).distinct()
+    
+    if not request.user.is_superuser:
+        request_list = request_list.filter(requested_by_user__exact=request.user.username)
+    request_list.order_by('-id', 'request_status')
+    response = {
+        'download_requests': request_list,
+        'settings_class': settings_class,
+        'active_class': active_class,
+        'archived_class': archived_class
+    }
+    return render(request, 'downman_index.html', response)
+
+def update_request(request, request_id):
+    try:
+        download_request = downman_models.DownloadRequest.objects.get(pk=int(request_id))
+        response = {
+            'download_request': download_request
+            }
+        return render(request, 'download_request_update.html', response)
+    except:
+        logger.exception("Error")
+        raise Http404
+
+@require_POST
+def settings_store(request):
+    validity = int(request.POST.get('validity'))
+    max_public_download_size = int(request.POST.get('max_public_download_size'))
+    GolSettings.objects.set_value(apps.PLUGIN_NAME, SETTINGS_KEY_VALIDITY, validity)
+    GolSettings.objects.set_value(apps.PLUGIN_NAME, SETTINGS_KEY_MAX_PUBLIC_DOWNLOAD_SIZE, max_public_download_size) 
+    return redirect(reverse('downman-dashboard-index') + "?tab=settings")
