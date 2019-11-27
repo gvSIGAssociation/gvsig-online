@@ -106,3 +106,5 @@ celery==4.3.0
 # workaround for indirect dependencies problem when using pip 8
 more-itertools<6.0.0
 
+django-tinymce==2.8.0
+
