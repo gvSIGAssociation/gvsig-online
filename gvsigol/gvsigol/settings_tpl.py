@@ -89,6 +89,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'django.contrib.sites',
+    'django.contrib.flatpages',
+    'tinymce',
     'rest_framework',
     'gvsigol_statistics',
     'gvsigol_auth',
@@ -121,6 +123,7 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True

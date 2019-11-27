@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
 from gvsigol_core import views as core_views
 
 urlpatterns = [
@@ -26,4 +26,5 @@ urlpatterns = [
     # keep compatibility with old project URLs:
     url(r'^public_project_load/(?P<project_name>.*)/$', core_views.load_public_project, name='public_project_load'),
     url(r'^project_load/(?P<project_name>.*)/$', core_views.load_project, name='project_load'),
+    url(r'^tinymce/', include('tinymce.urls')),
 ]
