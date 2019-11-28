@@ -54,7 +54,7 @@
 									<td>{{ download_request.status_desc }}</td>
 									<td>{% if download_request.requested_by_user %} {{ download_request.requested_by_user}} {% else %} {{ download_request.requested_by_external}} {% trans '(External user)' %} {% endif %}</td>
 									<td>{{ download_request.contents_details }}</td>
-									<td></td>
+									<td><a href="{% url 'downman-update-request' request_id=download_request.id %}"><button type="button" name="button-update-request" data-toggle="tooltip" data-placement="bottom" title="{% trans 'Update request' %}" class="btn btn-success"><i class="fa fa-edit"></i></button></a></td>
 								</tr>
 								{% endfor %}
 							</tbody>
@@ -136,22 +136,9 @@ $('#submenu-layers').addClass("active");
 					sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
 				}
 			},
-			"columnDefs": [{
-				"targets": -1,
-				"data": null,
-				"defaultContent": '<button type="button" name="button-update-request" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update request" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
-			}],
 			"order": [["1", "desc"]],
 			"dom": 'T<"clear">lfrtip',
 			"bLengthChange": false
-		});
-		
-		$('#requests-table tbody').on('click', 'button', function (){
-			var row = table.row($(this).parents('tr'));
-			var data = row.data();
-			if (this.name == "button-update-request") {
-				updateRequest(data);
-			}
 		});
 		
 		var getHumanReadableSeconds = function(validity) {
@@ -209,10 +196,5 @@ $('#submenu-layers').addClass("active");
 		});
 	});
 
-	
-	function updateRequest(data){
-		var url = "{% url 'downman-update-request' request_id=12345 %}".replace(/12345/, data[0]);
-		location.href = url;
-	}
 </script>
 {% endblock %}
