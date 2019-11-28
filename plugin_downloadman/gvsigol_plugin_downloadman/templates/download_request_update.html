@@ -28,14 +28,6 @@
 					<div class="box-body">
 						<div class="row">
 							<div class="col-md-4">
-								<label>{% trans "Random ID" %}</label>
-								<input class="form-control" readonly name="requested_date" id="requested_date" type="text" value="{{download_request.request_random_id}}">
-							</div>
-							<div class="col-md-4">
-								<label>{% trans "Date" %}</label>
-								<input class="form-control" readonly name="requested_date" id="requested_date" type="text" value="{{download_request.requested_date}}">
-							</div>
-							<div class="col-md-4">
 								<label>{% trans "User" %}</label>
 								<div class="input-group">
 									{% if download_request.requested_by_user %}
@@ -47,11 +39,26 @@
 									{% endif %}
 								</div>
 							</div>
-						</div>
-						<div class="row">
-							<div class="col-md-12">
+							<div class="col-md-4">
+								<label>{% trans "Date" %}</label>
+								<input class="form-control" readonly name="requested_date" id="requested_date" type="text" value="{{download_request.requested_date}}">
+							</div>
+							<div class="col-md-4">
 								<label>{% trans "Status" %}</label>
 								<input readonly name="request_status" id="request_status" type="text" class="form-control" value="{{download_request.status_active}}">
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-5">
+								<label>{% trans "Random ID" %}</label>
+								<input class="form-control" readonly name="requested_date" id="requested_date" type="text" value="{{download_request.request_random_id}}">
+							</div>
+							<div class="col-md-7">
+								<label>{% trans "Tracking URL" %}</label>
+								<div class="input-group">
+								<a target="_blank" href="{% url 'download-request-tracking' download_request.request_random_id %}"><input class="form-control" readonly name="requested_date" id="requested_date" type="text" value="{% url 'download-request-tracking' download_request.request_random_id %}"></a>
+								<a class="input-group-addon" target="_blank" href="{% url 'download-request-tracking' download_request.request_random_id %}"><i class="fa fa-external-link"></i></a>
+								</div>
 							</div>
 						</div>
 						<div class="row" style="padding-top: 10px">
