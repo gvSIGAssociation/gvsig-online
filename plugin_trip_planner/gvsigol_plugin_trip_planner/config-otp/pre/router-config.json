@@ -5,7 +5,7 @@
       "transferSlack": 120,
       "maxTransfers": 4,
       "waitReluctance": 0.99,
-      "waitAtBeginningFactor": 0.4,
+      "waitAtBeginningFactor": 0.9,
       "walkReluctance": 1.0,
       "stairsReluctance": 1.0,
       "walkBoardCost": 50,
