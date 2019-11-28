@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-11-28 17:37+0000\n"
+"POT-Creation-Date: 2019-11-28 18:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,112 +18,117 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: models.py:39
+#: models.py:40
 msgid "Request queued"
 msgstr "Petición encolada"
 
-#: models.py:40
+#: models.py:41
 msgid "Processing request"
 msgstr "Procesando petición"
 
-#: models.py:41
+#: models.py:42
 msgid "Completed"
 msgstr "Completado"
 
-#: models.py:42
+#: models.py:43
 msgid "Completed with errors"
 msgstr "Complatado con errores"
 
-#: models.py:43
+#: models.py:44
 msgid "Error queueing request"
 msgstr "Error encolando la petición"
 
-#: models.py:46
+#: models.py:47
 msgid "Initial notification completed"
 msgstr "Notificación inicial completada"
 
-#: models.py:47
+#: models.py:48
 msgid "Notification completed"
 msgstr "Notificación completada"
 
-#: models.py:48
+#: models.py:49
 msgid "Notification error"
 msgstr "Error de notificación"
 
-#: models.py:49
+#: models.py:50
 msgid "Permanent notification error"
 msgstr "Error permanente de modificación"
 
-#: models.py:74
+#: models.py:75
 msgid "Active"
 msgstr "Activo"
 
-#: models.py:76
+#: models.py:77
 msgid "Archived"
 msgstr "Archivado"
 
-#: models.py:103 tasks.py:507 tasks.py:510 views.py:471 views.py:477
+#: models.py:104 tasks.py:507 tasks.py:510 views.py:471 views.py:477
 msgid "Multiresource package"
 msgstr "Paquete multi-recurso"
 
-#: models.py:135 models.py:152 models.py:208
-msgid "Processed"
+#: models.py:136
+#| msgid "Processed"
+msgid "Processed #sing#"
 msgstr "Procesado"
 
-#: models.py:136
+#: models.py:137
 msgid "Cancelled by the user"
 msgstr "Cancelado por el usuario"
 
-#: models.py:137
+#: models.py:138
 msgid "Cancelled by the administrator"
 msgstr "Cancelado por el administrador"
 
-#: models.py:154 models.py:233
+#: models.py:153 models.py:209
+msgid "Processed"
+msgstr "Procesado"
+
+#: models.py:155 models.py:234
 msgid "Canceled"
 msgstr "Cancelado"
 
-#: models.py:157 views.py:460
+#: models.py:158 views.py:460
 msgid "Expired"
 msgstr "Caducado"
 
-#: models.py:206
-#| msgid "Resource "
+#: models.py:207
 msgid "Resource queued"
 msgstr "Recurso en la cola"
 
-#: models.py:207
+#: models.py:208
 msgid "Queued, waiting for free space"
 msgstr "En cola, esperando espacio libre"
 
-#: models.py:209
+#: models.py:210
 msgid "On hold"
 msgstr "Suspendido"
 
-#: models.py:210
+#: models.py:211
 msgid "Temporal error"
 msgstr "Error temporal"
 
-#: models.py:211
+#: models.py:212
 msgid "Permanent error"
 msgstr "Error permanente"
 
-#: models.py:219
+#: models.py:220
 msgid "Not required"
 msgstr "No requerida"
 
-#: models.py:220
+#: models.py:221
 msgid "Pending"
 msgstr "Pendiente"
 
-#: models.py:221
+#: models.py:222
 msgid "Accepted"
 msgstr "Aceptado"
 
-#: models.py:222
+#: models.py:223
 msgid "Rejected"
 msgstr "Rechazado"
 
 #: tasks.py:419
+#, python-format
 msgid "Download service: your request has been received - %(requestid)s"
 msgstr "Servicio de descargas: se ha recibido su petición - %(requestid)s"
 
@@ -134,7 +139,8 @@ msgid ""
 "You can use this tracking link to check the status of your request: {0}"
 msgstr ""
 "\n"
-"Puede usar este enlace de seguimiento para comprobar el estado de su petición: {0}"
+"Puede usar este enlace de seguimiento para comprobar el estado de su "
+"petición: {0}"
 
 #: tasks.py:426
 msgid "Your download request has been received."
@@ -162,6 +168,7 @@ msgstr ""
 "y no están disponibles para descargar en este momento."
 
 #: tasks.py:482
+#, python-format
 msgid "Download service: request progress - %(requestid)s"
 msgstr "Servicio de descargas: progreso de la petición - %(requestid)s"
 
@@ -171,9 +178,11 @@ msgstr "Su petición de descarga se ha procesado parcialmente"
 
 #: tasks.py:486 templates/progress_notif_email.html:14
 msgid "You can use the following links to download the requested resources:"
-msgstr "Puede usar los siguientes enlaces para descargar los recursos solicitados:"
+msgstr ""
+"Puede usar los siguientes enlaces para descargar los recursos solicitados:"
 
 #: tasks.py:489
+#, python-brace-format
 msgid "Download service: request progress - {0}"
 msgstr "Servicio de descargas: progreso de la petición - {0}"
 
@@ -209,7 +218,8 @@ msgstr "Los siguientes recursos no se pudieron procesar"
 msgid ""
 "You can also use this tracking link to check the status of your request:"
 msgstr ""
-"También puede usar este enlace de descarga para comprobar el estado de su peticion:"
+"También puede usar este enlace de descarga para comprobar el estado de su "
+"peticion:"
 
 #: templates/dashboard_downloadman_menu.html:10
 #: templates/dashboard_downloadman_menu.html:18
@@ -332,8 +342,9 @@ msgid ""
 "not be available for the user who requested the download. Do you want to "
 "continue?"
 msgstr ""
-"El enlace [<span id=\"disabled-link\"></span>] y los recursos relacionados no estarán disponibles "
-"para el usuario que solicitó la petición. ¿Desea continuar?"
+"El enlace [<span id=\"disabled-link\"></span>] y los recursos relacionados "
+"no estarán disponibles para el usuario que solicitó la petición. ¿Desea "
+"continuar?"
 
 #: templates/downman_error_page.html:39 templates/track_request.html:39
 msgid "Download service"
@@ -461,7 +472,6 @@ msgid "Status: "
 msgstr "Estado: "
 
 #: templates/track_request.html:49
-#| msgid "Resource "
 msgid "Requested resources: "
 msgstr "Recursos solicitados:  "
 
@@ -511,7 +521,8 @@ msgstr "No se pudo encontrar el recurso"
 
 #: views.py:607
 msgid "Contact the service administrators if you believe this is an error"
-msgstr "Contacte a los administradores del servicio si cree que se trata de un error"
+msgstr ""
+"Contacte a los administradores del servicio si cree que se trata de un error"
 
 #~ msgid ""
 #~ "Your download request is ready. You can download it in the following "
