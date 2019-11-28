@@ -8,7 +8,7 @@ import json
 from django.http import JsonResponse
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.translation import ugettext as _
-from gvsigol_plugin_downloadman.tasks import processDownloadRequest, resolveFileUrl, notifyReceivedRequest
+from gvsigol_plugin_downloadman.tasks import processDownloadRequest, resolveFileUrl, notifyReceivedRequest, packageRequest
 from gvsigol_plugin_downloadman import models as downman_models
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.crypto import get_random_string
@@ -552,8 +552,10 @@ def getDirectDownloadUrl(url, name):
 def downloadResource(request, uuid, resuuid):
     try:
         link = downman_models.DownloadLink.objects.get(link_random_id=resuuid, request__request_random_id=uuid)
-        if timezone.now() > link.valid_to:
+        if not link.is_valid:
             return render(request, 'downman_error_page.html', {'message': _('Your download request has expired'), 'details': _('You can start a new request using the Download Service')})
+        if link.status != downman_models.DownloadLink.PROCESSED_STATUS:
+            return render(request, 'downman_error_page.html', {'message': _('Your download request has been cancelled'), 'details': _('You can start a new request using the Download Service')})
         link.download_count += 1
         link.save()
         
@@ -626,26 +628,27 @@ def dashboard_index(request):
         settings_class = ""
         active_class = ""
         archived_class = "active"
-        request_list = downman_models.DownloadRequest.objects.filter(
-            Q(downloadlink__valid_to__gte=now) | \
-            Q(resourcelocator__status=downman_models.ResourceLocator.PACKAGE_QUEUED_STATUS) | \
-            Q(resourcelocator__status=downman_models.ResourceLocator.PENDING_AUTHORIZATION_STATUS) | \
+        request_list = downman_models.DownloadRequest.objects.exclude( \
+            (Q(downloadlink__valid_to__gte=now) &
+             Q(downloadlink__status=downman_models.DownloadLink.PROCESSED_STATUS)) | \
+            (Q(resourcelocator__canceled=False) & \
+            (Q(resourcelocator__status=downman_models.ResourceLocator.RESOURCE_QUEUED_STATUS) | \
             Q(resourcelocator__status=downman_models.ResourceLocator.WAITING_SPACE_STATUS) | \
-            Q(resourcelocator__status=downman_models.ResourceLocator.PROCESSING_STATUS) | \
             Q(resourcelocator__status=downman_models.ResourceLocator.TEMPORAL_ERROR_STATUS) | \
-            Q(resourcelocator__status=downman_models.ResourceLocator.HOLD_STATUS)).distinct()
+            Q(resourcelocator__status=downman_models.ResourceLocator.HOLD_STATUS)))).distinct()
+
     else: # "active"
         settings_class = ""
         active_class = "active"
         archived_class = ""
-        request_list = downman_models.DownloadRequest.objects.exclude( \
-            Q(downloadlink__valid_to__gte=now) | \
-            Q(resourcelocator__status=downman_models.ResourceLocator.PACKAGE_QUEUED_STATUS) | \
-            Q(resourcelocator__status=downman_models.ResourceLocator.PENDING_AUTHORIZATION_STATUS) | \
+        request_list = downman_models.DownloadRequest.objects.filter( \
+            (Q(downloadlink__valid_to__gte=now) &
+             Q(downloadlink__status=downman_models.DownloadLink.PROCESSED_STATUS)) | \
+            (Q(resourcelocator__canceled=False) & \
+            (Q(resourcelocator__status=downman_models.ResourceLocator.RESOURCE_QUEUED_STATUS) | \
             Q(resourcelocator__status=downman_models.ResourceLocator.WAITING_SPACE_STATUS) | \
-            Q(resourcelocator__status=downman_models.ResourceLocator.PROCESSING_STATUS) | \
             Q(resourcelocator__status=downman_models.ResourceLocator.TEMPORAL_ERROR_STATUS) | \
-            Q(resourcelocator__status=downman_models.ResourceLocator.HOLD_STATUS)).distinct()
+            Q(resourcelocator__status=downman_models.ResourceLocator.HOLD_STATUS)))).distinct()
     
     if not request.user.is_superuser:
         request_list = request_list.filter(requested_by_user__exact=request.user.username)
@@ -676,3 +679,62 @@ def settings_store(request):
     GolSettings.objects.set_value(apps.PLUGIN_NAME, SETTINGS_KEY_VALIDITY, validity)
     GolSettings.objects.set_value(apps.PLUGIN_NAME, SETTINGS_KEY_MAX_PUBLIC_DOWNLOAD_SIZE, max_public_download_size) 
     return redirect(reverse('downman-dashboard-index') + "?tab=settings")
+
+@require_POST
+def cancel_locator(request, resource_id):
+    try:
+        resource = downman_models.ResourceLocator.objects.get(pk=int(resource_id))
+        resource.canceled = True
+        resource.save()
+        if resource.download_link:
+            resource.download_link.status = downman_models.DownloadLink.ADMIN_CANCELED_STATUS
+            resource.download_link.save()
+            pending_locators = 0
+            for locator in resource.download_link.resourcelocator_set.all():
+                if (not locator.canceled) and locator.status == downman_models.ResourceLocator.PROCESSED_STATUS:
+                    locator.status = downman_models.ResourceLocator.RESOURCE_QUEUED_STATUS
+                    locator.save()
+                    pending_locators += 1
+            if pending_locators:
+                packageRequest.apply_async(args=[locator.request.pk], queue='package') #@UndefinedVariable
+        return redirect(reverse('downman-update-request', args=(locator.request.pk,)))
+    except:
+        logger.exception("Error")
+        raise Http404
+
+@require_POST
+def cancel_link(request, link_id):
+    try:
+        download_link = downman_models.DownloadLink.objects.get(pk=int(link_id))
+        download_link.status = downman_models.DownloadLink.ADMIN_CANCELED_STATUS
+        download_link.save()
+
+        for locator in download_link.resourcelocator_set.all():
+            locator.canceled = True
+            locator.status = downman_models.ResourceLocator.PROCESSED_STATUS
+            locator.save()
+        return redirect(reverse('downman-update-request', args=(locator.request.pk,)))
+    except:
+        logger.exception("Error")
+        raise Http404
+
+@require_POST
+def cancel_request(request, request_id):
+    try:
+        download_request = downman_models.DownloadRequest.objects.get(pk=int(request_id))
+        download_request.status = downman_models.DownloadRequest.COMPLETED_STATUS
+        download_request.save()
+        
+        for download_link in download_request.downloadlink_set.all():
+            download_link.status = downman_models.DownloadLink.ADMIN_CANCELED_STATUS
+            download_link.save()
+
+        for locator in download_request.resourcelocator_set.all():
+            locator.canceled = True
+            locator.status = downman_models.ResourceLocator.PROCESSED_STATUS
+            locator.save()
+        return redirect(reverse('downman-update-request', args=(locator.request.pk,)))
+    except:
+        logger.exception("Error")
+        raise Http404
+

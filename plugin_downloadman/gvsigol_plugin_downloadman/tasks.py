@@ -134,9 +134,13 @@ class ForbiddenAccessError(Exception):
 
 def getFreeSpace(path):
     try:
+        logger.debug(u"getFreeSpace path: "+path)
         usage  = os.statvfs(path)
         return (usage.f_frsize * usage.f_bfree)
-    except:
+    except OSError:
+        logger.exception(u"Error getting free space for path: " + path)
+        return 0
+    except AttributeError: # Python 3
         try:
             usage = shutil.disk_usage(path) #@UndefinedVariable 
             return usage.free
@@ -561,27 +565,23 @@ def notifyRequestProgress(self, request_id):
 
 def processLocators(request, zipobj=None, zip_path=None):
     logger.debug('processLocators')
-    locators = request.resourcelocator_set.filter(Q(status=ResourceLocator.PACKAGE_QUEUED_STATUS) | \
-        Q(status=ResourceLocator.PROCESSING_STATUS) | \
-        Q(status=ResourceLocator.PENDING_AUTHORIZATION_STATUS) | \
-        Q(status=ResourceLocator.HOLD_STATUS) | \
-        Q(status=ResourceLocator.WAITING_SPACE_STATUS) | \
-        Q(status=ResourceLocator.TEMPORAL_ERROR_STATUS))
+    locators = request.resourcelocator_set.filter((Q(status=ResourceLocator.RESOURCE_QUEUED_STATUS) | \
+                                                   Q(status=ResourceLocator.HOLD_STATUS) | \
+                                                   Q(status=ResourceLocator.WAITING_SPACE_STATUS) | \
+                                                   Q(status=ResourceLocator.TEMPORAL_ERROR_STATUS)) & \
+                                                   (Q(authorization=ResourceLocator.AUTHORIZATION_ACCEPTED) | \
+                                                   Q(authorization=ResourceLocator.AUTHORIZATION_NOT_REQUIRED)))
             
-    pending_locators = 0
     temporal_errors = 0
     permanent_errors = 0
     packaged_locators = []
     completed_locators = 0
     to_package = 0
     waiting_space = 0
-    ResultTuple = namedtuple('ResultTuple', ['completed', 'packaged', 'pending', 'waiting_space', 'to_package', 'temporal_error', 'permanent_error'])
+    ResultTuple = namedtuple('ResultTuple', ['completed', 'packaged', 'waiting_space', 'to_package', 'temporal_error', 'permanent_error'])
     for resourceLocator in locators:
         try:
-            if resourceLocator.status == ResourceLocator.PENDING_AUTHORIZATION_STATUS or \
-                    resourceLocator.status == ResourceLocator.HOLD_STATUS or \
-                    resourceLocator.status == ResourceLocator.PROCESSING_STATUS:
-                pending_locators += 1
+            if resourceLocator.status == ResourceLocator.HOLD_STATUS:
                 continue
 
             resource_descriptor = json.loads(resourceLocator.data_source)
@@ -591,25 +591,25 @@ def processLocators(request, zipobj=None, zip_path=None):
                 (resourceLocator.is_dynamic and DOWNMAN_PACKAGING_BEHAVIOUR == 'DYNAMIC'):
                 if zipobj is not None:
                     if getFreeSpace(getTmpDir()) < MIN_TMP_SPACE:
-                        pending_locators += 1
                         waiting_space += 1
                         resourceLocator.status = ResourceLocator.WAITING_SPACE_STATUS
-                        resourceLocator.save()
-                        
                     else:
+                        # ensure the locator has not been cancelled before starting packaging
+                        resourceLocator.refresh_from_db(fields=['canceled'])
+                        if resourceLocator.canceled:
+                            continue
                         _addResource(zipobj, resource_descriptor, resourceLocator.resolved_url)
                         packaged_locators.append(resourceLocator)
                         completed_locators += 1
                 else:
                     to_package += 1
-                    pending_locators += 1
             else:
                 # store a direct download link instead of packaging the resource
                 new_link = createDownloadLink(request, resourceLocator)
                 resourceLocator.download_link = new_link
                 resourceLocator.status = ResourceLocator.PROCESSED_STATUS
-                resourceLocator.save()
                 completed_locators += 1
+            resourceLocator.save()
         except PermanentPreparationError:
             logger.exception("Error resolving locator")
             resourceLocator.status = ResourceLocator.PERMANENT_ERROR_STATUS
@@ -625,10 +625,32 @@ def processLocators(request, zipobj=None, zip_path=None):
     if len(packaged_locators) > 0:
         new_link = createDownloadLink(request, resourceLocator, zip_path)
         for resourceLocator in packaged_locators:
+            # we need to ensure that locators have not been cancelled while we were processing
+            resourceLocator.refresh_from_db(fields=['status'])
             resourceLocator.status = ResourceLocator.PROCESSED_STATUS
             resourceLocator.download_link = new_link
             resourceLocator.save()
-    return ResultTuple(completed_locators, len(packaged_locators), pending_locators, waiting_space, to_package, temporal_errors, permanent_errors)
+        
+        # Finally, we need to ensure that locators have not been cancelled while we were processing
+        new_link.refresh_from_db()
+        locators = new_link.resourcelocator_set.all()
+        cancel_link = False
+        for resourceLocator in locators:
+            #if any of the locators has been cancelled, we need to cancel the link and process again the locators
+            if resourceLocator.canceled:
+                cancel_link = True
+        if cancel_link:
+            for resourceLocator in locators:
+                #if any of the locators has been cancelled, we need to cancel the link and process again the locators
+                if not resourceLocator.canceled and resourceLocator.status == ResourceLocator.PROCESSED_STATUS:
+                     resourceLocator.status = ResourceLocator.RESOURCE_QUEUED_STATUS
+                     resourceLocator.save()
+                new_link.status = DownloadLink.ADMIN_CANCELED_STATUS
+                new_link.save()
+            return processLocators(request, zipobj, zip_path)
+        
+
+    return ResultTuple(completed_locators, len(packaged_locators), waiting_space, to_package, temporal_errors, permanent_errors)
 
 def createDownloadLink(downloadRequest, resourceLocator, prepared_download_path=None):
     try:
@@ -657,14 +679,14 @@ def packageRequest(self, request_id):
         logger.debug("Task already processed: " + request_id)
         return
     result = None
+    zip_file = None
     try:
         if getFreeSpace(getTargetDir()) < MIN_TARGET_SPACE:
             logger.debug("Scheduling a retry due to not enough space error")
             self.retry(countdown=FREE_SPACE_RETRY_DELAY)
             
         link_uuid = date.today().strftime("%Y%m%d") + get_random_string(length=32)
-        zip_file = None
-
+        
         # 1. create target zip file
         prefix = _getPackagePrefix() + link_uuid + "_"
         (fd, zip_path) = tempfile.mkstemp('.zip', prefix, getTargetDir())
@@ -690,8 +712,6 @@ def packageRequest(self, request_id):
         if delay:
             request.package_retry_count = request.package_retry_count + 1 
             request.save()
-            if result.completed > 0:
-                notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
             self.retry(countdown=delay)
     if result.waiting_space > 0:
         delay = getNextPackagingRetryDelay(request)
@@ -714,13 +734,13 @@ def packageRequest(self, request_id):
     # if there are no locators waiting for admin feedback and we reach the maximum amount of retries,
     # then we need to update locators and request status
     waiting_feedback = request.resourcelocator_set.filter( \
-                                                  Q(status=ResourceLocator.PENDING_AUTHORIZATION_STATUS) | \
+                                                  Q(authorization=ResourceLocator.AUTHORIZATION_PENDING) | \
                                                   Q(status=ResourceLocator.HOLD_STATUS)).count()
     if waiting_feedback == 0:
         errors = 0
         locators = ( request.resourcelocator_set.filter(status=ResourceLocator.TEMPORAL_ERROR_STATUS) | \
                      request.resourcelocator_set.filter(status=ResourceLocator.PERMANENT_ERROR_STATUS) | \
-                     request.resourcelocator_set.filter(status=ResourceLocator.PACKAGE_QUEUED_STATUS))
+                     request.resourcelocator_set.filter(status=ResourceLocator.RESOURCE_QUEUED_STATUS))
         for locator in locators:
             errors += 1
             if locator.status != ResourceLocator.PERMANENT_ERROR_STATUS:
@@ -789,13 +809,13 @@ def processDownloadRequest(self, request_id):
     # then we need to update locators and request status
     try:
         waiting_feedback = request.resourcelocator_set.filter( \
-                                                      Q(status=ResourceLocator.PENDING_AUTHORIZATION_STATUS) | \
+                                                      Q(authorization=ResourceLocator.AUTHORIZATION_PENDING) | \
                                                       Q(status=ResourceLocator.HOLD_STATUS)).count()
         if waiting_feedback == 0:
             errors = 0
             locators = ( request.resourcelocator_set.filter(status=ResourceLocator.TEMPORAL_ERROR_STATUS) | \
                          request.resourcelocator_set.filter(status=ResourceLocator.PERMANENT_ERROR_STATUS) | \
-                         request.resourcelocator_set.filter(status=ResourceLocator.PACKAGE_QUEUED_STATUS))
+                         request.resourcelocator_set.filter(status=ResourceLocator.RESOURCE_QUEUED_STATUS))
             for locator in locators:
                 errors += 1
                 if locator.status != ResourceLocator.PERMANENT_ERROR_STATUS:
@@ -831,12 +851,12 @@ def cleanOutdatedRequests(self):
                 link = DownloadLink.objects.get(link_random_id=link_uuid)
                 if fullpath != link.prepared_download_path:
                     raise Error
-                if timezone.now() > link.valid_to:
+                if not link.is_valid:
                     # request is oudated
                     os.remove(link.prepared_download_path)
                 else:
                     for resource in link.resourcelocator_set.all():
-                        if resource.status == ResourceLocator.CANCELLED_STATUS or resource.status == ResourceLocator.REJECTED_STATUS:
+                        if resource.canceled:
                             # for some status value such as cancelled, we should also remove the file
                             os.remove(link.prepared_download_path)
                             break

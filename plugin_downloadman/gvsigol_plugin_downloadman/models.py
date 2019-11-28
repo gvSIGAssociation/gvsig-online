@@ -68,24 +68,29 @@ class DownloadRequest(models.Model):
         for (choice_code, choice_desc) in DownloadRequest.REQUEST_STATUS_CHOICES:
             if self.request_status == choice_code:
                 return _(choice_desc)
+    @property
+    def status_active(self):
+        if self.active:
+            return self.status_desc + ' - ' + _('Active')
+        else:
+            return self.status_desc + ' - ' +_('Archived')
     
     @property
     def active(self):
         now = timezone.now()
-        for locator in self.resourcelocator_set:
-            # the Request is active if there is any associated ResourceLocator in the following statuses
-            if locator.status in [
-                    ResourceLocator.PACKAGE_QUEUED_STATUS,
-                    ResourceLocator.PENDING_AUTHORIZATION_STATUS,
-                    ResourceLocator.WAITING_SPACE_STATUS,
-                    ResourceLocator.PROCESSING_STATUS,
-                    ResourceLocator.TEMPORAL_ERROR_STATUS,
-                    ResourceLocator.HOLD_STATUS,
-                    ]:
-                return True
-        for downloadLink in self.downloadlink_set:
+        for locator in self.resourcelocator_set.all():
+            if not locator.canceled:
+                # the Request is active if there is any associated ResourceLocator in the following statuses
+                if locator.status in [
+                        ResourceLocator.RESOURCE_QUEUED_STATUS,
+                        ResourceLocator.WAITING_SPACE_STATUS,
+                        ResourceLocator.TEMPORAL_ERROR_STATUS,
+                        ResourceLocator.HOLD_STATUS,
+                        ]:
+                    return True
+        for downloadLink in self.downloadlink_set.all():
             # the Request is also active if there is any associated DownloadLink which is currently valid
-            if downloadLink.valid_to > now:
+            if downloadLink.valid_to > now and downloadLink.status == DownloadLink.PROCESSED_STATUS:
                 return True
         return False 
 
@@ -123,19 +128,46 @@ FORMAT_PARAM_NAME = 'format'
 
 class DownloadLink(models.Model):
     PROCESSED_STATUS = 'PR'
-    USER_CANCELLED_STATUS = 'UC'
-    ADMIN_CANCELLED_STATUS = 'AC'
+    USER_CANCELED_STATUS = 'UC'
+    ADMIN_CANCELED_STATUS = 'AC'
 
     STATUS_CHOICES = (
         (PROCESSED_STATUS, _('Processed')),
-        (USER_CANCELLED_STATUS, _('Cancelled by the user')),
-        (ADMIN_CANCELLED_STATUS, _('Cancelled by the administrator')),
+        (USER_CANCELED_STATUS, _('Cancelled by the user')),
+        (ADMIN_CANCELED_STATUS, _('Cancelled by the administrator')),
     )
+    @property
+    def active(self):
+        if self.valid_to > timezone.now() and self.status == DownloadLink.PROCESSED_STATUS:
+            return True
+        return False
     @property
     def status_desc(self):
         for (choice_code, choice_desc) in DownloadLink.STATUS_CHOICES:
             if self.status == choice_code:
                 return _(choice_desc)
+    @property
+    def status_active(self):
+        if self.status == DownloadLink.PROCESSED_STATUS:
+            status_txt = _('Processed')
+        else:
+            status_txt = _('Canceled')
+            
+        if not self.is_valid:
+            return status_txt + " - " + _('Expired')
+        return status_txt
+    
+    @property
+    def is_valid(self):
+        if self.valid_to > timezone.now():
+            return True
+        return False
+    
+    @property
+    def contents_details(self):
+        locators = self.resourcelocator_set.all()
+        return ", ".join([ locator.fq_title_name for locator in locators ])
+    
     request = models.ForeignKey('DownloadRequest', on_delete=models.CASCADE, db_index=False)
     prepared_download_path = models.TextField(null=True, blank=True)
     valid_to=models.DateTimeField(db_index=True)
@@ -144,7 +176,7 @@ class DownloadLink(models.Model):
     download_count = models.PositiveIntegerField(default=0)
     class Meta:
         indexes = [
-            models.Index(fields=['request', 'valid_to']),
+            models.Index(fields=['request', 'valid_to', 'status']),
             ]
 
 class ResourceLocator(models.Model):
@@ -163,34 +195,47 @@ class ResourceLocator(models.Model):
         (GVSIGOL_LAYER_ID, GVSIGOL_DATA_SOURCE_TYPE)
     )
     
-    PENDING_AUTHORIZATION_STATUS = 'AU'
-    PACKAGE_QUEUED_STATUS = 'QP' # Queued for package preparation
+    RESOURCE_QUEUED_STATUS = 'QD' # Queued for package preparation
     WAITING_SPACE_STATUS = 'SP' # Queued for package preparation
-    PROCESSING_STATUS = 'PG' # Queued for package preparation
     PROCESSED_STATUS = 'PD' # The download package was sucessfully created
-    REJECTED_STATUS = 'RE' # Rejected or cancelled by the admins
     HOLD_STATUS = 'HO' # Set on hold by admins    
-    CANCELLED_STATUS = 'CL' # Cancelled by the user
-    TEMPORAL_ERROR_STATUS = 'ER' # An error was found during preparation of the package
+    TEMPORAL_ERROR_STATUS = 'TE' # An error was found during preparation of the package
     PERMANENT_ERROR_STATUS = 'PE' # A permanent error was found during preparation
 
     REQUEST_STATUS_CHOICES = (
-        (PENDING_AUTHORIZATION_STATUS, _('Pending authorization')),
-        (PACKAGE_QUEUED_STATUS, _('Package queued')),
-        (PROCESSING_STATUS, _('Processing resource')),
+        (RESOURCE_QUEUED_STATUS, _('Resource queued')),
         (WAITING_SPACE_STATUS, _('Queued, waiting for free space')),
         (PROCESSED_STATUS, _('Processed')),
-        (REJECTED_STATUS, _('Rejected')),
         (HOLD_STATUS, _('On hold')),
-        (CANCELLED_STATUS, _('Cancelled')),
         (TEMPORAL_ERROR_STATUS, _('Temporal error')),
         (PERMANENT_ERROR_STATUS, _('Permanent error')),
     )
+    
+    AUTHORIZATION_NOT_REQUIRED = 0
+    AUTHORIZATION_PENDING = 1
+    AUTHORIZATION_ACCEPTED = 2
+    AUTHORIZATION_REJECTED = 3
+    AUTHORIZATION_CHOICES = (
+        (AUTHORIZATION_NOT_REQUIRED, _('Not required')),
+        (AUTHORIZATION_PENDING, _('Pending')),
+        (AUTHORIZATION_ACCEPTED, _('Accepted')),
+        (AUTHORIZATION_REJECTED, _('Rejected')),
+        )
     
     @property
     def status_desc(self):
         for (choice_code, choice_desc) in ResourceLocator.REQUEST_STATUS_CHOICES:
             if self.status == choice_code:
+                return _(choice_desc)
+    @property
+    def status_canceled(self):
+        if self.canceled:
+            return self.status_desc + " + " + _('Canceled')
+        return self.status_desc
+    @property
+    def authorization_desc(self):
+        for (choice_code, choice_desc) in ResourceLocator.AUTHORIZATION_CHOICES:
+            if self.authorization == choice_code:
                 return _(choice_desc)
     
     # res_einternal_id = models.PositiveIntegerField()
@@ -215,17 +260,18 @@ class ResourceLocator(models.Model):
         if self.layer_title == self.title:
             return self.layer_title + u" [" + self.name + u"]"
         return self.layer_title + u" - " + self.title + u" [" + self.name + u"]"
-    pending_authorization = models.BooleanField(default=False)
-    status = models.CharField(max_length=2, default=PACKAGE_QUEUED_STATUS, choices=REQUEST_STATUS_CHOICES)
+    authorization = models.PositiveSmallIntegerField(default=0, choices=AUTHORIZATION_CHOICES)
+    status = models.CharField(max_length=2, default=RESOURCE_QUEUED_STATUS, choices=REQUEST_STATUS_CHOICES)
     download_count = models.PositiveIntegerField(default=0)
     resolved_url =  models.TextField(null=True, blank=True)
     is_dynamic = models.BooleanField(default=False)
+    canceled = models.BooleanField(default=False)
     download_link = models.ForeignKey('DownloadLink', on_delete=models.CASCADE, null=True)
     request = models.ForeignKey('DownloadRequest', on_delete=models.CASCADE, db_index=False)
     #mime_type = models.CharField(max_length=255)
     class Meta:
         indexes = [
-            models.Index(fields=['request', 'status', 'pending_authorization',]),
+            models.Index(fields=['request', 'canceled', 'status', 'authorization',]),
             ]
     
 
