@@ -27,6 +27,8 @@ from sendfile import sendfile
 from django.shortcuts import redirect
 from actstream import action
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from gvsigol_auth.utils import superuser_required, staff_required
 from django.db.models import Q
 
 from collections import namedtuple
@@ -44,7 +46,7 @@ class DownloadParam():
         self.title = title;
 
 class ResourceDownloadDescriptor():
-    def __init__(self, layer_id, layer_name, layer_title, resource_name, resource_title, dataSourceType=downman_models.ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.OGC_WFS_RESOURCE_TYPE, url='', directDownloadUrl=None, dataFormats=[], resolutions=[], scales=[], crss=[]):
+    def __init__(self, layer_id, layer_name, layer_title, resource_name, resource_title, dataSourceType=downman_models.ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.OGC_WFS_RESOURCE_TYPE, url='', directDownloadUrl=None, dataFormats=[], resolutions=[], scales=[], crss=[], restricted=False):
         self.layer_id = layer_id
         self.layer_name = layer_name
         self.layer_title = layer_title
@@ -58,6 +60,7 @@ class ResourceDownloadDescriptor():
         self.scales = self._processOptions(scales)
         self.crss = self._processOptions(crss)
         self.url = url
+        self.restricted = False
         # more params: CRSs? imagemode (raster RGB, BYTE, INT16, INT32, FLOAT32, etc)? char encoding?
     
     def _processOptions(self, params):
@@ -176,6 +179,7 @@ class ResourceDownloadDescriptor():
             "data_source_type": self.dataSourceType,
             "name": self.name,
             "title": self.title,
+            "restricted": self.restricted,
             "url": self.url,
             "params": params}
         if self.directDownloadUrl:
@@ -619,6 +623,8 @@ def render_settings(request):
     return render(request, 'downman_index.html', response)
 
 @require_safe
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@superuser_required
 def dashboard_index(request):
     selected_tab = request.GET.get("tab", "active")
     now = timezone.now()
@@ -661,6 +667,8 @@ def dashboard_index(request):
     }
     return render(request, 'downman_index.html', response)
 
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@superuser_required
 def update_request(request, request_id):
     try:
         download_request = downman_models.DownloadRequest.objects.get(pk=int(request_id))
@@ -673,6 +681,8 @@ def update_request(request, request_id):
         raise Http404
 
 @require_POST
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@superuser_required
 def settings_store(request):
     validity = int(request.POST.get('validity'))
     max_public_download_size = int(request.POST.get('max_public_download_size'))
@@ -681,6 +691,8 @@ def settings_store(request):
     return redirect(reverse('downman-dashboard-index') + "?tab=settings")
 
 @require_POST
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@superuser_required
 def cancel_locator(request, resource_id):
     try:
         resource = downman_models.ResourceLocator.objects.get(pk=int(resource_id))
@@ -703,6 +715,8 @@ def cancel_locator(request, resource_id):
         raise Http404
 
 @require_POST
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@superuser_required
 def cancel_link(request, link_id):
     try:
         download_link = downman_models.DownloadLink.objects.get(pk=int(link_id))
@@ -719,6 +733,8 @@ def cancel_link(request, link_id):
         raise Http404
 
 @require_POST
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@superuser_required
 def cancel_request(request, request_id):
     try:
         download_request = downman_models.DownloadRequest.objects.get(pk=int(request_id))
