@@ -401,6 +401,12 @@ class Introspect:
         rows = self.cursor.fetchall()
 
         return rows
+    
+    def custom_query_fetchone(self, query):
+        self.cursor.execute(query)
+        row = self.cursor.fetchone()
+
+        return row
 
     def custom_no_return_query(self, query):
         self.cursor.execute(query)
