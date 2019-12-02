@@ -133,7 +133,7 @@ class DownloadLink(models.Model):
     ADMIN_CANCELED_STATUS = 'AC'
 
     STATUS_CHOICES = (
-        (PROCESSED_STATUS, _('Processed #sing#')),
+        (PROCESSED_STATUS, _('Processed')),
         (USER_CANCELED_STATUS, _('Cancelled by the user')),
         (ADMIN_CANCELED_STATUS, _('Cancelled by the administrator')),
     )
