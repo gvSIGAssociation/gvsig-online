@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from lxml import etree as ET
 from builtins import str as text
-from registry import XmlStandardUpdater, BaseStandardManager
+from registry import XmlStandardUpdater, BaseStandardManager, XmlStandardReader
 from datetime import datetime
 from django.utils.translation import ugettext as _
-
+from gvsigol_plugin_catalog.xmlutils import getTextFromXMLNode
 
 def define_translations():
     """
@@ -196,8 +196,11 @@ class Iso19139_2007Manager(BaseStandardManager):
     def get_updater_instance(self, metadata_record):
         return Iso19139_2007Updater(metadata_record)
     
+    def get_reader_instance(self, metadata_record):
+        return Iso19139_2007Reader(metadata_record)
+    
     def can_update(self, metadata_record):
-        return self.can_update(metadata_record)
+        return self.can_extract(metadata_record)
 
     def create(self, mdtype, mdfields):
         if mdtype == 'dataset':
@@ -269,3 +272,12 @@ class Iso19139_2007Updater(XmlStandardUpdater):
         self.update_extent(extent_tuple)
         self.update_thumbnail(thumbnail_url)
         return self
+
+class Iso19139_2007Reader(XmlStandardReader):
+    def get_title(self):
+        return getTextFromXMLNode(self.tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/', namespaces)
+    def get_abstract(self):
+        return getTextFromXMLNode(self.tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/', namespaces)
+    def get_identifier(self, ):
+        return getTextFromXMLNode(self.tree, './gmd:fileIdentifier/', namespaces)
+    

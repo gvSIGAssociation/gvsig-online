@@ -330,10 +330,20 @@ class Geonetwork():
             'protocol': protocol,
             'url': url
             }
-        
+    def gn_get_metadata_raw(self, metadata_id):
+        url = self.service_url + "/srv/api/0.1/records/"+str(metadata_id)
+        headers = {
+            'Accept': 'application/xml',
+            'X-XSRF-TOKEN': self.get_csrf_token()
+        }
+              
+        r = self.session.get(url, headers=headers, timeout=DEFAULT_TIMEOUT, proxies=settings.PROXIES)
+        if r.status_code==200:
+            return r.content
+        raise FailedRequestError(r.status_code, r.content)
+    
     def gn_get_metadata(self, metadata_id):
-        #curl -X DELETE --header 'Accept: */*' 'http://localhost:8080/geonetwork/srv/api/0.1/records/159?withBackup=false'
-        #NOTE: uuid is an id not in format 97769e85-2e7b-418b-a8c8-0163bfb97aac
+        #curl -X DELETE --header 'Accept: */*' 'http://localhost:8080/geonetwork/srv/api/0.1/records/97769e85-2e7b-418b-a8c8-0163bfb97aac?withBackup=false'
         url = self.service_url + "/srv/api/0.1/records/"+str(metadata_id)+""
         print ("Getting metadata from uuid:" + str(metadata_id) + " -> " + url)
         headers = {

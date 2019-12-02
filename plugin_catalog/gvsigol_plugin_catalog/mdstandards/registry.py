@@ -26,10 +26,17 @@ class BaseStandardManager(with_metaclass(ABCMeta, object)):
     @abstractmethod
     def get_updater_instance(self, metadata_record):
         pass
+    @abstractmethod
+    def get_reader_instance(self, metadata_record):
+        pass
     
     def get_updater(self, metadata_record):
         if self.can_update(metadata_record):
             return self.get_updater_instance(metadata_record)
+        return None
+    def get_reader(self, metadata_record):
+        if self.can_extract(metadata_record):
+            return self.get_reader_instance(metadata_record)
         return None
     
     @abstractmethod
@@ -67,6 +74,22 @@ class XmlStandardUpdater(object):
     def tostring(self, encoding='unicode'):
         return ET.tostring(self.tree, encoding=encoding)
 
+class XmlStandardReader(object):
+    def __init__(self, metadata_record):
+        if ET.iselement(metadata_record):
+            self.tree = metadata_record
+        else:
+            self.tree = ET.fromstring(metadata_record)
+    @abstractmethod
+    def get_title(self, extent_tuple, thumbnail_url):
+        pass
+    @abstractmethod
+    def get_abstract(self, extent_tuple, thumbnail_url):
+        pass
+    
+    def tostring(self, encoding='unicode'):
+        return ET.tostring(self.tree, encoding=encoding)
+
 def _prioritysorter(item):
     return item.get_priority()
 
@@ -82,6 +105,13 @@ def get_updater(metadata_record):
         updater = manager.get_updater(tree)
         if updater:
             return updater
+
+def get_reader(metadata_record):
+    tree = ET.fromstring(metadata_record)
+    for manager in _registry:
+        reader = manager.get_reader(tree)
+        if reader:
+            return reader
 
 def create(mdtype, mdfields, mdcode=None):
     if not mdcode:

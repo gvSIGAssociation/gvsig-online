@@ -28,6 +28,7 @@ from gvsigol_plugin_catalog import api_old as xmlapi_old
 from gvsigol_plugin_catalog import api_new as xmlapi_new
 import logging
 from gvsigol_plugin_catalog.mdstandards import registry
+import requests
 
 logger = logging.getLogger("gvsigol")
 
@@ -72,6 +73,18 @@ class Geonetwork():
         except Exception as e:
             logger.exception(e);
             print e
+
+    def get_metadata_raw(self, uuid):
+        try:
+            if self.xmlapi.gn_auth(self.user, self.password):
+                content = self.xmlapi.gn_get_metadata_raw(uuid)
+                self.xmlapi.gn_unauth()
+                return content
+            return None
+        
+        except Exception as e:
+            logger.exception(e);
+            print e
             
     def _get_first_dict_value(self, d):
         if len(d) > 0:
@@ -79,7 +92,7 @@ class Geonetwork():
             return d.get(key, '')
         return ''
         
-    def get_online_resources(self, record_uuid):
+    def get_online_resources(self, record_uuid, raiseRequestExceptions=False):
         """
         Returns a list of OnlineResource objects, describing the online resources
         encoded in the provided metadata_record
@@ -99,6 +112,8 @@ class Geonetwork():
                     online_resource = OnlineResource(res_type, url, protocol, title, desc, app_profile, function)
                     online_resources.append(online_resource) 
                 self.xmlapi.gn_unauth()
+        except requests.exceptions.RequestException as e:
+            raise
         except Exception as e:
             logger.exception(e);
             print e

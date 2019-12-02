@@ -610,7 +610,9 @@ CatalogView.prototype._createOLLayer = function(url, name, title, abstract, data
 		url = url.substring(0, url.length-1);
 	}
 	var zIndex = $("#layer-tree-tab #gvsigol-geonetwork-group .layer-box").length + this.getCatalogGroupOrder();
-	
+	console.log("_createOLLayer");
+	console.log(name);
+	console.log(url);
 	var catalogLayer = new ol.layer.Tile({
 		source: new ol.source.TileWMS({
 			url: url,
@@ -962,6 +964,7 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 						if(link.length==6){
 							var type = link[3].trim().substring(0, 7);
 							if(type == "OGC:WMS"){
+								console.log(link);
 								wms.url = link[2];
 								wms.name = link[0];
 								wms.title = title;
@@ -978,14 +981,20 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 					if (wms.url) {
 						var group_visible = false;
 						group_visible = $("#layergroup-geonetwork-group").is(":checked");
-						try {
-							self.createLayer(wms.name, wms.title, wms.abstract, wms.url, id, geoBox, group_visible, wfs_url, wcs_url);
+						if (wms.name) {
+							try {
+								console.log(wms);
+								self.createLayer(wms.name, wms.title, wms.abstract, wms.url, id, geoBox, group_visible, wfs_url, wcs_url);
+								self.hidePanel();
+							}
+							catch(error) {
+								console.log(error);
+							}
 						}
-						catch(error) {
-							console.log(error);
+						else {
+							self.createAvailableLayersPanel(wms.url, "WMS");
 						}
 						
-						self.hidePanel();
 					}
 				});
 
@@ -1039,6 +1048,43 @@ CatalogView.prototype.createDetailsPanel = function(layer){
 			} else {
 				alert('Error');
 			}
+
+		},
+		error: function(jqXHR, textStatus){
+			console.log(textStatus);
+			console.log(jqXHR);
+		}
+	});
+}
+
+CatalogView.prototype.createAvailableLayersPanel = function(url, service){
+	service = service || "WMS";
+	var serviceUrl = url.split("?")[0];
+	var getCapabilitiesUrl = serviceUrl + "?service=" + service + "&request=GetCapabilities&version=1.3.0";
+	var self = this;
+	console.log(getCapabilitiesUrl);
+	$.ajax({
+		type: "GET",
+		async: true,
+		url: getCapabilitiesUrl,
+		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		success: function(response){
+			var xmlDoc = $.parseXML(response);
+			var xml = $(xmlDoc);
+			console.log(xml);
+			var rootElem = xml.get(0);
+			console.log(rootElem);
+			/*
+			if ("html" in response) {
+				$('#modal-catalog .modal-title').html(gettext("Details"));
+				$('#modal-catalog .modal-body').html(response['html']);
+				$('#modal-catalog .modal-footer').html("");
+				$('#modal-catalog').modal('show');
+			} else {
+				alert('Error');
+			}*/
 
 		},
 		error: function(jqXHR, textStatus){
