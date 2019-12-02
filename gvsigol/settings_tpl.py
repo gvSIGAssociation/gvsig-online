@@ -465,6 +465,7 @@ except:
     }
     
 CELERY_BROKER_URL = '##CELERY_BROKER_URL##'
+SENDFILE_BACKEND = 'sendfile.backends.xsendfile'
 
 OSM_TILING_1 = '##OSM_TILING_1##'
 OSM_TILING_2 = '##OSM_TILING_2##'
