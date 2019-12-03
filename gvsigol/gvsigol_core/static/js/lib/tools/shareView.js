@@ -53,8 +53,9 @@ shareView.prototype.handler = function(e) {
 	var ui = '';
 	ui += '<div class="row">';
 	ui += 	'<div class="col-md-12 form-group">';	
-	ui += 	'<label>' + gettext('Share view with the following users') + '</label>';
-	ui += 	'<textarea class="form-control" name="shareview-emails" id="shareview-emails" rows="3" placeholder"Enter email addresses separated by semicolons"></textarea>';
+	ui += 	'<label>' + gettext('Enter a description') + '</label>';
+	//ui += 	'<textarea class="form-control" name="shareview-emails" id="shareview-emails" rows="3" placeholder"Enter email addresses separated by semicolons"></textarea>';
+	ui += 	'<textarea class="form-control" name="shareview-description" id="shareview-description" rows="2"></textarea>';
 	ui += 	'</div>';
 	ui += '</div>';
 	
@@ -72,8 +73,9 @@ shareView.prototype.handler = function(e) {
 	
 	var self = this;	
 	$('#float-modal-accept-shareview').on('click', function () {
-		var emails = $('#shareview-emails').val();
-		self.save(emails);
+		//var emails = $('#shareview-emails').val();
+		var description = $('#shareview-description').val();
+		self.save(description);
 		$('#float-modal').modal('hide');
 	});
 };
@@ -81,7 +83,7 @@ shareView.prototype.handler = function(e) {
 /**
  * TODO
  */
-shareView.prototype.save = function(emails) {
+shareView.prototype.save = function(description) {
 	var self = this;
 	
 	var viewState = this.layerTree.getState();
@@ -105,10 +107,12 @@ shareView.prototype.save = function(emails) {
 		},
 	  	data: {
 	  		'pid': self.conf.pid,
-	  		'emails': emails,
+	  		'description': description,
 			'view_state': JSON.stringify(viewState),
 		},
-	  	success	:function(response){},
+	  	success	:function(response){
+	  		messageBox.show('info', response.shared_url);
+	  	},
 	  	error: function(){}
 	});
 };

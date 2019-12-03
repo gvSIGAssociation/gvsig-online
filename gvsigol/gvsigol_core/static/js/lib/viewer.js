@@ -42,6 +42,8 @@ viewer.core = {
 	search: null,
 
 	layerTree: null,
+	
+	activeToolbar: null,
 
 	layerCount: 0,
 
@@ -781,9 +783,11 @@ viewer.core = {
 			this.tools.push(new getFeatureInfo(this.conf, this.map, this.conf.tools.get_feature_info_control.private_fields_prefix));
 		}
 		if (this.ifToolInConf('gvsigol_tool_measure')) {
-			this.tools.push(new measureLength(this.map));
-			this.tools.push(new measureArea(this.map));
-			this.tools.push(new measureAngle(this.map));
+			//this.tools.push(new measureLength(this.map));
+			//this.tools.push(new measureArea(this.map));
+			//this.tools.push(new measureAngle(this.map));
+			
+			new MeasureToolBar(this.map);
 		}
 		/*if (this.ifToolInConf('gvsigol_tool_export')) {
 			this.tools.push(new exportToPDF(this.conf, this.map));
@@ -801,8 +805,9 @@ viewer.core = {
 			this.tools.push(new shareView(this.conf, this.map, this.layerTree));
 		}
 		if (this.ifToolInConf('gvsigol_tool_selectfeature')) {
-			this.tools.push(new selectFeature(this.map, this));
-			this.tools.push(new selectFeatureByBuffer(this.map, this));
+			//this.tools.push(new selectFeature(this.map, this));
+			//this.tools.push(new selectFeatureByBuffer(this.map, this));
+			new SelectToolBar(this.map);
 		}
 
 
@@ -855,6 +860,14 @@ viewer.core = {
 
     getConf: function(){
     	return this.conf;
+    },
+    
+    setActiveToolbar: function(activeToolBar){
+    	this.activeToolbar = activeToolBar;
+    },
+    
+    getActiveToolbar: function(activeToolBar){
+    	return this.activeToolbar;
     },
 
     _nextLayerId: function() {

@@ -23,38 +23,32 @@
 /**
  * TODO
  */
-var CloseDrawControl = function(map, drawBar, pointLayer, lineLayer, polygonLayer, textLayer) {
+var CloseMeasureControl = function(map, toolbar) {
 	var self = this;
 	
 	this.map = map;
-	this.drawBar = drawBar;
-	this.pointLayer = pointLayer;
-	this.lineLayer = lineLayer;
-	this.polygonLayer = polygonLayer;
-	this.textLayer = textLayer;
+	this.toolbar = toolbar;
 	
 	this.control = new ol.control.Toggle({	
 		html: '<i class="fa fa-times" ></i>',
 		className: "edit",
-		title: gettext('Close draw bar'),
+		title: gettext('Close measure tools'),
 		onToggle: function(active){
-			self.pointLayer.getSource().clear();
-			self.lineLayer.getSource().clear();
-			self.polygonLayer.getSource().clear();
-			self.textLayer.getSource().clear();
-			self.map.removeControl(self.drawBar);
+			for (var i=0; i<toolbar.controlArray.length; i++) {
+				toolbar.controlArray[i].deactivate();
+			}
+			map.removeControl(toolbar);
 			this.toggle();
 		}
 	});
-	drawBar.addControl(this.control);
+	toolbar.addControl(this.control);
 
 };
 
-CloseDrawControl.prototype.close = function(e) {
-	this.pointLayer.getSource().clear();
-	this.lineLayer.getSource().clear();
-	this.polygonLayer.getSource().clear();
-	this.textLayer.getSource().clear();
-	this.map.removeControl(this.drawBar);
+CloseMeasureControl.prototype.close = function(e) {
+	for (var i=0; i<this.toolbar.controlArray.length; i++) {
+		this.toolbar.controlArray[i].deactivate();
+	}
+	this.map.removeControl(this.toolbar);
 
 };
