@@ -374,8 +374,12 @@ search.prototype.initUI = function() {
 					'address': suggestion.data
 				},
 				success	:function(response){
-					if(response.address && response.address["address"]){
-						self.locate(response.address, 'EPSG:4258', true);
+					if(response.address && response.address["address"]) {
+						var epsg = 'EPSG:4258';
+						if (response.address.source && response.address.source === 'ide_uy') { // Ugly Patch
+							epsg = 'EPSG:4326';
+						}
+						self.locate(response.address, epsg, true);
 					}
 				},
 				error: function(xhr, status, error) {
