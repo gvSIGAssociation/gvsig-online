@@ -116,6 +116,13 @@ try:
 except:
     DOWNMAN_PACKAGING_BEHAVIOUR = 'NEVER'
 
+
+try:
+    from gvsigol_plugin_downloadman.settings import DOWNMAN_XSEND_BASEURL as XSEND_BASEURL #@UnresolvedImport
+except:
+    XSEND_BASEURL = ''
+
+
 class Error(Exception):
     def __init__(self, message=None):
         super(Error, self).__init__(message)
@@ -131,6 +138,21 @@ class PermanentPreparationError(Exception):
 class ForbiddenAccessError(Exception):
     def __init__(self, message=None):
         super(ForbiddenAccessError, self).__init__(message)
+
+def getDownloadResourceUrl(request_random_id, link_random_id):
+    """
+    We check if we need to map the "normal" URL to a special URL in a 
+    different domain or path. This mapping is sometimes used to set
+    maximum download transfer rates or faster routes.
+    """
+    if XSEND_BASEURL:
+        url = reverse('downman-download-resource', args=(request_random_id, link_random_id))
+        urlParts = url.split("/")
+        if len(urlParts>1):
+            app_name = urlParts[1]
+        return XSEND_BASEURL + url[len(app_name)+1:]
+    else:
+        return core_settings.BASE_URL + reverse('downman-download-resource', args=(request_random_id, link_random_id))
 
 def getFreeSpace(path):
     try:
@@ -494,7 +516,7 @@ def notifyRequestProgress(self, request_id):
             links = []
             for link in request.downloadlink_set.all():
                 linkHtmlContext = {}
-                link_url = core_settings.BASE_URL + reverse('downman-download-resource', args=(request.request_random_id, link.link_random_id))
+                link_url = getDownloadResourceUrl(request.request_random_id, link.link_random_id)
                 logger.debug(link_url)
                 valid_to = date_format(link.valid_to, 'DATETIME_FORMAT')
                 link.save()

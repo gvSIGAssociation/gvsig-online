@@ -8,7 +8,7 @@ import json
 from django.http import JsonResponse
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.translation import ugettext as _
-from gvsigol_plugin_downloadman.tasks import processDownloadRequest, resolveFileUrl, notifyReceivedRequest, packageRequest
+from gvsigol_plugin_downloadman.tasks import processDownloadRequest, resolveFileUrl, notifyReceivedRequest, packageRequest, getDownloadResourceUrl
 from gvsigol_plugin_downloadman import models as downman_models
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.crypto import get_random_string
@@ -471,7 +471,8 @@ def requestTracking(request, uuid):
                 link['valid_to'] = valid_to
                 link['status'] = downloadlink.status_desc
                 if downloadlink.status == downman_models.DownloadLink.PROCESSED_STATUS:
-                    link['download_url'] = reverse('downman-download-resource', args=(uuid, downloadlink.link_random_id,)) 
+                    
+                    link['download_url'] = getDownloadResourceUrl(uuid, downloadlink.link_random_id) 
             linkResources = downloadlink.resourcelocator_set.all()
             if len(linkResources)==1:
                 link['name'] = u'{0:d}-{1!s} [{2!s}]\n'.format(count, linkResources[0].fq_title, linkResources[0].name)
