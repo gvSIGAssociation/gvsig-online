@@ -14,8 +14,7 @@
 					<thead>
 						<tr>
 							<th>ID</th>
-							<th>{% trans "Name" %}</th>
-							<th>{% trans "Created by" %}</th>
+							<th>{% trans "URL" %}</th>
 							<th>{% trans "Expiration date" %}</th>
 							<th></th>
 						</tr>
@@ -24,8 +23,7 @@
 						{% for sv in shared_views %}
 						<tr>
 							<td>{{ sv.id }}</td>
-							<td>{{ sv.name }}</td>
-							<td>{{ sv.created_by }}</td>
+							<td>{{ sv.url }}</td>
 							<td>{{ sv.expiration_date }}</td>
 							<td></td>
 						</tr>

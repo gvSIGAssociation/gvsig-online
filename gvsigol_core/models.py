@@ -52,6 +52,7 @@ class SharedView(models.Model):
     name = models.CharField(max_length=10, unique=True)
     project_id = models.IntegerField()
     description = models.CharField(max_length=250, null=True, blank=True)
+    url = models.CharField(max_length=500, null=True, blank=True)
     state = models.TextField(null=True, blank=True)
     creation_date = models.DateField(auto_now=True)
     expiration_date = models.DateField(null=False)

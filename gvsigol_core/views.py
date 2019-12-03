@@ -1254,23 +1254,27 @@ def documentation(request):
 def save_shared_view(request):
     if request.method == 'POST':
         pid = int(request.POST.get('pid'))
-        emails = request.POST.get('emails')
+        #emails = request.POST.get('emails')
+        description = request.POST.get('description')
         view_state = request.POST.get('view_state')
 
         name = ''.join(random.choice(string.ascii_uppercase) for i in range(10))
+        shared_url = settings.BASE_URL + '/gvsigonline/auth/login_user/?next=/gvsigonline/core/load_shared_view/' + name
         shared_project = SharedView(
             name=name,
             project_id=pid,
+            description=description,
+            url=shared_url,
             state=view_state,
             expiration_date=datetime.datetime.now() + datetime.timedelta(days = settings.SHARED_VIEW_EXPIRATION_TIME),
             created_by=request.user.username
         )
         shared_project.save()
         
-        shared_url = settings.BASE_URL + '/gvsigonline/auth/login_user/?next=/gvsigonline/core/load_shared_view/' + name
         
-        for email in emails.split(';'):
-            send_shared_view(email, shared_url)
+        
+        #for email in emails.split(';'):
+        #    send_shared_view(email, shared_url)
         
         response = {
             'shared_url': shared_url
@@ -1341,8 +1345,7 @@ def shared_view_list(request):
     for sv in shared_view_list:
         shared_view = {}
         shared_view['id'] = sv.id
-        shared_view['name'] = sv.name
-        shared_view['created_by'] = sv.created_by
+        shared_view['url'] = sv.url
         shared_view['expiration_date'] = sv.expiration_date
         shared_view['description'] = sv.description
         shared_views.append(shared_view)
