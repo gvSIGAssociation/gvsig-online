@@ -148,7 +148,7 @@ def getDownloadResourceUrl(request_random_id, link_random_id):
     if XSEND_BASEURL:
         url = reverse('downman-download-resource', args=(request_random_id, link_random_id))
         urlParts = url.split("/")
-        if len(urlParts>1):
+        if len(urlParts)>1:
             app_name = urlParts[1]
         return XSEND_BASEURL + url[len(app_name)+1:]
     else:
