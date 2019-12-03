@@ -207,8 +207,11 @@ msgid "Multimedia resources"
 msgstr "Recursos multimedia"
 
 # measureArea.js
-msgid "Measure area"
-msgstr "Medir área"
+msgid "Show measure tools"
+msgstr "Mostrar herramientas de medida"
+
+msgid "Measure area and perimeter"
+msgstr "Medir área y perímetro"
 
 msgid "Click to continue measuring"
 msgstr "Click para continuar midiendo"
@@ -219,6 +222,24 @@ msgstr "Click para empezar a medir"
 # measureLength.js
 msgid "Measure length"
 msgstr "Medir distancia"
+
+msgid "Measure angle"
+msgstr "Medir ángulo"
+
+msgid "Close measure tools"
+msgstr "Cerrar herramientas de medida"
+
+msgid "Show selection tools"
+msgstr "Mostrar herramientas de selección"
+
+msgid "Select features"
+msgstr "Seleccionar features"
+
+msgid "Select by buffer"
+msgstr "Seleccionar por buffer"
+
+msgid "Close selection tools"
+msgstr "Cerrar herramientas de selección"
 
 # measureLength.js
 msgid "Search by coordinate"
