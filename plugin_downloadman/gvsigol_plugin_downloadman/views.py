@@ -92,9 +92,10 @@ class ResourceDownloadDescriptor():
     
     def to_json(self):
         """
-          We expect an array of objects like this:
+          This should produce a JSON object similar to these examples:
           
-          [{
+          - Example 1:
+          {
             "layer_id": "asfasfasf234dfasfsa",
             "layer_name": "ortofoto_nvt2010",
             "layer_title": "Ortofoto urbana",
@@ -104,7 +105,7 @@ class ResourceDownloadDescriptor():
             "title": "Datos ráster",
             "url": "http://yourserver/geoserver/service/wms",
             "direct_download_url": '',
-            "": ""
+            "restricted": true,
             "params": [
               {
                 "name": "format",
@@ -126,7 +127,10 @@ class ResourceDownloadDescriptor():
                   "title": "Proyección Google Mercator",
                 }]
                 }]
-          },{
+          }
+          
+          - Example 2:
+          {
             "layer_id": "asfasfasf234dfasfsa",
             "layer_name": "ortofoto_nvt2010",
             "layer_title": "Ortofoto urbana",
@@ -136,7 +140,7 @@ class ResourceDownloadDescriptor():
             "title": "Datos ráster",
             "url": "http://yourserver/geoserver/service/wms",
             "direct_download_url": '',
-            "": ""
+            "restricted": true,
             "params": [
               {
                 "name": "format",
@@ -555,6 +559,7 @@ def getDirectDownloadUrl(url, name):
 
 def downloadResource(request, uuid, resuuid):
     try:
+        logger.debug("downloadResource")
         link = downman_models.DownloadLink.objects.get(link_random_id=resuuid, request__request_random_id=uuid)
         if not link.is_valid:
             return render(request, 'downman_error_page.html', {'message': _('Your download request has expired'), 'details': _('You can start a new request using the Download Service')})
@@ -601,9 +606,12 @@ def downloadResource(request, uuid, resuuid):
                 action.send(None, verb="gvsigol_plugin_downloadman/layer_downloaded", action_object=ldown_log)
 
         if link.prepared_download_path:
+            logger.debug(u"using sendfile: " + link.prepared_download_path)
             return sendfile(request, link.prepared_download_path)
         else:
+            logger.debug(u"going to use redirect")
             for locator in link.resourcelocator_set.all():
+                logger.debug(u"using redirect: " + locator.resolved_url)
                 # we expect a single locator associated to the link if prepared_download_path is not defined
                 return redirect(locator.resolved_url)
     except:
