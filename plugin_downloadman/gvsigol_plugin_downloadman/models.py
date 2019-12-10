@@ -56,7 +56,7 @@ class DownloadRequest(models.Model):
     requested_date = models.DateTimeField(auto_now_add=True)
     # number of seconds the download link will be up since notified to the user
     validity = models.IntegerField()
-    authorization_request = models.TextField()
+    #authorization_request = models.TextField(blank=True, default='')
     request_status = models.CharField(max_length=2, default=REQUEST_QUEUED_STATUS, choices=REQUEST_STATUS_CHOICES, db_index=True)
     notification_status = models.CharField(max_length=2, null=True, choices=NOTIFICATION_STATUS_CHOICES)
     package_retry_count = models.PositiveIntegerField(default=0)
@@ -212,11 +212,13 @@ class ResourceLocator(models.Model):
         (PERMANENT_ERROR_STATUS, _('Permanent error')),
     )
     
-    AUTHORIZATION_NOT_REQUIRED = 0
+    AUTHORIZATION_NOT_PROCESSED = 0
     AUTHORIZATION_PENDING = 1
     AUTHORIZATION_ACCEPTED = 2
     AUTHORIZATION_REJECTED = 3
+    AUTHORIZATION_NOT_REQUIRED = 4
     AUTHORIZATION_CHOICES = (
+        (AUTHORIZATION_NOT_PROCESSED, _('Not processed')),
         (AUTHORIZATION_NOT_REQUIRED, _('Not required')),
         (AUTHORIZATION_PENDING, _('Pending')),
         (AUTHORIZATION_ACCEPTED, _('Accepted')),
@@ -261,7 +263,7 @@ class ResourceLocator(models.Model):
         if self.layer_title == self.title:
             return self.layer_title + u" [" + self.name + u"]"
         return self.layer_title + u" - " + self.title + u" [" + self.name + u"]"
-    authorization = models.PositiveSmallIntegerField(default=0, choices=AUTHORIZATION_CHOICES)
+    authorization = models.PositiveSmallIntegerField(default=AUTHORIZATION_NOT_PROCESSED, choices=AUTHORIZATION_CHOICES)
     status = models.CharField(max_length=2, default=RESOURCE_QUEUED_STATUS, choices=REQUEST_STATUS_CHOICES)
     download_count = models.PositiveIntegerField(default=0)
     resolved_url =  models.TextField(null=True, blank=True)

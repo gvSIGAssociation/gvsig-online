@@ -27,7 +27,7 @@ from builtins import str as text
 from celery import shared_task, task
 from celery.exceptions import Retry
 from gvsigol_plugin_downloadman.models import DownloadRequest, DownloadLink, ResourceLocator
-from gvsigol_plugin_downloadman.models import get_packaging_max_retry_time, get_mail_max_retry_time
+from gvsigol_plugin_downloadman.models import get_packaging_max_retry_time, get_mail_max_retry_time, get_max_public_download_size
 from datetime import date, timedelta, datetime
 
 import os
@@ -251,12 +251,26 @@ def _getWcsRequest(layer_name, baseUrl, params):
         url += '&format=' + file_format
     return url
 
+
+def isRestricted(onlineResource, max_public_size):
+    if onlineResource.app_profile.startswith("gvsigol:download:restricted"):
+        return True
+    if onlineResource.transfer_size is not None and onlineResource.transfer_size > max_public_size:
+        return True
+    return False
+
 def checkCatalogPermissions(metadata_uuid, res_type, url):
     logger.debug("checkCatalogPermissions start")
     try:
         import gvsigol_plugin_catalog.service as geonetwork_service
         geonetwork_instance = geonetwork_service.get_instance()
-        onlineResources = geonetwork_instance.get_online_resources(metadata_uuid)
+        xml_md = geonetwork_instance.get_metadata_raw(metadata_uuid)
+        from gvsigol_plugin_catalog.mdstandards import registry
+        reader = registry.get_reader(xml_md)
+        onlineResources = reader.get_transfer_options()
+        max_public_size = float(get_max_public_download_size())
+
+        #onlineResources = geonetwork_instance.get_online_resources(metadata_uuid)
         protocol = None
         if res_type == ResourceLocator.OGC_WFS_RESOURCE_TYPE:
             protocol = 'OGC:WFS'
@@ -264,11 +278,10 @@ def checkCatalogPermissions(metadata_uuid, res_type, url):
             protocol = 'OGC:WCS'
         if protocol:
             for onlineResource in onlineResources:
-                resource = None
                 if protocol in onlineResource.protocol:
                     if url == onlineResource.url:
                         logger.debug(u"permissions OK - " + metadata_uuid + u" - " + res_type)
-                        return
+                        return isRestricted(onlineResource, max_public_size)
         elif res_type == ResourceLocator.HTTP_LINK_RESOURCE_TYPE:
             for onlineResource in onlineResources:
                 if (onlineResource.protocol.startswith('WWW:DOWNLOAD-') and onlineResource.protocol.endswith('-download')) \
@@ -276,7 +289,7 @@ def checkCatalogPermissions(metadata_uuid, res_type, url):
                         or onlineResource.protocol.startswith('FILE:'):
                     if url == onlineResource.url:
                         logger.debug(u"permissions OK - " + metadata_uuid + u" - " + res_type)
-                        return
+                        return isRestricted(onlineResource, max_public_size)
     except requests.exceptions.RequestException:
         logger.exception("Error connecting to the catalog")
         raise PreparationError("Error connecting to catalog")
@@ -326,7 +339,7 @@ def resolveFileUrl(url):
     for path in LOCAL_PATHS_WHITELIST:
         if local_path.startswith(path):
             return local_path
-    raise ForbiddenAccessError
+    raise ForbiddenAccessError(url)
 
 def resolveLocator(resourceLocator, resource_descriptor):
     """
@@ -342,11 +355,17 @@ def resolveLocator(resourceLocator, resource_descriptor):
     params = resource_descriptor.get('params', [])
 
     if resourceLocator.layer_id_type == ResourceLocator.GEONETWORK_UUID:
-        checkCatalogPermissions(res_id, res_type, resource_url)
+        restricted = checkCatalogPermissions(res_id, res_type, resource_url)
         (resourceLocator.resolved_url, resourceLocator.is_dynamic) = getCatalogResourceURL(res_type, resource_name, resource_url, params)
+        if restricted:
+            resourceLocator.authorization = ResourceLocator.AUTHORIZATION_PENDING
+        else:
+            resourceLocator.authorization = ResourceLocator.AUTHORIZATION_NOT_REQUIRED
     elif resourceLocator.layer_id_type == ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE:
+        # TODO: check user permissions on the layer
         layer = getLayer(resourceLocator.layer_id)
         (resourceLocator.resolved_url, resourceLocator.is_dynamic) = getGvsigolResourceURL(res_type, layer, params)
+        resourceLocator.authorization = ResourceLocator.AUTHORIZATION_NOT_REQUIRED
     
     if not resourceLocator.resolved_url:
         raise PermanentPreparationError(u"Url could not be resolved for resource locator: " + text(resourceLocator.pk))
@@ -592,7 +611,8 @@ def processLocators(request, zipobj=None, zip_path=None):
                                                    Q(status=ResourceLocator.WAITING_SPACE_STATUS) | \
                                                    Q(status=ResourceLocator.TEMPORAL_ERROR_STATUS)) & \
                                                    (Q(authorization=ResourceLocator.AUTHORIZATION_ACCEPTED) | \
-                                                   Q(authorization=ResourceLocator.AUTHORIZATION_NOT_REQUIRED)))
+                                                    Q(authorization=ResourceLocator.AUTHORIZATION_NOT_PROCESSED) | \
+                                                    Q(authorization=ResourceLocator.AUTHORIZATION_NOT_REQUIRED)))
             
     temporal_errors = 0
     permanent_errors = 0
@@ -609,6 +629,10 @@ def processLocators(request, zipobj=None, zip_path=None):
             resource_descriptor = json.loads(resourceLocator.data_source)
             if not resourceLocator.resolved_url:
                 resolveLocator(resourceLocator, resource_descriptor)
+            if resourceLocator.authorization == ResourceLocator.AUTHORIZATION_PENDING:
+                # resolveLocator will also check if authorization is required
+                resourceLocator.save()
+                continue
             if DOWNMAN_PACKAGING_BEHAVIOUR == 'ALL' or \
                 (resourceLocator.is_dynamic and DOWNMAN_PACKAGING_BEHAVIOUR == 'DYNAMIC'):
                 if zipobj is not None:
@@ -691,6 +715,7 @@ def createDownloadLink(downloadRequest, resourceLocator, prepared_download_path=
         new_link.save()
         return new_link
     except ForbiddenAccessError:
+        logger.exception("Error creating download link")
         raise PermanentPreparationError()
 
 @shared_task(bind=True)

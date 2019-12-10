@@ -20,37 +20,21 @@
  * @author: César Martinez <cmartinez@scolab.es>
  */
 
-var ResourceDownloadParam = function(param_name, title, param_options) {
-	this.name = param_name;
-	this.title = title;
-	this.options = param_options;
-}
+var gvsigol = gvsigol || {};
+gvsigol.downman = gvsigol.downman || {};
 
-var ResourceDownloadParamValue = function(resource_param, value) {
+gvsigol.downman.ResourceDownloadParamValue = function(resource_param, value) {
 	this.param = resource_param;
 	this.value = value;
 }
 
-var ResourceDescriptor = function(layer_id, layer_name, layer_title, resource_name, resource_title, params, data_source_type, resource_type, url, direct_download_url) {
-	this.layer_id = layer_id;
-	this.layer_name = layer_name;
-	this.layer_title = layer_title;
-	this.name = resource_name;
-	this.title = resource_title;
-	this.direct_download_url = direct_download_url || '';
-	this.url = url || '';
-	this.data_source_type = data_source_type || '';
-	this.resource_type = resource_type || '';
-	this.params = params || [];
-}
-
-var LayerDownloadDescriptor = function(download_res_id, resource_descriptor, param_values) {
+gvsigol.downman.LayerDownloadDescriptor = function(download_res_id, resource_descriptor, param_values) {
 	this.download_id = download_res_id;
 	this.resource_descriptor = resource_descriptor;
 	this.param_values = param_values;
 }
 
-var DownloadManagerClient = function(config) {
+DownloadManagerClient = function(config) {
 	this.config = config || {};
 	this.config.baseQueryUrl = this.config.queryUrl || '/gvsigonline/downloadmanager/';
 	this.config.timeout = this.config.timeout || 20000;
@@ -73,11 +57,49 @@ DownloadManagerClient.prototype.queryAvailableResources = function(layer_id, wor
 	 * We expect an array of objects like this:
 	 * 
           [{
-            "layer_id": 23,
-            "layer_name": "blabla",
+            "layer_id": "asfasfasf234dfasfsa",
+            "layer_name": "ortofoto_nvt2010",
+            "layer_title": "Ortofoto urbana",
+            "resource_type": "HTTP_LINK_TYPE",
+            "data_source_type": "GEONET_DATA_SOURCE",
             "name": "RASTER_DATA_TYPE",
             "title": "Datos ráster",
-            "direct_download": false,
+            "url": "http://yourserver/geoserver/service/wms",
+            "direct_download_url": '',
+            "restricted": true,
+            "params": [
+              {
+                "name": "format",
+                "title": "Formato de fichero",
+                 "options": [{
+                   "name": "geotiff",
+                   "title": "Geotiff (formato Tiff Georeferenciado)",
+                }]
+              },
+              {
+                "name": "crs",
+                "title": "Sistema de referencia de coordenadas",
+                "options": [{
+                  "name": "EPSG:4326",
+                  "title": "Coordinadas geográficas WGS84",
+                },
+                {
+                  "name": "EPSG:3857",
+                  "title": "Proyección Google Mercator",
+                }]
+                }]
+          },
+          {
+            "layer_id": "asfasfasf234dfasfsa",
+            "layer_name": "ortofoto_nvt2010",
+            "layer_title": "Ortofoto urbana",
+            "resource_type": "downman_models.ResourceLocator.OGC_WFS_RESOURCE_TYPE",
+            "data_source_type": "GEONET_DATA_SOURCE",
+            "name": "RASTER_DATA_TYPE",
+            "title": "Datos ráster",
+            "url": "http://yourserver/geoserver/service/wms",
+            "direct_download_url": '',
+            "restricted": true,
             "params": [
               {
                 "name": "format",
@@ -104,33 +126,7 @@ DownloadManagerClient.prototype.queryAvailableResources = function(layer_id, wor
 	$.ajax({
 		url: queryUrl,
 		success: function(response) {
-			try{
-				var resources = [];
-				for (var i=0; i<response.length; i++) {
-					var res = response[i];
-					var params = [];
-					for (var j=0; j<res.params.length; j++) {
-						downloadParam = new ResourceDownloadParam(res.params[j].name, res.params[j].title, res.params[j].options);
-						params.push(downloadParam);
-					}
-					console.log(response);
-					var resource = new ResourceDescriptor(response[i].layer_id,
-							response[i].layer_name,
-							response[i].layer_title,
-							response[i].name,
-							response[i].title,
-							params,
-							response[i].data_source_type,
-							response[i].resource_type,
-							response[i].url,
-							response[i].direct_download_url);
-					resources.push(resource);
-				}
-			} catch (e) {
-				error_callback.call(callback_context, e);
-			}
-			var params = [resources];
-			success_callback.apply(callback_context, params);
+			success_callback.apply(callback_context, [response]);
 		},
 		error: function(jqXHR, textStatus) {
 			console.log(textStatus);
@@ -144,7 +140,7 @@ DownloadManagerClient.prototype.queryAvailableResources = function(layer_id, wor
 	});
 }
 
-DownloadManagerClient.prototype.startDownloadRequest = function(email, success_callback, error_callback, callback_context){
+DownloadManagerClient.prototype.startDownloadRequest = function(email, usage, organization, success_callback, error_callback, callback_context){
 	var self = this;
 	var queryUrl = self.config.baseQueryUrl + "request/";
 
@@ -155,6 +151,8 @@ DownloadManagerClient.prototype.startDownloadRequest = function(email, success_c
 		if (email !== null) {
 			request["email"] = email;
 		}
+		request["usage"] = usage;
+		request["organization"] = organization;
 		var data = JSON.stringify(request);
 	} catch (e) {console.log("error stringify"); console.log(e)}
 	$.ajax({
@@ -194,7 +192,7 @@ DownloadManagerClient.prototype.clearDownloadList = function(){
 
 
 DownloadManagerClient.prototype.addLayer = function(resourceDescriptor, param_values) {
-	var descriptor = new LayerDownloadDescriptor(this.nextDescriptorId++, resourceDescriptor, param_values);
+	var descriptor = new gvsigol.downman.LayerDownloadDescriptor(this.nextDescriptorId++, resourceDescriptor, param_values);
 	this.layerList.push(descriptor);
 	
 	this.downloadListUpdated();
@@ -234,11 +232,62 @@ DownloadManagerUI.prototype.setModalSelector = function(selector) {
 } 
 
 DownloadManagerUI.prototype.createDownloadResource = function(downloadDescriptor) {
-	var resourceDescriptor = downloadDescriptor.resource_descriptor;
+	//var resourceDescriptor = downloadDescriptor.resource_descriptor;
+	var resource = downloadDescriptor.resource_descriptor;
 	var downloadParams = downloadDescriptor.param_values;
 	var param, paramOption;
 	var value;
 
+	var content = '<tr data-downloadid="' + downloadDescriptor.download_id + '">';
+	if (resource.name != resource.title) {}
+	var name = resource.title + " [" + resource.name + "]";
+	if (resource.restricted) {
+		content += '<td style="width: 80px"><div class="form-inline"><div class="form-group"><i class="fa fa-3x fa-file-archive-o" aria-hidden="true"><i class="fa fa-lock"></i></i></span></div></div></td>';
+	}
+	else {
+		content += '<td style="width: 80px"><div class="form-inline"><div class="form-group"><i class="fa fa-3x fa-file-archive-o" aria-hidden="true"></i></div></div></td>';
+	}
+	
+	content += '<td style="width: 120px;"><div class="col"><label class="form-label">'+ resource.title + '</label>';
+	content += '<div style="padding: 6px 4px 6px 0px">' + resource.name + '</div></div></td>';
+	content += '<td><div class="col"><label class="form-label">'+ gettext("Authorization") + '</label>';
+	if (resource.restricted) {
+		content += '<div style="padding: 6px 4px 6px 0px"><span class="label-warning">' + gettext("Requires confirmation") + '</span></div></div></td>';
+	}
+	else {
+		content += '<div style="padding: 6px 4px 6px 0px"><span class="label-default">' + gettext("Authorized") + '</span></div></div></td>';
+	}
+	content += '</td>';
+	content += '<td style="vertical-align: top; padding-left: 12px; padding-right: 20px"><div class="form-horizontal"><div class="form-group">';
+	var first = true;
+	for (var j=0; j<downloadParams.length; j++) {
+		param = downloadParams[j];
+		var param_name = param.name;
+		var param_title = param.title;
+		value = downloadParams[j].value;
+		if (first) {
+			first = false;
+			var paramHtml = '<label for="' + param_name + '" class="form-label">' + param_title + '</label>';
+		}
+		else {
+			var paramHtml = '<label for="' + param_name + '" class="control-label">' + param_title + '</label>';
+		}
+		paramHtml += '<p id="' + param_name +'" class="form-control-static">' + value + '</p>';
+		content += paramHtml;
+	}
+	/*
+	content += '<label for"kk" class="control-label">Spatial filter</label>';
+	content += '<select id="kk" class="form-control" data-paramname="bla">';
+	content += '<option value="1">Include all geometries</option>';
+	content += '<option value="1">Include geometries within search filter</option>';
+	content += '<option value="1">Include geometries overlapping search filter</option>';
+	content += '</select>';
+	*/
+	content += '</div></div></td>';
+	content += '<td style="vertical-align: top; padding-left: 12px; width: 100px"><label class="control-label" aria-hidden="true">&nbsp;</label><i class="fa fa-times fa-2x remove-resource-btn" aria-hidden="true" data-downloadid="' + downloadDescriptor.download_id + '"></i></div></td>';
+	content += '</tr>';
+	return content;
+	/*
 	var content = '<li class="downman-link downman-download-resource"  data-downloadid="' + downloadDescriptor.download_id + '" data-downloadresource="' + resourceDescriptor.name + '"><div class="form-inline"><div class="form-group"><div class="col-md-10">';
 	content += '<i class="fa fa-file-archive-o download-resource" aria-hidden="true"></i><label class="control-label download-resource download-resource-title">' + resourceDescriptor.layer_title + " - " + resourceDescriptor.title + '</label>' ;
 
@@ -256,44 +305,9 @@ DownloadManagerUI.prototype.createDownloadResource = function(downloadDescriptor
 	//content += '<button class="btn btn-default remove-resource-btn" type="button" data-layerid="' + resource.layer_id + '" data-downloadresource="' + resource.name + '"><i class="fa fa-times fa-icon-button-left" aria-hidden="true"></i></button>';
 	content += '<i class="fa fa-times fa-icon-button-left remove-resource-btn" aria-hidden="true" data-downloadid="' + downloadDescriptor.download_id + '"></i>';
 	content += '</div></div></div></li>';
-	return content;
+	return content;*/
+	
 }
-
-DownloadManagerUI.prototype.createAvailableResource = function(resource) {
-	var downloadParams = resource.params;
-	var param, paramOption;
-	var content = '';
-	content = '<div class="row downman-download-resource" data-downloadresource="' + resource.name + '">';
-	content += '	<div class="downman-link col-sm-8">';
-	content += '		<i class="fa fa-file-archive-o download-resource" aria-hidden="true"></i><label class="control-label download-resource-title">' + resource.title + '</label>' ;
-
-	for (var j=0; j<downloadParams.length; j++) {
-		param = downloadParams[j];
-		var param_name = param.name;
-		var param_title = param.title;
-		var paramHtml = '<label for="' + param_name + '" class="control-label">' + param_title + '</label>';
-		paramHtml += '<select class="form-control" data-paramname="' + param_name + '">';
-		for (var k=0; k<param.options.length; k++) {
-			paramOption = param.options[k];
-			paramHtml += '<option value="' + paramOption.name + '">' + paramOption.title + '</option>';
-		}
-		paramHtml += '</select>';
-		content += paramHtml;
-	}
-
-	content += '	</div>';
-	content += '	<div class="col-sm-2">';
-	content += '		<button class="btn btn-default add-to-download-btn download-resource-btn" type="button" data-layerid="' + resource.layer_id + '" data-downloadresource="' + resource.name + '">'+gettext("Add to download list")+'</button>';
-	if (resource.direct_download_url) {
-		content += '	</div><div class="col-sm-2">';
-		content += '<a target="_blank" href="' + resource.direct_download_url + '" class="btn btn-default download-resource-btn">'+gettext("Direct download")+'</a>';
-	}
-	content += '	</div>';
-	content += '</div>';
-	console.log(content);
-	return content;
-} 
-
 
 DownloadManagerUI.prototype._getSelectedResource = function(resource_name){
 	for (var i=0; i<this.resources.length; i++) {
@@ -313,23 +327,68 @@ DownloadManagerUI.prototype._getParam = function(resource, param_name){
 	return null;
 }
 
+DownloadManagerUI.prototype.createAvailableResource = function(resource) {
+	var downloadParams = resource.params;
+	var param, paramOption;
+	var content = '<tr data-downloadresource="' + resource.name + '">';
+	if (resource.name != resource.title) {}
+	var name = resource.title + " [" + resource.name + "]";
+	if (resource.restricted) {
+		content += '<td style="width: 80px"><div class="form-inline"><div class="form-group"><i class="fa fa-3x fa-file-archive-o" aria-hidden="true"><i class="fa fa-lock"></i></i></span></div></div></td>';
+	}
+	else {
+		content += '<td style="width: 80px"><div class="form-inline"><div class="form-group"><i class="fa fa-3x fa-file-archive-o" aria-hidden="true"></i></div></div></td>';
+	}
+	
+	content += '<td style="width: 120px;"><div class="col"><label class="form-label">'+ resource.title + '</label>';
+	content += '<div style="padding: 6px 4px 6px 0px">' + resource.name + '</div></div></td>';
+	content += '<td style="vertical-align: top; padding-left: 12px; padding-right: 20px"><div class="form-horizontal"><div class="form-group">';
+	var first = true;
+	for (var j=0; j<downloadParams.length; j++) {
+		param = downloadParams[j];
+		var param_name = param.name;
+		var param_title = param.title;
+		if (first) {
+			first = false;
+			var paramHtml = '<label for="' + param_name + '" class="form-label">' + param_title + '</label>';
+		}
+		else {
+			var paramHtml = '<label for="' + param_name + '" class="control-label">' + param_title + '</label>';
+		}
+		paramHtml += '<select class="form-control" data-paramname="' + param_name + '">';
+		for (var k=0; k<param.options.length; k++) {
+			paramOption = param.options[k];
+			paramHtml += '<option value="' + paramOption.name + '">' + paramOption.title + '</option>';
+		}
+		paramHtml += '</select>';
+		content += paramHtml;
+	}
+	/*
+	content += '<label for"kk" class="control-label">Spatial filter</label>';
+	content += '<select id="kk" class="form-control" data-paramname="bla">';
+	content += '<option value="1">Include all geometries</option>';
+	content += '<option value="1">Include geometries within search filter</option>';
+	content += '<option value="1">Include geometries overlapping search filter</option>';
+	content += '</select>';
+	*/
+	content += '</div></div></td>';
+	content += '<td style="vertical-align: top; padding-left: 12px; width: 100px"><label class="control-label" aria-hidden="true">&nbsp;</label><button style="width: 100%" class="btn btn-default add-to-download-btn" type="button" data-layerid="' + resource.layer_id + '" data-downloadresource="' + resource.name + '">'+gettext("Add to download list")+'</button></div></td>';
+	content += '</tr>';
+	console.log(content);
+	return content;
+}
+
 DownloadManagerUI.prototype.initAvailableResources = function(downloadResources){
 	var self = this;
 	self.resources = downloadResources;
 	var content = '<div class="container-fluid">';
+	content += '<table class="table" id="resources-table">';
+	content += '<tbody>';
 	for (var i=0; i<downloadResources.length; i++) {
 		content += this.createAvailableResource(downloadResources[i]);
 	}
-	if(downloadResources.length == 0){
-		content += '<div style="padding: 10px">';
-		content += '<div class="downman-no-content col-md-12">';
-		content += '<i class="fa fa-ban" aria-hidden="true"></i>   ';
-		content += gettext('No results found');
-		content += '</div>';
-		content += '<div style="clear:both"></div>';
-		content += '</div>';
-	}
-	content += '</div>';
+	content += '</tbody>';
+	content += '</table>';
 
 	$(self.modalSelector).find('.modal-body').html(content);
 	var footer = '	<button class="btn btn-default downman-footer-button catalog-download-list-btn" type="button"><span class="download_list_count">' + self.getClient().getDownloadListCount() + '</span><i class="fa fa-shopping-cart fa-icon-button-left fa-icon-button-right" aria-hidden="true"></i>'+gettext("View download list")+'</button>';
@@ -349,7 +408,7 @@ DownloadManagerUI.prototype.initAvailableResources = function(downloadResources)
 		var values = [];
 		liElement.find('select').each(function() {
 			var currentParam = self._getParam(clickedResource, this.getAttribute("data-paramname"));
-			var resVal = new ResourceDownloadParamValue(currentParam, $(this).val());
+			var resVal = new gvsigol.downman.ResourceDownloadParamValue(currentParam, $(this).val());
 			values.push(resVal);
 		});
 		self.getClient().addLayer(clickedResource, values);
@@ -371,37 +430,73 @@ DownloadManagerUI.prototype.initAvailableResourcesError = function(){
 }
 
 DownloadManagerUI.prototype._updateStartDownloadButton = function(){
-	if(this.getClient().getDownloadList().length > 0){
-		if (viewer.core.conf.user) {
-			document.getElementById('start-download-btn').disabled = false;
+	console.log("_updateStartDownloadButton");
+	if(this.getClient().getDownloadList().length == 0){
+		document.getElementById('start-download-btn').disabled = true;
+		return;
+	}
+	console.log("_updateStartDownloadButton 1");
+	if (!viewer.core.conf.user) {
+		try {
+			var email =  document.getElementById("contactemail").value;
+			if (email.length<6 || !email.includes("@")) {
+				document.getElementById('start-download-btn').disabled = true;
+				return;
+			}
+		}
+		catch {}
+	}
+	console.log("_updateStartDownloadButton 2");
+	try {
+		var intendedUsage =  document.getElementById("downloadAuthorizationUsage").value;
+		console.log("intended usage: '" + intendedUsage + "' - " + intendedUsage.length);
+		if (intendedUsage.length==0 ) {
+			document.getElementById('start-download-btn').disabled = true;
 			return;
 		}
-		else {
-			try {
-				var email =  document.getElementById("contactemail").value;
-				if (email.length>6 && email.includes("@")) {
-					document.getElementById('start-download-btn').disabled = false;
-					return;
-				}
-			}
-			catch {}
-		}
 	}
-	document.getElementById('start-download-btn').disabled = true;
+	catch {}
+
+	document.getElementById('start-download-btn').disabled = false;
 }
 
 DownloadManagerUI.prototype.initDownloadList = function(){
 	var downloadResources = this.getClient().getDownloadList();
 	var self = this;
+	var content = '<div class="container-fluid">';
+	content += '<table class="table" id="resources-table">';
+	content += '<tbody>';
+	for (var i=0; i<downloadResources.length; i++) {
+		content += this.createDownloadResource(downloadResources[i]);
+	}
+	content += '</tbody>';
+	content += '</table>';
+	/*
 	var content = '';
 	for (var i=0; i<downloadResources.length; i++) {
 		content += this.createDownloadResource(downloadResources[i]);
 	}
-	if (!viewer.core.conf.user) {
-		content += '<div><label for="contactemail" class="control-label">' + gettext("Email") + '</label><input id="contactemail" type="email" class="form-control"></div>';
+	*/
+	if(downloadResources.length > 0){
+		for (var i=0; i<downloadResources.length; i++) {
+			if (downloadResources[i].resource_descriptor.restricted) {
+				content += '<div><p>' + gettext('Some of the selected resources require authorization. Please fill the following information:')+ '</p>';
+				content += '<div class="form-group">';
+				content += '<label for="downloadAuthorizationOrganization">' + gettext('Organization')+ '</label>';
+				content += '<input id="downloadAuthorizationOrganization" class="form-control" type="text"></input>';
+				content += '</div>';
+				content += '<div class="form-group required">';
+				content += '<label for="downloadAuthorizationUsage">' + gettext('Indended usage')+ '*</label>';
+				content += '<textarea required class="form-control" id="downloadAuthorizationUsage" rows="5"></textarea>';
+				content += '</div></div>';
+				break;
+			}
+		}
+		if (!viewer.core.conf.user) {
+			content += '<div><label for="contactemail" class="control-label">' + gettext("Email") + '*</label><input id="contactemail" type="email" class="form-control"></div>';
+		}
 	}
-	
-	if(downloadResources.length == 0){
+	else {
 		content += '<div style="padding: 10px">';
 		content += '<div class="downman-no-content col-md-12">';
 		content += '<i class="fa fa-ban" aria-hidden="true"></i>   ';
@@ -410,6 +505,7 @@ DownloadManagerUI.prototype.initDownloadList = function(){
 		content += '<div style="clear:both"></div>';
 		content += '</div>';
 	}
+	content += '</div>';
 
 	$(self.modalSelector).find('.modal-body').html(content);
 	$(self.modalSelector).find('.modal-title').html(gettext("List of downloads"));
@@ -423,7 +519,7 @@ DownloadManagerUI.prototype.initDownloadList = function(){
 	$(".remove-resource-btn").unbind("click").click(function(){
 		var download_id = event.currentTarget.getAttribute("data-downloadid");
 		self.getClient().removeLayer(download_id);
-		$(".modal-body").find('li[data-downloadid="'+download_id+'"]').remove();
+		$(".modal-body").find('tr[data-downloadid="'+download_id+'"]').remove();
 		self._updateStartDownloadButton();
 	});
 	
@@ -436,13 +532,31 @@ DownloadManagerUI.prototype.initDownloadList = function(){
 		catch(e) {
 			var email = null;
 		}
-		self.getClient().startDownloadRequest(email, DownloadManagerUI.prototype.showDownloadQueued, DownloadManagerUI.prototype.showDownloadQueued, self);	
+		try {
+			var intendedUsage =  document.getElementById("downloadAuthorizationUsage").value;
+		}
+		catch(e) {
+			var intendedUsage = null;
+		}
+		try {
+			var organization =  document.getElementById("downloadAuthorizationOrganization").value;
+		}
+		catch(e) {
+			var organization = null;
+		}
+		self.getClient().startDownloadRequest(email, intendedUsage, organization,DownloadManagerUI.prototype.showDownloadQueued, DownloadManagerUI.prototype.showDownloadQueued, self);	
 	});
 	
 	$("#contactemail").change(function(){
 		self._updateStartDownloadButton();
 	});
-	$("#contactemail").keypress(function(){
+	$("#contactemail").keyup(function(){
+		self._updateStartDownloadButton();
+	});
+	$("#downloadAuthorizationUsage").change(function(){
+		self._updateStartDownloadButton();
+	});
+	$("#downloadAuthorizationUsage").keyup(function(){
 		self._updateStartDownloadButton();
 	});
 }

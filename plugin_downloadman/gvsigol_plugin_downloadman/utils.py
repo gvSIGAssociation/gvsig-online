@@ -36,7 +36,7 @@ def getLayer(id_or_uuid):
             lm = LayerMetadata.objects.get(metadata_uuid=id_or_uuid)
             return lm.layer
         except:
-            logger.exception("Error retrieving layer metadata with uuid: " + id_or_uuid)
+            #logger.exception("Error retrieving layer metadata with uuid: " + id_or_uuid)
             pass
 
 

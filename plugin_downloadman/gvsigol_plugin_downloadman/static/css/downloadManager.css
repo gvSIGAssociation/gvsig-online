@@ -42,16 +42,16 @@
 }
 
 .downman-link i{
-    padding: 0px 10px;
-    font-size: 35px;
-    float: left;
-    width: 65px;
-    text-align: center;
+	padding: 0px 10px;
+	font-size: 35px;
+	float: left;
+	width: 65px;
+	text-align: center;
 }
 
 .downman-link span{
-    float: left;
-    margin-top: 0px;
+	float: left;
+	margin-top: 0px;
 }
 
 .downman-footer-button{
@@ -85,5 +85,11 @@
 
 .control-label.ng-scope {
 	padding: 0px;
+}
+
+.fa .fa-lock {
+	position: relative;
+	top: 13px;
+	left: -13px;
 }
 

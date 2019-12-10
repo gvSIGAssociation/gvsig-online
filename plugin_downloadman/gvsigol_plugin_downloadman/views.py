@@ -8,7 +8,7 @@ import json
 from django.http import JsonResponse
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.translation import ugettext as _
-from gvsigol_plugin_downloadman.tasks import processDownloadRequest, resolveFileUrl, notifyReceivedRequest, packageRequest, getDownloadResourceUrl
+from gvsigol_plugin_downloadman.tasks import processDownloadRequest, resolveFileUrl, notifyReceivedRequest, packageRequest, getDownloadResourceUrl, isRestricted
 from gvsigol_plugin_downloadman import models as downman_models
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.crypto import get_random_string
@@ -267,15 +267,18 @@ def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
     all_resources = []
     try:
         geonetwork_instance = geonetwork_service.get_instance()
+        xml_md = geonetwork_instance.get_metadata_raw(metadata_uuid)
+        from gvsigol_plugin_catalog.mdstandards import registry
+        reader = registry.get_reader(xml_md)
+        onlineResources = reader.get_transfer_options()
+        max_public_size = float(downman_models.get_max_public_download_size())
+
         if not layer:
-            xml_md = geonetwork_instance.get_metadata_raw(metadata_uuid)
             if xml_md:
-                from gvsigol_plugin_catalog.mdstandards import registry
-                reader = registry.get_reader(xml_md)
                 layer_title = reader.get_title()
                 LayerTuple = namedtuple('LayerTuple', ['name', 'title'])
                 layer = LayerTuple('', layer_title)
-        onlineResources = geonetwork_instance.get_online_resources(metadata_uuid)
+        #onlineResources = geonetwork_instance.get_online_resources(metadata_uuid)
         for onlineResource in onlineResources:
             resource = None
             if 'OGC:WFS' in onlineResource.protocol:
@@ -340,6 +343,7 @@ def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
                 resource = ResourceDownloadDescriptor(metadata_uuid, layer_name, layer_title, resource_name, resource_title, dataSourceType = downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.HTTP_LINK_RESOURCE_TYPE, url=onlineResource.url, directDownloadUrl=directDownloadUrl)
             #elif onlineResource.protocol.startswith('WWW:LINK-'):
             if resource:
+                resource.restricted = isRestricted(onlineResource, max_public_size)
                 all_resources.append(resource)
     except:
         logger.exception("Error getting download resources for layer")
@@ -424,11 +428,22 @@ def requestDownload(request):
     if request.is_ajax():
         if request.method == 'POST':
             json_data = json.loads(request.body)
+            print json_data
             downRequest = downman_models.DownloadRequest()
+            """
+            # if any of the resoures requires authorization:
+            usage = json_data.get('downloadAuthorizationUsage', '')
+            if not usage:
+                # return an error
+                pass
+            """
             if request.user and not request.user.is_anonymous():
                 downRequest.requested_by_user = request.user.username
             else:
-                downRequest.requested_by_external = json_data.get('email', 'anonymous')
+                downRequest.requested_by_external = json_data.get('email', '')
+                if not downRequest.requested_by_external:
+                    pass
+        
             downRequest.validity = downman_models.get_default_validity()
             downRequest.request_random_id = date.today().strftime("%Y%m%d") + get_random_string(length=32)
             downRequest.json_request = request.body.decode("UTF-8")
@@ -453,6 +468,7 @@ def requestDownload(request):
 
 def requestTracking(request, uuid):
     try:
+        logger.debug(request.get_host())
         r = downman_models.DownloadRequest.objects.get(request_random_id=uuid)
         result = {}
         result['download_uuid'] =  r.request_random_id
@@ -470,9 +486,12 @@ def requestTracking(request, uuid):
                 valid_to = date_format(downloadlink.valid_to, 'DATETIME_FORMAT')
                 link['valid_to'] = valid_to
                 link['status'] = downloadlink.status_desc
+                link['authorization_desc'] = _('Authorized')
                 if downloadlink.status == downman_models.DownloadLink.PROCESSED_STATUS:
-                    
-                    link['download_url'] = getDownloadResourceUrl(uuid, downloadlink.link_random_id) 
+                    url = reverse('downman-download-resource', args=(uuid, downloadlink.link_random_id))
+                    logger.debug(request.build_absolute_uri(url))
+                    link['download_url'] = getDownloadResourceUrl(uuid, downloadlink.link_random_id)
+                    logger.debug(link['download_url']) 
             linkResources = downloadlink.resourcelocator_set.all()
             if len(linkResources)==1:
                 link['name'] = u'{0:d}-{1!s} [{2!s}]\n'.format(count, linkResources[0].fq_title, linkResources[0].name)
@@ -489,6 +508,7 @@ def requestTracking(request, uuid):
         #plain_message += _('\nThe following resources are still being processed:|n')
         for locator in r.resourcelocator_set.filter(download_link__isnull=True):
             link = {}
+            link['authorization_desc'] = locator.authorization_desc
             link['status'] = locator.status_desc
             link['valid_to'] = '-'
             link['download_url'] = '-'
@@ -681,8 +701,13 @@ def dashboard_index(request):
 def update_request(request, request_id):
     try:
         download_request = downman_models.DownloadRequest.objects.get(pk=int(request_id))
+        raw_request = json.loads(download_request.json_request)
+        usage = raw_request.get('usage')
+        organization = raw_request.get('organization')
         response = {
-            'download_request': download_request
+            'download_request': download_request,
+            'usage': usage,
+            'organization': organization
             }
         return render(request, 'download_request_update.html', response)
     except:
@@ -717,8 +742,8 @@ def cancel_locator(request, resource_id):
                     locator.save()
                     pending_locators += 1
             if pending_locators:
-                packageRequest.apply_async(args=[locator.request.pk], queue='package') #@UndefinedVariable
-        return redirect(reverse('downman-update-request', args=(locator.request.pk,)))
+                packageRequest.apply_async(args=[resource.request.pk], queue='package') #@UndefinedVariable
+        return redirect(reverse('downman-update-request', args=(resource.request.pk,)))
     except:
         logger.exception("Error")
         raise Http404
@@ -736,7 +761,7 @@ def cancel_link(request, link_id):
             locator.canceled = True
             locator.status = downman_models.ResourceLocator.PROCESSED_STATUS
             locator.save()
-        return redirect(reverse('downman-update-request', args=(locator.request.pk,)))
+        return redirect(reverse('downman-update-request', args=(download_link.request.pk,)))
     except:
         logger.exception("Error")
         raise Http404
@@ -763,3 +788,34 @@ def cancel_request(request, request_id):
         logger.exception("Error")
         raise Http404
 
+
+@require_POST
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@superuser_required
+def accept_resource_authorization(request, resource_id):
+    try:
+        resource = downman_models.ResourceLocator.objects.get(pk=int(resource_id))
+        resource.authorization = downman_models.ResourceLocator.AUTHORIZATION_ACCEPTED
+        resource.save()
+        processDownloadRequest.apply_async(args=[resource.request.pk], queue='resolvreq') #@UndefinedVariable
+        return redirect(reverse('downman-update-request', args=(resource.request.pk,)))
+    except:
+        logger.exception("Error")
+        raise Http404
+    
+
+@require_POST
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@superuser_required
+def reject_resource_authorization(request, resource_id):
+    try:
+        resource = downman_models.ResourceLocator.objects.get(pk=int(resource_id))
+        resource.authorization = downman_models.ResourceLocator.AUTHORIZATION_REJECTED
+        resource.save()
+        processDownloadRequest.apply_async(args=[resource.request.pk], queue='resolvreq') #@UndefinedVariable
+        return redirect(reverse('downman-update-request', args=(resource.request.pk,)))
+    except:
+        logger.exception("Error")
+        raise Http404
+    
+    

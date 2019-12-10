@@ -61,6 +61,27 @@
 								</div>
 							</div>
 						</div>
+						{% if usage %}
+						<div class="row">
+							<div class="col-sm-12">
+								<div class="box-header">
+									<h3 class="box-title">Authorization request</h3>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12">
+								<label>{% trans "Indended usage" %}</label>
+								<textarea class="form-control" readonly name="usage" id="usage">{{usage}}</textarea>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12">
+								<label>{% trans "Organization" %}</label>
+								<input class="form-control" readonly name="organization" id="organization" type="text" value="{{organization}}">
+							</div>
+						</div>
+						{% endif %}
 						<div class="row" style="padding-top: 10px">
 							<div class="col-md-12">
 								<div class="box-header"  style="padding-top: 10px; padding-bottom: 0px">
@@ -194,6 +215,46 @@
 			</div>
 		</div>
 	</div>
+	<div class="modal fade" id="modal-authorization-accept" tabindex="-1" role="dialog" aria-labelledby="modal-authorization-label">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="modal-authorization-label">{% trans "Authorize access to a restricted resource" %}</h4>
+				</div>
+				<div class="modal-body">
+					<p>{% blocktrans %}The user will get access to a restricted resource [ID <span id="authorized-resource"></span>]. Do you want to continue?{% endblocktrans %}</p>
+				</div>
+				<div class="modal-footer">
+					<button id="button-cancel-authorize-resource" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+					<button id="button-confirm-authorize-resource" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="modal-authorization-reject" tabindex="-1" role="dialog" aria-labelledby="modal-authorization-reject-label">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="modal-authorization-reject-label">{% trans "Reject authorization" %}</h4>
+				</div>
+				<div class="modal-body">
+					<p>{% blocktrans %}The resource [<span id="rejected-resource"></span>] will not be available for the user who requested the download. Do you want to continue?{% endblocktrans %}</p>
+				</div>
+				<div class="modal-footer">
+					<button id="button-cancel-reject-resource" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+					<button id="button-confirm-reject-resource" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+				</div>
+			</div>
+		</div>
+	</div>
 {% endblock %}
 
 {% block extra-scripts %}
@@ -203,7 +264,6 @@
 
 	$( document ).ready(function() {
 		$('#button-confirm-disable-resource').click( function() {
-			console.log($(this));
 			var theForm = document.getElementById("theform");
 			var resourceId = $('#disabled-resource').html();
 			var actionUrl = "{% url 'download-resource-cancel' resource_id=12345 %}".replace(/12345/, resourceId);
@@ -211,41 +271,41 @@
 			theForm.submit();
 		});
 		$('#button-confirm-disable-link').click( function() {
-			console.log($(this));
 			var theForm = document.getElementById("theform");
 			var linkId = $('#disabled-link').html();
 			var actionUrl = "{% url 'download-link-cancel' link_id=12345 %}".replace(/12345/, linkId);
 			theForm.action = actionUrl;
 			theForm.submit();
 		});
+		$('#button-confirm-authorize-resource').click( function() {
+			var theForm = document.getElementById("theform");
+			var resourceId = $('#authorized-resource').html();
+			var actionUrl = "{% url 'resource-authorization-accept' resource_id=12345 %}".replace(/12345/, resourceId);
+			theForm.action = actionUrl;
+			theForm.submit();
+		});
+		$('#button-confirm-reject-resource').click( function() {
+			var theForm = document.getElementById("theform");
+			var resourceId = $('#rejected-resource').html();
+			var actionUrl = "{% url 'resource-authorization-reject' resource_id=12345 %}".replace(/12345/, resourceId);
+			theForm.action = actionUrl;
+			theForm.submit();
+		});
 		$('.disable-link-button').on('click', function (){
 			$('#disabled-link').html($(this).attr('data-linkid'));
 			$('#modal-link-cancel').modal('show');
-			console.log($(this));
-			console.log($(this).attr('data-linkid'));
 		});
 		$('.disable-resource-button').on('click', function (){
 			$('#disabled-resource').html($(this).attr('data-resourceid'));
 			$('#modal-resource-cancel').modal('show');
-			
-			console.log($(this));
-			console.log($(this).attr('data-resourceid'));
 		});
 		$('.reject-resource-button').on('click', function (){
-			/* TODO
-			$('#disabled-resource').html($(this).attr('data-resourceid'));
-			$('#modal-resource-cancel').modal('show');
-			
-			console.log($(this));
-			console.log($(this).attr('data-resourceid'));*/
+			$('#rejected-resource').html($(this).attr('data-resourceid'));
+			$('#modal-authorization-reject').modal('show');
 		});
 		$('.authorize-resource-button').on('click', function (){
-			/* TODO
-			$('#disabled-resource').html($(this).attr('data-resourceid'));
-			$('#modal-resource-cancel').modal('show');
-			
-			console.log($(this));
-			console.log($(this).attr('data-resourceid'));*/
+			$('#authorized-resource').html($(this).attr('data-resourceid'));
+			$('#modal-authorization-accept').modal('show');
 		});
 	});
 </script>

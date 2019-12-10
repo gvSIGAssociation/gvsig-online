@@ -49,7 +49,7 @@
 				<h4>{% trans "Requested resources: " %}</h4>
 				{% if link_count %}
 					<table class="table">
-					<tr><th>{% trans "Name" %}</th><th>{% trans "Status" %}</th><th>{% trans "Valid to" %}</th><th>{% trans "URL" %}</th></tr>
+					<tr><th>{% trans "Name" %}</th><th>{% trans "Authorization" %}</th><th>{% trans "Status" %}</th><th>{% trans "Valid to" %}</th><th>{% trans "URL" %}</th></tr>
 					{% for link in links %}
 						<tr>
 							<td>{{ link.name }}
@@ -61,6 +61,7 @@
 							</ul>
 							{% endif %}
 							</td>
+							<td>{{ link.authorization_desc }}</td>
 							<td>{{ link.status }}</td>
 							<td>{{ link.valid_to }}</td>
 							<td><a href="{{ link.download_url }}">{{ link.download_url }}</a></td>

@@ -18,10 +18,6 @@ urlpatterns = [
     url(r'^downloadmanager/request/(?P<request_id>[\-a-zA-Z0-9]+)/cancel/$', downman_views.cancel_request, name='download-request-cancel'),
     url(r'^downloadmanager/link/(?P<link_id>[\-a-zA-Z0-9]+)/cancel/$', downman_views.cancel_link, name='download-link-cancel'),
     url(r'^downloadmanager/resource/(?P<resource_id>[\-a-zA-Z0-9]+)/cancel/$', downman_views.cancel_locator, name='download-resource-cancel'),
-    #url(r'^downloadmanager/request/(?P<uuid>[\-a-zA-Z0-9]+)/$', downman_views.downloadLink, name='download-link'),
-    #url(r'^upload/$', UploadView.as_view(), name='upload'),
-    #url(r'^upload/file/$', csrf_exempt(UploadFileView.as_view()), name='upload-file'),
-    #url(r'^delete/file/$', csrf_exempt(DeleteFileView.as_view()), name='delete-file'),
-    #url(r'^create/directory/$', DirectoryCreateView.as_view(), name='create-directory'),
-    #url(r'^export_to_database/$', ExportToDatabaseView.as_view(), name='export-to-database'),
+    url(r'^downloadmanager/resource-authorization/(?P<resource_id>[\-a-zA-Z0-9]+)/accept/$', downman_views.accept_resource_authorization, name='resource-authorization-accept'),
+    url(r'^downloadmanager/resource-authorization/(?P<resource_id>[\-a-zA-Z0-9]+)/reject/$', downman_views.reject_resource_authorization, name='resource-authorization-reject'),
 ]
