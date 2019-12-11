@@ -3,7 +3,7 @@
 {% load i18n %}
 
 {% block content %}	
-	<div class="row">
+	<div class="row">	
 		<div class="col-md-12">
 				<div class="row">
 					<div class="col" style="padding-left: 30px;">
@@ -252,6 +252,15 @@
 					<button id="button-cancel-reject-resource" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
 					<button id="button-confirm-reject-resource" type="button" class="btn btn-default">{% trans "Accept" %}</button>
 				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row" style="padding-top: 10px">
+		<div class="col-md-12">
+			<div class="box-tools pull-right">
+				<a href="{% url 'downman-dashboard-index' %}"><button type="button" class="btn btn-default btn-sm">
+					{% trans "Close" %}
+				</button></a>
 			</div>
 		</div>
 	</div>
