@@ -375,6 +375,7 @@ search.prototype.initUI = function() {
 				},
 				success	:function(response){
 					if(response.address && response.address["address"]) {
+						window.lastgeolocationsearch = response;
 						var epsg = 'EPSG:4258';
 						if (response.address.source && response.address.source === 'ide_uy') { // Ugly Patch
 							epsg = 'EPSG:4326';
