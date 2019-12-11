@@ -54,3 +54,22 @@ msgstr "Hubo un error procesando su petición. Por favor, inténtelo más tarde"
 msgid "Direct download"
 msgstr "Descarga directa"
 
+msgid "Requires confirmation"
+msgstr "Requiere confirmación"
+
+msgid "Authorized"
+msgstr "Autorizado"
+
+msgid "Authorization"
+msgstr "Autorización"
+
+msgid "Some of the selected resources require authorization. Please fill the following information:"
+msgstr "Alguno de los recursos seleccionados requiere autorización. Por favor, rellene la siguiente información:"
+
+msgid "Organization"
+msgstr "Autorización"
+
+msgid "Indended usage"
+msgstr "Uso previsto"
+
+

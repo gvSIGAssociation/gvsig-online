@@ -52,3 +52,22 @@ msgstr ""
 msgid "Direct download"
 msgstr ""
 
+msgid "Requires confirmation"
+msgstr ""
+
+msgid "Authorized"
+msgstr ""
+
+msgid "Authorization"
+msgstr ""
+
+msgid "Some of the selected resources require authorization. Please fill the following information:"
+msgstr ""
+
+msgid "Organization"
+msgstr ""
+
+msgid "Indended usage"
+msgstr ""
+
+
