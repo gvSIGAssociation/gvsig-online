@@ -64,6 +64,7 @@ class DownloadRequest(models.Model):
     request_random_id = models.TextField(db_index=True)
     json_request = models.TextField() # we keep the request as received from the client for debugging purposes
     language = models.CharField(max_length=50, blank=True)
+    pending_authorization = models.BooleanField(default=False, db_index=True)
     @property
     def status_desc(self):
         for (choice_code, choice_desc) in DownloadRequest.REQUEST_STATUS_CHOICES:
@@ -75,6 +76,12 @@ class DownloadRequest(models.Model):
             return self.status_desc + ' - ' + ugettext('Active')
         else:
             return self.status_desc + ' - ' +ugettext('Archived')
+    @property
+    def status_authorization(self):
+        if self.pending_authorization:
+            return self.status_desc + ' - ' + ugettext('Awaiting authorization')
+        else:
+            return self.status_desc
     
     @property
     def active(self):

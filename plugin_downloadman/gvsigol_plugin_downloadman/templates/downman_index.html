@@ -24,13 +24,34 @@
 		</div>
 		
 		<ul id="navigationTabs" class="nav nav-tabs">
-			<li class="{{ active_class }}" role="navigation"><a href="{{ downman_dashboard_index }}?tab=active" >{% trans "Active download requests" %}</a></li>
-			<li class="{{ archived_class }}" role="navigation"><a href="{{ downman_dashboard_index }}?tab=archived" >{% trans "Archived download requests" %}</a></li>
-			<li class="{{ settings_class }}" role="navigation"><a href="{{ downman_dashboard_index }}?tab=settings" >{% trans "Download manager settings" %}</a></li>
+			{% if activetab == "pendingauth" %}
+			<li class="active" role="navigation"><a href="{{ downman_dashboard_index }}?tab=pendingauth" >{% trans "Awaiting authorization" %}</a></li>
+			{% else %}
+			<li class="" role="navigation"><a href="{{ downman_dashboard_index }}?tab=pendingauth" >{% trans "Awaiting authorization" %}</a></li>
+			{% endif %}
+			{% if activetab == "active" %}
+			<li class="active" role="navigation"><a href="{{ downman_dashboard_index }}?tab=active" >{% trans "Active download requests" %}</a></li>
+			{% else %}
+			<li class="" role="navigation"><a href="{{ downman_dashboard_index }}?tab=active" >{% trans "Active download requests" %}</a></li>
+			{% endif %}
+			{% if activetab == "archived" %}
+			<li class="active" role="navigation"><a href="{{ downman_dashboard_index }}?tab=archived" >{% trans "Archived download requests" %}</a></li>
+			{% else %}
+			<li class="" role="navigation"><a href="{{ downman_dashboard_index }}?tab=archived" >{% trans "Archived download requests" %}</a></li>
+			{% endif %}
+			{% if activetab == "settings" %}
+			<li class="active" role="navigation"><a href="{{ downman_dashboard_index }}?tab=settings" >{% trans "Download manager settings" %}</a></li>
+			{% else %}
+			<li class="" role="navigation"><a href="{{ downman_dashboard_index }}?tab=settings" >{% trans "Download manager settings" %}</a></li>
+			{% endif %}
 		</ul>
 		
 		<div class="tab-content">
-			<div class="tab-pane  {{ active_class }} {{ archived_class }}" id="tab-download-requests">
+			{% if activetab != "settings" %}
+			<div class="tab-pane active" id="tab-download-requests">
+			{% else %}
+			<div class="tab-pane" id="tab-download-requests">
+			{% endif %}
 				<div class="box">
 					<div id="form-error" style="color:#ff0000;">
 					</div>
@@ -51,7 +72,7 @@
 								<tr>
 									<td>{{ download_request.id }}</td>
 									<td>{{ download_request.requested_date }}</td>
-									<td>{{ download_request.status_desc }}</td>
+									<td>{{ download_request.status_authorization }}</td>
 									<td>{% if download_request.requested_by_user %} {{ download_request.requested_by_user}} {% else %} {{ download_request.requested_by_external}} {% trans '(External user)' %} {% endif %}</td>
 									<td>{{ download_request.contents_details }}</td>
 									<td><a href="{% url 'downman-update-request' request_id=download_request.id %}"><button type="button" name="button-update-request" data-toggle="tooltip" data-placement="bottom" title="{% trans 'Update request' %}" class="btn btn-success"><i class="fa fa-edit"></i></button></a></td>
@@ -62,7 +83,11 @@
 					</div>
 				</div>
 			</div>
-			<div class="tab-pane {{ settings_class }}" id="tab-downman-settings">
+			{% if activetab == "settings" %}
+			<div class="tab-pane active" id="tab-downman-settings">
+			{% else %}
+			<div class="tab-pane" id="tab-downman-settings">
+			{% endif %}
 				<form role="form" method="post" action="{% url 'downman-settings-store' %}?tab=settings">
 					{% csrf_token %}
 					<div class="row">

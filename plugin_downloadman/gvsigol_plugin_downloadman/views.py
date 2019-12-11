@@ -307,9 +307,10 @@ def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
                                                     dataSourceType=downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE,
                                                     resourceType=downman_models.ResourceLocator.OGC_WCS_RESOURCE_TYPE,
                                                     dataFormats=['image/geotiff', 'image/png'])
-            elif (onlineResource.protocol.startswith('WWW:DOWNLOAD-') and onlineResource.protocol.endswith('-download')) \
-                    or (onlineResource.protocol.startswith('WWW:LINK-') and onlineResource.protocol.endswith('-link')) \
-                    or onlineResource.protocol.startswith('FILE:'):
+            elif (onlineResource.protocol.startswith('WWW:DOWNLOAD-') and onlineResource.protocol.endswith('-download')) or \
+                onlineResource.protocol.startswith('FILE:'):
+                # or (onlineResource.protocol.startswith('WWW:LINK-') and onlineResource.protocol.endswith('-link')) \
+                #onlineResource.protocol.startswith('FILE:'):
                 if onlineResource.name:
                     resource_name = onlineResource.name
                 elif onlineResource.url and not onlineResource.url.endswith("/"):
@@ -655,14 +656,13 @@ def render_settings(request):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @superuser_required
 def dashboard_index(request):
-    selected_tab = request.GET.get("tab", "active")
+    selected_tab = request.GET.get("tab", "pendingauth")
     now = timezone.now()
     if selected_tab == "settings":
         return render_settings(request)
+    elif selected_tab == "pendingauth":
+        request_list = downman_models.DownloadRequest.objects.filter(pending_authorization=True)
     elif selected_tab == "archived":
-        settings_class = ""
-        active_class = ""
-        archived_class = "active"
         request_list = downman_models.DownloadRequest.objects.exclude( \
             (Q(downloadlink__valid_to__gte=now) &
              Q(downloadlink__status=downman_models.DownloadLink.PROCESSED_STATUS)) | \
@@ -673,9 +673,6 @@ def dashboard_index(request):
             Q(resourcelocator__status=downman_models.ResourceLocator.HOLD_STATUS)))).distinct()
 
     else: # "active"
-        settings_class = ""
-        active_class = "active"
-        archived_class = ""
         request_list = downman_models.DownloadRequest.objects.filter( \
             (Q(downloadlink__valid_to__gte=now) &
              Q(downloadlink__status=downman_models.DownloadLink.PROCESSED_STATUS)) | \
@@ -690,9 +687,7 @@ def dashboard_index(request):
     request_list.order_by('-id', 'request_status')
     response = {
         'download_requests': request_list,
-        'settings_class': settings_class,
-        'active_class': active_class,
-        'archived_class': archived_class
+        'activetab': selected_tab
     }
     return render(request, 'downman_index.html', response)
 

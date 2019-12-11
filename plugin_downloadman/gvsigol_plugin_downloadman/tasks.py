@@ -718,6 +718,14 @@ def createDownloadLink(downloadRequest, resourceLocator, prepared_download_path=
         logger.exception("Error creating download link")
         raise PermanentPreparationError()
 
+def updatePendingAuthorization(request):
+    pending_authorization = request.resourcelocator_set.filter(authorization=ResourceLocator.AUTHORIZATION_PENDING).count()
+    if pending_authorization > 0:
+        request.pending_authorization = True
+    else: 
+        request.pending_authorization = False
+    request.save()
+
 @shared_task(bind=True)
 def packageRequest(self, request_id):
     logger.debug('packageRequest')
@@ -754,6 +762,8 @@ def packageRequest(self, request_id):
                 os.remove(zip_path)
         except:
             logger.exception("error handling packaging error")
+    updatePendingAuthorization(request)
+    
     if not result:
         delay = getNextPackagingRetryDelay(request)
         if delay:
@@ -820,10 +830,13 @@ def processDownloadRequest(self, request_id):
         request.save()
         
         result = processLocators(request)
-        logger.debug(result)
+        #logger.debug(result)
+
     except Exception:
-        logger.exception("error preparing download request")
+        logger.exception("Error preparing download request")
     
+    updatePendingAuthorization(request)
+
     try:
         if not result:
             delay = getNextPackagingRetryDelay(request)
@@ -850,14 +863,14 @@ def processDownloadRequest(self, request_id):
         logger.debug("raising retry")
         raise
     except:
-        logger.exception("error cmi 02")
+        logger.exception("Error processing request")
 
     # if there are no locators waiting for admin feedback and we reach the maximum amount of retries,
     # then we need to update locators and request status
     try:
-        waiting_feedback = request.resourcelocator_set.filter( \
-                                                      Q(authorization=ResourceLocator.AUTHORIZATION_PENDING) | \
-                                                      Q(status=ResourceLocator.HOLD_STATUS)).count()
+        on_hold = request.resourcelocator_set.filter(status=ResourceLocator.HOLD_STATUS).count()
+        waiting_feedback = on_hold + pending_authorization
+        
         if waiting_feedback == 0:
             errors = 0
             locators = ( request.resourcelocator_set.filter(status=ResourceLocator.TEMPORAL_ERROR_STATUS) | \
