@@ -13,32 +13,33 @@
 #
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 msgid "Import from service"
-msgstr ""
+msgstr "Importar desde servei"
 
 msgid "Import layer from service"
-msgstr ""
+msgstr "Importar capa desde servei"
 
 msgid "Service"
-msgstr ""
+msgstr "Servei"
 
 msgid "Service URL"
-msgstr ""
+msgstr "URL del servei"
 
 msgid "Connect"
-msgstr ""
+msgstr "Connectar"
 
 msgid "Remove layer"
-msgstr ""
+msgstr "Eliminar capa"
 
 msgid "You must type a valid URL"
-msgstr ""
+msgstr "Heu d'escriure un URL vàlid"
 
 msgid "Load layer"
-msgstr ""
+msgstr "Carregar capes"
 
 msgid "Imported layers"
-msgstr ""
+msgstr "Capes importades"
 
 msgid "Close"
-msgstr ""
+msgstr "Tancar"
