@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import include, url, i18n
 from django.views.i18n import javascript_catalog
+from django.views.i18n import JavaScriptCatalog
 from django.contrib import admin
 
 import settings
@@ -22,13 +23,54 @@ import settings
 handler404 = 'gvsigol_core.views.not_found_view'
 
 js_info_dict = {
-    'packages': ('gvsigol_auth','gvsigol_core','gvsigol_services','gvsigol_symbology','gvsigol_plugin_print','gvsigol_plugin_etl','gvsigol_plugin_graphiccapture', 'gvsigol_plugin_importvector', 'gvsigol_plugin_picassa', 'gvsigol_plugin_catalog', 'gvsigol_plugin_worldwind', 'gvsigol_plugin_edition', 'gvsigol_plugin_print', 'gvsigol_plugin_geocoding', 'gvsigol_plugin_downloadman', 'gvsigol_plugin_importfromservice', 'gvsigol_plugin_trip_planner', 'gvsigol_plugin_draw', 'gvsigol_plugin_elevation'),
+    'packages': (
+        'gvsigol_auth',
+        'gvsigol_core',
+        'gvsigol_services',
+        'gvsigol_symbology',
+        'gvsigol_plugin_print',
+        'gvsigol_plugin_etl',
+        'gvsigol_plugin_graphiccapture',
+        'gvsigol_plugin_importvector',
+        'gvsigol_plugin_picassa',
+        'gvsigol_plugin_catalog',
+        'gvsigol_plugin_worldwind',
+        'gvsigol_plugin_edition',
+        'gvsigol_plugin_print',
+        'gvsigol_plugin_geocoding',
+        'gvsigol_plugin_downloadman',
+        'gvsigol_plugin_importfromservice',
+        'gvsigol_plugin_trip_planner',
+        'gvsigol_plugin_draw',
+        'gvsigol_plugin_elevation'
+    ),
 }
+
+packages = [
+    'gvsigol_auth',
+    'gvsigol_core',
+    'gvsigol_services',
+    'gvsigol_symbology',
+    'gvsigol_plugin_print',
+    'gvsigol_plugin_etl',
+    'gvsigol_plugin_graphiccapture',
+    'gvsigol_plugin_importvector',
+    'gvsigol_plugin_picassa',
+    'gvsigol_plugin_catalog',
+    'gvsigol_plugin_worldwind',
+    'gvsigol_plugin_edition',
+    'gvsigol_plugin_print',
+    'gvsigol_plugin_geocoding',
+    'gvsigol_plugin_downloadman',
+    'gvsigol_plugin_importfromservice',
+    'gvsigol_plugin_trip_planner',
+    'gvsigol_plugin_draw',
+    'gvsigol_plugin_elevation'
+]
 
 urlpatterns = [
     url(r'^gvsigonline/i18n/', include(i18n)),
-    #url(r'^gvsigonline/jsi18n/$', javascript_catalog, js_info_dict),   
-    url(r'^gvsigonline/jsi18n/$', javascript_catalog, js_info_dict, name='javascript-catalog'),
+    url(r'^gvsigonline/jsi18n/$', JavaScriptCatalog.as_view(packages=packages), name='javascript-catalog'),
     url(r'^gvsigonline/admin/', include(admin.site.urls)),
 ]
 
