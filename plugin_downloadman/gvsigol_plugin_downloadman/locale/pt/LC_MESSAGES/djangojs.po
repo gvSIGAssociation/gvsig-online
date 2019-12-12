@@ -15,40 +15,42 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 msgid "Add to download list"
-msgstr ""
+msgstr "Add to download list"
 
 msgid "No results found"
-msgstr ""
+msgstr "No results found"
 
 msgid "View download list"
-msgstr ""
+msgstr "View download list"
 
 msgid "Available downloads"
-msgstr ""
+msgstr "Available downloads"
 
 msgid "The list of downloads could not be retrieved. Try again later or contact the service administrator if the error persists"
-msgstr ""
+msgstr "The list of downloads could not be retrieved. Try again later or contact the service administrator if the error persists"
 
 msgid "Email"
-msgstr ""
+msgstr "Email"
 
 msgid "No layers have been selected for download"
-msgstr ""
+msgstr "No layers have been selected for download"
 
 msgid "List of downloads"
-msgstr ""
+msgstr "List of downloads"
 
 msgid "Start downloading"
-msgstr ""
+msgstr "Start downloading"
 
 msgid ""
 "Your download request has been registered. You will receive an email when your request is ready for download. "
 "You can also use this tracking link to check the status of your request: "
 msgstr ""
+"Your download request has been registered. You will receive an email when your request is ready for download. "
+"You can also use this tracking link to check the status of your request: "
 
 msgid "There was an error processing your download request. Please, try again later"
-msgstr ""
+msgstr "There was an error processing your download request. Please, try again later"
 
 msgid "Direct download"
-msgstr ""
+msgstr "Direct download"
 

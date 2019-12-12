@@ -15,25 +15,25 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 msgid "Import vector file"
-msgstr "Importar archivo vectorial"
+msgstr "Importar arxiu vectorial"
 
 msgid "Vector file"
-msgstr "Archivo vectorial"
+msgstr "Arxiu vectorial"
 
 msgid "Layer title in TOC"
-msgstr "Título de la capa en el TOC"
+msgstr "Títol de la capa al TOC"
 
 msgid "Imported vector files"
-msgstr "Archivos vectoriales importados"
+msgstr "Arxius vectorials importats"
 
 msgid "Remove layer"
 msgstr "Eliminar capa"
 
 msgid "You must select a file"
-msgstr "Debe seleccionar un archivo"
+msgstr "Heu de seleccionar un arxiu"
 
 msgid "You must indicate a title for the layer"
-msgstr "Debe indicar un título para la capa"
+msgstr "Heu d'indicar un títol per a la capa"
 
 msgid "Close"
-msgstr ""
+msgstr "Tancar"

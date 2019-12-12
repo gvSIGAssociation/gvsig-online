@@ -14,31 +14,31 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid "Import from service"
-msgstr ""
+msgstr "Import from service"
 
 msgid "Import layer from service"
-msgstr ""
+msgstr "Import layer from service"
 
 msgid "Service"
-msgstr ""
+msgstr "Service"
 
 msgid "Service URL"
-msgstr ""
+msgstr "Service URL"
 
 msgid "Connect"
-msgstr ""
+msgstr "Connect"
 
 msgid "Remove layer"
-msgstr ""
+msgstr "Remove layer"
 
 msgid "You must type a valid URL"
-msgstr ""
+msgstr "You must type a valid URL"
 
 msgid "Load layer"
-msgstr ""
+msgstr "Load layer"
 
 msgid "Imported layers"
-msgstr ""
+msgstr "Imported layers"
 
 msgid "Close"
-msgstr ""
+msgstr "Close"

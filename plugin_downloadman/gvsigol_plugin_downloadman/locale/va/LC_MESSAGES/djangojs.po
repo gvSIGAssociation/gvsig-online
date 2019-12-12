@@ -15,40 +15,42 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 msgid "Add to download list"
-msgstr ""
+msgstr "Afegeix a la llista de descàrregues"
 
 msgid "No results found"
-msgstr ""
+msgstr "Sense resultats"
 
 msgid "View download list"
-msgstr ""
+msgstr "Veure la llista de descàrregues"
 
 msgid "Available downloads"
-msgstr ""
+msgstr "Descàrregues disponibles"
 
 msgid "The list of downloads could not be retrieved. Try again later or contact the service administrator if the error persists"
-msgstr ""
+msgstr "La llista de descàrregues no s'ha pogut recuperar. Torneu-ho a provar més tard o poseu-vos en contacte amb l'administrador del servei si l'error persisteix"
 
 msgid "Email"
-msgstr ""
+msgstr "Correu electrònic"
 
 msgid "No layers have been selected for download"
-msgstr ""
+msgstr "No s'han seleccionat capes per descarregar"
 
 msgid "List of downloads"
-msgstr ""
+msgstr "Llista de descàrregues"
 
 msgid "Start downloading"
-msgstr ""
+msgstr "Comença a descarregar"
 
 msgid ""
 "Your download request has been registered. You will receive an email when your request is ready for download. "
 "You can also use this tracking link to check the status of your request: "
 msgstr ""
+"S'ha registrat la sol·licitud de descàrrega. Rebrà un correu electrònic quan la sol·licitud estigui llesta per a la seva descàrrega. "
+"També podeu utilitzar aquest enllaç de seguiment per comprovar l'estat de la sol·licitud: "
 
 msgid "There was an error processing your download request. Please, try again later"
-msgstr ""
+msgstr "S'ha produït un error en processar la sol·licitud de descàrrega. Siusplau, intenta-ho més tard"
 
 msgid "Direct download"
-msgstr ""
+msgstr "Descàrrega directa"
 

@@ -15,25 +15,25 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 msgid "Import vector file"
-msgstr ""
+msgstr "Import vector file"
 
 msgid "Vector file"
-msgstr ""
+msgstr "Vector file"
 
 msgid "Layer title in TOC"
-msgstr ""
+msgstr "Layer title in TOC"
 
 msgid "Imported vector files"
-msgstr ""
+msgstr "Imported vector files"
 
 msgid "Remove layer"
-msgstr ""
+msgstr "Remove layer"
 
 msgid "You must select a file"
-msgstr ""
+msgstr "You must select a file"
 
 msgid "You must indicate a title for the layer"
-msgstr ""
+msgstr "You must indicate a title for the layer"
 
 msgid "Close"
 msgstr ""
