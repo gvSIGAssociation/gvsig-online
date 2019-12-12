@@ -16,455 +16,455 @@
 
 # export_a4h.html
 msgid "Printing date"
-msgstr ""
+msgstr "Printing date"
 
 msgid "Printing message"
-msgstr ""
+msgstr "Printing message"
 
 # viewer.js
 msgid "Blank"
-msgstr ""
+msgstr "Blank"
 
 msgid "OpenStreetMap"
-msgstr ""
+msgstr "OpenStreetMap"
 
 # attributeTable.js
 msgid "Processing request"
-msgstr ""
+msgstr "Processing request"
 
 msgid "Search"
-msgstr ""
+msgstr "Search"
 
 msgid "Showing"
-msgstr ""
+msgstr "Showing"
 
 msgid "Showing from"
-msgstr ""
+msgstr "Showing from"
 
 msgid "registers"
-msgstr ""
+msgstr "registers"
 
 msgid "to"
-msgstr ""
+msgstr "to"
 
 msgid "of"
-msgstr ""
+msgstr "of"
 
 msgid "Filtering"
-msgstr ""
+msgstr "Filtering"
 
 msgid "Loading"
-msgstr ""
+msgstr "Loading"
 
 msgid "No records available"
-msgstr ""
+msgstr "No records available"
 
 msgid "First"
-msgstr ""
+msgstr "First"
 
 msgid "Previous"
-msgstr ""
+msgstr "Previous"
 
 msgid "Next"
-msgstr ""
+msgstr "Next"
 
 msgid "Last"
-msgstr ""
+msgstr "Last"
 
 msgid "Sort ascending"
-msgstr ""
+msgstr "Sort ascending"
 
 msgid "Sort descending"
-msgstr ""
+msgstr "Sort descending"
 
 msgid "Zoom to selection"
-msgstr ""
+msgstr "Zoom to selection"
 
 msgid "Select all"
-msgstr ""
+msgstr "Select all"
 
 msgid "Clear selection"
-msgstr ""
+msgstr "Clear selection"
 
 msgid "You must select at least one row"
-msgstr ""
+msgstr "You must select at least one row"
 
 msgid "Print selection"
-msgstr ""
+msgstr "Print selection"
 
 msgid "Advanced filter"
-msgstr ""
+msgstr "Advanced filter"
 
 msgid "A visible layer with temporal properties is needed"
-msgstr ""
+msgstr "A visible layer with temporal properties is needed"
 
 msgid "Select field"
-msgstr ""
+msgstr "Select field"
 
 msgid "Select value"
-msgstr ""
+msgstr "Select value"
 
 msgid "Apply filter"
-msgstr ""
+msgstr "Apply filter"
 
 msgid "Clear filter"
-msgstr ""
+msgstr "Clear filter"
 
 # editionBar.js
 msgid "Add point to center"
-msgstr ""
+msgstr "Add point to center"
 
 msgid "can't be empty"
-msgstr ""
+msgstr "can't be empty"
 
 msgid "can't be null"
-msgstr ""
+msgstr "can't be null"
 
 msgid "Add point"
-msgstr ""
+msgstr "Add point"
 
 msgid "Add line"
-msgstr ""
+msgstr "Add line"
 
 msgid "Add polygon"
-msgstr ""
+msgstr "Add polygon"
 
 msgid "Edit feature"
-msgstr ""
+msgstr "Edit feature"
 
 msgid "Remove feature"
-msgstr ""
+msgstr "Remove feature"
 
 msgid "Stop edition"
-msgstr ""
+msgstr "Stop edition"
 
 msgid "Error starting edition"
-msgstr ""
+msgstr "Error starting edition"
 
 msgid "Feature properties"
-msgstr ""
+msgstr "Feature properties"
 
 msgid "Feature resources"
-msgstr ""
+msgstr "Feature resources"
 
 msgid "remove"
-msgstr ""
+msgstr "remove"
 
 msgid "Failed to remove layer lock"
-msgstr ""
+msgstr "Failed to remove layer lock"
 
 msgid "New feature"
-msgstr ""
+msgstr "New feature"
 
 msgid "Save"
-msgstr ""
+msgstr "Save"
 
 msgid "Cancel"
-msgstr ""
+msgstr "Cancel"
 
 msgid "Failed to save the new record. Please check values"
-msgstr ""
+msgstr "Failed to save the new record. Please check values"
 
 # exportToPDF.js
 msgid "Map title"
-msgstr ""
+msgstr "Map title"
 
 msgid "Print"
-msgstr ""
+msgstr "Print"
 
 
 # geolocation.js
 msgid "Get current location"
-msgstr ""
+msgstr "Get current location"
 
 # getFeatureInfo.js
 msgid "Point information"
-msgstr ""
+msgstr "Point information"
 
 msgid "No layers available"
-msgstr ""
+msgstr "No layers available"
 
 msgid "More info"
-msgstr ""
+msgstr "More info"
 
 msgid "Coordinates"
-msgstr ""
+msgstr "Coordinates"
 
 msgid "View resources"
-msgstr ""
+msgstr "View resources"
 
 msgid "Feature info"
-msgstr ""
+msgstr "Feature info"
 
 msgid "Multimedia resources"
-msgstr ""
+msgstr "Multimedia resources"
 
 # measureArea.js
 msgid "Show measure tools"
-msgstr ""
+msgstr "Show measure tools"
 
 msgid "Measure area and perimeter"
-msgstr ""
+msgstr "Measure area and perimeter"
 
 msgid "Click to continue measuring"
-msgstr ""
+msgstr "Click to continue measuring"
 
 msgid "Click to start measuring"
-msgstr ""
+msgstr "Click to start measuring"
 
 # measureLength.js
 msgid "Measure length"
-msgstr ""
+msgstr "Measure length"
 
 msgid "Measure angle"
-msgstr ""
+msgstr "Measure angle"
 
 msgid "Close measure tools"
-msgstr ""
+msgstr "Close measure tools"
 
 msgid "Show selection tools"
-msgstr ""
+msgstr "Show selection tools"
 
 msgid "Select features"
-msgstr ""
+msgstr "Select features"
 
 msgid "Select by buffer"
-msgstr ""
+msgstr "Select by buffer"
 
 msgid "Close selection tools"
-msgstr ""
+msgstr "Close selection tools"
 
 # measureLength.js
 msgid "Search by coordinate"
-msgstr ""
+msgstr "Search by coordinate"
 
 msgid "Select projection"
-msgstr ""
+msgstr "Select projection"
 
 msgid "Coordinate Reference System"
-msgstr ""
+msgstr "Coordinate Reference System"
 
 msgid "Latitude"
-msgstr ""
+msgstr "Latitude"
 
 msgid "Longitude"
-msgstr ""
+msgstr "Longitude"
 
 msgid "Find"
-msgstr ""
+msgstr "Find"
 
 # messageBox.js
 msgid "Success"
-msgstr ""
+msgstr "Success"
 
 msgid "Warning"
-msgstr ""
+msgstr "Warning"
 
 # layerTree.js
 msgid "The layer you are trying to edit is locked"
-msgstr ""
+msgstr "The layer you are trying to edit is locked"
 
 msgid "Base layers"
-msgstr ""
+msgstr "Base layers"
 
 msgid "None"
-msgstr ""
+msgstr "None"
 
 msgid "No layer"
-msgstr ""
+msgstr "No layer"
 
 msgid "Bing roads"
-msgstr ""
+msgstr "Bing roads"
 
 msgid "Bing aerial"
-msgstr ""
+msgstr "Bing aerial"
 
 msgid "Bing aerial with labels"
-msgstr ""
+msgstr "Bing aerial with labels"
 
 msgid "You are editing the layer"
-msgstr ""
+msgstr "You are editing the layer"
 
 msgid "Layer metadata"
-msgstr ""
+msgstr "Layer metadata"
 
 msgid "Details"
-msgstr ""
+msgstr "Details"
 
 msgid "Downloads"
-msgstr ""
+msgstr "Downloads"
 
 msgid "Metadata"
-msgstr ""
+msgstr "Metadata"
 
 msgid "Download links"
-msgstr ""
+msgstr "Download links"
 
 msgid "Download shapefile"
-msgstr ""
+msgstr "Download shapefile"
 
 msgid "Download CSV"
-msgstr ""
+msgstr "Download CSV"
 
 msgid "Download GML"
-msgstr ""
+msgstr "Download GML"
 
 msgid "Attribute table"
-msgstr ""
+msgstr "Attribute table"
 
 msgid "Edit layer"
-msgstr ""
+msgstr "Edit layer"
 
 msgid "Opacity"
-msgstr ""
+msgstr "Opacity"
 
 msgid "Show in geonetwork"
-msgstr ""
+msgstr "Show in geonetwork"
 
 msgid "Version"
-msgstr ""
+msgstr "Version"
 
 msgid "Summary"
-msgstr ""
+msgstr "Summary"
 
 msgid "Requests"
-msgstr ""
+msgstr "Requests"
 
 msgid "Supported CRS"
-msgstr ""
+msgstr "Supported CRS"
 
 msgid "Layers"
-msgstr ""
+msgstr "Layers"
 
 msgid "Organization"
-msgstr ""
+msgstr "Organization"
 
 msgid "Contact person"
-msgstr ""
+msgstr "Contact person"
 
 msgid "Address"
-msgstr ""
+msgstr "Address"
 
 msgid "City"
-msgstr ""
+msgstr "City"
 
 msgid "Country"
-msgstr ""
+msgstr "Country"
 
 msgid "Email"
-msgstr ""
+msgstr "Email"
 
 msgid "Name"
-msgstr ""
+msgstr "Name"
 
 msgid "Title"
-msgstr ""
+msgstr "Title"
 
 msgid "Abstract"
-msgstr ""
+msgstr "Abstract"
 
 msgid "Queryable"
-msgstr ""
+msgstr "Queryable"
 
 msgid "MaxScaleDenominator"
-msgstr ""
+msgstr "MaxScaleDenominator"
 
 msgid "MinScaleDenominator"
-msgstr ""
+msgstr "MinScaleDenominator"
 
 msgid "Default CRS"
-msgstr ""
+msgstr "Default CRS"
 
 msgid "BoundingBox"
-msgstr ""
+msgstr "BoundingBox"
 
 msgid "GeographicBoundingBox"
-msgstr ""
+msgstr "GeographicBoundingBox"
 
 msgid "Zoom to layer"
-msgstr ""
+msgstr "Zoom to layer"
 
 msgid "Project zoom"
-msgstr ""
+msgstr "Project zoom"
 
 #cleanMap.js
 msgid "Clean map"
-msgstr ""
+msgstr "Clean map"
 
 msgid "Inverse geocoding"
-msgstr ""
+msgstr "Inverse geocoding"
 
 msgid "More element info"
-msgstr ""
+msgstr "More element info"
 
 msgid "Invalid identifier. Unable to get requested geometry"
-msgstr ""
+msgstr "Invalid identifier. Unable to get requested geometry"
 
 msgid "Temporary layers"
-msgstr ""
+msgstr "Temporary layers"
 
 msgid "From"
-msgstr ""
+msgstr "From"
 
 msgid "To"
-msgstr ""
+msgstr "To"
 
 msgid "Step"
-msgstr ""
+msgstr "Step"
 
 msgid "Single"
-msgstr ""
+msgstr "Single"
 
 msgid "Range"
-msgstr ""
+msgstr "Range"
 
 msgid "temporary_field"
-msgstr ""
+msgstr "temporary_field"
 
 msgid "temporary_endfield"
-msgstr ""
+msgstr "temporary_endfield"
 
 msgid "second(s)"
-msgstr ""
+msgstr "second(s)"
 
 msgid "minute(s)"
-msgstr ""
+msgstr "minute(s)"
 
 msgid "hour(s)"
-msgstr ""
+msgstr "hour(s)"
 
 msgid "day(s)"
-msgstr ""
+msgstr "day(s)"
 
 msgid "month(s)"
-msgstr ""
+msgstr "month(s)"
 
 msgid "year(s)"
-msgstr ""
+msgstr "year(s)"
 
 msgid "Attribute details"
-msgstr ""
+msgstr "Attribute details"
 
 msgid "Show resources"
-msgstr ""
+msgstr "Show resources"
 
 msgid "Enable temporary features"
-msgstr ""
+msgstr "Enable temporary features"
 
 msgid "apply relative date"
-msgstr ""
+msgstr "apply relative date"
 
 msgid "Temporary range"
-msgstr ""
+msgstr "Temporary range"
 
 msgid "Only relative intervals can be defined if the other field is PRESENT or a concrete date."
-msgstr ""
+msgstr "Only relative intervals can be defined if the other field is PRESENT or a concrete date."
 
 msgid "Only PRESENT is available in Instant mode. You need to define a RANGE to use relative intervals"
-msgstr ""
+msgstr "Only PRESENT is available in Instant mode. You need to define a RANGE to use relative intervals"
 
 msgid "Image Mosaic"
-msgstr ""
+msgstr "Image Mosaic"
 
 msgid "Share view"
-msgstr ""
+msgstr "Share view"
