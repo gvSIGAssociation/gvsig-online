@@ -78,7 +78,7 @@ class IdeUY():
         http://127.0.0.1:8080/api/v1/geocode/find?type=calle&nomvia=YAGUARON&departamento=MONTEVIDEO&localidad=MONTEVIDEO
         '''
         address = json.loads(address_str)
-        typeSearch = "calle"
+        typeSearch = address['address[type]']
         inmueble = address['address[inmueble]'] 
         if (inmueble != ''):
             typeSearch = "inmueble"
@@ -88,7 +88,9 @@ class IdeUY():
         params = {}
         params = {
             'type': typeSearch,
-            'idcalle': address['address[id]'],
+            'id': address['address[id]'],
+            'idcalle': address['address[idCalle]'],
+            'idcalleEsq': address['address[idCalleEsq]'],
             'nomvia': address['address[nomVia]'],
             'source': 'ide_uy',
             'localidad': address['address[localidad]'],
@@ -97,6 +99,14 @@ class IdeUY():
         }
         if ('0' != address['address[portalNumber]']):
             params['portal'] = address['address[portalNumber]']
+
+        if ('0' != address['address[manzana]']):
+            params['manzana'] = address['address[manzana]']
+            params['solar'] = address['address[solar]']
+
+        if ('0' != address['address[km]']):
+            params['km'] = address['address[km]']
+
 
         #url = "?".join((self.urls['candidates_url'], urlencode(params)))
         json_result =  self.get_json_from_url(self.urls['find_url'], params)
