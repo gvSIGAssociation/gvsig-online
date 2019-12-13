@@ -218,13 +218,25 @@ ElevationControl.prototype.addProfilControl = function(feat) {
 	this.profilControl = new ol.control.Profil({	
 		target: document.querySelector(".floating-modal-elevation-body"),
 		width:400, 
-		height:200
+		height:200,
+		info: {
+			"zmin": "Zmin",
+			"zmax": "Zmax",
+			"ytitle": "Altitud (m)",
+			"xtitle": "Distancia (km)",
+			"time": " ",
+			"altitude": "Altitud",
+			"distance": "Distancia",
+			"altitudeUnits": "m",
+			"distanceUnitsM": "m",
+			"distanceUnitsKM": "km",
+		}
 	});
 	this.map.addControl(this.profilControl);
 	
 	this.profilControl.setGeometry(feat, {	
 		graduation:250,
-		amplitude:1000,
+		amplitude:500,
 		zmin: parseFloat('0')
 	});
 	

@@ -157,6 +157,7 @@
 						insertText.getLayer().getSource().removeFeature(feature);
 						insertText.getLayer().setVisible(false);
 						insertText.getLayer().setVisible(true);
+						select.getFeatures().clear();
 						feature.fpopup.hide();
 					}
 				});
