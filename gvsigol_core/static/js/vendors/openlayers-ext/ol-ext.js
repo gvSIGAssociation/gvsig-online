@@ -6917,7 +6917,7 @@ ol.control.Profil = function(opt_options)
 	div_distance.innerHTML = (this.info.distance||"Distance")+': <span class="dist">';
 	firstTr.appendChild(div_distance);
 	var div_time = document.createElement("td");
-	div_time.innerHTML = (this.info.time||"Time")+': <span class="time">';
+	div_time.innerHTML = (this.info.time||"Time")+' <span class="time">';
 	firstTr.appendChild(div_time);
 	var secondTr = document.createElement("tr");
 			secondTr.classList.add("point-info")
@@ -6929,7 +6929,7 @@ ol.control.Profil = function(opt_options)
 	div_distance2.innerHTML = (this.info.distance||"Distance")+': <span class="dist">';
 	secondTr.appendChild(div_distance2);
 	var div_time2 = document.createElement("td");
-	div_time2.innerHTML = (this.info.time||"Time")+': <span class="time">';
+	div_time2.innerHTML = (this.info.time||"Time")+' <span class="time">';
 	secondTr.appendChild(div_time2);
 	// Array of data
 	this.tab_ = [];
@@ -7187,8 +7187,8 @@ ol.control.Profil.prototype.setGeometry = function(g, options)
 	ctx.restore();
 	ctx.stroke();
 	// 
-	ctx.strokeStyle = "#369";
-	ctx.lineWidth = 1;
+	ctx.strokeStyle = "#f15511";
+	ctx.lineWidth = 4;
 	ctx.setLineDash([]);
 	ctx.beginPath();
 	for (i=0; p=t[i]; i++)
