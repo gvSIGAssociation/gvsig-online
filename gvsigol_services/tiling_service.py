@@ -186,13 +186,14 @@ def tiling_base_layer(prj_id, tiles_side):
         
         layers_dir = os.path.join(settings.MEDIA_ROOT, 'layer_downloads')
         folder_prj =  os.path.join(layers_dir, prj.name) + "_prj"
-        base_zip = os.getcwd() + "/gvsigol_services/static/data/osm_tiles_levels_0-6.zip"
+        folder_package = os.path.join(folder_prj, 'EPSG3857')
+        base_zip = os.getcwd() + "/gvsigol/gvsigol_services/static/data/osm_tiles_levels_0-6.zip"
         if not os.path.exists(layers_dir):
             os.mkdir(layers_dir)
         with zipfile.ZipFile(base_zip, 'r') as zipObj:
             zipObj.extractall(path=layers_dir)
-            shutil.move(layers_dir + '/tiles_download', folder_prj)
-            tiling = Tiling(folder_prj)
+            shutil.move(layers_dir + '/tiles_download', folder_package)
+            tiling = Tiling(folder_package)
             tiling.create_tiles_from_utm(min_x, min_y, max_x, max_y, tiling.get_zoom_level(floor(max_x - min_x)/1000, tiles_side))
             shutil.make_archive(folder_prj, 'zip', folder_prj)
             shutil.rmtree(folder_prj)
