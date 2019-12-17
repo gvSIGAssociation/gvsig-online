@@ -6904,7 +6904,7 @@ ol.control.Profil = function(opt_options)
 			t.cellSpacing = '0';
 			t.style.clientWidth = this.canvas_.width/ratio + "px";
 		div.appendChild(t);
-	var firstTr = document.createElement("tr");
+	/*var firstTr = document.createElement("tr");
 			firstTr.classList.add("track-info");
 			t.appendChild(firstTr);
 	var div_zmin = document.createElement("td");
@@ -6918,7 +6918,8 @@ ol.control.Profil = function(opt_options)
 	firstTr.appendChild(div_distance);
 	var div_time = document.createElement("td");
 	div_time.innerHTML = (this.info.time||"Time")+' <span class="time">';
-	firstTr.appendChild(div_time);
+	firstTr.appendChild(div_time);*/
+	
 	var secondTr = document.createElement("tr");
 			secondTr.classList.add("point-info")
 			t.appendChild(secondTr);
@@ -7110,7 +7111,7 @@ ol.control.Profil.prototype.setGeometry = function(g, options)
 		t.push ([d, z, ti, p]);
 	}
 	// Info
-	this.element.querySelector(".track-info .zmin").textContent = parseFloat(zmin).toFixed(2)+this.info.altitudeUnits;
+	/*this.element.querySelector(".track-info .zmin").textContent = parseFloat(zmin).toFixed(2)+this.info.altitudeUnits;
 	this.element.querySelector(".track-info .zmax").textContent = parseFloat(zmax).toFixed(2)+this.info.altitudeUnits;
 	if (d>1000)
 	{	this.element.querySelector(".track-info .dist").textContent = (d/1000).toFixed(1)+this.info.distanceUnitsKM;
@@ -7118,7 +7119,7 @@ ol.control.Profil.prototype.setGeometry = function(g, options)
 	else
 	{	this.element.querySelector(".track-info .dist").textContent= (d).toFixed(1)+this.info.distanceUnitsM;
 	}
-	this.element.querySelector(".track-info .time").textContent = ti;
+	this.element.querySelector(".track-info .time").textContent = ti;*/
 	// Set graduation
 	var grad = options.graduation || 100;
 	while (true)

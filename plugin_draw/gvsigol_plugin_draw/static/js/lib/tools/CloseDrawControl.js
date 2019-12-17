@@ -23,7 +23,7 @@
 /**
  * TODO
  */
-var CloseDrawControl = function(map, drawBar, pointLayer, lineLayer, polygonLayer, textLayer) {
+var CloseDrawControl = function(map, drawBar, pointLayer, lineLayer, polygonLayer, textLayer, select) {
 	var self = this;
 	
 	this.map = map;
@@ -32,6 +32,7 @@ var CloseDrawControl = function(map, drawBar, pointLayer, lineLayer, polygonLaye
 	this.lineLayer = lineLayer;
 	this.polygonLayer = polygonLayer;
 	this.textLayer = textLayer;
+	this.select = select;
 	
 	this.control = new ol.control.Toggle({	
 		html: '<i class="fa fa-times" ></i>',
@@ -42,7 +43,10 @@ var CloseDrawControl = function(map, drawBar, pointLayer, lineLayer, polygonLaye
 			self.lineLayer.getSource().clear();
 			self.polygonLayer.getSource().clear();
 			self.textLayer.getSource().clear();
+			self.select.getFeatures().clear();
 			self.map.removeControl(self.drawBar);
+			$('#get-feature-info').attr("disabled", false);
+			$('#get-feature-info').css("cursor", "pointer");
 			this.toggle();
 		}
 	});
@@ -55,6 +59,10 @@ CloseDrawControl.prototype.close = function(e) {
 	this.lineLayer.getSource().clear();
 	this.polygonLayer.getSource().clear();
 	this.textLayer.getSource().clear();
+	this.select.getFeatures().clear();
 	this.map.removeControl(this.drawBar);
+	
+	$('#get-feature-info').attr("disabled", false);
+	$('#get-feature-info').css("cursor", "pointer");
 
 };

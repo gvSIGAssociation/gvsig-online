@@ -46,8 +46,17 @@
 		var drawLine = new DrawLineControl(drawBar, map, styleSettings);
 		var drawPolygon = new DrawPolygonControl(drawBar, map, styleSettings);
 		var insertText = new InsertTextControl(drawBar, map, styleSettings);
-		var cleanControl = new CleanDrawControl(drawBar, drawPoint.getLayer(), drawLine.getLayer(), drawPolygon.getLayer(), insertText.getLayer());
-		var closeControl = new CloseDrawControl(map, drawBar, drawPoint.getLayer(), drawLine.getLayer(), drawPolygon.getLayer(), insertText.getLayer());
+		
+		var select = new ol.interaction.Select({
+			layers: [insertText.getLayer()]
+		});
+
+		var modify = new ol.interaction.Modify({
+		  	features: select.getFeatures()
+		});
+		
+		var cleanControl = new CleanDrawControl(drawBar, drawPoint.getLayer(), drawLine.getLayer(), drawPolygon.getLayer(), insertText.getLayer(), select);
+		var closeControl = new CloseDrawControl(map, drawBar, drawPoint.getLayer(), drawLine.getLayer(), drawPolygon.getLayer(), insertText.getLayer(), select);
 		
 		drawBar.closeControl = closeControl;
 		
@@ -72,23 +81,6 @@
 			count++;
 		});
 		
-		//var popup = new ol.Overlay.Popup();
-
-		/*var popup = new ol.Overlay.Popup ({	
-			popupClass: "default", //"tooltips", "warning" "black" "default", "tips", "shadow",
-			closeBox: true,
-			onshow: function(){ console.log("You opened the box"); },
-			onclose: function(){ console.log("You close the box"); },
-			positioning: 'auto',
-			autoPan: true,
-			autoPanAnimation: { duration: 250 }
-		});
-		map.addOverlay(popup);*/
-
-		/*$(".text-popup").parent().parent().children(".ol-popup-closer").unbind("click").click(function() {
-		 	return false;
-		});*/
-		
 		map.on('singleclick', function (event) {
 			if (map.hasFeatureAtPixel(event.pixel) === true) {
 				var coordinate = event.coordinate;
@@ -112,7 +104,7 @@
 							popupContent += '</div>';
 						}
 						var popup = new ol.Overlay.Popup ({	
-							popupClass: "default", //"tooltips", "warning" "black" "default", "tips", "shadow",
+							popupClass: "default",
 							closeBox: true,
 							onshow: function(){ console.log("You opened the box"); },
 							onclose: function(){ console.log("You close the box"); },
@@ -168,11 +160,15 @@
 			if (viewer.core.getActiveToolbar() == null) {
 				map.addControl(drawBar);
 				viewer.core.setActiveToolbar(drawBar);
+				$('#get-feature-info').attr("disabled", true);
+				$('#get-feature-info').css("cursor", "not-allowed");
 				
 			} else {
 				viewer.core.getActiveToolbar().closeControl.close();
 				map.addControl(drawBar);
 				viewer.core.setActiveToolbar(drawBar);
+				$('#get-feature-info').attr("disabled", true);
+				$('#get-feature-info').css("cursor", "not-allowed");
 			}
 			
 			for (var i=0; i<map.tools.length; i++){
@@ -182,13 +178,6 @@
 			}
 		});
 		
-		var select = new ol.interaction.Select({
-			layers: [insertText.getLayer()]
-		});
-
-		var modify = new ol.interaction.Modify({
-		  	features: select.getFeatures()
-		});
 		map.addInteraction(select);
 		map.addInteraction(modify);
 		

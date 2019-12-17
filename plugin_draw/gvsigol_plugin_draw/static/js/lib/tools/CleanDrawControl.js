@@ -23,7 +23,7 @@
 /**
  * TODO
  */
-var CleanDrawControl = function(drawBar, pointLayer, lineLayer, polygonLayer, textLayer) {
+var CleanDrawControl = function(drawBar, pointLayer, lineLayer, polygonLayer, textLayer, select) {
 	var self = this;
 	this.drawBar = drawBar;
 
@@ -37,6 +37,8 @@ var CleanDrawControl = function(drawBar, pointLayer, lineLayer, polygonLayer, te
 			polygonLayer.getSource().clear();
 			textLayer.getSource().clear();
 			
+			select.getFeatures().clear();
+			
 			pointLayer.setVisible(false);
 			pointLayer.setVisible(true);
 			lineLayer.setVisible(false);
@@ -45,6 +47,7 @@ var CleanDrawControl = function(drawBar, pointLayer, lineLayer, polygonLayer, te
 			polygonLayer.setVisible(true);
 			textLayer.setVisible(false);
 			textLayer.setVisible(true);
+			
 			this.toggle();
 		}
 	});
