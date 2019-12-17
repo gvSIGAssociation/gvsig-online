@@ -50,7 +50,7 @@ shareView.prototype.handler = function(e) {
 	var self = this;
 	e.preventDefault();
 	
-	var ui = '';
+	/*var ui = '';
 	ui += '<div class="row">';
 	ui += 	'<div class="col-md-12 form-group">';	
 	ui += 	'<label>' + gettext('Enter a description') + '</label>';
@@ -77,7 +77,11 @@ shareView.prototype.handler = function(e) {
 		var description = $('#shareview-description').val();
 		self.save(description);
 		$('#float-modal').modal('hide');
-	});
+	});*/
+	
+	var description = $('#shareview-description').val();
+	self.save(description);
+	$('#float-modal').modal('hide');
 };
 
 /**
@@ -111,7 +115,37 @@ shareView.prototype.save = function(description) {
 			'view_state': JSON.stringify(viewState),
 		},
 	  	success	:function(response){
-	  		messageBox.show('info', response.shared_url);
+	  		var ui = '';
+	  		ui += '<div class="row">';
+	  		ui += 	'<div class="col-md-12 form-group">';	
+	  		ui +=   	'<input type="text" class="form-control url-to-copy" value="' + response.shared_url + '"></input>';
+	  		ui += 	'</div>';
+	  		ui += '</div>';
+	  		
+	  		$('#float-modal .modal-body').empty();
+	  		$('#float-modal .modal-body').append(ui);
+	  		
+	  		var buttons = '';
+	  		buttons += '<button id="float-modal-accept-shareview" type="button" class="btn btn-default">' + gettext('Copiar URL') + '</button>';
+	  		
+	  		$('#float-modal .modal-footer').empty();
+	  		$('#float-modal .modal-footer').append(buttons);
+	  		
+	  		$("#float-modal").modal('show');
+	  		
+	  		var self = this;	
+	  		$('#float-modal-accept-shareview').on('click', function () {
+	  			var urlToCopy = document.querySelector('.url-to-copy');
+	  			urlToCopy.select();
+	  			
+	  			try {
+	  			    var successful = document.execCommand('cut');
+	  			    $(".url-to-copy").val(response.shared_url);
+	  			    
+	  			  } catch(err) {
+	  			    console.log('Oops, unable to cut');
+	  			  }
+	  		});
 	  	},
 	  	error: function(){}
 	});
