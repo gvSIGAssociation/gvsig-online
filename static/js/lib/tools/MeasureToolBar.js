@@ -49,10 +49,16 @@ var MeasureToolBar = function(map) {
 			self.map.addControl(self.toolBar);
 			viewer.core.setActiveToolbar(self.toolBar);
 			
+			$('#get-feature-info').attr("disabled", true);
+			$('#get-feature-info').css("cursor", "not-allowed");
+			
 		} else {
 			viewer.core.getActiveToolbar().closeControl.close();
 			self.map.addControl(self.toolBar);
 			viewer.core.setActiveToolbar(self.toolBar);
+			
+			$('#get-feature-info').attr("disabled", true);
+			$('#get-feature-info').css("cursor", "not-allowed");
 		}
 		
 	});

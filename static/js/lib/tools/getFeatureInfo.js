@@ -100,52 +100,13 @@ getFeatureInfo.prototype.handler = function(e) {
 		this.deactivate();
 
 	} else {
-
-			for (var i=0; i<this.map.tools.length; i++){
-			  if (this.id != this.map.tools[i].id) {
-				  if (this.map.tools[i].deactivable == true) {
-  					  this.map.tools[i].deactivate();
-				  }
-			  }
-		  }
-
-
-		/*if (this.hasLayers()) {
-			this.popup = new ol.Overlay.Popup();
-			this.map.addOverlay(this.popup);
-
-			this.$button.addClass('button-active');
-			this.active = true;
-			this.$button.trigger('control-active', [this]);
-
-	    	var self = this;
-
-			this.map.on('click', this.clickHandler, self);
-			this.source = new ol.source.Vector();
-			this.resultLayer = new ol.layer.Vector({
-				source: this.source,
-			  	style: new ol.style.Style({
-			    	fill: new ol.style.Fill({
-			      		color: 'rgba(255, 255, 255, 0.2)'
-			    	}),
-			    	stroke: new ol.style.Stroke({
-			      		color: '#0099ff',
-			      		width: 2
-			    	}),
-			    	image: new ol.style.Circle({
-			      		radius: 7,
-			      		fill: new ol.style.Fill({
-			        		color: '#0099ff'
-			      		})
-			    	})
-			  	})
-			});
-			this.resultLayer.baselayer = true;
-			this.map.addLayer(this.resultLayer);
-
-		} else {
-			messageBox.show('warning', gettext('No layers available.'));
-		}*/
+		for (var i=0; i<this.map.tools.length; i++){
+			if (this.id != this.map.tools[i].id) {
+				if (this.map.tools[i].deactivable == true) {
+					this.map.tools[i].deactivate();
+				}
+			}
+		}
 		
 		this.popup = new ol.Overlay.Popup();
 		this.map.addOverlay(this.popup);
