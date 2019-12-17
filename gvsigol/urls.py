@@ -42,7 +42,8 @@ js_info_dict = {
         'gvsigol_plugin_importfromservice',
         'gvsigol_plugin_trip_planner',
         'gvsigol_plugin_draw',
-        'gvsigol_plugin_elevation'
+        'gvsigol_plugin_elevation',
+        'gvsigol_plugin_manageaddresses',
     ),
 }
 
@@ -65,7 +66,8 @@ packages = [
     'gvsigol_plugin_importfromservice',
     'gvsigol_plugin_trip_planner',
     'gvsigol_plugin_draw',
-    'gvsigol_plugin_elevation'
+    'gvsigol_plugin_elevation',
+    'gvsigol_plugin_manageaddresses',
 ]
 
 urlpatterns = [
