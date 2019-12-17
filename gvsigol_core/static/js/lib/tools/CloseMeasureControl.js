@@ -38,6 +38,8 @@ var CloseMeasureControl = function(map, toolbar) {
 				toolbar.controlArray[i].deactivate();
 			}
 			map.removeControl(toolbar);
+			$('#get-feature-info').attr("disabled", false);
+			$('#get-feature-info').css("cursor", "pointer");
 			this.toggle();
 		}
 	});
@@ -50,5 +52,7 @@ CloseMeasureControl.prototype.close = function(e) {
 		this.toolbar.controlArray[i].deactivate();
 	}
 	this.map.removeControl(this.toolbar);
+	$('#get-feature-info').attr("disabled", false);
+	$('#get-feature-info').css("cursor", "pointer");
 
 };
