@@ -135,6 +135,15 @@ ElevationControl.prototype.handler = function(e) {
 		this.$button.addClass('button-active');
 		this.active = true;
 		this.$button.trigger('control-active', [this]);
+		
+		for (var i=0; i<this.map.tools.length; i++){
+			if (this.map.tools[i].deactivable == true) {
+				this.map.tools[i].deactivate();
+			}
+		}
+		
+		$('#get-feature-info').attr("disabled", true);
+		$('#get-feature-info').css("cursor", "not-allowed");
 
 		this.map.addInteraction(this.drawInteraction);
 		this.drawInteraction.on('drawend', function(evt) {
@@ -186,9 +195,11 @@ ElevationControl.prototype.calculateElevation = function(feat) {
 	var coordinates2D = line2D.getGeometry().getCoordinates();
 	
 	var coordinates3D = new Array();
+	var zArray = [];
 	for (var i=0; i<coordinates2D.length; i++) {
 		var z = self.getElevation(coordinates2D[i]);
 		coordinates3D.push([coordinates2D[i][0], coordinates2D[i][1], z]);
+		zArray.push(z);
 	}
 	var geomLine3D = new ol.geom.LineString(coordinates3D, 'XYZ');
 	var line3D = new ol.Feature();
@@ -200,7 +211,7 @@ ElevationControl.prototype.calculateElevation = function(feat) {
 	this.point.setStyle([]);
 	self.source3D.addFeature(this.point);
 	$("#floating-modal-elevation").dialog("open");
-	self.addProfilControl(line3D);
+	self.addProfilControl(line3D, zArray);
 	self.map.removeInteraction(self.drawInteraction);
 	
 	$.overlayout();
@@ -209,7 +220,8 @@ ElevationControl.prototype.calculateElevation = function(feat) {
 /**
  * TODO
  */
-ElevationControl.prototype.addProfilControl = function(feat) {
+ElevationControl.prototype.addProfilControl = function(feat, zArray) {
+	zArray.sort(function (a, b) { return a-b; });
 	var self = this;
 	if (this.profilControl != null) {
 		this.profilControl = null;
@@ -235,8 +247,8 @@ ElevationControl.prototype.addProfilControl = function(feat) {
 	this.map.addControl(this.profilControl);
 	
 	this.profilControl.setGeometry(feat, {	
-		graduation:250,
-		amplitude:500,
+		graduation:50,
+		amplitude:zArray[zArray.length - 1],
 		zmin: parseFloat('0')
 	});
 	
@@ -315,4 +327,6 @@ ElevationControl.prototype.deactivate = function() {
 	$("#floating-modal-elevation").dialog("close");
 	this.map.removeControl(this.profilControl);
 	this.profilControl = null;
+	$('#get-feature-info').attr("disabled", false);
+	$('#get-feature-info').css("cursor", "pointer");
 };
