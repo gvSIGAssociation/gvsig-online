@@ -5,6 +5,7 @@ from registry import XmlStandardUpdater, BaseStandardManager, XmlStandardReader
 from datetime import datetime
 from django.utils.translation import ugettext as _
 from gvsigol_plugin_catalog.xmlutils import getTextFromXMLNode
+import collections
 
 def define_translations():
     """
@@ -280,4 +281,32 @@ class Iso19139_2007Reader(XmlStandardReader):
         return getTextFromXMLNode(self.tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/', namespaces)
     def get_identifier(self, ):
         return getTextFromXMLNode(self.tree, './gmd:fileIdentifier/', namespaces)
+    def get_transfer_options(self):
+        result = []
+        OnlineResource = collections.namedtuple('OnlineResource', ['url', 'protocol', 'app_profile', 'name', 'desc', 'function', 'transfer_size'])
+        for transferOption in self.tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions', namespaces):
+            transferSizeNode = transferOption.find('./gmd:transferSize', namespaces)
+            transferSize = None
+            if transferSizeNode is not None and transferSizeNode.text != '':
+                try:
+                    transferSize = float(transferSizeNode.text)
+                except:
+                    pass
+            for online in transferOption.findall('./gmd:onLine/gmd:CI_OnlineResource', namespaces):
+                protocol = getTextFromXMLNode(online, './gmd:protocol/', namespaces)
+                name = getTextFromXMLNode(online, './gmd:name/', namespaces)
+                url = getTextFromXMLNode(online, './gmd:linkage/', namespaces)
+                desc = getTextFromXMLNode(online, './gmd:description/', namespaces)
+                app_profile = getTextFromXMLNode(online, './gmd:applicationProfile/', namespaces)
+                functionNode = online.find('./gmd:function/gmd:CI_OnLineFunctionCode', namespaces)
+                if functionNode is not None:
+                    function = functionNode.get('codeListValue', '')
+                else:
+                    function = ''
+                onlineObj = OnlineResource(url, protocol, app_profile, name, desc, function, transferSize)
+                result.append(onlineObj)
+        return result
+    
+    
+    
     

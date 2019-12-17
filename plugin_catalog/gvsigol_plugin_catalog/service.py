@@ -43,7 +43,7 @@ ONLINE_RES_TYPE_HTTP = 'HTTP'
 ONLINE_RES_TYPE_OTHER = 'OTHER'
 
 class OnlineResource():
-    def __init__(self, res_type, url, protocol, name, desc, app_profile, function):
+    def __init__(self, res_type, url, protocol, name, desc, app_profile, function, transferSize=None):
         self.res_type = res_type,
         self.url = url
         self.protocol = protocol
@@ -51,6 +51,7 @@ class OnlineResource():
         self.desc = desc
         self.app_profile = app_profile
         self.function = function
+        self.transferSize = transferSize
 
 
 class Geonetwork():

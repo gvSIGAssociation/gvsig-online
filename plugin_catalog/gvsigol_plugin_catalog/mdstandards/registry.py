@@ -86,6 +86,10 @@ class XmlStandardReader(object):
     @abstractmethod
     def get_abstract(self, extent_tuple, thumbnail_url):
         pass
+    @abstractmethod
+    def get_transfer_options(self):
+        pass
+
     
     def tostring(self, encoding='unicode'):
         return ET.tostring(self.tree, encoding=encoding)
