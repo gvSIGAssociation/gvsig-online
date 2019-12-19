@@ -345,6 +345,7 @@ search.prototype.initUI = function() {
 		groupBy: 'category',
 		transformResult: function(response) {
 			jsonResponse = JSON.parse(response);
+			window.lastcandidatestring = jsonResponse.query;
 			if (jsonResponse.suggestions.length > 0) {
 				return {
 					suggestions: $.map(jsonResponse.suggestions, function(item) {
