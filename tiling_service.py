@@ -187,7 +187,7 @@ def tiling_base_layer(prj_id, tiles_side):
         layers_dir = os.path.join(settings.MEDIA_ROOT, 'layer_downloads')
         folder_prj =  os.path.join(layers_dir, prj.name) + "_prj"
         folder_package = os.path.join(folder_prj, 'EPSG3857')
-        base_zip = os.getcwd() + "/gvsigol/gvsigol_services/static/data/osm_tiles_levels_0-6.zip"
+        base_zip = os.getcwd() + "/gvsigol_services/static/data/osm_tiles_levels_0-6.zip"
         if not os.path.exists(layers_dir):
             os.mkdir(layers_dir)
         with zipfile.ZipFile(base_zip, 'r') as zipObj:
