@@ -12,6 +12,7 @@
 <script type="text/javascript" src="{% static "js/lib/tools/CleanDrawControl.js" %}"></script>
 <script type="text/javascript" src="{% static "js/lib/tools/CloseDrawControl.js" %}"></script>
 <script type="text/javascript">
+(function(){
 	var map = viewer.core.getMap();
 	var conf = viewer.core.getConf();
 	
@@ -169,5 +170,5 @@
 		map.addInteraction(modify);
 		
 	}
-	
+})();
 </script>
