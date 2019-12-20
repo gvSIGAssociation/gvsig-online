@@ -58,6 +58,7 @@ var SelectByBufferControl = function(map, toolbar) {
 		title: gettext('Select by buffer'),
 		onToggle: function(active){
 			if (active) {
+				viewer.core.disableTools(this);
 				self.activate();
 			} else {
 				self.deactivate();

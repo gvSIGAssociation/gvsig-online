@@ -100,13 +100,7 @@ getFeatureInfo.prototype.handler = function(e) {
 		this.deactivate();
 
 	} else {
-		for (var i=0; i<this.map.tools.length; i++){
-			if (this.id != this.map.tools[i].id) {
-				if (this.map.tools[i].deactivable == true) {
-					this.map.tools[i].deactivate();
-				}
-			}
-		}
+		viewer.core.disableTools(this.id);
 		
 		this.popup = new ol.Overlay.Popup();
 		this.map.addOverlay(this.popup);

@@ -975,6 +975,39 @@ viewer.core = {
 			this.downloadManager = new DownloadManagerUI();
 		}
 		return this.downloadManager;
-	}
+	},
 
+	disableTools: function(exceptTool, disableEditionControls) {
+		if (disableEditionControls != false) { //in case not defined
+			disableEditionControls = true;
+		}
+		if (exceptTool instanceof ol.control.Control) {
+			var exceptToolObj = exceptTool;
+			var exceptToolId = null;
+		}
+		else {
+			var exceptToolObj = null;
+			var exceptToolId = exceptTool;
+		}
+		for (var i=0; i<this.tools.length; i++){
+			if (!exceptToolId || (exceptToolId != this.tools[i].id)) {
+				if (this.tools[i].deactivable == true) {
+					if (this.tools[i].active) {
+						this.tools[i].deactivate();
+					}
+				}
+			}
+		}
+		if (viewer.core.getActiveToolbar() != null) {
+			var activeControls = viewer.core.getActiveToolbar().getActiveControls();
+			for (i=0; i<activeControls.length; i++) {
+				if (!exceptToolObj || (exceptToolObj != activeControls[i])) {
+					activeControls[i].setActive(false);
+				}
+			}
+		}
+		if (disableEditionControls && this.layerTree.getEditionBar()) {
+			this.layerTree.getEditionBar().deactivateControls();
+		}
+	}
 }

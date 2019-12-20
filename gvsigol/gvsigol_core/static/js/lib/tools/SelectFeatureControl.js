@@ -48,6 +48,7 @@ var SelectFeatureControl = function(map, toolbar) {
 		interaction: this.interaction,
 		onToggle: function(active){
 			if (active) {
+				viewer.core.disableTools(this);
 				self.activate();
 			} else {
 				self.deactivate();

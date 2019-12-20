@@ -45,22 +45,11 @@ var MeasureToolBar = function(map) {
 	$('#show_measure_toolbar').click(function(e){
 		//self.map.addControl(self.toolBar);
 		
-		if (viewer.core.getActiveToolbar() == null) {
-			self.map.addControl(self.toolBar);
-			viewer.core.setActiveToolbar(self.toolBar);
-			
-			$('#get-feature-info').attr("disabled", true);
-			$('#get-feature-info').css("cursor", "not-allowed");
-			
-		} else {
+		if (viewer.core.getActiveToolbar() != null) {
 			viewer.core.getActiveToolbar().closeControl.close();
-			self.map.addControl(self.toolBar);
-			viewer.core.setActiveToolbar(self.toolBar);
-			
-			$('#get-feature-info').attr("disabled", true);
-			$('#get-feature-info').css("cursor", "not-allowed");
 		}
-		
+		self.map.addControl(self.toolBar);
+		viewer.core.setActiveToolbar(self.toolBar);
 	});
 
 };
