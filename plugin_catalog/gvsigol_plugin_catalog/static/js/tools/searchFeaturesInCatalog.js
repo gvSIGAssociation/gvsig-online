@@ -89,10 +89,8 @@ SearchFeaturesInCatalog.prototype.toggle = function(e) {
 	var self = this;
 	e.preventDefault();
 	if (this.active) {
-		console.log('deactivate');
 		this.deactivate();
 	} else {
-		console.log('activate SearchFeaturesInCatalog');
 		viewer.core.disableTools(this.id);
 		if (this.popup == null) {
 			this.popup = new ol.Overlay.Popup({
@@ -133,7 +131,6 @@ SearchFeaturesInCatalog.prototype.toggle = function(e) {
  */
 
 SearchFeaturesInCatalog.prototype.clickHandler = function(evt) {
-	console.log("clickHandler");
 	//evt.preventDefault();
 	var self = this;
 	var mapCoordinates = evt.coordinate;
@@ -141,8 +138,6 @@ SearchFeaturesInCatalog.prototype.clickHandler = function(evt) {
 		this.selectInteraction.un('select', this.onSelect);
 	}
 	this.onSelect = function(e) {
-		console.log('selected');
-		console.log(e);
 		self.showPopup(e.target.getFeatures(), mapCoordinates);
 	}
 	this.selectInteraction.on('select', this.onSelect);
@@ -183,10 +178,6 @@ SearchFeaturesInCatalog.prototype.showPopup = function(features, coordinates){
 	if (!this.active) {
 		return;
 	}
-	console.log('features');
-	console.log(features);
-	console.log('coordinates');
-	console.log(coordinates);
 	var self = this;
 	this.activePage = 1;
 	this.selectedFeatures = features.getArray();
@@ -201,9 +192,6 @@ SearchFeaturesInCatalog.prototype.showPopup = function(features, coordinates){
 		featArray = [featArray0[0], featArray0[0], featArray0[0], featArray0[0]];
 	}
 	*/
-	console.log('featArray');
-	console.log(featArray);
-	console.log(features);
 	for (var i=0; i<featArray.length; i++) {
 		if (i>0) {
 			html += '<div class="search_feat_in_catalog_page row hidden" data-featid="' + i + '"><div class="col-12">';
@@ -245,7 +233,6 @@ SearchFeaturesInCatalog.prototype.showPopup = function(features, coordinates){
 		html += '</ul></nav>';
 		html += '</div></div>';
 	}
-	console.log('this.popup.show');
 	this.map.addOverlay(this.popup);
 	this.popup.show(coordinates, '<div class="popup-wrapper searchfeaturesincatalog-popup">' + html + '</div>');
 	//self.map.getView().setCenter(coordinates);
@@ -286,7 +273,6 @@ SearchFeaturesInCatalog.prototype.showPopup = function(features, coordinates){
 };
 
 SearchFeaturesInCatalog.prototype.deactivate = function() {
-	console.log('deactivate SearchFeaturesInCatalog');
 	this.$button.removeClass('button-active');
 	this.map.un('click', this.clickHandler, this);
 	if (this.selectInteraction != null) {
@@ -296,8 +282,6 @@ SearchFeaturesInCatalog.prototype.deactivate = function() {
 		this.selectInteraction.getFeatures().clear()
 		this.selectInteraction.setActive(false);
 		var interct = this.map.removeInteraction(this.selectInteraction);
-		console.log('removed interaction');
-		console.log(interct);
 	}
 	this.active = false;
 };
