@@ -46,7 +46,7 @@ var SearchFeaturesInCatalog = function(map, conf, extraParams) {
 	var this_ = this;
 
 	var handler = function(e) {
-		this_.handler(e);
+		this_.toggle(e);
 	};
 
 	button.addEventListener('click', handler, false);
@@ -85,7 +85,7 @@ SearchFeaturesInCatalog.prototype.onSelect = null;
 /**
  * @param {Event} e Browser event.
  */
-SearchFeaturesInCatalog.prototype.handler = function(e) {
+SearchFeaturesInCatalog.prototype.toggle = function(e) {
 	var self = this;
 	e.preventDefault();
 	if (this.active) {
@@ -108,8 +108,21 @@ SearchFeaturesInCatalog.prototype.handler = function(e) {
 		this.$button.addClass('button-active');
 		this.active = true;
 		this.$button.trigger('control-active', [this]);
+		
+		var selectClick = new ol.interaction.Select({
+			condition: ol.events.condition.click
+			});
+
+		// select interaction working on "pointermove"
+		var selectPointerMove = new ol.interaction.Select({
+			condition: ol.events.condition.pointerMove
+		});
+		this.selectInteraction = selectClick;
+		this.map.addInteraction(this.selectInteraction);
+		
 		this.map.un('click', this.clickHandler, this);
 		this.map.on('click', this.clickHandler, this);
+		
 	}
 };
 
@@ -123,19 +136,13 @@ SearchFeaturesInCatalog.prototype.clickHandler = function(evt) {
 	console.log("clickHandler");
 	//evt.preventDefault();
 	var self = this;
-	var selectClick = new ol.interaction.Select({
-		condition: ol.events.condition.click
-		});
-
-	// select interaction working on "pointermove"
-	var selectPointerMove = new ol.interaction.Select({
-		condition: ol.events.condition.pointerMove
-	});
-	this.selectInteraction = selectClick;
-	this.map.addInteraction(this.selectInteraction);
 	var mapCoordinates = evt.coordinate;
+	if (this.selectInteraction!=null && this.onSelect!=null) {
+		this.selectInteraction.un('select', this.onSelect);
+	}
 	this.onSelect = function(e) {
 		console.log('selected');
+		console.log(e);
 		self.showPopup(e.target.getFeatures(), mapCoordinates);
 	}
 	this.selectInteraction.on('select', this.onSelect);
@@ -282,12 +289,15 @@ SearchFeaturesInCatalog.prototype.deactivate = function() {
 	console.log('deactivate SearchFeaturesInCatalog');
 	this.$button.removeClass('button-active');
 	this.map.un('click', this.clickHandler, this);
-	if (this.onSelect != null) {
-		this.selectInteraction.un('select', this.onSelect);
+	if (this.selectInteraction != null) {
+		if (this.onSelect != null) {
+			this.selectInteraction.un('select', this.onSelect);
+		}
+		this.selectInteraction.getFeatures().clear()
+		this.selectInteraction.setActive(false);
+		var interct = this.map.removeInteraction(this.selectInteraction);
+		console.log('removed interaction');
+		console.log(interct);
 	}
-	var interct = this.map.removeInteraction(this.selectInteraction);
-	console.log('removed interaction');
-	console.log(interct);
-	this.selectInteraction.getFeatures().clear()
 	this.active = false;
 };
