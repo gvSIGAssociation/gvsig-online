@@ -211,3 +211,8 @@
 .catalog_detail_attr{
 	font-weight: bold;
 }
+
+.ol-popup.search-in-catalog-popup .ol-popup-content {
+	max-height: 400px;
+	overflow-y: auto;
+}

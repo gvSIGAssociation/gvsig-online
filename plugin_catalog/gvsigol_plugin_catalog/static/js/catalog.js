@@ -18,7 +18,7 @@
 
 /**
  * @author: José Badía <jbadia@scolab.es>
- * @author: César Marinez <cmartinez@scolab.es>
+ * @author: César Martinez <cmartinez@scolab.es>
  */
 
 /**
@@ -67,7 +67,7 @@ CatalogView.prototype.initialization = function(){
 	catalogPanel += '			</div>';
 	catalogPanel += '		</div>';
 	catalogPanel += '		<div class="col-sm-7">';
-	catalogPanel += '			<div id="catalog_search"  class="row">';
+	catalogPanel += '			<div id="catalog_search"class="row">';
 	catalogPanel += '				<div class="col-sm-12">';
 	catalogPanel += '					<div class="input-group gn-form-any">';
 	catalogPanel += '						<input type="text" class="form-control input-lg" id="gn-any-field" placeholder="' + gettext('Search...') + '" data-typeahead="address for address in getAnySuggestions($viewValue)" data-typeahead-loading="anyLoading" data-typeahead-min-length="1" data-typeahead-focus-first="false" data-typeahead-wait-ms="300" aria-autocomplete="list" aria-expanded="false" aria-owns="typeahead-310-2994">';
@@ -94,21 +94,21 @@ CatalogView.prototype.initialization = function(){
 	catalogPanel += '							<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Categories') + '</strong>';
 	catalogPanel += '						</div>';
 	catalogPanel += '						<br>';
-	catalogPanel += '						<input type="text" id="categoriesF" placeHolder="' + gettext('Separated by') + ' \';\'    P.ej: cat_1;cat_2;..." value="" class="form-control"/>';
+	catalogPanel += '						<input type="text" id="categoriesF" placeHolder="' + gettext('Separated by') + ' \';\'	P.ej: cat_1;cat_2;..." value="" class="form-control"/>';
 	catalogPanel += '					</div>';
 	catalogPanel += '					<div class="">';
 	catalogPanel += '						<div class="btn-group btn-group-xs">';
 	catalogPanel += '						<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Keywords') + '</strong>';
 	catalogPanel += '						</div>';
 	catalogPanel += '						<br>';
-	catalogPanel += '						<input type="text" id="keywordsF" placeHolder="' + gettext('Separated by') + ' \';\'    P.ej: cat_1;cat_2;..." value="" class="form-control"/>';
+	catalogPanel += '						<input type="text" id="keywordsF" placeHolder="' + gettext('Separated by') + ' \';\'	P.ej: cat_1;cat_2;..." value="" class="form-control"/>';
 	catalogPanel += '					</div>';
 	catalogPanel += '					<div class="">';
 	catalogPanel += '						<div class="btn-group btn-group-xs">';
 	catalogPanel += '							<span data-translate="" class="ng-scope ng-binding"><strong>' + gettext('Contact for the resource') + '</strong>';
 	catalogPanel += '						</div>';
 	catalogPanel += '						<br>';
-	catalogPanel += '						<input type="text" id="orgNameF" placeHolder="' + gettext('Separated by') + ' \';\'    P.ej: cat_1;cat_2;..." value="" class="form-control"/>';
+	catalogPanel += '						<input type="text" id="orgNameF" placeHolder="' + gettext('Separated by') + ' \';\'	P.ej: cat_1;cat_2;..." value="" class="form-control"/>';
 	catalogPanel += '					</div>';
 	catalogPanel += '				</div>';
 	catalogPanel += '				<div class="catalog_search_advanced_col col-md-4">';
@@ -196,18 +196,19 @@ CatalogView.prototype.initialization = function(){
 	});
 }
 
-CatalogView.prototype.getLocalizedEndpoint = function() {
+CatalogView.prototype.getBaseUrl = function() {
 	if (this.config.baseUrl) {
-		if (viewer.core.conf.language.iso639_2b) {
-			url = this.config.baseUrl + '/srv/' + viewer.core.conf.language.iso639_2b;	
-		}
-		else {
-			url = this.config.baseUrl + '/srv/eng';
-		}
-		
+		return this.config.baseUrl;
+	}
+	return '/geonetwork'
+}
+
+CatalogView.prototype.getLocalizedEndpoint = function() {
+	if (viewer.core.conf.language.iso639_2b) {
+		url = this.getBaseUrl() + '/srv/' + viewer.core.conf.language.iso639_2b;	
 	}
 	else {
-		url = '/geonetwork/srv/eng';
+		url = this.getBaseUrl() + '/srv/eng';
 	}
 	return url;
 }
@@ -401,7 +402,7 @@ CatalogView.prototype.getMetadataEntry = function(metadata){
 		met += '</div>';
 	}else{
 		met += '<div class="no_catalog_content col-sm-12">';
-		met += '<i class="fa fa-ban" aria-hidden="true"></i>   ';
+		met += '<i class="fa fa-ban" aria-hidden="true"></i> ';
 		met += 	gettext('No results found');
 		met += '</div>';
 	}
@@ -438,8 +439,8 @@ CatalogView.prototype.createResourceLink = function(links){
 			content += '<li class="catalog-link">';
 			content += '<div class="row">';
 			content += '<div class="col-md-4 form-group">';	
-			content +=   '<i class="fa fa-file-archive-o" aria-hidden="true"></i>';
-			content +=   '<span class="catalog-link-resource"><p>' + layer_title + '<br/><span class="catalog-entry-subtitle">' + layer_name + '</span></p></span>';
+			content += '<i class="fa fa-file-archive-o" aria-hidden="true"></i>';
+			content += '<span class="catalog-link-resource"><p>' + layer_title + '<br/><span class="catalog-entry-subtitle">' + layer_name + '</span></p></span>';
 			content += '</div>';
 			content += 	'<div class="col-md-2 form-group">';	
 			content += 		'<a href="' + shapeLink + '"><div class="download-btn"><i style="margin-right: 10px;" class="fa fa-download"></i>' + gettext('Download ShapeFile') + '</div></a>';
@@ -457,8 +458,8 @@ CatalogView.prototype.createResourceLink = function(links){
 			content += '<li class="catalog-link">';
 			content += '<div class="row">';
 			content += '<div class="col-md-4 form-group">';	
-			content +=   '<i class="fa fa-file-archive-o" aria-hidden="true"></i>';
-			content +=   '<span class="catalog-link-resource"><p>' + layer_title + '<br/><span class="catalog-entry-subtitle">' + layer_name + '</span></p></span>';
+			content += '<i class="fa fa-file-archive-o" aria-hidden="true"></i>';
+			content += '<span class="catalog-link-resource"><p>' + layer_title + '<br/><span class="catalog-entry-subtitle">' + layer_name + '</span></p></span>';
 			content += '</div>';
 			content += 	'<div class="col-md-2 form-group">';	
 			content += 		'<a href="' + wcs_link + '"><div class="download-btn"><i style="margin-right: 10px;" class="fa fa-download"></i>' + gettext('Access raster data') + '</div></a>';
@@ -470,8 +471,8 @@ CatalogView.prototype.createResourceLink = function(links){
 			content += '<li class="catalog-link">';
 			content += '<div class="row">';
 			content += '<div class="col-md-6 form-group">';	
-			content +=   '<i class="fa fa-file-archive-o" aria-hidden="true"></i>';
-			content +=   '<span class="catalog-link-resource"><p>' + layer_title + '<br/><span class="catalog-entry-subtitle">' + layer_name + '</span></p></span>';
+			content += '<i class="fa fa-file-archive-o" aria-hidden="true"></i>';
+			content += '<span class="catalog-link-resource"><p>' + layer_title + '<br/><span class="catalog-entry-subtitle">' + layer_name + '</span></p></span>';
 			content += '</div>';
 			content += 	'<div class="col-md-2 form-group">';	
 			content += 		'<a href="' + link_url + '"><div class="download-btn"><i style="margin-right: 10px;" class="fa fa-download"></i>' + gettext('Access resource') + '</div></a>';
@@ -610,9 +611,6 @@ CatalogView.prototype._createOLLayer = function(url, name, title, abstract, data
 		url = url.substring(0, url.length-1);
 	}
 	var zIndex = $("#layer-tree-tab #gvsigol-geonetwork-group .layer-box").length + this.getCatalogGroupOrder();
-	console.log("_createOLLayer");
-	console.log(name);
-	console.log(url);
 	var catalogLayer = new ol.layer.Tile({
 		source: new ol.source.TileWMS({
 			url: url,
@@ -670,8 +668,8 @@ CatalogView.prototype.createLayer = function(name, title, abstract, url, dataId,
 	var layerTree = self.mapViewer.getLayerTree();
 	
 	var removeLayerButtonUI = '<a id="remove-catalog-layer-' + dataId + '" data-layerid="' + dataId + '" class="btn btn-block btn-social btn-custom-tool remove-catalog-layer-btn">';
-	removeLayerButtonUI +=    '	<i class="fa fa-times"></i> ' + gettext('Remove layer');
-	removeLayerButtonUI +=    '</a>';
+	removeLayerButtonUI +=	'	<i class="fa fa-times"></i> ' + gettext('Remove layer');
+	removeLayerButtonUI +=	'</a>';
 	
 	var newLayerUI = $(layerTree.createOverlayUI(newLayer, $("#layergroup-"+groupId).is(":checked")));
 	newLayerUI.find(".box-body .zoom-to-layer").after(removeLayerButtonUI);
@@ -802,13 +800,7 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 	var facetsOrder = self.config.facetsOrder;
 	var disabledFacets = self.config.disabledFacets;
 	
-	var url;
-	if (self.config.queryUrl) {
-		url = self.config.queryUrl;
-	}
-	else {
-		self.getLocalizedEndpoint() + "/q";
-	}
+	var url = self.getLocalizedEndpoint() + "/q";
 	// TODO: authentication
 	url = url + '?_content_type=json' + filters + '&bucket=s101&facet.q=' + query + '&fast=index&resultType=details&sortBy=relevance';
 	//var url = '/gvsigonline/catalog/get_query/?_content_type=json&bucket=s101&facet.q='+query+'&fast=index&from=1&resultType=details&sortBy=relevance';
@@ -915,7 +907,7 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 						if(aux_content.length == 0){
 							aux_content += '<div style="padding: 10px">';
 							aux_content += '<div class="no_catalog_content col-md-12">';
-							aux_content += '<i class="fa fa-ban" aria-hidden="true"></i>   ';
+							aux_content += '<i class="fa fa-ban" aria-hidden="true"></i> ';
 							aux_content += gettext('No results found');
 							aux_content += '</div>';
 							aux_content += '<div style="clear:both"></div>';
@@ -964,7 +956,6 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 						if(link.length==6){
 							var type = link[3].trim().substring(0, 7);
 							if(type == "OGC:WMS"){
-								console.log(link);
 								wms.url = link[2];
 								wms.name = link[0];
 								wms.title = title;
@@ -983,7 +974,6 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 						group_visible = $("#layergroup-geonetwork-group").is(":checked");
 						if (wms.name) {
 							try {
-								console.log(wms);
 								self.createLayer(wms.name, wms.title, wms.abstract, wms.url, id, geoBox, group_visible, wfs_url, wcs_url);
 								self.hidePanel();
 							}
@@ -1015,6 +1005,7 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 			console.log(jqXHR);
 			content_code = self.getMetadataEntry(null);
 			$("#catalog_content").html(content_code);
+			self.updatePager(1);
 		}
 	});
 }
@@ -1062,7 +1053,6 @@ CatalogView.prototype.createAvailableLayersPanel = function(url, service){
 	var serviceUrl = url.split("?")[0];
 	var getCapabilitiesUrl = serviceUrl + "?service=" + service + "&request=GetCapabilities&version=1.3.0";
 	var self = this;
-	console.log(getCapabilitiesUrl);
 	$.ajax({
 		type: "GET",
 		async: true,
@@ -1073,9 +1063,7 @@ CatalogView.prototype.createAvailableLayersPanel = function(url, service){
 		success: function(response){
 			var xmlDoc = $.parseXML(response);
 			var xml = $(xmlDoc);
-			console.log(xml);
 			var rootElem = xml.get(0);
-			console.log(rootElem);
 			/*
 			if ("html" in response) {
 				$('#modal-catalog .modal-title').html(gettext("Details"));
@@ -1094,7 +1082,7 @@ CatalogView.prototype.createAvailableLayersPanel = function(url, service){
 	});
 }
 
-CatalogView.prototype.showPanel = function(){
+CatalogView.prototype.showPanel = function(searchString, geomFilter){
 	if (this.catalog_panel===null) {
 		var firstTime = true;
 		this.initialization();
@@ -1104,11 +1092,20 @@ CatalogView.prototype.showPanel = function(){
 	}
 	this.catalog_panel.show();
 	this.catalog_map.map.updateSize();
+	this.catalog_map.updateExtent();
 	this.map_container.hide();
 	$('.viewer-search-form').css("display","none");
-	if (firstTime) {
+	if (searchString) {
+		$("#gn-any-field").val(searchString);
+	}
+	if (firstTime && !geomFilter) {
+		geomFilter = ol.geom.Polygon.fromExtent(viewer.core.getMap().getView().calculateExtent(viewer.core.getMap().getSize()));
+	}
+	this.catalog_map.setSpatialFilter(geomFilter);
+	
+	if (firstTime || searchString || geomFilter) {
 		// apply filters after the map has been loaded
-		this.getCatalogFilters("", null, null, null, null, null, null, null, null, this.catalog_map.getSelectedArea());
+		this.filterCatalog();
 	}
 }
 
@@ -1132,7 +1129,6 @@ CatalogView.prototype._replaceMetadataBtnEvents = function() {
 			var layers = self.map.getLayers();
 			layers.forEach(function(layer){
 				if (!layer.baselayer) {
-					//console.log(layer);
 					if (element.id===("show-metadata-" + layer.get("id"))) {
 						selectedLayer = layer;
 						if (!layer.metadata) {
@@ -1220,10 +1216,10 @@ CatalogView.prototype.installNavBars = function() {
 	var html = '';
 	
 	/*html += '<ul class="nav navbar-nav">';
-	html += '    <li><a href="#" id="show_map" class="dropdown-toggle">Map</a></li>';
+	html += '	<li><a href="#" id="show_map" class="dropdown-toggle">Map</a></li>';
 	html += '</ul>'
 	html += '<ul class="nav navbar-nav">';
-	html += '    <li><a href="#" id="show_catalog" class="dropdown-toggle">Catalog</a></li>';
+	html += '	<li><a href="#" id="show_catalog" class="dropdown-toggle">Catalog</a></li>';
 	html += '</ul>';
 	
 	$("#viewer-navbar").append(html);*/
@@ -1240,8 +1236,8 @@ CatalogView.prototype.installNavBars = function() {
 	
 	$("#gvsigol-navbar-menus").append(html);*/
 	
-    var button = '<li id="show_catalog" role="presentation"><a role="menuitem" tabindex="-1" href="#"><i class="fa fa-newspaper-o m-r-5"></i>' + gettext('Catalog') + '</a></li>';
-    $('#gvsigol-navbar-views-menu').append(button);
+	var button = '<li id="show_catalog" role="presentation"><a role="menuitem" tabindex="-1" href="#"><i class="fa fa-newspaper-o m-r-5"></i>' + gettext('Catalog') + '</a></li>';
+	$('#gvsigol-navbar-views-menu').append(button);
 	
 	$("#show_catalog").click(function(){
 		$("body").trigger('show-catalog-event');

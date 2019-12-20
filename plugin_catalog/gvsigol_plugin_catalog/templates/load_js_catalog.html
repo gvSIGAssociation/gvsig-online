@@ -3,6 +3,7 @@
 <link rel="stylesheet" type="text/css" href="{% static "css/catalog.css" %}" />
 <script type="text/javascript" src="{% static "js/catalog_map.js" %}"></script>
 <script type="text/javascript" src="{% static "js/catalog.js" %}"></script>
+<script type="text/javascript" src="{% static "js/tools/searchFeaturesInCatalog.js" %}"></script>
 
 
 <script type="text/javascript">
@@ -52,5 +53,12 @@ if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')) {
 		catalog.installNavBars();
 	}
 	catalog.install();
-}	
+	viewer.core.catalog = catalog;
+}
+
+$(document).ready(function() {
+	var map = viewer.core.getMap();	
+	var tool = new SearchFeaturesInCatalog(map, {});
+	viewer.core.loadTool(tool);
+});
 </script>
