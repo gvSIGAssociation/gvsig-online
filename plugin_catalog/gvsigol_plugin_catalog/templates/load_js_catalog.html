@@ -8,7 +8,6 @@
 
 <script type="text/javascript">
 (function() {
-	console.log("load_js_catalog");
 if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')) {
 	
 	var catalog = new CatalogView(viewer.core,
@@ -56,7 +55,6 @@ if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')) {
 	}
 	catalog.install();
 	viewer.core.catalog = catalog;
-	console.log("load_js_catalog end");
 }
 
 $(document).ready(function() {
