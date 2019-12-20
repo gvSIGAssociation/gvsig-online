@@ -65,14 +65,15 @@ var DrawPolygonControl = function(drawBar, map, styleSettings) {
 		html: '<i class="fa fa-object-ungroup" ></i>',
 		className: "edit",
 		title: gettext('Draw polygon'),
-		interaction: this.drawInteraction,
-		onToggle: function(active){
-			if (active) {
-				viewer.core.disableTools(this);
-				self.activate();
-			} else {
-				self.deactivate();
-			}
+		interaction: this.drawInteraction
+	});
+	this.control.on('change:active', function(evt) {
+		if (evt.active) {
+			viewer.core.disableTools(this);
+			self.activate();
+		}
+		else {
+			self.deactivate();
 		}
 	});
 	this.drawBar.addControl(this.control);
@@ -94,10 +95,13 @@ DrawPolygonControl.prototype.activate = function(e) {
 };
 
 DrawPolygonControl.prototype.deactivate = function() {
-	this.active = false;
+	if (this.drawInteraction != null) {
+		//this.drawInteraction.finishDrawing();
+		//this.drawInteraction.setActive(false);
+		this.map.removeInteraction(this.drawInteraction);
+	}
 	this.control.setActive(false);
-	this.drawInteraction.setActive(false);
-	this.map.removeInteraction(this.drawInteraction);
+	this.active = false;
 };
 
 DrawPolygonControl.prototype.getStyle = function(feature) {
