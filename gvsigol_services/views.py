@@ -609,6 +609,21 @@ def layer_list(request):
         layer_list = Layer.objects.filter(external=False)
     else:
         layer_list = Layer.objects.filter(created_by__exact=request.user.username).filter(external=False)
+        
+    for l in layer_list:
+        datastore = Datastore.objects.get(id=l.datastore_id)
+        workspace = Workspace.objects.get(id=datastore.workspace_id)
+        server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+        try:
+            (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, l.name, "json")
+            if ds_type == 'imagemosaic':
+                ds_type = 'coverage'
+            l.default_srs = layer_info[ds_type]['srs']
+            
+        except Exception as e:
+            l.default_srs = 'EPSG:4326'
+        print l.default_srs   
+        l.save()
 
     response = {
         'layers': layer_list
