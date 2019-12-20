@@ -68,6 +68,7 @@ var DrawPolygonControl = function(drawBar, map, styleSettings) {
 		interaction: this.drawInteraction,
 		onToggle: function(active){
 			if (active) {
+				viewer.core.disableTools(this);
 				self.activate();
 			} else {
 				self.deactivate();
@@ -94,6 +95,8 @@ DrawPolygonControl.prototype.activate = function(e) {
 
 DrawPolygonControl.prototype.deactivate = function() {
 	this.active = false;
+	this.control.setActive(false);
+	this.drawInteraction.setActive(false);
 	this.map.removeInteraction(this.drawInteraction);
 };
 

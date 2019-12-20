@@ -69,6 +69,7 @@ var DrawPointControl = function(drawBar, map, styleSettings) {
 		interaction: this.drawInteraction,
 		onToggle: function(active){
 			if (active) {
+				viewer.core.disableTools(this);
 				self.activate();
 			} else {
 				self.deactivate();
@@ -94,6 +95,7 @@ DrawPointControl.prototype.activate = function(e) {
 
 DrawPointControl.prototype.deactivate = function() {
 	this.active = false;
+	this.control.setActive(false);
 	this.map.removeInteraction(this.drawInteraction);
 };
 

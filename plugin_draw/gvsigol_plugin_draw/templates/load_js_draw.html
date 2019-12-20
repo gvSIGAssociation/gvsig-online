@@ -157,25 +157,12 @@
 		});
 		
 		$('#show_draw').click(function(e){
-			if (viewer.core.getActiveToolbar() == null) {
-				map.addControl(drawBar);
-				viewer.core.setActiveToolbar(drawBar);
-				$('#get-feature-info').attr("disabled", true);
-				$('#get-feature-info').css("cursor", "not-allowed");
-				
-			} else {
+			if (viewer.core.getActiveToolbar() != null) {
 				viewer.core.getActiveToolbar().closeControl.close();
-				map.addControl(drawBar);
-				viewer.core.setActiveToolbar(drawBar);
-				$('#get-feature-info').attr("disabled", true);
-				$('#get-feature-info').css("cursor", "not-allowed");
 			}
-			
-			for (var i=0; i<map.tools.length; i++){
-				if (map.tools[i].deactivable == true) {
-					map.tools[i].deactivate();
-				}
-			}
+			map.addControl(drawBar);
+			viewer.core.setActiveToolbar(drawBar);
+			viewer.core.disableTools();
 		});
 		
 		map.addInteraction(select);

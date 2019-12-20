@@ -66,6 +66,7 @@ var DrawLineControl = function(drawBar, map, styleSettings) {
 		interaction: this.drawInteraction,
 		onToggle: function(active){
 			if (active) {
+				viewer.core.disableTools(this);
 				self.activate();
 			} else {
 				self.deactivate();
@@ -92,6 +93,7 @@ DrawLineControl.prototype.activate = function(e) {
 
 DrawLineControl.prototype.deactivate = function() {
 	this.active = false;
+	this.control.setActive(false);
 	this.map.removeInteraction(this.drawInteraction);
 };
 

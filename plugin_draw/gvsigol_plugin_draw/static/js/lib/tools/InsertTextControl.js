@@ -77,6 +77,7 @@ var InsertTextControl = function(drawBar, map, styleSettings) {
 		interaction: this.drawInteraction,
 		onToggle: function(active){
 			if (active) {
+				viewer.core.disableTools(this);
 				self.activate();
 			} else {
 				self.deactivate();

@@ -67,6 +67,7 @@ DrawArrow.prototype.activate = function(e) {
 
 DrawArrow.prototype.deactivate = function() {
 	this.active = false;
+	this.control.setActive(false);
 	this.map.removeInteraction(this.drawInteraction);
 };
 
