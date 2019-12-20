@@ -127,6 +127,7 @@ var MeasureAreaControl = function(map, toolbar) {
 		interaction: this.interaction,
 		onToggle: function(active){
 			if (active) {
+				viewer.core.disableTools(this);
 				self.activate();
 			} else {
 				self.deactivate();
@@ -269,6 +270,7 @@ MeasureAreaControl.prototype.formatLength = function(coordinates) {
  * TODO
  */
 MeasureAreaControl.prototype.removeOverlays = function(){
+	console.log('removeOverlays')
 	this.map.removeOverlay(this.helpTooltip);
 	this.map.removeOverlay(this.measureTooltip);
 	var overlays = this.map.getOverlays().getArray();
