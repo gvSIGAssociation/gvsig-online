@@ -947,16 +947,11 @@ def project_get_conf(request):
                             else:
                                 layer['is_vector'] = False
     
-                            layer_info = None
                             defaultCrs = None
-                            if datastore.type == 'e_WMS':
+                            if str(datastore.type) == 'e_WMS':
                                 defaultCrs = 'EPSG:4326'
                             else:
-                                server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-                                (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, l.name, "json")
-                                if ds_type == 'imagemosaic':
-                                    ds_type = 'coverage'
-                                defaultCrs = layer_info[ds_type]['srs']
+                                defaultCrs = l.default_srs
     
                             crs_code = int(defaultCrs.split(':')[1])
                             if crs_code in core_utils.get_supported_crs():
