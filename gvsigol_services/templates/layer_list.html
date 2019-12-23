@@ -32,6 +32,7 @@
 							<th></th>
 							<th></th>
 							<th></th>
+							<th></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -51,6 +52,7 @@
 							<td></td>
 							<td></td>
 							<td></td>
+							<th></th>
 							<td></td>
 						</tr>
 						{% endfor %}
@@ -154,11 +156,15 @@ $(document).ready(function() {
 	       	"data": null,
 	        "defaultContent": '<button type="button" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Configure layer" %}' + '" class="btn bg-purple"><i class="fa fa-cogs"></i></button>'
 	  	},{
-	      	"targets": -4,
+	      	"targets": -5,
 	       	"data": null,
 	        "defaultContent": '<button type="button" name="button-update-layer" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update layer" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
 	  	},{
 	      	"targets": -3,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-refresh-extent" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Refresh extent" %}' + '" class="btn btn-info"><i class="fa fa-arrows-alt"></i></button>'
+	  	},{
+	      	"targets": -4,
 	       	"data": null,
 	        "defaultContent": '<button type="button" name="button-update-thumbnail" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update thumbnail" %}' + '" class="btn btn-primary"><i class="fa fa-file-image-o"></i></button>'
 	  	}],
@@ -197,6 +203,9 @@ $(document).ready(function() {
 
 		} else if (this.name == "button-delete-layer"){
 	        deleteLayer(data, row);
+	        
+	    } else if (this.name == "button-refresh-extent"){
+	        refreshExtent(data, row);
 	    }
 	});
 
@@ -242,6 +251,10 @@ $(document).ready(function() {
 
 	function clearCache(data){
 		location.href = '/gvsigonline/services/cache_clear/' + data[0] + '/';
+	}
+	
+	function refreshExtent(data){
+		location.href = '/gvsigonline/services/layer_refresh_extent/' + data[0] + '/';
 	}
 
 	function deleteLayer(data, row){
