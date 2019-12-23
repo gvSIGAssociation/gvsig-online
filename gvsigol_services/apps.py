@@ -1,11 +1,14 @@
 from __future__ import unicode_literals
 
 from django.apps import AppConfig
+import logging
+logger = logging.getLogger("gvsigol")
+
 
 class GvsigolServicesConfig(AppConfig):
     name = 'gvsigol_services'
     
-    def ready(self):
+    def _updateLayerInfo(self):
         import geographic_servers
         from models import Layer, Datastore, Workspace
         layer_list = Layer.objects.filter(external=False)
@@ -25,6 +28,10 @@ class GvsigolServicesConfig(AppConfig):
                 l.default_srs = 'EPSG:4326'
                 l.native_extent = '-180,-90,180,90'
                 l.latlong_extent = '-180,-90,180,90'
-                
-            #server.updateBoundingBoxFromData(l)   
-            l.save()
+            l.save()        
+    
+    def ready(self):
+        try:
+            self._updateLayerInfo()
+        except:
+            logger.exception("Error updating layer information")
