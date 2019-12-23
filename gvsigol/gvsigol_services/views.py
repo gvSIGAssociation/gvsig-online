@@ -609,26 +609,34 @@ def layer_list(request):
         layer_list = Layer.objects.filter(external=False)
     else:
         layer_list = Layer.objects.filter(created_by__exact=request.user.username).filter(external=False)
-        
-    for l in layer_list:
-        datastore = Datastore.objects.get(id=l.datastore_id)
-        workspace = Workspace.objects.get(id=datastore.workspace_id)
-        server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-        try:
-            (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, l.name, "json")
-            if ds_type == 'imagemosaic':
-                ds_type = 'coverage'
-            l.default_srs = layer_info[ds_type]['srs']
-            
-        except Exception as e:
-            l.default_srs = 'EPSG:4326'
-        print l.default_srs   
-        l.save()
 
     response = {
         'layers': layer_list
     }
     return render(request, 'layer_list.html', response)
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def layer_refresh_extent(request, layer_id):
+    layer = Layer.objects.get(pk=layer_id)
+    datastore = Datastore.objects.get(id=layer.datastore_id)
+    workspace = Workspace.objects.get(id=datastore.workspace_id)
+    server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+    try:
+        (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
+        if ds_type == 'imagemosaic':
+            ds_type = 'coverage'
+        layer.native_srs = layer_info[ds_type]['srs']
+        layer.native_extent = layer_info[ds_type]['nativeBoundingBox']['minx'] + ',' + layer_info[ds_type]['nativeBoundingBox']['miny'] + ',' + layer_info[ds_type]['nativeBoundingBox']['maxx'] + ',' + layer_info[ds_type]['nativeBoundingBox']['maxy']
+        layer.latlong_extent = layer_info[ds_type]['latLonBoundingBox']['minx'] + ',' + layer_info[ds_type]['latLonBoundingBox']['miny'] + ',' + layer_info[ds_type]['latLonBoundingBox']['maxx'] + ',' + layer_info[ds_type]['latLonBoundingBox']['maxy']      
+        
+    except Exception as e:
+        layer.default_srs = 'EPSG:4326'
+        layer.native_extent = '-180,-90,180,90'
+        layer.latlong_extent = '-180,-90,180,90' 
+        
+    #server.updateBoundingBoxFromData(layer)    
+    layer.save()
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -1080,6 +1088,25 @@ def layer_add_with_group(request, layergroup_id):
                         }
                     newRecord.conf = layer_conf
                     newRecord.save()
+                
+                datastore = Datastore.objects.get(id=newRecord.datastore.id)
+                workspace = Workspace.objects.get(id=datastore.workspace_id)
+                server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+                try:
+                    (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, newRecord.name, "json")
+                    if ds_type == 'imagemosaic':
+                        ds_type = 'coverage'
+                    newRecord.native_srs = layer_info[ds_type]['srs']
+                    newRecord.native_extent = layer_info[ds_type]['nativeBoundingBox']['minx'] + ',' + layer_info[ds_type]['nativeBoundingBox']['miny'] + ',' + layer_info[ds_type]['nativeBoundingBox']['maxx'] + ',' + layer_info[ds_type]['nativeBoundingBox']['maxy']
+                    newRecord.latlong_extent = layer_info[ds_type]['latLonBoundingBox']['minx'] + ',' + layer_info[ds_type]['latLonBoundingBox']['miny'] + ',' + layer_info[ds_type]['latLonBoundingBox']['maxx'] + ',' + layer_info[ds_type]['latLonBoundingBox']['maxy']      
+                    
+                except Exception as e:
+                    newRecord.default_srs = 'EPSG:4326'
+                    newRecord.native_extent = '-180,-90,180,90'
+                    newRecord.latlong_extent = '-180,-90,180,90' 
+
+                newRecord.save()    
+                
                 if redirect_to_layergroup:
                     return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id})+"?redirect=grouplayer-redirect")
                 else:

@@ -152,7 +152,9 @@ class Layer(models.Model):
     detailed_info_button_title = models.CharField(max_length=150, null=True, blank=True, default='Detailed info')
     detailed_info_html = models.TextField(null=True, blank=True)
     timeout = models.IntegerField(null=True, default=30000)
-    default_srs = models.CharField(max_length=100, default='EPSG:4326')
+    native_srs = models.CharField(max_length=100, default='EPSG:4326')
+    native_extent = models.CharField(max_length=250, default='-180,-90,180,90')
+    latlong_extent = models.CharField(max_length=250, default='-180,-90,180,90')
     
     def __unicode__(self):
         return self.name

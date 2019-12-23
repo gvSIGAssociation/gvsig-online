@@ -951,7 +951,7 @@ def project_get_conf(request):
                             if str(datastore.type) == 'e_WMS':
                                 defaultCrs = 'EPSG:4326'
                             else:
-                                defaultCrs = l.default_srs
+                                defaultCrs = l.native_srs
     
                             crs_code = int(defaultCrs.split(':')[1])
                             if crs_code in core_utils.get_supported_crs():
@@ -961,7 +961,10 @@ def project_get_conf(request):
                                     'units': epsg['units']
                                 }
                                 used_crs.append(epsg)
-    
+                                
+                            layer['native_srs'] = l.native_srs
+                            layer['native_extent'] = l.native_extent
+                            layer['latlong_extent'] = l.latlong_extent
                             layer['opacity'] = 1
                             layer['wms_url'] = core_utils.get_wms_url(request, workspace)
                             layer['wms_url_no_auth'] = workspace.wms_endpoint
@@ -1245,7 +1248,7 @@ def documentation(request):
     }
     return render(request, 'documentation.html', response)
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+#@login_required(login_url='/gvsigonline/auth/login_user/')
 def save_shared_view(request):
     if request.method == 'POST':
         pid = int(request.POST.get('pid'))
@@ -1254,7 +1257,10 @@ def save_shared_view(request):
         view_state = request.POST.get('view_state')
 
         name = ''.join(random.choice(string.ascii_uppercase) for i in range(10))
-        shared_url = settings.BASE_URL + '/gvsigonline/auth/login_user/?next=/gvsigonline/core/load_shared_view/' + name
+        if request.user.is_authenticated():
+            shared_url = settings.BASE_URL + '/gvsigonline/auth/login_user/?next=/gvsigonline/core/load_shared_view/' + name
+        else:
+            shared_url = settings.BASE_URL + '/gvsigonline/core/load_shared_view/' + name
         shared_project = SharedView(
             name=name,
             project_id=pid,
@@ -1294,7 +1300,6 @@ def send_shared_view(destination, shared_url):
             print e.smtp_error
             pass
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
 @cache_control(max_age=86400)
 def load_shared_view(request, view_name):
     try:
