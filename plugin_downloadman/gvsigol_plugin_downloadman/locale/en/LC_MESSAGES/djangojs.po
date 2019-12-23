@@ -70,4 +70,12 @@ msgstr ""
 msgid "Indended usage"
 msgstr ""
 
+msgid "%(number)s days"
+msgstr ""
+
+msgid "%(number)s hours"
+msgstr ""
+
+msgid "%(number)s minutes"
+msgstr ""
 

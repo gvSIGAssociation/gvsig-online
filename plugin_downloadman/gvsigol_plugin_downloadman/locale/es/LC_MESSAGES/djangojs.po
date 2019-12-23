@@ -73,3 +73,11 @@ msgid "Indended usage"
 msgstr "Uso previsto"
 
 
+msgid "%(number)s days"
+msgstr "%(number)s días"
+
+msgid "%(number)s hours"
+msgstr "%(number)s horas"
+
+msgid "%(number)s minutes"
+msgstr "%(number)s minutos"
