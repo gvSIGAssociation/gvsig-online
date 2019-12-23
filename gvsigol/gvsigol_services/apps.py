@@ -20,13 +20,11 @@ class GvsigolServicesConfig(AppConfig):
                 l.native_srs = layer_info[ds_type]['srs']
                 l.native_extent = str(layer_info[ds_type]['nativeBoundingBox']['minx']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['miny']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['maxx']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['maxy'])
                 l.latlong_extent = str(layer_info[ds_type]['latLonBoundingBox']['minx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['miny']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
-                print 'OBTENIENDO SRS Y EXTENT NATIVO PARA ' + l.name
                 
             except Exception as e:
                 l.default_srs = 'EPSG:4326'
                 l.native_extent = '-180,-90,180,90'
                 l.latlong_extent = '-180,-90,180,90'
-                print 'SRS Y EXTENT POR DEFECTO PARA ' + l.name
                 
             #server.updateBoundingBoxFromData(l)   
             l.save()
