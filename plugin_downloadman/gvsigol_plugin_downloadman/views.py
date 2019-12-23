@@ -644,8 +644,7 @@ def downloadResource(request, uuid, resuuid):
 def render_settings(request):
     response = {
         'download_requests': [],
-        'settings_class': "active",
-        'active_class': "",
+        'activetab': "settings",
         'archived_class': "",
         'validity': downman_models.get_default_validity(),
         'max_public_download_size': downman_models.get_max_public_download_size()
