@@ -637,6 +637,8 @@ def layer_refresh_extent(request, layer_id):
         
     #server.updateBoundingBoxFromData(layer)    
     layer.save()
+    
+    return redirect('layer_list')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
