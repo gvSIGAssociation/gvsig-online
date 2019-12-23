@@ -627,8 +627,8 @@ def layer_refresh_extent(request, layer_id):
         if ds_type == 'imagemosaic':
             ds_type = 'coverage'
         layer.native_srs = layer_info[ds_type]['srs']
-        layer.native_extent = layer_info[ds_type]['nativeBoundingBox']['minx'] + ',' + layer_info[ds_type]['nativeBoundingBox']['miny'] + ',' + layer_info[ds_type]['nativeBoundingBox']['maxx'] + ',' + layer_info[ds_type]['nativeBoundingBox']['maxy']
-        layer.latlong_extent = layer_info[ds_type]['latLonBoundingBox']['minx'] + ',' + layer_info[ds_type]['latLonBoundingBox']['miny'] + ',' + layer_info[ds_type]['latLonBoundingBox']['maxx'] + ',' + layer_info[ds_type]['latLonBoundingBox']['maxy']      
+        layer.native_extent = str(layer_info[ds_type]['nativeBoundingBox']['minx']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['miny']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['maxx']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['maxy'])
+        layer.latlong_extent = str(layer_info[ds_type]['latLonBoundingBox']['minx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['miny']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxy'])      
         
     except Exception as e:
         layer.default_srs = 'EPSG:4326'
@@ -1099,8 +1099,8 @@ def layer_add_with_group(request, layergroup_id):
                     if ds_type == 'imagemosaic':
                         ds_type = 'coverage'
                     newRecord.native_srs = layer_info[ds_type]['srs']
-                    newRecord.native_extent = layer_info[ds_type]['nativeBoundingBox']['minx'] + ',' + layer_info[ds_type]['nativeBoundingBox']['miny'] + ',' + layer_info[ds_type]['nativeBoundingBox']['maxx'] + ',' + layer_info[ds_type]['nativeBoundingBox']['maxy']
-                    newRecord.latlong_extent = layer_info[ds_type]['latLonBoundingBox']['minx'] + ',' + layer_info[ds_type]['latLonBoundingBox']['miny'] + ',' + layer_info[ds_type]['latLonBoundingBox']['maxx'] + ',' + layer_info[ds_type]['latLonBoundingBox']['maxy']      
+                    newRecord.native_extent = str(layer_info[ds_type]['nativeBoundingBox']['minx']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['miny']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['maxx']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['maxy'])
+                    newRecord.latlong_extent = str(layer_info[ds_type]['latLonBoundingBox']['minx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['miny']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxy'])      
                     
                 except Exception as e:
                     newRecord.default_srs = 'EPSG:4326'
