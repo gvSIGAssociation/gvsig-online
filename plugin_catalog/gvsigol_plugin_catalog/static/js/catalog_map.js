@@ -250,27 +250,3 @@ CatalogMap.prototype.initialization = function(container_id){
 	mainBar.addControl(clearControl);
 	this.map.addControl(mainBar);
 }
-
-CatalogMap.prototype.updateExtent = function(){
-	console.log('updateExtent');
-	var container_id = this.map.getViewport().parentNode.id;
-	var mainMapView = viewer.core.getMap().getView();
-	// apply to the new map a similar extent compared to the main map
-	var mainMapExtent = mainMapView.calculateExtent(viewer.core.getMap().getSize());
-	var height = $('#' + container_id).height();
-	var width = $('#' + container_id).width();
-	console.log('height: ' + height + " - width: " + width);
-	var yResolution = ol.extent.getHeight(mainMapExtent) / height;
-	var xResolution = ol.extent.getHeight(mainMapExtent) / width;
-	console.log('yResolution: ' + yResolution + " - xResolution: " + xResolution);
-	var resolution = Math.max(xResolution);
-	console.log("zoom x: " + this.getZoomForResolution(xResolution));
-	console.log("zoom y: " + this.getZoomForResolution(yResolution));
-	var zoom = Math.round(this.getZoomForResolution(resolution)) - 2;
-	console.log(zoom);
-	if (zoom < 0) {
-		zoom = 0;
-	}
-	
-	this.map.getView().setZoom(Math.floor(zoom));
-}

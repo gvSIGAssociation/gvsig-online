@@ -1092,17 +1092,19 @@ CatalogView.prototype.showPanel = function(searchString, geomFilter){
 	}
 	this.catalog_panel.show();
 	this.catalog_map.map.updateSize();
-	this.catalog_map.updateExtent();
-	this.map_container.hide();
+	if (firstTime && !geomFilter) {
+		geomFilter = ol.geom.Polygon.fromExtent(viewer.core.getMap().getView().calculateExtent(viewer.core.getMap().getSize()));
+	}
+	if (geomFilter) {
+		this.catalog_map.map.getView().fit(geomFilter);
+	}
+	this.catalog_map.setSpatialFilter(geomFilter);
 	$('.viewer-search-form').css("display","none");
 	if (searchString) {
 		$("#gn-any-field").val(searchString);
 	}
-	if (firstTime && !geomFilter) {
-		geomFilter = ol.geom.Polygon.fromExtent(viewer.core.getMap().getView().calculateExtent(viewer.core.getMap().getSize()));
-	}
-	this.catalog_map.setSpatialFilter(geomFilter);
-	
+	this.map_container.hide();
+
 	if (firstTime || searchString || geomFilter) {
 		// apply filters after the map has been loaded
 		this.filterCatalog();
