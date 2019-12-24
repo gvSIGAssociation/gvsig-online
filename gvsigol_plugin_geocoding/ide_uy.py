@@ -100,7 +100,7 @@ class IdeUY():
         if ('0' != address['address[portalNumber]']):
             params['portal'] = address['address[portalNumber]']
 
-        if ('0' != address['address[manzana]']):
+        if ('' != address['address[manzana]']):
             params['manzana'] = address['address[manzana]']
             params['solar'] = address['address[solar]']
 
