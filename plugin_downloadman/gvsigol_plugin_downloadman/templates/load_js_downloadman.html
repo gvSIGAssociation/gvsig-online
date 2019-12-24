@@ -6,6 +6,7 @@
 
 
 <script type="text/javascript">
+(function(){
 if (viewer.core.ifToolInConf('gvsigol_plugin_downloadman')) {
 	
 	var config = {
@@ -25,10 +26,10 @@ if (viewer.core.ifToolInConf('gvsigol_plugin_downloadman')) {
 
 		$(".show_downloads_catalog_btn").unbind("click").click(function(){
 			$("body").trigger('show-catalog-event');
-			catalog.showPanel();
+			viewer.core.catalog.showPanel();
 		});
 		$("#show_map").click(function(){
-			catalog.hidePanel()
+			viewer.core.catalog.hidePanel()
 		});
 	}
 	html = '<li class="dropdown">';
@@ -42,4 +43,5 @@ if (viewer.core.ifToolInConf('gvsigol_plugin_downloadman')) {
 		viewer.core.getDownloadManager().showDownloadList();
 	});
 }
+})();
 </script>
