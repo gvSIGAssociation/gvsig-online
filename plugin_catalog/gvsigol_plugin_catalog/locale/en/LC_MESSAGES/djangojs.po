@@ -75,3 +75,7 @@ msgstr ""
 
 msgid "Metadatum"
 msgstr "Metadata"
+
+msgid "Draw rectangle"
+msgstr ""
+

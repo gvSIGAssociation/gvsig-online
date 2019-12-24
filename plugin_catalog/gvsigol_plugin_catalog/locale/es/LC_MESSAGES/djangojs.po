@@ -75,3 +75,7 @@ msgstr "Incluir sólo los resultados que se solapen con el área visible del map
 
 msgid "Metadatum"
 msgstr "Metadato"
+
+msgid "Draw rectangle"
+msgstr "Dibujar rectángulo"
+
