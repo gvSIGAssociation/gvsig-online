@@ -52,7 +52,7 @@ DownloadManagerClient.prototype.queryAvailableResources = function(layer_id, wor
 		queryUrl = self.config.baseQueryUrl + "layer/" + layer_id + "/";
 	}
 	
-	console.log(queryUrl);
+	//console.log(queryUrl);
 	/*
 	 * We expect an array of objects like this:
 	 * 
@@ -232,15 +232,11 @@ DownloadManagerUI.prototype.setModalSelector = function(selector) {
 } 
 
 DownloadManagerUI.prototype.createDownloadResource = function(downloadDescriptor) {
-	//var resourceDescriptor = downloadDescriptor.resource_descriptor;
 	var resource = downloadDescriptor.resource_descriptor;
 	var downloadParams = downloadDescriptor.param_values;
 	var param, paramOption;
-	var value;
-
-	var content = '<tr data-downloadid="' + downloadDescriptor.download_id + '">';
-	if (resource.name != resource.title) {}
-	var name = resource.title + " [" + resource.name + "]";
+	var value, valueTitle;
+	var content = '<tr class="downman-download-resource" data-downloadid="' + downloadDescriptor.download_id + '">';
 	if (resource.restricted) {
 		content += '<td style="width: 80px"><div class="form-inline"><div class="form-group"><i class="fa fa-3x fa-file-archive-o" aria-hidden="true"><i class="fa fa-lock"></i></i></span></div></div></td>';
 	}
@@ -261,10 +257,14 @@ DownloadManagerUI.prototype.createDownloadResource = function(downloadDescriptor
 	content += '<td style="vertical-align: top; padding-left: 12px; padding-right: 20px"><div class="form-horizontal"><div class="form-group">';
 	var first = true;
 	for (var j=0; j<downloadParams.length; j++) {
-		param = downloadParams[j];
-		var param_name = param.name;
-		var param_title = param.title;
-		value = downloadParams[j].value;
+		param_value_desc = downloadParams[j];
+		if (param_value_desc.param.name == 'spatial_filter_geom' || param_value_desc.param.name == 'spatial_filter_bbox') {
+			continue;
+		}
+		var param_name = param_value_desc.param.name;
+		var param_title = param_value_desc.param.title;
+		value = param_value_desc.value;
+		valueTitle = this._getOptionTitle(param_value_desc.param, value);
 		if (first) {
 			first = false;
 			var paramHtml = '<label for="' + param_name + '" class="form-label">' + param_title + '</label>';
@@ -272,46 +272,19 @@ DownloadManagerUI.prototype.createDownloadResource = function(downloadDescriptor
 		else {
 			var paramHtml = '<label for="' + param_name + '" class="control-label">' + param_title + '</label>';
 		}
-		paramHtml += '<p id="' + param_name +'" class="form-control-static">' + value + '</p>';
+		paramHtml += '<p id="' + param_name +'" class="form-control-static">' + valueTitle + '</p>';
 		content += paramHtml;
 	}
-	/*
-	content += '<label for"kk" class="control-label">Spatial filter</label>';
-	content += '<select id="kk" class="form-control" data-paramname="bla">';
-	content += '<option value="1">Include all geometries</option>';
-	content += '<option value="1">Include geometries within search filter</option>';
-	content += '<option value="1">Include geometries overlapping search filter</option>';
-	content += '</select>';
-	*/
 	content += '</div></div></td>';
 	content += '<td style="vertical-align: top; padding-left: 12px; width: 100px"><label class="control-label" aria-hidden="true">&nbsp;</label><i class="fa fa-times fa-2x remove-resource-btn" aria-hidden="true" data-downloadid="' + downloadDescriptor.download_id + '"></i></div></td>';
 	content += '</tr>';
 	return content;
-	/*
-	var content = '<li class="downman-link downman-download-resource"  data-downloadid="' + downloadDescriptor.download_id + '" data-downloadresource="' + resourceDescriptor.name + '"><div class="form-inline"><div class="form-group"><div class="col-md-10">';
-	content += '<i class="fa fa-file-archive-o download-resource" aria-hidden="true"></i><label class="control-label download-resource download-resource-title">' + resourceDescriptor.layer_title + " - " + resourceDescriptor.title + '</label>' ;
 
-	for (var j=0; j<downloadParams.length; j++) {
-		param = downloadParams[j].param;
-		value = downloadParams[j].value;
-		var param_name = param.name;
-		var param_title = param.title;
-		var paramHtml = '<label for="' + param_name + '" class="control-label">' + param_title + '</label>';
-		paramHtml += '<p id="' + param_name +'" class="form-control-static">' + value + '</p>';
-		content += paramHtml;
-	}
-
-	content += '	</div><div class="col-md-2">';
-	//content += '<button class="btn btn-default remove-resource-btn" type="button" data-layerid="' + resource.layer_id + '" data-downloadresource="' + resource.name + '"><i class="fa fa-times fa-icon-button-left" aria-hidden="true"></i></button>';
-	content += '<i class="fa fa-times fa-icon-button-left remove-resource-btn" aria-hidden="true" data-downloadid="' + downloadDescriptor.download_id + '"></i>';
-	content += '</div></div></div></li>';
-	return content;*/
-	
 }
 
-DownloadManagerUI.prototype._getSelectedResource = function(resource_name){
+DownloadManagerUI.prototype._getSelectedResource = function(resource_name, resource_type, resource_url){
 	for (var i=0; i<this.resources.length; i++) {
-		if (this.resources[i].name == resource_name) {
+		if (this.resources[i].name == resource_name && this.resources[i].resource_type == resource_type && this.resources[i].url == resource_url) {
 			return this.resources[i];
 		}
 	}
@@ -327,10 +300,19 @@ DownloadManagerUI.prototype._getParam = function(resource, param_name){
 	return null;
 }
 
+DownloadManagerUI.prototype._getOptionTitle = function(param, param_name){
+	for (var i=0; i<param.options.length; i++) {
+		if (param.options[i].name == param_name) {
+			return param.options[i].title;
+		}
+	}
+	return null;
+}
+
 DownloadManagerUI.prototype.createAvailableResource = function(resource) {
 	var downloadParams = resource.params;
 	var param, paramOption;
-	var content = '<tr data-downloadresource="' + resource.name + '">';
+	var content = '<tr class="downman-download-resource">';
 	if (resource.name != resource.title) {}
 	var name = resource.title + " [" + resource.name + "]";
 	if (resource.restricted) {
@@ -372,9 +354,8 @@ DownloadManagerUI.prototype.createAvailableResource = function(resource) {
 	content += '</select>';
 	*/
 	content += '</div></div></td>';
-	content += '<td style="vertical-align: top; padding-left: 12px; width: 100px"><label class="control-label" aria-hidden="true">&nbsp;</label><button style="width: 100%" class="btn btn-default add-to-download-btn" type="button" data-layerid="' + resource.layer_id + '" data-downloadresource="' + resource.name + '">'+gettext("Add to download list")+'</button></div></td>';
+	content += '<td style="vertical-align: top; padding-left: 12px; width: 100px"><label class="control-label" aria-hidden="true">&nbsp;</label><button style="width: 100%" class="btn btn-default add-to-download-btn" type="button" data-layerid="' + resource.layer_id + '" data-resourcename="' + resource.name + '" data-resourcetype="' + resource.resource_type +'" data-resourceurl="' + resource.url + '">'+gettext("Add to download list")+'</button></div></td>';
 	content += '</tr>';
-	console.log(content);
 	return content;
 }
 
@@ -392,7 +373,6 @@ DownloadManagerUI.prototype.initAvailableResources = function(downloadResources)
 
 	$(self.modalSelector).find('.modal-body').html(content);
 	var footer = '	<button class="btn btn-default downman-footer-button catalog-download-list-btn" type="button"><span class="download_list_count">' + self.getClient().getDownloadListCount() + '</span><i class="fa fa-shopping-cart fa-icon-button-left fa-icon-button-right" aria-hidden="true"></i>'+gettext("View download list")+'</button>';
-	//var footer = '	<button class="btn btn-default downman-footer-button catalog-download-list-btn" type="button"><i class="fa fa-shopping-cart fa-icon-button-left" aria-hidden="true"></i></button>';
 	footer += '		<div style="clear:both"></div>';
 	$(self.modalSelector).find('.modal-footer').html(footer);
 	$(self.modalSelector).find('.modal-title').html(gettext("Available downloads"));
@@ -402,18 +382,92 @@ DownloadManagerUI.prototype.initAvailableResources = function(downloadResources)
 	});
 	$(".add-to-download-btn").unbind("click").click(function(event){
 		var layer_id = event.currentTarget.getAttribute("data-layerid");
-		var resource_name = event.currentTarget.getAttribute("data-downloadresource");
-		var clickedResource = self._getSelectedResource(resource_name);
-		var liElement = $('.downman-download-resource[data-downloadresource="'+resource_name+'"]');
+		
+		var resource_name = event.currentTarget.getAttribute("data-resourcename");
+		var resource_type = event.currentTarget.getAttribute("data-resourcetype");
+		var resource_url = event.currentTarget.getAttribute("data-resourceurl");
+		var clickedResource = self._getSelectedResource(resource_name, resource_type, resource_url);
+		clickedResource = $.extend({}, clickedResource);
 		var values = [];
-		liElement.find('select').each(function() {
+		
+		$(event.currentTarget).closest('.downman-download-resource').find('select').each(function() {
 			var currentParam = self._getParam(clickedResource, this.getAttribute("data-paramname"));
-			var resVal = new gvsigol.downman.ResourceDownloadParamValue(currentParam, $(this).val());
+			var value = $(this).val();
+			var resVal = new gvsigol.downman.ResourceDownloadParamValue(currentParam, value);
 			values.push(resVal);
+			if (currentParam.name=='spatial_filter_type') {
+				if (value == 'bbox') {
+					var param = {
+						name: 'spatial_filter_bbox',
+						title: 'spatial_filter_bbox',
+						options: []
+					}
+					var targetCrs;
+					var extent;
+					if (clickedResource.native_crs) {
+						extent = self.getSelectedExtent(clickedResource.native_crs);
+					}
+					else {
+						extent = self.getSelectedExtent();
+					}
+					var bbox = extent[0] + "," + extent[2] + "," + extent[1] + "," + extent[3];
+					var spatialFilterGeomParam = new gvsigol.downman.ResourceDownloadParamValue(param, bbox);
+					values.push(spatialFilterGeomParam);
+					clickedResource.params.push(param);
+				}
+				/*
+				 * NOT SUPPORTED
+				else {
+					var param = {
+							name: 'spatial_filter_geom',
+							title: 'spatial_filter_geom',
+							options: []
+						}
+						var selectedAreaGeom = self.getSelectedArea();
+						// TODO var selectedArea = convertir selectedAreaGeom a GML
+						var spatialFilterGeomParam = new gvsigol.downman.ResourceDownloadParamValue(param, selectedArea);
+						values.push(spatialFilterGeomParam);
+				}*/
+			}
 		});
 		self.getClient().addLayer(clickedResource, values);
 	});
 	$(self.modalSelector + " .modal-dialog").LoadingOverlay("hide");
+}
+
+
+DownloadManagerUI.prototype.getSelectedExtent = function(targetCrsCode){
+	var extent, sourceCrs;
+	if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')) {
+		var geom = viewer.core.catalog.catalog_map.getSelectedArea();
+		sourceCrs = viewer.core.catalog.catalog_map.map.getView().getProjection();
+		extent = geom.getExtent();
+	}
+	else {
+		// if catalog plugin is not available, we use the extent of the main  map viewer as spatial filter
+		var view = viewer.core.getMap().getView();
+		sourceCrs = view.getProjection();
+		extent = view.calculateExtent();
+	}
+	if (targetCrsCode && sourceCrs) {
+		return ol.proj.transformExtent(extent, sourceCrs.getCode(), targetCrsCode)
+	}
+	return extent;
+}
+
+DownloadManagerUI.prototype.getSelectedArea = function(){
+	if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')) {
+		var geom = viewer.core.catalog.catalog_map.getSelectedArea();
+		return geom;
+	}
+	// if catalog is not available, we use the extent of the main  map viewer as spatial filter
+	var extent = viewer.core.getMap().getView().calculateExtent();
+	return ol.geom.Polygon.fromExtent(extent);
+	/*
+	var format = new ol.format.GML3();
+	var geomNode = format.writeGeometryNode(geom, {featureProjection: viewer.core.getMap().getView().getProjection()});
+	return geomNode.firstChild.outerHTML;
+	*/
 }
 
 DownloadManagerUI.prototype.initAvailableResourcesError = function(){
@@ -430,12 +484,10 @@ DownloadManagerUI.prototype.initAvailableResourcesError = function(){
 }
 
 DownloadManagerUI.prototype._updateStartDownloadButton = function(){
-	console.log("_updateStartDownloadButton");
 	if(this.getClient().getDownloadList().length == 0){
 		document.getElementById('start-download-btn').disabled = true;
 		return;
 	}
-	console.log("_updateStartDownloadButton 1");
 	if (!viewer.core.conf.user) {
 		try {
 			var email =  document.getElementById("contactemail").value;
@@ -446,10 +498,8 @@ DownloadManagerUI.prototype._updateStartDownloadButton = function(){
 		}
 		catch {}
 	}
-	console.log("_updateStartDownloadButton 2");
 	try {
 		var intendedUsage =  document.getElementById("downloadAuthorizationUsage").value;
-		console.log("intended usage: '" + intendedUsage + "' - " + intendedUsage.length);
 		if (intendedUsage.length==0 ) {
 			document.getElementById('start-download-btn').disabled = true;
 			return;
@@ -471,12 +521,6 @@ DownloadManagerUI.prototype.initDownloadList = function(){
 	}
 	content += '</tbody>';
 	content += '</table>';
-	/*
-	var content = '';
-	for (var i=0; i<downloadResources.length; i++) {
-		content += this.createDownloadResource(downloadResources[i]);
-	}
-	*/
 	if(downloadResources.length > 0){
 		for (var i=0; i<downloadResources.length; i++) {
 			if (downloadResources[i].resource_descriptor.restricted) {
@@ -524,8 +568,6 @@ DownloadManagerUI.prototype.initDownloadList = function(){
 	});
 	
 	$(".start-downloading-btn").unbind("click").click(function(){
-		// deshabilitamos para evitar ir creando peticiones que todavía no gestionamos al 100%
-		//alert('No disponible temporalmente');
 		try {
 			var email =  document.getElementById("contactemail").value;
 		}

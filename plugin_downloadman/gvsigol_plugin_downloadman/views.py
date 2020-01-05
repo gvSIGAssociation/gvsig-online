@@ -2,7 +2,6 @@
 
 from django.shortcuts import render
 from gvsigol_services.models import Layer
-import gvsigol_plugin_catalog.service as geonetwork_service
 import logging
 import json
 from django.http import JsonResponse
@@ -17,8 +16,7 @@ from django.utils import timezone
 from django.utils.formats import date_format
 
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse
-from models import FORMAT_PARAM_NAME
+from models import FORMAT_PARAM_NAME, SPATIAL_FILTER_GEOM_PARAM_NAME, SPATIAL_FILTER_TYPE_PARAM_NAME
 from utils import getLayer
 from settings import TARGET_URL, TARGET_ROOT, DOWNLOADS_ROOT, DOWNLOADS_URL
 import os
@@ -44,9 +42,13 @@ class DownloadParam():
     def __init__(self, name, title):
         self.name = name;
         self.title = title;
+    
+    def asDict(self):
+        return {"name": self.name, "title": self.title}
+
 
 class ResourceDownloadDescriptor():
-    def __init__(self, layer_id, layer_name, layer_title, resource_name, resource_title, dataSourceType=downman_models.ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.OGC_WFS_RESOURCE_TYPE, url='', directDownloadUrl=None, dataFormats=[], resolutions=[], scales=[], crss=[], restricted=False):
+    def __init__(self, layer_id, layer_name, layer_title, resource_name, resource_title, dataSourceType=downman_models.ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.OGC_WFS_RESOURCE_TYPE, url='', directDownloadUrl=None, dataFormats=[], spatialFilterType=[], resolutions=[], scales=[], crss=[], restricted=False, nativeCrs=None):
         self.layer_id = layer_id
         self.layer_name = layer_name
         self.layer_title = layer_title
@@ -56,11 +58,13 @@ class ResourceDownloadDescriptor():
         self.resourceType = resourceType
         self.directDownloadUrl = directDownloadUrl
         self.dataFormats = self._processOptions(dataFormats)
+        self.spatialFilterType = self._processOptions(spatialFilterType)
         self.resolutions = self._processOptions(resolutions)
         self.scales = self._processOptions(scales)
         self.crss = self._processOptions(crss)
         self.url = url
         self.restricted = False
+        self.nativeCrs = nativeCrs
         # more params: CRSs? imagemode (raster RGB, BYTE, INT16, INT32, FLOAT32, etc)? char encoding?
     
     def _processOptions(self, params):
@@ -167,13 +171,20 @@ class ResourceDownloadDescriptor():
 
         formats = []
         for f in self.dataFormats:
-            formats.append({"name": f.name, "title": f.title})
+            formats.append(f.asDict())
         params = []
         if len(formats)>0:
             params.append({
                 "name": FORMAT_PARAM_NAME,
                 "title": _("File format"),
                 "options": formats
+            })
+        spatialFilterTypes = [param.asDict() for param in self.spatialFilterType]
+        if len(spatialFilterTypes) > 0:
+            params.append({
+                "name": SPATIAL_FILTER_TYPE_PARAM_NAME,
+                "title": _("Spatial filter"),
+                "options": spatialFilterTypes
             })
         result = {
             "layer_id": self.layer_id,
@@ -185,9 +196,13 @@ class ResourceDownloadDescriptor():
             "title": self.title,
             "restricted": self.restricted,
             "url": self.url,
-            "params": params}
+            "params": params
+        }
+        
         if self.directDownloadUrl:
             result["direct_download_url"] = self.directDownloadUrl
+        if self.nativeCrs:
+            result["native_crs"] = self.nativeCrs
         print result 
         return result
         #return json.dumps(result)
@@ -198,16 +213,6 @@ class CustomJsonEncoder(DjangoJSONEncoder):
              return obj.to_json()
         # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)
-
-
-class DownloadRequest():
-    def __init__(self, metadata_uuid, dataFormat=None, resolution=None, scale=None, crs=None, imagemode=None):
-        self.layer_uuid = metadata_uuid
-        self.dataFormat = dataFormat
-        self.resolution = resolution
-        self.scale = scale
-        self.crs = crs
-        self.imagemode = None
 
 def getWsLayerDownloadResources(request, workspace_name, layer_name):
     try:
@@ -244,7 +249,7 @@ def getLayerDownloadResources(request, layer_id):
     print json_resources
     return JsonResponse(resources, encoder=CustomJsonEncoder, safe=False)
 
-def getOgcDownloadDescriptor(layer_uuid, onlineResource, layer, fallbackTitle, dataSourceType, resourceType, dataFormats):
+def getOgcDownloadDescriptor(layer_uuid, onlineResource, layer, fallbackTitle, dataSourceType, resourceType, dataFormats, nativeCrs):
     if onlineResource.name:
         resource_name = onlineResource.name
     else:
@@ -261,16 +266,38 @@ def getOgcDownloadDescriptor(layer_uuid, onlineResource, layer, fallbackTitle, d
         layer_title = layer.title
     else:
         layer_title = resource_title
-    return ResourceDownloadDescriptor(layer_uuid, layer_name, layer_title, resource_name, resource_title, dataSourceType=dataSourceType, resourceType=resourceType, dataFormats=dataFormats, url=onlineResource.url)
+    if resourceType == downman_models.ResourceLocator.OGC_WFS_RESOURCE_TYPE:
+        """
+        spatialFilterType = [
+            ['nofilter', _('Do not filter output')],
+            ['intersects', _('Include only geometries that intersect the selected area')],
+            ['within', _('Include only geometries that are within the selected area')],
+            ['contains', _('Include only geometries that contain the selected area')]
+        ]
+        """
+        spatialFilterType = [
+            ['nofilter', _('Do not filter output')],
+            ['bbox', _('Include only geometries that intersect the bounding box of the selected area')]
+        ]
+    elif resourceType == downman_models.ResourceLocator.OGC_WCS_RESOURCE_TYPE:
+        spatialFilterType = [
+            ['nofilter', _('Do not filter output')],
+            ['bbox', _('Trim result using the bounding box of the selected area')]
+        ]
+    else:
+        spatialFilterType = []
+    return ResourceDownloadDescriptor(layer_uuid, layer_name, layer_title, resource_name, resource_title, dataSourceType=dataSourceType, resourceType=resourceType, dataFormats=dataFormats, spatialFilterType=spatialFilterType, url=onlineResource.url, nativeCrs=nativeCrs)
     
 def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
     all_resources = []
     try:
+        import gvsigol_plugin_catalog.service as geonetwork_service
         geonetwork_instance = geonetwork_service.get_instance()
         xml_md = geonetwork_instance.get_metadata_raw(metadata_uuid)
         from gvsigol_plugin_catalog.mdstandards import registry
         reader = registry.get_reader(xml_md)
         onlineResources = reader.get_transfer_options()
+        nativeCrs = reader.get_crs()
         max_public_size = float(downman_models.get_max_public_download_size())
 
         if not layer:
@@ -288,7 +315,8 @@ def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
                                                     _('Vector data'),
                                                     dataSourceType = downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE,
                                                     resourceType=downman_models.ResourceLocator.OGC_WFS_RESOURCE_TYPE,
-                                                    dataFormats=['shape-zip', 'application/json', 'csv', 'gml2', 'gml3'])
+                                                    dataFormats=['shape-zip', 'application/json', 'csv', 'gml2', 'gml3'],
+                                                    nativeCrs=nativeCrs)
             elif 'OGC:WCS' in onlineResource.protocol:
                 if 'Mapserver' in onlineResource.app_profile:
                     # necesitamos ofrecer el formato adecuado para el tipo de imagen (ortofoto, ráster de temperaturas, ráster cualitativo, etc)
@@ -298,7 +326,8 @@ def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
                                                     _('Raster data'),
                                                     dataSourceType=downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE,
                                                     resourceType=downman_models.ResourceLocator.OGC_WCS_RESOURCE_TYPE,
-                                                    dataFormats=['GEOTIFF_16', 'GEOTIFF_32', 'GEOTIFF_8'])
+                                                    dataFormats=['GEOTIFF_16', 'GEOTIFF_32', 'GEOTIFF_8'],
+                                                    nativeCrs=nativeCrs)
                 else: # assume Geoserver
                     resource = getOgcDownloadDescriptor(metadata_uuid,
                                                     onlineResource,
@@ -306,7 +335,8 @@ def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
                                                     _('Raster data'),
                                                     dataSourceType=downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE,
                                                     resourceType=downman_models.ResourceLocator.OGC_WCS_RESOURCE_TYPE,
-                                                    dataFormats=['image/geotiff', 'image/png'])
+                                                    dataFormats=['image/geotiff', 'image/png'],
+                                                    nativeCrs=nativeCrs)
             elif (onlineResource.protocol.startswith('WWW:DOWNLOAD-') and onlineResource.protocol.endswith('-download')) or \
                 onlineResource.protocol.startswith('FILE:'):
                 # or (onlineResource.protocol.startswith('WWW:LINK-') and onlineResource.protocol.endswith('-link')) \
@@ -341,7 +371,7 @@ def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
                             directDownloadUrl = getDirectDownloadUrl(onlineResource.url, resource_title)
                         except:
                             logger.exception("Error resolving file download resource for layer")
-                resource = ResourceDownloadDescriptor(metadata_uuid, layer_name, layer_title, resource_name, resource_title, dataSourceType = downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.HTTP_LINK_RESOURCE_TYPE, url=onlineResource.url, directDownloadUrl=directDownloadUrl)
+                resource = ResourceDownloadDescriptor(metadata_uuid, layer_name, layer_title, resource_name, resource_title, dataSourceType = downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.HTTP_LINK_RESOURCE_TYPE, url=onlineResource.url, directDownloadUrl=directDownloadUrl, nativeCrs=nativeCrs)
             #elif onlineResource.protocol.startswith('WWW:LINK-'):
             if resource:
                 resource.restricted = isRestricted(onlineResource, max_public_size)
@@ -354,20 +384,16 @@ def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
 def doGetLayerDownloadResources(layer, user):
     all_resources = []
     try:
-        if layer.allow_download:
+        if layer.allow_download and layer.external == False:
             # TODO: maybe we should check permissions for request.user
             server = layer.datastore.workspace.server
             if server.type == 'geoserver':
-                if layer.external == False:
-                    if layer.type.startswith('c_'):
-                        resource = ResourceDownloadDescriptor(layer.id, layer.name, layer.title, downman_models.ResourceLocator.OGC_WCS_RESOURCE_TYPE, _("Raster data"), dataSourceType = downman_models.ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE,  resourceType=downman_models.ResourceLocator.OGC_WCS_RESOURCE_TYPE, dataFormats=['image/geotiff', 'image/png'])
-                        all_resources.append(resource)
-                    elif layer.type.startswith('v_'):
-                        resource = ResourceDownloadDescriptor(layer.id, layer.name, layer.title, downman_models.ResourceLocator.OGC_WFS_RESOURCE_TYPE, _("Vector data"),  dataSourceType = downman_models.ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.OGC_WFS_RESOURCE_TYPE, dataFormats=['shape-zip', 'application/json', 'csv', 'gml2', 'gml3'])
-                        all_resources.append(resource)
-                else:
-                    # TODO:
-                    pass
+                if layer.type.startswith('c_') and layer.datastore.workspace.wcs_endpoint:
+                    resource = ResourceDownloadDescriptor(layer.id, layer.name, layer.title, downman_models.ResourceLocator.OGC_WCS_RESOURCE_TYPE, _("Raster data"), dataSourceType = downman_models.ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE,  resourceType=downman_models.ResourceLocator.OGC_WCS_RESOURCE_TYPE, dataFormats=['image/geotiff', 'image/png'], nativeCrs=layer.native_srs)
+                    all_resources.append(resource)
+                elif layer.type.startswith('v_') and layer.datastore.workspace.wfs_endpoint:
+                    resource = ResourceDownloadDescriptor(layer.id, layer.name, layer.title, downman_models.ResourceLocator.OGC_WFS_RESOURCE_TYPE, _("Vector data"),  dataSourceType = downman_models.ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.OGC_WFS_RESOURCE_TYPE, dataFormats=['shape-zip', 'application/json', 'csv', 'gml2', 'gml3'], nativeCrs=layer.native_srs)
+                    all_resources.append(resource)
             elif server.type == 'mapserver':
                 # TODO:
                 pass    

@@ -35,7 +35,7 @@ import tempfile
 import zipfile
 import requests
 import logging
-from gvsigol_plugin_downloadman.models import FORMAT_PARAM_NAME
+from gvsigol_plugin_downloadman.models import FORMAT_PARAM_NAME, SPATIAL_FILTER_GEOM_PARAM_NAME, SPATIAL_FILTER_TYPE_PARAM_NAME, SPATIAL_FILTER_BBOX_PARAM_NAME
 import json
 from django.core import mail
 from django.template.loader import render_to_string
@@ -45,6 +45,7 @@ from django.utils.formats import date_format
 from django.utils import timezone
 from gvsigol import settings as core_settings
 import re
+from numpy import genfromtxt
 from django.utils.translation import ugettext as _
 from django.utils.crypto import get_random_string
 
@@ -55,6 +56,7 @@ from gvsigol.celery import app as celery_app
 from django.contrib.auth.models import User
 from django.db.models import Q
 from collections import namedtuple
+from lxml import etree as ET
 
 from gvsigol_plugin_downloadman.settings import TMP_DIR,TARGET_ROOT
 from gvsigol_plugin_downloadman.settings import DOWNLOADS_URL
@@ -110,7 +112,8 @@ except:
 
 # valid values:
 # - NEVER: a direct link will always be returned, even for non-static URLs (e.g WFS and WCS requests)
-# - DYNAMIC [Not implemented yet]: dynamic links (e.g. WFS and WCS requests) will be async processed and packaged
+# - DYNAMIC: dynamic links (e.g. WFS and WCS requests) will be async processed and packaged
+# - ALL: all the downloads will be async processed and packaged
 try:
     from gvsigol_plugin_downloadman.settings import DOWNMAN_PACKAGING_BEHAVIOUR
 except:
@@ -172,7 +175,7 @@ def getFreeSpace(path):
 
 def getTmpDir():
     global __TMP_DIR
-    if not __TMP_DIR:
+    if __TMP_DIR is None:
         try:
             if not os.path.exists(TMP_DIR):
                 os.makedirs(TMP_DIR, 0o700)
@@ -183,7 +186,7 @@ def getTmpDir():
 
 def getTargetDir():
     global __TARGET_ROOT
-    if not __TARGET_ROOT:
+    if __TARGET_ROOT is None:
         try:
             if not os.path.exists(TARGET_ROOT):
                 os.makedirs(TARGET_ROOT, 0o700)
@@ -242,15 +245,109 @@ def _getWfsRequest(layer_name, baseUrl, params):
     file_format = _getParamValue(params, FORMAT_PARAM_NAME)
     if not file_format:
         file_format = 'shape-zip'
-    return _normalizeWxsUrl(baseUrl) + '?service=WFS&version=1.0.0&request=GetFeature&typeName=' + layer_name + '&outputFormat='+ file_format
+    """
+    # TODO:
+    - usar el parámetro SPATIAL_FILTER_BBOX_PARAM_NAME para filtrar usando el atributo BBOX de WFS
+    - de momento no permitiremos filtrar por polígono (usando WFS Filter encoding) porque es complicado obtener el
+      nombre del atributo que contiene la geometría para montar el filtro.
+    - Usar filter encoding requiere hacer un describeFeatureType y parsear la respuesta, que puede ser un XSD muy complejo
+     de interpretar
+    
+    https://gvsigol.localhost/geoserver/wfs?request=GetFeature&service=WFS&version=1.0.0&typeName=ws_cmartinez:countries4326&BBOX=18,21,40,42
+    
+    spatial_filter_type = _getParamValue(params, SPATIAL_FILTER_TYPE_PARAM_NAME)
+    spatial_filter_geom = _getParamValue(params, SPATIAL_FILTER_GEOM_PARAM_NAME)
+    
+    getFeature = ET.Element("wfs:GetFeature")
+    query = ET.SubElement(getFeature, "wfs:query")
+    ET.SubElement(query, "fes:Filter")
+    
+    OJO! Podemos usar el filter BBOX sin necesidad de saber el campo de geometry (se puede omitir propertyName en el operador BBOX)
+      <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
+    <ogc:BBOX>
+      <gml:Box xmlns:gml="http://www.opengis.net/gml" srsName="EPSG:3785">
+          <gml:coordinates decimal="." cs="," ts=" ">
+            -8033496.4863128,5677373.0653376 -7988551.5136872,5718801.9346624
+          </gml:coordinates>
+        </gml:Box>
+      </ogc:BBOX>
+    </ogc:Filter>
+    """
+
+    url = _normalizeWxsUrl(baseUrl) + '?service=WFS&version=1.0.0&request=GetFeature&typeName=' + layer_name + '&outputFormat='+ file_format
+    spatial_filter_type = _getParamValue(params, SPATIAL_FILTER_TYPE_PARAM_NAME)
+    if spatial_filter_type == 'bbox':
+        spatial_filter_bbox = _getParamValue(params, SPATIAL_FILTER_BBOX_PARAM_NAME)
+        if spatial_filter_bbox:
+            bboxElements = spatial_filter_bbox.split(",")
+            if len(bboxElements) == 4:
+                url += '&bbox=' + bboxElements[0] + "," + bboxElements[2]  + "," + bboxElements[1] + "," + bboxElements[3]
+    logger.debug(url)
+    return url
+
+def _getDescribeWcsCoverageTree(layer_name, baseUrl):
+    try:
+        url = _normalizeWxsUrl(baseUrl) + '?service=WCS&version=2.0.0&request=DescribeCoverage&CoverageId=' + layer_name
+        logger.debug(url)
+        r = requests.get(url, verify=False, timeout=DEFAULT_TIMEOUT)
+        describeCoverageXml = r.content
+        incorrectGeoserverNamespaces = '<wcs:CoverageDescriptions xsi:schemaLocation=" http://www.opengis.net/wcs/2.0 http://schemas.opengis.net/wcs/2.0/wcsDescribeCoverage.xsd">'
+        fixedGeoserverWCS2Namespaces = '<wcs:CoverageDescriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmlcov="http://www.opengis.net/gmlcov/1.0" xmlns:swe="http://www.opengis.net/swe/2.0" xsi:schemaLocation="http://schemas.opengis.net/swe/2.0 http://schemas.opengis.net/sweCommon/2.0/swe.xsd http://www.opengis.net/wcs/2.0 http://schemas.opengis.net/wcs/2.0/wcsDescribeCoverage.xsd" xmlns:wcs="http://www.opengis.net/wcs/2.0">'
+        if describeCoverageXml.startswith(incorrectGeoserverNamespaces):
+            describeCoverageXml = describeCoverageXml.replace(incorrectGeoserverNamespaces, fixedGeoserverWCS2Namespaces)
+        return ET.fromstring(describeCoverageXml)
+    except:
+        logger.exception("Error retrieving or parsing describeCoverageXml")
+
+def _getDescribeWcsCoverageAxes(envelopeNode):
+    if envelopeNode:
+        axis = envelopeNode.get('axisLabels')
+        return axis.split(" ")
+
+def _getDescribeWcsCoverageSrsCode(envelopeNode):
+    if envelopeNode:
+        srs = envelopeNode.get('srsName')
+        if srs.startswith('http://www.opengis.net/def/crs/EPSG/'):
+            return re.sub('http://www.opengis.net/def/crs/EPSG/[^/]+/', '', srs)
+        if srs.startswith('EPSG:'):
+            return srs[5:]
+
+def _getDescribeWcsCoverageEnvelope(describeCoverageTree):
+    if describeCoverageTree:
+        namespaces =  {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'gml': 'http://www.opengis.net/gml/3.2', 'wcs': 'http://www.opengis.net/wcs/2.0'}
+        return describeCoverageTree.find('./wcs:CoverageDescription/gml:boundedBy/gml:Envelope', namespaces)
+
+INVERSE_AXIS_CRS_LIST = None
+def _getCrsReverseAxisList():
+    global INVERSE_AXIS_CRS_LIST
+    if INVERSE_AXIS_CRS_LIST is None:
+        INVERSE_AXIS_CRS_LIST = genfromtxt(os.path.join(core_settings.BASE_DIR, 'gvsigol_core/static/crs_axis_order/mapaxisorder.csv'), skip_header=1)
+    return INVERSE_AXIS_CRS_LIST
 
 def _getWcsRequest(layer_name, baseUrl, params):
     url = _normalizeWxsUrl(baseUrl) + '?service=WCS&version=2.0.0&request=GetCoverage&CoverageId=' + layer_name
     file_format = _getParamValue(params, FORMAT_PARAM_NAME)
     if file_format:
         url += '&format=' + file_format
+    spatial_filter_type = _getParamValue(params, SPATIAL_FILTER_TYPE_PARAM_NAME)
+    if spatial_filter_type == 'bbox':
+        spatial_filter_bbox = _getParamValue(params, SPATIAL_FILTER_BBOX_PARAM_NAME)
+        describeCoverageTree = _getDescribeWcsCoverageTree(layer_name, baseUrl)
+        envelopeNode = _getDescribeWcsCoverageEnvelope(describeCoverageTree)
+        axes = _getDescribeWcsCoverageAxes(envelopeNode)
+        srs = _getDescribeWcsCoverageSrsCode(envelopeNode)
+        bboxElements = spatial_filter_bbox.split(",")
+        spatial_subset = ''
+        if axes is not None and bboxElements is not None and len(axes) == 2 and len(bboxElements) == 4:
+            if srs and int(srs) in _getCrsReverseAxisList():
+                spatial_subset = '&subset=' + axes[0] + '%28%22' + bboxElements[2] + '%22%2C%22' + bboxElements[3] + '%22%29'
+                spatial_subset += '&subset=' + axes[1] + '%28%22' + bboxElements[0] + '%22%2C%22' + bboxElements[1] + '%22%29'
+            else:
+                spatial_subset = '&subset=' + axes[0] + '%28%22' + bboxElements[0] + '%22%2C%22' + bboxElements[1] + '%22%29'
+                spatial_subset += '&subset=' + axes[1] + '%28%22' + bboxElements[2] + '%22%2C%22' + bboxElements[3] + '%22%29'
+        url += spatial_subset
+    logger.debug(url)
     return url
-
 
 def isRestricted(onlineResource, max_public_size):
     if onlineResource.app_profile.startswith("gvsigol:download:restricted"):
@@ -260,7 +357,6 @@ def isRestricted(onlineResource, max_public_size):
     return False
 
 def checkCatalogPermissions(metadata_uuid, res_type, url):
-    logger.debug("checkCatalogPermissions start")
     try:
         import gvsigol_plugin_catalog.service as geonetwork_service
         geonetwork_instance = geonetwork_service.get_instance()
@@ -322,11 +418,19 @@ def retrieveLinkLocator(url):
     GVSIGOL_NAME.lower()
     (fd, tmp_path) = tempfile.mkstemp('.tmp', GVSIGOL_NAME.lower()+"dm", dir=getTmpDir())
     tmp_file = os.fdopen(fd, "wb")
-    
-    r = requests.get(url, stream=True, verify=False, timeout=DEFAULT_TIMEOUT)
-    for chunk in r.iter_content(chunk_size=128):
-        tmp_file.write(chunk)
-    tmp_file.close()
+    try:
+        r = requests.get(url, stream=True, verify=False, timeout=DEFAULT_TIMEOUT)
+        logger.debug("status_code: " + text(r.status_code))
+        if r.status_code != 200:
+            tmp_file.close()
+            raise PreparationError(u'Error retrieving link. HTTP status code: '+text(r.status_code) + u". Url: " + url)
+        for chunk in r.iter_content(chunk_size=128):
+            tmp_file.write(chunk)
+        tmp_file.close()
+    except PreparationError:
+        raise
+    except:
+        logger.exception('error retrieving link: ' + url)
     return tmp_path
 
 def resolveFileUrl(url):
@@ -396,11 +500,14 @@ def retrieveResource(url, resource_descriptor):
     # TODO: error management
     return []
 
-def _addResource(zipobj, resource_descriptor, resolved_url):
+def _addResource(zipobj, resource_descriptor, resolved_url, count):
     resourceDescList = retrieveResource(resolved_url, resource_descriptor)
     i = 0
     for resourceDesc in resourceDescList:
-        res_name = text(i) + "-" + resourceDesc.name
+        if len(resourceDescList) > 1:
+            res_name = text(count) + u"-" + text(i) + u"-" + resourceDesc.name
+        else:
+            res_name = text(count) + u"-" + resourceDesc.name
         zipobj.write(resourceDesc.res_path, res_name)
         if resourceDesc.temporary:
             os.remove(resourceDesc.res_path)
@@ -621,6 +728,7 @@ def processLocators(request, zipobj=None, zip_path=None):
     to_package = 0
     waiting_space = 0
     ResultTuple = namedtuple('ResultTuple', ['completed', 'packaged', 'waiting_space', 'to_package', 'temporal_error', 'permanent_error'])
+    count = 0
     for resourceLocator in locators:
         try:
             if resourceLocator.status == ResourceLocator.HOLD_STATUS:
@@ -643,8 +751,9 @@ def processLocators(request, zipobj=None, zip_path=None):
                         # ensure the locator has not been cancelled before starting packaging
                         resourceLocator.refresh_from_db(fields=['canceled'])
                         if resourceLocator.canceled:
-                            continue
-                        _addResource(zipobj, resource_descriptor, resourceLocator.resolved_url)
+                            continue 
+                        _addResource(zipobj, resource_descriptor, resourceLocator.resolved_url, count)
+                        count += 1
                         packaged_locators.append(resourceLocator)
                         completed_locators += 1
                 else:
@@ -868,10 +977,14 @@ def processDownloadRequest(self, request_id):
     # if there are no locators waiting for admin feedback and we reach the maximum amount of retries,
     # then we need to update locators and request status
     try:
+        """
+        waiting_feedback = request.resourcelocator_set.filter( \
+                                                      Q(authorization=ResourceLocator.AUTHORIZATION_PENDING) | \
+                                                      Q(status=ResourceLocator.HOLD_STATUS)).count()
+        """
         on_hold = request.resourcelocator_set.filter(status=ResourceLocator.HOLD_STATUS).count()
-        waiting_feedback = on_hold + pending_authorization
-        
-        if waiting_feedback == 0:
+
+        if not request.pending_authorization and on_hold == 0:
             errors = 0
             locators = ( request.resourcelocator_set.filter(status=ResourceLocator.TEMPORAL_ERROR_STATUS) | \
                          request.resourcelocator_set.filter(status=ResourceLocator.PERMANENT_ERROR_STATUS) | \

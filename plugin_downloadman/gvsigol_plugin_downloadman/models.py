@@ -132,6 +132,9 @@ class DownloadRequest(models.Model):
 #    restricted = models.BooleanField()
 
 FORMAT_PARAM_NAME = 'format'
+SPATIAL_FILTER_TYPE_PARAM_NAME = 'spatial_filter_type'
+SPATIAL_FILTER_GEOM_PARAM_NAME = 'spatial_filter_geom'
+SPATIAL_FILTER_BBOX_PARAM_NAME = 'spatial_filter_bbox'
 
 
 class DownloadLink(models.Model):
