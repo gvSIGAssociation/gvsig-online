@@ -249,7 +249,9 @@ CatalogView.prototype.filterCatalog = function(){
 	var creation_to = $("#catalog_resource_to").val();
 	var date_from = $("#catalog_register_from").val();
 	var date_to = $("#catalog_register_to").val();
-	var extent = this.catalog_map.getSelectedArea();
+	var geom = this.catalog_map.getSelectedArea();
+	var format = new ol.format.WKT();
+	var extent =  format.writeGeometry(geom, {dataProjection: 'EPSG:4326', featureProjection: this.catalog_map.map.getView().getProjection()});
 	this.launchQuery(orWildcardSearch, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent);
 
 }

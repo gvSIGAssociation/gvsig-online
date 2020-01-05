@@ -38,27 +38,9 @@ CatalogMap.prototype.cleanData = function(){
 	this.selected_feat = null;
 }
 
-CatalogMap.prototype.getSelectedArea = function(){
-	if (document.getElementById("chck_mapareaoverlap").checked) {
-		var feat = this.getDrawnArea();
-		if (feat!=null) {
-			return feat;
-		}
-	
-		var extent = this.map.getView().calculateExtent();
-		var geom = ol.geom.Polygon.fromExtent(extent);
-		var format = new ol.format.WKT();
-		return format.writeGeometry(geom, {dataProjection: 'EPSG:4326', featureProjection: this.map.getView().getProjection()});
-		}
-	return null;
-	
-}
-
-CatalogMap.prototype.getDrawnArea = function(){
+CatalogMap.prototype.getSelectedArea = function(format){
 	if (this.selected_feat != null){
-		var geom = this.selected_feat.getGeometry();
-		var format = new ol.format.WKT();
-		return format.writeGeometry(geom, {dataProjection: 'EPSG:4326', featureProjection: this.map.getView().getProjection()});
+		return this.selected_feat.getGeometry();
 	}
 	return null;
 }

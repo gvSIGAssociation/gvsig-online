@@ -279,8 +279,10 @@ class Iso19139_2007Reader(XmlStandardReader):
         return getTextFromXMLNode(self.tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/', namespaces)
     def get_abstract(self):
         return getTextFromXMLNode(self.tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/', namespaces)
-    def get_identifier(self, ):
+    def get_identifier(self):
         return getTextFromXMLNode(self.tree, './gmd:fileIdentifier/', namespaces)
+    def get_crs(self):
+        return getTextFromXMLNode(self.tree, './gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code/', namespaces)
     def get_transfer_options(self):
         result = []
         OnlineResource = collections.namedtuple('OnlineResource', ['url', 'protocol', 'app_profile', 'name', 'desc', 'function', 'transfer_size'])

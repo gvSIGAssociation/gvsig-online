@@ -86,6 +86,15 @@ class XmlStandardReader(object):
     @abstractmethod
     def get_abstract(self, extent_tuple, thumbnail_url):
         pass
+    
+    @abstractmethod
+    def get_identifier(self):
+        pass
+
+    @abstractmethod
+    def get_crs(self):
+        pass
+
     @abstractmethod
     def get_transfer_options(self):
         pass
