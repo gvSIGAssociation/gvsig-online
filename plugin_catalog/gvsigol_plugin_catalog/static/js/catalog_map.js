@@ -104,7 +104,6 @@ CatalogMap.prototype.getDrawRectangleControl = function(toolbar, map){
 		title: gettext('Draw rectangle'),
 		interaction: self.drawRectangleInteraction,
 		onToggle: function(active){
-			console.log('toggle rectangleDrawControl');
 			if (active) {
 				self.map.removeInteraction(self.drawPolygonInteraction);
 				self.map.addInteraction(self.drawRectangleInteraction);
@@ -140,7 +139,6 @@ CatalogMap.prototype.getDrawPolygonControl = function(toolbar, map){
 		title: gettext('Draw polygon'),
 		interaction: self.drawPolygonInteraction,
 		onToggle: function(active){
-			console.log('toggle polygonDrawControl');
 			if (active) {
 				self.map.removeInteraction(self.drawRectangleInteraction);
 				self.map.addInteraction(self.drawPolygonInteraction);
@@ -161,6 +159,10 @@ CatalogMap.prototype.getClearControl = function(map){
 			self.catalog.filterCatalog();
 		}
 	});
+}
+
+CatalogMap.prototype.isSpatialFilterEnabled = function() {
+	return document.getElementById("chck_mapareaoverlap").checked;
 }
 
 CatalogMap.prototype.initialization = function(container_id){

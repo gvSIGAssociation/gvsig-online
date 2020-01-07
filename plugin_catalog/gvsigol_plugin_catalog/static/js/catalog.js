@@ -61,7 +61,7 @@ CatalogView.prototype.initialization = function(){
 	catalogPanel += '				<div class="checkbox">';
 	catalogPanel += '					<label>';
 	catalogPanel += '						<input type="checkbox" id="chck_mapareaoverlap" value="mapareaoverlap" checked>';
-	catalogPanel += 						gettext('Include only results overlapping with map visible area');
+	catalogPanel += 						gettext('Include only results overlapping with the selected area');
 	catalogPanel += '					</label>';
 	catalogPanel += '				</div>';
 	catalogPanel += '			</div>';
@@ -249,10 +249,15 @@ CatalogView.prototype.filterCatalog = function(){
 	var creation_to = $("#catalog_resource_to").val();
 	var date_from = $("#catalog_register_from").val();
 	var date_to = $("#catalog_register_to").val();
-	var geom = this.catalog_map.getSelectedArea();
-	var format = new ol.format.WKT();
-	var extent =  format.writeGeometry(geom, {dataProjection: 'EPSG:4326', featureProjection: this.catalog_map.map.getView().getProjection()});
-	this.launchQuery(orWildcardSearch, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent);
+	var selectedArea = null;
+	if (this.catalog_map.isSpatialFilterEnabled()) {
+		var geom = this.catalog_map.getSelectedArea();
+		if (geom != null) {
+			var format = new ol.format.WKT();
+			var selectedArea =  format.writeGeometry(geom, {dataProjection: 'EPSG:4326', featureProjection: this.catalog_map.map.getView().getProjection()});
+		}
+	}
+	this.launchQuery(orWildcardSearch, categories, keywords, resources, creation_from, creation_to, date_from, date_to, selectedArea);
 
 }
 

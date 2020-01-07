@@ -70,7 +70,7 @@ msgstr ""
 msgid "List of layers"
 msgstr ""
 
-msgid "Include only results overlapping with map visible area"
+msgid "Include only results overlapping with the selected area"
 msgstr ""
 
 msgid "Metadatum"
