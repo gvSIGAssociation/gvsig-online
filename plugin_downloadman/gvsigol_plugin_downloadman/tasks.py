@@ -300,12 +300,12 @@ def _getDescribeWcsCoverageTree(layer_name, baseUrl):
         logger.exception("Error retrieving or parsing describeCoverageXml")
 
 def _getDescribeWcsCoverageAxes(envelopeNode):
-    if envelopeNode:
+    if envelopeNode is not None:
         axis = envelopeNode.get('axisLabels')
         return axis.split(" ")
 
 def _getDescribeWcsCoverageSrsCode(envelopeNode):
-    if envelopeNode:
+    if envelopeNode is not None:
         srs = envelopeNode.get('srsName')
         if srs.startswith('http://www.opengis.net/def/crs/EPSG/'):
             return re.sub('http://www.opengis.net/def/crs/EPSG/[^/]+/', '', srs)
@@ -313,7 +313,7 @@ def _getDescribeWcsCoverageSrsCode(envelopeNode):
             return srs[5:]
 
 def _getDescribeWcsCoverageEnvelope(describeCoverageTree):
-    if describeCoverageTree:
+    if describeCoverageTree is not None:
         namespaces =  {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'gml': 'http://www.opengis.net/gml/3.2', 'wcs': 'http://www.opengis.net/wcs/2.0'}
         return describeCoverageTree.find('./wcs:CoverageDescription/gml:boundedBy/gml:Envelope', namespaces)
 
@@ -332,20 +332,33 @@ def _getWcsRequest(layer_name, baseUrl, params):
     spatial_filter_type = _getParamValue(params, SPATIAL_FILTER_TYPE_PARAM_NAME)
     if spatial_filter_type == 'bbox':
         spatial_filter_bbox = _getParamValue(params, SPATIAL_FILTER_BBOX_PARAM_NAME)
-        describeCoverageTree = _getDescribeWcsCoverageTree(layer_name, baseUrl)
-        envelopeNode = _getDescribeWcsCoverageEnvelope(describeCoverageTree)
-        axes = _getDescribeWcsCoverageAxes(envelopeNode)
-        srs = _getDescribeWcsCoverageSrsCode(envelopeNode)
-        bboxElements = spatial_filter_bbox.split(",")
-        spatial_subset = ''
-        if axes is not None and bboxElements is not None and len(axes) == 2 and len(bboxElements) == 4:
-            if srs and int(srs) in _getCrsReverseAxisList():
-                spatial_subset = '&subset=' + axes[0] + '%28%22' + bboxElements[2] + '%22%2C%22' + bboxElements[3] + '%22%29'
-                spatial_subset += '&subset=' + axes[1] + '%28%22' + bboxElements[0] + '%22%2C%22' + bboxElements[1] + '%22%29'
-            else:
-                spatial_subset = '&subset=' + axes[0] + '%28%22' + bboxElements[0] + '%22%2C%22' + bboxElements[1] + '%22%29'
-                spatial_subset += '&subset=' + axes[1] + '%28%22' + bboxElements[2] + '%22%2C%22' + bboxElements[3] + '%22%29'
-        url += spatial_subset
+        if spatial_filter_bbox:
+            describeCoverageTree = _getDescribeWcsCoverageTree(layer_name, baseUrl)
+            envelopeNode = _getDescribeWcsCoverageEnvelope(describeCoverageTree)
+            axes = _getDescribeWcsCoverageAxes(envelopeNode)
+            srs = _getDescribeWcsCoverageSrsCode(envelopeNode)
+            bboxElements = spatial_filter_bbox.split(",")
+            spatial_subset = ''
+            if axes is not None and bboxElements is not None and len(axes) == 2 and len(bboxElements) == 4:
+                if float(bboxElements[0]) <= float(bboxElements[1]):
+                    axis0_min = bboxElements[0]
+                    axis0_max = bboxElements[1]
+                else:
+                    axis0_min = bboxElements[1]
+                    axis0_max = bboxElements[0]
+                if float(bboxElements[2]) <= float(bboxElements[3]):
+                    axis1_min = bboxElements[2]
+                    axis1_max = bboxElements[3]
+                else:
+                    axis1_min = bboxElements[3]
+                    axis1_max = bboxElements[2]
+                if srs and int(srs) in _getCrsReverseAxisList():
+                    spatial_subset = '&subset=' + axes[0] + '%28%22' + axis1_min + '%22%2C%22' + axis1_max + '%22%29'
+                    spatial_subset += '&subset=' + axes[1] + '%28%22' + axis0_min + '%22%2C%22' + axis0_max + '%22%29'
+                else:
+                    spatial_subset = '&subset=' + axes[0] + '%28%22' + axis0_min + '%22%2C%22' + axis0_max + '%22%29'
+                    spatial_subset += '&subset=' + axes[1] + '%28%22' + axis1_min + '%22%2C%22' + axis1_max + '%22%29'
+            url += spatial_subset
     logger.debug(url)
     return url
 

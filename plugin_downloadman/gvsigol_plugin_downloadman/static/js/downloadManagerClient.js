@@ -453,10 +453,12 @@ DownloadManagerUI.prototype.initAvailableResources = function(downloadResources)
 					else {
 						extent = self.getSelectedExtent();
 					}
-					var bbox = extent[0] + "," + extent[2] + "," + extent[1] + "," + extent[3];
-					var spatialFilterGeomParam = new gvsigol.downman.ResourceDownloadParamValue(param, bbox);
-					values.push(spatialFilterGeomParam);
-					clickedResource.params.push(param);
+					if (extent != null) {
+						var bbox = extent[0] + "," + extent[2] + "," + extent[1] + "," + extent[3];
+						var spatialFilterGeomParam = new gvsigol.downman.ResourceDownloadParamValue(param, bbox);
+						values.push(spatialFilterGeomParam);
+						clickedResource.params.push(param);
+					}
 				}
 				/*
 				 * NOT SUPPORTED
@@ -480,11 +482,13 @@ DownloadManagerUI.prototype.initAvailableResources = function(downloadResources)
 
 
 DownloadManagerUI.prototype.getSelectedExtent = function(targetCrsCode){
-	var extent, sourceCrs;
+	var extent = null, sourceCrs;
 	if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')) {
 		var geom = viewer.core.catalog.catalog_map.getSelectedArea();
-		sourceCrs = viewer.core.catalog.catalog_map.map.getView().getProjection();
-		extent = geom.getExtent();
+		if (geom != null) {
+			sourceCrs = viewer.core.catalog.catalog_map.map.getView().getProjection();
+			extent = geom.getExtent();
+		}
 	}
 	else {
 		// if catalog plugin is not available, we use the extent of the main  map viewer as spatial filter
@@ -492,8 +496,8 @@ DownloadManagerUI.prototype.getSelectedExtent = function(targetCrsCode){
 		sourceCrs = view.getProjection();
 		extent = view.calculateExtent();
 	}
-	if (targetCrsCode && sourceCrs) {
-		return ol.proj.transformExtent(extent, sourceCrs.getCode(), targetCrsCode)
+	if (extent != null && targetCrsCode && sourceCrs) {
+		return ol.proj.transformExtent(extent, sourceCrs.getCode(), targetCrsCode);
 	}
 	return extent;
 }
