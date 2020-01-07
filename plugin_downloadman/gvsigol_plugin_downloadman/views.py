@@ -48,7 +48,7 @@ class DownloadParam():
 
 
 class ResourceDownloadDescriptor():
-    def __init__(self, layer_id, layer_name, layer_title, resource_name, resource_title, dataSourceType=downman_models.ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.OGC_WFS_RESOURCE_TYPE, url='', directDownloadUrl=None, dataFormats=[], spatialFilterType=[], resolutions=[], scales=[], crss=[], restricted=False, nativeCrs=None):
+    def __init__(self, layer_id, layer_name, layer_title, resource_name, resource_title, dataSourceType=downman_models.ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.OGC_WFS_RESOURCE_TYPE, url='', directDownloadUrl=None, dataFormats=[], spatialFilterType=[], resolutions=[], scales=[], crss=[], restricted=False, size=0, nativeCrs=None):
         self.layer_id = layer_id
         self.layer_name = layer_name
         self.layer_title = layer_title
@@ -65,6 +65,7 @@ class ResourceDownloadDescriptor():
         self.url = url
         self.restricted = False
         self.nativeCrs = nativeCrs
+        self.size = size
         # more params: CRSs? imagemode (raster RGB, BYTE, INT16, INT32, FLOAT32, etc)? char encoding?
     
     def _processOptions(self, params):
@@ -203,6 +204,8 @@ class ResourceDownloadDescriptor():
             result["direct_download_url"] = self.directDownloadUrl
         if self.nativeCrs:
             result["native_crs"] = self.nativeCrs
+        if self.size:
+            result["size"] = self.size
         print result 
         return result
         #return json.dumps(result)
@@ -249,7 +252,7 @@ def getLayerDownloadResources(request, layer_id):
     print json_resources
     return JsonResponse(resources, encoder=CustomJsonEncoder, safe=False)
 
-def getOgcDownloadDescriptor(layer_uuid, onlineResource, layer, fallbackTitle, dataSourceType, resourceType, dataFormats, nativeCrs):
+def getOgcDownloadDescriptor(layer_uuid, onlineResource, layer, fallbackTitle, dataSourceType, resourceType, dataFormats, size, nativeCrs):
     if onlineResource.name:
         resource_name = onlineResource.name
     else:
@@ -286,7 +289,7 @@ def getOgcDownloadDescriptor(layer_uuid, onlineResource, layer, fallbackTitle, d
         ]
     else:
         spatialFilterType = []
-    return ResourceDownloadDescriptor(layer_uuid, layer_name, layer_title, resource_name, resource_title, dataSourceType=dataSourceType, resourceType=resourceType, dataFormats=dataFormats, spatialFilterType=spatialFilterType, url=onlineResource.url, nativeCrs=nativeCrs)
+    return ResourceDownloadDescriptor(layer_uuid, layer_name, layer_title, resource_name, resource_title, dataSourceType=dataSourceType, resourceType=resourceType, dataFormats=dataFormats, spatialFilterType=spatialFilterType, url=onlineResource.url, size=size, nativeCrs=nativeCrs)
     
 def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
     all_resources = []
@@ -316,6 +319,7 @@ def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
                                                     dataSourceType = downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE,
                                                     resourceType=downman_models.ResourceLocator.OGC_WFS_RESOURCE_TYPE,
                                                     dataFormats=['shape-zip', 'application/json', 'csv', 'gml2', 'gml3'],
+                                                    size = onlineResource.transfer_size,
                                                     nativeCrs=nativeCrs)
             elif 'OGC:WCS' in onlineResource.protocol:
                 if 'Mapserver' in onlineResource.app_profile:
@@ -327,6 +331,7 @@ def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
                                                     dataSourceType=downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE,
                                                     resourceType=downman_models.ResourceLocator.OGC_WCS_RESOURCE_TYPE,
                                                     dataFormats=['GEOTIFF_16', 'GEOTIFF_32', 'GEOTIFF_8'],
+                                                    size = onlineResource.transfer_size,
                                                     nativeCrs=nativeCrs)
                 else: # assume Geoserver
                     resource = getOgcDownloadDescriptor(metadata_uuid,
@@ -336,6 +341,7 @@ def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
                                                     dataSourceType=downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE,
                                                     resourceType=downman_models.ResourceLocator.OGC_WCS_RESOURCE_TYPE,
                                                     dataFormats=['image/geotiff', 'image/png'],
+                                                    size=onlineResource.transfer_size,
                                                     nativeCrs=nativeCrs)
             elif (onlineResource.protocol.startswith('WWW:DOWNLOAD-') and onlineResource.protocol.endswith('-download')) or \
                 onlineResource.protocol.startswith('FILE:'):
@@ -371,7 +377,17 @@ def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
                             directDownloadUrl = getDirectDownloadUrl(onlineResource.url, resource_title)
                         except:
                             logger.exception("Error resolving file download resource for layer")
-                resource = ResourceDownloadDescriptor(metadata_uuid, layer_name, layer_title, resource_name, resource_title, dataSourceType = downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.HTTP_LINK_RESOURCE_TYPE, url=onlineResource.url, directDownloadUrl=directDownloadUrl, nativeCrs=nativeCrs)
+                resource = ResourceDownloadDescriptor(metadata_uuid,
+                                                      layer_name,
+                                                      layer_title,
+                                                      resource_name,
+                                                      resource_title,
+                                                      dataSourceType = downman_models.ResourceLocator.GEONETWORK_CATALOG_DATA_SOURCE_TYPE,
+                                                      resourceType=downman_models.ResourceLocator.HTTP_LINK_RESOURCE_TYPE,
+                                                      url=onlineResource.url,
+                                                      directDownloadUrl=directDownloadUrl,
+                                                      size = onlineResource.transfer_size,
+                                                      nativeCrs=nativeCrs)
             #elif onlineResource.protocol.startswith('WWW:LINK-'):
             if resource:
                 resource.restricted = isRestricted(onlineResource, max_public_size)

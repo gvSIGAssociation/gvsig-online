@@ -309,17 +309,60 @@ DownloadManagerUI.prototype._getOptionTitle = function(param, param_name){
 	return null;
 }
 
+DownloadManagerUI.prototype._getHumanReadableSize = function(size) {
+	try {
+		var floatSize = parseFloat(size);
+	}
+	catch (e) {
+		return size;
+	}
+	var hrSize, units;
+
+	if (floatSize < 0.1) {
+		try {
+			hrSize = floatSize * 1024;
+			units = ' KB';
+			return hrSize.toLocaleString(undefined, {'maximumFractionDigits': 3}) + units;
+		} catch (e) {
+			return hrSize.toPrecision(3) + units;
+		}
+	}
+	if (floatSize > (1024*1024)) {
+		hrSize = floatSize / (1024*1024);
+		units = ' TB';
+	}
+	else if (floatSize > 1024) {
+		hrSize = floatSize / 1024;
+		units = ' GB';
+	}
+	else if (floatSize > 0.1) {
+		hrSize = size;
+		units = ' MB';
+	}
+	try {
+		return hrSize.toLocaleString(undefined, {'maximumFractionDigits': 1}) + units;
+	} catch (e) {
+		return hrSize.toPrecision(1) + units;
+	}
+}
+
 DownloadManagerUI.prototype.createAvailableResource = function(resource) {
 	var downloadParams = resource.params;
 	var param, paramOption;
 	var content = '<tr class="downman-download-resource">';
 	if (resource.name != resource.title) {}
 	var name = resource.title + " [" + resource.name + "]";
+	var sizeBadge = '';
+	if (resource.size > 0) {
+		sizeBadge = '<div style="padding-top:8px"><span class="badge">' + this._getHumanReadableSize(resource.size) + '</span></div>';
+	}
 	if (resource.restricted) {
-		content += '<td style="width: 80px"><div class="form-inline"><div class="form-group"><i class="fa fa-3x fa-file-archive-o" aria-hidden="true"><i class="fa fa-lock"></i></i></span></div></div></td>';
+		content += '<td style="width: 80px"><div class="form-inline"><div class="form-group"><i class="fa fa-3x fa-file-archive-o" aria-hidden="true"><i class="fa fa-lock"></i></i></span></div></div>';
+		content += sizeBadge + '</td>';
 	}
 	else {
-		content += '<td style="width: 80px"><div class="form-inline"><div class="form-group"><i class="fa fa-3x fa-file-archive-o" aria-hidden="true"></i></div></div></td>';
+		content += '<td style="width: 80px"><div class="form-inline"><div class="form-group"><i class="fa fa-3x fa-file-archive-o" aria-hidden="true"></i></div></div>';
+		content += sizeBadge + '</td>';
 	}
 	
 	content += '<td style="width: 120px;"><div class="col"><label class="form-label">'+ resource.title + '</label>';
