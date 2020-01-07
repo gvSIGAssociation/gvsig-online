@@ -24,7 +24,7 @@ from tasks import Error
 from sendfile import sendfile
 from django.shortcuts import redirect
 from actstream import action
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser, AbstractBaseUser
 from django.contrib.auth.decorators import login_required
 from gvsigol_auth.utils import superuser_required, staff_required
 from django.db.models import Q
@@ -662,12 +662,11 @@ def downloadResource(request, uuid, resuuid):
             lrdown_log.save()
             if link.request.requested_by_user:
                 user = User.objects.get(username=link.request.requested_by_user)
-                #action.send(user, verb="gvsigol_plugin_downloadman/resource_downloaded", action_object=resourceLocator)
                 action.send(user, verb="gvsigol_plugin_downloadman/layer_resource_downloaded", action_object=lrdown_log)
                 action.send(user, verb="gvsigol_plugin_downloadman/layer_downloaded", action_object=ldown_log)
             else:
-                action.send(None, verb="gvsigol_plugin_downloadman/layer_resource_downloaded", action_object=lrdown_log)
-                action.send(None, verb="gvsigol_plugin_downloadman/layer_downloaded", action_object=ldown_log)
+                action.send(lrdown_log, verb="gvsigol_plugin_downloadman/layer_resource_downloaded", action_object=lrdown_log)
+                action.send(ldown_log, verb="gvsigol_plugin_downloadman/layer_downloaded", action_object=ldown_log)
 
         if link.prepared_download_path:
             logger.debug(u"using sendfile: " + link.prepared_download_path)
