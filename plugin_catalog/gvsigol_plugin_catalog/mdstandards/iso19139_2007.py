@@ -287,7 +287,7 @@ class Iso19139_2007Reader(XmlStandardReader):
         result = []
         OnlineResource = collections.namedtuple('OnlineResource', ['url', 'protocol', 'app_profile', 'name', 'desc', 'function', 'transfer_size'])
         for transferOption in self.tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions', namespaces):
-            transferSizeNode = transferOption.find('./gmd:transferSize', namespaces)
+            transferSizeNode = transferOption.find('./gmd:transferSize/gco:Real', namespaces)
             transferSize = None
             if transferSizeNode is not None and transferSizeNode.text != '':
                 try:
