@@ -3716,10 +3716,14 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
             #        formats.append(f)
             formats.append('image/jpeg')
             formats.append('image/png')
-            all_infoformats = wms.getOperationByName('GetFeatureInfo').formatOptions
-            for i_format in all_infoformats:
-                if i_format == 'text/plain' or i_format == 'text/html' or i_format == 'application/json' or i_format == 'application/geojson':
-                    infoformats.append(i_format)
+            try:
+                all_infoformats = wms.getOperationByName('GetFeatureInfo').formatOptions
+                for i_format in all_infoformats:
+                    if i_format == 'text/plain' or i_format == 'text/html' or i_format == 'application/json' or i_format == 'application/geojson':
+                        infoformats.append(i_format)
+            except Exception:
+                pass
+            
             lyr = wms.contents.get(layer)
             if not lyr:
                 for capabLyrName in wms.contents:
@@ -3733,7 +3737,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                     style = lyr.styles[style_name]
                     title = style['title'] if style['title'] else style_name
                     style_def = {'name': style_name, 'title':title}
-                    if style['legend']:
+                    if 'legend' in style:
                         style_def['custom_legend_url'] = style['legend']
                     styles.append(style_def)
                 crs_list = lyr.crs_list
