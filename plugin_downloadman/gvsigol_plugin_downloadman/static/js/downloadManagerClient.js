@@ -446,22 +446,15 @@ DownloadManagerUI.prototype.initAvailableResources = function(downloadResources)
 						options: []
 					}
 					var targetCrs;
-					var extent;
-					if (clickedResource.native_crs) {
-						extent = self.getSelectedExtent(clickedResource.native_crs);
-					}
-					else {
-						extent = self.getSelectedExtent();
-					}
+					var extent = self.getSelectedExtent();
 					if (extent != null) {
-						var bbox = extent[0] + "," + extent[2] + "," + extent[1] + "," + extent[3];
-						var spatialFilterGeomParam = new gvsigol.downman.ResourceDownloadParamValue(param, bbox);
+						var spatialFilterGeomParam = new gvsigol.downman.ResourceDownloadParamValue(param, extent.toString());
 						values.push(spatialFilterGeomParam);
 						clickedResource.params.push(param);
 					}
 				}
 				/*
-				 * NOT SUPPORTED
+				 * NOT SUPPORTED YET
 				else {
 					var param = {
 							name: 'spatial_filter_geom',
@@ -481,25 +474,23 @@ DownloadManagerUI.prototype.initAvailableResources = function(downloadResources)
 }
 
 
-DownloadManagerUI.prototype.getSelectedExtent = function(targetCrsCode){
-	var extent = null, sourceCrs;
+DownloadManagerUI.prototype.getSelectedExtent = function(){
 	if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')) {
 		var geom = viewer.core.catalog.catalog_map.getSelectedArea();
 		if (geom != null) {
-			sourceCrs = viewer.core.catalog.catalog_map.map.getView().getProjection();
-			extent = geom.getExtent();
+			var sourceCrs = viewer.core.catalog.catalog_map.map.getView().getProjection();
+			var extent = geom.getExtent();
+			return extent.concat([sourceCrs.getCode()]);
 		}
 	}
 	else {
 		// if catalog plugin is not available, we use the extent of the main  map viewer as spatial filter
 		var view = viewer.core.getMap().getView();
-		sourceCrs = view.getProjection();
-		extent = view.calculateExtent();
+		var sourceCrs = view.getProjection();
+		var extent = view.calculateExtent();
+		return extent.concat([sourceCrs.getCode()]);
 	}
-	if (extent != null && targetCrsCode && sourceCrs) {
-		return ol.proj.transformExtent(extent, sourceCrs.getCode(), targetCrsCode);
-	}
-	return extent;
+	return null;
 }
 
 DownloadManagerUI.prototype.getSelectedArea = function(){

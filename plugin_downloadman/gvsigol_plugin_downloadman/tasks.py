@@ -239,7 +239,7 @@ def _getExtension(file_format):
     return "." + file_format
 
 def _normalizeWxsUrl(url):
-        return url.split("?")[0]
+        return url.split(u"?")[0]
 
 def _getWfsRequest(layer_name, baseUrl, params):
     file_format = _getParamValue(params, FORMAT_PARAM_NAME)
@@ -273,17 +273,49 @@ def _getWfsRequest(layer_name, baseUrl, params):
       </ogc:BBOX>
     </ogc:Filter>
     """
+    getCapabilitiesTree = _getCapabilitiesWfsTree(baseUrl)
+    nativeSrs = _getWfsLayerCrs(getCapabilitiesTree, layer_name)
 
-    url = _normalizeWxsUrl(baseUrl) + '?service=WFS&version=1.0.0&request=GetFeature&typeName=' + layer_name + '&outputFormat='+ file_format
+    url = _normalizeWxsUrl(baseUrl) + u'?service=WFS&version=1.0.0&request=GetFeature&typeName=' + layer_name + u'&outputFormat='+ file_format
     spatial_filter_type = _getParamValue(params, SPATIAL_FILTER_TYPE_PARAM_NAME)
     if spatial_filter_type == 'bbox':
         spatial_filter_bbox = _getParamValue(params, SPATIAL_FILTER_BBOX_PARAM_NAME)
         if spatial_filter_bbox:
             bboxElements = spatial_filter_bbox.split(",")
-            if len(bboxElements) == 4:
-                url += '&bbox=' + bboxElements[0] + "," + bboxElements[2]  + "," + bboxElements[1] + "," + bboxElements[3]
+            if len(bboxElements) == 5:
+                sourceCrs = bboxElements[4]
+                nativeExtent = reprojectExtent(float(bboxElements[0]), float(bboxElements[1]), float(bboxElements[2]), float(bboxElements[3]), sourceCrs, nativeSrs)
+                url += u'&bbox=' + text(nativeExtent[0]) + u"," + text(nativeExtent[1])  + u"," + text(nativeExtent[2]) + u"," + text(nativeExtent[3])
     logger.debug(url)
     return url
+
+def _getCapabilitiesWfsTree(baseUrl):
+    try:
+        url = _normalizeWxsUrl(baseUrl) + '?service=WFS&version=1.0.0&request=GetCapabilities'
+        logger.debug(url)
+        r = requests.get(url, verify=False, timeout=DEFAULT_TIMEOUT)
+        getCapabilitiesXml = r.content
+        #incorrectGeoserverNamespaces = '<WFS_Capabilities version="1.0.0" xsi:schemaLocation="http://www.opengis.net/wfs https://gvsigol.localhost/geoserver/schemas/wfs/1.0.0/WFS-capabilities.xsd">'
+        #fixedGeoserverWFS100Namespaces = '<WFS_Capabilities version="1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  xsi:schemaLocation="http://www.opengis.net/wfs https://gvsigol.localhost/geoserver/schemas/wfs/1.0.0/WFS-capabilities.xsd">'
+        #if getCapabilitiesXml.startswith(incorrectGeoserverNamespaces):
+        #    getCapabilitiesXml = getCapabilitiesXml.replace(incorrectGeoserverNamespaces, fixedGeoserverWFS100Namespaces)
+        return ET.fromstring(getCapabilitiesXml)
+    except:
+        logger.exception("Error retrieving or parsing getCapabilitiesXml")
+
+def _getWfsLayerCrs(getCapabilitiesTree, layerName):
+    try:
+        if getCapabilitiesTree is not None:
+            namespaces =  {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'wfs': 'http://www.opengis.net/wfs'}
+            findExpr = "./wfs:FeatureTypeList/wfs:FeatureType/wfs:Name"
+            featureTypes = getCapabilitiesTree.findall(findExpr, namespaces)
+            for featureTypeNameNode in featureTypes:
+                if featureTypeNameNode.text == layerName:
+                    srsNode = featureTypeNameNode.find("../wfs:SRS", namespaces)
+                    if srsNode is not None:
+                        return srsNode.text
+    except:
+        logger.exception(u"Error getting the CRS of the WFS layer" + layerName)
 
 def _getDescribeWcsCoverageTree(layer_name, baseUrl):
     try:
@@ -324,11 +356,26 @@ def _getCrsReverseAxisList():
         INVERSE_AXIS_CRS_LIST = genfromtxt(os.path.join(core_settings.BASE_DIR, 'gvsigol_core/static/crs_axis_order/mapaxisorder.csv'), skip_header=1)
     return INVERSE_AXIS_CRS_LIST
 
+def reprojectExtent(xmin, ymin, xmax, ymax, sourceCrs, targetCrs):
+    try:
+        from django.contrib.gis.gdal import SpatialReference, CoordTransform, OGRGeometry
+        if sourceCrs != targetCrs:
+            sourceCrsOgr = SpatialReference(sourceCrs)
+            targetCrsOgr = SpatialReference(targetCrs)
+            coordTransform = CoordTransform(sourceCrsOgr, targetCrsOgr)
+            ogrExtentPolygon = OGRGeometry.from_bbox((xmin, ymin, xmax, ymax))
+            ogrExtentPolygon.transform(coordTransform)
+            # extent tuple: xmin, ymin, xmax, ymax
+            return ogrExtentPolygon.extent
+    except:
+        logger.exception('Error reprojecting extent')
+        raise
+
 def _getWcsRequest(layer_name, baseUrl, params):
-    url = _normalizeWxsUrl(baseUrl) + '?service=WCS&version=2.0.0&request=GetCoverage&CoverageId=' + layer_name
+    url = _normalizeWxsUrl(baseUrl) + u'?service=WCS&version=2.0.0&request=GetCoverage&CoverageId=' + layer_name
     file_format = _getParamValue(params, FORMAT_PARAM_NAME)
     if file_format:
-        url += '&format=' + file_format
+        url += u'&format=' + file_format
     spatial_filter_type = _getParamValue(params, SPATIAL_FILTER_TYPE_PARAM_NAME)
     if spatial_filter_type == 'bbox':
         spatial_filter_bbox = _getParamValue(params, SPATIAL_FILTER_BBOX_PARAM_NAME)
@@ -336,28 +383,31 @@ def _getWcsRequest(layer_name, baseUrl, params):
             describeCoverageTree = _getDescribeWcsCoverageTree(layer_name, baseUrl)
             envelopeNode = _getDescribeWcsCoverageEnvelope(describeCoverageTree)
             axes = _getDescribeWcsCoverageAxes(envelopeNode)
-            srs = _getDescribeWcsCoverageSrsCode(envelopeNode)
+            nativeSrsCode = _getDescribeWcsCoverageSrsCode(envelopeNode)
             bboxElements = spatial_filter_bbox.split(",")
             spatial_subset = ''
-            if axes is not None and bboxElements is not None and len(axes) == 2 and len(bboxElements) == 4:
-                if float(bboxElements[0]) <= float(bboxElements[1]):
-                    axis0_min = bboxElements[0]
-                    axis0_max = bboxElements[1]
+            if axes is not None and bboxElements is not None and len(axes) == 2 and len(bboxElements) == 5:
+                srs = bboxElements[4]
+                if float(bboxElements[0]) <= float(bboxElements[2]):
+                    xmin = bboxElements[0]
+                    xmax = bboxElements[2]
                 else:
-                    axis0_min = bboxElements[1]
-                    axis0_max = bboxElements[0]
-                if float(bboxElements[2]) <= float(bboxElements[3]):
-                    axis1_min = bboxElements[2]
-                    axis1_max = bboxElements[3]
+                    xmin = bboxElements[2]
+                    xmax = bboxElements[0]
+                if float(bboxElements[1]) <= float(bboxElements[3]):
+                    ymin = bboxElements[1]
+                    ymax = bboxElements[3]
                 else:
-                    axis1_min = bboxElements[3]
-                    axis1_max = bboxElements[2]
-                if srs and int(srs) in _getCrsReverseAxisList():
-                    spatial_subset = '&subset=' + axes[0] + '%28%22' + axis1_min + '%22%2C%22' + axis1_max + '%22%29'
-                    spatial_subset += '&subset=' + axes[1] + '%28%22' + axis0_min + '%22%2C%22' + axis0_max + '%22%29'
+                    ymin = bboxElements[3]
+                    ymax = bboxElements[1]
+                    
+                axis0_min, axis1_min, axis0_max, axis1_max = reprojectExtent(xmin, ymin, xmax, ymax, srs, nativeSrsCode)
+                if nativeSrsCode and int(nativeSrsCode) in _getCrsReverseAxisList():
+                    spatial_subset = u'&subset=' + text(axes[0]) + u'%28%22' + text(axis1_min) + u'%22%2C%22' + text(axis1_max) + u'%22%29'
+                    spatial_subset += u'&subset=' + text(axes[1]) + u'%28%22' + text(axis0_min) + u'%22%2C%22' + text(axis0_max) + u'%22%29'
                 else:
-                    spatial_subset = '&subset=' + axes[0] + '%28%22' + axis0_min + '%22%2C%22' + axis0_max + '%22%29'
-                    spatial_subset += '&subset=' + axes[1] + '%28%22' + axis1_min + '%22%2C%22' + axis1_max + '%22%29'
+                    spatial_subset = u'&subset=' + text(axes[0]) + u'%28%22' + text(axis0_min) + u'%22%2C%22' + text(axis0_max) + u'%22%29'
+                    spatial_subset += u'&subset=' + text(axes[1]) + u'%28%22' + text(axis1_min) + u'%22%2C%22' + text(axis1_max) + u'%22%29'
             url += spatial_subset
     logger.debug(url)
     return url
