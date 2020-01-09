@@ -163,7 +163,6 @@ class DownloadLink(models.Model):
             status_txt = ugettext('Processed')
         else:
             status_txt = ugettext('Canceled')
-            
         if not self.is_valid:
             return status_txt + " - " + ugettext('Expired')
         return status_txt
@@ -176,14 +175,20 @@ class DownloadLink(models.Model):
     
     @property
     def contents_details(self):
-        locators = self.resourcelocator_set.all()
-        return ", ".join([ locator.fq_title_name for locator in locators ])
+        if self.is_auxiliary:
+            locators = self.resourcelocator_set.all()
+            return ", ".join([ locator.fq_title + u" [" + self.name + u"]" for locator in locators ])
+        else:
+            locators = self.resourcelocator_set.all()
+            return ", ".join([ locator.fq_title_name for locator in locators ])
     
     request = models.ForeignKey('DownloadRequest', on_delete=models.CASCADE, db_index=False)
     prepared_download_path = models.TextField(null=True, blank=True)
     valid_to=models.DateTimeField(db_index=True)
     link_random_id = models.TextField(db_index=True, unique=True)
     status = models.CharField(max_length=2, default=PROCESSED_STATUS, choices=STATUS_CHOICES)
+    name = models.TextField(null=True, default=None)
+    is_auxiliary = models.BooleanField(default=False)
     download_count = models.PositiveIntegerField(default=0)
     class Meta:
         indexes = [
@@ -251,6 +256,10 @@ class ResourceLocator(models.Model):
             if self.authorization == choice_code:
                 return ugettext(choice_desc)
     
+    @property
+    def status_detail(self):
+        return self.status_canceled + " - " + ugettext('Authorization: ') + self.authorization_desc
+    
     # res_einternal_id = models.PositiveIntegerField()
     #ds_type = models.CharField(max_length=3, choices=RESOURCE_TYPES_CHOICES)
     data_source  = models.TextField() # description of the layer data source and download params
@@ -279,7 +288,8 @@ class ResourceLocator(models.Model):
     resolved_url =  models.TextField(null=True, blank=True)
     is_dynamic = models.BooleanField(default=False)
     canceled = models.BooleanField(default=False)
-    download_link = models.ForeignKey('DownloadLink', on_delete=models.CASCADE, null=True)
+    #download_link = models.ForeignKey('DownloadLink', on_delete=models.CASCADE, null=True)
+    download_links = models.ManyToManyField('DownloadLink')
     request = models.ForeignKey('DownloadRequest', on_delete=models.CASCADE, db_index=False)
     #mime_type = models.CharField(max_length=255)
     class Meta:

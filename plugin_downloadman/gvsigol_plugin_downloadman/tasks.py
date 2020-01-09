@@ -30,7 +30,7 @@ from gvsigol_plugin_downloadman.models import DownloadRequest, DownloadLink, Res
 from gvsigol_plugin_downloadman.models import get_packaging_max_retry_time, get_mail_max_retry_time, get_max_public_download_size
 from datetime import date, timedelta, datetime
 
-import os
+import os, glob
 import tempfile
 import zipfile
 import requests
@@ -640,7 +640,7 @@ def notifyReceivedRequest(self, request_id, only_if_queued=True):
             for locator in request.resourcelocator_set.all():
                 plain_message += u' - {0!s} [{1!s}]\n'.format(locator.fq_title, locator.name)
                 htmlContext['locators'].append({'name': '{0!s} [{1!s}]\n'.format(locator.fq_title, locator.name),
-                                                'status': _(locator.get_status_description())})
+                                                'status': _(locator.status_detail)})
                 
             html_message = render_to_string('request_received_email.html', htmlContext)
             #plain_message = strip_tags(html_message)
@@ -710,9 +710,14 @@ def notifyRequestProgress(self, request_id):
                 valid_to = date_format(link.valid_to, 'DATETIME_FORMAT')
                 link.save()
                 linkResources = link.resourcelocator_set.all()
+                linkHtmlContext['validto'] = valid_to
                 if len(linkResources)==1:
-                    plain_message += u' {0:2d}- {1!s} [{2!s}]: {3!s}\n'.format(count, linkResources[0].fq_title, linkResources[0].name, link_url)
-                    linkHtmlContext['name'] = u'{0!s} [{0!s}]'.format(linkResources[0].fq_title, linkResources[0].name)
+                    if link.is_auxiliary:
+                        plain_message += u' {0:2d}- {1!s} [{2!s}]: {3!s}\n'.format(count, linkResources[0].fq_title, link.name, link_url)
+                        linkHtmlContext['name'] = u'{0!s} [{0!s}]'.format(linkResources[0].fq_title, link.name)
+                    else:
+                        plain_message += u' {0:2d}- {1!s} [{2!s}]: {3!s}\n'.format(count, linkResources[0].fq_title, linkResources[0].name, link_url)
+                        linkHtmlContext['name'] = u'{0!s} [{0!s}]'.format(linkResources[0].fq_title, linkResources[0].name)
                     linkHtmlContext['url'] = link_url
                 else:
                     plain_message += u' {0:2d}- {1!s}: {2!s}\n'.format(count, _('Multiresource package'), link_url)
@@ -720,7 +725,6 @@ def notifyRequestProgress(self, request_id):
                     plain_message += _(u'    -- Contents:')
                     linkHtmlContext['name'] = _('Multiresource package')
                     linkHtmlContext['url'] = link_url
-                    linkHtmlContext['validto'] = valid_to
                     linkHtmlContext['locators'] = []
                     for linkResource in linkResources:
                         plain_message += _(u'     -- {0!s} [{1!s}]\n').format(linkResource.fq_title, linkResource.name)
@@ -728,24 +732,24 @@ def notifyRequestProgress(self, request_id):
                 count += 1
                 links.append(linkHtmlContext)
             htmlContext['links'] = links
-            locators =  request.resourcelocator_set.filter(download_link__isnull=True).exclude(status=ResourceLocator.PERMANENT_ERROR_STATUS)
+            locators =  request.resourcelocator_set.filter(download_links__isnull=True).exclude(status=ResourceLocator.PERMANENT_ERROR_STATUS)
             if len(locators)>0:
                 htmlContext['pendinglocators'] = []
                 plain_message += '\n' + _('The following resources are still being processed:') + '\n'
                 for locator in locators:
                     plain_message += u' - {0!s} [{1!s}]\n'.format(locator.fq_title, locator.name)
-                    plain_message += (u'   -- ' + _('Status:') + '{0!s}\n').format(_(locator.get_status_description()))
+                    plain_message += (u'   -- ' + _('Status:') + '{0!s}\n').format(_(locator.status_detail))
                     htmlContext['pendinglocators'].append({'name': '{0!s} [{1!s}]\n'.format(locator.fq_title, locator.name),
-                                                           'status': _(locator.get_status_description())})
-            locators =  request.resourcelocator_set.filter(download_link__isnull=True).filter(status=ResourceLocator.PERMANENT_ERROR_STATUS)
+                                                           'status': _(locator.status_detail)})
+            locators =  request.resourcelocator_set.filter(download_links__isnull=True).filter(status=ResourceLocator.PERMANENT_ERROR_STATUS)
             if len(locators)>0:
                 htmlContext['failedlocators'] = []
                 plain_message += '\n' + _("The following resources could not be processed:") + '\n'
                 for locator in locators:
                     plain_message += u' - {0!s} [{1!s}]\n'.format(locator.fq_title, locator.name)
-                    plain_message += (u'   -- ' + _('Status:') + '{0!s}\n').format(_(locator.get_status_description()))
+                    plain_message += (u'   -- ' + _('Status:') + '{0!s}\n').format(_(locator.status_detail))
                     htmlContext['failedlocators'].append({'name': '{0!s} [{1!s}]\n'.format(locator.fq_title, locator.name),
-                                                           'status': _(locator.get_status_description())})
+                                                           'status': _(locator.status_detail)})
             plain_message += u'\n' + _(u'You can also use this tracking link to check the status of your request:') + u' ' + tracking_url + u'\n'
             htmlContext['request_url'] = tracking_url
             html_message = render_to_string('progress_notif_email.html', context=htmlContext)
@@ -823,8 +827,7 @@ def processLocators(request, zipobj=None, zip_path=None):
                     to_package += 1
             else:
                 # store a direct download link instead of packaging the resource
-                new_link = createDownloadLink(request, resourceLocator)
-                resourceLocator.download_link = new_link
+                createDownloadLinks(request, resourceLocator)
                 resourceLocator.status = ResourceLocator.PROCESSED_STATUS
                 completed_locators += 1
             resourceLocator.save()
@@ -841,12 +844,9 @@ def processLocators(request, zipobj=None, zip_path=None):
             temporal_errors += 1
 
     if len(packaged_locators) > 0:
-        new_link = createDownloadLink(request, resourceLocator, zip_path)
+        new_link = createDownloadLink(request, packaged_locators, zip_path)
         for resourceLocator in packaged_locators:
-            # we need to ensure that locators have not been cancelled while we were processing
-            resourceLocator.refresh_from_db(fields=['status'])
             resourceLocator.status = ResourceLocator.PROCESSED_STATUS
-            resourceLocator.download_link = new_link
             resourceLocator.save()
         
         # Finally, we need to ensure that locators have not been cancelled while we were processing
@@ -861,31 +861,70 @@ def processLocators(request, zipobj=None, zip_path=None):
             for resourceLocator in locators:
                 #if any of the locators has been cancelled, we need to cancel the link and process again the locators
                 if not resourceLocator.canceled and resourceLocator.status == ResourceLocator.PROCESSED_STATUS:
-                     resourceLocator.status = ResourceLocator.RESOURCE_QUEUED_STATUS
-                     resourceLocator.save()
+                    resourceLocator.status = ResourceLocator.RESOURCE_QUEUED_STATUS
+                    resourceLocator.save()
                 new_link.status = DownloadLink.ADMIN_CANCELED_STATUS
                 new_link.save()
             return processLocators(request, zipobj, zip_path)
-        
 
     return ResultTuple(completed_locators, len(packaged_locators), waiting_space, to_package, temporal_errors, permanent_errors)
 
-def createDownloadLink(downloadRequest, resourceLocator, prepared_download_path=None):
+def createDownloadLink(downloadRequest, resourceLocators, prepared_download_path, is_auxiliary=False):
     try:
         new_link = DownloadLink()
         new_link.request = downloadRequest
         link_uuid = date.today().strftime("%Y%m%d") + get_random_string(length=32)
         new_link.valid_to = timezone.now() + timedelta(seconds = downloadRequest.validity)
         new_link.link_random_id = link_uuid
-        if prepared_download_path:
-            new_link.prepared_download_path = prepared_download_path
-        elif resourceLocator.resolved_url.startswith("file://"):
-            if resourceLocator.resolved_url.endswith("/"):
-                new_link.prepared_download_path = resolveFileUrl(resourceLocator.resolved_url)
-            else:
-                new_link.prepared_download_path = resolveFileUrl(resourceLocator.resolved_url)
+        new_link.prepared_download_path = prepared_download_path
+        new_link.is_auxiliary = is_auxiliary
+        new_link.name = os.path.basename(prepared_download_path)
         new_link.save()
+        if isinstance(resourceLocators, ResourceLocator):
+            resourceLocators.download_links.add(new_link)
+        else:
+            for resourceLocator in resourceLocators:
+                resourceLocator.download_links.add(new_link)
         return new_link
+    except ForbiddenAccessError:
+        logger.exception("Error creating download link")
+        raise PermanentPreparationError()
+
+def getAuxiliaryFiles(local_path):
+    """
+    Gets a list of paths which are considered to be auxiliary files of the provided
+    local_path. In this method, an auxiliary file is any file that shares the same name
+    of the provided local_path with a different extension. The provided local_path is
+    also included in the list of returned paths.
+    
+    Example:
+    
+    getAuxiliaryFiles('/mnt/data/vuelo2019/vuelo2019.tif) may return a list such as:
+    
+    [
+        '/mnt/data/vuelo2019/vuelo2019.tif',
+        '/mnt/data/vuelo2019/vuelo2019.tfw',
+        '/mnt/data/vuelo2019/vuelo2019.tif.xml'
+    ]
+    
+    """
+    pathdir = os.path.dirname(local_path)
+    fnameext = os.path.basename(local_path)
+    fname = fnameext.split(".", 1)[0] # don't use path.splitext to consider extensions such us .shp.xml
+    return glob.glob(pathdir + "/" + fname + "*") 
+
+def createDownloadLinks(downloadRequest, resourceLocator):
+    try:
+        if resourceLocator.resolved_url.startswith("file://"):
+            local_path = resolveFileUrl(resourceLocator.resolved_url)
+            paths = getAuxiliaryFiles(local_path)
+            for p in paths:
+                is_auxiliary = (p != local_path)
+                createDownloadLink(downloadRequest, resourceLocator, p, is_auxiliary)
+            #if resourceLocator.resolved_url.endswith("/"):
+            #    new_link.prepared_download_path = resolveFileUrl(resourceLocator.resolved_url)
+            #else:
+            #    new_link.prepared_download_path = resolveFileUrl(resourceLocator.resolved_url)
     except ForbiddenAccessError:
         logger.exception("Error creating download link")
         raise PermanentPreparationError()
@@ -1020,7 +1059,8 @@ def processDownloadRequest(self, request_id):
                 self.retry(countdown=delay)
     
         if result.to_package > 0:
-            notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
+            if result.completed > 0:
+                notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
             packageRequest.apply_async(args=[request.pk], queue='package')
             return
         if result.temporal_error > 0:

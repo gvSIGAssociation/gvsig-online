@@ -537,7 +537,10 @@ def requestTracking(request, uuid):
                     logger.debug(link['download_url']) 
             linkResources = downloadlink.resourcelocator_set.all()
             if len(linkResources)==1:
-                link['name'] = u'{0:d}-{1!s} [{2!s}]\n'.format(count, linkResources[0].fq_title, linkResources[0].name)
+                if downloadlink.is_auxiliary:
+                    link['name'] = u'{0:d}-{1!s} [{2!s}]\n'.format(count, linkResources[0].fq_title, downloadlink.name)
+                else:
+                    link['name'] = u'{0:d}-{1!s} [{2!s}]\n'.format(count, linkResources[0].fq_title, linkResources[0].name)
             else:
                 link['name'] = u'{0:2d}-{1!s}\n'.format(count, _('Multiresource package'))
                 link['locators'] = []
@@ -549,7 +552,7 @@ def requestTracking(request, uuid):
             count += 1
             result['links'].append(link)
         #plain_message += _('\nThe following resources are still being processed:|n')
-        for locator in r.resourcelocator_set.filter(download_link__isnull=True):
+        for locator in r.resourcelocator_set.filter(download_links__isnull=True):
             link = {}
             link['authorization_desc'] = locator.authorization_desc
             link['status'] = locator.status_desc
@@ -633,40 +636,41 @@ def downloadResource(request, uuid, resuuid):
         link.save()
         
         # log download statistics
-        for resourceLocator in link.resourcelocator_set.all():
-            resourceLocator.download_count += 1
-            resourceLocator.save()
-            # We can't directly send an action based on the ResouceLocatorn, because the same layer and resource is represented using several ResourceLocators,
-            # so we need to create proxy log tables
-            try: 
-                ldown_log = downman_models.LayerProxy.objects.get(layer_id=resourceLocator.layer_id, layer_id_type=resourceLocator.layer_id_type)
-            except:
-                ldown_log = downman_models.LayerProxy()
-                ldown_log.layer_id = resourceLocator.layer_id
-                ldown_log.layer_id_type = resourceLocator.layer_id_type
-            ldown_log.name = resourceLocator.layer_name
-            ldown_log.title = resourceLocator.layer_title
-            ldown_log.title_name = resourceLocator.layer_title + u'[' + resourceLocator.name + u']'
-            ldown_log.save()
-            try:
-                lrdown_log = downman_models.LayerResourceProxy.objects.get(layer=ldown_log, name=resourceLocator.name)
-            except:
-                logger.exception("error")
-                lrdown_log = downman_models.LayerResourceProxy()
-                lrdown_log.name = resourceLocator.name
-                lrdown_log.layer = ldown_log
-            lrdown_log.title = resourceLocator.title
-            lrdown_log.fq_name = resourceLocator.fq_name
-            lrdown_log.fq_title_name = resourceLocator.fq_title_name
-            lrdown_log.fq_title = resourceLocator.fq_title
-            lrdown_log.save()
-            if link.request.requested_by_user:
-                user = User.objects.get(username=link.request.requested_by_user)
-                action.send(user, verb="gvsigol_plugin_downloadman/layer_resource_downloaded", action_object=lrdown_log)
-                action.send(user, verb="gvsigol_plugin_downloadman/layer_downloaded", action_object=ldown_log)
-            else:
-                action.send(lrdown_log, verb="gvsigol_plugin_downloadman/layer_resource_downloaded", action_object=lrdown_log)
-                action.send(ldown_log, verb="gvsigol_plugin_downloadman/layer_downloaded", action_object=ldown_log)
+        if not link.is_auxiliary: # we don't log downloads of auxiliary files at the moment
+            for resourceLocator in link.resourcelocator_set.all():
+                resourceLocator.download_count += 1
+                resourceLocator.save()
+                # We can't directly send an action based on the ResouceLocatorn, because the same layer and resource is represented using several ResourceLocators,
+                # so we need to create proxy log tables
+                try: 
+                    ldown_log = downman_models.LayerProxy.objects.get(layer_id=resourceLocator.layer_id, layer_id_type=resourceLocator.layer_id_type)
+                except:
+                    ldown_log = downman_models.LayerProxy()
+                    ldown_log.layer_id = resourceLocator.layer_id
+                    ldown_log.layer_id_type = resourceLocator.layer_id_type
+                ldown_log.name = resourceLocator.layer_name
+                ldown_log.title = resourceLocator.layer_title
+                ldown_log.title_name = resourceLocator.layer_title + u'[' + resourceLocator.name + u']'
+                ldown_log.save()
+                try:
+                    lrdown_log = downman_models.LayerResourceProxy.objects.get(layer=ldown_log, name=resourceLocator.name)
+                except:
+                    logger.exception("error")
+                    lrdown_log = downman_models.LayerResourceProxy()
+                    lrdown_log.name = resourceLocator.name
+                    lrdown_log.layer = ldown_log
+                lrdown_log.title = resourceLocator.title
+                lrdown_log.fq_name = resourceLocator.fq_name
+                lrdown_log.fq_title_name = resourceLocator.fq_title_name
+                lrdown_log.fq_title = resourceLocator.fq_title
+                lrdown_log.save()
+                if link.request.requested_by_user:
+                    user = User.objects.get(username=link.request.requested_by_user)
+                    action.send(user, verb="gvsigol_plugin_downloadman/layer_resource_downloaded", action_object=lrdown_log)
+                    action.send(user, verb="gvsigol_plugin_downloadman/layer_downloaded", action_object=ldown_log)
+                else:
+                    action.send(lrdown_log, verb="gvsigol_plugin_downloadman/layer_resource_downloaded", action_object=lrdown_log)
+                    action.send(ldown_log, verb="gvsigol_plugin_downloadman/layer_downloaded", action_object=ldown_log)
 
         if link.prepared_download_path:
             logger.debug(u"using sendfile: " + link.prepared_download_path)
@@ -767,11 +771,11 @@ def cancel_locator(request, resource_id):
         resource = downman_models.ResourceLocator.objects.get(pk=int(resource_id))
         resource.canceled = True
         resource.save()
-        if resource.download_link:
-            resource.download_link.status = downman_models.DownloadLink.ADMIN_CANCELED_STATUS
-            resource.download_link.save()
+        for link in resource.download_links:
+            link.status = downman_models.DownloadLink.ADMIN_CANCELED_STATUS
+            link.save()
             pending_locators = 0
-            for locator in resource.download_link.resourcelocator_set.all():
+            for locator in link.resourcelocator_set.all():
                 if (not locator.canceled) and locator.status == downman_models.ResourceLocator.PROCESSED_STATUS:
                     locator.status = downman_models.ResourceLocator.RESOURCE_QUEUED_STATUS
                     locator.save()
