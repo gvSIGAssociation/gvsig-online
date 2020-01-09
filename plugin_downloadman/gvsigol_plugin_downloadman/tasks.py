@@ -942,7 +942,7 @@ def packageRequest(self, request_id):
     logger.debug('packageRequest')
     request = DownloadRequest.objects.get(id=request_id)
     if (request.request_status != DownloadRequest.REQUEST_QUEUED_STATUS) and (request.request_status != DownloadRequest.PROCESSING_STATUS):
-        logger.debug("Task already processed: " + request_id)
+        logger.debug(u"Task already processed: " + text(request_id))
         return
     result = None
     zip_file = None
