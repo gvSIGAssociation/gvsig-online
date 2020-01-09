@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-07 09:23+0000\n"
+"POT-Creation-Date: 2020-01-09 13:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -70,7 +70,7 @@ msgstr ""
 msgid "Awaiting authorization"
 msgstr "Autorização pendente"
 
-#: models.py:111 tasks.py:655 tasks.py:658 views.py:542 views.py:548
+#: models.py:111 tasks.py:723 tasks.py:726 views.py:545 views.py:551
 msgid "Multiresource package"
 msgstr ""
 
@@ -86,153 +86,158 @@ msgstr ""
 msgid "Cancelled by the administrator"
 msgstr ""
 
-#: models.py:163 models.py:219
+#: models.py:163 models.py:224
 msgid "Processed"
 msgstr ""
 
-#: models.py:165 models.py:246
+#: models.py:165 models.py:251
 msgid "Canceled"
 msgstr ""
 
-#: models.py:168 views.py:527
+#: models.py:167 views.py:527
 msgid "Expired"
 msgstr ""
 
-#: models.py:217
+#: models.py:222
 #, fuzzy
 #| msgid "Resource "
 msgid "Resource queued"
 msgstr "Recurso "
 
-#: models.py:218
+#: models.py:223
 msgid "Queued, waiting for free space"
 msgstr ""
 
-#: models.py:220
+#: models.py:225
 msgid "On hold"
 msgstr ""
 
-#: models.py:221
+#: models.py:226
 msgid "Temporal error"
 msgstr ""
 
-#: models.py:222
+#: models.py:227
 msgid "Permanent error"
 msgstr ""
 
-#: models.py:231
+#: models.py:236
 msgid "Not processed"
 msgstr ""
 
-#: models.py:232
+#: models.py:237
 msgid "Not required"
 msgstr ""
 
-#: models.py:233
+#: models.py:238
 msgid "Pending"
 msgstr ""
 
-#: models.py:234
+#: models.py:239
 msgid "Accepted"
 msgstr ""
 
-#: models.py:235
+#: models.py:240
 msgid "Rejected"
 msgstr ""
 
-#: tasks.py:567
+#: models.py:261
+#| msgid "Pending authorization"
+msgid "Authorization: "
+msgstr "Autorização: "
+
+#: tasks.py:630
 #, fuzzy, python-format
 #| msgid "Download service: your request has failed - %(requestid)s"
 msgid "Download service: your request has been received - %(requestid)s"
 msgstr "Serviço de download: o seu pedido falhou - %(requestid)s"
 
-#: tasks.py:568
+#: tasks.py:631
 #, python-brace-format
 msgid ""
 "\n"
 "You can use this tracking link to check the status of your request: {0}"
 msgstr ""
 
-#: tasks.py:574
+#: tasks.py:637
 #, fuzzy
 #| msgid "Sorry, your download request has been rejected."
 msgid "Your download request has been received."
 msgstr "Desculpe, o seu pedido de descarga foi rejeitado."
 
-#: tasks.py:576 templates/request_received_email.html:14
+#: tasks.py:639 templates/request_received_email.html:14
 msgid "Included resources:"
 msgstr ""
 
-#: tasks.py:624 tasks.py:627
+#: tasks.py:687 tasks.py:690
 #, python-format
 msgid "Download service: your request is ready - %(requestid)s"
 msgstr "Serviço de download: o seu pedido está pronto - %(requestid)s"
 
-#: tasks.py:625
+#: tasks.py:688
 #, fuzzy
 #| msgid "Your download request is being prepared."
 msgid "Your download request is ready."
 msgstr "Seu pedido de descarga está sendo preparado."
 
-#: tasks.py:628
+#: tasks.py:691
 msgid ""
 "Your download request is ready. Some resources failed to be processed and "
 "are not available for download at the moment."
 msgstr ""
 
-#: tasks.py:630
+#: tasks.py:693
 #, fuzzy, python-format
 #| msgid "Download service: your request is ready - %(requestid)s"
 msgid "Download service: request progress - %(requestid)s"
 msgstr "Serviço de download: o seu pedido está pronto - %(requestid)s"
 
-#: tasks.py:631
+#: tasks.py:694
 #, fuzzy
 #| msgid "Your download request is being prepared."
 msgid "Your download request has been partially processed."
 msgstr "Seu pedido de descarga está sendo preparado."
 
-#: tasks.py:634 templates/progress_notif_email.html:14
+#: tasks.py:697 templates/progress_notif_email.html:14
 msgid "You can use the following links to download the requested resources:"
 msgstr ""
 
-#: tasks.py:637
+#: tasks.py:700
 #, fuzzy, python-brace-format
 #| msgid "Download service: your request is ready - %(requestid)s"
 msgid "Download service: request progress - {0}"
 msgstr "Serviço de download: o seu pedido está pronto - %(requestid)s"
 
-#: tasks.py:656
+#: tasks.py:724
 msgid "    -- Link valid until {0!s}:\n"
 msgstr ""
 
-#: tasks.py:657
+#: tasks.py:725
 msgid "    -- Contents:"
 msgstr ""
 
-#: tasks.py:663
+#: tasks.py:730
 msgid "     -- {0!s} [{1!s}]\n"
 msgstr ""
 
-#: tasks.py:664
+#: tasks.py:731
 msgid "{0!s} [{1!s}]\n"
 msgstr ""
 
-#: tasks.py:671 templates/progress_notif_email.html:35
+#: tasks.py:738 templates/progress_notif_email.html:35
 msgid "The following resources are still being processed:"
 msgstr ""
 
-#: tasks.py:674 tasks.py:683
+#: tasks.py:741 tasks.py:750
 msgid "Status:"
 msgstr ""
 
-#: tasks.py:680 templates/progress_notif_email.html:47
+#: tasks.py:747 templates/progress_notif_email.html:47
 #, fuzzy
 #| msgid "Your download request could not be processed."
 msgid "The following resources could not be processed:"
 msgstr "O seu pedido de download não pôde ser processado."
 
-#: tasks.py:686 templates/progress_notif_email.html:58
+#: tasks.py:753 templates/progress_notif_email.html:58
 msgid ""
 "You can also use this tracking link to check the status of your request:"
 msgstr ""
@@ -321,10 +326,9 @@ msgid "Requested resources"
 msgstr ""
 
 #: templates/download_request_update.html:142 templates/track_request.html:52
-#, fuzzy
 #| msgid "Pending authorization"
 msgid "Authorization"
-msgstr "Autorização pendente"
+msgstr "Autorização"
 
 #: templates/download_request_update.html:143
 #, fuzzy
@@ -587,33 +591,33 @@ msgstr "Dados rasterizados"
 msgid "Authorized"
 msgstr ""
 
-#: views.py:591
+#: views.py:594
 msgid "Your download request could not be found"
 msgstr "O seu pedido de descarga não pôde ser encontrado"
 
-#: views.py:629
+#: views.py:632
 #, fuzzy
 #| msgid "Your download request is being prepared."
 msgid "Your download request has expired"
 msgstr "Seu pedido de descarga está sendo preparado."
 
-#: views.py:629 views.py:631
+#: views.py:632 views.py:634
 msgid "You can start a new request using the Download Service"
 msgstr ""
 
-#: views.py:631
+#: views.py:634
 #, fuzzy
 #| msgid "Your download request is being prepared."
 msgid "Your download request has been cancelled"
 msgstr "Seu pedido de descarga está sendo preparado."
 
-#: views.py:683
+#: views.py:686
 #, fuzzy
 #| msgid "Your download request could not be found"
 msgid "The resource could not be found"
 msgstr "O seu pedido de descarga não pôde ser encontrado"
 
-#: views.py:683
+#: views.py:686
 msgid "Contact the service administrators if you believe this is an error"
 msgstr ""
 
