@@ -475,7 +475,8 @@ DownloadManagerUI.prototype.initAvailableResources = function(downloadResources)
 
 
 DownloadManagerUI.prototype.getSelectedExtent = function(){
-	if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')) {
+	if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')
+			&& viewer.core.catalog.isActivePanel()) {
 		var geom = viewer.core.catalog.catalog_map.getSelectedArea();
 		if (geom != null) {
 			var sourceCrs = viewer.core.catalog.catalog_map.map.getView().getProjection();
@@ -484,7 +485,7 @@ DownloadManagerUI.prototype.getSelectedExtent = function(){
 		}
 	}
 	else {
-		// if catalog plugin is not available, we use the extent of the main  map viewer as spatial filter
+		// if catalog panel is not active, we use the extent of the main  map viewer as spatial filter
 		var view = viewer.core.getMap().getView();
 		var sourceCrs = view.getProjection();
 		var extent = view.calculateExtent();
