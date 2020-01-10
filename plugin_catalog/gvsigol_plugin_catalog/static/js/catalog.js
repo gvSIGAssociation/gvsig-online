@@ -1089,6 +1089,14 @@ CatalogView.prototype.createAvailableLayersPanel = function(url, service){
 	});
 }
 
+CatalogView.prototype.isActivePanel = function(){
+	if (this.catalog_panel
+			&& this.catalog_panel.css('display')!='none') {
+		return true;
+	}
+	return false;
+}
+
 CatalogView.prototype.showPanel = function(searchString, geomFilter){
 	if (this.catalog_panel===null) {
 		var firstTime = true;
