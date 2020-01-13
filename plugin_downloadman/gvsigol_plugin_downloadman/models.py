@@ -189,6 +189,7 @@ class DownloadLink(models.Model):
     status = models.CharField(max_length=2, default=PROCESSED_STATUS, choices=STATUS_CHOICES)
     name = models.TextField(null=True, default=None)
     is_auxiliary = models.BooleanField(default=False)
+    is_temporary = models.BooleanField(default=False)
     download_count = models.PositiveIntegerField(default=0)
     class Meta:
         indexes = [

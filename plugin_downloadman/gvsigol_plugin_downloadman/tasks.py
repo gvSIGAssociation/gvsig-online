@@ -57,9 +57,11 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from collections import namedtuple
 from lxml import etree as ET
+import email
 
 from gvsigol_plugin_downloadman.settings import TMP_DIR,TARGET_ROOT
 from gvsigol_plugin_downloadman.settings import DOWNLOADS_URL
+from django.contrib.gis.gdal import SpatialReference, CoordTransform, OGRGeometry
 
 try:
     from gvsigol.settings import GVSIGOL_NAME
@@ -317,38 +319,6 @@ def _getWfsLayerCrs(getCapabilitiesTree, layerName):
     except:
         logger.exception(u"Error getting the CRS of the WFS layer" + layerName)
 
-def _getDescribeWcsCoverageTree(layer_name, baseUrl):
-    try:
-        url = _normalizeWxsUrl(baseUrl) + '?service=WCS&version=2.0.0&request=DescribeCoverage&CoverageId=' + layer_name
-        logger.debug(url)
-        r = requests.get(url, verify=False, timeout=DEFAULT_TIMEOUT)
-        describeCoverageXml = r.content
-        incorrectGeoserverNamespaces = '<wcs:CoverageDescriptions xsi:schemaLocation=" http://www.opengis.net/wcs/2.0 http://schemas.opengis.net/wcs/2.0/wcsDescribeCoverage.xsd">'
-        fixedGeoserverWCS2Namespaces = '<wcs:CoverageDescriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmlcov="http://www.opengis.net/gmlcov/1.0" xmlns:swe="http://www.opengis.net/swe/2.0" xsi:schemaLocation="http://schemas.opengis.net/swe/2.0 http://schemas.opengis.net/sweCommon/2.0/swe.xsd http://www.opengis.net/wcs/2.0 http://schemas.opengis.net/wcs/2.0/wcsDescribeCoverage.xsd" xmlns:wcs="http://www.opengis.net/wcs/2.0">'
-        if describeCoverageXml.startswith(incorrectGeoserverNamespaces):
-            describeCoverageXml = describeCoverageXml.replace(incorrectGeoserverNamespaces, fixedGeoserverWCS2Namespaces)
-        return ET.fromstring(describeCoverageXml)
-    except:
-        logger.exception("Error retrieving or parsing describeCoverageXml")
-
-def _getDescribeWcsCoverageAxes(envelopeNode):
-    if envelopeNode is not None:
-        axis = envelopeNode.get('axisLabels')
-        return axis.split(" ")
-
-def _getDescribeWcsCoverageSrsCode(envelopeNode):
-    if envelopeNode is not None:
-        srs = envelopeNode.get('srsName')
-        if srs.startswith('http://www.opengis.net/def/crs/EPSG/'):
-            return re.sub('http://www.opengis.net/def/crs/EPSG/[^/]+/', '', srs)
-        if srs.startswith('EPSG:'):
-            return srs[5:]
-
-def _getDescribeWcsCoverageEnvelope(describeCoverageTree):
-    if describeCoverageTree is not None:
-        namespaces =  {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'gml': 'http://www.opengis.net/gml/3.2', 'wcs': 'http://www.opengis.net/wcs/2.0'}
-        return describeCoverageTree.find('./wcs:CoverageDescription/gml:boundedBy/gml:Envelope', namespaces)
-
 INVERSE_AXIS_CRS_LIST = None
 def _getCrsReverseAxisList():
     global INVERSE_AXIS_CRS_LIST
@@ -358,7 +328,6 @@ def _getCrsReverseAxisList():
 
 def reprojectExtent(xmin, ymin, xmax, ymax, sourceCrs, targetCrs):
     try:
-        from django.contrib.gis.gdal import SpatialReference, CoordTransform, OGRGeometry
         if sourceCrs != targetCrs:
             sourceCrsOgr = SpatialReference(sourceCrs)
             targetCrsOgr = SpatialReference(targetCrs)
@@ -370,47 +339,6 @@ def reprojectExtent(xmin, ymin, xmax, ymax, sourceCrs, targetCrs):
     except:
         logger.exception('Error reprojecting extent')
         raise
-
-def _getWcsRequest(layer_name, baseUrl, params):
-    url = _normalizeWxsUrl(baseUrl) + u'?service=WCS&version=2.0.0&request=GetCoverage&CoverageId=' + layer_name
-    file_format = _getParamValue(params, FORMAT_PARAM_NAME)
-    if file_format:
-        url += u'&format=' + file_format
-    spatial_filter_type = _getParamValue(params, SPATIAL_FILTER_TYPE_PARAM_NAME)
-    if spatial_filter_type == 'bbox':
-        spatial_filter_bbox = _getParamValue(params, SPATIAL_FILTER_BBOX_PARAM_NAME)
-        if spatial_filter_bbox:
-            describeCoverageTree = _getDescribeWcsCoverageTree(layer_name, baseUrl)
-            envelopeNode = _getDescribeWcsCoverageEnvelope(describeCoverageTree)
-            axes = _getDescribeWcsCoverageAxes(envelopeNode)
-            nativeSrsCode = _getDescribeWcsCoverageSrsCode(envelopeNode)
-            bboxElements = spatial_filter_bbox.split(",")
-            spatial_subset = ''
-            if axes is not None and bboxElements is not None and len(axes) == 2 and len(bboxElements) == 5:
-                srs = bboxElements[4]
-                if float(bboxElements[0]) <= float(bboxElements[2]):
-                    xmin = bboxElements[0]
-                    xmax = bboxElements[2]
-                else:
-                    xmin = bboxElements[2]
-                    xmax = bboxElements[0]
-                if float(bboxElements[1]) <= float(bboxElements[3]):
-                    ymin = bboxElements[1]
-                    ymax = bboxElements[3]
-                else:
-                    ymin = bboxElements[3]
-                    ymax = bboxElements[1]
-                    
-                axis0_min, axis1_min, axis0_max, axis1_max = reprojectExtent(xmin, ymin, xmax, ymax, srs, nativeSrsCode)
-                if nativeSrsCode and int(nativeSrsCode) in _getCrsReverseAxisList():
-                    spatial_subset = u'&subset=' + text(axes[0]) + u'%28%22' + text(axis1_min) + u'%22%2C%22' + text(axis1_max) + u'%22%29'
-                    spatial_subset += u'&subset=' + text(axes[1]) + u'%28%22' + text(axis0_min) + u'%22%2C%22' + text(axis0_max) + u'%22%29'
-                else:
-                    spatial_subset = u'&subset=' + text(axes[0]) + u'%28%22' + text(axis0_min) + u'%22%2C%22' + text(axis0_max) + u'%22%29'
-                    spatial_subset += u'&subset=' + text(axes[1]) + u'%28%22' + text(axis1_min) + u'%22%2C%22' + text(axis1_max) + u'%22%29'
-            url += spatial_subset
-    logger.debug(url)
-    return url
 
 def isRestricted(onlineResource, max_public_size):
     if onlineResource.app_profile.startswith("gvsigol:download:restricted"):
@@ -461,7 +389,7 @@ def getCatalogResourceURL(res_type, resource_name, resource_url, params):
     if res_type == ResourceLocator.HTTP_LINK_RESOURCE_TYPE:
         return (resource_url, False)
     elif res_type == ResourceLocator.OGC_WCS_RESOURCE_TYPE:
-        return (_getWcsRequest(resource_name, resource_url, params), True)
+        return (resource_url, True)
     elif res_type == ResourceLocator.OGC_WFS_RESOURCE_TYPE:
         return (_getWfsRequest(resource_name, resource_url, params), True)
     return (None, False)
@@ -473,7 +401,7 @@ def getGvsigolResourceURL(res_type, layer, params):
             return (_getWfsRequest(layer.name, baseUrl, params), True)
         elif res_type == ResourceLocator.OGC_WCS_RESOURCE_TYPE and layer.datastore.workspace.wcs_endpoint:
             baseUrl = layer.datastore.workspace.wcs_endpoint
-            return (_getWcsRequest(layer.name, baseUrl, params), True)
+            return (baseUrl, True)
     return (None, False)
 
 def retrieveLinkLocator(url):
@@ -508,7 +436,7 @@ def resolveFileUrl(url):
             return local_path
     raise ForbiddenAccessError(url)
 
-def resolveLocator(resourceLocator, resource_descriptor):
+def preprocessLocator(resourceLocator, resource_descriptor):
     """
     Parses the resourceLocator to translate the locator on a concrete URL or local file.
     If the resource described by the locator is static (does not require processing)
@@ -563,6 +491,260 @@ def retrieveResource(url, resource_descriptor):
     # TODO: error management
     return []
 
+class WCSClient():
+    def __init__(self, url, layer_name, params):
+        self.url = url
+        self.layer_name = layer_name
+        self.params = params
+        self.nativeSrsCode = None
+        self.wcs200Namespaces = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'gml': 'http://www.opengis.net/gml/3.2', 'wcs': 'http://www.opengis.net/wcs/2.0'}
+        self.gmlCoverageNamespaces =  {
+                'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+                'wcscrs': "http://www.opengis.net/wcs/service-extension/crs/1.0",
+                'int': "http://www.opengis.net/WCS_service-extension_interpolation/1.0",
+                'gmlcov': "http://www.opengis.net/gmlcov/1.0",
+                'swe': "http://www.opengis.net/swe/2.0",
+                'xlink': "http://www.w3.org/1999/xlink", 
+                 'gml': 'http://www.opengis.net/gml/3.2',
+                 'wcs': 'http://www.opengis.net/wcs/2.0'
+            }
+
+    def _getDescribeWcsCoverageTree(self, layer_name, baseUrl):
+        try:
+            url = _normalizeWxsUrl(baseUrl) + '?service=WCS&version=2.0.0&request=DescribeCoverage&CoverageId=' + layer_name
+            logger.debug(url)
+            r = requests.get(url, verify=False, timeout=DEFAULT_TIMEOUT)
+            describeCoverageXml = r.content
+            incorrectGeoserverNamespaces = '<wcs:CoverageDescriptions xsi:schemaLocation=" http://www.opengis.net/wcs/2.0 http://schemas.opengis.net/wcs/2.0/wcsDescribeCoverage.xsd">'
+            fixedGeoserverWCS2Namespaces = '<wcs:CoverageDescriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmlcov="http://www.opengis.net/gmlcov/1.0" xmlns:swe="http://www.opengis.net/swe/2.0" xsi:schemaLocation="http://schemas.opengis.net/swe/2.0 http://schemas.opengis.net/sweCommon/2.0/swe.xsd http://www.opengis.net/wcs/2.0 http://schemas.opengis.net/wcs/2.0/wcsDescribeCoverage.xsd" xmlns:wcs="http://www.opengis.net/wcs/2.0">'
+            if describeCoverageXml.startswith(incorrectGeoserverNamespaces):
+                describeCoverageXml = describeCoverageXml.replace(incorrectGeoserverNamespaces, fixedGeoserverWCS2Namespaces)
+            return ET.fromstring(describeCoverageXml)
+        except:
+            logger.exception("Error retrieving or parsing describeCoverageXml")
+
+    def _getDescribeWcsCoverageAxes(self, envelopeNode):
+        if envelopeNode is not None:
+            axis = envelopeNode.get('axisLabels')
+            return axis.split(" ")
+
+    def _getEnvelopeSrsCode(self, envelopeNode):
+        if envelopeNode is not None:
+            srs = envelopeNode.get('srsName')
+            if srs.startswith('http://www.opengis.net/def/crs/EPSG/'):
+                return re.sub('http://www.opengis.net/def/crs/EPSG/[^/]+/', '', srs)
+            if srs.startswith('EPSG:'):
+                return srs[5:]
+
+    def _getDescribeWcsCoverageEnvelope(self, describeCoverageTree):
+        if describeCoverageTree is not None:
+            return describeCoverageTree.find('./wcs:CoverageDescription/gml:boundedBy/gml:Envelope', self.wcs200Namespaces)
+
+    def getWcsRequest(self):
+        url = _normalizeWxsUrl(self.url) + u'?service=WCS&version=2.0.0&request=GetCoverage&mediatype=multipart/related&CoverageId=' + self.layer_name
+        file_format = _getParamValue(self.params, FORMAT_PARAM_NAME)
+        if file_format:
+            url += u'&format=' + file_format
+        spatial_filter_type = _getParamValue(self.params, SPATIAL_FILTER_TYPE_PARAM_NAME)
+        if spatial_filter_type == 'bbox':
+            spatial_filter_bbox = _getParamValue(self.params, SPATIAL_FILTER_BBOX_PARAM_NAME)
+            if spatial_filter_bbox:
+                describeCoverageTree = self._getDescribeWcsCoverageTree(self.layer_name, self.url)
+                envelopeNode = self._getDescribeWcsCoverageEnvelope(describeCoverageTree)
+                axes = self._getDescribeWcsCoverageAxes(envelopeNode)
+                self.nativeSrsCode = self._getEnvelopeSrsCode(envelopeNode)
+                bboxElements = spatial_filter_bbox.split(",")
+                spatial_subset = ''
+                if axes is not None and bboxElements is not None and len(axes) == 2 and len(bboxElements) == 5:
+                    srs = bboxElements[4]
+                    if float(bboxElements[0]) <= float(bboxElements[2]):
+                        xmin = bboxElements[0]
+                        xmax = bboxElements[2]
+                    else:
+                        xmin = bboxElements[2]
+                        xmax = bboxElements[0]
+                    if float(bboxElements[1]) <= float(bboxElements[3]):
+                        ymin = bboxElements[1]
+                        ymax = bboxElements[3]
+                    else:
+                        ymin = bboxElements[3]
+                        ymax = bboxElements[1]
+                        
+                    axis0_min, axis1_min, axis0_max, axis1_max = reprojectExtent(xmin, ymin, xmax, ymax, srs, self.nativeSrsCode)
+                    if self.nativeSrsCode and int(self.nativeSrsCode) in _getCrsReverseAxisList():
+                        spatial_subset = u'&subset=' + text(axes[0]) + u'%28%22' + text(axis1_min) + u'%22%2C%22' + text(axis1_max) + u'%22%29'
+                        spatial_subset += u'&subset=' + text(axes[1]) + u'%28%22' + text(axis0_min) + u'%22%2C%22' + text(axis0_max) + u'%22%29'
+                    else:
+                        spatial_subset = u'&subset=' + text(axes[0]) + u'%28%22' + text(axis0_min) + u'%22%2C%22' + text(axis0_max) + u'%22%29'
+                        spatial_subset += u'&subset=' + text(axes[1]) + u'%28%22' + text(axis1_min) + u'%22%2C%22' + text(axis1_max) + u'%22%29'
+                url += spatial_subset
+        logger.debug(url)
+        return url
+    
+    def _createPrjFile(self, wcsCoverageDescTree, output_dir):
+        try:
+            logger.debug('_createPrjFile')
+            if wcsCoverageDescTree is not None:
+                envelopeNode = wcsCoverageDescTree.find('./gml:boundedBy/gml:Envelope', self.gmlCoverageNamespaces)
+                nativeSrsCode = self._getEnvelopeSrsCode(envelopeNode)
+                logger.debug('_createPrjFile0')
+                srs = SpatialReference(nativeSrsCode)
+                outfile = os.path.join(output_dir, self.layer_name + ".prj")
+                logger.debug(outfile)
+                f = open(outfile, 'w')
+                f.write(srs.wkt.encode('UTF-8'))
+                logger.debug(srs.wkt.encode('UTF-8'))
+                f.close()
+        except:
+            logger.exception("Error creating PRJ file")
+    
+    def _getWCSCoverageDescTree(self, wcsCoverageDescFolder):
+        try:
+            wcsCoverageDescPath = os.path.join(wcsCoverageDescFolder, 'wcs')
+            return ET.parse(wcsCoverageDescPath)
+        except:
+            logger.exception("Error parsing WCS Coverge Desc XML")
+
+    def _getDomainSetValues(self, wcsCoverageDescTree):
+        if wcsCoverageDescTree is not None:
+            #envelopeNode = wcsCoverageDescTree.find('./gml:RectifiedGridCoverage/gml:boundedBy/gml:Envelope', namespaces)
+            #self._getEnvelopeSrsCode(envelopeNode)
+            rectifiedGridNode = wcsCoverageDescTree.find('./gml:domainSet/gml:RectifiedGrid', self.gmlCoverageNamespaces)
+            
+            offsetVectors =  rectifiedGridNode.findall('./gml:offsetVector', self.gmlCoverageNamespaces)
+            values = []
+            for offvec in offsetVectors:
+                values += offvec.text.split(" ")
+            origin =  rectifiedGridNode.find('./gml:origin/gml:Point/gml:pos', self.gmlCoverageNamespaces)
+            if len(values)>0 and origin is not None:
+                # FIXME: consider axis order
+                return values + origin.text.split(" ")
+            
+    def _createWldFile(self, wcsCoverageDescTree, output_dir):
+        try:
+            values = self._getDomainSetValues(wcsCoverageDescTree)
+            if values is not None:
+                outfile = os.path.join(output_dir, self.layer_name + ".wld")
+                f = open(outfile, 'w')
+                for val in values:
+                    f.write(val + '\n')
+                f.close()
+        except:
+            logger.exception("Error creating WLD file")
+    
+    def _retrieveResource(self, url):
+        # TODO: authentication and permissions
+        (fd, tmp_path) = tempfile.mkstemp('.tmp', GVSIGOL_NAME.lower()+"dm", dir=getTmpDir())
+        tmp_file = os.fdopen(fd, "wb")
+        try:
+            r = requests.get(url, stream=True, verify=False, timeout=DEFAULT_TIMEOUT)
+            if r.status_code != 200:
+                tmp_file.close()
+                raise PreparationError(u'Error retrieving link. HTTP status code: '+text(r.status_code) + u". Url: " + url)
+            for chunk in r.iter_content(chunk_size=128):
+                tmp_file.write(chunk)
+            tmp_file.close()
+            if r.headers.get('content-type') == 'application/xml':
+                # check we get the expected document and not a OGC error
+                for event, element in ET.iterparse(tmp_path, events=("start",)):
+                    # use iterpase to avoid parsing the whole document (it could be a big GML file for instance)
+                    ns, sep, tag = element.tag.rpartition('}') # get the tag name
+                    if 'www.opengis.net/ows' in ns and tag == 'ExceptionReport':
+                        error_text = ET.parse(tmp_path).tostring()
+                        raise PreparationError(u'Error retrieving WCS resource. Url: ' + url + 'OWS error message: ' + error_text)
+                    break
+
+        except PreparationError:
+            raise
+        except:
+            logger.exception('error retrieving link: ' + url)
+        return tmp_path
+
+    def retrieveResources(self):
+        """
+        Retrieves resources on a temporary folder.
+        Returns the path to the temporary folder containing the resources
+        """
+        url = self.getWcsRequest()
+        local_path = self._retrieveResource(url)
+        output_dir = tempfile.mkdtemp('-tmp', GVSIGOL_NAME.lower()+"dm", dir=getTmpDir())
+        parseMultipart(local_path, output_dir)
+        os.remove(local_path)
+        wcsCoverageDescTree = self._getWCSCoverageDescTree(output_dir)
+        self._createWldFile(wcsCoverageDescTree, output_dir)
+        self._createPrjFile(wcsCoverageDescTree, output_dir)
+        return output_dir
+
+def guessResourceName(resource_descriptor):
+    resource_name = resource_descriptor.get('name')
+
+    params = resource_descriptor.get('params', [])
+    file_format = _getParamValue(params, FORMAT_PARAM_NAME)
+    # remove non-a-z_ or numeric characters
+    resource_name = resource_name.replace(":", "_")
+    resource_name = re.sub('[^\w\s_-]', '', resource_name).strip().lower()
+    resource_name = resource_name + _getExtension(file_format)
+    return resource_name
+
+def retrieveResources(resource_descriptor):
+    """
+    Returns the resource pointed by the resourceLocator as a local file path,
+    wrapped in a ResourceDescription object.
+    If the resource is a remote resource, it is first copied as a local file. 
+    """
+    resource_name = guessResourceName(resource_descriptor)
+    res_type = resource_descriptor.get('resource_type')
+    res_id = resource_descriptor.get('layer_id')
+    resource_name = resource_descriptor.get('name', '')
+
+    resource_url = resource_descriptor.get('url')
+    params = resource_descriptor.get('params', [])
+    if res_type == ResourceLocator.OGC_WCS_RESOURCE_TYPE:
+        client = WCSClient(resource_url, resource_name, params)
+        output_folder = client.retrieveResources()
+        return [ResourceDescription(resource_name, output_folder, True)]
+        
+    elif res_type == ResourceLocator.HTTP_LINK_RESOURCE_TYPE:
+        url = resource_url
+    elif res_type == ResourceLocator.OGC_WFS_RESOURCE_TYPE:
+        url = _getWfsRequest(resource_name, resource_url, params)
+    if (url.startswith("http://") or url.startswith("https://")):
+        local_path = retrieveLinkLocator(url)
+        return [ResourceDescription(resource_name, local_path, True)]
+    if url.startswith("file://"):
+        local_path = resolveFileUrl(url)
+        if url.endswith("/"):
+            return [ResourceDescription(resource_name, local_path)] 
+        else:
+            return [ResourceDescription(os.path.basename(url), local_path)]
+    # TODO: error management
+    return []
+
+def _addResources(zipobj, resource_desc_list, count):
+    i = 0
+    for resourceDesc in resource_desc_list:
+        if len(resource_desc_list) > 1:
+            res_name = text(count) + u"-" + text(i) + u"-" + resourceDesc.name
+        else:
+            res_name = text(count) + u"-" + resourceDesc.name
+        if os.path.isdir(resourceDesc.res_path):
+            for root, dirs, files in os.walk(resourceDesc.res_path):
+                for file_name in files:
+                    file_path = os.path.join(root, file_name)
+                    # TODO FIXME: use res_name as a folder to contain the resource in the zipfile
+                    rel_file_path = res_name + '/' + file_name
+                    zipobj.write(file_path, rel_file_path)
+                    if resourceDesc.temporary:
+                        os.remove(os.path.join(root, file_name))
+            if resourceDesc.temporary:
+                os.rmdir(resourceDesc.res_path)
+        else:
+            zipobj.write(resourceDesc.res_path, res_name)
+            if resourceDesc.temporary:
+                os.remove(resourceDesc.res_path)
+        i = i + 1
+
+"""
 def _addResource(zipobj, resource_descriptor, resolved_url, count):
     resourceDescList = retrieveResource(resolved_url, resource_descriptor)
     i = 0
@@ -575,6 +757,7 @@ def _addResource(zipobj, resource_descriptor, resolved_url, count):
         if resourceDesc.temporary:
             os.remove(resourceDesc.res_path)
         i = i + 1
+"""
 
 def _getPackagePrefix():
     if GVSIGOL_NAME:
@@ -778,6 +961,32 @@ def notifyRequestProgress(self, request_id):
             request.notification_status = DownloadRequest.PERMANENT_NOTIFICATION_ERROR_STATUS
             request.save()
 
+def parseMultipart(input_file_path, output_dir):
+    parser = email.parser.Parser()
+    fp = open(input_file_path, 'r')
+    mainPart = parser.parse(fp)
+    out_files = []
+    if mainPart.is_multipart():
+        i = 0
+        for part in mainPart.walk():
+            if part.is_multipart():
+                continue
+            out_path = output_dir + '/' + os.path.basename(part.get_filename(part.get('Content-ID', 'part'+text(i))))
+            f = open(out_path, "wb")
+            payload = part.get_payload(decode=1)
+            f.write(payload)
+            f.close()
+            i += 1
+            out_files.append(out_path)
+    else:
+        out_path = output_dir + '/' + os.path.basename(mainPart.get_filename(mainPart.get('Content-ID', 'mainpart')))
+        f = open(out_path, "wb")
+        f.write(part.get_payload(decode=1))
+        f.close()
+        out_files.append(out_path)
+    fp.close()
+    return out_files
+
 def processLocators(request, zipobj=None, zip_path=None):
     logger.debug('processLocators')
     locators = request.resourcelocator_set.filter((Q(status=ResourceLocator.RESOURCE_QUEUED_STATUS) | \
@@ -803,9 +1012,8 @@ def processLocators(request, zipobj=None, zip_path=None):
 
             resource_descriptor = json.loads(resourceLocator.data_source)
             if not resourceLocator.resolved_url:
-                resolveLocator(resourceLocator, resource_descriptor)
+                preprocessLocator(resourceLocator, resource_descriptor)
             if resourceLocator.authorization == ResourceLocator.AUTHORIZATION_PENDING:
-                # resolveLocator will also check if authorization is required
                 resourceLocator.save()
                 continue
             if DOWNMAN_PACKAGING_BEHAVIOUR == 'ALL' or \
@@ -819,7 +1027,9 @@ def processLocators(request, zipobj=None, zip_path=None):
                         resourceLocator.refresh_from_db(fields=['canceled'])
                         if resourceLocator.canceled:
                             continue 
-                        _addResource(zipobj, resource_descriptor, resourceLocator.resolved_url, count)
+                        #_addResource(zipobj, resource_descriptor, resourceLocator.resolved_url, count)
+                        resource_desc_list = retrieveResources(resource_descriptor)
+                        _addResources(zipobj, resource_desc_list, count)
                         count += 1
                         packaged_locators.append(resourceLocator)
                         completed_locators += 1
@@ -844,7 +1054,7 @@ def processLocators(request, zipobj=None, zip_path=None):
             temporal_errors += 1
 
     if len(packaged_locators) > 0:
-        new_link = createDownloadLink(request, packaged_locators, zip_path)
+        new_link = createDownloadLink(request, packaged_locators, zip_path, is_temporary=True)
         for resourceLocator in packaged_locators:
             resourceLocator.status = ResourceLocator.PROCESSED_STATUS
             resourceLocator.save()
@@ -869,7 +1079,7 @@ def processLocators(request, zipobj=None, zip_path=None):
 
     return ResultTuple(completed_locators, len(packaged_locators), waiting_space, to_package, temporal_errors, permanent_errors)
 
-def createDownloadLink(downloadRequest, resourceLocators, prepared_download_path, is_auxiliary=False):
+def createDownloadLink(downloadRequest, resourceLocators, prepared_download_path, is_auxiliary=False, is_temporary=False):
     try:
         new_link = DownloadLink()
         new_link.request = downloadRequest
@@ -878,6 +1088,7 @@ def createDownloadLink(downloadRequest, resourceLocators, prepared_download_path
         new_link.link_random_id = link_uuid
         new_link.prepared_download_path = prepared_download_path
         new_link.is_auxiliary = is_auxiliary
+        new_link.is_temporary = is_temporary
         new_link.name = os.path.basename(prepared_download_path)
         new_link.save()
         if isinstance(resourceLocators, ResourceLocator):
@@ -921,10 +1132,6 @@ def createDownloadLinks(downloadRequest, resourceLocator):
             for p in paths:
                 is_auxiliary = (p != local_path)
                 createDownloadLink(downloadRequest, resourceLocator, p, is_auxiliary)
-            #if resourceLocator.resolved_url.endswith("/"):
-            #    new_link.prepared_download_path = resolveFileUrl(resourceLocator.resolved_url)
-            #else:
-            #    new_link.prepared_download_path = resolveFileUrl(resourceLocator.resolved_url)
     except ForbiddenAccessError:
         logger.exception("Error creating download link")
         raise PermanentPreparationError()
@@ -1125,24 +1332,25 @@ def cleanOutdatedRequests(self):
             try:
                 link_uuid = _parseLinkUiid(f)
                 link = DownloadLink.objects.get(link_random_id=link_uuid)
-                if fullpath != link.prepared_download_path:
-                    raise Error
-                if not link.is_valid:
-                    # request is oudated
-                    os.remove(link.prepared_download_path)
-                else:
-                    for resource in link.resourcelocator_set.all():
-                        if resource.canceled:
-                            # for some status value such as cancelled, we should also remove the file
-                            os.remove(link.prepared_download_path)
-                            break
+                if link.is_temporary:
+                    if fullpath != link.prepared_download_path:
+                        raise Error
+                    if not link.is_valid:
+                        # request is oudated
+                        os.remove(link.prepared_download_path)
+                    else:
+                        for resource in link.resourcelocator_set.all():
+                            if resource.canceled:
+                                # for some status value such as cancelled, we should also remove the file
+                                os.remove(link.prepared_download_path)
+                                break
             except:
                 try:
                     logger.exception(u"error getting link: " + fullpath + u" - " + link_uuid)
                     # if older than UNKNOWN_FILES_MAX_AGE days, remove the file
-                    modified_time = os.path.getmtime(fullpath)
-                    if date.fromtimestamp(modified_time) < (date.today() - timedelta(days=UNKNOWN_FILES_MAX_AGE)):
-                        os.remove(fullpath)
+                    #modified_time = os.path.getmtime(fullpath)
+                    #if date.fromtimestamp(modified_time) < (date.today() - timedelta(days=UNKNOWN_FILES_MAX_AGE)):
+                    #    os.remove(fullpath)
                 except:
                     logger.exception("Error cleaning request package")
             
