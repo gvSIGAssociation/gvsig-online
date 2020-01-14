@@ -505,8 +505,8 @@ print.prototype.createPrintJob = function(template) {
 		  			"layers": printLayers,
 		  			"bbox": f.getGeometry().getExtent()
 		  	    },
-		  	    //"logo_url": self.conf.project_image,
-		  	    "logo_url": "https://demo.gvsigonline.com/media/images/igvsb.jpg",
+		  	    "logo_url": self.conf.project_image,
+		  	    //"logo_url": "https://demo.gvsigonline.com/media/images/igvsb.jpg",
 		  	    "legend": {
 		  	    	"name": "",
 		            "classes": legends
