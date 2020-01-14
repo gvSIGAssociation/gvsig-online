@@ -2573,19 +2573,27 @@ def enumeration_update(request, eid):
 @staff_required
 def create_base_layer(request, pid):
     if request.method == 'POST':   
-        if tiling_service.exists_base_layer_tiled(pid):
-            return utils.get_exception(400, 'The base layer already exists')
+        plg = ProjectLayerGroup.objects.filter(project_id=pid, baselayer_group=True)
+        if plg is None or len(plg) == 0:
+            return utils.get_exception(400, 'This project does not have base layer')
+        id_base_lyr = plg[0].default_baselayer
+        base_lyr = Layer.objects.get(id=id_base_lyr)
+                                       
+        #if tiling_service.exists_base_layer_tiled(pid):
+            #    return utils.get_exception(400, 'The base layer already exists')
+            
         tiles = None
         try:
             tiles = int(request.POST.get('tiles'))
         except Exception:
             return utils.get_exception(400, 'Wrong number of tiles')
+        tilematrixset = request.POST.get('tilematrixset')
         
         if tiles is not None:
-            tiling_service.tiling_base_layer(pid, tiles)
+            tiling_service.tiling_base_layer(base_lyr, pid, tiles, tilematrixset)
         else:
             return utils.get_exception(400, 'Wrong number of tiles')
-                
+                    
     return HttpResponse('{"response": "ok"}', content_type='application/json')
   
      
