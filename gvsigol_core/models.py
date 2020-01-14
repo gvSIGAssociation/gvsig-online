@@ -25,6 +25,7 @@ class Project(models.Model):
     selectable_groups = models.BooleanField(default=False)
     restricted_extent = models.BooleanField(default=False)
     tools = models.TextField(null=True, blank=True) 
+    baselayer_version = models.BigIntegerField(null=True, blank=True)
     
     def __unicode__(self):
         return self.name + ' - ' + self.description
