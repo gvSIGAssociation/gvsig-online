@@ -10,24 +10,43 @@ import urllib2
 import zipfile
 
 from gvsigol import settings
-from gvsigol_core.models import Project
+from gvsigol_core.models import Project, ProjectLayerGroup
+import ssl
+import time
+
 
 
 class Tiling():
-
-    mode = "OSM"
-    #mode = "WMTS"
     
     directory = None
+    mode = 'OSM'
+    tilematrixset = None
+    layer = None
+    ctx = None
 
-    def __init__(self, folder):
+    def __init__(self, folder, type_, tilematrixset, url):
         if folder is not None:
             self.directory = folder 
         self.tile_url1 = settings.OSM_TILING_1
         self.tile_url2 = settings.OSM_TILING_2
         self.tile_url3 = settings.OSM_TILING_3
-        self.tile_url = self.tile_url1
-            
+        
+
+        self.tilematrixset = tilematrixset
+        if type_ is not None:
+            self.mode = type_
+            if type_ == "OSM":
+                self.tile_url = self.tile_url1
+            else:
+                self.tile_url = url 
+        
+        self.ctx = ssl.create_default_context()
+        self.ctx.check_hostname = False
+        self.ctx.verify_mode = ssl.CERT_NONE
+    
+    def set_layer_name(self, lyr_name):
+        self.layer = lyr_name
+                
     def _deg2num(self, lat_deg, lon_deg, zoom):
         lat_rad = math.radians(lat_deg)
         n = 2.0 ** zoom
@@ -46,8 +65,10 @@ class Tiling():
         return (xtile, ytile)
     
     def _download_wmts(self, zoom, xtile, ytile):
-        #TILEMATRIX=14&TILEROW=3065&TILECOL=4758
-        url = "%s&TILEMATRIX=%d&TILECOL=%d&TILEROW=%d" % (self.tile_url, zoom, xtile, ytile)
+        params = "?REQUEST=GetTile&&TILEMATRIXSET=" + self.tilematrixset + "&LAYER=" + self.layer + "&FORMAT=image/jpeg" 
+        url = self.tile_url + params
+        
+        url = "%s&TILEMATRIX=%s&TILECOL=%d&TILEROW=%d" % (url, (self.tilematrixset + ':' + str(zoom)), xtile, ytile)
         dir_path = "%s/%d/%d/" % (self.directory,zoom, xtile)
         download_path = "%s/%d/%d/%d.png" % (self.directory, zoom, xtile, ytile)
         
@@ -57,7 +78,7 @@ class Tiling():
         if(not os.path.isfile(download_path)):
             print "downloading %r" % url
             try:
-                source = urllib2.urlopen(url)
+                source = urllib2.urlopen(url, context=self.ctx)
                 content = source.read()
                 source.close()
                 destination = open(download_path,'wb')
@@ -98,16 +119,13 @@ class Tiling():
             pass
     
     def create_tiles(self, min_lon, min_lat, max_lon, max_lat, maxzoom):
-        
-    #    from 0 to 6 download all
-    #     for zoom in range(6,7,1):
-    #         #break;
-    #         for x in range(0,2**zoom,1):        
-    #             for y in range(0,2**zoom,1):
-    #                 if mode == "OSM":
-    #                     download_url(zoom, x, y)
-    #                 else:
-    #                     download_wmts(zoom, x, y)
+            #from 0 to 6 download all
+        if self.mode  != "OSM":
+            for zoom in range(0,7,1):
+                #break;
+                for x in range(0,2**zoom,1):        
+                    for y in range(0,2**zoom,1):
+                        self._download_wmts(zoom, x, y)
                     
         # from 6 to 15 ranges
         for zoom in range(7, int(maxzoom)+1, 1):
@@ -124,11 +142,19 @@ class Tiling():
                           
                         
     def create_tiles_from_utm(self, min_x, min_y, max_x, max_y, maxzoom):
+        #from 0 to 6 download all
+        if self.mode  != "OSM":
+            for zoom in range(0,7,1):
+                #break;
+                for x in range(0,2**zoom,1):        
+                    for y in range(0,2**zoom,1):
+                        self._download_wmts(zoom, x, y)
+                        
         # from 6 to 15 ranges
         for zoom in range(7, int(maxzoom)+1, 1):
             xtile, ytile = self._utm2num(min_y, min_x, zoom)
             final_xtile, final_ytile = self._utm2num(max_y, max_x, zoom)
-    
+      
             #print "%d:%d-%d/%d-%d" % (zoom, xtile, final_xtile, ytile, final_ytile)
             for x in range(xtile, final_xtile + 1, 1):
                 for y in range(ytile, final_ytile - 1, -1):  
@@ -136,6 +162,7 @@ class Tiling():
                         self._download_url(zoom, x, y)
                     else:
                         self._download_wmts(zoom, x, y)     
+                        
                         
     def get_zoom_level(self, dist, tiles_side):
         max_ = tiles_side # num tiles max por lado en el nivel ultimo
@@ -173,8 +200,9 @@ class Tiling():
         elif(tiles >= 128):
             return 7                      
 
+#***********END TILING CLASS********************
 
-def tiling_base_layer(prj_id, tiles_side):
+def tiling_base_layer(base_lyr, prj_id, tiles_side, tilematrixset):
     prj = Project.objects.get(id = prj_id)
     if prj.extent is not None:
         bbox = prj.extent.split(',')
@@ -183,20 +211,37 @@ def tiling_base_layer(prj_id, tiles_side):
         max_x = float(bbox[2])
         max_y = float(bbox[3])
         
+        url = None
+        if base_lyr.datastore is not None:
+            url = base_lyr.datastore.workspace.wmts_endpoint
         
         layers_dir = os.path.join(settings.MEDIA_ROOT, 'layer_downloads')
-        folder_prj =  os.path.join(layers_dir, prj.name) + "_prj"
+        
+        millis = int(round(time.time() * 1000))
+        folder_prj =  os.path.join(layers_dir, prj.name) + "_prj_" + str(millis) 
         folder_package = os.path.join(folder_prj, 'EPSG3857')
-        base_zip = os.getcwd() + "/gvsigol_services/static/data/osm_tiles_levels_0-6.zip"
         if not os.path.exists(layers_dir):
             os.mkdir(layers_dir)
-        with zipfile.ZipFile(base_zip, 'r') as zipObj:
-            zipObj.extractall(path=layers_dir)
-            shutil.move(layers_dir + '/tiles_download', folder_package)
-            tiling = Tiling(folder_package)
-            tiling.create_tiles_from_utm(min_x, min_y, max_x, max_y, tiling.get_zoom_level(floor(max_x - min_x)/1000, tiles_side))
-            shutil.make_archive(folder_prj, 'zip', folder_prj)
-            shutil.rmtree(folder_prj)
+        
+        mode = base_lyr.type
+        tiling = Tiling(folder_package, mode, tilematrixset, url)
+        zoom = tiling.get_zoom_level(floor(max_x - min_x)/1000, tiles_side) 
+        
+        if mode == 'OSM':
+            base_zip = os.getcwd() + "/gvsigol_services/static/data/osm_tiles_levels_0-6.zip"
+            with zipfile.ZipFile(base_zip, 'r') as zipObj:
+                zipObj.extractall(path=layers_dir)
+                shutil.move(layers_dir + '/tiles_download', folder_package)
+        else:
+            lyr_name = base_lyr.datastore.workspace.name + ":" + base_lyr.name
+            tiling.set_layer_name(lyr_name)
+        
+        tiling.create_tiles_from_utm(min_x, min_y, max_x, max_y, zoom)
+        shutil.make_archive(folder_prj, 'zip', folder_prj)
+        shutil.rmtree(folder_prj)
+        
+        prj.baselayer_version = millis
+        prj.save()
             
 def exists_base_layer_tiled(prj_id):
     prj = Project.objects.get(id = prj_id)
