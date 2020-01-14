@@ -496,6 +496,7 @@ class WCSClient():
         self.url = url
         self.layer_name = layer_name
         self.params = params
+        self.output_dir = tempfile.mkdtemp('-tmp', GVSIGOL_NAME.lower()+"dm", dir=getTmpDir())
         self.nativeSrsCode = None
         self.wcs200Namespaces = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'gml': 'http://www.opengis.net/gml/3.2', 'wcs': 'http://www.opengis.net/wcs/2.0'}
         self.gmlCoverageNamespaces =  {
@@ -536,9 +537,9 @@ class WCSClient():
             if srs.startswith('EPSG:'):
                 return srs[5:]
 
-    def _getDescribeWcsCoverageEnvelope(self, describeCoverageTree):
+    def _getWcsCoverageEnvelope(self, describeCoverageTree, namespaces):
         if describeCoverageTree is not None:
-            return describeCoverageTree.find('./wcs:CoverageDescription/gml:boundedBy/gml:Envelope', self.wcs200Namespaces)
+            return describeCoverageTree.find('./gml:boundedBy/gml:Envelope', namespaces)
 
     def getWcsRequest(self):
         url = _normalizeWxsUrl(self.url) + u'?service=WCS&version=2.0.0&request=GetCoverage&mediatype=multipart/related&CoverageId=' + self.layer_name
@@ -550,88 +551,101 @@ class WCSClient():
             spatial_filter_bbox = _getParamValue(self.params, SPATIAL_FILTER_BBOX_PARAM_NAME)
             if spatial_filter_bbox:
                 describeCoverageTree = self._getDescribeWcsCoverageTree(self.layer_name, self.url)
-                envelopeNode = self._getDescribeWcsCoverageEnvelope(describeCoverageTree)
-                axes = self._getDescribeWcsCoverageAxes(envelopeNode)
-                self.nativeSrsCode = self._getEnvelopeSrsCode(envelopeNode)
-                bboxElements = spatial_filter_bbox.split(",")
-                spatial_subset = ''
-                if axes is not None and bboxElements is not None and len(axes) == 2 and len(bboxElements) == 5:
-                    srs = bboxElements[4]
-                    if float(bboxElements[0]) <= float(bboxElements[2]):
-                        xmin = bboxElements[0]
-                        xmax = bboxElements[2]
-                    else:
-                        xmin = bboxElements[2]
-                        xmax = bboxElements[0]
-                    if float(bboxElements[1]) <= float(bboxElements[3]):
-                        ymin = bboxElements[1]
-                        ymax = bboxElements[3]
-                    else:
-                        ymin = bboxElements[3]
-                        ymax = bboxElements[1]
-                        
-                    axis0_min, axis1_min, axis0_max, axis1_max = reprojectExtent(xmin, ymin, xmax, ymax, srs, self.nativeSrsCode)
-                    if self.nativeSrsCode and int(self.nativeSrsCode) in _getCrsReverseAxisList():
-                        spatial_subset = u'&subset=' + text(axes[0]) + u'%28%22' + text(axis1_min) + u'%22%2C%22' + text(axis1_max) + u'%22%29'
-                        spatial_subset += u'&subset=' + text(axes[1]) + u'%28%22' + text(axis0_min) + u'%22%2C%22' + text(axis0_max) + u'%22%29'
-                    else:
-                        spatial_subset = u'&subset=' + text(axes[0]) + u'%28%22' + text(axis0_min) + u'%22%2C%22' + text(axis0_max) + u'%22%29'
-                        spatial_subset += u'&subset=' + text(axes[1]) + u'%28%22' + text(axis1_min) + u'%22%2C%22' + text(axis1_max) + u'%22%29'
-                url += spatial_subset
+                if describeCoverageTree is not None:
+                    describeCoverageRoot = describeCoverageTree.find('./wcs:CoverageDescription', self.wcs200Namespaces)
+                    envelopeNode = self._getWcsCoverageEnvelope(describeCoverageRoot, self.wcs200Namespaces)
+                    axes = self._getDescribeWcsCoverageAxes(envelopeNode)
+                    self.nativeSrsCode = self._getEnvelopeSrsCode(envelopeNode)
+                    bboxElements = spatial_filter_bbox.split(",")
+                    spatial_subset = ''
+                    if axes is not None and bboxElements is not None and len(axes) == 2 and len(bboxElements) == 5:
+                        srs = bboxElements[4]
+                        if float(bboxElements[0]) <= float(bboxElements[2]):
+                            xmin = bboxElements[0]
+                            xmax = bboxElements[2]
+                        else:
+                            xmin = bboxElements[2]
+                            xmax = bboxElements[0]
+                        if float(bboxElements[1]) <= float(bboxElements[3]):
+                            ymin = bboxElements[1]
+                            ymax = bboxElements[3]
+                        else:
+                            ymin = bboxElements[3]
+                            ymax = bboxElements[1]
+                            
+                        axis0_min, axis1_min, axis0_max, axis1_max = reprojectExtent(xmin, ymin, xmax, ymax, srs, self.nativeSrsCode)
+                        if self.nativeSrsCode and int(self.nativeSrsCode) in _getCrsReverseAxisList():
+                            spatial_subset = u'&subset=' + text(axes[0]) + u'%28%22' + text(axis1_min) + u'%22%2C%22' + text(axis1_max) + u'%22%29'
+                            spatial_subset += u'&subset=' + text(axes[1]) + u'%28%22' + text(axis0_min) + u'%22%2C%22' + text(axis0_max) + u'%22%29'
+                        else:
+                            spatial_subset = u'&subset=' + text(axes[0]) + u'%28%22' + text(axis0_min) + u'%22%2C%22' + text(axis0_max) + u'%22%29'
+                            spatial_subset += u'&subset=' + text(axes[1]) + u'%28%22' + text(axis1_min) + u'%22%2C%22' + text(axis1_max) + u'%22%29'
+                    url += spatial_subset
         logger.debug(url)
         return url
     
-    def _createPrjFile(self, wcsCoverageDescTree, output_dir):
+    def _createPrjFile(self, nativeSrsObj):
         try:
-            logger.debug('_createPrjFile')
-            if wcsCoverageDescTree is not None:
-                envelopeNode = wcsCoverageDescTree.find('./gml:boundedBy/gml:Envelope', self.gmlCoverageNamespaces)
-                nativeSrsCode = self._getEnvelopeSrsCode(envelopeNode)
-                logger.debug('_createPrjFile0')
-                srs = SpatialReference(nativeSrsCode)
-                outfile = os.path.join(output_dir, self.layer_name + ".prj")
-                logger.debug(outfile)
+            if nativeSrsObj is not None:
+                outfile = os.path.join(self.output_dir, self.layer_name + ".prj")
                 f = open(outfile, 'w')
-                f.write(srs.wkt.encode('UTF-8'))
-                logger.debug(srs.wkt.encode('UTF-8'))
+                f.write(nativeSrsObj.wkt.encode('UTF-8'))
                 f.close()
         except:
             logger.exception("Error creating PRJ file")
     
-    def _getWCSCoverageDescTree(self, wcsCoverageDescFolder):
+    def _getWCSCoverageDescTree(self):
         try:
-            wcsCoverageDescPath = os.path.join(wcsCoverageDescFolder, 'wcs')
+            wcsCoverageDescPath = os.path.join(self.output_dir, 'wcs')
             return ET.parse(wcsCoverageDescPath)
         except:
             logger.exception("Error parsing WCS Coverge Desc XML")
 
     def _getDomainSetValues(self, wcsCoverageDescTree):
         if wcsCoverageDescTree is not None:
-            #envelopeNode = wcsCoverageDescTree.find('./gml:RectifiedGridCoverage/gml:boundedBy/gml:Envelope', namespaces)
-            #self._getEnvelopeSrsCode(envelopeNode)
             rectifiedGridNode = wcsCoverageDescTree.find('./gml:domainSet/gml:RectifiedGrid', self.gmlCoverageNamespaces)
-            
             offsetVectors =  rectifiedGridNode.findall('./gml:offsetVector', self.gmlCoverageNamespaces)
             values = []
             for offvec in offsetVectors:
-                values += offvec.text.split(" ")
-            origin =  rectifiedGridNode.find('./gml:origin/gml:Point/gml:pos', self.gmlCoverageNamespaces)
-            if len(values)>0 and origin is not None:
+                values = values + offvec.text.split(" ")
+            envelopeNode = self._getWcsCoverageEnvelope(wcsCoverageDescTree, self.gmlCoverageNamespaces)
+            envelope_lower = envelopeNode.find('./gml:lowerCorner', self.gmlCoverageNamespaces)
+            envelope_upper = envelopeNode.find('./gml:upperCorner', self.gmlCoverageNamespaces)
+            if len(values)>0 and envelope_lower is not None and envelope_upper is not None:
                 # FIXME: consider axis order
-                return values + origin.text.split(" ")
+                topleft_x = envelope_lower.text.split(" ")[0]
+                topleft_y = envelope_upper.text.split(" ")[1]
+                values.append(topleft_x)
+                values.append(topleft_y)
+                return values
             
-    def _createWldFile(self, wcsCoverageDescTree, output_dir):
+    def _createWldFile(self, domainSetValues):
         try:
-            values = self._getDomainSetValues(wcsCoverageDescTree)
-            if values is not None:
-                outfile = os.path.join(output_dir, self.layer_name + ".wld")
+            if domainSetValues is not None:
+                outfile = os.path.join(self.output_dir, self.layer_name + ".wld")
                 f = open(outfile, 'w')
-                for val in values:
+                for val in domainSetValues:
                     f.write(val + '\n')
                 f.close()
         except:
             logger.exception("Error creating WLD file")
     
+    def _createPamDatasetFile(self, nativeSrsObj, values, mainFileName):
+        root = ET.Element('PAMDataset')
+        srs = ET.SubElement(root, 'SRS')
+        srs.text = nativeSrsObj.wkt
+        if len(values) == 6:
+            transform = ET.SubElement(root, 'GeoTransform')
+            transform.text = values[4] + ", " + values[0] + ", " + values[1] + ", " + values[5] + ", " + values[2] + ", " + values[3]
+        outxml = os.path.join(self.output_dir, mainFileName) + ".aux.xml"
+        tree = ET.ElementTree(root)
+        tree.write(outxml)
+    
+    def getMainFile(self, wcsCoverageDescTree):
+        fileReference = wcsCoverageDescTree.find('./gml:rangeSet/gml:File/gml:fileReference', self.gmlCoverageNamespaces)
+        if fileReference is not None:
+            return os.path.basename(fileReference.text)
+        
     def _retrieveResource(self, url):
         # TODO: authentication and permissions
         (fd, tmp_path) = tempfile.mkstemp('.tmp', GVSIGOL_NAME.lower()+"dm", dir=getTmpDir())
@@ -659,6 +673,13 @@ class WCSClient():
         except:
             logger.exception('error retrieving link: ' + url)
         return tmp_path
+    
+    def isSelfreferencedFormat(self, mainFileName):
+        name, ext = os.path.splitext(mainFileName)
+        extlow = ext.lower()
+        if '.tif' == extlow or '.tiff' == extlow or 'geotif' in extlow:
+            return True
+        return False
 
     def retrieveResources(self):
         """
@@ -667,13 +688,27 @@ class WCSClient():
         """
         url = self.getWcsRequest()
         local_path = self._retrieveResource(url)
-        output_dir = tempfile.mkdtemp('-tmp', GVSIGOL_NAME.lower()+"dm", dir=getTmpDir())
-        parseMultipart(local_path, output_dir)
+        parseMultipart(local_path, self.output_dir)
         os.remove(local_path)
-        wcsCoverageDescTree = self._getWCSCoverageDescTree(output_dir)
-        self._createWldFile(wcsCoverageDescTree, output_dir)
-        self._createPrjFile(wcsCoverageDescTree, output_dir)
-        return output_dir
+        try:
+            # now write auxiliary files to improve compatibility with traditional GIS software
+            wcsCoverageDescTree = self._getWCSCoverageDescTree()
+            mainFileName = self.getMainFile(wcsCoverageDescTree)
+            selfReferencedFormat = self.isSelfreferencedFormat(mainFileName)
+            envelopeNode = self._getWcsCoverageEnvelope(wcsCoverageDescTree, self.gmlCoverageNamespaces)
+            values = self._getDomainSetValues(wcsCoverageDescTree)
+            nativeSrsCode = self._getEnvelopeSrsCode(envelopeNode)
+            if nativeSrsCode is not None:
+                nativeSrsObj = SpatialReference(nativeSrsCode)
+                self._createPrjFile(nativeSrsObj)
+                if not selfReferencedFormat:
+                    self._createPamDatasetFile(nativeSrsObj, values, mainFileName)
+            # name, ext = os.path.splitext(nameext)
+            if not selfReferencedFormat:
+                self._createWldFile(values)
+        except:
+            logger.exception(u"Error creating auxiliary files for resource: " + url)
+        return self.output_dir
 
 def guessResourceName(resource_descriptor):
     resource_name = resource_descriptor.get('name')
