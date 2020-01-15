@@ -105,7 +105,7 @@
 									</div>
 									<div class="row">
 										<div class="col-md-12 form-group">
-											<label for="max_public_download_size">{% trans "Maximum size for public downloads (bytes)" %}</label>
+											<label for="max_public_download_size">{% trans "Maximum size for public downloads (MB)" %}</label>
 											<div class="input-group">
 												<input class="form-control" type="number" name="max_public_download_size" id="max_public_download_size" value="{{max_public_download_size}}" />
 												<span class="input-group-addon" id="max_public_download_size_human_readable"></span>
@@ -185,27 +185,22 @@ $('#submenu-downloadman').addClass("active");
 			var valTxt = (val/60).toFixed(2);
 			return interpolate(fmt, {number: valTxt}, true);
 		};
-		var getHumanReadableBytes = function(bytes) {
-			var val = parseInt(bytes);
+		var getHumanReadableMegabytes = function(megabytes) {
+			var val = parseInt(megabytes);
 			if (isNaN(val)) {
 				return "";
 			}
-			if (val/(1024*1024*1024) > 1) {
-				var fmt = gettext("%(number)s GB");
-				var valTxt = (val/(1024*1024*1024)).toFixed(2);
+			if (val/(1024*1024) > 1) {
+				var fmt = gettext("%(number)s TB");
+				var valTxt = (val/(1024*1024)).toFixed(2);
 				return interpolate(fmt, {number: valTxt}, true);
 			}
-			else if (val/(1024*1024) > 1) {
-				var fmt = gettext("%(number)s MB");
-				var valTxt = (val/(1024*1024)).toFixed(2);
-				return interpolate(fmt, {number: valTxt}, true); 
-			}
-			else if (val > 256) {
-				var fmt = gettext("%(number)s KB");
+			else if (val/(1024) > 1) {
+				var fmt = gettext("%(number)s GB");
 				var valTxt = (val/(1024)).toFixed(2);
-				return interpolate(fmt, {number: valTxt}, true); 
+				return interpolate(fmt, {number: valTxt}, true);
 			}
-			var fmt = gettext("%(number)s bytes");
+			var fmt = gettext("%(number)s MB");
 			return interpolate(fmt, {number: val}, true);
 		};
 		
@@ -214,10 +209,10 @@ $('#submenu-downloadman').addClass("active");
 			var val = $(this).val();
 			$('#validity_human_readable').html(getHumanReadableSeconds(val));
 		});
-		$('#max_public_download_size_human_readable').html(getHumanReadableBytes($('#max_public_download_size').val()));
+		$('#max_public_download_size_human_readable').html(getHumanReadableMegabytes($('#max_public_download_size').val()));
 		$('#max_public_download_size').on('input', function(e) {
 			var val = $(this).val();
-			$('#max_public_download_size_human_readable').html(getHumanReadableBytes(val));
+			$('#max_public_download_size_human_readable').html(getHumanReadableMegabytes(val));
 		});
 	});
 

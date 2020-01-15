@@ -13,7 +13,7 @@ from gvsigol_core.models import GolSettings
 SETTINGS_KEY_VALIDITY = 'default_link_validity'
 DEFAULT_VALIDITY = 604800 # seconds = 7 days
 SETTINGS_KEY_MAX_PUBLIC_DOWNLOAD_SIZE = 'max_public_download_size'
-DEFAULT_MAX_PUBLIC_DOWNLOAD_SIZE = 314572800 # bytes = 300 MB
+DEFAULT_MAX_PUBLIC_DOWNLOAD_SIZE = 300 # MB
 
 
 class AuthorizationRequestForm(models.Model):
