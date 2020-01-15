@@ -829,11 +829,14 @@ def getNextMailRetryDelay(request):
 
 def get_language(request):
     if request.language:
+        logger.debug(u"request language: " + request.language)
         return request.language
     else:
         try:
+            logger.debug(u"platform language: " + core_settings.LANGUAGE_CODE)
             return core_settings.LANGUAGE_CODE
         except:
+            logger.debug(u"default language: " + u'en-us')
             return 'en-us'
 
 @shared_task(bind=True)
@@ -1275,6 +1278,7 @@ def processDownloadRequest(self, request_id):
     # 1 get request
     try:
         request = DownloadRequest.objects.get(id=request_id)
+        logger.debug(u'request ID: ' + request.request_random_id)
         if (request.request_status != DownloadRequest.REQUEST_QUEUED_STATUS) and (request.request_status != DownloadRequest.PROCESSING_STATUS):
             logger.debug("Task already processed: " + request_id)
             return
@@ -1348,7 +1352,8 @@ def processDownloadRequest(self, request_id):
                 request.request_status = DownloadRequest.COMPLETED_STATUS
                 request.save()
                 notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
-        elif result and result.completed > 0:
+        #elif result and result.completed > 0:
+        else:
             notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
     except:
         logger.exception("Error cmi")
