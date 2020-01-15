@@ -26,6 +26,11 @@ class Tiling():
     ctx = None
     gsuser = None
     gspaswd = None
+    #Son siempre en geográficas
+    min_lon = None
+    min_lat = None
+    max_lon = None
+    max_lat = None
 
     def __init__(self, folder, type_, tilematrixset, url):
         if folder is not None:
@@ -54,6 +59,12 @@ class Tiling():
     
     def set_layer_name(self, lyr_name):
         self.layer = lyr_name
+        
+    def set_layer_extent(self, minx, miny, maxx, maxy):
+        self.min_lon = minx
+        self.min_lat = miny
+        self.max_lon = maxx
+        self.max_lat = maxy
                 
     def _deg2num(self, lat_deg, lon_deg, zoom):
         lat_rad = math.radians(lat_deg)
@@ -129,6 +140,7 @@ class Tiling():
             print "skipped %r" % url
             pass
     
+    #No se usa
     def create_tiles(self, min_lon, min_lat, max_lon, max_lat, maxzoom):
             #from 0 to 6 download all
         if self.mode  != "OSM":
@@ -154,15 +166,30 @@ class Tiling():
                         
     def create_tiles_from_utm(self, min_x, min_y, max_x, max_y, maxzoom):
         #from 0 to 6 download all
+#         if self.mode  != "OSM":
+#             for zoom in range(0,7,1):
+#                 break;
+#                 for x in range(0,2**zoom,1):        
+#                     for y in range(0,2**zoom,1):
+#                         self._download_wmts(zoom, x, y)
+        
         if self.mode  != "OSM":
-            for zoom in range(0,7,1):
-                #break;
-                for x in range(0,2**zoom,1):        
-                    for y in range(0,2**zoom,1):
+            #Si la capa es WMTS:
+            #De los niveles 0-6 se descargan todos los tiles de la capa ajustandose al extent de esta
+            #para no pedir tiles que no contenga.
+            # Como el extent de la capa siempre viene en geográficas se usa deg2num
+            for zoom in range(0, 7, 1):
+                xtile, ytile = self._deg2num(float(self.min_lat), float(self.min_lon), zoom)
+                final_xtile, final_ytile = self._deg2num(float(self.max_lat), float(self.max_lon), zoom)
+
+                for x in range(xtile, final_xtile + 1, 1):
+                    for y in range(ytile, final_ytile - 1, -1):  
                         self._download_wmts(zoom, x, y)
+            #Si la capa es OSM los niveles 0-6 ya están en un zip
                         
-        # from 6 to 15 ranges
-        for zoom in range(7, int(maxzoom)+1, 1):
+        #Para cualquier capa base se descargan los siguientes niveles               
+        #solo de la extensión del proyecto
+        for zoom in range(7, int(maxzoom) + 1, 1):
             xtile, ytile = self._utm2num(min_y, min_x, zoom)
             final_xtile, final_ytile = self._utm2num(max_y, max_x, zoom)
       
@@ -246,7 +273,15 @@ def tiling_base_layer(base_lyr, prj_id, tiles_side, tilematrixset):
         else:
             lyr_name = base_lyr.datastore.workspace.name + ":" + base_lyr.name
             tiling.set_layer_name(lyr_name)
-        
+            
+            extent = base_lyr.latlong_extent
+            extent = extent.split(',')
+            lyr_min_x = float(extent[0])
+            lyr_min_y = float(extent[1])
+            lyr_max_x = float(extent[2])
+            lyr_max_y = float(extent[3])
+            tiling.set_layer_extent(lyr_min_x, lyr_min_y, lyr_max_x, lyr_max_y)
+            
         tiling.create_tiles_from_utm(min_x, min_y, max_x, max_y, zoom)
         shutil.make_archive(folder_prj, 'zip', folder_prj)
         shutil.rmtree(folder_prj)
