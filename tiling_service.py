@@ -2,18 +2,19 @@
 # -*- coding: utf-8 -*-
 #
 
+import base64
 from math import floor
 import math
 import os.path
 import shutil
+import ssl
+import time
 import urllib2
 import zipfile
 
 from gvsigol import settings
 from gvsigol_core.models import Project, ProjectLayerGroup
-import ssl
-import time
-
+from gvsigol_services.models import Server
 
 
 class Tiling():
@@ -23,6 +24,8 @@ class Tiling():
     tilematrixset = None
     layer = None
     ctx = None
+    gsuser = None
+    gspaswd = None
 
     def __init__(self, folder, type_, tilematrixset, url):
         if folder is not None:
@@ -43,6 +46,11 @@ class Tiling():
         self.ctx = ssl.create_default_context()
         self.ctx.check_hostname = False
         self.ctx.verify_mode = ssl.CERT_NONE
+        
+        server = Server.objects.filter(default=True)
+        if server is not None and len(server) > 0:
+            self.gsuser = server[0].user
+            self.gspaswd = server[0].password
     
     def set_layer_name(self, lyr_name):
         self.layer = lyr_name
@@ -78,7 +86,10 @@ class Tiling():
         if(not os.path.isfile(download_path)):
             print "downloading %r" % url
             try:
-                source = urllib2.urlopen(url, context=self.ctx)
+                request = urllib2.Request(url)
+                base64string = base64.b64encode('%s:%s' % (self.gsuser, self.gspaswd))
+                request.add_header("Authorization", "Basic %s" % base64string)
+                source = urllib2.urlopen(request, context=self.ctx)
                 content = source.read()
                 source.close()
                 destination = open(download_path,'wb')
