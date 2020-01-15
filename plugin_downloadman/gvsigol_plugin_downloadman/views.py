@@ -7,6 +7,7 @@ import json
 from django.http import JsonResponse
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.translation import ugettext as _
+from django.utils.translation import get_language
 from gvsigol_plugin_downloadman.tasks import processDownloadRequest, resolveFileUrl, notifyReceivedRequest, packageRequest, getDownloadResourceUrl, isRestricted
 from gvsigol_plugin_downloadman import models as downman_models
 from django.views.decorators.csrf import csrf_exempt
@@ -486,7 +487,7 @@ def requestDownload(request):
                 downRequest.requested_by_external = json_data.get('email', '')
                 if not downRequest.requested_by_external:
                     pass
-        
+            downRequest.language = get_language()
             downRequest.validity = downman_models.get_default_validity()
             downRequest.request_random_id = date.today().strftime("%Y%m%d") + get_random_string(length=32)
             downRequest.json_request = request.body.decode("UTF-8")
