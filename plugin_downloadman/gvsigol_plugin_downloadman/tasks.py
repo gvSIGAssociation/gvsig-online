@@ -213,7 +213,7 @@ class ResolvedLocator():
         self.desc = desc
         self.processed = processed
         
-def _getParamValue(params, name):
+def _getParamValue(params, name, default_value=None):
     for param in params:
         if param.get('name') == name:
             return param.get('value')
@@ -710,14 +710,14 @@ class WCSClient():
             logger.exception(u"Error creating auxiliary files for resource: " + url)
         return self.output_dir
 
-def guessResourceName(resource_descriptor):
-    resource_name = resource_descriptor.get('name')
+def normalizeOutname(name):
+    resource_name = name.replace(":", "_")
+    return re.sub('[^\w\s_-]', '', resource_name).strip().lower()
 
-    params = resource_descriptor.get('params', [])
-    file_format = _getParamValue(params, FORMAT_PARAM_NAME)
+def guessResourceName(resource_name, params):
+    file_format = _getParamValue(params, FORMAT_PARAM_NAME, '')
     # remove non-a-z_ or numeric characters
-    resource_name = resource_name.replace(":", "_")
-    resource_name = re.sub('[^\w\s_-]', '', resource_name).strip().lower()
+    resource_name = normalizeOutname(resource_name)
     resource_name = resource_name + _getExtension(file_format)
     return resource_name
 
@@ -727,17 +727,14 @@ def retrieveResources(resource_descriptor):
     wrapped in a ResourceDescription object.
     If the resource is a remote resource, it is first copied as a local file. 
     """
-    resource_name = guessResourceName(resource_descriptor)
     res_type = resource_descriptor.get('resource_type')
-    res_id = resource_descriptor.get('layer_id')
     resource_name = resource_descriptor.get('name', '')
-
     resource_url = resource_descriptor.get('url')
     params = resource_descriptor.get('params', [])
     if res_type == ResourceLocator.OGC_WCS_RESOURCE_TYPE:
         client = WCSClient(resource_url, resource_name, params)
         output_folder = client.retrieveResources()
-        return [ResourceDescription(resource_name, output_folder, True)]
+        return [ResourceDescription(normalizeOutname(resource_name), output_folder, True)]
         
     elif res_type == ResourceLocator.HTTP_LINK_RESOURCE_TYPE:
         url = resource_url
@@ -745,11 +742,11 @@ def retrieveResources(resource_descriptor):
         url = _getWfsRequest(resource_name, resource_url, params)
     if (url.startswith("http://") or url.startswith("https://")):
         local_path = retrieveLinkLocator(url)
-        return [ResourceDescription(resource_name, local_path, True)]
+        return [ResourceDescription(guessResourceName(resource_name, params), local_path, True)]
     if url.startswith("file://"):
         local_path = resolveFileUrl(url)
         if url.endswith("/"):
-            return [ResourceDescription(resource_name, local_path)] 
+            return [ResourceDescription(guessResourceName(resource_name, params), local_path)] 
         else:
             return [ResourceDescription(os.path.basename(url), local_path)]
     # TODO: error management
