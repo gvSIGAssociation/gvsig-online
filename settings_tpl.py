@@ -303,7 +303,7 @@ MOSAIC_DB = {
 # OGR path is only necessary if different from the one defined on gdal_tools.OGR2OGR_PATH
 OGR2OGR_PATH = '##OGR2OGR_PATH##'
 GDALTOOLS_BASEPATH = '##GDALTOOLS_BASEPATH##'
-GDAL_LIBRARY_PATH = '/lib64/libgdal.so.1'
+GDAL_LIBRARY_PATH = '##GDAL_LIBRARY_PATH##'
 
 
 
