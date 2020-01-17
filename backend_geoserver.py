@@ -129,6 +129,9 @@ class Geoserver():
     def getSupportedFonts(self):
         return self.rest_catalog.get_fonts(user=self.user, password=self.password)
     
+    def reload_master(self):
+        self.rest_catalog.reload(self.conf_url, user=self.user, password=self.password) 
+        
     def reload_nodes(self):
         try:
             # get sequence from master
