@@ -115,6 +115,11 @@ function configure() {
 		OGR2OGR_PATH="$GDALTOOLS_BASEPATH/ogr2ogr"
 	fi														
 	grep -rl "##OGR2OGR_PATH##"  | xargs sed -i "s ##OGR2OGR_PATH## $OGR2OGR_PATH g"
+	if [ -z $GDAL_LIBRARY_PATH ]; then
+		echo "WARNING: GDAL_LIBRARY_PATH is not defined, using /lib64/libgdal.so.1"					
+		GDAL_LIBRARY_PATH="/lib64/libgdal.so.1"
+	fi														
+	grep -rl "##GDAL_LIBRARY_PATH##"  | xargs sed -i "s ##GDAL_LIBRARY_PATH## $GDAL_LIBRARY_PATH g"
 	
 	#TODO: hay que llevarlo a la app 	
 	if [ -z $EMAIL_BACKEND_ACTIVE ]; then
