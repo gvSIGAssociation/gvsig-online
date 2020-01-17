@@ -826,14 +826,11 @@ def getNextMailRetryDelay(request):
 
 def get_language(request):
     if request.language:
-        logger.debug(u"request language: " + request.language)
         return request.language
     else:
         try:
-            logger.debug(u"platform language: " + core_settings.LANGUAGE_CODE)
             return core_settings.LANGUAGE_CODE
         except:
-            logger.debug(u"default language: " + u'en-us')
             return 'en-us'
 
 @shared_task(bind=True)
