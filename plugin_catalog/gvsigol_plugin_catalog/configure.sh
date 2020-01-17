@@ -3,14 +3,19 @@
 echo "Running install script for catalog plugin ..."
 mv settings_tpl.py settings.py
 
+if [ -z "$CATALOG_BASE_URL" ]; then
+        echo "WARNING: CATALOG_BASE_URL is not defined, using BASE_URL."
+        CATALOG_BASE_URL="$BASE_URL/geonetwork"
+fi
+
 if [ -z "$CATALOG_URL" ]; then
-        echo "WARNING: CATALOG_URL is not defined, using CATALOG_BASE_URL ."
+        echo "WARNING: CATALOG_URL is not defined, using CATALOG_BASE_URL."
         CATALOG_URL="$CATALOG_BASE_URL/srv/eng/"
 fi
 
 if [ -z "$CATALOG_API_VERSION" ]; then
         echo "WARNING: CATALOG_API_VERSION is not defined, using 'legacy3.2'."
-        CATALOG_API_VERSION="legacy3.2"
+        CATALOG_API_VERSION="api0.1"
 fi
 
 if [ -z "$GEONETWORK_USER" ]; then
