@@ -267,6 +267,19 @@ attributeTable.prototype.createTableUI = function(featureType) {
 		extend: 'selectNone',
         text: '<i class="fa fa-eraser margin-r-5"></i> ' + gettext('Clear selection')
     });
+	tableButtons.push({
+    	text: '<i class="fa fa-file-pdf-o margin-r-5"></i> ' + gettext('PDF Report'),
+        action: function ( e, dt, node, config ) {
+        	var t = $('#table-' + self.layer.get("id")).DataTable();
+        	var selectedRows = t.rows('.selected').data();
+        	if (selectedRows.length > 0){
+        		self.createPdfReport(selectedRows);
+
+	    	} else {
+	    		messageBox.show('warning', gettext('You must select at least one row'));
+	    	}
+        }
+    });
 
 	var self = this;
 	this.table = $('#table-' + this.layer.get("id")).DataTable({
@@ -1058,4 +1071,351 @@ attributeTable.prototype.getReport = function(reportInfo) {
 	  	},
 	  	error: function(){}
 	});
+};
+
+/**
+ * TODO
+ */
+attributeTable.prototype.createPdfReport = function(selectedRows) {
+	var self = this;
+		
+	var body = '';
+	body += '<div class="row">';
+	body += 	'<div class="col-md-12 form-group">';
+	body +=			'<label>' + gettext('Map title') + '</label>';
+	body += 		'<input name="report-title" id="report-title" type="text" value="' + gettext('Insert title') + '" class="form-control">';					
+	body += 	'</div>';
+	body += '</div>';
+	
+	body += '<div class="row">';
+	body += 	'<div class="col-md-12 form-group">';
+	body +=			'<label>' + gettext('Map description') + '</label>';
+	body += 		'<input name="report-description" id="report-description" type="text" value="' + gettext('Insert description') + '" class="form-control">';					
+	body += 	'</div>';
+	body += '</div>';
+	
+	body += '<div class="row">';
+	body += 	'<div class="col-md-12 form-group">';
+	body +=			'<input checked type="checkbox" name="report-option" value="report-include-images"> <label style="font-weight: normal;">' + gettext('Include images related to report elements') + '</label>';
+	body += 	'</div>';
+	body += '</div>';
+	
+	body += '<div class="row">';
+	body += 	'<div class="col-md-12 form-group">';
+	body +=			'<input checked type="checkbox" name="report-option" value="report-include-address"> <label style="font-weight: normal;">' + gettext('Include the address related to report elements') + '</label>';
+	body += 	'</div>';
+	body += '</div>';
+	
+	body += '<div class="row">';
+	body += 	'<div class="col-md-12 form-group">';
+	body +=			'<label>' + gettext('Fields to include') + '</label>';
+	body += 	'</div>';
+	body += '</div>';
+	body += '<div class="row">';
+	if (selectedRows.length > 0) {
+		for (var key in selectedRows[0]) {
+			body +=     '<div class="col-md-4 form-group">';
+			body +=			'<input checked type="checkbox" name="report-field" value="' + key + '"> <label style="font-weight: normal;" >' + key + '</label>';
+			body +=     '</div>';
+		}
+	}
+	body += '</div>';
+	
+	$('#float-modal .modal-body').empty();
+	$('#float-modal .modal-body').append(body);
+	
+	var buttons = '';
+	buttons += '<button id="float-modal-cancel-print" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
+	buttons += '<button id="float-modal-accept-print" style="border:none; color: white;background-color: #07579E !important" type="button" class="btn btn-default">' + gettext('Generate PDF') + '</button>';
+	
+	$('#float-modal .modal-footer').empty();
+	$('#float-modal .modal-footer').append(buttons);
+	
+	$("#float-modal").modal('show');
+	
+	var self = this;	
+	$('#float-modal-accept-print').on('click', function () {
+		var title = $('#report-title').val();
+		var description = $('#report-description').val();
+		var options = [];
+        $.each($("input[name='report-option']:checked"), function(){
+        	options.push($(this).val());
+        });
+		var fields = [];
+        $.each($("input[name='report-field']:checked"), function(){
+        	fields.push($(this).val());
+        });
+        
+        var reportElements = new Array();
+        for (var j=0; j<selectedRows.length; j++) {
+        	var feat = self.getFeature(selectedRows[j]);
+        	var address = self.getAddress(feat);
+        	var resources = self.getResources(feat);
+        	reportElements.push({
+        		'fid': selectedRows[j].featureid,
+        		'properties': selectedRows[j],
+        		'address': address,
+        		'resources': resources
+        	});
+        }
+        self.source.clear();
+		
+        self.imageUrls = new Array();
+    	self.arrayImages = new Array();
+    	self.count = 0;
+    	for (var k=0; k < reportElements.length; k++) {
+    		var iurl = IMG_PATH + 'no_image.png';
+    		if (reportElements[k].resources.length > 0) {
+    			iurl = reportElements[k].resources[0].url;
+    		}
+    		self.imageUrls.push({
+    			type: reportElements[k].fid,
+    			url: iurl,
+    		});
+    	}
+    	self.registers = reportElements;
+    	self.title = title;
+    	self.description = description;
+    	self.getImagesFromUrl();
+		$('#float-modal').modal('hide');
+	});
+};
+
+
+attributeTable.prototype.getImagesFromUrl = function() {
+	var self = this;
+	var img = new Image, data, ret={data: null, pending: true};
+	
+    img.onError = function() {
+    	throw new Error('Cannot load image: "' + url + '"');
+    };
+        
+    img.onload = function() {
+    	if (self.count < self.imageUrls.length) {
+    		var image = {
+    			type	: img.iType,
+    			data	: img
+    		};
+    		self.arrayImages.push(image);
+	        self.getImagesFromUrl();	
+	    
+	    } else {	
+	    	var image = {
+    			type	: img.iType,
+    			data	: img
+    		};
+    		self.arrayImages.push(image);
+    		
+    		for (var i=0; i < self.arrayImages.length; i++) {
+    			var auxImg = self.arrayImages[i].data;
+    			var cv = document.createElement('canvas');
+    			cv.setAttribute('style','background-color: #ffffff;');
+    			cv.setAttribute('id','cv-'+i);
+				document.body.appendChild(cv);
+				cv.width = 500;
+				cv.height = 300;
+	    		var ctx = cv.getContext("2d");
+	    		ctx.fillStyle = '#ffffff';  /// set white fill style
+	    		ctx.fillRect(0, 0, 500, 300);
+	    		ctx.drawImage(auxImg, 0, 0, 500, 300);
+	    		var im = cv.toDataURL('image/jpeg').slice('data:image/jpeg;base64,'.length);
+	    		im = atob(im);
+	    		self.arrayImages[i].dataUrl = im;
+				document.body.removeChild(cv);
+			}
+			
+			self.createPDF();
+    	}
+    };
+    
+    img.iType = this.imageUrls[this.count].type;
+    	        	
+    img.src = this.imageUrls[this.count].url;
+    this.count++;
+};
+
+/**
+ * TODO
+ */
+attributeTable.prototype.createPDF = function() {
+	var doc = new jsPDF();
+	
+	doc.setFontSize(32);
+	doc.text(10, 15, this.title);
+	doc.setFontSize(12);
+	doc.text(10, 22, this.description);
+	
+	var top = 35;
+	
+	var numItems = 0;
+	for (var i=0; i < this.registers.length; i++) {
+		if (numItems > 3) {
+			doc.addPage();
+			numItems = 0;
+			top = 30;
+		}
+		var r = this.registers[i];
+		doc.setFontSize(12);
+		doc.setFontType('bold');
+		doc.text(10, top, 'Dirección:');
+		doc.setFontType('italic');
+		doc.text(35, top, r.address);
+		doc.addImage(this.getRegisterImage(r), 'JPEG', 10, top + 5, 80, 40);
+		var auxTop = top;
+		var fieldCount = 0;
+		for (var key in r.properties) {
+			if (key != 'id' && r.properties[key] != null && fieldCount < 8) {
+				doc.setFontSize(10);
+				doc.setFontType('bold');
+				doc.text(95, auxTop + 10, key + ':');
+				doc.setFontType('italic');
+				doc.text(120, auxTop + 10, r.properties[key]);
+				auxTop = auxTop + 5;
+				fieldCount++;
+			}
+			
+			
+		}
+		top = top + 65;
+		numItems++;
+	}
+	
+	var url = doc.output('dataurlstring');
+	var html = '<html>' +
+    '<style>html, body { padding: 0; margin: 0; } iframe { width: 100%; height: 100%; border: 0;}  </style>' +
+    '<body>' +
+    '<iframe id="pdf-iframe" src="' + url + '"></iframe>' +
+    '</body></html>';
+	a = window.open("", "_blank");
+	a.document.write(html);
+};
+
+/**
+ * TODO
+ */
+attributeTable.prototype.getRegisterImage = function(register) {
+	var self = this;
+	var imgData = null;
+	for (var j=0; j < this.arrayImages.length; j++) {
+		if (this.arrayImages[j].type == register.fid) {
+			imgData = this.arrayImages[j].dataUrl;
+		}
+	}
+	return imgData;
+	
+};
+
+/**
+ * TODO
+ */
+attributeTable.prototype.getFeature = function(row) {
+	var self = this;
+	var feature = null;
+	
+	var typename = row.featureid.split('.')[0];
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: this.layer.wfs_url,
+	  	data: {
+	  		'service': 'WFS',
+			'version': '1.1.0',
+			'request': 'GetFeature',
+			'typename': this.layer.workspace + ':' + typename,
+			'srsname': 'EPSG:3857',
+			'outputFormat': 'application/json',
+			'featureId': row.featureid
+	  	},
+	  	success	:function(response){
+	    	if (response.features.length > 0 ) {
+	    		for (var i=0; i<response.features.length; i++) {
+		    		feature = new ol.Feature();
+			    	if (response.features[i].geometry.type == 'Point') {
+			    		feature.setGeometry(new ol.geom.Point(response.features[i].geometry.coordinates));
+			    	} else if (response.features[i].geometry.type == 'MultiPoint') {
+			    		feature.setGeometry(new ol.geom.MultiPoint(response.features[i].geometry.coordinates));
+			    	} else if (response.features[i].geometry.type == 'LineString') {
+			    		feature.setGeometry(new ol.geom.LineString(response.features[i].geometry.coordinates));
+			    	} else if (response.features[i].geometry.type == 'MultiLineString') {
+			    		feature.setGeometry(new ol.geom.MultiLineString(response.features[i].geometry.coordinates));
+			    	} else if (response.features[i].geometry.type == 'Polygon') {
+			    		feature.setGeometry(new ol.geom.Polygon(response.features[i].geometry.coordinates));
+			    	} else if (response.features[i].geometry.type == 'MultiPolygon') {
+			    		feature.setGeometry(new ol.geom.MultiPolygon(response.features[i].geometry.coordinates));
+			    	}
+			    	feature.setProperties(response.features[i].properties);
+			    	feature.setId(response.features[i].id);
+		    	}
+
+	    	} else {
+	    		messageBox.show('warning', gettext('Invalid identifier. Unable to get requested geometry'));
+	    	}
+
+	  	},
+	  	error: function(){}
+	});
+	return feature;
+
+};
+
+/**
+ * TODO
+ */
+attributeTable.prototype.getAddress = function(feat) {
+	var self = this;
+	var address = null;
+	var type = feat.getGeometry().getType();
+	var coords = null;
+	if (type == 'Point') {
+		coords = feat.getGeometry().getCoordinates();
+	} else if (type == 'MultiPoint') {
+		coords = feat.getGeometry().getCoordinates()[0];
+	}
+	if (coords != null) {
+		var tCoords = ol.proj.transform(coords, 'EPSG:3857', 'EPSG:4326');
+		$.ajax({
+			type: 'POST',
+			async: false,
+		  	url: '/gvsigonline/geocoding/get_location_address/',
+		  	beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+		  	data: {
+		  		'coord': tCoords.toString(),
+		  		'type': 'new_cartociudad'
+		  	},
+		  	success	:function(response){
+		    	address = response.address;
+		  	},
+		  	error: function(){}
+		});
+		
+	} else {
+		address = 'No encontrado';
+	}
+	
+	return address;
+};
+
+/**
+ * TODO
+ */
+attributeTable.prototype.getResources = function(feat) {
+	var resources = null;
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: '/gvsigonline/services/get_feature_resources/',
+	  	data: {
+	  		query_layer: this.layer.layer_name,
+	  		workspace: this.layer.workspace,
+	  		fid: feat.getId().split('.')[1]
+	  	},
+	  	success	:function(response){
+	  		resources = response.resources;
+	  	},
+	  	error: function(){}
+	});
+	
+	return resources;
 };
