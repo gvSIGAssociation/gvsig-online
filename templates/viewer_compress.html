@@ -35,6 +35,7 @@
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror-5.49.0/addon/hint/show-hint.css" %}" />
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror-5.49.0/theme/xq-dark.css" %}" />
 	<link rel="stylesheet" href="{% static "css/fastsearch/fastselect.min.css" %}" />
+	<link rel="stylesheet" href="{% static "js/vendors/ol3-sidebar.css" %}">
 	<link rel="stylesheet" href="{% static "css/toc.css" %}">
 
 	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -327,6 +328,17 @@
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.easy-overlay.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQueryUI/jquery-ui.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jsZip/jszip.min.js" %}"></script>
+	
+	<script type="text/javascript" src="{% static "js/vendors/jsPDF/jspdf.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/vendors/jsPDF/libs/Deflate/adler32cs.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/vendors/jsPDF/libs/FileSaver/FileSaver.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/vendors/jsPDF/libs/Blob/Blob.js" %}"></script>
+
+    <script type="text/javascript" src="{% static "js/vendors/jsPDF/jspdf.plugin.addimage.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/vendors/jsPDF/jspdf.plugin.png_support.js" %}"></script>
+
+    <script type="text/javascript" src="{% static "js/vendors/jsPDF/jspdf.plugin.standard_fonts_metrics.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/vendors/jsPDF/jspdf.plugin.split_text_to_size.js" %}"></script>
 	<script>
 		$.widget.bridge('uibutton', $.ui.button);
 		$("body").overlay();
@@ -386,7 +398,7 @@
 	<script type="text/javascript" src="{% static "js/vendors/fastsearch/fastselect.min.js" %}"></script>
 
 	<script type="text/javascript" src="{% static "js/vendors/jquery-loading-overlay-2.1.6/loadingoverlay.min.js" %}"></script>
-
+	<script type="text/javascript" src="{% static "js/vendors/ol3-sidebar.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/dist/gvsigol-compress.js" %}"></script>
 	<script>
 		var messageBox = new messageBox();
