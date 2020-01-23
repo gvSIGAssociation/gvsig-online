@@ -1082,15 +1082,15 @@ attributeTable.prototype.createPdfReport = function(selectedRows) {
 	var body = '';
 	body += '<div class="row">';
 	body += 	'<div class="col-md-12 form-group">';
-	body +=			'<label>' + gettext('Map title') + '</label>';
-	body += 		'<input name="report-title" id="report-title" type="text" value="' + gettext('Insert title') + '" class="form-control">';					
+	body +=			'<label>' + gettext('Report title') + '</label>';
+	body += 		'<input name="report-title" id="report-title" type="text" value="' + gettext('Insert title') + ' ..." class="form-control">';					
 	body += 	'</div>';
 	body += '</div>';
 	
 	body += '<div class="row">';
 	body += 	'<div class="col-md-12 form-group">';
-	body +=			'<label>' + gettext('Map description') + '</label>';
-	body += 		'<input name="report-description" id="report-description" type="text" value="' + gettext('Insert description') + '" class="form-control">';					
+	body +=			'<label>' + gettext('Report description') + '</label>';
+	body += 		'<input name="report-description" id="report-description" type="text" value="' + gettext('Insert description') + ' ..." class="form-control">';					
 	body += 	'</div>';
 	body += '</div>';
 	
@@ -1257,7 +1257,7 @@ attributeTable.prototype.createPDF = function() {
 		var r = this.registers[i];
 		doc.setFontSize(12);
 		doc.setFontType('bold');
-		doc.text(10, top, 'Dirección:');
+		doc.text(10, top, gettext('Address') + ':');
 		doc.setFontType('italic');
 		doc.text(35, top, r.address);
 		doc.addImage(this.getRegisterImage(r), 'JPEG', 10, top + 5, 80, 40);
@@ -1269,7 +1269,7 @@ attributeTable.prototype.createPDF = function() {
 				doc.setFontType('bold');
 				doc.text(95, auxTop + 10, key + ':');
 				doc.setFontType('italic');
-				doc.text(120, auxTop + 10, r.properties[key]);
+				doc.text(120, auxTop + 10, r.properties[key].toString());
 				auxTop = auxTop + 5;
 				fieldCount++;
 			}
