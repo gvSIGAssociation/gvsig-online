@@ -491,3 +491,27 @@ msgstr "El número de teselas por lado es incorrecto"
 
 msgid "tile process ended"
 msgstr "El proceso de generación de teselas de la capa base ha terminado"
+
+msgid "Report title"
+msgstr "Título del informe"
+
+msgid "Report description"
+msgstr "Descripción del informe"
+
+msgid "Insert title"
+msgstr "Insertar título"
+
+msgid "Insert description"
+msgstr "Insertar descripción"
+
+msgid "Include images related to report elements"
+msgstr "Incluir imágenes relacionadas con los elementos del informe"
+
+msgid "Include the address related to report elements"
+msgstr "Incluir direcciones relacionadas con los elementos del informe"
+
+msgid "Fields to include"
+msgstr "Campos a incluir"
+
+msgid "Generate PDF"
+msgstr "Generar PDF"
