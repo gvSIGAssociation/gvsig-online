@@ -482,3 +482,27 @@ msgstr "Mosaic d'imatge"
 
 msgid "Share view"
 msgstr "Compartir vista"
+
+msgid "Report title"
+msgstr ""
+
+msgid "Report description"
+msgstr ""
+
+msgid "Insert title"
+msgstr ""
+
+msgid "Insert description"
+msgstr ""
+
+msgid "Include images related to report elements"
+msgstr ""
+
+msgid "Include the address related to report elements"
+msgstr ""
+
+msgid "Fields to include"
+msgstr ""
+
+msgid "Generate PDF"
+msgstr ""
