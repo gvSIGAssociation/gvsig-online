@@ -265,8 +265,12 @@ class Iso19139_2007Updater(XmlStandardUpdater):
         return self
         
     def update_thumbnail(self, thumbnail_url):
-        for thumbnail_element in self.tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic', namespaces):
-            update_thumbnail(thumbnail_element, thumbnail_url)
+        thumbnails = self.tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic', namespaces)
+        if len(thumbnails) > 0:
+            for thumbnail_element in thumbnails:
+                update_thumbnail(thumbnail_element, thumbnail_url)
+        else:
+            create_thumbnail(self.tree, thumbnail_url)
         return self
         
     def update_all(self, extent_tuple, thumbnail_url):
