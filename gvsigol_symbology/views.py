@@ -229,6 +229,7 @@ def unique_symbol_update(request, layer_id, style_id):
         
         style_rules = Rule.objects.filter(style=style)
         rules = []
+        rule = None
         for r in style_rules:
             symbolizers = []
             for s in Symbolizer.objects.filter(rule=r).order_by('order'):
