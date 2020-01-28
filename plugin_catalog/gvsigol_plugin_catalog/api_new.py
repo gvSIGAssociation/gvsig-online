@@ -138,7 +138,7 @@ class Geonetwork():
         csw_transaction_url = self.service_url + "/srv/eng/csw-publication"
         csw_response = self.session.post(csw_transaction_url, headers=headers, data=metadata.encode("UTF-8"), timeout=DEFAULT_TIMEOUT, proxies=settings.PROXIES)
         if csw_response.status_code==200:
-            tree = ET.fromstring(csw_response.text)
+            tree = ET.fromstring(csw_response.content)
             ns = {'csw': 'http://www.opengis.net/cat/csw/2.0.2'}
             for total_updated in tree.findall('./csw:TransactionSummary/csw:totalUpdated', ns):
                 if total_updated.text == '1':
