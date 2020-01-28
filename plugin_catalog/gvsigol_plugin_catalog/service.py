@@ -19,6 +19,7 @@
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 @author: Cesar Martinez Izquierdo <cmartinez@scolab.es>
 '''
+from builtins import str as text
 from gvsigol_services import signals
 from gvsigol_services import geographic_servers
 from gvsigol_plugin_catalog import settings as plugin_settings
@@ -208,6 +209,7 @@ class Geonetwork():
         
     def layer_updated_handler(self, sender, **kwargs):
         try:
+            logger.debug(u'layer_updated_handler')
             layer = kwargs['layer']
             lm = LayerMetadata.objects.get(layer=layer)
             

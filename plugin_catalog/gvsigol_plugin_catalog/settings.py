@@ -13,4 +13,4 @@ CATALOG_FACETS_ORDER = '["panaceaWorkingGroups", "interregMedProjects", "type", 
 CATALOG_DISABLED_FACETS = '["mdActions"]'
 
 METADATA_VIEWER_BUTTON = 'FULL'
-DISABLE_CATALOG_NAVBAR_MENUS = 'True'
+DISABLE_CATALOG_NAVBAR_MENUS = 'False'
