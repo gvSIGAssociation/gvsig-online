@@ -3404,6 +3404,42 @@ def _describeFeatureType(lyr, workspace, skip_pks):
     
     return response
 
+def describe_feature_type(lyr, workspace):
+    try:
+        layer = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
+        params = json.loads(layer.datastore.connection_params)
+        schema = params.get('schema', 'public')
+
+        i = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
+        layer_defs = i.get_fields_info(layer.name, schema)
+        layer_mv_defs = []
+        if layer_defs.__len__() == 0:
+            layer_mv_defs = i.get_fields_mv_info(layer.name, schema)
+        layer_defs = layer_defs + layer_mv_defs
+        geom_defs = i.get_geometry_columns_info(layer.name, schema)
+
+        for layer_def in layer_defs:
+            for geom_def in geom_defs:
+                if layer_def['name'] == geom_def[2]:
+                    layer_def['type'] = geom_def[5]
+                    layer_def['length'] = geom_def[4]
+        for layer_def in layer_defs:
+            enum, multiple = utils.is_field_enumerated(layer_def['name'], lyr, layer.datastore.name)
+            if enum:
+                if multiple:
+                    layer_def['type'] = 'multiple_enumeration'
+                else:
+                    layer_def['type'] = 'enumeration'
+
+        response = {'fields': layer_defs}
+
+
+    except Exception as e:
+        print e.message
+        response = {'fields': [], 'error': e.message}
+        pass
+    
+    return response
 
 @csrf_exempt
 def describeFeatureTypeWithPk(request):
