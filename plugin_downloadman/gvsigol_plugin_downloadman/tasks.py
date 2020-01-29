@@ -396,7 +396,7 @@ def getCatalogResourceURL(res_type, resource_name, resource_url, params):
 
 def getGvsigolResourceURL(res_type, layer, params):
     if layer:
-        if res_type == ResourceLocator.OGC_WFS_RESOURCE_TYPE and layer.datastore.workspace.wfs_endpoin:
+        if res_type == ResourceLocator.OGC_WFS_RESOURCE_TYPE and layer.datastore.workspace.wfs_endpoint:
             baseUrl = layer.datastore.workspace.wfs_endpoint
             return (_getWfsRequest(layer.name, baseUrl, params), True)
         elif res_type == ResourceLocator.OGC_WCS_RESOURCE_TYPE and layer.datastore.workspace.wcs_endpoint:
@@ -456,7 +456,7 @@ def preprocessLocator(resourceLocator, resource_descriptor):
             resourceLocator.authorization = ResourceLocator.AUTHORIZATION_PENDING
         else:
             resourceLocator.authorization = ResourceLocator.AUTHORIZATION_NOT_REQUIRED
-    elif resourceLocator.layer_id_type == ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE:
+    elif resourceLocator.layer_id_type == ResourceLocator.GVSIGOL_LAYER_ID:
         # TODO: check user permissions on the layer
         layer = getLayer(resourceLocator.layer_id)
         (resourceLocator.resolved_url, resourceLocator.is_dynamic) = getGvsigolResourceURL(res_type, layer, params)
