@@ -342,7 +342,7 @@ SymbologyUtils.prototype.reloadLayerPreview = function(name){
 	layers.forEach(function(layer){
 		if (!layer.baselayer && !layer.external) {
 			if (layer.get("id") === 'preview-layer') {
-				layer.getSource().updateParams({'STYLES': name+"__tmp", time_: (new Date()).getTime()});
+				layer.getSource().updateParams({'STYLES': name+"__tmp", "_time": (new Date()).getTime()});
 				self.map.render();
 			}
 		};
