@@ -594,7 +594,6 @@ EditionBar.prototype.showInfo = function(evt, layer, features, selectInteraction
 	html += '</li>';
 
 	for (var i in features) {
-
 			var fid = features[i].getId();
 			var is_first_configured = true;
 			var item_shown = false;
@@ -753,8 +752,6 @@ EditionBar.prototype.showInfo = function(evt, layer, features, selectInteraction
 EditionBar.prototype.addModifyInteraction = function() {
 
 	var self = this;
-
-	//this.map.un('click', this.click_callback);
 	this.map.on('click', this.click_callback);
 
 	this.selectInteraction = new ol.interaction.Select({
@@ -1063,7 +1060,6 @@ EditionBar.prototype.getNumericProperties = function(featureType){
 		}
 		scale += "1";
 		return "min=-"+min_string+" max="+ min_string +" step="+scale;
-		//return "min=-999999999999999 max=999999999999999 step=0,000000000000000000001";
 	}
 
 
@@ -1278,7 +1274,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 							'format': dateformat
 						});
 						featureProperties += '<div id="datetimepicker-' + this.featureType[i].name + '"><input id="' + this.featureType[i].name + '" class="form-control"/></div>';
-						//featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="'+dateformat+'">';
+					
 					} else if (this.featureType[i].type.endsWith("enumeration")) {
 						var name = this.featureType[i].name;
 						var has_multiple = false;
@@ -1290,6 +1286,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 							enumeration_names.push(this.featureType[i].name);
 							featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="single"></div>';
 						}
+					
 					} else if (this.isStringType(this.featureType[i].type)) {
 						if (this.featureType[i].name.startsWith("form_")) {
 							featureProperties += '<br/><a target="_blank" class="form-link form-link-open form-control" href="" data-orig="'+ this.featureType[i].name +'" data-value=""><i class="fa fa-check-square-o" aria-hidden="true"></i>&nbsp;&nbsp;' + gettext("Show form") + '</a>';
@@ -1506,7 +1503,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 				} else if (self.resourceManager.getEngine() == 'alfresco'){
 					self.resourceManager.saveResource(transaction.fid);
 				}
-				self.selectedLayer.getSource().updateParams({"time": Date.now()});
+				self.selectedLayer.getSource().updateParams({"_time": Date.now()});
 				self.showLayersTab();
 			}
 			var geojson_obj = new ol.format.GeoJSON();
@@ -1957,7 +1954,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 				} else if (self.resourceManager.getEngine() == 'alfresco'){
 					self.resourceManager.updateResource(transaction.fid);
 				}
-				self.selectedLayer.getSource().updateParams({"time": Date.now()});
+				self.selectedLayer.getSource().updateParams({"_time": Date.now()});
 				self.clearFeatureBackup();
 				self.selectInteraction.getFeatures().clear();
 				self.showLayersTab();
@@ -2124,7 +2121,7 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 					});
 					self.wfsLayer.getSource().removeFeature(feature);
 					self.removeInteraction.getFeatures().clear();
-					self.selectedLayer.getSource().updateParams({"time": Date.now()});
+					self.selectedLayer.getSource().updateParams({"_time": Date.now()});
 					self.showLayersTab();
 				}
 			}
