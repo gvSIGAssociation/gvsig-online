@@ -631,10 +631,10 @@ getFeatureInfo.prototype.appendInfo = function(features, count){
 										var text = features[i].feature.properties[key];
 		
 										if(typeof features[i].feature.properties[key] == 'boolean' && text == true){
-											text = "<input type='checkbox' checked onclick=\"return false;\">";
+											text = '<input disabled checked type="checkbox">';
 										}else{
 											if(typeof features[i].feature.properties[key] == 'boolean' && text == false){
-												text = "<input type='checkbox' onclick=\"return false;\">";
+												text = '<input disabled type="checkbox">';
 											}
 										}
 		
@@ -836,9 +836,9 @@ getFeatureInfo.prototype.showMoreInfo = function(fid, features, tab_opened){
 					}
 					if(featureType[i].type == "boolean"){
 						if(value == true){
-							value = "<input type='checkbox' checked onclick=\"return false;\">";
+							value = '<input disabled checked type="checkbox">';
 						}else {
-							value = "<input type='checkbox' onclick=\"return false;\">";
+							value = '<input disabled type="checkbox">';
 						}
 					}
 	
