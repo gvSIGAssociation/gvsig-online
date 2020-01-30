@@ -1112,10 +1112,8 @@ CatalogView.prototype.showPanel = function(searchString, geomFilter){
 	if (firstTime && !geomFilter) {
 		geomFilter = ol.geom.Polygon.fromExtent(viewer.core.getMap().getView().calculateExtent(viewer.core.getMap().getSize()));
 	}
-	if (geomFilter) {
-		this.catalog_map.map.getView().fit(geomFilter);
-	}
 	this.catalog_map.setSpatialFilter(geomFilter);
+	this.catalog_map.zoomToSelection();
 	$('.viewer-search-form').css("display","none");
 	if (searchString) {
 		$("#gn-any-field").val(searchString);

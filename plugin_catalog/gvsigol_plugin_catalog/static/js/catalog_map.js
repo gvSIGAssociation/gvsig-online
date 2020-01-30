@@ -46,13 +46,30 @@ CatalogMap.prototype.getSelectedArea = function(format){
 }
 
 CatalogMap.prototype.setSpatialFilter = function(geom, filterType) {
-	if (geom!=null && (geom.getType()=='Polygon' || geom.getType()=='MultiPolygon')) {
+	if (geom!=null) {
 		this.selected_feat = new ol.Feature({
 			name: "selected_area",
 			geometry: geom
 		});
 		this.vector_source.clear();
 		this.vector_source.addFeatures([this.selected_feat]);
+	}
+}
+
+CatalogMap.prototype.zoomToSelection = function() {
+	if (this.selected_feat!=null) {
+		var geom = this.selected_feat.getGeometry(); 
+		if (geom!=null) {
+			if (geom.getType()=='Point' || geom.getType()=='MultiPoint') {
+				var extent = geom.getExtent();
+				var x = extent[0] + (extent[2]-extent[0])/2;
+				var y = extent[1] + (extent[3]-extent[1])/2;
+				this.map.getView().setCenter([x, y]);
+			}
+			else {
+				this.map.getView().fit(geom);
+			}
+		}
 	}
 }
 
