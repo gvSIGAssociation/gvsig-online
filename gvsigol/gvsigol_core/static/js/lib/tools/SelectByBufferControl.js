@@ -65,6 +65,11 @@ var SelectByBufferControl = function(map, toolbar) {
 			}
 		}
 	});
+	this.control.on('change:active', function(evt) {
+		if (!evt.active) {
+			self._disableClickEvent();
+		}
+	});
 	this.toolbar.addControl(this.control);
 };
 
@@ -293,7 +298,7 @@ SelectByBufferControl.prototype.isGeomType = function(type){
 	return false;
 };
 
-SelectByBufferControl.prototype.deactivate = function() {
+SelectByBufferControl.prototype._disableClickEvent = function() {
 	this.active = false;
 
 	if (this.source) this.source.clear();
@@ -304,5 +309,9 @@ SelectByBufferControl.prototype.deactivate = function() {
 		this.popup.hide();
 		this.popup = null;
 	}
+}
+
+SelectByBufferControl.prototype.deactivate = function() {
+	this._disableClickEvent();
 	viewer.core.clearAllSelectedFeatures();
 };
