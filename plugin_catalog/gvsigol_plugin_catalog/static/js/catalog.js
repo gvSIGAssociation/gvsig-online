@@ -253,8 +253,10 @@ CatalogView.prototype.filterCatalog = function(){
 	if (this.catalog_map.isSpatialFilterEnabled()) {
 		var geom = this.catalog_map.getSelectedArea();
 		if (geom != null) {
+			// don't use the real geometry for filtering, use the bbox instead
+			var extent = ol.geom.Polygon.fromExtent(geom.getExtent());
 			var format = new ol.format.WKT();
-			var selectedArea =  format.writeGeometry(geom, {dataProjection: 'EPSG:4326', featureProjection: this.catalog_map.map.getView().getProjection()});
+			var selectedArea =  format.writeGeometry(extent, {dataProjection: 'EPSG:4326', featureProjection: this.catalog_map.map.getView().getProjection()});
 		}
 	}
 	this.launchQuery(orWildcardSearch, categories, keywords, resources, creation_from, creation_to, date_from, date_to, selectedArea);
@@ -773,7 +775,7 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 	var self = this;
 	var filters = ""
 		if(search && search.length > 0){
-			filters += "&any="+search;
+			filters += "&title_OR_abstract_OR_keywords="+search;
 		}
 	if(resources && resources.length > 0){
 		filters += this.getKeywordQuery(resources, "orgName");
