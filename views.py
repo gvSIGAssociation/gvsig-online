@@ -33,6 +33,7 @@ import string
 import unicodedata
 import urllib
 import zipfile
+import hashlib
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -1258,6 +1259,16 @@ def layer_update(request, layer_id):
             layer.external_params = json.dumps(params)
             
             layer.save()
+            
+            if 'layer-image' in request.FILES:
+                up_file = request.FILES['layer-image']
+                path, _ = utils.get_layer_img(layer.id, up_file.name)
+                
+                destination = open(path, 'wb+')
+                for chunk in up_file.chunks():
+                    destination.write(chunk)
+                    destination.close()
+                  
 
             if layer.datastore.type == 'c_ImageMosaic':
                 gs.updateImageMosaicTemporal(layer.datastore, layer)
@@ -1334,7 +1345,9 @@ def layer_update(request, layer_id):
         html = True
         if layer.detailed_info_html == None or layer.detailed_info_html == '' or layer.detailed_info_html == 'null':
             html = False
-        return render(request, 'layer_update.html', {'html': html, 'layer': layer, 'workspace': workspace, 'form': form, 'layer_id': layer_id, 'date_fields': json.dumps(date_fields), 'redirect_to_layergroup': redirect_to_layergroup, 'layer_md_uuid': md_uuid, 'plugins_config': plugins_config})
+        
+        _, layer_image_url = utils.get_layer_img(layer.id, None)
+        return render(request, 'layer_update.html', {'html': html, 'layer': layer, 'workspace': workspace, 'form': form, 'layer_id': layer_id, 'date_fields': json.dumps(date_fields), 'redirect_to_layergroup': redirect_to_layergroup, 'layer_md_uuid': md_uuid, 'plugins_config': plugins_config, 'layer_image_url': layer_image_url})
 
 def get_date_fields(layer_id):
     date_fields = []
