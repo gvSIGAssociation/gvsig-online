@@ -13,7 +13,7 @@ import urllib2
 import zipfile
 
 from gvsigol import settings
-from gvsigol_core.models import Project, ProjectLayerGroup
+from gvsigol_core.models import Project
 from gvsigol_services.models import Server
 
 
@@ -83,13 +83,17 @@ class Tiling():
         ytile = int(floor((n * (maxY - y)) / (maxY - minY)))
         return (xtile, ytile)
     
-    def _download_wmts(self, zoom, xtile, ytile):
-        params = "?REQUEST=GetTile&&TILEMATRIXSET=" + self.tilematrixset + "&LAYER=" + self.layer + "&FORMAT=image/jpeg" 
+    def _download_wmts(self, zoom, xtile, ytile, format_):
+        params = "?REQUEST=GetTile&&TILEMATRIXSET=" + self.tilematrixset + "&LAYER=" + self.layer + "&FORMAT=" + format_ 
         url = self.tile_url + params
         
         url = "%s&TILEMATRIX=%s&TILECOL=%d&TILEROW=%d" % (url, (self.tilematrixset + ':' + str(zoom)), xtile, ytile)
         dir_path = "%s/%d/%d/" % (self.directory,zoom, xtile)
-        download_path = "%s/%d/%d/%d.png" % (self.directory, zoom, xtile, ytile)
+        
+        if(format_.endswith("png")):
+            download_path = "%s/%d/%d/%d.png" % (self.directory, zoom, xtile, ytile)
+        else:
+            download_path = "%s/%d/%d/%d.jpg" % (self.directory, zoom, xtile, ytile)
         
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
@@ -141,14 +145,14 @@ class Tiling():
             pass
     
     #No se usa
-    def create_tiles(self, min_lon, min_lat, max_lon, max_lat, maxzoom):
+    def create_tiles(self, min_lon, min_lat, max_lon, max_lat, maxzoom, format_):
             #from 0 to 6 download all
         if self.mode  != "OSM":
             for zoom in range(0,7,1):
                 #break;
                 for x in range(0,2**zoom,1):        
                     for y in range(0,2**zoom,1):
-                        self._download_wmts(zoom, x, y)
+                        self._download_wmts(zoom, x, y, format_)
                     
         # from 6 to 15 ranges
         for zoom in range(7, int(maxzoom)+1, 1):
@@ -161,10 +165,10 @@ class Tiling():
                     if self.mode == "OSM":
                         self._download_url(zoom, x, y)
                     else:
-                        self._download_wmts(zoom, x, y)   
+                        self._download_wmts(zoom, x, y, format_)   
                           
                         
-    def create_tiles_from_utm(self, min_x, min_y, max_x, max_y, maxzoom):
+    def create_tiles_from_utm(self, min_x, min_y, max_x, max_y, maxzoom, format_):
         #from 0 to 6 download all
 #         if self.mode  != "OSM":
 #             for zoom in range(0,7,1):
@@ -184,7 +188,7 @@ class Tiling():
 
                 for x in range(xtile, final_xtile + 1, 1):
                     for y in range(ytile, final_ytile - 1, -1):  
-                        self._download_wmts(zoom, x, y)
+                        self._download_wmts(zoom, x, y, format_)
             #Si la capa es OSM los niveles 0-6 ya están en un zip
                         
         #Para cualquier capa base se descargan los siguientes niveles               
@@ -199,7 +203,7 @@ class Tiling():
                     if self.mode == "OSM":
                         self._download_url(zoom, x, y)
                     else:
-                        self._download_wmts(zoom, x, y)     
+                        self._download_wmts(zoom, x, y, format_)     
                         
                         
     def get_zoom_level(self, dist, tiles_side):
@@ -240,7 +244,7 @@ class Tiling():
 
 #***********END TILING CLASS********************
 
-def tiling_base_layer(base_lyr, prj_id, tiles_side, tilematrixset):
+def tiling_base_layer(base_lyr, prj_id, num_res_levels, tilematrixset, format_='image/png'):
     prj = Project.objects.get(id = prj_id)
     if prj.extent is not None:
         bbox = prj.extent.split(',')
@@ -263,7 +267,7 @@ def tiling_base_layer(base_lyr, prj_id, tiles_side, tilematrixset):
         
         mode = base_lyr.type
         tiling = Tiling(folder_package, mode, tilematrixset, url)
-        zoom = tiling.get_zoom_level(floor(max_x - min_x)/1000, tiles_side) 
+        #num_res_levels = tiling.get_zoom_level(floor(max_x - min_x)/1000, tiles_side) 
         
         if mode == 'OSM':
             base_zip = os.getcwd() + "/gvsigol_services/static/data/osm_tiles_levels_0-6.zip"
@@ -282,7 +286,7 @@ def tiling_base_layer(base_lyr, prj_id, tiles_side, tilematrixset):
             lyr_max_y = float(extent[3])
             tiling.set_layer_extent(lyr_min_x, lyr_min_y, lyr_max_x, lyr_max_y)
             
-        tiling.create_tiles_from_utm(min_x, min_y, max_x, max_y, zoom)
+        tiling.create_tiles_from_utm(min_x, min_y, max_x, max_y, num_res_levels, format_)
         shutil.make_archive(folder_prj, 'zip', folder_prj)
         shutil.rmtree(folder_prj)
         

@@ -2595,15 +2595,19 @@ def create_base_layer(request, pid):
         #if tiling_service.exists_base_layer_tiled(pid):
             #    return utils.get_exception(400, 'The base layer already exists')
             
-        tiles = None
+        num_res_levels = None
         try:
-            tiles = int(request.POST.get('tiles'))
+            num_res_levels = int(request.POST.get('tiles'))
+            format_ = request.POST.get('format')
         except Exception:
             return utils.get_exception(400, 'Wrong number of tiles')
         tilematrixset = request.POST.get('tilematrixset')
         
-        if tiles is not None:
-            tiling_service.tiling_base_layer(base_lyr, pid, tiles, tilematrixset)
+        if num_res_levels is not None:
+            if num_res_levels > 20:
+                return utils.get_exception(400, 'The number of resolution levels cannot be greater than 20')
+            else:
+                tiling_service.tiling_base_layer(base_lyr, pid, num_res_levels, tilematrixset, format_)
         else:
             return utils.get_exception(400, 'Wrong number of tiles')
                     
