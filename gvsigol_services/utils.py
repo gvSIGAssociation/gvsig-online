@@ -35,6 +35,7 @@ from gvsigol_auth.models import UserGroup
 from gvsigol_services.models import Datastore, LayerResource, \
     LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup
 from models import LayerReadGroup, LayerWriteGroup
+import hashlib
 
 
 def get_all_user_groups_checked_by_layer(layer):
@@ -291,7 +292,43 @@ def get_enum_entry(column_name, lyr_name, workspace_name):
         if len(enums) > 0:
             return Enumeration.objects.get(id=enums[0].enumeration_id)
             
+def get_layer_img(layerid, filename):
+    """
+    Devuelve la ruta y la URL de un icono asociado a una capa. 
     
+    Una imagen de una capa se guarda en media/images y su nombre es un md5 de layer + id de la capa. 
+    Cuando se sube el fichero este se guarda con la extensión del original ('png', 'jpg', 'jpeg', 'gif' o 'tif') 
+    pero cuando se consulta no se conoce la extensión con la que se guardó por lo que el parámetro filename será null. 
+    
+    Si quiero obtener la imagen de una capa se llamará a get_layer_img(idcapa, None)
+    """
+    path_ = None
+    url = None
+    m = hashlib.md5()
+    m.update("layer" + str(layerid))
+    if(filename is not None):
+        suffix = filename.split('.')
+        ext = ''
+        if(suffix is not None and len(suffix) > 0):
+            ext = suffix[-1]
+        filename = m.hexdigest() + "." + ext
+        path_ = settings.MEDIA_ROOT + "images/" + filename
+        url = settings.MEDIA_URL + "images/" + filename
+    else:
+        suffix_list = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'svg']
+        filename = m.hexdigest()
+        for ext in suffix_list:
+            test = filename + "." + ext
+            path_ = settings.MEDIA_ROOT + "images/" + test
+            if os.path.exists(path_):
+                url = settings.MEDIA_URL + "images/" + test
+                break
+            else:
+                path_ = None
+            
+    
+    return path_, url
+     
 def get_exception(code, msg):
     response = HttpResponse(msg)
     response.status_code = code

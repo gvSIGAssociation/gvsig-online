@@ -103,3 +103,8 @@
 .download-btn > .fa {
 	color: #333;
 }
+
+.layer-icon {
+	margin-right: 2px;
+	margin-top: -8px;
+}

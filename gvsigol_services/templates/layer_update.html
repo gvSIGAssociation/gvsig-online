@@ -5,9 +5,9 @@
 {% block content %}
 
 {% if redirect_to_layergroup %}
-<form role="form" method="post" action="/gvsigonline/services/layer_update/{{layer_id}}/?redirect=layergroup-redirect">
+<form role="form" enctype="multipart/form-data" method="post" action="/gvsigonline/services/layer_update/{{layer_id}}/?redirect=layergroup-redirect">
 {% else %}
-<form role="form" method="post" action="/gvsigonline/services/layer_update/{{layer_id}}/">
+<form role="form" enctype="multipart/form-data" method="post" action="/gvsigonline/services/layer_update/{{layer_id}}/">
 {% endif %}	
 <div class="row">
 	<div class="col-md-12">
@@ -83,6 +83,17 @@
 										<label for="id_format">{% trans "Format" %}</label>
 										{{ form.format }}						
 									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12" style="margin-bottom: 20px;">
+										<div class="provider-img">
+											<img style="height: 50px; width: 50px;" id="image-preview" src="{{layer_image_url}}" alt="">
+										</div>
+										<div class="provider-img-change">
+											<label>{% trans "Icono" %}</label>({% trans "Supported formats" %}: .jpg, .jpeg, .png, .svg)
+											<input id="layer-image" name="layer-image" accept=".jpg, .jpeg, .png, .svg" type="file" class="file" data-show-preview="true">						
+										</div>
+									</div>	
 								</div>
 							</div>
 						</div>
@@ -313,6 +324,22 @@
 <script type="text/javascript">
 $('#menu-manage-services').addClass("active");
 $('#submenu-layers').addClass("active");
+	
+	function readURL(input) {
+	    if (input.files && input.files[0]) {
+	        var reader = new FileReader();
+	        
+	        reader.onload = function (e) {
+	            $('#image-preview').attr('src', e.target.result);
+	        }
+	        
+	        reader.readAsDataURL(input.files[0]);
+	    }
+	}
+
+	$("#layer-image").change(function(){
+	  readURL(this);
+	});
 
 	function rebuildSelect(selectObj, placeholderOptionText, placeholderSelected, extraOptions) {
 		selectObj.empty().html(' ');
