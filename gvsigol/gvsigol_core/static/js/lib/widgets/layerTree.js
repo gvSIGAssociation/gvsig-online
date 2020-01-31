@@ -1823,7 +1823,9 @@ layerTree.prototype.createOverlayUI = function(layer, group_visible) {
 		ui += '		<div class="box-header with-border">';
 		
 		if(layer.icon) {
+			ui += '			<span class="handle" style="margin-left:-1px"> ';
 			ui += '			<image class="layer-icon" src="' + layer.icon + '" width=16px height=16px"/>';
+			ui += '			</span>';
 		} else {
 			ui += '			<span class="handle"> ';
 			ui += '				<i class="fa fa-ellipsis-v"></i>';
