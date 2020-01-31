@@ -34,7 +34,7 @@ from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User, AnonymousUser
 from gvsigol_auth.utils import is_superuser, staff_required
 import utils as core_utils
-from gvsigol_services import geographic_servers
+from gvsigol_services import geographic_servers, utils
 from django.views.decorators.cache import cache_control
 from gvsigol import settings
 import gvsigol_services.utils as services_utils
@@ -1006,6 +1006,8 @@ def project_get_conf(request):
                                         layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
                             
                             layer['timeout'] = l.timeout
+                            _, urlicon = utils.get_layer_img(l.id, None)
+                            layer['icon'] = urlicon 
                             layers.append(layer)
     
                             w = {}
