@@ -146,25 +146,31 @@
 								{% if superuser %}
 								<div class="row">
 									<div class="col-md-6 form-group">
-										<label>{% trans "Create base layer" %}</label>&nbsp;&nbsp;
+										<label>{% trans "Crear capa base" %}</label>&nbsp;&nbsp;
 									</div>
 								</div>
 
 								<div class="row">
-									<div class="col-md-2 form-group">
+									<div class="col-md-1 form-group">
 										<input placeholder="{% trans 'Tiles per side' %}" name="tiles-side" id="tiles-side" type="text" class="form-control" value="16">															
 									</div>
-									<div class="col-md-6 form-group" style="padding-left:0px;top:5px;">
-										<label>{% trans "Tiles per side in the last level" %}</label>&nbsp;&nbsp;															
+									<div class="col-md-1 form-group" style="padding-left:0px;top:5px;">
+										<label>{% trans "Niveles de zoom" %}</label>&nbsp;&nbsp;															
 									</div>
-								</div>
-								<div class="row">
+									<div class="col-md-1 form-group" style="padding-left:0px;top:5px;">
+										<input type="radio" id="png" name="imgtype" value="image/png" checked>{% trans "PNG" %}<br>
+										<input type="radio" id="jpg" name="imgtype" value="image/jpeg">{% trans "JPG" %}<br>														
+									</div>
 									<div class="col-md-2 form-group">
 										<input placeholder="{% trans 'Tilematrixset' %}" name="tilematrixset" id="tilematrixset" type="text" class="form-control" value="EPSG:900913">															
 									</div>
-									<div class="col-md-6 form-group" style="padding-left:0px;top:5px;">
+									<div class="col-md-2 form-group" style="padding-left:0px;top:5px;">
 										<label>{% trans "Tilematrixset (WMTS)" %}</label>&nbsp;&nbsp;															
 									</div>
+									
+								</div>
+								<div class="row">
+									
 								</div>
 								<div class="row">
 									<div class="col-md-2 form-group">
@@ -613,7 +619,8 @@
 				async: false,
 				data: {
 					"tiles":$("#tiles-side").val(),
-					"tilematrixset":$("#tilematrixset").val()
+					"tilematrixset":$("#tilematrixset").val(),
+					"format":$("input[name='imgtype']:checked").val()
 				},
 				url: '/gvsigonline/services/create_base_layer/{{pid}}/',
 				beforeSend:function(xhr){
