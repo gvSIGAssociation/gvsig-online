@@ -1821,10 +1821,16 @@ layerTree.prototype.createOverlayUI = function(layer, group_visible) {
 		
 		ui += '<div id="layer-box-' + id + '" data-layerid="' + id + '" data-zindex="' + mapLayer.getZIndex() + '" class="box layer-box thin-border box-default collapsed-box">';
 		ui += '		<div class="box-header with-border">';
-		ui += '			<span class="handle"> ';
-		ui += '				<i class="fa fa-ellipsis-v"></i>';
-		ui += '				<i class="fa fa-ellipsis-v"></i>';
-		ui += '			</span>';
+		
+		if(layer.icon) {
+			ui += '			<image class="layer-icon" src="' + layer.icon + '" width=16px height=16px"/>';
+		} else {
+			ui += '			<span class="handle"> ';
+			ui += '				<i class="fa fa-ellipsis-v"></i>';
+			ui += '				<i class="fa fa-ellipsis-v"></i>';
+			ui += '			</span>';
+		}
+		
 		if (group_visible) {
 			ui += '		<input type="checkbox" id="' + id + '" disabled checked>';
 		}else{
