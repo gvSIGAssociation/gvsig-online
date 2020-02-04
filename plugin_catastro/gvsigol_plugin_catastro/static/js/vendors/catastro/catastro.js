@@ -161,6 +161,7 @@ var	ui = '<ul class="nav nav-tabs">';
 			}
 
 			if($("#rustic_radio").is(":checked")){
+			    params['urban_radio'] = false;
 				params['poligonovia'] = $("#road-polygon-input").val();
 				params['parcelavia'] = $("#road-parcel-input").val();
 			}
