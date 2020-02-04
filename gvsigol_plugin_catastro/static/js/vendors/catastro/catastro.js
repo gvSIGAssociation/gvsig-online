@@ -126,8 +126,6 @@ var	ui = '<ul class="nav nav-tabs">';
 		if(tab == "tab-cadastral-reference"){
 			type = 'ref_catastral';
 			params = {
-				provincia : $("#provincia-rc-input").val(),
-				municipio : $("#municipio-rc-input").val(),
 				rc : $("#cadastral_reference_input").val()
 			}
 		}
@@ -273,13 +271,7 @@ var	ui = '<ul class="nav nav-tabs">';
                 var value = $(this).find("np").text();
                 options += "<option value=\""+value+"\">"+value+"</option>";
             });
-	  		$("#provincia-rc-input").empty().html(options)
 	  		$("#provincia-input").empty().html(options);
-
-	  		$("#provincia-rc-input").unbind("change").change(function(){
-	  			self.onMunicipallyKeyPress($(this).attr("id"));
-	  		})
-
 	  		$("#provincia-input").unbind("change").change(function(){
 	  			self.onMunicipallyKeyPress($(this).attr("id"));
 	  		})
