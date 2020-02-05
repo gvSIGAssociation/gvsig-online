@@ -24,84 +24,62 @@
  * TODO
  */
 var shareView = function(conf, map, layerTree) {
-	var self = this;
-	this.conf = conf;
-	this.map = map;
-	this.layerTree = layerTree;
-
+	this.tool = new ShareView(conf, map, layerTree);
 	this.id = "share-view";
-	
+	this.installUI();
+};
+
+shareView.prototype.installUI = function() {
 	var button = '<li role="presentation"><a id="share-view" role="menuitem" tabindex="-1" href="#"><i class="fa fa-share-alt m-r-5"></i>'+gettext("Share view")+'</a></li>';
 	$('#gvsigol-navbar-file-menu').append(button);
 
 	this.$button = $("#share-view");
-	var handler = function(e) {self.handler(e);};
+	var self = this;
+	var handler = function(e) {self.tool.handle(e)};
 	this.$button.on('click', handler);
 	this.$button.on('touchstart', handler);
+}
 
-};
 
-
+/**
+ * We define the tool that can be used independently from UI
+ */
+var ShareView = function(conf, map, layerTree) {
+	this.conf = conf;
+	this.map = map;
+	this.layerTree = layerTree;
+}
 
 /**
  * @param {Event} e Browser event.
  */
-shareView.prototype.handler = function(e) {
+ShareView.prototype.handle = function(e) {
 	var self = this;
 	e.preventDefault();
-	
-	/*var ui = '';
-	ui += '<div class="row">';
-	ui += 	'<div class="col-md-12 form-group">';	
-	ui += 	'<label>' + gettext('Enter a description') + '</label>';
-	//ui += 	'<textarea class="form-control" name="shareview-emails" id="shareview-emails" rows="3" placeholder"Enter email addresses separated by semicolons"></textarea>';
-	ui += 	'<textarea class="form-control" name="shareview-description" id="shareview-description" rows="2"></textarea>';
-	ui += 	'</div>';
-	ui += '</div>';
-	
-	$('#float-modal .modal-body').empty();
-	$('#float-modal .modal-body').append(ui);
-	
-	var buttons = '';
-	buttons += '<button id="float-modal-cancel-shareview" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
-	buttons += '<button id="float-modal-accept-shareview" type="button" class="btn btn-default">' + gettext('Save') + '</button>';
-	
-	$('#float-modal .modal-footer').empty();
-	$('#float-modal .modal-footer').append(buttons);
-	
-	$("#float-modal").modal('show');
-	
-	var self = this;	
-	$('#float-modal-accept-shareview').on('click', function () {
-		//var emails = $('#shareview-emails').val();
-		var description = $('#shareview-description').val();
-		self.save(description);
-		$('#float-modal').modal('hide');
-	});*/
-	
 	var description = $('#shareview-description').val();
 	self.save(description);
 	$('#float-modal').modal('hide');
 };
 
+ShareView.prototype.getViewState = function(e) {
+	var viewState = this.layerTree.getState();
+	var center = this.map.getView().getCenter();
+	var transformedCenter = ol.proj.transform(center, 'EPSG:3857', 'EPSG:4326');
+	viewState['view'] = {
+			"max_zoom_level": this.conf.view.max_zoom_level,
+			"zoom": this.map.getView().getZoom(),
+			"center_lon": transformedCenter[0],      
+			"center_lat": transformedCenter[1]
+		}
+	return viewState;
+}
+
 /**
  * TODO
  */
-shareView.prototype.save = function(description) {
+ShareView.prototype.save = function(description) {
 	var self = this;
-	
-	var viewState = this.layerTree.getState();
-	
-	var center = map.getView().getCenter();
-	var transformedCenter = ol.proj.transform(center, 'EPSG:3857', 'EPSG:4326');
-	
-	viewState['view'] = {
-		"max_zoom_level": this.conf.view.max_zoom_level,
-		"zoom": this.map.getView().getZoom(),
-	    "center_lon": transformedCenter[0],      
-	    "center_lat": transformedCenter[1]
-	}
-	
+	var viewState = this.getViewState();
 	$.ajax({
 		type: 'POST',
 		async: true,

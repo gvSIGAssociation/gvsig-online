@@ -56,6 +56,8 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from actstream import action
 from actstream.models import Action
 from iso639 import languages
+from django.core.exceptions import PermissionDenied
+from django.utils.crypto import get_random_string
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
@@ -701,7 +703,7 @@ def load(request, project_name):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @cache_control(max_age=86400)
 def load_project(request, project_name):
-    if core_utils.is_valid_project(request.user, project_name):
+    if core_utils.can_read_project(request.user, project_name):
         project = Project.objects.get(name__exact=project_name)
 
         has_image = True
@@ -738,6 +740,8 @@ def load_project(request, project_name):
 @cache_control(max_age=86400)
 def load_public_project(request, project_name):
     project = Project.objects.get(name__exact=project_name)
+    if not core_utils.can_read_project(request.user, project):
+        return render(request, 'illegal_operation.html', {})
 
     has_image = True
     if "no_project.png" in project.image.url:
@@ -771,7 +775,7 @@ def load_public_project(request, project_name):
 @xframe_options_exempt
 @cache_control(max_age=86400)
 def portable_project_load(request, project_name):
-    if core_utils.is_valid_project(request.user, project_name):
+    if core_utils.can_read_project(request.user, project_name):
         project = Project.objects.get(name__exact=project_name)
         response = render(request, 'portable_viewer.html', {'supported_crs': core_utils.get_supported_crs(), 'project': project, 'pid': project.id, 'extra_params': json.dumps(request.GET)})
         #Expira la caché cada día
@@ -1265,39 +1269,38 @@ def documentation(request):
     }
     return render(request, 'documentation.html', response)
 
+def do_save_shared_view(pid, description, view_state, expiration, user, internal=False):
+    name = datetime.date.today().strftime("%Y%m%d") + get_random_string(length=32)
+    shared_url = settings.BASE_URL + '/gvsigonline/core/load_shared_view/' + name
+    shared_project = SharedView(
+        name=name,
+        project_id=pid,
+        description=description,
+        url=shared_url,
+        state=view_state,
+        expiration_date=expiration,
+        created_by=user.username,
+        internal=internal
+    )
+    shared_project.save()
+    return shared_project
+
 #@login_required(login_url='/gvsigonline/auth/login_user/')
 def save_shared_view(request):
     if request.method == 'POST':
         pid = int(request.POST.get('pid'))
+        if not core_utils.can_read_project(request.user, pid):
+            return HttpResponse(json.dumps({'result': 'illegal_operation', 'shared_url': ''}, indent=4), content_type='folder/json')
         #emails = request.POST.get('emails')
         description = request.POST.get('description')
         view_state = request.POST.get('view_state')
-
-        name = ''.join(random.choice(string.ascii_uppercase) for i in range(10))
-        if request.user.is_authenticated():
-            shared_url = settings.BASE_URL + '/gvsigonline/auth/login_user/?next=/gvsigonline/core/load_shared_view/' + name
-        else:
-            shared_url = settings.BASE_URL + '/gvsigonline/core/load_shared_view/' + name
-        shared_project = SharedView(
-            name=name,
-            project_id=pid,
-            description=description,
-            url=shared_url,
-            state=view_state,
-            expiration_date=datetime.datetime.now() + datetime.timedelta(days = settings.SHARED_VIEW_EXPIRATION_TIME),
-            created_by=request.user.username
-        )
-        shared_project.save()
-        
-        
-        
+        expiration_date = datetime.datetime.now() + datetime.timedelta(days = settings.SHARED_VIEW_EXPIRATION_TIME)
+        shared_view = do_save_shared_view(pid, description, view_state, expiration_date, request.user)
         #for email in emails.split(';'):
         #    send_shared_view(email, shared_url)
-        
         response = {
-            'shared_url': shared_url
+            'shared_url': shared_view.url
         }
-
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
     
 def send_shared_view(destination, shared_url):
@@ -1322,6 +1325,11 @@ def load_shared_view(request, view_name):
     try:
         shared_view = SharedView.objects.get(name__exact=view_name)
         project = Project.objects.get(id=shared_view.project_id)
+        if shared_view.internal and not request.user.is_superuser:
+            raise PermissionDenied
+        if not project.is_public or not request.user.is_authenticated():
+            shared_url = settings.BASE_URL + '/gvsigonline/auth/login_user/?next=/gvsigonline/core/load_shared_view/' + view_name
+            return redirect(shared_url)
 
         has_image = True
         if "no_project.png" in project.image.url:
@@ -1356,7 +1364,7 @@ def load_shared_view(request, view_name):
 @staff_required
 def shared_view_list(request):
 
-    shared_view_list = SharedView.objects.all()
+    shared_view_list = SharedView.objects.filter(internal=False)
 
     shared_views = []
     for sv in shared_view_list:
