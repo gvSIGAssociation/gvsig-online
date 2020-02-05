@@ -147,6 +147,13 @@
 								<div class="row">
 									<div class="col-md-6 form-group">
 										<label>{% trans "Crear capa base" %}</label>&nbsp;&nbsp;
+										<image id="processing_icon" src="{{processing_icon}}" width=60px height=60px {% if project.baselayer_version > 0 %}class="hide"{% endif %}></img>
+									</div>
+								</div>
+								
+								<div class="row">
+									<div class="col-md-6 form-group">
+										<a id="processing_url" href={{url_base_lyr}} style="color:#3c8dbc" {% if project.baselayer_version <= 0 %}class="hide"{% endif %}>Download</a>&nbsp;&nbsp;
 									</div>
 								</div>
 
@@ -614,9 +621,11 @@
 		});
 	  	
 	  	$('#button-create-base-layer').click(function() {
+	  		$("#processing_icon").removeClass("hide")
+	  		$("#processing_url").addClass("hide")
 	  		$.ajax({
 				type: 'POST',
-				async: false,
+				async: true,
 				data: {
 					"tiles":$("#tiles-side").val(),
 					"tilematrixset":$("#tilematrixset").val(),
@@ -627,7 +636,7 @@
 				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 				},
 				success	:function(response){
-					messageBox.show('info', gettext('tile process ended'));
+					//messageBox.show('info', gettext('tile process ended'));
 				},
 				error: function(jqXHR, textStatus, errorThrown){
 					messageBox.show('error', gettext(jqXHR.responseText));

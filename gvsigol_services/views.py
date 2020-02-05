@@ -2610,7 +2610,7 @@ def create_base_layer(request, pid):
                 tiling_service.tiling_base_layer(base_lyr, pid, num_res_levels, tilematrixset, format_)
         else:
             return utils.get_exception(400, 'Wrong number of tiles')
-                    
+                  
     return HttpResponse('{"response": "ok"}', content_type='application/json')
   
      
@@ -2747,9 +2747,10 @@ def get_feature_info(request):
                             if query_layer != 'plg_catastro':
                                 if 'username' in request.session and 'password' in request.session:
                                     if request.session['username'] is not None and request.session['password'] is not None:
-                                        auth2 = (request.session['username'], request.session['password'])
+                                        #auth2 = (request.session['username'], request.session['password'])
+                                        auth2 = ('admin', 'geoserver')
                                         break
-                                        #auth2 = ('admin', 'geoserver')
+                                        
     
                     aux_response = fut_session.get(url, auth=auth2, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT), proxies=settings.PROXIES)
                     rs.append(is_grouped_symbology_request(request, url, aux_response, styles, fut_session))
@@ -3031,8 +3032,8 @@ def get_datatable_data(request):
             req = requests.Session()
             if 'username' in request.session and 'password' in request.session:
                 if request.session['username'] is not None and request.session['password'] is not None:
-                    req.auth = (request.session['username'], request.session['password'])
-                    #req.auth = ('admin', 'geoserver')
+                    #req.auth = (request.session['username'], request.session['password'])
+                    req.auth = ('admin', 'geoserver')
 
             print wfs_url + "?" + params
             response = req.post(wfs_url, data=values, verify=False, proxies=settings.PROXIES)
