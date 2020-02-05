@@ -2,6 +2,24 @@
 # -*- coding: utf-8 -*-
 #
 
+'''
+    gvSIG Online.
+    Copyright (C) 2010-2017 SCOLAB.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 import base64
 from math import floor
 import math
@@ -14,6 +32,7 @@ import zipfile
 
 from gvsigol import settings
 from gvsigol_core.models import Project
+from gvsigol_services.decorators import start_new_thread
 from gvsigol_services.models import Server
 
 
@@ -102,7 +121,7 @@ class Tiling():
             os.makedirs(dir_path)
         
         if(not os.path.isfile(download_path)):
-            print "downloading %r" % url
+            #print "downloading %r" % url
             try:
                 request = urllib2.Request(url)
                 base64string = base64.b64encode('%s:%s' % (self.gsuser, self.gspaswd))
@@ -247,6 +266,8 @@ class Tiling():
 
 #***********END TILING CLASS********************
 
+
+@start_new_thread
 def tiling_base_layer(base_lyr, prj_id, num_res_levels, tilematrixset, format_='image/png'):
     prj = Project.objects.get(id = prj_id)
     if prj.extent is not None:
@@ -260,7 +281,7 @@ def tiling_base_layer(base_lyr, prj_id, num_res_levels, tilematrixset, format_='
         if base_lyr.datastore is not None:
             url = base_lyr.datastore.workspace.wmts_endpoint
         
-        layers_dir = os.path.join(settings.MEDIA_ROOT, 'layer_downloads')
+        layers_dir = os.path.join(settings.MEDIA_ROOT, settings.LAYERS_ROOT)
         
         millis = int(round(time.time() * 1000))
         folder_prj =  os.path.join(layers_dir, prj.name) + "_prj_" + str(millis) 
@@ -268,37 +289,47 @@ def tiling_base_layer(base_lyr, prj_id, num_res_levels, tilematrixset, format_='
         if not os.path.exists(layers_dir):
             os.mkdir(layers_dir)
         
-        mode = base_lyr.type
-        tiling = Tiling(folder_package, mode, tilematrixset, url)
-        #num_res_levels = tiling.get_zoom_level(floor(max_x - min_x)/1000, tiles_side) 
+        old_version = prj.baselayer_version
+        prj.baselayer_version = -99999
+        prj.save()
         
-        if mode == 'OSM':
-            base_zip = os.getcwd() + "/gvsigol_services/static/data/osm_tiles_levels_0-6.zip"
-            with zipfile.ZipFile(base_zip, 'r') as zipObj:
-                zipObj.extractall(path=layers_dir)
-                shutil.move(layers_dir + '/tiles_download', folder_package)
-        else:
-            lyr_name = base_lyr.datastore.workspace.name + ":" + base_lyr.name
-            tiling.set_layer_name(lyr_name)
+        try:
+            mode = base_lyr.type
+            tiling = Tiling(folder_package, mode, tilematrixset, url)
+            #num_res_levels = tiling.get_zoom_level(floor(max_x - min_x)/1000, tiles_side) 
             
-            extent = base_lyr.latlong_extent
-            extent = extent.split(',')
-            lyr_min_x = float(extent[0])
-            lyr_min_y = float(extent[1])
-            lyr_max_x = float(extent[2])
-            lyr_max_y = float(extent[3])
-            tiling.set_layer_extent(lyr_min_x, lyr_min_y, lyr_max_x, lyr_max_y)
-            
-        tiling.create_tiles_from_utm(min_x, min_y, max_x, max_y, num_res_levels, format_)
-        shutil.make_archive(folder_prj, 'zip', folder_prj)
-        shutil.rmtree(folder_prj)
+            if mode == 'OSM':
+                base_zip = os.getcwd() + "/gvsigol_services/static/data/osm_tiles_levels_0-6.zip"
+                with zipfile.ZipFile(base_zip, 'r') as zipObj:
+                    zipObj.extractall(path=layers_dir)
+                    shutil.move(layers_dir + '/tiles_download', folder_package)
+            else:
+                lyr_name = base_lyr.datastore.workspace.name + ":" + base_lyr.name
+                tiling.set_layer_name(lyr_name)
+                
+                extent = base_lyr.latlong_extent
+                extent = extent.split(',')
+                lyr_min_x = float(extent[0])
+                lyr_min_y = float(extent[1])
+                lyr_max_x = float(extent[2])
+                lyr_max_y = float(extent[3])
+                tiling.set_layer_extent(lyr_min_x, lyr_min_y, lyr_max_x, lyr_max_y)
+                
+            tiling.create_tiles_from_utm(min_x, min_y, max_x, max_y, num_res_levels, format_)
+            shutil.make_archive(folder_prj, 'zip', folder_prj)
+            shutil.rmtree(folder_prj)
+        except Exception:
+            #Si ha habido algún problema restauramos la versión vieja
+            prj.baselayer_version = old_version
+            prj.save()
+            return
         
         prj.baselayer_version = millis
         prj.save()
             
 def exists_base_layer_tiled(prj_id):
     prj = Project.objects.get(id = prj_id)
-    layers_dir = os.path.join(settings.MEDIA_ROOT, 'layer_downloads')
+    layers_dir = os.path.join(settings.MEDIA_ROOT, settings.LAYERS_ROOT)
     file_ =  os.path.join(layers_dir, prj.name) + "_prj.zip"
     return os.path.isfile(file_)
                 
