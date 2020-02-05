@@ -654,8 +654,23 @@ def project_update(request, pid):
                     'title': l.title,
                     'baselayer': baselayer
                 })
-
-        return render(request, 'project_update.html', {'tools': projectTools,'pid': pid, 'project': project, 'groups': groups, 'layergroups': layer_groups, 'has_geocoding_plugin': has_geocoding_plugin, 'toc': ordered_toc, 'superuser' : is_superuser(request.user)})
+        
+        url_base_lyr = ''
+        icon = settings.BASE_URL + settings.STATIC_URL + 'img/processing.gif'
+        if(project.baselayer_version > 0):
+            url_base_lyr = settings.MEDIA_URL + settings.LAYERS_ROOT + "/" + project.name + '_prj_' + str(project.baselayer_version) + ".zip"
+                    
+        return render(request, 'project_update.html', {'tools': projectTools,
+                                                       'pid': pid, 
+                                                       'project': project, 
+                                                       'groups': groups, 
+                                                       'layergroups': layer_groups, 
+                                                       'has_geocoding_plugin': has_geocoding_plugin, 
+                                                       'toc': ordered_toc, 
+                                                       'superuser' : is_superuser(request.user), 
+                                                       'processing_icon' : icon,
+                                                       'url_base_lyr' : url_base_lyr
+                                                       })
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
