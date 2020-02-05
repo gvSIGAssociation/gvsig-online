@@ -34,41 +34,29 @@ from numpy import genfromtxt
 import importlib
 import gvsigol
 from iso639 import languages
+from future.utils import string_types
+from future.builtins import int
 
 
-def is_valid_project(user, project_name):
-    valid = False
+def can_read_project(user, project):
+    """
+    Checks whether the user has permissions to read provied project.
+    It accepts a project instance, a project name or a project id.
+    """
     try:
+        if isinstance(project, string_types):
+            project = Project.objects.get(name__exact=project)
+        elif isinstance(project, int):
+            project = Project.objects.get(pk=project)
+        if project.is_public:
+            return True
         if user.is_superuser:
-            valid = True
-        else:
-            project = Project.objects.get(name__exact=project_name)   
-            groups_by_user = UserGroupUser.objects.filter(user_id=user.id)
-            
-            projects_by_user = []
-            for usergroup_user in groups_by_user:
-                user_group = UserGroup.objects.get(id=usergroup_user.user_group_id)
-                projects_by_group = ProjectUserGroup.objects.filter(user_group_id=user_group.id)
-                for project_group in projects_by_group:
-                    exists = False
-                    for aux in projects_by_user:
-                        if aux.project_id == project_group.project_id:
-                            exists = True
-                    if not exists:
-                        projects_by_user.append(project_group)
-                
-            if len (projects_by_user) > 0:
-                for ua in projects_by_user:
-                    aux = Project.objects.get(id=ua.project_id)
-                    if project.id == aux.id:
-                        valid = True
-                        
-        return valid
-                    
+            return True
+        if UserGroupUser.objects.filter(user_id=user.id, user_group__projectusergroup__project_id=project.id).count() > 0:
+            return True
     except Exception as e:
         print e
-        return valid
-    
+    return False
 
 def get_all_groups():
     groups_list = UserGroup.objects.all()

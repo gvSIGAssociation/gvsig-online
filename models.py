@@ -50,7 +50,7 @@ class ProjectLayerGroup(models.Model):
         return self.project.name + ' - ' + self.layer_group.name
 
 class SharedView(models.Model):
-    name = models.CharField(max_length=10, unique=True)
+    name = models.CharField(max_length=40, unique=True)
     project_id = models.IntegerField()
     description = models.CharField(max_length=250, null=True, blank=True)
     url = models.CharField(max_length=500, null=True, blank=True)
@@ -58,6 +58,9 @@ class SharedView(models.Model):
     creation_date = models.DateField(auto_now=True)
     expiration_date = models.DateField(null=False)
     created_by = models.CharField(max_length=100)
+    # Internal views are only available for superuser and are not listed on shared_views
+    # They are used to bookmark the map state of user requests
+    internal = models.BooleanField(default=False, db_index=True)
     
     def __unicode__(self):
         return self.name
