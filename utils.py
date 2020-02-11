@@ -21,6 +21,7 @@
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 
+import hashlib
 import json
 import os
 from string import strip
@@ -32,10 +33,10 @@ import geographic_servers
 from gvsigol import settings
 from gvsigol.settings import MEDIA_ROOT
 from gvsigol_auth.models import UserGroup
+from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.models import Datastore, LayerResource, \
     LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup
 from models import LayerReadGroup, LayerWriteGroup
-import hashlib
 
 
 def get_all_user_groups_checked_by_layer(layer):
@@ -328,6 +329,18 @@ def get_layer_img(layerid, filename):
             
     
     return path_, url
+
+def get_db_connect_from_layer(layer_id):
+    layer = Layer.objects.get(id=int(layer_id))
+    datastore = Datastore.objects.get(id=layer.datastore_id)
+    params = json.loads(datastore.connection_params)
+    host = params['host']
+    port = params['port']
+    dbname = params['database']
+    user = params['user']
+    passwd = params['passwd']
+    i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+    return i, layer.name, params['schema']
      
 def get_exception(code, msg):
     response = HttpResponse(msg)
