@@ -5086,3 +5086,13 @@ input.temporary-check[type=checkbox]{
     top: -25px;
 }
 
+.dashboard-form-title {
+	padding-left: 15px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	font-size: 20px;
+}
+
+.dashboard-form-title-color {
+	color: #444;
+}
