@@ -21,6 +21,7 @@
 
 import ast
 from datetime import datetime
+import hashlib
 from httplib import HTTPResponse
 import json
 import logging
@@ -33,7 +34,6 @@ import string
 import unicodedata
 import urllib
 import zipfile
-import hashlib
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -1084,6 +1084,7 @@ def layer_add_with_group(request, layergroup_id):
                                 field['editableactive'] = False
                                 field['editable'] = False
                         field['infovisible'] = False
+                        field['mandatory'] = False
                         fields.append(field)
 
                     layer_conf = {
@@ -1425,6 +1426,7 @@ def layer_autoconfig(layer_id):
                 field['editableactive'] = False
                 field['editable'] = False
         field['infovisible'] = False
+        field['mandatory'] = False
         fields.append(field)
 
     conf['fields'] = fields
@@ -1458,6 +1460,17 @@ def layer_config(request, layer_id):
             field['infovisible'] = False
             if 'field-infovisible-' + str(i) in request.POST:
                 field['infovisible'] = True
+            field['mandatory'] = False
+            if 'field-mandatory-' + str(i) in request.POST:
+                if _set_field_mandatory(layer_id, field['name'], True):
+                    field['mandatory'] = True
+                else:
+                    field['mandatory'] = False
+            else:
+                if _set_field_mandatory(layer_id, field['name'], False):
+                    field['mandatory'] = False
+                else:
+                    field['mandatory'] = True
             field['editable'] = False
             if 'field-editable-' + str(i) in request.POST:
                 field['editableactive'] = True
@@ -1489,6 +1502,7 @@ def layer_config(request, layer_id):
         try:
             conf = ast.literal_eval(layer.conf)
             fields_used = []
+            fields_mand = _get_fields_mandatory(layer_id)
             for f in conf['fields']:
                 field = {}
                 field['name'] = f['name']
@@ -1503,6 +1517,7 @@ def layer_config(request, layer_id):
                         field['editableactive'] = False
                         field['editable'] = False
                 field['infovisible'] = f['infovisible']
+                field['mandatory'] = fields_mand[field['name']]
                 fields.append(field)
 
             datastore = Datastore.objects.get(id=layer.datastore_id)
@@ -1524,6 +1539,7 @@ def layer_config(request, layer_id):
                             field['editableactive'] = False
                             field['editable'] = False
                     field['infovisible'] = False
+                    field['mandatory'] = False
                     fields.append(field)
 
 
@@ -1547,12 +1563,49 @@ def layer_config(request, layer_id):
                         field['editableactive'] = False
                         field['editable'] = False
                 field['infovisible'] = False
+                field['mandatory'] = False
                 fields.append(field)
                 
         enums = Enumeration.objects.all();
         
         return render(request, 'layer_config.html', {'layer': layer, 'layer_id': layer.id, 'fields': fields, 'fields_json': json.dumps(fields), 'available_languages': LANGUAGES, 'available_languages_array': available_languages, 'redirect_to_layergroup': redirect_to_layergroup, 'enumerations': enums})
 
+def _set_field_mandatory(layer_id, field_name, mandatory):
+    """
+    Sets a column to NULL or NOT NULL constraint depending on 
+    "mandatory" parameter. "Mandatory" should be True to set a column
+    to NOT NULL and False otherwise
+    """
+    i, layername, dsname = utils.get_db_connect_from_layer(layer_id)
+    try:
+        if(mandatory) :
+            i.set_field_mandatory(dsname, layername, field_name)
+        else:
+            i.set_field_not_mandatory(dsname, layername, field_name)
+    except Exception:
+        return False
+    return True
+
+def _get_field_mandatory(layer_id, field_name):
+    i, layername, dsname = utils.get_db_connect_from_layer(layer_id)
+    return i.is_column_nullable(dsname, layername, field_name)
+
+def _get_fields_mandatory(layer_id):
+    i, layername, dsname = utils.get_db_connect_from_layer(layer_id)
+    return i.nullable_cols(dsname, layername)
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_http_methods(["POST"])
+@staff_required
+def check_has_null_values(request):
+    layer_id = request.POST['layer_id']
+    field_name = request.POST['field_name']
+    i, layername, dsname = utils.get_db_connect_from_layer(layer_id)
+    hasnullvalues = i.check_has_null_values(dsname, layername, field_name)
+    if(hasnullvalues):
+        return utils.get_exception(405, 'The field has null values')
+    return HttpResponse('{"response": "ok"}', content_type='application/json')
+    
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["POST"])

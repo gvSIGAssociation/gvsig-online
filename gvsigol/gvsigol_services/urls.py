@@ -84,5 +84,5 @@ urlpatterns = [
     url(r'^describeLayerConfig/$', services_views.describeLayerConfig, name='describeLayerConfig'),
     
     url(r'^update_thumbnail/(?P<layer_id>[0-9]+)/$', services_views.update_thumbnail, name='update_thumbnail'),
-    
+    url(r'^mandatory_check/$', services_views.check_has_null_values, name='check_has_null_values'),
 ]

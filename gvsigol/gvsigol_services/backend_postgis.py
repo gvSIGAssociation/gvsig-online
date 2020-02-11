@@ -460,6 +460,63 @@ class Introspect:
         bb = rows[0]
         bb = bb.replace("BOX(","").replace(")","").replace(" ", ",")        
         return bb
+    
+    def set_field_mandatory(self, schema, table, field):
+        """
+        Sets a column to NOT NULL
+        """
+        query = "ALTER TABLE " + schema + "." + table + " ALTER COLUMN " + field + " SET NOT NULL ;"
+        self.cursor.execute(query)
+        
+    def set_field_not_mandatory(self, schema, table, field):
+        """
+        Sets a column to NOT NULL
+        """
+        query = "ALTER TABLE " + schema + "." + table + " ALTER COLUMN " + field + " DROP NOT NULL ;"
+        self.cursor.execute(query)
+        
+    def check_has_null_values(self, schema, table, field):
+        """
+        Returns True if the column has any null values and False otherwise
+        """
+        query = "SELECT * FROM " + schema + "." + table + " WHERE " + field + " IS NULL ;"
+        self.cursor.execute(query)
+        if self.cursor.rowcount > 0:
+            return True
+        return False
+    
+    def is_column_nullable(self, schema, table, field):
+        self.cursor.execute("""
+        select c.is_nullable
+        from information_schema.columns c
+        join information_schema.tables t on c.table_schema = t.table_schema 
+        and c.table_name = t.table_name
+        where c.table_schema not in ('pg_catalog', 'information_schema')
+          and t.table_type = 'BASE TABLE' and c.table_name=%s and c.table_schema=%s and column_name=%s;
+        """, [table, schema, field])
+        rows = self.cursor.fetchall()
+        if(rows[0][0] == 'YES'):
+            return False
+        else:
+            return True
+        
+    def nullable_cols(self, schema, table):
+        self.cursor.execute("""
+        select c.column_name, c.is_nullable
+        from information_schema.columns c
+        join information_schema.tables t on c.table_schema = t.table_schema 
+        and c.table_name = t.table_name
+        where c.table_schema not in ('pg_catalog', 'information_schema')
+          and t.table_type = 'BASE TABLE' and c.table_name=%s and c.table_schema=%s;
+        """, [table, schema])
+        rows = self.cursor.fetchall()
+        res = {}
+        for r in rows:
+            if(r[1] == 'YES'):
+                res[r[0]] = False
+            else:
+                res[r[0]] = True
+        return res
         
     def close(self):
         """
