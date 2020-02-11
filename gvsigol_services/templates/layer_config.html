@@ -49,6 +49,7 @@
 										{% for id, language in available_languages %}
 										<th>{% trans "Field title" %}&nbsp;({{ language }})</th>
 										{% endfor %}
+										<th>{% trans "mandatory" %}</th>
 										<th>{% trans "Is visible?" %}</th>
 										<th>{% trans "Is editable?" %}</th>
 										<th>{% trans "Is shown in getFeatureInfo?" %}</th>
@@ -63,6 +64,11 @@
 													{% for id, language in available_languages %}
 													<td><input name="field-title-{{id}}-{{counter}}" type="text" class="form-control" placeHolder="{{f.name}}" value=""></td>
 													{% endfor %}
+													{% if f.mandatory %}
+													<td><input type="checkbox" name="field-mandatory-{{counter}}" checked/></td>
+													{% else %}
+													<td><input id="mandatory-check-{{counter}}" data-type="mandatory" data-fieldname="{{f.name}}" type="checkbox" name="field-mandatory-{{counter}}"/></td>
+													{% endif %}
 													{% if f.visible %}
 													<td><input type="checkbox" name="field-visible-{{counter}}" checked/></td>
 													{% else %}
@@ -145,6 +151,33 @@
 			}
 		}
 	});
+	
+	$('input[type="checkbox"]'). click(function(evt){
+		if($(this).is(":checked") && evt.target.id.startsWith('mandatory-check')){
+			var obj = document.getElementById(evt.target.id);
+			field_name = obj.getAttribute('data-fieldname');
+			data = {
+				"layer_id" : "{{layer_id}}",
+				"field_name": field_name,
+			}
+			$.ajax({
+				type: 'POST',
+				async: false,
+				data: data,
+				url: '/gvsigonline/services/mandatory_check/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				success	:function(response) {
+				},
+				error: function() {
+					obj.checked = false;
+					messageBox.show('error', gettext('El campo no puede ser obligario.'));
+				}
+			});
+		}
+	});
+	
 	
 	$('#field-list-table-body').on('click', 'button', function (evt){
 	    if (this.name == "button-convert-enum") {
