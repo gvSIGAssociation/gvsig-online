@@ -55,19 +55,19 @@ msgstr ""
 msgid "Requires confirmation"
 msgstr ""
 
-msgid "Authorized"
+msgid "Approved"
 msgstr ""
 
-msgid "Authorization"
+msgid "Approval"
 msgstr ""
 
-msgid "Some of the selected resources require authorization. Please fill the following information:"
+msgid "Some of the selected resources must be approved by an administrator. Please fill the following information:"
 msgstr ""
 
-msgid "Organization"
+msgid "Organization (optional)"
 msgstr ""
 
-msgid "Indended usage"
+msgid "Indended usage (optional)"
 msgstr ""
 
 msgid "%(number)s days"

@@ -36,6 +36,7 @@ from gvsigol_core.models import GolSettings
 from gvsigol_plugin_downloadman.models import SETTINGS_KEY_VALIDITY, SETTINGS_KEY_MAX_PUBLIC_DOWNLOAD_SIZE
 import apps
 from django.http.response import Http404
+import gvsigol_core
 
 logger = logging.getLogger("gvsigol")
 
@@ -280,13 +281,13 @@ def getOgcDownloadDescriptor(layer_uuid, onlineResource, layer, fallbackTitle, d
         ]
         """
         spatialFilterType = [
-            ['nofilter', _('Do not filter output')],
-            ['bbox', _('Include only geometries that intersect the bounding box of the selected area')]
+            ['bbox', _('Include only geometries that intersect the bounding box of the selected area')],
+            ['nofilter', _('Do not filter output')]
         ]
     elif resourceType == downman_models.ResourceLocator.OGC_WCS_RESOURCE_TYPE:
         spatialFilterType = [
-            ['nofilter', _('Do not filter output')],
-            ['bbox', _('Trim result using the bounding box of the selected area')]
+            ['bbox', _('Trim result using the bounding box of the selected area')],
+            ['nofilter', _('Do not filter output')]
         ]
     else:
         spatialFilterType = []
@@ -473,28 +474,42 @@ def requestDownload(request):
         if request.method == 'POST':
             json_data = json.loads(request.body)
             print json_data
-            downRequest = downman_models.DownloadRequest()
-            """
-            # if any of the resoures requires authorization:
-            usage = json_data.get('downloadAuthorizationUsage', '')
-            if not usage:
-                # return an error
-                pass
-            """
-            if request.user and not request.user.is_anonymous():
-                downRequest.requested_by_user = request.user.username
-            else:
-                downRequest.requested_by_external = json_data.get('email', '')
-                if not downRequest.requested_by_external:
+            try:
+                downRequest = downman_models.DownloadRequest()
+                """
+                # if any of the resoures requires authorization:
+                usage = json_data.get('downloadAuthorizationUsage', '')
+                if not usage:
+                    # return an error
                     pass
-            downRequest.language = get_language()
-            downRequest.validity = downman_models.get_default_validity()
-            downRequest.request_random_id = date.today().strftime("%Y%m%d") + get_random_string(length=32)
-            downRequest.json_request = request.body.decode("UTF-8")
-            tracking_url = reverse('download-request-tracking', args=(downRequest.request_random_id,))
-            downRequest.save()
-            for resource in json_data.get('resources', []):
-                createResourceLocator(resource, downRequest)
+                """
+                if request.user and not request.user.is_anonymous():
+                    downRequest.requested_by_user = request.user.username
+                else:
+                    downRequest.requested_by_external = json_data.get('email', '')
+                    if not downRequest.requested_by_external:
+                        pass
+                downRequest.language = get_language()
+                downRequest.validity = downman_models.get_default_validity()
+                downRequest.request_random_id = date.today().strftime("%Y%m%d") + get_random_string(length=32)
+                downRequest.json_request = request.body.decode("UTF-8")
+                tracking_url = reverse('download-request-tracking', args=(downRequest.request_random_id,))
+                if len(json_data.get('resources', [])) == 0 and json_data.get('request_desc'):
+                    downRequest.pending_authorization = True
+                    downRequest.generic_request = True
+                    shared_view_state = json_data.get('shared_view_state')
+                    shv_pid = shared_view_state.get('pid')
+                    shv_state = shared_view_state.get('view_state')
+                    shv_description = shared_view_state.get('description', '')
+                    shv_expiration = date(9999, 12, 31)
+                    shv = gvsigol_core.views.do_save_shared_view(shv_pid, shv_description, shv_state, shv_expiration, request.user, True)
+                    downRequest.shared_view_url = shv.url
+                downRequest.save()
+                for resource in json_data.get('resources', []):
+                    createResourceLocator(resource, downRequest)
+            except:
+                logger.exception('error creating DownloadRequest')
+                raise
             
             try:
                 #processDownloadRequest(downRequest.id)
@@ -517,52 +532,59 @@ def requestTracking(request, uuid):
         result = {}
         result['download_uuid'] =  r.request_random_id
         result['download_status'] = r.status_desc
-
-        result['links'] = []
+        links_info = []
         links = r.downloadlink_set.all()
-        #result['link_count'] = len(links)
-        count = 1
-        for downloadlink in links:
-            link = {}
-            if timezone.now() > downloadlink.valid_to:
-                link['status'] = _('Expired')
-            else:
-                valid_to = date_format(downloadlink.valid_to, 'DATETIME_FORMAT')
-                link['valid_to'] = valid_to
-                link['status'] = downloadlink.status_desc
-                link['authorization_desc'] = _('Authorized')
-                if downloadlink.status == downman_models.DownloadLink.PROCESSED_STATUS:
-                    url = reverse('downman-download-resource', args=(uuid, downloadlink.link_random_id))
-                    logger.debug(request.build_absolute_uri(url))
-                    link['download_url'] = getDownloadResourceUrl(uuid, downloadlink.link_random_id)
-                    logger.debug(link['download_url']) 
-            linkResources = downloadlink.resourcelocator_set.all()
-            if len(linkResources)==1:
-                if downloadlink.is_auxiliary:
-                    link['name'] = u'{0:d}-{1!s} [{2!s}]\n'.format(count, linkResources[0].fq_title, downloadlink.name)
+        if r.generic_request:
+            raw_request = json.loads(r.json_request)
+            if r.pending_authorization:
+                result['pending_authorization'] = True 
+            result['request_desc'] = raw_request.get('request_desc', '')
+            result['organization'] = raw_request.get('organization', '')
+            result['usage'] = raw_request.get('usage', '')
+        else:
+            count = 1
+            for downloadlink in links:
+                link = {}
+                if timezone.now() > downloadlink.valid_to:
+                    link['status'] = _('Expired')
                 else:
-                    link['name'] = u'{0:d}-{1!s} [{2!s}]\n'.format(count, linkResources[0].fq_title, linkResources[0].name)
-            else:
-                link['name'] = u'{0:2d}-{1!s}\n'.format(count, _('Multiresource package'))
-                link['locators'] = []
-                locator_count =1
-                for locator in linkResources:
-                    link['locators'].append({'name': u'{0:d}-{1!s} [{2!s}]\n'.format(locator_count, locator.fq_title, locator.name)})
-                    locator_count += 1
-                link['name'] = u'{0:2d}-{1!s}\n'.format(count, _('Multiresource package'))
-            count += 1
-            result['links'].append(link)
-        #plain_message += _('\nThe following resources are still being processed:|n')
-        for locator in r.resourcelocator_set.filter(download_links__isnull=True):
-            link = {}
-            link['authorization_desc'] = locator.authorization_desc
-            link['status'] = locator.status_desc
-            link['valid_to'] = '-'
-            link['download_url'] = '-'
-            link['name'] = u'{0:d}-{1!s} [{2!s}]\n'.format(count, locator.fq_title, locator.name)
-            result['links'].append(link)
-            count += 1
-        result['link_count'] = count
+                    valid_to = date_format(downloadlink.valid_to, 'DATETIME_FORMAT')
+                    link['valid_to'] = valid_to
+                    link['status'] = downloadlink.status_desc
+                    link['authorization_desc'] = _('Approved')
+                    if downloadlink.status == downman_models.DownloadLink.PROCESSED_STATUS:
+                        url = reverse('downman-download-resource', args=(uuid, downloadlink.link_random_id))
+                        logger.debug(request.build_absolute_uri(url))
+                        link['download_url'] = getDownloadResourceUrl(uuid, downloadlink.link_random_id)
+                        logger.debug(link['download_url']) 
+                linkResources = downloadlink.resourcelocator_set.all()
+                if len(linkResources)==1:
+                    if downloadlink.is_auxiliary:
+                        link['name'] = u'{0:d}-{1!s} [{2!s}]\n'.format(count, linkResources[0].fq_title, downloadlink.name)
+                    else:
+                        link['name'] = u'{0:d}-{1!s} [{2!s}]\n'.format(count, linkResources[0].fq_title, linkResources[0].name)
+                else:
+                    link['name'] = u'{0:2d}-{1!s}\n'.format(count, _('Multiresource package'))
+                    link['locators'] = []
+                    locator_count =1
+                    for locator in linkResources:
+                        link['locators'].append({'name': u'{0:d}-{1!s} [{2!s}]\n'.format(locator_count, locator.fq_title, locator.name)})
+                        locator_count += 1
+                    link['name'] = u'{0:2d}-{1!s}\n'.format(count, _('Multiresource package'))
+                count += 1
+                links_info.append(link)
+            #plain_message += _('\nThe following resources are still being processed:|n')
+            for locator in r.resourcelocator_set.filter(download_links__isnull=True):
+                link = {}
+                link['authorization_desc'] = locator.authorization_desc
+                link['status'] = locator.status_desc
+                link['valid_to'] = '-'
+                link['download_url'] = '-'
+                link['name'] = u'{0:d}-{1!s} [{2!s}]\n'.format(count, locator.fq_title, locator.name)
+                links_info.append(link)
+                count += 1
+            if len(links_info)>0:
+                result['links'] = links_info
         return render(request, 'track_request.html', result)
         """
             else:
@@ -744,10 +766,12 @@ def update_request(request, request_id):
         raw_request = json.loads(download_request.json_request)
         usage = raw_request.get('usage')
         organization = raw_request.get('organization')
+        request_desc = raw_request.get('request_desc', '')
         response = {
             'download_request': download_request,
             'usage': usage,
-            'organization': organization
+            'organization': organization,
+            'request_desc': request_desc
             }
         return render(request, 'download_request_update.html', response)
     except:
@@ -858,4 +882,35 @@ def reject_resource_authorization(request, resource_id):
         logger.exception("Error")
         raise Http404
     
+@require_POST
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@superuser_required
+def complete_generic_request(request, request_id):
+    try:
+        request = downman_models.DownloadRequest.objects.get(pk=int(request_id))
+        logger.debug('complete_generic_request - request.pending_authorization = False')
+        request.pending_authorization = False
+        request.request_status = downman_models.DownloadRequest.COMPLETED_STATUS
+        request.save()
+        # processDownloadRequest.apply_async(args=[resource.request.pk], queue='resolvreq') #@UndefinedVariable
+        return redirect(reverse('downman-update-request', args=(request.pk,)))
+    except:
+        logger.exception("Error")
+        raise Http404
+
     
+@require_POST
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@superuser_required
+def reject_generic_request(request, request_id):
+    try:
+        request = downman_models.DownloadRequest.objects.get(pk=int(request_id))
+        logger.debug('reject_generic_request - request.pending_authorization = False')
+        request.pending_authorization = False
+        request.request_status = downman_models.DownloadRequest.REJECTED_STATUS
+        request.save()
+        # processDownloadRequest.apply_async(args=[resource.request.pk], queue='resolvreq') #@UndefinedVariable
+        return redirect(reverse('downman-update-request', args=(request.pk,)))
+    except:
+        logger.exception("Error")
+        raise Http404

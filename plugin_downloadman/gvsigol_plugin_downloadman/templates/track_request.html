@@ -46,10 +46,28 @@
 			<div class="container">
 				<section class="content background-grey">
 				<h3>{% trans "Status: " %}{{ download_status }}</h3>
-				<h4>{% trans "Requested resources: " %}</h4>
-				{% if link_count %}
+				{% if request_desc %}
+				<h4>{% trans "Generic request" %}</h4>
+				{% if pending_authorization %}
+				<p>{% trans "The request has to be analysed and processed." %}</p>
+				{% endif %}
+				<div class="row"><div class="col-md-12 form-group">
+					<label for="request_desc">{% trans "Request description" %}</label>
+					<textarea readonly class="form-control" name="request_desc" id="request_desc" rows="5">{{request_desc}}</textarea>
+				</div></div>
+				<div class="row"><div class="col-md-12 form-group">
+					<label for="organization">{% trans "Organization" %}</label>
+					<input type="text" readonly class="form-control" name="organization" id="organization" rows="5" value="{{organization}}">
+				</div></div>
+				<div class="row"><div class="col-md-12 form-group">
+					<label for="usage">{% trans "Intended usage" %}</label>
+					<textarea readonly class="form-control" name="usage" id="usage" rows="5">{{usage}}</textarea>
+				</div></div>
+				{% endif %}
+				{% if links %}
+					<h4>{% trans "Requested resources: " %}</h4>
 					<table class="table">
-					<tr><th>{% trans "Name" %}</th><th>{% trans "Authorization" %}</th><th>{% trans "Status" %}</th><th>{% trans "Valid to" %}</th><th>{% trans "URL" %}</th></tr>
+					<tr><th>{% trans "Name" %}</th><th>{% trans "Approval" %}</th><th>{% trans "Status" %}</th><th>{% trans "Valid to" %}</th><th>{% trans "URL" %}</th></tr>
 					{% for link in links %}
 						<tr>
 							<td>{{ link.name }}

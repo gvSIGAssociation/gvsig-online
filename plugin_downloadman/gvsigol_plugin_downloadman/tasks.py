@@ -411,7 +411,6 @@ def retrieveLinkLocator(url):
     tmp_file = os.fdopen(fd, "wb")
     try:
         r = requests.get(url, stream=True, verify=False, timeout=DEFAULT_TIMEOUT)
-        logger.debug("status_code: " + text(r.status_code))
         if r.status_code != 200:
             tmp_file.close()
             raise PreparationError(u'Error retrieving link. HTTP status code: '+text(r.status_code) + u". Url: " + url)
@@ -836,7 +835,6 @@ def get_language(request):
 @shared_task(bind=True)
 def notifyReceivedRequest(self, request_id, only_if_queued=True):
     try:
-        logger.debug("starting notifyReceivedRequest")
         request = DownloadRequest.objects.get(pk=request_id)
         if only_if_queued and request.request_status != DownloadRequest.REQUEST_QUEUED_STATUS:
             return
@@ -871,7 +869,7 @@ def notifyReceivedRequest(self, request_id, only_if_queued=True):
                 raise
             mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
             request.notification_status = DownloadRequest.INITIAL_NOTIFICATION_COMPLETED_STATUS
-            request.save()
+            request.save(update_fields=['notification_status'])
 
     except Exception as exc:
         logger.exception("Download request completed: error notifying the user")
@@ -879,17 +877,16 @@ def notifyReceivedRequest(self, request_id, only_if_queued=True):
         if delay:
             request.notification_status = DownloadRequest.NOTIFICATION_ERROR_STATUS
             request.package_retry_count = request.notify_retry_count + 1 
-            request.save()
+            request.save(update_fields=['notification_status', 'package_retry_count'])
             self.retry(exc=exc, countdown=delay)
         else:
             # maximum retry time reached
             request.notification_status = DownloadRequest.PERMANENT_NOTIFICATION_ERROR_STATUS
-            request.save()
+            request.save(update_fields=['notification_status'])
 
 @shared_task(bind=True)
 def notifyRequestProgress(self, request_id):
     try:
-        logger.debug("starting notify task completed")
         try:
             from_email =  core_settings.EMAIL_HOST_USER
         except:
@@ -978,7 +975,7 @@ def notifyRequestProgress(self, request_id):
             #mail.send_mail(subject, plain_message, from_email, [to])
             mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
             request.notification_status = DownloadRequest.NOTIFICATION_COMPLETED_STATUS
-            request.save()
+            request.save(update_fields=['notification_status'])
 
     except Exception as exc:
         logger.exception("Download request completed: error notifying the user")
@@ -986,12 +983,61 @@ def notifyRequestProgress(self, request_id):
         if delay:
             request.notification_status = DownloadRequest.NOTIFICATION_ERROR_STATUS
             request.package_retry_count = request.notify_retry_count + 1 
-            request.save()
+            request.save(update_fields=['notification_status', 'package_retry_count'])
             self.retry(exc=exc, countdown=delay)
         else:
             # maximum retry time reached
             request.notification_status = DownloadRequest.PERMANENT_NOTIFICATION_ERROR_STATUS
-            request.save()
+            request.save(update_fields=['notification_status'])
+
+
+
+@shared_task(bind=True)
+def notifyGenericRequestRegistered(self, request_id):
+    try:
+        try:
+            from_email =  core_settings.EMAIL_HOST_USER
+        except:
+            logger.exception("EMAIL_HOST_USER has not been configured")
+            raise
+        request = DownloadRequest.objects.get(pk=request_id)
+        with override(get_language(request)):
+            tracking_url = core_settings.BASE_URL + reverse('download-request-tracking', args=(request.request_random_id,))
+            subject = _('Download service: your request has been received - %(requestid)s') % {'requestid': request.request_random_id}
+            statusdetails = _(u'Our team will contact you when your request has been analysed.')
+            plain_message = statusdetails + '\n'
+            htmlContext = {
+                u"statusdesc": _(u'Download service: received request - {0}').format(request.request_random_id),
+                u"statusdetails": statusdetails,
+                }
+            plain_message += u'\n' + _(u'You can also use this tracking link to check the status of your request:') + u' ' + tracking_url + u'\n'
+            htmlContext['request_url'] = tracking_url
+            html_message = render_to_string('progress_notif_email.html', context=htmlContext)
+            #plain_message = strip_tags(html_message)
+            if request.requested_by_user:
+                user = User.objects.get(username=request.requested_by_user)
+                to = user.email
+            else:
+                to = request.requested_by_external
+            logger.debug(u"mailing: " + to)
+            #mail.send_mail(subject, plain_message, from_email, [to])
+            mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+            request.notification_status = DownloadRequest.NOTIFICATION_COMPLETED_STATUS
+            request.save(update_fields=['notification_status'])
+
+    except Exception as exc:
+        logger.exception("Download request completed: error notifying the user")
+        delay = getNextMailRetryDelay(request)
+        if delay:
+            request.notification_status = DownloadRequest.NOTIFICATION_ERROR_STATUS
+            request.package_retry_count = request.notify_retry_count + 1 
+            request.save(update_fields=['notification_status', 'package_retry_count'])
+            self.retry(exc=exc, countdown=delay)
+        else:
+            # maximum retry time reached
+            request.notification_status = DownloadRequest.PERMANENT_NOTIFICATION_ERROR_STATUS
+            request.save(update_fields=['notification_status'])
+
 
 def parseMultipart(input_file_path, output_dir):
     parser = email.parser.Parser()
@@ -1020,7 +1066,6 @@ def parseMultipart(input_file_path, output_dir):
     return out_files
 
 def processLocators(request, zipobj=None, zip_path=None):
-    logger.debug('processLocators')
     locators = request.resourcelocator_set.filter((Q(status=ResourceLocator.RESOURCE_QUEUED_STATUS) | \
                                                    Q(status=ResourceLocator.HOLD_STATUS) | \
                                                    Q(status=ResourceLocator.WAITING_SPACE_STATUS) | \
@@ -1038,6 +1083,7 @@ def processLocators(request, zipobj=None, zip_path=None):
     ResultTuple = namedtuple('ResultTuple', ['completed', 'packaged', 'waiting_space', 'to_package', 'temporal_error', 'permanent_error'])
     count = 0
     for resourceLocator in locators:
+        logger.debug('resourceLocator: ' + text(resourceLocator.id))
         try:
             if resourceLocator.status == ResourceLocator.HOLD_STATUS:
                 continue
@@ -1046,10 +1092,12 @@ def processLocators(request, zipobj=None, zip_path=None):
             if not resourceLocator.resolved_url:
                 preprocessLocator(resourceLocator, resource_descriptor)
             if resourceLocator.authorization == ResourceLocator.AUTHORIZATION_PENDING:
+                logger.debug("AUTHORIZATION_PENDING")
                 resourceLocator.save()
                 continue
             if DOWNMAN_PACKAGING_BEHAVIOUR == 'ALL' or \
                 (resourceLocator.is_dynamic and DOWNMAN_PACKAGING_BEHAVIOUR == 'DYNAMIC'):
+                logger.debug('packaging')
                 if zipobj is not None:
                     if getFreeSpace(getTmpDir()) < MIN_TMP_SPACE:
                         waiting_space += 1
@@ -1068,6 +1116,7 @@ def processLocators(request, zipobj=None, zip_path=None):
                 else:
                     to_package += 1
             else:
+                logger.debug('creating links')
                 # store a direct download link instead of packaging the resource
                 createDownloadLinks(request, resourceLocator)
                 resourceLocator.status = ResourceLocator.PROCESSED_STATUS
@@ -1172,20 +1221,32 @@ def updatePendingAuthorization(request):
     pending_authorization = request.resourcelocator_set.filter(authorization=ResourceLocator.AUTHORIZATION_PENDING).count()
     if pending_authorization > 0:
         request.pending_authorization = True
-    else: 
+    else:
         request.pending_authorization = False
-    request.save()
+    request.save(update_fields=getPackageManagedFields(request))
+
+def getPackageManagedFields(requestInstance):
+    """
+    To avoid race conditions, we manage a different set of field in each  
+    """
+    excluded_fields = ['id', 'notification_status', 'package_retry_count']
+    fields = [ f.name for f in requestInstance._meta.fields if not f.name in excluded_fields ]
+    logger.debug(fields)
+    return [ f.name for f in requestInstance._meta.fields if not f.name in excluded_fields ]
 
 @shared_task(bind=True)
 def packageRequest(self, request_id):
-    logger.debug('packageRequest')
-    request = DownloadRequest.objects.get(id=request_id)
-    if (request.request_status != DownloadRequest.REQUEST_QUEUED_STATUS) and (request.request_status != DownloadRequest.PROCESSING_STATUS):
-        logger.debug(u"Task already processed: " + text(request_id))
-        return
-    result = None
-    zip_file = None
     try:
+        logger.debug('starting packageRequest')
+        logger.info(u'request ID: ' + text(request_id))
+        request = DownloadRequest.objects.get(id=request_id)
+        logger.info(u'request UUID: ' + request.request_random_id)
+        if (request.request_status != DownloadRequest.REQUEST_QUEUED_STATUS) and (request.request_status != DownloadRequest.PROCESSING_STATUS):
+            logger.debug(u"Task already processed: " + text(request_id))
+            return
+        result = None
+        zip_file = None
+    
         if getFreeSpace(getTargetDir()) < MIN_TARGET_SPACE:
             logger.debug("Scheduling a retry due to not enough space error")
             self.retry(countdown=FREE_SPACE_RETRY_DELAY)
@@ -1212,88 +1273,98 @@ def packageRequest(self, request_id):
                 os.remove(zip_path)
         except:
             logger.exception("error handling packaging error")
-    updatePendingAuthorization(request)
     
-    if not result:
-        delay = getNextPackagingRetryDelay(request)
-        if delay:
-            request.package_retry_count = request.package_retry_count + 1 
-            request.save()
-            self.retry(countdown=delay)
-    if result.waiting_space > 0:
-        delay = getNextPackagingRetryDelay(request)
-        if delay:
-            if result.completed > 0:
-                notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
-            # we retry forever if the problem is a lack of space
-            self.retry(countdown=FREE_SPACE_RETRY_DELAY)
-        else:
-            pass
-    elif result.temporal_error > 0:
-        delay = getNextPackagingRetryDelay(request)
-        if delay:
-            request.package_retry_count = request.package_retry_count + 1 
-            request.save()
-            if result.completed > 0:
-                notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
-            self.retry(countdown=delay)
+    try:
+        updatePendingAuthorization(request)
+        
+        if not result:
+            delay = getNextPackagingRetryDelay(request)
+            if delay:
+                request.package_retry_count = request.package_retry_count + 1 
+                request.save(update_fields=getPackageManagedFields(request))
+                self.retry(countdown=delay)
+        if result.waiting_space > 0:
+            delay = getNextPackagingRetryDelay(request)
+            if delay:
+                if result.completed > 0:
+                    notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
+                # we retry forever if the problem is a lack of space
+                self.retry(countdown=FREE_SPACE_RETRY_DELAY)
+            else:
+                pass
+        elif result.temporal_error > 0:
+            delay = getNextPackagingRetryDelay(request)
+            if delay:
+                request.package_retry_count = request.package_retry_count + 1 
+                request.save(update_fields=getPackageManagedFields(request))
+                if result.completed > 0:
+                    notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
+                self.retry(countdown=delay)
+    except Retry:
+        logger.debug("raising retry")
+        raise
+    except:
+        logger.exception("Error packaging request")
 
-    # if there are no locators waiting for admin feedback and we reach the maximum amount of retries,
-    # then we need to update locators and request status
-    waiting_feedback = request.resourcelocator_set.filter( \
-                                                  Q(authorization=ResourceLocator.AUTHORIZATION_PENDING) | \
-                                                  Q(status=ResourceLocator.HOLD_STATUS)).count()
-    if waiting_feedback == 0:
-        errors = 0
-        locators = ( request.resourcelocator_set.filter(status=ResourceLocator.TEMPORAL_ERROR_STATUS) | \
-                     request.resourcelocator_set.filter(status=ResourceLocator.PERMANENT_ERROR_STATUS) | \
-                     request.resourcelocator_set.filter(status=ResourceLocator.RESOURCE_QUEUED_STATUS))
-        for locator in locators:
-            errors += 1
-            if locator.status != ResourceLocator.PERMANENT_ERROR_STATUS:
-                locator.status = ResourceLocator.PERMANENT_ERROR_STATUS
-                locator.save()
-            
-        if errors > 0:
-            request.request_status = DownloadRequest.COMPLETED_WITH_ERRORS
-            request.save()
+    try:
+        # if there are no locators waiting for admin feedback and we reach the maximum amount of retries,
+        # then we need to update locators and request status
+        waiting_feedback = request.resourcelocator_set.filter( \
+                                                      Q(authorization=ResourceLocator.AUTHORIZATION_PENDING) | \
+                                                      Q(status=ResourceLocator.HOLD_STATUS)).count()
+        if waiting_feedback == 0:
+            errors = 0
+            locators = ( request.resourcelocator_set.filter(status=ResourceLocator.TEMPORAL_ERROR_STATUS) | \
+                         request.resourcelocator_set.filter(status=ResourceLocator.PERMANENT_ERROR_STATUS) | \
+                         request.resourcelocator_set.filter(status=ResourceLocator.RESOURCE_QUEUED_STATUS))
+            for locator in locators:
+                errors += 1
+                if locator.status != ResourceLocator.PERMANENT_ERROR_STATUS:
+                    locator.status = ResourceLocator.PERMANENT_ERROR_STATUS
+                    locator.save()
+                
+            if errors > 0:
+                request.request_status = DownloadRequest.COMPLETED_WITH_ERRORS
+                request.save(update_fields=getPackageManagedFields(request))
+                notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
+            else:
+                request.request_status = DownloadRequest.COMPLETED_STATUS
+                request.save(update_fields=getPackageManagedFields(request))
+                notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
+        elif result and result.completed > 0:
             notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
-        else:
-            request.request_status = DownloadRequest.COMPLETED_STATUS
-            request.save()
-            notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
-    elif result and result.completed > 0:
-        notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
-
+    except:
+        logger.exception("Error packaging request")
+    
 @shared_task(bind=True)
 def processDownloadRequest(self, request_id):
-    logger.debug("starting processDownloadRequest")
-    result = None
-    # 1 get request
     try:
+        logger.info("starting processDownloadRequest")
+        logger.info(u'request ID: ' + text(request_id)) 
+        result = None
+        # 1 get request
         request = DownloadRequest.objects.get(id=request_id)
-        logger.debug(u'request ID: ' + request.request_random_id)
+        logger.info(u'request UUID: ' + request.request_random_id)
+        if request.generic_request == True:
+            logger.debug("Skipping generic request")
+            return
         if (request.request_status != DownloadRequest.REQUEST_QUEUED_STATUS) and (request.request_status != DownloadRequest.PROCESSING_STATUS):
             logger.debug("Task already processed: " + request_id)
             return
         
         request.request_status = DownloadRequest.PROCESSING_STATUS
-        request.save()
-        
+        request.save(update_fields=getPackageManagedFields(request))
         result = processLocators(request)
-        #logger.debug(result)
-
     except Exception:
         logger.exception("Error preparing download request")
-    
-    updatePendingAuthorization(request)
 
     try:
+        updatePendingAuthorization(request)
         if not result:
             delay = getNextPackagingRetryDelay(request)
             if delay:
                 request.package_retry_count = request.package_retry_count + 1 
-                request.save()
+                request.save(update_fields=getPackageManagedFields(request))
                 if result.completed > 0:
                     notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
                 self.retry(countdown=delay)
@@ -1306,8 +1377,9 @@ def processDownloadRequest(self, request_id):
         if result.temporal_error > 0:
             delay = getNextPackagingRetryDelay(request)
             if delay:
-                request.package_retry_count = request.package_retry_count + 1 
-                request.save()
+                request.package_retry_count = request.package_retry_count + 1
+                 
+                request.save(update_fields=getPackageManagedFields(request))
                 if result.completed > 0:
                     notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
                 self.retry(countdown=delay)
@@ -1317,16 +1389,15 @@ def processDownloadRequest(self, request_id):
     except:
         logger.exception("Error processing request")
 
+    try:
     # if there are no locators waiting for admin feedback and we reach the maximum amount of retries,
     # then we need to update locators and request status
-    try:
         """
         waiting_feedback = request.resourcelocator_set.filter( \
                                                       Q(authorization=ResourceLocator.AUTHORIZATION_PENDING) | \
                                                       Q(status=ResourceLocator.HOLD_STATUS)).count()
         """
         on_hold = request.resourcelocator_set.filter(status=ResourceLocator.HOLD_STATUS).count()
-
         if not request.pending_authorization and on_hold == 0:
             errors = 0
             locators = ( request.resourcelocator_set.filter(status=ResourceLocator.TEMPORAL_ERROR_STATUS) | \
@@ -1340,17 +1411,17 @@ def processDownloadRequest(self, request_id):
                 
             if errors > 0:
                 request.request_status = DownloadRequest.COMPLETED_WITH_ERRORS
-                request.save()
+                request.save(update_fields=getPackageManagedFields(request))
                 notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
             else:
                 request.request_status = DownloadRequest.COMPLETED_STATUS
-                request.save()
+                request.save(update_fields=getPackageManagedFields(request))
                 notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
         #elif result and result.completed > 0:
         else:
             notifyRequestProgress.apply_async(args=[request.pk], queue='notify')
     except:
-        logger.exception("Error cmi")
+        logger.exception("Error processing request")
 
 @celery_app.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):

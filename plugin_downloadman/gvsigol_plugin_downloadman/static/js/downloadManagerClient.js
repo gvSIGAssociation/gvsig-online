@@ -140,6 +140,34 @@ DownloadManagerClient.prototype.queryAvailableResources = function(layer_id, wor
 	});
 }
 
+DownloadManagerClient.prototype.sendGenericRequest = function(request, success_callback, error_callback, callback_context){
+	var self = this;
+	var queryUrl = self.config.baseQueryUrl + "request/";
+
+	try {
+		var data = JSON.stringify(request);
+	} catch (e) {console.log("error stringify"); console.log(e)}
+	$.ajax({
+		type: 'POST',
+		url: queryUrl,
+		data: data,
+		timeout: self.config.timeout
+		}).done(function(result) {
+			if (result.status_code == 'RQ') {
+				success_callback.apply(callback_context, [result, true]);
+				//self.clearDownloadList();
+			}
+			else {
+				error_callback.apply(callback_context, [result, false]);
+			}
+	
+		})
+		.fail(function(err) {
+			console.log(err);
+			error_callback.apply(callback_context, err, false);
+	});
+}
+
 DownloadManagerClient.prototype.startDownloadRequest = function(email, usage, organization, success_callback, error_callback, callback_context){
 	var self = this;
 	var queryUrl = self.config.baseQueryUrl + "request/";
@@ -246,12 +274,12 @@ DownloadManagerUI.prototype.createDownloadResource = function(downloadDescriptor
 	
 	content += '<td style="width: 120px;"><div class="col"><label class="form-label">'+ resource.title + '</label>';
 	content += '<div style="padding: 6px 4px 6px 0px">' + resource.name + '</div></div></td>';
-	content += '<td><div class="col"><label class="form-label">'+ gettext("Authorization") + '</label>';
+	content += '<td><div class="col"><label class="form-label">'+ gettext("Approval") + '</label>';
 	if (resource.restricted) {
 		content += '<div style="padding: 6px 4px 6px 0px"><span class="label-warning">' + gettext("Requires confirmation") + '</span></div></div></td>';
 	}
 	else {
-		content += '<div style="padding: 6px 4px 6px 0px"><span class="label-default">' + gettext("Authorized") + '</span></div></div></td>';
+		content += '<div style="padding: 6px 4px 6px 0px"><span class="label-default">' + gettext("Approved") + '</span></div></div></td>';
 	}
 	content += '</td>';
 	content += '<td style="vertical-align: top; padding-left: 12px; padding-right: 20px"><div class="form-horizontal"><div class="form-group">';
@@ -524,8 +552,14 @@ DownloadManagerUI.prototype.initAvailableResourcesError = function(){
 
 DownloadManagerUI.prototype._updateStartDownloadButton = function(){
 	if(this.getClient().getDownloadList().length == 0){
-		document.getElementById('start-download-btn').disabled = true;
+		//document.getElementById('start-download-btn').disabled = true;
+		document.getElementById('start-download-btn').style = 'display:none';
+		document.getElementById('show-generic-request-btn').style = 'display:block';
 		return;
+	}
+	else {
+		document.getElementById('start-download-btn').style = 'display:block';
+		document.getElementById('show-generic-request-btn').style = 'display:none';
 	}
 	if (!viewer.core.conf.user) {
 		try {
@@ -537,17 +571,109 @@ DownloadManagerUI.prototype._updateStartDownloadButton = function(){
 		}
 		catch {}
 	}
+	document.getElementById('start-download-btn').disabled = false;
+}
+
+DownloadManagerUI.prototype._updateSendGenericStartDownloadButton = function(){
+	if (!viewer.core.conf.user) {
+		try {
+			var email =  document.getElementById("contactemail").value;
+			if (email.length<6 || !email.includes("@")) {
+				document.getElementById('send-request-btn').disabled = true;
+				return;
+			}
+		}
+		catch {}
+	}
+	
 	try {
-		var intendedUsage =  document.getElementById("downloadAuthorizationUsage").value;
-		if (intendedUsage.length==0 ) {
-			document.getElementById('start-download-btn').disabled = true;
+		var downloadRequestDescription =  document.getElementById("downloadRequestDescription").value;
+		if (downloadRequestDescription.length==0 ) {
+			document.getElementById('send-request-btn').disabled = true;
 			return;
 		}
 	}
 	catch {}
 
-	document.getElementById('start-download-btn').disabled = false;
+	document.getElementById('send-request-btn').disabled = false;
 }
+
+DownloadManagerUI.prototype.initGenericDownloadRequest = function(){
+	var self = this;
+	var content = '<div class="container-fluid">';
+	content += '<div><p>' + gettext('Please, use this form to describe which data you need to download:')+ '</p>';
+	content += '<div class="form-group">';
+	content += '<label for="downloadRequestDescription">' + gettext('Request description')+ '</label>';
+	content += '<textarea required class="form-control" id="downloadRequestDescription" rows="5"></textarea>';
+	content += '</div>';
+	content += '<div class="form-group">';
+	content += '<label for="downloadAuthorizationOrganization">' + gettext('Organization (optional)')+ '</label>';
+	content += '<input id="downloadAuthorizationOrganization" class="form-control" type="text"></input>';
+	content += '</div>';
+	content += '<div class="form-group required">';
+	content += '<label for="downloadAuthorizationUsage">' + gettext('Indended usage (optional)')+ '</label>';
+	content += '<textarea required class="form-control" id="downloadAuthorizationUsage" rows="5"></textarea>';
+	content += '</div></div>';
+	if (!viewer.core.conf.user) {
+		content += '<div><label for="contactemail" class="control-label">' + gettext("Email") + '*</label><input id="contactemail" type="email" class="form-control"></div>';
+	}
+	content += '</div>';
+
+	$(self.modalSelector).find('.modal-body').html(content);
+	$(self.modalSelector).find('.modal-title').html(gettext("Generic download request"));
+
+	var footer = '	<button  id="send-request-btn" class="btn btn-default downman-footer-button send-request-btn" type="button"><i class="fa file-download fa-icon-button-left" aria-hidden="true"></i></span>'+gettext("Send request")+'</button>';
+	footer += '		<div style="clear:both"></div>';
+	$(self.modalSelector).find('.modal-footer').html(footer);
+	
+	
+	$(".send-request-btn").unbind("click").click(function(){
+		try {
+			var email =  document.getElementById("contactemail").value;
+		}
+		catch(e) {
+			var email = null;
+		}
+		try {
+			var intendedUsage =  document.getElementById("downloadAuthorizationUsage").value;
+		}
+		catch(e) {
+			var intendedUsage = null;
+		}
+		try {
+			var organization =  document.getElementById("downloadAuthorizationOrganization").value;
+		}
+		catch(e) {
+			var organization = null;
+		}
+		try {
+			var downloadRequestDesc =  document.getElementById("downloadRequestDescription").value;
+		}
+		catch(e) {
+			var downloadRequestDesc = null;
+		}
+		var shareViewTool = new gvsigol.tools.ShareView(viewer.core.getConf(), viewer.core.getMap(), viewer.core.getLayerTree());
+	  	var sharedViewState = shareViewTool.getSharedViewState('downman internal');
+		var request = {
+				"resources": [],
+				"shared_view_state": sharedViewState,
+				"request_desc": downloadRequestDesc,
+				"usage": intendedUsage,
+				"organization": organization
+			}
+			if (email !== null) {
+				request["email"] = email;
+			}
+		self.getClient().sendGenericRequest(request, DownloadManagerUI.prototype.showGenericRequestSent, DownloadManagerUI.prototype.showGenericRequestSent, self);	
+	});
+	$("#downloadRequestDescription").change(function(){
+		self._updateSendGenericStartDownloadButton();
+	});
+	$("#downloadRequestDescription").keyup(function(){
+		self._updateSendGenericStartDownloadButton();
+	});
+}
+
 
 DownloadManagerUI.prototype.initDownloadList = function(){
 	var downloadResources = this.getClient().getDownloadList();
@@ -563,13 +689,13 @@ DownloadManagerUI.prototype.initDownloadList = function(){
 	if(downloadResources.length > 0){
 		for (var i=0; i<downloadResources.length; i++) {
 			if (downloadResources[i].resource_descriptor.restricted) {
-				content += '<div><p>' + gettext('Some of the selected resources require authorization. Please fill the following information:')+ '</p>';
+				content += '<div><p>' + gettext('Some of the selected resources must be approved by an administrator. Please fill the following information:')+ '</p>';
 				content += '<div class="form-group">';
-				content += '<label for="downloadAuthorizationOrganization">' + gettext('Organization')+ '</label>';
+				content += '<label for="downloadAuthorizationOrganization">' + gettext('Organization (optional)')+ '</label>';
 				content += '<input id="downloadAuthorizationOrganization" class="form-control" type="text"></input>';
 				content += '</div>';
 				content += '<div class="form-group required">';
-				content += '<label for="downloadAuthorizationUsage">' + gettext('Indended usage')+ '*</label>';
+				content += '<label for="downloadAuthorizationUsage">' + gettext('Indended usage (optional)')+ '</label>';
 				content += '<textarea required class="form-control" id="downloadAuthorizationUsage" rows="5"></textarea>';
 				content += '</div></div>';
 				break;
@@ -593,7 +719,8 @@ DownloadManagerUI.prototype.initDownloadList = function(){
 	$(self.modalSelector).find('.modal-body').html(content);
 	$(self.modalSelector).find('.modal-title').html(gettext("List of downloads"));
 
-	var footer = '	<button  id="start-download-btn" class="btn btn-default downman-footer-button start-downloading-btn" type="button"><i class="fa file-download fa-icon-button-left" aria-hidden="true"></i></span>'+gettext("Start downloading")+'</button>';
+	var footer = '	<button id="show-generic-request-btn" class="btn btn-default downman-footer-button show-generic-request-btn" type="button"><i class="fa file-download fa-icon-button-left" aria-hidden="true"></i></span>'+gettext("Send generic request")+'</button>';
+	footer += '	<button  id="start-download-btn" class="btn btn-default downman-footer-button start-downloading-btn" type="button"><i class="fa file-download fa-icon-button-left" aria-hidden="true"></i></span>'+gettext("Start downloading")+'</button>';
 	footer += '		<div style="clear:both"></div>';
 	$(self.modalSelector).find('.modal-footer').html(footer);
 	
@@ -604,6 +731,9 @@ DownloadManagerUI.prototype.initDownloadList = function(){
 		self.getClient().removeLayer(download_id);
 		$(".modal-body").find('tr[data-downloadid="'+download_id+'"]').remove();
 		self._updateStartDownloadButton();
+	});
+	$(".show-generic-request-btn").unbind("click").click(function(){
+		self.initGenericDownloadRequest();
 	});
 	
 	$(".start-downloading-btn").unbind("click").click(function(){
@@ -634,12 +764,6 @@ DownloadManagerUI.prototype.initDownloadList = function(){
 	$("#contactemail").keyup(function(){
 		self._updateStartDownloadButton();
 	});
-	$("#downloadAuthorizationUsage").change(function(){
-		self._updateStartDownloadButton();
-	});
-	$("#downloadAuthorizationUsage").keyup(function(){
-		self._updateStartDownloadButton();
-	});
 }
 
 DownloadManagerUI.prototype.showDownloadList = function() {
@@ -652,6 +776,39 @@ DownloadManagerUI.prototype.getClient = function() {
 		this.downloadClient = new DownloadManagerClient();
 	}
 	return this.downloadClient; 
+}
+
+
+DownloadManagerUI.prototype.showGenericRequestSent = function(json_result, success){
+	var content = '';
+	content += '<div style="padding: 10px">';
+	if (success) {
+		content += '<div class="alert alert-success col-md-12">';
+		content += '<i class="fa fa-envelope fa-icon-button-left" aria-hidden="true"></i>';
+		var msg = 'Your download request has been registered. You will receive an email when your request is ready for download. ';
+		msg += 'You can also use this tracking link to check the status of your request: ';
+		content += gettext(msg);
+		content += gettext('<a target="_blank" href="' + json_result.tracking_url + '">' + json_result.tracking_url + '</a>');
+		$(this.modalSelector).find('.modal-footer').empty();
+	}
+	else {
+		content += '<div class="alert alert-danger col-md-12">';
+		content += '<i class="fa fa-exclamation-circle fa-icon-button-left" aria-hidden="true"></i>';
+		content += gettext('There was an error processing your download request. Please, try again later');
+		var footer = '	<button class="btn btn-default downman-footer-button catalog-download-list-btn" type="button"><span class="download_list_count">' + this.getClient().getDownloadListCount() + '</span><i class="fa fa-shopping-cart fa-icon-button-left fa-icon-button-right" aria-hidden="true"></i>'+gettext("View download list")+'</button>';
+		footer += '		<div style="clear:both"></div>';
+		$(self.modalSelector).find('.modal-footer').html(footer);
+		$(".catalog-download-list-btn").unbind("click").click(function(){
+			self.showDownloadList();
+		});
+	}
+	content += '</div>';
+	content += '<div style="clear:both"></div>';
+	content += '</div>';
+
+	$(this.modalSelector).find('.modal-body').html(content);
+	$(this.modalSelector).find('.modal-title').html(gettext("Download request"));
+	$(this.modalSelector).modal('show');
 }
 
 DownloadManagerUI.prototype.showDownloadQueued = function(json_result, success){

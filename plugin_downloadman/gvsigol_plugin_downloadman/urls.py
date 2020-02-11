@@ -20,4 +20,6 @@ urlpatterns = [
     url(r'^downloadmanager/resource/(?P<resource_id>[\-a-zA-Z0-9]+)/cancel/$', downman_views.cancel_locator, name='download-resource-cancel'),
     url(r'^downloadmanager/resource-authorization/(?P<resource_id>[\-a-zA-Z0-9]+)/accept/$', downman_views.accept_resource_authorization, name='resource-authorization-accept'),
     url(r'^downloadmanager/resource-authorization/(?P<resource_id>[\-a-zA-Z0-9]+)/reject/$', downman_views.reject_resource_authorization, name='resource-authorization-reject'),
+    url(r'^downloadmanager/generic-request/(?P<request_id>[\-a-zA-Z0-9]+)/completed/$', downman_views.complete_generic_request, name='generic-request-completed'),
+    url(r'^downloadmanager/generic-request/(?P<request_id>[\-a-zA-Z0-9]+)/rejected/$', downman_views.reject_generic_request, name='generic-request-rejected'),
 ]

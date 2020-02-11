@@ -57,20 +57,20 @@ msgstr "Descarga directa"
 msgid "Requires confirmation"
 msgstr "Requiere confirmación"
 
-msgid "Authorized"
-msgstr "Autorizado"
+msgid "Approved"
+msgstr "Aprobado"
 
-msgid "Authorization"
-msgstr "Autorización"
+msgid "Approval"
+msgstr "Aprobación"
 
-msgid "Some of the selected resources require authorization. Please fill the following information:"
-msgstr "Alguno de los recursos seleccionados requiere autorización. Por favor, rellene la siguiente información:"
+msgid "Some of the selected resources must be approved by an administrator. Please fill the following information:"
+msgstr "Alguno de los recursos seleccionados requiere ser aprobado por un administrador. Por favor, rellene la siguiente información:"
 
-msgid "Organization"
-msgstr "Autorización"
+msgid "Organization (optional)"
+msgstr "Organización (opcional)"
 
-msgid "Indended usage"
-msgstr "Uso previsto"
+msgid "Indended usage (optional)"
+msgstr "Uso previsto (opcional)"
 
 
 msgid "%(number)s days"

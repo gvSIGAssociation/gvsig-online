@@ -25,9 +25,9 @@
 		
 		<ul id="navigationTabs" class="nav nav-tabs">
 			{% if activetab == "pendingauth" %}
-			<li class="active" role="navigation"><a href="{{ downman_dashboard_index }}?tab=pendingauth" >{% trans "Awaiting authorization" %}</a></li>
+			<li class="active" role="navigation"><a href="{{ downman_dashboard_index }}?tab=pendingauth" >{% trans "Awaiting approval" %}</a></li>
 			{% else %}
-			<li class="" role="navigation"><a href="{{ downman_dashboard_index }}?tab=pendingauth" >{% trans "Awaiting authorization" %}</a></li>
+			<li class="" role="navigation"><a href="{{ downman_dashboard_index }}?tab=pendingauth" >{% trans "Awaiting approval" %}</a></li>
 			{% endif %}
 			{% if activetab == "active" %}
 			<li class="active" role="navigation"><a href="{{ downman_dashboard_index }}?tab=active" >{% trans "Active download requests" %}</a></li>
@@ -161,7 +161,7 @@ $('#submenu-downloadman').addClass("active");
 					sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
 				}
 			},
-			"order": [["1", "desc"]],
+			"order": [["0", "desc"]],
 			"dom": 'T<"clear">lfrtip',
 			"bLengthChange": false
 		});

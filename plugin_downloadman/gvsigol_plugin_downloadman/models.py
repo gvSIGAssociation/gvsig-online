@@ -29,6 +29,7 @@ class DownloadRequest(models.Model):
     PROCESSING_STATUS = 'PR' # Queued for package preparation
     COMPLETED_STATUS = 'CT' # The download package was sucessfully created and notified
     COMPLETED_WITH_ERRORS = 'CE' # An error was found during preparation of the package
+    REJECTED_STATUS = 'RJ' # The download package was rejected by the admins
     QUEUEING_ERROR = 'QE' # The request could not be queued
 
     INITIAL_NOTIFICATION_COMPLETED_STATUS = 'NI'
@@ -41,6 +42,7 @@ class DownloadRequest(models.Model):
         (PROCESSING_STATUS, _('Processing request')),
         (COMPLETED_STATUS, _('Completed')),
         (COMPLETED_WITH_ERRORS, _('Completed with errors')),
+        (REJECTED_STATUS, _('Rejected')),
         (QUEUEING_ERROR, _('Error queueing request')),
     )
     NOTIFICATION_STATUS_CHOICES = (
@@ -65,6 +67,8 @@ class DownloadRequest(models.Model):
     json_request = models.TextField() # we keep the request as received from the client for debugging purposes
     language = models.CharField(max_length=50, blank=True)
     pending_authorization = models.BooleanField(default=False, db_index=True)
+    generic_request = models.BooleanField(default=False)
+    shared_view_url = models.TextField(null=True, blank=True, default='')
     @property
     def status_desc(self):
         for (choice_code, choice_desc) in DownloadRequest.REQUEST_STATUS_CHOICES:
@@ -79,12 +83,15 @@ class DownloadRequest(models.Model):
     @property
     def status_authorization(self):
         if self.pending_authorization:
-            return self.status_desc + ' - ' + ugettext('Awaiting authorization')
+            return self.status_desc + ' - ' + ugettext('Awaiting approval')
         else:
             return self.status_desc
     
     @property
     def active(self):
+        if (self.request_status == DownloadRequest.REQUEST_QUEUED_STATUS or self.request_status == DownloadRequest.PROCESSING_STATUS) \
+                and self.pending_authorization:
+            return True
         now = timezone.now()
         for locator in self.resourcelocator_set.all():
             if not locator.canceled:
@@ -259,7 +266,7 @@ class ResourceLocator(models.Model):
     
     @property
     def status_detail(self):
-        return self.status_canceled + " - " + ugettext('Authorization: ') + self.authorization_desc
+        return self.status_canceled + " - " + ugettext('Approval: ') + self.authorization_desc
     
     # res_einternal_id = models.PositiveIntegerField()
     #ds_type = models.CharField(max_length=3, choices=RESOURCE_TYPES_CHOICES)
