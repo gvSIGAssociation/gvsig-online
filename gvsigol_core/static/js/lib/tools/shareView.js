@@ -23,8 +23,9 @@
 /**
  * TODO
  */
+console.log('shareView declare');
 var shareView = function(conf, map, layerTree) {
-	this.tool = new ShareView(conf, map, layerTree);
+	this.tool = new gvsigol.tools.ShareView(conf, map, layerTree);
 	this.id = "share-view";
 	this.installUI();
 };
@@ -39,21 +40,24 @@ shareView.prototype.installUI = function() {
 	this.$button.on('click', handler);
 	this.$button.on('touchstart', handler);
 }
-
+ 
 
 /**
  * We define the tool that can be used independently from UI
  */
-var ShareView = function(conf, map, layerTree) {
+var gvsigol = gvsigol || {};
+gvsigol.tools = gvsigol.tools || {};
+gvsigol.tools.ShareView = function(conf, map, layerTree) {
 	this.conf = conf;
 	this.map = map;
 	this.layerTree = layerTree;
 }
+console.log('ShareView declare');
 
 /**
  * @param {Event} e Browser event.
  */
-ShareView.prototype.handle = function(e) {
+gvsigol.tools.ShareView.prototype.handle = function(e) {
 	var self = this;
 	e.preventDefault();
 	var description = $('#shareview-description').val();
@@ -61,23 +65,32 @@ ShareView.prototype.handle = function(e) {
 	$('#float-modal').modal('hide');
 };
 
-ShareView.prototype.getViewState = function(e) {
+gvsigol.tools.ShareView.prototype.getViewState = function() {
 	var viewState = this.layerTree.getState();
 	var center = this.map.getView().getCenter();
 	var transformedCenter = ol.proj.transform(center, 'EPSG:3857', 'EPSG:4326');
 	viewState['view'] = {
 			"max_zoom_level": this.conf.view.max_zoom_level,
 			"zoom": this.map.getView().getZoom(),
-			"center_lon": transformedCenter[0],      
+			"center_lon": transformedCenter[0],
 			"center_lat": transformedCenter[1]
 		}
 	return viewState;
 }
 
+gvsigol.tools.ShareView.prototype.getSharedViewState = function(description) {
+	var description = description || '';
+	return {
+		'pid': self.conf.pid,
+		'description': description,
+		'view_state': JSON.stringify(this.getViewState())
+	};
+}
+
 /**
  * TODO
  */
-ShareView.prototype.save = function(description) {
+gvsigol.tools.ShareView.prototype.save = function(description) {
 	var self = this;
 	var viewState = this.getViewState();
 	$.ajax({
@@ -87,11 +100,7 @@ ShareView.prototype.save = function(description) {
 	  	beforeSend : function(xhr) {
 			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},
-	  	data: {
-	  		'pid': self.conf.pid,
-	  		'description': description,
-			'view_state': JSON.stringify(viewState),
-		},
+	  	data: this.getSharedViewState(description),
 	  	success	:function(response){
 	  		var ui = '';
 	  		ui += '<div class="row">';
