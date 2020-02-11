@@ -102,6 +102,8 @@ iso-639
 
 # job and queque manager, for download manager and email queues
 celery==4.3.0
+# harcode indirect celery requirements
+zipp==0.6.0
 
 # workaround for indirect dependencies problem when using pip 8
 more-itertools<6.0.0
