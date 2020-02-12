@@ -1210,6 +1210,10 @@ def createDownloadLinks(downloadRequest, resourceLocator):
         if resourceLocator.resolved_url.startswith("file://"):
             local_path = resolveFileUrl(resourceLocator.resolved_url)
             paths = getAuxiliaryFiles(local_path)
+            if len(paths) == 0:
+                # file can't be found
+                logger.error("Error locating file for download")
+                raise PermanentPreparationError()
             for p in paths:
                 is_auxiliary = (p != local_path)
                 createDownloadLink(downloadRequest, resourceLocator, p, is_auxiliary)
