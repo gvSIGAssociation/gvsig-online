@@ -145,6 +145,7 @@ def shp2postgis(shp_path, table_name, srs, host, port, dbname, schema, user, pas
     if encoding != "autodetect":
         args.extend(["--config", "SHAPE_ENCODING", encoding])
     args.extend(["-lco", "LAUNDER=YES"])
+    args.extend(["-lco", "precision=NO"])
     args.extend([conn_string, shp_path])
     print " ".join(args).replace("password='{password}'".format(password=password), "password='xxxxxx'")
     p = subprocess.Popen(args, stdin=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=-1)
