@@ -276,7 +276,7 @@ DownloadManagerUI.prototype.createDownloadResource = function(downloadDescriptor
 	content += '<div style="padding: 6px 4px 6px 0px">' + resource.name + '</div></div></td>';
 	content += '<td><div class="col"><label class="form-label">'+ gettext("Approval") + '</label>';
 	if (resource.restricted) {
-		content += '<div style="padding: 6px 4px 6px 0px"><span class="label-warning">' + gettext("Requires confirmation") + '</span></div></div></td>';
+		content += '<div style="padding: 6px 4px 6px 0px"><span class="label-warning">' + gettext("Requires approval") + '</span></div></div></td>';
 	}
 	else {
 		content += '<div style="padding: 6px 4px 6px 0px"><span class="label-default">' + gettext("Approved") + '</span></div></div></td>';

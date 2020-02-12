@@ -54,8 +54,8 @@ msgstr "Hubo un error procesando su petición. Por favor, inténtelo más tarde"
 msgid "Direct download"
 msgstr "Descarga directa"
 
-msgid "Requires confirmation"
-msgstr "Requiere confirmación"
+msgid "Requires approval"
+msgstr "Requiere aprobación"
 
 msgid "Approved"
 msgstr "Aprobado"
