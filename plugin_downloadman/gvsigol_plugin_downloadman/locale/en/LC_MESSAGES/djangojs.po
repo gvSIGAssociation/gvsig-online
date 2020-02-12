@@ -79,3 +79,17 @@ msgstr ""
 msgid "%(number)s minutes"
 msgstr ""
 
+msgid "Generic download request"
+msgstr ""
+
+msgid "Please, use this form to describe which data you need to download:"
+msgstr ""
+
+msgid "Request description"
+msgstr ""
+
+msgid "Send generic request"
+msgstr ""
+
+msgid "Send request"
+msgstr ""
