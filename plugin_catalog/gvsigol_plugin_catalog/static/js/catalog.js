@@ -352,11 +352,21 @@ CatalogView.prototype.getPatternBasedCategories = function(cat, config){
 	return subCategories;
 }
 
+
+CatalogView.prototype.sanitizeHtmlText = function(text){
+	var placeHolder = $('<ph></ph>');
+	var result = placeHolder.text(text).html();
+	result = result.replace(/"/g, '&#x22;');
+	result = result.replace(/'/g, "&#x27;");
+	result = result.replace(/`/g, "&#x60;");
+	return result;
+}
+
 CatalogView.prototype.getMetadataEntry = function(metadata){
 	var met = '';
 	if(metadata){
-		var title = metadata['defaultTitle'] || '';
-		var abstract = metadata['abstract'] || '';
+		var title = this.sanitizeHtmlText(metadata['defaultTitle']) || '';
+		var abstract = this.sanitizeHtmlText(metadata['abstract']) || '';
 		met += '<div class="catalog_content_layer col-md-6">';
 		met += '	<div class="col-sm-9">';
 		met += '		<p class="catalog_content_title block-with-text">'+ title +'</p>';
@@ -381,9 +391,8 @@ CatalogView.prototype.getMetadataEntry = function(metadata){
 			}
 		}
 		
-		var md_url = this.getMetadataUrl(metadata['geonet:info']['uuid']); 
-		
-		met += '			<img src="'+image_src+'" style="width:100%;"/>';
+		var md_url = this.sanitizeHtmlText(this.getMetadataUrl(metadata['geonet:info']['uuid']));
+		met += '			<img src="'+this.sanitizeHtmlText(image_src)+'" style="width:100%;"/>';
 		met += '		</div>';
 		met += '	</div>';
 		met += '	<div class="col-sm-12">';

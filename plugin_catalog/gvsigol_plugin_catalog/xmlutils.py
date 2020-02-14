@@ -21,6 +21,7 @@
 '''
 @author: Cesar Martinez Izquierdo
 '''
+from lxml import etree
 
 def getTextFromXMLNode(tree, xpath_filter, ns={}):
     if tree is not None:
@@ -54,4 +55,16 @@ def getLocalizedText(node, lang=None, childNodeName='value'):
         if len(aux) > 0:
             return aux[0]
     return ''
-    
+
+def sanitizeXmlText(text):
+    """
+    Escapes the provided text to ensure that no XML elements are injected
+    in a XML fragment.
+    """
+    placeHolder = etree.Element('ph')
+    placeHolder.text = text
+    serialized = etree.tostring(placeHolder, encoding='unicode')
+    serialized = serialized.replace('"', '&#x22;');
+    serialized = serialized.replace("'", "&#x27;");
+    serialized = serialized.replace("`", "&#x60;")
+    return serialized[4:-5]

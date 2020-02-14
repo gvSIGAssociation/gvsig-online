@@ -20,6 +20,7 @@
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
+from builtins import str as text
 from lxml import etree as ET
 from gvsigol import settings
 from datetime import datetime
@@ -30,7 +31,7 @@ from gvsigol_plugin_catalog.mdstandards import registry
 #from gvsigol_plugin_catalog.mdstandards import iso19139_2007
 import logging
 logger = logging.getLogger("gvsigol")
-from xmlutils import getTextFromXMLNode, getXMLNode, getXMLCodeText
+from xmlutils import getTextFromXMLNode, getXMLNode, getXMLCodeText, sanitizeXmlText
 
 DEFAULT_TIMEOUT = 5 #seconds
 
@@ -72,6 +73,7 @@ class Geonetwork():
             else:
                 return False
         except Exception as e:
+            logger.exception('Error authenticating')
             print (e.message)
             return False
         
@@ -278,14 +280,14 @@ class Geonetwork():
         for constraintsNode in tree.findall(xpath_filter, ns):
             for useLimitationsNode in constraintsNode.findall('./gmd:MD_Constraints/gmd:useLimitation/gco:CharacterString', ns):
                 if useLimitationsNode.text:
-                    useLimitations.append(useLimitationsNode.text)
+                    useLimitations.append(sanitizeXmlText(useLimitationsNode.text))
             for accessConstraintsNode in constraintsNode.findall('./gmd:MD_LegalConstraints/gmd:accessConstraints/gmd:MD_RestrictionCode', ns):
-                accessConstraints.append(getXMLCodeText(accessConstraintsNode, 'codeListValue', ns))
+                accessConstraints.append(sanitizeXmlText(getXMLCodeText(accessConstraintsNode, 'codeListValue', ns)))
             for useConstraintsNode in constraintsNode.findall('./gmd:MD_LegalConstraints/gmd:useConstraints/gmd:MD_RestrictionCode', ns):
-                useConstraints.append(getXMLCodeText(useConstraintsNode, ns=ns))
+                useConstraints.append(sanitizeXmlText(getXMLCodeText(useConstraintsNode, ns=ns)))
             for otherConstraintsNode in constraintsNode.findall('./gmd:MD_LegalConstraints/gmd:otherConstraints/gco:CharacterString', ns):
                 if otherConstraintsNode.text:
-                    otherConstraints.append(otherConstraintsNode.text)
+                    otherConstraints.append(sanitizeXmlText(otherConstraintsNode.text))
         return {
                 'useLimitations': useLimitations,
                 'accessConstraints': accessConstraints,
@@ -323,12 +325,12 @@ class Geonetwork():
         applicationProfile = getTextFromXMLNode(node, './gmd:applicationProfile/gco:CharacterString', ns)
         function = getTextFromXMLNode(node, './gmd:function/gco:CharacterString', ns)
         return {
-            'name': name,
-            'description': description,
-            'applicationProfile': applicationProfile,
-            'function': function,
-            'protocol': protocol,
-            'url': url
+            'name': sanitizeXmlText(name),
+            'description': sanitizeXmlText(description),
+            'applicationProfile': sanitizeXmlText(applicationProfile),
+            'function': sanitizeXmlText(function),
+            'protocol': sanitizeXmlText(protocol),
+            'url': sanitizeXmlText(url)
             }
     def gn_get_metadata_raw(self, metadata_id):
         url = self.service_url + "/srv/api/0.1/records/"+str(metadata_id)
@@ -338,6 +340,7 @@ class Geonetwork():
         }
               
         r = self.session.get(url, headers=headers, timeout=DEFAULT_TIMEOUT, proxies=settings.PROXIES)
+        logger.debug('gn_get_metadata_raw: ' + text(r.status_code))
         if r.status_code==200:
             return r.content
         raise FailedRequestError(r.status_code, r.content)
@@ -372,11 +375,11 @@ class Geonetwork():
                 
                 categories = []
                 for category in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:topicCategory/gmd:MD_TopicCategoryCode/', ns):
-                    categories.append(category.text)
+                    categories.append(sanitizeXmlText(category.text))
                 
                 keywords = []
                 for keyword in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/', ns):
-                    keywords.append(keyword.text)
+                    keywords.append(sanitizeXmlText(keyword.text))
                 
                 representation_type = ''
                 aux = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialRepresentationType/', ns)
@@ -406,8 +409,8 @@ class Geonetwork():
                 if thumbnails_urls.__len__() == thumbnail_names.__len__():
                     for i in range(0,thumbnails_urls.__len__()):
                         thumbnail = {
-                            'url' : thumbnails_urls[i],
-                            'name': thumbnail_names[i]
+                            'url' : sanitizeXmlText(thumbnails_urls[i]),
+                            'name': sanitizeXmlText(thumbnail_names[i])
                         }
                         thumbnails.append(thumbnail)
                 
@@ -420,43 +423,15 @@ class Geonetwork():
                 for onlineResourceNode in tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource', ns):
                     onlineResource = self._getOnlineResource(onlineResourceNode, ns)
                     resources.append(onlineResource)
-                """
-                resources_urls = []
-                for resources_url in tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:linkage/', ns):
-                    resources_urls.append(resources_url.text)
-                    
-                resources_names = []
-                for resources_name in tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:name/', ns):
-                    resources_names.append(resources_name.text)
-                    
-                resources_protocols = []
-                for resources_protocol in tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:protocol/', ns):
-                    resources_protocols.append(resources_protocol.text)
-                    
-                resources_descriptions = []
-                for resources_description in tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:description/', ns):
-                    resources_descriptions.append(resources_description.text)
-                
-                resources = []
-                if resources_names.__len__() == resources_urls.__len__() and resources_protocols.__len__() == resources_urls.__len__() and resources_descriptions.__len__() == resources_urls.__len__():
-                    for i in range(0,resources_urls.__len__()):
-                        res = {
-                            'url' : resources_urls[i],
-                            'name': resources_names[i],
-                            'protocol': resources_protocols[i],
-                            'descriptions' : resources_descriptions[i]
-                        }
-                        resources.append(res)
-                """
                 resource_contacts = []
                 for pointOfContact in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:pointOfContact', ns):
                     contact = {}
                     organisation = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString', ns)
                     role = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:role/gmd:CI_RoleCode', ns)
                     if organisation is not None:
-                        contact['organisation'] = organisation.text
+                        contact['organisation'] = sanitizeXmlText(organisation.text)
                     if role is not None:
-                        contact['role'] = getXMLCodeText(role)
+                        contact['role'] = sanitizeXmlText(getXMLCodeText(role))
                     contactInfoNode = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource', ns)
                     if contactInfoNode is not None:
                         onlineResource = self._getOnlineResource(contactInfoNode, ns)
@@ -468,9 +443,9 @@ class Geonetwork():
                     organisation = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString', ns)
                     role = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:role/gmd:CI_RoleCode', ns)
                     if organisation is not None:
-                        contact['organisation'] = organisation.text
+                        contact['organisation'] = sanitizeXmlText(organisation.text)
                     if role is not None:
-                        contact['role'] = getXMLCodeText(role)
+                        contact['role'] = sanitizeXmlText(getXMLCodeText(role))
                     contactInfoNode = pointOfContact.find('./gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource', ns)
                     if contactInfoNode is not None:
                         onlineResource = self._getOnlineResource(contactInfoNode, ns)
@@ -482,9 +457,9 @@ class Geonetwork():
                     organisation = responsibleParty.find('./gmd:organisationName/gco:CharacterString', ns)
                     role = responsibleParty.find('./gmd:role/gmd:CI_RoleCode', ns)
                     if organisation is not None:
-                        contact['organisation'] = organisation.text
+                        contact['organisation'] = sanitizeXmlText(organisation.text)
                     if role is not None:
-                        contact['role'] = getXMLCodeText(role)
+                        contact['role'] = sanitizeXmlText(getXMLCodeText(role))
                     contactInfoNode = responsibleParty.find('./gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource', ns)
                     if contactInfoNode is not None:
                         onlineResource = self._getOnlineResource(contactInfoNode, ns)
@@ -497,18 +472,18 @@ class Geonetwork():
                     }
                 
                 resource = {
-                    'metadata_id': metadata_id,
-                    'title': title,
-                    'abstract': abstract,
-                    'publish_date': publish_date,
-                    'period_start': period_start,
-                    'period_end': period_end,
+                    'metadata_id': sanitizeXmlText(metadata_id),
+                    'title': sanitizeXmlText(title),
+                    'abstract': sanitizeXmlText(abstract),
+                    'publish_date': sanitizeXmlText(publish_date),
+                    'period_start': sanitizeXmlText(period_start),
+                    'period_end': sanitizeXmlText(period_end),
                     'categories': categories,
                     'keywords': keywords,
-                    'representation_type': representation_type,
-                    'scale': scale,
-                    'srs': srs,
-                    'image_url': image_url,
+                    'representation_type': sanitizeXmlText(representation_type),
+                    'scale': sanitizeXmlText(scale),
+                    'srs': sanitizeXmlText(srs),
+                    'image_url': sanitizeXmlText(image_url),
                     'thumbnails': thumbnails,
                     'resources': resources,
                     'resource_constraints': resource_constraints,
