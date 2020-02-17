@@ -22,11 +22,9 @@
 from builtins import str as text
 from gvsigol_services import signals
 from gvsigol_services import geographic_servers
-from gvsigol_plugin_catalog import settings as plugin_settings
+from gvsigol_plugin_catalog import settings as plugin_settings, api_gn_0_1
 from django.core.exceptions import ImproperlyConfigured
 from gvsigol_plugin_catalog.models import LayerMetadata
-from gvsigol_plugin_catalog import api_old as xmlapi_old
-from gvsigol_plugin_catalog import api_new as xmlapi_new
 import logging
 from gvsigol_plugin_catalog.mdstandards import registry
 import requests
@@ -57,10 +55,7 @@ class OnlineResource():
 
 class Geonetwork():
     def __init__(self, version, service_url, user, password):
-        if version == 'legacy3.2':
-            self.xmlapi = xmlapi_old.Geonetwork(service_url + '/srv/eng/')
-        else: # version == 'api0.1':
-            self.xmlapi = xmlapi_new.Geonetwork(service_url)
+        self.xmlapi = api_gn_0_1.Geonetwork(service_url)
         self.user = user
         self.password = password
     

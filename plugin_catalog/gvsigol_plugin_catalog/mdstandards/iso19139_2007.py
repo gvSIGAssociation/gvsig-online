@@ -334,19 +334,6 @@ def create_transfer_options(root_elem, qualified_name, title, wms_endpoint, wfs_
         if wcs_endpoint:
             create_online_resource(MD_DigitalTransferOptionsElem, wms_endpoint, 'OGC:WCS', qualified_name, title)
 
-
-def update_metadata(xml_str, extent_tuple, thumbnail_url):
-    tree = ET.fromstring(xml_str)
-    for geog_bounding_box_element in tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox', namespaces):
-        update_extent(geog_bounding_box_element, extent_tuple)
-    thumbnails = tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic', namespaces)
-    if len(thumbnails) > 0:
-        for thumbnail_element in thumbnails:
-            update_thumbnail(thumbnail_element, thumbnail_url)
-    else:
-        create_thumbnail(tree, thumbnail_url)
-    return ET.tostring(tree, encoding='unicode')
-
 class Iso19139_2007Updater(XmlStandardUpdater):
     def update_extent(self, extent_tuple):
         for geog_bounding_box_element in self.tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox', namespaces):
@@ -354,13 +341,24 @@ class Iso19139_2007Updater(XmlStandardUpdater):
         return self
         
     def update_thumbnail(self, thumbnail_url):
-        thumbnails = self.tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic', namespaces)
-        if len(thumbnails) > 0:
-            for thumbnail_element in thumbnails:
-                update_thumbnail(thumbnail_element, thumbnail_url)
-        else:
+        graphicOverviews = self.tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview', namespaces)
+        valid_overviews = 0
+        to_remove = []
+        for overview in graphicOverviews:
+            file_name = overview.find('./gmd:MD_BrowseGraphic/gmd:fileName/gco:CharacterString', namespaces)
+            if file_name.text == '' or file_name.text == 'n/a':
+                to_remove.append(overview)
+            else:
+                valid_overviews += 1
+                desc = overview.find('./gmd:MD_BrowseGraphic/gmd:fileDescription/gco:CharacterString', namespaces)
+                if desc is not None and desc.text == u'gvsigol thumbnail':
+                    file_name.text = thumbnail_url
+        for el in to_remove:
+            el.getparent().remove(el)
+        if valid_overviews == 0:
             create_thumbnail(self.tree, thumbnail_url)
         return self
+
         
     def update_all(self, extent_tuple, thumbnail_url):
         self.update_extent(extent_tuple)
