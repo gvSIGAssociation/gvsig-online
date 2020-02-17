@@ -68,3 +68,25 @@ def sanitizeXmlText(text):
     serialized = serialized.replace("'", "&#x27;");
     serialized = serialized.replace("`", "&#x60;")
     return serialized[4:-5]
+
+
+def getLastExistingSibling(parent, previousSiblingNames, namespaces={}):
+    """
+    Since most 19115 elements are sequences, the children must follow a specific order. This method
+    finds the last existing sibling or returns None.
+    """
+    for sibling in reversed(previousSiblingNames):
+        child = parent.find(sibling, namespaces)
+        if child is not None:
+            return child
+
+def insertAfter(parent, child, previousSiblingNames, namespaces={}):
+    """
+    Since most 19115 elements are sequences, the children must follow a specific order. This method
+    inserts a child in the right order, i.e, after the last existing sibling
+    """
+    prevSibling = getLastExistingSibling(parent, previousSiblingNames, namespaces)
+    if prevSibling is not None:
+        prevSibling.addnext(child)
+    else:
+        parent.append(child)

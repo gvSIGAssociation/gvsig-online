@@ -134,12 +134,15 @@ class Geonetwork():
         if ds_type == 'featureType':
             wfs_endpoint = ws.wfs_endpoint
             wcs_endpoint = None
+            spatial_representation_type = 'vector'
         elif ds_type in ('coverage', 'imagemosaic') and ws.wcs_endpoint:
             wfs_endpoint = None
             wcs_endpoint = ws.wcs_endpoint
+            spatial_representation_type = 'grid'
         else:
             wfs_endpoint = None
             wcs_endpoint = None
+            spatial_representation_type = None
 
         mdfields = {
             'title': layer.title,
@@ -147,6 +150,7 @@ class Geonetwork():
             'qualified_name': ws.name + ':' + layer.name,
             'extent_tuple': (minx, miny, maxx, maxy),
             'crs': crs,
+            'spatial_representation_type': spatial_representation_type,
             'thumbnail_url': layer.thumbnail.url,
             'wms_endpoint': wms_endpoint,
             'wfs_endpoint': wfs_endpoint,

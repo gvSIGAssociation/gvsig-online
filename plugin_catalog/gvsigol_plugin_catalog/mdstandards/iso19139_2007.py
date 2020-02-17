@@ -4,8 +4,9 @@ from builtins import str as text
 from registry import XmlStandardUpdater, BaseStandardManager, XmlStandardReader
 from datetime import datetime
 from django.utils.translation import ugettext as _
-from gvsigol_plugin_catalog.xmlutils import getTextFromXMLNode, sanitizeXmlText
+from gvsigol_plugin_catalog.xmlutils import getTextFromXMLNode, sanitizeXmlText, insertAfter
 import collections
+from owslib import wcs
 
 def define_translations():
     """
@@ -186,7 +187,6 @@ def create_datset_metadata(mdfields):
     metadata +=       u'</gmd:MD_Distribution>'
     metadata +=   u'</gmd:distributionInfo>'
     metadata += u'</gmd:MD_Metadata>'
-
     return metadata
 
 class Iso19139_2007Manager(BaseStandardManager):
@@ -235,15 +235,105 @@ def update_thumbnail(browse_graphic_elem, thumbnail_url):
 
 def create_thumbnail(root_elem, thumbnail_url):
     data_ident_elements = root_elem.findall('./gmd:identificationInfo/gmd:MD_DataIdentification', namespaces)
-    if len(data_ident_elements) > 0:
-        grov = ET.SubElement(data_ident_elements[0], "{http://www.isotc211.org/2005/gmd}graphicOverview")
-        brgr = ET.SubElement(grov, "{http://www.isotc211.org/2005/gmd}MD_BrowseGraphic")
+    for data_ident_elem in data_ident_elements:
+        prevSiblingNames = ['gmd:citation',
+                            'gmd:abstract',
+                            'gmd:purpose',
+                            'gmd:credit',
+                            'gmd:status',
+                            'gmd:pointOfContact',
+                            'gmd:resourceMaintenance']
+        graphicOverviewElem = ET.Element("{http://www.isotc211.org/2005/gmd}graphicOverview")
+        insertAfter(data_ident_elem, graphicOverviewElem, prevSiblingNames, namespaces)
+        #grov = ET.SubElement(data_ident_elements[0], "{http://www.isotc211.org/2005/gmd}graphicOverview")
+        brgr = ET.SubElement(graphicOverviewElem, "{http://www.isotc211.org/2005/gmd}MD_BrowseGraphic")
         file_name = ET.SubElement(brgr, "{http://www.isotc211.org/2005/gmd}fileName")
         file_name_str = ET.SubElement(file_name, "{http://www.isotc211.org/2005/gco}CharacterString")
         file_name_str.text = thumbnail_url
         file_desc = ET.SubElement(brgr, "{http://www.isotc211.org/2005/gmd}fileDescription")
         file_desc_str = ET.SubElement(file_desc, "{http://www.isotc211.org/2005/gco}CharacterString")
         file_desc_str.text = u'gvsigol thumbnail'
+
+def create_extent(root_elem, minx, miny, maxx, maxy):
+    data_ident_elements = root_elem.findall('./gmd:identificationInfo/gmd:MD_DataIdentification', namespaces)
+    for data_ident_elem in data_ident_elements:
+        prevSiblingNames = ['gmd:citation',
+                            'gmd:abstract',
+                            'gmd:purpose',
+                            'gmd:credit',
+                            'gmd:status',
+                            'gmd:pointOfContact',
+                            'gmd:resourceMaintenance',
+                            'gmd:spatialRepresentationType',
+                            'gmd:spatialResolution',
+                            'gmd:language',
+                            'gmd:characterSet',
+                            'gmd:topicCategory',
+                            'gmd:environmentDescription'
+                            ]
+        extentElem = ET.Element("{http://www.isotc211.org/2005/gmd}extent")
+        insertAfter(data_ident_elem, extentElem, prevSiblingNames, namespaces)
+        #extentElem = ET.SubElement(data_ident_elem, "{http://www.isotc211.org/2005/gmd}extent")
+        exExtentElem = ET.SubElement(extentElem, "{http://www.isotc211.org/2005/gmd}EX_Extent")
+        geogExtentElem = ET.SubElement(exExtentElem, "{http://www.isotc211.org/2005/gmd}geographicElement")
+        exGeogBBElem = ET.SubElement(geogExtentElem, "{http://www.isotc211.org/2005/gmd}EX_GeographicBoundingBox")
+        westBoundLongElem = ET.SubElement(exGeogBBElem, "{http://www.isotc211.org/2005/gmd}westBoundLongitude")
+        decimalElem = ET.SubElement(westBoundLongElem, "{http://www.isotc211.org/2005/gco}Decimal")
+        decimalElem.text = minx
+        eastBoundLongElem = ET.SubElement(exGeogBBElem, "{http://www.isotc211.org/2005/gmd}eastBoundLongitude")
+        decimalElem = ET.SubElement(eastBoundLongElem, "{http://www.isotc211.org/2005/gco}Decimal")
+        decimalElem.text = maxx
+        southBoundLatElem = ET.SubElement(exGeogBBElem, "{http://www.isotc211.org/2005/gmd}southBoundLatitude")
+        decimalElem = ET.SubElement(southBoundLatElem, "{http://www.isotc211.org/2005/gco}Decimal")
+        decimalElem.text = miny
+        northBoundLatElem = ET.SubElement(exGeogBBElem, "{http://www.isotc211.org/2005/gmd}northBoundLatitude")
+        decimalElem = ET.SubElement(northBoundLatElem, "{http://www.isotc211.org/2005/gco}Decimal")
+        decimalElem.text = maxy
+
+def create_online_resource(parent, url, protocol, name, description, application_profile=None, function=None):
+    onlineElem = ET.SubElement(parent, "{http://www.isotc211.org/2005/gmd}onLine")
+    onlineResElem = ET.SubElement(onlineElem, "{http://www.isotc211.org/2005/gmd}CI_OnlineResource")
+    linkageElem = ET.SubElement(onlineResElem, "{http://www.isotc211.org/2005/gmd}linkage")
+    urlElem = ET.SubElement(linkageElem, "{http://www.isotc211.org/2005/gmd}URL")
+    urlElem.text = url
+    protocolElem = ET.SubElement(onlineResElem, "{http://www.isotc211.org/2005/gmd}protocol")
+    charStr = ET.SubElement(protocolElem, "{http://www.isotc211.org/2005/gco}CharacterString")
+    charStr.text = protocol
+    if application_profile:
+        applicationProfileElem = ET.SubElement(onlineResElem, "{http://www.isotc211.org/2005/gmd}applicationProfile")
+        charStr = ET.SubElement(applicationProfileElem, "{http://www.isotc211.org/2005/gco}CharacterString")
+        charStr.text = application_profile
+    nameElem = ET.SubElement(onlineResElem, "{http://www.isotc211.org/2005/gmd}name")
+    charStr = ET.SubElement(nameElem, "{http://www.isotc211.org/2005/gco}CharacterString")
+    charStr.text = name
+    descriptionElem = ET.SubElement(onlineResElem, "{http://www.isotc211.org/2005/gmd}description")
+    charStr = ET.SubElement(descriptionElem, "{http://www.isotc211.org/2005/gco}CharacterString")
+    charStr.text = description
+    if function:
+        functionElem = ET.SubElement(onlineResElem, "{http://www.isotc211.org/2005/gmd}function")
+        charStr = ET.SubElement(functionElem, "{http://www.isotc211.org/2005/gco}CharacterString")
+        charStr.text = function
+
+def create_transfer_options(root_elem, qualified_name, title, wms_endpoint, wfs_endpoint=None, wcs_endpoint=None):
+    distribInfoElements = root_elem.findall('./gmd:distributionInfo/gmd:MD_Distribution', namespaces)
+    
+    if len(distribInfoElements) == 0:
+        distributionInfoElem = ET.SubElement(root_elem, "{http://www.isotc211.org/2005/gmd}distributionInfo")
+        MD_DistributionElem = ET.SubElement(distributionInfoElem, "{http://www.isotc211.org/2005/gmd}MD_Distribution")
+        distribInfoElements = [MD_DistributionElem]
+        
+    for distribInfoElem in distribInfoElements:
+        prevSiblingNames = ['gmd:distributionFormat',
+                            'gmd:distributor']
+        transferOptionsElem = ET.Element("{http://www.isotc211.org/2005/gmd}transferOptions")
+        insertAfter(distribInfoElem, transferOptionsElem, prevSiblingNames, namespaces)
+        MD_DigitalTransferOptionsElem = ET.SubElement(transferOptionsElem, "{http://www.isotc211.org/2005/gmd}MD_DigitalTransferOptions")
+        create_online_resource(MD_DigitalTransferOptionsElem, wms_endpoint, 'OGC:WMS', qualified_name, title)
+        if wfs_endpoint:
+            create_online_resource(MD_DigitalTransferOptionsElem, wms_endpoint, 'OGC:WFS', qualified_name, title)
+        if wcs_endpoint:
+            create_online_resource(MD_DigitalTransferOptionsElem, wms_endpoint, 'OGC:WCS', qualified_name, title)
+
 
 def update_metadata(xml_str, extent_tuple, thumbnail_url):
     tree = ET.fromstring(xml_str)
