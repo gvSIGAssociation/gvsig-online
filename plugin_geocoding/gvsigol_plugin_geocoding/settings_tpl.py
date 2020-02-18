@@ -75,9 +75,9 @@ GEOCODING_PROVIDER = {
     # http://callejerouy2-direcciones.paas.red.uy/api/v1/geocode/candidates?limit=10&q=general%20ordo%C3%B1ez%2C%20montevideo&soloLocalidad=false
     # Direccion interna de OpenShift
     'ide_uy': {
-        'candidates_url': 'https://callejerouy-direcciones.agesic.gub.uy//api/v1/geocode/candidates',
-        'find_url': 'https://callejerouy-direcciones.agesic.gub.uy//api/v1/geocode/find',
-        'reverse_url': 'https://callejerouy-direcciones.agesic.gub.uy//api/v1/geocode/reverse',  
+        'candidates_url': '##GEOCODER_IDEUY_URL##/api/v1/geocode/candidates',
+        'find_url': '##GEOCODER_IDEUY_URL##/api/v1/geocode/find',
+        'reverse_url': '##GEOCODER_IDEUY_URL##/api/v1/geocode/reverse',  
         'max_results': 10,
         'filter': ''
     }
