@@ -14,6 +14,8 @@ fi
 grep -rl "##SOLR_URL##" | xargs sed -i "s ##SOLR_URL## $SOLR_URL g" 
 grep -rl "##GEOCODER_URL##" | xargs sed -i "s ##GEOCODER_URL## $GEOCODER_URL g"
 grep -rl "##CARTOCIUDAD_INE_MUN##" | xargs sed -i "s/##CARTOCIUDAD_INE_MUN##/$CARTOCIUDAD_INE_MUN/g"
+grep -rl "##GEOCODER_IDEUY_URL##" | xargs sed -i "s ##GEOCODER_IDEUY_URL## $GEOCODER_IDEUY_URL g"
+
 
 
 
