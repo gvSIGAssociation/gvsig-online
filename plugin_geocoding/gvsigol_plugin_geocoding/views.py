@@ -314,8 +314,8 @@ def provider_update(request, provider_id):
             
         form.fields['params'].initial = provider.params
     
-    image_url = settings.BASE_URL + 'img/geocoding/toponimo.png'
-    #image_url = 'img/geocoding/toponimo.png'
+    #image_url = settings.BASE_URL + 'img/geocoding/toponimo.png'
+    image_url = '/gvsigonline/static/img/geocoding/toponimo.png'
     if provider.image:
         image_url = provider.image.url
         # HACK HTTPS
