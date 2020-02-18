@@ -67,7 +67,9 @@ class IdeUY():
                 if (json_result['address'] == None):
                     json_result['address'] = ''
                 json_result['category'] = provider.category
-                json_result['image'] = str(provider.image)
+                #If there is not a defined image, use provider's image
+                if 'image' not in json_result:                    
+                    json_result['image'] = str(provider.image)
             
         return json_results
     
@@ -78,6 +80,7 @@ class IdeUY():
         http://127.0.0.1:8080/api/v1/geocode/find?type=calle&nomvia=YAGUARON&departamento=MONTEVIDEO&localidad=MONTEVIDEO
         '''
         address = json.loads(address_str)
+        print(str(address))
         typeSearch = address['address[type]']
         inmueble = address['address[inmueble]'] 
         if (inmueble != ''):
@@ -156,6 +159,14 @@ class IdeUY():
             if data:
                 if 'address' in params:
                     data['address'] = params['address']
+                for d in data:                        
+                    if 'type' in d:
+                        myType = d['type']
+                        if myType == 'LOCALIDAD':
+                            d['image'] = '/gvsigonline/static/img/geocoding/country.png'    
+                        if myType == 'POI':
+                            d['image'] = '/gvsigonline/static/img/geocoding/municipio.png'                                
+                    
                 return data
         return []
         
