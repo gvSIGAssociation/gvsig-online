@@ -163,9 +163,9 @@ class IdeUY():
                     if 'type' in d:
                         myType = d['type']
                         if myType == 'LOCALIDAD':
-                            d['image'] = '/gvsigonline/static/img/geocoding/country.png'    
+                            d['image'] = 'static/img/geocoding/country.png'    
                         if myType == 'POI':
-                            d['image'] = '/gvsigonline/static/img/geocoding/municipio.png'                                
+                            d['image'] = 'static/img/geocoding/municipio.png'                                
                     
                 return data
         return []
