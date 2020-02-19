@@ -93,7 +93,7 @@ GEOCODING_PROVIDER = {
 
 }
 
-STATIC_URL = '/gvsigonline/static/'
+# STATIC_URL = '/gvsigonline/static/'
 
 LAST_MODIFIED_FIELD_NAME="last_modified"
 

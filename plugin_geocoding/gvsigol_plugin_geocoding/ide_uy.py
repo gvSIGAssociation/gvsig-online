@@ -17,6 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 import os
+import settings
 '''
 @author: Francisco J. Peñarrubia <fjp@scolab.es>
 '''
@@ -24,7 +25,6 @@ from django.utils.translation import ugettext as _
 from geopy.compat import urlencode
 from geopy.util import logger
 from gvsigol import settings as core_settings
-import settings
 import urllib2
 import json, requests, ast
 from urlparse import urlparse
@@ -164,9 +164,9 @@ class IdeUY():
                     if 'type' in d:
                         myType = d['type']
                         if myType == 'LOCALIDAD':
-                            d['image'] = os.path.join(settings.STATIC_URL, 'img/geocoding/country.png');    
+                            d['image'] = os.path.join(core_settings.STATIC_URL, 'img/geocoding/country.png');    
                         if myType == 'POI':
-                            d['image'] = os.path.join(settings.STATIC_URL, 'img/geocoding/municipio.png');                                
+                            d['image'] = os.path.join(core_settings.STATIC_URL, 'img/geocoding/municipio.png');                                
                     
                 return data
         return []
