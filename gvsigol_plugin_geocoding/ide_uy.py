@@ -16,6 +16,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+import os
 '''
 @author: Francisco J. Peñarrubia <fjp@scolab.es>
 '''
@@ -163,9 +164,9 @@ class IdeUY():
                     if 'type' in d:
                         myType = d['type']
                         if myType == 'LOCALIDAD':
-                            d['image'] = '../static/img/geocoding/country.png'    
+                            d['image'] = os.path.join(settings.STATIC_URL, 'img/geocoding/country.png');    
                         if myType == 'POI':
-                            d['image'] = '../static/img/geocoding/municipio.png'                                
+                            d['image'] = os.path.join(settings.STATIC_URL, 'img/geocoding/municipio.png');                                
                     
                 return data
         return []
