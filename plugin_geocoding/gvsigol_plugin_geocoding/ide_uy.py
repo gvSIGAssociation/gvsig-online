@@ -160,13 +160,14 @@ class IdeUY():
             if data:
                 if 'address' in params:
                     data['address'] = params['address']
+                auxStaticUrl = os.path.join(core_settings.BASE_URL, core_settings.STATIC_URL)
                 for d in data:                        
                     if 'type' in d:
                         myType = d['type']
                         if myType == 'LOCALIDAD':
-                            d['image'] = os.path.join(core_settings.STATIC_URL, 'img/geocoding/country.png');    
+                            d['image'] = os.path.join(auxStaticUrl, 'img/geocoding/country.png');    
                         if myType == 'POI':
-                            d['image'] = os.path.join(core_settings.STATIC_URL, 'img/geocoding/municipio.png');                                
+                            d['image'] = os.path.join(auxStaticUrl, 'img/geocoding/municipio.png');                                
                     
                 return data
         return []
