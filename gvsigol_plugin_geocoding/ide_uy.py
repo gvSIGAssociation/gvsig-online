@@ -69,8 +69,8 @@ class IdeUY():
                     json_result['address'] = ''
                 json_result['category'] = provider.category
                 #If there is not a defined image, use provider's image
-                if 'image' not in json_result:                    
-                    json_result['image'] = str(provider.image)
+                #if 'image' not in json_result:                    
+                #    json_result['image'] = str(provider.image)
             
         return json_results
     
@@ -160,14 +160,21 @@ class IdeUY():
             if data:
                 if 'address' in params:
                     data['address'] = params['address']
-                auxStaticUrl = os.path.join(core_settings.BASE_URL, core_settings.STATIC_URL)
-                for d in data:                        
-                    if 'type' in d:
-                        myType = d['type']
-                        if myType == 'LOCALIDAD':
-                            d['image'] = os.path.join(auxStaticUrl, 'img/geocoding/country.png');    
-                        if myType == 'POI':
-                            d['image'] = os.path.join(auxStaticUrl, 'img/geocoding/municipio.png');                                
+                # auxStaticUrl = os.path.join(core_settings.BASE_URL, core_settings.STATIC_URL)
+                # Parche: Jose hizo un apaño para usar image o type como parámetro para las imágenes.
+                # El problema es que si usas image, las busca en MEDIA, y si usas type, busca en static.
+                # Para que busque en static, hay que usar la clave "type", que ya la estamos usando, así que le doy el cambiazo aquí
+                # No cambio ese funcionamiento por si rompo algo en otro sitio, pero estaría bien buscar otra forma de hacerlo.
+                # Mirar en el javascript jquery.autocomplete.js, que es ahí donde metió el parche Jose.
+                # Cambio de táctica. Metemos unas imagenes con los nombres de los iconos que nos interesan en nuestro type
+                
+#                 for d in data:                        
+#                     if 'type' in d:
+#                         myType = d['type']
+#                         if myType == 'LOCALIDAD':
+#                             d['type'] = 'country';    
+#                         if myType == 'POI':
+#                             d['image'] = os.path.join(auxStaticUrl, 'img/geocoding/municipio.png');                                
                     
                 return data
         return []
