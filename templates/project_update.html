@@ -147,7 +147,7 @@
 								<div class="row">
 									<div class="col-md-6 form-group">
 										<label>{% trans "Crear capa base" %}</label>&nbsp;&nbsp;
-										<image id="processing_icon" src="{{processing_icon}}" width=60px height=60px {% if project.baselayer_version > 0 %}class="hide"{% endif %}></img>
+										<image id="processing_icon" src="{{processing_icon}}" width=60px height=60px {% if project.baselayer_version != -99999 %}class="hide"{% endif %}></img>
 									</div>
 								</div>
 								
