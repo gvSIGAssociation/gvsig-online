@@ -100,11 +100,11 @@ searchByCoordinate.prototype.handler = function(e) {
 	body += '<div class="row">';
 	body += 	'<div class="col-md-6 form-group">';
 	body += 		'<label for="longitude">' + gettext('Longitude') + '/X</label>';
-	body += 		'<input placeholder="" name="longitude" id="longitude" type="text" class="form-control">';					
+	body += 		'<input placeholder="" name="longitude" id="longitude" type="number" class="form-control">';					
 	body += 	'</div>';
 	body += 	'<div class="col-md-6 form-group">';
 	body += 		'<label for="latitude">' + gettext('Latitude') + '/Y</label>';
-	body += 		'<input placeholder="" name="latitude" id="latitude" type="text" class="form-control">';					
+	body += 		'<input placeholder="" name="latitude" id="latitude" type="number" class="form-control">';					
 	body += 	'</div>';
 
 	body += '</div>';
@@ -127,22 +127,28 @@ searchByCoordinate.prototype.handler = function(e) {
 		var latitude = $('#latitude').val();
 		var longitude = $('#longitude').val();
 		
-		var coordinate = ol.proj.transform([parseFloat(longitude), parseFloat(latitude)], projection, 'EPSG:3857');	
+		if (latitude != "" && longitude != "") {
+			var coordinate = ol.proj.transform([parseFloat(longitude), parseFloat(latitude)], projection, 'EPSG:3857');	
+			
+			var popup = new ol.Overlay.Popup();
+			self.map.addOverlay(popup);
+			
+			var popupContent = '';
+			popupContent += '<p style="font-weight:bold">' + projection + '</p>';
+			popupContent += '<code>' + gettext('Longitude') + ' - X: ' + longitude + '<br />' + gettext('Latitude') + ' - Y: ' + latitude + '</code>';
+			
+			popup.show(coordinate, '<div class="popup-wrapper">' + popupContent + '</div>');
+			
+			self.map.getView().setCenter(coordinate);
+			self.map.getView().setZoom(12);
+			
+			$('#float-modal').modal('hide');
+			self.deactivate();
+			
+		} else {
+			messageBox.show('error', 'Los valores de las coordenadas no pueden ser nulos o vacíos.');
+		}
 		
-		var popup = new ol.Overlay.Popup();
-		self.map.addOverlay(popup);
-		
-		var popupContent = '';
-		popupContent += '<p style="font-weight:bold">' + projection + '</p>';
-		popupContent += '<code>' + gettext('Longitude') + ' - X: ' + longitude + '<br />' + gettext('Latitude') + ' - Y: ' + latitude + '</code>';
-		
-		popup.show(coordinate, '<div class="popup-wrapper">' + popupContent + '</div>');
-		
-		self.map.getView().setCenter(coordinate);
-		self.map.getView().setZoom(12);
-		
-		$('#float-modal').modal('hide');
-		self.deactivate();
 	});
 };
 
