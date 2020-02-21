@@ -125,7 +125,9 @@ viewer.core = {
 		this.zoombar = new ol.control.Zoom();
 
 		var osm = new ol.layer.Tile({
-    		source: new ol.source.OSM()
+    		source: new ol.source.OSM({
+    			url: 'https://{a-c}.tile.openstreetmap.de/{z}/{x}/{y}.png'
+    		})
     	});
 
 		var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false});
