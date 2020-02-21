@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-
 '''
     gvSIG Online.
     Copyright (C) 2010-2017 SCOLAB.
@@ -133,7 +132,7 @@ class Tiling():
                 destination.write(content)
                 destination.close()
             except Exception as e:
-                print "ERROR: " + str(e)
+                print "ERROR: " + str(e) + " " + url
         else: 
         #print "skipped %r" % url
             pass
@@ -315,8 +314,28 @@ def tiling_base_layer(base_lyr, prj_id, num_res_levels, tilematrixset, format_='
                 lyr_max_y = float(extent[3])
                 tiling.set_layer_extent(lyr_min_x, lyr_min_y, lyr_max_x, lyr_max_y)
                 
+            #Genera el tileado a partir de coords en 3857 q es en las que está el extent del proyecto
             tiling.create_tiles_from_utm(min_x, min_y, max_x, max_y, num_res_levels, format_)
-            shutil.make_archive(folder_prj, 'zip', folder_prj)
+            
+            #Ahora ya no lo quieren con el extent del proyecto sino de la capa. Transformamos a 3857 para seguir usando create_tiles_from_utm
+            #inProj = Proj(init='epsg:4326')
+            #outProj = Proj(init='epsg:3857')
+            #tile_min_x, tile_min_y = transform(inProj, outProj, lyr_min_x, lyr_min_y)
+            #tile_max_x, tile_max_y = transform(inProj, outProj, lyr_max_x, lyr_max_y)
+            #tiling.create_tiles_from_utm(tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, format_)
+            
+            #TODO;
+            #Shutil tiene un bug en algunos SO que hace que te meta una carpeta ./ dentro del zip (a los de SAV no les sirve). 
+            #A partir de la 3.6 de python está resuelto. Mientras tanto lo hago con ZipFile. Queda pendiente volverlo a dejar con shutil  
+            #shutil.make_archive(folder_prj, 'zip', folder_prj)
+            zipf = zipfile.ZipFile(folder_prj + '.zip', 'w', zipfile.ZIP_DEFLATED)
+            lenDirPath = len(folder_prj)
+            for root, _, files in os.walk(folder_prj):
+                for file_ in files:
+                    filePath = os.path.join(root, file_)
+                    zipf.write(filePath, filePath[lenDirPath :])
+            zipf.close()
+            
             shutil.rmtree(folder_prj)
         except Exception:
             #Si ha habido algún problema restauramos la versión vieja
