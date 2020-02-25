@@ -805,7 +805,7 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 	var self = this;
 	var filters = ""
 		if(search && search.length > 0){
-			filters += "&any="+search;
+			filters += "&title="+search;
 		}
 	if(resources && resources.length > 0){
 		filters += this.getKeywordQuery(resources, "orgName");
