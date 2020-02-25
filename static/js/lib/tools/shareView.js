@@ -23,7 +23,6 @@
 /**
  * TODO
  */
-console.log('shareView declare');
 var shareView = function(conf, map, layerTree) {
 	this.tool = new gvsigol.tools.ShareView(conf, map, layerTree);
 	this.id = "share-view";
@@ -52,7 +51,6 @@ gvsigol.tools.ShareView = function(conf, map, layerTree) {
 	this.map = map;
 	this.layerTree = layerTree;
 }
-console.log('ShareView declare');
 
 /**
  * @param {Event} e Browser event.
