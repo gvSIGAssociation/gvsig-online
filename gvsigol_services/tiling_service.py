@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
+
 '''
     gvSIG Online.
     Copyright (C) 2010-2017 SCOLAB.
@@ -132,7 +133,7 @@ class Tiling():
                 destination.write(content)
                 destination.close()
             except Exception as e:
-                print "ERROR: " + str(e) + " " + url
+                print "ERROR: " + str(e)
         else: 
         #print "skipped %r" % url
             pass
