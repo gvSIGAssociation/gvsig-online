@@ -38,6 +38,7 @@ var CatalogView = function(mapViewer, config) {
 	this.config.disabledFacets = this.config.disabledFacets || [];
 	this.config.resultsPerPage = this.config.resultsPerPage || 20;
 	this.fromResult = 1;
+	this.sortBy = '&sortBy=relevance';
 	
 	var self = this;
 	$('body').on('change-to-2D-event', function() {
@@ -144,7 +145,17 @@ CatalogView.prototype.initialization = function(){
 	catalogPanel += '	</div>';
 	catalogPanel += '	<div id="catalog_results" class="row">';
 	catalogPanel += '		<div class="col">';
-	catalogPanel += '			<div class="row text-center"><div class="col-md-12 center-block"><ul class="catalog-pager pagination"></div></div>';
+	catalogPanel += '			<div class="row text-center form">';
+	catalogPanel += '				<div class="col-md-2 center-block"></div>';
+	catalogPanel += '				<div class="col-md-8 center-block"><ul class="catalog-pager pagination"></ul></div>';
+	catalogPanel += '				<div class="col-md-2">';
+	catalogPanel += '					<select class="form-control" id="search-results-order-btn" style="margin-top: 20px">';
+	catalogPanel += '					<option val="&sortBy=relevance">' + gettext('Order by relevance') + '</option>';
+	catalogPanel += '					<option val="&sortBy=changeDate">' + gettext('Order by modification date') + '</option>';
+	catalogPanel += '					<option val="&sortBy=title&sortOrder=reverse">' + gettext('Order by title') + '</option>';
+	catalogPanel += '					</select></div>';
+	catalogPanel += '				</div>';
+	catalogPanel += '			</div>';
 	catalogPanel += '			<div class="row">';
 	catalogPanel += '				<div class="col-sm-3" id="catalog_filter"></div>';
 	catalogPanel += '				<div class="col-sm-9" id="catalog_content"></div>';
@@ -161,6 +172,14 @@ CatalogView.prototype.initialization = function(){
 
 	$("#catalog-search-button").unbind("click").click(function(){
 		self.filterCatalog();
+	});
+	
+	$("#search-results-order-btn").change(function(a, b, c) {
+		var option = $("#search-results-order-btn option:selected").get(0);
+		if (option) {
+			self.sortBy = option.getAttribute("val");
+			self.filterCatalog();
+		}
 	});
 	
 	$("#gn-any-field").off("keypress").on("keypress", function(e){
@@ -419,6 +438,8 @@ CatalogView.prototype.getMetadataEntry = function(metadata){
 		met += '	</div>';
 		met += '</div>';
 	}else{
+		this.fromResult = 1;
+		this.updatePager(0);
 		met += '<div class="no_catalog_content col-sm-12">';
 		met += '<i class="fa fa-ban" aria-hidden="true"></i> ';
 		met += 	gettext('No results found');
@@ -784,7 +805,7 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 	var self = this;
 	var filters = ""
 		if(search && search.length > 0){
-			filters += "&title_OR_abstract_OR_keywords="+search;
+			filters += "&any="+search;
 		}
 	if(resources && resources.length > 0){
 		filters += this.getKeywordQuery(resources, "orgName");
@@ -820,7 +841,7 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 	
 	var url = self.getLocalizedEndpoint() + "/q";
 	// TODO: authentication
-	url = url + '?_content_type=json' + filters + '&bucket=s101&facet.q=' + query + '&fast=index&resultType=details&sortBy=relevance';
+	url = url + '?_content_type=json' + filters + '&bucket=s101&facet.q=' + query + '&fast=index&resultType=details' + self.sortBy;
 	//var url = '/gvsigonline/catalog/get_query/?_content_type=json&bucket=s101&facet.q='+query+'&fast=index&from=1&resultType=details&sortBy=relevance';
 	$.ajax({
 		url: url,
@@ -1007,11 +1028,7 @@ CatalogView.prototype.getCatalogFilters = function(query, search, categories, ke
 				});
 
 				$(".catalog_filter_entry_ck").unbind("click").click(function(){
-					var search = $("#gn-any-field").val();
-					var categories = $("#categoriesF").val();
-					var keywords = $("#keywordsF").val();
-					var resources = $("#orgNameF").val();
-					self.launchQuery(search, categories, keywords, resources);
+					self.filterCatalog();
 				})
 
 			} catch (e) {
