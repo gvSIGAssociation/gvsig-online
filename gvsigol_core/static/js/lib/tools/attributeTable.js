@@ -1078,7 +1078,9 @@ attributeTable.prototype.getReport = function(reportInfo) {
  */
 attributeTable.prototype.createPdfReport = function(selectedRows) {
 	var self = this;
-		
+	
+	this.checkCount = 0;
+	
 	var body = '';
 	body += '<div class="row">';
 	body += 	'<div class="col-md-12 form-group">';
@@ -1115,7 +1117,12 @@ attributeTable.prototype.createPdfReport = function(selectedRows) {
 	if (selectedRows.length > 0) {
 		for (var key in selectedRows[0]) {
 			body +=     '<div class="col-md-4 form-group">';
-			body +=			'<input checked type="checkbox" name="report-field" value="' + key + '"> <label style="font-weight: normal;" >' + key + '</label>';
+			if (this.checkCount < 8) {
+				body +=	'<input checked type="checkbox" name="report-field" value="' + key + '"> <label style="font-weight: normal;" >' + self.getFieldTitle(key) + '</label>';
+				this.checkCount++;
+			} else {
+				body +=	'<input type="checkbox" name="report-field" value="' + key + '"> <label style="font-weight: normal;" >' + self.getFieldTitle(key) + '</label>';
+			}
 			body +=     '</div>';
 		}
 	}
@@ -1179,6 +1186,33 @@ attributeTable.prototype.createPdfReport = function(selectedRows) {
     	self.getImagesFromUrl();
 		$('#float-modal').modal('hide');
 	});
+	
+	$('input[name=report-field]').change(function(e) {
+		if ($(this).is(':checked')) {
+			if (self.checkCount >= 8) {
+				$(this).attr('checked', false);
+				messageBox.show('warning', gettext('El número máximo de campos a mostrar en la impresión es 8'));
+				
+			} else {
+				self.checkCount++;
+			}
+			
+		} else {
+			self.checkCount--;
+		}
+	});
+};
+
+attributeTable.prototype.getFieldTitle = function(fieldName) {
+	var language = $("#select-language").val();
+	
+	var title = fieldName;
+	for (var i=0; i<this.layer.conf.fields.length; i++) {
+		if (this.layer.conf.fields[i].name == fieldName) {
+			title = this.layer.conf.fields[i]['title-' + language];
+		}
+	}
+	return title;
 };
 
 
@@ -1267,9 +1301,15 @@ attributeTable.prototype.createPDF = function() {
 			if (key != 'id' && r.properties[key] != null && fieldCount < 8) {
 				doc.setFontSize(10);
 				doc.setFontType('bold');
-				doc.text(95, auxTop + 10, key + ':');
+				doc.text(95, auxTop + 10, this.getFieldTitle(key) + ':');
 				doc.setFontType('italic');
-				doc.text(120, auxTop + 10, r.properties[key].toString());
+				var value = r.properties[key].toString();
+				if (value.length > 50) {
+					value = value.slice(0, 45) + ' ...';
+					doc.text(120, auxTop + 10, value);
+				} else {
+					doc.text(120, auxTop + 10, value);
+				}
 				auxTop = auxTop + 5;
 				fieldCount++;
 			}
