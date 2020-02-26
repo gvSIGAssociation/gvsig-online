@@ -412,15 +412,15 @@ class Introspect:
         self.cursor.execute(query)
 
 
-    def set_transaction(self, schema, table_name):
+    def set_transaction(self):
         query = "BEGIN;"
         self.cursor.execute(query)
     
-    def end_transaction_commit(self, schema, table_name):
+    def end_transaction_commit(self):
         query = "COMMIT;"
         self.cursor.execute(query)
         
-    def end_transaction_rollback(self, schema, table_name):
+    def end_transaction_rollback(self):
         query = "ROLLBACK;"
         self.cursor.execute(query)
     
