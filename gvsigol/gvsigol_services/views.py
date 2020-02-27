@@ -3274,9 +3274,12 @@ def delete_resource(request):
         rid = request.POST.get('rid')
         try:
             resource = LayerResource.objects.get(id=int(rid))
+            featid = resource.feature
+            lyrid = resource.layer.id
+            path_ = resource.path
             resource.delete()
             resource_manager.delete_resource(resource)
-            response = {'deleted': True}
+            response = {'deleted': True, 'featid': featid, 'lyrid': lyrid, 'path': path_}
 
         except Exception as e:
             response = {'deleted': False}
@@ -3294,10 +3297,16 @@ def delete_resources(request):
         try:
             layer = Layer.objects.get(name=query_layer, datastore__workspace__name=workspace)
             layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=int(fid))
+            featidlist = []
+            lyridlist = []
+            pathlist = []
             for resource in layer_resources:
+                featidlist.append(resource.feature)
+                lyridlist.append(resource.layer.id)
+                pathlist.append(resource.path)
                 resource_manager.delete_resource(resource)
                 resource.delete()
-            response = {'deleted': True}
+            response = {'deleted': True, 'featidlist': featidlist, 'lyridlist': lyridlist, 'pathlist': pathlist}
 
         except Exception as e:
             print e.message

@@ -153,6 +153,7 @@ GvsigolResourceManager.prototype.loadResources = function(feature) {
  */
 GvsigolResourceManager.prototype.deleteResource = function(rid) {
 	var deleted = false;
+	var self = this;
 	$.ajax({
 		type: 'POST',
 		async: false,
@@ -163,6 +164,7 @@ GvsigolResourceManager.prototype.deleteResource = function(rid) {
 	  	success	:function(response){
 	  		if (response.deleted) {
 	  			deleted = true;
+	  			self.featureVersionManagement(response.lyrid, response.featid, response.path);
 	  		}
 	  	}, 
 	  	error: function(){}
@@ -176,6 +178,7 @@ GvsigolResourceManager.prototype.deleteResource = function(rid) {
  */
 GvsigolResourceManager.prototype.deleteResources = function(feature) {
 	var deleted = false;
+	var self = this;
 	$.ajax({
 		type: 'POST',
 		async: false,
@@ -188,6 +191,7 @@ GvsigolResourceManager.prototype.deleteResources = function(feature) {
 	  	success	:function(response){
 	  		if (response.deleted) {
 	  			deleted = true;
+	  			
 	  		}
 	  	}, 
 	  	error: function(){}
@@ -217,4 +221,29 @@ GvsigolResourceManager.prototype.getFeatureResources = function(feature) {
 	});
 	
 	return resources;
+};
+
+GvsigolResourceManager.prototype.featureVersionManagement = function(lyrid, featid, path_) {
+	data = {
+			"lyrid":lyrid,	
+			"featid":featid,
+			"operation":5,
+			"path":path_
+		}
+	
+	$.ajax({
+		type: 'POST',
+		async: false,
+		data: data,
+		url: '/gvsigonline/api/v1/edition/feature_version_management/',
+		beforeSend:function(xhr){
+		    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		success	:function(response) {
+			
+		},
+		error: function(response) {
+			console.log(response.statusText)
+		}
+	});
 };
