@@ -1504,6 +1504,8 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 					self.resourceManager.saveResource(transaction.fid);
 				}
 				self.selectedLayer.getSource().updateParams({"_time": Date.now()});
+				
+				self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 1, feature, null);
 				self.showLayersTab();
 			}
 			var geojson_obj = new ol.format.GeoJSON();
@@ -1949,6 +1951,10 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 							fid: transaction.fid
 						});
 						uploader.startUpload();
+						//Control de versión con el tipo de operación de subir fichero
+						for(var i = 0; i < uploader.getFileCount(); i++) {
+							self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 4, feature, uploader.existingFileNames[i]);
+						}
 					}
 
 				} else if (self.resourceManager.getEngine() == 'alfresco'){
@@ -1957,6 +1963,10 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 				self.selectedLayer.getSource().updateParams({"_time": Date.now()});
 				self.clearFeatureBackup();
 				self.selectInteraction.getFeatures().clear();
+				if (uploader.getFileCount() <= 0) {
+					//Control de versión con el tipo de operación de subir fichero
+					self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 2, feature, null);
+				}
 				self.showLayersTab();
 			}
 
@@ -2105,6 +2115,7 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 		});
 
 		$('#remove-feature').on('click', function () {
+			self.featureVersionManagement(self.selectedLayer, null, feature.getId(), 3, feature);
 			var transaction = self.transactWFS('delete', feature);
 			if (transaction.success) {
 				var deleted = self.resourceManager.deleteResources(feature);
@@ -2167,7 +2178,10 @@ EditionBar.prototype.transactWFS = function(p,f) {
 	    dataType: 'xml',
 	    processData: false,
 	    contentType: 'text/xml',
-	    data: str
+	    data: str,
+		error: function(response) {
+			console.log(response.statusText)
+		}
 	}).success(function(response, status, request) {
 		try {
 			var resp = self.formatWFS.readTransactionResponse(response);
@@ -2312,4 +2326,46 @@ EditionBar.prototype.verifyGeometryField = function(feature) {
 	feature.setGeometryName(featureTypeGeometryName);
 
 	return feature;
+};
+
+
+EditionBar.prototype.featureVersionManagement = function(selectedLayer, lyrid, featid, operation, feat, path) {
+	if(lyrid) {
+		data = {
+				"lyrid":lyrid,	
+				"featid":featid,
+				"operation":operation,
+				"path":path
+			}
+	} else {
+		data = {
+				"featid":featid,
+				"operation":operation,
+				"lyrname":selectedLayer.layer_name,
+				"workspace":selectedLayer.workspace,
+				"path":path
+			}
+	}
+	$.ajax({
+		type: 'POST',
+		async: false,
+		data: data,
+		url: '/gvsigonline/api/v1/edition/feature_version_management/',
+		beforeSend:function(xhr){
+		    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		success	:function(response) {
+			//Actualiza las propiedades de versión de la feature en el  
+			//cliente ya que se han cambiado en el servidor
+			feat_version_gvol = response.feat_version_gvol
+			feat_date_gvol = response.feat_date_gvol
+			feat.setProperties({
+				"feat_date_gvol": feat_date_gvol,
+				"feat_version_gvol": feat_version_gvol
+			})
+		},
+		error: function(response) {
+			console.log(response.statusText)
+		}
+	});
 };
