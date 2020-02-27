@@ -19,11 +19,13 @@
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
-from models import LayerResource
 from gvsigol import settings
 import logging
 import utils
 import os
+import time
+from os import path
+from shutil import copyfile
 
 logger = logging.getLogger(__name__)
 
@@ -55,5 +57,24 @@ class GvsigolRM():
                 os.remove(path)  
         except Exception as e:
             raise e
+        
+    def store_historical(self, path_):
+        """
+        Hace una copia del recurso para el historico y devuelve la url al fichero
+        """
+        millis = int(round(time.time() * 1000))
+        suffix = "_" + str(millis)
+        if(not path.exists(path_)):
+            path_ = settings.MEDIA_ROOT + path_
+        li = path_.rsplit(".", 1)
+        try:
+            new_path = li[0] + suffix  + "." + li[1]
+        except Exception:
+            new_path = li[0] + suffix
+        if(path.exists(path_)):
+            copyfile(path_, new_path)
+            rel_path = new_path.replace(settings.MEDIA_ROOT, '')
+            url = settings.MEDIA_URL + rel_path
+        return url, new_path
 
 resource_manager = GvsigolRM()
