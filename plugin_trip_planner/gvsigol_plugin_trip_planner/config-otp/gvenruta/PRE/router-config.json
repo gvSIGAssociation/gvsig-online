@@ -20,9 +20,12 @@
     },  
     "externalGeocoder": {
       "typeName": "IcvGeocoder",
-      "urlGeocode": "http://descargas.icv.gva.es/server_api/geocodificador/solrgeocoderatmv.php?",
+      "urlGeocode": "https://descargas.icv.gva.es/server_api/geocodificador/solrgeocoderatmvcv.php?servicio=rtcv+nomenclator&start=0&",
       "urlReverseGeocode": "http://descargas.icv.gva.es/server_api/geocodificador/geocoder.php?"
-    },    
+    },  
+    "rulesCsv": {
+      "ruleCsvFile": "restricciones.csv"
+    },  	
     "updaters": [
       {
         "type": "bike-rental",
