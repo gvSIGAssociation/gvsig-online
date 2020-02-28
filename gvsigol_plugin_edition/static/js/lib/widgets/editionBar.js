@@ -1939,6 +1939,10 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 			}
 
 			feature.setProperties(properties);
+			var checkversion = self.checkFeatureVersion(self.selectedLayer, feature.getId(), feature.getProperties().feat_version_gvol);
+			if (!checkversion) {
+				return;
+			}
 			var transaction = self.transactWFS('update', feature);
 			if (transaction.success) {
 				if (self.resourceManager.getEngine() == 'gvsigol') {
@@ -2350,7 +2354,7 @@ EditionBar.prototype.featureVersionManagement = function(selectedLayer, lyrid, f
 		type: 'POST',
 		async: false,
 		data: data,
-		url: '/gvsigonline/api/v1/edition/feature_version_management/',
+		url: '/gvsigonline/edition/feature_version_management/',
 		beforeSend:function(xhr){
 		    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},
@@ -2368,4 +2372,35 @@ EditionBar.prototype.featureVersionManagement = function(selectedLayer, lyrid, f
 			console.log(response.statusText)
 		}
 	});
+};
+
+EditionBar.prototype.checkFeatureVersion = function(selectedLayer, featid, version) {
+	var success = false;
+	data = {
+			"featid":featid,
+			"lyrname":selectedLayer.layer_name,
+			"workspace":selectedLayer.workspace,
+			"version":version
+		}
+	
+	$.ajax({
+		type: 'POST',
+		async: false,
+		data: data,
+		url: '/gvsigonline/edition/check_feat_version/',
+		beforeSend:function(xhr){
+		    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		success	:function(response) {
+			success = true;
+		},
+		error: function(response) {
+			if(response.responseText && response.responseText != '') {
+				messageBox.show('error', response.responseText);
+			} else {
+				messageBox.show('error', gettext('Error validando la version'));
+			}
+		}
+	});
+	return success;
 };
