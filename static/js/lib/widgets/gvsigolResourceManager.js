@@ -98,6 +98,7 @@ GvsigolResourceManager.prototype.createUploader = function() {
  * TODO.
  */
 GvsigolResourceManager.prototype.loadResources = function(feature) {
+	this.feature = feature;
 	var self = this;
 	var resourceList = $('#resources-list');
 	var resources = this.getFeatureResources(feature);
@@ -164,7 +165,7 @@ GvsigolResourceManager.prototype.deleteResource = function(rid) {
 	  	success	:function(response){
 	  		if (response.deleted) {
 	  			deleted = true;
-	  			self.featureVersionManagement(response.lyrid, response.featid, response.path);
+	  			self.featureVersionManagement(response.lyrid, response.featid, response.url, self.feature);
 	  		}
 	  	}, 
 	  	error: function(){}
@@ -191,7 +192,12 @@ GvsigolResourceManager.prototype.deleteResources = function(feature) {
 	  	success	:function(response){
 	  		if (response.deleted) {
 	  			deleted = true;
-	  			
+	  			/* deleteResources se llama cuando se borra una feature por lo que no es necesario mantener el control de versión
+	  			 if(response.featidlist) {
+		  			for(var i = 0; i < response.featidlist.length; i++) {
+		  				self.featureVersionManagement(response.lyridlist[i], response.featidlist[i], response.urllist[i], self.feature);
+		  			}
+	  			}*/
 	  		}
 	  	}, 
 	  	error: function(){}
@@ -223,7 +229,7 @@ GvsigolResourceManager.prototype.getFeatureResources = function(feature) {
 	return resources;
 };
 
-GvsigolResourceManager.prototype.featureVersionManagement = function(lyrid, featid, path_) {
+GvsigolResourceManager.prototype.featureVersionManagement = function(lyrid, featid, path_, feat) {
 	data = {
 			"lyrid":lyrid,	
 			"featid":featid,
@@ -240,7 +246,14 @@ GvsigolResourceManager.prototype.featureVersionManagement = function(lyrid, feat
 		    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},
 		success	:function(response) {
-			
+			//Actualiza las propiedades de versión de la feature en el  
+			//cliente ya que se han cambiado en el servidor
+			feat_version_gvol = response.feat_version_gvol
+			feat_date_gvol = response.feat_date_gvol
+			feat.setProperties({
+				"feat_date_gvol": feat_date_gvol,
+				"feat_version_gvol": feat_version_gvol
+			})
 		},
 		error: function(response) {
 			console.log(response.statusText)
