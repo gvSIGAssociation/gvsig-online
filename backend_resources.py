@@ -54,16 +54,22 @@ class GvsigolRM():
         try:
             path = os.path.join(settings.MEDIA_ROOT, resource.path) 
             if os.path.exists(path):
+                url, media_path = self.store_historical(path, resource.layer.id, resource.feature)
                 os.remove(path)  
+                return url, media_path
         except Exception as e:
             raise e
         
-    def store_historical(self, path_):
+    def store_historical(self, path_, lyrid = None, featid = None):
         """
         Hace una copia del recurso para el historico y devuelve la url al fichero
         """
         millis = int(round(time.time() * 1000))
-        suffix = "_" + str(millis)
+        if(lyrid is not None and featid is not None):
+            suffix = "_" + str(lyrid) + "_" + str(featid) + "_" + str(millis)
+        else:
+            suffix = "_" + str(millis)    
+            
         if(not path.exists(path_)):
             path_ = settings.MEDIA_ROOT + path_
         li = path_.rsplit(".", 1)

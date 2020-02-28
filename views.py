@@ -3276,12 +3276,11 @@ def delete_resource(request):
             resource = LayerResource.objects.get(id=int(rid))
             featid = resource.feature
             lyrid = resource.layer.id
-            path_ = resource.path
             resource.delete()
-            resource_manager.delete_resource(resource)
-            response = {'deleted': True, 'featid': featid, 'lyrid': lyrid, 'path': path_}
+            historical_url, historical_filepath = resource_manager.delete_resource(resource)
+            response = {'deleted': True, 'featid': featid, 'lyrid': lyrid, 'path': historical_filepath, 'url': historical_url}
 
-        except Exception as e:
+        except Exception:
             response = {'deleted': False}
             pass
 
@@ -3300,13 +3299,15 @@ def delete_resources(request):
             featidlist = []
             lyridlist = []
             pathlist = []
+            urllist = []
             for resource in layer_resources:
                 featidlist.append(resource.feature)
                 lyridlist.append(resource.layer.id)
-                pathlist.append(resource.path)
-                resource_manager.delete_resource(resource)
+                historical_url, historical_filepath = resource_manager.delete_resource(resource)
+                pathlist.append(historical_filepath)
+                urllist.append(historical_url)
                 resource.delete()
-            response = {'deleted': True, 'featidlist': featidlist, 'lyridlist': lyridlist, 'pathlist': pathlist}
+            response = {'deleted': True, 'featidlist': featidlist, 'lyridlist': lyridlist, 'pathlist': pathlist, 'urllist':urllist}
 
         except Exception as e:
             print e.message
