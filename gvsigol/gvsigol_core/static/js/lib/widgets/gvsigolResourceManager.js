@@ -241,7 +241,7 @@ GvsigolResourceManager.prototype.featureVersionManagement = function(lyrid, feat
 		type: 'POST',
 		async: false,
 		data: data,
-		url: '/gvsigonline/api/v1/edition/feature_version_management/',
+		url: '/gvsigonline/edition/feature_version_management/',
 		beforeSend:function(xhr){
 		    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},
