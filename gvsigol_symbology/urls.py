@@ -24,6 +24,9 @@ urlpatterns = [
     url(r'^expressions_add/(?P<layer_id>[0-9]+)/$', symbology_views.expressions_add, name='expressions_add'),
     url(r'^expressions_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', symbology_views.expressions_update, name='expressions_update'),
     
+    url(r'^custom_add/(?P<layer_id>[0-9]+)/$', symbology_views.custom_add, name='custom_add'),
+    url(r'^custom_update/(?P<layer_id>[0-9]+)/(?P<style_id>[0-9]+)/$', symbology_views.custom_update, name='custom_update'),
+    
     url(r'^create_sld/$', symbology_views.create_sld, name='create_sld'),
     
     url(r'^clustered_points_add/(?P<layer_id>[0-9]+)/$', symbology_views.clustered_points_add, name='clustered_points_add'),
