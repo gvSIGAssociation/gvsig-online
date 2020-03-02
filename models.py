@@ -18,6 +18,7 @@ from __future__ import unicode_literals
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+
 '''
 @author: José Badía <jbadia@scolab.es>
 '''
@@ -69,6 +70,7 @@ class Style(models.Model):
     order = models.IntegerField(null=False, default=0)
     has_custom_legend = models.BooleanField(default=False)
     custom_legend_url = models.CharField(max_length=250, blank=True, null=True)
+    sld = models.TextField(null=True, blank=True)
     
     def __unicode__(self):
         return self.name

@@ -207,22 +207,22 @@ Rule.prototype.registerEvents = function(type) {
 		}
 		
 		if(type == undefined || type != "unique"){
-		ui += 	'<div class="row">';
-		ui += 		'<div class="col-md-12 form-group">';
-		ui += 			'<input id="has-custom-scale-denominator" type="checkbox" class="has-custom-scale-denominator" data-orig="'+self.id+'">   ' + gettext('Define custom scale denominators?') + '</input>';
-		ui += 		'</div>';
-		ui += 	'</div>';
-		ui += 	'<div class="row">';
-		ui += 		'<div class="col-md-12 form-group">';
-		ui += 			'<label>' + gettext( 'Minimum scale denominator') + '</label>';
-		ui += 			'<input placeholder="' + gettext('No limit') + '" name="r-minscale" id="r-minscale-' + self.id + '" type="number" step="any" value="'+self.minscale+'" class="form-control">';					
-		ui += 		'</div>';
-		ui += 	'</div>';
-		ui += 	'<div class="row">';
-		ui += 		'<div class="col-md-12 form-group">';
-		ui += 			'<label>' + gettext( 'Maximum scale denominator') + '</label>';
-		ui += 			'<input placeholder="' + gettext('No limit') + '" name="r-maxscale" id="r-maxscale-' + self.id + '" type="number" step="any" value="'+self.maxscale+'" class="form-control">';					
-		ui += 		'</div>';
+			ui += 	'<div class="row">';
+			ui += 		'<div class="col-md-12 form-group">';
+			ui += 			'<input id="has-custom-scale-denominator" type="checkbox" class="has-custom-scale-denominator" data-orig="'+self.id+'">   ' + gettext('Define custom scale denominators?') + '</input>';
+			ui += 		'</div>';
+			ui += 	'</div>';
+			ui += 	'<div class="row">';
+			ui += 		'<div class="col-md-12 form-group">';
+			ui += 			'<label>' + gettext( 'Minimum scale denominator') + '</label>';
+			ui += 			'<input placeholder="' + gettext('No limit') + '" name="r-minscale" id="r-minscale-' + self.id + '" type="number" step="any" value="'+self.minscale+'" class="form-control">';					
+			ui += 		'</div>';
+			ui += 	'</div>';
+			ui += 	'<div class="row">';
+			ui += 		'<div class="col-md-12 form-group">';
+			ui += 			'<label>' + gettext( 'Maximum scale denominator') + '</label>';
+			ui += 			'<input placeholder="' + gettext('No limit') + '" name="r-maxscale" id="r-maxscale-' + self.id + '" type="number" step="any" value="'+self.maxscale+'" class="form-control">';					
+			ui += 		'</div>';
 		}
 		ui += 	'<div class="box-footer clearfix">';
 		ui += 		'<button id="save-rule-metadata-' + self.id + '" class="btn btn-sm btn-success btn-flat pull-right margin-r-5">';
