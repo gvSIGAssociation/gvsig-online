@@ -1485,6 +1485,10 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 			}
 
 			feature.setProperties(properties);
+			var checkversion = self.checkFeatureVersion(self.selectedLayer, feature.getId(), 1, 1);
+			if (!checkversion) {
+				return;
+			}
 			var transaction = self.transactWFS('insert', feature);
 			if (transaction.success) {
 				self.lastAddedFeature = null;
@@ -1939,7 +1943,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 			}
 
 			feature.setProperties(properties);
-			var checkversion = self.checkFeatureVersion(self.selectedLayer, feature.getId(), feature.getProperties().feat_version_gvol);
+			var checkversion = self.checkFeatureVersion(self.selectedLayer, feature.getId(), feature.getProperties().feat_version_gvol, 2);
 			if (!checkversion) {
 				return;
 			}
@@ -2119,6 +2123,10 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 		});
 
 		$('#remove-feature').on('click', function () {
+			var checkversion = self.checkFeatureVersion(self.selectedLayer, feature.getId(), feature.getProperties().feat_version_gvol, 3);
+			if (!checkversion) {
+				return;
+			}
 			self.featureVersionManagement(self.selectedLayer, null, feature.getId(), 3, feature);
 			var transaction = self.transactWFS('delete', feature);
 			if (transaction.success) {
@@ -2374,13 +2382,15 @@ EditionBar.prototype.featureVersionManagement = function(selectedLayer, lyrid, f
 	});
 };
 
-EditionBar.prototype.checkFeatureVersion = function(selectedLayer, featid, version) {
+//Operation: 1-Create feat, 2-Update feat, 3-Delete feat, 4-Upload file, 5-Delete file
+EditionBar.prototype.checkFeatureVersion = function(selectedLayer, featid, version, operation) {
 	var success = false;
 	data = {
 			"featid":featid,
 			"lyrname":selectedLayer.layer_name,
 			"workspace":selectedLayer.workspace,
-			"version":version
+			"version":version,
+			"operation":operation
 		}
 	
 	$.ajax({
