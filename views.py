@@ -3267,6 +3267,18 @@ def upload_resources(request):
 
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
+def get_feat_version(resource, featid):
+    try:
+        params = json.loads(resource.layer.datastore.connection_params)
+        i = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
+        pks = i.get_pk_columns(resource.layer.name, resource.layer.datastore.name)
+        if(pks and len(pks) > 0):
+            rows = i.custom_query("SELECT " + settings.VERSION_FIELD + ", " + settings.DATE_FIELD + " FROM "+ resource.layer.datastore.name + "." + resource.layer.name + " WHERE " + pks[0] + "=" + str(featid))
+            if(rows and len(rows) > 0): 
+                return rows[0][0]
+    except Exception:
+        return None
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @csrf_exempt
 def delete_resource(request):
@@ -3278,7 +3290,9 @@ def delete_resource(request):
             lyrid = resource.layer.id
             resource.delete()
             historical_url, historical_filepath = resource_manager.delete_resource(resource)
-            response = {'deleted': True, 'featid': featid, 'lyrid': lyrid, 'path': historical_filepath, 'url': historical_url}
+            
+            version = get_feat_version(resource, featid)
+            response = {'deleted': True, 'featid': featid, 'lyrid': lyrid, 'path': historical_filepath, 'url': historical_url, 'feat_version': version}
 
         except Exception:
             response = {'deleted': False}
