@@ -473,3 +473,6 @@ SENDFILE_BACKEND = 'sendfile.backends.xsendfile'
 OSM_TILING_1 = '##OSM_TILING_1##'
 OSM_TILING_2 = '##OSM_TILING_2##'
 OSM_TILING_3 = '##OSM_TILING_3##'
+
+VERSION_FIELD = 'feat_version_gvol'
+DATE_FIELD = 'feat_date_gvol'
