@@ -531,3 +531,6 @@ PROXIES = {
     "https" : None,
     "ftp"   : None
 }
+
+VERSION_FIELD = 'feat_version_gvol'
+DATE_FIELD = 'feat_date_gvol'
