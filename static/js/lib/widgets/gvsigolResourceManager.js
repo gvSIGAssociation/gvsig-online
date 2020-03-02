@@ -165,6 +165,10 @@ GvsigolResourceManager.prototype.deleteResource = function(rid) {
 	  	success	:function(response){
 	  		if (response.deleted) {
 	  			deleted = true;
+				var checkversion = self.checkFeatureVersion(self.selectedLayer, response.featid, response.version, 5);
+				if (!checkversion) {
+					return;
+				}
 	  			self.featureVersionManagement(response.lyrid, response.featid, response.url, self.feature);
 	  		}
 	  	}, 
@@ -256,7 +260,40 @@ GvsigolResourceManager.prototype.featureVersionManagement = function(lyrid, feat
 			})
 		},
 		error: function(response) {
-			console.log(response.statusText)
+			//console.log(response.statusText)
 		}
 	});
+};
+
+//Operation: 1-Create feat, 2-Update feat, 3-Delete feat, 4-Upload file, 5-Delete file
+GvsigolResourceManager.prototype.checkFeatureVersion = function(selectedLayer, featid, version, operation) {
+	var success = false;
+	data = {
+			"featid":featid,
+			"lyrname":selectedLayer.layer_name,
+			"workspace":selectedLayer.workspace,
+			"version":version,
+			"operation":operation
+		}
+	
+	$.ajax({
+		type: 'POST',
+		async: false,
+		data: data,
+		url: '/gvsigonline/edition/check_feat_version/',
+		beforeSend:function(xhr){
+		    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		success	:function(response) {
+			success = true;
+		},
+		error: function(response) {
+			if(response.responseText && response.responseText != '') {
+				messageBox.show('error', response.responseText);
+			} else {
+				messageBox.show('error', gettext('Error validando la version'));
+			}
+		}
+	});
+	return success;
 };
