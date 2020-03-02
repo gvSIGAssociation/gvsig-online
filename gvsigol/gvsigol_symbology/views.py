@@ -31,7 +31,7 @@ from django.utils.translation import ugettext as _
 from models import Style, StyleLayer, Rule, Library, LibraryRule, Symbolizer, ColorMap, ColorMapEntry, RasterSymbolizer, ColorRamp, ColorRampFolder, ColorRampLibrary
 from gvsigol_auth.utils import staff_required
 from gvsigol_symbology import services, services_library, services_unique_symbol,\
-    services_unique_values, services_intervals, services_expressions, services_color_table, services_clustered_points
+    services_unique_values, services_intervals, services_expressions, services_color_table, services_clustered_points, services_custom
 from django.views.decorators.csrf import csrf_exempt
 import utils
 import json
@@ -121,6 +121,9 @@ def style_layer_update(request, layer_id, style_id):
     elif (style.type == 'CT'):
         return redirect('color_table_update', layer_id=layer_id, style_id=style_id)
     
+    elif (style.type == 'CS'):
+        return redirect('custom_update', layer_id=layer_id, style_id=style_id)
+    
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def style_layer_delete(request):
@@ -191,6 +194,53 @@ def select_legend_type(request, layer_id):
         
     return render(request, 'select_legend_type.html', response)
 
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def custom_add(request, layer_id):
+    if request.method == 'POST':
+        style_name = request.POST.get('style_name')
+        sld = request.POST.get('sld')
+        
+        is_default = False
+        if request.POST.get('is_default') == 'true':
+            is_default = True  
+        
+        if services_custom.create_style(style_name, is_default, sld, layer_id):   
+            delete_preview_style(request, style_name, layer_id)            
+            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            
+        else:
+            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+        
+    else:                 
+        response = services_unique_symbol.get_conf(request, layer_id)     
+        return render(request, 'custom_add.html', response)
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def custom_update(request, layer_id, style_id):  
+    if request.method == 'POST':
+        style_name = request.POST.get('style_name')
+        sld = request.POST.get('sld')
+            
+        is_default = False
+        if request.POST.get('is_default') == 'true':
+            is_default = True
+        
+        if services_custom.update_style(is_default, sld, layer_id, style_id):  
+            delete_preview_style(request, style_name, layer_id)             
+            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            
+        else:
+            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+        
+    else:
+        style = Style.objects.get(id=int(style_id))
+                         
+        response = services_custom.get_conf(request, layer_id)
+        response['style'] = style  
+         
+        return render(request, 'custom_update.html', response)
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
@@ -408,40 +458,63 @@ def intervals_add(request, layer_id):
 def update_preview(request, layer_id):  
     if request.method == 'POST':
         style_type = request.POST['style']
-        style_data = request.POST['style_data']
-        json_data = json.loads(style_data)
-        name = json_data.get('name')
-        services = None
-        
-        if style_type == 'UV':
-            services = services_unique_values
-        if style_type == 'US':
-            services = services_unique_symbol
-        if style_type == 'IN':
-            services = services_intervals
-        if style_type == 'EX':
-            services = services_expressions
-        if style_type == 'CT':
-            services = services_color_table
-        if style_type == 'CP':
-            services = services_clustered_points
-           
-        
-        if services:
+        if style_type == 'CS':
+            style_name = request.POST.get('style_name')
+            sld = request.POST.get('sld')
+            
+            is_default = False
+            if request.POST.get('is_default') == 'true':
+                is_default = True 
+            
             layer = Layer.objects.get(id=layer_id)
             layer_styles = StyleLayer.objects.filter(layer_id=layer.id)
             style = None
             for layer_style in layer_styles:
                 stl = Style.objects.get(id=layer_style.style_id)
-                if stl.name == name + '__tmp':
+                if stl.name == style_name + '__tmp':
                     style = stl
             
             if not style:
-                if services.create_style(request, json_data, layer_id, True):            
+                if services_custom.create_style(style_name, is_default, sld, layer_id, True):            
                     return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             else:    
-                if services.update_style(request, json_data, layer_id, style.id, True):            
+                if services_custom.update_style(is_default, sld, layer_id, style.id, True):            
                     return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            
+        else:
+            style_data = request.POST['style_data']
+            json_data = json.loads(style_data)
+            name = json_data.get('name')
+            services = None
+            
+            if style_type == 'UV':
+                services = services_unique_values
+            if style_type == 'US':
+                services = services_unique_symbol
+            if style_type == 'IN':
+                services = services_intervals
+            if style_type == 'EX':
+                services = services_expressions
+            if style_type == 'CT':
+                services = services_color_table
+            if style_type == 'CP':
+                services = services_clustered_points
+            
+            if services:
+                layer = Layer.objects.get(id=layer_id)
+                layer_styles = StyleLayer.objects.filter(layer_id=layer.id)
+                style = None
+                for layer_style in layer_styles:
+                    stl = Style.objects.get(id=layer_style.style_id)
+                    if stl.name == name + '__tmp':
+                        style = stl
+                
+                if not style:
+                    if services.create_style(request, json_data, layer_id, True):            
+                        return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+                else:    
+                    if services.update_style(request, json_data, layer_id, style.id, True):            
+                        return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
     return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
  

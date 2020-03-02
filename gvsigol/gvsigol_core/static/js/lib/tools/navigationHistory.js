@@ -145,7 +145,7 @@ navigationHistory.prototype.registerEvents = function(e) {
 				self.index += 1;
 				self.indexChanged();
 			}                
-			self.history.push(viewStatus);       
+			self.history.push(viewStatus);
 			
 		} else {                
 			self.shouldSave = true;            
