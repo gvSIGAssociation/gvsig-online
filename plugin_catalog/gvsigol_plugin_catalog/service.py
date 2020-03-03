@@ -168,8 +168,8 @@ class Geonetwork():
             logger.error("Error authenticating in catalog")
             return None
         
-        except Exception as e:
-            logger.exception("Error inserting metadata", e)
+        except:
+            logger.exception("Error inserting metadata")
             
     def get_query(self, query):
         try:
