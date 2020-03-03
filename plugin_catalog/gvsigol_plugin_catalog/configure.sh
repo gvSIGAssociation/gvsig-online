@@ -18,6 +18,12 @@ if [ -z "$CATALOG_API_VERSION" ]; then
         CATALOG_API_VERSION="api0.1"
 fi
 
+if [ -z "$CATALOG_TIMEOUT" ]; then
+        echo "WARNING: CATALOG_TIMEOUT is not defined, using '10'."
+        CATALOG_TIMEOUT="10"
+fi
+
+
 if [ -z "$GEONETWORK_USER" ]; then
         echo "WARNING: GEONETWORK_USER is not defined, using 'admin'."
         GEONETWORK_USER="root"

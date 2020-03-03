@@ -76,9 +76,9 @@ def getLastExistingSibling(parent, previousSiblingNames, namespaces={}):
     finds the last existing sibling or returns None.
     """
     for sibling in reversed(previousSiblingNames):
-        child = parent.find(sibling, namespaces)
-        if child is not None:
-            return child
+        children = parent.findall(sibling, namespaces)
+        if len(children) > 0:
+            return children[-1] # return last child
 
 def insertAfter(parent, child, previousSiblingNames, namespaces={}):
     """
@@ -89,4 +89,4 @@ def insertAfter(parent, child, previousSiblingNames, namespaces={}):
     if prevSibling is not None:
         prevSibling.addnext(child)
     else:
-        parent.append(child)
+        parent.insert(0, child)

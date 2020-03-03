@@ -4,7 +4,7 @@ APP_DESCRIPTION = 'Catálogo de metadatos'
 CATALOG_BASE_URL = 'https://gvsigol.localhost/geonetwork'
 CATALOG_URL = CATALOG_BASE_URL + '/srv/eng/'
 CATALOG_QUERY_URL = CATALOG_BASE_URL + '/srv/eng/q'
-CATALOG_USER = 'sysadmin'
+CATALOG_USER = 'admin'
 CATALOG_PASSWORD = 'admin'
 # valid values: 'legacy3.2', 'api0.1'
 CATALOG_API_VERSION = 'api0.1'
@@ -14,3 +14,4 @@ CATALOG_DISABLED_FACETS = '["mdActions"]'
 
 METADATA_VIEWER_BUTTON = 'FULL'
 DISABLE_CATALOG_NAVBAR_MENUS = 'False'
+CATALOG_TIMEOUT = 10

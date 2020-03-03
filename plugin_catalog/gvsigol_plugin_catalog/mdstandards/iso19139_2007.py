@@ -5,8 +5,14 @@ from registry import XmlStandardUpdater, BaseStandardManager, XmlStandardReader
 from datetime import datetime
 from django.utils.translation import ugettext as _
 from gvsigol_plugin_catalog.xmlutils import getTextFromXMLNode, sanitizeXmlText, insertAfter
+from gvsigol.settings import BASE_DIR
 import collections
 from owslib import wcs
+import os
+from django.apps import apps
+import logging
+logger = logging.getLogger("gvsigol")
+
 
 def define_translations():
     """
@@ -15,9 +21,68 @@ def define_translations():
     _('author')
     _('owner')
     _('Contact')
+    _('originator')
 
 namespaces = {'gmd': 'http://www.isotc211.org/2005/gmd', 'gco': 'http://www.isotc211.org/2005/gco'}
 
+def get_template(md_type):
+    """
+    Allows the default templates to be replaced by templates defined by the client gvsigol app
+    
+    md_type: Specifies the type of template to be retrieved (dataset, series, service, etc). Ignored for the moment
+    """
+    for app in apps.get_app_configs():
+        if 'gvsigol_app_' in app.name:
+            tpl_path = os.path.join(BASE_DIR, app.name, 'mdtemplates/dataset.xml')
+            if os.path.exists(tpl_path):
+                return tpl_path
+    return os.path.join(BASE_DIR, 'gvsigol_plugin_catalog/mdtemplates/dataset19139.xml')
+
+def create_datset_metadata(mdfields):
+    try:
+        qualified_name = mdfields.get('qualified_name')
+        title = mdfields.get('title')
+        abstract = mdfields.get('abstract')
+        extent_tuple = mdfields.get('extent_tuple', (0.0, 0.0, 0.0, 0.0))
+        crs = mdfields.get('crs')
+        thumbnail_url = mdfields.get('thumbnail_url')
+        wms_endpoint = mdfields.get('wms_endpoint')
+        wfs_endpoint = mdfields.get('wfs_endpoint')
+        wcs_endpoint = mdfields.get('wcs_endpoint')
+        spatial_representation_type = mdfields.get('spatial_representation_type', 'vector')
+        current_date = text(datetime.now().isoformat())
+        
+        tpl_path = get_template('dataset')
+        tree = ET.parse(tpl_path)
+        
+        spatialRepresentationTypeCode = tree.find('//gmd:MD_SpatialRepresentationTypeCode', namespaces)
+        spatialRepresentationTypeCode.set('codeListValue', spatial_representation_type)
+        
+        titleElem = tree.find('/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString', namespaces)
+        titleElem.text = title
+        
+        abstractElem = tree.find('/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/gco:CharacterString', namespaces)
+        abstractElem.text = abstract
+        
+        crsElem = tree.find('/gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code/gco:CharacterString', namespaces)
+        crsElem.text = crs
+        
+        dateTime = tree.find('/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/gco:DateTime', namespaces)
+        dateTime.text = current_date
+        
+        create_thumbnail(tree, thumbnail_url)
+        minx, miny, maxx, maxy = extent_tuple
+        create_extent(tree, minx, miny, maxx, maxy)
+        
+        create_transfer_options(tree, qualified_name, spatial_representation_type, title, wms_endpoint, wfs_endpoint, wcs_endpoint)
+        resourceCodeElems = tree.xpath("//*[text()='IDEUY_RESOURCE_CODE']")
+        for resCodeElem in resourceCodeElems:
+            resCodeElem.text = qualified_name
+        return ET.tostring(tree, encoding='unicode')
+    except:
+        logger.exception("Error creating metadata")
+
+"""
 def create_datset_metadata(mdfields):
     qualified_name = mdfields.get('qualified_name')
     title = mdfields.get('title')
@@ -188,6 +253,7 @@ def create_datset_metadata(mdfields):
     metadata +=   u'</gmd:distributionInfo>'
     metadata += u'</gmd:MD_Metadata>'
     return metadata
+"""
 
 class Iso19139_2007Manager(BaseStandardManager):
     def get_code(self):
@@ -314,7 +380,22 @@ def create_online_resource(parent, url, protocol, name, description, application
         charStr = ET.SubElement(functionElem, "{http://www.isotc211.org/2005/gco}CharacterString")
         charStr.text = function
 
-def create_transfer_options(root_elem, qualified_name, title, wms_endpoint, wfs_endpoint=None, wcs_endpoint=None):
+def create_distrib_format(parent, name, version, specification=None):
+    distributionFormatElem = ET.Element("{http://www.isotc211.org/2005/gmd}distributionFormat")
+    MD_FormatElem = ET.SubElement(distributionFormatElem, "{http://www.isotc211.org/2005/gmd}MD_Format")
+    nameElem = ET.SubElement(MD_FormatElem, "{http://www.isotc211.org/2005/gmd}name")
+    nameElemCharStr = ET.SubElement(nameElem, "{http://www.isotc211.org/2005/gco}CharacterString")
+    nameElemCharStr.text = name
+    versionElem = ET.SubElement(MD_FormatElem, "{http://www.isotc211.org/2005/gmd}version")
+    versionElemCharStr = ET.SubElement(versionElem, "{http://www.isotc211.org/2005/gco}CharacterString")
+    versionElemCharStr.text = version
+    if specification is not None:
+        specificationElem = ET.SubElement(MD_FormatElem, "{http://www.isotc211.org/2005/gmd}specification")
+        specificationElemCharStr = ET.SubElement(specificationElem, "{http://www.isotc211.org/2005/gco}CharacterString")
+        specificationElemCharStr.text = specification
+    insertAfter(parent, distributionFormatElem, [], namespaces)
+
+def create_transfer_options(root_elem, qualified_name, spatialRepresentationType, title, wms_endpoint, wfs_endpoint=None, wcs_endpoint=None):
     distribInfoElements = root_elem.findall('./gmd:distributionInfo/gmd:MD_Distribution', namespaces)
     
     if len(distribInfoElements) == 0:
@@ -323,6 +404,10 @@ def create_transfer_options(root_elem, qualified_name, title, wms_endpoint, wfs_
         distribInfoElements = [MD_DistributionElem]
         
     for distribInfoElem in distribInfoElements:
+        if spatialRepresentationType == 'vector':
+            create_distrib_format(distribInfoElem, 'Shapefile', 'SHP 1.0')
+        elif spatialRepresentationType == 'grid':
+            create_distrib_format(distribInfoElem, 'TIF', 'GeoTiff 1.0')
         prevSiblingNames = ['gmd:distributionFormat',
                             'gmd:distributor']
         transferOptionsElem = ET.Element("{http://www.isotc211.org/2005/gmd}transferOptions")
