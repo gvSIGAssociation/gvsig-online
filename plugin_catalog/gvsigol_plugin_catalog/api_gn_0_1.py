@@ -235,7 +235,7 @@ class Geonetwork():
         r = self.session.get(url, headers=headers, timeout=get_default_timeout(), proxies=settings.PROXIES)
         if r.status_code==200:
             response = json.loads(r.text)
-            print r.text
+            #print r.text
             
             #Otros grupos
             for group in response:
