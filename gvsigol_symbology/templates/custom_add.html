@@ -26,6 +26,12 @@
 					</div>
 				</div>
 				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Title" %}</label>
+						<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" value="{{style_name}}" type="text" class="form-control">	
+					</div>
+				</div>
+				<div class="row">
 					<div class="checkbox col-md-12">								
 						<label>
 							<input checked type="checkbox" name="style-is-default" id="style-is-default"/>{% trans "Set as default style" %}
@@ -159,6 +165,7 @@ function save(layerId, codemirror, utils) {
 	var sld = codemirror.getValue();
 	var isDefault = $('#style-is-default').is(":checked");
 	var styleName = $("#style-name").val();
+	var styleTitle = $("#style-title").val();
 	
 	$.ajax({
 		type: "POST",
@@ -170,6 +177,7 @@ function save(layerId, codemirror, utils) {
 		data: {
 			style: 'CS',
 			style_name: styleName,
+			style_title: styleTitle,
 			is_default: isDefault,
 			sld: sld
 		},
@@ -191,6 +199,7 @@ function updatePreview(layerId, codemirror, utils) {
 	var sld = codemirror.getValue();
 	var isDefault = $('#style-is-default').is(":checked");
 	var styleName = $("#style-name").val();
+	var styleTitle = $("#style-title").val();
 	
 	$.ajax({
 		type: "POST",
@@ -202,6 +211,7 @@ function updatePreview(layerId, codemirror, utils) {
 		data: {
 			style: 'CS',
 			style_name: styleName,
+			style_title: styleTitle,
 			is_default: isDefault,
 			sld: sld
 			
