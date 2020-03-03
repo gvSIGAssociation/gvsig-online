@@ -31,7 +31,7 @@ import utils, sld_builder
 import json
 import ast
 
-def create_style(style_name, is_default, sld, layer_id, is_preview=False):
+def create_style(style_name, style_title, is_default, sld, layer_id, is_preview=False):
     
     layer = Layer.objects.get(id=int(layer_id))
     datastore = layer.datastore
@@ -59,7 +59,7 @@ def create_style(style_name, is_default, sld, layer_id, is_preview=False):
 
     style = Style(
         name = style_name,
-        title = 'SLD',
+        title = style_title,
         is_default = is_default,
         minscale = -1,
         maxscale = -1,
@@ -89,7 +89,7 @@ def create_style(style_name, is_default, sld, layer_id, is_preview=False):
         else:
             return False
 
-def update_style(is_default, sld, layer_id, style_id, is_preview=False):
+def update_style(style_title, is_default, sld, layer_id, style_id, is_preview=False):
     style = Style.objects.get(id=int(style_id))
     layer = Layer.objects.get(id=int(layer_id))
     datastore = layer.datastore
@@ -101,7 +101,6 @@ def update_style(is_default, sld, layer_id, style_id, is_preview=False):
     if is_default:
         for ls in layer_styles:
             s = Style.objects.get(id=ls.style.id)
-            s.sld = sld
             s.is_default = False
             s.save()
         gs.setLayerStyle(layer, style.name, style.is_default)
@@ -116,6 +115,7 @@ def update_style(is_default, sld, layer_id, style_id, is_preview=False):
             gs.setLayerStyle(layer, style.name, True)
 
     style.sld = sld
+    style.title = style_title
     style.is_default = is_default
     style.save()
 
