@@ -199,13 +199,14 @@ def select_legend_type(request, layer_id):
 def custom_add(request, layer_id):
     if request.method == 'POST':
         style_name = request.POST.get('style_name')
+        style_title = request.POST.get('style_title')
         sld = request.POST.get('sld')
         
         is_default = False
         if request.POST.get('is_default') == 'true':
             is_default = True  
         
-        if services_custom.create_style(style_name, is_default, sld, layer_id):   
+        if services_custom.create_style(style_name, style_title, is_default, sld, layer_id):   
             delete_preview_style(request, style_name, layer_id)            
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
@@ -221,13 +222,14 @@ def custom_add(request, layer_id):
 def custom_update(request, layer_id, style_id):  
     if request.method == 'POST':
         style_name = request.POST.get('style_name')
+        style_title = request.POST.get('style_title')
         sld = request.POST.get('sld')
             
         is_default = False
         if request.POST.get('is_default') == 'true':
             is_default = True
         
-        if services_custom.update_style(is_default, sld, layer_id, style_id):  
+        if services_custom.update_style(style_title, is_default, sld, layer_id, style_id):  
             delete_preview_style(request, style_name, layer_id)             
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
@@ -460,6 +462,7 @@ def update_preview(request, layer_id):
         style_type = request.POST['style']
         if style_type == 'CS':
             style_name = request.POST.get('style_name')
+            style_title = request.POST.get('style_title')
             sld = request.POST.get('sld')
             
             is_default = False
@@ -475,10 +478,10 @@ def update_preview(request, layer_id):
                     style = stl
             
             if not style:
-                if services_custom.create_style(style_name, is_default, sld, layer_id, True):            
+                if services_custom.create_style(style_name, style_title, is_default, sld, layer_id, True):            
                     return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             else:    
-                if services_custom.update_style(is_default, sld, layer_id, style.id, True):            
+                if services_custom.update_style(style_title, is_default, sld, layer_id, style.id, True):            
                     return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
