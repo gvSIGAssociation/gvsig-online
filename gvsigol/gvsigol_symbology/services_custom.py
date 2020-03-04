@@ -139,8 +139,7 @@ def get_conf(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
-    gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-       
+    
     index = len(StyleLayer.objects.filter(layer=layer))
     styleLayers = StyleLayer.objects.filter(layer=layer)
     for style_layer in styleLayers:
@@ -153,59 +152,14 @@ def get_conf(request, layer_id):
                 index = aux_index + 1
         except ValueError:
             print "Error getting index"
-            
-    (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
-    fields = utils.get_fields(resource)
-    if layer.conf:
-        new_fields = []
-        conf = None
-        if layer and layer.conf:
-            conf = ast.literal_eval(layer.conf)
-        for field in fields:
-            if conf:
-                for f in conf['fields']:
-                    if f['name'] == field['name']:
-                        for id, language in settings.LANGUAGES:
-                            if 'title-'+id in f:
-                                field['title-'+id] = f['title-'+id]
-                            else:
-                                field['title-'+id] = f['name']
-            else:
-                for id, language in settings.LANGUAGES:
-                    field['title-'+id] = field['name']
-            new_fields.append(field)
-        fields = new_fields
-
-    feature_type = utils.get_feature_type(fields)
-    alphanumeric_fields = utils.get_alphanumeric_fields(fields)
-
-    supported_fonts_str = gs.getSupportedFonts()
-    supported_fonts = json.loads(supported_fonts_str)
-    sorted_fonts = utils.sortFontsArray(supported_fonts.get("fonts"))
     
     layer_url = core_utils.get_wms_url(request, workspace)
-    layer_wfs_url = core_utils.get_wfs_url(request, workspace)
-
-    preview_url = ''
-    if feature_type == 'PointSymbolizer':
-        preview_url = workspace.server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point'    
-    elif feature_type == 'LineSymbolizer':
-        preview_url = workspace.server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line'     
-    elif feature_type == 'PolygonSymbolizer':
-        preview_url = workspace.server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
 
     conf = {
-        'featureType': feature_type,
-        'json_alphanumeric_fields': json.dumps(alphanumeric_fields),
-        'fonts': sorted_fonts,
         'layer_id': layer_id,
         'layer_url': layer_url,
-        'layer_wfs_url': layer_wfs_url,
         'layer_name': workspace.name + ':' + layer.name,
-        'style_name': workspace.name + '_' + layer.name + '_' + str(index),
-        'libraries': Library.objects.all(),
-        'supported_crs': json.dumps(core_utils.get_supported_crs()),
-        'preview_url': preview_url
+        'style_name': workspace.name + '_' + layer.name + '_' + str(index)
     }
 
     return conf

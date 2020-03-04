@@ -214,7 +214,7 @@ def custom_add(request, layer_id):
             return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
         
     else:                 
-        response = services_unique_symbol.get_conf(request, layer_id)     
+        response = services_custom.get_conf(request, layer_id)     
         return render(request, 'custom_add.html', response)
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
