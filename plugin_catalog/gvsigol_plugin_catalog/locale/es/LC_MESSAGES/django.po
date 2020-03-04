@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-20 15:48+0200\n"
+"POT-Creation-Date: 2020-03-04 09:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,27 +20,43 @@ msgstr ""
 "X-Language: es_ES\n"
 "X-Source-Language: C\n"
 
-#: mdstandards/iso19139_2007.py:13
+#: mdstandards/iso19139_2007.py:21
 msgid "author"
 msgstr "autor"
 
-#: mdstandards/iso19139_2007.py:14
+#: mdstandards/iso19139_2007.py:22
 msgid "owner"
 msgstr "propietario"
 
-#: mdstandards/iso19139_2007.py:15
+#: mdstandards/iso19139_2007.py:23
 msgid "Contact"
 msgstr "Contacto"
+
+#: mdstandards/iso19139_2007.py:24
+msgid "resourceProvider"
+msgstr "proveedor del recurso"
+
+#: mdstandards/iso19139_2007.py:25
+msgid "custodian"
+msgstr "custodio"
+
+#: mdstandards/iso19139_2007.py:26
+msgid "originator"
+msgstr "creador"
+
+#: mdstandards/iso19139_2007.py:27
+msgid "publisher"
+msgstr "editor"
 
 #: templates/catalog_details.html:12
 msgid "About this resource"
 msgstr "Acerca de este recurso"
 
-#: templates/catalog_details.html:13 views.py:116
+#: templates/catalog_details.html:13 views.py:118
 msgid "Categories"
 msgstr "Categorias"
 
-#: templates/catalog_details.html:17 views.py:122
+#: templates/catalog_details.html:17 views.py:124
 msgid "Keywords"
 msgstr "Palabras clave"
 
@@ -48,27 +64,27 @@ msgstr "Palabras clave"
 msgid "Legal constraints"
 msgstr "Restricciones legales"
 
-#: templates/catalog_details.html:25 views.py:168
+#: templates/catalog_details.html:25 views.py:170
 msgid "Technical information"
 msgstr "Información técnica"
 
-#: templates/catalog_details.html:27 views.py:171
+#: templates/catalog_details.html:27 views.py:173
 msgid "Representation type"
 msgstr "Tipo de representación"
 
-#: templates/catalog_details.html:31 views.py:176
+#: templates/catalog_details.html:31 views.py:178
 msgid "Scale"
 msgstr "Escala"
 
-#: templates/catalog_details.html:35 views.py:181
+#: templates/catalog_details.html:35 views.py:183
 msgid "Coordinate Reference System"
 msgstr "Sistema de referencia de coordenadas"
 
-#: templates/catalog_details.html:39 views.py:188
+#: templates/catalog_details.html:39 views.py:190
 msgid "Metadata identifier"
 msgstr "Identificador del metadato"
 
-#: templates/catalog_details.html:50 views.py:224
+#: templates/catalog_details.html:50 views.py:227
 msgid "Download and links"
 msgstr "Enlaces y descargas"
 
@@ -80,46 +96,46 @@ msgstr "Descargar"
 msgid "Get shape"
 msgstr "Obtener shape"
 
-#: templates/catalog_details.html:68 views.py:249
+#: templates/catalog_details.html:68 views.py:256
 msgid "Spatial Extent"
 msgstr "Extensión espacial"
 
-#: templates/catalog_details.html:71 views.py:263
+#: templates/catalog_details.html:71 views.py:270
 msgid "Temporal Extent"
 msgstr "Extensión temporal"
 
-#: templates/catalog_details.html:72 views.py:254
+#: templates/catalog_details.html:72 views.py:261
 msgid "Publication date"
 msgstr "Fecha de publicación"
 
-#: templates/catalog_details.html:76 views.py:259
+#: templates/catalog_details.html:76 views.py:266
 msgid "Period"
 msgstr "Periodo"
 
-#: views.py:137
+#: views.py:139
 msgid "Resource Contacts"
 msgstr "Contactos del recurso"
 
-#: views.py:148
+#: views.py:150
 msgid "Metadata Contacts"
 msgstr "Contactos del metadato"
 
-#: views.py:165
+#: views.py:167
 msgid "Resource constraints"
 msgstr "Restricciones del recurso"
 
-#: views.py:190
+#: views.py:192
 msgid " Show in Catalog"
 msgstr "Mostrar en Catálogo"
 
-#: views.py:198 views.py:231
+#: views.py:200 views.py:234
 msgid "Resource"
 msgstr "Recurso"
 
-#: views.py:214
+#: views.py:217
 msgid "Online services"
 msgstr "Servicios en línea"
 
-#: views.py:235 views.py:238 views.py:241
+#: views.py:242 views.py:245 views.py:248
 msgid "Access resource"
 msgstr "Acceder al recurso"

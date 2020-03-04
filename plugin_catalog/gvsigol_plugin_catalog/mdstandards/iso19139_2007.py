@@ -21,7 +21,10 @@ def define_translations():
     _('author')
     _('owner')
     _('Contact')
+    _('resourceProvider')
+    _('custodian')
     _('originator')
+    _('publisher')
 
 namespaces = {'gmd': 'http://www.isotc211.org/2005/gmd', 'gco': 'http://www.isotc211.org/2005/gco'}
 
