@@ -113,18 +113,8 @@ $(document).ready(function() {
 	
 	var layerId = "{{layer_id}}";
 	var layerUrl = "{{layer_url}}";
-	var wfsUrl = "{{layer_wfs_url}}";
 	var layerName = "{{layer_name}}";
 	var styleId = "{{style.id}}";
-	var featureType = "{{featureType}}";
-	var jsonAlphanumericFields = {{json_alphanumeric_fields|safe}};
-	var fonts = {{ fonts|safe }};
-	var previewUrl = "{{preview_url}}";
-	var supported_crs = {{supported_crs|safe}};
-	
-	for (var crs in supported_crs) {
-		proj4.defs(supported_crs[crs].code, supported_crs[crs].definition);	
-	}
 	
 	var map = new ol.Map({
 		layers: [
@@ -163,17 +153,13 @@ $(document).ready(function() {
 	});
 	
 	codemirror.refresh();
-	
-	var utils = new SymbologyUtils(map, layerId, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
-	
-	utils.centerMap(layerName, wfsUrl);
 
 	$("#save-legend").on('click', function(e){
-		update(layerId, styleId, codemirror, utils);
+		update(layerId, styleId, codemirror);
 	});
 	
 	$("#refresh-preview").on('click', function(e){
-		updatePreview(layerId, codemirror, utils);
+		updatePreview(layerId, codemirror, map);
 	});
 
 	$(window).unload(function(){
@@ -199,7 +185,7 @@ $(document).ready(function() {
 
 });
 
-function update(layerId, styleId, codemirror, utils) {
+function update(layerId, styleId, codemirror) {
 	var self = this;
 	
 	var sld = codemirror.getValue();
@@ -234,7 +220,7 @@ function update(layerId, styleId, codemirror, utils) {
 	});
 }
 
-function updatePreview(layerId, codemirror, utils) {
+function updatePreview(layerId, codemirror, map) {
 	var self = this;
 	
 	var sld = codemirror.getValue();
@@ -259,7 +245,7 @@ function updatePreview(layerId, codemirror, utils) {
 		},
 		success: function(response){
 			if (response.success) {
-				utils.reloadLayerPreview($('#style-name').val());
+				reloadLayerPreview(map);
 				
 			} else {
 				alert('Error');
@@ -268,6 +254,19 @@ function updatePreview(layerId, codemirror, utils) {
 		},
 		error: function(){}
 	});
+}
+
+function reloadLayerPreview (map){
+	var styleName = $("#style-name").val();
+	var layers = map.getLayers();
+	layers.forEach(function(layer){
+		if (!layer.baselayer && !layer.external) {
+			if (layer.get("id") === 'preview-layer') {
+				layer.getSource().updateParams({'STYLES': styleName + "__tmp", "_time": (new Date()).getTime()});
+				map.render();
+			}
+		};
+	}, this);
 }
 </script>
 {% endblock %}

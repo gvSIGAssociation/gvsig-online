@@ -65,15 +65,6 @@ $(document).ready(function() {
 	var layerId = "{{layer_id}}";
 	var layerUrl = "{{layer_url}}";
 	var layerName = "{{layer_name}}";
-	var featureType = "{{featureType}}";
-	var jsonAlphanumericFields = {{json_alphanumeric_fields|safe}};
-	var fonts = {{ fonts|safe }};
-	var previewUrl = "{{preview_url}}";
-	var supported_crs = {{supported_crs|safe}};
-	
-	for (var crs in supported_crs) {
-		proj4.defs(supported_crs[crs].code, supported_crs[crs].definition);	
-	}
 	
 	var map = new ol.Map({
 		layers: [
@@ -119,12 +110,10 @@ $(document).ready(function() {
 	
 	codemirror.setValue(code);
 	codemirror.refresh();
-	
-	var utils = new SymbologyUtils(map, layerId, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
 
 	$("#save-legend").on('click', function(e){
 		if ($("#style-name").val() != '') {
-			save(layerId, codemirror, utils);
+			save(layerId, codemirror);
 			
 		} else {
 			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
@@ -134,7 +123,7 @@ $(document).ready(function() {
 	});
 	
 	$("#refresh-preview").on('click', function(e){
-		updatePreview(layerId, codemirror, utils);
+		updatePreview(layerId, codemirror, map);
 	});
 	
 	$(window).unload(function(){
@@ -159,7 +148,7 @@ $(document).ready(function() {
 	
 });
 
-function save(layerId, codemirror, utils) {
+function save(layerId, codemirror) {
 	var self = this;
 	
 	var sld = codemirror.getValue();
@@ -193,7 +182,7 @@ function save(layerId, codemirror, utils) {
 	});
 }
 
-function updatePreview(layerId, codemirror, utils) {
+function updatePreview(layerId, codemirror, map) {
 	var self = this;
 	
 	var sld = codemirror.getValue();
@@ -218,7 +207,7 @@ function updatePreview(layerId, codemirror, utils) {
 		},
 		success: function(response){
 			if (response.success) {
-				utils.reloadLayerPreview($('#style-name').val());
+				reloadLayerPreview(map);
 				
 			} else {
 				alert('Error');
@@ -227,6 +216,19 @@ function updatePreview(layerId, codemirror, utils) {
 		},
 		error: function(){}
 	});
+}
+
+function reloadLayerPreview (map){
+	var styleName = $("#style-name").val();
+	var layers = map.getLayers();
+	layers.forEach(function(layer){
+		if (!layer.baselayer && !layer.external) {
+			if (layer.get("id") === 'preview-layer') {
+				layer.getSource().updateParams({'STYLES': styleName + "__tmp", "_time": (new Date()).getTime()});
+				map.render();
+			}
+		};
+	}, this);
 }
 
 function imagePostFunction(image, src) {
