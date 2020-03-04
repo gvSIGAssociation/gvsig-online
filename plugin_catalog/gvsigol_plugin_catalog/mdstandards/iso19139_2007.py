@@ -75,7 +75,7 @@ def create_datset_metadata(mdfields):
         create_extent(tree, minx, miny, maxx, maxy)
         
         create_transfer_options(tree, qualified_name, spatial_representation_type, title, wms_endpoint, wfs_endpoint, wcs_endpoint)
-        resourceCodeElems = tree.xpath("//*[text()='IDEUY_RESOURCE_CODE']")
+        resourceCodeElems = tree.xpath("//*[text()='RESOURCE_CODE']")
         for resCodeElem in resourceCodeElems:
             resCodeElem.text = qualified_name
         return ET.tostring(tree, encoding='unicode')
