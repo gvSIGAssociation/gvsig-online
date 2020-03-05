@@ -712,7 +712,7 @@ a:focus {
 }
 @media (max-width: 768px) {
   .control-sidebar {
-    padding-top: 100px;
+    /*padding-top: 100px;*/
   }
 }
 .control-sidebar > .tab-content {
@@ -1227,7 +1227,7 @@ a:focus {
 }
 @media (max-width: 991px) {
   .navbar-custom-menu > .navbar-nav {
-    float: right;
+    /*float: right;*/
   }
   .navbar-custom-menu > .navbar-nav > li {
     position: static;

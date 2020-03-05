@@ -516,7 +516,7 @@ html, body {
 	.ol-toolbar {
 	    left: auto;
 	    right: 6px;
-	    top: 124px;
+	    top: 194px;
 	    z-index: 1000;
 	    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
 	}
@@ -627,4 +627,24 @@ html, body {
 .ol-popup .anchor {
     margin: auto;
     /*border-color: #666;*/
+}
+
+
+@media only screen and (max-width: 640px) {
+	#custom-mouse-position-output {
+		display: none;
+	}
+	#custom-mouse-position-form {
+		display: none;
+	}
+}
+
+/* iPads (portrait and landscape) ----------- */
+@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) {
+	#custom-mouse-position-output {
+		display: none;
+	}
+	#custom-mouse-position-form {
+		display: none;
+	}
 }
