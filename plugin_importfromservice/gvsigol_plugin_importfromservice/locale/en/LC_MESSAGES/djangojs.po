@@ -14,31 +14,34 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 msgid "Import from service"
-msgstr "Import from service"
+msgstr ""
 
 msgid "Import layer from service"
-msgstr "Import layer from service"
+msgstr ""
 
 msgid "Service"
-msgstr "Service"
+msgstr ""
 
 msgid "Service URL"
-msgstr "Service URL"
+msgstr ""
 
 msgid "Connect"
-msgstr "Connect"
+msgstr ""
 
 msgid "Remove layer"
-msgstr "Remove layer"
+msgstr ""
 
 msgid "You must type a valid URL"
-msgstr "You must type a valid URL"
+msgstr ""
 
 msgid "Load layer"
-msgstr "Load layer"
+msgstr ""
 
 msgid "Imported layers"
-msgstr "Imported layers"
+msgstr ""
 
 msgid "Close"
-msgstr "Close"
+msgstr ""
+
+msgid "Mixed content: The page at was loaded over HTTPS, but requested an insecure URL"
+msgstr ""

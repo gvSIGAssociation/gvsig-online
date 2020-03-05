@@ -43,3 +43,6 @@ msgstr "Capas importadas"
 
 msgid "Close"
 msgstr "Cerrar"
+
+msgid "Mixed content: The page at was loaded over HTTPS, but requested an insecure URL"
+msgstr "Contenido mixto: La página fue cargada sobre HTTPS, pero se ha solicitado una URL insegura"

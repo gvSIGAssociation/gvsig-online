@@ -76,7 +76,8 @@ ImportVector.prototype.createUploadForm = function() {
 		self.modal += 							'<div class="col-md-12 form-group">';	
 		self.modal += 								'<label for="vectorfile">' + gettext('Vector file') + ' (shp.zip, *.kml, .json)</label>';
 		self.modal += 								'<input class="form-control" id="vectorfile" name="vectorfile" type="file"  required="required" accept=".zip,.kml,.json">';
-		self.modal +=								'<span id="vectorfile-error" style="display: none; color: red;">* ' + gettext('You must select a file') + '</span>'
+		self.modal +=								'<span id="vectorfile-error" style="display: none; color: red;">* ' + gettext('You must select a file') + '</span>';
+		self.modal +=								'<span id="vectorfilesize-error" style="display: none; color: red;">* ' + gettext('The file is too large. You can publish it from the administrator') + '</span>';
 		self.modal += 							'</div>';
 		self.modal += 						'</div>';
 		self.modal += 						'<div class="row">';
@@ -105,6 +106,7 @@ ImportVector.prototype.createUploadForm = function() {
 		
 		$('#vectorfile').on('input', function(){
 			$('#vectorfile-error').css('display', 'none');
+			$('#vectorfilesize-error').css('display', 'none');
 		});
 		
 		$('#button-importvector-accept').unbind("click").click(function(e){
@@ -114,108 +116,120 @@ ImportVector.prototype.createUploadForm = function() {
 				$('#vectortitle-error').css('display', 'block');
 				
 			} else {
+				$('body').overlay();
 				var form = document.getElementById('addvector_form');
 				var file = form[0].files[0];   
 				if (file) {
-					var currentProj = self.map.getView().getProjection();    
-					var fr = new FileReader();   
-					var sourceFormat = null;
-					var source = new ol.source.Vector();
-					var layerId = viewer.core._nextLayerId();
-					var name = file.name.split('.')[0];
-					var extension = file.name.split('.')[1];
-					
-					var style = self.getRandomStyle();
-					
-					if (extension == 'zip') {
-						sourceFormat = new ol.format.GeoJSON();
-						
-						fr.onload = function (evt) {  
-							var vectorData = evt.target.result;
-							var dataProjection = sourceFormat.readProjection(vectorData) || currentProj;        
-							shp(vectorData).then(function (geojson) {            
-								source.addFeatures(sourceFormat.readFeatures(geojson,  {                
-									dataProjection: dataProjection,                
-									featureProjection: currentProj            
-								}));        
+					var size = file.size / 1024;
+					if (size < 20000) {
+						var currentProj = self.map.getView().getProjection();    
+						var fr = new FileReader();   
+						var sourceFormat = null;
+						var source = new ol.source.Vector();
+						var layerId = viewer.core._nextLayerId();
+						var name = file.name.split('.')[0];
+						var extension = file.name.split('.')[1];
+
+						var style = self.getRandomStyle();	
+						if (extension == 'zip') {
+							sourceFormat = new ol.format.GeoJSON();
+							
+							fr.onload = function (evt) {  
+								var vectorData = evt.target.result;
+								var dataProjection = sourceFormat.readProjection(vectorData) || currentProj;        
+								shp(vectorData).then(function (geojson) {            
+									source.addFeatures(sourceFormat.readFeatures(geojson,  {                
+										dataProjection: dataProjection,                
+										featureProjection: currentProj            
+									}));   
+									$.overlayout();
+								});
+								
+								
+							};    
+							fr.readAsArrayBuffer(file);
+							
+						} else if (extension == 'kml') {
+							sourceFormat = new ol.format.KML({
+								extractStyles: false,
+					            extractAttributes: true
 							});
 							
+							fr.onload = function (evt) {       
+								var vectorData = evt.target.result;   
+								var dataProjection = sourceFormat.readProjection(vectorData) || currentProj;        
+								source.addFeatures(sourceFormat.readFeatures(vectorData,  {                
+									dataProjection: dataProjection,                
+									featureProjection: currentProj            
+								}));
+								$.overlayout();
+								
+								
+							};    
+							fr.readAsText(file);
 							
-						};    
-						fr.readAsArrayBuffer(file);
-						
-					} else if (extension == 'kml') {
-						sourceFormat = new ol.format.KML({
-							extractStyles: false,
-				            extractAttributes: true
-						});
-						
-						fr.onload = function (evt) {       
-							var vectorData = evt.target.result;   
-							var dataProjection = sourceFormat.readProjection(vectorData) || currentProj;        
-							source.addFeatures(sourceFormat.readFeatures(vectorData,  {                
-								dataProjection: dataProjection,                
-								featureProjection: currentProj            
-							}));
+						} else if (extension == 'json') {
+							sourceFormat = new ol.format.GeoJSON();
 							
-							
-						};    
-						fr.readAsText(file);
-						
-					} else if (extension == 'json') {
-						sourceFormat = new ol.format.GeoJSON();
-						
-						fr.onload = function (evt) {       
-							var vectorData = evt.target.result;
-							var jsonVectorData = JSON.parse(vectorData);
-							var dataProjection = 'EPSG:4326';
-							if (jsonVectorData.crs) {
-								if (jsonVectorData.crs.properties) {
-									if (jsonVectorData.crs.properties.name) {
-										var crsName = jsonVectorData.crs.properties.name.split('::');
-										if (crsName.length > 1) {
-											dataProjection = 'EPSG:' + jsonVectorData.crs.properties.name.split('::')[1];
+							fr.onload = function (evt) {       
+								var vectorData = evt.target.result;
+								var jsonVectorData = JSON.parse(vectorData);
+								var dataProjection = 'EPSG:4326';
+								if (jsonVectorData.crs) {
+									if (jsonVectorData.crs.properties) {
+										if (jsonVectorData.crs.properties.name) {
+											var crsName = jsonVectorData.crs.properties.name.split('::');
+											if (crsName.length > 1) {
+												dataProjection = 'EPSG:' + jsonVectorData.crs.properties.name.split('::')[1];
+											}
 										}
-									}
-								} 
-							}
-							       
-							source.addFeatures(sourceFormat.readFeatures(vectorData,  {                
-								dataProjection: dataProjection,                
-								featureProjection: currentProj            
-							}));
-							
-							
-						};    
-						fr.readAsText(file);
-					} 
-					
-					var vectorLayer = new ol.layer.Vector({
-						id: layerId,
-						source: source,
-						name: name,
-						style: style,
-						strategy: ol.loadingstrategy.bbox
-					});
-					vectorLayer.baselayer = false;
-					vectorLayer.setZIndex(99999999);
-					vectorLayer.dataid = layerId;
-					vectorLayer.id = layerId;
-					vectorLayer.layer_name = name;
-					vectorLayer.queryable = false;
-					vectorLayer.title = title;
-					vectorLayer.visible = true;
-					vectorLayer.imported = true;
-					vectorLayer.printable = true;
-					vectorLayer.randomStyle = self.getVectorStyle('polygon');
+									} 
+								}
+								       
+								source.addFeatures(sourceFormat.readFeatures(vectorData,  {                
+									dataProjection: dataProjection,                
+									featureProjection: currentProj            
+								}));
+								$.overlayout();
+								
+								
+							};    
+							fr.readAsText(file);
+						} 
+						
+						var vectorLayer = new ol.layer.Vector({
+							id: layerId,
+							source: source,
+							name: name,
+							style: style,
+							strategy: ol.loadingstrategy.bbox
+						});
+						vectorLayer.baselayer = false;
+						vectorLayer.setZIndex(99999999);
+						vectorLayer.dataid = layerId;
+						vectorLayer.id = layerId;
+						vectorLayer.layer_name = name;
+						vectorLayer.queryable = false;
+						vectorLayer.title = title;
+						vectorLayer.visible = true;
+						vectorLayer.imported = true;
+						vectorLayer.is_vector = true;
+						vectorLayer.printable = true;
+						vectorLayer.randomStyle = self.getVectorStyle('polygon');
 
-					self.map.addLayer(vectorLayer);
-					self.createVectorLayerUI (vectorLayer, layerId);
-					$("#modal-importvector-dialog").modal('hide');
-					self.modal = null;
+						self.map.addLayer(vectorLayer);
+						self.createVectorLayerUI (vectorLayer, layerId);
+						$("#modal-importvector-dialog").modal('hide');
+						self.modal = null;
+						
+					} else {
+						$('#vectorfilesize-error').css('display', 'block');
+						$.overlayout();
+					}
 					
 				} else {
 					$('#vectorfile-error').css('display', 'block');
+					$.overlayout();
 				}
 				
 			}

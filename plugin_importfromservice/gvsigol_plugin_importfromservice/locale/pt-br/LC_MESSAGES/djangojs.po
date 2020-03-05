@@ -52,3 +52,6 @@ msgstr "Camadas importadas"
 
 msgid "Close"
 msgstr "Fechar"
+
+msgid "Mixed content: The page at was loaded over HTTPS, but requested an insecure URL"
+msgstr "Conteúdo misto: a página em foi carregada por HTTPS, mas solicitou um URL não seguro"

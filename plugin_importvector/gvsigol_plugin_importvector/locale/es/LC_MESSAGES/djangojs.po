@@ -37,3 +37,6 @@ msgstr "Debe indicar un título para la capa"
 
 msgid "Close"
 msgstr "Cerrar"
+
+msgid "The file is too large. You can publish it from the administrator"
+msgstr "El archivo es demasiado grande. Puedes publicarlo desde el administrador"

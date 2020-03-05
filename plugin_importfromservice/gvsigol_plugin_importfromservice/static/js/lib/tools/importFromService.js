@@ -93,6 +93,7 @@ ImportFromService.prototype.createServiceForm = function() {
 		self.modal += 						'<div class="row">';
 		self.modal += 							'<div class="col-md-12 form-group">';	
 		self.modal +=								'<span id="serviceurl-error" style="display: none; color: red;">* ' + gettext('You must type a valid URL') + '</span>';
+		self.modal +=								'<span id="mixedcontent-error" style="display: none; color: red;">* ' + gettext('Mixed content: The page at was loaded over HTTPS, but requested an insecure URL') + '</span>';
 		self.modal += 							'</div>';
 		self.modal += 						'</div>';
 		self.modal += 					'</form>';
@@ -113,79 +114,94 @@ ImportFromService.prototype.createServiceForm = function() {
 		
 		$('#serviceurl').on('input', function(){
 			$('#serviceurl-error').css('display', 'none');
+			$('#mixedcontent-error').css('display', 'none');
 		});
 		
 		$('#button-importfromservice-connect').unbind("click").click(function(e){
 			e.preventDefault();
 			var serviceURL = $('#serviceurl').val();
 			var serviceType = $('option:selected', $('#servicetype')).val();
+			var currentProtocol = window.location.href.split("/")[0];
+			currentProtocol = currentProtocol.substring(0, currentProtocol.length - 1);
+			var protocol = serviceURL.split("/")[0];
+			protocol = protocol.substring(0, protocol.length - 1);
 			if (serviceURL == '') {
 				$('#serviceurl-error').css('display', 'block');
 				
 			} else {
-				//var url = serviceURL + '/' + serviceType.toLowerCase() + '?request=GetCapabilities&service=' + serviceType;
-				var url = serviceURL + '?request=GetCapabilities&service=' + serviceType;
-				var parser = new ol.format.WMSCapabilities();
-				$.ajax(url).then(function(response) {
-					if (serviceType == 'WMS') {
-						var parser = new ol.format.WMSCapabilities();
-						var result = parser.read(response);
-						self.wmsLayers = result.Capability.Layer.Layer;
-						
-						$('#importfromservice-layerlist').empty();
-						for (var i=0; i<self.wmsLayers.length; i++) {
-							var htmlLayer = '';
-							htmlLayer += '<li class="item">';
-							htmlLayer += 	'<div class="product-info">';
-							htmlLayer += 		'<a data-layername="' + self.wmsLayers[i].Name + '" href="" class="product-title load-wms-layer">' + self.wmsLayers[i].Name + '<span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-globe margin-r-5"></i>' + gettext('Load layer') + '</span></a>'; 
-							htmlLayer += 		'<span class="product-description">' + self.wmsLayers[i].Title + '</span>';
-							htmlLayer += 	'</div>';
-							htmlLayer += '</li>';
+				if (protocol == currentProtocol) {
+					if (serviceURL.endsWith('?')) {
+						serviceURL = serviceURL.substring(0, serviceURL.length - 1);
+					}
+					if (serviceURL.includes('?')) {
+						serviceURL = serviceURL.split('?')[0];
+					}
+					var url = serviceURL + '?request=GetCapabilities&service=' + serviceType;
+					var parser = new ol.format.WMSCapabilities();
+					$.ajax(url).then(function(response) {
+						if (serviceType == 'WMS') {
+							var parser = new ol.format.WMSCapabilities();
+							var result = parser.read(response);
+							self.wmsLayers = result.Capability.Layer.Layer;
 							
-							$('#importfromservice-layerlist').append(htmlLayer);
-						}
-						
-						$('.load-wms-layer').on('click', function(e){
-							e.preventDefault();
-							var layerName = this.dataset.layername;
+							$('#importfromservice-layerlist').empty();
 							for (var i=0; i<self.wmsLayers.length; i++) {
-								if (self.wmsLayers[i].Name == layerName) {
-									self.loadWMSLayer(serviceURL, self.wmsLayers[i]);
-								}
+								var htmlLayer = '';
+								htmlLayer += '<li class="item">';
+								htmlLayer += 	'<div class="product-info">';
+								htmlLayer += 		'<a data-layername="' + self.wmsLayers[i].Name + '" href="" class="product-title load-wms-layer">' + self.wmsLayers[i].Name + '<span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-globe margin-r-5"></i>' + gettext('Load layer') + '</span></a>'; 
+								htmlLayer += 		'<span class="product-description">' + self.wmsLayers[i].Title + '</span>';
+								htmlLayer += 	'</div>';
+								htmlLayer += '</li>';
+								
+								$('#importfromservice-layerlist').append(htmlLayer);
 							}
-						});
-						
-					} else if (serviceType == 'WFS') {
-						self.featureTypeList = response.getElementsByTagName("FeatureTypeList")[0];
-						
-						$('#importfromservice-layerlist').empty();
-						for (var i=0; i<self.featureTypeList.children.length; i++) {
-							var htmlLayer = '';
-							htmlLayer += '<li class="item">';
-							htmlLayer += 	'<div class="product-info">';
-							htmlLayer += 		'<a data-layername="' + self.featureTypeList.children[i].children[0].textContent + '" href="" class="product-title load-wfs-layer">' + self.featureTypeList.children[i].children[0].textContent + '<span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-globe margin-r-5"></i>' + gettext('Load layer') + '</span></a>'; 
-							htmlLayer += 		'<span class="product-description">' + self.featureTypeList.children[i].children[1].textContent + '</span>';
-							htmlLayer += 	'</div>';
-							htmlLayer += '</li>';
 							
-							$('#importfromservice-layerlist').append(htmlLayer);
-						}
-						
-						$('.load-wfs-layer').on('click', function(e){
-							e.preventDefault();
-							var layerName = this.dataset.layername;
-							for (var i=0; i<self.featureTypeList.children.length; i++) {
-								if (self.featureTypeList.children[i].children[0].textContent == layerName) {
-									self.loadWFSLayer(serviceURL, self.featureTypeList.children[i]);
+							$('.load-wms-layer').on('click', function(e){
+								e.preventDefault();
+								var layerName = this.dataset.layername;
+								for (var i=0; i<self.wmsLayers.length; i++) {
+									if (self.wmsLayers[i].Name == layerName) {
+										self.loadWMSLayer(serviceURL, self.wmsLayers[i]);
+									}
 								}
+							});
+							
+						} else if (serviceType == 'WFS') {
+							self.featureTypeList = response.getElementsByTagName("FeatureTypeList")[0];
+							
+							$('#importfromservice-layerlist').empty();
+							for (var i=0; i<self.featureTypeList.children.length; i++) {
+								var htmlLayer = '';
+								htmlLayer += '<li class="item">';
+								htmlLayer += 	'<div class="product-info">';
+								htmlLayer += 		'<a data-layername="' + self.featureTypeList.children[i].children[0].textContent + '" href="" class="product-title load-wfs-layer">' + self.featureTypeList.children[i].children[0].textContent + '<span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-globe margin-r-5"></i>' + gettext('Load layer') + '</span></a>'; 
+								htmlLayer += 		'<span class="product-description">' + self.featureTypeList.children[i].children[1].textContent + '</span>';
+								htmlLayer += 	'</div>';
+								htmlLayer += '</li>';
+								
+								$('#importfromservice-layerlist').append(htmlLayer);
 							}
-						});
-						
-					} 
-				}).fail(function(error) {
-					$('#importfromservice-layerlist').empty();
-					$('#serviceurl-error').css('display', 'block');
-				});
+							
+							$('.load-wfs-layer').on('click', function(e){
+								e.preventDefault();
+								var layerName = this.dataset.layername;
+								for (var i=0; i<self.featureTypeList.children.length; i++) {
+									if (self.featureTypeList.children[i].children[0].textContent == layerName) {
+										self.loadWFSLayer(serviceURL, self.featureTypeList.children[i]);
+									}
+								}
+							});
+							
+						} 
+					}).fail(function(xhr, status, error) {
+						$('#importfromservice-layerlist').empty();
+						$('#serviceurl-error').css('display', 'block');
+					});
+					
+				} else {
+					$('#mixedcontent-error').css('display', 'block');
+				}
 				
 			}
 			

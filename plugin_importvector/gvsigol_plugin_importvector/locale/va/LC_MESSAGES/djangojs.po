@@ -37,3 +37,6 @@ msgstr "Heu d'indicar un títol per a la capa"
 
 msgid "Close"
 msgstr "Tancar"
+
+msgid "The file is too large. You can publish it from the administrator"
+msgstr "El fitxer és massa gran. Podeu publicar-lo des de l'administrador"
