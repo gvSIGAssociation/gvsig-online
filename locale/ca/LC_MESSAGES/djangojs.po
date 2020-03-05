@@ -484,25 +484,64 @@ msgid "Share view"
 msgstr "Compartir vista"
 
 msgid "Report title"
-msgstr ""
+msgstr "Títol de l'informe"
 
 msgid "Report description"
-msgstr ""
+msgstr "Descripció de l'informe"
 
 msgid "Insert title"
-msgstr ""
+msgstr "Insertar títol"
 
 msgid "Insert description"
-msgstr ""
+msgstr "Insertar descripció"
 
 msgid "Include images related to report elements"
-msgstr ""
+msgstr "Incloure imatges relacionades amb els elements de l'informe"
 
 msgid "Include the address related to report elements"
-msgstr ""
+msgstr "Incloure adreces relacionades amb els elements de l'informe"
 
 msgid "Fields to include"
-msgstr ""
+msgstr "Camps a incloure"
 
 msgid "Generate PDF"
-msgstr ""
+msgstr "Generar PDF"
+
+msgid "Origin coordinates"
+msgstr "Coordenades d'origen"
+
+msgid "Select reference system"
+msgstr "Seleccionar sistema de coordenades"
+
+msgid "Format"
+msgstr "Format"
+
+msgid "Destination coordinates"
+msgstr "Coordenades de destinació"
+
+msgid "Calculate"
+msgstr "Calcular"
+
+msgid "Select format"
+msgstr "Seleccionar format"
+
+msgid "Decimal degrees"
+msgstr "Graus decimals"
+
+msgid "Degrees, minutes and seconds"
+msgstr "Graus, minuts i segons"
+
+msgid "Degrees"
+msgstr "Graus"
+
+msgid "Minutes"
+msgstr "Minut"
+
+msgid "Seconds"
+msgstr "Segons"
+
+msgid "You must fill in all the values"
+msgstr "Ha d'omplir tots els valors"
+
+msgid "Some value is out of range"
+msgstr "Algun valor està fora de rang"

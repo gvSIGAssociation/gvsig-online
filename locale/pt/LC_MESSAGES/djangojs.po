@@ -485,25 +485,64 @@ msgid "Share view"
 msgstr "Compartilhar visão"
 
 msgid "Report title"
-msgstr ""
+msgstr "Título do relatório"
 
 msgid "Report description"
-msgstr ""
+msgstr "Descrição do relatório"
 
 msgid "Insert title"
-msgstr ""
+msgstr "Digite o título"
 
 msgid "Insert description"
-msgstr ""
+msgstr "Digite a descrição"
 
 msgid "Include images related to report elements"
-msgstr ""
+msgstr "Incluir imagens relacionadas aos elementos do relatório"
 
 msgid "Include the address related to report elements"
-msgstr ""
+msgstr "Incluir endereços relacionados aos elementos do relatório"
 
 msgid "Fields to include"
-msgstr ""
+msgstr "Campos a incluir"
 
 msgid "Generate PDF"
-msgstr ""
+msgstr "Gerar PDF"
+
+msgid "Origin coordinates"
+msgstr "Coordenadas de origem"
+
+msgid "Select reference system"
+msgstr "Selecionar sistema de coordenadas"
+
+msgid "Format"
+msgstr "Formato"
+
+msgid "Destination coordinates"
+msgstr "Coordenadas de destino"
+
+msgid "Calculate"
+msgstr "Calcular"
+
+msgid "Select format"
+msgstr "Selecionar formato"
+
+msgid "Decimal degrees"
+msgstr "Graus decimais"
+
+msgid "Degrees, minutes and seconds"
+msgstr "Graus, minutos e segundos"
+
+msgid "Degrees"
+msgstr "Graus"
+
+msgid "Minutes"
+msgstr "Minutos"
+
+msgid "Seconds"
+msgstr "Segundos"
+
+msgid "You must fill in all the values"
+msgstr "Você deve preencher todos os valores"
+
+msgid "Some value is out of range"
+msgstr "Algum valor está fora da faixa"
