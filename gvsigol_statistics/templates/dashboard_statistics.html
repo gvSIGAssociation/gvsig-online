@@ -4,24 +4,24 @@
 
 
 	<div style="background-color:#eee; padding-left:20px;padding-right:20px;padding-top:1px;padding-bottom:5px;">
-	<h3 style="font-weight:bold">{{ plugin.title }} statistics<div id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter-icon" style="float:right"><i class="fa fa-filter" aria-hidden="true"></i></div></h3>
+	<h3 style="font-weight:bold">{{ plugin.title }} {% trans "statistics" %}<div id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter-icon" style="float:right"><i class="fa fa-filter" aria-hidden="true"></i></div></h3>
 	<div class="row hidden" id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter-div" style="padding: 15px;background-color: rgba(200,200,200,0.4);">
 
 		<div class="col-md-4 form-group">
-			Petitions from date<br/>
+			{% trans "Petitions from date" %}<br/>
 			<input type="date" name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_start_date" class="form-control" style="width:100%" onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")');">
 		</div>
 
 		<div class="col-md-4 form-group">
-			Petitions to date<br/>
+			{% trans "Petitions to date" %}<br/>
 			<input type="date" name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_end_date" class="form-control" style="width:100%" onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")'>
 		</div>
 
 		<div class="col-md-4 form-group">
-			Petitions done by<br />
+			{% trans "Petitions done by" %}<br />
 			<select name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_username" class="form-control" style="width:100%" onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")'>
 		  		<option value="all">All</option>
-		  		<option value="anonymous">Anonymous</option>
+		  		<option value="anonymous">{% trans "Anonymous" %}</option>
 
 		  		{% for user in users %}
 		  		<option value="{{ user.username }}">{{ user.username }}</option>
@@ -30,21 +30,21 @@
 		</div>
 
 		<div class="col-md-4 form-group">
-			Divide by time?
+			{% trans "Divide by time?" %}
 			<input type="checkbox" name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_time" class="form-control"  onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")'>
 		</div>
 
 		<div class="col-md-4 form-group">
-			Time division<br />
+			{% trans "Time division" %}<br />
 			<select name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_time_pattern" class="form-control" style="width:100%" onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")'>
-		  		<option value="YYYY">Year</option>
-		  		<option value="MM-YYYY">Month</option>
-				<option value="dd-MM-YYYY">Day</option>
+		  		<option value="YYYY">{% trans "Year" %}</option>
+		  		<option value="MM-YYYY">{% trans "Month" %}</option>
+				<option value="dd-MM-YYYY">{% trans "Day" %}</option>
 			</select>
 		</div>
 
 		<div class="col-md-12 form-group">
-			<span style="font-weight:bold">Total petitions: <span id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-absolute-total"></span></span>
+			<span style="font-weight:bold">{% trans "Total petitions" %}: <span id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-absolute-total"></span></span>
 		</div>
 	</div>
 	</div>
@@ -52,7 +52,7 @@
 	<div class="row" style="margin-top: 15px;">
 		<div class="col-md-6 form-group">
 			<div class="col-md-12 form-group">
-				<span style="font-size: 17px;font-weight: bold;">{{ plugin.title }} list:</span>
+				<span style="font-size: 17px;font-weight: bold;">{{ plugin.title }} {% trans "list" %}:</span>
 			</div>
 			<div class="col-md-12 form-group" style="overflow:auto">
 				<table id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-target-by-user-table" class="display" style="width:100%">

@@ -492,3 +492,42 @@ msgstr ""
 
 msgid "Generate PDF"
 msgstr ""
+
+msgid "Origin coordinates"
+msgstr ""
+
+msgid "Select reference system"
+msgstr ""
+
+msgid "Format"
+msgstr ""
+
+msgid "Destination coordinates"
+msgstr ""
+
+msgid "Calculate"
+msgstr ""
+
+msgid "Select format"
+msgstr ""
+
+msgid "Decimal degrees"
+msgstr ""
+
+msgid "Degrees, minutes and seconds"
+msgstr ""
+
+msgid "Degrees"
+msgstr ""
+
+msgid "Minutes"
+msgstr ""
+
+msgid "Seconds"
+msgstr ""
+
+msgid "You must fill in all the values"
+msgstr ""
+
+msgid "Some value is out of range"
+msgstr ""

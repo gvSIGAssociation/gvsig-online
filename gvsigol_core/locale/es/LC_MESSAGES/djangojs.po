@@ -515,3 +515,42 @@ msgstr "Campos a incluir"
 
 msgid "Generate PDF"
 msgstr "Generar PDF"
+
+msgid "Origin coordinates"
+msgstr "Coordenadas de origen"
+
+msgid "Select reference system"
+msgstr "Seleccionar sistema de coordenadas"
+
+msgid "Format"
+msgstr "Formato"
+
+msgid "Destination coordinates"
+msgstr "Coordenadas de destino"
+
+msgid "Calculate"
+msgstr "Calcular"
+
+msgid "Select format"
+msgstr "Seleccionar formato"
+
+msgid "Decimal degrees"
+msgstr "Grados decimales"
+
+msgid "Degrees, minutes and seconds"
+msgstr "Grados, minutos y segundos"
+
+msgid "Degrees"
+msgstr "Grados"
+
+msgid "Minutes"
+msgstr "Minutos"
+
+msgid "Seconds"
+msgstr "Segundos"
+
+msgid "You must fill in all the values"
+msgstr "Debe rellenar todos los valores"
+
+msgid "Some value is out of range"
+msgstr "Algún valor está fuera de rango"
