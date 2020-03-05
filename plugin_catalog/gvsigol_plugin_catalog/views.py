@@ -40,6 +40,7 @@ from gvsigol_plugin_catalog import settings as catalog_settings
 from django.utils.translation import ugettext as _
 from gvsigol_core import utils as core_utils
 import os
+from builtins import str as text
 
 logger = logging.getLogger("gvsigol")
 
@@ -109,123 +110,123 @@ def get_metadata_as_html(response, lang='eng'):
     try:
         if response:
             #http://localhost/gvsigonline/catalog/get_metadata/<metadata_id>/?getPanel=true
-            html = '<div class="row" style="padding: 20px;">'
-            html += '    <div class="col-md-8">'
-            html += '        <h4 class="modal-catalog-title" style="font-weight:bold">'+response.get('title', '')+'</h4>'
-            html += '        <p>'+response.get('abstract', '')+'</p>'
+            html = u'<div class="row" style="padding: 20px;">'
+            html += u'    <div class="col-md-8">'
+            html += u'        <h4 class="modal-catalog-title" style="font-weight:bold">'+response.get('title', u'')+u'</h4>'
+            html += u'        <p>'+response.get('abstract', u'')+u'</p>'
              
             if len(response['categories'])>0:
-                html += '        <span class="catalog_detail_attr">'+_('Categories')+':</span>'
-                categories = ", ".join(response['categories'])
-                html += '        '+ categories
-                html += '        <br />'
+                html += u'        <span class="catalog_detail_attr">'+_(u'Categories')+u':</span>'
+                categories = u", ".join(response['categories'])
+                html += u'        '+ categories
+                html += u'        <br />'
         
             if len(response['keywords'])>0:
-                html += '        <span class="catalog_detail_attr">' +_('Keywords') + ':</span>'
-                keywords = [ '<span class="badge">' + kw + '</span>' for kw in response['keywords'] if kw]
-                keywords = ' '.join(keywords)
-                html += '        '+ keywords
-                html += '        <br />'
+                html += u'        <span class="catalog_detail_attr">' +_(u'Keywords') + u':</span>'
+                keywords = [ u'<span class="badge">' + kw + u'</span>' for kw in response['keywords'] if kw]
+                keywords = u' '.join(keywords)
+                html += u'        '+ keywords
+                html += u'        <br />'
 
             contactsHtml = ''
             for contact in response['contacts']['resource_contacts']:
                 if contact.get('organisation'):
                     if contact.get('onlineResource') and contact.get('onlineResource').get('url'):
-                        onlineResourceHtml = '&nbsp;&nbsp;<a href="'+contact.get('onlineResource').get('url')+'" target="_blank" class="fa fa-external-link"> ' + contact.get('onlineResource').get('name') + '</a>'
+                        onlineResourceHtml = u'&nbsp;&nbsp;<a href="'+contact.get('onlineResource').get('url')+u'" target="_blank" class="fa fa-external-link"> ' + contact.get('onlineResource').get('name') + u'</a>'
                     else:
-                        onlineResourceHtml = ''
-                    contactsHtml += '<p><span class="catalog_detail_attr">' + _(contact.get('role', 'Contact')) + ": </span>"+contact.get('organisation')+onlineResourceHtml+'</p>'
+                        onlineResourceHtml = u''
+                    contactsHtml += u'<p><span class="catalog_detail_attr">' + _(contact.get('role', u'Contact')) + u": </span>"+contact.get('organisation')+onlineResourceHtml+u'</p>'
             if contactsHtml != '':
-                html += '        <h4 class="modal-catalog-title">' + _('Resource Contacts')+'</h4>'
+                html += u'        <h4 class="modal-catalog-title">' + _(u'Resource Contacts')+u'</h4>'
                 html += contactsHtml
-            contactsHtml = ''
+            contactsHtml = u''
             for contact in response['contacts']['metadata_contacts']:
                 if contact.get('organisation'):
                     if contact.get('onlineResource') and contact.get('onlineResource').get('url'):
-                        onlineResourceHtml = '&nbsp;&nbsp;<a href="'+contact.get('onlineResource').get('url')+'" target="_blank" class="fa fa-external-link"> ' + contact.get('onlineResource').get('name') + '</a>'
+                        onlineResourceHtml = u'&nbsp;&nbsp;<a href="'+contact.get('onlineResource').get('url')+u'" target="_blank" class="fa fa-external-link"> ' + contact.get('onlineResource').get('name') + u'</a>'
                     else:
-                        onlineResourceHtml = ''
-                    contactsHtml += '<p><span class="catalog_detail_attr">' + _(contact.get('role', 'Contact')) + ": </span>"+contact.get('organisation')+onlineResourceHtml+'</p>'
+                        onlineResourceHtml = u''
+                    contactsHtml += u'<p><span class="catalog_detail_attr">' + _(contact.get('role', u'Contact')) + u": </span>"+contact.get('organisation')+onlineResourceHtml+u'</p>'
             if contactsHtml != '':
-                html += '        <h4 class="modal-catalog-title">' + _('Metadata Contacts') + '</h4>'
+                html += u'        <h4 class="modal-catalog-title">' + _(u'Metadata Contacts') + u'</h4>'
                 html += contactsHtml
             
             resConstraints = ''
             for useLimitation in response['resource_constraints']['useLimitations']:
                 if useLimitation:
-                    resConstraints += '        <span class="catalog_detail_attr">Use limitation: </span>'+useLimitation+'<br>'
+                    resConstraints += u'        <span class="catalog_detail_attr">Use limitation: </span>'+useLimitation+u'<br>'
             for accessConstraint in response['resource_constraints']['accessConstraints']:
                 if accessConstraint:
-                    resConstraints += '        <span class="catalog_detail_attr">Access constraint: </span>'+accessConstraint+'<br>'
+                    resConstraints += u'        <span class="catalog_detail_attr">Access constraint: </span>'+accessConstraint+u'<br>'
             for useConstraint in response['resource_constraints']['useConstraints']:
                 if useConstraint:
-                    resConstraints += '        <span class="catalog_detail_attr">Use constraint type: </span>'+useConstraint+'<br>'
+                    resConstraints += u'        <span class="catalog_detail_attr">Use constraint type: </span>'+useConstraint+u'<br>'
             for otherConstraint in response['resource_constraints']['otherConstraints']:
                 if otherConstraint:
-                    resConstraints += '        <span class="catalog_detail_attr">Constraint description: </span>'+otherConstraint+'<br>'
+                    resConstraints += u'        <span class="catalog_detail_attr">Constraint description: </span>'+otherConstraint+u'<br>'
             if resConstraints != '':
-                html += '        <h4 class="modal-catalog-title">' + _('Resource constraints') + '</h4>'
+                html += u'        <h4 class="modal-catalog-title">' + _(u'Resource constraints') + u'</h4>'
                 html += resConstraints
          
-            html += '        <h4 class="modal-catalog-title">' + _('Technical information') + '</h4>'
+            html += u'        <h4 class="modal-catalog-title">' + _('Technical information') + '</h4>'
             
             if response.get('representation_type', None):
-                html += '        <span class="catalog_detail_attr">' + _('Representation type') + ':</span>'
-                html += '        '+response['representation_type']
-                html += '        <br />'
+                html += u'        <span class="catalog_detail_attr">' + _(u'Representation type') + u':</span>'
+                html += u'        '+response['representation_type']
+                html += u'        <br />'
             
             if response.get('scale', None):
-                html += '        <span class="catalog_detail_attr">'+ _('Scale') + ':</span>'
-                html += '        1:'+response['scale']
-                html += '        <br />'
+                html += u'        <span class="catalog_detail_attr">'+ _(u'Scale') + u':</span>'
+                html += u'        1:'+response['scale']
+                html += u'        <br />'
             
             if response.get('srs', None):
-                html += '        <span class="catalog_detail_attr">' + _('Coordinate Reference System') + ':</span>'
-                html += '        '+response['srs']
-                html += '        <br />'
+                html += u'        <span class="catalog_detail_attr">' + _(u'Coordinate Reference System') + u':</span>'
+                html += u'        '+response['srs']
+                html += u'        <br />'
             #https://gvsigol.localhost/geonetwork/srv/eng/catalog.search#/metadata/8dd47e35-2895-40df-9bf5-4f43d4257bb2
             
             if response.get('metadata_id', None):
-                gn_md_url = catalog_settings.CATALOG_BASE_URL + "/srv/" + lang + "/catalog.search#metadata/" + response.get('metadata_id', '')
-                html += '        <span class="catalog_detail_attr">' + _('Metadata identifier') + ':</span>'
-                html += '        '+response.get('metadata_id', '')
-                html += '        &nbsp;&nbsp;<a class="fa fa-external-link" target="_blank" href="' + gn_md_url + '">'+_(' Show in Catalog')+'</a>'
-                html += '        <br />'
+                gn_md_url = text(catalog_settings.CATALOG_BASE_URL) + u"/srv/" + text(lang) + u"/catalog.search#metadata/" + response.get('metadata_id', u'')
+                html += u'        <span class="catalog_detail_attr">' + _(u'Metadata identifier') + u':</span>'
+                html += u'        '+response.get('metadata_id', u'')
+                html += u'        &nbsp;&nbsp;<a class="fa fa-external-link" target="_blank" href="' + gn_md_url + u'">'+_(u' Show in Catalog')+u'</a>'
+                html += u'        <br />'
             # online services
             ogcservices_html = ''
             for resource in response['resources']:
                 if resource.get('name'):
                     res_desc = resource.get('name')
                 else:
-                    res_desc = resource.get('description', _('Resource'))
+                    res_desc = resource.get('description', _(u'Resource'))
                 if resource.get('url'):
                     url = getBaseOgcServiceUrl(resource.get('url'))
                     if "OGC:WMS" in resource['protocol']:
-                        ogcservices_html += '            WMS: '
-                        ogcservices_html += '('+ str(res_desc)+')'
-                        ogcservices_html += '                <span>'+url+'?service=WMS&request=GetCapabilities</span>'
+                        ogcservices_html += u'            WMS: '
+                        ogcservices_html += u'('+ text(res_desc)+u')'
+                        ogcservices_html += u'                <span>'+text(url)+u'?service=WMS&request=GetCapabilities</span>'
                     elif "OGC:WFS" in resource['protocol']:
-                        ogcservices_html += '            WFS: '
-                        ogcservices_html += '('+ str(res_desc)+')'
-                        ogcservices_html += '                <span>'+url+'?service=WFS&request=GetCapabilities</span>'
+                        ogcservices_html += u'            WFS: '
+                        ogcservices_html += u'('+ text(res_desc)+u')'
+                        ogcservices_html += u'                <span>'+text(url)+u'?service=WFS&request=GetCapabilities</span>'
                     elif "OGC:WCS" in resource['protocol']:
-                        ogcservices_html += '            WCS: '
-                        ogcservices_html += '('+ str(res_desc)+')'
-                        ogcservices_html += '                <span>WCS: '+url+'?service=WCS&request=GetCapabilities</span>'
-                    ogcservices_html += '            <div style="clear:both"></div>'
+                        ogcservices_html += u'            WCS: '
+                        ogcservices_html += u'('+ text(res_desc)+u')'
+                        ogcservices_html += u'                <span>WCS: '+text(url)+u'?service=WCS&request=GetCapabilities</span>'
+                    ogcservices_html += u'            <div style="clear:both"></div>'
             if ogcservices_html != '':
-                html += '        <h4 class="modal-catalog-title">' + _('Online services') +'</h4>'
+                html += u'        <h4 class="modal-catalog-title">' + _(u'Online services') +u'</h4>'
                 html += ogcservices_html
                      
-            html += '    </div>'
+            html += u'    </div>'
             
-            html += '    <div class="col-md-4" style="border: 1px solid #ddd; border-radius: 4px; padding: 20px;">'
+            html += u'    <div class="col-md-4" style="border: 1px solid #ddd; border-radius: 4px; padding: 20px;">'
             if len(response['thumbnails']) > 0:
-                html += '<h4 class="modal-catalog-title">'+'Overview'+'</h4>' 
+                html += u'<h4 class="modal-catalog-title">'+'Overview'+'</h4>' 
                 for thumbnail in response['thumbnails']:
-                    html += '            <img src="'+thumbnail['url']+'" alt="'+thumbnail['name']+'" style="width:100%"/><br />'
-            html += '        <h4 class="modal-catalog-title">'+ _('Download and links') + '</h4>'
-            resources = "        <ul>"
+                    html += u'            <img src="'+thumbnail['url']+u'" alt="'+thumbnail['name']+u'" style="width:100%"/><br />'
+            html += u'        <h4 class="modal-catalog-title">'+ _(u'Download and links') + u'</h4>'
+            resources = u"        <ul>"
             if len(response['resources']) > 0: 
                 for resource in response['resources']:
                     if resource.get('name'):
@@ -238,51 +239,51 @@ def get_metadata_as_html(response, lang='eng'):
                             res_desc = os.path.basename(os.path.dirname(resource.get('url')))
                     if resource.get('url'):
                         if resource['protocol'] == 'WWW:DOWNLOAD-1.0-http--download':
-                            resources += '            <li><div>'+ str(res_desc) + '</div>'
-                            resources += '                <a href="'+resource['url']+'" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:140px; text-align:center">' + _('Access resource') + '</a><div style="clear:both;"></div></li>'
+                            resources += u'            <li><div>'+ text(res_desc) + u'</div>'
+                            resources += u'                <a href="'+resource['url']+u'" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:140px; text-align:center">' + _(u'Access resource') + u'</a><div style="clear:both;"></div></li>'
                         elif "OGC:WFS" in resource['protocol']:
-                            resources += '            <li><div>'+ str(res_desc) + '</div>'
-                            resources += '                <a href="'+resource['url']+'?service=WFS&version=1.0.0&request=GetFeature&typeName='+str(resource['name'])+'&outputFormat=SHAPE-ZIP" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:140px; text-align:center">' + _('Access resource') + '</a><div style="clear:both;"></div></li>'
+                            resources += u'            <li><div>'+ text(res_desc) + u'</div>'
+                            resources += u'                <a href="'+resource['url']+u'?service=WFS&version=1.0.0&request=GetFeature&typeName='+text(resource['name'])+u'&outputFormat=SHAPE-ZIP" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:140px; text-align:center">' + _(u'Access resource') + u'</a><div style="clear:both;"></div></li>'
                         elif not 'OGC:' in resource['protocol']:
-                            resources += '            <li><div>'+ str(res_desc) + '</div>'
-                            resources += '                <a href="'+resource['url']+'" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:140px; text-align:center">' + _('Access resource') + '</a><div style="clear:both;"></div></li>'
+                            resources += u'            <li><div>'+ text(res_desc) + u'</div>'
+                            resources += u'                <a href="'+resource['url']+u'" target="_blank" style="float:right; background-color:#ddd; padding:5px; width:140px; text-align:center">' + _(u'Access resource') + u'</a><div style="clear:both;"></div></li>'
                         #resources += '            <div style="clear:both"></div>'
             if resources == "":
-                resources += '<p>'+'No resources available'+'</p>'
-            resources += '        </ul>'
+                resources += u'<p>'+_(u'No resources available')+u'</p>'
+            resources += u'        </ul>'
             html += resources
-            html += '            <div style="clear:both"></div>'
+            html += u'            <div style="clear:both"></div>'
             
-            html += '        <h4 class="modal-catalog-title">' + _('Spatial Extent') + '</h4>'
-            html += '        <img class="gn-img-thumbnail img-thumbnail gn-img-extent" data-ng-src="'+response['image_url']+'" src="'+response['image_url']+'" style="width:100%"/>'
+            html += u'        <h4 class="modal-catalog-title">' + _(u'Spatial Extent') + u'</h4>'
+            html += u'        <img class="gn-img-thumbnail img-thumbnail gn-img-extent" data-ng-src="'+response['image_url']+u'" src="'+response['image_url']+u'" style="width:100%"/>'
             
             temporal_extent_html = ''
             if response.get('publish_date'):
-                temporal_extent_html += '        <span class="catalog_detail_attr">' + _('Publication date') + ':</span>'
-                temporal_extent_html += '        '+response.get('publish_date')
-                temporal_extent_html += '        <br />'
+                temporal_extent_html += u'        <span class="catalog_detail_attr">' + _(u'Publication date') + u':</span>'
+                temporal_extent_html += u'        '+response.get('publish_date')
+                temporal_extent_html += u'        <br />'
             
             if response.get('period_start'):
-                temporal_extent_html += '        <span class="catalog_detail_attr">'+ _('Period') +':</span>'
-                temporal_extent_html += '        '+response['period_start']+' - '+response.get('period_end', '')
-                temporal_extent_html += '        <br />'
+                temporal_extent_html += u'        <span class="catalog_detail_attr">'+ _(u'Period') +u':</span>'
+                temporal_extent_html += u'        '+response['period_start']+u' - '+response.get('period_end', u'')
+                temporal_extent_html += u'        <br />'
             if temporal_extent_html != '':
-                html += '        <br /><br /><h4 class="modal-catalog-title">' + _('Temporal Extent') +'</h4>'
+                html += u'        <br /><br /><h4 class="modal-catalog-title">' + _(u'Temporal Extent') +u'</h4>'
                 html += temporal_extent_html
                      
-            html += '    </div>'
-            html += '</div>'
+            html += u'    </div>'
+            html += u'</div>'
              
             return html     
     except Exception as e:
         logger.exception(e)
         #print e
         
-    html = '<div class="row" style="padding: 20px;">'
-    html += '    <div class="col-md-8">'
-    html += '        <h4 class="modal-catalog-title" style="font-weight:bold">Metadata detail not available</h4>'
-    html += '    </div>'
-    html += '</div>'
+    html = u'<div class="row" style="padding: 20px;">'
+    html += u'    <div class="col-md-8">'
+    html += u'        <h4 class="modal-catalog-title" style="font-weight:bold">' + _(u'Metadata detail not available') + u'</h4>'
+    html += u'    </div>'
+    html += u'</div>'
     return html
 
 def get_metadata(request, layer_id):
