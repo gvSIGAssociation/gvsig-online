@@ -151,12 +151,12 @@ coordinateCalculator.prototype.handler = function(e) {
 		
 		$('#origin-format').empty();
 		if (units == 'degrees') {
-			$('#origin-format').append($('<option>', {value: '', text: gettext('Select format ...'), selected: true, disabled: true}));
+			$('#origin-format').append($('<option>', {value: '', text: gettext('Select format'), selected: true, disabled: true}));
 			$('#origin-format').append($('<option>', {value: 'GG', text: gettext('Decimal degrees'), selected: false}));
 			$('#origin-format').append($('<option>', {value: 'DMS', text: gettext('Degrees, minutes and seconds'), selected: false}));
 			
 		} else if (units == 'meters'){
-			$('#origin-format').append($('<option>', {value: '', text: gettext('Select format ...'), selected: true, disabled: true}));
+			$('#origin-format').append($('<option>', {value: '', text: gettext('Select format'), selected: true, disabled: true}));
 			$('#origin-format').append($('<option>', {value: 'XY', text: gettext('X/Y'), selected: false}));
 		}
 	});
@@ -329,12 +329,12 @@ coordinateCalculator.prototype.handler = function(e) {
 		
 		$('#destination-format').empty();
 		if (units == 'degrees') {
-			$('#destination-format').append($('<option>', {value: '', text: gettext('Select format ...'), selected: true, disabled: true}));
+			$('#destination-format').append($('<option>', {value: '', text: gettext('Select format'), selected: true, disabled: true}));
 			$('#destination-format').append($('<option>', {value: 'GG', text: gettext('Decimal degrees'), selected: false}));
 			//$('#destination-format').append($('<option>', {value: 'DMS', text: gettext('Degrees, minutes and seconds'), selected: false}));
 			
 		} else if (units == 'meters'){
-			$('#destination-format').append($('<option>', {value: '', text: gettext('Select format ...'), selected: true, disabled: true}));
+			$('#destination-format').append($('<option>', {value: '', text: gettext('Select format'), selected: true, disabled: true}));
 			$('#destination-format').append($('<option>', {value: 'XY', text: gettext('X/Y'), selected: false}));
 		}
 	});
