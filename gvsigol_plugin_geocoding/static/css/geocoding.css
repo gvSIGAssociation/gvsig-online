@@ -100,18 +100,21 @@ tr.ui-state-default.ui-sortable-handle{ height:50px}
     height: 34px;
 }
 
-@media only screen and (max-width: 575px) {
+@media only screen and (max-width: 640px) {
 	.viewer-search-form {
-	border-radius: 3px;
-    border: 1px solid #374850;
-    margin: 0px 10px;
-    margin-top: 5px;
-    overflow: hidden;
-    text-overflow: clip;
-	max-width: 400px;
-    display: inline-block;
-    width: 192px;
-    min-width: 175px;
+		display: none;
+	}
 }
-	
+
+/* iPads (portrait and landscape) ----------- */
+@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) {
+	.viewer-search-form {
+		border-radius: 3px;
+	    border: 1px solid #374850;
+	    margin: 0px 10px;
+	    margin-top: 5px;
+	    overflow: hidden;
+	    text-overflow: clip;
+		max-width: 40%;
+	}
 }
