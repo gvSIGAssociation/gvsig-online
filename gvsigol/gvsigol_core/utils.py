@@ -432,13 +432,15 @@ def get_layer_metadata_uuid(layer):
 
 def update_layer_metadata_uuid(layer, uuid):   
     if 'gvsigol_plugin_catalog' in settings.INSTALLED_APPS:
-        #from gvsigol_plugin_catalog import settings as catalog_settings
         from gvsigol_plugin_catalog.models import  LayerMetadata
         
         try: 
             lm = LayerMetadata.objects.get(layer=layer)
-            lm.metadata_uuid = uuid
-            lm.save()
+            if uuid is not None and uuid != u'':
+                lm.metadata_uuid = uuid
+                lm.save()
+            else:
+                lm.delete()
         except LayerMetadata.DoesNotExist as e:
             lm = LayerMetadata()
             lm.layer = layer
