@@ -75,3 +75,19 @@ msgstr "Incloure només resultats que es solapen amb l'àrea seleccionada"
 
 msgid "Metadatum"
 msgstr "Metadada"
+
+msgid "Draw rectangle"
+msgstr ""
+
+msgid "Order by relevance"
+msgstr ""
+
+msgid "Order by modification date"
+msgstr ""
+
+msgid "Order by title"
+msgstr ""
+
+msgid "Search..."
+msgstr ""
+

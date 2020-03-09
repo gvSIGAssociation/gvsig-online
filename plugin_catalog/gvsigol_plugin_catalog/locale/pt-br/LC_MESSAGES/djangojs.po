@@ -84,3 +84,19 @@ msgstr ""
 
 msgid "Metadatum"
 msgstr "Metadado"
+
+msgid "Draw rectangle"
+msgstr ""
+
+msgid "Order by relevance"
+msgstr ""
+
+msgid "Order by modification date"
+msgstr ""
+
+msgid "Order by title"
+msgstr ""
+
+msgid "Search..."
+msgstr ""
+

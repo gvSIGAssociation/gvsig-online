@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-20 15:48+0200\n"
+"POT-Creation-Date: 2020-03-09 16:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,27 +20,43 @@ msgstr ""
 "X-Language: ca_ES\n"
 "X-Source-Language: C\n"
 
-#: mdstandards/iso19139_2007.py:13
+#: mdstandards/iso19139_2007.py:21
 msgid "author"
 msgstr "Autor"
 
-#: mdstandards/iso19139_2007.py:14
+#: mdstandards/iso19139_2007.py:22
 msgid "owner"
 msgstr "Propietari"
 
-#: mdstandards/iso19139_2007.py:15
+#: mdstandards/iso19139_2007.py:23
 msgid "Contact"
 msgstr "Contacte"
+
+#: mdstandards/iso19139_2007.py:24
+msgid "resourceProvider"
+msgstr ""
+
+#: mdstandards/iso19139_2007.py:25
+msgid "custodian"
+msgstr ""
+
+#: mdstandards/iso19139_2007.py:26
+msgid "originator"
+msgstr ""
+
+#: mdstandards/iso19139_2007.py:27
+msgid "publisher"
+msgstr ""
 
 #: templates/catalog_details.html:12
 msgid "About this resource"
 msgstr "Quant a aquest recurs"
 
-#: templates/catalog_details.html:13 views.py:116
+#: templates/catalog_details.html:13 views.py:119
 msgid "Categories"
 msgstr "Categories"
 
-#: templates/catalog_details.html:17 views.py:122
+#: templates/catalog_details.html:17 views.py:125
 msgid "Keywords"
 msgstr "Paraules clau"
 
@@ -48,27 +64,27 @@ msgstr "Paraules clau"
 msgid "Legal constraints"
 msgstr "Restriccions legals"
 
-#: templates/catalog_details.html:25 views.py:168
+#: templates/catalog_details.html:25 views.py:171
 msgid "Technical information"
 msgstr "Informació tècnica"
 
-#: templates/catalog_details.html:27 views.py:171
+#: templates/catalog_details.html:27 views.py:174
 msgid "Representation type"
 msgstr "Tipus de representació"
 
-#: templates/catalog_details.html:31 views.py:176
+#: templates/catalog_details.html:31 views.py:179
 msgid "Scale"
 msgstr "Escala"
 
-#: templates/catalog_details.html:35 views.py:181
+#: templates/catalog_details.html:35 views.py:184
 msgid "Coordinate Reference System"
 msgstr "Sistema de referència de coordenades"
 
-#: templates/catalog_details.html:39 views.py:188
+#: templates/catalog_details.html:39 views.py:191
 msgid "Metadata identifier"
 msgstr "Identificador de metadades"
 
-#: templates/catalog_details.html:50 views.py:224
+#: templates/catalog_details.html:50 views.py:228
 msgid "Download and links"
 msgstr "Links i descarregues"
 
@@ -80,46 +96,56 @@ msgstr "Descarregues"
 msgid "Get shape"
 msgstr "Obtenir shape"
 
-#: templates/catalog_details.html:68 views.py:249
+#: templates/catalog_details.html:68 views.py:257
 msgid "Spatial Extent"
 msgstr "Extensió espacial"
 
-#: templates/catalog_details.html:71 views.py:263
+#: templates/catalog_details.html:71 views.py:271
 msgid "Temporal Extent"
 msgstr "Extensió temporal"
 
-#: templates/catalog_details.html:72 views.py:254
+#: templates/catalog_details.html:72 views.py:262
 msgid "Publication date"
 msgstr "Dada de publicació"
 
-#: templates/catalog_details.html:76 views.py:259
+#: templates/catalog_details.html:76 views.py:267
 msgid "Period"
 msgstr "Periode"
 
-#: views.py:137
+#: views.py:140
 msgid "Resource Contacts"
 msgstr "Contactes del recurs"
 
-#: views.py:148
+#: views.py:151
 msgid "Metadata Contacts"
 msgstr "Contactes de la Metadada"
 
-#: views.py:165
+#: views.py:168
 msgid "Resource constraints"
 msgstr "Restriccions del recurs"
 
-#: views.py:190
+#: views.py:193
 msgid " Show in Catalog"
 msgstr "Mostrar al catàleg"
 
-#: views.py:198 views.py:231
+#: views.py:201 views.py:235
 msgid "Resource"
 msgstr "Recurs"
 
-#: views.py:214
+#: views.py:218
 msgid "Online services"
 msgstr "Serveis en línia"
 
-#: views.py:235 views.py:238 views.py:241
+#: views.py:243 views.py:246 views.py:249
 msgid "Access resource"
 msgstr "Accedir al recurs"
+
+#: views.py:252
+msgid "No resources available"
+msgstr ""
+
+#: views.py:284
+#, fuzzy
+#| msgid "Metadata identifier"
+msgid "Metadata detail not available"
+msgstr "Identificador de metadades"

@@ -79,3 +79,15 @@ msgstr "Metadato"
 msgid "Draw rectangle"
 msgstr "Dibujar rectángulo"
 
+msgid "Order by relevance"
+msgstr "Ordenar por relevancia"
+
+msgid "Order by modification date"
+msgstr "Ordenar por fecha de modificación"
+
+msgid "Order by title"
+msgstr "Ordenar por título"
+
+msgid "Search..."
+msgstr "Buscar..."
+
