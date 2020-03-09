@@ -62,6 +62,10 @@ import email
 from gvsigol_plugin_downloadman.settings import TMP_DIR,TARGET_ROOT
 from gvsigol_plugin_downloadman.settings import DOWNLOADS_URL
 from django.contrib.gis.gdal import SpatialReference, CoordTransform, OGRGeometry
+try:
+    from gvsigol.settings import PROXIES
+except:
+    PROXIES = {}
 
 try:
     from gvsigol.settings import GVSIGOL_NAME
@@ -295,7 +299,7 @@ def _getCapabilitiesWfsTree(baseUrl):
     try:
         url = _normalizeWxsUrl(baseUrl) + '?service=WFS&version=1.0.0&request=GetCapabilities'
         logger.debug(url)
-        r = requests.get(url, verify=False, timeout=DEFAULT_TIMEOUT)
+        r = requests.get(url, verify=False, timeout=DEFAULT_TIMEOUT, proxies=PROXIES)
         getCapabilitiesXml = r.content
         #incorrectGeoserverNamespaces = '<WFS_Capabilities version="1.0.0" xsi:schemaLocation="http://www.opengis.net/wfs https://gvsigol.localhost/geoserver/schemas/wfs/1.0.0/WFS-capabilities.xsd">'
         #fixedGeoserverWFS100Namespaces = '<WFS_Capabilities version="1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  xsi:schemaLocation="http://www.opengis.net/wfs https://gvsigol.localhost/geoserver/schemas/wfs/1.0.0/WFS-capabilities.xsd">'
@@ -410,7 +414,7 @@ def retrieveLinkLocator(url):
     (fd, tmp_path) = tempfile.mkstemp('.tmp', GVSIGOL_NAME.lower()+"dm", dir=getTmpDir())
     tmp_file = os.fdopen(fd, "wb")
     try:
-        r = requests.get(url, stream=True, verify=False, timeout=DEFAULT_TIMEOUT)
+        r = requests.get(url, stream=True, verify=False, timeout=DEFAULT_TIMEOUT, proxies=PROXIES)
         if r.status_code != 200:
             tmp_file.close()
             raise PreparationError(u'Error retrieving link. HTTP status code: '+text(r.status_code) + u". Url: " + url)
@@ -513,7 +517,7 @@ class WCSClient():
         try:
             url = _normalizeWxsUrl(baseUrl) + '?service=WCS&version=2.0.0&request=DescribeCoverage&CoverageId=' + layer_name
             logger.debug(url)
-            r = requests.get(url, verify=False, timeout=DEFAULT_TIMEOUT)
+            r = requests.get(url, verify=False, timeout=DEFAULT_TIMEOUT, proxies=PROXIES)
             describeCoverageXml = r.content
             incorrectGeoserverNamespaces = '<wcs:CoverageDescriptions xsi:schemaLocation=" http://www.opengis.net/wcs/2.0 http://schemas.opengis.net/wcs/2.0/wcsDescribeCoverage.xsd">'
             fixedGeoserverWCS2Namespaces = '<wcs:CoverageDescriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmlcov="http://www.opengis.net/gmlcov/1.0" xmlns:swe="http://www.opengis.net/swe/2.0" xsi:schemaLocation="http://schemas.opengis.net/swe/2.0 http://schemas.opengis.net/sweCommon/2.0/swe.xsd http://www.opengis.net/wcs/2.0 http://schemas.opengis.net/wcs/2.0/wcsDescribeCoverage.xsd" xmlns:wcs="http://www.opengis.net/wcs/2.0">'
@@ -650,7 +654,7 @@ class WCSClient():
         (fd, tmp_path) = tempfile.mkstemp('.tmp', GVSIGOL_NAME.lower()+"dm", dir=getTmpDir())
         tmp_file = os.fdopen(fd, "wb")
         try:
-            r = requests.get(url, stream=True, verify=False, timeout=DEFAULT_TIMEOUT)
+            r = requests.get(url, stream=True, verify=False, timeout=DEFAULT_TIMEOUT, proxies=PROXIES)
             if r.status_code != 200:
                 tmp_file.close()
                 raise PreparationError(u'Error retrieving link. HTTP status code: '+text(r.status_code) + u". Url: " + url)
@@ -1213,6 +1217,8 @@ def createDownloadLinks(downloadRequest, resourceLocator):
             if len(paths) == 0:
                 # file can't be found
                 logger.error("Error locating file for download")
+                logger.debug(resourceLocator.resolved_url)
+                logger.debug(local_path)
                 raise PermanentPreparationError()
             for p in paths:
                 is_auxiliary = (p != local_path)
