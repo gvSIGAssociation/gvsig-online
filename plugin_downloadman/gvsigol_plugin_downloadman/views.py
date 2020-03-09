@@ -295,6 +295,7 @@ def getOgcDownloadDescriptor(layer_uuid, onlineResource, layer, fallbackTitle, d
     
 def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
     all_resources = []
+    xml_md = None
     try:
         import gvsigol_plugin_catalog.service as geonetwork_service
         geonetwork_instance = geonetwork_service.get_instance()
@@ -394,8 +395,11 @@ def doGetMetadataDownloadResources(metadata_uuid, layer = None, user = None):
             if resource:
                 resource.restricted = isRestricted(onlineResource, max_public_size)
                 all_resources.append(resource)
+        if onlineResources is None or len(onlineResources) == 0:
+            logger.debug(xml_md)
     except:
         logger.exception("Error getting download resources for layer")
+        logger.debug(xml_md)
     return all_resources
 
 
@@ -416,7 +420,7 @@ def doGetLayerDownloadResources(layer, user):
                 # TODO:
                 pass    
     except:
-        pass
+        logger.exception("Error getting download resources for layer")
     return all_resources
 
 def createResourceLocator(resource, downloadRequest):
