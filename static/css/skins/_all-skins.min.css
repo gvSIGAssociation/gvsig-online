@@ -460,7 +460,7 @@
     background-color: rgba(255, 255, 255, 0.1);
   }
   .skin-ideuy .main-header .navbar .dropdown-menu li a {
-    color: #fff;
+    /*color: #fff;*/
   }
   .skin-ideuy .main-header .navbar .dropdown-menu li a:hover {
     background: #3155a6;
