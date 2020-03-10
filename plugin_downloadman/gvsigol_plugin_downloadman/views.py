@@ -701,7 +701,7 @@ def downloadResource(request, uuid, resuuid):
 
         if link.prepared_download_path:
             logger.debug(u"using sendfile: " + link.prepared_download_path)
-            return sendfile(request, link.prepared_download_path)
+            return sendfile(request, link.prepared_download_path, attachment=True)
         else:
             logger.debug(u"going to use redirect")
             for locator in link.resourcelocator_set.all():
