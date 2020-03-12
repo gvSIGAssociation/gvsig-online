@@ -232,7 +232,13 @@ CatalogView.prototype.getLocalizedEndpoint = function() {
 	return url;
 }
 
-CatalogView.prototype.filterCatalog = function(){
+CatalogView.prototype.filterCatalog = function(fromResult){
+	if (fromResult) {
+		this.fromResult = fromResult;
+	}
+	else {
+		this.fromResult = 1;
+	}
 	var search = $("#gn-any-field").val();
 	// hack: remove accents since Geonetwork index removes them
 	// This should be fixed/configured in Geonetwork. What about Ñ??
@@ -247,18 +253,36 @@ CatalogView.prototype.filterCatalog = function(){
 	search = search.replace("ú", "u");
 	search = search.replace("Ú", "U");
 
+	// remove extra blanks
+	search = search.replace(/ +/g, " ");
+	// remove blanks surrounding + signs
+	search = search.replace(/ \+/g, "+");
+	search = search.replace(/\+ /g, "+");
 	var searchTerms = search.split(" ");
-	var orWildcardSearch = '';
-	var first = true;
+	var andWildcardSearchComponents = [];
 	for (var i=0; i<searchTerms.length; i++) {
 		// add wildcards to search for partial terms
 		if (searchTerms[i] != "") {
-			if (!first) {
-				orWildcardSearch = orWildcardSearch + "+";
+			var term;
+			orSearchTerms = searchTerms[i].split("+");
+			if (orSearchTerms.length == 1) {
+				term = searchTerms[i] + "*";
 			}
-			orWildcardSearch += searchTerms[i]+"*";
+			else {
+				for (j = 0; j<orSearchTerms.length; j++) {
+					if (orSearchTerms[j] != "") {
+						if (j==0) { // first
+							term = orSearchTerms[j]+"*";
+						}
+						else {
+							term = term + " or " + orSearchTerms[j]+"*";
+						}
+					}
+				}
+
+			}
+			andWildcardSearchComponents.push(term);
 		}
-		first = false;
 	}
 
 	var categories = $("#categoriesF").val();
@@ -278,11 +302,11 @@ CatalogView.prototype.filterCatalog = function(){
 			var selectedArea =  format.writeGeometry(extent, {dataProjection: 'EPSG:4326', featureProjection: this.catalog_map.map.getView().getProjection()});
 		}
 	}
-	this.launchQuery(orWildcardSearch, categories, keywords, resources, creation_from, creation_to, date_from, date_to, selectedArea);
+	this.launchQuery(andWildcardSearchComponents, categories, keywords, resources, creation_from, creation_to, date_from, date_to, selectedArea);
 
 }
 
-CatalogView.prototype.launchQuery = function(search, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent){
+CatalogView.prototype.launchQuery = function(searchComponents, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent, mainSearchField){
 	var query = "";
 	var is_first = true;
 	$(".catalog_filter_entry_ck").each(function(){
@@ -295,7 +319,7 @@ CatalogView.prototype.launchQuery = function(search, categories, keywords, resou
 		}
 
 	});
-	this.getCatalogFilters(query, search, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent);
+	this.getCatalogFilters(query, searchComponents, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent, mainSearchField);
 }
 
 CatalogView.prototype.getCatalogEntry = function(query, cat, entry, filterName){
@@ -787,7 +811,7 @@ CatalogView.prototype.updatePager = function(totalCount) {
 	$('.catalog-pager').html(pagerEntries);
 	$(".next-result-page").unbind("click").click(function(){
 		self.fromResult = self.fromResult + self.config.resultsPerPage;
-		self.filterCatalog();
+		self.filterCatalog(self.fromResult);
 	});
 	$(".prev-result-page").unbind("click").click(function(){
 		var fromResult = self.fromResult - self.config.resultsPerPage;
@@ -797,16 +821,21 @@ CatalogView.prototype.updatePager = function(totalCount) {
 		else {
 			self.fromResult = fromResult;
 		}
-		self.filterCatalog();
+		self.filterCatalog(self.fromResult);
 	});
 }
 
-CatalogView.prototype.getCatalogFilters = function(query, search, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent){
+CatalogView.prototype.getCatalogFilters = function(query, searchComponents, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent, mainSearchField){
 	var self = this;
-	var filters = ""
-		if(search && search.length > 0){
-			filters += "&title="+search;
+	if (!mainSearchField) {
+		mainSearchField = "title";
+	}
+	var filters = "";
+	if (searchComponents && searchComponents.length>0) {
+		for (var i=0; i<searchComponents.length; i++) {
+			filters += "&" + mainSearchField + "=" + searchComponents[i];
 		}
+	}
 	if(resources && resources.length > 0){
 		filters += this.getKeywordQuery(resources, "orgName");
 	}
