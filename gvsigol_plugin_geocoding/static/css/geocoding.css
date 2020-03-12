@@ -5,9 +5,9 @@
     margin-top: 5px;
     overflow: hidden;
     text-overflow: clip;
-	max-width: 600px;
+	max-width: 400px;
     display: inline-block;
-    width: 600px;
+    width: 400px;
     min-width: 175px;
 }
 
