@@ -166,10 +166,10 @@ GvsigolResourceManager.prototype.deleteResource = function(rid) {
 	  		if (response.deleted) {
 	  			deleted = true;
 				var checkversion = self.checkFeatureVersion(self.selectedLayer, response.featid, response.version, 5);
-				if (!checkversion) {
+				if (checkversion <= 0) {
 					return;
 				}
-	  			self.featureVersionManagement(response.lyrid, response.featid, response.url, self.feature);
+				self.featureVersionManagement(response.lyrid, response.featid, response.url, self.feature);
 	  		}
 	  	}, 
 	  	error: function(){}
@@ -267,7 +267,7 @@ GvsigolResourceManager.prototype.featureVersionManagement = function(lyrid, feat
 
 //Operation: 1-Create feat, 2-Update feat, 3-Delete feat, 4-Upload file, 5-Delete file
 GvsigolResourceManager.prototype.checkFeatureVersion = function(selectedLayer, featid, version, operation) {
-	var success = false;
+	var success = -1;
 	data = {
 			"featid":featid,
 			"lyrname":selectedLayer.layer_name,
@@ -288,11 +288,15 @@ GvsigolResourceManager.prototype.checkFeatureVersion = function(selectedLayer, f
 			success = true;
 		},
 		error: function(response) {
-			if(response.responseText && response.responseText != '') {
+			if(response.status == 404){
+				success = 0; //No hay servidor
+				return;
+			} else if(response.responseText && response.responseText != '') {
 				messageBox.show('error', response.responseText);
 			} else {
 				messageBox.show('error', gettext('Error validando la version'));
 			}
+			success = -1 //Error en la respuesta
 		}
 	});
 	return success;
