@@ -1486,7 +1486,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 
 			feature.setProperties(properties);
 			var checkversion = self.checkFeatureVersion(self.selectedLayer, feature.getId(), 1, 1);
-			if (!checkversion) {
+			if (checkversion < 0) {
 				return;
 			}
 			var transaction = self.transactWFS('insert', feature);
@@ -1509,7 +1509,9 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 				}
 				self.selectedLayer.getSource().updateParams({"_time": Date.now()});
 				
-				self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 1, feature, null);
+				if (checkversion > 0) {
+					self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 1, feature, null);
+				}
 				self.showLayersTab();
 			}
 			var geojson_obj = new ol.format.GeoJSON();
@@ -1944,7 +1946,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 
 			feature.setProperties(properties);
 			var checkversion = self.checkFeatureVersion(self.selectedLayer, feature.getId(), feature.getProperties().feat_version_gvol, 2);
-			if (!checkversion) {
+			if (checkversion < 0) {
 				return;
 			}
 			var transaction = self.transactWFS('update', feature);
@@ -1960,8 +1962,10 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 						});
 						uploader.startUpload();
 						//Control de versión con el tipo de operación de subir fichero
-						for(var i = 0; i < uploader.getFileCount(); i++) {
-							self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 4, feature, uploader.existingFileNames[i]);
+						if (checkversion > 0) {
+							for(var i = 0; i < uploader.getFileCount(); i++) {
+								self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 4, feature, uploader.existingFileNames[i]);
+							}
 						}
 					}
 
@@ -1971,9 +1975,11 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 				self.selectedLayer.getSource().updateParams({"_time": Date.now()});
 				self.clearFeatureBackup();
 				self.selectInteraction.getFeatures().clear();
-				if (uploader.getFileCount() <= 0) {
-					//Control de versión con el tipo de operación de subir fichero
-					self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 2, feature, null);
+				if (checkversion > 0) {
+					if (uploader.getFileCount() <= 0) {
+						//Control de versión con el tipo de operación de subir fichero
+						self.featureVersionManagement(self.selectedLayer, null, transaction.fid, 2, feature, null);
+					}
 				}
 				self.showLayersTab();
 			}
@@ -2124,10 +2130,12 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 
 		$('#remove-feature').on('click', function () {
 			var checkversion = self.checkFeatureVersion(self.selectedLayer, feature.getId(), feature.getProperties().feat_version_gvol, 3);
-			if (!checkversion) {
+			if (checkversion < 0) {
 				return;
 			}
-			self.featureVersionManagement(self.selectedLayer, null, feature.getId(), 3, feature);
+			if (checkversion > 0) {
+				self.featureVersionManagement(self.selectedLayer, null, feature.getId(), 3, feature);
+			}
 			var transaction = self.transactWFS('delete', feature);
 			if (transaction.success) {
 				var deleted = self.resourceManager.deleteResources(feature);
@@ -2384,7 +2392,7 @@ EditionBar.prototype.featureVersionManagement = function(selectedLayer, lyrid, f
 
 //Operation: 1-Create feat, 2-Update feat, 3-Delete feat, 4-Upload file, 5-Delete file
 EditionBar.prototype.checkFeatureVersion = function(selectedLayer, featid, version, operation) {
-	var success = false;
+	var success = -1;
 	data = {
 			"featid":featid,
 			"lyrname":selectedLayer.layer_name,
@@ -2402,15 +2410,20 @@ EditionBar.prototype.checkFeatureVersion = function(selectedLayer, featid, versi
 		    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},
 		success	:function(response) {
-			success = true;
+			success = 1; //OK
 		},
 		error: function(response) {
-			if(response.responseText && response.responseText != '') {
+			if(response.status == 404){
+				success = 0; //No hay servidor
+				return;
+			} else if(response.responseText && response.responseText != '') {
 				messageBox.show('error', response.responseText);
 			} else {
 				messageBox.show('error', gettext('Error validando la version'));
 			}
+			success = -1 //Error en la respuesta
 		}
 	});
+	
 	return success;
 };
