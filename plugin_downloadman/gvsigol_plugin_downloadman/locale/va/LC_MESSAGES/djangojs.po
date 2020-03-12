@@ -54,3 +54,50 @@ msgstr "S'ha produït un error en processar la sol·licitud de descàrrega. Sius
 msgid "Direct download"
 msgstr "Descàrrega directa"
 
+msgid "Requires approval"
+msgstr ""
+
+msgid "Approved"
+msgstr ""
+
+msgid "Approval"
+msgstr ""
+
+msgid "Some of the selected resources must be approved by an administrator. Please fill the following information:"
+msgstr ""
+
+msgid "Organization (optional)"
+msgstr ""
+
+msgid "Indended usage (optional)"
+msgstr ""
+
+msgid "%(number)s days"
+msgstr ""
+
+msgid "%(number)s hours"
+msgstr ""
+
+msgid "%(number)s minutes"
+msgstr ""
+
+msgid "Generic download request"
+msgstr ""
+
+msgid "Please, use this form to describe which data you need to download:"
+msgstr ""
+
+msgid "Request description"
+msgstr ""
+
+msgid "Send generic request"
+msgstr ""
+
+msgid "Send request"
+msgstr ""
+
+msgid ""
+"The limit of allowed download items per request has been reached. "
+"You can start a new request to download additional items."
+msgstr ""
+

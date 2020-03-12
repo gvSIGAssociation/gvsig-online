@@ -72,7 +72,6 @@ msgstr "Organización (opcional)"
 msgid "Indended usage (optional)"
 msgstr "Uso previsto (opcional)"
 
-
 msgid "%(number)s days"
 msgstr "%(number)s días"
 
@@ -96,4 +95,12 @@ msgstr "Enviar solicitud genérica"
 
 msgid "Send request"
 msgstr "Enviar solicitud"
+
+msgid ""
+"The limit of allowed download items per request has been reached. "
+"You can start a new request to download additional items."
+msgstr ""
+"Se ha alcanzado el límite de elementos de descarga permitidos "
+"en cada solicitud. Puede iniciar una nueva solicitud para "
+"descargar elementos adicionales."
 

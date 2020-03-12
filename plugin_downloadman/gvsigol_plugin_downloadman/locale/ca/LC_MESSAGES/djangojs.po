@@ -54,3 +54,54 @@ msgstr "S'ha produït un error en processar la sol·licitud de descàrrega. Sius
 msgid "Direct download"
 msgstr "Descàrrega directa"
 
+msgid "Requires approval"
+msgstr "Requereix aprovació"
+
+msgid "Approved"
+msgstr "Aprovat"
+
+msgid "Approval"
+msgstr "Aprovat"
+
+msgid "Some of the selected resources must be approved by an administrator. Please fill the following information:"
+msgstr "Alguns dels recursos seleccionats ha de ser aprovats per un administrador. Si us plau ompliu la següent informacio:"
+
+msgid "Organization (optional)"
+msgstr "Organització (opcional)"
+
+msgid "Indended usage (optional)"
+msgstr "Ús previst (opcional)"
+
+msgid "%(number)s days"
+msgstr "%(number)s dies"
+
+msgid "%(number)s hours"
+msgstr "%(number)s hores"
+
+msgid "%(number)s minutes"
+msgstr "%(number)s minuts"
+
+msgid "Generic download request"
+msgstr "Petició genèrica de descàrrega"
+
+msgid "Please, use this form to describe which data you need to download:"
+msgstr "Si us plau, feu servir aquest formulari per descriure quines dades necessites descarregar:"
+
+msgid "Request description"
+msgstr "Descripció de la petició"
+
+msgid "Send generic request"
+msgstr "Enviar petició genèrica"
+
+msgid "Send request"
+msgstr "Enviar petició"
+
+msgid ""
+"The limit of allowed download items per request has been reached. "
+"You can start a new request to download additional items."
+msgstr ""
+"S'ha arribat al límit d'elements de descàrrega permesos "
+"en cada sol·licitud. Pot iniciar una nova sol·licitud per a"
+"descarregar elements addicionals."
+
+

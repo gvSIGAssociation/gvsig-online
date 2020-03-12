@@ -93,3 +93,9 @@ msgstr ""
 
 msgid "Send request"
 msgstr ""
+
+msgid ""
+"The limit of allowed download items per request has been reached. "
+"You can start a new request to download additional items."
+msgstr ""
+

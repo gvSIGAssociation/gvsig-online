@@ -15,42 +15,87 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 msgid "Add to download list"
-msgstr "Add to download list"
+msgstr ""
 
 msgid "No results found"
-msgstr "No results found"
+msgstr ""
 
 msgid "View download list"
-msgstr "View download list"
+msgstr ""
 
 msgid "Available downloads"
-msgstr "Available downloads"
+msgstr ""
 
 msgid "The list of downloads could not be retrieved. Try again later or contact the service administrator if the error persists"
-msgstr "The list of downloads could not be retrieved. Try again later or contact the service administrator if the error persists"
+msgstr ""
 
 msgid "Email"
-msgstr "Email"
+msgstr ""
 
 msgid "No layers have been selected for download"
-msgstr "No layers have been selected for download"
+msgstr ""
 
 msgid "List of downloads"
-msgstr "List of downloads"
+msgstr ""
 
 msgid "Start downloading"
-msgstr "Start downloading"
+msgstr ""
 
 msgid ""
 "Your download request has been registered. You will receive an email when your request is ready for download. "
 "You can also use this tracking link to check the status of your request: "
 msgstr ""
-"Your download request has been registered. You will receive an email when your request is ready for download. "
-"You can also use this tracking link to check the status of your request: "
 
 msgid "There was an error processing your download request. Please, try again later"
-msgstr "There was an error processing your download request. Please, try again later"
+msgstr ""
 
 msgid "Direct download"
-msgstr "Direct download"
+msgstr ""
+
+msgid "Requires approval"
+msgstr ""
+
+msgid "Approved"
+msgstr ""
+
+msgid "Approval"
+msgstr ""
+
+msgid "Some of the selected resources must be approved by an administrator. Please fill the following information:"
+msgstr ""
+
+msgid "Organization (optional)"
+msgstr ""
+
+msgid "Indended usage (optional)"
+msgstr ""
+
+msgid "%(number)s days"
+msgstr ""
+
+msgid "%(number)s hours"
+msgstr ""
+
+msgid "%(number)s minutes"
+msgstr ""
+
+msgid "Generic download request"
+msgstr ""
+
+msgid "Please, use this form to describe which data you need to download:"
+msgstr ""
+
+msgid "Request description"
+msgstr ""
+
+msgid "Send generic request"
+msgstr ""
+
+msgid "Send request"
+msgstr ""
+
+msgid ""
+"The limit of allowed download items per request has been reached. "
+"You can start a new request to download additional items."
+msgstr ""
 

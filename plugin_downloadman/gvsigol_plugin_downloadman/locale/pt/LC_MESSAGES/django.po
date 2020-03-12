@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-09 13:28+0000\n"
+"POT-Creation-Date: 2020-03-11 16:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,227 +20,236 @@ msgstr ""
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
 
-#: models.py:40
+#: models.py:42
 msgid "Request queued"
 msgstr ""
 
-#: models.py:41
+#: models.py:43
 msgid "Processing request"
 msgstr ""
 
-#: models.py:42
+#: models.py:44 templates/download_request_update.html:88
 msgid "Completed"
 msgstr ""
 
-#: models.py:43
+#: models.py:45
 msgid "Completed with errors"
 msgstr ""
 
-#: models.py:44
-msgid "Error queueing request"
+#: models.py:46 models.py:249
+msgid "Rejected"
 msgstr ""
 
 #: models.py:47
-msgid "Initial notification completed"
-msgstr ""
-
-#: models.py:48
-msgid "Notification completed"
-msgstr ""
-
-#: models.py:49
-msgid "Notification error"
+msgid "Error queueing request"
 msgstr ""
 
 #: models.py:50
+msgid "Initial notification completed"
+msgstr ""
+
+#: models.py:51
+msgid "Notification completed"
+msgstr ""
+
+#: models.py:52
+msgid "Notification error"
+msgstr ""
+
+#: models.py:53
 msgid "Permanent notification error"
 msgstr ""
 
-#: models.py:76
+#: models.py:81
 msgid "Active"
 msgstr ""
 
-#: models.py:78
+#: models.py:83
 msgid "Archived"
 msgstr ""
 
-#: models.py:82 templates/downman_index.html:28 templates/downman_index.html:30
+#: models.py:87 templates/downman_index.html:28 templates/downman_index.html:30
 #, fuzzy
 #| msgid "Pending authorization"
-msgid "Awaiting authorization"
+msgid "Awaiting approval"
 msgstr "Autorização pendente"
 
-#: models.py:111 tasks.py:723 tasks.py:726 views.py:545 views.py:551
+#: models.py:119 tasks.py:939 tasks.py:942 views.py:575 views.py:581
 msgid "Multiresource package"
 msgstr ""
 
-#: models.py:146
+#: models.py:154
 msgid "Processed #sing#"
 msgstr ""
 
-#: models.py:147
+#: models.py:155
 msgid "Cancelled by the user"
 msgstr ""
 
-#: models.py:148
+#: models.py:156
 msgid "Cancelled by the administrator"
 msgstr ""
 
-#: models.py:163 models.py:224
+#: models.py:171 models.py:233
 msgid "Processed"
 msgstr ""
 
-#: models.py:165 models.py:251
+#: models.py:173 models.py:260
 msgid "Canceled"
 msgstr ""
 
-#: models.py:167 views.py:527
+#: models.py:175 views.py:557
 msgid "Expired"
 msgstr ""
 
-#: models.py:222
+#: models.py:231
 #, fuzzy
 #| msgid "Resource "
 msgid "Resource queued"
 msgstr "Recurso "
 
-#: models.py:223
+#: models.py:232
 msgid "Queued, waiting for free space"
 msgstr ""
 
-#: models.py:225
+#: models.py:234
 msgid "On hold"
 msgstr ""
 
-#: models.py:226
+#: models.py:235
 msgid "Temporal error"
 msgstr ""
 
-#: models.py:227
+#: models.py:236
 msgid "Permanent error"
 msgstr ""
 
-#: models.py:236
+#: models.py:245
 msgid "Not processed"
 msgstr ""
 
-#: models.py:237
+#: models.py:246
 msgid "Not required"
 msgstr ""
 
-#: models.py:238
+#: models.py:247
 msgid "Pending"
 msgstr ""
 
-#: models.py:239
+#: models.py:248
 msgid "Accepted"
 msgstr ""
 
-#: models.py:240
-msgid "Rejected"
+#: models.py:270
+msgid "Approval: "
 msgstr ""
 
-#: models.py:261
-#| msgid "Pending authorization"
-msgid "Authorization: "
-msgstr "Autorização: "
-
-#: tasks.py:630
+#: tasks.py:847 tasks.py:1010
 #, fuzzy, python-format
 #| msgid "Download service: your request has failed - %(requestid)s"
 msgid "Download service: your request has been received - %(requestid)s"
 msgstr "Serviço de download: o seu pedido falhou - %(requestid)s"
 
-#: tasks.py:631
+#: tasks.py:848
 #, python-brace-format
 msgid ""
 "\n"
 "You can use this tracking link to check the status of your request: {0}"
 msgstr ""
 
-#: tasks.py:637
+#: tasks.py:854
 #, fuzzy
 #| msgid "Sorry, your download request has been rejected."
 msgid "Your download request has been received."
 msgstr "Desculpe, o seu pedido de descarga foi rejeitado."
 
-#: tasks.py:639 templates/request_received_email.html:14
+#: tasks.py:856 templates/request_received_email.html:14
 msgid "Included resources:"
 msgstr ""
 
-#: tasks.py:687 tasks.py:690
+#: tasks.py:903 tasks.py:906
 #, python-format
 msgid "Download service: your request is ready - %(requestid)s"
 msgstr "Serviço de download: o seu pedido está pronto - %(requestid)s"
 
-#: tasks.py:688
+#: tasks.py:904
 #, fuzzy
 #| msgid "Your download request is being prepared."
 msgid "Your download request is ready."
 msgstr "Seu pedido de descarga está sendo preparado."
 
-#: tasks.py:691
+#: tasks.py:907
 msgid ""
 "Your download request is ready. Some resources failed to be processed and "
 "are not available for download at the moment."
 msgstr ""
 
-#: tasks.py:693
+#: tasks.py:909
 #, fuzzy, python-format
 #| msgid "Download service: your request is ready - %(requestid)s"
 msgid "Download service: request progress - %(requestid)s"
 msgstr "Serviço de download: o seu pedido está pronto - %(requestid)s"
 
-#: tasks.py:694
+#: tasks.py:910
 #, fuzzy
 #| msgid "Your download request is being prepared."
 msgid "Your download request has been partially processed."
 msgstr "Seu pedido de descarga está sendo preparado."
 
-#: tasks.py:697 templates/progress_notif_email.html:14
+#: tasks.py:913 templates/progress_notif_email.html:14
 msgid "You can use the following links to download the requested resources:"
 msgstr ""
 
-#: tasks.py:700
+#: tasks.py:916
 #, fuzzy, python-brace-format
 #| msgid "Download service: your request is ready - %(requestid)s"
 msgid "Download service: request progress - {0}"
 msgstr "Serviço de download: o seu pedido está pronto - %(requestid)s"
 
-#: tasks.py:724
+#: tasks.py:940
 msgid "    -- Link valid until {0!s}:\n"
 msgstr ""
 
-#: tasks.py:725
+#: tasks.py:941
 msgid "    -- Contents:"
 msgstr ""
 
-#: tasks.py:730
+#: tasks.py:946
 msgid "     -- {0!s} [{1!s}]\n"
 msgstr ""
 
-#: tasks.py:731
+#: tasks.py:947
 msgid "{0!s} [{1!s}]\n"
 msgstr ""
 
-#: tasks.py:738 templates/progress_notif_email.html:35
+#: tasks.py:954 templates/progress_notif_email.html:35
 msgid "The following resources are still being processed:"
 msgstr ""
 
-#: tasks.py:741 tasks.py:750
+#: tasks.py:957 tasks.py:966
 msgid "Status:"
 msgstr ""
 
-#: tasks.py:747 templates/progress_notif_email.html:47
+#: tasks.py:963 templates/progress_notif_email.html:47
 #, fuzzy
 #| msgid "Your download request could not be processed."
 msgid "The following resources could not be processed:"
 msgstr "O seu pedido de download não pôde ser processado."
 
-#: tasks.py:753 templates/progress_notif_email.html:58
+#: tasks.py:969 tasks.py:1017 templates/progress_notif_email.html:58
 msgid ""
 "You can also use this tracking link to check the status of your request:"
 msgstr ""
+
+#: tasks.py:1011
+msgid "Our team will contact you when your request has been analysed."
+msgstr ""
+
+#: tasks.py:1014
+#, fuzzy, python-brace-format
+#| msgid "Download service: your request is ready - %(requestid)s"
+msgid "Download service: received request - {0}"
+msgstr "Serviço de download: o seu pedido está pronto - %(requestid)s"
 
 #: templates/dashboard_downloadman_menu.html:10
 #: templates/dashboard_downloadman_menu.html:18
@@ -253,159 +262,210 @@ msgstr "Serviço de descarga"
 msgid "Plugins"
 msgstr ""
 
-#: templates/download_request_update.html:31 templates/downman_index.html:65
+#: templates/download_request_update.html:10
+#, fuzzy
+#| msgid "Download request: "
+msgid "Download request"
+msgstr "Solicitação de descarga: "
+
+#: templates/download_request_update.html:36 templates/downman_index.html:65
 msgid "User"
 msgstr ""
 
-#: templates/download_request_update.html:35
+#: templates/download_request_update.html:40
 msgid "Internal user"
 msgstr ""
 
-#: templates/download_request_update.html:38
+#: templates/download_request_update.html:43
 msgid "External user"
 msgstr ""
 
-#: templates/download_request_update.html:43 templates/downman_index.html:63
+#: templates/download_request_update.html:48 templates/downman_index.html:63
 msgid "Date"
 msgstr ""
 
-#: templates/download_request_update.html:47
-#: templates/download_request_update.html:96
-#: templates/download_request_update.html:141 templates/downman_index.html:64
-#: templates/track_request.html:52
+#: templates/download_request_update.html:52
+#: templates/download_request_update.html:141
+#: templates/download_request_update.html:186 templates/downman_index.html:64
+#: templates/track_request.html:70
 msgid "Status"
 msgstr ""
 
-#: templates/download_request_update.html:53
+#: templates/download_request_update.html:58
 msgid "Random ID"
 msgstr ""
 
-#: templates/download_request_update.html:57
+#: templates/download_request_update.html:62
 msgid "Tracking URL"
 msgstr ""
 
-#: templates/download_request_update.html:74
+#: templates/download_request_update.html:73 templates/track_request.html:50
+msgid "Generic request"
+msgstr ""
+
+#: templates/download_request_update.html:78
+msgid "Approval status"
+msgstr ""
+
+#: templates/download_request_update.html:81
+msgid "Do you want to approve the request?"
+msgstr ""
+
+#: templates/download_request_update.html:94 templates/track_request.html:55
+#, fuzzy
+#| msgid "Resource "
+msgid "Request description"
+msgstr "Recurso "
+
+#: templates/download_request_update.html:101
+msgid "Approval request"
+msgstr ""
+
+#: templates/download_request_update.html:107
 msgid "Indended usage"
 msgstr ""
 
-#: templates/download_request_update.html:80
+#: templates/download_request_update.html:113 templates/track_request.html:59
 msgid "Organization"
 msgstr ""
 
-#: templates/download_request_update.html:88
+#: templates/download_request_update.html:120
+#, fuzzy
+#| msgid "Resource "
+msgid "Requested area"
+msgstr "Recurso "
+
+#: templates/download_request_update.html:133
 #, fuzzy
 #| msgid "Download service"
 msgid "Download links"
 msgstr "Serviço de descarga"
 
-#: templates/download_request_update.html:97 templates/track_request.html:52
+#: templates/download_request_update.html:142 templates/track_request.html:70
 msgid "Valid to"
 msgstr ""
 
-#: templates/download_request_update.html:98
-#: templates/download_request_update.html:146
+#: templates/download_request_update.html:143
+#: templates/download_request_update.html:191
 #, fuzzy
 #| msgid "Download service"
 msgid "Downloaded"
 msgstr "Serviço de descarga"
 
-#: templates/download_request_update.html:99 templates/downman_index.html:66
+#: templates/download_request_update.html:144 templates/downman_index.html:66
 msgid "Contents"
 msgstr ""
 
-#: templates/download_request_update.html:100
+#: templates/download_request_update.html:145
 msgid "Public Link"
 msgstr ""
 
-#: templates/download_request_update.html:101
+#: templates/download_request_update.html:146
 msgid "Internal link"
 msgstr ""
 
-#: templates/download_request_update.html:134
+#: templates/download_request_update.html:179
 msgid "Requested resources"
 msgstr ""
 
-#: templates/download_request_update.html:142 templates/track_request.html:52
-#| msgid "Pending authorization"
-msgid "Authorization"
-msgstr "Autorização"
+#: templates/download_request_update.html:187 templates/track_request.html:70
+msgid "Approval"
+msgstr ""
 
-#: templates/download_request_update.html:143
+#: templates/download_request_update.html:188
 #, fuzzy
 #| msgid "Resource "
 msgid "Resource description"
 msgstr "Recurso "
 
-#: templates/download_request_update.html:144
+#: templates/download_request_update.html:189
 msgid "Layer id"
 msgstr ""
 
-#: templates/download_request_update.html:145
+#: templates/download_request_update.html:190
 msgid "Type"
 msgstr ""
 
-#: templates/download_request_update.html:147
+#: templates/download_request_update.html:192
 msgid "Disable"
 msgstr ""
 
-#: templates/download_request_update.html:186
+#: templates/download_request_update.html:232
 msgid "Disable resource"
 msgstr ""
 
-#: templates/download_request_update.html:189
+#: templates/download_request_update.html:235
 msgid ""
 "The resource [<span id=\"disabled-resource\"></span>] will not be available "
 "for the user who requested the download. Do you want to continue?"
 msgstr ""
 
-#: templates/download_request_update.html:192
-#: templates/download_request_update.html:212
-#: templates/download_request_update.html:232
-#: templates/download_request_update.html:252
+#: templates/download_request_update.html:238
+#: templates/download_request_update.html:258
+#: templates/download_request_update.html:278
+#: templates/download_request_update.html:298
+#: templates/download_request_update.html:318
+#: templates/download_request_update.html:338
 msgid "Cancel"
 msgstr ""
 
-#: templates/download_request_update.html:193
-#: templates/download_request_update.html:213
-#: templates/download_request_update.html:233
-#: templates/download_request_update.html:253
+#: templates/download_request_update.html:239
+#: templates/download_request_update.html:259
+#: templates/download_request_update.html:279
+#: templates/download_request_update.html:299
+#: templates/download_request_update.html:319
+#: templates/download_request_update.html:339
 msgid "Accept"
 msgstr ""
 
-#: templates/download_request_update.html:206
+#: templates/download_request_update.html:252
 msgid "Disable download link"
 msgstr ""
 
-#: templates/download_request_update.html:209
+#: templates/download_request_update.html:255
 msgid ""
 "The link [<span id=\"disabled-link\"></span>] and the related resources will "
 "not be available for the user who requested the download. Do you want to "
 "continue?"
 msgstr ""
 
-#: templates/download_request_update.html:226
-msgid "Authorize access to a restricted resource"
+#: templates/download_request_update.html:272
+msgid "Approve access to a restricted resource"
 msgstr ""
 
-#: templates/download_request_update.html:229
+#: templates/download_request_update.html:275
 msgid ""
 "The user will get access to a restricted resource [ID <span id=\"authorized-"
 "resource\"></span>]. Do you want to continue?"
 msgstr ""
 
-#: templates/download_request_update.html:246
-#, fuzzy
-#| msgid "Pending authorization"
-msgid "Reject authorization"
-msgstr "Autorização pendente"
+#: templates/download_request_update.html:292
+msgid "Reject approval"
+msgstr ""
 
-#: templates/download_request_update.html:249
+#: templates/download_request_update.html:295
 msgid ""
 "The resource [<span id=\"rejected-resource\"></span>] will not be available "
 "for the user who requested the download. Do you want to continue?"
 msgstr ""
 
-#: templates/download_request_update.html:262
+#: templates/download_request_update.html:312
+msgid "Complete request"
+msgstr ""
+
+#: templates/download_request_update.html:315
+msgid "The request will be tagged as completed. Do you want to continue?"
+msgstr ""
+
+#: templates/download_request_update.html:332
+msgid "Reject request"
+msgstr ""
+
+#: templates/download_request_update.html:335
+msgid "The request will be tagged as rejected. Do you want to continue?"
+msgstr ""
+
+#: templates/download_request_update.html:348
 msgid "Close"
 msgstr ""
 
@@ -413,11 +473,11 @@ msgstr ""
 msgid "Download service"
 msgstr "Serviço de descarga"
 
-#: templates/downman_error_page.html:56 templates/track_request.html:80
+#: templates/downman_error_page.html:56 templates/track_request.html:98
 msgid "Version"
 msgstr "Versão"
 
-#: templates/downman_error_page.html:60 templates/track_request.html:84
+#: templates/downman_error_page.html:60 templates/track_request.html:102
 msgid "All rights reserved"
 msgstr "Todos os direitos reservados"
 
@@ -450,71 +510,75 @@ msgid "Default validity (seconds)"
 msgstr ""
 
 #: templates/downman_index.html:108
-msgid "Maximum size for public downloads (bytes)"
+msgid "Maximum size for public downloads (MB)"
 msgstr ""
 
-#: templates/downman_index.html:118
+#: templates/downman_index.html:117
+msgid "Maximum number of allowed items in the download list"
+msgstr ""
+
+#: templates/downman_index.html:124
 msgid "Save"
 msgstr ""
 
-#: templates/downman_index.html:143
+#: templates/downman_index.html:149
 msgid "Processing request..."
 msgstr ""
 
-#: templates/downman_index.html:144
+#: templates/downman_index.html:150
 #, python-format
 msgid "Search%(sep)s"
 msgstr ""
 
-#: templates/downman_index.html:145
+#: templates/downman_index.html:151
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr ""
 
-#: templates/downman_index.html:146
+#: templates/downman_index.html:152
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr ""
 
-#: templates/downman_index.html:147
+#: templates/downman_index.html:153
 msgid "Showing from 0 to 0 of 0 records"
 msgstr ""
 
-#: templates/downman_index.html:148
+#: templates/downman_index.html:154
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr ""
 
-#: templates/downman_index.html:150
+#: templates/downman_index.html:156
 msgid "Loading..."
 msgstr ""
 
-#: templates/downman_index.html:151 templates/downman_index.html:152
+#: templates/downman_index.html:157 templates/downman_index.html:158
 msgid "No records available"
 msgstr ""
 
-#: templates/downman_index.html:154
+#: templates/downman_index.html:160
 msgid "First"
 msgstr ""
 
-#: templates/downman_index.html:155
+#: templates/downman_index.html:161
 msgid "Previous"
 msgstr ""
 
-#: templates/downman_index.html:156
+#: templates/downman_index.html:162
 msgid "Next"
 msgstr ""
 
-#: templates/downman_index.html:157
+#: templates/downman_index.html:163
 msgid "Last"
 msgstr ""
 
-#: templates/downman_index.html:160
+#: templates/downman_index.html:166
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr ""
 
-#: templates/downman_index.html:161
+#: templates/downman_index.html:167
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr ""
@@ -540,86 +604,109 @@ msgstr ""
 msgid "Status: "
 msgstr ""
 
-#: templates/track_request.html:49
+#: templates/track_request.html:52
+#, fuzzy
+#| msgid "Your download request is being prepared."
+msgid "The request has to be analysed and processed."
+msgstr "Seu pedido de descarga está sendo preparado."
+
+#: templates/track_request.html:63
+msgid "Intended usage"
+msgstr ""
+
+#: templates/track_request.html:68
 #, fuzzy
 #| msgid "Resource "
 msgid "Requested resources: "
 msgstr "Recurso "
 
-#: templates/track_request.html:52
+#: templates/track_request.html:70
 msgid "Name"
 msgstr ""
 
-#: templates/track_request.html:52
+#: templates/track_request.html:70
 msgid "URL"
 msgstr ""
 
-#: templates/track_request.html:72
+#: templates/track_request.html:90
 msgid "Download request: "
 msgstr "Solicitação de descarga: "
 
-#: views.py:180
+#: views.py:182
 msgid "File format"
 msgstr "Formato do arquivo"
 
-#: views.py:187
+#: views.py:189
 msgid "Spatial filter"
 msgstr ""
 
-#: views.py:282 views.py:287
-msgid "Do not filter output"
-msgstr ""
-
-#: views.py:283
+#: views.py:284
 msgid ""
 "Include only geometries that intersect the bounding box of the selected area"
 msgstr ""
 
-#: views.py:288
+#: views.py:285 views.py:290
+msgid "Do not filter output"
+msgstr ""
+
+#: views.py:289
 msgid "Trim result using the bounding box of the selected area"
 msgstr ""
 
-#: views.py:318 views.py:411
+#: views.py:321 views.py:417
 msgid "Vector data"
 msgstr "Dados vectoriais"
 
-#: views.py:330 views.py:340 views.py:408
+#: views.py:333 views.py:343 views.py:414
 msgid "Raster data"
 msgstr "Dados rasterizados"
 
-#: views.py:532
-msgid "Authorized"
+#: views.py:562
+msgid "Approved"
 msgstr ""
 
-#: views.py:594
+#: views.py:625
 msgid "Your download request could not be found"
 msgstr "O seu pedido de descarga não pôde ser encontrado"
 
-#: views.py:632
+#: views.py:663
 #, fuzzy
 #| msgid "Your download request is being prepared."
 msgid "Your download request has expired"
 msgstr "Seu pedido de descarga está sendo preparado."
 
-#: views.py:632 views.py:634
+#: views.py:663 views.py:665
 msgid "You can start a new request using the Download Service"
 msgstr ""
 
-#: views.py:634
+#: views.py:665
 #, fuzzy
 #| msgid "Your download request is being prepared."
 msgid "Your download request has been cancelled"
 msgstr "Seu pedido de descarga está sendo preparado."
 
-#: views.py:686
+#: views.py:717
 #, fuzzy
 #| msgid "Your download request could not be found"
 msgid "The resource could not be found"
 msgstr "O seu pedido de descarga não pôde ser encontrado"
 
-#: views.py:686
+#: views.py:717
 msgid "Contact the service administrators if you believe this is an error"
 msgstr ""
+
+#~| msgid "Pending authorization"
+#~ msgid "Authorization: "
+#~ msgstr "Autorização: "
+
+#~| msgid "Pending authorization"
+#~ msgid "Authorization"
+#~ msgstr "Autorização"
+
+#, fuzzy
+#~| msgid "Pending authorization"
+#~ msgid "Reject authorization"
+#~ msgstr "Autorização pendente"
 
 #~ msgid ""
 #~ "Your download request is ready. You can download it in the following "
