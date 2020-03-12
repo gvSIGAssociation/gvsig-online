@@ -35,9 +35,13 @@ gvsigol.downman.LayerDownloadDescriptor = function(download_res_id, resource_des
 }
 
 DownloadManagerClient = function(config) {
-	this.config = config || {};
-	this.config.baseQueryUrl = this.config.queryUrl || '/gvsigonline/downloadmanager/';
-	this.config.timeout = this.config.timeout || 20000;
+	this.setConfig = function(theConfig) {
+		this.config = theConfig || {};
+		this.config.baseQueryUrl = this.config.queryUrl || '/gvsigonline/downloadmanager/';
+		this.config.timeout = this.config.timeout || 20000;
+		this.config.shopping_cart_max_items = this.config.shopping_cart_max_items || 0;
+	};
+	this.setConfig(config);
 	this.nextDescriptorId = 0;
 	this.layerList = [];
 }
@@ -216,6 +220,10 @@ DownloadManagerClient.prototype.getDownloadListCount = function(){
 DownloadManagerClient.prototype.clearDownloadList = function(){
 	this.layerList.splice(0);
 	this.downloadListUpdated();
+}
+
+DownloadManagerClient.prototype.getConfig = function(){
+	return this.config;
 }
 
 
@@ -452,6 +460,12 @@ DownloadManagerUI.prototype.initAvailableResources = function(downloadResources)
 		self.showDownloadList();
 	});
 	$(".add-to-download-btn").unbind("click").click(function(event){
+		
+		if (self.getClient().getConfig().shopping_cart_max_items > 0 &&
+			self.getClient().getDownloadListCount() >= self.getClient().getConfig().shopping_cart_max_items) {
+			messageBox.show('warning', gettext('The limit of allowed download items per request has been reached. You can start a new request to download additional items.'));
+			return;
+		}
 		var layer_id = event.currentTarget.getAttribute("data-layerid");
 		
 		var resource_name = event.currentTarget.getAttribute("data-resourcename");

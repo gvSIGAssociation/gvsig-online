@@ -33,7 +33,7 @@ from django.db.models import Q
 from collections import namedtuple
 from django.views.decorators.http import require_POST, require_GET, require_safe
 from gvsigol_core.models import GolSettings
-from gvsigol_plugin_downloadman.models import SETTINGS_KEY_VALIDITY, SETTINGS_KEY_MAX_PUBLIC_DOWNLOAD_SIZE
+from gvsigol_plugin_downloadman.models import SETTINGS_KEY_VALIDITY, SETTINGS_KEY_MAX_PUBLIC_DOWNLOAD_SIZE, SETTINGS_KEY_SHOPPING_CART_MAX_ITEMS
 import apps
 from django.http.response import Http404
 import gvsigol_core
@@ -498,7 +498,11 @@ def requestDownload(request):
                 downRequest.request_random_id = date.today().strftime("%Y%m%d") + get_random_string(length=32)
                 downRequest.json_request = request.body.decode("UTF-8")
                 tracking_url = reverse('download-request-tracking', args=(downRequest.request_random_id,))
-                if len(json_data.get('resources', [])) == 0 and json_data.get('request_desc'):
+                resources = json_data.get('resources', [])
+                if downman_models.get_shopping_cart_max_items()>0 and len(resources) > downman_models.get_shopping_cart_max_items():
+                    return JsonResponse({"status": "error", 'error_message': "Invalid request"})
+                
+                if len(resources) == 0 and json_data.get('request_desc'):
                     downRequest.pending_authorization = True
                     downRequest.generic_request = True
                     shared_view_state = json_data.get('shared_view_state')
@@ -719,7 +723,8 @@ def render_settings(request):
         'activetab': "settings",
         'archived_class': "",
         'validity': downman_models.get_default_validity(),
-        'max_public_download_size': downman_models.get_max_public_download_size()
+        'max_public_download_size': downman_models.get_max_public_download_size(),
+        'shopping_cart_max_items': downman_models.get_shopping_cart_max_items()
     }
     return render(request, 'downman_index.html', response)
 
@@ -788,8 +793,10 @@ def update_request(request, request_id):
 def settings_store(request):
     validity = int(request.POST.get('validity'))
     max_public_download_size = int(request.POST.get('max_public_download_size'))
+    shopping_cart_max_items =  int(request.POST.get('shopping_cart_max_items'))
     GolSettings.objects.set_value(apps.PLUGIN_NAME, SETTINGS_KEY_VALIDITY, validity)
-    GolSettings.objects.set_value(apps.PLUGIN_NAME, SETTINGS_KEY_MAX_PUBLIC_DOWNLOAD_SIZE, max_public_download_size) 
+    GolSettings.objects.set_value(apps.PLUGIN_NAME, SETTINGS_KEY_MAX_PUBLIC_DOWNLOAD_SIZE, max_public_download_size)
+    GolSettings.objects.set_value(apps.PLUGIN_NAME, SETTINGS_KEY_SHOPPING_CART_MAX_ITEMS, shopping_cart_max_items)
     return redirect(reverse('downman-dashboard-index') + "?tab=settings")
 
 @require_POST
@@ -918,3 +925,9 @@ def reject_generic_request(request, request_id):
     except:
         logger.exception("Error")
         raise Http404
+
+def get_conf(request):
+    response = {
+        "shopping_cart_max_items": downman_models.get_shopping_cart_max_items()
+        }
+    return JsonResponse(response)

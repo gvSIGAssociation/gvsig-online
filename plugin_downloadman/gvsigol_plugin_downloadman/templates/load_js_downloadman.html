@@ -10,9 +10,25 @@
 if (viewer.core.ifToolInConf('gvsigol_plugin_downloadman')) {
 	
 	var config = {
-		queryUrl: "{% url 'download_manager_base' %}"
+		queryUrl: "{% url 'download_manager_base' %}",
+		shopping_cart_max_items: 0,
 	};
 	var client = new DownloadManagerClient(config);
+	$.ajax({
+		type : 'POST',
+		async : false,
+		url : "{% url 'download_manager_getconf' %}",
+		beforeSend : function(xhr) {
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+		success : function(response) {
+			config.shopping_cart_max_items = response.shopping_cart_max_items;
+			client.setConfig(config);
+		},
+		error : function() {
+			console.log(gettext('Error loading download manager conf'));
+		}
+	});
 	var clientUI = new DownloadManagerUI();
 	clientUI.setClient(client);
 	viewer.core.downloadManager = clientUI;

@@ -14,7 +14,8 @@ SETTINGS_KEY_VALIDITY = 'default_link_validity'
 DEFAULT_VALIDITY = 604800 # seconds = 7 days
 SETTINGS_KEY_MAX_PUBLIC_DOWNLOAD_SIZE = 'max_public_download_size'
 DEFAULT_MAX_PUBLIC_DOWNLOAD_SIZE = 300 # MB
-
+SETTINGS_KEY_SHOPPING_CART_MAX_ITEMS = 'shopping_cart_max_items'
+DEFAULT_SHOPPING_CART_MAX_ITEMS = 0 # means no limit
 
 class AuthorizationRequestForm(models.Model):
     definition = models.TextField()
@@ -343,6 +344,8 @@ def get_default_validity():
 def get_max_public_download_size():
     return GolSettings.objects.get_value(apps.PLUGIN_NAME, SETTINGS_KEY_MAX_PUBLIC_DOWNLOAD_SIZE, DEFAULT_MAX_PUBLIC_DOWNLOAD_SIZE)
 
+def get_shopping_cart_max_items():
+    return int(GolSettings.objects.get_value(apps.PLUGIN_NAME, SETTINGS_KEY_SHOPPING_CART_MAX_ITEMS, DEFAULT_SHOPPING_CART_MAX_ITEMS))
 
 def get_packaging_max_retry_time():
     # TODO: we could get it for a settings entry, or a settings table in DB

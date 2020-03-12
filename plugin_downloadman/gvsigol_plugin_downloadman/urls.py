@@ -22,4 +22,5 @@ urlpatterns = [
     url(r'^downloadmanager/resource-authorization/(?P<resource_id>[\-a-zA-Z0-9]+)/reject/$', downman_views.reject_resource_authorization, name='resource-authorization-reject'),
     url(r'^downloadmanager/generic-request/(?P<request_id>[\-a-zA-Z0-9]+)/completed/$', downman_views.complete_generic_request, name='generic-request-completed'),
     url(r'^downloadmanager/generic-request/(?P<request_id>[\-a-zA-Z0-9]+)/rejected/$', downman_views.reject_generic_request, name='generic-request-rejected'),
+    url(r'^downloadmanager/get_conf/$', downman_views.get_conf, name='download_manager_getconf'),
 ]
