@@ -2422,6 +2422,7 @@ EditionBar.prototype.checkFeatureVersion = function(selectedLayer, featid, versi
 				messageBox.show('error', gettext('Error validando la version'));
 			}
 			success = -1 //Error en la respuesta
+			return;
 		}
 	});
 	
