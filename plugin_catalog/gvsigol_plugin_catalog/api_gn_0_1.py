@@ -223,10 +223,11 @@ class Geonetwork():
             }
             
             for operation in response2:
-                value = False
-                if (operation['name'] == "view" or operation['name'] == "notify") and idx == 1:
-                    value = True
-                privi_group['operations'][operation['name']] = value
+                if operation['name'] == "view" or operation['name'] == "dynamic" or operation['name'] == "download":
+                    allowOperation = True
+                else:
+                    allowOperation = False
+                privi_group['operations'][operation['name']] = allowOperation
 
             privileges["privileges"].append(privi_group)
         
@@ -239,6 +240,7 @@ class Geonetwork():
             
             #Otros grupos
             for group in response:
+                logger.debug(group)
                 privi_group = {
                     "operations": {
                         },
@@ -246,10 +248,11 @@ class Geonetwork():
                 }
                 
                 for operation in response2:
-                    value = False
-                    if (operation['name'] == "view" or operation['name'] == "edit" or operation['name'] == "download"):
-                        value = True
-                    privi_group['operations'][operation['name']] = value
+                    if operation['name'] == "view" or operation['name'] == "dynamic" or operation['name'] == "download":
+                        allowOperation = True
+                    else:
+                        allowOperation = False
+                    privi_group['operations'][operation['name']] = allowOperation
     
                 privileges["privileges"].append(privi_group)
         
