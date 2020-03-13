@@ -285,7 +285,7 @@ GvsigolResourceManager.prototype.checkFeatureVersion = function(selectedLayer, f
 		    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 		},
 		success	:function(response) {
-			success = true;
+			success = 1;//OK
 		},
 		error: function(response) {
 			if(response.status == 404){
@@ -297,6 +297,7 @@ GvsigolResourceManager.prototype.checkFeatureVersion = function(selectedLayer, f
 				messageBox.show('error', gettext('Error validando la version'));
 			}
 			success = -1 //Error en la respuesta
+			return;
 		}
 	});
 	return success;
