@@ -48,6 +48,7 @@ var CloseDrawControl = function(map, drawBar, pointLayer, lineLayer, polygonLaye
 			$('#get-feature-info').attr("disabled", false);
 			$('#get-feature-info').css("cursor", "pointer");
 			this.toggle();
+			viewer.core.setActiveToolbar(null);
 		}
 	});
 	drawBar.addControl(this.control);
@@ -64,5 +65,6 @@ CloseDrawControl.prototype.close = function(e) {
 	
 	$('#get-feature-info').attr("disabled", false);
 	$('#get-feature-info').css("cursor", "pointer");
+	viewer.core.setActiveToolbar(null);
 
 };
