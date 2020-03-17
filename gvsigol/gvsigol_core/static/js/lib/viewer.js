@@ -73,10 +73,6 @@ viewer.core = {
     _authenticate: function() {
     	var self = this;
     	
-    	var authenticateCallback = function(json) {
-    		alert();
-    	};
-      
     	for (var i=0; i<self.conf.auth_urls.length; i++) {
     		$.ajax({
     			url: self.conf.auth_urls[i],
@@ -85,9 +81,9 @@ viewer.core = {
     				'VERSION': '1.1.1',
     				'REQUEST': 'GetCapabilities'
     			},
-    			async: false,
-    			dataType: 'jsonp',
-    			jsonpCallback: "authenticateCallback",
+    			async: true,
+    			//dataType: 'jsonp',
+    			//jsonpCallback: "authenticateCallback",
     			method: 'GET',
     			headers: {
     				"Authorization": "Basic " + btoa(self.conf.user.credentials.username + ":" + self.conf.user.credentials.password)
