@@ -41,6 +41,7 @@ var CloseSelectControl = function(map, toolbar) {
 			$('#get-feature-info').attr("disabled", false);
 			$('#get-feature-info').css("cursor", "pointer");
 			this.toggle();
+			viewer.core.setActiveToolbar(null);
 		}
 	});
 	toolbar.addControl(this.control);
@@ -54,5 +55,6 @@ CloseSelectControl.prototype.close = function(e) {
 	this.map.removeControl(this.toolbar);
 	$('#get-feature-info').attr("disabled", false);
 	$('#get-feature-info').css("cursor", "pointer");
+	viewer.core.setActiveToolbar(null);
 
 };
