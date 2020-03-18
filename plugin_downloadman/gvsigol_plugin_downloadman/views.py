@@ -477,7 +477,6 @@ def requestDownload(request):
     if request.is_ajax():
         if request.method == 'POST':
             json_data = json.loads(request.body)
-            print json_data
             try:
                 downRequest = downman_models.DownloadRequest()
                 """
