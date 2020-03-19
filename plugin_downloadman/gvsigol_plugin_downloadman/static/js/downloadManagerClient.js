@@ -38,7 +38,7 @@ DownloadManagerClient = function(config) {
 	this.setConfig = function(theConfig) {
 		this.config = theConfig || {};
 		this.config.baseQueryUrl = this.config.queryUrl || '/gvsigonline/downloadmanager/';
-		this.config.timeout = this.config.timeout || 20000;
+		this.config.timeout = this.config.timeout || 60000;
 		this.config.shopping_cart_max_items = this.config.shopping_cart_max_items || 0;
 	};
 	this.setConfig(config);
@@ -151,12 +151,14 @@ DownloadManagerClient.prototype.sendGenericRequest = function(request, success_c
 	try {
 		var data = JSON.stringify(request);
 	} catch (e) {console.log("error stringify"); console.log(e)}
+	$('#start-download-btn i').removeClass('fa-download').addClass('fa-spinner fa-spin');
 	$.ajax({
 		type: 'POST',
 		url: queryUrl,
 		data: data,
 		timeout: self.config.timeout
 		}).done(function(result) {
+			$('#start-download-btn i').removeClass('fa-spinner fa-spin').addClass('fa-download');
 			if (result.status_code == 'RQ') {
 				success_callback.apply(callback_context, [result, true]);
 				//self.clearDownloadList();
@@ -167,6 +169,7 @@ DownloadManagerClient.prototype.sendGenericRequest = function(request, success_c
 	
 		})
 		.fail(function(err) {
+			$('#start-download-btn i').removeClass('fa-spinner fa-spin').addClass('fa-download');
 			console.log(err);
 			error_callback.apply(callback_context, err, false);
 	});
@@ -187,12 +190,14 @@ DownloadManagerClient.prototype.startDownloadRequest = function(email, usage, or
 		request["organization"] = organization;
 		var data = JSON.stringify(request);
 	} catch (e) {console.log("error stringify"); console.log(e)}
+	$('#start-download-btn i').removeClass('fa-download').addClass('fa-spinner fa-spin');
 	$.ajax({
 		type: 'POST',
 		url: queryUrl,
 		data: data,
 		timeout: self.config.timeout
 		}).done(function(result) {
+			$('#start-download-btn i').removeClass('fa-spinner fa-spin').addClass('fa-download');
 			if (result.status_code == 'RQ') {
 				success_callback.apply(callback_context, [result, true]);
 				self.clearDownloadList();
@@ -203,6 +208,7 @@ DownloadManagerClient.prototype.startDownloadRequest = function(email, usage, or
 	
 		})
 		.fail(function(err) {
+			$('#start-download-btn i').removeClass('fa-spinner fa-spin').addClass('fa-download');
 			console.log(err);
 			error_callback.apply(callback_context, err, false);
 	});
@@ -636,7 +642,7 @@ DownloadManagerUI.prototype.initGenericDownloadRequest = function(){
 	$(self.modalSelector).find('.modal-body').html(content);
 	$(self.modalSelector).find('.modal-title').html(gettext("Generic download request"));
 
-	var footer = '	<button  id="send-request-btn" class="btn btn-default downman-footer-button send-request-btn" type="button"><i class="fa file-download fa-icon-button-left" aria-hidden="true"></i></span>'+gettext("Send request")+'</button>';
+	var footer = '	<button  id="send-request-btn" class="btn btn-default downman-footer-button send-request-btn" type="button"><i class="fa fa-download fa-icon-button-left" aria-hidden="true"></i></span>'+gettext("Send request")+'</button>';
 	footer += '		<div style="clear:both"></div>';
 	$(self.modalSelector).find('.modal-footer').html(footer);
 	self._updateSendGenericStartDownloadButton();
@@ -739,8 +745,8 @@ DownloadManagerUI.prototype.initDownloadList = function(){
 	$(self.modalSelector).find('.modal-body').html(content);
 	$(self.modalSelector).find('.modal-title').html(gettext("List of downloads"));
 
-	var footer = '	<button id="show-generic-request-btn" class="btn btn-default downman-footer-button show-generic-request-btn" type="button"><i class="fa file-download fa-icon-button-left" aria-hidden="true"></i></span>'+gettext("Send generic request")+'</button>';
-	footer += '	<button  id="start-download-btn" class="btn btn-default downman-footer-button start-downloading-btn" type="button"><i class="fa file-download fa-icon-button-left" aria-hidden="true"></i></span>'+gettext("Start downloading")+'</button>';
+	var footer = '	<button id="show-generic-request-btn" class="btn btn-default downman-footer-button show-generic-request-btn" type="button"><i class="fa fa-download fa-icon-button-left" aria-hidden="true"></i></span>'+gettext("Send generic request")+'</button>';
+	footer += '	<button  id="start-download-btn" class="btn btn-default downman-footer-button start-downloading-btn" type="button"><i class="fa fa-download fa-icon-button-left" aria-hidden="true"></i></span>'+gettext("Start downloading")+'</button>';
 	footer += '		<div style="clear:both"></div>';
 	$(self.modalSelector).find('.modal-footer').html(footer);
 	
