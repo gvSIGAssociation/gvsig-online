@@ -78,7 +78,7 @@ CatalogView.prototype.initialization = function(){
 	catalogPanel += '							</button>';
 	catalogPanel += '							<button id="catalog-search-button" type="button" class="btn btn-primary btn-lg">';
 	catalogPanel += '								&nbsp;&nbsp;';
-	catalogPanel += '								<i class="fa fa-search"></i>';
+	catalogPanel += '								<i id="catalog-search-button-icon" class="fa fa-search"></i>';
 	catalogPanel += '								&nbsp;&nbsp;';
 	catalogPanel += '							</button>';
 	catalogPanel += '							<button id="catalog-clear-button" type="button" title="' + gettext('Clean current search, filters and order') + '" class="btn btn-link btn-lg">';
@@ -487,6 +487,14 @@ CatalogView.prototype.getKeywordQuery = function(keywords, key){
 	return cats;
 }
 
+CatalogView.prototype._getSearchingContent = function() {
+	var content = '<div class="no_catalog_content col-sm-12">';
+	content += '<i class="fa fa-spinner fa-spin" aria-hidden="true"></i>&nbsp;';
+	content += 	gettext('The search is running...');
+	content += '</div>';
+	return content;
+}
+
 CatalogView.prototype.createResourceLink = function(links){
 	var link = links.split('|');
 	var content = '';
@@ -826,6 +834,9 @@ CatalogView.prototype.updatePager = function(totalCount) {
 }
 
 CatalogView.prototype.getCatalogFilters = function(query, searchComponents, categories, keywords, resources, creation_from, creation_to, date_from, date_to, extent, mainSearchField){
+	$('#catalog-search-button-icon').removeClass('fa-search').addClass('fa-spinner fa-spin');
+	$("#catalog_content").html(this._getSearchingContent());
+
 	var self = this;
 	if (!mainSearchField) {
 		mainSearchField = "title";
@@ -876,6 +887,7 @@ CatalogView.prototype.getCatalogFilters = function(query, searchComponents, cate
 		url: url,
 		success: function(response) {
 			try{
+				$('#catalog-search-button-icon').removeClass('fa-spinner fa-spin').addClass('fa-search');
 				//response = JSON.parse(response);
 				self.data = {};
 				
@@ -1068,6 +1080,7 @@ CatalogView.prototype.getCatalogFilters = function(query, searchComponents, cate
 			console.log(textStatus);
 			console.log(jqXHR);
 			content_code = self.getMetadataEntry(null);
+			$('#catalog-search-button-icon').removeClass('fa-spinner fa-spin').addClass('fa-search');
 			$("#catalog_content").html(content_code);
 			self.updatePager(1);
 		}
