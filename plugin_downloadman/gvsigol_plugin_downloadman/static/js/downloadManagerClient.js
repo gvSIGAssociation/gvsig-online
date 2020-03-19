@@ -639,7 +639,7 @@ DownloadManagerUI.prototype.initGenericDownloadRequest = function(){
 	var footer = '	<button  id="send-request-btn" class="btn btn-default downman-footer-button send-request-btn" type="button"><i class="fa file-download fa-icon-button-left" aria-hidden="true"></i></span>'+gettext("Send request")+'</button>';
 	footer += '		<div style="clear:both"></div>';
 	$(self.modalSelector).find('.modal-footer').html(footer);
-	
+	self._updateSendGenericStartDownloadButton();
 	
 	$(".send-request-btn").unbind("click").click(function(){
 		try {
@@ -667,7 +667,7 @@ DownloadManagerUI.prototype.initGenericDownloadRequest = function(){
 			var downloadRequestDesc = null;
 		}
 		var shareViewTool = new gvsigol.tools.ShareView(viewer.core.getConf(), viewer.core.getMap(), viewer.core.getLayerTree());
-	  	var sharedViewState = shareViewTool.getSharedViewState('downman internal');
+		var sharedViewState = shareViewTool.getSharedViewState('downman internal');
 		var request = {
 				"resources": [],
 				"shared_view_state": sharedViewState,
@@ -684,6 +684,12 @@ DownloadManagerUI.prototype.initGenericDownloadRequest = function(){
 		self._updateSendGenericStartDownloadButton();
 	});
 	$("#downloadRequestDescription").keyup(function(){
+		self._updateSendGenericStartDownloadButton();
+	});
+	$("#contactemail").change(function(){
+		self._updateSendGenericStartDownloadButton();
+	});
+	$("#contactemail").keyup(function(){
 		self._updateSendGenericStartDownloadButton();
 	});
 }
