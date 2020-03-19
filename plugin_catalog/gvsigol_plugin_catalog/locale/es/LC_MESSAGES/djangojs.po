@@ -91,3 +91,6 @@ msgstr "Ordenar por título"
 msgid "Search..."
 msgstr "Buscar..."
 
+msgid "The search is running..."
+msgstr "La búsqueda se está ejecutando..."
+

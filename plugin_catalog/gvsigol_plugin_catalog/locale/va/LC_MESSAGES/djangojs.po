@@ -77,17 +77,20 @@ msgid "Metadatum"
 msgstr "Metadada"
 
 msgid "Draw rectangle"
-msgstr ""
+msgstr "Dibuixar rectangle"
 
 msgid "Order by relevance"
-msgstr ""
+msgstr "Ordenar per rellevància"
 
 msgid "Order by modification date"
-msgstr ""
+msgstr "Ordenar per data de modificació"
 
 msgid "Order by title"
-msgstr ""
+msgstr "Ordenar per títol"
 
 msgid "Search..."
-msgstr ""
+msgstr "Buscar"
+
+msgid "The search is running..."
+msgstr "La cerca s'està executant..."
 

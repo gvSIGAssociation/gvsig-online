@@ -100,3 +100,6 @@ msgstr ""
 msgid "Search..."
 msgstr ""
 
+msgid "The search is running..."
+msgstr ""
+
