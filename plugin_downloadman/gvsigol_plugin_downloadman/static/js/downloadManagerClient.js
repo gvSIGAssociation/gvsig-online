@@ -151,14 +151,14 @@ DownloadManagerClient.prototype.sendGenericRequest = function(request, success_c
 	try {
 		var data = JSON.stringify(request);
 	} catch (e) {console.log("error stringify"); console.log(e)}
-	$('#start-download-btn i').removeClass('fa-download').addClass('fa-spinner fa-spin');
+	$('#send-request-btn i').removeClass('fa-download').addClass('fa-spinner fa-spin');
 	$.ajax({
 		type: 'POST',
 		url: queryUrl,
 		data: data,
 		timeout: self.config.timeout
 		}).done(function(result) {
-			$('#start-download-btn i').removeClass('fa-spinner fa-spin').addClass('fa-download');
+			$('#send-request-btn i').removeClass('fa-spinner fa-spin').addClass('fa-download');
 			if (result.status_code == 'RQ') {
 				success_callback.apply(callback_context, [result, true]);
 				//self.clearDownloadList();
@@ -169,7 +169,7 @@ DownloadManagerClient.prototype.sendGenericRequest = function(request, success_c
 	
 		})
 		.fail(function(err) {
-			$('#start-download-btn i').removeClass('fa-spinner fa-spin').addClass('fa-download');
+			$('#send-request-btn i').removeClass('fa-spinner fa-spin').addClass('fa-download');
 			console.log(err);
 			error_callback.apply(callback_context, err, false);
 	});
