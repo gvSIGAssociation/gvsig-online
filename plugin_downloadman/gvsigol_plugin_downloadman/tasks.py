@@ -545,10 +545,12 @@ class WCSClient():
             return describeCoverageTree.find('./gml:boundedBy/gml:Envelope', namespaces)
 
     def getWcsRequest(self):
-        url = _normalizeWxsUrl(self.url) + u'?service=WCS&version=2.0.0&request=GetCoverage&mediatype=multipart/related&CoverageId=' + self.layer_name
-        file_format = _getParamValue(self.params, FORMAT_PARAM_NAME)
-        if file_format:
-            url += u'&format=' + file_format
+        url = _normalizeWxsUrl(self.url) + u'?service=WCS&version=2.0.0&request=GetCoverage&CoverageId=' + self.layer_name
+        self.file_format = _getParamValue(self.params, FORMAT_PARAM_NAME)
+        if self.isMultipartResult():
+            url += u'&mediatype=multipart/related'
+        if self.file_format:
+            url += u'&format=' + self.file_format
         spatial_filter_type = _getParamValue(self.params, SPATIAL_FILTER_TYPE_PARAM_NAME)
         if spatial_filter_type == 'bbox':
             spatial_filter_bbox = _getParamValue(self.params, SPATIAL_FILTER_BBOX_PARAM_NAME)
@@ -678,11 +680,24 @@ class WCSClient():
         return tmp_path
     
     def isSelfreferencedFormat(self, mainFileName):
+        """
+        Returns true if the format of the provided file name contains CRS information
+        in its internal structure. The format is determined by examining the file
+        extension.
+        """
         name, ext = os.path.splitext(mainFileName)
         extlow = ext.lower()
         if '.tif' == extlow or '.tiff' == extlow or 'geotif' in extlow:
             return True
         return False
+    
+    def isMultipartResult(self):
+        if not self.file_format:
+            return True
+        file_format = self.file_format.lower()
+        if file_format == 'geotiff' or file_format == 'image/geotiff':
+            return False
+        return True
 
     def retrieveResources(self):
         """
@@ -691,6 +706,8 @@ class WCSClient():
         """
         url = self.getWcsRequest()
         local_path = self._retrieveResource(url)
+        if not self.isMultipartResult():
+            return local_path
         parseMultipart(local_path, self.output_dir)
         os.remove(local_path)
         try:
@@ -718,11 +735,12 @@ def normalizeOutname(name):
     return re.sub('[^\w\s_-]', '', resource_name).strip().lower()
 
 def guessResourceName(resource_name, params):
-    file_format = _getParamValue(params, FORMAT_PARAM_NAME, '')
     # remove non-a-z_ or numeric characters
     resource_name = normalizeOutname(resource_name)
-    resource_name = resource_name + _getExtension(file_format)
-    return resource_name
+    if u'.' in resource_name:
+        return resource_name
+    file_format = _getParamValue(params, FORMAT_PARAM_NAME, '')
+    return resource_name + _getExtension(file_format)
 
 def retrieveResources(resource_descriptor):
     """
@@ -736,8 +754,8 @@ def retrieveResources(resource_descriptor):
     params = resource_descriptor.get('params', [])
     if res_type == ResourceLocator.OGC_WCS_RESOURCE_TYPE:
         client = WCSClient(resource_url, resource_name, params)
-        output_folder = client.retrieveResources()
-        return [ResourceDescription(normalizeOutname(resource_name), output_folder, True)]
+        output_file_or_folder = client.retrieveResources()
+        return [ResourceDescription(guessResourceName(resource_name, params), output_file_or_folder, True)]
         
     elif res_type == ResourceLocator.HTTP_LINK_RESOURCE_TYPE:
         url = resource_url
