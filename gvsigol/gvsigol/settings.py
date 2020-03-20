@@ -44,7 +44,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'q-#1q+!^2@4#3@hgmrgne%1nh4q4(@wpi-x(y^1^1cqnz^7d(g'
+SECRET_KEY = '##SECRET_KEY##'
 if len(SECRET_KEY) == 14:
     # It has not been replaced by deployment scripts
     # Generate a random one
@@ -53,16 +53,7 @@ if len(SECRET_KEY) == 14:
         SECRET_KEY = open(SECRET_FILE).read().strip()
     except IOError:
         try:
-            try:
-                # available since Django 1.10.x
-                from django.core.management.utils import get_random_secret_key
-            except:
-                from django.utils.crypto import get_random_string
-                def get_random_secret_key():
-                    chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
-                    return get_random_string(50, chars) 
-            from django.core.management import utils
-            import os
+            from django.core.management.utils import get_random_secret_key
             SECRET_KEY = get_random_secret_key()
             secret = file(SECRET_FILE, 'w')
             secret.write(SECRET_KEY)
@@ -78,30 +69,62 @@ except:
     # Do not write any password here!!!!
     pw_file = file(os.path.join(BASE_DIR, 'gvsigol', 'settings_passwords.py'), 'w')
     pw_file.write("BING_KEY_DEVEL='yourbingkey'\n")
-    pw_file.write("DB_USER_DEVEL='yourdbuser'\n")
-    pw_file.write("DB_PW_DEVEL='yourdbkey'\n")
+    pw_file.write("DB_USER_DEVEL='postgres'\n")
+    pw_file.write("DB_PW_DEVEL='postgres'\n")
     pw_file.write("LDAP_USER_DEVEL='yourldapuser'\n")
     pw_file.write("LDAP_PW_DEVEL='yourldapkey'\n")
     pw_file.write("GEOSERVER_USER_DEVEL='admin'\n")
     pw_file.write("GEOSERVER_PW_DEVEL='geoserver'\n")
+    pw_file.write("EMAIL_USER_DEVEL='example@youremaildomain.org'\n")
+    pw_file.write("EMAIL_PASSWORD_DEVEL=''\n")
     pw_file.close()
     from gvsigol import settings_passwords
 finally:
     # Store your passwords for local development in 'settings_passwords.py'
     # Do not write any password here!!!!
-    BING_KEY_DEVEL = settings_passwords.BING_KEY_DEVEL
-    DB_USER_DEVEL = settings_passwords.DB_USER_DEVEL
-    DB_PW_DEVEL = settings_passwords.DB_PW_DEVEL
-    LDAP_USER_DEVEL = settings_passwords.LDAP_USER_DEVEL
-    LDAP_PW_DEVEL = settings_passwords.LDAP_PW_DEVEL
-    GEOSERVER_USER_DEVEL = settings_passwords.GEOSERVER_USER_DEVEL
-    GEOSERVER_PW_DEVEL = settings_passwords.GEOSERVER_PW_DEVEL
+    try:
+        BING_KEY_DEVEL = settings_passwords.BING_KEY_DEVEL
+    except:
+        BING_KEY_DEVEL = ''
+    try:
+        DB_USER_DEVEL = settings_passwords.DB_USER_DEVEL
+    except:
+        DB_USER_DEVEL = 'postgres'
+    try:
+        DB_PW_DEVEL = settings_passwords.DB_PW_DEVEL
+    except:
+        DB_PW_DEVEL = 'postgres'
+    try:
+        LDAP_USER_DEVEL = settings_passwords.LDAP_USER_DEVEL
+    except:
+        LDAP_USER_DEVEL = ''
+    try:
+        LDAP_PW_DEVEL = settings_passwords.LDAP_PW_DEVEL
+    except:
+        LDAP_PW_DEVEL = ''
+    try:
+        GEOSERVER_USER_DEVEL = settings_passwords.GEOSERVER_USER_DEVEL
+    except:
+        GEOSERVER_USER_DEVEL = 'admin'
+    try:
+        GEOSERVER_PW_DEVEL = settings_passwords.GEOSERVER_PW_DEVEL
+    except:
+        GEOSERVER_PW_DEVEL = 'geoserver'
+    try:
+        EMAIL_USER_DEVEL = settings.EMAIL_USER_DEVEL
+    except:
+        EMAIL_USER_DEVEL = ''
+    try:
+        EMAIL_PASSWORD_DEVEL = settings.EMAIL_PASSWORD_DEVEL
+    except:
+        EMAIL_PASSWORD_DEVEL = ''
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+USE_X_FORWARDED_HOST = True
 
 #GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
 #GDAL_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\gdal202.dll'
@@ -124,8 +147,8 @@ INSTALLED_APPS = [
     'gvsigol_symbology',
     'gvsigol_filemanager',
     'gvsigol_core',
-    #'gvsigol_app_dev',
-    'gvsigol_app_panacea',
+    'gvsigol_app_dev',
+    #'gvsigol_app_panacea',
     'gvsigol_plugin_edition',
     'gvsigol_plugin_worldwind',
     'gvsigol_plugin_geocoding',
@@ -305,9 +328,9 @@ LOGOUT_PAGE_URL = '/gvsigonline/'
 EMAIL_BACKEND_ACTIVE = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'gvsigonline@scolab.es'
-EMAIL_HOST_PASSWORD = 'Ohp2leej'
+EMAIL_HOST = ''
+EMAIL_HOST_USER = EMAIL_USER_DEVEL
+EMAIL_HOST_PASSWORD = EMAIL_PASSWORD_DEVEL
 EMAIL_PORT = 587
 SITE_ID=1
 
@@ -515,9 +538,7 @@ LEGACY_GVSIGOL_SERVICES = {
 }
 
 
-#CELERY_BROKER_URL = 'amqp://'
-#CELERY_BROKER_URL = 'amqp://gvsigol:12345678@pimenton:5672/gvsigol'
-CELERY_BROKER_URL = 'pyamqp://gvsigol:12345678@pimenton:5672/gvsigol'
+CELERY_BROKER_URL = 'pyamqp://gvsigol:12345678@localhost:5672/gvsigol'
 CELERY_TASK_ACKS_LATE = True
 
 CACHE_OPTIONS = {
@@ -534,3 +555,6 @@ PROXIES = {
 
 VERSION_FIELD = 'feat_version_gvol'
 DATE_FIELD = 'feat_date_gvol'
+
+SENDFILE_BACKEND = 'sendfile.backends.xsendfile'
+SHARED_VIEW_EXPIRATION_TIME = 1
