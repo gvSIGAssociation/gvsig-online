@@ -171,7 +171,7 @@ DownloadManagerClient.prototype.sendGenericRequest = function(request, success_c
 		.fail(function(err) {
 			$('#send-request-btn i').removeClass('fa-spinner fa-spin').addClass('fa-download');
 			console.log(err);
-			error_callback.apply(callback_context, err, false);
+			error_callback.apply(callback_context, [err, false]);
 	});
 }
 
@@ -210,7 +210,7 @@ DownloadManagerClient.prototype.startDownloadRequest = function(email, usage, or
 		.fail(function(err) {
 			$('#start-download-btn i').removeClass('fa-spinner fa-spin').addClass('fa-download');
 			console.log(err);
-			error_callback.apply(callback_context, err, false);
+			error_callback.apply(callback_context, [err, false]);
 	});
 }
 
@@ -756,7 +756,12 @@ DownloadManagerUI.prototype.initDownloadList = function(){
 		var download_id = event.currentTarget.getAttribute("data-downloadid");
 		self.getClient().removeLayer(download_id);
 		$(".modal-body").find('tr[data-downloadid="'+download_id+'"]').remove();
-		self._updateStartDownloadButton();
+		if (self.getClient().getDownloadListCount() > 0) {
+			self._updateStartDownloadButton();
+		}
+		else {
+			self.initDownloadList();
+		}
 	});
 	$(".show-generic-request-btn").unbind("click").click(function(){
 		self.initGenericDownloadRequest();
@@ -823,7 +828,8 @@ DownloadManagerUI.prototype.showGenericRequestSent = function(json_result, succe
 		content += gettext('There was an error processing your download request. Please, try again later');
 		var footer = '	<button class="btn btn-default downman-footer-button catalog-download-list-btn" type="button"><span class="download_list_count">' + this.getClient().getDownloadListCount() + '</span><i class="fa fa-shopping-cart fa-icon-button-left fa-icon-button-right" aria-hidden="true"></i>'+gettext("View download list")+'</button>';
 		footer += '		<div style="clear:both"></div>';
-		$(self.modalSelector).find('.modal-footer').html(footer);
+		$(this.modalSelector).find('.modal-footer').html(footer);
+		var self = this;
 		$(".catalog-download-list-btn").unbind("click").click(function(){
 			self.showDownloadList();
 		});
@@ -855,7 +861,8 @@ DownloadManagerUI.prototype.showDownloadQueued = function(json_result, success){
 		content += gettext('There was an error processing your download request. Please, try again later');
 		var footer = '	<button class="btn btn-default downman-footer-button catalog-download-list-btn" type="button"><span class="download_list_count">' + this.getClient().getDownloadListCount() + '</span><i class="fa fa-shopping-cart fa-icon-button-left fa-icon-button-right" aria-hidden="true"></i>'+gettext("View download list")+'</button>';
 		footer += '		<div style="clear:both"></div>';
-		$(self.modalSelector).find('.modal-footer').html(footer);
+		$(this.modalSelector).find('.modal-footer').html(footer);
+		var self = this;
 		$(".catalog-download-list-btn").unbind("click").click(function(){
 			self.showDownloadList();
 		});
