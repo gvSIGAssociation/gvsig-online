@@ -33,7 +33,7 @@ from gvsigol_auth.utils import superuser_required, staff_required
 from forms_services import ProviderForm, ProviderUpdateForm
 
 from gvsigol_plugin_geocoding import settings as geocoding_setting
-from gvsigol import settings
+from gvsigol import settings as core_settings
 from gvsigol_plugin_geocoding.utils import *
 import json
 import ast
@@ -314,7 +314,7 @@ def provider_update(request, provider_id):
             
         form.fields['params'].initial = provider.params
     
-    image_url = os.path.join(settings.BASE_URL + settings.STATIC_URL, 'img/geocoding/toponimo.png');
+    image_url = os.path.join(core_settings.BASE_URL + core_settings.STATIC_URL, 'img/geocoding/toponimo.png');
     #image_url = '../static/img/geocoding/toponimo.png'
     if provider.image:
         image_url = provider.image.url
@@ -414,7 +414,7 @@ def get_conf(request):
     if request.method == 'POST': 
         provider = Provider.objects.all()
         has_providers = provider.__len__() > 0
-        # if has_providers == False :            
+        #if has_providers == False :            
         response = {
             'has_providers': has_providers, 
             'candidates_url': geocoding_setting.GEOCODING_PROVIDER['cartociudad']['candidates_url'],

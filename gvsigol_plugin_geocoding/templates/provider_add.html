@@ -93,10 +93,6 @@
 								{{ form.category }}						
 							</div>
 						</div>	
-						
-						
-	
-						
 						<div class="row nominatim-param googlemaps-param new_cartociudad-param user-param">
 							<div class="col-md-12" style="margin-bottom: 40px;">
 								<div class="provider-img">
@@ -108,16 +104,17 @@
 								</div>
 							</div>	
 						</div>	
-						
-						
-						<div class="row nominatim-param googlemaps-param new_cartociudad-param" id="params-row">
+										
+						<div class="row nominatim-param googlemaps-param new_cartociudad-param" id="advanced-params-row">
 							<div class="col-md-12 form-group">
 								<div id="advanced-params-button">
-								<label for="id_params">{% trans "Advanced params" %}</label>
+								<label for="advance-params">{% trans "Advanced params" %}</label>
 								<div class="pull-right"><i id="advanced-params-icon" class="fa fa-plus"></i></div>
 								</div>
 								<div id="advanced-params">
-									{{ form.params }}			
+									<textarea id="params" name="params" form="provider-form">
+										{{ form.params }}
+									</textarea>
 								</div>			
 							</div>
 						</div>
@@ -141,7 +138,7 @@
 //	var settings = JSON.parse("{\"datastore_id\": 2, \"resource\": \"municipio\", \"text_field\": \"nombre\", \"id_field\": \"id\", \"geom_field\": \"geom\"}");
  	var settings = JSON.parse('{{ settings | escapejs }}');
 
-	var connectionParams = document.getElementById('id_params');
+	var connectionParams = document.getElementById('params');
 	var codemirror = CodeMirror.fromTextArea(connectionParams, {
 		value: "",
 		mode:  "javascript",
