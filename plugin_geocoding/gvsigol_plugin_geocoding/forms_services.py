@@ -45,7 +45,7 @@ class ProviderForm(forms.ModelForm):
 
     category = forms.CharField(label=_(u'Category'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     
-    params = forms.CharField(label=_(u'Parameters'), required=False, disabled=True, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))
+    params = forms.CharField(label=_(u'Parameters'), required=False, disabled=False, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))
 
 
 class ProviderUpdateForm(forms.ModelForm):
@@ -65,6 +65,6 @@ class ProviderUpdateForm(forms.ModelForm):
  
     category = forms.CharField(label=_(u'Category'),  required=True, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     
-    params = forms.CharField(label=_(u'Parameters'), required=True, disabled=True, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))
+    params = forms.CharField(label=_(u'Parameters'), required=True, disabled=False, widget=forms.Textarea(attrs={'class': 'form-control', 'tabindex': '4'}))
 
     
