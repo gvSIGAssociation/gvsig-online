@@ -45,7 +45,7 @@
 							<input type="hidden" name="provider-type" value="{{ type }}"/>
 						</div>
 						
-						<div class="row user-param cartociudad-param hidden">
+						<div class="row user-param cartociudad-param postgres-param hidden">
 							<div class="col-md-12 form-group">	
 								<label for="id_workspace">{% trans "Workspace" %}</label>
 								{{ form.workspace }}									
@@ -62,7 +62,7 @@
 							<input type="hidden" id="provider-datastore" name="provider-datastore" value="{{ datastore }}"/>
 						</div>
 										
-						<div class="row user-param hidden">
+						<div class="row user-param postgres-param hidden">
 							<div class="col-md-12 form-group">
 								<label for="id_resource">{% trans "Resource name" %}</label>
 								{{ form.resource }}						
@@ -70,7 +70,7 @@
 							<input type="hidden" id="provider-resource" name="provider-resource" value="{{ resource }}"/>
 						</div>	
 						
-						<div class="row user-param hidden">
+						<div class="row user-param postgres-param hidden">
 							<div class="col-md-12 form-group">
 								<label for="id_id_field">{% trans "ID Field" %}</label>
 								{{ form.id_field }}						
@@ -78,7 +78,7 @@
 							<input type="hidden" id="provider-id_field" name="provider-id_field" value="{{ form.id_field.value|default_if_none:"" }}"/>
 						</div>	
 						
-						<div class="row user-param hidden">
+						<div class="row user-param postgres-param hidden">
 							<div class="col-md-12 form-group">
 								<label for="id_text_field">{% trans "Text Field" %}</label>
 								{{ form.text_field }}						
@@ -86,7 +86,7 @@
 							<input type="hidden" id="provider-text_field" name="provider-text_field" value="{{  form.text_field.value|default_if_none:"" }}"/>
 						</div>	
 						
-						<div class="row user-param hidden">
+						<div class="row user-param postgres-param hidden">
 							<div class="col-md-12 form-group">
 								<label for="id_geom_field">{% trans "Geom Field" %}</label>
 								{{ form.geom_field }}						
@@ -101,7 +101,7 @@
 							</div>
 						</div>	
 						
-						<div class="row nominatim-param googlemaps-param new_cartociudad-param user-param ide_uy-param">
+						<div class="row nominatim-param googlemaps-param new_cartociudad-param user-param postgres-param ide_uy-param">
 							<div class="col-md-12" style="margin-bottom: 20px;">
 								<div class="provider-img">
 									<img id="image-preview" src={{image_photo_url}} alt="">
@@ -255,7 +255,7 @@
 		var code = params;
 		$('#select-file-row').css('display', 'none');
 		$('#connection-params-row').css('display', 'block');
-		codemirror.setValue(JSON.stringify(code));
+		codemirror.setValue(JSON.stringify(code, null, "\t"));
 	
 	}
 	

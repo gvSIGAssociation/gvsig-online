@@ -32,7 +32,10 @@ from urlparse import urlparse
 class GoogleMaps():
 
     def __init__(self, provider):
-        self.urls = settings.GEOCODING_PROVIDER['googlemaps']
+        params = json.loads(provider.params)
+        self.urls = params
+#        country_code = params['country_codes']
+
         self.key = self.urls['key']
         self.providers=[]
         self.append(provider)
@@ -104,7 +107,8 @@ class GoogleMaps():
                     parse_result = {
                         'address': result['formatted_address'],
                         'lat': result['geometry']['location']['lat'],
-                        'lng': result['geometry']['location']['lng']
+                        'lng': result['geometry']['location']['lng'],
+                        'srs': 'EPSG:4326'
                     }
                     return parse_result
             if 'error_message' in json_results:
@@ -132,13 +136,15 @@ class GoogleMaps():
                 parse_result = {
                     'address': result['formatted_address'],
                     'lat': result['geometry']['location']['lat'],
-                    'lng': result['geometry']['location']['lng']
+                    'lng': result['geometry']['location']['lng'],
+                    'srs': 'EPSG:4326'
                 }
                 return parse_result
         parse_result = {
                     'address': message,
                     'lat': coordinate[1],
-                    'lng': coordinate[0]
+                    'lng': coordinate[0],
+                    'srs': 'EPSG:4326'
                 }
         return parse_result
 

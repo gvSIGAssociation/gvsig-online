@@ -62,7 +62,7 @@ GEOCODING_PROVIDER = {
         'country_codes': ''
     },
     'googlemaps': {
-        'candidates_url': 'https://maps.googleapis.com/maps/api/place/autocomplete/json',
+        "candidates_url": "https://maps.googleapis.com/maps/api/place/autocomplete/json?language=es&components=country:uy",
         'find_url': 'https://maps.googleapis.com/maps/api/geocode/json',
         'reverse_url': 'https://maps.googleapis.com/maps/api/geocode/json',
         'key': 'AIzaSyDRJwLAQS6t8LP-rnv0IBhkp6fT4lHjV1w'
@@ -91,6 +91,10 @@ GEOCODING_PROVIDER = {
         'reverse_url': 'http://127.0.0.1:8090/api/v1/geocode/reverse',  
         'max_results': 10,
         'filter': ''
+    },
+    'postgres':{
+        'autocancel': True,
+        'max_results': 10
     },
 
     

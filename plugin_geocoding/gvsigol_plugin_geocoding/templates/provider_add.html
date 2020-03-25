@@ -45,42 +45,42 @@
 							</div>
 						</div>
 						
-						<div class="row user-param cartociudad-param hidden">
+						<div class="row user-param cartociudad-param postgres-param hidden">
 							<div class="col-md-12 form-group">	
 								<label for="id_workspace">{% trans "Workspace" %}</label>
 								{{ form.workspace }}									
 							</div>
 						</div>
 						
-						<div class="row user-param cartociudad-param hidden">
+						<div class="row user-param cartociudad-param postgres-param hidden">
 							<div class="col-md-12 form-group">
 								<label for="id_datastore">{% trans "Data Store" %}</label>
 								{{ form.datastore }}						
 							</div>
 						</div>
 										
-						<div class="row user-param hidden">
+						<div class="row user-param postgres-param hidden">
 							<div class="col-md-12 form-group">
 								<label for="id_resource">{% trans "Resource name" %}</label>
 								{{ form.resource }}						
 							</div>
 						</div>	
 						
-						<div class="row user-param hidden">
+						<div class="row user-param postgres-param hidden">
 							<div class="col-md-12 form-group">
 								<label for="id_id_field">{% trans "ID Field" %}</label>
 								{{ form.id_field }}						
 							</div>
 						</div>	
 						
-						<div class="row user-param hidden">
+						<div class="row user-param postgres-param hidden">
 							<div class="col-md-12 form-group">
 								<label for="id_text_field">{% trans "Text Field" %}</label>
 								{{ form.text_field }}						
 							</div>
 						</div>	
 						
-						<div class="row user-param hidden">
+						<div class="row user-param postgres-param hidden">
 							<div class="col-md-12 form-group">
 								<label for="id_geom_field">{% trans "Geom Field" %}</label>
 								{{ form.geom_field }}						
@@ -93,7 +93,7 @@
 								{{ form.category }}						
 							</div>
 						</div>	
-						<div class="row nominatim-param googlemaps-param new_cartociudad-param user-param">
+						<div class="row nominatim-param googlemaps-param new_cartociudad-param user-param postgres-param">
 							<div class="col-md-12" style="margin-bottom: 40px;">
 								<div class="provider-img">
 									<img id="image-preview" src="" alt="">
@@ -182,7 +182,7 @@
 		$("."+type+"-param").removeClass("hidden");
 		
 		
-		if(type == "cartociudad" || type == "user"){
+		if(type == "cartociudad" || type == "user" || type == "postgres" ){
 			$("#submit-button").html("<i class=\"fa fa-chevron-right\" aria-hidden=\"true\"></i> " + continue_label);
 		}else{
 			$("#submit-button").html("<i class=\"fa fa-floppy-o margin-r-5\"></i> " + save_label);

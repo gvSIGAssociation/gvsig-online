@@ -63,6 +63,7 @@ class CartoCiudad2():
             for json_result in json_results:
                 json_result['category'] = provider.category
                 json_result['image'] = str(provider.image)
+                json_result['srs'] = 'EPSG:4258'
             
         return json_results
     
@@ -121,13 +122,14 @@ class CartoCiudad2():
         json_result =  self.get_json_from_url(self.urls['reverse_url'], params)
         if isinstance(json_result, dict):
             json_result['source'] = self.get_type()
-                
+            json_result['srs'] = 'EPSG:4258'            
             return json_result
         
         parse_result = {
                     'address': _('Not founded'),
                     'lat': coordinate[1], 
-                    'lng': coordinate[0]
+                    'lng': coordinate[0],
+                    'srs': 'EPSG:4258'
                 }
         return parse_result
     

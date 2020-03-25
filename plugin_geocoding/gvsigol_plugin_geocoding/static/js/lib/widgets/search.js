@@ -204,7 +204,7 @@ search.prototype.initUI = function() {
 									'type': 'nominatim'
 								},
 								success	:function(response){
-									self.locate(response, 'EPSG:4258', false);
+									self.locate(response, response.srs, false);
 								},
 								error: function(){}
 							});
@@ -230,7 +230,7 @@ search.prototype.initUI = function() {
 									'type': 'new_cartociudad'
 								},
 								success	:function(response){
-									self.locate(response, 'EPSG:4258', false);
+									self.locate(response, response.srs, false);
 								},
 								error: function(xhr, status, error) {
 									  console.error(xhr.responseText);
@@ -258,7 +258,7 @@ search.prototype.initUI = function() {
 									'type': 'cartociudad'
 								},
 								success	:function(response){
-									self.locate(response, 'EPSG:4258', false);
+									self.locate(response, response.srs, false);
 								},
 								error: function(){}
 							});
@@ -284,7 +284,7 @@ search.prototype.initUI = function() {
 									'type': 'googlemaps'
 								},
 								success	:function(response){
-									self.locate(response, 'EPSG:4258', false);
+									self.locate(response, response.srs, false);
 								},
 								error: function(){}
 							});
@@ -310,7 +310,7 @@ search.prototype.initUI = function() {
 									'type': 'ide_uy'
 								},
 								success	:function(response){
-									self.locate(response, 'EPSG:4326', false);
+									self.locate(response, response.srs, false);
 								},
 								error: function(xhr, status, error) {
 									  console.error(xhr.responseText);
@@ -377,9 +377,9 @@ search.prototype.initUI = function() {
 				success	:function(response){
 					if(response.address && response.address["address"]) {
 						window.lastgeolocationsearch = response;
-						var epsg = 'EPSG:4258';
-						if (response.address.source && response.address.source === 'ide_uy') { // Ugly Patch
-							epsg = 'EPSG:4326';
+						var epsg = 'EPSG:4326'; // Por defecto
+						if (response.address.srs) { 
+							epsg = response.address.srs;
 						}
 						self.locate(response.address, epsg, true);
 					}

@@ -16,6 +16,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from __builtin__ import RuntimeError
 '''
 @author: Jose Badia <jbadia@scolab.es>
 '''
@@ -56,22 +57,27 @@ class Nominatim():
         suggestions = []
         
         i=1
-        for geolocator in self.geolocators:
-            locations = geolocator['geocoder'].geocode(query,exactly_one=False)
-            if locations:
-                for l in locations:
-                    suggestion = {}
-                    suggestion['source'] = 'nominatim'
-                    suggestion['type'] = 'nominatim-'+ str(geolocator['provider'].id)
-                    suggestion['address'] = l.address
-                    suggestion['id'] = l.address
-                    suggestion['lat'] = l._raw['lat']
-                    suggestion['lng'] = l._raw['lon'] 
-                    suggestion['image'] = str(geolocator['provider'].image)
-                    suggestion['category'] = geolocator['provider'].category
-                    suggestions.append(suggestion)
-            i=i+1
-                
+        try: 
+            for geolocator in self.geolocators:
+                locations = geolocator['geocoder'].geocode(query,exactly_one=False)
+                if locations:
+                    for l in locations:
+                        suggestion = {}
+                        suggestion['source'] = 'nominatim'
+                        suggestion['type'] = 'nominatim-'+ str(geolocator['provider'].id)
+                        suggestion['address'] = l.address
+                        suggestion['id'] = l.address
+                        suggestion['lat'] = l._raw['lat']
+                        suggestion['lng'] = l._raw['lon'] 
+                        suggestion['image'] = str(geolocator['provider'].image)
+                        suggestion['category'] = geolocator['provider'].category
+                        suggestions.append(suggestion)
+                i=i+1
+        except Exception as e:
+            print e
+            print 'Error al geocodificar con Nominatim. Probablemente está usando el servicio gratuito.'
+            
+        
         response = suggestions
         
         return response
@@ -86,6 +92,7 @@ class Nominatim():
         suggestion['id'] = locations['address[address]']
         suggestion['lat'] = locations['address[lat]']
         suggestion['lng'] = locations['address[lng]']
+        suggestion['srs'] = 'EPSG:4326'
 
         return suggestion
         
@@ -104,7 +111,7 @@ class Nominatim():
                 suggestion['id'] = l.address
                 suggestion['lat'] = l._raw['lat']
                 suggestion['lng'] = l._raw['lon'] 
-            
+                suggestion['srs'] = 'EPSG:4326'
                 return suggestion
         
         suggestion = {}
@@ -113,6 +120,6 @@ class Nominatim():
         suggestion['address'] = _('Not founded')
         suggestion['lat'] = coordinate[1]
         suggestion['lng'] = coordinate[0]
-        
+        suggestion['srs'] = 'EPSG:4326'
         return suggestion
         
