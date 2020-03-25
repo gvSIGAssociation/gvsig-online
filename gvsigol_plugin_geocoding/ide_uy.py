@@ -118,7 +118,7 @@ class IdeUY():
             if (json_result.__len__() > 0):
                 first = json_result[0]
                 first['source'] = self.get_type()
-                    
+                first['srs'] = 'EPSG:4326'
                 return first
         
         return []
@@ -145,7 +145,8 @@ class IdeUY():
         parse_result = {
                     'address': _('Not found'),
                     'lat': coordinate[1], 
-                    'lng': coordinate[0]
+                    'lng': coordinate[0],
+                    'srs': 'EPSG:4326'
                 }
         return parse_result
     

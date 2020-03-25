@@ -618,6 +618,31 @@ def create_cartociudad_config(provider, has_soundex):
 
     return True
 
+def create_postgres_config(provider, has_soundex):
+    params = json.loads(provider.params)
+    datastore_id = params["datastore_id"]
+    datastore = Datastore.objects.get(id=datastore_id)
+    try:
+        datastore_params = json.loads(datastore.connection_params)
+        
+        root = ET.Element("dataConfig")
+        ET.SubElement(
+            root, 
+            "dataSource", 
+            name="DS2", 
+            type="JdbcDataSource", 
+            driver="org.postgresql.Driver", 
+            url="jdbc:postgresql://"+datastore_params["host"]+":"+datastore_params["port"]+"/"+datastore_params["database"], 
+            user=datastore_params["user"], 
+            password=datastore_params["passwd"])
+    except Exception as e:
+        #self.add_error('connection_params', _("Error: Invalid JSON format"))
+        return False
+
+    return True
+
+
+
 def delete_XML_config(provider):
     file_path = geocoding_settings.DIR_SOLR_CONFIG + str(provider.pk)+"-"+geocoding_settings.FILE_DATE_CONFIG
     if os.path.isfile(file_path):

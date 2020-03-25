@@ -58,8 +58,8 @@ GEOCODING_PROVIDER = {
         'url': 'http://nominatim.openstreetmap.org',
         'country_codes': ''
     },
-    'googlemaps': {
-        'candidates_url': 'https://maps.googleapis.com/maps/api/place/autocomplete/json',
+    'googlemaps': {        
+        "candidates_url": "https://maps.googleapis.com/maps/api/place/autocomplete/json?language=es&components=country:es",
         'find_url': 'https://maps.googleapis.com/maps/api/geocode/json',
         'reverse_url': 'https://maps.googleapis.com/maps/api/geocode/json',
         'key': 'AIzaSyDRJwLAQS6t8LP-rnv0IBhkp6fT4lHjV1w'

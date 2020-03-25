@@ -380,9 +380,12 @@ def provider_full_import(request, provider_id):
     correct_conf = configure_datastore(provider)
     if provider.type == 'cartociudad':
         has_config = create_cartociudad_config(provider, correct_conf)
+    if provider.type == 'postgres':
+        has_config = create_postgres_config(provider, correct_conf)
+        return redirect('provider_list')
     else:
         has_config = create_XML_config(provider, correct_conf)
-    if has_config:
+    if has_config and provider.type == 'user':
         add_solr_config(provider)
         reload_solr_config()
     remove_solr_data(provider)
@@ -414,21 +417,9 @@ def get_conf(request):
     if request.method == 'POST': 
         provider = Provider.objects.all()
         has_providers = provider.__len__() > 0
-        #if has_providers == False :            
         response = {
             'has_providers': has_providers, 
-            'candidates_url': geocoding_setting.GEOCODING_PROVIDER['cartociudad']['candidates_url'],
-            'find_url': geocoding_setting.GEOCODING_PROVIDER['cartociudad']['find_url'],
-            'reverse_url': geocoding_setting.GEOCODING_PROVIDER['cartociudad']['reverse_url']
         }
-#         else:
-#             params = json.loads(provider[0].params)
-#             response = {
-#                 'has_providers': has_providers, 
-#                 'candidates_url': params['candidates_url'],
-#                 'find_url': params['find_url'],
-#                 'reverse_url': params['reverse_url']
-#             }                   
         return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')           
 
 

@@ -92,7 +92,8 @@ class Cartociudad():
                 'source': address['address[source]'],
                 'type': address['address[type]'],
                 'lat': address['address[lat]'],
-                'lng': address['address[lng]']
+                'lng': address['address[lng]'],
+                'srs' : 'EPSG:4258'
             }
             return params
 
@@ -115,6 +116,7 @@ class Cartociudad():
                     updated_data = self.set_database_config(provider)
             if updated_data:
                 json_result = self.get_json_from_url(self.urls['find_url'], params)
+                json_result['srs'] = 'EPSG:4258'
 
         return json_result
 
@@ -140,7 +142,8 @@ class Cartociudad():
         params = {
             'lat': coordinate[1],
             'lon': coordinate[0],
-            'schema': schema
+            'schema': schema,
+            'srs' : 'EPSG:4258'
         }
 
         json_result =  self.get_json_from_url(self.urls['reverse_url'], params)
