@@ -25,7 +25,7 @@ from gvsigol_services.models import Datastore, Layer
 
 from geopy.util import logger
 from gvsigol import settings as core_settings
-from backend_postgis import Introspect
+from gvsigol_services.backend_postgis import Introspect
 import settings
 import json, requests
 import logging
@@ -41,7 +41,12 @@ class GeocoderPostgres():
         self.set_database_config(provider)
         self.providers.append(provider)
 
-
+    def __del__(self):
+        for p in self.providers:
+            if p.conn is not None:
+                p.cursor.close()
+                p.conn.close()
+                p.conn = None
 
     def get_type(self):
         return 'postgres'
