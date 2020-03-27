@@ -109,6 +109,33 @@ class Introspect:
             """, [schema])
         
         return [(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7]) for r in self.cursor.fetchall()]
+
+    def get_geometry_column_info(self, table=None, column=None, schema='public'):
+        """
+        Gives information about a geometry column. Use exact name.
+        Returns a tuple formed of:
+         (f_table_schema, table_name, geom_column, coord_dimension, srid, type, key_column, fields)
+        """
+        if table:
+            self.cursor.execute("""
+            SELECT f_table_schema, f_table_name, f_geometry_column, coord_dimension, srid, type,
+            array (SELECT a.attname AS data_type
+                        FROM pg_index i
+                        JOIN pg_attribute a ON a.attrelid = i.indrelid
+                        AND a.attnum = ANY(i.indkey)
+                        WHERE
+                        i.indrelid = ('"'||replace(f_table_schema, '"', '""')||'"."'||replace(f_table_name, '"', '""')||'"')::regclass
+                        AND i.indisprimary) key_column,
+            array(SELECT column_name::text
+                        FROM information_schema.columns
+                        WHERE table_schema = f_table_schema 
+                        AND table_name = f_table_name) fields
+            FROM public.geometry_columns
+            WHERE f_table_schema = %s AND f_table_name = %s and f_geometry_column = %s
+            """, [schema, table, column])
+        
+        return [(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7]) for r in self.cursor.fetchall()]
+
     
     def get_geography_columns(self, table, schema='public'):
         self.cursor.execute("""
