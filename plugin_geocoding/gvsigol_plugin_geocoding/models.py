@@ -55,10 +55,11 @@ class Provider(models.Model):
             return cadena
         
         params = json.loads(self.params)
-        datastore = Datastore.objects.get(id=params['datastore_id'])
-        cadena = cadena + '  (' + str(datastore.name)
-        if self.type == 'user':
-            cadena = cadena + ' - ' + params['resource'] #+ ' (' + params['id_field'] + ', ' + params['text_field'] + ', ' + params['geom_field'] + ')'           
-        cadena = cadena + ')'
+        if 'datastore_id' in params:
+            datastore = Datastore.objects.get(id=params['datastore_id'])
+            cadena = cadena + '  (' + str(datastore.name)
+            if self.type == 'user' or self.type == 'postgres':
+                cadena = cadena + ' - ' + params['resource'] #+ ' (' + params['id_field'] + ', ' + params['text_field'] + ', ' + params['geom_field'] + ')'           
+            cadena = cadena + ')'
         
         return  cadena

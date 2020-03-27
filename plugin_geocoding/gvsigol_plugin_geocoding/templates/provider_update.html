@@ -30,7 +30,7 @@
 								</ul>
 							</div>
 						{% endif %}
-						
+																		
 						{% if message %}
 							<div id="form-error" style="color:#ff0000;">
 								<p>* {{ message }}</p>
@@ -206,7 +206,12 @@
 					<div class="col-md-12 upload-form-button-div">
 						<button
 							class="btn btn-default upload-form-button full-import-button btn-sm">
-							<i class="fa fa-cloud-upload margin-r-5"></i> {% trans "Upload full data" %}
+							<i class="fa fa-cloud-upload margin-r-5"></i> 
+								{% if type == 'postgres' %}
+								{%     trans "Create fulltext index" %}
+								{% else %}
+								{%     trans "Upload full data" %}
+								{% endif %}
 						</button>
 					</div>
 				</div>
@@ -566,7 +571,7 @@
 		var ws_id = $("#provider-workspace-id").val();
 		var ds_name = $("#provider-datastore").val();
 		
-		if(type=="user"){
+		if(type=="user" || type == 'postgres'){
 			var resource = $("#provider-resource").val();
 			updateResourceList(ws_id, ds_name, resource);
  			updateFieldsList(ws_id, ds_name, resource, "id_id_field", params["id_field"]);
@@ -574,7 +579,7 @@
  			updateFieldsList(ws_id, ds_name, resource, "id_geom_field", params["geom_field"]);
 		}
 		
-		if(type=="user" || type=="cartociudad"){
+		if(type=="user" || type=="cartociudad" || type == 'postgres'){
 			$("#id_category").prop("disabled", "disabled");
 		}
 		
