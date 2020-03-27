@@ -60,13 +60,17 @@ def provider_list(request):
         providers = Provider.objects.order_by('order')
     
     for provider in providers:
-        if provider.type == 'cartociudad' or provider.type == 'user':
+        if provider.type == 'cartociudad' or provider.type == 'user' or provider.type == 'postgres':
             params = json.loads(provider.params)
-            if params['datastore_id']:
+            if 'datastore_id' in params:
                 datastore = Datastore.objects.filter(id=params['datastore_id'])
                 if not datastore:
                     provider_delete(request, provider.id)
                     providers = Provider.objects.order_by('order')
+            else:
+                #Something wrong happend. Remove this provider, is not well configured
+                provider_delete(request, provider.id)
+                providers = Provider.objects.order_by('order')
     
     response = {
         'providers': providers
@@ -90,7 +94,7 @@ def provider_add(request):
             
             params = {}
             
-            if type=='cartociudad' or type=='user':
+            if type=='cartociudad' or type=='user' or type=='postgres':
                 if 'params' in request.POST:
                     params = json.loads(request.POST.get('params'))
                 workspace = request.POST.get('workspace')
@@ -99,7 +103,7 @@ def provider_add(request):
                 ws = Workspace.objects.get(id=workspace)
                 ds = Datastore.objects.filter(workspace=ws, name=datastore).first()
 
-                if type=='user':
+                if type=='user' or type=='postgres':
                     resource = request.POST.get('resource')
                     id_field = request.POST.get('id_field')
                     text_field = request.POST.get('text_field')
@@ -126,7 +130,7 @@ def provider_add(request):
                 if 'params' in request.POST:
                     params = ast.literal_eval(request.POST.get('params'))
                             
-            if type != 'user':
+            if type != 'user' and type!='postgres':
                 prov = Provider.objects.filter(type=type)
                 if prov and prov.__len__() > 0:
                     form.add_error(None, _("Error: this type of provider is already added to the project"))
@@ -235,7 +239,7 @@ def provider_update(request, provider_id):
         form = ProviderUpdateForm(request.POST)
         
         type = request.POST.get('provider-type')
-        if type!='cartociudad' and type!='user':
+        if type!='cartociudad' and type!='user' and type != 'postgres':
             provider.category = request.POST['category']
         if request.FILES.get('image'):
             provider.image = request.FILES.get('image')  
@@ -245,7 +249,7 @@ def provider_update(request, provider_id):
             params = ast.literal_eval(request.POST.get('params'))
         has_errors = False
         
-        if type=='cartociudad' or type=='user':
+        if type=='cartociudad' or type=='user' or type=='postgres':
             workspace = request.POST.get('provider-workspace')
             datastore = request.POST.get('provider-datastore')
 
@@ -292,13 +296,13 @@ def provider_update(request, provider_id):
         params = json.loads(provider.params)
         form.fields['category'].initial = provider.category
         
-        if provider.type == 'user' or provider.type == 'cartociudad':
+        if provider.type == 'user' or provider.type == 'cartociudad' or provider.type == 'postgres':
             datastore_id = params["datastore_id"]
             datastore = Datastore.objects.get(id=datastore_id)
             
             form.fields['workspace'].initial = datastore.workspace.name
             form.fields['datastore'].initial = datastore.name
-            if provider.type == 'user':
+            if provider.type == 'user' or provider.type == 'postgres':
                 form.fields['resource'].initial = params["resource"]
                 form.fields['id_field'].initial = params["id_field"]
                 form.fields['text_field'].initial = params["text_field"]
@@ -396,6 +400,10 @@ def provider_full_import(request, provider_id):
 @staff_required
 def provider_import_status(request, provider_id):
     provider = Provider.objects.get(pk=provider_id)
+    if (provider.type == 'postgres'):
+        status = {}
+        return HttpResponse(json.dumps(status, indent=4), content_type='application/json')
+
     response = status_solr_import(provider)
     
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')

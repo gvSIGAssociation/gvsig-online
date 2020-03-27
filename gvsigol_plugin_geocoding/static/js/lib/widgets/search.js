@@ -319,6 +319,33 @@ search.prototype.initUI = function() {
 						}
 					});
 				}
+				if(response.types[i] == "postgres"){
+					self.menus.push({
+						text: 'Dirección Simple',
+						classname: 'geocoding-contextmenu', // add some CSS rules
+						callback: function (obj) {
+							var coordinate = ol.proj.transform([parseFloat(obj.coordinate[0]), parseFloat(obj.coordinate[1])], 'EPSG:3857', 'EPSG:4326');	
+							$.ajax({
+								type: 'POST',
+								async: false,
+								url: '/gvsigonline/geocoding/get_location_address/',
+								beforeSend:function(xhr){
+									xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+								},
+								data: {
+									'coord': coordinate[0] + ","+ coordinate[1],
+									'type': 'postgres'
+								},
+								success	:function(response){
+									self.locate(response, response.srs, false);
+								},
+								error: function(xhr, status, error) {
+									  console.error(xhr.responseText);
+								}
+							});
+						}
+					});
+				}
 				
 			}
 
@@ -402,11 +429,12 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 	this.popup = new ol.Overlay.Popup();
 	this.map.addOverlay(this.popup);
 	if(address != null && !(address instanceof Array && address.length == 0)){
-		var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], origin_srs, 'EPSG:3857');	
 		if(fromCombo){
+			var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], origin_srs, 'EPSG:3857');
 			this.popup.show(coordinate, '<div><p>' + $("#autocomplete").val() + '</p></div>');
-		}else{
+		}else{			
 			if(address.source == "cartociudad" || address.source == "new_cartociudad"){
+				var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], origin_srs, 'EPSG:3857');	
 				var callejero = "";
 				if(address.tip_via && (address.tip_via.trim() != 0)){
 					callejero = address.tip_via + " ";
@@ -421,6 +449,7 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 				this.popup.show(coordinate, '<div><p>' + callejero + '</p></div>');
 			}else{
 				if (address.source == "ide_uy") {
+					var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], origin_srs, 'EPSG:3857');	
 					var callejero = "";
 					if(address.tip_via && (address.tip_via.trim() != 0)){
 						callejero = address.tip_via + " ";
@@ -444,7 +473,19 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 				}
 				else
 				{
-					this.popup.show(coordinate, '<div><p>' + address.address + '</p></div>');
+					if (address instanceof Array) {
+						for (var i=0; i < address.length; i++)
+						{
+							var a = address[i];
+							var coordinate = ol.proj.transform([parseFloat(a.lng), parseFloat(a.lat)], a.srs, 'EPSG:3857');
+							this.popup.show(coordinate, '<div><p>' + a.address + '</p></div>');
+						}
+					}
+					else
+					{
+						var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], address.srs, 'EPSG:3857');
+						this.popup.show(coordinate, '<div><p>' + address.address + '</p></div>');
+					}
 				}
 			}
 		}

@@ -22,6 +22,9 @@ from models import Provider
 from gvsigol_services.models import Datastore
 # from gvsigol import settings
 from gvsigol_plugin_geocoding import settings as geocoding_settings
+
+import psycopg2
+
 import json
 import xml.etree.cElementTree as ET
 import xml.etree.ElementTree as ET2
@@ -37,6 +40,7 @@ from subprocess import call
 from dbfpy import dbf
 import shutil
 import logging
+from bsddb import dbtables
 
 '''
 @author: José Badía <jbadia@scolab.es>
@@ -53,6 +57,7 @@ def status_solr_import(provider):
         return None
     data = json.load(req)   
     return data
+
 
 '''
 http://localhost:8983/solr/admin/cores?action=RELOAD&core=<core_name>
@@ -625,20 +630,66 @@ def create_postgres_config(provider, has_soundex):
     try:
         datastore_params = json.loads(datastore.connection_params)
         
-        root = ET.Element("dataConfig")
-        ET.SubElement(
-            root, 
-            "dataSource", 
-            name="DS2", 
-            type="JdbcDataSource", 
-            driver="org.postgresql.Driver", 
-            url="jdbc:postgresql://"+datastore_params["host"]+":"+datastore_params["port"]+"/"+datastore_params["database"], 
-            user=datastore_params["user"], 
-            password=datastore_params["passwd"])
+        dbhost = datastore_params['host']
+        dbport = datastore_params['port']
+        dbname = datastore_params['database']
+        dbuser = datastore_params['user']
+        dbpassword = datastore_params['passwd']
+        dbtable = params['resource']
+        dbfield = params['text_field']
+        dbfieldGeom = params['geom_field']
+        dbschema = datastore.name
+        
+        provider.dbschema = dbschema
+                
+        #connection = get_connection(dbhost, dbport, dbname, dbuser, dbpassword)
+        try:
+            connection = psycopg2.connect("host=" + dbhost +" port=" + dbport +" dbname=" + dbname +" user=" + dbuser +" password="+ dbpassword);
+            connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+            print "Connect ... "
+        
+        except StandardError, e:
+            print "Failed to connect!", e
+            return False
+        cursor = connection.cursor()
+        
+        try:        
+            create_extension = "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+            
+            create_function = ("CREATE OR REPLACE FUNCTION immutable_unaccent(text) \n"
+                "RETURNS text AS \n" 
+                "$func$ \n"
+                "SELECT unaccent('unaccent', $1)  -- schema-qualify function and dictionary \n"
+                "$func$  LANGUAGE sql IMMUTABLE;")
+       
+            cursor.execute(create_extension)
+            cursor.execute(create_function)
+            
+            # Trigram index
+            index_name = "index_" + dbtable + "_on_" + dbfield + "_trigram" 
+            create_index = ("CREATE INDEX IF NOT EXISTS " + 
+                index_name + " ON " + dbschema + "." + dbtable + " USING gin (immutable_unaccent(" + 
+                dbfield + ") gin_trgm_ops);")       
+            cursor.execute(create_index)
+
+            # Spatial index in srs 4326
+            index_name = "index_" + dbtable + "_on_" + dbfieldGeom + "_spatial"
+            create_spatial_index = ("CREATE INDEX IF NOT EXISTS " + index_name + " ON " +
+                 dbschema + "." + dbtable + " USING GIST(st_transform(" + dbfieldGeom + ", 4326));")
+            cursor.execute(create_spatial_index)
+            #rows = cursor.fetchall()
+    
+        except StandardError, e:
+            print "SQL Error", e
+            cursor.close();
+            connection.close();
+
+        
     except Exception as e:
         #self.add_error('connection_params', _("Error: Invalid JSON format"))
         return False
 
+    provider.connection = connection
     return True
 
 

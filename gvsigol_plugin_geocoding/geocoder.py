@@ -26,6 +26,7 @@ import settings
 from cartociudad2 import CartoCiudad2
 from cartociudad import Cartociudad
 from nominatim import Nominatim 
+from geocoder_postgres import GeocoderPostgres
 from ide_uy import IdeUY
 import json, ast
 
@@ -60,6 +61,10 @@ class Geocoder():
 
         if provider.type == 'ide_uy':
             geocoder[provider.type] = IdeUY(provider)
+            self.geocoders.append(geocoder)
+
+        if provider.type == 'postgres':
+            geocoder[provider.type] = GeocoderPostgres(provider)
             self.geocoders.append(geocoder)
             
             
