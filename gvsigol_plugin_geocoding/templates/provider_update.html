@@ -403,6 +403,9 @@
 			if(data.statusMessages["Total Documents Skipped"]){
 				$(".details .skipped").text(data.statusMessages["Total Documents Skipped"]);
 			}
+			if(data.statusMessages["Postgres Index Created"]){
+				$(".details .skipped").text(data.statusMessages["Postgres Index Created"]);
+			}
 			
 			if(data.statusMessages[""]){
 				$(".result_import .result-message").text(data.statusMessages[""]);

@@ -401,7 +401,19 @@ def provider_full_import(request, provider_id):
 def provider_import_status(request, provider_id):
     provider = Provider.objects.get(pk=provider_id)
     if (provider.type == 'postgres'):
-        status = {}
+#         status = {
+#             "statusMessages": {
+#                     "Postgres Index Created": _("Postgres Index Created")
+#                 }
+#             }
+#         }
+        status = {
+            "statusMessages": {
+                    "Time taken": _("5 segs")
+                },
+            "status": "idle"
+        }
+
         return HttpResponse(json.dumps(status, indent=4), content_type='application/json')
 
     response = status_solr_import(provider)
