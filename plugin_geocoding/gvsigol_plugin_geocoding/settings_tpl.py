@@ -33,7 +33,8 @@ GEOCODING_SUPPORTED_TYPES = (
                 ('cartociudad', _('Cartography of CartoCiudad')),
                 ('new_cartociudad', _('(New) Cartography of CartoCiudad')),
                 ('user', _('Other data sources')),
-                ('ide_uy', _('IDE Uruguay Geocoder'))
+                ('ide_uy', _('IDE Uruguay Geocoder')),
+                ('postgres', _('Simple Geocoder'))
             )
 
 GEOCODING_PROVIDER = {
@@ -80,7 +81,12 @@ GEOCODING_PROVIDER = {
         'reverse_url': '##GEOCODER_IDEUY_URL##/api/v1/geocode/reverse',  
         'max_results': 10,
         'filter': ''
-    }
+    },
+   'postgres':{
+        'autocancel': True,
+        'max_results': 10
+    },
+
     
     #'ide_uy': {
     #    'candidates_url': 'https://callejerouy-direcciones.agesic.gub.uy/direcciones-0.0.2-SNAPSHOT/api/v1/geocode/candidates',
