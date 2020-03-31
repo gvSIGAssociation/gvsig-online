@@ -682,6 +682,7 @@ viewer.core = {
 			wmsLayer.on('change:visible', function(){
 				self.legend.reloadLegend();
 			});
+			wmsLayer.id = layerId;
 			wmsLayer.baselayer = baselayer;
 			wmsLayer.layer_name = layerConf.name;
 			wmsLayer.wms_url = layerConf.wms_url;
@@ -720,6 +721,77 @@ viewer.core = {
 
 			wmsLayer.setOpacity(layerConf.opacity);
 			this.map.addLayer(wmsLayer);
+			
+			wmsLayer.getSource().loadend = false;
+			wmsLayer.getSource().layer_name = layerConf.name;
+			wmsLayer.getSource().on('tileloadstart', function() {
+				var time = 0;
+				var pid;
+				var _this = this;
+				pid = setInterval(function() {
+					if (time < layerConf.timeout) {
+						time += 1000;
+					} else {
+						if (!_this.loadend) {
+							var iLayer = null;
+							clearInterval(pid);
+							self.map.getLayers().forEach(function(layer){
+								if (layer.layer_name) {
+									if (layer.layer_name === _this.layer_name) {
+										iLayer = layer;
+									}
+								}
+														
+							}, _this);
+							
+							if (iLayer) {
+								if (iLayer.baselayer) {
+									$('#' + iLayer.id).parent().css('color', '#ff0000');
+									$('#' + iLayer.id).parent().children('input').prop( "checked", false );
+									$('#' + iLayer.id).parent().children('input').css( "display", 'none' );
+									$('#' + iLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
+									
+								} else {
+									$('#' + iLayer.id).parent().css('color', '#ff0000');
+									$('#' + iLayer.id).parent().children('input').prop( "checked", false );
+									$('#' + iLayer.id).parent().children('input').css( "display", 'none' );
+									$('#' + iLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
+									
+								}
+								self.map.removeLayer(iLayer);
+							}
+						}
+	
+					}
+				}, 1000);
+			
+			});
+			wmsLayer.getSource().on('tileloadend', function() {
+				this.loadend = true;
+			
+			});
+			wmsLayer.getSource().on('tileloaderror', function(e){
+				var iLayer = null;
+				self.map.getLayers().forEach(function(layer){
+					if (layer.layer_name) {
+						if (layer.layer_name === this.layer_name) {
+							iLayer = layer;
+						}
+					}						
+				}, this);
+				
+				if (iLayer) {
+					$('#' + iLayer.id).parent().css('color', '#ff0000');
+					$('#' + iLayer.id).parent().children('input').prop( "checked", false );
+					$('#' + iLayer.id).parent().children('input').css( "display", 'none' );
+					$('#' + iLayer.id).parent().prepend('<i style="font-color: red;" class="fa fa-exclamation-triangle"></i>');
+					self.map.removeLayer(iLayer);
+				}
+				
+				
+			});
+			
+			
 		}
 	},
 
