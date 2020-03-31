@@ -211,6 +211,7 @@ class Geoserver():
                     driver = None
                 elif driver == 'PostGIS':
                     params_dict['schema'] = params_dict.get('schema', 'public')
+                    params_dict['Support on the fly geometry simplification'] = params_dict.get('Support on the fly geometry simplification', 'true') 
                 ds = catalog.create_datastore(name, workspace.name)
                 ds.connection_parameters.update(params_dict)
             elif format_nature == "c": # coverage (raster)
