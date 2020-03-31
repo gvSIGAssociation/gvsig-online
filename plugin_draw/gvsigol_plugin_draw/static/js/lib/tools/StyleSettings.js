@@ -104,7 +104,7 @@ var StyleSettings = function(drawBar) {
 			"symbolizers" : [{
 				"type" : "polygon",
 				"fillColor": "#ffcc33",
-				"fillOpacity": 1.0,
+				"fillOpacity": 0.1,
 				"strokeColor": "#ffcc33",
 				"strokeWidth": 2
 			}
