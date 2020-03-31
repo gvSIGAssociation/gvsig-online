@@ -1009,6 +1009,7 @@ def layer_add_with_group(request, layergroup_id):
                 newRecord.detailed_info_enabled = detailed_info_enabled
                 newRecord.detailed_info_button_title = detailed_info_button_title
                 newRecord.detailed_info_html = detailed_info_html
+                newRecord.timeout = request.POST.get('timeout')
                 
                 params = {}
                 params['format'] = request.POST.get('format')
@@ -1254,6 +1255,7 @@ def layer_update(request, layer_id):
             layer.detailed_info_enabled = detailed_info_enabled
             layer.detailed_info_button_title = detailed_info_button_title
             layer.detailed_info_html = detailed_info_html
+            layer.timeout = request.POST.get('timeout')
             
             params = {}
             params['format'] = request.POST.get('format')

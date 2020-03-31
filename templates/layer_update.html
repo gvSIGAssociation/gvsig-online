@@ -107,6 +107,12 @@
 						<div class="box">
 		          			<div class="box-body">
 		          				<div class="row">
+			          				<div class="col-md-4 form-group">
+	          							<label for="timeout">{% trans "Timeout (miliseconds)" %}</label>
+										<input name="timeout" id="timeout" value="{{layer.timeout}}" type="number" class="form-control">														
+									</div>
+								</div>
+		          				<div class="row">
 									<div class="col-md-12 form-group">
 										<span>{% trans "Layer properties in the viewer" %}.</span>
 									</div>
