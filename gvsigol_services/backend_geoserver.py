@@ -211,7 +211,10 @@ class Geoserver():
                     driver = None
                 elif driver == 'PostGIS':
                     params_dict['schema'] = params_dict.get('schema', 'public')
-                    params_dict['Support on the fly geometry simplification'] = params_dict.get('Support on the fly geometry simplification', 'true') 
+                    params_dict['Support on the fly geometry simplification'] = params_dict.get('Support on the fly geometry simplification', 'true')
+                    params_dict['Loose bbox'] = params_dict.get('Loose bbox', 'true')
+                    params_dict['Estimated extends'] = params_dict.get('Estimated extends', 'true')
+                    params_dict['encode functions'] = params_dict.get('encode functions', 'true') 
                 ds = catalog.create_datastore(name, workspace.name)
                 ds.connection_parameters.update(params_dict)
             elif format_nature == "c": # coverage (raster)
