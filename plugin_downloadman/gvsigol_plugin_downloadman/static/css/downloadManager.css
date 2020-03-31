@@ -95,20 +95,20 @@
 
 @media only screen and (max-width: 640px) {
 	.show_downloads_catalog_btn {
-		display: none;
+		display: none !important;
 	}
 	.viewer-download-list-btn {
-		display: none;
+		display: none !important;
 	}
 }
 
 /* iPads (portrait and landscape) ----------- */
 @media only screen and (min-device-width : 768px) and (max-device-width : 1024px) {
 	.show_downloads_catalog_btn {
-		display: none;
+		display: none !important;
 	}
 	.viewer-download-list-btn {
-		display: none;
+		display: none !important;
 	}
 }
 
