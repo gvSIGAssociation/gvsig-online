@@ -60,6 +60,8 @@ from django.core.exceptions import PermissionDenied
 from django.utils.crypto import get_random_string
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
+import logging
+logger = logging.getLogger("gvsigol")
 
 def not_found_view(request):
     response = render(request, '404.html', {})
@@ -1036,6 +1038,7 @@ def project_get_conf(request):
                         idx = idx + 1
     
                     except Exception as e:
+                        logger.exception('error getting layer conf')
                         datastore = Datastore.objects.get(id=l.datastore_id)
                         workspace = Workspace.objects.get(id=datastore.workspace_id)
     
