@@ -649,6 +649,9 @@ html, body {
 	.show-attribute-table-link {
 		display: none;
 	}
+	#show_select_toolbar {
+		display: none;
+	}
 }
 
 /* iPads (portrait and landscape) ----------- */
@@ -669,6 +672,9 @@ html, body {
 		display: none;
 	}
 	.show-attribute-table-link {
+		display: none;
+	}
+	#show_select_toolbar {
 		display: none;
 	}
 }
