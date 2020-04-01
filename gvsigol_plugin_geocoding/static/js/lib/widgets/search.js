@@ -449,7 +449,7 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 				this.popup.show(coordinate, '<div><p>' + callejero + '</p></div>');
 			}else{
 				if (address.source == "ide_uy") {
-					var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], origin_srs, 'EPSG:3857');	
+					var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], 'EPSG:4326', 'EPSG:3857');	
 					var callejero = "";
 					if(address.tip_via && (address.tip_via.trim() != 0)){
 						callejero = address.tip_via + " ";
