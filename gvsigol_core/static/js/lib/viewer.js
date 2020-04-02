@@ -722,7 +722,7 @@ viewer.core = {
 			wmsLayer.setOpacity(layerConf.opacity);
 			this.map.addLayer(wmsLayer);
 			
-			wmsLayer.getSource().loadend = false;
+			/*wmsLayer.getSource().loadend = false;
 			wmsLayer.getSource().layer_name = layerConf.name;
 			wmsLayer.getSource().on('tileloadstart', function() {
 				var time = 0;
@@ -789,7 +789,7 @@ viewer.core = {
 				}
 				
 				
-			});
+			});*/
 			
 			
 		}
