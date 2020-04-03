@@ -418,9 +418,9 @@ def create_transfer_options(root_elem, qualified_name, spatialRepresentationType
         MD_DigitalTransferOptionsElem = ET.SubElement(transferOptionsElem, "{http://www.isotc211.org/2005/gmd}MD_DigitalTransferOptions")
         create_online_resource(MD_DigitalTransferOptionsElem, wms_endpoint, 'OGC:WMS', qualified_name, title)
         if wfs_endpoint:
-            create_online_resource(MD_DigitalTransferOptionsElem, wms_endpoint, 'OGC:WFS', qualified_name, title)
+            create_online_resource(MD_DigitalTransferOptionsElem, wfs_endpoint, 'OGC:WFS', qualified_name, title)
         if wcs_endpoint:
-            create_online_resource(MD_DigitalTransferOptionsElem, wms_endpoint, 'OGC:WCS', qualified_name, title)
+            create_online_resource(MD_DigitalTransferOptionsElem, wcs_endpoint, 'OGC:WCS', qualified_name, title)
 
 class Iso19139_2007Updater(XmlStandardUpdater):
     def update_extent(self, extent_tuple):
