@@ -155,8 +155,29 @@
 									{% endwith %}
 		    					{% endif %}		    					
 		    				{% endfor %}
+		    			
+		    			{% else %}
 		    				
-						{% endif %}			
+		    				{% for plugin in PUBLIC_PLUGINS %}												  
+		    					{% if 'gvsigol_plugin_' in plugin %}	
+		    						{% with "dashboard_"|add:plugin|cut:"gvsigol_plugin_"|add:"_menu.html" as aux %}	    	
+										{% include_if_exists aux %}	
+									{% endwith %}
+		    					{% endif %}		    					
+		    				{% endfor %}
+		    				
+						{% endif %}		
+					
+					{% else %}
+		    				
+		    				{% for plugin in PUBLIC_PLUGINS %}												  
+		    					{% if 'gvsigol_plugin_' in plugin %}	
+		    						{% with "dashboard_"|add:plugin|cut:"gvsigol_plugin_"|add:"_menu.html" as aux %}	    	
+										{% include_if_exists aux %}	
+									{% endwith %}
+		    					{% endif %}		    					
+		    				{% endfor %}
+		    						
 					{% endif %}						
 				</ul>				
 			</section>			

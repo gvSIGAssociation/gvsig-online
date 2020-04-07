@@ -104,6 +104,10 @@ INSTALLED_APPS.append('actstream')
 INSTALLED_APPS.append('corsheaders')
 INSTALLED_APPS.append('drf_yasg')
 
+PUBLIC_PLUGINS = [
+    ##GVSIGOL_PUBLIC_PLUGINS##
+]
+
 ACTSTREAM_SETTINGS = {
     'FETCH_RELATIONS': True,
     'USE_JSONFIELD': True,

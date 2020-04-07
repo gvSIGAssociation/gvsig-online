@@ -33,5 +33,6 @@ def global_settings(request):
         'GVSIGOL_SURNAME': gvsigol.settings.GVSIGOL_SURNAME,
         'GVSIGOL_NAME_SHORT': gvsigol.settings.GVSIGOL_NAME_SHORT,
         'GVSIGOL_SURNAME_SHORTv': gvsigol.settings.GVSIGOL_SURNAME_SHORT,
-        'TEMPORAL_ADVANCED_PARAMETERS': gvsigol.settings.TEMPORAL_ADVANCED_PARAMETERS
+        'TEMPORAL_ADVANCED_PARAMETERS': gvsigol.settings.TEMPORAL_ADVANCED_PARAMETERS,
+        'PUBLIC_PLUGINS': gvsigol.settings.PUBLIC_PLUGINS,
     }
