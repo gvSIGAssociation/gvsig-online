@@ -40,7 +40,6 @@ from subprocess import call
 from dbfpy import dbf
 import shutil
 import logging
-from bsddb import dbtables
 
 '''
 @author: José Badía <jbadia@scolab.es>
