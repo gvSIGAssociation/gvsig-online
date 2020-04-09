@@ -90,7 +90,7 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     'django.contrib.sites',
     'django.contrib.flatpages',
-    'tinymce',
+    'push_notifications',
     'rest_framework',
     'gvsigol_statistics',
     'gvsigol_auth',
