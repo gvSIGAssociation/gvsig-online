@@ -606,7 +606,8 @@ viewer.core = {
 				url: url,
 				visible: layerConf.visible,
 				params: {'LAYERS': layerConf.workspace + ':' + layerConf.name, 'FORMAT': format, 'VERSION': '1.1.1'},
-				serverType: 'geoserver'
+				serverType: 'geoserver',
+				crossOrigin: 'anonymous',
 			});
 			wmsLayer = new ol.layer.Image({
 				id: layerId,
