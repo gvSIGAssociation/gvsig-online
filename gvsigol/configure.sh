@@ -162,7 +162,8 @@ function configure() {
 		EMAIL_TIMEOUT=60
 	fi
 	grep -rl "##EMAIL_TIMEOUT##"  | xargs sed -i "s ##EMAIL_TIMEOUT## $EMAIL_TIMEOUT g"
-
+	grep -rl "##EMAIL_PORT##"  | xargs sed -i "s ##EMAIL_PORT## $EMAIL_PORT g"
+	
 	
 	#TODO: hay que llevarlo a la app 
 	if [ "$LANGUAGES" = "" ]; then
