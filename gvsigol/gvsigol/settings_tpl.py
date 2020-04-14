@@ -89,7 +89,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'django.contrib.sites',
-    'django.contrib.flatpages',
     'rest_framework',
     'gvsigol_statistics',
     'gvsigol_auth',
@@ -111,7 +110,7 @@ try:
     __import__('drf_yasg')
     INSTALLED_APPS.append('drf_yasg')
 except ImportError:
-    print 'ERROR: No ha instalado la libreria corsheaders'
+    print 'ERROR: No ha instalado la libreria drf_yasg'
 
 PUBLIC_PLUGINS = [
     ##GVSIGOL_PUBLIC_PLUGINS##
@@ -134,10 +133,14 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 ]
+
+try:
+    __import__('corsheaders')
+    MIDDLEWARE_CLASSES.append('corsheaders.middleware.CorsMiddleware')
+except ImportError:
+    print 'ERROR: No ha instalado la libreria corsheaders'
 
 CORS_ORIGIN_ALLOW_ALL = True
 
