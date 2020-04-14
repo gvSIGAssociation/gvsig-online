@@ -100,8 +100,18 @@ INSTALLED_APPS = [
     ##GVSIGOL_PLUGINS##
 ]
 INSTALLED_APPS.append('actstream')
-INSTALLED_APPS.append('corsheaders')
-INSTALLED_APPS.append('drf_yasg')
+
+try:
+    __import__('corsheaders')
+    INSTALLED_APPS.append('corsheaders')
+except ImportError:
+    print 'ERROR: No ha instalado la libreria corsheaders'
+    
+try:
+    __import__('drf_yasg')
+    INSTALLED_APPS.append('drf_yasg')
+except ImportError:
+    print 'ERROR: No ha instalado la libreria corsheaders'
 
 PUBLIC_PLUGINS = [
     ##GVSIGOL_PUBLIC_PLUGINS##
