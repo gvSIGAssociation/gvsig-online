@@ -3838,13 +3838,13 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
     capabilities = None
     title = ''
     crs_list = None
-
+    
+    auth = Authentication(verify=False)
     if service == 'WMS':
         if not version:
             version = WMS_MAX_VERSION
         try:
             print 'Add base layer: ' + url+ ', version: ' + version
-            auth = Authentication(verify=False)
             wms = WebMapService(url, version=version, auth=auth)
 
             print 'Add base layer type ' + wms.identification.type
@@ -3893,7 +3893,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
         try:
             if not version:
                 version = WMTS_MAX_VERSION
-            wmts = WebMapTileService(url, version=version)
+            wmts = WebMapTileService(url, version=version, auth=auth)
             title = wmts.identification.title
             capabilities = wmts.getServiceXML()
 
