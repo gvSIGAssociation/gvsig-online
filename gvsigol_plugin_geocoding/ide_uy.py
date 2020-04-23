@@ -32,7 +32,10 @@ from urlparse import urlparse
 class IdeUY():
     
     def __init__(self, provider):
-        self.urls = settings.GEOCODING_PROVIDER['ide_uy']
+        # self.urls = settings.GEOCODING_PROVIDER['ide_uy']
+        params = json.loads(provider.params)
+        self.urls = params
+        
         self.postal_codes = self.urls['filter']  # not used
         self.providers=[]
         self.append(provider)
