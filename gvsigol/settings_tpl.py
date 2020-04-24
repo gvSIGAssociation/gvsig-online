@@ -446,7 +446,7 @@ LOGGING = {
         },
         'gvsigol': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': '##DEBUG_LEVEL##',
         },
     },
 }

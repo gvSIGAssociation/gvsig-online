@@ -15,7 +15,18 @@ function configure() {
 		fi
 	fi	
 	grep -rl "##DEBUG##"  | xargs sed -i "s/##DEBUG##/$DEBUG/g"		
-	
+
+	if [ -z $DEBUG_LEVEL ]; then
+			if [ "$DEBUG" = True ] ; then
+					echo "WARNING: DEBUG_LEVEL is not defined, using 'DEBUG'."
+					DEBUG_LEVEL="DEBUG"
+			else
+					echo "WARNING: DEBUG_LEVEL is not defined, using 'INFO'."
+					DEBUG_LEVEL="INFO"
+			fi
+
+	fi
+	grep -rl "##DEBUG_LEVEL##"  | xargs sed -i "s/##DEBUG_LEVEL##/$DEBUG_LEVEL/g"	
 	
 	echo "INFO: Replace GVSIGOL_PATH"
 	if [ -z $GVSIGOL_PATH ]; then
