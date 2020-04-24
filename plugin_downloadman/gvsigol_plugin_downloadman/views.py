@@ -208,7 +208,7 @@ class ResourceDownloadDescriptor():
             result["native_crs"] = self.nativeCrs
         if self.size:
             result["size"] = self.size
-        print result 
+        #print result 
         return result
         #return json.dumps(result)
 
@@ -222,14 +222,11 @@ class CustomJsonEncoder(DjangoJSONEncoder):
 def getWsLayerDownloadResources(request, workspace_name, layer_name):
     try:
         layers = Layer.objects.filter(name=layer_name, datastore__workspace__name=workspace_name)
-        print layers
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace_name)
-        print layer
         resources = doGetLayerDownloadResources(layer, request.user)
     except:
         resources = []
     json_resources = json.dumps(resources, cls=CustomJsonEncoder)
-    print json_resources
     return JsonResponse(resources, encoder=CustomJsonEncoder, safe=False)
 
 
@@ -249,9 +246,7 @@ def getLayerDownloadResources(request, layer_id):
         # TODO: error handling
         resources = []
         pass
-    print resources
     json_resources = json.dumps(resources, cls=CustomJsonEncoder)
-    print json_resources
     return JsonResponse(resources, encoder=CustomJsonEncoder, safe=False)
 
 def getOgcDownloadDescriptor(layer_uuid, onlineResource, layer, fallbackTitle, dataSourceType, resourceType, dataFormats, size, nativeCrs):
@@ -685,7 +680,6 @@ def downloadResource(request, uuid, resuuid):
                 try:
                     lrdown_log = downman_models.LayerResourceProxy.objects.get(layer=ldown_log, name=resourceLocator.name)
                 except:
-                    logger.exception("error")
                     lrdown_log = downman_models.LayerResourceProxy()
                     lrdown_log.name = resourceLocator.name
                     lrdown_log.layer = ldown_log
