@@ -264,7 +264,6 @@ class Geonetwork():
                 'content-type': 'application/json',
                 'X-XSRF-TOKEN': self.get_csrf_token()
             }
-        print privileges
         r3 = self.session.put(url3, data=json.dumps(privileges), headers=headers, timeout=get_default_timeout(), proxies=settings.PROXIES)
         if r3.status_code==204:
             return True
