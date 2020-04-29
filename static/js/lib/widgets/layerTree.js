@@ -1911,8 +1911,8 @@ layerTree.prototype.createOverlayUI = function(layer, group_visible) {
 
 layerTree.prototype.zoomToLayer = function(layer) {
 	var self = this;
-	if (Array.isArray(layer.bboxwgs84) && layer.bboxwgs84.length==4) { // use extent from metadata if available
-		var extent = ol.proj.transformExtent(layer.bboxwgs84, ol.proj.get('EPSG:4326'), ol.proj.get('EPSG:3857'));
+	if (Array.isArray(layer.latlong_extent) && layer.latlong_extent.length==4) { // use extent from metadata if available
+		var extent = ol.proj.transformExtent(layer.latlong_extent, ol.proj.get('EPSG:4326'), ol.proj.get('EPSG:3857'));
 		self.map.getView().fit(extent, self.map.getSize());
 		return;
 		

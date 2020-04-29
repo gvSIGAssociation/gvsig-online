@@ -718,6 +718,11 @@ viewer.core = {
 			wmsLayer.imported = false;
 			wmsLayer.allow_download = layerConf.allow_download;
 
+			var latLong = new Array();
+			for (i in layerConf.latlong_extent.split(',')) {
+				latLong.push(parseFloat(layerConf.latlong_extent.split(',')[i]));
+			}
+			wmsLayer.latlong_extent = latLong;
 			wmsLayer.time_resolution = layerConf.time_resolution;
 
 			wmsLayer.setOpacity(layerConf.opacity);
