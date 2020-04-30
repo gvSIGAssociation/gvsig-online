@@ -20,12 +20,14 @@
     },  
     "externalGeocoder": {
       "typeName": "IcvGeocoder",
-      "urlGeocode": "https://descargas.icv.gva.es/server_api/geocodificador/solrgeocoderatmvcv.php?servicio=rtcv+nomenclator&start=0&",
+      "urlGeocode": "http://descargas.icv.gva.es/server_api/geocodificador/solrgeocoderatmvcv.php?servicio=rtcv+nomenclator&start=0&",
       "urlReverseGeocode": "http://descargas.icv.gva.es/server_api/geocodificador/geocoder.php?"
     },  
-    "rulesCsv": {
-      "ruleCsvFile": "restricciones.csv"
-    },  	
+    "rules": {
+      "ruleCsvFile": "restricciones.csv",
+      "crucesAdentro":"limiteCrucesAdentro_4326.geojson",
+      "zonaATMV":"zona_atmv_simplificada.geojson"
+    },	
     "updaters": [
       {
         "type": "bike-rental",
@@ -46,5 +48,5 @@
       "alightTimes": {
         "AIRPLANE": 1200
       }
-  }
-  
+}
+      
