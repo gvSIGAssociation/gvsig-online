@@ -74,9 +74,6 @@ pyexcel-xls==0.4.0
 pyexcel-xlsx==0.4.0
 pyexcel-ods==0.4.0
 
-
-greenlet==0.4.12
-
 # Parseo del getCapabilities (baseLayers)
 # se instala un pyproj compatible con python 2
 pyproj==2.2.2
@@ -116,3 +113,4 @@ django-tinymce==2.8.0
 # uwsgi server
 uwsgi==2.0.18
 gevent==1.4.0
+#greenlet==0.4.12
