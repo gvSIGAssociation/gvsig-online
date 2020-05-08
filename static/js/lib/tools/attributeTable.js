@@ -347,6 +347,12 @@ attributeTable.prototype.createTableUI = function(featureType) {
 	        self.selectFeatures();
 	    }
     });
+	
+	/*$('.panel-wrapper').on('resize', function(event, ui){
+		var oSettings = self.table.fnSettings();
+		oSettings.oScroll.sY = ui.size.height;
+		self.table.fnDraw();
+	});*/
 };
 
 attributeTable.prototype.selectTableEvent = function(e, dt, items, indexes) {

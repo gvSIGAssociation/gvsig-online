@@ -592,16 +592,6 @@
 
 		}
 
-		$('.panel-wrapper').resizable({
-	    	handles: 'n',
-	    	resize: function(event, ui){
-	    		console.log("Hola mundo");
-	    		var oSettings = oTable.fnSettings();
-	    		oSettings.oScroll.sY = ui.size.height;
-	    		oTable.fnDraw();
-	    	}
-	      });
-
 		{% if project.toc_mode == "toc_groups" %}
 			$(".sidebar-toggle").trigger("click");
 		{% endif %}
