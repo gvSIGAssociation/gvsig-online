@@ -56,7 +56,7 @@ from requests_futures.sessions import FuturesSession
 
 from backend_postgis import Introspect
 from forms_geoserver import CreateFeatureTypeForm
-from forms_services import ServerForm, WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, ExternalLayerForm
+from forms_services import ServerForm, WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, ExternalLayerForm, ServiceUrlForm
 from gdal_tools import gdalsrsinfo
 import geographic_servers
 from gvsigol import settings
@@ -73,7 +73,7 @@ import gvsigol_services.tiling_service as tiling_service
 import locks_utils
 from models import LayerFieldEnumeration
 from models import Workspace, Datastore, LayerGroup, Layer, LayerReadGroup, LayerWriteGroup, Enumeration, EnumerationItem, \
-    LayerLock, Server, Node
+    LayerLock, Server, Node, ServiceUrl
 from rest_geoserver import RequestError
 import rest_geoserver
 import rest_geowebcache as geowebcache
@@ -4274,3 +4274,68 @@ def update_thumbnail(request, layer_id):
     except Exception as e:
         print str(e)
         return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+    
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_safe
+@superuser_required
+def service_url_list(request):
+    response = {
+        'services': ServiceUrl.objects.values()
+    }
+    return render(request, 'service_url_list.html', response)
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@superuser_required
+@require_http_methods(["GET", "POST", "HEAD"])
+def service_url_add(request):
+    if request.method == 'POST':
+        form = ServiceUrlForm(request.POST)
+        if form.is_valid():
+            # save it on DB if successfully created
+            service_url = ServiceUrl(**form.cleaned_data)
+            service_url.save()
+            
+            return HttpResponseRedirect(reverse('service_url_list'))
+                
+    else:
+        form = ServiceUrlForm()
+            
+    return render(request, 'service_url_add.html', {'form': form})
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@require_POST
+@superuser_required
+def service_url_delete(request, svid):
+    try: 
+        service_url = ServiceUrl.objects.get(id=svid)
+        service_url.delete()
+        return HttpResponseRedirect(reverse('service_url_list'))
+        
+    except Exception as e:
+        print e.message 
+        return HttpResponseNotFound(e.message ) 
+    
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@superuser_required
+def service_url_update(request, svid):
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        type = request.POST.get('type')
+        url = request.POST.get('url')
+        
+        service_url = ServiceUrl.objects.get(id=int(svid))
+        
+        service_url.title = title
+        service_url.type = type
+        service_url.url = url
+        service_url.save() 
+        
+        return HttpResponseRedirect(reverse('service_url_list'))
+    
+    else:
+        service_url = ServiceUrl.objects.get(id=int(svid))
+        form = ServiceUrlForm(instance=service_url)
+        
+        return render(request, 'service_url_update.html', {'svid': svid, 'form': form})

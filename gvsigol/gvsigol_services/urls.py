@@ -85,4 +85,9 @@ urlpatterns = [
     
     url(r'^update_thumbnail/(?P<layer_id>[0-9]+)/$', services_views.update_thumbnail, name='update_thumbnail'),
     url(r'^mandatory_check/$', services_views.check_has_null_values, name='check_has_null_values'),
+    
+    url(r'^service_url_list/$', services_views.service_url_list, name='service_url_list'),
+    url(r'^service_url_add/$', services_views.service_url_add, name='service_url_add'),
+    url(r'^service_url_delete/(?P<svid>\d+)/$', services_views.service_url_delete, name='service_url_delete'),
+    url(r'^service_url_update/(?P<svid>[0-9]+)/$', services_views.service_url_update, name='service_url_update'),
 ]

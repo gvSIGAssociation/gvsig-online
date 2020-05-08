@@ -298,9 +298,10 @@ html, body {
 	position: fixed;
 	left: 0;
 	bottom: 0;
-	overflow: hidden;
+	overflow: auto;
 	width: 100%;
 	z-index: 1050;
+	max-height: 600px;
 }
 .panel-controller {
 	position: relative;
@@ -328,7 +329,7 @@ html, body {
 	display: none;
 }
 .panel-content {
-	overflow: hidden;
+	overflow: auto;
 	width: 100%;
 	background-color: #ffffff;
 	box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);

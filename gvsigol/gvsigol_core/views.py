@@ -27,7 +27,7 @@ from gvsigol_core.models import SharedView
 
 from django.shortcuts import render, HttpResponse, redirect
 from models import Project, ProjectUserGroup, ProjectLayerGroup
-from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup
+from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup, ServiceUrl
 from gvsigol_auth.models import UserGroup, UserGroupUser
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -1226,8 +1226,11 @@ def export(request, pid):
     return render(request, 'app_print_template.html', {'print_logo_url': urllib.unquote(image)})
 
 def ogc_services(request):
-    workspaces = Workspace.objects.filter(is_public=True)
-    return render(request, 'ogc_services.html', {'workspaces': workspaces})
+    wms = ServiceUrl.objects.filter(type='WMS')
+    wmts = ServiceUrl.objects.filter(type='WMTS')
+    wfs = ServiceUrl.objects.filter(type='WFS')
+    csw = ServiceUrl.objects.filter(type='CSW')
+    return render(request, 'services_view.html', {'wms': wms, 'wmts': wmts, 'wfs': wfs, 'csw': csw})
 
 def select_public_project(request):
     public_projects = Project.objects.filter(is_public=True)
