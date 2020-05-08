@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-05 12:17+0100\n"
+"POT-Creation-Date: 2020-05-08 10:00+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -61,9 +61,9 @@ msgstr "Painel de controle"
 msgid "Home"
 msgstr "Inicial"
 
-#: templates/base.html:173 templates/base_compress.html:173
+#: templates/base.html:194 templates/base_compress.html:173
 #: templates/documentation.html:118 templates/ogc_services.html:99
-#: templates/select_public_project.html:80
+#: templates/select_public_project.html:80 templates/services_view.html:144
 msgid "Version"
 msgstr "Versão"
 
@@ -102,8 +102,8 @@ msgstr "Guia de Administração"
 #: templates/documentation.html:69
 msgid ""
 "This guide is intended for platform admin users. It teaches the steps to "
-"carry out the management of users and groups, services, symbology, "
-"projects ... "
+"carry out the management of users and groups, services, symbology, projects "
+"... "
 msgstr ""
 "Este manual é destinado a usuários admin da plataforma. Ele ensina os passos "
 "para efectuar a gestão de usuários e grupos, serviços, simbologia, "
@@ -145,11 +145,11 @@ msgstr ""
 "Saiba como gerenciar informações geográficas de um dispositivo celular ou "
 "tablet"
 
-#: templates/home.html:18 utils.py:474
+#: templates/home.html:18 utils.py:476
 msgid "Username"
 msgstr "Nome de usuário"
 
-#: templates/home.html:20 utils.py:477
+#: templates/home.html:20 utils.py:479
 msgid "Email"
 msgstr "Correio electrónico"
 
@@ -173,7 +173,7 @@ msgstr "Você está logado como usuário básico"
 msgid "Last login"
 msgstr "Último Login"
 
-#: templates/home.html:34 utils.py:478 utils.py:490
+#: templates/home.html:34 utils.py:480 utils.py:492
 msgid "Password"
 msgstr "Senha"
 
@@ -189,7 +189,7 @@ msgstr "para atualizar sua senha"
 msgid "Passwords doesn't match"
 msgstr "As senhas não correspondem"
 
-#: templates/home.html:44 templates/home.html:45 utils.py:486
+#: templates/home.html:44 templates/home.html:45 utils.py:488
 msgid "New password"
 msgstr "Nova senha"
 
@@ -239,7 +239,7 @@ msgstr "Serviço WFS"
 msgid "No services have been published"
 msgstr ""
 
-#: templates/ogc_services.html:117
+#: templates/ogc_services.html:117 templates/services_view.html:159
 msgid "Service capabilities"
 msgstr "Capacidades de serviço"
 
@@ -282,7 +282,9 @@ msgid "Project name"
 msgstr "Nome do projeto"
 
 #: templates/project_add.html:51 templates/project_list.html:25
-#: templates/project_update.html:51
+#: templates/project_update.html:51 templates/services_view.html:64
+#: templates/services_view.html:84 templates/services_view.html:103
+#: templates/services_view.html:122
 msgid "Title"
 msgstr "Tí­tulo"
 
@@ -491,11 +493,11 @@ msgstr "Atualizar"
 
 #: templates/project_update.html:149
 msgid "Crear capa base"
-msgstr ""
+msgstr "Criar camada base"
 
 #: templates/project_update.html:162
 msgid "Tiles per side"
-msgstr ""
+msgstr "Tiles por lado"
 
 #: templates/project_update.html:165
 msgid "Niveles de zoom"
@@ -518,18 +520,39 @@ msgid "Tilematrixset (WMTS)"
 msgstr ""
 
 #: templates/project_update.html:184
-#, fuzzy
 #| msgid "Created by"
 msgid "Create"
-msgstr "Criado por"
+msgstr "Criar"
+
+#: templates/services_view.html:51
+#| msgid "WMS Service"
+msgid "WMS Services"
+msgstr "Serviços WMS"
+
+#: templates/services_view.html:52
+#| msgid "WMS Service"
+msgid "WMTS Services"
+msgstr "Serviços WMTS"
+
+#: templates/services_view.html:53
+#| msgid "WFS Service"
+msgid "WFS Services"
+msgstr "Serviços WFS"
+
+#: templates/services_view.html:54
+#| msgid "WMS Service"
+msgid "CSW Services"
+msgstr "Serviços CSW"
+
+#: templates/services_view.html:65 templates/services_view.html:85
+#: templates/services_view.html:104 templates/services_view.html:123
+#: templates/shared_view_list.html:17
+msgid "URL"
+msgstr ""
 
 #: templates/shared_view_list.html:10
 msgid "Shared views list"
 msgstr "Lista de vista compartilhada"
-
-#: templates/shared_view_list.html:17
-msgid "URL"
-msgstr ""
 
 #: templates/shared_view_list.html:18
 msgid "Expiration date"
@@ -592,103 +615,103 @@ msgstr "As alterações não guardadas serão perdidas. Continuar?"
 msgid "Error loading layers"
 msgstr "Erro nas camadas carregadas"
 
-#: utils.py:457
+#: utils.py:459
 msgid "New user account"
 msgstr "Nova conta de usuário"
 
-#: utils.py:473
+#: utils.py:475
 msgid "Account data"
 msgstr "Dados da conta"
 
-#: utils.py:475
+#: utils.py:477
 msgid "First name"
 msgstr "Nome"
 
-#: utils.py:476
+#: utils.py:478
 msgid "Last name"
 msgstr "Sobrenome"
 
-#: utils.py:488
+#: utils.py:490
 msgid "This is your new temporary password"
 msgstr "Esta é a  sua nova senha temporária"
 
-#: views.py:186
+#: views.py:188
 msgid "Navigation history"
 msgstr "Histórico de navegação"
 
-#: views.py:187
+#: views.py:189
 msgid "Browse the view forward and backward"
 msgstr "Navegue pela janela para a frente e para trás"
 
-#: views.py:191
+#: views.py:193
 msgid "Zoom tools"
 msgstr "Ferramentas de zoom"
 
-#: views.py:192
+#: views.py:194
 msgid "Zoom in, zoom out, ..."
 msgstr "Ampliar zoom, diminuir zoom "
 
-#: views.py:196
+#: views.py:198
 msgid "Feature info"
 msgstr "Informação de caracterí­sticas"
 
-#: views.py:197
+#: views.py:199
 msgid "Map information at point"
 msgstr "Informações do mapa no ponto"
 
-#: views.py:201
+#: views.py:203
 msgid "Measure tools"
 msgstr "Ferramentas de medida"
 
-#: views.py:202
+#: views.py:204
 msgid "It allows to measure areas and distances"
 msgstr "Permite medir áreas e distâncias"
 
-#: views.py:206
+#: views.py:208
 msgid "Search coordinates"
 msgstr "Procurar coordenadas"
 
-#: views.py:207
+#: views.py:209
 msgid "Center the map at given coordinates"
 msgstr "Centrar o mapa em coordenadas dadas"
 
-#: views.py:211
+#: views.py:213
 msgid "Coordinate calculator"
 msgstr "Calculadora de coordenadas"
 
-#: views.py:212
+#: views.py:214
 msgid "Transform coordinates between different systems"
 msgstr "Transformar coordenadas entre diferentes sistemas"
 
-#: views.py:216
+#: views.py:218
 msgid "Geolocation"
 msgstr "Geolocalização"
 
-#: views.py:217
+#: views.py:219
 msgid "Center the map in the current position"
 msgstr "Centrar o mapa na posição actual"
 
-#: views.py:221
+#: views.py:223
 msgid "Share view"
 msgstr "Vista de compartilhamento"
 
-#: views.py:222
+#: views.py:224
 msgid "Allows you to share the view in its current state"
 msgstr "Permite-lhe compartilhar a visualizasão em seu estado atual"
 
-#: views.py:226
+#: views.py:228
 msgid "Select feature"
 msgstr "Seleccionar caracterí­stica"
 
-#: views.py:227
+#: views.py:229
 msgid "Select features from current layers"
 msgstr "Selecionar características das camadas atuais"
 
-#: views.py:352
+#: views.py:354
 msgid "You must enter an project name"
 msgstr "É  necessário inserir um nome de projeto"
 
-#: views.py:356
+#: views.py:358
 #, python-brace-format
 msgid ""
 "Invalid project name: '{value}'. Identifiers must begin with a letter or an "
@@ -698,15 +721,15 @@ msgstr ""
 "uma letra ou uma sublinhado (_). Os caracteres subsequentes podem ser "
 "letras, sublinhados ou números"
 
-#: views.py:438
+#: views.py:440
 msgid "Project name already exists"
 msgstr "O nome do projeto já existe"
 
-#: views.py:1308 views.py:1310
+#: views.py:1314 views.py:1316
 msgid "Shared view"
 msgstr "Vista compartilhada"
 
-#: views.py:1311
+#: views.py:1317
 msgid "Link"
 msgstr "Link"
 

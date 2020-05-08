@@ -31,8 +31,8 @@ from os import listdir
 from os.path import isfile, join
 
 OGR2OGR_PATH = '/usr/bin/ogr2ogr'
-GDALINFO_PATH = '/usr/bin/gdalinfo'
-GDALSRSINFO_PATH = '/usr/bin/gdalsrsinfo'
+GDALINFO_PATH = '/usr/local/bin/gdalinfo'
+GDALSRSINFO_PATH = '/usr/local/bin/gdalsrsinfo'
 
 __BAND_PATTERN=re.compile("Band ([0-9]+).*")
 __BAND_STATS_PATTERN=re.compile("  Minimum=([-+]?\d*\.\d+|\d+), Maximum=([-+]?\d*\.\d+|\d+), Mean=([-+]?\d*\.\d+|\d+), StdDev=([-+]?\d*\.\d+|\d+).*")

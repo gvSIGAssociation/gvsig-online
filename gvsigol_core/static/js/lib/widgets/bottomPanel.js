@@ -27,7 +27,6 @@ var bottomPanel = function(layer, map) {
 	this.isVisible = false;
 	this.animationDuration = 500;
 	this.animationEasing = 'linear';
-	
 	this.initialize();
 };
 
@@ -35,34 +34,51 @@ var bottomPanel = function(layer, map) {
  * TODO
  */
 bottomPanel.prototype.initialize = function() {
+	var self = this;
+	$('.panel-wrapper').resizable({
+    	handles: 'n',
+    	minHeight: 80,
+    	maxHeight: 600,
+    	create: function( event, ui ) {
+            $(".ui-resizable-n").css("cursor","ns-resize");
+        }
+    });
+	
 };
 
 /**
  * TODO
  */
 bottomPanel.prototype.hidePanel = function() {
-    $('.panel-wrapper').animate(
-    	{bottom : -(bottomPanel.getAnimationOffset())}, 
-    	bottomPanel.animationDuration, 
-    	bottomPanel.animationEasing, function() {
-    		bottomPanel.isVisible = false;
-    	}
-    );
+	$('.panel-wrapper').css('display', 'none');
 };
 
 bottomPanel.prototype.minimizePanel = function() {
-    $('.panel-wrapper').animate(
-    	{bottom : -(bottomPanel.getAnimationMinimizedOffset())}, 
+	$('.panel-wrapper').animate(
+		{
+			bottom : -(bottomPanel.getAnimationMinimizedOffset())
+		}, 
     	bottomPanel.animationDuration, 
     	bottomPanel.animationEasing, function() {
     		bottomPanel.isVisible = false;
     		$('.panel-wrapper').addClass("minimized-table");
     	}
     );
+	$('.panel-wrapper').css('top', '');
+    
 };
 
 bottomPanel.prototype.maximizePanel = function() {
-    this.showPanel();
+	$('.panel-wrapper').removeClass("minimized-table");
+	$('.panel-wrapper').animate(
+		{
+			bottom : 0
+		}, 
+		bottomPanel.animationDuration, 
+		bottomPanel.animationEasing, function() {
+			bottomPanel.isVisible = true;
+		}
+	);
 };
 
 /**
@@ -70,13 +86,7 @@ bottomPanel.prototype.maximizePanel = function() {
  */
 bottomPanel.prototype.showPanel = function() {
 	$('.panel-wrapper').removeClass("minimized-table");
-	$('.panel-wrapper').animate(
-		{bottom : 0}, 
-		bottomPanel.animationDuration, 
-		bottomPanel.animationEasing, function() {
-			bottomPanel.isVisible = true;
-		}
-	);
+	$('.panel-wrapper').css('display', 'block');
 };
 
 
@@ -96,7 +106,7 @@ bottomPanel.prototype.getAnimationOffset = function() {
 
 
 bottomPanel.prototype.getAnimationMinimizedOffset = function() {
-	return $('.panel-content').height()-$('.nav-tabs li.pull-right').height();
+	return $('.panel-wrapper').height()-$('.nav-tabs li.pull-right').height();
 };
 
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-05 12:17+0100\n"
+"POT-Creation-Date: 2020-05-08 10:00+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -56,9 +56,9 @@ msgstr ""
 msgid "Home"
 msgstr ""
 
-#: templates/base.html:173 templates/base_compress.html:173
+#: templates/base.html:194 templates/base_compress.html:173
 #: templates/documentation.html:118 templates/ogc_services.html:99
-#: templates/select_public_project.html:80
+#: templates/select_public_project.html:80 templates/services_view.html:144
 msgid "Version"
 msgstr ""
 
@@ -130,11 +130,11 @@ msgid ""
 "Learn how to manage geographic information from a mobile device or tablet"
 msgstr ""
 
-#: templates/home.html:18 utils.py:474
+#: templates/home.html:18 utils.py:476
 msgid "Username"
 msgstr ""
 
-#: templates/home.html:20 utils.py:477
+#: templates/home.html:20 utils.py:479
 msgid "Email"
 msgstr ""
 
@@ -158,7 +158,7 @@ msgstr ""
 msgid "Last login"
 msgstr ""
 
-#: templates/home.html:34 utils.py:478 utils.py:490
+#: templates/home.html:34 utils.py:480 utils.py:492
 msgid "Password"
 msgstr ""
 
@@ -174,7 +174,7 @@ msgstr ""
 msgid "Passwords doesn't match"
 msgstr ""
 
-#: templates/home.html:44 templates/home.html:45 utils.py:486
+#: templates/home.html:44 templates/home.html:45 utils.py:488
 msgid "New password"
 msgstr ""
 
@@ -224,7 +224,7 @@ msgstr ""
 msgid "No services have been published"
 msgstr ""
 
-#: templates/ogc_services.html:117
+#: templates/ogc_services.html:117 templates/services_view.html:159
 msgid "Service capabilities"
 msgstr ""
 
@@ -267,7 +267,9 @@ msgid "Project name"
 msgstr ""
 
 #: templates/project_add.html:51 templates/project_list.html:25
-#: templates/project_update.html:51
+#: templates/project_update.html:51 templates/services_view.html:64
+#: templates/services_view.html:84 templates/services_view.html:103
+#: templates/services_view.html:122
 msgid "Title"
 msgstr ""
 
@@ -508,12 +510,30 @@ msgstr ""
 msgid "Create"
 msgstr ""
 
-#: templates/shared_view_list.html:10
-msgid "Shared views list"
+#: templates/services_view.html:51
+msgid "WMS Services"
 msgstr ""
 
+#: templates/services_view.html:52
+msgid "WMTS Services"
+msgstr ""
+
+#: templates/services_view.html:53
+msgid "WFS Services"
+msgstr ""
+
+#: templates/services_view.html:54
+msgid "CSW Services"
+msgstr ""
+
+#: templates/services_view.html:65 templates/services_view.html:85
+#: templates/services_view.html:104 templates/services_view.html:123
 #: templates/shared_view_list.html:17
 msgid "URL"
+msgstr ""
+
+#: templates/shared_view_list.html:10
+msgid "Shared views list"
 msgstr ""
 
 #: templates/shared_view_list.html:18
@@ -577,118 +597,118 @@ msgstr ""
 msgid "Error loading layers"
 msgstr ""
 
-#: utils.py:457
+#: utils.py:459
 msgid "New user account"
 msgstr ""
 
-#: utils.py:473
+#: utils.py:475
 msgid "Account data"
 msgstr ""
 
-#: utils.py:475
+#: utils.py:477
 msgid "First name"
 msgstr ""
 
-#: utils.py:476
+#: utils.py:478
 msgid "Last name"
 msgstr ""
 
-#: utils.py:488
+#: utils.py:490
 msgid "This is your new temporary password"
 msgstr ""
 
-#: views.py:186
+#: views.py:188
 msgid "Navigation history"
 msgstr ""
 
-#: views.py:187
+#: views.py:189
 msgid "Browse the view forward and backward"
 msgstr ""
 
-#: views.py:191
+#: views.py:193
 msgid "Zoom tools"
 msgstr ""
 
-#: views.py:192
+#: views.py:194
 msgid "Zoom in, zoom out, ..."
 msgstr ""
 
-#: views.py:196
+#: views.py:198
 msgid "Feature info"
 msgstr ""
 
-#: views.py:197
+#: views.py:199
 msgid "Map information at point"
 msgstr ""
 
-#: views.py:201
+#: views.py:203
 msgid "Measure tools"
 msgstr ""
 
-#: views.py:202
+#: views.py:204
 msgid "It allows to measure areas and distances"
 msgstr ""
 
-#: views.py:206
+#: views.py:208
 msgid "Search coordinates"
 msgstr ""
 
-#: views.py:207
+#: views.py:209
 msgid "Center the map at given coordinates"
 msgstr ""
 
-#: views.py:211
+#: views.py:213
 msgid "Coordinate calculator"
 msgstr ""
 
-#: views.py:212
+#: views.py:214
 msgid "Transform coordinates between different systems"
 msgstr ""
 
-#: views.py:216
+#: views.py:218
 msgid "Geolocation"
 msgstr ""
 
-#: views.py:217
+#: views.py:219
 msgid "Center the map in the current position"
 msgstr ""
 
-#: views.py:221
+#: views.py:223
 msgid "Share view"
 msgstr ""
 
-#: views.py:222
+#: views.py:224
 msgid "Allows you to share the view in its current state"
 msgstr ""
 
-#: views.py:226
+#: views.py:228
 msgid "Select feature"
 msgstr ""
 
-#: views.py:227
+#: views.py:229
 msgid "Select features from current layers"
 msgstr ""
 
-#: views.py:352
+#: views.py:354
 msgid "You must enter an project name"
 msgstr ""
 
-#: views.py:356
+#: views.py:358
 #, python-brace-format
 msgid ""
 "Invalid project name: '{value}'. Identifiers must begin with a letter or an "
 "underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr ""
 
-#: views.py:438
+#: views.py:440
 msgid "Project name already exists"
 msgstr ""
 
-#: views.py:1308 views.py:1310
+#: views.py:1314 views.py:1316
 msgid "Shared view"
 msgstr ""
 
-#: views.py:1311
+#: views.py:1317
 msgid "Link"
 msgstr ""
 

@@ -251,3 +251,17 @@ class LayerFieldEnumeration(models.Model):
     field = models.CharField(max_length=150) 
     multiple = models.BooleanField(default=False)
     
+class ServiceUrl(models.Model):
+    SERVICE_TYPE_CHOICES = (
+        ('WMS', 'WMS'),
+        ('WMTS', 'WMTS'),
+        ('WFS', 'WFS'),
+        ('CSW', 'CSW'),
+    )
+    title = models.CharField(max_length=500, null=True, blank=True)
+    type = models.CharField(max_length=50, choices=SERVICE_TYPE_CHOICES, default='WMS')
+    url = models.CharField(max_length=500, null=True, blank=True)
+    
+    def __unicode__(self):
+        return self.title
+    
