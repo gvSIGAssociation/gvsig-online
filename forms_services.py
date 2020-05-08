@@ -20,7 +20,7 @@
 '''
 @author: César Martinez <cmartinez@scolab.es>
 '''
-from models import Workspace, Datastore, Layer, LayerGroup, Server
+from models import Workspace, Datastore, Layer, LayerGroup, Server, ServiceUrl
 from django.utils.translation import ugettext as _
 from gvsigol_services import geographic_servers
 from django import forms
@@ -63,6 +63,13 @@ supported_types = (
     ('c_GeoTIFF', _('GeoTiff')),
     ('e_WMS', _('Cascading WMS')),
     ('c_ImageMosaic', _('ImageMosaic')), 
+)
+
+service_types = (
+    ('WMS', 'WMS'),
+    ('WMTS', 'WMTS'),
+    ('WFS', 'WFS'),
+    ('CSW', 'CSW'),
 )
 
 def random_id():
@@ -222,4 +229,11 @@ class ExternalLayerForm(forms.ModelForm):
     infoformat = forms.ChoiceField(label=_(u'Featureinfo format'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     matrixset = forms.ChoiceField(label=_(u'Matrixset'), required=False, choices=blank, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     key = forms.CharField(label=_(u'Apikey'), required=False, max_length=250, widget=forms.TextInput(attrs={'class': 'form-control', 'tabindex': '2'}))
-    
+ 
+class ServiceUrlForm(forms.ModelForm):
+    class Meta:
+        model = ServiceUrl
+        fields = ['title', 'type', 'url']
+    title = forms.CharField(label=_(u'Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '1'}))
+    type = forms.ChoiceField(label=_(u'Type'), required=False, choices=service_types, widget=forms.Select(attrs={'class':'form-control', 'tabindex': '2'}))
+    url = forms.CharField(label=_(u'URL'), required=False, max_length=500, widget=forms.TextInput(attrs={'class' : 'form-control', 'tabindex': '3'}))   
