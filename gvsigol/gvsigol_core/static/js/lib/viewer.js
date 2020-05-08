@@ -115,7 +115,7 @@ viewer.core = {
 	        projection: 'EPSG:4326',
 	        className: 'custom-mouse-position-output',
 	        target: document.getElementById('custom-mouse-position-output'),
-	        undefinedHTML: '----------, ----------'
+	        undefinedHTML: '--------,--------'
 	    });
 
 		this.zoombar = new ol.control.Zoom();
