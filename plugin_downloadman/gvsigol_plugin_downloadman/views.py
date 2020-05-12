@@ -279,11 +279,13 @@ def getOgcDownloadDescriptor(layer_uuid, onlineResource, layer, fallbackTitle, d
             ['bbox', _('Include only geometries that intersect the bounding box of the selected area')],
             ['nofilter', _('Do not filter output')]
         ]
+        resource_title += ' (WFS)'
     elif resourceType == downman_models.ResourceLocator.OGC_WCS_RESOURCE_TYPE:
         spatialFilterType = [
             ['bbox', _('Trim result using the bounding box of the selected area')],
             ['nofilter', _('Do not filter output')]
         ]
+        resource_title += ' (WCS)'
     else:
         spatialFilterType = []
     return ResourceDownloadDescriptor(layer_uuid, layer_name, layer_title, resource_name, resource_title, dataSourceType=dataSourceType, resourceType=resourceType, dataFormats=dataFormats, spatialFilterType=spatialFilterType, url=onlineResource.url, size=size, nativeCrs=nativeCrs)
