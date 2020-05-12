@@ -236,7 +236,7 @@ def getLayerDownloadResources(request, layer_id):
     """
     try:
         layer = getLayer(layer_id)
-        resources = 0
+        resources = []
         if not layer or layer.allow_download:
             resources = doGetMetadataDownloadResources(layer_id, layer, request.user)
         if len(resources) == 0:

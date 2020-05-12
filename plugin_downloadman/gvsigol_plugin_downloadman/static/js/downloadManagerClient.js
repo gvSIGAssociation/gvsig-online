@@ -377,7 +377,7 @@ DownloadManagerUI.prototype._getHumanReadableSize = function(size) {
 		hrSize = floatSize / 1024;
 		units = ' GB';
 	}
-	else if (floatSize > 0.1) {
+	else {
 		hrSize = size;
 		units = ' MB';
 	}
