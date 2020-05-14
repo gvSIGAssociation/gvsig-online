@@ -44,6 +44,7 @@ js_info_dict = {
         'gvsigol_plugin_draw',
         'gvsigol_plugin_elevation',
         'gvsigol_plugin_manageaddresses',
+        'gvsigol_plugin_emergencies'
     ),
 }
 
@@ -68,6 +69,7 @@ packages = [
     'gvsigol_plugin_draw',
     'gvsigol_plugin_elevation',
     'gvsigol_plugin_manageaddresses',
+    'gvsigol_plugin_emergencies'
 ]
 
 urlpatterns = [
