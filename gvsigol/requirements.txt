@@ -53,8 +53,7 @@ six==1.10.0
 pytz==2016.3
 python-dateutil==2.5.2
 
-# se ha quitado la dependencia para que no haya conflicto con gdal-python (instalado del sistema)
-# numpy==1.12.0
+numpy==1.12.0
 
 argparse==1.2.1
 wsgiref==0.1.2
