@@ -253,6 +253,8 @@ CatalogView.prototype.filterCatalog = function(fromResult){
 	search = search.replace("ú", "u");
 	search = search.replace("Ú", "U");
 
+	// allow using the "or" keyword as synonym of + sign
+	search = search.replace(/[ \+][oO][rR][ \+]/g, "+");
 	// remove extra blanks
 	search = search.replace(/ +/g, " ");
 	// remove blanks surrounding + signs
@@ -265,21 +267,15 @@ CatalogView.prototype.filterCatalog = function(fromResult){
 		if (searchTerms[i] != "") {
 			var term;
 			orSearchTerms = searchTerms[i].split("+");
-			if (orSearchTerms.length == 1) {
-				term = searchTerms[i] + "*";
-			}
-			else {
-				for (j = 0; j<orSearchTerms.length; j++) {
-					if (orSearchTerms[j] != "") {
-						if (j==0) { // first
-							term = orSearchTerms[j]+"*";
-						}
-						else {
-							term = term + " or " + orSearchTerms[j]+"*";
-						}
+			for (j = 0; j<orSearchTerms.length; j++) {
+				if (orSearchTerms[j] != "") {
+					if (j==0) { // first
+						term = orSearchTerms[j]+"*";
+					}
+					else {
+						term = term + " or " + orSearchTerms[j]+"*";
 					}
 				}
-
 			}
 			andWildcardSearchComponents.push(term);
 		}
