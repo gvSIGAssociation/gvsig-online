@@ -40,6 +40,7 @@ from subprocess import call
 from dbfpy import dbf
 import shutil
 import logging
+from __builtin__ import False
 
 '''
 @author: José Badía <jbadia@scolab.es>
@@ -622,6 +623,50 @@ def create_cartociudad_config(provider, has_soundex):
 
     return True
 
+def check_postgres_config_is_ok(provider):
+    params = json.loads(provider.params)
+    datastore_id = params["datastore_id"]
+    datastore = Datastore.objects.get(id=datastore_id)
+    datastore_params = json.loads(datastore.connection_params)
+    
+    dbhost = datastore_params['host']
+    dbport = datastore_params['port']
+    dbname = datastore_params['database']
+    dbuser = datastore_params['user']
+    dbpassword = datastore_params['passwd']
+    dbschema = datastore.name
+    
+    provider.dbschema = dbschema
+            
+    #connection = get_connection(dbhost, dbport, dbname, dbuser, dbpassword)
+    try:
+        connection = psycopg2.connect("host=" + dbhost +" port=" + dbport +" dbname=" + dbname +" user=" + dbuser +" password="+ dbpassword);
+        connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+        print "Connect ... "
+    
+    except StandardError, e:
+        print "Failed to connect!", e
+        return False
+    cursor = connection.cursor()
+    
+    try:        
+        test_ext_exists = "SELECT * FROM pg_extension WHERE extname ilike 'pg_trgm';"
+        test_func_exists = "select 'immutable_unaccent'::regproc;"
+        cursor.execute(test_ext_exists)
+        if (cursor.rowcount == 0):
+            print "NO existe la extensión pg_trgm en la base de datos. Intentamos crearla."
+            return False
+        
+        cursor.execute(test_func_exists)
+        if (cursor.rowcount == 0):
+            print "NO existe la función immmutable_unaccent en la base de datos. Intentamos crearla."
+            return False
+    except Exception, e:
+        return False
+    return True
+            
+            
+
 def create_postgres_config(provider, has_soundex):
     params = json.loads(provider.params)
     datastore_id = params["datastore_id"]
@@ -653,16 +698,26 @@ def create_postgres_config(provider, has_soundex):
         cursor = connection.cursor()
         
         try:        
-            create_extension = "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+            test_ext_exists = "SELECT * FROM pg_extension WHERE extname ilike 'pg_trgm';"
+            test_func_exists = "select 'immutable_unaccent'::regproc;"
+            cursor.execute(test_ext_exists)
+            if (cursor.rowcount == 0):
+                print "NO existe la extensión pg_trgm en la base de datos. Intentamos crearla."
+                create_extension = "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+                
+                create_function = ("CREATE OR REPLACE FUNCTION immutable_unaccent(text) \n"
+                    "RETURNS text AS \n" 
+                    "$func$ \n"
+                    "SELECT unaccent('unaccent', $1)  -- schema-qualify function and dictionary \n"
+                    "$func$  LANGUAGE sql IMMUTABLE;")
+           
+                cursor.execute(create_extension)
             
-            create_function = ("CREATE OR REPLACE FUNCTION immutable_unaccent(text) \n"
-                "RETURNS text AS \n" 
-                "$func$ \n"
-                "SELECT unaccent('unaccent', $1)  -- schema-qualify function and dictionary \n"
-                "$func$  LANGUAGE sql IMMUTABLE;")
-       
-            cursor.execute(create_extension)
-            cursor.execute(create_function)
+            cursor.execute(test_func_exists)
+            if (cursor.rowcount == 0):
+                print "NO existe la función immmutable_unaccent en la base de datos. Intentamos crearla."
+                cursor.execute(create_function)
+                
             
             # Trigram index
             index_name = "index_" + dbtable + "_on_" + dbfield + "_trigram" 
@@ -682,6 +737,7 @@ def create_postgres_config(provider, has_soundex):
             print "SQL Error", e
             cursor.close();
             connection.close();
+            return False;
 
         
     except Exception as e:

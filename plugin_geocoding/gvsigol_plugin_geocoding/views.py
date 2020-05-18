@@ -42,6 +42,7 @@ from gvsigol_services.views import backend_resource_list_available,\
     backend_resource_list
 from gvsigol_services.backend_postgis import Introspect
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
 
 from time import time
 
@@ -279,6 +280,11 @@ def provider_update(request, provider_id):
                 params = {
                     'datastore_id': ds.id,
                 }
+            if type=='postgres':
+                is_valid = check_postgres_config_is_ok(provider)
+                if not is_valid:
+                    messages.error( request, "Error: Bad Postgres config. Check your permission to create extensions and functions")
+                    has_errors = True
             
         if type == 'googlemaps':
             if not 'key' in params or params['key'] == '':
@@ -375,7 +381,6 @@ def provider_delete(request, provider_id):
     
     return redirect('provider_list')
 
-
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def provider_full_import(request, provider_id):
@@ -386,6 +391,8 @@ def provider_full_import(request, provider_id):
         has_config = create_cartociudad_config(provider, correct_conf)
     if provider.type == 'postgres':
         has_config = create_postgres_config(provider, correct_conf)
+        if (not has_config):
+            messages.error(request, 'Error creating provider: ' + provider.type)        
         return redirect('provider_list')
     else:
         has_config = create_XML_config(provider, correct_conf)
