@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import, unicode_literals
 from builtins import str as text
+from __builtin__ import True
+from billiard.compat import resource
 
 '''
     gvSIG Online.
@@ -62,6 +64,9 @@ import email
 from gvsigol_plugin_downloadman.settings import TMP_DIR,TARGET_ROOT
 from gvsigol_plugin_downloadman.settings import DOWNLOADS_URL
 from django.contrib.gis.gdal import SpatialReference, CoordTransform, OGRGeometry
+import gdaltools
+import sys
+from io import StringIO
 try:
     from gvsigol.settings import PROXIES
 except:
@@ -247,82 +252,6 @@ def _getExtension(file_format):
 def _normalizeWxsUrl(url):
         return url.split(u"?")[0]
 
-def _getWfsRequest(layer_name, baseUrl, params):
-    file_format = _getParamValue(params, FORMAT_PARAM_NAME)
-    if not file_format:
-        file_format = 'shape-zip'
-    """
-    # TODO:
-    - usar el parámetro SPATIAL_FILTER_BBOX_PARAM_NAME para filtrar usando el atributo BBOX de WFS
-    - de momento no permitiremos filtrar por polígono (usando WFS Filter encoding) porque es complicado obtener el
-      nombre del atributo que contiene la geometría para montar el filtro.
-    - Usar filter encoding requiere hacer un describeFeatureType y parsear la respuesta, que puede ser un XSD muy complejo
-     de interpretar
-    
-    https://gvsigol.localhost/geoserver/wfs?request=GetFeature&service=WFS&version=1.0.0&typeName=ws_cmartinez:countries4326&BBOX=18,21,40,42
-    
-    spatial_filter_type = _getParamValue(params, SPATIAL_FILTER_TYPE_PARAM_NAME)
-    spatial_filter_geom = _getParamValue(params, SPATIAL_FILTER_GEOM_PARAM_NAME)
-    
-    getFeature = ET.Element("wfs:GetFeature")
-    query = ET.SubElement(getFeature, "wfs:query")
-    ET.SubElement(query, "fes:Filter")
-    
-    OJO! Podemos usar el filter BBOX sin necesidad de saber el campo de geometry (se puede omitir propertyName en el operador BBOX)
-      <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
-    <ogc:BBOX>
-      <gml:Box xmlns:gml="http://www.opengis.net/gml" srsName="EPSG:3785">
-          <gml:coordinates decimal="." cs="," ts=" ">
-            -8033496.4863128,5677373.0653376 -7988551.5136872,5718801.9346624
-          </gml:coordinates>
-        </gml:Box>
-      </ogc:BBOX>
-    </ogc:Filter>
-    """
-    getCapabilitiesTree = _getCapabilitiesWfsTree(baseUrl)
-    nativeSrs = _getWfsLayerCrs(getCapabilitiesTree, layer_name)
-
-    url = _normalizeWxsUrl(baseUrl) + u'?service=WFS&version=1.0.0&request=GetFeature&typeName=' + layer_name + u'&outputFormat='+ file_format
-    spatial_filter_type = _getParamValue(params, SPATIAL_FILTER_TYPE_PARAM_NAME)
-    if spatial_filter_type == 'bbox':
-        spatial_filter_bbox = _getParamValue(params, SPATIAL_FILTER_BBOX_PARAM_NAME)
-        if spatial_filter_bbox:
-            bboxElements = spatial_filter_bbox.split(",")
-            if len(bboxElements) == 5:
-                sourceCrs = bboxElements[4]
-                nativeExtent = reprojectExtent(float(bboxElements[0]), float(bboxElements[1]), float(bboxElements[2]), float(bboxElements[3]), sourceCrs, nativeSrs)
-                url += u'&bbox=' + text(nativeExtent[0]) + u"," + text(nativeExtent[1])  + u"," + text(nativeExtent[2]) + u"," + text(nativeExtent[3])
-    logger.debug(url)
-    return url
-
-def _getCapabilitiesWfsTree(baseUrl):
-    try:
-        url = _normalizeWxsUrl(baseUrl) + '?service=WFS&version=1.0.0&request=GetCapabilities'
-        logger.debug(url)
-        r = requests.get(url, verify=False, timeout=DEFAULT_TIMEOUT, proxies=PROXIES)
-        getCapabilitiesXml = r.content
-        #incorrectGeoserverNamespaces = '<WFS_Capabilities version="1.0.0" xsi:schemaLocation="http://www.opengis.net/wfs https://gvsigol.localhost/geoserver/schemas/wfs/1.0.0/WFS-capabilities.xsd">'
-        #fixedGeoserverWFS100Namespaces = '<WFS_Capabilities version="1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  xsi:schemaLocation="http://www.opengis.net/wfs https://gvsigol.localhost/geoserver/schemas/wfs/1.0.0/WFS-capabilities.xsd">'
-        #if getCapabilitiesXml.startswith(incorrectGeoserverNamespaces):
-        #    getCapabilitiesXml = getCapabilitiesXml.replace(incorrectGeoserverNamespaces, fixedGeoserverWFS100Namespaces)
-        return ET.fromstring(getCapabilitiesXml)
-    except:
-        logger.exception("Error retrieving or parsing getCapabilitiesXml")
-
-def _getWfsLayerCrs(getCapabilitiesTree, layerName):
-    try:
-        if getCapabilitiesTree is not None:
-            namespaces =  {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'wfs': 'http://www.opengis.net/wfs'}
-            findExpr = "./wfs:FeatureTypeList/wfs:FeatureType/wfs:Name"
-            featureTypes = getCapabilitiesTree.findall(findExpr, namespaces)
-            for featureTypeNameNode in featureTypes:
-                if featureTypeNameNode.text == layerName:
-                    srsNode = featureTypeNameNode.find("../wfs:SRS", namespaces)
-                    if srsNode is not None:
-                        return srsNode.text
-    except:
-        logger.exception(u"Error getting the CRS of the WFS layer" + layerName)
-
 INVERSE_AXIS_CRS_LIST = None
 def _getCrsReverseAxisList():
     global INVERSE_AXIS_CRS_LIST
@@ -351,11 +280,38 @@ def isRestricted(onlineResource, max_public_size):
         return True
     return False
 
+def getMetadataUuid(layer_id):
+    try:
+        from gvsigol_plugin_catalog.models import LayerMetadata 
+        theId = int(layer_id)
+        lm = LayerMetadata.objects.get(id=theId)
+        return lm.uuid
+    except:
+        return layer_id
+
+def getRawMetadata(layer_id):
+    metadata_uuid = getMetadataUuid(layer_id)
+    if metadata_uuid:
+        try:
+            import gvsigol_plugin_catalog.service as geonetwork_service
+            geonetwork_instance = geonetwork_service.get_instance()
+            return geonetwork_instance.get_metadata_raw(metadata_uuid)
+        except:
+            pass
+
+def getRawMetadataUrl(layer_id):
+    metadata_uuid = getMetadataUuid(layer_id)
+    if metadata_uuid:
+        try:
+            import gvsigol_plugin_catalog.service as geonetwork_service
+            geonetwork_instance = geonetwork_service.get_instance()
+            return geonetwork_instance.get_raw_metadata_url(metadata_uuid)
+        except:
+            pass
+
 def checkCatalogPermissions(metadata_uuid, res_type, url):
     try:
-        import gvsigol_plugin_catalog.service as geonetwork_service
-        geonetwork_instance = geonetwork_service.get_instance()
-        xml_md = geonetwork_instance.get_metadata_raw(metadata_uuid)
+        xml_md = getRawMetadata(metadata_uuid)
         from gvsigol_plugin_catalog.mdstandards import registry
         reader = registry.get_reader(xml_md)
         onlineResources = reader.get_transfer_options()
@@ -395,14 +351,14 @@ def getCatalogResourceURL(res_type, resource_name, resource_url, params):
     elif res_type == ResourceLocator.OGC_WCS_RESOURCE_TYPE:
         return (resource_url, True)
     elif res_type == ResourceLocator.OGC_WFS_RESOURCE_TYPE:
-        return (_getWfsRequest(resource_name, resource_url, params), True)
+        return (resource_url, True)
     return (None, False)
 
 def getGvsigolResourceURL(res_type, layer, params):
     if layer:
         if res_type == ResourceLocator.OGC_WFS_RESOURCE_TYPE and layer.datastore.workspace.wfs_endpoint:
             baseUrl = layer.datastore.workspace.wfs_endpoint
-            return (_getWfsRequest(layer.name, baseUrl, params), True)
+            return (baseUrl, True)
         elif res_type == ResourceLocator.OGC_WCS_RESOURCE_TYPE and layer.datastore.workspace.wcs_endpoint:
             baseUrl = layer.datastore.workspace.wcs_endpoint
             return (baseUrl, True)
@@ -518,6 +474,9 @@ class WCSClient():
             url = _normalizeWxsUrl(baseUrl) + '?service=WCS&version=2.0.0&request=DescribeCoverage&CoverageId=' + layer_name
             logger.debug(url)
             r = requests.get(url, verify=False, timeout=DEFAULT_TIMEOUT, proxies=PROXIES)
+            if r.status_code != 200:
+                logger.debug(u'Error getting DescribeCoverage. HTTP status code: '+text(r.status_code) + u". Url: " + url)
+                return
             describeCoverageXml = r.content
             incorrectGeoserverNamespaces = '<wcs:CoverageDescriptions xsi:schemaLocation=" http://www.opengis.net/wcs/2.0 http://schemas.opengis.net/wcs/2.0/wcsDescribeCoverage.xsd">'
             fixedGeoserverWCS2Namespaces = '<wcs:CoverageDescriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmlcov="http://www.opengis.net/gmlcov/1.0" xmlns:swe="http://www.opengis.net/swe/2.0" xsi:schemaLocation="http://schemas.opengis.net/swe/2.0 http://schemas.opengis.net/sweCommon/2.0/swe.xsd http://www.opengis.net/wcs/2.0 http://schemas.opengis.net/wcs/2.0/wcsDescribeCoverage.xsd" xmlns:wcs="http://www.opengis.net/wcs/2.0">'
@@ -730,18 +689,355 @@ class WCSClient():
             logger.exception(u"Error creating auxiliary files for resource: " + url)
         return self.output_dir
 
+class WFSClient():
+    def __init__(self, url, layer_name, params):
+        self.url = url
+        self.layer_name = layer_name
+        self.params = params
+        self.file_format = _getParamValue(self.params, FORMAT_PARAM_NAME)
+        self.output_dir = tempfile.mkdtemp('-tmp', GVSIGOL_NAME.lower()+"dm", dir=getTmpDir())
+        self.nativeSrsCode = None
+        self.canceled = False
+        self.wfs200Namespaces = {'wfs': 'http://www.opengis.net/wfs/2.0', 'gml': 'http://www.opengis.net/gml/3.2', 'xsi': 'http://www.w3.org/2001/XMLSchema-instance'}
+        self.wfs100Namespaces = {'wfs': 'http://www.opengis.net/wfs', 'ogc': 'http://www.opengis.net/ogc', 'gml': 'http://www.opengis.net/gml/3.2', 'xsi': 'http://www.w3.org/2001/XMLSchema-instance'}
+
+    def cancel(self):
+        self.canceled = True
+        
+    def _getEpsgValue(self, epsgString):
+        if epsgString is not None:
+            if epsgString.startswith('http://www.opengis.net/def/crs/EPSG/'):
+                return re.sub('http://www.opengis.net/def/crs/EPSG/[^/]+/', '', epsgString)
+            if epsgString.startswith('EPSG:'):
+                return epsgString[5:]
+            if epsgString.startswith('urn:ogc:def:crs:EPSG:'):
+                return re.sub('urn:ogc:def:crs:EPSG:[^:]*:', '', epsgString)
+
+    def getLayerCrs_v1_0_0(self, getCapabilitiesTree, layerName):
+        try:
+            if getCapabilitiesTree is not None:
+                findExpr = "./wfs:FeatureTypeList/wfs:FeatureType/wfs:Name"
+                featureTypes = getCapabilitiesTree.findall(findExpr, self.wfs100Namespaces)
+                for featureTypeNameNode in featureTypes:
+                    if featureTypeNameNode.text == layerName:
+                        srsNode = featureTypeNameNode.find("../wfs:SRS", self.wfs100Namespaces)
+                        if srsNode is not None:
+                            return srsNode.text
+        except:
+            logger.exception(u"Error getting the CRS of the WFS layer" + layerName)
+
+    def getLayerCrs_v2_0_0(self, getCapabilitiesTree, layerName):
+        try:
+            if getCapabilitiesTree is not None:
+                findExpr = "./wfs:FeatureTypeList/wfs:FeatureType/wfs:Name"
+                featureTypes = getCapabilitiesTree.findall(findExpr, self.wfs200Namespaces)
+                for featureTypeNameNode in featureTypes:
+                    if featureTypeNameNode.text == layerName:
+                        srsNode = featureTypeNameNode.find("../wfs:DefaultCRS", self.wfs200Namespaces)
+                        if srsNode is not None:
+                            return srsNode.text
+        except:
+            logger.exception(u"Error getting the CRS of the WFS layer" + layerName)
+    
+    def getCapabilitiesTree(self, baseUrl, version='2.0.0'):
+        url = _normalizeWxsUrl(baseUrl) + '?service=WFS&version=' + version +'&request=GetCapabilities'
+        logger.debug(url)
+        r = requests.get(url, verify=False, timeout=DEFAULT_TIMEOUT, proxies=PROXIES)
+        if r.status_code != 200:
+            raise PreparationError("Error retrieving getCapabilities")
+        return ET.fromstring(r.content)
+
+    def getWfsGetFeatureRequest_v1_0_0(self, baseUrl, layer_name, params, file_format ='shape-zip', startIndex=None, count=None, hits=False):
+        """
+        # TODO:
+        - usar el parámetro SPATIAL_FILTER_BBOX_PARAM_NAME para filtrar usando el atributo BBOX de WFS
+        - de momento no permitiremos filtrar por polígono (usando WFS Filter encoding) porque es complicado obtener el
+          nombre del atributo que contiene la geometría para montar el filtro.
+        - Usar filter encoding requiere hacer un describeFeatureType y parsear la respuesta, que puede ser un XSD muy complejo
+         de interpretar
+        
+        https://gvsigol.localhost/geoserver/wfs?request=GetFeature&service=WFS&version=1.0.0&typeName=ws_cmartinez:countries4326&BBOX=18
+    ,21,40,42
+        
+        spatial_filter_type = _getParamValue(params, SPATIAL_FILTER_TYPE_PARAM_NAME)
+        spatial_filter_geom = _getParamValue(params, SPATIAL_FILTER_GEOM_PARAM_NAME)
+        
+        getFeature = ET.Element("wfs:GetFeature")
+        query = ET.SubElement(getFeature, "wfs:query")
+        ET.SubElement(query, "fes:Filter")
+        
+        OJO! Podemos usar el filter BBOX sin necesidad de saber el campo de geometry (se puede omitir propertyName en el operador BBOX)
+          <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
+        <ogc:BBOX>
+          <gml:Box xmlns:gml="http://www.opengis.net/gml" srsName="EPSG:3785">
+              <gml:coordinates decimal="." cs="," ts=" ">
+                -8033496.4863128,5677373.0653376 -7988551.5136872,5718801.9346624
+              </gml:coordinates>
+            </gml:Box>
+          </ogc:BBOX>
+        </ogc:Filter>
+        """
+    
+        url = _normalizeWxsUrl(baseUrl) + u'?service=WFS&version=1.0.0&request=GetFeature&typeName=' + layer_name
+        if hits:
+            url += u'&RESULTTYPE=hits'
+        else:
+            url += u'&OUTPUTFORMAT='+ file_format
+        spatial_filter_type = _getParamValue(params, SPATIAL_FILTER_TYPE_PARAM_NAME)
+        if spatial_filter_type == 'bbox':
+            spatial_filter_bbox = _getParamValue(params, SPATIAL_FILTER_BBOX_PARAM_NAME)
+            if spatial_filter_bbox:
+                bboxElements = spatial_filter_bbox.split(",")
+                if len(bboxElements) == 5:
+                    sourceCrs = bboxElements[4]
+                    nativeExtent = reprojectExtent(float(bboxElements[0]), float(bboxElements[1]), float(bboxElements[2]), float(bboxElements[3]), sourceCrs, self.nativeSrs)
+                    url += u'&BBOX=' + text(nativeExtent[0]) + u"," + text(nativeExtent[1])  + u"," + text(nativeExtent[2]) + u"," + text(nativeExtent[3])
+        if not hits and count is not None:
+            url += u'&MAXFEATURES=' + text(count)
+            if startIndex is not None:
+                url += u'&STARTINDEX=' + text(startIndex)
+    
+        return url
+
+    def getWfsGetFeatureRequest_v2_0_0(self, baseUrl, layer_name, params, file_format ='shape-zip', startIndex=None, count=None, hits=False):
+        """
+        # TODO:
+        - de momento no permitiremos filtrar por polígono (usando WFS Filter encoding) porque es complicado obtener el
+          nombre del atributo que contiene la geometría para montar el filtro.
+        - Usar filter encoding requiere hacer un describeFeatureType y parsear la respuesta, que puede ser un XSD muy complejo
+         de interpretar
+        
+        https://gvsigol.localhost/geoserver/wfs?request=GetFeature&service=WFS&version=1.0.0&typeName=ws_cmartinez:countries4326&BBOX=18,21,40,42
+        
+        spatial_filter_type = _getParamValue(params, SPATIAL_FILTER_TYPE_PARAM_NAME)
+        spatial_filter_geom = _getParamValue(params, SPATIAL_FILTER_GEOM_PARAM_NAME)
+        
+        getFeature = ET.Element("wfs:GetFeature")
+        query = ET.SubElement(getFeature, "wfs:query")
+        ET.SubElement(query, "fes:Filter")
+        
+        OJO! Podemos usar el filter BBOX sin necesidad de saber el campo de geometry (se puede omitir propertyName en el operador BBOX)
+          <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
+        <ogc:BBOX>
+          <gml:Box xmlns:gml="http://www.opengis.net/gml" srsName="EPSG:3785">
+              <gml:coordinates decimal="." cs="," ts=" ">
+                -8033496.4863128,5677373.0653376 -7988551.5136872,5718801.9346624
+              </gml:coordinates>
+            </gml:Box>
+          </ogc:BBOX>
+        </ogc:Filter>
+        """
+        url = _normalizeWxsUrl(baseUrl) + u'?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAME=' + layer_name
+        if hits:
+            url += u'&RESULTTYPE=hits'
+        else:
+            url += u'&OUTPUTFORMAT='+ file_format
+        spatial_filter_type = _getParamValue(params, SPATIAL_FILTER_TYPE_PARAM_NAME)
+        if spatial_filter_type == 'bbox':
+            spatial_filter_bbox = _getParamValue(params, SPATIAL_FILTER_BBOX_PARAM_NAME)
+            if spatial_filter_bbox:
+                bboxElements = spatial_filter_bbox.split(",")
+                if len(bboxElements) == 5:
+                    sourceCrs = bboxElements[4]
+                    if float(bboxElements[0]) <= float(bboxElements[2]):
+                        xmin = bboxElements[0]
+                        xmax = bboxElements[2]
+                    else:
+                        xmin = bboxElements[2]
+                        xmax = bboxElements[0]
+                    if float(bboxElements[1]) <= float(bboxElements[3]):
+                        ymin = bboxElements[1]
+                        ymax = bboxElements[3]
+                    else:
+                        ymin = bboxElements[3]
+                        ymax = bboxElements[1]
+                    
+                    epsgCodeValue = self._getEpsgValue(self.nativeSrs)
+                    axis0_min, axis1_min, axis0_max, axis1_max = reprojectExtent(xmin, ymin, xmax, ymax, sourceCrs, epsgCodeValue)
+                    if epsgCodeValue and self.nativeSrs != 'urn:ogc:def:crs:OGC:1.3:CRS:84' and int(epsgCodeValue) in _getCrsReverseAxisList():
+                        url += u'&BBOX=' + text(axis1_min) + u"," + text(axis0_min)  + u"," + text(axis1_max) + u"," + text(axis0_max)
+                    else:
+                        url += u'&BBOX=' + text(axis0_min) + u"," + text(axis1_min)  + u"," + text(axis0_max) + u"," + text(axis1_max)
+        if not hits and count is not None:
+            url += u'&COUNT=' + text(count)
+            if startIndex is not None:
+                url += u'&STARTINDEX=' + text(startIndex)
+        logger.debug(url)
+        return url
+
+    def _retrieveResource(self, url, suffix=''):
+        # TODO: authentication and permissions
+        resource_path = self.output_dir + "/" + self.layer_name + suffix + _getExtension(self.file_format)
+        resource_file = open(resource_path, "wb")
+        try:
+            r = requests.get(url, stream=True, verify=False, timeout=DEFAULT_TIMEOUT, proxies=PROXIES)
+            if r.status_code != 200:
+                resource_file.close()
+                os.remove(resource_file)
+                raise PreparationError(u'Error retrieving link. HTTP status code: '+text(r.status_code) + u". Url: " + url)
+            for chunk in r.iter_content(chunk_size=1024*1024):
+                resource_file.write(chunk)
+                # logger.debug("got 1MB")
+            resource_file.close()
+            logger.debug("resource download completed")
+            if r.headers.get('content-type') == 'application/xml':
+                # check we get the expected document and not a OGC error
+                for event, element in ET.iterparse(resource_path, events=("start",)):
+                    # use iterpase to avoid parsing the whole document (it could be a big GML file for instance)
+                    ns, sep, tag = element.tag.rpartition('}') # get the tag name
+                    if 'www.opengis.net/ows' in ns and tag == 'ExceptionReport':
+                        error_text = ET.parse(resource_path).tostring()
+                        raise PreparationError(u'Error retrieving WFS resource. Url: ' + url + 'OWS error message: ' + error_text)
+                    break
+
+        except PreparationError:
+            logger.exception("Preparation error")
+            raise
+        except:
+            logger.exception('error retrieving link: ' + url)
+        return resource_path
+    
+    def _getLayerPlainName(self, layer_fqname):
+        parts = layer_fqname.split(":")
+        if len(parts) > 1:
+            return parts[-1]
+        return parts[0]
+
+    def getFileRecordsCount(self, local_path, layer_name, file_type):
+        try:
+            if file_type == 'shape-zip':
+                layer_name = self._getLayerPlainName(layer_name)
+                virtual_path = '/vsizip/{' + local_path + '}/' + layer_name + ".shp"
+                info_str = gdaltools.ogrinfo(virtual_path, layer_name, summary=True, readonly=True)
+            else:
+                info_str = gdaltools.ogrinfo(local_path, alltables=True, summary=True, readonly=True)
+            try:
+                sys_encoding = sys.stdout.encoding or 'utf-8'
+            except:
+                sys_encoding = 'utf-8'
+            info_str = info_str.decode(sys_encoding)
+            buf = StringIO(info_str)
+            line = buf.readline()
+            while line != "":
+                if line.startswith('Feature Count: '):
+                    return int(line[15:])
+                line = buf.readline()
+            logger.error(u"Error getting feature count: " + local_path)
+            logger.debug(info_str)
+            return None
+        except:
+            logger.exception(u"Error getting feature count: " + local_path)
+
+    def parseHits(self, response):
+        try:
+            logger.debug(response)
+            collection = ET.fromstring(response)
+            if collection is not None:
+                logger.debug(collection.tag)
+                return int(collection.get('numberMatched'))
+            """
+            hitsTree = ET.fromstring(response)
+            if hitsTree is not None:
+                findExpr = "/wfs:FeatureCollection"
+                collection = hitsTree.find(findExpr, self.wfs200Namespaces)
+                if collection is not None:
+                    return int(collection.get('numberMatched'))
+            """ 
+        except:
+            logger.exception(u"Error parsing the hits response")
+        return 0
+    
+    def getHits(self):
+        hitsUrl = self.getWfsGetFeatureRequest_v1_0_0(self.url, self.layer_name, self.params,  file_format='text/xml', hits=True)
+        r = requests.get(hitsUrl, verify=False, timeout=DEFAULT_TIMEOUT, proxies=PROXIES)
+        if r.status_code != 200:
+            raise PreparationError("Error retrieving hits")
+        return self.parseHits(r.content)
+
+    def retrieveResources(self):
+        """
+        Retrieves the WFS resource. If the number of matched features is bigger than the
+        maximum allowed number of features, the layer will be split in several parts.
+        Returns a list of paths pointing the downloaded resources.
+        
+        """
+        logger.debug(self.url)
+        try:
+            self.getCapabilitiesTree = self.getCapabilitiesTree(self.url, version='1.0.0')
+            self.nativeSrs = self.getLayerCrs_v1_0_0(self.getCapabilitiesTree, self.layer_name)
+            paramDict = {}
+            if self.file_format is not None:
+                paramDict['file_format'] = self.file_format
+            #hits = self.getHits()
+            #logger.debug(u"Hits:" + text(hits))
+            totalReturnedCount = 0
+            returnedCount = 0
+            partCount = 1
+            ## Since hits is not reliable in Geoserver when maxFeatures is reached,
+            ## we will ask for more features until we don't get any
+            while partCount == 1 or returnedCount > 0:
+                """
+                We use WFS 1.0 because it is easier to get consistent axis order results
+                for Shapefiles, GeoJSONs, etc, as expected by most of the existing GIS software.
+                """
+                url = self.getWfsGetFeatureRequest_v1_0_0(self.url, self.layer_name, self.params, **paramDict)
+                if partCount > 1:
+                    suffix = '_part{:02}'.format(partCount)
+                else:
+                    suffix = ''
+                local_path = self._retrieveResource(url, suffix)
+                returnedCount = self.getFileRecordsCount(local_path, self.layer_name, self.file_format)
+                if returnedCount is None:
+                    raise PreparationError('The downloaded resource could not be checked')
+                elif partCount == 1 or returnedCount > 0:
+                    totalReturnedCount += returnedCount
+                    paramDict['count'] = paramDict.get('count', returnedCount) # maxFeatures
+                    paramDict['startIndex'] = totalReturnedCount
+                else:
+                    os.remove(local_path)
+                partCount += 1
+                if self.canceled:
+                    return []
+            """
+            TODO:
+            - comprobar el caso en el que el shape sea > 2 GB y volver a pedirlo en subconjuntos menores
+            """
+        except:
+            shutil.rmtree(self.output_dir, ignore_errors=True)
+            logger.exception(u"Error retrieving resource: " + self.url)
+            raise
+        return self.output_dir
+
+
 def normalizeOutname(name):
     resource_name = name.replace(":", "_")
     return re.sub('[^\w\s_-]', '', resource_name).strip().lower()
 
-def guessResourceName(resource_name, params):
+def guessResourceName(resource_name, params, suffix='', extension=None):
     # remove non-a-z_ or numeric characters
     resource_name = normalizeOutname(resource_name)
     if u'.' in resource_name:
         return resource_name
     file_format = _getParamValue(params, FORMAT_PARAM_NAME, '')
-    return resource_name + _getExtension(file_format)
+    if extension is not None:
+        return resource_name + suffix + extension
+    return resource_name + suffix + _getExtension(file_format)
 
+def retrieveMetadata(layer_id, md_name, output_dir=None):
+    try:
+        mdbytes = getRawMetadata(layer_id)
+        if mdbytes is not None:
+            if output_dir is None:
+                output_dir = tempfile.mkdtemp('-tmp', GVSIGOL_NAME.lower()+"dm", dir=getTmpDir())
+            # FIXME: should sanitize md_name
+            md_path = output_dir + "/" + md_name
+            f = open(md_path, "wb")
+            f.write(mdbytes)
+            f.close()
+            return md_path
+    except:
+        logger.exception("Error retrieving metadata")
+    
 def retrieveResources(resource_descriptor):
     """
     Returns the resource pointed by the resourceLocator as a local file path,
@@ -749,29 +1045,45 @@ def retrieveResources(resource_descriptor):
     If the resource is a remote resource, it is first copied as a local file. 
     """
     res_type = resource_descriptor.get('resource_type')
+    layer_id = resource_descriptor.get('layer_id')
     resource_name = resource_descriptor.get('name', '')
     resource_url = resource_descriptor.get('url')
     params = resource_descriptor.get('params', [])
+    metadata_name = guessResourceName(resource_name, params, extension=".metadata.xml")
     if res_type == ResourceLocator.OGC_WCS_RESOURCE_TYPE:
         client = WCSClient(resource_url, resource_name, params)
         output_file_or_folder = client.retrieveResources()
-        return [ResourceDescription(guessResourceName(resource_name, params), output_file_or_folder, True)]
-        
+        if os.path.isdir(output_file_or_folder):
+            retrieveMetadata(layer_id, metadata_name, output_file_or_folder)
+            return [ResourceDescription(guessResourceName(resource_name, params), output_file_or_folder, True)]
+        else:
+            resources = [ResourceDescription(guessResourceName(resource_name, params), output_file_or_folder, True)]
+            md_path = retrieveMetadata(layer_id, metadata_name)
+            if md_path:
+                    resources.append(ResourceDescription(metadata_name, md_path, True))
+            return resources
+    elif res_type == ResourceLocator.OGC_WFS_RESOURCE_TYPE:
+        client = WFSClient(resource_url, resource_name, params)
+        output_folder = client.retrieveResources()
+        retrieveMetadata(layer_id, metadata_name, output_folder)
+        return [ResourceDescription(guessResourceName(resource_name, params, extension=''), output_folder, True)]
     elif res_type == ResourceLocator.HTTP_LINK_RESOURCE_TYPE:
         url = resource_url
-    elif res_type == ResourceLocator.OGC_WFS_RESOURCE_TYPE:
-        url = _getWfsRequest(resource_name, resource_url, params)
+    resources = []
+    md_path = retrieveMetadata(layer_id, metadata_name)
+    if md_path:
+        resources.append(ResourceDescription(metadata_name, md_path, True))
     if (url.startswith("http://") or url.startswith("https://")):
         local_path = retrieveLinkLocator(url)
-        return [ResourceDescription(guessResourceName(resource_name, params), local_path, True)]
-    if url.startswith("file://"):
+        resources.insert(0, ResourceDescription(guessResourceName(resource_name, params), local_path, True))
+    elif url.startswith("file://"):
         local_path = resolveFileUrl(url)
         if url.endswith("/"):
-            return [ResourceDescription(guessResourceName(resource_name, params), local_path)] 
+            resources.insert(0, ResourceDescription(guessResourceName(resource_name, params), local_path)) 
         else:
-            return [ResourceDescription(os.path.basename(url), local_path)]
+            resources.insert(0, ResourceDescription(os.path.basename(url), local_path))
     # TODO: error management
-    return []
+    return resources
 
 def _addResources(zipobj, resource_desc_list, count):
     i = 0
@@ -1141,6 +1453,10 @@ def processLocators(request, zipobj=None, zip_path=None):
                 logger.debug('creating links')
                 # store a direct download link instead of packaging the resource
                 createDownloadLinks(request, resourceLocator)
+                # add metadata link
+                md_url = getRawMetadataUrl(resourceLocator.layer_id)
+                if md_url:
+                    createDownloadLink(request, resourceLocator, resolved_url=md_url, name='metadata', is_auxiliary=True)
                 resourceLocator.status = ResourceLocator.PROCESSED_STATUS
                 completed_locators += 1
             resourceLocator.save()
@@ -1182,7 +1498,7 @@ def processLocators(request, zipobj=None, zip_path=None):
 
     return ResultTuple(completed_locators, len(packaged_locators), waiting_space, to_package, temporal_errors, permanent_errors)
 
-def createDownloadLink(downloadRequest, resourceLocators, prepared_download_path, is_auxiliary=False, is_temporary=False):
+def createDownloadLink(downloadRequest, resourceLocators, prepared_download_path=None, resolved_url=None, name=None, is_auxiliary=False, is_temporary=False):
     try:
         new_link = DownloadLink()
         new_link.request = downloadRequest
@@ -1190,9 +1506,13 @@ def createDownloadLink(downloadRequest, resourceLocators, prepared_download_path
         new_link.valid_to = timezone.now() + timedelta(seconds = downloadRequest.validity)
         new_link.link_random_id = link_uuid
         new_link.prepared_download_path = prepared_download_path
+        new_link.resolved_url = resolved_url
         new_link.is_auxiliary = is_auxiliary
         new_link.is_temporary = is_temporary
-        new_link.name = os.path.basename(prepared_download_path)
+        if name:
+            new_link.name = name
+        else:
+            new_link.name = os.path.basename(prepared_download_path)
         new_link.save()
         if isinstance(resourceLocators, ResourceLocator):
             resourceLocators.download_links.add(new_link)
@@ -1240,7 +1560,7 @@ def createDownloadLinks(downloadRequest, resourceLocator):
                 raise PermanentPreparationError()
             for p in paths:
                 is_auxiliary = (p != local_path)
-                createDownloadLink(downloadRequest, resourceLocator, p, is_auxiliary)
+                createDownloadLink(downloadRequest, resourceLocator, p, is_auxiliary=is_auxiliary)
     except ForbiddenAccessError:
         logger.exception("Error creating download link")
         raise PermanentPreparationError()

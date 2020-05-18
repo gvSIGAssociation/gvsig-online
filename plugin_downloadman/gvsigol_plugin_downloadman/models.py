@@ -192,6 +192,7 @@ class DownloadLink(models.Model):
     
     request = models.ForeignKey('DownloadRequest', on_delete=models.CASCADE, db_index=False)
     prepared_download_path = models.TextField(null=True, blank=True)
+    resolved_url = models.TextField(null=True, blank=True, default=None)
     valid_to=models.DateTimeField(db_index=True)
     link_random_id = models.TextField(db_index=True, unique=True)
     status = models.CharField(max_length=2, default=PROCESSED_STATUS, choices=STATUS_CHOICES)

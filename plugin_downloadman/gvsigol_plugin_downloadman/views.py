@@ -221,12 +221,10 @@ class CustomJsonEncoder(DjangoJSONEncoder):
 
 def getWsLayerDownloadResources(request, workspace_name, layer_name):
     try:
-        layers = Layer.objects.filter(name=layer_name, datastore__workspace__name=workspace_name)
         layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace_name)
         resources = doGetLayerDownloadResources(layer, request.user)
     except:
         resources = []
-    json_resources = json.dumps(resources, cls=CustomJsonEncoder)
     return JsonResponse(resources, encoder=CustomJsonEncoder, safe=False)
 
 
@@ -407,11 +405,12 @@ def doGetLayerDownloadResources(layer, user):
             # TODO: maybe we should check permissions for request.user
             server = layer.datastore.workspace.server
             if server.type == 'geoserver':
+                fqname = layer.datastore.workspace.name + ":" + layer.name if not ":" in layer.name else layer.name
                 if layer.type.startswith('c_') and layer.datastore.workspace.wcs_endpoint:
-                    resource = ResourceDownloadDescriptor(layer.id, layer.name, layer.title, downman_models.ResourceLocator.OGC_WCS_RESOURCE_TYPE, _("Raster data"), dataSourceType = downman_models.ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE,  resourceType=downman_models.ResourceLocator.OGC_WCS_RESOURCE_TYPE, dataFormats=['image/geotiff', 'image/png'], nativeCrs=layer.native_srs)
+                    resource = ResourceDownloadDescriptor(layer.id, fqname, layer.title, fqname, _("Raster data"), dataSourceType = downman_models.ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE,  resourceType=downman_models.ResourceLocator.OGC_WCS_RESOURCE_TYPE, url=layer.datastore.workspace.wcs_endpoint, dataFormats=['image/geotiff', 'image/png'], nativeCrs=layer.native_srs)
                     all_resources.append(resource)
                 elif layer.type.startswith('v_') and layer.datastore.workspace.wfs_endpoint:
-                    resource = ResourceDownloadDescriptor(layer.id, layer.name, layer.title, downman_models.ResourceLocator.OGC_WFS_RESOURCE_TYPE, _("Vector data"),  dataSourceType = downman_models.ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.OGC_WFS_RESOURCE_TYPE, dataFormats=['shape-zip', 'application/json', 'csv', 'gml2', 'gml3'], nativeCrs=layer.native_srs)
+                    resource = ResourceDownloadDescriptor(layer.id, fqname, layer.title, fqname, _("Vector data"),  dataSourceType = downman_models.ResourceLocator.GVSIGOL_DATA_SOURCE_TYPE, resourceType=downman_models.ResourceLocator.OGC_WFS_RESOURCE_TYPE, url=layer.datastore.workspace.wfs_endpoint, dataFormats=['shape-zip', 'application/json', 'csv', 'gml2', 'gml3'], nativeCrs=layer.native_srs)
                     all_resources.append(resource)
             elif server.type == 'mapserver':
                 # TODO:
@@ -702,6 +701,8 @@ def downloadResource(request, uuid, resuuid):
             logger.debug(u"using sendfile: " + link.prepared_download_path)
             return sendfile(request, link.prepared_download_path, attachment=True)
         else:
+            if link.resolved_url:
+                return redirect(link.resolved_url) 
             logger.debug(u"going to use redirect")
             for locator in link.resourcelocator_set.all():
                 logger.debug(u"using redirect: " + locator.resolved_url)
@@ -802,7 +803,7 @@ def cancel_locator(request, resource_id):
         resource = downman_models.ResourceLocator.objects.get(pk=int(resource_id))
         resource.canceled = True
         resource.save()
-        for link in resource.download_links:
+        for link in resource.download_links.all():
             link.status = downman_models.DownloadLink.ADMIN_CANCELED_STATUS
             link.save()
             pending_locators = 0
