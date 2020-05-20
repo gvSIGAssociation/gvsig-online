@@ -4561,8 +4561,8 @@ table.text-center th {
 .user-block .username,
 .user-block .description,
 .user-block .comment {
-  display: block;
-  margin-left: 50px;
+  display: inline;
+  margin-right: 20px;
 }
 .user-block .username {
   font-size: 16px;
@@ -4592,6 +4592,10 @@ table.text-center th {
 .user-block.user-block-sm img {
   width: 30px!important;
   height: 30px!important;
+}
+.user-block:hover {
+  cursor: pointer;
+  color: #666;
 }
 .img-sm + .img-push {
   margin-left: 40px;
