@@ -68,7 +68,7 @@ legend.prototype.reloadLegend = function() {
 		var legend = this.dataset.legend;
 		var ui = '';
 		ui += '<div class="box-body">';
-		ui += 	'<img src="' + layers[i].legend + '" alt="Photo">';
+		ui += 	'<img src="' + legend + '" alt="Photo">';
 		ui += '</div>';
 		
 		$('#float-modal .modal-body').empty();
