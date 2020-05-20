@@ -39,6 +39,18 @@ legend.prototype.loadLegend = function() {
 	var self = this;
 	var legends = this.getLegendsFromVisibleLayers();
 	this.legendContainer.append(legends);
+	
+	$('.user-block').on('click', function(){
+		var legend = this.dataset.legend;
+		var ui = '';
+		ui += '<div class="box-body">';
+		ui += 	'<img src="' + legend + '" alt="Photo">';
+		ui += '</div>';
+		
+		$('#float-modal .modal-body').empty();
+		$('#float-modal .modal-body').append(ui);
+		$("#float-modal").modal('show');
+	});
 };
 
 
@@ -51,6 +63,18 @@ legend.prototype.reloadLegend = function() {
 	var legends = this.getLegendsFromVisibleLayers();
 	this.legendContainer.empty();	
 	this.legendContainer.append(legends);
+	
+	$('.user-block').on('click', function(){
+		var legend = this.dataset.legend;
+		var ui = '';
+		ui += '<div class="box-body">';
+		ui += 	'<img src="' + layers[i].legend + '" alt="Photo">';
+		ui += '</div>';
+		
+		$('#float-modal .modal-body').empty();
+		$('#float-modal .modal-body').append(ui);
+		$("#float-modal").modal('show');
+	});
 };
 
 
@@ -70,8 +94,9 @@ legend.prototype.getLegendsFromVisibleLayers = function() {
 					if (layers[i].legend != "") {
 						html += 		'<div class="box box-widget">';
 						html += 			'<div class="box-header with-border">';
-						html += 				'<div class="user-block">';
-						html += 					'<span class="username"><a href="#">' + layers[i].title + '</a></span>';
+						html += 				'<div class="user-block" data-legend="' + layers[i].legend + '">';
+						html += 					'<span class="username">' + layers[i].title + '</span>';
+						html +=						'<i class="fa fa-expand"></i>';
 						html += 				'</div>';
 						html += 			'</div>';
 						html += 			'<div class="box-body">';
