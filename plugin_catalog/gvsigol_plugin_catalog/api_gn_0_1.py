@@ -32,6 +32,7 @@ from gvsigol_plugin_catalog.mdstandards import registry
 import logging
 logger = logging.getLogger("gvsigol")
 from xmlutils import getTextFromXMLNode, getXMLNode, getXMLCodeText, sanitizeXmlText
+from future.moves.urllib.parse import quote
 
 DEFAULT_TIMEOUT = 10 #seconds
 
@@ -347,6 +348,9 @@ class Geonetwork():
             'protocol': sanitizeXmlText(protocol),
             'url': sanitizeXmlText(url)
             }
+    def gn_get_raw_metadata_url(self, metadata_id):
+        return self.service_url + "/srv/api/0.1/records/"+quote(str(metadata_id), safe='')+'/formatters/xml'
+
     def gn_get_metadata_raw(self, metadata_id):
         url = self.service_url + "/srv/api/0.1/records/"+str(metadata_id)
         headers = {

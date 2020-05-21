@@ -71,6 +71,9 @@ class Geonetwork():
             logger.exception(e);
             print e
 
+    def get_raw_metadata_url(self, uuid):
+        return self.xmlapi.gn_get_raw_metadata_url(uuid)
+    
     def get_metadata_raw(self, uuid):
         try:
             if self.xmlapi.gn_auth(self.user, self.password):
