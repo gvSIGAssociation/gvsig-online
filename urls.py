@@ -57,6 +57,7 @@ urlpatterns = [
     url(r'^get_feature_info/$', services_views.get_feature_info, name='get_feature_info'),
     url(r'^get_feature_resources/$', services_views.get_feature_resources, name='get_feature_resources'),
     url(r'^get_datatable_data/$', services_views.get_datatable_data, name='get_datatable_data'),
+    url(r'^get_feature_wfs/$', services_views.get_feature_wfs, name='get_feature_wfs'),
     url(r'^get_unique_values/$', services_views.get_unique_values, name='get_unique_values'),
     url(r'^upload_resources/$', services_views.upload_resources, name='upload_resources'),
     url(r'^delete_resource/$', services_views.delete_resource, name='delete_resource'),
