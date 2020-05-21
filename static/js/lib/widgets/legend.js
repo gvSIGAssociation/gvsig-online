@@ -49,7 +49,6 @@ legend.prototype.loadLegend = function() {
 		
 		$('#float-modal .modal-body').empty();
 		$('#float-modal .modal-body').append(ui);
-		$('#float-modal .modal-footer').empty();
 		$("#float-modal").modal('show');
 	});
 };
@@ -74,7 +73,6 @@ legend.prototype.reloadLegend = function() {
 		
 		$('#float-modal .modal-body').empty();
 		$('#float-modal .modal-body').append(ui);
-		$('#float-modal .modal-footer').empty();
 		$("#float-modal").modal('show');
 	});
 };
