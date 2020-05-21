@@ -3120,6 +3120,78 @@ def get_datatable_data(request):
             pass
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+    
+    
+@csrf_exempt
+def get_feature_wfs(request):
+    if request.method == 'POST':
+        layer_name = request.POST.get('layer_name')
+        workspace = request.POST.get('workspace')
+        wfs_url = request.POST.get('wfs_url')
+        field = request.POST.get('field')
+        field_type = request.POST.get('field_type')
+        value = request.POST.get('value')
+        operator = request.POST.get('operator')
+
+        try:
+            layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
+            if wfs_url == None:
+                wfs_url = layer.datastore.workspace.wfs_endpoint
+              
+            cql_filter = None  
+            if operator == 'equal_to':
+                if field_type == 'character varying':
+                    cql_filter = field + "='" + value + "'"
+                else:
+                    cql_filter = field + "=" + value
+            
+            elif operator == 'smaller_than':
+                cql_filter = field + "<" + value
+                
+            elif operator == 'greater_than':
+                cql_filter = field + ">" + value
+            
+            data = {
+                "SERVICE": "WFS",
+                "VERSION": "1.1.0",
+                "REQUEST": "GetFeature",
+                "TYPENAME": layer_name,
+                "OUTPUTFORMAT": "application/json",
+                "MAXFEATURES": 500,
+                "CQL_FILTER": cql_filter
+            }
+            
+            params = urllib.urlencode(data)
+            req = requests.Session()
+            if 'username' in request.session and 'password' in request.session:
+                if request.session['username'] is not None and request.session['password'] is not None:
+                    req.auth = (request.session['username'], request.session['password'])
+                    #req.auth = ('admin', 'geoserver')
+
+            print wfs_url + "?" + params
+            response = req.post(wfs_url, data=data, verify=False, proxies=settings.PROXIES)
+            jsonString = response.text
+            geojson = json.loads(jsonString)
+
+            data = []
+            for f in geojson['features']:
+                row = {}
+                for p in f['properties']:
+                    row[p] = f['properties'][p]
+                row['featureid'] = f['id']
+                data.append(row)
+
+            response = {
+                'data': data
+            }
+
+        except Exception as e:
+            response = {
+                'data': []
+            }
+            pass
+
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
