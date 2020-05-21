@@ -1163,11 +1163,24 @@ attributeTable.prototype.createPdfReport = function(selectedRows) {
         for (var j=0; j<selectedRows.length; j++) {
         	var feat = self.getFeature(selectedRows[j]);
         	var address = self.getAddress(feat);
+        	var completeAddress = address.address;
+        	if (address.tip_via) {
+        		completeAddress = address.tip_via + ' ' + completeAddress;
+        	}
+        	if (address.portalNumber) {
+        		completeAddress = completeAddress + ', ' + address.portalNumber.toString();
+        	}
+        	/*if (address.poblacion) {
+        		completeAddress = completeAddress + ', ' + address.poblacion;
+        	}
+        	if (address.muni) {
+        		completeAddress = completeAddress + ', ' + address.muni;
+        	}*/
         	var resources = self.getResources(feat);
         	reportElements.push({
         		'fid': selectedRows[j].featureid,
         		'properties': selectedRows[j],
-        		'address': address,
+        		'address': completeAddress,
         		'resources': resources
         	});
         }
@@ -1431,7 +1444,7 @@ attributeTable.prototype.getAddress = function(feat) {
 		  		'type': 'new_cartociudad'
 		  	},
 		  	success	:function(response){
-		    	address = response.address;
+		    	address = response;
 		  	},
 		  	error: function(){}
 		});
