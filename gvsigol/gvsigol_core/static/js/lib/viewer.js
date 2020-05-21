@@ -234,6 +234,7 @@ viewer.core = {
     _createWidgets: function() {
     	this.layerTree = new layerTree(this.conf, this.map, this);
     	this.legend = new legend(this.conf, this.map);
+    	this.rawFilter = new RawFilter(this.conf, this.map);
     },
 
     _loadExternalLayer: function(externalLayer, group, index) {

@@ -195,6 +195,7 @@
 			<ul id="gvsigol-toc-tabs" class="nav nav-tabs nav-justified control-sidebar-tabs">
 				<li class="active" title="{% trans "Layer tree" %}"><a href="#layer-tree-tab" data-toggle="tab"><i class="icon-layers"></i></a></li>
 				<li title="{% trans "Legend" %}"><a href="#legend-tab" data-toggle="tab"><i class="fa fa-tags"></i></a></li>
+				<li title="{% trans "Filters" %}"><a href="#filters-tab" data-toggle="tab"><i class="fa fa-filter"></i></a></li>
 				<li title="{% trans "Details" %}"><a href="#details-tab" data-toggle="tab"><i class="fa fa-list-alt"></i></a></li>
 				<li title="{% trans "Temporary" %}" class="temporary-tab"><a href="#temporary-tab" data-toggle="tab"><i class="fa fa-clock-o" aria-hidden="true"></i></a></li>
 			</ul>
@@ -207,6 +208,10 @@
 
 				<!-- Legend -->
 				<div class="tab-pane" id="legend-tab" style="overflow-y: auto; height: 100%;">
+				</div>
+				
+				<!-- Legend -->
+				<div class="tab-pane" id="filters-tab" style="overflow-y: auto; height: 100%;">
 				</div>
 
 				<!-- Details -->
@@ -412,6 +417,7 @@
 	<script type="text/javascript" src="{% static "js/lib/tools/projectZoom.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/tools/getFeatureInfo.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/tools/attributeTable.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/tools/SelectionTable.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/tools/measureLength.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/tools/measureArea.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/tools/measureAngle.js" %}"></script>
@@ -437,6 +443,7 @@
 	<script type="text/javascript" src="{% static "js/lib/widgets/downloadManagerClientBase.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/widgets/layerTree.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/widgets/legend.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/widgets/rawFilter.js" %}"></script>
 
 	<script type="text/javascript" src="{% static "js/lib/viewer.js" %}"></script>
 
