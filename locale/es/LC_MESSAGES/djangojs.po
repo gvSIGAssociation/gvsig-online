@@ -554,3 +554,57 @@ msgstr "Debe rellenar todos los valores"
 
 msgid "Some value is out of range"
 msgstr "Algún valor está fuera de rango"
+
+msgid "Raw filter"
+msgstr "Filtro rápido"
+
+msgid "Layer group"
+msgstr "Grupo de capas"
+
+msgid "Select layer group"
+msgstr "Seleccionar grupo de capas"
+
+msgid "Layer"
+msgstr "Capa"
+
+msgid "Select layer"
+msgstr "Seleccionar capa"
+
+msgid "Field"
+msgstr "Campo"
+
+msgid "Operator"
+msgstr "Operador"
+
+msgid "Select operator"
+msgstr "Seleccionar operador"
+
+msgid "Value"
+msgstr "Valor"
+
+msgid "Clean filter"
+msgstr "Limpiar filtro"
+
+msgid "The selected layer group does not contain queryable layers"
+msgstr "El grupo de capas seleccionado no contiene capas consultables"
+
+msgid "The selected layer does not contain queryable fields"
+msgstr "La capa seleccionada no contiene campos consultables"
+
+msgid "The selected field does not contain values"
+msgstr "El campo seleccionado no contiene valores"
+
+msgid "No results found"
+msgstr "No se han encontrado resultados"
+
+msgid "Equal to"
+msgstr "Es igual que"
+
+msgid "Smaller than"
+msgstr "Es menor que"
+
+msgid "Greater than"
+msgstr "Es mayor que"
+
+msgid "You must fill in all fields"
+msgstr "Debe rellenar todos los campos"
