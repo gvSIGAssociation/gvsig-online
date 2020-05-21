@@ -73,7 +73,7 @@ def create_datset_metadata(mdfields):
         dateTime = tree.find('/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/gco:DateTime', namespaces)
         dateTime.text = current_date
         
-        create_thumbnail(tree, thumbnail_url)
+        create_thumbnail(tree, thumbnail_url, title)
         minx, miny, maxx, maxy = extent_tuple
         create_extent(tree, minx, miny, maxx, maxy)
         
@@ -295,14 +295,7 @@ def update_extent(geo_bb_elem, extent_tuple):
         elif bound.tag == '{http://www.isotc211.org/2005/gmd}northBoundLatitude':
             bound[0].text = maxy
 
-def update_thumbnail(browse_graphic_elem, thumbnail_url):
-    desc = browse_graphic_elem.findall('./gmd:fileDescription/gco:CharacterString', namespaces)
-    if len(desc) > 0 and desc[0].text == u'gvsigol thumbnail':
-        file_names = browse_graphic_elem.findall('./gmd:fileName/gco:CharacterString', namespaces)
-        if len(file_names) > 0:
-            file_names[0].text = thumbnail_url
-
-def create_thumbnail(root_elem, thumbnail_url):
+def create_thumbnail(root_elem, thumbnail_url, thumbnail_desc=None):
     data_ident_elements = root_elem.findall('./gmd:identificationInfo/gmd:MD_DataIdentification', namespaces)
     for data_ident_elem in data_ident_elements:
         prevSiblingNames = ['gmd:citation',
@@ -319,9 +312,13 @@ def create_thumbnail(root_elem, thumbnail_url):
         file_name = ET.SubElement(brgr, "{http://www.isotc211.org/2005/gmd}fileName")
         file_name_str = ET.SubElement(file_name, "{http://www.isotc211.org/2005/gco}CharacterString")
         file_name_str.text = thumbnail_url
-        file_desc = ET.SubElement(brgr, "{http://www.isotc211.org/2005/gmd}fileDescription")
-        file_desc_str = ET.SubElement(file_desc, "{http://www.isotc211.org/2005/gco}CharacterString")
-        file_desc_str.text = u'gvsigol thumbnail'
+        if thumbnail_desc:
+            file_desc = ET.SubElement(brgr, "{http://www.isotc211.org/2005/gmd}fileDescription")
+            file_desc_str = ET.SubElement(file_desc, "{http://www.isotc211.org/2005/gco}CharacterString")
+            file_desc_str.text = thumbnail_desc
+        file_type = ET.SubElement(brgr, "{http://www.isotc211.org/2005/gmd}fileType")
+        file_type_str = ET.SubElement(file_type, "{http://www.isotc211.org/2005/gco}CharacterString")
+        file_type_str.text = u'gvsigol thumbnail'
 
 def create_extent(root_elem, minx, miny, maxx, maxy):
     data_ident_elements = root_elem.findall('./gmd:identificationInfo/gmd:MD_DataIdentification', namespaces)
@@ -438,8 +435,10 @@ class Iso19139_2007Updater(XmlStandardUpdater):
                 to_remove.append(overview)
             else:
                 valid_overviews += 1
+                ftype = overview.find('./gmd:MD_BrowseGraphic/gmd:fileType/gco:CharacterString', namespaces)
                 desc = overview.find('./gmd:MD_BrowseGraphic/gmd:fileDescription/gco:CharacterString', namespaces)
-                if desc is not None and desc.text == u'gvsigol thumbnail':
+                if (ftype is not None and ftype.text ==  u'gvsigol thumbnail') \
+                        or (desc is not None and desc.text == u'gvsigol thumbnail'):
                     file_name.text = thumbnail_url
         for el in to_remove:
             el.getparent().remove(el)
