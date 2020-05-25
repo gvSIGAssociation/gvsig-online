@@ -492,3 +492,5 @@ OSM_TILING_3 = '##OSM_TILING_3##'
 
 VERSION_FIELD = 'feat_version_gvol'
 DATE_FIELD = 'feat_date_gvol'
+
+RELOAD_NODES_DELAY = 5 #EN SEGUNDOS
