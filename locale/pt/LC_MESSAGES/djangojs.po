@@ -110,3 +110,9 @@ msgstr "Gravar nódulo"
 
 msgid "Edit node"
 msgstr "Editar nodulo"
+
+msgid "Node has been reloaded"
+msgstr "O nó foi recarregado"
+
+msgid "Error reloading node"
+msgstr "Erro ao recarregar o nó"
