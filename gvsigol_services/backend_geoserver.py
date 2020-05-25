@@ -48,6 +48,7 @@ import re
 import unicodedata
 from dbfread import DBF
 import time
+import utils
 
 logger = logging.getLogger("gvsigol")
 DEFAULT_REQUEST_TIMEOUT = 5
@@ -230,6 +231,7 @@ class Geoserver():
                     params_dict['Expose primary keys'] = params_dict.get('Expose primary keys', 'true')
                 ds = catalog.create_datastore(name, workspace.name)
                 ds.connection_parameters.update(params_dict)
+                
             elif format_nature == "c": # coverage (raster)
                 if driver == "GeoTIFF":
                     ds = catalog.create_coveragestore2(name, workspace.name)
