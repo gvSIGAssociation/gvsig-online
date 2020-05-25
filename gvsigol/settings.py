@@ -147,22 +147,20 @@ INSTALLED_APPS = [
     'gvsigol_symbology',
     'gvsigol_filemanager',
     'gvsigol_core',
-    'gvsigol_app_dev',
-    #'gvsigol_app_panacea',
-    'gvsigol_plugin_edition',
-    'gvsigol_plugin_worldwind',
-    'gvsigol_plugin_geocoding',
-    'gvsigol_plugin_print',
-    'gvsigol_statistics',
-     #'gvsigol_app_test',
+    'gvsigol_app_librapicassa',
+    #'gvsigol_plugin_edition',
+    #'gvsigol_plugin_worldwind',
+    #'gvsigol_plugin_geocoding',
+    #'gvsigol_plugin_print',
+    #'gvsigol_statistics',
     #'gvsigol_app_repsol',
     #'gvsigol_app_ideuy',
     #'gvsigol_app_librapicassa',
     #'gvsigol_plugin_worldwind',
     #'gvsigol_plugin_print',
     #'gvsigol_plugin_geocoding',
-    'gvsigol_plugin_catalog',
-    'gvsigol_plugin_downloadman',
+    #'gvsigol_plugin_catalog',
+    #'gvsigol_plugin_downloadman',
     #'gvsigol_app_libraregepa',
     #'gvsigol_plugin_regepa',
     'actstream',
@@ -171,6 +169,13 @@ INSTALLED_APPS = [
     'corsheaders',
     'drf_yasg',
 ]
+
+PUBLIC_PLUGINS = []
+
+ACTSTREAM_SETTINGS = {
+    'FETCH_RELATIONS': True,
+    'USE_JSONFIELD': True,
+}
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -301,9 +306,9 @@ django.conf.locale.LANG_INFO = LANG_INFO
 LANGUAGES = (
     ('es', _('Spanish')),
     ('va', _('Valencian')),
-    ('ca', _('Catalan')), 
+    #('ca', _('Catalan')), 
     ('en', _('English')),
-    ('pt-br', _('Portuguese')),
+    #('pt', _('Portuguese')),
 )
 LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol/locale'),
@@ -318,7 +323,9 @@ LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'gvsigol_plugin_geocoding/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_edition/locale'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_catalog/locale'),
-    os.path.join(BASE_DIR, 'gvsigol_plugin_print/locale')
+    os.path.join(BASE_DIR, 'gvsigol_plugin_print/locale'),
+    os.path.join(BASE_DIR, 'gvsigol_plugin_importvector/locale'),
+    os.path.join(BASE_DIR, 'gvsigol_plugin_draw/locale'),
 )
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -336,9 +343,9 @@ SITE_ID=1
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
-BASE_URL = 'https://gvsigol.localhost'
-MEDIA_ROOT = '/var/www/sites/gvsigol.localhost/media/'
-MEDIA_URL = 'https://gvsigol.localhost/media/'
+BASE_URL = 'https://localhost'
+MEDIA_ROOT = '/usr/local/var/www/media/'
+MEDIA_URL = 'https://localhost/media/'
 STATIC_URL = '/gvsigonline/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 
@@ -377,8 +384,9 @@ MOSAIC_DB = {
     'passwd': DB_PW_DEVEL # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 },
 
-OGR2OGR_PATH = '/usr/bin/ogr2ogr'
-GDALTOOLS_BASEPATH = '/usr/bin'
+OGR2OGR_PATH = '/usr/local/bin/ogr2ogr'
+SHP2PGSQL_PATH = '/Library/PostgreSQL/9.6/bin/shp2pgsql'
+GDALTOOLS_BASEPATH = '/usr/local/bin'
 
 TILE_SIZE = 256
 MAX_ZOOM_LEVEL = 18 
@@ -421,6 +429,18 @@ SUPPORTED_CRS = {
         'code': 'EPSG:25829',
         'title': 'ETRS89 / UTM zone 29N',
         'definition': '+proj=utm +zone=30 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
+        'units': 'meters'
+    },
+    '102033': {
+        'code': 'EPSG:102033',
+        'title': 'South America Albers Equal Area Conic',
+        'definition': '+proj=aea +lat_1=-5 +lat_2=-42 +lat_0=-32 +lon_0=-60 +x_0=0 +y_0=0 +ellps=aust_SA +units=m +no_defs',
+        'units': 'meters'
+    },
+    '32721': {
+        'code': 'EPSG:32721',
+        'title': 'WGS 84 / UTM zone 21S',
+        'definition': '+proj=utm +zone=21 +south +datum=WGS84 +units=m +no_defs',
         'units': 'meters'
     }
 }
@@ -532,7 +552,7 @@ TEMPORAL_ADVANCED_PARAMETERS = False
 
 LEGACY_GVSIGOL_SERVICES = {
     'ENGINE':'geoserver',
-    'URL': 'https://gvsigol.localhost/geoserver',
+    'URL': 'https://localhost/geoserver',
     'USER': GEOSERVER_USER_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
     'PASSWORD': GEOSERVER_PW_DEVEL, # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
 }
@@ -558,3 +578,19 @@ DATE_FIELD = 'feat_date_gvol'
 
 SENDFILE_BACKEND = 'sendfile.backends.xsendfile'
 SHARED_VIEW_EXPIRATION_TIME = 1
+
+VERSION_FIELD = 'feat_version_gvol'
+DATE_FIELD = 'feat_date_gvol'
+
+PUSH_NOTIFICATIONS_SETTINGS = {
+    "FCM_API_KEY": "[your api key]",
+    "GCM_API_KEY": "[your api key]",
+    "APNS_CERTIFICATE": "/path/to/your/certificate.pem",
+    "APNS_TOPIC": "com.example.push_test",
+    "WNS_PACKAGE_SECURITY_ID": "[your package security id, e.g: 'ms-app://e-3-4-6234...']",
+    "WNS_SECRET_KEY": "[your app secret key, e.g.: 'KDiejnLKDUWodsjmewuSZkk']",
+    "WP_PRIVATE_KEY": "/path/to/your/private.pem",
+    "WP_CLAIMS": {'sub': "mailto: development@example.com"}
+}
+
+RELOAD_NODES_DELAY = 5 #EN SEGUNDOS
