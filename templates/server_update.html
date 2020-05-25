@@ -257,10 +257,7 @@
 		$.ajax({
 			type: 'POST',
 			async: false,
-			url: '/gvsigonline/services/reload_node/',
-			data: {
-				id: node.id	
-			},
+			url: '/gvsigonline/services/reload_node/' + node.id + '/',
 			beforeSend:function(xhr){
 			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 			},

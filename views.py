@@ -272,13 +272,13 @@ def get_server(request, svid):
     
     except:
         return HttpResponseNotFound('<h1>Server not found{0}</h1>'.format(s.name))
-    
-@csrf_exempt
-def reload_node(request):
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@superuser_required
+@csrf_exempt   
+def reload_node(request, nid):
     if request.method == 'POST':
-        id = request.POST.get('id')
-        
-        node = Node.objects.get(id=int(id))
+        node = Node.objects.get(id=int(nid))
         gs = geographic_servers.get_instance().get_server_by_id(node.server_id)
         if gs.reload_node(node.url):
             response = {'reloaded': True}
@@ -488,6 +488,7 @@ def datastore_add(request):
                                                       form.cleaned_data['name'],
                                                       form.cleaned_data['description'],
                                                       form.cleaned_data['connection_params']):
+                    
                     # save it on DB if successfully created
                     newRecord = Datastore(
                         workspace=form.cleaned_data['workspace'],
