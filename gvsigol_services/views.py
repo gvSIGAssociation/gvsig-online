@@ -272,6 +272,21 @@ def get_server(request, svid):
     
     except:
         return HttpResponseNotFound('<h1>Server not found{0}</h1>'.format(s.name))
+    
+@csrf_exempt
+def reload_node(request):
+    if request.method == 'POST':
+        id = request.POST.get('id')
+        
+        node = Node.objects.get(id=int(id))
+        gs = geographic_servers.get_instance().get_server_by_id(node.server_id)
+        if gs.reload_node(node.url):
+            response = {'reloaded': True}
+        else:
+            response = {'reloaded': False}
+
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+    
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_safe

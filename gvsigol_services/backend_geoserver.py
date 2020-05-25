@@ -47,6 +47,7 @@ import json
 import re
 import unicodedata
 from dbfread import DBF
+import time
 
 logger = logging.getLogger("gvsigol")
 DEFAULT_REQUEST_TIMEOUT = 5
@@ -132,8 +133,18 @@ class Geoserver():
     def reload_master(self):
         self.rest_catalog.reload(self.conf_url, user=self.user, password=self.password) 
         
+    def reload_node(self, node_url):
+        try:
+            self.rest_catalog.reload(node_url, user=self.user, password=self.password) 
+            return True
+        
+        except Exception as e:
+            print str(e)
+            return False
+        
     def reload_nodes(self):
         try:
+            time.sleep(settings.RELOAD_NODES_DELAY)
             # get sequence from master
             us_master = self.rest_catalog.get_update_sequence(self.conf_url, user=self.user, password=self.password)
             print "INFO: Reloading Geoserver all nodes except master configured with IP FO in Aapche. Update Sequence = " + str(us_master)
@@ -145,6 +156,7 @@ class Geoserver():
                         print  "INFO: Reloading ... " + node + " with updatedSequence " + str(us) 
                         self.rest_catalog.reload(node, user=self.user, password=self.password)                        
             return True
+        
         except Exception as e:
             print str(e)
             return False
