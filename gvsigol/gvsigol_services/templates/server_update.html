@@ -159,11 +159,17 @@
 			ui += 	'<td id="node-status-' + n.id + '">' + n.status + '</td>';
 			ui += 	'<td id="node-url-' + n.id + '">' + n.url + '</td>';
 			ui += 	'<td id="node-ismaster-' + n.id + '">' + n.is_master + '</td>';
+			ui += 	'<td><a class="reload-node-' + n.id + '" data-nodeid="' + n.id + '" href="javascript:void(0)"><i class="fa fa-refresh text-primary"></i></a></td>';
 			ui += 	'<td><a class="edit-node-' + n.id + '" data-nodeid="' + n.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
 			ui += 	'<td><a class="delete-node-' + n.id + '" data-nodeid="' + n.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
 			ui += '</tr>';
 			
 			$('#server-nodes-table tbody').append(ui);	
+			
+			$(".reload-node-" + n.id).on('click', function(e){	
+				e.preventDefault();
+				reloadNode(this.dataset.nodeid);
+			});
 			
 			$(".edit-node-" + n.id).on('click', function(e){	
 				e.preventDefault();
@@ -186,11 +192,17 @@
 		ui += 	'<td id="node-status-' + node.id + '">' + node.status + '</td>';
 		ui += 	'<td id="node-url-' + node.id + '">' + node.url + '</td>';
 		ui += 	'<td id="node-ismaster-' + node.id + '">' + node.is_master + '</td>';
+		ui += 	'<td><a class="reload-node-' + node.id + '" data-nodeid="' + node.id + '" href="javascript:void(0)"><i class="fa fa-refresh text-primary"></i></a></td>';
 		ui += 	'<td><a class="edit-node-' + node.id + '" data-nodeid="' + node.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
 		ui += 	'<td><a class="delete-node-' + node.id + '" data-nodeid="' + node.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
 		ui += '</tr>';
 		
 		$('#server-nodes-table tbody').append(ui);	
+		
+		$(".reload-node-" + n.id).on('click', function(e){	
+			e.preventDefault();
+			reloadNode(this.dataset.nodeid);
+		});
 		
 		$(".edit-node-" + node.id).on('click', function(e){	
 			e.preventDefault();
@@ -236,6 +248,32 @@
 				return nodes[i];
 			}
 		}
+	};
+	
+	function reloadNode(fid) {
+		var id = fid; 
+		var node = getNodeById(fid);
+		
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/services/reload_node/',
+			data: {
+				id: node.id	
+			},
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			success	:function(response){
+				if (response.reloaded) {
+					messageBox.show('info', gettext('Node has been reloaded'));
+					
+				} else {
+					messageBox.show('warning', gettext('Error reloading node'));
+				}
+			},
+			error: function(){}
+		});
 	};
 	
 	function createModalContent(fid, mode){

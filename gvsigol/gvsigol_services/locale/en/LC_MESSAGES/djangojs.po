@@ -94,3 +94,9 @@ msgstr ""
 
 msgid "Edit node"
 msgstr ""
+
+msgid "Node has been reloaded"
+msgstr ""
+
+msgid "Error reloading node"
+msgstr ""

@@ -109,3 +109,9 @@ msgstr "Se ha asignado el campo enumerado correctamente"
 
 msgid "El campo no puede ser obligario"
 msgstr "El campo no puede ser obligario. Puede que ya tenga valores nulos en la columna. Elimine los valores nulos y vuelva a intentarlo"
+
+msgid "Node has been reloaded"
+msgstr "El nodo ha sido recargado"
+
+msgid "Error reloading node"
+msgstr "Error recargando nodo"
