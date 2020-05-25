@@ -142,6 +142,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'django.contrib.sites',
+    'gvsigol_statistics',
     'gvsigol_auth',
     'gvsigol_services',
     'gvsigol_symbology',
@@ -166,9 +167,19 @@ INSTALLED_APPS = [
     'actstream',
     #'gvsigol_plugin_picassa',
     #'gvsigol_plugin_uampp',
-    'corsheaders',
-    'drf_yasg',
 ]
+
+try:
+    __import__('corsheaders')
+    INSTALLED_APPS.append('corsheaders')
+except ImportError:
+    print 'ERROR: No ha instalado la libreria corsheaders'
+    
+try:
+    __import__('drf_yasg')
+    INSTALLED_APPS.append('drf_yasg')
+except ImportError:
+    print 'ERROR: No ha instalado la libreria drf_yasg'
 
 PUBLIC_PLUGINS = []
 
@@ -188,9 +199,14 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
 ]
+
+try:
+    __import__('corsheaders')
+    MIDDLEWARE_CLASSES.append('corsheaders.middleware.CorsMiddleware')
+except ImportError:
+    print 'ERROR: No ha instalado la libreria corsheaders'
 
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -355,7 +371,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gvsigol_services/static'),
     os.path.join(BASE_DIR, 'gvsigol_symbology/static'),
     os.path.join(BASE_DIR, 'gvsigol_filemanager/static'),
-    os.path.join(BASE_DIR, 'gvsigol_statistics/locale'),
+    os.path.join(BASE_DIR, 'gvsigol_statistics/static'),
     os.path.join(BASE_DIR, 'gvsigol_app_librapicassa/static'),
     os.path.join(BASE_DIR, 'gvsigol_plugin_picassa/static'),
 )
