@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-08 10:17+0200\n"
+"POT-Creation-Date: 2020-05-26 14:19+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,64 +20,64 @@ msgstr ""
 "X-Language: ca_ES\n"
 "X-Source-Language: C\n"
 
-#: backend_geoserver.py:90 backend_geoserver.py:116 forms_services.py:62
+#: backend_geoserver.py:92 backend_geoserver.py:118 forms_services.py:62
 msgid "PostGIS vector"
 msgstr "PostGIS vectorial"
 
-#: backend_geoserver.py:91 forms_services.py:63
+#: backend_geoserver.py:93 forms_services.py:63
 msgid "GeoTiff"
 msgstr "GeoTiff"
 
-#: backend_geoserver.py:92 forms_services.py:64
+#: backend_geoserver.py:94 forms_services.py:64
 msgid "Cascading WMS"
 msgstr "WMS en cascada"
 
-#: backend_geoserver.py:93 forms_services.py:65
+#: backend_geoserver.py:95 forms_services.py:65
 msgid "ImageMosaic"
 msgstr "Mosaic d'imatges"
 
-#: backend_geoserver.py:104
+#: backend_geoserver.py:106
 msgid "Vector layer"
 msgstr "Capa vectorial"
 
-#: backend_geoserver.py:105
+#: backend_geoserver.py:107
 msgid "SQL View"
 msgstr "Vista SQL"
 
-#: backend_geoserver.py:637 backend_geoserver.py:652 backend_geoserver.py:664
-#: backend_geoserver.py:674 backend_geoserver.py:685 backend_geoserver.py:694
-#: backend_geoserver.py:707
+#: backend_geoserver.py:657 backend_geoserver.py:672 backend_geoserver.py:684
+#: backend_geoserver.py:694 backend_geoserver.py:705 backend_geoserver.py:714
+#: backend_geoserver.py:727
 #, python-brace-format
 msgid "Error publishing the layer. Backend error: {msg}"
 msgstr "Error publicant la capa. Error: {msg}"
 
-#: backend_geoserver.py:640 backend_geoserver.py:655 backend_geoserver.py:667
-#: backend_geoserver.py:677 backend_geoserver.py:687 backend_geoserver.py:697
-#: backend_geoserver.py:709 views.py:1124 views.py:2453
+#: backend_geoserver.py:660 backend_geoserver.py:675 backend_geoserver.py:687
+#: backend_geoserver.py:697 backend_geoserver.py:707 backend_geoserver.py:717
+#: backend_geoserver.py:729 views.py:1140 views.py:2469
 msgid "Error: layer could not be published"
 msgstr "Error: La capa no pot ser publicada"
 
-#: backend_geoserver.py:720 backend_geoserver.py:729 backend_geoserver.py:739
-#: views.py:675
+#: backend_geoserver.py:740 backend_geoserver.py:749 backend_geoserver.py:759
+#: views.py:691
 #, python-brace-format
 msgid "Error publishing the layer group. Backend error: {msg}"
 msgstr "Error publicant el grup de capes. Error: {msg}"
 
-#: backend_geoserver.py:723 backend_geoserver.py:732 backend_geoserver.py:742
+#: backend_geoserver.py:743 backend_geoserver.py:752 backend_geoserver.py:762
 msgid "Error: layer group could not be published"
 msgstr "Error: El grup de capes no pot ser publicat"
 
-#: backend_geoserver.py:780 backend_geoserver.py:790
+#: backend_geoserver.py:800 backend_geoserver.py:810
 #, python-brace-format
 msgid "Error changing property. Backend error: {msg}"
 msgstr "Error canviant propietat. Error: {msg}"
 
-#: backend_geoserver.py:783 backend_geoserver.py:793
+#: backend_geoserver.py:803 backend_geoserver.py:813
 msgid "Error: layer could not be updated"
 msgstr "Error: La capa no pot ser actualitzada"
 
-#: backend_geoserver.py:985 backend_geoserver.py:1036 backend_geoserver.py:1316
-#: backend_geoserver.py:1389
+#: backend_geoserver.py:1005 backend_geoserver.py:1056
+#: backend_geoserver.py:1336 backend_geoserver.py:1409
 #, python-brace-format
 msgid ""
 "Invalid layer name: '{value}'. Identifiers must begin with a letter or an "
@@ -87,7 +87,8 @@ msgstr ""
 "una lletra o un guió baix (_). Els següents caràcters poden ser lletres, "
 "guions o nombres"
 
-#: backend_geoserver.py:987 backend_geoserver.py:1038 backend_geoserver.py:1108
+#: backend_geoserver.py:1007 backend_geoserver.py:1058
+#: backend_geoserver.py:1128
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid database name: {value}. "
@@ -98,7 +99,8 @@ msgstr ""
 "{value}. Els Identificadors han de començar amb una lletra o un guió baix "
 "(_). Els següents caràcters poden ser lletres, guions o nombres"
 
-#: backend_geoserver.py:989 backend_geoserver.py:1040 backend_geoserver.py:1110
+#: backend_geoserver.py:1009 backend_geoserver.py:1060
+#: backend_geoserver.py:1130
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid user name: {value}. Identifiers "
@@ -109,7 +111,8 @@ msgstr ""
 "vàlid: {value}. Els Identificadors han de començar amb una lletra o un guió "
 "baix (_). Els següents caràcters poden ser lletres, guions o nombres"
 
-#: backend_geoserver.py:991 backend_geoserver.py:1042 backend_geoserver.py:1112
+#: backend_geoserver.py:1011 backend_geoserver.py:1062
+#: backend_geoserver.py:1132
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid schema: {value}. Identifiers "
@@ -120,19 +123,19 @@ msgstr ""
 "{value}. Els Identificadors han de començar amb una lletra o un guió baix "
 "(_). Els següents caràcters poden ser lletres, guions o nombres"
 
-#: backend_geoserver.py:1013 backend_geoserver.py:1065
+#: backend_geoserver.py:1033 backend_geoserver.py:1085
 msgid "Error uploading the layer. Review the file format."
 msgstr "Error publicant la capa. Revisar el format del fitxer."
 
-#: backend_geoserver.py:1063
+#: backend_geoserver.py:1083
 msgid "Error uploading the layer. Review the file format. Cause: "
 msgstr "Error publicant la capa. Revisar el format del fitxer. Causa: "
 
-#: backend_geoserver.py:1289
+#: backend_geoserver.py:1309
 msgid "Error creating the layer. Review the file format."
 msgstr "Error creant la capa. Revisar el format del fitxer."
 
-#: backend_geoserver.py:1312 views.py:972
+#: backend_geoserver.py:1332 views.py:988
 #, python-brace-format
 msgid ""
 "Invalid layer fields: '{value}'. Layer can't have fields with whitespaces"
@@ -140,45 +143,45 @@ msgstr ""
 "Camps de capa no vàlids: '{value}'. La capa no pot tenir camps amb espais en "
 "blanc"
 
-#: backend_geoserver.py:1347
+#: backend_geoserver.py:1367
 msgid "Invalid geometry type"
 msgstr "Tipus de geometria no vàlid"
 
-#: backend_geoserver.py:1351
+#: backend_geoserver.py:1371
 #, python-brace-format
 msgid "Duplicated field name: {0}"
 msgstr "Nom del camp duplicat: {0}"
 
-#: backend_geoserver.py:1353
+#: backend_geoserver.py:1373
 #, python-brace-format
 msgid "Invalid field name. '{0}' is a reserved word"
 msgstr "Nom del camp no vàlid. '{0}' és una paraula reservada"
 
-#: backend_geoserver.py:1375
+#: backend_geoserver.py:1395
 #, python-brace-format
 msgid "Unsupported field type: {0}"
 msgstr "Tipus de camp no suportat: {0}"
 
-#: backend_geoserver.py:1380
+#: backend_geoserver.py:1400
 #: templates/geoserver/create_layer_feature_type.html:299
 #: templates/layer_create.html:880
 msgid "At least one field must be defined"
 msgstr "Heu de definir almenys un camp"
 
-#: backend_geoserver.py:1383
+#: backend_geoserver.py:1403
 msgid "Invalid field definition"
 msgstr "Definició de camp no vàlida"
 
-#: backend_geoserver.py:1395
+#: backend_geoserver.py:1415
 #, python-brace-format
 msgid "A layer already exists with this name: '{value}'"
 msgstr "Ja existeis una capa amb aquest nom: '{value}'"
 
-#: backend_geoserver.py:1415 backend_geoserver.py:1424
+#: backend_geoserver.py:1435 backend_geoserver.py:1444
 msgid "Error occurred building the view. Review the SQL sentence"
 msgstr "Hi ha hagut un error construint la vista. Revisar la sentència SQL"
 
-#: backend_geoserver.py:1856
+#: backend_geoserver.py:1876
 msgid ""
 "Bad file format. The provided zip file must not contain any subdirectory."
 msgstr ""
@@ -267,8 +270,8 @@ msgstr "Arxiu"
 #: forms_services.py:135 forms_services.py:156 forms_services.py:183
 #: templates/cache_list.html:24 templates/cache_list.html:67
 #: templates/datastore_add.html:57 templates/datastore_list.html:22
-#: templates/enumeration_add.html:38 templates/enumeration_list.html:21
-#: templates/enumeration_update.html:38
+#: templates/datastore_update.html:43 templates/enumeration_add.html:38
+#: templates/enumeration_list.html:21 templates/enumeration_update.html:38
 #: templates/geoserver/create_layer_feature_type.html:76
 #: templates/geoserver/create_layer_feature_type.html:147
 #: templates/geoserver/layer_upload_imagemosaic.html:59
@@ -516,9 +519,9 @@ msgstr "anys"
 
 #: forms_services.py:82 forms_services.py:92 forms_services.py:106
 #: forms_services.py:136 templates/datastore_add.html:64
-#: templates/datastore_list.html:23 templates/server_update.html:51
-#: templates/server_update.html:52 templates/workspace_list.html:23
-#: templates/workspace_update.html:26
+#: templates/datastore_list.html:23 templates/datastore_update.html:50
+#: templates/server_update.html:51 templates/server_update.html:52
+#: templates/workspace_list.html:23 templates/workspace_update.html:26
 msgid "Description"
 msgstr "Descripció"
 
@@ -526,7 +529,8 @@ msgstr "Descripció"
 #: forms_services.py:222 forms_services.py:238 templates/base_layer_add.html:35
 #: templates/base_layer_list.html:23 templates/base_layer_update.html:37
 #: templates/datastore_add.html:41 templates/datastore_list.html:24
-#: templates/external_layer_add.html:48 templates/external_layer_list.html:23
+#: templates/datastore_update.html:27 templates/external_layer_add.html:48
+#: templates/external_layer_list.html:23
 #: templates/external_layer_update.html:51
 #: templates/geoserver/create_layer_feature_type.html:77
 #: templates/lock_list.html:17 templates/server_list.html:25
@@ -589,7 +593,7 @@ msgid "Is public?"
 msgstr "Es públic?"
 
 #: forms_services.py:107 forms_services.py:137 templates/datastore_add.html:71
-#: templates/datastore_list.html:25
+#: templates/datastore_list.html:25 templates/datastore_update.html:57
 msgid "Connection params"
 msgstr "Paràmetres de connexió"
 
@@ -900,7 +904,8 @@ msgstr "Actualitzar capa base"
 
 #: templates/base_layer_update.html:13 templates/datastore_update.html:12
 #: templates/external_layer_update.html:13 templates/layergroup_update.html:12
-#: templates/server_update.html:12 templates/workspace_update.html:12
+#: templates/server_update.html:12 templates/service_url_update.html:12
+#: templates/workspace_update.html:12
 msgid "Update"
 msgstr "Actualitzar"
 
@@ -965,17 +970,21 @@ msgstr "Tipus de dades"
 msgid "Enumerations"
 msgstr "Enumeracions"
 
-#: templates/datastore_add.html:48
+#: templates/datastore_add.html:48 templates/datastore_update.html:34
 #: templates/geoserver/layer_upload_imagemosaic.html:43
 #: templates/geoserver/layer_upload_raster.html:43
 msgid "Select file"
 msgstr "Seleccionar arxiu"
 
-#: templates/datastore_add.html:78 templates/datastore_update.html:31
+#: templates/datastore_add.html:72 templates/datastore_update.html:58
+msgid "Test database connection"
+msgstr ""
+
+#: templates/datastore_add.html:79 templates/datastore_update.html:73
 msgid "Temporal dimension"
 msgstr "Dimensió temporal"
 
-#: templates/datastore_add.html:90 templates/datastore_update.html:43
+#: templates/datastore_add.html:91 templates/datastore_update.html:85
 msgid "Elevation dimension"
 msgstr "Dimensió d'elevació"
 
@@ -1800,15 +1809,15 @@ msgstr "Afegir node"
 msgid "New node"
 msgstr "Nou node"
 
-#: templates/server_add.html:326 templates/server_update.html:397
+#: templates/server_add.html:326 templates/server_update.html:432
 msgid "At least one node must be defined"
 msgstr "Heu de definir almenys un node"
 
-#: templates/server_add.html:337 templates/server_update.html:408
+#: templates/server_add.html:337 templates/server_update.html:443
 msgid "One of the nodes must be a master node"
 msgstr "Un dels nodes deu ser mestre"
 
-#: templates/server_add.html:341 templates/server_update.html:412
+#: templates/server_add.html:341 templates/server_update.html:447
 msgid "Only one master node can exist"
 msgstr "Només pot existir un node mestre"
 
@@ -1888,7 +1897,7 @@ msgstr "Actualitzar espai de treball"
 msgid "Workspace description"
 msgstr "Descripció de l'espai de treball"
 
-#: views.py:294
+#: views.py:309
 #, python-brace-format
 msgid ""
 "Invalid workspace name: '{value}'. Identifiers must begin with a letter or "
@@ -1899,11 +1908,11 @@ msgstr ""
 "començar amb una lletra o un guió baix (_). Els següents caràcters poden ser "
 "lletres, guions o números"
 
-#: views.py:314
+#: views.py:329
 msgid "Error: workspace could not be created"
 msgstr "Error: L'espai de treball no pot ser creat"
 
-#: views.py:466
+#: views.py:481
 #, python-brace-format
 msgid ""
 "Invalid datastore name: '{value}'. Identifiers must begin with a letter or "
@@ -1914,31 +1923,31 @@ msgstr ""
 "una lletra o un guió baix (_). Els següents caràcters poden ser lletres, "
 "guions o números"
 
-#: views.py:499
+#: views.py:515
 msgid "Error: Data store could not be created"
 msgstr "Error: El magatzem no pot ser creat"
 
-#: views.py:502
+#: views.py:518
 msgid "Error: GeoTIFF is not georreferenced"
 msgstr "Error: GeoTIFF no està georreferenciat"
 
-#: views.py:516
+#: views.py:532
 msgid "Datastore not found"
 msgstr "Magatzem de dades no trobat"
 
-#: views.py:547
+#: views.py:563
 msgid "Error updating datastore"
 msgstr "Error actualitzant magatzem"
 
-#: views.py:652
+#: views.py:668
 msgid "ERROR can't connect with GeoServer"
 msgstr ""
 
-#: views.py:660
+#: views.py:676
 msgid "ERROR can't remove GeoServer data. Forcing remove from DataBase"
 msgstr ""
 
-#: views.py:2034 views.py:2190
+#: views.py:2050 views.py:2206
 #, python-brace-format
 msgid ""
 "Invalid layer group name: '{value}'. Identifiers must begin with a letter or "
@@ -1949,29 +1958,29 @@ msgstr ""
 "començar amb una lletra o un guió baix (_). Els següents caràcters poden ser "
 "lletres, guions o números"
 
-#: views.py:2083 views.py:2211
+#: views.py:2099 views.py:2227
 msgid "Layer group name already exists"
 msgstr "El nom del grup de capes ja existeix"
 
-#: views.py:2087
+#: views.py:2103
 msgid "You must enter a name for layer group"
 msgstr "Ha d'introduir un nom per al grup de capes"
 
-#: views.py:2584
+#: views.py:2600
 msgid "You must enter a title for enumeration"
 msgstr "Ha d'introduir un títol per l'enumeració"
 
-#: views.py:2589
+#: views.py:2605
 msgid "Name already taken"
 msgstr "Nom ja utilitzat"
 
-#: views.py:3687
+#: views.py:3775
 #, fuzzy
 #| msgid "Error: layer could not be published"
 msgid "Error: ExternalLayer could not be published"
 msgstr "Error: La capa no pot ser publicada"
 
-#: views.py:3780
+#: views.py:3868
 #, fuzzy
 #| msgid "Error: layer could not be published"
 msgid "Error: externallayer could not be published"

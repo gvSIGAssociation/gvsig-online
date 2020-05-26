@@ -115,3 +115,6 @@ msgstr "El nodo ha sido recargado"
 
 msgid "Error reloading node"
 msgstr "Error recargando nodo"
+
+msgid "Connection has been success"
+msgstr "La conexión ha sido exitosa"
