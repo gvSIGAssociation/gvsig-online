@@ -642,7 +642,7 @@ attributeTable.prototype.isNumericType = function(type){
 }
 
 attributeTable.prototype.isStringType = function(type){
-	if(type == 'character varying' || type == 'varchar' || type == 'character' || type == 'char' || type == 'text' ){
+	if(type == 'character varying' || type == 'varchar' || type == 'character' || type == 'char' || type == 'text' || type == 'enumeration'){
 		return true;
 	}
 	return false;
