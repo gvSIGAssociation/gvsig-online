@@ -107,8 +107,6 @@ zipp==0.6.0
 # workaround for indirect dependencies problem when using pip 8
 more-itertools<6.0.0
 
-django-tinymce==2.8.0
-
 # uwsgi server
 uwsgi==2.0.18
 gevent==1.4.0
