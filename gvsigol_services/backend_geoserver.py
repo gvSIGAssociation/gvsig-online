@@ -326,7 +326,7 @@ class Geoserver():
             print exc
             return False
     
-    def deleteDatastore(self, workspace, datastore, purge=None):
+    def deleteDatastore(self, workspace, datastore, delete_schema, purge=None):
         """
         Deletes a datastore and all its associated resources
         """
@@ -341,7 +341,8 @@ class Geoserver():
                 return True
             else:
                 catalog.delete(ds, purge, recurse=True)
-                utils.delete_schema_for_datastore(json.loads(datastore.connection_params))
+                if delete_schema:
+                    utils.delete_schema_for_datastore(json.loads(datastore.connection_params))
                 
             return True
         except Exception as e:

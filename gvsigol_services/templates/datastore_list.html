@@ -58,7 +58,17 @@
 				<h4 class="modal-title" id="myModalLabel">{% trans "Delete datastore" %}</h4>
 			</div>
 			<div class="modal-body">
-				<p>{% trans "The data store and its registered resources will be deleted" %}</p>
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<p style="font-weight: 600;">{% trans "The data store and its registered resources will be deleted" %}</p>
+					</div>
+				</div>
+				<div id="div-delete-schema" class="row">
+					<div class="col-md-12 form-group">
+						<input type="checkbox" name="checkbox-delete-schema" id="checkbox-delete-schema"/>
+						<label style="font-weight: normal; font-size: 12px;" for="checkbox-delete-schema">{% trans "Check this option to remove the schema associated with the datastore" %}</label>
+					</div>
+				</div>
 			</div>
 			<div class="modal-footer">
 				<button id="button-delete-datastore-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
@@ -125,6 +135,9 @@ $(document).ready(function() {
 	    	}
 			
 		} else if (this.name == "button-delete-datastore"){
+			if (data[3] != 'v_PostGIS') {
+				$('#div-delete-schema').css('display', 'none');	
+	    	}
         	deleteDatastore(data, row);   
         }
 	});
@@ -139,10 +152,17 @@ $(document).ready(function() {
 
 	function deleteDatastore(data, row){
 		$('#button-delete-datastore-accept').click( function() {
+			var deleteSchema = false;
+			if($('#checkbox-delete-schema').is(":checked")) {
+				deleteSchema = true;
+			}
 			$.ajax({
 				type: 'POST',
 				async: false,
 				url: '/gvsigonline/services/datastore_delete/' + data[0] + '/',
+				data: {
+					'delete_schema': deleteSchema
+				},
 				beforeSend:function(xhr){
 				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 				},
