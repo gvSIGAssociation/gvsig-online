@@ -579,9 +579,13 @@ def datastore_update(request, datastore_id):
 @staff_required
 def datastore_delete(request, dsid):
     try:
+        delete_schema = False
+        if request.POST.get('delete_schema') == 'true':
+            delete_schema = True
+
         ds = Datastore.objects.get(id=dsid)
         gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
-        if gs.deleteDatastore(ds.workspace, ds) or ds.type == 'c_ImageMosaic':
+        if gs.deleteDatastore(ds.workspace, ds, delete_schema) or ds.type == 'c_ImageMosaic':
             layers = Layer.objects.filter(external=False).filter(datastore_id=ds.id)
             for l in layers:
                 gs.deleteLayerStyles(l)
@@ -611,8 +615,10 @@ def datastore_delete(request, dsid):
                 i.delete_mosaic(ds.name, schema)
             gs.reload_nodes()
             return HttpResponseRedirect(reverse('datastore_list'))
+            
         else:
             return HttpResponseBadRequest()
+
     except:
         return HttpResponseNotFound('<h1>Datastore not found{0}</h1>'.format(ds.name))
 
