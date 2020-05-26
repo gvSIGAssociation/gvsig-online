@@ -136,6 +136,58 @@ def create_schema(ds_name):
     return True
 
 #TODO: llevar al paquete del core
+def create_schema_for_datastore(connection_params):
+    host = connection_params.get('host')
+    port = connection_params.get('port')
+    database = connection_params.get('database')
+    user = connection_params.get('user')
+    passwd = connection_params.get('passwd')
+    schema = connection_params.get('schema')
+
+    connection = get_connection(host, port, database, user, passwd)
+    cursor = connection.cursor()
+
+    try:
+        create_schema = "CREATE SCHEMA IF NOT EXISTS " + schema + " AUTHORIZATION " + user + ";"
+        cursor.execute(create_schema)
+
+    except StandardError, e:
+        print "SQL Error", e
+        if e.pgcode == '42710':
+            return True
+        else:
+            return False
+
+    close_connection(cursor, connection)
+    return True
+
+#TODO: llevar al paquete del core
+def delete_schema_for_datastore(connection_params):
+    host = connection_params.get('host')
+    port = connection_params.get('port')
+    database = connection_params.get('database')
+    user = connection_params.get('user')
+    passwd = connection_params.get('passwd')
+    schema = connection_params.get('schema')
+
+    connection = get_connection(host, port, database, user, passwd)
+    cursor = connection.cursor()
+
+    try:
+        delete_schema = "DROP SCHEMA IF EXISTS " + schema +  ";"
+        cursor.execute(delete_schema)
+
+    except StandardError, e:
+        print "SQL Error", e
+        if e.pgcode == '42710':
+            return True
+        else:
+            return False
+
+    close_connection(cursor, connection)
+    return True
+
+#TODO: llevar al paquete del core
 def get_connection(host, port, database, user, password):
     try:
         conn = psycopg2.connect("host=" + host +" port=" + port +" dbname=" + database +" user=" + user +" password="+ password);

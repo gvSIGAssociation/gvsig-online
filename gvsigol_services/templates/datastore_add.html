@@ -69,6 +69,7 @@
 				<div class="row" id="connection-params-row">
 					<div class="col-md-12 form-group">
 						<label for="id_connection_params">{% trans "Connection params" %}</label>
+						<div id="test_connection" style="margin: 10px;" class="btn btn-default btn-sm"><i class="fa fa-database margin-r-5"></i> {% trans "Test database connection" %}</div>					
 						{{ form.connection_params }}						
 					</div>
 				</div>
@@ -253,6 +254,31 @@ $().ready(function(){
 		}
 		
 		$('#main_form').submit();
+	});
+	
+	$('#test_connection').click(function (e) {
+		var connectionParams = JSON.parse(codemirror.getValue());
+		
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/services/test_connection/',
+			data: {
+				connection_params: JSON.stringify(connectionParams)
+			},
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			success	:function(response){
+				if (response.success) {
+					messageBox.show('info', gettext('Connection has been success'));
+					
+				} else {
+					messageBox.show('warning', response.error);
+				}
+			},
+			error: function(){}
+		});
 	});
 });
 </script>
