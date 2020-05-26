@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-26 14:18+0200\n"
+"POT-Creation-Date: 2020-05-26 16:55+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -41,48 +41,48 @@ msgstr ""
 msgid "SQL View"
 msgstr ""
 
-#: backend_geoserver.py:657 backend_geoserver.py:672 backend_geoserver.py:684
-#: backend_geoserver.py:694 backend_geoserver.py:705 backend_geoserver.py:714
-#: backend_geoserver.py:727
+#: backend_geoserver.py:658 backend_geoserver.py:673 backend_geoserver.py:685
+#: backend_geoserver.py:695 backend_geoserver.py:706 backend_geoserver.py:715
+#: backend_geoserver.py:728
 #, python-brace-format
 msgid "Error publishing the layer. Backend error: {msg}"
 msgstr ""
 
-#: backend_geoserver.py:660 backend_geoserver.py:675 backend_geoserver.py:687
-#: backend_geoserver.py:697 backend_geoserver.py:707 backend_geoserver.py:717
-#: backend_geoserver.py:729 views.py:1140 views.py:2469
+#: backend_geoserver.py:661 backend_geoserver.py:676 backend_geoserver.py:688
+#: backend_geoserver.py:698 backend_geoserver.py:708 backend_geoserver.py:718
+#: backend_geoserver.py:730 views.py:1146 views.py:2475
 msgid "Error: layer could not be published"
 msgstr ""
 
-#: backend_geoserver.py:740 backend_geoserver.py:749 backend_geoserver.py:759
-#: views.py:691
+#: backend_geoserver.py:741 backend_geoserver.py:750 backend_geoserver.py:760
+#: views.py:697
 #, python-brace-format
 msgid "Error publishing the layer group. Backend error: {msg}"
 msgstr ""
 
-#: backend_geoserver.py:743 backend_geoserver.py:752 backend_geoserver.py:762
+#: backend_geoserver.py:744 backend_geoserver.py:753 backend_geoserver.py:763
 msgid "Error: layer group could not be published"
 msgstr ""
 
-#: backend_geoserver.py:800 backend_geoserver.py:810
+#: backend_geoserver.py:801 backend_geoserver.py:811
 #, python-brace-format
 msgid "Error changing property. Backend error: {msg}"
 msgstr ""
 
-#: backend_geoserver.py:803 backend_geoserver.py:813
+#: backend_geoserver.py:804 backend_geoserver.py:814
 msgid "Error: layer could not be updated"
 msgstr ""
 
-#: backend_geoserver.py:1005 backend_geoserver.py:1056
-#: backend_geoserver.py:1336 backend_geoserver.py:1409
+#: backend_geoserver.py:1006 backend_geoserver.py:1057
+#: backend_geoserver.py:1337 backend_geoserver.py:1410
 #, python-brace-format
 msgid ""
 "Invalid layer name: '{value}'. Identifiers must begin with a letter or an "
 "underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr ""
 
-#: backend_geoserver.py:1007 backend_geoserver.py:1058
-#: backend_geoserver.py:1128
+#: backend_geoserver.py:1008 backend_geoserver.py:1059
+#: backend_geoserver.py:1129
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid database name: {value}. "
@@ -90,8 +90,8 @@ msgid ""
 "characters can be letters, underscores or numbers"
 msgstr ""
 
-#: backend_geoserver.py:1009 backend_geoserver.py:1060
-#: backend_geoserver.py:1130
+#: backend_geoserver.py:1010 backend_geoserver.py:1061
+#: backend_geoserver.py:1131
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid user name: {value}. Identifiers "
@@ -99,8 +99,8 @@ msgid ""
 "letters, underscores or numbers"
 msgstr ""
 
-#: backend_geoserver.py:1011 backend_geoserver.py:1062
-#: backend_geoserver.py:1132
+#: backend_geoserver.py:1012 backend_geoserver.py:1063
+#: backend_geoserver.py:1133
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid schema: {value}. Identifiers "
@@ -108,63 +108,63 @@ msgid ""
 "letters, underscores or numbers"
 msgstr ""
 
-#: backend_geoserver.py:1033 backend_geoserver.py:1085
+#: backend_geoserver.py:1034 backend_geoserver.py:1086
 msgid "Error uploading the layer. Review the file format."
 msgstr ""
 
-#: backend_geoserver.py:1083
+#: backend_geoserver.py:1084
 msgid "Error uploading the layer. Review the file format. Cause: "
 msgstr ""
 
-#: backend_geoserver.py:1309
+#: backend_geoserver.py:1310
 msgid "Error creating the layer. Review the file format."
 msgstr ""
 
-#: backend_geoserver.py:1332 views.py:988
+#: backend_geoserver.py:1333 views.py:994
 #, python-brace-format
 msgid ""
 "Invalid layer fields: '{value}'. Layer can't have fields with whitespaces"
 msgstr ""
 
-#: backend_geoserver.py:1367
+#: backend_geoserver.py:1368
 msgid "Invalid geometry type"
 msgstr ""
 
-#: backend_geoserver.py:1371
+#: backend_geoserver.py:1372
 #, python-brace-format
 msgid "Duplicated field name: {0}"
 msgstr ""
 
-#: backend_geoserver.py:1373
+#: backend_geoserver.py:1374
 #, python-brace-format
 msgid "Invalid field name. '{0}' is a reserved word"
 msgstr ""
 
-#: backend_geoserver.py:1395
+#: backend_geoserver.py:1396
 #, python-brace-format
 msgid "Unsupported field type: {0}"
 msgstr ""
 
-#: backend_geoserver.py:1400
+#: backend_geoserver.py:1401
 #: templates/geoserver/create_layer_feature_type.html:299
 #: templates/layer_create.html:880
 msgid "At least one field must be defined"
 msgstr ""
 
-#: backend_geoserver.py:1403
+#: backend_geoserver.py:1404
 msgid "Invalid field definition"
 msgstr ""
 
-#: backend_geoserver.py:1415
+#: backend_geoserver.py:1416
 #, python-brace-format
 msgid "A layer already exists with this name: '{value}'"
 msgstr ""
 
-#: backend_geoserver.py:1435 backend_geoserver.py:1444
+#: backend_geoserver.py:1436 backend_geoserver.py:1445
 msgid "Error occurred building the view. Review the SQL sentence"
 msgstr ""
 
-#: backend_geoserver.py:1876
+#: backend_geoserver.py:1877
 msgid ""
 "Bad file format. The provided zip file must not contain any subdirectory."
 msgstr ""
@@ -698,7 +698,7 @@ msgstr ""
 msgid "Base layer will be deleted"
 msgstr ""
 
-#: templates/base_layer_list.html:62 templates/datastore_list.html:64
+#: templates/base_layer_list.html:62 templates/datastore_list.html:74
 #: templates/enumeration_list.html:59 templates/external_layer_list.html:69
 #: templates/layer_list.html:81 templates/layergroup_add.html:104
 #: templates/layergroup_list.html:69 templates/layergroup_update.html:156
@@ -707,7 +707,7 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: templates/base_layer_list.html:63 templates/datastore_list.html:65
+#: templates/base_layer_list.html:63 templates/datastore_list.html:75
 #: templates/enumeration_list.html:60 templates/external_layer_list.html:70
 #: templates/layer_list.html:82 templates/layer_list.html:97
 #: templates/layer_list.html:112 templates/layergroup_add.html:105
@@ -718,7 +718,7 @@ msgid "Accept"
 msgstr ""
 
 #: templates/base_layer_list.html:80 templates/cache_list.html:113
-#: templates/cache_list.html:150 templates/datastore_list.html:82
+#: templates/cache_list.html:150 templates/datastore_list.html:92
 #: templates/enumeration_list.html:77 templates/external_layer_list.html:87
 #: templates/geoserver/create_layer_sql_view.html:249
 #: templates/layer_list.html:129 templates/layergroup_list.html:87
@@ -728,7 +728,7 @@ msgid "Processing request..."
 msgstr ""
 
 #: templates/base_layer_list.html:81 templates/cache_list.html:114
-#: templates/cache_list.html:151 templates/datastore_list.html:83
+#: templates/cache_list.html:151 templates/datastore_list.html:93
 #: templates/enumeration_list.html:78 templates/external_layer_list.html:88
 #: templates/geoserver/create_layer_sql_view.html:250
 #: templates/layer_list.html:130 templates/layergroup_list.html:88
@@ -739,7 +739,7 @@ msgid "Search%(sep)s"
 msgstr ""
 
 #: templates/base_layer_list.html:82 templates/cache_list.html:115
-#: templates/cache_list.html:152 templates/datastore_list.html:84
+#: templates/cache_list.html:152 templates/datastore_list.html:94
 #: templates/enumeration_list.html:79 templates/external_layer_list.html:89
 #: templates/geoserver/create_layer_sql_view.html:251
 #: templates/layer_list.html:131 templates/layergroup_list.html:89
@@ -750,7 +750,7 @@ msgid "Showing %(numrecords)s records"
 msgstr ""
 
 #: templates/base_layer_list.html:83 templates/cache_list.html:116
-#: templates/cache_list.html:153 templates/datastore_list.html:85
+#: templates/cache_list.html:153 templates/datastore_list.html:95
 #: templates/enumeration_list.html:80 templates/external_layer_list.html:90
 #: templates/geoserver/create_layer_sql_view.html:252
 #: templates/layer_list.html:132 templates/layergroup_list.html:90
@@ -761,7 +761,7 @@ msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr ""
 
 #: templates/base_layer_list.html:84 templates/cache_list.html:117
-#: templates/cache_list.html:154 templates/datastore_list.html:86
+#: templates/cache_list.html:154 templates/datastore_list.html:96
 #: templates/enumeration_list.html:81 templates/external_layer_list.html:91
 #: templates/geoserver/create_layer_sql_view.html:253
 #: templates/layer_list.html:133 templates/layergroup_list.html:91
@@ -771,7 +771,7 @@ msgid "Showing from 0 to 0 of 0 records"
 msgstr ""
 
 #: templates/base_layer_list.html:85 templates/cache_list.html:118
-#: templates/cache_list.html:155 templates/datastore_list.html:87
+#: templates/cache_list.html:155 templates/datastore_list.html:97
 #: templates/enumeration_list.html:82 templates/external_layer_list.html:92
 #: templates/geoserver/create_layer_sql_view.html:254
 #: templates/layer_list.html:134 templates/layergroup_list.html:92
@@ -782,7 +782,7 @@ msgid "Filtering %(max)s records"
 msgstr ""
 
 #: templates/base_layer_list.html:87 templates/cache_list.html:120
-#: templates/cache_list.html:157 templates/datastore_list.html:89
+#: templates/cache_list.html:157 templates/datastore_list.html:99
 #: templates/enumeration_list.html:84 templates/external_layer_list.html:94
 #: templates/geoserver/create_layer_sql_view.html:256
 #: templates/layer_list.html:136 templates/layergroup_list.html:94
@@ -794,7 +794,7 @@ msgstr ""
 #: templates/base_layer_list.html:88 templates/base_layer_list.html:89
 #: templates/cache_list.html:121 templates/cache_list.html:122
 #: templates/cache_list.html:158 templates/cache_list.html:159
-#: templates/datastore_list.html:90 templates/datastore_list.html:91
+#: templates/datastore_list.html:100 templates/datastore_list.html:101
 #: templates/enumeration_list.html:85 templates/enumeration_list.html:86
 #: templates/external_layer_list.html:95 templates/external_layer_list.html:96
 #: templates/geoserver/create_layer_sql_view.html:257
@@ -809,7 +809,7 @@ msgid "No records available"
 msgstr ""
 
 #: templates/base_layer_list.html:91 templates/cache_list.html:124
-#: templates/cache_list.html:161 templates/datastore_list.html:93
+#: templates/cache_list.html:161 templates/datastore_list.html:103
 #: templates/enumeration_list.html:88 templates/external_layer_list.html:98
 #: templates/geoserver/create_layer_sql_view.html:260
 #: templates/layer_list.html:140 templates/layergroup_list.html:98
@@ -819,7 +819,7 @@ msgid "First"
 msgstr ""
 
 #: templates/base_layer_list.html:92 templates/cache_list.html:125
-#: templates/cache_list.html:162 templates/datastore_list.html:94
+#: templates/cache_list.html:162 templates/datastore_list.html:104
 #: templates/enumeration_list.html:89 templates/external_layer_list.html:99
 #: templates/geoserver/create_layer_sql_view.html:261
 #: templates/layer_list.html:141 templates/layergroup_list.html:99
@@ -829,7 +829,7 @@ msgid "Previous"
 msgstr ""
 
 #: templates/base_layer_list.html:93 templates/cache_list.html:126
-#: templates/cache_list.html:163 templates/datastore_list.html:95
+#: templates/cache_list.html:163 templates/datastore_list.html:105
 #: templates/enumeration_list.html:90 templates/external_layer_list.html:100
 #: templates/geoserver/create_layer_sql_view.html:262
 #: templates/layer_add.html:17 templates/layer_create.html:17
@@ -841,7 +841,7 @@ msgid "Next"
 msgstr ""
 
 #: templates/base_layer_list.html:94 templates/cache_list.html:127
-#: templates/cache_list.html:164 templates/datastore_list.html:96
+#: templates/cache_list.html:164 templates/datastore_list.html:106
 #: templates/enumeration_list.html:91 templates/external_layer_list.html:101
 #: templates/geoserver/create_layer_sql_view.html:263
 #: templates/layer_list.html:143 templates/layergroup_list.html:101
@@ -851,7 +851,7 @@ msgid "Last"
 msgstr ""
 
 #: templates/base_layer_list.html:97 templates/cache_list.html:130
-#: templates/cache_list.html:167 templates/datastore_list.html:99
+#: templates/cache_list.html:167 templates/datastore_list.html:109
 #: templates/enumeration_list.html:94 templates/external_layer_list.html:104
 #: templates/geoserver/create_layer_sql_view.html:266
 #: templates/layer_list.html:146 templates/layergroup_list.html:104
@@ -862,7 +862,7 @@ msgid "%(sep)sSort ascending"
 msgstr ""
 
 #: templates/base_layer_list.html:98 templates/cache_list.html:131
-#: templates/cache_list.html:168 templates/datastore_list.html:100
+#: templates/cache_list.html:168 templates/datastore_list.html:110
 #: templates/enumeration_list.html:95 templates/external_layer_list.html:105
 #: templates/geoserver/create_layer_sql_view.html:267
 #: templates/layer_list.html:147 templates/layergroup_list.html:105
@@ -974,15 +974,19 @@ msgstr ""
 msgid "Delete datastore"
 msgstr ""
 
-#: templates/datastore_list.html:61
+#: templates/datastore_list.html:63
 msgid "The data store and its registered resources will be deleted"
 msgstr ""
 
-#: templates/datastore_list.html:106
+#: templates/datastore_list.html:69
+msgid "Check this option to remove the schema associated with the datastore"
+msgstr ""
+
+#: templates/datastore_list.html:116
 msgid "Remove datastore"
 msgstr ""
 
-#: templates/datastore_list.html:110
+#: templates/datastore_list.html:120
 msgid "Update datastore"
 msgstr ""
 
@@ -1883,15 +1887,15 @@ msgstr ""
 msgid "Error updating datastore"
 msgstr ""
 
-#: views.py:668
+#: views.py:674
 msgid "ERROR can't connect with GeoServer"
 msgstr ""
 
-#: views.py:676
+#: views.py:682
 msgid "ERROR can't remove GeoServer data. Forcing remove from DataBase"
 msgstr ""
 
-#: views.py:2050 views.py:2206
+#: views.py:2056 views.py:2212
 #, python-brace-format
 msgid ""
 "Invalid layer group name: '{value}'. Identifiers must begin with a letter or "
@@ -1899,26 +1903,26 @@ msgid ""
 "numbers"
 msgstr ""
 
-#: views.py:2099 views.py:2227
+#: views.py:2105 views.py:2233
 msgid "Layer group name already exists"
 msgstr ""
 
-#: views.py:2103
+#: views.py:2109
 msgid "You must enter a name for layer group"
 msgstr ""
 
-#: views.py:2600
+#: views.py:2606
 msgid "You must enter a title for enumeration"
 msgstr ""
 
-#: views.py:2605
+#: views.py:2611
 msgid "Name already taken"
 msgstr ""
 
-#: views.py:3775
+#: views.py:3781
 msgid "Error: ExternalLayer could not be published"
 msgstr ""
 
-#: views.py:3868
+#: views.py:3874
 msgid "Error: externallayer could not be published"
 msgstr ""
