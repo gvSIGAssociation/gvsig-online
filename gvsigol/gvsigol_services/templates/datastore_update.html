@@ -19,7 +19,49 @@
 				<div class="box-body">	
 					<label for="workspace_name">{% trans "Workspace" %}</label>
 					<input name="workspace_name" class="form-control" id="workspace_name" type="text" value="{{workspace_name}}" readonly>			
-					{{ form }}				
+							
+					
+					
+					<div class="row">
+						<div class="col-md-12 form-group">	
+							<label for="id_workspace">{% trans "Type" %}</label>
+							{{ form.type }}									
+						</div>
+					</div>	
+						
+					<div class="row" id="select-file-row" style="display: none;">
+						<div class="col-md-2">
+							<a href="#" id="select-file-button" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>{% trans "Select file" %}</a>					
+						</div>
+						<div class="col-md-10">
+							{{ form.file }}			
+						</div>
+					</div>		
+						
+					<div class="row">		
+						<div class="col-md-12 form-group">
+							<label for="id_name">{% trans "Name" %}</label>
+							{{ form.name }}
+						</div>	
+					</div>
+						
+					<div class="row">
+						<div class="col-md-12 form-group">
+							<label for="id_description">{% trans "Description" %}</label>
+							{{ form.description }}						
+						</div>
+					</div>	
+						
+					<div class="row" id="connection-params-row">
+						<div class="col-md-12 form-group">
+							<label for="id_connection_params">{% trans "Connection params" %}</label>
+							<div id="test_connection" style="margin: 10px;" class="btn btn-default btn-sm"><i class="fa fa-database margin-r-5"></i> {% trans "Test database connection" %}</div>					
+							{{ form.connection_params }}						
+						</div>
+					</div>
+					
+					
+							
 					<div class="row" id="select-file-row" style="display: none;">
 						<div class="col-md-12">
 								<input class="form-control" id="id_file" maxlength="500" name="file" type="text" readonly>
@@ -73,7 +115,6 @@ $().ready(function(){
 		theme: "xq-dark",
 		lineNumbers: true
 	});
-	
 	
 	if($("#id_type").val() == "c_ImageMosaic"){
 		$('#select-file-row').css('display', 'block');
@@ -222,6 +263,31 @@ $().ready(function(){
 		}
 		
 		$('#main_form').submit();
+	});
+	
+	$('#test_connection').click(function (e) {
+		var connectionParams = JSON.parse(codemirror.getValue());
+		
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/services/test_connection/',
+			data: {
+				connection_params: JSON.stringify(connectionParams)
+			},
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+			},
+			success	:function(response){
+				if (response.success) {
+					messageBox.show('info', gettext('Connection has been success'));
+					
+				} else {
+					messageBox.show('warning', response.error);
+				}
+			},
+			error: function(){}
+		});
 	});
 });
 </script>

@@ -79,7 +79,7 @@ import rest_geoserver
 import rest_geowebcache as geowebcache
 import signals
 import utils
-
+import psycopg2
 
 logger = logging.getLogger("gvsigol")
 
@@ -4427,3 +4427,28 @@ def service_url_update(request, svid):
         form = ServiceUrlForm(instance=service_url)
         
         return render(request, 'service_url_update.html', {'svid': svid, 'form': form})
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@superuser_required
+def test_connection(request):
+    if request.method == 'POST':
+        connection_params = json.loads(request.POST.get('connection_params'))
+        
+        try:
+            connection = psycopg2.connect(
+                user = connection_params.get('user'),
+                password = connection_params.get('passwd'),
+                host = connection_params.get('host'),
+                port = connection_params.get('port'),
+                database = connection_params.get('database')
+            )
+            response = { 'success': True }
+            connection.close()
+            
+        except Exception as e:
+            response = {
+                'error': str(e),
+                'success': False 
+            }
+        
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
