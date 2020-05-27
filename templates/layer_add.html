@@ -94,6 +94,10 @@
 										<label for="timeout">{% trans "Timeout (miliseconds)" %}</label>
 										<input name="timeout" id="timeout" value="30000" type="number" class="form-control">														
 									</div>
+		          					<div class="col-md-4 form-group vector_fields">
+										<label for="max_features">{% trans "WFS request feature limit" %}</label>
+										<input name="max_features" id="max_features" value="0" type="number" class="form-control">														
+									</div>
 								</div>
 								<div class="row">
 									<div class="col-md-4 form-group">
@@ -548,6 +552,12 @@
 			updateLayerGroupList(id_datastore);
 			
 			if(id_datastore in datastore_types){
+				if(datastore_types[id_datastore].startsWith('v_')){
+					$(".vector_fields").css("display", "block");
+				}
+				else {
+					$(".vector_fields").css("display", "none");
+				}
 				if(datastore_types[id_datastore] == 'c_ImageMosaic'){
 					$(".image_mosaic_tmp_fields").css("display", "none");
 				}else{
