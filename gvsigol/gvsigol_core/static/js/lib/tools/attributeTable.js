@@ -786,17 +786,19 @@ attributeTable.prototype.registerEvents = function() {
 
 	$("#filter-value-select").on('change', function(){
 		var currentFilter = self.filterCode.getValue();
+		var value = this.value;
 		if (self.isStringType(self.selectedType)) {
-			currentFilter += "'" + this.value + "' ";
+			value = value.replace("'", "''");
+			currentFilter += "'" + value + "' ";
 
 		} else if (self.isDateType(self.selectedType)) {
-			currentFilter += "'" + this.value + "' ";
+			currentFilter += "'" + value + "' ";
 
 		}  else if (self.selectedType == 'xsd:boolean') {
-			currentFilter += "'" + this.value + "' ";
+			currentFilter += "'" + value + "' ";
 
 		} else {
-			currentFilter += this.value + ' ';
+			currentFilter += value + ' ';
 		}
 		self.filterCode.setValue(currentFilter);
 		$("#filter-field-select").prop('selectedIndex', 0);

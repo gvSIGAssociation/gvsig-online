@@ -3055,7 +3055,7 @@ def get_datatable_data(request):
                     values['SORTBY'] = sortby_field
 
                 if cql_filter != '':
-                    values['cql_filter'] = cql_filter
+                    values['cql_filter'] = cql_filter.encode('utf-8')
 
                 recordsTotal = gs.getFeatureCount(request, wfs_url, layer_name, None)
                 recordsFiltered = gs.getFeatureCount(request, wfs_url, layer_name, cql_filter)
@@ -3101,7 +3101,7 @@ def get_datatable_data(request):
                 if cql_filter == '':
                     values['cql_filter'] = raw_search_cql
                 else:
-                    values['cql_filter'] = cql_filter + ' AND ' + raw_search_cql
+                    values['cql_filter'] = cql_filter.encode('utf-8') + ' AND ' + raw_search_cql
                 recordsTotal = gs.getFeatureCount(request, wfs_url, layer_name, None)
                 recordsFiltered = gs.getFeatureCount(request, wfs_url, layer_name, cql_filter)
 
