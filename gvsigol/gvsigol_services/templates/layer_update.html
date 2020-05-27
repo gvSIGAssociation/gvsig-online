@@ -90,7 +90,7 @@
 											<img style="height: 50px; width: 50px;" id="image-preview" src="{{layer_image_url}}" alt="">
 										</div>
 										<div class="provider-img-change">
-											<label>{% trans "Icono" %}</label>({% trans "Supported formats" %}: .jpg, .jpeg, .png, .svg)
+											<label>{% trans "Icon" %}</label>({% trans "Supported formats" %}: .jpg, .jpeg, .png, .svg)
 											<input id="layer-image" name="layer-image" accept=".jpg, .jpeg, .png, .svg" type="file" class="file" data-show-preview="true">						
 										</div>
 									</div>	
@@ -111,6 +111,12 @@
 	          							<label for="timeout">{% trans "Timeout (miliseconds)" %}</label>
 										<input name="timeout" id="timeout" value="{{layer.timeout}}" type="number" class="form-control">														
 									</div>
+									{% if datastore_type|slice:":2" == "v_" %}
+			          				<div class="col-md-4 form-group">
+	          							<label for="max_features">{% trans "WFS request feature limit" %}</label>
+										<input name="max_features" id="max_features" value="{{layer_conf.featuretype.max_features}}" type="number" class="form-control">														
+									</div>
+									{% endif %}
 								</div>
 		          				<div class="row">
 									<div class="col-md-12 form-group">

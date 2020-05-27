@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-26 16:55+0200\n"
+"POT-Creation-Date: 2020-05-27 16:56+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,64 +20,85 @@ msgstr ""
 "X-Language: ca_ES\n"
 "X-Source-Language: C\n"
 
-#: backend_geoserver.py:92 backend_geoserver.py:118 forms_services.py:62
+#: gvsigol_services/backend_geoserver.py:92
+#: gvsigol_services/backend_geoserver.py:118
+#: gvsigol_services/forms_services.py:62
 msgid "PostGIS vector"
 msgstr "PostGIS vectorial"
 
-#: backend_geoserver.py:93 forms_services.py:63
+#: gvsigol_services/backend_geoserver.py:93
+#: gvsigol_services/forms_services.py:63
 msgid "GeoTiff"
 msgstr "GeoTiff"
 
-#: backend_geoserver.py:94 forms_services.py:64
+#: gvsigol_services/backend_geoserver.py:94
+#: gvsigol_services/forms_services.py:64
 msgid "Cascading WMS"
 msgstr "WMS en cascada"
 
-#: backend_geoserver.py:95 forms_services.py:65
+#: gvsigol_services/backend_geoserver.py:95
+#: gvsigol_services/forms_services.py:65
 msgid "ImageMosaic"
 msgstr "Mosaic d'imatges"
 
-#: backend_geoserver.py:106
+#: gvsigol_services/backend_geoserver.py:106
 msgid "Vector layer"
 msgstr "Capa vectorial"
 
-#: backend_geoserver.py:107
+#: gvsigol_services/backend_geoserver.py:107
 msgid "SQL View"
 msgstr "Vista SQL"
 
-#: backend_geoserver.py:658 backend_geoserver.py:673 backend_geoserver.py:685
-#: backend_geoserver.py:695 backend_geoserver.py:706 backend_geoserver.py:715
-#: backend_geoserver.py:728
+#: gvsigol_services/backend_geoserver.py:652
+#: gvsigol_services/backend_geoserver.py:667
+#: gvsigol_services/backend_geoserver.py:679
+#: gvsigol_services/backend_geoserver.py:689
+#: gvsigol_services/backend_geoserver.py:700
+#: gvsigol_services/backend_geoserver.py:709
+#: gvsigol_services/backend_geoserver.py:722
 #, python-brace-format
 msgid "Error publishing the layer. Backend error: {msg}"
 msgstr "Error publicant la capa. Error: {msg}"
 
-#: backend_geoserver.py:661 backend_geoserver.py:676 backend_geoserver.py:688
-#: backend_geoserver.py:698 backend_geoserver.py:708 backend_geoserver.py:718
-#: backend_geoserver.py:730 views.py:1146 views.py:2475
+#: gvsigol_services/backend_geoserver.py:655
+#: gvsigol_services/backend_geoserver.py:670
+#: gvsigol_services/backend_geoserver.py:682
+#: gvsigol_services/backend_geoserver.py:692
+#: gvsigol_services/backend_geoserver.py:702
+#: gvsigol_services/backend_geoserver.py:712
+#: gvsigol_services/backend_geoserver.py:724 gvsigol_services/views.py:1160
+#: gvsigol_services/views.py:2506
 msgid "Error: layer could not be published"
 msgstr "Error: La capa no pot ser publicada"
 
-#: backend_geoserver.py:741 backend_geoserver.py:750 backend_geoserver.py:760
-#: views.py:697
+#: gvsigol_services/backend_geoserver.py:735
+#: gvsigol_services/backend_geoserver.py:744
+#: gvsigol_services/backend_geoserver.py:754 gvsigol_services/views.py:697
 #, python-brace-format
 msgid "Error publishing the layer group. Backend error: {msg}"
 msgstr "Error publicant el grup de capes. Error: {msg}"
 
-#: backend_geoserver.py:744 backend_geoserver.py:753 backend_geoserver.py:763
+#: gvsigol_services/backend_geoserver.py:738
+#: gvsigol_services/backend_geoserver.py:747
+#: gvsigol_services/backend_geoserver.py:757
 msgid "Error: layer group could not be published"
 msgstr "Error: El grup de capes no pot ser publicat"
 
-#: backend_geoserver.py:801 backend_geoserver.py:811
+#: gvsigol_services/backend_geoserver.py:800
+#: gvsigol_services/backend_geoserver.py:810
 #, python-brace-format
 msgid "Error changing property. Backend error: {msg}"
 msgstr "Error canviant propietat. Error: {msg}"
 
-#: backend_geoserver.py:804 backend_geoserver.py:814
+#: gvsigol_services/backend_geoserver.py:803
+#: gvsigol_services/backend_geoserver.py:813
 msgid "Error: layer could not be updated"
 msgstr "Error: La capa no pot ser actualitzada"
 
-#: backend_geoserver.py:1006 backend_geoserver.py:1057
-#: backend_geoserver.py:1337 backend_geoserver.py:1410
+#: gvsigol_services/backend_geoserver.py:1006
+#: gvsigol_services/backend_geoserver.py:1057
+#: gvsigol_services/backend_geoserver.py:1337
+#: gvsigol_services/backend_geoserver.py:1410
 #, python-brace-format
 msgid ""
 "Invalid layer name: '{value}'. Identifiers must begin with a letter or an "
@@ -87,8 +108,9 @@ msgstr ""
 "una lletra o un guió baix (_). Els següents caràcters poden ser lletres, "
 "guions o nombres"
 
-#: backend_geoserver.py:1008 backend_geoserver.py:1059
-#: backend_geoserver.py:1129
+#: gvsigol_services/backend_geoserver.py:1008
+#: gvsigol_services/backend_geoserver.py:1059
+#: gvsigol_services/backend_geoserver.py:1129
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid database name: {value}. "
@@ -99,8 +121,9 @@ msgstr ""
 "{value}. Els Identificadors han de començar amb una lletra o un guió baix "
 "(_). Els següents caràcters poden ser lletres, guions o nombres"
 
-#: backend_geoserver.py:1010 backend_geoserver.py:1061
-#: backend_geoserver.py:1131
+#: gvsigol_services/backend_geoserver.py:1010
+#: gvsigol_services/backend_geoserver.py:1061
+#: gvsigol_services/backend_geoserver.py:1131
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid user name: {value}. Identifiers "
@@ -111,8 +134,9 @@ msgstr ""
 "vàlid: {value}. Els Identificadors han de començar amb una lletra o un guió "
 "baix (_). Els següents caràcters poden ser lletres, guions o nombres"
 
-#: backend_geoserver.py:1012 backend_geoserver.py:1063
-#: backend_geoserver.py:1133
+#: gvsigol_services/backend_geoserver.py:1012
+#: gvsigol_services/backend_geoserver.py:1063
+#: gvsigol_services/backend_geoserver.py:1133
 #, python-brace-format
 msgid ""
 "The connection parameters contain an invalid schema: {value}. Identifiers "
@@ -123,19 +147,20 @@ msgstr ""
 "{value}. Els Identificadors han de començar amb una lletra o un guió baix "
 "(_). Els següents caràcters poden ser lletres, guions o nombres"
 
-#: backend_geoserver.py:1034 backend_geoserver.py:1086
+#: gvsigol_services/backend_geoserver.py:1034
+#: gvsigol_services/backend_geoserver.py:1086
 msgid "Error uploading the layer. Review the file format."
 msgstr "Error publicant la capa. Revisar el format del fitxer."
 
-#: backend_geoserver.py:1084
+#: gvsigol_services/backend_geoserver.py:1084
 msgid "Error uploading the layer. Review the file format. Cause: "
 msgstr "Error publicant la capa. Revisar el format del fitxer. Causa: "
 
-#: backend_geoserver.py:1310
+#: gvsigol_services/backend_geoserver.py:1310
 msgid "Error creating the layer. Review the file format."
 msgstr "Error creant la capa. Revisar el format del fitxer."
 
-#: backend_geoserver.py:1333 views.py:994
+#: gvsigol_services/backend_geoserver.py:1333 gvsigol_services/views.py:1002
 #, python-brace-format
 msgid ""
 "Invalid layer fields: '{value}'. Layer can't have fields with whitespaces"
@@ -143,547 +168,699 @@ msgstr ""
 "Camps de capa no vàlids: '{value}'. La capa no pot tenir camps amb espais en "
 "blanc"
 
-#: backend_geoserver.py:1368
+#: gvsigol_services/backend_geoserver.py:1368
 msgid "Invalid geometry type"
 msgstr "Tipus de geometria no vàlid"
 
-#: backend_geoserver.py:1372
+#: gvsigol_services/backend_geoserver.py:1372
 #, python-brace-format
 msgid "Duplicated field name: {0}"
 msgstr "Nom del camp duplicat: {0}"
 
-#: backend_geoserver.py:1374
+#: gvsigol_services/backend_geoserver.py:1374
 #, python-brace-format
 msgid "Invalid field name. '{0}' is a reserved word"
 msgstr "Nom del camp no vàlid. '{0}' és una paraula reservada"
 
-#: backend_geoserver.py:1396
+#: gvsigol_services/backend_geoserver.py:1396
 #, python-brace-format
 msgid "Unsupported field type: {0}"
 msgstr "Tipus de camp no suportat: {0}"
 
-#: backend_geoserver.py:1401
-#: templates/geoserver/create_layer_feature_type.html:299
-#: templates/layer_create.html:880
+#: gvsigol_services/backend_geoserver.py:1401
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:299
+#: gvsigol_services/templates/layer_create.html:880
 msgid "At least one field must be defined"
 msgstr "Heu de definir almenys un camp"
 
-#: backend_geoserver.py:1404
+#: gvsigol_services/backend_geoserver.py:1404
 msgid "Invalid field definition"
 msgstr "Definició de camp no vàlida"
 
-#: backend_geoserver.py:1416
+#: gvsigol_services/backend_geoserver.py:1416
 #, python-brace-format
 msgid "A layer already exists with this name: '{value}'"
 msgstr "Ja existeis una capa amb aquest nom: '{value}'"
 
-#: backend_geoserver.py:1436 backend_geoserver.py:1445
+#: gvsigol_services/backend_geoserver.py:1436
+#: gvsigol_services/backend_geoserver.py:1445
 msgid "Error occurred building the view. Review the SQL sentence"
 msgstr "Hi ha hagut un error construint la vista. Revisar la sentència SQL"
 
-#: backend_geoserver.py:1877
+#: gvsigol_services/backend_geoserver.py:1877
 msgid ""
 "Bad file format. The provided zip file must not contain any subdirectory."
 msgstr ""
 "Format d'arxiu incorrecte. L'arxiu zip proporcionada no ha de contenir cap "
 "subdirectori."
 
-#: forms_geoserver.py:33
+#: gvsigol_services/forms_geoserver.py:33
 msgid "autodetect"
 msgstr "autodetectar"
 
-#: forms_geoserver.py:40
+#: gvsigol_services/forms_geoserver.py:40
 msgid "Create"
 msgstr "Crear"
 
-#: forms_geoserver.py:40
+#: gvsigol_services/forms_geoserver.py:40
 msgid "Append"
 msgstr "Afegir"
 
-#: forms_geoserver.py:40
+#: gvsigol_services/forms_geoserver.py:40
 msgid "Overwrite"
 msgstr "Sobreescriure"
 
-#: forms_geoserver.py:41
+#: gvsigol_services/forms_geoserver.py:41
 msgid "Point"
 msgstr "Punt"
 
-#: forms_geoserver.py:41
+#: gvsigol_services/forms_geoserver.py:41
 msgid "Multipoint"
 msgstr "Multipunt"
 
-#: forms_geoserver.py:42
+#: gvsigol_services/forms_geoserver.py:42
 msgid "Line"
 msgstr "Línia"
 
-#: forms_geoserver.py:42
+#: gvsigol_services/forms_geoserver.py:42
 msgid "Multiline"
 msgstr "Multilínia"
 
-#: forms_geoserver.py:43
+#: gvsigol_services/forms_geoserver.py:43
 msgid "Polygon"
 msgstr "Polígon"
 
-#: forms_geoserver.py:43
+#: gvsigol_services/forms_geoserver.py:43
 msgid "Multipolygon"
 msgstr "Multipolígon"
 
-#: forms_geoserver.py:45 forms_services.py:42
+#: gvsigol_services/forms_geoserver.py:45 gvsigol_services/forms_services.py:42
 msgid "continuous interval"
 msgstr "Interval continu"
 
-#: forms_geoserver.py:47 forms_services.py:46
+#: gvsigol_services/forms_geoserver.py:47 gvsigol_services/forms_services.py:46
 msgid "smallest domain value"
 msgstr "Valor inferior del domini"
 
-#: forms_geoserver.py:47 forms_services.py:47
+#: gvsigol_services/forms_geoserver.py:47 gvsigol_services/forms_services.py:47
 msgid "biggest domain value"
 msgstr "Valor superior del domini"
 
-#: forms_geoserver.py:47 forms_services.py:48
+#: gvsigol_services/forms_geoserver.py:47 gvsigol_services/forms_services.py:48
 msgid "nearest to the reference value"
 msgstr "El més proper al valor de referència"
 
-#: forms_geoserver.py:47 forms_services.py:49
+#: gvsigol_services/forms_geoserver.py:47 gvsigol_services/forms_services.py:49
 msgid "reference value"
 msgstr "Valor de referència"
 
-#: forms_geoserver.py:51 forms_geoserver.py:66 forms_services.py:102
-#: templates/datastore_add.html:35 templates/datastore_update.html:20
-#: templates/geoserver/layer_upload_imagemosaic.html:52
-#: templates/geoserver/layer_upload_raster.html:52
-#: templates/layer_update.html:53
+#: gvsigol_services/forms_geoserver.py:51
+#: gvsigol_services/forms_geoserver.py:66
+#: gvsigol_services/forms_services.py:102
+#: gvsigol_services/templates/datastore_add.html:35
+#: gvsigol_services/templates/datastore_update.html:20
+#: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:52
+#: gvsigol_services/templates/geoserver/layer_upload_raster.html:52
+#: gvsigol_services/templates/layer_update.html:53
 msgid "Workspace"
 msgstr "Espai de treball"
 
-#: forms_geoserver.py:53 forms_geoserver.py:68 forms_geoserver.py:80
-#: forms_geoserver.py:94 forms_services.py:104
-#: templates/geoserver/layer_upload_postgis.html:43
-#: templates/geoserver/layer_upload_vector.html:35
-#: templates/geoserver/layer_upload_vector.html:41
+#: gvsigol_services/forms_geoserver.py:53
+#: gvsigol_services/forms_geoserver.py:68
+#: gvsigol_services/forms_geoserver.py:80
+#: gvsigol_services/forms_geoserver.py:94
+#: gvsigol_services/forms_services.py:104
+#: gvsigol_services/templates/geoserver/layer_upload_postgis.html:43
+#: gvsigol_services/templates/geoserver/layer_upload_vector.html:35
+#: gvsigol_services/templates/geoserver/layer_upload_vector.html:41
 msgid "File"
 msgstr "Arxiu"
 
-#: forms_geoserver.py:54 forms_geoserver.py:69 forms_geoserver.py:81
-#: forms_geoserver.py:96 forms_geoserver.py:127 forms_geoserver.py:142
-#: forms_services.py:80 forms_services.py:91 forms_services.py:105
-#: forms_services.py:135 forms_services.py:156 forms_services.py:183
-#: templates/cache_list.html:24 templates/cache_list.html:67
-#: templates/datastore_add.html:57 templates/datastore_list.html:22
-#: templates/datastore_update.html:43 templates/enumeration_add.html:38
-#: templates/enumeration_list.html:21 templates/enumeration_update.html:38
-#: templates/geoserver/create_layer_feature_type.html:76
-#: templates/geoserver/create_layer_feature_type.html:147
-#: templates/geoserver/layer_upload_imagemosaic.html:59
-#: templates/geoserver/layer_upload_postgis.html:64
-#: templates/geoserver/layer_upload_raster.html:59 templates/layer_list.html:26
-#: templates/layergroup_add.html:48 templates/layergroup_list.html:21
-#: templates/layergroup_update.html:53 templates/server_list.html:23
-#: templates/workspace_list.html:22
+#: gvsigol_services/forms_geoserver.py:54
+#: gvsigol_services/forms_geoserver.py:69
+#: gvsigol_services/forms_geoserver.py:81
+#: gvsigol_services/forms_geoserver.py:96
+#: gvsigol_services/forms_geoserver.py:127
+#: gvsigol_services/forms_geoserver.py:142
+#: gvsigol_services/forms_services.py:80 gvsigol_services/forms_services.py:91
+#: gvsigol_services/forms_services.py:105
+#: gvsigol_services/forms_services.py:135
+#: gvsigol_services/forms_services.py:156
+#: gvsigol_services/forms_services.py:183
+#: gvsigol_services/templates/cache_list.html:24
+#: gvsigol_services/templates/cache_list.html:67
+#: gvsigol_services/templates/datastore_add.html:57
+#: gvsigol_services/templates/datastore_list.html:22
+#: gvsigol_services/templates/datastore_update.html:43
+#: gvsigol_services/templates/enumeration_add.html:38
+#: gvsigol_services/templates/enumeration_list.html:21
+#: gvsigol_services/templates/enumeration_update.html:38
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:76
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:147
+#: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:59
+#: gvsigol_services/templates/geoserver/layer_upload_postgis.html:64
+#: gvsigol_services/templates/geoserver/layer_upload_raster.html:59
+#: gvsigol_services/templates/layer_list.html:26
+#: gvsigol_services/templates/layergroup_add.html:48
+#: gvsigol_services/templates/layergroup_list.html:21
+#: gvsigol_services/templates/layergroup_update.html:53
+#: gvsigol_services/templates/server_list.html:23
+#: gvsigol_services/templates/workspace_list.html:22
 msgid "Name"
 msgstr "Nom"
 
-#: forms_geoserver.py:55 forms_geoserver.py:70 forms_geoserver.py:82
-#: forms_geoserver.py:133 forms_geoserver.py:145 forms_services.py:81
-#: forms_services.py:157 forms_services.py:184 forms_services.py:218
-#: forms_services.py:237 templates/base_layer_add.html:55
-#: templates/base_layer_list.html:22 templates/base_layer_update.html:57
-#: templates/cache_list.html:25 templates/cache_list.html:68
-#: templates/enumeration_add.html:44 templates/enumeration_list.html:22
-#: templates/enumeration_update.html:44 templates/external_layer_add.html:68
-#: templates/external_layer_list.html:22
-#: templates/external_layer_update.html:71
-#: templates/geoserver/create_layer_feature_type.html:51
-#: templates/geoserver/create_layer_sql_view.html:49
-#: templates/geoserver/layer_upload_imagemosaic.html:67
-#: templates/geoserver/layer_upload_postgis.html:72
-#: templates/geoserver/layer_upload_raster.html:67
-#: templates/geoserver/layer_upload_vector.html:72 templates/layer_add.html:65
-#: templates/layer_create.html:71 templates/layer_list.html:27
-#: templates/layer_update.html:71 templates/layergroup_add.html:55
-#: templates/layergroup_list.html:22 templates/layergroup_update.html:60
-#: templates/server_list.html:24 templates/server_update.html:45
-#: templates/server_update.html:46 templates/service_url_list.html:23
+#: gvsigol_services/forms_geoserver.py:55
+#: gvsigol_services/forms_geoserver.py:70
+#: gvsigol_services/forms_geoserver.py:82
+#: gvsigol_services/forms_geoserver.py:133
+#: gvsigol_services/forms_geoserver.py:145
+#: gvsigol_services/forms_services.py:81 gvsigol_services/forms_services.py:157
+#: gvsigol_services/forms_services.py:184
+#: gvsigol_services/forms_services.py:218
+#: gvsigol_services/forms_services.py:237
+#: gvsigol_services/templates/base_layer_add.html:55
+#: gvsigol_services/templates/base_layer_list.html:22
+#: gvsigol_services/templates/base_layer_update.html:57
+#: gvsigol_services/templates/cache_list.html:25
+#: gvsigol_services/templates/cache_list.html:68
+#: gvsigol_services/templates/enumeration_add.html:44
+#: gvsigol_services/templates/enumeration_list.html:22
+#: gvsigol_services/templates/enumeration_update.html:44
+#: gvsigol_services/templates/external_layer_add.html:68
+#: gvsigol_services/templates/external_layer_list.html:22
+#: gvsigol_services/templates/external_layer_update.html:71
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:51
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:49
+#: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:67
+#: gvsigol_services/templates/geoserver/layer_upload_postgis.html:72
+#: gvsigol_services/templates/geoserver/layer_upload_raster.html:67
+#: gvsigol_services/templates/geoserver/layer_upload_vector.html:72
+#: gvsigol_services/templates/layer_add.html:65
+#: gvsigol_services/templates/layer_create.html:71
+#: gvsigol_services/templates/layer_list.html:27
+#: gvsigol_services/templates/layer_update.html:71
+#: gvsigol_services/templates/layergroup_add.html:55
+#: gvsigol_services/templates/layergroup_list.html:22
+#: gvsigol_services/templates/layergroup_update.html:60
+#: gvsigol_services/templates/server_list.html:24
+#: gvsigol_services/templates/server_update.html:45
+#: gvsigol_services/templates/server_update.html:46
+#: gvsigol_services/templates/service_url_list.html:23
 msgid "Title"
 msgstr "Títol"
 
-#: forms_geoserver.py:57 forms_geoserver.py:72 forms_geoserver.py:84
-#: forms_geoserver.py:134 forms_geoserver.py:146 forms_geoserver.py:183
-#: forms_services.py:158 forms_services.py:185 forms_services.py:220
-#: templates/cache_list.html:27 templates/external_layer_add.html:74
-#: templates/external_layer_list.html:24
-#: templates/external_layer_update.html:77
-#: templates/geoserver/create_layer_feature_type.html:94
-#: templates/geoserver/create_layer_sql_view.html:84
-#: templates/geoserver/layer_upload_imagemosaic.html:74
-#: templates/geoserver/layer_upload_postgis.html:79
-#: templates/geoserver/layer_upload_raster.html:74
-#: templates/geoserver/layer_upload_vector.html:89 templates/layer_add.html:71
-#: templates/layer_create.html:87 templates/layer_list.html:29
-#: templates/layer_update.html:77
+#: gvsigol_services/forms_geoserver.py:57
+#: gvsigol_services/forms_geoserver.py:72
+#: gvsigol_services/forms_geoserver.py:84
+#: gvsigol_services/forms_geoserver.py:134
+#: gvsigol_services/forms_geoserver.py:146
+#: gvsigol_services/forms_geoserver.py:183
+#: gvsigol_services/forms_services.py:158
+#: gvsigol_services/forms_services.py:185
+#: gvsigol_services/forms_services.py:220
+#: gvsigol_services/templates/cache_list.html:27
+#: gvsigol_services/templates/external_layer_add.html:74
+#: gvsigol_services/templates/external_layer_list.html:24
+#: gvsigol_services/templates/external_layer_update.html:77
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:94
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:84
+#: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:74
+#: gvsigol_services/templates/geoserver/layer_upload_postgis.html:79
+#: gvsigol_services/templates/geoserver/layer_upload_raster.html:74
+#: gvsigol_services/templates/geoserver/layer_upload_vector.html:89
+#: gvsigol_services/templates/layer_add.html:71
+#: gvsigol_services/templates/layer_create.html:87
+#: gvsigol_services/templates/layer_list.html:29
+#: gvsigol_services/templates/layer_update.html:77
 msgid "Layer group"
 msgstr "Grup de capes"
 
-#: forms_geoserver.py:58 forms_geoserver.py:73 forms_geoserver.py:85
-#: forms_geoserver.py:135 forms_geoserver.py:147
-#: templates/external_layer_add.html:138
-#: templates/external_layer_update.html:144
-#: templates/geoserver/create_layer_feature_type.html:106
-#: templates/geoserver/create_layer_sql_view.html:96
-#: templates/geoserver/layer_upload_imagemosaic.html:106
-#: templates/geoserver/layer_upload_postgis.html:104
-#: templates/geoserver/layer_upload_raster.html:88
-#: templates/geoserver/layer_upload_vector.html:99 templates/layer_add.html:101
-#: templates/layer_create.html:137 templates/layer_update.html:125
+#: gvsigol_services/forms_geoserver.py:58
+#: gvsigol_services/forms_geoserver.py:73
+#: gvsigol_services/forms_geoserver.py:85
+#: gvsigol_services/forms_geoserver.py:135
+#: gvsigol_services/forms_geoserver.py:147
+#: gvsigol_services/templates/external_layer_add.html:138
+#: gvsigol_services/templates/external_layer_update.html:144
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:106
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:96
+#: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:106
+#: gvsigol_services/templates/geoserver/layer_upload_postgis.html:104
+#: gvsigol_services/templates/geoserver/layer_upload_raster.html:88
+#: gvsigol_services/templates/geoserver/layer_upload_vector.html:99
+#: gvsigol_services/templates/layer_add.html:105
+#: gvsigol_services/templates/layer_create.html:137
+#: gvsigol_services/templates/layer_update.html:131
 msgid "Visible"
 msgstr "Visible"
 
-#: forms_geoserver.py:59 forms_geoserver.py:74 forms_geoserver.py:86
-#: forms_geoserver.py:136 forms_geoserver.py:148
-#: templates/geoserver/create_layer_feature_type.html:116
-#: templates/geoserver/create_layer_sql_view.html:106
-#: templates/geoserver/layer_upload_imagemosaic.html:114
-#: templates/geoserver/layer_upload_postgis.html:112
-#: templates/geoserver/layer_upload_raster.html:96
-#: templates/geoserver/layer_upload_vector.html:109
-#: templates/layer_add.html:109 templates/layer_create.html:145
-#: templates/layer_update.html:141
+#: gvsigol_services/forms_geoserver.py:59
+#: gvsigol_services/forms_geoserver.py:74
+#: gvsigol_services/forms_geoserver.py:86
+#: gvsigol_services/forms_geoserver.py:136
+#: gvsigol_services/forms_geoserver.py:148
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:116
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:106
+#: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:114
+#: gvsigol_services/templates/geoserver/layer_upload_postgis.html:112
+#: gvsigol_services/templates/geoserver/layer_upload_raster.html:96
+#: gvsigol_services/templates/geoserver/layer_upload_vector.html:109
+#: gvsigol_services/templates/layer_add.html:113
+#: gvsigol_services/templates/layer_create.html:145
+#: gvsigol_services/templates/layer_update.html:147
 msgid "Queryable"
 msgstr "Consultable"
 
-#: forms_geoserver.py:60 forms_geoserver.py:75 forms_geoserver.py:87
-#: forms_geoserver.py:137 forms_geoserver.py:149 templates/cache_list.html:28
-#: templates/cache_list.html:69 templates/external_layer_add.html:143
-#: templates/external_layer_list.html:25
-#: templates/external_layer_update.html:152
-#: templates/geoserver/create_layer_feature_type.html:111
-#: templates/geoserver/create_layer_sql_view.html:101
-#: templates/geoserver/layer_upload_imagemosaic.html:110
-#: templates/geoserver/layer_upload_postgis.html:108
-#: templates/geoserver/layer_upload_raster.html:92
-#: templates/geoserver/layer_upload_vector.html:104
-#: templates/layer_add.html:105 templates/layer_create.html:141
-#: templates/layer_list.html:30 templates/layer_update.html:133
+#: gvsigol_services/forms_geoserver.py:60
+#: gvsigol_services/forms_geoserver.py:75
+#: gvsigol_services/forms_geoserver.py:87
+#: gvsigol_services/forms_geoserver.py:137
+#: gvsigol_services/forms_geoserver.py:149
+#: gvsigol_services/templates/cache_list.html:28
+#: gvsigol_services/templates/cache_list.html:69
+#: gvsigol_services/templates/external_layer_add.html:143
+#: gvsigol_services/templates/external_layer_list.html:25
+#: gvsigol_services/templates/external_layer_update.html:152
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:111
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:101
+#: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:110
+#: gvsigol_services/templates/geoserver/layer_upload_postgis.html:108
+#: gvsigol_services/templates/geoserver/layer_upload_raster.html:92
+#: gvsigol_services/templates/geoserver/layer_upload_vector.html:104
+#: gvsigol_services/templates/layer_add.html:109
+#: gvsigol_services/templates/layer_create.html:141
+#: gvsigol_services/templates/layer_list.html:30
+#: gvsigol_services/templates/layer_update.html:139
 msgid "Cached"
 msgstr "Cachejada"
 
-#: forms_geoserver.py:61 forms_geoserver.py:76 forms_geoserver.py:88
-#: forms_geoserver.py:138 forms_geoserver.py:150
+#: gvsigol_services/forms_geoserver.py:61
+#: gvsigol_services/forms_geoserver.py:76
+#: gvsigol_services/forms_geoserver.py:88
+#: gvsigol_services/forms_geoserver.py:138
+#: gvsigol_services/forms_geoserver.py:150
 msgid "Single image"
 msgstr "Imatge simple"
 
-#: forms_geoserver.py:62
+#: gvsigol_services/forms_geoserver.py:62
 msgid "Date regex"
 msgstr "Data regex"
 
-#: forms_geoserver.py:63
+#: gvsigol_services/forms_geoserver.py:63
 msgid "Elevation regex"
 msgstr "Elevació regex"
 
-#: forms_geoserver.py:79 forms_geoserver.py:92 forms_geoserver.py:116
-#: forms_geoserver.py:126 forms_geoserver.py:141 forms_geoserver.py:177
-#: forms_services.py:155 forms_services.py:182 templates/cache_list.html:26
-#: templates/layer_list.html:28
+#: gvsigol_services/forms_geoserver.py:79
+#: gvsigol_services/forms_geoserver.py:92
+#: gvsigol_services/forms_geoserver.py:116
+#: gvsigol_services/forms_geoserver.py:126
+#: gvsigol_services/forms_geoserver.py:141
+#: gvsigol_services/forms_geoserver.py:177
+#: gvsigol_services/forms_services.py:155
+#: gvsigol_services/forms_services.py:182
+#: gvsigol_services/templates/cache_list.html:26
+#: gvsigol_services/templates/layer_list.html:28
 msgid "Datastore"
 msgstr "Magatzem de dades"
 
-#: forms_geoserver.py:95
+#: gvsigol_services/forms_geoserver.py:95
 msgid "Mode"
 msgstr "Mode"
 
-#: forms_geoserver.py:100
+#: gvsigol_services/forms_geoserver.py:100
 msgid "Encoding"
 msgstr "Codificació"
 
-#: forms_geoserver.py:101 forms_geoserver.py:132 forms_geoserver.py:144
+#: gvsigol_services/forms_geoserver.py:101
+#: gvsigol_services/forms_geoserver.py:132
+#: gvsigol_services/forms_geoserver.py:144
 msgid "SRS"
 msgstr "SRS"
 
-#: forms_geoserver.py:128
+#: gvsigol_services/forms_geoserver.py:128
 msgid "SQL Statement"
 msgstr "Estament SQL"
 
-#: forms_geoserver.py:129 templates/geoserver/create_layer_sql_view.html:64
+#: gvsigol_services/forms_geoserver.py:129
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:64
 msgid "Primary key column"
 msgstr "Columna de clau primària"
 
-#: forms_geoserver.py:130 templates/geoserver/create_layer_sql_view.html:68
+#: gvsigol_services/forms_geoserver.py:130
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:68
 msgid "Geometry column"
 msgstr "columna de geometria"
 
-#: forms_geoserver.py:131 forms_geoserver.py:143
-#: templates/geoserver/create_layer_feature_type.html:57
-#: templates/geoserver/create_layer_sql_view.html:74
-#: templates/layer_create.html:77
+#: gvsigol_services/forms_geoserver.py:131
+#: gvsigol_services/forms_geoserver.py:143
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:57
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:74
+#: gvsigol_services/templates/layer_create.html:77
 msgid "Geometry type"
 msgstr "Tipus de geometria"
 
-#: forms_geoserver.py:151 templates/geoserver/create_layer_feature_type.html:68
-#: templates/geoserver/create_layer_sql_view.html:143
-#: templates/layer_create.html:45
+#: gvsigol_services/forms_geoserver.py:151
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:68
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:143
+#: gvsigol_services/templates/layer_create.html:45
 msgid "Fields"
 msgstr "Camps"
 
-#: forms_geoserver.py:152 forms_services.py:162 forms_services.py:193
+#: gvsigol_services/forms_geoserver.py:152
+#: gvsigol_services/forms_services.py:162
+#: gvsigol_services/forms_services.py:193
 msgid "Field"
 msgstr "Camp"
 
-#: forms_geoserver.py:153 forms_services.py:163 forms_services.py:194
+#: gvsigol_services/forms_geoserver.py:153
+#: gvsigol_services/forms_services.py:163
+#: gvsigol_services/forms_services.py:194
 msgid "End field"
 msgstr "Camp final"
 
-#: forms_geoserver.py:154 forms_services.py:167 forms_services.py:195
+#: gvsigol_services/forms_geoserver.py:154
+#: gvsigol_services/forms_services.py:167
+#: gvsigol_services/forms_services.py:195
 msgid "Presentation"
 msgstr "Presentació"
 
-#: forms_geoserver.py:155 forms_services.py:168 forms_services.py:196
+#: gvsigol_services/forms_geoserver.py:155
+#: gvsigol_services/forms_services.py:168
+#: gvsigol_services/forms_services.py:196
 msgid "Resolution year"
 msgstr "Resolució any"
 
-#: forms_geoserver.py:156 forms_services.py:169 forms_services.py:197
+#: gvsigol_services/forms_geoserver.py:156
+#: gvsigol_services/forms_services.py:169
+#: gvsigol_services/forms_services.py:197
 msgid "Resolution month"
 msgstr "Resolució mes"
 
-#: forms_geoserver.py:157 forms_services.py:170 forms_services.py:198
+#: gvsigol_services/forms_geoserver.py:157
+#: gvsigol_services/forms_services.py:170
+#: gvsigol_services/forms_services.py:198
 msgid "Resolution week"
 msgstr "Resolució setmana"
 
-#: forms_geoserver.py:158 forms_services.py:171 forms_services.py:199
+#: gvsigol_services/forms_geoserver.py:158
+#: gvsigol_services/forms_services.py:171
+#: gvsigol_services/forms_services.py:199
 msgid "Resolution day"
 msgstr "Resolució dia"
 
-#: forms_geoserver.py:159 forms_services.py:172 forms_services.py:200
+#: gvsigol_services/forms_geoserver.py:159
+#: gvsigol_services/forms_services.py:172
+#: gvsigol_services/forms_services.py:200
 msgid "Resolution hour"
 msgstr "Resolució hora"
 
-#: forms_geoserver.py:160 forms_services.py:173 forms_services.py:201
+#: gvsigol_services/forms_geoserver.py:160
+#: gvsigol_services/forms_services.py:173
+#: gvsigol_services/forms_services.py:201
 msgid "Resolution minute"
 msgstr "Resolució minut"
 
-#: forms_geoserver.py:161 forms_services.py:174 forms_services.py:202
+#: gvsigol_services/forms_geoserver.py:161
+#: gvsigol_services/forms_services.py:174
+#: gvsigol_services/forms_services.py:202
 msgid "Resolution second"
 msgstr "Resolució segon"
 
-#: forms_geoserver.py:162 forms_services.py:175 forms_services.py:203
+#: gvsigol_services/forms_geoserver.py:162
+#: gvsigol_services/forms_services.py:175
+#: gvsigol_services/forms_services.py:203
 msgid "Default mode"
 msgstr "Mode per defecte"
 
-#: forms_geoserver.py:163 templates/layer_add.html:178
-#: templates/layer_create.html:208 templates/layer_update.html:218
+#: gvsigol_services/forms_geoserver.py:163
+#: gvsigol_services/templates/layer_add.html:182
+#: gvsigol_services/templates/layer_create.html:208
+#: gvsigol_services/templates/layer_update.html:224
 msgid "Default value"
 msgstr "Value per defecte"
 
-#: forms_geoserver.py:196
+#: gvsigol_services/forms_geoserver.py:196
 msgid "Error: Invalid field definition"
 msgstr "Error: Definició de camp no vàlida"
 
-#: forms_services.py:34
+#: gvsigol_services/forms_services.py:34
 msgid "No se han podido obtener las capas"
 msgstr "No s'han pogut obtenir les capes"
 
-#: forms_services.py:35
+#: gvsigol_services/forms_services.py:35
 msgid "1.1.1"
 msgstr "1.1.1"
 
-#: forms_services.py:35
+#: gvsigol_services/forms_services.py:35
 msgid "1.3.0"
 msgstr "1.3.0"
 
-#: forms_services.py:35
+#: gvsigol_services/forms_services.py:35
 msgid "1.0.0"
 msgstr "1.0.0"
 
-#: forms_services.py:53
+#: gvsigol_services/forms_services.py:53
 msgid "seconds"
 msgstr "segons"
 
-#: forms_services.py:54
+#: gvsigol_services/forms_services.py:54
 msgid "minutes"
 msgstr "minuts"
 
-#: forms_services.py:55
+#: gvsigol_services/forms_services.py:55
 msgid "hours"
 msgstr "hores"
 
-#: forms_services.py:56
+#: gvsigol_services/forms_services.py:56
 msgid "days"
 msgstr "dies"
 
-#: forms_services.py:57
+#: gvsigol_services/forms_services.py:57
 msgid "months"
 msgstr "mesos"
 
-#: forms_services.py:58
+#: gvsigol_services/forms_services.py:58
 msgid "years"
 msgstr "anys"
 
-#: forms_services.py:82 forms_services.py:92 forms_services.py:106
-#: forms_services.py:136 templates/datastore_add.html:64
-#: templates/datastore_list.html:23 templates/datastore_update.html:50
-#: templates/server_update.html:51 templates/server_update.html:52
-#: templates/workspace_list.html:23 templates/workspace_update.html:26
+#: gvsigol_services/forms_services.py:82 gvsigol_services/forms_services.py:92
+#: gvsigol_services/forms_services.py:106
+#: gvsigol_services/forms_services.py:136
+#: gvsigol_services/templates/datastore_add.html:64
+#: gvsigol_services/templates/datastore_list.html:23
+#: gvsigol_services/templates/datastore_update.html:50
+#: gvsigol_services/templates/server_update.html:51
+#: gvsigol_services/templates/server_update.html:52
+#: gvsigol_services/templates/workspace_list.html:23
+#: gvsigol_services/templates/workspace_update.html:26
 msgid "Description"
 msgstr "Descripció"
 
-#: forms_services.py:83 forms_services.py:103 forms_services.py:134
-#: forms_services.py:222 forms_services.py:238 templates/base_layer_add.html:35
-#: templates/base_layer_list.html:23 templates/base_layer_update.html:37
-#: templates/datastore_add.html:41 templates/datastore_list.html:24
-#: templates/datastore_update.html:27 templates/external_layer_add.html:48
-#: templates/external_layer_list.html:23
-#: templates/external_layer_update.html:51
-#: templates/geoserver/create_layer_feature_type.html:77
-#: templates/lock_list.html:17 templates/server_list.html:25
-#: templates/service_url_list.html:24
+#: gvsigol_services/forms_services.py:83 gvsigol_services/forms_services.py:103
+#: gvsigol_services/forms_services.py:134
+#: gvsigol_services/forms_services.py:222
+#: gvsigol_services/forms_services.py:238
+#: gvsigol_services/templates/base_layer_add.html:35
+#: gvsigol_services/templates/base_layer_list.html:23
+#: gvsigol_services/templates/base_layer_update.html:37
+#: gvsigol_services/templates/datastore_add.html:41
+#: gvsigol_services/templates/datastore_list.html:24
+#: gvsigol_services/templates/datastore_update.html:27
+#: gvsigol_services/templates/external_layer_add.html:48
+#: gvsigol_services/templates/external_layer_list.html:23
+#: gvsigol_services/templates/external_layer_update.html:51
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:77
+#: gvsigol_services/templates/lock_list.html:17
+#: gvsigol_services/templates/server_list.html:25
+#: gvsigol_services/templates/service_url_list.html:24
 msgid "Type"
 msgstr "Tipus"
 
-#: forms_services.py:84 templates/server_list.html:26
-#: templates/server_update.html:57 templates/server_update.html:58
+#: gvsigol_services/forms_services.py:84
+#: gvsigol_services/templates/server_list.html:26
+#: gvsigol_services/templates/server_update.html:57
+#: gvsigol_services/templates/server_update.html:58
 msgid "Frontend URL"
 msgstr "URL del frontal"
 
-#: forms_services.py:85 templates/server_update.html:63
-#: templates/server_update.html:64
+#: gvsigol_services/forms_services.py:85
+#: gvsigol_services/templates/server_update.html:63
+#: gvsigol_services/templates/server_update.html:64
 msgid "User"
 msgstr "Usuari"
 
-#: forms_services.py:87 templates/external_layer_update.html:367
-#: templates/geoserver/create_layer_feature_type.html:271
-#: templates/geoserver/create_layer_sql_view.html:185
-#: templates/geoserver/layer_upload_imagemosaic.html:152
-#: templates/geoserver/layer_upload_postgis.html:150
-#: templates/geoserver/layer_upload_raster.html:134
-#: templates/geoserver/layer_upload_vector.html:144
-#: templates/layer_add.html:574 templates/layer_create.html:847
-#: templates/layer_create.html:859 templates/layer_create.html:866
-#: templates/layer_update.html:511 templates/layergroup_list.html:35
-#: templates/server_update.html:75
+#: gvsigol_services/forms_services.py:87
+#: gvsigol_services/templates/external_layer_update.html:367
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:271
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:185
+#: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:152
+#: gvsigol_services/templates/geoserver/layer_upload_postgis.html:150
+#: gvsigol_services/templates/geoserver/layer_upload_raster.html:134
+#: gvsigol_services/templates/geoserver/layer_upload_vector.html:144
+#: gvsigol_services/templates/layer_add.html:584
+#: gvsigol_services/templates/layer_create.html:847
+#: gvsigol_services/templates/layer_create.html:859
+#: gvsigol_services/templates/layer_create.html:866
+#: gvsigol_services/templates/layer_update.html:517
+#: gvsigol_services/templates/layergroup_list.html:35
+#: gvsigol_services/templates/server_update.html:75
 msgid "Default"
 msgstr "Per defecte"
 
-#: forms_services.py:90 templates/layergroup_list.html:23
-#: templates/server_add.html:33 templates/server_update.html:33
+#: gvsigol_services/forms_services.py:90
+#: gvsigol_services/templates/layergroup_list.html:23
+#: gvsigol_services/templates/server_add.html:33
+#: gvsigol_services/templates/server_update.html:33
 msgid "Server"
 msgstr "Servidor"
 
-#: forms_services.py:94
+#: gvsigol_services/forms_services.py:94
 msgid "WMS URL"
 msgstr "WMS URL"
 
-#: forms_services.py:95
+#: gvsigol_services/forms_services.py:95
 msgid "WFS URL"
 msgstr "WFS URL"
 
-#: forms_services.py:96
+#: gvsigol_services/forms_services.py:96
 msgid "WCS URL"
 msgstr "WCS URL"
 
-#: forms_services.py:97
+#: gvsigol_services/forms_services.py:97
 msgid "WMTS URL"
 msgstr "WMTS URL"
 
-#: forms_services.py:98
+#: gvsigol_services/forms_services.py:98
 msgid "Cache URL"
 msgstr "Caché URL"
 
-#: forms_services.py:99 templates/workspace_list.html:25
-#: templates/workspace_update.html:33
+#: gvsigol_services/forms_services.py:99
+#: gvsigol_services/templates/workspace_list.html:25
+#: gvsigol_services/templates/workspace_update.html:33
 msgid "Is public?"
 msgstr "Es públic?"
 
-#: forms_services.py:107 forms_services.py:137 templates/datastore_add.html:71
-#: templates/datastore_list.html:25 templates/datastore_update.html:57
+#: gvsigol_services/forms_services.py:107
+#: gvsigol_services/forms_services.py:137
+#: gvsigol_services/templates/datastore_add.html:71
+#: gvsigol_services/templates/datastore_list.html:25
+#: gvsigol_services/templates/datastore_update.html:57
 msgid "Connection params"
 msgstr "Paràmetres de connexió"
 
-#: forms_services.py:121
+#: gvsigol_services/forms_services.py:121
 msgid "Datastore already exists"
 msgstr "El magatzem de dades ja existeix"
 
-#: forms_services.py:127 forms_services.py:147
+#: gvsigol_services/forms_services.py:127
+#: gvsigol_services/forms_services.py:147
 msgid "Error: Invalid JSON format"
 msgstr "Error: JSON no vàlid"
 
-#: forms_services.py:159 forms_services.py:186 forms_services.py:228
-#: templates/base_layer_add.html:75 templates/base_layer_update.html:77
-#: templates/external_layer_add.html:94 templates/external_layer_update.html:97
-#: templates/group_cache_config.html:79 templates/layer_add.html:77
-#: templates/layer_cache_config.html:79 templates/layer_update.html:83
+#: gvsigol_services/forms_services.py:159
+#: gvsigol_services/forms_services.py:186
+#: gvsigol_services/forms_services.py:228
+#: gvsigol_services/templates/base_layer_add.html:75
+#: gvsigol_services/templates/base_layer_update.html:77
+#: gvsigol_services/templates/external_layer_add.html:94
+#: gvsigol_services/templates/external_layer_update.html:97
+#: gvsigol_services/templates/group_cache_config.html:79
+#: gvsigol_services/templates/layer_add.html:77
+#: gvsigol_services/templates/layer_cache_config.html:79
+#: gvsigol_services/templates/layer_update.html:83
 msgid "Format"
 msgstr "Format"
 
-#: forms_services.py:165 forms_services.py:191
+#: gvsigol_services/forms_services.py:165
+#: gvsigol_services/forms_services.py:191
 msgid "Resolution"
 msgstr "Resolució"
 
-#: forms_services.py:176 forms_services.py:204
+#: gvsigol_services/forms_services.py:176
+#: gvsigol_services/forms_services.py:204
 msgid "Default date value"
 msgstr "Valor per defecte de la data"
 
-#: forms_services.py:223 templates/base_layer_add.html:61
-#: templates/base_layer_update.html:63 templates/external_layer_add.html:80
-#: templates/external_layer_update.html:83
+#: gvsigol_services/forms_services.py:223
+#: gvsigol_services/templates/base_layer_add.html:61
+#: gvsigol_services/templates/base_layer_update.html:63
+#: gvsigol_services/templates/external_layer_add.html:80
+#: gvsigol_services/templates/external_layer_update.html:83
 msgid "Version"
 msgstr "Versió"
 
-#: forms_services.py:225 forms_services.py:239 templates/server_add.html:63
-#: templates/server_update.html:102 templates/service_url_list.html:25
+#: gvsigol_services/forms_services.py:225
+#: gvsigol_services/forms_services.py:239
+#: gvsigol_services/templates/server_add.html:63
+#: gvsigol_services/templates/server_update.html:102
+#: gvsigol_services/templates/service_url_list.html:25
 msgid "URL"
 msgstr "URL"
 
-#: forms_services.py:226 templates/base_layer_add.html:67
-#: templates/base_layer_update.html:69
-#: templates/dashboard_services_menu.html:12
-#: templates/external_layer_add.html:86 templates/external_layer_update.html:89
+#: gvsigol_services/forms_services.py:226
+#: gvsigol_services/templates/base_layer_add.html:67
+#: gvsigol_services/templates/base_layer_update.html:69
+#: gvsigol_services/templates/dashboard_services_menu.html:12
+#: gvsigol_services/templates/external_layer_add.html:86
+#: gvsigol_services/templates/external_layer_update.html:89
 msgid "Layers"
 msgstr "Capes"
 
-#: forms_services.py:229 templates/external_layer_add.html:102
-#: templates/external_layer_update.html:105
+#: gvsigol_services/forms_services.py:229
+#: gvsigol_services/templates/external_layer_add.html:102
+#: gvsigol_services/templates/external_layer_update.html:105
 msgid "Featureinfo format"
 msgstr "Format de Featureinfo"
 
-#: forms_services.py:230
+#: gvsigol_services/forms_services.py:230
 msgid "Matrixset"
 msgstr "Matrixset"
 
-#: forms_services.py:231
+#: gvsigol_services/forms_services.py:231
 msgid "Apikey"
 msgstr "Apikey"
 
-#: gdal_tools.py:112 gdal_tools.py:128
+#: gvsigol_services/gdal_tools.py:112 gvsigol_services/gdal_tools.py:128
 #, python-brace-format
 msgid "Error calculating raster stats. Gdalinfo error: {msg}"
 msgstr "Error calculant les estadístiques del ràster. Error de Gdalinfo: {msg}"
 
-#: gdal_tools.py:156
+#: gvsigol_services/gdal_tools.py:156
 #, python-brace-format
 msgid "Error when loading the layer to PostGIS. Ogr2ogr error: {msg}"
 msgstr "Error carregant la capa a PostGIS. Error de Ogr2ogr: {msg}"
 
-#: gdal_tools.py:192 gdal_tools.py:253
+#: gvsigol_services/gdal_tools.py:192 gvsigol_services/gdal_tools.py:253
 #, python-brace-format
 msgid "Error exporting layer from PostGIS to Spatialite. Ogr2ogr error: {msg}"
 msgstr ""
 "Error exportant la capa d'PostGIS a Spatialite. Error de Ogr2ogr: {msg}"
 
-#: templates/base_layer_add.html:12 templates/datastore_add.html:12
-#: templates/enumeration_add.html:12 templates/enumeration_update.html:12
-#: templates/external_layer_add.html:12 templates/layer_config.html:17
-#: templates/layer_permissions_add.html:17 templates/layergroup_add.html:12
-#: templates/server_add.html:12 templates/service_url_add.html:12
-#: templates/workspace_add.html:12
+#: gvsigol_services/templates/base_layer_add.html:12
+#: gvsigol_services/templates/datastore_add.html:12
+#: gvsigol_services/templates/enumeration_add.html:12
+#: gvsigol_services/templates/enumeration_update.html:12
+#: gvsigol_services/templates/external_layer_add.html:12
+#: gvsigol_services/templates/layer_config.html:17
+#: gvsigol_services/templates/layer_permissions_add.html:17
+#: gvsigol_services/templates/layergroup_add.html:12
+#: gvsigol_services/templates/server_add.html:12
+#: gvsigol_services/templates/service_url_add.html:12
+#: gvsigol_services/templates/workspace_add.html:12
 msgid "Save"
 msgstr "Guardar"
 
-#: templates/base_layer_add.html:41 templates/base_layer_update.html:43
-#: templates/external_layer_add.html:54 templates/external_layer_update.html:57
+#: gvsigol_services/templates/base_layer_add.html:41
+#: gvsigol_services/templates/base_layer_update.html:43
+#: gvsigol_services/templates/external_layer_add.html:54
+#: gvsigol_services/templates/external_layer_update.html:57
 msgid "Url"
 msgstr "Url"
 
-#: templates/base_layer_add.html:47 templates/base_layer_update.html:49
-#: templates/external_layer_add.html:60 templates/external_layer_update.html:63
+#: gvsigol_services/templates/base_layer_add.html:47
+#: gvsigol_services/templates/base_layer_update.html:49
+#: gvsigol_services/templates/external_layer_add.html:60
+#: gvsigol_services/templates/external_layer_update.html:63
 msgid ""
 "Alert: this url is not in the same domain. Several browsers could not load "
 "this base layer due to cross-domain policy."
@@ -691,674 +868,820 @@ msgstr ""
 "Alerta: aquesta url no es troba al mateix domini. Diversos navegadors no van "
 "poder carregar aquesta capa base a causa de la política entre dominis."
 
-#: templates/base_layer_add.html:50 templates/base_layer_update.html:52
-#: templates/external_layer_add.html:63 templates/external_layer_update.html:66
+#: gvsigol_services/templates/base_layer_add.html:50
+#: gvsigol_services/templates/base_layer_update.html:52
+#: gvsigol_services/templates/external_layer_add.html:63
+#: gvsigol_services/templates/external_layer_update.html:66
 msgid "Connect"
 msgstr "Connectar"
 
-#: templates/base_layer_add.html:83 templates/base_layer_update.html:85
-#: templates/external_layer_add.html:110
-#: templates/external_layer_update.html:113
+#: gvsigol_services/templates/base_layer_add.html:83
+#: gvsigol_services/templates/base_layer_update.html:85
+#: gvsigol_services/templates/external_layer_add.html:110
+#: gvsigol_services/templates/external_layer_update.html:113
 msgid "MatrixSet"
 msgstr "MatrixSet"
 
-#: templates/base_layer_add.html:89 templates/base_layer_update.html:91
-#: templates/external_layer_add.html:116
-#: templates/external_layer_update.html:119
+#: gvsigol_services/templates/base_layer_add.html:89
+#: gvsigol_services/templates/base_layer_update.html:91
+#: gvsigol_services/templates/external_layer_add.html:116
+#: gvsigol_services/templates/external_layer_update.html:119
 msgid "Api-key"
 msgstr "Api-key"
 
-#: templates/base_layer_list.html:11
+#: gvsigol_services/templates/base_layer_list.html:11
 msgid "Add base layer"
 msgstr "Anyadir capa base"
 
-#: templates/base_layer_list.html:56
+#: gvsigol_services/templates/base_layer_list.html:56
 msgid "Delete base layer"
 msgstr "Eliminar capa base"
 
-#: templates/base_layer_list.html:59
+#: gvsigol_services/templates/base_layer_list.html:59
 msgid "Base layer will be deleted"
 msgstr "La capa base será eliminada"
 
-#: templates/base_layer_list.html:62 templates/datastore_list.html:74
-#: templates/enumeration_list.html:59 templates/external_layer_list.html:69
-#: templates/layer_list.html:81 templates/layergroup_add.html:104
-#: templates/layergroup_list.html:69 templates/layergroup_update.html:156
-#: templates/layergroup_update.html:178 templates/server_list.html:65
-#: templates/service_url_list.html:63 templates/workspace_list.html:68
+#: gvsigol_services/templates/base_layer_list.html:62
+#: gvsigol_services/templates/datastore_list.html:74
+#: gvsigol_services/templates/enumeration_list.html:59
+#: gvsigol_services/templates/external_layer_list.html:69
+#: gvsigol_services/templates/layer_list.html:81
+#: gvsigol_services/templates/layergroup_add.html:104
+#: gvsigol_services/templates/layergroup_list.html:69
+#: gvsigol_services/templates/layergroup_update.html:156
+#: gvsigol_services/templates/layergroup_update.html:178
+#: gvsigol_services/templates/server_list.html:65
+#: gvsigol_services/templates/service_url_list.html:63
+#: gvsigol_services/templates/workspace_list.html:68
 msgid "Cancel"
 msgstr "Cancel·lar"
 
-#: templates/base_layer_list.html:63 templates/datastore_list.html:75
-#: templates/enumeration_list.html:60 templates/external_layer_list.html:70
-#: templates/layer_list.html:82 templates/layer_list.html:97
-#: templates/layer_list.html:112 templates/layergroup_add.html:105
-#: templates/layergroup_list.html:70 templates/layergroup_update.html:157
-#: templates/layergroup_update.html:179 templates/server_list.html:66
-#: templates/service_url_list.html:64 templates/workspace_list.html:69
+#: gvsigol_services/templates/base_layer_list.html:63
+#: gvsigol_services/templates/datastore_list.html:75
+#: gvsigol_services/templates/enumeration_list.html:60
+#: gvsigol_services/templates/external_layer_list.html:70
+#: gvsigol_services/templates/layer_list.html:82
+#: gvsigol_services/templates/layer_list.html:97
+#: gvsigol_services/templates/layer_list.html:112
+#: gvsigol_services/templates/layergroup_add.html:105
+#: gvsigol_services/templates/layergroup_list.html:70
+#: gvsigol_services/templates/layergroup_update.html:157
+#: gvsigol_services/templates/layergroup_update.html:179
+#: gvsigol_services/templates/server_list.html:66
+#: gvsigol_services/templates/service_url_list.html:64
+#: gvsigol_services/templates/workspace_list.html:69
 msgid "Accept"
 msgstr "Acceptar"
 
-#: templates/base_layer_list.html:80 templates/cache_list.html:113
-#: templates/cache_list.html:150 templates/datastore_list.html:92
-#: templates/enumeration_list.html:77 templates/external_layer_list.html:87
-#: templates/geoserver/create_layer_sql_view.html:249
-#: templates/layer_list.html:129 templates/layergroup_list.html:87
-#: templates/lock_list.html:54 templates/server_list.html:83
-#: templates/service_url_list.html:81 templates/workspace_list.html:87
+#: gvsigol_services/templates/base_layer_list.html:80
+#: gvsigol_services/templates/cache_list.html:113
+#: gvsigol_services/templates/cache_list.html:150
+#: gvsigol_services/templates/datastore_list.html:92
+#: gvsigol_services/templates/enumeration_list.html:77
+#: gvsigol_services/templates/external_layer_list.html:87
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:249
+#: gvsigol_services/templates/layer_list.html:129
+#: gvsigol_services/templates/layergroup_list.html:87
+#: gvsigol_services/templates/lock_list.html:54
+#: gvsigol_services/templates/server_list.html:83
+#: gvsigol_services/templates/service_url_list.html:81
+#: gvsigol_services/templates/workspace_list.html:87
 msgid "Processing request..."
 msgstr "Processant petició..."
 
-#: templates/base_layer_list.html:81 templates/cache_list.html:114
-#: templates/cache_list.html:151 templates/datastore_list.html:93
-#: templates/enumeration_list.html:78 templates/external_layer_list.html:88
-#: templates/geoserver/create_layer_sql_view.html:250
-#: templates/layer_list.html:130 templates/layergroup_list.html:88
-#: templates/lock_list.html:55 templates/server_list.html:84
-#: templates/service_url_list.html:82 templates/workspace_list.html:88
+#: gvsigol_services/templates/base_layer_list.html:81
+#: gvsigol_services/templates/cache_list.html:114
+#: gvsigol_services/templates/cache_list.html:151
+#: gvsigol_services/templates/datastore_list.html:93
+#: gvsigol_services/templates/enumeration_list.html:78
+#: gvsigol_services/templates/external_layer_list.html:88
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:250
+#: gvsigol_services/templates/layer_list.html:130
+#: gvsigol_services/templates/layergroup_list.html:88
+#: gvsigol_services/templates/lock_list.html:55
+#: gvsigol_services/templates/server_list.html:84
+#: gvsigol_services/templates/service_url_list.html:82
+#: gvsigol_services/templates/workspace_list.html:88
 #, python-format
 msgid "Search%(sep)s"
 msgstr "Cercar%(sep)s"
 
-#: templates/base_layer_list.html:82 templates/cache_list.html:115
-#: templates/cache_list.html:152 templates/datastore_list.html:94
-#: templates/enumeration_list.html:79 templates/external_layer_list.html:89
-#: templates/geoserver/create_layer_sql_view.html:251
-#: templates/layer_list.html:131 templates/layergroup_list.html:89
-#: templates/lock_list.html:56 templates/server_list.html:85
-#: templates/service_url_list.html:83 templates/workspace_list.html:89
+#: gvsigol_services/templates/base_layer_list.html:82
+#: gvsigol_services/templates/cache_list.html:115
+#: gvsigol_services/templates/cache_list.html:152
+#: gvsigol_services/templates/datastore_list.html:94
+#: gvsigol_services/templates/enumeration_list.html:79
+#: gvsigol_services/templates/external_layer_list.html:89
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:251
+#: gvsigol_services/templates/layer_list.html:131
+#: gvsigol_services/templates/layergroup_list.html:89
+#: gvsigol_services/templates/lock_list.html:56
+#: gvsigol_services/templates/server_list.html:85
+#: gvsigol_services/templates/service_url_list.html:83
+#: gvsigol_services/templates/workspace_list.html:89
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr "Mostrant %(numrecords)s registres"
 
-#: templates/base_layer_list.html:83 templates/cache_list.html:116
-#: templates/cache_list.html:153 templates/datastore_list.html:95
-#: templates/enumeration_list.html:80 templates/external_layer_list.html:90
-#: templates/geoserver/create_layer_sql_view.html:252
-#: templates/layer_list.html:132 templates/layergroup_list.html:90
-#: templates/lock_list.html:57 templates/server_list.html:86
-#: templates/service_url_list.html:84 templates/workspace_list.html:90
+#: gvsigol_services/templates/base_layer_list.html:83
+#: gvsigol_services/templates/cache_list.html:116
+#: gvsigol_services/templates/cache_list.html:153
+#: gvsigol_services/templates/datastore_list.html:95
+#: gvsigol_services/templates/enumeration_list.html:80
+#: gvsigol_services/templates/external_layer_list.html:90
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:252
+#: gvsigol_services/templates/layer_list.html:132
+#: gvsigol_services/templates/layergroup_list.html:90
+#: gvsigol_services/templates/lock_list.html:57
+#: gvsigol_services/templates/server_list.html:86
+#: gvsigol_services/templates/service_url_list.html:84
+#: gvsigol_services/templates/workspace_list.html:90
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr "Mostrant des de %(start)s fins a %(end)s de %(numrecords)s registres"
 
-#: templates/base_layer_list.html:84 templates/cache_list.html:117
-#: templates/cache_list.html:154 templates/datastore_list.html:96
-#: templates/enumeration_list.html:81 templates/external_layer_list.html:91
-#: templates/geoserver/create_layer_sql_view.html:253
-#: templates/layer_list.html:133 templates/layergroup_list.html:91
-#: templates/lock_list.html:58 templates/server_list.html:87
-#: templates/service_url_list.html:85 templates/workspace_list.html:91
+#: gvsigol_services/templates/base_layer_list.html:84
+#: gvsigol_services/templates/cache_list.html:117
+#: gvsigol_services/templates/cache_list.html:154
+#: gvsigol_services/templates/datastore_list.html:96
+#: gvsigol_services/templates/enumeration_list.html:81
+#: gvsigol_services/templates/external_layer_list.html:91
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:253
+#: gvsigol_services/templates/layer_list.html:133
+#: gvsigol_services/templates/layergroup_list.html:91
+#: gvsigol_services/templates/lock_list.html:58
+#: gvsigol_services/templates/server_list.html:87
+#: gvsigol_services/templates/service_url_list.html:85
+#: gvsigol_services/templates/workspace_list.html:91
 msgid "Showing from 0 to 0 of 0 records"
 msgstr "Mostrant des de 0 fins a 0 de 0 registres"
 
-#: templates/base_layer_list.html:85 templates/cache_list.html:118
-#: templates/cache_list.html:155 templates/datastore_list.html:97
-#: templates/enumeration_list.html:82 templates/external_layer_list.html:92
-#: templates/geoserver/create_layer_sql_view.html:254
-#: templates/layer_list.html:134 templates/layergroup_list.html:92
-#: templates/lock_list.html:59 templates/server_list.html:88
-#: templates/service_url_list.html:86 templates/workspace_list.html:92
+#: gvsigol_services/templates/base_layer_list.html:85
+#: gvsigol_services/templates/cache_list.html:118
+#: gvsigol_services/templates/cache_list.html:155
+#: gvsigol_services/templates/datastore_list.html:97
+#: gvsigol_services/templates/enumeration_list.html:82
+#: gvsigol_services/templates/external_layer_list.html:92
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:254
+#: gvsigol_services/templates/layer_list.html:134
+#: gvsigol_services/templates/layergroup_list.html:92
+#: gvsigol_services/templates/lock_list.html:59
+#: gvsigol_services/templates/server_list.html:88
+#: gvsigol_services/templates/service_url_list.html:86
+#: gvsigol_services/templates/workspace_list.html:92
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr "Filtrant %(max)s registres"
 
-#: templates/base_layer_list.html:87 templates/cache_list.html:120
-#: templates/cache_list.html:157 templates/datastore_list.html:99
-#: templates/enumeration_list.html:84 templates/external_layer_list.html:94
-#: templates/geoserver/create_layer_sql_view.html:256
-#: templates/layer_list.html:136 templates/layergroup_list.html:94
-#: templates/lock_list.html:61 templates/server_list.html:90
-#: templates/service_url_list.html:88 templates/workspace_list.html:94
+#: gvsigol_services/templates/base_layer_list.html:87
+#: gvsigol_services/templates/cache_list.html:120
+#: gvsigol_services/templates/cache_list.html:157
+#: gvsigol_services/templates/datastore_list.html:99
+#: gvsigol_services/templates/enumeration_list.html:84
+#: gvsigol_services/templates/external_layer_list.html:94
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:256
+#: gvsigol_services/templates/layer_list.html:136
+#: gvsigol_services/templates/layergroup_list.html:94
+#: gvsigol_services/templates/lock_list.html:61
+#: gvsigol_services/templates/server_list.html:90
+#: gvsigol_services/templates/service_url_list.html:88
+#: gvsigol_services/templates/workspace_list.html:94
 msgid "Loading..."
 msgstr "Carregant..."
 
-#: templates/base_layer_list.html:88 templates/base_layer_list.html:89
-#: templates/cache_list.html:121 templates/cache_list.html:122
-#: templates/cache_list.html:158 templates/cache_list.html:159
-#: templates/datastore_list.html:100 templates/datastore_list.html:101
-#: templates/enumeration_list.html:85 templates/enumeration_list.html:86
-#: templates/external_layer_list.html:95 templates/external_layer_list.html:96
-#: templates/geoserver/create_layer_sql_view.html:257
-#: templates/geoserver/create_layer_sql_view.html:258
-#: templates/layer_list.html:137 templates/layer_list.html:138
-#: templates/layergroup_list.html:95 templates/layergroup_list.html:96
-#: templates/lock_list.html:62 templates/lock_list.html:63
-#: templates/server_list.html:91 templates/server_list.html:92
-#: templates/service_url_list.html:89 templates/service_url_list.html:90
-#: templates/workspace_list.html:95 templates/workspace_list.html:96
+#: gvsigol_services/templates/base_layer_list.html:88
+#: gvsigol_services/templates/base_layer_list.html:89
+#: gvsigol_services/templates/cache_list.html:121
+#: gvsigol_services/templates/cache_list.html:122
+#: gvsigol_services/templates/cache_list.html:158
+#: gvsigol_services/templates/cache_list.html:159
+#: gvsigol_services/templates/datastore_list.html:100
+#: gvsigol_services/templates/datastore_list.html:101
+#: gvsigol_services/templates/enumeration_list.html:85
+#: gvsigol_services/templates/enumeration_list.html:86
+#: gvsigol_services/templates/external_layer_list.html:95
+#: gvsigol_services/templates/external_layer_list.html:96
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:257
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:258
+#: gvsigol_services/templates/layer_list.html:137
+#: gvsigol_services/templates/layer_list.html:138
+#: gvsigol_services/templates/layergroup_list.html:95
+#: gvsigol_services/templates/layergroup_list.html:96
+#: gvsigol_services/templates/lock_list.html:62
+#: gvsigol_services/templates/lock_list.html:63
+#: gvsigol_services/templates/server_list.html:91
+#: gvsigol_services/templates/server_list.html:92
+#: gvsigol_services/templates/service_url_list.html:89
+#: gvsigol_services/templates/service_url_list.html:90
+#: gvsigol_services/templates/workspace_list.html:95
+#: gvsigol_services/templates/workspace_list.html:96
 msgid "No records available"
 msgstr "No hi ha registres disponibles"
 
-#: templates/base_layer_list.html:91 templates/cache_list.html:124
-#: templates/cache_list.html:161 templates/datastore_list.html:103
-#: templates/enumeration_list.html:88 templates/external_layer_list.html:98
-#: templates/geoserver/create_layer_sql_view.html:260
-#: templates/layer_list.html:140 templates/layergroup_list.html:98
-#: templates/lock_list.html:65 templates/server_list.html:94
-#: templates/service_url_list.html:92 templates/workspace_list.html:98
+#: gvsigol_services/templates/base_layer_list.html:91
+#: gvsigol_services/templates/cache_list.html:124
+#: gvsigol_services/templates/cache_list.html:161
+#: gvsigol_services/templates/datastore_list.html:103
+#: gvsigol_services/templates/enumeration_list.html:88
+#: gvsigol_services/templates/external_layer_list.html:98
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:260
+#: gvsigol_services/templates/layer_list.html:140
+#: gvsigol_services/templates/layergroup_list.html:98
+#: gvsigol_services/templates/lock_list.html:65
+#: gvsigol_services/templates/server_list.html:94
+#: gvsigol_services/templates/service_url_list.html:92
+#: gvsigol_services/templates/workspace_list.html:98
 msgid "First"
 msgstr "Primer"
 
-#: templates/base_layer_list.html:92 templates/cache_list.html:125
-#: templates/cache_list.html:162 templates/datastore_list.html:104
-#: templates/enumeration_list.html:89 templates/external_layer_list.html:99
-#: templates/geoserver/create_layer_sql_view.html:261
-#: templates/layer_list.html:141 templates/layergroup_list.html:99
-#: templates/lock_list.html:66 templates/server_list.html:95
-#: templates/service_url_list.html:93 templates/workspace_list.html:99
+#: gvsigol_services/templates/base_layer_list.html:92
+#: gvsigol_services/templates/cache_list.html:125
+#: gvsigol_services/templates/cache_list.html:162
+#: gvsigol_services/templates/datastore_list.html:104
+#: gvsigol_services/templates/enumeration_list.html:89
+#: gvsigol_services/templates/external_layer_list.html:99
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:261
+#: gvsigol_services/templates/layer_list.html:141
+#: gvsigol_services/templates/layergroup_list.html:99
+#: gvsigol_services/templates/lock_list.html:66
+#: gvsigol_services/templates/server_list.html:95
+#: gvsigol_services/templates/service_url_list.html:93
+#: gvsigol_services/templates/workspace_list.html:99
 msgid "Previous"
 msgstr "Anterior"
 
-#: templates/base_layer_list.html:93 templates/cache_list.html:126
-#: templates/cache_list.html:163 templates/datastore_list.html:105
-#: templates/enumeration_list.html:90 templates/external_layer_list.html:100
-#: templates/geoserver/create_layer_sql_view.html:262
-#: templates/layer_add.html:17 templates/layer_create.html:17
-#: templates/layer_list.html:142 templates/layer_update.html:17
-#: templates/layergroup_list.html:100 templates/lock_list.html:67
-#: templates/server_list.html:96 templates/service_url_list.html:94
-#: templates/workspace_list.html:100
+#: gvsigol_services/templates/base_layer_list.html:93
+#: gvsigol_services/templates/cache_list.html:126
+#: gvsigol_services/templates/cache_list.html:163
+#: gvsigol_services/templates/datastore_list.html:105
+#: gvsigol_services/templates/enumeration_list.html:90
+#: gvsigol_services/templates/external_layer_list.html:100
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:262
+#: gvsigol_services/templates/layer_add.html:17
+#: gvsigol_services/templates/layer_create.html:17
+#: gvsigol_services/templates/layer_list.html:142
+#: gvsigol_services/templates/layer_update.html:17
+#: gvsigol_services/templates/layergroup_list.html:100
+#: gvsigol_services/templates/lock_list.html:67
+#: gvsigol_services/templates/server_list.html:96
+#: gvsigol_services/templates/service_url_list.html:94
+#: gvsigol_services/templates/workspace_list.html:100
 msgid "Next"
 msgstr "Següent"
 
-#: templates/base_layer_list.html:94 templates/cache_list.html:127
-#: templates/cache_list.html:164 templates/datastore_list.html:106
-#: templates/enumeration_list.html:91 templates/external_layer_list.html:101
-#: templates/geoserver/create_layer_sql_view.html:263
-#: templates/layer_list.html:143 templates/layergroup_list.html:101
-#: templates/lock_list.html:68 templates/server_list.html:97
-#: templates/service_url_list.html:95 templates/workspace_list.html:101
+#: gvsigol_services/templates/base_layer_list.html:94
+#: gvsigol_services/templates/cache_list.html:127
+#: gvsigol_services/templates/cache_list.html:164
+#: gvsigol_services/templates/datastore_list.html:106
+#: gvsigol_services/templates/enumeration_list.html:91
+#: gvsigol_services/templates/external_layer_list.html:101
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:263
+#: gvsigol_services/templates/layer_list.html:143
+#: gvsigol_services/templates/layergroup_list.html:101
+#: gvsigol_services/templates/lock_list.html:68
+#: gvsigol_services/templates/server_list.html:97
+#: gvsigol_services/templates/service_url_list.html:95
+#: gvsigol_services/templates/workspace_list.html:101
 msgid "Last"
 msgstr "Últim"
 
-#: templates/base_layer_list.html:97 templates/cache_list.html:130
-#: templates/cache_list.html:167 templates/datastore_list.html:109
-#: templates/enumeration_list.html:94 templates/external_layer_list.html:104
-#: templates/geoserver/create_layer_sql_view.html:266
-#: templates/layer_list.html:146 templates/layergroup_list.html:104
-#: templates/lock_list.html:71 templates/server_list.html:100
-#: templates/service_url_list.html:98 templates/workspace_list.html:104
+#: gvsigol_services/templates/base_layer_list.html:97
+#: gvsigol_services/templates/cache_list.html:130
+#: gvsigol_services/templates/cache_list.html:167
+#: gvsigol_services/templates/datastore_list.html:109
+#: gvsigol_services/templates/enumeration_list.html:94
+#: gvsigol_services/templates/external_layer_list.html:104
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:266
+#: gvsigol_services/templates/layer_list.html:146
+#: gvsigol_services/templates/layergroup_list.html:104
+#: gvsigol_services/templates/lock_list.html:71
+#: gvsigol_services/templates/server_list.html:100
+#: gvsigol_services/templates/service_url_list.html:98
+#: gvsigol_services/templates/workspace_list.html:104
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr "%(sep)sOrdre ascendent"
 
-#: templates/base_layer_list.html:98 templates/cache_list.html:131
-#: templates/cache_list.html:168 templates/datastore_list.html:110
-#: templates/enumeration_list.html:95 templates/external_layer_list.html:105
-#: templates/geoserver/create_layer_sql_view.html:267
-#: templates/layer_list.html:147 templates/layergroup_list.html:105
-#: templates/lock_list.html:72 templates/server_list.html:101
-#: templates/service_url_list.html:99 templates/workspace_list.html:105
+#: gvsigol_services/templates/base_layer_list.html:98
+#: gvsigol_services/templates/cache_list.html:131
+#: gvsigol_services/templates/cache_list.html:168
+#: gvsigol_services/templates/datastore_list.html:110
+#: gvsigol_services/templates/enumeration_list.html:95
+#: gvsigol_services/templates/external_layer_list.html:105
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:267
+#: gvsigol_services/templates/layer_list.html:147
+#: gvsigol_services/templates/layergroup_list.html:105
+#: gvsigol_services/templates/lock_list.html:72
+#: gvsigol_services/templates/server_list.html:101
+#: gvsigol_services/templates/service_url_list.html:99
+#: gvsigol_services/templates/workspace_list.html:105
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr "%(sep)sOrdre descendent"
 
-#: templates/base_layer_list.html:104
+#: gvsigol_services/templates/base_layer_list.html:104
 msgid "Remove baselayer"
 msgstr "Eliminar capa base"
 
-#: templates/base_layer_list.html:108
+#: gvsigol_services/templates/base_layer_list.html:108
 msgid "Update baselayer"
 msgstr "Actualitzar capa base"
 
-#: templates/base_layer_update.html:13 templates/datastore_update.html:12
-#: templates/external_layer_update.html:13 templates/layergroup_update.html:12
-#: templates/server_update.html:12 templates/service_url_update.html:12
-#: templates/workspace_update.html:12
+#: gvsigol_services/templates/base_layer_update.html:13
+#: gvsigol_services/templates/datastore_update.html:12
+#: gvsigol_services/templates/external_layer_update.html:13
+#: gvsigol_services/templates/layergroup_update.html:12
+#: gvsigol_services/templates/server_update.html:12
+#: gvsigol_services/templates/service_url_update.html:12
+#: gvsigol_services/templates/workspace_update.html:12
 msgid "Update"
 msgstr "Actualitzar"
 
-#: templates/cache_list.html:10
+#: gvsigol_services/templates/cache_list.html:10
 msgid "Cached layers"
 msgstr "Capes cacheades"
 
-#: templates/cache_list.html:11
+#: gvsigol_services/templates/cache_list.html:11
 msgid "Cached groups"
 msgstr "Grups cacheats"
 
-#: templates/cache_list.html:137 templates/cache_list.html:174
-#: templates/layergroup_list.html:115 templates/layergroup_update.html:129
+#: gvsigol_services/templates/cache_list.html:137
+#: gvsigol_services/templates/cache_list.html:174
+#: gvsigol_services/templates/layergroup_list.html:115
+#: gvsigol_services/templates/layergroup_update.html:129
 msgid "Clear cache"
 msgstr "Netejar cache"
 
-#: templates/cache_list.html:141 templates/cache_list.html:178
+#: gvsigol_services/templates/cache_list.html:141
+#: gvsigol_services/templates/cache_list.html:178
 msgid "Configure cache options"
 msgstr "Configurar opcions de la caché"
 
-#: templates/dashboard_services_menu.html:4
+#: gvsigol_services/templates/dashboard_services_menu.html:4
 msgid "Services"
 msgstr "Serveis"
 
-#: templates/dashboard_services_menu.html:7
+#: gvsigol_services/templates/dashboard_services_menu.html:7
 msgid "Servers"
 msgstr "Servidors"
 
-#: templates/dashboard_services_menu.html:8
+#: gvsigol_services/templates/dashboard_services_menu.html:8
 msgid "Workspaces"
 msgstr "Espais de treball"
 
-#: templates/dashboard_services_menu.html:10
+#: gvsigol_services/templates/dashboard_services_menu.html:10
 msgid "Datastores"
 msgstr "Magatzems de dades"
 
-#: templates/dashboard_services_menu.html:11
+#: gvsigol_services/templates/dashboard_services_menu.html:11
 msgid "Layer groups"
 msgstr "Grups de capes"
 
-#: templates/dashboard_services_menu.html:13
+#: gvsigol_services/templates/dashboard_services_menu.html:13
 msgid "External layers"
 msgstr "Capes externes"
 
-#: templates/dashboard_services_menu.html:14
+#: gvsigol_services/templates/dashboard_services_menu.html:14
 msgid "Cache management"
 msgstr "Gestió de la caché"
 
-#: templates/dashboard_services_menu.html:15
+#: gvsigol_services/templates/dashboard_services_menu.html:15
 msgid "Locks"
 msgstr "Bloquejos"
 
-#: templates/dashboard_services_menu.html:16
+#: gvsigol_services/templates/dashboard_services_menu.html:16
 msgid "Services URL"
 msgstr "Serveis"
 
-#: templates/dashboard_services_menu.html:21
+#: gvsigol_services/templates/dashboard_services_menu.html:21
 msgid "Datatypes"
 msgstr "Tipus de dades"
 
-#: templates/dashboard_services_menu.html:23
+#: gvsigol_services/templates/dashboard_services_menu.html:23
 msgid "Enumerations"
 msgstr "Enumeracions"
 
-#: templates/datastore_add.html:48 templates/datastore_update.html:34
-#: templates/geoserver/layer_upload_imagemosaic.html:43
-#: templates/geoserver/layer_upload_raster.html:43
+#: gvsigol_services/templates/datastore_add.html:48
+#: gvsigol_services/templates/datastore_update.html:34
+#: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:43
+#: gvsigol_services/templates/geoserver/layer_upload_raster.html:43
 msgid "Select file"
 msgstr "Seleccionar arxiu"
 
-#: templates/datastore_add.html:72 templates/datastore_update.html:58
+#: gvsigol_services/templates/datastore_add.html:72
+#: gvsigol_services/templates/datastore_update.html:58
 msgid "Test database connection"
 msgstr ""
 
-#: templates/datastore_add.html:79 templates/datastore_update.html:73
+#: gvsigol_services/templates/datastore_add.html:79
+#: gvsigol_services/templates/datastore_update.html:73
 msgid "Temporal dimension"
 msgstr "Dimensió temporal"
 
-#: templates/datastore_add.html:91 templates/datastore_update.html:85
+#: gvsigol_services/templates/datastore_add.html:91
+#: gvsigol_services/templates/datastore_update.html:85
 msgid "Elevation dimension"
 msgstr "Dimensió d'elevació"
 
-#: templates/datastore_list.html:11
+#: gvsigol_services/templates/datastore_list.html:11
 msgid "Add datastore"
 msgstr "Afegir magatzem"
 
-#: templates/datastore_list.html:58
+#: gvsigol_services/templates/datastore_list.html:58
 msgid "Delete datastore"
 msgstr "Eliminar magatzem"
 
-#: templates/datastore_list.html:63
+#: gvsigol_services/templates/datastore_list.html:63
 msgid "The data store and its registered resources will be deleted"
 msgstr "El magatzem de dades i els recursos associats a ell seran eliminats"
 
-#: templates/datastore_list.html:69
+#: gvsigol_services/templates/datastore_list.html:69
 msgid "Check this option to remove the schema associated with the datastore"
 msgstr ""
 
-#: templates/datastore_list.html:116
+#: gvsigol_services/templates/datastore_list.html:116
 msgid "Remove datastore"
 msgstr "Eliminar magatzem"
 
-#: templates/datastore_list.html:120
+#: gvsigol_services/templates/datastore_list.html:120
 msgid "Update datastore"
 msgstr "Actualitzar magatzem"
 
-#: templates/enumeration_add.html:53 templates/enumeration_update.html:53
+#: gvsigol_services/templates/enumeration_add.html:53
+#: gvsigol_services/templates/enumeration_update.html:53
 msgid "Enumeration items"
 msgstr "Elements de l'enumeració"
 
-#: templates/enumeration_add.html:59 templates/enumeration_update.html:71
+#: gvsigol_services/templates/enumeration_add.html:59
+#: gvsigol_services/templates/enumeration_update.html:71
 msgid "Add item"
 msgstr "Afegir element"
 
-#: templates/enumeration_list.html:11
+#: gvsigol_services/templates/enumeration_list.html:11
 msgid "Add enumeration"
 msgstr "Afegir enumeració"
 
-#: templates/enumeration_list.html:53 templates/enumeration_list.html:101
+#: gvsigol_services/templates/enumeration_list.html:53
+#: gvsigol_services/templates/enumeration_list.html:101
 msgid "Delete enumeration"
 msgstr "Eliminar enumeració"
 
-#: templates/enumeration_list.html:56
+#: gvsigol_services/templates/enumeration_list.html:56
 msgid "The enumeration will be removed, Do you want continue?"
 msgstr "L'enumeració serà eliminada, desitja continuar?"
 
-#: templates/enumeration_list.html:105
+#: gvsigol_services/templates/enumeration_list.html:105
 msgid "Update enumeration"
 msgstr "Actualitzar enumeració"
 
-#: templates/enumeration_update.html:60
+#: gvsigol_services/templates/enumeration_update.html:60
 msgid "Enumeration cannot contain point-colon"
 msgstr "L'enumeració no pot contenir dos punts"
 
-#: templates/enumeration_update.html:63
+#: gvsigol_services/templates/enumeration_update.html:63
 msgid "Delete"
 msgstr "Eliminar"
 
-#: templates/external_layer_add.html:33 templates/external_layer_update.html:35
-#: templates/layer_add.html:38 templates/layer_create.html:44
-#: templates/layer_update.html:38
+#: gvsigol_services/templates/external_layer_add.html:33
+#: gvsigol_services/templates/external_layer_update.html:35
+#: gvsigol_services/templates/layer_add.html:38
+#: gvsigol_services/templates/layer_create.html:44
+#: gvsigol_services/templates/layer_update.html:38
 msgid "General"
 msgstr ""
 
-#: templates/external_layer_add.html:34 templates/external_layer_update.html:36
-#: templates/layer_add.html:39 templates/layer_create.html:46
-#: templates/layer_update.html:39
+#: gvsigol_services/templates/external_layer_add.html:34
+#: gvsigol_services/templates/external_layer_update.html:36
+#: gvsigol_services/templates/layer_add.html:39
+#: gvsigol_services/templates/layer_create.html:46
+#: gvsigol_services/templates/layer_update.html:39
 msgid "Display properties"
-msgstr ""
+msgstr "Propietats de  visualització"
 
-#: templates/external_layer_add.html:35 templates/external_layer_update.html:37
-#: templates/layer_add.html:40 templates/layer_create.html:47
-#: templates/layer_update.html:40
-#, fuzzy
-#| msgid "Metadata UUID"
+#: gvsigol_services/templates/external_layer_add.html:35
+#: gvsigol_services/templates/external_layer_update.html:37
+#: gvsigol_services/templates/layer_add.html:40
+#: gvsigol_services/templates/layer_create.html:47
+#: gvsigol_services/templates/layer_update.html:40
 msgid "Metadata"
-msgstr "UUID de les metadades"
+msgstr "Metadades"
 
-#: templates/external_layer_add.html:36 templates/external_layer_update.html:38
-#: templates/layer_add.html:41 templates/layer_create.html:48
-#: templates/layer_update.html:41
-#, fuzzy
-#| msgid "Delete enumeration"
+#: gvsigol_services/templates/external_layer_add.html:36
+#: gvsigol_services/templates/external_layer_update.html:38
+#: gvsigol_services/templates/layer_add.html:41
+#: gvsigol_services/templates/layer_create.html:48
+#: gvsigol_services/templates/layer_update.html:41
 msgid "Detailed information"
-msgstr "Eliminar enumeració"
+msgstr "Informació detallada"
 
-#: templates/external_layer_add.html:133
-#: templates/external_layer_update.html:135 templates/layer_add.html:94
-#: templates/layer_update.html:111
+#: gvsigol_services/templates/external_layer_add.html:133
+#: gvsigol_services/templates/external_layer_update.html:135
+#: gvsigol_services/templates/layer_add.html:94
+#: gvsigol_services/templates/layer_update.html:111
 msgid "Timeout (miliseconds)"
 msgstr ""
 
-#: templates/external_layer_add.html:159
-#: templates/external_layer_update.html:192
-#: templates/geoserver/create_layer_feature_type.html:133
-#: templates/geoserver/create_layer_sql_view.html:123
-#: templates/geoserver/layer_upload_imagemosaic.html:129
-#: templates/geoserver/layer_upload_postgis.html:127
-#: templates/geoserver/layer_upload_raster.html:111
-#: templates/geoserver/layer_upload_vector.html:126
-#: templates/layer_add.html:202 templates/layer_create.html:232
-#: templates/layer_update.html:267
+#: gvsigol_services/templates/external_layer_add.html:159
+#: gvsigol_services/templates/external_layer_update.html:192
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:133
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:123
+#: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:129
+#: gvsigol_services/templates/geoserver/layer_upload_postgis.html:127
+#: gvsigol_services/templates/geoserver/layer_upload_raster.html:111
+#: gvsigol_services/templates/geoserver/layer_upload_vector.html:126
+#: gvsigol_services/templates/layer_add.html:206
+#: gvsigol_services/templates/layer_create.html:232
+#: gvsigol_services/templates/layer_update.html:273
 msgid "Metadata: Abstract"
 msgstr "Metadades: Resum"
 
-#: templates/external_layer_add.html:160
-#: templates/geoserver/create_layer_feature_type.html:132
-#: templates/geoserver/create_layer_sql_view.html:122
-#: templates/geoserver/layer_upload_imagemosaic.html:130
-#: templates/geoserver/layer_upload_postgis.html:128
-#: templates/geoserver/layer_upload_raster.html:112
-#: templates/geoserver/layer_upload_vector.html:125
-#: templates/layer_add.html:203 templates/layer_create.html:233
+#: gvsigol_services/templates/external_layer_add.html:160
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:132
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:122
+#: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:130
+#: gvsigol_services/templates/geoserver/layer_upload_postgis.html:128
+#: gvsigol_services/templates/geoserver/layer_upload_raster.html:112
+#: gvsigol_services/templates/geoserver/layer_upload_vector.html:125
+#: gvsigol_services/templates/layer_add.html:207
+#: gvsigol_services/templates/layer_create.html:233
 msgid "Some description of the layer"
 msgstr "Alguna descripció de la capa"
 
-#: templates/external_layer_add.html:177
-#: templates/external_layer_update.html:215 templates/layer_add.html:220
-#: templates/layer_create.html:250 templates/layer_update.html:290
+#: gvsigol_services/templates/external_layer_add.html:177
+#: gvsigol_services/templates/external_layer_update.html:215
+#: gvsigol_services/templates/layer_add.html:224
+#: gvsigol_services/templates/layer_create.html:250
+#: gvsigol_services/templates/layer_update.html:296
 msgid "Enable metaquality"
-msgstr ""
+msgstr "Activar metaqualitat"
 
-#: templates/external_layer_add.html:182
-#: templates/external_layer_update.html:224 templates/layer_add.html:225
-#: templates/layer_create.html:255 templates/layer_update.html:299
+#: gvsigol_services/templates/external_layer_add.html:182
+#: gvsigol_services/templates/external_layer_update.html:224
+#: gvsigol_services/templates/layer_add.html:229
+#: gvsigol_services/templates/layer_create.html:255
+#: gvsigol_services/templates/layer_update.html:305
 msgid "Button title in the TOC"
 msgstr ""
 
-#: templates/external_layer_add.html:183
-#: templates/external_layer_update.html:225 templates/layer_add.html:226
-#: templates/layer_create.html:256 templates/layer_update.html:300
+#: gvsigol_services/templates/external_layer_add.html:183
+#: gvsigol_services/templates/external_layer_update.html:225
+#: gvsigol_services/templates/layer_add.html:230
+#: gvsigol_services/templates/layer_create.html:256
+#: gvsigol_services/templates/layer_update.html:306
 msgid "Button title"
 msgstr ""
 
-#: templates/external_layer_add.html:183
-#: templates/external_layer_update.html:225 templates/layer_add.html:226
-#: templates/layer_create.html:256 templates/layer_update.html:300
+#: gvsigol_services/templates/external_layer_add.html:183
+#: gvsigol_services/templates/external_layer_update.html:225
+#: gvsigol_services/templates/layer_add.html:230
+#: gvsigol_services/templates/layer_create.html:256
+#: gvsigol_services/templates/layer_update.html:306
 msgid "Detailed info"
-msgstr ""
+msgstr "Informació detallada"
 
-#: templates/external_layer_add.html:189
-#: templates/external_layer_update.html:234 templates/layer_add.html:232
-#: templates/layer_create.html:262 templates/layer_update.html:309
+#: gvsigol_services/templates/external_layer_add.html:189
+#: gvsigol_services/templates/external_layer_update.html:234
+#: gvsigol_services/templates/layer_add.html:236
+#: gvsigol_services/templates/layer_create.html:262
+#: gvsigol_services/templates/layer_update.html:315
 msgid "HTML"
 msgstr ""
 
-#: templates/external_layer_add.html:246
-#: templates/external_layer_update.html:289 templates/layer_add.html:523
-#: templates/layer_create.html:818 templates/layer_update.html:461
-#, fuzzy
-#| msgid "Layer group title"
+#: gvsigol_services/templates/external_layer_add.html:246
+#: gvsigol_services/templates/external_layer_update.html:289
+#: gvsigol_services/templates/layer_add.html:527
+#: gvsigol_services/templates/layer_create.html:818
+#: gvsigol_services/templates/layer_update.html:467
 msgid "Layer title"
-msgstr "Títol del grup"
+msgstr "Títol de la capa"
 
-#: templates/external_layer_add.html:247
-#: templates/external_layer_update.html:290 templates/layer_add.html:524
-#: templates/layer_create.html:819 templates/layer_update.html:462
-#, fuzzy
-#| msgid "Workspace description"
+#: gvsigol_services/templates/external_layer_add.html:247
+#: gvsigol_services/templates/external_layer_update.html:290
+#: gvsigol_services/templates/layer_add.html:528
+#: gvsigol_services/templates/layer_create.html:819
+#: gvsigol_services/templates/layer_update.html:468
 msgid "Layer description"
-msgstr "Descripció de l'espai de treball"
+msgstr "Descripció de la capa"
 
-#: templates/external_layer_list.html:11
+#: gvsigol_services/templates/external_layer_list.html:11
 msgid "Add external layer"
 msgstr "Afegir capa externa"
 
-#: templates/external_layer_list.html:63
+#: gvsigol_services/templates/external_layer_list.html:63
 msgid "Delete external layer"
 msgstr "Eliminar capa externa"
 
-#: templates/external_layer_list.html:66
+#: gvsigol_services/templates/external_layer_list.html:66
 msgid "External layer will be deleted"
 msgstr "La capa externa será eliminada"
 
-#: templates/external_layer_list.html:111
+#: gvsigol_services/templates/external_layer_list.html:111
 msgid "Remove external layer"
 msgstr "Eliminar capa externa"
 
-#: templates/external_layer_list.html:115
+#: gvsigol_services/templates/external_layer_list.html:115
 msgid "Update external layer"
 msgstr "Actualitzar capa externa"
 
-#: templates/external_layer_update.html:168 templates/layer_update.html:243
+#: gvsigol_services/templates/external_layer_update.html:168
+#: gvsigol_services/templates/layer_update.html:249
 msgid "Layer metadata"
 msgstr "Metadades de la capa"
 
-#: templates/external_layer_update.html:173 templates/layer_update.html:248
+#: gvsigol_services/templates/external_layer_update.html:173
+#: gvsigol_services/templates/layer_update.html:254
 msgid "Metadata UUID"
 msgstr "UUID de les metadades"
 
-#: templates/external_layer_update.html:179
-#: templates/external_layer_update.html:185 templates/layer_update.html:254
-#: templates/layer_update.html:260
+#: gvsigol_services/templates/external_layer_update.html:179
+#: gvsigol_services/templates/external_layer_update.html:185
+#: gvsigol_services/templates/layer_update.html:260
+#: gvsigol_services/templates/layer_update.html:266
 msgid "Metadata tools"
 msgstr "Eines de metadades"
 
-#: templates/external_layer_update.html:180 templates/layer_update.html:255
+#: gvsigol_services/templates/external_layer_update.html:180
+#: gvsigol_services/templates/layer_update.html:261
 msgid "Edit in catalog"
 msgstr "Editar en catàleg"
 
-#: templates/external_layer_update.html:186 templates/layer_update.html:261
+#: gvsigol_services/templates/external_layer_update.html:186
+#: gvsigol_services/templates/layer_update.html:267
 msgid "Create metadata"
 msgstr "Crear metadada"
 
-#: templates/geoserver/create_layer_feature_type.html:12
-#: templates/geoserver/create_layer_sql_view.html:12
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:12
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:12
 msgid "Create Layer"
 msgstr "Crear capa"
 
-#: templates/geoserver/create_layer_feature_type.html:38
-#: templates/geoserver/create_layer_sql_view.html:36
-#: templates/geoserver/layer_upload_postgis.html:57
-#: templates/geoserver/layer_upload_vector.html:54
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:38
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:36
+#: gvsigol_services/templates/geoserver/layer_upload_postgis.html:57
+#: gvsigol_services/templates/geoserver/layer_upload_vector.html:54
 msgid "Data store"
 msgstr "Magatzem de dades"
 
-#: templates/geoserver/create_layer_feature_type.html:45
-#: templates/geoserver/create_layer_sql_view.html:43
-#: templates/geoserver/layer_upload_vector.html:61
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:45
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:43
+#: gvsigol_services/templates/geoserver/layer_upload_vector.html:61
 msgid "Layer name"
 msgstr "Nom de la capa"
 
-#: templates/geoserver/create_layer_feature_type.html:61
-#: templates/geoserver/create_layer_sql_view.html:78
-#: templates/geoserver/layer_upload_postgis.html:90
-#: templates/layer_create.html:81
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:61
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:78
+#: gvsigol_services/templates/geoserver/layer_upload_postgis.html:90
+#: gvsigol_services/templates/layer_create.html:81
 msgid "Coordinate reference system"
 msgstr "Sistema de referència de coordenades"
 
-#: templates/geoserver/create_layer_feature_type.html:85
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:85
 msgid "Add Field"
 msgstr "Afegir camp"
 
-#: templates/geoserver/create_layer_feature_type.html:99
-#: templates/geoserver/create_layer_sql_view.html:89
-#: templates/geoserver/layer_upload_imagemosaic.html:99
-#: templates/geoserver/layer_upload_postgis.html:97
-#: templates/geoserver/layer_upload_raster.html:81
-#: templates/geoserver/layer_upload_vector.html:94
-#: templates/layer_update.html:117
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:99
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:89
+#: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:99
+#: gvsigol_services/templates/geoserver/layer_upload_postgis.html:97
+#: gvsigol_services/templates/geoserver/layer_upload_raster.html:81
+#: gvsigol_services/templates/geoserver/layer_upload_vector.html:94
+#: gvsigol_services/templates/layer_update.html:123
 msgid "Layer properties in the viewer"
 msgstr "Propietats de la capa a la vista"
 
-#: templates/geoserver/create_layer_feature_type.html:122
-#: templates/geoserver/create_layer_sql_view.html:112
-#: templates/geoserver/layer_upload_imagemosaic.html:121
-#: templates/geoserver/layer_upload_postgis.html:119
-#: templates/geoserver/layer_upload_raster.html:103
-#: templates/geoserver/layer_upload_vector.html:115
-#: templates/layer_add.html:115 templates/layer_create.html:151
-#: templates/layer_update.html:151
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:122
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:112
+#: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:121
+#: gvsigol_services/templates/geoserver/layer_upload_postgis.html:119
+#: gvsigol_services/templates/geoserver/layer_upload_raster.html:103
+#: gvsigol_services/templates/geoserver/layer_upload_vector.html:115
+#: gvsigol_services/templates/layer_add.html:119
+#: gvsigol_services/templates/layer_create.html:151
+#: gvsigol_services/templates/layer_update.html:157
 msgid "Single image (No tiles)"
 msgstr "Imatge simple (Sense tiles)"
 
-#: templates/geoserver/create_layer_feature_type.html:143
-#: templates/layer_create.html:285
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:143
+#: gvsigol_services/templates/layer_create.html:285
 msgid "New field"
 msgstr "Nou camp"
 
-#: templates/geoserver/create_layer_feature_type.html:151
-#: templates/layer_create.html:110
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:151
+#: gvsigol_services/templates/layer_create.html:110
 msgid "Field type"
 msgstr "Tipus de camp"
 
-#: templates/geoserver/create_layer_feature_type.html:153
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:153
 msgid "text"
 msgstr "text"
 
-#: templates/geoserver/create_layer_feature_type.html:154
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:154
 msgid "integer"
 msgstr "sencer"
 
-#: templates/geoserver/create_layer_feature_type.html:155
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:155
 msgid "decimal"
 msgstr "decimal"
 
-#: templates/geoserver/create_layer_feature_type.html:156
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:156
 msgid "boolean"
 msgstr "booleà"
 
-#: templates/geoserver/create_layer_feature_type.html:157
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:157
 msgid "date"
 msgstr "data"
 
-#: templates/geoserver/create_layer_feature_type.html:163
-#: templates/geoserver/create_layer_sql_view.html:170
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:163
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:170
 msgid "OK"
 msgstr "OK"
 
-#: templates/geoserver/create_layer_feature_type.html:194
-#: templates/geoserver/create_layer_feature_type.html:195
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:194
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:195
 msgid "No fields have been defined"
 msgstr "No s'ha definit cap camp"
 
-#: templates/geoserver/create_layer_feature_type.html:201
-#: templates/geoserver/create_layer_feature_type.html:207
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:201
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:207
 msgid "Delete field"
 msgstr "Eliminar camp"
 
-#: templates/geoserver/create_layer_feature_type.html:231
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:231
 msgid "The name field is required"
 msgstr "El nom del camp és requerit"
 
-#: templates/geoserver/create_layer_feature_type.html:236
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:236
 msgid "Duplicated field name"
 msgstr "Nom del camp duplicat"
 
 #. Translators: Do not translate the quoted KEYWORD
-#: templates/geoserver/create_layer_feature_type.html:242
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:242
 msgid "Invalid field name: \\"
 msgstr "Nom del camp no vàlid"
 
-#: templates/geoserver/create_layer_feature_type.html:282
-#: templates/geoserver/create_layer_sql_view.html:234
+#: gvsigol_services/templates/geoserver/create_layer_feature_type.html:282
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:234
 msgid "Creating layer. Please wait..."
 msgstr "Creant capa. Per favor espere..."
 
-#: templates/geoserver/create_layer_sql_view.html:55
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:55
 msgid "SQL statement"
 msgstr "Sentència SQL"
 
-#: templates/geoserver/create_layer_sql_view.html:58
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:58
 msgid "Autocomplete"
 msgstr "Ompliment automàtic"
 
-#: templates/geoserver/create_layer_sql_view.html:138
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:138
 msgid "Schema"
 msgstr "Esquema"
 
-#: templates/geoserver/create_layer_sql_view.html:139
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:139
 msgid "Table"
 msgstr "Taula"
 
-#: templates/geoserver/create_layer_sql_view.html:140
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:140
 msgid "Geom column"
 msgstr "Columna de geometria"
 
-#: templates/geoserver/create_layer_sql_view.html:141
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:141
 msgid "Geom type"
 msgstr "Tipus de geometria"
 
-#: templates/geoserver/create_layer_sql_view.html:142
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:142
 msgid "CRS"
 msgstr "CRS"
 
-#: templates/geoserver/create_layer_sql_view.html:144
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:144
 msgid "Key column"
 msgstr "Columna de clau"
 
-#: templates/geoserver/create_layer_sql_view.html:166
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:166
 msgid "Warning"
 msgstr "Avís"
 
-#: templates/geoserver/create_layer_sql_view.html:167
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:167
 msgid "Select a data store before using Autocomplete"
 msgstr "Selecciona un magatzem abans d'utilitzar l'ompliment automàtic"
 
-#: templates/geoserver/create_layer_sql_view.html:273
+#: gvsigol_services/templates/geoserver/create_layer_sql_view.html:273
 msgid "Select row"
 msgstr "Seleccionar una fila"
 
-#: templates/geoserver/layer_upload_imagemosaic.html:13
-#: templates/geoserver/layer_upload_raster.html:13 templates/layer_list.html:12
-#: templates/layergroup_add.html:81 templates/layergroup_update.html:100
+#: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:13
+#: gvsigol_services/templates/geoserver/layer_upload_raster.html:13
+#: gvsigol_services/templates/layer_list.html:12
+#: gvsigol_services/templates/layergroup_add.html:81
+#: gvsigol_services/templates/layergroup_update.html:100
 msgid "Publish layer"
 msgstr "Publicar capa"
 
-#: templates/geoserver/layer_upload_imagemosaic.html:61
-#: templates/geoserver/layer_upload_raster.html:61
+#: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:61
+#: gvsigol_services/templates/geoserver/layer_upload_raster.html:61
 msgid "A new data store will be automatically created"
 msgstr "Un nou magatzem serà automàticament creat"
 
-#: templates/geoserver/layer_upload_imagemosaic.html:82
+#: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:82
 #, python-format
 msgid ""
 "Regular expression for date (empty to disable). Example: "
@@ -1367,7 +1690,7 @@ msgstr ""
 "Expressió regular per a la data (buida per desactivar). Exemple: "
 "%(sample_regex_pattern)s"
 
-#: templates/geoserver/layer_upload_imagemosaic.html:91
+#: gvsigol_services/templates/geoserver/layer_upload_imagemosaic.html:91
 #, python-format
 msgid ""
 "Regular expression for elevation (empty to disable). Example: "
@@ -1376,464 +1699,534 @@ msgstr ""
 "Expressió regular per a l'elevació (buida per desactivar). Exemple: "
 "%(sample_regex_pattern)s"
 
-#: templates/geoserver/layer_upload_postgis.html:13
-#: templates/geoserver/layer_upload_vector.html:12
+#: gvsigol_services/templates/geoserver/layer_upload_postgis.html:13
+#: gvsigol_services/templates/geoserver/layer_upload_vector.html:12
 msgid "Upload vector layer"
 msgstr "Pujar capa vectorial"
 
-#: templates/geoserver/layer_upload_postgis.html:50
+#: gvsigol_services/templates/geoserver/layer_upload_postgis.html:50
 msgid "Table creation mode"
 msgstr "Mode de creació de la taula"
 
-#: templates/geoserver/layer_upload_postgis.html:66
-#: templates/geoserver/layer_upload_vector.html:65
+#: gvsigol_services/templates/geoserver/layer_upload_postgis.html:66
+#: gvsigol_services/templates/geoserver/layer_upload_vector.html:65
 msgid "Layer will be uploaded to the selected data store"
 msgstr "La capa serà pujada al magatzem seleccionat"
 
-#: templates/geoserver/layer_upload_postgis.html:86
+#: gvsigol_services/templates/geoserver/layer_upload_postgis.html:86
 msgid "Character encoding"
 msgstr "Codificació de caràcters"
 
-#: templates/geoserver/layer_upload_vector.html:78
-#: templates/geoserver/layer_upload_vector.html:83
+#: gvsigol_services/templates/geoserver/layer_upload_vector.html:78
+#: gvsigol_services/templates/geoserver/layer_upload_vector.html:83
 msgid "Select style"
 msgstr "Seleccionar estil"
 
-#: templates/geoserver/layer_upload_vector.html:155
+#: gvsigol_services/templates/geoserver/layer_upload_vector.html:155
 msgid "Uploading layer. Please wait..."
 msgstr "Pujant capa. Per favor espere..."
 
-#: templates/group_cache_config.html:20 templates/layer_cache_config.html:20
+#: gvsigol_services/templates/group_cache_config.html:20
+#: gvsigol_services/templates/layer_cache_config.html:20
 msgid "Create a new task"
 msgstr "Crear nova tarea"
 
-#: templates/group_cache_config.html:21 templates/layer_cache_config.html:21
+#: gvsigol_services/templates/group_cache_config.html:21
+#: gvsigol_services/templates/layer_cache_config.html:21
 msgid "Currently executing tasks"
 msgstr "Tasques en execució"
 
-#: templates/group_cache_config.html:31 templates/layer_cache_config.html:31
+#: gvsigol_services/templates/group_cache_config.html:31
+#: gvsigol_services/templates/layer_cache_config.html:31
 msgid "Execute"
 msgstr "Executar"
 
-#: templates/group_cache_config.html:37 templates/layer_cache_config.html:37
+#: gvsigol_services/templates/group_cache_config.html:37
+#: gvsigol_services/templates/layer_cache_config.html:37
 msgid "Number of tasks to use"
 msgstr "Nombre de tasques a utilitzar"
 
-#: templates/group_cache_config.html:58 templates/layer_cache_config.html:58
+#: gvsigol_services/templates/group_cache_config.html:58
+#: gvsigol_services/templates/layer_cache_config.html:58
 msgid "Type of operation"
 msgstr "Tipus d'operació"
 
-#: templates/group_cache_config.html:60 templates/layer_cache_config.html:60
+#: gvsigol_services/templates/group_cache_config.html:60
+#: gvsigol_services/templates/layer_cache_config.html:60
 msgid "Seed - generate missing tiles"
 msgstr ""
 
-#: templates/group_cache_config.html:61 templates/layer_cache_config.html:61
+#: gvsigol_services/templates/group_cache_config.html:61
+#: gvsigol_services/templates/layer_cache_config.html:61
 msgid "Reseed - regenerate all tiles"
 msgstr ""
 
-#: templates/group_cache_config.html:62 templates/layer_cache_config.html:62
+#: gvsigol_services/templates/group_cache_config.html:62
+#: gvsigol_services/templates/layer_cache_config.html:62
 msgid "Truncate - remove tiles"
 msgstr ""
 
-#: templates/group_cache_config.html:68 templates/layer_cache_config.html:68
+#: gvsigol_services/templates/group_cache_config.html:68
+#: gvsigol_services/templates/layer_cache_config.html:68
 msgid "Grid set"
 msgstr ""
 
-#: templates/group_cache_config.html:87 templates/layer_cache_config.html:87
+#: gvsigol_services/templates/group_cache_config.html:87
+#: gvsigol_services/templates/layer_cache_config.html:87
 msgid "Zoom start"
 msgstr ""
 
-#: templates/group_cache_config.html:95 templates/layer_cache_config.html:95
+#: gvsigol_services/templates/group_cache_config.html:95
+#: gvsigol_services/templates/layer_cache_config.html:95
 msgid "Zoom stop"
 msgstr ""
 
-#: templates/group_cache_config.html:105 templates/layer_cache_config.html:105
+#: gvsigol_services/templates/group_cache_config.html:105
+#: gvsigol_services/templates/layer_cache_config.html:105
 msgid "MinX"
 msgstr ""
 
-#: templates/group_cache_config.html:109 templates/layer_cache_config.html:109
+#: gvsigol_services/templates/group_cache_config.html:109
+#: gvsigol_services/templates/layer_cache_config.html:109
 msgid "MinY"
 msgstr ""
 
-#: templates/group_cache_config.html:113 templates/layer_cache_config.html:113
+#: gvsigol_services/templates/group_cache_config.html:113
+#: gvsigol_services/templates/layer_cache_config.html:113
 msgid "MaxX"
 msgstr ""
 
-#: templates/group_cache_config.html:117 templates/layer_cache_config.html:117
+#: gvsigol_services/templates/group_cache_config.html:117
+#: gvsigol_services/templates/layer_cache_config.html:117
 msgid "MaxY"
 msgstr ""
 
-#: templates/group_cache_config.html:134 templates/layer_cache_config.html:134
+#: gvsigol_services/templates/group_cache_config.html:134
+#: gvsigol_services/templates/layer_cache_config.html:134
 msgid "Refresh tasks"
 msgstr ""
 
-#: templates/group_cache_config.html:135 templates/layer_cache_config.html:135
+#: gvsigol_services/templates/group_cache_config.html:135
+#: gvsigol_services/templates/layer_cache_config.html:135
 msgid "kill all tasks"
 msgstr ""
 
-#: templates/group_cache_config.html:142 templates/layer_cache_config.html:142
+#: gvsigol_services/templates/group_cache_config.html:142
+#: gvsigol_services/templates/layer_cache_config.html:142
 msgid "Tiles processed"
 msgstr ""
 
-#: templates/group_cache_config.html:143 templates/layer_cache_config.html:143
+#: gvsigol_services/templates/group_cache_config.html:143
+#: gvsigol_services/templates/layer_cache_config.html:143
 msgid "Total of tiles to process"
 msgstr ""
 
-#: templates/group_cache_config.html:144 templates/layer_cache_config.html:144
+#: gvsigol_services/templates/group_cache_config.html:144
+#: gvsigol_services/templates/layer_cache_config.html:144
 msgid "Total of remaining tiles"
 msgstr ""
 
-#: templates/group_cache_config.html:145 templates/layer_cache_config.html:145
+#: gvsigol_services/templates/group_cache_config.html:145
+#: gvsigol_services/templates/layer_cache_config.html:145
 msgid "Task ID"
 msgstr ""
 
-#: templates/group_cache_config.html:146 templates/layer_cache_config.html:146
+#: gvsigol_services/templates/group_cache_config.html:146
+#: gvsigol_services/templates/layer_cache_config.html:146
 msgid "Task status"
 msgstr ""
 
-#: templates/layer_add.html:53 templates/layer_create.html:59
-#: templates/layer_update.html:59
+#: gvsigol_services/templates/layer_add.html:53
+#: gvsigol_services/templates/layer_create.html:59
+#: gvsigol_services/templates/layer_update.html:59
 msgid "Data Store"
 msgstr "Magatzem de dades"
 
-#: templates/layer_add.html:59 templates/layer_create.html:65
-#: templates/layer_update.html:65
+#: gvsigol_services/templates/layer_add.html:59
+#: gvsigol_services/templates/layer_create.html:65
+#: gvsigol_services/templates/layer_update.html:65
 msgid "Resource name"
 msgstr "Nom del recurs"
 
-#: templates/layer_add.html:119 templates/layer_create.html:155
-#: templates/layer_update.html:159
+#: gvsigol_services/templates/layer_add.html:98
+#: gvsigol_services/templates/layer_update.html:116
+msgid "WFS request feature limit"
+msgstr "Límit de registres en peticions WFS"
+
+#: gvsigol_services/templates/layer_add.html:123
+#: gvsigol_services/templates/layer_create.html:155
+#: gvsigol_services/templates/layer_update.html:165
 msgid "time_enabled"
 msgstr "temps_habilitat"
 
-#: templates/layer_add.html:123 templates/layer_create.html:159
-#: templates/layer_update.html:167
+#: gvsigol_services/templates/layer_add.html:127
+#: gvsigol_services/templates/layer_create.html:159
+#: gvsigol_services/templates/layer_update.html:173
 msgid "Allow downloads"
-msgstr ""
+msgstr "Permetre descàrregues"
 
-#: templates/layer_add.html:131 templates/layer_create.html:165
-#: templates/layer_update.html:174
+#: gvsigol_services/templates/layer_add.html:135
+#: gvsigol_services/templates/layer_create.html:165
+#: gvsigol_services/templates/layer_update.html:180
 msgid "time_enabled field"
 msgstr "Camp temps_habilitat"
 
-#: templates/layer_add.html:138 templates/layer_create.html:171
-#: templates/layer_update.html:180
+#: gvsigol_services/templates/layer_add.html:142
+#: gvsigol_services/templates/layer_create.html:171
+#: gvsigol_services/templates/layer_update.html:186
 msgid "End time_enabled field"
 msgstr "Final del camp temps_habilitat"
 
-#: templates/layer_add.html:145 templates/layer_create.html:177
-#: templates/layer_update.html:187
+#: gvsigol_services/templates/layer_add.html:149
+#: gvsigol_services/templates/layer_create.html:177
+#: gvsigol_services/templates/layer_update.html:193
 msgid "Time resolution"
 msgstr "Resolució del temps"
 
-#: templates/layer_add.html:151 templates/layer_create.html:183
-#: templates/layer_update.html:193
+#: gvsigol_services/templates/layer_add.html:155
+#: gvsigol_services/templates/layer_create.html:183
+#: gvsigol_services/templates/layer_update.html:199
 msgid "Time presentation"
 msgstr "Presentació del temps"
 
-#: templates/layer_add.html:157 templates/layer_create.html:189
-#: templates/layer_update.html:199
+#: gvsigol_services/templates/layer_add.html:161
+#: gvsigol_services/templates/layer_create.html:189
+#: gvsigol_services/templates/layer_update.html:205
 msgid ""
 "Time resolution (years, months, weeks, days, hours, minutes and seconds)"
 msgstr ""
 "Resolució de temps (anys, mesos, setmanes, dies, hores, minuts i segons)"
 
-#: templates/layer_add.html:172 templates/layer_create.html:202
-#: templates/layer_update.html:212
+#: gvsigol_services/templates/layer_add.html:176
+#: gvsigol_services/templates/layer_create.html:202
+#: gvsigol_services/templates/layer_update.html:218
 msgid "Default value mode"
 msgstr "Valor per defecte del mode"
 
-#: templates/layer_add.html:304 templates/layer_create.html:708
-#: templates/layer_update.html:395
+#: gvsigol_services/templates/layer_add.html:308
+#: gvsigol_services/templates/layer_create.html:708
+#: gvsigol_services/templates/layer_update.html:401
 msgid "Resource contains no fields"
 msgstr "El recurs no conté cap camp"
 
-#: templates/layer_add.html:322 templates/layer_create.html:728
-#: templates/layer_update.html:421
+#: gvsigol_services/templates/layer_add.html:326
+#: gvsigol_services/templates/layer_create.html:728
+#: gvsigol_services/templates/layer_update.html:427
 msgid "Choose field"
 msgstr "Trieu camp"
 
-#: templates/layer_add.html:349
+#: gvsigol_services/templates/layer_add.html:353
 msgid "Data store contains no resources to publish"
 msgstr "El magatzem no conté recursos per publicar"
 
-#: templates/layer_add.html:366
+#: gvsigol_services/templates/layer_add.html:370
 msgid "Choose resource"
 msgstr "Seleccionar recurs"
 
-#: templates/layer_add.html:372
+#: gvsigol_services/templates/layer_add.html:376
 msgid "Service is unavailable"
 msgstr "El servei no està disponible"
 
-#: templates/layer_add.html:379 templates/layer_add.html:423
-#: templates/layer_add.html:489 templates/layer_create.html:785
+#: gvsigol_services/templates/layer_add.html:383
+#: gvsigol_services/templates/layer_add.html:427
+#: gvsigol_services/templates/layer_add.html:493
+#: gvsigol_services/templates/layer_create.html:785
 msgid "No valid data store selected"
 msgstr "Magatzem no vàlid"
 
-#: templates/layer_add.html:393 templates/layer_add.html:416
-#: templates/layer_create.html:755 templates/layer_create.html:778
+#: gvsigol_services/templates/layer_add.html:397
+#: gvsigol_services/templates/layer_add.html:420
+#: gvsigol_services/templates/layer_create.html:755
+#: gvsigol_services/templates/layer_create.html:778
 msgid "No layer groups available"
 msgstr "No hi ha grups de capes disponibles"
 
-#: templates/layer_add.html:410 templates/layer_create.html:772
+#: gvsigol_services/templates/layer_add.html:414
+#: gvsigol_services/templates/layer_create.html:772
 msgid "Choose layer group"
 msgstr "Trieu grup de capes"
 
-#: templates/layer_add.html:451 templates/layer_add.html:479
+#: gvsigol_services/templates/layer_add.html:455
+#: gvsigol_services/templates/layer_add.html:483
 msgid "-----------"
 msgstr "-----------"
 
-#: templates/layer_add.html:472
+#: gvsigol_services/templates/layer_add.html:476
 msgid "Choose date field"
 msgstr "Trieu data"
 
-#: templates/layer_config.html:48 templates/layer_create.html:109
+#: gvsigol_services/templates/layer_config.html:48
+#: gvsigol_services/templates/layer_create.html:109
 msgid "Field name"
 msgstr "Nom del camp"
 
-#: templates/layer_config.html:50
+#: gvsigol_services/templates/layer_config.html:50
 msgid "Field title"
 msgstr "Títol del camp"
 
-#: templates/layer_config.html:52
+#: gvsigol_services/templates/layer_config.html:52
 msgid "mandatory"
 msgstr ""
 
-#: templates/layer_config.html:53
+#: gvsigol_services/templates/layer_config.html:53
 msgid "Is visible?"
 msgstr "És visible?"
 
-#: templates/layer_config.html:54
+#: gvsigol_services/templates/layer_config.html:54
 msgid "Is editable?"
 msgstr "És editable?"
 
-#: templates/layer_config.html:55
+#: gvsigol_services/templates/layer_config.html:55
 msgid "Is shown in getFeatureInfo?"
 msgstr "Es mostra a getFeatureInfo?"
 
-#: templates/layer_config.html:56 templates/layer_config.html:117
+#: gvsigol_services/templates/layer_config.html:56
+#: gvsigol_services/templates/layer_config.html:117
 msgid "Convert to enum"
 msgstr ""
 
-#: templates/layer_create.html:102
+#: gvsigol_services/templates/layer_create.html:102
 msgid "Field list"
 msgstr "Llistat de camps"
 
-#: templates/layer_create.html:120
+#: gvsigol_services/templates/layer_create.html:120
 msgid "Add field"
 msgstr "Afegir camp"
 
-#: templates/layer_list.html:11 templates/layergroup_add.html:80
-#: templates/layergroup_update.html:99
+#: gvsigol_services/templates/layer_list.html:11
+#: gvsigol_services/templates/layergroup_add.html:80
+#: gvsigol_services/templates/layergroup_update.html:99
 msgid "Create empty layer"
 msgstr "Crear capa buida"
 
-#: templates/layer_list.html:25
+#: gvsigol_services/templates/layer_list.html:25
 msgid "Preview"
 msgstr "Previsualització"
 
-#: templates/layer_list.html:75 templates/layer_list.html:153
-#: templates/layergroup_update.html:130 templates/layergroup_update.html:172
+#: gvsigol_services/templates/layer_list.html:75
+#: gvsigol_services/templates/layer_list.html:153
+#: gvsigol_services/templates/layergroup_update.html:130
+#: gvsigol_services/templates/layergroup_update.html:172
 msgid "Delete layer"
 msgstr "Eliminar capa"
 
-#: templates/layer_list.html:78 templates/layergroup_update.html:175
+#: gvsigol_services/templates/layer_list.html:78
+#: gvsigol_services/templates/layergroup_update.html:175
 msgid "The layer will be removed, Do you want continue?"
 msgstr "La capa serà eliminada, desitja continuar?"
 
-#: templates/layer_list.html:94
+#: gvsigol_services/templates/layer_list.html:94
 msgid "Raster layers are not configurable"
 msgstr "Les capes raster no son configurables"
 
-#: templates/layer_list.html:109
+#: gvsigol_services/templates/layer_list.html:109
 msgid ""
 "This layer can't be remove from GeoServer, but it was delete from the list "
 "anyway"
 msgstr ""
 
-#: templates/layer_list.html:157 templates/layergroup_update.html:125
-#: templates/layergroup_update.html:127
+#: gvsigol_services/templates/layer_list.html:157
+#: gvsigol_services/templates/layergroup_update.html:125
+#: gvsigol_services/templates/layergroup_update.html:127
 msgid "Configure layer"
 msgstr "Configurar capa"
 
-#: templates/layer_list.html:161 templates/layergroup_update.html:123
+#: gvsigol_services/templates/layer_list.html:161
+#: gvsigol_services/templates/layergroup_update.html:123
 msgid "Update layer"
 msgstr "Actualitzar capa"
 
-#: templates/layer_list.html:165
+#: gvsigol_services/templates/layer_list.html:165
 msgid "Refresh extent"
 msgstr ""
 
-#: templates/layer_list.html:169
-#, fuzzy
-#| msgid "Update enumeration"
+#: gvsigol_services/templates/layer_list.html:169
 msgid "Update thumbnail"
-msgstr "Actualitzar enumeració"
+msgstr "Actualitzar miniatura"
 
-#: templates/layer_permissions_add.html:44
-#: templates/layer_permissions_add.html:57 templates/lock_list.html:14
+#: gvsigol_services/templates/layer_permissions_add.html:44
+#: gvsigol_services/templates/layer_permissions_add.html:57
+#: gvsigol_services/templates/lock_list.html:14
 msgid "Layer"
 msgstr "Capa"
 
-#: templates/layer_permissions_add.html:45
+#: gvsigol_services/templates/layer_permissions_add.html:45
 msgid "Read permissions"
 msgstr "Permisos de lectura"
 
-#: templates/layer_permissions_add.html:46
+#: gvsigol_services/templates/layer_permissions_add.html:46
 msgid "Write permissions"
 msgstr "Permisos de escritura"
 
-#: templates/layer_permissions_add.html:63
+#: gvsigol_services/templates/layer_permissions_add.html:63
 msgid "Warning: Layer will be public if no read group is assigned"
 msgstr "Avís: La capa serà pública si no se l'assigna un grup de lectura"
 
-#: templates/layer_permissions_add.html:76
+#: gvsigol_services/templates/layer_permissions_add.html:76
 msgid "Make layer readable only for the following groups"
 msgstr "Fer la capa llegible només per als següents grups"
 
-#: templates/layer_permissions_add.html:77
-#: templates/layer_permissions_add.html:116
+#: gvsigol_services/templates/layer_permissions_add.html:77
+#: gvsigol_services/templates/layer_permissions_add.html:116
 msgid "Search user group..."
 msgstr "Cercar grup d'usuari..."
 
-#: templates/layer_permissions_add.html:91
-#: templates/layer_permissions_add.html:93
-#: templates/layer_permissions_add.html:130
-#: templates/layer_permissions_add.html:132
+#: gvsigol_services/templates/layer_permissions_add.html:91
+#: gvsigol_services/templates/layer_permissions_add.html:93
+#: gvsigol_services/templates/layer_permissions_add.html:130
+#: gvsigol_services/templates/layer_permissions_add.html:132
 msgid "Assign user group"
 msgstr "Asignar grup"
 
-#: templates/layer_permissions_add.html:115
+#: gvsigol_services/templates/layer_permissions_add.html:115
 msgid "Make layer writeable only for the following groups"
 msgstr "Fer la capa editable només per als següents grups"
 
-#: templates/layer_update.html:93
-msgid "Icono"
-msgstr ""
+#: gvsigol_services/templates/layer_update.html:93
+msgid "Icon"
+msgstr "Icona"
 
-#: templates/layer_update.html:93
+#: gvsigol_services/templates/layer_update.html:93
 msgid "Supported formats"
 msgstr ""
 
-#: templates/layergroup_add.html:37 templates/layergroup_update.html:38
+#: gvsigol_services/templates/layergroup_add.html:37
+#: gvsigol_services/templates/layergroup_update.html:38
 msgid "Select server"
 msgstr "Seleccionar servidor"
 
-#: templates/layergroup_add.html:49 templates/layergroup_update.html:54
+#: gvsigol_services/templates/layergroup_add.html:49
+#: gvsigol_services/templates/layergroup_update.html:54
 msgid "Layer group name"
 msgstr "Nom del grup"
 
-#: templates/layergroup_add.html:56 templates/layergroup_update.html:61
+#: gvsigol_services/templates/layergroup_add.html:56
+#: gvsigol_services/templates/layergroup_update.html:61
 msgid "Layer group title"
 msgstr "Títol del grup"
 
-#: templates/layergroup_add.html:70 templates/layergroup_update.html:70
-#: templates/layergroup_update.html:72
+#: gvsigol_services/templates/layergroup_add.html:70
+#: gvsigol_services/templates/layergroup_update.html:70
+#: gvsigol_services/templates/layergroup_update.html:72
 msgid "Create cache for the layer group"
 msgstr "Crear cache per al grup de capes"
 
-#: templates/layergroup_add.html:75 templates/layergroup_update.html:79
-#: templates/layergroup_update.html:81
+#: gvsigol_services/templates/layergroup_add.html:75
+#: gvsigol_services/templates/layergroup_update.html:79
+#: gvsigol_services/templates/layergroup_update.html:81
 msgid "Is visible"
 msgstr "És visible"
 
-#: templates/layergroup_add.html:98 templates/layergroup_update.html:150
+#: gvsigol_services/templates/layergroup_add.html:98
+#: gvsigol_services/templates/layergroup_update.html:150
 msgid "Create new layer"
 msgstr "Crear nova capa"
 
-#: templates/layergroup_add.html:101 templates/layergroup_update.html:153
+#: gvsigol_services/templates/layergroup_add.html:101
+#: gvsigol_services/templates/layergroup_update.html:153
 msgid "Is needed to save this layer group first, Do you want continue?"
 msgstr "Cal primer per guardar aquest grup de capes. Voleu continuar?"
 
-#: templates/layergroup_list.html:11
+#: gvsigol_services/templates/layergroup_list.html:11
 msgid "Add layer group"
 msgstr "Afegir grup de capes"
 
-#: templates/layergroup_list.html:24
+#: gvsigol_services/templates/layergroup_list.html:24
 msgid "Asigned to"
 msgstr "Assignat a"
 
-#: templates/layergroup_list.html:63 templates/layergroup_list.html:111
+#: gvsigol_services/templates/layergroup_list.html:63
+#: gvsigol_services/templates/layergroup_list.html:111
 msgid "Delete layer group"
 msgstr "Eliminar grup de capes"
 
-#: templates/layergroup_list.html:66
+#: gvsigol_services/templates/layergroup_list.html:66
 msgid "The layer group will be removed, Do you want continue?"
 msgstr "El grup de capes serà eliminat, desitja continuar?"
 
-#: templates/layergroup_list.html:119
+#: gvsigol_services/templates/layergroup_list.html:119
 msgid "Update layer group"
 msgstr "Actualitzar grup de capes"
 
-#: templates/layergroup_update.html:97
+#: gvsigol_services/templates/layergroup_update.html:97
 msgid "Group layers"
 msgstr "Grups de capes"
 
-#: templates/lock_list.html:15
+#: gvsigol_services/templates/lock_list.html:15
 msgid "Date"
 msgstr "Data"
 
-#: templates/lock_list.html:16
+#: gvsigol_services/templates/lock_list.html:16
 msgid "Created by"
 msgstr "Creat per"
 
-#: templates/lock_list.html:29
+#: gvsigol_services/templates/lock_list.html:29
 msgid "GEOPORTAL"
 msgstr "GEOPORTAL"
 
-#: templates/lock_list.html:31
+#: gvsigol_services/templates/lock_list.html:31
 msgid "MOBILE"
 msgstr "MÒBIL"
 
-#: templates/lock_list.html:78
+#: gvsigol_services/templates/lock_list.html:78
 msgid "Unlock layer"
 msgstr "Desbloquejar capa"
 
-#: templates/server_add.html:34 templates/server_update.html:34
+#: gvsigol_services/templates/server_add.html:34
+#: gvsigol_services/templates/server_update.html:34
 msgid "Nodes"
 msgstr "Nodes"
 
-#: templates/server_add.html:55 templates/server_update.html:94
+#: gvsigol_services/templates/server_add.html:55
+#: gvsigol_services/templates/server_update.html:94
 msgid "Server nodes"
 msgstr "Nodes del servidor"
 
-#: templates/server_add.html:62 templates/server_update.html:101
+#: gvsigol_services/templates/server_add.html:62
+#: gvsigol_services/templates/server_update.html:101
 msgid "Status"
 msgstr "Estat"
 
-#: templates/server_add.html:64 templates/server_update.html:103
+#: gvsigol_services/templates/server_add.html:64
+#: gvsigol_services/templates/server_update.html:103
 msgid "Is master?"
 msgstr "És mestre?"
 
-#: templates/server_add.html:74 templates/server_update.html:113
+#: gvsigol_services/templates/server_add.html:74
+#: gvsigol_services/templates/server_update.html:113
 msgid "Add node"
 msgstr "Afegir node"
 
-#: templates/server_add.html:95 templates/server_update.html:134
+#: gvsigol_services/templates/server_add.html:95
+#: gvsigol_services/templates/server_update.html:134
 msgid "New node"
 msgstr "Nou node"
 
-#: templates/server_add.html:326 templates/server_update.html:432
+#: gvsigol_services/templates/server_add.html:326
+#: gvsigol_services/templates/server_update.html:432
 msgid "At least one node must be defined"
 msgstr "Heu de definir almenys un node"
 
-#: templates/server_add.html:337 templates/server_update.html:443
+#: gvsigol_services/templates/server_add.html:337
+#: gvsigol_services/templates/server_update.html:443
 msgid "One of the nodes must be a master node"
 msgstr "Un dels nodes deu ser mestre"
 
-#: templates/server_add.html:341 templates/server_update.html:447
+#: gvsigol_services/templates/server_add.html:341
+#: gvsigol_services/templates/server_update.html:447
 msgid "Only one master node can exist"
 msgstr "Només pot existir un node mestre"
 
-#: templates/server_list.html:12
+#: gvsigol_services/templates/server_list.html:12
 msgid "Add server"
 msgstr "Afegir servidror"
 
-#: templates/server_list.html:59 templates/server_list.html:107
+#: gvsigol_services/templates/server_list.html:59
+#: gvsigol_services/templates/server_list.html:107
 msgid "Delete server"
 msgstr "Eliminar servidor"
 
-#: templates/server_list.html:62
+#: gvsigol_services/templates/server_list.html:62
 #, fuzzy
 #| msgid ""
 #| "The server and all associated elements will be deleted, Do you want "
@@ -1844,64 +2237,61 @@ msgid ""
 msgstr ""
 "El servidor i tots els elements associats se suprimiran, voleu continuar?"
 
-#: templates/server_list.html:111
+#: gvsigol_services/templates/server_list.html:111
 msgid "Update server"
 msgstr "Actualitzar servidor"
 
-#: templates/server_update.html:69 templates/server_update.html:70
+#: gvsigol_services/templates/server_update.html:69
+#: gvsigol_services/templates/server_update.html:70
 msgid "Password"
 msgstr "Contrasenya"
 
-#: templates/service_url_list.html:12
-#, fuzzy
-#| msgid "Add server"
+#: gvsigol_services/templates/service_url_list.html:12
 msgid "Add service URL"
-msgstr "Afegir servidror"
+msgstr "Afegir URL de servei"
 
-#: templates/service_url_list.html:57 templates/service_url_list.html:105
-#, fuzzy
-#| msgid "Delete server"
+#: gvsigol_services/templates/service_url_list.html:57
+#: gvsigol_services/templates/service_url_list.html:105
 msgid "Delete service URL"
-msgstr "Eliminar servidor"
+msgstr "Eliminar URL del servei"
 
-#: templates/service_url_list.html:60
+#: gvsigol_services/templates/service_url_list.html:60
 #, fuzzy
 #| msgid "The layer will be removed, Do you want continue?"
 msgid "Service URL will be deleted, Do you want to continue?"
 msgstr "La capa serà eliminada, desitja continuar?"
 
-#: templates/service_url_list.html:109
-#, fuzzy
-#| msgid "Update server"
+#: gvsigol_services/templates/service_url_list.html:109
 msgid "Update service URL"
-msgstr "Actualitzar servidor"
+msgstr "Actualitzar URL de servei"
 
-#: templates/workspace_list.html:11
+#: gvsigol_services/templates/workspace_list.html:11
 msgid "Add workspace"
 msgstr "Afegir espai de treball"
 
-#: templates/workspace_list.html:24
+#: gvsigol_services/templates/workspace_list.html:24
 msgid "URI"
 msgstr "URI"
 
-#: templates/workspace_list.html:62 templates/workspace_list.html:111
+#: gvsigol_services/templates/workspace_list.html:62
+#: gvsigol_services/templates/workspace_list.html:111
 msgid "Delete workspace"
 msgstr "Eliminar espai de treball"
 
-#: templates/workspace_list.html:65
+#: gvsigol_services/templates/workspace_list.html:65
 msgid ""
 "The workspace and its registered data stores and resources will be deleted"
 msgstr "L'espai de treball i els recursos assignats al mateix seran eliminats"
 
-#: templates/workspace_list.html:115
+#: gvsigol_services/templates/workspace_list.html:115
 msgid "Update workspace"
 msgstr "Actualitzar espai de treball"
 
-#: templates/workspace_update.html:27
+#: gvsigol_services/templates/workspace_update.html:27
 msgid "Workspace description"
 msgstr "Descripció de l'espai de treball"
 
-#: views.py:309
+#: gvsigol_services/views.py:309
 #, python-brace-format
 msgid ""
 "Invalid workspace name: '{value}'. Identifiers must begin with a letter or "
@@ -1912,11 +2302,11 @@ msgstr ""
 "començar amb una lletra o un guió baix (_). Els següents caràcters poden ser "
 "lletres, guions o números"
 
-#: views.py:329
+#: gvsigol_services/views.py:329
 msgid "Error: workspace could not be created"
 msgstr "Error: L'espai de treball no pot ser creat"
 
-#: views.py:481
+#: gvsigol_services/views.py:481
 #, python-brace-format
 msgid ""
 "Invalid datastore name: '{value}'. Identifiers must begin with a letter or "
@@ -1927,31 +2317,31 @@ msgstr ""
 "una lletra o un guió baix (_). Els següents caràcters poden ser lletres, "
 "guions o números"
 
-#: views.py:515
+#: gvsigol_services/views.py:515
 msgid "Error: Data store could not be created"
 msgstr "Error: El magatzem no pot ser creat"
 
-#: views.py:518
+#: gvsigol_services/views.py:518
 msgid "Error: GeoTIFF is not georreferenced"
 msgstr "Error: GeoTIFF no està georreferenciat"
 
-#: views.py:532
+#: gvsigol_services/views.py:532
 msgid "Datastore not found"
 msgstr "Magatzem de dades no trobat"
 
-#: views.py:563
+#: gvsigol_services/views.py:563
 msgid "Error updating datastore"
 msgstr "Error actualitzant magatzem"
 
-#: views.py:674
+#: gvsigol_services/views.py:674
 msgid "ERROR can't connect with GeoServer"
 msgstr ""
 
-#: views.py:682
+#: gvsigol_services/views.py:682
 msgid "ERROR can't remove GeoServer data. Forcing remove from DataBase"
 msgstr ""
 
-#: views.py:2056 views.py:2212
+#: gvsigol_services/views.py:2087 gvsigol_services/views.py:2243
 #, python-brace-format
 msgid ""
 "Invalid layer group name: '{value}'. Identifiers must begin with a letter or "
@@ -1962,29 +2352,29 @@ msgstr ""
 "començar amb una lletra o un guió baix (_). Els següents caràcters poden ser "
 "lletres, guions o números"
 
-#: views.py:2105 views.py:2233
+#: gvsigol_services/views.py:2136 gvsigol_services/views.py:2264
 msgid "Layer group name already exists"
 msgstr "El nom del grup de capes ja existeix"
 
-#: views.py:2109
+#: gvsigol_services/views.py:2140
 msgid "You must enter a name for layer group"
 msgstr "Ha d'introduir un nom per al grup de capes"
 
-#: views.py:2606
+#: gvsigol_services/views.py:2637
 msgid "You must enter a title for enumeration"
 msgstr "Ha d'introduir un títol per l'enumeració"
 
-#: views.py:2611
+#: gvsigol_services/views.py:2642
 msgid "Name already taken"
 msgstr "Nom ja utilitzat"
 
-#: views.py:3781
+#: gvsigol_services/views.py:3812
 #, fuzzy
 #| msgid "Error: layer could not be published"
 msgid "Error: ExternalLayer could not be published"
 msgstr "Error: La capa no pot ser publicada"
 
-#: views.py:3874
+#: gvsigol_services/views.py:3905
 #, fuzzy
 #| msgid "Error: layer could not be published"
 msgid "Error: externallayer could not be published"

@@ -940,6 +940,11 @@ def layer_add_with_group(request, layergroup_id):
         allow_download = False
         if 'allow_download' in request.POST:
             allow_download = True
+        
+        try:
+            maxFeatures = int(request.POST.get('max_features', 0))
+        except:
+            maxFeatures = 0
             
         detailed_info_enabled = False
         detailed_info_button_title = request.POST.get('detailed_info_button_title')
@@ -977,6 +982,8 @@ def layer_add_with_group(request, layergroup_id):
 
         if form.is_valid():
             try:
+                extraParams = {}
+                
                 if form.cleaned_data['datastore'].type == 'v_PostGIS':
                     dts = form.cleaned_data['datastore']
                     params = json.loads(dts.connection_params)
@@ -986,6 +993,7 @@ def layer_add_with_group(request, layergroup_id):
                     user = params['user']
                     passwd = params['passwd']
                     schema = params.get('schema', 'public')
+                    extraParams['maxFeatures'] = maxFeatures
                     i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
                     fields = i.get_fields(form.cleaned_data['name'], schema)
 
@@ -993,13 +1001,15 @@ def layer_add_with_group(request, layergroup_id):
                         if ' ' in field:
                             raise ValueError(_("Invalid layer fields: '{value}'. Layer can't have fields with whitespaces").format(value=field))
                 
+                    
                 gs = geographic_servers.get_instance().get_server_by_id(form.cleaned_data['datastore'].workspace.server.id)
                 # first create the resource on the backend
                 gs.createResource(
                     form.cleaned_data['datastore'].workspace,
                     form.cleaned_data['datastore'],
                     form.cleaned_data['name'],
-                    form.cleaned_data['title']
+                    form.cleaned_data['title'],
+                    extraParams=extraParams
                 )
                 
                 # save it on DB if successfully created
@@ -1111,7 +1121,10 @@ def layer_add_with_group(request, layergroup_id):
                         fields.append(field)
 
                     layer_conf = {
-                        'fields': fields
+                        'fields': fields,
+                        'featuretype': {
+                            'max_features': maxFeatures
+                            }
                         }
                     newRecord.conf = layer_conf
                     newRecord.save()
@@ -1140,6 +1153,7 @@ def layer_add_with_group(request, layergroup_id):
                     return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
 
             except Exception as e:
+                logger.exception(e)
                 try:
                     msg = e.server_message
                 except:
@@ -1159,8 +1173,6 @@ def layer_add_with_group(request, layergroup_id):
         types[datastore.id] = datastore.type
         datastore_types[datastore.id] = datastore.type
 
-    #datastore_types['types'] = types
-
     return render(request, 'layer_add.html', {
             'form': form,
             'datastore_types': json.dumps(datastore_types),
@@ -1175,13 +1187,17 @@ def layer_update(request, layer_id):
     redirect_to_layergroup = request.GET.get('redirect')
 
     if request.method == 'POST':
+        updatedParams = {}
+
         layer = Layer.objects.get(id=int(layer_id))
         workspace = request.POST.get('workspace')
         datastore = request.POST.get('datastore')
         name = request.POST.get('name')
         title = request.POST.get('title')
+        updatedParams['title'] = title
         #style = request.POST.get('style')
         layer_group_id = request.POST.get('layer_group')
+        layerConf = ast.literal_eval(layer.conf) if layer.conf else {}
 
         is_visible = False
         if 'visible' in request.POST:
@@ -1203,7 +1219,16 @@ def layer_update(request, layer_id):
         allow_download = False
         if 'allow_download' in request.POST:
             allow_download = True
-            
+
+        if layer.datastore.type.startswith('v_'):
+            try:
+                maxFeatures = int(request.POST.get('max_features', 0))
+            except:
+                maxFeatures = 0
+            updatedParams['maxFeatures'] = maxFeatures
+            layerConf['featuretype'] = layerConf.get('featuretype', {})
+            layerConf['featuretype']['max_features'] = maxFeatures
+
         detailed_info_enabled = False
         detailed_info_button_title = request.POST.get('detailed_info_button_title')
         detailed_info_html = request.POST.get('detailed_info_html')
@@ -1252,7 +1277,7 @@ def layer_update(request, layer_id):
 
         ds = Datastore.objects.get(id=layer.datastore.id)
         gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
-        if gs.updateResource(workspace, datastore, name, title):
+        if gs.updateResource(workspace, layer.datastore.name, layer.datastore.type, name, updatedParams=updatedParams):
             layer.title = title
             layer.cached = cached
             layer.visible = is_visible
@@ -1282,7 +1307,7 @@ def layer_update(request, layer_id):
             params = {}
             params['format'] = request.POST.get('format')
             layer.external_params = json.dumps(params)
-            
+            layer.conf = layerConf
             layer.save()
             
             if 'layer-image' in request.FILES:
@@ -1353,17 +1378,23 @@ def layer_update(request, layer_id):
             form.fields['datastore'].queryset = Datastore.objects.filter(created_by__exact=request.user.username)
             form.fields['layer_group'].queryset =(LayerGroup.objects.filter(created_by__exact=request.user.username) | LayerGroup.objects.filter(name='__default__')).order_by('name')
 
-
+        try:
+            layerConf = ast.literal_eval(layer.conf)
+        except:
+            layerConf = {}
+        
         date_fields = []
+        if layer.type.startswith('v_'):
+            # ensure we get a value for max_features
+            layerConf['featuretype'] = layerConf.get('featuretype', {})
+            layerConf['featuretype']['max_features'] = layerConf['featuretype'].get('max_features', 0)
         if layer.type == 'v_PostGIS':
             aux_fields = get_date_fields(layer.id)
-            if layer.conf and layer.conf != '':
-                conf = ast.literal_eval(layer.conf)
-                if 'fields' in conf:
-                    for field in conf['fields']:
-                        for data_field in aux_fields:
-                            if field['name'] == data_field:
-                                date_fields.append(field)
+            if 'fields' in layerConf:
+                for field in layerConf['fields']:
+                    for data_field in aux_fields:
+                        if field['name'] == data_field:
+                            date_fields.append(field)
 
         md_uuid = core_utils.get_layer_metadata_uuid(layer)
         plugins_config = core_utils.get_plugins_config()
@@ -1372,7 +1403,7 @@ def layer_update(request, layer_id):
             html = False
         
         _, layer_image_url = utils.get_layer_img(layer.id, None)
-        return render(request, 'layer_update.html', {'html': html, 'layer': layer, 'workspace': workspace, 'form': form, 'layer_id': layer_id, 'date_fields': json.dumps(date_fields), 'redirect_to_layergroup': redirect_to_layergroup, 'layer_md_uuid': md_uuid, 'plugins_config': plugins_config, 'layer_image_url': layer_image_url})
+        return render(request, 'layer_update.html', {'html': html, 'layer': layer, 'workspace': workspace, 'form': form, 'layer_id': layer_id, 'layer_conf': layerConf, 'date_fields': json.dumps(date_fields), 'redirect_to_layergroup': redirect_to_layergroup, 'layer_md_uuid': md_uuid, 'plugins_config': plugins_config, 'layer_image_url': layer_image_url, 'datastore_type': layer.datastore.type})
 
 def get_date_fields(layer_id):
     date_fields = []

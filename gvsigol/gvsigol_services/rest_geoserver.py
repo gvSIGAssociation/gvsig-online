@@ -28,6 +28,10 @@ import requests
 import json
 from datetime import datetime
 from lxml import etree as ET
+import logging
+from builtins import str as text
+
+logger = logging.getLogger("gvsigol")
 
 PURGE_NONE="none"
 PURGE_METADATA="metadata"
@@ -73,7 +77,7 @@ class Geoserver():
             return True
         raise FailedRequestError(r.status_code, r.content)
         
-    def create_feature_type(self, name, title, store, workspace, srs=None, fields=None, maxFeatures=0, content_type=None, user=None, password=None, extraParams=None):
+    def create_feature_type(self, name, title, store, workspace, srs=None, fields=None, content_type=None, user=None, password=None, extraParams={}):
         url = self.service_url + "/workspaces/" + workspace + "/datastores/" + store + "/featuretypes"
         qualified_store = workspace + ":" + store
         
@@ -85,8 +89,7 @@ class Geoserver():
         # in use, but it seems to work correctly).
         ft = {
                 'name': name, 'title': title, 'enabled': True,
-                "store": {"@class": "dataStore", "name": qualified_store},
-                "maxFeatures": maxFeatures
+                "store": {"@class": "dataStore", "name": qualified_store}
               }
         if srs is not None:
             ft['nativeBoundingBox'] = {"minx": 0, "maxx": 1, "miny": 0, "maxy":1 , "crs":srs}
@@ -272,7 +275,7 @@ class Geoserver():
         if r.status_code==201:
             return True
         raise UploadError(r.status_code, r.content)
-    
+
     def set_queryable(self, workspace, ds_name, ds_type, name, queryable, user=None, password=None):
         url = self.service_url + '/layers/' + name + '.json'
         
@@ -493,23 +496,29 @@ class Geoserver():
         if r.status_code==200:
             return
         raise UploadError(r.status_code, r.content)
-    
-    def update_feature_type(self, workspace, datastore, feature_type, user=None, password=None):
+
+    def update_featuretype(self, workspace, ds_name, name, updatedParams={}, user=None, password=None):
         """
-        Updates the native & lat/lon bounding box of the feature type using
-        the bounding box computed from data
+        Updates the featuretype definition. Only params included in the updatedParams dict will be
+        updated on the feature type. The rest of the featuretype definition will remain unchanged.
         """
-        url = self.service_url + "/workspaces/" + workspace + "/datastores/" + datastore + "/featuretypes/" + feature_type + ".json?recalculate="
         if user and password:
             auth = (user, password)
         else:
             auth = self.session.auth
         
-        data = {"featureType": {"name": feature_type, "enabled": "true"}}
+        url = self.service_url + u'/workspaces/' + workspace + u'/datastores/' + ds_name + u'/featuretypes/' + name + u'.json' 
+        r = self.session.get(url, auth=auth)
+        if r.status_code!=200:
+            raise FailedRequestError(r.status_code, r.content)
+        data = r.json()
+        data.get('featureType').update(updatedParams) 
         r = self.session.put(url, json=data, auth=auth)
-        if r.status_code==200:
-            return
-        raise UploadError(r.status_code, r.content)
+        if r.status_code!=200:
+            logger.error(u'Error updating featuretype. Status code: ' + text(r.status_code) + u' - Url: ' + url)
+            logger.error(r.text)
+            raise FailedRequestError(r.status_code, r.content)
+        return True
     
     def update_ft_bounding_box(self, workspace, datastore, feature_type, user=None, password=None):
         """

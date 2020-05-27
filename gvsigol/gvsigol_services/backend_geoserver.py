@@ -620,17 +620,11 @@ class Geoserver():
         if store.type[0]=="v":
             self.rest_catalog.update_ft_bounding_box(layer.datastore.workspace.name, layer.datastore.name, layer.name, user=self.user, password=self.password)
         # not available/necessary for coverages
-            
-    def updateFeatureTypeFromData(self, layer):
-        store = layer.datastore
-        if store.type[0]=="v":
-            self.rest_catalog.update_feature_type(layer.datastore.workspace.name, layer.datastore.name, layer.name, user=self.user, password=self.password)
-        # not available/necessary for coverages
 
-    def createResource(self, workspace, store, name, title):
+    def createResource(self, workspace, store, name, title, extraParams={}):
         try:
             if store.type[0]=="v":
-                return self.createFeaturetype(workspace, store, name, title)
+                return self.createFeaturetype(workspace, store, name, title, extraParams)
             elif store.type[0]=="e":
                 return self.createWMSLayer(workspace, store, name, title)
             else:
@@ -650,9 +644,9 @@ class Geoserver():
     def getFeaturetype(self, workspace, datastore, name, title):
         return self.rest_catalog.get_feature_type(workspace.name, datastore.name, name, user=self.user, password=self.password)
 
-    def createFeaturetype(self, workspace, datastore, name, title):
+    def createFeaturetype(self, workspace, datastore, name, title, extraParams={}):
         try:
-            return self.rest_catalog.create_feature_type(name, title, datastore.name, workspace.name, user=self.user, password=self.password)
+            return self.rest_catalog.create_feature_type(name, title, datastore.name, workspace.name, user=self.user, password=self.password, extraParams=extraParams)
         except rest_geoserver.FailedRequestError as e:
             logger.exception('ERROR createFeatureType failed: ' + name)
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
@@ -781,18 +775,23 @@ class Geoserver():
         
         return True
 
-    def updateResource(self, workspace, datastore, name, title):
+    def updateResource(self, workspace, ds_name, ds_type, name, updatedParams={}):
         try:
-            catalog = self.getGsconfig()
-            resource = catalog.get_resource(name, datastore, workspace)
-            resource.name = name
-            resource.title = title
-            catalog.save(resource)
+            if ds_type.startswith('v_'): # vector
+                self.rest_catalog.update_featuretype(workspace, ds_name, name, updatedParams=updatedParams, user=self.user, password=self.password)
+            else: # raster, external layer, etc
+                title = updatedParams.get('title')
+                if title:
+                    catalog = self.getGsconfig()
+                    resource = catalog.get_resource(name, ds_name, workspace)
+                    resource.name = name
+                    resource.title = title
+                    catalog.save(resource)
             return True
-        except Exception as e:
+        except:
             logger.exception('ERROR updateResource. Resource:' + name)
             return False
-        
+    
     def setQueryable(self, workspace, ds_name, ds_type, name, queryable):
         try:
             return self.rest_catalog.set_queryable(workspace, ds_name, ds_type, name, queryable, user=self.user, password=self.password)
@@ -862,6 +861,7 @@ class Geoserver():
                 #return store.get_resources(available=available)
             
         except:
+            logger.exception("Error getting resources")
             e = sys.exc_info()[0]
             pass 
     
