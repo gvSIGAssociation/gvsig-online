@@ -581,11 +581,11 @@ class Geoserver():
         try:
             catalog = self.getGsconfig()
             style = catalog.get_style(name, workspace=None)
-            catalog.delete(style, purge=True, recurse=False)
+            catalog.delete(style, purge=True, recurse=True)
             return True        
         except Exception as e:
             logger.exception('Borrando estilo: ' + name)
-            pass
+            raise
         
     def deleteLayerStyles(self, lyr):
         try:
@@ -595,7 +595,7 @@ class Geoserver():
                 style = Style.objects.get(id=layer_style.style_id)
                 catalog = self.getGsconfig()
                 gs_style = catalog.get_style(style.name, workspace=None)
-                catalog.delete(gs_style, purge=True, recurse=False)
+                catalog.delete(gs_style, purge=True, recurse=True)
                 layer_style.delete()
                 
                 rules = Rule.objects.filter(style=style)
