@@ -36,7 +36,7 @@
 					<div class="row">
 						<div class="col-md-12 form-group">
 							<label for="layergroup_server_id">{% trans "Select server" %}</label>
-							<select readonly class="form-control" id="layergroup_server_id" name="layergroup_server_id">
+							<select disabled class="form-control" id="layergroup_server_id" name="layergroup_server_id">
 							{% for server in servers %}
 								{% if server.id == layergroup.server_id %}
 									<option value="{{server.id}}" selected>{{server.title}}</option>
@@ -51,7 +51,7 @@
 					<div class="row">
 						<div class="col-md-12">
 							<label>{% trans "Name" %}</label>	
-							<input placeholder="{% trans 'Layer group name' %}" name="layergroup_name" id="layergroup_name" type="text" class="form-control" value="{{layergroup.name}}">							
+							<input readonly placeholder="{% trans 'Layer group name' %}" name="layergroup_name" id="layergroup_name" type="text" class="form-control" value="{{layergroup.name}}">							
 						</div>
 					</div>
 					
