@@ -39,22 +39,31 @@ class Server(models.Model):
     password = models.CharField(max_length=100)
     default = models.BooleanField(default=False)
     
-    def getWmsEndpoint(self):
-        return self.frontend_url + "/wms"
+    def getWmsEndpoint(self, workspace=None):
+        if workspace:
+            return self.frontend_url + "/" + workspace + "/wms"
+        else:
+            return self.frontend_url + "/wms"
     
-    def getWfsEndpoint(self):
-        return self.frontend_url + "/wfs"
+    def getWfsEndpoint(self, workspace=None):
+        if workspace:
+            return self.frontend_url + "/" + workspace + "/wfs"
+        else:
+            return self.frontend_url + "/wfs"
     
-    def getWcsEndpoint(self):
-        return self.frontend_url + "/wcs"
+    def getWcsEndpoint(self, workspace=None):
+        if workspace:
+            return self.frontend_url + "/" + workspace + "/wcs"
+        else:
+            return self.frontend_url + "/wcs"
     
-    def getWmtsEndpoint(self):
+    def getWmtsEndpoint(self, workspace=None):
         return self.frontend_url + "/wmts"
     
-    def getCacheEndpoint(self):
+    def getCacheEndpoint(self, workspace=None):
         return self.frontend_url + "/gwc/service/wms"
     
-    def getGWCRestEndpoint(self):
+    def getGWCRestEndpoint(self, workspace=None):
         return self.frontend_url + "/gwc/rest"
     
     def __unicode__(self):
