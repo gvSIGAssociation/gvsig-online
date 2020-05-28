@@ -213,11 +213,11 @@ def server_update(request, svid):
         workspaces = Workspace.objects.filter(server_id=server.id)
         for ws in workspaces:
             ws.uri = ws.uri.replace(old_frontend_url, frontend_url)
-            ws.wms_endpoint = ws.wms_endpoint.replace(old_frontend_url, frontend_url)
-            ws.wfs_endpoint = ws.wfs_endpoint.replace(old_frontend_url, frontend_url)
-            ws.wcs_endpoint = ws.wcs_endpoint.replace(old_frontend_url, frontend_url)
-            ws.wmts_endpoint = ws.wmts_endpoint.replace(old_frontend_url, frontend_url)
-            ws.cache_endpoint = ws.cache_endpoint.replace(old_frontend_url, frontend_url)
+            ws.wms_endpoint = ws.server.getWmsEndpoint(ws.name)
+            ws.wfs_endpoint = ws.server.getWfsEndpoint(ws.name)
+            ws.wcs_endpoint = ws.server.getWcsEndpoint(ws.name)
+            ws.wmts_endpoint = ws.server.getWmtsEndpoint(ws.name)
+            ws.cache_endpoint = ws.server.getCacheEndpoint(ws.name)
             ws.save()
             
         for n in Node.objects.filter(server=server):
