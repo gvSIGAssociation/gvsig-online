@@ -168,6 +168,7 @@ ElevationControl.prototype.calculateElevation = function(feat) {
 	
 	var newCoords = new Array();
 	var currentCoords = line2D.getGeometry().getCoordinates();
+	var length = line2D.getGeometry().getLength();
 	for (i=0; i<currentCoords.length-1; i++) {
 		var startPoint = ol.proj.transform(currentCoords[i], 'EPSG:3857', 'EPSG:4326');
 		var endPoint = ol.proj.transform(currentCoords[i+1], 'EPSG:3857', 'EPSG:4326');
@@ -211,7 +212,7 @@ ElevationControl.prototype.calculateElevation = function(feat) {
 	this.point.setStyle([]);
 	self.source3D.addFeature(this.point);
 	$("#floating-modal-elevation").dialog("open");
-	self.addProfilControl(line3D, zArray);
+	self.addProfilControl(line3D, zArray, length);
 	self.map.removeInteraction(self.drawInteraction);
 	
 	$.overlayout();
@@ -220,7 +221,7 @@ ElevationControl.prototype.calculateElevation = function(feat) {
 /**
  * TODO
  */
-ElevationControl.prototype.addProfilControl = function(feat, zArray) {
+ElevationControl.prototype.addProfilControl = function(feat, zArray, length) {
 	zArray.sort(function (a, b) { return a-b; });
 	var self = this;
 	if (this.profilControl != null) {
@@ -246,11 +247,20 @@ ElevationControl.prototype.addProfilControl = function(feat, zArray) {
 	});
 	this.map.addControl(this.profilControl);
 	
+	var altMax = zArray[zArray.length - 1];
 	this.profilControl.setGeometry(feat, {	
 		graduation:50,
-		amplitude:zArray[zArray.length - 1],
+		amplitude:altMax,
 		zmin: parseFloat('0')
 	});
+	
+	var magnification = (length/altMax)/2;
+	
+	var magnificationHtml = '';
+	magnificationHtml += '<div>';
+	magnificationHtml += '<span><b>Exageración vertical: </b>' + Math.round(magnification) + 'x</span>';
+	magnificationHtml += '</div>';
+	$('.floating-modal-elevation-body').prepend(magnificationHtml);
 	
 	function drawPoint(e) {
 		if (!self.point) return;
