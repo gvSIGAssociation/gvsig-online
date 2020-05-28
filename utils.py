@@ -252,11 +252,22 @@ def toc_update_layer_group(old_layergroup, old_name, new_name, title):
     for p in projects_by_layergroup:
         json_toc = p.project.toc_order
         toc = json.loads(json_toc)
-        toc[old_name]['name'] = new_name
-        toc[old_name]['title'] = title
-        toc[new_name] = toc.pop(old_name)
+        try:
+            toc[old_name]['name'] = new_name
+            toc[old_name]['title'] = title
+            toc[new_name] = toc.pop(old_name)
+        except Exception as e:
+            if old_name == '__default_baselayergroup__':
+                toc[old_name] = {
+                    "layers": {}, 
+                    "order": 990000, 
+                    "name": old_name, 
+                    "title": title
+                }
+            pass
         p.project.toc_order = json.dumps(toc)
         p.project.save()
+            
    
 def toc_remove_layergroups(toc_structure, layer_groups): 
     if not toc_structure:
