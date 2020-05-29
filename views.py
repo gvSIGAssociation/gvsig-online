@@ -3212,7 +3212,7 @@ def get_feature_wfs(request):
                 "TYPENAME": layer_name,
                 "OUTPUTFORMAT": "application/json",
                 "MAXFEATURES": 500,
-                "CQL_FILTER": cql_filter
+                "CQL_FILTER": cql_filter.encode('utf-8')
             }
             
             params = urllib.urlencode(data)
