@@ -1,21 +1,28 @@
 {
-    "timeouts": [20, 20, 20],
+	"maxQueueLimit": 20,
+    "timeouts": [20, 10, 5],
     "routingDefaults": {
       "walkSpeed": 1.3,
-      "transferSlack": 120,
+      "boardSlack": 20,
+      "alightSlack":20,  
+      "transferSlack": 100,
+      "transferPenalty": 120,
+      "minTransferTime": 50,
       "maxTransfers": 4,
-      "waitReluctance": 0.99,
+      "waitReluctance": 0.8,
       "waitAtBeginningFactor": 0.9,
-      "walkReluctance": 1.0,
-      "stairsReluctance": 1.0,
-      "walkBoardCost": 50,
-      "compactLegsByReversedSearch": false,
+      "softWalkLimiting": false,
+      "softPreTransitLimiting": false,  
+      "walkReluctance": 1.1,
+      "stairsReluctance": 1.2,
+      "walkBoardCost": 30,
+      "compactLegsByReversedSearch": true,
       "itineraryFiltering": 1.0,
-      "bikeSwitchCost": 10,
-      "bikeSwitchTime": 10
+      "bikeSwitchCost": 20,
+      "bikeSwitchTime": 20
     },
-    "poisWfs": {
-      "urlGetCapabilities": "https://intranet-pre.gva.es/geoserver/atmv/ows?service=WFS&version=1.1.0&request=GetCapabilities",
+	"poisWfs": {
+      "urlGetCapabilities": "http://intranet-pre.gva.es/geoserver/atmv/ows?service=WFS&version=1.1.0&request=GetCapabilities",
       "typeName": "atmv:pois"
     },  
     "externalGeocoder": {
@@ -27,7 +34,7 @@
       {
         "type": "bike-rental",
         "sourceType": "jcdecaux",
-        "url": "https://api.jcdecaux.com/vls/v1/stations?contract=valence&apiKey=9595de725ee4c60aac7406c1a69743625c9056a0",
+        "url": "http://api.jcdecaux.com/vls/v1/stations?contract=valence&apiKey=9595de725ee4c60aac7406c1a69743625c9056a0",
         "frequencySec": 60
       },
       {
