@@ -529,6 +529,9 @@ class Geonetwork():
         r = self.session.get(url, headers=headers, timeout=get_default_timeout(), proxies=settings.PROXIES)
         if r.status_code==200:
             return r.content
+        logger.debug(url)
+        logger.error(r.status_code)
+        logger.error(r.content)
         raise FailedRequestError(r.status_code, r.content)
 
     def get_updated_metadata(self, layer, uuid, layer_info, ds_type):
@@ -547,6 +550,9 @@ class Geonetwork():
             updater = registry.get_updater(md_response.content)
             return updater.update_all(extent_tuple, layer.thumbnail.url).tostring()
             #return iso19139_2007.update_metadata(md_response.content, extent_tuple, layer.thumbnail.url)
+        logger.debug(md_url)
+        logger.error(md_response.status_code)
+        logger.error(md_response.content)
         raise FailedRequestError(md_response.status_code, md_response.content)
 
     def get_extent(self, layer_info, ds_type):
