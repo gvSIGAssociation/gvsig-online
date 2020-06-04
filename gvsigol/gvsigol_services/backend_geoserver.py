@@ -822,7 +822,7 @@ class Geoserver():
      
     def getDataStores(self, workspace):
         ws = self.getGsconfig().get_workspace(workspace.name)
-        stores = self.getGsconfig().get_stores(ws)
+        stores = self.getGsconfig().get_stores(workspaces=ws)
         resources = []
         for store in stores:
             resources.append(store.name)
