@@ -111,3 +111,5 @@ more-itertools<6.0.0
 uwsgi==2.0.18
 gevent==1.4.0
 #greenlet==0.4.12
+
+APScheduler==3.6.3
