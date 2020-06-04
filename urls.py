@@ -22,32 +22,6 @@ import settings
 
 handler404 = 'gvsigol_core.views.not_found_view'
 
-js_info_dict = {
-    'packages': (
-        'gvsigol_auth',
-        'gvsigol_core',
-        'gvsigol_services',
-        'gvsigol_symbology',
-        'gvsigol_plugin_print',
-        'gvsigol_plugin_etl',
-        'gvsigol_plugin_graphiccapture',
-        'gvsigol_plugin_importvector',
-        'gvsigol_plugin_picassa',
-        'gvsigol_plugin_catalog',
-        'gvsigol_plugin_worldwind',
-        'gvsigol_plugin_edition',
-        'gvsigol_plugin_print',
-        'gvsigol_plugin_geocoding',
-        'gvsigol_plugin_downloadman',
-        'gvsigol_plugin_importfromservice',
-        'gvsigol_plugin_trip_planner',
-        'gvsigol_plugin_draw',
-        'gvsigol_plugin_elevation',
-        'gvsigol_plugin_manageaddresses',
-        'gvsigol_plugin_emergencies'
-    ),
-}
-
 packages = [
     'gvsigol_auth',
     'gvsigol_core',
@@ -69,7 +43,8 @@ packages = [
     'gvsigol_plugin_draw',
     'gvsigol_plugin_elevation',
     'gvsigol_plugin_manageaddresses',
-    'gvsigol_plugin_emergencies'
+    'gvsigol_plugin_emergencies',
+    'gvsigol_plugin_opensea2'
 ]
 
 urlpatterns = [
