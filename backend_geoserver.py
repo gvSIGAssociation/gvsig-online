@@ -49,6 +49,7 @@ import unicodedata
 from dbfread import DBF
 import time
 import utils
+from builtins import str as text
 
 logger = logging.getLogger("gvsigol")
 DEFAULT_REQUEST_TIMEOUT = 5
@@ -581,8 +582,11 @@ class Geoserver():
         try:
             catalog = self.getGsconfig()
             style = catalog.get_style(name, workspace=None)
-            catalog.delete(style, purge=True, recurse=True)
-            return True        
+            if style is None:
+                logger.warn(u'gvsigol style was not found in Geoserver:' + text(name))
+            else:
+                catalog.delete(style, purge=True, recurse=True)
+            return True
         except Exception as e:
             logger.exception('Borrando estilo: ' + name)
             raise
