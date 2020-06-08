@@ -237,7 +237,7 @@ ElevationControl.prototype.addProfilControl = function(feat, zArray, length) {
 			"zmax": "Zmax",
 			"ytitle": "Altitud (m)",
 			"xtitle": "Distancia (km)",
-			"time": " ",
+			"slope": "Pendiente (%)",
 			"altitude": "Altitud",
 			"distance": "Distancia",
 			"altitudeUnits": "m",
