@@ -6904,21 +6904,6 @@ ol.control.Profil = function(opt_options)
 			t.cellSpacing = '0';
 			t.style.clientWidth = this.canvas_.width/ratio + "px";
 		div.appendChild(t);
-	/*var firstTr = document.createElement("tr");
-			firstTr.classList.add("track-info");
-			t.appendChild(firstTr);
-	var div_zmin = document.createElement("td");
-	div_zmin.innerHTML = (this.info.zmin||"Zmin")+': <span class="zmin">';
-	firstTr.appendChild(div_zmin);
-	var div_zmax = document.createElement("td");
-	div_zmax.innerHTML = (this.info.zmax||"Zmax")+': <span class="zmax">';
-	firstTr.appendChild(div_zmax);
-	var div_distance = document.createElement("td");
-	div_distance.innerHTML = (this.info.distance||"Distance")+': <span class="dist">';
-	firstTr.appendChild(div_distance);
-	var div_time = document.createElement("td");
-	div_time.innerHTML = (this.info.time||"Time")+' <span class="time">';
-	firstTr.appendChild(div_time);*/
 	
 	var secondTr = document.createElement("tr");
 			secondTr.classList.add("point-info")
@@ -6929,9 +6914,9 @@ ol.control.Profil = function(opt_options)
 	var div_distance2 = document.createElement("td");
 	div_distance2.innerHTML = (this.info.distance||"Distance")+': <span class="dist">';
 	secondTr.appendChild(div_distance2);
-	var div_time2 = document.createElement("td");
-	div_time2.innerHTML = (this.info.time||"Time")+' <span class="time">';
-	secondTr.appendChild(div_time2);
+	var div_slope = document.createElement("td");
+	div_slope.innerHTML = (this.info.slope||"Slope")+' <span class="slope">';
+	secondTr.appendChild(div_slope);
 	// Array of data
 	this.tab_ = [];
 	// Show feature
@@ -6948,7 +6933,7 @@ ol.control.Profil.prototype.info =
 	"zmax": "Zmax",
 	"ytitle": "Altitude (m)",
 	"xtitle": "Distance (km)",
-	"time": "Time",
+	"slope": "Slope",
 	"altitude": "Altitude",
 	"distance": "Distance",
 	"altitudeUnits": "m",
@@ -6997,10 +6982,10 @@ ol.control.Profil.prototype.onMove = function(e)
 		this.bar_.parentElement.classList.add("over");
 		this.element.querySelector(".point-info .z").textContent = p[1]+this.info.altitudeUnits;
 		this.element.querySelector(".point-info .dist").textContent = (p[0]/1000).toFixed(1)+this.info.distanceUnitsKM;
-		this.element.querySelector(".point-info .time").textContent = p[2];
+		this.element.querySelector(".point-info .slope").textContent = p[2];
 		if (dx>this.canvas_.width/ratio/2) this.popup_.classList.add('ol-left');
 		else this.popup_.classList.remove('ol-left');
-		this.dispatchEvent({ type:'over', click:e.type=="click", coord: p[3], time: p[2], distance: p[0] });
+		this.dispatchEvent({ type:'over', click:e.type=="click", coord: p[3], slope: p[2], distance: p[0] });
 	}
 	else
 	{	if (this.bar_.parentElement.classList.contains("over"))
@@ -7063,8 +7048,10 @@ ol.control.Profil.prototype.setGeometry = function(g, options)
 	// No Z
 	if (!/Z/.test(g.getLayout())) return;
 	// No time
-	if(/M/.test(g.getLayout())) this.element.querySelector(".time").parentElement.style.display = 'block';
-	else this.element.querySelector(".time").parentElement.style.display = 'none';
+	if(/M/.test(g.getLayout())) 
+		this.element.querySelector(".slope").parentElement.style.display = 'block';
+	else 
+		this.element.querySelector(".slope").parentElement.style.display = 'block';
 	// Coords
 	var c = g.getCoordinates();
 	switch (g.getType())
@@ -7086,6 +7073,12 @@ ol.control.Profil.prototype.setGeometry = function(g, options)
 		var mn = Math.trunc(dt-ti*60);
 		return ti+"h"+(mn<10?"0":"")+mn+"mn";
 	}
+	function getSlope(p1,p2) {
+		var h = parseFloat(p2[2]) - parseFloat(p1[2]);
+		var d = ol.sphere.getDistance(ol.proj.transform(p1, proj, 'EPSG:4326'), ol.proj.transform(p2, proj, 'EPSG:4326'));
+		var slope =( h / parseFloat(d)) * 100;
+		return slope;
+	}
 	// Margin
 	ctx.setTransform(1, 0, 0, 1, this.margin_.left, h-this.margin_.bottom);
 	var ratio = this.ratio;
@@ -7100,15 +7093,20 @@ ol.control.Profil.prototype.setGeometry = function(g, options)
 	ctx.stroke();
 	//
 	var zmin=Infinity, zmax=-Infinity;
-	var i, p, d, z, ti, t = this.tab_ = [];
+	var i, p, d, z, sl, t = this.tab_ = [];
 	for (i=0, p; p=c[i]; i++)
 	{	z = p[2];
 		if (z<zmin) zmin=z;
 		if (z>zmax) zmax=z;
-		if (i==0) d = 0;
-		else d += dist2d(c[i-1], p);
-		ti = getTime(c[0][3],p[3]);
-		t.push ([d, z, ti, p]);
+		if (i==0) 
+			d = 0;
+		else 
+			d += dist2d(c[i-1], p);
+		if (i==0) 
+			sl = 0;
+		else 
+			sl = Math.abs(getSlope(c[i-1], p)).toFixed(2);
+		t.push ([d, z, sl, p]);
 	}
 	// Info
 	/*this.element.querySelector(".track-info .zmin").textContent = parseFloat(zmin).toFixed(2)+this.info.altitudeUnits;
@@ -7119,7 +7117,7 @@ ol.control.Profil.prototype.setGeometry = function(g, options)
 	else
 	{	this.element.querySelector(".track-info .dist").textContent= (d).toFixed(1)+this.info.distanceUnitsM;
 	}
-	this.element.querySelector(".track-info .time").textContent = ti;*/
+	this.element.querySelector(".track-info .slope").textContent = ti;*/
 	// Set graduation
 	var grad = options.graduation || 100;
 	while (true)
