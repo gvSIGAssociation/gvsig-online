@@ -131,13 +131,25 @@ ImportVector.prototype.createUploadForm = function() {
 						var extension = file.name.split('.')[1];
 
 						var style = self.getRandomStyle();	
+						
+						var vectorLayer = new ol.layer.Vector({
+							id: layerId,
+							source: source,
+							name: name,
+							style: style,
+							strategy: ol.loadingstrategy.bbox
+						});
+						
+						var geomType = null;
 						if (extension == 'zip') {
 							sourceFormat = new ol.format.GeoJSON();
 							
 							fr.onload = function (evt) {  
 								var vectorData = evt.target.result;
 								var dataProjection = sourceFormat.readProjection(vectorData) || currentProj;        
-								shp(vectorData).then(function (geojson) {            
+								shp(vectorData).then(function (geojson) {   
+									geomType = geojson.features[0].geometry.type;
+									vectorLayer.randomStyle = self.getVectorStyle(geomType);
 									source.addFeatures(sourceFormat.readFeatures(geojson,  {                
 										dataProjection: dataProjection,                
 										featureProjection: currentProj            
@@ -162,6 +174,17 @@ ImportVector.prototype.createUploadForm = function() {
 									dataProjection: dataProjection,                
 									featureProjection: currentProj            
 								}));
+								geomType = 'LineString';
+								if (vectorData.indexOf('<Point') > -1 || vectorData.indexOf('<MultiPoint') > -1) {
+									geomType = 'Point';
+									
+								} else if (vectorData.indexOf('<LineString') > -1 || vectorData.indexOf('<MultiLineString') > -1) {
+									geomType = 'LineString';
+									
+								} else if (vectorData.indexOf('<Polygon') > -1 || vectorData.indexOf('<MultiPolygon') > -1) {
+									geomType = 'Polygon';
+								}
+								vectorLayer.randomStyle = self.getVectorStyle(geomType);
 								$.overlayout();
 								
 								
@@ -190,6 +213,8 @@ ImportVector.prototype.createUploadForm = function() {
 									dataProjection: dataProjection,                
 									featureProjection: currentProj            
 								}));
+								geomType = jsonVectorData.features[0].geometry.type;
+								vectorLayer.randomStyle = self.getVectorStyle(geomType);
 								$.overlayout();
 								
 								
@@ -197,13 +222,6 @@ ImportVector.prototype.createUploadForm = function() {
 							fr.readAsText(file);
 						} 
 						
-						var vectorLayer = new ol.layer.Vector({
-							id: layerId,
-							source: source,
-							name: name,
-							style: style,
-							strategy: ol.loadingstrategy.bbox
-						});
 						vectorLayer.baselayer = false;
 						vectorLayer.setZIndex(99999999);
 						vectorLayer.dataid = layerId;
@@ -215,7 +233,6 @@ ImportVector.prototype.createUploadForm = function() {
 						vectorLayer.imported = true;
 						vectorLayer.is_vector = true;
 						vectorLayer.printable = true;
-						vectorLayer.randomStyle = self.getVectorStyle('polygon');
 
 						self.map.addLayer(vectorLayer);
 						self.createVectorLayerUI (vectorLayer, layerId);
@@ -248,7 +265,7 @@ ImportVector.prototype.createUploadForm = function() {
 };
 
 ImportVector.prototype.getVectorStyle = function(gtype) {
-	if (gtype == 'point') {
+	if (gtype == 'Point' || gtype == 'MultiPoint') {
 		return {
 			"version" : "2",
 			"*" : {
@@ -264,7 +281,7 @@ ImportVector.prototype.getVectorStyle = function(gtype) {
 			]}
 		};
 		
-	} else if (gtype == 'line') {
+	} else if (gtype == 'LineString' || gtype == 'MultiLineString') {
 		return {
 			"version" : "2",
 			"*" : {
@@ -276,7 +293,7 @@ ImportVector.prototype.getVectorStyle = function(gtype) {
 			]}
 		};
 		
-	} else if (gtype == 'polygon') {
+	} else if (gtype == 'Polygon' || gtype == 'MultiPolygon') {
 		return {
 			"version" : "2",
 			"*" : {
