@@ -582,7 +582,10 @@ def intervals_update(request, layer_id, style_id):
             if r and r['filter']:
                 if r['filter'] != '':
                     filter_json = json.loads(r['filter'])
-                    response['property_name'] = filter_json.get('field')   
+                    if isinstance(filter_json, list):
+                        response['property_name'] = filter_json[0].get('field')
+                    else:
+                        response['property_name'] = filter_json.get('field')   
             
         response['intervals'] = num_rules
         
