@@ -431,7 +431,14 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 	if(address != null && !(address instanceof Array && address.length == 0)){
 		if(fromCombo){
 			var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], origin_srs, 'EPSG:3857');
-			this.popup.show(coordinate, '<div><p>' + $("#autocomplete").val() + '</p></div>');
+			var txtPopup = $("#autocomplete").val();
+			if (address.source == "ide_uy") {
+				if(address.state && (address.state == 2)){
+					txtPopup += '<br> (Aproximado)';
+				}
+			}
+			
+			this.popup.show(coordinate, '<div><p>' + txtPopup + '</p></div>');
 		}else{			
 			if(address.source == "cartociudad" || address.source == "new_cartociudad"){
 				var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], origin_srs, 'EPSG:3857');	
