@@ -106,6 +106,9 @@ class IdeUY():
         }
         if ('0' != address['address[portalNumber]']):
             params['portal'] = address['address[portalNumber]']
+        if ('' != address['address[letra]']):
+            params['letra'] = address['address[letra]']
+            
 
         if ('' != address['address[manzana]']):
             params['manzana'] = address['address[manzana]']
