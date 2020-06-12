@@ -2067,12 +2067,19 @@ layerTree.prototype.changeState = function(object, objectType, action, value) {
 						
 					} else if (action == 'set-visibility') {
 						this.state.layerGroups[i].layers[j].visible = value;
+						if (value) {
+							this.registerAction(this.state.layerGroups[i].layers[j]);
+						}
+						
 						
 					} else if (action == 'change-order') {
 						this.state.layerGroups[i].layers[j].order = value;
 						
 					} else if (action == 'change-baselayer') {
 						this.state.layerGroups[i].layers[j].default_baselayer = value;
+						if (value) {
+							this.registerAction(this.state.layerGroups[i].layers[j]);
+						}
 					}
 				}				
 				
@@ -2097,4 +2104,25 @@ layerTree.prototype.changeState = function(object, objectType, action, value) {
  */
 layerTree.prototype.getState = function() {
 	return this.state;
+};
+
+layerTree.prototype.registerAction = function(layer) {
+	var self = this;
+	
+	$.ajax({
+		type: 'POST',
+		async: true,
+	  	url: '/gvsigonline/services/register_action/',
+	  	data: {
+	  		'layer_name': layer.name,
+			'workspace': layer.workspace
+		},
+	  	success	:function(response){
+	  		console.log('Layer action registered');
+		},
+	  	error: function(e){
+	  		console.log('Error registering layer action');
+	  		
+	  	}
+	});
 };
