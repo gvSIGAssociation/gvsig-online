@@ -110,14 +110,10 @@ def home(request):
             project['description'] = p.description
             project['image'] = urllib.unquote(image)
 
-            if p.created_by == request.user.username:
-                projects.append(project)
+            if p.is_public:
+                public_projects.append(project)
             else:
-                if p.is_public:
-                    public_projects.append(project)
-                else:
-                    projects.append(project)
-
+                projects.append(project)
     else:
         for p in Project.objects.all():
             image = ''
@@ -134,21 +130,16 @@ def home(request):
             project['description'] = p.description
             project['image'] = urllib.unquote(image)
 
-
-            if p.created_by == request.user.username:
-                projects.append(project)
-
             if p.is_public:
-                if p.created_by != request.user.username:
-                    public_projects.append(project)
+                public_projects.append(project)
             else:
+                if p.created_by == request.user.username:
+                    projects.append(project)
                 if p.created_by != request.user.username:
-                    exists = False
                     for ua in projects_by_user:
                         if p.id == ua.project_id:
-                            exists = True
-                    if exists:
-                        projects.append(project)
+                            projects.append(project)
+                            break
 
     external_ldap_mode = True
     if 'AD' in settings.GVSIGOL_LDAP and settings.GVSIGOL_LDAP['AD'].__len__() > 0:
