@@ -31,6 +31,9 @@ class GvsigolServicesConfig(AppConfig):
             l.save()        
     
     def ready(self):
+        from actstream import registry
+        registry.register(self.get_model('Layer'))
+            
         try:
             self._updateLayerInfo()
         except:
