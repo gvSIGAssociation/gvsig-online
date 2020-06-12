@@ -93,4 +93,5 @@ urlpatterns = [
     url(r'^service_url_delete/(?P<svid>\d+)/$', services_views.service_url_delete, name='service_url_delete'),
     url(r'^service_url_update/(?P<svid>[0-9]+)/$', services_views.service_url_update, name='service_url_update'),
     url(r'^test_connection/$', services_views.test_connection, name='test_connection'),
+    url(r'^register_action/$', services_views.register_action, name='register_action'),
 ]

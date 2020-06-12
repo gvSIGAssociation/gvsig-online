@@ -81,6 +81,9 @@ import signals
 import utils
 import psycopg2
 
+from actstream import action
+from actstream.models import Action
+
 logger = logging.getLogger("gvsigol")
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
@@ -4490,3 +4493,15 @@ def test_connection(request):
             }
         
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+    
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@csrf_exempt
+def register_action(request):
+    if request.method == 'POST':
+        layer_name = request.POST.get('layer_name')
+        workspace = request.POST.get('workspace')
+        layer = Layer.objects.get(name=layer_name, datastore__workspace__name=workspace)
+        
+        action.send(request.user, verb="gvsigol_services/layer_activate", action_object=layer)
+        
+        return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
