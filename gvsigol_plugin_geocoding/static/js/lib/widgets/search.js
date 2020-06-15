@@ -528,8 +528,15 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 				var nPopup = new ol.Overlay.Popup();
 				this.popups.push(nPopup); 
 				this.map.addOverlay(nPopup);
+				// TODO: MIRAR SI VIENE DEL COMBO? => 	var txtPopup = $("#autocomplete").val();
+				var txtPopup = a.address;
+				if (a.source == "ide_uy") {
+					if(a.state && (a.state == 2)){
+						txtPopup += '<br> (Aproximado)';
+					}
+				}
 
-				nPopup.show(coordinate, '<div><p>' + a.address + '</p></div>');
+				nPopup.show(coordinate, txtPopup);
 				mCoord[0] = mCoord[0] + coordinate[0];
 				mCoord[1] = mCoord[1] + coordinate[1];
 			}
