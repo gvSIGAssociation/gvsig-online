@@ -52,7 +52,7 @@ class IdeUY():
     def append(self, provider):
         self.providers.append(provider)
         
-    
+    # Search for candidates
     def geocode(self, query, exactly_one):
         '''
         www.cartociudad.es/geocoder/api/geocoder/candidatesJsonp?q=blasco ibañez&limit=10     
@@ -77,7 +77,7 @@ class IdeUY():
             
         return json_results
     
-    
+    # Used when use selects one item in the combo box
     def find(self, address_str, exactly_one):
         '''
         http://www.cartociudad.es/geocoder/api/geocoder/findJsonp?q=blasco ibañez   
@@ -119,13 +119,18 @@ class IdeUY():
 
 
         #url = "?".join((self.urls['candidates_url'], urlencode(params)))
+        # Podemos devolver varios resultados (para el caso en que hay portales repetidos, por ejemplo)
         json_result =  self.get_json_from_url(self.urls['find_url'], params)
         if isinstance(json_result, list):
-            if (json_result.__len__() > 0):
-                first = json_result[0]
-                first['source'] = self.get_type()
-                first['srs'] = 'EPSG:4326'
-                return first
+            for r in json_result:
+                r['source'] = self.get_type()
+                r['srs'] = 'EPSG:4326'
+            return json_result
+            # if (json_result.__len__() > 0):
+#                 first = json_result[0]
+#                 first['source'] = self.get_type()
+#                 first['srs'] = 'EPSG:4326'
+#                 return first
         
         return []
         

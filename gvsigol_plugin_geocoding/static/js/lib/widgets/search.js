@@ -29,6 +29,7 @@ var search = function(map, conf) {
 	this.overlay = null;	
 	this.menus = null;	
 	this.popup = null;
+	this.popups = [];
 	this.popupCloser = null;
 	this.popupContent = null;
 	this.contextmenu = null;
@@ -402,14 +403,23 @@ search.prototype.initUI = function() {
 					'address': suggestion.data
 				},
 				success	:function(response){
-					if(response.address && response.address["address"]) {
-						window.lastgeolocationsearch = response;
-						var epsg = 'EPSG:4326'; // Por defecto
-						if (response.address.srs) { 
-							epsg = response.address.srs;
+					if (response.address) {
+						if (Array.isArray(response.address)) {
+							var epsg = 'EPSG:4326'; // Por defecto
+							if (response.address.srs) { 
+								epsg = response.address.srs;
+							}								
+							self.locate(response.address, epsg, true);
 						}
-						self.locate(response.address, epsg, true);
-					}
+						else if (response.address["address"]) {
+							window.lastgeolocationsearch = response;
+							var epsg = 'EPSG:4326'; // Por defecto
+							if (response.address.srs) { 
+								epsg = response.address.srs;
+							}
+							self.locate(response.address, epsg, true);
+						} // if - else
+					} // if
 				},
 				error: function(xhr, status, error) {
 					  console.error(xhr.responseText);
@@ -426,10 +436,14 @@ search.prototype.initUI = function() {
 search.prototype.locate = function(address, origin_srs, fromCombo) {	
 	var self = this;	
 	this.map.removeOverlay(this.popup);
+	for (var i=0; i < this.popups.length; i++) {
+		this.map.removeOverlay(this.popups[i]);
+	}
+	this.poups = [];
 	this.popup = new ol.Overlay.Popup();
 	this.map.addOverlay(this.popup);
-	if(address != null && !(address instanceof Array && address.length == 0)){
-		if(fromCombo){
+	if(address != null && !(address instanceof Array)){
+		if(fromCombo){			
 			var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], origin_srs, 'EPSG:3857');
 			var txtPopup = $("#autocomplete").val();
 			if (address.source == "ide_uy") {
@@ -493,7 +507,7 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 						var coordinate = ol.proj.transform([parseFloat(address.lng), parseFloat(address.lat)], address.srs, 'EPSG:3857');
 						this.popup.show(coordinate, '<div><p>' + address.address + '</p></div>');
 					}
-				}
+				}			
 			}
 		}
 		this.map.getView().setCenter(coordinate);
@@ -501,6 +515,31 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 			this.map.getView().setZoom(14);
 		}
 	}
+	else
+	{
+		if (address instanceof Array) {
+			var mCoord = [0, 0];
+
+			for (var i=0; i < address.length; i++)
+			{
+				var a = address[i];
+//				console.log('Llega ' + a.address + ' -> latlon:[' + a.lat + ',' + a.lng + ']');
+				var coordinate = ol.proj.transform([parseFloat(a.lng), parseFloat(a.lat)], a.srs, 'EPSG:3857');
+				var nPopup = new ol.Overlay.Popup();
+				this.popups.push(nPopup); 
+				this.map.addOverlay(nPopup);
+
+				nPopup.show(coordinate, '<div><p>' + a.address + '</p></div>');
+				mCoord[0] = mCoord[0] + coordinate[0];
+				mCoord[1] = mCoord[1] + coordinate[1];
+			}
+			mCoord[0] = mCoord[0] / address.length;
+			mCoord[1] = mCoord[1] / address.length;
+			this.map.getView().setCenter(mCoord);
+			this.map.getView().setZoom(14);			
+		}
+	}			
+
 };
 
 
