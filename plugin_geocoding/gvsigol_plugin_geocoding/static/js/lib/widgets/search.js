@@ -404,6 +404,7 @@ search.prototype.initUI = function() {
 				},
 				success	:function(response){
 					if (response.address) {
+						window.lastgeolocationsearch = response;
 						if (Array.isArray(response.address)) {
 							var epsg = 'EPSG:4326'; // Por defecto
 							if (response.address.srs) { 
@@ -412,7 +413,6 @@ search.prototype.initUI = function() {
 							self.locate(response.address, epsg, true);
 						}
 						else if (response.address["address"]) {
-							window.lastgeolocationsearch = response;
 							var epsg = 'EPSG:4326'; // Por defecto
 							if (response.address.srs) { 
 								epsg = response.address.srs;
