@@ -31,10 +31,16 @@
 					</div>
 					{% endif %}
 							
-					{% if message %}
-					<div id="form-error" style="color:#ff0000;">
-						<p>* {{ message }}</p>
-					</div>
+					{% if messages %}
+				    <ul class="messages" style="list-style: none;margin-left: -40px;">
+				        {% for message in messages %}
+				        	{% if message.tags == "info" %}
+				            <li style="border: 1px solid green; color: green; padding: 5px; margin-bottom: 5px;">{{ message }}</li>
+				            {% elif message.tags == "error" %}
+				            <li style="border: 1px solid red; color: red; padding: 5px; margin-bottom: 5px;">{{ message }}</li>
+				            {% endif %}
+				        {% endfor %}
+				    </ul>
 					{% endif %}
 					
 					<div class="row" style="margin-top:20px;">
