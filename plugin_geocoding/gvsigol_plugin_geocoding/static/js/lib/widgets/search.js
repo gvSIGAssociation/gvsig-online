@@ -543,7 +543,7 @@ search.prototype.locate = function(address, origin_srs, fromCombo) {
 			mCoord[0] = mCoord[0] / address.length;
 			mCoord[1] = mCoord[1] / address.length;
 			this.map.getView().setCenter(mCoord);
-			this.map.getView().setZoom(14);			
+			this.map.getView().setZoom(17);			
 		}
 	}			
 
