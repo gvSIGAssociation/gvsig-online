@@ -11,6 +11,7 @@ from django.http import HttpResponseBadRequest
 from gvsigol_services import rest_geoserver
 from django.views.generic.base import View
 from forms import DirectoryCreateForm
+from django.contrib import messages
 from core import Filemanager
 from zipfile import ZipFile
 import json
@@ -26,11 +27,6 @@ class FilemanagerMixin(object):
             self.fm.update_path(params['path'][0])
         if 'popup' in params:
             self.popup = params['popup']
-        
-        self.message = ''
-        if request.session and 'message' in request.session:
-            self.message = request.session['message']
-            request.session['message'] = ''
         
         return super(FilemanagerMixin, self).dispatch(request, *args, **kwargs)
 
@@ -81,10 +77,6 @@ class ExportToDatabaseView(FilemanagerMixin, TemplateView):
         form = PostgisLayerUploadForm(user=self.request.user)
         
         context['form'] = form
-        if self.message:
-            if self.message != '':
-                context['message'] = self.message
-                self.message = ''
         context['file'] = self.fm.file_details()
     
         return context
@@ -95,12 +87,14 @@ class ExportToDatabaseView(FilemanagerMixin, TemplateView):
             try:
                 gs = geographic_servers.get_instance().get_server_by_id(form.cleaned_data['datastore'].workspace.server.id)
                 if gs.exportShpToPostgis(form.cleaned_data):
-                    request.session.message = _('Export process done successfully')
+                    #request.session.message = _('Export process done successfully')
+                    messages.add_message(request, messages.INFO, _('Export process done successfully'))
                     return redirect("/gvsigonline/filemanager/?path=" + request.POST.get('directory_path'))
             
             except rest_geoserver.RequestError as e:
                 message = e.server_message
-                request.session['message'] = str(message)
+                #request.session['message'] = str(message)
+                messages.add_message(request, messages.ERROR, str(message))
                 if e.status_code == -1:
                     name = form.data['name']
                     datastore_id = form.data['datastore']
@@ -117,10 +111,12 @@ class ExportToDatabaseView(FilemanagerMixin, TemplateView):
                 return redirect("/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path'))
                 
             except Exception as exc:
-                request.session['message'] = _('Server error') +  ":" + str(exc)
+                #request.session['message'] = _('Server error') +  ":" + str(exc)
+                messages.add_message(request, messages.ERROR, _('Server error') +  ":" + str(exc))
                 return redirect("/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path'))
         else:
-            request.session['message'] = _('You must fill in all fields')
+            #request.session['message'] = _('You must fill in all fields')
+            messages.add_message(request, messages.ERROR, _('You must fill in all fields'))
             return redirect("/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path'))
 
 class UploadView(FilemanagerMixin, TemplateView):
