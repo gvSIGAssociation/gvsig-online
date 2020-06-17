@@ -2,6 +2,7 @@ from gvsigol_services.models import Datastore
 from gvsigol_services import geographic_servers
 from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.forms_geoserver import PostgisLayerUploadForm
+from gvsigol_core import utils as core_utils
 from django.views.generic import TemplateView, FormView
 from django.shortcuts import HttpResponse, redirect
 from django.utils.translation import ugettext as _
@@ -16,6 +17,35 @@ from core import Filemanager
 from zipfile import ZipFile
 import json
 import os
+import logging
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
+
+logger = logging.getLogger("gvsigol")
+ABS_FILEMANAGER_DIRECTORY = os.path.abspath(FILEMANAGER_DIRECTORY)
+
+def can_manage_path(user, path):
+    if path is not None:
+        full_path = os.path.abspath(os.path.join(ABS_FILEMANAGER_DIRECTORY, path))
+        if not full_path.startswith(ABS_FILEMANAGER_DIRECTORY):
+            logger.warning(u"Suspicious path provided")
+            return False
+        if user:
+            if user.is_superuser:
+                return True
+            if not user.is_staff:
+                return False
+            first_level_path = os.path.relpath(full_path, ABS_FILEMANAGER_DIRECTORY).split("/")[0]
+            first_level_abspath = os.path.abspath(os.path.join(ABS_FILEMANAGER_DIRECTORY, first_level_path))
+            if os.path.isdir(first_level_abspath):
+                if  first_level_abspath == ABS_FILEMANAGER_DIRECTORY:
+                    return True
+                for g in core_utils.get_group_names_by_user(user):
+                    if first_level_path == g:
+                        return True
+            elif os.path.isfile(first_level_abspath):
+                return False
+    return False
 
 class FilemanagerMixin(object):
     def dispatch(self, request, *args, **kwargs):
@@ -44,8 +74,11 @@ class FilemanagerMixin(object):
         return context
 
 
-class BrowserView(FilemanagerMixin, TemplateView):
+class BrowserView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, TemplateView):
     template_name = 'browser/filemanager_list.html'
+    raise_exception = True
+    def test_func(self):
+        return can_manage_path(self.request.user, self.request.GET.get('path', ''))
 
     def dispatch(self, request, *args, **kwargs):
         self.popup = self.request.GET.get('popup', 0) == '1'
@@ -68,8 +101,12 @@ class BrowserView(FilemanagerMixin, TemplateView):
         return context
 
 
-class ExportToDatabaseView(FilemanagerMixin, TemplateView):
+class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, TemplateView):
     template_name = 'browser/export_to_database.html'
+    raise_exception = True
+    def test_func(self):
+        # Note: user permissions in the target datastore are specifically checked in form validation
+        return (self.request.user.is_superuser or self.request.user.is_staff)
 
     def get_context_data(self, **kwargs):
         context = super(ExportToDatabaseView, self).get_context_data(**kwargs)
@@ -127,7 +164,11 @@ class UploadView(FilemanagerMixin, TemplateView):
     }]
 
 
-class UploadFileView(FilemanagerMixin, View):
+class UploadFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, View):
+    raise_exception = True
+    def test_func(self):
+        return can_manage_path(self.request.user, self.request.POST.get('path'))
+    
     def post(self, request, *args, **kwargs):
         if len(request.FILES) != 1:
             return HttpResponseBadRequest("Just a single file please.")
@@ -150,7 +191,11 @@ class UploadFileView(FilemanagerMixin, View):
             'path': request.POST.get('path'),
         }))
         
-class DeleteFileView(FilemanagerMixin, View):
+class DeleteFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, View):
+    raise_exception = True
+    def test_func(self):
+        return can_manage_path(self.request.user, self.request.POST.get('path'))
+    
     def post(self, request, *args, **kwargs):
         path = FILEMANAGER_DIRECTORY +'/'+ request.POST.get('path')
         geotiffs = Datastore.objects.filter(type__in=['c_GeoTIFF','c_ImageMosaic'])
@@ -173,12 +218,16 @@ class DeleteFileView(FilemanagerMixin, View):
                 'message': _('Error deleting resource') + ' ' + path
             }))
 
-class UnzipFileView(FilemanagerMixin, View):
+class UnzipFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, View):
+    raise_exception = True
+    def test_func(self):
+        return can_manage_path(self.request.user, self.request.POST.get('path'))
+    
     def post(self, request, *args, **kwargs):
-        path = FILEMANAGER_DIRECTORY +'/'+ request.POST.get('path')
+        path = os.path.join(FILEMANAGER_DIRECTORY, request.POST.get('path'))
         
         try:
-            folder = path.split(".")[0]
+            folder = os.path.join(os.path.dirname(path), os.path.basename(path).split(".")[0])
             self.fm.extract_zip(path, folder)
 
             return HttpResponse(json.dumps({
@@ -186,18 +235,24 @@ class UnzipFileView(FilemanagerMixin, View):
             }))
             
         except Exception as e:
+            logger.exception("Error unzipping file")
             return HttpResponse(json.dumps({
                 'success': False,
-                'message': _('Error deleting resource') + ' ' + path
+                'message': _('Error unzipping resource') + ' ' + path
             }))
 
-class DirectoryCreateView(FilemanagerMixin, FormView):
+class DirectoryCreateView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, FormView):
     template_name = 'filemanager_create_directory.html'
     form_class = DirectoryCreateForm
     extra_breadcrumbs = [{
         'path': '#',
         'label': 'Create directory'
     }]
+    raise_exception = True
+    def test_func(self):
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return (self.request.user.is_superuser or self.request.user.is_staff)
+        return can_manage_path(self.request.user, self.request.POST.get('path'))
 
     def get_success_url(self):
         url = '%s?path=%s' % (reverse_lazy('filemanager:browser'), self.fm.path)

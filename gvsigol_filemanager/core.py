@@ -88,6 +88,7 @@ class Filemanager(object):
                 'filesize': sizeof_fmt(FILEMANAGER_STORAGE.size(os.path.join(self.path, name))),
             }
 
+        groups = core_utils.get_group_names_by_user(request.user)
         for directoryname in directories:
             '''if first_level:
                 if request.user.is_superuser:
@@ -103,7 +104,6 @@ class Filemanager(object):
                 listing.append(_helper(directoryname, 'Directory', ''))
             else: 
                 if first_level:
-                    groups = core_utils.get_group_names_by_user(request.user)
                     for g in groups:
                         if directoryname == g:
                             listing.append(_helper(directoryname, 'Directory', ''))
@@ -136,17 +136,17 @@ class Filemanager(object):
         try:
             file = name.split('/')[-1]
             filename = file.split('.')[0]
-            path = self.location.replace(file, '')
+            path = os.path.dirname(name)
             directories, files = FILEMANAGER_STORAGE.listdir(path)
             if len(files) >= 1:
                 for f in files:
                     if filename == f.split('.')[0]:
-                        FILEMANAGER_STORAGE.delete(path + f)
+                        FILEMANAGER_STORAGE.delete(os.path.join(path, f))
                         
             if len(directories) >= 1:
                 for d in directories:
                     if filename == d.split('.')[0]:
-                        FILEMANAGER_STORAGE.delete(path + d)
+                        FILEMANAGER_STORAGE.delete(os.path.join(path, d))
             return True
             
         except Exception as e:
