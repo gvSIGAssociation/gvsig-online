@@ -3,15 +3,21 @@
 
 {% block content %}
 
-	{% if self.message|length > 0 %}
-		<div id="form-error" style="color:#00ff00;border: 1px solid #00ff00;margin-bottom:5px">
-			<ul>
-				<li style="list-style: none;padding-top: 10px;">{{ self.message }}</li>
-			</ul>
-			</div>
-	{% endif %}	
-		<div id="delete-error" style="color: #ff0000;margin-bottom:15px;padding:15px;background-color:rgba(255,0,0,0.2);display:none">
-		</div>
+	{% if messages %}
+    <ul class="messages" style="list-style: none;margin-left: -40px;">
+        {% for message in messages %}
+        	{% if message.tags == "info" %}
+            <li style="border: 1px solid green; color: green; padding: 5px; margin-bottom: 5px;">{{ message }}</li>
+            {% elif message.tags == "error" %}
+            <li style="border: 1px solid red; color: red; padding: 5px; margin-bottom: 5px;">{{ message }}</li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+	{% endif %}
+	
+	<div id="delete-error" style="color: #ff0000;margin-bottom:15px;padding:15px;background-color:rgba(255,0,0,0.2);display:none">
+	</div>
+	
 	{% include "filemanager_breadcrumbs.html" %}
 	
 	<table class="table">
