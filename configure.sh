@@ -235,6 +235,8 @@ function configure() {
 		TEMPORAL_ADVANCED_PARAMETERS="False"
 	fi
 	grep -rl "##TEMPORAL_ADVANCED_PARAMETERS##"  | xargs sed -i "s/##TEMPORAL_ADVANCED_PARAMETERS##/$TEMPORAL_ADVANCED_PARAMETERS/g"
+
+	grep -rl "##GVSIGOL_PUBLIC_PLUGINS##"  | xargs sed -i "s ##GVSIGOL_PUBLIC_PLUGINS## $GVSIGOL_PUBLIC_PLUGINS g"  | true
 }
 
 function move_template() {
