@@ -452,7 +452,7 @@ msgstr "Consultable"
 #: gvsigol_services/templates/layer_list.html:30
 #: gvsigol_services/templates/layer_update.html:139
 msgid "Cached"
-msgstr "Cachejada"
+msgstr "En memòria cau"
 
 #: gvsigol_services/forms_geoserver.py:61
 #: gvsigol_services/forms_geoserver.py:76
