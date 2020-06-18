@@ -38,14 +38,17 @@ def can_manage_path(user, path):
             first_level_path = os.path.relpath(full_path, ABS_FILEMANAGER_DIRECTORY).split("/")[0]
             first_level_abspath = os.path.abspath(os.path.join(ABS_FILEMANAGER_DIRECTORY, first_level_path))
             if os.path.isdir(first_level_abspath):
-                if  first_level_abspath == ABS_FILEMANAGER_DIRECTORY:
-                    return True
                 for g in core_utils.get_group_names_by_user(user):
                     if first_level_path == g:
                         return True
             elif os.path.isfile(first_level_abspath):
                 return False
     return False
+
+def can_browse_path(user, path):
+    if path == '' and (user.is_superuser or user.is_staff):
+        return True
+    return can_manage_path(user, path)
 
 class FilemanagerMixin(object):
     def dispatch(self, request, *args, **kwargs):
@@ -78,7 +81,7 @@ class BrowserView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, Tem
     template_name = 'browser/filemanager_list.html'
     raise_exception = True
     def test_func(self):
-        return can_manage_path(self.request.user, self.request.GET.get('path', ''))
+        return can_browse_path(self.request.user, self.request.GET.get('path', ''))
 
     def dispatch(self, request, *args, **kwargs):
         self.popup = self.request.GET.get('popup', 0) == '1'
