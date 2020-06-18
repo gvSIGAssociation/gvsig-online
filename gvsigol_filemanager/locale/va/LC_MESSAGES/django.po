@@ -118,7 +118,7 @@ msgstr "Pujar"
 
 #: templates/dashboard_filemanager_menu.html:7
 msgid "File manager"
-msgstr "Administrador de arxius"
+msgstr "Administrador d'arxius"
 
 #: views.py:96
 msgid "Export process done successfully"
