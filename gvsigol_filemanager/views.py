@@ -23,6 +23,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 
 logger = logging.getLogger("gvsigol")
 ABS_FILEMANAGER_DIRECTORY = os.path.abspath(FILEMANAGER_DIRECTORY)
+SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
 
 def can_manage_path(user, path):
     if path is not None:
@@ -109,7 +110,11 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
     raise_exception = True
     def test_func(self):
         # Note: user permissions in the target datastore are specifically checked in form validation
-        return (self.request.user.is_superuser or self.request.user.is_staff)
+        if self.request.user.is_superuser or self.request.user.is_staff:
+            if self.request.method in SAFE_METHODS:
+                return can_manage_path(self.request.user, self.request.GET.get('path'))
+            return can_manage_path(self.request.user, self.request.POST.get('file'))
+        return False
 
     def get_context_data(self, **kwargs):
         context = super(ExportToDatabaseView, self).get_context_data(**kwargs)
@@ -253,7 +258,7 @@ class DirectoryCreateView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMi
     }]
     raise_exception = True
     def test_func(self):
-        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+        if self.request.method in SAFE_METHODS:
             return (self.request.user.is_superuser or self.request.user.is_staff)
         return can_manage_path(self.request.user, self.request.POST.get('path'))
 
