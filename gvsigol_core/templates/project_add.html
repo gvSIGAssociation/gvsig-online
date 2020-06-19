@@ -35,6 +35,21 @@
               			<div class="box">
               				<div class="box-body">
               					<div class="row">
+									<div class="col-md-7" style="margin-bottom: 20px;">
+										<div class="provider-img">
+											<img style="max-height: 52px;" id="logo-preview" src="{{logo}}" alt="">
+										</div>
+										<div class="provider-img-change">
+											<label>{% trans "Select main logo" %}</label>({% trans "Supported formats" %}: .jpg, .jpeg, .png)
+											<input id="project-logo" name="project-logo" accept=".jpg, .jpeg, .png" type="file" onchange="readURL(this);" class="file" data-show-preview="true">						
+										</div>
+									</div>
+									<div class="col-md-5" style="margin-bottom: 20px;">
+										<label for="project-logo-link">{% trans "Link for logo" %}</label>
+										<input name="project-logo-link" id="project-logo-link" type="text" class="form-control">
+									</div>
+								</div>
+              					<div class="row">
 									<div class="col-md-3 form-group">
 										<label for="is_public">{% trans "Is public?" %}</label>&nbsp;&nbsp;
 										<input type="checkbox" name="is_public" id="is_public"/>														
@@ -311,6 +326,18 @@
 <script type="text/javascript">
 	$('#menu-manage-projects').addClass("active");
 	$('#submenu-projects').addClass("active");
+	
+	function readURL(input) {
+  	    if (input.files && input.files[0]) {
+  	        var reader = new FileReader();
+  	        reader.onload = function (e) {
+  	            $('#logo-preview').attr('src', e.target.result);
+  	        };
+  	        reader.readAsDataURL(input.files[0]);
+  	        
+  	    }
+  	}
+	
 	$().ready(function() {
 		/**
 		  * Create the map.
@@ -599,6 +626,7 @@
 			});
 			
 	  	});
+	  	
 	});
 </script>
 {% endblock %}

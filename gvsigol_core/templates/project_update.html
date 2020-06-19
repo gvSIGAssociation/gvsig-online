@@ -36,6 +36,22 @@
               					<input type="hidden" id="project-name" name="project-name" value="{{project.name}}"/>
 						
 								<div class="row">
+									<div class="col-md-6" style="margin-bottom: 20px;">
+										<div class="provider-img">
+											<img style="max-height: 52px;" id="logo-preview" src="{{project.logo.url}}" alt="">
+										</div>
+										<div class="provider-img-change">
+											<label>{% trans "Select main logo" %}</label>({% trans "Supported formats" %}: .jpg, .jpeg, .png)
+											<input id="project-logo" name="project-logo" accept=".jpg, .jpeg, .png" onchange="readLogoURL(this);" type="file" class="file" data-show-preview="true">						
+										</div>
+									</div>	
+									<div class="col-md-6" style="margin-bottom: 20px;">
+										<label for="project-logo-link">{% trans "Link for logo" %}</label>
+										<input name="project-logo-link" id="project-logo-link" type="text" class="form-control" value="{{project.logo_link}}">
+									</div>
+								</div>
+								
+								<div class="row">
 									<div class="col-md-3 form-group">
 										<label for="is_public">{% trans "Is public?" %}</label>&nbsp;&nbsp;
 										{% if project.is_public %}
@@ -418,6 +434,17 @@
 	$("#project-image").change(function(){
 	  readURL(this);
 	});
+	
+	function readLogoURL(input) {
+  	    if (input.files && input.files[0]) {
+  	        var reader = new FileReader();
+  	        reader.onload = function (e) {
+  	            $('#logo-preview').attr('src', e.target.result);
+  	        };
+  	        reader.readAsDataURL(input.files[0]);
+  	        
+  	    }
+  	}
 	
 	
 	$().ready(function() {

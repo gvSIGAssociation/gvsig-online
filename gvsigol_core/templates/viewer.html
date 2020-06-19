@@ -107,7 +107,7 @@
           	<a href="#" class="sidebar-toggle" data-toggle="control-sidebar" role="button"></a>
 
           	<div id="viewer-navbar-header" class="navbar-header">
-      			<a href="{{main_page}}"><img src="{% static "img/logo_principal.png"%}" height=50 onError="this.style='display:none'"></a>
+      			<a id="main-logo-link" href="{{project.logo_link}}"><img id="main-logo" src="{{project.logo.url}}" style="max-height: 52px;" onError="this.style='display:none'"></a>
 			</div>
 
 			<div class="navbar-custom-menu">
