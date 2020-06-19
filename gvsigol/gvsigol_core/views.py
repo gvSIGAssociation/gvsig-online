@@ -262,6 +262,7 @@ def project_add(request):
         name = re.sub(r'[^a-zA-Z0-9 ]',r'',name) #for remove all characters
         name = re.sub(' ','',name)
 
+        logo_link = request.POST.get('project-logo-link')
         title = request.POST.get('project-title')
         description = request.POST.get('project-description')
         latitude = request.POST.get('center-lat')
@@ -291,6 +292,10 @@ def project_add(request):
         has_image = False
         if 'project-image' in request.FILES:
             has_image = True
+            
+        has_logo = False
+        if 'project-logo' in request.FILES:
+            has_logo = True
 
         selected_base_layer = None
         if 'selected_base_layer' in request.POST:
@@ -350,45 +355,33 @@ def project_add(request):
             return render(request, 'project_add.html', {'message': message, 'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
 
         if not exists:
-            project = None
-            if has_image:
-                project = Project(
-                    name = name,
-                    title = title,
-                    description = description,
-                    image = request.FILES['project-image'],
-                    center_lat = latitude,
-                    center_lon = longitude,
-                    zoom = int(float(zoom)),
-                    extent = extent,
-                    toc_order = toc,
-                    toc_mode = toc_mode,
-                    created_by = request.user.username,
-                    is_public = is_public,
-                    show_project_icon = show_project_icon,
-                    selectable_groups = selectable_groups,
-                    restricted_extent = restricted_extent,
-                    tools = tools
-                )
-            else:
-                project = Project(
-                    name = name,
-                    title = title,
-                    description = description,
-                    center_lat = latitude,
-                    center_lon = longitude,
-                    zoom = int(float(zoom)),
-                    extent = extent,
-                    toc_order = toc,
-                    toc_mode = toc_mode,
-                    created_by = request.user.username,
-                    is_public = is_public,
-                    show_project_icon = show_project_icon,
-                    selectable_groups = selectable_groups,
-                    restricted_extent = restricted_extent,
-                    tools = tools
-                )
+            project = Project(
+                name = name,
+                title = title,
+                logo_link = logo_link,
+                description = description,
+                center_lat = latitude,
+                center_lon = longitude,
+                zoom = int(float(zoom)),
+                extent = extent,
+                toc_order = toc,
+                toc_mode = toc_mode,
+                created_by = request.user.username,
+                is_public = is_public,
+                show_project_icon = show_project_icon,
+                selectable_groups = selectable_groups,
+                restricted_extent = restricted_extent,
+                tools = tools
+            )
             project.save()
+            
+            if has_image:
+                project.image = request.FILES['project-image']
+                project.save()
+            
+            if has_logo:
+                project.logo = request.FILES['project-logo']
+                project.save()
 
             for alg in assigned_layergroups:
                 layergroup = LayerGroup.objects.get(id=alg)
@@ -462,8 +455,10 @@ def project_add(request):
                     'title': l.title
                 })
             prepared_layer_groups.append(layer_group)
+            
+        logo = settings.BASE_URL + settings.STATIC_URL + 'img/logo_principal.png'
 
-        return render(request, 'project_add.html', {'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
+        return render(request, 'project_add.html', {'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin, 'logo': logo})
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -479,6 +474,7 @@ def project_update(request, pid):
     if request.method == 'POST':
         name = request.POST.get('project-name')
         title = request.POST.get('project-title')
+        logo_link = request.POST.get('project-logo-link')
         description = request.POST.get('project-description')
         latitude = request.POST.get('center-lat')
         longitude = request.POST.get('center-lon')
@@ -523,6 +519,10 @@ def project_update(request, pid):
         has_image = False
         if 'project-image' in request.FILES:
             has_image = True
+            
+        has_logo = False
+        if 'project-logo' in request.FILES:
+            has_logo = True
 
         project = Project.objects.get(id=int(pid))
 
@@ -540,6 +540,7 @@ def project_update(request, pid):
 
         project.name = name
         project.title = title
+        project.logo_link = logo_link
         project.description = description
         project.center_lat = latitude
         project.center_lon = longitude
@@ -555,6 +556,9 @@ def project_update(request, pid):
 
         if has_image:
             project.image = request.FILES['project-image']
+            
+        if has_logo:
+            project.logo = request.FILES['project-logo']
 
         project.save()
 
@@ -1125,6 +1129,8 @@ def project_get_conf(request):
             'pid': pid,
             'project_name': project.name,
             'project_title': project.title,
+            'project_logo': project.logo.url,
+            'project_logo_link': project.logo_link,
             'project_image': project.image.url,
             'project_tools': project_tools,
             "view": {
