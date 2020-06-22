@@ -158,7 +158,12 @@ def shp2postgis(shp_path, table_name, srs, host, port, dbname, schema, user, pas
         message_already_exists = "FAILED: Layer "+str(schema)+"."+str(table_name)+" already exists, and -append not specified"
         if err.startswith(message_already_exists):
             rc=2
-        raise GdalError(rc, msg)
+        raise GdalError(rc, msg)  
+    if err != '':
+        logging.error(err)
+        rc=1
+        raise GdalError(rc, err)
+        
     return args
 
 def postgis2spatialite(table_name, out_spatialite_path, pg_conn_str, out_table_name=None, srs=None, creation_mode=MODE_CREATE, update=True):
