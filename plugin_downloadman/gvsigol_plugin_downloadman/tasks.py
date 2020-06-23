@@ -905,10 +905,19 @@ class WFSClient():
 
     def getFileRecordsCount(self, local_path, layer_name, file_type):
         try:
+            logger.debug('getFileRecordsCount:')
+            logger.debug(local_path)
+            logger.debug(layer_name)
+            logger.debug(file_type)
             if file_type == 'shape-zip':
                 layer_name = self._getLayerPlainName(layer_name)
-                virtual_path = '/vsizip/{' + local_path + '}/' + layer_name + ".shp"
-                info_str = gdaltools.ogrinfo(virtual_path, layer_name, summary=True, readonly=True)
+                try:
+                    virtual_path = '/vsizip/{' + local_path + '}/' + layer_name + ".shp"
+                    info_str = gdaltools.ogrinfo(virtual_path, layer_name, summary=True, readonly=True)
+                except:
+                    # for ogr version < 2.2
+                    virtual_path = '/vsizip/' + local_path + '/' + layer_name + ".shp"
+                    info_str = gdaltools.ogrinfo(virtual_path, layer_name, summary=True, readonly=True)
             else:
                 info_str = gdaltools.ogrinfo(local_path, alltables=True, summary=True, readonly=True)
             try:
@@ -963,8 +972,8 @@ class WFSClient():
         """
         logger.debug(self.url)
         try:
-            self.getCapabilitiesTree = self.getCapabilitiesTree(self.url, version='1.0.0')
-            self.nativeSrs = self.getLayerCrs_v1_0_0(self.getCapabilitiesTree, self.layer_name)
+            self.capabilitiesTree = self.getCapabilitiesTree(self.url, version='1.0.0')
+            self.nativeSrs = self.getLayerCrs_v1_0_0(self.capabilitiesTree, self.layer_name)
             paramDict = {}
             if self.file_format is not None:
                 paramDict['file_format'] = self.file_format
