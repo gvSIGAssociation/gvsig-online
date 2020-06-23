@@ -561,6 +561,10 @@ def project_update(request, pid):
             project.logo = request.FILES['project-logo']
 
         project.save()
+        
+        if '/media/' in project.logo.url:
+            project.logo.url = project.logo.url.replace('/media/', '/')
+            project.save()
 
         for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
             lg.delete()
@@ -658,6 +662,10 @@ def project_update(request, pid):
         icon = settings.BASE_URL + settings.STATIC_URL + 'img/processing.gif'
         if(project.baselayer_version > 0):
             url_base_lyr = settings.MEDIA_URL + settings.LAYERS_ROOT + "/" + project.name + '_prj_' + str(project.baselayer_version) + ".zip"
+        
+        logo = project.logo.url
+        if '/media/' in logo:
+            logo = logo.replace('/media/', '/')
                     
         return render(request, 'project_update.html', {'tools': projectTools,
                                                        'pid': pid, 
@@ -668,7 +676,8 @@ def project_update(request, pid):
                                                        'toc': ordered_toc, 
                                                        'superuser' : is_superuser(request.user), 
                                                        'processing_icon' : icon,
-                                                       'url_base_lyr' : url_base_lyr
+                                                       'url_base_lyr' : url_base_lyr,
+                                                       'logo': logo
                                                        })
 
 
@@ -706,6 +715,10 @@ def load_project(request, project_name):
         has_image = True
         if "no_project.png" in project.image.url:
             has_image = False
+            
+        logo = project.logo.url
+        if '/media/' in logo:
+            logo = logo.replace('/media/', '/')
 
         plugins_config = core_utils.get_plugins_config()
         response = render(request, 'viewer.html', {
@@ -716,7 +729,8 @@ def load_project(request, project_name):
             'extra_params': json.dumps(request.GET),
             'plugins_config': plugins_config,
             'is_shared_view': False,
-            'main_page': settings.LOGOUT_PAGE_URL
+            'main_page': settings.LOGOUT_PAGE_URL,
+            'logo': logo
             }
         )
 
@@ -743,6 +757,10 @@ def load_public_project(request, project_name):
     has_image = True
     if "no_project.png" in project.image.url:
         has_image = False
+        
+    logo = project.logo.url
+    if '/media/' in logo:
+        logo = logo.replace('/media/', '/')
 
     plugins_config = core_utils.get_plugins_config()
     response = render(request, 'viewer.html', {
@@ -753,7 +771,8 @@ def load_public_project(request, project_name):
         'extra_params': json.dumps(request.GET),
         'plugins_config': plugins_config,
         'is_shared_view': False,
-        'main_page': settings.LOGOUT_PAGE_URL
+        'main_page': settings.LOGOUT_PAGE_URL,
+        'logo': logo
         }
     )
 
@@ -1337,6 +1356,10 @@ def load_shared_view(request, view_name):
         has_image = True
         if "no_project.png" in project.image.url:
             has_image = False
+            
+        logo = project.logo.url
+        if '/media/' in logo:
+            logo = logo.replace('/media/', '/')
 
         plugins_config = core_utils.get_plugins_config()
         response = render(request, 'viewer.html', {
@@ -1348,7 +1371,8 @@ def load_shared_view(request, view_name):
             'plugins_config': plugins_config,
             'is_shared_view': True,
             'shared_view_name': shared_view.name,
-            'main_page': settings.LOGOUT_PAGE_URL
+            'main_page': settings.LOGOUT_PAGE_URL,
+            'logo': logo
             }
         )
 
