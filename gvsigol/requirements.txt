@@ -90,7 +90,7 @@ django-jsonfield==1.2.0
 django-jsonfield-compat==0.4.4
 
 # xsendfile wrapper
-django-sendfile2==0.4.3
+django-sendfile2==0.6.0
 
 # Comprobar el timestamp de un fichero antes de bajarlo
 tzlocal==1.5.1
