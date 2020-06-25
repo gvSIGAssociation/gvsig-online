@@ -561,10 +561,6 @@ def project_update(request, pid):
             project.logo = request.FILES['project-logo']
 
         project.save()
-        
-        if '/media/' in project.logo.url:
-            project.logo.url = project.logo.url.replace('/media/', '/')
-            project.save()
 
         for lg in ProjectLayerGroup.objects.filter(project_id=project.id):
             lg.delete()
