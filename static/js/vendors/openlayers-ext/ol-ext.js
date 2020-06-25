@@ -5551,6 +5551,9 @@ ol.control.Legend = function(options) {
   element.appendChild(this._imgElement);
   this._tableElement = document.createElement('ul');
   element.appendChild(this._tableElement);
+  this._legendFooter = document.createElement('div');
+  this._legendFooter.className = 'ol-legend-footer';
+  element.appendChild(this._legendFooter);
 	ol.control.Control.call(this, {
     element: element,
 		target: options.target
