@@ -455,10 +455,8 @@ def project_add(request):
                     'title': l.title
                 })
             prepared_layer_groups.append(layer_group)
-            
-        logo = settings.BASE_URL + settings.STATIC_URL + 'img/logo_principal.png'
 
-        return render(request, 'project_add.html', {'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin, 'logo': logo})
+        return render(request, 'project_add.html', {'layergroups': prepared_layer_groups, 'tools': project_tools, 'groups': groups, 'has_geocoding_plugin': has_geocoding_plugin})
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -658,10 +656,6 @@ def project_update(request, pid):
         icon = settings.BASE_URL + settings.STATIC_URL + 'img/processing.gif'
         if(project.baselayer_version > 0):
             url_base_lyr = settings.MEDIA_URL + settings.LAYERS_ROOT + "/" + project.name + '_prj_' + str(project.baselayer_version) + ".zip"
-        
-        logo = project.logo.url
-        if '/media/' in logo:
-            logo = logo.replace('/media/', '/')
                     
         return render(request, 'project_update.html', {'tools': projectTools,
                                                        'pid': pid, 
@@ -672,8 +666,7 @@ def project_update(request, pid):
                                                        'toc': ordered_toc, 
                                                        'superuser' : is_superuser(request.user), 
                                                        'processing_icon' : icon,
-                                                       'url_base_lyr' : url_base_lyr,
-                                                       'logo': logo
+                                                       'url_base_lyr' : url_base_lyr
                                                        })
 
 
@@ -711,10 +704,6 @@ def load_project(request, project_name):
         has_image = True
         if "no_project.png" in project.image.url:
             has_image = False
-            
-        logo = project.logo.url
-        if '/media/' in logo:
-            logo = logo.replace('/media/', '/')
 
         plugins_config = core_utils.get_plugins_config()
         response = render(request, 'viewer.html', {
@@ -725,8 +714,7 @@ def load_project(request, project_name):
             'extra_params': json.dumps(request.GET),
             'plugins_config': plugins_config,
             'is_shared_view': False,
-            'main_page': settings.LOGOUT_PAGE_URL,
-            'logo': logo
+            'main_page': settings.LOGOUT_PAGE_URL
             }
         )
 
@@ -753,10 +741,6 @@ def load_public_project(request, project_name):
     has_image = True
     if "no_project.png" in project.image.url:
         has_image = False
-        
-    logo = project.logo.url
-    if '/media/' in logo:
-        logo = logo.replace('/media/', '/')
 
     plugins_config = core_utils.get_plugins_config()
     response = render(request, 'viewer.html', {
@@ -767,8 +751,7 @@ def load_public_project(request, project_name):
         'extra_params': json.dumps(request.GET),
         'plugins_config': plugins_config,
         'is_shared_view': False,
-        'main_page': settings.LOGOUT_PAGE_URL,
-        'logo': logo
+        'main_page': settings.LOGOUT_PAGE_URL
         }
     )
 
@@ -1352,10 +1335,6 @@ def load_shared_view(request, view_name):
         has_image = True
         if "no_project.png" in project.image.url:
             has_image = False
-            
-        logo = project.logo.url
-        if '/media/' in logo:
-            logo = logo.replace('/media/', '/')
 
         plugins_config = core_utils.get_plugins_config()
         response = render(request, 'viewer.html', {
@@ -1367,8 +1346,7 @@ def load_shared_view(request, view_name):
             'plugins_config': plugins_config,
             'is_shared_view': True,
             'shared_view_name': shared_view.name,
-            'main_page': settings.LOGOUT_PAGE_URL,
-            'logo': logo
+            'main_page': settings.LOGOUT_PAGE_URL
             }
         )
 
