@@ -98,6 +98,12 @@ class Geoserver():
 
         if settings.OGR2OGR_PATH is not None and settings.OGR2OGR_PATH != '':
             gdal_tools.OGR2OGR_PATH = settings.OGR2OGR_PATH
+        if settings.GDALSRSINFO_PATH is not None and settings.GDALSRSINFO_PATH != '':
+            gdal_tools.GDALSRSINFO_PATH = settings.GDALSRSINFO_PATH
+        if settings.GDALINFO_PATH is not None and settings.GDALINFO_PATH != '':
+            gdal_tools.GDALINFO_PATH = settings.GDALINFO_PATH
+         
+
         
         self.supported_srs_plain = [ x[0] for x in forms_geoserver.supported_srs ]
         self.supported_encodings_plain = [ x[0] for x in forms_geoserver.supported_encodings ]
