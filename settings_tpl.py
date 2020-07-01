@@ -318,13 +318,11 @@ MOSAIC_DB = {
 # NOTE: we are migrating gdal_tools to the external library pygdaltools.
 # In the future we will only need GDALTOOLS_BASEPATH variable
 # OGR path is only necessary if different from the one defined on gdal_tools.OGR2OGR_PATH
-OGR2OGR_PATH = '##OGR2OGR_PATH##'
 GDALTOOLS_BASEPATH = '##GDALTOOLS_BASEPATH##'
 GDAL_LIBRARY_PATH = '##GDAL_LIBRARY_PATH##'
-GDALSRSINFO_PATH = '##GDALSRSINFO_PATH##'
-GDALINFO_PATH = '##GDALINFO_PATH##'
-
-
+GDALSRSINFO_PATH = GDALTOOLS_BASEPATH + '/gdalsrsinfo'
+GDALINFO_PATH = GDALTOOLS_BASEPATH + '/gdalinfo'
+OGR2OGR_PATH = GDALTOOLS_BASEPATH + '/ogr2ogr'
 
 TILE_SIZE = 256
 MAX_ZOOM_LEVEL = ##MAX_ZOOM_LEVELS##
