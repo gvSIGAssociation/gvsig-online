@@ -274,6 +274,10 @@ def update_symbol(request, json_rule, rule, library_rule):
 def delete_symbol(rule, library_rule):
     try:
         gs = geographic_servers.get_instance().get_default_server()
+        style = Style.objects.get(id=rule.style.id)
+
+        if gs.deleteStyle(style.name):
+            style.delete()
         symbolizers = Symbolizer.objects.filter(rule_id=rule.id)
         for symbolizer in symbolizers:
             if get_ftype(symbolizer) == 'ExternalGraphic':
@@ -281,12 +285,6 @@ def delete_symbol(rule, library_rule):
                 utils.delete_external_graphic_img(library_rule.library, file_name)
             symbolizer.delete()
         library_rule.delete()
-
-        style = Style.objects.get(id=rule.style.id)
-
-        if gs.deleteStyle(style.name):            
-            style.delete()
-
         rule.delete()
     
     except Exception as e:
