@@ -3810,6 +3810,7 @@ def external_layer_add(request):
             return redirect('external_layer_list')
 
         except Exception as e:
+            logger.exception("Error creating external layer")
             try:
                 msg = e.get_message()
             except:
