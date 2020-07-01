@@ -37,6 +37,7 @@ from gvsigol_plugin_downloadman.models import SETTINGS_KEY_VALIDITY, SETTINGS_KE
 import apps
 from django.http.response import Http404
 import gvsigol_core
+from gvsigol_plugin_downloadman.settings import TARGET_ROOT
 
 logger = logging.getLogger("gvsigol")
 
@@ -698,8 +699,10 @@ def downloadResource(request, uuid, resuuid):
                     action.send(ldown_log, verb="gvsigol_plugin_downloadman/layer_downloaded", action_object=ldown_log)
 
         if link.prepared_download_path:
-            logger.debug(u"using sendfile: " + link.prepared_download_path)
-            return sendfile(request, link.prepared_download_path, attachment=True)
+            # ensure the file is contained in DOWNLOADS_ROOT or TARGET_ROOT folders
+            if os.path.relpath(link.prepared_download_path, DOWNLOADS_ROOT)[:2] != '..' or os.path.relpath(link.prepared_download_path, TARGET_ROOT)[:2] != '..':
+                logger.debug(u"using sendfile: " + link.prepared_download_path)
+                return sendfile(request, link.prepared_download_path, attachment=True)
         else:
             if link.resolved_url:
                 return redirect(link.resolved_url) 
