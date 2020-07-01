@@ -28,7 +28,7 @@ from django_auth_ldap.config import LDAPSearch
 from django.utils.translation import ugettext_lazy as _
 from django.core.files.storage import FileSystemStorage
 
-GVSIGOL_VERSION = '2.6.3'
+GVSIGOL_VERSION = '2.6.4-dev'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 if '__file__' in globals():
