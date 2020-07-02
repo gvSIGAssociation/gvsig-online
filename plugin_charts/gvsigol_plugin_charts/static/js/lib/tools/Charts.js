@@ -28,6 +28,7 @@ var Charts = function(conf, map, chartLayers) {
 	this.conf = conf;
 	this.map = map;
 	this.chartLayers = chartLayers;
+	this.chartsView = new ChartsView();
 	
 	this.initialize();
 	this.registerEvents();
@@ -49,11 +50,11 @@ Charts.prototype.initialize = function() {
 						ui += 	'<i class="fa fa-bar-chart" aria-hidden="true"></i>';
 						ui += 	'<select id="chart-layer-' + chartLayer.id + '" class="select-chart btn btn-block btn-custom-tool">';
 						ui += 		'<option value="__none__"><i class="aria-hidden="true"></i>'+ gettext('Select chart') +'...</option>';
-						for(var i=0; i<chartLayer.charts.length; i++){
+						/*for(var i=0; i<chartLayer.charts.length; i++){
 							var title = chartLayer.charts[i].title;
 							ui += 	'<option value="' + chartLayer.charts[i].id + '"><i class="fa fa-search" aria-hidden="true"></i>'+ title +'</option>';
-						}
-						ui += 		'<option data-layerid="' + chartLayer.id + '" value="__charts_dashboard__"><i class="aria-hidden="true"></i>'+ gettext('Show dashboard (All)') +'</option>';
+						}*/
+						ui += 		'<option data-layerid="' + chartLayer.id + '" value="__charts_dashboard__"><i class="aria-hidden="true"></i>'+ gettext('Show charts view') +'</option>';
 						ui += 	'</select>';
 						ui += '</div>';
 					}
@@ -86,7 +87,7 @@ Charts.prototype.registerEvents = function() {
 			
 		} else if (chartId == '__charts_dashboard__') {
 			var layerId = $('option:selected', $(this)).data().layerid;
-			self.showDashboard(layerId);
+			self.showChartsView(layerId);
 			
 		} else {
 			self.showChart(chartId);
@@ -94,11 +95,41 @@ Charts.prototype.registerEvents = function() {
 	});
 };
 
-Charts.prototype.showDashboard = function(layerId) {
-	window.logo_url = document.getElementById('main-logo').src;
-	window.open('/gvsigonline/charts/dashboard/' + layerId + '/');        
-	window.focus();
-	
+Charts.prototype.showChartsView = function(layerId) {
+	var self = this;
+	$.ajax({
+		type: 'POST',
+		async: false,
+	  	url: '/gvsigonline/charts/view/',
+	  	beforeSend : function(xhr) {
+			xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+		},
+	  	data: {
+	  		layer_id: layerId
+	  	},
+	  	success	:function(response){
+	  		var layer = {
+  				layer_id: response.layer_id,
+  				layer_name: response.layer_name,
+  				layer_title: response.layer_title,
+  				layer_workspace: response.layer_workspace,
+  				layer_wfs_url: response.layer_wfs_url
+  			};
+	  		var charts = response.charts;
+	  		
+	  		$('#container').hide();
+	  		$('.viewer-search-form').css("display","none");
+	  		$('#gvsigol-navbar-tools-dropdown').css("display","none");
+	  		
+	  		$('#chart-layer-' + layerId + ' option[value=__none__]').attr('selected','selected');
+	  		
+	  		self.chartsView.createUI(layer, charts);
+	  		self.chartsView.loadCharts();
+		},
+	  	error: function(e){
+	  		console.log(e);
+	  	}
+	});
 };
 
 Charts.prototype.showChart = function(chartId) {

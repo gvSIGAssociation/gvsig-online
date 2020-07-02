@@ -27,11 +27,13 @@ from gvsigol_auth.utils import superuser_required, staff_required
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import HttpResponse
 from gvsigol_core.models import Project
 from gvsigol_services.models import Layer, Datastore, Workspace
 from gvsigol_services import geographic_servers
 from forms import ChartForm
+
 from models import Chart
 import settings
 import utils
@@ -307,16 +309,46 @@ def linechart_update(request, layer_id, chart_id):
 @require_http_methods(["GET", "POST", "HEAD"])
 def piechart_add(request, layer_id):
     if request.method == 'POST':
-        form = ChartForm(request.POST)
-        if form.is_valid():
-            chart = Chart(**form.cleaned_data)
-            chart.save()
-            return HttpResponseRedirect(reverse('chart_list'))
+        layer = Layer.objects.get(id=int(layer_id))
+        
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        chart_conf = request.POST.get('chart_conf')
+        
+        chart = Chart(
+            layer = layer,
+            type = 'piechart',
+            title = title,
+            description = description,
+            conf = chart_conf
+        )
+        chart.save()
+                
+        return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
 
     else:
-        form = ChartForm()
-
-    return render(request, 'piechart_add.html', {'form': form})
+        layer = Layer.objects.get(id=int(layer_id))
+        
+        layer = Layer.objects.get(id=int(layer_id))
+        datastore = Datastore.objects.get(id=layer.datastore_id)
+        workspace = Workspace.objects.get(id=datastore.workspace_id)
+        gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+        
+        (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
+        fields = utils.get_fields(resource)
+        numeric_fields = utils.get_numeric_fields(fields)
+        alpha_numeric_fields = utils.get_alphanumeric_fields(fields)
+        geom_fields = utils.get_geometry_fields(fields)
+        
+        conf = {
+            'layer_id': layer_id,
+            'fields': json.dumps(fields),
+            'numeric_fields': json.dumps(numeric_fields),
+            'alpha_numeric_fields': json.dumps(alpha_numeric_fields),
+            'geom_fields': json.dumps(geom_fields)
+        }
+    
+        return render(request, 'piechart_add.html', conf)
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -324,7 +356,20 @@ def piechart_add(request, layer_id):
 @require_http_methods(["GET", "POST", "HEAD"])
 def piechart_update(request, layer_id, chart_id):
     if request.method == 'POST':
-        return redirect('chart_list')
+        layer = Layer.objects.get(id=int(layer_id))
+        chart = Chart.objects.get(id=int(chart_id))
+        
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        chart_conf = request.POST.get('chart_conf')
+        
+        chart.title = title
+        chart.description = description
+        chart.conf = chart_conf
+
+        chart.save()
+                
+        return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
         
     else:
         layer = Layer.objects.get(id=int(layer_id))
@@ -341,9 +386,9 @@ def piechart_update(request, layer_id, chart_id):
         alpha_numeric_fields = utils.get_alphanumeric_fields(fields)
         geom_fields = utils.get_geometry_fields(fields)
         
-        conf = json.dumps(chart.conf)
+        conf = json.loads(chart.conf)
         
-        return render(request, 'barchart_update.html', {
+        return render(request, 'piechart_update.html', {
             'layer_id': layer_id,
             'chart_id': chart_id,
             'fields': json.dumps(fields),
@@ -354,7 +399,7 @@ def piechart_update(request, layer_id, chart_id):
             'description': chart.description,
             'dataset_type': conf['dataset_type'],
             'geographic_names_column': conf['geographic_names_column'],
-            'geometries_name': conf['geometries_name'],
+            'geometries_column': conf['geometries_column'],
             'selected_columns': json.dumps(conf['columns'])
         })
     
@@ -372,25 +417,28 @@ def chart_delete(request, chart_id):
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')   
-def dashboard(request, layer_id):
-    layer = Layer.objects.get(id=int(layer_id))
-    chart_objects = Chart.objects.filter(layer=layer)
-    
-    charts = []
-    for c in chart_objects:
-        charts.append({
-            'chart_id': c.id,
-            'chart_type': c.type,
-            'chart_title': c.title,
-            'chart_description': c.description,
-            'chart_conf': json.loads(c.conf)
-        })
+def view(request):
+    if request.method == 'POST':
+        layer = Layer.objects.get(id=int(request.POST.get('layer_id')))
+        chart_objects = Chart.objects.filter(layer=layer)
         
-    response = {
-        'layer_id': layer.id,
-        'layer_name': layer.name,
-        'layer_workspace': layer.datastore.workspace.name,
-        'layer_wfs_url': layer.datastore.workspace.wfs_endpoint,
-        'charts': json.dumps(charts)
-    }
-    return render(request, 'charts_dashboard.html', response)
+        charts = []
+        for c in chart_objects:
+            charts.append({
+                'chart_id': c.id,
+                'chart_type': c.type,
+                'chart_title': c.title,
+                'chart_description': c.description,
+                'chart_conf': json.loads(c.conf)
+            })
+            
+        response = {
+            'layer_id': layer.id,
+            'layer_name': layer.name,
+            'layer_title': layer.title,
+            'layer_workspace': layer.datastore.workspace.name,
+            'layer_wfs_url': layer.datastore.workspace.wfs_endpoint,
+            'charts': charts
+        }
+        
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')

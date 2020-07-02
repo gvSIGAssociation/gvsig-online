@@ -34,11 +34,12 @@
           	<div id="viewer-navbar-header" class="navbar-header">
       			<a id="main-logo-link" href="#"><img id="main-logo" style="max-height: 52px;" onError="this.style='display:none'"></a>
 			</div>
+			<span id="dashboard-layer-tile" style="position: relative;left: 40%;top: 5px;font-size: 24px;color: #ffffff;">{% trans "Statistics" %}: {{ layer_title }}</span>
 		</nav>
 	</header>
 
-	<div id="charts-container" class="container" style="width: 100%;">
-	</div>
+	<ul id="charts-container" style="list-style-type: none; margin: 0; padding: 20px; width: 100%;">
+	</ul>
 
 	<script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jQuery-2.1.4.min.js" %}"></script>
@@ -53,7 +54,7 @@
 	<script type="text/javascript" src="{% static "js/lib/widgets/messageBox.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jquery-loading-overlay-2.1.6/loadingoverlay.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/Chart.bundle.min.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/lib/tools/ChartsDashboard.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/tools/ChartsView.js" %}"></script>
 
 	<script>
 	$(document).ready(function() {

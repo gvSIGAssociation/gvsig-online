@@ -1,2 +1,17 @@
-msgid ""
+msgid "Select chart"
+msgstr ""
+
+msgid "Show charts view"
+msgstr ""
+
+msgid "Statistics"
+msgstr ""
+
+msgid "X axis"
+msgstr ""
+
+msgid "Y axis"
+msgstr ""
+
+msgid "Error loading charts plugin"
 msgstr ""

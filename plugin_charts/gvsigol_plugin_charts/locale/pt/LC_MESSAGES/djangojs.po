@@ -1,2 +1,17 @@
-msgid ""
-msgstr ""
+msgid "Select chart"
+msgstr "Selecionar gráfico"
+
+msgid "Show charts view"
+msgstr "Mostrar visualização de gráficos"
+
+msgid "Statistics"
+msgstr "Estatisticas"
+
+msgid "X axis"
+msgstr "Eixo X"
+
+msgid "Y axis"
+msgstr "Eixo Y"
+
+msgid "Error loading charts plugin"
+msgstr "Erro ao carregar o plug-in de gráficos"
