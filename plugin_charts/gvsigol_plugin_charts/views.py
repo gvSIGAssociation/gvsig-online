@@ -406,14 +406,16 @@ def piechart_update(request, layer_id, chart_id):
     
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
-def chart_delete(request, chart_id):
+def chart_delete(request):
     try:
-        chart = Chart.objects.get(id=chart_id)
+        chart_id = request.POST.get('chart_id')
+        chart = Chart.objects.get(id=int(chart_id))
         chart.delete()
-        return HttpResponseRedirect(reverse('chart_list'))
+        
+        return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
     
     except:
-        return HttpResponseNotFound('<h1>chart not found{0}</h1>'.format(chart.title)) 
+        return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json') 
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')   

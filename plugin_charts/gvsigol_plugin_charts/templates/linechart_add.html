@@ -35,16 +35,16 @@
 						<div class="row">
 							<label style="margin-left: 20px; font-size: 12px;">{% trans "Dataset type" %}</label>
 							<div class="col-md-12 form-group">
-								<input type="radio" name="dataset_type" value="sumarized"/>
-								<label style="font-size: 11px;" for="dataset_type">{% trans "Sumarized" %}</label>
+								<input type="radio" name="dataset_type" value="aggregated"/>
+								<label style="font-size: 11px;" for="dataset_type">{% trans "Aggregated" %} ({% trans "Show aggregated data for a column" %})</label>
 							</div>
 							<div class="col-md-12 form-group">
-								<input checked type="radio" name="dataset_type" value="single_selection"/>
-								<label style="font-size: 11px;" for="dataset_type">{% trans "Single selection" %}</label>
+								<input type="radio" name="dataset_type" value="single_selection"/>
+								<label style="font-size: 11px;" for="dataset_type">{% trans "Single selection" %} ({% trans "Shows the data of the last selected element" %})</label>
 							</div>
 							<div class="col-md-12 form-group">
-								<input type="radio" name="dataset_type" value="multiple_selection"/>
-								<label style="font-size: 11px;" for="dataset_type">{% trans "Multiple selection" %}</label>
+								<input checked type="radio" name="dataset_type" value="multiple_selection"/>
+								<label style="font-size: 11px;" for="dataset_type">{% trans "Multiple selection" %} ({% trans "Shows the data of each selected element" %})</label>
 							</div>
 						</div>
 						<div class="row">

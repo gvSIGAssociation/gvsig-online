@@ -12,6 +12,6 @@ urlpatterns = [
     url(r'^charts/barchart_update/(?P<layer_id>[0-9]+)/(?P<chart_id>[0-9]+)/$$', views.barchart_update, name='barchart_update'),
     url(r'^charts/linechart_update/(?P<layer_id>[0-9]+)/(?P<chart_id>[0-9]+)/$$', views.linechart_update, name='linechart_update'),
     url(r'^charts/piechart_update/(?P<layer_id>[0-9]+)/(?P<chart_id>[0-9]+)/$$', views.piechart_update, name='piechart_update'),
-    url(r'^charts/chart_delete/(?P<chart_id>[0-9]+)/$', views.chart_delete, name='chart_delete'),
+    url(r'^charts/chart_delete/$', views.chart_delete, name='chart_delete'),
     url(r'^charts/view/$', views.view, name='view'),
 ]

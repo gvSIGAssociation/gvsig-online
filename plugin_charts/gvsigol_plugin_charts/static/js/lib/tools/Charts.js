@@ -44,7 +44,7 @@ Charts.prototype.initialize = function() {
 			if (layer.is_vector) {
 				var chartLayer = self.getChartLayer(layer);
 				if (chartLayer != null) {
-					if (chartLayer.charts.length > 1) {
+					if (chartLayer.charts.length > 0) {
 						var ui = '';
 						ui += '<div style="padding: 0px 12px !important;" class="btn btn-block btn-social btn-select btn-custom-tool">';
 						ui += 	'<i class="fa fa-bar-chart" aria-hidden="true"></i>';

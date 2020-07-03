@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-02 12:34+0200\n"
+"POT-Creation-Date: 2020-07-03 10:59+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -81,7 +81,13 @@ msgstr ""
 #: templates/barchart_add.html:39 templates/barchart_update.html:39
 #: templates/linechart_add.html:39 templates/linechart_update.html:39
 #: templates/piechart_add.html:39 templates/piechart_update.html:39
-msgid "Sumarized"
+msgid "Aggregated"
+msgstr ""
+
+#: templates/barchart_add.html:39 templates/barchart_update.html:39
+#: templates/linechart_add.html:39 templates/linechart_update.html:39
+#: templates/piechart_add.html:39 templates/piechart_update.html:39
+msgid "Show aggregated data for a column"
 msgstr ""
 
 #: templates/barchart_add.html:43 templates/barchart_update.html:43
@@ -90,9 +96,20 @@ msgstr ""
 msgid "Single selection"
 msgstr ""
 
+#: templates/barchart_add.html:43 templates/barchart_update.html:43
+#: templates/linechart_add.html:43 templates/linechart_update.html:43
+#: templates/piechart_add.html:43 templates/piechart_update.html:43
+msgid "Shows the data of the last selected element"
+msgstr ""
+
 #: templates/barchart_add.html:47 templates/barchart_update.html:47
 #: templates/linechart_add.html:47 templates/linechart_update.html:47
 msgid "Multiple selection"
+msgstr ""
+
+#: templates/barchart_add.html:47 templates/barchart_update.html:47
+#: templates/linechart_add.html:47 templates/linechart_update.html:47
+msgid "Shows the data of each selected element"
 msgstr ""
 
 #: templates/barchart_add.html:52 templates/barchart_update.html:52

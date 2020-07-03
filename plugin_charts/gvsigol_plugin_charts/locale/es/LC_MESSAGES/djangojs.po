@@ -1,8 +1,8 @@
 msgid "Select chart"
-msgstr "Selecciona gráfica"
+msgstr "Selecciona gráfico"
 
 msgid "Show charts view"
-msgstr "Mostrar vista de gráficas"
+msgstr "Mostrar vista de gráficos"
 
 msgid "Statistics"
 msgstr "Estadísticas"

@@ -59,7 +59,7 @@ ChartsView.prototype.createUI = function(layer, charts) {
 	this.jsonCharts = charts;
 	this.charts = new Array();
 	
-	var title = '<span id="dashboard-layer-tile" style="position: relative;left: 35%;top: 5px;font-size: 24px;color: #ffffff;">' + gettext('Statistics') + ': ' + this.layer.layer_title + '</span>';
+	var title = '<span id="dashboard-layer-tile" style="position: relative;left: 35%;top: 5px;font-size: 24px;color: #ffffff;">' + gettext('Layer') + ': ' + this.layer.layer_title + '</span>';
 	$('#viewer-navbar').append(title);
 	
 	this.chartsContainer.empty();
@@ -196,6 +196,52 @@ ChartsView.prototype.createUI = function(layer, charts) {
 		    }
 		});
 	});
+	
+	var search = new ol.control.SearchFeature({
+		placeholder: gettext('Search') + ' ...',
+		source: this.source,
+		property: this.jsonCharts[0].chart_conf.geographic_names_column
+	});
+	this.map.addControl (search);
+	// Select feature when click on the reference index
+	search.on('select', function(e){	
+		var f = e.search;
+		var selIndex = self.selected.indexOf(f);
+		var selectedStyle = new ol.style.Style({
+			fill: new ol.style.Fill({
+				color: 'rgba(247, 247, 18, 0.5)'
+			}),
+	    	stroke: new ol.style.Stroke({
+	    		color: 'rgba(247, 247, 18, 1.0)',
+	      		width: 2
+	    	}),
+	    	text: new ol.style.Text({
+	    		textAlign: 'center',
+	    		font: 'normal 12px/1 sans-serif',
+	    		text: f.getProperties()['nome'],
+	    		fill: new ol.style.Fill({color: '#ffffff'}),
+	    		stroke: new ol.style.Stroke({color: '#000000', width: 1}),
+	    		offsetX: 0,
+	    		offsetY: 0,
+	    		placement: 'point',
+	    		rotation: 0
+	    	})
+	    });
+	    if (selIndex < 0) {
+	    	self.selected.push(f);
+	    	f.setStyle(selectedStyle);
+	    	self.refreshCharts(self.selected);
+	    	
+	    } else {
+	    	self.selected.splice(selIndex, 1);
+	    	f.setStyle(null);
+	    	self.refreshCharts(self.selected);
+	    }
+		var p = e.search.getGeometry().getFirstCoordinate();
+		self.map.getView().animate({ center:p });
+		var extent = f.getGeometry().getExtent();
+    	self.map.getView().fit(extent, self.map.getSize());
+	});
 };
 
 ChartsView.prototype.hide = function() {
@@ -219,24 +265,24 @@ ChartsView.prototype.loadCharts = function() {
 			$('#first-tools').append(download);
 			
 			if (firstChart.chart_type == 'barchart') {
-				if (firstChart.chart_conf.dataset_type == 'sumarized') {
-					this.createSumarizedBarChart(firstChart);
+				if (firstChart.chart_conf.dataset_type == 'aggregated') {
+					this.createAggregatedBarChart(firstChart);
 					
 				} else {
 					this.createBarChart(firstChart);
 				}			
 				
 			} else if (firstChart.chart_type == 'linechart') {
-				if (firstChart.chart_conf.dataset_type == 'sumarized') {
-					this.createSumarizedLineChart(firstChart);
+				if (firstChart.chart_conf.dataset_type == 'aggregated') {
+					this.createAggregatedLineChart(firstChart);
 					
 				} else {
 					this.createLineChart(firstChart);
 				}
 				
 			} else if (firstChart.chart_type == 'piechart') {
-				if (firstChart.chart_conf.dataset_type == 'sumarized') {
-					this.createSumarizedPieChart(firstChart);
+				if (firstChart.chart_conf.dataset_type == 'aggregated') {
+					this.createAggregatedPieChart(firstChart);
 					
 				} else {
 					this.createPieChart(firstChart);
@@ -265,60 +311,26 @@ ChartsView.prototype.loadCharts = function() {
 			ui += 		'</div>';
 			ui += 	'</li>';
 			$('#charts-container').append(ui);
-			/*if(i % 2 == 0) {
-				ui += 	'<td class="col-md-6 form-group">';
-				ui += 		'<div class="box">';
-				ui += 			'<div class="box-header with-border">';
-				ui += 				'<h3 class="box-title">' + chart.chart_title + '</h3>';
-				ui += 				'<div class="box-tools pull-right">';
-				ui += 					'<button type="button" class="btn btn-box-tool"><i class="fa fa-arrows"></i></button>';
-				ui += 				'</div>';
-				ui += 			'</div>';
-				ui += 			'<div class="box-body">';
-				ui += 				'<canvas id="chart-' + chart.chart_id + '"></canvas>';
-				ui += 			'</div>';
-				ui += 		'</div>';
-				ui += 	'</td>';
-				$('#row-' + (i-1)).append(ui);
-				
-			} else {
-				ui += '<tr id="row-' + i + '" class="row" style="margin-top: 20px;">';
-				ui += 	'<td class="col-md-6 form-group">';
-				ui += 		'<div class="box">';
-				ui += 			'<div class="box-header with-border">';
-				ui += 				'<h3 class="box-title">' + chart.chart_title + '</h3>';
-				ui += 				'<div class="box-tools pull-right">';
-				ui += 					'<button type="button" class="btn btn-box-tool"><i class="fa fa-arrows"></i></button>';
-				ui += 				'</div>';
-				ui += 			'</div>';
-				ui += 			'<div class="box-body">';
-				ui += 				'<canvas id="chart-' + chart.chart_id + '"></canvas>';
-				ui += 			'</div>';
-				ui += 		'</div>';
-				ui += 	'</td>';
-				ui += '</tr>';
-				$('#charts-container').append(ui);
-			}*/
 			
 			if (chart.chart_type == 'barchart') {
-				if (chart.chart_conf.dataset_type == 'sumarized') {
-					this.createSumarizedBarChart(chart);
+				if (chart.chart_conf.dataset_type == 'aggregated') {
+					this.createAggregatedBarChart(chart);
 					
 				} else {
 					this.createBarChart(chart);
 				}			
 				
 			} else if (chart.chart_type == 'linechart') {
-				if (chart.chart_conf.dataset_type == 'sumarized') {
-					this.createSumarizedLineChart(chart);
+				if (chart.chart_conf.dataset_type == 'aggregated') {
+					this.createAggregatedLineChart(chart);
 					
 				} else {
 					this.createLineChart(chart);
 				}
 				
 			} else if (chart.chart_type == 'piechart') {
-				if (chart.chart_conf.dataset_type == 'sumarized') {
-					this.createSumarizedPieChart(chart);
+				if (chart.chart_conf.dataset_type == 'aggregated') {
+					this.createAggregatedPieChart(chart);
 					
 				} else {
 					this.createPieChart(chart);
@@ -456,7 +468,7 @@ ChartsView.prototype.createBarChart = function(c) {
 	this.charts.push(chart);
 };
 
-ChartsView.prototype.createSumarizedBarChart = function(c) {
+ChartsView.prototype.createAggregatedBarChart = function(c) {
 	var ctx = document.getElementById('chart-' + c.chart_id).getContext('2d');
 	
 	var labels = new Array();
@@ -557,7 +569,7 @@ ChartsView.prototype.createLineChart = function(c) {
 	this.charts.push(chart);
 };
 
-ChartsView.prototype.createSumarizedLineChart = function(c) {
+ChartsView.prototype.createAggregatedLineChart = function(c) {
 };
 
 ChartsView.prototype.createPieChart = function(c) {
@@ -586,7 +598,7 @@ ChartsView.prototype.createPieChart = function(c) {
 	this.charts.push(chart);
 };
 
-ChartsView.prototype.createSumarizedPieChart = function(c) {
+ChartsView.prototype.createAggregatedPieChart = function(c) {
 	var ctx = document.getElementById('chart-' + c.chart_id).getContext('2d');
 	
 	var labels = new Array();
