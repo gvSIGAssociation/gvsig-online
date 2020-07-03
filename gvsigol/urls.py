@@ -44,7 +44,8 @@ packages = [
     'gvsigol_plugin_elevation',
     'gvsigol_plugin_manageaddresses',
     'gvsigol_plugin_emergencies',
-    'gvsigol_plugin_opensea2'
+    'gvsigol_plugin_opensea2',
+    'gvsigol_plugin_charts'
 ]
 
 urlpatterns = [
