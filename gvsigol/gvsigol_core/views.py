@@ -396,7 +396,7 @@ def project_add(request):
                     baselayer_group = baselayer_group
                 )
                 project_layergroup.save()
-                if baselayer_group and selected_base_layer is not None:
+                if baselayer_group and selected_base_layer:
                     project_layergroup.default_baselayer = selected_base_layer
                     project_layergroup.save()
 
@@ -499,9 +499,10 @@ def project_update(request, pid):
         if 'restricted_extent' in request.POST:
             restricted_extent = True
 
-        selected_base_layer = None
-        if 'selected_base_layer' in request.POST:
-            selected_base_layer = request.POST.get('selected_base_layer')
+        try:
+            selected_base_layer = int(request.POST.get('selected_base_layer'))
+        except:
+            selected_base_layer = None
             
         selected_base_group = None
         if 'selected_base_group' in request.POST:
@@ -582,8 +583,8 @@ def project_update(request, pid):
                 baselayer_group = baselayer_group
             )
             project_layergroup.save()
-            if baselayer_group:
-                project_layergroup.default_baselayer = int(selected_base_layer)
+            if baselayer_group and selected_base_layer:
+                project_layergroup.default_baselayer = selected_base_layer
                 project_layergroup.save()
 
         for aug in assigned_usergroups:
