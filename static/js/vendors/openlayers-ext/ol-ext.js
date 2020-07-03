@@ -902,6 +902,9 @@ ol.control.Search = function(options) {
   })
   if (!options.target) {
     this.button = document.createElement("BUTTON");
+    var iconButton = document.createElement("i");
+    iconButton.setAttribute("class", "fa fa-search");
+    this.button.appendChild(iconButton);
     this.button.setAttribute("type", "button");
     this.button.setAttribute("title", options.label||"search");
     this.button.addEventListener("click", function() {
@@ -1029,6 +1032,7 @@ ol.control.Search = function(options) {
   }
   // Autocomplete list
   var ul = document.createElement('UL');
+  ul.setAttribute("style", "text-align:left;");
   ul.classList.add('autocomplete');
   element.appendChild(ul);
   ol.control.Control.call(this, {
