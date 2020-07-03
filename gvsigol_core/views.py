@@ -297,9 +297,10 @@ def project_add(request):
         if 'project-logo' in request.FILES:
             has_logo = True
 
-        selected_base_layer = None
-        if 'selected_base_layer' in request.POST:
-            selected_base_layer = request.POST.get('selected_base_layer')
+        try:
+            selected_base_layer = int(request.POST.get('selected_base_layer'))
+        except:
+            selected_base_layer = None
             
         selected_base_group = None
         if 'selected_base_group' in request.POST:
@@ -395,8 +396,8 @@ def project_add(request):
                     baselayer_group = baselayer_group
                 )
                 project_layergroup.save()
-                if baselayer_group:
-                    project_layergroup.default_baselayer = int(selected_base_layer)
+                if baselayer_group and selected_base_layer is not None:
+                    project_layergroup.default_baselayer = selected_base_layer
                     project_layergroup.save()
 
             for aug in assigned_usergroups:
