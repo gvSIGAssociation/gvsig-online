@@ -148,7 +148,9 @@ ChartsView.prototype.createUI = function(layer, charts) {
 	  			var feat = features[i];
 	  			var geom = feat.getGeometry().transform('EPSG:4326', 'EPSG:3857');
 	  			feat.setGeometry(geom.clone());	
-	  			feat.default_style = null;
+	  			var props = feat.getProperties();
+	  			props['custom_color'] = self.getRandomColor();
+	  			feat.setProperties(props);
 	  			self.vectorLayer.getSource().addFeature(feat);
 	  		}
 	  		
@@ -253,6 +255,7 @@ ChartsView.prototype.hide = function() {
 };
 
 ChartsView.prototype.loadCharts = function() {
+	var self = this;
 	for (var i=0; i < this.jsonCharts.length; i++) {
 		if (i == 0) {
 			var firstChart = this.jsonCharts[i];
@@ -260,7 +263,10 @@ ChartsView.prototype.loadCharts = function() {
 			$('#first-chart-title').text(firstChart.chart_title);
 			var download = '';
 			download += '<a class="download-chart" data-chartid="' + firstChart.chart_id + '" id="download-' + firstChart.chart_id + '" download="' + this.layer.layer_title + '.jpg" href="" class="btn btn-primary float-right bg-flat-color-1">';
-			download += 	'<i class="fa fa-download"></i>';
+			download += 	'<i style="margin-right: 10px;" class="fa fa-download"></i>';
+			download += '</a>';
+			download += '<a class="download-pdf-chart" data-chartid="' + firstChart.chart_id + '" id="download-pdf-' + firstChart.chart_id + '" href="" class="btn btn-primary float-right bg-flat-color-1">';
+			download += 	'<i class="fa fa-file-pdf-o"></i>';
 			download += '</a>';
 			$('#first-tools').append(download);
 			
@@ -301,7 +307,10 @@ ChartsView.prototype.loadCharts = function() {
 			ui += 				'<h3 class="box-title">' + chart.chart_title + '</h3>';
 			ui += 				'<div class="box-tools pull-right">';
 			ui += 					'<a class="download-chart" data-chartid="' + chart.chart_id + '" id="download-' + chart.chart_id + '" download="' + this.layer.layer_title + '.jpg" href="" class="btn btn-primary float-right bg-flat-color-1">';
-			ui += 						'<i class="fa fa-download"></i>';
+			ui += 						'<i style="margin-right: 10px;" class="fa fa-download"></i>';
+			ui += 					'</a>';
+			ui += 					'<a class="download-pdf-chart" data-chartid="' + chart.chart_id + '" id="download-pdf-' + chart.chart_id + '" href="" class="btn btn-primary float-right bg-flat-color-1">';
+			ui += 						'<i class="fa fa-file-pdf-o"></i>';
 			ui += 					'</a>';
 			ui += 				'</div>';
 			ui += 			'</div>';
@@ -345,7 +354,82 @@ ChartsView.prototype.loadCharts = function() {
 			a.href = url_base64jp;
 		});
 		
+		
+		$('.download-pdf-chart').on('click', function(e){
+			e.preventDefault();
+			var chartId = this.dataset.chartid;
+			var chartConf = self.getChartConf(chartId);
+			var canvas = document.querySelector('#chart-' + chartId);
+			//creates image
+			var canvasImg = self.canvasToImage(canvas, '#ffffff');
+		  
+			//creates PDF from img
+			var doc = new jsPDF('landscape');
+			doc.setFontSize(20);
+			doc.text(15, 15, chartConf.chart_title);
+			doc.addImage(canvasImg, 'JPEG', 10, 10, 280, 150 );
+			
+			var uri = doc.output('dataurlstring');
+	        self.openDataUriWindow(uri);
+		});
+		
 	}
+};
+
+ChartsView.prototype.canvasToImage = function(canvas, backgroundColor) {
+	//cache height and width		
+	var w = canvas.width;
+	var h = canvas.height;
+	
+	var context = canvas.getContext("2d");
+ 
+	var data;
+ 
+	if(backgroundColor)
+	{
+		//get the current ImageData for the canvas.
+		data = context.getImageData(0, 0, w, h);
+ 
+		//store the current globalCompositeOperation
+		var compositeOperation = context.globalCompositeOperation;
+ 
+		//set to draw behind current content
+		context.globalCompositeOperation = "destination-over";
+ 
+		//set background color
+		context.fillStyle = backgroundColor;
+ 
+		//draw background / rect on entire canvas
+		context.fillRect(0,0,w,h);
+	}
+ 
+	//get the image data from the canvas
+	var imageData = canvas.toDataURL("image/jpeg", 1.0);
+ 
+	if(backgroundColor)
+	{
+		//clear the canvas
+		context.clearRect (0,0,w,h);
+ 
+		//restore it with original / cached ImageData
+		context.putImageData(data, 0,0);
+ 
+		//reset the globalCompositeOperation to what it was
+		context.globalCompositeOperation = compositeOperation;
+	}
+ 
+	//return the Base64 encoded data url string
+	return imageData;
+};
+
+ChartsView.prototype.openDataUriWindow = function(url) {
+	var html = '<html>' +
+	    '<style>html, body { padding: 0; margin: 0; } iframe { width: 100%; height: 100%; border: 0;}  </style>' +
+	    '<body>' +
+	    '<iframe id="pdf-iframe" src="' + url + '"></iframe>' +
+	    '</body></html>';
+	a = window.open("", "_blank");
+	a.document.write(html);
 };
 
 ChartsView.prototype.refreshCharts = function(selectedFeatures) {
@@ -357,7 +441,7 @@ ChartsView.prototype.refreshCharts = function(selectedFeatures) {
 			if (chartConf.chart_conf.dataset_type == 'single_selection') {
 				chart.data.datasets = [];
 				var feature = selectedFeatures[selectedFeatures.length - 1];
-				var color = this.getRandomColor();
+				var color = feature.getProperties().custom_color;
 				var newDataset = {
 					label: feature.getProperties()[chartConf.chart_conf.geographic_names_column],
 					backgroundColor: color,
@@ -378,7 +462,7 @@ ChartsView.prototype.refreshCharts = function(selectedFeatures) {
 				chart.data.datasets = [];
 				for (var j=0; j<selectedFeatures.length; j++) {
 					var feature = selectedFeatures[j];
-					var color = this.getRandomColor();
+					var color = feature.getProperties().custom_color;
 					var newDataset = {
 						label: feature.getProperties()[chartConf.chart_conf.geographic_names_column],
 						backgroundColor: color,
@@ -667,14 +751,15 @@ ChartsView.prototype.hexToRgb = function(hex) {
 ChartsView.prototype.styleFunction = function(feature, resolution) {
 	//var color = this.getRandomColor();
 	
-	//var fillColor = this.hexToRgb(color);
+	var fillColor = this.hexToRgb(feature.getProperties()['custom_color']);
 	var fill = new ol.style.Fill({
-		//color: 'rgba(' + fillColor.r + ',' + fillColor.g + ',' + fillColor.b + ',0.5)'
-		color: 'rgba(32, 206, 88, 0.5)'
+		color: 'rgba(' + fillColor.r + ',' + fillColor.g + ',' + fillColor.b + ',0.2)'
+		//color: 'rgba(32, 206, 88, 0.5)'
 	});
 	var stroke = new ol.style.Stroke({
-		color: 'rgba(32, 206, 88, 1.0)',
-  		width: 2
+		color: 'rgba(' + fillColor.r + ',' + fillColor.g + ',' + fillColor.b + ',1.0)',
+		//color: 'rgba(32, 206, 88, 1.0)',
+  		width: 1
 	});
 	var text = new ol.style.Text({
 		textAlign: 'center',
