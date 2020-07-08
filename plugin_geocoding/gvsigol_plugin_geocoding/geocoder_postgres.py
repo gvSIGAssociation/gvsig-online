@@ -17,6 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from openpyxl.utils.cell import rows_from_range
+from lxml.etree import tounicode
+from string import replace
 '''
 @author: Francisco José Peñarrubia <fjp@scolab.es>
 '''
@@ -112,16 +114,17 @@ class GeocoderPostgres():
             'autocancel': self.urls['autocancel'],
             'limit': self.urls['max_results'],
         }
+        sanitized_q = replace(query, "'", " ")
 
         # TODO: NO LLAMAR A UNA URL, BUSCAR EN POSTGRES Y DEVOLVER UN JSON
         resul = []
         for provider in self.providers:
-            t1 = time()
-            
+            auxSql =  " '%s' ORDER BY SIMILARITY( %s, '%s') DESC LIMIT 10" % (sanitized_q, provider.dbfield, sanitized_q)
             sqlQuery = ("SELECT " + provider.fields +  " FROM " + provider.dbschema + "." + 
-                        provider.dbtable + " WHERE immutable_unaccent(" + provider.dbfield + ") % '" + query + 
-                        "' ORDER BY SIMILARITY(" + provider.dbfield + ", '" + query + "') DESC LIMIT 10" )
-            print 'SQL:' + sqlQuery  
+                        provider.dbtable + " WHERE immutable_unaccent(" + provider.dbfield + ") % " + 
+                        auxSql)
+            print 'SQL:' + sqlQuery            
+            t1 = time()              
             provider.cursor.execute(sqlQuery)        
             rows = provider.cursor.fetchall()
             for r in rows:                
