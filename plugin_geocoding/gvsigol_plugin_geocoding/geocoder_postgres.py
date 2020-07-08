@@ -74,7 +74,7 @@ class GeocoderPostgres():
         provider.dbfield = params['text_field']
         provider.dbfieldId = params['id_field']
         provider.dbfieldGeom = params['geom_field']
-        provider.dbschema = datastore.name
+        provider.dbschema = datastore_params['schema']
         provider.fieldsWithGeom = (provider.dbfield + ', ' + provider.dbfieldId + ', ' +
                            'st_transform(ST_PointOnSurface(' + provider.dbfieldGeom + '), 4326) AS P,' +
                            'st_asgeojson(st_transform(' + provider.dbfieldGeom + ', 4326)) as G ')
