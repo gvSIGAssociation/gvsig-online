@@ -119,10 +119,10 @@ class GeocoderPostgres():
             t1 = time()
             
             sqlQuery = ("SELECT " + provider.fields +  " FROM " + provider.dbschema + "." + 
-                        provider.dbtable + " WHERE SIMILARITY(" + provider.dbfield + ", %s) > 0.3 " + 
-                        " ORDER BY SIMILARITY(" + provider.dbfield + ", %s) DESC LIMIT 10" )
+                        provider.dbtable + " WHERE immutable_unaccent(" + provider.dbfield + ") % '" + query + 
+                        "' ORDER BY SIMILARITY(" + provider.dbfield + ", '" + query + "') DESC LIMIT 10" )
             print 'SQL:' + sqlQuery  
-            provider.cursor.execute(sqlQuery, (query, query))        
+            provider.cursor.execute(sqlQuery)        
             rows = provider.cursor.fetchall()
             for r in rows:                
                 a = {

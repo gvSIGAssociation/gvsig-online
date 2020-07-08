@@ -682,7 +682,7 @@ def create_postgres_config(provider, has_soundex):
         dbtable = params['resource']
         dbfield = params['text_field']
         dbfieldGeom = params['geom_field']
-        dbschema = datastore.name
+        dbschema = datastore_params['schema']
         
         provider.dbschema = dbschema
                 
