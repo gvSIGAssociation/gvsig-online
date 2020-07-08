@@ -123,7 +123,7 @@ class GeocoderPostgres():
             sqlQuery = ("SELECT " + provider.fields +  " FROM " + provider.dbschema + "." + 
                         provider.dbtable + " WHERE immutable_unaccent(" + provider.dbfield + ") % " + 
                         auxSql)
-            print 'SQL:' + sqlQuery            
+            # print 'SQL:' + sqlQuery            
             t1 = time()              
             provider.cursor.execute(sqlQuery)        
             rows = provider.cursor.fetchall()
