@@ -156,9 +156,7 @@
 		    				{% endfor %}
 		    			
 		    			{% else %}
-		    				<script>console.log('USER STAFF')</script>
-		    				{% for plugin in PUBLIC_PLUGINS %}	
-		    					<script>console.log('PUBLIC_PLUGIN: {{plugin}}')</script>					  
+		    				{% for plugin in PUBLIC_PLUGINS %}					  
 		    					{% if 'gvsigol_plugin_' in plugin %}	
 		    						{% with "dashboard_"|add:plugin|cut:"gvsigol_plugin_"|add:"_menu.html" as aux %}	    	
 										{% include_if_exists aux %}	
@@ -169,9 +167,7 @@
 						{% endif %}		
 					
 					{% else %}
-		    				<script>console.log('USER NO STAFF')</script>
 		    				{% for plugin in PUBLIC_PLUGINS %}	
-		    					<script>console.log('PUBLIC_PLUGIN: {{plugin}}')</script>
 		    					{% if 'gvsigol_plugin_' in plugin %}	
 		    						{% with "dashboard_"|add:plugin|cut:"gvsigol_plugin_"|add:"_menu.html" as aux %}
 										{% include_if_exists aux %}	
