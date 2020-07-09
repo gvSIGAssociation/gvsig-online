@@ -190,6 +190,7 @@ def isValidCartociudadDB(datastore):
     schema = params.get('schema', 'public')
     i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
     resources = i.get_tables(schema)
+    i.close()
     
     resources_needed = []
     
