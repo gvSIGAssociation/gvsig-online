@@ -480,7 +480,8 @@ class Geoserver():
                 i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
                 count = i.get_estimated_count(schema, layer.name)
                 aux = count[0]
-    
+                i.close()
+                
             sld_body = symbology_services.create_default_style(layer.id, style_name, style_type, geom_type, aux)
         
         except Exception as ex:
@@ -1088,6 +1089,8 @@ class Geoserver():
                 schema = params.get('schema', 'public')
                 i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
                 i.delete_table(schema, name)
+                i.close()
+                
             raise rest_geoserver.RequestError(e.code, e.message)
         except Exception as e:
             #logging.exception(e)
@@ -1503,6 +1506,8 @@ class Geoserver():
             schema = params.get('schema', 'public')
             i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
             i.create_table(schema, name, geom_type, srs, fields)
+            i.close()
+            
             return True
         
         except Exception as e:
@@ -1522,6 +1527,8 @@ class Geoserver():
             schema = params.get('schema', 'public')
             i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
             i.delete_table(schema, name)
+            i.close()
+            
             return True
         
         except Exception as e:
@@ -1686,6 +1693,8 @@ class Geoserver():
             schema = params.get('schema', 'public')
             i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
             rows = i.get_geometry_columns_info(schema=schema)
+            i.close()
+            
             result = []
             for r in rows:
                 srs = "EPSG:"+str(r[4])
@@ -1740,7 +1749,6 @@ class Geoserver():
             i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
             count = i.get_estimated_count(schema, layer.name)
             aux = count[0]
-            
             if aux < 10000:
                 maxx = str(layer_info[ds_type]['latLonBoundingBox']['maxx'])
                 maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
@@ -1753,7 +1761,8 @@ class Geoserver():
                 bbox = minx + "," + miny + "," + maxx + "," + maxy 
             else:
                 bbox = i.get_bbox_firstgeom(schema, layer.name, 0.01)  
-                
+            i.close()
+               
         else:
             maxx = str(layer_info[ds_type]['latLonBoundingBox']['maxx'])
             maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])

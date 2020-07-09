@@ -153,6 +153,7 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
                     schema = params.get('schema', 'public')
                     i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
                     i.delete_table(schema, name)
+                    i.close()
                 return redirect("/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path'))
                 
             except Exception as exc:
