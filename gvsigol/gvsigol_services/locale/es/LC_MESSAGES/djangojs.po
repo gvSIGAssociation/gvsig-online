@@ -118,3 +118,9 @@ msgstr "Error recargando nodo"
 
 msgid "Connection has been success"
 msgstr "La conexión ha sido exitosa"
+
+msgid "Filter by project"
+msgstr "Filtrar por proyecto"
+
+msgid "Clean filter"
+msgstr "Limpiar filtro"

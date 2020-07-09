@@ -27,6 +27,7 @@
 							<th>{% trans "Title" %}</th>
 							<th>{% trans "Datastore" %}</th>
 							<th>{% trans "Layer group" %}</th>
+							<th>{% trans "Projects" %}</th>
 							<th>{% trans "Cached" %}</th>
 							<th></th>
 							<th></th>
@@ -39,11 +40,12 @@
 						{% for layer in layers %}
 						<tr>
 							<td>{{ layer.id }}</td>
-							<td><img style="cursor: pointer;" id="layerpreview-{{ layer.id }}" data-origin="{{ layer.type }}" src="{{ layer.thumbnail.url }}" height="60" width="84"></td>
+							<td><img style="cursor: pointer;" id="layerpreview-{{ layer.id }}" data-origin="{{ layer.type }}" src="{{ layer.thumbnail_url }}" height="60" width="84"></td>
 							<td>{{ layer.name }}</td>
 							<td>{{ layer.title }}</td>
-							<td>{{ layer.datastore.name }}</td>
-							<td>{{ layer.layer_group.name }} ({{layer.layer_group.title }})</td>
+							<td>{{ layer.datastore_name }}</td>
+							<td>{{ layer.lg_name }} ({{layer.lg_title }})</td>
+							<td>{{ layer.projects }}</td>
 							{% if layer.cached %}
 							<td><input disabled type="checkbox" checked/></td>
 							{% else %}
@@ -123,6 +125,8 @@
 </script>
 <script>
 $(document).ready(function() {
+	var projects = {{ projects|safe }};
+	
 	var table = $('#layers-table').DataTable({
 		responsive: true,
 	    language: {
@@ -214,6 +218,30 @@ $(document).ready(function() {
 	});
 	$('#button-create-layer').click( function() {
 		location.href = "{% url 'layer_create'%}";
+	});
+	
+	var clearButton = '';
+	clearButton += '<button id="button-clean-filter" style="padding: 7px; margin: 0px; margin-left: 5px;" class="btn btn-sm btn-default"><i class="fa fa-refresh margin-r-5"></i>' + gettext('Clean filter') + '</button>';
+	$('#layers-table_wrapper').prepend(clearButton);
+	
+	var selectHtml = '';
+	selectHtml += '<select id="select-project" style="float: left; width: 200px;" name="select-project" class="form-control">';
+	selectHtml += 	'<option value="__none__">' + gettext('Filter by project') + ' ...</option>';
+	selectHtml += '</select>';
+	$('#layers-table_wrapper').prepend(selectHtml);
+	for (var i=0; i<projects.length; i++) {
+		$('#select-project').append($('<option>', {value: projects[i].title, text: projects[i].title}));
+	}
+
+	$('#select-project').on('change', function() {
+		var project = $(this).val();
+		var dataTable = $('#layers-table').DataTable();
+		dataTable.columns(6).search(project, true, false).draw();
+	});
+	
+	$('#button-clean-filter').on('click', function() {
+		var dataTable = $('#layers-table').DataTable();
+		dataTable.columns(6).search('', true, false).draw();
 	});
 	
 	function updateThumbnail(data){
