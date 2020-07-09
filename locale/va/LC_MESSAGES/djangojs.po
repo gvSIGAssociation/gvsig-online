@@ -107,5 +107,5 @@ msgstr ""
 msgid "Filter by project"
 msgstr "Filtrar per projecte"
 
-msgid "Clean filter"
-msgstr "Netejar filtre"
+msgid "Show all layers"
+msgstr "Mostrar totes les capes"

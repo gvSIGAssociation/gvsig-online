@@ -122,5 +122,5 @@ msgstr "La conexión ha sido exitosa"
 msgid "Filter by project"
 msgstr "Filtrar por proyecto"
 
-msgid "Clean filter"
-msgstr "Limpiar filtro"
+msgid "Show all layers"
+msgstr "Mostrar todas las capas"

@@ -107,5 +107,5 @@ msgstr ""
 msgid "Filter by project"
 msgstr ""
 
-msgid "Clean filter"
+msgid "Show all layers"
 msgstr ""
