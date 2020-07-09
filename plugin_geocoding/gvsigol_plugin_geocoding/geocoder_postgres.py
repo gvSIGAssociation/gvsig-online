@@ -84,6 +84,7 @@ class GeocoderPostgres():
 
         i = Introspect(database=dbname, host=dbhost, port=dbport, user=dbuser, password=dbpassword)
         field_info = i.get_geometry_column_info(provider.dbtable, provider.dbfieldGeom, provider.dbschema)
+        i.close()
         
         try:
             provider.srs = field_info[0][4]
