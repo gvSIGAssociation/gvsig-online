@@ -28,7 +28,6 @@
 							<th>{% trans "Datastore" %}</th>
 							<th>{% trans "Layer group" %}</th>
 							<th>{% trans "Projects" %}</th>
-							<th>{% trans "Cached" %}</th>
 							<th></th>
 							<th></th>
 							<th></th>
@@ -46,11 +45,6 @@
 							<td>{{ layer.datastore_name }}</td>
 							<td>{{ layer.lg_name }} ({{layer.lg_title }})</td>
 							<td>{{ layer.projects }}</td>
-							{% if layer.cached %}
-							<td><input disabled type="checkbox" checked/></td>
-							{% else %}
-							<td><input disabled type="checkbox"/></td>
-							{% endif %}
 							<td></td>
 							<td></td>
 							<td></td>
@@ -221,7 +215,7 @@ $(document).ready(function() {
 	});
 	
 	var clearButton = '';
-	clearButton += '<button id="button-clean-filter" style="padding: 7px; margin: 0px; margin-left: 5px;" class="btn btn-sm btn-default"><i class="fa fa-refresh margin-r-5"></i>' + gettext('Clean filter') + '</button>';
+	clearButton += '<button id="button-clean-filter" style="padding: 7px; margin: 0px; margin-left: 5px;" class="btn btn-sm btn-default"><i class="fa fa-eye margin-r-5"></i>' + gettext('Show all layers') + '</button>';
 	$('#layers-table_wrapper').prepend(clearButton);
 	
 	var selectHtml = '';
@@ -242,6 +236,7 @@ $(document).ready(function() {
 	$('#button-clean-filter').on('click', function() {
 		var dataTable = $('#layers-table').DataTable();
 		dataTable.columns(6).search('', true, false).draw();
+		$('#select-project option[value=__none__]').attr('selected','selected');
 	});
 	
 	function updateThumbnail(data){
