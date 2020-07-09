@@ -633,11 +633,44 @@ def layer_list(request):
     layer_list = None
     if request.user.is_superuser:
         layer_list = Layer.objects.filter(external=False)
+        project_list = Project.objects.all()
+        
     else:
         layer_list = Layer.objects.filter(created_by__exact=request.user.username).filter(external=False)
+        project_list = Project.objects.filter(created_by__exact=request.user.username)
 
+    layers = []
+    for l in layer_list:
+        projects = []
+        project_layergroups = ProjectLayerGroup.objects.filter(layer_group_id=l.layer_group.id)
+        for lg in project_layergroups:
+            projects.append(lg.project.title)
+        layer = {
+            'id': l.id,
+            'type': l.type,
+            'thumbnail_url': l.thumbnail.url,
+            'name': l.name,
+            'title': l.title,
+            'datastore_name': l.datastore.name,
+            'lg_name': l.layer_group.name,
+            'lg_title': l.layer_group.title,
+            'cached': l.cached,
+            'projects': '; '.join(projects)
+        }
+        layers.append(layer)
+        
+    projects = []
+    for p in project_list:
+        project = {
+            'id': p.id,
+            'name': p.name,
+            'title': p.title
+        }
+        projects.append(project)
+        
     response = {
-        'layers': layer_list
+        'layers': layers,
+        'projects': json.dumps(projects)
     }
     return render(request, 'layer_list.html', response)
 

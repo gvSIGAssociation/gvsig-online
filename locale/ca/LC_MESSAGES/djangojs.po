@@ -103,3 +103,9 @@ msgstr ""
 
 msgid "Connection has been success"
 msgstr ""
+
+msgid "Filter by project"
+msgstr "Filtrar per projecte"
+
+msgid "Clean filter"
+msgstr "Netejar filtre"

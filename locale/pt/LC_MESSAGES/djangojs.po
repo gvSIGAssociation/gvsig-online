@@ -119,3 +119,9 @@ msgstr "Erro ao recarregar o nó"
 
 msgid "Connection has been success"
 msgstr "A conexão foi um sucesso"
+
+msgid "Filter by project"
+msgstr "Filtrar por projeto"
+
+msgid "Clean filter"
+msgstr "Limpe o filtro"
