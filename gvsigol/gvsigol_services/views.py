@@ -616,6 +616,8 @@ def datastore_delete(request, dsid):
                 schema = 'imagemosaic'
                 i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
                 i.delete_mosaic(ds.name, schema)
+                i.close()
+                
             gs.reload_nodes()
             return HttpResponseRedirect(reverse('datastore_list'))
             
@@ -764,6 +766,7 @@ def layer_delete_operation(request, layer_id):
         schema = 'imagemosaic'
         i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
         i.delete_mosaic(layer.datastore.name, schema)
+        i.close()
 
     if not 'no_thumbnail.jpg' in layer.thumbnail.name:
         if os.path.isfile(layer.thumbnail.path):
@@ -904,6 +907,7 @@ def backend_fields_list(request):
             schema = params.get('schema', 'public')
             i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
             layer_defs = i.get_fields_info(name, schema)
+            i.close()
             result_resources = []
             conf = None
             if layer and layer.conf:
@@ -1032,7 +1036,8 @@ def layer_add_with_group(request, layergroup_id):
                     extraParams['maxFeatures'] = maxFeatures
                     i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
                     fields = i.get_fields(form.cleaned_data['name'], schema)
-
+                    i.close()
+                    
                     for field in fields:
                         if ' ' in field:
                             raise ValueError(_("Invalid layer fields: '{value}'. Layer can't have fields with whitespaces").format(value=field))
@@ -1477,7 +1482,8 @@ def get_date_fields_from_resource(request):
             schema = params.get('schema', 'public')
             i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
             layer_defs = i.get_fields_info(resource_name, schema)
-
+            i.close()
+            
             for layer_def in layer_defs:
                 if layer_def['type'] == 'date':
                     date_fields.append(layer_def['name'])
@@ -1783,7 +1789,7 @@ def layers_get_temporal_properties(request):
                 schema = 'imagemosaic'
                 i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
                 temporal_defs = i.get_mosaic_temporal_info(layer.name, schema, layer.time_default_value_mode, layer.time_default_value)
-
+                i.close()
 
             else:
                 host = params['host']
@@ -1794,7 +1800,8 @@ def layers_get_temporal_properties(request):
                 schema = params.get('schema', 'public')
                 i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
                 temporal_defs = i.get_temporal_info(layer.name, schema, layer.time_enabled_field, layer.time_enabled_endfield, layer.time_default_value_mode, layer.time_default_value)
-
+                i.close()
+                
             if temporal_defs.__len__() > 0 and temporal_defs[0]['min_value'] != '' and temporal_defs[0]['max_value'] != '':
                 aux_min_value = datetime.strptime(temporal_defs[0]['min_value'], '%Y-%m-%d %H:%M:%S')
                 if min_value == '' or datetime.strptime(min_value, '%Y-%m-%d %H:%M:%S') > aux_min_value:
@@ -3091,7 +3098,8 @@ def get_datatable_data(request):
         params = json.loads(layer.datastore.connection_params)
         i = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
         pk_defs = i.get_pk_columns(layer.name, params.get('schema', 'public'))
-
+        i.close()
+        
         if not sortby_field:
             sortby_field = encoded_property_name.split(',')[0]
 
@@ -3438,6 +3446,7 @@ def get_feat_version(resource, featid):
         pks = i.get_pk_columns(resource.layer.name, resource.layer.datastore.name)
         if(pks and len(pks) > 0):
             rows = i.custom_query("SELECT " + settings.VERSION_FIELD + ", " + settings.DATE_FIELD + " FROM "+ resource.layer.datastore.name + "." + resource.layer.name + " WHERE " + pks[0] + "=" + str(featid))
+            i.close()
             if(rows and len(rows) > 0): 
                 return rows[0][0]
     except Exception:
@@ -3615,7 +3624,8 @@ def _describeFeatureType(lyr, workspace, skip_pks):
         layer_defs = layer_defs + layer_mv_defs
         geom_defs = i.get_geometry_columns_info(layer.name, schema)
         pk_defs = i.get_pk_columns(layer.name, schema)
-
+        i.close()
+        
         for layer_def in layer_defs:
             for geom_def in geom_defs:
                 if layer_def['name'] == geom_def[2]:
@@ -3676,7 +3686,8 @@ def describe_feature_type(lyr, workspace):
             layer_mv_defs = i.get_fields_mv_info(layer.name, schema)
         layer_defs = layer_defs + layer_mv_defs
         geom_defs = i.get_geometry_columns_info(layer.name, schema)
-
+        i.close()
+        
         for layer_def in layer_defs:
             for geom_def in geom_defs:
                 if layer_def['name'] == geom_def[2]:
@@ -3718,7 +3729,8 @@ def describeFeatureTypeWithPk(request):
             layer_defs = i.get_fields_info(layer.name, schema)
             geom_defs = i.get_geometry_columns_info(layer.name, schema)
             pk_defs = i.get_pk_columns(layer.name, schema)
-
+            i.close()
+            
             for layer_def in layer_defs:
                 for geom_def in geom_defs:
                     if layer_def['name'] == geom_def[2]:

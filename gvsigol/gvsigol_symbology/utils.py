@@ -401,6 +401,7 @@ def get_geometry_field(layer):
             layer_name = layer_name_split[1]
         if layer_name:
             geom_fields = i.get_geometry_columns_info(layer_name, schema)
+            i.close()
             if geom_fields.__len__() > 0: 
                 return {
                     'field_name': geom_fields[0][2],
