@@ -230,7 +230,8 @@ $(document).ready(function() {
 	$('#select-project').on('change', function() {
 		var project = $(this).val();
 		var dataTable = $('#layers-table').DataTable();
-		dataTable.columns(6).search(project, true, false).draw();
+		var regex = ";" + project + "(?<=;)a[^;]+(?=;)";
+		dataTable.columns(6).search(project, "(?<=;)a[^;]+(?=;)", true, false).draw();
 	});
 	
 	$('#button-clean-filter').on('click', function() {
