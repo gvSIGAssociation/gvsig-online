@@ -114,7 +114,7 @@ class Geoserver():
                                    (Geoserver.CREATE_TYPE_SQL_VIEW, _("SQL View")))
     
     def getGsconfig(self):
-        return gscat.Catalog(self.rest_url, self.user, self.password, disable_ssl_certificate_validation=True)
+        return gscat.Catalog(self.rest_url, self.user, self.password, validate_ssl_certificate=False)
     
     
     def getSupportedTypes(self):
@@ -833,7 +833,7 @@ class Geoserver():
      
     def getDataStores(self, workspace):
         ws = self.getGsconfig().get_workspace(workspace.name)
-        stores = self.getGsconfig().get_stores(workspace=ws)
+        stores = self.getGsconfig().get_stores(workspaces=ws)
         resources = []
         for store in stores:
             resources.append(store.name)
