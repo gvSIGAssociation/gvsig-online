@@ -28,6 +28,7 @@ from gvsigol_plugin_catalog.models import LayerMetadata
 import logging
 from gvsigol_plugin_catalog.mdstandards import registry
 import requests
+from  django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger("gvsigol")
 
@@ -220,6 +221,8 @@ class Geonetwork():
             if self.xmlapi.gn_auth(self.user, self.password) and lm.metadata_uuid:
                 self.xmlapi.gn_update_metadata(lm.metadata_uuid, layer, layer.abstract, layer_info, ds_type)
                 self.xmlapi.gn_unauth()
+        except ObjectDoesNotExist:
+            pass
         except Exception as e:
             logger.exception("layer metadata update failed")
             pass
