@@ -4273,7 +4273,8 @@ def layer_cache_config(request, layer_id):
             "grid_subsets": config.get('gridSubsets'),
             "json_grid_subsets": json.dumps(config.get('gridSubsets')),
             "formats": settings.CACHE_OPTIONS['FORMATS'],
-            "tasks": tasks['long-array-array']
+            "tasks": tasks['long-array-array'],
+            "latlong_extent": layer.latlong_extent
         }
             
         return render(request, 'layer_cache_config.html', response)
@@ -4540,7 +4541,7 @@ def test_connection(request):
         
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
     
-@login_required(login_url='/gvsigonline/auth/login_user/')
+#@login_required(login_url='/gvsigonline/auth/login_user/')
 @csrf_exempt
 def register_action(request):
     if request.method == 'POST':

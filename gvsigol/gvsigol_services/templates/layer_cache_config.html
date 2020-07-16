@@ -103,19 +103,19 @@
 						<div class="row">
 							<div class="col-md-3 form-group">
 								<label for="input_min_x">{% trans "MinX" %}</label>
-								<input readonly name="input_min_x" id="input_min_x" type="text" class="form-control">						
+								<input readonly name="input_min_x" id="input_min_x" type="text" class="form-control" value="null">						
 							</div>
 							<div class="col-md-3 form-group">
 								<label for="input_min_y">{% trans "MinY" %}</label>
-								<input readonly name="input_min_y" id="input_min_y" type="text" class="form-control">						
+								<input readonly name="input_min_y" id="input_min_y" type="text" class="form-control" value="null">						
 							</div>
 							<div class="col-md-3 form-group">
 								<label for="input_max_x">{% trans "MaxX" %}</label>
-								<input readonly name="input_max_x" id="input_max_x" type="text" class="form-control">						
+								<input readonly name="input_max_x" id="input_max_x" type="text" class="form-control" value="null">						
 							</div>
 							<div class="col-md-3 form-group">
 								<label for="input_max_y">{% trans "MaxY" %}</label>
-								<input readonly name="input_max_y" id="input_max_y" type="text" class="form-control">						
+								<input readonly name="input_max_y" id="input_max_y" type="text" class="form-control" value="null">						
 							</div>
 						</div>
 	       				<div class="row">
@@ -170,6 +170,10 @@
 $('#menu-manage-services').addClass("active");
 $('#submenu-cache').addClass("active");
 $().ready(function() {
+	
+	var latLongExtentString = '{{ latlong_extent }}';
+	var latLongExtent = latLongExtentString.split(',');
+      
 	/**
 	  * Create the map.
 	  */
@@ -183,19 +187,58 @@ $().ready(function() {
 			zoom : 2
 		})
 	});
-	var extent = map.getView().calculateExtent(map.getSize());
+	
+	var interaction = new ol.interaction.Extent({
+		condition: ol.events.condition.allways
+	});
+	interaction.on('extentchanged', function(e) {
+		if (e.b) {
+			$('#input_min_x').val(e.b[0]);
+			$('#input_min_y').val(e.b[1]);
+			$('#input_max_x').val(e.b[2]);
+			$('#input_max_y').val(e.b[3]);	
+		}
+	});
+	
+	var dragBoxCtrl = new ol.control.Toggle({
+		html: '<i class="fa fa-pencil-square-o"></i>',
+		className: "dragbox-custom",
+		title: "Select extent",
+		//interaction: interaction,
+		active: false,
+		onToggle: function(active){	
+			if (active) {
+				map.addInteraction(interaction);
+				
+			} else {
+				map.removeInteraction(interaction);
+			}
+		}
+	});
+	map.addControl(dragBoxCtrl);
+	
+	if (Array.isArray(latLongExtent) && latLongExtent.length==4) { // use extent from metadata if available
+		var extent = ol.proj.transformExtent([parseFloat(latLongExtent[0]), parseFloat(latLongExtent[1]), parseFloat(latLongExtent[2]), parseFloat(latLongExtent[3])], ol.proj.get('EPSG:4326'), ol.proj.get('EPSG:3857'));
+		map.getView().fit(extent, map.getSize());
+		/*$('#input_min_x').val(extent[0]);
+		$('#input_min_y').val(extent[1]);
+		$('#input_max_x').val(extent[2]);
+		$('#input_max_y').val(extent[3]);*/
+	}
+	
+	/*var extent = map.getView().calculateExtent(map.getSize());
 	$('#input_min_x').val(extent[0]);
 	$('#input_min_y').val(extent[1]);
 	$('#input_max_x').val(extent[2]);
-	$('#input_max_y').val(extent[3]);
+	$('#input_max_y').val(extent[3]);*/
 	
-	map.on('moveend', function (){
+	/*map.on('moveend', function (){
 		var extent = map.getView().calculateExtent(map.getSize());
 		$('#input_min_x').val(extent[0]);
 		$('#input_min_y').val(extent[1]);
 		$('#input_max_x').val(extent[2]);
 		$('#input_max_y').val(extent[3]);
-	});
+	});*/
 	
 	var gridSubsets = {{json_grid_subsets|safe}};
 	for (var i=0; i<gridSubsets.length; i++) {
@@ -207,10 +250,10 @@ $().ready(function() {
 				$('#input_zoom_stop option[value=' + zoomStop + ']').attr('selected','selected');
 			}
 			if (gridSubsets[i].extent) {
-				$('#input_min_x').val(gridSubsets[i].extent.coords[0]);
+				/*$('#input_min_x').val(gridSubsets[i].extent.coords[0]);
 				$('#input_min_y').val(gridSubsets[i].extent.coords[1]);
 				$('#input_max_x').val(gridSubsets[i].extent.coords[2]);
-				$('#input_max_y').val(gridSubsets[i].extent.coords[3]);
+				$('#input_max_y').val(gridSubsets[i].extent.coords[3]);*/
 			}
 		}
 	}
@@ -230,10 +273,10 @@ $().ready(function() {
 				var zoomStop = gridSubsets[i].zoomStop;
 				$('#input_zoom_start option[value=' + zoomStart + ']').attr('selected','selected');
 				$('#input_zoom_stop option[value=' + zoomStop + ']').attr('selected','selected');
-				$('#input_min_x').val(gridSubsets[i].extent.coords[0]);
+				/*$('#input_min_x').val(gridSubsets[i].extent.coords[0]);
 				$('#input_min_y').val(gridSubsets[i].extent.coords[1]);
 				$('#input_max_x').val(gridSubsets[i].extent.coords[2]);
-				$('#input_max_y').val(gridSubsets[i].extent.coords[3]);
+				$('#input_max_y').val(gridSubsets[i].extent.coords[3]);*/
 			}
 		}
   	});
@@ -298,6 +341,22 @@ $().ready(function() {
 			}
 		});
 	});
+	
+	$('#cache-config-form').submit(function(event) {
+		event.preventDefault();
+		 
+		var minX = $('#input_min_x').val();
+		var minY = $('#input_min_y').val();
+		var maxX = $('#input_max_x').val();
+		var maxY = $('#input_max_y').val();
+		 
+		 if (minX == 'null' || minY == 'null' || maxX == 'null' || maxY == 'null') {
+			 messageBox.show('warning', gettext('You must select an extent on the map using the control'));
+			 
+		 } else {
+			 $(this).unbind('submit').submit();	 
+		 }
+	})
 	
 });
 </script>
