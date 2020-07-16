@@ -5100,3 +5100,14 @@ input.temporary-check[type=checkbox]{
 .dashboard-form-title-color {
 	color: #444;
 }
+
+.ol-button i {	
+	color: inherit;
+}
+.ol-button.ol-active button{	
+	background: rgba(60, 136, 0, 0.7)
+}
+.dragbox-custom {	
+	right: 8px;
+	top: 8px;
+}

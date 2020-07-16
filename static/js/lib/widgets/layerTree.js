@@ -78,6 +78,13 @@ layerTree.prototype.createTree = function() {
 	
 	var tree = '';
 	tree += '<div class="box">';
+	tree += 	'<div class="box-body">';
+	tree += 		'<select class="combo-layers" id="combo-layers">';
+	tree +=				'<option></option>';
+	tree += 		'</select>';
+	tree += 	'</div>';
+	tree += '</div>';
+	tree += '<div class="box">';
 	tree += '	<div class="box-body">';
 	tree += '		<ul class="layer-tree">';
 	if (baseGroup != null) {
@@ -115,7 +122,7 @@ layerTree.prototype.createTree = function() {
 				tree += '					<i style="cursor: pointer;" class="layertree-folder-icon fa fa-folder-o"></i>';
 				tree += '					<span class="text">' + layerGroup.groupTitle + '</span>';
 				tree += '					<div class="box-tools pull-right">';
-				tree += '						<button class="btn btn-box-tool btn-box-tool-custom group-collapsed-button" data-widget="collapse">';
+				tree += '						<button id="button-' + layerGroup.groupId + '" class="btn btn-box-tool btn-box-tool-custom group-collapsed-button" data-widget="collapse">';
 				tree += '							<i class="fa fa-plus"></i>';
 				tree += '						</button>';
 				tree += '					</div>';
@@ -231,6 +238,48 @@ layerTree.prototype.createTree = function() {
 	
 	this.setLayerEvents();
 	this.createTemporaryTab();
+	
+	var availableLayers = new Array();
+	if (this.conf.layerGroups) {
+		for (var i=0; i<this.conf.layerGroups.length; i++) {
+			var layerGroup = this.conf.layerGroups[i];
+			if (!layerGroup.basegroup) {
+				for (var j=0; j<layerGroup.layers.length; j++) {	
+					var layer = layerGroup.layers[j];
+					availableLayers.push({
+						id: layer.id,
+				        text: layer.title,
+				        group: layerGroup.groupId
+					});
+				}
+			}
+		}
+	}
+	$(".combo-layers").select2({
+		data: availableLayers,
+		placeholder: gettext('Find layer'),
+		allowClear: true,
+		width: '380px'
+	});
+	
+	$('#combo-layers').on('select2:select', function (e) {
+	    var data = e.params.data;
+	    $('.layer-tree li').each(function () {
+	    	if (!$('#' + this.id).hasClass("collapsed-box")) {
+		    	$('#button-' + this.id).click();
+		    	$('#' + this.id).addClass("collapsed-box");
+		    }
+	    });
+	    if ($('#' + data.group).hasClass( "collapsed-box" )) {
+	    	$('#button-' + data.group).click();
+	    }
+	    document.getElementById('layer-box-' + data.id).scrollIntoView();
+	    var mapLayer = self.getLayerFromMap(data);
+	    if (!mapLayer.getVisible()) {
+	    	mapLayer.setVisible(true);
+	    	$('#' + data.id).prop('checked', true);
+	    }  
+	});
 
 };
 
