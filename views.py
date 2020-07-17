@@ -982,21 +982,21 @@ def project_get_conf(request):
                             layer['native_extent'] = l.native_extent
                             layer['latlong_extent'] = l.latlong_extent
                             layer['opacity'] = 1
-                            layer['wms_url'] = core_utils.get_wms_url(request, workspace)
-                            layer['wms_url_no_auth'] = workspace.wms_endpoint
+                            layer['wms_url'] = core_utils.get_wms_url(workspace)
+                            layer['wms_url_no_auth'] = core_utils.get_wms_url(workspace)
                             if datastore.type.startswith('v_'):
-                                layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
-                                layer['wfs_url_no_auth'] = workspace.wfs_endpoint
+                                layer['wfs_url'] = core_utils.get_wfs_url(workspace)
+                                layer['wfs_url_no_auth'] = core_utils.get_wfs_url(workspace)
                             elif datastore.type.startswith('c_'):
-                                layer['wcs_url'] = workspace.wcs_endpoint
+                                layer['wcs_url'] = core_utils.get_wcs_url(workspace)
                             layer['namespace'] = workspace.uri
                             layer['workspace'] = workspace.name
                             layer['metadata'] = core_utils.get_layer_metadata_uuid(l)
                             layer['metadata_url'] = core_utils.get_catalog_url_from_uuid(request, layer['metadata'], lang=language.part2b)
                             if l.cached:
-                                layer['cache_url'] = core_utils.get_cache_url(request, workspace)
+                                layer['cache_url'] = core_utils.get_cache_url(workspace)
                             else:
-                                layer['cache_url'] = core_utils.get_wms_url(request, workspace)
+                                layer['cache_url'] = core_utils.get_wms_url(workspace)
     
                             if datastore.type == 'e_WMS':
                                 layer['legend'] = ""
@@ -1004,22 +1004,22 @@ def project_get_conf(request):
                                 ls = get_default_style(l)
                                 if ls is None:
                                     print 'CAPA SIN ESTILO POR DEFECTO: ' + l.name
-                                    layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
-                                    layer['legend_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
-                                    layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
-                                    layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                    layer['legend'] = core_utils.get_wms_url(workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                    layer['legend_no_auth'] = core_utils.get_wms_url(workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                    layer['legend_graphic'] = core_utils.get_wms_url(workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                    layer['legend_graphic_no_auth'] = core_utils.get_wms_url(workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
     
                                 else:
                                     if not ls.has_custom_legend:
-                                        layer['legend'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
-                                        layer['legend_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
-                                        layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
-                                        layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                        layer['legend'] = core_utils.get_wms_url(workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                        layer['legend_no_auth'] = core_utils.get_wms_url(workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                        layer['legend_graphic'] = core_utils.get_wms_url(workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                        layer['legend_graphic_no_auth'] = core_utils.get_wms_url(workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
                                     else:
                                         layer['legend'] = ls.custom_legend_url
                                         layer['legend_no_auth'] = ls.custom_legend_url
-                                        layer['legend_graphic'] = core_utils.get_wms_url(request, workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
-                                        layer['legend_graphic_no_auth'] = workspace.wms_endpoint + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                        layer['legend_graphic'] = core_utils.get_wms_url(workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
+                                        layer['legend_graphic_no_auth'] = core_utils.get_wms_url(workspace) + '?SERVICE=WMS&VERSION=1.1.1&layer=' + l.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
                             
                             layer['timeout'] = l.timeout
                             _, urlicon = utils.get_layer_img(l.id, None)
@@ -1028,7 +1028,7 @@ def project_get_conf(request):
     
                             w = {}
                             w['name'] = workspace.name
-                            w['wms_url'] = workspace.wms_endpoint
+                            w['wms_url'] = core_utils.get_wms_url(workspace)
                             workspaces.append(w)
                         idx = idx + 1
     
@@ -1121,7 +1121,11 @@ def project_get_conf(request):
 
         auth_urls = []
         for s in Server.objects.all():
-            auth_urls.append(s.frontend_url + '/wms')
+            if settings.BASE_URL in s.frontend_url:
+                u = s.frontend_url.replace(settings.BASE_URL, '')
+                auth_urls.append(u + '/wms')
+            else:
+                auth_urls.append(s.frontend_url + '/wms')
 
         project_tools = json.loads(project.tools) if project.tools else get_available_tools(True, True)
 
@@ -1129,9 +1133,9 @@ def project_get_conf(request):
             'pid': pid,
             'project_name': project.name,
             'project_title': project.title,
-            'project_logo': project.logo.url,
+            'project_logo': project.logo.url.replace(settings.BASE_URL, ''),
             'project_logo_link': project.logo_link,
-            'project_image': project.image.url,
+            'project_image': project.image.url.replace(settings.BASE_URL, ''),
             'project_tools': project_tools,
             "view": {
                 "restricted_extent": project.restricted_extent,
@@ -1264,11 +1268,11 @@ def select_public_project(request):
 def documentation(request):
     lang = request.LANGUAGE_CODE
     response = {
-        'intro_url': settings.BASE_URL + '/docs/web/intro/' + lang + '/',
-        'admin_guide_url': settings.BASE_URL + '/docs/web/dashboard/' + lang + '/',
-        'viewer_url': settings.BASE_URL + '/docs/web/viewer/' + lang + '/',
-        'plugins_url': settings.BASE_URL + '/docs/web/plugins/' + lang + '/',
-        'mobile_url': settings.BASE_URL + '/docs/mobile/' + lang + '/'
+        'intro_url': '/docs/web/intro/' + lang + '/',
+        'admin_guide_url': '/docs/web/dashboard/' + lang + '/',
+        'viewer_url': '/docs/web/viewer/' + lang + '/',
+        'plugins_url': '/docs/web/plugins/' + lang + '/',
+        'mobile_url': '/docs/mobile/' + lang + '/'
     }
     return render(request, 'documentation.html', response)
 
