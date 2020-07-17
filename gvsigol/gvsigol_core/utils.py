@@ -338,63 +338,27 @@ def toc_remove_layer(layer):
             pass
         
 def get_geoserver_base_url(request, url):
-    '''
-    geoserver_url = None
-    if 'username' in request.session:
-        if request.session['username'] is not None and request.session['password'] is not None:
-            split_geoserver_url = url.split('//')
-            geoserver_url = split_geoserver_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_geoserver_url[1]
-    else:
-        geoserver_url = url
-        
-    return geoserver_url
-    '''
     return url
    
-def get_wms_url(request, workspace):
-    '''
-    wms_url = None
-    if 'username' in request.session:
-        if request.session['username'] is not None and request.session['password'] is not None:
-            split_wms_url = workspace.wms_endpoint.split('//')
-            wms_url = split_wms_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_wms_url[1]
-    else:
-        wms_url = workspace.wms_endpoint
-        
-    return wms_url
-    '''
-    return workspace.wms_endpoint
+def get_wms_url(workspace):
+    url = workspace.wms_endpoint.replace(settings.BASE_URL, '')
+    return url
 
-def get_wfs_url(request, workspace):
-    '''
-    wfs_url = None
-    if 'username' in request.session:
-        if request.session['username'] is not None and request.session['password'] is not None:
-            split_wfs_url = workspace.wfs_endpoint.split('//')
-            wfs_url = split_wfs_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_wfs_url[1]
-    else:
-        wfs_url = workspace.wfs_endpoint
-        
-    return wfs_url
-    '''
-    return workspace.wfs_endpoint
+def get_wfs_url(workspace):
+    url = workspace.wfs_endpoint.replace(settings.BASE_URL, '')
+    return url
 
-def get_cache_url(request, workspace):
-    '''
-    cache_url = None
-    if 'username' in request.session:
-        if request.session['username'] is not None and request.session['password'] is not None:
-            split_cache_url = workspace.cache_endpoint.split('//')
-            cache_url = split_cache_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_cache_url[1]
-    else:
-        cache_url = workspace.cache_endpoint
-        
-    return cache_url
-    '''
+def get_wcs_url(workspace):
+    url = workspace.wcs_endpoint.replace(settings.BASE_URL, '')
+    return url
+
+def get_cache_url(workspace):
     if workspace.wmts_endpoint and workspace.wmts_endpoint.__len__() > 0:
-        return workspace.wmts_endpoint
+        url = workspace.wmts_endpoint.replace(settings.BASE_URL, '')
+        return url
     
-    return workspace.cache_endpoint
+    url = workspace.cache_endpoint.replace(settings.BASE_URL, '')
+    return url
 
 def get_catalog_url(request, layer):   
     catalog_url = ''
