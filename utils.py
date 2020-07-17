@@ -295,21 +295,26 @@ def get_resources_dir(resource_type):
 def get_resource_type(lr):
     url = None
     type = None
+    
+    url = settings.MEDIA_URL
+    if settings.BASE_URL in url:
+        url = url.replace(settings.BASE_URL, '')
+    
     if lr.type == LayerResource.EXTERNAL_IMAGE:
         type = 'image'
-        url = os.path.join(settings.MEDIA_URL, lr.path)
+        url = os.path.join(url, lr.path)
     elif lr.type == LayerResource.EXTERNAL_PDF:
         type = 'pdf'
-        url = os.path.join(settings.MEDIA_URL, lr.path)
+        url = os.path.join(url, lr.path)
     elif lr.type == LayerResource.EXTERNAL_DOC:
         type = 'doc'
-        url = os.path.join(settings.MEDIA_URL, lr.path)
+        url = os.path.join(url, lr.path)
     elif lr.type == LayerResource.EXTERNAL_FILE:
         type = 'file'
-        url = os.path.join(settings.MEDIA_URL, lr.path)
+        url = os.path.join(url, lr.path)
     elif lr.type == LayerResource.EXTERNAL_VIDEO:
         type = 'video'
-        url = os.path.join(settings.MEDIA_URL, lr.path)
+        url = os.path.join(url, lr.path)
     elif lr.type == LayerResource.EXTERNAL_ALFRESCO_DIR:
         type = 'alfresco_dir'
         url = lr.path

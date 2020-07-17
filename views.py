@@ -2878,10 +2878,10 @@ def get_feature_info(request):
                     rs.append(is_grouped_symbology_request(request, layer_array['url'], aux_response, styles, fut_session))
                     
                 else:
+                    url = request.META['HTTP_ORIGIN'] + layer_array['url']
                     styles = []
                     if 'styles' in layer_array:
                         styles = layer_array['styles']
-                    url = layer_array['url']
                     urls.append(url)
                     query_layer = layer_array['query_layer']
                     ws= None
@@ -2909,7 +2909,7 @@ def get_feature_info(request):
 
             i=0
             for layer_array in layers_array:
-                url = layer_array['url']
+                url = request.META['HTTP_ORIGIN'] + layer_array['url']
                 query_layer = layer_array['query_layer']
                 ws= None
                 if 'workspace' in layer_array:
@@ -3110,10 +3110,10 @@ def get_datatable_data(request):
         if len(pk_defs) >= 1:
             sortby_field = str(pk_defs[0])
         '''
-
+        
+        wfs_url = request.META['HTTP_ORIGIN'] + wfs_url
         if wfs_url == None:
-            wfs_url = layer.datastore.workspace.wfs_endpoint
-
+            wfs_url = request.META['HTTP_ORIGIN'] + wfs_url
         try:
             if search_value == '':
                 values = {
@@ -3356,27 +3356,30 @@ def get_feature_resources(request):
             layer_resources = LayerResource.objects.filter(layer_id=layer.id).filter(feature=int(fid))
             resources = []
             for lr in layer_resources:
-                url = None
+                url = settings.MEDIA_URL
+                if settings.BASE_URL in url:
+                    url = url.replace(settings.BASE_URL, '')
+                    
                 type = None
                 if lr.type == LayerResource.EXTERNAL_IMAGE:
                     type = 'image'
-                    url = os.path.join(settings.MEDIA_URL, lr.path)
+                    url = os.path.join(url, lr.path)
                     name = lr.path.split('/')[-1]
                 elif lr.type == LayerResource.EXTERNAL_PDF:
                     type = 'pdf'
-                    url = os.path.join(settings.MEDIA_URL, lr.path)
+                    url = os.path.join(url, lr.path)
                     name = lr.path.split('/')[-1]
                 elif lr.type == LayerResource.EXTERNAL_DOC:
                     type = 'doc'
-                    url = os.path.join(settings.MEDIA_URL, lr.path)
+                    url = os.path.join(url, lr.path)
                     name = lr.path.split('/')[-1]
                 elif lr.type == LayerResource.EXTERNAL_FILE:
                     type = 'file'
-                    url = os.path.join(settings.MEDIA_URL, lr.path)
+                    url = os.path.join(url, lr.path)
                     name = lr.path.split('/')[-1]
                 elif lr.type == LayerResource.EXTERNAL_VIDEO:
                     type = 'video'
-                    url = os.path.join(settings.MEDIA_URL, lr.path)
+                    url = os.path.join(url, lr.path)
                     name = lr.path.split('/')[-1]
                 elif lr.type == LayerResource.EXTERNAL_ALFRESCO_DIR:
                     type = 'alfresco_dir'
