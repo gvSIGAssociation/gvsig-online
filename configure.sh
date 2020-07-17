@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function configure() {
-	echo "INFO: Replace settings from variables ..."
+	echo "INFO: Replace settings from variables ...."
 	
 	#echo "INFO: Replace DEBUG"
 	if [ -z $DEBUG ]; then
