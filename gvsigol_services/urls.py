@@ -79,6 +79,8 @@ urlpatterns = [
     url(r'^kill_all_tasks/$', services_views.kill_all_tasks, name='kill_all_tasks'),
     url(r'^kill_all_group_tasks/$', services_views.kill_all_group_tasks, name='kill_all_group_tasks'),
     url(r'^create_base_layer/(?P<pid>[0-9]+)/$', services_views.create_base_layer, name='create_base_layer'),
+    url(r'^base_layer_process_update/(?P<pid>[0-9]+)/$', services_views.base_layer_process_update, name='base_layer_process_update'),
+    url(r'^stop_base_layer_process/(?P<pid>[0-9]+)/$', services_views.stop_base_layer_process, name='stop_base_layer_process'),
     
     url(r'^layers_get_temporal_properties/$', services_views.layers_get_temporal_properties, name='layers_get_temporal_properties'),
     url(r'^get_date_fields_from_resource/$', services_views.get_date_fields_from_resource, name='get_date_fields_from_resource'),
