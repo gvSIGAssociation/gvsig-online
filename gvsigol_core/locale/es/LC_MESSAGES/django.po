@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-20 11:51+0200\n"
+"POT-Creation-Date: 2020-07-20 13:40+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -160,11 +160,11 @@ msgstr ""
 "Aprenda a administrar la información geográfica desde un dispositivo móvil o "
 "una tableta"
 
-#: gvsigol_core/templates/home.html:18 gvsigol_core/utils.py:487
+#: gvsigol_core/templates/home.html:18 gvsigol_core/utils.py:451
 msgid "Username"
 msgstr "Nombre de usuario"
 
-#: gvsigol_core/templates/home.html:20 gvsigol_core/utils.py:490
+#: gvsigol_core/templates/home.html:20 gvsigol_core/utils.py:454
 msgid "Email"
 msgstr "Correo electrónico"
 
@@ -188,8 +188,8 @@ msgstr "Ha iniciado sesión como usuario con permisos restringidos"
 msgid "Last login"
 msgstr "Último acceso"
 
-#: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:491
-#: gvsigol_core/utils.py:503
+#: gvsigol_core/templates/home.html:34 gvsigol_core/utils.py:455
+#: gvsigol_core/utils.py:467
 msgid "Password"
 msgstr "Contraseña"
 
@@ -206,7 +206,7 @@ msgid "Passwords doesn't match"
 msgstr "Las contraseñas no coinciden"
 
 #: gvsigol_core/templates/home.html:44 gvsigol_core/templates/home.html:45
-#: gvsigol_core/utils.py:499
+#: gvsigol_core/utils.py:463
 msgid "New password"
 msgstr "Nueva contraseña"
 
@@ -639,14 +639,12 @@ msgid "Tilematrixset"
 msgstr ""
 
 #: gvsigol_core/templates/project_update.html:436
-msgid "Create"
-msgstr "Crear"
+msgid "Create layer"
+msgstr "Empaquetar capa"
 
 #: gvsigol_core/templates/project_update.html:439
-#, fuzzy
-#| msgid "Processed"
 msgid "Stop Process"
-msgstr "Procesados"
+msgstr "Parar proceso"
 
 #: gvsigol_core/templates/services_view.html:51
 msgid "WMS Services"
@@ -754,23 +752,23 @@ msgstr "Los cambios que no se hayan salvado se perdarán. ¿Continuar?"
 msgid "Error loading layers"
 msgstr "Error cargando capas"
 
-#: gvsigol_core/utils.py:470
+#: gvsigol_core/utils.py:434
 msgid "New user account"
 msgstr "Nueva cuenta de usuario"
 
-#: gvsigol_core/utils.py:486
+#: gvsigol_core/utils.py:450
 msgid "Account data"
 msgstr "Datos de la cuenta"
 
-#: gvsigol_core/utils.py:488
+#: gvsigol_core/utils.py:452
 msgid "First name"
 msgstr "Nombre"
 
-#: gvsigol_core/utils.py:489
+#: gvsigol_core/utils.py:453
 msgid "Last name"
 msgstr "Apellidos"
 
-#: gvsigol_core/utils.py:501
+#: gvsigol_core/utils.py:465
 msgid "This is your new temporary password"
 msgstr "Esta es su contraseña temporal"
 
@@ -864,13 +862,16 @@ msgstr ""
 msgid "Project name already exists"
 msgstr "El nombre del proyecto ya existe"
 
-#: gvsigol_core/views.py:1311 gvsigol_core/views.py:1313
+#: gvsigol_core/views.py:1315 gvsigol_core/views.py:1317
 msgid "Shared view"
 msgstr "Vista compartida"
 
-#: gvsigol_core/views.py:1314
+#: gvsigol_core/views.py:1318
 msgid "Link"
 msgstr "Enlace"
+
+#~ msgid "Create"
+#~ msgstr "Crear"
 
 #~ msgid "Project"
 #~ msgstr "Proyectos"
