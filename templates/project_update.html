@@ -27,6 +27,7 @@
               		<li><a href="#tab-project-layergroups" data-toggle="tab">{% trans "Layer groups" %}</a></li>
               		<li><a href="#tab-project-tools" data-toggle="tab">{% trans "Tools" %}</a></li>
               		<li><a href="#tab-project-usergroups" data-toggle="tab">{% trans "User groups" %}</a></li>
+              		<li><a href="#tab-project-packagebaselayer" data-toggle="tab">{% trans "Package the base layer" %}</a></li>
             	</ul>
             	
             	<div class="tab-content">
@@ -159,48 +160,8 @@
 								</div>
 								
 								
-								{% if superuser %}
-								<div class="row">
-									<div class="col-md-6 form-group">
-										<label>{% trans "Crear capa base" %}</label>&nbsp;&nbsp;
-										<image id="processing_icon" src="{{processing_icon}}" width=60px height=60px {% if project.baselayer_version != -99999 %}class="hide"{% endif %}></img>
-									</div>
-								</div>
+				
 								
-								<div class="row">
-									<div class="col-md-6 form-group">
-										<a id="processing_url" href={{url_base_lyr}} style="color:#3c8dbc" {% if project.baselayer_version <= 0 %}class="hide"{% endif %}>Download</a>&nbsp;&nbsp;
-									</div>
-								</div>
-
-								<div class="row">
-									<div class="col-md-1 form-group">
-										<input placeholder="{% trans 'Tiles per side' %}" name="tiles-side" id="tiles-side" type="text" class="form-control" value="16">															
-									</div>
-									<div class="col-md-1 form-group" style="padding-left:0px;top:5px;">
-										<label>{% trans "Niveles de zoom" %}</label>&nbsp;&nbsp;															
-									</div>
-									<div class="col-md-1 form-group" style="padding-left:0px;top:5px;">
-										<input type="radio" id="png" name="imgtype" value="image/png" checked>{% trans "PNG" %}<br>
-										<input type="radio" id="jpg" name="imgtype" value="image/jpeg">{% trans "JPG" %}<br>														
-									</div>
-									<div class="col-md-2 form-group">
-										<input placeholder="{% trans 'Tilematrixset' %}" name="tilematrixset" id="tilematrixset" type="text" class="form-control" value="EPSG:900913">															
-									</div>
-									<div class="col-md-2 form-group" style="padding-left:0px;top:5px;">
-										<label>{% trans "Tilematrixset (WMTS)" %}</label>&nbsp;&nbsp;															
-									</div>
-									
-								</div>
-								<div class="row">
-									
-								</div>
-								<div class="row">
-									<div class="col-md-2 form-group">
-										<button id="button-create-base-layer" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Create" %}</button>															
-									</div>
-								</div>
-								{% endif %}	
 								
 							</div>
               			</div>
@@ -385,8 +346,99 @@
 						</div>
               		</div>
               		
+              		{% if superuser %}
+              		<div class="tab-pane" id="tab-project-packagebaselayer">
+              			<div class="row">
+              				<div class="col-md-12">
+              					<div id="user-list-box" class="box searchable-list-box">
+              						<div class="box-body">
+              						
+              							<div id="processing_header" style="border: 1px solid #3c8dbc;">
+	              							<div class="row">
+	              								<div class="col-md-6" style="margin-left: 20px">
+	              									<image id="processing_icon" src="{{processing_icon}}" width=60px height=60px {% if project.baselayer_version != -99999 %}class=""{% endif %}></img>
+					              					<label style="color: #3c8dbc;font-size:18px">{% trans "Process running" %}</label>&nbsp;&nbsp;
+					              				</div>
+					              			</div>
+					              			<div class="row" style="margin-top: 20px">
+												<div class="col-md-6 form-group" style="margin-left: 20px">
+													<label style="color: #3c8dbc;">Tiles {% trans "Processed" %}</label>
+													<label style="color: #3c8dbc;" id='total_tiles'>0</label>
+													<label style="color: #3c8dbc;">{% trans "of" %}</label>
+													<label style="color: #3c8dbc;" id='processed_tiles'>0</label>
+													<label style="color: #ff0000;" id='tiles_percent'>(0%)</label>
+												</div>
+											</div>
+											<div class="row">
+												<div class="col-md-6 form-group" style="margin-left: 20px">
+													<label style="color: #3c8dbc;">{% trans "Estimated Time" %}: </label>
+													<label style="color: #ff0000;" id='estimated_time'>-</label>
+												</div>
+											</div>
+										</div>
+										
+										<!-- Enlace para descarga cuando hay una versión -->
+										{% if project.baselayer_version > 0 %}
+											<div class="row">
+												<div class="col-md-3 form-group" style="top:15px;">
+													<label>{% trans "Download version" %}</label>
+													<label id="download_version">({{project.baselayer_version}}):</label>&nbsp;&nbsp;	
+												</div>
+
+												<div class="col-md-2 form-group" style="top:15px;">
+													<a id="processing_url" href="{{url_base_lyr}}" style="color:#3c8dbc" >{% trans "Download" %}</a>&nbsp;&nbsp;
+												</div>
+											</div>
+										{% endif %}
+				
+										<div class="row">
+											<div class="col-md-3 form-group" style="top:15px;">
+												<label>{% trans "Niveles de zoom" %}</label>&nbsp;&nbsp;															
+											</div>
+											<div class="col-md-1 form-group" style="top:15px;">
+												<input placeholder="{% trans 'Tiles per side' %}" name="tiles-side" id="tiles-side" type="text" class="form-control" value="16">															
+											</div>
+										</div>
+										
+										<div class="row">
+											<div class="col-md-3 form-group" style="top:5px;">
+												<label>{% trans "Format" %}</label>&nbsp;&nbsp;															
+											</div>
+											<div class="col-md-1 form-group" style="top:5px;">
+												<input type="radio" id="png" name="imgtype" value="image/png" checked>{% trans "PNG" %}<br>
+											</div>
+											<div class="col-md-1 form-group" style="top:5px;">
+												<input type="radio" id="jpg" name="imgtype" value="image/jpeg">{% trans "JPG" %}<br>														
+											</div>
+										</div>
+											
+										<div class="row">
+											<div class="col-md-3 form-group" style="top:5px">
+												<label>{% trans "Tilematrixset (WMTS)" %}</label>&nbsp;&nbsp;															
+											</div>
+											<div class="col-md-2 form-group">
+												<input placeholder="{% trans 'Tilematrixset' %}" name="tilematrixset" id="tilematrixset" type="text" class="form-control" value="EPSG:900913">															
+											</div>
+										</div>
+
+										
+									</div>
+								</div>
+							</div>
+						</div>
+              		</div>
+              		{% endif %}
+              		
           		</div>
           	</form>
+          	<div class="row">
+				<div class="col-md-1 form-group" style="top:25px;padding-bottom: 25px">
+					<button id="button-create-base-layer" style="width: 120px"> {% trans "Create" %}</button>															
+				</div>
+				<div class="col-md-1 form-group" style="top:25px;padding-bottom: 25px">
+					<button id="button-stop-process" style="width: 120px"> {% trans "Stop Process" %}</button>															
+				</div>
+			</div>
 		</div>
 	</div>
 	
@@ -477,6 +529,49 @@
 		  page: 6,
 		  pagination: false
 		});
+		
+		$("#processing_header").hide()
+		$("#button-stop-process").hide()
+		setInterval(function() { 
+			console.log("Lanzando llamada ajax para comprobar el progreso de la generación de capa base")
+			$.ajax({
+				type: 'POST',
+				async: true,
+				url: '/gvsigonline/services/base_layer_process_update/{{pid}}/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				success	:function(response){
+					if(response.active == 'true') {
+						$("#processing_header").show()
+						$("#button-stop-process").show()
+						$("#total_tiles").text(response.total_tiles);
+						$("#processed_tiles").text(response.processed_tiles);
+						var perc = (parseInt(response.processed_tiles) * 100) / parseInt(response.total_tiles)
+						$("#tiles_percent").text("(" + parseInt(perc) + "%)");
+						$("#estimated_time").text(response.time);
+						
+					} else {
+						$("#processing_header").hide()
+						$("#button-stop-process").hide()
+						if(response.version) {
+							var oldUrl = $("#processing_url").attr("href");
+							var index = oldUrl.lastIndexOf("_")
+							var strToReplace = oldUrl.substring(index + 1, oldUrl.length - 4)
+							var newUrl = oldUrl.replace(strToReplace, response.version)
+							$("#processing_url").attr("href", newUrl); 
+							$("#download_version").text("(" + response.version + ")"); 
+						}
+					}
+				},
+				error :function(response){
+					$("#total_tiles").text("-");
+					$("#processed_tiles").text("-");
+					$("#tiles_percent").text("(-)");
+					$("#estimated_time").text('-')
+				}
+			});
+		}, 10000);
 		
 		searcheableList2.on("updated", function(){
 			$(".layergroup-input").unbind("click").click(function(){
@@ -648,8 +743,6 @@
 		});
 	  	
 	  	$('#button-create-base-layer').click(function() {
-	  		$("#processing_icon").removeClass("hide")
-	  		$("#processing_url").addClass("hide")
 	  		$.ajax({
 				type: 'POST',
 				async: true,
@@ -667,6 +760,18 @@
 				},
 				error: function(jqXHR, textStatus, errorThrown){
 					messageBox.show('error', gettext(jqXHR.responseText));
+				}
+			});
+		});
+	  	
+	  	$('#button-stop-process').click(function() {
+	  		$("#button-stop-process").hide()
+	  		$.ajax({
+				type: 'POST',
+				async: true,
+				url: '/gvsigonline/services/stop_base_layer_process/{{pid}}/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
 				}
 			});
 		});
