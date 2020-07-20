@@ -153,7 +153,7 @@ def get_conf(request, layer_id):
         except ValueError:
             print "Error getting index"
     
-    layer_url = core_utils.get_wms_url(request, workspace)
+    layer_url = core_utils.get_wms_url(workspace)
 
     conf = {
         'layer_id': layer_id,

@@ -309,8 +309,8 @@ def get_conf(request, layer_id):
 
     (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
 
-    layer_url = core_utils.get_wms_url(request, workspace)
-    layer_wfs_url = core_utils.get_wfs_url(request, workspace)
+    layer_url = core_utils.get_wms_url(workspace)
+    layer_wfs_url = core_utils.get_wfs_url(workspace)
     
     preview_url = workspace.server.frontend_url + '/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
                       
