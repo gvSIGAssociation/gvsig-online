@@ -3596,15 +3596,15 @@ def describeLayerConfig(request):
                         'units': epsg['units']
                     }
 
-                layer['wms_url'] = core_utils.get_wms_url(request, workspace)
-                layer['wfs_url'] = core_utils.get_wfs_url(request, workspace)
+                layer['wms_url'] = core_utils.get_wms_url(workspace)
+                layer['wfs_url'] = core_utils.get_wfs_url(workspace)
                 layer['namespace'] = workspace.uri
                 layer['workspace'] = workspace.name
                 layer['metadata'] = core_utils.get_catalog_url(request, l)
                 if l.cached:
-                    layer['cache_url'] = core_utils.get_cache_url(request, workspace)
+                    layer['cache_url'] = core_utils.get_cache_url(workspace)
                 else:
-                    layer['cache_url'] = core_utils.get_wms_url(request, workspace)
+                    layer['cache_url'] = core_utils.get_wms_url(workspace)
 
 
 
