@@ -22,12 +22,12 @@
 					</div>
 				</div>
 				
-				<ul class="nav nav-tabs">
-              		<li class="active"><a href="#tab-project-main" data-toggle="tab">{% trans "General" %}</a></li>
-              		<li><a href="#tab-project-layergroups" data-toggle="tab">{% trans "Layer groups" %}</a></li>
-              		<li><a href="#tab-project-tools" data-toggle="tab">{% trans "Tools" %}</a></li>
-              		<li><a href="#tab-project-usergroups" data-toggle="tab">{% trans "User groups" %}</a></li>
-              		<li><a href="#tab-project-packagebaselayer" data-toggle="tab">{% trans "Package the base layer" %}</a></li>
+				<ul id="project-update-tabs" class="nav nav-tabs">
+              		<li class="active"><a data-id="0" href="#tab-project-main" data-toggle="tab">{% trans "General" %}</a></li>
+              		<li><a  data-id="1" href="#tab-project-layergroups" data-toggle="tab">{% trans "Layer groups" %}</a></li>
+              		<li><a  data-id="2" href="#tab-project-tools" data-toggle="tab">{% trans "Tools" %}</a></li>
+              		<li><a  data-id="3" href="#tab-project-usergroups" data-toggle="tab">{% trans "User groups" %}</a></li>
+              		<li><a  data-id="4" href="#tab-project-packagebaselayer" data-toggle="tab">{% trans "Package the base layer" %}</a></li>
             	</ul>
             	
             	<div class="tab-content">
@@ -432,11 +432,9 @@
           		</div>
           	</form>
           	<div class="row">
-				<div class="col-md-1 form-group" style="top:25px;padding-bottom: 25px">
-					<button id="button-create-base-layer" style="width: 120px"> {% trans "Create" %}</button>															
-				</div>
-				<div class="col-md-1 form-group" style="top:25px;padding-bottom: 25px">
-					<button id="button-stop-process" style="width: 120px"> {% trans "Stop Process" %}</button>															
+				<div class="col-md-3" style="top:25px;padding-bottom: 25px">
+					<button id="button-create-base-layer"> {% trans "Create layer" %}</button>	
+					<button id="button-stop-process"> {% trans "Stop Process" %}</button>														
 				</div>
 			</div>
 		</div>
@@ -530,48 +528,61 @@
 		  pagination: false
 		});
 		
+		var process_status = null
 		$("#processing_header").hide()
 		$("#button-stop-process").hide()
-		setInterval(function() { 
-			console.log("Lanzando llamada ajax para comprobar el progreso de la generación de capa base")
-			$.ajax({
-				type: 'POST',
-				async: true,
-				url: '/gvsigonline/services/base_layer_process_update/{{pid}}/',
-				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
-				},
-				success	:function(response){
-					if(response.active == 'true') {
-						$("#processing_header").show()
-						$("#button-stop-process").show()
-						$("#total_tiles").text(response.total_tiles);
-						$("#processed_tiles").text(response.processed_tiles);
-						var perc = (parseInt(response.processed_tiles) * 100) / parseInt(response.total_tiles)
-						$("#tiles_percent").text("(" + parseInt(perc) + "%)");
-						$("#estimated_time").text(response.time);
-						
-					} else {
-						$("#processing_header").hide()
-						$("#button-stop-process").hide()
-						if(response.version) {
-							var oldUrl = $("#processing_url").attr("href");
-							var index = oldUrl.lastIndexOf("_")
-							var strToReplace = oldUrl.substring(index + 1, oldUrl.length - 4)
-							var newUrl = oldUrl.replace(strToReplace, response.version)
-							$("#processing_url").attr("href", newUrl); 
-							$("#download_version").text("(" + response.version + ")"); 
+		
+		
+		$('#project-update-tabs').on("click", function (e) {
+			var target = $(e.target).attr("data-id");
+			if(process_status) {
+				clearInterval(process_status);
+			}
+			if (target != null && target == 4) {
+				process_status = setInterval(function() { 
+					$.ajax({
+						type: 'POST',
+						async: true,
+						url: '/gvsigonline/services/base_layer_process_update/{{pid}}/',
+						beforeSend:function(xhr){
+						    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+						},
+						success	:function(response){
+							if(response.active == 'true') {
+								$("#processing_header").show()
+								$("#button-stop-process").show()
+								$("#total_tiles").text(response.total_tiles);
+								$("#processed_tiles").text(response.processed_tiles);
+								var perc = (parseInt(response.processed_tiles) * 100) / parseInt(response.total_tiles)
+								$("#tiles_percent").text("(" + parseInt(perc) + "%)");
+								$("#estimated_time").text(response.time);
+								
+							} else {
+								$("#processing_header").hide()
+								$("#button-stop-process").hide()
+								if(response.version) {
+									var oldUrl = $("#processing_url").attr("href");
+									var index = oldUrl.lastIndexOf("_")
+									var strToReplace = oldUrl.substring(index + 1, oldUrl.length - 4)
+									var newUrl = oldUrl.replace(strToReplace, response.version)
+									$("#processing_url").attr("href", newUrl); 
+									$("#download_version").text("(" + response.version + ")"); 
+								}
+							}
+						},
+						error :function(response){
+							$("#total_tiles").text("-");
+							$("#processed_tiles").text("-");
+							$("#tiles_percent").text("(-)");
+							$("#estimated_time").text('-')
 						}
-					}
-				},
-				error :function(response){
-					$("#total_tiles").text("-");
-					$("#processed_tiles").text("-");
-					$("#tiles_percent").text("(-)");
-					$("#estimated_time").text('-')
-				}
-			});
-		}, 10000);
+					});
+				}, 7000);
+			}       
+		})
+		
+
+		
 		
 		searcheableList2.on("updated", function(){
 			$(".layergroup-input").unbind("click").click(function(){
@@ -743,6 +754,7 @@
 		});
 	  	
 	  	$('#button-create-base-layer').click(function() {
+	  		$("#button-stop-process").text(gettext('Parar proceso'))
 	  		$.ajax({
 				type: 'POST',
 				async: true,
@@ -765,7 +777,7 @@
 		});
 	  	
 	  	$('#button-stop-process').click(function() {
-	  		$("#button-stop-process").hide()
+	  		$("#button-stop-process").text(gettext('Parando') + "...")
 	  		$.ajax({
 				type: 'POST',
 				async: true,
