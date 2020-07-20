@@ -410,8 +410,8 @@ def get_conf(request, layer_id):
     supported_fonts = json.loads(supported_fonts_str)
     sorted_fonts = utils.sortFontsArray(supported_fonts.get("fonts"))
 
-    layer_url = core_utils.get_wms_url(request, workspace)
-    layer_wfs_url = core_utils.get_wfs_url(request, workspace)
+    layer_url = core_utils.get_wms_url(workspace)
+    layer_wfs_url = core_utils.get_wfs_url(workspace)
 
     preview_url = ''
     if feature_type == 'PointSymbolizer':
