@@ -90,6 +90,7 @@ _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 CONNECT_TIMEOUT = 3.05
 READ_TIMEOUT = 30
+base_layer_process = {}
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_safe
@@ -2737,7 +2738,9 @@ def enumeration_update(request, eid):
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def create_base_layer(request, pid):
-    if request.method == 'POST':   
+    if request.method == 'POST': 
+        global base_layer_process
+          
         plg = ProjectLayerGroup.objects.filter(project_id=pid, baselayer_group=True)
         if plg is None or len(plg) == 0:
             return utils.get_exception(400, 'This project does not have base layer')
@@ -2759,13 +2762,30 @@ def create_base_layer(request, pid):
             if num_res_levels > 20:
                 return utils.get_exception(400, 'The number of resolution levels cannot be greater than 20')
             else:
-                tiling_service.tiling_base_layer(base_lyr, pid, num_res_levels, tilematrixset, format_)
+                tiling_service.tiling_base_layer(base_layer_process, base_lyr, pid, num_res_levels, tilematrixset, format_)
         else:
             return utils.get_exception(400, 'Wrong number of tiles')
                   
     return HttpResponse('{"response": "ok"}', content_type='application/json')
   
-     
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def base_layer_process_update(request, pid):
+    if request.method == 'POST':   
+        global base_layer_process
+        if str(pid) in base_layer_process:
+            return HttpResponse(json.dumps(base_layer_process[str(pid)], indent=4), content_type='application/json')
+        else :
+            return HttpResponse('{"active" : "false"}', content_type='application/json')
+        
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@staff_required
+def stop_base_layer_process(request, pid):
+    if request.method == 'POST':   
+        if str(pid) in base_layer_process:
+            base_layer_process[str(pid)]['stop'] = 'true'
+        return HttpResponse('{"response": "ok"}', content_type='application/json')
+        
 @csrf_exempt
 def get_enumeration(request):
     if request.method == 'POST':
