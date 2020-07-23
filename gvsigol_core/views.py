@@ -21,20 +21,23 @@ from gvsigol_core.utils import get_supported_crs
 from gvsigol_symbology.models import StyleLayer
 from gdaltools.metadata import project
 from gvsigol_core.models import SharedView
+from django.http.response import JsonResponse
+from gvsigol_core import forms
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 
 from django.shortcuts import render, HttpResponse, redirect
+from django.http import HttpResponseForbidden
 from models import Project, ProjectUserGroup, ProjectLayerGroup
 from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup, ServiceUrl
 from gvsigol_auth.models import UserGroup, UserGroupUser
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User, AnonymousUser
-from gvsigol_auth.utils import is_superuser, staff_required
+from gvsigol_auth.utils import superuser_required, is_superuser, staff_required
 import utils as core_utils
-from gvsigol_services import geographic_servers, utils
+from gvsigol_services import geographic_servers, utils, backend_postgis
 from django.views.decorators.cache import cache_control
 from gvsigol import settings
 import gvsigol_services.utils as services_utils
@@ -58,6 +61,9 @@ from actstream.models import Action
 from iso639 import languages
 from django.core.exceptions import PermissionDenied
 from django.utils.crypto import get_random_string
+from gvsigol_core.forms import CloneProjectForm
+from django.contrib import messages
+from django.shortcuts import redirect
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 import logging
@@ -168,7 +174,8 @@ def project_list(request):
         projects.append(project)
 
     response = {
-        'projects': projects
+        'projects': projects,
+        'servers': Server.objects.all().order_by('-default')
     }
     return render(request, 'project_list.html', response)
 
@@ -676,14 +683,19 @@ def project_update(request, pid):
 @staff_required
 def project_delete(request, pid):
     if request.method == 'POST':
-        project = Project.objects.get(id=int(pid))
-        project.delete()
-
-        response = {
-            'deleted': True
-        }
-        return HttpResponse(json.dumps(response, indent=4), content_type='project/json')
-
+        try:
+            if request.user.is_superuser:
+                project = Project.objects.get(id=int(pid))
+            else:
+                project = Project.objects.get(id=int(pid), created_by__exact=request.user.username)
+            project.delete()
+            response = {
+                'deleted': True
+            }
+            return HttpResponse(json.dumps(response, indent=4), content_type='project/json')
+        except:
+            logger.exception("Error deleting project")
+            return HttpResponseForbidden({"deleted": False, "error": "Not allowed"})
 
 def load(request, project_name):
     project = Project.objects.get(name__exact=project_name)
@@ -1403,3 +1415,55 @@ def not_found_sharedview(request):
     response = render(request, 'not_found_sharedview.html', {})
     response.status_code = 404
     return response
+
+@login_required(login_url='/gvsigonline/auth/login_user/')
+@superuser_required
+def project_clone(request, pid):
+    try:
+        if request.user.is_superuser:
+            project = Project.objects.get(id=int(pid))
+        else:
+            project = Project.objects.get(id=int(pid), created_by__exact=request.user.username)
+    except:
+        project = None
+    if request.method == 'POST':
+        form = CloneProjectForm(request.POST)
+        if form.is_valid():
+            if not project:
+                form.add_error(None, _('Operation not allowed on project: ')+str(pid))
+            name = form.cleaned_data.get('project_name')
+            title = form.cleaned_data.get('project_title')
+            target_workspace_name = form.cleaned_data.get('target_workspace')
+            target_datastore_name = form.cleaned_data.get('target_datastore')
+            target_server = form.cleaned_data.get('target_server')
+
+            if target_server.frontend_url.endswith("/"):
+                uri = target_server.frontend_url + target_workspace_name
+            else:
+                uri = target_server.frontend_url + "/" + target_workspace_name
+
+            values = {
+                "name": target_workspace_name,
+                "description": target_workspace_name + " ws",
+                "uri": uri,
+                "wms_endpoint": target_server.getWmsEndpoint(target_workspace_name),
+                "wfs_endpoint": target_server.getWfsEndpoint(target_workspace_name),
+                "wcs_endpoint": target_server.getWcsEndpoint(target_workspace_name),
+                "wmts_endpoint": target_server.getWmtsEndpoint(target_workspace_name),
+                "cache_endpoint": target_server.getCacheEndpoint(target_workspace_name)
+            }
+            target_workspace = services_utils.create_workspace(target_server.id, target_workspace_name, uri, values, request.user.username)
+            if target_workspace:
+                datastore = services_utils.create_datastore(request.user.username, target_datastore_name, target_workspace)
+                project.clone(target_datastore=datastore, name=name, title=title)
+                
+                messages.add_message(request, messages.INFO, _('The project was successfully cloned.'))
+                return redirect('project_update', pid=project.id)
+    else:
+        form = CloneProjectForm()
+        if not project:
+            form.add_error(None, _('Operation not allowed on project: ')+str(pid))
+    servers = Server.objects.all()
+    return render(request, 'project_clone.html', {'form': form, 'servers': servers})
+
+    

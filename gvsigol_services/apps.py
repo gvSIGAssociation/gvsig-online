@@ -28,13 +28,16 @@ class GvsigolServicesConfig(AppConfig):
                 l.default_srs = 'EPSG:4326'
                 l.native_extent = '-180,-90,180,90'
                 l.latlong_extent = '-180,-90,180,90'
-            l.save()        
-    
+            l.save()
+            
     def ready(self):
         from actstream import registry
         registry.register(self.get_model('Layer'))
-            
-        try:
-            self._updateLayerInfo()
-        except:
-            logger.exception("Error updating layer information")
+        
+        import sys
+        if len(sys.argv) <= 1 or sys.argv[1] != 'migrate':
+            # don't run during migrations 
+            try:
+                self._updateLayerInfo()
+            except:
+                logger.exception("Error updating layer information")

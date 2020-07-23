@@ -312,21 +312,12 @@ def workspace_add(request):
             if _valid_name_regex.search(name) == None:
                 form.add_error(None, _("Invalid workspace name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name))
             else:
-                # first create the ws on the backend
-                gs = geographic_servers.get_instance().get_server_by_id(form.cleaned_data['server'].id)
-                if gs.createWorkspace(form.cleaned_data['name'],
-                    form.cleaned_data['uri']):
-
-                    isPublic = False
-                    if form.cleaned_data['is_public']:
-                        isPublic = True
-
-                    # save it on DB if successfully created
-                    newWs = Workspace(**form.cleaned_data)
-                    newWs.created_by = request.user.username
-                    newWs.is_public = isPublic
-                    newWs.save()
-                    gs.reload_nodes()
+                form.cleaned_data['is_public'] = form.cleaned_data['is_public'] if form.cleaned_data['is_public'] else False
+                if utils.create_workspace(form.cleaned_data['server'].id,
+                                       form.cleaned_data['name'],
+                                       form.cleaned_data['uri'],
+                                       form.cleaned_data,
+                                       request.user.username):
                     return HttpResponseRedirect(reverse('workspace_list'))
                 else:
                     # FIXME: the backend should raise an exception to identify the cause (e.g. workspace exists, backend is offline)
@@ -445,6 +436,7 @@ def datastore_list(request):
     }
     return render(request, 'datastore_list.html', response)
 
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
@@ -485,31 +477,19 @@ def datastore_add(request):
                 form.add_error(None, _("Invalid datastore name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name))
             else:
                 ws = form.cleaned_data['workspace']
-                gs = geographic_servers.get_instance().get_server_by_id(ws.server.id)
-                # first create the datastore on the backend
-                if gs.createDatastore(form.cleaned_data['workspace'],
-                                                      form.cleaned_data['type'],
-                                                      form.cleaned_data['name'],
-                                                      form.cleaned_data['description'],
-                                                      form.cleaned_data['connection_params']):
-                    
-                    # save it on DB if successfully created
-                    newRecord = Datastore(
-                        workspace=form.cleaned_data['workspace'],
-                        type=form.cleaned_data['type'],
-                        name=form.cleaned_data['name'],
-                        description=form.cleaned_data['description'],
-                        connection_params=form.cleaned_data['connection_params'],
-                        created_by=request.user.username
-                    )
-                    newRecord.save()
-                    gs.reload_nodes()
+                ds = utils.add_datastore(form.cleaned_data['workspace'],
+                                  form.cleaned_data['type'],
+                                  form.cleaned_data['name'],
+                                  form.cleaned_data['description'],
+                                  form.cleaned_data['connection_params'],
+                                  request.user.username)
 
+                if ds is not None:
                     if type == 'c_ImageMosaic':
+                        gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
                         try:
-                            gs.uploadImageMosaic(newRecord.workspace, newRecord)
+                            gs.uploadImageMosaic(ds.workspace, ds)
                             gs.reload_nodes()
-                            
                         except Exception as e:
                             pass
                    
@@ -681,25 +661,13 @@ def layer_list(request):
 @staff_required
 def layer_refresh_extent(request, layer_id):
     layer = Layer.objects.get(pk=layer_id)
-    datastore = Datastore.objects.get(id=layer.datastore_id)
-    workspace = Workspace.objects.get(id=datastore.workspace_id)
+    datastore = layer.datastore
+    workspace = datastore.workspace
+    #server.updateBoundingBoxFromData(layer)
     server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-    try:
-        (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
-        if ds_type == 'imagemosaic':
-            ds_type = 'coverage'
-        layer.native_srs = layer_info[ds_type]['srs']
-        layer.native_extent = str(layer_info[ds_type]['nativeBoundingBox']['minx']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['miny']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['maxx']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['maxy'])
-        layer.latlong_extent = str(layer_info[ds_type]['latLonBoundingBox']['minx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['miny']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxy'])      
-        
-    except Exception as e:
-        layer.default_srs = 'EPSG:4326'
-        layer.native_extent = '-180,-90,180,90'
-        layer.latlong_extent = '-180,-90,180,90' 
-        
-    #server.updateBoundingBoxFromData(layer)    
+    (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
+    utils.setLayerExtent(layer, ds_type, layer_info, server)
     layer.save()
-    
     return redirect('layer_list')
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -944,6 +912,55 @@ def backend_fields_list(request):
     return HttpResponseBadRequest()
 
 
+def do_add_layer(server, datastore, name, title, is_queryable, extraParams):
+    workspace = datastore.workspace
+    name = prepare_string(name)
+    """
+    server.createTable(form.cleaned_data)
+    """
+    
+    # first create the resource on the backend
+    server.createResource(
+        workspace,
+        datastore,
+        name,
+        title,
+        extraParams=extraParams
+    )
+
+    if datastore.type != 'e_WMS' and datastore.type != 'c_ImageMosaic':
+        server.setQueryable(
+            workspace.name,
+            datastore.name,
+            datastore.type,
+            name,
+            is_queryable
+        )
+
+def do_config_layer(server, layer, featuretype):
+    layer_autoconfig(layer, featuretype)
+    layer.save()
+
+    if layer.datastore.type != 'e_WMS':
+        if layer.datastore.type == 'c_ImageMosaic':
+            server.updateImageMosaicTemporal(layer.datastore, layer)
+        utils.setTimeEnabled(server, layer)
+        create_symbology(server, layer)
+        server.updateThumbnail(layer, 'create')
+
+    core_utils.toc_add_layer(layer)
+    server.createOrUpdateGeoserverLayerGroup(layer.layer_group)
+    server.reload_nodes()
+
+
+def create_symbology(server, layer):
+    style_name = layer.datastore.workspace.name + '_' + layer.name + '_default'
+    server.createDefaultStyle(layer, style_name)
+    server.setLayerStyle(layer, style_name, True)
+    layer.save()
+
+
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
@@ -1023,10 +1040,13 @@ def layer_add_with_group(request, layergroup_id):
 
         if form.is_valid():
             try:
+                datastore = form.cleaned_data['datastore']
+                workspace = datastore.workspace
                 extraParams = {}
                 
-                if form.cleaned_data['datastore'].type == 'v_PostGIS':
-                    dts = form.cleaned_data['datastore']
+                if datastore.type == 'v_PostGIS':
+                    extraParams['maxFeatures'] = maxFeatures
+                    dts = datastore
                     params = json.loads(dts.connection_params)
                     host = params['host']
                     port = params['port']
@@ -1034,7 +1054,6 @@ def layer_add_with_group(request, layergroup_id):
                     user = params['user']
                     passwd = params['passwd']
                     schema = params.get('schema', 'public')
-                    extraParams['maxFeatures'] = maxFeatures
                     i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
                     fields = i.get_fields(form.cleaned_data['name'], schema)
                     i.close()
@@ -1043,23 +1062,19 @@ def layer_add_with_group(request, layergroup_id):
                         if ' ' in field:
                             raise ValueError(_("Invalid layer fields: '{value}'. Layer can't have fields with whitespaces").format(value=field))
                 
-                    
-                gs = geographic_servers.get_instance().get_server_by_id(form.cleaned_data['datastore'].workspace.server.id)
+
+                server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
                 # first create the resource on the backend
-                gs.createResource(
-                    form.cleaned_data['datastore'].workspace,
-                    form.cleaned_data['datastore'],
-                    form.cleaned_data['name'],
-                    form.cleaned_data['title'],
-                    extraParams=extraParams
-                )
-                
+                do_add_layer(server, datastore, form.cleaned_data['name'], form.cleaned_data['title'], is_queryable, extraParams)
+
                 # save it on DB if successfully created
                 del form.cleaned_data['format']
                 newRecord = Layer(**form.cleaned_data)
+                if not newRecord.source_name:
+                    newRecord.source_name = newRecord.name
                 newRecord.external = False
                 newRecord.created_by = request.user.username
-                newRecord.type = form.cleaned_data['datastore'].type
+                newRecord.type = datastore.type
                 newRecord.visible = is_visible
                 newRecord.queryable = is_queryable
                 newRecord.allow_download = allow_download
@@ -1090,116 +1105,25 @@ def layer_add_with_group(request, layergroup_id):
                 newRecord.external_params = json.dumps(params)
                 
                 newRecord.save()
-
-                if form.cleaned_data['datastore'].type == 'c_ImageMosaic':
-                    gs.updateImageMosaicTemporal(form.cleaned_data['datastore'], newRecord)
-
-                if form.cleaned_data['datastore'].type != 'e_WMS':
-                    if form.cleaned_data['datastore'].type != 'c_ImageMosaic':
-                        gs.setQueryable(
-                            form.cleaned_data['datastore'].workspace.name,
-                            form.cleaned_data['datastore'].name,
-                            form.cleaned_data['datastore'].type,
-                            form.cleaned_data['name'],
-                            is_queryable
-                        )
-
-                    datastore = Datastore.objects.get(id=newRecord.datastore.id)
-                    workspace = Workspace.objects.get(id=datastore.workspace_id)
-
-                    style_name = workspace.name + '_' + newRecord.name + '_default'
-                    gs.createDefaultStyle(newRecord, style_name)
-                    gs.setLayerStyle(newRecord, style_name, True)
-                    newRecord2 = gs.updateThumbnail(newRecord, 'create')
-
-                    if datastore.type == 'v_PostGIS':
-                        time_resolution = 0
-                        if (time_resolution_year != None and time_resolution_year > 0) or (time_resolution_month != None and time_resolution_month > 0) or (time_resolution_week != None and time_resolution_week > 0) or (time_resolution_day != None and time_resolution_day > 0):
-                            #time_resolution = 'P'
-                            if (time_resolution_year != None and time_resolution_year > 0):
-                                time_resolution = time_resolution + (int(time_resolution_year) * 3600 * 24 * 365)
-                            if (time_resolution_month != None and time_resolution_month > 0):
-                                time_resolution = time_resolution + (int(time_resolution_month) * 3600 * 24 * 31)
-                            if (time_resolution_week != None and time_resolution_week > 0):
-                                time_resolution = time_resolution + (int(time_resolution_week) * 3600 * 24 * 7)
-                            if (time_resolution_day != None and time_resolution_day > 0):
-                                time_resolution = time_resolution + (int(time_resolution_day) * 3600 * 24 * 1)
-                        if (time_resolution_hour != None and time_resolution_hour > 0) or (time_resolution_minute != None and time_resolution_minute > 0) or (time_resolution_second != None and time_resolution_second > 0):
-                            #time_resolution = time_resolution + 'T'
-                            if (time_resolution_hour != None and time_resolution_hour > 0):
-                                time_resolution = time_resolution + (int(time_resolution_hour) * 3600)
-                            if (time_resolution_minute != None and time_resolution_minute > 0):
-                                time_resolution = time_resolution + (int(time_resolution_minute) * 60)
-                            if (time_resolution_second != None and time_resolution_second > 0):
-                                time_resolution = time_resolution + (int(time_resolution_second))
-                        gs.setTimeEnabled(workspace.name, datastore.name, datastore.type, newRecord.name, time_enabled, time_field, time_endfield, time_presentation, time_resolution, time_default_value_mode, time_default_value)
-
-                    if newRecord2:
-                        newRecord2.save()
-                        newRecord = newRecord2
-
-                core_utils.toc_add_layer(newRecord)
-                gs.createOrUpdateGeoserverLayerGroup(newRecord.layer_group)
-                gs.reload_nodes()
-
-                if form.cleaned_data['datastore'].type == 'v_PostGIS':
-                    fields=[]
-                    (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, newRecord.name, "json")
-                    resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
-                    for f in resource_fields:
-                        field = {}
-                        field['name'] = f['name']
-                        for id, language in LANGUAGES:
-                            field['title-'+id] = f['name']
-                        field['visible'] = True
-                        field['editableactive'] = True
-                        field['editable'] = True
-                        for control_field in settings.CONTROL_FIELDS:
-                            if field['name'] == control_field['name']:
-                                field['editableactive'] = False
-                                field['editable'] = False
-                        field['infovisible'] = False
-                        field['mandatory'] = False
-                        fields.append(field)
-
-                    layer_conf = {
-                        'fields': fields,
-                        'featuretype': {
-                            'max_features': maxFeatures
-                            }
-                        }
-                    newRecord.conf = layer_conf
-                    newRecord.save()
                 
-                datastore = Datastore.objects.get(id=newRecord.datastore.id)
-                workspace = Workspace.objects.get(id=datastore.workspace_id)
-                server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-                try:
-                    (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, newRecord.name, "json")
-                    if ds_type == 'imagemosaic':
-                        ds_type = 'coverage'
-                    newRecord.native_srs = layer_info[ds_type]['srs']
-                    newRecord.native_extent = str(layer_info[ds_type]['nativeBoundingBox']['minx']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['miny']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['maxx']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['maxy'])
-                    newRecord.latlong_extent = str(layer_info[ds_type]['latLonBoundingBox']['minx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['miny']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxy'])      
-                    
-                except Exception as e:
-                    newRecord.default_srs = 'EPSG:4326'
-                    newRecord.native_extent = '-180,-90,180,90'
-                    newRecord.latlong_extent = '-180,-90,180,90' 
+                featuretype = {
+                    'max_features': maxFeatures
+                }
+                do_config_layer(server, newRecord, featuretype)
 
-                newRecord.save()    
-                
                 if redirect_to_layergroup:
                     return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id})+"?redirect=grouplayer-redirect")
                 else:
                     return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id}))
 
             except Exception as e:
-                logger.exception(e)
+                msg = _("Error: layer could not be published")
+                logger.exception(msg)
                 try:
                     msg = e.server_message
                 except:
-                    msg = _("Error: layer could not be published")
+                    pass
+                logger.exception(msg)
                 # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
                 form.add_error(None, msg)
     else:
@@ -1312,7 +1236,7 @@ def layer_update(request, layer_id):
 
             time_resolution = request.POST.get('time_resolution')
 
-        layer_md_uuid = request.POST.get('uuid')
+        layer_md_uuid = request.POST.get('uuid', '').strip()
         core_utils.update_layer_metadata_uuid(layer, layer_md_uuid)
 
         old_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
@@ -1369,27 +1293,7 @@ def layer_update(request, layer_id):
             if ds.type != 'e_WMS':
                 gs.setQueryable(workspace, ds.name, ds.type, name, is_queryable)
                 if ds.type == 'v_PostGIS':
-                    time_resolution = 0
-                    if (time_resolution_year != None and time_resolution_year > 0) or (time_resolution_month != None and time_resolution_month > 0) or (time_resolution_week != None and time_resolution_week > 0) or (time_resolution_day != None and time_resolution_day > 0):
-                        #time_resolution = 'P'
-                        if (time_resolution_year != None and time_resolution_year > 0):
-                            time_resolution = time_resolution + (int(time_resolution_year) * 3600 * 24 * 365)
-                        if (time_resolution_month != None and time_resolution_month > 0):
-                            time_resolution = time_resolution + (int(time_resolution_month) * 3600 * 24 * 31) - (int(time_resolution_month) * 3600 * 14)
-                        if (time_resolution_week != None and time_resolution_week > 0):
-                            time_resolution = time_resolution + (int(time_resolution_week) * 3600 * 24 * 7)
-                        if (time_resolution_day != None and time_resolution_day > 0):
-                            time_resolution = time_resolution + (int(time_resolution_day) * 3600 * 24 * 1)
-                    if (time_resolution_hour != None and time_resolution_hour > 0) or (time_resolution_minute != None and time_resolution_minute > 0) or (time_resolution_second != None and time_resolution_second > 0):
-                        #time_resolution = time_resolution + 'T'
-                        if (time_resolution_hour != None and time_resolution_hour > 0):
-                            time_resolution = time_resolution + (int(time_resolution_hour) * 3600)
-                        if (time_resolution_minute != None and time_resolution_minute > 0):
-                            time_resolution = time_resolution + (int(time_resolution_minute) * 60)
-                        if (time_resolution_second != None and time_resolution_second > 0):
-                            time_resolution = time_resolution + (int(time_resolution_second))
-
-                    gs.setTimeEnabled(workspace, ds.name, ds.type, name, time_enabled, time_field, time_endfield, time_presentation, time_resolution, time_default_value_mode, time_default_value)
+                    utils.setTimeEnabled(gs, layer)
 
             new_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
 
@@ -1498,19 +1402,18 @@ def get_date_fields_from_resource(request):
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 
-def layer_autoconfig(layer_id):
-    layer = Layer.objects.get(id=int(layer_id))
+def layer_autoconfig(layer, featuretype):
     fields = []
-    conf = {}
     available_languages = []
     for id, language in LANGUAGES:
         available_languages.append(id)
 
-    datastore = Datastore.objects.get(id=layer.datastore_id)
-    workspace = Workspace.objects.get(id=datastore.workspace_id)
-    gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-    (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
-    resource_fields = utils.get_alphanumeric_fields(utils.get_fields(resource))
+    datastore = layer.datastore
+    workspace = datastore.workspace
+    server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+    (ds_type, layer_info) = server.getResourceInfo(workspace.name, datastore, layer.name, "json")
+    utils.setLayerExtent(layer, ds_type, layer_info, server)
+    resource_fields = utils.get_alphanumeric_fields(utils.get_fields(layer_info))
     for f in resource_fields:
         field = {}
         field['name'] = f['name']
@@ -1527,12 +1430,12 @@ def layer_autoconfig(layer_id):
         field['mandatory'] = False
         fields.append(field)
 
-    conf['fields'] = fields
+    layer_conf = {
+        'fields': fields,
+        'featuretype': featuretype
+        }
 
-    json_conf = conf
-    layer.conf = json_conf
-    layer.save()
-
+    layer.conf = layer_conf
 
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -1543,8 +1446,11 @@ def layer_config(request, layer_id):
 
     if request.method == 'POST':
         layer = Layer.objects.get(id=int(layer_id))
+        old_conf = ast.literal_eval(layer.conf) if layer.conf else {}
 
-        conf = {}
+        conf = {
+            "featuretype": old_conf.get('featuretype', {})
+            }
         fields = []
         counter = int(request.POST.get('counter'))
         for i in range(1, counter+1):
@@ -1579,9 +1485,7 @@ def layer_config(request, layer_id):
                         field['editable'] = False
             fields.append(field)
         conf['fields'] = fields
-
-        json_conf = conf
-        layer.conf = json_conf
+        layer.conf = conf
         layer.save()
 
         if redirect_to_layergroup:
@@ -2399,6 +2303,11 @@ def layer_create_with_group(request, layergroup_id):
         if 'allow_download' in request.POST:
             allow_download = True
 
+        try:
+            maxFeatures = int(request.POST.get('max_features', 0))
+        except:
+            maxFeatures = 0
+
         time_enabled = False
         time_field=''
         time_endfield=''
@@ -2436,30 +2345,20 @@ def layer_create_with_group(request, layergroup_id):
         form = CreateFeatureTypeForm(request.POST, user=request.user)
         if form.is_valid():
             try:
-                gs = geographic_servers.get_instance().get_server_by_id(form.cleaned_data['datastore'].workspace.server.id)
+                datastore = form.cleaned_data['datastore']
+                server = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
                 form.cleaned_data['name'] = prepare_string(form.cleaned_data['name'])
-                gs.createTable(form.cleaned_data)
+                server.createTable(form.cleaned_data)
+                extraParams = {}
+                if datastore.type == 'v_PostGIS':
+                    extraParams['maxFeatures'] = maxFeatures
 
                 # first create the resource on the backend
-                gs.createResource(
-                    form.cleaned_data['datastore'].workspace,
-                    form.cleaned_data['datastore'],
-                    form.cleaned_data['name'],
-                    form.cleaned_data['title']
-                )
-
-                if form.cleaned_data['datastore'].type != 'e_WMS':
-                    gs.setQueryable(
-                        form.cleaned_data['datastore'].workspace.name,
-                        form.cleaned_data['datastore'].name,
-                        form.cleaned_data['datastore'].type,
-                        form.cleaned_data['name'],
-                        is_queryable
-                    )
+                do_add_layer(server, datastore, form.cleaned_data['name'], form.cleaned_data['title'], is_queryable, extraParams)
 
                 # save it on DB if successfully created
                 newRecord = Layer(
-                    datastore = form.cleaned_data['datastore'],
+                    datastore = datastore,
                     layer_group = form.cleaned_data['layer_group'],
                     name = form.cleaned_data['name'],
                     title = form.cleaned_data['title'],
@@ -2472,6 +2371,8 @@ def layer_create_with_group(request, layergroup_id):
                     cached = cached,
                     single_image = single_image
                 )
+                if not newRecord.source_name:
+                    newRecord.source_name = newRecord.name
                 newRecord.time_enabled = time_enabled
                 newRecord.time_enabled_field = time_field
                 newRecord.time_enabled_endfield = time_endfield
@@ -2497,47 +2398,10 @@ def layer_create_with_group(request, layergroup_id):
                         field_enum.enumeration_id = int(i['enumkey']) 
                         field_enum.multiple = True if i['type'] == 'multiple_enumeration' else False
                         field_enum.save() 
-
-                if form.cleaned_data['datastore'].type != 'e_WMS':
-                    datastore = Datastore.objects.get(id=newRecord.datastore.id)
-                    workspace = Workspace.objects.get(id=datastore.workspace_id)
-
-                    style_name = workspace.name + '_' + newRecord.name + '_default'
-                    gs.createDefaultStyle(newRecord, style_name)
-                    gs.setLayerStyle(newRecord, style_name, True)
-
-                    time_resolution = 0
-                    if (time_resolution_year != None and time_resolution_year > 0) or (time_resolution_month != None and time_resolution_month > 0) or (time_resolution_week != None and time_resolution_week > 0) or (time_resolution_day != None and time_resolution_day > 0):
-                        #time_resolution = 'P'
-                        if (time_resolution_year != None and time_resolution_year > 0):
-                            time_resolution = time_resolution + (int(time_resolution_year) * 3600 * 24 * 365)
-                        if (time_resolution_month != None and time_resolution_month > 0):
-                            time_resolution = time_resolution + (int(time_resolution_month) * 3600 * 24 * 31)
-                        if (time_resolution_week != None and time_resolution_week > 0):
-                            time_resolution = time_resolution + (int(time_resolution_week) * 3600 * 24 * 7)
-                        if (time_resolution_day != None and time_resolution_day > 0):
-                            time_resolution = time_resolution + (int(time_resolution_day) * 3600 * 24 * 1)
-                    if (time_resolution_hour != None and time_resolution_hour > 0) or (time_resolution_minute != None and time_resolution_minute > 0) or (time_resolution_second != None and time_resolution_second > 0):
-                        #time_resolution = time_resolution + 'T'
-                        if (time_resolution_hour != None and time_resolution_hour > 0):
-                            time_resolution = time_resolution + (int(time_resolution_hour) * 3600)
-                        if (time_resolution_minute != None and time_resolution_minute > 0):
-                            time_resolution = time_resolution + (int(time_resolution_minute) * 60)
-                        if (time_resolution_second != None and time_resolution_second > 0):
-                            time_resolution = time_resolution + (int(time_resolution_second))
-                    gs.setTimeEnabled(workspace.name, datastore.name, datastore.type, newRecord.name, time_enabled, time_field, time_endfield, time_presentation, time_resolution, time_default_value_mode, time_default_value)
-
-                    newRecord.save()
-
-                core_utils.toc_add_layer(newRecord)
-                gs.createOrUpdateGeoserverLayerGroup(newRecord.layer_group)
-                gs.reload_nodes()
-
-                if form.cleaned_data['datastore'].type != 'e_WMS':
-                    gs.updateThumbnail(newRecord, 'create')
-
-                layer_autoconfig(newRecord.id)
-
+                featuretype = {
+                    'max_features': maxFeatures
+                }
+                do_config_layer(server, newRecord, featuretype)
                 if redirect_to_layergroup:
                     return HttpResponseRedirect(reverse('layer_permissions_update', kwargs={'layer_id': newRecord.id})+"?redirect=grouplayer-redirect")
                 else:
@@ -3116,10 +2980,6 @@ def get_datatable_data(request):
         encoded_property_name = aux_encoded_property_name.strip().replace(' ',',')
 
         params = json.loads(layer.datastore.connection_params)
-        i = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
-        pk_defs = i.get_pk_columns(layer.name, params.get('schema', 'public'))
-        i.close()
-        
         if not sortby_field:
             sortby_field = encoded_property_name.split(',')[0]
 
@@ -3127,6 +2987,10 @@ def get_datatable_data(request):
             sortby_field = encoded_property_name.split(',')[1]
 
         '''
+        i = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
+        pk_defs = i.get_pk_columns(layer.name, params.get('schema', 'public'))
+        i.close()
+        
         if len(pk_defs) >= 1:
             sortby_field = str(pk_defs[0])
         '''
@@ -3229,6 +3093,7 @@ def get_datatable_data(request):
             }
 
         except Exception as e:
+            logger.exception("Error building feature info")
             response = {
                 'draw': 0,
                 'recordsTotal': 0,
