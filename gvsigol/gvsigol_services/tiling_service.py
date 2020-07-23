@@ -58,10 +58,13 @@ class Tiling():
         
         if folder is not None:
             self.directory = folder 
-        self.tile_url1 = settings.OSM_TILING_1
-        self.tile_url2 = settings.OSM_TILING_2
-        self.tile_url3 = settings.OSM_TILING_3
         
+        try:
+            self.tile_url1 = settings.OSM_TILING_1
+            self.tile_url2 = settings.OSM_TILING_2
+            self.tile_url3 = settings.OSM_TILING_3
+        except Exception:
+            pass
 
         self.tilematrixset = tilematrixset
         if type_ is not None:
