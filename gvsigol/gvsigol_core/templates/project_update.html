@@ -21,7 +21,21 @@
 						{% endif %}
 					</div>
 				</div>
-				
+				{% if messages %}
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<ul class="messages" style="list-style: none;margin-left: -40px;">
+							{% for message in messages %}
+								{% if message.tags == "info" %}
+								<li style="border: 1px solid green; color: green; padding: 5px; margin-bottom: 5px;">{{ message }}</li>
+								{% elif message.tags == "error" %}
+								<li style="border: 1px solid red; color: red; padding: 5px; margin-bottom: 5px;">{{ message }}</li>
+								{% endif %}
+							{% endfor %}
+						</ul>
+					</div>
+				</div>
+				{% endif %}
 				<ul id="project-update-tabs" class="nav nav-tabs">
               		<li class="active"><a data-id="0" href="#tab-project-main" data-toggle="tab">{% trans "General" %}</a></li>
               		<li><a  data-id="1" href="#tab-project-layergroups" data-toggle="tab">{% trans "Layer groups" %}</a></li>

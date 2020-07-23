@@ -8,7 +8,7 @@
 		<div class="row">
 			<div class="col-md-12 form-group">
 				<div class="box-tools pull-right">
-					<button id="button-add-project" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add project" %}</button>
+					<a href="/gvsigonline/core/project_add/" class="btn btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add project" %}</a>
 				</div>
 			</div>
 		</div>	
@@ -27,6 +27,7 @@
 							<th>{% trans "Is public?" %}</th>
 							<th></th>
 							<th></th>
+							<th></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -43,6 +44,7 @@
 							{% endif %}
 							<td></td>
 							<td></td>
+							<th></th>
 						</tr>
 						{% endfor %}
 					</tbody>
@@ -69,6 +71,57 @@
 			<div class="modal-footer">
 				<button id="button-delete-project-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
 				<button id="button-delete-project-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-clone-project" tabindex="-1" role="dialog" aria-labelledby="cloneProjectLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="cloneProjectLabel">{% trans "Clone project" %}</h4>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-md-12 form-group has-error">
+						<ul class="errorlist help-block">
+						</ul>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label for="project_name">{% trans "Name" %}</label>
+						<input placeholder="{% trans 'New project name' %}" name="project_name" id="project_name" type="text" class="form-control">
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label for="target_workspace">{% trans "Workspace" %}</label>
+						<input placeholder="{% trans 'Target workspace name' %}" name="target_workspace" id="target_workspace" type="text" class="form-control">
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label for="target_datastore">{% trans "Datastore" %}</label>
+						<input placeholder="{% trans 'Target datastore and database schema name' %}" name="target_datastore" id="target_datastore" type="text" class="form-control">
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label for="target_server">{% trans "Server" %}</label>
+						<input placeholder="{% trans 'Target server' %}" name="target_server" id="target_server" type="text" class="form-control">
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button id="button-clone-project-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-clone-project-accept" type="button" class="btn btn-default">{% trans "Clone" %}</button>
 			</div>
 		</div>
 	</div>
@@ -113,36 +166,85 @@ $(document).ready(function() {
 		},{
 	        "targets": -2,
 	        "data": null,
-	        "defaultContent": '<button type="button" name="button-update-project" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update project" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
+            "render": function ( data, type, row ) {
+            	// disabled for the moment
+            	//return '<a title="' + '{% trans "Clone project" %}" ' + '" href="/gvsigonline/core/project_clone/' + data[0] + '/" data-toggle="tooltip" data-placement="bottom" class="btn btn-primary"><i class="fa fa-clone"></i></a>';
+            	return '';
+            }
+	    },{
+	        "targets": -3,
+	        "data": null,
+            "render": function ( data, type, row ) {
+            	return '<a title="' + '{% trans "Update project" %}" ' + '" href="/gvsigonline/core/project_update/' + data[0] + '/" data-toggle="tooltip" data-placement="bottom" class="btn btn-success"><i class="fa fa-edit"></i></a>';
+            }
 	    }],
 	    "dom": 'T<"clear">lfrtip',
 		"bLengthChange": false
 	});
-		 
+	
+	
 	$('#projects-table tbody').on('click', 'button', function (){
 		var row = table.row($(this).parents('tr'));
-	    var data = row.data();     
-	    if (this.name == "button-update-project") {
-	    	updateProject(data);
-	    	
-	    } else if (this.name == "button-update-toc"){
-	        updateToc(data);   
+	    var data = row.data();
+	    if (this.name == "button-clone-project"){
+	        cloneProject(data);
 	        
 	    } else if (this.name == "button-delete-project"){
 	        deleteProject(data, row);   
 	    }
 	});
-	
-	$('#button-add-project').click( function() {
-		location.href = '/gvsigonline/core/project_add/';
+
+	$('#project_name').change(function(event) {
+		console.log($('#project_name').val());
+		var normalizedVal = $('#project_name').val().toLowerCase().replace(/[^a-z0-9_]/gm, '');
+		$('#project_name').val(normalizedVal);
+		if ($('#target_workspace').val() == '') {
+			$('#target_workspace').val(normalizedVal);
+		}
+		if ($('#target_datastore').val() == '') {
+			$('#target_datastore').val('wds_' + normalizedVal);
+		}
 	});
 
-	function updateProject(data){			
-		location.href = '/gvsigonline/core/project_update/' + data[0] + '/';
-	}
 	
-	function updateToc(data){			
-		location.href = '/gvsigonline/core/toc_update/' + data[0] + '/';
+	function cloneProject(data){
+		$('#button-clone-project-accept').click(function(event) {
+			console.log('/gvsigonline/core/project_clone/' + data[0] + '/');
+			console.log($('#modal-clone-project input').serialize());
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/core/project_clone/' + data[0] + '/',
+				data: $('#modal-clone-project input').serialize(),
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+				},
+				success	:function(response){
+					$('#modal-clone-project').modal('hide');
+					location.reload();
+				},
+				error: function(err){
+					var html = '';
+					for (var field in err.responseJSON.error) {
+						var label;
+						if (field == 'project_name') {
+							label = '{% trans "Name" %}';
+						}
+						else if (field == 'target_workspace') {
+							label = '{% trans "Workspace" %}';
+						}
+						else if (field == 'target_datastore') {
+							label = '{% trans "Datastore" %}';
+						}
+						else {
+							label = field;
+						}
+						html += '<li>' + label + ": " + err.responseJSON.error[field] + '</li>';
+					}
+					$('#modal-clone-project .errorlist').html(html);
+				}
+			});
+		});
 	}
 
 	function deleteProject(data, row){

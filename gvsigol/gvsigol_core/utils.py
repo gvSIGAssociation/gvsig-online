@@ -405,29 +405,28 @@ def get_layer_metadata_uuid(layer):
             pass
     return ''
 
-def update_layer_metadata_uuid(layer, uuid):   
+def update_layer_metadata_uuid(layer, uuid):
     if 'gvsigol_plugin_catalog' in settings.INSTALLED_APPS:
         from gvsigol_plugin_catalog.models import  LayerMetadata
         
         try: 
             lm = LayerMetadata.objects.get(layer=layer)
-            if uuid is not None and uuid != u'':
+            if uuid != u'':
                 lm.metadata_uuid = uuid
                 lm.save()
+                return
             else:
                 lm.delete()
-        except LayerMetadata.DoesNotExist as e:
-            lm = LayerMetadata()
-            lm.layer = layer
-            lm.metadata_uuid = uuid
-            lm.save()
+                return
         except LayerMetadata.MultipleObjectsReturned as e:
             lm = LayerMetadata.objects.filter(layer=layer).delete()
+        except LayerMetadata.DoesNotExist as e:
+            pass
+        if uuid != u'':
             lm = LayerMetadata()
             lm.layer = layer
             lm.metadata_uuid = uuid
             lm.save()
-            
 
 def sendMail(user, password):
             

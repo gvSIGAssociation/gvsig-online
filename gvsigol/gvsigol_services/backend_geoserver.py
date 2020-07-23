@@ -152,12 +152,12 @@ class Geoserver():
         
     def reload_nodes(self):
         try:
-            time.sleep(settings.RELOAD_NODES_DELAY)
             # get sequence from master
             us_master = self.rest_catalog.get_update_sequence(self.conf_url, user=self.user, password=self.password)
             print "INFO: Reloading Geoserver all nodes except master configured with IP FO in Aapche. Update Sequence = " + str(us_master)
             # reload all nodes except master
-            if len(self.slave_nodes) > 0:                                
+            if len(self.slave_nodes) > 0:
+                time.sleep(settings.RELOAD_NODES_DELAY)
                 for node in self.slave_nodes:
                     us =  self.rest_catalog.get_update_sequence(node, user=self.user, password=self.password)
                     if us != us_master:
@@ -1233,6 +1233,8 @@ class Geoserver():
                     
                     if self.updateResource(workspace.name, datastore.name, layer_name, layer_title):
                         layer.name = layer_name
+                        if not layer.source_name:
+                            layer.source_name = layer.name
                         layer.visible = visible
                         layer.cached = True
                         layer.single_image = False
@@ -1463,6 +1465,8 @@ class Geoserver():
         l = Layer()
         l.datastore = datastore
         l.name =  name
+        if not l.source_name:
+            l.source_name = l.name
         l.visible = form_data.get('visible', False) # it will be missing on the form when false
         l.queryable = form_data.get('queryable', False) # it will be missing on the form when false
         l.cached = form_data.get('cached', False) # it will be missing on the form when false
@@ -1764,6 +1768,8 @@ class Geoserver():
             i.close()
                
         else:
+            if ds_type == 'imagemosaic':
+                ds_type = 'coverage'
             maxx = str(layer_info[ds_type]['latLonBoundingBox']['maxx'])
             maxy = str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
             minx = str(layer_info[ds_type]['latLonBoundingBox']['minx'])
@@ -1966,3 +1972,4 @@ class Geoserver():
             
             
             fd.close()
+

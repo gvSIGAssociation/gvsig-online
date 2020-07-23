@@ -227,6 +227,14 @@ class Introspect:
 
         return result
 
+    def schema_exists(self, schema):
+        self.cursor.execute("""
+        SELECT count(*) FROM information_schema.schemata WHERE schema_name = %s
+        """, [schema])
+        results = self.cursor.fetchall()
+        exists = results[0][0]
+        return (exists > 0)
+        
     def get_pk_sequences(self, table, schema='public'):
         seqs = self.get_sequences(table, schema)
         pks = self.get_pk_columns(table, schema)
@@ -405,6 +413,11 @@ class Introspect:
         query += "    CONSTRAINT " + table_name + "_pkey PRIMARY KEY (gid)"
         query += ");"
         
+        self.cursor.execute(query)
+        
+    
+    def clone_table(self, schema, table_name, new_schema, new_name):
+        query = "CREATE TABLE " + new_schema + "." + new_name + " AS (SELECT * FROM " + schema + "." + table_name + ")"
         self.cursor.execute(query)
         
     def delete_table(self, schema, table_name):
